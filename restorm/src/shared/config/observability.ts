@@ -6,11 +6,11 @@
  * and under whose permission". Two things read it:
  *   - the firewall, which exempts a host EXACTLY (never a wildcard) and only
  *     while the matching consent is active;
- *   - the firewall panel, which renders one read-only row per entry so the
- *     inventory is something a user can verify rather than take on trust.
+ *   - the firewall's outbound inventory, which carries one declaration per
+ *     entry so the "phone home" surface stays auditable.
  *
  * Adding an endpoint anywhere else in the codebase is the bug this file exists
- * to make obvious: an undeclared destination is invisible in the panel, and an
+ * to make obvious: an undeclared destination is unaccounted for, and an
  * un-gated one sends without asking.
  *
  * Pure data + pure predicates (no electron, no app state) so the eligibility
@@ -65,8 +65,8 @@ export interface ObservabilityEndpoint {
   /** EXACT host. Never a wildcard: a `*.ingest.example.com` exemption would
    * cover every other tenant of a shared provider. */
   host: string
-  /** i18n key describing why the host is contacted, rendered in the firewall
-   * panel. */
+  /** Key describing why the host is contacted, carried on the firewall
+   * declaration. */
   purposeKey: string
   /** Consent gate that must be granted before the host is exempted. */
   consentGate: ConsentGateId
@@ -82,11 +82,10 @@ export const CRASH_DSN_ENV = 'RESTORM_SENTRY_DSN'
 /**
  * Fallback crash-ingest host, used only when no DSN is configured.
  *
- * `o0` is not a valid Sentry organisation, so this resolves to nothing — the row
- * still renders in the firewall panel (so the user can see crash reporting
- * exists as a destination) while pointing at a host that cannot receive
- * anything. Once a DSN is set, the REAL host is derived from it and this value
- * is never used.
+ * `o0` is not a valid Sentry organisation, so this resolves to nothing — the
+ * endpoint is still declared (so crash reporting is accounted for as a
+ * destination) while pointing at a host that cannot receive anything. Once a
+ * DSN is set, the REAL host is derived from it and this value is never used.
  */
 const CRASH_INGEST_HOST_FALLBACK = 'o0.ingest.de.sentry.io'
 
@@ -136,8 +135,8 @@ const TELEMETRY_INGEST_HOST = 'eu.i.posthog.com'
  * per-channel switch here.
  *
  * Neither SDK is wired yet; the entries exist so the consent gate, the firewall
- * exemption and the panel row are all connected and testable end to end before
- * anything can actually send.
+ * exemption and the declaration are all connected and testable end to end
+ * before anything can actually send.
  */
 export function resolveObservabilityEndpoints(
   env: NodeJS.ProcessEnv = process.env

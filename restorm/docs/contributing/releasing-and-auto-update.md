@@ -87,6 +87,15 @@ combined one.
    without needing access to this repository.
 5. Confirm the feed has the new `latest-linux.yml` / `latest.yml` /
    `latest-mac.yml`, the matching installers, and `release-notes/vX.Y.Z.md`.
+6. **Re-open the dev cycle — MANDATORY, do not skip.** Immediately bump `main`'s
+   `restorm/package.json` back to the next dev version WITH a `-preview` suffix
+   (e.g. after cutting `0.1.20`, set `0.1.21-preview`). The release tooling
+   strips `-preview` to cut the release, so `main` is left on a plain version;
+   if it stays that way, every unpackaged dev build off `main` resolves to the
+   **PROD** backend instead of DEV (see `src/shared/config/backend.ts` —
+   `resolveChannel` keys the channel off the `-preview` suffix). A developer or
+   agent testing "on dev" would then silently hit the production Supabase /
+   WorkOS. Treat this bump as part of the release, not an afterthought.
 
 ## Exercising auto-update locally (dev mock)
 

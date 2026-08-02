@@ -177,6 +177,9 @@
       "copied": "Kopierat!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Börja skriva…"
+  },
   "tagsView": {
     "removeTag": "Ta bort tagg",
     "newTag": "Ny tagg"
@@ -412,19 +415,19 @@
     "addOrigin": "Lägg till origin",
     "removeOrigin": "Ta bort {{origin}}",
     "noEntries": "Inga poster ännu.",
-    "outbound": {
-      "title": "Utgående tjänster",
-      "intro": "Destinationer som den här applikationen kan kontakta på eget initiativ. De är deklarerade i koden och kan inte redigeras här — de som kräver ditt samtycke förblir avstängda tills du ger det i Inställningar.",
-      "empty": "Den här applikationen deklarerar ingen egen utgående destination.",
-      "hostUnset": "inte konfigurerad",
-      "stateConsented": "Tillåten — du har gett ditt samtycke",
-      "stateNoConsent": "Blockerad — inget samtycke givet",
-      "stateRequired": "Tillåten — krävs av applikationen",
-      "stateInactive": "Inaktiv — används inte just nu",
-      "purpose": {
-        "avatar": "Profilbild för det inloggade kontot"
-      }
+    "prompt": {
+      "title": "Utgående begäran blockerad",
+      "allow": "Tillåt",
+      "deny": "Neka",
+      "fromOrigin": "från {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Tillbaka",
+    "refresh": "Uppdatera",
+    "go": "Gå",
+    "address": "Adress",
+    "emptyHint": "Ange en adress ovan för att börja surfa."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lägg till bokmärke"

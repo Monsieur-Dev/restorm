@@ -190,9 +190,9 @@ export function initEntitlementService(version: string = resolveBackendVersion()
     isEligibleUrl: (url) => isBackendFunctionsUrl(url, host),
     bypass: withFirewallBypass
   })
-  // Surface the bypass in the firewall panel's read-only outbound list. A
-  // call-scoped bypass never appears in the allowlist, so without a declaration
-  // this is traffic the firewall UI could not account for at all.
+  // Surface the bypass in the firewall's outbound inventory. A call-scoped
+  // bypass never appears in the allowlist, so without a declaration this is
+  // traffic the firewall could not account for at all.
   permissionService.declareSystemEndpoint({
     id: 'backend',
     host,

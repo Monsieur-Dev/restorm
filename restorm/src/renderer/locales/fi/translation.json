@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Vastaus",
+        "infos": "Tiedot",
         "requestBody": "Pyynnön sisältö",
         "graph": "Kaavio"
       },
@@ -1210,24 +1211,24 @@
       "emptyRightClick": "Napsauta hiiren oikealla painikkeella tyhjää kohtaa lisätäksesi toimintoja skenaarioosi"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON-polku",
       "ariaLabel": "JSON-polun valitsin",
       "pick": "Valitse tuloksesta",
-      "loading": "Loading…",
+      "loading": "Ladataan…",
       "noResult": "Suorita lähdetoiminto valitaksesi ominaisuuden sen tuloksesta."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Skenaario",
+      "notes": "Muistiinpanot"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Vaihda väri",
+        "resetColor": "Palauta väri",
         "addNote": "Lisää/muokkaa muistiinpanoa",
         "runOnEachEvent": "Suorita jokaisella vastaanotetulla tapahtumalla",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Monista",
+        "delete": "Poista",
         "deleteShortcut": "Del",
         "copy": "Kopioi",
         "paste": "Liitä"
@@ -1237,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Vaihda väri",
+        "resetColor": "Palauta väri",
+        "delete": "Poista"
       }
     },
     "locked": "Muokkaus lukittu skenaarion ollessa käynnissä",
@@ -1298,49 +1299,49 @@
       "getVariable": "Hae muuttuja",
       "addToList": "Lisää luetteloon",
       "removeFromList": "Poista luettelosta",
-      "cast": "Cast",
+      "cast": "Muunna",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Krypto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Päivämäärälaskenta",
+      "objectOp": "Olio-operaatiot",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Satunnainen",
+      "throw": "Heitä virhe",
+      "retry": "Yritä uudelleen",
+      "listOp": "Listaoperaatiot",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematiikka",
+      "schema": "Vahvista skeema",
+      "readFile": "Lue tiedosto",
+      "writeFile": "Kirjoita tiedosto",
       "timer": "Ajastin",
       "code": "Koodi",
       "socketioConnect": "Socket.IO-yhteys",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO-lähetys",
       "socketioClose": "Sulje Socket.IO-yhteys",
       "socketioServerClose": "Sulje Socket.IO-palvelin",
       "websocketConnect": "WebSocket-yhteys",
       "sseConnect": "SSE-yhteys",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket-lähetys",
       "websocketClose": "Sulje WebSocket-yhteys",
       "websocketServerClose": "Sulje WebSocket-palvelin",
       "sseClose": "Sulje SSE-yhteys",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC-yhteys",
+      "grpcSend": "gRPC-lähetys",
       "grpcClose": "Sulje gRPC-yhteys",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT-yhteys",
+      "mqttSend": "MQTT-julkaisu",
       "mqttClose": "Sulje MQTT-yhteys",
       "amqpConnect": "AMQP-yhteys",
       "amqpPublish": "AMQP-julkaisu",
       "amqpClose": "Sulje AMQP-yhteys",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis-tilaus",
       "redisClose": "Sulje Redis-yhteys",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis-komento",
       "httpListen": "HTTP-palvelin",
       "httpClose": "Sulje HTTP-palvelin",
       "grpcServerClose": "Sulje gRPC-palvelin",
@@ -1355,8 +1356,8 @@
       "stompConnect": "STOMP-yhteys",
       "stompSend": "STOMP-lähetys",
       "stompClose": "Sulje STOMP-yhteys",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka-tuotanto",
+      "kafkaConsume": "Kafka-kulutus",
       "kafkaClose": "Sulje Kafka-yhteys",
       "grpcListen": "gRPC-palvelin"
     },
@@ -1376,29 +1377,29 @@
     },
     "assert": {
       "message": "viesti",
-      "operator": "operator",
+      "operator": "operaattori",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "yhtä suuri",
+        "ne": "eri suuri",
+        "lt": "pienempi kuin",
         "lte": "pienempi tai yhtä suuri",
-        "gt": "greater than",
+        "gt": "suurempi kuin",
         "gte": "suurempi tai yhtä suuri",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "sisältää",
+        "isString": "on merkkijono",
+        "isNumber": "on luku",
+        "isBoolean": "on totuusarvo",
+        "isArray": "on lista",
+        "isObject": "on olio",
+        "isNull": "on null",
+        "exists": "on olemassa",
+        "isEmpty": "on tyhjä",
+        "matchesRegex": "vastaa regexiä",
         "isOneOf": "on jokin seuraavista",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "syvä yhtäsuuruus",
+        "lengthEq": "pituus ==",
+        "lengthGt": "pituus >",
+        "lengthLt": "pituus <"
       }
     },
     "editRequest": "Muokkaa pyyntöä",
@@ -1406,8 +1407,8 @@
     "object": {
       "addProperty": "Lisää ominaisuus",
       "removeProperty": "Poista ominaisuus",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Ominaisuuden nimi",
+      "propertyValue": "arvo"
     },
     "output": {
       "outputName": "Tulosteen nimi",
@@ -1415,7 +1416,7 @@
       "removeOutput": "Poista"
     },
     "input": {
-      "name": "Name",
+      "name": "Nimi",
       "defaultType": "Oletus / tyyppi",
       "addParam": "Lisää parametri",
       "removeParam": "Poista"
@@ -1461,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "Mallipohja ei saa olla tyhjä.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Syötteen \"value\" on oltava kytkettynä, kun malli viittaa {{…}}."
       },
       "request": {
         "missing": "Liitettyä pyyntöä ei enää ole."
@@ -1492,8 +1493,8 @@
       "syntheticInfo": "Esimerkkidata, joka on luotu tämän pyynnön dokumentaatiosta.",
       "syntheticRunHint": "Esimerkkidata — suorita pyyntö korvataksesi sen oikealla tuloksella.",
       "stop": "Pysäytä",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Suorituslokit",
+      "copyLogs": "Kopioi lokit",
       "copyThisLog": "Kopioi tämä loki",
       "clearLogs": "Tyhjennä lokit",
       "logsShowAll": "Näytä kaikki lokit",
@@ -1503,12 +1504,12 @@
       "helpTitle": "Mitä tämä toiminto tekee"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Aikavyöhyke",
+      "formatLabel": "Muoto",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Päivä/aika",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Merkkijono"
       }
     },
     "callers": {
@@ -1516,8 +1517,8 @@
       "title": "Tätä skenaariota kutsuu:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Suoritusparametrit",
+      "run": "Suorita",
       "midRunTitle": "Syöte tarvitaan"
     },
     "runHistory": {
@@ -1532,20 +1533,20 @@
       "unpin": "Irrota"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "alkaen",
+      "to": "asti",
+      "step": "askel",
+      "index": "indeksi",
+      "done": "valmis"
     },
     "while": {
-      "body": "body"
+      "body": "runko"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "silmukka"
     },
     "loop": {
-      "done": "done"
+      "done": "valmis"
     },
     "breakpoint": {
       "add": "Lisää keskeytyskohta",
@@ -1558,84 +1559,84 @@
       "toggle": "Näytä/piilota pienoiskartta"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "lista",
+      "values": "arvot",
+      "result": "tulos",
       "addValue": "Lisää arvo",
       "removeValue": "Poista arvo",
       "updateVariable": "Päivitä lähdemuuttuja"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "arvo",
+      "targetType": "muunna tyypiksi",
+      "result": "tulos",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "luku",
+        "string": "merkkijono",
+        "boolean": "totuusarvo",
+        "date": "päivämäärä",
+        "list": "lista"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "arvo",
+      "operation": "operaatio",
+      "pattern": "kuvio",
+      "flags": "liput",
+      "replacement": "korvaava",
+      "result": "tulos",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "poimi",
+        "extractAll": "poimi kaikki",
+        "test": "testaa",
+        "replace": "korvaa",
+        "split": "jaa"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Kirjainkoosta riippumaton",
         "m": "Monirivinen (^ ja $ täsmäävät rivinvaihtoihin)",
         "s": "Dotall (. täsmää rivinvaihtoihin)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "arvo",
+      "operation": "operaatio",
+      "indent": "sisennys",
+      "result": "tulos",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "jäsennä",
+        "stringify": "sarjallista"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "arvo",
+      "operation": "operaatio",
+      "indent": "sisennys",
+      "result": "tulos",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "jäsennä",
+        "stringify": "sarjallista"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "arvo",
+      "operation": "operaatio",
+      "indent": "sisennys",
+      "result": "tulos",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "jäsennä",
+        "stringify": "sarjallista"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "arvo",
+      "operation": "operaatio",
+      "key": "avain",
+      "keyPlaceholder": "salaisuus",
+      "result": "tulos",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "koodaa base64",
+        "base64Decode": "pura base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1646,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "tulos"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "päivämäärä",
+      "operation": "operaatio",
+      "amount": "määrä",
+      "unitLabel": "yksikkö",
+      "format": "muoto",
+      "other": "toinen päivämäärä",
+      "result": "tulos",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "lisää",
+        "subtract": "vähennä",
+        "format": "muotoile",
+        "diff": "erotus"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "millisekuntia",
+        "seconds": "sekuntia",
+        "minutes": "minuuttia",
+        "hours": "tuntia",
+        "days": "päivää",
+        "weeks": "viikkoa",
+        "months": "kuukautta",
+        "years": "vuotta"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "olio",
+      "operation": "operaatio",
+      "path": "polku",
+      "keys": "avaimet",
+      "setValue": "arvo",
+      "mergeWith": "yhdistä kohteeseen",
+      "result": "tulos",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "lue",
+        "set": "kirjoita",
+        "merge": "yhdistä",
+        "pick": "säilytä",
+        "omit": "poista",
+        "keys": "avaimet",
+        "values": "arvot"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "arvo",
+      "operation": "operaatio",
+      "result": "tulos",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "koodaa",
+        "decode": "pura",
+        "parseQuery": "jäsennä kysely",
+        "buildQuery": "rakenna kysely",
+        "parseUrl": "jäsennä URL"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "operaatio",
       "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "max": "maks",
+      "length": "pituus",
+      "items": "kohteet",
+      "seed": "siemen (valinnainen)",
+      "seedPlaceholder": "toistettava",
+      "result": "tulos",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "kokonaisluku",
+        "float": "desimaaliluku",
+        "string": "merkkijono",
+        "boolean": "totuusarvo",
+        "pick": "valitse"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "viesti"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "maks. yrityksiä",
+      "backoff": "odotusstrategia",
+      "delay": "viive",
+      "factor": "kerroin",
       "retryOnError": "yritä uudelleen virheen yhteydessä",
       "retryOnStatus": "yritä uudelleen HTTP-statuksella",
       "retryOnFailure": "yritä uudelleen millä tahansa ei-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "yritys",
+      "exhausted": "loppuun käytetty",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "kiinteä",
+        "linear": "lineaarinen",
+        "exponential": "eksponentiaalinen"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Listat",
+      "math": "Matematiikka",
+      "dataFormats": "Datamuodot",
+      "encoding": "Koodaus",
       "time": "Ajoitus",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmit",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "lista",
+      "operation": "operaatio",
+      "result": "tulos",
+      "key": "avain",
+      "order": "järjestys",
+      "depth": "syvyys",
+      "size": "koko",
+      "start": "alku",
+      "end": "loppu",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "lajittele",
+        "unique": "uniikit",
+        "reverse": "käännä",
+        "flatten": "litistä",
+        "chunk": "paloittele",
+        "slice": "leikkaa",
+        "groupBy": "ryhmittele"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "arvo",
+      "operation": "operaatio",
+      "result": "tulos",
+      "delimiter": "erotin",
+      "header": "otsikkorivi",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "jäsennä",
+        "stringify": "sarjallista"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "arvo",
+      "operation": "operaatio",
+      "result": "tulos",
+      "b": "kanssa",
       "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "max": "maks",
+      "precision": "tarkkuus",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "pyöristä",
+        "floor": "pyöristä alas",
+        "ceil": "pyöristä ylös",
+        "trunc": "katkaise",
+        "abs": "itseisarvo",
+        "sign": "etumerkki",
+        "sqrt": "neliöjuuri",
         "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "max": "maks",
+        "clamp": "rajoita"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "arvo",
+      "schema": "JSON-skeema",
+      "valid": "kelvollinen",
+      "invalid": "virheellinen",
+      "errors": "virheet",
       "editTitle": "Muokkaa JSON Schemaa"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "polku",
+      "content": "sisältö"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "polku",
+      "mode": "tila",
+      "content": "sisältö"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Muokkaa",
+      "edit": "Avaa editori",
+      "moreLines": "+{{count}} riviä",
+      "editTemplate": "Muokkaa mallia"
     },
     "timer": {
       "mode": "tila",
@@ -1889,7 +1890,7 @@
       "waitUntil": "Pysäyttää annettuun päivämäärään/kellonaikaan asti, sitten jatkaa.",
       "now": "Lähettää nykyisen päivämäärän ja kellonajan.",
       "timer": "Laukaisee runkonsa toistuvin väliajoin tai cron-aikataulun mukaan.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Laskee kahden luvun a + − × ÷ … .",
       "comparator": "Vertaa kahta arvoa ja tuottaa arvon tosi tai epätosi.",
       "boolean": "Yhdistää totuusarvoja operaattoreilla and / or / xor / not.",
       "object": "Rakentaa objektin nimetyistä syötteistään.",
@@ -1902,7 +1903,7 @@
       "json": "Jäsentää JSON-merkkijonon tai sarjallistaa arvon JSON-muotoon.",
       "xml": "Jäsentää XML-merkkijonon tai sarjallistaa arvon XML-muotoon.",
       "yaml": "Jäsentää YAML-merkkijonon tai sarjallistaa arvon YAML-muotoon.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Tiivistää tai koodaa merkkijonon (base64, md5, sha…, hmac, uuid).",
       "jwt": "Purkaa JWT-tokenin osiin: header, payload ja signature.",
       "datetime": "Siirtää, muotoilee tai laskee päivämäärien erotuksen.",
       "retry": "Suorittaa runkonsa uudelleen, kunnes se onnistuu, backoff-käytännöllä.",
@@ -1911,7 +1912,7 @@
       "random": "Luo satunnaisen luvun, merkkijonon, totuusarvon tai valinnan.",
       "listOp": "Muokkaa listan muotoa (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Jäsentää CSV-merkkijonon tai sarjallistaa listan CSV-muotoon.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Suorittaa skalaarioperaation (pyöristä, itseisarvo, neliöjuuri, min, maks, rajoita…).",
       "schema": "Validoi arvon JSON Schemaa vasten.",
       "readFile": "Lukee tiedoston tekstisisällön.",
       "writeFile": "Kirjoittaa tai lisää tekstiä tiedostoon.",
@@ -1950,13 +1951,13 @@
       "redisClose": "Sulkee jo avoimen Redis-tilausyhteyden.",
       "redisCommand": "Suorittaa sidotun Redis-komennon (yksi komento uudessa yhteydessä, sitten katkaisu) ja lähettää sen vastauksen.",
       "toast": "Näyttää toast-ilmoituksen Restorm-käyttöliittymässä skenaarion suorituksen aikana.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Ylläpitää paikallista HTTP-mock-palvelinta ja kuuntelee rajattomasti. `connected` laukeaa heti kun palvelin kuuntelee; jokainen palveltu pyyntö lähettää datansa uudelleen `served`-portista. Palvelin pysyy pystyssä kunnes HTTP-sulkeminen (tai Stop), minkä jälkeen `done` laukeaa. Ei response-ulostuloa — se palvelee, se ei kutsu ulos.",
       "httpClose": "Pysäyttää jo kuuntelevan HTTP-mock-palvelimen (jonka HTTP-palvelinsolmu on määritellyt) ja vapauttaa sen portin.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Ylläpitää paikallista gRPC-mock-palvelinta ja kuuntelee rajattomasti. `connected` laukeaa heti kun palvelin kuuntelee; jokainen palveltu kutsu lähettää datansa uudelleen `served`-portista. Palvelin pysyy pystyssä kunnes gRPC-palvelimen sulkeminen (tai Stop), minkä jälkeen `done` laukeaa. Ei response-ulostuloa — se palvelee, se ei kutsu ulos.",
       "grpcServerClose": "Pysäyttää jo kuuntelevan gRPC-mock-palvelimen (jonka gRPC-palvelinsolmu on määritellyt) ja vapauttaa sen portin.",
       "soapListen": "Isännöi paikallista SOAP-mock-palvelinta ja kuuntelee loputtomasti. Jokainen saapuva pyyntö ohjataan määritettyyn toimintoon (sen SOAPActionin tai rungon toiminnon nimen perusteella) ja siihen vastataan ennalta määritetyllä SOAP-kuorella (virhetoiminto palauttaa `<soap:Fault>`). `connected` laukeaa heti, kun palvelin kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy aktiivisena SOAP-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa.",
       "soapClose": "Pysäyttää jo kuuntelevan SOAP-mock-palvelimen (jonka SOAP-palvelinsolmu on määrittänyt) ja vapauttaa sen portin.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Ylläpitää paikallista GraphQL-mock-palvelinta ja kuuntelee rajattomasti. `connected` laukeaa heti kun palvelin kuuntelee; jokainen palveltu operaatio lähettää datansa uudelleen `served`-portista. Palvelin pysyy pystyssä kunnes GraphQL-sulkeminen (tai Stop), minkä jälkeen `done` laukeaa. Ei response-ulostuloa — se palvelee, se ei kutsu ulos.",
       "graphqlClose": "Pysäyttää jo kuuntelevan GraphQL-mock-palvelimen (jonka GraphQL-palvelinsolmu on määritellyt) ja vapauttaa sen portin.",
       "odataListen": "Isännöi paikallista OData v4 -näennäispalvelua ja kuuntelee loputtomiin. `connected` laukeaa heti kun palvelu kuuntelee; jokainen palveltu pyyntö lähettää tietonsa uudelleen `served`-porttiin. Palvelin pysyy käynnissä OData-sulkemiseen (tai pysäytykseen) asti, minkä jälkeen `done` laukeaa. Ei response-tulostetta — se palvelee, se ei kutsu ulospäin.",
       "odataClose": "Pysäyttää jo kuuntelevan OData-näennäispalvelun (jonka OData-palvelinsolmu on määrittänyt) ja vapauttaa sen portin.",
@@ -1992,43 +1993,43 @@
       "title": "Suorita komentoriviltä",
       "intro": "Suorita tämä skenaario avaamatta sovellusta (CI, cron, skripti):",
       "byId": "Määritä id:n mukaan",
-      "allLogs": "All logs",
+      "allLogs": "Kaikki lokit",
       "note": "`--out file` kirjoittaa run-login myös tiedostoon.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekti.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Headless-ajo vaatii Restorm Pro -suunnitelman ja CI-tokenin.",
       "tokenLink": "Hanki token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Yhteyden nimi",
+      "connectionNamePlaceholder": "yhteyden nimi",
+      "eventPlaceholder": "tapahtuma",
+      "addEvent": "Lisää tapahtuma",
+      "connected": "yhdistetty",
+      "others": "muut",
+      "connection": "yhteys",
+      "pickConnection": "— valitse yhteys —",
+      "channelLabel": "Kanavan nimi",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Muokkaa payloadia",
       "started": "käynnistetty"
     },
     "websocket": {
-      "message": "message"
+      "message": "viesti"
     },
     "sse": {
-      "message": "message"
+      "message": "viesti"
     },
     "grpc": {
-      "message": "message"
+      "message": "viesti"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Järjestä toiminnot uudelleen"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "sisään",
+      "error": "virhe",
+      "done": "valmis"
     },
     "toast": {
       "title": "otsikko",
@@ -2036,7 +2037,7 @@
       "duration": "kesto (s)"
     },
     "http": {
-      "served": "served"
+      "served": "palveltu"
     },
     "actionOverride": {
       "configMissingShort": "Kokoonpano puuttuu",
@@ -2549,13 +2550,6 @@
     "crashReportsDescription": "Lähettää anonymisoidun raportin, kun Restorm kaatuu, jotta vika voidaan korjata. Raporteista poistetaan URL-osoitteet, tunnisteet, pyyntöjen sisällöt ja henkilötiedot ennen kuin ne lähtevät koneeltasi. Sisältyy ilmaiseen tilaukseen; maksullisessa tilauksessa sen voi kytkeä pois. Kaikki tiedot: https://restorm.app/privacy",
     "telemetryTitle": "Lähetä käyttötilastot",
     "telemetryDescription": "Lähettää anonyymejä tilastoja siitä, mitä ominaisuuksia käytetään, kehityksen suuntaamiseksi. Oletuksena pois päältä eikä koskaan käytössä ilman nimenomaista suostumustasi. Ei sisällä pyyntödataa, URL-osoitteita eikä henkilötietoja. Kaikki tiedot: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Kaatumisraportit (vain suostumuksellasi)",
-        "telemetry": "Anonyymit käyttötilastot (vain suostumuksellasi)",
-        "backend": "Tili, lisenssi ja tilaus"
-      }
-    },
     "crashReportsLockedLabel": "Muutettavissa Pro-tilauksesta alkaen. Maksuttomassa tilauksessa kaatumisraportit ovat tarpeen laadun ylläpitämiseksi.",
     "consentToast": {
       "title": "Auta meitä parantamaan Restormia",

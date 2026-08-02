@@ -166,10 +166,15 @@ class GraphQLExecutionService {
               continue
             }
             if (h.key) {
-              // Type-aware: only `ExpressionValue` rows get handlebars-
-              // substituted; a `StringValue` row ships verbatim. Matches
-              // the HTTP path's invariant — see `HTTPExecutionService`.
-              headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
+              // The KEY resolves unconditionally through Handlebars, same as
+              // a path/query param key or the URL — see `HTTPExecutionService`.
+              // The VALUE stays type-aware: only `ExpressionValue` rows get
+              // handlebars-substituted; a `StringValue` row ships verbatim.
+              const resolvedKey = contextService.resolveValue(h.key, requestId)
+              // An unknown variable resolves to '' — an empty header name is
+              // an invalid HTTP token. Skip the row rather than throw.
+              if (!resolvedKey) continue
+              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
             }
           }
         }

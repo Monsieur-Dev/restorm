@@ -58,7 +58,15 @@ vi.mock('../../../src/main/services/ContextService', () => ({
   contextService: {
     getResolvedUrl: vi.fn().mockReturnValue({ resolvedUrl: 'https://api.test.com/resource' }),
     getRequestContext: vi.fn().mockReturnValue({ fullData: { method: 'GET' }, keyValueGroups: new Map() }),
-    resolveValue: vi.fn((v: string) => v)
+    resolveValue: vi.fn((v: string) => v),
+    // Type-aware value resolution (mirrors the live dispatch path — only an
+    // `ExpressionValue` row substitutes). Test fixtures pass plain
+    // `{ key, value }` KeyValue-shaped rows; unwrap `.value` the same way the
+    // real gate falls back for a non-class-instance value.
+    resolveKeyValueForRequest: vi.fn((kv: { value: unknown }) => {
+      const raw = typeof kv.value === 'string' ? kv.value : String(kv.value)
+      return raw
+    })
   }
 }))
 vi.mock('../../../src/main/services/DocumentEvents', () => ({
@@ -86,6 +94,7 @@ import { responseHistoryService } from '../../../src/main/services/ResponseHisto
 import { existsSync } from 'fs'
 import { isFileServiceInitialized, getFileService } from 'electron-core-ui/main'
 import { collectionStore } from '../../../src/main/services/CollectionStore'
+import { contextService } from '../../../src/main/services/ContextService'
 import {
   getHistoryArchivePath,
   readHistoryArchive,
@@ -100,6 +109,7 @@ interface SI {
 }
 
 const svc = responseHistoryService as unknown as SI
+const mockedContextService = vi.mocked(contextService)
 const AP = '/tmp/test.json.responses.zip'
 let store: Map<string, Map<string, string>>
 
@@ -254,6 +264,52 @@ describe('ResponseHistoryService', () => {
     )
     const idx = getIdx(AP)
     expect(idx?.requests[0]?.entries).toHaveLength(1)
+  })
+
+  it('storeExecutionResult echoes requestHeaders resolved exactly like the live dispatch: KEY unconditional, VALUE type-aware', async () => {
+    setupCols()
+    const defaultGetRequestContext = mockedContextService.getRequestContext.getMockImplementation()
+    const defaultResolveValue = mockedContextService.resolveValue.getMockImplementation()
+    const defaultResolveKeyValueForRequest = mockedContextService.resolveKeyValueForRequest.getMockImplementation()
+    try {
+      mockedContextService.getRequestContext.mockReturnValue({
+        fullData: { method: 'GET' },
+        keyValueGroups: new Map([['headers', [
+          // KEY has no ValueType to gate on — resolves unconditionally.
+          { key: '{{headerNameVar}}', value: 'plain-value', enabled: true },
+          // VALUE only substitutes when explicitly typed as an expression.
+          { key: 'X-Templated-Value', value: { type: 'expression', value: '{{tokenVar}}' }, enabled: true }
+        ]]])
+      } as never)
+      mockedContextService.resolveValue.mockImplementation((v: string) => v.replace('{{headerNameVar}}', 'X-Templated-Key'))
+      mockedContextService.resolveKeyValueForRequest.mockImplementation((kv) => {
+        if (typeof kv.value === 'object' && 'type' in kv.value) {
+          const typed = kv.value as { type: string; value: string }
+          return typed.type === 'expression' ? typed.value.replace('{{tokenVar}}', 'resolved-token') : typed.value
+        }
+        return String(kv.value)
+      })
+
+      await responseHistoryService.storeExecutionResult('req-1', 'http', mkHttp('2026-01-15T10:00:01.000Z'))
+
+      const idx = getIdx(AP)
+      const guid = idx?.requests[0]?.entries[0]?.guid
+      expect(guid).toBeDefined()
+      const detailText = store.get(AP)?.get(`responses/${String(guid)}.json`)
+      const parsed = JSON.parse(detailText ?? '{}') as ResponseHistoryDetail
+      if (parsed.response.type !== 'http') throw new Error('expected http response')
+      expect(parsed.response.requestHeaders).toEqual([
+        { key: 'X-Templated-Key', value: 'plain-value', enabled: true },
+        { key: 'X-Templated-Value', value: 'resolved-token', enabled: true }
+      ])
+    } finally {
+      // This file's `beforeEach` doesn't reset mocks between tests (no
+      // `vi.clearAllMocks`), so a persistent `mockImplementation` override
+      // would otherwise leak into every later test in the file.
+      if (defaultGetRequestContext) mockedContextService.getRequestContext.mockImplementation(defaultGetRequestContext)
+      if (defaultResolveValue) mockedContextService.resolveValue.mockImplementation(defaultResolveValue)
+      if (defaultResolveKeyValueForRequest) mockedContextService.resolveKeyValueForRequest.mockImplementation(defaultResolveKeyValueForRequest)
+    }
   })
 
   it('storeExecutionResult skips when not initialized', async () => {

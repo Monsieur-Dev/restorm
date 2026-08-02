@@ -177,6 +177,9 @@
       "copied": "Đã sao chép!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Bắt đầu viết…"
+  },
   "tagsView": {
     "removeTag": "Xóa thẻ",
     "newTag": "Thẻ mới"
@@ -412,19 +415,19 @@
     "addOrigin": "Thêm nguồn gốc",
     "removeOrigin": "Xóa {{origin}}",
     "noEntries": "Chưa có mục nào.",
-    "outbound": {
-      "title": "Dịch vụ gửi đi",
-      "intro": "Các đích đến mà ứng dụng này có thể tự liên hệ. Chúng được khai báo trong mã nguồn và không thể chỉnh sửa tại đây — những đích cần bạn đồng ý sẽ vẫn tắt cho đến khi bạn cấp quyền trong Tùy chọn.",
-      "empty": "Ứng dụng này không khai báo đích đến gửi đi nào của riêng nó.",
-      "hostUnset": "chưa cấu hình",
-      "stateConsented": "Được phép — bạn đã đồng ý",
-      "stateNoConsent": "Bị chặn — chưa có sự đồng ý",
-      "stateRequired": "Được phép — cần thiết cho ứng dụng",
-      "stateInactive": "Không hoạt động — hiện không được dùng",
-      "purpose": {
-        "avatar": "Ảnh đại diện của tài khoản đã đăng nhập"
-      }
+    "prompt": {
+      "title": "Đã chặn yêu cầu gửi đi",
+      "allow": "Cho phép",
+      "deny": "Từ chối",
+      "fromOrigin": "từ {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Quay lại",
+    "refresh": "Tải lại",
+    "go": "Đi",
+    "address": "Địa chỉ",
+    "emptyHint": "Nhập địa chỉ ở trên để bắt đầu duyệt web."
   },
   "bookmarkRibbon": {
     "addBookmark": "Thêm dấu trang"

@@ -1,13 +1,12 @@
 import { createBdd } from 'playwright-bdd'
 import type { Page } from '@playwright/test'
-import { test, expect } from '../../fixtures/firewall-outbound.fixture'
+import { test, expect } from '../../fixtures/firewall-exemptions.fixture'
 
 const bdd = createBdd(test)
 const { Given, When, Then } = bdd
 
 /** The Firewall workbench tab is a singleton with this stable id. */
 const FIREWALL_TAB_CONTENT = '[data-testid="firewall-panel"]'
-const OUTBOUND_SECTION = '[data-testid="firewall-outbound"]'
 
 /** Consent gate id → the settings storage key backing it. Mirrors
  * `src/shared/config/observability.ts` — kept as a literal here so the E2E
@@ -25,8 +24,8 @@ interface SystemEndpointStatusLike {
   active: boolean
 }
 
-/** Read the main-process truth: what the firewall actually considers exempt,
- * independent of what the panel happens to be rendering. */
+/** Read the main-process truth: what the firewall actually declares. The
+ * inventory has no UI surface, so this IPC read is the only way to observe it. */
 async function readEndpoints(page: Page): Promise<SystemEndpointStatusLike[]> {
   return await page.evaluate(async () => {
     const w = window as unknown as {
@@ -39,10 +38,10 @@ async function readEndpoints(page: Page): Promise<SystemEndpointStatusLike[]> {
 }
 
 /**
- * The firewall's system allowlist — the ACTUAL input to the permission check,
- * read from main rather than derived from the rows the panel renders. Asserting
- * on this rather than on `SystemEndpointStatus.active` is what makes the
- * exemption steps prove enforcement instead of restating presentation.
+ * The firewall's system allowlist — the ACTUAL input to the permission check.
+ * Asserting on this rather than on `SystemEndpointStatus.active` is what makes
+ * the exemption steps prove enforcement instead of restating a declaration's
+ * own claim about itself.
  *
  * (The verdict itself — allowlisted ⇒ `allow`, otherwise `prompt` — is asserted
  * in `PermissionService.test.ts`; it cannot be observed from here because the
@@ -71,8 +70,8 @@ async function setConsent(page: Page, gate: string, granted: boolean): Promise<v
     if (typeof fn !== 'function') throw new Error('window.api.settings.set is not available')
     await fn(storageKey, value)
   }, { storageKey: key, value: granted })
-  // The setting change fans out main-side (consent → firewall exemption →
-  // renderer push); poll the panel rather than sleeping a fixed amount.
+  // The setting change fans out main-side (consent → firewall exemption);
+  // poll the inventory rather than sleeping a fixed amount.
   await expect
     .poll(async () => (await readEndpoints(page)).find((e) => e.id === gate)?.active, { timeout: 10000 })
     .toBe(granted)
@@ -123,26 +122,43 @@ When('consent for {string} is withdrawn', async ({ page }, gate: string) => {
   await setConsent(page, gate, false)
 })
 
-Then('the outbound services section should be visible', async ({ page }) => {
-  await expect(page.locator(OUTBOUND_SECTION)).toBeVisible({ timeout: 10000 })
+Then('the firewall panel should be visible', async ({ page }) => {
+  await expect(page.locator(FIREWALL_TAB_CONTENT)).toBeVisible({ timeout: 10000 })
 })
 
-Then('the outbound services section should list {string}', async ({ page }, id: string) => {
-  const row = page.locator(`[data-testid="firewall-outbound-row-${id}"]`)
-  await expect(row).toBeVisible({ timeout: 10000 })
-  // The row must name the destination, not just exist.
-  const host = await page.locator(`[data-testid="firewall-outbound-host-${id}"]`).innerText()
-  expect(host.trim().length).toBeGreaterThan(0)
+Then('the whitelist and blacklist tabs should be visible', async ({ page }) => {
+  await expect(page.locator('[data-testid="firewall-tabs"]')).toBeVisible({ timeout: 10000 })
+  await expect(page.locator('[data-testid="firewall-whitelist-add"]')).toBeVisible({ timeout: 10000 })
+})
+
+// The app's own destinations are declared and enforced, but deliberately not
+// displayed: the panel holds the lists the user acts on, and a read-only
+// inventory of the app's plumbing was noise in front of them. Asserting the
+// absence keeps it from creeping back in.
+Then('the outbound services section should not be present', async ({ page }) => {
+  await expect(page.locator('[data-testid="firewall-outbound"]')).toHaveCount(0)
+})
+
+Then('the test outbound button should not be present', async ({ page }) => {
+  await expect(page.locator('[data-testid="firewall-test-outbound"]')).toHaveCount(0)
+})
+
+Then('the outbound endpoint {string} should be declared', async ({ page }, id: string) => {
+  const endpoint = (await readEndpoints(page)).find((e) => e.id === id)
+  expect(endpoint, `endpoint "${id}" is not declared`).toBeDefined()
+  expect(endpoint?.host, `endpoint "${id}" declares no host`).toBeTruthy()
 })
 
 Then('the outbound endpoint {string} should be active', async ({ page }, id: string) => {
-  await expect(page.locator(`[data-testid="firewall-outbound-state-${id}"]`))
-    .toHaveAttribute('data-active', 'true', { timeout: 10000 })
+  await expect
+    .poll(async () => (await readEndpoints(page)).find((e) => e.id === id)?.active, { timeout: 10000 })
+    .toBe(true)
 })
 
 Then('the outbound endpoint {string} should be inactive', async ({ page }, id: string) => {
-  await expect(page.locator(`[data-testid="firewall-outbound-state-${id}"]`))
-    .toHaveAttribute('data-active', 'false', { timeout: 10000 })
+  await expect
+    .poll(async () => (await readEndpoints(page)).find((e) => e.id === id)?.active, { timeout: 10000 })
+    .toBe(false)
 })
 
 Then('the outbound endpoint {string} should be exempted from the firewall', async ({ page }, id: string) => {

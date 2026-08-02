@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "Respons",
+        "infos": "Info",
         "requestBody": "Body permintaan",
         "graph": "Grafik"
       },
@@ -1209,24 +1210,24 @@
       "emptyRightClick": "Klik kanan pada tempat kosong untuk menambahkan aksi ke skenario Anda"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Jalur JSON",
       "ariaLabel": "Pemilih path JSON",
       "pick": "Pilih dari hasil",
-      "loading": "Loading…",
+      "loading": "Memuat…",
       "noResult": "Jalankan aksi sumber untuk memilih sebuah properti dari hasilnya."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Skenario",
+      "notes": "Catatan"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Ubah warna",
+        "resetColor": "Atur ulang warna",
         "addNote": "Tambah / ubah catatan",
         "runOnEachEvent": "Jalankan pada setiap event yang diterima",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Duplikat",
+        "delete": "Hapus",
         "deleteShortcut": "Del",
         "copy": "Salin",
         "paste": "Tempel"
@@ -1236,9 +1237,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Ubah warna",
+        "resetColor": "Atur ulang warna",
+        "delete": "Hapus"
       }
     },
     "locked": "Pengeditan terkunci saat skenario berjalan",
@@ -1297,49 +1298,49 @@
       "getVariable": "Ambil variabel",
       "addToList": "Tambahkan ke daftar",
       "removeFromList": "Hapus dari daftar",
-      "cast": "Cast",
+      "cast": "Konversi",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Kripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Perhitungan tanggal",
+      "objectOp": "Operasi objek",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Acak",
+      "throw": "Lempar kesalahan",
+      "retry": "Coba lagi",
+      "listOp": "Operasi daftar",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematika",
+      "schema": "Validasi skema",
+      "readFile": "Baca berkas",
+      "writeFile": "Tulis berkas",
       "timer": "Pengatur waktu",
       "code": "Kode",
       "socketioConnect": "Koneksi Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Kirim Socket.IO",
       "socketioClose": "Tutup koneksi Socket.IO",
       "socketioServerClose": "Tutup server Socket.IO",
       "websocketConnect": "Koneksi WebSocket",
       "sseConnect": "Koneksi SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Kirim WebSocket",
       "websocketClose": "Tutup koneksi WebSocket",
       "websocketServerClose": "Tutup server WebSocket",
       "sseClose": "Tutup koneksi SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Koneksi gRPC",
+      "grpcSend": "Kirim gRPC",
       "grpcClose": "Tutup koneksi gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Koneksi MQTT",
+      "mqttSend": "Publikasi MQTT",
       "mqttClose": "Tutup koneksi MQTT",
       "amqpConnect": "Koneksi AMQP",
       "amqpPublish": "Publikasi AMQP",
       "amqpClose": "Tutup koneksi AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Langganan Redis",
       "redisClose": "Tutup koneksi Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Perintah Redis",
       "httpListen": "Server HTTP",
       "httpClose": "Tutup server HTTP",
       "grpcServerClose": "Tutup server gRPC",
@@ -1354,8 +1355,8 @@
       "stompConnect": "Koneksi STOMP",
       "stompSend": "Kirim STOMP",
       "stompClose": "Tutup koneksi STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Produksi Kafka",
+      "kafkaConsume": "Konsumsi Kafka",
       "kafkaClose": "Tutup koneksi Kafka",
       "grpcListen": "Server gRPC"
     },
@@ -1377,27 +1378,27 @@
       "message": "pesan",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "sama dengan",
+        "ne": "tidak sama",
+        "lt": "lebih kecil dari",
         "lte": "lebih kecil atau sama dengan",
-        "gt": "greater than",
+        "gt": "lebih besar dari",
         "gte": "lebih besar atau sama dengan",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "mengandung",
+        "isString": "adalah teks",
+        "isNumber": "adalah angka",
+        "isBoolean": "adalah boolean",
+        "isArray": "adalah daftar",
+        "isObject": "adalah objek",
+        "isNull": "adalah null",
+        "exists": "ada",
+        "isEmpty": "kosong",
+        "matchesRegex": "cocok dengan regex",
         "isOneOf": "merupakan salah satu dari",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "sama secara mendalam",
+        "lengthEq": "panjang ==",
+        "lengthGt": "panjang >",
+        "lengthLt": "panjang <"
       }
     },
     "editRequest": "Edit permintaan",
@@ -1405,8 +1406,8 @@
     "object": {
       "addProperty": "Tambah properti",
       "removeProperty": "Hapus properti",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Nama properti",
+      "propertyValue": "nilai"
     },
     "output": {
       "outputName": "Nama output",
@@ -1414,7 +1415,7 @@
       "removeOutput": "Hapus"
     },
     "input": {
-      "name": "Name",
+      "name": "Nama",
       "defaultType": "Bawaan / tipe",
       "addParam": "Tambah parameter",
       "removeParam": "Hapus"
@@ -1460,7 +1461,7 @@
       },
       "transform": {
         "emptyTemplate": "Templat tidak boleh kosong.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Input \"value\" harus terhubung ketika templat mereferensikan {{…}}."
       },
       "request": {
         "missing": "Permintaan yang ditautkan tidak ada lagi."
@@ -1491,8 +1492,8 @@
       "syntheticInfo": "Contoh data yang dihasilkan dari dokumentasi permintaan ini.",
       "syntheticRunHint": "Contoh data — jalankan permintaan untuk menggantinya dengan hasil nyata.",
       "stop": "Hentikan",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Log eksekusi",
+      "copyLogs": "Salin log",
       "copyThisLog": "Salin log ini",
       "clearLogs": "Hapus log",
       "logsShowAll": "Tampilkan semua log",
@@ -1502,12 +1503,12 @@
       "helpTitle": "Apa yang dilakukan aksi ini"
     },
     "now": {
-      "timezone": "Timezone",
+      "timezone": "Zona waktu",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Tanggal/waktu",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Teks"
       }
     },
     "callers": {
@@ -1515,8 +1516,8 @@
       "title": "Skenario ini dipanggil oleh:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Parameter eksekusi",
+      "run": "Jalankan",
       "midRunTitle": "Input diminta"
     },
     "runHistory": {
@@ -1531,20 +1532,20 @@
       "unpin": "Lepas sematan"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "dari",
+      "to": "sampai",
+      "step": "langkah",
+      "index": "indeks",
+      "done": "selesai"
     },
     "while": {
-      "body": "body"
+      "body": "badan"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "perulangan"
     },
     "loop": {
-      "done": "done"
+      "done": "selesai"
     },
     "breakpoint": {
       "add": "Tambah breakpoint",
@@ -1557,84 +1558,84 @@
       "toggle": "Alihkan minimap"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "daftar",
+      "values": "nilai",
+      "result": "hasil",
       "addValue": "Tambah nilai",
       "removeValue": "Hapus nilai",
       "updateVariable": "Perbarui variabel sumber"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "nilai",
+      "targetType": "konversi ke",
+      "result": "hasil",
       "type": {
-        "number": "number",
-        "string": "string",
+        "number": "angka",
+        "string": "teks",
         "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "date": "tanggal",
+        "list": "daftar"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "nilai",
+      "operation": "operasi",
+      "pattern": "pola",
+      "flags": "flag",
+      "replacement": "pengganti",
+      "result": "hasil",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "ekstrak",
+        "extractAll": "ekstrak semua",
+        "test": "uji",
+        "replace": "ganti",
+        "split": "pisah"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Tidak membedakan huruf besar/kecil",
         "m": "Multiline (^ dan $ cocok dengan jeda baris)",
         "s": "Dotall (. cocok dengan baris baru)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "nilai",
+      "operation": "operasi",
+      "indent": "indentasi",
+      "result": "hasil",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "urai",
+        "stringify": "serialisasi"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "nilai",
+      "operation": "operasi",
+      "indent": "indentasi",
+      "result": "hasil",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "urai",
+        "stringify": "serialisasi"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "nilai",
+      "operation": "operasi",
+      "indent": "indentasi",
+      "result": "hasil",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "urai",
+        "stringify": "serialisasi"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "nilai",
+      "operation": "operasi",
+      "key": "kunci",
+      "keyPlaceholder": "rahasia",
+      "result": "hasil",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "enkode base64",
+        "base64Decode": "dekode base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1645,182 +1646,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "hasil"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
+      "value": "tanggal",
+      "operation": "operasi",
+      "amount": "jumlah",
+      "unitLabel": "satuan",
       "format": "format",
-      "other": "second date",
-      "result": "result",
+      "other": "tanggal kedua",
+      "result": "hasil",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "tambah",
+        "subtract": "kurangi",
+        "format": "memformat",
+        "diff": "selisih"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milidetik",
+        "seconds": "detik",
+        "minutes": "menit",
+        "hours": "jam",
+        "days": "hari",
+        "weeks": "minggu",
+        "months": "bulan",
+        "years": "tahun"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "objek",
+      "operation": "operasi",
+      "path": "jalur",
+      "keys": "kunci",
+      "setValue": "nilai",
+      "mergeWith": "gabung dengan",
+      "result": "hasil",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "baca",
+        "set": "tulis",
+        "merge": "gabung",
+        "pick": "pertahankan",
+        "omit": "hilangkan",
+        "keys": "kunci",
+        "values": "nilai"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "nilai",
+      "operation": "operasi",
+      "result": "hasil",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "enkode",
+        "decode": "dekode",
+        "parseQuery": "urai query",
+        "buildQuery": "bangun query",
+        "parseUrl": "urai URL"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "operasi",
       "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "max": "maks",
+      "length": "panjang",
+      "items": "item",
+      "seed": "seed (opsional)",
+      "seedPlaceholder": "dapat direproduksi",
+      "result": "hasil",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
+        "int": "bilangan bulat",
+        "float": "bilangan desimal",
+        "string": "teks",
         "boolean": "boolean",
-        "pick": "pick"
+        "pick": "pilih"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "pesan"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "maks. percobaan",
+      "backoff": "strategi tunggu",
+      "delay": "jeda",
+      "factor": "faktor",
       "retryOnError": "coba lagi saat error",
       "retryOnStatus": "coba lagi pada status HTTP",
       "retryOnFailure": "coba lagi pada setiap non-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "percobaan",
+      "exhausted": "habis",
       "backoffOpt": {
-        "fixed": "fixed",
+        "fixed": "tetap",
         "linear": "linear",
-        "exponential": "exponential"
+        "exponential": "eksponensial"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Daftar",
+      "math": "Matematika",
+      "dataFormats": "Format data",
+      "encoding": "Enkode",
       "time": "Pewaktuan",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritma",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "daftar",
+      "operation": "operasi",
+      "result": "hasil",
+      "key": "kunci",
+      "order": "urutan",
+      "depth": "kedalaman",
+      "size": "ukuran",
+      "start": "awal",
+      "end": "akhir",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "urutkan",
+        "unique": "unik",
+        "reverse": "balikkan",
+        "flatten": "ratakan",
+        "chunk": "pecah jadi bagian",
+        "slice": "potong",
+        "groupBy": "kelompokkan berdasarkan"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "nilai",
+      "operation": "operasi",
+      "result": "hasil",
+      "delimiter": "pemisah",
+      "header": "baris header",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "urai",
+        "stringify": "serialisasi"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "nilai",
+      "operation": "operasi",
+      "result": "hasil",
+      "b": "dengan",
       "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "max": "maks",
+      "precision": "presisi",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "bulatkan",
+        "floor": "bulatkan ke bawah",
+        "ceil": "bulatkan ke atas",
+        "trunc": "pangkas",
+        "abs": "nilai absolut",
+        "sign": "tanda",
+        "sqrt": "akar kuadrat",
         "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "max": "maks",
+        "clamp": "batasi"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
+      "value": "nilai",
+      "schema": "Skema JSON",
       "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "invalid": "tidak valid",
+      "errors": "kesalahan",
       "editTitle": "Ubah JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "jalur",
+      "content": "konten"
     },
     "writeFile": {
-      "path": "path",
+      "path": "jalur",
       "mode": "mode",
-      "content": "content"
+      "content": "konten"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Ubah",
+      "edit": "Buka editor",
+      "moreLines": "+{{count}} baris",
+      "editTemplate": "Ubah templat"
     },
     "timer": {
       "mode": "mode",
@@ -1888,7 +1889,7 @@
       "waitUntil": "Berhenti sejenak hingga tanggal/waktu tertentu, lalu melanjutkan.",
       "now": "Memancarkan tanggal dan waktu saat ini.",
       "timer": "Memicu body-nya pada interval berulang atau jadwal cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Menghitung a + − × ÷ … dari dua angka.",
       "comparator": "Membandingkan dua nilai dan menghasilkan true atau false.",
       "boolean": "Menggabungkan boolean dengan and / or / xor / not.",
       "object": "Membangun sebuah objek dari masukan-masukan bernamanya.",
@@ -1901,7 +1902,7 @@
       "json": "Mem-parsing sebuah string JSON, atau menserialkan sebuah nilai ke JSON.",
       "xml": "Mem-parsing sebuah string XML, atau menserialkan sebuah nilai ke XML.",
       "yaml": "Mem-parsing sebuah string YAML, atau menserialkan sebuah nilai ke YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Meng-hash atau meng-enkode sebuah teks (base64, md5, sha…, hmac, uuid).",
       "jwt": "Mendekode sebuah token JWT menjadi header, payload, dan tanda tangan.",
       "datetime": "Menggeser, memformat, atau menghitung selisih sebuah tanggal.",
       "retry": "Menjalankan ulang body-nya sampai berhasil, dengan kebijakan backoff.",
@@ -1910,7 +1911,7 @@
       "random": "Menghasilkan angka, teks, boolean, atau pilihan acak.",
       "listOp": "Membentuk ulang sebuah daftar (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Mem-parsing sebuah string CSV, atau menserialkan sebuah daftar ke CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Menjalankan operasi skalar (bulatkan, abs, akar, min, maks, batasi…).",
       "schema": "Memvalidasi sebuah nilai terhadap sebuah JSON Schema.",
       "readFile": "Membaca konten teks sebuah file.",
       "writeFile": "Menulis atau menambahkan teks ke sebuah file.",
@@ -1949,13 +1950,13 @@
       "redisClose": "Menutup koneksi langganan Redis yang sudah terbuka.",
       "redisCommand": "Menjalankan perintah Redis terikat (satu perintah pada koneksi baru, lalu terputus) dan memancarkan responsnya.",
       "toast": "Memancarkan notifikasi toast di antarmuka Restorm selama skenario berjalan.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Meng-host server tiruan HTTP lokal dan mendengarkan tanpa batas. `connected` menyala begitu server mendengarkan; setiap permintaan yang dilayani memancarkan ulang datanya di port `served`. Server tetap aktif sampai penutupan HTTP (atau Stop), lalu `done` menyala. Tidak ada keluaran response — ia melayani, bukan memanggil ke luar.",
       "httpClose": "Menghentikan server tiruan HTTP yang sudah mendengarkan (dideklarasikan oleh node server HTTP), membebaskan port-nya.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Meng-host server tiruan gRPC lokal dan mendengarkan tanpa batas. `connected` menyala begitu server mendengarkan; setiap panggilan yang dilayani memancarkan ulang datanya di port `served`. Server tetap aktif sampai penutupan server gRPC (atau Stop), lalu `done` menyala. Tidak ada keluaran response — ia melayani, bukan memanggil ke luar.",
       "grpcServerClose": "Menghentikan server tiruan gRPC yang sudah mendengarkan (dideklarasikan oleh node server gRPC), membebaskan port-nya.",
       "soapListen": "Menjadi host server tiruan SOAP lokal dan mendengarkan tanpa batas. Setiap permintaan masuk diarahkan ke operasi yang dikonfigurasi (berdasarkan SOAPAction-nya atau nama operasi di body) dan dijawab dengan amplop SOAP yang telah ditentukan (operasi kesalahan mengembalikan `<soap:Fault>`). `connected` dipicu segera setelah server mendengarkan; setiap permintaan yang dilayani memancarkan kembali datanya di port `served`. Server tetap aktif hingga penutupan SOAP (atau penghentian), lalu `done` dipicu.",
       "soapClose": "Menghentikan server tiruan SOAP yang sudah mendengarkan (dideklarasikan oleh node server SOAP) dan membebaskan port-nya.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Meng-host server tiruan GraphQL lokal dan mendengarkan tanpa batas. `connected` menyala begitu server mendengarkan; setiap operasi yang dilayani memancarkan ulang datanya di port `served`. Server tetap aktif sampai penutupan GraphQL (atau Stop), lalu `done` menyala. Tidak ada keluaran response — ia melayani, bukan memanggil ke luar.",
       "graphqlClose": "Menghentikan server tiruan GraphQL yang sudah mendengarkan (dideklarasikan oleh node server GraphQL), membebaskan port-nya.",
       "odataListen": "Menghosting layanan tiruan OData v4 lokal dan mendengarkan tanpa batas. `connected` terpicu begitu mulai mendengarkan; setiap permintaan yang dilayani memancarkan ulang datanya pada port `served`. Server tetap aktif hingga penutupan OData (atau Stop), lalu `done` terpicu. Tanpa keluaran response — ia melayani, bukan memanggil keluar.",
       "odataClose": "Menghentikan layanan tiruan OData yang sudah mendengarkan (dideklarasikan oleh node server OData), membebaskan portnya.",
@@ -1991,43 +1992,43 @@
       "title": "Jalankan dari baris perintah",
       "intro": "Jalankan skenario ini tanpa membuka aplikasi (CI, cron, skrip):",
       "byId": "Tetapkan berdasarkan id",
-      "allLogs": "All logs",
+      "allLogs": "Semua log",
       "note": "`--out file` juga menulis run-log ke sebuah file.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<proyek.restorm>",
       "tokenPlaceholder": "<token_anda>",
       "tokenNote": "Eksekusi headless memerlukan paket Restorm Pro dan token CI.",
       "tokenLink": "Dapatkan token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
+      "connectionNameLabel": "Nama koneksi",
+      "connectionNamePlaceholder": "nama koneksi",
       "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "addEvent": "Tambah event",
+      "connected": "terhubung",
+      "others": "lainnya",
+      "connection": "koneksi",
+      "pickConnection": "— pilih koneksi —",
+      "channelLabel": "Nama kanal",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Ubah payload",
       "started": "dimulai"
     },
     "websocket": {
-      "message": "message"
+      "message": "pesan"
     },
     "sse": {
-      "message": "message"
+      "message": "pesan"
     },
     "grpc": {
-      "message": "message"
+      "message": "pesan"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Tata ulang aksi"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "masuk",
+      "error": "kesalahan",
+      "done": "selesai"
     },
     "toast": {
       "title": "judul",
@@ -2035,7 +2036,7 @@
       "duration": "durasi (d)"
     },
     "http": {
-      "served": "served"
+      "served": "dilayani"
     },
     "actionOverride": {
       "configMissingShort": "Konfigurasi tidak ada",
@@ -2548,13 +2549,6 @@
     "crashReportsDescription": "Mengirim laporan yang dianonimkan saat Restorm mengalami kerusakan, agar masalahnya dapat diperbaiki. Laporan dibersihkan dari URL, token, isi permintaan, dan data pribadi sebelum meninggalkan komputer Anda. Termasuk dalam paket gratis; paket berbayar dapat mematikannya. Detail lengkap: https://restorm.app/privacy",
     "telemetryTitle": "Kirim statistik penggunaan",
     "telemetryDescription": "Mengirim statistik anonim tentang fitur mana yang digunakan, untuk mengarahkan pengembangan berikutnya. Mati secara bawaan dan tidak pernah aktif tanpa persetujuan tegas Anda. Tidak berisi data permintaan, URL, maupun data pribadi. Detail lengkap: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Laporan kerusakan (hanya dengan persetujuan Anda)",
-        "telemetry": "Statistik penggunaan anonim (hanya dengan persetujuan Anda)",
-        "backend": "Akun, lisensi, dan langganan"
-      }
-    },
     "crashReportsLockedLabel": "Dapat diubah mulai paket Pro. Pada paket gratis, laporan crash diperlukan untuk menjaga kualitas.",
     "consentToast": {
       "title": "Bantu kami meningkatkan Restorm",

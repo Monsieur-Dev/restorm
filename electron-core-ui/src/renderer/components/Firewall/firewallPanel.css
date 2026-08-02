@@ -52,12 +52,6 @@
 	min-width: 0;
 }
 
-.firewall-panel__header-test {
-	display: flex;
-	align-items: flex-start;
-	margin-top: 4px;
-}
-
 .firewall-panel__title {
 	font-size: 22px;
 	font-weight: 600;
@@ -80,85 +74,6 @@
 	border-radius: 3px;
 	font-family: var(--monospace-font);
 	font-size: 11px;
-}
-
-/* Read-only inventory of the app's own outbound destinations. Sits between the
- * header and the whitelist / blacklist tabs so it is visible without scrolling
- * — an audit surface the user has to hunt for is not much of an audit surface. */
-.firewall-panel__outbound {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	padding: 16px 20px;
-	border-bottom: 1px solid var(--toolbar-hover-background, rgb(127, 127, 127, 0.12));
-}
-
-.firewall-panel__outbound-title {
-	font-size: 13px;
-	font-weight: 600;
-	margin: 0;
-	letter-spacing: 0.2px;
-}
-
-.firewall-panel__outbound-list {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-
-.firewall-panel__outbound-row {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 6px 10px;
-	border: 1px solid var(--input-border, rgb(127, 127, 127, 0.3));
-	border-radius: 3px;
-	background: var(--input-background, var(--editor-background, transparent));
-}
-
-.firewall-panel__outbound-identity {
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
-	flex: 1 1 auto;
-	min-width: 0;
-}
-
-.firewall-panel__outbound-host {
-	font-family: var(--monospace-font);
-	font-size: 12px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.firewall-panel__outbound-purpose {
-	font-size: 11px;
-	opacity: 0.7;
-	line-height: 1.4;
-}
-
-.firewall-panel__outbound-state {
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	flex: 0 0 auto;
-	font-size: 11px;
-	white-space: nowrap;
-}
-
-/* Green / muted rather than green / red: an endpoint the user declined is a
- * setting working as intended, not an error to alarm them about. */
-.firewall-panel__outbound-state[data-active='true'] {
-	color: var(--testing-iconPassed, var(--charts-green, #388a34));
-}
-
-.firewall-panel__outbound-state[data-active='false'] {
-	color: var(--editor-foreground);
-	opacity: 0.6;
 }
 
 .firewall-panel__tabs {

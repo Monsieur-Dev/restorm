@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Respuesta",
+        "infos": "Información",
         "requestBody": "Cuerpo de la petición",
         "graph": "Gráfico"
       },
@@ -1210,25 +1211,25 @@
       "emptyRightClick": "Haga clic derecho en un lugar vacío para añadir acciones a su escenario"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Ruta JSON",
       "ariaLabel": "Selector de ruta JSON",
       "pick": "Elegir del resultado",
-      "loading": "Loading…",
+      "loading": "Cargando…",
       "noResult": "Ejecute la acción fuente para elegir una propiedad de su resultado."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Escenario",
+      "notes": "Notas"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Cambiar color",
+        "resetColor": "Restablecer color",
         "addNote": "Añadir/editar nota",
         "runOnEachEvent": "Ejecutar en cada evento recibido",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
-        "deleteShortcut": "Del",
+        "duplicate": "Duplicar",
+        "delete": "Eliminar",
+        "deleteShortcut": "Supr",
         "copy": "Copiar",
         "paste": "Pegar"
       },
@@ -1237,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Cambiar color",
+        "resetColor": "Restablecer color",
+        "delete": "Eliminar"
       }
     },
     "locked": "Edición bloqueada mientras el escenario se está ejecutando",
@@ -1303,44 +1304,44 @@
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Cripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Cálculo de fechas",
+      "objectOp": "Operaciones de objeto",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Aleatorio",
+      "throw": "Lanzar error",
+      "retry": "Reintento",
+      "listOp": "Operaciones de lista",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matemáticas",
+      "schema": "Validar esquema",
+      "readFile": "Leer archivo",
+      "writeFile": "Escribir archivo",
       "timer": "Temporizador",
       "code": "Código",
       "socketioConnect": "Conexión Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Envío Socket.IO",
       "socketioClose": "Cerrar conexión Socket.IO",
       "socketioServerClose": "Cerrar servidor Socket.IO",
       "websocketConnect": "Conexión WebSocket",
       "sseConnect": "Conexión SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Envío WebSocket",
       "websocketClose": "Cerrar conexión WebSocket",
       "websocketServerClose": "Cerrar servidor WebSocket",
       "sseClose": "Cerrar conexión SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Conexión gRPC",
+      "grpcSend": "Envío gRPC",
       "grpcClose": "Cerrar conexión gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Conexión MQTT",
+      "mqttSend": "Publicación MQTT",
       "mqttClose": "Cerrar conexión MQTT",
       "amqpConnect": "Conexión AMQP",
       "amqpPublish": "Publicación AMQP",
       "amqpClose": "Cerrar conexión AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Suscripción Redis",
       "redisClose": "Cerrar conexión Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Comando Redis",
       "httpListen": "Servidor HTTP",
       "httpClose": "Cerrar servidor HTTP",
       "grpcServerClose": "Cerrar servidor gRPC",
@@ -1355,8 +1356,8 @@
       "stompConnect": "Conectar STOMP",
       "stompSend": "Enviar STOMP",
       "stompClose": "Cerrar conexión STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Producción Kafka",
+      "kafkaConsume": "Consumo Kafka",
       "kafkaClose": "Cerrar conexión Kafka",
       "grpcListen": "Servidor gRPC"
     },
@@ -1376,29 +1377,29 @@
     },
     "assert": {
       "message": "mensaje",
-      "operator": "operator",
+      "operator": "operador",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "igual",
+        "ne": "distinto",
+        "lt": "menor que",
         "lte": "menor o igual",
-        "gt": "greater than",
+        "gt": "mayor que",
         "gte": "mayor o igual",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "contiene",
+        "isString": "es cadena",
+        "isNumber": "es número",
+        "isBoolean": "es booleano",
+        "isArray": "es lista",
+        "isObject": "es objeto",
+        "isNull": "es null",
+        "exists": "existe",
+        "isEmpty": "está vacío",
+        "matchesRegex": "coincide con regex",
         "isOneOf": "es uno de",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "igualdad profunda",
+        "lengthEq": "longitud ==",
+        "lengthGt": "longitud >",
+        "lengthLt": "longitud <"
       }
     },
     "editRequest": "Editar la solicitud",
@@ -1406,8 +1407,8 @@
     "object": {
       "addProperty": "Añadir propiedad",
       "removeProperty": "Eliminar propiedad",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Nombre de la propiedad",
+      "propertyValue": "valor"
     },
     "output": {
       "outputName": "Nombre de salida",
@@ -1415,7 +1416,7 @@
       "removeOutput": "Eliminar"
     },
     "input": {
-      "name": "Name",
+      "name": "Nombre",
       "defaultType": "Valor por defecto / tipo",
       "addParam": "Añadir parámetro",
       "removeParam": "Eliminar"
@@ -1461,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "La plantilla no debe estar vacía.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "La entrada \"value\" debe estar conectada cuando la plantilla referencia {{…}}."
       },
       "request": {
         "missing": "La petición vinculada ya no existe."
@@ -1492,8 +1493,8 @@
       "syntheticInfo": "Datos de ejemplo generados a partir de la documentación de esta solicitud.",
       "syntheticRunHint": "Datos de ejemplo: ejecute la solicitud para reemplazarlos por un resultado real.",
       "stop": "Detener",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Registros de ejecución",
+      "copyLogs": "Copiar registros",
       "copyThisLog": "Copiar este registro",
       "clearLogs": "Borrar registros",
       "logsShowAll": "Mostrar todos los logs",
@@ -1503,12 +1504,12 @@
       "helpTitle": "Qué hace esta acción"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Zona horaria",
+      "formatLabel": "Formato",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Fecha/hora",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Cadena"
       }
     },
     "callers": {
@@ -1532,20 +1533,20 @@
       "unpin": "Desfijar"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "desde",
+      "to": "hasta",
+      "step": "paso",
+      "index": "índice",
+      "done": "listo"
     },
     "while": {
-      "body": "body"
+      "body": "cuerpo"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "bucle"
     },
     "loop": {
-      "done": "done"
+      "done": "listo"
     },
     "breakpoint": {
       "add": "Añadir punto de interrupción",
@@ -1581,7 +1582,7 @@
       "value": "valor",
       "operation": "operación",
       "pattern": "patrón",
-      "flags": "flags",
+      "flags": "indicadores",
       "replacement": "reemplazo",
       "result": "resultado",
       "op": {
@@ -1608,34 +1609,34 @@
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "valor",
+      "operation": "operación",
+      "indent": "sangría",
+      "result": "resultado",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizar",
+        "stringify": "serializar"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "valor",
+      "operation": "operación",
+      "indent": "sangría",
+      "result": "resultado",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizar",
+        "stringify": "serializar"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "valor",
+      "operation": "operación",
+      "key": "clave",
+      "keyPlaceholder": "secreto",
+      "result": "resultado",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "codificar base64",
+        "base64Decode": "decodificar base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1646,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "resultado"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "fecha",
+      "operation": "operación",
+      "amount": "cantidad",
+      "unitLabel": "unidad",
+      "format": "formato",
+      "other": "segunda fecha",
+      "result": "resultado",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "sumar",
+        "subtract": "restar",
+        "format": "formatear",
+        "diff": "diferencia"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milisegundos",
+        "seconds": "segundos",
+        "minutes": "minutos",
+        "hours": "horas",
+        "days": "días",
+        "weeks": "semanas",
+        "months": "meses",
+        "years": "años"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "objeto",
+      "operation": "operación",
+      "path": "ruta",
+      "keys": "claves",
+      "setValue": "valor",
+      "mergeWith": "fusionar con",
+      "result": "resultado",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "leer",
+        "set": "escribir",
+        "merge": "fusionar",
+        "pick": "conservar",
+        "omit": "quitar",
+        "keys": "claves",
+        "values": "valores"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "valor",
+      "operation": "operación",
+      "result": "resultado",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "codificar",
+        "decode": "decodificar",
+        "parseQuery": "analizar query",
+        "buildQuery": "construir query",
+        "parseUrl": "analizar URL"
       }
     },
     "random": {
-      "operation": "operation",
-      "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
+      "operation": "operación",
+      "min": "mín",
+      "max": "máx",
+      "length": "longitud",
+      "items": "elementos",
+      "seed": "semilla (opcional)",
       "seedPlaceholder": "reproducible",
-      "result": "result",
+      "result": "resultado",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "entero",
+        "float": "decimal",
+        "string": "cadena",
+        "boolean": "booleano",
+        "pick": "elegir"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "mensaje"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
+      "maxAttempts": "intentos máx.",
+      "backoff": "espera",
+      "delay": "retardo",
       "factor": "factor",
       "retryOnError": "reintentar en caso de error",
       "retryOnStatus": "reintentar según el status HTTP",
       "retryOnFailure": "reintentar ante cualquier no-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "intento",
+      "exhausted": "agotado",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "fijo",
+        "linear": "lineal",
+        "exponential": "exponencial"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Listas",
+      "math": "Matemáticas",
+      "dataFormats": "Formatos de datos",
+      "encoding": "Codificación",
       "time": "Temporización",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmos",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "lista",
+      "operation": "operación",
+      "result": "resultado",
+      "key": "clave",
+      "order": "orden",
+      "depth": "profundidad",
+      "size": "tamaño",
+      "start": "inicio",
+      "end": "fin",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "ordenar",
+        "unique": "únicos",
+        "reverse": "invertir",
+        "flatten": "aplanar",
+        "chunk": "trocear",
+        "slice": "extraer",
+        "groupBy": "agrupar por"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "valor",
+      "operation": "operación",
+      "result": "resultado",
+      "delimiter": "delimitador",
+      "header": "fila de cabecera",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizar",
+        "stringify": "serializar"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
-      "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "a": "valor",
+      "operation": "operación",
+      "result": "resultado",
+      "b": "con",
+      "min": "mín",
+      "max": "máx",
+      "precision": "precisión",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
-        "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "round": "redondear",
+        "floor": "suelo",
+        "ceil": "techo",
+        "trunc": "truncar",
+        "abs": "valor absoluto",
+        "sign": "signo",
+        "sqrt": "raíz cuadrada",
+        "min": "mín",
+        "max": "máx",
+        "clamp": "acotar"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "valor",
+      "schema": "Esquema JSON",
+      "valid": "válido",
+      "invalid": "inválido",
+      "errors": "errores",
       "editTitle": "Editar JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "ruta",
+      "content": "contenido"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "ruta",
+      "mode": "modo",
+      "content": "contenido"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Editar",
+      "edit": "Abrir el editor",
+      "moreLines": "+{{count}} líneas",
+      "editTemplate": "Editar plantilla"
     },
     "timer": {
       "mode": "modo",
@@ -1889,7 +1890,7 @@
       "waitUntil": "Pausa hasta una fecha/hora dada, luego continúa.",
       "now": "Emite la fecha y hora actuales.",
       "timer": "Dispara su cuerpo en un intervalo repetido o según una programación cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Calcula a + − × ÷ … de dos números.",
       "comparator": "Compara dos valores y emite verdadero o falso.",
       "boolean": "Combina booleanos con and / or / xor / not.",
       "object": "Construye un objeto a partir de sus entradas con nombre.",
@@ -1902,7 +1903,7 @@
       "json": "Analiza una cadena JSON, o serializa un valor a JSON.",
       "xml": "Analiza una cadena XML, o serializa un valor a XML.",
       "yaml": "Analiza una cadena YAML, o serializa un valor a YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Aplica hash o codifica una cadena (base64, md5, sha…, hmac, uuid).",
       "jwt": "Decodifica un token JWT en header, payload y signature.",
       "datetime": "Desplaza, formatea o compara una fecha.",
       "retry": "Reejecuta su cuerpo hasta que tenga éxito, con una política de backoff.",
@@ -1911,7 +1912,7 @@
       "random": "Genera un número, texto, booleano o selección aleatoria.",
       "listOp": "Reorganiza una lista (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Analiza una cadena CSV, o serializa una lista a CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Aplica una operación escalar (redondear, abs, raíz, mín, máx, acotar…).",
       "schema": "Valida un valor contra un JSON Schema.",
       "readFile": "Lee el contenido de texto de un archivo.",
       "writeFile": "Escribe o añade texto a un archivo.",
@@ -1950,13 +1951,13 @@
       "redisClose": "Cierra una conexión de suscripción Redis ya abierta.",
       "redisCommand": "Ejecuta un comando Redis vinculado (un único comando en una conexión nueva, luego se desconecta) y emite su respuesta.",
       "toast": "Emite una notificación toast en la interfaz de Restorm mientras se ejecuta el escenario.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Aloja un servidor HTTP simulado local y escucha indefinidamente. `connected` se dispara en cuanto está escuchando; cada petición servida reemite sus datos en el puerto `served`. El servidor sigue activo hasta un cierre HTTP (o un Stop), y entonces se dispara `done`. Sin salida response — sirve, no llama.",
       "httpClose": "Detiene un servidor simulado HTTP que ya está escuchando (declarado por un nodo servidor HTTP) y libera su puerto.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Aloja un servidor gRPC simulado local y escucha indefinidamente. `connected` se dispara en cuanto está escuchando; cada llamada servida reemite sus datos en el puerto `served`. El servidor sigue activo hasta un cierre del servidor gRPC (o un Stop), y entonces se dispara `done`. Sin salida response — sirve, no llama.",
       "grpcServerClose": "Detiene un servidor simulado gRPC que ya está escuchando (declarado por un nodo servidor gRPC) y libera su puerto.",
       "soapListen": "Aloja un servidor SOAP de prueba local y escucha indefinidamente. Cada solicitud entrante se dirige a una operación configurada (por su SOAPAction o el nombre de operación del cuerpo) y se responde con el sobre SOAP predefinido (una operación de fallo devuelve `<soap:Fault>`). `connected` se activa en cuanto el servidor escucha; cada solicitud atendida vuelve a emitir sus datos en el puerto `served`. El servidor permanece activo hasta un cierre SOAP (o una parada), entonces se activa `done`.",
       "soapClose": "Detiene un servidor SOAP de prueba que ya está escuchando (declarado por un nodo de servidor SOAP) y libera su puerto.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Aloja un servidor GraphQL simulado local y escucha indefinidamente. `connected` se dispara en cuanto está escuchando; cada operación servida reemite sus datos en el puerto `served`. El servidor sigue activo hasta un cierre GraphQL (o un Stop), y entonces se dispara `done`. Sin salida response — sirve, no llama.",
       "graphqlClose": "Detiene un servidor simulado GraphQL que ya está escuchando (declarado por un nodo servidor GraphQL) y libera su puerto.",
       "odataListen": "Aloja un servicio simulado OData v4 local y escucha indefinidamente. `connected` se activa en cuanto está escuchando; cada solicitud atendida reemite sus datos por el puerto `served`. El servidor permanece activo hasta un cierre OData (o un Stop), luego se activa `done`. Sin salida response — sirve, no llama hacia fuera.",
       "odataClose": "Detiene un servicio simulado OData que ya está escuchando (declarado por un nodo de servidor OData) y libera su puerto.",
@@ -1992,43 +1993,43 @@
       "title": "Ejecutar desde la línea de comandos",
       "intro": "Ejecute este escenario sin abrir la aplicación (CI, cron, script):",
       "byId": "Designar por id",
-      "allLogs": "All logs",
+      "allLogs": "Todos los logs",
       "note": "`--out archivo` también escribe el run-log en un archivo.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<proyecto.restorm>",
       "tokenPlaceholder": "<su_token>",
       "tokenNote": "Una ejecución headless requiere un plan Restorm Pro y un token de CI.",
       "tokenLink": "Obtener un token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Nombre de la conexión",
+      "connectionNamePlaceholder": "nombre de la conexión",
+      "eventPlaceholder": "evento",
+      "addEvent": "Añadir evento",
+      "connected": "conectado",
+      "others": "otros",
+      "connection": "conexión",
+      "pickConnection": "— elige una conexión —",
+      "channelLabel": "Nombre del canal",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Editar payload",
       "started": "iniciado"
     },
     "websocket": {
-      "message": "message"
+      "message": "mensaje"
     },
     "sse": {
-      "message": "message"
+      "message": "mensaje"
     },
     "grpc": {
-      "message": "message"
+      "message": "mensaje"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Reorganizar las acciones"
     },
     "port": {
-      "in": "in",
+      "in": "entrada",
       "error": "error",
-      "done": "done"
+      "done": "listo"
     },
     "toast": {
       "title": "título",
@@ -2036,7 +2037,7 @@
       "duration": "duración (s)"
     },
     "http": {
-      "served": "served"
+      "served": "servida"
     },
     "actionOverride": {
       "configMissingShort": "Falta la configuración",
@@ -2549,13 +2550,6 @@
     "crashReportsDescription": "Envía un informe anonimizado cuando Restorm falla, para que el problema pueda corregirse. Los informes se depuran de URL, tokens, cuerpos de petición y datos personales antes de salir de su equipo. Incluido en el plan gratuito; un plan de pago permite desactivarlo. Todos los detalles: https://restorm.app/privacy",
     "telemetryTitle": "Enviar estadísticas de uso",
     "telemetryDescription": "Envía estadísticas anónimas sobre qué funciones se usan, para orientar lo que se desarrollará a continuación. Desactivado por defecto y nunca activado sin su consentimiento explícito. No contiene datos de peticiones, ni URL, ni datos personales. Todos los detalles: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Informes de fallos (solo con su consentimiento)",
-        "telemetry": "Estadísticas de uso anónimas (solo con su consentimiento)",
-        "backend": "Cuenta, licencia y suscripción"
-      }
-    },
     "crashReportsLockedLabel": "Modificable a partir del plan Pro. En el plan gratuito, los informes de fallos son necesarios para mantener la calidad.",
     "consentToast": {
       "title": "Ayúdenos a mejorar Restorm",

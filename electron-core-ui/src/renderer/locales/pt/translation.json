@@ -177,6 +177,9 @@
       "copied": "Copiado!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Comece a escrever…"
+  },
   "tagsView": {
     "removeTag": "Remover etiqueta",
     "newTag": "Nova etiqueta"
@@ -412,19 +415,19 @@
     "addOrigin": "Adicionar origem",
     "removeOrigin": "Remover {{origin}}",
     "noEntries": "Nenhuma entrada ainda.",
-    "outbound": {
-      "title": "Serviços de saída",
-      "intro": "Destinos que esta aplicação pode contactar por iniciativa própria. Estão declarados no código e não podem ser editados aqui — os que exigem o seu consentimento permanecem desativados até que o conceda nas Preferências.",
-      "empty": "Esta aplicação não declara qualquer destino de saída próprio.",
-      "hostUnset": "não configurado",
-      "stateConsented": "Permitido — deu o seu consentimento",
-      "stateNoConsent": "Bloqueado — nenhum consentimento dado",
-      "stateRequired": "Permitido — necessário à aplicação",
-      "stateInactive": "Inativo — não utilizado neste momento",
-      "purpose": {
-        "avatar": "Fotografia de perfil da conta com sessão iniciada"
-      }
+    "prompt": {
+      "title": "Pedido de saída bloqueado",
+      "allow": "Permitir",
+      "deny": "Recusar",
+      "fromOrigin": "de {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Voltar",
+    "refresh": "Atualizar",
+    "go": "Ir",
+    "address": "Endereço",
+    "emptyHint": "Introduza um endereço acima para começar a navegar."
   },
   "bookmarkRibbon": {
     "addBookmark": "Adicionar marcador"

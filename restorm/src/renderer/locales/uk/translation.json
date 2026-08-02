@@ -423,6 +423,7 @@
     "responses": {
       "tabs": {
         "response": "Відповідь",
+        "infos": "Інформація",
         "requestBody": "Тіло запиту",
         "graph": "Граф"
       },
@@ -1212,24 +1213,24 @@
       "emptyRightClick": "Клацніть правою кнопкою миші на порожньому місці, щоб додати дії до сценарію"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Шлях JSON",
       "ariaLabel": "Селектор шляху JSON",
       "pick": "Вибрати з результату",
-      "loading": "Loading…",
+      "loading": "Завантаження…",
       "noResult": "Запустіть дію-джерело, щоб вибрати властивість з її результату."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Сценарій",
+      "notes": "Нотатки"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Змінити колір",
+        "resetColor": "Скинути колір",
         "addNote": "Додати/редагувати нотатку",
         "runOnEachEvent": "Запускати при кожній отриманій події",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Дублювати",
+        "delete": "Видалити",
         "deleteShortcut": "Del",
         "copy": "Копіювати",
         "paste": "Вставити"
@@ -1239,9 +1240,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Змінити колір",
+        "resetColor": "Скинути колір",
+        "delete": "Видалити"
       }
     },
     "locked": "Редагування заблоковано під час виконання сценарію",
@@ -1300,49 +1301,49 @@
       "getVariable": "Отримати змінну",
       "addToList": "Додати до списку",
       "removeFromList": "Видалити зі списку",
-      "cast": "Cast",
+      "cast": "Перетворити",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Крипто",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Обчислення дат",
+      "objectOp": "Операції з об'єктами",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Випадкове",
+      "throw": "Викинути помилку",
+      "retry": "Повторити",
+      "listOp": "Операції зі списками",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Математика",
+      "schema": "Перевірити схему",
+      "readFile": "Прочитати файл",
+      "writeFile": "Записати файл",
       "timer": "Таймер",
       "code": "Код",
       "socketioConnect": "З’єднання Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Надсилання Socket.IO",
       "socketioClose": "Закрити з’єднання Socket.IO",
       "socketioServerClose": "Закрити сервер Socket.IO",
       "websocketConnect": "З’єднання WebSocket",
       "sseConnect": "З’єднання SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Надсилання WebSocket",
       "websocketClose": "Закрити з’єднання WebSocket",
       "websocketServerClose": "Закрити сервер WebSocket",
       "sseClose": "Закрити з’єднання SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "З'єднання gRPC",
+      "grpcSend": "Надсилання gRPC",
       "grpcClose": "Закрити з’єднання gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "З'єднання MQTT",
+      "mqttSend": "Публікація MQTT",
       "mqttClose": "Закрити з’єднання MQTT",
       "amqpConnect": "З’єднання AMQP",
       "amqpPublish": "Публікація AMQP",
       "amqpClose": "Закрити з’єднання AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Підписка Redis",
       "redisClose": "Закрити з’єднання Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Команда Redis",
       "httpListen": "Сервер HTTP",
       "httpClose": "Закрити сервер HTTP",
       "grpcServerClose": "Закрити сервер gRPC",
@@ -1357,8 +1358,8 @@
       "stompConnect": "З'єднання STOMP",
       "stompSend": "Надсилання STOMP",
       "stompClose": "Закрити з’єднання STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Продукування Kafka",
+      "kafkaConsume": "Споживання Kafka",
       "kafkaClose": "Закрити з’єднання Kafka",
       "grpcListen": "Сервер gRPC"
     },
@@ -1378,29 +1379,29 @@
     },
     "assert": {
       "message": "повідомлення",
-      "operator": "operator",
+      "operator": "оператор",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "дорівнює",
+        "ne": "не дорівнює",
+        "lt": "менше ніж",
         "lte": "менше або дорівнює",
-        "gt": "greater than",
+        "gt": "більше ніж",
         "gte": "більше або дорівнює",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "містить",
+        "isString": "є рядком",
+        "isNumber": "є числом",
+        "isBoolean": "є логічним значенням",
+        "isArray": "є списком",
+        "isObject": "є об'єктом",
+        "isNull": "є null",
+        "exists": "існує",
+        "isEmpty": "порожнє",
+        "matchesRegex": "відповідає регексу",
         "isOneOf": "є одним із",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "глибока рівність",
+        "lengthEq": "довжина ==",
+        "lengthGt": "довжина >",
+        "lengthLt": "довжина <"
       }
     },
     "editRequest": "Редагувати запит",
@@ -1408,8 +1409,8 @@
     "object": {
       "addProperty": "Додати властивість",
       "removeProperty": "Видалити властивість",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Назва властивості",
+      "propertyValue": "значення"
     },
     "output": {
       "outputName": "Назва виходу",
@@ -1417,7 +1418,7 @@
       "removeOutput": "Видалити"
     },
     "input": {
-      "name": "Name",
+      "name": "Назва",
       "defaultType": "За замовчуванням / тип",
       "addParam": "Додати параметр",
       "removeParam": "Видалити"
@@ -1463,7 +1464,7 @@
       },
       "transform": {
         "emptyTemplate": "Шаблон не може бути порожнім.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Вхід \"value\" має бути під'єднаний, коли шаблон посилається на {{…}}."
       },
       "request": {
         "missing": "Пов'язаний запит більше не існує."
@@ -1494,8 +1495,8 @@
       "syntheticInfo": "Приклад даних, згенерований з документації цього запиту.",
       "syntheticRunHint": "Приклад даних — виконайте запит, щоб замінити їх реальним результатом.",
       "stop": "Зупинити",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Журнали виконання",
+      "copyLogs": "Копіювати журнали",
       "copyThisLog": "Копіювати цей запис",
       "clearLogs": "Очистити журнали",
       "logsShowAll": "Показати всі логи",
@@ -1505,12 +1506,12 @@
       "helpTitle": "Що робить ця дія"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Часовий пояс",
+      "formatLabel": "Формат",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Дата/час",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Рядок"
       }
     },
     "callers": {
@@ -1518,8 +1519,8 @@
       "title": "Цей сценарій викликається:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Параметри виконання",
+      "run": "Запустити",
       "midRunTitle": "Потрібен ввід"
     },
     "runHistory": {
@@ -1527,27 +1528,27 @@
       "tooltip": "Історія запусків",
       "empty": "Ще немає записаних запусків",
       "noLogs": "Немає журналу для цього запуску",
-      "logsTab": "Logs",
+      "logsTab": "Журнали",
       "graphTab": "Граф",
       "noGraph": "Немає знімка сценарію для цього запуску",
       "pin": "Закріпити",
       "unpin": "Відкріпити"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "від",
+      "to": "до",
+      "step": "крок",
+      "index": "індекс",
+      "done": "готово"
     },
     "while": {
-      "body": "body"
+      "body": "тіло"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "цикл"
     },
     "loop": {
-      "done": "done"
+      "done": "готово"
     },
     "breakpoint": {
       "add": "Додати точку зупину",
@@ -1560,84 +1561,84 @@
       "toggle": "Перемкнути мінікарту"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "список",
+      "values": "значення",
+      "result": "результат",
       "addValue": "Додати значення",
       "removeValue": "Видалити значення",
       "updateVariable": "Оновити вихідну змінну"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "значення",
+      "targetType": "перетворити на",
+      "result": "результат",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "число",
+        "string": "рядок",
+        "boolean": "логічне значення",
+        "date": "дата",
+        "list": "список"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "значення",
+      "operation": "операція",
+      "pattern": "взірець",
+      "flags": "прапорці",
+      "replacement": "заміна",
+      "result": "результат",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "витягти",
+        "extractAll": "витягти все",
+        "test": "перевірити",
+        "replace": "замінити",
+        "split": "розділити"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Без урахування регістру",
         "m": "Багаторядковий (^ і $ відповідають кінцям рядків)",
         "s": "Dotall (. відповідає символам нового рядка)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "значення",
+      "operation": "операція",
+      "indent": "відступ",
+      "result": "результат",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "розібрати",
+        "stringify": "серіалізувати"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "значення",
+      "operation": "операція",
+      "indent": "відступ",
+      "result": "результат",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "розібрати",
+        "stringify": "серіалізувати"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "значення",
+      "operation": "операція",
+      "indent": "відступ",
+      "result": "результат",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "розібрати",
+        "stringify": "серіалізувати"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "значення",
+      "operation": "операція",
+      "key": "ключ",
+      "keyPlaceholder": "секрет",
+      "result": "результат",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "закодувати base64",
+        "base64Decode": "декодувати base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1647,183 +1648,183 @@
       }
     },
     "jwt": {
-      "value": "token",
-      "result": "result"
+      "value": "токен",
+      "result": "результат"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "дата",
+      "operation": "операція",
+      "amount": "кількість",
+      "unitLabel": "одиниця",
+      "format": "формат",
+      "other": "друга дата",
+      "result": "результат",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "додати",
+        "subtract": "відняти",
+        "format": "форматувати",
+        "diff": "різниця"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "мілісекунди",
+        "seconds": "секунди",
+        "minutes": "хвилини",
+        "hours": "години",
+        "days": "дні",
+        "weeks": "тижні",
+        "months": "місяці",
+        "years": "роки"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "об'єкт",
+      "operation": "операція",
+      "path": "шлях",
+      "keys": "ключі",
+      "setValue": "значення",
+      "mergeWith": "об'єднати з",
+      "result": "результат",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "прочитати",
+        "set": "записати",
+        "merge": "об'єднати",
+        "pick": "залишити",
+        "omit": "вилучити",
+        "keys": "ключі",
+        "values": "значення"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "значення",
+      "operation": "операція",
+      "result": "результат",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "закодувати",
+        "decode": "декодувати",
+        "parseQuery": "розібрати запит",
+        "buildQuery": "побудувати запит",
+        "parseUrl": "розібрати URL"
       }
     },
     "random": {
-      "operation": "operation",
-      "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "operation": "операція",
+      "min": "мін",
+      "max": "макс",
+      "length": "довжина",
+      "items": "елементи",
+      "seed": "зерно (необов'язково)",
+      "seedPlaceholder": "відтворюване",
+      "result": "результат",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "ціле число",
+        "float": "дробове число",
+        "string": "рядок",
+        "boolean": "логічне значення",
+        "pick": "обрати"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "повідомлення"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "макс. спроб",
+      "backoff": "стратегія очікування",
+      "delay": "затримка",
+      "factor": "коефіцієнт",
       "retryOnError": "повторити при помилці",
       "retryOnStatus": "повторити при статусі HTTP",
       "retryOnFailure": "повторити при будь-якому non-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "спроба",
+      "exhausted": "вичерпано",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "фіксована",
+        "linear": "лінійна",
+        "exponential": "експоненційна"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Списки",
+      "math": "Математика",
+      "dataFormats": "Формати даних",
+      "encoding": "Кодування",
       "time": "Таймінг",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Алгоритми",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "список",
+      "operation": "операція",
+      "result": "результат",
+      "key": "ключ",
+      "order": "порядок",
+      "depth": "глибина",
+      "size": "розмір",
+      "start": "початок",
+      "end": "кінець",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "сортувати",
+        "unique": "унікальні",
+        "reverse": "обернути",
+        "flatten": "сплющити",
+        "chunk": "розбити на частини",
+        "slice": "вирізати",
+        "groupBy": "згрупувати за"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "значення",
+      "operation": "операція",
+      "result": "результат",
+      "delimiter": "роздільник",
+      "header": "рядок заголовків",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "розібрати",
+        "stringify": "серіалізувати"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
-      "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "a": "значення",
+      "operation": "операція",
+      "result": "результат",
+      "b": "з",
+      "min": "мін",
+      "max": "макс",
+      "precision": "точність",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
-        "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "round": "округлити",
+        "floor": "округлити вниз",
+        "ceil": "округлити вгору",
+        "trunc": "обрізати",
+        "abs": "абсолютне значення",
+        "sign": "знак",
+        "sqrt": "квадратний корінь",
+        "min": "мін",
+        "max": "макс",
+        "clamp": "обмежити"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "значення",
+      "schema": "Схема JSON",
+      "valid": "дійсне",
+      "invalid": "недійсне",
+      "errors": "помилки",
       "editTitle": "Редагувати JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "шлях",
+      "content": "вміст"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "шлях",
+      "mode": "режим",
+      "content": "вміст"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Редагувати",
+      "edit": "Відкрити редактор",
+      "moreLines": "+{{count}} рядків",
+      "editTemplate": "Редагувати шаблон"
     },
     "timer": {
       "mode": "режим",
@@ -1891,7 +1892,7 @@
       "waitUntil": "Призупиняється до заданої дати/часу, потім продовжує.",
       "now": "Видає поточну дату й час.",
       "timer": "Запускає своє тіло через повторюваний інтервал або за розкладом cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Обчислює a + − × ÷ … двох чисел.",
       "comparator": "Порівнює два значення і видає істина або хиба.",
       "boolean": "Поєднує булеві значення за допомогою and / or / xor / not.",
       "object": "Будує об'єкт з його іменованих входів.",
@@ -1904,7 +1905,7 @@
       "json": "Розбирає рядок JSON або серіалізує значення у JSON.",
       "xml": "Розбирає рядок XML або серіалізує значення у XML.",
       "yaml": "Розбирає рядок YAML або серіалізує значення у YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Хешує або кодує рядок (base64, md5, sha…, hmac, uuid).",
       "jwt": "Декодує токен JWT на header, payload та signature.",
       "datetime": "Зсуває, форматує або порівнює дату.",
       "retry": "Повторно запускає своє тіло до успіху, з політикою backoff.",
@@ -1913,7 +1914,7 @@
       "random": "Генерує випадкове число, рядок, boolean або вибір.",
       "listOp": "Перебудовує список (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Розбирає рядок CSV або серіалізує список у CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Виконує скалярну операцію (округлити, abs, корінь, мін, макс, обмежити…).",
       "schema": "Перевіряє значення відповідно до JSON Schema.",
       "readFile": "Читає текстовий вміст файлу.",
       "writeFile": "Записує або додає текст у файл.",
@@ -1952,13 +1953,13 @@
       "redisClose": "Закриває вже відкрите з'єднання підписки Redis.",
       "redisCommand": "Виконує прив'язану команду Redis (одна команда на новому з'єднанні, потім відключення) і видає її відповідь.",
       "toast": "Показує toast-сповіщення в інтерфейсі Restorm під час виконання сценарію.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Розміщує локальний фіктивний сервер HTTP і слухає необмежено. `connected` спрацьовує, щойно він починає слухати; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер лишається активним до закриття HTTP (або Stop), після чого спрацьовує `done`. Немає виходу response — він обслуговує, а не викликає.",
       "httpClose": "Зупиняє вже активний фіктивний сервер HTTP (оголошений вузлом HTTP server) і звільняє його порт.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Розміщує локальний фіктивний сервер gRPC і слухає необмежено. `connected` спрацьовує, щойно він починає слухати; кожен обслужений виклик повторно надсилає свої дані на порт `served`. Сервер лишається активним до закриття сервера gRPC (або Stop), після чого спрацьовує `done`. Немає виходу response — він обслуговує, а не викликає.",
       "grpcServerClose": "Зупиняє вже активний фіктивний сервер gRPC (оголошений вузлом gRPC server) і звільняє його порт.",
       "soapListen": "Розміщує локальний макетний сервер SOAP і слухає необмежено. Кожен вхідний запит спрямовується до налаштованої операції (за його SOAPAction або назвою операції в тілі) і отримує відповідь у вигляді попередньо визначеного конверта SOAP (операція помилки повертає `<soap:Fault>`). `connected` спрацьовує, щойно сервер слухає; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер залишається активним до закриття SOAP (або зупинки), після чого спрацьовує `done`.",
       "soapClose": "Зупиняє макетний сервер SOAP, який уже слухає (оголошений вузлом сервера SOAP), і звільняє його порт.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Розміщує локальний фіктивний сервер GraphQL і слухає необмежено. `connected` спрацьовує, щойно він починає слухати; кожна обслужена операція повторно надсилає свої дані на порт `served`. Сервер лишається активним до закриття GraphQL (або Stop), після чого спрацьовує `done`. Немає виходу response — він обслуговує, а не викликає.",
       "graphqlClose": "Зупиняє вже активний фіктивний сервер GraphQL (оголошений вузлом GraphQL server) і звільняє його порт.",
       "odataListen": "Розміщує локальну фіктивну службу OData v4 і слухає необмежено. `connected` спрацьовує, щойно вона починає слухати; кожен обслужений запит повторно надсилає свої дані на порт `served`. Сервер працює до закриття OData (або зупинки), після чого спрацьовує `done`. Без виводу response — він обслуговує, а не викликає назовні.",
       "odataClose": "Зупиняє фіктивну службу OData, яка вже слухає (оголошену вузлом сервера OData), звільняючи її порт.",
@@ -1994,43 +1995,43 @@
       "title": "Запустити з командного рядка",
       "intro": "Запустіть цей сценарій без відкриття застосунку (CI, cron, скрипт):",
       "byId": "Визначити за id",
-      "allLogs": "All logs",
+      "allLogs": "Усі логи",
       "note": "`--out file` також записує run-log у файл.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<проєкт.restorm>",
       "tokenPlaceholder": "<токен>",
       "tokenNote": "Безголовий запуск вимагає плану Restorm Pro та CI-токена.",
       "tokenLink": "Отримати токен"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Назва з'єднання",
+      "connectionNamePlaceholder": "назва з'єднання",
+      "eventPlaceholder": "подія",
+      "addEvent": "Додати подію",
+      "connected": "підключено",
+      "others": "інші",
+      "connection": "з'єднання",
+      "pickConnection": "— оберіть з'єднання —",
+      "channelLabel": "Назва каналу",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Редагувати payload",
       "started": "запущено"
     },
     "websocket": {
-      "message": "message"
+      "message": "повідомлення"
     },
     "sse": {
-      "message": "message"
+      "message": "повідомлення"
     },
     "grpc": {
-      "message": "message"
+      "message": "повідомлення"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Упорядкувати дії"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "вхід",
+      "error": "помилка",
+      "done": "готово"
     },
     "toast": {
       "title": "заголовок",
@@ -2038,7 +2039,7 @@
       "duration": "тривалість (с)"
     },
     "http": {
-      "served": "served"
+      "served": "обслужено"
     },
     "actionOverride": {
       "configMissingShort": "Конфігурацію не знайдено",
@@ -2551,13 +2552,6 @@
     "crashReportsDescription": "Надсилає анонімізований звіт, коли Restorm аварійно завершується, щоб несправність можна було виправити. Звіти очищаються від URL-адрес, токенів, тіл запитів і персональних даних, перш ніж залишити ваш комп'ютер. Входить до безкоштовного плану; платний план дозволяє це вимкнути. Докладніше: https://restorm.app/privacy",
     "telemetryTitle": "Надсилати статистику використання",
     "telemetryDescription": "Надсилає анонімну статистику про те, які функції використовуються, щоб спрямувати подальший розвиток. Вимкнено за замовчуванням і ніколи не вмикається без вашої явної згоди. Не містить даних запитів, URL-адрес чи персональних даних. Докладніше: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Звіти про збої (лише за вашою згодою)",
-        "telemetry": "Анонімна статистика використання (лише за вашою згодою)",
-        "backend": "Обліковий запис, ліцензія та підписка"
-      }
-    },
     "crashReportsLockedLabel": "Можна змінити починаючи з тарифу Pro. У безкоштовному тарифі звіти про збої потрібні для підтримання якості.",
     "consentToast": {
       "title": "Допоможіть нам покращити Restorm",

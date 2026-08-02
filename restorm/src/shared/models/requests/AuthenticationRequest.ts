@@ -11,6 +11,7 @@ import {
   graphqlField
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { HTTPRequestBody } from './HTTPRequest'
 import type { HTTPMethod, RuntimeId, Icon } from '../types'
@@ -60,7 +61,7 @@ export class AuthenticationRequest extends BaseRequest {
   authErrorCodes: number[] = [...DEFAULT_AUTH_ERROR_CODES]
 
   @graphqlField({ type: 'Boolean', nullable: true })
-  deprecated = false
+  override deprecated = false
 
   /** User-saved quick-config snapshots for this request. */
   quickConfigs?: QuickConfig[]
@@ -104,7 +105,7 @@ export class AuthenticationRequest extends BaseRequest {
     authErrorCodes?: number[]
     deprecated?: boolean
     quickConfigs?: QuickConfig[]
-  }): AuthenticationRequest {
+  } & ImportMarkerFields): AuthenticationRequest {
     return new AuthenticationRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -113,6 +114,7 @@ export class AuthenticationRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       method: obj.method ?? 'POST',
       url: obj.url ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
@@ -122,7 +124,6 @@ export class AuthenticationRequest extends BaseRequest {
       producedHeaders: (obj.producedHeaders ?? []) as KeyValue[],
       ...(obj.expirationExpression !== undefined && { expirationExpression: obj.expirationExpression }),
       authErrorCodes: obj.authErrorCodes ?? [...DEFAULT_AUTH_ERROR_CODES],
-      deprecated: obj.deprecated ?? false,
       ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
@@ -137,6 +138,7 @@ export class AuthenticationRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       method: this.method,
       url: this.url,
       headers: this.headers.map((h) => h.toPlainObject()),
@@ -146,7 +148,6 @@ export class AuthenticationRequest extends BaseRequest {
       producedHeaders: this.producedHeaders.map((h) => h.toPlainObject()),
       ...(this.expirationExpression !== undefined && { expirationExpression: this.expirationExpression }),
       authErrorCodes: this.authErrorCodes,
-      deprecated: this.deprecated,
       ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }

@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Response",
+        "infos": "Infos",
         "requestBody": "Request body",
         "graph": "Graph"
       },
@@ -2549,13 +2550,6 @@
     "crashReportsDescription": "Send an anonymised report when Restorm crashes, so the failure can be fixed. Reports are scrubbed of URLs, tokens, request bodies and personal data before leaving your machine. Included with the free plan; a paid plan can turn it off. Full details: https://restorm.app/privacy",
     "telemetryTitle": "Send usage analytics",
     "telemetryDescription": "Send anonymous statistics on which features are used, to guide what gets built next. Off by default and never enabled without your explicit consent. Contains no request data, no URLs and no personal data. Full details: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Crash reports (only with your consent)",
-        "telemetry": "Anonymous usage analytics (only with your consent)",
-        "backend": "Account, licence and subscription"
-      }
-    },
     "crashReportsLockedLabel": "Changeable from the Pro plan. On the free plan, crash reports are what keep quality up.",
     "consentToast": {
       "title": "Help us improve Restorm",

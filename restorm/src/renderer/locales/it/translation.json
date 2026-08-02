@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Risposta",
+        "infos": "Info",
         "requestBody": "Corpo della richiesta",
         "graph": "Grafico"
       },
@@ -1210,25 +1211,25 @@
       "emptyRightClick": "Fai clic con il tasto destro su un punto vuoto per aggiungere azioni al tuo scenario"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Percorso JSON",
       "ariaLabel": "Selettore di percorso JSON",
       "pick": "Scegli dal risultato",
-      "loading": "Loading…",
+      "loading": "Caricamento…",
       "noResult": "Esegui l'azione di origine per scegliere una proprietà dal suo risultato."
     },
     "tab": {
       "graph": "Scenario",
-      "notes": "Notes"
+      "notes": "Note"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Cambia colore",
+        "resetColor": "Reimposta colore",
         "addNote": "Aggiungi/modifica nota",
         "runOnEachEvent": "Esegui a ogni evento ricevuto",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
-        "deleteShortcut": "Del",
+        "duplicate": "Duplica",
+        "delete": "Elimina",
+        "deleteShortcut": "Canc",
         "copy": "Copia",
         "paste": "Incolla"
       },
@@ -1237,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Cambia colore",
+        "resetColor": "Reimposta colore",
+        "delete": "Elimina"
       }
     },
     "locked": "Modifica bloccata mentre lo scenario è in esecuzione",
@@ -1303,44 +1304,44 @@
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Cripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Calcolo date",
+      "objectOp": "Operazioni oggetto",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Casuale",
+      "throw": "Lancia errore",
+      "retry": "Riprova",
+      "listOp": "Operazioni lista",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematica",
+      "schema": "Convalida schema",
+      "readFile": "Leggi file",
+      "writeFile": "Scrivi file",
       "timer": "Timer",
       "code": "Codice",
       "socketioConnect": "Connessione Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Invio Socket.IO",
       "socketioClose": "Chiudi connessione Socket.IO",
       "socketioServerClose": "Chiudi server Socket.IO",
       "websocketConnect": "Connessione WebSocket",
       "sseConnect": "Connessione SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Invio WebSocket",
       "websocketClose": "Chiudi connessione WebSocket",
       "websocketServerClose": "Chiudi server WebSocket",
       "sseClose": "Chiudi connessione SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Connessione gRPC",
+      "grpcSend": "Invio gRPC",
       "grpcClose": "Chiudi connessione gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Connessione MQTT",
+      "mqttSend": "Pubblicazione MQTT",
       "mqttClose": "Chiudi connessione MQTT",
       "amqpConnect": "Connessione AMQP",
       "amqpPublish": "Pubblicazione AMQP",
       "amqpClose": "Chiudi connessione AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Sottoscrizione Redis",
       "redisClose": "Chiudi connessione Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Comando Redis",
       "httpListen": "Server HTTP",
       "httpClose": "Chiudi server HTTP",
       "grpcServerClose": "Chiudi server gRPC",
@@ -1355,8 +1356,8 @@
       "stompConnect": "Connessione STOMP",
       "stompSend": "Invio STOMP",
       "stompClose": "Chiudi connessione STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Produzione Kafka",
+      "kafkaConsume": "Consumo Kafka",
       "kafkaClose": "Chiudi connessione Kafka",
       "grpcListen": "Server gRPC"
     },
@@ -1376,29 +1377,29 @@
     },
     "assert": {
       "message": "messaggio",
-      "operator": "operator",
+      "operator": "operatore",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "uguale",
+        "ne": "diverso",
+        "lt": "minore di",
         "lte": "minore o uguale",
-        "gt": "greater than",
+        "gt": "maggiore di",
         "gte": "maggiore o uguale",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "contiene",
+        "isString": "è una stringa",
+        "isNumber": "è un numero",
+        "isBoolean": "è un booleano",
+        "isArray": "è una lista",
+        "isObject": "è un oggetto",
+        "isNull": "è null",
+        "exists": "esiste",
+        "isEmpty": "è vuoto",
+        "matchesRegex": "corrisponde alla regex",
         "isOneOf": "è uno di",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "uguaglianza profonda",
+        "lengthEq": "lunghezza ==",
+        "lengthGt": "lunghezza >",
+        "lengthLt": "lunghezza <"
       }
     },
     "editRequest": "Modifica richiesta",
@@ -1406,8 +1407,8 @@
     "object": {
       "addProperty": "Aggiungi proprietà",
       "removeProperty": "Rimuovi proprietà",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Nome della proprietà",
+      "propertyValue": "valore"
     },
     "output": {
       "outputName": "Nome output",
@@ -1415,7 +1416,7 @@
       "removeOutput": "Rimuovi"
     },
     "input": {
-      "name": "Name",
+      "name": "Nome",
       "defaultType": "Predefinito / tipo",
       "addParam": "Aggiungi parametro",
       "removeParam": "Rimuovi"
@@ -1461,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "Il modello non deve essere vuoto.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "L'ingresso \"value\" deve essere collegato quando il template referenzia {{…}}."
       },
       "request": {
         "missing": "La richiesta collegata non esiste più."
@@ -1492,8 +1493,8 @@
       "syntheticInfo": "Dati di esempio generati dalla documentazione di questa richiesta.",
       "syntheticRunHint": "Dati di esempio — esegui la richiesta per sostituirli con un risultato reale.",
       "stop": "Ferma",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Log di esecuzione",
+      "copyLogs": "Copia log",
       "copyThisLog": "Copia questo log",
       "clearLogs": "Cancella log",
       "logsShowAll": "Mostra tutti i log",
@@ -1503,12 +1504,12 @@
       "helpTitle": "Cosa fa questa azione"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Fuso orario",
+      "formatLabel": "Formato",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Data/ora",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Stringa"
       }
     },
     "callers": {
@@ -1532,20 +1533,20 @@
       "unpin": "Rimuovi"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "da",
+      "to": "a",
+      "step": "passo",
+      "index": "indice",
+      "done": "fatto"
     },
     "while": {
-      "body": "body"
+      "body": "corpo"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "ciclo"
     },
     "loop": {
-      "done": "done"
+      "done": "fatto"
     },
     "breakpoint": {
       "add": "Aggiungi punto di interruzione",
@@ -1580,7 +1581,7 @@
     "regex": {
       "value": "valore",
       "operation": "operazione",
-      "pattern": "pattern",
+      "pattern": "modello",
       "flags": "flag",
       "replacement": "sostituzione",
       "result": "risultato",
@@ -1608,34 +1609,34 @@
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "valore",
+      "operation": "operazione",
+      "indent": "indentazione",
+      "result": "risultato",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizza",
+        "stringify": "serializza"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "valore",
+      "operation": "operazione",
+      "indent": "indentazione",
+      "result": "risultato",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizza",
+        "stringify": "serializza"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "valore",
+      "operation": "operazione",
+      "key": "chiave",
+      "keyPlaceholder": "segreto",
+      "result": "risultato",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "codifica base64",
+        "base64Decode": "decodifica base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1646,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "risultato"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "data",
+      "operation": "operazione",
+      "amount": "quantità",
+      "unitLabel": "unità",
+      "format": "formato",
+      "other": "seconda data",
+      "result": "risultato",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "aggiungi",
+        "subtract": "sottrai",
+        "format": "formatta",
+        "diff": "differenza"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "millisecondi",
+        "seconds": "secondi",
+        "minutes": "minuti",
+        "hours": "ore",
+        "days": "giorni",
+        "weeks": "settimane",
+        "months": "mesi",
+        "years": "anni"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "oggetto",
+      "operation": "operazione",
+      "path": "percorso",
+      "keys": "chiavi",
+      "setValue": "valore",
+      "mergeWith": "unisci con",
+      "result": "risultato",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "leggi",
+        "set": "scrivi",
+        "merge": "unisci",
+        "pick": "mantieni",
+        "omit": "rimuovi",
+        "keys": "chiavi",
+        "values": "valori"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "valore",
+      "operation": "operazione",
+      "result": "risultato",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "codifica",
+        "decode": "decodifica",
+        "parseQuery": "analizza query",
+        "buildQuery": "costruisci query",
+        "parseUrl": "analizza URL"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "operazione",
       "min": "min",
       "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "length": "lunghezza",
+      "items": "elementi",
+      "seed": "seme (opzionale)",
+      "seedPlaceholder": "riproducibile",
+      "result": "risultato",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "intero",
+        "float": "decimale",
+        "string": "stringa",
+        "boolean": "booleano",
+        "pick": "scegli"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "messaggio"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "tentativi max",
+      "backoff": "attesa",
+      "delay": "ritardo",
+      "factor": "fattore",
       "retryOnError": "riprova in caso di errore",
       "retryOnStatus": "riprova in base allo status HTTP",
       "retryOnFailure": "riprova su qualsiasi non-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "tentativo",
+      "exhausted": "esaurito",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "fisso",
+        "linear": "lineare",
+        "exponential": "esponenziale"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Liste",
+      "math": "Matematica",
+      "dataFormats": "Formati dati",
+      "encoding": "Codifica",
       "time": "Temporizzazione",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmi",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "lista",
+      "operation": "operazione",
+      "result": "risultato",
+      "key": "chiave",
+      "order": "ordine",
+      "depth": "profondità",
+      "size": "dimensione",
+      "start": "inizio",
+      "end": "fine",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "ordina",
+        "unique": "univoci",
+        "reverse": "inverti",
+        "flatten": "appiattisci",
+        "chunk": "suddividi",
+        "slice": "estrai",
+        "groupBy": "raggruppa per"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "valore",
+      "operation": "operazione",
+      "result": "risultato",
+      "delimiter": "delimitatore",
+      "header": "riga di intestazione",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizza",
+        "stringify": "serializza"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "valore",
+      "operation": "operazione",
+      "result": "risultato",
+      "b": "con",
       "min": "min",
       "max": "max",
-      "precision": "precision",
+      "precision": "precisione",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "arrotonda",
+        "floor": "arrotonda per difetto",
+        "ceil": "arrotonda per eccesso",
+        "trunc": "tronca",
+        "abs": "valore assoluto",
+        "sign": "segno",
+        "sqrt": "radice quadrata",
         "min": "min",
         "max": "max",
-        "clamp": "clamp"
+        "clamp": "limita"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "valore",
+      "schema": "Schema JSON",
+      "valid": "valido",
+      "invalid": "non valido",
+      "errors": "errori",
       "editTitle": "Modifica JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "percorso",
+      "content": "contenuto"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "percorso",
+      "mode": "modalità",
+      "content": "contenuto"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Modifica",
+      "edit": "Apri l'editor",
+      "moreLines": "+{{count}} righe",
+      "editTemplate": "Modifica template"
     },
     "timer": {
       "mode": "modalità",
@@ -1889,7 +1890,7 @@
       "waitUntil": "Mette in pausa fino a una data/ora specificata, poi continua.",
       "now": "Emette la data e l'ora correnti.",
       "timer": "Attiva il suo corpo a intervalli ripetuti o secondo una pianificazione cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Calcola a + − × ÷ … di due numeri.",
       "comparator": "Confronta due valori ed emette vero o falso.",
       "boolean": "Combina booleani con and / or / xor / not.",
       "object": "Costruisce un oggetto dai suoi input denominati.",
@@ -1902,7 +1903,7 @@
       "json": "Analizza una stringa JSON, o serializza un valore in JSON.",
       "xml": "Analizza una stringa XML, o serializza un valore in XML.",
       "yaml": "Analizza una stringa YAML, o serializza un valore in YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Calcola l'hash o codifica una stringa (base64, md5, sha…, hmac, uuid).",
       "jwt": "Decodifica un token JWT in header, payload e signature.",
       "datetime": "Sposta, formatta o calcola la differenza di una data.",
       "retry": "Riesegue il suo corpo finché non riesce, con una policy di backoff.",
@@ -1911,7 +1912,7 @@
       "random": "Genera un numero, testo, booleano o scelta casuale.",
       "listOp": "Ristruttura un elenco (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Analizza una stringa CSV, o serializza un elenco in CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Applica un'operazione scalare (arrotonda, abs, radice, min, max, limita…).",
       "schema": "Convalida un valore rispetto a un JSON Schema.",
       "readFile": "Legge il contenuto testuale di un file.",
       "writeFile": "Scrive o aggiunge testo a un file.",
@@ -1950,13 +1951,13 @@
       "redisClose": "Chiude una connessione di sottoscrizione Redis già aperta.",
       "redisCommand": "Esegue un comando Redis associato (un singolo comando su una nuova connessione, poi si disconnette) ed emette la sua risposta.",
       "toast": "Emette una notifica toast nell'interfaccia di Restorm mentre lo scenario è in esecuzione.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Ospita un server HTTP fittizio locale e resta in ascolto indefinitamente. `connected` scatta appena è in ascolto; ogni richiesta servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura HTTP (o uno Stop), poi scatta `done`. Nessun output response — serve, non chiama.",
       "httpClose": "Arresta un server mock HTTP già in ascolto (dichiarato da un nodo server HTTP) e libera la sua porta.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Ospita un server gRPC fittizio locale e resta in ascolto indefinitamente. `connected` scatta appena è in ascolto; ogni chiamata servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura del server gRPC (o uno Stop), poi scatta `done`. Nessun output response — serve, non chiama.",
       "grpcServerClose": "Arresta un server mock gRPC già in ascolto (dichiarato da un nodo server gRPC) e libera la sua porta.",
       "soapListen": "Ospita un server mock SOAP locale e resta in ascolto indefinitamente. Ogni richiesta in arrivo viene instradata a un'operazione configurata (in base alla sua SOAPAction o al nome dell'operazione nel corpo) e riceve in risposta la busta SOAP predefinita (un'operazione di errore restituisce `<soap:Fault>`). `connected` si attiva non appena il server è in ascolto; ogni richiesta servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura SOAP (o a un arresto), quindi si attiva `done`.",
       "soapClose": "Arresta un server mock SOAP già in ascolto (dichiarato da un nodo server SOAP) e ne libera la porta.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Ospita un server GraphQL fittizio locale e resta in ascolto indefinitamente. `connected` scatta appena è in ascolto; ogni operazione servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura GraphQL (o uno Stop), poi scatta `done`. Nessun output response — serve, non chiama.",
       "graphqlClose": "Arresta un server mock GraphQL già in ascolto (dichiarato da un nodo server GraphQL) e libera la sua porta.",
       "odataListen": "Ospita un servizio mock OData v4 locale e resta in ascolto indefinitamente. `connected` si attiva non appena è in ascolto; ogni richiesta servita riemette i suoi dati sulla porta `served`. Il server resta attivo fino a una chiusura OData (o uno Stop), poi si attiva `done`. Nessun output response — serve, non chiama verso l’esterno.",
       "odataClose": "Arresta un servizio mock OData già in ascolto (dichiarato da un nodo server OData), liberandone la porta.",
@@ -1992,43 +1993,43 @@
       "title": "Esegui dalla riga di comando",
       "intro": "Esegui questo scenario senza aprire l'app (CI, cron, script):",
       "byId": "Designa per id",
-      "allLogs": "All logs",
+      "allLogs": "Tutti i log",
       "note": "`--out file` scrive anche il run-log su un file.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<progetto.restorm>",
       "tokenPlaceholder": "<il_tuo_token>",
       "tokenNote": "Un'esecuzione headless richiede un piano Restorm Pro e un token CI.",
       "tokenLink": "Ottieni un token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Nome della connessione",
+      "connectionNamePlaceholder": "nome della connessione",
+      "eventPlaceholder": "evento",
+      "addEvent": "Aggiungi evento",
+      "connected": "connesso",
+      "others": "altri",
+      "connection": "connessione",
+      "pickConnection": "— scegli una connessione —",
+      "channelLabel": "Nome del canale",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Modifica payload",
       "started": "avviato"
     },
     "websocket": {
-      "message": "message"
+      "message": "messaggio"
     },
     "sse": {
-      "message": "message"
+      "message": "messaggio"
     },
     "grpc": {
-      "message": "message"
+      "message": "messaggio"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Riorganizza le azioni"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "ingresso",
+      "error": "errore",
+      "done": "fatto"
     },
     "toast": {
       "title": "titolo",
@@ -2036,7 +2037,7 @@
       "duration": "durata (s)"
     },
     "http": {
-      "served": "served"
+      "served": "servita"
     },
     "actionOverride": {
       "configMissingShort": "Configurazione mancante",
@@ -2549,13 +2550,6 @@
     "crashReportsDescription": "Invia un rapporto anonimizzato quando Restorm si arresta, così il problema può essere corretto. I rapporti vengono ripuliti da URL, token, corpi delle richieste e dati personali prima di lasciare il suo computer. Incluso nel piano gratuito; un piano a pagamento consente di disattivarlo. Tutti i dettagli: https://restorm.app/privacy",
     "telemetryTitle": "Inviare le statistiche di utilizzo",
     "telemetryDescription": "Invia statistiche anonime sulle funzionalità utilizzate, per orientare gli sviluppi futuri. Disattivato per impostazione predefinita e mai attivato senza il suo consenso esplicito. Non contiene dati delle richieste, né URL, né dati personali. Tutti i dettagli: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Rapporti di arresto anomalo (solo con il suo consenso)",
-        "telemetry": "Statistiche di utilizzo anonime (solo con il suo consenso)",
-        "backend": "Account, licenza e abbonamento"
-      }
-    },
     "crashReportsLockedLabel": "Modificabile a partire dal piano Pro. Nel piano gratuito i rapporti di arresto anomalo sono necessari per mantenere la qualità.",
     "consentToast": {
       "title": "Aiutaci a migliorare Restorm",

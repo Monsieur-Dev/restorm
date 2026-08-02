@@ -3456,7 +3456,10 @@ const App: React.FC = () => {
                   // attached at the breadcrumb path main produced
                   // (so a Swagger op tagged "Other" lands inside the
                   // existing "Other" folder instead of at the env
-                  // root). The apiUpdate marker is swapped wholesale.
+                  // root); the lifecycle markers the pipeline flipped
+                  // on requests already present are replayed onto them;
+                  // the apiUpdate config and the spec-derived
+                  // documentation are swapped wholesale.
                   // We DON'T replace the whole folder — sub-
                   // environments / per-tab pinning / other renderer-
                   // only state would be lost since they may not have
@@ -3465,21 +3468,57 @@ const App: React.FC = () => {
                     request: unknown
                     parentPath: string[]
                   }
+                  interface MarkedRequestPayload {
+                    id: string
+                    deprecated?: boolean
+                    removed?: boolean
+                  }
                   interface ApplyPayload {
                     id: string
                     addedRequests: AddedRequestPayload[]
+                    markedRequests?: MarkedRequestPayload[]
                     apiUpdate: unknown
+                    apiDocumentation?: unknown
+                    enumDefinitions?: unknown
                   }
                   const payload = updatedFolder as ApplyPayload | null
                   if (!payload?.id) {
                     setRefreshSourceTarget(null)
                     return
                   }
+                  // Requests that were already in the tree and whose
+                  // `deprecated` / `removed` flag the pipeline flipped.
+                  // Main marked its own copy; this tree is a separate
+                  // one, so without replaying them the row never renders
+                  // dimmed / struck-through and the next mirror back to
+                  // main would erase the marking.
+                  const markers = new Map<string, MarkedRequestPayload>(
+                    (payload.markedRequests ?? []).map((entry) => [entry.id, entry])
+                  )
+                  // Assign through the live reactive request rather than
+                  // rebuilding it: the proxy's set trap is what repaints
+                  // the sidebar row and queues the request for the next
+                  // save. Writing the same booleans twice is a no-op, so
+                  // a double-invoked reducer stays harmless.
+                  const replayMarkers = (items: readonly FolderItem[]): void => {
+                    for (const child of items) {
+                      if ('items' in child) {
+                        replayMarkers((child as Folder).items)
+                        continue
+                      }
+                      const marker = markers.get(child.id)
+                      if (!marker) continue
+                      const request = child as FolderItem & { deprecated?: boolean; removed?: boolean }
+                      if (marker.deprecated !== undefined) request.deprecated = marker.deprecated
+                      if (marker.removed !== undefined) request.removed = marker.removed
+                    }
+                  }
                   const updatedFolderRef: { value: EnvironmentFolder | null } = { value: null }
                   setRootItems((current) => current.map((item) => {
                     if (!('id' in item) || item.id !== payload.id) return item
                     if (!('items' in item)) return item
                     const next = item as Folder
+                    if (markers.size > 0) replayMarkers(next.items)
                     const placeAt = (
                       items: FolderItem[],
                       path: readonly string[],
@@ -3522,7 +3561,14 @@ const App: React.FC = () => {
                     const merged = {
                       ...next,
                       items: updated,
-                      ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {})
+                      ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {}),
+                      // Spec-derived, never user-edited: the home page
+                      // reads the documentation and the sidebar derives
+                      // its deprecation dimming from it, so a stale copy
+                      // would keep describing the version the folder was
+                      // first imported at.
+                      ...(payload.apiDocumentation ? { apiDocumentation: payload.apiDocumentation } : {}),
+                      ...(payload.enumDefinitions ? { enumDefinitions: payload.enumDefinitions } : {})
                     } as typeof item
                     updatedFolderRef.value = merged as unknown as EnvironmentFolder
                     return merged

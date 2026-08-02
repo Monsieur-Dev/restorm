@@ -94,7 +94,7 @@ import {
 
 ```tsx
 // Mount the admin panel somewhere in your workbench:
-<FirewallPanel appName="My App" testButtonFeature="firewall.testButton" />
+<FirewallPanel appName="My App" />
 
 // Subscribe to permission prompts once, near the app root:
 function App() {
@@ -171,7 +171,7 @@ interface InfraPorts { graphqlPort: number | null; mcpPort: number | null; viteD
 
 ### Renderer
 
-- `FirewallPanel` — admin panel. Props: `appName?`, `testButtonFeature?`, `data-testid?`.
+- `FirewallPanel` — admin panel. Props: `appName?`, `data-testid?`.
 - `useFirewallControl()` / `refreshFirewallControl()` — read/mutate the rule lists from React.
 - `useFirewallPromptToasts()` — subscribe to prompts + render Allow/Deny toasts.
 - `FirewallPromptBody` — the toast body component.
@@ -185,23 +185,23 @@ interface InfraPorts { graphqlPort: number | null; mcpPort: number | null; viteD
 The whitelist / blacklist govern the USER's API traffic. The host application
 also makes calls of its own (a licensing backend, the signed-in account's avatar
 CDN, an opt-in crash or telemetry ingest), and those bypass the user firewall by
-design. Left undeclared they are the one class of outbound call the panel cannot
+design. Left undeclared they are the one class of outbound call nothing can
 account for — which is exactly the thing a firewall is supposed to rule out.
 
-Declare each one and the panel renders a read-only row for it, **including the
-rows that are currently switched off**:
+Declare each one and it joins the auditable inventory, **including the entries
+that are currently switched off**:
 
 ```typescript
 permissionService.declareSystemEndpoint({
   id: 'telemetry',                          // stable; also the upsert key
   host: 'eu.i.example.com',                 // EXACT host, or null when unresolved
-  purposeKey: 'privacy.outbound.purpose.telemetry', // i18n key, resolved renderer-side
+  purposeKey: 'privacy.outbound.purpose.telemetry', // key naming the purpose
   consentGate: 'telemetry',                 // null when the app cannot work without it
   exemption: 'system-allowlist'             // or 'call-scoped-bypass'
 })
 ```
 
-Two exemption mechanisms, and the distinction matters to the UI:
+Two exemption mechanisms, and the distinction matters:
 
 | `exemption` | How the call gets through | When `active` is true |
 | --- | --- | --- |
@@ -209,20 +209,21 @@ Two exemption mechanisms, and the distinction matters to the UI:
 | `call-scoped-bypass` | a guarded fetch wraps its own call-chain in `withFirewallBypass` | as soon as the host is known |
 
 `active` is **computed**, never stored — dropping the host with
-`removeSystemAllowedHost` flips the row immediately, which is how consent
+`removeSystemAllowedHost` flips the entry immediately, which is how consent
 revocation is enforced by the firewall rather than promised by the sender.
 
-Renderers read the list over `FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS` (read-only —
-there is no mutating counterpart, these are declared in code) and receive a
-payload-free `FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED` push whenever the inventory
-moves, so an open panel reflects a consent change without being re-mounted. Host
-apps should expose both through their preload bridge as
+The inventory is **not** rendered by `FirewallPanel`: the panel is the surface
+the user acts on (whitelist / blacklist), and a read-only list of the app's own
+plumbing was noise there. It is read over `FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS`
+(read-only — there is no mutating counterpart, these are declared in code), with
+a payload-free `FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED` push whenever it moves.
+Host apps expose both through their preload bridge as
 `window.api.firewall.listSystemEndpoints()` and
-`window.api.firewall.onSystemEndpointsChanged(cb)`; `useFirewallControl()` wires
-itself to both when present and degrades to an empty, non-live list when absent.
+`window.api.firewall.onSystemEndpointsChanged(cb)` — which is what lets a test,
+a diagnostic, or a future audit view assert on enforcement.
 
 See [`docs/Architecture/Privacy.md`](../Architecture/Privacy.md) for the consent
-model that drives the gated rows.
+model that drives the gated entries.
 
 ## Rule matching
 

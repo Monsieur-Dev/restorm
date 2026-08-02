@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import type { RequestType, RuntimeId, Icon, RedisMode, RedisCommandName } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
 
@@ -93,7 +94,7 @@ export class RedisRequest extends BaseRequest {
     args?: string[]
     freeformCommand?: string
     quickConfigs?: QuickConfig[]
-  }): RedisRequest {
+  } & ImportMarkerFields): RedisRequest {
     return new RedisRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -102,6 +103,7 @@ export class RedisRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       ...(obj.password !== undefined && { password: obj.password }),
       mode: obj.mode ?? 'command',
@@ -126,6 +128,7 @@ export class RedisRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       ...(this.password !== undefined && { password: this.password }),
       mode: this.mode,

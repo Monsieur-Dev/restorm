@@ -1,7 +1,7 @@
 import { restormBaseTest, expect } from '../../helpers/base-fixture'
 
 /**
- * Fixture for the firewall outbound-services E2E. Launches on the welcome
+ * Fixture for the firewall outbound-exemptions E2E. Launches on the welcome
  * screen — the Firewall tab opens from the View menu without needing a project,
  * and the consent toggles are user-level settings, so no workspace is involved.
  */

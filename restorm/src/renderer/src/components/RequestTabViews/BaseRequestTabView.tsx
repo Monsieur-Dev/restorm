@@ -402,7 +402,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     if (responseContent || hadResponseOnce) {
       tabs.push({
         id: 'response',
-        label: 'Response',
+        label: t('requestTab.responses.tabs.response'),
         useScrollableElement: false,
         content: (
           // Flex column with minHeight: 0 so the CodeEditor (height: 100%)
@@ -419,7 +419,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
 
     tabs.push({
       id: 'infos',
-      label: 'Infos',
+      label: t('requestTab.responses.tabs.infos'),
       // Scroll via the shared ecu container so a tall tree of
       // response/request headers can be read inside a constrained
       // modal without leaking past the frame.

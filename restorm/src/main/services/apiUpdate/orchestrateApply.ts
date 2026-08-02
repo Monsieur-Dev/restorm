@@ -288,21 +288,36 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
     addedCount: applyResult.addedRequests.length
   })
 
-  // Return only the new requests + their target placement + the
-  // post-apply apiUpdate marker. The renderer splices the new rows
-  // into its own folder copy at the same breadcrumb path the apply
-  // pipeline used, so additions land under the same tag / group
+  // Return the new requests + their target placement, the lifecycle
+  // markers the pipeline flipped on requests that were already there,
+  // and the post-apply apiUpdate marker. The renderer splices the new
+  // rows into its own folder copy at the same breadcrumb path the
+  // apply pipeline used, so additions land under the same tag / group
   // folder a fresh import would have produced (instead of at the
-  // env-folder root).
+  // env-folder root), and replays the markers onto the requests it
+  // already holds.
   const addedRequests = applyResult.addedRequests.map((entry) => ({
     request: JSON.parse(JSON.stringify(entry.request)) as unknown,
     parentPath: [...entry.parentPath]
   }))
+  // The refreshed spec documentation rides along too: it is what the
+  // env-folder home page renders, and what the sidebar derives its
+  // deprecation dimming from — both would otherwise keep showing the
+  // version the folder was first imported at. Neither field is
+  // user-editable, so replacing them wholesale is safe.
+  const docs = env as unknown as { apiDocumentation?: unknown; enumDefinitions?: unknown }
   return {
     updatedFolder: {
       id: env.id,
       addedRequests,
-      apiUpdate: JSON.parse(JSON.stringify(env.apiUpdate)) as unknown
+      markedRequests: applyResult.markedRequests.map((entry) => ({ ...entry })),
+      apiUpdate: JSON.parse(JSON.stringify(env.apiUpdate)) as unknown,
+      ...(docs.apiDocumentation !== undefined
+        ? { apiDocumentation: JSON.parse(JSON.stringify(docs.apiDocumentation)) as unknown }
+        : {}),
+      ...(docs.enumDefinitions !== undefined
+        ? { enumDefinitions: JSON.parse(JSON.stringify(docs.enumDefinitions)) as unknown }
+        : {})
     }
   }
 }

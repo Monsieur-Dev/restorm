@@ -177,6 +177,9 @@
       "copied": "Zkopírováno!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Začněte psát…"
+  },
   "tagsView": {
     "removeTag": "Odebrat štítek",
     "newTag": "Nový štítek"
@@ -412,19 +415,19 @@
     "addOrigin": "Přidat origin",
     "removeOrigin": "Odebrat {{origin}}",
     "noEntries": "Zatím žádné záznamy.",
-    "outbound": {
-      "title": "Odchozí služby",
-      "intro": "Cíle, které může tato aplikace kontaktovat z vlastní iniciativy. Jsou deklarovány v kódu a nelze je zde upravovat — ty, které vyžadují váš souhlas, zůstávají vypnuté, dokud jej neudělíte v Předvolbách.",
-      "empty": "Tato aplikace nedeklaruje žádný vlastní odchozí cíl.",
-      "hostUnset": "nenakonfigurováno",
-      "stateConsented": "Povoleno — udělili jste souhlas",
-      "stateNoConsent": "Blokováno — souhlas nebyl udělen",
-      "stateRequired": "Povoleno — nezbytné pro aplikaci",
-      "stateInactive": "Neaktivní — momentálně se nepoužívá",
-      "purpose": {
-        "avatar": "Profilový obrázek přihlášeného účtu"
-      }
+    "prompt": {
+      "title": "Odchozí požadavek byl zablokován",
+      "allow": "Povolit",
+      "deny": "Odepřít",
+      "fromOrigin": "z {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Zpět",
+    "refresh": "Obnovit",
+    "go": "Přejít",
+    "address": "Adresa",
+    "emptyHint": "Zadejte výše adresu a začněte procházet."
   },
   "bookmarkRibbon": {
     "addBookmark": "Přidat záložku"

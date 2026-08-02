@@ -429,8 +429,9 @@ When('I open the pet request in a tab', async () => {
   // `{{baseUrl}}/pet/{{id}}` — `{{baseUrl}}` resolves via the env
   // folder (scheme=http, host=localhost:5110, basePath=/), and
   // `{{id}}` picks up the path-param value we set here. td layout:
-  // [drag, enabled, key, value, mode, description, trash]; the plain
-  // "abc" mode uses a regular `<input>` the tests can target.
+  // [drag, enabled, key, value, mode, description, trash]; the swagger
+  // importer casts `id` to a Numeric value (a spinbutton `<input>`, not the
+  // Handlebars-aware editor a default string value would get).
   const idRow = pathParamsTable.locator('tbody tr').first()
   await idRow.locator('td').nth(3).locator('input').first().fill('1')
 })

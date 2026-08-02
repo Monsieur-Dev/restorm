@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, HTTPBodyType, RuntimeId, Icon } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
@@ -59,7 +60,7 @@ export class HTTPRequest extends BaseRequest {
 
   /** Whether this endpoint is deprecated */
   @graphqlField({ type: 'Boolean', nullable: true })
-  deprecated = false
+  override deprecated = false
 
   /** When true, restorm ACTS AS a local HTTP mock server: it listens on
    * `localhost:<port><path>` for this request's METHOD + PATH and answers with
@@ -133,7 +134,7 @@ export class HTTPRequest extends BaseRequest {
     timeout?: number
     followRedirects?: boolean
     quickConfigs?: QuickConfig[]
-  }): HTTPRequest {
+  } & ImportMarkerFields): HTTPRequest {
     return new HTTPRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -142,13 +143,13 @@ export class HTTPRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       method: obj.method ?? 'GET',
       url: obj.url ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
       params: (obj.params ?? []) as KeyValue[],
       pathParams: (obj.pathParams ?? []) as KeyValue[],
       ...(obj.body !== undefined && { body: obj.body }),
-      deprecated: obj.deprecated ?? false,
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.mockStatus !== undefined && { mockStatus: obj.mockStatus }),
       ...(obj.timeout !== undefined && { timeout: obj.timeout }),
@@ -170,13 +171,13 @@ export class HTTPRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       method: this.method,
       url: this.url,
       headers: this.headers.map(h => h.toPlainObject()),
       params: this.params.map(p => p.toPlainObject()),
       pathParams: this.pathParams.map(p => p.toPlainObject()),
       body: this.body,
-      deprecated: this.deprecated,
       ...(this.server !== undefined && { server: this.server }),
       ...(this.mockStatus !== undefined && { mockStatus: this.mockStatus }),
       ...(this.timeout !== undefined && { timeout: this.timeout }),

@@ -109,7 +109,7 @@ describe('runApiUpdateApply source resolution', () => {
     findById.mockReset()
     importFrom.mockReset()
     applyApiUpdate.mockReset()
-    applyApiUpdate.mockReturnValue({ addedRequests: [] })
+    applyApiUpdate.mockReturnValue({ addedRequests: [], markedRequests: [] })
     importFrom.mockResolvedValue({ success: true, items: [folder('openapi')] })
   })
 

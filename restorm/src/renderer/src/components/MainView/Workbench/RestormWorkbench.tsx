@@ -30,7 +30,6 @@ import {
   isSettingsTab,
   isMcpLogsTab
 } from '../../../../../shared/types/editor'
-import { FIREWALL_TEST_BUTTON_FEATURE } from '../../../../../main/featureFlags'
 import { renderProtocolTabView } from '../../../protocol/protocolUiRegistry'
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { WorkbenchActiveTabContext } from '../../../contexts/WorkbenchActiveTabContext'
@@ -1787,10 +1786,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
 
     // Firewall admin tab — singleton, identified by `tabType: 'firewall'`.
-    // Mounts the `<FirewallPanel />` (mode picker + allowlist editor).
+    // Mounts the `<FirewallPanel />` (whitelist / blacklist editor).
     // No breadcrumbs for the same reason as Console.
     if (isFirewallTab(effectiveTab)) {
-      return <FirewallPanel appName="Restorm" testButtonFeature={FIREWALL_TEST_BUTTON_FEATURE} />
+      return <FirewallPanel appName="Restorm" />
     }
 
     // Mini browser tab — singleton, identified by `tabType: 'mini-browser'`.

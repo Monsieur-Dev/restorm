@@ -177,6 +177,9 @@
       "copied": "Kopiert!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Beginnen Sie zu schreiben…"
+  },
   "tagsView": {
     "removeTag": "Tag entfernen",
     "newTag": "Neues Tag"
@@ -412,19 +415,19 @@
     "addOrigin": "Origin hinzufügen",
     "removeOrigin": "{{origin}} entfernen",
     "noEntries": "Noch keine Einträge.",
-    "outbound": {
-      "title": "Ausgehende Dienste",
-      "intro": "Ziele, die diese Anwendung von sich aus kontaktieren kann. Sie sind im Code deklariert und hier nicht bearbeitbar — jene, die Ihre Einwilligung erfordern, bleiben deaktiviert, bis Sie sie in den Einstellungen erteilen.",
-      "empty": "Diese Anwendung deklariert kein eigenes ausgehendes Ziel.",
-      "hostUnset": "nicht konfiguriert",
-      "stateConsented": "Erlaubt — Sie haben eingewilligt",
-      "stateNoConsent": "Blockiert — keine Einwilligung erteilt",
-      "stateRequired": "Erlaubt — für die Anwendung erforderlich",
-      "stateInactive": "Inaktiv — derzeit nicht in Verwendung",
-      "purpose": {
-        "avatar": "Profilbild des angemeldeten Kontos"
-      }
+    "prompt": {
+      "title": "Ausgehende Anfrage blockiert",
+      "allow": "Zulassen",
+      "deny": "Ablehnen",
+      "fromOrigin": "von {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Zurück",
+    "refresh": "Aktualisieren",
+    "go": "Los",
+    "address": "Adresse",
+    "emptyHint": "Gib oben eine Adresse ein, um mit dem Surfen zu beginnen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lesezeichen hinzufügen"

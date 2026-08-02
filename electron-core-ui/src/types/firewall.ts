@@ -65,7 +65,8 @@ export const FIREWALL_IPC = {
 	PROMPT_RESOLVE: 'firewall:prompt-resolve',
 	/** Read-only: the app's OWN outbound destinations (see
 	 * {@link SystemEndpointStatus}). No mutating counterpart by design — these
-	 * are declared in code, not editable by the user. */
+	 * are declared in code, not editable by the user. Introspection for tests
+	 * and diagnostics. */
 	LIST_SYSTEM_ENDPOINTS: 'firewall:list-system-endpoints',
 	/** Read-only: the hosts currently in the system allowlist — the actual input
 	 * to the permission check, as opposed to the descriptive declarations above.
@@ -73,8 +74,8 @@ export const FIREWALL_IPC = {
 	LIST_SYSTEM_ALLOWED_HOSTS: 'firewall:list-system-allowed-hosts',
 	/** Main → renderer push: the declared endpoints or their live state moved
 	 * (consent granted / revoked, a host resolved on login). Carries no payload
-	 * — the renderer re-reads via {@link FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS}, so
-	 * a burst of changes collapses into one authoritative read. */
+	 * — a listener re-reads via {@link FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS}, so a
+	 * burst of changes collapses into one authoritative read. */
 	SYSTEM_ENDPOINTS_CHANGED: 'firewall:system-endpoints-changed'
 } as const
 
@@ -99,11 +100,12 @@ export type SystemEndpointExemption = 'system-allowlist' | 'call-scoped-bypass'
  * One outbound destination the APPLICATION ITSELF contacts — as opposed to the
  * user's own API traffic, which the whitelist / blacklist govern.
  *
- * Declaring these makes the app's "phone home" surface auditable: the firewall
- * panel renders one row per declaration, so a user can see every host the app
- * may reach on its own initiative, why, and whether it is currently live. An
- * exemption that isn't declared here is an exemption nobody can see, which is
- * the failure mode this type exists to prevent.
+ * Declaring these makes the app's "phone home" surface auditable: the inventory
+ * names every host the app may reach on its own initiative, why, and whether it
+ * is currently live, and is readable over
+ * {@link FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS}. An exemption that isn't declared
+ * here is an exemption nobody can audit, which is the failure mode this type
+ * exists to prevent.
  */
 export interface SystemEndpointDeclaration {
 	/** Stable id, unique per app (`'backend'`, `'avatar'`, `'crash'`, …). Also
@@ -111,11 +113,12 @@ export interface SystemEndpointDeclaration {
 	id: string
 	/** EXACT host — never a wildcard, never a pattern. `null` when the host is
 	 * not resolved yet (a signed-out avatar CDN, an unconfigured endpoint); the
-	 * row still renders, marked inactive. */
+	 * declaration is still reported, marked inactive. */
 	host: string | null
-	/** i18n key describing WHY this host is contacted. Resolved by the renderer
-	 * against the host app's catalogue — no English is baked into the
-	 * declaration. */
+	/** Key describing WHY this host is contacted, resolvable against the host
+	 * app's i18n catalogue — no English is baked into the declaration. Nothing
+	 * in the library renders it; it labels the entry for whatever surfaces the
+	 * inventory. */
 	purposeKey: string
 	/** Id of the consent gate governing it (`'telemetry'`, …), or `null` when
 	 * the endpoint needs no consent (the licensing backend the app cannot work

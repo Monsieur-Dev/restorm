@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
@@ -68,7 +69,7 @@ export class SseRequest extends BaseRequest {
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
     lastEventId?: string
     quickConfigs?: QuickConfig[]
-  }): SseRequest {
+  } & ImportMarkerFields): SseRequest {
     return new SseRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -77,6 +78,7 @@ export class SseRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
       ...(obj.lastEventId !== undefined && { lastEventId: obj.lastEventId }),
@@ -97,6 +99,7 @@ export class SseRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       headers: this.headers.map(h => h.toPlainObject()),
       ...(this.lastEventId !== undefined && { lastEventId: this.lastEventId }),

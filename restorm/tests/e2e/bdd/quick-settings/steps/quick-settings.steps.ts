@@ -61,25 +61,35 @@ interface ProtocolMatrix {
 
 const kv = (key: string, value: string): { key: string; value: string; enabled: boolean } => ({ key, value, enabled: true })
 
-// A RestormKeyValueTable renders each cell as an ECUI InputBox, so the row's
-// key/value live in `<input>` VALUES — not as table text. `toContainText`
-// never sees them; assert against the inputs' values instead. The key cell
-// carries `<table-testid>-key-input`; the value cell is a TypedValueField whose
-// inner input has no per-cell testid, so match any input under the table.
+// A RestormKeyValueTable cell renders either as an ECUI InputBox (row key/value
+// live in an `<input>` VALUE) or, on the header/param/metadata tables, as the
+// Handlebars-aware VariableInputBox (a Monaco editor whose text lives in
+// `.view-line` spans, not an input value). `toContainText` only sees rendered
+// text nodes, and a Monaco cell has none outside its `.view-line` spans, so
+// this reads BOTH surfaces and matches an EXACT cell value in their union —
+// not a substring, so e.g. "X-Saved-Header" never false-matches
+// "X-Changed-Header".
+function kvTableHasKey(p: Page, tableTestid: string, key: string): Promise<boolean> {
+  return p.evaluate(({ tid, k }) => {
+    const table = Array.from(document.querySelectorAll(`[data-testid="${tid}"]`))
+      .find((el) => (el as HTMLElement).offsetParent !== null)
+    if (!table) return false
+    const inputValues = Array.from(table.querySelectorAll('input, textarea')).map((e) => (e as HTMLInputElement | HTMLTextAreaElement).value)
+    const monacoLineTexts = Array.from(table.querySelectorAll('.view-line')).map((e) => e.textContent.trim())
+    return inputValues.includes(k) || monacoLineTexts.includes(k)
+  }, { tid: tableTestid, k: key })
+}
+
 async function expectKvTableKey(p: Page, tableTestid: string, key: string): Promise<void> {
-  const inputs = p.locator(`${vis(tableTestid)} input`)
-  await expect.poll(async () => {
-    const values = await inputs.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value))
-    return values.includes(key)
-  }, { timeout: 20_000, message: `${tableTestid} should have a row whose input value is "${key}"` }).toBe(true)
+  await expect.poll(() => kvTableHasKey(p, tableTestid, key), {
+    timeout: 20_000, message: `${tableTestid} should have a row whose input value is "${key}"`
+  }).toBe(true)
 }
 
 async function expectKvTableLacksKey(p: Page, tableTestid: string, key: string): Promise<void> {
-  const inputs = p.locator(`${vis(tableTestid)} input`)
-  await expect.poll(async () => {
-    const values = await inputs.evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value))
-    return values.includes(key)
-  }, { timeout: 20_000, message: `${tableTestid} should NOT have a row whose input value is "${key}"` }).toBe(false)
+  await expect.poll(() => kvTableHasKey(p, tableTestid, key), {
+    timeout: 20_000, message: `${tableTestid} should NOT have a row whose input value is "${key}"`
+  }).toBe(false)
 }
 
 // A surface's value can live in three places depending on the widget: plain

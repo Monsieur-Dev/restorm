@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Απάντηση",
+        "infos": "Πληροφορίες",
         "requestBody": "Σώμα αιτήματος",
         "graph": "Γράφημα"
       },
@@ -1210,24 +1211,24 @@
       "emptyRightClick": "Κάντε δεξί κλικ σε ένα κενό σημείο για να προσθέσετε ενέργειες στο σενάριό σας"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Διαδρομή JSON",
       "ariaLabel": "Επιλογέας διαδρομής JSON",
       "pick": "Επιλογή από το αποτέλεσμα",
-      "loading": "Loading…",
+      "loading": "Φόρτωση…",
       "noResult": "Εκτελέστε την ενέργεια πηγής για να επιλέξετε μια ιδιότητα από το αποτέλεσμά της."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Σενάριο",
+      "notes": "Σημειώσεις"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Αλλαγή χρώματος",
+        "resetColor": "Επαναφορά χρώματος",
         "addNote": "Προσθήκη/επεξεργασία σημείωσης",
         "runOnEachEvent": "Εκτέλεση σε κάθε ληφθέν συμβάν",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Διπλασιασμός",
+        "delete": "Διαγραφή",
         "deleteShortcut": "Del",
         "copy": "Αντιγραφή",
         "paste": "Επικόλληση"
@@ -1237,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Αλλαγή χρώματος",
+        "resetColor": "Επαναφορά χρώματος",
+        "delete": "Διαγραφή"
       }
     },
     "locked": "Η επεξεργασία είναι κλειδωμένη ενώ εκτελείται το σενάριο",
@@ -1298,49 +1299,49 @@
       "getVariable": "Λήψη μεταβλητής",
       "addToList": "Προσθήκη στη λίστα",
       "removeFromList": "Αφαίρεση από τη λίστα",
-      "cast": "Cast",
+      "cast": "Μετατροπή",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Κρυπτογραφία",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Υπολογισμός ημερομηνιών",
+      "objectOp": "Πράξεις αντικειμένου",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Τυχαίο",
+      "throw": "Ρίψη σφάλματος",
+      "retry": "Επανάληψη",
+      "listOp": "Πράξεις λίστας",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Μαθηματικά",
+      "schema": "Επικύρωση σχήματος",
+      "readFile": "Ανάγνωση αρχείου",
+      "writeFile": "Εγγραφή αρχείου",
       "timer": "Χρονοδιακόπτης",
       "code": "Κώδικας",
       "socketioConnect": "Σύνδεση Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Αποστολή Socket.IO",
       "socketioClose": "Κλείσιμο σύνδεσης Socket.IO",
       "socketioServerClose": "Κλείσιμο διακομιστή Socket.IO",
       "websocketConnect": "Σύνδεση WebSocket",
       "sseConnect": "Σύνδεση SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Αποστολή WebSocket",
       "websocketClose": "Κλείσιμο σύνδεσης WebSocket",
       "websocketServerClose": "Κλείσιμο διακομιστή WebSocket",
       "sseClose": "Κλείσιμο σύνδεσης SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Σύνδεση gRPC",
+      "grpcSend": "Αποστολή gRPC",
       "grpcClose": "Κλείσιμο σύνδεσης gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Σύνδεση MQTT",
+      "mqttSend": "Δημοσίευση MQTT",
       "mqttClose": "Κλείσιμο σύνδεσης MQTT",
       "amqpConnect": "Σύνδεση AMQP",
       "amqpPublish": "Δημοσίευση AMQP",
       "amqpClose": "Κλείσιμο σύνδεσης AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Συνδρομή Redis",
       "redisClose": "Κλείσιμο σύνδεσης Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Εντολή Redis",
       "httpListen": "Διακομιστής HTTP",
       "httpClose": "Κλείσιμο διακομιστή HTTP",
       "grpcServerClose": "Κλείσιμο διακομιστή gRPC",
@@ -1355,8 +1356,8 @@
       "stompConnect": "Σύνδεση STOMP",
       "stompSend": "Αποστολή STOMP",
       "stompClose": "Κλείσιμο σύνδεσης STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Παραγωγή Kafka",
+      "kafkaConsume": "Κατανάλωση Kafka",
       "kafkaClose": "Κλείσιμο σύνδεσης Kafka",
       "grpcListen": "Διακομιστής gRPC"
     },
@@ -1376,29 +1377,29 @@
     },
     "assert": {
       "message": "μήνυμα",
-      "operator": "operator",
+      "operator": "τελεστής",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "ίσο",
+        "ne": "διάφορο",
+        "lt": "μικρότερο από",
         "lte": "μικρότερο ή ίσο",
-        "gt": "greater than",
+        "gt": "μεγαλύτερο από",
         "gte": "μεγαλύτερο ή ίσο",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "περιέχει",
+        "isString": "είναι συμβολοσειρά",
+        "isNumber": "είναι αριθμός",
+        "isBoolean": "είναι λογική τιμή",
+        "isArray": "είναι λίστα",
+        "isObject": "είναι αντικείμενο",
+        "isNull": "είναι null",
+        "exists": "υπάρχει",
+        "isEmpty": "είναι κενό",
+        "matchesRegex": "ταιριάζει με regex",
         "isOneOf": "είναι ένα από τα",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "βαθιά ισότητα",
+        "lengthEq": "μήκος ==",
+        "lengthGt": "μήκος >",
+        "lengthLt": "μήκος <"
       }
     },
     "editRequest": "Επεξεργασία αιτήματος",
@@ -1406,8 +1407,8 @@
     "object": {
       "addProperty": "Προσθήκη ιδιότητας",
       "removeProperty": "Αφαίρεση ιδιότητας",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Όνομα ιδιότητας",
+      "propertyValue": "τιμή"
     },
     "output": {
       "outputName": "Όνομα εξόδου",
@@ -1415,7 +1416,7 @@
       "removeOutput": "Αφαίρεση"
     },
     "input": {
-      "name": "Name",
+      "name": "Όνομα",
       "defaultType": "Προεπιλογή / τύπος",
       "addParam": "Προσθήκη παραμέτρου",
       "removeParam": "Αφαίρεση"
@@ -1461,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "Το πρότυπο δεν πρέπει να είναι κενό.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Η είσοδος \"value\" πρέπει να είναι συνδεδεμένη όταν το πρότυπο αναφέρεται σε {{…}}."
       },
       "request": {
         "missing": "Το συνδεδεμένο αίτημα δεν υπάρχει πλέον."
@@ -1492,8 +1493,8 @@
       "syntheticInfo": "Δείγμα δεδομένων που δημιουργήθηκε από την τεκμηρίωση αυτού του αιτήματος.",
       "syntheticRunHint": "Δείγμα δεδομένων — εκτελέστε το αίτημα για να τα αντικαταστήσετε με πραγματικό αποτέλεσμα.",
       "stop": "Διακοπή",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Καταγραφές εκτέλεσης",
+      "copyLogs": "Αντιγραφή καταγραφών",
       "copyThisLog": "Αντιγραφή αυτού του αρχείου",
       "clearLogs": "Εκκαθάριση καταγραφών",
       "logsShowAll": "Εμφάνιση όλων των αρχείων καταγραφής",
@@ -1503,12 +1504,12 @@
       "helpTitle": "Τι κάνει αυτή η ενέργεια"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Ζώνη ώρας",
+      "formatLabel": "Μορφή",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Ημερομηνία/ώρα",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Συμβολοσειρά"
       }
     },
     "callers": {
@@ -1516,8 +1517,8 @@
       "title": "Αυτό το σενάριο καλείται από:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Παράμετροι εκτέλεσης",
+      "run": "Εκτέλεση",
       "midRunTitle": "Απαιτείται είσοδος"
     },
     "runHistory": {
@@ -1525,27 +1526,27 @@
       "tooltip": "Ιστορικό εκτελέσεων",
       "empty": "Δεν έχει καταγραφεί εκτέλεση ακόμη",
       "noLogs": "Κανένα αρχείο για αυτήν την εκτέλεση",
-      "logsTab": "Logs",
+      "logsTab": "Καταγραφές",
       "graphTab": "Γράφημα",
       "noGraph": "Κανένα στιγμιότυπο σεναρίου για αυτήν την εκτέλεση",
       "pin": "Καρφίτσωμα",
       "unpin": "Ξεκαρφίτσωμα"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "από",
+      "to": "έως",
+      "step": "βήμα",
+      "index": "δείκτης",
+      "done": "έτοιμο"
     },
     "while": {
-      "body": "body"
+      "body": "σώμα"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "βρόχος"
     },
     "loop": {
-      "done": "done"
+      "done": "έτοιμο"
     },
     "breakpoint": {
       "add": "Προσθήκη σημείου διακοπής",
@@ -1558,84 +1559,84 @@
       "toggle": "Εναλλαγή μικρού χάρτη"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "λίστα",
+      "values": "τιμές",
+      "result": "αποτέλεσμα",
       "addValue": "Προσθήκη τιμής",
       "removeValue": "Αφαίρεση τιμής",
       "updateVariable": "Ενημέρωση μεταβλητής προέλευσης"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "τιμή",
+      "targetType": "μετατροπή σε",
+      "result": "αποτέλεσμα",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "αριθμός",
+        "string": "συμβολοσειρά",
+        "boolean": "λογική τιμή",
+        "date": "ημερομηνία",
+        "list": "λίστα"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "τιμή",
+      "operation": "πράξη",
+      "pattern": "μοτίβο",
+      "flags": "σημαίες",
+      "replacement": "αντικαταστάτης",
+      "result": "αποτέλεσμα",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "εξαγωγή",
+        "extractAll": "εξαγωγή όλων",
+        "test": "δοκιμή",
+        "replace": "αντικατάσταση",
+        "split": "διαχωρισμός"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Χωρίς διάκριση πεζών-κεφαλαίων",
         "m": "Πολλαπλών γραμμών (τα ^ και $ ταιριάζουν στις αλλαγές γραμμής)",
         "s": "Dotall (το . ταιριάζει στις αλλαγές γραμμής)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "τιμή",
+      "operation": "πράξη",
+      "indent": "εσοχή",
+      "result": "αποτέλεσμα",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ανάλυση",
+        "stringify": "σειριοποίηση"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "τιμή",
+      "operation": "πράξη",
+      "indent": "εσοχή",
+      "result": "αποτέλεσμα",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ανάλυση",
+        "stringify": "σειριοποίηση"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "τιμή",
+      "operation": "πράξη",
+      "indent": "εσοχή",
+      "result": "αποτέλεσμα",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ανάλυση",
+        "stringify": "σειριοποίηση"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "τιμή",
+      "operation": "πράξη",
+      "key": "κλειδί",
+      "keyPlaceholder": "μυστικό",
+      "result": "αποτέλεσμα",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "κωδικοποίηση base64",
+        "base64Decode": "αποκωδικοποίηση base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1645,183 +1646,183 @@
       }
     },
     "jwt": {
-      "value": "token",
-      "result": "result"
+      "value": "διακριτικό",
+      "result": "αποτέλεσμα"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "ημερομηνία",
+      "operation": "πράξη",
+      "amount": "ποσότητα",
+      "unitLabel": "μονάδα",
+      "format": "μορφή",
+      "other": "δεύτερη ημερομηνία",
+      "result": "αποτέλεσμα",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "πρόσθεση",
+        "subtract": "αφαίρεση",
+        "format": "μορφοποίηση",
+        "diff": "διαφορά"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "χιλιοστά δευτερολέπτου",
+        "seconds": "δευτερόλεπτα",
+        "minutes": "λεπτά",
+        "hours": "ώρες",
+        "days": "ημέρες",
+        "weeks": "εβδομάδες",
+        "months": "μήνες",
+        "years": "έτη"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "αντικείμενο",
+      "operation": "πράξη",
+      "path": "διαδρομή",
+      "keys": "κλειδιά",
+      "setValue": "τιμή",
+      "mergeWith": "συγχώνευση με",
+      "result": "αποτέλεσμα",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "ανάγνωση",
+        "set": "εγγραφή",
+        "merge": "συγχώνευση",
+        "pick": "διατήρηση",
+        "omit": "παράλειψη",
+        "keys": "κλειδιά",
+        "values": "τιμές"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "τιμή",
+      "operation": "πράξη",
+      "result": "αποτέλεσμα",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "κωδικοποίηση",
+        "decode": "αποκωδικοποίηση",
+        "parseQuery": "ανάλυση ερωτήματος",
+        "buildQuery": "δόμηση ερωτήματος",
+        "parseUrl": "ανάλυση URL"
       }
     },
     "random": {
-      "operation": "operation",
-      "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "operation": "πράξη",
+      "min": "ελάχ",
+      "max": "μέγ",
+      "length": "μήκος",
+      "items": "στοιχεία",
+      "seed": "σπόρος (προαιρετικό)",
+      "seedPlaceholder": "αναπαραγώγιμο",
+      "result": "αποτέλεσμα",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "ακέραιος",
+        "float": "δεκαδικός",
+        "string": "συμβολοσειρά",
+        "boolean": "λογική τιμή",
+        "pick": "επιλογή"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "μήνυμα"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "μέγ. προσπάθειες",
+      "backoff": "στρατηγική αναμονής",
+      "delay": "καθυστέρηση",
+      "factor": "συντελεστής",
       "retryOnError": "επανάληψη σε σφάλμα",
       "retryOnStatus": "επανάληψη σε κατάσταση HTTP",
       "retryOnFailure": "επανάληψη σε οποιοδήποτε μη 2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "προσπάθεια",
+      "exhausted": "εξαντλήθηκε",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "σταθερή",
+        "linear": "γραμμική",
+        "exponential": "εκθετική"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Λίστες",
+      "math": "Μαθηματικά",
+      "dataFormats": "Μορφές δεδομένων",
+      "encoding": "Κωδικοποίηση",
       "time": "Χρονισμός",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Αλγόριθμοι",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "λίστα",
+      "operation": "πράξη",
+      "result": "αποτέλεσμα",
+      "key": "κλειδί",
+      "order": "σειρά",
+      "depth": "βάθος",
+      "size": "μέγεθος",
+      "start": "αρχή",
+      "end": "τέλος",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "ταξινόμηση",
+        "unique": "μοναδικά",
+        "reverse": "αντιστροφή",
+        "flatten": "ισοπέδωση",
+        "chunk": "τεμαχισμός",
+        "slice": "απόσπαση",
+        "groupBy": "ομαδοποίηση κατά"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "τιμή",
+      "operation": "πράξη",
+      "result": "αποτέλεσμα",
+      "delimiter": "διαχωριστικό",
+      "header": "γραμμή κεφαλίδων",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ανάλυση",
+        "stringify": "σειριοποίηση"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
-      "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "a": "τιμή",
+      "operation": "πράξη",
+      "result": "αποτέλεσμα",
+      "b": "με",
+      "min": "ελάχ",
+      "max": "μέγ",
+      "precision": "ακρίβεια",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
-        "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "round": "στρογγυλοποίηση",
+        "floor": "στρογγυλοποίηση προς τα κάτω",
+        "ceil": "στρογγυλοποίηση προς τα πάνω",
+        "trunc": "περικοπή",
+        "abs": "απόλυτη τιμή",
+        "sign": "πρόσημο",
+        "sqrt": "τετραγωνική ρίζα",
+        "min": "ελάχ",
+        "max": "μέγ",
+        "clamp": "περιορισμός"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "τιμή",
+      "schema": "Σχήμα JSON",
+      "valid": "έγκυρο",
+      "invalid": "μη έγκυρο",
+      "errors": "σφάλματα",
       "editTitle": "Επεξεργασία JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "διαδρομή",
+      "content": "περιεχόμενο"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "διαδρομή",
+      "mode": "λειτουργία",
+      "content": "περιεχόμενο"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Επεξεργασία",
+      "edit": "Άνοιγμα επεξεργαστή",
+      "moreLines": "+{{count}} γραμμές",
+      "editTemplate": "Επεξεργασία προτύπου"
     },
     "timer": {
       "mode": "λειτουργία",
@@ -1889,7 +1890,7 @@
       "waitUntil": "Παύει μέχρι μια δεδομένη ημερομηνία/ώρα, μετά συνεχίζει.",
       "now": "Εκπέμπει την τρέχουσα ημερομηνία και ώρα.",
       "timer": "Πυροδοτεί το σώμα του σε επαναλαμβανόμενο διάστημα ή σε χρονοπρόγραμμα cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Υπολογίζει a + − × ÷ … δύο αριθμών.",
       "comparator": "Συγκρίνει δύο τιμές και εκπέμπει αληθές ή ψευδές.",
       "boolean": "Συνδυάζει λογικές τιμές με and / or / xor / not.",
       "object": "Δημιουργεί ένα αντικείμενο από τις επώνυμες εισόδους του.",
@@ -1902,7 +1903,7 @@
       "json": "Αναλύει μια συμβολοσειρά JSON ή σειριοποιεί μια τιμή σε JSON.",
       "xml": "Αναλύει μια συμβολοσειρά XML ή σειριοποιεί μια τιμή σε XML.",
       "yaml": "Αναλύει μια συμβολοσειρά YAML ή σειριοποιεί μια τιμή σε YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Κατακερματίζει ή κωδικοποιεί μια συμβολοσειρά (base64, md5, sha…, hmac, uuid).",
       "jwt": "Αποκωδικοποιεί ένα token JWT σε header, payload και signature.",
       "datetime": "Μετατοπίζει, μορφοποιεί ή υπολογίζει διαφορά ημερομηνιών.",
       "retry": "Επανεκτελεί το σώμα του μέχρι να επιτύχει, με πολιτική backoff.",
@@ -1911,7 +1912,7 @@
       "random": "Δημιουργεί έναν τυχαίο αριθμό, συμβολοσειρά, λογική τιμή ή επιλογή.",
       "listOp": "Αναδιαμορφώνει μια λίστα (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Αναλύει μια συμβολοσειρά CSV ή σειριοποιεί μια λίστα σε CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Εκτελεί μια βαθμωτή πράξη (στρογγυλοποίηση, abs, ρίζα, ελάχ, μέγ, περιορισμός…).",
       "schema": "Επικυρώνει μια τιμή έναντι ενός JSON Schema.",
       "readFile": "Διαβάζει το περιεχόμενο κειμένου ενός αρχείου.",
       "writeFile": "Γράφει ή προσαρτά κείμενο σε ένα αρχείο.",
@@ -1950,13 +1951,13 @@
       "redisClose": "Κλείνει μια ήδη ανοιχτή σύνδεση συνδρομής Redis.",
       "redisCommand": "Εκτελεί μια συνδεδεμένη εντολή Redis (μία εντολή σε νέα σύνδεση, στη συνέχεια αποσύνδεση) και εκπέμπει την απόκρισή της.",
       "toast": "Εμφανίζει μια ειδοποίηση toast στο περιβάλλον Restorm όσο εκτελείται το σενάριο.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Φιλοξενεί έναν τοπικό εικονικό διακομιστή HTTP και ακούει επ' αόριστον. Το `connected` ενεργοποιείται μόλις αρχίσει να ακούει· κάθε εξυπηρετούμενο αίτημα αναμεταδίδει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο HTTP (ή ένα Stop), οπότε ενεργοποιείται το `done`. Χωρίς έξοδο response — εξυπηρετεί, δεν καλεί.",
       "httpClose": "Σταματά έναν ήδη ακροαζόμενο εικονικό διακομιστή HTTP (που δηλώνεται από έναν κόμβο διακομιστή HTTP) και απελευθερώνει τη θύρα του.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Φιλοξενεί έναν τοπικό εικονικό διακομιστή gRPC και ακούει επ' αόριστον. Το `connected` ενεργοποιείται μόλις αρχίσει να ακούει· κάθε εξυπηρετούμενη κλήση αναμεταδίδει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο διακομιστή gRPC (ή ένα Stop), οπότε ενεργοποιείται το `done`. Χωρίς έξοδο response — εξυπηρετεί, δεν καλεί.",
       "grpcServerClose": "Σταματά έναν ήδη ακροαζόμενο εικονικό διακομιστή gRPC (που δηλώνεται από έναν κόμβο διακομιστή gRPC) και απελευθερώνει τη θύρα του.",
       "soapListen": "Φιλοξενεί έναν τοπικό διακομιστή εικονικού SOAP και ακούει επ' αόριστον. Κάθε εισερχόμενο αίτημα δρομολογείται σε μια διαμορφωμένη λειτουργία (βάσει του SOAPAction του ή του ονόματος λειτουργίας στο σώμα) και απαντάται με τον προκαθορισμένο φάκελο SOAP (μια λειτουργία σφάλματος επιστρέφει `<soap:Fault>`). Το `connected` ενεργοποιείται μόλις ο διακομιστής ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο SOAP (ή μια διακοπή), και μετά ενεργοποιείται το `done`.",
       "soapClose": "Σταματά έναν διακομιστή εικονικού SOAP που ήδη ακούει (δηλωμένον από έναν κόμβο διακομιστή SOAP) και απελευθερώνει τη θύρα του.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Φιλοξενεί έναν τοπικό εικονικό διακομιστή GraphQL και ακούει επ' αόριστον. Το `connected` ενεργοποιείται μόλις αρχίσει να ακούει· κάθε εξυπηρετούμενη λειτουργία αναμεταδίδει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο GraphQL (ή ένα Stop), οπότε ενεργοποιείται το `done`. Χωρίς έξοδο response — εξυπηρετεί, δεν καλεί.",
       "graphqlClose": "Σταματά έναν ήδη ακροαζόμενο εικονικό διακομιστή GraphQL (που δηλώνεται από έναν κόμβο διακομιστή GraphQL) και απελευθερώνει τη θύρα του.",
       "odataListen": "Φιλοξενεί μια τοπική εικονική υπηρεσία OData v4 και ακούει επ’ αόριστον. Η θύρα `connected` ενεργοποιείται μόλις αρχίσει να ακούει· κάθε εξυπηρετούμενο αίτημα επανεκπέμπει τα δεδομένα του στη θύρα `served`. Ο διακομιστής παραμένει ενεργός μέχρι ένα κλείσιμο OData (ή ένα Stop), οπότε ενεργοποιείται η θύρα `done`. Καμία έξοδος response — εξυπηρετεί, δεν καλεί προς τα έξω.",
       "odataClose": "Σταματά μια ήδη ενεργή εικονική υπηρεσία OData (που δηλώθηκε από έναν κόμβο διακομιστή OData), απελευθερώνοντας τη θύρα της.",
@@ -1992,43 +1993,43 @@
       "title": "Εκτέλεση από τη γραμμή εντολών",
       "intro": "Εκτελέστε αυτό το σενάριο χωρίς να ανοίξετε την εφαρμογή (CI, cron, script):",
       "byId": "Προσδιορισμός με id",
-      "allLogs": "All logs",
+      "allLogs": "Όλα τα αρχεία καταγραφής",
       "note": "Το `--out file` γράφει επίσης το run-log σε αρχείο.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<έργο.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Μια εκτέλεση headless απαιτεί πλάνο Restorm Pro και CI token.",
       "tokenLink": "Αποκτήστε token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Όνομα σύνδεσης",
+      "connectionNamePlaceholder": "όνομα σύνδεσης",
+      "eventPlaceholder": "συμβάν",
+      "addEvent": "Προσθήκη συμβάντος",
+      "connected": "συνδέθηκε",
+      "others": "άλλα",
+      "connection": "σύνδεση",
+      "pickConnection": "— επιλέξτε σύνδεση —",
+      "channelLabel": "Όνομα καναλιού",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Επεξεργασία payload",
       "started": "ξεκίνησε"
     },
     "websocket": {
-      "message": "message"
+      "message": "μήνυμα"
     },
     "sse": {
-      "message": "message"
+      "message": "μήνυμα"
     },
     "grpc": {
-      "message": "message"
+      "message": "μήνυμα"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Αναδιάταξη ενεργειών"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "είσοδος",
+      "error": "σφάλμα",
+      "done": "έτοιμο"
     },
     "toast": {
       "title": "τίτλος",
@@ -2036,7 +2037,7 @@
       "duration": "διάρκεια (δ)"
     },
     "http": {
-      "served": "served"
+      "served": "εξυπηρετήθηκε"
     },
     "actionOverride": {
       "configMissingShort": "Λείπει η διαμόρφωση",
@@ -2549,13 +2550,6 @@
     "crashReportsDescription": "Στέλνει μια ανωνυμοποιημένη αναφορά όταν το Restorm καταρρέει, ώστε να διορθωθεί η βλάβη. Οι αναφορές καθαρίζονται από URL, διακριτικά, σώματα αιτημάτων και προσωπικά δεδομένα πριν φύγουν από το μηχάνημά σας. Περιλαμβάνεται στο δωρεάν πρόγραμμα· ένα επί πληρωμή πρόγραμμα επιτρέπει την απενεργοποίηση. Πλήρεις λεπτομέρειες: https://restorm.app/privacy",
     "telemetryTitle": "Αποστολή στατιστικών χρήσης",
     "telemetryDescription": "Στέλνει ανώνυμα στατιστικά για το ποιες λειτουργίες χρησιμοποιούνται, ώστε να καθοδηγηθεί η μελλοντική ανάπτυξη. Απενεργοποιημένο εξ ορισμού και ποτέ ενεργό χωρίς τη ρητή συγκατάθεσή σας. Δεν περιέχει δεδομένα αιτημάτων, ούτε URL, ούτε προσωπικά δεδομένα. Πλήρεις λεπτομέρειες: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Αναφορές κατάρρευσης (μόνο με τη συγκατάθεσή σας)",
-        "telemetry": "Ανώνυμα στατιστικά χρήσης (μόνο με τη συγκατάθεσή σας)",
-        "backend": "Λογαριασμός, άδεια και συνδρομή"
-      }
-    },
     "crashReportsLockedLabel": "Τροποποιήσιμο από το πρόγραμμα Pro. Στο δωρεάν πρόγραμμα, οι αναφορές σφαλμάτων είναι απαραίτητες για τη διατήρηση της ποιότητας.",
     "consentToast": {
       "title": "Βοηθήστε μας να βελτιώσουμε το Restorm",

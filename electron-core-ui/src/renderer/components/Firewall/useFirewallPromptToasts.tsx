@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toasterService } from '../Toaster/ToasterService'
 import type { FirewallPromptPayload } from '../../../types/firewall'
 import { FirewallPromptBody } from './FirewallPromptBody'
@@ -33,6 +34,14 @@ export function useFirewallPromptToasts(): void {
 	// for the toast id) so dismiss is a direct lookup.
 	const openPrompts = useRef(new Set<string>())
 
+	// The subscription is mount-once, so a `t` captured in its closure
+	// would stay pinned to the language active at mount. Keep it in a
+	// ref so a prompt raised after a language switch reads the current
+	// translation.
+	const { t } = useTranslation()
+	const tRef = useRef(t)
+	useEffect(() => { tRef.current = t }, [t])
+
 	useEffect(() => {
 		const firewall = getFirewallApi()
 		if (firewall === null) return
@@ -53,7 +62,7 @@ export function useFirewallPromptToasts(): void {
 			}
 			toasterService.push('app', {
 				id: toastId,
-				title: 'Outbound request blocked',
+				title: tRef.current('firewall.prompt.title'),
 				body: <FirewallPromptBody payload={payload} resolve={resolve} />
 			})
 		})

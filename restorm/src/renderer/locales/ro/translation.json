@@ -422,6 +422,7 @@
     "responses": {
       "tabs": {
         "response": "Răspuns",
+        "infos": "Informații",
         "requestBody": "Corpul cererii",
         "graph": "Grafic"
       },
@@ -1211,24 +1212,24 @@
       "emptyRightClick": "Faceți clic dreapta pe un loc gol pentru a adăuga acțiuni în scenariul dvs."
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Cale JSON",
       "ariaLabel": "Selector de cale JSON",
       "pick": "Alegeți din rezultat",
-      "loading": "Loading…",
+      "loading": "Se încarcă…",
       "noResult": "Rulați acțiunea sursă pentru a alege o proprietate din rezultatul ei."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Scenariu",
+      "notes": "Notițe"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Schimbă culoarea",
+        "resetColor": "Resetează culoarea",
         "addNote": "Adăugați/editați nota",
         "runOnEachEvent": "Rulează la fiecare eveniment primit",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Duplică",
+        "delete": "Șterge",
         "deleteShortcut": "Del",
         "copy": "Copiază",
         "paste": "Lipește"
@@ -1238,9 +1239,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Schimbă culoarea",
+        "resetColor": "Resetează culoarea",
+        "delete": "Șterge"
       }
     },
     "locked": "Editare blocată în timp ce scenariul rulează",
@@ -1299,49 +1300,49 @@
       "getVariable": "Obține variabila",
       "addToList": "Adaugă în listă",
       "removeFromList": "Elimină din listă",
-      "cast": "Cast",
+      "cast": "Convertește",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Cripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Calcul cu date",
+      "objectOp": "Operații pe obiecte",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Aleatoriu",
+      "throw": "Aruncă eroare",
+      "retry": "Reîncercare",
+      "listOp": "Operații pe liste",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematică",
+      "schema": "Validează schema",
+      "readFile": "Citește fișier",
+      "writeFile": "Scrie fișier",
       "timer": "Cronometru",
       "code": "Cod",
       "socketioConnect": "Conexiune Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Trimitere Socket.IO",
       "socketioClose": "Închide conexiunea Socket.IO",
       "socketioServerClose": "Închide serverul Socket.IO",
       "websocketConnect": "Conexiune WebSocket",
       "sseConnect": "Conexiune SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Trimitere WebSocket",
       "websocketClose": "Închide conexiunea WebSocket",
       "websocketServerClose": "Închide serverul WebSocket",
       "sseClose": "Închide conexiunea SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Conexiune gRPC",
+      "grpcSend": "Trimitere gRPC",
       "grpcClose": "Închide conexiunea gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Conexiune MQTT",
+      "mqttSend": "Publicare MQTT",
       "mqttClose": "Închide conexiunea MQTT",
       "amqpConnect": "Conexiune AMQP",
       "amqpPublish": "Publicare AMQP",
       "amqpClose": "Închide conexiunea AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Abonare Redis",
       "redisClose": "Închide conexiunea Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Comandă Redis",
       "httpListen": "Server HTTP",
       "httpClose": "Închide serverul HTTP",
       "grpcServerClose": "Închide serverul gRPC",
@@ -1356,8 +1357,8 @@
       "stompConnect": "Conectare STOMP",
       "stompSend": "Trimitere STOMP",
       "stompClose": "Închide conexiunea STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Producție Kafka",
+      "kafkaConsume": "Consum Kafka",
       "kafkaClose": "Închide conexiunea Kafka",
       "grpcListen": "Server gRPC"
     },
@@ -1379,27 +1380,27 @@
       "message": "mesaj",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "egal",
+        "ne": "diferit",
+        "lt": "mai mic decât",
         "lte": "mai mic sau egal",
-        "gt": "greater than",
+        "gt": "mai mare decât",
         "gte": "mai mare sau egal",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "conține",
+        "isString": "este text",
+        "isNumber": "este număr",
+        "isBoolean": "este valoare logică",
+        "isArray": "este listă",
+        "isObject": "este obiect",
+        "isNull": "este null",
+        "exists": "există",
+        "isEmpty": "este gol",
+        "matchesRegex": "se potrivește cu regex",
         "isOneOf": "este unul dintre",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "egalitate profundă",
+        "lengthEq": "lungime ==",
+        "lengthGt": "lungime >",
+        "lengthLt": "lungime <"
       }
     },
     "editRequest": "Editează cererea",
@@ -1407,8 +1408,8 @@
     "object": {
       "addProperty": "Adaugă proprietate",
       "removeProperty": "Elimină proprietatea",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Numele proprietății",
+      "propertyValue": "valoare"
     },
     "output": {
       "outputName": "Nume ieșire",
@@ -1416,7 +1417,7 @@
       "removeOutput": "Elimină"
     },
     "input": {
-      "name": "Name",
+      "name": "Nume",
       "defaultType": "Implicit / tip",
       "addParam": "Adaugă parametru",
       "removeParam": "Elimină"
@@ -1462,7 +1463,7 @@
       },
       "transform": {
         "emptyTemplate": "Șablonul nu trebuie să fie gol.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Intrarea \"value\" trebuie conectată atunci când șablonul referențiază {{…}}."
       },
       "request": {
         "missing": "Cererea asociată nu mai există."
@@ -1493,8 +1494,8 @@
       "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
       "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real.",
       "stop": "Oprește",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Jurnale de execuție",
+      "copyLogs": "Copiază jurnalele",
       "copyThisLog": "Copiază acest jurnal",
       "clearLogs": "Șterge jurnalele",
       "logsShowAll": "Afișați toate jurnalele",
@@ -1504,12 +1505,12 @@
       "helpTitle": "Ce face această acțiune"
     },
     "now": {
-      "timezone": "Timezone",
+      "timezone": "Fus orar",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Dată/oră",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Text"
       }
     },
     "callers": {
@@ -1517,8 +1518,8 @@
       "title": "Acest scenariu este apelat de:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Parametri de rulare",
+      "run": "Rulează",
       "midRunTitle": "Date solicitate"
     },
     "runHistory": {
@@ -1533,20 +1534,20 @@
       "unpin": "Anulează fixarea"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
+      "from": "de la",
+      "to": "până la",
+      "step": "pas",
       "index": "index",
-      "done": "done"
+      "done": "gata"
     },
     "while": {
-      "body": "body"
+      "body": "corp"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "buclă"
     },
     "loop": {
-      "done": "done"
+      "done": "gata"
     },
     "breakpoint": {
       "add": "Adăugare punct de întrerupere",
@@ -1559,84 +1560,84 @@
       "toggle": "Comută minimapa"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "listă",
+      "values": "valori",
+      "result": "rezultat",
       "addValue": "Adaugă valoare",
       "removeValue": "Elimină valoarea",
       "updateVariable": "Actualizează variabila sursă"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "valoare",
+      "targetType": "convertește în",
+      "result": "rezultat",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "număr",
+        "string": "text",
+        "boolean": "valoare logică",
+        "date": "dată",
+        "list": "listă"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "valoare",
+      "operation": "operație",
+      "pattern": "tipar",
+      "flags": "indicatori",
+      "replacement": "înlocuitor",
+      "result": "rezultat",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "extrage",
+        "extractAll": "extrage tot",
+        "test": "testează",
+        "replace": "înlocuiește",
+        "split": "împarte"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Fără diferență între majuscule și minuscule",
         "m": "Multilinie (^ și $ corespund întreruperilor de linie)",
         "s": "Dotall (. corespunde liniilor noi)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "valoare",
+      "operation": "operație",
+      "indent": "indentare",
+      "result": "rezultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizează",
+        "stringify": "serializează"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "valoare",
+      "operation": "operație",
+      "indent": "indentare",
+      "result": "rezultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizează",
+        "stringify": "serializează"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "valoare",
+      "operation": "operație",
+      "indent": "indentare",
+      "result": "rezultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizează",
+        "stringify": "serializează"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
+      "value": "valoare",
+      "operation": "operație",
+      "key": "cheie",
       "keyPlaceholder": "secret",
-      "result": "result",
+      "result": "rezultat",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "codează base64",
+        "base64Decode": "decodează base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1647,182 +1648,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "rezultat"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
+      "value": "dată",
+      "operation": "operație",
+      "amount": "cantitate",
+      "unitLabel": "unitate",
       "format": "format",
-      "other": "second date",
-      "result": "result",
+      "other": "a doua dată",
+      "result": "rezultat",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "adaugă",
+        "subtract": "scade",
+        "format": "formatează",
+        "diff": "diferență"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milisecunde",
+        "seconds": "secunde",
+        "minutes": "minute",
+        "hours": "ore",
+        "days": "zile",
+        "weeks": "săptămâni",
+        "months": "luni",
+        "years": "ani"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "obiect",
+      "operation": "operație",
+      "path": "cale",
+      "keys": "chei",
+      "setValue": "valoare",
+      "mergeWith": "îmbină cu",
+      "result": "rezultat",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "citește",
+        "set": "scrie",
+        "merge": "îmbină",
+        "pick": "păstrează",
+        "omit": "elimină",
+        "keys": "chei",
+        "values": "valori"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "valoare",
+      "operation": "operație",
+      "result": "rezultat",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "codează",
+        "decode": "decodează",
+        "parseQuery": "analizează interogarea",
+        "buildQuery": "construiește interogarea",
+        "parseUrl": "analizează URL-ul"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "operație",
       "min": "min",
       "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "length": "lungime",
+      "items": "elemente",
+      "seed": "sămânță (opțional)",
+      "seedPlaceholder": "reproductibil",
+      "result": "rezultat",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "număr întreg",
+        "float": "număr zecimal",
+        "string": "text",
+        "boolean": "valoare logică",
+        "pick": "alege"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "mesaj"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
+      "maxAttempts": "încercări max.",
+      "backoff": "strategie de așteptare",
+      "delay": "întârziere",
       "factor": "factor",
       "retryOnError": "reîncercare la eroare",
       "retryOnStatus": "reîncercare la status HTTP",
       "retryOnFailure": "reîncercare la orice non-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "încercare",
+      "exhausted": "epuizat",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "fix",
+        "linear": "liniar",
+        "exponential": "exponențial"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Liste",
+      "math": "Matematică",
+      "dataFormats": "Formate de date",
+      "encoding": "Codificare",
       "time": "Sincronizare",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmi",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "listă",
+      "operation": "operație",
+      "result": "rezultat",
+      "key": "cheie",
+      "order": "ordine",
+      "depth": "adâncime",
+      "size": "dimensiune",
+      "start": "început",
+      "end": "sfârșit",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sortează",
+        "unique": "unice",
+        "reverse": "inversează",
+        "flatten": "aplatizează",
+        "chunk": "împarte în bucăți",
+        "slice": "decupează",
+        "groupBy": "grupează după"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "valoare",
+      "operation": "operație",
+      "result": "rezultat",
+      "delimiter": "delimitator",
+      "header": "rând de antet",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizează",
+        "stringify": "serializează"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "valoare",
+      "operation": "operație",
+      "result": "rezultat",
+      "b": "cu",
       "min": "min",
       "max": "max",
-      "precision": "precision",
+      "precision": "precizie",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "rotunjește",
+        "floor": "rotunjire în jos",
+        "ceil": "rotunjire în sus",
+        "trunc": "trunchiază",
+        "abs": "valoare absolută",
+        "sign": "semn",
+        "sqrt": "radical",
         "min": "min",
         "max": "max",
-        "clamp": "clamp"
+        "clamp": "limitează"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
+      "value": "valoare",
+      "schema": "Schemă JSON",
       "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "invalid": "nevalid",
+      "errors": "erori",
       "editTitle": "Editați JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "cale",
+      "content": "conținut"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "cale",
+      "mode": "mod",
+      "content": "conținut"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Editează",
+      "edit": "Deschide editorul",
+      "moreLines": "+{{count}} linii",
+      "editTemplate": "Editează șablonul"
     },
     "timer": {
       "mode": "mod",
@@ -1890,7 +1891,7 @@
       "waitUntil": "Întrerupe până la o dată/oră dată, apoi continuă.",
       "now": "Emite data și ora curente.",
       "timer": "Declanșează corpul său la un interval repetat sau conform unei programări cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Calculează a + − × ÷ … a două numere.",
       "comparator": "Compară două valori și emite adevărat sau fals.",
       "boolean": "Combină valori booleene cu and / or / xor / not.",
       "object": "Construiește un obiect din intrările sale denumite.",
@@ -1903,7 +1904,7 @@
       "json": "Analizează un șir JSON sau serializează o valoare în JSON.",
       "xml": "Analizează un șir XML sau serializează o valoare în XML.",
       "yaml": "Analizează un șir YAML sau serializează o valoare în YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Calculează hash-ul sau codează un text (base64, md5, sha…, hmac, uuid).",
       "jwt": "Decodează un token JWT în header, payload și signature.",
       "datetime": "Decalează, formatează sau compară o dată.",
       "retry": "Reexecută corpul său până reușește, cu o politică de backoff.",
@@ -1912,7 +1913,7 @@
       "random": "Generează un număr, text, boolean sau o alegere aleatorie.",
       "listOp": "Restructurează o listă (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Analizează un șir CSV sau serializează o listă în CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Execută o operație scalară (rotunjire, abs, radical, min, max, limitare…).",
       "schema": "Validează o valoare față de un JSON Schema.",
       "readFile": "Citește conținutul text al unui fișier.",
       "writeFile": "Scrie sau adaugă text într-un fișier.",
@@ -1951,13 +1952,13 @@
       "redisClose": "Închide o conexiune de abonare Redis deja deschisă.",
       "redisCommand": "Execută o comandă Redis asociată (o singură comandă pe o conexiune nouă, apoi deconectare) și emite răspunsul ei.",
       "toast": "Emite o notificare toast în interfața Restorm în timp ce scenariul rulează.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Găzduiește un server HTTP fals local și ascultă la nesfârșit. `connected` se declanșează de îndată ce ascultă; fiecare cerere servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere HTTP (sau un Stop), apoi se declanșează `done`. Fără ieșire response — servește, nu apelează.",
       "httpClose": "Oprește un server fals HTTP care ascultă deja (declarat de un nod server HTTP), eliberându-i portul.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Găzduiește un server gRPC fals local și ascultă la nesfârșit. `connected` se declanșează de îndată ce ascultă; fiecare apel servit își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere a serverului gRPC (sau un Stop), apoi se declanșează `done`. Fără ieșire response — servește, nu apelează.",
       "grpcServerClose": "Oprește un server fals gRPC care ascultă deja (declarat de un nod server gRPC), eliberându-i portul.",
       "soapListen": "Găzduiește un server mock SOAP local și ascultă la nesfârșit. Fiecare cerere primită este direcționată către o operațiune configurată (după SOAPAction sau numele operațiunii din corp) și primește ca răspuns plicul SOAP predefinit (o operațiune de eroare returnează `<soap:Fault>`). `connected` se declanșează imediat ce serverul ascultă; fiecare cerere servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere SOAP (sau o oprire), apoi se declanșează `done`.",
       "soapClose": "Oprește un server mock SOAP care ascultă deja (declarat de un nod de server SOAP) și îi eliberează portul.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Găzduiește un server GraphQL fals local și ascultă la nesfârșit. `connected` se declanșează de îndată ce ascultă; fiecare operație servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere GraphQL (sau un Stop), apoi se declanșează `done`. Fără ieșire response — servește, nu apelează.",
       "graphqlClose": "Oprește un server fals GraphQL care ascultă deja (declarat de un nod server GraphQL), eliberându-i portul.",
       "odataListen": "Găzduiește un serviciu fictiv OData v4 local și ascultă la nesfârșit. `connected` se declanșează imediat ce ascultă; fiecare cerere servită își reemite datele pe portul `served`. Serverul rămâne activ până la o închidere OData (sau un Stop), apoi se declanșează `done`. Fără ieșire response — servește, nu apelează în exterior.",
       "odataClose": "Oprește un serviciu fictiv OData care ascultă deja (declarat de un nod server OData), eliberându-i portul.",
@@ -1993,43 +1994,43 @@
       "title": "Rulați din linia de comandă",
       "intro": "Rulați acest scenariu fără a deschide aplicația (CI, cron, script):",
       "byId": "Desemnați după id",
-      "allLogs": "All logs",
+      "allLogs": "Toate jurnalele",
       "note": "`--out fișier` scrie de asemenea run-log-ul într-un fișier.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<proiect.restorm>",
       "tokenPlaceholder": "<token_dvs>",
       "tokenNote": "O rulare headless necesită un plan Restorm Pro și un token CI.",
       "tokenLink": "Obțineți un token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Numele conexiunii",
+      "connectionNamePlaceholder": "numele conexiunii",
+      "eventPlaceholder": "eveniment",
+      "addEvent": "Adaugă eveniment",
+      "connected": "conectat",
+      "others": "altele",
+      "connection": "conexiune",
+      "pickConnection": "— alege o conexiune —",
+      "channelLabel": "Numele canalului",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Editează payload-ul",
       "started": "pornit"
     },
     "websocket": {
-      "message": "message"
+      "message": "mesaj"
     },
     "sse": {
-      "message": "message"
+      "message": "mesaj"
     },
     "grpc": {
-      "message": "message"
+      "message": "mesaj"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Rearanjează acțiunile"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "intrare",
+      "error": "eroare",
+      "done": "gata"
     },
     "toast": {
       "title": "titlu",
@@ -2037,7 +2038,7 @@
       "duration": "durată (s)"
     },
     "http": {
-      "served": "served"
+      "served": "servit"
     },
     "actionOverride": {
       "configMissingShort": "Configurație lipsă",
@@ -2550,13 +2551,6 @@
     "crashReportsDescription": "Trimite un raport anonimizat atunci când Restorm se blochează, pentru ca defecțiunea să poată fi remediată. Rapoartele sunt curățate de URL-uri, jetoane, corpuri de cerere și date personale înainte de a părăsi computerul dumneavoastră. Inclus în planul gratuit; un plan cu plată permite dezactivarea. Toate detaliile: https://restorm.app/privacy",
     "telemetryTitle": "Trimite statistici de utilizare",
     "telemetryDescription": "Trimite statistici anonime despre funcțiile utilizate, pentru a orienta dezvoltările viitoare. Dezactivat implicit și niciodată activat fără consimțământul dumneavoastră explicit. Nu conține date ale cererilor, URL-uri sau date personale. Toate detaliile: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Rapoarte de blocare (numai cu consimțământul dumneavoastră)",
-        "telemetry": "Statistici de utilizare anonime (numai cu consimțământul dumneavoastră)",
-        "backend": "Cont, licență și abonament"
-      }
-    },
     "crashReportsLockedLabel": "Modificabil începând cu planul Pro. În planul gratuit, rapoartele de blocare sunt necesare pentru menținerea calității.",
     "consentToast": {
       "title": "Ajutați-ne să îmbunătățim Restorm",

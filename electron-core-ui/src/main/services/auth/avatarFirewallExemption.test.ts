@@ -109,7 +109,7 @@ describe('AvatarFirewallExemption', () => {
   })
 })
 
-describe('AvatarFirewallExemption — firewall panel visibility', () => {
+describe('AvatarFirewallExemption — outbound inventory declaration', () => {
   it('declares the row up-front, host-less, so a signed-out user still sees it', () => {
     const fw = makeFakeAllowlist()
     new AvatarFirewallExemption(fw)
@@ -125,7 +125,7 @@ describe('AvatarFirewallExemption — firewall panel visibility', () => {
     expect(fw.declared.at(-1)?.host).toBe('lh3.googleusercontent.com')
     ex.sync(SIGNED_OUT_STATE)
     expect(fw.declared.at(-1)?.host).toBeNull()
-    // Always the same id — the host changes, the panel row does not.
+    // Always the same id — the host changes, the declaration does not.
     expect(new Set(fw.declared.map((d) => d.id))).toEqual(new Set(['avatar']))
   })
 

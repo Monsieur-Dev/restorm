@@ -687,6 +687,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
             onRowsChange={handleHeadersChange}
             persistenceId={`graphql-headers:${request.id}`}
             data-testid="graphql-headers-table"
+            variableAware
           />
         </div>
       </Pane>

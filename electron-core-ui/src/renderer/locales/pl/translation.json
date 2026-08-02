@@ -177,6 +177,9 @@
       "copied": "Skopiowano!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Zacznij pisać…"
+  },
   "tagsView": {
     "removeTag": "Usuń tag",
     "newTag": "Nowy tag"
@@ -412,19 +415,19 @@
     "addOrigin": "Dodaj origin",
     "removeOrigin": "Usuń {{origin}}",
     "noEntries": "Brak wpisów.",
-    "outbound": {
-      "title": "Usługi wychodzące",
-      "intro": "Miejsca docelowe, z którymi ta aplikacja może się skontaktować z własnej inicjatywy. Są zadeklarowane w kodzie i nie można ich tu edytować — te, które wymagają Twojej zgody, pozostają wyłączone, dopóki nie udzielisz jej w Preferencjach.",
-      "empty": "Ta aplikacja nie deklaruje żadnego własnego miejsca docelowego.",
-      "hostUnset": "nieskonfigurowane",
-      "stateConsented": "Dozwolone — udzielono zgody",
-      "stateNoConsent": "Zablokowane — brak zgody",
-      "stateRequired": "Dozwolone — wymagane przez aplikację",
-      "stateInactive": "Nieaktywne — obecnie nieużywane",
-      "purpose": {
-        "avatar": "Zdjęcie profilowe zalogowanego konta"
-      }
+    "prompt": {
+      "title": "Zablokowano żądanie wychodzące",
+      "allow": "Zezwól",
+      "deny": "Odmów",
+      "fromOrigin": "z {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Wstecz",
+    "refresh": "Odśwież",
+    "go": "Przejdź",
+    "address": "Adres",
+    "emptyHint": "Wpisz adres powyżej, aby rozpocząć przeglądanie."
   },
   "bookmarkRibbon": {
     "addBookmark": "Dodaj zakładkę"

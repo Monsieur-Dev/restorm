@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon, TrpcCallKind } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
@@ -79,7 +80,7 @@ export class TrpcRequest extends BaseRequest {
     kind?: TrpcCallKind
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
     quickConfigs?: QuickConfig[]
-  }): TrpcRequest {
+  } & ImportMarkerFields): TrpcRequest {
     return new TrpcRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -88,6 +89,7 @@ export class TrpcRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       procedure: obj.procedure ?? '',
       ...(obj.input !== undefined && { input: obj.input }),
@@ -110,6 +112,7 @@ export class TrpcRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       procedure: this.procedure,
       input: this.input,

@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { WebSocketProtocol, RequestType, RuntimeId, Icon } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
@@ -155,7 +156,7 @@ export class WebSocketRequest extends BaseRequest {
     lwtQos?: number
     lwtRetain?: boolean
     quickConfigs?: QuickConfig[]
-  }): WebSocketRequest {
+  } & ImportMarkerFields): WebSocketRequest {
     return new WebSocketRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -164,6 +165,7 @@ export class WebSocketRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       protocol: obj.protocol ?? 'websocket',
       ...(obj.event !== undefined && { event: obj.event }),
@@ -198,6 +200,7 @@ export class WebSocketRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       protocol: this.protocol,
       event: this.event,

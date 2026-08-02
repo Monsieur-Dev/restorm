@@ -125,10 +125,10 @@ export function initConsentService(getPlan: () => ResolvedPlan): ConsentService 
   // the firewall exemption always names the host the SDK will actually reach.
   const endpoints = resolveObservabilityEndpoints()
 
-  // Declare the endpoints BEFORE the first sync so the panel can render a row
-  // for each one whatever the consent answer — including the rows that will
-  // read "blocked, no consent". A destination the user cannot see is one they
-  // cannot refuse.
+  // Declare the endpoints BEFORE the first sync so each one is accounted for
+  // whatever the consent answer — including the ones that will report "not
+  // exempted, no consent". A destination that is never declared is one nobody
+  // can audit.
   for (const endpoint of endpoints) {
     permissionService.declareSystemEndpoint({
       id: endpoint.id,

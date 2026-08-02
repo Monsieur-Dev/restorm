@@ -129,21 +129,21 @@ contextBridge.exposeInMainWorld('api', {
     /** Read-only inventory of the destinations the APP itself may contact
      * (licensing backend, avatar CDN, consent-gated crash / telemetry ingest).
      * No mutating counterpart by design — these are declared in code and
-     * governed by the Privacy settings, not editable from the panel. */
+     * governed by the Privacy settings, not editable by the user. */
     listSystemEndpoints: async (): Promise<SystemEndpointStatus[]> => {
       const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_SYSTEM_ENDPOINTS)
       return Array.isArray(result) ? (result as SystemEndpointStatus[]) : []
     },
     /** The hosts the firewall currently exempts as system / display assets —
      * the actual input to the permission check, as opposed to the descriptive
-     * rows above. Read-only introspection; the panel does not use it, but it is
-     * what lets a test assert on enforcement rather than on presentation. */
+     * declarations above. Read-only introspection: it is what lets a test
+     * assert on enforcement rather than on a declaration's own claim. */
     listSystemAllowedHosts: async (): Promise<string[]> => {
       const result: unknown = await ipcRenderer.invoke(FIREWALL_IPC.LIST_SYSTEM_ALLOWED_HOSTS)
       return Array.isArray(result) ? (result as string[]) : []
     },
     /** Push notification that the outbound inventory moved (consent granted or
-     * revoked, a host resolved on login) so an open panel re-reads it live. */
+     * revoked, a host resolved on login) so a subscriber re-reads it live. */
     onSystemEndpointsChanged: (cb: () => void): (() => void) => {
       const handler = (): void => { cb() }
       ipcRenderer.on(FIREWALL_IPC.SYSTEM_ENDPOINTS_CHANGED, handler)

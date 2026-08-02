@@ -177,6 +177,9 @@
       "copied": "Kopieret!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Begynd at skrive…"
+  },
   "tagsView": {
     "removeTag": "Fjern tag",
     "newTag": "Nyt tag"
@@ -412,19 +415,19 @@
     "addOrigin": "Tilføj origin",
     "removeOrigin": "Fjern {{origin}}",
     "noEntries": "Ingen poster endnu.",
-    "outbound": {
-      "title": "Udgående tjenester",
-      "intro": "Destinationer, som denne applikation kan kontakte på eget initiativ. De er erklæret i koden og kan ikke redigeres her — de, der kræver dit samtykke, forbliver slået fra, indtil du giver det under Indstillinger.",
-      "empty": "Denne applikation erklærer ingen egen udgående destination.",
-      "hostUnset": "ikke konfigureret",
-      "stateConsented": "Tilladt — du har givet samtykke",
-      "stateNoConsent": "Blokeret — der er ikke givet samtykke",
-      "stateRequired": "Tilladt — påkrævet af applikationen",
-      "stateInactive": "Inaktiv — bruges ikke lige nu",
-      "purpose": {
-        "avatar": "Profilbillede for den tilmeldte konto"
-      }
+    "prompt": {
+      "title": "Udgående anmodning blokeret",
+      "allow": "Tillad",
+      "deny": "Afvis",
+      "fromOrigin": "fra {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Tilbage",
+    "refresh": "Opdater",
+    "go": "Gå",
+    "address": "Adresse",
+    "emptyHint": "Indtast en adresse ovenfor for at begynde at surfe."
   },
   "bookmarkRibbon": {
     "addBookmark": "Tilføj bogmærke"

@@ -177,6 +177,9 @@
       "copied": "Kopioitu!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Aloita kirjoittaminen…"
+  },
   "tagsView": {
     "removeTag": "Poista tagi",
     "newTag": "Uusi tagi"
@@ -412,19 +415,19 @@
     "addOrigin": "Lisää alkuperä",
     "removeOrigin": "Poista {{origin}}",
     "noEntries": "Ei merkintöjä vielä.",
-    "outbound": {
-      "title": "Lähtevät palvelut",
-      "intro": "Kohteet, joihin tämä sovellus voi ottaa yhteyttä omasta aloitteestaan. Ne on määritelty koodissa eikä niitä voi muokata täällä — suostumustasi vaativat kohteet pysyvät poissa käytöstä, kunnes annat suostumuksen Asetuksissa.",
-      "empty": "Tämä sovellus ei määrittele omia lähteviä kohteita.",
-      "hostUnset": "ei määritetty",
-      "stateConsented": "Sallittu — annoit suostumuksen",
-      "stateNoConsent": "Estetty — suostumusta ei annettu",
-      "stateRequired": "Sallittu — sovelluksen toiminnan edellytys",
-      "stateInactive": "Ei aktiivinen — ei tällä hetkellä käytössä",
-      "purpose": {
-        "avatar": "Kirjautuneen tilin profiilikuva"
-      }
+    "prompt": {
+      "title": "Lähtevä pyyntö estetty",
+      "allow": "Salli",
+      "deny": "Estä",
+      "fromOrigin": "lähteestä {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Takaisin",
+    "refresh": "Päivitä",
+    "go": "Siirry",
+    "address": "Osoite",
+    "emptyHint": "Kirjoita osoite yläpuolelle aloittaaksesi selaamisen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lisää kirjanmerkki"

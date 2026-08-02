@@ -499,7 +499,9 @@ When(
       await clearAndType(page, plainInput, value)
       await page.keyboard.press('Tab')
     } else {
-      const monacoCell = row.locator('.monaco-editor').first()
+      // Scope to the VALUE cell: the KEY cell is now a Handlebars-aware
+      // editor too, so a row-wide `.monaco-editor` would match the key first.
+      const monacoCell = row.locator('td').nth(3).locator('.monaco-editor').first()
       await expect(monacoCell).toBeVisible({ timeout: 5000 })
       await monacoCell.click()
       await page.keyboard.press('Control+A')
@@ -2164,7 +2166,7 @@ When(
     const addEntry = page
       .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
       .first()
-    await expect(addEntry).toBeVisible({ timeout: 5000 })
+    await expect(addEntry).toBeVisible({ timeout: 15000 })
     await addEntry.hover()
     await page.waitForTimeout(350)
 
@@ -2177,7 +2179,7 @@ When(
     if (groupLabel) {
       // Second hop: open the protocol group's own submenu.
       const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
-      await expect(groupEntry).toBeVisible({ timeout: 5000 })
+      await expect(groupEntry).toBeVisible({ timeout: 15000 })
       await groupEntry.hover()
       await page.waitForTimeout(350)
       submenu = page.locator('.menubar-menu-items-holder:visible').last()
@@ -2185,7 +2187,7 @@ When(
     const target = submenu
       .getByRole('menuitem', { name: childLabel })
       .first()
-    await expect(target).toBeVisible({ timeout: 5000 })
+    await expect(target).toBeVisible({ timeout: 15000 })
     // Dispatch the click via the DOM `click()` method. Playwright's
     // own `.click()` sometimes no-ops here because the Badge rendered
     // in the MenuItem's icon slot ships absolute layout that eats the

@@ -9,6 +9,7 @@ import {
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
 // The stored / runtime call-type representation is the hyphenated
@@ -191,7 +192,7 @@ export class GrpcRequest extends BaseRequest {
     tlsCertPem?: string
     tlsKeyPem?: string
     quickConfigs?: QuickConfig[]
-  }): GrpcRequest {
+  } & ImportMarkerFields): GrpcRequest {
     return new GrpcRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -200,6 +201,7 @@ export class GrpcRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       service: obj.service ?? '',
       method: obj.method ?? '',
@@ -233,6 +235,7 @@ export class GrpcRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       service: this.service,
       method: this.method,

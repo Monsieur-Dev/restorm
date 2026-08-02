@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "レスポンス",
+        "infos": "情報",
         "requestBody": "リクエストボディ",
         "graph": "グラフ"
       },
@@ -1209,24 +1210,24 @@
       "emptyRightClick": "空いている場所を右クリックして、シナリオにアクションを追加します"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON パス",
       "ariaLabel": "JSON パスセレクター",
       "pick": "結果から選択",
-      "loading": "Loading…",
+      "loading": "読み込み中…",
       "noResult": "ソースアクションを実行して、その結果からプロパティを選択してください。"
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "シナリオ",
+      "notes": "メモ"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "色を変更",
+        "resetColor": "色をリセット",
         "addNote": "ノートを追加 / 編集",
         "runOnEachEvent": "イベントを受信するたびに実行",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "複製",
+        "delete": "削除",
         "deleteShortcut": "Del",
         "copy": "コピー",
         "paste": "貼り付け"
@@ -1236,9 +1237,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "色を変更",
+        "resetColor": "色をリセット",
+        "delete": "削除"
       }
     },
     "locked": "シナリオの実行中は編集がロックされます",
@@ -1297,49 +1298,49 @@
       "getVariable": "変数を取得",
       "addToList": "リストに追加",
       "removeFromList": "リストから削除",
-      "cast": "Cast",
+      "cast": "型変換",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "暗号",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "日付計算",
+      "objectOp": "オブジェクト操作",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "乱数",
+      "throw": "エラーを送出",
+      "retry": "リトライ",
+      "listOp": "リスト操作",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "数学",
+      "schema": "スキーマ検証",
+      "readFile": "ファイル読み込み",
+      "writeFile": "ファイル書き込み",
       "timer": "タイマー",
       "code": "コード",
       "socketioConnect": "Socket.IO 接続",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO 送信",
       "socketioClose": "Socket.IO 接続を閉じる",
       "socketioServerClose": "Socket.IO サーバーを閉じる",
       "websocketConnect": "WebSocket 接続",
       "sseConnect": "SSE 接続",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket 送信",
       "websocketClose": "WebSocket 接続を閉じる",
       "websocketServerClose": "WebSocket サーバーを閉じる",
       "sseClose": "SSE 接続を閉じる",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC 接続",
+      "grpcSend": "gRPC 送信",
       "grpcClose": "gRPC 接続を閉じる",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT 接続",
+      "mqttSend": "MQTT 発行",
       "mqttClose": "MQTT 接続を閉じる",
       "amqpConnect": "AMQP 接続",
       "amqpPublish": "AMQP パブリッシュ",
       "amqpClose": "AMQP 接続を閉じる",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis 購読",
       "redisClose": "Redis 接続を閉じる",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis コマンド",
       "httpListen": "HTTP サーバー",
       "httpClose": "HTTP サーバーを閉じる",
       "grpcServerClose": "gRPC サーバーを閉じる",
@@ -1354,8 +1355,8 @@
       "stompConnect": "STOMP接続",
       "stompSend": "STOMP送信",
       "stompClose": "STOMP 接続を閉じる",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka 送出",
+      "kafkaConsume": "Kafka 消費",
       "kafkaClose": "Kafka 接続を閉じる",
       "grpcListen": "gRPC サーバー"
     },
@@ -1375,29 +1376,29 @@
     },
     "assert": {
       "message": "メッセージ",
-      "operator": "operator",
+      "operator": "演算子",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "等しい",
+        "ne": "等しくない",
+        "lt": "より小さい",
         "lte": "以下",
-        "gt": "greater than",
+        "gt": "より大きい",
         "gte": "以上",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "含む",
+        "isString": "文字列である",
+        "isNumber": "数値である",
+        "isBoolean": "真偽値である",
+        "isArray": "リストである",
+        "isObject": "オブジェクトである",
+        "isNull": "null である",
+        "exists": "存在する",
+        "isEmpty": "空である",
+        "matchesRegex": "正規表現に一致",
         "isOneOf": "いずれかである",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "深い等価",
+        "lengthEq": "長さ ==",
+        "lengthGt": "長さ >",
+        "lengthLt": "長さ <"
       }
     },
     "editRequest": "リクエストを編集",
@@ -1405,8 +1406,8 @@
     "object": {
       "addProperty": "プロパティを追加",
       "removeProperty": "プロパティを削除",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "プロパティ名",
+      "propertyValue": "値"
     },
     "output": {
       "outputName": "出力名",
@@ -1414,7 +1415,7 @@
       "removeOutput": "削除"
     },
     "input": {
-      "name": "Name",
+      "name": "名前",
       "defaultType": "デフォルト / 型",
       "addParam": "パラメータを追加",
       "removeParam": "削除"
@@ -1460,7 +1461,7 @@
       },
       "transform": {
         "emptyTemplate": "テンプレートを空にすることはできません。",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "テンプレートが {{…}} を参照する場合、\"value\" 入力を接続する必要があります。"
       },
       "request": {
         "missing": "リンクされたリクエストは存在しません。"
@@ -1491,8 +1492,8 @@
       "syntheticInfo": "このリクエストのドキュメントから生成されたサンプルデータです。",
       "syntheticRunHint": "サンプルデータ — リクエストを実行して実際の結果に置き換えてください。",
       "stop": "停止",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "実行ログ",
+      "copyLogs": "ログをコピー",
       "copyThisLog": "このログをコピー",
       "clearLogs": "ログをクリア",
       "logsShowAll": "すべてのログを表示",
@@ -1502,12 +1503,12 @@
       "helpTitle": "このアクションの動作"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "タイムゾーン",
+      "formatLabel": "書式",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "日時",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "文字列"
       }
     },
     "callers": {
@@ -1515,8 +1516,8 @@
       "title": "このシナリオを呼び出しているのは:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "実行パラメーター",
+      "run": "実行",
       "midRunTitle": "入力が必要です"
     },
     "runHistory": {
@@ -1524,27 +1525,27 @@
       "tooltip": "実行履歴",
       "empty": "まだ実行記録がありません",
       "noLogs": "この実行のログはありません",
-      "logsTab": "Logs",
+      "logsTab": "ログ",
       "graphTab": "グラフ",
       "noGraph": "この実行のシナリオスナップショットはありません",
       "pin": "ピン留め",
       "unpin": "ピン留め解除"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "開始値",
+      "to": "終了値",
+      "step": "刻み",
+      "index": "インデックス",
+      "done": "完了"
     },
     "while": {
-      "body": "body"
+      "body": "本体"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "ループ"
     },
     "loop": {
-      "done": "done"
+      "done": "完了"
     },
     "breakpoint": {
       "add": "ブレークポイントを追加",
@@ -1557,84 +1558,84 @@
       "toggle": "ミニマップの切り替え"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "リスト",
+      "values": "値",
+      "result": "結果",
       "addValue": "値を追加",
       "removeValue": "値を削除",
       "updateVariable": "元の変数を更新"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "値",
+      "targetType": "変換先の型",
+      "result": "結果",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "数値",
+        "string": "文字列",
+        "boolean": "真偽値",
+        "date": "日付",
+        "list": "リスト"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "値",
+      "operation": "操作",
+      "pattern": "パターン",
+      "flags": "フラグ",
+      "replacement": "置換文字列",
+      "result": "結果",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "抽出",
+        "extractAll": "すべて抽出",
+        "test": "テスト",
+        "replace": "置換",
+        "split": "分割"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "大文字・小文字を区別しない",
         "m": "Multiline (^ と $ が改行に一致)",
         "s": "Dotall (. が改行に一致)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "値",
+      "operation": "操作",
+      "indent": "インデント",
+      "result": "結果",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "文字列化"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "値",
+      "operation": "操作",
+      "indent": "インデント",
+      "result": "結果",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "文字列化"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "値",
+      "operation": "操作",
+      "indent": "インデント",
+      "result": "結果",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "文字列化"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "値",
+      "operation": "操作",
+      "key": "キー",
+      "keyPlaceholder": "シークレット",
+      "result": "結果",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "base64 エンコード",
+        "base64Decode": "base64 デコード",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1644,183 +1645,183 @@
       }
     },
     "jwt": {
-      "value": "token",
-      "result": "result"
+      "value": "トークン",
+      "result": "結果"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "日付",
+      "operation": "操作",
+      "amount": "量",
+      "unitLabel": "単位",
+      "format": "書式",
+      "other": "2つ目の日付",
+      "result": "結果",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "加算",
+        "subtract": "減算",
+        "format": "書式設定",
+        "diff": "差分"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "ミリ秒",
+        "seconds": "秒",
+        "minutes": "分",
+        "hours": "時間",
+        "days": "日",
+        "weeks": "週",
+        "months": "月",
+        "years": "年"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "オブジェクト",
+      "operation": "操作",
+      "path": "パス",
+      "keys": "キー",
+      "setValue": "値",
+      "mergeWith": "マージ対象",
+      "result": "結果",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "読み取り",
+        "set": "書き込み",
+        "merge": "マージ",
+        "pick": "保持",
+        "omit": "除外",
+        "keys": "キー",
+        "values": "値"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "値",
+      "operation": "操作",
+      "result": "結果",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "エンコード",
+        "decode": "デコード",
+        "parseQuery": "クエリを解析",
+        "buildQuery": "クエリを構築",
+        "parseUrl": "URL を解析"
       }
     },
     "random": {
-      "operation": "operation",
-      "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "operation": "操作",
+      "min": "最小",
+      "max": "最大",
+      "length": "長さ",
+      "items": "項目",
+      "seed": "シード（任意）",
+      "seedPlaceholder": "再現可能",
+      "result": "結果",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "整数",
+        "float": "小数",
+        "string": "文字列",
+        "boolean": "真偽値",
+        "pick": "抽選"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "メッセージ"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "最大試行回数",
+      "backoff": "待機方式",
+      "delay": "遅延",
+      "factor": "係数",
       "retryOnError": "エラー時に再試行",
       "retryOnStatus": "HTTP ステータスで再試行",
       "retryOnFailure": "2xx 以外すべてで再試行",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "試行",
+      "exhausted": "使い切り",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "固定",
+        "linear": "線形",
+        "exponential": "指数"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "リスト",
+      "math": "数学",
+      "dataFormats": "データ形式",
+      "encoding": "エンコード",
       "time": "タイミング",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "アルゴリズム",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "リスト",
+      "operation": "操作",
+      "result": "結果",
+      "key": "キー",
+      "order": "順序",
+      "depth": "深さ",
+      "size": "サイズ",
+      "start": "開始",
+      "end": "終了",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "並べ替え",
+        "unique": "重複排除",
+        "reverse": "逆順",
+        "flatten": "平坦化",
+        "chunk": "チャンク分割",
+        "slice": "切り出し",
+        "groupBy": "グループ化"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "値",
+      "operation": "操作",
+      "result": "結果",
+      "delimiter": "区切り文字",
+      "header": "ヘッダー行",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "文字列化"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
-      "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "a": "値",
+      "operation": "操作",
+      "result": "結果",
+      "b": "対象",
+      "min": "最小",
+      "max": "最大",
+      "precision": "精度",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
-        "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "round": "四捨五入",
+        "floor": "切り捨て",
+        "ceil": "切り上げ",
+        "trunc": "切り詰め",
+        "abs": "絶対値",
+        "sign": "符号",
+        "sqrt": "平方根",
+        "min": "最小",
+        "max": "最大",
+        "clamp": "範囲制限"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "値",
+      "schema": "JSON スキーマ",
+      "valid": "有効",
+      "invalid": "無効",
+      "errors": "エラー",
       "editTitle": "JSON Schema を編集"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "パス",
+      "content": "内容"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "パス",
+      "mode": "モード",
+      "content": "内容"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "編集",
+      "edit": "エディターを開く",
+      "moreLines": "+{{count}} 行",
+      "editTemplate": "テンプレートを編集"
     },
     "timer": {
       "mode": "モード",
@@ -1888,7 +1889,7 @@
       "waitUntil": "指定した日時まで一時停止してから続行します。",
       "now": "現在の日付と時刻を出力します。",
       "timer": "一定間隔または cron スケジュールで本体を発火します。",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "2つの数値の a + − × ÷ … を計算します。",
       "comparator": "2つの値を比較し、true または false を出力します。",
       "boolean": "and / or / xor / not で真偽値を組み合わせます。",
       "object": "名前付き入力からオブジェクトを構築します。",
@@ -1901,7 +1902,7 @@
       "json": "JSON 文字列を解析するか、値を JSON にシリアライズします。",
       "xml": "XML 文字列を解析するか、値を XML にシリアライズします。",
       "yaml": "YAML 文字列を解析するか、値を YAML にシリアライズします。",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "文字列をハッシュ化またはエンコードします（base64、md5、sha…、hmac、uuid）。",
       "jwt": "JWT トークンを header、payload、signature にデコードします。",
       "datetime": "日付をずらす、整形する、または差分を求めます。",
       "retry": "成功するまで本体を backoff ポリシーで再実行します。",
@@ -1910,7 +1911,7 @@
       "random": "ランダムな数値、文字列、真偽値、または抽選を生成します。",
       "listOp": "リストを再構成します (sort、unique、reverse、flatten、chunk、slice、groupBy)。",
       "csv": "CSV 文字列を解析するか、リストを CSV にシリアライズします。",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "スカラー演算を実行します（四捨五入、絶対値、平方根、最小、最大、範囲制限…）。",
       "schema": "値を JSON Schema に対して検証します。",
       "readFile": "ファイルのテキスト内容を読み取ります。",
       "writeFile": "ファイルにテキストを書き込むか追記します。",
@@ -1949,13 +1950,13 @@
       "redisClose": "すでに開いている Redis 購読接続を閉じます。",
       "redisCommand": "バインドされた Redis コマンドを実行し (新しい接続で単一のコマンドを実行後に切断)、そのレスポンスを出力します。",
       "toast": "シナリオ実行中に Restorm の UI にトースト通知を表示します。",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "ローカルの HTTP モックサーバーをホストし、無期限に待ち受けます。待ち受けを開始すると `connected` が発火し、提供された各リクエストはそのデータを `served` ポートに再送します。サーバーは HTTP のクローズ（または Stop）まで稼働し、その後 `done` が発火します。response 出力はありません — 提供するだけで、外部を呼び出しません。",
       "httpClose": "すでに待ち受け中の HTTP モックサーバー (HTTP サーバーノードで宣言) を停止し、ポートを解放します。",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "ローカルの gRPC モックサーバーをホストし、無期限に待ち受けます。待ち受けを開始すると `connected` が発火し、提供された各呼び出しはそのデータを `served` ポートに再送します。サーバーは gRPC サーバーのクローズ（または Stop）まで稼働し、その後 `done` が発火します。response 出力はありません — 提供するだけで、外部を呼び出しません。",
       "grpcServerClose": "すでに待ち受け中の gRPC モックサーバー (gRPC サーバーノードで宣言) を停止し、ポートを解放します。",
       "soapListen": "ローカルの SOAP モックサーバーをホストし、無期限にリッスンします。受信した各リクエストは、設定された操作（その SOAPAction または本文の操作名による）にディスパッチされ、定義済みの SOAP エンベロープで応答されます（フォルト操作は `<soap:Fault>` を返します）。サーバーがリッスンを開始すると `connected` が発火します。処理された各リクエストは、そのデータを `served` ポートで再発行します。サーバーは SOAP のクローズ（または停止）まで稼働し続け、その後 `done` が発火します。",
       "soapClose": "すでにリッスンしている SOAP モックサーバー（SOAP サーバーノードで宣言されたもの）を停止し、そのポートを解放します。",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "ローカルの GraphQL モックサーバーをホストし、無期限に待ち受けます。待ち受けを開始すると `connected` が発火し、提供された各オペレーションはそのデータを `served` ポートに再送します。サーバーは GraphQL のクローズ（または Stop）まで稼働し、その後 `done` が発火します。response 出力はありません — 提供するだけで、外部を呼び出しません。",
       "graphqlClose": "すでに待ち受け中の GraphQL モックサーバー (GraphQL サーバーノードで宣言) を停止し、ポートを解放します。",
       "odataListen": "ローカルの OData v4 モックサービスをホストし、無期限に待ち受けます。待ち受けを開始すると `connected` が発火し、処理した各リクエストはそのデータを `served` ポートに再送出します。サーバーは OData のクローズ（または停止）まで稼働を続け、その後 `done` が発火します。response 出力はありません。提供するだけで、外部を呼び出すことはありません。",
       "odataClose": "すでに待ち受けている OData モックサービス（OData サーバーノードで宣言されたもの）を停止し、そのポートを解放します。",
@@ -1991,43 +1992,43 @@
       "title": "コマンドラインから実行",
       "intro": "アプリを開かずにこのシナリオを実行 (CI、cron、スクリプト):",
       "byId": "id で指定する",
-      "allLogs": "All logs",
+      "allLogs": "すべてのログ",
       "note": "`--out file` は run-log もファイルに書き出します。",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<プロジェクト.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "ヘッドレス実行にはRestorm ProプランとCIトークンが必要です。",
       "tokenLink": "トークンを取得"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
-      "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "connectionNameLabel": "接続名",
+      "connectionNamePlaceholder": "接続名",
+      "eventPlaceholder": "イベント",
+      "addEvent": "イベントを追加",
+      "connected": "接続済み",
+      "others": "その他",
+      "connection": "接続",
+      "pickConnection": "— 接続を選択 —",
+      "channelLabel": "チャンネル名",
+      "payload": "ペイロード",
+      "payloadModalTitle": "ペイロードを編集",
       "started": "起動済み"
     },
     "websocket": {
-      "message": "message"
+      "message": "メッセージ"
     },
     "sse": {
-      "message": "message"
+      "message": "メッセージ"
     },
     "grpc": {
-      "message": "message"
+      "message": "メッセージ"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "アクションを再配置"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "入力",
+      "error": "エラー",
+      "done": "完了"
     },
     "toast": {
       "title": "タイトル",
@@ -2035,7 +2036,7 @@
       "duration": "表示時間 (秒)"
     },
     "http": {
-      "served": "served"
+      "served": "提供済み"
     },
     "actionOverride": {
       "configMissingShort": "構成がありません",
@@ -2548,13 +2549,6 @@
     "crashReportsDescription": "Restorm がクラッシュしたときに匿名化されたレポートを送信し、不具合を修正できるようにします。レポートは端末を離れる前に URL、トークン、リクエスト本文、個人データが除去されます。無料プランに含まれます。有料プランでは無効にできます。 詳細: https://restorm.app/privacy",
     "telemetryTitle": "利用状況の統計を送信",
     "telemetryDescription": "どの機能が使われているかの匿名統計を送信し、今後の開発方針に役立てます。既定ではオフで、明示的な同意なしに有効になることはありません。リクエストデータ、URL、個人データは一切含みません。 詳細: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "クラッシュレポート（同意した場合のみ）",
-        "telemetry": "匿名の利用状況統計（同意した場合のみ）",
-        "backend": "アカウント、ライセンス、サブスクリプション"
-      }
-    },
     "crashReportsLockedLabel": "Pro プラン以上で変更できます。無料プランでは、品質を保つためにクラッシュレポートが必要です。",
     "consentToast": {
       "title": "Restorm の改善にご協力ください",

@@ -177,6 +177,9 @@
       "copied": "Kopyalandı!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Yazmaya başlayın…"
+  },
   "tagsView": {
     "removeTag": "Etiketi kaldır",
     "newTag": "Yeni etiket"
@@ -412,19 +415,19 @@
     "addOrigin": "Kaynak ekle",
     "removeOrigin": "{{origin}} kaldır",
     "noEntries": "Henüz girdi yok.",
-    "outbound": {
-      "title": "Giden servisler",
-      "intro": "Bu uygulamanın kendi inisiyatifiyle bağlanabileceği hedefler. Kodda tanımlıdır ve burada düzenlenemez — onayınızı gerektirenler, Tercihler'de onay verene kadar kapalı kalır.",
-      "empty": "Bu uygulama kendine ait bir giden hedef tanımlamıyor.",
-      "hostUnset": "yapılandırılmadı",
-      "stateConsented": "İzin verildi — onay verdiniz",
-      "stateNoConsent": "Engellendi — onay verilmedi",
-      "stateRequired": "İzin verildi — uygulama için gerekli",
-      "stateInactive": "Etkin değil — şu anda kullanılmıyor",
-      "purpose": {
-        "avatar": "Oturum açmış hesabın profil fotoğrafı"
-      }
+    "prompt": {
+      "title": "Giden istek engellendi",
+      "allow": "İzin ver",
+      "deny": "Reddet",
+      "fromOrigin": "{{origin}} kaynağından"
     }
+  },
+  "miniBrowser": {
+    "back": "Geri",
+    "refresh": "Yenile",
+    "go": "Git",
+    "address": "Adres",
+    "emptyHint": "Taramaya başlamak için yukarıya bir adres girin."
   },
   "bookmarkRibbon": {
     "addBookmark": "Yer işareti ekle"

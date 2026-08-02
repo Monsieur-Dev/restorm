@@ -177,6 +177,9 @@
       "copied": "Másolva!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Kezdjen el írni…"
+  },
   "tagsView": {
     "removeTag": "Címke eltávolítása",
     "newTag": "Új címke"
@@ -412,19 +415,19 @@
     "addOrigin": "Eredet hozzáadása",
     "removeOrigin": "{{origin}} eltávolítása",
     "noEntries": "Még nincsenek bejegyzések.",
-    "outbound": {
-      "title": "Kimenő szolgáltatások",
-      "intro": "Célpontok, amelyekhez ez az alkalmazás saját kezdeményezésére kapcsolódhat. A kódban vannak deklarálva, és itt nem szerkeszthetők — amelyek az Ön hozzájárulását igénylik, kikapcsolva maradnak, amíg meg nem adja a Beállításokban.",
-      "empty": "Ez az alkalmazás nem deklarál saját kimenő célpontot.",
-      "hostUnset": "nincs beállítva",
-      "stateConsented": "Engedélyezve — hozzájárulást adott",
-      "stateNoConsent": "Letiltva — nincs hozzájárulás",
-      "stateRequired": "Engedélyezve — az alkalmazás működéséhez szükséges",
-      "stateInactive": "Inaktív — jelenleg nincs használatban",
-      "purpose": {
-        "avatar": "A bejelentkezett fiók profilképe"
-      }
+    "prompt": {
+      "title": "Kimenő kérés blokkolva",
+      "allow": "Engedélyezés",
+      "deny": "Elutasítás",
+      "fromOrigin": "innen: {{origin}}"
     }
+  },
+  "miniBrowser": {
+    "back": "Vissza",
+    "refresh": "Frissítés",
+    "go": "Ugrás",
+    "address": "Cím",
+    "emptyHint": "Adj meg egy címet fent a böngészés megkezdéséhez."
   },
   "bookmarkRibbon": {
     "addBookmark": "Könyvjelző hozzáadása"

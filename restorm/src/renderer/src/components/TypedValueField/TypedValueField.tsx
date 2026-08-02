@@ -1085,6 +1085,11 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
         { icon: 'symbol-string', ariaLabel: 'String value', typeTestid: 'string' }
       )
     }
+    // A plain `StringValue` is LITERAL: it is never Handlebars-resolved at
+    // execution time (only an `ExpressionValue` opts into resolution, via the
+    // type-pick menu). So it gets a bare `InputBox` — dressing it with the
+    // `{{}}`-highlighting editor would advertise a substitution that never
+    // happens.
     return withTypeControl(
       <InputBox
         value={value.toString()}

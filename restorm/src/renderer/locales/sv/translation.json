@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Svar",
+        "infos": "Info",
         "requestBody": "Förfrågans kropp",
         "graph": "Graf"
       },
@@ -1210,24 +1211,24 @@
       "emptyRightClick": "Högerklicka på en tom plats för att lägga till åtgärder i ditt scenario"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON-sökväg",
       "ariaLabel": "JSON-sökvägsväljare",
       "pick": "Välj från resultat",
-      "loading": "Loading…",
+      "loading": "Laddar…",
       "noResult": "Kör källåtgärden för att välja en egenskap från dess resultat."
     },
     "tab": {
       "graph": "Scenario",
-      "notes": "Notes"
+      "notes": "Anteckningar"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Ändra färg",
+        "resetColor": "Återställ färg",
         "addNote": "Lägg till/redigera anteckning",
         "runOnEachEvent": "Kör vid varje mottagen händelse",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Duplicera",
+        "delete": "Ta bort",
         "deleteShortcut": "Del",
         "copy": "Kopiera",
         "paste": "Klistra in"
@@ -1237,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Ändra färg",
+        "resetColor": "Återställ färg",
+        "delete": "Ta bort"
       }
     },
     "locked": "Redigering låst medan scenariot körs",
@@ -1298,49 +1299,49 @@
       "getVariable": "Hämta variabel",
       "addToList": "Lägg till i listan",
       "removeFromList": "Ta bort från listan",
-      "cast": "Cast",
+      "cast": "Konvertera",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Krypto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Datumberäkning",
+      "objectOp": "Objektoperationer",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Slumpmässig",
+      "throw": "Kasta fel",
+      "retry": "Försök igen",
+      "listOp": "Listoperationer",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematik",
+      "schema": "Validera schema",
+      "readFile": "Läs fil",
+      "writeFile": "Skriv fil",
       "timer": "Timer",
       "code": "Kod",
       "socketioConnect": "Socket.IO-anslutning",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO-sändning",
       "socketioClose": "Stäng Socket.IO-anslutning",
       "socketioServerClose": "Stäng Socket.IO-server",
       "websocketConnect": "WebSocket-anslutning",
       "sseConnect": "SSE-anslutning",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket-sändning",
       "websocketClose": "Stäng WebSocket-anslutning",
       "websocketServerClose": "Stäng WebSocket-server",
       "sseClose": "Stäng SSE-anslutning",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC-anslutning",
+      "grpcSend": "gRPC-sändning",
       "grpcClose": "Stäng gRPC-anslutning",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT-anslutning",
+      "mqttSend": "MQTT-publicering",
       "mqttClose": "Stäng MQTT-anslutning",
       "amqpConnect": "AMQP-anslutning",
       "amqpPublish": "AMQP-publicering",
       "amqpClose": "Stäng AMQP-anslutning",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis-prenumeration",
       "redisClose": "Stäng Redis-anslutning",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis-kommando",
       "httpListen": "HTTP-server",
       "httpClose": "Stäng HTTP-server",
       "grpcServerClose": "Stäng gRPC-server",
@@ -1355,8 +1356,8 @@
       "stompConnect": "STOMP-anslutning",
       "stompSend": "STOMP-sändning",
       "stompClose": "Stäng STOMP-anslutning",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka-produktion",
+      "kafkaConsume": "Kafka-konsumtion",
       "kafkaClose": "Stäng Kafka-anslutning",
       "grpcListen": "gRPC-server"
     },
@@ -1378,27 +1379,27 @@
       "message": "meddelande",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "lika med",
+        "ne": "skilt från",
+        "lt": "mindre än",
         "lte": "mindre än eller lika med",
-        "gt": "greater than",
+        "gt": "större än",
         "gte": "större än eller lika med",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "innehåller",
+        "isString": "är text",
+        "isNumber": "är tal",
+        "isBoolean": "är boolesk",
+        "isArray": "är lista",
+        "isObject": "är objekt",
+        "isNull": "är null",
+        "exists": "finns",
+        "isEmpty": "är tom",
+        "matchesRegex": "matchar regex",
         "isOneOf": "är en av",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "djupt lika",
+        "lengthEq": "längd ==",
+        "lengthGt": "längd >",
+        "lengthLt": "längd <"
       }
     },
     "editRequest": "Redigera begäran",
@@ -1406,8 +1407,8 @@
     "object": {
       "addProperty": "Lägg till egenskap",
       "removeProperty": "Ta bort egenskap",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Egenskapsnamn",
+      "propertyValue": "värde"
     },
     "output": {
       "outputName": "Utdatanamn",
@@ -1415,7 +1416,7 @@
       "removeOutput": "Ta bort"
     },
     "input": {
-      "name": "Name",
+      "name": "Namn",
       "defaultType": "Standard / typ",
       "addParam": "Lägg till parameter",
       "removeParam": "Ta bort"
@@ -1461,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "Mallen får inte vara tom.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Ingången \"value\" måste vara ansluten när mallen refererar till {{…}}."
       },
       "request": {
         "missing": "Den länkade begäran finns inte längre."
@@ -1492,8 +1493,8 @@
       "syntheticInfo": "Exempeldata genererad från denna förfrågans dokumentation.",
       "syntheticRunHint": "Exempeldata — kör förfrågan för att ersätta dem med ett verkligt resultat.",
       "stop": "Stopp",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "Körningsloggar",
+      "copyLogs": "Kopiera loggar",
       "copyThisLog": "Kopiera denna logg",
       "clearLogs": "Rensa loggar",
       "logsShowAll": "Visa alla loggar",
@@ -1503,12 +1504,12 @@
       "helpTitle": "Vad den här åtgärden gör"
     },
     "now": {
-      "timezone": "Timezone",
+      "timezone": "Tidszon",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Datum/tid",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Text"
       }
     },
     "callers": {
@@ -1516,8 +1517,8 @@
       "title": "Detta scenario anropas av:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Körningsparametrar",
+      "run": "Kör",
       "midRunTitle": "Inmatning krävs"
     },
     "runHistory": {
@@ -1532,20 +1533,20 @@
       "unpin": "Lossa"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
+      "from": "från",
+      "to": "till",
+      "step": "steg",
       "index": "index",
-      "done": "done"
+      "done": "klar"
     },
     "while": {
-      "body": "body"
+      "body": "kropp"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "slinga"
     },
     "loop": {
-      "done": "done"
+      "done": "klar"
     },
     "breakpoint": {
       "add": "Lägg till brytpunkt",
@@ -1558,84 +1559,84 @@
       "toggle": "Växla minikarta"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "lista",
+      "values": "värden",
+      "result": "resultat",
       "addValue": "Lägg till värde",
       "removeValue": "Ta bort värde",
       "updateVariable": "Uppdatera källvariabeln"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "värde",
+      "targetType": "konvertera till",
+      "result": "resultat",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "tal",
+        "string": "text",
+        "boolean": "boolesk",
+        "date": "datum",
+        "list": "lista"
       }
     },
     "regex": {
-      "value": "value",
+      "value": "värde",
       "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "pattern": "mönster",
+      "flags": "flaggor",
+      "replacement": "ersättning",
+      "result": "resultat",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "extrahera",
+        "extractAll": "extrahera alla",
+        "test": "testa",
+        "replace": "ersätt",
+        "split": "dela"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Skilj inte på stora och små bokstäver",
         "m": "Flerradig (^ och $ matchar radbrytningar)",
         "s": "Dotall (. matchar nya rader)"
       }
     },
     "json": {
-      "value": "value",
+      "value": "värde",
       "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "indent": "indrag",
+      "result": "resultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsa",
+        "stringify": "serialisera"
       }
     },
     "xml": {
-      "value": "value",
+      "value": "värde",
       "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "indent": "indrag",
+      "result": "resultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsa",
+        "stringify": "serialisera"
       }
     },
     "yaml": {
-      "value": "value",
+      "value": "värde",
       "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "indent": "indrag",
+      "result": "resultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsa",
+        "stringify": "serialisera"
       }
     },
     "crypto": {
-      "value": "value",
+      "value": "värde",
       "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "key": "nyckel",
+      "keyPlaceholder": "hemlighet",
+      "result": "resultat",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "base64-koda",
+        "base64Decode": "base64-avkoda",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1646,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "resultat"
     },
     "datetime": {
-      "value": "date",
+      "value": "datum",
       "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
+      "amount": "mängd",
+      "unitLabel": "enhet",
       "format": "format",
-      "other": "second date",
-      "result": "result",
+      "other": "andra datum",
+      "result": "resultat",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "addera",
+        "subtract": "subtrahera",
+        "format": "formatera",
+        "diff": "differens"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "millisekunder",
+        "seconds": "sekunder",
+        "minutes": "minuter",
+        "hours": "timmar",
+        "days": "dagar",
+        "weeks": "veckor",
+        "months": "månader",
+        "years": "år"
       }
     },
     "objectOp": {
-      "value": "object",
+      "value": "objekt",
       "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "path": "sökväg",
+      "keys": "nycklar",
+      "setValue": "värde",
+      "mergeWith": "slå ihop med",
+      "result": "resultat",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "läs",
+        "set": "skriv",
+        "merge": "slå ihop",
+        "pick": "behåll",
+        "omit": "ta bort",
+        "keys": "nycklar",
+        "values": "värden"
       }
     },
     "url": {
-      "value": "value",
+      "value": "värde",
       "operation": "operation",
-      "result": "result",
+      "result": "resultat",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "koda",
+        "decode": "avkoda",
+        "parseQuery": "parsa query",
+        "buildQuery": "bygg query",
+        "parseUrl": "parsa URL"
       }
     },
     "random": {
       "operation": "operation",
       "min": "min",
       "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "length": "längd",
+      "items": "objekt",
+      "seed": "frö (valfritt)",
+      "seedPlaceholder": "reproducerbar",
+      "result": "resultat",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "heltal",
+        "float": "decimaltal",
+        "string": "text",
+        "boolean": "boolesk",
+        "pick": "välj"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "meddelande"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "max försök",
+      "backoff": "väntestrategi",
+      "delay": "fördröjning",
+      "factor": "faktor",
       "retryOnError": "försök igen vid fel",
       "retryOnStatus": "försök igen vid HTTP-status",
       "retryOnFailure": "försök igen vid alla icke-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "försök",
+      "exhausted": "uttömd",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "fast",
+        "linear": "linjär",
+        "exponential": "exponentiell"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Listor",
+      "math": "Matematik",
+      "dataFormats": "Dataformat",
+      "encoding": "Kodning",
       "time": "Tidsstyrning",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmer",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
+      "value": "lista",
       "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "result": "resultat",
+      "key": "nyckel",
+      "order": "ordning",
+      "depth": "djup",
+      "size": "storlek",
+      "start": "början",
+      "end": "slut",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sortera",
+        "unique": "unika",
+        "reverse": "vänd",
+        "flatten": "platta ut",
+        "chunk": "dela i block",
+        "slice": "skär ut",
+        "groupBy": "gruppera efter"
       }
     },
     "csv": {
-      "value": "value",
+      "value": "värde",
       "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "result": "resultat",
+      "delimiter": "avgränsare",
+      "header": "rubrikrad",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsa",
+        "stringify": "serialisera"
       }
     },
     "math": {
-      "a": "value",
+      "a": "värde",
       "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "result": "resultat",
+      "b": "med",
       "min": "min",
       "max": "max",
       "precision": "precision",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "avrunda",
+        "floor": "avrunda nedåt",
+        "ceil": "avrunda uppåt",
+        "trunc": "korta av",
+        "abs": "absolutbelopp",
+        "sign": "tecken",
+        "sqrt": "kvadratrot",
         "min": "min",
         "max": "max",
-        "clamp": "clamp"
+        "clamp": "begränsa"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "värde",
+      "schema": "JSON-schema",
+      "valid": "giltig",
+      "invalid": "ogiltig",
+      "errors": "fel",
       "editTitle": "Redigera JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "sökväg",
+      "content": "innehåll"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "sökväg",
+      "mode": "läge",
+      "content": "innehåll"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Redigera",
+      "edit": "Öppna redigeraren",
+      "moreLines": "+{{count}} rader",
+      "editTemplate": "Redigera mall"
     },
     "timer": {
       "mode": "läge",
@@ -1889,7 +1890,7 @@
       "waitUntil": "Pausar tills ett angivet datum/klockslag och fortsätter sedan.",
       "now": "Sänder aktuellt datum och klockslag.",
       "timer": "Utlöser sin kropp med ett upprepat intervall eller ett cron-schema.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Beräknar a + − × ÷ … av två tal.",
       "comparator": "Jämför två värden och sänder sant eller falskt.",
       "boolean": "Kombinerar booleans med and / or / xor / not.",
       "object": "Bygger ett objekt från sina namngivna indata.",
@@ -1902,7 +1903,7 @@
       "json": "Tolkar en JSON-sträng eller serialiserar ett värde till JSON.",
       "xml": "Tolkar en XML-sträng eller serialiserar ett värde till XML.",
       "yaml": "Tolkar en YAML-sträng eller serialiserar ett värde till YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Hashar eller kodar en text (base64, md5, sha…, hmac, uuid).",
       "jwt": "Avkodar ett JWT-token till header, payload och signatur.",
       "datetime": "Förskjuter, formaterar eller jämför ett datum.",
       "retry": "Kör sin kropp på nytt tills den lyckas, med en backoff-policy.",
@@ -1911,7 +1912,7 @@
       "random": "Genererar ett slumpmässigt tal, text, boolean eller urval.",
       "listOp": "Omformar en lista (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Tolkar en CSV-sträng eller serialiserar en lista till CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Utför en skalär operation (avrunda, abs, kvadratrot, min, max, begränsa…).",
       "schema": "Validerar ett värde mot ett JSON Schema.",
       "readFile": "Läser en fils textinnehåll.",
       "writeFile": "Skriver eller lägger till text i en fil.",
@@ -1950,13 +1951,13 @@
       "redisClose": "Stänger en redan-öppen Redis-prenumerationsanslutning.",
       "redisCommand": "Kör ett bundet Redis-kommando (ett enda kommando på en ny anslutning, sedan frånkoppling) och sänder dess svar.",
       "toast": "Visar en toast-avisering i Restorm-gränssnittet medan scenariot körs.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Kör en lokal HTTP-mockserver och lyssnar obegränsat. `connected` utlöses så snart den lyssnar; varje betjänad förfrågan sänder ut sina data igen på porten `served`. Servern är aktiv fram till en HTTP-stängning (eller ett Stopp), sedan utlöses `done`. Ingen response-utgång — den betjänar, den anropar inte ut.",
       "httpClose": "Stoppar en redan-lyssnande HTTP-mockserver (deklarerad av en HTTP-servernod) och frigör dess port.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Kör en lokal gRPC-mockserver och lyssnar obegränsat. `connected` utlöses så snart den lyssnar; varje betjänat anrop sänder ut sina data igen på porten `served`. Servern är aktiv fram till en gRPC-serverstängning (eller ett Stopp), sedan utlöses `done`. Ingen response-utgång — den betjänar, den anropar inte ut.",
       "grpcServerClose": "Stoppar en redan-lyssnande gRPC-mockserver (deklarerad av en gRPC-servernod) och frigör dess port.",
       "soapListen": "Är värd för en lokal SOAP-mockserver och lyssnar i obegränsad tid. Varje inkommande begäran dirigeras till en konfigurerad operation (efter dess SOAPAction eller operationsnamnet i brödtexten) och besvaras med det fördefinierade SOAP-kuvertet (en feloperation returnerar `<soap:Fault>`). `connected` utlöses så snart servern lyssnar; varje betjänad begäran återutsänder sina data på porten `served`. Servern förblir aktiv tills en SOAP-stängning (eller ett stopp), sedan utlöses `done`.",
       "soapClose": "Stoppar en redan lyssnande SOAP-mockserver (deklarerad av en SOAP-servernod) och frigör dess port.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Kör en lokal GraphQL-mockserver och lyssnar obegränsat. `connected` utlöses så snart den lyssnar; varje betjänad operation sänder ut sina data igen på porten `served`. Servern är aktiv fram till en GraphQL-stängning (eller ett Stopp), sedan utlöses `done`. Ingen response-utgång — den betjänar, den anropar inte ut.",
       "graphqlClose": "Stoppar en redan-lyssnande GraphQL-mockserver (deklarerad av en GraphQL-servernod) och frigör dess port.",
       "odataListen": "Är värd för en lokal OData v4-mocktjänst och lyssnar i all oändlighet. `connected` utlöses så snart den lyssnar; varje betjänad begäran sänder sina data på nytt på `served`-porten. Servern är aktiv tills en OData-stängning (eller ett Stopp), sedan utlöses `done`. Ingen response-utdata — den betjänar, den ringer inte ut.",
       "odataClose": "Stoppar en redan lyssnande OData-mocktjänst (deklarerad av en OData-servernod) och frigör dess port.",
@@ -1992,43 +1993,43 @@
       "title": "Kör från kommandoraden",
       "intro": "Kör detta scenario utan att öppna appen (CI, cron, script):",
       "byId": "Ange med id",
-      "allLogs": "All logs",
+      "allLogs": "Alla loggar",
       "note": "`--out file` skriver även run-log till en fil.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekt.restorm>",
       "tokenPlaceholder": "<din_token>",
       "tokenNote": "En headless-körning kräver ett Restorm Pro-plan och en CI-token.",
       "tokenLink": "Hämta token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Anslutningsnamn",
+      "connectionNamePlaceholder": "anslutningsnamn",
+      "eventPlaceholder": "händelse",
+      "addEvent": "Lägg till händelse",
+      "connected": "ansluten",
+      "others": "övriga",
+      "connection": "anslutning",
+      "pickConnection": "— välj en anslutning —",
+      "channelLabel": "Kanalnamn",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Redigera payload",
       "started": "startad"
     },
     "websocket": {
-      "message": "message"
+      "message": "meddelande"
     },
     "sse": {
-      "message": "message"
+      "message": "meddelande"
     },
     "grpc": {
-      "message": "message"
+      "message": "meddelande"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Ordna om åtgärderna"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "ingång",
+      "error": "fel",
+      "done": "klar"
     },
     "toast": {
       "title": "titel",
@@ -2036,7 +2037,7 @@
       "duration": "varaktighet (s)"
     },
     "http": {
-      "served": "served"
+      "served": "betjänad"
     },
     "actionOverride": {
       "configMissingShort": "Konfiguration saknas",
@@ -2549,13 +2550,6 @@
     "crashReportsDescription": "Skickar en anonymiserad rapport när Restorm kraschar, så att felet kan åtgärdas. Rapporter rensas från URL:er, tokens, förfrågningsinnehåll och personuppgifter innan de lämnar din dator. Ingår i gratisplanen; en betald plan låter dig stänga av det. Fullständiga uppgifter: https://restorm.app/privacy",
     "telemetryTitle": "Skicka användningsstatistik",
     "telemetryDescription": "Skickar anonym statistik om vilka funktioner som används, för att styra vad som byggs härnäst. Av som standard och aldrig påslaget utan ditt uttryckliga samtycke. Innehåller inga förfrågningsdata, inga URL:er och inga personuppgifter. Fullständiga uppgifter: https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "Kraschrapporter (endast med ditt samtycke)",
-        "telemetry": "Anonym användningsstatistik (endast med ditt samtycke)",
-        "backend": "Konto, licens och prenumeration"
-      }
-    },
     "crashReportsLockedLabel": "Kan ändras från Pro-abonnemanget. I gratisabonnemanget behövs kraschrapporter för att upprätthålla kvaliteten.",
     "consentToast": {
       "title": "Hjälp oss att förbättra Restorm",

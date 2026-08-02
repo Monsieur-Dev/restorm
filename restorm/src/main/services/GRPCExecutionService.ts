@@ -257,7 +257,15 @@ class GRPCExecutionService {
     if (headersGroup) {
       for (const h of headersGroup) {
         if (h.enabled === false || !h.key) continue
-        metadata.set(h.key, contextService.resolveKeyValueForRequest(h, requestId))
+        // The KEY resolves unconditionally through Handlebars, same as a
+        // path/query param key or the URL — see `HTTPExecutionService`. The
+        // VALUE stays type-aware: only ExpressionValue rows get
+        // handlebars-substituted; a StringValue row ships verbatim.
+        const resolvedKey = contextService.resolveValue(h.key, requestId)
+        // An unknown variable resolves to '' — `Metadata.set('')` rejects the
+        // empty name as an invalid key. Skip the row rather than throw.
+        if (!resolvedKey) continue
+        metadata.set(resolvedKey, contextService.resolveKeyValueForRequest(h, requestId))
       }
     }
 

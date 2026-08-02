@@ -91,12 +91,14 @@ In **E2E mode** (`RESTORM_USER_DATA_OVERRIDE` env var set by Playwright fixtures
 Singleton workbench tab. Built end-to-end with `electron-core-ui` primitives:
 
 - A 72-pixel shield codicon + H1 + intro paragraph.
-- A "Test outbound to google.com" button you can use to exercise the prompt manually.
 - A `<Tabs>` strip with `Whitelist (X)` / `Blacklist (Y)` showing live counts.
 - Each row is a full-width `<ControlGroup>` with a read-only origin label + an icon-only trash button.
 - The "add" row at the top of each tab takes free-form `scheme://host:port` text.
 
-- Above the tabs, a read-only **Services sortants** section (see below).
+The panel holds the surface you act on and nothing else: the destinations
+Restorm contacts on its own initiative are declared and auditable (see below),
+but they are not listed here — a read-only inventory of the app's own plumbing
+sat between you and the lists you actually edit.
 
 The panel mirrors the `View → Console` pattern: one tab, no specific group placement, persists across project reloads.
 
@@ -107,26 +109,29 @@ The panel mirrors the `View → Console` pattern: one tab, no specific group pla
 The whitelist / blacklist govern *your* API traffic. Restorm also makes a handful
 of calls of its own, and those bypass the user firewall by design — otherwise
 signing in would prompt you to whitelist your own licence server. Left
-unadvertised they would be the one class of outbound call the panel cannot
-account for, which is exactly what a firewall is supposed to rule out. So every
-one of them is declared in
+undeclared they would be the one class of outbound call nothing could account
+for, which is exactly what a firewall is supposed to rule out. So every one of
+them is declared in
 [`src/shared/config/observability.ts`](../../src/shared/config/observability.ts)
-(or at its own composition root) and rendered as a read-only row at the top of
-the Firewall panel — **including the rows that are currently switched off**.
+(or at its own composition root) — **including the ones that are currently
+switched off**.
 
-| Row | Host | Consent gate | How it gets through |
+| Endpoint | Host | Consent gate | How it gets through |
 |-----|------|--------------|---------------------|
 | `backend` | the channel's Supabase Edge Functions host | none — the app cannot manage your licence without it | call-scoped bypass around the guarded fetch |
 | `avatar` | the signed-in account's photo CDN (`lh3.googleusercontent.com`, …) | none — display asset, and only while signed in | system allowlist, registered on login and dropped on logout |
 | `crash` | the crash-report ingest | `privacy:crashReports` | system allowlist, registered only while consent is active |
 | `telemetry` | the product-analytics ingest | `privacy:telemetry` | system allowlist, registered only while consent is active |
 
-Each row shows the exact host, why it is contacted, and its live state. The state
-is **computed from the firewall**, not from a flag the sender sets: a row reads
-"Allowed" only while the host is genuinely exempt. That is what makes revocation
-enforceable — turn `privacy:telemetry` off in **Preferences → Privacy**
-and the host leaves the allowlist, so a queued event retried afterwards hits the
-same prompt-or-block path as any unknown tracker would.
+Each declaration carries the exact host, why it is contacted, and its live
+state. That state is **computed from the firewall**, not from a flag the sender
+sets: an endpoint reads active only while the host is genuinely exempt. That is
+what makes revocation enforceable — turn `privacy:telemetry` off in
+**Preferences → Privacy** and the host leaves the allowlist, so a queued event
+retried afterwards hits the same prompt-or-block path as any unknown tracker
+would. The inventory is readable over
+`window.api.firewall.listSystemEndpoints()`, which is what the tests assert
+against.
 
 Hosts are always matched **exactly** and over **https** only. There is no
 wildcard form here — a `*.ingest.example.com` exemption would cover every other
@@ -213,5 +218,6 @@ The consent + outbound-visibility half is covered by
 [`ConsentFirewallExemption.test.ts`](../../electron-core-ui/src/main/services/privacy/ConsentFirewallExemption.test.ts),
 [`scrub.test.ts`](../../electron-core-ui/src/shared/privacy/scrub.test.ts) and
 [`observability.test.ts`](../../src/shared/config/observability.test.ts), plus the
-`firewall-outbound` E2E project which drives the real panel across a consent
-grant and revocation.
+`firewall-exemptions` E2E project which drives the real app across a consent
+grant and revocation and asserts the host enters and leaves the firewall's
+system allowlist.

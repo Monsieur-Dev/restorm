@@ -371,7 +371,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
 
     tabs.push({
       id: 'infos',
-      label: 'Infos',
+      label: t('requestTab.responses.tabs.infos'),
       useScrollableElement: false,
       content: (
         <div style={{ height: '100%', boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>

@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "响应",
+        "infos": "信息",
         "requestBody": "请求正文",
         "graph": "图表"
       },
@@ -1209,24 +1210,24 @@
       "emptyRightClick": "右键单击空白处即可向场景添加操作"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON 路径",
       "ariaLabel": "JSON 路径选择器",
       "pick": "从结果中选择",
-      "loading": "Loading…",
+      "loading": "加载中…",
       "noResult": "运行源操作以从其结果中选择一个属性。"
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "场景",
+      "notes": "笔记"
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "更改颜色",
+        "resetColor": "重置颜色",
         "addNote": "添加 / 编辑注释",
         "runOnEachEvent": "每次收到事件时执行",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "复制副本",
+        "delete": "删除",
         "deleteShortcut": "Del",
         "copy": "复制",
         "paste": "粘贴"
@@ -1236,9 +1237,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "更改颜色",
+        "resetColor": "重置颜色",
+        "delete": "删除"
       }
     },
     "locked": "场景运行时编辑已锁定",
@@ -1297,49 +1298,49 @@
       "getVariable": "获取变量",
       "addToList": "添加到列表",
       "removeFromList": "从列表移除",
-      "cast": "Cast",
+      "cast": "类型转换",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "加密",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "日期计算",
+      "objectOp": "对象运算",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "随机",
+      "throw": "抛出错误",
+      "retry": "重试",
+      "listOp": "列表运算",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "数学",
+      "schema": "架构校验",
+      "readFile": "读取文件",
+      "writeFile": "写入文件",
       "timer": "定时器",
       "code": "代码",
       "socketioConnect": "Socket.IO 连接",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO 发送",
       "socketioClose": "关闭 Socket.IO 连接",
       "socketioServerClose": "关闭 Socket.IO 服务器",
       "websocketConnect": "WebSocket 连接",
       "sseConnect": "SSE 连接",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket 发送",
       "websocketClose": "关闭 WebSocket 连接",
       "websocketServerClose": "关闭 WebSocket 服务器",
       "sseClose": "关闭 SSE 连接",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC 连接",
+      "grpcSend": "gRPC 发送",
       "grpcClose": "关闭 gRPC 连接",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT 连接",
+      "mqttSend": "MQTT 发布",
       "mqttClose": "关闭 MQTT 连接",
       "amqpConnect": "AMQP 连接",
       "amqpPublish": "AMQP 发布",
       "amqpClose": "关闭 AMQP 连接",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis 订阅",
       "redisClose": "关闭 Redis 连接",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis 命令",
       "httpListen": "HTTP 服务器",
       "httpClose": "关闭 HTTP 服务器",
       "grpcServerClose": "关闭 gRPC 服务器",
@@ -1354,8 +1355,8 @@
       "stompConnect": "STOMP 连接",
       "stompSend": "STOMP 发送",
       "stompClose": "关闭 STOMP 连接",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka 生产",
+      "kafkaConsume": "Kafka 消费",
       "kafkaClose": "关闭 Kafka 连接",
       "grpcListen": "gRPC 服务器"
     },
@@ -1375,29 +1376,29 @@
     },
     "assert": {
       "message": "消息",
-      "operator": "operator",
+      "operator": "运算符",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "等于",
+        "ne": "不等于",
+        "lt": "小于",
         "lte": "小于或等于",
-        "gt": "greater than",
+        "gt": "大于",
         "gte": "大于或等于",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "包含",
+        "isString": "是字符串",
+        "isNumber": "是数字",
+        "isBoolean": "是布尔值",
+        "isArray": "是列表",
+        "isObject": "是对象",
+        "isNull": "是 null",
+        "exists": "存在",
+        "isEmpty": "为空",
+        "matchesRegex": "匹配正则",
         "isOneOf": "属于其中之一",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "深度相等",
+        "lengthEq": "长度 ==",
+        "lengthGt": "长度 >",
+        "lengthLt": "长度 <"
       }
     },
     "editRequest": "编辑请求",
@@ -1405,8 +1406,8 @@
     "object": {
       "addProperty": "添加属性",
       "removeProperty": "删除属性",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "属性名称",
+      "propertyValue": "值"
     },
     "output": {
       "outputName": "输出名称",
@@ -1414,7 +1415,7 @@
       "removeOutput": "移除"
     },
     "input": {
-      "name": "Name",
+      "name": "名称",
       "defaultType": "默认值 / 类型",
       "addParam": "添加参数",
       "removeParam": "移除"
@@ -1460,7 +1461,7 @@
       },
       "transform": {
         "emptyTemplate": "模板不能为空。",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "当模板引用 {{…}} 时，必须连接 \"value\" 输入。"
       },
       "request": {
         "missing": "关联的请求已不存在。"
@@ -1491,8 +1492,8 @@
       "syntheticInfo": "从此请求的文档生成的示例数据。",
       "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。",
       "stop": "停止",
-      "logsTitle": "Run logs",
-      "copyLogs": "Copy logs",
+      "logsTitle": "运行日志",
+      "copyLogs": "复制日志",
       "copyThisLog": "复制此日志",
       "clearLogs": "清除日志",
       "logsShowAll": "显示所有日志",
@@ -1502,12 +1503,12 @@
       "helpTitle": "此操作的作用"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "时区",
+      "formatLabel": "格式",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "日期/时间",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "字符串"
       }
     },
     "callers": {
@@ -1515,8 +1516,8 @@
       "title": "此场景被以下调用:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "运行参数",
+      "run": "运行",
       "midRunTitle": "需要输入"
     },
     "runHistory": {
@@ -1524,27 +1525,27 @@
       "tooltip": "运行历史",
       "empty": "暂无运行记录",
       "noLogs": "此运行没有日志",
-      "logsTab": "Logs",
+      "logsTab": "日志",
       "graphTab": "图",
       "noGraph": "此运行没有场景快照",
       "pin": "固定",
       "unpin": "取消固定"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "起始值",
+      "to": "结束值",
+      "step": "步长",
+      "index": "索引",
+      "done": "完成"
     },
     "while": {
-      "body": "body"
+      "body": "主体"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "循环"
     },
     "loop": {
-      "done": "done"
+      "done": "完成"
     },
     "breakpoint": {
       "add": "添加断点",
@@ -1557,84 +1558,84 @@
       "toggle": "切换小地图"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "列表",
+      "values": "值",
+      "result": "结果",
       "addValue": "添加值",
       "removeValue": "移除值",
       "updateVariable": "更新源变量"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "值",
+      "targetType": "转换为",
+      "result": "结果",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "数字",
+        "string": "字符串",
+        "boolean": "布尔值",
+        "date": "日期",
+        "list": "列表"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "值",
+      "operation": "操作",
+      "pattern": "模式",
+      "flags": "标志",
+      "replacement": "替换内容",
+      "result": "结果",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "提取",
+        "extractAll": "提取全部",
+        "test": "测试",
+        "replace": "替换",
+        "split": "拆分"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "不区分大小写",
         "m": "Multiline (^ 和 $ 匹配换行符)",
         "s": "Dotall (. 匹配换行符)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "值",
+      "operation": "操作",
+      "indent": "缩进",
+      "result": "结果",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "序列化"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "值",
+      "operation": "操作",
+      "indent": "缩进",
+      "result": "结果",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "序列化"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "值",
+      "operation": "操作",
+      "indent": "缩进",
+      "result": "结果",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "序列化"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "值",
+      "operation": "操作",
+      "key": "键",
+      "keyPlaceholder": "密钥",
+      "result": "结果",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "base64 编码",
+        "base64Decode": "base64 解码",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1644,183 +1645,183 @@
       }
     },
     "jwt": {
-      "value": "token",
-      "result": "result"
+      "value": "令牌",
+      "result": "结果"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "日期",
+      "operation": "操作",
+      "amount": "数量",
+      "unitLabel": "单位",
+      "format": "格式",
+      "other": "第二个日期",
+      "result": "结果",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "相加",
+        "subtract": "相减",
+        "format": "格式化",
+        "diff": "差值"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "毫秒",
+        "seconds": "秒",
+        "minutes": "分钟",
+        "hours": "小时",
+        "days": "天",
+        "weeks": "周",
+        "months": "月",
+        "years": "年"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "对象",
+      "operation": "操作",
+      "path": "路径",
+      "keys": "键",
+      "setValue": "值",
+      "mergeWith": "合并对象",
+      "result": "结果",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "读取",
+        "set": "写入",
+        "merge": "合并",
+        "pick": "保留",
+        "omit": "排除",
+        "keys": "键",
+        "values": "值"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "值",
+      "operation": "操作",
+      "result": "结果",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "编码",
+        "decode": "解码",
+        "parseQuery": "解析查询串",
+        "buildQuery": "构建查询串",
+        "parseUrl": "解析 URL"
       }
     },
     "random": {
-      "operation": "operation",
-      "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "operation": "操作",
+      "min": "最小",
+      "max": "最大",
+      "length": "长度",
+      "items": "项",
+      "seed": "种子（可选）",
+      "seedPlaceholder": "可复现",
+      "result": "结果",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "整数",
+        "float": "小数",
+        "string": "字符串",
+        "boolean": "布尔值",
+        "pick": "抽取"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "消息"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "最大尝试次数",
+      "backoff": "退避策略",
+      "delay": "延迟",
+      "factor": "系数",
       "retryOnError": "出错时重试",
       "retryOnStatus": "按 HTTP 状态重试",
       "retryOnFailure": "对任何非 2xx 重试",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "尝试",
+      "exhausted": "已耗尽",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "固定",
+        "linear": "线性",
+        "exponential": "指数"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "列表",
+      "math": "数学",
+      "dataFormats": "数据格式",
+      "encoding": "编码",
       "time": "定时",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "算法",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "列表",
+      "operation": "操作",
+      "result": "结果",
+      "key": "键",
+      "order": "排序方向",
+      "depth": "深度",
+      "size": "大小",
+      "start": "起点",
+      "end": "结束",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "排序",
+        "unique": "去重",
+        "reverse": "反转",
+        "flatten": "展平",
+        "chunk": "分块",
+        "slice": "切片",
+        "groupBy": "按其分组"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "值",
+      "operation": "操作",
+      "result": "结果",
+      "delimiter": "分隔符",
+      "header": "表头行",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "解析",
+        "stringify": "序列化"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
-      "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "a": "值",
+      "operation": "操作",
+      "result": "结果",
+      "b": "与",
+      "min": "最小",
+      "max": "最大",
+      "precision": "精度",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
-        "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "round": "四舍五入",
+        "floor": "向下取整",
+        "ceil": "向上取整",
+        "trunc": "截断",
+        "abs": "绝对值",
+        "sign": "符号",
+        "sqrt": "平方根",
+        "min": "最小",
+        "max": "最大",
+        "clamp": "限制范围"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "值",
+      "schema": "JSON 架构",
+      "valid": "有效",
+      "invalid": "无效",
+      "errors": "错误",
       "editTitle": "编辑 JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "路径",
+      "content": "内容"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "路径",
+      "mode": "模式",
+      "content": "内容"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "编辑",
+      "edit": "打开编辑器",
+      "moreLines": "+{{count}} 行",
+      "editTemplate": "编辑模板"
     },
     "timer": {
       "mode": "模式",
@@ -1888,7 +1889,7 @@
       "waitUntil": "暂停到指定的日期/时间，然后继续。",
       "now": "输出当前日期和时间。",
       "timer": "按重复间隔或 cron 计划触发其主体。",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "计算两个数的 a + − × ÷ … 。",
       "comparator": "比较两个值并输出 true 或 false。",
       "boolean": "用 and / or / xor / not 组合布尔值。",
       "object": "从其命名输入构建一个对象。",
@@ -1901,7 +1902,7 @@
       "json": "解析 JSON 字符串，或将值序列化为 JSON。",
       "xml": "解析 XML 字符串，或将值序列化为 XML。",
       "yaml": "解析 YAML 字符串，或将值序列化为 YAML。",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "对字符串进行哈希或编码（base64、md5、sha…、hmac、uuid）。",
       "jwt": "将 JWT 令牌解码为 header、payload 和 signature。",
       "datetime": "对日期进行偏移、格式化或求差。",
       "retry": "按 backoff 策略重新运行其主体，直到成功。",
@@ -1910,7 +1911,7 @@
       "random": "生成随机的数字、字符串、布尔值或抽取。",
       "listOp": "重塑列表 (sort、unique、reverse、flatten、chunk、slice、groupBy)。",
       "csv": "解析 CSV 字符串，或将列表序列化为 CSV。",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "执行标量运算（四舍五入、绝对值、平方根、最小、最大、限制范围…）。",
       "schema": "针对 JSON Schema 校验一个值。",
       "readFile": "读取文件的文本内容。",
       "writeFile": "向文件写入或追加文本。",
@@ -1949,13 +1950,13 @@
       "redisClose": "关闭一个已打开的 Redis 订阅连接。",
       "redisCommand": "运行一个绑定的 Redis 命令（在新连接上执行单个命令，然后断开连接）并输出其响应。",
       "toast": "在场景运行时于 Restorm 界面中显示一条 toast 通知。",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "托管一个本地 HTTP 模拟服务器并无限期监听。开始监听后 `connected` 触发；每个被服务的请求会在 `served` 端口上重新发出其数据。服务器会一直运行到 HTTP 关闭（或 Stop），随后 `done` 触发。没有 response 输出 —— 它只提供服务，不向外发起调用。",
       "httpClose": "停止一个已在监听的 HTTP 模拟服务器 (由 HTTP 服务器节点声明)，释放其端口。",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "托管一个本地 gRPC 模拟服务器并无限期监听。开始监听后 `connected` 触发；每个被服务的调用会在 `served` 端口上重新发出其数据。服务器会一直运行到 gRPC 服务器关闭（或 Stop），随后 `done` 触发。没有 response 输出 —— 它只提供服务，不向外发起调用。",
       "grpcServerClose": "停止一个已在监听的 gRPC 模拟服务器 (由 gRPC 服务器节点声明)，释放其端口。",
       "soapListen": "托管本地 SOAP 模拟服务器并无限期侦听。每个传入请求都会被分发到已配置的操作（依据其 SOAPAction 或正文中的操作名称），并以预定义的 SOAP 信封进行响应（故障操作返回 `<soap:Fault>`）。服务器一旦开始侦听便会触发 `connected`；每个已处理的请求都会在 `served` 端口重新发出其数据。服务器会一直运行，直到 SOAP 关闭（或停止），随后触发 `done`。",
       "soapClose": "停止一个已在侦听的 SOAP 模拟服务器（由 SOAP 服务器节点声明），并释放其端口。",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "托管一个本地 GraphQL 模拟服务器并无限期监听。开始监听后 `connected` 触发；每个被服务的操作会在 `served` 端口上重新发出其数据。服务器会一直运行到 GraphQL 关闭（或 Stop），随后 `done` 触发。没有 response 输出 —— 它只提供服务，不向外发起调用。",
       "graphqlClose": "停止一个已在监听的 GraphQL 模拟服务器 (由 GraphQL 服务器节点声明)，释放其端口。",
       "odataListen": "托管本地 OData v4 模拟服务并无限期监听。一旦开始监听便触发 `connected`；每个被服务的请求都会在 `served` 端口重新发出其数据。服务器持续运行，直到 OData 关闭（或 Stop），然后触发 `done`。无 response 输出——它只提供服务，不向外调用。",
       "odataClose": "停止一个已在监听的 OData 模拟服务（由 OData 服务器节点声明），释放其端口。",
@@ -1991,43 +1992,43 @@
       "title": "从命令行运行",
       "intro": "无需打开应用即可运行此场景 (CI、cron、脚本):",
       "byId": "按 id 指定",
-      "allLogs": "All logs",
+      "allLogs": "全部日志",
       "note": "`--out file` 还会将 run-log 写入文件。",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<项目.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "无头运行需要 Restorm Pro 计划和 CI 令牌。",
       "tokenLink": "获取令牌"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
-      "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "connectionNameLabel": "连接名称",
+      "connectionNamePlaceholder": "连接名称",
+      "eventPlaceholder": "事件",
+      "addEvent": "添加事件",
+      "connected": "已连接",
+      "others": "其他",
+      "connection": "连接",
+      "pickConnection": "— 选择一个连接 —",
+      "channelLabel": "频道名称",
+      "payload": "负载",
+      "payloadModalTitle": "编辑负载",
       "started": "已启动"
     },
     "websocket": {
-      "message": "message"
+      "message": "消息"
     },
     "sse": {
-      "message": "message"
+      "message": "消息"
     },
     "grpc": {
-      "message": "message"
+      "message": "消息"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "重新排列动作"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "输入",
+      "error": "错误",
+      "done": "完成"
     },
     "toast": {
       "title": "标题",
@@ -2035,7 +2036,7 @@
       "duration": "持续时间 (秒)"
     },
     "http": {
-      "served": "served"
+      "served": "已服务"
     },
     "actionOverride": {
       "configMissingShort": "配置缺失",
@@ -2548,13 +2549,6 @@
     "crashReportsDescription": "在 Restorm 崩溃时发送匿名化报告，以便修复故障。报告在离开您的设备前会清除 URL、令牌、请求正文和个人数据。免费版包含此功能；付费版可将其关闭。 完整说明：https://restorm.app/privacy",
     "telemetryTitle": "发送使用统计",
     "telemetryDescription": "发送关于使用了哪些功能的匿名统计，用于指导后续开发。默认关闭，未经您明确同意绝不启用。不含任何请求数据、URL 或个人数据。 完整说明：https://restorm.app/privacy",
-    "outbound": {
-      "purpose": {
-        "crash": "崩溃报告（仅在您同意时）",
-        "telemetry": "匿名使用统计（仅在您同意时）",
-        "backend": "账户、许可证与订阅"
-      }
-    },
     "crashReportsLockedLabel": "自 Pro 套餐起可更改。在免费套餐中，崩溃报告是保持质量所必需的。",
     "consentToast": {
       "title": "帮助我们改进 Restorm",

@@ -65,6 +65,19 @@ export interface RunIdempotentImportOptions {
    * the env-folder root.
    */
   placeRequest?: (target: EnvironmentFolder, request: Request, op: NormalizedOperation) => void
+  /**
+   * Hook invoked whenever the pipeline flips a lifecycle marker
+   * (`deprecated` / `removed`) on an EXISTING request. Only the
+   * pipeline writes those two fields, so the callback is the complete
+   * record of the marking pass.
+   *
+   * The refresh flow needs it because the renderer keeps its own copy
+   * of the tree and only splices the pipeline's ADDITIONS into it:
+   * without a marker channel the strike-through would never render,
+   * and the renderer's next mirror back to main would overwrite the
+   * flag the pipeline just set.
+   */
+  onRequestMarked?: (request: Request) => void
 }
 
 /**
@@ -128,7 +141,7 @@ function defaultPlaceRequest(target: EnvironmentFolder, req: Request): void {
 }
 
 export function runIdempotentImport(options: RunIdempotentImportOptions): ImportDiff {
-  const { target, spec, adapter, createRequest, mergeRequestShape, placeRequest } = options
+  const { target, spec, adapter, createRequest, mergeRequestShape, placeRequest, onRequestMarked } = options
   const diff = emptyImportDiff()
   const index = indexRequestsByOrigin(target, adapter.format)
   const seenInThisRun = new Set<Request>()
@@ -156,6 +169,7 @@ export function runIdempotentImport(options: RunIdempotentImportOptions): Import
     if (existing.removed === true) {
       existing.removed = false
       mergedThisRun = true
+      onRequestMarked?.(existing)
     }
 
     // Spec-level deprecation propagates to the request. Once
@@ -166,6 +180,7 @@ export function runIdempotentImport(options: RunIdempotentImportOptions): Import
       existing.deprecated = true
       diff.deprecated.push(op)
       mergedThisRun = true
+      onRequestMarked?.(existing)
     }
 
     // Conservative shape merge — delegate to the materialiser hook
@@ -194,6 +209,7 @@ export function runIdempotentImport(options: RunIdempotentImportOptions): Import
     if (r.removed === true) continue
     if ((r as { type?: string }).type === 'auth') continue
     r.removed = true
+    onRequestMarked?.(r)
     diff.removed.push({
       operationId: r.importOrigin?.operationId,
       naturalKey: r.importOrigin?.naturalKey ?? r.name,

@@ -12,10 +12,10 @@ import {
   graphqlField
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
+import { pickImportMarkers, type ImportMarkerFields } from './importMarkers'
 import { KeyValue } from '../KeyValue'
 import type { RequestType, RuntimeId, Icon } from '../types'
 import type { QuickConfig } from '../../types/requests/QuickConfig'
-import type { ImportOrigin } from '../../types/requests/BaseRequest'
 import type { JsonRpcBatchCallSpec } from '../../types/requests/JsonRpcRequest'
 
 export type { JsonRpcBatchCallSpec }
@@ -52,12 +52,7 @@ export class JsonRpcRequest extends BaseRequest {
   notificationMode?: boolean
 
   @graphqlField({ type: 'Boolean', nullable: true })
-  deprecated = false
-
-  /** Set when this request was materialised by the OpenRPC importer; the
-   * idempotent refresh pipeline matches it back to its source method
-   * across re-imports. Absent on user-created requests. */
-  importOrigin?: ImportOrigin
+  override deprecated = false
 
   /** User-saved quick-config snapshots for this request. */
   quickConfigs?: QuickConfig[]
@@ -88,9 +83,8 @@ export class JsonRpcRequest extends BaseRequest {
     rpcId?: string
     notificationMode?: boolean
     deprecated?: boolean
-    importOrigin?: ImportOrigin
     quickConfigs?: QuickConfig[]
-  }): JsonRpcRequest {
+  } & ImportMarkerFields): JsonRpcRequest {
     return new JsonRpcRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -99,14 +93,13 @@ export class JsonRpcRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
       method: obj.method ?? '',
       params: obj.params ?? '',
       rpcId: obj.rpcId ?? '',
       ...(obj.notificationMode !== undefined && { notificationMode: obj.notificationMode }),
-      deprecated: obj.deprecated ?? false,
-      ...(obj.importOrigin !== undefined && { importOrigin: obj.importOrigin }),
       ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
@@ -121,14 +114,13 @@ export class JsonRpcRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       headers: this.headers.map(h => h.toPlainObject()),
       method: this.method,
       params: this.params,
       rpcId: this.rpcId,
       ...(this.notificationMode !== undefined && { notificationMode: this.notificationMode }),
-      deprecated: this.deprecated,
-      ...(this.importOrigin !== undefined && { importOrigin: this.importOrigin }),
       ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
@@ -152,7 +144,7 @@ export class JsonRpcBatchRequest extends BaseRequest {
   children: JsonRpcBatchCallSpec[] = []
 
   @graphqlField({ type: 'Boolean', nullable: true })
-  deprecated = false
+  override deprecated = false
 
   /** User-saved quick-config snapshots for this request. */
   quickConfigs?: QuickConfig[]
@@ -181,7 +173,7 @@ export class JsonRpcBatchRequest extends BaseRequest {
     children?: JsonRpcBatchCallSpec[]
     deprecated?: boolean
     quickConfigs?: QuickConfig[]
-  }): JsonRpcBatchRequest {
+  } & ImportMarkerFields): JsonRpcBatchRequest {
     return new JsonRpcBatchRequest({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -190,10 +182,10 @@ export class JsonRpcBatchRequest extends BaseRequest {
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       ...(obj.authenticationRequestId !== undefined && { authenticationRequestId: obj.authenticationRequestId }),
+      ...pickImportMarkers(obj),
       url: obj.url ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
       children: obj.children ?? [],
-      deprecated: obj.deprecated ?? false,
       ...(obj.quickConfigs !== undefined && { quickConfigs: obj.quickConfigs })
     })
   }
@@ -208,10 +200,10 @@ export class JsonRpcBatchRequest extends BaseRequest {
       notes: this.notes,
       tags: this.tags,
       ...(this.authenticationRequestId !== undefined && { authenticationRequestId: this.authenticationRequestId }),
+      ...pickImportMarkers(this),
       url: this.url,
       headers: this.headers.map(h => h.toPlainObject()),
       children: this.children,
-      deprecated: this.deprecated,
       ...(this.quickConfigs !== undefined && this.quickConfigs.length > 0 && { quickConfigs: this.quickConfigs })
     }
   }
