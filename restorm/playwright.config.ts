@@ -105,6 +105,12 @@ const mcpServerTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-server'
 })
 
+const sidebarCloneTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sidebar-clone/features/**/*.feature',
+  steps: ['tests/e2e/bdd/sidebar-clone/steps/**/*.ts', 'tests/e2e/bdd/fixtures/sidebar-clone.fixture.ts'],
+  outputDir: '.features-gen/sidebar-clone'
+})
+
 const socketioExecutionTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/socketio-execution/features/**/*.feature',
   steps: ['tests/e2e/bdd/socketio-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -621,6 +627,11 @@ export default defineConfig({
     {
       name: 'mcp-server',
       testDir: mcpServerTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'sidebar-clone',
+      testDir: sidebarCloneTestDir,
       timeout: 180 * 1000
     },
     {

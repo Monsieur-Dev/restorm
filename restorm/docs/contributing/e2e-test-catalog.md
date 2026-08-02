@@ -98,6 +98,7 @@ server; — = pure UI/in-process.
 | documentation-viewer | 4 | Documentation viewer interactions | — |
 | quick-settings | 13 | Quick-config save/load round-trip every protocol field + app-wide popover exclusivity | — |
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
+| sidebar-clone | 3 | Sidebar "Clone" recursive id independence: request / quick-configs / env-folder (nested request, custom value list, enum definition, cross-scenario runScenario, connectionNodeId) — clone-then-rename-the-original leaves the clone unaffected, both stay distinctly searchable | 🔌 |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
 | open-folder | 2 | Open Folder | — |
 | body-type-migration | 1 | Legacy body-type canonicalisation on load | — |
