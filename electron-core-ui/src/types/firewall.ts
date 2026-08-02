@@ -113,7 +113,7 @@ export interface SystemEndpointDeclaration {
 	id: string
 	/** EXACT host — never a wildcard, never a pattern. `null` when the host is
 	 * not resolved yet (a signed-out avatar CDN, an unconfigured endpoint); the
-	 * row still renders, marked inactive. */
+	 * declaration is still reported, marked inactive. */
 	host: string | null
 	/** Key describing WHY this host is contacted, resolvable against the host
 	 * app's i18n catalogue — no English is baked into the declaration. Nothing

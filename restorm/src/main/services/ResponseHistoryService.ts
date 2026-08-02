@@ -1072,6 +1072,10 @@ class ResponseHistoryService {
       // against, so the cast mirrors `resolveKeyValueForRequest`'s existing
       // callers exactly.
       const resolvedKey = contextService.resolveValue(kv.key, requestId)
+      // An unknown variable resolves to '', and the execution services drop
+      // such a row (an empty header name is an invalid HTTP token). Drop it
+      // here too — echoing it would show a header that never went on the wire.
+      if (!resolvedKey) continue
       const resolvedValue = contextService.resolveKeyValueForRequest(kv as unknown as KeyValue, requestId)
       values.push({
         key: resolvedKey,

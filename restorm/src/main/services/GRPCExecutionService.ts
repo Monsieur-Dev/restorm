@@ -262,6 +262,9 @@ class GRPCExecutionService {
         // VALUE stays type-aware: only ExpressionValue rows get
         // handlebars-substituted; a StringValue row ships verbatim.
         const resolvedKey = contextService.resolveValue(h.key, requestId)
+        // An unknown variable resolves to '' — `Metadata.set('')` rejects the
+        // empty name as an invalid key. Skip the row rather than throw.
+        if (!resolvedKey) continue
         metadata.set(resolvedKey, contextService.resolveKeyValueForRequest(h, requestId))
       }
     }

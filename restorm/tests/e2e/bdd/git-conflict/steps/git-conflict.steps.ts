@@ -357,25 +357,30 @@ Then('the changed header row is highlighted but the unchanged one is not', async
   // — read its own computed border rather than walking parent elements. The
   // cell's text lives in Monaco's `.view-line` spans (a Handlebars-aware
   // VariableInputBox, not a plain `<input>`).
-  const cells = await conflictPaneBySide(p, 'user')
-    .locator('[data-testid="http-request-headers-table-key-diff"]')
-    .evaluateAll((els) =>
-      els.map((el) => {
-        const value = Array.from(el.querySelectorAll('.view-line'))
-          .map((line) => line.textContent.trim())
-          .join('')
-        const borderColor = getComputedStyle(el).borderColor
-        return { value, borderColor }
-      })
-    )
-  const changed = cells.find((c) => c.value === 'X-Trace')
-  const unchanged = cells.find((c) => c.value === 'X-Common')
-  expect(changed, 'changed header row present').toBeTruthy()
-  expect(unchanged, 'unchanged header row present').toBeTruthy()
-  // A transparent border computes to rgba(0, 0, 0, 0); the diff border is a
-  // solid (non-transparent) colour.
-  expect(changed?.borderColor).not.toBe('rgba(0, 0, 0, 0)')
-  expect(unchanged?.borderColor).toBe('rgba(0, 0, 0, 0)')
+  // Monaco paints its `.view-line`s asynchronously after mount, so a
+  // single-shot read can land on an editor that is up but still blank. Poll
+  // the whole read+assert until both rows have their text.
+  await expect(async () => {
+    const cells = await conflictPaneBySide(p, 'user')
+      .locator('[data-testid="http-request-headers-table-key-diff"]')
+      .evaluateAll((els) =>
+        els.map((el) => {
+          const value = Array.from(el.querySelectorAll('.view-line'))
+            .map((line) => line.textContent.trim())
+            .join('')
+          const borderColor = getComputedStyle(el).borderColor
+          return { value, borderColor }
+        })
+      )
+    const changed = cells.find((c) => c.value === 'X-Trace')
+    const unchanged = cells.find((c) => c.value === 'X-Common')
+    expect(changed, 'changed header row present').toBeTruthy()
+    expect(unchanged, 'unchanged header row present').toBeTruthy()
+    // A transparent border computes to rgba(0, 0, 0, 0); the diff border is a
+    // solid (non-transparent) colour.
+    expect(changed?.borderColor).not.toBe('rgba(0, 0, 0, 0)')
+    expect(unchanged?.borderColor).toBe('rgba(0, 0, 0, 0)')
+  }).toPass({ timeout: 10000 })
 })
 
 // ---------------------------------------------------------------------------

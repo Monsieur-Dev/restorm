@@ -227,7 +227,9 @@ If you genuinely need something new, the order is:
 * **Custom modal backdrops.** Use `Modal`. The shared one already wires Esc,
   focus trap, and scroll lock.
 * **Plain `<input>` for a value the user types.** See Section 3 — must be
-  `VariableInputBox` for variable-aware inputs.
+  `VariableInputBox` for variable-aware inputs. For a key/value table that
+  means passing `variableAware` to `RestormKeyValueTable`; the table is not
+  variable-aware by default.
 
 ---
 
@@ -249,7 +251,7 @@ strings, SOAP envelope namespaces, etc. all qualify.
 | --- | --- |
 | Single-line string field | `VariableInputBox` (autocompletes `{{var}}` against the active env, syntax-highlights resolved values). |
 | Multi-line / structured body | `CodeEditor` (Monaco) — already includes the Handlebars language contribution. |
-| Key/value pairs (headers, query) | `KeyValueTable` — its cells already wrap `VariableInputBox`. |
+| Key/value pairs (headers, query) | `RestormKeyValueTable` with `variableAware` — that prop is what wraps the KEY cell in a `VariableInputBox`; without it the cells are plain `InputBox`es. The VALUE cell is deliberately NOT variable-aware: a plain string value is literal at execution time (only an expression-typed value resolves), so it must not advertise `{{}}` substitution. |
 
 If you introduce a brand-new editor (e.g. a binary frame composer for MQTT),
 register the same Handlebars language contribution from

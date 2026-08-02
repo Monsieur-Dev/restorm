@@ -515,7 +515,7 @@ class PermissionService {
 	 * Every declared outbound destination with its live state, sorted by id for
 	 * a stable order. `active` is computed, never stored: an allowlist-backed
 	 * endpoint is live only while its host is actually registered, so a revoked
-	 * consent flips the row the moment the exemption is dropped.
+	 * consent flips the entry to inactive the moment the exemption is dropped.
 	 */
 	listSystemEndpoints(): SystemEndpointStatus[] {
 		return Array.from(this.systemEndpoints.values())

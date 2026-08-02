@@ -1287,6 +1287,9 @@ class WebSocketExecutionService {
           // path/query param key or the URL. The VALUE stays type-aware —
           // see `HTTPExecutionService`.
           const resolvedKey = contextService.resolveValue(h.key, requestId)
+          // An unknown variable resolves to '' — an empty header name is an
+          // invalid HTTP token on the handshake. Skip the row rather than throw.
+          if (!resolvedKey) continue
           headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
         }
       }

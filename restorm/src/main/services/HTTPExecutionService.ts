@@ -250,6 +250,10 @@ class HTTPExecutionService {
               // so a user who handcrafted `{{token}}` as a plain
               // string saw it silently expanded on send.
               const resolvedKey = contextService.resolveValue(h.key, requestId)
+              // An unknown variable resolves to '', and `headers['']` throws
+              // ERR_INVALID_HTTP_TOKEN — drop the row instead of failing the
+              // whole send on a typo'd / not-yet-defined variable.
+              if (!resolvedKey) continue
               headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
             }
           }
@@ -654,6 +658,9 @@ class HTTPExecutionService {
       for (const h of headersGroup) {
         if (h.enabled === false || !h.key) continue
         const resolvedKey = contextService.resolveValue(h.key, requestId)
+        // An unknown variable resolves to '' — `writeHead` would then throw
+        // ERR_INVALID_HTTP_TOKEN on the empty name. Skip the row.
+        if (!resolvedKey) continue
         headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
       }
     }

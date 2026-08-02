@@ -174,6 +174,9 @@ class StompExecutionService {
         // get substituted, a `StringValue` row ships verbatim. See
         // `HTTPExecutionService`.
         const resolvedKey = contextService.resolveValue(h.key, requestId)
+        // An unknown variable resolves to '' — an empty frame-header name is
+        // not addressable by the broker. Skip the row rather than emit it.
+        if (!resolvedKey) continue
         out[resolvedKey] = contextService.resolveKeyValueForRequest(h as Parameters<typeof contextService.resolveKeyValueForRequest>[0], requestId)
       }
       return out

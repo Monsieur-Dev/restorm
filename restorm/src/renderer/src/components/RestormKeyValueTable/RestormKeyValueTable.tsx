@@ -49,10 +49,13 @@ export interface RestormKeyValueTableProps {
    * view, in which case no per-cell wrapper is rendered at all. */
   highlightRowKeys?: readonly string[]
   /**
-   * Render the KEY cell (and a plain-`StringValue` VALUE cell) with the
-   * Handlebars-aware editor — syntax highlighting + `{{}}` autocomplete
-   * suggestions, the same experience the request URL field already has —
-   * instead of a bare `InputBox`. Off by default: only the header / param
+   * Render the KEY cell with the Handlebars-aware editor — syntax
+   * highlighting + `{{}}` autocomplete suggestions, the same experience the
+   * request URL field already has — instead of a bare `InputBox`. Scoped to
+   * the KEY on purpose: a key IS resolved at execution time, whereas a plain
+   * string VALUE is literal (only an `ExpressionValue` value resolves), so
+   * the value cell keeps its plain input rather than advertising a
+   * substitution that never happens. Off by default: only the header / param
    * (path+query) / metadata tables opt in; every other consumer of this
    * table (env-folder variables, the body form-fields table, …) is
    * unaffected. When the cell is locked (`disabled`), the plain `InputBox`
@@ -313,10 +316,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       const rowKey = id ? tableInitialRowsRef.current?.find((tr) => tr.id === id)?.key : undefined
       const diffStyle = highlightActive ? cellDiffStyle(rowKey ? highlightKeySet.has(rowKey) : false) : undefined
       return (
-        <div
-          style={{ ...diffStyle, ...(cellDisabled ? { opacity: 0.6, pointerEvents: 'none' } : {}) }}
-          {...(highlightActive && dataTestId && { 'data-testid': `${dataTestId}-value-diff` })}
-        >
+        <div style={{ ...diffStyle, ...(cellDisabled ? { opacity: 0.6, pointerEvents: 'none' } : {}) }}>
           <TypedValueField
             value={resolved}
             onChange={(next) => {
@@ -341,12 +341,11 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
             valueTypeGroups={valueTypeGroupsRef.current}
             {...(id !== undefined && { expressionVariableId: id })}
             {...(dataTestId && { dataTestId })}
-            stringVariableAware={variableAware}
           />
         </div>
       )
     },
-    [dataTestId, highlightActive, highlightKeySet, variableAware]
+    [dataTestId, highlightActive, highlightKeySet]
   )
 
   return (

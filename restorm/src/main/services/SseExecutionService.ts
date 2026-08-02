@@ -537,6 +537,9 @@ class SseExecutionService {
           // rows get substituted, a `StringValue` row ships verbatim. See
           // `HTTPExecutionService`.
           const resolvedKey = contextService.resolveValue(h.key, requestId)
+          // An unknown variable resolves to '' — an empty header name is an
+          // invalid HTTP token. Skip the row rather than throw.
+          if (!resolvedKey) continue
           headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
         }
       }

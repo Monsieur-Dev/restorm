@@ -456,17 +456,6 @@ export interface TypedValueFieldProps {
    * new type.
    */
   lockType?: boolean | undefined
-  /**
-   * Render a plain `StringValue` with the Handlebars-aware editor (syntax
-   * highlighting + `{{}}` autocomplete) instead of a bare `InputBox` — the
-   * SAME editing surface an `ExpressionValue` gets below, minus the
-   * execution-time opt-in: the value still ships as a literal `StringValue`
-   * (the type-pick menu is how a user opts into Handlebars *resolution*).
-   * Off by default so every other consumer (env-folder variables, scenario
-   * node boxes, the body form-fields table, …) keeps the plain `InputBox`
-   * unchanged; only the header / param / metadata key-value tables opt in.
-   */
-  stringVariableAware?: boolean | undefined
 }
 
 /**
@@ -494,8 +483,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   dataTestId,
   lockType,
   trailingControls,
-  multilineLanguage,
-  stringVariableAware
+  multilineLanguage
 }) => {
   const { t } = useTranslation()
 
@@ -1097,19 +1085,11 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
         { icon: 'symbol-string', ariaLabel: 'String value', typeTestid: 'string' }
       )
     }
-    if (stringVariableAware) {
-      return withTypeControl(
-        <RestormVariableInputBox
-          value={value.toString()}
-          onChange={(next) => { onChange(new StringValue(next)) }}
-          variables={variables}
-          helpers={helpers}
-          {...(expressionVariableId !== undefined && { variableId: expressionVariableId })}
-          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-string` })}
-        />,
-        { icon: 'symbol-string', ariaLabel: 'String value', typeTestid: 'string' }
-      )
-    }
+    // A plain `StringValue` is LITERAL: it is never Handlebars-resolved at
+    // execution time (only an `ExpressionValue` opts into resolution, via the
+    // type-pick menu). So it gets a bare `InputBox` — dressing it with the
+    // `{{}}`-highlighting editor would advertise a substitution that never
+    // happens.
     return withTypeControl(
       <InputBox
         value={value.toString()}

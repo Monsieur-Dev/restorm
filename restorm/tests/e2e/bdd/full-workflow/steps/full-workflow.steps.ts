@@ -499,7 +499,9 @@ When(
       await clearAndType(page, plainInput, value)
       await page.keyboard.press('Tab')
     } else {
-      const monacoCell = row.locator('.monaco-editor').first()
+      // Scope to the VALUE cell: the KEY cell is now a Handlebars-aware
+      // editor too, so a row-wide `.monaco-editor` would match the key first.
+      const monacoCell = row.locator('td').nth(3).locator('.monaco-editor').first()
       await expect(monacoCell).toBeVisible({ timeout: 5000 })
       await monacoCell.click()
       await page.keyboard.press('Control+A')
