@@ -177,6 +177,9 @@
       "copied": "Kopyalandı!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Yazmaya başlayın…"
+  },
   "tagsView": {
     "removeTag": "Etiketi kaldır",
     "newTag": "Yeni etiket"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Kaynak ekle",
     "removeOrigin": "{{origin}} kaldır",
-    "noEntries": "Henüz girdi yok."
+    "noEntries": "Henüz girdi yok.",
+    "prompt": {
+      "title": "Giden istek engellendi",
+      "allow": "İzin ver",
+      "deny": "Reddet",
+      "fromOrigin": "{{origin}} kaynağından"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Gezinmeye başlamak için yukarıya bir adres girin."
   },
   "bookmarkRibbon": {
     "addBookmark": "Yer işareti ekle"

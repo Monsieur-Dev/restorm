@@ -177,6 +177,9 @@
       "copied": "U kopjua!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Filloni të shkruani…"
+  },
   "tagsView": {
     "removeTag": "Hiq etiketën",
     "newTag": "Etiketë e re"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Shto origjinën",
     "removeOrigin": "Hiq {{origin}}",
-    "noEntries": "Ende nuk ka hyrje."
+    "noEntries": "Ende nuk ka hyrje.",
+    "prompt": {
+      "title": "Kërkesa dalëse u bllokua",
+      "allow": "Lejo",
+      "deny": "Refuzo",
+      "fromOrigin": "nga {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Shkruani një adresë më sipër për të filluar shfletimin."
   },
   "bookmarkRibbon": {
     "addBookmark": "Shto faqeshënues"

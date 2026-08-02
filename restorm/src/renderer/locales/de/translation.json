@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Antwort",
+        "infos": "Infos",
         "requestBody": "Anfrage-Body",
         "graph": "Graph"
       },
@@ -1217,8 +1218,8 @@
       "noResult": "Führen Sie die Quellaktion aus, um eine Eigenschaft aus ihrem Ergebnis zu wählen."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Szenario",
+      "notes": "Notizen"
     },
     "node": {
       "menu": {

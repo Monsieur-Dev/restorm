@@ -423,6 +423,7 @@
     "responses": {
       "tabs": {
         "response": "Odpověď",
+        "infos": "Informace",
         "requestBody": "Tělo požadavku",
         "graph": "Graf"
       },
@@ -1219,8 +1220,8 @@
       "noResult": "Spusťte zdrojovou akci a vyberte vlastnost z jejího výsledku."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Scénář",
+      "notes": "Poznámky"
     },
     "node": {
       "menu": {

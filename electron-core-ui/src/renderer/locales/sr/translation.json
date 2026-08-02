@@ -177,6 +177,9 @@
       "copied": "Копирано!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Почните да пишете…"
+  },
   "tagsView": {
     "removeTag": "Ukloni oznaku",
     "newTag": "Nova oznaka"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Додај origin",
     "removeOrigin": "Уклони {{origin}}",
-    "noEntries": "Нема уноса."
+    "noEntries": "Нема уноса.",
+    "prompt": {
+      "title": "Одлазни захтев је блокиран",
+      "allow": "Дозволи",
+      "deny": "Одбиј",
+      "fromOrigin": "са {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Унесите адресу изнад да бисте почели са прегледањем."
   },
   "bookmarkRibbon": {
     "addBookmark": "Додај обележивач"

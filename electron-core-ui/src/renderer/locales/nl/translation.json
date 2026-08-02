@@ -177,6 +177,9 @@
       "copied": "Gekopieerd!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Begin met schrijven…"
+  },
   "tagsView": {
     "removeTag": "Tag verwijderen",
     "newTag": "Nieuwe tag"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Oorsprong toevoegen",
     "removeOrigin": "{{origin}} verwijderen",
-    "noEntries": "Nog geen vermeldingen."
+    "noEntries": "Nog geen vermeldingen.",
+    "prompt": {
+      "title": "Uitgaand verzoek geblokkeerd",
+      "allow": "Toestaan",
+      "deny": "Weigeren",
+      "fromOrigin": "van {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Voer hierboven een adres in om te beginnen met browsen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Bladwijzer toevoegen"

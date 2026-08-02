@@ -423,6 +423,7 @@
     "responses": {
       "tabs": {
         "response": "Odpowiedź",
+        "infos": "Informacje",
         "requestBody": "Treść żądania",
         "graph": "Wykres"
       },
@@ -1219,8 +1220,8 @@
       "noResult": "Uruchom akcję źródłową, aby wybrać właściwość z jej wyniku."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Scenariusz",
+      "notes": "Notatki"
     },
     "node": {
       "menu": {

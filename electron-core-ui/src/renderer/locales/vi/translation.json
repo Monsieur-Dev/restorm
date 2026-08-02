@@ -177,6 +177,9 @@
       "copied": "Đã sao chép!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Bắt đầu viết…"
+  },
   "tagsView": {
     "removeTag": "Xóa thẻ",
     "newTag": "Thẻ mới"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Thêm nguồn gốc",
     "removeOrigin": "Xóa {{origin}}",
-    "noEntries": "Chưa có mục nào."
+    "noEntries": "Chưa có mục nào.",
+    "prompt": {
+      "title": "Đã chặn yêu cầu gửi đi",
+      "allow": "Cho phép",
+      "deny": "Từ chối",
+      "fromOrigin": "từ {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Nhập địa chỉ ở trên để bắt đầu duyệt web."
   },
   "bookmarkRibbon": {
     "addBookmark": "Thêm dấu trang"

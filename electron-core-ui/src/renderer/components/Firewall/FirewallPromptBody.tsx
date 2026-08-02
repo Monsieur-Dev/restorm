@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import type { FirewallPromptPayload } from '../../../types/firewall'
 import './firewallPromptToast.css'
@@ -15,6 +16,7 @@ interface FirewallPromptBodyProps {
  * next call denies silently).
  */
 export function FirewallPromptBody({ payload, resolve }: FirewallPromptBodyProps): React.JSX.Element {
+	const { t } = useTranslation()
 	const display = renderOrigin(payload)
 	return (
 		<div className="firewall-prompt-toast">
@@ -24,9 +26,12 @@ export function FirewallPromptBody({ payload, resolve }: FirewallPromptBodyProps
 			<div className="firewall-prompt-toast__source">
 				{payload.source}
 				{payload.originHint !== undefined && payload.originHint !== '' && (
-					<>
-						{' '}— from <span className="firewall-prompt-toast__origin-hint">{payload.originHint}</span>
-					</>
+					// The whole "from <hint>" clause is one translated
+					// string so locales that put the origin first (ja, ko,
+					// tr…) can order it their way.
+					<span className="firewall-prompt-toast__origin-hint">
+						{' '}— {t('firewall.prompt.fromOrigin', { origin: payload.originHint })}
+					</span>
 				)}
 			</div>
 			<div className="firewall-prompt-toast__actions">
@@ -35,13 +40,13 @@ export function FirewallPromptBody({ payload, resolve }: FirewallPromptBodyProps
 					data-testid="firewall-prompt-allow"
 					onClick={() => { resolve('allow') }}
 				>
-					Allow
+					{t('firewall.prompt.allow')}
 				</Button>
 				<Button
 					data-testid="firewall-prompt-deny"
 					onClick={() => { resolve('deny') }}
 				>
-					Deny
+					{t('firewall.prompt.deny')}
 				</Button>
 			</div>
 		</div>

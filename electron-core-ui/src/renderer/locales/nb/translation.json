@@ -177,6 +177,9 @@
       "copied": "Kopiert!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Begynn å skrive…"
+  },
   "tagsView": {
     "removeTag": "Fjern tagg",
     "newTag": "Ny tagg"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Legg til opprinnelse",
     "removeOrigin": "Fjern {{origin}}",
-    "noEntries": "Ingen oppføringer ennå."
+    "noEntries": "Ingen oppføringer ennå.",
+    "prompt": {
+      "title": "Utgående forespørsel blokkert",
+      "allow": "Tillat",
+      "deny": "Avvis",
+      "fromOrigin": "fra {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Skriv inn en adresse ovenfor for å begynne å surfe."
   },
   "bookmarkRibbon": {
     "addBookmark": "Legg til bokmerke"

@@ -177,6 +177,9 @@
       "copied": "Zkopírováno!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Začněte psát…"
+  },
   "tagsView": {
     "removeTag": "Odebrat štítek",
     "newTag": "Nový štítek"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Přidat origin",
     "removeOrigin": "Odebrat {{origin}}",
-    "noEntries": "Zatím žádné záznamy."
+    "noEntries": "Zatím žádné záznamy.",
+    "prompt": {
+      "title": "Odchozí požadavek byl zablokován",
+      "allow": "Povolit",
+      "deny": "Odepřít",
+      "fromOrigin": "z {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Zadejte adresu výše a začněte prohlížet."
   },
   "bookmarkRibbon": {
     "addBookmark": "Přidat záložku"

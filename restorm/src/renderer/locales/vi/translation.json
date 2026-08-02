@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "Phản hồi",
+        "infos": "Thông tin",
         "requestBody": "Body yêu cầu",
         "graph": "Đồ thị"
       },
@@ -1216,8 +1217,8 @@
       "noResult": "Chạy hành động nguồn để chọn một thuộc tính từ kết quả của nó."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Kịch bản",
+      "notes": "Ghi chú"
     },
     "node": {
       "menu": {

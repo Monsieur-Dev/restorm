@@ -177,6 +177,9 @@
       "copied": "Copied!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Start writing…"
+  },
   "tagsView": {
     "removeTag": "Remove tag",
     "newTag": "New tag"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Add origin",
     "removeOrigin": "Remove {{origin}}",
-    "noEntries": "No entries yet."
+    "noEntries": "No entries yet.",
+    "prompt": {
+      "title": "Outbound request blocked",
+      "allow": "Allow",
+      "deny": "Deny",
+      "fromOrigin": "from {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Enter an address above to start browsing."
   },
   "bookmarkRibbon": {
     "addBookmark": "Add bookmark"

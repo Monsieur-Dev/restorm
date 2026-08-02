@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Përgjigjja",
+        "infos": "Informacione",
         "requestBody": "Trupi i kërkesës",
         "graph": "Grafiku"
       },
@@ -1217,8 +1218,8 @@
       "noResult": "Ekzekutoni veprimin burim për të zgjedhur një veti nga rezultati i tij."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Skenari",
+      "notes": "Shënimet"
     },
     "node": {
       "menu": {

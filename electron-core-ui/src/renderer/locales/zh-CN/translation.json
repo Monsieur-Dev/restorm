@@ -177,6 +177,9 @@
       "copied": "已复制！"
     }
   },
+  "markdownEditor": {
+    "placeholder": "开始输入…"
+  },
   "tagsView": {
     "removeTag": "移除标签",
     "newTag": "新标签"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "添加来源",
     "removeOrigin": "移除 {{origin}}",
-    "noEntries": "暂无条目。"
+    "noEntries": "暂无条目。",
+    "prompt": {
+      "title": "出站请求已阻止",
+      "allow": "允许",
+      "deny": "拒绝",
+      "fromOrigin": "来自 {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "在上方输入地址即可开始浏览。"
   },
   "bookmarkRibbon": {
     "addBookmark": "添加书签"

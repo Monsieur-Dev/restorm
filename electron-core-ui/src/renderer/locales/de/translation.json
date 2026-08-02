@@ -177,6 +177,9 @@
       "copied": "Kopiert!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Beginnen Sie zu schreiben…"
+  },
   "tagsView": {
     "removeTag": "Tag entfernen",
     "newTag": "Neues Tag"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Origin hinzufügen",
     "removeOrigin": "{{origin}} entfernen",
-    "noEntries": "Noch keine Einträge."
+    "noEntries": "Noch keine Einträge.",
+    "prompt": {
+      "title": "Ausgehende Anfrage blockiert",
+      "allow": "Zulassen",
+      "deny": "Ablehnen",
+      "fromOrigin": "von {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Geben Sie oben eine Adresse ein, um mit dem Surfen zu beginnen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lesezeichen hinzufügen"

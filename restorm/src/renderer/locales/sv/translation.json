@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Svar",
+        "infos": "Info",
         "requestBody": "Förfrågans kropp",
         "graph": "Graf"
       },
@@ -1218,7 +1219,7 @@
     },
     "tab": {
       "graph": "Scenario",
-      "notes": "Notes"
+      "notes": "Anteckningar"
     },
     "node": {
       "menu": {

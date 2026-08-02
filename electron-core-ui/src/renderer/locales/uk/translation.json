@@ -177,6 +177,9 @@
       "copied": "Скопійовано!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Почніть писати…"
+  },
   "tagsView": {
     "removeTag": "Видалити тег",
     "newTag": "Новий тег"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Додати origin",
     "removeOrigin": "Видалити {{origin}}",
-    "noEntries": "Записів ще немає."
+    "noEntries": "Записів ще немає.",
+    "prompt": {
+      "title": "Вихідний запит заблоковано",
+      "allow": "Дозволити",
+      "deny": "Відхилити",
+      "fromOrigin": "з {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Введіть адресу вище, щоб почати перегляд."
   },
   "bookmarkRibbon": {
     "addBookmark": "Додати закладку"

@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Válasz",
+        "infos": "Információk",
         "requestBody": "Kérés törzse",
         "graph": "Grafikon"
       },
@@ -1217,8 +1218,8 @@
       "noResult": "Futtassa a forrásműveletet, hogy kiválasszon egy tulajdonságot az eredményéből."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Forgatókönyv",
+      "notes": "Jegyzetek"
     },
     "node": {
       "menu": {

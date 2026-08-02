@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Response",
+        "infos": "Infos",
         "requestBody": "Request body",
         "graph": "Graph"
       },

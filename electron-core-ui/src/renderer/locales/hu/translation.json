@@ -177,6 +177,9 @@
       "copied": "Másolva!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Kezdjen el írni…"
+  },
   "tagsView": {
     "removeTag": "Címke eltávolítása",
     "newTag": "Új címke"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Eredet hozzáadása",
     "removeOrigin": "{{origin}} eltávolítása",
-    "noEntries": "Még nincsenek bejegyzések."
+    "noEntries": "Még nincsenek bejegyzések.",
+    "prompt": {
+      "title": "Kimenő kérés blokkolva",
+      "allow": "Engedélyezés",
+      "deny": "Elutasítás",
+      "fromOrigin": "innen: {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Adjon meg fent egy címet a böngészés megkezdéséhez."
   },
   "bookmarkRibbon": {
     "addBookmark": "Könyvjelző hozzáadása"

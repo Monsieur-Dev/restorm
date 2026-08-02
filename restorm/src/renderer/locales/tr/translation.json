@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Yanıt",
+        "infos": "Bilgiler",
         "requestBody": "İstek gövdesi",
         "graph": "Grafik"
       },
@@ -1217,8 +1218,8 @@
       "noResult": "Sonucundan bir özellik seçmek için kaynak eylemi çalıştırın."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Senaryo",
+      "notes": "Notlar"
     },
     "node": {
       "menu": {

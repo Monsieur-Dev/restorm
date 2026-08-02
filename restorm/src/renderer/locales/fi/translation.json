@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Vastaus",
+        "infos": "Tiedot",
         "requestBody": "Pyynnön sisältö",
         "graph": "Kaavio"
       },
@@ -1217,8 +1218,8 @@
       "noResult": "Suorita lähdetoiminto valitaksesi ominaisuuden sen tuloksesta."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Skenaario",
+      "notes": "Muistiinpanot"
     },
     "node": {
       "menu": {

@@ -422,6 +422,7 @@
     "responses": {
       "tabs": {
         "response": "Odgovor",
+        "infos": "Informacije",
         "requestBody": "Tijelo zahtjeva",
         "graph": "Graf"
       },
@@ -1218,8 +1219,8 @@
       "noResult": "Pokrenite izvornu radnju da odaberete svojstvo iz njezina rezultata."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Scenarij",
+      "notes": "Bilješke"
     },
     "node": {
       "menu": {

@@ -177,6 +177,9 @@
       "copied": "복사됨!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "입력을 시작하세요…"
+  },
   "tagsView": {
     "removeTag": "태그 제거",
     "newTag": "새 태그"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "오리진 추가",
     "removeOrigin": "{{origin}} 제거",
-    "noEntries": "항목이 없습니다."
+    "noEntries": "항목이 없습니다.",
+    "prompt": {
+      "title": "아웃바운드 요청이 차단됨",
+      "allow": "허용",
+      "deny": "거부",
+      "fromOrigin": "{{origin}}에서"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "위에 주소를 입력하면 탐색을 시작합니다."
   },
   "bookmarkRibbon": {
     "addBookmark": "북마크 추가"

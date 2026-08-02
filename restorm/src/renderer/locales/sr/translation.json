@@ -422,6 +422,7 @@
     "responses": {
       "tabs": {
         "response": "Odgovor",
+        "infos": "Informacije",
         "requestBody": "Telo zahteva",
         "graph": "Graf"
       },
@@ -1219,7 +1220,7 @@
     },
     "tab": {
       "graph": "Scenario",
-      "notes": "Notes"
+      "notes": "Beleške"
     },
     "node": {
       "menu": {

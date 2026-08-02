@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "Respons",
+        "infos": "Info",
         "requestBody": "Body permintaan",
         "graph": "Grafik"
       },
@@ -1216,8 +1217,8 @@
       "noResult": "Jalankan aksi sumber untuk memilih sebuah properti dari hasilnya."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Skenario",
+      "notes": "Catatan"
     },
     "node": {
       "menu": {

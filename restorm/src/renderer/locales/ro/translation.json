@@ -422,6 +422,7 @@
     "responses": {
       "tabs": {
         "response": "Răspuns",
+        "infos": "Informații",
         "requestBody": "Corpul cererii",
         "graph": "Grafic"
       },
@@ -1218,8 +1219,8 @@
       "noResult": "Rulați acțiunea sursă pentru a alege o proprietate din rezultatul ei."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Scenariu",
+      "notes": "Notițe"
     },
     "node": {
       "menu": {

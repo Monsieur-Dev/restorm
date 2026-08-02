@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "回應",
+        "infos": "資訊",
         "requestBody": "請求內文",
         "graph": "圖表"
       },
@@ -1216,8 +1217,8 @@
       "noResult": "執行來源動作以從其結果中選擇一個屬性。"
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "場景",
+      "notes": "備註"
     },
     "node": {
       "menu": {

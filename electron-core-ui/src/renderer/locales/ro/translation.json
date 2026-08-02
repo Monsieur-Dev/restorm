@@ -177,6 +177,9 @@
       "copied": "Copiat!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Începeți să scrieți…"
+  },
   "tagsView": {
     "removeTag": "Elimină eticheta",
     "newTag": "Etichetă nouă"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Adaugă origine",
     "removeOrigin": "Elimină {{origin}}",
-    "noEntries": "Nicio intrare încă."
+    "noEntries": "Nicio intrare încă.",
+    "prompt": {
+      "title": "Cerere de ieșire blocată",
+      "allow": "Permite",
+      "deny": "Refuză",
+      "fromOrigin": "de la {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Introduceți o adresă mai sus pentru a începe navigarea."
   },
   "bookmarkRibbon": {
     "addBookmark": "Adaugă marcaj"

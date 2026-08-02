@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "响应",
+        "infos": "信息",
         "requestBody": "请求正文",
         "graph": "图表"
       },
@@ -1216,8 +1217,8 @@
       "noResult": "运行源操作以从其结果中选择一个属性。"
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "场景",
+      "notes": "笔记"
     },
     "node": {
       "menu": {

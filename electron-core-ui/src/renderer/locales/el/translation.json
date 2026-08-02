@@ -177,6 +177,9 @@
       "copied": "Αντιγράφηκε!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Ξεκινήστε να γράφετε…"
+  },
   "tagsView": {
     "removeTag": "Αφαίρεση ετικέτας",
     "newTag": "Νέα ετικέτα"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Προσθήκη origin",
     "removeOrigin": "Αφαίρεση {{origin}}",
-    "noEntries": "Δεν υπάρχουν ακόμα εγγραφές."
+    "noEntries": "Δεν υπάρχουν ακόμα εγγραφές.",
+    "prompt": {
+      "title": "Το εξερχόμενο αίτημα αποκλείστηκε",
+      "allow": "Να επιτραπεί",
+      "deny": "Άρνηση",
+      "fromOrigin": "από {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Εισαγάγετε μια διεύθυνση παραπάνω για να ξεκινήσετε την περιήγηση."
   },
   "bookmarkRibbon": {
     "addBookmark": "Προσθήκη σελιδοδείκτη"

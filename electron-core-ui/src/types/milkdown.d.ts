@@ -14,8 +14,20 @@ declare module '@milkdown/react' {
 }
 
 declare module '@milkdown/crepe' {
+  /** Per-feature options passed through `CrepeConfig.featureConfigs`.
+   * Only the features this app actually configures are modelled. */
+  export interface CrepeFeatureConfig {
+    placeholder?: {
+      /** Empty-document hint. Crepe defaults it to an untranslatable
+       * English string, so callers must supply a localized one. */
+      text?: string
+      mode?: 'doc' | 'block'
+    }
+  }
+
   export interface CrepeConfig {
     root: HTMLElement
+    featureConfigs?: CrepeFeatureConfig
     [key: string]: unknown
   }
 
@@ -24,7 +36,10 @@ declare module '@milkdown/crepe' {
     destroy?(): Promise<unknown>
   }
 
-  export type CrepeConstructor = new (config: CrepeConfig) => CrepeInstance
+  export type CrepeConstructor = (new (config: CrepeConfig) => CrepeInstance) & {
+    /** Feature-name constants, keyed the same as `CrepeFeatureConfig`. */
+    Feature: { Placeholder: 'placeholder' }
+  }
 
   export const Crepe: CrepeConstructor
 }

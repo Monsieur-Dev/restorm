@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Resposta",
+        "infos": "Informações",
         "requestBody": "Corpo do pedido",
         "graph": "Grafo"
       },
@@ -1217,8 +1218,8 @@
       "noResult": "Execute a ação de origem para escolher uma propriedade do seu resultado."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Cenário",
+      "notes": "Notas"
     },
     "node": {
       "menu": {

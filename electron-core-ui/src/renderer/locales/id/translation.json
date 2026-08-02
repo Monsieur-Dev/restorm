@@ -177,6 +177,9 @@
       "copied": "Disalin!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Mulai menulis…"
+  },
   "tagsView": {
     "removeTag": "Hapus tag",
     "newTag": "Tag baru"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Tambahkan origin",
     "removeOrigin": "Hapus {{origin}}",
-    "noEntries": "Belum ada entri."
+    "noEntries": "Belum ada entri.",
+    "prompt": {
+      "title": "Permintaan keluar diblokir",
+      "allow": "Izinkan",
+      "deny": "Tolak",
+      "fromOrigin": "dari {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Masukkan alamat di atas untuk mulai menjelajah."
   },
   "bookmarkRibbon": {
     "addBookmark": "Tambah penanda"

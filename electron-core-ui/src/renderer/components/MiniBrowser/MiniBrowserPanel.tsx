@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import { ControlGroup } from '../ControlGroup'
 import { InputBox } from '../InputBox'
@@ -88,6 +89,7 @@ export interface MiniBrowserPanelProps {
  * workbench without disturbing the embedded page.
  */
 export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initialUrl, onUrlChange, driver }) => {
+  const { t } = useTranslation()
   const [addressBar, setAddressBar] = useState(initialUrl ?? '')
   const [committedUrl, setCommittedUrl] = useState(initialUrl ?? '')
   const [canGoBack, setCanGoBack] = useState(false)
@@ -526,7 +528,7 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
         >
           {committedUrl === '' ? (
             <div className="mini-browser-panel__placeholder" data-testid="mini-browser-placeholder">
-              Enter an address above to start browsing.
+              {t('miniBrowser.emptyState')}
             </div>
           ) : null}
         </div>

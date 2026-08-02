@@ -177,6 +177,9 @@
       "copied": "已複製！"
     }
   },
+  "markdownEditor": {
+    "placeholder": "開始輸入…"
+  },
   "tagsView": {
     "removeTag": "移除標籤",
     "newTag": "新標籤"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "新增來源",
     "removeOrigin": "移除 {{origin}}",
-    "noEntries": "目前沒有條目。"
+    "noEntries": "目前沒有條目。",
+    "prompt": {
+      "title": "已封鎖對外請求",
+      "allow": "允許",
+      "deny": "拒絕",
+      "fromOrigin": "來自 {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "在上方輸入網址即可開始瀏覽。"
   },
   "bookmarkRibbon": {
     "addBookmark": "新增書籤"

@@ -177,6 +177,9 @@
       "copied": "Kopieret!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Begynd at skrive…"
+  },
   "tagsView": {
     "removeTag": "Fjern tag",
     "newTag": "Nyt tag"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Tilføj origin",
     "removeOrigin": "Fjern {{origin}}",
-    "noEntries": "Ingen poster endnu."
+    "noEntries": "Ingen poster endnu.",
+    "prompt": {
+      "title": "Udgående anmodning blokeret",
+      "allow": "Tillad",
+      "deny": "Afvis",
+      "fromOrigin": "fra {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Indtast en adresse ovenfor for at begynde at browse."
   },
   "bookmarkRibbon": {
     "addBookmark": "Tilføj bogmærke"

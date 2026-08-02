@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "レスポンス",
+        "infos": "情報",
         "requestBody": "リクエストボディ",
         "graph": "グラフ"
       },
@@ -1216,8 +1217,8 @@
       "noResult": "ソースアクションを実行して、その結果からプロパティを選択してください。"
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "シナリオ",
+      "notes": "メモ"
     },
     "node": {
       "menu": {

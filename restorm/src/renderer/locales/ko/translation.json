@@ -420,6 +420,7 @@
     "responses": {
       "tabs": {
         "response": "응답",
+        "infos": "정보",
         "requestBody": "요청 본문",
         "graph": "그래프"
       },
@@ -1216,8 +1217,8 @@
       "noResult": "소스 액션을 실행하여 그 결과에서 속성을 선택하세요."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "시나리오",
+      "notes": "메모"
     },
     "node": {
       "menu": {

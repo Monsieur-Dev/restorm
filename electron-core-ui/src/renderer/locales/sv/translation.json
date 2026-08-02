@@ -177,6 +177,9 @@
       "copied": "Kopierat!"
     }
   },
+  "markdownEditor": {
+    "placeholder": "Börja skriva…"
+  },
   "tagsView": {
     "removeTag": "Ta bort tagg",
     "newTag": "Ny tagg"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "Lägg till origin",
     "removeOrigin": "Ta bort {{origin}}",
-    "noEntries": "Inga poster ännu."
+    "noEntries": "Inga poster ännu.",
+    "prompt": {
+      "title": "Utgående begäran blockerad",
+      "allow": "Tillåt",
+      "deny": "Neka",
+      "fromOrigin": "från {{origin}}"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "Ange en adress ovan för att börja surfa."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lägg till bokmärke"

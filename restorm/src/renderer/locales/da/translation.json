@@ -421,6 +421,7 @@
     "responses": {
       "tabs": {
         "response": "Svar",
+        "infos": "Info",
         "requestBody": "Anmodnings-body",
         "graph": "Graf"
       },
@@ -1217,8 +1218,8 @@
       "noResult": "Kør kildehandlingen for at vælge en egenskab fra dens resultat."
     },
     "tab": {
-      "graph": "Scenario",
-      "notes": "Notes"
+      "graph": "Scenarie",
+      "notes": "Noter"
     },
     "node": {
       "menu": {

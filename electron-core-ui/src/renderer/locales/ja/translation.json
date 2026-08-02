@@ -177,6 +177,9 @@
       "copied": "コピーしました！"
     }
   },
+  "markdownEditor": {
+    "placeholder": "入力を開始…"
+  },
   "tagsView": {
     "removeTag": "タグを削除",
     "newTag": "新しいタグ"
@@ -411,7 +414,16 @@
   "firewall": {
     "addOrigin": "オリジンを追加",
     "removeOrigin": "{{origin}} を削除",
-    "noEntries": "エントリがありません。"
+    "noEntries": "エントリがありません。",
+    "prompt": {
+      "title": "送信リクエストをブロックしました",
+      "allow": "許可",
+      "deny": "拒否",
+      "fromOrigin": "{{origin}} から"
+    }
+  },
+  "miniBrowser": {
+    "emptyState": "上のアドレスバーに URL を入力すると閲覧を開始できます。"
   },
   "bookmarkRibbon": {
     "addBookmark": "ブックマークを追加"
