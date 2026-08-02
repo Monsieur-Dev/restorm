@@ -188,7 +188,10 @@ export function detectFormat(content: string, filePath?: string): string | null 
   // provider) and handed to every `canImport` call as `parsed`; providers
   // that sniff a JSON shape read it instead of re-parsing `content`
   // themselves. `undefined` when `content` isn't valid JSON — providers
-  // fall back to their own (identical, so identically-failing) parse.
+  // that also accept YAML (OpenAPI, Swagger) fall back to their own
+  // JSON-then-YAML parse attempt at that point (see `tryParseSpecText` in
+  // `transformers/_shared.ts`); every other provider's own fallback parse
+  // is JSON-only and fails identically to this one.
   let parsed: unknown
   try {
     parsed = JSON.parse(content)

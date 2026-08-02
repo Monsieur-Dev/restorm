@@ -36,7 +36,7 @@ import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 import { toHTTPMethod } from './httpMethodValidator'
 import { openapi3ToApiDocumentation, type OAS3Spec, type OAS3Server, type OAS3SecurityScheme, expandServerVariables, pickPrimaryContentType } from './transformers/openapi3ToApiDocumentation'
 import { openapi31ToApiDocumentation, type OAS31Spec } from './transformers/openapi31ToApiDocumentation'
-import { rewriteUrlTemplate, resolveJsonPointer, type CommonSchema } from './transformers/_shared'
+import { rewriteUrlTemplate, resolveJsonPointer, tryParseSpecText, parseSpecTextOrThrow, type CommonSchema } from './transformers/_shared'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 
@@ -922,9 +922,9 @@ export async function importOpenAPIFromUrl(
   return importOpenAPI(spec, { ...options, sourceUrl: options.sourceUrl ?? url })
 }
 
-/** Import an OpenAPI 3.x specification from a JSON string. */
+/** Import an OpenAPI 3.x specification from a JSON or YAML string. */
 export function importOpenAPIFromJson(json: string, options: OpenAPIImportOptions = {}): EnvironmentFolder {
-  const spec = JSON.parse(json) as OAS3Spec | OAS31Spec
+  const spec = parseSpecTextOrThrow(json, 'OpenAPI') as unknown as OAS3Spec | OAS31Spec
   return importOpenAPI(spec, options)
 }
 
@@ -964,24 +964,25 @@ export async function importOpenAPIValidated(
 import { importProviders } from './registry'
 
 function canImportOpenAPI30(content: string, _filePath?: string, parsed?: unknown): boolean {
-  try {
-    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
-    if (typeof json === 'object' && json !== null) {
-      const obj = json as Record<string, unknown>
-      return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.0')
-    }
-  } catch { /* not JSON */ }
+  // `parsed` is the shared JSON.parse `detectFormat` already ran once for
+  // this pass — reuse it when present (the common JSON case, zero extra
+  // parse cost). Only fall back to our own JSON-then-YAML attempt
+  // (`tryParseSpecText`) when the shared pre-parse failed, i.e. the content
+  // genuinely isn't JSON and might be YAML.
+  const json: unknown = parsed !== undefined ? parsed : tryParseSpecText(content.trim())
+  if (typeof json === 'object' && json !== null) {
+    const obj = json as Record<string, unknown>
+    return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.0')
+  }
   return false
 }
 
 function canImportOpenAPI31(content: string, _filePath?: string, parsed?: unknown): boolean {
-  try {
-    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
-    if (typeof json === 'object' && json !== null) {
-      const obj = json as Record<string, unknown>
-      return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.1')
-    }
-  } catch { /* not JSON */ }
+  const json: unknown = parsed !== undefined ? parsed : tryParseSpecText(content.trim())
+  if (typeof json === 'object' && json !== null) {
+    const obj = json as Record<string, unknown>
+    return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.1')
+  }
   return false
 }
 

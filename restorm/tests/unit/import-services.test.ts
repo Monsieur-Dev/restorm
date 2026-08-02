@@ -182,8 +182,10 @@ describe('SwaggerImportService', () => {
       expect(new Set(ids).size).toBe(ids.length)
     })
 
-    it('should throw on invalid JSON', () => {
-      expect(() => { importSwaggerFromJson('not valid json') }).toThrow()
+    it('throws a clear parse error on content that is neither valid JSON nor a YAML object', () => {
+      // 'not valid json' IS valid YAML (a bare scalar), so this exercises the
+      // parse-boundary object-shape check, not just a parser failure.
+      expect(() => { importSwaggerFromJson('not valid json') }).toThrow(/Failed to parse Swagger spec/)
     })
   })
 })
