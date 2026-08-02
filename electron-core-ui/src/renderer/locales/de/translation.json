@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Geben Sie oben eine Adresse ein, um mit dem Surfen zu beginnen."
+    "back": "Zurück",
+    "refresh": "Aktualisieren",
+    "go": "Los",
+    "address": "Adresse",
+    "emptyHint": "Gib oben eine Adresse ein, um mit dem Surfen zu beginnen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lesezeichen hinzufügen"

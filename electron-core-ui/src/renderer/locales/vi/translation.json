@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Nhập địa chỉ ở trên để bắt đầu duyệt web."
+    "back": "Quay lại",
+    "refresh": "Tải lại",
+    "go": "Đi",
+    "address": "Địa chỉ",
+    "emptyHint": "Nhập địa chỉ ở trên để bắt đầu duyệt web."
   },
   "bookmarkRibbon": {
     "addBookmark": "Thêm dấu trang"

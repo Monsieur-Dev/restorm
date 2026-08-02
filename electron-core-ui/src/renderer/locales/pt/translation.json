@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Introduza um endereço acima para começar a navegar."
+    "back": "Voltar",
+    "refresh": "Atualizar",
+    "go": "Ir",
+    "address": "Endereço",
+    "emptyHint": "Introduza um endereço acima para começar a navegar."
   },
   "bookmarkRibbon": {
     "addBookmark": "Adicionar marcador"

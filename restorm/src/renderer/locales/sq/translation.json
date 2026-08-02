@@ -1211,10 +1211,10 @@
       "emptyRightClick": "Klikoni me të djathtën në një vend bosh për të shtuar veprime në skenarin tuaj"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Shteg JSON",
       "ariaLabel": "Përzgjedhës i shtegut JSON",
       "pick": "Zgjidh nga rezultati",
-      "loading": "Loading…",
+      "loading": "Duke u ngarkuar…",
       "noResult": "Ekzekutoni veprimin burim për të zgjedhur një veti nga rezultati i tij."
     },
     "tab": {
@@ -1223,12 +1223,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Ndrysho ngjyrën",
+        "resetColor": "Rikthe ngjyrën",
         "addNote": "Shto/redakto shënim",
         "runOnEachEvent": "Ekzekuto në çdo ngjarje të marrë",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Dyfisho",
+        "delete": "Fshi",
         "deleteShortcut": "Del",
         "copy": "Kopjo",
         "paste": "Ngjit"
@@ -1238,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Ndrysho ngjyrën",
+        "resetColor": "Rikthe ngjyrën",
+        "delete": "Fshi"
       }
     },
     "locked": "Modifikimi i kyçur ndërsa skenari po ekzekutohet",
@@ -1299,49 +1299,49 @@
       "getVariable": "Merr variablën",
       "addToList": "Shto në listë",
       "removeFromList": "Hiq nga lista",
-      "cast": "Cast",
+      "cast": "Konverto",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Kripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Llogaritje datash",
+      "objectOp": "Veprime me objekte",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Rastësor",
+      "throw": "Hidh gabim",
+      "retry": "Riprovo",
+      "listOp": "Veprime me lista",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematikë",
+      "schema": "Valido skemën",
+      "readFile": "Lexo skedar",
+      "writeFile": "Shkruaj skedar",
       "timer": "Kohëmatës",
       "code": "Kodi",
       "socketioConnect": "Lidhje Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Dërgim Socket.IO",
       "socketioClose": "Mbyll lidhjen Socket.IO",
       "socketioServerClose": "Mbyll serverin Socket.IO",
       "websocketConnect": "Lidhje WebSocket",
       "sseConnect": "Lidhje SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Dërgim WebSocket",
       "websocketClose": "Mbyll lidhjen WebSocket",
       "websocketServerClose": "Mbyll serverin WebSocket",
       "sseClose": "Mbyll lidhjen SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Lidhje gRPC",
+      "grpcSend": "Dërgim gRPC",
       "grpcClose": "Mbyll lidhjen gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Lidhje MQTT",
+      "mqttSend": "Publikim MQTT",
       "mqttClose": "Mbyll lidhjen MQTT",
       "amqpConnect": "Lidhje AMQP",
       "amqpPublish": "Publikim AMQP",
       "amqpClose": "Mbyll lidhjen AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Abonim Redis",
       "redisClose": "Mbyll lidhjen Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Komandë Redis",
       "httpListen": "Server HTTP",
       "httpClose": "Mbyll serverin HTTP",
       "grpcServerClose": "Mbyll serverin gRPC",
@@ -1356,8 +1356,8 @@
       "stompConnect": "Lidhje STOMP",
       "stompSend": "Dërgim STOMP",
       "stompClose": "Mbyll lidhjen STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Prodhim Kafka",
+      "kafkaConsume": "Konsumim Kafka",
       "kafkaClose": "Mbyll lidhjen Kafka",
       "grpcListen": "Server gRPC"
     },
@@ -1379,27 +1379,27 @@
       "message": "mesazh",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "e barabartë",
+        "ne": "e ndryshme",
+        "lt": "më i vogël se",
         "lte": "më e vogël ose e barabartë",
-        "gt": "greater than",
+        "gt": "më i madh se",
         "gte": "më e madhe ose e barabartë",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "përmban",
+        "isString": "është varg",
+        "isNumber": "është numër",
+        "isBoolean": "është vlerë logjike",
+        "isArray": "është listë",
+        "isObject": "është objekt",
+        "isNull": "është null",
+        "exists": "ekziston",
+        "isEmpty": "është bosh",
+        "matchesRegex": "përputhet me regex",
         "isOneOf": "është një nga",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "barazi e thellë",
+        "lengthEq": "gjatësi ==",
+        "lengthGt": "gjatësi >",
+        "lengthLt": "gjatësi <"
       }
     },
     "editRequest": "Modifiko kërkesën",
@@ -1407,8 +1407,8 @@
     "object": {
       "addProperty": "Shto veti",
       "removeProperty": "Hiq vetinë",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Emri i vetisë",
+      "propertyValue": "vlerë"
     },
     "output": {
       "outputName": "Emri i daljes",
@@ -1416,7 +1416,7 @@
       "removeOutput": "Hiq"
     },
     "input": {
-      "name": "Name",
+      "name": "Emri",
       "defaultType": "I parazgjedhur / lloj",
       "addParam": "Shto parametër",
       "removeParam": "Hiq"
@@ -1462,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "Shablloni nuk duhet të jetë bosh.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Hyrja \"value\" duhet të jetë e lidhur kur shablloni referon {{…}}."
       },
       "request": {
         "missing": "Kërkesa e lidhur nuk ekziston më."
@@ -1504,12 +1504,12 @@
       "helpTitle": "Çfarë bën ky veprim"
     },
     "now": {
-      "timezone": "Timezone",
+      "timezone": "Zona kohore",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Datë/orë",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Varg"
       }
     },
     "callers": {
@@ -1517,8 +1517,8 @@
       "title": "Ky skenar thirret nga:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Parametrat e ekzekutimit",
+      "run": "Ekzekuto",
       "midRunTitle": "Kërkohet hyrje"
     },
     "runHistory": {
@@ -1533,20 +1533,20 @@
       "unpin": "Hiq fiksimin"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "nga",
+      "to": "deri",
+      "step": "hap",
+      "index": "indeks",
+      "done": "u krye"
     },
     "while": {
-      "body": "body"
+      "body": "trup"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "cikël"
     },
     "loop": {
-      "done": "done"
+      "done": "u krye"
     },
     "breakpoint": {
       "add": "Shto pikë ndërprerjeje",
@@ -1559,84 +1559,84 @@
       "toggle": "Aktivizo/çaktivizo minihartën"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "listë",
+      "values": "vlera",
+      "result": "rezultati",
       "addValue": "Shto vlerë",
       "removeValue": "Hiq vlerën",
       "updateVariable": "Përditëso variablën burim"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "vlerë",
+      "targetType": "konverto në",
+      "result": "rezultati",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "numër",
+        "string": "varg",
+        "boolean": "vlerë logjike",
+        "date": "datë",
+        "list": "listë"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "vlerë",
+      "operation": "veprim",
+      "pattern": "model",
+      "flags": "flamurë",
+      "replacement": "zëvendësim",
+      "result": "rezultati",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "nxirr",
+        "extractAll": "nxirr të gjitha",
+        "test": "testo",
+        "replace": "zëvendëso",
+        "split": "ndaj"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Pa dallim shkronjash të mëdha e të vogla",
         "m": "Shumërreshtësh (^ dhe $ përputhin fundet e rreshtave)",
         "s": "Dotall (. përputh rreshtat e rinj)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "vlerë",
+      "operation": "veprim",
+      "indent": "dhëmbëzim",
+      "result": "rezultati",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizo",
+        "stringify": "serializo"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "vlerë",
+      "operation": "veprim",
+      "indent": "dhëmbëzim",
+      "result": "rezultati",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizo",
+        "stringify": "serializo"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "vlerë",
+      "operation": "veprim",
+      "indent": "dhëmbëzim",
+      "result": "rezultati",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizo",
+        "stringify": "serializo"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "vlerë",
+      "operation": "veprim",
+      "key": "çelës",
+      "keyPlaceholder": "sekret",
+      "result": "rezultati",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "kodo base64",
+        "base64Decode": "dekodo base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1647,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "rezultati"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
+      "value": "datë",
+      "operation": "veprim",
+      "amount": "sasia",
+      "unitLabel": "njësia",
       "format": "format",
-      "other": "second date",
-      "result": "result",
+      "other": "data e dytë",
+      "result": "rezultati",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "shto",
+        "subtract": "zbrit",
+        "format": "formato",
+        "diff": "diferencë"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milisekonda",
+        "seconds": "sekonda",
+        "minutes": "minuta",
+        "hours": "orë",
+        "days": "ditë",
+        "weeks": "javë",
+        "months": "muaj",
+        "years": "vite"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "objekt",
+      "operation": "veprim",
+      "path": "shteg",
+      "keys": "çelësa",
+      "setValue": "vlerë",
+      "mergeWith": "bashko me",
+      "result": "rezultati",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "lexo",
+        "set": "shkruaj",
+        "merge": "bashko",
+        "pick": "mbaj",
+        "omit": "hiq",
+        "keys": "çelësa",
+        "values": "vlera"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "vlerë",
+      "operation": "veprim",
+      "result": "rezultati",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "kodo",
+        "decode": "dekodo",
+        "parseQuery": "analizo kërkesën",
+        "buildQuery": "ndërto kërkesën",
+        "parseUrl": "analizo URL-në"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "veprim",
       "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "max": "maks",
+      "length": "gjatësi",
+      "items": "artikuj",
+      "seed": "farë (opsionale)",
+      "seedPlaceholder": "i riprodhueshëm",
+      "result": "rezultati",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "numër i plotë",
+        "float": "numër dhjetor",
+        "string": "varg",
+        "boolean": "vlerë logjike",
+        "pick": "zgjidh"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "mesazh"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "përpjekje maks.",
+      "backoff": "strategji pritjeje",
+      "delay": "vonesë",
+      "factor": "faktor",
       "retryOnError": "riprovo në gabim",
       "retryOnStatus": "riprovo në status HTTP",
       "retryOnFailure": "riprovo në çdo non-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "përpjekje",
+      "exhausted": "e shteruar",
       "backoffOpt": {
-        "fixed": "fixed",
+        "fixed": "fiks",
         "linear": "linear",
-        "exponential": "exponential"
+        "exponential": "eksponencial"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Lista",
+      "math": "Matematikë",
+      "dataFormats": "Formate të dhënash",
+      "encoding": "Kodim",
       "time": "Kohëmatja",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritme",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "listë",
+      "operation": "veprim",
+      "result": "rezultati",
+      "key": "çelës",
+      "order": "renditje",
+      "depth": "thellësi",
+      "size": "madhësi",
+      "start": "fillim",
+      "end": "fund",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "rendit",
+        "unique": "unike",
+        "reverse": "përmbys",
+        "flatten": "rrafshos",
+        "chunk": "ndaj në copa",
+        "slice": "prit",
+        "groupBy": "grupo sipas"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "vlerë",
+      "operation": "veprim",
+      "result": "rezultati",
+      "delimiter": "ndarës",
+      "header": "rreshti i kokës",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "analizo",
+        "stringify": "serializo"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "vlerë",
+      "operation": "veprim",
+      "result": "rezultati",
+      "b": "me",
       "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "max": "maks",
+      "precision": "saktësi",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "rrumbullakos",
+        "floor": "rrumbullakos poshtë",
+        "ceil": "rrumbullakos lart",
+        "trunc": "shkurto",
+        "abs": "vlerë absolute",
+        "sign": "shenjë",
+        "sqrt": "rrënjë katrore",
         "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "max": "maks",
+        "clamp": "kufizo"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "vlerë",
+      "schema": "Skemë JSON",
+      "valid": "i vlefshëm",
+      "invalid": "i pavlefshëm",
+      "errors": "gabime",
       "editTitle": "Redakto JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "shteg",
+      "content": "përmbajtje"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "shteg",
+      "mode": "mënyra",
+      "content": "përmbajtje"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Redakto",
+      "edit": "Hap redaktuesin",
+      "moreLines": "+{{count}} rreshta",
+      "editTemplate": "Redakto shabllonin"
     },
     "timer": {
       "mode": "mënyra",
@@ -1890,7 +1890,7 @@
       "waitUntil": "Ndalon deri në një datë/orë të dhënë, pastaj vazhdon.",
       "now": "Lëshon datën dhe orën aktuale.",
       "timer": "Aktivizon trupin e tij në një interval të përsëritur ose sipas një orari cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Llogarit a + − × ÷ … të dy numrave.",
       "comparator": "Krahason dy vlera dhe lëshon e vërtetë ose e gabuar.",
       "boolean": "Kombinon vlera boolean me and / or / xor / not.",
       "object": "Ndërton një objekt nga hyrjet e tij të emërtuara.",
@@ -1903,7 +1903,7 @@
       "json": "Analizon një varg JSON ose serializon një vlerë në JSON.",
       "xml": "Analizon një varg XML ose serializon një vlerë në XML.",
       "yaml": "Analizon një varg YAML ose serializon një vlerë në YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Bën hash ose kodon një varg (base64, md5, sha…, hmac, uuid).",
       "jwt": "Dekodon një token JWT në header, payload dhe signature.",
       "datetime": "Zhvendos, formaton ose krahason një datë.",
       "retry": "Riekzekuton trupin e tij derisa të ketë sukses, me një politikë backoff.",
@@ -1912,7 +1912,7 @@
       "random": "Gjeneron një numër, varg, boolean ose zgjedhje të rastësishme.",
       "listOp": "Riformëson një listë (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Analizon një varg CSV ose serializon një listë në CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Kryen një veprim skalar (rrumbullakos, abs, rrënjë, min, maks, kufizo…).",
       "schema": "Validon një vlerë kundrejt një JSON Schema.",
       "readFile": "Lexon përmbajtjen tekstuale të një skedari.",
       "writeFile": "Shkruan ose shton tekst në një skedar.",
@@ -1951,13 +1951,13 @@
       "redisClose": "Mbyll një lidhje pajtimi Redis tashmë të hapur.",
       "redisCommand": "Ekzekuton një komandë Redis të lidhur (një komandë e vetme në një lidhje të re, pastaj shkëputet) dhe lëshon përgjigjen e saj.",
       "toast": "Shfaq një njoftim toast në ndërfaqen Restorm gjatë ekzekutimit të skenarit.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Pret një server HTTP të rremë lokal dhe dëgjon pa afat. `connected` aktivizohet sapo të fillojë të dëgjojë; çdo kërkesë e shërbyer riemeton të dhënat e veta në portin `served`. Serveri qëndron aktiv deri në një mbyllje HTTP (ose një Stop), pastaj aktivizohet `done`. Pa dalje response — shërben, nuk thërret jashtë.",
       "httpClose": "Ndalon një server fiktiv HTTP që tashmë po dëgjon (i deklaruar nga një nyje HTTP server) dhe çliron portin e tij.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Pret një server gRPC të rremë lokal dhe dëgjon pa afat. `connected` aktivizohet sapo të fillojë të dëgjojë; çdo thirrje e shërbyer riemeton të dhënat e veta në portin `served`. Serveri qëndron aktiv deri në një mbyllje të serverit gRPC (ose një Stop), pastaj aktivizohet `done`. Pa dalje response — shërben, nuk thërret jashtë.",
       "grpcServerClose": "Ndalon një server fiktiv gRPC që tashmë po dëgjon (i deklaruar nga një nyje gRPC server) dhe çliron portin e tij.",
       "soapListen": "Strehon një server mock SOAP lokal dhe dëgjon pafundësisht. Çdo kërkesë hyrëse drejtohet te një operacion i konfiguruar (sipas SOAPAction-it të saj ose emrit të operacionit në trup) dhe i përgjigjet me zarfin SOAP të paracaktuar (një operacion gabimi kthen `<soap:Fault>`). `connected` aktivizohet sapo serveri dëgjon; çdo kërkesë e shërbyer riemeton të dhënat e saj në portën `served`. Serveri qëndron aktiv deri në një mbyllje SOAP (ose një ndalim), pastaj aktivizohet `done`.",
       "soapClose": "Ndalon një server mock SOAP që tashmë po dëgjon (deklaruar nga një nyje serveri SOAP) dhe liron portën e tij.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Pret një server GraphQL të rremë lokal dhe dëgjon pa afat. `connected` aktivizohet sapo të fillojë të dëgjojë; çdo veprim i shërbyer riemeton të dhënat e veta në portin `served`. Serveri qëndron aktiv deri në një mbyllje GraphQL (ose një Stop), pastaj aktivizohet `done`. Pa dalje response — shërben, nuk thërret jashtë.",
       "graphqlClose": "Ndalon një server fiktiv GraphQL që tashmë po dëgjon (i deklaruar nga një nyje GraphQL server) dhe çliron portin e tij.",
       "odataListen": "Pret një shërbim lokal imitues OData v4 dhe dëgjon pafundësisht. `connected` aktivizohet sapo fillon të dëgjojë; çdo kërkesë e shërbyer riemeton të dhënat e saj në portën `served`. Serveri qëndron aktiv deri në një mbyllje OData (ose një Stop), pastaj aktivizohet `done`. Pa dalje response — shërben, nuk thërret nga jashtë.",
       "odataClose": "Ndalon një shërbim imitues OData që po dëgjon tashmë (i deklaruar nga një nyje serveri OData), duke liruar portën e tij.",
@@ -1993,43 +1993,43 @@
       "title": "Ekzekuto nga rreshti i komandës",
       "intro": "Ekzekutoni këtë skenar pa hapur aplikacionin (CI, cron, skript):",
       "byId": "Cakto sipas id-së",
-      "allLogs": "All logs",
+      "allLogs": "Të gjitha regjistrat",
       "note": "`--out file` e shkruan run-log-un edhe në një skedar.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekti.restorm>",
       "tokenPlaceholder": "<token_juaj>",
       "tokenNote": "Një ekzekutim headless kërkon një plan Restorm Pro dhe një token CI.",
       "tokenLink": "Merr një token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Emri i lidhjes",
+      "connectionNamePlaceholder": "emri i lidhjes",
+      "eventPlaceholder": "ngjarje",
+      "addEvent": "Shto ngjarje",
+      "connected": "i lidhur",
+      "others": "të tjera",
+      "connection": "lidhje",
+      "pickConnection": "— zgjidh një lidhje —",
+      "channelLabel": "Emri i kanalit",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Redakto payload-in",
       "started": "filloi"
     },
     "websocket": {
-      "message": "message"
+      "message": "mesazh"
     },
     "sse": {
-      "message": "message"
+      "message": "mesazh"
     },
     "grpc": {
-      "message": "message"
+      "message": "mesazh"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Riorganizo veprimet"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "hyrje",
+      "error": "gabim",
+      "done": "u krye"
     },
     "toast": {
       "title": "titulli",
@@ -2037,7 +2037,7 @@
       "duration": "kohëzgjatja (s)"
     },
     "http": {
-      "served": "served"
+      "served": "e shërbyer"
     },
     "actionOverride": {
       "configMissingShort": "Mungon konfigurimi",

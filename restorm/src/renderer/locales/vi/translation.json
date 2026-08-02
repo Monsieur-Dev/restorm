@@ -1210,10 +1210,10 @@
       "emptyRightClick": "Nhấp chuột phải vào chỗ trống để thêm hành động vào kịch bản của bạn"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Đường dẫn JSON",
       "ariaLabel": "Bộ chọn đường dẫn JSON",
       "pick": "Chọn từ kết quả",
-      "loading": "Loading…",
+      "loading": "Đang tải…",
       "noResult": "Chạy hành động nguồn để chọn một thuộc tính từ kết quả của nó."
     },
     "tab": {
@@ -1222,12 +1222,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Đổi màu",
+        "resetColor": "Đặt lại màu",
         "addNote": "Thêm / sửa ghi chú",
         "runOnEachEvent": "Chạy mỗi khi nhận sự kiện",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Nhân bản",
+        "delete": "Xóa",
         "deleteShortcut": "Del",
         "copy": "Sao chép",
         "paste": "Dán"
@@ -1237,9 +1237,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Đổi màu",
+        "resetColor": "Đặt lại màu",
+        "delete": "Xóa"
       }
     },
     "locked": "Đã khóa chỉnh sửa khi kịch bản đang chạy",
@@ -1298,49 +1298,49 @@
       "getVariable": "Lấy biến",
       "addToList": "Thêm vào danh sách",
       "removeFromList": "Xóa khỏi danh sách",
-      "cast": "Cast",
+      "cast": "Chuyển kiểu",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Mật mã",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Tính toán ngày",
+      "objectOp": "Thao tác đối tượng",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Ngẫu nhiên",
+      "throw": "Ném lỗi",
+      "retry": "Thử lại",
+      "listOp": "Thao tác danh sách",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Toán",
+      "schema": "Kiểm tra lược đồ",
+      "readFile": "Đọc tệp",
+      "writeFile": "Ghi tệp",
       "timer": "Bộ hẹn giờ",
       "code": "Mã",
       "socketioConnect": "Kết nối Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Gửi Socket.IO",
       "socketioClose": "Đóng kết nối Socket.IO",
       "socketioServerClose": "Đóng máy chủ Socket.IO",
       "websocketConnect": "Kết nối WebSocket",
       "sseConnect": "Kết nối SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Gửi WebSocket",
       "websocketClose": "Đóng kết nối WebSocket",
       "websocketServerClose": "Đóng máy chủ WebSocket",
       "sseClose": "Đóng kết nối SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Kết nối gRPC",
+      "grpcSend": "Gửi gRPC",
       "grpcClose": "Đóng kết nối gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Kết nối MQTT",
+      "mqttSend": "Xuất bản MQTT",
       "mqttClose": "Đóng kết nối MQTT",
       "amqpConnect": "Kết nối AMQP",
       "amqpPublish": "Xuất bản AMQP",
       "amqpClose": "Đóng kết nối AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Đăng ký Redis",
       "redisClose": "Đóng kết nối Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Lệnh Redis",
       "httpListen": "Máy chủ HTTP",
       "httpClose": "Đóng máy chủ HTTP",
       "grpcServerClose": "Đóng máy chủ gRPC",
@@ -1355,8 +1355,8 @@
       "stompConnect": "Kết nối STOMP",
       "stompSend": "Gửi STOMP",
       "stompClose": "Đóng kết nối STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Sản xuất Kafka",
+      "kafkaConsume": "Tiêu thụ Kafka",
       "kafkaClose": "Đóng kết nối Kafka",
       "grpcListen": "Máy chủ gRPC"
     },
@@ -1376,29 +1376,29 @@
     },
     "assert": {
       "message": "thông báo",
-      "operator": "operator",
+      "operator": "toán tử",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "bằng",
+        "ne": "khác",
+        "lt": "nhỏ hơn",
         "lte": "nhỏ hơn hoặc bằng",
-        "gt": "greater than",
+        "gt": "lớn hơn",
         "gte": "lớn hơn hoặc bằng",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "chứa",
+        "isString": "là chuỗi",
+        "isNumber": "là số",
+        "isBoolean": "là luận lý",
+        "isArray": "là danh sách",
+        "isObject": "là đối tượng",
+        "isNull": "là null",
+        "exists": "tồn tại",
+        "isEmpty": "rỗng",
+        "matchesRegex": "khớp regex",
         "isOneOf": "là một trong các giá trị",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "bằng sâu",
+        "lengthEq": "độ dài ==",
+        "lengthGt": "độ dài >",
+        "lengthLt": "độ dài <"
       }
     },
     "editRequest": "Sửa yêu cầu",
@@ -1406,8 +1406,8 @@
     "object": {
       "addProperty": "Thêm thuộc tính",
       "removeProperty": "Xóa thuộc tính",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Tên thuộc tính",
+      "propertyValue": "giá trị"
     },
     "output": {
       "outputName": "Tên đầu ra",
@@ -1415,7 +1415,7 @@
       "removeOutput": "Xóa"
     },
     "input": {
-      "name": "Name",
+      "name": "Tên",
       "defaultType": "Mặc định / kiểu",
       "addParam": "Thêm tham số",
       "removeParam": "Xóa"
@@ -1461,7 +1461,7 @@
       },
       "transform": {
         "emptyTemplate": "Mẫu không được để trống.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Đầu vào \"value\" phải được kết nối khi khuôn mẫu tham chiếu {{…}}."
       },
       "request": {
         "missing": "Yêu cầu được liên kết không còn tồn tại."
@@ -1503,12 +1503,12 @@
       "helpTitle": "Hành động này làm gì"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Múi giờ",
+      "formatLabel": "Định dạng",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Ngày/giờ",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Chuỗi"
       }
     },
     "callers": {
@@ -1516,8 +1516,8 @@
       "title": "Kịch bản này được gọi bởi:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Tham số chạy",
+      "run": "Chạy",
       "midRunTitle": "Yêu cầu nhập liệu"
     },
     "runHistory": {
@@ -1532,20 +1532,20 @@
       "unpin": "Bỏ ghim"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "từ",
+      "to": "đến",
+      "step": "bước",
+      "index": "chỉ số",
+      "done": "xong"
     },
     "while": {
-      "body": "body"
+      "body": "thân"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "vòng lặp"
     },
     "loop": {
-      "done": "done"
+      "done": "xong"
     },
     "breakpoint": {
       "add": "Thêm điểm dừng",
@@ -1558,84 +1558,84 @@
       "toggle": "Bật/tắt minimap"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "danh sách",
+      "values": "giá trị",
+      "result": "kết quả",
       "addValue": "Thêm giá trị",
       "removeValue": "Xóa giá trị",
       "updateVariable": "Cập nhật biến nguồn"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "giá trị",
+      "targetType": "chuyển sang",
+      "result": "kết quả",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "số",
+        "string": "chuỗi",
+        "boolean": "luận lý",
+        "date": "ngày",
+        "list": "danh sách"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "giá trị",
+      "operation": "thao tác",
+      "pattern": "mẫu",
+      "flags": "cờ",
+      "replacement": "chuỗi thay thế",
+      "result": "kết quả",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "trích xuất",
+        "extractAll": "trích xuất tất cả",
+        "test": "kiểm tra",
+        "replace": "thay thế",
+        "split": "tách"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Không phân biệt hoa thường",
         "m": "Multiline (^ và $ khớp với các ngắt dòng)",
         "s": "Dotall (. khớp với các dòng mới)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "giá trị",
+      "operation": "thao tác",
+      "indent": "thụt lề",
+      "result": "kết quả",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "phân tích",
+        "stringify": "tuần tự hóa"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "giá trị",
+      "operation": "thao tác",
+      "indent": "thụt lề",
+      "result": "kết quả",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "phân tích",
+        "stringify": "tuần tự hóa"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "giá trị",
+      "operation": "thao tác",
+      "indent": "thụt lề",
+      "result": "kết quả",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "phân tích",
+        "stringify": "tuần tự hóa"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "giá trị",
+      "operation": "thao tác",
+      "key": "khóa",
+      "keyPlaceholder": "bí mật",
+      "result": "kết quả",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "mã hóa base64",
+        "base64Decode": "giải mã base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1646,182 +1646,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "kết quả"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "ngày",
+      "operation": "thao tác",
+      "amount": "lượng",
+      "unitLabel": "đơn vị",
+      "format": "định dạng",
+      "other": "ngày thứ hai",
+      "result": "kết quả",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "cộng",
+        "subtract": "trừ",
+        "format": "định dạng lại",
+        "diff": "hiệu"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "mili giây",
+        "seconds": "giây",
+        "minutes": "phút",
+        "hours": "giờ",
+        "days": "ngày",
+        "weeks": "tuần",
+        "months": "tháng",
+        "years": "năm"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "đối tượng",
+      "operation": "thao tác",
+      "path": "đường dẫn",
+      "keys": "khóa",
+      "setValue": "giá trị",
+      "mergeWith": "hợp nhất với",
+      "result": "kết quả",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "đọc",
+        "set": "ghi",
+        "merge": "hợp nhất",
+        "pick": "giữ lại",
+        "omit": "bỏ",
+        "keys": "khóa",
+        "values": "giá trị"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "giá trị",
+      "operation": "thao tác",
+      "result": "kết quả",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "mã hóa",
+        "decode": "giải mã",
+        "parseQuery": "phân tích truy vấn",
+        "buildQuery": "dựng truy vấn",
+        "parseUrl": "phân tích URL"
       }
     },
     "random": {
-      "operation": "operation",
-      "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "operation": "thao tác",
+      "min": "tối thiểu",
+      "max": "tối đa",
+      "length": "độ dài",
+      "items": "mục",
+      "seed": "hạt giống (tùy chọn)",
+      "seedPlaceholder": "tái lập được",
+      "result": "kết quả",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "số nguyên",
+        "float": "số thực",
+        "string": "chuỗi",
+        "boolean": "luận lý",
+        "pick": "chọn"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "thông báo"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "số lần thử tối đa",
+      "backoff": "chiến lược chờ",
+      "delay": "độ trễ",
+      "factor": "hệ số",
       "retryOnError": "thử lại khi lỗi",
       "retryOnStatus": "thử lại theo trạng thái HTTP",
       "retryOnFailure": "thử lại với mọi mã không phải 2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "lần thử",
+      "exhausted": "đã cạn",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "cố định",
+        "linear": "tuyến tính",
+        "exponential": "lũy thừa"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Danh sách",
+      "math": "Toán",
+      "dataFormats": "Định dạng dữ liệu",
+      "encoding": "Mã hóa",
       "time": "Hẹn giờ",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Thuật toán",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "danh sách",
+      "operation": "thao tác",
+      "result": "kết quả",
+      "key": "khóa",
+      "order": "thứ tự",
+      "depth": "độ sâu",
+      "size": "kích thước",
+      "start": "bắt đầu",
+      "end": "kết thúc",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sắp xếp",
+        "unique": "duy nhất",
+        "reverse": "đảo ngược",
+        "flatten": "làm phẳng",
+        "chunk": "chia khối",
+        "slice": "cắt lát",
+        "groupBy": "nhóm theo"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "giá trị",
+      "operation": "thao tác",
+      "result": "kết quả",
+      "delimiter": "dấu phân cách",
+      "header": "hàng tiêu đề",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "phân tích",
+        "stringify": "tuần tự hóa"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
-      "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "a": "giá trị",
+      "operation": "thao tác",
+      "result": "kết quả",
+      "b": "với",
+      "min": "tối thiểu",
+      "max": "tối đa",
+      "precision": "độ chính xác",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
-        "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "round": "làm tròn",
+        "floor": "làm tròn xuống",
+        "ceil": "làm tròn lên",
+        "trunc": "cắt bớt",
+        "abs": "giá trị tuyệt đối",
+        "sign": "dấu",
+        "sqrt": "căn bậc hai",
+        "min": "tối thiểu",
+        "max": "tối đa",
+        "clamp": "giới hạn"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "giá trị",
+      "schema": "Lược đồ JSON",
+      "valid": "hợp lệ",
+      "invalid": "không hợp lệ",
+      "errors": "lỗi",
       "editTitle": "Sửa JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "đường dẫn",
+      "content": "nội dung"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "đường dẫn",
+      "mode": "chế độ",
+      "content": "nội dung"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Sửa",
+      "edit": "Mở trình soạn thảo",
+      "moreLines": "+{{count}} dòng",
+      "editTemplate": "Sửa khuôn mẫu"
     },
     "timer": {
       "mode": "chế độ",
@@ -1889,7 +1889,7 @@
       "waitUntil": "Tạm dừng cho đến một ngày/giờ nhất định, rồi tiếp tục.",
       "now": "Phát ra ngày và giờ hiện tại.",
       "timer": "Kích hoạt phần thân của nó theo một khoảng lặp lại hoặc một lịch cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Tính a + − × ÷ … của hai số.",
       "comparator": "So sánh hai giá trị và phát ra true hoặc false.",
       "boolean": "Kết hợp các giá trị boolean với and / or / xor / not.",
       "object": "Dựng một đối tượng từ các đầu vào được đặt tên của nó.",
@@ -1902,7 +1902,7 @@
       "json": "Phân tích một chuỗi JSON, hoặc tuần tự hóa một giá trị thành JSON.",
       "xml": "Phân tích một chuỗi XML, hoặc tuần tự hóa một giá trị thành XML.",
       "yaml": "Phân tích một chuỗi YAML, hoặc tuần tự hóa một giá trị thành YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Băm hoặc mã hóa một chuỗi (base64, md5, sha…, hmac, uuid).",
       "jwt": "Giải mã một token JWT thành header, payload và chữ ký.",
       "datetime": "Dịch chuyển, định dạng hoặc tính khoảng cách một ngày.",
       "retry": "Chạy lại phần thân của nó cho đến khi thành công, với một chính sách backoff.",
@@ -1911,7 +1911,7 @@
       "random": "Tạo một số, chuỗi, boolean hoặc lựa chọn ngẫu nhiên.",
       "listOp": "Định hình lại một danh sách (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Phân tích một chuỗi CSV, hoặc tuần tự hóa một danh sách thành CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Thực hiện một phép toán vô hướng (làm tròn, abs, căn, tối thiểu, tối đa, giới hạn…).",
       "schema": "Kiểm chứng một giá trị theo một JSON Schema.",
       "readFile": "Đọc nội dung văn bản của một tệp.",
       "writeFile": "Ghi hoặc nối thêm văn bản vào một tệp.",
@@ -1950,13 +1950,13 @@
       "redisClose": "Đóng một kết nối đăng ký Redis đang mở.",
       "redisCommand": "Chạy một lệnh Redis đã gắn (một lệnh duy nhất trên kết nối mới, sau đó ngắt kết nối) và phát ra phản hồi của nó.",
       "toast": "Phát ra một thông báo toast trong giao diện Restorm khi kịch bản chạy.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Lưu trữ một máy chủ giả lập HTTP cục bộ và lắng nghe vô thời hạn. `connected` kích hoạt ngay khi bắt đầu lắng nghe; mỗi yêu cầu được phục vụ phát lại dữ liệu của nó trên cổng `served`. Máy chủ vẫn hoạt động cho đến một lần đóng HTTP (hoặc một Stop), rồi `done` kích hoạt. Không có đầu ra response — nó phục vụ, không gọi ra ngoài.",
       "httpClose": "Dừng một máy chủ giả lập HTTP đang lắng nghe (được khai báo bởi một nút máy chủ HTTP), giải phóng cổng của nó.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Lưu trữ một máy chủ giả lập gRPC cục bộ và lắng nghe vô thời hạn. `connected` kích hoạt ngay khi bắt đầu lắng nghe; mỗi lệnh gọi được phục vụ phát lại dữ liệu của nó trên cổng `served`. Máy chủ vẫn hoạt động cho đến một lần đóng máy chủ gRPC (hoặc một Stop), rồi `done` kích hoạt. Không có đầu ra response — nó phục vụ, không gọi ra ngoài.",
       "grpcServerClose": "Dừng một máy chủ giả lập gRPC đang lắng nghe (được khai báo bởi một nút máy chủ gRPC), giải phóng cổng của nó.",
       "soapListen": "Lưu trữ một máy chủ mô phỏng SOAP cục bộ và lắng nghe vô thời hạn. Mỗi yêu cầu đến được định tuyến đến một thao tác đã cấu hình (theo SOAPAction của nó hoặc tên thao tác trong phần thân) và được trả lời bằng phong bì SOAP định sẵn (thao tác lỗi trả về `<soap:Fault>`). `connected` kích hoạt ngay khi máy chủ lắng nghe; mỗi yêu cầu được phục vụ sẽ phát lại dữ liệu của nó trên cổng `served`. Máy chủ vẫn hoạt động cho đến khi đóng SOAP (hoặc dừng), sau đó `done` kích hoạt.",
       "soapClose": "Dừng một máy chủ mô phỏng SOAP đang lắng nghe (được khai báo bởi một nút máy chủ SOAP) và giải phóng cổng của nó.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Lưu trữ một máy chủ giả lập GraphQL cục bộ và lắng nghe vô thời hạn. `connected` kích hoạt ngay khi bắt đầu lắng nghe; mỗi thao tác được phục vụ phát lại dữ liệu của nó trên cổng `served`. Máy chủ vẫn hoạt động cho đến một lần đóng GraphQL (hoặc một Stop), rồi `done` kích hoạt. Không có đầu ra response — nó phục vụ, không gọi ra ngoài.",
       "graphqlClose": "Dừng một máy chủ giả lập GraphQL đang lắng nghe (được khai báo bởi một nút máy chủ GraphQL), giải phóng cổng của nó.",
       "odataListen": "Lưu trữ một dịch vụ mô phỏng OData v4 cục bộ và lắng nghe vô thời hạn. `connected` kích hoạt ngay khi bắt đầu lắng nghe; mỗi yêu cầu được phục vụ phát lại dữ liệu của nó trên cổng `served`. Máy chủ vẫn hoạt động cho đến khi đóng OData (hoặc Stop), sau đó `done` kích hoạt. Không có đầu ra response — nó phục vụ, không gọi ra ngoài.",
       "odataClose": "Dừng một dịch vụ mô phỏng OData đang lắng nghe (được khai báo bởi một nút máy chủ OData), giải phóng cổng của nó.",
@@ -1992,43 +1992,43 @@
       "title": "Chạy từ dòng lệnh",
       "intro": "Chạy kịch bản này mà không cần mở ứng dụng (CI, cron, script):",
       "byId": "Chỉ định theo id",
-      "allLogs": "All logs",
+      "allLogs": "Tất cả nhật ký",
       "note": "`--out file` cũng ghi run-log vào một tệp.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<dự-án.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Chạy headless yêu cầu gói Restorm Pro và token CI.",
       "tokenLink": "Lấy token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Tên kết nối",
+      "connectionNamePlaceholder": "tên kết nối",
+      "eventPlaceholder": "sự kiện",
+      "addEvent": "Thêm sự kiện",
+      "connected": "đã kết nối",
+      "others": "còn lại",
+      "connection": "kết nối",
+      "pickConnection": "— chọn một kết nối —",
+      "channelLabel": "Tên kênh",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Sửa payload",
       "started": "đã khởi động"
     },
     "websocket": {
-      "message": "message"
+      "message": "thông báo"
     },
     "sse": {
-      "message": "message"
+      "message": "thông báo"
     },
     "grpc": {
-      "message": "message"
+      "message": "thông báo"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Sắp xếp lại hành động"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "vào",
+      "error": "lỗi",
+      "done": "xong"
     },
     "toast": {
       "title": "tiêu đề",
@@ -2036,7 +2036,7 @@
       "duration": "thời lượng (giây)"
     },
     "http": {
-      "served": "served"
+      "served": "đã phục vụ"
     },
     "actionOverride": {
       "configMissingShort": "Thiếu cấu hình",

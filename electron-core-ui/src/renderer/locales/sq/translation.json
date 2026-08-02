@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Shkruani një adresë më sipër për të filluar shfletimin."
+    "back": "Prapa",
+    "refresh": "Rifresko",
+    "go": "Shko",
+    "address": "Adresa",
+    "emptyHint": "Shkruaj një adresë më sipër për të filluar shfletimin."
   },
   "bookmarkRibbon": {
     "addBookmark": "Shto faqeshënues"

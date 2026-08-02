@@ -1213,10 +1213,10 @@
       "emptyRightClick": "Kliknij prawym przyciskiem myszy puste miejsce, aby dodać akcje do scenariusza"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Ścieżka JSON",
       "ariaLabel": "Selektor ścieżki JSON",
       "pick": "Wybierz z wyniku",
-      "loading": "Loading…",
+      "loading": "Wczytywanie…",
       "noResult": "Uruchom akcję źródłową, aby wybrać właściwość z jej wyniku."
     },
     "tab": {
@@ -1225,12 +1225,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Zmień kolor",
+        "resetColor": "Przywróć kolor",
         "addNote": "Dodaj/edytuj notatkę",
         "runOnEachEvent": "Uruchom przy każdym otrzymanym zdarzeniu",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Duplikuj",
+        "delete": "Usuń",
         "deleteShortcut": "Del",
         "copy": "Kopiuj",
         "paste": "Wklej"
@@ -1240,9 +1240,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Zmień kolor",
+        "resetColor": "Przywróć kolor",
+        "delete": "Usuń"
       }
     },
     "locked": "Edycja zablokowana podczas działania scenariusza",
@@ -1301,49 +1301,49 @@
       "getVariable": "Pobierz zmienną",
       "addToList": "Dodaj do listy",
       "removeFromList": "Usuń z listy",
-      "cast": "Cast",
+      "cast": "Konwertuj",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Krypto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Obliczenia na datach",
+      "objectOp": "Operacje na obiektach",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Losowe",
+      "throw": "Zgłoś błąd",
+      "retry": "Ponów",
+      "listOp": "Operacje na listach",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematyka",
+      "schema": "Waliduj schemat",
+      "readFile": "Odczytaj plik",
+      "writeFile": "Zapisz plik",
       "timer": "Czasomierz",
       "code": "Kod",
       "socketioConnect": "Połączenie Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Wysyłka Socket.IO",
       "socketioClose": "Zamknij połączenie Socket.IO",
       "socketioServerClose": "Zamknij serwer Socket.IO",
       "websocketConnect": "Połączenie WebSocket",
       "sseConnect": "Połączenie SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Wysyłka WebSocket",
       "websocketClose": "Zamknij połączenie WebSocket",
       "websocketServerClose": "Zamknij serwer WebSocket",
       "sseClose": "Zamknij połączenie SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Połączenie gRPC",
+      "grpcSend": "Wysyłka gRPC",
       "grpcClose": "Zamknij połączenie gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Połączenie MQTT",
+      "mqttSend": "Publikacja MQTT",
       "mqttClose": "Zamknij połączenie MQTT",
       "amqpConnect": "Połączenie AMQP",
       "amqpPublish": "Publikacja AMQP",
       "amqpClose": "Zamknij połączenie AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Subskrypcja Redis",
       "redisClose": "Zamknij połączenie Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Polecenie Redis",
       "httpListen": "Serwer HTTP",
       "httpClose": "Zamknij serwer HTTP",
       "grpcServerClose": "Zamknij serwer gRPC",
@@ -1358,8 +1358,8 @@
       "stompConnect": "Połączenie STOMP",
       "stompSend": "Wysyłanie STOMP",
       "stompClose": "Zamknij połączenie STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Produkcja Kafka",
+      "kafkaConsume": "Konsumpcja Kafka",
       "kafkaClose": "Zamknij połączenie Kafka",
       "grpcListen": "Serwer gRPC"
     },
@@ -1381,27 +1381,27 @@
       "message": "komunikat",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "równe",
+        "ne": "różne",
+        "lt": "mniejsze niż",
         "lte": "mniejsze lub równe",
-        "gt": "greater than",
+        "gt": "większe niż",
         "gte": "większe lub równe",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "zawiera",
+        "isString": "jest ciągiem znaków",
+        "isNumber": "jest liczbą",
+        "isBoolean": "jest wartością logiczną",
+        "isArray": "jest listą",
+        "isObject": "jest obiektem",
+        "isNull": "jest null",
+        "exists": "istnieje",
+        "isEmpty": "jest puste",
+        "matchesRegex": "pasuje do regexu",
         "isOneOf": "jest jednym z",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "głęboka równość",
+        "lengthEq": "długość ==",
+        "lengthGt": "długość >",
+        "lengthLt": "długość <"
       }
     },
     "editRequest": "Edytuj żądanie",
@@ -1409,8 +1409,8 @@
     "object": {
       "addProperty": "Dodaj właściwość",
       "removeProperty": "Usuń właściwość",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Nazwa właściwości",
+      "propertyValue": "wartość"
     },
     "output": {
       "outputName": "Nazwa wyjścia",
@@ -1418,7 +1418,7 @@
       "removeOutput": "Usuń"
     },
     "input": {
-      "name": "Name",
+      "name": "Nazwa",
       "defaultType": "Domyślny / typ",
       "addParam": "Dodaj parametr",
       "removeParam": "Usuń"
@@ -1464,7 +1464,7 @@
       },
       "transform": {
         "emptyTemplate": "Szablon nie może być pusty.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Wejście \"value\" musi być podłączone, gdy szablon odwołuje się do {{…}}."
       },
       "request": {
         "missing": "Powiązane żądanie już nie istnieje."
@@ -1506,12 +1506,12 @@
       "helpTitle": "Co robi ta akcja"
     },
     "now": {
-      "timezone": "Timezone",
+      "timezone": "Strefa czasowa",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Data/godzina",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Ciąg znaków"
       }
     },
     "callers": {
@@ -1519,8 +1519,8 @@
       "title": "Ten scenariusz jest wywoływany przez:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Parametry wykonania",
+      "run": "Uruchom",
       "midRunTitle": "Wymagane dane"
     },
     "runHistory": {
@@ -1535,20 +1535,20 @@
       "unpin": "Odepnij"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "od",
+      "to": "do",
+      "step": "krok",
+      "index": "indeks",
+      "done": "gotowe"
     },
     "while": {
-      "body": "body"
+      "body": "treść"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "pętla"
     },
     "loop": {
-      "done": "done"
+      "done": "gotowe"
     },
     "breakpoint": {
       "add": "Dodaj punkt przerwania",
@@ -1561,84 +1561,84 @@
       "toggle": "Przełącz minimapę"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "lista",
+      "values": "wartości",
+      "result": "wynik",
       "addValue": "Dodaj wartość",
       "removeValue": "Usuń wartość",
       "updateVariable": "Zaktualizuj zmienną źródłową"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "wartość",
+      "targetType": "konwertuj na",
+      "result": "wynik",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "liczba",
+        "string": "ciąg znaków",
+        "boolean": "wartość logiczna",
+        "date": "data",
+        "list": "lista"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "wartość",
+      "operation": "operacja",
+      "pattern": "wzorzec",
+      "flags": "flagi",
+      "replacement": "zamiennik",
+      "result": "wynik",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "wyodrębnij",
+        "extractAll": "wyodrębnij wszystko",
+        "test": "testuj",
+        "replace": "zamień",
+        "split": "podziel"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Bez rozróżniania wielkości liter",
         "m": "Wielowierszowy (^ i $ dopasowują końce wierszy)",
         "s": "Dotall (. dopasowuje znaki nowej linii)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "wartość",
+      "operation": "operacja",
+      "indent": "wcięcie",
+      "result": "wynik",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsuj",
+        "stringify": "serializuj"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "wartość",
+      "operation": "operacja",
+      "indent": "wcięcie",
+      "result": "wynik",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsuj",
+        "stringify": "serializuj"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "wartość",
+      "operation": "operacja",
+      "indent": "wcięcie",
+      "result": "wynik",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsuj",
+        "stringify": "serializuj"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "wartość",
+      "operation": "operacja",
+      "key": "klucz",
+      "keyPlaceholder": "sekret",
+      "result": "wynik",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "koduj base64",
+        "base64Decode": "dekoduj base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1649,182 +1649,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "wynik"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
+      "value": "data",
+      "operation": "operacja",
+      "amount": "ilość",
+      "unitLabel": "jednostka",
       "format": "format",
-      "other": "second date",
-      "result": "result",
+      "other": "druga data",
+      "result": "wynik",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "dodaj",
+        "subtract": "odejmij",
+        "format": "formatuj",
+        "diff": "różnica"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milisekundy",
+        "seconds": "sekundy",
+        "minutes": "minuty",
+        "hours": "godziny",
+        "days": "dni",
+        "weeks": "tygodnie",
+        "months": "miesiące",
+        "years": "lata"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "obiekt",
+      "operation": "operacja",
+      "path": "ścieżka",
+      "keys": "klucze",
+      "setValue": "wartość",
+      "mergeWith": "scal z",
+      "result": "wynik",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "odczytaj",
+        "set": "zapisz",
+        "merge": "scal",
+        "pick": "zachowaj",
+        "omit": "usuń",
+        "keys": "klucze",
+        "values": "wartości"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "wartość",
+      "operation": "operacja",
+      "result": "wynik",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "koduj",
+        "decode": "dekoduj",
+        "parseQuery": "parsuj zapytanie",
+        "buildQuery": "zbuduj zapytanie",
+        "parseUrl": "parsuj URL"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "operacja",
       "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "max": "maks",
+      "length": "długość",
+      "items": "elementy",
+      "seed": "ziarno (opcjonalne)",
+      "seedPlaceholder": "powtarzalne",
+      "result": "wynik",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "liczba całkowita",
+        "float": "liczba dziesiętna",
+        "string": "ciąg znaków",
+        "boolean": "wartość logiczna",
+        "pick": "wylosuj"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "komunikat"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "maks. prób",
+      "backoff": "strategia oczekiwania",
+      "delay": "opóźnienie",
+      "factor": "współczynnik",
       "retryOnError": "ponów przy błędzie",
       "retryOnStatus": "ponów przy statusie HTTP",
       "retryOnFailure": "ponów przy każdym non-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "próba",
+      "exhausted": "wyczerpano",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "stałe",
+        "linear": "liniowe",
+        "exponential": "wykładnicze"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Listy",
+      "math": "Matematyka",
+      "dataFormats": "Formaty danych",
+      "encoding": "Kodowanie",
       "time": "Harmonogram",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algorytmy",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "lista",
+      "operation": "operacja",
+      "result": "wynik",
+      "key": "klucz",
+      "order": "kolejność",
+      "depth": "głębokość",
+      "size": "rozmiar",
+      "start": "początek",
+      "end": "koniec",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sortuj",
+        "unique": "unikalne",
+        "reverse": "odwróć",
+        "flatten": "spłaszcz",
+        "chunk": "podziel na części",
+        "slice": "wytnij",
+        "groupBy": "grupuj według"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "wartość",
+      "operation": "operacja",
+      "result": "wynik",
+      "delimiter": "separator",
+      "header": "wiersz nagłówka",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsuj",
+        "stringify": "serializuj"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "wartość",
+      "operation": "operacja",
+      "result": "wynik",
+      "b": "z",
       "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "max": "maks",
+      "precision": "precyzja",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "zaokrąglij",
+        "floor": "zaokrąglij w dół",
+        "ceil": "zaokrąglij w górę",
+        "trunc": "obetnij",
+        "abs": "wartość bezwzględna",
+        "sign": "znak",
+        "sqrt": "pierwiastek kwadratowy",
         "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "max": "maks",
+        "clamp": "ogranicz"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "wartość",
+      "schema": "Schemat JSON",
+      "valid": "prawidłowe",
+      "invalid": "nieprawidłowe",
+      "errors": "błędy",
       "editTitle": "Edytuj JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "ścieżka",
+      "content": "zawartość"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "ścieżka",
+      "mode": "tryb",
+      "content": "zawartość"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Edytuj",
+      "edit": "Otwórz edytor",
+      "moreLines": "+{{count}} wierszy",
+      "editTemplate": "Edytuj szablon"
     },
     "timer": {
       "mode": "tryb",
@@ -1892,7 +1892,7 @@
       "waitUntil": "Wstrzymuje do podanej daty/godziny, następnie kontynuuje.",
       "now": "Emituje bieżącą datę i godzinę.",
       "timer": "Wyzwala swoje ciało w powtarzającym się interwale lub według harmonogramu cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Oblicza a + − × ÷ … dwóch liczb.",
       "comparator": "Porównuje dwie wartości i zwraca prawda lub fałsz.",
       "boolean": "Łączy wartości logiczne za pomocą and / or / xor / not.",
       "object": "Buduje obiekt na podstawie nazwanych wejść.",
@@ -1905,7 +1905,7 @@
       "json": "Parsuje ciąg JSON lub serializuje wartość do JSON.",
       "xml": "Parsuje ciąg XML lub serializuje wartość do XML.",
       "yaml": "Parsuje ciąg YAML lub serializuje wartość do YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Haszuje lub koduje ciąg znaków (base64, md5, sha…, hmac, uuid).",
       "jwt": "Dekoduje token JWT na header, payload i signature.",
       "datetime": "Przesuwa, formatuje lub porównuje datę.",
       "retry": "Ponawia swoje ciało aż do powodzenia, ze strategią backoff.",
@@ -1914,7 +1914,7 @@
       "random": "Generuje losową liczbę, ciąg, boolean lub wybór.",
       "listOp": "Przekształca listę (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Parsuje ciąg CSV lub serializuje listę do CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Wykonuje operację skalarną (zaokrąglij, abs, pierwiastek, min, maks, ogranicz…).",
       "schema": "Waliduje wartość względem JSON Schema.",
       "readFile": "Odczytuje tekstową zawartość pliku.",
       "writeFile": "Zapisuje lub dopisuje tekst do pliku.",
@@ -1953,13 +1953,13 @@
       "redisClose": "Zamyka już otwarte połączenie subskrypcji Redis.",
       "redisCommand": "Uruchamia powiązane polecenie Redis (jedno polecenie na nowym połączeniu, a następnie rozłączenie) i emituje jego odpowiedź.",
       "toast": "Wyświetla powiadomienie toast w interfejsie Restorm podczas działania scenariusza.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Hostuje lokalny serwer mock HTTP i nasłuchuje bez końca. `connected` uruchamia się, gdy tylko zacznie nasłuchiwać; każde obsłużone żądanie ponownie emituje swoje dane na porcie `served`. Serwer działa aż do zamknięcia HTTP (lub Stop), po czym uruchamia się `done`. Brak wyjścia response — obsługuje, nie wywołuje na zewnątrz.",
       "httpClose": "Zatrzymuje już nasłuchujący próbny serwer HTTP (zadeklarowany przez węzeł HTTP server) i zwalnia jego port.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Hostuje lokalny serwer mock gRPC i nasłuchuje bez końca. `connected` uruchamia się, gdy tylko zacznie nasłuchiwać; każde obsłużone wywołanie ponownie emituje swoje dane na porcie `served`. Serwer działa aż do zamknięcia serwera gRPC (lub Stop), po czym uruchamia się `done`. Brak wyjścia response — obsługuje, nie wywołuje na zewnątrz.",
       "grpcServerClose": "Zatrzymuje już nasłuchujący próbny serwer gRPC (zadeklarowany przez węzeł gRPC server) i zwalnia jego port.",
       "soapListen": "Hostuje lokalny serwer mock SOAP i nasłuchuje bez ograniczeń. Każde przychodzące żądanie jest kierowane do skonfigurowanej operacji (na podstawie jego SOAPAction lub nazwy operacji w treści) i otrzymuje odpowiedź w postaci predefiniowanej koperty SOAP (operacja błędu zwraca `<soap:Fault>`). `connected` uruchamia się, gdy tylko serwer nasłuchuje; każde obsłużone żądanie ponownie emituje swoje dane na porcie `served`. Serwer pozostaje aktywny do zamknięcia SOAP (lub zatrzymania), po czym uruchamia się `done`.",
       "soapClose": "Zatrzymuje już nasłuchujący serwer mock SOAP (zadeklarowany przez węzeł serwera SOAP) i zwalnia jego port.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Hostuje lokalny serwer mock GraphQL i nasłuchuje bez końca. `connected` uruchamia się, gdy tylko zacznie nasłuchiwać; każda obsłużona operacja ponownie emituje swoje dane na porcie `served`. Serwer działa aż do zamknięcia GraphQL (lub Stop), po czym uruchamia się `done`. Brak wyjścia response — obsługuje, nie wywołuje na zewnątrz.",
       "graphqlClose": "Zatrzymuje już nasłuchujący próbny serwer GraphQL (zadeklarowany przez węzeł GraphQL server) i zwalnia jego port.",
       "odataListen": "Hostuje lokalną usługę próbną OData v4 i nasłuchuje bezterminowo. Port `connected` uruchamia się, gdy tylko zacznie nasłuchiwać; każde obsłużone żądanie ponownie wysyła swoje dane na porcie `served`. Serwer działa aż do zamknięcia OData (lub zatrzymania), po czym uruchamia się port `done`. Brak wyjścia response — obsługuje, nie wywołuje na zewnątrz.",
       "odataClose": "Zatrzymuje już nasłuchującą usługę próbną OData (zadeklarowaną przez węzeł serwera OData) i zwalnia jej port.",
@@ -1995,43 +1995,43 @@
       "title": "Uruchom z wiersza poleceń",
       "intro": "Uruchom ten scenariusz bez otwierania aplikacji (CI, cron, skrypt):",
       "byId": "Wskaż po id",
-      "allLogs": "All logs",
+      "allLogs": "Wszystkie logi",
       "note": "`--out file` zapisuje run-log także do pliku.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekt.restorm>",
       "tokenPlaceholder": "<twój_token>",
       "tokenNote": "Uruchomienie headless wymaga planu Restorm Pro i tokenu CI.",
       "tokenLink": "Uzyskaj token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Nazwa połączenia",
+      "connectionNamePlaceholder": "nazwa połączenia",
+      "eventPlaceholder": "zdarzenie",
+      "addEvent": "Dodaj zdarzenie",
+      "connected": "połączono",
+      "others": "pozostałe",
+      "connection": "połączenie",
+      "pickConnection": "— wybierz połączenie —",
+      "channelLabel": "Nazwa kanału",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Edytuj payload",
       "started": "uruchomiono"
     },
     "websocket": {
-      "message": "message"
+      "message": "komunikat"
     },
     "sse": {
-      "message": "message"
+      "message": "komunikat"
     },
     "grpc": {
-      "message": "message"
+      "message": "komunikat"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Uporządkuj akcje"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "wejście",
+      "error": "błąd",
+      "done": "gotowe"
     },
     "toast": {
       "title": "tytuł",
@@ -2039,7 +2039,7 @@
       "duration": "czas trwania (s)"
     },
     "http": {
-      "served": "served"
+      "served": "obsłużono"
     },
     "actionOverride": {
       "configMissingShort": "Brak konfiguracji",

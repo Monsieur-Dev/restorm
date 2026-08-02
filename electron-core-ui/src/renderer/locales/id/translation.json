@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Masukkan alamat di atas untuk mulai menjelajah."
+    "back": "Kembali",
+    "refresh": "Muat ulang",
+    "go": "Buka",
+    "address": "Alamat",
+    "emptyHint": "Masukkan alamat di atas untuk mulai menjelajah."
   },
   "bookmarkRibbon": {
     "addBookmark": "Tambah penanda"

@@ -1211,10 +1211,10 @@
       "emptyRightClick": "Højreklik på et tomt sted for at tilføje handlinger til dit scenarie"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON-sti",
       "ariaLabel": "JSON-sti-vælger",
       "pick": "Vælg fra resultat",
-      "loading": "Loading…",
+      "loading": "Indlæser…",
       "noResult": "Kør kildehandlingen for at vælge en egenskab fra dens resultat."
     },
     "tab": {
@@ -1223,12 +1223,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Skift farve",
+        "resetColor": "Nulstil farve",
         "addNote": "Tilføj/rediger note",
         "runOnEachEvent": "Kør ved hver modtaget hændelse",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Duplikér",
+        "delete": "Slet",
         "deleteShortcut": "Del",
         "copy": "Kopiér",
         "paste": "Indsæt"
@@ -1238,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Skift farve",
+        "resetColor": "Nulstil farve",
+        "delete": "Slet"
       }
     },
     "locked": "Redigering låst, mens scenariet kører",
@@ -1299,49 +1299,49 @@
       "getVariable": "Hent variabel",
       "addToList": "Føj til liste",
       "removeFromList": "Fjern fra liste",
-      "cast": "Cast",
+      "cast": "Konvertér",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Krypto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Datoberegning",
+      "objectOp": "Objektoperationer",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Tilfældig",
+      "throw": "Kast fejl",
+      "retry": "Gentag",
+      "listOp": "Listeoperationer",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematik",
+      "schema": "Validér skema",
+      "readFile": "Læs fil",
+      "writeFile": "Skriv fil",
       "timer": "Timer",
       "code": "Kode",
       "socketioConnect": "Socket.IO-forbindelse",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO-afsendelse",
       "socketioClose": "Luk Socket.IO-forbindelse",
       "socketioServerClose": "Luk Socket.IO-server",
       "websocketConnect": "WebSocket-forbindelse",
       "sseConnect": "SSE-forbindelse",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket-afsendelse",
       "websocketClose": "Luk WebSocket-forbindelse",
       "websocketServerClose": "Luk WebSocket-server",
       "sseClose": "Luk SSE-forbindelse",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC-forbindelse",
+      "grpcSend": "gRPC-afsendelse",
       "grpcClose": "Luk gRPC-forbindelse",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT-forbindelse",
+      "mqttSend": "MQTT-udgivelse",
       "mqttClose": "Luk MQTT-forbindelse",
       "amqpConnect": "AMQP-forbindelse",
       "amqpPublish": "AMQP-udgivelse",
       "amqpClose": "Luk AMQP-forbindelse",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis-abonnement",
       "redisClose": "Luk Redis-forbindelse",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis-kommando",
       "httpListen": "HTTP-server",
       "httpClose": "Luk HTTP-server",
       "grpcServerClose": "Luk gRPC-server",
@@ -1356,8 +1356,8 @@
       "stompConnect": "STOMP-forbindelse",
       "stompSend": "STOMP-afsendelse",
       "stompClose": "Luk STOMP-forbindelse",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka-produktion",
+      "kafkaConsume": "Kafka-forbrug",
       "kafkaClose": "Luk Kafka-forbindelse",
       "grpcListen": "gRPC-server"
     },
@@ -1379,27 +1379,27 @@
       "message": "besked",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "lig med",
+        "ne": "ikke lig med",
+        "lt": "mindre end",
         "lte": "mindre end eller lig med",
-        "gt": "greater than",
+        "gt": "større end",
         "gte": "større end eller lig med",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "indeholder",
+        "isString": "er tekst",
+        "isNumber": "er tal",
+        "isBoolean": "er boolean",
+        "isArray": "er liste",
+        "isObject": "er objekt",
+        "isNull": "er null",
+        "exists": "findes",
+        "isEmpty": "er tom",
+        "matchesRegex": "matcher regex",
         "isOneOf": "er en af",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "dybt lig",
+        "lengthEq": "længde ==",
+        "lengthGt": "længde >",
+        "lengthLt": "længde <"
       }
     },
     "editRequest": "Rediger anmodning",
@@ -1407,8 +1407,8 @@
     "object": {
       "addProperty": "Tilføj egenskab",
       "removeProperty": "Fjern egenskab",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Egenskabsnavn",
+      "propertyValue": "værdi"
     },
     "output": {
       "outputName": "Outputnavn",
@@ -1416,7 +1416,7 @@
       "removeOutput": "Fjern"
     },
     "input": {
-      "name": "Name",
+      "name": "Navn",
       "defaultType": "Standard / type",
       "addParam": "Tilføj parameter",
       "removeParam": "Fjern"
@@ -1462,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "Skabelonen må ikke være tom.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Indgangen \"value\" skal være forbundet, når skabelonen refererer til {{…}}."
       },
       "request": {
         "missing": "Den tilknyttede anmodning findes ikke længere."
@@ -1504,12 +1504,12 @@
       "helpTitle": "Hvad denne handling gør"
     },
     "now": {
-      "timezone": "Timezone",
+      "timezone": "Tidszone",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Dato/tid",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Tekst"
       }
     },
     "callers": {
@@ -1517,8 +1517,8 @@
       "title": "Dette scenarie kaldes af:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Kørselsparametre",
+      "run": "Kør",
       "midRunTitle": "Input påkrævet"
     },
     "runHistory": {
@@ -1533,20 +1533,20 @@
       "unpin": "Frigør"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "fra",
+      "to": "til",
+      "step": "trin",
+      "index": "indeks",
+      "done": "færdig"
     },
     "while": {
-      "body": "body"
+      "body": "krop"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "løkke"
     },
     "loop": {
-      "done": "done"
+      "done": "færdig"
     },
     "breakpoint": {
       "add": "Tilføj brydepunkt",
@@ -1559,84 +1559,84 @@
       "toggle": "Skift minikort"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "liste",
+      "values": "værdier",
+      "result": "resultat",
       "addValue": "Tilføj værdi",
       "removeValue": "Fjern værdi",
       "updateVariable": "Opdater kildevariablen"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "værdi",
+      "targetType": "konvertér til",
+      "result": "resultat",
       "type": {
-        "number": "number",
-        "string": "string",
+        "number": "tal",
+        "string": "tekst",
         "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "date": "dato",
+        "list": "liste"
       }
     },
     "regex": {
-      "value": "value",
+      "value": "værdi",
       "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "pattern": "mønster",
+      "flags": "flag",
+      "replacement": "erstatning",
+      "result": "resultat",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
+        "extract": "udtræk",
+        "extractAll": "udtræk alle",
         "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "replace": "erstat",
+        "split": "opdel"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Skeln ikke mellem store og små bogstaver",
         "m": "Flerlinjet (^ og $ matcher linjeskift)",
         "s": "Dotall (. matcher linjeskift)"
       }
     },
     "json": {
-      "value": "value",
+      "value": "værdi",
       "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "indent": "indrykning",
+      "result": "resultat",
       "op": {
         "parse": "parse",
-        "stringify": "stringify"
+        "stringify": "serialisér"
       }
     },
     "xml": {
-      "value": "value",
+      "value": "værdi",
       "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "indent": "indrykning",
+      "result": "resultat",
       "op": {
         "parse": "parse",
-        "stringify": "stringify"
+        "stringify": "serialisér"
       }
     },
     "yaml": {
-      "value": "value",
+      "value": "værdi",
       "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "indent": "indrykning",
+      "result": "resultat",
       "op": {
         "parse": "parse",
-        "stringify": "stringify"
+        "stringify": "serialisér"
       }
     },
     "crypto": {
-      "value": "value",
+      "value": "værdi",
       "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "key": "nøgle",
+      "keyPlaceholder": "hemmelighed",
+      "result": "resultat",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "base64-kod",
+        "base64Decode": "base64-afkod",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1647,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "resultat"
     },
     "datetime": {
-      "value": "date",
+      "value": "dato",
       "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
+      "amount": "mængde",
+      "unitLabel": "enhed",
       "format": "format",
-      "other": "second date",
-      "result": "result",
+      "other": "anden dato",
+      "result": "resultat",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "læg til",
+        "subtract": "træk fra",
+        "format": "formatér",
+        "diff": "forskel"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "millisekunder",
+        "seconds": "sekunder",
+        "minutes": "minutter",
+        "hours": "timer",
+        "days": "dage",
+        "weeks": "uger",
+        "months": "måneder",
+        "years": "år"
       }
     },
     "objectOp": {
-      "value": "object",
+      "value": "objekt",
       "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "path": "sti",
+      "keys": "nøgler",
+      "setValue": "værdi",
+      "mergeWith": "flet med",
+      "result": "resultat",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "læs",
+        "set": "skriv",
+        "merge": "flet",
+        "pick": "behold",
+        "omit": "fjern",
+        "keys": "nøgler",
+        "values": "værdier"
       }
     },
     "url": {
-      "value": "value",
+      "value": "værdi",
       "operation": "operation",
-      "result": "result",
+      "result": "resultat",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
+        "encode": "kod",
+        "decode": "afkod",
         "parseQuery": "parse query",
-        "buildQuery": "build query",
+        "buildQuery": "byg query",
         "parseUrl": "parse URL"
       }
     },
     "random": {
       "operation": "operation",
       "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "max": "maks",
+      "length": "længde",
+      "items": "elementer",
+      "seed": "seed (valgfri)",
+      "seedPlaceholder": "reproducerbar",
+      "result": "resultat",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
+        "int": "heltal",
+        "float": "decimaltal",
+        "string": "tekst",
         "boolean": "boolean",
-        "pick": "pick"
+        "pick": "vælg"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "besked"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "maks. forsøg",
+      "backoff": "ventestrategi",
+      "delay": "forsinkelse",
+      "factor": "faktor",
       "retryOnError": "prøv igen ved fejl",
       "retryOnStatus": "prøv igen ved HTTP-status",
       "retryOnFailure": "prøv igen ved enhver ikke-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "forsøg",
+      "exhausted": "opbrugt",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "fast",
+        "linear": "lineær",
+        "exponential": "eksponentiel"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Lister",
+      "math": "Matematik",
+      "dataFormats": "Dataformater",
+      "encoding": "Kodning",
       "time": "Timing",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmer",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
+      "value": "liste",
       "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
+      "result": "resultat",
+      "key": "nøgle",
+      "order": "rækkefølge",
+      "depth": "dybde",
+      "size": "størrelse",
       "start": "start",
-      "end": "end",
+      "end": "slut",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sortér",
+        "unique": "unikke",
+        "reverse": "vend om",
+        "flatten": "udflad",
+        "chunk": "opdel i blokke",
+        "slice": "udskær",
+        "groupBy": "gruppér efter"
       }
     },
     "csv": {
-      "value": "value",
+      "value": "værdi",
       "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "result": "resultat",
+      "delimiter": "skilletegn",
+      "header": "overskriftsrække",
       "op": {
         "parse": "parse",
-        "stringify": "stringify"
+        "stringify": "serialisér"
       }
     },
     "math": {
-      "a": "value",
+      "a": "værdi",
       "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "result": "resultat",
+      "b": "med",
       "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "max": "maks",
+      "precision": "præcision",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "afrund",
+        "floor": "rund ned",
+        "ceil": "rund op",
+        "trunc": "afkort",
+        "abs": "absolutværdi",
+        "sign": "fortegn",
+        "sqrt": "kvadratrod",
         "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "max": "maks",
+        "clamp": "begræns"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "værdi",
+      "schema": "JSON-skema",
+      "valid": "gyldig",
+      "invalid": "ugyldig",
+      "errors": "fejl",
       "editTitle": "Rediger JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "sti",
+      "content": "indhold"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "sti",
+      "mode": "tilstand",
+      "content": "indhold"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Redigér",
+      "edit": "Åbn editoren",
+      "moreLines": "+{{count}} linjer",
+      "editTemplate": "Redigér skabelon"
     },
     "timer": {
       "mode": "tilstand",
@@ -1890,7 +1890,7 @@
       "waitUntil": "Pauser indtil en given dato/tid og fortsætter derefter.",
       "now": "Udsender den aktuelle dato og tid.",
       "timer": "Udløser sin krop med et gentaget interval eller en cron-tidsplan.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Beregner a + − × ÷ … af to tal.",
       "comparator": "Sammenligner to værdier og udsender sand eller falsk.",
       "boolean": "Kombinerer booleans med and / or / xor / not.",
       "object": "Bygger et objekt ud fra dets navngivne input.",
@@ -1903,7 +1903,7 @@
       "json": "Parser en JSON-streng eller serialiserer en værdi til JSON.",
       "xml": "Parser en XML-streng eller serialiserer en værdi til XML.",
       "yaml": "Parser en YAML-streng eller serialiserer en værdi til YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Hasher eller koder en tekst (base64, md5, sha…, hmac, uuid).",
       "jwt": "Afkoder et JWT-token til header, payload og signatur.",
       "datetime": "Forskyder, formaterer eller sammenligner en dato.",
       "retry": "Kører sin krop igen indtil den lykkes, med en backoff-politik.",
@@ -1912,7 +1912,7 @@
       "random": "Genererer et tilfældigt tal, tekst, boolean eller udvalg.",
       "listOp": "Omformer en liste (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Parser en CSV-streng eller serialiserer en liste til CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Udfører en skalar operation (afrund, abs, kvadratrod, min, maks, begræns…).",
       "schema": "Validerer en værdi mod et JSON Schema.",
       "readFile": "Læser en fils tekstindhold.",
       "writeFile": "Skriver eller tilføjer tekst til en fil.",
@@ -1951,13 +1951,13 @@
       "redisClose": "Lukker en allerede-åben Redis-abonnementsforbindelse.",
       "redisCommand": "Kører en bundet Redis-kommando (én kommando på en ny forbindelse, derefter afbrydelse) og udsender dens svar.",
       "toast": "Viser en toastnotifikation i Restorm-grænsefladen, mens scenariet kører.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Hoster en lokal HTTP-mockserver og lytter uendeligt. `connected` udløses, så snart den lytter; hver betjent forespørgsel genudsender sine data på porten `served`. Serveren forbliver aktiv indtil en HTTP-lukning (eller et Stop), hvorefter `done` udløses. Ingen response-udgang — den betjener, den kalder ikke ud.",
       "httpClose": "Stopper en allerede-lyttende HTTP-mockserver (deklareret af en HTTP-serverknude) og frigiver dens port.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Hoster en lokal gRPC-mockserver og lytter uendeligt. `connected` udløses, så snart den lytter; hvert betjent kald genudsender sine data på porten `served`. Serveren forbliver aktiv indtil en gRPC-serverlukning (eller et Stop), hvorefter `done` udløses. Ingen response-udgang — den betjener, den kalder ikke ud.",
       "grpcServerClose": "Stopper en allerede-lyttende gRPC-mockserver (deklareret af en gRPC-serverknude) og frigiver dens port.",
       "soapListen": "Hoster en lokal SOAP-mockserver og lytter uendeligt. Hver indkommende anmodning dirigeres til en konfigureret handling (efter dens SOAPAction eller handlingsnavnet i brødteksten) og besvares med den foruddefinerede SOAP-konvolut (en fejlhandling returnerer `<soap:Fault>`). `connected` udløses, så snart serveren lytter; hver betjent anmodning genudsender sine data på porten `served`. Serveren forbliver aktiv, indtil en SOAP-lukning (eller et stop), hvorefter `done` udløses.",
       "soapClose": "Stopper en SOAP-mockserver, der allerede lytter (erklæret af en SOAP-serverknude), og frigiver dens port.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Hoster en lokal GraphQL-mockserver og lytter uendeligt. `connected` udløses, så snart den lytter; hver betjent operation genudsender sine data på porten `served`. Serveren forbliver aktiv indtil en GraphQL-lukning (eller et Stop), hvorefter `done` udløses. Ingen response-udgang — den betjener, den kalder ikke ud.",
       "graphqlClose": "Stopper en allerede-lyttende GraphQL-mockserver (deklareret af en GraphQL-serverknude) og frigiver dens port.",
       "odataListen": "Hoster en lokal OData v4-mockservice og lytter i det uendelige. `connected` udløses, så snart den lytter; hver betjent forespørgsel sender sine data igen på `served`-porten. Serveren kører, indtil en OData-lukning (eller et Stop), hvorefter `done` udløses. Intet response-output — den betjener, den kalder ikke ud.",
       "odataClose": "Stopper en allerede lyttende OData-mockservice (erklæret af en OData-serverknude) og frigiver dens port.",
@@ -1993,43 +1993,43 @@
       "title": "Kør fra kommandolinjen",
       "intro": "Kør dette scenarie uden at åbne appen (CI, cron, script):",
       "byId": "Angiv med id",
-      "allLogs": "All logs",
+      "allLogs": "Alle logs",
       "note": "`--out file` skriver også run-log til en fil.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekt.restorm>",
       "tokenPlaceholder": "<dit_token>",
       "tokenNote": "En headless-kørsel kræver en Restorm Pro-plan og et CI-token.",
       "tokenLink": "Hent token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Forbindelsesnavn",
+      "connectionNamePlaceholder": "forbindelsesnavn",
+      "eventPlaceholder": "hændelse",
+      "addEvent": "Tilføj hændelse",
+      "connected": "forbundet",
+      "others": "andre",
+      "connection": "forbindelse",
+      "pickConnection": "— vælg en forbindelse —",
+      "channelLabel": "Kanalnavn",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Redigér payload",
       "started": "startet"
     },
     "websocket": {
-      "message": "message"
+      "message": "besked"
     },
     "sse": {
-      "message": "message"
+      "message": "besked"
     },
     "grpc": {
-      "message": "message"
+      "message": "besked"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Omarrangér handlinger"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "ind",
+      "error": "fejl",
+      "done": "færdig"
     },
     "toast": {
       "title": "titel",
@@ -2037,7 +2037,7 @@
       "duration": "varighed (s)"
     },
     "http": {
-      "served": "served"
+      "served": "betjent"
     },
     "actionOverride": {
       "configMissingShort": "Konfiguration mangler",

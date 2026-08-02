@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Adjon meg fent egy címet a böngészés megkezdéséhez."
+    "back": "Vissza",
+    "refresh": "Frissítés",
+    "go": "Ugrás",
+    "address": "Cím",
+    "emptyHint": "Adj meg egy címet fent a böngészés megkezdéséhez."
   },
   "bookmarkRibbon": {
     "addBookmark": "Könyvjelző hozzáadása"

@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Zadejte adresu výše a začněte prohlížet."
+    "back": "Zpět",
+    "refresh": "Obnovit",
+    "go": "Přejít",
+    "address": "Adresa",
+    "emptyHint": "Zadejte výše adresu a začněte procházet."
   },
   "bookmarkRibbon": {
     "addBookmark": "Přidat záložku"

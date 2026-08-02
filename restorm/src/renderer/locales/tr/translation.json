@@ -1211,10 +1211,10 @@
       "emptyRightClick": "Senaryonuza eylem eklemek için boş bir noktaya sağ tıklayın"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON yolu",
       "ariaLabel": "JSON yol seçici",
       "pick": "Sonuçtan seç",
-      "loading": "Loading…",
+      "loading": "Yükleniyor…",
       "noResult": "Sonucundan bir özellik seçmek için kaynak eylemi çalıştırın."
     },
     "tab": {
@@ -1223,12 +1223,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Rengi değiştir",
+        "resetColor": "Rengi sıfırla",
         "addNote": "Not ekle / düzenle",
         "runOnEachEvent": "Alınan her olayda çalıştır",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Çoğalt",
+        "delete": "Sil",
         "deleteShortcut": "Del",
         "copy": "Kopyala",
         "paste": "Yapıştır"
@@ -1238,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Rengi değiştir",
+        "resetColor": "Rengi sıfırla",
+        "delete": "Sil"
       }
     },
     "locked": "Senaryo çalışırken düzenleme kilitli",
@@ -1299,49 +1299,49 @@
       "getVariable": "Değişkeni al",
       "addToList": "Listeye ekle",
       "removeFromList": "Listeden kaldır",
-      "cast": "Cast",
+      "cast": "Dönüştür",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Kripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Tarih hesabı",
+      "objectOp": "Nesne işlemleri",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Rastgele",
+      "throw": "Hata fırlat",
+      "retry": "Yeniden dene",
+      "listOp": "Liste işlemleri",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematik",
+      "schema": "Şemayı doğrula",
+      "readFile": "Dosya oku",
+      "writeFile": "Dosya yaz",
       "timer": "Zamanlayıcı",
       "code": "Kod",
       "socketioConnect": "Socket.IO bağlantısı",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO gönderimi",
       "socketioClose": "Socket.IO bağlantısını kapat",
       "socketioServerClose": "Socket.IO sunucusunu kapat",
       "websocketConnect": "WebSocket bağlantısı",
       "sseConnect": "SSE bağlantısı",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket gönderimi",
       "websocketClose": "WebSocket bağlantısını kapat",
       "websocketServerClose": "WebSocket sunucusunu kapat",
       "sseClose": "SSE bağlantısını kapat",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC bağlantısı",
+      "grpcSend": "gRPC gönderimi",
       "grpcClose": "gRPC bağlantısını kapat",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT bağlantısı",
+      "mqttSend": "MQTT yayını",
       "mqttClose": "MQTT bağlantısını kapat",
       "amqpConnect": "AMQP bağlantısı",
       "amqpPublish": "AMQP yayını",
       "amqpClose": "AMQP bağlantısını kapat",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis aboneliği",
       "redisClose": "Redis bağlantısını kapat",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis komutu",
       "httpListen": "HTTP sunucusu",
       "httpClose": "HTTP sunucusunu kapat",
       "grpcServerClose": "gRPC sunucusunu kapat",
@@ -1356,8 +1356,8 @@
       "stompConnect": "STOMP bağlantısı",
       "stompSend": "STOMP gönder",
       "stompClose": "STOMP bağlantısını kapat",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka üretimi",
+      "kafkaConsume": "Kafka tüketimi",
       "kafkaClose": "Kafka bağlantısını kapat",
       "grpcListen": "gRPC sunucusu"
     },
@@ -1377,29 +1377,29 @@
     },
     "assert": {
       "message": "mesaj",
-      "operator": "operator",
+      "operator": "operatör",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "eşit",
+        "ne": "eşit değil",
+        "lt": "küçüktür",
         "lte": "küçük veya eşit",
-        "gt": "greater than",
+        "gt": "büyüktür",
         "gte": "büyük veya eşit",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "içerir",
+        "isString": "metin mi",
+        "isNumber": "sayı mı",
+        "isBoolean": "mantıksal değer mi",
+        "isArray": "liste mi",
+        "isObject": "nesne mi",
+        "isNull": "null mu",
+        "exists": "var",
+        "isEmpty": "boş mu",
+        "matchesRegex": "regex ile eşleşir",
         "isOneOf": "şunlardan biri",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "derin eşitlik",
+        "lengthEq": "uzunluk ==",
+        "lengthGt": "uzunluk >",
+        "lengthLt": "uzunluk <"
       }
     },
     "editRequest": "İsteği düzenle",
@@ -1407,8 +1407,8 @@
     "object": {
       "addProperty": "Özellik ekle",
       "removeProperty": "Özelliği kaldır",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Özellik adı",
+      "propertyValue": "değer"
     },
     "output": {
       "outputName": "Çıktı adı",
@@ -1416,7 +1416,7 @@
       "removeOutput": "Kaldır"
     },
     "input": {
-      "name": "Name",
+      "name": "Ad",
       "defaultType": "Varsayılan / tür",
       "addParam": "Parametre ekle",
       "removeParam": "Kaldır"
@@ -1462,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "Şablon boş olmamalıdır.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Şablon {{…}} referansı içerdiğinde \"value\" girişi bağlı olmalıdır."
       },
       "request": {
         "missing": "Bağlı istek artık mevcut değil."
@@ -1504,12 +1504,12 @@
       "helpTitle": "Bu eylemin ne yaptığı"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Saat dilimi",
+      "formatLabel": "Biçim",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Tarih/saat",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Metin"
       }
     },
     "callers": {
@@ -1517,8 +1517,8 @@
       "title": "Bu senaryo şunlar tarafından çağrılır:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Çalıştırma parametreleri",
+      "run": "Çalıştır",
       "midRunTitle": "Giriş gerekli"
     },
     "runHistory": {
@@ -1533,20 +1533,20 @@
       "unpin": "Sabitlemeyi kaldır"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "şuradan",
+      "to": "şuraya",
+      "step": "adım",
+      "index": "dizin",
+      "done": "bitti"
     },
     "while": {
-      "body": "body"
+      "body": "gövde"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "döngü"
     },
     "loop": {
-      "done": "done"
+      "done": "bitti"
     },
     "breakpoint": {
       "add": "Kesme noktası ekle",
@@ -1559,84 +1559,84 @@
       "toggle": "Mini haritayı aç/kapat"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "liste",
+      "values": "değerler",
+      "result": "sonuç",
       "addValue": "Değer ekle",
       "removeValue": "Değeri kaldır",
       "updateVariable": "Kaynak değişkeni güncelle"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "değer",
+      "targetType": "şuna dönüştür",
+      "result": "sonuç",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "sayı",
+        "string": "metin",
+        "boolean": "mantıksal değer",
+        "date": "tarih",
+        "list": "liste"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "değer",
+      "operation": "işlem",
+      "pattern": "desen",
+      "flags": "bayraklar",
+      "replacement": "değiştirilen",
+      "result": "sonuç",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "ayıkla",
+        "extractAll": "tümünü ayıkla",
+        "test": "test et",
+        "replace": "değiştir",
+        "split": "böl"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Büyük/küçük harf duyarsız",
         "m": "Çok satırlı (^ ve $ satır sonlarıyla eşleşir)",
         "s": "Dotall (. yeni satırlarla eşleşir)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "değer",
+      "operation": "işlem",
+      "indent": "girinti",
+      "result": "sonuç",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ayrıştır",
+        "stringify": "serileştir"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "değer",
+      "operation": "işlem",
+      "indent": "girinti",
+      "result": "sonuç",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ayrıştır",
+        "stringify": "serileştir"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "değer",
+      "operation": "işlem",
+      "indent": "girinti",
+      "result": "sonuç",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ayrıştır",
+        "stringify": "serileştir"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "değer",
+      "operation": "işlem",
+      "key": "anahtar",
+      "keyPlaceholder": "gizli anahtar",
+      "result": "sonuç",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "base64 kodla",
+        "base64Decode": "base64 çöz",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1646,183 +1646,183 @@
       }
     },
     "jwt": {
-      "value": "token",
-      "result": "result"
+      "value": "belirteç",
+      "result": "sonuç"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "tarih",
+      "operation": "işlem",
+      "amount": "miktar",
+      "unitLabel": "birim",
+      "format": "biçim",
+      "other": "ikinci tarih",
+      "result": "sonuç",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "ekle",
+        "subtract": "çıkar",
+        "format": "biçimlendir",
+        "diff": "fark"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milisaniye",
+        "seconds": "saniye",
+        "minutes": "dakika",
+        "hours": "saat",
+        "days": "gün",
+        "weeks": "hafta",
+        "months": "ay",
+        "years": "yıl"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "nesne",
+      "operation": "işlem",
+      "path": "yol",
+      "keys": "anahtarlar",
+      "setValue": "değer",
+      "mergeWith": "şununla birleştir",
+      "result": "sonuç",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "oku",
+        "set": "yaz",
+        "merge": "birleştir",
+        "pick": "koru",
+        "omit": "hariç tut",
+        "keys": "anahtarlar",
+        "values": "değerler"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "değer",
+      "operation": "işlem",
+      "result": "sonuç",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "kodla",
+        "decode": "çöz",
+        "parseQuery": "sorguyu ayrıştır",
+        "buildQuery": "sorgu oluştur",
+        "parseUrl": "URL'yi ayrıştır"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "işlem",
       "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "max": "maks",
+      "length": "uzunluk",
+      "items": "öğeler",
+      "seed": "tohum (isteğe bağlı)",
+      "seedPlaceholder": "tekrarlanabilir",
+      "result": "sonuç",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "tam sayı",
+        "float": "ondalık sayı",
+        "string": "metin",
+        "boolean": "mantıksal değer",
+        "pick": "seç"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "mesaj"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "maks. deneme",
+      "backoff": "bekleme stratejisi",
+      "delay": "gecikme",
+      "factor": "çarpan",
       "retryOnError": "hatada yeniden dene",
       "retryOnStatus": "HTTP durumunda yeniden dene",
       "retryOnFailure": "2xx olmayan her durumda yeniden dene",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "deneme",
+      "exhausted": "tükendi",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "sabit",
+        "linear": "doğrusal",
+        "exponential": "üstel"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Listeler",
+      "math": "Matematik",
+      "dataFormats": "Veri biçimleri",
+      "encoding": "Kodlama",
       "time": "Zamanlama",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmalar",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "liste",
+      "operation": "işlem",
+      "result": "sonuç",
+      "key": "anahtar",
+      "order": "sıra",
+      "depth": "derinlik",
+      "size": "boyut",
+      "start": "başlangıç",
+      "end": "son",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sırala",
+        "unique": "benzersiz",
+        "reverse": "ters çevir",
+        "flatten": "düzleştir",
+        "chunk": "parçalara ayır",
+        "slice": "dilimle",
+        "groupBy": "şuna göre grupla"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "değer",
+      "operation": "işlem",
+      "result": "sonuç",
+      "delimiter": "ayırıcı",
+      "header": "başlık satırı",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "ayrıştır",
+        "stringify": "serileştir"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "değer",
+      "operation": "işlem",
+      "result": "sonuç",
+      "b": "ile",
       "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "max": "maks",
+      "precision": "hassasiyet",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "yuvarla",
+        "floor": "aşağı yuvarla",
+        "ceil": "yukarı yuvarla",
+        "trunc": "kırp",
+        "abs": "mutlak değer",
+        "sign": "işaret",
+        "sqrt": "karekök",
         "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "max": "maks",
+        "clamp": "sınırla"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "değer",
+      "schema": "JSON şeması",
+      "valid": "geçerli",
+      "invalid": "geçersiz",
+      "errors": "hatalar",
       "editTitle": "JSON Schema'yı düzenle"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "yol",
+      "content": "içerik"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "yol",
+      "mode": "mod",
+      "content": "içerik"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Düzenle",
+      "edit": "Düzenleyiciyi aç",
+      "moreLines": "+{{count}} satır",
+      "editTemplate": "Şablonu düzenle"
     },
     "timer": {
       "mode": "mod",
@@ -1890,7 +1890,7 @@
       "waitUntil": "Belirli bir tarihe/saate kadar duraklatır, sonra devam eder.",
       "now": "Geçerli tarih ve saati yayınlar.",
       "timer": "Gövdesini tekrarlanan bir aralıkta veya bir cron zamanlamasında tetikler.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "İki sayının a + − × ÷ … işlemini hesaplar.",
       "comparator": "İki değeri karşılaştırır ve true ya da false üretir.",
       "boolean": "Boole değerlerini and / or / xor / not ile birleştirir.",
       "object": "Adlandırılmış girişlerinden bir nesne oluşturur.",
@@ -1903,7 +1903,7 @@
       "json": "Bir JSON dizesini ayrıştırır veya bir değeri JSON'a serileştirir.",
       "xml": "Bir XML dizesini ayrıştırır veya bir değeri XML'e serileştirir.",
       "yaml": "Bir YAML dizesini ayrıştırır veya bir değeri YAML'a serileştirir.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Bir metni özetler veya kodlar (base64, md5, sha…, hmac, uuid).",
       "jwt": "Bir JWT belirtecini header, payload ve imzaya çözer.",
       "datetime": "Bir tarihi kaydırır, biçimlendirir veya farkını alır.",
       "retry": "Başarılı olana kadar gövdesini bir backoff politikasıyla yeniden çalıştırır.",
@@ -1912,7 +1912,7 @@
       "random": "Rastgele bir sayı, metin, boole veya seçim üretir.",
       "listOp": "Bir listeyi yeniden şekillendirir (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Bir CSV dizesini ayrıştırır veya bir listeyi CSV'ye serileştirir.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Skaler bir işlem uygular (yuvarla, mutlak, karekök, min, maks, sınırla…).",
       "schema": "Bir değeri bir JSON Schema'ya göre doğrular.",
       "readFile": "Bir dosyanın metin içeriğini okur.",
       "writeFile": "Bir dosyaya metin yazar veya ekler.",
@@ -1951,13 +1951,13 @@
       "redisClose": "Zaten açık olan bir Redis abonelik bağlantısını kapatır.",
       "redisCommand": "Bağlı bir Redis komutunu çalıştırır (yeni bir bağlantıda tek bir komut, ardından bağlantı kesilir) ve yanıtını yayınlar.",
       "toast": "Senaryo çalışırken Restorm arayüzünde bir toast bildirimi yayınlar.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Yerel bir HTTP sahte sunucusu barındırır ve süresiz dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her istek verisini `served` portunda yeniden yayar. Sunucu bir HTTP kapanışı (ya da bir Stop) gerçekleşene kadar açık kalır, ardından `done` tetiklenir. response çıkışı yok — sunar, dışarıyı çağırmaz.",
       "httpClose": "Zaten dinleyen bir sahte HTTP sunucusunu (bir HTTP sunucu düğümü tarafından bildirilen) durdurur ve portunu serbest bırakır.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Yerel bir gRPC sahte sunucusu barındırır ve süresiz dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her çağrı verisini `served` portunda yeniden yayar. Sunucu bir gRPC sunucu kapanışı (ya da bir Stop) gerçekleşene kadar açık kalır, ardından `done` tetiklenir. response çıkışı yok — sunar, dışarıyı çağırmaz.",
       "grpcServerClose": "Zaten dinleyen bir sahte gRPC sunucusunu (bir gRPC sunucu düğümü tarafından bildirilen) durdurur ve portunu serbest bırakır.",
       "soapListen": "Yerel bir SOAP sahte sunucusu barındırır ve süresiz olarak dinler. Gelen her istek, yapılandırılmış bir işleme yönlendirilir (SOAPAction'ına veya gövdedeki işlem adına göre) ve önceden tanımlanmış SOAP zarfıyla yanıtlanır (bir hata işlemi `<soap:Fault>` döndürür). Sunucu dinlemeye başlar başlamaz `connected` tetiklenir; hizmet verilen her istek, verilerini `served` bağlantı noktasında yeniden yayınlar. Sunucu, bir SOAP kapatmasına (veya bir durdurmaya) kadar etkin kalır, ardından `done` tetiklenir.",
       "soapClose": "Zaten dinlemekte olan bir SOAP sahte sunucusunu (bir SOAP sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Yerel bir GraphQL sahte sunucusu barındırır ve süresiz dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her işlem verisini `served` portunda yeniden yayar. Sunucu bir GraphQL kapanışı (ya da bir Stop) gerçekleşene kadar açık kalır, ardından `done` tetiklenir. response çıkışı yok — sunar, dışarıyı çağırmaz.",
       "graphqlClose": "Zaten dinleyen bir sahte GraphQL sunucusunu (bir GraphQL sunucu düğümü tarafından bildirilen) durdurur ve portunu serbest bırakır.",
       "odataListen": "Yerel bir OData v4 sahte hizmetini barındırır ve süresiz olarak dinler. Dinlemeye başlar başlamaz `connected` tetiklenir; sunulan her istek verisini `served` bağlantı noktasında yeniden yayar. Sunucu bir OData kapatmaya (veya bir Stop'a) kadar açık kalır, ardından `done` tetiklenir. response çıktısı yoktur — hizmet verir, dışarıyı çağırmaz.",
       "odataClose": "Halihazırda dinlemekte olan bir OData sahte hizmetini (bir OData sunucu düğümü tarafından bildirilen) durdurur ve bağlantı noktasını serbest bırakır.",
@@ -1993,43 +1993,43 @@
       "title": "Komut satırından çalıştır",
       "intro": "Bu senaryoyu uygulamayı açmadan çalıştırın (CI, cron, betik):",
       "byId": "id ile belirt",
-      "allLogs": "All logs",
+      "allLogs": "Tüm günlükler",
       "note": "`--out file` ayrıca run-log'u bir dosyaya yazar.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<proje.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "Başsız çalıştırma, Restorm Pro planı ve CI token gerektirir.",
       "tokenLink": "Token al"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
-      "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "connectionNameLabel": "Bağlantı adı",
+      "connectionNamePlaceholder": "bağlantı adı",
+      "eventPlaceholder": "olay",
+      "addEvent": "Olay ekle",
+      "connected": "bağlandı",
+      "others": "diğerleri",
+      "connection": "bağlantı",
+      "pickConnection": "— bir bağlantı seç —",
+      "channelLabel": "Kanal adı",
+      "payload": "yük",
+      "payloadModalTitle": "Yükü düzenle",
       "started": "başlatıldı"
     },
     "websocket": {
-      "message": "message"
+      "message": "mesaj"
     },
     "sse": {
-      "message": "message"
+      "message": "mesaj"
     },
     "grpc": {
-      "message": "message"
+      "message": "mesaj"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Eylemleri yeniden düzenle"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "giriş",
+      "error": "hata",
+      "done": "bitti"
     },
     "toast": {
       "title": "başlık",
@@ -2037,7 +2037,7 @@
       "duration": "süre (sn)"
     },
     "http": {
-      "served": "served"
+      "served": "sunuldu"
     },
     "actionOverride": {
       "configMissingShort": "Yapılandırma eksik",

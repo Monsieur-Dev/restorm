@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Enter an address above to start browsing."
+    "back": "Back",
+    "refresh": "Refresh",
+    "go": "Go",
+    "address": "Address",
+    "emptyHint": "Enter an address above to start browsing."
   },
   "bookmarkRibbon": {
     "addBookmark": "Add bookmark"

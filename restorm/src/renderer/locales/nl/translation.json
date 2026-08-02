@@ -1211,10 +1211,10 @@
       "emptyRightClick": "Klik met de rechtermuisknop op een lege plek om acties aan je scenario toe te voegen"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON-pad",
       "ariaLabel": "JSON-padselector",
       "pick": "Kies uit resultaat",
-      "loading": "Loading…",
+      "loading": "Laden…",
       "noResult": "Voer de bronactie uit om een eigenschap uit het resultaat te kiezen."
     },
     "tab": {
@@ -1223,12 +1223,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Kleur wijzigen",
+        "resetColor": "Kleur herstellen",
         "addNote": "Notitie toevoegen/bewerken",
         "runOnEachEvent": "Uitvoeren bij elk ontvangen event",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Dupliceren",
+        "delete": "Verwijderen",
         "deleteShortcut": "Del",
         "copy": "Kopiëren",
         "paste": "Plakken"
@@ -1238,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Kleur wijzigen",
+        "resetColor": "Kleur herstellen",
+        "delete": "Verwijderen"
       }
     },
     "locked": "Bewerken vergrendeld terwijl het scenario draait",
@@ -1306,42 +1306,42 @@
       "yaml": "YAML",
       "crypto": "Crypto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Datumberekening",
+      "objectOp": "Objectbewerkingen",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Willekeurig",
+      "throw": "Fout werpen",
+      "retry": "Opnieuw proberen",
+      "listOp": "Lijstbewerkingen",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Wiskunde",
+      "schema": "Schema valideren",
+      "readFile": "Bestand lezen",
+      "writeFile": "Bestand schrijven",
       "timer": "Timer",
       "code": "Code",
       "socketioConnect": "Socket.IO-verbinding",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO verzenden",
       "socketioClose": "Socket.IO-verbinding sluiten",
       "socketioServerClose": "Socket.IO-server sluiten",
       "websocketConnect": "WebSocket-verbinding",
       "sseConnect": "SSE-verbinding",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket verzenden",
       "websocketClose": "WebSocket-verbinding sluiten",
       "websocketServerClose": "WebSocket-server sluiten",
       "sseClose": "SSE-verbinding sluiten",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC-verbinding",
+      "grpcSend": "gRPC verzenden",
       "grpcClose": "gRPC-verbinding sluiten",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT-verbinding",
+      "mqttSend": "MQTT publiceren",
       "mqttClose": "MQTT-verbinding sluiten",
       "amqpConnect": "AMQP-verbinding",
       "amqpPublish": "AMQP-publicatie",
       "amqpClose": "AMQP-verbinding sluiten",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis abonneren",
       "redisClose": "Redis-verbinding sluiten",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis-commando",
       "httpListen": "HTTP-server",
       "httpClose": "HTTP-server sluiten",
       "grpcServerClose": "gRPC-server sluiten",
@@ -1356,8 +1356,8 @@
       "stompConnect": "STOMP-verbinding",
       "stompSend": "STOMP verzenden",
       "stompClose": "STOMP-verbinding sluiten",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka produceren",
+      "kafkaConsume": "Kafka consumeren",
       "kafkaClose": "Kafka-verbinding sluiten",
       "grpcListen": "gRPC-server"
     },
@@ -1379,27 +1379,27 @@
       "message": "bericht",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "gelijk",
+        "ne": "ongelijk",
+        "lt": "kleiner dan",
         "lte": "kleiner dan of gelijk aan",
-        "gt": "greater than",
+        "gt": "groter dan",
         "gte": "groter dan of gelijk aan",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
+        "contains": "bevat",
+        "isString": "is tekst",
+        "isNumber": "is getal",
         "isBoolean": "is boolean",
-        "isArray": "is array",
+        "isArray": "is lijst",
         "isObject": "is object",
         "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "exists": "bestaat",
+        "isEmpty": "is leeg",
+        "matchesRegex": "komt overeen met regex",
         "isOneOf": "is een van",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "diep gelijk",
+        "lengthEq": "lengte ==",
+        "lengthGt": "lengte >",
+        "lengthLt": "lengte <"
       }
     },
     "editRequest": "Verzoek bewerken",
@@ -1407,8 +1407,8 @@
     "object": {
       "addProperty": "Eigenschap toevoegen",
       "removeProperty": "Eigenschap verwijderen",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Eigenschapsnaam",
+      "propertyValue": "waarde"
     },
     "output": {
       "outputName": "Uitvoernaam",
@@ -1416,7 +1416,7 @@
       "removeOutput": "Verwijderen"
     },
     "input": {
-      "name": "Name",
+      "name": "Naam",
       "defaultType": "Standaard / type",
       "addParam": "Parameter toevoegen",
       "removeParam": "Verwijderen"
@@ -1462,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "De sjabloon mag niet leeg zijn.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "De invoer \"value\" moet verbonden zijn wanneer het sjabloon naar {{…}} verwijst."
       },
       "request": {
         "missing": "De gekoppelde aanvraag bestaat niet meer."
@@ -1504,12 +1504,12 @@
       "helpTitle": "Wat deze actie doet"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Tijdzone",
+      "formatLabel": "Formaat",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Datum/tijd",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Tekst"
       }
     },
     "callers": {
@@ -1533,20 +1533,20 @@
       "unpin": "Losmaken"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
+      "from": "van",
+      "to": "tot",
+      "step": "stap",
       "index": "index",
-      "done": "done"
+      "done": "klaar"
     },
     "while": {
       "body": "body"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "lus"
     },
     "loop": {
-      "done": "done"
+      "done": "klaar"
     },
     "breakpoint": {
       "add": "Onderbrekingspunt toevoegen",
@@ -1609,34 +1609,34 @@
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "waarde",
+      "operation": "bewerking",
+      "indent": "inspringen",
+      "result": "resultaat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsen",
+        "stringify": "serialiseren"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "waarde",
+      "operation": "bewerking",
+      "indent": "inspringen",
+      "result": "resultaat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsen",
+        "stringify": "serialiseren"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "waarde",
+      "operation": "bewerking",
+      "key": "sleutel",
+      "keyPlaceholder": "geheim",
+      "result": "resultaat",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "base64 coderen",
+        "base64Decode": "base64 decoderen",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1647,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "resultaat"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "datum",
+      "operation": "bewerking",
+      "amount": "hoeveelheid",
+      "unitLabel": "eenheid",
+      "format": "formaat",
+      "other": "tweede datum",
+      "result": "resultaat",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "optellen",
+        "subtract": "aftrekken",
+        "format": "formatteren",
+        "diff": "verschil"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milliseconden",
+        "seconds": "seconden",
+        "minutes": "minuten",
+        "hours": "uren",
+        "days": "dagen",
+        "weeks": "weken",
+        "months": "maanden",
+        "years": "jaren"
       }
     },
     "objectOp": {
       "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "operation": "bewerking",
+      "path": "pad",
+      "keys": "sleutels",
+      "setValue": "waarde",
+      "mergeWith": "samenvoegen met",
+      "result": "resultaat",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "lezen",
+        "set": "schrijven",
+        "merge": "samenvoegen",
+        "pick": "behouden",
+        "omit": "weglaten",
+        "keys": "sleutels",
+        "values": "waarden"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "waarde",
+      "operation": "bewerking",
+      "result": "resultaat",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "coderen",
+        "decode": "decoderen",
+        "parseQuery": "query parsen",
+        "buildQuery": "query bouwen",
+        "parseUrl": "URL parsen"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "bewerking",
       "min": "min",
       "max": "max",
-      "length": "length",
+      "length": "lengte",
       "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "seed": "seed (optioneel)",
+      "seedPlaceholder": "reproduceerbaar",
+      "result": "resultaat",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
+        "int": "geheel getal",
+        "float": "decimaal",
+        "string": "tekst",
         "boolean": "boolean",
-        "pick": "pick"
+        "pick": "kiezen"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "bericht"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
+      "maxAttempts": "max. pogingen",
+      "backoff": "wachtstrategie",
+      "delay": "vertraging",
       "factor": "factor",
       "retryOnError": "opnieuw proberen bij fout",
       "retryOnStatus": "opnieuw proberen bij HTTP-status",
       "retryOnFailure": "opnieuw proberen bij elke niet-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "poging",
+      "exhausted": "uitgeput",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "vast",
+        "linear": "lineair",
+        "exponential": "exponentieel"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Lijsten",
+      "math": "Wiskunde",
+      "dataFormats": "Dataformaten",
+      "encoding": "Codering",
       "time": "Timing",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmen",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "lijst",
+      "operation": "bewerking",
+      "result": "resultaat",
+      "key": "sleutel",
+      "order": "volgorde",
+      "depth": "diepte",
+      "size": "grootte",
+      "start": "begin",
+      "end": "einde",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sorteren",
+        "unique": "uniek",
+        "reverse": "omkeren",
+        "flatten": "afvlakken",
+        "chunk": "opdelen",
+        "slice": "uitsnijden",
+        "groupBy": "groeperen op"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "waarde",
+      "operation": "bewerking",
+      "result": "resultaat",
+      "delimiter": "scheidingsteken",
+      "header": "koprij",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsen",
+        "stringify": "serialiseren"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "waarde",
+      "operation": "bewerking",
+      "result": "resultaat",
+      "b": "met",
       "min": "min",
       "max": "max",
-      "precision": "precision",
+      "precision": "precisie",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "afronden",
+        "floor": "naar beneden afronden",
+        "ceil": "naar boven afronden",
+        "trunc": "afkappen",
+        "abs": "absolute waarde",
+        "sign": "teken",
+        "sqrt": "vierkantswortel",
         "min": "min",
         "max": "max",
-        "clamp": "clamp"
+        "clamp": "begrenzen"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "waarde",
+      "schema": "JSON-schema",
+      "valid": "geldig",
+      "invalid": "ongeldig",
+      "errors": "fouten",
       "editTitle": "JSON Schema bewerken"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "pad",
+      "content": "inhoud"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "pad",
+      "mode": "modus",
+      "content": "inhoud"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Bewerken",
+      "edit": "Editor openen",
+      "moreLines": "+{{count}} regels",
+      "editTemplate": "Sjabloon bewerken"
     },
     "timer": {
       "mode": "modus",
@@ -1890,7 +1890,7 @@
       "waitUntil": "Pauzeert tot een opgegeven datum/tijd en gaat dan verder.",
       "now": "Zendt de huidige datum en tijd uit.",
       "timer": "Activeert zijn body met een herhalend interval of een cron-schema.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Berekent a + − × ÷ … van twee getallen.",
       "comparator": "Vergelijkt twee waarden en geeft waar of onwaar terug.",
       "boolean": "Combineert booleans met and / or / xor / not.",
       "object": "Bouwt een object uit zijn benoemde invoeren.",
@@ -1903,7 +1903,7 @@
       "json": "Parseert een JSON-string of serialiseert een waarde naar JSON.",
       "xml": "Parseert een XML-string of serialiseert een waarde naar XML.",
       "yaml": "Parseert een YAML-string of serialiseert een waarde naar YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Hasht of codeert een tekst (base64, md5, sha…, hmac, uuid).",
       "jwt": "Decodeert een JWT-token in header, payload en handtekening.",
       "datetime": "Verschuift, formatteert of vergelijkt een datum.",
       "retry": "Voert zijn body opnieuw uit tot het slaagt, met een backoff-beleid.",
@@ -1912,7 +1912,7 @@
       "random": "Genereert een willekeurig getal, tekst, boolean of keuze.",
       "listOp": "Hervormt een lijst (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Parseert een CSV-string of serialiseert een lijst naar CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Voert een scalaire bewerking uit (afronden, abs, wortel, min, max, begrenzen…).",
       "schema": "Valideert een waarde tegen een JSON Schema.",
       "readFile": "Leest de tekstinhoud van een bestand.",
       "writeFile": "Schrijft tekst naar een bestand of voegt tekst toe.",
@@ -1951,13 +1951,13 @@
       "redisClose": "Sluit een al-open Redis-abonneeverbinding.",
       "redisCommand": "Voert een gekoppeld Redis-commando uit (één commando op een nieuwe verbinding, daarna verbreken) en zendt zijn antwoord uit.",
       "toast": "Toont een toastmelding in de Restorm-UI terwijl het scenario draait.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Host een lokale HTTP-mockserver en luistert onbeperkt. `connected` vuurt zodra hij luistert; elk bediend verzoek zendt zijn data opnieuw uit op de poort `served`. De server blijft actief tot een HTTP-close (of een Stop), daarna vuurt `done`. Geen response-uitvoer — hij bedient, hij roept niet aan.",
       "httpClose": "Stopt een al-luisterende HTTP-mockserver (gedeclareerd door een HTTP-servernode) en maakt zijn poort vrij.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Host een lokale gRPC-mockserver en luistert onbeperkt. `connected` vuurt zodra hij luistert; elke bediende aanroep zendt zijn data opnieuw uit op de poort `served`. De server blijft actief tot een gRPC-serverclose (of een Stop), daarna vuurt `done`. Geen response-uitvoer — hij bedient, hij roept niet aan.",
       "grpcServerClose": "Stopt een al-luisterende gRPC-mockserver (gedeclareerd door een gRPC-servernode) en maakt zijn poort vrij.",
       "soapListen": "Host een lokale SOAP-mockserver en luistert onbeperkt. Elk binnenkomend verzoek wordt naar een geconfigureerde bewerking geleid (op basis van de SOAPAction of de bewerkingsnaam in de body) en beantwoord met de vooraf ingestelde SOAP-envelop (een foutbewerking retourneert `<soap:Fault>`). `connected` wordt geactiveerd zodra de server luistert; elk afgehandeld verzoek zendt zijn gegevens opnieuw uit op de poort `served`. De server blijft actief tot een SOAP-sluiting (of een stop), waarna `done` wordt geactiveerd.",
       "soapClose": "Stopt een al luisterende SOAP-mockserver (gedeclareerd door een SOAP-serverknooppunt) en maakt de poort vrij.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Host een lokale GraphQL-mockserver en luistert onbeperkt. `connected` vuurt zodra hij luistert; elke bediende operatie zendt zijn data opnieuw uit op de poort `served`. De server blijft actief tot een GraphQL-close (of een Stop), daarna vuurt `done`. Geen response-uitvoer — hij bedient, hij roept niet aan.",
       "graphqlClose": "Stopt een al-luisterende GraphQL-mockserver (gedeclareerd door een GraphQL-servernode) en maakt zijn poort vrij.",
       "odataListen": "Host een lokale OData v4-mockservice en luistert oneindig. `connected` wordt geactiveerd zodra er geluisterd wordt; elk bediend verzoek zendt zijn gegevens opnieuw uit op de `served`-poort. De server blijft actief tot een OData-sluiting (of een Stop), waarna `done` wordt geactiveerd. Geen response-uitvoer — hij bedient, hij roept niet naar buiten.",
       "odataClose": "Stopt een al luisterende OData-mockservice (gedeclareerd door een OData-serverknooppunt) en maakt de poort vrij.",
@@ -1993,7 +1993,7 @@
       "title": "Uitvoeren vanaf de opdrachtregel",
       "intro": "Voer dit scenario uit zonder de app te openen (CI, cron, script):",
       "byId": "Aanduiden via id",
-      "allLogs": "All logs",
+      "allLogs": "Alle logs",
       "note": "`--out file` schrijft het run-log ook naar een bestand.",
       "projectPlaceholder": "<project.restorm>",
       "tokenPlaceholder": "<uw_token>",
@@ -2001,35 +2001,35 @@
       "tokenLink": "Token ophalen"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Naam van de verbinding",
+      "connectionNamePlaceholder": "naam van de verbinding",
+      "eventPlaceholder": "gebeurtenis",
+      "addEvent": "Gebeurtenis toevoegen",
+      "connected": "verbonden",
+      "others": "overige",
+      "connection": "verbinding",
+      "pickConnection": "— kies een verbinding —",
+      "channelLabel": "Kanaalnaam",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Payload bewerken",
       "started": "gestart"
     },
     "websocket": {
-      "message": "message"
+      "message": "bericht"
     },
     "sse": {
-      "message": "message"
+      "message": "bericht"
     },
     "grpc": {
-      "message": "message"
+      "message": "bericht"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Acties herschikken"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "invoer",
+      "error": "fout",
+      "done": "klaar"
     },
     "toast": {
       "title": "titel",
@@ -2037,7 +2037,7 @@
       "duration": "duur (s)"
     },
     "http": {
-      "served": "served"
+      "served": "bediend"
     },
     "actionOverride": {
       "configMissingShort": "Configuratie ontbreekt",

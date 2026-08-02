@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Unesite adresu iznad za početak pregledavanja."
+    "back": "Natrag",
+    "refresh": "Osvježi",
+    "go": "Idi",
+    "address": "Adresa",
+    "emptyHint": "Unesi adresu iznad za početak pregledavanja."
   },
   "bookmarkRibbon": {
     "addBookmark": "Dodaj oznaku"

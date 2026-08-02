@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Gezinmeye başlamak için yukarıya bir adres girin."
+    "back": "Geri",
+    "refresh": "Yenile",
+    "go": "Git",
+    "address": "Adres",
+    "emptyHint": "Taramaya başlamak için yukarıya bir adres girin."
   },
   "bookmarkRibbon": {
     "addBookmark": "Yer işareti ekle"

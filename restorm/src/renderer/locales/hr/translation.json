@@ -1212,10 +1212,10 @@
       "emptyRightClick": "Desnom tipkom miša kliknite prazno mjesto da biste dodali akcije u svoj scenarij"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON putanja",
       "ariaLabel": "Birač JSON putanje",
       "pick": "Odaberi iz rezultata",
-      "loading": "Loading…",
+      "loading": "Učitavanje…",
       "noResult": "Pokrenite izvornu radnju da odaberete svojstvo iz njezina rezultata."
     },
     "tab": {
@@ -1224,12 +1224,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Promijeni boju",
+        "resetColor": "Vrati boju",
         "addNote": "Dodaj/uredi bilješku",
         "runOnEachEvent": "Pokreni pri svakom primljenom događaju",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Dupliciraj",
+        "delete": "Obriši",
         "deleteShortcut": "Del",
         "copy": "Kopiraj",
         "paste": "Zalijepi"
@@ -1239,9 +1239,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Promijeni boju",
+        "resetColor": "Vrati boju",
+        "delete": "Obriši"
       }
     },
     "locked": "Uređivanje zaključano dok se scenarij izvodi",
@@ -1300,49 +1300,49 @@
       "getVariable": "Dohvati varijablu",
       "addToList": "Dodaj na popis",
       "removeFromList": "Ukloni s popisa",
-      "cast": "Cast",
+      "cast": "Pretvori",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Kripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Računanje s datumima",
+      "objectOp": "Operacije nad objektima",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Nasumično",
+      "throw": "Baci grešku",
+      "retry": "Ponovi",
+      "listOp": "Operacije nad listama",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematika",
+      "schema": "Provjeri shemu",
+      "readFile": "Pročitaj datoteku",
+      "writeFile": "Zapiši datoteku",
       "timer": "Mjerač vremena",
       "code": "Kôd",
       "socketioConnect": "Socket.IO veza",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO slanje",
       "socketioClose": "Zatvori Socket.IO vezu",
       "socketioServerClose": "Zatvori Socket.IO poslužitelj",
       "websocketConnect": "WebSocket veza",
       "sseConnect": "SSE veza",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket slanje",
       "websocketClose": "Zatvori WebSocket vezu",
       "websocketServerClose": "Zatvori WebSocket poslužitelj",
       "sseClose": "Zatvori SSE vezu",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC veza",
+      "grpcSend": "gRPC slanje",
       "grpcClose": "Zatvori gRPC vezu",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT veza",
+      "mqttSend": "MQTT objava",
       "mqttClose": "Zatvori MQTT vezu",
       "amqpConnect": "AMQP veza",
       "amqpPublish": "AMQP objava",
       "amqpClose": "Zatvori AMQP vezu",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis pretplata",
       "redisClose": "Zatvori Redis vezu",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis naredba",
       "httpListen": "HTTP poslužitelj",
       "httpClose": "Zatvori HTTP poslužitelj",
       "grpcServerClose": "Zatvori gRPC poslužitelj",
@@ -1357,8 +1357,8 @@
       "stompConnect": "STOMP povezivanje",
       "stompSend": "STOMP slanje",
       "stompClose": "Zatvori STOMP vezu",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka proizvodnja",
+      "kafkaConsume": "Kafka konzumiranje",
       "kafkaClose": "Zatvori Kafka vezu",
       "grpcListen": "gRPC poslužitelj"
     },
@@ -1380,27 +1380,27 @@
       "message": "poruka",
       "operator": "operator",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "jednako",
+        "ne": "nije jednako",
+        "lt": "manje od",
         "lte": "manje ili jednako",
-        "gt": "greater than",
+        "gt": "veće od",
         "gte": "veće ili jednako",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "sadrži",
+        "isString": "je niz znakova",
+        "isNumber": "je broj",
+        "isBoolean": "je logička vrijednost",
+        "isArray": "je lista",
+        "isObject": "je objekt",
+        "isNull": "je null",
+        "exists": "postoji",
+        "isEmpty": "je prazno",
+        "matchesRegex": "odgovara regexu",
         "isOneOf": "jedno je od",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "duboka jednakost",
+        "lengthEq": "duljina ==",
+        "lengthGt": "duljina >",
+        "lengthLt": "duljina <"
       }
     },
     "editRequest": "Uredi zahtjev",
@@ -1408,8 +1408,8 @@
     "object": {
       "addProperty": "Dodaj svojstvo",
       "removeProperty": "Ukloni svojstvo",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Naziv svojstva",
+      "propertyValue": "vrijednost"
     },
     "output": {
       "outputName": "Naziv izlaza",
@@ -1417,7 +1417,7 @@
       "removeOutput": "Ukloni"
     },
     "input": {
-      "name": "Name",
+      "name": "Naziv",
       "defaultType": "Zadano / tip",
       "addParam": "Dodaj parametar",
       "removeParam": "Ukloni"
@@ -1463,7 +1463,7 @@
       },
       "transform": {
         "emptyTemplate": "Predložak ne smije biti prazan.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Ulaz \"value\" mora biti povezan kada predložak referencira {{…}}."
       },
       "request": {
         "missing": "Povezani zahtjev više ne postoji."
@@ -1505,12 +1505,12 @@
       "helpTitle": "Što ova radnja čini"
     },
     "now": {
-      "timezone": "Timezone",
+      "timezone": "Vremenska zona",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Datum/vrijeme",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Niz znakova"
       }
     },
     "callers": {
@@ -1518,8 +1518,8 @@
       "title": "Ovaj scenarij pozivaju:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Parametri izvođenja",
+      "run": "Pokreni",
       "midRunTitle": "Potreban unos"
     },
     "runHistory": {
@@ -1534,20 +1534,20 @@
       "unpin": "Otkvači"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
-      "index": "index",
-      "done": "done"
+      "from": "od",
+      "to": "do",
+      "step": "korak",
+      "index": "indeks",
+      "done": "gotovo"
     },
     "while": {
-      "body": "body"
+      "body": "tijelo"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "petlja"
     },
     "loop": {
-      "done": "done"
+      "done": "gotovo"
     },
     "breakpoint": {
       "add": "Dodaj točku prekida",
@@ -1560,84 +1560,84 @@
       "toggle": "Uključi/isključi minikartu"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "lista",
+      "values": "vrijednosti",
+      "result": "rezultat",
       "addValue": "Dodaj vrijednost",
       "removeValue": "Ukloni vrijednost",
       "updateVariable": "Ažuriraj izvornu varijablu"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "vrijednost",
+      "targetType": "pretvori u",
+      "result": "rezultat",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "broj",
+        "string": "niz znakova",
+        "boolean": "logička vrijednost",
+        "date": "datum",
+        "list": "lista"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "vrijednost",
+      "operation": "operacija",
+      "pattern": "uzorak",
+      "flags": "zastavice",
+      "replacement": "zamjena",
+      "result": "rezultat",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "izdvoji",
+        "extractAll": "izdvoji sve",
+        "test": "testiraj",
+        "replace": "zamijeni",
+        "split": "razdvoji"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Bez razlike velikih i malih slova",
         "m": "Višeredni (^ i $ odgovaraju prijelomima redaka)",
         "s": "Dotall (. odgovara novim recima)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "vrijednost",
+      "operation": "operacija",
+      "indent": "uvlaka",
+      "result": "rezultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsiraj",
+        "stringify": "serijaliziraj"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "vrijednost",
+      "operation": "operacija",
+      "indent": "uvlaka",
+      "result": "rezultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsiraj",
+        "stringify": "serijaliziraj"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "vrijednost",
+      "operation": "operacija",
+      "indent": "uvlaka",
+      "result": "rezultat",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsiraj",
+        "stringify": "serijaliziraj"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "vrijednost",
+      "operation": "operacija",
+      "key": "ključ",
+      "keyPlaceholder": "tajna",
+      "result": "rezultat",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "kodiraj base64",
+        "base64Decode": "dekodiraj base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1648,182 +1648,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "rezultat"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
+      "value": "datum",
+      "operation": "operacija",
+      "amount": "količina",
+      "unitLabel": "jedinica",
       "format": "format",
-      "other": "second date",
-      "result": "result",
+      "other": "drugi datum",
+      "result": "rezultat",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "dodaj",
+        "subtract": "oduzmi",
+        "format": "formatiraj",
+        "diff": "razlika"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milisekunde",
+        "seconds": "sekunde",
+        "minutes": "minute",
+        "hours": "sati",
+        "days": "dani",
+        "weeks": "tjedni",
+        "months": "mjeseci",
+        "years": "godine"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "objekt",
+      "operation": "operacija",
+      "path": "putanja",
+      "keys": "ključevi",
+      "setValue": "vrijednost",
+      "mergeWith": "spoji s",
+      "result": "rezultat",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "pročitaj",
+        "set": "zapiši",
+        "merge": "spoji",
+        "pick": "zadrži",
+        "omit": "ukloni",
+        "keys": "ključevi",
+        "values": "vrijednosti"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "vrijednost",
+      "operation": "operacija",
+      "result": "rezultat",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "kodiraj",
+        "decode": "dekodiraj",
+        "parseQuery": "parsiraj upit",
+        "buildQuery": "izgradi upit",
+        "parseUrl": "parsiraj URL"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "operacija",
       "min": "min",
-      "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "max": "maks",
+      "length": "duljina",
+      "items": "stavke",
+      "seed": "sjeme (neobavezno)",
+      "seedPlaceholder": "ponovljivo",
+      "result": "rezultat",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "cijeli broj",
+        "float": "decimalni broj",
+        "string": "niz znakova",
+        "boolean": "logička vrijednost",
+        "pick": "odaberi"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "poruka"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "maks. pokušaja",
+      "backoff": "strategija čekanja",
+      "delay": "odgoda",
+      "factor": "faktor",
       "retryOnError": "ponovi pri pogrešci",
       "retryOnStatus": "ponovi pri HTTP statusu",
       "retryOnFailure": "ponovi pri svakom non-2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "pokušaj",
+      "exhausted": "iscrpljeno",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "fiksno",
+        "linear": "linearno",
+        "exponential": "eksponencijalno"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Liste",
+      "math": "Matematika",
+      "dataFormats": "Formati podataka",
+      "encoding": "Kodiranje",
       "time": "Tempiranje",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmi",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "lista",
+      "operation": "operacija",
+      "result": "rezultat",
+      "key": "ključ",
+      "order": "redoslijed",
+      "depth": "dubina",
+      "size": "veličina",
+      "start": "početak",
+      "end": "kraj",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "sortiraj",
+        "unique": "jedinstveni",
+        "reverse": "obrni",
+        "flatten": "poravnaj",
+        "chunk": "podijeli na dijelove",
+        "slice": "izreži",
+        "groupBy": "grupiraj po"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "vrijednost",
+      "operation": "operacija",
+      "result": "rezultat",
+      "delimiter": "razdjelnik",
+      "header": "redak zaglavlja",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsiraj",
+        "stringify": "serijaliziraj"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "vrijednost",
+      "operation": "operacija",
+      "result": "rezultat",
+      "b": "s",
       "min": "min",
-      "max": "max",
-      "precision": "precision",
+      "max": "maks",
+      "precision": "preciznost",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "zaokruži",
+        "floor": "zaokruži prema dolje",
+        "ceil": "zaokruži prema gore",
+        "trunc": "skrati",
+        "abs": "apsolutna vrijednost",
+        "sign": "predznak",
+        "sqrt": "drugi korijen",
         "min": "min",
-        "max": "max",
-        "clamp": "clamp"
+        "max": "maks",
+        "clamp": "ograniči"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "vrijednost",
+      "schema": "JSON shema",
+      "valid": "važeće",
+      "invalid": "nevažeće",
+      "errors": "greške",
       "editTitle": "Uredi JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "putanja",
+      "content": "sadržaj"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "putanja",
+      "mode": "način",
+      "content": "sadržaj"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Uredi",
+      "edit": "Otvori uređivač",
+      "moreLines": "+{{count}} redaka",
+      "editTemplate": "Uredi predložak"
     },
     "timer": {
       "mode": "način",
@@ -1891,7 +1891,7 @@
       "waitUntil": "Pauzira do zadanog datuma/vremena, zatim nastavlja.",
       "now": "Emitira trenutni datum i vrijeme.",
       "timer": "Aktivira svoje tijelo u ponavljajućem intervalu ili prema cron rasporedu.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Izračunava a + − × ÷ … dvaju brojeva.",
       "comparator": "Uspoređuje dvije vrijednosti i emitira točno ili netočno.",
       "boolean": "Kombinira booleove vrijednosti pomoću and / or / xor / not.",
       "object": "Gradi objekt iz svojih imenovanih ulaza.",
@@ -1904,7 +1904,7 @@
       "json": "Parsira JSON niz ili serijalizira vrijednost u JSON.",
       "xml": "Parsira XML niz ili serijalizira vrijednost u XML.",
       "yaml": "Parsira YAML niz ili serijalizira vrijednost u YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Hashira ili kodira niz znakova (base64, md5, sha…, hmac, uuid).",
       "jwt": "Dekodira JWT token u header, payload i signature.",
       "datetime": "Pomiče, oblikuje ili uspoređuje datum.",
       "retry": "Ponovno pokreće svoje tijelo do uspjeha, uz backoff politiku.",
@@ -1913,7 +1913,7 @@
       "random": "Generira nasumičan broj, niz, boolean ili odabir.",
       "listOp": "Preoblikuje popis (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Parsira CSV niz ili serijalizira popis u CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Izvodi skalarnu operaciju (zaokruži, apsolutna, korijen, min, maks, ograniči…).",
       "schema": "Provjerava vrijednost prema JSON Schema.",
       "readFile": "Čita tekstualni sadržaj datoteke.",
       "writeFile": "Zapisuje ili dodaje tekst u datoteku.",
@@ -1952,13 +1952,13 @@
       "redisClose": "Zatvara već otvorenu Redis pretplatničku vezu.",
       "redisCommand": "Izvodi povezanu Redis naredbu (jedna naredba na novoj vezi, zatim prekid) i emitira njezin odgovor.",
       "toast": "Prikazuje toast obavijest u Restorm sučelju tijekom izvođenja scenarija.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Hosta lokalni lažni HTTP poslužitelj i sluša neograničeno. `connected` se aktivira čim počne slušati; svaki posluženi zahtjev ponovno emitira svoje podatke na portu `served`. Poslužitelj ostaje aktivan do HTTP zatvaranja (ili Stopa), nakon čega se aktivira `done`. Nema response izlaza — poslužuje, ne poziva prema van.",
       "httpClose": "Zaustavlja već aktivni lažni HTTP poslužitelj (deklariran čvorom HTTP server) i oslobađa njegov port.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Hosta lokalni lažni gRPC poslužitelj i sluša neograničeno. `connected` se aktivira čim počne slušati; svaki posluženi poziv ponovno emitira svoje podatke na portu `served`. Poslužitelj ostaje aktivan do zatvaranja gRPC poslužitelja (ili Stopa), nakon čega se aktivira `done`. Nema response izlaza — poslužuje, ne poziva prema van.",
       "grpcServerClose": "Zaustavlja već aktivni lažni gRPC poslužitelj (deklariran čvorom gRPC server) i oslobađa njegov port.",
       "soapListen": "Udomljuje lokalni SOAP mock poslužitelj i sluša neograničeno. Svaki dolazni zahtjev usmjerava se na konfiguriranu operaciju (prema njegovoj SOAPAction ili nazivu operacije u tijelu) i odgovara mu se unaprijed definiranom SOAP omotnicom (operacija pogreške vraća `<soap:Fault>`). `connected` se aktivira čim poslužitelj sluša; svaki posluženi zahtjev ponovno emitira svoje podatke na priključku `served`. Poslužitelj ostaje aktivan do SOAP zatvaranja (ili zaustavljanja), a zatim se aktivira `done`.",
       "soapClose": "Zaustavlja SOAP mock poslužitelj koji već sluša (deklariran SOAP poslužiteljskim čvorom) i oslobađa njegov priključak.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Hosta lokalni lažni GraphQL poslužitelj i sluša neograničeno. `connected` se aktivira čim počne slušati; svaka poslužena operacija ponovno emitira svoje podatke na portu `served`. Poslužitelj ostaje aktivan do GraphQL zatvaranja (ili Stopa), nakon čega se aktivira `done`. Nema response izlaza — poslužuje, ne poziva prema van.",
       "graphqlClose": "Zaustavlja već aktivni lažni GraphQL poslužitelj (deklariran čvorom GraphQL server) i oslobađa njegov port.",
       "odataListen": "Hostira lokalnu lažnu OData v4 uslugu i sluša neograničeno. `connected` se aktivira čim počne slušati; svaki posluženi zahtjev ponovno emitira svoje podatke na priključku `served`. Poslužitelj ostaje aktivan do OData zatvaranja (ili zaustavljanja), nakon čega se aktivira `done`. Bez response izlaza — poslužuje, ne poziva prema van.",
       "odataClose": "Zaustavlja lažnu OData uslugu koja već sluša (deklariranu OData poslužiteljskim čvorom) i oslobađa njezin priključak.",
@@ -1994,43 +1994,43 @@
       "title": "Pokreni iz naredbenog retka",
       "intro": "Pokrenite ovaj scenarij bez otvaranja aplikacije (CI, cron, skripta):",
       "byId": "Odredi po id-u",
-      "allLogs": "All logs",
+      "allLogs": "Svi zapisi",
       "note": "`--out file` zapisuje run-log i u datoteku.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekt.restorm>",
       "tokenPlaceholder": "<vaš_token>",
       "tokenNote": "Headless pokretanje zahtijeva Restorm Pro plan i CI token.",
       "tokenLink": "Dohvati token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Naziv veze",
+      "connectionNamePlaceholder": "naziv veze",
+      "eventPlaceholder": "događaj",
+      "addEvent": "Dodaj događaj",
+      "connected": "povezano",
+      "others": "ostali",
+      "connection": "veza",
+      "pickConnection": "— odaberi vezu —",
+      "channelLabel": "Naziv kanala",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Uredi payload",
       "started": "pokrenuto"
     },
     "websocket": {
-      "message": "message"
+      "message": "poruka"
     },
     "sse": {
-      "message": "message"
+      "message": "poruka"
     },
     "grpc": {
-      "message": "message"
+      "message": "poruka"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Preuredi akcije"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "ulaz",
+      "error": "greška",
+      "done": "gotovo"
     },
     "toast": {
       "title": "naslov",
@@ -2038,7 +2038,7 @@
       "duration": "trajanje (s)"
     },
     "http": {
-      "served": "served"
+      "served": "posluženo"
     },
     "actionOverride": {
       "configMissingShort": "Konfiguracija nedostaje",

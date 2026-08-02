@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "在上方输入地址即可开始浏览。"
+    "back": "后退",
+    "refresh": "刷新",
+    "go": "前往",
+    "address": "地址",
+    "emptyHint": "在上方输入地址即可开始浏览。"
   },
   "bookmarkRibbon": {
     "addBookmark": "添加书签"

@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Saisissez une adresse ci-dessus pour commencer à naviguer."
+    "back": "Retour",
+    "refresh": "Actualiser",
+    "go": "Aller",
+    "address": "Adresse",
+    "emptyHint": "Saisissez une adresse ci-dessus pour commencer à naviguer."
   },
   "bookmarkRibbon": {
     "addBookmark": "Ajouter un signet"

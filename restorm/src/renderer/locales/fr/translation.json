@@ -1307,14 +1307,14 @@
       "crypto": "Crypto",
       "jwt": "JWT",
       "datetime": "Calcul de date",
-      "objectOp": "Object ops",
+      "objectOp": "Opérations objet",
       "url": "URL",
       "random": "Aléatoire",
-      "throw": "Throw",
-      "retry": "Retry",
+      "throw": "Lever erreur",
+      "retry": "Réessai",
       "listOp": "Opérations liste",
       "csv": "CSV",
-      "math": "Math",
+      "math": "Maths",
       "schema": "Validation schéma",
       "readFile": "Lire fichier",
       "writeFile": "Écrire fichier",
@@ -1507,7 +1507,7 @@
       "timezone": "Fuseau horaire",
       "formatLabel": "Format",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Date/heure",
         "epoch": "Epoch",
         "string": "Chaîne"
       }
@@ -1582,7 +1582,7 @@
       "value": "valeur",
       "operation": "opération",
       "pattern": "motif",
-      "flags": "flags",
+      "flags": "indicateurs",
       "replacement": "remplacement",
       "result": "résultat",
       "op": {
@@ -1646,7 +1646,7 @@
       }
     },
     "jwt": {
-      "value": "token",
+      "value": "jeton",
       "result": "résultat"
     },
     "datetime": {
@@ -1726,7 +1726,7 @@
     },
     "retry": {
       "maxAttempts": "essais max",
-      "backoff": "backoff",
+      "backoff": "temporisation",
       "delay": "délai",
       "factor": "facteur",
       "retryOnError": "re-tenter sur erreur",
@@ -2027,9 +2027,9 @@
       "message": "message"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "entrée",
+      "error": "erreur",
+      "done": "terminé"
     },
     "toast": {
       "title": "titre",

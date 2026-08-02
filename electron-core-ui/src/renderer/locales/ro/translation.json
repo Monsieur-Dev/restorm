@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Introduceți o adresă mai sus pentru a începe navigarea."
+    "back": "Înapoi",
+    "refresh": "Reîmprospătează",
+    "go": "Mergi",
+    "address": "Adresă",
+    "emptyHint": "Introdu o adresă mai sus pentru a începe navigarea."
   },
   "bookmarkRibbon": {
     "addBookmark": "Adaugă marcaj"

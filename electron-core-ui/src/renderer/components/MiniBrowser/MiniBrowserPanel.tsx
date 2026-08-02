@@ -471,14 +471,14 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
             icon="arrow-left"
             disabled={!canGoBack}
             onClick={handleBack}
-            options={{ ariaLabel: 'Back', title: 'Back' }}
+            options={{ ariaLabel: t('miniBrowser.back'), title: t('miniBrowser.back') }}
             data-testid="mini-browser-button-back"
           />
           <Button
             icon="refresh"
             disabled={!canRefresh}
             onClick={handleRefresh}
-            options={{ ariaLabel: 'Refresh', title: 'Refresh' }}
+            options={{ ariaLabel: t('miniBrowser.refresh'), title: t('miniBrowser.refresh') }}
             data-testid="mini-browser-button-refresh"
           />
           <InputBox
@@ -496,7 +496,7 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
             }}
             options={{
               placeholder: 'https://example.com',
-              ariaLabel: 'Address'
+              ariaLabel: t('miniBrowser.address')
             }}
             data-testid="mini-browser-address"
           />
@@ -504,7 +504,7 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
             emphasis={1}
             icon="arrow-right"
             onClick={handleSubmit}
-            options={{ ariaLabel: 'Go', title: 'Go' }}
+            options={{ ariaLabel: t('miniBrowser.go'), title: t('miniBrowser.go') }}
             data-testid="mini-browser-button-go"
           />
         </ControlGroup>
@@ -528,7 +528,7 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
         >
           {committedUrl === '' ? (
             <div className="mini-browser-panel__placeholder" data-testid="mini-browser-placeholder">
-              {t('miniBrowser.emptyState')}
+              {t('miniBrowser.emptyHint')}
             </div>
           ) : null}
         </div>

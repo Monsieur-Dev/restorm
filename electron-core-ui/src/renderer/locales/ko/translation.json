@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "위에 주소를 입력하면 탐색을 시작합니다."
+    "back": "뒤로",
+    "refresh": "새로고침",
+    "go": "이동",
+    "address": "주소",
+    "emptyHint": "위에 주소를 입력하면 탐색을 시작합니다."
   },
   "bookmarkRibbon": {
     "addBookmark": "북마크 추가"

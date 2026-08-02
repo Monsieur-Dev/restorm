@@ -1213,10 +1213,10 @@
       "emptyRightClick": "Klikněte pravým tlačítkem na prázdné místo a přidejte do scénáře akce"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "Cesta JSON",
       "ariaLabel": "Výběr cesty JSON",
       "pick": "Vybrat z výsledku",
-      "loading": "Loading…",
+      "loading": "Načítání…",
       "noResult": "Spusťte zdrojovou akci a vyberte vlastnost z jejího výsledku."
     },
     "tab": {
@@ -1225,12 +1225,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Změnit barvu",
+        "resetColor": "Obnovit barvu",
         "addNote": "Přidat/upravit poznámku",
         "runOnEachEvent": "Spustit při každé přijaté události",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Duplikovat",
+        "delete": "Smazat",
         "deleteShortcut": "Del",
         "copy": "Kopírovat",
         "paste": "Vložit"
@@ -1240,9 +1240,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Změnit barvu",
+        "resetColor": "Obnovit barvu",
+        "delete": "Smazat"
       }
     },
     "locked": "Úpravy uzamčeny během běhu scénáře",
@@ -1301,49 +1301,49 @@
       "getVariable": "Získat proměnnou",
       "addToList": "Přidat do seznamu",
       "removeFromList": "Odebrat ze seznamu",
-      "cast": "Cast",
+      "cast": "Převést",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Krypto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Výpočty s daty",
+      "objectOp": "Operace s objektem",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Náhodné",
+      "throw": "Vyvolat chybu",
+      "retry": "Opakovat",
+      "listOp": "Operace se seznamem",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematika",
+      "schema": "Ověřit schéma",
+      "readFile": "Číst soubor",
+      "writeFile": "Zapsat soubor",
       "timer": "Časovač",
       "code": "Kód",
       "socketioConnect": "Připojení Socket.IO",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Odeslání Socket.IO",
       "socketioClose": "Zavřít připojení Socket.IO",
       "socketioServerClose": "Zavřít server Socket.IO",
       "websocketConnect": "Připojení WebSocket",
       "sseConnect": "Připojení SSE",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "Odeslání WebSocket",
       "websocketClose": "Zavřít připojení WebSocket",
       "websocketServerClose": "Zavřít server WebSocket",
       "sseClose": "Zavřít připojení SSE",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "Připojení gRPC",
+      "grpcSend": "Odeslání gRPC",
       "grpcClose": "Zavřít připojení gRPC",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "Připojení MQTT",
+      "mqttSend": "Publikace MQTT",
       "mqttClose": "Zavřít připojení MQTT",
       "amqpConnect": "Připojení AMQP",
       "amqpPublish": "Publikace AMQP",
       "amqpClose": "Zavřít připojení AMQP",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Odběr Redis",
       "redisClose": "Zavřít připojení Redis",
-      "redisCommand": "Redis command",
+      "redisCommand": "Příkaz Redis",
       "httpListen": "Server HTTP",
       "httpClose": "Zavřít server HTTP",
       "grpcServerClose": "Zavřít server gRPC",
@@ -1358,8 +1358,8 @@
       "stompConnect": "Připojení STOMP",
       "stompSend": "Odeslání STOMP",
       "stompClose": "Zavřít připojení STOMP",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Produkce Kafka",
+      "kafkaConsume": "Konzumace Kafka",
       "kafkaClose": "Zavřít připojení Kafka",
       "grpcListen": "Server gRPC"
     },
@@ -1379,29 +1379,29 @@
     },
     "assert": {
       "message": "zpráva",
-      "operator": "operator",
+      "operator": "operátor",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "rovná se",
+        "ne": "nerovná se",
+        "lt": "menší než",
         "lte": "menší nebo rovno",
-        "gt": "greater than",
+        "gt": "větší než",
         "gte": "větší nebo rovno",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "obsahuje",
+        "isString": "je řetězec",
+        "isNumber": "je číslo",
+        "isBoolean": "je logická hodnota",
+        "isArray": "je seznam",
+        "isObject": "je objekt",
+        "isNull": "je null",
+        "exists": "existuje",
+        "isEmpty": "je prázdné",
+        "matchesRegex": "odpovídá regexu",
         "isOneOf": "je jedním z",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "hluboká rovnost",
+        "lengthEq": "délka ==",
+        "lengthGt": "délka >",
+        "lengthLt": "délka <"
       }
     },
     "editRequest": "Upravit požadavek",
@@ -1409,8 +1409,8 @@
     "object": {
       "addProperty": "Přidat vlastnost",
       "removeProperty": "Odebrat vlastnost",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Název vlastnosti",
+      "propertyValue": "hodnota"
     },
     "output": {
       "outputName": "Název výstupu",
@@ -1418,7 +1418,7 @@
       "removeOutput": "Odebrat"
     },
     "input": {
-      "name": "Name",
+      "name": "Název",
       "defaultType": "Výchozí / typ",
       "addParam": "Přidat parametr",
       "removeParam": "Odebrat"
@@ -1464,7 +1464,7 @@
       },
       "transform": {
         "emptyTemplate": "Šablona nesmí být prázdná.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "Vstup \"value\" musí být připojen, když šablona odkazuje na {{…}}."
       },
       "request": {
         "missing": "Propojený požadavek již neexistuje."
@@ -1506,12 +1506,12 @@
       "helpTitle": "Co tato akce dělá"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Časové pásmo",
+      "formatLabel": "Formát",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Datum/čas",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Řetězec"
       }
     },
     "callers": {
@@ -1519,8 +1519,8 @@
       "title": "Tento scénář je volán z:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Parametry běhu",
+      "run": "Spustit",
       "midRunTitle": "Vyžadována vstupní data"
     },
     "runHistory": {
@@ -1535,20 +1535,20 @@
       "unpin": "Odepnout"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
+      "from": "od",
+      "to": "do",
+      "step": "krok",
       "index": "index",
-      "done": "done"
+      "done": "hotovo"
     },
     "while": {
-      "body": "body"
+      "body": "tělo"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "smyčka"
     },
     "loop": {
-      "done": "done"
+      "done": "hotovo"
     },
     "breakpoint": {
       "add": "Přidat bod přerušení",
@@ -1561,84 +1561,84 @@
       "toggle": "Přepnout minimapu"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "seznam",
+      "values": "hodnoty",
+      "result": "výsledek",
       "addValue": "Přidat hodnotu",
       "removeValue": "Odebrat hodnotu",
       "updateVariable": "Aktualizovat zdrojovou proměnnou"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "hodnota",
+      "targetType": "převést na",
+      "result": "výsledek",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "číslo",
+        "string": "řetězec",
+        "boolean": "logická hodnota",
+        "date": "datum",
+        "list": "seznam"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "hodnota",
+      "operation": "operace",
+      "pattern": "vzor",
+      "flags": "příznaky",
+      "replacement": "náhrada",
+      "result": "výsledek",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "extrahovat",
+        "extractAll": "extrahovat vše",
+        "test": "otestovat",
+        "replace": "nahradit",
+        "split": "rozdělit"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Nerozlišovat velikost písmen",
         "m": "Víceřádkový (^ a $ odpovídají zlomům řádků)",
         "s": "Dotall (. odpovídá novým řádkům)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "hodnota",
+      "operation": "operace",
+      "indent": "odsazení",
+      "result": "výsledek",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsovat",
+        "stringify": "serializovat"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "hodnota",
+      "operation": "operace",
+      "indent": "odsazení",
+      "result": "výsledek",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsovat",
+        "stringify": "serializovat"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "hodnota",
+      "operation": "operace",
+      "indent": "odsazení",
+      "result": "výsledek",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsovat",
+        "stringify": "serializovat"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "hodnota",
+      "operation": "operace",
+      "key": "klíč",
+      "keyPlaceholder": "tajný klíč",
+      "result": "výsledek",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "zakódovat base64",
+        "base64Decode": "dekódovat base64",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1649,182 +1649,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "výsledek"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "datum",
+      "operation": "operace",
+      "amount": "množství",
+      "unitLabel": "jednotka",
+      "format": "formát",
+      "other": "druhé datum",
+      "result": "výsledek",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "přidat",
+        "subtract": "odečíst",
+        "format": "formátovat",
+        "diff": "rozdíl"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "milisekundy",
+        "seconds": "sekundy",
+        "minutes": "minuty",
+        "hours": "hodiny",
+        "days": "dny",
+        "weeks": "týdny",
+        "months": "měsíce",
+        "years": "roky"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "objekt",
+      "operation": "operace",
+      "path": "cesta",
+      "keys": "klíče",
+      "setValue": "hodnota",
+      "mergeWith": "sloučit s",
+      "result": "výsledek",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "číst",
+        "set": "zapsat",
+        "merge": "sloučit",
+        "pick": "ponechat",
+        "omit": "odebrat",
+        "keys": "klíče",
+        "values": "hodnoty"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "hodnota",
+      "operation": "operace",
+      "result": "výsledek",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "zakódovat",
+        "decode": "dekódovat",
+        "parseQuery": "parsovat dotaz",
+        "buildQuery": "sestavit dotaz",
+        "parseUrl": "parsovat URL"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "operace",
       "min": "min",
       "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "length": "délka",
+      "items": "položky",
+      "seed": "seed (volitelné)",
+      "seedPlaceholder": "reprodukovatelné",
+      "result": "výsledek",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "celé číslo",
+        "float": "desetinné číslo",
+        "string": "řetězec",
+        "boolean": "logická hodnota",
+        "pick": "vybrat"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "zpráva"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "max. pokusů",
+      "backoff": "čekání",
+      "delay": "prodleva",
+      "factor": "faktor",
       "retryOnError": "opakovat při chybě",
       "retryOnStatus": "opakovat při stavu HTTP",
       "retryOnFailure": "opakovat při čemkoli mimo 2xx",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "pokus",
+      "exhausted": "vyčerpáno",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "pevné",
+        "linear": "lineární",
+        "exponential": "exponenciální"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Seznamy",
+      "math": "Matematika",
+      "dataFormats": "Datové formáty",
+      "encoding": "Kódování",
       "time": "Časování",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmy",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "seznam",
+      "operation": "operace",
+      "result": "výsledek",
+      "key": "klíč",
+      "order": "pořadí",
+      "depth": "hloubka",
+      "size": "velikost",
+      "start": "začátek",
+      "end": "konec",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "seřadit",
+        "unique": "jedinečné",
+        "reverse": "obrátit",
+        "flatten": "zploštit",
+        "chunk": "rozdělit na části",
+        "slice": "vyříznout",
+        "groupBy": "seskupit podle"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "hodnota",
+      "operation": "operace",
+      "result": "výsledek",
+      "delimiter": "oddělovač",
+      "header": "řádek záhlaví",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "parsovat",
+        "stringify": "serializovat"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "hodnota",
+      "operation": "operace",
+      "result": "výsledek",
+      "b": "s",
       "min": "min",
       "max": "max",
-      "precision": "precision",
+      "precision": "přesnost",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "zaokrouhlit",
+        "floor": "zaokrouhlit dolů",
+        "ceil": "zaokrouhlit nahoru",
+        "trunc": "oříznout",
+        "abs": "absolutní hodnota",
+        "sign": "znaménko",
+        "sqrt": "odmocnina",
         "min": "min",
         "max": "max",
-        "clamp": "clamp"
+        "clamp": "omezit"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "hodnota",
+      "schema": "Schéma JSON",
+      "valid": "platné",
+      "invalid": "neplatné",
+      "errors": "chyby",
       "editTitle": "Upravit JSON Schema"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "cesta",
+      "content": "obsah"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "cesta",
+      "mode": "režim",
+      "content": "obsah"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Upravit",
+      "edit": "Otevřít editor",
+      "moreLines": "+{{count}} řádků",
+      "editTemplate": "Upravit šablonu"
     },
     "timer": {
       "mode": "režim",
@@ -1892,7 +1892,7 @@
       "waitUntil": "Pozastaví se do daného data/času, pak pokračuje.",
       "now": "Vydá aktuální datum a čas.",
       "timer": "Spouští své tělo v opakujícím se intervalu nebo podle plánu cron.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Vypočítá a + − × ÷ … dvou čísel.",
       "comparator": "Porovná dvě hodnoty a vydá pravda nebo nepravda.",
       "boolean": "Kombinuje booleovské hodnoty pomocí and / or / xor / not.",
       "object": "Sestaví objekt z jeho pojmenovaných vstupů.",
@@ -1905,7 +1905,7 @@
       "json": "Parsuje řetězec JSON nebo serializuje hodnotu do JSON.",
       "xml": "Parsuje řetězec XML nebo serializuje hodnotu do XML.",
       "yaml": "Parsuje řetězec YAML nebo serializuje hodnotu do YAML.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Zahashuje nebo zakóduje řetězec (base64, md5, sha…, hmac, uuid).",
       "jwt": "Dekóduje token JWT na header, payload a signature.",
       "datetime": "Posune, formátuje nebo porovná datum.",
       "retry": "Opakuje své tělo, dokud neuspěje, s politikou backoff.",
@@ -1914,7 +1914,7 @@
       "random": "Vygeneruje náhodné číslo, řetězec, boolean nebo výběr.",
       "listOp": "Přetvaruje seznam (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "Parsuje řetězec CSV nebo serializuje seznam do CSV.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Provede skalární operaci (zaokrouhlit, abs, odmocnina, min, max, omezit…).",
       "schema": "Ověří hodnotu vůči JSON Schema.",
       "readFile": "Přečte textový obsah souboru.",
       "writeFile": "Zapíše nebo připojí text do souboru.",
@@ -1953,13 +1953,13 @@
       "redisClose": "Uzavře již otevřené odběratelské připojení Redis.",
       "redisCommand": "Spustí navázaný příkaz Redis (jeden příkaz na novém připojení, poté odpojení) a vydá jeho odpověď.",
       "toast": "Zobrazí toast notifikaci v rozhraní Restorm během běhu scénáře.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Hostuje lokální fiktivní HTTP server a naslouchá neomezeně. `connected` se spustí, jakmile naslouchá; každý obsloužený požadavek znovu vyšle svá data na portu `served`. Server zůstává aktivní až do zavření HTTP (nebo Stop), poté se spustí `done`. Žádný výstup response — obsluhuje, nevolá ven.",
       "httpClose": "Zastaví již naslouchající fiktivní server HTTP (deklarovaný uzlem HTTP server) a uvolní jeho port.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Hostuje lokální fiktivní gRPC server a naslouchá neomezeně. `connected` se spustí, jakmile naslouchá; každé obsloužené volání znovu vyšle svá data na portu `served`. Server zůstává aktivní až do zavření gRPC serveru (nebo Stop), poté se spustí `done`. Žádný výstup response — obsluhuje, nevolá ven.",
       "grpcServerClose": "Zastaví již naslouchající fiktivní server gRPC (deklarovaný uzlem gRPC server) a uvolní jeho port.",
       "soapListen": "Hostuje místní server SOAP mock a naslouchá neomezeně. Každý příchozí požadavek je směrován na nakonfigurovanou operaci (podle jeho SOAPAction nebo názvu operace v těle) a je zodpovězen předdefinovanou obálkou SOAP (chybová operace vrací `<soap:Fault>`). `connected` se spustí, jakmile server naslouchá; každý obsloužený požadavek znovu vyšle svá data na portu `served`. Server zůstává aktivní až do zavření SOAP (nebo zastavení), poté se spustí `done`.",
       "soapClose": "Zastaví již naslouchající server SOAP mock (deklarovaný uzlem serveru SOAP) a uvolní jeho port.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Hostuje lokální fiktivní GraphQL server a naslouchá neomezeně. `connected` se spustí, jakmile naslouchá; každá obsloužená operace znovu vyšle svá data na portu `served`. Server zůstává aktivní až do zavření GraphQL (nebo Stop), poté se spustí `done`. Žádný výstup response — obsluhuje, nevolá ven.",
       "graphqlClose": "Zastaví již naslouchající fiktivní server GraphQL (deklarovaný uzlem GraphQL server) a uvolní jeho port.",
       "odataListen": "Hostuje místní fiktivní službu OData v4 a naslouchá neomezeně. Port `connected` se aktivuje, jakmile služba naslouchá; každý obsloužený požadavek znovu vyšle svá data na portu `served`. Server běží až do uzavření OData (nebo do zastavení), poté se aktivuje port `done`. Žádný výstup response — pouze obsluhuje, sám nevolá ven.",
       "odataClose": "Zastaví již naslouchající fiktivní službu OData (deklarovanou uzlem serveru OData) a uvolní její port.",
@@ -1995,43 +1995,43 @@
       "title": "Spustit z příkazové řádky",
       "intro": "Spusťte tento scénář bez otevření aplikace (CI, cron, skript):",
       "byId": "Označit podle id",
-      "allLogs": "All logs",
+      "allLogs": "Všechny logy",
       "note": "`--out file` zapíše run-log také do souboru.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekt.restorm>",
       "tokenPlaceholder": "<váš_token>",
       "tokenNote": "Headless spuštění vyžaduje plán Restorm Pro a CI token.",
       "tokenLink": "Získat token"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Název připojení",
+      "connectionNamePlaceholder": "název připojení",
+      "eventPlaceholder": "událost",
+      "addEvent": "Přidat událost",
+      "connected": "připojeno",
+      "others": "ostatní",
+      "connection": "připojení",
+      "pickConnection": "— vyberte připojení —",
+      "channelLabel": "Název kanálu",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Upravit payload",
       "started": "spuštěno"
     },
     "websocket": {
-      "message": "message"
+      "message": "zpráva"
     },
     "sse": {
-      "message": "message"
+      "message": "zpráva"
     },
     "grpc": {
-      "message": "message"
+      "message": "zpráva"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Přeuspořádat akce"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "vstup",
+      "error": "chyba",
+      "done": "hotovo"
     },
     "toast": {
       "title": "název",
@@ -2039,7 +2039,7 @@
       "duration": "doba trvání (s)"
     },
     "http": {
-      "served": "served"
+      "served": "obslouženo"
     },
     "actionOverride": {
       "configMissingShort": "Konfigurace chybí",

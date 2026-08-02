@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "在上方輸入網址即可開始瀏覽。"
+    "back": "上一頁",
+    "refresh": "重新整理",
+    "go": "前往",
+    "address": "網址",
+    "emptyHint": "在上方輸入網址即可開始瀏覽。"
   },
   "bookmarkRibbon": {
     "addBookmark": "新增書籤"

@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Ange en adress ovan för att börja surfa."
+    "back": "Tillbaka",
+    "refresh": "Uppdatera",
+    "go": "Gå",
+    "address": "Adress",
+    "emptyHint": "Ange en adress ovan för att börja surfa."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lägg till bokmärke"

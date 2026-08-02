@@ -1211,10 +1211,10 @@
       "emptyRightClick": "Kattintson a jobb gombbal egy üres helyre, hogy műveleteket adjon a forgatókönyvéhez"
     },
     "pathSelector": {
-      "placeholder": "JSON path",
+      "placeholder": "JSON útvonal",
       "ariaLabel": "JSON-útvonalválasztó",
       "pick": "Választás az eredményből",
-      "loading": "Loading…",
+      "loading": "Betöltés…",
       "noResult": "Futtassa a forrásműveletet, hogy kiválasszon egy tulajdonságot az eredményéből."
     },
     "tab": {
@@ -1223,12 +1223,12 @@
     },
     "node": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
+        "changeColor": "Szín módosítása",
+        "resetColor": "Szín visszaállítása",
         "addNote": "Jegyzet hozzáadása/szerkesztése",
         "runOnEachEvent": "Futtatás minden beérkező eseménynél",
-        "duplicate": "Duplicate",
-        "delete": "Delete",
+        "duplicate": "Duplikálás",
+        "delete": "Törlés",
         "deleteShortcut": "Del",
         "copy": "Másolás",
         "paste": "Beillesztés"
@@ -1238,9 +1238,9 @@
     },
     "edge": {
       "menu": {
-        "changeColor": "Change colour",
-        "resetColor": "Reset colour",
-        "delete": "Delete"
+        "changeColor": "Szín módosítása",
+        "resetColor": "Szín visszaállítása",
+        "delete": "Törlés"
       }
     },
     "locked": "A szerkesztés zárolva, amíg a forgatókönyv fut",
@@ -1299,49 +1299,49 @@
       "getVariable": "Változó lekérése",
       "addToList": "Hozzáadás a listához",
       "removeFromList": "Eltávolítás a listából",
-      "cast": "Cast",
+      "cast": "Átalakítás",
       "regex": "Regex",
       "json": "JSON",
       "xml": "XML",
       "yaml": "YAML",
-      "crypto": "Crypto",
+      "crypto": "Kripto",
       "jwt": "JWT",
-      "datetime": "Date math",
-      "objectOp": "Object ops",
+      "datetime": "Dátumszámítás",
+      "objectOp": "Objektumműveletek",
       "url": "URL",
-      "random": "Random",
-      "throw": "Throw",
-      "retry": "Retry",
-      "listOp": "List ops",
+      "random": "Véletlen",
+      "throw": "Hiba dobása",
+      "retry": "Újrapróbálkozás",
+      "listOp": "Listaműveletek",
       "csv": "CSV",
-      "math": "Math",
-      "schema": "Schema validate",
-      "readFile": "Read file",
-      "writeFile": "Write file",
+      "math": "Matematika",
+      "schema": "Séma ellenőrzése",
+      "readFile": "Fájl olvasása",
+      "writeFile": "Fájl írása",
       "timer": "Időzítő",
       "code": "Kód",
       "socketioConnect": "Socket.IO-kapcsolat",
-      "socketioSend": "Socket.IO send",
+      "socketioSend": "Socket.IO küldés",
       "socketioClose": "Socket.IO-kapcsolat bezárása",
       "socketioServerClose": "Socket.IO-kiszolgáló bezárása",
       "websocketConnect": "WebSocket-kapcsolat",
       "sseConnect": "SSE-kapcsolat",
-      "websocketSend": "WebSocket send",
+      "websocketSend": "WebSocket küldés",
       "websocketClose": "WebSocket-kapcsolat bezárása",
       "websocketServerClose": "WebSocket-kiszolgáló bezárása",
       "sseClose": "SSE-kapcsolat bezárása",
-      "grpcConnect": "gRPC connect",
-      "grpcSend": "gRPC send",
+      "grpcConnect": "gRPC kapcsolat",
+      "grpcSend": "gRPC küldés",
       "grpcClose": "gRPC-kapcsolat bezárása",
-      "mqttConnect": "MQTT connect",
-      "mqttSend": "MQTT publish",
+      "mqttConnect": "MQTT kapcsolat",
+      "mqttSend": "MQTT közzététel",
       "mqttClose": "MQTT-kapcsolat bezárása",
       "amqpConnect": "AMQP-kapcsolat",
       "amqpPublish": "AMQP-közzététel",
       "amqpClose": "AMQP-kapcsolat bezárása",
-      "redisSubscribe": "Redis subscribe",
+      "redisSubscribe": "Redis feliratkozás",
       "redisClose": "Redis-kapcsolat bezárása",
-      "redisCommand": "Redis command",
+      "redisCommand": "Redis parancs",
       "httpListen": "HTTP-kiszolgáló",
       "httpClose": "HTTP-kiszolgáló bezárása",
       "grpcServerClose": "gRPC-kiszolgáló bezárása",
@@ -1356,8 +1356,8 @@
       "stompConnect": "STOMP kapcsolódás",
       "stompSend": "STOMP küldés",
       "stompClose": "STOMP-kapcsolat bezárása",
-      "kafkaProduce": "Kafka produce",
-      "kafkaConsume": "Kafka consume",
+      "kafkaProduce": "Kafka előállítás",
+      "kafkaConsume": "Kafka fogyasztás",
       "kafkaClose": "Kafka-kapcsolat bezárása",
       "grpcListen": "gRPC-kiszolgáló"
     },
@@ -1377,29 +1377,29 @@
     },
     "assert": {
       "message": "üzenet",
-      "operator": "operator",
+      "operator": "operátor",
       "op": {
-        "eq": "equals",
-        "ne": "not equals",
-        "lt": "less than",
+        "eq": "egyenlő",
+        "ne": "nem egyenlő",
+        "lt": "kisebb mint",
         "lte": "kisebb vagy egyenlő",
-        "gt": "greater than",
+        "gt": "nagyobb mint",
         "gte": "nagyobb vagy egyenlő",
-        "contains": "contains",
-        "isString": "is string",
-        "isNumber": "is number",
-        "isBoolean": "is boolean",
-        "isArray": "is array",
-        "isObject": "is object",
-        "isNull": "is null",
-        "exists": "exists",
-        "isEmpty": "is empty",
-        "matchesRegex": "matches regex",
+        "contains": "tartalmazza",
+        "isString": "szöveg-e",
+        "isNumber": "szám-e",
+        "isBoolean": "logikai érték-e",
+        "isArray": "lista-e",
+        "isObject": "objektum-e",
+        "isNull": "null-e",
+        "exists": "létezik",
+        "isEmpty": "üres-e",
+        "matchesRegex": "illeszkedik a regexre",
         "isOneOf": "egyike a következőknek",
-        "deepEquals": "deep equals",
-        "lengthEq": "length ==",
-        "lengthGt": "length >",
-        "lengthLt": "length <"
+        "deepEquals": "mély egyenlőség",
+        "lengthEq": "hossz ==",
+        "lengthGt": "hossz >",
+        "lengthLt": "hossz <"
       }
     },
     "editRequest": "Kérés szerkesztése",
@@ -1407,8 +1407,8 @@
     "object": {
       "addProperty": "Tulajdonság hozzáadása",
       "removeProperty": "Tulajdonság eltávolítása",
-      "propertyName": "Property name",
-      "propertyValue": "value"
+      "propertyName": "Tulajdonság neve",
+      "propertyValue": "érték"
     },
     "output": {
       "outputName": "Kimenet neve",
@@ -1416,7 +1416,7 @@
       "removeOutput": "Eltávolítás"
     },
     "input": {
-      "name": "Name",
+      "name": "Név",
       "defaultType": "Alapértelmezett / típus",
       "addParam": "Paraméter hozzáadása",
       "removeParam": "Eltávolítás"
@@ -1462,7 +1462,7 @@
       },
       "transform": {
         "emptyTemplate": "A sablon nem lehet üres.",
-        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+        "valueRequired": "A \"value\" bemenetet csatlakoztatni kell, ha a sablon {{…}} hivatkozást tartalmaz."
       },
       "request": {
         "missing": "A hozzárendelt kérés már nem létezik."
@@ -1504,12 +1504,12 @@
       "helpTitle": "Mit csinál ez a művelet"
     },
     "now": {
-      "timezone": "Timezone",
-      "formatLabel": "Format",
+      "timezone": "Időzóna",
+      "formatLabel": "Formátum",
       "format": {
-        "datetime": "DateTime",
+        "datetime": "Dátum/idő",
         "epoch": "Epoch",
-        "string": "String"
+        "string": "Szöveg"
       }
     },
     "callers": {
@@ -1517,8 +1517,8 @@
       "title": "Ezt a forgatókönyvet hívja:"
     },
     "runPrompt": {
-      "title": "Run parameters",
-      "run": "Run",
+      "title": "Futtatási paraméterek",
+      "run": "Futtatás",
       "midRunTitle": "Bevitel szükséges"
     },
     "runHistory": {
@@ -1533,20 +1533,20 @@
       "unpin": "Feloldás"
     },
     "for": {
-      "from": "from",
-      "to": "to",
-      "step": "step",
+      "from": "ettől",
+      "to": "eddig",
+      "step": "lépés",
       "index": "index",
-      "done": "done"
+      "done": "kész"
     },
     "while": {
-      "body": "body"
+      "body": "törzs"
     },
     "doWhile": {
-      "loop": "loop"
+      "loop": "ciklus"
     },
     "loop": {
-      "done": "done"
+      "done": "kész"
     },
     "breakpoint": {
       "add": "Töréspont hozzáadása",
@@ -1559,84 +1559,84 @@
       "toggle": "Minitérkép be/ki"
     },
     "listMutation": {
-      "list": "list",
-      "values": "values",
-      "result": "result",
+      "list": "lista",
+      "values": "értékek",
+      "result": "eredmény",
       "addValue": "Érték hozzáadása",
       "removeValue": "Érték eltávolítása",
       "updateVariable": "Forrásváltozó frissítése"
     },
     "cast": {
-      "value": "value",
-      "targetType": "cast to",
-      "result": "result",
+      "value": "érték",
+      "targetType": "átalakítás erre",
+      "result": "eredmény",
       "type": {
-        "number": "number",
-        "string": "string",
-        "boolean": "boolean",
-        "date": "date",
-        "list": "list"
+        "number": "szám",
+        "string": "szöveg",
+        "boolean": "logikai érték",
+        "date": "dátum",
+        "list": "lista"
       }
     },
     "regex": {
-      "value": "value",
-      "operation": "operation",
-      "pattern": "pattern",
-      "flags": "flags",
-      "replacement": "replacement",
-      "result": "result",
+      "value": "érték",
+      "operation": "művelet",
+      "pattern": "minta",
+      "flags": "jelzők",
+      "replacement": "helyettesítő",
+      "result": "eredmény",
       "op": {
-        "extract": "extract",
-        "extractAll": "extract all",
-        "test": "test",
-        "replace": "replace",
-        "split": "split"
+        "extract": "kinyerés",
+        "extractAll": "összes kinyerése",
+        "test": "tesztelés",
+        "replace": "csere",
+        "split": "felosztás"
       },
       "flag": {
-        "i": "Case-insensitive",
+        "i": "Kis- és nagybetű nem számít",
         "m": "Többsoros (a ^ és a $ illeszkedik a sortörésekre)",
         "s": "Dotall (a . illeszkedik a sortörésekre)"
       }
     },
     "json": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "érték",
+      "operation": "művelet",
+      "indent": "behúzás",
+      "result": "eredmény",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "elemzés",
+        "stringify": "sorosítás"
       }
     },
     "xml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "érték",
+      "operation": "művelet",
+      "indent": "behúzás",
+      "result": "eredmény",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "elemzés",
+        "stringify": "sorosítás"
       }
     },
     "yaml": {
-      "value": "value",
-      "operation": "operation",
-      "indent": "indent",
-      "result": "result",
+      "value": "érték",
+      "operation": "művelet",
+      "indent": "behúzás",
+      "result": "eredmény",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "elemzés",
+        "stringify": "sorosítás"
       }
     },
     "crypto": {
-      "value": "value",
-      "operation": "operation",
-      "key": "key",
-      "keyPlaceholder": "secret",
-      "result": "result",
+      "value": "érték",
+      "operation": "művelet",
+      "key": "kulcs",
+      "keyPlaceholder": "titok",
+      "result": "eredmény",
       "op": {
-        "base64Encode": "base64 encode",
-        "base64Decode": "base64 decode",
+        "base64Encode": "base64 kódolás",
+        "base64Decode": "base64 dekódolás",
         "md5": "MD5",
         "sha1": "SHA-1",
         "sha256": "SHA-256",
@@ -1647,182 +1647,182 @@
     },
     "jwt": {
       "value": "token",
-      "result": "result"
+      "result": "eredmény"
     },
     "datetime": {
-      "value": "date",
-      "operation": "operation",
-      "amount": "amount",
-      "unitLabel": "unit",
-      "format": "format",
-      "other": "second date",
-      "result": "result",
+      "value": "dátum",
+      "operation": "művelet",
+      "amount": "mennyiség",
+      "unitLabel": "egység",
+      "format": "formátum",
+      "other": "második dátum",
+      "result": "eredmény",
       "op": {
-        "add": "add",
-        "subtract": "subtract",
-        "format": "format",
-        "diff": "diff"
+        "add": "hozzáadás",
+        "subtract": "kivonás",
+        "format": "formázás",
+        "diff": "különbség"
       },
       "unit": {
-        "milliseconds": "milliseconds",
-        "seconds": "seconds",
-        "minutes": "minutes",
-        "hours": "hours",
-        "days": "days",
-        "weeks": "weeks",
-        "months": "months",
-        "years": "years"
+        "milliseconds": "ezredmásodperc",
+        "seconds": "másodperc",
+        "minutes": "perc",
+        "hours": "óra",
+        "days": "nap",
+        "weeks": "hét",
+        "months": "hónap",
+        "years": "év"
       }
     },
     "objectOp": {
-      "value": "object",
-      "operation": "operation",
-      "path": "path",
-      "keys": "keys",
-      "setValue": "value",
-      "mergeWith": "merge with",
-      "result": "result",
+      "value": "objektum",
+      "operation": "művelet",
+      "path": "útvonal",
+      "keys": "kulcsok",
+      "setValue": "érték",
+      "mergeWith": "összefésülés ezzel",
+      "result": "eredmény",
       "op": {
-        "get": "get",
-        "set": "set",
-        "merge": "merge",
-        "pick": "pick",
-        "omit": "omit",
-        "keys": "keys",
-        "values": "values"
+        "get": "olvasás",
+        "set": "írás",
+        "merge": "összefésülés",
+        "pick": "megtartás",
+        "omit": "elhagyás",
+        "keys": "kulcsok",
+        "values": "értékek"
       }
     },
     "url": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
+      "value": "érték",
+      "operation": "művelet",
+      "result": "eredmény",
       "op": {
-        "encode": "encode",
-        "decode": "decode",
-        "parseQuery": "parse query",
-        "buildQuery": "build query",
-        "parseUrl": "parse URL"
+        "encode": "kódolás",
+        "decode": "dekódolás",
+        "parseQuery": "lekérdezés elemzése",
+        "buildQuery": "lekérdezés építése",
+        "parseUrl": "URL elemzése"
       }
     },
     "random": {
-      "operation": "operation",
+      "operation": "művelet",
       "min": "min",
       "max": "max",
-      "length": "length",
-      "items": "items",
-      "seed": "seed (optional)",
-      "seedPlaceholder": "reproducible",
-      "result": "result",
+      "length": "hossz",
+      "items": "elemek",
+      "seed": "mag (opcionális)",
+      "seedPlaceholder": "reprodukálható",
+      "result": "eredmény",
       "op": {
-        "int": "integer",
-        "float": "float",
-        "string": "string",
-        "boolean": "boolean",
-        "pick": "pick"
+        "int": "egész szám",
+        "float": "tizedes szám",
+        "string": "szöveg",
+        "boolean": "logikai érték",
+        "pick": "választás"
       }
     },
     "throw": {
-      "message": "message"
+      "message": "üzenet"
     },
     "retry": {
-      "maxAttempts": "max attempts",
-      "backoff": "backoff",
-      "delay": "delay",
-      "factor": "factor",
+      "maxAttempts": "max. próbálkozás",
+      "backoff": "várakozási stratégia",
+      "delay": "késleltetés",
+      "factor": "szorzó",
       "retryOnError": "újrapróbálkozás hiba esetén",
       "retryOnStatus": "újrapróbálkozás HTTP-státusz esetén",
       "retryOnFailure": "újrapróbálkozás bármely nem 2xx esetén",
-      "attempt": "attempt",
-      "exhausted": "exhausted",
+      "attempt": "próbálkozás",
+      "exhausted": "kimerült",
       "backoffOpt": {
-        "fixed": "fixed",
-        "linear": "linear",
-        "exponential": "exponential"
+        "fixed": "fix",
+        "linear": "lineáris",
+        "exponential": "exponenciális"
       }
     },
     "menuGroups": {
-      "lists": "Lists",
-      "math": "Math",
-      "dataFormats": "Data formats",
-      "encoding": "Encoding",
+      "lists": "Listák",
+      "math": "Matematika",
+      "dataFormats": "Adatformátumok",
+      "encoding": "Kódolás",
       "time": "Időzítés",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algoritmusok",
       "ux": "UX"
     },
     "listOp": {
-      "value": "list",
-      "operation": "operation",
-      "result": "result",
-      "key": "key",
-      "order": "order",
-      "depth": "depth",
-      "size": "size",
-      "start": "start",
-      "end": "end",
+      "value": "lista",
+      "operation": "művelet",
+      "result": "eredmény",
+      "key": "kulcs",
+      "order": "sorrend",
+      "depth": "mélység",
+      "size": "méret",
+      "start": "kezdet",
+      "end": "vég",
       "op": {
-        "sort": "sort",
-        "unique": "unique",
-        "reverse": "reverse",
-        "flatten": "flatten",
-        "chunk": "chunk",
-        "slice": "slice",
-        "groupBy": "group by"
+        "sort": "rendezés",
+        "unique": "egyediek",
+        "reverse": "megfordítás",
+        "flatten": "lapítás",
+        "chunk": "darabolás",
+        "slice": "kivágás",
+        "groupBy": "csoportosítás"
       }
     },
     "csv": {
-      "value": "value",
-      "operation": "operation",
-      "result": "result",
-      "delimiter": "delimiter",
-      "header": "header row",
+      "value": "érték",
+      "operation": "művelet",
+      "result": "eredmény",
+      "delimiter": "elválasztó",
+      "header": "fejlécsor",
       "op": {
-        "parse": "parse",
-        "stringify": "stringify"
+        "parse": "elemzés",
+        "stringify": "sorosítás"
       }
     },
     "math": {
-      "a": "value",
-      "operation": "operation",
-      "result": "result",
-      "b": "with",
+      "a": "érték",
+      "operation": "művelet",
+      "result": "eredmény",
+      "b": "ezzel",
       "min": "min",
       "max": "max",
-      "precision": "precision",
+      "precision": "pontosság",
       "op": {
-        "round": "round",
-        "floor": "floor",
-        "ceil": "ceil",
-        "trunc": "truncate",
-        "abs": "absolute",
-        "sign": "sign",
-        "sqrt": "square root",
+        "round": "kerekítés",
+        "floor": "lefelé kerekítés",
+        "ceil": "felfelé kerekítés",
+        "trunc": "csonkolás",
+        "abs": "abszolút érték",
+        "sign": "előjel",
+        "sqrt": "négyzetgyök",
         "min": "min",
         "max": "max",
-        "clamp": "clamp"
+        "clamp": "korlátozás"
       }
     },
     "schema": {
-      "value": "value",
-      "schema": "JSON Schema",
-      "valid": "valid",
-      "invalid": "invalid",
-      "errors": "errors",
+      "value": "érték",
+      "schema": "JSON séma",
+      "valid": "érvényes",
+      "invalid": "érvénytelen",
+      "errors": "hibák",
       "editTitle": "JSON Schema szerkesztése"
     },
     "readFile": {
-      "path": "path",
-      "content": "content"
+      "path": "útvonal",
+      "content": "tartalom"
     },
     "writeFile": {
-      "path": "path",
-      "mode": "mode",
-      "content": "content"
+      "path": "útvonal",
+      "mode": "mód",
+      "content": "tartalom"
     },
     "codeField": {
-      "title": "Edit",
-      "edit": "Open editor",
-      "moreLines": "+{{count}} lines",
-      "editTemplate": "Edit template"
+      "title": "Szerkesztés",
+      "edit": "Szerkesztő megnyitása",
+      "moreLines": "+{{count}} sor",
+      "editTemplate": "Sablon szerkesztése"
     },
     "timer": {
       "mode": "mód",
@@ -1890,7 +1890,7 @@
       "waitUntil": "Egy megadott dátumig/időpontig szünetel, majd folytatja.",
       "now": "Kibocsátja az aktuális dátumot és időt.",
       "timer": "Ismétlődő időközönként vagy cron ütemezés szerint indítja a törzsét.",
-      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "arithmetic": "Kiszámítja két szám a + − × ÷ … műveletét.",
       "comparator": "Két értéket hasonlít össze, és igaz vagy hamis értéket ad.",
       "boolean": "Logikai értékeket kombinál az and / or / xor / not műveletekkel.",
       "object": "Objektumot épít a megnevezett bemeneteiből.",
@@ -1903,7 +1903,7 @@
       "json": "JSON-szöveget elemez, vagy egy értéket JSON formátumba sorosít.",
       "xml": "XML-szöveget elemez, vagy egy értéket XML formátumba sorosít.",
       "yaml": "YAML-szöveget elemez, vagy egy értéket YAML formátumba sorosít.",
-      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "crypto": "Hasheli vagy kódolja a szöveget (base64, md5, sha…, hmac, uuid).",
       "jwt": "Egy JWT-tokent header, payload és signature részekre dekódol.",
       "datetime": "Eltol, formáz vagy dátumkülönbséget számol.",
       "retry": "Újrafuttatja a törzsét, amíg sikerül, backoff-házirenddel.",
@@ -1912,7 +1912,7 @@
       "random": "Véletlenszerű számot, szöveget, logikai értéket vagy választást generál.",
       "listOp": "Átalakítja egy lista alakját (sort, unique, reverse, flatten, chunk, slice, groupBy).",
       "csv": "CSV-szöveget elemez, vagy egy listát CSV formátumba sorosít.",
-      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "math": "Skaláris műveletet hajt végre (kerekítés, abszolút, gyök, min, max, korlátozás…).",
       "schema": "Egy értéket egy JSON Schema alapján validál.",
       "readFile": "Beolvassa egy fájl szöveges tartalmát.",
       "writeFile": "Szöveget ír vagy fűz egy fájlhoz.",
@@ -1951,13 +1951,13 @@
       "redisClose": "Lezár egy már nyitott Redis feliratkozási kapcsolatot.",
       "redisCommand": "Lefuttat egy kötött Redis parancsot (egyetlen parancs egy új kapcsolaton, majd bontás), és kibocsátja a válaszát.",
       "toast": "Toast-értesítést jelenít meg a Restorm felületén, miközben a forgatókönyv fut.",
-      "httpListen": "Hosts a local HTTP mock server and listens indefinitely. `connected` fires once it is listening; each served request re-emits its data on the `served` port. The server stays up until an HTTP close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "httpListen": "Helyi HTTP mock-szervert üzemeltet és korlátlan ideig figyel. A `connected` akkor sül el, amint figyelni kezd; minden kiszolgált kérés újra kibocsátja az adatait a `served` porton. A szerver aktív marad egy HTTP-lezárásig (vagy egy Stopig), majd elsül a `done`. Nincs response kimenet — kiszolgál, nem hív ki.",
       "httpClose": "Leállít egy már figyelő HTTP-mockkiszolgálót (amelyet egy HTTP-kiszolgálócsomópont deklarál), és felszabadítja a portját.",
-      "grpcListen": "Hosts a local gRPC mock server and listens indefinitely. `connected` fires once it is listening; each served call re-emits its data on the `served` port. The server stays up until a gRPC server close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "grpcListen": "Helyi gRPC mock-szervert üzemeltet és korlátlan ideig figyel. A `connected` akkor sül el, amint figyelni kezd; minden kiszolgált hívás újra kibocsátja az adatait a `served` porton. A szerver aktív marad egy gRPC-szerverlezárásig (vagy egy Stopig), majd elsül a `done`. Nincs response kimenet — kiszolgál, nem hív ki.",
       "grpcServerClose": "Leállít egy már figyelő gRPC-mockkiszolgálót (amelyet egy gRPC-kiszolgálócsomópont deklarál), és felszabadítja a portját.",
       "soapListen": "Helyi SOAP mock-kiszolgálót üzemeltet, és korlátlan ideig figyel. Minden bejövő kérést egy konfigurált művelethez irányít (a SOAPAction vagy a törzs műveletneve alapján), és az előre megadott SOAP-borítékkal válaszol (egy hibaművelet `<soap:Fault>` választ ad). A `connected` akkor aktiválódik, amint a kiszolgáló figyel; minden kiszolgált kérés újra kibocsátja az adatait a `served` porton. A kiszolgáló aktív marad egy SOAP-lezárásig (vagy leállításig), majd a `done` aktiválódik.",
       "soapClose": "Leállít egy már figyelő SOAP mock-kiszolgálót (amelyet egy SOAP-kiszolgáló csomópont deklarált), és felszabadítja a portját.",
-      "graphqlListen": "Hosts a local GraphQL mock server and listens indefinitely. `connected` fires once it is listening; each served operation re-emits its data on the `served` port. The server stays up until a GraphQL close (or a Stop), then `done` fires. No response output — it serves, it does not call out.",
+      "graphqlListen": "Helyi GraphQL mock-szervert üzemeltet és korlátlan ideig figyel. A `connected` akkor sül el, amint figyelni kezd; minden kiszolgált művelet újra kibocsátja az adatait a `served` porton. A szerver aktív marad egy GraphQL-lezárásig (vagy egy Stopig), majd elsül a `done`. Nincs response kimenet — kiszolgál, nem hív ki.",
       "graphqlClose": "Leállít egy már figyelő GraphQL-mockkiszolgálót (amelyet egy GraphQL-kiszolgálócsomópont deklarál), és felszabadítja a portját.",
       "odataListen": "Helyi OData v4 mock szolgáltatást üzemeltet, és határozatlan ideig figyel. A `connected` akkor aktiválódik, amint figyel; minden kiszolgált kérés újraküldi az adatait a `served` porton. A kiszolgáló az OData lezárásig (vagy egy Stopig) fut, majd a `done` aktiválódik. Nincs response kimenet — kiszolgál, nem hív kifelé.",
       "odataClose": "Leállít egy már figyelő OData mock szolgáltatást (amelyet egy OData kiszolgáló csomópont deklarált), és felszabadítja a portját.",
@@ -1993,43 +1993,43 @@
       "title": "Futtatás parancssorból",
       "intro": "Futtassa ezt a forgatókönyvet az alkalmazás megnyitása nélkül (CI, cron, szkript):",
       "byId": "Megadás id alapján",
-      "allLogs": "All logs",
+      "allLogs": "Összes napló",
       "note": "A `--out file` a run-log fájlba írását is elvégzi.",
-      "projectPlaceholder": "<project.restorm>",
+      "projectPlaceholder": "<projekt.restorm>",
       "tokenPlaceholder": "<token>",
       "tokenNote": "A headless futtatáshoz Restorm Pro csomag és CI token szükséges.",
       "tokenLink": "Token beszerzése"
     },
     "socketio": {
-      "connectionNameLabel": "Connection name",
-      "connectionNamePlaceholder": "connection name",
-      "eventPlaceholder": "event",
-      "addEvent": "Add event",
-      "connected": "connected",
-      "others": "others",
-      "connection": "connection",
-      "pickConnection": "— pick a connection —",
-      "channelLabel": "Channel name",
+      "connectionNameLabel": "Kapcsolat neve",
+      "connectionNamePlaceholder": "kapcsolat neve",
+      "eventPlaceholder": "esemény",
+      "addEvent": "Esemény hozzáadása",
+      "connected": "csatlakozva",
+      "others": "egyebek",
+      "connection": "kapcsolat",
+      "pickConnection": "— válasszon kapcsolatot —",
+      "channelLabel": "Csatorna neve",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload",
+      "payloadModalTitle": "Payload szerkesztése",
       "started": "elindítva"
     },
     "websocket": {
-      "message": "message"
+      "message": "üzenet"
     },
     "sse": {
-      "message": "message"
+      "message": "üzenet"
     },
     "grpc": {
-      "message": "message"
+      "message": "üzenet"
     },
     "palette": {
-      "arrangeActions": "Re-arrange actions"
+      "arrangeActions": "Műveletek átrendezése"
     },
     "port": {
-      "in": "in",
-      "error": "error",
-      "done": "done"
+      "in": "be",
+      "error": "hiba",
+      "done": "kész"
     },
     "toast": {
       "title": "cím",
@@ -2037,7 +2037,7 @@
       "duration": "időtartam (mp)"
     },
     "http": {
-      "served": "served"
+      "served": "kiszolgálva"
     },
     "actionOverride": {
       "configMissingShort": "Hiányzó konfiguráció",

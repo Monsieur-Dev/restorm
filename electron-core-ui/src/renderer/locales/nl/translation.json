@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Voer hierboven een adres in om te beginnen met browsen."
+    "back": "Terug",
+    "refresh": "Vernieuwen",
+    "go": "Ga",
+    "address": "Adres",
+    "emptyHint": "Voer hierboven een adres in om te beginnen met browsen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Bladwijzer toevoegen"

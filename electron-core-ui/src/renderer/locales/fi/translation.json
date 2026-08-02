@@ -423,7 +423,11 @@
     }
   },
   "miniBrowser": {
-    "emptyState": "Kirjoita osoite yläpuolelle aloittaaksesi selaamisen."
+    "back": "Takaisin",
+    "refresh": "Päivitä",
+    "go": "Siirry",
+    "address": "Osoite",
+    "emptyHint": "Kirjoita osoite yläpuolelle aloittaaksesi selaamisen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lisää kirjanmerkki"
