@@ -77,6 +77,11 @@ jobs:
           cd electron-core-ui
           NODE_OPTIONS="--max-old-space-size=4096" pnpm run typecheck
 
+      - name: Run electron-core-ui tests
+        run: |
+          cd electron-core-ui
+          pnpm run test
+
       - name: Validate theme contrast ratios
         run: |
           cd electron-core-ui

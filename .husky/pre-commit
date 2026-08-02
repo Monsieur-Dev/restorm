@@ -43,6 +43,8 @@ echo "📦 electron-core-ui: lint"
 pnpm run lint || exit 1
 echo "📦 electron-core-ui: typecheck"
 pnpm run typecheck || exit 1
+echo "📦 electron-core-ui: test"
+pnpm run test || exit 1
 echo "📦 electron-core-ui: build"
 pnpm run build || exit 1
 cd ..

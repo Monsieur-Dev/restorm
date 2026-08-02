@@ -24,8 +24,9 @@ instances → multiple commits can run in parallel):
    - `depcheck` - Verifies dependencies
    - `lint` - ESLint validation
    - `typecheck` - TypeScript type checking
+   - `test` (electron-core-ui) / `test:all` (restorm) - Unit (and, for restorm,
+     integration) tests
    - `build` - Build verification
-   - `test:all` (restorm only) - Unit and integration tests
 
    The **Playwright e2e suite does NOT run here** — it is the heavy gate and
    moved to push time (see the Pre-push Hook below).
