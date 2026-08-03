@@ -333,6 +333,15 @@ const scenarioSetVariableOverrideTestDir = defineBddConfig({
   outputDir: '.features-gen/scenario-setvariable-override'
 })
 
+const scenarioInputPromptTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-input-prompt/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-input-prompt/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-runlog.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-input-prompt'
+})
+
 const postmanImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/postman-import/features/**/*.feature',
   steps: [
@@ -805,6 +814,11 @@ export default defineConfig({
       name: 'scenario-setvariable-override',
       testDir: scenarioSetVariableOverrideTestDir,
       timeout: 120 * 1000 // 2 min — opens a fresh app + runs one scenario against the petstore mock
+    },
+    {
+      name: 'scenario-input-prompt',
+      testDir: scenarioInputPromptTestDir,
+      timeout: 240 * 1000 // 4 min — four typed scenarios, each opens a fresh app + answers the run-parameters modal
     },
     {
       name: 'postman-import',

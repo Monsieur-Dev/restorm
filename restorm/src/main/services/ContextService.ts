@@ -752,8 +752,13 @@ class ContextService {
       if (updatedData.params) updatedData.params = this.materializeCustomListKVs(updatedData.params, requestId)
       if (updatedData.pathParams) updatedData.pathParams = this.materializeCustomListKVs(updatedData.pathParams, requestId)
 
-      // Delegate URL resolution to URLResolver
-      const urlResult = resolveUrl(updatedData, baseContext, this.transformValue.bind(this))
+      // Delegate URL resolution to URLResolver. The run's variables are handed
+      // over SEPARATELY as well as being part of `baseContext`: inside the
+      // resolver the request's own path params are written over the context, so
+      // a run value merged in beforehand would be discarded. Passing it here
+      // lets the resolver re-apply it last and keep the layering
+      // `environment → request → scenario run`.
+      const urlResult = resolveUrl(updatedData, baseContext, this.transformValue.bind(this), ctx.scenarioVariables)
       const previousUrlResult = this.resolvedUrls.get(requestId)
       if (previousUrlResult?.resolvedUrl !== urlResult.resolvedUrl) {
         this.resolvedUrls.set(requestId, urlResult)

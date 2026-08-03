@@ -82,6 +82,7 @@ server; — = pure UI/in-process.
 | scenario-runlog | 56 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main) | 🏠 |
 | scenario-quick-config-selector | 1 | Request-action config selector stays live | — |
 | scenario-setvariable-override | 1 | setVariable overrides an env-folder var downstream | — |
+| scenario-input-prompt | 4 | Run-parameters modal: the answer wins over the input default AND the request's own path param (string / number / enum / custom-list) | 🐳 petstore |
 | scenario-suggestions | 1 | Scenario inspector data suggestions | — |
 | secrets-sources | 1 | Secret-source scenarios → stable run-log | — |
 

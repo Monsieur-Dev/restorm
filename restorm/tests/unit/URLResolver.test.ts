@@ -144,3 +144,106 @@ describe('URLResolver — path-param priority over env variables', () => {
     expect(result.resolvedUrl).toBe('https://api/enabled-value')
   })
 })
+
+/**
+ * The three-layer contract: environment-folder variables, then the request's
+ * own values, then the scenario run's values — each layer replacing same-named
+ * keys from the one before.
+ *
+ * The boundary this suite was originally written for (request > env) is pinned
+ * above. These tests pin the OTHER two, because a layering is only as good as
+ * its weakest boundary: if only the boundary a bug exposed is covered, the
+ * others are correct merely because nothing has moved them yet.
+ *
+ * The fixtures use three DISTINCT values, one per layer, so a failure names
+ * which layer won instead of only reporting that something is wrong.
+ */
+describe('URLResolver — environment / request / scenario-run layering', () => {
+  const LAYERED_URL = '{{baseUrl}}/pet/{{petId}}'
+  const ENV_VALUE = '1'
+  const REQUEST_VALUE = '2'
+  const RUN_VALUE = '3'
+
+  const envWith = (petId?: string): TransformedContext => ({
+    baseUrl: 'https://api.example.com',
+    ...(petId !== undefined ? { petId } : {})
+  })
+
+  it('boundary 1→2: the request path param replaces the env-folder value', () => {
+    const data = httpRequest({
+      url: LAYERED_URL,
+      pathParams: [{ key: 'petId', value: new StringValue(REQUEST_VALUE), enabled: true }]
+    })
+    const result = resolveUrl(data, envWith(ENV_VALUE), transform)
+    expect(result.resolvedUrl).toBe(`https://api.example.com/pet/${REQUEST_VALUE}`)
+  })
+
+  it('boundary 2→3: the scenario run value replaces the request path param', () => {
+    const data = httpRequest({
+      url: LAYERED_URL,
+      pathParams: [{ key: 'petId', value: new StringValue(REQUEST_VALUE), enabled: true }]
+    })
+    const result = resolveUrl(data, envWith(ENV_VALUE), transform, { petId: RUN_VALUE })
+    expect(result.resolvedUrl).toBe(`https://api.example.com/pet/${RUN_VALUE}`)
+  })
+
+  it('all three layers at once: the run value wins over both', () => {
+    const data = httpRequest({
+      url: LAYERED_URL,
+      pathParams: [{ key: 'petId', value: new StringValue(REQUEST_VALUE), enabled: true }]
+    })
+    const result = resolveUrl(data, envWith(ENV_VALUE), transform, { petId: RUN_VALUE })
+    expect(result.resolvedUrl).not.toContain(`/pet/${ENV_VALUE}`)
+    expect(result.resolvedUrl).not.toContain(`/pet/${REQUEST_VALUE}`)
+    expect(result.resolvedUrl).toBe(`https://api.example.com/pet/${RUN_VALUE}`)
+  })
+
+  it('the run value also replaces an env-folder value when the request has no path param', () => {
+    const data = httpRequest({ url: LAYERED_URL, pathParams: [] })
+    const result = resolveUrl(data, envWith(ENV_VALUE), transform, { petId: RUN_VALUE })
+    expect(result.resolvedUrl).toBe(`https://api.example.com/pet/${RUN_VALUE}`)
+  })
+
+  it('a run value for a DIFFERENT key leaves the request path param alone', () => {
+    const data = httpRequest({
+      url: LAYERED_URL,
+      pathParams: [{ key: 'petId', value: new StringValue(REQUEST_VALUE), enabled: true }]
+    })
+    const result = resolveUrl(data, envWith(ENV_VALUE), transform, { orderId: RUN_VALUE })
+    expect(result.resolvedUrl).toBe(`https://api.example.com/pet/${REQUEST_VALUE}`)
+  })
+
+  it('no run context at all keeps the historical request > env layering', () => {
+    // Outside a scenario run layer 3 is absent, so nothing about an ordinary
+    // Send changes — the whole blast radius of the layering is a live run.
+    const data = httpRequest({
+      url: LAYERED_URL,
+      pathParams: [{ key: 'petId', value: new StringValue(REQUEST_VALUE), enabled: true }]
+    })
+    expect(resolveUrl(data, envWith(ENV_VALUE), transform).resolvedUrl)
+      .toBe(resolveUrl(data, envWith(ENV_VALUE), transform, undefined).resolvedUrl)
+  })
+
+  it('an empty run context changes nothing', () => {
+    const data = httpRequest({
+      url: LAYERED_URL,
+      pathParams: [{ key: 'petId', value: new StringValue(REQUEST_VALUE), enabled: true }]
+    })
+    const result = resolveUrl(data, envWith(ENV_VALUE), transform, {})
+    expect(result.resolvedUrl).toBe(`https://api.example.com/pet/${REQUEST_VALUE}`)
+  })
+
+  it('the env-folder layer keeps its own cumulative self-override', () => {
+    // Within layer 1 a key defined again replaces the earlier one — the
+    // behaviour used to build a value by successive concatenation. The
+    // flattening happens before this resolver sees the context, so what is
+    // pinned here is that layer 3 does not disturb an unrelated env key.
+    const data = httpRequest({ url: '{{baseUrl}}/pet/{{petId}}', pathParams: [] })
+    const envContext: TransformedContext = {
+      baseUrl: 'https://api.example.com/v2',
+      petId: ENV_VALUE
+    }
+    const result = resolveUrl(data, envContext, transform, { petId: RUN_VALUE })
+    expect(result.resolvedUrl).toBe(`https://api.example.com/v2/pet/${RUN_VALUE}`)
+  })
+})

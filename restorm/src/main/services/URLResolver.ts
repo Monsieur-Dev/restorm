@@ -9,17 +9,54 @@ import { isExpressionValue, isEnumListValue, isEnumValue } from '../../shared/ut
 import { serializeODataQueryOptions } from '../../shared/utils/odataQuery'
 
 /**
+ * Overlay a scenario run's values onto a URL-template context, in place.
+ *
+ * Written VERBATIM, not `encodeURIComponent`-ed. Note this is NOT uniform with
+ * everything it can overwrite: env values are verbatim, but a path-param row is
+ * encoded just above, so a run value replacing one swaps an encoded value for an
+ * unencoded one. That is deliberate — a run value is a VARIABLE, like an env
+ * variable, not a path-param row, and encoding it would make the same value
+ * behave differently depending on whether the request happens to carry a row of
+ * that name, which is the hidden asymmetry this layering exists to remove.
+ *
+ * Known property, not a defect: a run value containing `/`, `?`, `#` or `%`
+ * therefore changes the URL's STRUCTURE where the same characters in a
+ * path-param row would have been escaped. Harmless for a value the user typed
+ * into the run prompt; worth knowing for a headless `--param`, whose value can
+ * come from a build parameter someone else controls. Env variables have always
+ * carried the same property.
+ */
+function applyRunContext(target: TransformedContext, runContext: TransformedContext | undefined): void {
+  if (runContext === undefined) return
+  for (const [key, value] of Object.entries(runContext)) target[key] = value
+}
+
+/**
  * Calculate the resolved URL for a request.
+ *
+ * Values are layered, each layer replacing same-named keys from the one before:
+ *
+ *   1. environment-folder variables (`envContext`, already flattened through the
+ *      parent → sub-environment chain, including the deliberate "same key
+ *      defined twice" cumulation used to build a value by concatenation);
+ *   2. the request's own values (its path params, then its query params);
+ *   3. the scenario run's values (`runContext`) — an input node's answered
+ *      param, or a `setVariable`.
+ *
+ * Layer 3 exists only while a scenario run is in flight; outside one it is
+ * absent and the layering collapses to the historical `request > environment`.
  *
  * @param data - Full request data containing url, pathParams, params
  * @param envContext - Transformed environment context for Handlebars resolution
  * @param transformValue - Function to resolve Handlebars templates
+ * @param runContext - Scenario run variables, applied last (layer 3)
  * @returns The resolved URL result with baseUrl, queryString and final resolvedUrl
  */
 export function resolveUrl(
   data: FullRequestData,
   envContext: TransformedContext,
-  transformValue: TransformValueFn
+  transformValue: TransformValueFn,
+  runContext?: TransformedContext
 ): ResolvedUrlResult {
   // Build cumulative context with path params (non-encoded for resolution).
   // Path params override env vars for the same key — request-level
@@ -63,6 +100,11 @@ export function resolveUrl(
     const value = cumulativeContext[key] ?? ''
     fullContext[key] = encodeURIComponent(value)
   }
+  // Layer 3 last: a scenario run's value replaces the request's own row for the
+  // same key. Without this the request's path param would silently discard the
+  // value a run supplied — an input node's answered param, or a `setVariable` —
+  // and the prompt the user answered would have no effect on the URL.
+  applyRunContext(fullContext, runContext)
 
   // Transform the URL template
   let baseUrl = transformValue(data.url, fullContext)

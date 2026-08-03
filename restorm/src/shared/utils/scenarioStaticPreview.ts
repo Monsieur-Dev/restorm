@@ -127,6 +127,17 @@ export function concreteValue(persisted: unknown): unknown {
             .map((lbl) => customListValueOrLabel((p as { listId?: unknown }).listId, lbl))
             .join(',')
         : ''
+    // The OTHER multi-select. Like `customListMulti` it renders as the joined
+    // display string — that is this function's job for a multi-select, while
+    // `listValueArray` is the array form used where list semantics are wanted
+    // (conditions, forEach/map/filter). Without this case an `enumList` fell to
+    // `default:`, whose non-scalar guard returns `''` — so a user's picks were
+    // discarded wherever a value reaches execution through here, e.g. an input
+    // param answered in the run-parameters prompt.
+    case 'enumList':
+      return Array.isArray(p.value)
+        ? p.value.filter((v): v is string => typeof v === 'string').join(',')
+        : ''
     case 'variable':
       return typeof p.value === 'string' ? `{{${p.value}}}` : ''
     case 'environment': {
@@ -148,7 +159,7 @@ export function concreteValue(persisted: unknown): unknown {
       return secretPreviewResolver(source, params && typeof params === 'object' ? (params as Record<string, unknown>) : {}) ?? ''
     }
     // 'string' | 'expression' | 'color' | 'datetime' | 'enum' |
-    // 'enumList' | unknown — value carries the renderable string.
+    // unknown — value carries the renderable string.
     default:
       if (typeof p.value === 'string') return p.value
       if (typeof p.value === 'number' || typeof p.value === 'boolean') return p.value
