@@ -1,10 +1,30 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
   CURRENT_FILE_FORMAT_VERSION,
+  FILE_FORMAT_VERSION_KEY,
   checkFileFormatCompatibility,
-  normalizeFileFormatVersion
+  resolveFileFormatVersion,
+  stripLegacyFileFormatVersion
 } from '../../src/shared/config/fileFormatVersion'
 import { EnvironmentFolder } from '../../src/shared/models/EnvironmentFolder'
+import { prepareForSerialization } from '../../src/shared/utils/serialization'
+import { serialize } from 'electron-core-ui/main'
+
+const silentLogger = { warn: (): void => { /* quiet */ } }
+
+/** A collection root as it appears inside `collections`. */
+const collection = (version?: unknown): Record<string, unknown> => {
+  const root: Record<string, unknown> = { folderType: 'environment', id: 'x', name: 'C' }
+  if (version !== undefined) root[FILE_FORMAT_VERSION_KEY] = version
+  return root
+}
+
+/** A parsed document with the version at its root — the current shape. */
+const documentAtRoot = (version?: unknown, collections: unknown[] = [collection()]): Record<string, unknown> => {
+  const doc: Record<string, unknown> = { collections }
+  if (version !== undefined) doc[FILE_FORMAT_VERSION_KEY] = version
+  return doc
+}
 
 describe('CURRENT_FILE_FORMAT_VERSION', () => {
   it('is 1', () => {
@@ -12,196 +32,263 @@ describe('CURRENT_FILE_FORMAT_VERSION', () => {
   })
 })
 
-describe('EnvironmentFolder fileFormatVersion default', () => {
-  it('new EnvironmentFolder() has fileFormatVersion = CURRENT_FILE_FORMAT_VERSION', () => {
-    const folder = new EnvironmentFolder()
-    expect(folder.fileFormatVersion).toBe(CURRENT_FILE_FORMAT_VERSION)
+describe('the version is not carried by a collection', () => {
+  it('a new EnvironmentFolder has no version of its own', () => {
+    const folder = new EnvironmentFolder({ name: 'Test' })
+    expect(FILE_FORMAT_VERSION_KEY in folder).toBe(false)
   })
 
-  it('fromPlain() defaults to CURRENT_FILE_FORMAT_VERSION when field is missing', () => {
-    const folder = EnvironmentFolder.fromPlain({
-      id: 'env-1',
-      name: 'Legacy env',
-      folderType: 'environment'
-    })
-    expect(folder.fileFormatVersion).toBe(CURRENT_FILE_FORMAT_VERSION)
+  it('toPlainObject() emits no version, so a save cannot put one back on a collection', () => {
+    const folder = new EnvironmentFolder({ name: 'Test' })
+    expect(Object.keys(folder.toPlainObject())).not.toContain(FILE_FORMAT_VERSION_KEY)
   })
 
-  it('fromPlain() preserves a present valid version', () => {
-    const folder = EnvironmentFolder.fromPlain({
-      id: 'env-1',
-      name: 'Env v1',
-      folderType: 'environment',
-      fileFormatVersion: 1
-    })
-    expect(folder.fileFormatVersion).toBe(1)
-  })
-
-  it('fromPlain() falls back to CURRENT_FILE_FORMAT_VERSION when version is non-numeric garbage', () => {
-    const folder = EnvironmentFolder.fromPlain({
-      // Cast because `fromPlain` types the input but on-disk data may be
-      // malformed — we want the defensive default to kick in.
-      id: 'env-1',
-      name: 'Garbage',
-      folderType: 'environment',
-      fileFormatVersion: Number.NaN
-    })
-    expect(folder.fileFormatVersion).toBe(CURRENT_FILE_FORMAT_VERSION)
-  })
-
-  it('toPlainObject() round-trips fileFormatVersion through a JSON cycle', () => {
-    const folder = new EnvironmentFolder({ id: 'env-1', name: 'Rt' })
-    folder.fileFormatVersion = 1
-    const plain = folder.toPlainObject()
-    expect(plain['fileFormatVersion']).toBe(1)
-    const reloaded = EnvironmentFolder.fromPlain(plain as unknown as Parameters<typeof EnvironmentFolder.fromPlain>[0])
-    expect(reloaded.fileFormatVersion).toBe(1)
-  })
-
-  it('toPlainObject() places fileFormatVersion right after folderType', () => {
-    const folder = new EnvironmentFolder({ id: 'env-1', name: 'Rt' })
-    const keys = Object.keys(folder.toPlainObject())
-    const folderTypeIdx = keys.indexOf('folderType')
-    const versionIdx = keys.indexOf('fileFormatVersion')
-    expect(folderTypeIdx).toBeGreaterThanOrEqual(0)
-    expect(versionIdx).toBe(folderTypeIdx + 1)
-  })
-})
-
-describe('normalizeFileFormatVersion', () => {
-  const silentLogger = { warn: (): void => { /* noop */ } }
-
-  it('sets the current version when the field is missing', () => {
-    const root: Record<string, unknown> = { folderType: 'environment', id: 'x' }
-    normalizeFileFormatVersion(root, silentLogger)
-    expect(root['fileFormatVersion']).toBe(CURRENT_FILE_FORMAT_VERSION)
-  })
-
-  it('leaves a valid current version untouched', () => {
-    const root: Record<string, unknown> = { folderType: 'environment', id: 'x', fileFormatVersion: 1 }
-    normalizeFileFormatVersion(root, silentLogger)
-    expect(root['fileFormatVersion']).toBe(1)
-  })
-
-  it('defaults non-numeric versions to the current one', () => {
-    const root: Record<string, unknown> = { folderType: 'environment', id: 'x', fileFormatVersion: 'one' }
-    normalizeFileFormatVersion(root, silentLogger)
-    expect(root['fileFormatVersion']).toBe(CURRENT_FILE_FORMAT_VERSION)
-  })
-
-  it('warns about a bypassed gate but preserves a higher-than-current version', () => {
-    // This path is unreachable once the compatibility gate runs first;
-    // the warning exists to make a new, ungated entry point obvious.
-    const warn = vi.fn()
-    const root: Record<string, unknown> = { folderType: 'environment', id: 'x', fileFormatVersion: 99 }
-    normalizeFileFormatVersion(root, { warn })
-    expect(root['fileFormatVersion']).toBe(99)
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0]?.[0]).toMatch(/gate was bypassed/)
-  })
-
-  it('is a no-op on non-env-folder shapes', () => {
-    const notAFolder: Record<string, unknown> = { folderType: 'folder' }
-    normalizeFileFormatVersion(notAFolder, silentLogger)
-    expect('fileFormatVersion' in notAFolder).toBe(false)
-  })
-
-  it('is a no-op on null / primitive inputs', () => {
-    expect(() => { normalizeFileFormatVersion(null, silentLogger) }).not.toThrow()
-    expect(() => { normalizeFileFormatVersion(42, silentLogger) }).not.toThrow()
-    expect(() => { normalizeFileFormatVersion('string', silentLogger) }).not.toThrow()
-    expect(() => { normalizeFileFormatVersion([], silentLogger) }).not.toThrow()
-  })
-
-  it('does not mutate the original reference when the field is already current', () => {
-    // Defaulting on legacy files must not look like a user edit — the
-    // caller (file-open path) relies on this to avoid firing spurious
-    // dirty signals on documents loaded from fully-up-to-date files.
-    const root: Record<string, unknown> = { folderType: 'environment', id: 'x', fileFormatVersion: 1, other: 'unchanged' }
-    const snapshot = JSON.parse(JSON.stringify(root))
-    normalizeFileFormatVersion(root, silentLogger)
-    expect(root).toEqual(snapshot)
+  it('fromPlain() drops a version a document written before the move carries', () => {
+    const legacy = {
+      id: 'folder-1',
+      name: 'Legacy',
+      folderType: 'environment' as const,
+      [FILE_FORMAT_VERSION_KEY]: 1
+    }
+    const folder = EnvironmentFolder.fromPlain(legacy as Parameters<typeof EnvironmentFolder.fromPlain>[0])
+    expect(FILE_FORMAT_VERSION_KEY in folder).toBe(false)
+    expect(Object.keys(folder.toPlainObject())).not.toContain(FILE_FORMAT_VERSION_KEY)
   })
 })
 
 describe('checkFileFormatCompatibility', () => {
-  const envRoot = (fileFormatVersion?: unknown): Record<string, unknown> => {
-    const root: Record<string, unknown> = { folderType: 'environment', id: 'env-1', name: 'Root' }
-    if (fileFormatVersion !== undefined) root['fileFormatVersion'] = fileFormatVersion
-    return root
-  }
-
-  it('accepts a document at the current version', () => {
-    const result = checkFileFormatCompatibility({ collections: [envRoot(CURRENT_FILE_FORMAT_VERSION)] })
+  it('accepts the current version at the document root', () => {
+    const result = checkFileFormatCompatibility(documentAtRoot(CURRENT_FILE_FORMAT_VERSION))
     expect(result.supported).toBe(true)
     expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
     expect(result.current).toBe(CURRENT_FILE_FORMAT_VERSION)
   })
 
-  it('accepts a document below the current version', () => {
-    const result = checkFileFormatCompatibility({ collections: [envRoot(CURRENT_FILE_FORMAT_VERSION - 1)] })
-    expect(result.supported).toBe(true)
+  it('accepts an older version', () => {
+    expect(checkFileFormatCompatibility(documentAtRoot(CURRENT_FILE_FORMAT_VERSION - 1)).supported).toBe(true)
   })
 
-  it('accepts a legacy document with no version field', () => {
-    const result = checkFileFormatCompatibility({ collections: [envRoot()] })
+  it('accepts a document that declares no version anywhere', () => {
+    const result = checkFileFormatCompatibility(documentAtRoot())
     expect(result.supported).toBe(true)
     expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
   })
 
-  it('accepts a document whose version is not a finite number', () => {
-    // Malformed values default to current, exactly as the normalizer does —
-    // garbage in the field is a repairable defect, not a future format.
-    for (const garbage of ['two', null, Number.NaN, Number.POSITIVE_INFINITY, {}, []]) {
-      expect(checkFileFormatCompatibility({ collections: [envRoot(garbage)] }).supported).toBe(true)
+  it('treats a malformed version as no declaration rather than as a refusal', () => {
+    for (const garbage of ['2', null, {}, [], Number.NaN, Number.POSITIVE_INFINITY, true]) {
+      expect(checkFileFormatCompatibility(documentAtRoot(garbage)).supported).toBe(true)
     }
   })
 
-  it('refuses a document above the current version', () => {
-    const result = checkFileFormatCompatibility({ collections: [envRoot(CURRENT_FILE_FORMAT_VERSION + 1)] })
+  it('refuses a future version at the document root', () => {
+    const result = checkFileFormatCompatibility(documentAtRoot(CURRENT_FILE_FORMAT_VERSION + 1))
+    expect(result.supported).toBe(false)
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION + 1)
+    expect(result.current).toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('does not consult a version sitting on a collection', () => {
+    // The root is the ONE read site. A document that declares the version
+    // where an older build wrote it reads as "absent at the root", which
+    // has always meant supported — so it opens, exactly as a file
+    // predating the field does.
+    const result = checkFileFormatCompatibility({
+      collections: [collection(), collection(CURRENT_FILE_FORMAT_VERSION + 5)]
+    })
+    expect(result.supported).toBe(true)
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('a collection cannot override the version the root declares', () => {
+    // Not "the highest wins": the root is the answer, full stop. Nothing
+    // written on a collection can pull the verdict either way.
+    const result = checkFileFormatCompatibility(
+      documentAtRoot(CURRENT_FILE_FORMAT_VERSION, [collection(CURRENT_FILE_FORMAT_VERSION + 3)])
+    )
+    expect(result.supported).toBe(true)
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('refuses on the root value even when a collection claims something lower', () => {
+    const result = checkFileFormatCompatibility(
+      documentAtRoot(CURRENT_FILE_FORMAT_VERSION + 1, [collection(CURRENT_FILE_FORMAT_VERSION)])
+    )
     expect(result.supported).toBe(false)
     expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION + 1)
   })
 
-  it('refuses when ANY root is from the future, not just the first', () => {
-    // A document assembled from several collections is only as openable
-    // as its newest root — accepting it would load part of the file.
-    const result = checkFileFormatCompatibility({
-      collections: [envRoot(CURRENT_FILE_FORMAT_VERSION), envRoot(CURRENT_FILE_FORMAT_VERSION + 5)]
-    })
-    expect(result.supported).toBe(false)
-    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION + 5)
+  it('handles a bare array of collections', () => {
+    // An array has no root to read, so nothing is declared.
+    expect(checkFileFormatCompatibility([collection(CURRENT_FILE_FORMAT_VERSION + 1)]).supported).toBe(true)
+    expect(checkFileFormatCompatibility([collection()]).supported).toBe(true)
   })
 
-  it('reports the HIGHEST future version found', () => {
-    const result = checkFileFormatCompatibility({
-      collections: [envRoot(CURRENT_FILE_FORMAT_VERSION + 9), envRoot(CURRENT_FILE_FORMAT_VERSION + 2)]
-    })
-    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION + 9)
+  it('handles a single root handed over on its own (an importer output)', () => {
+    // Whatever object it is given, the gate reads that object's own
+    // top-level key — there is no second place to look.
+    expect(checkFileFormatCompatibility(collection(CURRENT_FILE_FORMAT_VERSION + 1)).supported).toBe(false)
+    expect(checkFileFormatCompatibility(collection()).supported).toBe(true)
   })
 
-  it('checks a bare array of roots', () => {
-    expect(checkFileFormatCompatibility([envRoot(CURRENT_FILE_FORMAT_VERSION + 1)]).supported).toBe(false)
-    expect(checkFileFormatCompatibility([envRoot()]).supported).toBe(true)
-  })
-
-  it('checks a single root handed over on its own', () => {
-    expect(checkFileFormatCompatibility(envRoot(CURRENT_FILE_FORMAT_VERSION + 1)).supported).toBe(false)
-    expect(checkFileFormatCompatibility(envRoot()).supported).toBe(true)
-  })
-
-  it('treats unrecognisable content as supported', () => {
-    // An unparsable or empty file is a different failure with a different
-    // message; claiming "update your Restorm" here would misdirect the user.
-    for (const shape of [null, undefined, 42, 'text', {}, { collections: 'not-an-array' }]) {
+  it('reports an unrecognisable shape as supported', () => {
+    for (const shape of [null, undefined, 42, 'text', true, { unrelated: 'x' }]) {
       expect(checkFileFormatCompatibility(shape).supported).toBe(true)
     }
   })
 
-  it('never mutates the content it inspects', () => {
-    const content = { collections: [envRoot(), envRoot(CURRENT_FILE_FORMAT_VERSION)] }
-    const snapshot = JSON.parse(JSON.stringify(content))
+  it('never mutates what it reads', () => {
+    const content = documentAtRoot(undefined, [collection(), collection(CURRENT_FILE_FORMAT_VERSION)])
+    const before = JSON.stringify(content)
     checkFileFormatCompatibility(content)
-    expect(content).toEqual(snapshot)
+    expect(JSON.stringify(content)).toBe(before)
+  })
+})
+
+describe('resolveFileFormatVersion', () => {
+  it('reads the document root', () => {
+    expect(resolveFileFormatVersion(documentAtRoot(CURRENT_FILE_FORMAT_VERSION), silentLogger))
+      .toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('ignores a version sitting on a collection and defaults to current', () => {
+    // Same single read site as the gate. Loading such a document as
+    // current is correct: that is what an absent version has always
+    // meant, and the value it carries on a collection is only ever 1.
+    expect(resolveFileFormatVersion({ collections: [collection(1)] }, silentLogger))
+      .toBe(CURRENT_FILE_FORMAT_VERSION)
+    expect(resolveFileFormatVersion({ collections: [collection(99)] }, silentLogger))
+      .toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('defaults to the current version when nothing is declared', () => {
+    expect(resolveFileFormatVersion(documentAtRoot(), silentLogger)).toBe(CURRENT_FILE_FORMAT_VERSION)
+    expect(resolveFileFormatVersion({}, silentLogger)).toBe(CURRENT_FILE_FORMAT_VERSION)
+    expect(resolveFileFormatVersion(null, silentLogger)).toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('ignores a malformed value', () => {
+    expect(resolveFileFormatVersion(documentAtRoot('one'), silentLogger)).toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('warns that the gate was bypassed when a future version reaches it', () => {
+    const warn = vi.fn()
+    const resolved = resolveFileFormatVersion(documentAtRoot(99), { warn })
+    // The value is reported as it stands — this function repairs nothing.
+    expect(resolved).toBe(99)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toMatch(/gate was bypassed/i)
+  })
+
+  it('stays quiet on a supported version', () => {
+    const warn = vi.fn()
+    resolveFileFormatVersion(documentAtRoot(CURRENT_FILE_FORMAT_VERSION), { warn })
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('never mutates what it reads', () => {
+    const content = documentAtRoot(undefined, [collection(1)])
+    const before = JSON.stringify(content)
+    resolveFileFormatVersion(content, silentLogger)
+    expect(JSON.stringify(content)).toBe(before)
+  })
+})
+
+describe('stripLegacyFileFormatVersion', () => {
+  it('removes the key a document written before the move carries on a collection', () => {
+    const root = collection(1)
+    stripLegacyFileFormatVersion(root)
+    expect(FILE_FORMAT_VERSION_KEY in root).toBe(false)
+  })
+
+  it('leaves every other property alone', () => {
+    const root = { ...collection(1), notes: 'keep me', tags: ['a'] }
+    stripLegacyFileFormatVersion(root)
+    expect(root).toEqual({ folderType: 'environment', id: 'x', name: 'C', notes: 'keep me', tags: ['a'] })
+  })
+
+  it('is a no-op when there is nothing to strip', () => {
+    const root = collection()
+    stripLegacyFileFormatVersion(root)
+    expect(root).toEqual({ folderType: 'environment', id: 'x', name: 'C' })
+  })
+
+  it('tolerates anything that is not an object', () => {
+    for (const shape of [null, undefined, 42, 'text', []]) {
+      expect(() => { stripLegacyFileFormatVersion(shape) }).not.toThrow()
+    }
+  })
+
+  it('is what makes the old key GO AWAY, and the guard is not vacuous', () => {
+    // First: prove the key really would survive. The renderer loads plain
+    // parsed objects and serialises them back wholesale, so an unknown
+    // key round-trips — a document that once had it would keep it for
+    // ever, declaring its version in a second place nothing reads.
+    const unstripped = { collections: [collection(1)] }
+    expect(
+      JSON.stringify(unstripped.collections),
+      'without the strip the stale key rides the save payload back to disk'
+    ).toContain(FILE_FORMAT_VERSION_KEY)
+
+    // Then: with the strip, the next save writes it at the root only.
+    const loaded = { collections: [collection(1)] }
+    const version = resolveFileFormatVersion(loaded, silentLogger)
+    for (const root of loaded.collections) stripLegacyFileFormatVersion(root)
+
+    const payload = { fileFormatVersion: version, collections: loaded.collections }
+    expect(payload.fileFormatVersion).toBe(CURRENT_FILE_FORMAT_VERSION)
+    expect(JSON.stringify(payload.collections)).not.toContain(FILE_FORMAT_VERSION_KEY)
+  })
+})
+
+describe('the persisted document', () => {
+  /**
+   * The load-then-save pipeline the renderer runs, minus React: resolve
+   * the version, strip the position an earlier build used, then hand the
+   * document to the serializer. What comes out is what lands on disk.
+   */
+  function persist(parsedFromDisk: Record<string, unknown>): string {
+    const version = resolveFileFormatVersion(parsedFromDisk, silentLogger)
+    const collections = (parsedFromDisk['collections'] ?? []) as unknown[]
+    for (const root of collections) stripLegacyFileFormatVersion(root)
+    return serialize(prepareForSerialization({ fileFormatVersion: version, collections }), 'yaml')
+  }
+
+  it('declares the version on its first line, above the collections it applies to', () => {
+    const folder = new EnvironmentFolder({ name: 'Petstore' })
+    const written = persist({ collections: [folder.toPlainObject()] })
+
+    expect(written.split('\n')[0]).toBe(`${FILE_FORMAT_VERSION_KEY}: ${CURRENT_FILE_FORMAT_VERSION}`)
+  })
+
+  it('declares it exactly once, however many collections the document holds', () => {
+    const written = persist({
+      collections: [
+        new EnvironmentFolder({ name: 'One' }).toPlainObject(),
+        new EnvironmentFolder({ name: 'Two' }).toPlainObject(),
+        new EnvironmentFolder({ name: 'Three' }).toPlainObject()
+      ]
+    })
+
+    expect(written.match(new RegExp(`${FILE_FORMAT_VERSION_KEY}:`, 'g'))).toHaveLength(1)
+  })
+
+  it('a document written before the move comes out with the key at the root only', () => {
+    const older = {
+      collections: [
+        { ...new EnvironmentFolder({ name: 'Petstore' }).toPlainObject(), [FILE_FORMAT_VERSION_KEY]: 1 }
+      ]
+    }
+    const written = persist(older)
+
+    expect(written.split('\n')[0]).toBe(`${FILE_FORMAT_VERSION_KEY}: ${CURRENT_FILE_FORMAT_VERSION}`)
+    // Indented means "on a collection". There must be none left.
+    expect(written).not.toMatch(new RegExp(`^\\s+${FILE_FORMAT_VERSION_KEY}:`, 'm'))
+  })
+
+  it('carries the version a document declared rather than restamping the current one', () => {
+    // This build migrates nothing, so it has no standing to relabel the
+    // model a document is written in.
+    const written = persist({ fileFormatVersion: 1, collections: [] })
+    expect(written.split('\n')[0]).toBe(`${FILE_FORMAT_VERSION_KEY}: 1`)
   })
 })

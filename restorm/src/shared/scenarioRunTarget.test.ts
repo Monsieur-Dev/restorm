@@ -3,7 +3,7 @@ import type { FolderItem } from './types/collections'
 import { collectScenarioTargets, suggestRunTarget, resolveRunTarget } from './scenarioRunTarget'
 
 function ef(id: string, name: string, items: FolderItem[] = []): FolderItem {
-  return { id, name, folderType: 'environment', fileFormatVersion: 1, tags: [], configuration: {}, items, environments: [] } as unknown as FolderItem
+  return { id, name, folderType: 'environment', tags: [], configuration: {}, items, environments: [] } as unknown as FolderItem
 }
 function f(id: string, name: string, items: FolderItem[] = []): FolderItem {
   return { id, name, tags: [], configuration: {}, items } as unknown as FolderItem

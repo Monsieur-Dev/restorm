@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: gRPC Playground
@@ -188,5 +189,4 @@ collections:
         metadata: []
         id: e5f6a7b8-c9d0-4e1f-b2c3-d4e5f6a7b8c9
     id: e3c4d5e6-f708-4192-ab3c-4d5e6f708192
-    fileFormatVersion: 1
 _projectUuid: f4d5e6f7-0819-42a3-bc4d-5e6f70819203

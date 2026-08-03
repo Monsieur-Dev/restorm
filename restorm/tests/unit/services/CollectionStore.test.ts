@@ -49,7 +49,7 @@ describe('CollectionStore', () => {
     })
 
     it('should clear collections', () => {
-      collectionStore.setCollections([{ id: 'col-1', name: 'Test', items: [], fileFormatVersion: 1 }])
+      collectionStore.setCollections([{ id: 'col-1', name: 'Test', items: [] }])
       collectionStore.clear()
       expect(collectionStore.getCollections()).toHaveLength(0)
     })
@@ -220,7 +220,6 @@ describe('CollectionStore', () => {
           id: 'col-1',
           name: 'Root',
           folderType: 'environment',
-          fileFormatVersion: 1,
           items: [
             {
               type: 'scenario',

@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: SSE Playground
@@ -74,5 +75,4 @@ collections:
         headers: []
         id: 5d6e7f80-9192-4b3c-c4d5-e6f708192031
     id: 6e7f8091-a2b3-4c4d-d5e6-f70819203142
-    fileFormatVersion: 1
 _projectUuid: 7f809192-b3c4-4d5e-e6f7-081920314253

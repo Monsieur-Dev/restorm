@@ -9,8 +9,14 @@ import {
   serialize as coreSerialize,
   deserialize as coreDeserialize
 } from 'electron-core-ui'
+import { stampFolderFormatVersion } from './utils/folderFormatVersion'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
-import { checkFileFormatCompatibility, FILE_FORMAT_TOO_NEW_CODE } from '../shared/config/fileFormatVersion'
+import {
+  checkFileFormatCompatibility,
+  resolveFileFormatVersion,
+  FILE_FORMAT_TOO_NEW_CODE,
+  FILE_FORMAT_VERSION_KEY
+} from '../shared/config/fileFormatVersion'
 import { join, basename } from 'path'
 import { promises as fs, existsSync, mkdirSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -327,11 +333,14 @@ export async function saveFolderStructure(
     // UUID invariant for folder mode: `ensureFolderUuid` (called from
     // `loadFolderStructure` and `attachDraftStoreForFolder` at open
     // time) stamps `_projectUuid` into `folderPath/index.<ext>`. This
-    // function never rewrites that root index on the `collections` path
-    // below, so the stamp survives save cycles transparently. If a future
-    // refactor adds a root-index write, re-stamp `data[PROJECT_UUID_KEY]`
-    // before serializing or the UUID will vanish and every consumer
-    // keyed by it (sidebar expansion, env selections, …) will reset.
+    // function never REPLACES that root index on the `collections` path
+    // below, so the stamp survives save cycles transparently. The one
+    // root-index write on that path — `stampFolderFormatVersion` —
+    // inserts a single key into the file's existing text and can only
+    // add, never drop. Any future refactor that writes the root index by
+    // SERIALIZING an object must re-stamp `data[PROJECT_UUID_KEY]` first,
+    // or the UUID vanishes and every consumer keyed by it (sidebar
+    // expansion, env selections, …) resets.
 
     // Ensure folder exists
     if (!existsSync(folderPath)) {
@@ -351,6 +360,23 @@ export async function saveFolderStructure(
         data,
         { format }
       )
+    }
+
+    // The format version describes the document, so it belongs to the
+    // project's root index — never to a collection's own index below.
+    // This runs on a save the user asked for, which is the only moment a
+    // project carrying the version at its old, per-collection place is
+    // migrated: opening one writes nothing.
+    //
+    // Every unhappy outcome leaves the root index exactly as it was; the
+    // project saves normally either way, it just keeps declaring what it
+    // declared before.
+    const stamp = await stampFolderFormatVersion(folderPath, ext, format, resolveFileFormatVersion(data, logger))
+    if (stamp === 'declares-another-version' || stamp === 'unreadable' || stamp === 'refused') {
+      logger.warn('Left the root index untouched instead of stamping the file format version', {
+        path: folderPath,
+        outcome: stamp
+      })
     }
 
     // Save each collection (EnvironmentFolder) as a subfolder
@@ -539,6 +565,8 @@ export async function loadFolderStructure(
     }
 
     let data: Record<string, unknown>
+    /** What the project's ROOT index declares — the document-level keys. */
+    let rootIndex: Record<string, unknown> | null = null
 
     // If no index file, try to reconstruct from folder structure
     if (!indexPath) {
@@ -552,6 +580,8 @@ export async function loadFolderStructure(
         return null
       }
 
+      rootIndex = result.data as Record<string, unknown>
+
       // If it's a collection folder (has subfolders), reconstruct the full structure
       const entries = await fs.readdir(folderPath, { withFileTypes: true })
       const hasSubfolders = entries.some(e => e.isDirectory())
@@ -561,6 +591,16 @@ export async function loadFolderStructure(
       } else {
         data = result.data as Record<string, unknown>
       }
+    }
+
+    // Carry the document-level format version over from the root index.
+    // `reconstructFromFolders` rebuilds a bare `{ collections }` and drops
+    // every root-index key, so without this the gate below would judge a
+    // folder project on its collections alone and a future-format root
+    // would sail straight through.
+    const declaredVersion = rootIndex?.[FILE_FORMAT_VERSION_KEY]
+    if (typeof declaredVersion === 'number' && Number.isFinite(declaredVersion)) {
+      data[FILE_FORMAT_VERSION_KEY] = declaredVersion
     }
 
     // Compatibility gate, BEFORE the UUID stamp below writes to the
@@ -604,6 +644,12 @@ export async function loadFolderStructure(
     // `{ collections }` object that drops root-index metadata, so we
     // re-stamp it here regardless of which branch populated `data`.
     data[PROJECT_UUID_KEY] = projectUuid
+
+    // Same treatment for the format version: the renderer receives the
+    // resolved value at the root — the root index's, else the current
+    // version. In memory only; the project on disk keeps whatever it has
+    // until the next save the user asks for, never because of this open.
+    data[FILE_FORMAT_VERSION_KEY] = resolveFileFormatVersion(data, logger)
 
     // Apply env-file secrets from restorm.env (if present)
     await applyFolderSecretsEnvFile(folderPath, data)

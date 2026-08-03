@@ -34,7 +34,6 @@ const envFolder = (
   id,
   name: id,
   folderType: 'environment',
-  fileFormatVersion: 1,
   environments: [],
   tags: [],
   configuration: {} as EnvironmentFolder['configuration'],

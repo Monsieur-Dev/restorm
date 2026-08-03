@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: JSON-RPC Playground
@@ -153,5 +154,4 @@ collections:
             rpcId: ''
         id: 18293041-5263-47e8-f901-234567890123
     id: 29304152-6374-48f9-0123-456789012345
-    fileFormatVersion: 1
 _projectUuid: 3a415263-7485-49f9-1234-567890123456

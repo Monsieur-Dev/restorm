@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: GraphQL Mock Playground
@@ -142,5 +143,4 @@ collections:
         pathParams: []
         id: 7e3b2c01-6f88-4d21-af32-1b0a4c723104
     id: 6b1d8f4c-2e99-4a13-91be-3c8daf751f20
-    fileFormatVersion: 1
 _projectUuid: 4f8b3d2a-9e55-4c7f-b2d3-af1e6c849c33

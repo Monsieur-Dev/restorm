@@ -25,7 +25,6 @@ import {
 } from '../../../shared/models'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { postmanToApiDocumentation } from './transformers/postmanToApiDocumentation'
 import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
 import type { Scenario } from '../../../shared/types/scenario'
@@ -622,7 +621,6 @@ export function importPostman(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'postman',
     id: generateId(`postman:root:${collection.info.name}`),
     name: collection.info.name,

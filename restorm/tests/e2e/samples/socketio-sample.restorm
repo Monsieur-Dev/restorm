@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: Socket.IO Playground
@@ -59,5 +60,4 @@ collections:
         headers: []
         id: 83ce3cdb-22e7-4e89-95eb-9e983fadb125
     id: d0c04fc1-a11f-459a-a25b-eb1791a50bf2
-    fileFormatVersion: 1
 _projectUuid: 370d3ca1-3211-4e4b-94f6-441c90c9a5de

@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: GraphQL Playground
@@ -315,5 +316,4 @@ collections:
         headers: []
         id: b4c5d6e7-f819-4d7e-5648-d6e7f8091930
     id: b4c5d6e7-f819-4c5d-5647-c5d6e7f81920
-    fileFormatVersion: 1
 _projectUuid: c5d6e7f8-0920-4d6e-6758-d6e7f8092031

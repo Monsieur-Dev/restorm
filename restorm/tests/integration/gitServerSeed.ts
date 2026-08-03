@@ -129,7 +129,6 @@ collections:
     configuration: {}
     folderType: environment
     environments: []
-    fileFormatVersion: 1
     items:
       - id: e2e-seed-request
         name: Find pet by ID

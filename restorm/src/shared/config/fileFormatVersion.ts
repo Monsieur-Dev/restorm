@@ -1,6 +1,40 @@
 /**
- * File-format version stamped on the root of every persisted Restorm
- * document (`EnvironmentFolder.fileFormatVersion`).
+ * File-format version of a persisted Restorm document.
+ *
+ * The version describes the DOCUMENT, so it lives at the root of the
+ * file — a sibling of `collections:`, next to `_projectUuid` — and never
+ * on a collection inside it:
+ *
+ * ```yaml
+ * fileFormatVersion: 1
+ * _projectUuid: 8b1f…
+ * collections:
+ *   - folderType: environment
+ *     …
+ * ```
+ *
+ * It used to be stamped on each root `EnvironmentFolder`, which made it
+ * per-collection in shape and per-file in intent: a nine-collection file
+ * had nine possible carriers, nothing kept them in agreement, and in
+ * practice only one was filled. The root is the only placement where the
+ * question "what format is this file?" has exactly one answer.
+ *
+ * **The root is the only place this value is ever read from.** There is
+ * deliberately no fallback to the old position, and adding one back would
+ * be a regression: a second home for the value that every future reader
+ * has to know about, in exchange for nothing.
+ *
+ * Nothing breaks without that fallback. A version declared nowhere at the
+ * root already means SUPPORTED — the long-standing rule for files that
+ * predate the field — so a document carrying it on a collection reads as
+ * "absent", defaults to the current version, and opens normally. The case
+ * a fallback would seem to protect (a FUTURE version on a collection)
+ * has no producer: no build writes that position any more, and the builds
+ * that did only ever wrote `1`.
+ *
+ * The stale key on such a document is inert data. It disappears on the
+ * next save the user asks for, because the collection model no longer
+ * carries the field — not because anything rewrites the file on open.
  *
  * The version exists so that — once Restorm ships to production users —
  * a future breaking change to the on-disk model can migrate forward from
@@ -8,12 +42,12 @@
  * the field; no migration framework is wired up yet.
  *
  * Semantics on load:
- * - Field absent (legacy file): treat as {@link CURRENT_FILE_FORMAT_VERSION},
- *   set it in memory, do NOT flag the document dirty. The next
- *   user-initiated save will carry it to disk.
- * - Field present and ≤ current: proceed normally.
- * - Field present and > current: the document is REFUSED before it is
- *   loaded — see {@link checkFileFormatCompatibility}. A build cannot
+ * - Declared nowhere (a file predating the field): treat as
+ *   {@link CURRENT_FILE_FORMAT_VERSION}, set it in memory, do NOT flag
+ *   the document dirty. The next user-initiated save carries it to disk.
+ * - Declared at the root and ≤ current: proceed normally.
+ * - Declared at the root and > current: the document is REFUSED before it
+ *   is loaded — see {@link checkFileFormatCompatibility}. A build cannot
  *   know what a later format added, so loading such a file would risk a
  *   partial read followed by a save that writes the impoverished
  *   understanding back over the user's data.
@@ -33,57 +67,36 @@
 export const CURRENT_FILE_FORMAT_VERSION = 1
 
 /**
+ * Name of the top-level key. Shared so the writers that insert it into a
+ * document's TEXT (folder mode's root index) spell it the same way the
+ * readers here do.
+ */
+export const FILE_FORMAT_VERSION_KEY = 'fileFormatVersion'
+
+/**
  * Rejection code the main process sends with `file:open-rejected` when a
  * document declares a format this build predates. Shared so the renderer
  * matches on the constant rather than a duplicated string literal.
  */
 export const FILE_FORMAT_TOO_NEW_CODE = 'file-format-too-new'
 
-interface MutableRoot {
-  folderType?: unknown
-  fileFormatVersion?: unknown
-}
-
 interface VersionLogger {
   warn: (message: string, meta?: Record<string, unknown>) => void
 }
 
-/**
- * Normalize the `fileFormatVersion` of a loaded root EnvironmentFolder
- * plain object in-place. Called on the parsed collection **before**
- * wrapping it in a reactive proxy and **before** the whole-file content
- * checksum baseline is computed — that way the defaulted value is part
- * of the "loaded" snapshot and never looks like a user edit.
- *
- * Intentionally tolerant: unknown shapes, non-env folders, and
- * non-number version values all short-circuit cleanly.
- */
-export function normalizeFileFormatVersion(root: unknown, logger: VersionLogger): void {
-  if (root === null || typeof root !== 'object' || Array.isArray(root)) return
-  const node = root as MutableRoot
-  if (node.folderType !== 'environment') return
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
 
-  const raw = node.fileFormatVersion
-  if (raw === undefined || raw === null) {
-    node.fileFormatVersion = CURRENT_FILE_FORMAT_VERSION
-    return
-  }
-  if (typeof raw !== 'number' || !Number.isFinite(raw)) {
-    node.fileFormatVersion = CURRENT_FILE_FORMAT_VERSION
-    return
-  }
-  if (raw > CURRENT_FILE_FORMAT_VERSION) {
-    // Unreachable on every supported load path: `checkFileFormatCompatibility`
-    // refuses a future-format document before it reaches the normalizer.
-    // Reaching here means a new entry point reads a `.restorm` without
-    // consulting the gate first — say so loudly rather than proceeding as
-    // if the file were current, which is what silently corrupts it on the
-    // next save. The value is left untouched either way.
-    logger.warn('Future fileFormatVersion reached the normalizer — the compatibility gate was bypassed on this load path.', {
-      found: raw,
-      current: CURRENT_FILE_FORMAT_VERSION
-    })
-  }
+/** The version an object declares on itself, or `null` when it declares none. */
+function declaredOn(node: unknown): number | null {
+  if (!isRecord(node)) return null
+  const raw = node[FILE_FORMAT_VERSION_KEY]
+  // A malformed value is treated as "declares nothing" rather than as a
+  // failure: an unreadable version is not evidence of a future format,
+  // and refusing on it would turn a typo into "update your Restorm".
+  if (typeof raw !== 'number' || !Number.isFinite(raw)) return null
+  return raw
 }
 
 /**
@@ -94,9 +107,10 @@ export interface FileFormatCompatibility {
   /** `false` when the document declares a format this build cannot read. */
   supported: boolean
   /**
-   * The highest `fileFormatVersion` declared by any root in the document.
-   * Absent / malformed values count as {@link CURRENT_FILE_FORMAT_VERSION},
-   * matching `normalizeFileFormatVersion`'s defaulting.
+   * The `fileFormatVersion` the document declares AT ITS ROOT — the one
+   * place it is read from. Absent / malformed counts as
+   * {@link CURRENT_FILE_FORMAT_VERSION}, matching the load-time default,
+   * so this never reports less than the current version.
    */
   found: number
   /** The version this build understands — for the user-facing message. */
@@ -106,30 +120,22 @@ export interface FileFormatCompatibility {
 /**
  * Decide whether a parsed `.restorm` document can be opened by this build.
  *
- * Deliberately SEPARATE from {@link normalizeFileFormatVersion}: the
- * normalizer repairs a document in place and has no way to say "don't
+ * Deliberately SEPARATE from {@link resolveFileFormatVersion}: resolving
+ * answers "which version is this document?" and has no way to say "don't
  * open this at all". This function is pure — it reads, never mutates —
  * so it can run on the raw parsed content BEFORE anything is written to
  * disk, wrapped in a reactive proxy, or published to the renderer.
  *
- * Accepts the whole parsed file (`{ collections: [...] }`, both file mode
- * and folder mode) as well as a bare array of roots. Anything it cannot
- * recognise is reported as supported: an unreadable shape is not this
- * gate's problem, and refusing it here would turn every unrelated parse
- * failure into a misleading "update your Restorm" message.
+ * It consults ONE location: the document root. A version sitting anywhere
+ * else is not consulted and cannot influence the verdict.
+ *
+ * Anything it cannot recognise is reported as supported: an unreadable
+ * shape is not this gate's problem, and refusing it here would turn every
+ * unrelated parse failure into a misleading "update your Restorm".
  */
 export function checkFileFormatCompatibility(content: unknown): FileFormatCompatibility {
-  const roots = extractRoots(content)
-
-  let found = CURRENT_FILE_FORMAT_VERSION
-  for (const root of roots) {
-    if (root === null || typeof root !== 'object' || Array.isArray(root)) continue
-    const raw = (root as MutableRoot).fileFormatVersion
-    // Absent or malformed defaults to current — same rule the normalizer
-    // applies, so a legacy file keeps opening silently.
-    if (typeof raw !== 'number' || !Number.isFinite(raw)) continue
-    if (raw > found) found = raw
-  }
+  const declared = declaredOn(content)
+  const found = declared ?? CURRENT_FILE_FORMAT_VERSION
 
   return {
     supported: found <= CURRENT_FILE_FORMAT_VERSION,
@@ -138,13 +144,58 @@ export function checkFileFormatCompatibility(content: unknown): FileFormatCompat
   }
 }
 
-/** Roots of a parsed document, whatever wrapper the caller happens to hold. */
-function extractRoots(content: unknown): unknown[] {
-  if (Array.isArray(content)) return content
-  if (content === null || typeof content !== 'object') return []
-  const collections = (content as { collections?: unknown }).collections
-  if (Array.isArray(collections)) return collections
-  // A single root handed over on its own (an importer's output, a
-  // single-collection document) still has to be checked.
-  return [content]
+/**
+ * The version a parsed document is loaded AS: its root value, else the
+ * current version.
+ *
+ * Pure. The caller holds the result and writes it back at the root on the
+ * next save. A document that declares nothing at the root — whether it
+ * predates the field entirely or carries it on a collection — is loaded
+ * as current, which is the long-standing rule for a missing version and
+ * is what makes a fallback unnecessary.
+ */
+export function resolveFileFormatVersion(content: unknown, logger: VersionLogger): number {
+  const resolved = declaredOn(content) ?? CURRENT_FILE_FORMAT_VERSION
+
+  if (resolved > CURRENT_FILE_FORMAT_VERSION) {
+    // Unreachable on every supported load path: `checkFileFormatCompatibility`
+    // refuses a future-format document before it reaches here. Reaching
+    // this point means a new entry point read a `.restorm` without
+    // consulting the gate first — say so loudly rather than proceeding as
+    // if the file were current, which is what silently corrupts it on the
+    // next save.
+    logger.warn('Future fileFormatVersion resolved on load — the compatibility gate was bypassed on this load path.', {
+      found: resolved,
+      current: CURRENT_FILE_FORMAT_VERSION
+    })
+  }
+
+  return resolved
+}
+
+/**
+ * Drop the collection-level `fileFormatVersion` an older build wrote,
+ * in memory.
+ *
+ * This is NOT tidiness, and it is not what makes the old key harmless —
+ * no reader consults that position any more. It is what makes the key
+ * actually GO AWAY. The renderer loads a project as parsed plain objects
+ * and serializes them back wholesale, so unknown keys round-trip: without
+ * this, every save would faithfully rewrite the stale value, and a
+ * document that once had it would carry it forever, declaring its version
+ * in two places while only one is read.
+ *
+ * Called at load — BEFORE the reactive wrap so the deletion fires no
+ * document event, and BEFORE the content-checksum baseline so it is part
+ * of the "loaded" snapshot and never looks like a user edit. Nothing is
+ * written here: the file on disk keeps the old key until the user saves,
+ * and opening a project is not a save.
+ */
+export function stripLegacyFileFormatVersion(collectionRoot: unknown): void {
+  if (!isRecord(collectionRoot)) return
+  if (!Object.prototype.hasOwnProperty.call(collectionRoot, FILE_FORMAT_VERSION_KEY)) return
+  // Spelled out rather than indexed by the constant above: deleting a
+  // computed key is not allowed here. The two are kept in step by the
+  // unit test, which strips by the constant and asserts the key is gone.
+  delete collectionRoot['fileFormatVersion']
 }

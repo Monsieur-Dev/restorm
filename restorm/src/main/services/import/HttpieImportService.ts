@@ -21,7 +21,6 @@ import {
 } from '../../../shared/models'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId } from './stableImportId'
 
 // ============================================================================
@@ -210,7 +209,6 @@ export function importHttpieCollection(
   // Case: No options - create new EnvironmentFolder as root
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'httpie',
     id: stableImportId(`httpie:root:${rootName}`),
     name: rootName,
@@ -287,7 +285,6 @@ export function importHttpieSession(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'httpie',
     id: stableImportId(`httpie:session:${name}`),
     name,

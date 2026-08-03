@@ -32,6 +32,13 @@ import { deserialize, type PersistenceFormat } from '../PersistenceService'
  * Return `raw` with the top-level `key` set to `value`, or `null` when
  * that cannot be done safely.
  *
+ * `value` may be a string or a number. The distinction is not cosmetic:
+ * the round-trip check below compares the re-parsed value with `value`
+ * using `!==`, so a numeric key written as the string `'1'` would parse
+ * back as the number `1` and the insertion would be refused. Documents
+ * carry both kinds of top-level scalar — an identity is a string, a
+ * format version is a number.
+ *
  * Two shapes are handled, and only two:
  * - the key is **absent** → it is appended / inserted at the top level;
  * - the key is present but **blank** (`key: ''`, or `key:` with no value
@@ -52,7 +59,7 @@ import { deserialize, type PersistenceFormat } from '../PersistenceService'
 export function setTopLevelKey(
   raw: string,
   key: string,
-  value: string,
+  value: string | number,
   format: PersistenceFormat
 ): string | null {
   const existing = readExistingValue(raw, key, format)
@@ -97,7 +104,7 @@ function readExistingValue(raw: string, key: string, format: PersistenceFormat):
  * column 0 so it can only match a top-level key of a block mapping, and
  * the round-trip check still has the last word.
  */
-function replaceEmptyValue(raw: string, key: string, value: string, format: PersistenceFormat): string | null {
+function replaceEmptyValue(raw: string, key: string, value: string | number, format: PersistenceFormat): string | null {
   const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const pattern =
     format === 'yaml'
@@ -109,7 +116,7 @@ function replaceEmptyValue(raw: string, key: string, value: string, format: Pers
   // single top-level slot; refuse rather than pick one.
   if (matches?.length !== 1) return null
 
-  const replacement = format === 'yaml' ? escapeYamlScalar(value) : JSON.stringify(value)
+  const replacement = format === 'yaml' ? yamlScalar(value) : JSON.stringify(value)
   return raw.replace(pattern, (_full, prefix: string) => {
     // `key:` with nothing after it is a valid blank slot, but `key:value`
     // is not a mapping at all — YAML needs the separating space. Normalise
@@ -125,7 +132,7 @@ function replaceEmptyValue(raw: string, key: string, value: string, format: Pers
  * why the insertion goes at the end rather than trying to find a spot
  * inside the document.
  */
-function insertYamlKey(raw: string, key: string, value: string): string | null {
+function insertYamlKey(raw: string, key: string, value: string | number): string | null {
   // A multi-document stream would take the key into its LAST document
   // rather than the one the caller means. A single leading `---` is
   // fine — that is still one document — but a second marker, or an
@@ -137,9 +144,9 @@ function insertYamlKey(raw: string, key: string, value: string): string | null {
   const body = raw.replace(/\s+$/, '')
   // An empty document has no mapping to extend, but starting one is
   // unambiguous.
-  if (body.length === 0) return `${key}: ${escapeYamlScalar(value)}\n`
+  if (body.length === 0) return `${key}: ${yamlScalar(value)}\n`
 
-  return `${body}\n${key}: ${escapeYamlScalar(value)}\n`
+  return `${body}\n${key}: ${yamlScalar(value)}\n`
 }
 
 /**
@@ -147,7 +154,7 @@ function insertYamlKey(raw: string, key: string, value: string): string | null {
  * rest of the text — including any comments in a JSON5 document —
  * exactly where it was.
  */
-function insertJsonLikeKey(raw: string, key: string, value: string): string | null {
+function insertJsonLikeKey(raw: string, key: string, value: string | number): string | null {
   const open = raw.indexOf('{')
   if (open === -1) return null
   // Anything before the first brace that isn't whitespace means the root
@@ -164,8 +171,15 @@ function insertJsonLikeKey(raw: string, key: string, value: string): string | nu
   return `${raw.slice(0, open + 1)}\n  ${entry}${separator}${rest}`
 }
 
-/** YAML scalars we emit are UUID-shaped, but quote defensively anyway. */
-function escapeYamlScalar(value: string): string {
+/**
+ * A YAML scalar for the value we are about to write.
+ *
+ * A number is emitted bare — quoting it would make it parse back as a
+ * string and the round-trip check would (correctly) refuse the result.
+ * A string we emit is UUID-shaped, but quote defensively anyway.
+ */
+function yamlScalar(value: string | number): string {
+  if (typeof value === 'number') return JSON.stringify(value)
   return /^[A-Za-z0-9_.-]+$/.test(value) ? value : JSON.stringify(value)
 }
 
@@ -175,7 +189,7 @@ function escapeYamlScalar(value: string): string {
  * a file nobody has validated: a mistake becomes a refusal, never a
  * corrupted document.
  */
-function verify(raw: string, candidate: string, key: string, value: string, format: PersistenceFormat): boolean {
+function verify(raw: string, candidate: string, key: string, value: string | number, format: PersistenceFormat): boolean {
   let before: unknown
   let after: unknown
   try {

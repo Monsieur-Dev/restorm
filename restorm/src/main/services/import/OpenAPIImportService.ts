@@ -37,7 +37,6 @@ import { toHTTPMethod } from './httpMethodValidator'
 import { openapi3ToApiDocumentation, type OAS3Spec, type OAS3Server, type OAS3SecurityScheme, expandServerVariables, pickPrimaryContentType } from './transformers/openapi3ToApiDocumentation'
 import { openapi31ToApiDocumentation, type OAS31Spec } from './transformers/openapi31ToApiDocumentation'
 import { rewriteUrlTemplate, resolveJsonPointer, tryParseSpecText, parseSpecTextOrThrow, type CommonSchema } from './transformers/_shared'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -895,7 +894,6 @@ export function importOpenAPI(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
     tags: [],

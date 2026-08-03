@@ -232,7 +232,6 @@ export function registerImportTools(mcp: McpService): void {
               id: `imported-${Date.now()}-${String(Math.random()).slice(2, 8)}`,
               name: result.format ? `Imported (${result.format})` : 'Imported',
               folderType: 'environment',
-              fileFormatVersion: 1,
               tags: [],
               configuration: {} as EnvironmentFolder['configuration'],
               items: [item],

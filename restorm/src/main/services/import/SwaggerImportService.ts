@@ -30,7 +30,6 @@ import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 import { toHTTPMethod } from './httpMethodValidator'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
 import { tryParseSpecText, parseSpecTextOrThrow } from './transformers/_shared'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 
 // ============================================================================
@@ -963,7 +962,6 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
   // Case: No options - create new EnvironmentFolder as root
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
     tags: [],

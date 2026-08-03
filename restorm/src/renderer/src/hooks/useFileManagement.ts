@@ -68,7 +68,11 @@ import { searchIndexService } from '../services/SearchIndexService'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
-import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
+import {
+  CURRENT_FILE_FORMAT_VERSION,
+  resolveFileFormatVersion,
+  stripLegacyFileFormatVersion
+} from '../../../shared/config/fileFormatVersion'
 import { normalizeBodyTypes } from '../../../shared/config/normalizeBodyType'
 import type { Folder, EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder, isScenario } from '../../../shared/types/collections'
@@ -176,6 +180,36 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    * and still flush `.env`.
    */
   const savedEnvBaselineRef = useRef<string | null>(null)
+
+  /**
+   * On-disk format version of the open document, resolved once at load
+   * (see `resolveFileFormatVersion`) and written back at the ROOT of
+   * every save payload — a sibling of `collections`, never on a
+   * collection.
+   *
+   * Held here rather than on the tree because it describes the FILE, and
+   * the tree is only its contents. Carrying the loaded value forward,
+   * instead of stamping the current one on every save, keeps a save
+   * honest: the version says which model the bytes are in, and this
+   * build does not migrate anything, so it has no standing to claim a
+   * different one. A document that declared nothing resolves to the
+   * current version, which is how a legacy file acquires one.
+   */
+  const fileFormatVersionRef = useRef<number>(CURRENT_FILE_FORMAT_VERSION)
+
+  /**
+   * The document as it is persisted: the format version at the root,
+   * then the collections. Every save payload and every whole-file
+   * checksum goes through here, so the shape compared at load is the
+   * shape written at save.
+   */
+  const buildDocument = useCallback(
+    (collections: unknown[]): Record<string, unknown> => ({
+      fileFormatVersion: fileFormatVersionRef.current,
+      collections
+    }),
+    []
+  )
 
   /**
    * Compose the on-disk folder name for a root collection the exact
@@ -305,7 +339,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
   // Save handlers
   const handleMenuSave = useCallback(async (): Promise<boolean> => {
-    const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<
+    const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<
       string,
       unknown
     >
@@ -389,7 +423,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     markAllTabsSaved()
     await hydrateSaveUnitsFromTree(rootItems)
     return true
-  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, currentFolderPath, filePath, markAllTabsSaved, hydrateSaveUnitsFromTree])
+  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, currentFolderPath, filePath, markAllTabsSaved, hydrateSaveUnitsFromTree, buildDocument])
 
   const handleMenuSaveAll = handleMenuSave
 
@@ -583,7 +617,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const fileUnits = buildFileModeDecomposition()
       const fileSubtreeIds = subtreeIds
 
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>
+      const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<string, unknown>
       const dataForChecksum = prepareForSerialization(plainData)
       const currentChecksum = JSON.stringify(dataForChecksum)
       const hasRealChanges = await hasContentChanged(currentChecksum)
@@ -656,7 +690,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       })
     }
     return allOk
-  }, [isOpenedAsFolder, currentFolderPath, rootItems, getOrBuildUnitMap, handleMenuSave, saveFile, filePath, buildFileModeDecomposition, collectSaveSubtreeIds])
+  }, [isOpenedAsFolder, currentFolderPath, rootItems, getOrBuildUnitMap, handleMenuSave, saveFile, filePath, buildFileModeDecomposition, collectSaveSubtreeIds, buildDocument])
 
   /**
    * Core save implementation shared by the direct-bypass path (File → New /
@@ -669,8 +703,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     async (intent: 'new' | 'saveAs', saveOptions: SaveOptions): Promise<void> => {
       const isNew = intent === 'new'
       const plainData = isNew
-        ? ({ collections: [] } as Record<string, unknown>)
-        : (JSON.parse(JSON.stringify({ collections: rootItems })) as Record<string, unknown>)
+        // A brand-new document is written by THIS build, so it is at the
+        // current version — not at whatever the previously open document
+        // declared. It carries the stamp from its very first save, which
+        // an empty project could not do while the version lived on a
+        // collection: it has none.
+        ? ({ fileFormatVersion: CURRENT_FILE_FORMAT_VERSION, collections: [] } as Record<string, unknown>)
+        : (JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<string, unknown>)
 
       logger.info('[useFileManagement] Saving with options', {
         intent,
@@ -731,7 +770,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         logger.error('[useFileManagement] Save error', { error: String(error) })
       }
     },
-    [rootItems, setRootItems, clearTabDirtyState, closeFile, openFile]
+    [rootItems, setRootItems, clearTabDirtyState, closeFile, openFile, buildDocument]
   )
 
   const handleMenuSaveAs = useCallback(() => {
@@ -745,7 +784,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   )
 
   const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
-    const dataForChecksum = prepareForSerialization({ collections: rootItems })
+    const dataForChecksum = prepareForSerialization(buildDocument(rootItems))
     const currentChecksum = JSON.stringify(dataForChecksum)
     const hasRealChanges = await hasContentChanged(currentChecksum)
 
@@ -761,7 +800,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     })
     if (result === 'cancel') return false
     if (result === 'save') {
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
+      const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as unknown
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved && filePath) {
@@ -778,7 +817,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     // and the next launch reads them as a recovery candidate.
     await window.restorm?.file.clearDrafts()
     return true
-  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName, filePath])
+  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName, filePath, buildDocument])
 
   const handleMenuNew = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
@@ -878,18 +917,29 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
         clearTabDirtyState()
 
+        // The document's format version, read from its root and nowhere
+        // else. A document that declares nothing there — whether it
+        // predates the field or carries it on a collection — loads as
+        // the current version. Resolved BEFORE the checksum baseline
+        // below, so dropping the stale collection-level key (just after)
+        // is part of the "loaded" snapshot and never looks like an edit.
+        fileFormatVersionRef.current = resolveFileFormatVersion(content, logger)
+
         const collectionsWithIds = processAfterDeserialization(collections)
-        // Default `fileFormatVersion` to the current value on legacy
-        // files (those predating the version field) BEFORE the
-        // reactive wrap so the mutation doesn't fire a FOLDER_UPDATED
-        // event, and BEFORE the content-checksum baseline (set below)
-        // so "default-on-load" doesn't look like a user edit on the
-        // next save.
         for (const root of collectionsWithIds) {
-          normalizeFileFormatVersion(root, logger)
+          // Drop the version from the collection it used to sit on. In
+          // memory only — the file keeps it until the user saves, and an
+          // open is not a save. Without this the stray key would ride
+          // the save payload back to disk (unknown keys round-trip) and
+          // the document would declare its version twice.
+          //
+          // BEFORE the reactive wrap so the deletion fires no
+          // FOLDER_UPDATED event, and BEFORE the checksum baseline for
+          // the same reason as above.
+          stripLegacyFileFormatVersion(root)
           // Rewrite legacy camelCase `body.type` spellings to the
           // canonical kebab-case form (same BEFORE-reactive-wrap /
-          // BEFORE-checksum-baseline contract as the version default).
+          // BEFORE-checksum-baseline contract).
           normalizeBodyTypes(root)
         }
         // Requests can legally live at the root (see `useImport`'s
@@ -934,7 +984,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // to skip redundant saves when nothing has been touched. Per-object
         // dirty state lives in the save-unit registry now, so we no longer
         // feed a parallel checksum map.
-        const dataForChecksum = prepareForSerialization({ collections: reactiveItems })
+        const dataForChecksum = prepareForSerialization(buildDocument(reactiveItems))
         const baselineChecksum = JSON.stringify(dataForChecksum)
         void setContentChecksum(baselineChecksum)
         savedBaselineRef.current = baselineChecksum
@@ -1007,13 +1057,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         isLoadingRef.current = false
       })()
     },
-    [clearTabDirtyState, registerTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, folderFormat]
+    [clearTabDirtyState, registerTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, folderFormat, buildDocument]
   )
 
   // Handle file closed event
   const handleFileClosed = useCallback(() => {
     isLoadingRef.current = false
     lastLoadedPathRef.current = null
+    // Back to the version a new document would be written at, so the
+    // closed document's value cannot leak into the next one.
+    fileFormatVersionRef.current = CURRENT_FILE_FORMAT_VERSION
     setIsOpenedAsFolder(false)
     setCurrentFolderPath(null)
     setWorkbenchTree({
@@ -1045,19 +1098,19 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     if (baseline === null) return
     const timer = setTimeout(() => {
       void (async () => {
-        const dataForChecksum = prepareForSerialization({ collections: rootItems })
+        const dataForChecksum = prepareForSerialization(buildDocument(rootItems))
         const currentChecksum = JSON.stringify(dataForChecksum)
         if (currentChecksum !== baseline) return
         await window.restorm?.file.clearDrafts()
       })()
     }, 200)
     return () => { clearTimeout(timer) }
-  }, [rootItems, isDirty])
+  }, [rootItems, isDirty, buildDocument])
 
   // Save-and-close handler
   useEffect(() => {
     const handleSaveAndClose = async (): Promise<void> => {
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as unknown
+      const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as unknown
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved) {
@@ -1075,7 +1128,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     })
 
     return cleanup
-  }, [rootItems, saveFile, filePath])
+  }, [rootItems, saveFile, filePath, buildDocument])
 
   return {
     handleMenuNew,

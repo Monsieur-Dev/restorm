@@ -88,7 +88,18 @@ export const CANONICAL_KEY_PRIORITY: readonly string[] = [
   'type',
   'folderType',
   'method',
-  'url'
+  'url',
+  // Adding an entry to this list is normally a one-time reformat of every
+  // file that carries the key. This one is inert BY CONSTRUCTION: no
+  // existing document carries `fileFormatVersion` at its root, so ordering
+  // it cannot reorder anything already on disk — only files this code
+  // writes from now on can contain it.
+  //
+  // It earns the place because alphabetical order would put it AFTER the
+  // whole `collections` block, at the very bottom of the file, and a
+  // format stamp exists to be the first thing a reader — human or tool —
+  // sees.
+  'fileFormatVersion'
 ]
 
 /** Compare two object keys per the {@link CANONICAL_KEY_PRIORITY} contract:

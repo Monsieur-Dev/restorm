@@ -58,6 +58,18 @@ completely untouched** and the result carries `persisted: false`. There is
 deliberately no fallback to the round-trip: the UUID is convenience, the
 user's file is not.
 
+The same primitive is the only supported way to add ANY document-level
+key to a file the app is not otherwise rewriting — an identity, an
+on-disk format version, whatever a host app keeps beside its content.
+`value` may be a string or a **number**, and the distinction is load-
+bearing rather than a convenience: the round-trip check compares the
+re-parsed value with the one asked for, so a number written as a quoted
+string parses back as a string and the insertion is refused. A key
+already holding a real value is never overwritten — only an absent key,
+or a blank slot (`key:` / `key: ''`), is filled — so a caller that needs
+to CHANGE an existing value has to rewrite the document properly rather
+than patch its text.
+
 **`persisted: false` means: do not attach a draft store.** An
 unpersisted UUID is regenerated on every call, and `attachDraftStore` is
 routinely called more than once for a single open, so the attaches would

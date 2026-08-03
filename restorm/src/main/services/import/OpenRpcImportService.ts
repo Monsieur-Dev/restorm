@@ -22,7 +22,6 @@ import {
   JsonRpcRequest
 } from '../../../shared/models'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 
 // ============================================================================
 // OpenRPC Types (subset — v1 scope)
@@ -200,7 +199,6 @@ export function importOpenRpc(content: string, options: OpenRpcImportOptions = {
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'openrpc',
     id: generateId(`${name}:folder:jsonrpc:root`),
     name,

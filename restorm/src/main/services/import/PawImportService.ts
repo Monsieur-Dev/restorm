@@ -25,7 +25,6 @@ import {
 } from '../../../shared/models'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 
 // ============================================================================
@@ -282,7 +281,6 @@ export function importPaw(exportData: PawExport, _options: PawImportOptions = {}
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'paw',
     id: generateId('paw:root'),
     name: 'Paw Import',

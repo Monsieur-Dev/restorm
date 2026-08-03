@@ -17,7 +17,6 @@ import { importBrunoFromJson } from '../../src/main/services/import/BrunoImportS
 import { importCurl } from '../../src/main/services/import/CurlImportService'
 import { importPowerShell } from '../../src/main/services/import/PowerShellImportService'
 import { importRestClient } from '../../src/main/services/import/RestClientImportService'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../src/shared/config/fileFormatVersion'
 import type { Folder, EnvironmentFolder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest } from '../../src/shared/types/collections'
 
 // Helper to load test files
@@ -1167,7 +1166,7 @@ describe('Import Services - Cross-validation', () => {
     })
   })
 
-  it('stamps fileFormatVersion = CURRENT_FILE_FORMAT_VERSION on every importer output', () => {
+  it('leaves the file-format version off every importer output — it belongs to the document, not a collection', () => {
     const swagger = importSwaggerFromJson(loadTestFile('swagger-petstore.json'))
     const graphql = importGraphQLFromString(loadTestFile('graphql-docker.graphql'), { name: 'GraphQL' })
     const grpc = importGrpcFromString(loadTestFile('grpc-docker.proto'), { name: 'gRPC' })
@@ -1194,7 +1193,15 @@ describe('Import Services - Cross-validation', () => {
       restClient
     ]
     for (const result of results) {
-      expect(result.fileFormatVersion, `importer ${result.importSource ?? 'unknown'} missing fileFormatVersion`).toBe(CURRENT_FILE_FORMAT_VERSION)
+      // An imported collection is grafted onto a document that already
+      // declares its own version at the root. A version carried here
+      // would be a second, unreconciled answer to a question the file
+      // answers once — which is exactly what put the field in the wrong
+      // place to begin with.
+      expect(
+        Object.prototype.hasOwnProperty.call(result, 'fileFormatVersion'),
+        `importer ${result.importSource ?? 'unknown'} stamps a collection-level fileFormatVersion`
+      ).toBe(false)
     }
   })
 

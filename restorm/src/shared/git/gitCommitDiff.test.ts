@@ -19,7 +19,7 @@ function makeFolder(id: string, name: string, items: FolderItem[] = [], extra: R
 
 function makeEnvironmentFolder(id: string, name: string, items: FolderItem[] = []): EnvironmentFolder {
   return {
-    id, name, tags: [], configuration: {}, folderType: 'environment', environments: [], fileFormatVersion: 1, items
+    id, name, tags: [], configuration: {}, folderType: 'environment', environments: [], items
   } as unknown as EnvironmentFolder
 }
 

@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - id: 5a5d9fc3-3702-4ce5-ba8f-9cbca3198abf
     name: Input prompt petstore
@@ -32,7 +33,6 @@ collections:
             value:
               type: string
               value: http://localhost:8080/api
-    fileFormatVersion: 1
     items:
       - id: adec3bce-1dc0-4571-b50f-fa73085056a7
         name: Pet by string

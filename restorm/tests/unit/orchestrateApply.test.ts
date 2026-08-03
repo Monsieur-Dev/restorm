@@ -81,7 +81,6 @@ function folder(importSource: string): EnvironmentFolder {
     configuration: {},
     items: [],
     folderType: 'environment',
-    fileFormatVersion: 1,
     environments: [],
     importSource,
     apiUpdate: { sourceUrl: 'https://api.example.com/spec' }

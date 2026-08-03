@@ -164,7 +164,7 @@ describe('ContextService', () => {
         headers: [], params: [], pathParams: [], tags: []
       } as unknown as HTTPRequest
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'env-folder', name: 'F',
+        folderType: 'environment', id: 'env-folder', name: 'F',
         tags: [], configuration: {}, environments: [], items: [request],
         customValueLists: [{ id: listId, name: 'Couleur', entries }]
       } as unknown as EnvironmentFolder
@@ -186,7 +186,7 @@ describe('ContextService', () => {
       expect(contextService.resolveKeyValueForRequest(kv, reqId)).toBe('FF0000')
       // Edit the list entry value, then resolve again.
       collectionStore.setCollections([{
-        folderType: 'environment', fileFormatVersion: 1, id: 'env-folder', name: 'F',
+        folderType: 'environment', id: 'env-folder', name: 'F',
         tags: [], configuration: {}, environments: [],
         items: [{ type: 'http', id: reqId, name: 'r', method: 'GET', url: '{{baseUrl}}/x', headers: [], params: [], pathParams: [], tags: [] }],
         customValueLists: [{ id: listId, name: 'Couleur', entries: [{ id: 'e1', label: 'Rouge', value: 'FF0001' }] }]
@@ -223,7 +223,7 @@ describe('ContextService', () => {
         headers: [], params: [], pathParams: [], tags: []
       } as unknown as HTTPRequest
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'env-folder', name: 'F',
+        folderType: 'environment', id: 'env-folder', name: 'F',
         tags: [], configuration: {}, environments: [], items: [request],
         customValueLists: [{ id: listId, name: 'Couleur', entries }]
       } as unknown as EnvironmentFolder
@@ -278,7 +278,7 @@ describe('ContextService', () => {
       entries: { id: string; label: string; value: string; enabled?: boolean }[]
     ): void {
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'folder-cl', name: 'F',
+        folderType: 'environment', id: 'folder-cl', name: 'F',
         tags: [], configuration: {}, items: [],
         environments: [{ id: envId, name: 'E', variables: [] }],
         customValueLists: [{ id: listId, name: 'Colors', entries }]
@@ -380,7 +380,7 @@ describe('ContextService', () => {
         headers: [], params: [], pathParams: [], tags: []
       } as unknown as HTTPRequest
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'folder-scenario-body', name: 'F',
+        folderType: 'environment', id: 'folder-scenario-body', name: 'F',
         tags: [], configuration: {}, items: [request],
         environments: [{ id: envId, name: 'E', variables: [] }]
       } as unknown as EnvironmentFolder

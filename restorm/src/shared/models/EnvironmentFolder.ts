@@ -14,7 +14,6 @@ import { Environment } from './Environment'
 import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem } from './types'
 import type { ApiDocumentation } from '../types/apiDocumentation'
 import type { ApiUpdateConfig, ImportSourceType, CustomValueList } from '../types/baseTypes'
-import { CURRENT_FILE_FORMAT_VERSION } from '../config/fileFormatVersion'
 
 /**
  * Environment folder containing both items and environment configurations.
@@ -43,14 +42,6 @@ export class EnvironmentFolder {
   /** Discriminator to identify environment folders */
   @graphqlField({ type: 'String' })
   folderType: FolderType = 'environment'
-
-  /**
-   * On-disk file-format version stamped on the root env folder. Lets a
-   * future breaking model change migrate forward from the right starting
-   * point. New folders get `CURRENT_FILE_FORMAT_VERSION`; legacy files
-   * are defaulted on load via `normalizeFileFormatVersion`.
-   */
-  fileFormatVersion: number = CURRENT_FILE_FORMAT_VERSION
 
   /** Optional user notes */
   @graphqlField({ type: 'String', nullable: true })
@@ -123,7 +114,6 @@ export class EnvironmentFolder {
     tags?: string[]
     tagColors?: Record<string, string>
     folderType?: FolderType
-    fileFormatVersion?: number
     configuration?: FolderConfiguration
     environments?: Parameters<typeof Environment.fromPlain>[0][]
     items?: BaseFolderItem[]
@@ -140,15 +130,6 @@ export class EnvironmentFolder {
       tags: obj.tags ?? [],
       tagColors: obj.tagColors ?? {},
       folderType: 'environment',
-      // Legacy files predating the version field omit it — default on
-      // load. `normalizeFileFormatVersion` handles the same case for
-      // plain objects that never reach this factory (e.g. the
-      // renderer's `processAfterDeserialization` → `makeReactiveFolder`
-      // path).
-      fileFormatVersion:
-        typeof obj.fileFormatVersion === 'number' && Number.isFinite(obj.fileFormatVersion)
-          ? obj.fileFormatVersion
-          : CURRENT_FILE_FORMAT_VERSION,
       configuration: obj.configuration ?? {}
     })
     if (Array.isArray(obj.environments)) {
@@ -171,16 +152,14 @@ export class EnvironmentFolder {
    * Create a plain object from this EnvironmentFolder
    */
   toPlainObject(): Record<string, unknown> {
-    // Place `fileFormatVersion` right after `folderType` so it lands near
-    // the top of the serialized YAML/JSON5 output — the persistence
-    // service preserves property order for those formats, and a visible
-    // version stamp at the top of the file is easier to inspect.
+    // No `fileFormatVersion` here: the format version describes the
+    // FILE, not a collection inside it, and lives at the document root.
+    // See `src/shared/config/fileFormatVersion.ts`.
     const plain: Record<string, unknown> = {
       id: this.id,
       name: this.name,
       icon: this.icon,
       folderType: this.folderType,
-      fileFormatVersion: this.fileFormatVersion,
       notes: this.notes,
       tags: this.tags,
       tagColors: this.tagColors,

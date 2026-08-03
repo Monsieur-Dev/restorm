@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: AMQP Playground
@@ -51,5 +52,4 @@ collections:
         autoAck: true
         id: 8f4e2a1b-9c3d-4e7f-a2b6-1d5c8e0f4a29
     id: e2c9a4d1-6b3f-4a87-9d2e-5c8b1f0a3e67
-    fileFormatVersion: 1
 _projectUuid: c4a9d2e1-7b3f-4a86-9d1e-6c8b0f2a4e58

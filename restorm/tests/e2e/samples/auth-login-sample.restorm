@@ -1,6 +1,6 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
-    fileFormatVersion: 1
     name: Auth Service
     documentation: ''
     tags:

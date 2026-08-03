@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { isAnyFolder, isScenario, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
 import {
   HTTPRequest,
@@ -1007,7 +1006,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       id: generateUniqueId(),
       name: t('sidebar.newEnvironmentFolder'),
       folderType: 'environment',
-      fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
       tags: [],
       configuration: {},
       environments: [],

@@ -28,7 +28,6 @@ import {
 } from '../../../shared/models'
 import { StringValue, NumericValue, type ValueType } from '../../../shared/types/collections'
 import { toHTTPMethod } from './httpMethodValidator'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 import {
   apiBlueprintToApiDocumentation,
@@ -251,7 +250,6 @@ function importApiCategory(apiCategory: RefractElement, options: ApiBlueprintImp
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'api-blueprint',
     id: generateId(`folder:root:api-blueprint:${name}`),
     name,

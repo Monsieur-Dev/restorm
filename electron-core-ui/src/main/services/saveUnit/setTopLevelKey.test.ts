@@ -181,3 +181,62 @@ describe('setTopLevelKey — JSON5', () => {
     expect(setTopLevelKey('[1, 2]', KEY, UUID, 'json5')).toBeNull()
   })
 })
+
+describe('setTopLevelKey — a numeric value', () => {
+  // Documents carry more than identities at their top level: an on-disk
+  // format version is a number, and writing it as a quoted string would
+  // parse back as a string — which the round-trip check catches, so the
+  // insertion would be refused outright rather than silently wrong.
+  const VERSION_KEY = 'fileFormatVersion'
+
+  it('writes a bare YAML scalar that parses back as a number', () => {
+    const out = setTopLevelKey('collections: []\n', VERSION_KEY, 1, 'yaml')
+    expect(out).not.toBeNull()
+    if (out === null) throw new Error('unreachable — asserted non-null above')
+    expect(out).toContain(`${VERSION_KEY}: 1`)
+    expect(out).not.toContain(`${VERSION_KEY}: '1'`)
+    expect(out).not.toContain(`${VERSION_KEY}: "1"`)
+    expect(yaml.load(out)).toEqual({ collections: [], [VERSION_KEY]: 1 })
+  })
+
+  it('keeps the comments of the document it is added to', () => {
+    const raw = [
+      '# Project index — hand-authored.',
+      '_projectUuid: 8b1f  # stamped on first open',
+      ''
+    ].join('\n')
+
+    const out = setTopLevelKey(raw, VERSION_KEY, 1, 'yaml')
+    expect(out).not.toBeNull()
+    if (out === null) throw new Error('unreachable — asserted non-null above')
+    expect(out).toContain('# Project index — hand-authored.')
+    expect(out).toContain('# stamped on first open')
+    expect(yaml.load(out)).toEqual({ _projectUuid: '8b1f', [VERSION_KEY]: 1 })
+  })
+
+  it('writes a JSON number, not a string', () => {
+    const out = setTopLevelKey('{"collections": []}', VERSION_KEY, 2, 'json')
+    expect(out).not.toBeNull()
+    if (out === null) throw new Error('unreachable — asserted non-null above')
+    expect(JSON.parse(out)).toEqual({ collections: [], [VERSION_KEY]: 2 })
+  })
+
+  it('fills a blank slot in place', () => {
+    const out = setTopLevelKey(`${VERSION_KEY}:\nname: My project\n`, VERSION_KEY, 1, 'yaml')
+    expect(out).not.toBeNull()
+    if (out === null) throw new Error('unreachable — asserted non-null above')
+    expect(yaml.load(out)).toEqual({ [VERSION_KEY]: 1, name: 'My project' })
+  })
+
+  it('never overwrites a version the document already declares', () => {
+    // Only a migration may move a format version, and a textual key
+    // insertion is not one.
+    expect(setTopLevelKey(`${VERSION_KEY}: 1\nname: My project\n`, VERSION_KEY, 2, 'yaml')).toBeNull()
+  })
+
+  it('refuses a value that cannot survive the round-trip', () => {
+    // NaN has no YAML/JSON spelling that parses back as itself, so the
+    // verify step rejects the candidate and the file is left alone.
+    expect(setTopLevelKey('name: My project\n', VERSION_KEY, Number.NaN, 'yaml')).toBeNull()
+  })
+})

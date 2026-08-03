@@ -15,7 +15,7 @@ Open project metadata.
   "path": "/home/me/work/petstore.restorm",   // null when no project open
   "name": "petstore",                         // null when no project open
   "isDirty": false,
-  "fileFormatVersion": 1,
+  "fileFormatVersion": 1,                     // null when the file declares none
   "collectionCount": 1
 }
 ```

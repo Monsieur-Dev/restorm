@@ -23,7 +23,6 @@ import {
   EnvironmentFolder,
   TrpcRequest
 } from '../../../shared/models'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 
 const SCHEMA_PATH_SUFFIX = '/.trpc/_schema'
@@ -101,7 +100,6 @@ export function importTrpcSchema(content: string, options: { sourceUrl?: string;
 
   return new EnvironmentFolder({
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'trpc',
     id: generateId(`${name}:folder:trpc:root`),
     name,

@@ -255,7 +255,7 @@ describe('deepCloneItem — config.scenarioId remap (already correct — this lo
  */
 function makeEnvironmentFolder(): FolderItem {
   return {
-    id: 'root-env', name: 'Root', folderType: 'environment', configuration: {}, fileFormatVersion: 1,
+    id: 'root-env', name: 'Root', folderType: 'environment', configuration: {},
     items: [],
     environments: [
       {
@@ -586,7 +586,7 @@ describe('REASSIGNED_ID_CONTAINER_KEYS', () => {
  */
 function makeReferenceRichFolder(): FolderItem {
   return {
-    id: 'root-env', name: 'API', folderType: 'environment', configuration: {}, fileFormatVersion: 1,
+    id: 'root-env', name: 'API', folderType: 'environment', configuration: {},
     apiUpdate: { sourceUrl: 'https://example.com/spec.json', authenticationRequestId: 'auth-1' },
     enumDefinitions: [
       { id: 'enum-1', name: 'Status', values: ['open', 'closed'], matchingRules: [] }

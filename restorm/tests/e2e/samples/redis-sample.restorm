@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: Redis Playground
@@ -75,5 +76,4 @@ collections:
           - e2e-key
         id: f5b48f07-dd24-465d-9e75-d4fcda51eac6
     id: 97291ab6-5a05-4619-b550-ecc7e3b02a1e
-    fileFormatVersion: 1
 _projectUuid: 6e9c1d2a-4b7f-4c3a-9e8d-2f5a7b1c9d3e

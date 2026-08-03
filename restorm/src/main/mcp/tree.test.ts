@@ -25,7 +25,6 @@ function ef(id: string, name: string, items: FolderItem[] = []): EnvironmentFold
     id,
     name,
     folderType: 'environment',
-    fileFormatVersion: 1,
     documentation: '',
     tags: [],
     configuration: {} as Folder['configuration'],

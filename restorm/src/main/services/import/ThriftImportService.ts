@@ -24,7 +24,6 @@ import {
 import { logger } from 'electron-core-ui'
 import { Folder, EnvironmentFolder } from '../../../shared/models'
 import type { EnumDefinition } from '../../../shared/types/collections'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { isPathContained } from '../../utils/pathSecurity'
 import { stableImportId as generateId } from './stableImportId'
 import { thriftToApiDocumentation, type ParsedThriftData } from './transformers/thriftToApiDocumentation'
@@ -314,7 +313,6 @@ export function importThrift(idlContent: string, options: ThriftImportOptions = 
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'thrift',
     id: generateId(`${name}:folder:thrift:root`),
     name,
