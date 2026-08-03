@@ -933,9 +933,15 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           // the save payload back to disk (unknown keys round-trip) and
           // the document would declare its version twice.
           //
-          // BEFORE the reactive wrap so the deletion fires no
-          // FOLDER_UPDATED event, and BEFORE the checksum baseline for
-          // the same reason as above.
+          // THE ORDER HERE IS LOAD-BEARING, not incidental: resolve the
+          // version, strip, wrap reactive, THEN take the checksum
+          // baseline. Taking the baseline before the strip makes a
+          // document that carries the old key come out DIRTY on open —
+          // the tree no longer matches the baseline it was measured
+          // against — which is exactly the "opening a project changes it"
+          // behaviour this area exists to prevent. Nothing tests this
+          // sequence; moving a line here is silent until a user sees a
+          // dirty dot on a project they only looked at.
           stripLegacyFileFormatVersion(root)
           // Rewrite legacy camelCase `body.type` spellings to the
           // canonical kebab-case form (same BEFORE-reactive-wrap /

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import yaml from 'js-yaml'
+import JSON5 from 'json5'
 import { setTopLevelKey } from './setTopLevelKey'
 
 const KEY = '_projectUuid'
@@ -219,6 +220,38 @@ describe('setTopLevelKey — a numeric value', () => {
     expect(out).not.toBeNull()
     if (out === null) throw new Error('unreachable — asserted non-null above')
     expect(JSON.parse(out)).toEqual({ collections: [], [VERSION_KEY]: 2 })
+  })
+
+  it('writes a JSON5 number and keeps the comments around it', () => {
+    // Reachable: a folder project can be json5, so its root index takes
+    // the same numeric stamp a YAML one does.
+    const raw = [
+      '{',
+      '  // the project identity, stamped on first open',
+      '  _projectUuid: "abc",',
+      '  /* nothing else belongs at the root */',
+      '}',
+      ''
+    ].join('\n')
+
+    const out = setTopLevelKey(raw, VERSION_KEY, 1, 'json5')
+    expect(out).not.toBeNull()
+    if (out === null) throw new Error('unreachable — asserted non-null above')
+    expect(out).toContain('// the project identity, stamped on first open')
+    expect(out).toContain('/* nothing else belongs at the root */')
+    const parsed: Record<string, unknown> = JSON5.parse(out)
+    expect(parsed[VERSION_KEY]).toBe(1)
+    expect(typeof parsed[VERSION_KEY]).toBe('number')
+    expect(parsed['_projectUuid']).toBe('abc')
+  })
+
+  it('refuses a JSON5 root that declares the key as an explicit null', () => {
+    // YAML spells a valueless key as `null` and treats it as a blank slot
+    // to fill; JSON5's explicit `null` is a real value, so the insertion
+    // is refused and the file is left exactly as it is. Refusal, never
+    // repair — the cost is that such a project never acquires a stamp,
+    // and only the caller's log line says why.
+    expect(setTopLevelKey('{ "fileFormatVersion": null }', VERSION_KEY, 1, 'json5')).toBeNull()
   })
 
   it('fills a blank slot in place', () => {

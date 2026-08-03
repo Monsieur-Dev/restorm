@@ -75,6 +75,31 @@ describe('stampFolderFormatVersion', () => {
     expect(deserialize(after, 'yaml')).toEqual({ _projectUuid: 'abc', fileFormatVersion: 1 })
   })
 
+  it('stamps a json5 folder project as a number, keeping its comments', async () => {
+    // A folder project's format comes from `restorm.conf`, so json5 is a
+    // real configuration rather than a theoretical one — and the point of
+    // the text route is that a hand-authored index survives it.
+    const jsonIndex = join(projectPath, 'index.json5')
+    const original = [
+      '{',
+      '  // team project index',
+      '  _projectUuid: "ca41759c",',
+      '}',
+      ''
+    ].join('\n')
+    writeFileSync(jsonIndex, original, 'utf-8')
+
+    const outcome = await stampFolderFormatVersion(projectPath, 'json5', 'json5', 1)
+
+    expect(outcome).toBe('inserted')
+    const after = readFileSync(jsonIndex, 'utf-8')
+    expect(after).toContain('// team project index')
+    const parsed = deserialize(after, 'json5') as Record<string, unknown>
+    expect(parsed['fileFormatVersion']).toBe(1)
+    expect(typeof parsed['fileFormatVersion']).toBe('number')
+    expect(parsed['_projectUuid']).toBe('ca41759c')
+  })
+
   it('does nothing when the version is already declared', async () => {
     const original = 'fileFormatVersion: 1\n_projectUuid: abc\n'
     writeFileSync(indexPath(), original, 'utf-8')

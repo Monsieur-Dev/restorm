@@ -598,6 +598,16 @@ export async function loadFolderStructure(
     // every root-index key, so without this the gate below would judge a
     // folder project on its collections alone and a future-format root
     // would sail straight through.
+    //
+    // THIS NAMES ONE KEY, SO IT CARRIES ONLY THAT ONE. Every document-root
+    // key a folder project may hold has to be re-established here or it is
+    // lost in folder mode while surviving in file mode — and nothing
+    // fails: the project opens, the key is simply gone. Today the root
+    // holds exactly three (`collections`, `fileFormatVersion`,
+    // `_projectUuid`) and all three survive. A FOURTH one added later will
+    // be added to the serializer or the renderer's document builder, never
+    // to this function, which is why the requirement is written here
+    // rather than there.
     const declaredVersion = rootIndex?.[FILE_FORMAT_VERSION_KEY]
     if (typeof declaredVersion === 'number' && Number.isFinite(declaredVersion)) {
       data[FILE_FORMAT_VERSION_KEY] = declaredVersion
