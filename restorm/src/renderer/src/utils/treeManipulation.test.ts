@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { FolderItem, Scenario } from '../../../shared/types/collections'
-import { deepCloneItem, cloneItemInTree, generateUniqueId, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
+import { deepCloneItem, cloneItemInTree, generateUniqueId, ID_REFERENCE_KEYS, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
 
 describe('generateUniqueId', () => {
   it('produces a UUID, never colliding within a tight loop', () => {
@@ -573,6 +573,154 @@ describe('REASSIGNED_ID_CONTAINER_KEYS', () => {
       'enumDefinitions', 'subEnvironments', 'entries',
       'nodes', 'edges', 'quickConfigs'
     ])
+  })
+})
+
+/**
+ * An environment folder wiring up every id REFERENCE a clone must follow but
+ * that nothing walked before: a request's `authenticationRequestId`, an
+ * `apiUpdate` config's `authenticationRequestId`, an enum-typed variable's
+ * `enumDefinitionId`, and a scenario action's `quickConfigId`. All four
+ * targets live INSIDE this subtree, so cloning the folder must rebind every
+ * one of them onto the copy.
+ */
+function makeReferenceRichFolder(): FolderItem {
+  return {
+    id: 'root-env', name: 'API', folderType: 'environment', configuration: {}, fileFormatVersion: 1,
+    apiUpdate: { sourceUrl: 'https://example.com/spec.json', authenticationRequestId: 'auth-1' },
+    enumDefinitions: [
+      { id: 'enum-1', name: 'Status', values: ['open', 'closed'], matchingRules: [] }
+    ],
+    environments: [
+      {
+        id: 'env-1', name: 'Default',
+        variables: [
+          { id: 'kv-1', key: 'status', value: { type: 'enum', value: 'open', enumDefinitionId: 'enum-1' } },
+          { id: 'kv-2', key: 'statuses', value: { type: 'enumList', value: ['open'], enumDefinitionId: 'enum-1' } }
+        ]
+      }
+    ],
+    items: [
+      { type: 'auth', id: 'auth-1', name: 'Login' },
+      {
+        type: 'http', id: 'req-1', name: 'List pets', method: 'GET', url: '',
+        authenticationRequestId: 'auth-1',
+        quickConfigs: [{ id: 'qc-1', name: 'Staging', requestId: 'req-1', storageTarget: 'project', fields: {} }]
+      },
+      {
+        type: 'scenario', id: 'scn-1', name: 'Smoke', tags: [], params: [], edges: [],
+        nodes: [
+          { id: 'node-1', kind: 'httpRequest', config: { requestId: 'req-1', quickConfigId: 'qc-1' },
+            inputs: [], outputs: [], position: { x: 0, y: 0 } }
+        ]
+      }
+    ]
+  } as unknown as FolderItem
+}
+
+describe('deepCloneItem — id references the remap walk did not follow', () => {
+  it("rebinds a request's authenticationRequestId onto the CLONED auth request", () => {
+    const clone = deepCloneItem(makeReferenceRichFolder()) as unknown as { items: { id: string, authenticationRequestId?: string }[] }
+    const clonedAuthId = clone.items[0]?.id
+    const clonedRequest = clone.items[1]
+
+    expect(clonedAuthId).not.toBe('auth-1')
+    expect(clonedRequest?.authenticationRequestId).toBe(clonedAuthId)
+    expect(clonedRequest?.authenticationRequestId).not.toBe('auth-1')
+  })
+
+  it("rebinds an apiUpdate config's authenticationRequestId onto the CLONED auth request", () => {
+    // The same key name on a different carrier — a folder's spec-refresh
+    // config rather than a request. One Set entry covers both, because the
+    // remap walk matches by key name wherever it appears.
+    const clone = deepCloneItem(makeReferenceRichFolder()) as unknown as {
+      items: { id: string }[], apiUpdate: { authenticationRequestId?: string }
+    }
+    expect(clone.apiUpdate.authenticationRequestId).toBe(clone.items[0]?.id)
+    expect(clone.apiUpdate.authenticationRequestId).not.toBe('auth-1')
+  })
+
+  it('rebinds an enum-typed variable onto the CLONED EnumDefinition, single and list alike', () => {
+    // EnumDefinition ids ARE reassigned on clone, so an unfollowed
+    // `enumDefinitionId` does not merely go stale — it resolves against the
+    // ORIGINAL folder's definition, since several call sites look an
+    // EnumDefinition up by a global id sweep over the whole tree.
+    const clone = deepCloneItem(makeReferenceRichFolder()) as unknown as {
+      enumDefinitions: { id: string }[],
+      environments: { variables: { value: { enumDefinitionId?: string } }[] }[]
+    }
+    const clonedEnumId = clone.enumDefinitions[0]?.id
+    const vars = clone.environments[0]?.variables ?? []
+
+    expect(clonedEnumId).not.toBe('enum-1')
+    expect(vars[0]?.value.enumDefinitionId).toBe(clonedEnumId)
+    expect(vars[1]?.value.enumDefinitionId).toBe(clonedEnumId)
+  })
+
+  it("rebinds a scenario action's quickConfigId onto the CLONED request's quick config", () => {
+    // A quick config is resolved by id scoped to the request that owns it
+    // (`resolveProjectConfigFields`, shared/scenarioActionOverride.ts), so a
+    // clone whose node still names the ORIGINAL config's id finds nothing on
+    // its own request and silently degrades to "config missing" — the action
+    // loses its base configuration. Live since quickConfigs[] entries started
+    // getting fresh ids on clone.
+    const clone = deepCloneItem(makeReferenceRichFolder()) as unknown as {
+      items: ({ quickConfigs?: { id: string }[], nodes?: { config: { quickConfigId?: string } }[] })[]
+    }
+    const clonedQuickConfigId = clone.items[1]?.quickConfigs?.[0]?.id
+    const nodeConfig = clone.items[2]?.nodes?.[0]?.config
+
+    expect(clonedQuickConfigId).not.toBe('qc-1')
+    expect(nodeConfig?.quickConfigId).toBe(clonedQuickConfigId)
+  })
+
+  it('leaves a reference whose target sits OUTSIDE the cloned subtree pointing at the original', () => {
+    // Cloning just the request: the auth request it names is a sibling, not a
+    // descendant, so it is not part of this clone and no new id exists for
+    // it. The reference must stay on the original — rewriting it would be
+    // worse than leaving it, and dropping it would break the binding.
+    const folder = makeReferenceRichFolder() as unknown as { items: [FolderItem, FolderItem, FolderItem] }
+    const request = folder.items[1]
+    const clone = deepCloneItem(request) as unknown as { authenticationRequestId?: string }
+
+    expect(clone.authenticationRequestId).toBe('auth-1')
+  })
+})
+
+/**
+ * `ID_REFERENCE_KEYS` cannot be derived from the type system: half the live
+ * references live in `ScenarioNode.config`, an untyped `Record<string,
+ * unknown>` whose key names exist only as strings. So the list is hand-held,
+ * and the guard against it drifting again is this table — every reference
+ * field known to be live, with where it is declared, asserted individually.
+ * A key silently dropped fails here loudly; a key ADDED without being
+ * audited fails the exact-membership assertion at the bottom, which is the
+ * prompt to decide whether it belongs.
+ */
+describe('ID_REFERENCE_KEYS', () => {
+  const liveReferenceFields: readonly { key: string, declaredIn: string, target: string }[] = [
+    { key: 'listId', declaredIn: 'shared/types/valueTypes/CustomListValue.ts + CustomListMultiValue.ts', target: 'CustomValueList.id' },
+    { key: 'requestId', declaredIn: "ScenarioNode.config (request-binding kinds) + QuickConfig.requestId", target: 'a request' },
+    { key: 'scenarioId', declaredIn: "ScenarioNode.config of the 'runScenario' kind", target: 'Scenario.id' },
+    { key: 'nodeId', declaredIn: 'shared/types/scenario.ts — ScenarioEdge.from/to.nodeId', target: 'ScenarioNode.id' },
+    { key: 'connectionNodeId', declaredIn: "ScenarioNode.config of the connect/close kinds", target: 'the connecting ScenarioNode.id' },
+    { key: 'quickConfigId', declaredIn: 'shared/scenarioActionOverride.ts — QUICK_CONFIG_ID_KEY, read off ScenarioNode.config', target: 'QuickConfig.id on the bound request' },
+    { key: 'authenticationRequestId', declaredIn: 'shared/types/requests/BaseRequest.ts + shared/types/baseTypes.ts (ApiUpdateConfig)', target: "a request of type 'auth'" },
+    { key: 'enumDefinitionId', declaredIn: 'shared/types/valueTypes/EnumValue.ts + EnumListValue.ts', target: 'EnumDefinition.id' }
+  ]
+
+  for (const { key, declaredIn, target } of liveReferenceFields) {
+    it(`follows ${key} (${declaredIn} → ${target})`, () => {
+      expect(ID_REFERENCE_KEYS.has(key)).toBe(true)
+    })
+  }
+
+  it('carries nothing beyond the audited list — an unlisted key is either dead weight or an unreviewed addition', () => {
+    expect([...ID_REFERENCE_KEYS].sort()).toEqual(liveReferenceFields.map((f) => f.key).sort())
+  })
+
+  it('never follows portId — a port id is a structural label, never reassigned, and rewriting it would break the clone against its own edges', () => {
+    expect(ID_REFERENCE_KEYS.has('portId')).toBe(false)
   })
 })
 

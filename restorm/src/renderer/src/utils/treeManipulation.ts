@@ -174,15 +174,45 @@ function reassignTreeIds(node: unknown, idMap: Map<string, string>): void {
  * the same generic walk — self-referential (the config lives ON the
  * request it names), and correct precisely because the walk doesn't care
  * where a key appears structurally, only what it's called.
+ *
+ * The list is exactly the reference fields the persisted document actually
+ * carries, audited field by field against the type system and the node-kind
+ * configs — see the table in `treeManipulation.test.ts`, which asserts each
+ * one individually AND that nothing else is in here. Speculative entries
+ * are worse than useless: a key that names no persisted field cannot help,
+ * and if the name is later claimed by a FREE-TEXT field it starts silently
+ * rewriting user content. `portId` is the one live key deliberately left
+ * out — a port id is a structural label copied from the node kind's static
+ * template, never reassigned, so following it would break a clone's edges
+ * against its own nodes.
+ *
+ * The failure mode this guards is quiet by construction: a missing key is a
+ * no-op until the ids it names start moving. `connectionNodeId` sat absent
+ * and harmless for as long as scenario node ids were never reassigned, and
+ * broke every cloned connect/close pair the moment they were. Adding a
+ * container to {@link REASSIGNED_ID_CONTAINER_KEYS} means auditing this
+ * list in the same breath.
  */
-const ID_REFERENCE_KEYS = new Set<string>([
-  'listId', 'customValueListId',
-  'scenarioId', 'targetScenarioId', 'runScenarioId',
-  'requestId', 'targetRequestId', 'boundRequestId',
-  'environmentId', 'envId', 'selectedEnvironmentId',
-  'parentFolderId', 'folderId',
-  'sourceNodeId', 'targetNodeId', 'fromNodeId', 'toNodeId', 'nodeId',
-  'connectionNodeId'
+export const ID_REFERENCE_KEYS = new Set<string>([
+  'listId',
+  'scenarioId',
+  'requestId',
+  'nodeId',
+  'connectionNodeId',
+  // A scenario action's picked quick-config (`QUICK_CONFIG_ID_KEY`,
+  // `shared/scenarioActionOverride.ts`). Resolved SCOPED to the request that
+  // owns the config, so a clone still naming the original's id resolves to
+  // nothing on its own request and silently degrades to "config missing".
+  'quickConfigId',
+  // A request's auth route, and an env folder's spec-refresh config
+  // (`ApiUpdateConfig`) — the same key name on two different carriers, both
+  // pointing at an `auth` request, both covered by this one entry.
+  'authenticationRequestId',
+  // An enum-typed variable's definition (`EnumValue` / `EnumListValue`).
+  // EnumDefinitions are resolved by a global id sweep over the whole tree,
+  // so an unfollowed reference does not dangle — it silently binds the copy
+  // to the ORIGINAL folder's definition.
+  'enumDefinitionId'
 ])
 
 /** After ids are reassigned, walk the cloned subtree and replace an old id with
