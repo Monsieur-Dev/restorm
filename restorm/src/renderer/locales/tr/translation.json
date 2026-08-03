@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} taslak önceki oturumunuzdan geri yüklendi.",
     "draftsRestoredBody_other": "{{count}} taslak önceki oturumunuzdan geri yüklendi."
   },
+  "about": {
+    "version": "Sürüm {{version}}",
+    "tagline": "API test ortamı — istemci ve sunucu.",
+    "links": {
+      "website": "Web sitesi",
+      "documentation": "Belgeler",
+      "releaseNotes": "Sürüm notları"
+    },
+    "publishedBy": "Yayımlayan",
+    "legal": {
+      "trademark": "Restorm®, INPI nezdinde tescilli bir markadır.",
+      "copyright": "© 2026 Monsieur Dev. Tüm hakları saklıdır."
+    },
+    "close": "Kapat"
+  },
   "statusbar": {
     "requestHistory": "İstek geçmişi",
     "envSelector": {

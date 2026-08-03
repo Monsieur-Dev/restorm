@@ -31,6 +31,46 @@ export function pricingUrl(channel: ReleaseChannel): string {
 }
 
 /**
+ * The marketing site's locale path segments, lowercased, EXCLUDING the default
+ * one. The site serves French at the unprefixed root and every other language
+ * under `/<code>` (`/en`, `/ja`, `/zh-cn`, …) — so a link built for the app's
+ * current language must carry that prefix or it lands on French.
+ *
+ * The app's shipped locale codes and the site's are the same 27, differing only
+ * in case (`zh-CN` here, `zh-cn` in the URL). Kept as an explicit set so an app
+ * locale that has no page on the site degrades to the root instead of linking
+ * to a 404.
+ */
+const SITE_LOCALE_PATHS = new Set([
+  'en', 'es', 'de', 'it', 'pt', 'nl', 'sv', 'da', 'nb', 'fi', 'pl', 'cs', 'hu',
+  'ro', 'el', 'uk', 'hr', 'sr', 'sq', 'tr', 'id', 'vi', 'ja', 'ko', 'zh-cn', 'zh-tw'
+])
+
+/**
+ * The site path prefix for an app locale — `''` for French (the unprefixed
+ * default) and for anything the site does not publish, `/<code>` otherwise.
+ */
+export function siteLocalePath(locale: string): string {
+  const code = locale.toLowerCase()
+  return SITE_LOCALE_PATHS.has(code) ? `/${code}` : ''
+}
+
+/** The marketing-site home page, in the caller's language. */
+export function websiteUrl(channel: ReleaseChannel, locale: string): string {
+  return `${siteBaseUrl(channel)}${siteLocalePath(locale)}`
+}
+
+/** The documentation home, in the caller's language. */
+export function docsUrl(channel: ReleaseChannel, locale: string): string {
+  return `${siteBaseUrl(channel)}${siteLocalePath(locale)}/docs`
+}
+
+/** The release-notes (changelog) index, in the caller's language. */
+export function releaseNotesUrl(channel: ReleaseChannel, locale: string): string {
+  return `${siteBaseUrl(channel)}${siteLocalePath(locale)}/changelog`
+}
+
+/**
  * The customer dashboard (self-serve account / billing) URL. A single host
  * across channels for now: the dashboard is not yet deployed, so this resolves
  * to a page that 404s until it ships — acceptable because there are no

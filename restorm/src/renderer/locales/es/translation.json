@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "Se ha restaurado {{count}} borrador de tu sesión anterior.",
     "draftsRestoredBody_other": "Se han restaurado {{count}} borradores de tu sesión anterior."
   },
+  "about": {
+    "version": "Versión {{version}}",
+    "tagline": "El entorno de pruebas de API: cliente y servidor.",
+    "links": {
+      "website": "Sitio web",
+      "documentation": "Documentación",
+      "releaseNotes": "Notas de la versión"
+    },
+    "publishedBy": "Editado por",
+    "legal": {
+      "trademark": "Restorm® es una marca registrada en el INPI.",
+      "copyright": "© 2026 Monsieur Dev. Todos los derechos reservados."
+    },
+    "close": "Cerrar"
+  },
   "statusbar": {
     "requestHistory": "Historial de peticiones",
     "envSelector": {

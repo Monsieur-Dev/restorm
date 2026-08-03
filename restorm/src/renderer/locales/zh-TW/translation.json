@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "已還原未儲存的工作",
     "draftsRestoredBody_other": "已從上一次工作階段還原 {{count}} 份草稿。"
   },
+  "about": {
+    "version": "版本 {{version}}",
+    "tagline": "API 測試環境 — 用戶端與伺服器。",
+    "links": {
+      "website": "網站",
+      "documentation": "文件",
+      "releaseNotes": "版本資訊"
+    },
+    "publishedBy": "發行者",
+    "legal": {
+      "trademark": "Restorm® 是在 INPI 註冊的商標。",
+      "copyright": "© 2026 Monsieur Dev. 保留一切權利。"
+    },
+    "close": "關閉"
+  },
   "statusbar": {
     "requestHistory": "請求歷史紀錄",
     "envSelector": {

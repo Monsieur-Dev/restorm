@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} concept is hersteld uit de vorige sessie.",
     "draftsRestoredBody_other": "{{count}} concepten zijn hersteld uit de vorige sessie."
   },
+  "about": {
+    "version": "Versie {{version}}",
+    "tagline": "De API-testomgeving — client en server.",
+    "links": {
+      "website": "Website",
+      "documentation": "Documentatie",
+      "releaseNotes": "Release-opmerkingen"
+    },
+    "publishedBy": "Uitgegeven door",
+    "legal": {
+      "trademark": "Restorm® is een bij het INPI gedeponeerd merk.",
+      "copyright": "© 2026 Monsieur Dev. Alle rechten voorbehouden."
+    },
+    "close": "Sluiten"
+  },
   "statusbar": {
     "requestHistory": "Geschiedenis van verzoeken",
     "envSelector": {

@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "未保存の作業を復元しました",
     "draftsRestoredBody_other": "前回のセッションから {{count}} 件の下書きを復元しました。"
   },
+  "about": {
+    "version": "バージョン {{version}}",
+    "tagline": "API テスト環境 — クライアントとサーバー。",
+    "links": {
+      "website": "ウェブサイト",
+      "documentation": "ドキュメント",
+      "releaseNotes": "リリースノート"
+    },
+    "publishedBy": "発行元",
+    "legal": {
+      "trademark": "Restorm® は INPI に登録された商標です。",
+      "copyright": "© 2026 Monsieur Dev. 全著作権所有。"
+    },
+    "close": "閉じる"
+  },
   "statusbar": {
     "requestHistory": "リクエスト履歴",
     "envSelector": {

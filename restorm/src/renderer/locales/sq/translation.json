@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} skicë u rikthye nga sesioni juaj i mëparshëm.",
     "draftsRestoredBody_other": "{{count}} skica u rikthyen nga sesioni juaj i mëparshëm."
   },
+  "about": {
+    "version": "Versioni {{version}}",
+    "tagline": "Mjedisi i testimit të API-ve — klient dhe server.",
+    "links": {
+      "website": "Faqja e internetit",
+      "documentation": "Dokumentacioni",
+      "releaseNotes": "Shënimet e versionit"
+    },
+    "publishedBy": "Botuar nga",
+    "legal": {
+      "trademark": "Restorm® është markë e regjistruar pranë INPI-t.",
+      "copyright": "© 2026 Monsieur Dev. Të gjitha të drejtat e rezervuara."
+    },
+    "close": "Mbyll"
+  },
   "statusbar": {
     "requestHistory": "Historiku i kërkesave",
     "envSelector": {

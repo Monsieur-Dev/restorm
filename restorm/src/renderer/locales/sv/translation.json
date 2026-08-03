@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} utkast återställdes från din föregående session.",
     "draftsRestoredBody_other": "{{count}} utkast återställdes från din föregående session."
   },
+  "about": {
+    "version": "Version {{version}}",
+    "tagline": "API-testmiljön — klient och server.",
+    "links": {
+      "website": "Webbplats",
+      "documentation": "Dokumentation",
+      "releaseNotes": "Versionsinformation"
+    },
+    "publishedBy": "Utgiven av",
+    "legal": {
+      "trademark": "Restorm® är ett varumärke registrerat hos INPI.",
+      "copyright": "© 2026 Monsieur Dev. Med ensamrätt."
+    },
+    "close": "Stäng"
+  },
   "statusbar": {
     "requestHistory": "Förfrågningshistorik",
     "envSelector": {

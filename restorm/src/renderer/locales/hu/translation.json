@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} piszkozat lett helyreállítva az előző munkamenetből.",
     "draftsRestoredBody_other": "{{count}} piszkozat lett helyreállítva az előző munkamenetből."
   },
+  "about": {
+    "version": "{{version}} verzió",
+    "tagline": "Az API-tesztkörnyezet — kliens és szerver.",
+    "links": {
+      "website": "Weboldal",
+      "documentation": "Dokumentáció",
+      "releaseNotes": "Kiadási megjegyzések"
+    },
+    "publishedBy": "Kiadó",
+    "legal": {
+      "trademark": "A Restorm® az INPI-nél bejegyzett védjegy.",
+      "copyright": "© 2026 Monsieur Dev. Minden jog fenntartva."
+    },
+    "close": "Bezárás"
+  },
   "statusbar": {
     "requestHistory": "Kérések előzményei",
     "envSelector": {

@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} πρόχειρο επαναφέρθηκε από την προηγούμενη συνεδρία σας.",
     "draftsRestoredBody_other": "{{count}} πρόχειρα επαναφέρθηκαν από την προηγούμενη συνεδρία σας."
   },
+  "about": {
+    "version": "Έκδοση {{version}}",
+    "tagline": "Το περιβάλλον δοκιμών API — πελάτης και διακομιστής.",
+    "links": {
+      "website": "Ιστότοπος",
+      "documentation": "Τεκμηρίωση",
+      "releaseNotes": "Σημειώσεις έκδοσης"
+    },
+    "publishedBy": "Εκδίδεται από",
+    "legal": {
+      "trademark": "Το Restorm® είναι σήμα κατατεθέν στο INPI.",
+      "copyright": "© 2026 Monsieur Dev. Με επιφύλαξη παντός δικαιώματος."
+    },
+    "close": "Κλείσιμο"
+  },
   "statusbar": {
     "requestHistory": "Ιστορικό αιτημάτων",
     "envSelector": {

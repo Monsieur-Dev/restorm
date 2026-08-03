@@ -52,6 +52,21 @@
     "draftsRestoredBody_many": "Przywrócono {{count}} brudnopisów z poprzedniej sesji.",
     "draftsRestoredBody_other": "Przywrócono {{count}} brudnopisu z poprzedniej sesji."
   },
+  "about": {
+    "version": "Wersja {{version}}",
+    "tagline": "Środowisko testowania API — klient i serwer.",
+    "links": {
+      "website": "Witryna",
+      "documentation": "Dokumentacja",
+      "releaseNotes": "Informacje o wydaniu"
+    },
+    "publishedBy": "Wydawca",
+    "legal": {
+      "trademark": "Restorm® jest znakiem towarowym zarejestrowanym w INPI.",
+      "copyright": "© 2026 Monsieur Dev. Wszelkie prawa zastrzeżone."
+    },
+    "close": "Zamknij"
+  },
   "statusbar": {
     "requestHistory": "Historia żądań",
     "envSelector": {

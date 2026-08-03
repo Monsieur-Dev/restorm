@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "已恢复未保存的工作",
     "draftsRestoredBody_other": "已从上一次会话恢复 {{count}} 个草稿。"
   },
+  "about": {
+    "version": "版本 {{version}}",
+    "tagline": "API 测试环境 — 客户端与服务器。",
+    "links": {
+      "website": "网站",
+      "documentation": "文档",
+      "releaseNotes": "版本说明"
+    },
+    "publishedBy": "发行方",
+    "legal": {
+      "trademark": "Restorm® 是在 INPI 注册的商标。",
+      "copyright": "© 2026 Monsieur Dev. 保留所有权利。"
+    },
+    "close": "关闭"
+  },
   "statusbar": {
     "requestHistory": "请求历史",
     "envSelector": {

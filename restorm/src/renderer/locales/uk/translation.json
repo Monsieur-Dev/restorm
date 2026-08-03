@@ -52,6 +52,21 @@
     "draftsRestoredBody_many": "Відновлено {{count}} чернеток з попередньої сесії.",
     "draftsRestoredBody_other": "Відновлено {{count}} чернетки з попередньої сесії."
   },
+  "about": {
+    "version": "Версія {{version}}",
+    "tagline": "Середовище тестування API — клієнт і сервер.",
+    "links": {
+      "website": "Вебсайт",
+      "documentation": "Документація",
+      "releaseNotes": "Нотатки до випуску"
+    },
+    "publishedBy": "Видавець",
+    "legal": {
+      "trademark": "Restorm® — торговельна марка, зареєстрована в INPI.",
+      "copyright": "© 2026 Monsieur Dev. Усі права захищено."
+    },
+    "close": "Закрити"
+  },
   "statusbar": {
     "requestHistory": "Історія запитів",
     "envSelector": {

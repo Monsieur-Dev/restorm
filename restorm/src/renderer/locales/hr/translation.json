@@ -51,6 +51,21 @@
     "draftsRestoredBody_few": "{{count}} skice su vraćene iz prethodne sesije.",
     "draftsRestoredBody_other": "{{count}} skica je vraćeno iz prethodne sesije."
   },
+  "about": {
+    "version": "Verzija {{version}}",
+    "tagline": "Okruženje za testiranje API-ja — klijent i poslužitelj.",
+    "links": {
+      "website": "Web-mjesto",
+      "documentation": "Dokumentacija",
+      "releaseNotes": "Bilješke o izdanju"
+    },
+    "publishedBy": "Izdavač",
+    "legal": {
+      "trademark": "Restorm® je žig registriran pri INPI-ju.",
+      "copyright": "© 2026 Monsieur Dev. Sva prava pridržana."
+    },
+    "close": "Zatvori"
+  },
   "statusbar": {
     "requestHistory": "Povijest zahtjeva",
     "envSelector": {

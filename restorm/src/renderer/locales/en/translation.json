@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} draft was restored from your previous session.",
     "draftsRestoredBody_other": "{{count}} drafts were restored from your previous session."
   },
+  "about": {
+    "version": "Version {{version}}",
+    "tagline": "The API testing environment — client and server.",
+    "links": {
+      "website": "Website",
+      "documentation": "Documentation",
+      "releaseNotes": "Release notes"
+    },
+    "publishedBy": "Published by",
+    "legal": {
+      "trademark": "Restorm® is a trademark registered with the INPI.",
+      "copyright": "© 2026 Monsieur Dev. All rights reserved."
+    },
+    "close": "Close"
+  },
   "statusbar": {
     "requestHistory": "Requests history",
     "envSelector": {

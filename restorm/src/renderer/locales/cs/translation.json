@@ -52,6 +52,21 @@
     "draftsRestoredBody_many": "{{count}} konceptu bylo obnoveno z předchozí relace.",
     "draftsRestoredBody_other": "{{count}} konceptů bylo obnoveno z předchozí relace."
   },
+  "about": {
+    "version": "Verze {{version}}",
+    "tagline": "Prostředí pro testování API — klient i server.",
+    "links": {
+      "website": "Web",
+      "documentation": "Dokumentace",
+      "releaseNotes": "Poznámky k vydání"
+    },
+    "publishedBy": "Vydavatel",
+    "legal": {
+      "trademark": "Restorm® je ochranná známka zapsaná u INPI.",
+      "copyright": "© 2026 Monsieur Dev. Všechna práva vyhrazena."
+    },
+    "close": "Zavřít"
+  },
   "statusbar": {
     "requestHistory": "Historie požadavků",
     "envSelector": {

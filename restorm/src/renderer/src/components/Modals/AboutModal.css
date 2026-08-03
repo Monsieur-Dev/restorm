@@ -1,0 +1,135 @@
+/* About dialog — two columns (mark | identity), a rule, the publisher block,
+ * the legal mentions, and a footer holding the Close button.
+ *
+ * The negative margin cancels the shared modal body's 8px padding so the
+ * footer's separator runs edge-to-edge like the header's, and this dialog
+ * owns its own (larger) content padding. */
+.about-modal {
+	display: flex;
+	flex-direction: column;
+	margin: -8px;
+	min-width: 0;
+}
+
+.about-modal__main {
+	display: grid;
+	grid-template-columns: 88px 1fr;
+	gap: 20px;
+	align-items: start;
+	padding: 24px 26px 18px;
+}
+
+.about-modal__mark {
+	width: 88px;
+	height: 88px;
+}
+
+.about-modal__identity {
+	min-width: 0;
+}
+
+.about-modal__name {
+	font-size: 21px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--foreground);
+}
+
+.about-modal__registered {
+	margin-left: 1px;
+	font-size: 10px;
+	font-weight: 600;
+	vertical-align: super;
+	color: var(--descriptionForeground);
+}
+
+.about-modal__version {
+	margin-top: 4px;
+	font-size: 12.5px;
+	font-variant-numeric: tabular-nums;
+	color: var(--descriptionForeground);
+}
+
+.about-modal__tagline {
+	margin-top: 12px;
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: var(--descriptionForeground);
+}
+
+.about-modal__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 14px;
+	margin-top: 13px;
+	font-size: 12.5px;
+}
+
+.about-modal__links a {
+	color: var(--textLink-foreground);
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.about-modal__links a:hover {
+	text-decoration: underline;
+}
+
+.about-modal__rule {
+	grid-column: 1 / -1;
+	height: 1px;
+	margin: 18px 0 14px;
+	background: var(--panel-border);
+}
+
+.about-modal__publisher {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	gap: 11px;
+}
+
+/* Light plate behind the bicolour publisher mark — see the component. */
+.about-modal__publisher-chip {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 8px;
+	background: #f2f4f8;
+}
+
+.about-modal__publisher-chip img {
+	width: 22px;
+	height: 22px;
+}
+
+.about-modal__publisher-label {
+	font-size: 10.5px;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	color: color-mix(in srgb, var(--descriptionForeground) 80%, transparent);
+}
+
+.about-modal__publisher-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--foreground);
+}
+
+.about-modal__legal {
+	grid-column: 1 / -1;
+	margin-top: 14px;
+	font-size: 11px;
+	line-height: 1.6;
+	color: color-mix(in srgb, var(--descriptionForeground) 80%, transparent);
+}
+
+.about-modal__footer {
+	display: flex;
+	justify-content: flex-end;
+	padding: 12px 16px;
+	border-top: 1px solid var(--panel-border);
+	background-color: var(--titleBar-activeBackground);
+}

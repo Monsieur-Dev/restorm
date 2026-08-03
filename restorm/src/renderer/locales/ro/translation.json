@@ -51,6 +51,21 @@
     "draftsRestoredBody_few": "{{count}} ciorne au fost restaurate din sesiunea anterioară.",
     "draftsRestoredBody_other": "{{count}} de ciorne au fost restaurate din sesiunea anterioară."
   },
+  "about": {
+    "version": "Versiunea {{version}}",
+    "tagline": "Mediul de testare pentru API — client și server.",
+    "links": {
+      "website": "Site web",
+      "documentation": "Documentație",
+      "releaseNotes": "Note de lansare"
+    },
+    "publishedBy": "Editat de",
+    "legal": {
+      "trademark": "Restorm® este o marcă înregistrată la INPI.",
+      "copyright": "© 2026 Monsieur Dev. Toate drepturile rezervate."
+    },
+    "close": "Închide"
+  },
   "statusbar": {
     "requestHistory": "Istoricul cererilor",
     "envSelector": {

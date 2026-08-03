@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} brouillon restauré depuis la session précédente.",
     "draftsRestoredBody_other": "{{count}} brouillons restaurés depuis la session précédente."
   },
+  "about": {
+    "version": "Version {{version}}",
+    "tagline": "L'environnement de test d'API — client et serveur.",
+    "links": {
+      "website": "Site web",
+      "documentation": "Documentation",
+      "releaseNotes": "Notes de version"
+    },
+    "publishedBy": "Édité par",
+    "legal": {
+      "trademark": "Restorm® est une marque déposée auprès de l'INPI.",
+      "copyright": "© 2026 Monsieur Dev. Tous droits réservés."
+    },
+    "close": "Fermer"
+  },
   "statusbar": {
     "requestHistory": "Historique des requêtes",
     "envSelector": {

@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} bozza è stata ripristinata dalla sessione precedente.",
     "draftsRestoredBody_other": "{{count}} bozze sono state ripristinate dalla sessione precedente."
   },
+  "about": {
+    "version": "Versione {{version}}",
+    "tagline": "L'ambiente di test per API — client e server.",
+    "links": {
+      "website": "Sito web",
+      "documentation": "Documentazione",
+      "releaseNotes": "Note di rilascio"
+    },
+    "publishedBy": "Edito da",
+    "legal": {
+      "trademark": "Restorm® è un marchio registrato presso l'INPI.",
+      "copyright": "© 2026 Monsieur Dev. Tutti i diritti riservati."
+    },
+    "close": "Chiudi"
+  },
   "statusbar": {
     "requestHistory": "Cronologia richieste",
     "envSelector": {

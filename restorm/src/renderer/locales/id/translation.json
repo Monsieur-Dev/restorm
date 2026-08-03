@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "Pekerjaan yang belum disimpan telah dipulihkan",
     "draftsRestoredBody_other": "{{count}} draf dipulihkan dari sesi sebelumnya."
   },
+  "about": {
+    "version": "Versi {{version}}",
+    "tagline": "Lingkungan pengujian API — klien dan server.",
+    "links": {
+      "website": "Situs web",
+      "documentation": "Dokumentasi",
+      "releaseNotes": "Catatan rilis"
+    },
+    "publishedBy": "Diterbitkan oleh",
+    "legal": {
+      "trademark": "Restorm® adalah merek dagang terdaftar di INPI.",
+      "copyright": "© 2026 Monsieur Dev. Seluruh hak cipta dilindungi."
+    },
+    "close": "Tutup"
+  },
   "statusbar": {
     "requestHistory": "Riwayat permintaan",
     "envSelector": {

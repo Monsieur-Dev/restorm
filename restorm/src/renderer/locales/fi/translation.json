@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} luonnos palautettiin edellisestä istunnosta.",
     "draftsRestoredBody_other": "{{count}} luonnosta palautettiin edellisestä istunnosta."
   },
+  "about": {
+    "version": "Versio {{version}}",
+    "tagline": "API-testausympäristö — asiakas ja palvelin.",
+    "links": {
+      "website": "Verkkosivusto",
+      "documentation": "Dokumentaatio",
+      "releaseNotes": "Julkaisutiedot"
+    },
+    "publishedBy": "Julkaisija",
+    "legal": {
+      "trademark": "Restorm® on INPI:ssä rekisteröity tavaramerkki.",
+      "copyright": "© 2026 Monsieur Dev. Kaikki oikeudet pidätetään."
+    },
+    "close": "Sulje"
+  },
   "statusbar": {
     "requestHistory": "Pyyntöhistoria",
     "envSelector": {

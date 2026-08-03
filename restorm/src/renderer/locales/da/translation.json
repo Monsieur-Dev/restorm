@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} kladde blev gendannet fra din forrige session.",
     "draftsRestoredBody_other": "{{count}} kladder blev gendannet fra din forrige session."
   },
+  "about": {
+    "version": "Version {{version}}",
+    "tagline": "API-testmiljøet — klient og server.",
+    "links": {
+      "website": "Websted",
+      "documentation": "Dokumentation",
+      "releaseNotes": "Udgivelsesnoter"
+    },
+    "publishedBy": "Udgivet af",
+    "legal": {
+      "trademark": "Restorm® er et varemærke registreret hos INPI.",
+      "copyright": "© 2026 Monsieur Dev. Alle rettigheder forbeholdes."
+    },
+    "close": "Luk"
+  },
   "statusbar": {
     "requestHistory": "Anmodningshistorik",
     "envSelector": {

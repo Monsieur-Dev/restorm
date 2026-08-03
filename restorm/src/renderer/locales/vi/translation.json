@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "Đã khôi phục công việc chưa lưu",
     "draftsRestoredBody_other": "{{count}} bản nháp đã được khôi phục từ phiên trước của bạn."
   },
+  "about": {
+    "version": "Phiên bản {{version}}",
+    "tagline": "Môi trường kiểm thử API — máy khách và máy chủ.",
+    "links": {
+      "website": "Trang web",
+      "documentation": "Tài liệu",
+      "releaseNotes": "Ghi chú phát hành"
+    },
+    "publishedBy": "Phát hành bởi",
+    "legal": {
+      "trademark": "Restorm® là nhãn hiệu đã đăng ký tại INPI.",
+      "copyright": "© 2026 Monsieur Dev. Bảo lưu mọi quyền."
+    },
+    "close": "Đóng"
+  },
   "statusbar": {
     "requestHistory": "Lịch sử yêu cầu",
     "envSelector": {

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Titlebar,
@@ -17,6 +17,7 @@ import { renderSearchTooltipContent } from './renderSearchTooltipContent'
 import { RELEASE_NOTES_OPEN, type ReleaseNotesOpenPayload } from '../../releaseNotesEvents'
 import { DASHBOARD_URL } from '../../../../../shared/config/site'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
+import { AboutModal } from '../../Modals/AboutModal'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
@@ -193,7 +194,13 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
     void window.api.toggleFullscreen()
   }, [])
 
+  // The About dialog is owned here: it is opened from this menu alone and has
+  // no state to share with the rest of the app.
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const handleCloseAbout = useCallback(() => { setAboutOpen(false) }, [])
+
   return (
+    <>
     <Titlebar
       data-testid="main-titlebar"
       title={fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : t('app.title')}
@@ -409,7 +416,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             />
           </MenuBarItem>
           <MenuBarItem title={t('menuBar.help')} data-testid="titlebar-menubar-item-help">
-            <MenuItem data-testid="titlebar-menu-item-about" title={t('menuBar.about')} disabled />
+            <MenuItem
+              data-testid="titlebar-menu-item-about"
+              title={t('menuBar.about')}
+              onClick={() => { setAboutOpen(true) }}
+            />
             <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} disabled />
             <MenuItem data-testid="titlebar-menu-item-keyboard-shortcuts" title={t('menuBar.keyboardShortcuts')} disabled />
             <MenuItem
@@ -448,6 +459,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
         </>
       }
     />
+    <AboutModal isOpen={aboutOpen} onClose={handleCloseAbout} />
+    </>
   )
 }
 

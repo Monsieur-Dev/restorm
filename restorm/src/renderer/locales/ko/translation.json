@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "저장하지 않은 작업이 복원되었습니다",
     "draftsRestoredBody_other": "이전 세션에서 초안 {{count}}개를 복원했습니다."
   },
+  "about": {
+    "version": "버전 {{version}}",
+    "tagline": "API 테스트 환경 — 클라이언트와 서버.",
+    "links": {
+      "website": "웹사이트",
+      "documentation": "문서",
+      "releaseNotes": "릴리스 노트"
+    },
+    "publishedBy": "발행처",
+    "legal": {
+      "trademark": "Restorm®은 INPI에 등록된 상표입니다.",
+      "copyright": "© 2026 Monsieur Dev. 모든 권리 보유."
+    },
+    "close": "닫기"
+  },
   "statusbar": {
     "requestHistory": "요청 기록",
     "envSelector": {
