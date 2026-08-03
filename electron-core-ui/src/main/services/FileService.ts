@@ -745,8 +745,16 @@ export class FileService {
       // see the content before we touch the file, so that refusing a
       // document leaves it byte-for-byte as it was. Stamping the UUID
       // before this point would mutate a file the app then declines to
-      // open — an unrequested write to someone's data, and on a
-      // read-only file an outright error where a clean refusal belongs.
+      // open — an unrequested write to data the user is only reading.
+      //
+      // A write that fails is not the loud problem it sounds like, which
+      // is why this went unnoticed: the stamp is wrapped in a try/catch,
+      // so a read-only file merely logged a warning here and opened
+      // anyway. The damage is on the paths where the write SUCCEEDS.
+      // (Host apps should note the asymmetry: a host that stamps outside
+      // a catch — restorm's folder-mode loader did — turns the same
+      // read-only directory into a whole open that fails and returns
+      // nothing, with no message at all.)
       let data = readFileSync(filePath, 'utf-8')
       let content = this.deserialize(data, format)
 

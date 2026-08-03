@@ -98,11 +98,21 @@ caller can tell a refusal from a read error.
 **Ordering invariant: read → parse → validate → stamp.** The UUID stamp
 (`ensureFileUuid`) runs *after* the gate, never before. Stamping first
 would mutate a file the app then declines to open — an unrequested write to
-the user's data, and an outright error on a read-only file where a clean
-refusal belongs. The same ordering applies to any future step that writes
-during open. Only the first-ever open of a UUID-less file re-reads the file
-(the stamp changed the bytes, and `diskDigest` must match what is on disk
-or the external-change guard misfires).
+data the user is only reading. The same ordering applies to any future step
+that writes during open. Only the first-ever open of a UUID-less file
+re-reads the file (the stamp changed the bytes, and `diskDigest` must match
+what is on disk or the external-change guard misfires).
+
+A note on how this stayed hidden, because it shapes where to look for the
+same bug elsewhere. The stamp inside `open()` is wrapped in a try/catch, so
+a **read-only** file never announced itself — the write failed, a warning
+was logged, and the document opened normally. The harm was confined to the
+files where the write *succeeded*. Host apps that stamp **outside** a catch
+get the opposite and louder failure: restorm's folder-mode loader called
+`ensureFolderUuid` inside a `try` whose `catch` returns `null`, so a
+read-only project directory made the entire open fail silently — no
+document, no message. Both shapes are worth checking for whenever a read
+path writes.
 
 The library deliberately renders no message of its own. It broadcasts
 `file:open-rejected` with `{ path, code, detail }` and leaves the wording to
