@@ -44,6 +44,17 @@ function applyRunContext(target: TransformedContext, runContext: TransformedCont
  * That made resolution order-dependent, which is the worst residual to leave:
  * it works until someone reorders two rows, and then breaks with nothing
  * pointing at why.
+ *
+ * THE RULE, for whoever adds a fourth kind of row: **path-param rows POPULATE
+ * the resolution context; query and header rows CONSUME it.** The scenario
+ * run's layer overrides context CONTRIBUTORS, never context CONSUMERS.
+ *
+ * Why: a path-param row is a BINDING — it defines `{{petId}}` for the URL
+ * template — so a run variable of the same name competes for the same token and
+ * must win. A query or header row named `petId` holding a literal is an OUTPUT
+ * the request declares; nothing reads it, so there is nothing to arbitrate and
+ * it is left alone. Replacing one would be the per-slot request-override
+ * feature, which is a separate capability.
  */
 function noteRowValue(
   target: TransformedContext,
