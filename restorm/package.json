@@ -171,6 +171,17 @@
   "build": {
     "appId": "com.monsieurdev.restorm",
     "productName": "restorm",
+    "fileAssociations": [
+      {
+        "ext": "restorm",
+        "name": "Restorm project",
+        "description": "Restorm API project",
+        "mimeType": "application/x-restorm",
+        "role": "Editor",
+        "rank": "Owner",
+        "icon": "assets/icons/icon"
+      }
+    ],
     "afterPack": "scripts/after-pack.cjs",
     "directories": {
       "output": "dist-electron"
@@ -235,7 +246,8 @@
           "Comment": "Local-first API testing environment — client and server",
           "Categories": "Development;Network;WebDevelopment;",
           "Keywords": "REST;API;HTTP;GraphQL;gRPC;WebSocket;",
-          "StartupWMClass": "restorm"
+          "StartupWMClass": "restorm",
+          "MimeType": "application/x-restorm;"
         }
       }
     },
