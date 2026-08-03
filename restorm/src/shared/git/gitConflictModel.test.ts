@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { identifyConflictingEntities } from './gitConflictModel'
+import { conflictingMoves, identifyConflictingEntities } from './gitConflictModel'
 // The renderer's rehydrate callback — the one the conflict UI really
 // passes (`useConflictResolution.ts`), and the only one that backfills ids.
 import { processAfterDeserialization } from '../../renderer/src/utils/serialization'
+import type { FolderItem } from '../types/folderTypes'
 
 const OURS_YAML = [
   'collections:',
@@ -412,5 +413,43 @@ describe('identifyConflictingEntities on a project whose ids are not persisted y
     }, processAfterDeserialization)
 
     expect(conflicts).toEqual([])
+  })
+})
+
+/**
+ * `conflictingMoves` compares three independently-parsed trees by a
+ * `Map<id, parentId>`. An entity with no `id` keys that map under the JS
+ * value `undefined`, so all three sides collapse their id-less entities
+ * into one shared slot — and any disagreement between whichever entity
+ * landed there on each side is reported as a contradictory MOVE, under the
+ * id `undefined`. The modal then outlines an item that does not exist.
+ */
+describe('conflictingMoves with an id-less entity in the tree', () => {
+  const idless = (name: string): FolderItem =>
+    ({ name, type: 'scenario', tags: [], params: [], nodes: [], edges: [] }) as unknown as FolderItem
+  const request = (id: string, name: string): FolderItem =>
+    ({ id, name, type: 'http', tags: [] }) as unknown as FolderItem
+  const folder = (id: string, name: string, items: FolderItem[]): FolderItem =>
+    ({ id, name, tags: [], configuration: {}, items }) as unknown as FolderItem
+
+  it('reports no move at all for an entity that has no id to be moved BY', () => {
+    // The same id-less scenario sits in a different folder on each of the
+    // three sides — the exact shape that reads as a contradictory move once
+    // all three collapse onto the `undefined` key.
+    const base = [folder('f1', 'A', [idless('Smoke')]), folder('f2', 'B', [])]
+    const ours = [folder('f1', 'A', []), folder('f2', 'B', [idless('Smoke')])]
+    const theirs = [folder('f1', 'A', []), folder('f2', 'B', []), idless('Smoke')]
+
+    expect(conflictingMoves(base, ours, theirs)).toEqual([])
+  })
+
+  it('still reports a real contradictory move on an id-bearing entity beside it', () => {
+    // Guard against a vacuous pass: `r1` genuinely moved in two different
+    // directions and must still be flagged, id-less neighbour or not.
+    const base = [folder('f1', 'A', [request('r1', 'Find pet'), idless('Smoke')]), folder('f2', 'B', [])]
+    const ours = [folder('f1', 'A', [idless('Smoke')]), folder('f2', 'B', [request('r1', 'Find pet')])]
+    const theirs = [folder('f1', 'A', []), folder('f2', 'B', [idless('Smoke')]), request('r1', 'Find pet')]
+
+    expect(conflictingMoves(base, ours, theirs)).toEqual(['r1'])
   })
 })

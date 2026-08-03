@@ -110,6 +110,12 @@ export function deriveStableId(pathSegments: readonly string[]): RuntimeId {
  * - **KeyValue** — `key` + `value` → `kv:<key>`
  * - **Environment** — `name` + `variables[]` → `env:<name>`
  * - **Request** — `name` + a known `type` discriminant → `req:<type>:<name>`
+ * - **Scenario** — `type: 'scenario'` → `scenario:<name>`. A top-level tree
+ *   entity like a folder or a request, paired by id by both git engines,
+ *   but matched by none of the other shapes: it has no `variables`, no
+ *   `configuration`, and its `type` is not a protocol. It also doubles as
+ *   a container, so the segment is what keeps two same-named requests in
+ *   two different scenarios from spelling the same path.
  * - **Folder / environment-folder** — `name` + `items[]` + `configuration`
  *   → `folder:<name>`
  * - **EnumDefinition** — `values[]` + `matchingRules[]`, the only persisted
@@ -143,6 +149,13 @@ export function idPathSegment(record: Record<string, unknown>): string | null {
     if ((REQUEST_TYPES as readonly string[]).includes(record['type'] as string)) {
       return `req:${record['type'] as string}:${asText(record['name'])}`
     }
+  }
+
+  // Scenario: the `type` discriminant, checked after the request branch
+  // (which is also `type`-driven) and before the folder branch (a scenario
+  // carries `items` too, though never `configuration`).
+  if ('name' in record && record['type'] === 'scenario') {
+    return `scenario:${asText(record['name'])}`
   }
 
   if ('name' in record && 'items' in record && 'configuration' in record && Array.isArray(record['items'])) {

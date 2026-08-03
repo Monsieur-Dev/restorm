@@ -330,6 +330,86 @@ describe('generateIds — EnumDefinition', () => {
   })
 })
 
+/**
+ * A `Scenario` is paired by id by both git engines exactly like a folder or
+ * a request, but no classification branch recognised it — so a document
+ * whose scenario carries no persisted id (written by hand, produced by a
+ * script, or loaded through a path that never reaches the renderer) fed an
+ * `undefined` key straight into the diff and conflict maps.
+ */
+describe('generateIds — Scenario', () => {
+  const treeWith = (scenario: Record<string, unknown>): unknown => ({
+    collections: [{ name: 'Root', configuration: {}, items: [scenario] }]
+  })
+  const scenarioOf = (loaded: unknown): Record<string, unknown> | undefined =>
+    (loaded as { collections: { items: Record<string, unknown>[] }[] }).collections[0]?.items[0]
+
+  it('backfills a missing id deterministically, and never touches an id the file already carries', () => {
+    const withoutId = treeWith({ type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] })
+    const first = scenarioOf(processAfterDeserialization(structuredClone(withoutId)))
+    const second = scenarioOf(processAfterDeserialization(structuredClone(withoutId)))
+
+    expect(typeof first?.['id']).toBe('string')
+    expect((first?.['id'] as string).length).toBeGreaterThan(0)
+    expect(second?.['id']).toBe(first?.['id'])
+
+    const withId = treeWith({ id: 'persisted-scenario', type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] })
+    expect(scenarioOf(processAfterDeserialization(structuredClone(withId)))?.['id']).toBe('persisted-scenario')
+  })
+
+  it('gives two same-named sibling scenarios distinct ids', () => {
+    const tree = {
+      collections: [{ name: 'Root', configuration: {}, items: [
+        { type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] },
+        { type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] }
+      ] }]
+    }
+    const loaded = processAfterDeserialization(structuredClone(tree)) as {
+      collections: { items: { id?: string }[] }[]
+    }
+    const [a, b] = loaded.collections[0]?.items ?? []
+    expect(typeof a?.id).toBe('string')
+    expect(b?.id).not.toBe(a?.id)
+  })
+
+  it("tells two same-named requests apart by their OWNING scenario, not by array position", () => {
+    // The consequence of a scenario contributing an identity segment: a
+    // request nested in a scenario now derives its id from a path naming
+    // that scenario. Without it both requests below spell the same path and
+    // are separated only by the occurrence suffix — order-dependent, which
+    // is the one thing the derivation must never rely on.
+    const tree = {
+      collections: [{ name: 'Root', configuration: {}, items: [
+        { type: 'scenario', name: 'First', tags: [], params: [], nodes: [], edges: [],
+          items: [{ name: 'Ping', type: 'http' }] },
+        { type: 'scenario', name: 'Second', tags: [], params: [], nodes: [], edges: [],
+          items: [{ name: 'Ping', type: 'http' }] }
+      ] }]
+    }
+    const loaded = processAfterDeserialization(structuredClone(tree)) as {
+      collections: { items: { items?: { id?: string }[] }[] }[]
+    }
+    const scenarios = loaded.collections[0]?.items ?? []
+    const firstPing = scenarios[0]?.items?.[0]?.id
+    const secondPing = scenarios[1]?.items?.[0]?.id
+
+    expect(typeof firstPing).toBe('string')
+    expect(secondPing).not.toBe(firstPing)
+
+    // Swapping the two scenarios must leave each request's id alone — the
+    // proof that neither depends on its position.
+    const swapped = structuredClone(tree)
+    const items = swapped.collections[0]?.items
+    if (items) items.reverse()
+    const reloaded = processAfterDeserialization(swapped) as {
+      collections: { items: { name: string, items?: { id?: string }[] }[] }[]
+    }
+    const byName = new Map((reloaded.collections[0]?.items ?? []).map((s) => [s.name, s.items?.[0]?.id]))
+    expect(byName.get('First')).toBe(firstPing)
+    expect(byName.get('Second')).toBe(secondPing)
+  })
+})
+
 describe('generateIds — determinism on the committed reference samples', () => {
   const SAMPLES_DIR = join(__dirname, '../../../../tests/e2e/samples')
   const SAMPLES = readdirSync(SAMPLES_DIR, { withFileTypes: true })

@@ -1,7 +1,7 @@
 import type { GitConflictVersions } from 'electron-core-ui'
 import type { FolderItem } from '../types/folderTypes'
 import type { ApiDocumentation } from '../types/apiDocumentation'
-import { flattenEntities, ownFieldsSnapshot, parseProjectYaml, type GitEntityKind } from './gitCommitDiff'
+import { entityId, flattenEntities, ownFieldsSnapshot, parseProjectYaml, type GitEntityKind } from './gitCommitDiff'
 
 export interface ConflictEntity {
   id: string
@@ -42,14 +42,23 @@ export const TREE_STRUCTURE_CONFLICT_ID = '__tree-structure__'
 
 /** Where each entity sits, as a `parentId` per id — the shape the tree
  * comparison needs. `flattenEntities` gives ancestor NAMES, which change
- * on a rename and would report a move that never happened. */
+ * on a rename and would report a move that never happened.
+ *
+ * An entity with no id is skipped, for the reason spelled out on
+ * `flattenEntities` (`gitCommitDiff.ts`): `undefined` keys the map just
+ * fine, so all three sides collapse their id-less entities into one shared
+ * slot, and whatever disagreement lands there reads as a contradictory move
+ * — surfaced under the id `undefined`, which the modal then tries to
+ * outline in trees that contain no such item. Children keep walking with a
+ * `null` parent so their own moves are still detected. */
 function parentIdByChild(items: FolderItem[]): Map<string, string | null> {
   const out = new Map<string, string | null>()
   const walk = (nodes: FolderItem[], parentId: string | null): void => {
     for (const item of nodes) {
-      out.set(item.id, parentId)
+      const id = entityId(item)
+      if (id) out.set(id, parentId)
       const children = (item as FolderItem & { items?: FolderItem[] }).items
-      if (children && children.length > 0) walk(children, item.id)
+      if (children && children.length > 0) walk(children, id ?? null)
     }
   }
   walk(items, null)

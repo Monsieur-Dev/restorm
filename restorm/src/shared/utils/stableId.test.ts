@@ -90,6 +90,20 @@ describe('idPathSegment', () => {
     expect(idPathSegment({ name: 'API', items: [], configuration: {}, folderType: 'environment' })).toBe('folder:API')
   })
 
+  it('classifies a scenario by its name', () => {
+    // A scenario is a top-level tree entity like a folder or a request, and
+    // both git engines pair it by id — but no other branch recognises it: it
+    // has no `variables`, no `configuration`, and its `type` is not a
+    // protocol. Left unclassified it got no backfill AND contributed no path
+    // segment, so its children were told apart by array position.
+    expect(idPathSegment({ type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] }))
+      .toBe('scenario:Smoke')
+    // A scenario doubles as a container: carrying `items` must not divert it
+    // into the folder branch (it has no `configuration`, but stating it).
+    expect(idPathSegment({ type: 'scenario', name: 'Nested', items: [], nodes: [], edges: [] }))
+      .toBe('scenario:Nested')
+  })
+
   it('classifies a request-keyed record by the request it points at, plus its own name', () => {
     expect(idPathSegment({ requestId: 'r1' })).toBe('ref:r1')
     // Two saved quick-configs of the same request stay distinguishable by

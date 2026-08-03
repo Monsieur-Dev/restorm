@@ -12,6 +12,19 @@ export interface GitEntityChange {
   action: GitChangeAction
 }
 
+/**
+ * An entity's id as the RUNTIME can actually deliver it. `FolderItem`
+ * declares `id` as always present, and for anything the app itself builds
+ * that holds — but these walks also run on the raw output of a YAML parse
+ * (a HEAD blob, a merge stage), where a hand-written or script-generated
+ * document simply may not carry one. The optional return type is what lets
+ * the id-keyed maps below refuse such an entity instead of filing it under
+ * the JS value `undefined`.
+ */
+export function entityId(item: FolderItem): string | undefined {
+  return (item as { id?: string }).id
+}
+
 export function kindOf(item: FolderItem): GitEntityKind {
   if (isEnvironmentFolder(item)) return 'environmentFolder'
   if (isFolder(item)) return 'folder'
@@ -26,14 +39,28 @@ export function kindOf(item: FolderItem): GitEntityKind {
  * `kind`/`name`/an own-fields snapshot for comparison) and the conflict
  * model (`gitConflictModel.ts`, which needs the actual `FolderItem` to
  * hand to an entity panel).
+ *
+ * An entity carrying NO id is left OUT of the map. Not defensive noise:
+ * `undefined` is a perfectly good `Map` key, so without the guard every
+ * id-less entity in a tree lands in the SAME slot and the last one wins.
+ * The two sides of a comparison then hold different entities under that
+ * one phantom key and get compared against each other — a difference
+ * between two unrelated entities, reported as a change to whichever landed
+ * there last. An entity with no id has nothing stable to pair on, so it
+ * takes no part; there is no honest fallback, because an id invented here
+ * would differ between two independent parses of the same bytes and break
+ * the pairing in a new way. Its CHILDREN still walk — they carry their own
+ * ids, and dropping them would turn one malformed parent into silently
+ * unreported work loss across a whole subtree.
  */
 export function flattenEntities(items: FolderItem[]): Map<string, { kind: GitEntityKind, name: string, item: FolderItem, path: string[] }> {
   const out = new Map<string, { kind: GitEntityKind, name: string, item: FolderItem, path: string[] }>()
   const walk = (nodes: FolderItem[], ancestors: string[]): void => {
     for (const item of nodes) {
+      const id = entityId(item)
       // `path` = the ANCESTOR names, root-first, self excluded — the
       // conflict modal's breadcrumb band is the consumer.
-      out.set(item.id, { kind: kindOf(item), name: item.name, item, path: ancestors })
+      if (id) out.set(id, { kind: kindOf(item), name: item.name, item, path: ancestors })
       const children = (item as FolderItem & { items?: FolderItem[] }).items
       if (children && children.length > 0) {
         walk(children, [...ancestors, item.name])
@@ -121,12 +148,18 @@ interface CollectedEntity {
   parentId: string | null
 }
 
+/** Same id-keyed map, same phantom-`undefined` hazard, same handling — see
+ * {@link flattenEntities} for why an id-less entity is skipped while its
+ * children keep walking. Their `parentId` becomes `null` rather than the
+ * parent's absent id: both sides of a comparison agree on it, so a move is
+ * never invented, and no side records a parent that is not in the map. */
 function collectEntities(items: FolderItem[], out: Map<string, CollectedEntity>, parentId: string | null = null): void {
   for (const item of items) {
     const children = (item as FolderItem & { items?: FolderItem[] }).items
-    out.set(item.id, { kind: kindOf(item), name: item.name, ownSnapshot: ownFieldsSnapshot(item), parentId })
+    const id = entityId(item)
+    if (id) out.set(id, { kind: kindOf(item), name: item.name, ownSnapshot: ownFieldsSnapshot(item), parentId })
     if (children && children.length > 0) {
-      collectEntities(children, out, item.id)
+      collectEntities(children, out, id ?? null)
     }
   }
 }
