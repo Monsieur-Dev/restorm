@@ -29,6 +29,7 @@ import { ImportFormatShowcase } from './ImportFormatShowcase'
 import { GrpcReflectionImportModal } from './GrpcReflectionImportModal'
 import { ImportSelectionTree } from './ImportSelectionTree'
 import { allLeafKeys } from './importSelectionHelpers'
+import { describeImportError, flattenImportError, type DisplayedImportError } from './importErrorDisplay'
 import { filterImportTreeBySelection } from '../../../../shared/utils/importNaturalKey'
 import type { ImportMeta } from '../../hooks/useImport'
 import './ImportModal.css'
@@ -162,7 +163,11 @@ export function ImportModal({
    */
   const [selection, setSelection] = useState<Set<string>>(() => new Set())
   const [searchFilter, setSearchFilter] = useState<string>('')
-  const [error, setError] = useState<string | null>(null)
+  // Failures are held as the pair the user reads: a translated sentence
+  // plus, when the failure came from outside the app (a parser, the
+  // filesystem, a server), the upstream text verbatim. See
+  // `importErrorDisplay.ts` for why the two never merge into one string.
+  const [error, setError] = useState<DisplayedImportError | null>(null)
   const [attachedAuth, setAttachedAuth] = useState<AuthenticationRequest | null>(null)
   // Resolved auth headers live in a ref rather than state — the only
   // consumer is the debounced preview closure, and we need the value
@@ -321,14 +326,18 @@ export function ImportModal({
             setPreviewChecksum(undefined)
             setPreviewFormat(undefined)
             setPreviewExtraHeaders(undefined)
-            setError(result?.error ?? t('import.error.unknown'))
+            setError(describeImportError(t, {
+              ...(result?.error !== undefined ? { raw: result.error } : {}),
+              ...(result?.errorCode !== undefined ? { code: result.errorCode } : {}),
+              ...(result?.errorParams !== undefined ? { params: result.errorParams } : {})
+            }))
           }
         } catch (err) {
           setPreviewItems([])
           setPreviewChecksum(undefined)
           setPreviewFormat(undefined)
           setPreviewExtraHeaders(undefined)
-          setError(err instanceof Error ? err.message : String(err))
+          setError(describeImportError(t, { raw: err instanceof Error ? err.message : String(err) }))
         } finally {
           setIsLoading(false)
         }
@@ -499,12 +508,22 @@ export function ImportModal({
           // error row, which keeps the message attached to the action
           // that produced it, and a toast that outlives the dialog if
           // the user dismisses it.
-          const message = err instanceof Error ? err.message : String(err)
-          logger.error('[ImportModal] apiUpdate.apply failed', { error: message })
-          setError(message)
+          const rawMessage = err instanceof Error ? err.message : String(err)
+          // `runApiUpdateApply` rejects with a coded message for every
+          // failure it can name, so the sentence below is localised
+          // rather than main-process English. Anything it can't name
+          // (a parser, the filesystem, the network) keeps its text as
+          // a separate diagnostic line — the user needs it intact to
+          // report the bug.
+          const displayed = describeImportError(t, { raw: rawMessage })
+          logger.error('[ImportModal] apiUpdate.apply failed', { error: rawMessage })
+          setError(displayed)
           toasterService.push('app', {
             title: t('import.applyFailedTitle', 'Refresh from source failed'),
-            body: message,
+            // The toast outlives the dialog, so it carries the detail
+            // too — on one line, since the toast body renders as plain
+            // inline text.
+            body: flattenImportError(displayed),
             durationMs: 10000,
             ariaLive: 'assertive'
           })
@@ -686,7 +705,7 @@ export function ImportModal({
           if (!token.cancelled) {
             setPreviewItems([])
             setPreviewChecksum(undefined)
-            setError(t('import.error.unknown'))
+            setError({ message: t('import.error.unknown'), detail: null })
             setLockedKeys(new Set())
           }
           return
@@ -717,14 +736,14 @@ export function ImportModal({
         } else {
           setPreviewItems([])
           setPreviewChecksum(undefined)
-          setError(result.error)
+          setError(describeImportError(t, { raw: result.error }))
           setLockedKeys(new Set())
         }
       } catch (err) {
         if (!token.cancelled) {
           setPreviewItems([])
           setPreviewChecksum(undefined)
-          setError(err instanceof Error ? err.message : String(err))
+          setError(describeImportError(t, { raw: err instanceof Error ? err.message : String(err) }))
           setLockedKeys(new Set())
         }
       } finally {
@@ -894,7 +913,23 @@ export function ImportModal({
           {error && (
             <div className="import-error" role="alert" data-testid="import-error-message">
               <i className="codicon codicon-error" aria-hidden="true" />
-              <span style={{ flex: 1 }}>{error}</span>
+              <div className="import-error__text">
+                <span>{error.message}</span>
+                {/* Upstream text sits in its own slot rather than
+                    inside the sentence above: it is whatever a parser,
+                    the filesystem or the server produced, in whatever
+                    language they produced it. Labelled so it reads as
+                    diagnostics rather than as part of our message, and
+                    left selectable so it can be pasted into a report. */}
+                {error.detail !== null && (
+                  <span className="import-error__detail" data-testid="import-error-detail">
+                    <span className="import-error__detail-label">
+                      {t('import.error.detailLabel', 'Technical detail')}
+                    </span>
+                    <code>{error.detail}</code>
+                  </span>
+                )}
+              </div>
             </div>
           )}
           {/* Auth-route attach + manual headers are always available —

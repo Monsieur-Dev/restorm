@@ -1044,7 +1044,19 @@
     "dropZone": "Pudotusalue",
     "editAuth": "Muokkaa todennusreittiä",
     "error": {
-      "unknown": "Tapahtui tuntematon virhe"
+      "unknown": "Tapahtui tuntematon virhe",
+      "unexpected": "Tuonti epäonnistui odottamattomasta syystä.",
+      "detailLabel": "Tekniset tiedot",
+      "folderNotFound": "Tätä kansiota ei enää ole projektissa, joten sitä ei voi päivittää.",
+      "noSourceUrl": "Tälle kansiolle ei ole tallennettu lähde-URL-osoitetta, joten päivitettävää ei ole.",
+      "noImportSource": "Tätä kansiota ei luotu tunnistetulla tuonnilla, joten sitä ei voi päivittää lähteestä.",
+      "formatNotRefreshable": "{{format}}-tuonti on kertaluonteinen: uudelleen noudettavaa määrittelyä ei ole, joten tätä kansiota ei voi päivittää.",
+      "httpStatus": "Lähde vastasi pyyntöön HTTP-koodilla {{status}}.",
+      "specParseFailed": "Osoitteesta {{url}} noudettua määrittelyä ei voitu jäsentää.",
+      "sourceImportFailed": "Määrittelyä ei voitu tuoda uudelleen sen lähteestä.",
+      "emptySpec": "Osoitteesta {{url}} noudettu määrittely ei sisällä yhtään {{format}}-operaatiota. Sen käyttöönotto tyhjentäisi tämän kansion, joten päivitys hylättiin.",
+      "formatNotDetected": "Tämän lähteen muotoa ei tunnistettu.",
+      "unsupportedFormat": "Mikään tuoja ei tue muotoa {{format}}."
     },
     "formats": {
       "swagger": {

@@ -32,7 +32,32 @@ vi.mock('../../src/main/utils/urlSecurity', () => ({
 }))
 
 import { isImportSource, runApiUpdateApply } from '../../src/main/services/apiUpdate/orchestrateApply'
+import { parseImportError, type ImportErrorCode, type ImportErrorParams } from '../../src/shared/config/importErrors'
 import type { EnvironmentFolder } from '../../src/shared/types/folderTypes'
+
+/**
+ * Assert that an apply rejected with a NAMED failure.
+ *
+ * Every rejection this function raises crosses the IPC boundary as a
+ * bare `Error.message` and is decoded by the renderer before anything
+ * reaches the user, so the contract worth pinning is the decoded
+ * `{ code, params }` — not the encoded string, which no user ever sees.
+ */
+async function expectImportError(
+  run: () => Promise<unknown>,
+  code: ImportErrorCode,
+  params: ImportErrorParams = {}
+): Promise<void> {
+  let message: string | null = null
+  try {
+    await run()
+  } catch (err) {
+    message = err instanceof Error ? err.message : String(err)
+  }
+  expect(message, 'expected the apply to reject').not.toBeNull()
+  if (message === null) return
+  expect(parseImportError(message)).toEqual({ code, params })
+}
 
 const OPENAPI_3_SPEC = JSON.stringify({
   openapi: '3.0.0',
@@ -154,7 +179,47 @@ describe('runApiUpdateApply source resolution', () => {
     findById.mockReturnValue(folder('definitely-not-a-format'))
     stubFetch(OPENAPI_3_SPEC)
 
-    await expect(runApiUpdateApply('folder-1')).rejects.toThrow(/has no importSource/)
+    await expectImportError(() => runApiUpdateApply('folder-1'), 'noImportSource')
+    expect(applyApiUpdate).not.toHaveBeenCalled()
+  })
+
+  it('re-raises the import pipeline\'s own failure code instead of a generic wrapper', async () => {
+    // A non-2xx on the apply's re-fetch is a failure `importFrom`
+    // already names. Collapsing it into `sourceImportFailed` would cost
+    // the user the specific sentence and push "HTTP 500" into the
+    // untranslated detail slot for no reason.
+    findById.mockReturnValue(folder('openapi'))
+    stubFetch(OPENAPI_3_SPEC)
+    importFrom.mockResolvedValue({
+      success: false,
+      items: [],
+      error: 'HTTP 500: Internal Server Error',
+      errorCode: 'httpStatus',
+      errorParams: { status: '500', detail: 'Internal Server Error' }
+    })
+
+    await expectImportError(() => runApiUpdateApply('folder-1'), 'httpStatus', {
+      status: '500',
+      detail: 'Internal Server Error'
+    })
+    expect(applyApiUpdate).not.toHaveBeenCalled()
+  })
+
+  it('wraps an unnamed import failure, keeping its text as diagnostic detail', async () => {
+    // Everything `importFrom` could not name — a provider's own parse
+    // throw, a filesystem error — reaches the user as a translated frame
+    // with the original text beside it, never inside the sentence.
+    findById.mockReturnValue(folder('openapi'))
+    stubFetch(OPENAPI_3_SPEC)
+    importFrom.mockResolvedValue({
+      success: false,
+      items: [],
+      error: 'Unexpected token < in JSON at position 0'
+    })
+
+    await expectImportError(() => runApiUpdateApply('folder-1'), 'sourceImportFailed', {
+      detail: 'Unexpected token < in JSON at position 0'
+    })
     expect(applyApiUpdate).not.toHaveBeenCalled()
   })
 
@@ -163,7 +228,10 @@ describe('runApiUpdateApply source resolution', () => {
     findById.mockReturnValue(folder('openapi'))
     stubFetch(JSON.stringify({ openapi: '3.0.0', info: { title: 'Empty', version: '1' }, paths: {} }))
 
-    await expect(runApiUpdateApply('folder-1')).rejects.toThrow(/refusing to apply an empty update/)
+    await expectImportError(() => runApiUpdateApply('folder-1'), 'emptySpec', {
+      url: 'https://api.example.com/spec',
+      format: 'openapi'
+    })
     expect(applyApiUpdate).not.toHaveBeenCalled()
   })
 })

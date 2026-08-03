@@ -18,6 +18,7 @@ import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
 import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
 import type { ApiUpdateConfig } from '../../../shared/types/baseTypes'
+import { formatImportError } from '../../../shared/config/importErrors'
 
 /**
  * Wire the on-demand API spec refresh flow into the IPC bus.
@@ -35,6 +36,14 @@ import type { ApiUpdateConfig } from '../../../shared/types/baseTypes'
  *   and return the body + a structural checksum. The renderer
  *   compares the checksum against the stored one to decide whether
  *   to open the Import modal in refresh mode.
+ *
+ * The `error` a failed `refresh-fetch` returns is displayed to the
+ * user by the Import modal, so every failure this handler can NAME is
+ * returned as a coded message (`shared/config/importErrors.ts`) that
+ * the renderer turns into a localised sentence. Anything thrown from
+ * further down — a DNS failure, an SSRF refusal, an auth route that
+ * won't resolve — has no code and travels as raw text, which the
+ * renderer shows as diagnostic detail under a translated frame.
  */
 export interface ApiUpdateIPCDeps {
   /** Mutate the persisted `apiUpdate` config for a folder. The main
@@ -114,12 +123,12 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
     > => {
       const target = collectionStore.findById(folderId)
       if (!target || !('folderType' in target)) {
-        return { ok: false, error: `Folder ${folderId} not found` }
+        return { ok: false, error: formatImportError('folderNotFound') }
       }
       const env = target as unknown as EnvironmentFolder
       const config = (env as unknown as { apiUpdate?: ApiUpdateConfig }).apiUpdate
       if (!config?.sourceUrl) {
-        return { ok: false, error: `Folder ${folderId} has no apiUpdate.sourceUrl` }
+        return { ok: false, error: formatImportError('noSourceUrl') }
       }
       try {
         const variables = defaultVariablesFor(env)
@@ -142,7 +151,13 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
         assertSafeFetchUrl(url, { allowPrivateHosts: true })
         const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
         if (!response.ok) {
-          return { ok: false, error: `HTTP ${String(response.status)}: ${response.statusText}` }
+          return {
+            ok: false,
+            error: formatImportError('httpStatus', {
+              status: String(response.status),
+              detail: response.statusText
+            })
+          }
         }
         const payload = await response.text()
         const checksum = `sha256:${createHash('sha256').update(payload).digest('hex')}`

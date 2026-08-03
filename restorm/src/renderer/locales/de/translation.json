@@ -1044,7 +1044,19 @@
     "dropZone": "Ablagezone",
     "editAuth": "Authentifizierungsroute bearbeiten",
     "error": {
-      "unknown": "Ein unbekannter Fehler ist aufgetreten"
+      "unknown": "Ein unbekannter Fehler ist aufgetreten",
+      "unexpected": "Der Import ist aus einem unerwarteten Grund fehlgeschlagen.",
+      "detailLabel": "Technisches Detail",
+      "folderNotFound": "Dieser Ordner existiert nicht mehr im Projekt und kann daher nicht aktualisiert werden.",
+      "noSourceUrl": "Für diesen Ordner ist keine Quell-URL hinterlegt, es gibt also nichts zu aktualisieren.",
+      "noImportSource": "Dieser Ordner stammt nicht aus einem erkannten Import und kann daher nicht aus einer Quelle aktualisiert werden.",
+      "formatNotRefreshable": "Ein {{format}}-Import ist einmalig: Es gibt keine Spezifikation, die erneut abgerufen werden könnte, daher lässt sich dieser Ordner nicht aktualisieren.",
+      "httpStatus": "Die Quelle hat die Anfrage mit HTTP {{status}} beantwortet.",
+      "specParseFailed": "Die von {{url}} abgerufene Spezifikation konnte nicht gelesen werden.",
+      "sourceImportFailed": "Die Spezifikation konnte nicht erneut aus ihrer Quelle importiert werden.",
+      "emptySpec": "Die von {{url}} abgerufene Spezifikation deklariert keine {{format}}-Operation. Sie anzuwenden würde diesen Ordner leeren, daher wurde die Aktualisierung abgelehnt.",
+      "formatNotDetected": "Das Format dieser Quelle wurde nicht erkannt.",
+      "unsupportedFormat": "Kein Importer unterstützt das Format {{format}}."
     },
     "formats": {
       "swagger": {

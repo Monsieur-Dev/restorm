@@ -1044,7 +1044,19 @@
     "dropZone": "Bedobási terület",
     "editAuth": "Hitelesítési útvonal szerkesztése",
     "error": {
-      "unknown": "Ismeretlen hiba történt"
+      "unknown": "Ismeretlen hiba történt",
+      "unexpected": "Az importálás váratlan okból meghiúsult.",
+      "detailLabel": "Technikai részletek",
+      "folderNotFound": "Ez a mappa már nem létezik a projektben, ezért nem frissíthető.",
+      "noSourceUrl": "Ehhez a mappához nincs forrás-URL rögzítve, így nincs mit frissíteni.",
+      "noImportSource": "Ez a mappa nem felismert importálásból származik, ezért nem frissíthető forrásból.",
+      "formatNotRefreshable": "A {{format}} importálás egyszeri: nincs újra letölthető specifikáció, ezért ez a mappa nem frissíthető.",
+      "httpStatus": "A forrás HTTP {{status}} kóddal válaszolt a kérésre.",
+      "specParseFailed": "A(z) {{url}} címről letöltött specifikációt nem sikerült feldolgozni.",
+      "sourceImportFailed": "A specifikációt nem sikerült újra importálni a forrásából.",
+      "emptySpec": "A(z) {{url}} címről letöltött specifikáció egyetlen {{format}} műveletet sem deklarál. Alkalmazása kiürítené ezt a mappát, ezért a frissítés elutasításra került.",
+      "formatNotDetected": "A forrás formátuma nem volt felismerhető.",
+      "unsupportedFormat": "Egyetlen importáló sem kezeli a(z) {{format}} formátumot."
     },
     "formats": {
       "swagger": {

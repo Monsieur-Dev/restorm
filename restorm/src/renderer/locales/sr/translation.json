@@ -1045,7 +1045,19 @@
     "dropZone": "Zona za ispuštanje",
     "editAuth": "Uredi rutu za autentifikaciju",
     "error": {
-      "unknown": "Došlo je do nepoznate greške"
+      "unknown": "Došlo je do nepoznate greške",
+      "unexpected": "Uvoz nije uspeo iz neočekivanog razloga.",
+      "detailLabel": "Tehnički detalj",
+      "folderNotFound": "Ova fascikla više ne postoji u projektu, pa ne može da se osveži.",
+      "noSourceUrl": "Ova fascikla nema zabeležen URL izvora, pa nema šta da se osveži.",
+      "noImportSource": "Ova fascikla nije nastala prepoznatim uvozom, pa ne može da se osveži iz izvora.",
+      "formatNotRefreshable": "Uvoz {{format}} je jednokratan: ne postoji specifikacija koja bi ponovo bila preuzeta, pa ova fascikla ne može da se osveži.",
+      "httpStatus": "Izvor je na zahtev odgovorio kodom HTTP {{status}}.",
+      "specParseFailed": "Specifikacija preuzeta sa {{url}} nije mogla da se raščlani.",
+      "sourceImportFailed": "Specifikacija nije mogla ponovo da se uveze iz svog izvora.",
+      "emptySpec": "Specifikacija preuzeta sa {{url}} ne deklariše nijednu operaciju {{format}}. Njena primena bi ispraznila ovu fasciklu, pa je ažuriranje odbijeno.",
+      "formatNotDetected": "Format ovog izvora nije prepoznat.",
+      "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}."
     },
     "formats": {
       "swagger": {

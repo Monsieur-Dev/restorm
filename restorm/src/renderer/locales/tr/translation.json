@@ -1044,7 +1044,19 @@
     "dropZone": "Bırakma alanı",
     "editAuth": "Kimlik doğrulama rotasını düzenle",
     "error": {
-      "unknown": "Bilinmeyen bir hata oluştu"
+      "unknown": "Bilinmeyen bir hata oluştu",
+      "unexpected": "İçe aktarma beklenmedik bir nedenle başarısız oldu.",
+      "detailLabel": "Teknik ayrıntı",
+      "folderNotFound": "Bu klasör artık projede bulunmuyor, bu yüzden yenilenemiyor.",
+      "noSourceUrl": "Bu klasörde kayıtlı bir kaynak URL'si yok, dolayısıyla yenilenecek bir şey yok.",
+      "noImportSource": "Bu klasör tanınan bir içe aktarmayla oluşturulmadı, bu yüzden bir kaynaktan yenilenemiyor.",
+      "formatNotRefreshable": "{{format}} içe aktarması tek seferliktir: yeniden alınacak bir belirtim yok, bu yüzden bu klasör yenilenemiyor.",
+      "httpStatus": "Kaynak, isteği HTTP {{status}} ile yanıtladı.",
+      "specParseFailed": "{{url}} adresinden alınan belirtim ayrıştırılamadı.",
+      "sourceImportFailed": "Belirtim kaynağından yeniden içe aktarılamadı.",
+      "emptySpec": "{{url}} adresinden alınan belirtim hiçbir {{format}} işlemi tanımlamıyor. Uygulanması bu klasörü boşaltacağı için güncelleme reddedildi.",
+      "formatNotDetected": "Bu kaynağın biçimi tanınmadı.",
+      "unsupportedFormat": "{{format}} biçimini işleyen bir içe aktarıcı yok."
     },
     "formats": {
       "swagger": {

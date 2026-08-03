@@ -1044,7 +1044,19 @@
     "dropZone": "Zona de largar",
     "editAuth": "Editar rota de autenticação",
     "error": {
-      "unknown": "Ocorreu um erro desconhecido"
+      "unknown": "Ocorreu um erro desconhecido",
+      "unexpected": "A importação falhou por um motivo inesperado.",
+      "detailLabel": "Detalhe técnico",
+      "folderNotFound": "Esta pasta já não existe no projeto, por isso não pode ser atualizada.",
+      "noSourceUrl": "Esta pasta não regista nenhum URL de origem, por isso não há nada para atualizar.",
+      "noImportSource": "Esta pasta não foi criada por uma importação reconhecida, por isso não pode ser atualizada a partir de uma origem.",
+      "formatNotRefreshable": "Uma importação {{format}} é pontual: não existe nenhuma especificação para obter novamente, por isso esta pasta não pode ser atualizada.",
+      "httpStatus": "A origem respondeu ao pedido com HTTP {{status}}.",
+      "specParseFailed": "Não foi possível analisar a especificação obtida de {{url}}.",
+      "sourceImportFailed": "Não foi possível reimportar a especificação a partir da sua origem.",
+      "emptySpec": "A especificação obtida de {{url}} não declara nenhuma operação {{format}}. Aplicá-la esvaziaria esta pasta, por isso a atualização foi recusada.",
+      "formatNotDetected": "O formato desta origem não foi reconhecido.",
+      "unsupportedFormat": "Nenhum importador suporta o formato {{format}}."
     },
     "formats": {
       "swagger": {

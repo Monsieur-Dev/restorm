@@ -1043,7 +1043,19 @@
     "dropZone": "ドロップ領域",
     "editAuth": "認証ルートを編集",
     "error": {
-      "unknown": "不明なエラーが発生しました"
+      "unknown": "不明なエラーが発生しました",
+      "unexpected": "予期しない理由でインポートに失敗しました。",
+      "detailLabel": "技術的な詳細",
+      "folderNotFound": "このフォルダーはプロジェクトに存在しないため、更新できません。",
+      "noSourceUrl": "このフォルダーにはソース URL が記録されていないため、更新するものがありません。",
+      "noImportSource": "このフォルダーは認識されたインポートで作成されていないため、ソースから更新できません。",
+      "formatNotRefreshable": "{{format}} のインポートは一度きりです。再取得できる仕様がないため、このフォルダーは更新できません。",
+      "httpStatus": "ソースはリクエストに HTTP {{status}} で応答しました。",
+      "specParseFailed": "{{url}} から取得した仕様を解析できませんでした。",
+      "sourceImportFailed": "仕様をソースから再インポートできませんでした。",
+      "emptySpec": "{{url}} から取得した仕様には {{format}} の操作が 1 つも宣言されていません。適用するとこのフォルダーが空になるため、更新を拒否しました。",
+      "formatNotDetected": "このソースの形式を認識できませんでした。",
+      "unsupportedFormat": "{{format}} 形式に対応するインポーターがありません。"
     },
     "formats": {
       "swagger": {

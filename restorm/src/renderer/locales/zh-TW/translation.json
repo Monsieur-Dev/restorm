@@ -1043,7 +1043,19 @@
     "dropZone": "拖放區",
     "editAuth": "編輯驗證路由",
     "error": {
-      "unknown": "發生未知的錯誤"
+      "unknown": "發生未知的錯誤",
+      "unexpected": "匯入因非預期的原因失敗。",
+      "detailLabel": "技術細節",
+      "folderNotFound": "此資料夾已不在專案中，因此無法重新整理。",
+      "noSourceUrl": "此資料夾未記錄來源 URL，因此沒有可重新整理的內容。",
+      "noImportSource": "此資料夾並非由可辨識的匯入建立，因此無法從來源重新整理。",
+      "formatNotRefreshable": "{{format}} 匯入是一次性的：沒有可重新取得的規格，因此無法重新整理此資料夾。",
+      "httpStatus": "來源以 HTTP {{status}} 回應了此要求。",
+      "specParseFailed": "無法剖析從 {{url}} 取得的規格。",
+      "sourceImportFailed": "無法從來源重新匯入此規格。",
+      "emptySpec": "從 {{url}} 取得的規格未宣告任何 {{format}} 作業。套用它會清空此資料夾，因此已拒絕這次更新。",
+      "formatNotDetected": "無法辨識此來源的格式。",
+      "unsupportedFormat": "沒有匯入器支援 {{format}} 格式。"
     },
     "formats": {
       "swagger": {

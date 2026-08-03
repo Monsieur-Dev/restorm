@@ -1044,7 +1044,19 @@
     "dropZone": "Släppzon",
     "editAuth": "Redigera autentiseringsrutt",
     "error": {
-      "unknown": "Ett okänt fel inträffade"
+      "unknown": "Ett okänt fel inträffade",
+      "unexpected": "Importen misslyckades av en oväntad anledning.",
+      "detailLabel": "Teknisk detalj",
+      "folderNotFound": "Den här mappen finns inte längre i projektet och kan därför inte uppdateras.",
+      "noSourceUrl": "Den här mappen har ingen käll-URL sparad, så det finns inget att uppdatera från.",
+      "noImportSource": "Den här mappen skapades inte av en igenkänd import och kan därför inte uppdateras från en källa.",
+      "formatNotRefreshable": "En {{format}}-import sker en gång: det finns ingen specifikation att hämta igen, så den här mappen kan inte uppdateras.",
+      "httpStatus": "Källan svarade på begäran med HTTP {{status}}.",
+      "specParseFailed": "Specifikationen som hämtades från {{url}} kunde inte tolkas.",
+      "sourceImportFailed": "Specifikationen kunde inte importeras om från sin källa.",
+      "emptySpec": "Specifikationen som hämtades från {{url}} deklarerar ingen {{format}}-operation. Att tillämpa den skulle tömma den här mappen, så uppdateringen avvisades.",
+      "formatNotDetected": "Formatet på den här källan kändes inte igen.",
+      "unsupportedFormat": "Ingen importmodul hanterar formatet {{format}}."
     },
     "formats": {
       "swagger": {

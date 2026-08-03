@@ -57,6 +57,47 @@
   background: var(--inputValidation-errorBackground);
   border: 1px solid var(--inputValidation-errorBorder);
   color: var(--inputValidation-errorForeground);
+  /* The row can carry two stacked lines (message + upstream detail), so
+     the icon pins to the first line rather than centring on the block. */
+  align-items: flex-start;
+}
+
+.import-error > .codicon {
+  line-height: 1.4;
+}
+
+.import-error__text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Diagnostic text produced outside the app — a parser's complaint, a
+   filesystem error, a server's reason phrase. Set apart from the
+   translated sentence above it so it never reads as our own copy, and
+   selectable so it can be pasted into a bug report. */
+.import-error__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.import-error__detail-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.import-error__detail code {
+  font-family: var(--editor-font-family, monospace);
+  font-size: 11px;
+  opacity: 0.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
 }
 
 .import-no-results {

@@ -22,6 +22,7 @@ import { openrpcImportAdapter } from '../import/idempotent/OpenRpcAdapter'
 import { computeSpecHash } from './specHash'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { specKeyToImportSelectionKey } from './specKeyTranslator'
+import { formatImportError } from '../../../shared/config/importErrors'
 
 /** Expand `${VAR}` placeholders against the env-var map. Mirrors the
  * resolution shape `registerApiUpdateIPC.refresh-fetch` uses so the
@@ -77,8 +78,7 @@ const ADAPTER_BY_SOURCE: Partial<Record<ImportSourceType, typeof swaggerImportAd
  * adapter — one-shot imports (a pasted cURL / PowerShell command, a
  * bare URL) with no re-fetchable spec behind them. They stay
  * recognised so the apply fails on the precise
- * `No idempotent adapter for …` instead of the misleading
- * `has no importSource`.
+ * `formatNotRefreshable` instead of the misleading `noImportSource`.
  */
 const SOURCES_WITHOUT_ADAPTER: readonly ImportSourceType[] = ['curl', 'powershell', 'url']
 
@@ -86,9 +86,9 @@ const SOURCES_WITHOUT_ADAPTER: readonly ImportSourceType[] = ['curl', 'powershel
  * Every source the apply path recognises. Derived from
  * `ADAPTER_BY_SOURCE` rather than restated as a literal: a
  * hand-maintained copy silently drifts from the adapter map, and a
- * source missing here resolves to `null` and throws
- * `has no importSource` — a refresh that fails for a format the app
- * demonstrably knows how to refresh.
+ * source missing here resolves to `null` and throws `noImportSource` —
+ * a refresh that fails for a format the app demonstrably knows how to
+ * refresh.
  */
 const RECOGNISED_IMPORT_SOURCES: ReadonlySet<string> = new Set<string>([
   ...Object.keys(ADAPTER_BY_SOURCE),
@@ -184,15 +184,15 @@ function filterEnumsBySelection<T extends { name: string }>(enums: T[], include:
 export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateApplySelection): Promise<{ updatedFolder: unknown }> {
   const target = collectionStore.findById(folderId)
   if (!target || !('folderType' in target)) {
-    throw new Error(`Folder ${folderId} not found`)
+    throw new Error(formatImportError('folderNotFound'))
   }
   const env = target as EnvironmentFolder
   const config: ApiUpdateConfig | undefined = env.apiUpdate
-  if (!config?.sourceUrl) throw new Error(`Folder ${folderId} has no apiUpdate.sourceUrl`)
+  if (!config?.sourceUrl) throw new Error(formatImportError('noSourceUrl'))
   const importSource = isImportSource(env.importSource) ? env.importSource : null
-  if (!importSource) throw new Error(`Folder ${folderId} has no importSource`)
+  if (!importSource) throw new Error(formatImportError('noImportSource'))
   const adapter = ADAPTER_BY_SOURCE[importSource]
-  if (!adapter) throw new Error(`No idempotent adapter for ${importSource}`)
+  if (!adapter) throw new Error(formatImportError('formatNotRefreshable', { format: importSource }))
 
   const variables = defaultVariablesFor(env)
   const url = expandVariables(config.sourceUrl, variables)
@@ -206,7 +206,15 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   const headers = { ...dynamicHeaders, ...staticHeaders }
   const result = await importFrom(url, Object.keys(headers).length === 0 ? {} : { extraHeaders: headers })
   if (!result.success || result.items.length === 0) {
-    throw new Error(result.error ?? 'Import returned no folder')
+    // `importFrom` names the failures it can (a non-2xx spec fetch, an
+    // unreadable format); re-raising its code keeps the user's sentence
+    // specific instead of collapsing every re-import failure into one
+    // generic frame. Only what it couldn't name falls back to the
+    // wrapper, with its prose kept as diagnostic detail.
+    if (result.errorCode !== undefined) {
+      throw new Error(formatImportError(result.errorCode, result.errorParams))
+    }
+    throw new Error(formatImportError('sourceImportFailed', result.error !== undefined ? { detail: result.error } : {}))
   }
   const freshFolder = result.items[0] as EnvironmentFolder
 
@@ -221,7 +229,7 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   try {
     parsedSpec = parseSpecText(rawSpecText, importSource)
   } catch (err) {
-    throw new Error(`Failed to parse spec from ${url}: ${err instanceof Error ? err.message : String(err)}`)
+    throw new Error(formatImportError('specParseFailed', { url, detail: err instanceof Error ? err.message : String(err) }))
   }
   const fullSpec = adapter.extractNormalizedSpec(parsedSpec, {})
   // A spec that normalises to nothing means the payload never reached
@@ -230,7 +238,7 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   // folder owns and flag the whole tree `removed: true` — so refuse
   // loudly instead of silently gutting the user's collection.
   if (fullSpec.operations.length === 0) {
-    throw new Error(`Spec fetched from ${url} declares no ${importSource} operations — refusing to apply an empty update`)
+    throw new Error(formatImportError('emptySpec', { url, format: importSource }))
   }
 
   // The renderer's `include` set carries ImportSelectionTree keys
@@ -332,6 +340,8 @@ async function fetchText(url: string, headers: Record<string, string>): Promise<
   // firewall-gated.
   assertSafeFetchUrl(url, { allowPrivateHosts: true })
   const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
-  if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+  if (!response.ok) {
+    throw new Error(formatImportError('httpStatus', { status: String(response.status), detail: response.statusText }))
+  }
   return response.text()
 }

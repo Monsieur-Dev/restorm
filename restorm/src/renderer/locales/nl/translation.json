@@ -1044,7 +1044,19 @@
     "dropZone": "Sleepzone",
     "editAuth": "Authenticatieroute bewerken",
     "error": {
-      "unknown": "Er is een onbekende fout opgetreden"
+      "unknown": "Er is een onbekende fout opgetreden",
+      "unexpected": "De import is om een onverwachte reden mislukt.",
+      "detailLabel": "Technisch detail",
+      "folderNotFound": "Deze map bestaat niet meer in het project en kan daarom niet worden vernieuwd.",
+      "noSourceUrl": "Deze map legt geen bron-URL vast, dus er valt niets te vernieuwen.",
+      "noImportSource": "Deze map is niet door een herkende import gemaakt en kan daarom niet vanaf een bron worden vernieuwd.",
+      "formatNotRefreshable": "Een {{format}}-import is eenmalig: er is geen specificatie om opnieuw op te halen, dus deze map kan niet worden vernieuwd.",
+      "httpStatus": "De bron beantwoordde het verzoek met HTTP {{status}}.",
+      "specParseFailed": "De specificatie die is opgehaald van {{url}} kon niet worden ontleed.",
+      "sourceImportFailed": "De specificatie kon niet opnieuw vanaf de bron worden geïmporteerd.",
+      "emptySpec": "De specificatie die is opgehaald van {{url}} declareert geen enkele {{format}}-bewerking. Toepassen zou deze map leegmaken, dus de update is geweigerd.",
+      "formatNotDetected": "Het formaat van deze bron is niet herkend.",
+      "unsupportedFormat": "Geen enkele importer ondersteunt het formaat {{format}}."
     },
     "formats": {
       "swagger": {

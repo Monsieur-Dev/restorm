@@ -1043,7 +1043,19 @@
     "dropZone": "Vùng thả",
     "editAuth": "Chỉnh sửa tuyến xác thực",
     "error": {
-      "unknown": "Đã xảy ra lỗi không xác định"
+      "unknown": "Đã xảy ra lỗi không xác định",
+      "unexpected": "Việc nhập thất bại vì một lý do không mong đợi.",
+      "detailLabel": "Chi tiết kỹ thuật",
+      "folderNotFound": "Thư mục này không còn tồn tại trong dự án nên không thể làm mới.",
+      "noSourceUrl": "Thư mục này không lưu URL nguồn nào nên không có gì để làm mới.",
+      "noImportSource": "Thư mục này không được tạo bởi một lần nhập được nhận diện nên không thể làm mới từ nguồn.",
+      "formatNotRefreshable": "Việc nhập {{format}} chỉ diễn ra một lần: không có đặc tả nào để tải lại nên không thể làm mới thư mục này.",
+      "httpStatus": "Nguồn đã phản hồi yêu cầu với HTTP {{status}}.",
+      "specParseFailed": "Không thể phân tích đặc tả tải về từ {{url}}.",
+      "sourceImportFailed": "Không thể nhập lại đặc tả từ nguồn của nó.",
+      "emptySpec": "Đặc tả tải về từ {{url}} không khai báo thao tác {{format}} nào. Áp dụng nó sẽ làm trống thư mục này nên bản cập nhật đã bị từ chối.",
+      "formatNotDetected": "Không nhận diện được định dạng của nguồn này.",
+      "unsupportedFormat": "Không có trình nhập nào xử lý định dạng {{format}}."
     },
     "formats": {
       "swagger": {

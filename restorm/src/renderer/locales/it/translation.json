@@ -1044,7 +1044,19 @@
     "dropZone": "Area di rilascio",
     "editAuth": "Modifica route di autenticazione",
     "error": {
-      "unknown": "Si è verificato un errore sconosciuto"
+      "unknown": "Si è verificato un errore sconosciuto",
+      "unexpected": "L'importazione non è riuscita per un motivo imprevisto.",
+      "detailLabel": "Dettaglio tecnico",
+      "folderNotFound": "Questa cartella non esiste più nel progetto, quindi non può essere aggiornata.",
+      "noSourceUrl": "Questa cartella non registra alcun URL di origine, quindi non c'è nulla da aggiornare.",
+      "noImportSource": "Questa cartella non è stata creata da un'importazione riconosciuta, quindi non può essere aggiornata da una sorgente.",
+      "formatNotRefreshable": "Un'importazione {{format}} è una tantum: non esiste una specifica da recuperare di nuovo, quindi questa cartella non può essere aggiornata.",
+      "httpStatus": "L'origine ha risposto alla richiesta con HTTP {{status}}.",
+      "specParseFailed": "Non è stato possibile analizzare la specifica recuperata da {{url}}.",
+      "sourceImportFailed": "Non è stato possibile reimportare la specifica dalla sua origine.",
+      "emptySpec": "La specifica recuperata da {{url}} non dichiara alcuna operazione {{format}}. Applicarla svuoterebbe questa cartella, quindi l'aggiornamento è stato rifiutato.",
+      "formatNotDetected": "Il formato di questa origine non è stato riconosciuto.",
+      "unsupportedFormat": "Nessun importatore gestisce il formato {{format}}."
     },
     "formats": {
       "swagger": {

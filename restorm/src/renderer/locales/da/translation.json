@@ -1044,7 +1044,19 @@
     "dropZone": "Slip-zone",
     "editAuth": "Rediger godkendelsesrute",
     "error": {
-      "unknown": "Der opstod en ukendt fejl"
+      "unknown": "Der opstod en ukendt fejl",
+      "unexpected": "Importen mislykkedes af en uventet årsag.",
+      "detailLabel": "Teknisk detalje",
+      "folderNotFound": "Denne mappe findes ikke længere i projektet, så den kan ikke opdateres.",
+      "noSourceUrl": "Denne mappe har ingen kilde-URL gemt, så der er intet at opdatere fra.",
+      "noImportSource": "Denne mappe blev ikke oprettet af en genkendt import, så den kan ikke opdateres fra en kilde.",
+      "formatNotRefreshable": "En {{format}}-import er engangs: der findes ingen specifikation at hente igen, så denne mappe kan ikke opdateres.",
+      "httpStatus": "Kilden besvarede anmodningen med HTTP {{status}}.",
+      "specParseFailed": "Specifikationen hentet fra {{url}} kunne ikke fortolkes.",
+      "sourceImportFailed": "Specifikationen kunne ikke importeres igen fra sin kilde.",
+      "emptySpec": "Specifikationen hentet fra {{url}} erklærer ingen {{format}}-handling. At anvende den ville tømme denne mappe, så opdateringen blev afvist.",
+      "formatNotDetected": "Formatet på denne kilde blev ikke genkendt.",
+      "unsupportedFormat": "Intet importmodul understøtter formatet {{format}}."
     },
     "formats": {
       "swagger": {

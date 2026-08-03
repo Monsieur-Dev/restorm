@@ -1044,7 +1044,19 @@
     "dropZone": "Zona e lëshimit",
     "editAuth": "Ndrysho rrugën e vërtetimit",
     "error": {
-      "unknown": "Ndodhi një gabim i panjohur"
+      "unknown": "Ndodhi një gabim i panjohur",
+      "unexpected": "Importimi dështoi për një arsye të papritur.",
+      "detailLabel": "Detaj teknik",
+      "folderNotFound": "Kjo dosje nuk ekziston më në projekt, prandaj nuk mund të rifreskohet.",
+      "noSourceUrl": "Kjo dosje nuk ka të regjistruar asnjë URL burimi, prandaj nuk ka çfarë të rifreskohet.",
+      "noImportSource": "Kjo dosje nuk u krijua nga një importim i njohur, prandaj nuk mund të rifreskohet nga një burim.",
+      "formatNotRefreshable": "Një importim {{format}} është i njëhershëm: nuk ka asnjë specifikim për t'u marrë sërish, prandaj kjo dosje nuk mund të rifreskohet.",
+      "httpStatus": "Burimi iu përgjigj kërkesës me HTTP {{status}}.",
+      "specParseFailed": "Specifikimi i marrë nga {{url}} nuk mundi të analizohej.",
+      "sourceImportFailed": "Specifikimi nuk mundi të riimportohej nga burimi i tij.",
+      "emptySpec": "Specifikimi i marrë nga {{url}} nuk deklaron asnjë veprim {{format}}. Zbatimi i tij do ta zbraste këtë dosje, prandaj përditësimi u refuzua.",
+      "formatNotDetected": "Formati i këtij burimi nuk u njoh.",
+      "unsupportedFormat": "Asnjë importues nuk e mbështet formatin {{format}}."
     },
     "formats": {
       "swagger": {

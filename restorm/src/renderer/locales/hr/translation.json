@@ -1045,7 +1045,19 @@
     "dropZone": "Područje za ispuštanje",
     "editAuth": "Uredi rutu provjere autentičnosti",
     "error": {
-      "unknown": "Dogodila se nepoznata pogreška"
+      "unknown": "Dogodila se nepoznata pogreška",
+      "unexpected": "Uvoz nije uspio iz neočekivanog razloga.",
+      "detailLabel": "Tehnički detalj",
+      "folderNotFound": "Ova mapa više ne postoji u projektu pa se ne može osvježiti.",
+      "noSourceUrl": "Ova mapa nema zabilježen URL izvora pa nema što osvježiti.",
+      "noImportSource": "Ova mapa nije nastala prepoznatim uvozom pa se ne može osvježiti iz izvora.",
+      "formatNotRefreshable": "Uvoz {{format}} jednokratan je: ne postoji specifikacija koja bi se ponovno dohvatila pa se ova mapa ne može osvježiti.",
+      "httpStatus": "Izvor je na zahtjev odgovorio kodom HTTP {{status}}.",
+      "specParseFailed": "Specifikaciju dohvaćenu s {{url}} nije bilo moguće raščlaniti.",
+      "sourceImportFailed": "Specifikaciju nije bilo moguće ponovno uvesti iz njezina izvora.",
+      "emptySpec": "Specifikacija dohvaćena s {{url}} ne deklarira nijednu operaciju {{format}}. Primjena bi ispraznila ovu mapu pa je ažuriranje odbijeno.",
+      "formatNotDetected": "Format ovog izvora nije prepoznat.",
+      "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}."
     },
     "formats": {
       "swagger": {

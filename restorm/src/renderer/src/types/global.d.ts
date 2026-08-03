@@ -437,6 +437,11 @@ declare global {
           source: string
           format?: string
           error?: string
+          /** Named identity of `error` when the failure is one the app
+           * can name — the renderer localises from this, not from
+           * `error`, which stays English diagnostic text. */
+          errorCode?: string
+          errorParams?: Record<string, string>
           statusCode?: number
           isAuthError?: boolean
         }>

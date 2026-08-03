@@ -1044,7 +1044,19 @@
     "dropZone": "Slippsone",
     "editAuth": "Rediger autentiseringsrute",
     "error": {
-      "unknown": "En ukjent feil oppstod"
+      "unknown": "En ukjent feil oppstod",
+      "unexpected": "Importen mislyktes av en uventet årsak.",
+      "detailLabel": "Teknisk detalj",
+      "folderNotFound": "Denne mappen finnes ikke lenger i prosjektet, så den kan ikke oppdateres.",
+      "noSourceUrl": "Denne mappen har ingen kilde-URL lagret, så det er ingenting å oppdatere fra.",
+      "noImportSource": "Denne mappen ble ikke opprettet av en gjenkjent import, så den kan ikke oppdateres fra en kilde.",
+      "formatNotRefreshable": "En {{format}}-import er engangs: det finnes ingen spesifikasjon å hente på nytt, så denne mappen kan ikke oppdateres.",
+      "httpStatus": "Kilden svarte på forespørselen med HTTP {{status}}.",
+      "specParseFailed": "Spesifikasjonen hentet fra {{url}} kunne ikke tolkes.",
+      "sourceImportFailed": "Spesifikasjonen kunne ikke importeres på nytt fra kilden sin.",
+      "emptySpec": "Spesifikasjonen hentet fra {{url}} erklærer ingen {{format}}-operasjon. Å bruke den ville tømt denne mappen, så oppdateringen ble avvist.",
+      "formatNotDetected": "Formatet til denne kilden ble ikke gjenkjent.",
+      "unsupportedFormat": "Ingen importmodul håndterer formatet {{format}}."
     },
     "formats": {
       "swagger": {

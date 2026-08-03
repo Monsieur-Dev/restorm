@@ -1044,7 +1044,19 @@
     "dropZone": "Drop zone",
     "editAuth": "Edit authentication route",
     "error": {
-      "unknown": "An unknown error occurred"
+      "unknown": "An unknown error occurred",
+      "unexpected": "The import failed for an unexpected reason.",
+      "detailLabel": "Technical detail",
+      "folderNotFound": "This folder no longer exists in the project, so it can't be refreshed.",
+      "noSourceUrl": "This folder records no source URL, so there is nothing to refresh from.",
+      "noImportSource": "This folder wasn't created by a recognised import, so it can't be refreshed from a source.",
+      "formatNotRefreshable": "A {{format}} import is one-shot: there is no spec to fetch again, so this folder cannot be refreshed.",
+      "httpStatus": "The source answered the request with HTTP {{status}}.",
+      "specParseFailed": "The spec fetched from {{url}} could not be parsed.",
+      "sourceImportFailed": "The spec could not be re-imported from its source.",
+      "emptySpec": "The spec fetched from {{url}} declares no {{format}} operation. Applying it would empty this folder, so the update was refused.",
+      "formatNotDetected": "The format of this source was not recognised.",
+      "unsupportedFormat": "No importer handles the {{format}} format."
     },
     "formats": {
       "swagger": {

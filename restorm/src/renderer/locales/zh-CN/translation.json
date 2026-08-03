@@ -1043,7 +1043,19 @@
     "dropZone": "拖放区",
     "editAuth": "编辑认证路由",
     "error": {
-      "unknown": "发生未知错误"
+      "unknown": "发生未知错误",
+      "unexpected": "导入因意外原因失败。",
+      "detailLabel": "技术详情",
+      "folderNotFound": "该文件夹已不在项目中，因此无法刷新。",
+      "noSourceUrl": "该文件夹未记录源 URL，因此没有可刷新的内容。",
+      "noImportSource": "该文件夹并非由可识别的导入创建，因此无法从源刷新。",
+      "formatNotRefreshable": "{{format}} 导入是一次性的：没有可重新获取的规范，因此无法刷新该文件夹。",
+      "httpStatus": "源以 HTTP {{status}} 响应了该请求。",
+      "specParseFailed": "无法解析从 {{url}} 获取的规范。",
+      "sourceImportFailed": "无法从源重新导入该规范。",
+      "emptySpec": "从 {{url}} 获取的规范未声明任何 {{format}} 操作。应用它会清空该文件夹，因此已拒绝此次更新。",
+      "formatNotDetected": "无法识别此来源的格式。",
+      "unsupportedFormat": "没有导入器支持 {{format}} 格式。"
     },
     "formats": {
       "swagger": {

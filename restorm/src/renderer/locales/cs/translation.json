@@ -1046,7 +1046,19 @@
     "dropZone": "Zóna pro vložení",
     "editAuth": "Upravit ověřovací trasu",
     "error": {
-      "unknown": "Došlo k neznámé chybě"
+      "unknown": "Došlo k neznámé chybě",
+      "unexpected": "Import selhal z neočekávaného důvodu.",
+      "detailLabel": "Technické podrobnosti",
+      "folderNotFound": "Tato složka už v projektu neexistuje, takže ji nelze aktualizovat.",
+      "noSourceUrl": "Tato složka nemá uloženou adresu URL zdroje, takže není co aktualizovat.",
+      "noImportSource": "Tato složka nevznikla rozpoznaným importem, takže ji nelze aktualizovat ze zdroje.",
+      "formatNotRefreshable": "Import {{format}} je jednorázový: neexistuje specifikace, kterou by šlo znovu stáhnout, takže tuto složku nelze aktualizovat.",
+      "httpStatus": "Zdroj odpověděl na požadavek kódem HTTP {{status}}.",
+      "specParseFailed": "Specifikaci staženou z {{url}} se nepodařilo zpracovat.",
+      "sourceImportFailed": "Specifikaci se nepodařilo znovu importovat z jejího zdroje.",
+      "emptySpec": "Specifikace stažená z {{url}} nedeklaruje žádnou operaci {{format}}. Jejím použitím by se tato složka vyprázdnila, aktualizace byla proto odmítnuta.",
+      "formatNotDetected": "Formát tohoto zdroje nebyl rozpoznán.",
+      "unsupportedFormat": "Formát {{format}} nezpracovává žádný importér."
     },
     "formats": {
       "swagger": {

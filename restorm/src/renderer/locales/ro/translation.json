@@ -1045,7 +1045,19 @@
     "dropZone": "Zonă de plasare",
     "editAuth": "Editează ruta de autentificare",
     "error": {
-      "unknown": "A apărut o eroare necunoscută"
+      "unknown": "A apărut o eroare necunoscută",
+      "unexpected": "Importul a eșuat dintr-un motiv neașteptat.",
+      "detailLabel": "Detaliu tehnic",
+      "folderNotFound": "Acest folder nu mai există în proiect, deci nu poate fi reîmprospătat.",
+      "noSourceUrl": "Acest folder nu are nicio adresă URL sursă înregistrată, deci nu există nimic de reîmprospătat.",
+      "noImportSource": "Acest folder nu a fost creat printr-un import recunoscut, deci nu poate fi reîmprospătat dintr-o sursă.",
+      "formatNotRefreshable": "Un import {{format}} este unic: nu există nicio specificație de descărcat din nou, deci acest folder nu poate fi reîmprospătat.",
+      "httpStatus": "Sursa a răspuns cererii cu HTTP {{status}}.",
+      "specParseFailed": "Specificația descărcată de la {{url}} nu a putut fi analizată.",
+      "sourceImportFailed": "Specificația nu a putut fi reimportată din sursa sa.",
+      "emptySpec": "Specificația descărcată de la {{url}} nu declară nicio operațiune {{format}}. Aplicarea ei ar goli acest folder, deci actualizarea a fost refuzată.",
+      "formatNotDetected": "Formatul acestei surse nu a fost recunoscut.",
+      "unsupportedFormat": "Niciun importator nu gestionează formatul {{format}}."
     },
     "formats": {
       "swagger": {

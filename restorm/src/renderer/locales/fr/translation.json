@@ -1044,7 +1044,19 @@
     "dropZone": "Drop zone",
     "editAuth": "Modifier la route d'authentification",
     "error": {
-      "unknown": "Une erreur inconnue s'est produite"
+      "unknown": "Une erreur inconnue s'est produite",
+      "unexpected": "L'import a échoué pour une raison inattendue.",
+      "detailLabel": "Détail technique",
+      "folderNotFound": "Ce dossier n'existe plus dans le projet, il ne peut donc pas être actualisé.",
+      "noSourceUrl": "Ce dossier n'enregistre aucune URL source : il n'y a rien à actualiser.",
+      "noImportSource": "Ce dossier n'a pas été créé par un import reconnu, il ne peut donc pas être actualisé depuis une source.",
+      "formatNotRefreshable": "Un import {{format}} est ponctuel : aucune spécification n'est récupérable à nouveau, ce dossier ne peut donc pas être actualisé.",
+      "httpStatus": "La source a répondu à la requête avec le code HTTP {{status}}.",
+      "specParseFailed": "La spécification récupérée depuis {{url}} n'a pas pu être analysée.",
+      "sourceImportFailed": "La spécification n'a pas pu être réimportée depuis sa source.",
+      "emptySpec": "La spécification récupérée depuis {{url}} ne déclare aucune opération {{format}}. L'appliquer viderait ce dossier ; la mise à jour a donc été refusée.",
+      "formatNotDetected": "Le format de cette source n'a pas été reconnu.",
+      "unsupportedFormat": "Aucun importateur ne prend en charge le format {{format}}."
     },
     "formats": {
       "swagger": {
