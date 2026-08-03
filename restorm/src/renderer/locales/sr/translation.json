@@ -2615,9 +2615,9 @@
   },
   "project": {
     "incompatible": {
-      "title": "Пројекат направљен новијом верзијом",
-      "message": "Овај фајл је направљен новијом верзијом Restorm-а од оне коју користите. Ажурирајте Restorm да бисте га отворили.",
-      "versions": "Формат фајла {{found}}; ова верзија подржава до {{current}}."
+      "title": "Projekat napravljen novijom verzijom",
+      "message": "Ovaj fajl je napravljen novijom verzijom Restorm-a od one koju koristite. Ažurirajte Restorm da biste ga otvorili.",
+      "versions": "Format fajla {{found}}; ova verzija podržava do {{current}}."
     }
   }
 }
