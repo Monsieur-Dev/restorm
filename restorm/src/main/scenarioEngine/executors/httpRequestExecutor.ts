@@ -24,11 +24,31 @@ import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { jsonRpcExecutionService } from '../../services/JsonRpcExecutionService'
 import { trpcExecutionService } from '../../services/TrpcExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
-import { flushRequestStateToContext } from '../../mcp/tools/execute'
+import { flushRequestStateToContext, scenarioVarsToOverlay } from '../../mcp/tools/execute'
+import { contextService } from '../../services/ContextService'
+import type { ResolutionContexts } from '../../services/ContextServiceTypes'
 import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest, isGraphQLRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest } from '../../../shared/types/collections'
 import { composeODataRequestBody, type ODataBodySource } from '../../../shared/utils/odataRequestBody'
 import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor, ExecResult } from '../types'
+
+/**
+ * Flush the request's live state into the ContextService, then compose the
+ * DISPOSABLE contexts this one dispatch resolves against.
+ *
+ * Both steps happen here, immediately before the dispatch, and in this order:
+ * the flush makes the stored rows current, the composition takes a copy of what
+ * that request resolves against and enriches it with the run's values as they
+ * stand AT THIS INSTANT. A variable the run declared since the previous request
+ * is in; one it declares after this returns is not.
+ *
+ * The composed object goes to the execution service and is dropped when the
+ * dispatch returns. Nothing about the run is written into the request.
+ */
+function flushAndComposeContexts(req: Request, ctx: Parameters<NodeExecutor>[1]): ResolutionContexts {
+  flushRequestStateToContext(req)
+  return contextService.composeResolutionContexts(req.id, scenarioVarsToOverlay(ctx.variables))
+}
 
 export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   const cfg = ctx.node.config as { requestId?: string }
@@ -112,7 +132,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   }
 
   const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), act.inputs)
-  flushRequestStateToContext(effectiveReq, ctx.variables)
+  const runContexts = flushAndComposeContexts(effectiveReq, ctx)
 
   // For OData, derive the dispatched verb + body from the (override-applied)
   // request via the shared composer — byte-identical to the request-panel Send.
@@ -129,6 +149,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
     ...(composed?.rawBody !== undefined
       ? { rawBody: composed.rawBody, ...(composed.rawBodyContentType !== undefined ? { rawBodyContentType: composed.rawBodyContentType } : {}) }
       : {}),
+    runContexts,
     ...(auth && isAuthenticationRequest(auth) ? { authRequest: auth } : {})
   }
 
@@ -140,7 +161,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
 
   const result = await httpExecutionService.execute(input)
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, odata ? 'odata' : 'http', result)
+  await responseHistoryService.storeExecutionResult(req.id, odata ? 'odata' : 'http', result, runContexts)
 
   // The `response` port carries the SAME `{ request, response }` shape the
   // JSON-path picker shows (see `getScenarioNodeResult` in
@@ -187,13 +208,13 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
  * gRPC, `graphqlExecutionService.execute()` does NOT persist history itself, so
  * we store it here (mirroring the `graphql:execute` IPC handler). */
 async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req, ctx.variables)
+  const runContexts = flushAndComposeContexts(req, ctx)
   const onAbort = (): void => { graphqlExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
-  const result = await graphqlExecutionService.execute({ requestId: req.id })
+  const result = await graphqlExecutionService.execute({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'graphql', result)
+  await responseHistoryService.storeExecutionResult(req.id, 'graphql', result, runContexts)
   // The wire body of a GraphQL HTTP response is the `{ data, errors }` envelope;
   // serialise it so a picker-built selector like `response.body.data.…` resolves.
   const body = JSON.stringify({
@@ -227,13 +248,13 @@ async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
  * `success` reflects the JSON-RPC-level outcome (a transport-successful
  * call whose envelope reports an `error` is still a scenario failure). */
 async function runJsonRpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req, ctx.variables)
+  const runContexts = flushAndComposeContexts(req, ctx)
   const onAbort = (): void => { jsonRpcExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
-  const result = await jsonRpcExecutionService.execute({ requestId: req.id })
+  const result = await jsonRpcExecutionService.execute({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'jsonrpc', result)
+  await responseHistoryService.storeExecutionResult(req.id, 'jsonrpc', result, runContexts)
   const body = result.notificationSent
     ? JSON.stringify({ notificationSent: true })
     : JSON.stringify({
@@ -265,13 +286,13 @@ async function runJsonRpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
  * OData's `$batch`) and shape its per-child results onto the `response`
  * port's `body` as `{ children: [...] }`. */
 async function runJsonRpcBatch(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req, ctx.variables)
+  const runContexts = flushAndComposeContexts(req, ctx)
   const onAbort = (): void => { jsonRpcExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
-  const result = await jsonRpcExecutionService.executeBatch({ requestId: req.id })
+  const result = await jsonRpcExecutionService.executeBatch({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'jsonrpcBatch', result)
+  await responseHistoryService.storeExecutionResult(req.id, 'jsonrpcBatch', result, runContexts)
   const body = JSON.stringify({ children: result.children })
   return {
     outputs: [
@@ -302,13 +323,13 @@ async function runJsonRpcBatch(req: Request, ctx: Parameters<NodeExecutor>[1]): 
  * default — so a picker selector like `response.body.name` resolves against
  * the data, not the `[{ result: { data } }]` wire envelope. */
 async function runTrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req, ctx.variables)
+  const runContexts = flushAndComposeContexts(req, ctx)
   const onAbort = (): void => { trpcExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
-  const result = await trpcExecutionService.execute({ requestId: req.id })
+  const result = await trpcExecutionService.execute({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'trpc', result)
+  await responseHistoryService.storeExecutionResult(req.id, 'trpc', result, runContexts)
   return {
     outputs: [
       {
@@ -331,11 +352,11 @@ async function runTrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Pro
 }
 
 async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
-  flushRequestStateToContext(req, ctx.variables)
+  const runContexts = flushAndComposeContexts(req, ctx)
   const onAbort = (): void => { grpcExecutionService.cancel(req.id) }
   if (ctx.signal.aborted) onAbort()
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
-  const result = await grpcExecutionService.execute({ requestId: req.id })
+  const result = await grpcExecutionService.execute({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
   // `execute()` persists the call to history itself.
   return {

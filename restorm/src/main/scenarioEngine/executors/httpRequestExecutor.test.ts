@@ -19,6 +19,7 @@ const execute = vi.fn<(i: unknown) => Promise<unknown>>()
 const cancel = vi.fn<(id: string) => void>()
 const storeExecutionResult = vi.fn<(...a: unknown[]) => Promise<void>>()
 const flushRequestStateToContext = vi.fn<(r: unknown) => void>()
+const composeResolutionContexts = vi.fn<(id: string, overlay?: Record<string, string>) => unknown>()
 const graphqlExecute = vi.fn<(i: unknown) => Promise<unknown>>()
 
 vi.mock('../../services/CollectionStore', () => ({ collectionStore: { findById: (id: string) => findById(id) } }))
@@ -31,7 +32,23 @@ vi.mock('../../services/GraphQLExecutionService', () => ({
 vi.mock('../../services/ResponseHistoryService', () => ({
   responseHistoryService: { storeExecutionResult: (...a: unknown[]) => storeExecutionResult(...a) }
 }))
-vi.mock('../../mcp/tools/execute', () => ({ flushRequestStateToContext: (r: unknown) => { flushRequestStateToContext(r) } }))
+vi.mock('../../mcp/tools/execute', () => ({
+  flushRequestStateToContext: (r: unknown) => { flushRequestStateToContext(r) },
+  // The real stringifier: the executor reads the run's live variable map at
+  // dispatch time, so what it hands to the composition is what the test wants
+  // to see.
+  scenarioVarsToOverlay: (vars: ReadonlyMap<string, unknown> | undefined) => {
+    if (!vars || vars.size === 0) return undefined
+    const out: Record<string, string> = {}
+    for (const [k, v] of vars) out[k] = String(v)
+    return out
+  }
+}))
+vi.mock('../../services/ContextService', () => ({
+  contextService: {
+    composeResolutionContexts: (id: string, overlay?: Record<string, string>) => composeResolutionContexts(id, overlay)
+  }
+}))
 
 // Import AFTER the mocks are registered.
 const { httpRequestExecutor, applyRequestOverride } = await import('./httpRequestExecutor')
@@ -91,6 +108,7 @@ beforeEach(() => {
   cancel.mockReset()
   storeExecutionResult.mockReset().mockResolvedValue(undefined)
   flushRequestStateToContext.mockReset()
+  composeResolutionContexts.mockReset().mockReturnValue({ base: {}, pathParams: {}, queryParams: {}, headers: {} })
   graphqlExecute.mockReset()
 })
 
@@ -107,8 +125,12 @@ describe('httpRequestExecutor — GraphQL unary', () => {
     graphqlExecute.mockResolvedValue(gqlResult())
     const out = await httpRequestExecutor(makeActivation({}), makeCtx(node()))
     expect(graphqlExecute).toHaveBeenCalledTimes(1)
-    // History is stored by the executor (the service does not persist it itself).
-    expect(storeExecutionResult).toHaveBeenCalledWith('req-1', 'graphql', expect.anything())
+    // History is stored by the executor (the service does not persist it itself),
+    // and it archives against the SAME disposable contexts the dispatch used —
+    // otherwise the stored "what we sent" would be resolved from the request's
+    // own values and contradict the URL that actually went out.
+    expect(storeExecutionResult).toHaveBeenCalledWith('req-1', 'graphql', expect.anything(), expect.anything())
+    expect(graphqlExecute.mock.calls[0]?.[0]).toMatchObject({ requestId: 'req-1', runContexts: expect.anything() as unknown })
     const value = out.outputs[0]?.value as { request: { method: string; url: string }; response: { status: number; success: boolean; body: string } }
     expect(value.request.method).toBe('POST')
     expect(value.request.url).toBe('https://gql.test/graphql')
@@ -116,6 +138,42 @@ describe('httpRequestExecutor — GraphQL unary', () => {
     expect(value.response.success).toBe(true)
     // The wire body carries the `{ data, errors }` envelope so `response.body.data.…` selectors resolve.
     expect(JSON.parse(value.response.body)).toEqual({ data: { ping: 'pong' } })
+  })
+})
+
+describe('httpRequestExecutor — the run\'s values travel as a disposable context', () => {
+  it('composes the contexts from the run variables AS THEY STAND at this dispatch', async () => {
+    // Composed per REQUEST EXECUTION, not once per run: the executor reads the
+    // run's live variable map at the moment it dispatches, so a variable the run
+    // declared since the previous request is in and one declared after is not.
+    const ctx = makeCtx(node())
+    ctx.variables.set('petId', 3)
+
+    await httpRequestExecutor(makeActivation({}), ctx)
+    expect(composeResolutionContexts).toHaveBeenCalledTimes(1)
+    expect(composeResolutionContexts).toHaveBeenLastCalledWith('req-1', { petId: '3' })
+
+    // The run declares another variable between the two requests.
+    ctx.variables.set('token', 'declared-mid-run')
+    await httpRequestExecutor(makeActivation({}), ctx)
+    expect(composeResolutionContexts).toHaveBeenLastCalledWith('req-1', { petId: '3', token: 'declared-mid-run' })
+  })
+
+  it('hands the composed contexts to the dispatch and to the history archive', async () => {
+    const ctx = makeCtx(node())
+    ctx.variables.set('petId', 3)
+    const composed = { base: { petId: '3' }, pathParams: { petId: '3' }, queryParams: { petId: '3' }, headers: { petId: '3' } }
+    composeResolutionContexts.mockReturnValue(composed)
+
+    await httpRequestExecutor(makeActivation({}), ctx)
+
+    expect(execute.mock.calls[0]?.[0]).toMatchObject({ runContexts: composed })
+    expect(storeExecutionResult).toHaveBeenCalledWith('req-1', 'http', expect.anything(), composed)
+  })
+
+  it('composes with no overlay when the run declared nothing', async () => {
+    await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+    expect(composeResolutionContexts).toHaveBeenLastCalledWith('req-1', undefined)
   })
 })
 

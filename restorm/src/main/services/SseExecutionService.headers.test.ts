@@ -56,8 +56,9 @@ function startMockStream(): Promise<MockStreamHandle> {
 function registerSseRequest(requestId: string, input: {
   url: string
   headers: { key: string; value: unknown; enabled?: boolean }[]
+  envId?: string
 }): void {
-  contextService.registerRequest(requestId, null, {
+  contextService.registerRequest(requestId, input.envId ?? null, {
     id: requestId,
     headers: input.headers
   } as Parameters<typeof contextService.registerRequest>[2])
@@ -67,6 +68,29 @@ function registerSseRequest(requestId: string, input: {
     url: input.url,
     headers: input.headers
   } as Parameters<typeof contextService.updateFullRequestData>[1])
+}
+
+/**
+ * Seed an environment holding `variables` and return its id, so a request can be
+ * registered against it.
+ *
+ * The variables reach resolution through the request's own environment — the
+ * only channel there is. A scenario run's values never enter a request's stored
+ * context; they travel as a disposable `ResolutionContexts` handed to the
+ * dispatch, and this protocol's executor does not compose one.
+ */
+function seedEnvironment(envId: string, variables: Record<string, string>): string {
+  const svc = contextService as unknown as { handleEnvironmentCreated: (payload: unknown) => void }
+  svc.handleEnvironmentCreated({
+    id: envId,
+    type: 'environment',
+    document: {
+      id: envId,
+      name: 'E',
+      variables: Object.entries(variables).map(([key, value]) => ({ key, value: { type: 'string', value } }))
+    }
+  })
+  return envId
 }
 
 describe('SseExecutionService header resolution', () => {
@@ -87,9 +111,9 @@ describe('SseExecutionService header resolution', () => {
     const requestId = 'sse-header-key-resolution'
     registerSseRequest(requestId, {
       url: `http://127.0.0.1:${stream.port}/events`,
-      headers: [{ key: '{{sseHeaderName}}', value: 'header-value', enabled: true }]
+      headers: [{ key: '{{sseHeaderName}}', value: 'header-value', enabled: true }],
+      envId: seedEnvironment('env-sse-header-key', { sseHeaderName: 'x-tenant' })
     })
-    contextService.setScenarioVariables(requestId, { sseHeaderName: 'x-tenant' })
 
     await sseExecutionService.execute({ requestId, timeout: 2000 })
 

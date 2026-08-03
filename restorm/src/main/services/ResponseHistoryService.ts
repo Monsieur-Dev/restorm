@@ -10,6 +10,7 @@ import {
 } from './DocumentEvents'
 import { collectionStore } from './CollectionStore'
 import { contextService } from './ContextService'
+import type { ResolutionContexts } from './ContextServiceTypes'
 import type { KeyValue } from '../../shared/models'
 import {
   getHistoryArchivePath,
@@ -243,7 +244,8 @@ class ResponseHistoryService {
   async storeExecutionResult(
     requestId: string,
     type: ResponseHistoryRequestType,
-    result: ExecutionResult
+    result: ExecutionResult,
+    runContexts?: ResolutionContexts
   ): Promise<void> {
     try {
       const archivePath = getHistoryArchivePath()
@@ -254,7 +256,7 @@ class ResponseHistoryService {
 
       logger.debug('[ResponseHistoryService] Storing history entry', { requestId, type })
 
-      const detail = this.buildDetail(requestId, type, result)
+      const detail = this.buildDetail(requestId, type, result, runContexts)
       if (!detail) {
         logger.warn('[ResponseHistoryService] Failed to build response detail', { requestId, type })
         return
@@ -423,7 +425,8 @@ class ResponseHistoryService {
   private buildDetail(
     requestId: string,
     type: ResponseHistoryRequestType,
-    result: ExecutionResult
+    result: ExecutionResult,
+    runContexts?: ResolutionContexts
   ): ResponseHistoryDetail | null {
     const requestMeta = this.getRequestMeta(requestId)
     const now = result.timings.startedAt
@@ -434,27 +437,27 @@ class ResponseHistoryService {
     // (guid/success/timestamp/…) is identical across protocols and is assembled
     // once below. A new protocol adds ONE row here — no `switch` case.
     const builders: Record<ResponseHistoryRequestType, {
-      build: (id: string, r: ExecutionResult) => ResponseHistoryDetail['response'] | null
+      build: (id: string, r: ExecutionResult, c?: ResolutionContexts) => ResponseHistoryDetail['response'] | null
       outcome: (r: ExecutionResult) => ReturnType<typeof httpOutcome>
     }> = {
-      http: { build: (id, r) => this.buildHttpResponse(id, r as HTTPExecutionResult), outcome: (r) => httpOutcome(r as HTTPExecutionResult) },
-      odata: { build: (id, r) => this.buildOdataResponse(id, r as HTTPExecutionResult), outcome: (r) => httpOutcome(r as HTTPExecutionResult) },
-      graphql: { build: (id, r) => this.buildGraphqlResponse(id, r as GraphQLExecutionResult), outcome: (r) => httpOutcome(r as GraphQLExecutionResult) },
-      grpc: { build: (id, r) => this.buildGrpcResponse(id, r as GRPCExecutionResult), outcome: (r) => grpcOutcome(r as GRPCExecutionResult) },
-      soap: { build: (id, r) => this.buildSoapResponse(id, r as SOAPExecutionResult), outcome: (r) => httpOutcome(r as SOAPExecutionResult) },
-      websocket: { build: (id, r) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) },
-      jsonrpc: { build: (id, r) => this.buildJsonRpcResponse(id, r as JsonRpcExecutionResult), outcome: (r) => jsonRpcOutcome(r as JsonRpcExecutionResult) },
-      jsonrpcBatch: { build: (id, r) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) },
-      trpc: { build: (id, r) => this.buildTrpcResponse(id, r as TrpcExecutionResult), outcome: (r) => httpOutcome(r as TrpcExecutionResult) },
-      sse: { build: (id, r) => this.buildSseResponse(id, r as SseExecutionResult), outcome: (r) => sseOutcome(r as SseExecutionResult) },
-      amqp: { build: (id, r) => this.buildAmqpResponse(id, r as AmqpExecutionResult), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) },
-      redis: { build: (id, r) => this.buildRedisResponse(id, r as RedisExecutionResult), outcome: (r) => redisOutcome(r as RedisExecutionResult) },
-      stomp: { build: (id, r) => this.buildStompResponse(id, r as StompExecutionResult), outcome: (r) => stompOutcome(r as StompExecutionResult) },
-      kafka: { build: (id, r) => this.buildKafkaResponse(id, r as KafkaExecutionResult), outcome: (r) => kafkaOutcome(r as KafkaExecutionResult) }
+      http: { build: (id, r, c) => this.buildHttpResponse(id, r as HTTPExecutionResult, c), outcome: (r) => httpOutcome(r as HTTPExecutionResult) },
+      odata: { build: (id, r, c) => this.buildOdataResponse(id, r as HTTPExecutionResult, c), outcome: (r) => httpOutcome(r as HTTPExecutionResult) },
+      graphql: { build: (id, r, c) => this.buildGraphqlResponse(id, r as GraphQLExecutionResult, c), outcome: (r) => httpOutcome(r as GraphQLExecutionResult) },
+      grpc: { build: (id, r, c) => this.buildGrpcResponse(id, r as GRPCExecutionResult, c), outcome: (r) => grpcOutcome(r as GRPCExecutionResult) },
+      soap: { build: (id, r, c) => this.buildSoapResponse(id, r as SOAPExecutionResult, c), outcome: (r) => httpOutcome(r as SOAPExecutionResult) },
+      websocket: { build: (id, r, c) => this.buildWebSocketResponse(id, r as WebSocketExecutionResult, c), outcome: (r) => webSocketOutcome(r as WebSocketExecutionResult) },
+      jsonrpc: { build: (id, r, c) => this.buildJsonRpcResponse(id, r as JsonRpcExecutionResult, c), outcome: (r) => jsonRpcOutcome(r as JsonRpcExecutionResult) },
+      jsonrpcBatch: { build: (id, r, c) => this.buildJsonRpcBatchResponse(id, r as JsonRpcBatchExecutionResult, c), outcome: (r) => jsonRpcBatchOutcome(r as JsonRpcBatchExecutionResult) },
+      trpc: { build: (id, r, c) => this.buildTrpcResponse(id, r as TrpcExecutionResult, c), outcome: (r) => httpOutcome(r as TrpcExecutionResult) },
+      sse: { build: (id, r, c) => this.buildSseResponse(id, r as SseExecutionResult, c), outcome: (r) => sseOutcome(r as SseExecutionResult) },
+      amqp: { build: (id, r, c) => this.buildAmqpResponse(id, r as AmqpExecutionResult, c), outcome: (r) => amqpOutcome(r as AmqpExecutionResult) },
+      redis: { build: (id, r, c) => this.buildRedisResponse(id, r as RedisExecutionResult, c), outcome: (r) => redisOutcome(r as RedisExecutionResult) },
+      stomp: { build: (id, r, c) => this.buildStompResponse(id, r as StompExecutionResult, c), outcome: (r) => stompOutcome(r as StompExecutionResult) },
+      kafka: { build: (id, r, c) => this.buildKafkaResponse(id, r as KafkaExecutionResult, c), outcome: (r) => kafkaOutcome(r as KafkaExecutionResult) }
     }
 
     const builder = builders[type]
-    const response = builder.build(requestId, result)
+    const response = builder.build(requestId, result, runContexts)
     if (!response) return null
     const outcome = builder.outcome(result)
     return {
@@ -470,15 +473,15 @@ class ResponseHistoryService {
     }
   }
 
-  private buildHttpResponse(requestId: string, result: HTTPExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildHttpResponse(requestId: string, result: HTTPExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
     const requestMethod = this.getRequestMethod(requestId)
-    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
-    const requestParams = this.getResolvedKeyValues(requestId, 'params')
-    const requestPathParams = this.getResolvedKeyValues(requestId, 'pathParams')
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers', runContexts)
+    const requestParams = this.getResolvedKeyValues(requestId, 'params', runContexts)
+    const requestPathParams = this.getResolvedKeyValues(requestId, 'pathParams', runContexts)
 
     const requestBodyData = this.getRequestBodyData(requestId)
-    const requestBody = requestBodyData ? this.buildHttpBody(requestId, requestBodyData, requestHeaders) : undefined
+    const requestBody = requestBodyData ? this.buildHttpBody(requestId, requestBodyData, requestHeaders, runContexts) : undefined
 
     let responseHeaders = this.headersRecordToKeyValues(result.headers)
     const contentTypeHeader = result.headers?.['content-type']
@@ -527,10 +530,10 @@ class ResponseHistoryService {
     }
   }
 
-  private buildOdataResponse(requestId: string, result: HTTPExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
-    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
-    const requestParams = this.getResolvedKeyValues(requestId, 'params')
+  private buildOdataResponse(requestId: string, result: HTTPExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers', runContexts)
+    const requestParams = this.getResolvedKeyValues(requestId, 'params', runContexts)
 
     const requestContext = contextService.getRequestContext(requestId)
     const fullData = requestContext?.fullData
@@ -621,9 +624,9 @@ class ResponseHistoryService {
     return normalized
   }
 
-  private buildGraphqlResponse(requestId: string, result: GraphQLExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
-    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+  private buildGraphqlResponse(requestId: string, result: GraphQLExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers', runContexts)
     const responseHeaders = this.headersRecordToKeyValues(result.headers)
 
     return {
@@ -639,9 +642,9 @@ class ResponseHistoryService {
     }
   }
 
-  private buildJsonRpcResponse(requestId: string, result: JsonRpcExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
-    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+  private buildJsonRpcResponse(requestId: string, result: JsonRpcExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers', runContexts)
     const fullData = this.getRequestFullData(requestId)
     const method = typeof fullData?.['jsonRpcMethod'] === 'string' ? fullData['jsonRpcMethod'] : ''
 
@@ -660,9 +663,9 @@ class ResponseHistoryService {
     }
   }
 
-  private buildJsonRpcBatchResponse(requestId: string, result: JsonRpcBatchExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
-    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+  private buildJsonRpcBatchResponse(requestId: string, result: JsonRpcBatchExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers', runContexts)
     const fullData = this.getRequestFullData(requestId)
     const childMethodById = new Map<string, string>()
     const rawChildren = fullData?.['jsonRpcChildren']
@@ -693,9 +696,9 @@ class ResponseHistoryService {
     }
   }
 
-  private buildTrpcResponse(requestId: string, result: TrpcExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
-    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+  private buildTrpcResponse(requestId: string, result: TrpcExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers', runContexts)
     const responseHeaders = this.headersRecordToKeyValues(result.headers)
     const fullData = this.getRequestFullData(requestId)
     const requestProcedure = typeof fullData?.['trpcProcedure'] === 'string' ? fullData['trpcProcedure'] : ''
@@ -719,10 +722,10 @@ class ResponseHistoryService {
     }
   }
 
-  private buildGrpcResponse(requestId: string, result: GRPCExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildGrpcResponse(requestId: string, result: GRPCExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
     const requestMessage = this.getRequestBodyContent(requestId)
-    const requestMetadata = this.getResolvedKeyValues(requestId, 'headers')
+    const requestMetadata = this.getResolvedKeyValues(requestId, 'headers', runContexts)
 
     const responseMetadata = result.metadata
       ? Object.entries(result.metadata).map(([key, value]) => ({ key, value, enabled: true }))
@@ -749,10 +752,10 @@ class ResponseHistoryService {
     }
   }
 
-  private buildSoapResponse(requestId: string, result: SOAPExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildSoapResponse(requestId: string, result: SOAPExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
     const requestBody = this.getRequestBodyContent(requestId)
-    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers')
+    const requestHeaders = this.getResolvedKeyValues(requestId, 'headers', runContexts)
     const soapAction = this.getRequestMeta(requestId)?.soapAction ?? ''
 
     return {
@@ -774,7 +777,7 @@ class ResponseHistoryService {
    * vs. a peeked/streamed message list) — `kafkaMode` on the stored response
    * lets the renderer branch without inspecting which optional fields are
    * populated. */
-  private buildKafkaResponse(_requestId: string, result: KafkaExecutionResult): ResponseHistoryResponse | null {
+  private buildKafkaResponse(_requestId: string, result: KafkaExecutionResult, _runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
     const messages = result.kafkaMode !== 'produce'
       ? result.messages.map((m) => ({
           direction: m.direction,
@@ -803,8 +806,8 @@ class ResponseHistoryService {
     }
   }
 
-  private buildWebSocketResponse(requestId: string, result: WebSocketExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildWebSocketResponse(requestId: string, result: WebSocketExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
     const protocol = this.getRequestMeta(requestId)?.protocol ?? ''
 
     return {
@@ -823,8 +826,8 @@ class ResponseHistoryService {
     }
   }
 
-  private buildSseResponse(requestId: string, result: SseExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildSseResponse(requestId: string, result: SseExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
 
     return {
       type: 'sse',
@@ -841,8 +844,8 @@ class ResponseHistoryService {
     }
   }
 
-  private buildAmqpResponse(requestId: string, result: AmqpExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildAmqpResponse(requestId: string, result: AmqpExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
 
     return {
       type: 'amqp',
@@ -863,8 +866,8 @@ class ResponseHistoryService {
     }
   }
 
-  private buildStompResponse(requestId: string, result: StompExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildStompResponse(requestId: string, result: StompExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
 
     return {
       type: 'stomp',
@@ -886,8 +889,8 @@ class ResponseHistoryService {
 
   /** Covers BOTH Redis modes — `result.mode` decides which optional fields are
    * populated (mirrors the discriminated `ResponseHistoryRedisResponse`). */
-  private buildRedisResponse(requestId: string, result: RedisExecutionResult): ResponseHistoryResponse | null {
-    const resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? result.requestUrl ?? ''
+  private buildRedisResponse(requestId: string, result: RedisExecutionResult, runContexts?: ResolutionContexts): ResponseHistoryResponse | null {
+    const resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? result.requestUrl ?? ''
 
     return {
       type: 'redis',
@@ -914,7 +917,8 @@ class ResponseHistoryService {
   private buildHttpBody(
     requestId: string,
     body: { type?: string; content?: string; path?: string; fields?: unknown[] } | undefined,
-    requestHeaders: ResponseHistoryKeyValue[] = []
+    requestHeaders: ResponseHistoryKeyValue[] = [],
+    runContexts?: ResolutionContexts
   ): ResponseHistoryHttpBody | undefined {
     const bodyType = typeof body?.type === 'string' ? body.type : ''
     if (bodyType === 'text') {
@@ -924,7 +928,7 @@ class ResponseHistoryService {
       const contentType = requestHeaders.find((h) => h.key.toLowerCase() === 'content-type')?.value
       return {
         type: 'text',
-        content: body?.content ? contextService.resolveBodyValue(body.content, requestId, contentType) : ''
+        content: body?.content ? contextService.resolveBodyValue(body.content, requestId, contentType, runContexts?.base) : ''
       }
     }
     if (bodyType === 'file') {
@@ -946,7 +950,7 @@ class ResponseHistoryService {
             const valueStr = typeof value === 'string' ? value : value.toString ? value.toString() : ''
             return {
               key,
-              value: contextService.resolveValue(valueStr, requestId),
+              value: contextService.resolveValue(valueStr, requestId, runContexts?.bodyFields),
               enabled: raw.enabled
             }
           })
@@ -1048,7 +1052,15 @@ class ResponseHistoryService {
     return extractor ? extractor(request) : undefined
   }
 
-  private getResolvedKeyValues(requestId: string, groupName: string): ResponseHistoryKeyValue[] {
+  private getResolvedKeyValues(requestId: string, groupName: string, runContexts?: ResolutionContexts): ResponseHistoryKeyValue[] {
+    // Each row family resolves against ITS OWN disposable context — the same
+    // one the execution service used for that family — so the archived
+    // "what we sent" is built the way the wire was, family by family.
+    const familyContext = groupName === 'params'
+      ? runContexts?.queryParams
+      : groupName === 'pathParams'
+        ? runContexts?.pathParams
+        : runContexts?.headers
     const ctx = contextService.getRequestContext(requestId) as unknown
     if (!this.isRecord(ctx)) return []
     const keyValueGroups = ctx['keyValueGroups']
@@ -1071,12 +1083,12 @@ class ResponseHistoryService {
       // registered `KeyValue` instances the execution services resolve
       // against, so the cast mirrors `resolveKeyValueForRequest`'s existing
       // callers exactly.
-      const resolvedKey = contextService.resolveValue(kv.key, requestId)
+      const resolvedKey = contextService.resolveValue(kv.key, requestId, familyContext)
       // An unknown variable resolves to '', and the execution services drop
       // such a row (an empty header name is an invalid HTTP token). Drop it
       // here too — echoing it would show a header that never went on the wire.
       if (!resolvedKey) continue
-      const resolvedValue = contextService.resolveKeyValueForRequest(kv as unknown as KeyValue, requestId)
+      const resolvedValue = contextService.resolveKeyValueForRequest(kv as unknown as KeyValue, requestId, familyContext)
       values.push({
         key: resolvedKey,
         value: resolvedValue,

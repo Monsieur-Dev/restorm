@@ -9,6 +9,7 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import type { ResolutionContexts } from './ContextServiceTypes'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
@@ -17,6 +18,9 @@ import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/con
 export interface GraphQLExecutionInput {
   requestId: string
   timeout?: number
+  /** The DISPOSABLE contexts this one dispatch resolves against — see
+   * `HTTPExecutionInput.runContexts`. Absent outside a scenario run. */
+  runContexts?: ResolutionContexts
 }
 
 /** GraphQL response result */
@@ -85,12 +89,12 @@ class GraphQLExecutionService {
    * Execute a GraphQL request using the resolved URL and data from ContextService
    */
   async execute(input: GraphQLExecutionInput): Promise<GraphQLExecutionResult> {
-    const { requestId, timeout = DEFAULT_REQUEST_TIMEOUT_MS } = input
+    const { requestId, timeout = DEFAULT_REQUEST_TIMEOUT_MS, runContexts } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
     // Get resolved URL from ContextService
-    const urlResult = contextService.getResolvedUrl(requestId)
+    const urlResult = contextService.resolveUrlForRequest(requestId, runContexts)
     if (!urlResult) {
       return {
         requestId,
@@ -136,7 +140,10 @@ class GraphQLExecutionService {
         await secretHydrationService.hydrate(requestId, secrets, abortController.signal)
         if (envSecrets.length > 0) {
           contextService.refreshEnvironmentContext(requestId)
-          effectiveUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? resolvedUrl
+          // Re-seed the disposable copy before it is used: hydration populated
+          // the env context after the copy was taken.
+          if (runContexts) contextService.refreshResolutionContexts(requestId, runContexts)
+          effectiveUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? resolvedUrl
         }
       }
 
@@ -170,11 +177,11 @@ class GraphQLExecutionService {
               // a path/query param key or the URL — see `HTTPExecutionService`.
               // The VALUE stays type-aware: only `ExpressionValue` rows get
               // handlebars-substituted; a `StringValue` row ships verbatim.
-              const resolvedKey = contextService.resolveValue(h.key, requestId)
+              const resolvedKey = contextService.resolveValue(h.key, requestId, runContexts?.headers)
               // An unknown variable resolves to '' — an empty header name is
               // an invalid HTTP token. Skip the row rather than throw.
               if (!resolvedKey) continue
-              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
+              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId, runContexts?.headers)
             }
           }
         }
@@ -197,7 +204,7 @@ class GraphQLExecutionService {
         // Body is already a JSON string with query/variables. The request panel
         // serialises `variables` as a STRING (`"{}"`); GraphQL-over-HTTP requires
         // it to be an object (or absent), so normalise it before sending.
-        const resolved = contextService.resolveValue(bodyString, requestId)
+        const resolved = contextService.resolveValue(bodyString, requestId, runContexts?.base)
         body = normalizeGraphqlBody(resolved)
       } else {
         // Fallback: try to construct from fullData

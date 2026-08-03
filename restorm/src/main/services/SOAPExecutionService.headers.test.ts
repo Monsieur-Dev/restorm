@@ -62,8 +62,9 @@ function startMockEndpoint(): Promise<MockEndpointHandle> {
 function registerSoapRequest(requestId: string, input: {
   url: string
   headers: { key: string; value: unknown; enabled?: boolean }[]
+  envId?: string
 }): void {
-  contextService.registerRequest(requestId, null, {
+  contextService.registerRequest(requestId, input.envId ?? null, {
     id: requestId,
     headers: input.headers
   } as Parameters<typeof contextService.registerRequest>[2])
@@ -74,6 +75,29 @@ function registerSoapRequest(requestId: string, input: {
     headers: input.headers,
     soapBody: '<Ping/>'
   } as Parameters<typeof contextService.updateFullRequestData>[1])
+}
+
+/**
+ * Seed an environment holding `variables` and return its id, so a request can be
+ * registered against it.
+ *
+ * The variables reach resolution through the request's own environment — the
+ * only channel there is. A scenario run's values never enter a request's stored
+ * context; they travel as a disposable `ResolutionContexts` handed to the
+ * dispatch, and this protocol's executor does not compose one.
+ */
+function seedEnvironment(envId: string, variables: Record<string, string>): string {
+  const svc = contextService as unknown as { handleEnvironmentCreated: (payload: unknown) => void }
+  svc.handleEnvironmentCreated({
+    id: envId,
+    type: 'environment',
+    document: {
+      id: envId,
+      name: 'E',
+      variables: Object.entries(variables).map(([key, value]) => ({ key, value: { type: 'string', value } }))
+    }
+  })
+  return envId
 }
 
 describe('SOAPExecutionService header resolution', () => {
@@ -94,9 +118,9 @@ describe('SOAPExecutionService header resolution', () => {
     const requestId = 'soap-header-key-resolution'
     registerSoapRequest(requestId, {
       url: `http://127.0.0.1:${endpoint.port}/service`,
-      headers: [{ key: '{{soapHeaderName}}', value: 'header-value', enabled: true }]
+      headers: [{ key: '{{soapHeaderName}}', value: 'header-value', enabled: true }],
+      envId: seedEnvironment('env-soap-header-key', { soapHeaderName: 'x-tenant' })
     })
-    contextService.setScenarioVariables(requestId, { soapHeaderName: 'x-tenant' })
 
     const result = await soapExecutionService.execute({ requestId, timeout: 2000 })
 

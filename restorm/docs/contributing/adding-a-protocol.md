@@ -280,6 +280,27 @@ and verify the transform is called. If the protocol has a structured payload
 (protobuf message, GraphQL variables, OData query options), call
 `transformValue` on every leaf string before the codec runs.
 
+**A scenario run's variables are passed in, never stored.** Every resolution
+entry point (`resolveValue`, `resolveKeyValueForRequest`, `resolveBodyValue`,
+`resolveUrlForRequest`) takes an optional context: the `ResolutionContexts` the
+scenario engine composes just before it dispatches a request, and drops when the
+dispatch returns. Absent — the request panel's Send, the resolved-URL display, an
+MCP dispatch outside a run — resolution runs against the request's own values.
+
+Two rules follow, and both are load-bearing:
+
+- **Do not write a run's values into the request.** A request whose stored
+  context a run can write keeps resolving from that run after it ends: the panel
+  shows the row the user typed while the wire carries the run's value, which on a
+  `DELETE` or a `PUT` reaches the wrong resource with the right value on screen.
+- **If your execution service is reachable from a scenario node that supplies
+  them, thread the contexts to EVERY resolve call of that dispatch** — url,
+  headers/metadata, body, payload — and to the history archive, picking the field
+  that matches the row family (`headers`, `bodyFields`, `pathParams`,
+  `queryParams`, or `base` for a value in no family). Threading some call sites
+  and not others is worse than threading none: the dispatch then sends a mix of
+  two resolutions, and the archived "what we sent" contradicts the wire.
+
 ### 3.3 — Mandatory E2E coverage
 
 The feature file must include the **"Env variable / Handlebars substitution"**

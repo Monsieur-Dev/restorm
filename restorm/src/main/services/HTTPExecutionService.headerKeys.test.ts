@@ -32,6 +32,7 @@ vi.mock('./ContextService', async () => {
   return {
     contextService: {
       getResolvedUrl: getResolvedUrlMock,
+      resolveUrlForRequest: getResolvedUrlMock,
       getRequestContext: getRequestContextMock,
       resolveValue: (v: string) => (v.includes('{{') ? tryResolve(v) : v),
       resolveBodyValue: (v: string) => v,

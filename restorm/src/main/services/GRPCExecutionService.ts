@@ -24,6 +24,7 @@ import * as grpc from '@grpc/grpc-js'
 import type { ClientReadableStream, ClientWritableStream, ClientDuplexStream } from '@grpc/grpc-js'
 import { logger, withFirewallBypass } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import type { ResolutionContexts } from './ContextServiceTypes'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
@@ -37,6 +38,9 @@ import { DEFAULT_WS_TIMEOUT_MS } from '../../shared/config/constants'
 export interface GRPCExecutionInput {
   requestId: string
   timeout?: number
+  /** The DISPOSABLE contexts this one dispatch resolves against — see
+   * `HTTPExecutionInput.runContexts`. Absent outside a scenario run. */
+  runContexts?: ResolutionContexts
 }
 
 /** A single gRPC frame (a sent request message or a received response message). */
@@ -227,11 +231,11 @@ class GRPCExecutionService {
   private activeHttpFramedCalls = new Map<string, ActiveHttpFramedCall>()
 
   /** Resolve a request into the everything-resolved shape, hydrating secrets. */
-  private async resolveExecution(requestId: string, timeout: number): Promise<ResolvedGrpcExecution> {
+  private async resolveExecution(requestId: string, timeout: number, runContexts?: ResolutionContexts): Promise<ResolvedGrpcExecution> {
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
-    const urlResult = contextService.getResolvedUrl(requestId)
+    const urlResult = contextService.resolveUrlForRequest(requestId, runContexts)
     if (!urlResult) {
       throw new Error('No resolved URL found for this request. Make sure the request is registered.')
     }
@@ -247,7 +251,10 @@ class GRPCExecutionService {
       await secretHydrationService.hydrate(requestId, secrets)
       if (envSecrets.length > 0) {
         contextService.refreshEnvironmentContext(requestId)
-        resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? resolvedUrl
+        // Re-seed the disposable copy before it is used: hydration populated
+        // the env context after the copy was taken.
+        if (runContexts) contextService.refreshResolutionContexts(requestId, runContexts)
+        resolvedUrl = contextService.resolveUrlForRequest(requestId, runContexts)?.resolvedUrl ?? resolvedUrl
       }
     }
 
@@ -261,11 +268,11 @@ class GRPCExecutionService {
         // path/query param key or the URL — see `HTTPExecutionService`. The
         // VALUE stays type-aware: only ExpressionValue rows get
         // handlebars-substituted; a StringValue row ships verbatim.
-        const resolvedKey = contextService.resolveValue(h.key, requestId)
+        const resolvedKey = contextService.resolveValue(h.key, requestId, runContexts?.headers)
         // An unknown variable resolves to '' — `Metadata.set('')` rejects the
         // empty name as an invalid key. Skip the row rather than throw.
         if (!resolvedKey) continue
-        metadata.set(resolvedKey, contextService.resolveKeyValueForRequest(h, requestId))
+        metadata.set(resolvedKey, contextService.resolveKeyValueForRequest(h, requestId, runContexts?.headers))
       }
     }
 
@@ -277,7 +284,7 @@ class GRPCExecutionService {
     // transport — never silently reinterpreted as gRPC-Web/Connect.
     const transport = ((full?.transport) ?? 'grpc') as GrpcTransport
     const message = (full?.requestMessage) ?? '{}'
-    const resolvedMessage = contextService.resolveValue(message, requestId)
+    const resolvedMessage = contextService.resolveValue(message, requestId, runContexts?.base)
     const protoSource: ProtoSource = {
       protoDescriptorSet: full?.protoDescriptorSet,
       protoContent: full?.protoContent,
@@ -317,13 +324,13 @@ class GRPCExecutionService {
    * response(s). Interactive multi-send uses {@link connectStreaming} instead.
    */
   async execute(input: GRPCExecutionInput): Promise<GRPCExecutionResult> {
-    const { requestId, timeout = DEFAULT_WS_TIMEOUT_MS } = input
+    const { requestId, timeout = DEFAULT_WS_TIMEOUT_MS, runContexts } = input
     const startedAt = new Date().toISOString()
     const startTime = Date.now()
 
     let resolved: ResolvedGrpcExecution
     try {
-      resolved = await this.resolveExecution(requestId, timeout)
+      resolved = await this.resolveExecution(requestId, timeout, runContexts)
     } catch (err) {
       return this.failure(requestId, (err as Error).message, { startedAt, durationMs: Date.now() - startTime })
     }

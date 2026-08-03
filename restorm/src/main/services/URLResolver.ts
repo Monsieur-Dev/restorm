@@ -85,13 +85,20 @@ function noteRowValue(
  * @param envContext - Transformed environment context for Handlebars resolution
  * @param transformValue - Function to resolve Handlebars templates
  * @param runContext - Scenario run variables, applied last (layer 3)
+ * @param queryContext - Seed for the query-string cumulation when the caller
+ *   keeps a context per row family. Path rows and query rows are blind to each
+ *   other, so they must not share a seed OBJECT even while the two hold equal
+ *   values — sharing one is how a later per-family rule silently becomes a
+ *   cross-family one. Defaults to `envContext`, the historical single-context
+ *   behaviour.
  * @returns The resolved URL result with baseUrl, queryString and final resolvedUrl
  */
 export function resolveUrl(
   data: FullRequestData,
   envContext: TransformedContext,
   transformValue: TransformValueFn,
-  runContext?: TransformedContext
+  runContext?: TransformedContext,
+  queryContext?: TransformedContext
 ): ResolvedUrlResult {
   // Build cumulative context with path params (non-encoded for resolution).
   // Path params override env vars for the same key — request-level
@@ -159,7 +166,7 @@ export function resolveUrl(
 
   // Build query string from params with cumulative resolution
   const params = data.params ?? []
-  const cumulativeParamsContext = { ...envContext }
+  const cumulativeParamsContext = { ...(queryContext ?? envContext) }
   applyRunContext(cumulativeParamsContext, runContext)
   // Use an array of [key, value] pairs instead of a Map to support
   // repeated keys (EnumListValue with collectionFormat: multi).

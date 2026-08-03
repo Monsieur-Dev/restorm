@@ -13,6 +13,7 @@ import { BrowserWindow } from 'electron'
 import { request as undiciRequest, type Dispatcher } from 'undici'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import type { ResolutionContexts, TransformedContext } from './ContextServiceTypes'
 import { websocketExecutionService } from './WebSocketExecutionService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
 import { responseHistoryService } from './ResponseHistoryService'
@@ -80,6 +81,12 @@ export interface HTTPExecutionInput {
    * when undefined — most users expect a Send to land on the final
    * resource. Set `false` to surface the raw redirect response. */
   followRedirects?: boolean
+  /** The DISPOSABLE contexts this one dispatch resolves against, composed by
+   * the scenario engine just before it runs the request and dropped when the
+   * dispatch returns. Absent for the request panel's Send and for any dispatch
+   * outside a run — those resolve against the request's own values, which is
+   * their correct answer. */
+  runContexts?: ResolutionContexts
 }
 
 /** HTTP response result */
@@ -139,7 +146,7 @@ class HTTPExecutionService {
    * Execute an HTTP request using the resolved URL and data from ContextService
    */
   async execute(input: HTTPExecutionInput): Promise<HTTPExecutionResult> {
-    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType, urlOverride, authRequest, followRedirects = true } = input
+    const { requestId, method, timeout = DEFAULT_REQUEST_TIMEOUT_MS, rawBody, rawBodyContentType, urlOverride, authRequest, followRedirects = true, runContexts } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
@@ -192,6 +199,10 @@ class HTTPExecutionService {
         // reaches the request's baseContext + resolved URL read below.
         if (envSecrets.length > 0) {
           contextService.refreshEnvironmentContext(requestId)
+          // The env context just changed: re-seed this execution's disposable
+          // copy from it, or the dispatch (and the history entry built from the
+          // same object) ships the pre-hydration, still-masked secret.
+          if (runContexts) contextService.refreshResolutionContexts(requestId, runContexts)
         }
       }
 
@@ -201,7 +212,11 @@ class HTTPExecutionService {
         // link, etc.) and we must dispatch it verbatim.
         resolvedUrl = urlOverride
       } else {
-        const urlResult = contextService.getResolvedUrl(requestId)
+        // With run contexts this resolves FRESH against them (and caches
+        // nothing); without, it is the request's own cached URL. The two must
+        // come from the same call so a run can never be served the request's
+        // URL, nor the request the run's.
+        const urlResult = contextService.resolveUrlForRequest(requestId, runContexts)
         if (!urlResult) {
           return {
             requestId,
@@ -249,12 +264,12 @@ class HTTPExecutionService {
               // path always ran the resolver regardless of type,
               // so a user who handcrafted `{{token}}` as a plain
               // string saw it silently expanded on send.
-              const resolvedKey = contextService.resolveValue(h.key, requestId)
+              const resolvedKey = contextService.resolveValue(h.key, requestId, runContexts?.headers)
               // An unknown variable resolves to '', and `headers['']` throws
               // ERR_INVALID_HTTP_TOKEN — drop the row instead of failing the
               // whole send on a typo'd / not-yet-defined variable.
               if (!resolvedKey) continue
-              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId)
+              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId, runContexts?.headers)
             }
           }
         }
@@ -274,7 +289,7 @@ class HTTPExecutionService {
       let body: string | Buffer | undefined
       const declaredContentType = findHeaderValue(headers, 'content-type')
       if (rawBody !== undefined) {
-        body = contextService.resolveBodyValue(rawBody, requestId, rawBodyContentType ?? declaredContentType)
+        body = contextService.resolveBodyValue(rawBody, requestId, rawBodyContentType ?? declaredContentType, runContexts?.base)
         if (rawBodyContentType) {
           headers['Content-Type'] ??= rawBodyContentType
         }
@@ -282,7 +297,7 @@ class HTTPExecutionService {
         const bodyData = requestContext.fullData.body
         switch (bodyData.type) {
           case 'text':
-            body = contextService.resolveBodyValue(bodyData.content, requestId, declaredContentType)
+            body = contextService.resolveBodyValue(bodyData.content, requestId, declaredContentType, runContexts?.base)
             break
           case 'x-www-form-urlencoded': {
             const params = new URLSearchParams()
@@ -293,8 +308,8 @@ class HTTPExecutionService {
                 // path). Coerce uniformly — body templates always run
                 // through handlebars regardless of declared type.
                 const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
-                const resolvedKey = contextService.resolveValue(field.key, requestId)
-                const resolvedValue = contextService.resolveValue(rawValue, requestId)
+                const resolvedKey = contextService.resolveValue(field.key, requestId, runContexts?.bodyFields)
+                const resolvedValue = contextService.resolveValue(rawValue, requestId, runContexts?.bodyFields)
                 params.append(resolvedKey, resolvedValue)
               }
             }
@@ -308,7 +323,7 @@ class HTTPExecutionService {
             // to an existing file path is streamed as a file part (so
             // `multipart/form-data` with a file upload works end-to-end
             // against e.g. Petstore `/pet/{id}/uploadImage`).
-            const built = this.buildMultipartBody(bodyData.fields, requestId)
+            const built = this.buildMultipartBody(bodyData.fields, requestId, runContexts?.bodyFields)
             body = built.buffer
             headers['Content-Type'] ??= `multipart/form-data; boundary=${built.boundary}`
             break
@@ -319,7 +334,7 @@ class HTTPExecutionService {
             // multipart envelope. Content-Type is guessed from the
             // extension (same map the multipart file part uses) and
             // only applied if the user hasn't already set one.
-            const resolvedPath = contextService.resolveValue(bodyData.path, requestId)
+            const resolvedPath = contextService.resolveValue(bodyData.path, requestId, runContexts?.base)
             if (resolvedPath && fs.existsSync(resolvedPath)) {
               body = fs.readFileSync(resolvedPath)
               headers['Content-Type'] ??= this.guessFileContentType(basename(resolvedPath))
@@ -361,7 +376,7 @@ class HTTPExecutionService {
       // hands to `dispatchAuthShape` — same bytes both sides.
       let authShape: ResolvedAuthShape | null = null
       if (authRequest) {
-        const resolved = this.resolveAuthShape(authRequest, requestId)
+        const resolved = this.resolveAuthShape(authRequest, requestId, runContexts)
         if (!resolved.ok) {
           const durationMs = Date.now() - startTime
           settleProgress('error')
@@ -1064,7 +1079,8 @@ class HTTPExecutionService {
    */
   private buildMultipartBody(
     fields: import('../../shared/types/collections').KeyValue[],
-    requestId: string
+    requestId: string,
+    bodyFieldsContext?: TransformedContext
   ): { buffer: Buffer; boundary: string } {
     const boundary = `----restormFormBoundary${randomBytes(16).toString('hex')}`
     const parts: Buffer[] = []
@@ -1073,9 +1089,9 @@ class HTTPExecutionService {
     for (const field of fields) {
       if (!field.key) continue
       if (field.enabled === false) continue
-      const key = contextService.resolveValue(field.key, requestId)
+      const key = contextService.resolveValue(field.key, requestId, bodyFieldsContext)
       const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
-      const value = contextService.resolveValue(rawValue, requestId)
+      const value = contextService.resolveValue(rawValue, requestId, bodyFieldsContext)
 
       // A value that resolves to an existing file path becomes a file
       // part (this is how a `form-data` field uploads a file, e.g.
@@ -1152,7 +1168,8 @@ class HTTPExecutionService {
    */
   private resolveAuthShape(
     authRequest: AuthenticationRequest,
-    parentRequestId?: string
+    parentRequestId?: string,
+    runContexts?: ResolutionContexts
   ): { ok: true; shape: ResolvedAuthShape; resolvedUrl: string; parsedUrl: URL } | { ok: false; error: string } {
     // Choose which env-context resolves auth handlebars / URL / body.
     //
@@ -1183,6 +1200,15 @@ class HTTPExecutionService {
     const resolutionRequestId = inheritParentEnv && parentRequestId
       ? parentRequestId
       : authRequest.id
+    // A run's values follow the context that OWNS the resolution: they are part
+    // of the calling request's execution, so they apply here only while this
+    // resolves against that request. Resolving against the auth route's own
+    // context means the auth route's own values, run or no run — an auth route
+    // is a separate request with its own rows, and a run that never named it
+    // does not get to rewrite them.
+    const authRunContexts = runContexts !== undefined && resolutionRequestId === parentRequestId
+      ? runContexts
+      : undefined
 
     // Prefer the ContextService-resolved URL when it matches the env
     // we're going to resolve against — i.e. only when the auth route
@@ -1197,9 +1223,9 @@ class HTTPExecutionService {
     if (authUrlResult) {
       resolvedUrl = authUrlResult.resolvedUrl
     } else if (contextService.getRequestContext(resolutionRequestId)) {
-      resolvedUrl = contextService.resolveValue(authRequest.url, resolutionRequestId)
+      resolvedUrl = contextService.resolveValue(authRequest.url, resolutionRequestId, authRunContexts?.base)
     } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
-      resolvedUrl = contextService.resolveValue(authRequest.url, parentRequestId)
+      resolvedUrl = contextService.resolveValue(authRequest.url, parentRequestId, runContexts?.base)
     } else {
       resolvedUrl = authRequest.url
     }
@@ -1223,10 +1249,10 @@ class HTTPExecutionService {
     // registered (import-wizard path).
     const resolveForAuth = (value: string): string => {
       if (contextService.getRequestContext(resolutionRequestId)) {
-        return contextService.resolveValue(value, resolutionRequestId)
+        return contextService.resolveValue(value, resolutionRequestId, authRunContexts?.base)
       }
       if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
-        return contextService.resolveValue(value, parentRequestId)
+        return contextService.resolveValue(value, parentRequestId, runContexts?.base)
       }
       return value
     }
@@ -1266,9 +1292,9 @@ class HTTPExecutionService {
       // with a real `ValueType` to gate on anyway (the renderer-import
       // path lands here for spec-fetch auth).
       if (contextService.getRequestContext(resolutionRequestId)) {
-        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, resolutionRequestId)
+        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, resolutionRequestId, authRunContexts?.headers)
       } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
-        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, parentRequestId)
+        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, parentRequestId, runContexts?.headers)
       } else {
         headers[resolvedKey] = extractString(h.value)
       }
@@ -1279,7 +1305,7 @@ class HTTPExecutionService {
     if (authCtx?.fullData?.body) {
       const bodyData = authCtx.fullData.body
       if (bodyData.type === 'text') {
-        body = contextService.resolveValue(bodyData.content, resolutionRequestId)
+        body = contextService.resolveValue(bodyData.content, resolutionRequestId, authRunContexts?.base)
       } else if (bodyData.type === 'x-www-form-urlencoded') {
         const params = new URLSearchParams()
         for (const field of bodyData.fields) {
@@ -1290,8 +1316,13 @@ class HTTPExecutionService {
           // `resolveValue` (which expects a string template) sees the
           // raw template either way.
           const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
-          const k = contextService.resolveValue(field.key, resolutionRequestId)
-          const v = contextService.resolveValue(rawValue, resolutionRequestId)
+          // `base`, not `bodyFields`: these are the AUTH route's rows resolved
+          // under the CALLING request's contexts, so the calling request's
+          // body-field family does not describe them — and it is absent
+          // entirely when that request's body carries no fields, which would
+          // make the auth token's resolution depend on the caller's body type.
+          const k = contextService.resolveValue(field.key, resolutionRequestId, authRunContexts?.base)
+          const v = contextService.resolveValue(rawValue, resolutionRequestId, authRunContexts?.base)
           params.append(k, v)
         }
         body = params.toString()
