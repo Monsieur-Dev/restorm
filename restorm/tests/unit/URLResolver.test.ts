@@ -13,7 +13,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { resolveUrl } from '../../src/main/services/URLResolver'
-import { StringValue } from '../../src/shared/types/valueTypes'
+import { StringValue, ExpressionValue } from '../../src/shared/types/valueTypes'
 import type { FullRequestData, TransformedContext } from '../../src/main/services/ContextServiceTypes'
 import Handlebars from 'handlebars'
 
@@ -245,5 +245,78 @@ describe('URLResolver — environment / request / scenario-run layering', () => 
     }
     const result = resolveUrl(data, envContext, transform, { petId: RUN_VALUE })
     expect(result.resolvedUrl).toBe(`https://api.example.com/v2/pet/${RUN_VALUE}`)
+  })
+})
+
+/**
+ * Each loop feeds every row it has resolved back into the context the NEXT row
+ * resolves against — that is how one row references another by name. A row
+ * whose key collides with a scenario run's variable must NOT shadow it there,
+ * or a later `{{key}}` picks up the sibling row's literal instead of the value
+ * the run supplied.
+ *
+ * Every case is asserted in BOTH row orders on purpose. The bug was
+ * order-dependent — it only appeared when the colliding row came first — so a
+ * single-ordering test would have passed by luck and pinned nothing.
+ */
+describe('URLResolver — a request row must not shadow a run variable for later rows', () => {
+  const RUN = { petId: '3' }
+  const collidingRow = { key: 'petId', value: new StringValue('1'), enabled: true }
+
+  it('query: a later row reading {{petId}} gets the RUN value, whichever order the rows sit in', () => {
+    const referencingRow = { key: 'echo', value: new ExpressionValue('{{petId}}'), enabled: true }
+
+    const collidingFirst = resolveUrl(
+      httpRequest({ url: 'https://api/x', params: [collidingRow, referencingRow] }),
+      { petId: 'env' }, transform, RUN
+    )
+    const referencingFirst = resolveUrl(
+      httpRequest({ url: 'https://api/x', params: [referencingRow, collidingRow] }),
+      { petId: 'env' }, transform, RUN
+    )
+
+    expect(collidingFirst.queryString).toContain('echo=3')
+    expect(referencingFirst.queryString).toContain('echo=3')
+    // …and the colliding row still sends its OWN literal: it is an output the
+    // request declares, not a variable binding for the run to replace.
+    expect(collidingFirst.queryString).toContain('petId=1')
+    expect(referencingFirst.queryString).toContain('petId=1')
+  })
+
+  it('path params: a later row reading {{petId}} gets the RUN value, whichever order the rows sit in', () => {
+    const referencingRow = { key: 'seg', value: new ExpressionValue('{{petId}}'), enabled: true }
+    const url = 'https://api/{{seg}}'
+
+    const collidingFirst = resolveUrl(
+      httpRequest({ url, pathParams: [collidingRow, referencingRow] }), { petId: 'env' }, transform, RUN
+    )
+    const referencingFirst = resolveUrl(
+      httpRequest({ url, pathParams: [referencingRow, collidingRow] }), { petId: 'env' }, transform, RUN
+    )
+
+    expect(collidingFirst.resolvedUrl).toBe('https://api/3')
+    expect(referencingFirst.resolvedUrl).toBe('https://api/3')
+  })
+
+  it('a row whose key the run does NOT supply still feeds later rows — the cumulative behaviour is intact', () => {
+    // Only run-supplied names are protected. Row-to-row resolution is a
+    // deliberate feature and must keep working for every other key.
+    const result = resolveUrl(
+      httpRequest({
+        url: 'https://api/x',
+        params: [
+          { key: 'tenant', value: new StringValue('acme'), enabled: true },
+          { key: 'echo', value: new ExpressionValue('{{tenant}}'), enabled: true }
+        ]
+      }),
+      {}, transform, RUN
+    )
+    expect(result.queryString).toContain('echo=acme')
+  })
+
+  it('with no run context the rows shadow each other exactly as before', () => {
+    const params = [collidingRow, { key: 'echo', value: new ExpressionValue('{{petId}}'), enabled: true }]
+    const result = resolveUrl(httpRequest({ url: 'https://api/x', params }), { petId: 'env' }, transform)
+    expect(result.queryString).toContain('echo=1')
   })
 })

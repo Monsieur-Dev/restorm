@@ -32,6 +32,30 @@ function applyRunContext(target: TransformedContext, runContext: TransformedCont
 }
 
 /**
+ * Record a row's resolved value in a cumulative context, then re-assert the
+ * run's values over it.
+ *
+ * Each loop below feeds every row it has resolved back into the context the
+ * NEXT row resolves against — that is how a row can reference an earlier one by
+ * name. Without re-asserting, a row whose key collides with a run variable
+ * would shadow it for every subsequent row, so `{{petId}}` in a later row would
+ * pick up the sibling row's literal instead of the value the run supplied.
+ *
+ * That made resolution order-dependent, which is the worst residual to leave:
+ * it works until someone reorders two rows, and then breaks with nothing
+ * pointing at why.
+ */
+function noteRowValue(
+  target: TransformedContext,
+  key: string,
+  value: string,
+  runContext: TransformedContext | undefined
+): void {
+  target[key] = value
+  applyRunContext(target, runContext)
+}
+
+/**
  * Calculate the resolved URL for a request.
  *
  * Values are layered, each layer replacing same-named keys from the one before:
@@ -61,7 +85,11 @@ export function resolveUrl(
   // Build cumulative context with path params (non-encoded for resolution).
   // Path params override env vars for the same key — request-level
   // overrides always win over the inherited environment chain.
+  // Seeded with the run's values rather than relying on the caller having
+  // merged them into `envContext`: layer 3 has to hold from this function's own
+  // arguments, or it is correct only by a coincidence one call site away.
   const cumulativeContext = { ...envContext }
+  applyRunContext(cumulativeContext, runContext)
   const pathParams = data.pathParams ?? []
   // Track which keys were set (or overridden) by a path param, so we
   // can URL-encode just those when building the URL-template context.
@@ -83,8 +111,9 @@ export function resolveUrl(
       const resolvedValue = isExpressionValue(pp.value)
         ? transformValue(raw, cumulativeContext)
         : raw
-      // Store non-encoded value for next iterations (last value wins for same key)
-      cumulativeContext[resolvedKey] = resolvedValue
+      // Store non-encoded value for next iterations (last value wins for same
+      // key), with the run's values re-asserted so a row can't shadow one.
+      noteRowValue(cumulativeContext, resolvedKey, resolvedValue, runContext)
       pathParamKeys.add(resolvedKey)
     }
   }
@@ -120,6 +149,7 @@ export function resolveUrl(
   // Build query string from params with cumulative resolution
   const params = data.params ?? []
   const cumulativeParamsContext = { ...envContext }
+  applyRunContext(cumulativeParamsContext, runContext)
   // Use an array of [key, value] pairs instead of a Map to support
   // repeated keys (EnumListValue with collectionFormat: multi).
   const queryParts: string[] = []
@@ -137,7 +167,7 @@ export function resolveUrl(
         for (const v of values) {
           queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
         }
-        cumulativeParamsContext[resolvedKey] = values.join(',')
+        noteRowValue(cumulativeParamsContext, resolvedKey, values.join(','), runContext)
         continue
       }
 
@@ -146,7 +176,7 @@ export function resolveUrl(
         const v = param.value.value
         if (v) {
           queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
-          cumulativeParamsContext[resolvedKey] = v
+          noteRowValue(cumulativeParamsContext, resolvedKey, v, runContext)
         }
         continue
       }
@@ -157,7 +187,7 @@ export function resolveUrl(
         ? transformValue(raw, cumulativeParamsContext)
         : raw
       queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
-      cumulativeParamsContext[resolvedKey] = resolvedValue
+      noteRowValue(cumulativeParamsContext, resolvedKey, resolvedValue, runContext)
     }
   }
 
