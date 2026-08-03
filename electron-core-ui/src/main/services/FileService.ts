@@ -19,7 +19,9 @@ import type {
   FileServiceConfig,
   SaveDialogResult,
   OpenDialogResult,
-  FileServiceState
+  FileServiceState,
+  OpenValidationResult,
+  OpenRejectedPayload
 } from '../../types/file'
 import type { RuntimeId } from '../../types/runtime'
 import { logger } from './LoggerService'
@@ -90,7 +92,10 @@ export class FileService {
       // whole feature is a no-op — FileService stays non-opinionated
       // about file metadata for apps that don't use the save-unit /
       // draft-store system.
-      ...(config.uuidKey !== undefined && { uuidKey: config.uuidKey })
+      ...(config.uuidKey !== undefined && { uuidKey: config.uuidKey }),
+      // Absent by default: with no validator installed, `open()` accepts
+      // whatever it can parse, exactly as it always has.
+      ...(config.validateOnOpen !== undefined && { validateOnOpen: config.validateOnOpen })
     }
 
     this.RECENT_FILES_KEY = `${this.config.storagePrefix}recent`
@@ -691,8 +696,13 @@ export class FileService {
 
   /**
    * Open a file (or folder if folderLoader callback is provided)
+   *
+   * `rejected: true` distinguishes "the host's `validateOnOpen` gate
+   * refused this document" from a plain failure: the caller must not
+   * report a read error, because the renderer has already been told why
+   * via `file:open-rejected` and is showing that message.
    */
-  public async open(path?: string, folderLoader?: (folderPath: string) => Promise<unknown>): Promise<{ success: boolean; content?: unknown; isDirectory?: boolean }> {
+  public async open(path?: string, folderLoader?: (folderPath: string) => Promise<unknown>): Promise<{ success: boolean; content?: unknown; isDirectory?: boolean; rejected?: boolean }> {
     let filePath = ''
 
     // Mark as loading to prevent dirty state during initialization. A single
@@ -731,15 +741,61 @@ export class FileService {
 
       const format = this.detectFormat(filePath)
 
-      // Opt-in stamp of the stable UUID BEFORE we read content. Doing it
-      // here — rather than at every call site that reaches us (`file:open`
-      // IPC, host-app CLI wrappers, welcome flows, etc.) — means the
-      // `file:opened` event the renderer consumes always carries the UUID
-      // on the very first open, without the host having to remember to
-      // stamp it. No-op when `uuidKey` isn't configured.
+      // READ FIRST, WRITE LAST. The host's `validateOnOpen` gate has to
+      // see the content before we touch the file, so that refusing a
+      // document leaves it byte-for-byte as it was. Stamping the UUID
+      // before this point would mutate a file the app then declines to
+      // open — an unrequested write to someone's data, and on a
+      // read-only file an outright error where a clean refusal belongs.
+      let data = readFileSync(filePath, 'utf-8')
+      let content = this.deserialize(data, format)
+
+      if (this.config.validateOnOpen) {
+        let verdict: OpenValidationResult
+        try {
+          verdict = this.config.validateOnOpen(content, filePath)
+        } catch (validationError) {
+          // A validator that throws has not said "this is fine", so the
+          // safe reading is refusal — loading a document whose
+          // acceptability is unknown is the outcome the gate exists to
+          // prevent.
+          logger.error('FileService: validateOnOpen threw — refusing the document', {
+            path: filePath,
+            error: validationError instanceof Error ? validationError.message : String(validationError)
+          })
+          verdict = { ok: false }
+        }
+
+        if (!verdict.ok) {
+          logger.warn('FileService: open refused by validateOnOpen', { path: filePath, code: verdict.code })
+          const payload: OpenRejectedPayload = { path: filePath }
+          if (verdict.code !== undefined) payload.code = verdict.code
+          if (verdict.detail !== undefined) payload.detail = verdict.detail
+          this.broadcastEvent('file:open-rejected', payload)
+          // No state mutated, no file written, no recent-files entry: the
+          // previously open document (if any) is still the current one.
+          return { success: false, rejected: true }
+        }
+      }
+
+      // Opt-in stamp of the stable UUID. Doing it here — rather than at
+      // every call site that reaches us (`file:open` IPC, host-app CLI
+      // wrappers, welcome flows, etc.) — means the `file:opened` event the
+      // renderer consumes always carries the UUID on the very first open,
+      // without the host having to remember to stamp it. No-op when
+      // `uuidKey` isn't configured.
       if (this.config.uuidKey) {
         try {
-          await ensureFileUuid({ filePath, format, uuidKey: this.config.uuidKey })
+          const { generated } = await ensureFileUuid({ filePath, format, uuidKey: this.config.uuidKey })
+          if (generated) {
+            // The stamp rewrote the file, so the bytes we read above are
+            // stale. Re-read rather than patch the parsed object: the
+            // digest must match what is actually on disk or the
+            // external-change guard fires on the next check. Only the
+            // first-ever open of a UUID-less file pays this second read.
+            data = readFileSync(filePath, 'utf-8')
+            content = this.deserialize(data, format)
+          }
         } catch (uuidError) {
           logger.warn('FileService: ensureFileUuid failed on open', {
             path: filePath,
@@ -748,8 +804,6 @@ export class FileService {
         }
       }
 
-      const data = readFileSync(filePath, 'utf-8')
-      const content = this.deserialize(data, format)
       const name = this.getDisplayName(filePath)
       this.diskDigest = FileService.digestOf(data)
       this.externalChangePending = false

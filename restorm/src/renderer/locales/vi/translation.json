@@ -2610,5 +2610,12 @@
       "body": "{{file}} không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây.",
       "bodyUnnamed": "Tệp gần nhất không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Dự án được tạo bằng phiên bản mới hơn",
+      "message": "Tệp này được tạo bằng phiên bản Restorm mới hơn phiên bản bạn đang dùng. Vui lòng cập nhật Restorm để mở tệp.",
+      "versions": "Định dạng tệp {{found}}; phiên bản này hỗ trợ tới {{current}}."
+    }
   }
 }

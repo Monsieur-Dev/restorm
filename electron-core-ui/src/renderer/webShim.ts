@@ -542,6 +542,12 @@ export function ensureCoreUiWebApiShim(): void {
       webFileOpenedCallbacks.add(callback)
       return () => { webFileOpenedCallbacks.delete(callback) }
     },
+    onFileOpenRejected: (): (() => void) => {
+      // The web shim has no main process, so nothing ever validates an
+      // open and no rejection can be emitted. The subscription is inert
+      // rather than absent so consumers can register unconditionally.
+      return () => { /* nothing subscribed */ }
+    },
     onFileClosed: (callback: () => void): (() => void) => {
       webFileClosedCallbacks.add(callback)
       return () => { webFileClosedCallbacks.delete(callback) }

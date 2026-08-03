@@ -2610,5 +2610,12 @@
       "body": "未重新開啟 {{file}}：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。",
       "bodyUnnamed": "未重新開啟上次的檔案：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。"
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "專案由較新版本建立",
+      "message": "此檔案由比您目前使用的 Restorm 更新的版本建立。請更新 Restorm 後再開啟。",
+      "versions": "檔案格式 {{found}}；目前版本最高支援 {{current}}。"
+    }
   }
 }

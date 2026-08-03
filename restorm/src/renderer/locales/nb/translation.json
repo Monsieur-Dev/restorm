@@ -2611,5 +2611,12 @@
       "body": "{{file}} ble ikke åpnet på nytt: Restorm krasjet da den ble åpnet ved forrige oppstart. Filen din er uskadd — du kan åpne den på nytt fra de siste filene.",
       "bodyUnnamed": "Den siste filen ble ikke åpnet på nytt: Restorm krasjet da den ble åpnet ved forrige oppstart. Filen din er uskadd — du kan åpne den på nytt fra de siste filene."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Prosjekt opprettet med en nyere versjon",
+      "message": "Denne filen ble opprettet med en nyere versjon av Restorm enn den du kjører. Oppdater Restorm for å åpne den.",
+      "versions": "Filformat {{found}}; denne versjonen støtter opp til {{current}}."
+    }
   }
 }

@@ -2611,5 +2611,12 @@
       "body": "{{file}} no se ha reabierto: Restorm falló al abrirlo en el inicio anterior. Su archivo está intacto: puede reabrirlo desde los archivos recientes.",
       "bodyUnnamed": "El último archivo no se ha reabierto: Restorm falló al abrirlo en el inicio anterior. Su archivo está intacto: puede reabrirlo desde los archivos recientes."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Proyecto creado con una versión más reciente",
+      "message": "Este archivo se creó con una versión de Restorm más reciente que la que está utilizando. Actualice Restorm para abrirlo.",
+      "versions": "Formato de archivo {{found}}; esta versión admite hasta {{current}}."
+    }
   }
 }

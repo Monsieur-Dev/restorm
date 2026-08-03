@@ -2611,5 +2611,12 @@
       "body": "{{file}} öppnades inte igen: Restorm kraschade när den öppnades vid föregående start. Din fil är oskadd — du kan öppna den från de senaste filerna.",
       "bodyUnnamed": "Den senaste filen öppnades inte igen: Restorm kraschade när den öppnades vid föregående start. Din fil är oskadd — du kan öppna den från de senaste filerna."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projektet skapades med en nyare version",
+      "message": "Den här filen skapades med en nyare version av Restorm än den du kör. Uppdatera Restorm för att öppna den.",
+      "versions": "Filformat {{found}}; den här versionen stöder upp till {{current}}."
+    }
   }
 }

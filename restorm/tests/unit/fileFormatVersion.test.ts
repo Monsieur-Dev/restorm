@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
   CURRENT_FILE_FORMAT_VERSION,
+  checkFileFormatCompatibility,
   normalizeFileFormatVersion
 } from '../../src/shared/config/fileFormatVersion'
 import { EnvironmentFolder } from '../../src/shared/models/EnvironmentFolder'
@@ -88,13 +89,15 @@ describe('normalizeFileFormatVersion', () => {
     expect(root['fileFormatVersion']).toBe(CURRENT_FILE_FORMAT_VERSION)
   })
 
-  it('warns but preserves a higher-than-current version for future-migration detection', () => {
+  it('warns about a bypassed gate but preserves a higher-than-current version', () => {
+    // This path is unreachable once the compatibility gate runs first;
+    // the warning exists to make a new, ungated entry point obvious.
     const warn = vi.fn()
     const root: Record<string, unknown> = { folderType: 'environment', id: 'x', fileFormatVersion: 99 }
     normalizeFileFormatVersion(root, { warn })
     expect(root['fileFormatVersion']).toBe(99)
     expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0]?.[0]).toMatch(/fileFormatVersion/)
+    expect(warn.mock.calls[0]?.[0]).toMatch(/gate was bypassed/)
   })
 
   it('is a no-op on non-env-folder shapes', () => {
@@ -118,5 +121,87 @@ describe('normalizeFileFormatVersion', () => {
     const snapshot = JSON.parse(JSON.stringify(root))
     normalizeFileFormatVersion(root, silentLogger)
     expect(root).toEqual(snapshot)
+  })
+})
+
+describe('checkFileFormatCompatibility', () => {
+  const envRoot = (fileFormatVersion?: unknown): Record<string, unknown> => {
+    const root: Record<string, unknown> = { folderType: 'environment', id: 'env-1', name: 'Root' }
+    if (fileFormatVersion !== undefined) root['fileFormatVersion'] = fileFormatVersion
+    return root
+  }
+
+  it('accepts a document at the current version', () => {
+    const result = checkFileFormatCompatibility({ collections: [envRoot(CURRENT_FILE_FORMAT_VERSION)] })
+    expect(result.supported).toBe(true)
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
+    expect(result.current).toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('accepts a document below the current version', () => {
+    const result = checkFileFormatCompatibility({ collections: [envRoot(CURRENT_FILE_FORMAT_VERSION - 1)] })
+    expect(result.supported).toBe(true)
+  })
+
+  it('accepts a legacy document with no version field', () => {
+    const result = checkFileFormatCompatibility({ collections: [envRoot()] })
+    expect(result.supported).toBe(true)
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
+  })
+
+  it('accepts a document whose version is not a finite number', () => {
+    // Malformed values default to current, exactly as the normalizer does —
+    // garbage in the field is a repairable defect, not a future format.
+    for (const garbage of ['two', null, Number.NaN, Number.POSITIVE_INFINITY, {}, []]) {
+      expect(checkFileFormatCompatibility({ collections: [envRoot(garbage)] }).supported).toBe(true)
+    }
+  })
+
+  it('refuses a document above the current version', () => {
+    const result = checkFileFormatCompatibility({ collections: [envRoot(CURRENT_FILE_FORMAT_VERSION + 1)] })
+    expect(result.supported).toBe(false)
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION + 1)
+  })
+
+  it('refuses when ANY root is from the future, not just the first', () => {
+    // A document assembled from several collections is only as openable
+    // as its newest root — accepting it would load part of the file.
+    const result = checkFileFormatCompatibility({
+      collections: [envRoot(CURRENT_FILE_FORMAT_VERSION), envRoot(CURRENT_FILE_FORMAT_VERSION + 5)]
+    })
+    expect(result.supported).toBe(false)
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION + 5)
+  })
+
+  it('reports the HIGHEST future version found', () => {
+    const result = checkFileFormatCompatibility({
+      collections: [envRoot(CURRENT_FILE_FORMAT_VERSION + 9), envRoot(CURRENT_FILE_FORMAT_VERSION + 2)]
+    })
+    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION + 9)
+  })
+
+  it('checks a bare array of roots', () => {
+    expect(checkFileFormatCompatibility([envRoot(CURRENT_FILE_FORMAT_VERSION + 1)]).supported).toBe(false)
+    expect(checkFileFormatCompatibility([envRoot()]).supported).toBe(true)
+  })
+
+  it('checks a single root handed over on its own', () => {
+    expect(checkFileFormatCompatibility(envRoot(CURRENT_FILE_FORMAT_VERSION + 1)).supported).toBe(false)
+    expect(checkFileFormatCompatibility(envRoot()).supported).toBe(true)
+  })
+
+  it('treats unrecognisable content as supported', () => {
+    // An unparsable or empty file is a different failure with a different
+    // message; claiming "update your Restorm" here would misdirect the user.
+    for (const shape of [null, undefined, 42, 'text', {}, { collections: 'not-an-array' }]) {
+      expect(checkFileFormatCompatibility(shape).supported).toBe(true)
+    }
+  })
+
+  it('never mutates the content it inspects', () => {
+    const content = { collections: [envRoot(), envRoot(CURRENT_FILE_FORMAT_VERSION)] }
+    const snapshot = JSON.parse(JSON.stringify(content))
+    checkFileFormatCompatibility(content)
+    expect(content).toEqual(snapshot)
   })
 })

@@ -2612,5 +2612,12 @@
       "body": "{{file}} nu a fost redeschis: Restorm s-a blocat în timp ce îl deschidea la lansarea anterioară. Fișierul dumneavoastră este intact — îl puteți redeschide din fișierele recente.",
       "bodyUnnamed": "Ultimul fișier nu a fost redeschis: Restorm s-a blocat în timp ce îl deschidea la lansarea anterioară. Fișierul dumneavoastră este intact — îl puteți redeschide din fișierele recente."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Proiect creat cu o versiune mai nouă",
+      "message": "Acest fișier a fost creat cu o versiune Restorm mai nouă decât cea pe care o utilizați. Actualizați Restorm pentru a-l deschide.",
+      "versions": "Format de fișier {{found}}; această versiune acceptă până la {{current}}."
+    }
   }
 }

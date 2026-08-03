@@ -23,6 +23,7 @@ import { promises as fs, existsSync } from 'fs'
 import crypto from 'crypto'
 import { join } from 'path'
 import { atomicWriteFile, deserialize, serialize, type PersistenceFormat } from '../PersistenceService'
+import { setTopLevelKey } from './setTopLevelKey'
 
 /**
  * Default property name under which the UUID is stored in the root
@@ -49,6 +50,13 @@ export interface EnsureUuidResult {
   uuid: string
   /** True when the UUID was just generated and written to disk. */
   generated: boolean
+  /**
+   * False when a freshly generated UUID could NOT be written without
+   * damaging the document, so the file was deliberately left alone (see
+   * {@link stampUuid}). The UUID is still usable for this session; it
+   * simply won't be the same one next time.
+   */
+  persisted: boolean
 }
 
 function uuid(): string {
@@ -84,13 +92,10 @@ export async function ensureFolderUuid(options: EnsureFolderUuidOptions): Promis
 
   const currentValue = existing[uuidKey]
   if (typeof currentValue === 'string' && currentValue.length > 0) {
-    return { uuid: currentValue, generated: false }
+    return { uuid: currentValue, generated: false, persisted: true }
   }
 
-  const fresh = uuid()
-  const next = { ...existing, [uuidKey]: fresh }
-  await atomicWriteFile(indexPath, serialize(next, options.format))
-  return { uuid: fresh, generated: true }
+  return await stampUuid(indexPath, uuidKey, options.format, existsSync(indexPath))
 }
 
 /**
@@ -142,11 +147,54 @@ export async function ensureFileUuid(options: EnsureFileUuidOptions): Promise<En
 
   const currentValue = existing[uuidKey]
   if (typeof currentValue === 'string' && currentValue.length > 0) {
-    return { uuid: currentValue, generated: false }
+    return { uuid: currentValue, generated: false, persisted: true }
   }
 
+  return await stampUuid(options.filePath, uuidKey, options.format, existsSync(options.filePath))
+}
+
+/**
+ * Write a freshly generated UUID into an existing document by INSERTING
+ * the key into its text, never by reparsing and re-serializing it.
+ *
+ * The round-trip that used to live here — `serialize({ ...deserialize(raw),
+ * [key]: uuid })` — silently destroyed comments, expanded YAML anchors
+ * into duplicated content, and renormalised quoting and indentation. It
+ * did so on a path the user experiences as *opening* a file, and it hit
+ * hardest exactly where it hurt most: a document only lacks the UUID
+ * when it was hand-authored or created outside the app, which is also
+ * when it is most likely to carry comments and anchors worth keeping.
+ *
+ * When the insertion cannot be proven safe, the file is left completely
+ * untouched and `persisted: false` is returned. Falling back to the
+ * round-trip would reintroduce the very damage this avoids; an identity
+ * that does not survive a restart is a far smaller cost than a document
+ * that does not survive being opened.
+ */
+async function stampUuid(
+  path: string,
+  uuidKey: string,
+  format: PersistenceFormat,
+  fileExists: boolean
+): Promise<EnsureUuidResult> {
   const fresh = uuid()
-  const next = { ...existing, [uuidKey]: fresh }
-  await atomicWriteFile(options.filePath, serialize(next, options.format))
-  return { uuid: fresh, generated: true }
+
+  // A document that does not exist yet has nothing to preserve, so
+  // writing a fresh one is both safe and necessary (the host's save flow
+  // fills in the rest).
+  if (!fileExists) {
+    await atomicWriteFile(path, serialize({ [uuidKey]: fresh }, format))
+    return { uuid: fresh, generated: true, persisted: true }
+  }
+
+  const raw = await fs.readFile(path, 'utf-8')
+  const stamped = setTopLevelKey(raw, uuidKey, fresh, format)
+  if (stamped === null) {
+    // Reporting is the caller's job: this module stays free of the
+    // logger so it can be exercised without an Electron app around it.
+    return { uuid: fresh, generated: true, persisted: false }
+  }
+
+  await atomicWriteFile(path, stamped)
+  return { uuid: fresh, generated: true, persisted: true }
 }

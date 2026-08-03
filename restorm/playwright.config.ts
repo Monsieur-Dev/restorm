@@ -53,6 +53,12 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
+const fileFormatGateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/file-format-gate/features/**/*.feature',
+  steps: ['tests/e2e/bdd/file-format-gate/steps/**/*.ts', 'tests/e2e/bdd/fixtures/file-format-gate.fixture.ts'],
+  outputDir: '.features-gen/file-format-gate'
+})
+
 const statusBarContextMenuTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/status-bar-context-menu/features/**/*.feature',
   steps: ['tests/e2e/bdd/status-bar-context-menu/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
@@ -587,6 +593,10 @@ export default defineConfig({
     {
       name: 'dirty-state',
       testDir: dirtyStateTestDir
+    },
+    {
+      name: 'file-format-gate',
+      testDir: fileFormatGateTestDir
     },
     {
       name: 'status-bar-context-menu',

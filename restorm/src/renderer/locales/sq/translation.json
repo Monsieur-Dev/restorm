@@ -2611,5 +2611,12 @@
       "body": "{{file}} nuk u rihap: Restorm u rrëzua duke e hapur në nisjen e mëparshme. Skedari juaj është i paprekur — mund ta rihapni nga skedarët e fundit.",
       "bodyUnnamed": "Skedari i fundit nuk u rihap: Restorm u rrëzua duke e hapur në nisjen e mëparshme. Skedari juaj është i paprekur — mund ta rihapni nga skedarët e fundit."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekti u krijua me një version më të ri",
+      "message": "Ky skedar u krijua me një version më të ri të Restorm sesa ai që po përdorni. Përditësoni Restorm për ta hapur.",
+      "versions": "Formati i skedarit {{found}}; ky version mbështet deri në {{current}}."
+    }
   }
 }

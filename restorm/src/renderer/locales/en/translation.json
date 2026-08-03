@@ -2611,5 +2611,12 @@
       "body": "{{file}} was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files.",
       "bodyUnnamed": "The last file was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Project created with a newer version",
+      "message": "This file was created with a newer version of Restorm than the one you are running. Please update Restorm to open it.",
+      "versions": "File format {{found}}; this version supports up to {{current}}."
+    }
   }
 }

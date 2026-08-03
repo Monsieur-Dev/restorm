@@ -2612,5 +2612,12 @@
       "body": "{{file}} nije ponovno otvorena: Restorm se srušio pri njezinu otvaranju tijekom prethodnog pokretanja. Vaša je datoteka netaknuta — možete je ponovno otvoriti iz nedavnih datoteka.",
       "bodyUnnamed": "Posljednja datoteka nije ponovno otvorena: Restorm se srušio pri njezinu otvaranju tijekom prethodnog pokretanja. Vaša je datoteka netaknuta — možete je ponovno otvoriti iz nedavnih datoteka."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt stvoren novijom verzijom",
+      "message": "Ova datoteka stvorena je novijom verzijom Restorma od one koju koristite. Ažurirajte Restorm da biste je otvorili.",
+      "versions": "Format datoteke {{found}}; ova verzija podržava do {{current}}."
+    }
   }
 }

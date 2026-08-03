@@ -1,0 +1,36 @@
+.incompatible-project {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.incompatible-project__message {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--vscode-foreground);
+}
+
+.incompatible-project__path {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--vscode-textCodeBlock-background);
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.85em;
+  /* A project path is arbitrarily long and must not widen the dialog. */
+  overflow-wrap: anywhere;
+}
+
+.incompatible-project__versions {
+  margin: 0;
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.9em;
+}
+
+.incompatible-project__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}

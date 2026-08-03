@@ -2613,5 +2613,12 @@
       "body": "Soubor {{file}} nebyl znovu otevřen: Restorm při jeho otevírání během předchozího spuštění spadl. Váš soubor je neporušený — můžete jej otevřít z nedávných souborů.",
       "bodyUnnamed": "Poslední soubor nebyl znovu otevřen: Restorm při jeho otevírání během předchozího spuštění spadl. Váš soubor je neporušený — můžete jej otevřít z nedávných souborů."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt vytvořen novější verzí",
+      "message": "Tento soubor byl vytvořen novější verzí Restormu, než kterou používáte. Aktualizujte prosím Restorm, abyste jej mohli otevřít.",
+      "versions": "Formát souboru {{found}}; tato verze podporuje až {{current}}."
+    }
   }
 }

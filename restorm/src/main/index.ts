@@ -82,6 +82,7 @@ import { pricingUrl } from '../shared/config/site'
 import restormEnTranslation from '../renderer/locales/en/translation.json'
 import restormFrTranslation from '../renderer/locales/fr/translation.json'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
+import { checkFileFormatCompatibility, FILE_FORMAT_TOO_NEW_CODE } from '../shared/config/fileFormatVersion'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
@@ -473,7 +474,23 @@ initFileService({
   defaultFormat: 'yaml',
   maxRecentFiles: 10,
   storagePrefix: 'restorm_',
-  uuidKey: PROJECT_UUID_KEY
+  uuidKey: PROJECT_UUID_KEY,
+  // Refuse a project written by a newer build rather than loading it
+  // "as if it were current": this build cannot know what a later format
+  // added, so a partial read followed by a save would write our
+  // impoverished understanding back over the user's data. The gate runs
+  // before anything is written or published; the renderer turns the code
+  // below into a localized message (the main process carries only two
+  // locales, the renderer carries them all).
+  validateOnOpen: (content) => {
+    const compatibility = checkFileFormatCompatibility(content)
+    if (compatibility.supported) return { ok: true }
+    return {
+      ok: false,
+      code: FILE_FORMAT_TOO_NEW_CODE,
+      detail: { found: compatibility.found, current: compatibility.current }
+    }
+  }
 })
 logger.info('File Service initialized')
 

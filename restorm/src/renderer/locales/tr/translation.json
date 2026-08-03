@@ -2611,5 +2611,12 @@
       "body": "{{file}} yeniden açılmadı: Restorm önceki başlatmada bu dosyayı açarken çöktü. Dosyanız sağlam — son kullanılan dosyalardan yeniden açabilirsiniz.",
       "bodyUnnamed": "Son dosya yeniden açılmadı: Restorm önceki başlatmada bu dosyayı açarken çöktü. Dosyanız sağlam — son kullanılan dosyalardan yeniden açabilirsiniz."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Proje daha yeni bir sürümle oluşturuldu",
+      "message": "Bu dosya, kullandığınızdan daha yeni bir Restorm sürümüyle oluşturuldu. Açmak için Restorm’u güncelleyin.",
+      "versions": "Dosya biçimi {{found}}; bu sürüm en fazla {{current}} destekler."
+    }
   }
 }

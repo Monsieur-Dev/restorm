@@ -2611,5 +2611,12 @@
       "body": "{{file}} non è stato riaperto: Restorm si è arrestato durante la sua apertura all'avvio precedente. Il file è intatto: può riaprirlo dai file recenti.",
       "bodyUnnamed": "L'ultimo file non è stato riaperto: Restorm si è arrestato durante la sua apertura all'avvio precedente. Il file è intatto: può riaprirlo dai file recenti."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Progetto creato con una versione più recente",
+      "message": "Questo file è stato creato con una versione di Restorm più recente di quella in uso. Aggiorna Restorm per aprirlo.",
+      "versions": "Formato file {{found}}; questa versione supporta fino a {{current}}."
+    }
   }
 }

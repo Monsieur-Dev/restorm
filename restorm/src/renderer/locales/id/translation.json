@@ -2610,5 +2610,12 @@
       "body": "{{file}} tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini.",
       "bodyUnnamed": "Berkas terakhir tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Proyek dibuat dengan versi yang lebih baru",
+      "message": "Berkas ini dibuat dengan versi Restorm yang lebih baru daripada yang Anda jalankan. Perbarui Restorm untuk membukanya.",
+      "versions": "Format berkas {{found}}; versi ini mendukung hingga {{current}}."
+    }
   }
 }

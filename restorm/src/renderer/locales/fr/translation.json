@@ -2611,5 +2611,12 @@
       "body": "{{file}} n'a pas été rouvert : Restorm a planté en l'ouvrant lors du lancement précédent. Votre fichier est intact — vous pouvez le rouvrir depuis les fichiers récents.",
       "bodyUnnamed": "Le dernier fichier n'a pas été rouvert : Restorm a planté en l'ouvrant lors du lancement précédent. Votre fichier est intact — vous pouvez le rouvrir depuis les fichiers récents."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projet créé avec une version plus récente",
+      "message": "Ce fichier a été créé avec une version plus récente de Restorm que la vôtre. Veuillez mettre à jour Restorm pour l’ouvrir.",
+      "versions": "Format de fichier {{found}} ; cette version prend en charge jusqu’à {{current}}."
+    }
   }
 }

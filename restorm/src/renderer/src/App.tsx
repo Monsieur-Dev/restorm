@@ -171,6 +171,7 @@ import { RestormWorkbenchContainer } from './components/MainView/Workbench/Resto
 import { suggestRunTarget } from '../../shared/scenarioRunTarget'
 import { ScenarioCliInfoProvider } from './contexts/scenarioRunTargetContext'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
+import { IncompatibleProjectModal } from './components/Modals/IncompatibleProjectModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
 import { removeItemFromTree } from './utils/treeManipulation'
@@ -3288,6 +3289,11 @@ const App: React.FC = () => {
        * "What's new" on the first run after an update, and owns the release-notes
        * modal those toasts (and the Help menu) open. */}
       <UpdateNotifications />
+      {/* Reports a project the main process refused to open because its
+       * file format is newer than this build understands. Rendered here
+       * rather than as a native dialog so the message reaches the user in
+       * their own language — the main process carries only en/fr. */}
+      <IncompatibleProjectModal />
       <CrashConsentPrompt />
       {/* Headless: says so when the crash-loop protection withheld a file, so
        * an app that starts empty on purpose is not mistaken for one that lost

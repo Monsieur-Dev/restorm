@@ -2613,5 +2613,12 @@
       "body": "Plik {{file}} nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików.",
       "bodyUnnamed": "Ostatni plik nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt utworzony w nowszej wersji",
+      "message": "Ten plik został utworzony w nowszej wersji Restorm niż używana. Zaktualizuj Restorm, aby go otworzyć.",
+      "versions": "Format pliku {{found}}; ta wersja obsługuje do {{current}}."
+    }
   }
 }

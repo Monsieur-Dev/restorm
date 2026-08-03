@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import {
   logger,
   getPersistenceService,
@@ -10,6 +10,7 @@ import {
   deserialize as coreDeserialize
 } from 'electron-core-ui'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
+import { checkFileFormatCompatibility, FILE_FORMAT_TOO_NEW_CODE } from '../shared/config/fileFormatVersion'
 import { join, basename } from 'path'
 import { promises as fs, existsSync, mkdirSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -499,6 +500,21 @@ export async function saveFolderItems(
 // ==========================================================================
 
 /**
+ * Tell every window a project was refused, so the renderer can show the
+ * reason in the user's language. Folder mode does not go through
+ * `FileService.open`, which owns the same broadcast for file mode, so
+ * the two paths converge on one channel rather than one of them failing
+ * silently.
+ */
+function broadcastOpenRejected(payload: { path: string; code: string; detail: Record<string, unknown> }): void {
+  for (const window of BrowserWindow.getAllWindows()) {
+    if (!window.isDestroyed()) {
+      window.webContents.send('file:open-rejected', payload)
+    }
+  }
+}
+
+/**
  * Load a collection from folder structure
  */
 export async function loadFolderStructure(
@@ -509,21 +525,6 @@ export async function loadFolderStructure(
     const config = readRestormConfig(folderPath)
     const format = config.format
     const ext = format === 'json5' ? 'json5' : format
-
-    // Stamp / read the stable project UUID FIRST, before we parse anything,
-    // so it's available on the content that the renderer sees via the
-    // `file:opened` event. This is the identity the renderer uses to key
-    // per-project preferences (sidebar expansion, etc) that must survive
-    // folder moves and renames — filePath is not stable enough. We pass
-    // our own `uuidKey` so existing `_projectUuid`-stamped files keep
-    // resolving to the same UUID.
-    const { uuid: projectUuid } = await ensureFolderUuid({
-      projectPath: folderPath,
-      format,
-      extension: ext,
-      indexFileName: 'index',
-      uuidKey: PROJECT_UUID_KEY
-    })
 
     // Look for index file
     const indexFiles = ['index.yaml', 'index.yml', 'index.json', 'index.json5']
@@ -561,6 +562,42 @@ export async function loadFolderStructure(
         data = result.data as Record<string, unknown>
       }
     }
+
+    // Compatibility gate, BEFORE the UUID stamp below writes to the
+    // index. Folder mode is the realistic way a user meets a
+    // future-format project at all — a colleague on a newer build
+    // commits, git pulls it in — so refusing here matters as much as it
+    // does for a single file, and refusing must leave the project on
+    // disk untouched.
+    const compatibility = checkFileFormatCompatibility(data)
+    if (!compatibility.supported) {
+      logger.warn('Refusing to open a folder project written by a newer build', {
+        path: folderPath,
+        found: compatibility.found,
+        current: compatibility.current
+      })
+      broadcastOpenRejected({
+        path: folderPath,
+        code: FILE_FORMAT_TOO_NEW_CODE,
+        detail: { found: compatibility.found, current: compatibility.current }
+      })
+      return null
+    }
+
+    // Stamp / read the stable project UUID. This is the identity the
+    // renderer uses to key per-project preferences (sidebar expansion,
+    // etc) that must survive folder moves and renames — filePath is not
+    // stable enough. We pass our own `uuidKey` so existing
+    // `_projectUuid`-stamped files keep resolving to the same UUID.
+    // It runs AFTER the gate above so a refused project is never
+    // written to.
+    const { uuid: projectUuid } = await ensureFolderUuid({
+      projectPath: folderPath,
+      format,
+      extension: ext,
+      indexFileName: 'index',
+      uuidKey: PROJECT_UUID_KEY
+    })
 
     // Ensure the top-level project UUID is always present on the data
     // the renderer receives. `reconstructFromFolders` builds a fresh
@@ -835,7 +872,7 @@ export async function attachDraftStoreForFolder(
   }
   const ext = format === 'json5' ? 'json5' : format
   try {
-    const { uuid, generated } = await ensureFolderUuid({
+    const { uuid, generated, persisted } = await ensureFolderUuid({
       projectPath: folderPath,
       format,
       extension: ext,
@@ -844,6 +881,16 @@ export async function attachDraftStoreForFolder(
     })
     if (generated) {
       logger.info('Generated project UUID', { path: folderPath, uuid })
+    }
+    if (!persisted) {
+      // Same reasoning as file mode: an identity that changes on every
+      // call cannot namespace drafts, and pretending otherwise would
+      // hide unsaved work rather than protect it.
+      logger.warn(
+        'No crash-recovery drafts for this project: its identity could not be stored without rewriting the index',
+        { path: folderPath }
+      )
+      return
     }
 
     const fileService = getFileService()
@@ -888,9 +935,24 @@ export async function attachDraftStoreForFile(
   // the draft store can use. `.restorm` files are YAML under the hood.
   const ext = format === 'json5' ? 'json5' : format
   try {
-    const { uuid, generated } = await ensureFileUuid({ filePath, format, uuidKey: PROJECT_UUID_KEY })
+    const { uuid, generated, persisted } = await ensureFileUuid({ filePath, format, uuidKey: PROJECT_UUID_KEY })
     if (generated) {
       logger.info('Generated project UUID for file', { path: filePath, uuid })
+    }
+    if (!persisted) {
+      // The identity could not be written without rewriting the user's
+      // file, so it is a fresh value on every call. Attaching a draft
+      // store to it would be WORSE than not attaching one: the two
+      // attaches a single open performs would land on different
+      // namespaces, and a crash would file the drafts under an id
+      // nothing can find again — unsaved work that looks recoverable
+      // and is not. No crash recovery for this project is the honest
+      // outcome; the project itself opens and saves normally.
+      logger.warn(
+        'No crash-recovery drafts for this project: its identity could not be stored without rewriting the file',
+        { path: filePath }
+      )
+      return
     }
 
     const fileService = getFileService()

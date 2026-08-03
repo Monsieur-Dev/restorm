@@ -2611,5 +2611,12 @@
       "body": "{{file}} wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen.",
       "bodyUnnamed": "Die letzte Datei wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt mit einer neueren Version erstellt",
+      "message": "Diese Datei wurde mit einer neueren Version von Restorm erstellt als der, die Sie verwenden. Bitte aktualisieren Sie Restorm, um sie zu öffnen.",
+      "versions": "Dateiformat {{found}}; diese Version unterstützt bis zu {{current}}."
+    }
   }
 }

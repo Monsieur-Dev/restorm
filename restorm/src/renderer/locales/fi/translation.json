@@ -2611,5 +2611,12 @@
       "body": "{{file}} jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista.",
       "bodyUnnamed": "Viimeisin tiedosto jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekti luotu uudemmalla versiolla",
+      "message": "Tämä tiedosto on luotu uudemmalla Restorm-versiolla kuin käytössäsi oleva. Päivitä Restorm avataksesi sen.",
+      "versions": "Tiedostomuoto {{found}}; tämä versio tukee enintään {{current}}."
+    }
   }
 }

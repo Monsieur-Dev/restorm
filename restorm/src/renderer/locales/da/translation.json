@@ -2611,5 +2611,12 @@
       "body": "{{file}} blev ikke genåbnet: Restorm gik ned, mens den blev åbnet ved forrige opstart. Din fil er intakt — du kan åbne den igen fra de seneste filer.",
       "bodyUnnamed": "Den seneste fil blev ikke genåbnet: Restorm gik ned, mens den blev åbnet ved forrige opstart. Din fil er intakt — du kan åbne den igen fra de seneste filer."
     }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt oprettet med en nyere version",
+      "message": "Denne fil blev oprettet med en nyere version af Restorm end den, du bruger. Opdater Restorm for at åbne den.",
+      "versions": "Filformat {{found}}; denne version understøtter op til {{current}}."
+    }
   }
 }

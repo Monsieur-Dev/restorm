@@ -48,6 +48,40 @@ export interface CurrentFileState {
 }
 
 /**
+ * Verdict returned by {@link FileServiceConfig.validateOnOpen}.
+ *
+ * `ok: false` aborts the open completely: the document is not loaded, the
+ * previous file stays open, the path is not added to recent files, and —
+ * crucially — nothing is written to the file.
+ */
+export interface OpenValidationResult {
+  /** `false` refuses the document. */
+  ok: boolean
+  /**
+   * Stable machine-readable reason, forwarded to the renderer with the
+   * `file:open-rejected` broadcast. The host app maps it to a localized
+   * message; the library never renders user-facing text of its own.
+   */
+  code?: string
+  /**
+   * Structured values the host's message needs (e.g. the version found
+   * versus the version supported). Must be JSON-serializable — it crosses
+   * the IPC boundary.
+   */
+  detail?: Record<string, unknown>
+}
+
+/** Payload of the `file:open-rejected` broadcast. */
+export interface OpenRejectedPayload {
+  /** Absolute path of the document that was refused. */
+  path: string
+  /** The `code` returned by the validator, when it supplied one. */
+  code?: string
+  /** The `detail` returned by the validator, when it supplied one. */
+  detail?: Record<string, unknown>
+}
+
+/**
  * File service configuration
  */
 export interface FileServiceConfig {
@@ -69,6 +103,25 @@ export interface FileServiceConfig {
    * disk (e.g. restorm's `_projectUuid`) should set this explicitly.
    */
   uuidKey?: string
+  /**
+   * Optional gate letting the host app refuse a document it cannot open.
+   *
+   * Called by `open()` on the freshly parsed content, BEFORE anything is
+   * written to the file, before the UUID is stamped, before the path
+   * joins recent files, and before `file:opened` is broadcast — so a
+   * refusal leaves both the file and the app exactly as they were.
+   *
+   * The library stays out of the decision: it neither knows nor cares why
+   * a document is unacceptable (an unsupported format version, a schema
+   * the build predates, a required capability the app lacks). It only
+   * relays the `code` / `detail` the validator returns, so the renderer
+   * can render a message in the user's language — the main process
+   * typically carries far fewer locales than the renderer does.
+   *
+   * Must be synchronous and side-effect free. Throwing is treated as a
+   * refusal rather than being allowed to escape.
+   */
+  validateOnOpen?: (content: unknown, filePath: string) => OpenValidationResult
 }
 
 /**
@@ -174,6 +227,7 @@ export const FileServiceEvents = {
   STATE_CHANGED: 'file:state:changed',
   DIRTY_CHANGED: 'file:dirty:changed',
   FILE_OPENED: 'file:opened',
+  FILE_OPEN_REJECTED: 'file:open-rejected',
   FILE_SAVED: 'file:saved',
   FILE_CLOSED: 'file:closed'
 } as const
