@@ -950,7 +950,7 @@ class ResponseHistoryService {
             const valueStr = typeof value === 'string' ? value : value.toString ? value.toString() : ''
             return {
               key,
-              value: contextService.resolveValue(valueStr, requestId, runContexts?.bodyFields),
+              value: contextService.resolveValue(valueStr, requestId, runContexts?.base),
               enabled: raw.enabled
             }
           })
@@ -1057,10 +1057,10 @@ class ResponseHistoryService {
     // one the execution service used for that family — so the archived
     // "what we sent" is built the way the wire was, family by family.
     const familyContext = groupName === 'params'
-      ? runContexts?.queryParams
+      ? runContexts?.base
       : groupName === 'pathParams'
-        ? runContexts?.pathParams
-        : runContexts?.headers
+        ? runContexts?.base
+        : runContexts?.base
     const ctx = contextService.getRequestContext(requestId) as unknown
     if (!this.isRecord(ctx)) return []
     const keyValueGroups = ctx['keyValueGroups']

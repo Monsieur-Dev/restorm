@@ -264,12 +264,12 @@ class HTTPExecutionService {
               // path always ran the resolver regardless of type,
               // so a user who handcrafted `{{token}}` as a plain
               // string saw it silently expanded on send.
-              const resolvedKey = contextService.resolveValue(h.key, requestId, runContexts?.headers)
+              const resolvedKey = contextService.resolveValue(h.key, requestId, runContexts?.base)
               // An unknown variable resolves to '', and `headers['']` throws
               // ERR_INVALID_HTTP_TOKEN — drop the row instead of failing the
               // whole send on a typo'd / not-yet-defined variable.
               if (!resolvedKey) continue
-              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId, runContexts?.headers)
+              headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, requestId, runContexts?.base)
             }
           }
         }
@@ -308,8 +308,8 @@ class HTTPExecutionService {
                 // path). Coerce uniformly — body templates always run
                 // through handlebars regardless of declared type.
                 const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
-                const resolvedKey = contextService.resolveValue(field.key, requestId, runContexts?.bodyFields)
-                const resolvedValue = contextService.resolveValue(rawValue, requestId, runContexts?.bodyFields)
+                const resolvedKey = contextService.resolveValue(field.key, requestId, runContexts?.base)
+                const resolvedValue = contextService.resolveValue(rawValue, requestId, runContexts?.base)
                 params.append(resolvedKey, resolvedValue)
               }
             }
@@ -323,7 +323,7 @@ class HTTPExecutionService {
             // to an existing file path is streamed as a file part (so
             // `multipart/form-data` with a file upload works end-to-end
             // against e.g. Petstore `/pet/{id}/uploadImage`).
-            const built = this.buildMultipartBody(bodyData.fields, requestId, runContexts?.bodyFields)
+            const built = this.buildMultipartBody(bodyData.fields, requestId, runContexts?.base)
             body = built.buffer
             headers['Content-Type'] ??= `multipart/form-data; boundary=${built.boundary}`
             break
@@ -1292,9 +1292,9 @@ class HTTPExecutionService {
       // with a real `ValueType` to gate on anyway (the renderer-import
       // path lands here for spec-fetch auth).
       if (contextService.getRequestContext(resolutionRequestId)) {
-        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, resolutionRequestId, authRunContexts?.headers)
+        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, resolutionRequestId, authRunContexts?.base)
       } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
-        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, parentRequestId, runContexts?.headers)
+        headers[resolvedKey] = contextService.resolveKeyValueForRequest(h, parentRequestId, runContexts?.base)
       } else {
         headers[resolvedKey] = extractString(h.value)
       }

@@ -268,11 +268,11 @@ class GRPCExecutionService {
         // path/query param key or the URL — see `HTTPExecutionService`. The
         // VALUE stays type-aware: only ExpressionValue rows get
         // handlebars-substituted; a StringValue row ships verbatim.
-        const resolvedKey = contextService.resolveValue(h.key, requestId, runContexts?.headers)
+        const resolvedKey = contextService.resolveValue(h.key, requestId, runContexts?.base)
         // An unknown variable resolves to '' — `Metadata.set('')` rejects the
         // empty name as an invalid key. Skip the row rather than throw.
         if (!resolvedKey) continue
-        metadata.set(resolvedKey, contextService.resolveKeyValueForRequest(h, requestId, runContexts?.headers))
+        metadata.set(resolvedKey, contextService.resolveKeyValueForRequest(h, requestId, runContexts?.base))
       }
     }
 

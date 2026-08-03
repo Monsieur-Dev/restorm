@@ -111,7 +111,7 @@ describe('disposable resolution contexts', () => {
       const contexts = contextService.composeResolutionContexts(REQ_ID, { petId: '3', token: 'run-token' })
       // Use them for everything a dispatch uses them for.
       contextService.resolveUrlForRequest(REQ_ID, contexts)
-      contextService.resolveKeyValueForRequest(headerRow('Authorization', 'Bearer {{token}}', true), REQ_ID, contexts.headers)
+      contextService.resolveKeyValueForRequest(headerRow('Authorization', 'Bearer {{token}}', true), REQ_ID, contexts.base)
       contextService.resolveValue('{{petId}}', REQ_ID, contexts.base)
 
       const after = JSON.parse(JSON.stringify({
@@ -139,46 +139,41 @@ describe('disposable resolution contexts', () => {
     it('hands out a fresh object each time, so a caller mutating one cannot reach the next', () => {
       registerRequest()
       const first = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
-      first.headers['petId'] = 'mutated'
+      first.base['petId'] = 'mutated'
       first.base['token'] = 'mutated'
       const second = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
-      expect(second.headers['petId']).toBe('3')
+      expect(second.base['petId']).toBe('3')
       expect(second.base['token']).toBe('env-token')
     })
 
-    it('keeps the row families blind to each other', () => {
+    it('hands out a context the caller may scribble on without reaching the store', () => {
       registerRequest()
       const contexts = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
-      // Distinct objects, not four references to one. A shared object would let
-      // a row accumulated by one family be read while resolving another.
-      contexts.pathParams['scratch'] = 'path'
-      expect(contexts.queryParams['scratch']).toBeUndefined()
-      expect(contexts.headers['scratch']).toBeUndefined()
-      expect(contexts.base['scratch']).toBeUndefined()
+      // The composed context is the caller's copy. Writing into it must not
+      // reach anything the service keeps — that write-through is the leak this
+      // whole change exists to remove.
+      contexts.base['scratch'] = 'path'
+      expect(contextService.composeResolutionContexts(REQ_ID, { petId: '3' }).base['scratch']).toBeUndefined()
     })
+
   })
 
-  describe('the body-field family: absent is not empty', () => {
-    it('omits bodyFields for a body that carries no fields', () => {
-      registerRequest({ type: 'text', content: '{"id":{{petId}}}' })
-      const contexts = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
-      expect('bodyFields' in contexts).toBe(false)
-      expect(contexts.bodyFields).toBeUndefined()
-    })
-
-    it('provides bodyFields for a field-bearing body that declares zero fields', () => {
-      registerRequest({ type: 'form-data', fields: [] })
-      const contexts = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
-      // Present, and carrying the resolution values — "this family applies and
-      // is empty" must not be confused with "this family does not apply".
-      expect('bodyFields' in contexts).toBe(true)
-      expect(contexts.bodyFields?.['petId']).toBe('3')
-    })
-
-    it('provides bodyFields for x-www-form-urlencoded too', () => {
-      registerRequest({ type: 'x-www-form-urlencoded', fields: [] })
-      expect(contextService.composeResolutionContexts(REQ_ID, { petId: '3' }).bodyFields).toBeDefined()
-    })
+  describe('one context regardless of body type', () => {
+    // The per-family split this replaced was HTTP's anatomy on a type every
+    // protocol shares. Whatever the body is, a request resolves against one
+    // context — so these three cases must be indistinguishable.
+    for (const body of [
+      { type: 'text', content: '{"id":{{petId}}}' },
+      { type: 'form-data', fields: [] },
+      { type: 'x-www-form-urlencoded', fields: [] }
+    ] as const) {
+      it(`composes the same single context for a ${body.type} body`, () => {
+        registerRequest(body)
+        const contexts = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
+        expect(Object.keys(contexts).sort()).toEqual(['base', 'runOverlay'])
+        expect(contexts.base['petId']).toBe('3')
+      })
+    }
   })
 
   describe('during the run, the run wins', () => {
@@ -202,7 +197,7 @@ describe('disposable resolution contexts', () => {
       const auth = headerRow('Authorization', 'Bearer {{token}}', true)
       const contexts = contextService.composeResolutionContexts(REQ_ID, { token: 'run-token' })
 
-      expect(contextService.resolveKeyValueForRequest(auth, REQ_ID, contexts.headers)).toBe('Bearer run-token')
+      expect(contextService.resolveKeyValueForRequest(auth, REQ_ID, contexts.base)).toBe('Bearer run-token')
       // Without the run's contexts — a manual Send, the display — the same row
       // resolves from the environment.
       expect(contextService.resolveKeyValueForRequest(auth, REQ_ID)).toBe('Bearer env-token')
@@ -221,7 +216,7 @@ describe('disposable resolution contexts', () => {
     it('resolves a body FIELD from the run mid-execution', () => {
       registerRequest({ type: 'form-data', fields: [] })
       const contexts = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
-      expect(contextService.resolveValue('{{petId}}', REQ_ID, contexts.bodyFields)).toBe('3')
+      expect(contextService.resolveValue('{{petId}}', REQ_ID, contexts.base)).toBe('3')
     })
   })
 
@@ -250,14 +245,14 @@ describe('disposable resolution contexts', () => {
       // from the reference it already holds.
       registerRequest()
       const contexts = contextService.composeResolutionContexts(REQ_ID, { petId: '3' })
-      const beforeIdentity = contexts.headers
+      const beforeIdentity = contexts.base
 
       seedEnvironment({ ...ENV_VARIABLES, token: 'hydrated-token' })
       contextService.refreshResolutionContexts(REQ_ID, contexts)
 
-      expect(contexts.headers).toBe(beforeIdentity)
+      expect(contexts.base).toBe(beforeIdentity)
       expect(contexts.base['token']).toBe('hydrated-token')
-      expect(contexts.headers['token']).toBe('hydrated-token')
+      expect(contexts.base['token']).toBe('hydrated-token')
       // The run's values survive the re-seed — they are not part of what changed.
       expect(contexts.base['petId']).toBe('3')
       expect(contexts.runOverlay?.['petId']).toBe('3')

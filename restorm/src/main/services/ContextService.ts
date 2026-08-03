@@ -819,23 +819,17 @@ class ContextService {
     const ctx = this.requestContexts.get(requestId)
     const env = ctx ? this.envContextFor(ctx) : undefined
     const overlay = runOverlay && Object.keys(runOverlay).length > 0 ? runOverlay : undefined
-    // One FRESH object per family. Spreading four times rather than sharing one
-    // is deliberate: the families are blind to each other, and a shared object
-    // would let a row accumulated by one family be read by another the moment
-    // anything starts writing into these.
-    const compose = (): TransformedContext => ({ ...(env ?? {}), ...(overlay ?? {}) })
+    // ONE context, not a per-family bundle. The four families this used to
+    // carry (path params, query params, headers, body fields) are HTTP's
+    // anatomy, and this object is shared by every protocol — Kafka, Redis,
+    // gRPC and AMQP each would have had to pick a family that did not
+    // describe them. They were seeded identically anyway, so collapsing them
+    // changes nothing: per-family cumulation that genuinely exists lives
+    // inside `URLResolver`, which is HTTP-specific by design.
     const contexts: ResolutionContexts = {
       ...(overlay !== undefined ? { runOverlay: { ...overlay } } : {}),
-      base: compose(),
-      pathParams: compose(),
-      queryParams: compose(),
-      headers: compose()
+      base: { ...(env ?? {}), ...(overlay ?? {}) }
     }
-    // `bodyFields` exists only for the two body types that carry rows. Absent
-    // means "no field family here at all"; a field-bearing body with zero
-    // fields still gets one, empty.
-    const bodyType = ctx?.fullData?.body?.type
-    if (bodyType === 'form-data' || bodyType === 'x-www-form-urlencoded') contexts.bodyFields = compose()
     return contexts
   }
 
@@ -865,12 +859,6 @@ class ContextService {
       Object.assign(target, source)
     }
     reseed(contexts.base, fresh.base)
-    reseed(contexts.pathParams, fresh.pathParams)
-    reseed(contexts.queryParams, fresh.queryParams)
-    reseed(contexts.headers, fresh.headers)
-    // The body-field family's PRESENCE describes the request's body type, which
-    // a hydration cannot change — re-seed it when it is there, never create it.
-    if (contexts.bodyFields && fresh.bodyFields) reseed(contexts.bodyFields, fresh.bodyFields)
   }
 
   /**
@@ -886,7 +874,7 @@ class ContextService {
     const ctx = this.requestContexts.get(requestId)
     if (!ctx?.fullData) return this.resolvedUrls.get(requestId)
     const data = this.buildResolvableData(ctx, ctx.fullData, requestId)
-    return resolveUrl(data, contexts.pathParams, this.transformValue.bind(this), contexts.runOverlay, contexts.queryParams)
+    return resolveUrl(data, contexts.base, this.transformValue.bind(this), contexts.runOverlay, contexts.base)
   }
 
   // =========================================================================

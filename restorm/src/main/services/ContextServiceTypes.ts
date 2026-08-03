@@ -296,29 +296,22 @@ export interface ResolutionContexts {
    */
   runOverlay?: TransformedContext
   /**
-   * env + run. What a value belonging to no row family resolves against: a
-   * `text` / `file` body, a message payload, a topic, a routing key, a
-   * non-HTTP url.
+   * env + run. Everything a request resolves against.
+   *
+   * Deliberately ONE context and not a per-family bundle. An earlier shape
+   * carried a separate context for path params, query params, headers and
+   * body fields — which is the anatomy of an HTTP request, and this type is
+   * shared by every protocol. Kafka has a topic, Redis a command, gRPC a
+   * message, AMQP a routing key; none of them has a path param, and each
+   * would have had to pick a family that did not describe it.
+   *
+   * Nothing is lost: the four were seeded identically, so they only ever
+   * differed once a per-family rule wrote into one of them, and no such rule
+   * exists. Where per-family cumulation genuinely applies — a query row
+   * seeing an earlier query row but not a path row — it lives inside
+   * `URLResolver`, which is HTTP-specific and the right place for it.
    */
   base: TransformedContext
-  /** env + run. Seed for the URL template's cumulative path-param resolution. */
-  pathParams: TransformedContext
-  /** env + run. Seed for the cumulative query-string resolution. */
-  queryParams: TransformedContext
-  /** env + run. What a header row resolves against. */
-  headers: TransformedContext
-  /**
-   * env + run. What a body FIELD resolves against — `form-data` and
-   * `x-www-form-urlencoded` only, the two body types that carry rows.
-   *
-   * ABSENT means "this body has no fields at all" (`text`, `file`, or no body);
-   * present-and-empty means "a field-bearing body that declares zero fields".
-   * The two must not collapse: the first says the family does not apply, the
-   * second says it applies and is empty, and a reader that treats one as the
-   * other will resolve a body field against a context that was never built for
-   * it.
-   */
-  bodyFields?: TransformedContext
 }
 
 /** Resolved URL result */
