@@ -438,6 +438,11 @@
         "requestBody": "Trupi i kërkesës",
         "graph": "Grafiku"
       },
+      "infos": {
+        "sentAt": "Dërguar më",
+        "requestBody": "Trupi i kërkesës",
+        "requestBodyFile": "Skedar"
+      },
       "loading": "Po dërgohet kërkesa...",
       "noResponseBody": "Pa trup përgjigjeje — shih Infos për detaje",
       "noResponse": "Klikoni Dërgo për të ekzekutuar kërkesën",
@@ -2140,6 +2145,11 @@
     "closePreview": "Mbyll",
     "captureImageTitle": "Pamja e ekranit MCP",
     "captureVideoTitle": "Regjistrim ekrani MCP"
+  },
+  "history": {
+    "title": "Historiku",
+    "maxEntriesTitle": "Hyrjet e ruajtura për çdo historik",
+    "maxEntriesDescription": "Sa hyrje ruan çdo historik: thirrjet e regjistruara të një kërkese, vulat kohore të dërgimit të një kërkese dhe vulat kohore të ekzekutimit të një skenari. Thirrjet e fiksuara ruhen gjithmonë, pavarësisht nga kjo vlerë."
   },
   "mcp": {
     "title": "MCP",

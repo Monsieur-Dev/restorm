@@ -18,9 +18,9 @@
  */
 import { BrowserWindow } from 'electron'
 import { logger, getStorageService } from 'electron-core-ui/main'
+import { getHistoryLimit, onHistoryLimitChanged } from './historyRetention'
 
 const STORAGE_KEY = 'scenario_usage'
-const HISTORY_LIMIT = 10
 const SAVE_DEBOUNCE_MS = 500
 const CHANGE_EVENT = 'scenario-usage:changed'
 
@@ -30,7 +30,8 @@ export interface ScenarioUsageEntry {
   count: number
   /** ISO timestamp of the last run. */
   lastRunAt: string
-  /** Last 10 run timestamps (newest first). */
+  /** The most recent run timestamps (newest first), capped by the
+   *  `history:maxEntries` setting. */
   history: string[]
 }
 
@@ -51,6 +52,7 @@ function isUsageMap(value: unknown): value is ScenarioUsageMap {
 class ScenarioUsageService {
   private data: ScenarioUsageMap = {}
   private saveTimer: NodeJS.Timeout | null = null
+  private unsubscribeLimit: (() => void) | null = null
   private initialized = false
 
   initialize(): void {
@@ -58,9 +60,20 @@ class ScenarioUsageService {
     this.initialized = true
     const stored = getStorageService().get(STORAGE_KEY)
     this.data = isUsageMap(stored) ? stored : {}
+
+    // Lowering the cap has to shrink what is ALREADY stored, not just bound
+    // the next run — otherwise a user who drops the limit keeps seeing the
+    // old, longer history until every scenario happens to be run again.
+    this.unsubscribeLimit = onHistoryLimitChanged((limit) => {
+      this.applyLimit(limit)
+    })
   }
 
   dispose(): void {
+    if (this.unsubscribeLimit) {
+      this.unsubscribeLimit()
+      this.unsubscribeLimit = null
+    }
     if (this.saveTimer) {
       clearTimeout(this.saveTimer)
       this.saveTimer = null
@@ -75,7 +88,7 @@ class ScenarioUsageService {
     if (!scenarioId) return
     const now = new Date().toISOString()
     const existing = this.data[scenarioId]
-    const nextHistory = [now, ...(existing?.history ?? [])].slice(0, HISTORY_LIMIT)
+    const nextHistory = [now, ...(existing?.history ?? [])].slice(0, getHistoryLimit())
     this.data[scenarioId] = {
       count: (existing?.count ?? 0) + 1,
       lastRunAt: now,
@@ -88,6 +101,25 @@ class ScenarioUsageService {
   /** Current snapshot of the full map (shallow clone). */
   getAll(): ScenarioUsageMap {
     return { ...this.data }
+  }
+
+  /** Truncate every stored history to `limit`. No-op (no save, no broadcast)
+   *  when nothing actually exceeded it, so raising the cap costs nothing. */
+  private applyLimit(limit: number): void {
+    let changed = false
+    const next: ScenarioUsageMap = {}
+    for (const [scenarioId, entry] of Object.entries(this.data)) {
+      if (entry.history.length > limit) {
+        next[scenarioId] = { ...entry, history: entry.history.slice(0, limit) }
+        changed = true
+      } else {
+        next[scenarioId] = entry
+      }
+    }
+    if (!changed) return
+    this.data = next
+    this.scheduleSave()
+    this.broadcast()
   }
 
   private scheduleSave(): void {

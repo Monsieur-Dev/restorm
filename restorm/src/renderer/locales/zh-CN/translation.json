@@ -437,6 +437,11 @@
         "requestBody": "请求正文",
         "graph": "图表"
       },
+      "infos": {
+        "sentAt": "发送时间",
+        "requestBody": "请求正文",
+        "requestBodyFile": "文件"
+      },
       "loading": "正在发送请求...",
       "noResponseBody": "无响应正文 — 详情请见 Infos",
       "noResponse": "点击“发送”以执行请求",
@@ -2139,6 +2144,11 @@
     "closePreview": "关闭",
     "captureImageTitle": "MCP 截图",
     "captureVideoTitle": "MCP 屏幕录制"
+  },
+  "history": {
+    "title": "历史记录",
+    "maxEntriesTitle": "每个历史记录保留的条目数",
+    "maxEntriesDescription": "每个历史记录保留的条目数：请求已记录的调用、请求的发送时间戳以及场景的运行时间戳。已固定的调用始终保留，与此值无关。"
   },
   "mcp": {
     "title": "MCP",

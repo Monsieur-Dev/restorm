@@ -440,6 +440,11 @@
         "requestBody": "Tělo požadavku",
         "graph": "Graf"
       },
+      "infos": {
+        "sentAt": "Odesláno",
+        "requestBody": "Tělo požadavku",
+        "requestBodyFile": "Soubor"
+      },
       "loading": "Odesílání požadavku...",
       "noResponseBody": "Bez těla odpovědi — podrobnosti viz Infos",
       "noResponse": "Klikněte na Odeslat pro spuštění požadavku",
@@ -2142,6 +2147,11 @@
     "closePreview": "Zavřít",
     "captureImageTitle": "Snímek obrazovky MCP",
     "captureVideoTitle": "Videozáznam MCP"
+  },
+  "history": {
+    "title": "Historie",
+    "maxEntriesTitle": "Počet záznamů uchovávaných v historii",
+    "maxEntriesDescription": "Kolik záznamů uchovává každá historie: zaznamenaná volání požadavku, časové značky odeslání požadavku a časové značky spuštění scénáře. Připnutá volání se uchovávají vždy, bez ohledu na tuto hodnotu."
   },
   "mcp": {
     "title": "MCP",

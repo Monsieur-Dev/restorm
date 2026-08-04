@@ -35,6 +35,30 @@ groups:
                 labelKey: "console.requestFormat.curl"
               - value: "powershell"
                 labelKey: "console.requestFormat.powershell"
+  - id: "history"
+    titleKey: "history.title"
+    items:
+      # One knob for the three per-item histories the app keeps: a request's
+      # recorded calls (the response archive), a request's send timestamps and
+      # a scenario's run timestamps. They are distinct stores but share the
+      # same question — "how far back do you want to be able to look?" — so a
+      # single number avoids three controls that a user would only ever set to
+      # the same value.
+      #
+      # The floor is 1, not 0: the response archive is the store a user
+      # actually reads, and "keep 0 calls" reads as a broken feature rather
+      # than a choice. Pinned entries are exempt from the cap regardless of
+      # what this is set to — see `ResponseHistoryService.addEntryAndPrune`.
+      - setting:
+          id: "maxEntries"
+          titleKey: "history.maxEntriesTitle"
+          descriptionKey: "history.maxEntriesDescription"
+          type: "number"
+          default: 10
+          params:
+            min: 1
+            max: 1000
+            integer: true
   - id: "mcp"
     titleKey: "mcp.title"
     items:

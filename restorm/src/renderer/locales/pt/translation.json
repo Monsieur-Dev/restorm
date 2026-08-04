@@ -438,6 +438,11 @@
         "requestBody": "Corpo do pedido",
         "graph": "Grafo"
       },
+      "infos": {
+        "sentAt": "Enviado em",
+        "requestBody": "Corpo do pedido",
+        "requestBodyFile": "Ficheiro"
+      },
       "loading": "A enviar pedido...",
       "noResponseBody": "Sem corpo de resposta — consulte Infos para detalhes",
       "noResponse": "Clique em Enviar para executar o pedido",
@@ -2140,6 +2145,11 @@
     "closePreview": "Fechar",
     "captureImageTitle": "Captura de ecrã MCP",
     "captureVideoTitle": "Gravação de ecrã MCP"
+  },
+  "history": {
+    "title": "Histórico",
+    "maxEntriesTitle": "Entradas mantidas por histórico",
+    "maxEntriesDescription": "Quantas entradas cada histórico mantém: as chamadas registadas de um pedido, os carimbos temporais de envio de um pedido e os carimbos temporais de execução de um cenário. As chamadas fixadas são sempre mantidas, qualquer que seja este valor."
   },
   "mcp": {
     "title": "MCP",

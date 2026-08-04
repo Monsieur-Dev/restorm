@@ -437,6 +437,11 @@
         "requestBody": "Body permintaan",
         "graph": "Grafik"
       },
+      "infos": {
+        "sentAt": "Dikirim pada",
+        "requestBody": "Body permintaan",
+        "requestBodyFile": "Berkas"
+      },
       "loading": "Mengirim permintaan...",
       "noResponseBody": "Tidak ada isi respons — lihat Infos untuk detail",
       "noResponse": "Klik Kirim untuk menjalankan permintaan",
@@ -2139,6 +2144,11 @@
     "closePreview": "Tutup",
     "captureImageTitle": "Tangkapan layar MCP",
     "captureVideoTitle": "Rekaman layar MCP"
+  },
+  "history": {
+    "title": "Riwayat",
+    "maxEntriesTitle": "Entri yang disimpan per riwayat",
+    "maxEntriesDescription": "Berapa banyak entri yang disimpan setiap riwayat: panggilan terekam sebuah permintaan, stempel waktu pengiriman sebuah permintaan, dan stempel waktu eksekusi sebuah skenario. Panggilan yang disematkan selalu disimpan, berapa pun nilai ini."
   },
   "mcp": {
     "title": "MCP",

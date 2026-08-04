@@ -438,6 +438,11 @@
         "requestBody": "Kérés törzse",
         "graph": "Grafikon"
       },
+      "infos": {
+        "sentAt": "Elküldve",
+        "requestBody": "Kérés törzse",
+        "requestBodyFile": "Fájl"
+      },
       "loading": "Kérés küldése...",
       "noResponseBody": "Nincs válasz-törzs — a részletekért lásd az Infos fület",
       "noResponse": "Kattintson a Küldés gombra a kérés végrehajtásához",
@@ -2140,6 +2145,11 @@
     "closePreview": "Bezárás",
     "captureImageTitle": "MCP képernyőkép",
     "captureVideoTitle": "MCP képernyőfelvétel"
+  },
+  "history": {
+    "title": "Előzmények",
+    "maxEntriesTitle": "Előzményenként megőrzött bejegyzések",
+    "maxEntriesDescription": "Hány bejegyzést őriz meg az egyes előzmények: egy kérés rögzített hívásai, egy kérés küldési időbélyegei és egy forgatókönyv futtatási időbélyegei. A rögzített hívások ettől az értéktől függetlenül mindig megmaradnak."
   },
   "mcp": {
     "title": "MCP",

@@ -438,6 +438,11 @@
         "requestBody": "Forespørsels-body",
         "graph": "Graf"
       },
+      "infos": {
+        "sentAt": "Sendt",
+        "requestBody": "Forespørsels-body",
+        "requestBodyFile": "Fil"
+      },
       "loading": "Sender forespørsel...",
       "noResponseBody": "Ingen svartekst — se Infos for detaljer",
       "noResponse": "Klikk Send for å utføre forespørselen",
@@ -2140,6 +2145,11 @@
     "closePreview": "Lukk",
     "captureImageTitle": "MCP-skjermbilde",
     "captureVideoTitle": "MCP-skjermopptak"
+  },
+  "history": {
+    "title": "Historikk",
+    "maxEntriesTitle": "Oppføringer som beholdes per historikk",
+    "maxEntriesDescription": "Hvor mange oppføringer hver historikk beholder: en forespørsels registrerte kall, en forespørsels sendetidsstempler og et scenarios kjøretidsstempler. Festede kall beholdes alltid, uansett denne verdien."
   },
   "mcp": {
     "title": "MCP",

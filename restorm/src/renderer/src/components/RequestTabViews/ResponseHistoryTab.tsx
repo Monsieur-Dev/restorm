@@ -204,6 +204,19 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     void store.loadEntries(requestId)
   }, [requestId, refreshKey, store])
 
+  // A run started anywhere OTHER than this request's own tab — a scenario
+  // step, an MCP call — stores its entry in the main process without touching
+  // `refreshKey`, which only the tab's own send handler bumps. Listen to the
+  // main-process broadcast so an open history view repaints for those too.
+  useEffect(() => {
+    const api = (window as { restorm?: { responsesHistory?: { onChanged?: (cb: (id: string) => void) => () => void } } }).restorm
+    const unsubscribe = api?.responsesHistory?.onChanged?.((changedRequestId) => {
+      if (changedRequestId !== requestId) return
+      void store.loadEntries(requestId)
+    })
+    return () => { unsubscribe?.() }
+  }, [requestId, store])
+
   const handleTogglePin = useCallback(async (entry: ResponseHistoryEntry) => {
     const nextPinned = !entry.pinned
     await store.togglePin(entry.guid, nextPinned)
@@ -453,11 +466,15 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     return idx >= 0 ? idx : 0
   }, [entries, selectedGuid])
 
+  // Switching entries keeps the CURRENT tab: comparing two calls means looking
+  // at the same facet (headers, or body) across them, and snapping back to the
+  // first tab would force a re-navigation on every comparison. `activeTabId`
+  // is resolved against the new entry's tabs below, so an entry that lacks the
+  // current facet still falls back gracefully instead of rendering nothing.
   const handleSelectChange = useCallback((data: ISelectData) => {
     const entry = entries[data.index]
     if (entry) {
       void store.select(entry.guid)
-      setActiveTabId('response')
     }
   }, [entries, store])
 
@@ -495,7 +512,6 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
               onSelectionChange={(ids) => {
                 const next = ids[0] ?? null
                 void store.select(next)
-                setActiveTabId('response')
               }}
               ariaLabel={t('requestTab.responses.history.list')}
               data-testid="response-history-list-view"

@@ -438,6 +438,11 @@
         "requestBody": "İstek gövdesi",
         "graph": "Grafik"
       },
+      "infos": {
+        "sentAt": "Gönderilme",
+        "requestBody": "İstek gövdesi",
+        "requestBodyFile": "Dosya"
+      },
       "loading": "İstek gönderiliyor...",
       "noResponseBody": "Yanıt gövdesi yok — ayrıntılar için Infos'a bakın",
       "noResponse": "İsteği yürütmek için Gönder'e tıklayın",
@@ -2140,6 +2145,11 @@
     "closePreview": "Kapat",
     "captureImageTitle": "MCP ekran görüntüsü",
     "captureVideoTitle": "MCP ekran kaydı"
+  },
+  "history": {
+    "title": "Geçmiş",
+    "maxEntriesTitle": "Geçmiş başına saklanan girdiler",
+    "maxEntriesDescription": "Her geçmişin sakladığı girdi sayısı: bir isteğin kaydedilen çağrıları, bir isteğin gönderim zaman damgaları ve bir senaryonun çalıştırma zaman damgaları. Sabitlenen çağrılar, bu değerden bağımsız olarak her zaman saklanır."
   },
   "mcp": {
     "title": "MCP",

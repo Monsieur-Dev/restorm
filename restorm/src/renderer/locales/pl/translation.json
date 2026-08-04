@@ -440,6 +440,11 @@
         "requestBody": "Treść żądania",
         "graph": "Wykres"
       },
+      "infos": {
+        "sentAt": "Wysłano",
+        "requestBody": "Treść żądania",
+        "requestBodyFile": "Plik"
+      },
       "loading": "Wysyłanie żądania...",
       "noResponseBody": "Brak treści odpowiedzi — szczegóły w zakładce Infos",
       "noResponse": "Kliknij Wyślij, aby wykonać żądanie",
@@ -2142,6 +2147,11 @@
     "closePreview": "Zamknij",
     "captureImageTitle": "Zrzut ekranu MCP",
     "captureVideoTitle": "Nagranie ekranu MCP"
+  },
+  "history": {
+    "title": "Historia",
+    "maxEntriesTitle": "Wpisy przechowywane w każdej historii",
+    "maxEntriesDescription": "Ile wpisów przechowuje każda historia: zarejestrowane wywołania żądania, znaczniki czasu wysłania żądania oraz znaczniki czasu uruchomienia scenariusza. Przypięte wywołania są zawsze zachowywane, niezależnie od tej wartości."
   },
   "mcp": {
     "title": "MCP",

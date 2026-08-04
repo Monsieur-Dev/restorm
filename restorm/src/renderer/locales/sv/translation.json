@@ -438,6 +438,11 @@
         "requestBody": "Förfrågans kropp",
         "graph": "Graf"
       },
+      "infos": {
+        "sentAt": "Skickat",
+        "requestBody": "Förfrågans kropp",
+        "requestBodyFile": "Fil"
+      },
       "loading": "Skickar förfrågan...",
       "noResponseBody": "Ingen svarstext — se Infos för detaljer",
       "noResponse": "Klicka på Skicka för att köra förfrågan",
@@ -2140,6 +2145,11 @@
     "closePreview": "Stäng",
     "captureImageTitle": "MCP-skärmbild",
     "captureVideoTitle": "MCP-skärminspelning"
+  },
+  "history": {
+    "title": "Historik",
+    "maxEntriesTitle": "Poster som sparas per historik",
+    "maxEntriesDescription": "Hur många poster varje historik sparar: en begärans registrerade anrop, en begärans sändningstidsstämplar och ett scenarios körningstidsstämplar. Fästa anrop sparas alltid, oavsett detta värde."
   },
   "mcp": {
     "title": "MCP",

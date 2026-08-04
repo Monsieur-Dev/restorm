@@ -1946,6 +1946,18 @@ contextBridge.exposeInMainWorld('restorm', {
     togglePin: async (guid: string, pinned: boolean): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('responses:history:toggle-pin', guid, pinned)
       return result as boolean
+    },
+    /** Subscribe to "this request's recorded calls changed". Fires for EVERY
+     * run that lands an entry, not just the ones started from the request's
+     * own tab — a scenario step or an MCP call reaches an open history view
+     * through here. The callback gets the request id; the view re-reads only
+     * when it matches the one it is showing. */
+    onChanged: (callback: (requestId: string) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, requestId: string): void => {
+        callback(requestId)
+      }
+      ipcRenderer.on('response-history:changed', handler)
+      return () => { ipcRenderer.removeListener('response-history:changed', handler) }
     }
   },
   requestUsage: {

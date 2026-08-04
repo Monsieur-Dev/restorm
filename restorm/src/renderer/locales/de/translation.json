@@ -438,6 +438,11 @@
         "requestBody": "Anfrage-Body",
         "graph": "Graph"
       },
+      "infos": {
+        "sentAt": "Gesendet am",
+        "requestBody": "Anfrage-Body",
+        "requestBodyFile": "Datei"
+      },
       "loading": "Anfrage wird gesendet...",
       "noResponseBody": "Kein Antworttext — Details siehe Infos",
       "noResponse": "Klicken Sie auf Senden, um die Anfrage auszuführen",
@@ -2140,6 +2145,11 @@
     "closePreview": "Schließen",
     "captureImageTitle": "MCP-Screenshot",
     "captureVideoTitle": "MCP-Bildschirmaufnahme"
+  },
+  "history": {
+    "title": "Verlauf",
+    "maxEntriesTitle": "Pro Verlauf aufbewahrte Einträge",
+    "maxEntriesDescription": "Wie viele Einträge jeder Verlauf behält: die aufgezeichneten Aufrufe einer Anfrage, die Sendezeitstempel einer Anfrage und die Ausführungszeitstempel eines Szenarios. Angeheftete Aufrufe bleiben unabhängig von diesem Wert immer erhalten."
   },
   "mcp": {
     "title": "MCP",

@@ -55,6 +55,7 @@ import { mapToBadgeType } from '../../utils/badgeUtils'
 import { resolveFilePickerPath } from '../../utils/filePicker'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
+import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
@@ -189,6 +190,7 @@ export interface LocalAuthenticationRequestFormProps {
 
 export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequestFormProps> = ({ request }) => {
   const { t } = useTranslation()
+  const { formatUserDate } = useUserDateFormat()
 
   // Snapshot-backed state. The form owns re-renders; the request
   // object is the caller's source of truth — we mutate it in place
@@ -921,8 +923,8 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
   ]
 
   const { infosContent, responseContent, jsonData } = useMemo(
-    () => buildHttpResponseViewData(httpResponse),
-    [httpResponse]
+    () => buildHttpResponseViewData(httpResponse, undefined, { t, formatDate: (date: Date) => formatUserDate(date) }),
+    [httpResponse, t, formatUserDate]
   )
 
   return (

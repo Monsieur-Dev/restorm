@@ -438,6 +438,11 @@
         "requestBody": "Request body",
         "graph": "Graph"
       },
+      "infos": {
+        "sentAt": "Sent At",
+        "requestBody": "Request body",
+        "requestBodyFile": "File"
+      },
       "loading": "Sending request...",
       "noResponseBody": "No response body — see Infos for details",
       "noResponse": "Click Send to execute the request",
@@ -2140,6 +2145,11 @@
     "closePreview": "Close",
     "captureImageTitle": "MCP screenshot",
     "captureVideoTitle": "MCP screen recording"
+  },
+  "history": {
+    "title": "History",
+    "maxEntriesTitle": "Entries kept per history",
+    "maxEntriesDescription": "How many entries each history keeps: a request's recorded calls, a request's send timestamps and a scenario's run timestamps. Pinned calls are always kept, whatever this is set to."
   },
   "mcp": {
     "title": "MCP",

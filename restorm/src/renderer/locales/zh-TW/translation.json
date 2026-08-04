@@ -437,6 +437,11 @@
         "requestBody": "請求內文",
         "graph": "圖表"
       },
+      "infos": {
+        "sentAt": "傳送時間",
+        "requestBody": "請求內文",
+        "requestBodyFile": "檔案"
+      },
       "loading": "正在傳送請求...",
       "noResponseBody": "無回應內容 — 詳情請見 Infos",
       "noResponse": "點擊「傳送」以執行請求",
@@ -2139,6 +2144,11 @@
     "closePreview": "關閉",
     "captureImageTitle": "MCP 螢幕擷取",
     "captureVideoTitle": "MCP 螢幕錄製"
+  },
+  "history": {
+    "title": "歷史記錄",
+    "maxEntriesTitle": "每個歷史記錄保留的項目數",
+    "maxEntriesDescription": "每個歷史記錄保留的項目數：請求已記錄的呼叫、請求的傳送時間戳記以及情境的執行時間戳記。已釘選的呼叫一律保留，與此值無關。"
   },
   "mcp": {
     "title": "MCP",

@@ -439,6 +439,11 @@
         "requestBody": "Telo zahteva",
         "graph": "Graf"
       },
+      "infos": {
+        "sentAt": "Poslato",
+        "requestBody": "Telo zahteva",
+        "requestBodyFile": "Datoteka"
+      },
       "loading": "Slanje zahteva...",
       "noResponseBody": "Nema tela odgovora — pogledajte Infos za detalje",
       "noResponse": "Kliknite Pošalji da biste izvršili zahtev",
@@ -2141,6 +2146,11 @@
     "closePreview": "Zatvori",
     "captureImageTitle": "MCP snimak ekrana",
     "captureVideoTitle": "MCP snimak ekrana (video)"
+  },
+  "history": {
+    "title": "Istorija",
+    "maxEntriesTitle": "Sačuvani unosi po istoriji",
+    "maxEntriesDescription": "Koliko unosa čuva svaka istorija: zabeleženi pozivi zahteva, vremenske oznake slanja zahteva i vremenske oznake izvršavanja scenarija. Zakačeni pozivi se uvek čuvaju, bez obzira na ovu vrednost."
   },
   "mcp": {
     "title": "MCP",

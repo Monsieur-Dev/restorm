@@ -438,6 +438,11 @@
         "requestBody": "Verzoekbody",
         "graph": "Grafiek"
       },
+      "infos": {
+        "sentAt": "Verzonden op",
+        "requestBody": "Verzoekbody",
+        "requestBodyFile": "Bestand"
+      },
       "loading": "Verzoek wordt verzonden...",
       "noResponseBody": "Geen response-body — zie Infos voor details",
       "noResponse": "Klik op Verzenden om het verzoek uit te voeren",
@@ -2140,6 +2145,11 @@
     "closePreview": "Sluiten",
     "captureImageTitle": "MCP-schermafbeelding",
     "captureVideoTitle": "MCP-schermopname"
+  },
+  "history": {
+    "title": "Geschiedenis",
+    "maxEntriesTitle": "Bewaarde items per geschiedenis",
+    "maxEntriesDescription": "Hoeveel items elke geschiedenis bewaart: de vastgelegde aanroepen van een verzoek, de verzendtijdstempels van een verzoek en de uitvoeringstijdstempels van een scenario. Vastgezette aanroepen blijven altijd bewaard, ongeacht deze waarde."
   },
   "mcp": {
     "title": "MCP",

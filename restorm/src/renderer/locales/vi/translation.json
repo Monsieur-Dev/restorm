@@ -437,6 +437,11 @@
         "requestBody": "Body yêu cầu",
         "graph": "Đồ thị"
       },
+      "infos": {
+        "sentAt": "Đã gửi lúc",
+        "requestBody": "Body yêu cầu",
+        "requestBodyFile": "Tệp"
+      },
       "loading": "Đang gửi yêu cầu...",
       "noResponseBody": "Không có nội dung phản hồi — xem Infos để biết chi tiết",
       "noResponse": "Nhấp Gửi để thực thi yêu cầu",
@@ -2139,6 +2144,11 @@
     "closePreview": "Đóng",
     "captureImageTitle": "Ảnh chụp màn hình MCP",
     "captureVideoTitle": "Quay màn hình MCP"
+  },
+  "history": {
+    "title": "Lịch sử",
+    "maxEntriesTitle": "Số mục được giữ trong mỗi lịch sử",
+    "maxEntriesDescription": "Số mục mà mỗi lịch sử giữ lại: các lệnh gọi đã ghi của một yêu cầu, dấu thời gian gửi của một yêu cầu và dấu thời gian chạy của một kịch bản. Các lệnh gọi đã ghim luôn được giữ lại, bất kể giá trị này."
   },
   "mcp": {
     "title": "MCP",

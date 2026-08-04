@@ -439,6 +439,11 @@
         "requestBody": "Corpul cererii",
         "graph": "Grafic"
       },
+      "infos": {
+        "sentAt": "Trimis la",
+        "requestBody": "Corpul cererii",
+        "requestBodyFile": "Fișier"
+      },
       "loading": "Se trimite cererea...",
       "noResponseBody": "Fără corp de răspuns — vezi Infos pentru detalii",
       "noResponse": "Apăsați Trimite pentru a executa cererea",
@@ -2141,6 +2146,11 @@
     "closePreview": "Închide",
     "captureImageTitle": "Captură de ecran MCP",
     "captureVideoTitle": "Înregistrare ecran MCP"
+  },
+  "history": {
+    "title": "Istoric",
+    "maxEntriesTitle": "Intrări păstrate per istoric",
+    "maxEntriesDescription": "Câte intrări păstrează fiecare istoric: apelurile înregistrate ale unei cereri, marcajele de timp ale trimiterii unei cereri și marcajele de timp ale rulării unui scenariu. Apelurile fixate sunt păstrate întotdeauna, indiferent de această valoare."
   },
   "mcp": {
     "title": "MCP",

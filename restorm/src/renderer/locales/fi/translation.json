@@ -438,6 +438,11 @@
         "requestBody": "Pyynnön sisältö",
         "graph": "Kaavio"
       },
+      "infos": {
+        "sentAt": "Lähetetty",
+        "requestBody": "Pyynnön sisältö",
+        "requestBodyFile": "Tiedosto"
+      },
       "loading": "Lähetetään pyyntöä...",
       "noResponseBody": "Ei vastausrunkoa — katso tiedot Infos-välilehdeltä",
       "noResponse": "Suorita pyyntö napsauttamalla Lähetä",
@@ -2140,6 +2145,11 @@
     "closePreview": "Sulje",
     "captureImageTitle": "MCP-kuvakaappaus",
     "captureVideoTitle": "MCP-näyttötallenne"
+  },
+  "history": {
+    "title": "Historia",
+    "maxEntriesTitle": "Säilytettävät merkinnät historiaa kohden",
+    "maxEntriesDescription": "Kuinka monta merkintää kukin historia säilyttää: pyynnön tallennetut kutsut, pyynnön lähetysaikaleimat ja skenaarion suoritusaikaleimat. Kiinnitetyt kutsut säilytetään aina tästä arvosta riippumatta."
   },
   "mcp": {
     "title": "MCP",

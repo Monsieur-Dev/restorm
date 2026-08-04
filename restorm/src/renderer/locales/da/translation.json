@@ -438,6 +438,11 @@
         "requestBody": "Anmodnings-body",
         "graph": "Graf"
       },
+      "infos": {
+        "sentAt": "Sendt den",
+        "requestBody": "Anmodnings-body",
+        "requestBodyFile": "Fil"
+      },
       "loading": "Sender anmodning...",
       "noResponseBody": "Ingen svar-body — se Infos for detaljer",
       "noResponse": "Klik på Send for at udføre anmodningen",
@@ -2140,6 +2145,11 @@
     "closePreview": "Luk",
     "captureImageTitle": "MCP-skærmbillede",
     "captureVideoTitle": "MCP-skærmoptagelse"
+  },
+  "history": {
+    "title": "Historik",
+    "maxEntriesTitle": "Poster gemt pr. historik",
+    "maxEntriesDescription": "Hvor mange poster hver historik gemmer: en anmodnings registrerede kald, en anmodnings afsendelsestidsstempler og et scenaries kørselstidsstempler. Fastgjorte kald gemmes altid, uanset denne værdi."
   },
   "mcp": {
     "title": "MCP",

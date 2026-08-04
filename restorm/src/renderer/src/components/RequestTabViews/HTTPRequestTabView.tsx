@@ -48,6 +48,7 @@ import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
+import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import type { HTTPRequestBody } from '../../../../shared/types/requestPrimitives'
 import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabViewUtils'
@@ -187,6 +188,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
+  const { formatUserDate } = useUserDateFormat()
   // `projectUuid` lives on the EnvironmentContext (mirrored from the
   // workbench's `persistenceKey`). Sourcing it from here — rather than
   // `useFileService` — guarantees it's already non-null at the first
@@ -1133,9 +1135,16 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
+  // Bound once so both the live panel and the history view render the sent-at
+  // row through the user's configured date format.
+  const responseViewLabels = useMemo(
+    () => ({ t, formatDate: (date: Date) => formatUserDate(date) }),
+    [t, formatUserDate]
+  )
+
   const { infosContent, responseContent, jsonData } = useMemo(
-    () => buildHttpResponseViewData(httpResponse, matchedOperation),
-    [httpResponse, matchedOperation]
+    () => buildHttpResponseViewData(httpResponse, matchedOperation, responseViewLabels),
+    [httpResponse, matchedOperation, responseViewLabels]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
@@ -1161,8 +1170,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       timings: detail.response.timings,
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
-    return buildHttpResponseViewData(historyResponse, matchedOperation)
-  }, [request.id, matchedOperation])
+    return buildHttpResponseViewData(historyResponse, matchedOperation, responseViewLabels)
+  }, [request.id, matchedOperation, responseViewLabels])
 
   // URL section
   const urlSection = (

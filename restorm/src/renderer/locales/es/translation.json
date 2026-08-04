@@ -438,6 +438,11 @@
         "requestBody": "Cuerpo de la petición",
         "graph": "Gráfico"
       },
+      "infos": {
+        "sentAt": "Enviado el",
+        "requestBody": "Cuerpo de la petición",
+        "requestBodyFile": "Archivo"
+      },
       "loading": "Enviando la petición...",
       "noResponseBody": "Sin cuerpo de respuesta — consulta Infos para más detalles",
       "noResponse": "Pulsa Enviar para ejecutar la petición",
@@ -2140,6 +2145,11 @@
     "closePreview": "Cerrar",
     "captureImageTitle": "Captura de pantalla MCP",
     "captureVideoTitle": "Grabación de pantalla MCP"
+  },
+  "history": {
+    "title": "Historial",
+    "maxEntriesTitle": "Entradas conservadas por historial",
+    "maxEntriesDescription": "Cuántas entradas conserva cada historial: las llamadas registradas de una solicitud, las marcas de tiempo de envío de una solicitud y las marcas de tiempo de ejecución de un escenario. Las llamadas ancladas se conservan siempre, sea cual sea este valor."
   },
   "mcp": {
     "title": "MCP",

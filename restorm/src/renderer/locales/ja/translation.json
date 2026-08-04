@@ -437,6 +437,11 @@
         "requestBody": "リクエストボディ",
         "graph": "グラフ"
       },
+      "infos": {
+        "sentAt": "送信日時",
+        "requestBody": "リクエストボディ",
+        "requestBodyFile": "ファイル"
+      },
       "loading": "リクエストを送信しています...",
       "noResponseBody": "レスポンス本文がありません — 詳細は Infos を参照してください",
       "noResponse": "「送信」をクリックしてリクエストを実行してください",
@@ -2139,6 +2144,11 @@
     "closePreview": "閉じる",
     "captureImageTitle": "MCP スクリーンショット",
     "captureVideoTitle": "MCP 画面録画"
+  },
+  "history": {
+    "title": "履歴",
+    "maxEntriesTitle": "履歴ごとに保持するエントリ数",
+    "maxEntriesDescription": "各履歴が保持するエントリ数です。リクエストの記録された呼び出し、リクエストの送信タイムスタンプ、シナリオの実行タイムスタンプが対象です。ピン留めした呼び出しは、この値にかかわらず常に保持されます。"
   },
   "mcp": {
     "title": "MCP",

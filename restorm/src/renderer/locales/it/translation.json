@@ -438,6 +438,11 @@
         "requestBody": "Corpo della richiesta",
         "graph": "Grafico"
       },
+      "infos": {
+        "sentAt": "Inviato il",
+        "requestBody": "Corpo della richiesta",
+        "requestBodyFile": "File"
+      },
       "loading": "Invio della richiesta in corso...",
       "noResponseBody": "Nessun corpo di risposta — vedi Infos per i dettagli",
       "noResponse": "Clicca su Invia per eseguire la richiesta",
@@ -2140,6 +2145,11 @@
     "closePreview": "Chiudi",
     "captureImageTitle": "Schermata MCP",
     "captureVideoTitle": "Registrazione schermo MCP"
+  },
+  "history": {
+    "title": "Cronologia",
+    "maxEntriesTitle": "Voci conservate per cronologia",
+    "maxEntriesDescription": "Quante voci conserva ogni cronologia: le chiamate registrate di una richiesta, i timestamp di invio di una richiesta e i timestamp di esecuzione di uno scenario. Le chiamate fissate vengono sempre conservate, indipendentemente da questo valore."
   },
   "mcp": {
     "title": "MCP",
