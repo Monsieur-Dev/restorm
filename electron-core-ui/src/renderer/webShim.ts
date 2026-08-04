@@ -392,6 +392,10 @@ export function ensureCoreUiWebApiShim(): void {
     showExternalChangeDialog: (): Promise<'reload' | 'keepMine'> => Promise.resolve('reload'),
     acceptExternalChange: (): Promise<void> => Promise.resolve(),
     onFileExternallyChanged: (): (() => void) => () => undefined,
+    // Web persistence never goes through the main process, so no save
+    // outcome is ever broadcast — the subscriptions stay inert.
+    onFileSaveFailed: (): (() => void) => () => undefined,
+    onFileSaveSucceeded: (): (() => void) => () => undefined,
     newFile: (): Promise<boolean> => {
       // Web behavior: For web, we'll ask for a name via prompt
       const name = window.prompt('Enter file name:')

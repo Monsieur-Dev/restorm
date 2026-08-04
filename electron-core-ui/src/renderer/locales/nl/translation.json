@@ -26,6 +26,19 @@
       "detail": "Herlaad om de versie op schijf te gebruiken, of behoud je versie en overschrijf die.",
       "reload": "Herladen",
       "keepMine": "Mijn versie behouden"
+    },
+    "saveFailed": {
+      "title": "Opslaan mislukt",
+      "reason": {
+        "readOnlyFile": "Het bestand is alleen-lezen. Wijzig de rechten of sla het op een andere locatie op.",
+        "readOnlyLocation": "Deze locatie is alleen-lezen aangekoppeld. Sla op een andere locatie op.",
+        "permissionDenied": "U hebt hier geen schrijfrechten. Controleer de rechten van de map of sla op een andere locatie op.",
+        "diskFull": "De schijf is vol. Maak ruimte vrij en sla opnieuw op.",
+        "quotaExceeded": "Uw schijfquotum is opgebruikt. Maak ruimte vrij en sla opnieuw op.",
+        "pathMissing": "Deze locatie bestaat niet meer. De map is mogelijk verwijderd of het station losgekoppeld.",
+        "fileBusy": "Het bestand is in gebruik door een ander programma. Sluit dat en sla opnieuw op.",
+        "unknown": "Het bestand kon niet worden geschreven: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {

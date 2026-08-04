@@ -26,6 +26,19 @@
       "detail": "Diskteki sürümü kullanmak için yeniden yükleyin ya da kendi sürümünüzü koruyup üzerine yazın.",
       "reload": "Yeniden yükle",
       "keepMine": "Sürümümü koru"
+    },
+    "saveFailed": {
+      "title": "Kaydetme başarısız",
+      "reason": {
+        "readOnlyFile": "Dosya salt okunur. İzinlerini değiştirin veya başka bir konuma kaydedin.",
+        "readOnlyLocation": "Bu konum salt okunur olarak bağlanmış. Başka bir konuma kaydedin.",
+        "permissionDenied": "Buraya yazma izniniz yok. Klasörün izinlerini denetleyin veya başka bir konuma kaydedin.",
+        "diskFull": "Disk dolu. Yer açın, sonra yeniden kaydedin.",
+        "quotaExceeded": "Disk kotanız tükendi. Yer açın, sonra yeniden kaydedin.",
+        "pathMissing": "Bu konum artık yok. Klasör silinmiş veya sürücü çıkarılmış olabilir.",
+        "fileBusy": "Dosya başka bir program tarafından kullanılıyor. Onu kapatın, sonra yeniden kaydedin.",
+        "unknown": "Dosya yazılamadı: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {

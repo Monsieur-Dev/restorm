@@ -26,6 +26,19 @@
       "detail": "重新載入以使用磁碟上的版本，或保留您的版本並覆寫它。",
       "reload": "重新載入",
       "keepMine": "保留我的版本"
+    },
+    "saveFailed": {
+      "title": "儲存失敗",
+      "reason": {
+        "readOnlyFile": "檔案為唯讀。請變更其權限，或儲存至其他位置。",
+        "readOnlyLocation": "此位置以唯讀方式掛載。請儲存至其他位置。",
+        "permissionDenied": "您沒有在此寫入的權限。請檢查資料夾權限，或儲存至其他位置。",
+        "diskFull": "磁碟已滿。請釋出空間後重新儲存。",
+        "quotaExceeded": "您的磁碟配額已用盡。請釋出空間後重新儲存。",
+        "pathMissing": "此位置已不存在。資料夾可能已被刪除，或磁碟機已中斷連線。",
+        "fileBusy": "檔案正由其他程式使用中。請關閉該程式後重新儲存。",
+        "unknown": "無法寫入檔案：{{error}}"
+      }
     }
   },
   "recentFilesVignette": {

@@ -11,12 +11,13 @@
  */
 
 import { promises as fs } from 'fs'
-import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs'
+import { constants as fsConstants, existsSync, mkdirSync, readdirSync, rmSync } from 'fs'
 import { join, basename, extname, dirname, resolve, relative, isAbsolute } from 'path'
 import crypto from 'crypto'
 import JSON5 from 'json5'
 import yaml from 'js-yaml'
 import { logger } from './LoggerService'
+import { FileSystemError } from '../../errors'
 import {
   getNonSerialisedProperties,
   getSeparateFilesProperties,
@@ -66,6 +67,13 @@ export interface SaveResult {
   success: boolean
   path: string
   error?: string
+  /**
+   * The failure's machine-readable code — an `fs` errno (`EACCES`,
+   * `ENOSPC`, …) or a {@link FileSystemError} code. Stringifying the
+   * error for `error` alone would strip it, and the code is what turns a
+   * failed save into a cause a user can act on.
+   */
+  code?: string
 }
 
 /** Result of a load operation */
@@ -110,17 +118,90 @@ export function deserialize(content: string, format: PersistenceFormat): unknown
 }
 
 /**
+ * The error's own code, shaped for spreading into a {@link SaveResult}.
+ * Empty when the thrown value carries none, so the field stays absent
+ * rather than `undefined`.
+ */
+export function codeOf(error: unknown): { code?: string } {
+  const code: unknown = error instanceof Error ? (error as { code?: unknown }).code : undefined
+  return typeof code === 'string' ? { code } : {}
+}
+
+/**
+ * Permission mode of an existing target file, or `null` when there is
+ * nothing at that path yet (a first write, which the directory's own
+ * permissions govern).
+ */
+async function targetMode(targetPath: string): Promise<number | null> {
+  try {
+    const stats = await fs.stat(targetPath)
+    return stats.isFile() ? stats.mode & 0o7777 : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Refuse to overwrite a file the user has marked read-only.
+ *
+ * `rename` consults only the DIRECTORY's permissions, so without this the
+ * read-only bit offers no resistance whatsoever: the file is replaced and
+ * the marking is gone. Honouring it is what most editors do, and it is
+ * what turns "the file is read-only" into something the user is told
+ * rather than something that silently doesn't happen.
+ *
+ * This is a DETECTION, not the safety net. `access(W_OK)` is advisory: it
+ * lies under ACLs and reports writable for root. So it is deliberately
+ * the only thing this function does — every other way a write can fail
+ * (unwritable directory, full disk, vanished path, and any case this
+ * check waves through) still surfaces from the write's own `catch`, and
+ * reaches the user by the same route. Deleting this one call reverts the
+ * behaviour cleanly and leaves the rest of the reporting intact.
+ */
+async function assertTargetWritable(targetPath: string): Promise<void> {
+  try {
+    await fs.access(targetPath, fsConstants.W_OK)
+  } catch (err: unknown) {
+    // Nothing there yet is not a refusal — a first write is governed by
+    // the directory, which the write itself will report on.
+    if ((err as { code?: unknown }).code === 'ENOENT') return
+    throw new FileSystemError(
+      `The file is read-only: ${targetPath}`,
+      'FS_TARGET_READ_ONLY',
+      { cause: err }
+    )
+  }
+}
+
+/**
  * Write a file atomically: serialize to a sibling `<target>.<uuid>.tmp`,
  * then `fs.rename` into place. A mid-write crash leaves the previous
  * target (if any) untouched — callers get a clean "before" state instead
  * of a truncated file. The rename is atomic on the same filesystem, which
  * is always the case when the temp file sits next to the target.
+ *
+ * Two things `rename` would otherwise get wrong, because it replaces the
+ * *inode* rather than the bytes of the existing file — and because it
+ * consults only the DIRECTORY's permissions:
+ *
+ * - **A read-only target is refused** ({@link assertTargetWritable}),
+ *   instead of being replaced as if it had never been protected.
+ * - **The target's permission mode is carried across.** Without it the
+ *   file comes back with whatever mode the umask gave the temp file: a
+ *   project kept at `600` — they can hold secrets — would silently
+ *   return as `644`.
+ *
+ * Everything else that can fail a write — an unwritable directory, a full
+ * disk, a vanished path — surfaces as the write's own errno, unchanged.
  */
 export async function atomicWriteFile(targetPath: string, contents: string): Promise<void> {
   const tmpPath = `${targetPath}.${crypto.randomUUID()}.tmp`
   await fs.mkdir(dirname(targetPath), { recursive: true })
+  await assertTargetWritable(targetPath)
+  const mode = await targetMode(targetPath)
   try {
     await fs.writeFile(tmpPath, contents, 'utf-8')
+    if (mode !== null) await fs.chmod(tmpPath, mode)
     await fs.rename(tmpPath, targetPath)
   } catch (err) {
     // Best-effort cleanup of the half-written temp file — ignore its own
@@ -323,7 +404,7 @@ export class PersistenceService {
     } catch (error) {
       const errorMsg = String(error)
       logger.error('[PersistenceService] Failed to save single file', { path: filePath, error: errorMsg })
-      return { success: false, path: filePath, error: errorMsg }
+      return { success: false, path: filePath, error: errorMsg, ...codeOf(error) }
     }
   }
 

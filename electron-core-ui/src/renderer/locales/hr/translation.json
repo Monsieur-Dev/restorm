@@ -26,6 +26,19 @@
       "detail": "Ponovno učitajte kako biste koristili verziju s diska ili zadržite svoju verziju i prepišite je.",
       "reload": "Ponovno učitaj",
       "keepMine": "Zadrži moju verziju"
+    },
+    "saveFailed": {
+      "title": "Spremanje nije uspjelo",
+      "reason": {
+        "readOnlyFile": "Datoteka je samo za čitanje. Promijenite njezine dozvole ili je spremite na drugo mjesto.",
+        "readOnlyLocation": "Ovo je mjesto montirano samo za čitanje. Spremite na drugo mjesto.",
+        "permissionDenied": "Nemate dozvolu za pisanje ovdje. Provjerite dozvole mape ili spremite na drugo mjesto.",
+        "diskFull": "Disk je pun. Oslobodite prostor pa spremite ponovno.",
+        "quotaExceeded": "Vaša diskovna kvota je iscrpljena. Oslobodite prostor pa spremite ponovno.",
+        "pathMissing": "Ovo mjesto više ne postoji. Mapa je možda izbrisana ili je pogon odspojen.",
+        "fileBusy": "Datoteku koristi drugi program. Zatvorite ga pa spremite ponovno.",
+        "unknown": "Datoteku nije bilo moguće zapisati: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {

@@ -26,6 +26,19 @@
       "detail": "Ricarica per usare la versione sul disco, oppure mantieni la tua versione e sovrascrivila.",
       "reload": "Ricarica",
       "keepMine": "Mantieni la mia versione"
+    },
+    "saveFailed": {
+      "title": "Salvataggio non riuscito",
+      "reason": {
+        "readOnlyFile": "Il file è di sola lettura. Modificane i permessi o salvalo in un'altra posizione.",
+        "readOnlyLocation": "Questa posizione è montata in sola lettura. Salva in un'altra posizione.",
+        "permissionDenied": "Non hai i permessi di scrittura qui. Controlla i permessi della cartella o salva in un'altra posizione.",
+        "diskFull": "Il disco è pieno. Libera spazio, poi salva di nuovo.",
+        "quotaExceeded": "La tua quota disco è esaurita. Libera spazio, poi salva di nuovo.",
+        "pathMissing": "Questa posizione non esiste più. La cartella potrebbe essere stata eliminata o l'unità scollegata.",
+        "fileBusy": "Il file è in uso da un altro programma. Chiudilo, poi salva di nuovo.",
+        "unknown": "Impossibile scrivere il file: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {

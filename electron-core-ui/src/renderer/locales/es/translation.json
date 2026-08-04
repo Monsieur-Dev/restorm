@@ -26,6 +26,19 @@
       "detail": "Vuelve a cargar para usar la versión del disco, o conserva tu versión y sobrescríbela.",
       "reload": "Volver a cargar",
       "keepMine": "Conservar mi versión"
+    },
+    "saveFailed": {
+      "title": "Error al guardar",
+      "reason": {
+        "readOnlyFile": "El archivo es de solo lectura. Cambie sus permisos o guárdelo en otra ubicación.",
+        "readOnlyLocation": "Esta ubicación está montada en solo lectura. Guarde en otra ubicación.",
+        "permissionDenied": "No tiene permiso para escribir aquí. Compruebe los permisos de la carpeta o guarde en otra ubicación.",
+        "diskFull": "El disco está lleno. Libere espacio y vuelva a guardar.",
+        "quotaExceeded": "Su cuota de disco se ha agotado. Libere espacio y vuelva a guardar.",
+        "pathMissing": "Esta ubicación ya no existe. Puede que la carpeta se haya eliminado o que la unidad se haya desconectado.",
+        "fileBusy": "Otro programa está usando el archivo. Ciérrelo y vuelva a guardar.",
+        "unknown": "No se pudo escribir el archivo: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {

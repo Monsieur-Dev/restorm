@@ -26,6 +26,19 @@
       "detail": "Znovu načtěte, chcete-li použít verzi z disku, nebo ponechte svou verzi a přepište ji.",
       "reload": "Znovu načíst",
       "keepMine": "Ponechat mou verzi"
+    },
+    "saveFailed": {
+      "title": "Uložení se nezdařilo",
+      "reason": {
+        "readOnlyFile": "Soubor je jen pro čtení. Změňte jeho oprávnění nebo jej uložte na jiné místo.",
+        "readOnlyLocation": "Toto umístění je připojeno jen pro čtení. Uložte na jiné místo.",
+        "permissionDenied": "Nemáte oprávnění zde zapisovat. Zkontrolujte oprávnění složky nebo uložte na jiné místo.",
+        "diskFull": "Disk je plný. Uvolněte místo a uložte znovu.",
+        "quotaExceeded": "Vaše disková kvóta je vyčerpána. Uvolněte místo a uložte znovu.",
+        "pathMissing": "Toto umístění již neexistuje. Složka mohla být smazána nebo disk odpojen.",
+        "fileBusy": "Soubor používá jiný program. Zavřete jej a uložte znovu.",
+        "unknown": "Soubor se nepodařilo zapsat: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {

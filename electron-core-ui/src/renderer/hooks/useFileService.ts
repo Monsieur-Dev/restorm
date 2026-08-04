@@ -5,6 +5,7 @@ import type {
   SerializationFormat,
   UnsavedChangesDialogLabels
 } from '../../types/file'
+import type { SaveFailureReason } from '../../errors'
 
 interface WindowFileApi {
   file: {
@@ -61,6 +62,12 @@ interface WindowFileApi {
       callback: (payload: { count: number }) => void
     ) => () => void
     onFileExternallyChanged: (
+      callback: (payload: { path: string | null }) => void
+    ) => () => void
+    onFileSaveFailed: (
+      callback: (payload: { path: string | null; reason: SaveFailureReason; detail: string }) => void
+    ) => () => void
+    onFileSaveSucceeded: (
       callback: (payload: { path: string | null }) => void
     ) => () => void
     saveUnit: (entry: {

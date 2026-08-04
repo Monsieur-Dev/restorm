@@ -26,6 +26,19 @@
       "detail": "Lataa uudelleen käyttääksesi levyllä olevaa versiota tai säilytä oma versiosi ja korvaa se.",
       "reload": "Lataa uudelleen",
       "keepMine": "Säilytä oma versioni"
+    },
+    "saveFailed": {
+      "title": "Tallennus epäonnistui",
+      "reason": {
+        "readOnlyFile": "Tiedosto on vain luku -tilassa. Muuta sen käyttöoikeuksia tai tallenna toiseen sijaintiin.",
+        "readOnlyLocation": "Tämä sijainti on liitetty vain luku -tilassa. Tallenna toiseen sijaintiin.",
+        "permissionDenied": "Sinulla ei ole kirjoitusoikeutta tänne. Tarkista kansion käyttöoikeudet tai tallenna toiseen sijaintiin.",
+        "diskFull": "Levy on täynnä. Vapauta tilaa ja tallenna uudelleen.",
+        "quotaExceeded": "Levykiintiösi on loppunut. Vapauta tilaa ja tallenna uudelleen.",
+        "pathMissing": "Tätä sijaintia ei enää ole. Kansio on voitu poistaa tai asema irrottaa.",
+        "fileBusy": "Tiedosto on toisen ohjelman käytössä. Sulje se ja tallenna uudelleen.",
+        "unknown": "Tiedostoa ei voitu kirjoittaa: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {

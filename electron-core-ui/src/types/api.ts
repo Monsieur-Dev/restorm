@@ -9,6 +9,7 @@ import type { ThemeInfo, ThemeDefinition, ThemeVariables } from './theme'
 import type { FeatureEnvironment, FeaturePlatform } from './feature'
 import type { FileServiceState, FileMetadata, SerializationFormat, OpenRejectedPayload } from './file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from './settings'
+import type { SaveFailureReason } from '../errors'
 import type {
   GitStatus,
   GitCommitResult,
@@ -126,6 +127,17 @@ export interface CoreUiFileApi {
     callback: (payload: { count: number }) => void
   ) => () => void
   onFileExternallyChanged: (
+    callback: (payload: { path: string | null }) => void
+  ) => () => void
+  /**
+   * A write to disk failed. Fires on EVERY failed attempt, including the
+   * autosave's — consumers own the "one notice per failing streak" rule.
+   */
+  onFileSaveFailed: (
+    callback: (payload: { path: string | null; reason: SaveFailureReason; detail: string }) => void
+  ) => () => void
+  /** A write to disk landed — the edge that retracts a failure notice. */
+  onFileSaveSucceeded: (
     callback: (payload: { path: string | null }) => void
   ) => () => void
   onAutoSaveTrigger: (callback: () => void) => () => void

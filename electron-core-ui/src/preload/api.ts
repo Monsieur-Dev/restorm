@@ -15,6 +15,7 @@ import type {
   GitState
 , GitLogEntry} from '../types/git'
 import type { CoreUiApi } from '../types/api'
+import type { SaveFailureReason } from '../errors'
 
 /**
  * Core UI API object for window.api
@@ -336,6 +337,31 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       ipcRenderer.on('file:externally-changed', handler)
       return () => {
         ipcRenderer.removeListener('file:externally-changed', handler)
+      }
+    },
+    onFileSaveFailed: (
+      callback: (payload: { path: string | null; reason: SaveFailureReason; detail: string }) => void
+    ): (() => void) => {
+      const handler = (
+        _event: Electron.IpcRendererEvent,
+        payload: { path: string | null; reason: SaveFailureReason; detail: string }
+      ): void => {
+        callback(payload)
+      }
+      ipcRenderer.on('file:save-failed', handler)
+      return () => {
+        ipcRenderer.removeListener('file:save-failed', handler)
+      }
+    },
+    onFileSaveSucceeded: (
+      callback: (payload: { path: string | null }) => void
+    ): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { path: string | null }): void => {
+        callback(payload)
+      }
+      ipcRenderer.on('file:save-succeeded', handler)
+      return () => {
+        ipcRenderer.removeListener('file:save-succeeded', handler)
       }
     },
     onAutoSaveTrigger: (callback: () => void): (() => void) => {

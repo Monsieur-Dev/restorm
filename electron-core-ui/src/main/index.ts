@@ -78,7 +78,8 @@ export {
   sanitizeFileName,
   calculateIndexPadding,
   PERSISTENCE_FORMATS,
-  atomicWriteFile
+  atomicWriteFile,
+  codeOf
 } from './services'
 
 // Settings

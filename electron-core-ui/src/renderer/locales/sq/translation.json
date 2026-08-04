@@ -26,6 +26,19 @@
       "detail": "Ringarkoni për të përdorur versionin në disk, ose ruani versionin tuaj dhe mbishkruajeni.",
       "reload": "Ringarko",
       "keepMine": "Ruaj versionin tim"
+    },
+    "saveFailed": {
+      "title": "Ruajtja dështoi",
+      "reason": {
+        "readOnlyFile": "Skedari është vetëm për lexim. Ndryshoni lejet e tij ose ruajeni në një vendndodhje tjetër.",
+        "readOnlyLocation": "Kjo vendndodhje është montuar vetëm për lexim. Ruajeni në një vendndodhje tjetër.",
+        "permissionDenied": "Nuk keni leje për të shkruar këtu. Kontrolloni lejet e dosjes ose ruajeni në një vendndodhje tjetër.",
+        "diskFull": "Disku është plot. Lironi hapësirë, pastaj ruani përsëri.",
+        "quotaExceeded": "Kuota juaj e diskut ka mbaruar. Lironi hapësirë, pastaj ruani përsëri.",
+        "pathMissing": "Kjo vendndodhje nuk ekziston më. Dosja mund të jetë fshirë ose disku të jetë shkëputur.",
+        "fileBusy": "Skedari po përdoret nga një program tjetër. Mbylleni, pastaj ruani përsëri.",
+        "unknown": "Skedari nuk mund të shkruhej: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
