@@ -237,16 +237,71 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     [rows]
   )
 
-  // Notify parent when rows change (for persistence)
-  const lastRowsRef = useRef<string | null>(null)
+  // Notify parent when rows change (for persistence).
+  //
+  // The baseline is seeded from the FIRST render's rows, not left null and
+  // filled by the first effect pass. Two things went wrong with a null seed,
+  // and both silently ate exactly one user edit:
+  //
+  //  - the `!onRowsChange` early return skipped the assignment as well as the
+  //    call, so any render without the callback left the baseline null. The
+  //    next edit then became the baseline instead of being emitted.
+  //  - "null means we have not established a baseline yet" and "null means do
+  //    not emit" were the same value, so anything that reset the ref also
+  //    bought a free swallowed change.
+  //
+  // A swallowed change is invisible: the checkbox moves, the row looks edited,
+  // and only the parent never hears about it — so the edit is lost with no
+  // error anywhere. Seeding at render time makes the first user edit a real
+  // difference against a real baseline, whatever the callback was doing.
+  const lastRowsRef = useRef<string | null>(JSON.stringify(keyValues))
   useEffect(() => {
-    if (!onRowsChange) return
     const rowsJson = JSON.stringify(keyValues)
-    if (lastRowsRef.current !== null && lastRowsRef.current !== rowsJson) {
-      onRowsChange(keyValues)
-    }
+    const previous = lastRowsRef.current
+    // Record BEFORE the callback: `onRowsChange` may re-render this component,
+    // and a baseline written afterwards could be skipped by an early return.
     lastRowsRef.current = rowsJson
+    if (previous !== rowsJson) onRowsChange?.(keyValues)
   }, [keyValues, onRowsChange])
+
+  // Adopt rows that changed OUTSIDE this component.
+  //
+  // `rows` is seeded once by `useState(defaultRows)`, so React ignores every
+  // later `initialRows`. The table then keeps showing its own copy while the
+  // owner's model has moved on — a toggle can read "on" while the request it
+  // describes is off, and the row the user sees is not the row that ships.
+  //
+  // The echo test is `lastRowsRef`, the last value this table EMITTED. Props
+  // matching it are our own change coming back and must be ignored — adopting
+  // those would fight the user mid-edit, which is why simply syncing on every
+  // prop change is wrong. Props that DIFFER came from somewhere else (a
+  // scenario run, an MCP write, a reset) and are authoritative.
+  // Done DURING RENDER rather than in an effect: React's documented way to
+  // adjust state when a prop changes. An effect would commit the stale rows,
+  // paint them, then re-render with the adopted ones — a visible flash of the
+  // superseded value on every external change. Setting state here instead
+  // makes React discard this render and redo it before anything is painted.
+  //
+  // Both trackers are STATE, not refs: render may neither read nor write a
+  // ref, and a "previous props" comparison is exactly what the render-phase
+  // state pattern is for.
+  //
+  // The echo test compares the incoming props against the rows currently
+  // DISPLAYED (`keyValues` is `rows` in the same shape). Props equal to them
+  // are our own change coming back and adopting would be a no-op; props that
+  // differ came from elsewhere — a scenario run, an MCP write, a reset — and
+  // are authoritative. Adopting re-notifies the owner through the effect
+  // above, which converges in one idempotent round-trip; suppressing that
+  // echo instead would re-open the swallowed-edit hole, because a user
+  // editing a row back to the value the owner last sent would emit nothing.
+  const incomingRows = JSON.stringify(
+    defaultRows.map((r) => ({ id: r.id, key: r.key, value: r.value, description: r.description, enabled: r.enabled }))
+  )
+  const [prevIncomingRows, setPrevIncomingRows] = useState(incomingRows)
+  if (incomingRows !== prevIncomingRows) {
+    setPrevIncomingRows(incomingRows)
+    if (incomingRows !== JSON.stringify(keyValues)) setRows(defaultRows)
+  }
 
   const handleAddRow = useCallback(() => {
     if (disabled) return

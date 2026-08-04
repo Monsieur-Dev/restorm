@@ -5,7 +5,7 @@
  */
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
-import { isExpressionValue, isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
+import { isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
 import { serializeODataQueryOptions } from '../../shared/utils/odataQuery'
 
 /**
@@ -123,12 +123,10 @@ export function resolveUrl(
     if (pp.key) {
       // Resolve using cumulative context (env + previous path params)
       const resolvedKey = transformValue(pp.key, cumulativeContext)
-      // Only `ExpressionValue` values go through Handlebars — plain
-      // strings/numbers/dates etc. are taken literally.
+      // Every value goes through Handlebars, same rule as the query rows
+      // below — what a row contains decides, not the class it was stored as.
       const raw = pp.value.toString()
-      const resolvedValue = isExpressionValue(pp.value)
-        ? transformValue(raw, cumulativeContext)
-        : raw
+      const resolvedValue = transformValue(raw, cumulativeContext)
       // Store non-encoded value for next iterations (last value wins for same
       // key), with the run's values re-asserted so a row can't shadow one.
       noteRowValue(cumulativeContext, resolvedKey, resolvedValue, runContext)
@@ -199,12 +197,22 @@ export function resolveUrl(
         continue
       }
 
-      // ExpressionValue goes through Handlebars, others taken literally
+      // EVERY value goes through Handlebars, whatever class the row holds.
+      // Gating this on `isExpressionValue` made resolution depend on how the
+      // row was CREATED rather than on what it contains: the same
+      // `a{{test}}b`, typed into the value cell, was sent verbatim — braces
+      // and all — while a row the UI happened to classify as an expression
+      // resolved. A template is a template.
       const raw = param.value.toString()
-      const resolvedValue = isExpressionValue(param.value)
-        ? transformValue(raw, cumulativeParamsContext)
-        : raw
-      queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
+      const resolvedValue = transformValue(raw, cumulativeParamsContext)
+      // An empty result means every variable in the template was undefined
+      // (Handlebars renders an unknown variable as ""), so the row has no
+      // value to send. Emit nothing rather than a bare `key=`: the server
+      // sees "absent", which is what the user's own context expressed, and
+      // not "present and empty", which is a different request.
+      if (resolvedValue !== '') {
+        queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
+      }
       noteRowValue(cumulativeParamsContext, resolvedKey, resolvedValue, runContext)
     }
   }

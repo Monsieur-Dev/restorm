@@ -496,18 +496,19 @@ class ContextService {
   }
 
   /**
-   * Resolve a `KeyValue`'s value. Only `ExpressionValue`s are run
-   * through Handlebars — every other type is taken literally, so a
-   * `StringValue("{{unresolved}}")` stays as-is. This is the rule the
-   * product asked for: variable substitution is opt-in, the user marks
-   * a variable as "expression" when they want templating.
+   * Resolve a `KeyValue`'s value through Handlebars, whatever type the row
+   * holds.
+   *
+   * Substitution is NOT opt-in per row type. Gating it on `ExpressionValue`
+   * made the same text behave differently depending on how the row happened
+   * to be created — `{{token}}` typed into a header cell was sent with its
+   * braces intact, while an identical row stored as an expression resolved —
+   * and nothing in the UI showed which of the two a row was. A value that
+   * resolves to nothing renders as the empty string, which is Handlebars'
+   * own treatment of an undefined variable.
    */
   private resolveKeyValue(kv: KeyValue, context: TransformedContext): string {
-    const raw = kv.value.toString()
-    if (isExpressionValue(kv.value)) {
-      return this.transformValue(raw, context)
-    }
-    return raw
+    return this.transformValue(kv.value.toString(), context)
   }
 
   /**

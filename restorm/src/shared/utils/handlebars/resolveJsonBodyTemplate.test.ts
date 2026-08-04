@@ -178,9 +178,13 @@ describe('resolveJsonBodyTemplate — failure modes keep the caller fallback', (
     expect(() => r('{"id":{{petId}', { petId: 42 })).toThrow()
   })
 
-  it('throws when a span fails to evaluate, so the caller can ship the raw body', () => {
-    // `test` is a block helper; invoked inline with no arguments it throws.
-    expect(() => r('{"a":{{test}}}', {})).toThrow()
+  it('renders a helper-colliding unknown name like any other unknown variable', () => {
+    // `test` is a block helper, so inline with no arguments it throws inside
+    // Handlebars — but the resolver retries it as a variable lookup, and an
+    // undefined variable renders empty. The name colliding with a helper is
+    // not a property of the USER'S template, so it must not decide whether
+    // the body resolves: this now matches `{"a":{{unknown}}}` exactly.
+    expect(r('{"a":{{test}}}', {})).toBe(r('{"a":{{unknown}}}', {}))
   })
 
   it('returns the template untouched when it holds no mustache', () => {

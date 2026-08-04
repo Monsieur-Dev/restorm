@@ -69,3 +69,40 @@ describe('resolveWithContextPriority — context variables win over same-named h
     expect(r('{{add a b}} / {{min}}', { a: 2, b: 3, min: 5 })).toBe('5 / 5')
   })
 })
+
+describe('resolveWithContextPriority — an UNDEFINED variable renders empty', () => {
+  it('renders empty for a name that collides with a block helper and is absent from the context', () => {
+    // `test` is a registered BLOCK helper. Dispatched as a no-arg inline call
+    // it reads `options` off a parameter it never got and throws, which used
+    // to make the caller return the whole raw template — so a single unknown
+    // variable was sent over the wire with its braces intact.
+    expect(r('a{{test}}b', {})).toBe('ab')
+    expect(r('{{test}}', {})).toBe('')
+  })
+
+  it('leaves a colliding helper that SUCCEEDS with no args dispatching to the helper', () => {
+    // The boundary of what's decidable: `{{min}}` with no numbers returns 0
+    // rather than throwing, so nothing distinguishes "undefined variable" from
+    // "deliberate no-arg helper call" and the helper keeps winning. Only a
+    // helper that CANNOT be called with no args (it throws) falls through to
+    // the variable reading. Defining the variable resolves the ambiguity —
+    // that is what the context-priority pass above is for.
+    expect(r('a{{min}}b', {})).toBe('a0b')
+    expect(r('a{{min}}b', { min: 5 })).toBe('a5b')
+  })
+
+  it('does not poison the other mustaches in the same template', () => {
+    expect(r('{{host}}/{{test}}/{{port}}', { host: 'localhost', port: '8080' })).toBe('localhost//8080')
+  })
+
+  it('still calls a legitimate no-arg helper rather than reading it as a variable', () => {
+    // The retry pass must not fire here: `uuid` succeeds on the first compile,
+    // so it keeps generating a value instead of silently rendering empty.
+    expect(r('{{uuid}}', {})).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-/i)
+  })
+
+  it('keeps block usage of a colliding helper working', () => {
+    expect(r('{{#test "abc" "b"}}yes{{else}}no{{/test}}', {})).toBe('yes')
+    expect(r('{{#test "abc" "z"}}yes{{else}}no{{/test}}', {})).toBe('no')
+  })
+})
