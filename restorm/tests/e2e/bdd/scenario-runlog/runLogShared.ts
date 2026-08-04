@@ -35,8 +35,32 @@ export function setupReferenceWorkingCopy(tempDir: string): string {
 const DYNAMIC_TIME_KEYS = new Set([
   'timestamp', 'now', 'startedAt', 'finishedAt', 'endedAt', 'completedAt', 'durationMs', 'date'
 ])
-/** Header keys whose value is a per-run secret (a freshly-issued Bearer token). */
-const MASKED_VALUE_KEYS = new Set(['authorization'])
+/**
+ * Header keys whose value is a credential and must never reach a committed
+ * golden.
+ *
+ * `authorization` alone was sufficient while the run log only carried the
+ * headers a transport reported back. It now also carries the request's **own
+ * resolved** header rows — which is exactly where an API key under a
+ * non-standard name lives. A golden is committed to git, and a key that lands
+ * there is not undone by a later commit, so the set errs wide: a false mask
+ * costs a less legible fixture, a missed one costs a leaked credential.
+ */
+const MASKED_VALUE_KEYS = new Set([
+  'authorization',
+  'proxy-authorization',
+  'cookie',
+  'set-cookie',
+  'x-api-key',
+  'apikey',
+  'api-key',
+  'x-auth-token',
+  'x-access-token',
+  'x-csrf-token',
+  'x-amz-security-token',
+  'private-token',
+  'access-token'
+])
 /** A freshly-generated v4 UUID is non-deterministic → masked. */
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 

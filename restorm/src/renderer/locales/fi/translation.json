@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Näytä {{level}}-lokit",
       "showLevelOnly": "Napsauta hiiren oikealla: vain tämä taso",
       "noUserLogs": "Ei käyttäjän lokeja (Log-toiminnon merkintöjä) tässä ajossa.",
-      "helpTitle": "Mitä tämä toiminto tekee"
+      "helpTitle": "Mitä tämä toiminto tekee",
+      "collapsePanel": "Tiivistä tarkastelupaneeli",
+      "expandPanel": "Laajenna tarkastelupaneeli"
     },
     "now": {
       "timezone": "Aikavyöhyke",

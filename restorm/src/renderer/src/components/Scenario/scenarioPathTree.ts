@@ -22,7 +22,18 @@ export function isDataLink(inputFlow: PortFlow, sourceOutputFlow: PortFlow): boo
  * a path into; the resolved `request` + `response` are what carry pickable
  * data). */
 const ROOT_HIDDEN = new Set(['nodeId', 'requestId', 'historyGuid', 'timestamp', 'restormRequest'])
-const PREVIEW_MAX = 32
+/**
+ * Safety cap on a leaf's row label. The VISIBLE truncation is the row's own CSS
+ * ellipsis, so the label follows the panel's real width — widening the
+ * inspector shows more text. This cap only keeps a megabyte-long value out of
+ * the DOM; it sits far beyond what any panel width can display.
+ */
+const LABEL_MAX = 400
+/**
+ * Cap on the untruncated value carried alongside the row (`data.full`) for the
+ * hover tooltip that makes a clipped value readable in full.
+ */
+const FULL_MAX = 4000
 
 /** Parse a JSON-looking string (e.g. a response body) into its object/array,
  * so the picker can drill into it. Returns `undefined` for non-JSON strings. */
@@ -37,12 +48,12 @@ function maybeParseJson(value: string): unknown {
   }
 }
 
-/** Short one-line preview of a leaf value for the row label. Objects/arrays
- * are rendered as expandable nodes, so they never reach here. */
-function leafPreview(value: unknown): string {
+/** One-line preview of a leaf value for the row label, clipped at `max` chars.
+ * Objects/arrays are rendered as expandable nodes, so they never reach here. */
+function leafPreview(value: unknown, max: number): string {
   if (value === null) return 'null'
   if (typeof value === 'string') {
-    const s = value.length > PREVIEW_MAX ? `${value.slice(0, PREVIEW_MAX)}…` : value
+    const s = value.length > max ? `${value.slice(0, max)}…` : value
     return `"${s}"`
   }
   if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value)
@@ -116,11 +127,15 @@ function buildNode(key: string, rawValue: unknown, path: string, expand: boolean
       children: entries.map(([k, v]) => buildNode(k, v, appendKey(path, k), true))
     }
   }
+  const label = `${key}: ${leafPreview(value, LABEL_MAX)}`
+  const full = `${key}: ${leafPreview(value, FULL_MAX)}`
   return {
     id: path,
-    title: `${key}: ${leafPreview(value)}`,
+    title: label,
     icon: typeIcon(value),
-    data: { path }
+    // `full` is carried only when the label itself had to clip — a row whose
+    // label is complete needs no fallback text for its hover tooltip.
+    data: full === label ? { path } : { path, full }
   }
 }
 

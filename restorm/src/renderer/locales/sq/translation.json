@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Shfaq loget {{level}}",
       "showLevelOnly": "Klik me të djathtën: vetëm ky nivel",
       "noUserLogs": "Asnjë log përdoruesi (hyrje nga veprimi Log) në këtë ekzekutim.",
-      "helpTitle": "Çfarë bën ky veprim"
+      "helpTitle": "Çfarë bën ky veprim",
+      "collapsePanel": "Palos inspektorin",
+      "expandPanel": "Shpalos inspektorin"
     },
     "now": {
       "timezone": "Zona kohore",

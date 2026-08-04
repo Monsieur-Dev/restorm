@@ -1537,7 +1537,9 @@
       "showLevelLogs": "Zobrazit logy {{level}}",
       "showLevelOnly": "Klikněte pravým tlačítkem: pouze tato úroveň",
       "noUserLogs": "Žádné uživatelské logy (záznamy z akce Log) v tomto běhu.",
-      "helpTitle": "Co tato akce dělá"
+      "helpTitle": "Co tato akce dělá",
+      "collapsePanel": "Sbalit inspektor",
+      "expandPanel": "Rozbalit inspektor"
     },
     "now": {
       "timezone": "Časové pásmo",

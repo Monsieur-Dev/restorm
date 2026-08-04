@@ -1535,7 +1535,9 @@
       "showLevelLogs": "{{level}}-Logs anzeigen",
       "showLevelOnly": "Rechtsklick: nur diese Stufe",
       "noUserLogs": "Keine Benutzer-Logs (Einträge der Log-Aktion) in diesem Run.",
-      "helpTitle": "Was diese Aktion bewirkt"
+      "helpTitle": "Was diese Aktion bewirkt",
+      "collapsePanel": "Inspektor einklappen",
+      "expandPanel": "Inspektor ausklappen"
     },
     "now": {
       "timezone": "Zeitzone",

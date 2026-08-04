@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Mostrar logs {{level}}",
       "showLevelOnly": "Clic derecho: solo este nivel",
       "noUserLogs": "No hay logs de usuario (entradas de la acción Log) en este run.",
-      "helpTitle": "Qué hace esta acción"
+      "helpTitle": "Qué hace esta acción",
+      "collapsePanel": "Contraer el inspector",
+      "expandPanel": "Expandir el inspector"
     },
     "now": {
       "timezone": "Zona horaria",

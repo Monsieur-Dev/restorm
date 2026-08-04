@@ -1534,7 +1534,9 @@
       "showLevelLogs": "Tampilkan log {{level}}",
       "showLevelOnly": "Klik kanan: hanya level ini",
       "noUserLogs": "Tidak ada log pengguna (entri dari aksi Log) dalam run ini.",
-      "helpTitle": "Apa yang dilakukan aksi ini"
+      "helpTitle": "Apa yang dilakukan aksi ini",
+      "collapsePanel": "Ciutkan inspektur",
+      "expandPanel": "Bentangkan inspektur"
     },
     "now": {
       "timezone": "Zona waktu",

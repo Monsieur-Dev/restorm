@@ -1535,7 +1535,9 @@
       "showLevelLogs": "{{level}} naplók megjelenítése",
       "showLevelOnly": "Jobb kattintás: csak ez a szint",
       "noUserLogs": "Nincsenek felhasználói naplók (a Log művelet bejegyzései) ebben a futásban.",
-      "helpTitle": "Mit csinál ez a művelet"
+      "helpTitle": "Mit csinál ez a művelet",
+      "collapsePanel": "Vizsgáló összecsukása",
+      "expandPanel": "Vizsgáló kibontása"
     },
     "now": {
       "timezone": "Időzóna",

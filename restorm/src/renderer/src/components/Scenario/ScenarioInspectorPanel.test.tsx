@@ -8,7 +8,7 @@
  * They deliberately assert wiring, not the panel's logic: each control still
  * renders, still calls its handler, and still honours its disabled state.
  */
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { render, cleanup, fireEvent } from '@testing-library/react'
 
 vi.hoisted(() => {
@@ -23,6 +23,23 @@ vi.hoisted(() => {
   }
   Object.defineProperty(globalThis, 'ResizeObserver', { value: NoopObserver, configurable: true })
   Object.defineProperty(globalThis, 'MutationObserver', { value: NoopObserver, configurable: true })
+  // The `localStorage` this environment exposes has no methods at all, so the
+  // panel's persisted width / folded state silently falls back to its defaults
+  // and nothing about persistence can be asserted. A minimal in-memory Storage
+  // makes it real.
+  const store = new Map<string, string>()
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => { store.set(key, value) },
+      removeItem: (key: string) => { store.delete(key) },
+      clear: () => { store.clear() },
+      key: (index: number) => [...store.keys()][index] ?? null,
+      get length() { return store.size }
+    },
+    configurable: true,
+    writable: true
+  })
   // The panel reaches the preload bridge through an auth hook; without it the
   // mount throws before any assertion runs.
   Object.defineProperty(globalThis, 'window', {
@@ -47,6 +64,9 @@ vi.mock('react-i18next', () => ({
 import { ScenarioInspectorPanel } from './ScenarioInspectorPanel'
 
 afterEach(() => { cleanup() })
+// The folded state persists in localStorage; without a reset one test's fold
+// would decide the next test's starting state.
+beforeEach(() => { localStorage.clear() })
 
 const baseProps = {
   scenarioId: 'scn-1',
@@ -55,6 +75,10 @@ const baseProps = {
   onFocusNode: vi.fn(),
   previewNode: null
 }
+
+const logs = [
+  { ts: '2026-05-21T10:00:00.000Z', level: 'info' as const, source: 'user' as const, message: 'hello from the run' }
+]
 
 describe('ScenarioInspectorPanel toolbar', () => {
   it('renders the four action discs through the shared round shape', () => {
@@ -104,6 +128,53 @@ describe('ScenarioInspectorPanel toolbar', () => {
     expect(undo.getAttribute('aria-disabled')).toBe('true')
     fireEvent.click(undo)
     expect(onUndo).not.toHaveBeenCalled()
+  })
+
+  it('folds the panel down to its toolbar, and unfolds it again', () => {
+    const { getByTestId, queryByTestId } = render(
+      <ScenarioInspectorPanel {...baseProps} runLog={logs} onUndo={vi.fn()} onRedo={vi.fn()} />
+    )
+    // Unfolded: the run logs are there.
+    expect(queryByTestId('scenario-inspector-logs-list')).not.toBeNull()
+
+    fireEvent.click(getByTestId('scenario-inspector-collapse'))
+    // Folded: only the toolbar survives — no logs, no legend, no resize sash.
+    expect(getByTestId('scenario-inspector-toolbar')).not.toBeNull()
+    expect(queryByTestId('scenario-inspector-logs-list')).toBeNull()
+    expect(queryByTestId('scenario-inspector-sash')).toBeNull()
+    expect(getByTestId('scenario-inspector-panel').className).toContain('scn-inspector-collapsed')
+
+    // The same button is the way back.
+    fireEvent.click(getByTestId('scenario-inspector-collapse'))
+    expect(queryByTestId('scenario-inspector-logs-list')).not.toBeNull()
+    expect(getByTestId('scenario-inspector-panel').className).not.toContain('scn-inspector-collapsed')
+  })
+
+  it('hides the selected box preview once folded', () => {
+    const previewNode = { id: 'n1', kind: 'log', title: 'My action', outputs: [], staticData: { value: 1 } }
+    const { getByTestId, queryByTestId } = render(
+      <ScenarioInspectorPanel {...baseProps} previewNode={previewNode} onUndo={vi.fn()} onRedo={vi.fn()} />
+    )
+    expect(queryByTestId('scenario-inspector-result')).not.toBeNull()
+    fireEvent.click(getByTestId('scenario-inspector-collapse'))
+    expect(queryByTestId('scenario-inspector-result')).toBeNull()
+  })
+
+  it('remembers the folded state across mounts', () => {
+    const { getByTestId, unmount } = render(<ScenarioInspectorPanel {...baseProps} runLog={logs} onUndo={vi.fn()} onRedo={vi.fn()} />)
+    fireEvent.click(getByTestId('scenario-inspector-collapse'))
+    unmount()
+
+    const remounted = render(<ScenarioInspectorPanel {...baseProps} runLog={logs} onUndo={vi.fn()} onRedo={vi.fn()} />)
+    expect(remounted.queryByTestId('scenario-inspector-logs-list')).toBeNull()
+  })
+
+  it('names the fold button after what the click will do', () => {
+    const { getByTestId } = render(<ScenarioInspectorPanel {...baseProps} onUndo={vi.fn()} onRedo={vi.fn()} />)
+    const button = getByTestId('scenario-inspector-collapse')
+    expect(button.getAttribute('aria-label')).toBe('Collapse the inspector')
+    fireEvent.click(button)
+    expect(getByTestId('scenario-inspector-collapse').getAttribute('aria-label')).toBe('Expand the inspector')
   })
 
   it('exposes an accessible name on every toolbar control', () => {

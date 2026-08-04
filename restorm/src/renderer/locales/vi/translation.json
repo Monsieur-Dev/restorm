@@ -1534,7 +1534,9 @@
       "showLevelLogs": "Hiển thị log {{level}}",
       "showLevelOnly": "Nhấp chuột phải: chỉ cấp độ này",
       "noUserLogs": "Không có nhật ký người dùng (mục từ hành động Log) trong lần chạy này.",
-      "helpTitle": "Hành động này làm gì"
+      "helpTitle": "Hành động này làm gì",
+      "collapsePanel": "Thu gọn trình kiểm tra",
+      "expandPanel": "Mở rộng trình kiểm tra"
     },
     "now": {
       "timezone": "Múi giờ",

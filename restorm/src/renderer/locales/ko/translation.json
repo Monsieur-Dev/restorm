@@ -1534,7 +1534,9 @@
       "showLevelLogs": "{{level}} 로그 표시",
       "showLevelOnly": "마우스 오른쪽 클릭: 이 수준만",
       "noUserLogs": "이 run에는 (Log 액션에서 나온) 사용자 로그가 없습니다.",
-      "helpTitle": "이 액션의 동작"
+      "helpTitle": "이 액션의 동작",
+      "collapsePanel": "인스펙터 접기",
+      "expandPanel": "인스펙터 펼치기"
     },
     "now": {
       "timezone": "시간대",

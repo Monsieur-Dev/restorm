@@ -1537,7 +1537,9 @@
       "showLevelLogs": "Pokaż logi {{level}}",
       "showLevelOnly": "Kliknij prawym przyciskiem: tylko ten poziom",
       "noUserLogs": "Brak logów użytkownika (wpisów z akcji Log) w tym przebiegu.",
-      "helpTitle": "Co robi ta akcja"
+      "helpTitle": "Co robi ta akcja",
+      "collapsePanel": "Zwiń inspektora",
+      "expandPanel": "Rozwiń inspektora"
     },
     "now": {
       "timezone": "Strefa czasowa",

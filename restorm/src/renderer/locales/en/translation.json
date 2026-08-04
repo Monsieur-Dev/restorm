@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Show {{level}} logs",
       "showLevelOnly": "Right-click: this level only",
       "noUserLogs": "No user logs (entries from the Log action) in this run.",
-      "helpTitle": "What this action does"
+      "helpTitle": "What this action does",
+      "collapsePanel": "Collapse the inspector",
+      "expandPanel": "Expand the inspector"
     },
     "now": {
       "timezone": "Timezone",

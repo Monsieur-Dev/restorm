@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Mostra log {{level}}",
       "showLevelOnly": "Clic destro: solo questo livello",
       "noUserLogs": "Nessun log utente (voci dall'azione Log) in questo run.",
-      "helpTitle": "Cosa fa questa azione"
+      "helpTitle": "Cosa fa questa azione",
+      "collapsePanel": "Comprimi l'ispettore",
+      "expandPanel": "Espandi l'ispettore"
     },
     "now": {
       "timezone": "Fuso orario",

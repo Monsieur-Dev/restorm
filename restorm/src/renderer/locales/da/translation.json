@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Vis {{level}}-logs",
       "showLevelOnly": "Højreklik: kun dette niveau",
       "noUserLogs": "Ingen brugerlogs (poster fra Log-handlingen) i denne run.",
-      "helpTitle": "Hvad denne handling gør"
+      "helpTitle": "Hvad denne handling gør",
+      "collapsePanel": "Fold inspektøren sammen",
+      "expandPanel": "Fold inspektøren ud"
     },
     "now": {
       "timezone": "Tidszone",

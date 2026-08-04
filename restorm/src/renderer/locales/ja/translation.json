@@ -1534,7 +1534,9 @@
       "showLevelLogs": "{{level}} ログを表示",
       "showLevelOnly": "右クリック: このレベルのみ",
       "noUserLogs": "この run には (Log アクションからの) ユーザーログがありません。",
-      "helpTitle": "このアクションの動作"
+      "helpTitle": "このアクションの動作",
+      "collapsePanel": "インスペクターを折りたたむ",
+      "expandPanel": "インスペクターを展開する"
     },
     "now": {
       "timezone": "タイムゾーン",

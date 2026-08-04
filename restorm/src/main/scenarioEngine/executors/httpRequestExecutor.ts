@@ -24,6 +24,7 @@ import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { jsonRpcExecutionService } from '../../services/JsonRpcExecutionService'
 import { trpcExecutionService } from '../../services/TrpcExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
+import { sentRequest } from './sentRequest'
 import { flushRequestStateToContext, scenarioVarsToOverlay } from '../../mcp/tools/execute'
 import { contextService } from '../../services/ContextService'
 import type { ResolutionContexts } from '../../services/ContextServiceTypes'
@@ -164,7 +165,7 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
 
   const result = await httpExecutionService.execute(input)
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, odata ? 'odata' : 'http', result, runContexts)
+  const detail = await responseHistoryService.storeExecutionResult(req.id, odata ? 'odata' : 'http', result, runContexts)
 
   // The `response` port carries the SAME `{ request, response }` shape the
   // JSON-path picker shows (see `getScenarioNodeResult` in
@@ -179,11 +180,10 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
       {
         port: 'response',
         value: {
-          request: {
-            url: result.requestUrl,
-            method: dispatchMethod,
-            headers: result.requestHeaders ?? {}
-          },
+          // The request as it actually went out — the transport's own values
+          // completed with everything only the history detail resolves (query +
+          // path params, body), so the run log shows the WHOLE origin request.
+          request: sentRequest({ url: result.requestUrl ?? '', method: dispatchMethod, headers: result.requestHeaders ?? {} }, detail),
           response: {
             status: result.statusCode ?? 0,
             statusText: result.statusText ?? '',
@@ -217,7 +217,7 @@ async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
   const result = await graphqlExecutionService.execute({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'graphql', result, runContexts)
+  const detail = await responseHistoryService.storeExecutionResult(req.id, 'graphql', result, runContexts)
   // The wire body of a GraphQL HTTP response is the `{ data, errors }` envelope;
   // serialise it so a picker-built selector like `response.body.data.…` resolves.
   const body = JSON.stringify({
@@ -230,7 +230,7 @@ async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
         port: 'response',
         value: {
           // GraphQL-over-HTTP is always a POST to the endpoint URL.
-          request: { url: result.requestUrl ?? '', method: 'POST', headers: {} },
+          request: sentRequest({ url: result.requestUrl ?? '', method: 'POST', headers: {} }, detail),
           response: {
             status: result.statusCode ?? 0,
             statusText: '',
@@ -257,7 +257,7 @@ async function runJsonRpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
   const result = await jsonRpcExecutionService.execute({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'jsonrpc', result, runContexts)
+  const detail = await responseHistoryService.storeExecutionResult(req.id, 'jsonrpc', result, runContexts)
   const body = result.notificationSent
     ? JSON.stringify({ notificationSent: true })
     : JSON.stringify({
@@ -269,7 +269,7 @@ async function runJsonRpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
       {
         port: 'response',
         value: {
-          request: { url: result.requestUrl ?? '', method: 'POST', headers: result.requestHeaders ?? {} },
+          request: sentRequest({ url: result.requestUrl ?? '', method: 'POST', headers: result.requestHeaders ?? {} }, detail),
           response: {
             status: result.statusCode ?? 0,
             statusText: result.statusText ?? '',
@@ -295,14 +295,14 @@ async function runJsonRpcBatch(req: Request, ctx: Parameters<NodeExecutor>[1]): 
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
   const result = await jsonRpcExecutionService.executeBatch({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'jsonrpcBatch', result, runContexts)
+  const detail = await responseHistoryService.storeExecutionResult(req.id, 'jsonrpcBatch', result, runContexts)
   const body = JSON.stringify({ children: result.children })
   return {
     outputs: [
       {
         port: 'response',
         value: {
-          request: { url: result.requestUrl ?? '', method: 'POST', headers: {} },
+          request: sentRequest({ url: result.requestUrl ?? '', method: 'POST', headers: {} }, detail),
           response: {
             status: result.statusCode ?? 0,
             statusText: '',
@@ -332,13 +332,13 @@ async function runTrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Pro
   else ctx.signal.addEventListener('abort', onAbort, { once: true })
   const result = await trpcExecutionService.execute({ requestId: req.id, runContexts })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'trpc', result, runContexts)
+  const detail = await responseHistoryService.storeExecutionResult(req.id, 'trpc', result, runContexts)
   return {
     outputs: [
       {
         port: 'response',
         value: {
-          request: { url: result.requestUrl ?? '', method: '', headers: result.requestHeaders ?? {} },
+          request: sentRequest({ url: result.requestUrl ?? '', method: '', headers: result.requestHeaders ?? {} }, detail),
           response: {
             status: result.statusCode ?? 0,
             statusText: result.statusText ?? '',

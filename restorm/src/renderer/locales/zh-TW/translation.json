@@ -1534,7 +1534,9 @@
       "showLevelLogs": "顯示 {{level}} 日誌",
       "showLevelOnly": "右鍵點選：僅此層級",
       "noUserLogs": "此 run 中沒有使用者日誌 (來自 Log 動作的項目)。",
-      "helpTitle": "此動作的作用"
+      "helpTitle": "此動作的作用",
+      "collapsePanel": "摺疊檢查器",
+      "expandPanel": "展開檢查器"
     },
     "now": {
       "timezone": "時區",

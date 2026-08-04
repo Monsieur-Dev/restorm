@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Visa {{level}}-loggar",
       "showLevelOnly": "Högerklick: endast denna nivå",
       "noUserLogs": "Inga användarloggar (poster från Log-åtgärden) i denna körning.",
-      "helpTitle": "Vad den här åtgärden gör"
+      "helpTitle": "Vad den här åtgärden gör",
+      "collapsePanel": "Fäll ihop inspektören",
+      "expandPanel": "Fäll ut inspektören"
     },
     "now": {
       "timezone": "Tidszon",

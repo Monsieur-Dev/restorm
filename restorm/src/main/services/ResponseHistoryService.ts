@@ -346,26 +346,41 @@ class ResponseHistoryService {
     }
   }
 
+  /**
+   * Persist one execution and return the detail it built.
+   *
+   * The detail is built FIRST and handed back even when nothing is archived: it
+   * is the only place the request as it ACTUALLY went out is materialised
+   * (resolved URL, headers, query + path params, body — env vars, Handlebars
+   * and any caller-side override already applied), and callers such as the
+   * scenario engine surface that in their run log whether or not history is
+   * being archived.
+   */
   async storeExecutionResult(
     requestId: string,
     type: ResponseHistoryRequestType,
     result: ExecutionResult,
     runContexts?: ResolutionContexts
-  ): Promise<void> {
+  ): Promise<ResponseHistoryDetail | null> {
+    // `built` mirrors the detail for the return AFTER the catch; the write
+    // closure below reads the `const` so its non-null narrowing holds inside
+    // the callback (a captured `let` would widen back to `| null`).
+    let built: ResponseHistoryDetail | null = null
     try {
-      const archivePath = getHistoryArchivePath()
-      if (!archivePath) {
-        logger.debug('[ResponseHistoryService] No archive path, skipping history save')
-        return
-      }
-
-      logger.debug('[ResponseHistoryService] Storing history entry', { requestId, type })
-
       const detail = this.buildDetail(requestId, type, result, runContexts)
       if (!detail) {
         logger.warn('[ResponseHistoryService] Failed to build response detail', { requestId, type })
-        return
+        return null
       }
+      built = detail
+
+      const archivePath = getHistoryArchivePath()
+      if (!archivePath) {
+        logger.debug('[ResponseHistoryService] No archive path, skipping history save')
+        return detail
+      }
+
+      logger.debug('[ResponseHistoryService] Storing history entry', { requestId, type })
 
       await queueHistoryWrite(async () => {
         const { index, entriesData } = await readHistoryArchive(archivePath)
@@ -400,6 +415,7 @@ class ResponseHistoryService {
         error: String(error)
       })
     }
+    return built
   }
 
   async list(requestId: string): Promise<ResponseHistoryEntry[]> {

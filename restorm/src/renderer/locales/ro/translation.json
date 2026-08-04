@@ -1536,7 +1536,9 @@
       "showLevelLogs": "Afișează jurnalele {{level}}",
       "showLevelOnly": "Clic dreapta: doar acest nivel",
       "noUserLogs": "Niciun jurnal de utilizator (intrări din acțiunea Log) în această rulare.",
-      "helpTitle": "Ce face această acțiune"
+      "helpTitle": "Ce face această acțiune",
+      "collapsePanel": "Restrânge inspectorul",
+      "expandPanel": "Extinde inspectorul"
     },
     "now": {
       "timezone": "Fus orar",

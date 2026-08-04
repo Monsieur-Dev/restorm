@@ -1534,7 +1534,9 @@
       "showLevelLogs": "显示 {{level}} 日志",
       "showLevelOnly": "右键单击：仅此级别",
       "noUserLogs": "此 run 中没有用户日志 (来自 Log 操作的条目)。",
-      "helpTitle": "此操作的作用"
+      "helpTitle": "此操作的作用",
+      "collapsePanel": "折叠检查器",
+      "expandPanel": "展开检查器"
     },
     "now": {
       "timezone": "时区",

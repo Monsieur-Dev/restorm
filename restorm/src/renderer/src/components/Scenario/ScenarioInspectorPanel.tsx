@@ -10,6 +10,7 @@ import { ScenarioInspectorLegend } from './ScenarioInspectorLegend'
 import type { ScenarioPort } from '../../../../shared/types/collections'
 import type { ScenarioNodeError } from '../../../../shared/scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
+import { withValueTooltips } from './scenarioTreeTooltips'
 import { resolveSelectorPath } from '../../../../shared/utils/scenarioStaticPreview'
 import type { SyntheticRequestPreview } from '../../../../shared/utils/syntheticRequestPreview'
 
@@ -145,6 +146,9 @@ const INSPECTOR_MIN_WIDTH = 450
 /** Minimum width to leave for the graph canvas when the inspector is stretched. */
 const INSPECTOR_MIN_CANVAS_WIDTH = 200
 const INSPECTOR_WIDTH_KEY = 'scenario-inspector-width'
+/** Folded state of the panel — a per-user preference, persisted like the
+ * width so the canvas stays clear across sessions once folded. */
+const INSPECTOR_COLLAPSED_KEY = 'scenario-inspector-collapsed'
 
 /** Pick an output's value out of the node's run result. Results are keyed by
  * output port id when a node emits several; a single-output node stores its
@@ -191,6 +195,17 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   useEffect(() => {
     try { localStorage.setItem(INSPECTOR_WIDTH_KEY, String(inspectorWidth)) } catch { /* ignore */ }
   }, [inspectorWidth])
+
+  // ── Folded state ──────────────────────────────────────────────────────────
+  // Folded, the panel keeps only its toolbar: errors, preview, logs and the
+  // help legend all go, and the panel shrinks to the toolbar's own width so the
+  // canvas gets the space back. The same button unfolds it.
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem(INSPECTOR_COLLAPSED_KEY) === 'true' } catch { return false }
+  })
+  useEffect(() => {
+    try { localStorage.setItem(INSPECTOR_COLLAPSED_KEY, String(collapsed)) } catch { /* ignore */ }
+  }, [collapsed])
 
   // Track the editor container width so the sash can clamp the max inspector width.
   const [editorWidth, setEditorWidth] = useState(0)
@@ -287,7 +302,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     const mo = new MutationObserver(apply)
     mo.observe(panel, { childList: true, subtree: true })
     return () => { ro.disconnect(); mo.disconnect() }
-  }, [previewNode, result, errors.length])
+  }, [previewNode, result, errors.length, collapsed])
 
   const previewId = previewNode?.id
   // Static-preview kinds (input, object, …) carry their output in the node
@@ -431,6 +446,9 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const mod = isMacintosh ? '⌘' : 'Ctrl'
   const undoTooltip = `${undoLabel} (${mod}+Z)`
   const redoTooltip = `${redoLabel} (${isMacintosh ? '⌘+⇧+Z' : isWindows ? 'Ctrl+Y' : 'Ctrl+Shift+Z'})`
+  const collapseLabel = collapsed
+    ? t('scenario.inspector.expandPanel', 'Expand the inspector')
+    : t('scenario.inspector.collapsePanel', 'Collapse the inspector')
 
   // Run-logs view (only when no box is selected) — the shared
   // `ScenarioRunLogView` (also used by the run-history modal) renders the
@@ -438,16 +456,26 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const allLogs = runLog ?? []
 
   return (
-    <div ref={panelRef} className="scn-inspector nodrag nopan" style={{ width: inspectorWidth }} data-testid="scenario-inspector-panel">
-      {/* Sash at the left edge — drag left to widen, drag right to narrow. */}
-      <Sash
-        orientation="vertical"
-        layoutProvider={sashLayoutProvider}
-        state={sashState}
-        onStart={handleSashStart}
-        onChange={handleSashChange}
-        data-testid="scenario-inspector-sash"
-      />
+    <div
+      ref={panelRef}
+      className={`scn-inspector nodrag nopan${collapsed ? ' scn-inspector-collapsed' : ''}`}
+      // Folded, the panel sizes to its toolbar (the stored width is kept for
+      // when it unfolds), so no inline width is imposed.
+      {...(collapsed ? {} : { style: { width: inspectorWidth } })}
+      data-testid="scenario-inspector-panel"
+    >
+      {/* Sash at the left edge — drag left to widen, drag right to narrow.
+        * Folded there is nothing to resize, so it is not rendered. */}
+      {!collapsed && (
+        <Sash
+          orientation="vertical"
+          layoutProvider={sashLayoutProvider}
+          state={sashState}
+          onStart={handleSashStart}
+          onChange={handleSashChange}
+          data-testid="scenario-inspector-sash"
+        />
+      )}
       {/* Run toolbar — Run flips the BorderBeam orbit on the selected node
        * (toggle: clicking again becomes Pause). Debug is a one-shot trigger
        * that fires a single travelling beam along every outgoing edge of
@@ -468,6 +496,16 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
             <div className="scn-inspector-toolbar-sep" aria-hidden="true" />
           </>
         )}
+        <HeaderHoverTooltip label={collapseLabel}>
+          <Button
+            small
+            icon={collapsed ? 'chevron-down' : 'chevron-up'}
+            onClick={() => { setCollapsed((c) => !c) }}
+            className="scn-inspector-collapse-round"
+            options={{ ariaLabel: collapseLabel }}
+            data-testid="scenario-inspector-collapse"
+          />
+        </HeaderHoverTooltip>
         <HeaderHoverTooltip label={runTooltip}>
           <Button appearance="round" icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
         </HeaderHoverTooltip>
@@ -490,7 +528,9 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         )}
       </div>
 
-      {hasErrors && (
+      {/* Folded → the toolbar is the whole panel: no errors, no preview, no
+        * logs, no legend. */}
+      {!collapsed && hasErrors && (
         <>
           <div className="scn-inspector-sep" />
           <div className="scn-inspector-section scn-inspector-errors">
@@ -513,7 +553,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         </>
       )}
 
-      {previewNode && (
+      {!collapsed && previewNode && (
         <>
           <div className="scn-inspector-sep" />
           <div className="scn-inspector-section scn-inspector-preview">
@@ -601,7 +641,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
                 </div>
                 <div className="scn-inspector-output">
                   <div className="scn-inspector-tree">
-                    <ListView items={buildScenarioPathTree(data)} selectionMode="single" selectedIds={[]} data-testid="scenario-inspector-result" />
+                    <ListView items={withValueTooltips(buildScenarioPathTree(data))} selectionMode="single" selectedIds={[]} data-testid="scenario-inspector-result" />
                   </div>
                 </div>
               </>
@@ -612,7 +652,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
 
       {/* No box selected → run logs of the current / last run. Nothing
         * is shown until there's at least one run to display. */}
-      {!previewNode && allLogs.length > 0 && (
+      {!collapsed && !previewNode && allLogs.length > 0 && (
         <>
           <div className="scn-inspector-sep" />
           <div className="scn-inspector-section scn-inspector-logs">
@@ -627,7 +667,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
       {/* Help legend — ONLY in the truly empty inspector (no box selected AND no
         * run-log). A selected box shows its preview instead (the legend would
         * push it out of view); a run shows its logs. */}
-      {previewNode === null && allLogs.length === 0 && (
+      {!collapsed && previewNode === null && allLogs.length === 0 && (
         <>
           <div className="scn-inspector-sep" />
           <ScenarioInspectorLegend

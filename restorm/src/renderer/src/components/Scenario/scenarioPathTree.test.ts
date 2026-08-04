@@ -66,6 +66,30 @@ describe('buildScenarioPathTree', () => {
     expect(map['response.body.users']).toBe('users [1]')
   })
 
+  it('leaves a long value to the row width instead of clipping it at a fixed length', () => {
+    // The row's CSS ellipsis is what truncates, so widening the inspector shows
+    // more text. A label cut short by the builder could never grow.
+    const value = 'x'.repeat(300)
+    const map = flatten(buildScenarioPathTree({ token: value }))
+    expect(map['token']).toBe(`token: "${value}"`)
+  })
+
+  it('carries the untruncated value for the hover tooltip once the label hits its safety cap', () => {
+    const value = 'y'.repeat(1200)
+    const [item] = buildScenarioPathTree({ token: value })
+    const title = item?.title as string
+    // The label is clipped (a megabyte value must not reach the DOM)…
+    expect(title.endsWith('…"')).toBe(true)
+    expect(title.length).toBeLessThan(value.length)
+    // … and the whole value travels alongside it, for the tooltip to show.
+    expect((item?.data as { full?: string }).full).toBe(`token: "${value}"`)
+  })
+
+  it('carries no tooltip fallback when the label already holds the whole value', () => {
+    const [item] = buildScenarioPathTree({ token: 'short' })
+    expect((item?.data as { full?: string }).full).toBeUndefined()
+  })
+
   it('returns an empty tree for a null/non-object context', () => {
     expect(buildScenarioPathTree(null)).toEqual([])
     expect(buildScenarioPathTree('nope')).toEqual([])

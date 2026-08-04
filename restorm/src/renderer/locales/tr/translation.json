@@ -1535,7 +1535,9 @@
       "showLevelLogs": "{{level}} günlüklerini göster",
       "showLevelOnly": "Sağ tıklama: yalnızca bu düzey",
       "noUserLogs": "Bu çalıştırmada kullanıcı günlüğü yok (Log eyleminden gelen girişler).",
-      "helpTitle": "Bu eylemin ne yaptığı"
+      "helpTitle": "Bu eylemin ne yaptığı",
+      "collapsePanel": "Denetçiyi daralt",
+      "expandPanel": "Denetçiyi genişlet"
     },
     "now": {
       "timezone": "Saat dilimi",

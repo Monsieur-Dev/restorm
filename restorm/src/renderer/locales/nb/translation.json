@@ -1535,7 +1535,9 @@
       "showLevelLogs": "Vis {{level}}-logger",
       "showLevelOnly": "Høyreklikk: bare dette nivået",
       "noUserLogs": "Ingen brukerlogger (oppføringer fra Log-handlingen) i denne kjøringen.",
-      "helpTitle": "Hva denne handlingen gjør"
+      "helpTitle": "Hva denne handlingen gjør",
+      "collapsePanel": "Slå sammen inspektøren",
+      "expandPanel": "Utvid inspektøren"
     },
     "now": {
       "timezone": "Tidssone",

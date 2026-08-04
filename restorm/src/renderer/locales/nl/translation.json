@@ -1535,7 +1535,9 @@
       "showLevelLogs": "{{level}}-logs tonen",
       "showLevelOnly": "Rechtermuisklik: alleen dit niveau",
       "noUserLogs": "Geen gebruikerslogs (vermeldingen van de Log-actie) in deze run.",
-      "helpTitle": "Wat deze actie doet"
+      "helpTitle": "Wat deze actie doet",
+      "collapsePanel": "Inspector inklappen",
+      "expandPanel": "Inspector uitklappen"
     },
     "now": {
       "timezone": "Tijdzone",
