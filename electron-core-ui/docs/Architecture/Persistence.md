@@ -195,15 +195,28 @@ Two things `rename` would otherwise get wrong, because it replaces the
 *inode* rather than the bytes of the existing file — and because it
 consults only the DIRECTORY's permissions:
 
-- **A read-only target is refused.** Without this the read-only bit
-  offers no resistance whatsoever: the file is replaced and the marking
-  is gone. `atomicWriteFile` checks `fs.access(W_OK)` on an existing
-  target first and throws `FileSystemError('FS_TARGET_READ_ONLY')`.
-  This is a **detection, not the safety net** — `access` is advisory, it
-  lies under ACLs and reports writable for root — so every case it waves
-  through still fails at the write and is reported from the `catch`,
-  through the same channel. A path with no file yet is not a refusal
-  (`ENOENT` there means the directory governs the write).
+- **A read-only target can be refused**, via the opt-in
+  `atomicWriteFile(path, contents, { refuseReadOnlyTarget: true })`.
+  Without it the read-only bit offers no resistance whatsoever: the file
+  is replaced and the marking is gone. When asked, `atomicWriteFile`
+  checks `fs.access(W_OK)` on an existing target first and throws
+  `FileSystemError('FS_TARGET_READ_ONLY')`. This is a **detection, not
+  the safety net** — `access` is advisory, it lies under ACLs and reports
+  writable for root — so every case it waves through still fails at the
+  write and is reported from the `catch`, through the same channel. A
+  path with no file yet is not a refusal (`ENOENT` there means the
+  directory governs the write).
+
+  **It is opt-in on purpose.** The throw lands on the caller, and only a
+  caller that reports failure to the user can act on it. The atomicity
+  here is *per file*: a caller writing several files in one pass (the
+  folder reorder in `saveIndexedFolder`, for instance) would be left
+  mid-operation, some files written and some not. Writers that report
+  failure **by value** (`'refused'`, `persisted: false`) or that merely
+  log would turn the refusal into a silent no-op or an unexpected
+  exception. So the default is the historical behaviour, and only the
+  `FileService` save paths — the ones that own the `file:save-failed`
+  notice — switch it on.
 - **The target's permission mode is carried across.** Without it the file
   comes back with whatever mode the umask gave the temp file: a project
   kept at `600` — they can hold secrets — would silently return as `644`.

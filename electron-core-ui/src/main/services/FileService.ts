@@ -403,7 +403,7 @@ export class FileService {
   }): Promise<{ ok: true } | { ok: false; error: unknown }> {
     try {
       const serialized = serializePersisted(params.content, params.format)
-      await atomicWriteFile(params.absolutePath, serialized)
+      await atomicWriteFile(params.absolutePath, serialized, { refuseReadOnlyTarget: true })
       const committed = this.saveUnitRegistry.commitIfDraftMatches(params.runtimeId, params.content)
       if (!committed) {
         logger.info('[FileService] Save completed but draft advanced — unit remains dirty', {
@@ -728,7 +728,7 @@ export class FileService {
       const emptyContent: Record<string, unknown> = {}
       if (uuidKey) {
         const data = this.serialize(emptyContent, this.config.defaultFormat)
-        await atomicWriteFile(filePath, data)
+        await atomicWriteFile(filePath, data, { refuseReadOnlyTarget: true })
         await ensureFileUuid({
           filePath,
           format: this.config.defaultFormat,
@@ -745,7 +745,7 @@ export class FileService {
         }
       } else {
         const data = this.serialize(emptyContent, this.config.defaultFormat)
-        await atomicWriteFile(filePath, data)
+        await atomicWriteFile(filePath, data, { refuseReadOnlyTarget: true })
         this.currentFile = {
           path: filePath,
           name,
@@ -1067,7 +1067,7 @@ export class FileService {
     try {
       const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, this.currentFile.format)
-      await atomicWriteFile(this.currentFile.path, data)
+      await atomicWriteFile(this.currentFile.path, data, { refuseReadOnlyTarget: true })
       this.diskDigest = FileService.digestOf(data)
 
       this.currentFile.content = preserved
@@ -1134,7 +1134,7 @@ export class FileService {
     try {
       const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, fileFormat)
-      await atomicWriteFile(filePath, data)
+      await atomicWriteFile(filePath, data, { refuseReadOnlyTarget: true })
       this.diskDigest = FileService.digestOf(data)
       this.externalChangePending = false
 

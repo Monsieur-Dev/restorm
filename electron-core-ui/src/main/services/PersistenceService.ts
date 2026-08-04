@@ -155,8 +155,14 @@ async function targetMode(targetPath: string): Promise<number | null> {
  * the only thing this function does — every other way a write can fail
  * (unwritable directory, full disk, vanished path, and any case this
  * check waves through) still surfaces from the write's own `catch`, and
- * reaches the user by the same route. Deleting this one call reverts the
- * behaviour cleanly and leaves the rest of the reporting intact.
+ * reaches the user by the same route.
+ *
+ * Opt-in per call, and deliberately so: a refusal is only useful where a
+ * caller can turn it into something the user sees. Applied to every writer
+ * it would convert previously-completing work into a mid-operation abort —
+ * a multi-file pass has no per-file atomicity to fall back on, and callers
+ * that report failure by value rather than by throwing would have their
+ * contract broken by an exception they never expected.
  */
 async function assertTargetWritable(targetPath: string): Promise<void> {
   try {
@@ -184,20 +190,36 @@ async function assertTargetWritable(targetPath: string): Promise<void> {
  * *inode* rather than the bytes of the existing file — and because it
  * consults only the DIRECTORY's permissions:
  *
- * - **A read-only target is refused** ({@link assertTargetWritable}),
- *   instead of being replaced as if it had never been protected.
- * - **The target's permission mode is carried across.** Without it the
- *   file comes back with whatever mode the umask gave the temp file: a
+ * - **The target's permission mode is carried across**, always. Without it
+ *   the file comes back with whatever mode the umask gave the temp file: a
  *   project kept at `600` — they can hold secrets — would silently
  *   return as `644`.
+ * - **A read-only target can be refused** ({@link assertTargetWritable}),
+ *   instead of being replaced as if it had never been protected — but only
+ *   when the caller asks, via `refuseReadOnlyTarget`.
+ *
+ * That refusal is opt-in because the throw lands on the caller, and only a
+ * caller that reports failure to the user can do anything with it. The
+ * atomicity here is **per file**: a caller writing several files in one
+ * pass would be left mid-operation, with earlier writes done and later
+ * ones skipped. Writers that recover by value (`'refused'`, `persisted:
+ * false`) or that merely log would turn a refusal into a silent no-op, or
+ * into an exception their callers never expected. So the default is the
+ * historical behaviour, and the save paths that own a user-facing failure
+ * notice switch it on.
  *
  * Everything else that can fail a write — an unwritable directory, a full
- * disk, a vanished path — surfaces as the write's own errno, unchanged.
+ * disk, a vanished path — surfaces as the write's own errno, unchanged,
+ * for every caller.
  */
-export async function atomicWriteFile(targetPath: string, contents: string): Promise<void> {
+export async function atomicWriteFile(
+  targetPath: string,
+  contents: string,
+  options?: { refuseReadOnlyTarget?: boolean }
+): Promise<void> {
   const tmpPath = `${targetPath}.${crypto.randomUUID()}.tmp`
   await fs.mkdir(dirname(targetPath), { recursive: true })
-  await assertTargetWritable(targetPath)
+  if (options?.refuseReadOnlyTarget === true) await assertTargetWritable(targetPath)
   const mode = await targetMode(targetPath)
   try {
     await fs.writeFile(tmpPath, contents, 'utf-8')

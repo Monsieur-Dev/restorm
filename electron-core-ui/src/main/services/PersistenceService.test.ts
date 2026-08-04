@@ -114,12 +114,29 @@ describe('atomicWriteFile', () => {
     writeFileSync(target, 'protected', 'utf-8')
     await fs.chmod(target, 0o444)
 
-    await expect(atomicWriteFile(target, 'overwritten')).rejects.toMatchObject({
+    await expect(
+      atomicWriteFile(target, 'overwritten', { refuseReadOnlyTarget: true })
+    ).rejects.toMatchObject({
       code: 'FS_TARGET_READ_ONLY'
     })
     expect(await fs.readFile(target, 'utf-8')).toBe('protected')
     expect(((await fs.stat(target)).mode & 0o777)).toBe(0o444)
     expect((await fs.readdir(dir)).some((n) => n.endsWith('.tmp'))).toBe(false)
+  })
+
+  it('replaces a read-only file when the caller has not asked to refuse one', async () => {
+    // The refusal is opt-in, and the default has to stay what it always
+    // was: writers that recover by value, or that write several files in
+    // one pass, would be left mid-operation by a throw they never handled.
+    const target = join(dir, 'unguarded-read-only.txt')
+    writeFileSync(target, 'protected', 'utf-8')
+    await fs.chmod(target, 0o444)
+
+    await atomicWriteFile(target, 'overwritten')
+
+    expect(await fs.readFile(target, 'utf-8')).toBe('overwritten')
+    // The mode is carried regardless — that half is never opt-in.
+    expect(((await fs.stat(target)).mode & 0o777)).toBe(0o444)
   })
 
   it('writes a first file even though there is nothing to check the permissions of', async () => {
