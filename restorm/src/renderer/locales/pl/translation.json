@@ -2151,7 +2151,7 @@
   "history": {
     "title": "Historia",
     "maxEntriesTitle": "Wpisy przechowywane w każdej historii",
-    "maxEntriesDescription": "Ile wpisów przechowuje każda historia: zarejestrowane wywołania żądania, znaczniki czasu wysłania żądania oraz znaczniki czasu uruchomienia scenariusza. Przypięte wywołania są zawsze zachowywane, niezależnie od tej wartości."
+    "maxEntriesDescription": "Ile wpisów przechowują historia wywołań żądania oraz historia uruchomień scenariusza. Przypięte wpisy są zawsze zachowywane, niezależnie od tej wartości. Nie dotyczy to list ostatniej aktywności na ekranie startowym."
   },
   "mcp": {
     "title": "MCP",

@@ -2149,7 +2149,7 @@
   "history": {
     "title": "History",
     "maxEntriesTitle": "Entries kept per history",
-    "maxEntriesDescription": "How many entries each history keeps: a request's recorded calls, a request's send timestamps and a scenario's run timestamps. Pinned calls are always kept, whatever this is set to."
+    "maxEntriesDescription": "How many entries the request call history and the scenario run history each keep. Pinned entries are always kept, whatever this is set to. The home screen's recent-activity lists are not affected."
   },
   "mcp": {
     "title": "MCP",

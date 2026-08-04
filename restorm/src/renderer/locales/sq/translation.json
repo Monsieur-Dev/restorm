@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Historiku",
     "maxEntriesTitle": "Hyrjet e ruajtura për çdo historik",
-    "maxEntriesDescription": "Sa hyrje ruan çdo historik: thirrjet e regjistruara të një kërkese, vulat kohore të dërgimit të një kërkese dhe vulat kohore të ekzekutimit të një skenari. Thirrjet e fiksuara ruhen gjithmonë, pavarësisht nga kjo vlerë."
+    "maxEntriesDescription": "Sa hyrje ruajnë historiku i thirrjeve të një kërkese dhe historiku i ekzekutimeve të një skenari. Hyrjet e fiksuara ruhen gjithmonë, pavarësisht nga kjo vlerë. Listat e aktivitetit të fundit në ekranin kryesor nuk preken."
   },
   "mcp": {
     "title": "MCP",

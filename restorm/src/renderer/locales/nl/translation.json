@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Geschiedenis",
     "maxEntriesTitle": "Bewaarde items per geschiedenis",
-    "maxEntriesDescription": "Hoeveel items elke geschiedenis bewaart: de vastgelegde aanroepen van een verzoek, de verzendtijdstempels van een verzoek en de uitvoeringstijdstempels van een scenario. Vastgezette aanroepen blijven altijd bewaard, ongeacht deze waarde."
+    "maxEntriesDescription": "Hoeveel items de aanroepgeschiedenis van een verzoek en de uitvoeringsgeschiedenis van een scenario elk bewaren. Vastgezette items blijven altijd bewaard, ongeacht deze waarde. De lijsten met recente activiteit op het startscherm worden niet beïnvloed."
   },
   "mcp": {
     "title": "MCP",

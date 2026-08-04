@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Verlauf",
     "maxEntriesTitle": "Pro Verlauf aufbewahrte Einträge",
-    "maxEntriesDescription": "Wie viele Einträge jeder Verlauf behält: die aufgezeichneten Aufrufe einer Anfrage, die Sendezeitstempel einer Anfrage und die Ausführungszeitstempel eines Szenarios. Angeheftete Aufrufe bleiben unabhängig von diesem Wert immer erhalten."
+    "maxEntriesDescription": "Wie viele Einträge der Aufrufverlauf einer Anfrage und der Ausführungsverlauf eines Szenarios jeweils behalten. Angeheftete Einträge bleiben unabhängig von diesem Wert immer erhalten. Die Listen der letzten Aktivitäten auf der Startseite sind nicht betroffen."
   },
   "mcp": {
     "title": "MCP",

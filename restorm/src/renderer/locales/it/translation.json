@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Cronologia",
     "maxEntriesTitle": "Voci conservate per cronologia",
-    "maxEntriesDescription": "Quante voci conserva ogni cronologia: le chiamate registrate di una richiesta, i timestamp di invio di una richiesta e i timestamp di esecuzione di uno scenario. Le chiamate fissate vengono sempre conservate, indipendentemente da questo valore."
+    "maxEntriesDescription": "Quante voci conservano la cronologia delle chiamate di una richiesta e la cronologia delle esecuzioni di uno scenario. Le voci fissate vengono sempre conservate, indipendentemente da questo valore. Gli elenchi delle attività recenti nella schermata iniziale non sono interessati."
   },
   "mcp": {
     "title": "MCP",

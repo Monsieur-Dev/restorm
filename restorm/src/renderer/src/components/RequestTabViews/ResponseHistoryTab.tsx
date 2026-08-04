@@ -208,9 +208,14 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
   // step, an MCP call — stores its entry in the main process without touching
   // `refreshKey`, which only the tab's own send handler bumps. Listen to the
   // main-process broadcast so an open history view repaints for those too.
+  // Goes through the DECLARED global rather than a locally-widened cast. Only
+  // `window.restorm` itself is optional (the web shim installs it after this
+  // module loads); `responsesHistory.onChanged` is not, so a rename or removal
+  // breaks the build here instead of silently degrading this subscription into
+  // a no-op that nothing tests and nobody notices until the history stops
+  // refreshing.
   useEffect(() => {
-    const api = (window as { restorm?: { responsesHistory?: { onChanged?: (cb: (id: string) => void) => () => void } } }).restorm
-    const unsubscribe = api?.responsesHistory?.onChanged?.((changedRequestId) => {
+    const unsubscribe = window.restorm?.responsesHistory.onChanged((changedRequestId) => {
       if (changedRequestId !== requestId) return
       void store.loadEntries(requestId)
     })

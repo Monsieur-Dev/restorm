@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Histórico",
     "maxEntriesTitle": "Entradas mantidas por histórico",
-    "maxEntriesDescription": "Quantas entradas cada histórico mantém: as chamadas registadas de um pedido, os carimbos temporais de envio de um pedido e os carimbos temporais de execução de um cenário. As chamadas fixadas são sempre mantidas, qualquer que seja este valor."
+    "maxEntriesDescription": "Quantas entradas o histórico de chamadas de um pedido e o histórico de execuções de um cenário mantêm cada um. As entradas fixadas são sempre mantidas, qualquer que seja este valor. As listas de atividade recente do ecrã inicial não são afetadas."
   },
   "mcp": {
     "title": "MCP",

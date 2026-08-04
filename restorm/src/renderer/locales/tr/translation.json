@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Geçmiş",
     "maxEntriesTitle": "Geçmiş başına saklanan girdiler",
-    "maxEntriesDescription": "Her geçmişin sakladığı girdi sayısı: bir isteğin kaydedilen çağrıları, bir isteğin gönderim zaman damgaları ve bir senaryonun çalıştırma zaman damgaları. Sabitlenen çağrılar, bu değerden bağımsız olarak her zaman saklanır."
+    "maxEntriesDescription": "Bir isteğin çağrı geçmişinin ve bir senaryonun çalıştırma geçmişinin her birinin sakladığı girdi sayısı. Sabitlenen girdiler, bu değerden bağımsız olarak her zaman saklanır. Başlangıç ekranındaki son etkinlik listeleri etkilenmez."
   },
   "mcp": {
     "title": "MCP",

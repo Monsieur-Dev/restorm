@@ -24,9 +24,14 @@ import {
   type Subscription
 } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentDeletedPayload } from './DocumentEvents'
-import { getHistoryLimit, onHistoryLimitChanged } from './historyRetention'
 
 const STORAGE_KEY = 'request_usage'
+/** The EmptyBench's "recently played" depth is deliberately FIXED, not tied to
+ *  the `history:maxEntries` setting: that setting governs the histories a user
+ *  reads and prunes (a request's recorded calls, a scenario's runs), whereas
+ *  this list only feeds the home screen's recent-activity cards, where a
+ *  longer tail would not change what the cards show. */
+const HISTORY_LIMIT = 10
 const SAVE_DEBOUNCE_MS = 500
 const CHANGE_EVENT = 'request-usage:changed'
 
@@ -36,8 +41,7 @@ export interface RequestUsageEntry {
   count: number
   /** ISO timestamp of the last send. */
   lastSentAt: string
-  /** The most recent send timestamps (newest first), capped by the
-   *  `history:maxEntries` setting. */
+  /** Last 10 send timestamps (newest first). */
   history: string[]
 }
 
@@ -59,7 +63,6 @@ class RequestUsageService {
   private data: RequestUsageMap = {}
   private subscriptions: Subscription[] = []
   private saveTimer: NodeJS.Timeout | null = null
-  private unsubscribeLimit: (() => void) | null = null
   private initialized = false
 
   initialize(): void {
@@ -74,22 +77,11 @@ class RequestUsageService {
         this.handleRequestDeleted(payload.id)
       })
     ]
-
-    // Lowering the cap has to shrink what is ALREADY stored, not just bound
-    // the next send — otherwise a user who drops the limit sees the old,
-    // longer history until every request happens to be sent again.
-    this.unsubscribeLimit = onHistoryLimitChanged((limit) => {
-      this.applyLimit(limit)
-    })
   }
 
   dispose(): void {
     for (const sub of this.subscriptions) sub.unsubscribe()
     this.subscriptions = []
-    if (this.unsubscribeLimit) {
-      this.unsubscribeLimit()
-      this.unsubscribeLimit = null
-    }
     if (this.saveTimer) {
       clearTimeout(this.saveTimer)
       this.saveTimer = null
@@ -105,7 +97,7 @@ class RequestUsageService {
     if (!requestId) return
     const now = new Date().toISOString()
     const existing = this.data[requestId]
-    const nextHistory = [now, ...(existing?.history ?? [])].slice(0, getHistoryLimit())
+    const nextHistory = [now, ...(existing?.history ?? [])].slice(0, HISTORY_LIMIT)
     this.data[requestId] = {
       count: (existing?.count ?? 0) + 1,
       lastSentAt: now,
@@ -119,25 +111,6 @@ class RequestUsageService {
    *  caller can't mutate the service's internal state by accident. */
   getAll(): RequestUsageMap {
     return { ...this.data }
-  }
-
-  /** Truncate every stored history to `limit`. No-op (no save, no broadcast)
-   *  when nothing actually exceeded it, so raising the cap costs nothing. */
-  private applyLimit(limit: number): void {
-    let changed = false
-    const next: RequestUsageMap = {}
-    for (const [requestId, entry] of Object.entries(this.data)) {
-      if (entry.history.length > limit) {
-        next[requestId] = { ...entry, history: entry.history.slice(0, limit) }
-        changed = true
-      } else {
-        next[requestId] = entry
-      }
-    }
-    if (!changed) return
-    this.data = next
-    this.scheduleSave()
-    this.broadcast()
   }
 
   private handleRequestDeleted(requestId: string): void {

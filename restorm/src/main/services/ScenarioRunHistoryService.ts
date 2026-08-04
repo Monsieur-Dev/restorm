@@ -5,14 +5,16 @@
  * references (main + transitively-referenced sub-scenarios), under
  * `scenarioRuns/<guid>.json`, indexed by the archive's `scenarios` slice.
  *
- * Retention mirrors the response history: the newest
- * `DEFAULT_MAX_PER_SCENARIO` non-pinned runs per scenario are kept,
- * pinned runs are kept indefinitely. All writes go through the shared
+ * Retention mirrors the response history: the newest non-pinned runs per
+ * scenario are kept — how many is the user's `history:maxEntries` setting,
+ * shared with the request call history — and pinned runs are kept
+ * indefinitely. All writes go through the shared
  * `queueHistoryWrite` so they never interleave with response writes; each
  * write preserves the `responses/` slice it doesn't own.
  */
 import { randomUUID } from 'crypto'
 import { logger } from 'electron-core-ui/main'
+import { getHistoryLimit, onHistoryLimitChanged } from './historyRetention'
 import {
   getHistoryArchivePath,
   readHistoryArchive,
@@ -29,8 +31,6 @@ import type {
   ScenarioRunLogEntry,
   ScenarioRunSnapshot
 } from '../../shared/types/scenarioRunHistory'
-
-const DEFAULT_MAX_PER_SCENARIO = 10
 
 export interface StoreScenarioRunInput {
   scenarioId: string
@@ -161,7 +161,7 @@ class ScenarioRunHistoryService {
     const keptNonPinned = target.runs
       .filter((r) => !r.pinned)
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-      .slice(0, DEFAULT_MAX_PER_SCENARIO)
+      .slice(0, getHistoryLimit())
     const keepGuids = new Set([...pinnedRuns, ...keptNonPinned].map((r) => r.guid))
     target.runs = target.runs.filter((r) => keepGuids.has(r.guid))
 
@@ -171,6 +171,63 @@ class ScenarioRunHistoryService {
     return {
       updatedIndex: { ...index, scenarios: scenarios.filter((s) => s.runs.length > 0) },
       keptGuids: keptGuidsAll
+    }
+  }
+
+  /**
+   * Re-apply `limit` to every scenario already in the archive, dropping the
+   * detail payloads of the runs that fall out. Pinned runs are exempt, exactly
+   * as in {@link addRunAndPrune}. Rewrites nothing when the archive is already
+   * within the cap, so raising the limit — and the pass at startup — cost
+   * nothing when there is nothing to drop.
+   */
+  async pruneToLimit(limit: number): Promise<void> {
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) return
+
+    try {
+      await queueHistoryWrite(async () => {
+        const { index, entriesData } = await readHistoryArchive(archivePath)
+
+        const scenarios = index.scenarios.map((s) => {
+          const pinned = s.runs.filter((r) => r.pinned)
+          const nonPinned = s.runs
+            .filter((r) => !r.pinned)
+            .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+          if (nonPinned.length <= limit) return s
+          const keep = new Set([...pinned, ...nonPinned.slice(0, limit)].map((r) => r.guid))
+          return { ...s, runs: s.runs.filter((r) => keep.has(r.guid)) }
+        })
+
+        const before = index.scenarios.reduce((sum, s) => sum + s.runs.length, 0)
+        const after = scenarios.reduce((sum, s) => sum + s.runs.length, 0)
+        if (after === before) return
+
+        const keptGuids = new Set<string>()
+        for (const s of scenarios) for (const r of s.runs) keptGuids.add(r.guid)
+
+        const nextEntriesData = new Map<string, string>()
+        for (const [entryName, entryText] of entriesData.entries()) {
+          if (entryName === INDEX_FILE_NAME) continue
+          if (entryName.startsWith(`${SCENARIO_RUNS_FOLDER}/`) && entryName.endsWith('.json')) {
+            const entryGuid = entryName.slice(`${SCENARIO_RUNS_FOLDER}/`.length, -'.json'.length)
+            if (keptGuids.has(entryGuid)) nextEntriesData.set(entryName, entryText)
+          } else {
+            // Preserve the other domain's entries (responses/…).
+            nextEntriesData.set(entryName, entryText)
+          }
+        }
+
+        await writeHistoryArchive(archivePath, {
+          ...index,
+          scenarios: scenarios.filter((s) => s.runs.length > 0)
+        }, nextEntriesData)
+      })
+    } catch (error) {
+      logger.error('[ScenarioRunHistoryService] Failed to re-prune runs to the new limit', {
+        limit,
+        error: String(error)
+      })
     }
   }
 
@@ -195,3 +252,9 @@ class ScenarioRunHistoryService {
 }
 
 export const scenarioRunHistoryService = new ScenarioRunHistoryService()
+
+// Parked until `activateHistoryRetention()` runs (see `historyRetention.ts`):
+// this module is imported long before `SettingsService` exists.
+onHistoryLimitChanged((limit) => {
+  void scenarioRunHistoryService.pruneToLimit(limit)
+})

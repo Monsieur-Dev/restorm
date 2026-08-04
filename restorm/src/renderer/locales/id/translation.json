@@ -2148,7 +2148,7 @@
   "history": {
     "title": "Riwayat",
     "maxEntriesTitle": "Entri yang disimpan per riwayat",
-    "maxEntriesDescription": "Berapa banyak entri yang disimpan setiap riwayat: panggilan terekam sebuah permintaan, stempel waktu pengiriman sebuah permintaan, dan stempel waktu eksekusi sebuah skenario. Panggilan yang disematkan selalu disimpan, berapa pun nilai ini."
+    "maxEntriesDescription": "Berapa banyak entri yang disimpan oleh riwayat panggilan sebuah permintaan dan riwayat eksekusi sebuah skenario. Entri yang disematkan selalu disimpan, berapa pun nilai ini. Daftar aktivitas terbaru di layar beranda tidak terpengaruh."
   },
   "mcp": {
     "title": "MCP",

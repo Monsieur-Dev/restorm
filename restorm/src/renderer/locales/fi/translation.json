@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Historia",
     "maxEntriesTitle": "Säilytettävät merkinnät historiaa kohden",
-    "maxEntriesDescription": "Kuinka monta merkintää kukin historia säilyttää: pyynnön tallennetut kutsut, pyynnön lähetysaikaleimat ja skenaarion suoritusaikaleimat. Kiinnitetyt kutsut säilytetään aina tästä arvosta riippumatta."
+    "maxEntriesDescription": "Kuinka monta merkintää pyynnön kutsuhistoria ja skenaarion suoritushistoria kumpikin säilyttävät. Kiinnitetyt merkinnät säilytetään aina tästä arvosta riippumatta. Aloitusnäytön viimeaikaisen toiminnan luettelot eivät muutu."
   },
   "mcp": {
     "title": "MCP",

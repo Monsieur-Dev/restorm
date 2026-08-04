@@ -2151,7 +2151,7 @@
   "history": {
     "title": "Historie",
     "maxEntriesTitle": "Počet záznamů uchovávaných v historii",
-    "maxEntriesDescription": "Kolik záznamů uchovává každá historie: zaznamenaná volání požadavku, časové značky odeslání požadavku a časové značky spuštění scénáře. Připnutá volání se uchovávají vždy, bez ohledu na tuto hodnotu."
+    "maxEntriesDescription": "Kolik záznamů uchovává historie volání požadavku a historie spuštění scénáře. Připnuté záznamy se uchovávají vždy, bez ohledu na tuto hodnotu. Seznamů nedávné aktivity na úvodní obrazovce se to netýká."
   },
   "mcp": {
     "title": "MCP",

@@ -18,7 +18,7 @@
  * for the stores that additionally need to shrink what they ALREADY hold when
  * the user lowers the cap — capping the next write is not enough there.
  */
-import { getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
+import { getSettingsService, isSettingsServiceInitialized, logger } from 'electron-core-ui/main'
 
 /** Storage key (`<groupId>:<settingId>`) — see the `history` group in
  *  `resources/settings.yaml`. */
@@ -65,14 +65,22 @@ export function getHistoryLimit(): number {
 
 type HistoryLimitListener = (limit: number) => void
 
-/** Listeners that asked to subscribe before `SettingsService` existed. */
+/**
+ * Listeners registered before `SettingsService` exists, promoted by
+ * {@link activateHistoryRetention}.
+ *
+ * This queue exists because of a hard ordering fact: the history stores are
+ * constructed and `initialize()`d at module scope in `main/index.ts`, which
+ * runs BEFORE `initializeApp()` stands up `SettingsService`. Subscribing
+ * eagerly there binds nothing at all — and because `src/main/**` is outside
+ * the typecheck gate and the stores mock an already-initialized settings
+ * service in their unit tests, that failure is invisible to every automated
+ * check. It only shows up as "changing the setting does nothing" in the
+ * shipped app.
+ */
 const pendingListeners = new Set<HistoryLimitListener>()
 /** Live subscriptions, so an unsubscribe works whichever path registered it. */
 const activeUnsubscribers = new Map<HistoryLimitListener, () => void>()
-let readyPollTimer: NodeJS.Timeout | null = null
-
-/** How often to re-check whether `SettingsService` has come up. */
-const SETTINGS_READY_POLL_MS = 200
 
 function subscribeNow(listener: HistoryLimitListener): void {
   const unsubscribe = getSettingsService().onSettingChanged(HISTORY_MAX_ENTRIES_KEY, (value) => {
@@ -81,50 +89,18 @@ function subscribeNow(listener: HistoryLimitListener): void {
   activeUnsubscribers.set(listener, unsubscribe)
 }
 
-/** Promote every deferred listener to a real subscription. */
-function flushPending(): boolean {
-  if (!isSettingsServiceInitialized()) return false
-  for (const listener of [...pendingListeners]) {
-    pendingListeners.delete(listener)
-    subscribeNow(listener)
-  }
-  return true
-}
-
-function stopPolling(): void {
-  if (!readyPollTimer) return
-  clearInterval(readyPollTimer)
-  readyPollTimer = null
-}
-
-function schedulePendingFlush(): void {
-  if (readyPollTimer) return
-  readyPollTimer = setInterval(() => {
-    if (pendingListeners.size === 0 || flushPending()) stopPolling()
-  }, SETTINGS_READY_POLL_MS)
-  // Never keep the process alive just to wait for the settings service.
-  readyPollTimer.unref()
-}
-
 /**
  * Run `listener` whenever the cap changes, with the already-normalized value.
  * Returns an unsubscribe function.
  *
- * The deferral matters: the history stores are constructed and `initialize()`d
- * at module scope in `main/index.ts`, which runs BEFORE `initializeApp()`
- * stands up `SettingsService`. Subscribing eagerly there would silently bind
- * nothing, and the "changing the setting re-prunes what is already stored"
- * behaviour would be dead in the shipped app while every unit test — which
- * mocks an already-initialized settings service — stayed green. So a listener
- * registered too early is parked and promoted as soon as the service appears,
- * rather than dropped.
+ * Safe to call before `SettingsService` exists: the listener is parked and
+ * {@link activateHistoryRetention} promotes it.
  */
 export function onHistoryLimitChanged(listener: HistoryLimitListener): () => void {
   if (isSettingsServiceInitialized()) {
     subscribeNow(listener)
   } else {
     pendingListeners.add(listener)
-    schedulePendingFlush()
   }
 
   return () => {
@@ -134,6 +110,38 @@ export function onHistoryLimitChanged(listener: HistoryLimitListener): () => voi
       unsubscribe()
       activeUnsubscribers.delete(listener)
     }
-    if (pendingListeners.size === 0) stopPolling()
+  }
+}
+
+/**
+ * Promote every parked listener to a real subscription and immediately apply
+ * the current cap once.
+ *
+ * Call this from `main/index.ts` right after `initializeApp()`, which is the
+ * first point at which `SettingsService` is guaranteed to exist.
+ *
+ * The initial apply is not redundant. Without it the cap would only ever be
+ * enforced on a CHANGE event, so an archive that arrives ALREADY over the cap
+ * — a project shared by a teammate whose history is deeper than your setting —
+ * would stay over it until the next write for each item. Applying once at
+ * startup is what makes the cap hold at rest rather than only on transition.
+ */
+export function activateHistoryRetention(): void {
+  if (!isSettingsServiceInitialized()) {
+    logger.warn('[historyRetention] Activated before the settings service exists; retention listeners stay parked')
+    return
+  }
+
+  const listeners = [...pendingListeners]
+  pendingListeners.clear()
+  for (const listener of listeners) subscribeNow(listener)
+
+  const limit = getHistoryLimit()
+  for (const listener of activeUnsubscribers.keys()) {
+    try {
+      listener(limit)
+    } catch (error) {
+      logger.error('[historyRetention] Initial retention pass failed', { error: String(error) })
+    }
   }
 }

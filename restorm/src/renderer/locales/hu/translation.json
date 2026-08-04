@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Előzmények",
     "maxEntriesTitle": "Előzményenként megőrzött bejegyzések",
-    "maxEntriesDescription": "Hány bejegyzést őriz meg az egyes előzmények: egy kérés rögzített hívásai, egy kérés küldési időbélyegei és egy forgatókönyv futtatási időbélyegei. A rögzített hívások ettől az értéktől függetlenül mindig megmaradnak."
+    "maxEntriesDescription": "Hány bejegyzést őriz meg egy kérés hívási előzménye és egy forgatókönyv futtatási előzménye. A rögzített bejegyzések ettől az értéktől függetlenül mindig megmaradnak. A kezdőképernyő legutóbbi tevékenységeit tartalmazó listákat ez nem érinti."
   },
   "mcp": {
     "title": "MCP",

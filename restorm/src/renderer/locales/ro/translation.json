@@ -2150,7 +2150,7 @@
   "history": {
     "title": "Istoric",
     "maxEntriesTitle": "Intrări păstrate per istoric",
-    "maxEntriesDescription": "Câte intrări păstrează fiecare istoric: apelurile înregistrate ale unei cereri, marcajele de timp ale trimiterii unei cereri și marcajele de timp ale rulării unui scenariu. Apelurile fixate sunt păstrate întotdeauna, indiferent de această valoare."
+    "maxEntriesDescription": "Câte intrări păstrează istoricul apelurilor unei cereri și istoricul rulărilor unui scenariu. Intrările fixate sunt păstrate întotdeauna, indiferent de această valoare. Listele de activitate recentă de pe ecranul principal nu sunt afectate."
   },
   "mcp": {
     "title": "MCP",

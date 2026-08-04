@@ -2150,7 +2150,7 @@
   "history": {
     "title": "Istorija",
     "maxEntriesTitle": "Sačuvani unosi po istoriji",
-    "maxEntriesDescription": "Koliko unosa čuva svaka istorija: zabeleženi pozivi zahteva, vremenske oznake slanja zahteva i vremenske oznake izvršavanja scenarija. Zakačeni pozivi se uvek čuvaju, bez obzira na ovu vrednost."
+    "maxEntriesDescription": "Koliko unosa čuvaju istorija poziva zahteva i istorija izvršavanja scenarija. Zakačeni unosi se uvek čuvaju, bez obzira na ovu vrednost. Liste nedavne aktivnosti na početnom ekranu nisu obuhvaćene."
   },
   "mcp": {
     "title": "MCP",

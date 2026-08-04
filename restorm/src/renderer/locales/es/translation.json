@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Historial",
     "maxEntriesTitle": "Entradas conservadas por historial",
-    "maxEntriesDescription": "Cuántas entradas conserva cada historial: las llamadas registradas de una solicitud, las marcas de tiempo de envío de una solicitud y las marcas de tiempo de ejecución de un escenario. Las llamadas ancladas se conservan siempre, sea cual sea este valor."
+    "maxEntriesDescription": "Cuántas entradas conservan el historial de llamadas de una solicitud y el historial de ejecuciones de un escenario. Las entradas ancladas se conservan siempre, sea cual sea este valor. Las listas de actividad reciente de la pantalla de inicio no se ven afectadas."
   },
   "mcp": {
     "title": "MCP",

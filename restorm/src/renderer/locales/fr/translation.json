@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Historique",
     "maxEntriesTitle": "Entrées conservées par historique",
-    "maxEntriesDescription": "Nombre d'entrées conservées dans chaque historique : les appels enregistrés d'une requête, les horodatages d'envoi d'une requête et les horodatages d'exécution d'un scénario. Les appels épinglés sont toujours conservés, quelle que soit cette valeur."
+    "maxEntriesDescription": "Nombre d'entrées conservées dans l'historique des appels d'une requête et dans l'historique des exécutions d'un scénario. Les entrées épinglées sont toujours conservées, quelle que soit cette valeur. Les listes d'activité récente de l'accueil ne sont pas concernées."
   },
   "mcp": {
     "title": "MCP",

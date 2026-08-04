@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Historik",
     "maxEntriesTitle": "Poster som sparas per historik",
-    "maxEntriesDescription": "Hur många poster varje historik sparar: en begärans registrerade anrop, en begärans sändningstidsstämplar och ett scenarios körningstidsstämplar. Fästa anrop sparas alltid, oavsett detta värde."
+    "maxEntriesDescription": "Hur många poster anropshistoriken för en begäran och körhistoriken för ett scenario var för sig sparar. Fästa poster sparas alltid, oavsett detta värde. Listorna över senaste aktivitet på startskärmen påverkas inte."
   },
   "mcp": {
     "title": "MCP",

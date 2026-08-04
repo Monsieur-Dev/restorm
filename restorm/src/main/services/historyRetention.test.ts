@@ -6,7 +6,8 @@ const settingsMock = vi.hoisted(() => ({
   listeners: new Map<string, (value: unknown) => void>()
 }))
 
-vi.mock('electron-core-ui', () => ({
+vi.mock('electron-core-ui/main', () => ({
+  logger: { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() },
   isSettingsServiceInitialized: (): boolean => settingsMock.initialized,
   getSettingsService: (): {
     get: (key: string) => unknown
@@ -23,6 +24,7 @@ vi.mock('electron-core-ui', () => ({
 const {
   DEFAULT_HISTORY_MAX_ENTRIES,
   HISTORY_MAX_ENTRIES_KEY,
+  activateHistoryRetention,
   getHistoryLimit,
   normalizeHistoryLimit,
   onHistoryLimitChanged
@@ -115,41 +117,62 @@ describe('onHistoryLimitChanged', () => {
   // `main/index.ts`, before `initializeApp()` stands up SettingsService. A
   // listener registered then must still end up subscribed, or changing the
   // setting would never re-prune anything in the shipped app.
-  it('subscribes a listener registered BEFORE the settings service exists, once it appears', async () => {
-    vi.useFakeTimers()
-    try {
-      settingsMock.initialized = false
-      const seen: number[] = []
-      onHistoryLimitChanged((limit) => { seen.push(limit) })
-      expect(settingsMock.listeners.size).toBe(0)
+  it('subscribes a listener registered BEFORE the settings service exists, once activated', () => {
+    settingsMock.initialized = false
+    const seen: number[] = []
+    onHistoryLimitChanged((limit) => { seen.push(limit) })
+    expect(settingsMock.listeners.size).toBe(0)
 
-      // SettingsService comes up later in the boot sequence.
-      settingsMock.initialized = true
-      await vi.advanceTimersByTimeAsync(500)
+    settingsMock.initialized = true
+    settingsMock.value = 7
+    activateHistoryRetention()
 
-      expect(settingsMock.listeners.has(HISTORY_MAX_ENTRIES_KEY)).toBe(true)
-      settingsMock.listeners.get(HISTORY_MAX_ENTRIES_KEY)?.(3)
-      expect(seen).toEqual([3])
-    } finally {
-      vi.useRealTimers()
-    }
+    expect(settingsMock.listeners.has(HISTORY_MAX_ENTRIES_KEY)).toBe(true)
+    // Activation applies the current cap once, so an archive that is ALREADY
+    // over the limit is brought back in line at startup rather than only on a
+    // later change.
+    expect(seen).toEqual([7])
+
+    settingsMock.listeners.get(HISTORY_MAX_ENTRIES_KEY)?.(3)
+    expect(seen).toEqual([7, 3])
   })
 
-  it('a deferred listener can be unsubscribed before the settings service appears', async () => {
-    vi.useFakeTimers()
-    try {
-      settingsMock.initialized = false
-      const seen: number[] = []
-      const unsubscribe = onHistoryLimitChanged((limit) => { seen.push(limit) })
-      unsubscribe()
+  it('a parked listener unsubscribed before activation never fires', () => {
+    settingsMock.initialized = false
+    const seen: number[] = []
+    const unsubscribe = onHistoryLimitChanged((limit) => { seen.push(limit) })
+    unsubscribe()
 
-      settingsMock.initialized = true
-      await vi.advanceTimersByTimeAsync(500)
+    settingsMock.initialized = true
+    activateHistoryRetention()
 
-      expect(settingsMock.listeners.size).toBe(0)
-      expect(seen).toEqual([])
-    } finally {
-      vi.useRealTimers()
-    }
+    expect(settingsMock.listeners.size).toBe(0)
+    expect(seen).toEqual([])
+  })
+
+  it('activating before the settings service exists parks rather than throws', () => {
+    settingsMock.initialized = false
+    const seen: number[] = []
+    onHistoryLimitChanged((limit) => { seen.push(limit) })
+    expect(() => { activateHistoryRetention() }).not.toThrow()
+    expect(seen).toEqual([])
+
+    // …and a later activation still promotes it.
+    settingsMock.initialized = true
+    settingsMock.value = 5
+    activateHistoryRetention()
+    expect(seen).toEqual([5])
+  })
+
+  it('one listener throwing does not stop the others from getting the initial pass', () => {
+    settingsMock.initialized = false
+    const seen: number[] = []
+    onHistoryLimitChanged(() => { throw new Error('boom') })
+    onHistoryLimitChanged((limit) => { seen.push(limit) })
+
+    settingsMock.initialized = true
+    settingsMock.value = 4
+    expect(() => { activateHistoryRetention() }).not.toThrow()
+    expect(seen).toEqual([4])
   })
 })

@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Historik",
     "maxEntriesTitle": "Poster gemt pr. historik",
-    "maxEntriesDescription": "Hvor mange poster hver historik gemmer: en anmodnings registrerede kald, en anmodnings afsendelsestidsstempler og et scenaries kørselstidsstempler. Fastgjorte kald gemmes altid, uanset denne værdi."
+    "maxEntriesDescription": "Hvor mange poster opkaldshistorikken for en anmodning og kørselshistorikken for et scenarie hver gemmer. Fastgjorte poster gemmes altid, uanset denne værdi. Listerne over seneste aktivitet på startskærmen påvirkes ikke."
   },
   "mcp": {
     "title": "MCP",

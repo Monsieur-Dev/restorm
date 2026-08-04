@@ -2148,7 +2148,7 @@
   "history": {
     "title": "Lịch sử",
     "maxEntriesTitle": "Số mục được giữ trong mỗi lịch sử",
-    "maxEntriesDescription": "Số mục mà mỗi lịch sử giữ lại: các lệnh gọi đã ghi của một yêu cầu, dấu thời gian gửi của một yêu cầu và dấu thời gian chạy của một kịch bản. Các lệnh gọi đã ghim luôn được giữ lại, bất kể giá trị này."
+    "maxEntriesDescription": "Số mục mà lịch sử lệnh gọi của một yêu cầu và lịch sử chạy của một kịch bản mỗi loại giữ lại. Các mục đã ghim luôn được giữ lại, bất kể giá trị này. Các danh sách hoạt động gần đây trên màn hình chính không bị ảnh hưởng."
   },
   "mcp": {
     "title": "MCP",

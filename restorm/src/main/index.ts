@@ -88,6 +88,7 @@ import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
+import { activateHistoryRetention } from './services/historyRetention'
 import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
@@ -838,6 +839,17 @@ void app.whenReady().then(() => {
     fileService: getFileService()
   })
   logger.info('AutoSave controller initialized')
+})
+
+// Activate the history retention listeners for the same reason, and at the
+// same point in the sequence: the history stores `initialize()` at module
+// scope above, long before `SettingsService` exists, so their subscriptions
+// are parked until here. Without this call the `history:maxEntries` setting
+// would still bound new writes but would never re-prune what is already
+// stored — the exact behaviour the setting is expected to have.
+void app.whenReady().then(() => {
+  activateHistoryRetention()
+  logger.info('History retention listeners activated')
 })
 
 // Wire the GitSemiPullController the same way — reads the `git:

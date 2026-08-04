@@ -2149,7 +2149,7 @@
   "history": {
     "title": "Historikk",
     "maxEntriesTitle": "Oppføringer som beholdes per historikk",
-    "maxEntriesDescription": "Hvor mange oppføringer hver historikk beholder: en forespørsels registrerte kall, en forespørsels sendetidsstempler og et scenarios kjøretidsstempler. Festede kall beholdes alltid, uansett denne verdien."
+    "maxEntriesDescription": "Hvor mange oppføringer kallhistorikken for en forespørsel og kjørehistorikken for et scenario hver beholder. Festede oppføringer beholdes alltid, uansett denne verdien. Listene over nylig aktivitet på startskjermen påvirkes ikke."
   },
   "mcp": {
     "title": "MCP",
