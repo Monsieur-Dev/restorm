@@ -26,6 +26,12 @@ This component is a generic, reusable key/value editor suitable for environment 
   - Add new rows programmatically via the `addRow` imperative handle.
   - Enable/disable rows per-line via `Toggle`.
   - Drag & drop reordering with a custom drag ghost and visual drop indicators (before/after).
+  - Delete a row from its trailing trash button. Its hover label is the styled `Tooltip`,
+    never the browser's native `title`; the `aria-label` remains the accessible name.
+- **Column headers**:
+  - The Description header is translated; the Key and Value headers default to `'Key'` /
+    `'Value'` and are overridable per consumer through `keyHeader` / `valueHeader` for
+    tables whose rows aren't key/value pairs in the HTTP sense.
 - **Theming**:
   - Uses theme CSS variables (`--*`) for borders, background and text.
   - Fits naturally into styled layouts and dark/light themes.
@@ -66,6 +72,15 @@ export interface KeyValueTableProps {
   renderValueCell?: React.ComponentType<CellRendererProps>
   /** Custom renderer for description cells. Defaults to InputBox. */
   renderDescriptionCell?: React.ComponentType<CellRendererProps>
+  /**
+   * Header of the KEY column. Defaults to `'Key'`. Consumers whose rows
+   * aren't key/value pairs in the HTTP sense — a label → value list, a
+   * name → default map — pass their own (already translated) wording so
+   * the column reads as what it actually holds.
+   */
+  keyHeader?: string
+  /** Header of the VALUE column. Defaults to `'Value'`. See `keyHeader`. */
+  valueHeader?: string
   /**
    * Whether the Description column is rendered. Defaults to `true`.
    * Hide it when descriptions aren't meaningful for the use-case
@@ -154,6 +169,29 @@ const Example: React.FC = () => {
 }
 ```
 
+### Rows that aren't key/value pairs
+
+The table is happy to edit any two-column list. When the rows are something
+other than HTTP-style key/value pairs, rename the columns so the header says
+what the column actually holds — pass wording you have already translated, the
+component does not translate these for you. The `Description` column usually
+goes away with them, which moves the delete button into its own trailing column.
+
+```tsx
+const { t } = useTranslation()
+
+<KeyValueTable
+  data-testid="custom-values-entries-table"
+  initialRows={entryRows}
+  onRowsChange={handleEntryRowsChange}
+  keyHeader={t('folderView.customValues.label')}
+  valueHeader={t('folderView.customValues.value')}
+  showDescription={false}
+/>
+```
+
+Omit either prop to keep the `'Key'` / `'Value'` defaults.
+
 ### Locked while a resource is active
 
 ```tsx
@@ -181,8 +219,8 @@ If you pass `data-testid` (e.g. `headers-table`), the component exposes stable h
 
 - Root: `{tableId}`
 - Table: `{tableId}-table`
-- Row: `{tableId}-row-{rowId}`
-- Drag handle: `{tableId}-row-{rowId}-drag`
+- Row: `{tableId}-table-row-{rowId}`
+- Drag handle: `{tableId}-table-drag-{rowId}`
 - Enabled toggle wrapper: `{tableId}-row-{rowId}-enabled`
 - Delete button: `{tableId}-row-{rowId}-delete`
 - Cell InputBox ids (so you can reuse `InputBox` selectors/steps):
@@ -190,6 +228,11 @@ If you pass `data-testid` (e.g. `headers-table`), the component exposes stable h
   - value: `{tableId}-row-{rowId}-value`
   - resolved value (when `showResolvedValue`): `{tableId}-row-{rowId}-resolved-value`
   - description (when `showDescription !== false`): `{tableId}-row-{rowId}-description`
+
+The row and the drag handle carry an extra `-table-` segment because they are
+emitted by the inner `Table`, whose own test id is `{tableId}-table`; everything
+else is emitted by `KeyValueTable`. Prefer the selector helpers below over
+hand-written strings — the asymmetry is easy to get wrong.
 
 ### Selectors (`electron-core-ui/testing`)
 
@@ -202,6 +245,22 @@ If you pass `data-testid` (e.g. `headers-table`), the component exposes stable h
 - `keyValueTableRowEnabledToggleSelector(tableId, rowId)`
 - `keyValueTableRowDeleteSelector(tableId, rowId)`
 - `keyValueTableRowDragHandleSelector(tableId, rowId)`
+
+The cell selectors match the element the cell renderer receives, which for the
+default `InputBox` renderer is a hidden mirror — not the `<input>` a test types
+into. To reach the input, compose the matching **test id** builder with the
+`InputBox` helper rather than appending `-input` to a finished selector:
+
+```ts
+import { inputBoxInputSelector, keyValueTableRowValueCellTestId } from 'electron-core-ui/testing'
+
+page.locator(inputBoxInputSelector(keyValueTableRowValueCellTestId('headers-table', rowId)))
+```
+
+The same pairing exists for the key and description cells
+(`keyValueTableRowKeyCellTestId`, `keyValueTableRowDescriptionCellTestId`), plus
+`keyValueTableRowTestId` and `keyValueTableRowDragHandleTestId` for the row and
+its grip.
 
 ### Playwright-BDD steps (`electron-core-ui/testing/playwright-bdd`)
 

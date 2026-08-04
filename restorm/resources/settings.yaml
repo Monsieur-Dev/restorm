@@ -35,6 +35,39 @@ groups:
                 labelKey: "console.requestFormat.curl"
               - value: "powershell"
                 labelKey: "console.requestFormat.powershell"
+  - id: "history"
+    titleKey: "history.title"
+    items:
+      # One knob for the two histories a user actually reads and prunes: a
+      # request's recorded calls (`ResponseHistoryService`, the `responses/`
+      # slice of the archive) and a scenario's runs (`ScenarioRunHistoryService`,
+      # the `scenarioRuns/` slice). They are distinct stores but share the same
+      # question — "how far back do you want to be able to look?" — so a single
+      # number avoids two controls nobody would set differently.
+      #
+      # It deliberately does NOT govern the EmptyBench's recent-activity depth
+      # (`RequestUsageService` / `ScenarioUsageService`), which stays fixed:
+      # those lists only feed the home screen's cards, where a longer tail
+      # would not change what is shown.
+      #
+      # The floor is 1, not 0: these are the stores a user opens to read, and
+      # "keep 0 entries" reads as a broken feature rather than a choice. (The
+      # MCP retention caps in the `mcp` group do allow 0 — that is a deliberate
+      # divergence, not an oversight: those bound an in-memory diagnostic log
+      # nobody browses, so switching them off entirely is a legitimate choice.)
+      # Pinned entries are exempt from the cap whatever it is set to — see
+      # `ResponseHistoryService.addEntryAndPrune` and
+      # `ScenarioRunHistoryService.addRunAndPrune`.
+      - setting:
+          id: "maxEntries"
+          titleKey: "history.maxEntriesTitle"
+          descriptionKey: "history.maxEntriesDescription"
+          type: "number"
+          default: 10
+          params:
+            min: 1
+            max: 1000
+            integer: true
   - id: "mcp"
     titleKey: "mcp.title"
     items:

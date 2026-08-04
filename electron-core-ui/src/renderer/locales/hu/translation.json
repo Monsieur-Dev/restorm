@@ -26,6 +26,19 @@
       "detail": "Töltse be újra a lemezen lévő verzió használatához, vagy tartsa meg a sajátját és írja felül.",
       "reload": "Újratöltés",
       "keepMine": "Saját verzió megtartása"
+    },
+    "saveFailed": {
+      "title": "A mentés nem sikerült",
+      "reason": {
+        "readOnlyFile": "A fájl írásvédett. Módosítsa a jogosultságait, vagy mentse másik helyre.",
+        "readOnlyLocation": "Ez a hely írásvédetten van csatolva. Mentse másik helyre.",
+        "permissionDenied": "Nincs írási jogosultsága ide. Ellenőrizze a mappa jogosultságait, vagy mentse másik helyre.",
+        "diskFull": "A lemez megtelt. Szabadítson fel helyet, majd mentsen újra.",
+        "quotaExceeded": "A lemezkvótája elfogyott. Szabadítson fel helyet, majd mentsen újra.",
+        "pathMissing": "Ez a hely már nem létezik. A mappát törölhették, vagy a meghajtót leválasztották.",
+        "fileBusy": "A fájlt egy másik program használja. Zárja be, majd mentsen újra.",
+        "unknown": "A fájlt nem sikerült írni: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Szerkesztő lapok"
   },
   "keyValueTable": {
-    "description": "Leírás"
+    "description": "Leírás",
+    "deleteRow": "Sor törlése"
   },
   "gatedControl": {
     "proLabel": "Pro verzió",

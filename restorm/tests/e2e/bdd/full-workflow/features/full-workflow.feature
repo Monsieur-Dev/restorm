@@ -756,6 +756,17 @@ Feature: Full workflow end-to-end scenario
     When I focus the custom-list "Paint" request tab
     Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
 
+    # Reorder the values → the picker of the ALREADY-OPEN request follows,
+    # without closing and reopening the tab, and the selection stays on the
+    # label the user chose rather than on the position it used to occupy.
+    When I focus the custom-list "Paint" request tab
+    Then the custom-list picker of the active request should offer "Rouge, Vert"
+    When I open the custom variables tab on the "Paint API" env folder
+    And I drag the "Vert" custom-list entry above "Rouge"
+    When I focus the custom-list "Paint" request tab
+    Then the custom-list picker of the active request should offer "Vert, Rouge"
+    And the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+
     # Rename the list → the binding holds (resolved by id, not name).
     When I open the custom variables tab on the "Paint API" env folder
     And I rename the "Couleur" custom value list to "Teinte"

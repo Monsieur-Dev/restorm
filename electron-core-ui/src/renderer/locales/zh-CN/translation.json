@@ -26,6 +26,19 @@
       "detail": "重新加载以使用磁盘上的版本，或保留您的版本并覆盖它。",
       "reload": "重新加载",
       "keepMine": "保留我的版本"
+    },
+    "saveFailed": {
+      "title": "保存失败",
+      "reason": {
+        "readOnlyFile": "文件为只读。请修改其权限，或保存到其他位置。",
+        "readOnlyLocation": "此位置以只读方式挂载。请保存到其他位置。",
+        "permissionDenied": "您没有在此写入的权限。请检查文件夹权限，或保存到其他位置。",
+        "diskFull": "磁盘已满。请释放空间后重新保存。",
+        "quotaExceeded": "您的磁盘配额已用尽。请释放空间后重新保存。",
+        "pathMissing": "此位置已不存在。文件夹可能已被删除，或驱动器已断开连接。",
+        "fileBusy": "文件正被其他程序占用。请关闭该程序后重新保存。",
+        "unknown": "无法写入文件：{{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "编辑器选项卡"
   },
   "keyValueTable": {
-    "description": "描述"
+    "description": "描述",
+    "deleteRow": "删除行"
   },
   "gatedControl": {
     "proLabel": "专业版",

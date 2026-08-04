@@ -26,6 +26,19 @@
       "detail": "Recarregue para usar a versão do disco, ou mantenha a sua versão e substitua-a.",
       "reload": "Recarregar",
       "keepMine": "Manter a minha versão"
+    },
+    "saveFailed": {
+      "title": "Falha ao guardar",
+      "reason": {
+        "readOnlyFile": "O ficheiro é apenas de leitura. Altere as suas permissões ou guarde-o noutra localização.",
+        "readOnlyLocation": "Esta localização está montada apenas para leitura. Guarde noutra localização.",
+        "permissionDenied": "Não tem permissão para escrever aqui. Verifique as permissões da pasta ou guarde noutra localização.",
+        "diskFull": "O disco está cheio. Liberte espaço e guarde novamente.",
+        "quotaExceeded": "A sua quota de disco esgotou. Liberte espaço e guarde novamente.",
+        "pathMissing": "Esta localização já não existe. A pasta pode ter sido eliminada ou a unidade desligada.",
+        "fileBusy": "O ficheiro está a ser usado por outro programa. Feche-o e guarde novamente.",
+        "unknown": "Não foi possível escrever o ficheiro: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Abas do editor"
   },
   "keyValueTable": {
-    "description": "Descrição"
+    "description": "Descrição",
+    "deleteRow": "Eliminar linha"
   },
   "gatedControl": {
     "proLabel": "Versão Pro",

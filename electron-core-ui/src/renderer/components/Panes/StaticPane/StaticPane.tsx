@@ -10,9 +10,10 @@ export interface StaticPaneProps {
 	title?: React.ReactNode;
 	/**
 	 * Optional actions area rendered on the right side of the header
-	 * (e.g. an "Add row" `+` button). Always visible — unlike the
-	 * hover-reveal defaults of `SplitView` panes — because a static
-	 * stack is typically used where the action is the only affordance.
+	 * (e.g. an "Add row" `+` button). Always at full opacity — unlike
+	 * `SplitView` panes, which dim their actions to half opacity until
+	 * hovered — because a static stack is typically used where the
+	 * action is the only affordance.
 	 */
 	headerActions?: React.ReactNode;
 	children?: React.ReactNode;

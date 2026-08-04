@@ -26,6 +26,19 @@
       "detail": "Genindlæs for at bruge versionen på disken, eller behold din version og overskriv den.",
       "reload": "Genindlæs",
       "keepMine": "Behold min version"
+    },
+    "saveFailed": {
+      "title": "Kunne ikke gemme",
+      "reason": {
+        "readOnlyFile": "Filen er skrivebeskyttet. Ændr dens tilladelser, eller gem et andet sted.",
+        "readOnlyLocation": "Denne placering er monteret skrivebeskyttet. Gem et andet sted.",
+        "permissionDenied": "Du har ikke tilladelse til at skrive her. Kontrollér mappens tilladelser, eller gem et andet sted.",
+        "diskFull": "Disken er fuld. Frigør plads, og gem igen.",
+        "quotaExceeded": "Din diskkvote er opbrugt. Frigør plads, og gem igen.",
+        "pathMissing": "Denne placering findes ikke længere. Mappen er måske slettet, eller drevet frakoblet.",
+        "fileBusy": "Filen bruges af et andet program. Luk det, og gem igen.",
+        "unknown": "Filen kunne ikke skrives: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Editorfaner"
   },
   "keyValueTable": {
-    "description": "Beskrivelse"
+    "description": "Beskrivelse",
+    "deleteRow": "Slet række"
   },
   "gatedControl": {
     "proLabel": "Pro-version",

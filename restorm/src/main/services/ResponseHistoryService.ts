@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { BrowserWindow } from 'electron'
 import {
   eventBusService,
   logger,
@@ -50,8 +51,16 @@ import type { KafkaExecutionResult } from './KafkaExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
 import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
+import { getHistoryLimit, onHistoryLimitChanged } from './historyRetention'
 
-const DEFAULT_MAX_PER_REQUEST = 10
+/**
+ * Broadcast to every renderer whenever a request's recorded calls change, so
+ * an OPEN history view repaints without the user reopening it. The write
+ * itself was never the problem — a run triggered from anywhere other than the
+ * request's own tab (a scenario step, an MCP call) stored its entry correctly
+ * and nobody asked the view to re-read it.
+ */
+const HISTORY_CHANGED_EVENT = 'response-history:changed'
 
 type ExecutionResult =
   | HTTPExecutionResult
@@ -173,6 +182,7 @@ function jsonRpcBatchOutcome(result: JsonRpcBatchExecutionResult): ResponseHisto
 
 class ResponseHistoryService {
   private subscriptions: Subscription[] = []
+  private unsubscribeLimit: (() => void) | null = null
   private initialized = false
   /** Per-request listeners woken when a new history entry is stored, so callers
    * (e.g. the MCP `run_request` flow) can await the new entry instead of
@@ -231,6 +241,13 @@ class ResponseHistoryService {
         void this.handleRequestDeleted(payload.id)
       })
     ]
+
+    // Lowering the cap has to shrink the archive already on disk, not just
+    // bound the next call — a user who drops the limit expects the extra
+    // entries gone, not to have to re-send every request to see the effect.
+    this.unsubscribeLimit = onHistoryLimitChanged((limit) => {
+      void this.pruneToLimit(limit)
+    })
   }
 
   dispose(): void {
@@ -238,29 +255,132 @@ class ResponseHistoryService {
       sub.unsubscribe()
     }
     this.subscriptions = []
+    if (this.unsubscribeLimit) {
+      this.unsubscribeLimit()
+      this.unsubscribeLimit = null
+    }
     this.initialized = false
   }
 
+  /**
+   * Re-apply `limit` to every request already in the archive, dropping the
+   * detail payloads of the entries that fall out. Pinned entries are exempt,
+   * exactly as in {@link addEntryAndPrune}. Rewrites nothing when the archive
+   * is already within the cap, so raising the limit is free.
+   */
+  private async pruneToLimit(limit: number): Promise<void> {
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) return
+
+    try {
+      await queueHistoryWrite(async () => {
+        const { index, entriesData } = await readHistoryArchive(archivePath)
+
+        const requests = index.requests.map((req) => {
+          const pinned = req.entries.filter((item) => item.pinned)
+          const nonPinned = req.entries
+            .filter((item) => !item.pinned)
+            .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+          if (nonPinned.length <= limit) return req
+          const keep = new Set([...pinned, ...nonPinned.slice(0, limit)].map((item) => item.guid))
+          return { ...req, entries: req.entries.filter((item) => keep.has(item.guid)) }
+        })
+
+        // Count rather than a flag set inside the map: nothing was dropped
+        // exactly when the totals match, and the archive is left untouched.
+        const before = index.requests.reduce((sum, req) => sum + req.entries.length, 0)
+        const after = requests.reduce((sum, req) => sum + req.entries.length, 0)
+        if (after === before) return
+
+        const keptGuids = new Set<string>()
+        for (const req of requests) {
+          for (const item of req.entries) keptGuids.add(item.guid)
+        }
+
+        const nextEntriesData = new Map<string, string>()
+        for (const [entryName, entryText] of entriesData.entries()) {
+          if (entryName === INDEX_FILE_NAME) continue
+          if (entryName.startsWith(`${RESPONSES_FOLDER}/`) && entryName.endsWith('.json')) {
+            const entryGuid = entryName.slice(`${RESPONSES_FOLDER}/`.length, -'.json'.length)
+            if (keptGuids.has(entryGuid)) nextEntriesData.set(entryName, entryText)
+          } else {
+            // Preserve other domains' entries (scenarioRuns/…).
+            nextEntriesData.set(entryName, entryText)
+          }
+        }
+
+        await writeHistoryArchive(archivePath, {
+          ...index,
+          requests: requests.filter((req) => req.entries.length > 0)
+        }, nextEntriesData)
+
+        for (const req of requests) this.broadcastChanged(req.requestId)
+      })
+    } catch (error) {
+      logger.error('[ResponseHistoryService] Failed to re-prune history to the new limit', {
+        limit,
+        error: String(error)
+      })
+    }
+  }
+
+  /**
+   * Tell every renderer that `requestId`'s recorded calls changed.
+   *
+   * Never allowed to throw: this runs AFTER the archive has been written, and
+   * the caller's error path reports "failed to store history". A window that
+   * tore down mid-broadcast must not turn a successful write into a logged
+   * storage failure.
+   */
+  private broadcastChanged(requestId: string): void {
+    try {
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (win.isDestroyed()) continue
+        win.webContents.send(HISTORY_CHANGED_EVENT, requestId)
+      }
+    } catch (error) {
+      logger.debug('[ResponseHistoryService] Could not broadcast the history change', {
+        requestId,
+        error: String(error)
+      })
+    }
+  }
+
+  /**
+   * Persist one execution and return the detail it built.
+   *
+   * The detail is built FIRST and handed back even when nothing is archived: it
+   * is the only place the request as it ACTUALLY went out is materialised
+   * (resolved URL, headers, query + path params, body — env vars, Handlebars
+   * and any caller-side override already applied), and callers such as the
+   * scenario engine surface that in their run log whether or not history is
+   * being archived.
+   */
   async storeExecutionResult(
     requestId: string,
     type: ResponseHistoryRequestType,
     result: ExecutionResult,
     runContexts?: ResolutionContexts
-  ): Promise<void> {
+  ): Promise<ResponseHistoryDetail | null> {
+    // `built` mirrors the detail for the return AFTER the catch; the write
+    // closure below reads the `const` so its non-null narrowing holds inside
+    // the callback (a captured `let` would widen back to `| null`).
+    let built: ResponseHistoryDetail | null = null
     try {
-      const archivePath = getHistoryArchivePath()
-      if (!archivePath) {
-        logger.debug('[ResponseHistoryService] No archive path, skipping history save')
-        return
-      }
-
-      logger.debug('[ResponseHistoryService] Storing history entry', { requestId, type })
-
       const detail = this.buildDetail(requestId, type, result, runContexts)
       if (!detail) {
         logger.warn('[ResponseHistoryService] Failed to build response detail', { requestId, type })
-        return
+        return null
       }
+      built = detail
+
+      const archivePath = getHistoryArchivePath()
+      if (!archivePath) {
+        logger.debug('[ResponseHistoryService] No archive path, skipping history save')
+        return detail
+      }
+
+      logger.debug('[ResponseHistoryService] Storing history entry', { requestId, type })
 
       await queueHistoryWrite(async () => {
         const { index, entriesData } = await readHistoryArchive(archivePath)
@@ -284,6 +404,9 @@ class ResponseHistoryService {
         nextEntriesData.set(this.getDetailEntryName(guid), JSON.stringify(detail))
         await writeHistoryArchive(archivePath, updatedIndex, nextEntriesData)
         this.notifyStored(requestId, guid)
+        // Wake any OPEN history view for this request, whatever triggered the
+        // call — the request's own tab, a scenario step, or an MCP run.
+        this.broadcastChanged(requestId)
       })
     } catch (error) {
       logger.error('[ResponseHistoryService] Failed to store response history', {
@@ -292,6 +415,7 @@ class ResponseHistoryService {
         error: String(error)
       })
     }
+    return built
   }
 
   async list(requestId: string): Promise<ResponseHistoryEntry[]> {
@@ -407,7 +531,10 @@ class ResponseHistoryService {
       .filter((item) => !item.pinned)
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
 
-    const keptNonPinned = nonPinnedEntries.slice(0, DEFAULT_MAX_PER_REQUEST)
+    // Pinned entries are counted separately and never truncated — the cap
+    // governs the rolling window only, so pinning is a durable "keep this one"
+    // whatever the user sets the limit to.
+    const keptNonPinned = nonPinnedEntries.slice(0, getHistoryLimit())
     const keepGuids = new Set([...pinnedEntries, ...keptNonPinned].map((item) => item.guid))
 
     target.entries = target.entries.filter((item) => keepGuids.has(item.guid))

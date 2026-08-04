@@ -26,6 +26,19 @@
       "detail": "Tải lại để dùng phiên bản trên đĩa, hoặc giữ phiên bản của bạn và ghi đè lên.",
       "reload": "Tải lại",
       "keepMine": "Giữ phiên bản của tôi"
+    },
+    "saveFailed": {
+      "title": "Lưu không thành công",
+      "reason": {
+        "readOnlyFile": "Tệp ở chế độ chỉ đọc. Hãy thay đổi quyền của tệp hoặc lưu sang vị trí khác.",
+        "readOnlyLocation": "Vị trí này được gắn kết ở chế độ chỉ đọc. Hãy lưu sang vị trí khác.",
+        "permissionDenied": "Bạn không có quyền ghi tại đây. Hãy kiểm tra quyền của thư mục hoặc lưu sang vị trí khác.",
+        "diskFull": "Đĩa đã đầy. Hãy giải phóng dung lượng rồi lưu lại.",
+        "quotaExceeded": "Hạn mức đĩa của bạn đã hết. Hãy giải phóng dung lượng rồi lưu lại.",
+        "pathMissing": "Vị trí này không còn tồn tại. Thư mục có thể đã bị xóa hoặc ổ đĩa đã bị ngắt kết nối.",
+        "fileBusy": "Tệp đang được chương trình khác sử dụng. Hãy đóng chương trình đó rồi lưu lại.",
+        "unknown": "Không thể ghi tệp: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Thẻ trình soạn thảo"
   },
   "keyValueTable": {
-    "description": "Mô tả"
+    "description": "Mô tả",
+    "deleteRow": "Xóa hàng"
   },
   "gatedControl": {
     "proLabel": "Phiên bản Pro",

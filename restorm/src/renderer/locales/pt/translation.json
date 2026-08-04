@@ -401,9 +401,7 @@
       "addEntry": "Adicionar um valor",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ainda não há valores",
-      "selectList": "Selecione uma lista",
-      "enabled": "Ativado"
+      "selectList": "Selecione uma lista"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Informações",
         "requestBody": "Corpo do pedido",
         "graph": "Grafo"
+      },
+      "infos": {
+        "sentAt": "Enviado em",
+        "requestBody": "Corpo do pedido",
+        "requestBodyFile": "Ficheiro"
       },
       "loading": "A enviar pedido...",
       "noResponseBody": "Sem corpo de resposta — consulte Infos para detalhes",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Mostrar logs {{level}}",
       "showLevelOnly": "Clique direito: apenas este nível",
       "noUserLogs": "Não há logs de utilizador (entradas da ação Log) neste run.",
-      "helpTitle": "O que esta ação faz"
+      "helpTitle": "O que esta ação faz",
+      "collapsePanel": "Recolher o inspetor",
+      "expandPanel": "Expandir o inspetor"
     },
     "now": {
       "timezone": "Fuso horário",
@@ -2142,6 +2147,11 @@
     "closePreview": "Fechar",
     "captureImageTitle": "Captura de ecrã MCP",
     "captureVideoTitle": "Gravação de ecrã MCP"
+  },
+  "history": {
+    "title": "Histórico",
+    "maxEntriesTitle": "Entradas mantidas por histórico",
+    "maxEntriesDescription": "Quantas entradas o histórico de chamadas de um pedido e o histórico de execuções de um cenário mantêm cada um. As entradas fixadas são sempre mantidas, qualquer que seja este valor. As listas de atividade recente do ecrã inicial não são afetadas."
   },
   "mcp": {
     "title": "MCP",

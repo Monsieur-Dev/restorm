@@ -19,6 +19,7 @@ import { collectionStore } from '../../services/CollectionStore'
 import { soapExecutionService } from '../../services/SOAPExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
+import { sentRequest } from './sentRequest'
 import { isSoapRequest } from '../../../shared/types/collections'
 import type { NodeExecutor } from '../types'
 
@@ -42,7 +43,7 @@ export const soapRequestExecutor: NodeExecutor = async (_act, ctx) => {
 
   const result = await soapExecutionService.execute({ requestId: req.id })
   ctx.signal.removeEventListener('abort', onAbort)
-  await responseHistoryService.storeExecutionResult(req.id, 'soap', result)
+  const detail = await responseHistoryService.storeExecutionResult(req.id, 'soap', result)
 
   // The `response` port carries the SAME `{ request, response }` shape the
   // JSON-path picker shows (see `resolveSoapPreview` in `mcp/tools/scenarioRun.ts`),
@@ -54,11 +55,10 @@ export const soapRequestExecutor: NodeExecutor = async (_act, ctx) => {
       {
         port: 'response',
         value: {
-          request: {
-            url: result.requestUrl ?? '',
-            method: 'POST',
-            headers: {}
-          },
+          // The origin request as it actually went out: the SOAP service
+          // echoes only the URL, so the resolved headers + envelope body come
+          // from the history detail.
+          request: sentRequest({ url: result.requestUrl ?? '', method: 'POST', headers: {} }, detail),
           response: {
             status: result.statusCode ?? 0,
             statusText: '',

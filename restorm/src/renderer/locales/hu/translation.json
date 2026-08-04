@@ -401,9 +401,7 @@
       "addEntry": "Érték hozzáadása",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Még nincsenek értékek",
-      "selectList": "Válasszon listát",
-      "enabled": "Engedélyezve"
+      "selectList": "Válasszon listát"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Információk",
         "requestBody": "Kérés törzse",
         "graph": "Grafikon"
+      },
+      "infos": {
+        "sentAt": "Elküldve",
+        "requestBody": "Kérés törzse",
+        "requestBodyFile": "Fájl"
       },
       "loading": "Kérés küldése...",
       "noResponseBody": "Nincs válasz-törzs — a részletekért lásd az Infos fület",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "{{level}} naplók megjelenítése",
       "showLevelOnly": "Jobb kattintás: csak ez a szint",
       "noUserLogs": "Nincsenek felhasználói naplók (a Log művelet bejegyzései) ebben a futásban.",
-      "helpTitle": "Mit csinál ez a művelet"
+      "helpTitle": "Mit csinál ez a művelet",
+      "collapsePanel": "Vizsgáló összecsukása",
+      "expandPanel": "Vizsgáló kibontása"
     },
     "now": {
       "timezone": "Időzóna",
@@ -2142,6 +2147,11 @@
     "closePreview": "Bezárás",
     "captureImageTitle": "MCP képernyőkép",
     "captureVideoTitle": "MCP képernyőfelvétel"
+  },
+  "history": {
+    "title": "Előzmények",
+    "maxEntriesTitle": "Előzményenként megőrzött bejegyzések",
+    "maxEntriesDescription": "Hány bejegyzést őriz meg egy kérés hívási előzménye és egy forgatókönyv futtatási előzménye. A rögzített bejegyzések ettől az értéktől függetlenül mindig megmaradnak. A kezdőképernyő legutóbbi tevékenységeit tartalmazó listákat ez nem érinti."
   },
   "mcp": {
     "title": "MCP",

@@ -26,6 +26,19 @@
       "detail": "Last inn på nytt for å bruke versjonen på disken, eller behold din versjon og overskriv den.",
       "reload": "Last inn på nytt",
       "keepMine": "Behold min versjon"
+    },
+    "saveFailed": {
+      "title": "Kunne ikke lagre",
+      "reason": {
+        "readOnlyFile": "Filen er skrivebeskyttet. Endre tillatelsene, eller lagre et annet sted.",
+        "readOnlyLocation": "Denne plasseringen er montert skrivebeskyttet. Lagre et annet sted.",
+        "permissionDenied": "Du har ikke tillatelse til å skrive her. Kontroller mappens tillatelser, eller lagre et annet sted.",
+        "diskFull": "Disken er full. Frigjør plass, og lagre på nytt.",
+        "quotaExceeded": "Diskkvoten din er brukt opp. Frigjør plass, og lagre på nytt.",
+        "pathMissing": "Denne plasseringen finnes ikke lenger. Mappen kan være slettet, eller stasjonen frakoblet.",
+        "fileBusy": "Filen er i bruk av et annet program. Lukk det, og lagre på nytt.",
+        "unknown": "Filen kunne ikke skrives: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Editorfaner"
   },
   "keyValueTable": {
-    "description": "Beskrivelse"
+    "description": "Beskrivelse",
+    "deleteRow": "Slett rad"
   },
   "gatedControl": {
     "proLabel": "Pro-versjon",

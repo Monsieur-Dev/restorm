@@ -91,6 +91,93 @@ describe('atomicWriteFile', () => {
     expect(entries.some((n) => n.endsWith('.tmp'))).toBe(false)
   })
 
+  it('keeps a restrictive target mode across the write', async () => {
+    // `rename` swaps the INODE, so the file inherits whatever mode the
+    // umask gave the temp file unless the mode is carried over. A project
+    // file kept at 600 can hold secrets; coming back as 644 is a silent
+    // permission downgrade nobody asked for.
+    const target = join(dir, 'secretish.txt')
+    writeFileSync(target, 'before', 'utf-8')
+    await fs.chmod(target, 0o600)
+
+    await atomicWriteFile(target, 'after')
+
+    expect(await fs.readFile(target, 'utf-8')).toBe('after')
+    expect(((await fs.stat(target)).mode & 0o777)).toBe(0o600)
+  })
+
+  it('refuses to overwrite a file marked read-only', async () => {
+    // `rename` consults only the DIRECTORY, so without the refusal the
+    // read-only bit offers no resistance: the file is replaced and the
+    // marking is gone. The user protected it on purpose.
+    const target = join(dir, 'marked-read-only.txt')
+    writeFileSync(target, 'protected', 'utf-8')
+    await fs.chmod(target, 0o444)
+
+    await expect(
+      atomicWriteFile(target, 'overwritten', { refuseReadOnlyTarget: true })
+    ).rejects.toMatchObject({
+      code: 'FS_TARGET_READ_ONLY'
+    })
+    expect(await fs.readFile(target, 'utf-8')).toBe('protected')
+    expect(((await fs.stat(target)).mode & 0o777)).toBe(0o444)
+    expect((await fs.readdir(dir)).some((n) => n.endsWith('.tmp'))).toBe(false)
+  })
+
+  it('replaces a read-only file when the caller has not asked to refuse one', async () => {
+    // The refusal is opt-in, and the default has to stay what it always
+    // was: writers that recover by value, or that write several files in
+    // one pass, would be left mid-operation by a throw they never handled.
+    const target = join(dir, 'unguarded-read-only.txt')
+    writeFileSync(target, 'protected', 'utf-8')
+    await fs.chmod(target, 0o444)
+
+    await atomicWriteFile(target, 'overwritten')
+
+    expect(await fs.readFile(target, 'utf-8')).toBe('overwritten')
+    // The mode is carried regardless — that half is never opt-in.
+    expect(((await fs.stat(target)).mode & 0o777)).toBe(0o444)
+  })
+
+  it('writes a first file even though there is nothing to check the permissions of', async () => {
+    // The refusal must not turn "no file yet" into a refusal of its own:
+    // `access` fails with ENOENT there, which is not a read-only target.
+    const target = join(dir, 'not-yet.txt')
+
+    await atomicWriteFile(target, 'hello')
+
+    expect(await fs.readFile(target, 'utf-8')).toBe('hello')
+  })
+
+  it('gives a brand-new file the umask default rather than inventing a mode', async () => {
+    const target = join(dir, 'fresh.txt')
+
+    await atomicWriteFile(target, 'hello')
+
+    // Only that it is readable+writable by the owner — the exact bits are
+    // the process umask's business, not this function's.
+    expect(((await fs.stat(target)).mode & 0o600)).toBe(0o600)
+  })
+
+  it('propagates the write error when the pre-flight passed but the write failed anyway', async () => {
+    // The pre-flight is a DETECTION, not the safety net: `access(W_OK)`
+    // is advisory, lies under ACLs and reports writable for root. Here it
+    // has nothing to object to — the file is writable, or absent — and
+    // the DIRECTORY is what refuses. That errno must still reach the
+    // caller, because this is the path the whole feature rests on.
+    const locked = join(dir, 'locked')
+    await fs.mkdir(locked)
+    const target = join(locked, 'data.txt')
+    writeFileSync(target, 'before', 'utf-8')
+    await fs.chmod(target, 0o644)
+    await fs.chmod(locked, 0o555)
+    try {
+      await expect(atomicWriteFile(target, 'x')).rejects.toMatchObject({ code: 'EACCES' })
+    } finally {
+      await fs.chmod(locked, 0o755)
+    }
+  })
+
   it('leaves the previous file untouched when mkdir fails', async () => {
     const target = join(dir, 'data.txt')
     writeFileSync(target, 'kept', 'utf-8')

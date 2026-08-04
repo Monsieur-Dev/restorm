@@ -3,6 +3,7 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../../types/theme'
 import type { FeaturePlatform } from '../../types/feature'
 import type { FileServiceState, FileMetadata, SerializationFormat } from '../../types/file'
+import type { SaveFailureReason } from '../../errors'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../../types/settings'
 import type { AuthState, CheckoutResult, PortalResult } from '../../shared/auth/authState'
 import type {
@@ -74,6 +75,10 @@ interface WindowApiFile {
   onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
   onFileOpened: (callback: (state: FileServiceState) => void) => () => void
   onFileClosed: (callback: () => void) => () => void
+  onFileSaveFailed: (
+    callback: (payload: { path: string | null; reason: SaveFailureReason; detail: string }) => void
+  ) => () => void
+  onFileSaveSucceeded: (callback: (payload: { path: string | null }) => void) => () => void
 }
 
 interface WindowApiEventBus {

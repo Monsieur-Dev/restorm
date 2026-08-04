@@ -134,4 +134,28 @@ describe('castValueToKind', () => {
     expect((next as CustomListMultiValue).listId).toBe('list1')
     expect((next as CustomListMultiValue).labels).toEqual(['red', 'green'])
   })
+
+  // The entries editor keeps an empty row to type into and stores a blank row
+  // left among filled ones, so a label-less entry reaches here. Seeding a
+  // recast picks a value on the user's behalf and must not pick that one.
+  const withBlankFirst: CustomValueList[] = [
+    {
+      id: 'list1',
+      name: 'Colours',
+      entries: [
+        { id: 'e0', label: '', value: '', enabled: true },
+        { id: 'e1', label: 'red', value: '#f00', enabled: true }
+      ]
+    }
+  ]
+
+  it('never seeds a customList with a label-less entry', () => {
+    const next = castValueToKind(new StringValue('purple'), 'customList', 'list1', withBlankFirst)
+    expect((next as CustomListValue).label).toBe('red')
+  })
+
+  it('does not let an empty label validate as a customListMulti selection', () => {
+    const next = castValueToKind(new StringValue('red'), 'customListMulti', 'list1', withBlankFirst)
+    expect((next as CustomListMultiValue).labels).toEqual(['red'])
+  })
 })

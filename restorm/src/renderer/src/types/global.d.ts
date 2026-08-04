@@ -464,6 +464,7 @@ declare global {
         list: (requestId: string) => Promise<ResponseHistoryEntry[]>
         get: (guid: string) => Promise<ResponseHistoryDetail | null>
         togglePin: (guid: string, pinned: boolean) => Promise<boolean>
+        onChanged: (callback: (requestId: string) => void) => () => void
       }
       requestUsage: {
         get: () => Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>>

@@ -5,6 +5,14 @@
 	overflow: hidden;
 	width: 20px;
 	height: 20px;
+
+	/* The box is a fixed square, so it must never be a flex shrink target.
+	   `.toggle-container` is a flex row and the label beside it is arbitrary
+	   caller text — a long one (a settings description carrying a URL, say)
+	   otherwise squeezes the box narrower than its own width and the checkmark
+	   renders clipped. The star renderer below already carries this for the
+	   same reason. */
+	flex-shrink: 0;
 	border-radius: 3px;
 	border: 1px solid transparent;
 	padding: 1px;

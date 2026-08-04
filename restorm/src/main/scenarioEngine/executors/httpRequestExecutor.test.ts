@@ -17,7 +17,7 @@ import type { ScenarioNode } from '../../../shared/types/scenario'
 const findById = vi.fn<(id: string) => unknown>()
 const execute = vi.fn<(i: unknown) => Promise<unknown>>()
 const cancel = vi.fn<(id: string) => void>()
-const storeExecutionResult = vi.fn<(...a: unknown[]) => Promise<void>>()
+const storeExecutionResult = vi.fn<(...a: unknown[]) => Promise<unknown>>()
 const flushRequestStateToContext = vi.fn<(r: unknown) => void>()
 const composeResolutionContexts = vi.fn<(id: string, overlay?: Record<string, string>) => unknown>()
 const graphqlExecute = vi.fn<(i: unknown) => Promise<unknown>>()
@@ -178,6 +178,49 @@ describe('httpRequestExecutor — the run\'s values travel as a disposable conte
   it('composes with no overlay when the run declared nothing', async () => {
     await httpRequestExecutor(makeActivation({}), makeCtx(node()))
     expect(composeResolutionContexts).toHaveBeenLastCalledWith('req-1', undefined)
+  })
+})
+
+describe('httpRequestExecutor — the origin request travels with the result', () => {
+  it('carries the whole resolved request on the response port, not just url + method + headers', async () => {
+    // What the run log shows about a played request is this object. The
+    // transport only echoes the URL + the dispatched headers, so without the
+    // history detail the body and the params are simply not knowable from the
+    // log — which is what made a failing scenario impossible to diagnose.
+    storeExecutionResult.mockResolvedValue({
+      guid: 'g1',
+      requestId: 'req-1',
+      type: 'http',
+      success: true,
+      timestamp: '2026-01-01T00:00:00.000Z',
+      pinned: false,
+      response: {
+        type: 'http',
+        requestUrl: 'https://api.test/my/Bob/action',
+        requestMethod: 'POST',
+        requestHeaders: [{ key: 'X-Env', value: 'resolved-token', enabled: true }],
+        requestParams: [{ key: 'page', value: '2', enabled: true }],
+        requestPathParams: [{ key: 'name', value: 'Bob', enabled: true }],
+        requestBody: { type: 'text', content: '{"persisted":true}' }
+      }
+    })
+
+    const out = await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+    const value = out.outputs[0]?.value as { request: Record<string, unknown> }
+    expect(value.request).toMatchObject({
+      url: 'https://api.test/my/Bob/action',
+      method: 'POST',
+      headers: { 'X-Env': 'resolved-token' },
+      params: { page: '2' },
+      pathParams: { name: 'Bob' },
+      body: { type: 'text', content: '{"persisted":true}' }
+    })
+  })
+
+  it('still emits the dispatched request when history built no detail', async () => {
+    const out = await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+    const value = out.outputs[0]?.value as { request: Record<string, unknown> }
+    expect(value.request).toEqual({ url: 'https://api.test/my/Bob/action', method: 'POST', headers: {} })
   })
 })
 

@@ -401,9 +401,7 @@
       "addEntry": "Wert hinzufügen",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Noch keine Werte",
-      "selectList": "Liste auswählen",
-      "enabled": "Aktiviert"
+      "selectList": "Liste auswählen"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Infos",
         "requestBody": "Anfrage-Body",
         "graph": "Graph"
+      },
+      "infos": {
+        "sentAt": "Gesendet am",
+        "requestBody": "Anfrage-Body",
+        "requestBodyFile": "Datei"
       },
       "loading": "Anfrage wird gesendet...",
       "noResponseBody": "Kein Antworttext — Details siehe Infos",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "{{level}}-Logs anzeigen",
       "showLevelOnly": "Rechtsklick: nur diese Stufe",
       "noUserLogs": "Keine Benutzer-Logs (Einträge der Log-Aktion) in diesem Run.",
-      "helpTitle": "Was diese Aktion bewirkt"
+      "helpTitle": "Was diese Aktion bewirkt",
+      "collapsePanel": "Inspektor einklappen",
+      "expandPanel": "Inspektor ausklappen"
     },
     "now": {
       "timezone": "Zeitzone",
@@ -2142,6 +2147,11 @@
     "closePreview": "Schließen",
     "captureImageTitle": "MCP-Screenshot",
     "captureVideoTitle": "MCP-Bildschirmaufnahme"
+  },
+  "history": {
+    "title": "Verlauf",
+    "maxEntriesTitle": "Pro Verlauf aufbewahrte Einträge",
+    "maxEntriesDescription": "Wie viele Einträge der Aufrufverlauf einer Anfrage und der Ausführungsverlauf eines Szenarios jeweils behalten. Angeheftete Einträge bleiben unabhängig von diesem Wert immer erhalten. Die Listen der letzten Aktivitäten auf der Startseite sind nicht betroffen."
   },
   "mcp": {
     "title": "MCP",

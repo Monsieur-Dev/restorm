@@ -26,6 +26,19 @@
       "detail": "Reload to use the version on disk, or keep your version and overwrite it.",
       "reload": "Reload",
       "keepMine": "Keep my version"
+    },
+    "saveFailed": {
+      "title": "Save failed",
+      "reason": {
+        "readOnlyFile": "The file is read-only. Change its permissions, or save to another location.",
+        "readOnlyLocation": "This location is mounted read-only. Save to another location.",
+        "permissionDenied": "You don't have permission to write here. Check the folder's permissions, or save to another location.",
+        "diskFull": "The disk is full. Free some space, then save again.",
+        "quotaExceeded": "Your disk quota is exhausted. Free some space, then save again.",
+        "pathMissing": "This location no longer exists. The folder may have been deleted, or the drive disconnected.",
+        "fileBusy": "The file is in use by another program. Close it, then save again.",
+        "unknown": "The file could not be written: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Editor tabs"
   },
   "keyValueTable": {
-    "description": "Description"
+    "description": "Description",
+    "deleteRow": "Delete row"
   },
   "gatedControl": {
     "proLabel": "Pro version",

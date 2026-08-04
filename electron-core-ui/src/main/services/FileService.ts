@@ -25,7 +25,7 @@ import type {
 } from '../../types/file'
 import type { RuntimeId } from '../../types/runtime'
 import { logger } from './LoggerService'
-import { FileSystemError, errorMeta } from '../../errors'
+import { FileSystemError, classifySaveFailure, errorMeta } from '../../errors'
 import { getStorageService } from './StorageService'
 import { i18nService } from './I18nService'
 
@@ -380,19 +380,40 @@ export class FileService {
     absolutePath: string
     format: PersistenceFormat
   }): Promise<boolean> {
+    const outcome = await this.writeUnit(params)
+    if (outcome.ok) {
+      this.broadcastSaveSucceeded(params.absolutePath)
+      return true
+    }
+    this.broadcastSaveFailed(params.absolutePath, outcome.error)
+    return false
+  }
+
+  /**
+   * The write half of {@link saveUnit}, without the save-outcome
+   * broadcast. Split out so a batch reports ONE outcome for the whole
+   * pass: interleaving per-unit failures and successes would let a later
+   * success retract the notice for an earlier failure the user never saw.
+   */
+  private async writeUnit(params: {
+    runtimeId: RuntimeId
+    content: unknown
+    absolutePath: string
+    format: PersistenceFormat
+  }): Promise<{ ok: true } | { ok: false; error: unknown }> {
     try {
       const serialized = serializePersisted(params.content, params.format)
-      await atomicWriteFile(params.absolutePath, serialized)
+      await atomicWriteFile(params.absolutePath, serialized, { refuseReadOnlyTarget: true })
       const committed = this.saveUnitRegistry.commitIfDraftMatches(params.runtimeId, params.content)
       if (!committed) {
         logger.info('[FileService] Save completed but draft advanced — unit remains dirty', {
           runtimeId: params.runtimeId
         })
       }
-      return true
+      return { ok: true }
     } catch (err: unknown) {
       logger.error('[FileService] Failed to save unit', { runtimeId: params.runtimeId, error: String(err) })
-      return false
+      return { ok: false, error: err }
     }
   }
 
@@ -401,14 +422,28 @@ export class FileService {
    * independently — a single failure doesn't short-circuit the rest.
    * Returns per-unit outcomes so the caller can surface partial
    * failures to the user.
+   *
+   * The batch reports a single save outcome: the FIRST failure, or
+   * success when every unit landed. A partially-written project is not a
+   * successful save, so one failing unit must not be papered over by the
+   * units that followed it.
    */
   public async saveUnitsBatch(
     units: { runtimeId: RuntimeId; content: unknown; absolutePath: string; format: PersistenceFormat }[]
   ): Promise<{ runtimeId: RuntimeId; success: boolean }[]> {
     const results: { runtimeId: RuntimeId; success: boolean }[] = []
+    let firstFailure: { path: string; error: unknown } | null = null
     for (const unit of units) {
-      const success = await this.saveUnit(unit)
-      results.push({ runtimeId: unit.runtimeId, success })
+      const outcome = await this.writeUnit(unit)
+      results.push({ runtimeId: unit.runtimeId, success: outcome.ok })
+      if (!outcome.ok && firstFailure === null) {
+        firstFailure = { path: unit.absolutePath, error: outcome.error }
+      }
+    }
+    if (firstFailure !== null) {
+      this.broadcastSaveFailed(firstFailure.path, firstFailure.error)
+    } else if (units.length > 0) {
+      this.broadcastSaveSucceeded(this.currentFile.path)
     }
     return results
   }
@@ -608,6 +643,49 @@ export class FileService {
   }
 
   /**
+   * Tell the renderer a write to disk failed, with a cause it can put in
+   * front of the user. Every `catch` around a project write goes through
+   * here: the log line alone leaves the user believing they saved, which
+   * is how a whole session's work gets lost on an unwritable file.
+   */
+  private broadcastSaveFailed(path: string | null, error: unknown): void {
+    this.broadcastEvent('file:save-failed', {
+      path,
+      reason: classifySaveFailure(error),
+      detail: error instanceof Error ? error.message : String(error)
+    })
+  }
+
+  /**
+   * Tell the renderer a write to disk landed. The counterpart of
+   * `broadcastSaveFailed`: a failure notice describes a STATE ("the last
+   * save failed"), so the renderer needs the success edge to retract it.
+   */
+  private broadcastSaveSucceeded(path: string | null): void {
+    this.broadcastEvent('file:save-succeeded', { path })
+  }
+
+  /**
+   * Report the outcome of a write the HOST performed itself — a host
+   * that persists through its own IPC path (a folder-mode save, an
+   * export) still owes the user the same notice, and the renderer-side
+   * state machine only knows what it is told. `error` may be anything
+   * that was thrown or returned; the reason is classified from it, and
+   * an unrecognised one still yields a notice carrying the raw text.
+   *
+   * Do NOT call this for a cancelled dialog or a refused precondition:
+   * they are not failed writes, and a notice for them is noise.
+   */
+  public notifySaveFailed(path: string | null, error: unknown): void {
+    this.broadcastSaveFailed(path, error)
+  }
+
+  /** Counterpart of {@link notifySaveFailed} for a host-performed write that landed. */
+  public notifySaveSucceeded(path: string | null): void {
+    this.broadcastSaveSucceeded(path)
+  }
+
+  /**
    * Broadcast an event to all windows via IPC
    */
   private broadcastEvent(channel: string, ...args: unknown[]): void {
@@ -650,7 +728,7 @@ export class FileService {
       const emptyContent: Record<string, unknown> = {}
       if (uuidKey) {
         const data = this.serialize(emptyContent, this.config.defaultFormat)
-        await atomicWriteFile(filePath, data)
+        await atomicWriteFile(filePath, data, { refuseReadOnlyTarget: true })
         await ensureFileUuid({
           filePath,
           format: this.config.defaultFormat,
@@ -667,7 +745,7 @@ export class FileService {
         }
       } else {
         const data = this.serialize(emptyContent, this.config.defaultFormat)
-        await atomicWriteFile(filePath, data)
+        await atomicWriteFile(filePath, data, { refuseReadOnlyTarget: true })
         this.currentFile = {
           path: filePath,
           name,
@@ -989,7 +1067,7 @@ export class FileService {
     try {
       const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, this.currentFile.format)
-      await atomicWriteFile(this.currentFile.path, data)
+      await atomicWriteFile(this.currentFile.path, data, { refuseReadOnlyTarget: true })
       this.diskDigest = FileService.digestOf(data)
 
       this.currentFile.content = preserved
@@ -1017,10 +1095,12 @@ export class FileService {
       }
 
       logger.info('FileService: File saved', { path: this.currentFile.path })
+      this.broadcastSaveSucceeded(this.currentFile.path)
       return true
     } catch (error) {
       const wrappedError = new FileSystemError('Failed to save file', 'FS_WRITE_FAILED', { cause: error })
       logger.error('FileService: Failed to save file', errorMeta(wrappedError))
+      this.broadcastSaveFailed(this.currentFile.path, wrappedError)
       return false
     }
   }
@@ -1054,7 +1134,7 @@ export class FileService {
     try {
       const preserved = this.preserveUuidMetadata(content)
       const data = this.serialize(preserved, fileFormat)
-      await atomicWriteFile(filePath, data)
+      await atomicWriteFile(filePath, data, { refuseReadOnlyTarget: true })
       this.diskDigest = FileService.digestOf(data)
       this.externalChangePending = false
 
@@ -1084,10 +1164,12 @@ export class FileService {
       }
 
       logger.info('FileService: File saved as', { path: filePath, format: fileFormat })
+      this.broadcastSaveSucceeded(filePath)
       return true
     } catch (error) {
       const wrappedError = new FileSystemError('Failed to save file', 'FS_WRITE_FAILED', { cause: error })
       logger.error('FileService: Failed to save file', errorMeta(wrappedError))
+      this.broadcastSaveFailed(filePath, wrappedError)
       return false
     }
   }

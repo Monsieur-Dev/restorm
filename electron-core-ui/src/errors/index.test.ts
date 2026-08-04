@@ -3,7 +3,8 @@ import {
   FileSystemError,
   PersistenceError,
   IpcError,
-  errorMeta
+  errorMeta,
+  classifySaveFailure
 } from './index'
 
 describe('FileSystemError', () => {
@@ -122,5 +123,49 @@ describe('errorMeta', () => {
       cause: 'disk full',
       code: 'PERSIST_SAVE_FAILED'
     })
+  })
+})
+
+describe('classifySaveFailure', () => {
+  it('names the cause from an fs errno', () => {
+    expect(classifySaveFailure(Object.assign(new Error('nope'), { code: 'EACCES' }))).toBe('permission-denied')
+    expect(classifySaveFailure(Object.assign(new Error('nope'), { code: 'ENOSPC' }))).toBe('disk-full')
+    expect(classifySaveFailure(Object.assign(new Error('nope'), { code: 'EROFS' }))).toBe('read-only-location')
+    expect(classifySaveFailure(Object.assign(new Error('nope'), { code: 'EPERM' }))).toBe('permission-denied')
+    expect(classifySaveFailure(Object.assign(new Error('nope'), { code: 'ENOENT' }))).toBe('path-missing')
+    expect(classifySaveFailure(Object.assign(new Error('nope'), { code: 'EBUSY' }))).toBe('file-busy')
+    expect(classifySaveFailure(Object.assign(new Error('nope'), { code: 'EDQUOT' }))).toBe('quota-exceeded')
+  })
+
+  it('reads through the wrapper the save path adds', () => {
+    // The errno rides on the original fs error; callers wrap it in a
+    // FileSystemError before rethrowing, and the wrapper's own code is
+    // not a cause anyone can act on.
+    const cause = Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' })
+    const wrapped = new FileSystemError('Failed to save file', 'FS_WRITE_FAILED', { cause })
+    expect(classifySaveFailure(wrapped)).toBe('permission-denied')
+  })
+
+  it('recognises the refusal to overwrite a read-only target', () => {
+    // The pre-flight throws its own code; the save path wraps it. The
+    // wrapper's own code names no cause, so the walk has to see past it.
+    const cause = new FileSystemError('not writable', 'FS_TARGET_READ_ONLY')
+    const wrapped = new FileSystemError('Failed to save file', 'FS_WRITE_FAILED', { cause })
+    expect(classifySaveFailure(wrapped)).toBe('read-only-file')
+  })
+
+  it('falls back to unknown for anything it cannot name', () => {
+    expect(classifySaveFailure(new Error('mystery'))).toBe('unknown')
+    expect(classifySaveFailure(Object.assign(new Error('x'), { code: 'EWEIRD' }))).toBe('unknown')
+    expect(classifySaveFailure('not even an error')).toBe('unknown')
+    expect(classifySaveFailure(null)).toBe('unknown')
+  })
+
+  it('terminates on a cause chain that loops back on itself', () => {
+    const a = new Error('a')
+    const b = new Error('b')
+    Object.defineProperty(a, 'cause', { value: b })
+    Object.defineProperty(b, 'cause', { value: a })
+    expect(classifySaveFailure(a)).toBe('unknown')
   })
 })

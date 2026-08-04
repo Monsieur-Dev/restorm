@@ -38,6 +38,7 @@ import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta } from './scenarioActionClipboard'
 import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow, socketioConnectEventPorts } from './scenarioNodePorts'
 import { isDataLink } from './scenarioPathTree'
+import { useDeselectOnRunStart } from './useDeselectOnRunStart'
 import { linkPaletteEntries } from './scenarioLinkPalette'
 // Side-effect: registers the env → { name, variables } resolver used by the
 // inspector's static preview (mirrors the runtime's env resolution).
@@ -917,6 +918,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // Keep `nodesRef` (used by the F9 keyboard handler defined above) pointed at
   // the latest nodes + their selection.
   useEffect(() => { nodesRef.current = nodes }, [nodes])
+
+  // Launching a run clears the box selection so the inspector switches to the
+  // run logs — what the user wants to watch the instant a scenario starts,
+  // instead of staying on the selected box's configuration.
+  useDeselectOnRunStart(engine.state, setNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   useEffect(() => { edgesRef.current = edges }, [edges])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)

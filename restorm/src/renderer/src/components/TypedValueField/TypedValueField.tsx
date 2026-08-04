@@ -30,6 +30,7 @@ import { EnvironmentValueCell } from './EnvironmentValueCell'
 import { ListValueCell } from './ListValueCell'
 import type { EnvValueTypeGroup } from '../../hooks/collectEnvValueTypeGroups'
 import { useScenarioVariables } from '../../contexts/ScenarioVariablesContext'
+import { isPickableEntry } from '../../utils/customValueEntries'
 import { castValueToKind, resolveValueTypeKind, type ValueTypeKind } from './castValue'
 import './typedValueField.css'
 
@@ -1019,7 +1020,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     // CustomListMultiValue → MultiSelectCombo of the list's labels.
     if (value instanceof CustomListMultiValue) {
       const list = customValueLists.find((l) => l.id === value.listId)
-      const enabled = (list?.entries ?? []).filter((e) => e.enabled !== false)
+      const enabled = (list?.entries ?? []).filter(isPickableEntry)
       const options = enabled.map((e) => ({ value: e.label, label: e.label }))
       const selected = value.labels.filter((l) => options.some((o) => o.value === l))
       return withTypeControl(
@@ -1037,7 +1038,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     // CustomListValue → SelectBox of the list's labels.
     if (value instanceof CustomListValue) {
       const list = customValueLists.find((l) => l.id === value.listId)
-      const options = (list?.entries ?? []).filter((e) => e.enabled !== false).map((e) => ({ text: e.label }))
+      const options = (list?.entries ?? []).filter(isPickableEntry).map((e) => ({ text: e.label }))
       const selectedIndex = options.findIndex((o) => o.text === value.label)
       return withTypeControl(
         <SelectBox

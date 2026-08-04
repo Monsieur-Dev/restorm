@@ -26,6 +26,19 @@
       "detail": "Läs in på nytt för att använda versionen på disken, eller behåll din version och skriv över den.",
       "reload": "Läs in på nytt",
       "keepMine": "Behåll min version"
+    },
+    "saveFailed": {
+      "title": "Det gick inte att spara",
+      "reason": {
+        "readOnlyFile": "Filen är skrivskyddad. Ändra dess behörigheter eller spara på en annan plats.",
+        "readOnlyLocation": "Den här platsen är monterad skrivskyddad. Spara på en annan plats.",
+        "permissionDenied": "Du har inte behörighet att skriva här. Kontrollera mappens behörigheter eller spara på en annan plats.",
+        "diskFull": "Disken är full. Frigör utrymme och spara igen.",
+        "quotaExceeded": "Din diskkvot är slut. Frigör utrymme och spara igen.",
+        "pathMissing": "Den här platsen finns inte längre. Mappen kan ha tagits bort eller enheten kopplats från.",
+        "fileBusy": "Filen används av ett annat program. Stäng det och spara igen.",
+        "unknown": "Det gick inte att skriva filen: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Redigerarflikar"
   },
   "keyValueTable": {
-    "description": "Beskrivning"
+    "description": "Beskrivning",
+    "deleteRow": "Ta bort rad"
   },
   "gatedControl": {
     "proLabel": "Pro-version",

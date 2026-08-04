@@ -400,9 +400,7 @@
       "addEntry": "新增值",
       "label": "Label",
       "value": "Value",
-      "noEntries": "尚無值",
-      "selectList": "選擇清單",
-      "enabled": "已啟用"
+      "selectList": "選擇清單"
     }
   },
   "requestTab": {
@@ -438,6 +436,11 @@
         "infos": "資訊",
         "requestBody": "請求內文",
         "graph": "圖表"
+      },
+      "infos": {
+        "sentAt": "傳送時間",
+        "requestBody": "請求內文",
+        "requestBodyFile": "檔案"
       },
       "loading": "正在傳送請求...",
       "noResponseBody": "無回應內容 — 詳情請見 Infos",
@@ -1531,7 +1534,9 @@
       "showLevelLogs": "顯示 {{level}} 日誌",
       "showLevelOnly": "右鍵點選：僅此層級",
       "noUserLogs": "此 run 中沒有使用者日誌 (來自 Log 動作的項目)。",
-      "helpTitle": "此動作的作用"
+      "helpTitle": "此動作的作用",
+      "collapsePanel": "摺疊檢查器",
+      "expandPanel": "展開檢查器"
     },
     "now": {
       "timezone": "時區",
@@ -2141,6 +2146,11 @@
     "closePreview": "關閉",
     "captureImageTitle": "MCP 螢幕擷取",
     "captureVideoTitle": "MCP 螢幕錄製"
+  },
+  "history": {
+    "title": "歷史記錄",
+    "maxEntriesTitle": "每個歷史記錄保留的項目數",
+    "maxEntriesDescription": "請求的呼叫歷史記錄和情境的執行歷史記錄各自保留的項目數。已釘選的項目一律保留，與此值無關。主畫面的近期活動清單不受影響。"
   },
   "mcp": {
     "title": "MCP",

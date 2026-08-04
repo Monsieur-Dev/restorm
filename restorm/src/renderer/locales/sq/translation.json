@@ -401,9 +401,7 @@
       "addEntry": "Shto një vlerë",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ende asnjë vlerë",
-      "selectList": "Zgjidhni një listë",
-      "enabled": "Aktivizuar"
+      "selectList": "Zgjidhni një listë"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Informacione",
         "requestBody": "Trupi i kërkesës",
         "graph": "Grafiku"
+      },
+      "infos": {
+        "sentAt": "Dërguar më",
+        "requestBody": "Trupi i kërkesës",
+        "requestBodyFile": "Skedar"
       },
       "loading": "Po dërgohet kërkesa...",
       "noResponseBody": "Pa trup përgjigjeje — shih Infos për detaje",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Shfaq loget {{level}}",
       "showLevelOnly": "Klik me të djathtën: vetëm ky nivel",
       "noUserLogs": "Asnjë log përdoruesi (hyrje nga veprimi Log) në këtë ekzekutim.",
-      "helpTitle": "Çfarë bën ky veprim"
+      "helpTitle": "Çfarë bën ky veprim",
+      "collapsePanel": "Palos inspektorin",
+      "expandPanel": "Shpalos inspektorin"
     },
     "now": {
       "timezone": "Zona kohore",
@@ -2142,6 +2147,11 @@
     "closePreview": "Mbyll",
     "captureImageTitle": "Pamja e ekranit MCP",
     "captureVideoTitle": "Regjistrim ekrani MCP"
+  },
+  "history": {
+    "title": "Historiku",
+    "maxEntriesTitle": "Hyrjet e ruajtura për çdo historik",
+    "maxEntriesDescription": "Sa hyrje ruajnë historiku i thirrjeve të një kërkese dhe historiku i ekzekutimeve të një skenari. Hyrjet e fiksuara ruhen gjithmonë, pavarësisht nga kjo vlerë. Listat e aktivitetit të fundit në ekranin kryesor nuk preken."
   },
   "mcp": {
     "title": "MCP",

@@ -401,9 +401,7 @@
       "addEntry": "Een waarde toevoegen",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Nog geen waarden",
-      "selectList": "Selecteer een lijst",
-      "enabled": "Ingeschakeld"
+      "selectList": "Selecteer een lijst"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Info",
         "requestBody": "Verzoekbody",
         "graph": "Grafiek"
+      },
+      "infos": {
+        "sentAt": "Verzonden op",
+        "requestBody": "Verzoekbody",
+        "requestBodyFile": "Bestand"
       },
       "loading": "Verzoek wordt verzonden...",
       "noResponseBody": "Geen response-body — zie Infos voor details",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "{{level}}-logs tonen",
       "showLevelOnly": "Rechtermuisklik: alleen dit niveau",
       "noUserLogs": "Geen gebruikerslogs (vermeldingen van de Log-actie) in deze run.",
-      "helpTitle": "Wat deze actie doet"
+      "helpTitle": "Wat deze actie doet",
+      "collapsePanel": "Inspector inklappen",
+      "expandPanel": "Inspector uitklappen"
     },
     "now": {
       "timezone": "Tijdzone",
@@ -2142,6 +2147,11 @@
     "closePreview": "Sluiten",
     "captureImageTitle": "MCP-schermafbeelding",
     "captureVideoTitle": "MCP-schermopname"
+  },
+  "history": {
+    "title": "Geschiedenis",
+    "maxEntriesTitle": "Bewaarde items per geschiedenis",
+    "maxEntriesDescription": "Hoeveel items de aanroepgeschiedenis van een verzoek en de uitvoeringsgeschiedenis van een scenario elk bewaren. Vastgezette items blijven altijd bewaard, ongeacht deze waarde. De lijsten met recente activiteit op het startscherm worden niet beïnvloed."
   },
   "mcp": {
     "title": "MCP",

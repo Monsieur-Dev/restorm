@@ -17,6 +17,8 @@
         method: GET
         headers:
           api_key: ""
+        pathParams:
+          petId: "1"
       response:
         status: 200
         statusText: OK
@@ -42,6 +44,8 @@
         method: GET
         headers:
           api_key: ""
+        pathParams:
+          petId: "1"
       response:
         status: 200
         statusText: OK
@@ -63,6 +67,8 @@
         method: GET
         headers:
           api_key: ""
+        pathParams:
+          petId: "1"
       response:
         status: 200
         statusText: OK
@@ -85,6 +91,8 @@
       method: GET
       headers:
         api_key: ""
+      pathParams:
+        petId: "1"
     response:
       status: 200
       statusText: OK
@@ -108,6 +116,8 @@
         method: GET
         headers:
           api_key: ""
+        pathParams:
+          petId: "1"
       response:
         status: 200
         statusText: OK

@@ -125,6 +125,12 @@ const dirtyIds = useDirtyUnitsSet()
 // acceptExternalChange() then save. See Architecture/Persistence.md.
 useFileExternallyChanged(({ path }) => { /* ask, then resolve */ })
 
+// A write to disk failed — surface it in the `app` toaster, and retract
+// the notice once a save gets through. Mount once at the app root; it
+// takes no arguments and owns the whole lifecycle. See
+// Architecture/Persistence.md for the causes it can name.
+useSaveFailureToast()
+
 // File events hook
 useFileEvents(
   (state) => { /* onFileOpened */ },
@@ -150,7 +156,8 @@ import {
   saveUnitsToDiskBatch,
   getSaveUnitsSnapshot,
   useDraftsRestored,
-  useFileExternallyChanged
+  useFileExternallyChanged,
+  useSaveFailureToast
 } from 'electron-core-ui/renderer'
 ```
 

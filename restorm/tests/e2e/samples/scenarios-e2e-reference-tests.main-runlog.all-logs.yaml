@@ -8169,6 +8169,9 @@
         method: POST
         headers:
           Content-Type: application/json
+        body:
+          type: text
+          content: '{"query":"{ pets }"}'
       response:
         status: 200
         statusText: OK
@@ -8192,6 +8195,9 @@
         method: POST
         headers:
           Content-Type: application/json
+        body:
+          type: text
+          content: '{"query":"{ pets }"}'
       response:
         status: 200
         statusText: OK
@@ -8210,6 +8216,9 @@
         method: POST
         headers:
           Content-Type: application/json
+        body:
+          type: text
+          content: '{"query":"{ pets }"}'
       response:
         status: 200
         statusText: OK
@@ -8229,6 +8238,9 @@
       method: POST
       headers:
         Content-Type: application/json
+      body:
+        type: text
+        content: '{"query":"{ pets }"}'
     response:
       status: 200
       statusText: OK
@@ -8249,6 +8261,9 @@
         method: POST
         headers:
           Content-Type: application/json
+        body:
+          type: text
+          content: '{"query":"{ pets }"}'
       response:
         status: 200
         statusText: OK

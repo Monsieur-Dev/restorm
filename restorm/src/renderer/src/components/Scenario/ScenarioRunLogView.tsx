@@ -1,83 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, ListView, Toggle, Tooltip, ContextMenu, type ContextMenuItem, type ListViewItemData } from 'electron-core-ui/renderer'
+import { Button, ListView, Toggle, ContextMenu, type ContextMenuItem, type ListViewItemData } from 'electron-core-ui/renderer'
 import { asText, serializeRunLogEntries, serializeRunLogEntry, type ScenarioRunLogLike } from '../../../../shared/scenarioRunLog/serializeRunLog'
 import { buildScenarioPathTree } from './scenarioPathTree'
+import { withValueTooltips } from './scenarioTreeTooltips'
+import { ScenarioTruncatedText } from './ScenarioTruncatedText'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 /**
- * A log row's `ts + message`. The message ellipsis-truncates; on hover an ECUI
- * tooltip appears when there's something extra to show:
- *  - the FULL message, when the row is truncated, and/or
- *  - a clickable link to the SOURCE scenario, when the entry came from a
- *    sub-scenario (and that scenario still exists).
- * When both apply, the full message is shown first, then the link.
- * The tooltip is hover-bridged (a short close delay) so the user can move into
- * it to click the link without it vanishing.
+ * A log row's `ts + message`. The message ellipsis-truncates at the row's
+ * width; hovering a truncated row reveals the FULL message in an ECUI tooltip
+ * (the sub-scenario provenance is reached by clicking the row instead, which
+ * pops a read-only preview).
  */
-const LogMessageCell: React.FC<{ ts: string; message: string }> = ({ ts, message }) => {
-  const msgRef = useRef<HTMLSpanElement>(null)
-  const [hover, setHover] = useState(false)
-  const [truncated, setTruncated] = useState(false)
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Track whether the message overflows its container via ResizeObserver.
-  // This replaces the old 600ms delayed measurement, which was unreliable
-  // because it fired before the list item was fully laid out (or when the
-  // msgRef was null/stale due to virtualization). ResizeObserver fires on
-  // mount and whenever the element's border-box changes (e.g. the inspector
-  // panel is resized), keeping `truncated` always current.
-  useEffect(() => {
-    const el = msgRef.current
-    if (!el) return
-    const check = (): void => { setTruncated(el.scrollWidth > el.clientWidth) }
-    check()
-    const obs = new ResizeObserver(check)
-    obs.observe(el)
-    return () => { obs.disconnect() }
-  }, []) // mount/unmount only — ResizeObserver covers layout-driven size changes
-
-  // Re-check when the message text itself changes: scrollWidth can change even
-  // when the element's clientWidth (observed by ResizeObserver) stays the same.
-  useEffect(() => {
-    const el = msgRef.current
-    if (!el) return
-    setTruncated(el.scrollWidth > el.clientWidth)
-  }, [message])
-
-  useEffect(() => () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current)
-  }, [])
-
-  const open = (): void => {
-    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null }
-    setHover(true)
-  }
-  const scheduleClose = (): void => {
-    if (closeTimer.current) clearTimeout(closeTimer.current)
-    closeTimer.current = setTimeout(() => { setHover(false) }, 160)
-  }
-
-  // Hover only surfaces the FULL message when the row truncates it — the
-  // sub-scenario provenance is now reached by clicking the row (which pops a
-  // read-only preview), so the old hover link is gone.
-  return (
-    <span className="scn-log-line" onMouseEnter={open} onMouseLeave={scheduleClose}>
-      <span className="scn-log-ts">{ts}</span>
-      <span className="scn-log-msg" ref={msgRef}>{message}</span>
-      <Tooltip
-        targetRef={msgRef}
-        show={hover && truncated}
-        placement="below"
-        content={
-          <span className="scn-log-tooltip" onMouseEnter={open} onMouseLeave={scheduleClose}>
-            <span className="scn-log-tooltip-msg">{message}</span>
-          </span>
-        }
-      />
-    </span>
-  )
-}
+const LogMessageCell: React.FC<{ ts: string; message: string }> = ({ ts, message }) => (
+  <ScenarioTruncatedText text={message} before={<span className="scn-log-ts">{ts}</span>} />
+)
 
 const LEVELS = ['debug', 'info', 'warn', 'error'] as const
 type LogLevel = typeof LEVELS[number]
@@ -171,7 +109,7 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
     }
     if (e.data !== undefined) {
       const tree = buildScenarioPathTree(typeof e.data === 'object' && e.data !== null ? (e.data as Record<string, unknown>) : { value: e.data })
-      item.children = prefixIds(tree, `log-${i}`)
+      item.children = withValueTooltips(prefixIds(tree, `log-${i}`))
       // Collapsed by default — the data is a sub-element you expand on demand.
       item.isExpanded = false
     }

@@ -402,9 +402,7 @@
       "addEntry": "Dodaj vrednost",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Još nema vrednosti",
-      "selectList": "Izaberite listu",
-      "enabled": "Omogućeno"
+      "selectList": "Izaberite listu"
     }
   },
   "requestTab": {
@@ -440,6 +438,11 @@
         "infos": "Informacije",
         "requestBody": "Telo zahteva",
         "graph": "Graf"
+      },
+      "infos": {
+        "sentAt": "Poslato",
+        "requestBody": "Telo zahteva",
+        "requestBodyFile": "Datoteka"
       },
       "loading": "Slanje zahteva...",
       "noResponseBody": "Nema tela odgovora — pogledajte Infos za detalje",
@@ -1533,7 +1536,9 @@
       "showLevelLogs": "Prikaži {{level}} logove",
       "showLevelOnly": "Desni klik: samo ovaj nivo",
       "noUserLogs": "Nema korisničkih logova (unosa iz radnje Log) u ovom izvršavanju.",
-      "helpTitle": "Šta ova radnja radi"
+      "helpTitle": "Šta ova radnja radi",
+      "collapsePanel": "Skupi inspektor",
+      "expandPanel": "Proširi inspektor"
     },
     "now": {
       "timezone": "Vremenska zona",
@@ -2143,6 +2148,11 @@
     "closePreview": "Zatvori",
     "captureImageTitle": "MCP snimak ekrana",
     "captureVideoTitle": "MCP snimak ekrana (video)"
+  },
+  "history": {
+    "title": "Istorija",
+    "maxEntriesTitle": "Sačuvani unosi po istoriji",
+    "maxEntriesDescription": "Koliko unosa čuvaju istorija poziva zahteva i istorija izvršavanja scenarija. Zakačeni unosi se uvek čuvaju, bez obzira na ovu vrednost. Liste nedavne aktivnosti na početnom ekranu nisu obuhvaćene."
   },
   "mcp": {
     "title": "MCP",

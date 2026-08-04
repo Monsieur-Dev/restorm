@@ -400,9 +400,7 @@
       "addEntry": "Thêm một giá trị",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Chưa có giá trị nào",
-      "selectList": "Chọn một danh sách",
-      "enabled": "Bật"
+      "selectList": "Chọn một danh sách"
     }
   },
   "requestTab": {
@@ -438,6 +436,11 @@
         "infos": "Thông tin",
         "requestBody": "Body yêu cầu",
         "graph": "Đồ thị"
+      },
+      "infos": {
+        "sentAt": "Đã gửi lúc",
+        "requestBody": "Body yêu cầu",
+        "requestBodyFile": "Tệp"
       },
       "loading": "Đang gửi yêu cầu...",
       "noResponseBody": "Không có nội dung phản hồi — xem Infos để biết chi tiết",
@@ -1531,7 +1534,9 @@
       "showLevelLogs": "Hiển thị log {{level}}",
       "showLevelOnly": "Nhấp chuột phải: chỉ cấp độ này",
       "noUserLogs": "Không có nhật ký người dùng (mục từ hành động Log) trong lần chạy này.",
-      "helpTitle": "Hành động này làm gì"
+      "helpTitle": "Hành động này làm gì",
+      "collapsePanel": "Thu gọn trình kiểm tra",
+      "expandPanel": "Mở rộng trình kiểm tra"
     },
     "now": {
       "timezone": "Múi giờ",
@@ -2141,6 +2146,11 @@
     "closePreview": "Đóng",
     "captureImageTitle": "Ảnh chụp màn hình MCP",
     "captureVideoTitle": "Quay màn hình MCP"
+  },
+  "history": {
+    "title": "Lịch sử",
+    "maxEntriesTitle": "Số mục được giữ trong mỗi lịch sử",
+    "maxEntriesDescription": "Số mục mà lịch sử lệnh gọi của một yêu cầu và lịch sử chạy của một kịch bản mỗi loại giữ lại. Các mục đã ghim luôn được giữ lại, bất kể giá trị này. Các danh sách hoạt động gần đây trên màn hình chính không bị ảnh hưởng."
   },
   "mcp": {
     "title": "MCP",

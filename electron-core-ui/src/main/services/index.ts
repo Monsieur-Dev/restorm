@@ -61,7 +61,8 @@ export {
   sanitizeFileName,
   calculateIndexPadding,
   PERSISTENCE_FORMATS,
-  atomicWriteFile
+  atomicWriteFile,
+  codeOf
 } from './PersistenceService'
 export type {
   PersistenceFormat,

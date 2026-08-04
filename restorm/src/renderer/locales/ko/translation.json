@@ -400,9 +400,7 @@
       "addEntry": "값 추가",
       "label": "Label",
       "value": "Value",
-      "noEntries": "아직 값이 없습니다",
-      "selectList": "목록 선택",
-      "enabled": "사용"
+      "selectList": "목록 선택"
     }
   },
   "requestTab": {
@@ -438,6 +436,11 @@
         "infos": "정보",
         "requestBody": "요청 본문",
         "graph": "그래프"
+      },
+      "infos": {
+        "sentAt": "보낸 시각",
+        "requestBody": "요청 본문",
+        "requestBodyFile": "파일"
       },
       "loading": "요청을 보내는 중...",
       "noResponseBody": "응답 본문이 없습니다 — 자세한 내용은 Infos 참조",
@@ -1531,7 +1534,9 @@
       "showLevelLogs": "{{level}} 로그 표시",
       "showLevelOnly": "마우스 오른쪽 클릭: 이 수준만",
       "noUserLogs": "이 run에는 (Log 액션에서 나온) 사용자 로그가 없습니다.",
-      "helpTitle": "이 액션의 동작"
+      "helpTitle": "이 액션의 동작",
+      "collapsePanel": "인스펙터 접기",
+      "expandPanel": "인스펙터 펼치기"
     },
     "now": {
       "timezone": "시간대",
@@ -2141,6 +2146,11 @@
     "closePreview": "닫기",
     "captureImageTitle": "MCP 스크린샷",
     "captureVideoTitle": "MCP 화면 녹화"
+  },
+  "history": {
+    "title": "기록",
+    "maxEntriesTitle": "기록별 보관 항목 수",
+    "maxEntriesDescription": "요청의 호출 기록과 시나리오의 실행 기록이 각각 보관하는 항목 수입니다. 고정된 항목은 이 값과 관계없이 항상 보관됩니다. 홈 화면의 최근 활동 목록에는 영향을 주지 않습니다."
   },
   "mcp": {
     "title": "MCP",

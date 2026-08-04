@@ -20,6 +20,7 @@ import {
   upsertSaveUnit,
   markSaveUnitDeleted,
   useDraftsRestored,
+  useSaveFailureToast,
   useDirtyUnitsSet,
   cleanseForPersistence,
   toasterService,
@@ -367,6 +368,12 @@ const App: React.FC = () => {
       body: t('app.draftsRestoredBody', { count: payload.count })
     })
   })
+
+  // A write to disk that fails leaves only the dirty markers behind, and
+  // those read as "not saved yet" — so the user keeps editing a project
+  // they believe is on disk. The lib owns the notice and its lifecycle;
+  // we just mount it against the app toaster.
+  useSaveFailureToast()
 
   // "Open containing folder" on a welcome-screen recent/favorite row.
   // The panel is a generic library component, so it only reports which

@@ -191,6 +191,83 @@ each re-indexed sibling — goes through `atomicWriteFile()`: serialize
 to `<target>.<uuid>.tmp` adjacent to the target, then `fs.rename` into
 place. A crash mid-write leaves the previous target intact.
 
+Two things `rename` would otherwise get wrong, because it replaces the
+*inode* rather than the bytes of the existing file — and because it
+consults only the DIRECTORY's permissions:
+
+- **A read-only target can be refused**, via the opt-in
+  `atomicWriteFile(path, contents, { refuseReadOnlyTarget: true })`.
+  Without it the read-only bit offers no resistance whatsoever: the file
+  is replaced and the marking is gone. When asked, `atomicWriteFile`
+  checks `fs.access(W_OK)` on an existing target first and throws
+  `FileSystemError('FS_TARGET_READ_ONLY')`. This is a **detection, not
+  the safety net** — `access` is advisory, it lies under ACLs and reports
+  writable for root — so every case it waves through still fails at the
+  write and is reported from the `catch`, through the same channel. A
+  path with no file yet is not a refusal (`ENOENT` there means the
+  directory governs the write).
+
+  **It is opt-in on purpose.** The throw lands on the caller, and only a
+  caller that reports failure to the user can act on it. The atomicity
+  here is *per file*: a caller writing several files in one pass (the
+  folder reorder in `saveIndexedFolder`, for instance) would be left
+  mid-operation, some files written and some not. Writers that report
+  failure **by value** (`'refused'`, `persisted: false`) or that merely
+  log would turn the refusal into a silent no-op or an unexpected
+  exception. So the default is the historical behaviour, and only the
+  `FileService` save paths — the ones that own the `file:save-failed`
+  notice — switch it on.
+- **The target's permission mode is carried across.** Without it the file
+  comes back with whatever mode the umask gave the temp file: a project
+  kept at `600` — they can hold secrets — would silently return as `644`.
+
+### When a write fails
+
+A failed save used to be invisible: the `catch` logged and returned
+`false`, and the only thing the user saw was the dirty markers staying
+lit — which is exactly what "not saved yet" looks like. So they keep
+working on a project they believe is on disk.
+
+Every write path therefore reports its outcome to the renderer:
+
+| Broadcast | Payload | Fired by |
+| --- | --- | --- |
+| **`file:save-failed`** | `{ path, reason, detail }` | `save()`, `saveAs()`, `saveUnit()`, `saveUnitsBatch()` |
+| **`file:save-succeeded`** | `{ path }` | the same, on the way through |
+
+`reason` is a `SaveFailureReason` — `'read-only-file'`,
+`'read-only-location'`, `'permission-denied'`, `'disk-full'`,
+`'quota-exceeded'`, `'path-missing'`, `'file-busy'`, `'unknown'` —
+derived by `classifySaveFailure()`, which walks the error's `cause` chain
+for an errno (or for the pre-flight's `FS_TARGET_READ_ONLY`). `detail`
+carries the raw message, which is what the `'unknown'` message renders.
+"The file is read-only" tells the user what to change; "save failed"
+tells them nothing.
+
+Two rules the reporting side keeps:
+
+- **Every failed attempt is reported**, including each autosave retry.
+  Main stays a plain reporter — only the renderer knows whether the user
+  has already been told and dismissed the notice.
+- **A batch reports one outcome**, its first failure or a success when
+  every unit landed. A partially-written project is not a successful
+  save, and letting the later successes speak would retract the notice
+  for a failure nobody saw.
+
+A save refused because the file changed outside the app broadcasts
+nothing here — that path has its own prompt (above), and no write was
+attempted.
+
+Hosts that persist through their own IPC (folder mode, exports) report
+through `getFileService().notifySaveSucceeded(path)` /
+`notifySaveFailed(path, error)`, so the notice covers those paths too.
+Do NOT call them for a cancelled dialog or a refused precondition: those
+are not failed writes.
+
+Renderer surface: **`useSaveFailureToast()`** — mount once at the app
+root, alongside an `app` toaster. See
+[Renderer/Hooks-Services-Contexts.md](../Renderer/Hooks-Services-Contexts.md).
+
 ### Files rewritten outside the app
 
 `FileService` keeps a SHA-1 digest of the bytes it last read from — or

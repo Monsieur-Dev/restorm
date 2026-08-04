@@ -26,6 +26,19 @@
       "detail": "Ponovo učitajte da biste koristili verziju sa diska ili zadržite svoju verziju i prepišite je.",
       "reload": "Ponovo učitaj",
       "keepMine": "Zadrži moju verziju"
+    },
+    "saveFailed": {
+      "title": "Čuvanje nije uspelo",
+      "reason": {
+        "readOnlyFile": "Datoteka je samo za čitanje. Promenite njene dozvole ili je sačuvajte na drugom mestu.",
+        "readOnlyLocation": "Ova lokacija je montirana samo za čitanje. Sačuvajte na drugom mestu.",
+        "permissionDenied": "Nemate dozvolu za pisanje ovde. Proverite dozvole fascikle ili sačuvajte na drugom mestu.",
+        "diskFull": "Disk je pun. Oslobodite prostor pa sačuvajte ponovo.",
+        "quotaExceeded": "Vaša disk kvota je iscrpljena. Oslobodite prostor pa sačuvajte ponovo.",
+        "pathMissing": "Ova lokacija više ne postoji. Fascikla je možda obrisana ili je uređaj isključen.",
+        "fileBusy": "Datoteku koristi drugi program. Zatvorite ga pa sačuvajte ponovo.",
+        "unknown": "Datoteku nije bilo moguće zapisati: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Kartice uređivača"
   },
   "keyValueTable": {
-    "description": "Opis"
+    "description": "Opis",
+    "deleteRow": "Obriši red"
   },
   "gatedControl": {
     "proLabel": "Pro verzija",

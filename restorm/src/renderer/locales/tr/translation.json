@@ -401,9 +401,7 @@
       "addEntry": "Bir değer ekle",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Henüz değer yok",
-      "selectList": "Bir liste seçin",
-      "enabled": "Etkin"
+      "selectList": "Bir liste seçin"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Bilgiler",
         "requestBody": "İstek gövdesi",
         "graph": "Grafik"
+      },
+      "infos": {
+        "sentAt": "Gönderilme",
+        "requestBody": "İstek gövdesi",
+        "requestBodyFile": "Dosya"
       },
       "loading": "İstek gönderiliyor...",
       "noResponseBody": "Yanıt gövdesi yok — ayrıntılar için Infos'a bakın",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "{{level}} günlüklerini göster",
       "showLevelOnly": "Sağ tıklama: yalnızca bu düzey",
       "noUserLogs": "Bu çalıştırmada kullanıcı günlüğü yok (Log eyleminden gelen girişler).",
-      "helpTitle": "Bu eylemin ne yaptığı"
+      "helpTitle": "Bu eylemin ne yaptığı",
+      "collapsePanel": "Denetçiyi daralt",
+      "expandPanel": "Denetçiyi genişlet"
     },
     "now": {
       "timezone": "Saat dilimi",
@@ -2142,6 +2147,11 @@
     "closePreview": "Kapat",
     "captureImageTitle": "MCP ekran görüntüsü",
     "captureVideoTitle": "MCP ekran kaydı"
+  },
+  "history": {
+    "title": "Geçmiş",
+    "maxEntriesTitle": "Geçmiş başına saklanan girdiler",
+    "maxEntriesDescription": "Bir isteğin çağrı geçmişinin ve bir senaryonun çalıştırma geçmişinin her birinin sakladığı girdi sayısı. Sabitlenen girdiler, bu değerden bağımsız olarak her zaman saklanır. Başlangıç ekranındaki son etkinlik listeleri etkilenmez."
   },
   "mcp": {
     "title": "MCP",

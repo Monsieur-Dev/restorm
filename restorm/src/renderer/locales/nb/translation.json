@@ -401,9 +401,7 @@
       "addEntry": "Legg til en verdi",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ingen verdier ennå",
-      "selectList": "Velg en liste",
-      "enabled": "Aktivert"
+      "selectList": "Velg en liste"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Info",
         "requestBody": "Forespørsels-body",
         "graph": "Graf"
+      },
+      "infos": {
+        "sentAt": "Sendt",
+        "requestBody": "Forespørsels-body",
+        "requestBodyFile": "Fil"
       },
       "loading": "Sender forespørsel...",
       "noResponseBody": "Ingen svartekst — se Infos for detaljer",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Vis {{level}}-logger",
       "showLevelOnly": "Høyreklikk: bare dette nivået",
       "noUserLogs": "Ingen brukerlogger (oppføringer fra Log-handlingen) i denne kjøringen.",
-      "helpTitle": "Hva denne handlingen gjør"
+      "helpTitle": "Hva denne handlingen gjør",
+      "collapsePanel": "Slå sammen inspektøren",
+      "expandPanel": "Utvid inspektøren"
     },
     "now": {
       "timezone": "Tidssone",
@@ -2142,6 +2147,11 @@
     "closePreview": "Lukk",
     "captureImageTitle": "MCP-skjermbilde",
     "captureVideoTitle": "MCP-skjermopptak"
+  },
+  "history": {
+    "title": "Historikk",
+    "maxEntriesTitle": "Oppføringer som beholdes per historikk",
+    "maxEntriesDescription": "Hvor mange oppføringer kallhistorikken for en forespørsel og kjørehistorikken for et scenario hver beholder. Festede oppføringer beholdes alltid, uansett denne verdien. Listene over nylig aktivitet på startskjermen påvirkes ikke."
   },
   "mcp": {
     "title": "MCP",

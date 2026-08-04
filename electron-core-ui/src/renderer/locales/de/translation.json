@@ -26,6 +26,19 @@
       "detail": "Neu laden, um die Version auf der Festplatte zu verwenden, oder Ihre Version behalten und sie überschreiben.",
       "reload": "Neu laden",
       "keepMine": "Meine Version behalten"
+    },
+    "saveFailed": {
+      "title": "Speichern fehlgeschlagen",
+      "reason": {
+        "readOnlyFile": "Die Datei ist schreibgeschützt. Ändern Sie ihre Berechtigungen oder speichern Sie an einem anderen Ort.",
+        "readOnlyLocation": "Dieser Speicherort ist schreibgeschützt eingebunden. Speichern Sie an einem anderen Ort.",
+        "permissionDenied": "Sie haben hier keine Schreibrechte. Prüfen Sie die Berechtigungen des Ordners oder speichern Sie an einem anderen Ort.",
+        "diskFull": "Der Datenträger ist voll. Geben Sie Speicherplatz frei und speichern Sie erneut.",
+        "quotaExceeded": "Ihr Speicherkontingent ist aufgebraucht. Geben Sie Speicherplatz frei und speichern Sie erneut.",
+        "pathMissing": "Dieser Speicherort existiert nicht mehr. Der Ordner wurde möglicherweise gelöscht oder das Laufwerk getrennt.",
+        "fileBusy": "Die Datei wird von einem anderen Programm verwendet. Schließen Sie es und speichern Sie erneut.",
+        "unknown": "Die Datei konnte nicht geschrieben werden: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Editor-Tabs"
   },
   "keyValueTable": {
-    "description": "Beschreibung"
+    "description": "Beschreibung",
+    "deleteRow": "Zeile löschen"
   },
   "gatedControl": {
     "proLabel": "Pro-Version",

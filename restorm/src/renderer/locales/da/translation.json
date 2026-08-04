@@ -401,9 +401,7 @@
       "addEntry": "Tilføj en værdi",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ingen værdier endnu",
-      "selectList": "Vælg en liste",
-      "enabled": "Aktiveret"
+      "selectList": "Vælg en liste"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Info",
         "requestBody": "Anmodnings-body",
         "graph": "Graf"
+      },
+      "infos": {
+        "sentAt": "Sendt den",
+        "requestBody": "Anmodnings-body",
+        "requestBodyFile": "Fil"
       },
       "loading": "Sender anmodning...",
       "noResponseBody": "Ingen svar-body — se Infos for detaljer",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Vis {{level}}-logs",
       "showLevelOnly": "Højreklik: kun dette niveau",
       "noUserLogs": "Ingen brugerlogs (poster fra Log-handlingen) i denne run.",
-      "helpTitle": "Hvad denne handling gør"
+      "helpTitle": "Hvad denne handling gør",
+      "collapsePanel": "Fold inspektøren sammen",
+      "expandPanel": "Fold inspektøren ud"
     },
     "now": {
       "timezone": "Tidszone",
@@ -2142,6 +2147,11 @@
     "closePreview": "Luk",
     "captureImageTitle": "MCP-skærmbillede",
     "captureVideoTitle": "MCP-skærmoptagelse"
+  },
+  "history": {
+    "title": "Historik",
+    "maxEntriesTitle": "Poster gemt pr. historik",
+    "maxEntriesDescription": "Hvor mange poster opkaldshistorikken for en anmodning og kørselshistorikken for et scenarie hver gemmer. Fastgjorte poster gemmes altid, uanset denne værdi. Listerne over seneste aktivitet på startskærmen påvirkes ikke."
   },
   "mcp": {
     "title": "MCP",

@@ -9,12 +9,14 @@ import {
   SplitView,
   Pane,
   Button,
-  InputBox,
-  Toggle,
+  KeyValueTable,
+  type KeyValueTableHandle,
+  type KeyValueTableRow,
   eventBus
 } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../../shared/types/collections'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 const MIN_LEFT_WIDTH = 160
 const RIGHT_MIN_WIDTH = 240
@@ -36,9 +38,15 @@ export interface CustomValueListsPanelProps {
 /**
  * Master-details editor for an env folder's user-defined custom value
  * lists ("Variables personnalisées"). Left: the list of named lists
- * (add / rename / delete, new list starts in edit mode). Right: a
- * label → value table for the selected list (add / edit / delete).
+ * (add / rename / delete, new list starts in edit mode). Right: the
+ * selected list's entries in the shared `KeyValueTable` primitive, which
+ * carries the enable toggle, the delete affordance and drag reordering.
  * These are 100% user-managed, never touched by spec re-import.
+ *
+ * The entries deliberately go through the plain ECUI table rather than
+ * restorm's `RestormKeyValueTable`: an entry's `value` is a literal string
+ * substituted at dispatch, so the typed-value cell would offer secrets,
+ * dates and nested lists that the stored shape cannot round-trip.
  */
 export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ folder, onFolderChange }) => {
   const { t } = useTranslation()
@@ -118,40 +126,61 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
   }, [persist, selectedId])
 
   const setEntries = useCallback((listId: string, entries: CustomValueEntry[]) => {
+    const current = listsRef.current.find((l) => l.id === listId)
+    // Ignore a write that changes nothing. Handed an empty list, the table
+    // seeds a fresh blank row with a NEW id and reports it; that report
+    // resolves back to "still empty", which would write again, which would
+    // hand the table another empty list, which would mint another id — a
+    // loop with no fixed point. Comparing what would be stored against what
+    // IS stored gives it one.
+    if (current && JSON.stringify(current.entries) === JSON.stringify(entries)) return
     const next = listsRef.current.map((l) => (l.id === listId ? { ...l, entries } : l))
     persist(next)
   }, [persist])
 
-  // Apply a per-entry change against the LATEST entries of the selected list
-  // (read from `listsRef`, not a closure snapshot) so a late debounced text
-  // commit merges its patch instead of clobbering an intervening edit.
-  const mutateSelectedEntries = useCallback(
-    (mutate: (entries: CustomValueEntry[]) => CustomValueEntry[]) => {
-      if (!selectedId) return
-      const list = listsRef.current.find((l) => l.id === selectedId)
-      if (!list) return
-      setEntries(selectedId, mutate(list.entries))
-    },
-    [selectedId, setEntries]
+  // The pane's "+" lives in the header, above the table, so it adds a row
+  // through the table's imperative handle rather than by writing an entry the
+  // table would then have to adopt.
+  const entriesTableRef = useRef<KeyValueTableHandle>(null)
+
+  const entryRows = useMemo<KeyValueTableRow[]>(
+    () => (selected?.entries ?? []).map((e) => ({
+      id: e.id,
+      key: e.label,
+      value: e.value,
+      enabled: e.enabled !== false
+    })),
+    [selected]
   )
 
+  // The table owns the entry rows: adding, editing, toggling, deleting AND
+  // reordering all come back through this one callback, already in the order
+  // the user sees. The row ARRAY ORDER is the entry order — persisting it
+  // verbatim is what makes a drag survive a save/reload round-trip, and what
+  // the value pickers of already-open requests read back.
+  const handleEntryRowsChange = useCallback((rows: KeyValueTableRow[]) => {
+    if (!selectedId) return
+    // A table with nothing in it always shows one empty row to type into.
+    // That row is an affordance, not a value: storing it would leave a
+    // label-less entry in the project file after the user deleted the last
+    // one, and an unpickable blank line in every menu bound to the list. So
+    // a table where NO row carries anything means the list is empty. A blank
+    // row sitting among filled ones is left alone — the user is mid-edit and
+    // dropping it would pull the row out from under them.
+    const hasContent = rows.some((r) => r.key.trim() !== '' || r.value.trim() !== '')
+    setEntries(selectedId, hasContent
+      ? rows.map((r) => ({
+        id: r.id ?? genId('cve'),
+        label: r.key,
+        value: r.value,
+        enabled: r.enabled !== false
+      }))
+      : [])
+  }, [selectedId, setEntries])
+
   const handleAddEntry = useCallback(() => {
-    mutateSelectedEntries((entries) => [...entries, { id: genId('cve'), label: '', value: '' }])
-  }, [mutateSelectedEntries])
-
-  // Text edits (label / value) arrive debounced from InputBox; the checkbox
-  // (enabled) fires immediately. Both merge into the current entries.
-  const handleEntryText = useCallback((entryId: string, patch: Partial<CustomValueEntry>) => {
-    mutateSelectedEntries((entries) => entries.map((e) => (e.id === entryId ? { ...e, ...patch } : e)))
-  }, [mutateSelectedEntries])
-
-  const handleEntryEnabled = useCallback((entryId: string, enabled: boolean) => {
-    mutateSelectedEntries((entries) => entries.map((e) => (e.id === entryId ? { ...e, enabled } : e)))
-  }, [mutateSelectedEntries])
-
-  const handleEntryDelete = useCallback((entryId: string) => {
-    mutateSelectedEntries((entries) => entries.filter((e) => e.id !== entryId))
-  }, [mutateSelectedEntries])
+    entriesTableRef.current?.addRow()
+  }, [])
 
   // `ContextMenuItem.onClick` receives no payload — it acts on the
   // row the user right-clicked, which `onItemContextMenu` has already
@@ -183,14 +212,16 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
               minSize={MIN_LEFT_WIDTH}
               data-testid="custom-values-lists-pane"
               headerActions={
-                <Button
-                  secondary
-                  small
-                  icon="add"
-                  options={{ ariaLabel: t('folderView.customValues.addList'), title: t('folderView.customValues.addList') }}
-                  onClick={handleAdd}
-                  data-testid="custom-values-add-list-button"
-                />
+                <HeaderHoverTooltip label={t('folderView.customValues.addList')}>
+                  <Button
+                    secondary
+                    small
+                    icon="add"
+                    options={{ ariaLabel: t('folderView.customValues.addList') }}
+                    onClick={handleAdd}
+                    data-testid="custom-values-add-list-button"
+                  />
+                </HeaderHoverTooltip>
               }
             >
               <ListView
@@ -202,6 +233,14 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
                 onEditingStart={(id) => { setEditingId(id) }}
                 onEditingEnd={() => { setEditingId(null) }}
                 isRenameable
+                // A closed door, not a deferred feature: the lists are picked,
+                // not arranged, and there is no order here worth dragging. Not
+                // wiring `onItemDrop` would NOT have been enough — a draggable
+                // row starts a real HTML5 drag stamped with the ListView marker
+                // MIME, and the workbench's drop zone claims any gesture
+                // carrying it, darkening the whole editor and swallowing the
+                // release. The drag has to be refused at its source.
+                disableDrag
                 data-testid="custom-values-list"
                 onItemClick={(payload) => { if (payload.item.id) setSelectedId(payload.item.id) }}
                 onItemRename={(payload: ListViewItemEventPayload, newValue: string) => { handleRename(payload.item.id, newValue) }}
@@ -221,62 +260,41 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
                 minSize={80}
                 data-testid="custom-values-entries-pane"
                 headerActions={
-                  <Button
-                    secondary
-                    small
-                    icon="add"
-                    options={{ ariaLabel: t('folderView.customValues.addEntry'), title: t('folderView.customValues.addEntry') }}
-                    onClick={handleAddEntry}
-                    data-testid="custom-values-add-entry-button"
-                  />
+                  <HeaderHoverTooltip label={t('folderView.customValues.addEntry')}>
+                    <Button
+                      secondary
+                      small
+                      icon="add"
+                      options={{ ariaLabel: t('folderView.customValues.addEntry') }}
+                      onClick={handleAddEntry}
+                      data-testid="custom-values-add-entry-button"
+                    />
+                  </HeaderHoverTooltip>
                 }
               >
-                <div style={{ padding: 8, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--descriptionForeground)', padding: '0 2px', alignItems: 'center' }}>
-                    <span style={{ width: 13, flexShrink: 0 }} />
-                    <span style={{ flex: 1 }}>{t('folderView.customValues.label')}</span>
-                    <span style={{ flex: 1 }}>{t('folderView.customValues.value')}</span>
-                    <span style={{ width: 28 }} />
-                  </div>
-                  {selected.entries.map((entry) => (
-                    <div key={entry.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }} data-testid={`custom-values-entry-${entry.id}`}>
-                      <Toggle
-                        checked={entry.enabled !== false}
-                        onChange={(checked) => { handleEntryEnabled(entry.id, checked) }}
-                        aria-label={t('folderView.customValues.enabled')}
-                        data-testid={`custom-values-entry-enabled-${entry.id}`}
-                      />
-                      <div style={{ flex: 1, minWidth: 0, opacity: entry.enabled === false ? 0.5 : 1 }}>
-                        <InputBox
-                          value={entry.label}
-                          onChange={(next) => { handleEntryText(entry.id, { label: next }) }}
-                          options={{ type: 'text', placeholder: t('folderView.customValues.label') }}
-                          data-testid={`custom-values-entry-label-${entry.id}`}
-                        />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0, opacity: entry.enabled === false ? 0.5 : 1 }}>
-                        <InputBox
-                          value={entry.value}
-                          onChange={(next) => { handleEntryText(entry.id, { value: next }) }}
-                          options={{ type: 'text', placeholder: t('folderView.customValues.value') }}
-                          data-testid={`custom-values-entry-value-${entry.id}`}
-                        />
-                      </div>
-                      <Button
-                        secondary
-                        small
-                        icon="trash"
-                        options={{ ariaLabel: t('sidebar.contextMenu.delete'), title: t('sidebar.contextMenu.delete') }}
-                        onClick={() => { handleEntryDelete(entry.id) }}
-                        data-testid={`custom-values-entry-delete-${entry.id}`}
-                      />
-                    </div>
-                  ))}
-                  {selected.entries.length === 0 && (
-                    <div style={{ color: 'var(--descriptionForeground)', fontStyle: 'italic', padding: 8 }}>
-                      {t('folderView.customValues.noEntries')}
-                    </div>
-                  )}
+                <div style={{ padding: 8, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                  {/* A list with no values shows the table's own empty row rather
+                      than an italic "no values yet" line: the row is where the
+                      user types the first value, and a placeholder next to it
+                      would label a field that is ready for input as absent.
+                      Bringing the line back means rendering it above this table
+                      when `selected.entries.length === 0` — the table stays as
+                      it is either way. */}
+                  <KeyValueTable
+                    // Remount on list switch: the table seeds its rows once and
+                    // then only adopts props that differ from what it emitted,
+                    // so sharing one instance across lists would have it argue
+                    // with itself about whose rows are authoritative.
+                    key={selected.id}
+                    ref={entriesTableRef}
+                    initialRows={entryRows}
+                    onRowsChange={handleEntryRowsChange}
+                    keyHeader={t('folderView.customValues.label')}
+                    valueHeader={t('folderView.customValues.value')}
+                    showDescription={false}
+                    persistenceId={`custom-value-list:${folder.id}`}
+                    data-testid="custom-values-entries-table"
+                  />
                 </div>
               </Pane>
             ) : (

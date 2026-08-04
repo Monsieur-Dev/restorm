@@ -7,7 +7,8 @@ import {
   ensureFolderUuid,
   ensureFileUuid,
   serialize as coreSerialize,
-  deserialize as coreDeserialize
+  deserialize as coreDeserialize,
+  codeOf
 } from 'electron-core-ui'
 import { stampFolderFormatVersion } from './utils/folderFormatVersion'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
@@ -312,7 +313,7 @@ export async function saveFolderStructure(
   folderPath: string,
   data: Record<string, unknown>,
   format: PersistenceFormat
-): Promise<{ success: boolean; path?: string; error?: string }> {
+): Promise<{ success: boolean; path?: string; error?: string; code?: string }> {
   const ext = format === 'json5' ? 'json5' : format
 
   try {
@@ -454,7 +455,9 @@ export async function saveFolderStructure(
 
     return { success: true, path: folderPath }
   } catch (error) {
-    return { success: false, error: String(error) }
+    // Keep the errno alongside the stringified message: it is what lets
+    // the caller tell "the folder is read-only" from "the disk is full".
+    return { success: false, error: String(error), ...codeOf(error) }
   }
 }
 

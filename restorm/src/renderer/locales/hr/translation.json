@@ -402,9 +402,7 @@
       "addEntry": "Dodaj vrijednost",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Još nema vrijednosti",
-      "selectList": "Odaberite popis",
-      "enabled": "Omogućeno"
+      "selectList": "Odaberite popis"
     }
   },
   "requestTab": {
@@ -440,6 +438,11 @@
         "infos": "Informacije",
         "requestBody": "Tijelo zahtjeva",
         "graph": "Graf"
+      },
+      "infos": {
+        "sentAt": "Poslano",
+        "requestBody": "Tijelo zahtjeva",
+        "requestBodyFile": "Datoteka"
       },
       "loading": "Slanje zahtjeva...",
       "noResponseBody": "Nema tijela odgovora — pojedinosti pogledajte u Infos",
@@ -1533,7 +1536,9 @@
       "showLevelLogs": "Prikaži {{level}} zapise",
       "showLevelOnly": "Desni klik: samo ova razina",
       "noUserLogs": "Nema korisničkih zapisa (unosa iz radnje Log) u ovom izvođenju.",
-      "helpTitle": "Što ova radnja čini"
+      "helpTitle": "Što ova radnja čini",
+      "collapsePanel": "Sažmi inspektor",
+      "expandPanel": "Proširi inspektor"
     },
     "now": {
       "timezone": "Vremenska zona",
@@ -2143,6 +2148,11 @@
     "closePreview": "Zatvori",
     "captureImageTitle": "MCP snimka zaslona",
     "captureVideoTitle": "MCP snimka zaslona (video)"
+  },
+  "history": {
+    "title": "Povijest",
+    "maxEntriesTitle": "Zadržani unosi po povijesti",
+    "maxEntriesDescription": "Koliko unosa zadržavaju povijest poziva zahtjeva i povijest izvođenja scenarija. Prikvačeni unosi uvijek se zadržavaju, bez obzira na ovu vrijednost. Popisi nedavne aktivnosti na početnom zaslonu nisu obuhvaćeni."
   },
   "mcp": {
     "title": "MCP",

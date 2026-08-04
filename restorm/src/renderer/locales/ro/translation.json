@@ -402,9 +402,7 @@
       "addEntry": "Adăugați o valoare",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Încă nicio valoare",
-      "selectList": "Selectați o listă",
-      "enabled": "Activat"
+      "selectList": "Selectați o listă"
     }
   },
   "requestTab": {
@@ -440,6 +438,11 @@
         "infos": "Informații",
         "requestBody": "Corpul cererii",
         "graph": "Grafic"
+      },
+      "infos": {
+        "sentAt": "Trimis la",
+        "requestBody": "Corpul cererii",
+        "requestBodyFile": "Fișier"
       },
       "loading": "Se trimite cererea...",
       "noResponseBody": "Fără corp de răspuns — vezi Infos pentru detalii",
@@ -1533,7 +1536,9 @@
       "showLevelLogs": "Afișează jurnalele {{level}}",
       "showLevelOnly": "Clic dreapta: doar acest nivel",
       "noUserLogs": "Niciun jurnal de utilizator (intrări din acțiunea Log) în această rulare.",
-      "helpTitle": "Ce face această acțiune"
+      "helpTitle": "Ce face această acțiune",
+      "collapsePanel": "Restrânge inspectorul",
+      "expandPanel": "Extinde inspectorul"
     },
     "now": {
       "timezone": "Fus orar",
@@ -2143,6 +2148,11 @@
     "closePreview": "Închide",
     "captureImageTitle": "Captură de ecran MCP",
     "captureVideoTitle": "Înregistrare ecran MCP"
+  },
+  "history": {
+    "title": "Istoric",
+    "maxEntriesTitle": "Intrări păstrate per istoric",
+    "maxEntriesDescription": "Câte intrări păstrează istoricul apelurilor unei cereri și istoricul rulărilor unui scenariu. Intrările fixate sunt păstrate întotdeauna, indiferent de această valoare. Listele de activitate recentă de pe ecranul principal nu sunt afectate."
   },
   "mcp": {
     "title": "MCP",

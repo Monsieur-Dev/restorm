@@ -26,6 +26,19 @@
       "detail": "Reîncărcați pentru a folosi versiunea de pe disc sau păstrați-vă versiunea și suprascrieți-o.",
       "reload": "Reîncarcă",
       "keepMine": "Păstrează versiunea mea"
+    },
+    "saveFailed": {
+      "title": "Salvarea a eșuat",
+      "reason": {
+        "readOnlyFile": "Fișierul este doar pentru citire. Modificați-i permisiunile sau salvați-l în altă locație.",
+        "readOnlyLocation": "Această locație este montată doar pentru citire. Salvați în altă locație.",
+        "permissionDenied": "Nu aveți permisiunea de a scrie aici. Verificați permisiunile folderului sau salvați în altă locație.",
+        "diskFull": "Discul este plin. Eliberați spațiu, apoi salvați din nou.",
+        "quotaExceeded": "Cota dvs. de disc este epuizată. Eliberați spațiu, apoi salvați din nou.",
+        "pathMissing": "Această locație nu mai există. Este posibil ca folderul să fi fost șters sau unitatea deconectată.",
+        "fileBusy": "Fișierul este folosit de alt program. Închideți-l, apoi salvați din nou.",
+        "unknown": "Fișierul nu a putut fi scris: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "File editor"
   },
   "keyValueTable": {
-    "description": "Descriere"
+    "description": "Descriere",
+    "deleteRow": "Ștergeți rândul"
   },
   "gatedControl": {
     "proLabel": "Versiunea Pro",

@@ -26,6 +26,19 @@
       "detail": "Rechargez pour utiliser la version du disque, ou conservez votre version et écrasez-la.",
       "reload": "Recharger",
       "keepMine": "Conserver ma version"
+    },
+    "saveFailed": {
+      "title": "Échec de l'enregistrement",
+      "reason": {
+        "readOnlyFile": "Le fichier est en lecture seule. Modifiez ses permissions ou enregistrez-le à un autre emplacement.",
+        "readOnlyLocation": "Cet emplacement est monté en lecture seule. Enregistrez à un autre emplacement.",
+        "permissionDenied": "Vous n'avez pas les droits d'écriture ici. Vérifiez les permissions du dossier ou enregistrez à un autre emplacement.",
+        "diskFull": "Le disque est plein. Libérez de l'espace, puis enregistrez à nouveau.",
+        "quotaExceeded": "Votre quota de disque est épuisé. Libérez de l'espace, puis enregistrez à nouveau.",
+        "pathMissing": "Cet emplacement n'existe plus. Le dossier a peut-être été supprimé, ou le support déconnecté.",
+        "fileBusy": "Le fichier est utilisé par un autre programme. Fermez-le, puis enregistrez à nouveau.",
+        "unknown": "Le fichier n'a pas pu être écrit : {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Onglets de l'éditeur"
   },
   "keyValueTable": {
-    "description": "Description"
+    "description": "Description",
+    "deleteRow": "Supprimer la ligne"
   },
   "gatedControl": {
     "proLabel": "Version Pro",

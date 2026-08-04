@@ -12,6 +12,7 @@ import { Toggle } from '../Toggle'
 import { InputBox } from '../InputBox'
 import { ScrollableElement } from '../ScrollableElement'
 import { Button } from '../Button'
+import { Tooltip } from '../Tooltip'
 import { Table, type TableColumn } from '../Table/Table'
 import './keyValueTable.css'
 
@@ -52,6 +53,42 @@ export interface CellRendererProps {
   /** When true, the cell must render its editor read-only/inert. Forwarded
    * from the table's own `disabled` prop. */
   disabled?: boolean | undefined
+}
+
+/**
+ * The per-row delete affordance. The hover label is the styled `Tooltip`, not
+ * the browser's native `title` — a `title` renders the OS bubble, unstyled and
+ * out of step with the rest of the chrome. The `ariaLabel` stays: it is the
+ * button's accessible name and is invisible to sighted users, so it is not the
+ * thing a tooltip replaces.
+ */
+const DeleteRowButton: React.FC<{
+  label: string
+  disabled: boolean
+  onClick: () => void
+  'data-testid'?: string | undefined
+}> = ({ label, disabled, onClick, 'data-testid': dataTestId }) => {
+  const anchorRef = useRef<HTMLSpanElement>(null)
+  const [hover, setHover] = useState(false)
+  return (
+    <span
+      ref={anchorRef}
+      className="params-table-delete-anchor"
+      onMouseEnter={() => { setHover(true) }}
+      onMouseLeave={() => { setHover(false) }}
+    >
+      <Button
+        line
+        secondary
+        disabled={disabled}
+        {...(dataTestId && { 'data-testid': dataTestId })}
+        options={{ ariaLabel: label }}
+        onClick={onClick}
+        icon="trash"
+      />
+      <Tooltip targetRef={anchorRef} show={hover && !disabled} placement="below" content={label} />
+    </span>
+  )
 }
 
 /**
@@ -102,6 +139,15 @@ export interface KeyValueTableProps {
    * Custom renderer for description cells. Defaults to InputBox.
    */
   renderDescriptionCell?: React.ComponentType<CellRendererProps> | undefined
+  /**
+   * Header of the KEY column. Defaults to `'Key'`. Consumers whose rows are
+   * not key/value pairs in the HTTP sense — a label → value list, a
+   * name → default map — pass their own (already translated) wording so the
+   * column reads as what it actually holds.
+   */
+  keyHeader?: string | undefined
+  /** Header of the VALUE column. Defaults to `'Value'`. See {@link keyHeader}. */
+  valueHeader?: string | undefined
   /**
    * Whether the Description column is rendered. Defaults to `true`.
    * Set to `false` in use-cases where descriptions aren't meaningful
@@ -166,6 +212,8 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     renderKeyCell: KeyCellRenderer = DefaultCellRenderer,
     renderValueCell: ValueCellRenderer = DefaultCellRenderer,
     renderDescriptionCell: DescriptionCellRenderer = DefaultCellRenderer,
+    keyHeader = 'Key',
+    valueHeader = 'Value',
     showDescription = true,
     showEnabledToggle = true,
     showResolvedValue = false,
@@ -363,7 +411,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     cols.push(
       {
         id: 'key',
-        header: 'Key',
+        header: keyHeader,
         resizable: true,
         minWidth: 80,
         renderCell: (row) => {
@@ -381,7 +429,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
       },
       {
         id: 'value',
-        header: 'Value',
+        header: valueHeader,
         resizable: true,
         // Room for an input + a trailing value-type indicator (~34px)
         // + some slack. A value column squeezed below this width makes
@@ -444,14 +492,11 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
                   disabled={disabled}
                 />
               </div>
-              <Button
-                line
-                secondary
+              <DeleteRowButton
+                label={t('keyValueTable.deleteRow')}
                 disabled={disabled}
                 {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
-                options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
                 onClick={() => { handleRemoveRow(row.id) }}
-                icon="trash"
               />
             </div>
           )
@@ -466,21 +511,18 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
         header: '',
         autoWidth: true,
         renderCell: (row) => (
-          <Button
-            line
-            secondary
+          <DeleteRowButton
+            label={t('keyValueTable.deleteRow')}
             disabled={disabled}
             {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-delete` })}
-            options={{ ariaLabel: 'Delete row', title: 'Delete row' }}
             onClick={() => { handleRemoveRow(row.id) }}
-            icon="trash"
           />
         )
       })
     }
 
     return cols
-  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow, t, disabled])
+  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, keyHeader, valueHeader, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow, t, disabled])
 
   return (
     <div

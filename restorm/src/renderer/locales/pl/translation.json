@@ -403,9 +403,7 @@
       "addEntry": "Dodaj wartość",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Jeszcze brak wartości",
-      "selectList": "Wybierz listę",
-      "enabled": "Włączone"
+      "selectList": "Wybierz listę"
     }
   },
   "requestTab": {
@@ -441,6 +439,11 @@
         "infos": "Informacje",
         "requestBody": "Treść żądania",
         "graph": "Wykres"
+      },
+      "infos": {
+        "sentAt": "Wysłano",
+        "requestBody": "Treść żądania",
+        "requestBodyFile": "Plik"
       },
       "loading": "Wysyłanie żądania...",
       "noResponseBody": "Brak treści odpowiedzi — szczegóły w zakładce Infos",
@@ -1534,7 +1537,9 @@
       "showLevelLogs": "Pokaż logi {{level}}",
       "showLevelOnly": "Kliknij prawym przyciskiem: tylko ten poziom",
       "noUserLogs": "Brak logów użytkownika (wpisów z akcji Log) w tym przebiegu.",
-      "helpTitle": "Co robi ta akcja"
+      "helpTitle": "Co robi ta akcja",
+      "collapsePanel": "Zwiń inspektora",
+      "expandPanel": "Rozwiń inspektora"
     },
     "now": {
       "timezone": "Strefa czasowa",
@@ -2144,6 +2149,11 @@
     "closePreview": "Zamknij",
     "captureImageTitle": "Zrzut ekranu MCP",
     "captureVideoTitle": "Nagranie ekranu MCP"
+  },
+  "history": {
+    "title": "Historia",
+    "maxEntriesTitle": "Wpisy przechowywane w każdej historii",
+    "maxEntriesDescription": "Ile wpisów przechowują historia wywołań żądania oraz historia uruchomień scenariusza. Przypięte wpisy są zawsze zachowywane, niezależnie od tej wartości. Nie dotyczy to list ostatniej aktywności na ekranie startowym."
   },
   "mcp": {
     "title": "MCP",

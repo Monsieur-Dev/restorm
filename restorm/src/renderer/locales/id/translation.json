@@ -400,9 +400,7 @@
       "addEntry": "Tambah nilai",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Belum ada nilai",
-      "selectList": "Pilih sebuah daftar",
-      "enabled": "Aktif"
+      "selectList": "Pilih sebuah daftar"
     }
   },
   "requestTab": {
@@ -438,6 +436,11 @@
         "infos": "Info",
         "requestBody": "Body permintaan",
         "graph": "Grafik"
+      },
+      "infos": {
+        "sentAt": "Dikirim pada",
+        "requestBody": "Body permintaan",
+        "requestBodyFile": "Berkas"
       },
       "loading": "Mengirim permintaan...",
       "noResponseBody": "Tidak ada isi respons — lihat Infos untuk detail",
@@ -1531,7 +1534,9 @@
       "showLevelLogs": "Tampilkan log {{level}}",
       "showLevelOnly": "Klik kanan: hanya level ini",
       "noUserLogs": "Tidak ada log pengguna (entri dari aksi Log) dalam run ini.",
-      "helpTitle": "Apa yang dilakukan aksi ini"
+      "helpTitle": "Apa yang dilakukan aksi ini",
+      "collapsePanel": "Ciutkan inspektur",
+      "expandPanel": "Bentangkan inspektur"
     },
     "now": {
       "timezone": "Zona waktu",
@@ -2141,6 +2146,11 @@
     "closePreview": "Tutup",
     "captureImageTitle": "Tangkapan layar MCP",
     "captureVideoTitle": "Rekaman layar MCP"
+  },
+  "history": {
+    "title": "Riwayat",
+    "maxEntriesTitle": "Entri yang disimpan per riwayat",
+    "maxEntriesDescription": "Berapa banyak entri yang disimpan oleh riwayat panggilan sebuah permintaan dan riwayat eksekusi sebuah skenario. Entri yang disematkan selalu disimpan, berapa pun nilai ini. Daftar aktivitas terbaru di layar beranda tidak terpengaruh."
   },
   "mcp": {
     "title": "MCP",

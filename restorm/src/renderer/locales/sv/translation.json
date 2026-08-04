@@ -401,9 +401,7 @@
       "addEntry": "Lägg till ett värde",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Inga värden ännu",
-      "selectList": "Välj en lista",
-      "enabled": "Aktiverad"
+      "selectList": "Välj en lista"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Info",
         "requestBody": "Förfrågans kropp",
         "graph": "Graf"
+      },
+      "infos": {
+        "sentAt": "Skickat",
+        "requestBody": "Förfrågans kropp",
+        "requestBodyFile": "Fil"
       },
       "loading": "Skickar förfrågan...",
       "noResponseBody": "Ingen svarstext — se Infos för detaljer",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Visa {{level}}-loggar",
       "showLevelOnly": "Högerklick: endast denna nivå",
       "noUserLogs": "Inga användarloggar (poster från Log-åtgärden) i denna körning.",
-      "helpTitle": "Vad den här åtgärden gör"
+      "helpTitle": "Vad den här åtgärden gör",
+      "collapsePanel": "Fäll ihop inspektören",
+      "expandPanel": "Fäll ut inspektören"
     },
     "now": {
       "timezone": "Tidszon",
@@ -2142,6 +2147,11 @@
     "closePreview": "Stäng",
     "captureImageTitle": "MCP-skärmbild",
     "captureVideoTitle": "MCP-skärminspelning"
+  },
+  "history": {
+    "title": "Historik",
+    "maxEntriesTitle": "Poster som sparas per historik",
+    "maxEntriesDescription": "Hur många poster anropshistoriken för en begäran och körhistoriken för ett scenario var för sig sparar. Fästa poster sparas alltid, oavsett detta värde. Listorna över senaste aktivitet på startskärmen påverkas inte."
   },
   "mcp": {
     "title": "MCP",

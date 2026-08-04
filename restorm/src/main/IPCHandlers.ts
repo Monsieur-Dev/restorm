@@ -294,6 +294,35 @@ export function registerRestormIPC(deps: {
   // File Save Mode IPC Handlers
   // ==========================================================================
 
+  /**
+   * Hand a save this process performed itself to the library's
+   * save-outcome broadcast, so the renderer's "the last save failed"
+   * notice covers the app's OWN persistence paths (single-file save-as,
+   * folder mode) and not just the ones `FileService` runs. The failure's
+   * `code` is re-attached to a real `Error` because the classification
+   * that turns it into a cause the user can act on reads it off the
+   * error, and crossing this boundary as a plain result object dropped it.
+   */
+  function reportSaveOutcome(
+    path: string | null,
+    result: { success: boolean; error?: string; code?: string }
+  ): void {
+    if (!isFileServiceInitialized()) return
+    if (result.success) {
+      getFileService().notifySaveSucceeded(path)
+      return
+    }
+    const error = new Error(result.error ?? 'Save failed')
+    if (result.code !== undefined) Object.assign(error, { code: result.code })
+    getFileService().notifySaveFailed(path, error)
+  }
+
+  /** {@link reportSaveOutcome} for a write that threw rather than returned. */
+  function reportSaveThrow(path: string | null, error: unknown): void {
+    if (!isFileServiceInitialized()) return
+    getFileService().notifySaveFailed(path, error)
+  }
+
   // IPC handler to save as single file with format choice
   validatedHandle('restorm:save-as-file', saveAsFileArgs, async (_event, [data, format]) => {
     logger.info('Save as single file requested', { format })
@@ -345,10 +374,15 @@ export function registerRestormIPC(deps: {
         }
       }
 
+      // Past the dialog, this IS a write — report it either way so a
+      // failure reaches the user instead of only the log. A cancelled
+      // dialog returned above and never gets here.
+      reportSaveOutcome(result.filePath, saveResult)
       return saveResult
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error('Failed to save file', { error: errorMsg })
+      reportSaveThrow(null, error)
       return { success: false, error: errorMsg }
     }
   })
@@ -427,10 +461,12 @@ export function registerRestormIPC(deps: {
         }
       }
 
+      reportSaveOutcome(folderPath, saveResult)
       return saveResult
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error('Failed to save folder', { error: errorMsg })
+      reportSaveThrow(null, error)
       return { success: false, error: errorMsg }
     }
   })

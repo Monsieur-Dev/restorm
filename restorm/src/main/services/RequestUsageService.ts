@@ -26,6 +26,11 @@ import {
 import { DocumentEvents, type DocumentDeletedPayload } from './DocumentEvents'
 
 const STORAGE_KEY = 'request_usage'
+/** The EmptyBench's "recently played" depth is deliberately FIXED, not tied to
+ *  the `history:maxEntries` setting: that setting governs the histories a user
+ *  reads and prunes (a request's recorded calls, a scenario's runs), whereas
+ *  this list only feeds the home screen's recent-activity cards, where a
+ *  longer tail would not change what the cards show. */
 const HISTORY_LIMIT = 10
 const SAVE_DEBOUNCE_MS = 500
 const CHANGE_EVENT = 'request-usage:changed'

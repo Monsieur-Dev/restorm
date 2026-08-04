@@ -26,6 +26,19 @@
       "detail": "Muat ulang untuk menggunakan versi di disk, atau pertahankan versi Anda dan timpa versi tersebut.",
       "reload": "Muat ulang",
       "keepMine": "Pertahankan versi saya"
+    },
+    "saveFailed": {
+      "title": "Gagal menyimpan",
+      "reason": {
+        "readOnlyFile": "Berkas ini hanya-baca. Ubah izinnya, atau simpan ke lokasi lain.",
+        "readOnlyLocation": "Lokasi ini dikaitkan sebagai hanya-baca. Simpan ke lokasi lain.",
+        "permissionDenied": "Anda tidak memiliki izin menulis di sini. Periksa izin folder, atau simpan ke lokasi lain.",
+        "diskFull": "Disk penuh. Kosongkan ruang, lalu simpan lagi.",
+        "quotaExceeded": "Kuota disk Anda habis. Kosongkan ruang, lalu simpan lagi.",
+        "pathMissing": "Lokasi ini sudah tidak ada. Folder mungkin telah dihapus, atau drive dilepas.",
+        "fileBusy": "Berkas sedang dipakai program lain. Tutup program itu, lalu simpan lagi.",
+        "unknown": "Berkas tidak dapat ditulis: {{error}}"
+      }
     }
   },
   "recentFilesVignette": {
@@ -443,7 +456,8 @@
     "editorTabs": "Tab editor"
   },
   "keyValueTable": {
-    "description": "Deskripsi"
+    "description": "Deskripsi",
+    "deleteRow": "Hapus baris"
   },
   "gatedControl": {
     "proLabel": "Versi Pro",

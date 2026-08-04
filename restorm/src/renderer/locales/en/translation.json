@@ -401,9 +401,7 @@
       "addEntry": "Add a value",
       "label": "Label",
       "value": "Value",
-      "noEntries": "No values yet",
-      "selectList": "Select a list",
-      "enabled": "Enabled"
+      "selectList": "Select a list"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Infos",
         "requestBody": "Request body",
         "graph": "Graph"
+      },
+      "infos": {
+        "sentAt": "Sent At",
+        "requestBody": "Request body",
+        "requestBodyFile": "File"
       },
       "loading": "Sending request...",
       "noResponseBody": "No response body — see Infos for details",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Show {{level}} logs",
       "showLevelOnly": "Right-click: this level only",
       "noUserLogs": "No user logs (entries from the Log action) in this run.",
-      "helpTitle": "What this action does"
+      "helpTitle": "What this action does",
+      "collapsePanel": "Collapse the inspector",
+      "expandPanel": "Expand the inspector"
     },
     "now": {
       "timezone": "Timezone",
@@ -2142,6 +2147,11 @@
     "closePreview": "Close",
     "captureImageTitle": "MCP screenshot",
     "captureVideoTitle": "MCP screen recording"
+  },
+  "history": {
+    "title": "History",
+    "maxEntriesTitle": "Entries kept per history",
+    "maxEntriesDescription": "How many entries the request call history and the scenario run history each keep. Pinned entries are always kept, whatever this is set to. The home screen's recent-activity lists are not affected."
   },
   "mcp": {
     "title": "MCP",

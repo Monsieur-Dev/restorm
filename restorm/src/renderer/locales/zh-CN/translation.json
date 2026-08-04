@@ -400,9 +400,7 @@
       "addEntry": "添加值",
       "label": "Label",
       "value": "Value",
-      "noEntries": "暂无值",
-      "selectList": "选择列表",
-      "enabled": "已启用"
+      "selectList": "选择列表"
     }
   },
   "requestTab": {
@@ -438,6 +436,11 @@
         "infos": "信息",
         "requestBody": "请求正文",
         "graph": "图表"
+      },
+      "infos": {
+        "sentAt": "发送时间",
+        "requestBody": "请求正文",
+        "requestBodyFile": "文件"
       },
       "loading": "正在发送请求...",
       "noResponseBody": "无响应正文 — 详情请见 Infos",
@@ -1531,7 +1534,9 @@
       "showLevelLogs": "显示 {{level}} 日志",
       "showLevelOnly": "右键单击：仅此级别",
       "noUserLogs": "此 run 中没有用户日志 (来自 Log 操作的条目)。",
-      "helpTitle": "此操作的作用"
+      "helpTitle": "此操作的作用",
+      "collapsePanel": "折叠检查器",
+      "expandPanel": "展开检查器"
     },
     "now": {
       "timezone": "时区",
@@ -2141,6 +2146,11 @@
     "closePreview": "关闭",
     "captureImageTitle": "MCP 截图",
     "captureVideoTitle": "MCP 屏幕录制"
+  },
+  "history": {
+    "title": "历史记录",
+    "maxEntriesTitle": "每个历史记录保留的条目数",
+    "maxEntriesDescription": "请求的调用历史记录和场景的运行历史记录各自保留的条目数。已固定的条目始终保留，与此值无关。主屏幕的近期活动列表不受影响。"
   },
   "mcp": {
     "title": "MCP",

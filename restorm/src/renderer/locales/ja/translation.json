@@ -400,9 +400,7 @@
       "addEntry": "値を追加",
       "label": "Label",
       "value": "Value",
-      "noEntries": "まだ値がありません",
-      "selectList": "リストを選択",
-      "enabled": "有効"
+      "selectList": "リストを選択"
     }
   },
   "requestTab": {
@@ -438,6 +436,11 @@
         "infos": "情報",
         "requestBody": "リクエストボディ",
         "graph": "グラフ"
+      },
+      "infos": {
+        "sentAt": "送信日時",
+        "requestBody": "リクエストボディ",
+        "requestBodyFile": "ファイル"
       },
       "loading": "リクエストを送信しています...",
       "noResponseBody": "レスポンス本文がありません — 詳細は Infos を参照してください",
@@ -1531,7 +1534,9 @@
       "showLevelLogs": "{{level}} ログを表示",
       "showLevelOnly": "右クリック: このレベルのみ",
       "noUserLogs": "この run には (Log アクションからの) ユーザーログがありません。",
-      "helpTitle": "このアクションの動作"
+      "helpTitle": "このアクションの動作",
+      "collapsePanel": "インスペクターを折りたたむ",
+      "expandPanel": "インスペクターを展開する"
     },
     "now": {
       "timezone": "タイムゾーン",
@@ -2141,6 +2146,11 @@
     "closePreview": "閉じる",
     "captureImageTitle": "MCP スクリーンショット",
     "captureVideoTitle": "MCP 画面録画"
+  },
+  "history": {
+    "title": "履歴",
+    "maxEntriesTitle": "履歴ごとに保持するエントリ数",
+    "maxEntriesDescription": "リクエストの呼び出し履歴とシナリオの実行履歴がそれぞれ保持するエントリ数です。ピン留めしたエントリは、この値にかかわらず常に保持されます。ホーム画面の最近のアクティビティ一覧には影響しません。"
   },
   "mcp": {
     "title": "MCP",

@@ -401,9 +401,7 @@
       "addEntry": "Aggiungi un valore",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ancora nessun valore",
-      "selectList": "Seleziona un elenco",
-      "enabled": "Attivato"
+      "selectList": "Seleziona un elenco"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Info",
         "requestBody": "Corpo della richiesta",
         "graph": "Grafico"
+      },
+      "infos": {
+        "sentAt": "Inviato il",
+        "requestBody": "Corpo della richiesta",
+        "requestBodyFile": "File"
       },
       "loading": "Invio della richiesta in corso...",
       "noResponseBody": "Nessun corpo di risposta — vedi Infos per i dettagli",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Mostra log {{level}}",
       "showLevelOnly": "Clic destro: solo questo livello",
       "noUserLogs": "Nessun log utente (voci dall'azione Log) in questo run.",
-      "helpTitle": "Cosa fa questa azione"
+      "helpTitle": "Cosa fa questa azione",
+      "collapsePanel": "Comprimi l'ispettore",
+      "expandPanel": "Espandi l'ispettore"
     },
     "now": {
       "timezone": "Fuso orario",
@@ -2142,6 +2147,11 @@
     "closePreview": "Chiudi",
     "captureImageTitle": "Schermata MCP",
     "captureVideoTitle": "Registrazione schermo MCP"
+  },
+  "history": {
+    "title": "Cronologia",
+    "maxEntriesTitle": "Voci conservate per cronologia",
+    "maxEntriesDescription": "Quante voci conservano la cronologia delle chiamate di una richiesta e la cronologia delle esecuzioni di uno scenario. Le voci fissate vengono sempre conservate, indipendentemente da questo valore. Gli elenchi delle attività recenti nella schermata iniziale non sono interessati."
   },
   "mcp": {
     "title": "MCP",

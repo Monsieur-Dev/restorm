@@ -3,6 +3,7 @@ import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, 
 import { SecretValue } from '../../../../shared/types/valueTypes/SecretValue'
 import { isSecretValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue, isVariableValue, isEnvironmentValue, isNullValue, isListValue } from '../../../../shared/utils/valueHelpers'
 import { isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
+import { isPickableEntry } from '../../utils/customValueEntries'
 
 export type ValueTypeKind =
   | 'string'
@@ -62,18 +63,20 @@ export function castValueToKind(
     case 'customList': {
       const listId = defId ?? ''
       const list = customValueLists?.find((l) => l.id === listId)
-      const enabledEntries = (list?.entries ?? []).filter((e) => e.enabled !== false)
-      const label = enabledEntries.some((e) => e.label === raw)
+      // Seeding a recast picks a choice on the user's behalf, so it must pick
+      // one they could have picked themselves.
+      const pickable = (list?.entries ?? []).filter(isPickableEntry)
+      const label = pickable.some((e) => e.label === raw)
         ? raw
-        : enabledEntries[0]?.label ?? ''
+        : pickable[0]?.label ?? ''
       return new CustomListValue(listId, label)
     }
     case 'customListMulti': {
       const listId = defId ?? ''
       const list = customValueLists?.find((l) => l.id === listId)
-      const enabledLabels = (list?.entries ?? []).filter((e) => e.enabled !== false).map((e) => e.label)
+      const pickableLabels = (list?.entries ?? []).filter(isPickableEntry).map((e) => e.label)
       const currentLabels = raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : []
-      const labels = currentLabels.filter((l) => enabledLabels.includes(l))
+      const labels = currentLabels.filter((l) => pickableLabels.includes(l))
       return new CustomListMultiValue(listId, labels)
     }
     case 'null':

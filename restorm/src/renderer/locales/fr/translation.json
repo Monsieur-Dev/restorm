@@ -401,9 +401,7 @@
       "addEntry": "Ajouter une valeur",
       "label": "Libellé",
       "value": "Valeur",
-      "noEntries": "Aucune valeur pour l’instant",
-      "selectList": "Sélectionnez une liste",
-      "enabled": "Activé"
+      "selectList": "Sélectionnez une liste"
     }
   },
   "requestTab": {
@@ -439,6 +437,11 @@
         "infos": "Infos",
         "requestBody": "Corps de la requête",
         "graph": "Graphe"
+      },
+      "infos": {
+        "sentAt": "Envoyé le",
+        "requestBody": "Corps de la requête",
+        "requestBodyFile": "Fichier"
       },
       "loading": "Envoi de la requête...",
       "noResponseBody": "Pas de corps de réponse — voir Infos pour le détail",
@@ -1532,7 +1535,9 @@
       "showLevelLogs": "Afficher les logs {{level}}",
       "showLevelOnly": "Clic droit : ce niveau uniquement",
       "noUserLogs": "Aucun log utilisateur (entrées de l'action Log) dans ce run.",
-      "helpTitle": "Ce que fait cette action"
+      "helpTitle": "Ce que fait cette action",
+      "collapsePanel": "Replier l'inspecteur",
+      "expandPanel": "Déplier l'inspecteur"
     },
     "now": {
       "timezone": "Fuseau horaire",
@@ -2142,6 +2147,11 @@
     "closePreview": "Fermer",
     "captureImageTitle": "Capture d'écran MCP",
     "captureVideoTitle": "Capture vidéo MCP"
+  },
+  "history": {
+    "title": "Historique",
+    "maxEntriesTitle": "Entrées conservées par historique",
+    "maxEntriesDescription": "Nombre d'entrées conservées dans l'historique des appels d'une requête et dans l'historique des exécutions d'un scénario. Les entrées épinglées sont toujours conservées, quelle que soit cette valeur. Les listes d'activité récente de l'accueil ne sont pas concernées."
   },
   "mcp": {
     "title": "MCP",

@@ -60,15 +60,15 @@ export interface SplitViewPaneProps {
   /**
    * Optional actions area rendered on the right side of the header.
    * Either a ReactNode or a render function receiving `{ collapsed, toggle }`.
-   * Hidden by default, revealed on pane hover — see `alwaysShowHeaderActions`
-   * to opt out of that behavior.
+   * Dimmed to half opacity at rest, full opacity on pane hover or focus —
+   * see `alwaysShowHeaderActions` to opt out of the dimming.
    */
   headerActions?: React.ReactNode | ((ctx: { collapsed: boolean; toggle: () => void }) => React.ReactNode);
   /**
-   * Force the header actions to stay visible instead of the default
-   * hover-reveal. Useful when the only way to add a row to a pane is
-   * that action button and the user would never hover to discover it.
-   * Defaults to false.
+   * Render the header actions at full opacity even when the pane is not
+   * hovered, instead of the default idle dimming. Useful when the pane's
+   * action is the sole affordance for a common task and any dimming at all
+   * costs it discoverability. Defaults to false.
    */
   alwaysShowHeaderActions?: boolean;
   /**
@@ -103,7 +103,7 @@ export interface SplitViewPaneProps {
 
 > `Pane` is declarative only: it does not render DOM itself, `SplitView` inspects its children and builds the layout.
 
-**Header actions visibility** — by default, the `headerActions` area fades in only while the user hovers the pane. Set `alwaysShowHeaderActions` to `true` when the action is the sole affordance for a common task (e.g. a "+" that adds a row to the body) and hover-reveal would hide it from discovery.
+**Header actions visibility** — by default the `headerActions` area sits at **50% opacity** and fades to full opacity while the user hovers the pane (or focuses an action with the keyboard). It is never hidden: an invisible button is not discreet, it is undiscoverable, because nothing signals to the user that an action lives there. The dimming is `opacity` only — the actions stay clickable and in the tab order at rest. Set `alwaysShowHeaderActions` to `true` when the action is the sole affordance for a common task (e.g. a "+" that adds a row to the body) and even the idle dimming costs it discoverability.
 
 ## Behavior
 

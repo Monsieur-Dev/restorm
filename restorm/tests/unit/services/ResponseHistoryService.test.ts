@@ -42,13 +42,28 @@ vi.mock('electron', () => ({
   BrowserWindow: vi.fn(), ipcMain: { handle: vi.fn(), on: vi.fn() }, app: { getPath: vi.fn() }
 }))
 
+// The retention cap the service reads through `historyRetention`. Mutable so a
+// test can change it and assert the cap follows the setting.
+const settingsState = vi.hoisted(() => ({
+  historyMaxEntries: 10 as unknown,
+  listeners: new Map<string, (value: unknown) => void>()
+}))
+
 vi.mock('electron-core-ui/main', () => ({
   eventBusService: { subscribe: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }), emit: vi.fn() },
   logger: { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: vi.fn() },
   isFileServiceInitialized: vi.fn().mockReturnValue(true),
   getFileService: vi.fn().mockReturnValue({ getFilePath: vi.fn().mockReturnValue('/tmp/test.json') }),
   createPubSub: () => ({ publish: vi.fn(), subscribe: vi.fn() }),
-  serializeWithDecorators: vi.fn()
+  serializeWithDecorators: vi.fn(),
+  isSettingsServiceInitialized: vi.fn().mockReturnValue(true),
+  getSettingsService: vi.fn(() => ({
+    get: () => settingsState.historyMaxEntries,
+    onSettingChanged: (key: string, listener: (value: unknown) => void) => {
+      settingsState.listeners.set(key, listener)
+      return () => { settingsState.listeners.delete(key) }
+    }
+  }))
 }))
 
 vi.mock('../../../src/main/services/CollectionStore', () => ({
@@ -207,6 +222,8 @@ describe('ResponseHistoryService', () => {
     vi.mocked(getFileService).mockReturnValue({ getFilePath: vi.fn().mockReturnValue('/tmp/test.json') } as never)
     vi.mocked(collectionStore.getCollections).mockReturnValue([] as never)
     vi.mocked(collectionStore.findById).mockReturnValue(null as never)
+    settingsState.historyMaxEntries = 10
+    settingsState.listeners.clear()
     patch()
   })
 
@@ -373,6 +390,86 @@ describe('ResponseHistoryService', () => {
     const parsed = JSON.parse(detailText ?? '{}') as ResponseHistoryDetail
     if (parsed.response.type !== 'odata') throw new Error('expected odata response')
     expect(parsed.response.odataDeltaLink).toBe('https://api.test.com/Pets?$deltatoken=abc123')
+  })
+
+  it('caps stored calls at the configured retention setting, not a hardcoded number', async () => {
+    setupCols()
+    settingsState.historyMaxEntries = 3
+    for (let i = 0; i < 6; i++) {
+      await responseHistoryService.storeExecutionResult(
+        'req-1', 'http', mkHttp(`2026-01-15T10:00:0${String(i)}.000Z`)
+      )
+    }
+    const entries = getIdx(AP)?.requests[0]?.entries ?? []
+    expect(entries).toHaveLength(3)
+    // The three kept are the newest three.
+    expect(entries.map((e) => e.timestamp).sort()).toEqual([
+      '2026-01-15T10:00:03.000Z',
+      '2026-01-15T10:00:04.000Z',
+      '2026-01-15T10:00:05.000Z'
+    ])
+  })
+
+  it('raising the setting lets more calls accumulate', async () => {
+    setupCols()
+    settingsState.historyMaxEntries = 12
+    for (let i = 0; i < 12; i++) {
+      await responseHistoryService.storeExecutionResult(
+        'req-1', 'http', mkHttp(`2026-01-15T10:00:${String(i).padStart(2, '0')}.000Z`)
+      )
+    }
+    expect(getIdx(AP)?.requests[0]?.entries).toHaveLength(12)
+  })
+
+  it('never truncates pinned entries, however low the setting goes', async () => {
+    setupCols()
+    settingsState.historyMaxEntries = 1
+    seed('C/R', [
+      { guid: 'pin-1', timestamp: '2026-01-15T09:00:00.000Z', pinned: true },
+      { guid: 'pin-2', timestamp: '2026-01-15T09:00:01.000Z', pinned: true },
+      { guid: 'loose', timestamp: '2026-01-15T09:00:02.000Z', pinned: false }
+    ])
+    await responseHistoryService.storeExecutionResult(
+      'req-1', 'http', mkHttp('2026-01-15T10:00:00.000Z')
+    )
+    const entries = getIdx(AP)?.requests[0]?.entries ?? []
+    const guids = entries.map((e) => e.guid)
+    expect(guids).toContain('pin-1')
+    expect(guids).toContain('pin-2')
+    // Cap of 1 keeps only the newest NON-pinned entry (the one just stored),
+    // so the older loose entry is the one that goes.
+    expect(guids).not.toContain('loose')
+    expect(entries.filter((e) => !e.pinned)).toHaveLength(1)
+  })
+
+  it('lowering the setting prunes an ALREADY-filled archive, without a restart', async () => {
+    setupCols()
+    responseHistoryService.initialize()
+    seed('C/R', [
+      { guid: 'e1', timestamp: '2026-01-15T09:00:01.000Z' },
+      { guid: 'e2', timestamp: '2026-01-15T09:00:02.000Z' },
+      { guid: 'e3', timestamp: '2026-01-15T09:00:03.000Z' },
+      { guid: 'e4', timestamp: '2026-01-15T09:00:04.000Z' },
+      { guid: 'p1', timestamp: '2026-01-15T09:00:00.000Z', pinned: true }
+    ])
+
+    // Fire the settings change the way `SettingsService` would.
+    const listener = settingsState.listeners.get('history:maxEntries')
+    expect(listener).toBeDefined()
+    listener?.(2)
+    await vi.waitFor(() => {
+      expect(getIdx(AP)?.requests[0]?.entries).toHaveLength(3)
+    })
+
+    const entries = getIdx(AP)?.requests[0]?.entries ?? []
+    const guids = entries.map((e) => e.guid)
+    // The two newest loose entries survive, plus the pinned one.
+    expect(guids).toEqual(expect.arrayContaining(['e4', 'e3', 'p1']))
+    expect(guids).not.toContain('e1')
+    expect(guids).not.toContain('e2')
+    // The dropped entries' detail payloads go with them.
+    expect(store.get(AP)?.has('responses/e1.json')).toBe(false)
+    expect(store.get(AP)?.has('responses/e4.json')).toBe(true)
   })
 
 })
