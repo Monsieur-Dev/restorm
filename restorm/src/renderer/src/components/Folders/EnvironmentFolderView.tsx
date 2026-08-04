@@ -612,6 +612,21 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 </>
               }
             >
+              {/*
+                * Rows are not draggable. This tree has no drop handler, so a
+                * drag could never reorder anything — but it still started a
+                * ListView drag, and the workbench, which reacts to any
+                * ListView drag reaching it, claimed the gesture: the split
+                * overlay darkened the window and swallowed the release.
+                * Making the rows undraggable removes the drag at its source,
+                * which is the only part of that chain this view owns.
+                *
+                * This closes the door on reordering rather than deferring it:
+                * there is no flag to flip, and restoring the gesture means
+                * both re-enabling drags here AND giving the tree a drop
+                * handler. That is deliberate — reordering environments was
+                * judged too risky to introduce this close to launch.
+                */}
               <ListView
                 items={sidebarItems}
                 rootRole="tree"
@@ -622,6 +637,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 onEditingEnd={() => { setEditingEnvId(null) }}
                 isRenameable
                 expandOnChevronOnly
+                disableDrag
                 data-testid="environment-folder-environment-list"
                 onItemClick={(payload) => {
                   const id = payload.item.id
