@@ -402,9 +402,7 @@
       "addEntry": "Adăugați o valoare",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Încă nicio valoare",
-      "selectList": "Selectați o listă",
-      "enabled": "Activat"
+      "selectList": "Selectați o listă"
     }
   },
   "requestTab": {

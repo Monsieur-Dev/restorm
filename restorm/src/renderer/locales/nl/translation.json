@@ -401,9 +401,7 @@
       "addEntry": "Een waarde toevoegen",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Nog geen waarden",
-      "selectList": "Selecteer een lijst",
-      "enabled": "Ingeschakeld"
+      "selectList": "Selecteer een lijst"
     }
   },
   "requestTab": {

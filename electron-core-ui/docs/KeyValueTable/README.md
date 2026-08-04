@@ -26,6 +26,12 @@ This component is a generic, reusable key/value editor suitable for environment 
   - Add new rows programmatically via the `addRow` imperative handle.
   - Enable/disable rows per-line via `Toggle`.
   - Drag & drop reordering with a custom drag ghost and visual drop indicators (before/after).
+  - Delete a row from its trailing trash button. Its hover label is the styled `Tooltip`,
+    never the browser's native `title`; the `aria-label` remains the accessible name.
+- **Column headers**:
+  - The Description header is translated; the Key and Value headers default to `'Key'` /
+    `'Value'` and are overridable per consumer through `keyHeader` / `valueHeader` for
+    tables whose rows aren't key/value pairs in the HTTP sense.
 - **Theming**:
   - Uses theme CSS variables (`--*`) for borders, background and text.
   - Fits naturally into styled layouts and dark/light themes.
@@ -66,6 +72,15 @@ export interface KeyValueTableProps {
   renderValueCell?: React.ComponentType<CellRendererProps>
   /** Custom renderer for description cells. Defaults to InputBox. */
   renderDescriptionCell?: React.ComponentType<CellRendererProps>
+  /**
+   * Header of the KEY column. Defaults to `'Key'`. Consumers whose rows
+   * aren't key/value pairs in the HTTP sense — a label → value list, a
+   * name → default map — pass their own (already translated) wording so
+   * the column reads as what it actually holds.
+   */
+  keyHeader?: string
+  /** Header of the VALUE column. Defaults to `'Value'`. See `keyHeader`. */
+  valueHeader?: string
   /**
    * Whether the Description column is rendered. Defaults to `true`.
    * Hide it when descriptions aren't meaningful for the use-case

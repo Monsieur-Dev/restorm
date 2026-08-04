@@ -443,7 +443,8 @@
     "editorTabs": "Editorfaner"
   },
   "keyValueTable": {
-    "description": "Beskrivelse"
+    "description": "Beskrivelse",
+    "deleteRow": "Slet række"
   },
   "gatedControl": {
     "proLabel": "Pro-version",

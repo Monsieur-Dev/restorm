@@ -401,9 +401,7 @@
       "addEntry": "Bir değer ekle",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Henüz değer yok",
-      "selectList": "Bir liste seçin",
-      "enabled": "Etkin"
+      "selectList": "Bir liste seçin"
     }
   },
   "requestTab": {

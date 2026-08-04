@@ -401,9 +401,7 @@
       "addEntry": "Wert hinzufügen",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Noch keine Werte",
-      "selectList": "Liste auswählen",
-      "enabled": "Aktiviert"
+      "selectList": "Liste auswählen"
     }
   },
   "requestTab": {

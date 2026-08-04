@@ -400,9 +400,7 @@
       "addEntry": "값 추가",
       "label": "Label",
       "value": "Value",
-      "noEntries": "아직 값이 없습니다",
-      "selectList": "목록 선택",
-      "enabled": "사용"
+      "selectList": "목록 선택"
     }
   },
   "requestTab": {

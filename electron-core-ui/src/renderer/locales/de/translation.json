@@ -443,7 +443,8 @@
     "editorTabs": "Editor-Tabs"
   },
   "keyValueTable": {
-    "description": "Beschreibung"
+    "description": "Beschreibung",
+    "deleteRow": "Zeile löschen"
   },
   "gatedControl": {
     "proLabel": "Pro-Version",

@@ -401,9 +401,7 @@
       "addEntry": "Legg til en verdi",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ingen verdier ennå",
-      "selectList": "Velg en liste",
-      "enabled": "Aktivert"
+      "selectList": "Velg en liste"
     }
   },
   "requestTab": {

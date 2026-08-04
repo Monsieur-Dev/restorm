@@ -403,9 +403,7 @@
       "addEntry": "Přidat hodnotu",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Zatím žádné hodnoty",
-      "selectList": "Vyberte seznam",
-      "enabled": "Povoleno"
+      "selectList": "Vyberte seznam"
     }
   },
   "requestTab": {

@@ -443,7 +443,8 @@
     "editorTabs": "Karty edytora"
   },
   "keyValueTable": {
-    "description": "Opis"
+    "description": "Opis",
+    "deleteRow": "Usuń wiersz"
   },
   "gatedControl": {
     "proLabel": "Wersja Pro",

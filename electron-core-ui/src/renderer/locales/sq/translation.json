@@ -443,7 +443,8 @@
     "editorTabs": "Skedat e redaktuesit"
   },
   "keyValueTable": {
-    "description": "Përshkrimi"
+    "description": "Përshkrimi",
+    "deleteRow": "Fshi rreshtin"
   },
   "gatedControl": {
     "proLabel": "Versioni Pro",

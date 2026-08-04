@@ -3026,15 +3026,82 @@ When('I select the {string} custom value list', async ({}, listName: string) => 
 
 When('I set the {string} custom-list entry value to {string}', async ({}, label: string, value: string) => {
   if (!page) throw new Error('app must be launched')
-  const input = page.locator(`[data-testid="custom-values-entry-value-${CVL_ENTRY_ID[label]}-input"]`)
+  const input = page.locator(`[data-testid="custom-values-entries-table-row-${CVL_ENTRY_ID[label]}-value-input"]`)
   await expect(input).toBeVisible({ timeout: 5000 })
   await input.fill(value)
   await page.waitForTimeout(600) // debounced folder write (~350ms) + propagation
 })
 
+// Row reordering is HTML5 drag & drop. Playwright's mouse-driven drag doesn't
+// produce real DragEvents under xvfb, so the events are synthesised — the same
+// recipe the sidebar drop steps use — with two extra constraints of the table's
+// implementation: the drop position is state the table records on `dragover`,
+// so the drop must be a SEPARATE evaluate (a React commit has to land between
+// the two), and both events must carry the SAME DataTransfer, which is stashed
+// on `window` across the boundary.
+When('I drag the {string} custom-list entry above {string}', async ({}, source: string, target: string) => {
+  if (!page) throw new Error('app must be launched')
+  const sourceId = CVL_ENTRY_ID[source]
+  const targetId = CVL_ENTRY_ID[target]
+  if (!sourceId || !targetId) throw new Error(`unknown custom-list entry: ${source} / ${target}`)
+  const handle = `[data-testid="custom-values-entries-table-table-drag-${sourceId}"]`
+  const targetRow = `[data-testid="custom-values-entries-table-table-row-${targetId}"]`
+  await expect(page.locator(handle)).toBeVisible({ timeout: 5000 })
+  await expect(page.locator(targetRow)).toBeVisible({ timeout: 5000 })
+
+  await page.evaluate(({ handle, targetRow }) => {
+    const grip = document.querySelector(handle)
+    const row = document.querySelector(targetRow)
+    if (!grip || !row) throw new Error('drag source or target row not found')
+    const dt = new DataTransfer()
+    ;(window as unknown as { __cvlDrag?: DataTransfer }).__cvlDrag = dt
+    const rect = row.getBoundingClientRect()
+    const fire = (el: Element, type: string, clientY: number): void => {
+      const ev = new DragEvent(type, { bubbles: true, cancelable: true, clientX: Math.round(rect.left + 8), clientY })
+      Object.defineProperty(ev, 'dataTransfer', { value: dt })
+      el.dispatchEvent(ev)
+    }
+    fire(grip, 'dragstart', Math.round(rect.top + rect.height / 2))
+    // Upper half of the target row → insert BEFORE it.
+    fire(row, 'dragover', Math.round(rect.top + rect.height * 0.25))
+  }, { handle, targetRow })
+
+  // Let the dragover's state update commit before the drop reads it.
+  await page.waitForTimeout(150)
+
+  await page.evaluate(({ targetRow }) => {
+    const row = document.querySelector(targetRow)
+    const dt = (window as unknown as { __cvlDrag?: DataTransfer }).__cvlDrag
+    if (!row || !dt) throw new Error('drop target or drag payload missing')
+    const rect = row.getBoundingClientRect()
+    const ev = new DragEvent('drop', {
+      bubbles: true,
+      cancelable: true,
+      clientX: Math.round(rect.left + 8),
+      clientY: Math.round(rect.top + rect.height * 0.25)
+    })
+    Object.defineProperty(ev, 'dataTransfer', { value: dt })
+    row.dispatchEvent(ev)
+  }, { targetRow })
+
+  await page.waitForTimeout(400) // folder write + propagation to open tabs
+})
+
+Then(
+  'the custom-list picker of the active request should offer {string}',
+  async ({}, expected: string) => {
+    if (!page) throw new Error('app must be launched')
+    const options = page.locator(
+      '[data-testid="http-request-query-params-table-value-input-customlist-select"] option'
+    )
+    await expect(options.first()).toBeAttached({ timeout: 5000 })
+    await expect(options).toHaveText(expected.split(',').map((s) => s.trim()), { timeout: 5000 })
+  }
+)
+
 When('I uncheck the {string} custom-list entry', async ({}, label: string) => {
   if (!page) throw new Error('app must be launched')
-  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}-action"]`)
+  const checkbox = page.locator(`[data-testid="custom-values-entries-table-row-${CVL_ENTRY_ID[label]}-enabled"] [role="checkbox"]`)
   await expect(checkbox).toBeVisible({ timeout: 5000 })
   await checkbox.uncheck()
   await page.waitForTimeout(300)
@@ -3042,7 +3109,7 @@ When('I uncheck the {string} custom-list entry', async ({}, label: string) => {
 
 When('I check the {string} custom-list entry', async ({}, label: string) => {
   if (!page) throw new Error('app must be launched')
-  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}-action"]`)
+  const checkbox = page.locator(`[data-testid="custom-values-entries-table-row-${CVL_ENTRY_ID[label]}-enabled"] [role="checkbox"]`)
   await expect(checkbox).toBeVisible({ timeout: 5000 })
   await checkbox.check()
   await page.waitForTimeout(300)

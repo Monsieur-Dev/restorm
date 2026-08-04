@@ -401,9 +401,7 @@
       "addEntry": "Ajouter une valeur",
       "label": "Libellé",
       "value": "Valeur",
-      "noEntries": "Aucune valeur pour l’instant",
-      "selectList": "Sélectionnez une liste",
-      "enabled": "Activé"
+      "selectList": "Sélectionnez une liste"
     }
   },
   "requestTab": {

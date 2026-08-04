@@ -443,7 +443,8 @@
     "editorTabs": "Kartice uređivača"
   },
   "keyValueTable": {
-    "description": "Opis"
+    "description": "Opis",
+    "deleteRow": "Obriši red"
   },
   "gatedControl": {
     "proLabel": "Pro verzija",

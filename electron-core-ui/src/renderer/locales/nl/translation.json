@@ -443,7 +443,8 @@
     "editorTabs": "Editortabbladen"
   },
   "keyValueTable": {
-    "description": "Beschrijving"
+    "description": "Beschrijving",
+    "deleteRow": "Rij verwijderen"
   },
   "gatedControl": {
     "proLabel": "Pro-versie",

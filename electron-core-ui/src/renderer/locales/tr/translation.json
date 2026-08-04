@@ -443,7 +443,8 @@
     "editorTabs": "Düzenleyici sekmeleri"
   },
   "keyValueTable": {
-    "description": "Açıklama"
+    "description": "Açıklama",
+    "deleteRow": "Satırı sil"
   },
   "gatedControl": {
     "proLabel": "Pro sürüm",

@@ -443,7 +443,8 @@
     "editorTabs": "Thẻ trình soạn thảo"
   },
   "keyValueTable": {
-    "description": "Mô tả"
+    "description": "Mô tả",
+    "deleteRow": "Xóa hàng"
   },
   "gatedControl": {
     "proLabel": "Phiên bản Pro",

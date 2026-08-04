@@ -401,9 +401,7 @@
       "addEntry": "Lägg till ett värde",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Inga värden ännu",
-      "selectList": "Välj en lista",
-      "enabled": "Aktiverad"
+      "selectList": "Välj en lista"
     }
   },
   "requestTab": {

@@ -443,7 +443,8 @@
     "editorTabs": "Redigerarflikar"
   },
   "keyValueTable": {
-    "description": "Beskrivning"
+    "description": "Beskrivning",
+    "deleteRow": "Ta bort rad"
   },
   "gatedControl": {
     "proLabel": "Pro-version",

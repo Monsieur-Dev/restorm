@@ -400,9 +400,7 @@
       "addEntry": "新增值",
       "label": "Label",
       "value": "Value",
-      "noEntries": "尚無值",
-      "selectList": "選擇清單",
-      "enabled": "已啟用"
+      "selectList": "選擇清單"
     }
   },
   "requestTab": {

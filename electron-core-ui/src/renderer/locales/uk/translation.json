@@ -443,7 +443,8 @@
     "editorTabs": "Вкладки редактора"
   },
   "keyValueTable": {
-    "description": "Опис"
+    "description": "Опис",
+    "deleteRow": "Видалити рядок"
   },
   "gatedControl": {
     "proLabel": "Версія Pro",

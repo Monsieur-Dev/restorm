@@ -400,9 +400,7 @@
       "addEntry": "Thêm một giá trị",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Chưa có giá trị nào",
-      "selectList": "Chọn một danh sách",
-      "enabled": "Bật"
+      "selectList": "Chọn một danh sách"
     }
   },
   "requestTab": {

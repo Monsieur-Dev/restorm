@@ -401,9 +401,7 @@
       "addEntry": "Lisää arvo",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ei vielä arvoja",
-      "selectList": "Valitse lista",
-      "enabled": "Käytössä"
+      "selectList": "Valitse lista"
     }
   },
   "requestTab": {

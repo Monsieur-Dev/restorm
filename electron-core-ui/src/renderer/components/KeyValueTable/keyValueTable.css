@@ -49,3 +49,10 @@
   flex: 1;
   min-width: 0;
 }
+
+/* Hover anchor for the delete button's tooltip. Inline-flex so wrapping the
+   button leaves the surrounding flex/table layout exactly as it was. */
+.params-table-delete-anchor {
+  display: inline-flex;
+  align-items: center;
+}

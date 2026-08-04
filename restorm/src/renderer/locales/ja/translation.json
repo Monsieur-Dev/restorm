@@ -400,9 +400,7 @@
       "addEntry": "値を追加",
       "label": "Label",
       "value": "Value",
-      "noEntries": "まだ値がありません",
-      "selectList": "リストを選択",
-      "enabled": "有効"
+      "selectList": "リストを選択"
     }
   },
   "requestTab": {

@@ -401,9 +401,7 @@
       "addEntry": "Érték hozzáadása",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Még nincsenek értékek",
-      "selectList": "Válasszon listát",
-      "enabled": "Engedélyezve"
+      "selectList": "Válasszon listát"
     }
   },
   "requestTab": {

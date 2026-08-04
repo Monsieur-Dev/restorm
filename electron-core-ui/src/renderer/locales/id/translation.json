@@ -443,7 +443,8 @@
     "editorTabs": "Tab editor"
   },
   "keyValueTable": {
-    "description": "Deskripsi"
+    "description": "Deskripsi",
+    "deleteRow": "Hapus baris"
   },
   "gatedControl": {
     "proLabel": "Versi Pro",

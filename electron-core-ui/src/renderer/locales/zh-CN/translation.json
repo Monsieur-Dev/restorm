@@ -443,7 +443,8 @@
     "editorTabs": "编辑器选项卡"
   },
   "keyValueTable": {
-    "description": "描述"
+    "description": "描述",
+    "deleteRow": "删除行"
   },
   "gatedControl": {
     "proLabel": "专业版",

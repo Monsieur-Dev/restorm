@@ -401,9 +401,7 @@
       "addEntry": "Προσθήκη τιμής",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Δεν υπάρχουν ακόμη τιμές",
-      "selectList": "Επιλέξτε λίστα",
-      "enabled": "Ενεργό"
+      "selectList": "Επιλέξτε λίστα"
     }
   },
   "requestTab": {

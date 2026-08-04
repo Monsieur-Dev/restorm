@@ -402,9 +402,7 @@
       "addEntry": "Dodaj vrednost",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Još nema vrednosti",
-      "selectList": "Izaberite listu",
-      "enabled": "Omogućeno"
+      "selectList": "Izaberite listu"
     }
   },
   "requestTab": {

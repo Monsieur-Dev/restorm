@@ -443,7 +443,8 @@
     "editorTabs": "Pestañas del editor"
   },
   "keyValueTable": {
-    "description": "Descripción"
+    "description": "Descripción",
+    "deleteRow": "Eliminar fila"
   },
   "gatedControl": {
     "proLabel": "Versión Pro",

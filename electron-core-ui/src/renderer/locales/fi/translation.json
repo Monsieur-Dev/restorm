@@ -443,7 +443,8 @@
     "editorTabs": "Editorin välilehdet"
   },
   "keyValueTable": {
-    "description": "Kuvaus"
+    "description": "Kuvaus",
+    "deleteRow": "Poista rivi"
   },
   "gatedControl": {
     "proLabel": "Pro-versio",

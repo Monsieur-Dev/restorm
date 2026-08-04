@@ -443,7 +443,8 @@
     "editorTabs": "エディタータブ"
   },
   "keyValueTable": {
-    "description": "説明"
+    "description": "説明",
+    "deleteRow": "行を削除"
   },
   "gatedControl": {
     "proLabel": "Pro版",

@@ -403,9 +403,7 @@
       "addEntry": "Dodaj wartość",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Jeszcze brak wartości",
-      "selectList": "Wybierz listę",
-      "enabled": "Włączone"
+      "selectList": "Wybierz listę"
     }
   },
   "requestTab": {

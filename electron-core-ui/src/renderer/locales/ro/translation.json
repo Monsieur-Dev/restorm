@@ -443,7 +443,8 @@
     "editorTabs": "File editor"
   },
   "keyValueTable": {
-    "description": "Descriere"
+    "description": "Descriere",
+    "deleteRow": "Ștergeți rândul"
   },
   "gatedControl": {
     "proLabel": "Versiunea Pro",

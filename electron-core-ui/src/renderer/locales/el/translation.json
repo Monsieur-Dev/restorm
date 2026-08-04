@@ -443,7 +443,8 @@
     "editorTabs": "Καρτέλες επεξεργαστή"
   },
   "keyValueTable": {
-    "description": "Περιγραφή"
+    "description": "Περιγραφή",
+    "deleteRow": "Διαγραφή γραμμής"
   },
   "gatedControl": {
     "proLabel": "Έκδοση Pro",

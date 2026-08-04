@@ -400,9 +400,7 @@
       "addEntry": "添加值",
       "label": "Label",
       "value": "Value",
-      "noEntries": "暂无值",
-      "selectList": "选择列表",
-      "enabled": "已启用"
+      "selectList": "选择列表"
     }
   },
   "requestTab": {

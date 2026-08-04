@@ -401,9 +401,7 @@
       "addEntry": "Shto një vlerë",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Ende asnjë vlerë",
-      "selectList": "Zgjidhni një listë",
-      "enabled": "Aktivizuar"
+      "selectList": "Zgjidhni një listë"
     }
   },
   "requestTab": {

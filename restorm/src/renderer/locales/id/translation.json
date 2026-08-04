@@ -400,9 +400,7 @@
       "addEntry": "Tambah nilai",
       "label": "Label",
       "value": "Value",
-      "noEntries": "Belum ada nilai",
-      "selectList": "Pilih sebuah daftar",
-      "enabled": "Aktif"
+      "selectList": "Pilih sebuah daftar"
     }
   },
   "requestTab": {
