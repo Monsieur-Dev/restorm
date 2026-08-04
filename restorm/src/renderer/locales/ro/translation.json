@@ -51,6 +51,21 @@
     "draftsRestoredBody_few": "{{count}} ciorne au fost restaurate din sesiunea anterioară.",
     "draftsRestoredBody_other": "{{count}} de ciorne au fost restaurate din sesiunea anterioară."
   },
+  "about": {
+    "version": "Versiunea {{version}}",
+    "tagline": "Mediul de testare pentru API — client și server.",
+    "links": {
+      "website": "Site web",
+      "documentation": "Documentație",
+      "releaseNotes": "Note de lansare"
+    },
+    "publishedBy": "Editat de",
+    "legal": {
+      "trademark": "Restorm® este o marcă înregistrată la INPI.",
+      "copyright": "© 2026 Monsieur Dev. Toate drepturile rezervate."
+    },
+    "close": "Închide"
+  },
   "statusbar": {
     "requestHistory": "Istoricul cererilor",
     "envSelector": {
@@ -1030,7 +1045,19 @@
     "dropZone": "Zonă de plasare",
     "editAuth": "Editează ruta de autentificare",
     "error": {
-      "unknown": "A apărut o eroare necunoscută"
+      "unknown": "A apărut o eroare necunoscută",
+      "unexpected": "Importul a eșuat dintr-un motiv neașteptat.",
+      "detailLabel": "Detaliu tehnic",
+      "folderNotFound": "Acest folder nu mai există în proiect, deci nu poate fi reîmprospătat.",
+      "noSourceUrl": "Acest folder nu are nicio adresă URL sursă înregistrată, deci nu există nimic de reîmprospătat.",
+      "noImportSource": "Acest folder nu a fost creat printr-un import recunoscut, deci nu poate fi reîmprospătat dintr-o sursă.",
+      "formatNotRefreshable": "Un import {{format}} este unic: nu există nicio specificație de descărcat din nou, deci acest folder nu poate fi reîmprospătat.",
+      "httpStatus": "Sursa a răspuns cererii cu HTTP {{status}}.",
+      "specParseFailed": "Specificația descărcată de la {{url}} nu a putut fi analizată.",
+      "sourceImportFailed": "Specificația nu a putut fi reimportată din sursa sa.",
+      "emptySpec": "Specificația descărcată de la {{url}} nu declară nicio operațiune {{format}}. Aplicarea ei ar goli acest folder, deci actualizarea a fost refuzată.",
+      "formatNotDetected": "Formatul acestei surse nu a fost recunoscut.",
+      "unsupportedFormat": "Niciun importator nu gestionează formatul {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1476,6 +1503,10 @@
       },
       "connection": {
         "missingName": "Numele conexiunii este obligatoriu."
+      },
+      "reachability": {
+        "unreachable": "Această acțiune nu se poate executa niciodată: nicio conexiune nu ajunge la ea dintr-o acțiune care pornește scenariul.",
+        "cycle": "Această acțiune face parte dintr-o buclă de conexiuni pe care nimic nu o pornește, deci nu se poate executa niciodată. Conectați la ea o acțiune din afara buclei."
       }
     },
     "usage": {
@@ -2449,13 +2480,16 @@
       "movedFolder": "Dosarul \"{{name}}\" a fost mutat",
       "movedEnvironmentFolder": "Dosarul de mediu \"{{name}}\" a fost mutat",
       "reorderedFolder": "Elemente reordonate în folderul „{{name}}”",
-      "reorderedEnvironmentFolder": "Elemente reordonate în folderul de mediu „{{name}}”"
+      "reorderedEnvironmentFolder": "Elemente reordonate în folderul de mediu „{{name}}”",
+      "stampedFileFormatVersion": "Versiunea formatului de fișier {{name}}",
+      "changedFileFormatVersion": "Format de fișier {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Actualizare a cererii „{{name}}”",
       "singleScenario": "Actualizare a scenariului „{{name}}”",
       "singleFolder": "Actualizare a folderului „{{name}}”",
       "singleEnvironmentFolder": "Actualizare a folderului de mediu „{{name}}”",
+      "singleFileFormatVersion": "Trecere la formatul de fișier {{name}}",
       "countRequest_one": "{{count}} cerere",
       "countRequest_other": "{{count}} cereri",
       "countScenario_one": "{{count}} scenariu",
@@ -2464,6 +2498,8 @@
       "countFolder_other": "{{count}} foldere",
       "countEnvironmentFolder_one": "{{count}} folder de mediu",
       "countEnvironmentFolder_other": "{{count}} foldere de mediu",
+      "countFileFormatVersion_one": "{{count}} modificare a formatului de fișier",
+      "countFileFormatVersion_other": "{{count}} modificări ale formatului de fișier",
       "multiple": "Actualizare: {{parts}}"
     },
     "semiPullFrequencyTitle": "Frecvența verificării automate a actualizărilor",
@@ -2580,6 +2616,13 @@
       "title": "Fișierul nu a fost redeschis",
       "body": "{{file}} nu a fost redeschis: Restorm s-a blocat în timp ce îl deschidea la lansarea anterioară. Fișierul dumneavoastră este intact — îl puteți redeschide din fișierele recente.",
       "bodyUnnamed": "Ultimul fișier nu a fost redeschis: Restorm s-a blocat în timp ce îl deschidea la lansarea anterioară. Fișierul dumneavoastră este intact — îl puteți redeschide din fișierele recente."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Proiect creat cu o versiune mai nouă",
+      "message": "Acest fișier a fost creat cu o versiune Restorm mai nouă decât cea pe care o utilizați. Actualizați Restorm pentru a-l deschide.",
+      "versions": "Format de fișier {{found}}; această versiune acceptă până la {{current}}."
     }
   }
 }

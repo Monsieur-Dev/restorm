@@ -19,10 +19,14 @@ import { tmpdir } from 'node:os'
 
 // `readImportSource`'s file branch logs via `electron-core-ui/main`'s
 // logger, which lazily reads Electron's `app.isPackaged` on first call —
-// not available outside a running Electron process. Same mock shape the
-// other main-process unit tests use.
+// not available outside a running Electron process. Its URL branch also
+// wraps the fetch in `withFirewallBypass` (imported from the `electron-core-ui`
+// root, which resolves to this same mocked module) — a pass-through here,
+// since the firewall itself is out of scope for these source-resolution
+// tests. Same mock shape the other main-process unit tests use.
 vi.mock('electron-core-ui/main', () => ({
-  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  withFirewallBypass: <T>(fn: () => Promise<T>): Promise<T> => fn()
 }))
 
 const { importFrom, classifyImportSource } = await import('../../src/main/services/import/ImportManager')
@@ -32,6 +36,8 @@ const CURL_TWO = "curl -X POST 'https://api.example.com/pets' -H 'Content-Type: 
 
 const POSTMAN_FIXTURE = join(__dirname, 'postman-petstore.json')
 const TYPESPEC_FIXTURE = join(__dirname, 'fixtures/typespec/petstore.tsp')
+const OPENAPI_YAML_FIXTURE = join(__dirname, 'fixtures/openapi/petstore-3.0.yaml')
+const SWAGGER_YAML_SPEC = 'swagger: "2.0"\ninfo:\n  title: Petstore\n  version: "1.0"\npaths:\n  /pets:\n    get:\n      responses:\n        "200":\n          description: ok\n'
 
 /** A leaf of an imported tree, narrowed to what these tests assert on. */
 interface ImportedLeaf {
@@ -191,5 +197,78 @@ describe('importFrom — real files', () => {
     expect(result.success).toBe(false)
     expect(result.error).toMatch(/ENOENT/)
     expect(result.error).toContain(missing)
+  })
+
+  it('reads and imports a local YAML-format OpenAPI spec', async () => {
+    // Regression: `detectFormat`'s Phase 1 extension-anchor never resolves
+    // OpenAPI (no filePath branch in `canImportOpenAPI30/31`), so this
+    // exercises the Phase 2 content sniff on a real on-disk YAML file —
+    // the same path a local-file "Import from file" pick would take.
+    const path = join(tmpDir, 'petstore.yaml')
+    await fs.writeFile(path, readFileSync(OPENAPI_YAML_FIXTURE, 'utf-8'), 'utf-8')
+
+    const result = await importFrom(path)
+
+    expect(result.error).toBeUndefined()
+    expect(result.success).toBe(true)
+    expect(result.format).toBe('openapi-3.0')
+    expect(flattenRequests(result.items).length).toBeGreaterThan(0)
+  })
+
+  it('reads and imports a local YAML-format Swagger 2.0 spec', async () => {
+    const path = join(tmpDir, 'swagger.yaml')
+    await fs.writeFile(path, SWAGGER_YAML_SPEC, 'utf-8')
+
+    const result = await importFrom(path)
+
+    expect(result.error).toBeUndefined()
+    expect(result.success).toBe(true)
+    expect(result.format).toBe('swagger')
+    expect(flattenRequests(result.items).length).toBeGreaterThan(0)
+  })
+})
+
+describe('importFrom — URL (YAML spec)', () => {
+  // The literal defect this ticket fixes: `import_from_url` fetching a
+  // YAML-format OpenAPI spec. `filePath` is `undefined` for a URL source
+  // (see `ImportManager.ts`'s `importFrom`), so detection here is 100%
+  // Phase 2 content sniff — this proves the whole fetch → detect → parse
+  // pipeline works end to end, not just `detectFormat` in isolation.
+  const realFetch = globalThis.fetch
+  let fetchMock: ReturnType<typeof vi.fn>
+
+  beforeAll(() => {
+    fetchMock = vi.fn()
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+  })
+  afterAll(() => {
+    globalThis.fetch = realFetch
+  })
+
+  it('fetches, detects, and imports a YAML-format OpenAPI 3.0 spec by URL', async () => {
+    const yamlSpec = readFileSync(OPENAPI_YAML_FIXTURE, 'utf-8')
+    fetchMock.mockResolvedValueOnce(
+      new Response(yamlSpec, { status: 200, headers: { 'content-type': 'application/yaml' } })
+    )
+
+    const result = await importFrom('https://example.com/openapi.yaml')
+
+    expect(result.error).toBeUndefined()
+    expect(result.success).toBe(true)
+    expect(result.format).toBe('openapi-3.0')
+    expect(flattenRequests(result.items).length).toBeGreaterThan(0)
+  })
+
+  it('fetches, detects, and imports a YAML-format Swagger 2.0 spec by URL', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(SWAGGER_YAML_SPEC, { status: 200, headers: { 'content-type': 'application/yaml' } })
+    )
+
+    const result = await importFrom('https://example.com/swagger.yaml')
+
+    expect(result.error).toBeUndefined()
+    expect(result.success).toBe(true)
+    expect(result.format).toBe('swagger')
+    expect(flattenRequests(result.items).length).toBeGreaterThan(0)
   })
 })

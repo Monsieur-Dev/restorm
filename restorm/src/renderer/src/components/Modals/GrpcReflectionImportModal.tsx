@@ -22,6 +22,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { FolderItem } from '../../../../shared/types/collections'
+import { describeImportError, type DisplayedImportError } from './importErrorDisplay'
 
 export interface GrpcReflectionImportModalProps {
   isOpen: boolean
@@ -35,7 +36,11 @@ export const GrpcReflectionImportModal: React.FC<GrpcReflectionImportModalProps>
   const [tls, setTls] = useState(false)
   const [metadata, setMetadata] = useState<KeyValueTableRow[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // Same pair the Import modal holds: a translated sentence, plus the
+  // gRPC stack's own text when it produced any. `grpc-js` reports in
+  // English regardless of the app's locale, so it stays in its own slot
+  // rather than being folded into a localised sentence.
+  const [error, setError] = useState<DisplayedImportError | null>(null)
   const metadataTableRef = useRef<KeyValueTableHandle | null>(null)
 
   const handleClose = useCallback(() => {
@@ -59,8 +64,11 @@ export const GrpcReflectionImportModal: React.FC<GrpcReflectionImportModalProps>
         if (!result.success) {
           setError(
             result.unsupported
-              ? t('import.grpcReflection.unsupported', 'This server does not support gRPC reflection — import a .proto file instead.')
-              : (result.error ?? t('import.grpcReflection.unknownError', 'Unknown error'))
+              ? {
+                  message: t('import.grpcReflection.unsupported', 'This server does not support gRPC reflection — import a .proto file instead.'),
+                  detail: null
+                }
+              : describeImportError(t, result.error !== undefined ? { raw: result.error } : {})
           )
           return
         }
@@ -89,14 +97,14 @@ export const GrpcReflectionImportModal: React.FC<GrpcReflectionImportModalProps>
           return
         }
         if (!result.folder) {
-          setError(t('import.grpcReflection.unknownError', 'Unknown error'))
+          setError({ message: t('import.grpcReflection.unknownError', 'Unknown error'), detail: null })
           return
         }
         onImport([result.folder as FolderItem])
         handleClose()
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : String(err))
+        setError(describeImportError(t, { raw: err instanceof Error ? err.message : String(err) }))
       })
       .finally(() => { setIsLoading(false) })
   }, [address, tls, metadata, isLoading, onImport, handleClose, t])
@@ -141,7 +149,17 @@ export const GrpcReflectionImportModal: React.FC<GrpcReflectionImportModalProps>
         {error && (
           <div className="import-error" role="alert" data-testid="grpc-reflection-import-error">
             <i className="codicon codicon-error" aria-hidden="true" />
-            <span style={{ flex: 1 }}>{error}</span>
+            <div className="import-error__text">
+              <span>{error.message}</span>
+              {error.detail !== null && (
+                <span className="import-error__detail" data-testid="grpc-reflection-import-error-detail">
+                  <span className="import-error__detail-label">
+                    {t('import.error.detailLabel', 'Technical detail')}
+                  </span>
+                  <code>{error.detail}</code>
+                </span>
+              )}
+            </div>
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>

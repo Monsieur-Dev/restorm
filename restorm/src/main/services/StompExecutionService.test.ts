@@ -103,8 +103,9 @@ function registerStompRequest(requestId: string, input: {
   sendBody?: string
   connectHeaders?: { key: string; value: unknown; enabled?: boolean }[]
   sendHeaders?: { key: string; value: unknown; enabled?: boolean }[]
+  envId?: string
 }): void {
-  contextService.registerRequest(requestId, null, { id: requestId, headers: [] })
+  contextService.registerRequest(requestId, input.envId ?? null, { id: requestId, headers: [] })
   contextService.updateFullRequestData(requestId, {
     id: requestId,
     requestType: 'stomp',
@@ -117,6 +118,29 @@ function registerStompRequest(requestId: string, input: {
     sendBody: input.sendBody ?? '',
     sendHeaders: input.sendHeaders ?? []
   })
+}
+
+/**
+ * Seed an environment holding `variables` and return its id, so a request can be
+ * registered against it.
+ *
+ * The variables reach resolution through the request's own environment — the
+ * only channel there is. A scenario run's values never enter a request's stored
+ * context; they travel as a disposable `ResolutionContexts` handed to the
+ * dispatch, and this protocol's executor does not compose one.
+ */
+function seedEnvironment(envId: string, variables: Record<string, string>): string {
+  const svc = contextService as unknown as { handleEnvironmentCreated: (payload: unknown) => void }
+  svc.handleEnvironmentCreated({
+    id: envId,
+    type: 'environment',
+    document: {
+      id: envId,
+      name: 'E',
+      variables: Object.entries(variables).map(([key, value]) => ({ key, value: { type: 'string', value } }))
+    }
+  })
+  return envId
 }
 
 describe('StompExecutionService', () => {
@@ -202,11 +226,8 @@ describe('StompExecutionService', () => {
       subscriptions: [{ id: 'sub-0', destination: '/topic/keys', ackMode: 'auto' }],
       sendDestination: '/topic/keys',
       sendBody: 'payload',
-      sendHeaders: [{ key: '{{sendHeaderName}}', value: 'send-value', enabled: true }]
-    })
-    contextService.setScenarioVariables(requestId, {
-      connectHeaderName: 'x-tenant',
-      sendHeaderName: 'x-trace'
+      sendHeaders: [{ key: '{{sendHeaderName}}', value: 'send-value', enabled: true }],
+      envId: seedEnvironment('env-stomp-header-key', { connectHeaderName: 'x-tenant', sendHeaderName: 'x-trace' })
     })
 
     const result = await stompExecutionService.execute({ requestId, timeout: 2000 })

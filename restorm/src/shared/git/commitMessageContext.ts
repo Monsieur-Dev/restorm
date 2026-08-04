@@ -11,6 +11,17 @@ const DIFF_KEYS: Record<GitEntityKind, Record<'added' | 'modified' | 'moved' | '
     moved: 'git.diff.movedEnvironmentFolder',
     deleted: 'git.diff.deletedEnvironmentFolder',
     reordered: 'git.diff.reorderedEnvironmentFolder'
+  },
+  // The document itself has no "moved", "deleted" or "reordered" state —
+  // it is the file. Those actions are unreachable and map to the format
+  // line so the table stays total rather than carrying holes a future
+  // reader would have to reason about.
+  document: {
+    added: 'git.diff.stampedFileFormatVersion',
+    modified: 'git.diff.changedFileFormatVersion',
+    moved: 'git.diff.changedFileFormatVersion',
+    deleted: 'git.diff.changedFileFormatVersion',
+    reordered: 'git.diff.changedFileFormatVersion'
   }
 }
 
@@ -18,19 +29,23 @@ const SINGLE_TITLE_KEYS: Record<GitEntityKind, string> = {
   request: 'git.commitTitle.singleRequest',
   scenario: 'git.commitTitle.singleScenario',
   folder: 'git.commitTitle.singleFolder',
-  environmentFolder: 'git.commitTitle.singleEnvironmentFolder'
+  environmentFolder: 'git.commitTitle.singleEnvironmentFolder',
+  document: 'git.commitTitle.singleFileFormatVersion'
 }
 
 const COUNT_KEYS: Record<GitEntityKind, string> = {
   request: 'git.commitTitle.countRequest',
   scenario: 'git.commitTitle.countScenario',
   folder: 'git.commitTitle.countFolder',
-  environmentFolder: 'git.commitTitle.countEnvironmentFolder'
+  environmentFolder: 'git.commitTitle.countEnvironmentFolder',
+  document: 'git.commitTitle.countFileFormatVersion'
 }
 
 // Folders/environment folders read first (structural), then requests,
 // then scenarios — matches the diff-line sort order in `gitCommitDiff`.
-const KIND_ORDER: GitEntityKind[] = ['folder', 'environmentFolder', 'request', 'scenario']
+// `document` leads: a format change explains why everything else in the
+// file may read differently, so it belongs at the front of the summary.
+const KIND_ORDER: GitEntityKind[] = ['document', 'folder', 'environmentFolder', 'request', 'scenario']
 
 // Extends `Record<string, unknown>` (rather than a plain interface) so it
 // slots straight into `renderCommitMessage`'s generic Handlebars context

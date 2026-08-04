@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "저장하지 않은 작업이 복원되었습니다",
     "draftsRestoredBody_other": "이전 세션에서 초안 {{count}}개를 복원했습니다."
   },
+  "about": {
+    "version": "버전 {{version}}",
+    "tagline": "API 테스트 환경 — 클라이언트와 서버.",
+    "links": {
+      "website": "웹사이트",
+      "documentation": "문서",
+      "releaseNotes": "릴리스 노트"
+    },
+    "publishedBy": "발행처",
+    "legal": {
+      "trademark": "Restorm®은 INPI에 등록된 상표입니다.",
+      "copyright": "© 2026 Monsieur Dev. 모든 권리 보유."
+    },
+    "close": "닫기"
+  },
   "statusbar": {
     "requestHistory": "요청 기록",
     "envSelector": {
@@ -1028,7 +1043,19 @@
     "dropZone": "드롭 영역",
     "editAuth": "인증 경로 편집",
     "error": {
-      "unknown": "알 수 없는 오류가 발생했습니다"
+      "unknown": "알 수 없는 오류가 발생했습니다",
+      "unexpected": "예기치 않은 이유로 가져오기에 실패했습니다.",
+      "detailLabel": "기술 세부 정보",
+      "folderNotFound": "이 폴더는 프로젝트에 더 이상 존재하지 않으므로 새로 고칠 수 없습니다.",
+      "noSourceUrl": "이 폴더에는 소스 URL이 기록되어 있지 않아 새로 고칠 대상이 없습니다.",
+      "noImportSource": "이 폴더는 인식된 가져오기로 만들어지지 않아 소스에서 새로 고칠 수 없습니다.",
+      "formatNotRefreshable": "{{format}} 가져오기는 일회성입니다. 다시 가져올 사양이 없으므로 이 폴더는 새로 고칠 수 없습니다.",
+      "httpStatus": "소스가 요청에 HTTP {{status}}(으)로 응답했습니다.",
+      "specParseFailed": "{{url}}에서 가져온 사양을 해석할 수 없습니다.",
+      "sourceImportFailed": "사양을 원본에서 다시 가져올 수 없습니다.",
+      "emptySpec": "{{url}}에서 가져온 사양에 {{format}} 작업이 하나도 선언되어 있지 않습니다. 적용하면 이 폴더가 비워지므로 업데이트를 거부했습니다.",
+      "formatNotDetected": "이 소스의 형식을 인식하지 못했습니다.",
+      "unsupportedFormat": "{{format}} 형식을 처리하는 가져오기 모듈이 없습니다."
     },
     "formats": {
       "swagger": {
@@ -1474,6 +1501,10 @@
       },
       "connection": {
         "missingName": "연결 이름은 필수입니다."
+      },
+      "reachability": {
+        "unreachable": "이 액션은 실행될 수 없습니다. 시나리오를 시작하는 액션에서 연결이 이어지지 않습니다.",
+        "cycle": "이 액션은 아무것도 시작하지 않는 연결 루프에 속해 있어 실행될 수 없습니다. 루프 바깥의 액션을 연결하세요."
       }
     },
     "usage": {
@@ -2447,13 +2478,16 @@
       "movedFolder": "폴더 \"{{name}}\"을(를) 이동",
       "movedEnvironmentFolder": "환경 폴더 \"{{name}}\"을(를) 이동",
       "reorderedFolder": "폴더 \"{{name}}\"의 항목 순서를 변경했습니다",
-      "reorderedEnvironmentFolder": "환경 폴더 \"{{name}}\"의 항목 순서를 변경했습니다"
+      "reorderedEnvironmentFolder": "환경 폴더 \"{{name}}\"의 항목 순서를 변경했습니다",
+      "stampedFileFormatVersion": "파일 형식 버전 {{name}}",
+      "changedFileFormatVersion": "파일 형식 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "요청 \"{{name}}\" 업데이트",
       "singleScenario": "시나리오 \"{{name}}\" 업데이트",
       "singleFolder": "폴더 \"{{name}}\" 업데이트",
       "singleEnvironmentFolder": "환경 폴더 \"{{name}}\" 업데이트",
+      "singleFileFormatVersion": "파일 형식 {{name}}(으)로 전환",
       "countRequest_one": "요청 {{count}}개",
       "countRequest_other": "요청 {{count}}개",
       "countScenario_one": "시나리오 {{count}}개",
@@ -2462,6 +2496,8 @@
       "countFolder_other": "폴더 {{count}}개",
       "countEnvironmentFolder_one": "환경 폴더 {{count}}개",
       "countEnvironmentFolder_other": "환경 폴더 {{count}}개",
+      "countFileFormatVersion_one": "파일 형식 변경 {{count}}건",
+      "countFileFormatVersion_other": "파일 형식 변경 {{count}}건",
       "multiple": "{{parts}} 업데이트"
     },
     "semiPullFrequencyTitle": "자동 풀 확인 빈도",
@@ -2578,6 +2614,13 @@
       "title": "파일을 다시 열지 않았습니다",
       "body": "{{file}}을(를) 다시 열지 않았습니다. 이전 실행에서 Restorm이 이 파일을 여는 중에 충돌했습니다. 파일은 손상되지 않았으며 최근 파일에서 다시 열 수 있습니다.",
       "bodyUnnamed": "마지막 파일을 다시 열지 않았습니다. 이전 실행에서 Restorm이 이 파일을 여는 중에 충돌했습니다. 파일은 손상되지 않았으며 최근 파일에서 다시 열 수 있습니다."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "상위 버전에서 만든 프로젝트",
+      "message": "이 파일은 현재 사용 중인 Restorm보다 상위 버전에서 만들어졌습니다. 열려면 Restorm을 업데이트하세요.",
+      "versions": "파일 형식 {{found}}. 이 버전은 {{current}}까지 지원합니다."
     }
   }
 }

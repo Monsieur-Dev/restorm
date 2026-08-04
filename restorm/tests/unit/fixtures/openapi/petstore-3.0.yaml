@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: Petstore
+  description: Sample 3.0 API
+  version: 1.0.0
+  contact:
+    name: Team
+    email: team@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+    description: Production
+tags:
+  - name: pet
+    description: Pet operations
+  - name: store
+paths:
+  /pet/{petId}:
+    get:
+      tags:
+        - pet
+      summary: Find pet by ID
+      description: Returns a single pet
+      operationId: getPetById
+      parameters:
+        - name: petId
+          in: path
+          description: Pet ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "404":
+          description: Pet not found
+    delete:
+      tags:
+        - pet
+      summary: Delete pet
+      operationId: deletePet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        "204":
+          description: deleted
+  /pet/findByStatus:
+    get:
+      tags:
+        - pet
+      summary: Finds Pets by status
+      operationId: findPetsByStatus
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - available
+                - pending
+                - sold
+              default: available
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+  /pet:
+    post:
+      tags:
+        - pet
+      summary: Add a new pet
+      operationId: addPet
+      requestBody:
+        description: Pet to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/Pet"
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                    - available
+                    - pending
+                    - sold
+      responses:
+        "200":
+          description: ok
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          description: Unique id
+        name:
+          type: string
+        category:
+          $ref: "#/components/schemas/Category"
+        status:
+          type: string
+          enum:
+            - available
+            - pending
+            - sold
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string

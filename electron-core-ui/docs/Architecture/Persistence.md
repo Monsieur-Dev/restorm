@@ -27,6 +27,115 @@ await service.saveSingleFile('/path/to/file.json', data, { format: 'json' })
 const data = await service.loadSingleFile('/path/to/file.json')
 ```
 
+### Stamping the document identity does not rewrite the document
+
+`ensureFileUuid` / `ensureFolderUuid` add the UUID by **inserting the key
+into the file's text** (`setTopLevelKey`), never by reparsing and
+re-serializing it. The round-trip they used to do —
+`serialize({ ...deserialize(raw), [uuidKey]: fresh })` — is lossy in every
+format this library persists:
+
+- **YAML**: `js-yaml` has no comment round-trip, so every comment is
+  discarded, and `noRefs: true` expands anchors and aliases into
+  duplicated literal content, irreversibly flattening a document that
+  used `&x`/`*x` to share configuration. Quoting, indentation and scalar
+  style are renormalised.
+- **JSON5**: comments are part of the format and `JSON5.stringify` drops
+  them.
+- **JSON**: no comments to lose, but key order and formatting churn.
+
+What made this sharp rather than cosmetic: a document only *lacks* the
+UUID when it was hand-authored, created outside the app, or predates the
+key — which is precisely the population most likely to contain comments
+and anchors. The damage concentrated exactly where it cost most, on an
+operation the user experiences as read-only.
+
+`setTopLevelKey` re-parses its own output and returns `null` unless the
+result is exactly the previous value plus the one new key. When it cannot
+prove that — a sequence or scalar root, a flow-style root, a
+multi-document YAML stream, unparsable input — the **file is left
+completely untouched** and the result carries `persisted: false`. There is
+deliberately no fallback to the round-trip: the UUID is convenience, the
+user's file is not.
+
+The same primitive is the only supported way to add ANY document-level
+key to a file the app is not otherwise rewriting — an identity, an
+on-disk format version, whatever a host app keeps beside its content.
+`value` may be a string or a **number**, and the distinction is load-
+bearing rather than a convenience: the round-trip check compares the
+re-parsed value with the one asked for, so a number written as a quoted
+string parses back as a string and the insertion is refused. A key
+already holding a real value is never overwritten — only an absent key,
+or a blank slot (`key:` / `key: ''`), is filled — so a caller that needs
+to CHANGE an existing value has to rewrite the document properly rather
+than patch its text.
+
+**`persisted: false` means: do not attach a draft store.** An
+unpersisted UUID is regenerated on every call, and `attachDraftStore` is
+routinely called more than once for a single open, so the attaches would
+land on different namespaces — and a crash would file the drafts under an
+id nothing can look up again. That is unsaved work which *looks*
+recoverable and is not, which is strictly worse than no recovery at all.
+Callers must therefore skip the attach and say so in the log; the
+document itself opens, edits and saves exactly as usual, it simply has no
+crash-recovery drafts. Anything else quietly recreates the failure that
+persisting the UUID at open exists to prevent.
+
+### Refusing a document on open (`validateOnOpen`)
+
+A host app can install a gate that refuses a document the running build
+cannot handle — an unsupported on-disk format version, a schema the build
+predates, a required capability it lacks:
+
+```typescript
+initFileService({
+  extension: '.myapp',
+  uuidKey: '_projectUuid',
+  validateOnOpen: (content, filePath) => {
+    if (isFromTheFuture(content)) {
+      return { ok: false, code: 'format-too-new', detail: { found: 7, current: 1 } }
+    }
+    return { ok: true }
+  }
+})
+```
+
+`FileService.open()` calls the validator on the freshly parsed content and,
+on `ok: false`, aborts completely: the document is not loaded, the previous
+file stays open, the path does not join recent files, `file:opened` is not
+emitted, and — the point of the ordering — **nothing is written to the
+file**. `open()` resolves to `{ success: false, rejected: true }` so the
+caller can tell a refusal from a read error.
+
+**Ordering invariant: read → parse → validate → stamp.** The UUID stamp
+(`ensureFileUuid`) runs *after* the gate, never before. Stamping first
+would mutate a file the app then declines to open — an unrequested write to
+data the user is only reading. The same ordering applies to any future step
+that writes during open. Only the first-ever open of a UUID-less file
+re-reads the file (the stamp changed the bytes, and `diskDigest` must match
+what is on disk or the external-change guard misfires).
+
+A note on how this stayed hidden, because it shapes where to look for the
+same bug elsewhere. The stamp inside `open()` is wrapped in a try/catch, so
+a **read-only** file never announced itself — the write failed, a warning
+was logged, and the document opened normally. The harm was confined to the
+files where the write *succeeded*. Host apps that stamp **outside** a catch
+get the opposite and louder failure: restorm's folder-mode loader called
+`ensureFolderUuid` inside a `try` whose `catch` returns `null`, so a
+read-only project directory made the entire open fail silently — no
+document, no message. Both shapes are worth checking for whenever a read
+path writes.
+
+The library deliberately renders no message of its own. It broadcasts
+`file:open-rejected` with `{ path, code, detail }` and leaves the wording to
+the host: the main process typically ships far fewer locales than the
+renderer, so a user-facing explanation composed in main would reach many
+users in the wrong language.
+
+A validator that throws is treated as a refusal, not as approval — a
+document whose acceptability is unknown is exactly what the gate exists to
+keep out.
+
 ## Folder Mode
 
 Hierarchical structure based on decorators.

@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} draft was restored from your previous session.",
     "draftsRestoredBody_other": "{{count}} drafts were restored from your previous session."
   },
+  "about": {
+    "version": "Version {{version}}",
+    "tagline": "The API testing environment — client and server.",
+    "links": {
+      "website": "Website",
+      "documentation": "Documentation",
+      "releaseNotes": "Release notes"
+    },
+    "publishedBy": "Published by",
+    "legal": {
+      "trademark": "Restorm® is a trademark registered with the INPI.",
+      "copyright": "© 2026 Monsieur Dev. All rights reserved."
+    },
+    "close": "Close"
+  },
   "statusbar": {
     "requestHistory": "Requests history",
     "envSelector": {
@@ -1029,7 +1044,19 @@
     "dropZone": "Drop zone",
     "editAuth": "Edit authentication route",
     "error": {
-      "unknown": "An unknown error occurred"
+      "unknown": "An unknown error occurred",
+      "unexpected": "The import failed for an unexpected reason.",
+      "detailLabel": "Technical detail",
+      "folderNotFound": "This folder no longer exists in the project, so it can't be refreshed.",
+      "noSourceUrl": "This folder records no source URL, so there is nothing to refresh from.",
+      "noImportSource": "This folder wasn't created by a recognised import, so it can't be refreshed from a source.",
+      "formatNotRefreshable": "A {{format}} import is one-shot: there is no spec to fetch again, so this folder cannot be refreshed.",
+      "httpStatus": "The source answered the request with HTTP {{status}}.",
+      "specParseFailed": "The spec fetched from {{url}} could not be parsed.",
+      "sourceImportFailed": "The spec could not be re-imported from its source.",
+      "emptySpec": "The spec fetched from {{url}} declares no {{format}} operation. Applying it would empty this folder, so the update was refused.",
+      "formatNotDetected": "The format of this source was not recognised.",
+      "unsupportedFormat": "No importer handles the {{format}} format."
     },
     "formats": {
       "swagger": {
@@ -1475,6 +1502,10 @@
       },
       "connection": {
         "missingName": "A connection name is required."
+      },
+      "reachability": {
+        "unreachable": "This action can never run: no connection reaches it from an action that starts the scenario.",
+        "cycle": "This action sits in a loop of connections that nothing starts, so it can never run. Connect an action from outside the loop into it."
       }
     },
     "usage": {
@@ -1746,7 +1777,7 @@
       "dataFormats": "Data formats",
       "encoding": "Encoding",
       "time": "Timing",
-      "algorithmie": "Algorithmie",
+      "algorithmie": "Algorithms",
       "ux": "UX"
     },
     "palette": {
@@ -2448,13 +2479,16 @@
       "movedFolder": "Moved the folder \"{{name}}\"",
       "movedEnvironmentFolder": "Moved the environment folder \"{{name}}\"",
       "reorderedFolder": "Reordered items in the folder \"{{name}}\"",
-      "reorderedEnvironmentFolder": "Reordered items in the environment folder \"{{name}}\""
+      "reorderedEnvironmentFolder": "Reordered items in the environment folder \"{{name}}\"",
+      "stampedFileFormatVersion": "File format version {{name}}",
+      "changedFileFormatVersion": "File format {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Update to the request \"{{name}}\"",
       "singleScenario": "Update to the scenario \"{{name}}\"",
       "singleFolder": "Update to the folder \"{{name}}\"",
       "singleEnvironmentFolder": "Update to the environment folder \"{{name}}\"",
+      "singleFileFormatVersion": "Move to file format {{name}}",
       "countRequest_one": "{{count}} request",
       "countRequest_other": "{{count}} requests",
       "countScenario_one": "{{count}} scenario",
@@ -2463,6 +2497,8 @@
       "countFolder_other": "{{count}} folders",
       "countEnvironmentFolder_one": "{{count}} environment folder",
       "countEnvironmentFolder_other": "{{count}} environment folders",
+      "countFileFormatVersion_one": "{{count}} file format change",
+      "countFileFormatVersion_other": "{{count}} file format changes",
       "multiple": "Update to {{parts}}"
     },
     "semiPullFrequencyTitle": "Automatic pull check frequency",
@@ -2579,6 +2615,13 @@
       "title": "File not reopened",
       "body": "{{file}} was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files.",
       "bodyUnnamed": "The last file was not reopened: Restorm crashed while opening it on the previous launch. Your file is intact — you can reopen it from the recent files."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Project created with a newer version",
+      "message": "This file was created with a newer version of Restorm than the one you are running. Please update Restorm to open it.",
+      "versions": "File format {{found}}; this version supports up to {{current}}."
     }
   }
 }

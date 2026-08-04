@@ -57,6 +57,7 @@ vi.mock('../../../src/main/services/CollectionStore', () => ({
 vi.mock('../../../src/main/services/ContextService', () => ({
   contextService: {
     getResolvedUrl: vi.fn().mockReturnValue({ resolvedUrl: 'https://api.test.com/resource' }),
+    resolveUrlForRequest: vi.fn().mockReturnValue({ resolvedUrl: 'https://api.test.com/resource' }),
     getRequestContext: vi.fn().mockReturnValue({ fullData: { method: 'GET' }, keyValueGroups: new Map() }),
     resolveValue: vi.fn((v: string) => v),
     // Type-aware value resolution (mirrors the live dispatch path — only an

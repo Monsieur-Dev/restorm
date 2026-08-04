@@ -51,11 +51,12 @@ import type {
   ResolvedUrlResult,
   CodeSnippetsResult,
   RequestContext,
-  RequestData
+  RequestData,
+  ResolutionContexts
 } from './ContextServiceTypes'
 
 // Re-export public types so existing imports from './ContextService' keep working
-export type { FullRequestData, ResolvedUrlResult, CodeSnippetsResult } from './ContextServiceTypes'
+export type { FullRequestData, ResolvedUrlResult, CodeSnippetsResult, ResolutionContexts } from './ContextServiceTypes'
 
 function normalizeKeyValues(values: unknown[]): KeyValue[] {
   return values.map((v) => KeyValueModel.fromPlain(v as Record<string, unknown>))
@@ -495,18 +496,19 @@ class ContextService {
   }
 
   /**
-   * Resolve a `KeyValue`'s value. Only `ExpressionValue`s are run
-   * through Handlebars — every other type is taken literally, so a
-   * `StringValue("{{unresolved}}")` stays as-is. This is the rule the
-   * product asked for: variable substitution is opt-in, the user marks
-   * a variable as "expression" when they want templating.
+   * Resolve a `KeyValue`'s value through Handlebars, whatever type the row
+   * holds.
+   *
+   * Substitution is NOT opt-in per row type. Gating it on `ExpressionValue`
+   * made the same text behave differently depending on how the row happened
+   * to be created — `{{token}}` typed into a header cell was sent with its
+   * braces intact, while an identical row stored as an expression resolved —
+   * and nothing in the UI showed which of the two a row was. A value that
+   * resolves to nothing renders as the empty string, which is Handlebars'
+   * own treatment of an undefined variable.
    */
   private resolveKeyValue(kv: KeyValue, context: TransformedContext): string {
-    const raw = kv.value.toString()
-    if (isExpressionValue(kv.value)) {
-      return this.transformValue(raw, context)
-    }
-    return raw
+    return this.transformValue(kv.value.toString(), context)
   }
 
   /**
@@ -692,17 +694,13 @@ class ContextService {
     const ctx = this.requestContexts.get(requestId)
     if (!ctx) return
 
-    // Get the base context from the selected environment, then layer the
-    // scenario `setVariable` overlay ON TOP (overlay wins) so the resolved URL +
-    // KV transforms reflect a per-run override of an env-folder variable.
-    let baseContext: TransformedContext = {}
-    if (ctx.environmentId) {
-      const envContext = this.transformedContexts.get(ctx.environmentId)
-      if (envContext) {
-        baseContext = { ...envContext }
-      }
-    }
-    if (ctx.scenarioVariables) baseContext = { ...baseContext, ...ctx.scenarioVariables }
+    // The base context is the selected environment's, and ONLY that. A scenario
+    // run's values are deliberately absent: they live in the disposable
+    // `ResolutionContexts` the engine passes to the dispatch, never in the
+    // request's own state. That is what makes this recompute — which is also
+    // what the request panel displays — show the request's own values at every
+    // instant, including while a run is in flight.
+    const baseContext: TransformedContext = { ...this.envContextFor(ctx) }
 
     // Process each KeyValue group
     for (const [_groupName, keyValues] of ctx.keyValueGroups) {
@@ -734,25 +732,12 @@ class ContextService {
 
     // Calculate resolved URL and code snippets if we have full data
     if (ctx.fullData) {
-      // Sync fullData with keyValueGroups to ensure we use the latest values
-      const headersFromGroup = ctx.keyValueGroups.get('headers')
-      const paramsFromGroup = ctx.keyValueGroups.get('params')
-      const pathParamsFromGroup = ctx.keyValueGroups.get('pathParams')
+      const updatedData = this.buildResolvableData(ctx, ctx.fullData, requestId)
 
-      const updatedData: FullRequestData = {
-        ...ctx.fullData,
-        headers: headersFromGroup ?? ctx.fullData.headers,
-        ...(paramsFromGroup !== undefined ? { params: paramsFromGroup } : ctx.fullData.params !== undefined ? { params: ctx.fullData.params } : {}),
-        ...(pathParamsFromGroup !== undefined ? { pathParams: pathParamsFromGroup } : ctx.fullData.pathParams !== undefined ? { pathParams: ctx.fullData.pathParams } : {})
-      }
-
-      // Materialise any CustomListValue params/pathParams into plain
-      // resolved StringValues so URLResolver (which only special-cases
-      // enums) builds the query/path with the substituted value.
-      if (updatedData.params) updatedData.params = this.materializeCustomListKVs(updatedData.params, requestId)
-      if (updatedData.pathParams) updatedData.pathParams = this.materializeCustomListKVs(updatedData.pathParams, requestId)
-
-      // Delegate URL resolution to URLResolver
+      // Delegate URL resolution to URLResolver. No run layer here: this recompute
+      // feeds the CACHED url + the request panel, both of which belong to the
+      // request. A dispatch that carries a run's values resolves its own URL
+      // through `resolveUrlForRequest`, against a context it throws away.
       const urlResult = resolveUrl(updatedData, baseContext, this.transformValue.bind(this))
       const previousUrlResult = this.resolvedUrls.get(requestId)
       if (previousUrlResult?.resolvedUrl !== urlResult.resolvedUrl) {
@@ -776,6 +761,121 @@ class ContextService {
 
       this.calculateAvailableVariables(requestId, updatedData, baseContext, sourceId)
     }
+  }
+
+  /**
+   * The request's `fullData`, re-synced from the live KeyValue groups and with
+   * custom-list rows materialised — the shape URLResolver and the snippet
+   * generator consume.
+   *
+   * Shared by the display recompute and by a dispatch's own URL resolution so
+   * the two cannot drift: a request whose URL the panel shows one way and the
+   * wire another is the failure mode this separation exists to prevent.
+   */
+  private buildResolvableData(ctx: RequestContext, fullData: FullRequestData, requestId: string): FullRequestData {
+    // Sync fullData with keyValueGroups to ensure we use the latest values
+    const headersFromGroup = ctx.keyValueGroups.get('headers')
+    const paramsFromGroup = ctx.keyValueGroups.get('params')
+    const pathParamsFromGroup = ctx.keyValueGroups.get('pathParams')
+
+    const updatedData: FullRequestData = {
+      ...fullData,
+      headers: headersFromGroup ?? fullData.headers,
+      ...(paramsFromGroup !== undefined ? { params: paramsFromGroup } : fullData.params !== undefined ? { params: fullData.params } : {}),
+      ...(pathParamsFromGroup !== undefined ? { pathParams: pathParamsFromGroup } : fullData.pathParams !== undefined ? { pathParams: fullData.pathParams } : {})
+    }
+
+    // Materialise any CustomListValue params/pathParams into plain
+    // resolved StringValues so URLResolver (which only special-cases
+    // enums) builds the query/path with the substituted value.
+    if (updatedData.params) updatedData.params = this.materializeCustomListKVs(updatedData.params, requestId)
+    if (updatedData.pathParams) updatedData.pathParams = this.materializeCustomListKVs(updatedData.pathParams, requestId)
+    return updatedData
+  }
+
+  // =========================================================================
+  // Disposable per-execution resolution contexts
+  // =========================================================================
+
+  /**
+   * Build the DISPOSABLE contexts one execution of `requestId` resolves
+   * against: a copy of what the request itself resolves against, enriched with
+   * the run's values, one object per row family.
+   *
+   * Pure. It reads the stored request + environment state and **writes
+   * nothing** — no field, no cache, no broadcast. That is the property, not an
+   * implementation detail: a run cannot leave a value behind if the only place
+   * it was ever written is an object the caller drops.
+   *
+   * Call it JUST BEFORE each request executes, never once per run — the
+   * overlay a run carries grows as the run proceeds (an answered input, a
+   * `setVariable`), and a variable declared between two requests must reach the
+   * second and not the first.
+   *
+   * `runOverlay` absent (the request panel's Send, an MCP dispatch outside a
+   * run) yields the request's own values alone, which is the correct answer for
+   * those callers rather than a degraded one.
+   */
+  composeResolutionContexts(requestId: string, runOverlay?: TransformedContext): ResolutionContexts {
+    const ctx = this.requestContexts.get(requestId)
+    const env = ctx ? this.envContextFor(ctx) : undefined
+    const overlay = runOverlay && Object.keys(runOverlay).length > 0 ? runOverlay : undefined
+    // ONE context, not a per-family bundle. The four families this used to
+    // carry (path params, query params, headers, body fields) are HTTP's
+    // anatomy, and this object is shared by every protocol — Kafka, Redis,
+    // gRPC and AMQP each would have had to pick a family that did not
+    // describe them. They were seeded identically anyway, so collapsing them
+    // changes nothing: per-family cumulation that genuinely exists lives
+    // inside `URLResolver`, which is HTTP-specific by design.
+    const contexts: ResolutionContexts = {
+      ...(overlay !== undefined ? { runOverlay: { ...overlay } } : {}),
+      base: { ...(env ?? {}), ...(overlay ?? {}) }
+    }
+    return contexts
+  }
+
+  /**
+   * Re-seed an execution's disposable contexts from the environment as it
+   * stands NOW, keeping the run's values and the object identity.
+   *
+   * A dispatch can change the environment under itself: hydrating an
+   * env-folder secret populates the resolved plaintext after the copy was
+   * taken, so the copy still carries the masked (empty) value. The whole
+   * dispatch — url, headers, body, and the history entry the caller archives
+   * afterwards from this same object — has to see the hydrated value, so this
+   * refreshes IN PLACE rather than returning a second object the caller would
+   * have to remember to swap in everywhere.
+   *
+   * Call it only after something has genuinely changed the environment
+   * context. It is not a substitute for composing per request execution.
+   */
+  refreshResolutionContexts(requestId: string, contexts: ResolutionContexts): void {
+    const fresh = this.composeResolutionContexts(requestId, contexts.runOverlay)
+    const reseed = (target: TransformedContext, source: TransformedContext): void => {
+      // `Reflect.deleteProperty`, not `delete target[key]`: the lint rule
+      // `no-dynamic-delete` rejects a computed-key delete, and suppressing it
+      // is not allowed here. Same semantics, and the keys are genuinely
+      // dynamic — this clears whatever the previous compose left behind.
+      for (const key of Object.keys(target)) Reflect.deleteProperty(target, key)
+      Object.assign(target, source)
+    }
+    reseed(contexts.base, fresh.base)
+  }
+
+  /**
+   * The URL a dispatch should send to.
+   *
+   * With `contexts`, the URL is resolved FRESH against them and returned to the
+   * caller only — it is never cached and never broadcast, so a run's value
+   * reaches the wire without reaching the request. Without them, this is the
+   * cached URL the request's own recompute produced, byte for byte.
+   */
+  resolveUrlForRequest(requestId: string, contexts?: ResolutionContexts): ResolvedUrlResult | undefined {
+    if (!contexts) return this.resolvedUrls.get(requestId)
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx?.fullData) return this.resolvedUrls.get(requestId)
+    const data = this.buildResolvableData(ctx, ctx.fullData, requestId)
+    return resolveUrl(data, contexts.base, this.transformValue.bind(this), contexts.runOverlay, contexts.base)
   }
 
   // =========================================================================
@@ -1450,52 +1550,54 @@ class ContextService {
   }
 
   /**
-   * Resolve a single value using the request's environment context
-   * Used by HTTPExecutionService to resolve headers, body, etc.
+   * The request's OWN context: the transformed context of its selected
+   * environment, or undefined when it has none.
    *
-   * NOTE: this overload doesn't know the value's `ValueType` so it
-   * always runs the resolver — fine for body templates and the URL
-   * (which are expression-shaped by construction) but WRONG for
-   * header / param `KeyValue.value`, where a `StringValue` must
-   * stay verbatim. Header / param resolution should use
-   * `resolveKeyValueForRequest` instead so the type-aware gate in
-   * `resolveKeyValue` fires.
+   * A run's values are never part of this. The only way a run's value reaches a
+   * resolution is a `ResolutionContexts` the caller passes in explicitly and
+   * then drops — see `composeResolutionContexts`.
    */
-  /**
-   * Set (or clear) a request's scenario `setVariable` OVERLAY — the per-run
-   * variables that win over the env context for this request. Recalculates the
-   * request context so the CACHED resolved URL (and KV transforms) reflect the
-   * overlay immediately. Pass an empty map / undefined to clear it.
-   */
-  setScenarioVariables(requestId: string, variables: TransformedContext | undefined): void {
-    const ctx = this.requestContexts.get(requestId)
-    if (!ctx) return
-    const next = variables && Object.keys(variables).length > 0 ? variables : undefined
-    if (ctx.scenarioVariables === undefined && next === undefined) return
-    ctx.scenarioVariables = next
-    this.recalculateRequestContext(requestId)
+  private envContextFor(ctx: RequestContext): TransformedContext | undefined {
+    return ctx.environmentId ? this.transformedContexts.get(ctx.environmentId) : undefined
   }
 
   /**
-   * The context a request resolves against: the transformed ENV context with
-   * the scenario `setVariable` overlay merged ON TOP (overlay wins). Returns the
-   * plain env context when there's no overlay, just the overlay when there's no
-   * env, or undefined when there's neither.
+   * Resolve a single value against the request's context.
+   *
+   * `context` is the DISPOSABLE context of the row family this value belongs to
+   * — `ResolutionContexts.base` for a value in no family (a payload, a topic, a
+   * text body), `.headers` for a header, `.bodyFields` for a body field. Absent
+   * (the request panel's Send, the display, an MCP dispatch outside a run) means
+   * the request's own environment context, which is the right answer for those
+   * callers and not a fallback.
+   *
+   * NOTE: this entry point doesn't know the value's `ValueType` so it always
+   * runs the resolver — fine for body templates and the URL (which are
+   * expression-shaped by construction) but WRONG for header / param
+   * `KeyValue.value`, where a `StringValue` must stay verbatim. Header / param
+   * resolution should use `resolveKeyValueForRequest` instead so the type-aware
+   * gate in `resolveKeyValue` fires.
    */
-  private effectiveEnvContext(ctx: RequestContext): TransformedContext | undefined {
-    const env = ctx.environmentId ? this.transformedContexts.get(ctx.environmentId) : undefined
-    if (ctx.scenarioVariables && Object.keys(ctx.scenarioVariables).length > 0) {
-      return { ...(env ?? {}), ...ctx.scenarioVariables }
-    }
-    return env
+  resolveValue(value: string, requestId: string, context?: TransformedContext): string {
+    const effective = this.pickResolutionContext(requestId, context)
+    if (!effective) return value
+    return this.transformValue(value, effective)
   }
 
-  resolveValue(value: string, requestId: string): string {
+  /**
+   * The context a resolution actually runs against: the caller's disposable one
+   * when it carries anything, the request's own environment context otherwise.
+   *
+   * An EMPTY disposable context falls through rather than winning. A run with no
+   * variables over a request with no environment resolves against nothing at
+   * all, and "nothing at all" means the caller gets its template back verbatim —
+   * the historical behaviour, which an empty-but-present object would silently
+   * turn into "every variable resolves to the empty string".
+   */
+  private pickResolutionContext(requestId: string, context?: TransformedContext): TransformedContext | undefined {
+    if (context && Object.keys(context).length > 0) return context
     const ctx = this.requestContexts.get(requestId)
-    if (!ctx) return value
-    const context = this.effectiveEnvContext(ctx)
-    if (!context) return value
-    return this.transformValue(value, context)
+    return ctx ? this.envContextFor(ctx) : undefined
   }
 
   /**
@@ -1509,15 +1611,13 @@ class ContextService {
    * Like `transformValue`, a resolution failure logs and returns the body
    * verbatim rather than shipping a half-substituted payload.
    */
-  resolveBodyValue(value: string, requestId: string, contentType?: string): string {
-    if (!isJsonContentType(contentType)) return this.resolveValue(value, requestId)
-    const ctx = this.requestContexts.get(requestId)
-    if (!ctx) return value
-    const context = this.effectiveEnvContext(ctx)
-    if (!context) return value
+  resolveBodyValue(value: string, requestId: string, contentType?: string, context?: TransformedContext): string {
+    if (!isJsonContentType(contentType)) return this.resolveValue(value, requestId, context)
+    const effective = this.pickResolutionContext(requestId, context)
+    if (!effective) return value
     if (!value.includes('{{')) return value
     try {
-      return resolveJsonBodyTemplate(value, context)
+      return resolveJsonBodyTemplate(value, effective)
     } catch (error) {
       logger.warn('[ContextService] JSON body transform error', {
         value,
@@ -1535,7 +1635,7 @@ class ContextService {
    * GraphQL execution services can opt into the strict gate
    * instead of the always-resolves shortcut.
    */
-  resolveKeyValueForRequest(kv: KeyValue, requestId: string): string {
+  resolveKeyValueForRequest(kv: KeyValue, requestId: string, context?: TransformedContext): string {
     // A CustomListValue carries a label; substitute the owning list's
     // current entry value (read live from the folder so edits to the
     // list are reflected on the next dispatch).
@@ -1548,11 +1648,9 @@ class ContextService {
     if (isCustomListMultiValue(kv.value)) {
       return this.resolveCustomListMultiValue(kv.value, requestId).join(',')
     }
-    const ctx = this.requestContexts.get(requestId)
-    if (!ctx) return kv.value.toString()
-    const context = this.effectiveEnvContext(ctx)
-    if (!context) return kv.value.toString()
-    return this.resolveKeyValue(kv, context)
+    const effective = this.pickResolutionContext(requestId, context)
+    if (!effective) return kv.value.toString()
+    return this.resolveKeyValue(kv, effective)
   }
 
   /**

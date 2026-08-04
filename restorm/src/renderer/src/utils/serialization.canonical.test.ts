@@ -124,7 +124,17 @@ describe('canonicalizeSerializedKeys — key-order contract', () => {
   })
 
   it('exposes the priority list as a stable contract', () => {
-    expect(CANONICAL_KEY_PRIORITY).toEqual(['id', 'name', 'key', 'type', 'folderType', 'method', 'url'])
+    expect(CANONICAL_KEY_PRIORITY).toEqual([
+      'id', 'name', 'key', 'type', 'folderType', 'method', 'url', 'fileFormatVersion'
+    ])
+  })
+
+  it('puts the document format version above the collections it applies to', () => {
+    // Alphabetically it would sort after `collections`, i.e. below the
+    // entire project — a format stamp nobody sees is a format stamp that
+    // gets missed.
+    const out = canonicalizeSerializedKeys({ collections: [], _projectUuid: 'u', fileFormatVersion: 1 })
+    expect(Object.keys(out)).toEqual(['fileFormatVersion', '_projectUuid', 'collections'])
   })
 })
 

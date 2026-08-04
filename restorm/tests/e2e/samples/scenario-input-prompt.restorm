@@ -1,0 +1,472 @@
+fileFormatVersion: 1
+collections:
+  - id: 5a5d9fc3-3702-4ce5-ba8f-9cbca3198abf
+    name: Input prompt petstore
+    folderType: environment
+    configuration: {}
+    customValueLists:
+      - id: 304ebed9-0997-4d12-ae97-9abde3f3c757
+        name: PetIds
+        entries:
+          - id: 2167f6af-7fb2-4cf0-a92b-8c4ef59ef5cf
+            label: Pet 1
+            value: '1'
+          - id: 23c95f06-227a-4899-ad03-f30b0bcfc39a
+            label: Pet 2
+            value: '2'
+          - id: 1c5caac0-9f8f-47a6-b11f-f2159abd4259
+            label: Pet 3
+            value: '3'
+    enumDefinitions:
+      - id: petid-enum
+        name: PetIdEnum
+        values:
+          - '1'
+          - '2'
+          - '3'
+    environments:
+      - id: 117152c6-3060-46b2-bf60-e8a30384ea62
+        name: Default
+        variables:
+          - key: baseUrl
+            enabled: true
+            value:
+              type: string
+              value: http://localhost:8080/api
+    items:
+      - id: adec3bce-1dc0-4571-b50f-fa73085056a7
+        name: Pet by string
+        type: http
+        method: GET
+        url: '{{baseUrl}}/pet/{{petId}}'
+        deprecated: false
+        documentation: ''
+        headers: []
+        params: []
+        pathParams:
+          - key: petId
+            enabled: true
+            value:
+              type: string
+              value: '1'
+        tags: []
+      - id: 44ccafce-c049-480b-9371-2b5d222d2dbb
+        name: Pet by number
+        type: http
+        method: GET
+        url: '{{baseUrl}}/pet/{{petId}}'
+        deprecated: false
+        documentation: ''
+        headers: []
+        params: []
+        pathParams:
+          - key: petId
+            enabled: true
+            value:
+              type: numeric
+              format: decimal
+              value: 1
+        tags: []
+      - id: 3716ed87-cf3d-414e-8acd-dfc9a619446f
+        name: Pet by enum
+        type: http
+        method: GET
+        url: '{{baseUrl}}/pet/{{petId}}'
+        deprecated: false
+        documentation: ''
+        headers: []
+        params: []
+        pathParams:
+          - key: petId
+            enabled: true
+            value:
+              type: enum
+              enumDefinitionId: petid-enum
+              value: '1'
+        tags: []
+      - id: 2c3d5c41-f56e-4074-978d-3f4f5b7ddd9d
+        name: Pet by custom list
+        type: http
+        method: GET
+        url: '{{baseUrl}}/pet/{{petId}}'
+        deprecated: false
+        documentation: ''
+        headers: []
+        params: []
+        pathParams:
+          - key: petId
+            enabled: true
+            value:
+              type: customList
+              label: Pet 1
+              listId: 304ebed9-0997-4d12-ae97-9abde3f3c757
+        tags: []
+      - id: 09ad7a71-d72b-4475-80a1-5650b20cf51a
+        name: string prompt
+        type: scenario
+        edges:
+          - id: fced1eaf-ebba-4ba4-99ee-2130feb0abf6
+            from:
+              nodeId: f62db755-bdac-4b78-8c2b-66d17eb2cb02
+              portId: value
+            to:
+              nodeId: 88a028ba-0f77-4004-bb9f-536be12c933c
+              portId: in
+          - id: 357075aa-1699-4b8d-b3e2-490d2e7a9035
+            from:
+              nodeId: 88a028ba-0f77-4004-bb9f-536be12c933c
+              portId: response
+            selector: response.body.name
+            to:
+              nodeId: cb5f8ad2-36db-4467-a497-06d21d74809b
+              portId: data
+        items: []
+        nodes:
+          - id: f62db755-bdac-4b78-8c2b-66d17eb2cb02
+            config:
+              params:
+                - id: p1
+                  name: petId
+                  valueType:
+                    type: string
+                    value: '2'
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+            kind: input
+            outputs:
+              - id: value
+                name: value
+                dataType: any
+                flow: both
+            position:
+              x: 12
+              'y': 12
+          - id: 88a028ba-0f77-4004-bb9f-536be12c933c
+            config:
+              label: Pet by string
+              requestId: adec3bce-1dc0-4571-b50f-fa73085056a7
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: env
+                name: env
+                dataType: any
+                flow: value
+              - id: requestOverride
+                name: override
+                dataType: object
+                flow: value
+            kind: httpRequest
+            outputs:
+              - id: response
+                name: response
+                dataType: response
+                flow: both
+                role: response
+            position:
+              x: 12
+              'y': 190
+          - id: cb5f8ad2-36db-4467-a497-06d21d74809b
+            config:
+              label: pet name
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: message
+                name: message
+                dataType: string
+              - id: data
+                name: data
+                dataType: any
+            kind: log
+            outputs: []
+            position:
+              x: 272
+              'y': 12
+        params: []
+        tags: []
+      - id: cf9ec985-0267-4461-bca6-6cbdcb1e0129
+        name: number prompt
+        type: scenario
+        edges:
+          - id: 1f481259-0f29-4cb4-abfe-e923140ac839
+            from:
+              nodeId: fea6d146-9e95-466c-8c3a-1afac8a2d2e3
+              portId: value
+            to:
+              nodeId: 35729b50-ee49-476f-a5ac-12b8b81d7838
+              portId: in
+          - id: 725a1269-4723-4d46-bd7a-c049d3dcf25f
+            from:
+              nodeId: 35729b50-ee49-476f-a5ac-12b8b81d7838
+              portId: response
+            selector: response.body.name
+            to:
+              nodeId: 1f2f259e-22a2-45f7-a70d-1ae2a435ad55
+              portId: data
+        items: []
+        nodes:
+          - id: fea6d146-9e95-466c-8c3a-1afac8a2d2e3
+            config:
+              params:
+                - id: p1
+                  name: petId
+                  valueType:
+                    type: numeric
+                    value: 2
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+            kind: input
+            outputs:
+              - id: value
+                name: value
+                dataType: any
+                flow: both
+            position:
+              x: 12
+              'y': 12
+          - id: 35729b50-ee49-476f-a5ac-12b8b81d7838
+            config:
+              label: Pet by number
+              requestId: 44ccafce-c049-480b-9371-2b5d222d2dbb
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: env
+                name: env
+                dataType: any
+                flow: value
+              - id: requestOverride
+                name: override
+                dataType: object
+                flow: value
+            kind: httpRequest
+            outputs:
+              - id: response
+                name: response
+                dataType: response
+                flow: both
+                role: response
+            position:
+              x: 12
+              'y': 190
+          - id: 1f2f259e-22a2-45f7-a70d-1ae2a435ad55
+            config:
+              label: pet name
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: message
+                name: message
+                dataType: string
+              - id: data
+                name: data
+                dataType: any
+            kind: log
+            outputs: []
+            position:
+              x: 272
+              'y': 12
+        params: []
+        tags: []
+      - id: 2968b3dc-8506-46a6-9f96-6438abda1815
+        name: enum prompt
+        type: scenario
+        edges:
+          - id: 1e9fe8ea-4ee3-4d54-87b1-b477efe0fca1
+            from:
+              nodeId: 20e61df0-a573-49ac-a5a4-cb381e43ff82
+              portId: value
+            to:
+              nodeId: da2e908b-4d71-4ecc-acf4-34ffd0268ebc
+              portId: in
+          - id: a1bc65d6-0fd2-4bd5-b744-c9aa888c3076
+            from:
+              nodeId: da2e908b-4d71-4ecc-acf4-34ffd0268ebc
+              portId: response
+            selector: response.body.name
+            to:
+              nodeId: 30dae873-ca45-4270-b16a-f13b0b59cf4c
+              portId: data
+        items: []
+        nodes:
+          - id: 20e61df0-a573-49ac-a5a4-cb381e43ff82
+            config:
+              params:
+                - id: p1
+                  name: petId
+                  valueType:
+                    type: enum
+                    enumDefinitionId: petid-enum
+                    value: '2'
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+            kind: input
+            outputs:
+              - id: value
+                name: value
+                dataType: any
+                flow: both
+            position:
+              x: 12
+              'y': 12
+          - id: da2e908b-4d71-4ecc-acf4-34ffd0268ebc
+            config:
+              label: Pet by enum
+              requestId: 3716ed87-cf3d-414e-8acd-dfc9a619446f
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: env
+                name: env
+                dataType: any
+                flow: value
+              - id: requestOverride
+                name: override
+                dataType: object
+                flow: value
+            kind: httpRequest
+            outputs:
+              - id: response
+                name: response
+                dataType: response
+                flow: both
+                role: response
+            position:
+              x: 12
+              'y': 190
+          - id: 30dae873-ca45-4270-b16a-f13b0b59cf4c
+            config:
+              label: pet name
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: message
+                name: message
+                dataType: string
+              - id: data
+                name: data
+                dataType: any
+            kind: log
+            outputs: []
+            position:
+              x: 272
+              'y': 12
+        params: []
+        tags: []
+      - id: 3ec56b6d-8fa3-43d7-b714-75e25d134190
+        name: custom list prompt
+        type: scenario
+        edges:
+          - id: 51d6916d-40c4-40b8-87ae-6fd718d1effa
+            from:
+              nodeId: a8a1693f-0d81-47c8-b72d-6a35c92a9bcb
+              portId: value
+            to:
+              nodeId: b07ba625-b6af-4166-90a5-21f3b0103085
+              portId: in
+          - id: ca782508-9418-4e20-901b-99229c27b6d1
+            from:
+              nodeId: b07ba625-b6af-4166-90a5-21f3b0103085
+              portId: response
+            selector: response.body.name
+            to:
+              nodeId: c829cfd4-94a7-48ad-9e4e-a68c69b22b53
+              portId: data
+        items: []
+        nodes:
+          - id: a8a1693f-0d81-47c8-b72d-6a35c92a9bcb
+            config:
+              params:
+                - id: p1
+                  name: petId
+                  valueType:
+                    type: customList
+                    label: Pet 2
+                    listId: 304ebed9-0997-4d12-ae97-9abde3f3c757
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+            kind: input
+            outputs:
+              - id: value
+                name: value
+                dataType: any
+                flow: both
+            position:
+              x: 12
+              'y': 12
+          - id: b07ba625-b6af-4166-90a5-21f3b0103085
+            config:
+              label: Pet by custom list
+              requestId: 2c3d5c41-f56e-4074-978d-3f4f5b7ddd9d
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: env
+                name: env
+                dataType: any
+                flow: value
+              - id: requestOverride
+                name: override
+                dataType: object
+                flow: value
+            kind: httpRequest
+            outputs:
+              - id: response
+                name: response
+                dataType: response
+                flow: both
+                role: response
+            position:
+              x: 12
+              'y': 190
+          - id: c829cfd4-94a7-48ad-9e4e-a68c69b22b53
+            config:
+              label: pet name
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: message
+                name: message
+                dataType: string
+              - id: data
+                name: data
+                dataType: any
+            kind: log
+            outputs: []
+            position:
+              x: 272
+              'y': 12
+        params: []
+        tags: []
+    tagColors: {}
+    tags: []
+_projectUuid: 5484a16b-a0ec-41af-87ae-75f4abbf29a1

@@ -5,26 +5,109 @@
  */
 
 import type { FullRequestData, ResolvedUrlResult, TransformedContext, TransformValueFn } from './ContextServiceTypes'
-import { isExpressionValue, isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
+import { isEnumListValue, isEnumValue } from '../../shared/utils/valueHelpers'
 import { serializeODataQueryOptions } from '../../shared/utils/odataQuery'
+
+/**
+ * Overlay a scenario run's values onto a URL-template context, in place.
+ *
+ * Written VERBATIM, not `encodeURIComponent`-ed. Note this is NOT uniform with
+ * everything it can overwrite: env values are verbatim, but a path-param row is
+ * encoded just above, so a run value replacing one swaps an encoded value for an
+ * unencoded one. That is deliberate — a run value is a VARIABLE, like an env
+ * variable, not a path-param row, and encoding it would make the same value
+ * behave differently depending on whether the request happens to carry a row of
+ * that name, which is the hidden asymmetry this layering exists to remove.
+ *
+ * Known property, not a defect: a run value containing `/`, `?`, `#` or `%`
+ * therefore changes the URL's STRUCTURE where the same characters in a
+ * path-param row would have been escaped. Harmless for a value the user typed
+ * into the run prompt; worth knowing for a headless `--param`, whose value can
+ * come from a build parameter someone else controls. Env variables have always
+ * carried the same property.
+ */
+function applyRunContext(target: TransformedContext, runContext: TransformedContext | undefined): void {
+  if (runContext === undefined) return
+  for (const [key, value] of Object.entries(runContext)) target[key] = value
+}
+
+/**
+ * Record a row's resolved value in a cumulative context, then re-assert the
+ * run's values over it.
+ *
+ * Each loop below feeds every row it has resolved back into the context the
+ * NEXT row resolves against — that is how a row can reference an earlier one by
+ * name. Without re-asserting, a row whose key collides with a run variable
+ * would shadow it for every subsequent row, so `{{petId}}` in a later row would
+ * pick up the sibling row's literal instead of the value the run supplied.
+ *
+ * That made resolution order-dependent, which is the worst residual to leave:
+ * it works until someone reorders two rows, and then breaks with nothing
+ * pointing at why.
+ *
+ * THE RULE, for whoever adds a fourth kind of row: **path-param rows POPULATE
+ * the resolution context; query and header rows CONSUME it.** The scenario
+ * run's layer overrides context CONTRIBUTORS, never context CONSUMERS.
+ *
+ * Why: a path-param row is a BINDING — it defines `{{petId}}` for the URL
+ * template — so a run variable of the same name competes for the same token and
+ * must win. A query or header row named `petId` holding a literal is an OUTPUT
+ * the request declares; nothing reads it, so there is nothing to arbitrate and
+ * it is left alone. Replacing one would be the per-slot request-override
+ * feature, which is a separate capability.
+ */
+function noteRowValue(
+  target: TransformedContext,
+  key: string,
+  value: string,
+  runContext: TransformedContext | undefined
+): void {
+  target[key] = value
+  applyRunContext(target, runContext)
+}
 
 /**
  * Calculate the resolved URL for a request.
  *
+ * Values are layered, each layer replacing same-named keys from the one before:
+ *
+ *   1. environment-folder variables (`envContext`, already flattened through the
+ *      parent → sub-environment chain, including the deliberate "same key
+ *      defined twice" cumulation used to build a value by concatenation);
+ *   2. the request's own values (its path params, then its query params);
+ *   3. the scenario run's values (`runContext`) — an input node's answered
+ *      param, or a `setVariable`.
+ *
+ * Layer 3 exists only while a scenario run is in flight; outside one it is
+ * absent and the layering collapses to the historical `request > environment`.
+ *
  * @param data - Full request data containing url, pathParams, params
  * @param envContext - Transformed environment context for Handlebars resolution
  * @param transformValue - Function to resolve Handlebars templates
+ * @param runContext - Scenario run variables, applied last (layer 3)
+ * @param queryContext - Seed for the query-string cumulation when the caller
+ *   keeps a context per row family. Path rows and query rows are blind to each
+ *   other, so they must not share a seed OBJECT even while the two hold equal
+ *   values — sharing one is how a later per-family rule silently becomes a
+ *   cross-family one. Defaults to `envContext`, the historical single-context
+ *   behaviour.
  * @returns The resolved URL result with baseUrl, queryString and final resolvedUrl
  */
 export function resolveUrl(
   data: FullRequestData,
   envContext: TransformedContext,
-  transformValue: TransformValueFn
+  transformValue: TransformValueFn,
+  runContext?: TransformedContext,
+  queryContext?: TransformedContext
 ): ResolvedUrlResult {
   // Build cumulative context with path params (non-encoded for resolution).
   // Path params override env vars for the same key — request-level
   // overrides always win over the inherited environment chain.
+  // Seeded with the run's values rather than relying on the caller having
+  // merged them into `envContext`: layer 3 has to hold from this function's own
+  // arguments, or it is correct only by a coincidence one call site away.
   const cumulativeContext = { ...envContext }
+  applyRunContext(cumulativeContext, runContext)
   const pathParams = data.pathParams ?? []
   // Track which keys were set (or overridden) by a path param, so we
   // can URL-encode just those when building the URL-template context.
@@ -40,14 +123,13 @@ export function resolveUrl(
     if (pp.key) {
       // Resolve using cumulative context (env + previous path params)
       const resolvedKey = transformValue(pp.key, cumulativeContext)
-      // Only `ExpressionValue` values go through Handlebars — plain
-      // strings/numbers/dates etc. are taken literally.
+      // Every value goes through Handlebars, same rule as the query rows
+      // below — what a row contains decides, not the class it was stored as.
       const raw = pp.value.toString()
-      const resolvedValue = isExpressionValue(pp.value)
-        ? transformValue(raw, cumulativeContext)
-        : raw
-      // Store non-encoded value for next iterations (last value wins for same key)
-      cumulativeContext[resolvedKey] = resolvedValue
+      const resolvedValue = transformValue(raw, cumulativeContext)
+      // Store non-encoded value for next iterations (last value wins for same
+      // key), with the run's values re-asserted so a row can't shadow one.
+      noteRowValue(cumulativeContext, resolvedKey, resolvedValue, runContext)
       pathParamKeys.add(resolvedKey)
     }
   }
@@ -63,6 +145,11 @@ export function resolveUrl(
     const value = cumulativeContext[key] ?? ''
     fullContext[key] = encodeURIComponent(value)
   }
+  // Layer 3 last: a scenario run's value replaces the request's own row for the
+  // same key. Without this the request's path param would silently discard the
+  // value a run supplied — an input node's answered param, or a `setVariable` —
+  // and the prompt the user answered would have no effect on the URL.
+  applyRunContext(fullContext, runContext)
 
   // Transform the URL template
   let baseUrl = transformValue(data.url, fullContext)
@@ -77,7 +164,8 @@ export function resolveUrl(
 
   // Build query string from params with cumulative resolution
   const params = data.params ?? []
-  const cumulativeParamsContext = { ...envContext }
+  const cumulativeParamsContext = { ...(queryContext ?? envContext) }
+  applyRunContext(cumulativeParamsContext, runContext)
   // Use an array of [key, value] pairs instead of a Map to support
   // repeated keys (EnumListValue with collectionFormat: multi).
   const queryParts: string[] = []
@@ -95,7 +183,7 @@ export function resolveUrl(
         for (const v of values) {
           queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
         }
-        cumulativeParamsContext[resolvedKey] = values.join(',')
+        noteRowValue(cumulativeParamsContext, resolvedKey, values.join(','), runContext)
         continue
       }
 
@@ -104,18 +192,28 @@ export function resolveUrl(
         const v = param.value.value
         if (v) {
           queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(v)}`)
-          cumulativeParamsContext[resolvedKey] = v
+          noteRowValue(cumulativeParamsContext, resolvedKey, v, runContext)
         }
         continue
       }
 
-      // ExpressionValue goes through Handlebars, others taken literally
+      // EVERY value goes through Handlebars, whatever class the row holds.
+      // Gating this on `isExpressionValue` made resolution depend on how the
+      // row was CREATED rather than on what it contains: the same
+      // `a{{test}}b`, typed into the value cell, was sent verbatim — braces
+      // and all — while a row the UI happened to classify as an expression
+      // resolved. A template is a template.
       const raw = param.value.toString()
-      const resolvedValue = isExpressionValue(param.value)
-        ? transformValue(raw, cumulativeParamsContext)
-        : raw
-      queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
-      cumulativeParamsContext[resolvedKey] = resolvedValue
+      const resolvedValue = transformValue(raw, cumulativeParamsContext)
+      // An empty result means every variable in the template was undefined
+      // (Handlebars renders an unknown variable as ""), so the row has no
+      // value to send. Emit nothing rather than a bare `key=`: the server
+      // sees "absent", which is what the user's own context expressed, and
+      // not "present and empty", which is a different request.
+      if (resolvedValue !== '') {
+        queryParts.push(`${encodeURIComponent(resolvedKey)}=${encodeURIComponent(resolvedValue)}`)
+      }
+      noteRowValue(cumulativeParamsContext, resolvedKey, resolvedValue, runContext)
     }
   }
 

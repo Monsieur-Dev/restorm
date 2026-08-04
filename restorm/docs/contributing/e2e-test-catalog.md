@@ -82,6 +82,7 @@ server; — = pure UI/in-process.
 | scenario-runlog | 56 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main) | 🏠 |
 | scenario-quick-config-selector | 1 | Request-action config selector stays live | — |
 | scenario-setvariable-override | 1 | setVariable overrides an env-folder var downstream | — |
+| scenario-input-prompt | 4 | Run-parameters modal: the answer wins over the input default AND the request's own path param (string / number / enum / custom-list) | 🐳 petstore |
 | scenario-suggestions | 1 | Scenario inspector data suggestions | — |
 | secrets-sources | 1 | Secret-source scenarios → stable run-log | — |
 
@@ -98,6 +99,7 @@ server; — = pure UI/in-process.
 | documentation-viewer | 4 | Documentation viewer interactions | — |
 | quick-settings | 13 | Quick-config save/load round-trip every protocol field + app-wide popover exclusivity | — |
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
+| sidebar-clone | 3 | Sidebar "Clone" recursive id independence: request / quick-configs / env-folder (nested request, custom value list, enum definition, cross-scenario runScenario, connectionNodeId) — clone-then-rename-the-original leaves the clone unaffected, both stay distinctly searchable | 🔌 |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
 | open-folder | 2 | Open Folder | — |
 | body-type-migration | 1 | Legacy body-type canonicalisation on load | — |

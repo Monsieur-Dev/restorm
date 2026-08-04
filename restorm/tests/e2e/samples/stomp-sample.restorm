@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: STOMP Playground
@@ -44,5 +45,4 @@ collections:
         sendHeaders: []
         id: 4d2f0a91-3c6b-4e77-9a18-5b3e0c7d2f55
     id: d9e3a9c4-6f18-43b1-8c3a-7e9b7d3f1b13
-    fileFormatVersion: 1
 _projectUuid: b2c3d4e5-f6a7-4809-9b1c-2d3e4f5a6172

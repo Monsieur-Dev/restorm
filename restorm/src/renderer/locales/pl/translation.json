@@ -52,6 +52,21 @@
     "draftsRestoredBody_many": "Przywrócono {{count}} brudnopisów z poprzedniej sesji.",
     "draftsRestoredBody_other": "Przywrócono {{count}} brudnopisu z poprzedniej sesji."
   },
+  "about": {
+    "version": "Wersja {{version}}",
+    "tagline": "Środowisko testowania API — klient i serwer.",
+    "links": {
+      "website": "Witryna",
+      "documentation": "Dokumentacja",
+      "releaseNotes": "Informacje o wydaniu"
+    },
+    "publishedBy": "Wydawca",
+    "legal": {
+      "trademark": "Restorm® jest znakiem towarowym zarejestrowanym w INPI.",
+      "copyright": "© 2026 Monsieur Dev. Wszelkie prawa zastrzeżone."
+    },
+    "close": "Zamknij"
+  },
   "statusbar": {
     "requestHistory": "Historia żądań",
     "envSelector": {
@@ -1031,7 +1046,19 @@
     "dropZone": "Strefa upuszczania",
     "editAuth": "Edytuj trasę uwierzytelniania",
     "error": {
-      "unknown": "Wystąpił nieznany błąd"
+      "unknown": "Wystąpił nieznany błąd",
+      "unexpected": "Import nie powiódł się z nieoczekiwanego powodu.",
+      "detailLabel": "Szczegóły techniczne",
+      "folderNotFound": "Ten folder już nie istnieje w projekcie, więc nie można go odświeżyć.",
+      "noSourceUrl": "Ten folder nie ma zapisanego adresu URL źródła, więc nie ma czego odświeżać.",
+      "noImportSource": "Ten folder nie powstał z rozpoznanego importu, więc nie można go odświeżyć ze źródła.",
+      "formatNotRefreshable": "Import {{format}} jest jednorazowy: nie ma specyfikacji do ponownego pobrania, więc tego folderu nie da się odświeżyć.",
+      "httpStatus": "Źródło odpowiedziało na żądanie kodem HTTP {{status}}.",
+      "specParseFailed": "Nie udało się przetworzyć specyfikacji pobranej z {{url}}.",
+      "sourceImportFailed": "Nie udało się ponownie zaimportować specyfikacji z jej źródła.",
+      "emptySpec": "Specyfikacja pobrana z {{url}} nie deklaruje żadnej operacji {{format}}. Zastosowanie jej opróżniłoby ten folder, więc aktualizacja została odrzucona.",
+      "formatNotDetected": "Nie rozpoznano formatu tego źródła.",
+      "unsupportedFormat": "Żaden importer nie obsługuje formatu {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1477,6 +1504,10 @@
       },
       "connection": {
         "missingName": "Nazwa połączenia jest wymagana."
+      },
+      "reachability": {
+        "unreachable": "Ta akcja nigdy się nie wykona: nie prowadzi do niej żadne połączenie od akcji rozpoczynającej scenariusz.",
+        "cycle": "Ta akcja należy do pętli połączeń, której nic nie uruchamia, więc nigdy się nie wykona. Podłącz do niej akcję spoza pętli."
       }
     },
     "usage": {
@@ -2450,13 +2481,16 @@
       "movedFolder": "Przeniesiono folder \"{{name}}\"",
       "movedEnvironmentFolder": "Przeniesiono folder środowiska \"{{name}}\"",
       "reorderedFolder": "Zmieniono kolejność elementów w folderze „{{name}}”",
-      "reorderedEnvironmentFolder": "Zmieniono kolejność elementów w folderze środowiska „{{name}}”"
+      "reorderedEnvironmentFolder": "Zmieniono kolejność elementów w folderze środowiska „{{name}}”",
+      "stampedFileFormatVersion": "Wersja formatu pliku {{name}}",
+      "changedFileFormatVersion": "Format pliku {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Aktualizacja żądania „{{name}}”",
       "singleScenario": "Aktualizacja scenariusza „{{name}}”",
       "singleFolder": "Aktualizacja folderu „{{name}}”",
       "singleEnvironmentFolder": "Aktualizacja folderu środowiska „{{name}}”",
+      "singleFileFormatVersion": "Przejście na format pliku {{name}}",
       "countRequest_one": "{{count}} żądanie",
       "countRequest_other": "{{count}} żądań",
       "countScenario_one": "{{count}} scenariusz",
@@ -2465,6 +2499,8 @@
       "countFolder_other": "{{count}} folderów",
       "countEnvironmentFolder_one": "{{count}} folder środowiska",
       "countEnvironmentFolder_other": "{{count}} folderów środowiska",
+      "countFileFormatVersion_one": "{{count}} zmiana formatu pliku",
+      "countFileFormatVersion_other": "{{count}} zmian formatu pliku",
       "multiple": "Aktualizacja: {{parts}}"
     },
     "semiPullFrequencyTitle": "Częstotliwość automatycznego sprawdzania aktualizacji",
@@ -2581,6 +2617,13 @@
       "title": "Plik nie został ponownie otwarty",
       "body": "Plik {{file}} nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików.",
       "bodyUnnamed": "Ostatni plik nie został ponownie otwarty: Restorm uległ awarii podczas jego otwierania przy poprzednim uruchomieniu. Plik jest nienaruszony — można go otworzyć z ostatnio używanych plików."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt utworzony w nowszej wersji",
+      "message": "Ten plik został utworzony w nowszej wersji Restorm niż używana. Zaktualizuj Restorm, aby go otworzyć.",
+      "versions": "Format pliku {{found}}; ta wersja obsługuje do {{current}}."
     }
   }
 }

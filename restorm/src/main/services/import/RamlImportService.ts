@@ -46,7 +46,6 @@ import {
 import { ramlToApiDocumentation } from './transformers/ramlToApiDocumentation'
 import type { CommonSchema } from './transformers/_shared'
 import { rewriteUrlTemplate } from './transformers/_shared'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -385,7 +384,6 @@ export function importRaml(content: string, options: RamlImportOptions = {}): En
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${expanded.title()}`),
     name: expanded.title(),
     tags: [],

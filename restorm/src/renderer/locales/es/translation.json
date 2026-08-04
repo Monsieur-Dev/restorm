@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "Se ha restaurado {{count}} borrador de tu sesión anterior.",
     "draftsRestoredBody_other": "Se han restaurado {{count}} borradores de tu sesión anterior."
   },
+  "about": {
+    "version": "Versión {{version}}",
+    "tagline": "El entorno de pruebas de API: cliente y servidor.",
+    "links": {
+      "website": "Sitio web",
+      "documentation": "Documentación",
+      "releaseNotes": "Notas de la versión"
+    },
+    "publishedBy": "Editado por",
+    "legal": {
+      "trademark": "Restorm® es una marca registrada en el INPI.",
+      "copyright": "© 2026 Monsieur Dev. Todos los derechos reservados."
+    },
+    "close": "Cerrar"
+  },
   "statusbar": {
     "requestHistory": "Historial de peticiones",
     "envSelector": {
@@ -1029,7 +1044,19 @@
     "dropZone": "Zona de arrastre",
     "editAuth": "Editar ruta de autenticación",
     "error": {
-      "unknown": "Se ha producido un error desconocido"
+      "unknown": "Se ha producido un error desconocido",
+      "unexpected": "La importación falló por un motivo inesperado.",
+      "detailLabel": "Detalle técnico",
+      "folderNotFound": "Esta carpeta ya no existe en el proyecto, por lo que no se puede actualizar.",
+      "noSourceUrl": "Esta carpeta no registra ninguna URL de origen, así que no hay nada que actualizar.",
+      "noImportSource": "Esta carpeta no se creó mediante una importación reconocida, por lo que no se puede actualizar desde un origen.",
+      "formatNotRefreshable": "Una importación {{format}} es puntual: no hay ninguna especificación que volver a descargar, así que esta carpeta no se puede actualizar.",
+      "httpStatus": "El origen respondió a la petición con HTTP {{status}}.",
+      "specParseFailed": "No se pudo analizar la especificación descargada desde {{url}}.",
+      "sourceImportFailed": "No se pudo volver a importar la especificación desde su origen.",
+      "emptySpec": "La especificación descargada desde {{url}} no declara ninguna operación {{format}}. Aplicarla vaciaría esta carpeta, así que se rechazó la actualización.",
+      "formatNotDetected": "No se reconoció el formato de este origen.",
+      "unsupportedFormat": "Ningún importador admite el formato {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1475,6 +1502,10 @@
       },
       "connection": {
         "missingName": "El nombre de la conexión es obligatorio."
+      },
+      "reachability": {
+        "unreachable": "Esta acción nunca puede ejecutarse: ninguna conexión llega hasta ella desde una acción que inicie el escenario.",
+        "cycle": "Esta acción forma parte de un bucle de conexiones que nada inicia, por lo que nunca puede ejecutarse. Conéctele una acción externa al bucle."
       }
     },
     "usage": {
@@ -2448,13 +2479,16 @@
       "movedFolder": "Movida la carpeta \"{{name}}\"",
       "movedEnvironmentFolder": "Movida la carpeta de entorno \"{{name}}\"",
       "reorderedFolder": "Elementos reordenados en la carpeta «{{name}}»",
-      "reorderedEnvironmentFolder": "Elementos reordenados en la carpeta de entorno «{{name}}»"
+      "reorderedEnvironmentFolder": "Elementos reordenados en la carpeta de entorno «{{name}}»",
+      "stampedFileFormatVersion": "Versión del formato de archivo {{name}}",
+      "changedFileFormatVersion": "Formato de archivo {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Actualización de la solicitud \"{{name}}\"",
       "singleScenario": "Actualización del escenario \"{{name}}\"",
       "singleFolder": "Actualización de la carpeta \"{{name}}\"",
       "singleEnvironmentFolder": "Actualización de la carpeta de entorno \"{{name}}\"",
+      "singleFileFormatVersion": "Cambio al formato de archivo {{name}}",
       "countRequest_one": "{{count}} solicitud",
       "countRequest_other": "{{count}} solicitudes",
       "countScenario_one": "{{count}} escenario",
@@ -2463,6 +2497,8 @@
       "countFolder_other": "{{count}} carpetas",
       "countEnvironmentFolder_one": "{{count}} carpeta de entorno",
       "countEnvironmentFolder_other": "{{count}} carpetas de entorno",
+      "countFileFormatVersion_one": "{{count}} cambio de formato de archivo",
+      "countFileFormatVersion_other": "{{count}} cambios de formato de archivo",
       "multiple": "Actualización de {{parts}}"
     },
     "semiPullFrequencyTitle": "Frecuencia de comprobación automática de actualizaciones",
@@ -2579,6 +2615,13 @@
       "title": "Archivo no reabierto",
       "body": "{{file}} no se ha reabierto: Restorm falló al abrirlo en el inicio anterior. Su archivo está intacto: puede reabrirlo desde los archivos recientes.",
       "bodyUnnamed": "El último archivo no se ha reabierto: Restorm falló al abrirlo en el inicio anterior. Su archivo está intacto: puede reabrirlo desde los archivos recientes."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Proyecto creado con una versión más reciente",
+      "message": "Este archivo se creó con una versión de Restorm más reciente que la que está utilizando. Actualice Restorm para abrirlo.",
+      "versions": "Formato de archivo {{found}}; esta versión admite hasta {{current}}."
     }
   }
 }

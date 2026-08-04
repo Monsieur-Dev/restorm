@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron'
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 import type { FeatureEnvironment, FeaturePlatform } from '../types/feature'
-import type { FileServiceState, FileMetadata, SerializationFormat } from '../types/file'
+import type { FileServiceState, FileMetadata, SerializationFormat, OpenRejectedPayload } from '../types/file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
 import type {
   GitStatus,
@@ -387,6 +387,15 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       ipcRenderer.on('file:opened', handler)
       return () => {
         ipcRenderer.removeListener('file:opened', handler)
+      }
+    },
+    onFileOpenRejected: (callback: (payload: OpenRejectedPayload) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: OpenRejectedPayload): void => {
+        callback(payload)
+      }
+      ipcRenderer.on('file:open-rejected', handler)
+      return () => {
+        ipcRenderer.removeListener('file:open-rejected', handler)
       }
     },
     onFileClosed: (callback: () => void): (() => void) => {

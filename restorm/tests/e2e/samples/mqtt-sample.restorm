@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: MQTT Playground
@@ -56,5 +57,4 @@ collections:
         headers: []
         id: 9c1f0a52-3b6d-4e88-bb70-1d6f4a2e9c33
     id: c8e2a9d4-5f17-43b0-8c2a-6e9b7d3f1a02
-    fileFormatVersion: 1
 _projectUuid: a1b2c3d4-e5f6-4708-9a0b-1c2d3e4f5061

@@ -1,0 +1,58 @@
+# Hand-authored (not derived from a JSON twin) to exercise real-world YAML
+# idioms a stringified-JSON fixture never contains: comments, block scalars
+# (literal + folded), an anchor/alias pair, an unquoted string containing
+# ':' and '#', and a YAML-1.1-style bareword ('on') enum value that a
+# looser parser might mis-coerce to a boolean instead of leaving as text.
+openapi: 3.0.3
+info:
+  title: Handwritten Petstore
+  version: "1.0.0"
+  description: |
+    Multi-line literal description of the API.
+    Line breaks are preserved verbatim here, the way a
+    hand-maintained spec commonly documents things.
+# `components` comes before `paths` so the `&notFound` anchor below is
+# defined before the `*notFound` aliases in `paths` reference it — a
+# single-pass YAML parser resolves an alias only against an anchor it has
+# already seen.
+components:
+  responses:
+    NotFound: &notFound
+      description: The specified pet was not found. See RFC:7231#section-6.5.4
+  schemas:
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        status:
+          type: string
+          enum: [available, pending, sold, on, no]
+          example: on
+paths:
+  /pets/{petId}:
+    get:
+      summary: Find pet by ID
+      description: >
+        Folded description that line-wraps across several source
+        lines but collapses into a single paragraph at parse time.
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '404': *notFound
+    delete:
+      summary: Deletes a pet
+      responses:
+        '404': *notFound

@@ -47,6 +47,7 @@ const { getResolvedUrlMock, getRequestContextMock } = vi.hoisted(() => ({
 vi.mock('./ContextService', () => ({
   contextService: {
     getResolvedUrl: getResolvedUrlMock,
+    resolveUrlForRequest: getResolvedUrlMock,
     getRequestContext: getRequestContextMock,
     resolveValue: (v: string) => v,
     resolveKeyValueForRequest: (kv: { value: unknown }) => String(kv.value),

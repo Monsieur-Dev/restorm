@@ -81,5 +81,7 @@
     "typedValue.list.edit"
   ],
   "_comment_false_tick": "Pre-existing debt: keys that exist in all locales but carry the English value verbatim. Tracked in the translation cleanup milestone.",
-  "false_tick_exceptions": []
+  "false_tick_exceptions": [
+    "grpc.urlPlaceholder"
+  ]
 }

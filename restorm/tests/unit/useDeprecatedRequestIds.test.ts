@@ -63,7 +63,6 @@ function makeEnvFolder(opts: {
   return {
     id: opts.id,
     folderType: 'environment',
-    fileFormatVersion: 1,
     name: opts.name ?? 'env',
     documentation: '',
     tags: [],

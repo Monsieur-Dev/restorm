@@ -27,6 +27,7 @@ vi.mock('../../../src/main/services/ContextService', () => {
   return {
     contextService: {
       getResolvedUrl: vi.fn(),
+      resolveUrlForRequest: vi.fn(),
       getRequestContext: vi.fn(),
       resolveValue: resolveValueMock,
       resolveBodyValue: vi.fn((v: string) => resolveValueMock(v)),
@@ -122,11 +123,16 @@ function authCallHeaders(): Record<string, string> | undefined {
 describe('HTTPExecutionService auth shape', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockedContextService.getResolvedUrl.mockImplementation(((id: string) => (
+    // The calling request's URL comes from `resolveUrlForRequest` (the dispatch
+    // entry point); the AUTH route's own cached URL is still read through
+    // `getResolvedUrl`, since an auth request is resolved as itself.
+    const urlFor = ((id: string) => (
       id === AUTH_ID
         ? { resolvedUrl: AUTH_URL, resolvedParts: [] }
         : { resolvedUrl: PARENT_URL, resolvedParts: [] }
-    )) as never)
+    )) as never
+    mockedContextService.resolveUrlForRequest.mockImplementation(urlFor)
+    mockedContextService.getResolvedUrl.mockImplementation(urlFor)
     mockedContextService.resolveValue.mockImplementation((v: string) => v.replace('{{authHeaderName}}', 'x-tenant'))
     undiciRequestSpy.mockImplementation(() => Promise.resolve(buildUndiciResponse(200, '{"access_token":"tok"}')))
   })
@@ -161,9 +167,11 @@ describe('HTTPExecutionService auth shape', () => {
         ? undefined
         : { environmentId: null, availableEnvironmentIds: [], fullData: {}, keyValueGroups: new Map() }
     )) as never)
-    mockedContextService.getResolvedUrl.mockImplementation(((id: string) => (
+    const urlFor = ((id: string) => (
       id === AUTH_ID ? undefined : { resolvedUrl: PARENT_URL, resolvedParts: [] }
-    )) as never)
+    )) as never
+    mockedContextService.resolveUrlForRequest.mockImplementation(urlFor)
+    mockedContextService.getResolvedUrl.mockImplementation(urlFor)
 
     const result = await httpExecutionService.execute({
       requestId: PARENT_ID,

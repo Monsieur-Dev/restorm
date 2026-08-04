@@ -39,7 +39,6 @@ import type { EnumDefinition } from '../../../shared/types/collections'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { toHTTPMethod } from './httpMethodValidator'
 import { smithyToApiDocumentation } from './transformers/smithyToApiDocumentation'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { stableImportId as generateId } from './stableImportId'
 
 // ============================================================================
@@ -700,7 +699,6 @@ export function importSmithyModel(model: SmithyModel, options: SmithyImportOptio
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'smithy',
     id: generateId(`${name}:folder:smithy:root`),
     name,

@@ -21,6 +21,7 @@ vi.mock('../../../src/main/services/ContextService', () => {
   return {
     contextService: {
       getResolvedUrl: vi.fn(),
+      resolveUrlForRequest: vi.fn(),
       getRequestContext: vi.fn(),
       resolveValue: resolveValueMock,
       // Type-aware header VALUE path (see `HTTPExecutionService`): only an
@@ -71,19 +72,21 @@ afterAll(async () => {
 
 function setupRequest(fullData: Record<string, unknown> = {}, keyValueGroups = new Map()): void {
   mockedContextService.getResolvedUrl.mockReturnValue({ resolvedUrl: baseUrl, resolvedParts: [] } as never)
+  mockedContextService.resolveUrlForRequest.mockReturnValue({ resolvedUrl: baseUrl, resolvedParts: [] } as never)
   mockedContextService.getRequestContext.mockReturnValue({ fullData, keyValueGroups } as never)
 }
 
 describe('GraphQLExecutionService', () => {
   beforeEach(() => {
     mockedContextService.getResolvedUrl.mockReset()
+    mockedContextService.resolveUrlForRequest.mockReset()
     mockedContextService.getRequestContext.mockReset()
     mockedContextService.resolveValue.mockImplementation((v: string) => v)
     lastRequestHeaders = undefined
   })
 
   it('returns error when no resolved URL is found', async () => {
-    mockedContextService.getResolvedUrl.mockReturnValue(undefined as never)
+    mockedContextService.resolveUrlForRequest.mockReturnValue(undefined as never)
 
     const result = await graphqlExecutionService.execute({ requestId: 'gql-no-url' })
 

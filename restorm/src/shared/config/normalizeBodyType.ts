@@ -12,7 +12,7 @@
  *
  * It runs on the parsed tree **before** the reactive proxy wrap and
  * **before** the whole-file content-checksum baseline — same contract as
- * `normalizeFileFormatVersion` — so the normalisation is part of the
+ * `stripLegacyFileFormatVersion` — so the normalisation is part of the
  * "loaded" snapshot and never looks like a user edit.
  */
 

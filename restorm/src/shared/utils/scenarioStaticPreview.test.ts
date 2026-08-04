@@ -295,3 +295,32 @@ describe('staticScenarioPreview — toast node', () => {
     })
   })
 })
+
+/**
+ * `concreteValue` renders a multi-select as its JOINED display string; the ARRAY
+ * form is `listValueArray`'s job, which conditions and the list boxes call
+ * before falling back here. `enumList` used to have no case at all and fell to
+ * the scalar `default:`, which returns '' for anything non-scalar — so a user's
+ * picked values were silently dropped on every path that reaches execution
+ * through this function, the run-parameters prompt among them.
+ */
+describe('concreteValue — enumList renders like the other multi-select', () => {
+  it('joins the picked values instead of dropping them', () => {
+    expect(concreteValue({ type: 'enumList', value: ['2'], enumDefinitionId: 'e' })).toBe('2')
+    expect(concreteValue({ type: 'enumList', value: ['1', '3'], enumDefinitionId: 'e' })).toBe('1,3')
+  })
+
+  it('matches how customListMulti renders — same shape for both multi-selects', () => {
+    expect(typeof concreteValue({ type: 'enumList', value: ['1', '3'], enumDefinitionId: 'e' }))
+      .toBe(typeof concreteValue({ type: 'customListMulti', listId: 'L', labels: ['1', '3'] }))
+  })
+
+  it('an empty or malformed enumList still renders as the empty string', () => {
+    expect(concreteValue({ type: 'enumList', value: [], enumDefinitionId: 'e' })).toBe('')
+    expect(concreteValue({ type: 'enumList', enumDefinitionId: 'e' })).toBe('')
+  })
+
+  it('drops non-string entries rather than rendering "undefined"', () => {
+    expect(concreteValue({ type: 'enumList', value: ['1', null, 2, '3'], enumDefinitionId: 'e' })).toBe('1,3')
+  })
+})

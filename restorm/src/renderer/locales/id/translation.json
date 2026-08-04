@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "Pekerjaan yang belum disimpan telah dipulihkan",
     "draftsRestoredBody_other": "{{count}} draf dipulihkan dari sesi sebelumnya."
   },
+  "about": {
+    "version": "Versi {{version}}",
+    "tagline": "Lingkungan pengujian API — klien dan server.",
+    "links": {
+      "website": "Situs web",
+      "documentation": "Dokumentasi",
+      "releaseNotes": "Catatan rilis"
+    },
+    "publishedBy": "Diterbitkan oleh",
+    "legal": {
+      "trademark": "Restorm® adalah merek dagang terdaftar di INPI.",
+      "copyright": "© 2026 Monsieur Dev. Seluruh hak cipta dilindungi."
+    },
+    "close": "Tutup"
+  },
   "statusbar": {
     "requestHistory": "Riwayat permintaan",
     "envSelector": {
@@ -1028,7 +1043,19 @@
     "dropZone": "Zona lepas",
     "editAuth": "Edit rute autentikasi",
     "error": {
-      "unknown": "Terjadi kesalahan yang tidak diketahui"
+      "unknown": "Terjadi kesalahan yang tidak diketahui",
+      "unexpected": "Impor gagal karena alasan yang tidak terduga.",
+      "detailLabel": "Detail teknis",
+      "folderNotFound": "Folder ini sudah tidak ada di proyek, sehingga tidak dapat disegarkan.",
+      "noSourceUrl": "Folder ini tidak menyimpan URL sumber, jadi tidak ada yang bisa disegarkan.",
+      "noImportSource": "Folder ini tidak dibuat melalui impor yang dikenali, sehingga tidak dapat disegarkan dari sebuah sumber.",
+      "formatNotRefreshable": "Impor {{format}} bersifat sekali jalan: tidak ada spesifikasi yang bisa diambil ulang, jadi folder ini tidak dapat disegarkan.",
+      "httpStatus": "Sumber menjawab permintaan dengan HTTP {{status}}.",
+      "specParseFailed": "Spesifikasi yang diambil dari {{url}} tidak dapat diurai.",
+      "sourceImportFailed": "Spesifikasi tidak dapat diimpor ulang dari sumbernya.",
+      "emptySpec": "Spesifikasi yang diambil dari {{url}} tidak mendeklarasikan operasi {{format}} apa pun. Menerapkannya akan mengosongkan folder ini, sehingga pembaruan ditolak.",
+      "formatNotDetected": "Format sumber ini tidak dikenali.",
+      "unsupportedFormat": "Tidak ada pengimpor yang menangani format {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1474,6 +1501,10 @@
       },
       "connection": {
         "missingName": "Nama koneksi wajib diisi."
+      },
+      "reachability": {
+        "unreachable": "Tindakan ini tidak akan pernah berjalan: tidak ada koneksi yang mencapainya dari tindakan yang memulai skenario.",
+        "cycle": "Tindakan ini berada dalam lingkaran koneksi yang tidak dimulai oleh apa pun, sehingga tidak akan pernah berjalan. Hubungkan tindakan dari luar lingkaran ke tindakan ini."
       }
     },
     "usage": {
@@ -2447,13 +2478,16 @@
       "movedFolder": "Memindahkan folder \"{{name}}\"",
       "movedEnvironmentFolder": "Memindahkan folder lingkungan \"{{name}}\"",
       "reorderedFolder": "Urutan item diubah di folder \"{{name}}\"",
-      "reorderedEnvironmentFolder": "Urutan item diubah di folder lingkungan \"{{name}}\""
+      "reorderedEnvironmentFolder": "Urutan item diubah di folder lingkungan \"{{name}}\"",
+      "stampedFileFormatVersion": "Versi format berkas {{name}}",
+      "changedFileFormatVersion": "Format berkas {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Pembaruan permintaan \"{{name}}\"",
       "singleScenario": "Pembaruan skenario \"{{name}}\"",
       "singleFolder": "Pembaruan folder \"{{name}}\"",
       "singleEnvironmentFolder": "Pembaruan folder lingkungan \"{{name}}\"",
+      "singleFileFormatVersion": "Beralih ke format berkas {{name}}",
       "countRequest_one": "{{count}} permintaan",
       "countRequest_other": "{{count}} permintaan",
       "countScenario_one": "{{count}} skenario",
@@ -2462,6 +2496,8 @@
       "countFolder_other": "{{count}} folder",
       "countEnvironmentFolder_one": "{{count}} folder lingkungan",
       "countEnvironmentFolder_other": "{{count}} folder lingkungan",
+      "countFileFormatVersion_one": "{{count}} perubahan format berkas",
+      "countFileFormatVersion_other": "{{count}} perubahan format berkas",
       "multiple": "Pembaruan {{parts}}"
     },
     "semiPullFrequencyTitle": "Frekuensi pemeriksaan pembaruan otomatis",
@@ -2578,6 +2614,13 @@
       "title": "Berkas tidak dibuka kembali",
       "body": "{{file}} tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini.",
       "bodyUnnamed": "Berkas terakhir tidak dibuka kembali: Restorm mengalami crash saat membukanya pada peluncuran sebelumnya. Berkas Anda utuh — Anda dapat membukanya kembali dari berkas terkini."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Proyek dibuat dengan versi yang lebih baru",
+      "message": "Berkas ini dibuat dengan versi Restorm yang lebih baru daripada yang Anda jalankan. Perbarui Restorm untuk membukanya.",
+      "versions": "Format berkas {{found}}; versi ini mendukung hingga {{current}}."
     }
   }
 }

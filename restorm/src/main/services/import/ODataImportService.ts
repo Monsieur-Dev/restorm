@@ -34,7 +34,6 @@ import type {
   PropertyDocumentation
 } from '../../../shared/types/apiDocumentation'
 import { StringValue } from '../../../shared/types/collections'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 
 // ============================================================================
 // CSDL (EDMX) intermediate shapes
@@ -952,7 +951,6 @@ export function importOData(content: string, options: ODataImportOptions = {}): 
 
   const root: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`odata:root:${apiTitle}`),
     name: apiTitle,
     // Tag the imported root with the detected protocol version so it is

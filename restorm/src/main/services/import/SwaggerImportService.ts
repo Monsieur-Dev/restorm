@@ -29,7 +29,7 @@ import {
 import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 import { toHTTPMethod } from './httpMethodValidator'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
+import { tryParseSpecText, parseSpecTextOrThrow } from './transformers/_shared'
 import { stableImportId as generateId } from './stableImportId'
 
 // ============================================================================
@@ -962,7 +962,6 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
   // Case: No options - create new EnvironmentFolder as root
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
     tags: [],
@@ -994,10 +993,10 @@ export async function importSwaggerFromUrl(
 }
 
 /**
- * Import a Swagger specification from a JSON string
+ * Import a Swagger specification from a JSON or YAML string
  */
 export function importSwaggerFromJson(json: string, options: SwaggerImportOptions = {}): EnvironmentFolder {
-  const spec = JSON.parse(json) as SwaggerSpec
+  const spec = parseSpecTextOrThrow(json, 'Swagger') as unknown as SwaggerSpec
   return importSwagger(spec, options)
 }
 
@@ -1008,13 +1007,14 @@ export function importSwaggerFromJson(json: string, options: SwaggerImportOption
 import { importProviders } from './registry'
 
 function canImport(content: string, _filePath?: string, parsed?: unknown): boolean {
-  try {
-    const json: unknown = parsed !== undefined ? parsed : JSON.parse(content.trim())
-    if (typeof json === 'object' && json !== null) {
-      const obj = json as Record<string, unknown>
-      return 'swagger' in obj && typeof obj.swagger === 'string' && obj.swagger.startsWith('2.')
-    }
-  } catch { /* not JSON */ }
+  // See the matching comment in `OpenAPIImportService.ts`'s `canImportOpenAPI30`:
+  // reuse `detectFormat`'s shared JSON.parse when present, and only pay for our
+  // own JSON-then-YAML attempt when the content genuinely isn't JSON.
+  const json: unknown = parsed !== undefined ? parsed : tryParseSpecText(content.trim())
+  if (typeof json === 'object' && json !== null) {
+    const obj = json as Record<string, unknown>
+    return 'swagger' in obj && typeof obj.swagger === 'string' && obj.swagger.startsWith('2.')
+  }
   return false
 }
 

@@ -97,8 +97,9 @@ every object through `canonicalizeSerializedKeys`, which emits keys in a fixed,
 documented order:
 
 1. a small **priority list** first, in this exact sequence when present —
-   `id`, `name`, `key`, `type`, `folderType`, `method`, `url` (the identity /
-   label fields a reader scans first, kept up top so diffs stay readable);
+   `id`, `name`, `key`, `type`, `folderType`, `method`, `url`,
+   `fileFormatVersion` (the identity / label fields a reader scans first,
+   kept up top so diffs stay readable);
 2. then every remaining key in ascending Unicode order.
 
 Array element order is **never** touched — item ordering inside a folder, header
@@ -107,6 +108,15 @@ contract**: reordering or removing an entry reformats every existing project
 file once on its next save (a one-time migration), so it changes only under a
 deliberate migration. The semantic commit diff compares canonicalized snapshots,
 so a pure shape/order change is never reported as a modification.
+
+`fileFormatVersion` is the one entry that was added without a reformat, and the
+reason is worth keeping: **no existing document carries it at the root**, so
+ordering it cannot reorder anything already on disk — only files written after
+that change can contain it, and those are written by this code anyway. It is
+inert by construction rather than by luck. (It is also why the entry is safe
+despite the key being a recent arrival: without a place in the list it would
+sort *after* the entire `collections` block, burying the document's format
+stamp at the bottom of the file.)
 
 ### Stable document ids
 

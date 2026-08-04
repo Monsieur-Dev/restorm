@@ -7,7 +7,7 @@
  */
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from './theme'
 import type { FeatureEnvironment, FeaturePlatform } from './feature'
-import type { FileServiceState, FileMetadata, SerializationFormat } from './file'
+import type { FileServiceState, FileMetadata, SerializationFormat, OpenRejectedPayload } from './file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from './settings'
 import type {
   GitStatus,
@@ -89,6 +89,13 @@ export interface CoreUiFileApi {
   onStateChanged: (callback: (state: FileServiceState) => void) => () => void
   onDirtyChanged: (callback: (isDirty: boolean) => void) => () => void
   onFileOpened: (callback: (state: FileServiceState) => void) => () => void
+  /**
+   * Fires when an open was refused by the host's `validateOnOpen` gate.
+   * The document was NOT loaded and the file was NOT written to; the
+   * payload carries the host's reason code so the renderer — which has
+   * the full set of locales — can show a message the user understands.
+   */
+  onFileOpenRejected: (callback: (payload: OpenRejectedPayload) => void) => () => void
   onFileClosed: (callback: () => void) => () => void
   // Save unit v2 API
   hydrateSaveUnit: (params: {

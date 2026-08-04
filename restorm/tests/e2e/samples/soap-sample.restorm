@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: SOAP Playground
@@ -275,5 +276,4 @@ collections:
             enabled: true
         id: 07182930-4152-46d7-e8f9-012345678901
     id: 18293041-5263-47e8-f901-234567890123
-    fileFormatVersion: 1
 _projectUuid: 29304152-6374-48f9-0123-456789012345

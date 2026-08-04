@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import {
   logger,
   getPersistenceService,
@@ -9,7 +9,14 @@ import {
   serialize as coreSerialize,
   deserialize as coreDeserialize
 } from 'electron-core-ui'
+import { stampFolderFormatVersion } from './utils/folderFormatVersion'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
+import {
+  checkFileFormatCompatibility,
+  resolveFileFormatVersion,
+  FILE_FORMAT_TOO_NEW_CODE,
+  FILE_FORMAT_VERSION_KEY
+} from '../shared/config/fileFormatVersion'
 import { join, basename } from 'path'
 import { promises as fs, existsSync, mkdirSync, readFileSync, writeFileSync, renameSync, rmSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -326,11 +333,14 @@ export async function saveFolderStructure(
     // UUID invariant for folder mode: `ensureFolderUuid` (called from
     // `loadFolderStructure` and `attachDraftStoreForFolder` at open
     // time) stamps `_projectUuid` into `folderPath/index.<ext>`. This
-    // function never rewrites that root index on the `collections` path
-    // below, so the stamp survives save cycles transparently. If a future
-    // refactor adds a root-index write, re-stamp `data[PROJECT_UUID_KEY]`
-    // before serializing or the UUID will vanish and every consumer
-    // keyed by it (sidebar expansion, env selections, …) will reset.
+    // function never REPLACES that root index on the `collections` path
+    // below, so the stamp survives save cycles transparently. The one
+    // root-index write on that path — `stampFolderFormatVersion` —
+    // inserts a single key into the file's existing text and can only
+    // add, never drop. Any future refactor that writes the root index by
+    // SERIALIZING an object must re-stamp `data[PROJECT_UUID_KEY]` first,
+    // or the UUID vanishes and every consumer keyed by it (sidebar
+    // expansion, env selections, …) resets.
 
     // Ensure folder exists
     if (!existsSync(folderPath)) {
@@ -350,6 +360,23 @@ export async function saveFolderStructure(
         data,
         { format }
       )
+    }
+
+    // The format version describes the document, so it belongs to the
+    // project's root index — never to a collection's own index below.
+    // This runs on a save the user asked for, which is the only moment a
+    // project carrying the version at its old, per-collection place is
+    // migrated: opening one writes nothing.
+    //
+    // Every unhappy outcome leaves the root index exactly as it was; the
+    // project saves normally either way, it just keeps declaring what it
+    // declared before.
+    const stamp = await stampFolderFormatVersion(folderPath, ext, format, resolveFileFormatVersion(data, logger))
+    if (stamp === 'declares-another-version' || stamp === 'unreadable' || stamp === 'refused') {
+      logger.warn('Left the root index untouched instead of stamping the file format version', {
+        path: folderPath,
+        outcome: stamp
+      })
     }
 
     // Save each collection (EnvironmentFolder) as a subfolder
@@ -499,6 +526,21 @@ export async function saveFolderItems(
 // ==========================================================================
 
 /**
+ * Tell every window a project was refused, so the renderer can show the
+ * reason in the user's language. Folder mode does not go through
+ * `FileService.open`, which owns the same broadcast for file mode, so
+ * the two paths converge on one channel rather than one of them failing
+ * silently.
+ */
+function broadcastOpenRejected(payload: { path: string; code: string; detail: Record<string, unknown> }): void {
+  for (const window of BrowserWindow.getAllWindows()) {
+    if (!window.isDestroyed()) {
+      window.webContents.send('file:open-rejected', payload)
+    }
+  }
+}
+
+/**
  * Load a collection from folder structure
  */
 export async function loadFolderStructure(
@@ -509,21 +551,6 @@ export async function loadFolderStructure(
     const config = readRestormConfig(folderPath)
     const format = config.format
     const ext = format === 'json5' ? 'json5' : format
-
-    // Stamp / read the stable project UUID FIRST, before we parse anything,
-    // so it's available on the content that the renderer sees via the
-    // `file:opened` event. This is the identity the renderer uses to key
-    // per-project preferences (sidebar expansion, etc) that must survive
-    // folder moves and renames — filePath is not stable enough. We pass
-    // our own `uuidKey` so existing `_projectUuid`-stamped files keep
-    // resolving to the same UUID.
-    const { uuid: projectUuid } = await ensureFolderUuid({
-      projectPath: folderPath,
-      format,
-      extension: ext,
-      indexFileName: 'index',
-      uuidKey: PROJECT_UUID_KEY
-    })
 
     // Look for index file
     const indexFiles = ['index.yaml', 'index.yml', 'index.json', 'index.json5']
@@ -538,6 +565,8 @@ export async function loadFolderStructure(
     }
 
     let data: Record<string, unknown>
+    /** What the project's ROOT index declares — the document-level keys. */
+    let rootIndex: Record<string, unknown> | null = null
 
     // If no index file, try to reconstruct from folder structure
     if (!indexPath) {
@@ -551,6 +580,8 @@ export async function loadFolderStructure(
         return null
       }
 
+      rootIndex = result.data as Record<string, unknown>
+
       // If it's a collection folder (has subfolders), reconstruct the full structure
       const entries = await fs.readdir(folderPath, { withFileTypes: true })
       const hasSubfolders = entries.some(e => e.isDirectory())
@@ -562,11 +593,73 @@ export async function loadFolderStructure(
       }
     }
 
+    // Carry the document-level format version over from the root index.
+    // `reconstructFromFolders` rebuilds a bare `{ collections }` and drops
+    // every root-index key, so without this the gate below would judge a
+    // folder project on its collections alone and a future-format root
+    // would sail straight through.
+    //
+    // THIS NAMES ONE KEY, SO IT CARRIES ONLY THAT ONE. Every document-root
+    // key a folder project may hold has to be re-established here or it is
+    // lost in folder mode while surviving in file mode — and nothing
+    // fails: the project opens, the key is simply gone. Today the root
+    // holds exactly three (`collections`, `fileFormatVersion`,
+    // `_projectUuid`) and all three survive. A FOURTH one added later will
+    // be added to the serializer or the renderer's document builder, never
+    // to this function, which is why the requirement is written here
+    // rather than there.
+    const declaredVersion = rootIndex?.[FILE_FORMAT_VERSION_KEY]
+    if (typeof declaredVersion === 'number' && Number.isFinite(declaredVersion)) {
+      data[FILE_FORMAT_VERSION_KEY] = declaredVersion
+    }
+
+    // Compatibility gate, BEFORE the UUID stamp below writes to the
+    // index. Folder mode is the realistic way a user meets a
+    // future-format project at all — a colleague on a newer build
+    // commits, git pulls it in — so refusing here matters as much as it
+    // does for a single file, and refusing must leave the project on
+    // disk untouched.
+    const compatibility = checkFileFormatCompatibility(data)
+    if (!compatibility.supported) {
+      logger.warn('Refusing to open a folder project written by a newer build', {
+        path: folderPath,
+        found: compatibility.found,
+        current: compatibility.current
+      })
+      broadcastOpenRejected({
+        path: folderPath,
+        code: FILE_FORMAT_TOO_NEW_CODE,
+        detail: { found: compatibility.found, current: compatibility.current }
+      })
+      return null
+    }
+
+    // Stamp / read the stable project UUID. This is the identity the
+    // renderer uses to key per-project preferences (sidebar expansion,
+    // etc) that must survive folder moves and renames — filePath is not
+    // stable enough. We pass our own `uuidKey` so existing
+    // `_projectUuid`-stamped files keep resolving to the same UUID.
+    // It runs AFTER the gate above so a refused project is never
+    // written to.
+    const { uuid: projectUuid } = await ensureFolderUuid({
+      projectPath: folderPath,
+      format,
+      extension: ext,
+      indexFileName: 'index',
+      uuidKey: PROJECT_UUID_KEY
+    })
+
     // Ensure the top-level project UUID is always present on the data
     // the renderer receives. `reconstructFromFolders` builds a fresh
     // `{ collections }` object that drops root-index metadata, so we
     // re-stamp it here regardless of which branch populated `data`.
     data[PROJECT_UUID_KEY] = projectUuid
+
+    // Same treatment for the format version: the renderer receives the
+    // resolved value at the root — the root index's, else the current
+    // version. In memory only; the project on disk keeps whatever it has
+    // until the next save the user asks for, never because of this open.
+    data[FILE_FORMAT_VERSION_KEY] = resolveFileFormatVersion(data, logger)
 
     // Apply env-file secrets from restorm.env (if present)
     await applyFolderSecretsEnvFile(folderPath, data)
@@ -835,7 +928,7 @@ export async function attachDraftStoreForFolder(
   }
   const ext = format === 'json5' ? 'json5' : format
   try {
-    const { uuid, generated } = await ensureFolderUuid({
+    const { uuid, generated, persisted } = await ensureFolderUuid({
       projectPath: folderPath,
       format,
       extension: ext,
@@ -844,6 +937,16 @@ export async function attachDraftStoreForFolder(
     })
     if (generated) {
       logger.info('Generated project UUID', { path: folderPath, uuid })
+    }
+    if (!persisted) {
+      // Same reasoning as file mode: an identity that changes on every
+      // call cannot namespace drafts, and pretending otherwise would
+      // hide unsaved work rather than protect it.
+      logger.warn(
+        'No crash-recovery drafts for this project: its identity could not be stored without rewriting the index',
+        { path: folderPath }
+      )
+      return
     }
 
     const fileService = getFileService()
@@ -888,9 +991,24 @@ export async function attachDraftStoreForFile(
   // the draft store can use. `.restorm` files are YAML under the hood.
   const ext = format === 'json5' ? 'json5' : format
   try {
-    const { uuid, generated } = await ensureFileUuid({ filePath, format, uuidKey: PROJECT_UUID_KEY })
+    const { uuid, generated, persisted } = await ensureFileUuid({ filePath, format, uuidKey: PROJECT_UUID_KEY })
     if (generated) {
       logger.info('Generated project UUID for file', { path: filePath, uuid })
+    }
+    if (!persisted) {
+      // The identity could not be written without rewriting the user's
+      // file, so it is a fresh value on every call. Attaching a draft
+      // store to it would be WORSE than not attaching one: the two
+      // attaches a single open performs would land on different
+      // namespaces, and a crash would file the drafts under an id
+      // nothing can find again — unsaved work that looks recoverable
+      // and is not. No crash recovery for this project is the honest
+      // outcome; the project itself opens and saves normally.
+      logger.warn(
+        'No crash-recovery drafts for this project: its identity could not be stored without rewriting the file',
+        { path: filePath }
+      )
+      return
     }
 
     const fileService = getFileService()

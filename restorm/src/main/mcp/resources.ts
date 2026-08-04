@@ -15,10 +15,11 @@
  * uses — there's no second serialiser to keep in sync.
  */
 
-import { McpService } from 'electron-core-ui'
+import { McpService, logger } from 'electron-core-ui'
 import { collectionStore } from '../services/CollectionStore'
 import { getFileService } from 'electron-core-ui/main'
 import { isRequest } from '../../shared/models'
+import { resolveFileFormatVersion } from '../../shared/config/fileFormatVersion'
 import { buildTree } from './tree'
 import { getCurrentTabSnapshot } from './tools/activeState'
 
@@ -39,7 +40,16 @@ export function registerResources(mcp: McpService): void {
       const fileService = getFileService()
       const state = fileService.getState()
       const collections = collectionStore.getCollections()
-      const fileFormatVersion = collections[0]?.fileFormatVersion ?? null
+      // The version the open project is LOADED AS, read from the document
+      // root — the one place it is ever read from. Reporting the resolved
+      // value rather than the raw declaration is what keeps the two modes
+      // agreeing: in folder mode the content held here is rebuilt from the
+      // directory tree, so "what does this object declare" is not a
+      // question about the project at all. `null` means no project is open.
+      const content = state.currentFile.content
+      const fileFormatVersion = content === null || content === undefined
+        ? null
+        : resolveFileFormatVersion(content, logger)
       return jsonText({
         path: state.currentFile.path ?? null,
         name: state.currentFile.name ?? null,

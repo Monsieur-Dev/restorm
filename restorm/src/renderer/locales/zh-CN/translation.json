@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "已恢复未保存的工作",
     "draftsRestoredBody_other": "已从上一次会话恢复 {{count}} 个草稿。"
   },
+  "about": {
+    "version": "版本 {{version}}",
+    "tagline": "API 测试环境 — 客户端与服务器。",
+    "links": {
+      "website": "网站",
+      "documentation": "文档",
+      "releaseNotes": "版本说明"
+    },
+    "publishedBy": "发行方",
+    "legal": {
+      "trademark": "Restorm® 是在 INPI 注册的商标。",
+      "copyright": "© 2026 Monsieur Dev. 保留所有权利。"
+    },
+    "close": "关闭"
+  },
   "statusbar": {
     "requestHistory": "请求历史",
     "envSelector": {
@@ -1028,7 +1043,19 @@
     "dropZone": "拖放区",
     "editAuth": "编辑认证路由",
     "error": {
-      "unknown": "发生未知错误"
+      "unknown": "发生未知错误",
+      "unexpected": "导入因意外原因失败。",
+      "detailLabel": "技术详情",
+      "folderNotFound": "该文件夹已不在项目中，因此无法刷新。",
+      "noSourceUrl": "该文件夹未记录源 URL，因此没有可刷新的内容。",
+      "noImportSource": "该文件夹并非由可识别的导入创建，因此无法从源刷新。",
+      "formatNotRefreshable": "{{format}} 导入是一次性的：没有可重新获取的规范，因此无法刷新该文件夹。",
+      "httpStatus": "源以 HTTP {{status}} 响应了该请求。",
+      "specParseFailed": "无法解析从 {{url}} 获取的规范。",
+      "sourceImportFailed": "无法从源重新导入该规范。",
+      "emptySpec": "从 {{url}} 获取的规范未声明任何 {{format}} 操作。应用它会清空该文件夹，因此已拒绝此次更新。",
+      "formatNotDetected": "无法识别此来源的格式。",
+      "unsupportedFormat": "没有导入器支持 {{format}} 格式。"
     },
     "formats": {
       "swagger": {
@@ -1474,6 +1501,10 @@
       },
       "connection": {
         "missingName": "连接名称为必填项。"
+      },
+      "reachability": {
+        "unreachable": "此操作永远不会执行：没有任何连接从启动场景的操作到达它。",
+        "cycle": "此操作位于一个没有任何起点的连接循环中，因此永远不会执行。请从循环外部连接一个操作到它。"
       }
     },
     "usage": {
@@ -2447,13 +2478,16 @@
       "movedFolder": "移动了文件夹“{{name}}”",
       "movedEnvironmentFolder": "移动了环境文件夹“{{name}}”",
       "reorderedFolder": "已重新排序文件夹“{{name}}”中的项目",
-      "reorderedEnvironmentFolder": "已重新排序环境文件夹“{{name}}”中的项目"
+      "reorderedEnvironmentFolder": "已重新排序环境文件夹“{{name}}”中的项目",
+      "stampedFileFormatVersion": "文件格式版本 {{name}}",
+      "changedFileFormatVersion": "文件格式 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "更新请求 \"{{name}}\"",
       "singleScenario": "更新场景 \"{{name}}\"",
       "singleFolder": "更新文件夹 \"{{name}}\"",
       "singleEnvironmentFolder": "更新环境文件夹 \"{{name}}\"",
+      "singleFileFormatVersion": "迁移到文件格式 {{name}}",
       "countRequest_one": "{{count}} 个请求",
       "countRequest_other": "{{count}} 个请求",
       "countScenario_one": "{{count}} 个场景",
@@ -2462,6 +2496,8 @@
       "countFolder_other": "{{count}} 个文件夹",
       "countEnvironmentFolder_one": "{{count}} 个环境文件夹",
       "countEnvironmentFolder_other": "{{count}} 个环境文件夹",
+      "countFileFormatVersion_one": "{{count}} 项文件格式变更",
+      "countFileFormatVersion_other": "{{count}} 项文件格式变更",
       "multiple": "更新 {{parts}}"
     },
     "semiPullFrequencyTitle": "自动拉取检查频率",
@@ -2578,6 +2614,13 @@
       "title": "未重新打开文件",
       "body": "未重新打开 {{file}}：上次启动时 Restorm 在打开它的过程中崩溃了。您的文件完好无损，可从最近的文件中重新打开。",
       "bodyUnnamed": "未重新打开上次的文件：上次启动时 Restorm 在打开它的过程中崩溃了。您的文件完好无损，可从最近的文件中重新打开。"
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "项目由更新版本创建",
+      "message": "此文件由比您当前使用的 Restorm 更新的版本创建。请更新 Restorm 后再打开。",
+      "versions": "文件格式 {{found}}；当前版本最高支持 {{current}}。"
     }
   }
 }

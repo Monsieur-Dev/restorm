@@ -8,6 +8,7 @@
  * the parent ticket). Every transformer keeps its own version-specific entry
  * point and feeds the shared helpers small, normalised pieces.
  */
+import * as yaml from 'yaml'
 import type {
   ApiContact,
   ApiInfo,
@@ -25,6 +26,54 @@ import type {
 export const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'] as const
 
 export type HttpMethod = (typeof HTTP_METHODS)[number]
+
+/**
+ * Best-effort parse of OpenAPI-family spec text (Swagger 2.0 / OpenAPI 3.0 /
+ * 3.1), which the wild publishes as either JSON or YAML. JSON is tried
+ * FIRST and is the fast/common path: it keeps every existing JSON import on
+ * `JSON.parse`'s exact semantics (e.g. a duplicate key silently keeps the
+ * last occurrence) rather than switching them onto YAML's stricter,
+ * slower parser, and it means a real-world (often multi-MB) JSON spec never
+ * pays YAML-parse cost. YAML — a JSON superset — is attempted only when
+ * `JSON.parse` fails, so a YAML-format spec still resolves.
+ *
+ * Returns `undefined` (never throws) when the text is neither valid JSON
+ * nor valid YAML, or parses to something other than an object (e.g. a bare
+ * YAML scalar) — callers that only need a yes/no signal (`canImport`
+ * content sniffs) check for `undefined`; `parseSpecTextOrThrow` below wraps
+ * this for the actual import entry points, which need a thrown error
+ * instead of silently handing a non-spec value downstream.
+ */
+export function tryParseSpecText(text: string): Record<string, unknown> | undefined {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    try {
+      parsed = yaml.parse(text)
+    } catch {
+      return undefined
+    }
+  }
+  return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : undefined
+}
+
+/**
+ * Same JSON-then-YAML parse as `tryParseSpecText`, but for the actual
+ * `import*FromJson` entry points: throws a clear, format-named error at the
+ * parse boundary instead of returning `undefined`. Without this, text that
+ * parses to a non-object (YAML happily parses a bare string like `"not
+ * valid json"` to the string itself, rather than throwing) would flow
+ * straight into a spec-shaped field access several calls downstream and
+ * fail with a confusing `TypeError` far from the actual cause.
+ */
+export function parseSpecTextOrThrow(text: string, formatLabel: string): Record<string, unknown> {
+  const parsed = tryParseSpecText(text)
+  if (parsed === undefined) {
+    throw new Error(`Failed to parse ${formatLabel} spec: content is not valid JSON or YAML`)
+  }
+  return parsed
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // Common, version-agnostic schema shape

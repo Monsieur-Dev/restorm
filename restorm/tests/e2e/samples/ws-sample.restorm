@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: WebSocket Playground
@@ -52,5 +53,4 @@ collections:
         headers: []
         id: a8d16c1c-879f-4acd-834c-c5d2092e967e
     id: 7cebefcd-058c-41ad-946e-8e3b2cf6ba39
-    fileFormatVersion: 1
 _projectUuid: 87743c3c-74c8-408c-b00d-a22338ddc23e

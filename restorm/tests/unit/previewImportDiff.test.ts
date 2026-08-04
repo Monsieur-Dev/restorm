@@ -13,7 +13,6 @@ function folder(items: unknown[] = []): EnvironmentFolder {
     configuration: {},
     items: items as never,
     folderType: 'environment',
-    fileFormatVersion: 1,
     environments: []
   }
 }

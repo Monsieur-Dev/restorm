@@ -82,6 +82,7 @@ import { pricingUrl } from '../shared/config/site'
 import restormEnTranslation from '../renderer/locales/en/translation.json'
 import restormFrTranslation from '../renderer/locales/fr/translation.json'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
+import { checkFileFormatCompatibility, FILE_FORMAT_TOO_NEW_CODE } from '../shared/config/fileFormatVersion'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
@@ -122,6 +123,7 @@ import { runScenarioHeadless } from './cli/headlessRunner'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
 import { registerDeepLinkSchemes, handleDeepLinkUrl, isDeepLinkUrl } from './deepLink'
+import { findProjectFileInArgv } from './fileAssociation'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
 // Test-isolation hook. When `RESTORM_USER_DATA_OVERRIDE` is set,
@@ -179,11 +181,18 @@ registerDeepLinkSchemes(app, app.getVersion())
 // their argv contains a deep-link URL (which identifies them as OS-launched
 // protocol handlers, not user-requested new windows).
 const deepLinkArgvUrl = process.argv.find((a) => isDeepLinkUrl(a))
+// A `.restorm` path in argv marks this process as an OS document handler
+// (a double-click / "Open with" passes the path as a bare positional, not
+// through the app's own `--open` flag), the same way a deep-link URL marks
+// a protocol handler.
+const projectArgvPath = findProjectFileInArgv(process.argv)
 const gotSingleInstanceLock = app.requestSingleInstanceLock()
-if (!gotSingleInstanceLock && deepLinkArgvUrl !== undefined) {
-  // This process was launched by the OS to handle a deep-link URL. The primary
-  // instance received the `second-instance` event and will dispatch the URL —
-  // nothing more for this process to do.
+if (!gotSingleInstanceLock && (deepLinkArgvUrl !== undefined || projectArgvPath !== undefined)) {
+  // This process was launched by the OS to handle a deep-link URL or to open
+  // a document. The primary instance received the `second-instance` event and
+  // will handle it — nothing more for this process to do. Spawned instances
+  // WITHOUT such an argument (the MCP `create_instance` tool) deliberately
+  // keep running without the lock.
   app.exit(0)
 }
 
@@ -196,13 +205,76 @@ app.on('open-url', (event, url) => {
   }
 })
 
-// Windows / Linux: the OS launches a second process with the deep-link URL in
-// argv. That process exits early (see above); the primary instance receives the
-// `second-instance` event carrying the second instance's argv.
+// ── OS document-open routing ────────────────────────────────────────────────
+//
+// Three channels converge here: a path in argv at cold start (Win/Linux), the
+// `second-instance` argv of an OS-launched handler (Win/Linux, app already
+// running), and `open-file` (macOS, both cases). All three mean the same
+// thing — "the user asked for this project" — so all three land on one
+// function.
+//
+// Routing is deliberately simple: the single-instance lock already funnels
+// every OS-launched handler into the one running instance, so the document
+// opens there and its window is brought forward. Picking WHICH of several
+// instances already owns a given file is a richer behaviour that belongs with
+// the shared open-routing work, not here.
+
+/** Set once the window exists and the startup open path is wired up. */
+let documentOpener: ((path: string) => void) | null = null
+
+/**
+ * A document the OS asked for before the app could show it. macOS fires
+ * `open-file` on a cold start well before `whenReady`, so this holds the
+ * path until the window exists.
+ */
+let pendingOpenFilePath: string | null = null
+
+function isAppReadyForDocuments(): boolean {
+  return documentOpener !== null
+}
+
+/** Bring the existing window forward, then open the document in it. */
+function routeDocumentOpen(path: string): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.show()
+    mainWindow.focus()
+  }
+  if (documentOpener) {
+    documentOpener(path)
+  } else {
+    // Ready-check raced the wiring; hold it for the drain below rather than
+    // dropping the user's document on the floor.
+    pendingOpenFilePath = path
+  }
+}
+
+// macOS: the OS never puts a document path in argv. `open-file` is the only
+// channel, and it can fire BEFORE `whenReady` on a cold start — the event that
+// launched the app arrives before there is a window to show it in. Buffer that
+// case and let the startup path drain it once the window exists.
+app.on('open-file', (event, path) => {
+  event.preventDefault()
+  logger.info('OS requested opening a document', { path })
+  if (isAppReadyForDocuments()) {
+    routeDocumentOpen(path)
+  } else {
+    pendingOpenFilePath = path
+  }
+})
+
+// Windows / Linux: the OS launches a second process with the deep-link URL or
+// the document path in argv. That process exits early (see above); the primary
+// instance receives the `second-instance` event carrying its argv.
 app.on('second-instance', (_event, argv) => {
   const url = argv.find((a) => isDeepLinkUrl(a))
   if (url !== undefined) {
     handleDeepLinkUrl(url)
+  }
+  const documentPath = findProjectFileInArgv(argv)
+  if (documentPath !== undefined) {
+    logger.info('OS requested opening a document in the running instance', { path: documentPath })
+    routeDocumentOpen(documentPath)
   }
 })
 
@@ -223,7 +295,9 @@ if (cliArgs.cliRun) {
   }
 }
 
-const fileToOpenOnStart = cliArgs.open
+// `--open` wins when both are present: an explicit flag is a deliberate
+// instruction, a positional is whatever the OS handed over.
+const fileToOpenOnStart = cliArgs.open ?? projectArgvPath
 if (fileToOpenOnStart) {
   logger.info('File to open on start:', { path: fileToOpenOnStart })
 }
@@ -374,6 +448,23 @@ function createWindow(): MainWindow | undefined {
           // to show that the file it opened is not what kills it.
           scheduleSurvivalMark()
         }, DEFAULT_UI_DELAY_MS)
+
+        // The app can now open documents on demand. Publish the opener and
+        // drain anything macOS delivered through `open-file` before the
+        // window existed — on a cold start the event that LAUNCHED the app
+        // arrives long before this point, so without the drain the
+        // double-click that started restorm would open nothing at all.
+        documentOpener = openPathOnStart
+        if (pendingOpenFilePath !== null) {
+          const buffered = pendingOpenFilePath
+          pendingOpenFilePath = null
+          // The startup plan above may already be opening this exact path
+          // (macOS can also surface it as the launch argument). Opening it
+          // twice is harmless but pointless, so skip the duplicate.
+          if (buffered !== fileToOpenOnStart) {
+            setTimeout(() => { routeDocumentOpen(buffered) }, DEFAULT_UI_DELAY_MS)
+          }
+        }
       })
     }
 
@@ -473,7 +564,23 @@ initFileService({
   defaultFormat: 'yaml',
   maxRecentFiles: 10,
   storagePrefix: 'restorm_',
-  uuidKey: PROJECT_UUID_KEY
+  uuidKey: PROJECT_UUID_KEY,
+  // Refuse a project written by a newer build rather than loading it
+  // "as if it were current": this build cannot know what a later format
+  // added, so a partial read followed by a save would write our
+  // impoverished understanding back over the user's data. The gate runs
+  // before anything is written or published; the renderer turns the code
+  // below into a localized message (the main process carries only two
+  // locales, the renderer carries them all).
+  validateOnOpen: (content) => {
+    const compatibility = checkFileFormatCompatibility(content)
+    if (compatibility.supported) return { ok: true }
+    return {
+      ok: false,
+      code: FILE_FORMAT_TOO_NEW_CODE,
+      detail: { found: compatibility.found, current: compatibility.current }
+    }
+  }
 })
 logger.info('File Service initialized')
 

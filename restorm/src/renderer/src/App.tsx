@@ -171,6 +171,7 @@ import { RestormWorkbenchContainer } from './components/MainView/Workbench/Resto
 import { suggestRunTarget } from '../../shared/scenarioRunTarget'
 import { ScenarioCliInfoProvider } from './contexts/scenarioRunTargetContext'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
+import { IncompatibleProjectModal } from './components/Modals/IncompatibleProjectModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
 import { removeItemFromTree } from './utils/treeManipulation'
@@ -217,7 +218,6 @@ import {
 import { useFavoritesAndOpenItems } from './hooks/useFavoritesAndOpenItems'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
-import { prepareForSerialization } from './utils/serialization'
 import { makeReactiveFolder, makeReactiveRequest } from './types/reactive'
 import { searchIndexService } from './services/SearchIndexService'
 import { useRestormStore } from './store/restormStore'
@@ -338,7 +338,6 @@ const App: React.FC = () => {
     isLoading: isFileServiceLoading,
     newFile: _newFile,
     open: _openFile,
-    save: saveFile,
     close: closeFileDirect
   } = useFileService()
 
@@ -2246,27 +2245,13 @@ const App: React.FC = () => {
     confirmDeleteAndPersist(deleteConfirmation.itemId)
   }, [confirmDeleteAndPersist, deleteConfirmation.itemId])
 
-  // File save handlers (after rootItems is defined)
-  // Deep clone to remove Proxy wrappers before IPC serialization
-
-  // Listen for save-and-close event from main process (when closing window with unsaved changes)
-  useEffect(() => {
-    const handleSaveAndClose = async (): Promise<void> => {
-      const plainData = JSON.parse(JSON.stringify({ collections: rootItems })) as { collections: unknown[] }
-      const dataForSave = prepareForSerialization(plainData) as { collections: unknown[] }
-      const saved = await saveFile(dataForSave)
-      if (saved) {
-        // Force close all windows after save
-        await window.restorm?.forceClose()
-      }
-    }
-
-    const cleanup = window.restorm?.onSaveAndClose(() => {
-      void handleSaveAndClose()
-    })
-
-    return cleanup
-  }, [rootItems, saveFile])
+  // Save-and-close is handled once, by `useFileManagement`. It used to be
+  // registered here as well, and `onSaveAndClose` uses `ipcRenderer.on`, so
+  // BOTH listeners fired on the same event and two whole-document saves
+  // raced — the file kept whichever landed last. The two payloads were not
+  // equivalent: only the hook's carries the document's `fileFormatVersion`
+  // and writes the `.env` sidecar, so the loser of that race silently
+  // dropped both.
 
   // Helper to check for unsaved changes before proceeding
   // Restore file state on initial load (e.g., after page refresh)
@@ -3288,6 +3273,11 @@ const App: React.FC = () => {
        * "What's new" on the first run after an update, and owns the release-notes
        * modal those toasts (and the Help menu) open. */}
       <UpdateNotifications />
+      {/* Reports a project the main process refused to open because its
+       * file format is newer than this build understands. Rendered here
+       * rather than as a native dialog so the message reaches the user in
+       * their own language — the main process carries only en/fr. */}
+      <IncompatibleProjectModal />
       <CrashConsentPrompt />
       {/* Headless: says so when the crash-loop protection withheld a file, so
        * an app that starts empty on purpose is not mistaken for one that lost

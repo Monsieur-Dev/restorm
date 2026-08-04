@@ -121,7 +121,8 @@ const DEFAULT_BRANCH = 'main'
  * the other three too, so every entity is here from the start rather than
  * added later — one shared seed shape for both waves.
  */
-const SEED_PROJECT_YAML = `_projectUuid: e2e-seed-project-uuid
+const SEED_PROJECT_YAML = `fileFormatVersion: 1
+_projectUuid: e2e-seed-project-uuid
 collections:
   - id: e2e-seed-env-folder
     name: Seed Project
@@ -129,7 +130,6 @@ collections:
     configuration: {}
     folderType: environment
     environments: []
-    fileFormatVersion: 1
     items:
       - id: e2e-seed-request
         name: Find pet by ID

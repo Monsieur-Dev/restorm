@@ -5,7 +5,7 @@ const mockState = {
   findById: vi.fn<(id: string) => unknown>(),
   getCollections: vi.fn<() => unknown[]>(),
   serializeRequest: vi.fn<(r: unknown) => Record<string, unknown>>(),
-  fileServiceState: vi.fn<() => { currentFile: { path: string | null; name: string | null; isDirty: boolean } }>()
+  fileServiceState: vi.fn<() => { currentFile: { path: string | null; name: string | null; isDirty: boolean; content?: unknown } }>()
 }
 
 vi.mock('../services/CollectionStore', () => ({
@@ -19,7 +19,12 @@ vi.mock('../services/CollectionStore', () => ({
 vi.mock('electron-core-ui/main', () => ({
   getFileService: () => ({
     getState: () => mockState.fileServiceState()
-  })
+  }),
+  // The project resource resolves the open document's format version, and
+  // that resolution logs when it meets a version the gate should already
+  // have refused. Stubbed rather than silenced so a stray warning still
+  // has somewhere to go.
+  logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() }
 }))
 
 vi.mock('./tools/activeState', () => ({
@@ -58,13 +63,20 @@ beforeEach(() => {
 })
 
 describe('resources — restorm://project', () => {
+  const collection = (extra: Record<string, unknown> = {}): Record<string, unknown> => ({
+    id: 'r', name: 'root', folderType: 'environment', configuration: {}, items: [], environments: [], ...extra
+  })
+
   it('returns the open file metadata + collection count', async () => {
     mockState.fileServiceState.mockReturnValue({
-      currentFile: { path: '/tmp/demo.restorm', name: 'demo.restorm', isDirty: true }
+      currentFile: {
+        path: '/tmp/demo.restorm',
+        name: 'demo.restorm',
+        isDirty: true,
+        content: { fileFormatVersion: 2, collections: [collection()] }
+      }
     })
-    mockState.getCollections.mockReturnValue([
-      { id: 'r', name: 'root', folderType: 'environment', fileFormatVersion: 2, configuration: {}, items: [], environments: [] }
-    ])
+    mockState.getCollections.mockReturnValue([collection()])
     const mcp = new FakeMcpService()
     registerResources(mcp as unknown as McpService)
     const { text, mimeType } = await mcp.readBy('restorm://project')
@@ -78,9 +90,49 @@ describe('resources — restorm://project', () => {
     })
   })
 
+  it('reports the version an open project is loaded as, whatever its shape on disk', async () => {
+    // A project written before the version moved declares nothing at the
+    // root, so it loads as the current version — and reports that. The
+    // point is that it does NOT report `null`: an open project always has
+    // a version, and `null` is reserved for "nothing is open".
+    for (const content of [
+      { collections: [collection({ fileFormatVersion: 1 })] },
+      { collections: [collection()] }
+    ]) {
+      mockState.fileServiceState.mockReturnValue({
+        currentFile: { path: '/tmp/older.restorm', name: 'older.restorm', isDirty: false, content }
+      })
+      mockState.getCollections.mockReturnValue([collection()])
+      const mcp = new FakeMcpService()
+      registerResources(mcp as unknown as McpService)
+      const { text } = await mcp.readBy('restorm://project')
+      expect((readJson(text) as { fileFormatVersion: unknown }).fileFormatVersion).toBe(1)
+    }
+  })
+
+  it('reports the same version for a project in file mode and in folder mode', async () => {
+    // Folder mode hands over content rebuilt from the directory tree with
+    // the resolved version stamped on it; file mode hands over the parsed
+    // file. Two views of the same project must not disagree.
+    const asFile = { collections: [collection({ fileFormatVersion: 1 })] }
+    const asFolder = { fileFormatVersion: 1, collections: [collection()] }
+    const reported: unknown[] = []
+    for (const content of [asFile, asFolder]) {
+      mockState.fileServiceState.mockReturnValue({
+        currentFile: { path: '/tmp/p', name: 'p', isDirty: false, content }
+      })
+      mockState.getCollections.mockReturnValue([collection()])
+      const mcp = new FakeMcpService()
+      registerResources(mcp as unknown as McpService)
+      const { text } = await mcp.readBy('restorm://project')
+      reported.push((readJson(text) as { fileFormatVersion: unknown }).fileFormatVersion)
+    }
+    expect(reported[0]).toBe(reported[1])
+  })
+
   it('handles the no-open-project state', async () => {
     mockState.fileServiceState.mockReturnValue({
-      currentFile: { path: null, name: null, isDirty: false }
+      currentFile: { path: null, name: null, isDirty: false, content: null }
     })
     mockState.getCollections.mockReturnValue([])
     const mcp = new FakeMcpService()

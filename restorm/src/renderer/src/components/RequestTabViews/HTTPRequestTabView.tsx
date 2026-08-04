@@ -646,7 +646,15 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     return () => { unsubscribe?.() }
   }, [urlVariableId])
 
-  // Callbacks for KeyValue changes - notify both reactive object and ContextService
+  // Callbacks for KeyValue changes - notify the reactive object + ContextService.
+  //
+  // Deliberately NOT mirrored onto the main-side CollectionStore here.
+  // `setCollections` is a whole-tree REPLACE, so firing it per row edit
+  // republishes the renderer's copy of everything — and anything main owns
+  // that the renderer's tree predates (a just-saved quick config, a fresh
+  // clone, a git arbitration result) is destroyed by the overwrite. The
+  // scenario run reads its rows' live state from ContextService instead; see
+  // `overlayLiveKeyValues` in the scenario engine.
   const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'headers', rows)
     const requestId = request.id

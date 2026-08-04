@@ -351,7 +351,9 @@ Then('{string} sees the follow redirects option {word} in the open request', asy
 // The root folder carries an explicit id like every other entity: an
 // id-less entity is assigned a fresh one on each load, so the two sides of
 // a merge would never match it and the whole subtree would be duplicated.
-const REACTIVITY_PROJECT_YAML = `collections:
+const REACTIVITY_PROJECT_YAML = `fileFormatVersion: 1
+_projectUuid: e2e-reactivity-project-uuid
+collections:
   - folderType: environment
     id: e2e-reactivity-root
     name: Reactivity Lab
@@ -405,7 +407,9 @@ Given('{string} has a committed multi-protocol project {string}', ({ collab }, a
 
 /** Two sibling folders + one request: the smallest project in which an
  * inter-folder move can conflict. */
-const TWO_FOLDER_PROJECT_YAML = `collections:
+const TWO_FOLDER_PROJECT_YAML = `fileFormatVersion: 1
+_projectUuid: e2e-tree-project-uuid
+collections:
   - folderType: environment
     id: e2e-tree-root
     name: Petstore Lab

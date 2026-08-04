@@ -64,7 +64,6 @@ function envFolder(name: string, items: FolderItem[] = []): EnvironmentFolder {
     configuration: {} as unknown as EnvironmentFolder['configuration'],
     items,
     folderType: 'environment',
-    fileFormatVersion: 1,
     environments: []
   }
 }

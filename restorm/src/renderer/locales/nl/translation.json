@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} concept is hersteld uit de vorige sessie.",
     "draftsRestoredBody_other": "{{count}} concepten zijn hersteld uit de vorige sessie."
   },
+  "about": {
+    "version": "Versie {{version}}",
+    "tagline": "De API-testomgeving — client en server.",
+    "links": {
+      "website": "Website",
+      "documentation": "Documentatie",
+      "releaseNotes": "Release-opmerkingen"
+    },
+    "publishedBy": "Uitgegeven door",
+    "legal": {
+      "trademark": "Restorm® is een bij het INPI gedeponeerd merk.",
+      "copyright": "© 2026 Monsieur Dev. Alle rechten voorbehouden."
+    },
+    "close": "Sluiten"
+  },
   "statusbar": {
     "requestHistory": "Geschiedenis van verzoeken",
     "envSelector": {
@@ -1029,7 +1044,19 @@
     "dropZone": "Sleepzone",
     "editAuth": "Authenticatieroute bewerken",
     "error": {
-      "unknown": "Er is een onbekende fout opgetreden"
+      "unknown": "Er is een onbekende fout opgetreden",
+      "unexpected": "De import is om een onverwachte reden mislukt.",
+      "detailLabel": "Technisch detail",
+      "folderNotFound": "Deze map bestaat niet meer in het project en kan daarom niet worden vernieuwd.",
+      "noSourceUrl": "Deze map legt geen bron-URL vast, dus er valt niets te vernieuwen.",
+      "noImportSource": "Deze map is niet door een herkende import gemaakt en kan daarom niet vanaf een bron worden vernieuwd.",
+      "formatNotRefreshable": "Een {{format}}-import is eenmalig: er is geen specificatie om opnieuw op te halen, dus deze map kan niet worden vernieuwd.",
+      "httpStatus": "De bron beantwoordde het verzoek met HTTP {{status}}.",
+      "specParseFailed": "De specificatie die is opgehaald van {{url}} kon niet worden ontleed.",
+      "sourceImportFailed": "De specificatie kon niet opnieuw vanaf de bron worden geïmporteerd.",
+      "emptySpec": "De specificatie die is opgehaald van {{url}} declareert geen enkele {{format}}-bewerking. Toepassen zou deze map leegmaken, dus de update is geweigerd.",
+      "formatNotDetected": "Het formaat van deze bron is niet herkend.",
+      "unsupportedFormat": "Geen enkele importer ondersteunt het formaat {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1475,6 +1502,10 @@
       },
       "connection": {
         "missingName": "Een verbindingsnaam is verplicht."
+      },
+      "reachability": {
+        "unreachable": "Deze actie kan nooit worden uitgevoerd: er loopt geen verbinding naartoe vanaf een actie die het scenario start.",
+        "cycle": "Deze actie maakt deel uit van een lus van verbindingen die door niets wordt gestart en kan daarom nooit worden uitgevoerd. Verbind er een actie van buiten de lus mee."
       }
     },
     "usage": {
@@ -2448,13 +2479,16 @@
       "movedFolder": "Map \"{{name}}\" verplaatst",
       "movedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verplaatst",
       "reorderedFolder": "Items opnieuw geordend in de map '{{name}}'",
-      "reorderedEnvironmentFolder": "Items opnieuw geordend in de omgevingsmap '{{name}}'"
+      "reorderedEnvironmentFolder": "Items opnieuw geordend in de omgevingsmap '{{name}}'",
+      "stampedFileFormatVersion": "Bestandsformaatversie {{name}}",
+      "changedFileFormatVersion": "Bestandsformaat {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Update van verzoek \"{{name}}\"",
       "singleScenario": "Update van scenario \"{{name}}\"",
       "singleFolder": "Update van map \"{{name}}\"",
       "singleEnvironmentFolder": "Update van omgevingsmap \"{{name}}\"",
+      "singleFileFormatVersion": "Overgang naar bestandsformaat {{name}}",
       "countRequest_one": "{{count}} verzoek",
       "countRequest_other": "{{count}} verzoeken",
       "countScenario_one": "{{count}} scenario",
@@ -2463,6 +2497,8 @@
       "countFolder_other": "{{count}} mappen",
       "countEnvironmentFolder_one": "{{count}} omgevingsmap",
       "countEnvironmentFolder_other": "{{count}} omgevingsmappen",
+      "countFileFormatVersion_one": "{{count}} wijziging van bestandsformaat",
+      "countFileFormatVersion_other": "{{count}} wijzigingen van bestandsformaat",
       "multiple": "Update van {{parts}}"
     },
     "semiPullFrequencyTitle": "Frequentie van automatische pull-controle",
@@ -2579,6 +2615,13 @@
       "title": "Bestand niet opnieuw geopend",
       "body": "{{file}} is niet opnieuw geopend: Restorm liep vast bij het openen ervan tijdens de vorige start. Uw bestand is intact — u kunt het openen via de recente bestanden.",
       "bodyUnnamed": "Het laatste bestand is niet opnieuw geopend: Restorm liep vast bij het openen ervan tijdens de vorige start. Uw bestand is intact — u kunt het openen via de recente bestanden."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Project gemaakt met een nieuwere versie",
+      "message": "Dit bestand is gemaakt met een nieuwere versie van Restorm dan de versie die u gebruikt. Werk Restorm bij om het te openen.",
+      "versions": "Bestandsformaat {{found}}; deze versie ondersteunt tot {{current}}."
     }
   }
 }

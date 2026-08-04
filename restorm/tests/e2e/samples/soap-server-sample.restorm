@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: SOAP Mock Playground
@@ -87,5 +88,4 @@ collections:
         headers: []
         id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e03
     id: 3c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e10
-    fileFormatVersion: 1
 _projectUuid: 4c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e20

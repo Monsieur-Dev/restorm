@@ -28,7 +28,6 @@ import {
 } from '../../../shared/models'
 import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import {
   brunoToApiDocumentation,
   type BrunoRequestData,
@@ -728,7 +727,6 @@ export function importBruno(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'bruno',
     id: generateId(`bruno:root:${collectionName}`),
     name: collectionName,
@@ -1011,7 +1009,6 @@ export function importBrunoFromJson(
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'bruno',
     id: generateId(`bruno:root:${collectionName}`),
     name: collectionName,

@@ -16,6 +16,7 @@
  */
 
 import { contextService } from './ContextService'
+import type { ResolutionContexts } from './ContextServiceTypes'
 import { httpExecutionService, type HTTPExecutionInput } from './HTTPExecutionService'
 import { composeTrpcRequestBody, unwrapTrpcEnvelope, unwrapTrpcError } from '../../shared/utils/trpcRequestBody'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
@@ -24,6 +25,9 @@ export interface TrpcExecutionInput {
   requestId: string
   timeout?: number
   authRequest?: AuthenticationRequest
+  /** The DISPOSABLE contexts this one dispatch resolves against — see
+   * `HTTPExecutionInput.runContexts`. Absent outside a scenario run. */
+  runContexts?: ResolutionContexts
 }
 
 /** tRPC response result. `data` is the unwrapped `result.data` payload;
@@ -50,7 +54,7 @@ export interface TrpcExecutionResult {
 
 class TrpcExecutionService {
   async execute(input: TrpcExecutionInput): Promise<TrpcExecutionResult> {
-    const { requestId, timeout, authRequest } = input
+    const { requestId, timeout, authRequest, runContexts } = input
     const requestContext = contextService.getRequestContext(requestId)
     const kind = requestContext?.fullData.trpcKind
     const composed = composeTrpcRequestBody({ kind, input: requestContext?.fullData.trpcInput })
@@ -62,7 +66,8 @@ class TrpcExecutionService {
       ...(composed.rawBody !== undefined
         ? { rawBody: composed.rawBody, ...(composed.rawBodyContentType !== undefined ? { rawBodyContentType: composed.rawBodyContentType } : {}) }
         : {}),
-      ...(authRequest ? { authRequest } : {})
+      ...(authRequest ? { authRequest } : {}),
+      ...(runContexts !== undefined ? { runContexts } : {})
     }
 
     const result = await httpExecutionService.execute(httpInput)

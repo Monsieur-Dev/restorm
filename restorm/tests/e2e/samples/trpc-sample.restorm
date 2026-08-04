@@ -1,3 +1,4 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
     name: tRPC Playground
@@ -123,5 +124,4 @@ collections:
         headers: []
         id: d2e3f4a5-b607-4687-9a3b-c4d5e6f7d687
     id: d2e3f4a5-b607-4788-9a3c-c4d5e6f7d788
-    fileFormatVersion: 1
 _projectUuid: e3f4a5b6-c708-4899-9a3d-c4d5e6f7d899

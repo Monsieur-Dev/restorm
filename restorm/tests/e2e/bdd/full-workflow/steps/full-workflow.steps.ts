@@ -2918,7 +2918,6 @@ const CVL_ENTRY_ID: Record<string, string> = { Rouge: 'entry-rouge', Vert: 'entr
 // value list and a request whose query param is bound to that list.
 const CVL_SAMPLE_RESTORM = `collections:
   - folderType: environment
-    fileFormatVersion: 1
     name: Paint API
     documentation: ''
     tags: []

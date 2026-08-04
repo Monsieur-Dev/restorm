@@ -401,7 +401,6 @@ describe('Reactive Document System', () => {
     const createTestEnvironmentFolder = (): EnvironmentFolder => ({
       id: 'envfolder-1',
       folderType: 'environment',
-      fileFormatVersion: 1,
       name: 'Envs',
       tags: [],
       configuration: { environments: [] },

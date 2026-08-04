@@ -254,6 +254,162 @@ describe('generateIds — the backfill is derived from the document, never rando
   })
 })
 
+/**
+ * `EnumDefinition` (`values[]` + `matchingRules[]`, see `idPathSegment` in
+ * `shared/utils/stableId.ts`) follows the same backfill/dedup contract as
+ * every other recognised shape — these tests mirror the request-type ones
+ * above, scoped to the shape this ticket adds.
+ */
+describe('generateIds — EnumDefinition', () => {
+  const treeWith = (enumDefinitions: unknown[]): unknown => ({
+    collections: [
+      { name: 'Root', configuration: {}, folderType: 'environment', items: [], enumDefinitions }
+    ]
+  })
+  const enumDefsOf = (loaded: unknown): Record<string, unknown>[] =>
+    (loaded as { collections: { enumDefinitions: Record<string, unknown>[] }[] }).collections[0]?.enumDefinitions ?? []
+
+  it('backfills a missing id deterministically, and never touches an id the file already carries', () => {
+    const tree = treeWith([
+      { name: 'Status', values: ['open', 'closed'], matchingRules: [] },
+      { id: 'persisted-enum', name: 'Kind', values: ['a'], matchingRules: [] }
+    ])
+    const first = enumDefsOf(processAfterDeserialization(structuredClone(tree)))
+    const second = enumDefsOf(processAfterDeserialization(structuredClone(tree)))
+
+    expect(typeof first[0]?.['id']).toBe('string')
+    expect((first[0]?.['id'] as string).length).toBeGreaterThan(0)
+    // Deterministic: the same document backfills the same id on every independent load.
+    expect(second[0]?.['id']).toBe(first[0]?.['id'])
+    // An id already in the file is never modified.
+    expect(first[1]?.['id']).toBe('persisted-enum')
+    expect(second[1]?.['id']).toBe('persisted-enum')
+  })
+
+  it('when two EnumDefinitions share a persisted id, an EnumValue.enumDefinitionId pointing at it keeps resolving to whichever one kept the id — never the void', () => {
+    // Same corollary as the odata/auth "duplicate id" test above, extended to
+    // a REFERENCE that targets the duplicated entity: generateIds never
+    // remaps a cross-reference (no way to tell, post-hoc, which of the two
+    // original entities a reference meant), so `enumDefinitionId` stays
+    // exactly as persisted and simply follows whichever EnumDefinition wins
+    // the id — the first one encountered in document order.
+    const tree = {
+      collections: [
+        { name: 'Root', configuration: {}, folderType: 'environment', items: [
+          { name: 'Pet', configuration: {}, items: [
+            { name: 'Find', type: 'http', headers: [
+              { key: 'status', value: { type: 'enum', value: 'open', enumDefinitionId: 'dup-enum' } }
+            ] }
+          ] }
+        ],
+        enumDefinitions: [
+          { id: 'dup-enum', name: 'StatusA', values: ['open'], matchingRules: [] },
+          { id: 'dup-enum', name: 'StatusB', values: ['open'], matchingRules: [] }
+        ] }
+      ]
+    }
+
+    const loaded = processAfterDeserialization(structuredClone(tree)) as {
+      collections: {
+        enumDefinitions: { id: string, name: string }[]
+        items: { items: { headers: { value: { enumDefinitionId: string } }[] }[] }[]
+      }[]
+    }
+    const [winner, loser] = loaded.collections[0]?.enumDefinitions ?? []
+    const resolvedId = loaded.collections[0]?.items[0]?.items[0]?.headers[0]?.value.enumDefinitionId
+
+    // The two definitions no longer share an id...
+    expect(winner?.id).not.toBe(loser?.id)
+    // ...the first one in document order keeps the persisted id...
+    expect(winner?.id).toBe('dup-enum')
+    expect(winner?.name).toBe('StatusA')
+    // ...and the untouched reference still resolves to it — never to the
+    // loser, and never to an id nothing carries anymore.
+    expect(resolvedId).toBe('dup-enum')
+    expect(resolvedId).toBe(winner?.id)
+  })
+})
+
+/**
+ * A `Scenario` is paired by id by both git engines exactly like a folder or
+ * a request, but no classification branch recognised it — so a document
+ * whose scenario carries no persisted id (written by hand, produced by a
+ * script, or loaded through a path that never reaches the renderer) fed an
+ * `undefined` key straight into the diff and conflict maps.
+ */
+describe('generateIds — Scenario', () => {
+  const treeWith = (scenario: Record<string, unknown>): unknown => ({
+    collections: [{ name: 'Root', configuration: {}, items: [scenario] }]
+  })
+  const scenarioOf = (loaded: unknown): Record<string, unknown> | undefined =>
+    (loaded as { collections: { items: Record<string, unknown>[] }[] }).collections[0]?.items[0]
+
+  it('backfills a missing id deterministically, and never touches an id the file already carries', () => {
+    const withoutId = treeWith({ type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] })
+    const first = scenarioOf(processAfterDeserialization(structuredClone(withoutId)))
+    const second = scenarioOf(processAfterDeserialization(structuredClone(withoutId)))
+
+    expect(typeof first?.['id']).toBe('string')
+    expect((first?.['id'] as string).length).toBeGreaterThan(0)
+    expect(second?.['id']).toBe(first?.['id'])
+
+    const withId = treeWith({ id: 'persisted-scenario', type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] })
+    expect(scenarioOf(processAfterDeserialization(structuredClone(withId)))?.['id']).toBe('persisted-scenario')
+  })
+
+  it('gives two same-named sibling scenarios distinct ids', () => {
+    const tree = {
+      collections: [{ name: 'Root', configuration: {}, items: [
+        { type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] },
+        { type: 'scenario', name: 'Smoke', tags: [], params: [], nodes: [], edges: [] }
+      ] }]
+    }
+    const loaded = processAfterDeserialization(structuredClone(tree)) as {
+      collections: { items: { id?: string }[] }[]
+    }
+    const [a, b] = loaded.collections[0]?.items ?? []
+    expect(typeof a?.id).toBe('string')
+    expect(b?.id).not.toBe(a?.id)
+  })
+
+  it("tells two same-named requests apart by their OWNING scenario, not by array position", () => {
+    // The consequence of a scenario contributing an identity segment: a
+    // request nested in a scenario now derives its id from a path naming
+    // that scenario. Without it both requests below spell the same path and
+    // are separated only by the occurrence suffix — order-dependent, which
+    // is the one thing the derivation must never rely on.
+    const tree = {
+      collections: [{ name: 'Root', configuration: {}, items: [
+        { type: 'scenario', name: 'First', tags: [], params: [], nodes: [], edges: [],
+          items: [{ name: 'Ping', type: 'http' }] },
+        { type: 'scenario', name: 'Second', tags: [], params: [], nodes: [], edges: [],
+          items: [{ name: 'Ping', type: 'http' }] }
+      ] }]
+    }
+    const loaded = processAfterDeserialization(structuredClone(tree)) as {
+      collections: { items: { items?: { id?: string }[] }[] }[]
+    }
+    const scenarios = loaded.collections[0]?.items ?? []
+    const firstPing = scenarios[0]?.items?.[0]?.id
+    const secondPing = scenarios[1]?.items?.[0]?.id
+
+    expect(typeof firstPing).toBe('string')
+    expect(secondPing).not.toBe(firstPing)
+
+    // Swapping the two scenarios must leave each request's id alone — the
+    // proof that neither depends on its position.
+    const swapped = structuredClone(tree)
+    const items = swapped.collections[0]?.items
+    if (items) items.reverse()
+    const reloaded = processAfterDeserialization(swapped) as {
+      collections: { items: { name: string, items?: { id?: string }[] }[] }[]
+    }
+    const byName = new Map((reloaded.collections[0]?.items ?? []).map((s) => [s.name, s.items?.[0]?.id]))
+    expect(byName.get('First')).toBe(firstPing)
+    expect(byName.get('Second')).toBe(secondPing)
+  })
+})
+
 describe('generateIds — determinism on the committed reference samples', () => {
   const SAMPLES_DIR = join(__dirname, '../../../../tests/e2e/samples')
   const SAMPLES = readdirSync(SAMPLES_DIR, { withFileTypes: true })

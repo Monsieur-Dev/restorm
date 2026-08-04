@@ -5,6 +5,7 @@ export type { DraftStoreOptions, LoadedDraft } from './DraftStore'
 export { decomposeForPersistence, cleanseForPersistence } from './decomposer'
 export type { DecomposedUnit, DecomposedProject, DecomposeOptions } from './decomposer'
 export { ensureFolderUuid, ensureFileUuid, readFolderUuid, DEFAULT_UUID_KEY } from './uuid'
+export { setTopLevelKey } from './setTopLevelKey'
 export type { EnsureFolderUuidOptions, EnsureFileUuidOptions, EnsureUuidResult } from './uuid'
 export {
   isTombstone,

@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "Đã khôi phục công việc chưa lưu",
     "draftsRestoredBody_other": "{{count}} bản nháp đã được khôi phục từ phiên trước của bạn."
   },
+  "about": {
+    "version": "Phiên bản {{version}}",
+    "tagline": "Môi trường kiểm thử API — máy khách và máy chủ.",
+    "links": {
+      "website": "Trang web",
+      "documentation": "Tài liệu",
+      "releaseNotes": "Ghi chú phát hành"
+    },
+    "publishedBy": "Phát hành bởi",
+    "legal": {
+      "trademark": "Restorm® là nhãn hiệu đã đăng ký tại INPI.",
+      "copyright": "© 2026 Monsieur Dev. Bảo lưu mọi quyền."
+    },
+    "close": "Đóng"
+  },
   "statusbar": {
     "requestHistory": "Lịch sử yêu cầu",
     "envSelector": {
@@ -1028,7 +1043,19 @@
     "dropZone": "Vùng thả",
     "editAuth": "Chỉnh sửa tuyến xác thực",
     "error": {
-      "unknown": "Đã xảy ra lỗi không xác định"
+      "unknown": "Đã xảy ra lỗi không xác định",
+      "unexpected": "Việc nhập thất bại vì một lý do không mong đợi.",
+      "detailLabel": "Chi tiết kỹ thuật",
+      "folderNotFound": "Thư mục này không còn tồn tại trong dự án nên không thể làm mới.",
+      "noSourceUrl": "Thư mục này không lưu URL nguồn nào nên không có gì để làm mới.",
+      "noImportSource": "Thư mục này không được tạo bởi một lần nhập được nhận diện nên không thể làm mới từ nguồn.",
+      "formatNotRefreshable": "Việc nhập {{format}} chỉ diễn ra một lần: không có đặc tả nào để tải lại nên không thể làm mới thư mục này.",
+      "httpStatus": "Nguồn đã phản hồi yêu cầu với HTTP {{status}}.",
+      "specParseFailed": "Không thể phân tích đặc tả tải về từ {{url}}.",
+      "sourceImportFailed": "Không thể nhập lại đặc tả từ nguồn của nó.",
+      "emptySpec": "Đặc tả tải về từ {{url}} không khai báo thao tác {{format}} nào. Áp dụng nó sẽ làm trống thư mục này nên bản cập nhật đã bị từ chối.",
+      "formatNotDetected": "Không nhận diện được định dạng của nguồn này.",
+      "unsupportedFormat": "Không có trình nhập nào xử lý định dạng {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1474,6 +1501,10 @@
       },
       "connection": {
         "missingName": "Tên kết nối là bắt buộc."
+      },
+      "reachability": {
+        "unreachable": "Hành động này không bao giờ chạy được: không có kết nối nào dẫn tới nó từ một hành động khởi động kịch bản.",
+        "cycle": "Hành động này nằm trong một vòng lặp kết nối mà không có gì khởi động, nên không bao giờ chạy được. Hãy nối một hành động bên ngoài vòng lặp vào nó."
       }
     },
     "usage": {
@@ -2447,13 +2478,16 @@
       "movedFolder": "Đã di chuyển thư mục \"{{name}}\"",
       "movedEnvironmentFolder": "Đã di chuyển thư mục môi trường \"{{name}}\"",
       "reorderedFolder": "Đã sắp xếp lại các mục trong thư mục \"{{name}}\"",
-      "reorderedEnvironmentFolder": "Đã sắp xếp lại các mục trong thư mục môi trường \"{{name}}\""
+      "reorderedEnvironmentFolder": "Đã sắp xếp lại các mục trong thư mục môi trường \"{{name}}\"",
+      "stampedFileFormatVersion": "Phiên bản định dạng tệp {{name}}",
+      "changedFileFormatVersion": "Định dạng tệp {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Cập nhật yêu cầu \"{{name}}\"",
       "singleScenario": "Cập nhật kịch bản \"{{name}}\"",
       "singleFolder": "Cập nhật thư mục \"{{name}}\"",
       "singleEnvironmentFolder": "Cập nhật thư mục môi trường \"{{name}}\"",
+      "singleFileFormatVersion": "Chuyển sang định dạng tệp {{name}}",
       "countRequest_one": "{{count}} yêu cầu",
       "countRequest_other": "{{count}} yêu cầu",
       "countScenario_one": "{{count}} kịch bản",
@@ -2462,6 +2496,8 @@
       "countFolder_other": "{{count}} thư mục",
       "countEnvironmentFolder_one": "{{count}} thư mục môi trường",
       "countEnvironmentFolder_other": "{{count}} thư mục môi trường",
+      "countFileFormatVersion_one": "{{count}} thay đổi định dạng tệp",
+      "countFileFormatVersion_other": "{{count}} thay đổi định dạng tệp",
       "multiple": "Cập nhật {{parts}}"
     },
     "semiPullFrequencyTitle": "Tần suất kiểm tra cập nhật tự động",
@@ -2578,6 +2614,13 @@
       "title": "Không mở lại tệp",
       "body": "{{file}} không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây.",
       "bodyUnnamed": "Tệp gần nhất không được mở lại: Restorm đã gặp sự cố khi mở tệp này ở lần khởi động trước. Tệp của bạn vẫn nguyên vẹn — bạn có thể mở lại từ các tệp gần đây."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Dự án được tạo bằng phiên bản mới hơn",
+      "message": "Tệp này được tạo bằng phiên bản Restorm mới hơn phiên bản bạn đang dùng. Vui lòng cập nhật Restorm để mở tệp.",
+      "versions": "Định dạng tệp {{found}}; phiên bản này hỗ trợ tới {{current}}."
     }
   }
 }

@@ -1,6 +1,6 @@
+fileFormatVersion: 1
 collections:
   - folderType: environment
-    fileFormatVersion: 1
     name: Swagger Petstore
     documentation: |-
       # Swagger Petstore

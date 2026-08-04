@@ -50,6 +50,21 @@
     "draftsRestoredBody_one": "{{count}} Entwurf wurde aus Ihrer vorherigen Sitzung wiederhergestellt.",
     "draftsRestoredBody_other": "{{count}} Entwürfe wurden aus Ihrer vorherigen Sitzung wiederhergestellt."
   },
+  "about": {
+    "version": "Version {{version}}",
+    "tagline": "Die API-Testumgebung – Client und Server.",
+    "links": {
+      "website": "Website",
+      "documentation": "Dokumentation",
+      "releaseNotes": "Versionshinweise"
+    },
+    "publishedBy": "Herausgegeben von",
+    "legal": {
+      "trademark": "Restorm® ist eine beim INPI eingetragene Marke.",
+      "copyright": "© 2026 Monsieur Dev. Alle Rechte vorbehalten."
+    },
+    "close": "Schließen"
+  },
   "statusbar": {
     "requestHistory": "Anfrageverlauf",
     "envSelector": {
@@ -1029,7 +1044,19 @@
     "dropZone": "Ablagezone",
     "editAuth": "Authentifizierungsroute bearbeiten",
     "error": {
-      "unknown": "Ein unbekannter Fehler ist aufgetreten"
+      "unknown": "Ein unbekannter Fehler ist aufgetreten",
+      "unexpected": "Der Import ist aus einem unerwarteten Grund fehlgeschlagen.",
+      "detailLabel": "Technisches Detail",
+      "folderNotFound": "Dieser Ordner existiert nicht mehr im Projekt und kann daher nicht aktualisiert werden.",
+      "noSourceUrl": "Für diesen Ordner ist keine Quell-URL hinterlegt, es gibt also nichts zu aktualisieren.",
+      "noImportSource": "Dieser Ordner stammt nicht aus einem erkannten Import und kann daher nicht aus einer Quelle aktualisiert werden.",
+      "formatNotRefreshable": "Ein {{format}}-Import ist einmalig: Es gibt keine Spezifikation, die erneut abgerufen werden könnte, daher lässt sich dieser Ordner nicht aktualisieren.",
+      "httpStatus": "Die Quelle hat die Anfrage mit HTTP {{status}} beantwortet.",
+      "specParseFailed": "Die von {{url}} abgerufene Spezifikation konnte nicht gelesen werden.",
+      "sourceImportFailed": "Die Spezifikation konnte nicht erneut aus ihrer Quelle importiert werden.",
+      "emptySpec": "Die von {{url}} abgerufene Spezifikation deklariert keine {{format}}-Operation. Sie anzuwenden würde diesen Ordner leeren, daher wurde die Aktualisierung abgelehnt.",
+      "formatNotDetected": "Das Format dieser Quelle wurde nicht erkannt.",
+      "unsupportedFormat": "Kein Importer unterstützt das Format {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1475,6 +1502,10 @@
       },
       "connection": {
         "missingName": "Ein Verbindungsname ist erforderlich."
+      },
+      "reachability": {
+        "unreachable": "Diese Aktion kann nie ausgeführt werden: Keine Verbindung erreicht sie von einer Aktion aus, die das Szenario startet.",
+        "cycle": "Diese Aktion liegt in einer Verbindungsschleife, die durch nichts gestartet wird, und kann daher nie ausgeführt werden. Verbinden Sie eine Aktion von außerhalb der Schleife mit ihr."
       }
     },
     "usage": {
@@ -2448,13 +2479,16 @@
       "movedFolder": "Ordner \"{{name}}\" verschoben",
       "movedEnvironmentFolder": "Umgebungsordner \"{{name}}\" verschoben",
       "reorderedFolder": "Elemente im Ordner „{{name}}“ neu angeordnet",
-      "reorderedEnvironmentFolder": "Elemente im Umgebungsordner „{{name}}“ neu angeordnet"
+      "reorderedEnvironmentFolder": "Elemente im Umgebungsordner „{{name}}“ neu angeordnet",
+      "stampedFileFormatVersion": "Dateiformatversion {{name}}",
+      "changedFileFormatVersion": "Dateiformat {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Aktualisierung der Anfrage „{{name}}“",
       "singleScenario": "Aktualisierung des Szenarios „{{name}}“",
       "singleFolder": "Aktualisierung des Ordners „{{name}}“",
       "singleEnvironmentFolder": "Aktualisierung des Umgebungsordners „{{name}}“",
+      "singleFileFormatVersion": "Wechsel zum Dateiformat {{name}}",
       "countRequest_one": "{{count}} Anfrage",
       "countRequest_other": "{{count}} Anfragen",
       "countScenario_one": "{{count}} Szenario",
@@ -2463,6 +2497,8 @@
       "countFolder_other": "{{count}} Ordner",
       "countEnvironmentFolder_one": "{{count}} Umgebungsordner",
       "countEnvironmentFolder_other": "{{count}} Umgebungsordner",
+      "countFileFormatVersion_one": "{{count}} Dateiformatänderung",
+      "countFileFormatVersion_other": "{{count}} Dateiformatänderungen",
       "multiple": "Aktualisierung von {{parts}}"
     },
     "semiPullFrequencyTitle": "Häufigkeit der automatischen Pull-Prüfung",
@@ -2579,6 +2615,13 @@
       "title": "Datei nicht erneut geöffnet",
       "body": "{{file}} wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen.",
       "bodyUnnamed": "Die letzte Datei wurde nicht erneut geöffnet: Restorm ist beim letzten Start beim Öffnen abgestürzt. Ihre Datei ist unversehrt – Sie können sie über die zuletzt verwendeten Dateien erneut öffnen."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt mit einer neueren Version erstellt",
+      "message": "Diese Datei wurde mit einer neueren Version von Restorm erstellt als der, die Sie verwenden. Bitte aktualisieren Sie Restorm, um sie zu öffnen.",
+      "versions": "Dateiformat {{found}}; diese Version unterstützt bis zu {{current}}."
     }
   }
 }

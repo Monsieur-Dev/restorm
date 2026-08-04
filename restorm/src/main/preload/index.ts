@@ -2324,6 +2324,10 @@ contextBridge.exposeInMainWorld('restorm', {
       source: string
       format?: string
       error?: string
+      /** Named identity of `error` when the failure is one the app can
+       * name — the renderer localises from this, not from `error`. */
+      errorCode?: string
+      errorParams?: Record<string, string>
       statusCode?: number
       isAuthError?: boolean
     }> => {
@@ -2335,6 +2339,8 @@ contextBridge.exposeInMainWorld('restorm', {
         source: string
         format?: string
         error?: string
+        errorCode?: string
+        errorParams?: Record<string, string>
         statusCode?: number
         isAuthError?: boolean
       }

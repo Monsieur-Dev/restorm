@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "已還原未儲存的工作",
     "draftsRestoredBody_other": "已從上一次工作階段還原 {{count}} 份草稿。"
   },
+  "about": {
+    "version": "版本 {{version}}",
+    "tagline": "API 測試環境 — 用戶端與伺服器。",
+    "links": {
+      "website": "網站",
+      "documentation": "文件",
+      "releaseNotes": "版本資訊"
+    },
+    "publishedBy": "發行者",
+    "legal": {
+      "trademark": "Restorm® 是在 INPI 註冊的商標。",
+      "copyright": "© 2026 Monsieur Dev. 保留一切權利。"
+    },
+    "close": "關閉"
+  },
   "statusbar": {
     "requestHistory": "請求歷史紀錄",
     "envSelector": {
@@ -1028,7 +1043,19 @@
     "dropZone": "拖放區",
     "editAuth": "編輯驗證路由",
     "error": {
-      "unknown": "發生未知的錯誤"
+      "unknown": "發生未知的錯誤",
+      "unexpected": "匯入因非預期的原因失敗。",
+      "detailLabel": "技術細節",
+      "folderNotFound": "此資料夾已不在專案中，因此無法重新整理。",
+      "noSourceUrl": "此資料夾未記錄來源 URL，因此沒有可重新整理的內容。",
+      "noImportSource": "此資料夾並非由可辨識的匯入建立，因此無法從來源重新整理。",
+      "formatNotRefreshable": "{{format}} 匯入是一次性的：沒有可重新取得的規格，因此無法重新整理此資料夾。",
+      "httpStatus": "來源以 HTTP {{status}} 回應了此要求。",
+      "specParseFailed": "無法剖析從 {{url}} 取得的規格。",
+      "sourceImportFailed": "無法從來源重新匯入此規格。",
+      "emptySpec": "從 {{url}} 取得的規格未宣告任何 {{format}} 作業。套用它會清空此資料夾，因此已拒絕這次更新。",
+      "formatNotDetected": "無法辨識此來源的格式。",
+      "unsupportedFormat": "沒有匯入器支援 {{format}} 格式。"
     },
     "formats": {
       "swagger": {
@@ -1474,6 +1501,10 @@
       },
       "connection": {
         "missingName": "連線名稱為必填。"
+      },
+      "reachability": {
+        "unreachable": "此動作永遠不會執行：沒有任何連線從啟動情境的動作連到它。",
+        "cycle": "此動作位於一個沒有任何起點的連線迴圈中，因此永遠不會執行。請從迴圈外部連接一個動作到它。"
       }
     },
     "usage": {
@@ -2447,13 +2478,16 @@
       "movedFolder": "已移動資料夾「{{name}}」",
       "movedEnvironmentFolder": "已移動環境資料夾「{{name}}」",
       "reorderedFolder": "已重新排序資料夾「{{name}}」中的項目",
-      "reorderedEnvironmentFolder": "已重新排序環境資料夾「{{name}}」中的項目"
+      "reorderedEnvironmentFolder": "已重新排序環境資料夾「{{name}}」中的項目",
+      "stampedFileFormatVersion": "檔案格式版本 {{name}}",
+      "changedFileFormatVersion": "檔案格式 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "更新請求 \"{{name}}\"",
       "singleScenario": "更新情境 \"{{name}}\"",
       "singleFolder": "更新資料夾 \"{{name}}\"",
       "singleEnvironmentFolder": "更新環境資料夾 \"{{name}}\"",
+      "singleFileFormatVersion": "遷移至檔案格式 {{name}}",
       "countRequest_one": "{{count}} 個請求",
       "countRequest_other": "{{count}} 個請求",
       "countScenario_one": "{{count}} 個情境",
@@ -2462,6 +2496,8 @@
       "countFolder_other": "{{count}} 個資料夾",
       "countEnvironmentFolder_one": "{{count}} 個環境資料夾",
       "countEnvironmentFolder_other": "{{count}} 個環境資料夾",
+      "countFileFormatVersion_one": "{{count}} 項檔案格式變更",
+      "countFileFormatVersion_other": "{{count}} 項檔案格式變更",
       "multiple": "更新 {{parts}}"
     },
     "semiPullFrequencyTitle": "自動提取檢查頻率",
@@ -2578,6 +2614,13 @@
       "title": "未重新開啟檔案",
       "body": "未重新開啟 {{file}}：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。",
       "bodyUnnamed": "未重新開啟上次的檔案：上次啟動時 Restorm 在開啟它的過程中當機了。您的檔案完好無損，可從最近的檔案中重新開啟。"
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "專案由較新版本建立",
+      "message": "此檔案由比您目前使用的 Restorm 更新的版本建立。請更新 Restorm 後再開啟。",
+      "versions": "檔案格式 {{found}}；目前版本最高支援 {{current}}。"
     }
   }
 }

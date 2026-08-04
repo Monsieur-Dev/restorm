@@ -762,12 +762,14 @@ Feature: Full workflow end-to-end scenario
     When I focus the custom-list "Paint" request tab
     Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
 
-    # Disable the entry → unresolvable, sends empty (no label fallback).
+    # Disable the entry → unresolvable. A param whose value resolves to nothing
+    # is OMITTED rather than sent as a bare `color=`: the server reads "absent",
+    # which is what the empty context expressed, not "present and empty".
     When I open the custom variables tab on the "Paint API" env folder
     And I select the "Teinte" custom value list
     And I uncheck the "Rouge" custom-list entry
     When I focus the custom-list "Paint" request tab
-    Then the active request URL tooltip should be "https://api.example.com/paint?color="
+    Then the active request URL tooltip should be "https://api.example.com/paint"
 
     # Re-enable → resolution returns.
     When I open the custom variables tab on the "Paint API" env folder
@@ -776,11 +778,12 @@ Feature: Full workflow end-to-end scenario
     When I focus the custom-list "Paint" request tab
     Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
 
-    # Delete the whole list → unresolvable, sends empty.
+    # Delete the whole list → unresolvable, so the param is omitted entirely
+    # (same rule as the unchecked entry above).
     When I open the custom variables tab on the "Paint API" env folder
     And I delete the "Teinte" custom value list
     When I focus the custom-list "Paint" request tab
-    Then the active request URL tooltip should be "https://api.example.com/paint?color="
+    Then the active request URL tooltip should be "https://api.example.com/paint"
 
     When I close the current file and discard changes
     And I close the app

@@ -263,15 +263,55 @@ export interface RequestContext {
   keyValueGroups: Map<string, KeyValue[]>
   /** Full request data for URL and code snippet generation */
   fullData: FullRequestData | null
+}
+
+/**
+ * The DISPOSABLE contexts one execution of one request resolves against.
+ *
+ * A scenario run never writes into the stored `RequestContext` above. Instead
+ * the engine composes this object just before it dispatches a request
+ * (`ContextService.composeResolutionContexts`), hands it to the execution
+ * service, and drops it when the dispatch returns. Nothing here is stored, so
+ * nothing here can outlive the request that used it — which is the whole
+ * property: a value a run supplies cannot still be in effect afterwards,
+ * because there is nowhere for it to be.
+ *
+ * Compose it PER REQUEST EXECUTION, never once per run: a variable declared
+ * between two requests must be visible to the second and not to the first.
+ *
+ * The row families are SEPARATE OBJECTS, not one context shared by reference.
+ * Path params, query params, headers and body fields each resolve from their
+ * own object and are blind to one another — a row one family resolves can never
+ * be observed by another. The four hold equal values today, so the separation
+ * buys nothing yet by itself; it is what makes that blindness structural rather
+ * than a convention that holds until the first per-family rule writes into one
+ * of them.
+ */
+export interface ResolutionContexts {
   /**
-   * Per-run variable OVERLAY set by a scenario `setVariable` node before this
-   * request runs. Merged ON TOP of the environment context (overlay WINS) for
-   * every resolution of this request — so a scenario can override an env-folder
-   * variable for the request's URL / headers / params / body. Undefined outside
-   * a scenario run (or when no setVariable applies). Name → already-resolved
-   * string, exactly like the transformed env context.
+   * The run's own values, flat (name → already-resolved string). Carried so a
+   * NESTED resolution can compose its own contexts against the same run — an
+   * authentication request dispatched for this one resolves against ITS
+   * request's rows, not this one's, but under the same run values.
    */
-  scenarioVariables?: TransformedContext
+  runOverlay?: TransformedContext
+  /**
+   * env + run. Everything a request resolves against.
+   *
+   * Deliberately ONE context and not a per-family bundle. An earlier shape
+   * carried a separate context for path params, query params, headers and
+   * body fields — which is the anatomy of an HTTP request, and this type is
+   * shared by every protocol. Kafka has a topic, Redis a command, gRPC a
+   * message, AMQP a routing key; none of them has a path param, and each
+   * would have had to pick a family that did not describe it.
+   *
+   * Nothing is lost: the four were seeded identically, so they only ever
+   * differed once a per-family rule wrote into one of them, and no such rule
+   * exists. Where per-family cumulation genuinely applies — a query row
+   * seeing an earlier query row but not a path row — it lives inside
+   * `URLResolver`, which is HTTP-specific and the right place for it.
+   */
+  base: TransformedContext
 }
 
 /** Resolved URL result */

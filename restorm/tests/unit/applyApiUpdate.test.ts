@@ -17,7 +17,6 @@ function makeFolder(overrides: Partial<EnvironmentFolder> = {}): EnvironmentFold
     configuration: {},
     items: [],
     folderType: 'environment',
-    fileFormatVersion: 1,
     environments: [],
     ...overrides
   }

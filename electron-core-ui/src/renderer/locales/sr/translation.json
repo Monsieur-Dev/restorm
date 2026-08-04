@@ -1,14 +1,14 @@
 {
   "releaseNotesModal": {
-    "title": "Новости",
-    "showMore": "Прикажи више",
-    "loading": "Учитавање напомена о издању…",
-    "empty": "Нема белешки о издању за приказ."
+    "title": "Novosti",
+    "showMore": "Prikaži više",
+    "loading": "Učitavanje napomena o izdanju…",
+    "empty": "Nema beleški o izdanju za prikaz."
   },
   "common": {
     "opened": "Otvoreno",
     "refresh": "Osveži",
-    "import": "Увези"
+    "import": "Uvezi"
   },
   "file": {
     "untitled": "Bez naslova",
@@ -21,11 +21,11 @@
       "cancel": "Otkaži"
     },
     "externalChange": {
-      "title": "Датотека је промењена на диску",
-      "message": "„{{fileName}}“ је измењена изван апликације.",
-      "detail": "Поново учитајте да бисте користили верзију са диска или задржите своју верзију и препишите је.",
-      "reload": "Поново учитај",
-      "keepMine": "Задржи моју верзију"
+      "title": "Datoteka je promenjena na disku",
+      "message": "„{{fileName}}“ je izmenjena izvan aplikacije.",
+      "detail": "Ponovo učitajte da biste koristili verziju sa diska ili zadržite svoju verziju i prepišite je.",
+      "reload": "Ponovo učitaj",
+      "keepMine": "Zadrži moju verziju"
     }
   },
   "recentFilesVignette": {
@@ -67,8 +67,8 @@
     "keyboardShortcuts": "Prečice na tastaturi",
     "releaseNotes": "Napomene o izdanju",
     "reportIssue": "Prijavi problem",
-    "mcpLogs": "MCP евиденције",
-    "checkForUpdates": "Провери ажурирања"
+    "mcpLogs": "MCP evidencije",
+    "checkForUpdates": "Proveri ažuriranja"
   },
   "settings": {
     "title": "Podešavanja",
@@ -165,20 +165,20 @@
         "description": "Kontroliše odlaganje u milisekundama nakon kojeg se izmenjeni editor automatski čuva. Primenjuje se samo kada je Automatsko čuvanje postavljeno na Posle odlaganja."
       },
       "reopenLastFile": {
-        "title": "Аутоматски поново отвори последње отворену датотеку",
-        "description": "Када је омогућено, при покретању поново отвара последњу датотеку коју сте имали отворену — али само ако је апликација затворена док је датотека била отворена."
+        "title": "Automatski ponovo otvori poslednje otvorenu datoteku",
+        "description": "Kada je omogućeno, pri pokretanju ponovo otvara poslednju datoteku koju ste imali otvorenu — ali samo ako je aplikacija zatvorena dok je datoteka bila otvorena."
       }
     }
   },
   "codeEditor": {
     "goToDefinition": "Idi na definiciju",
     "copyButton": {
-      "copy": "Копирај код",
-      "copied": "Копирано!"
+      "copy": "Kopiraj kod",
+      "copied": "Kopirano!"
     }
   },
   "markdownEditor": {
-    "placeholder": "Почните да пишете…"
+    "placeholder": "Počnite da pišete…"
   },
   "tagsView": {
     "removeTag": "Ukloni oznaku",
@@ -353,9 +353,9 @@
   },
   "statusbar": {
     "mcp": {
-      "serverRunningOnPort": "MCP сервер ради на порту {{port}}",
-      "sessionName": "Сесија: {{name}}",
-      "viewLogs": "Прикажи евиденције",
+      "serverRunningOnPort": "MCP server radi na portu {{port}}",
+      "sessionName": "Sesija: {{name}}",
+      "viewLogs": "Prikaži evidencije",
       "stopServer": "Zaustavi MCP server",
       "resumeServer": "Nastavi MCP server",
       "serverStopped": "zaustavljeno"
@@ -363,87 +363,87 @@
     "git": {
       "pushTooltip": "Pošalji u repozitorijum",
       "pullTooltip": "Preuzmi iz repozitorijuma",
-      "nothingToPushTooltip": "Нема промена за слање",
-      "refreshTooltip": "Провери промене за слање или преузимање",
+      "nothingToPushTooltip": "Nema promena za slanje",
+      "refreshTooltip": "Proveri promene za slanje ili preuzimanje",
       "historyTooltip": "Git istorija"
     }
   },
   "mcpToolTitles": {
-    "screenshot": "Снимак екрана",
-    "screencastStart": "Покрени снимање екрана",
-    "screencastStop": "Заустави снимање екрана",
-    "refresh": "Поново учитај прозор",
-    "domQuery": "Упит DOM-а",
-    "consoleLogs": "Читај дневнике конзоле",
-    "dispatchEvent": "Пошаљи DOM догађај",
-    "typeText": "Унеси текст",
-    "evaluate": "Покрени JavaScript",
-    "exit": "Изађи из апликације",
-    "waitFor": "Чекај услов",
-    "keyboardShortcut": "Притисни пречицу на тастатури",
-    "devtools": "Укључи/искључи DevTools",
-    "windowInfo": "Подаци о прозору",
-    "storage": "Читај/пиши складиште",
-    "scrollIntoView": "Помери у видно поље",
-    "injectCss": "Убаци CSS",
-    "wait": "Чекај",
-    "getComputedStyle": "Преузми израчунати стил",
-    "getWindows": "Излистај прозоре",
-    "dragDrop": "Превуци и пусти",
-    "mouseInput": "Унос мишем",
-    "batch": "Покрени групу алата",
-    "openMiniBrowser": "Отвори мини прегледач",
-    "miniBrowserExecute": "Покрени код у мини прегледачу",
-    "openConsole": "Отвори конзолу",
-    "consoleClear": "Очисти конзолу",
-    "setTabMaximized": "Увећај/врати картицу",
-    "listInstances": "Листа MCP инстанци",
-    "listThemes": "Листа доступних тема",
-    "getCurrentTheme": "Добави тренутну тему",
-    "getSettings": "Прикажи подешавања апликације",
-    "setSetting": "Промени подешавање",
-    "patchSettings": "Промени више подешавања одједном",
-    "resetSetting": "Врати подешавање на подразумевано"
+    "screenshot": "Snimak ekrana",
+    "screencastStart": "Pokreni snimanje ekrana",
+    "screencastStop": "Zaustavi snimanje ekrana",
+    "refresh": "Ponovo učitaj prozor",
+    "domQuery": "Upit DOM-a",
+    "consoleLogs": "Čitaj dnevnike konzole",
+    "dispatchEvent": "Pošalji DOM događaj",
+    "typeText": "Unesi tekst",
+    "evaluate": "Pokreni JavaScript",
+    "exit": "Izađi iz aplikacije",
+    "waitFor": "Čekaj uslov",
+    "keyboardShortcut": "Pritisni prečicu na tastaturi",
+    "devtools": "Uključi/isključi DevTools",
+    "windowInfo": "Podaci o prozoru",
+    "storage": "Čitaj/piši skladište",
+    "scrollIntoView": "Pomeri u vidno polje",
+    "injectCss": "Ubaci CSS",
+    "wait": "Čekaj",
+    "getComputedStyle": "Preuzmi izračunati stil",
+    "getWindows": "Izlistaj prozore",
+    "dragDrop": "Prevuci i pusti",
+    "mouseInput": "Unos mišem",
+    "batch": "Pokreni grupu alata",
+    "openMiniBrowser": "Otvori mini pregledač",
+    "miniBrowserExecute": "Pokreni kod u mini pregledaču",
+    "openConsole": "Otvori konzolu",
+    "consoleClear": "Očisti konzolu",
+    "setTabMaximized": "Uvećaj/vrati karticu",
+    "listInstances": "Lista MCP instanci",
+    "listThemes": "Lista dostupnih tema",
+    "getCurrentTheme": "Dobavi trenutnu temu",
+    "getSettings": "Prikaži podešavanja aplikacije",
+    "setSetting": "Promeni podešavanje",
+    "patchSettings": "Promeni više podešavanja odjednom",
+    "resetSetting": "Vrati podešavanje na podrazumevano"
   },
   "customWco": {
-    "minimize": "Минимизирај",
-    "maximize": "Максимизирај",
-    "restore": "Врати",
-    "close": "Затвори"
+    "minimize": "Minimiziraj",
+    "maximize": "Maksimiziraj",
+    "restore": "Vrati",
+    "close": "Zatvori"
   },
   "firewall": {
-    "addOrigin": "Додај origin",
-    "removeOrigin": "Уклони {{origin}}",
-    "noEntries": "Нема уноса.",
+    "addOrigin": "Dodaj origin",
+    "removeOrigin": "Ukloni {{origin}}",
+    "noEntries": "Nema unosa.",
     "prompt": {
-      "title": "Одлазни захтев је блокиран",
-      "allow": "Дозволи",
-      "deny": "Одбиј",
-      "fromOrigin": "са {{origin}}"
+      "title": "Odlazni zahtev je blokiran",
+      "allow": "Dozvoli",
+      "deny": "Odbij",
+      "fromOrigin": "sa {{origin}}"
     }
   },
   "miniBrowser": {
-    "back": "Назад",
-    "refresh": "Освежи",
-    "go": "Иди",
-    "address": "Адреса",
-    "emptyHint": "Унеси адресу изнад да почнеш прегледање."
+    "back": "Nazad",
+    "refresh": "Osveži",
+    "go": "Idi",
+    "address": "Adresa",
+    "emptyHint": "Unesi adresu iznad da počneš pregledanje."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Додај обележивач"
+    "addBookmark": "Dodaj obeleživač"
   },
   "toaster": {
-    "notificationsRegion": "Обавештења"
+    "notificationsRegion": "Obaveštenja"
   },
   "console": {
-    "shellFlavor": "Врста љуске"
+    "shellFlavor": "Vrsta ljuske"
   },
   "workbench": {
-    "tabModified": "Измењено",
-    "editorTabs": "Картице уређивача"
+    "tabModified": "Izmenjeno",
+    "editorTabs": "Kartice uređivača"
   },
   "keyValueTable": {
-    "description": "Опис"
+    "description": "Opis"
   },
   "gatedControl": {
     "proLabel": "Pro verzija",
@@ -455,20 +455,20 @@
       "body": "Instalirajte Git i dodajte ga u PATH da biste koristili Git integraciju."
     },
     "pullAvailable": {
-      "title": "Доступно ажурирање",
-      "body": "Новија верзија ове датотеке је доступна у репозиторијуму.",
-      "pullNow": "Повуци сада"
+      "title": "Dostupno ažuriranje",
+      "body": "Novija verzija ove datoteke je dostupna u repozitorijumu.",
+      "pullNow": "Povuci sada"
     },
     "mergeInProgress": {
-      "title": "Недовршено спајање",
-      "body": "Започето је Git спајање које никада није довршено. Датотека пројекта можда још садржи ознаке сукоба.",
-      "abort": "Прекини спајање"
+      "title": "Nedovršeno spajanje",
+      "body": "Započeto je Git spajanje koje nikada nije dovršeno. Datoteka projekta možda još sadrži oznake sukoba.",
+      "abort": "Prekini spajanje"
     }
   },
   "pushModal": {
     "title": "Pošalji",
     "languageLabel": "Jezik poruke commita",
-    "applyLanguageByDefault": "Подразумевани језик комитова",
+    "applyLanguageByDefault": "Podrazumevani jezik komitova",
     "titleFieldLabel": "Naslov commita",
     "bodyFieldLabel": "Opis",
     "cancel": "Otkaži",
@@ -489,6 +489,6 @@
     "date": "Datum",
     "hash": "Heš",
     "parents": "Roditelji",
-    "recoverVersion": "Врати ову верзију"
+    "recoverVersion": "Vrati ovu verziju"
   }
 }

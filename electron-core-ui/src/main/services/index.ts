@@ -110,6 +110,7 @@ export {
   cleanseForPersistence,
   ensureFolderUuid,
   ensureFileUuid,
+  setTopLevelKey,
   readFolderUuid,
   DEFAULT_UUID_KEY
 } from './saveUnit'

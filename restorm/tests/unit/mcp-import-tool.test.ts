@@ -146,7 +146,6 @@ describe('import_from_url tool', () => {
       id: 'env-1',
       name: 'Imported',
       folderType: 'environment',
-      fileFormatVersion: 1,
       tags: [],
       configuration: {},
       items: [],

@@ -21,6 +21,7 @@ import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
+import type { ImportErrorCode, ImportErrorParams } from '../../../shared/config/importErrors'
 import { withFirewallBypass } from 'electron-core-ui'
 import { assertSafeFetchUrl, fetchFollowingSafeRedirects } from '../../utils/urlSecurity'
 
@@ -38,6 +39,16 @@ export interface ImportResult {
   source: string
   format?: string
   error?: string
+  /** Machine-readable identity of `error`, when the failure is one the
+   * app can name. The renderer renders a localised sentence from it;
+   * `error` stays human-readable English for logs and for the MCP
+   * tools that hand it straight back to an agent. Absent for text
+   * produced outside the app (a parser, the filesystem, the network),
+   * which the renderer shows verbatim as diagnostic detail. */
+  errorCode?: ImportErrorCode
+  /** Parameters for `errorCode`'s sentence. The reserved `detail` key
+   * carries untranslatable upstream text. */
+  errorParams?: ImportErrorParams
   /** HTTP status code when the import source is a URL. Surfaced so
    * the UI can detect 401 / 403 and prompt for authentication. */
   statusCode?: number
@@ -188,7 +199,10 @@ export function detectFormat(content: string, filePath?: string): string | null 
   // provider) and handed to every `canImport` call as `parsed`; providers
   // that sniff a JSON shape read it instead of re-parsing `content`
   // themselves. `undefined` when `content` isn't valid JSON — providers
-  // fall back to their own (identical, so identically-failing) parse.
+  // that also accept YAML (OpenAPI, Swagger) fall back to their own
+  // JSON-then-YAML parse attempt at that point (see `tryParseSpecText` in
+  // `transformers/_shared.ts`); every other provider's own fallback parse
+  // is JSON-only and fails identically to this one.
   let parsed: unknown
   try {
     parsed = JSON.parse(content)
@@ -266,7 +280,9 @@ export async function importFromContent(
         success: false,
         items: [],
         source,
-        error: `Unsupported format: ${format}`
+        error: `Unsupported format: ${format}`,
+        errorCode: 'unsupportedFormat',
+        errorParams: { format }
       }
     }
 
@@ -316,6 +332,10 @@ interface ReadSourceResult {
 interface ReadSourceError {
   success: false
   error: string
+  /** Named identity of `error`, when there is one — propagated onto
+   * the `ImportResult` so the renderer can localise it. */
+  errorCode?: ImportErrorCode
+  errorParams?: ImportErrorParams
   statusCode?: number
   isAuthError?: boolean
 }
@@ -392,7 +412,9 @@ async function readImportSource(
           success: false,
           statusCode: response.status,
           ...(isAuthError ? { isAuthError: true } : {}),
-          error: `HTTP ${response.status}: ${response.statusText}`
+          error: `HTTP ${response.status}: ${response.statusText}`,
+          errorCode: 'httpStatus',
+          errorParams: { status: String(response.status), detail: response.statusText }
         }
       }
       return { success: true, content: await response.text(), kind }
@@ -430,6 +452,8 @@ export async function importFrom(
         source,
         ...(read.statusCode !== undefined ? { statusCode: read.statusCode } : {}),
         ...(read.isAuthError ? { isAuthError: true } : {}),
+        ...(read.errorCode !== undefined ? { errorCode: read.errorCode } : {}),
+        ...(read.errorParams !== undefined ? { errorParams: read.errorParams } : {}),
         error: read.error
       }
     }
@@ -451,7 +475,8 @@ export async function importFrom(
         success: false,
         items: [],
         source,
-        error: 'Could not detect file format'
+        error: 'Could not detect file format',
+        errorCode: 'formatNotDetected'
       }
     }
 

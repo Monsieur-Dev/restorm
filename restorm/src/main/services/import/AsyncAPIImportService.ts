@@ -3,7 +3,6 @@
  * Supports MQTT, Socket.IO, and WebSocket channels
  */
 
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import {
   Folder,
   EnvironmentFolder,
@@ -338,7 +337,6 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
 
   const rootFolder: EnvironmentFolder = {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'asyncapi',
     id: generateId(`${name}:folder:asyncapi:root`),
     name,

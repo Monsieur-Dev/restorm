@@ -22,7 +22,6 @@ function makeEnvironmentFolder(overrides: Partial<EnvironmentFolder> = {}): Envi
   return {
     ...makeFolder(),
     folderType: 'environment',
-    fileFormatVersion: 1,
     environments: [],
     ...overrides
   } as EnvironmentFolder

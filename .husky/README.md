@@ -11,8 +11,13 @@ e2e gate impossible to forget (a plain `git push` runs it automatically).
 ### Pre-commit Hook
 **File**: `.husky/pre-commit`
 
-Runs before each commit and performs only the **fast** checks (~2-3 min, no app
-instances → multiple commits can run in parallel):
+Runs before each commit and performs only the **fast** checks — no app instances,
+so multiple commits can run in parallel. Budget **~7-10 min** on this machine
+(measured across five real commits: 6m33s to 10m26s, varying with how much else
+is building at the time). The cost is dominated by the two package builds plus
+restorm's `test:all`; the per-package lint/typecheck/depcheck steps and the
+electron-core-ui unit suite (~17s alone, ~32s under contention) are a small
+fraction. Re-measure rather than trusting this figure if it matters to you:
 
 1. **🚫 Forbidden Patterns Check**
    - Blocks any use of `eslint-disable` comments
@@ -24,8 +29,10 @@ instances → multiple commits can run in parallel):
    - `depcheck` - Verifies dependencies
    - `lint` - ESLint validation
    - `typecheck` - TypeScript type checking
+   - `test` (electron-core-ui) / `test:all` (restorm) - Unit (and, for restorm,
+     integration) tests. `demo` has no unit test suite, so nothing runs for it
+     here.
    - `build` - Build verification
-   - `test:all` (restorm only) - Unit and integration tests
 
    The **Playwright e2e suite does NOT run here** — it is the heavy gate and
    moved to push time (see the Pre-push Hook below).

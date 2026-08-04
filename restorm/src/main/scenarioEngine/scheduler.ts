@@ -200,8 +200,14 @@ export class Scheduler {
   private readonly variables = new Map<string, unknown>()
   private readonly abortCtl = new AbortController()
   private readonly outgoingByPort = new Map<string, { edgeId: string; toNodeId: string; toPort: string; selector?: string }[]>()
+  /** Lazily-built Kahn ordering for `topologicalRank`; see that method. */
+  private topologicalRankCache?: Map<string, number>
   /** Lazily-built forward adjacency for `reachableForward`; see `forwardAdjacency`. */
   private forwardAdjacencyCache?: Map<string, string[]>
+  /** Emitter node id → the nodes whose activation is gated on THAT node's own
+   * `done` port (see `doneBlockedBy`). Built on first use per emitter; the edge
+   * set is immutable for the run, so it never needs invalidating. */
+  private readonly doneBlockedCache = new Map<string, ReadonlySet<string>>()
   private readonly runSubScenario?: SchedulerInit['runSubScenario']
   private readonly socketioConnectBridge?: SchedulerInit['socketioConnect']
   /** Live Socket.IO connections opened by `socketioConnect` nodes, keyed by the
@@ -245,6 +251,11 @@ export class Scheduler {
   /** Per node → port → set of source keys (`${fromNodeId}:${fromPort}`)
    * feeding that port. A port fed by >1 source is an AND-join barrier. */
   private readonly incomingSourcesByNodePort = new Map<string, Map<string, Set<string>>>()
+  /** Per node → port → the source ENDPOINTS feeding it, kept as structured
+   * pairs rather than the `${node}:${port}` keys above: a port id may itself
+   * contain a colon (`output:name`, `pathParams:<key>`), so the key form can't
+   * be parsed back. Feeds the `done`-gating analysis. */
+  private readonly incomingEndpointsByNodePort = new Map<string, Map<string, { nodeId: string; portId: string }[]>>()
   /** Aggregate nodes wired to a `forEach`/`for` `done` port — they collect
    * one contribution per iteration on `items` (inside the loop scope) and
    * fire ONCE when the loop closes (the `done` trigger), reordered by index.
@@ -276,6 +287,14 @@ export class Scheduler {
    * re-read on a later firing must NOT re-attribute its emitter. WeakSet so
    * a long / infinite loop doesn't leak (entries vanish with the token). */
   private readonly consumedTokens = new WeakSet<Token>()
+  /** Completion ids whose subtree was discharged at quiescence rather than by
+   * its descendants draining. A token of theirs matched afterwards must not
+   * re-release (the obligation is already settled) nor log a redundant-release
+   * warning — that release is expected, not anomalous. */
+  private readonly forceDrained = new Set<number>()
+  /** Node ids that have actually executed at least once, so the end of the run
+   * can tell a box that merely RECEIVED data from one that ran on it. */
+  private readonly firedNodes = new Set<string>()
   /** Loop iterations deferred to the macrotask queue (the anti-freeze yield):
    * counted as live work so the run isn't reported "done" while a re-entry is
    * still pending on a timer. */
@@ -546,6 +565,7 @@ export class Scheduler {
       return
     }
     this.inFlight += 1
+    this.firedNodes.add(act.nodeId)
     const startParams = this.startLogParams(act)
     this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `start ${act.kind}`, ...(Object.keys(startParams).length > 0 ? { data: logData(startParams) } : {}) })
     this.emit({ type: 'node-started', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now() })
@@ -696,6 +716,11 @@ export class Scheduler {
     // An edge `selector` reshapes the value in transit (e.g. picking
     // `body.data.cooldown.total_seconds` out of an HTTP response).
     const cid = act.completionId
+    // Consumers that can only activate once THIS box's `done` has fired (see
+    // `doneBlockedBy`). A token routed to one of them is deliberately NOT an
+    // obligation — counting it would make `done` wait for a consumer that is
+    // itself waiting for `done`.
+    const doneBlocked = this.doneBlockedBy(act.nodeId)
     for (const out of result.outputs) {
       const edges = this.outgoingByPort.get(`${act.nodeId}:${out.port}`) ?? []
       for (const edge of edges) {
@@ -704,7 +729,11 @@ export class Scheduler {
           : out.value
         // Each routed data token is one obligation on the emitter's subtree:
         // its `done` waits until this token's downstream chain has drained.
-        if (cid !== undefined) this.pending.set(cid, (this.pending.get(cid) ?? 0) + 1)
+        // The exception is a consumer gated on this very box's `done`: it runs
+        // on the `done` continuation, so it is not part of the subtree and
+        // must not hold `done` back (that is a circular wait, not an ordering).
+        const isObligation = cid !== undefined && !doneBlocked.has(edge.toNodeId)
+        if (isObligation) this.pending.set(cid, (this.pending.get(cid) ?? 0) + 1)
         this.enqueueToken({
           value: deepClone(routed),
           fromNodeId: act.nodeId,
@@ -713,7 +742,7 @@ export class Scheduler {
           toPort: edge.toPort,
           scope: act.scope,
           tokenId: ++this.tokenSeq,
-          ...(cid !== undefined ? { emitter: cid } : {})
+          ...(isObligation ? { emitter: cid } : {})
         })
         this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
       }
@@ -785,6 +814,11 @@ export class Scheduler {
     for (const p of parents) {
       const prev = this.pending.get(p) ?? 0
       if (prev <= 0) {
+        // A subtree discharged at quiescence settles its outstanding
+        // obligations up front, so a token of its matching later releases an
+        // obligation that is already gone. That is the designed outcome, not
+        // an anomaly — stay silent.
+        if (this.forceDrained.has(p)) continue
         // Already drained / never had this obligation — a redundant
         // release. Don't go negative and don't re-fire the cascade.
         this.pushLog({ ts: now(), runId: this.runId, level: 'warn', source: 'engine', message: `releaseParents: redundant release ignored for node-slot ${p} (pending was ${prev})` })
@@ -1481,6 +1515,11 @@ export class Scheduler {
       srcs.add(`${e.from.nodeId}:${e.from.portId}`)
       byPort.set(e.to.portId, srcs)
       this.incomingSourcesByNodePort.set(e.to.nodeId, byPort)
+      const endpointsByPort = this.incomingEndpointsByNodePort.get(e.to.nodeId) ?? new Map<string, { nodeId: string; portId: string }[]>()
+      const endpoints = endpointsByPort.get(e.to.portId) ?? []
+      endpoints.push({ nodeId: e.from.nodeId, portId: e.from.portId })
+      endpointsByPort.set(e.to.portId, endpoints)
+      this.incomingEndpointsByNodePort.set(e.to.nodeId, endpointsByPort)
       // An `aggregate` fed by a LOOP's `done` port is a scope-close collector
       // (collect per iteration, fire once on close). Gate on the SOURCE kind:
       // the universal `done` port now exists on every box, so a plain
@@ -1630,6 +1669,70 @@ export class Scheduler {
     return true
   }
 
+  /**
+   * The nodes that cannot activate until `nodeId`'s own `done` port has fired —
+   * directly (a gating input wired straight from `${nodeId}:done`) or
+   * transitively (every way of feeding a gating input goes through such a node).
+   *
+   * This is what makes the "fetch, then assert on the response" wiring work.
+   * A box that emits data into a consumer which ALSO takes its trigger from
+   * that box's `done` would otherwise deadlock: the `done` port waits for the
+   * data token to be consumed (post-order subtree drain) while the consumer
+   * waits for `done`. Neither side can move. Routing consults this set and does
+   * NOT record such a token as a subtree obligation — the consumer runs on the
+   * `done` CONTINUATION, so it was never part of the emitter's subtree to
+   * begin with. See `handleExecResult`.
+   *
+   * Least fixpoint, so a loop-back edge can't justify its own blocking: a node
+   * only enters the set on a non-circular ground.
+   */
+  private doneBlockedBy(nodeId: string): ReadonlySet<string> {
+    const cached = this.doneBlockedCache.get(nodeId)
+    if (cached) return cached
+    const blocked = new Set<string>()
+    // A source can't deliver before `nodeId`'s `done` fires when it IS that
+    // `done` port, or when it belongs to a node already known to be blocked.
+    const blockedSource = (src: { nodeId: string; portId: string }): boolean =>
+      (src.nodeId === nodeId && src.portId === 'done') || blocked.has(src.nodeId)
+    let changed = true
+    while (changed) {
+      changed = false
+      for (const node of this.scenario.nodes) {
+        if (blocked.has(node.id)) continue
+        if (this.hasUnfeedableGatingPort(node.id, blockedSource)) {
+          blocked.add(node.id)
+          changed = true
+        }
+      }
+    }
+    this.doneBlockedCache.set(nodeId, blocked)
+    return blocked
+  }
+
+  /** Does this node have a GATING input port that `blockedSource` says can
+   * never be fed? An AND-join port (fed by several forward edges, so every
+   * branch must deliver) is unfeedable as soon as ONE branch is; every other
+   * port is a MERGE, satisfied by any single arrival, so it is unfeedable only
+   * when EVERY source is. Non-gating ports — optional, or an OR trigger under
+   * `runOnEachEvent` — never block, which is exactly what makes a
+   * "run on each event" box immune to this class of stall. */
+  private hasUnfeedableGatingPort(
+    nodeId: string,
+    blockedSource: (src: { nodeId: string; portId: string }) => boolean
+  ): boolean {
+    const byPort = this.incomingEndpointsByNodePort.get(nodeId)
+    if (!byPort) return false
+    for (const [portId, sources] of byPort) {
+      if (sources.length === 0) continue
+      const spec = this.buffer.specFor(nodeId, portId)
+      if (!spec) continue
+      if (spec.required === false || spec.fireOnArrival === true) continue
+      const isAndJoin = spec.sources !== undefined && spec.sources.length > 0
+      if (isAndJoin ? sources.some(blockedSource) : sources.every(blockedSource)) return true
+    }
+    return false
+  }
+
   /** Is `to` reachable from `from` by following edges forward (BFS over
    * the node adjacency)? Used to spot loop-back edges. */
   /** Forward node adjacency (`from.nodeId → [to.nodeId]`), built once on first
@@ -1663,12 +1766,142 @@ export class Scheduler {
     return false
   }
 
+  /**
+   * A node's position in a Kahn ordering of the scenario graph, ties broken by
+   * node id — so the value depends only on the graph, never on how a given run
+   * happened to interleave. Nodes inside a cycle (no in-degree ever reaches 0)
+   * are ranked after the acyclic ones, still by id. Built once per run.
+   */
+  private topologicalRank(nodeId: string): number {
+    if (this.topologicalRankCache === undefined) {
+      const ranks = new Map<string, number>()
+      const inDegree = new Map<string, number>()
+      const successors = new Map<string, Set<string>>()
+      for (const node of this.scenario.nodes) {
+        inDegree.set(node.id, 0)
+        successors.set(node.id, new Set())
+      }
+      // Collapse parallel edges: two wires between the same pair of boxes are
+      // one dependency, so an unresolved duplicate can't strand the ordering.
+      for (const e of this.scenario.edges) {
+        if (e.from.nodeId === e.to.nodeId) continue
+        const succ = successors.get(e.from.nodeId)
+        if (!succ || !inDegree.has(e.to.nodeId) || succ.has(e.to.nodeId)) continue
+        succ.add(e.to.nodeId)
+        inDegree.set(e.to.nodeId, (inDegree.get(e.to.nodeId) ?? 0) + 1)
+      }
+      let rank = 0
+      for (;;) {
+        const ready = [...inDegree.entries()]
+          .filter(([, deg]) => deg === 0)
+          .map(([id]) => id)
+          .sort()
+        if (ready.length === 0) break
+        for (const id of ready) {
+          ranks.set(id, rank++)
+          inDegree.delete(id)
+          for (const next of successors.get(id) ?? []) {
+            const deg = inDegree.get(next)
+            if (deg !== undefined) inDegree.set(next, deg - 1)
+          }
+        }
+      }
+      // Whatever is left sits on a cycle — rank it deterministically too.
+      for (const id of [...inDegree.keys()].sort()) ranks.set(id, rank++)
+      this.topologicalRankCache = ranks
+    }
+    return this.topologicalRankCache.get(nodeId) ?? Number.MAX_SAFE_INTEGER
+  }
+
+  /**
+   * Settle ONE subtree that can no longer drain, and report whether it did.
+   *
+   * The caller establishes quiescence first: an empty queue, nothing in flight
+   * and no deferred re-entry means no token will ever move again on its own. An
+   * obligation still outstanding at that point is therefore unsatisfiable, and
+   * "this box's data subtree has finished" is simply true — the parts that never
+   * ran never will. Firing `done` here is that fact, not a guess: it routes the
+   * edges the user drew off `done`, inventing no value and choosing no branch.
+   *
+   * ONE at a time, because discharging the first subtree can let a consumer fire
+   * and drain a second one through the normal path — settling them all at once
+   * would fire a `done` that was about to become true by itself. The victim is
+   * picked by graph position (topological rank, then scope, then activation
+   * order), so the choice is reproducible across runs even when async executors
+   * interleave differently.
+   */
+  private dischargeUnsatisfiableSubtree(): boolean {
+    const stalled = [...this.actById.keys()].filter(
+      (cid) => this.returned.has(cid) && (this.pending.get(cid) ?? 0) > 0
+    )
+    if (stalled.length === 0) return false
+    stalled.sort((a, b) => {
+      const actA = this.actById.get(a)
+      const actB = this.actById.get(b)
+      if (!actA || !actB) return a - b
+      const rankDiff = this.topologicalRank(actA.nodeId) - this.topologicalRank(actB.nodeId)
+      if (rankDiff !== 0) return rankDiff
+      const scopeDiff = scopeKey(actA.scope).localeCompare(scopeKey(actB.scope))
+      if (scopeDiff !== 0) return scopeDiff
+      return a - b
+    })
+    const cid = stalled[0]
+    if (cid === undefined) return false
+    this.forceDrained.add(cid)
+    this.onSubtreeDrained(cid)
+    return true
+  }
+
+  /** Name every box that received data but never executed. A run can legitimately
+   * skip boxes (an untaken branch, a loop that never iterated), so this is not a
+   * failure — but it must never be invisible either: a scenario that ran a third
+   * of its graph and returned green is the failure mode worth guarding against,
+   * and the journal is what makes the difference readable. */
+  private reportBoxesThatNeverRan(): void {
+    const neverRan = this.buffer.nodesWithBufferedTokens().filter((id) => !this.firedNodes.has(id))
+    if (neverRan.length === 0) return
+    // Name the PORT that stayed empty, not just the box: that is the wire the
+    // user has to look at, and the difference between spotting a mis-wire in
+    // seconds and not knowing there was one.
+    const names = neverRan
+      .map((id) => {
+        const kind = this.scenario.nodes.find((n) => n.id === id)?.kind
+        const label = kind !== undefined ? `${kind} (${id})` : id
+        const ports = this.buffer.unsatisfiedPorts(id)
+        return ports.length > 0 ? `${label} waiting on "${ports.join('", "')}"` : label
+      })
+      .sort()
+    this.pushLog({
+      ts: now(),
+      runId: this.runId,
+      level: 'warn',
+      source: 'engine',
+      message: `${names.length} ${names.length === 1 ? 'box' : 'boxes'} received data but never ran — a required input never arrived: ${names.join('; ')}`
+    })
+  }
+
   private terminateIfDone(): void {
     if (this.state === 'completed' || this.state === 'cancelled' || this.state === 'failed') {
       this.flushWaiters()
       return
     }
-    if (this.queue.length > 0 || this.inFlight > 0 || this.pendingReentry > 0) return
+    for (;;) {
+      if (this.queue.length > 0 || this.inFlight > 0 || this.pendingReentry > 0) return
+      if (!this.dischargeUnsatisfiableSubtree()) break
+      // The `done` it fired may have unblocked real work — go run it, and
+      // re-test for a further stall only once that work has settled.
+      if (this.queue.length > 0) { this.tick(); return }
+    }
+    // The discharge loop must leave nothing owed. A survivor would mean a box
+    // is waiting on a subtree the engine can neither drain nor account for, and
+    // reporting success over that is the failure mode this guards against.
+    const owed = [...this.actById.keys()].filter((cid) => (this.pending.get(cid) ?? 0) > 0)
+    if (owed.length > 0) {
+      const names = owed.map((cid) => this.actById.get(cid)?.nodeId ?? `#${cid}`)
+      this.fail(`run stalled: ${owed.length} ${owed.length === 1 ? 'box is' : 'boxes are'} still waiting on a subtree that cannot drain (${[...new Set(names)].join(', ')})`)
+      return
+    }
+    this.reportBoxesThatNeverRan()
     this.state = 'completed'
     this.logRunBoundary('end')
     this.emit({ type: 'run-completed', runId: this.runId, at: now() })

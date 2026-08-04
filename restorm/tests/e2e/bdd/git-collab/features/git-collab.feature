@@ -52,11 +52,10 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed multi-protocol project "reactivity.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "reactivity.restorm" from his workspace
-    # Opening a hand-authored file rewrites it in the app's canonical
-    # serialization — publish that normalization echo once, so every
-    # protocol case below starts from a genuinely clean tree.
-    Then "Yoann" sees the push flag ON and the pull flag OFF
-    When "Yoann" pushes his changes
+    # Opening writes nothing, so the tree is clean from the start — the
+    # seeded project already carries its identity and format version, like
+    # any file this app has written. There is no normalization echo to
+    # absorb before the per-protocol cases below.
     Then "Yoann" sees the push flag OFF and the pull flag OFF
 
     # Kafka — a type the reactive layer must track end to end
@@ -84,8 +83,6 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed multi-protocol project "shared.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "shared.restorm" from his workspace
-    Then "Yoann" sees the push flag ON and the pull flag OFF
-    When "Yoann" pushes his changes
     # The premise of everything below: the colleague must branch from THIS
     # state, not from the hand-authored seed. Asserted against git, because
     # a push that silently fails leaves the whole scenario meaningless.
@@ -128,7 +125,6 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed multi-protocol project "reset.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "reset.restorm" from his workspace
-    And "Yoann" pushes his changes
     Then "Yoann" has nothing left to publish
     And "Yoann" sees the push flag OFF and the pull flag OFF
 
@@ -145,7 +141,6 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed multi-protocol project "quicksettings.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "quicksettings.restorm" from his workspace
-    And "Yoann" pushes his changes
     Then "Yoann" has nothing left to publish
 
     # Both sides change the SAME saved configuration, differently. The
@@ -180,7 +175,6 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed multi-protocol project "renames.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "renames.restorm" from his workspace
-    And "Yoann" pushes his changes
     Then "Yoann" has nothing left to publish
 
     # Both sides rename the SAME request, differently — nothing else about
@@ -212,7 +206,6 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed multi-protocol project "deletions.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "deletions.restorm" from his workspace
-    And "Yoann" pushes his changes
     Then "Yoann" has nothing left to publish
 
     # The colleague removes one request and edits another. Yoann leaves the
@@ -233,7 +226,6 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed multi-protocol project "tags.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "tags.restorm" from his workspace
-    And "Yoann" pushes his changes
     Then "Yoann" has nothing left to publish
 
     # Both sides tag the SAME request differently and touch nothing else, so
@@ -258,7 +250,6 @@ Feature: Git collaboration between two live restorm instances
     And "Yoann" has a committed two-folder project "tree.restorm"
     And "Yoann" launches restorm
     When "Yoann" opens the project file "tree.restorm" from his workspace
-    And "Yoann" pushes his changes
     Then "Yoann" has nothing left to publish
 
     # Both sides move the SAME request to a different folder. Where an item

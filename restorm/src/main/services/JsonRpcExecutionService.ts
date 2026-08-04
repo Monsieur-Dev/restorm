@@ -11,6 +11,7 @@
 import { randomUUID } from 'crypto'
 import { httpExecutionService, type HTTPExecutionResult } from './HTTPExecutionService'
 import { contextService } from './ContextService'
+import type { ResolutionContexts } from './ContextServiceTypes'
 
 /** One resolved JSON-RPC error object, per spec section 5.1. */
 export interface JsonRpcErrorShape {
@@ -22,6 +23,9 @@ export interface JsonRpcErrorShape {
 export interface JsonRpcExecutionInput {
   requestId: string
   timeout?: number
+  /** The DISPOSABLE contexts this one dispatch resolves against — see
+   * `HTTPExecutionInput.runContexts`. Absent outside a scenario run. */
+  runContexts?: ResolutionContexts
 }
 
 export interface JsonRpcExecutionResult {
@@ -86,11 +90,14 @@ export interface JsonRpcBatchChildInput {
  * not passed through as an opaque string. */
 function composeEnvelope(
   requestId: string,
-  call: { method: string; params: string; rpcId: string; notificationMode?: boolean }
+  call: { method: string; params: string; rpcId: string; notificationMode?: boolean },
+  runContexts?: ResolutionContexts
 ): { envelope: Record<string, unknown>; rpcId: string } | { parseError: string } {
-  const method = contextService.resolveValue(call.method, requestId)
+  // Method, params and id belong to no row family — they resolve against the
+  // execution's `base` context, like a text body.
+  const method = contextService.resolveValue(call.method, requestId, runContexts?.base)
   const rawParams = call.params.trim()
-  const resolvedParamsText = rawParams.length > 0 ? contextService.resolveValue(rawParams, requestId) : ''
+  const resolvedParamsText = rawParams.length > 0 ? contextService.resolveValue(rawParams, requestId, runContexts?.base) : ''
   let parsedParams: unknown
   if (resolvedParamsText.length > 0) {
     try {
@@ -99,7 +106,7 @@ function composeEnvelope(
       return { parseError: `Invalid params JSON for method "${method}": ${err instanceof Error ? err.message : String(err)}` }
     }
   }
-  const resolvedId = contextService.resolveValue(call.rpcId, requestId)
+  const resolvedId = contextService.resolveValue(call.rpcId, requestId, runContexts?.base)
   const rpcId = resolvedId.length > 0 ? resolvedId : randomUUID()
   const notificationMode = call.notificationMode === true
   const envelope: Record<string, unknown> = { jsonrpc: '2.0', method }
@@ -130,7 +137,7 @@ class JsonRpcExecutionService {
    * the renderer tab view, or by `flushRequestStateToContext` for a
    * cold-start MCP dispatch). */
   async execute(input: JsonRpcExecutionInput): Promise<JsonRpcExecutionResult> {
-    const { requestId, timeout } = input
+    const { requestId, timeout, runContexts } = input
     const startedAt = new Date().toISOString()
     const data = contextService.getRequestContext(requestId)?.fullData
     if (!data) {
@@ -146,7 +153,7 @@ class JsonRpcExecutionService {
       params: data.jsonRpcParams ?? '',
       rpcId: data.jsonRpcId ?? '',
       notificationMode: data.jsonRpcNotificationMode
-    })
+    }, runContexts)
     if ('parseError' in composed) {
       return { requestId, success: false, transportError: composed.parseError, timings: { startedAt, durationMs: 0 } }
     }
@@ -156,7 +163,8 @@ class JsonRpcExecutionService {
       method: 'POST',
       ...(timeout !== undefined ? { timeout } : {}),
       rawBody: JSON.stringify(composed.envelope),
-      rawBodyContentType: 'application/json'
+      rawBodyContentType: 'application/json',
+      ...(runContexts !== undefined ? { runContexts } : {})
     })
     if (!httpResult.success) {
       return {
@@ -192,7 +200,7 @@ class JsonRpcExecutionService {
    * array, POST it in a single call, and match each response entry back to
    * its originating child by the (resolved) JSON-RPC `id`. */
   async executeBatch(input: JsonRpcExecutionInput): Promise<JsonRpcBatchExecutionResult> {
-    const { requestId, timeout } = input
+    const { requestId, timeout, runContexts } = input
     const startedAt = new Date().toISOString()
     const data = contextService.getRequestContext(requestId)?.fullData
     const children = data?.jsonRpcChildren ?? []
@@ -200,7 +208,7 @@ class JsonRpcExecutionService {
       return { requestId, success: false, transportError: 'Batch has no child calls.', children: [], timings: { startedAt, durationMs: 0 } }
     }
     const composedChildren: { childId: string; rpcId: string; envelope?: Record<string, unknown>; parseError?: string }[] = children.map((child) => {
-      const composed = composeEnvelope(requestId, child)
+      const composed = composeEnvelope(requestId, child, runContexts)
       return 'parseError' in composed
         ? { childId: child.childId, rpcId: child.rpcId, parseError: composed.parseError }
         : { childId: child.childId, rpcId: composed.rpcId, envelope: composed.envelope }
@@ -220,7 +228,8 @@ class JsonRpcExecutionService {
       method: 'POST',
       ...(timeout !== undefined ? { timeout } : {}),
       rawBody: JSON.stringify(validEnvelopes.map((c) => c.envelope)),
-      rawBodyContentType: 'application/json'
+      rawBodyContentType: 'application/json',
+      ...(runContexts !== undefined ? { runContexts } : {})
     })
     if (!httpResult.success) {
       return {

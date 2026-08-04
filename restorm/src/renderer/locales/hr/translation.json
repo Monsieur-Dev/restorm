@@ -51,6 +51,21 @@
     "draftsRestoredBody_few": "{{count}} skice su vraćene iz prethodne sesije.",
     "draftsRestoredBody_other": "{{count}} skica je vraćeno iz prethodne sesije."
   },
+  "about": {
+    "version": "Verzija {{version}}",
+    "tagline": "Okruženje za testiranje API-ja — klijent i poslužitelj.",
+    "links": {
+      "website": "Web-mjesto",
+      "documentation": "Dokumentacija",
+      "releaseNotes": "Bilješke o izdanju"
+    },
+    "publishedBy": "Izdavač",
+    "legal": {
+      "trademark": "Restorm® je žig registriran pri INPI-ju.",
+      "copyright": "© 2026 Monsieur Dev. Sva prava pridržana."
+    },
+    "close": "Zatvori"
+  },
   "statusbar": {
     "requestHistory": "Povijest zahtjeva",
     "envSelector": {
@@ -1030,7 +1045,19 @@
     "dropZone": "Područje za ispuštanje",
     "editAuth": "Uredi rutu provjere autentičnosti",
     "error": {
-      "unknown": "Dogodila se nepoznata pogreška"
+      "unknown": "Dogodila se nepoznata pogreška",
+      "unexpected": "Uvoz nije uspio iz neočekivanog razloga.",
+      "detailLabel": "Tehnički detalj",
+      "folderNotFound": "Ova mapa više ne postoji u projektu pa se ne može osvježiti.",
+      "noSourceUrl": "Ova mapa nema zabilježen URL izvora pa nema što osvježiti.",
+      "noImportSource": "Ova mapa nije nastala prepoznatim uvozom pa se ne može osvježiti iz izvora.",
+      "formatNotRefreshable": "Uvoz {{format}} jednokratan je: ne postoji specifikacija koja bi se ponovno dohvatila pa se ova mapa ne može osvježiti.",
+      "httpStatus": "Izvor je na zahtjev odgovorio kodom HTTP {{status}}.",
+      "specParseFailed": "Specifikaciju dohvaćenu s {{url}} nije bilo moguće raščlaniti.",
+      "sourceImportFailed": "Specifikaciju nije bilo moguće ponovno uvesti iz njezina izvora.",
+      "emptySpec": "Specifikacija dohvaćena s {{url}} ne deklarira nijednu operaciju {{format}}. Primjena bi ispraznila ovu mapu pa je ažuriranje odbijeno.",
+      "formatNotDetected": "Format ovog izvora nije prepoznat.",
+      "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}."
     },
     "formats": {
       "swagger": {
@@ -1476,6 +1503,10 @@
       },
       "connection": {
         "missingName": "Naziv veze je obavezan."
+      },
+      "reachability": {
+        "unreachable": "Ova se radnja nikada ne može izvršiti: do nje ne dolazi nijedna veza iz radnje koja pokreće scenarij.",
+        "cycle": "Ova je radnja dio petlje veza koju ništa ne pokreće, pa se nikada ne može izvršiti. Povežite s njom radnju izvan petlje."
       }
     },
     "usage": {
@@ -2449,13 +2480,16 @@
       "movedFolder": "Premještena mapa \"{{name}}\"",
       "movedEnvironmentFolder": "Premještena mapa okruženja \"{{name}}\"",
       "reorderedFolder": "Promijenjen redoslijed stavki u mapi „{{name}}“",
-      "reorderedEnvironmentFolder": "Promijenjen redoslijed stavki u mapi okruženja „{{name}}“"
+      "reorderedEnvironmentFolder": "Promijenjen redoslijed stavki u mapi okruženja „{{name}}“",
+      "stampedFileFormatVersion": "Verzija formata datoteke {{name}}",
+      "changedFileFormatVersion": "Format datoteke {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahtjeva „{{name}}”",
       "singleScenario": "Ažuriranje scenarija „{{name}}”",
       "singleFolder": "Ažuriranje mape „{{name}}”",
       "singleEnvironmentFolder": "Ažuriranje mape okruženja „{{name}}”",
+      "singleFileFormatVersion": "Prijelaz na format datoteke {{name}}",
       "countRequest_one": "{{count}} zahtjev",
       "countRequest_other": "{{count}} zahtjeva",
       "countScenario_one": "{{count}} scenarij",
@@ -2464,6 +2498,8 @@
       "countFolder_other": "{{count}} mapa",
       "countEnvironmentFolder_one": "{{count}} mapa okruženja",
       "countEnvironmentFolder_other": "{{count}} mapa okruženja",
+      "countFileFormatVersion_one": "{{count}} promjena formata datoteke",
+      "countFileFormatVersion_other": "{{count}} promjena formata datoteke",
       "multiple": "Ažuriranje: {{parts}}"
     },
     "semiPullFrequencyTitle": "Učestalost automatske provjere ažuriranja",
@@ -2580,6 +2616,13 @@
       "title": "Datoteka nije ponovno otvorena",
       "body": "{{file}} nije ponovno otvorena: Restorm se srušio pri njezinu otvaranju tijekom prethodnog pokretanja. Vaša je datoteka netaknuta — možete je ponovno otvoriti iz nedavnih datoteka.",
       "bodyUnnamed": "Posljednja datoteka nije ponovno otvorena: Restorm se srušio pri njezinu otvaranju tijekom prethodnog pokretanja. Vaša je datoteka netaknuta — možete je ponovno otvoriti iz nedavnih datoteka."
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "Projekt stvoren novijom verzijom",
+      "message": "Ova datoteka stvorena je novijom verzijom Restorma od one koju koristite. Ažurirajte Restorm da biste je otvorili.",
+      "versions": "Format datoteke {{found}}; ova verzija podržava do {{current}}."
     }
   }
 }

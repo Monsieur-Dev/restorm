@@ -110,8 +110,16 @@ export function deriveStableId(pathSegments: readonly string[]): RuntimeId {
  * - **KeyValue** — `key` + `value` → `kv:<key>`
  * - **Environment** — `name` + `variables[]` → `env:<name>`
  * - **Request** — `name` + a known `type` discriminant → `req:<type>:<name>`
+ * - **Scenario** — `type: 'scenario'` → `scenario:<name>`. A top-level tree
+ *   entity like a folder or a request, paired by id by both git engines,
+ *   but matched by none of the other shapes: it has no `variables`, no
+ *   `configuration`, and its `type` is not a protocol. It also doubles as
+ *   a container, so the segment is what keeps two same-named requests in
+ *   two different scenarios from spelling the same path.
  * - **Folder / environment-folder** — `name` + `items[]` + `configuration`
  *   → `folder:<name>`
+ * - **EnumDefinition** — `values[]` + `matchingRules[]`, the only persisted
+ *   shape combining both → `enum:<name>`
  * - **Anything keyed to a request** (a response, a saved quick-config) —
  *   `requestId` → `ref:<requestId>` plus its `name` when it has one, so
  *   several quick-configs of the same request stay distinguishable by
@@ -143,8 +151,24 @@ export function idPathSegment(record: Record<string, unknown>): string | null {
     }
   }
 
+  // Scenario: the `type` discriminant, checked after the request branch
+  // (which is also `type`-driven) and before the folder branch (a scenario
+  // carries `items` too, though never `configuration`).
+  if ('name' in record && record['type'] === 'scenario') {
+    return `scenario:${asText(record['name'])}`
+  }
+
   if ('name' in record && 'items' in record && 'configuration' in record && Array.isArray(record['items'])) {
     return `folder:${asText(record['name'])}`
+  }
+
+  // EnumDefinition: `values` + `matchingRules` (both arrays) is a
+  // combination no other recognised shape carries — a Folder has `items`
+  // (not `values`), a CustomValueList has `entries` (not `values`), and an
+  // EnumMatchingRule (an element of `matchingRules` itself) has neither.
+  if ('values' in record && Array.isArray(record['values']) &&
+      'matchingRules' in record && Array.isArray(record['matchingRules'])) {
+    return `enum:${asText(record['name'])}`
   }
 
   if ('requestId' in record && typeof record['requestId'] === 'string') {

@@ -49,6 +49,21 @@
     "draftsRestoredTitle": "未保存の作業を復元しました",
     "draftsRestoredBody_other": "前回のセッションから {{count}} 件の下書きを復元しました。"
   },
+  "about": {
+    "version": "バージョン {{version}}",
+    "tagline": "API テスト環境 — クライアントとサーバー。",
+    "links": {
+      "website": "ウェブサイト",
+      "documentation": "ドキュメント",
+      "releaseNotes": "リリースノート"
+    },
+    "publishedBy": "発行元",
+    "legal": {
+      "trademark": "Restorm® は INPI に登録された商標です。",
+      "copyright": "© 2026 Monsieur Dev. 全著作権所有。"
+    },
+    "close": "閉じる"
+  },
   "statusbar": {
     "requestHistory": "リクエスト履歴",
     "envSelector": {
@@ -1028,7 +1043,19 @@
     "dropZone": "ドロップ領域",
     "editAuth": "認証ルートを編集",
     "error": {
-      "unknown": "不明なエラーが発生しました"
+      "unknown": "不明なエラーが発生しました",
+      "unexpected": "予期しない理由でインポートに失敗しました。",
+      "detailLabel": "技術的な詳細",
+      "folderNotFound": "このフォルダーはプロジェクトに存在しないため、更新できません。",
+      "noSourceUrl": "このフォルダーにはソース URL が記録されていないため、更新するものがありません。",
+      "noImportSource": "このフォルダーは認識されたインポートで作成されていないため、ソースから更新できません。",
+      "formatNotRefreshable": "{{format}} のインポートは一度きりです。再取得できる仕様がないため、このフォルダーは更新できません。",
+      "httpStatus": "ソースはリクエストに HTTP {{status}} で応答しました。",
+      "specParseFailed": "{{url}} から取得した仕様を解析できませんでした。",
+      "sourceImportFailed": "仕様をソースから再インポートできませんでした。",
+      "emptySpec": "{{url}} から取得した仕様には {{format}} の操作が 1 つも宣言されていません。適用するとこのフォルダーが空になるため、更新を拒否しました。",
+      "formatNotDetected": "このソースの形式を認識できませんでした。",
+      "unsupportedFormat": "{{format}} 形式に対応するインポーターがありません。"
     },
     "formats": {
       "swagger": {
@@ -1474,6 +1501,10 @@
       },
       "connection": {
         "missingName": "接続名は必須です。"
+      },
+      "reachability": {
+        "unreachable": "このアクションは実行されることがありません。シナリオを開始するアクションから接続がつながっていません。",
+        "cycle": "このアクションは何も開始しない接続のループに含まれているため、実行されることがありません。ループの外側のアクションを接続してください。"
       }
     },
     "usage": {
@@ -2447,13 +2478,16 @@
       "movedFolder": "フォルダー「{{name}}」を移動",
       "movedEnvironmentFolder": "環境フォルダー「{{name}}」を移動",
       "reorderedFolder": "フォルダー「{{name}}」内の項目を並べ替えました",
-      "reorderedEnvironmentFolder": "環境フォルダー「{{name}}」内の項目を並べ替えました"
+      "reorderedEnvironmentFolder": "環境フォルダー「{{name}}」内の項目を並べ替えました",
+      "stampedFileFormatVersion": "ファイル形式のバージョン {{name}}",
+      "changedFileFormatVersion": "ファイル形式 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "リクエスト「{{name}}」の更新",
       "singleScenario": "シナリオ「{{name}}」の更新",
       "singleFolder": "フォルダー「{{name}}」の更新",
       "singleEnvironmentFolder": "環境フォルダー「{{name}}」の更新",
+      "singleFileFormatVersion": "ファイル形式 {{name}} への移行",
       "countRequest_one": "リクエスト{{count}}件",
       "countRequest_other": "リクエスト{{count}}件",
       "countScenario_one": "シナリオ{{count}}件",
@@ -2462,6 +2496,8 @@
       "countFolder_other": "フォルダー{{count}}件",
       "countEnvironmentFolder_one": "環境フォルダー{{count}}件",
       "countEnvironmentFolder_other": "環境フォルダー{{count}}件",
+      "countFileFormatVersion_one": "ファイル形式の変更 {{count}} 件",
+      "countFileFormatVersion_other": "ファイル形式の変更 {{count}} 件",
       "multiple": "{{parts}}の更新"
     },
     "semiPullFrequencyTitle": "自動プル確認の頻度",
@@ -2578,6 +2614,13 @@
       "title": "ファイルを再度開きませんでした",
       "body": "{{file}} を再度開きませんでした。前回の起動時、Restorm はこのファイルを開く途中でクラッシュしました。ファイルは無傷です。最近使用したファイルから開き直せます。",
       "bodyUnnamed": "前回のファイルを再度開きませんでした。前回の起動時、Restorm はこのファイルを開く途中でクラッシュしました。ファイルは無傷です。最近使用したファイルから開き直せます。"
+    }
+  },
+  "project": {
+    "incompatible": {
+      "title": "新しいバージョンで作成されたプロジェクト",
+      "message": "このファイルは、ご使用中の Restorm より新しいバージョンで作成されています。開くには Restorm を更新してください。",
+      "versions": "ファイル形式 {{found}}。このバージョンが対応するのは {{current}} までです。"
     }
   }
 }

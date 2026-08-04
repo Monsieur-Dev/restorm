@@ -329,6 +329,38 @@ describe('useItemOperations.confirmDelete', () => {
     expect(callsFor(DocumentEvents.FOLDER_DELETED)).toHaveLength(0)
     expect(callsFor(DocumentEvents.REQUEST_DELETED).map((c) => c.payload.id)).toEqual(['r1'])
   })
+
+  it('announces every env / sub-env of a deleted environment folder, not just its `.items` requests', () => {
+    // An env-folder's `environments` (variables) are a SEPARATE array from
+    // `.items` (nested folders/requests) — a cascade that only walks
+    // `.items` never tells ContextService / the search index the folder's
+    // own environments are gone, leaving a stale entry behind.
+    const envFolder = {
+      id: 'ef1',
+      name: 'Envs',
+      folderType: 'environment',
+      tags: [],
+      configuration: {},
+      environments: [
+        { id: 'e1', name: 'Dev', variables: [], subEnvironments: [{ id: 'e2', name: 'DevChild', variables: [] }] }
+      ],
+      items: [httpRequest('r1', 'A')]
+    } as unknown as FolderItem
+    const rootItems: FolderItem[] = [envFolder]
+    const { result } = renderHook(() => useItemOperations(buildOptions(rootItems)))
+
+    act(() => { result.current.confirmDelete('ef1') })
+
+    expect(callsFor(DocumentEvents.FOLDER_DELETED).map((c) => c.payload.id)).toEqual(['ef1'])
+    expect(callsFor(DocumentEvents.REQUEST_DELETED).map((c) => c.payload.id)).toEqual(['r1'])
+    const envs = callsFor(DocumentEvents.ENVIRONMENT_DELETED)
+    expect(envs.map((c) => c.payload.id)).toEqual(['e1', 'e2'])
+    expect(envs[0]?.payload.parentFolderId).toBe('ef1')
+    expect(envs[0]?.payload.parentEnvironmentId).toBeUndefined()
+    expect(envs[1]?.payload.parentEnvironmentId).toBe('e1')
+    // Both buses: the local one is what marks the project dirty (autosave).
+    expect(localCallsFor(DocumentEvents.ENVIRONMENT_DELETED).map((c) => c.payload.id)).toEqual(['e1', 'e2'])
+  })
 })
 
 describe('inline rename on creation', () => {

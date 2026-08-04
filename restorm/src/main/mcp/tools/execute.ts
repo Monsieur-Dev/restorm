@@ -320,9 +320,16 @@ function decodeStreamToken(token: string): { requestId: string; cursor: number }
  * the API answers "already at destination"). Pushing from main here
  * sidesteps the renderer entirely and keeps the executor authoritative.
  */
-/** Stringify a scenario variable map (name → already-resolved value) into the
- * name → string overlay the ContextService merges over the env context. */
-function scenarioVarsToOverlay(vars: ReadonlyMap<string, unknown> | undefined): Record<string, string> | undefined {
+/**
+ * Stringify a scenario run's live variable map (name → already-resolved value)
+ * into the flat name → string overlay a disposable `ResolutionContexts` is
+ * composed from.
+ *
+ * Read it fresh at each dispatch, never once per run: the map grows as the run
+ * proceeds (an answered input, a `setVariable`), and a variable declared
+ * between two requests belongs to the second and not to the first.
+ */
+export function scenarioVarsToOverlay(vars: ReadonlyMap<string, unknown> | undefined): Record<string, string> | undefined {
   if (!vars || vars.size === 0) return undefined
   const out: Record<string, string> = {}
   for (const [k, v] of vars) {
@@ -334,7 +341,7 @@ function scenarioVarsToOverlay(vars: ReadonlyMap<string, unknown> | undefined): 
   return Object.keys(out).length > 0 ? out : undefined
 }
 
-export function flushRequestStateToContext(req: Request, scenarioVariables?: ReadonlyMap<string, unknown>): void {
+export function flushRequestStateToContext(req: Request): void {
   // Headers / params / pathParams / metadata are common across most
   // protocols — pull them off whichever shape the request takes.
   const headers = (req as { headers?: unknown }).headers
@@ -539,15 +546,10 @@ export function flushRequestStateToContext(req: Request, scenarioVariables?: Rea
     // also throws for the same reason. In production this never
     // fires (Electron populates `app.isPackaged`); silently skip.
   }
-  // Apply (or clear) the scenario `setVariable` overlay LAST, so the cached
-  // resolved URL + KV transforms reflect a per-run override of an env variable.
-  // Called every dispatch with the current run's variables (or undefined), so a
-  // previous run's overlay never leaks into a later one.
-  try {
-    contextService.setScenarioVariables(req.id, scenarioVarsToOverlay(scenarioVariables))
-  } catch {
-    // Same vitest logger-stub guard as above.
-  }
+  // A scenario run's variables are deliberately NOT pushed here. They belong to
+  // the disposable `ResolutionContexts` the caller composes for this one
+  // dispatch and then drops — writing them into the request's own state is what
+  // let a finished run keep deciding what the request resolved to.
 }
 
 /**

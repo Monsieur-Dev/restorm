@@ -53,7 +53,7 @@ import type { AddChildKind, AddMenuRequestEntry } from '../MainView/Sidebar/cont
 import { ADD_MENU_HTTP_ENTRIES, ADD_MENU_PROTOCOL_GROUPS } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
-import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink, type ValidationNode } from '../../../../shared/scenarioValidation'
+import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink, type ScenarioGraphEdge, type ValidationNode } from '../../../../shared/scenarioValidation'
 import { readInputParams } from '../../../../shared/scenarioInputParams'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInternalsContext } from './scenarioInternalsContext'
@@ -2607,6 +2607,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     return set
   }, [edges])
 
+  // The same wires, as the reachability check reads them — it needs the SOURCE
+  // of each connection, which `connectedTargets` throws away.
+  const graphEdges = useMemo<ScenarioGraphEdge[]>(() => {
+    const list: ScenarioGraphEdge[] = []
+    for (const e of edges) {
+      if (!e.source || !e.target || !e.targetHandle) continue
+      list.push({ fromNodeId: e.source, toNodeId: e.target, toPortId: e.targetHandle })
+    }
+    return list
+  }, [edges])
+
   // Per-box validation errors (missing name, bad data-link path, …) keyed by
   // node id — drives the red border + disabled play (via ScenarioErrorsContext)
   // and the workflow error panel below. The pure validator covers config-only
@@ -2627,7 +2638,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     [scenario.nodes]
   )
   const nodeErrors = useMemo(() => {
-    const byNode = validateScenarioGraph(validationNodes, dataLinks, connectedTargets, t)
+    const byNode = validateScenarioGraph(validationNodes, dataLinks, connectedTargets, t, graphEdges)
     const add = (id: string, error: ScenarioNodeError): void => {
       const list = byNode.get(id)
       if (list) list.push(error)
@@ -2654,7 +2665,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       }
     }
     return byNode
-  }, [validationNodes, dataLinks, connectedTargets, resolveBoundItem, resolveScenario, t])
+  }, [validationNodes, dataLinks, connectedTargets, graphEdges, resolveBoundItem, resolveScenario, t])
   // Flat list of every box error, with the box's display title, for the panel.
   const workflowErrors = useMemo<{ nodeId: string; title: string; error: ScenarioNodeError }[]>(() => {
     const meta = new Map(validationNodes.map((n) => [n.id, t(scenarioNodeMeta(n.kind).labelKey, scenarioNodeMeta(n.kind).defaultLabel)]))

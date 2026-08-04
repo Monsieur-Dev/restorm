@@ -53,6 +53,12 @@ const dirtyStateTestDir = defineBddConfig({
   outputDir: '.features-gen/dirty-state'
 })
 
+const fileFormatGateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/file-format-gate/features/**/*.feature',
+  steps: ['tests/e2e/bdd/file-format-gate/steps/**/*.ts', 'tests/e2e/bdd/fixtures/file-format-gate.fixture.ts'],
+  outputDir: '.features-gen/file-format-gate'
+})
+
 const statusBarContextMenuTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/status-bar-context-menu/features/**/*.feature',
   steps: ['tests/e2e/bdd/status-bar-context-menu/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
@@ -103,6 +109,12 @@ const mcpServerTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/mcp-server/features/**/*.feature',
   steps: ['tests/e2e/bdd/mcp-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/mcp-server'
+})
+
+const sidebarCloneTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sidebar-clone/features/**/*.feature',
+  steps: ['tests/e2e/bdd/sidebar-clone/steps/**/*.ts', 'tests/e2e/bdd/fixtures/sidebar-clone.fixture.ts'],
+  outputDir: '.features-gen/sidebar-clone'
 })
 
 const socketioExecutionTestDir = defineBddConfig({
@@ -319,6 +331,15 @@ const scenarioSetVariableOverrideTestDir = defineBddConfig({
     'tests/e2e/bdd/fixtures/scenario-runlog.fixture.ts'
   ],
   outputDir: '.features-gen/scenario-setvariable-override'
+})
+
+const scenarioInputPromptTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-input-prompt/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-input-prompt/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-runlog.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-input-prompt'
 })
 
 const postmanImportTestDir = defineBddConfig({
@@ -583,6 +604,10 @@ export default defineConfig({
       testDir: dirtyStateTestDir
     },
     {
+      name: 'file-format-gate',
+      testDir: fileFormatGateTestDir
+    },
+    {
       name: 'status-bar-context-menu',
       testDir: statusBarContextMenuTestDir
     },
@@ -621,6 +646,11 @@ export default defineConfig({
     {
       name: 'mcp-server',
       testDir: mcpServerTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'sidebar-clone',
+      testDir: sidebarCloneTestDir,
       timeout: 180 * 1000
     },
     {
@@ -784,6 +814,11 @@ export default defineConfig({
       name: 'scenario-setvariable-override',
       testDir: scenarioSetVariableOverrideTestDir,
       timeout: 120 * 1000 // 2 min — opens a fresh app + runs one scenario against the petstore mock
+    },
+    {
+      name: 'scenario-input-prompt',
+      testDir: scenarioInputPromptTestDir,
+      timeout: 240 * 1000 // 4 min — four typed scenarios, each opens a fresh app + answers the run-parameters modal
     },
     {
       name: 'postman-import',

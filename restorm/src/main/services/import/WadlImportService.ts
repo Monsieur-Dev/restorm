@@ -31,7 +31,6 @@ import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import type { ApiDocumentation, ModelDocumentation, OperationDocumentation } from '../../../shared/types/apiDocumentation'
 import { toHTTPMethod } from './httpMethodValidator'
 import { stableImportId as generateId } from './stableImportId'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 
 const ATTR_PREFIX = '@_'
 
@@ -443,7 +442,6 @@ export function importWadl(content: string, options: WadlImportOptions = {}): En
 
   return {
     folderType: 'environment',
-    fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     importSource: 'wadl',
     id: generateId(`wadl:folder:root:${name}`),
     name,

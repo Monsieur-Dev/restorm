@@ -41,6 +41,10 @@ vi.mock('../../../src/main/services/ContextService', () => {
   return {
     contextService: {
       getResolvedUrl: vi.fn(),
+      // The dispatch reads its URL through `resolveUrlForRequest`; with no run
+      // contexts that is the request's own cached URL, which is what these
+      // tests stub through `getResolvedUrl`.
+      resolveUrlForRequest: vi.fn(),
       getRequestContext: vi.fn(),
       resolveValue: resolveValueMock,
       // Body path: the executor resolves a text body through the
@@ -132,6 +136,7 @@ function buildUndiciResponse(
 
 function setupResolvedUrl(url: string): void {
   mockedContextService.getResolvedUrl.mockReturnValue({ resolvedUrl: url, resolvedParts: [] })
+  mockedContextService.resolveUrlForRequest.mockReturnValue({ resolvedUrl: url, resolvedParts: [] })
 }
 
 function setupRequestContext(overrides: Record<string, unknown> = {}): void {
@@ -153,6 +158,7 @@ describe('HTTPExecutionService', () => {
 
   it('returns error when no resolved URL is found', async () => {
     mockedContextService.getResolvedUrl.mockReturnValue(undefined as never)
+    mockedContextService.resolveUrlForRequest.mockReturnValue(undefined as never)
 
     const result = await httpExecutionService.execute({ requestId: 'r1', method: 'GET' })
 
@@ -507,6 +513,7 @@ describe('GRPCExecutionService', () => {
 
   it('returns error when no resolved URL is found', async () => {
     mockedContextService.getResolvedUrl.mockReturnValue(undefined as never)
+    mockedContextService.resolveUrlForRequest.mockReturnValue(undefined as never)
 
     const result = await grpcExecutionService.execute({ requestId: 'g1' })
 

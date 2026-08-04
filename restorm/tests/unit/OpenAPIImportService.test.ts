@@ -5,6 +5,7 @@ import { importOpenAPI, importOpenAPIFromJson, resolveServerUrl } from '../../sr
 import type { OAS3Spec } from '../../src/main/services/import/transformers/openapi3ToApiDocumentation'
 import type { OAS31Spec } from '../../src/main/services/import/transformers/openapi31ToApiDocumentation'
 import type { Folder, HTTPRequest } from '../../src/shared/models'
+import type { EnumDefinition } from '../../src/shared/types/collections'
 
 const FIXTURES = join(__dirname, 'fixtures/openapi')
 const loadFixture = (name: string): unknown => JSON.parse(readFileSync(join(FIXTURES, name), 'utf-8'))
@@ -195,6 +196,58 @@ describe('OpenAPIImportService — JSON entry point', () => {
     const json = loadJson('petstore-3.0.json')
     const folder = importOpenAPIFromJson(json, { sourceUrl: 'https://example.com/openapi.json' })
     expect(folder.apiDocumentation?.sourceUrl).toBe('https://example.com/openapi.json')
+  })
+})
+
+describe('OpenAPIImportService — hand-authored YAML idioms', () => {
+  // `petstore-3.0-handwritten.yaml` is NOT derived from a JSON twin (unlike
+  // the round-tripped `petstore-3.0.yaml`/`petstore-3.1.yaml` fixtures) — it
+  // exercises idioms real-world specs use that a stringified-JSON fixture
+  // never contains: comments, a literal (`|`) and a folded (`>`) block
+  // scalar, an anchor/alias pair, an unquoted string containing `:` and
+  // `#`, and a YAML-1.1-style bareword ('on'/'no') enum value a looser
+  // parser might mis-coerce to a boolean instead of leaving as text.
+  const folder = importOpenAPIFromJson(loadJson('petstore-3.0-handwritten.yaml'))
+
+  it('imports both operations under the path', () => {
+    const allRequests: HTTPRequest[] = []
+    const walk = (items: Folder['items']): void => {
+      for (const it of items) {
+        if ('items' in it) walk((it as Folder).items)
+        else allRequests.push(it as HTTPRequest)
+      }
+    }
+    walk(folder.items)
+    expect(allRequests.map((r) => r.method).sort()).toEqual(['DELETE', 'GET'])
+  })
+
+  it('preserves the literal block scalar description verbatim, with its line breaks', () => {
+    expect(folder.apiDocumentation?.api.description).toContain('Multi-line literal description of the API.\nLine breaks are preserved verbatim')
+  })
+
+  it('folds the folded block scalar description onto one paragraph', () => {
+    const opDescriptions = JSON.stringify(folder.apiDocumentation)
+    expect(opDescriptions).toContain('Folded description that line-wraps across several source lines but collapses into a single paragraph at parse time.')
+  })
+
+  it('resolves the anchor/alias pair to the same 404 response on both operations', () => {
+    // Both `get` and `delete` alias the same `&notFound` anchor — if aliasing
+    // didn't resolve, one or both responses would be missing this text.
+    const serialized = JSON.stringify(folder.apiDocumentation)
+    const occurrences = serialized.split('The specified pet was not found. See RFC:7231#section-6.5.4').length - 1
+    expect(occurrences).toBe(2)
+  })
+
+  it('keeps the unquoted colon+hash string intact, not mis-parsed as a comment or a new mapping', () => {
+    expect(JSON.stringify(folder.apiDocumentation)).toContain('RFC:7231#section-6.5.4')
+  })
+
+  it('keeps YAML-1.1 barewords ("on"/"no") as literal enum strings, not coerced to booleans', () => {
+    // If `yaml.parse` had coerced these to booleans (a real YAML 1.1 risk),
+    // `values` would contain `true`/`false` (or be missing them outright)
+    // instead of the literal strings "on"/"no".
+    const status = folder.enumDefinitions?.find((e: EnumDefinition) => e.values.includes('available'))
+    expect(status?.values.slice().sort()).toEqual(['available', 'no', 'on', 'pending', 'sold'])
   })
 })
 

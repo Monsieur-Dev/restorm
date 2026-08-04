@@ -44,6 +44,7 @@ import { collectionStore } from '../../../src/main/services/CollectionStore';
 import { KeyValue } from '../../../src/shared/models';
 import { CustomListValue, CustomListMultiValue } from '../../../src/shared/types/collections';
 import type { EnvironmentFolder, HTTPRequest } from '../../../src/shared/types/collections';
+import type { TransformedContext } from '../../../src/main/services/ContextServiceTypes';
 
 describe('ContextService', () => {
   // Access the private method via any cast for testing
@@ -164,7 +165,7 @@ describe('ContextService', () => {
         headers: [], params: [], pathParams: [], tags: []
       } as unknown as HTTPRequest
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'env-folder', name: 'F',
+        folderType: 'environment', id: 'env-folder', name: 'F',
         tags: [], configuration: {}, environments: [], items: [request],
         customValueLists: [{ id: listId, name: 'Couleur', entries }]
       } as unknown as EnvironmentFolder
@@ -186,7 +187,7 @@ describe('ContextService', () => {
       expect(contextService.resolveKeyValueForRequest(kv, reqId)).toBe('FF0000')
       // Edit the list entry value, then resolve again.
       collectionStore.setCollections([{
-        folderType: 'environment', fileFormatVersion: 1, id: 'env-folder', name: 'F',
+        folderType: 'environment', id: 'env-folder', name: 'F',
         tags: [], configuration: {}, environments: [],
         items: [{ type: 'http', id: reqId, name: 'r', method: 'GET', url: '{{baseUrl}}/x', headers: [], params: [], pathParams: [], tags: [] }],
         customValueLists: [{ id: listId, name: 'Couleur', entries: [{ id: 'e1', label: 'Rouge', value: 'FF0001' }] }]
@@ -223,7 +224,7 @@ describe('ContextService', () => {
         headers: [], params: [], pathParams: [], tags: []
       } as unknown as HTTPRequest
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'env-folder', name: 'F',
+        folderType: 'environment', id: 'env-folder', name: 'F',
         tags: [], configuration: {}, environments: [], items: [request],
         customValueLists: [{ id: listId, name: 'Couleur', entries }]
       } as unknown as EnvironmentFolder
@@ -278,7 +279,7 @@ describe('ContextService', () => {
       entries: { id: string; label: string; value: string; enabled?: boolean }[]
     ): void {
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'folder-cl', name: 'F',
+        folderType: 'environment', id: 'folder-cl', name: 'F',
         tags: [], configuration: {}, items: [],
         environments: [{ id: envId, name: 'E', variables: [] }],
         customValueLists: [{ id: listId, name: 'Colors', entries }]
@@ -325,9 +326,11 @@ describe('ContextService', () => {
   describe('body resolution gated on the Content-Type', () => {
     const reqId = 'req-json-body'
 
-    function seed(variables: Record<string, string>): void {
+    function seed(variables: Record<string, string>): TransformedContext {
       contextService.registerRequest(reqId, null, { id: reqId, headers: [], params: [], pathParams: [] })
-      contextService.setScenarioVariables(reqId, variables)
+      // The values reach the resolver through the DISPOSABLE context of this one
+      // execution, never through the request's stored state.
+      return contextService.composeResolutionContexts(reqId, variables).base
     }
 
     function cleanup(): void {
@@ -335,11 +338,12 @@ describe('ContextService', () => {
     }
 
     it('resolves a tight-brace variable and escapes a string value when the body is JSON', () => {
-      seed({ petId: '42', name: 'a"b' })
+      const context = seed({ petId: '42', name: 'a"b' })
       const out = contextService.resolveBodyValue(
         '{"id":{{petId}},"name":"{{name}}"}',
         reqId,
-        'application/json; charset=utf-8'
+        'application/json; charset=utf-8',
+        context
       )
       expect(out).toBe('{"id":42,"name":"a\\"b"}')
       expect(JSON.parse(out)).toEqual({ id: 42, name: 'a"b' })
@@ -347,12 +351,12 @@ describe('ContextService', () => {
     })
 
     it('keeps the raw whole-template substitution for a non-JSON content type', () => {
-      seed({ name: 'a"b' })
+      const context = seed({ name: 'a"b' })
       // XML / plain text keep today's behaviour: substituted verbatim, no escaping.
-      expect(contextService.resolveBodyValue('<n>{{name}}</n>', reqId, 'application/xml')).toBe('<n>a"b</n>')
+      expect(contextService.resolveBodyValue('<n>{{name}}</n>', reqId, 'application/xml', context)).toBe('<n>a"b</n>')
       // …and a JSON-looking body without a JSON content type still hits the
       // whole-template compile, whose parse error leaves the body untouched.
-      expect(contextService.resolveBodyValue('{"id":{{petId}}}', reqId, undefined)).toBe('{"id":{{petId}}}')
+      expect(contextService.resolveBodyValue('{"id":{{petId}}}', reqId, undefined, context)).toBe('{"id":{{petId}}}')
       cleanup()
     })
 
@@ -380,7 +384,7 @@ describe('ContextService', () => {
         headers: [], params: [], pathParams: [], tags: []
       } as unknown as HTTPRequest
       const folder = {
-        folderType: 'environment', fileFormatVersion: 1, id: 'folder-scenario-body', name: 'F',
+        folderType: 'environment', id: 'folder-scenario-body', name: 'F',
         tags: [], configuration: {}, items: [request],
         environments: [{ id: envId, name: 'E', variables: [] }]
       } as unknown as EnvironmentFolder
@@ -400,7 +404,6 @@ describe('ContextService', () => {
     }
 
     function cleanup(): void {
-      contextService.setScenarioVariables(reqId, undefined)
       contextService.unregisterRequest(reqId)
       collectionStore.setCollections([])
     }
@@ -413,8 +416,8 @@ describe('ContextService', () => {
         '{"name":"from-env","id":1}'
       )
 
-      contextService.setScenarioVariables(reqId, { petId: '42', petName: 'Rex "the\\dog"' })
-      const out = contextService.resolveBodyValue(template, reqId, 'application/json')
+      const runContexts = contextService.composeResolutionContexts(reqId, { petId: '42', petName: 'Rex "the\\dog"' })
+      const out = contextService.resolveBodyValue(template, reqId, 'application/json', runContexts.base)
 
       expect(JSON.parse(out)).toEqual({ name: 'Rex "the\\dog"', id: 42 })
       cleanup()

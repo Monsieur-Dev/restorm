@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { describe, it, expect } from 'vitest'
-import { diffProjectEntities, parseProjectYaml } from './gitCommitDiff'
+import { diffProjectEntities, flattenEntities, parseProjectYaml } from './gitCommitDiff'
 // The renderer's rehydrate callback — the one the publish flow really
 // passes (`usePushModal.ts`), and the only one that backfills ids.
 import { processAfterDeserialization } from '../../renderer/src/utils/serialization'
@@ -19,7 +19,7 @@ function makeFolder(id: string, name: string, items: FolderItem[] = [], extra: R
 
 function makeEnvironmentFolder(id: string, name: string, items: FolderItem[] = []): EnvironmentFolder {
   return {
-    id, name, tags: [], configuration: {}, folderType: 'environment', environments: [], fileFormatVersion: 1, items
+    id, name, tags: [], configuration: {}, folderType: 'environment', environments: [], items
   } as unknown as EnvironmentFolder
 }
 
@@ -257,6 +257,70 @@ describe('diffProjectEntities on a project whose ids are not persisted yet', () 
 
     expect(diffProjectEntities(head, live)).toEqual([
       { kind: 'request', name: 'Find pet by ID', action: 'modified' }
+    ])
+  })
+})
+
+/**
+ * Both maps in this module are built with `out.set(item.id, …)`. An entity
+ * whose `id` is missing keys its entry under the JS value `undefined` — and
+ * every further id-less entity overwrites that same slot. The result is not
+ * a harmless extra row: the two sides of a diff each end up holding a
+ * DIFFERENT entity under the same phantom key, so the engine happily
+ * compares one entity against another and reports the difference as a
+ * change to whichever one happened to land there last.
+ *
+ * An entity with no id has nothing stable to pair on, so it takes no part in
+ * the diff at all. Its children do: they carry their own ids, and dropping
+ * them would turn a malformed parent into silent, unreported work loss.
+ */
+describe('id-less entities never collide in the id-keyed maps', () => {
+  const idless = (name: string, items: FolderItem[] = []): Scenario =>
+    ({ name, type: 'scenario', tags: [], params: [], nodes: [], edges: [], items }) as unknown as Scenario
+
+  it('keeps every id-less entity out of flattenEntities, however many there are', () => {
+    const flat = flattenEntities([idless('Alpha'), idless('Beta'), makeRequest('r1', 'Find pet')])
+
+    expect(flat.has(undefined as unknown as string)).toBe(false)
+    expect([...flat.keys()]).toEqual(['r1'])
+  })
+
+  it('still indexes the id-bearing children of an id-less parent', () => {
+    const flat = flattenEntities([idless('Alpha', [makeRequest('r1', 'Find pet')])])
+
+    expect(flat.has('r1')).toBe(true)
+    // The breadcrumb still names the parent it really sits under.
+    expect(flat.get('r1')?.path).toEqual(['Alpha'])
+  })
+
+  it('never reports a change to one id-less entity as a change to another', () => {
+    // Two id-less siblings on the "before" side, three on the "after" side.
+    // Keyed by `undefined`, each side keeps only its LAST one — so the
+    // engine compares "Beta" against "Gamma" and calls it a modification of
+    // a scenario that was in fact merely added, and never existed before.
+    const before: FolderItem[] = [idless('Alpha'), idless('Beta')]
+    const after: FolderItem[] = [idless('Alpha'), idless('Beta'), idless('Gamma')]
+
+    expect(diffProjectEntities(before, after)).toEqual([])
+  })
+
+  it('stays sensitive to a real change sitting next to an id-less entity', () => {
+    // Guard against a vacuous pass: skipping the id-less entity must not
+    // blind the engine to everything around it.
+    const before: FolderItem[] = [idless('Alpha'), makeRequest('r1', 'Find pet', { notes: 'old' })]
+    const after: FolderItem[] = [idless('Alpha'), makeRequest('r1', 'Find pet', { notes: 'new' })]
+
+    expect(diffProjectEntities(before, after)).toEqual([
+      { kind: 'request', name: 'Find pet', action: 'modified' }
+    ])
+  })
+
+  it('stays sensitive to a change nested INSIDE an id-less entity', () => {
+    const before: FolderItem[] = [idless('Alpha', [makeRequest('r1', 'Find pet', { notes: 'old' })])]
+    const after: FolderItem[] = [idless('Alpha', [makeRequest('r1', 'Find pet', { notes: 'new' })])]
+
+    expect(diffProjectEntities(before, after)).toEqual([
+      { kind: 'request', name: 'Find pet', action: 'modified' }
     ])
   })
 })
