@@ -27,6 +27,7 @@ import {
   resolveProjectConfigFields
 } from '../../../shared/scenarioActionOverride'
 import { KeyValue } from '../../../shared/models/keyValues/KeyValue'
+import { contextService } from '../../services/ContextService'
 
 /** Identity / non-config fields a config must never clobber on the request
  * object — they define WHICH request this is, not how it's configured. */
@@ -97,6 +98,77 @@ export function buildEffectiveRequest<T extends object>(req: T, nodeConfig: Reco
     }
   }
   return clone as unknown as T
+}
+
+/**
+ * Overlay the row state the user is CURRENTLY looking at onto a request read
+ * from the CollectionStore.
+ *
+ * The store holds what was loaded or last saved; the request panel's live
+ * edits reach ContextService immediately (every row change calls
+ * `context:update-request-key-values`) but do not touch the store until a
+ * save. A scenario run reads the store, so without this overlay it executes
+ * the PRE-EDIT rows: a row the user just unchecked is still sent, and one
+ * they just checked is still missing — the panel and the run disagreeing
+ * about the same request.
+ *
+ * Only `enabled` is overlaid, and deliberately so. ContextService receives
+ * each row's value already stringified (`value.toString()` at the IPC
+ * boundary), so copying values back would flatten a `customList` or enum row
+ * into the plain text of whatever it happened to resolve to — destroying the
+ * binding to reproduce a checkbox. `enabled` is a boolean: it survives that
+ * trip intact, and it is the whole of the reported defect. A value edit still
+ * reaches the run through the normal save.
+ *
+ * Rows are matched by id; a row ContextService doesn't know (added since, or
+ * a group it never received) keeps the store's state.
+ */
+export function overlayLiveKeyValues<T extends object>(req: T, requestId: string): T {
+  const live = contextService.getRequestContext(requestId)
+  if (!live) return req
+
+  const src = req as unknown as Record<string, unknown>
+  let clone: Record<string, unknown> | undefined
+
+  for (const field of ['headers', 'params', 'pathParams', 'metadata']) {
+    const rows = src[field]
+    const liveRows = live.keyValueGroups.get(field)
+    if (!Array.isArray(rows) || !liveRows) continue
+
+    const enabledById = new Map<string, boolean>()
+    for (const row of liveRows) {
+      if (row.id !== undefined) enabledById.set(row.id, row.enabled !== false)
+    }
+
+    const next = rows.map((kv: unknown) => {
+      const row = kv as { id?: string; enabled?: boolean }
+      if (row.id === undefined) return kv
+      const liveEnabled = enabledById.get(row.id)
+      if (liveEnabled === undefined || liveEnabled === (row.enabled !== false)) return kv
+      // Prototype-preserving copy: the executor calls instance methods on
+      // these rows (`toPlainObject`, the ValueType's `toString`), so a plain
+      // spread would strip them.
+      const copy = Object.assign(Object.create(Object.getPrototypeOf(kv as object) as object) as object, kv) as {
+        enabled: boolean
+      }
+      copy.enabled = liveEnabled
+      return copy
+    })
+    // Identity comparison, not a mutated flag: every untouched row is returned
+    // as the SAME object above, so a differing reference is exactly "this row
+    // was overlaid".
+    if (next.every((kv, i) => kv === rows[i])) continue
+
+    // Clone lazily — an untouched request must stay the very object the store
+    // holds, so nothing downstream can mutate a copy and lose the write.
+    clone ??= Object.assign(Object.create(Object.getPrototypeOf(req) as object) as object, src) as Record<
+      string,
+      unknown
+    >
+    clone[field] = next
+  }
+
+  return (clone ?? src) as unknown as T
 }
 
 /**

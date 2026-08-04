@@ -2478,13 +2478,16 @@
       "movedFolder": "Đã di chuyển thư mục \"{{name}}\"",
       "movedEnvironmentFolder": "Đã di chuyển thư mục môi trường \"{{name}}\"",
       "reorderedFolder": "Đã sắp xếp lại các mục trong thư mục \"{{name}}\"",
-      "reorderedEnvironmentFolder": "Đã sắp xếp lại các mục trong thư mục môi trường \"{{name}}\""
+      "reorderedEnvironmentFolder": "Đã sắp xếp lại các mục trong thư mục môi trường \"{{name}}\"",
+      "stampedFileFormatVersion": "Phiên bản định dạng tệp {{name}}",
+      "changedFileFormatVersion": "Định dạng tệp {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Cập nhật yêu cầu \"{{name}}\"",
       "singleScenario": "Cập nhật kịch bản \"{{name}}\"",
       "singleFolder": "Cập nhật thư mục \"{{name}}\"",
       "singleEnvironmentFolder": "Cập nhật thư mục môi trường \"{{name}}\"",
+      "singleFileFormatVersion": "Chuyển sang định dạng tệp {{name}}",
       "countRequest_one": "{{count}} yêu cầu",
       "countRequest_other": "{{count}} yêu cầu",
       "countScenario_one": "{{count}} kịch bản",
@@ -2493,6 +2496,8 @@
       "countFolder_other": "{{count}} thư mục",
       "countEnvironmentFolder_one": "{{count}} thư mục môi trường",
       "countEnvironmentFolder_other": "{{count}} thư mục môi trường",
+      "countFileFormatVersion_one": "{{count}} thay đổi định dạng tệp",
+      "countFileFormatVersion_other": "{{count}} thay đổi định dạng tệp",
       "multiple": "Cập nhật {{parts}}"
     },
     "semiPullFrequencyTitle": "Tần suất kiểm tra cập nhật tự động",

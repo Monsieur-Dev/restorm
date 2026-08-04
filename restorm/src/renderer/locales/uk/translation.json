@@ -2481,13 +2481,16 @@
       "movedFolder": "Переміщено теку \"{{name}}\"",
       "movedEnvironmentFolder": "Переміщено теку середовища \"{{name}}\"",
       "reorderedFolder": "Змінено порядок елементів у теці «{{name}}»",
-      "reorderedEnvironmentFolder": "Змінено порядок елементів у теці середовища «{{name}}»"
+      "reorderedEnvironmentFolder": "Змінено порядок елементів у теці середовища «{{name}}»",
+      "stampedFileFormatVersion": "Версія формату файлу {{name}}",
+      "changedFileFormatVersion": "Формат файлу {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Оновлення запиту «{{name}}»",
       "singleScenario": "Оновлення сценарію «{{name}}»",
       "singleFolder": "Оновлення теки «{{name}}»",
       "singleEnvironmentFolder": "Оновлення теки середовища «{{name}}»",
+      "singleFileFormatVersion": "Перехід на формат файлу {{name}}",
       "countRequest_one": "{{count}} запит",
       "countRequest_other": "{{count}} запитів",
       "countScenario_one": "{{count}} сценарій",
@@ -2496,6 +2499,8 @@
       "countFolder_other": "{{count}} тек",
       "countEnvironmentFolder_one": "{{count}} тека середовища",
       "countEnvironmentFolder_other": "{{count}} тек середовища",
+      "countFileFormatVersion_one": "{{count}} зміна формату файлу",
+      "countFileFormatVersion_other": "{{count}} змін формату файлу",
       "multiple": "Оновлення: {{parts}}"
     },
     "semiPullFrequencyTitle": "Частота автоматичної перевірки оновлень",

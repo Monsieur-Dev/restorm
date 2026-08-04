@@ -17,7 +17,7 @@
  */
 
 import { collectionStore } from '../../services/CollectionStore'
-import { buildEffectiveRequest } from './effectiveRequest'
+import { buildEffectiveRequest, overlayLiveKeyValues } from './effectiveRequest'
 import { httpExecutionService, type HTTPExecutionInput } from '../../services/HTTPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
@@ -58,7 +58,10 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // Apply the action's picked quick-config (base request → the saved config's
   // fields, resolved by id from the .restorm file). Returns the bound request
   // unchanged when the node picked no config.
-  const req = buildEffectiveRequest(bound, ctx.node.config)
+  // Live row state first (the panel's unsaved checkbox edits), then the
+  // node's picked quick-config on top — a config the user explicitly chose
+  // for this node outranks the row state of whatever tab happens to be open.
+  const req = buildEffectiveRequest(overlayLiveKeyValues(bound, cfg.requestId), ctx.node.config)
   // A one-shot gRPC request (a unary call binds to this generic request node,
   // like httpRequest; streaming gRPC binds a grpcConnect instead) runs through
   // the gRPC execution service and emits the same `{ request, response }` shape.

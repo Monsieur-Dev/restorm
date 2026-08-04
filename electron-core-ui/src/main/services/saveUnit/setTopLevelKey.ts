@@ -146,7 +146,37 @@ function insertYamlKey(raw: string, key: string, value: string | number): string
   // unambiguous.
   if (body.length === 0) return `${key}: ${yamlScalar(value)}\n`
 
+  // A FLOW-style root (`{}`, `{a: 1}`) cannot be extended by a column-0
+  // line: `{}\nkey: value` is not valid YAML at all, so the round-trip
+  // check refuses it and the document never gets its key. That is the
+  // shape a freshly created, still-empty project has, which made the
+  // identity unstampable exactly when there was nothing to protect.
+  // Insert INSIDE the braces instead — YAML flow mapping syntax is
+  // JSON's, so the JSON-like insertion is correct here, and it leaves
+  // any surrounding comments where they are.
+  const flow = insertYamlFlowKey(body, key, value)
+  if (flow !== null) return flow
+
   return `${body}\n${key}: ${yamlScalar(value)}\n`
+}
+
+/**
+ * Insert into a flow-style mapping root, skipping a leading `---` marker
+ * and any comment lines above it. Returns null when the root is not a
+ * flow mapping, leaving the block-style path to handle it.
+ */
+function insertYamlFlowKey(body: string, key: string, value: string | number): string | null {
+  // Everything the root may legally be preceded by: comment lines, blank
+  // lines, and a single document-start marker (already proven unique).
+  const prefixPattern = /^(?:[ \t]*(?:#[^\n]*)?\n|---[ \t]*\n?)*/
+  const prefix = prefixPattern.exec(body)?.[0] ?? ''
+  const rest = body.slice(prefix.length)
+  if (!rest.startsWith('{')) return null
+
+  const inner = rest.slice(1)
+  const isEmpty = inner.trimStart().startsWith('}')
+  const entry = `${JSON.stringify(key)}: ${yamlScalar(value)}`
+  return `${prefix}{${entry}${isEmpty ? '' : ','}${inner}\n`
 }
 
 /**

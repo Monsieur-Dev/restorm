@@ -2479,13 +2479,16 @@
       "movedFolder": "Flyttade mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttade miljömappen \"{{name}}\"",
       "reorderedFolder": "Objekt omordnade i mappen ”{{name}}”",
-      "reorderedEnvironmentFolder": "Objekt omordnade i miljömappen ”{{name}}”"
+      "reorderedEnvironmentFolder": "Objekt omordnade i miljömappen ”{{name}}”",
+      "stampedFileFormatVersion": "Filformatversion {{name}}",
+      "changedFileFormatVersion": "Filformat {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Uppdatering av förfrågan \"{{name}}\"",
       "singleScenario": "Uppdatering av scenariot \"{{name}}\"",
       "singleFolder": "Uppdatering av mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Uppdatering av miljömappen \"{{name}}\"",
+      "singleFileFormatVersion": "Byte till filformat {{name}}",
       "countRequest_one": "{{count}} förfrågan",
       "countRequest_other": "{{count}} förfrågningar",
       "countScenario_one": "{{count}} scenario",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} mappar",
       "countEnvironmentFolder_one": "{{count}} miljömapp",
       "countEnvironmentFolder_other": "{{count}} miljömappar",
+      "countFileFormatVersion_one": "{{count}} ändring av filformat",
+      "countFileFormatVersion_other": "{{count}} ändringar av filformat",
       "multiple": "Uppdatering av {{parts}}"
     },
     "semiPullFrequencyTitle": "Frekvens för automatisk pull-kontroll",

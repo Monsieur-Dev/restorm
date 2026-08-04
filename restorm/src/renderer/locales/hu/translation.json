@@ -2479,13 +2479,16 @@
       "movedFolder": "A(z) \"{{name}}\" mappa áthelyezve",
       "movedEnvironmentFolder": "A(z) \"{{name}}\" környezeti mappa áthelyezve",
       "reorderedFolder": "Elemek átrendezve a(z) „{{name}}” mappában",
-      "reorderedEnvironmentFolder": "Elemek átrendezve a(z) „{{name}}” környezeti mappában"
+      "reorderedEnvironmentFolder": "Elemek átrendezve a(z) „{{name}}” környezeti mappában",
+      "stampedFileFormatVersion": "Fájlformátum verziója: {{name}}",
+      "changedFileFormatVersion": "Fájlformátum: {{name}}"
     },
     "commitTitle": {
       "singleRequest": "A(z) „{{name}}” kérés frissítése",
       "singleScenario": "A(z) „{{name}}” forgatókönyv frissítése",
       "singleFolder": "A(z) „{{name}}” mappa frissítése",
       "singleEnvironmentFolder": "A(z) „{{name}}” környezeti mappa frissítése",
+      "singleFileFormatVersion": "Váltás a(z) {{name}} fájlformátumra",
       "countRequest_one": "{{count}} kérés",
       "countRequest_other": "{{count}} kérés",
       "countScenario_one": "{{count}} forgatókönyv",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} mappa",
       "countEnvironmentFolder_one": "{{count}} környezeti mappa",
       "countEnvironmentFolder_other": "{{count}} környezeti mappa",
+      "countFileFormatVersion_one": "{{count}} fájlformátum-változás",
+      "countFileFormatVersion_other": "{{count}} fájlformátum-változás",
       "multiple": "{{parts}} frissítése"
     },
     "semiPullFrequencyTitle": "Automatikus frissítésellenőrzés gyakorisága",

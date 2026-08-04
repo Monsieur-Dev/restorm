@@ -2479,13 +2479,16 @@
       "movedFolder": "Déplacement du dossier « {{name}} »",
       "movedEnvironmentFolder": "Déplacement du dossier d'environnement « {{name}} »",
       "reorderedFolder": "Réorganisation des éléments du dossier « {{name}} »",
-      "reorderedEnvironmentFolder": "Réorganisation des éléments du dossier d'environnement « {{name}} »"
+      "reorderedEnvironmentFolder": "Réorganisation des éléments du dossier d'environnement « {{name}} »",
+      "stampedFileFormatVersion": "Version du format de fichier {{name}}",
+      "changedFileFormatVersion": "Format de fichier {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Mise à jour de la requête « {{name}} »",
       "singleScenario": "Mise à jour du scénario « {{name}} »",
       "singleFolder": "Mise à jour du dossier « {{name}} »",
       "singleEnvironmentFolder": "Mise à jour du dossier d'environnement « {{name}} »",
+      "singleFileFormatVersion": "Passage au format de fichier {{name}}",
       "countRequest_one": "{{count}} requête",
       "countRequest_other": "{{count}} requêtes",
       "countScenario_one": "{{count}} scénario",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} dossiers",
       "countEnvironmentFolder_one": "{{count}} dossier d'environnement",
       "countEnvironmentFolder_other": "{{count}} dossiers d'environnement",
+      "countFileFormatVersion_one": "{{count}} changement de format de fichier",
+      "countFileFormatVersion_other": "{{count}} changements de format de fichier",
       "multiple": "Mise à jour de {{parts}}"
     },
     "semiPullFrequencyTitle": "Fréquence de vérification automatique des mises à jour",

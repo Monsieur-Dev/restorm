@@ -2480,13 +2480,16 @@
       "movedFolder": "Premještena mapa \"{{name}}\"",
       "movedEnvironmentFolder": "Premještena mapa okruženja \"{{name}}\"",
       "reorderedFolder": "Promijenjen redoslijed stavki u mapi „{{name}}“",
-      "reorderedEnvironmentFolder": "Promijenjen redoslijed stavki u mapi okruženja „{{name}}“"
+      "reorderedEnvironmentFolder": "Promijenjen redoslijed stavki u mapi okruženja „{{name}}“",
+      "stampedFileFormatVersion": "Verzija formata datoteke {{name}}",
+      "changedFileFormatVersion": "Format datoteke {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahtjeva „{{name}}”",
       "singleScenario": "Ažuriranje scenarija „{{name}}”",
       "singleFolder": "Ažuriranje mape „{{name}}”",
       "singleEnvironmentFolder": "Ažuriranje mape okruženja „{{name}}”",
+      "singleFileFormatVersion": "Prijelaz na format datoteke {{name}}",
       "countRequest_one": "{{count}} zahtjev",
       "countRequest_other": "{{count}} zahtjeva",
       "countScenario_one": "{{count}} scenarij",
@@ -2495,6 +2498,8 @@
       "countFolder_other": "{{count}} mapa",
       "countEnvironmentFolder_one": "{{count}} mapa okruženja",
       "countEnvironmentFolder_other": "{{count}} mapa okruženja",
+      "countFileFormatVersion_one": "{{count}} promjena formata datoteke",
+      "countFileFormatVersion_other": "{{count}} promjena formata datoteke",
       "multiple": "Ažuriranje: {{parts}}"
     },
     "semiPullFrequencyTitle": "Učestalost automatske provjere ažuriranja",

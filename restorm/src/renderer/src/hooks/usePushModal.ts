@@ -3,7 +3,8 @@ import { i18n as ecuiI18n, renderCommitMessage, toasterService, useSetting, buil
 import { useTranslation } from 'react-i18next'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { useGitFolder } from './useGitFolder'
-import { diffProjectEntities, parseProjectYaml, type GitEntityChange } from '../../../shared/git/gitCommitDiff'
+import { diffProjectEntities, parseProjectDocumentFields, parseProjectYaml, type GitEntityChange } from '../../../shared/git/gitCommitDiff'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { buildCommitMessageContext } from '../../../shared/git/commitMessageContext'
 import { RESTORM_COMMIT_MESSAGE_TEMPLATE } from '../../../shared/git/commitMessageTemplates'
 import { processAfterDeserialization } from '../utils/serialization'
@@ -132,7 +133,15 @@ export function usePushModal(
     const relativePath = filePath.slice(gitFolder.length + 1)
     void window.api.git.getFileAtHead(gitFolder, relativePath).then((rawYaml) => {
       const beforeItems = parseProjectYaml(rawYaml, processAfterDeserialization)
-      const entityChanges = diffProjectEntities(beforeItems, rootItems)
+      // The file has two halves: its items, and its own root-level fields.
+      // Diffing only the items made a save that changed just the format
+      // stamp look like no change at all — the modal listed nothing and
+      // disabled Push on a project git reported as modified. What this app
+      // writes is always the current version, so that is the "after".
+      const entityChanges = diffProjectEntities(beforeItems, rootItems, {
+        before: parseProjectDocumentFields(rawYaml),
+        after: { fileFormatVersion: CURRENT_FILE_FORMAT_VERSION }
+      })
       setChanges(entityChanges)
       setLanguageState(defaultLanguage)
       regenerate(defaultLanguage, entityChanges)

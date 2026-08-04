@@ -2478,13 +2478,16 @@
       "movedFolder": "已移動資料夾「{{name}}」",
       "movedEnvironmentFolder": "已移動環境資料夾「{{name}}」",
       "reorderedFolder": "已重新排序資料夾「{{name}}」中的項目",
-      "reorderedEnvironmentFolder": "已重新排序環境資料夾「{{name}}」中的項目"
+      "reorderedEnvironmentFolder": "已重新排序環境資料夾「{{name}}」中的項目",
+      "stampedFileFormatVersion": "檔案格式版本 {{name}}",
+      "changedFileFormatVersion": "檔案格式 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "更新請求 \"{{name}}\"",
       "singleScenario": "更新情境 \"{{name}}\"",
       "singleFolder": "更新資料夾 \"{{name}}\"",
       "singleEnvironmentFolder": "更新環境資料夾 \"{{name}}\"",
+      "singleFileFormatVersion": "遷移至檔案格式 {{name}}",
       "countRequest_one": "{{count}} 個請求",
       "countRequest_other": "{{count}} 個請求",
       "countScenario_one": "{{count}} 個情境",
@@ -2493,6 +2496,8 @@
       "countFolder_other": "{{count}} 個資料夾",
       "countEnvironmentFolder_one": "{{count}} 個環境資料夾",
       "countEnvironmentFolder_other": "{{count}} 個環境資料夾",
+      "countFileFormatVersion_one": "{{count}} 項檔案格式變更",
+      "countFileFormatVersion_other": "{{count}} 項檔案格式變更",
       "multiple": "更新 {{parts}}"
     },
     "semiPullFrequencyTitle": "自動提取檢查頻率",

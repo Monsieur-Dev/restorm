@@ -2479,13 +2479,16 @@
       "movedFolder": "Siirrettiin kansio \"{{name}}\"",
       "movedEnvironmentFolder": "Siirrettiin ympäristökansio \"{{name}}\"",
       "reorderedFolder": "Kohteiden järjestys muutettu kansiossa ”{{name}}”",
-      "reorderedEnvironmentFolder": "Kohteiden järjestys muutettu ympäristökansiossa ”{{name}}”"
+      "reorderedEnvironmentFolder": "Kohteiden järjestys muutettu ympäristökansiossa ”{{name}}”",
+      "stampedFileFormatVersion": "Tiedostomuodon versio {{name}}",
+      "changedFileFormatVersion": "Tiedostomuoto {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Päivitys pyyntöön \"{{name}}\"",
       "singleScenario": "Päivitys skenaarioon \"{{name}}\"",
       "singleFolder": "Päivitys kansioon \"{{name}}\"",
       "singleEnvironmentFolder": "Päivitys ympäristökansioon \"{{name}}\"",
+      "singleFileFormatVersion": "Siirtyminen tiedostomuotoon {{name}}",
       "countRequest_one": "{{count}} pyyntö",
       "countRequest_other": "{{count}} pyyntöä",
       "countScenario_one": "{{count}} skenaario",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} kansiota",
       "countEnvironmentFolder_one": "{{count}} ympäristökansio",
       "countEnvironmentFolder_other": "{{count}} ympäristökansiota",
+      "countFileFormatVersion_one": "{{count}} tiedostomuodon muutos",
+      "countFileFormatVersion_other": "{{count}} tiedostomuodon muutosta",
       "multiple": "Päivitys: {{parts}}"
     },
     "semiPullFrequencyTitle": "Automaattisen päivitystarkistuksen tiheys",

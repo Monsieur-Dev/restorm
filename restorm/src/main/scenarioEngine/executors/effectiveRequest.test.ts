@@ -1,6 +1,18 @@
-import { describe, it, expect } from 'vitest'
-import { buildEffectiveRequest, buildEffectiveStreamingRequest } from './effectiveRequest'
+import { describe, it, expect, vi } from 'vitest'
 import type { QuickConfig } from '../../../shared/types/requests/QuickConfig'
+import { StringValue } from '../../../shared/types/valueTypes/StringValue'
+
+/** Swapped per-test to stand in for the live request context the panel
+ * registers; `undefined` means no panel has this request open. */
+let contextStub: unknown
+
+vi.mock('../../services/ContextService', () => ({
+  contextService: { getRequestContext: () => contextStub }
+}))
+
+const { buildEffectiveRequest, buildEffectiveStreamingRequest, overlayLiveKeyValues } = await import(
+  './effectiveRequest'
+)
 
 /** A fake request carrying a PROJECT quick-config on `quickConfigs[]` — the
  * resolver applies the picked config by id from there (no field snapshot on the
@@ -123,5 +135,76 @@ describe('buildEffectiveStreamingRequest (quick-config only)', () => {
   it('returns the request unchanged with no config picked', () => {
     const req = makeRequest()
     expect(buildEffectiveStreamingRequest(req, {})).toBe(req)
+  })
+})
+
+describe('overlayLiveKeyValues — the panel\'s unsaved row state reaches the run', () => {
+  /** A persisted request whose rows carry a typed value, so we can prove the
+   * overlay preserves the binding instead of flattening it to text. */
+  function storedRequest(): Record<string, unknown> {
+    return {
+      id: 'req-1',
+      type: 'http',
+      url: '{{baseUrl}}/pet/{{petId}}',
+      params: [
+        { id: 'row-a', key: 'test', value: new StringValue('a'), enabled: true },
+        { id: 'row-b', key: 'other', value: new StringValue('b'), enabled: true }
+      ],
+      pathParams: [{ id: 'row-p', key: 'petId', value: new StringValue('2'), enabled: true }]
+    }
+  }
+
+  const liveContext = (groups: Record<string, { id: string; enabled: boolean }[]>): unknown => ({
+    keyValueGroups: new Map(Object.entries(groups))
+  })
+
+  it('applies an unchecked row from the panel onto the stored request', () => {
+    contextStub = liveContext({ params: [{ id: 'row-a', enabled: false }, { id: 'row-b', enabled: true }] })
+    const stored = storedRequest()
+    const out = overlayLiveKeyValues(stored, 'req-1')
+    const params = out.params as { id: string; enabled: boolean }[]
+    expect(params[0].enabled).toBe(false)
+    expect(params[1].enabled).toBe(true)
+  })
+
+  it('applies a re-checked row too, not just an unchecking', () => {
+    contextStub = liveContext({ params: [{ id: 'row-a', enabled: true }] })
+    const stored = storedRequest()
+    ;(stored.params as { enabled: boolean }[])[0].enabled = false
+    const out = overlayLiveKeyValues(stored, 'req-1')
+    expect((out.params as { enabled: boolean }[])[0].enabled).toBe(true)
+  })
+
+  it('never mutates the stored request — the store keeps its own state', () => {
+    contextStub = liveContext({ params: [{ id: 'row-a', enabled: false }] })
+    const stored = storedRequest()
+    const before = (stored.params as { enabled: boolean }[])[0].enabled
+    overlayLiveKeyValues(stored, 'req-1')
+    expect((stored.params as { enabled: boolean }[])[0].enabled).toBe(before)
+  })
+
+  it('preserves the typed value rather than flattening it to text', () => {
+    contextStub = liveContext({ params: [{ id: 'row-a', enabled: false }] })
+    const out = overlayLiveKeyValues(storedRequest(), 'req-1')
+    const row = (out.params as { value: unknown }[])[0]
+    expect(row.value).toBeInstanceOf(StringValue)
+  })
+
+  it('returns the very same object when nothing was edited', () => {
+    contextStub = liveContext({ params: [{ id: 'row-a', enabled: true }, { id: 'row-b', enabled: true }] })
+    const stored = storedRequest()
+    expect(overlayLiveKeyValues(stored, 'req-1')).toBe(stored)
+  })
+
+  it('leaves the stored state alone for a row the panel never reported', () => {
+    contextStub = liveContext({ params: [{ id: 'row-a', enabled: false }] })
+    const out = overlayLiveKeyValues(storedRequest(), 'req-1')
+    expect((out.params as { enabled: boolean }[])[1].enabled).toBe(true)
+  })
+
+  it('is a no-op when no panel has registered the request', () => {
+    contextStub = undefined
+    const stored = storedRequest()
+    expect(overlayLiveKeyValues(stored, 'req-1')).toBe(stored)
   })
 })

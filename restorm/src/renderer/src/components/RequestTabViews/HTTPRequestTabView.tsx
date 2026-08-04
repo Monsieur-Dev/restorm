@@ -646,30 +646,15 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     return () => { unsubscribe?.() }
   }, [urlVariableId])
 
-  /**
-   * Mirror the tree to the main-side CollectionStore after a row edit.
-   *
-   * `updateReactiveProperty` mutates the request in place and
-   * `updateRequestKeyValues` feeds ContextService — which is what the URL
-   * PREVIEW reads, so the panel looked correct. Neither reaches
-   * CollectionStore, and that is what a SCENARIO RUN and the dispatch read.
-   * The result was a request whose displayed URL and whose executed URL came
-   * from two stores that a row edit only ever updated one of: unchecking a
-   * row, or retyping its value, changed the preview while the run kept using
-   * the values from before the edit.
-   *
-   * `setCollections` is the existing mirror path (it calls `syncCollections`
-   * onto main). The tree is passed by reference — the reactive object mutated
-   * just above is already inside it, so this publishes the edit rather than
-   * rebuilding anything.
-   */
-  const mirrorRowEdit = useCallback((): void => {
-    const state = useRestormStore.getState()
-    state.setCollections(state.collections, 'user')
-  }, [])
-
-  // Callbacks for KeyValue changes - notify the reactive object, ContextService
-  // AND the main-side store (see `mirrorRowEdit` — the run reads that one).
+  // Callbacks for KeyValue changes - notify the reactive object + ContextService.
+  //
+  // Deliberately NOT mirrored onto the main-side CollectionStore here.
+  // `setCollections` is a whole-tree REPLACE, so firing it per row edit
+  // republishes the renderer's copy of everything — and anything main owns
+  // that the renderer's tree predates (a just-saved quick config, a fresh
+  // clone, a git arbitration result) is destroyed by the overwrite. The
+  // scenario run reads its rows' live state from ContextService instead; see
+  // `overlayLiveKeyValues` in the scenario engine.
   const handleHeadersChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'headers', rows)
     const requestId = request.id
@@ -681,8 +666,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         sourceIdRef.current
       )
     }
-    mirrorRowEdit()
-  }, [request, mirrorRowEdit])
+  }, [request])
 
   const handleParamsChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'params', rows)
@@ -695,8 +679,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         sourceIdRef.current
       )
     }
-    mirrorRowEdit()
-  }, [request, mirrorRowEdit])
+  }, [request])
 
   const handlePathParamsChange = useCallback((rows: KeyValue[]): void => {
     updateReactiveProperty(request, 'pathParams', rows)
@@ -709,8 +692,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         sourceIdRef.current
       )
     }
-    mirrorRowEdit()
-  }, [request, mirrorRowEdit])
+  }, [request])
 
   // Combo entries: every well-known verb as its registry badge, plus the
   // request's CURRENT method when it isn't one of them (a free-typed verb),

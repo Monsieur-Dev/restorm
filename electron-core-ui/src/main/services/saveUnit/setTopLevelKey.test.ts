@@ -91,8 +91,13 @@ describe('setTopLevelKey — YAML', () => {
     expect(setTopLevelKey('- one\n- two\n', KEY, UUID, 'yaml')).toBeNull()
   })
 
-  it('refuses a flow-style root', () => {
-    expect(setTopLevelKey('{ name: My project }\n', KEY, UUID, 'yaml')).toBeNull()
+  // A flow-style root is now STAMPED rather than refused (see the dedicated
+  // describe below). Refusing it meant a freshly created, still-empty project
+  // — serialised as `{}` — was the one document that could never carry an
+  // identity, which is precisely the document where nothing is at risk.
+  it('stamps a flow-style root in place', () => {
+    const out = applied('{ name: My project }\n')
+    expect(yaml.load(out)).toEqual({ name: 'My project', [KEY]: UUID })
   })
 
   it('refuses a scalar root', () => {
@@ -271,5 +276,39 @@ describe('setTopLevelKey — a numeric value', () => {
     // NaN has no YAML/JSON spelling that parses back as itself, so the
     // verify step rejects the candidate and the file is left alone.
     expect(setTopLevelKey('name: My project\n', VERSION_KEY, Number.NaN, 'yaml')).toBeNull()
+  })
+})
+
+describe('setTopLevelKey — a YAML root in flow style', () => {
+  // The shape a freshly created, still-empty project has on disk. Appending a
+  // column-0 line after `{}` is not valid YAML, so the round-trip check used to
+  // refuse it — leaving the one document with nothing to protect as the one
+  // document that could never be stamped.
+  it('stamps an empty flow mapping', () => {
+    const out = applied('{}')
+    expect(yaml.load(out)).toEqual({ [KEY]: UUID })
+  })
+
+  it('stamps an empty flow mapping with a trailing newline', () => {
+    expect(yaml.load(applied('{}\n'))).toEqual({ [KEY]: UUID })
+  })
+
+  it('keeps the existing members of a populated flow mapping', () => {
+    const out = applied('{name: My project, version: 3}\n')
+    expect(yaml.load(out)).toEqual({ name: 'My project', version: 3, [KEY]: UUID })
+  })
+
+  it('stamps through a document-start marker', () => {
+    expect(yaml.load(applied('---\n{}\n'))).toEqual({ [KEY]: UUID })
+  })
+
+  it('preserves a comment sitting above the mapping', () => {
+    const out = applied('# my project\n{}\n')
+    expect(out).toContain('# my project')
+    expect(yaml.load(out)).toEqual({ [KEY]: UUID })
+  })
+
+  it('still refuses a multi-document stream', () => {
+    expect(setTopLevelKey('{}\n---\n{}\n', KEY, UUID, 'yaml')).toBeNull()
   })
 })

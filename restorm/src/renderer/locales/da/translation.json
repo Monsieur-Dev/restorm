@@ -2479,13 +2479,16 @@
       "movedFolder": "Flyttede mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttede miljømappen \"{{name}}\"",
       "reorderedFolder": "Elementer omarrangeret i mappen \"{{name}}\"",
-      "reorderedEnvironmentFolder": "Elementer omarrangeret i miljømappen \"{{name}}\""
+      "reorderedEnvironmentFolder": "Elementer omarrangeret i miljømappen \"{{name}}\"",
+      "stampedFileFormatVersion": "Filformatversion {{name}}",
+      "changedFileFormatVersion": "Filformat {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Opdatering af forespørgslen \"{{name}}\"",
       "singleScenario": "Opdatering af scenariet \"{{name}}\"",
       "singleFolder": "Opdatering af mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Opdatering af miljømappen \"{{name}}\"",
+      "singleFileFormatVersion": "Skift til filformat {{name}}",
       "countRequest_one": "{{count}} forespørgsel",
       "countRequest_other": "{{count}} forespørgsler",
       "countScenario_one": "{{count}} scenarie",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} mapper",
       "countEnvironmentFolder_one": "{{count}} miljømappe",
       "countEnvironmentFolder_other": "{{count}} miljømapper",
+      "countFileFormatVersion_one": "{{count}} ændring af filformat",
+      "countFileFormatVersion_other": "{{count}} ændringer af filformat",
       "multiple": "Opdatering af {{parts}}"
     },
     "semiPullFrequencyTitle": "Hyppighed for automatisk pull-tjek",

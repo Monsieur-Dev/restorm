@@ -46,7 +46,11 @@ vi.mock('../../mcp/tools/execute', () => ({
 }))
 vi.mock('../../services/ContextService', () => ({
   contextService: {
-    composeResolutionContexts: (id: string, overlay?: Record<string, string>) => composeResolutionContexts(id, overlay)
+    composeResolutionContexts: (id: string, overlay?: Record<string, string>) => composeResolutionContexts(id, overlay),
+    // No registered context: these cases exercise the PERSISTED request, so the
+    // live-row overlay must be a no-op. `overlayLiveKeyValues` has its own
+    // tests for the case where a panel edit is registered.
+    getRequestContext: () => undefined
   }
 }))
 

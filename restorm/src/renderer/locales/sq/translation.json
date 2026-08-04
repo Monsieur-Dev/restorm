@@ -2479,13 +2479,16 @@
       "movedFolder": "U zhvendos dosja \"{{name}}\"",
       "movedEnvironmentFolder": "U zhvendos dosja e mjedisit \"{{name}}\"",
       "reorderedFolder": "Elementet u rirenditën në dosjen «{{name}}»",
-      "reorderedEnvironmentFolder": "Elementet u rirenditën në dosjen e mjedisit «{{name}}»"
+      "reorderedEnvironmentFolder": "Elementet u rirenditën në dosjen e mjedisit «{{name}}»",
+      "stampedFileFormatVersion": "Versioni i formatit të skedarit {{name}}",
+      "changedFileFormatVersion": "Formati i skedarit {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Përditësim i kërkesës \"{{name}}\"",
       "singleScenario": "Përditësim i skenarit \"{{name}}\"",
       "singleFolder": "Përditësim i dosjes \"{{name}}\"",
       "singleEnvironmentFolder": "Përditësim i dosjes së mjedisit \"{{name}}\"",
+      "singleFileFormatVersion": "Kalim në formatin e skedarit {{name}}",
       "countRequest_one": "{{count}} kërkesë",
       "countRequest_other": "{{count}} kërkesa",
       "countScenario_one": "{{count}} skenar",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} dosje",
       "countEnvironmentFolder_one": "{{count}} dosje mjedisi",
       "countEnvironmentFolder_other": "{{count}} dosje mjedisi",
+      "countFileFormatVersion_one": "{{count}} ndryshim i formatit të skedarit",
+      "countFileFormatVersion_other": "{{count}} ndryshime të formatit të skedarit",
       "multiple": "Përditësim: {{parts}}"
     },
     "semiPullFrequencyTitle": "Shpeshtësia e kontrollit automatik të përditësimeve",

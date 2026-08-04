@@ -2481,13 +2481,16 @@
       "movedFolder": "Przeniesiono folder \"{{name}}\"",
       "movedEnvironmentFolder": "Przeniesiono folder środowiska \"{{name}}\"",
       "reorderedFolder": "Zmieniono kolejność elementów w folderze „{{name}}”",
-      "reorderedEnvironmentFolder": "Zmieniono kolejność elementów w folderze środowiska „{{name}}”"
+      "reorderedEnvironmentFolder": "Zmieniono kolejność elementów w folderze środowiska „{{name}}”",
+      "stampedFileFormatVersion": "Wersja formatu pliku {{name}}",
+      "changedFileFormatVersion": "Format pliku {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Aktualizacja żądania „{{name}}”",
       "singleScenario": "Aktualizacja scenariusza „{{name}}”",
       "singleFolder": "Aktualizacja folderu „{{name}}”",
       "singleEnvironmentFolder": "Aktualizacja folderu środowiska „{{name}}”",
+      "singleFileFormatVersion": "Przejście na format pliku {{name}}",
       "countRequest_one": "{{count}} żądanie",
       "countRequest_other": "{{count}} żądań",
       "countScenario_one": "{{count}} scenariusz",
@@ -2496,6 +2499,8 @@
       "countFolder_other": "{{count}} folderów",
       "countEnvironmentFolder_one": "{{count}} folder środowiska",
       "countEnvironmentFolder_other": "{{count}} folderów środowiska",
+      "countFileFormatVersion_one": "{{count}} zmiana formatu pliku",
+      "countFileFormatVersion_other": "{{count}} zmian formatu pliku",
       "multiple": "Aktualizacja: {{parts}}"
     },
     "semiPullFrequencyTitle": "Częstotliwość automatycznego sprawdzania aktualizacji",

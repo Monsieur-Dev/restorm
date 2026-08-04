@@ -2479,13 +2479,16 @@
       "movedFolder": "\"{{name}}\" klasörü taşındı",
       "movedEnvironmentFolder": "\"{{name}}\" ortam klasörü taşındı",
       "reorderedFolder": "\"{{name}}\" klasöründeki öğeler yeniden sıralandı",
-      "reorderedEnvironmentFolder": "\"{{name}}\" ortam klasöründeki öğeler yeniden sıralandı"
+      "reorderedEnvironmentFolder": "\"{{name}}\" ortam klasöründeki öğeler yeniden sıralandı",
+      "stampedFileFormatVersion": "Dosya biçimi sürümü {{name}}",
+      "changedFileFormatVersion": "Dosya biçimi {{name}}"
     },
     "commitTitle": {
       "singleRequest": "\"{{name}}\" isteğinde güncelleme",
       "singleScenario": "\"{{name}}\" senaryosunda güncelleme",
       "singleFolder": "\"{{name}}\" klasöründe güncelleme",
       "singleEnvironmentFolder": "\"{{name}}\" ortam klasöründe güncelleme",
+      "singleFileFormatVersion": "{{name}} dosya biçimine geçiş",
       "countRequest_one": "{{count}} istek",
       "countRequest_other": "{{count}} istek",
       "countScenario_one": "{{count}} senaryo",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} klasör",
       "countEnvironmentFolder_one": "{{count}} ortam klasörü",
       "countEnvironmentFolder_other": "{{count}} ortam klasörü",
+      "countFileFormatVersion_one": "{{count}} dosya biçimi değişikliği",
+      "countFileFormatVersion_other": "{{count}} dosya biçimi değişikliği",
       "multiple": "{{parts}} güncellemesi"
     },
     "semiPullFrequencyTitle": "Otomatik güncelleme kontrolü sıklığı",

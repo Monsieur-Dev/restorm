@@ -2479,13 +2479,16 @@
       "movedFolder": "Movida la carpeta \"{{name}}\"",
       "movedEnvironmentFolder": "Movida la carpeta de entorno \"{{name}}\"",
       "reorderedFolder": "Elementos reordenados en la carpeta «{{name}}»",
-      "reorderedEnvironmentFolder": "Elementos reordenados en la carpeta de entorno «{{name}}»"
+      "reorderedEnvironmentFolder": "Elementos reordenados en la carpeta de entorno «{{name}}»",
+      "stampedFileFormatVersion": "Versión del formato de archivo {{name}}",
+      "changedFileFormatVersion": "Formato de archivo {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Actualización de la solicitud \"{{name}}\"",
       "singleScenario": "Actualización del escenario \"{{name}}\"",
       "singleFolder": "Actualización de la carpeta \"{{name}}\"",
       "singleEnvironmentFolder": "Actualización de la carpeta de entorno \"{{name}}\"",
+      "singleFileFormatVersion": "Cambio al formato de archivo {{name}}",
       "countRequest_one": "{{count}} solicitud",
       "countRequest_other": "{{count}} solicitudes",
       "countScenario_one": "{{count}} escenario",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} carpetas",
       "countEnvironmentFolder_one": "{{count}} carpeta de entorno",
       "countEnvironmentFolder_other": "{{count}} carpetas de entorno",
+      "countFileFormatVersion_one": "{{count}} cambio de formato de archivo",
+      "countFileFormatVersion_other": "{{count}} cambios de formato de archivo",
       "multiple": "Actualización de {{parts}}"
     },
     "semiPullFrequencyTitle": "Frecuencia de comprobación automática de actualizaciones",

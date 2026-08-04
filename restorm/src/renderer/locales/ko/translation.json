@@ -2478,13 +2478,16 @@
       "movedFolder": "폴더 \"{{name}}\"을(를) 이동",
       "movedEnvironmentFolder": "환경 폴더 \"{{name}}\"을(를) 이동",
       "reorderedFolder": "폴더 \"{{name}}\"의 항목 순서를 변경했습니다",
-      "reorderedEnvironmentFolder": "환경 폴더 \"{{name}}\"의 항목 순서를 변경했습니다"
+      "reorderedEnvironmentFolder": "환경 폴더 \"{{name}}\"의 항목 순서를 변경했습니다",
+      "stampedFileFormatVersion": "파일 형식 버전 {{name}}",
+      "changedFileFormatVersion": "파일 형식 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "요청 \"{{name}}\" 업데이트",
       "singleScenario": "시나리오 \"{{name}}\" 업데이트",
       "singleFolder": "폴더 \"{{name}}\" 업데이트",
       "singleEnvironmentFolder": "환경 폴더 \"{{name}}\" 업데이트",
+      "singleFileFormatVersion": "파일 형식 {{name}}(으)로 전환",
       "countRequest_one": "요청 {{count}}개",
       "countRequest_other": "요청 {{count}}개",
       "countScenario_one": "시나리오 {{count}}개",
@@ -2493,6 +2496,8 @@
       "countFolder_other": "폴더 {{count}}개",
       "countEnvironmentFolder_one": "환경 폴더 {{count}}개",
       "countEnvironmentFolder_other": "환경 폴더 {{count}}개",
+      "countFileFormatVersion_one": "파일 형식 변경 {{count}}건",
+      "countFileFormatVersion_other": "파일 형식 변경 {{count}}건",
       "multiple": "{{parts}} 업데이트"
     },
     "semiPullFrequencyTitle": "자동 풀 확인 빈도",

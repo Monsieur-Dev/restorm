@@ -2478,13 +2478,16 @@
       "movedFolder": "Memindahkan folder \"{{name}}\"",
       "movedEnvironmentFolder": "Memindahkan folder lingkungan \"{{name}}\"",
       "reorderedFolder": "Urutan item diubah di folder \"{{name}}\"",
-      "reorderedEnvironmentFolder": "Urutan item diubah di folder lingkungan \"{{name}}\""
+      "reorderedEnvironmentFolder": "Urutan item diubah di folder lingkungan \"{{name}}\"",
+      "stampedFileFormatVersion": "Versi format berkas {{name}}",
+      "changedFileFormatVersion": "Format berkas {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Pembaruan permintaan \"{{name}}\"",
       "singleScenario": "Pembaruan skenario \"{{name}}\"",
       "singleFolder": "Pembaruan folder \"{{name}}\"",
       "singleEnvironmentFolder": "Pembaruan folder lingkungan \"{{name}}\"",
+      "singleFileFormatVersion": "Beralih ke format berkas {{name}}",
       "countRequest_one": "{{count}} permintaan",
       "countRequest_other": "{{count}} permintaan",
       "countScenario_one": "{{count}} skenario",
@@ -2493,6 +2496,8 @@
       "countFolder_other": "{{count}} folder",
       "countEnvironmentFolder_one": "{{count}} folder lingkungan",
       "countEnvironmentFolder_other": "{{count}} folder lingkungan",
+      "countFileFormatVersion_one": "{{count}} perubahan format berkas",
+      "countFileFormatVersion_other": "{{count}} perubahan format berkas",
       "multiple": "Pembaruan {{parts}}"
     },
     "semiPullFrequencyTitle": "Frekuensi pemeriksaan pembaruan otomatis",

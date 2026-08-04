@@ -2479,13 +2479,16 @@
       "movedFolder": "Ordner \"{{name}}\" verschoben",
       "movedEnvironmentFolder": "Umgebungsordner \"{{name}}\" verschoben",
       "reorderedFolder": "Elemente im Ordner „{{name}}“ neu angeordnet",
-      "reorderedEnvironmentFolder": "Elemente im Umgebungsordner „{{name}}“ neu angeordnet"
+      "reorderedEnvironmentFolder": "Elemente im Umgebungsordner „{{name}}“ neu angeordnet",
+      "stampedFileFormatVersion": "Dateiformatversion {{name}}",
+      "changedFileFormatVersion": "Dateiformat {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Aktualisierung der Anfrage „{{name}}“",
       "singleScenario": "Aktualisierung des Szenarios „{{name}}“",
       "singleFolder": "Aktualisierung des Ordners „{{name}}“",
       "singleEnvironmentFolder": "Aktualisierung des Umgebungsordners „{{name}}“",
+      "singleFileFormatVersion": "Wechsel zum Dateiformat {{name}}",
       "countRequest_one": "{{count}} Anfrage",
       "countRequest_other": "{{count}} Anfragen",
       "countScenario_one": "{{count}} Szenario",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} Ordner",
       "countEnvironmentFolder_one": "{{count}} Umgebungsordner",
       "countEnvironmentFolder_other": "{{count}} Umgebungsordner",
+      "countFileFormatVersion_one": "{{count}} Dateiformatänderung",
+      "countFileFormatVersion_other": "{{count}} Dateiformatänderungen",
       "multiple": "Aktualisierung von {{parts}}"
     },
     "semiPullFrequencyTitle": "Häufigkeit der automatischen Pull-Prüfung",

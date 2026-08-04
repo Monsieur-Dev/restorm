@@ -2481,13 +2481,16 @@
       "movedFolder": "Přesunuta složka \"{{name}}\"",
       "movedEnvironmentFolder": "Přesunuta složka prostředí \"{{name}}\"",
       "reorderedFolder": "Změněno pořadí položek ve složce „{{name}}“",
-      "reorderedEnvironmentFolder": "Změněno pořadí položek ve složce prostředí „{{name}}“"
+      "reorderedEnvironmentFolder": "Změněno pořadí položek ve složce prostředí „{{name}}“",
+      "stampedFileFormatVersion": "Verze formátu souboru {{name}}",
+      "changedFileFormatVersion": "Formát souboru {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Aktualizace požadavku „{{name}}“",
       "singleScenario": "Aktualizace scénáře „{{name}}“",
       "singleFolder": "Aktualizace složky „{{name}}“",
       "singleEnvironmentFolder": "Aktualizace složky prostředí „{{name}}“",
+      "singleFileFormatVersion": "Přechod na formát souboru {{name}}",
       "countRequest_one": "{{count}} požadavek",
       "countRequest_other": "{{count}} požadavků",
       "countScenario_one": "{{count}} scénář",
@@ -2496,6 +2499,8 @@
       "countFolder_other": "{{count}} složek",
       "countEnvironmentFolder_one": "{{count}} složka prostředí",
       "countEnvironmentFolder_other": "{{count}} složek prostředí",
+      "countFileFormatVersion_one": "{{count}} změna formátu souboru",
+      "countFileFormatVersion_other": "{{count}} změn formátu souboru",
       "multiple": "Aktualizace: {{parts}}"
     },
     "semiPullFrequencyTitle": "Frekvence automatické kontroly aktualizací",

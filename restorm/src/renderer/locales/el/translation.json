@@ -2479,13 +2479,16 @@
       "movedFolder": "Μετακινήθηκε ο φάκελος \"{{name}}\"",
       "movedEnvironmentFolder": "Μετακινήθηκε ο φάκελος περιβάλλοντος \"{{name}}\"",
       "reorderedFolder": "Αναδιάταξη στοιχείων στον φάκελο «{{name}}»",
-      "reorderedEnvironmentFolder": "Αναδιάταξη στοιχείων στον φάκελο περιβάλλοντος «{{name}}»"
+      "reorderedEnvironmentFolder": "Αναδιάταξη στοιχείων στον φάκελο περιβάλλοντος «{{name}}»",
+      "stampedFileFormatVersion": "Έκδοση μορφής αρχείου {{name}}",
+      "changedFileFormatVersion": "Μορφή αρχείου {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Ενημέρωση του αιτήματος «{{name}}»",
       "singleScenario": "Ενημέρωση του σεναρίου «{{name}}»",
       "singleFolder": "Ενημέρωση του φακέλου «{{name}}»",
       "singleEnvironmentFolder": "Ενημέρωση του φακέλου περιβάλλοντος «{{name}}»",
+      "singleFileFormatVersion": "Μετάβαση στη μορφή αρχείου {{name}}",
       "countRequest_one": "{{count}} αίτημα",
       "countRequest_other": "{{count}} αιτήματα",
       "countScenario_one": "{{count}} σενάριο",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} φάκελοι",
       "countEnvironmentFolder_one": "{{count}} φάκελος περιβάλλοντος",
       "countEnvironmentFolder_other": "{{count}} φάκελοι περιβάλλοντος",
+      "countFileFormatVersion_one": "{{count}} αλλαγή μορφής αρχείου",
+      "countFileFormatVersion_other": "{{count}} αλλαγές μορφής αρχείου",
       "multiple": "Ενημέρωση: {{parts}}"
     },
     "semiPullFrequencyTitle": "Συχνότητα αυτόματου ελέγχου ενημερώσεων",

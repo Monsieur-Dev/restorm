@@ -2479,13 +2479,16 @@
       "movedFolder": "Flyttet mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttet miljømappen \"{{name}}\"",
       "reorderedFolder": "Elementer omorganisert i mappen «{{name}}»",
-      "reorderedEnvironmentFolder": "Elementer omorganisert i miljømappen «{{name}}»"
+      "reorderedEnvironmentFolder": "Elementer omorganisert i miljømappen «{{name}}»",
+      "stampedFileFormatVersion": "Filformatversjon {{name}}",
+      "changedFileFormatVersion": "Filformat {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Oppdatering av forespørselen \"{{name}}\"",
       "singleScenario": "Oppdatering av scenarioet \"{{name}}\"",
       "singleFolder": "Oppdatering av mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Oppdatering av miljømappen \"{{name}}\"",
+      "singleFileFormatVersion": "Bytte til filformat {{name}}",
       "countRequest_one": "{{count}} forespørsel",
       "countRequest_other": "{{count}} forespørsler",
       "countScenario_one": "{{count}} scenario",
@@ -2494,6 +2497,8 @@
       "countFolder_other": "{{count}} mapper",
       "countEnvironmentFolder_one": "{{count}} miljømappe",
       "countEnvironmentFolder_other": "{{count}} miljømapper",
+      "countFileFormatVersion_one": "{{count}} endring av filformat",
+      "countFileFormatVersion_other": "{{count}} endringer av filformat",
       "multiple": "Oppdatering av {{parts}}"
     },
     "semiPullFrequencyTitle": "Frekvens for automatisk pull-sjekk",

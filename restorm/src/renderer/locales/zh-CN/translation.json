@@ -2478,13 +2478,16 @@
       "movedFolder": "移动了文件夹“{{name}}”",
       "movedEnvironmentFolder": "移动了环境文件夹“{{name}}”",
       "reorderedFolder": "已重新排序文件夹“{{name}}”中的项目",
-      "reorderedEnvironmentFolder": "已重新排序环境文件夹“{{name}}”中的项目"
+      "reorderedEnvironmentFolder": "已重新排序环境文件夹“{{name}}”中的项目",
+      "stampedFileFormatVersion": "文件格式版本 {{name}}",
+      "changedFileFormatVersion": "文件格式 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "更新请求 \"{{name}}\"",
       "singleScenario": "更新场景 \"{{name}}\"",
       "singleFolder": "更新文件夹 \"{{name}}\"",
       "singleEnvironmentFolder": "更新环境文件夹 \"{{name}}\"",
+      "singleFileFormatVersion": "迁移到文件格式 {{name}}",
       "countRequest_one": "{{count}} 个请求",
       "countRequest_other": "{{count}} 个请求",
       "countScenario_one": "{{count}} 个场景",
@@ -2493,6 +2496,8 @@
       "countFolder_other": "{{count}} 个文件夹",
       "countEnvironmentFolder_one": "{{count}} 个环境文件夹",
       "countEnvironmentFolder_other": "{{count}} 个环境文件夹",
+      "countFileFormatVersion_one": "{{count}} 项文件格式变更",
+      "countFileFormatVersion_other": "{{count}} 项文件格式变更",
       "multiple": "更新 {{parts}}"
     },
     "semiPullFrequencyTitle": "自动拉取检查频率",

@@ -240,7 +240,12 @@ export function identifyConflictingEntities(
     }
   }
 
-  const kindOrder: Record<GitEntityKind, number> = { folder: 0, environmentFolder: 1, request: 2, scenario: 3 }
+  // `document` is listed for totality only: conflict entries are built from
+  // tree entities, and the document's own fields never produce one — the
+  // format stamp is written by whichever side saves, not merged field by
+  // field. It sorts first anyway, so if a future document-level conflict is
+  // ever introduced it lands where a reader would look for it.
+  const kindOrder: Record<GitEntityKind, number> = { document: -1, folder: 0, environmentFolder: 1, request: 2, scenario: 3 }
   conflicts.sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind] || a.name.localeCompare(b.name))
 
   // ONE entry for the tree shape, listed first: where an item LIVES is a

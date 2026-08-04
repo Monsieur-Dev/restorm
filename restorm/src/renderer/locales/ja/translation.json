@@ -2478,13 +2478,16 @@
       "movedFolder": "フォルダー「{{name}}」を移動",
       "movedEnvironmentFolder": "環境フォルダー「{{name}}」を移動",
       "reorderedFolder": "フォルダー「{{name}}」内の項目を並べ替えました",
-      "reorderedEnvironmentFolder": "環境フォルダー「{{name}}」内の項目を並べ替えました"
+      "reorderedEnvironmentFolder": "環境フォルダー「{{name}}」内の項目を並べ替えました",
+      "stampedFileFormatVersion": "ファイル形式のバージョン {{name}}",
+      "changedFileFormatVersion": "ファイル形式 {{name}}"
     },
     "commitTitle": {
       "singleRequest": "リクエスト「{{name}}」の更新",
       "singleScenario": "シナリオ「{{name}}」の更新",
       "singleFolder": "フォルダー「{{name}}」の更新",
       "singleEnvironmentFolder": "環境フォルダー「{{name}}」の更新",
+      "singleFileFormatVersion": "ファイル形式 {{name}} への移行",
       "countRequest_one": "リクエスト{{count}}件",
       "countRequest_other": "リクエスト{{count}}件",
       "countScenario_one": "シナリオ{{count}}件",
@@ -2493,6 +2496,8 @@
       "countFolder_other": "フォルダー{{count}}件",
       "countEnvironmentFolder_one": "環境フォルダー{{count}}件",
       "countEnvironmentFolder_other": "環境フォルダー{{count}}件",
+      "countFileFormatVersion_one": "ファイル形式の変更 {{count}} 件",
+      "countFileFormatVersion_other": "ファイル形式の変更 {{count}} 件",
       "multiple": "{{parts}}の更新"
     },
     "semiPullFrequencyTitle": "自動プル確認の頻度",

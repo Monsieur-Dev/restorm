@@ -2480,13 +2480,16 @@
       "movedFolder": "Premeštena fascikla \"{{name}}\"",
       "movedEnvironmentFolder": "Premeštena fascikla okruženja \"{{name}}\"",
       "reorderedFolder": "Promenjen redosled stavki u fascikli „{{name}}“",
-      "reorderedEnvironmentFolder": "Promenjen redosled stavki u fascikli okruženja „{{name}}“"
+      "reorderedEnvironmentFolder": "Promenjen redosled stavki u fascikli okruženja „{{name}}“",
+      "stampedFileFormatVersion": "Verzija formata datoteke {{name}}",
+      "changedFileFormatVersion": "Format datoteke {{name}}"
     },
     "commitTitle": {
       "singleRequest": "Ažuriranje zahteva „{{name}}”",
       "singleScenario": "Ažuriranje scenarija „{{name}}”",
       "singleFolder": "Ažuriranje fascikle „{{name}}”",
       "singleEnvironmentFolder": "Ažuriranje fascikle okruženja „{{name}}”",
+      "singleFileFormatVersion": "Prelazak na format datoteke {{name}}",
       "countRequest_one": "{{count}} zahtev",
       "countRequest_other": "{{count}} zahteva",
       "countScenario_one": "{{count}} scenario",
@@ -2495,6 +2498,8 @@
       "countFolder_other": "{{count}} fascikli",
       "countEnvironmentFolder_one": "{{count}} fascikla okruženja",
       "countEnvironmentFolder_other": "{{count}} fascikli okruženja",
+      "countFileFormatVersion_one": "{{count}} promena formata datoteke",
+      "countFileFormatVersion_other": "{{count}} promena formata datoteke",
       "multiple": "Ažuriranje: {{parts}}"
     },
     "semiPullFrequencyTitle": "Učestalost automatske provere ažuriranja",

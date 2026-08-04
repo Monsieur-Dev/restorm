@@ -3,7 +3,21 @@ import type { FolderItem } from '../types/folderTypes'
 import { isEnvironmentFolder, isFolder, isScenario } from '../types/folderTypes'
 import { prepareForSerialization, stripIds } from '../utils/serialization'
 
-export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario'
+/**
+ * `document` is not a tree item: it stands for the fields carried by the
+ * DOCUMENT ITSELF — today `fileFormatVersion`, tomorrow whatever joins it
+ * at the root, next to `collections`.
+ *
+ * Those fields belong to the file and to nothing inside it, so before this
+ * kind existed they were in the file but present in no model: a save that
+ * changed only them produced a git diff nobody could describe, a push
+ * modal listing no changes, and a Push button disabled on a project git
+ * reported as modified. Giving them a kind is what puts a format change
+ * in the commit message a reader will later use to understand why a file
+ * moved — which is the whole point of stamping a version in the first
+ * place.
+ */
+export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario' | 'document'
 export type GitChangeAction = 'added' | 'modified' | 'moved' | 'deleted' | 'reordered'
 
 export interface GitEntityChange {
@@ -23,6 +37,56 @@ export interface GitEntityChange {
  */
 export function entityId(item: FolderItem): string | undefined {
   return (item as { id?: string }).id
+}
+
+/**
+ * The document's own fields, as read from the root of a project file —
+ * NOT from anything inside `collections`.
+ *
+ * `fileFormatVersion` is `undefined` for a document that declares none.
+ * That is a real, meaningful state and not a missing value to default
+ * away: a file predating the field reads as "unversioned", and the first
+ * save this app performs stamps it. Collapsing it to the current version
+ * here would hide exactly the transition this type exists to report.
+ */
+export interface ProjectDocumentFields {
+  fileFormatVersion?: number | undefined
+}
+
+/**
+ * Read a project file's DOCUMENT-level fields from raw YAML text. A
+ * sibling of {@link parseProjectYaml}, which reads the same text for the
+ * items — the two halves of one file.
+ */
+export function parseProjectDocumentFields(rawYaml: string | null): ProjectDocumentFields {
+  if (rawYaml === null) return {}
+  const parsed = yamlParse(rawYaml) as { fileFormatVersion?: unknown } | null
+  const declared = parsed?.fileFormatVersion
+  return typeof declared === 'number' ? { fileFormatVersion: declared } : {}
+}
+
+/**
+ * One change line for the document itself, or `null` when its fields are
+ * identical.
+ *
+ * The `name` carries the TRANSITION rather than an entity name, because
+ * that is what a reader of the history needs: "which format did this file
+ * move from, and to what". An unversioned "before" renders as an arrow
+ * with no left side — the file did not declare one, and inventing the
+ * current version there would claim a stamp that was never in the file.
+ */
+export function diffDocumentFields(
+  before: ProjectDocumentFields,
+  after: ProjectDocumentFields
+): GitEntityChange | null {
+  if (before.fileFormatVersion === after.fileFormatVersion) return null
+  if (after.fileFormatVersion === undefined) return null
+  const from = before.fileFormatVersion
+  return {
+    kind: 'document',
+    name: from === undefined ? `${after.fileFormatVersion}` : `${from} → ${after.fileFormatVersion}`,
+    action: from === undefined ? 'added' : 'modified'
+  }
 }
 
 export function kindOf(item: FolderItem): GitEntityKind {
@@ -183,7 +247,11 @@ function collectEntities(items: FolderItem[], out: Map<string, CollectedEntity>,
  * same normalization the "before" side already went through when it was
  * last written to disk.
  */
-export function diffProjectEntities(beforeItems: FolderItem[], afterItems: FolderItem[]): GitEntityChange[] {
+export function diffProjectEntities(
+  beforeItems: FolderItem[],
+  afterItems: FolderItem[],
+  documents?: { before: ProjectDocumentFields; after: ProjectDocumentFields }
+): GitEntityChange[] {
   const before = new Map<string, CollectedEntity>()
   const after = new Map<string, CollectedEntity>()
   collectEntities(prepareForSerialization(beforeItems), before)
@@ -245,9 +313,17 @@ export function diffProjectEntities(beforeItems: FolderItem[], afterItems: Folde
     }
   }
 
+  // The document's own fields, compared last but sorted to the top below:
+  // a format change is the first thing a reader of the history needs, since
+  // it explains why the rest of the file may look different at all.
+  if (documents) {
+    const change = diffDocumentFields(documents.before, documents.after)
+    if (change) changes.push(change)
+  }
+
   // Deterministic order — the same diff always renders the same commit
   // body, independent of the two Maps' insertion order.
-  const kindOrder: Record<GitEntityKind, number> = { folder: 0, environmentFolder: 1, request: 2, scenario: 3 }
+  const kindOrder: Record<GitEntityKind, number> = { document: -1, folder: 0, environmentFolder: 1, request: 2, scenario: 3 }
   const actionOrder: Record<GitChangeAction, number> = { added: 0, modified: 1, moved: 2, reordered: 3, deleted: 4 }
   changes.sort((a, b) =>
     kindOrder[a.kind] - kindOrder[b.kind] ||
