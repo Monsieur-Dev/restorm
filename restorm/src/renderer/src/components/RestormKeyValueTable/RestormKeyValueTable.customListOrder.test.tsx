@@ -216,6 +216,19 @@ describe('a reordered value list reaches the picker of an open request', () => {
     expect(container.querySelector('select')?.getAttribute('data-selected-index')).toBe('2')
   })
 
+  it('offers no choice at all for a list whose only entry has no label', () => {
+    const { container } = renderOpenRequest()
+    // The shape the entries table produces for an emptied list: one blank row.
+    // Rendering it as an option would put an invisible line in the menu that
+    // silently selects nothing.
+    folder.customValueLists = [{ id: 'cvl-1', name: 'Couleur', entries: [{ id: 'blank', label: '', value: '' }] }]
+    act(() => {
+      eventBus.emitLocalSync(DocumentEvents.FOLDER_UPDATED, { type: 'folder', id: folder.id, document: folder })
+    })
+
+    expect(pickerOptions(container)).toEqual([])
+  })
+
   it('drops a disabled entry from the picker while keeping the rest in order', () => {
     const { container } = renderOpenRequest()
     const list = folder.customValueLists[0]

@@ -126,6 +126,14 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
   }, [persist, selectedId])
 
   const setEntries = useCallback((listId: string, entries: CustomValueEntry[]) => {
+    const current = listsRef.current.find((l) => l.id === listId)
+    // Ignore a write that changes nothing. Handed an empty list, the table
+    // seeds a fresh blank row with a NEW id and reports it; that report
+    // resolves back to "still empty", which would write again, which would
+    // hand the table another empty list, which would mint another id — a
+    // loop with no fixed point. Comparing what would be stored against what
+    // IS stored gives it one.
+    if (current && JSON.stringify(current.entries) === JSON.stringify(entries)) return
     const next = listsRef.current.map((l) => (l.id === listId ? { ...l, entries } : l))
     persist(next)
   }, [persist])
@@ -152,12 +160,22 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
   // the value pickers of already-open requests read back.
   const handleEntryRowsChange = useCallback((rows: KeyValueTableRow[]) => {
     if (!selectedId) return
-    setEntries(selectedId, rows.map((r) => ({
-      id: r.id ?? genId('cve'),
-      label: r.key,
-      value: r.value,
-      enabled: r.enabled !== false
-    })))
+    // A table with nothing in it always shows one empty row to type into.
+    // That row is an affordance, not a value: storing it would leave a
+    // label-less entry in the project file after the user deleted the last
+    // one, and an unpickable blank line in every menu bound to the list. So
+    // a table where NO row carries anything means the list is empty. A blank
+    // row sitting among filled ones is left alone — the user is mid-edit and
+    // dropping it would pull the row out from under them.
+    const hasContent = rows.some((r) => r.key.trim() !== '' || r.value.trim() !== '')
+    setEntries(selectedId, hasContent
+      ? rows.map((r) => ({
+        id: r.id ?? genId('cve'),
+        label: r.key,
+        value: r.value,
+        enabled: r.enabled !== false
+      }))
+      : [])
   }, [selectedId, setEntries])
 
   const handleAddEntry = useCallback(() => {
@@ -247,6 +265,13 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
                 }
               >
                 <div style={{ padding: 8, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                  {/* A list with no values shows the table's own empty row rather
+                      than an italic "no values yet" line: the row is where the
+                      user types the first value, and a placeholder next to it
+                      would label a field that is ready for input as absent.
+                      Bringing the line back means rendering it above this table
+                      when `selected.entries.length === 0` — the table stays as
+                      it is either way. */}
                   <KeyValueTable
                     // Remount on list switch: the table seeds its rows once and
                     // then only adopts props that differ from what it emitted,

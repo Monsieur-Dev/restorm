@@ -189,6 +189,45 @@ describe('CustomValueListsPanel — the entries table owns the order', () => {
     expect(entries.some((e) => e.label === 'Bleu')).toBe(false)
   })
 
+  it('stores an EMPTY list when the last entry is deleted, not a blank one', () => {
+    const folder = makeFolder()
+    renderPanel(folder)
+
+    // Deleting the last row empties the table, which immediately seeds one
+    // blank row to type into and reports it. That row must not become an
+    // entry: it would survive to disk and show up as an unpickable blank
+    // line in every menu bound to the list.
+    emitRows([])
+    emitRows([{ id: 'seeded-blank', key: '', value: '', enabled: true }])
+
+    expect(persistedEntries()).toEqual([])
+    expect(folder.customValueLists?.[0]?.entries).toEqual([])
+  })
+
+  it('settles instead of looping when the table keeps re-seeding a blank row', () => {
+    renderPanel(makeFolder())
+    emitRows([])
+    const afterEmptying = updateFolderCustomValueLists.mock.calls.length
+
+    // Each re-seed carries a FRESH row id — the table mints one every time it
+    // is handed an empty list. Writing on each of those would hand back an
+    // empty list again and never converge, so a write that changes nothing
+    // must not be a write at all.
+    emitRows([{ id: 'seeded-blank-1', key: '', value: '', enabled: true }])
+    emitRows([{ id: 'seeded-blank-2', key: '', value: '', enabled: true }])
+
+    expect(updateFolderCustomValueLists.mock.calls.length).toBe(afterEmptying)
+  })
+
+  it('leaves a blank row alone while other rows have content — the user is mid-edit', () => {
+    renderPanel(makeFolder())
+    emitRows([
+      { id: 'e-red', key: 'Rouge', value: 'FF0000', enabled: true },
+      { id: 'fresh', key: '', value: '', enabled: true }
+    ])
+    expect(persistedEntries().map((e) => e.label)).toEqual(['Rouge', ''])
+  })
+
   it('gives an id to a row the table created without one', () => {
     renderPanel(makeFolder())
     emitRows([

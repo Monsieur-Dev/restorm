@@ -136,12 +136,17 @@ export {
 export {
   keyValueTableRootSelector,
   keyValueTableTableSelector,
+  keyValueTableRowTestId,
   keyValueTableRowSelector,
+  keyValueTableRowKeyCellTestId,
   keyValueTableRowKeyCellSelector,
+  keyValueTableRowValueCellTestId,
   keyValueTableRowValueCellSelector,
+  keyValueTableRowDescriptionCellTestId,
   keyValueTableRowDescriptionCellSelector,
   keyValueTableRowEnabledToggleSelector,
   keyValueTableRowDeleteSelector,
+  keyValueTableRowDragHandleTestId,
   keyValueTableRowDragHandleSelector
 } from './keyValueTableSelectors'
 

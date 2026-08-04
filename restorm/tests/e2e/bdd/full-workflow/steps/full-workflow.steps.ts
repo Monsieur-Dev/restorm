@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd'
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
-import { configureNextConfirmationDialogForE2E, configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E, listViewRowSelectorByTitle } from 'electron-core-ui/testing'
+import { configureNextConfirmationDialogForE2E, configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E, listViewRowSelectorByTitle, inputBoxInputSelector, keyValueTableRowSelector, keyValueTableRowValueCellTestId, keyValueTableRowEnabledToggleSelector, keyValueTableRowDragHandleSelector } from 'electron-core-ui/testing'
 import { test, expect, readSavedMainBounds, currentElectronApp } from '../../fixtures/full-workflow.fixture'
 
 /** Absolute path to the repo's shared e2e sample directory (tests/unit). */
@@ -2914,6 +2914,20 @@ Then(
 // Stable entry ids so the entry-row testids are predictable.
 const CVL_ENTRY_ID: Record<string, string> = { Rouge: 'entry-rouge', Vert: 'entry-vert' }
 
+// The entries of a custom value list are edited in the shared key/value table.
+// Its row test ids are built by the ECUI selector helpers rather than spelled
+// out here: the row and the drag grip carry an extra `-table-` segment that a
+// hand-written string gets wrong silently, leaving a green test that asserts
+// nothing.
+const CVL_TABLE = 'custom-values-entries-table'
+
+/** The id of the row holding the entry with this label. */
+function cvlRowId(label: string): string {
+  const id = CVL_ENTRY_ID[label]
+  if (!id) throw new Error(`unknown custom-list entry: ${label}`)
+  return id
+}
+
 // Single-file collection seeded on disk: one env folder with a custom
 // value list and a request whose query param is bound to that list.
 const CVL_SAMPLE_RESTORM = `collections:
@@ -3026,7 +3040,7 @@ When('I select the {string} custom value list', async ({}, listName: string) => 
 
 When('I set the {string} custom-list entry value to {string}', async ({}, label: string, value: string) => {
   if (!page) throw new Error('app must be launched')
-  const input = page.locator(`[data-testid="custom-values-entries-table-row-${CVL_ENTRY_ID[label]}-value-input"]`)
+  const input = page.locator(inputBoxInputSelector(keyValueTableRowValueCellTestId(CVL_TABLE, cvlRowId(label))))
   await expect(input).toBeVisible({ timeout: 5000 })
   await input.fill(value)
   await page.waitForTimeout(600) // debounced folder write (~350ms) + propagation
@@ -3041,11 +3055,8 @@ When('I set the {string} custom-list entry value to {string}', async ({}, label:
 // on `window` across the boundary.
 When('I drag the {string} custom-list entry above {string}', async ({}, source: string, target: string) => {
   if (!page) throw new Error('app must be launched')
-  const sourceId = CVL_ENTRY_ID[source]
-  const targetId = CVL_ENTRY_ID[target]
-  if (!sourceId || !targetId) throw new Error(`unknown custom-list entry: ${source} / ${target}`)
-  const handle = `[data-testid="custom-values-entries-table-table-drag-${sourceId}"]`
-  const targetRow = `[data-testid="custom-values-entries-table-table-row-${targetId}"]`
+  const handle = keyValueTableRowDragHandleSelector(CVL_TABLE, cvlRowId(source))
+  const targetRow = keyValueTableRowSelector(CVL_TABLE, cvlRowId(target))
   await expect(page.locator(handle)).toBeVisible({ timeout: 5000 })
   await expect(page.locator(targetRow)).toBeVisible({ timeout: 5000 })
 
@@ -3101,7 +3112,7 @@ Then(
 
 When('I uncheck the {string} custom-list entry', async ({}, label: string) => {
   if (!page) throw new Error('app must be launched')
-  const checkbox = page.locator(`[data-testid="custom-values-entries-table-row-${CVL_ENTRY_ID[label]}-enabled"] [role="checkbox"]`)
+  const checkbox = page.locator(`${keyValueTableRowEnabledToggleSelector(CVL_TABLE, cvlRowId(label))} [role="checkbox"]`)
   await expect(checkbox).toBeVisible({ timeout: 5000 })
   await checkbox.uncheck()
   await page.waitForTimeout(300)
@@ -3109,7 +3120,7 @@ When('I uncheck the {string} custom-list entry', async ({}, label: string) => {
 
 When('I check the {string} custom-list entry', async ({}, label: string) => {
   if (!page) throw new Error('app must be launched')
-  const checkbox = page.locator(`[data-testid="custom-values-entries-table-row-${CVL_ENTRY_ID[label]}-enabled"] [role="checkbox"]`)
+  const checkbox = page.locator(`${keyValueTableRowEnabledToggleSelector(CVL_TABLE, cvlRowId(label))} [role="checkbox"]`)
   await expect(checkbox).toBeVisible({ timeout: 5000 })
   await checkbox.check()
   await page.waitForTimeout(300)

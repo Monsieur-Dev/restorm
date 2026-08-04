@@ -368,6 +368,18 @@ const SecretCell: React.FC<SecretCellProps> = ({ secret, onChange, onErrorChange
   )
 }
 
+/**
+ * Whether a custom-value entry can be offered as a choice. Disabled entries are
+ * out by definition; so is an entry with no label, which would render as a
+ * blank, indistinguishable line that selects an empty value. The empty-list
+ * table keeps one blank row as a typing affordance, so a label-less entry is a
+ * shape the editor can legitimately hand us — the menu just has nothing to show
+ * for it.
+ */
+function isPickable(entry: { label: string; enabled?: boolean }): boolean {
+  return entry.enabled !== false && entry.label.trim() !== ''
+}
+
 export interface TypedValueFieldProps {
   /** The current typed value. */
   value: ValueType
@@ -1019,7 +1031,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     // CustomListMultiValue → MultiSelectCombo of the list's labels.
     if (value instanceof CustomListMultiValue) {
       const list = customValueLists.find((l) => l.id === value.listId)
-      const enabled = (list?.entries ?? []).filter((e) => e.enabled !== false)
+      const enabled = (list?.entries ?? []).filter(isPickable)
       const options = enabled.map((e) => ({ value: e.label, label: e.label }))
       const selected = value.labels.filter((l) => options.some((o) => o.value === l))
       return withTypeControl(
@@ -1037,7 +1049,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     // CustomListValue → SelectBox of the list's labels.
     if (value instanceof CustomListValue) {
       const list = customValueLists.find((l) => l.id === value.listId)
-      const options = (list?.entries ?? []).filter((e) => e.enabled !== false).map((e) => ({ text: e.label }))
+      const options = (list?.entries ?? []).filter(isPickable).map((e) => ({ text: e.label }))
       const selectedIndex = options.findIndex((o) => o.text === value.label)
       return withTypeControl(
         <SelectBox
