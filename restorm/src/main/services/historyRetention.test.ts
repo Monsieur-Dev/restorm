@@ -25,6 +25,7 @@ const {
   DEFAULT_HISTORY_MAX_ENTRIES,
   HISTORY_MAX_ENTRIES_KEY,
   activateHistoryRetention,
+  applyHistoryRetentionNow,
   getHistoryLimit,
   normalizeHistoryLimit,
   onHistoryLimitChanged
@@ -174,5 +175,41 @@ describe('onHistoryLimitChanged', () => {
     settingsMock.value = 4
     expect(() => { activateHistoryRetention() }).not.toThrow()
     expect(seen).toEqual([4])
+  })
+
+  // The archive lives next to the OPEN project file, so a prune attempted with
+  // nothing open is a no-op. The cap therefore has to be re-applied whenever a
+  // project becomes the open one, not only once at startup.
+  it('applyHistoryRetentionNow re-fires every subscribed listener with the current cap', () => {
+    settingsMock.initialized = true
+    settingsMock.value = 6
+    const seen: number[] = []
+    onHistoryLimitChanged((limit) => { seen.push(limit) })
+
+    applyHistoryRetentionNow()
+    expect(seen).toEqual([6])
+
+    // A second project opening re-applies whatever the cap is by then.
+    settingsMock.value = 4
+    applyHistoryRetentionNow()
+    expect(seen).toEqual([6, 4])
+  })
+
+  it('applyHistoryRetentionNow is a no-op before the settings service exists', () => {
+    settingsMock.initialized = false
+    const seen: number[] = []
+    onHistoryLimitChanged((limit) => { seen.push(limit) })
+    expect(() => { applyHistoryRetentionNow() }).not.toThrow()
+    expect(seen).toEqual([])
+  })
+
+  it('applyHistoryRetentionNow keeps going when one listener throws', () => {
+    settingsMock.initialized = true
+    settingsMock.value = 8
+    const seen: number[] = []
+    onHistoryLimitChanged(() => { throw new Error('boom') })
+    onHistoryLimitChanged((limit) => { seen.push(limit) })
+    expect(() => { applyHistoryRetentionNow() }).not.toThrow()
+    expect(seen).toEqual([8])
   })
 })

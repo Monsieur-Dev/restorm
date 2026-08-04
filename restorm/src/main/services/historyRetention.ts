@@ -114,17 +114,37 @@ export function onHistoryLimitChanged(listener: HistoryLimitListener): () => voi
 }
 
 /**
- * Promote every parked listener to a real subscription and immediately apply
- * the current cap once.
+ * Fire every subscribed listener with the cap currently in force.
+ *
+ * Call this whenever a project becomes the open one. The cap is not a global
+ * fact: the history archive lives NEXT TO the open project file, so
+ * `getHistoryArchivePath()` returns null while nothing is open and a prune
+ * attempted then is a silent no-op. Applying the cap only at startup would
+ * therefore enforce nothing in the normal case — the app opens with no
+ * project — and an archive that arrives already over the cap (a project
+ * shared by a teammate whose history is deeper than your setting) would stay
+ * over it until the next write for each item.
+ */
+export function applyHistoryRetentionNow(): void {
+  if (!isSettingsServiceInitialized()) return
+  const limit = getHistoryLimit()
+  for (const listener of activeUnsubscribers.keys()) {
+    try {
+      listener(limit)
+    } catch (error) {
+      logger.error('[historyRetention] Retention pass failed', { error: String(error) })
+    }
+  }
+}
+
+/**
+ * Promote every parked listener to a real subscription.
  *
  * Call this from `main/index.ts` right after `initializeApp()`, which is the
- * first point at which `SettingsService` is guaranteed to exist.
- *
- * The initial apply is not redundant. Without it the cap would only ever be
- * enforced on a CHANGE event, so an archive that arrives ALREADY over the cap
- * — a project shared by a teammate whose history is deeper than your setting —
- * would stay over it until the next write for each item. Applying once at
- * startup is what makes the cap hold at rest rather than only on transition.
+ * first point at which `SettingsService` is guaranteed to exist. The stores
+ * register at module scope, long before that, so without this call their
+ * subscriptions would bind nothing — silently, since nothing throws and the
+ * unit suites mock an already-initialized settings service.
  */
 export function activateHistoryRetention(): void {
   if (!isSettingsServiceInitialized()) {
@@ -136,12 +156,7 @@ export function activateHistoryRetention(): void {
   pendingListeners.clear()
   for (const listener of listeners) subscribeNow(listener)
 
-  const limit = getHistoryLimit()
-  for (const listener of activeUnsubscribers.keys()) {
-    try {
-      listener(limit)
-    } catch (error) {
-      logger.error('[historyRetention] Initial retention pass failed', { error: String(error) })
-    }
-  }
+  // Covers the case where a project is somehow already open at activation.
+  // The per-open pass is what carries the normal path.
+  applyHistoryRetentionNow()
 }

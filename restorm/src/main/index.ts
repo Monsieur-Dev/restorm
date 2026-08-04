@@ -88,7 +88,7 @@ import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
-import { activateHistoryRetention } from './services/historyRetention'
+import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
 import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
@@ -627,6 +627,15 @@ logger.info('File Service initialized')
     }
 
     if (!path) return
+
+    // Bring the newly-opened project's history archive within the retention
+    // cap. This is the pass that matters: the archive lives next to the
+    // project file, so there is nothing to prune until one is open — a
+    // startup-only pass would enforce nothing, because the app opens with no
+    // project. Doing it here also covers an archive authored elsewhere (a
+    // teammate's shared project) whose history is deeper than this user's cap.
+    applyHistoryRetentionNow()
+
     // Folder-mode paths point to a directory; file-mode paths end in the
     // `.restorm` extension. Use the extension as the discriminator so we
     // don't have to hit the filesystem on every state change.
