@@ -103,13 +103,19 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
   // force a rebuild on a type change without listing it as a dependency.
   const onRowsChangeRef = useRef(onRowsChange)
   useEffect(() => { onRowsChangeRef.current = onRowsChange }, [onRowsChange])
-  // Mirror the per-API groups into a ref so the (stable) value cell renderer
-  // reads the latest groups without listing them as a dependency — the hook
-  // returns a fresh array on every render, which would otherwise thrash the
-  // renderer identity and remount every cell. This matches the variables /
-  // helpers refs above; the menu is built lazily on open from the current ref.
-  const valueTypeGroupsRef = useRef(valueTypeGroups)
-  useEffect(() => { valueTypeGroupsRef.current = valueTypeGroups }, [valueTypeGroups])
+  // Read the groups DIRECTLY rather than through a ref.
+  //
+  // A ref used to hold them, on the stated grounds that "the hook returns a
+  // fresh array on every render" and listing it would remount every cell.
+  // That is true of `useAllEnvValueTypes`, but NOT of the grouped hook used
+  // here: it memoises on `[collections, version]`, so its identity moves only
+  // when the tree actually mutates or a FOLDER_UPDATED lands — never merely
+  // because this component re-rendered.
+  //
+  // The ref's cost was a real bug: it kept the DATA fresh while nothing asked
+  // the cells to look again, so renaming a custom value list left every open
+  // request's type menu showing the old name until the tab was closed and
+  // reopened. A ref cannot notify.
 
   // Update refs via useEffect to avoid accessing during render
   useEffect(() => {
@@ -338,14 +344,14 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
             }}
             variables={variablesRef.current}
             helpers={helpersRef.current}
-            valueTypeGroups={valueTypeGroupsRef.current}
+            valueTypeGroups={valueTypeGroups}
             {...(id !== undefined && { expressionVariableId: id })}
             {...(dataTestId && { dataTestId })}
           />
         </div>
       )
     },
-    [dataTestId, highlightActive, highlightKeySet]
+    [dataTestId, highlightActive, highlightKeySet, valueTypeGroups]
   )
 
   return (
