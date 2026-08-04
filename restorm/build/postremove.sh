@@ -15,7 +15,7 @@ rm -f /usr/share/metainfo/com.oyo-fr.restorm.metainfo.xml
 
 rm -f /usr/share/mime/packages/restorm.xml
 for SIZE in 16 32 48 64 128 256 512; do
-  rm -f "/usr/share/icons/hicolor/${SIZE}x${SIZE}/mimetypes/application-x-restorm.png"
+  rm -f "/usr/share/icons/hicolor/$SIZE"x"$SIZE/mimetypes/application-x-restorm.png"
 done
 command -v update-mime-database >/dev/null 2>&1 && update-mime-database /usr/share/mime || true
 
