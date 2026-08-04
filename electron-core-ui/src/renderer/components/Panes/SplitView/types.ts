@@ -15,13 +15,16 @@ export interface SplitViewPaneProps {
 	title?: React.ReactNode;
 	/**
 	 * Optional actions area rendered on the right side of the header.
+	 * Rendered at half opacity while the pane is not hovered and at full
+	 * opacity on hover or focus — always present, clickable and in the
+	 * tab order in both states.
 	 */
 	headerActions?: React.ReactNode | SplitViewHeaderActionsRender;
 	/**
-	 * Force the header actions to stay visible instead of the default
-	 * hover-reveal. Useful when the only way to add a row to a pane is
-	 * that "+" button and the user would never hover to discover it.
-	 * Defaults to false.
+	 * Render the header actions at full opacity even when the pane is not
+	 * hovered, instead of the default idle dimming. Useful when the pane's
+	 * action is the sole affordance for a common task and any dimming at
+	 * all costs it discoverability. Defaults to false.
 	 */
 	alwaysShowHeaderActions?: boolean;
 	/**

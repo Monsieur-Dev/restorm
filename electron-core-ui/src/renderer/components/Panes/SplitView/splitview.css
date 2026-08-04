@@ -78,25 +78,35 @@
 	gap: 4px;
 	margin-left: auto;
 	flex: 0 0 auto;
-	opacity: 0;
-	transform: translateY(-2px);
-	pointer-events: none;
-	transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+
+	/* At rest the actions are dimmed, never hidden. A button faded to
+	   zero is not discreet — it is undiscoverable: nothing tells the
+	   user an action lives here, so they never hover to find out, and
+	   hover only reveals what one already thought to hover over. Half
+	   opacity keeps the affordance permanently on screen while the
+	   header stays visually quiet. Dim with `opacity` alone: the
+	   cluster must remain clickable and in the tab order at rest, so
+	   no `pointer-events: none`, no `visibility`/`display` gate. */
+	opacity: 0.5;
+	transition: opacity 0.15s ease-out;
 }
 
-/* Show header actions when hovering the whole pane (header or body) */
+/* Full strength while the pointer is anywhere over the pane (header or body) */
 .split-view2 .split-view-view:hover .split-view-view-header-actions {
 	opacity: 1;
-	transform: translateY(0);
-	pointer-events: auto;
 }
 
-/* Opt-out of the hover-reveal: panes with `alwaysShowHeaderActions`
-   keep their actions visible at rest. */
+/* Keyboard parity with hover: an action that has focus must render at
+   full strength, otherwise a keyboard user drives a half-faded control
+   and reads a half-faded focus ring. */
+.split-view2 .split-view-view-header-actions:focus-within {
+	opacity: 1;
+}
+
+/* Opt-out of the idle dimming: panes with `alwaysShowHeaderActions`
+   render their actions at full strength even at rest. */
 .split-view2 .split-view-view-header-actions[data-always-visible='true'] {
 	opacity: 1;
-	transform: translateY(0);
-	pointer-events: auto;
 }
 
 .split-view2 .split-view-view-header-title {

@@ -489,10 +489,7 @@ When('I add a new environment in the env folder', async () => {
     .locator('[data-testid="environment-folder-add-environment-button"]:visible')
     .first()
   await expect(addBtn).toBeVisible({ timeout: 5000 })
-  // SplitView hides pane header actions (`opacity: 0; pointer-events:
-  // none`) until the pane is hovered — force past the CSS gate so
-  // the click doesn't time-out in a retry loop.
-  await addBtn.click({ force: true })
+  await addBtn.click()
   // handleAddEnvironment selects the new env synchronously, then the
   // reactive proxy's 50 ms debounce fires FOLDER_UPDATED, which the
   // dirty tracker turns into a title update over two IPC hops.
@@ -506,9 +503,7 @@ When('I add a variable to the current environment', async () => {
     .locator('[data-testid="environment-folder-add-variable-button"]:visible')
     .first()
   await expect(addBtn).toBeVisible({ timeout: 5000 })
-  // Same hover-gated SplitView header actions as the env add button —
-  // force the click past the opacity-0 / pointer-events: none state.
-  await addBtn.click({ force: true })
+  await addBtn.click()
   // RestormKeyValueTable.addRow → onRowsChange →
   // handleEnvironmentVariablesChange → reactive env proxy set →
   // ENVIRONMENT_UPDATED (debounced). Give it a beat to propagate.

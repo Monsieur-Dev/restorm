@@ -37,8 +37,8 @@ export interface StaticPaneProps {
   /** Uppercase section header label. */
   title?: React.ReactNode
   /**
-   * Actions area rendered on the right side of the header — always
-   * visible (no hover-reveal). Use for an "Add row" `+`, an inline
+   * Actions area rendered on the right side of the header — always at
+   * full opacity (no idle dimming). Use for an "Add row" `+`, an inline
    * toggle, etc.
    */
   headerActions?: React.ReactNode
@@ -53,5 +53,5 @@ export interface StaticPaneProps {
 
 - The pane root is `display: flex; flex-direction: column` — children of `children` flow vertically with an 8px gap.
 - The header uses the same theme tokens (`--sideBarSectionHeader-background`, `--foreground`) as `SplitView`'s pane header, so a `StaticPane` stack blends seamlessly with a neighbouring `SplitView`.
-- Unlike `SplitView`'s pane, `headerActions` stay visible at all times — static panes are typically used where the action is the primary affordance.
+- Unlike `SplitView`'s pane, which dims its `headerActions` to 50% opacity until the pane is hovered, a static pane keeps them at full opacity at all times — static panes are typically used where the action is the primary affordance.
 - The pane body has `padding: 8px` and `gap: 8px`. Override with a custom `className` or inline wrappers if you need a different rhythm.
