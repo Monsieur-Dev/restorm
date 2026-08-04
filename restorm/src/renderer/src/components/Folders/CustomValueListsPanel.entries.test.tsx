@@ -17,6 +17,9 @@ const emitted: { event: string; payload: unknown }[] = []
 /** The props of the last rendered entries table, so a test can drive it. */
 let tableProps: { initialRows?: RowLike[]; onRowsChange?: (rows: RowLike[]) => void } | null = null
 
+/** The props of the lists tree, so a test can read what the panel declared. */
+let listViewProps: { disableDrag?: boolean } | null = null
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, fallback?: string) => fallback ?? key })
 }))
@@ -32,7 +35,10 @@ vi.mock('electron-core-ui/renderer', () => {
   }
   return {
     __esModule: true,
-    ListView: () => null,
+    ListView: (props: { disableDrag?: boolean }): ReactNode => {
+      listViewProps = props
+      return null
+    },
     VerticalSashContainer: (props: { Left?: ReactNode; Right?: ReactNode }): ReactNode =>
       createElement('div', {}, props.Left, props.Right),
     SplitView: passthrough,
@@ -78,6 +84,7 @@ function makeFolder(): EnvironmentFolder {
 beforeEach(() => {
   emitted.length = 0
   tableProps = null
+  listViewProps = null
   updateFolderCustomValueLists.mockReset()
   updateFolderCustomValueLists.mockResolvedValue(undefined)
   ;(window as unknown as { restorm: unknown }).restorm = {
@@ -117,6 +124,22 @@ function renderPanel(folder: EnvironmentFolder, onFolderChange?: (f: Environment
     ...(onFolderChange ? { onFolderChange } : {})
   }))
 }
+
+describe('CustomValueListsPanel — the lists tree refuses drags', () => {
+  // Scope on purpose: this pins the DECLARATION, which is what can regress in
+  // this file. What `disableDrag` then does — rows not draggable, and a
+  // `dragstart` stamping nothing, so no surrounding drop target can claim the
+  // gesture — is pinned one layer down against the real component, in
+  // `electron-core-ui/src/renderer/components/ListView/ListView.test.tsx`.
+  // Asserting it here would mean asserting against this file's own ListView
+  // stub, which cannot fail for the reason it claims to guard. Don't "improve"
+  // it into that.
+  it('declares the lists tree with drags disabled', () => {
+    renderPanel(makeFolder())
+    if (!listViewProps) throw new Error('expected the lists tree to be rendered')
+    expect(listViewProps.disableDrag).toBe(true)
+  })
+})
 
 describe('CustomValueListsPanel — the entries table owns the order', () => {
   it('exposes the stored entries to the table in their stored order', () => {

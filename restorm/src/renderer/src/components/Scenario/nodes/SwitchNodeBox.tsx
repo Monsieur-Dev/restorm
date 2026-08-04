@@ -8,6 +8,7 @@ import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups, type EnvValueTypeGroup } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
+import { isPickableEntry } from '../../../utils/customValueEntries'
 import { serializeValueForPersistence, type PersistedValue } from '../../../../../shared/utils/valuePersistence'
 
 interface SwitchCase {
@@ -43,9 +44,11 @@ function nextOfSameType(prev: PersistedValue, groups: EnvValueTypeGroup[]): Pers
     for (const g of groups) {
       const list = g.customValueLists.find((l) => l.id === prev.listId)
       if (!list) continue
-      const enabled = list.entries.filter((e) => e.enabled !== false)
-      const i = enabled.findIndex((e) => e.label === prev.label)
-      const next = i >= 0 && i < enabled.length - 1 ? enabled[i + 1] : enabled[0]
+      // Cycling steps through the choices a user could pick; an unnamed entry
+      // would be a stop showing nothing on the branch.
+      const pickable = list.entries.filter(isPickableEntry)
+      const i = pickable.findIndex((e) => e.label === prev.label)
+      const next = i >= 0 && i < pickable.length - 1 ? pickable[i + 1] : pickable[0]
       return { type: 'customList', listId: prev.listId, label: next?.label ?? '' }
     }
     return blankOfSameType(prev)

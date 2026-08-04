@@ -233,6 +233,14 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
                 onEditingStart={(id) => { setEditingId(id) }}
                 onEditingEnd={() => { setEditingId(null) }}
                 isRenameable
+                // A closed door, not a deferred feature: the lists are picked,
+                // not arranged, and there is no order here worth dragging. Not
+                // wiring `onItemDrop` would NOT have been enough — a draggable
+                // row starts a real HTML5 drag stamped with the ListView marker
+                // MIME, and the workbench's drop zone claims any gesture
+                // carrying it, darkening the whole editor and swallowing the
+                // release. The drag has to be refused at its source.
+                disableDrag
                 data-testid="custom-values-list"
                 onItemClick={(payload) => { if (payload.item.id) setSelectedId(payload.item.id) }}
                 onItemRename={(payload: ListViewItemEventPayload, newValue: string) => { handleRename(payload.item.id, newValue) }}
