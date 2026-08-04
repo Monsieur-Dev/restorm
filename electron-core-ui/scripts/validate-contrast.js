@@ -56,6 +56,19 @@ const CONTRAST_PAIRS = [
   
   // Side bar
   { fg: 'sideBarTitle.foreground', bg: 'sideBar.background', minRatio: 4.5, name: 'Side bar title' },
+
+  // Dock panel — its surface is a fixed per-family colour, so the text on it
+  // must come from the paired dock.* foregrounds. Content that borrows a
+  // foreground from another family (editor, button, …) is only readable by
+  // coincidence, and button.foreground DOES collide with the light surface.
+  { fg: 'dock.foreground', bg: 'dock.background', minRatio: 4.5, name: 'Dock panel text' },
+  { fg: 'dock.descriptionForeground', bg: 'dock.background', minRatio: 3.0, name: 'Dock panel secondary text' },
+
+  // Hyperlink text. An unstyled anchor falls to the user agent's #0000EE,
+  // which follows no theme and is unreadable on a dark editor background,
+  // so any surface rendering links must take this token — and the token
+  // has to stay legible on the surface it is read on.
+  { fg: 'textLink.foreground', bg: 'editor.background', minRatio: 4.5, name: 'Link text' },
   
   // Panel
   { fg: 'panelTitle.activeForeground', bg: 'panel.background', minRatio: 4.5, name: 'Panel title' },

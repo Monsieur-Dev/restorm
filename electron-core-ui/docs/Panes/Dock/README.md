@@ -167,9 +167,21 @@ The fold-back phase keeps `.dock--preview` on the dock root for the full `560 ms
 </Dock>
 ```
 
-## Theme variable
+## Theme variables
 
-`Dock` paints the panel surface from the CSS variable `--dock-background`, defined in the base light + dark theme YAMLs (`resources/themes/{light,dark}/_base.yaml`). The default mirrors `editor.background` so the dock blends into the workbench out-of-the-box, and any individual theme can override `dock.background` to diverge. Consumers should NOT set their own background on the panel root — the primitive owns the fill so the floating hover-preview reads cleanly over the main column without per-call-site opt-in.
+`Dock` paints the panel surface from the CSS variable `--dock-background`, defined in the base theme YAMLs (`resources/themes/{light,dark,hc_light,hc_dark}/_base.yaml`). The default mirrors `editor.background` so the dock blends into the workbench out-of-the-box, and any individual theme can override `dock.background` to diverge. Consumers should NOT set their own background on the panel root — the primitive owns the fill so the floating hover-preview reads cleanly over the main column without per-call-site opt-in.
+
+Two foreground variables are defined alongside it and **paired with it**:
+
+| Variable | Role |
+|---|---|
+| `--dock-background` | Panel surface |
+| `--dock-foreground` | Text painted on that surface |
+| `--dock-descriptionForeground` | Secondary / muted text on that surface |
+
+Panel content should take its colour from `--dock-foreground` / `--dock-descriptionForeground` rather than from another token family (`--editor-foreground`, `--button-foreground`, …). Because `dock.background` is a fixed per-family value and those other tokens vary per theme, an unpaired foreground is only readable by coincidence — and it does collide: any theme whose `button.foreground` equals the dock surface renders content invisible. Set all three together when a theme overrides one of them.
+
+Note that ECUI `Button`s rendered inside a panel carry `--button-foreground` from `.text-button`, which a single-class consumer rule does not out-specify. A panel that strips the button fill must restate the colour at a specificity that wins (e.g. scoping the rule under the panel root class).
 
 ## Layout invariants
 

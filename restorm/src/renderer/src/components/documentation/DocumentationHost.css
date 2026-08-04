@@ -1089,6 +1089,44 @@
   color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
 
+/* Bare anchors in the two metadata lists — the API info block (spec
+ * URL, contact, licence, terms of service, external + tag docs) and the
+ * route header's meta grid (per-operation external docs). Nothing else
+ * styles them, so without this they fall through to the user agent's
+ * `#0000EE`: a fixed dark blue that never follows the theme and sits
+ * almost unreadable on every dark editor background. `textLink.foreground`
+ * is defined for every shipped theme, so it is the colour to take.
+ *
+ * Scoped to these two containers on purpose. A blanket
+ * `.documentation-host a` would also hit the ECUI Buttons, which render
+ * as anchors (the outline entries, the model cross-references), and the
+ * MarkdownViewer's links, which already carry their own colour — that
+ * mismatch is exactly why this went unnoticed: the prose links right
+ * above these ones look perfectly healthy. */
+.documentation-host-api-info a[href],
+.documentation-host-route-header__meta a[href] {
+  color: var(--textLink-foreground, #4d9bf6);
+  text-decoration: none;
+}
+
+/* Hover keeps the base link colour and adds the underline as the
+ * affordance. It deliberately does NOT switch to
+ * `textLink.activeForeground`: that token is `#0078D4` on the light
+ * family, which lands at 4.15-4.29 against the lighter editor
+ * backgrounds — under the 4.5 WCAG asks of body text. Hovering is not a
+ * licence to drop below the threshold the resting state meets. */
+.documentation-host-api-info a[href]:hover,
+.documentation-host-route-header__meta a[href]:hover {
+  text-decoration: underline;
+}
+
+.documentation-host-api-info a[href]:focus-visible,
+.documentation-host-route-header__meta a[href]:focus-visible {
+  outline: 1px solid var(--focusBorder, #4d9bf6);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
 /* ──────────────────────────────────────────────────────────────────
  * Tag chip + non-HTTP discriminators on route header
  * ────────────────────────────────────────────────────────────────── */
@@ -1422,6 +1460,12 @@
   font-size: 12px;
   display: flex;
   flex-direction: column;
+  /* The outline is painted on the Dock's own surface
+   * (`--dock-background` on `.dock__panel-content`), so its base text
+   * colour is the foreground paired with that surface — NOT the
+   * host root's `--editor-foreground`, which belongs to a different
+   * surface and is under no obligation to contrast with this one. */
+  color: var(--dock-foreground, var(--editor-foreground));
   /* Override the host root's `user-select: text` — the sommaire
    * is a navigation surface, not a reading surface, and the
    * "select all" gesture should only sweep the body content. */
@@ -1472,7 +1516,6 @@
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: var(--editor-foreground);
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -1495,7 +1538,7 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  color: var(--dock-descriptionForeground, var(--dock-foreground, var(--editor-foreground)));
 }
 
 .documentation-host-sidebar__section {
@@ -1509,7 +1552,6 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
   padding: 4px 6px 2px;
 }
 
@@ -1526,8 +1568,11 @@
   font-family: inherit;
 }
 
-.documentation-host-sidebar__section-title--button:hover {
-  color: var(--editor-foreground);
+/* Hover lifts the muted section label to the full-strength foreground —
+ * same two-class scope as the base colour rule so it out-specifies the
+ * ECUI button rule. */
+.documentation-host-sidebar .documentation-host-sidebar__section-title--button:hover {
+  color: var(--dock-foreground, var(--editor-foreground));
 }
 
 .documentation-host-sidebar__section-title--button:focus-visible {
@@ -1551,6 +1596,34 @@
 .documentation-host-sidebar .documentation-host-sidebar__enum-model,
 .documentation-host-sidebar .documentation-host-sidebar__enum-prop-link {
   background: transparent;
+}
+
+/* Foreground pairing — the counterpart of the fill strip above, and it has
+ * to be stated at the SAME two-class specificity for the same reason: the
+ * entries are ECUI Buttons, so `.text-button { color: var(--button-foreground) }`
+ * beats any single-class rule here. Dropping the button's fill while keeping
+ * the button's foreground is what makes the outline unreadable — the text then
+ * carries the colour meant for the accent-filled button surface, painted on
+ * whatever the panel is actually made of.
+ *
+ * The panel is the Dock's own surface (`--dock-background` on
+ * `.dock__panel-content`), not the editor, so the outline takes the
+ * foreground paired with THAT surface: `--dock-foreground` for entries,
+ * `--dock-descriptionForeground` for the secondary labels. Both are fixed
+ * per theme family alongside the background they pair with, which is what
+ * guarantees the contrast holds on every theme instead of depending on two
+ * unrelated token families happening not to collide. */
+.documentation-host-sidebar .documentation-host-sidebar__overview-link,
+.documentation-host-sidebar .documentation-host-sidebar__group-header,
+.documentation-host-sidebar .documentation-host-sidebar__op-link,
+.documentation-host-sidebar .documentation-host-sidebar__model-link,
+.documentation-host-sidebar .documentation-host-sidebar__enum-model {
+  color: var(--dock-foreground, var(--editor-foreground));
+}
+
+.documentation-host-sidebar .documentation-host-sidebar__section-title--button,
+.documentation-host-sidebar .documentation-host-sidebar__enum-prop-link {
+  color: var(--dock-descriptionForeground, var(--dock-foreground, var(--editor-foreground)));
 }
 
 .documentation-host-sidebar .documentation-host-sidebar__overview-link:hover,
@@ -1584,7 +1657,6 @@
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: var(--editor-foreground);
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -1605,7 +1677,10 @@
   justify-content: center;
   font-size: 14px;
   line-height: 1;
-  color: var(--description-foreground, rgba(127, 127, 127, 0.85));
+  /* No `color` here on purpose: the caret is a codicon inside an ECUI
+   * Button, and `.text-button .codicon` forces `color: inherit !important`.
+   * Any colour stated here is dead — the glyph always takes the group
+   * header's own colour, which the sidebar rules pair with the panel. */
 }
 
 .documentation-host-sidebar__group-name {
@@ -1629,7 +1704,6 @@
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: var(--editor-foreground);
   font-family: inherit;
   font-size: 12px;
   text-align: left;
@@ -1659,7 +1733,6 @@
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: var(--editor-foreground);
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -1678,7 +1751,6 @@
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: var(--description-foreground, var(--editor-foreground));
   font-family: var(--monaco-monospace-font, monospace);
   font-size: 11px;
   text-align: left;
@@ -1718,7 +1790,7 @@
 .documentation-host-sidebar__method--patch { background: var(--badge-patch-background); color: var(--badge-on-accent, #fff); }
 .documentation-host-sidebar__method--delete { background: var(--badge-delete-background); color: var(--badge-on-accent, #fff); }
 .documentation-host-sidebar__method--head,
-.documentation-host-sidebar__method--options { background: rgba(127, 127, 127, 0.4); color: var(--editor-foreground); }
+.documentation-host-sidebar__method--options { background: rgba(127, 127, 127, 0.4); color: var(--dock-foreground, var(--editor-foreground)); }
 
 .documentation-host-sidebar__op-summary {
   flex: 1 1 auto;

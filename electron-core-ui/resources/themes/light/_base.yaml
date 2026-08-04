@@ -456,6 +456,21 @@ colors:
     value: "#ffffff"
     description: Dock panel background
 
+  # Foreground pair for `dock.background`. The surface above is a fixed
+  # per-family colour, so the text painted on it must be fixed the same
+  # way: a foreground inherited from another token family (editor, button,
+  # …) can coincide with the dock surface and render the panel content
+  # invisible. Mirrors `editor.foreground` / `descriptionForeground` the
+  # way `dock.background` mirrors `editor.background`; a theme that
+  # overrides one of the three should override all three together.
+  - id: dock.foreground
+    value: "#000000"
+    description: Dock panel foreground (paired with dock.background)
+
+  - id: dock.descriptionForeground
+    value: "#3B3B3B"
+    description: Dock panel secondary foreground (paired with dock.background)
+
   # Status bar
   - id: statusBarItem.remoteForeground
     value: "#FFF"

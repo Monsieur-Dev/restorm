@@ -283,6 +283,26 @@ colors:
     value: "#000000"
     description: Border color used when dragging tabs
 
+  # Dock primitive — panel surface (the dockable side that fades on
+  # collapse + floats over the main column during hover-preview) and
+  # the foreground pair painted on it. The surface is a fixed
+  # per-family colour, so the text on it must be fixed the same way:
+  # a foreground inherited from another token family (editor, button,
+  # …) can coincide with the dock surface and render the panel content
+  # invisible. All three mirror their `editor.*` / `descriptionForeground`
+  # counterparts; a theme that overrides one should override all three.
+  - id: dock.background
+    value: "#ffffff"
+    description: Dock panel background
+
+  - id: dock.foreground
+    value: "#000000"
+    description: Dock panel foreground (paired with dock.background)
+
+  - id: dock.descriptionForeground
+    value: "#3B3B3B"
+    description: Dock panel secondary foreground (paired with dock.background)
+
   # Status bar
   - id: statusBarItem.remoteBackground
     value: "#FFFFFF"

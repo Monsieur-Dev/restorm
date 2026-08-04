@@ -24,3 +24,6 @@ Feature: Documentation viewer interactions
   Scenario: Add a request button creates a new request inside the matching tag-folder
     When I click the "Add a request" button next to operation "deletePet"
     Then a request named "Deletes a pet" should appear inside the tag-folder "pet"
+
+  Scenario: The sidebar outline stays legible on every shipped theme
+    Then every sidebar outline entry should contrast with the panel behind it, on every shipped theme
