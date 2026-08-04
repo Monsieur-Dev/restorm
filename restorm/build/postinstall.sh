@@ -57,8 +57,8 @@ MIME_EOF
 # visual is a design task of its own, and shipping the app mark is better than
 # shipping the generic "unknown file" square.
 for SIZE in 16 32 48 64 128 256 512; do
-  APP_ICON="/usr/share/icons/hicolor/${SIZE}x${SIZE}/apps/restorm-bin.png"
-  MIME_ICON_DIR="/usr/share/icons/hicolor/${SIZE}x${SIZE}/mimetypes"
+  APP_ICON="/usr/share/icons/hicolor/$SIZE"x"$SIZE/apps/restorm-bin.png"
+  MIME_ICON_DIR="/usr/share/icons/hicolor/$SIZE"x"$SIZE/mimetypes"
   if [ -f "$APP_ICON" ]; then
     mkdir -p "$MIME_ICON_DIR"
     cp -f "$APP_ICON" "$MIME_ICON_DIR/application-x-restorm.png"
