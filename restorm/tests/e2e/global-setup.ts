@@ -3,6 +3,7 @@ import { rmSync } from 'fs'
 import { resolve } from 'path'
 import { isDockerAvailable, areContainersRunning, startDocker } from '../integration/docker-setup'
 import { seedGitServer } from '../integration/gitServerSeed'
+import { FIREWALL_E2E_BYPASS_ENV } from '../../src/main/config/firewallE2EBypass'
 
 /**
  * Per-test workspace dir wiped at the start of every run so a previous
@@ -49,6 +50,17 @@ function tryStartDockerDaemon(): void {
 
 export default async function globalSetup(): Promise<void> {
   wipeTmpDir()
+
+  // Arm the firewall's blanket bypass for the whole run. Every fixture
+  // spreads `process.env` into its `electron.launch` env, so setting it
+  // once here reaches all of them — and a fixture that wants the firewall
+  // genuinely armed can override this single key in its own env block
+  // (spread later, so it wins) without touching any other launch.
+  //
+  // Set here rather than inferred from the userData redirect: neutralising
+  // a security control should be something a reader can see named, and
+  // something one launch can decline without giving up its isolated profile.
+  process.env[FIREWALL_E2E_BYPASS_ENV] = '1'
 
   if (!isDockerAvailable()) {
     throw new Error([

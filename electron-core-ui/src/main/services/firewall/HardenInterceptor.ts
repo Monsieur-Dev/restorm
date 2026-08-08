@@ -271,24 +271,29 @@ function patchDnsResolve(): void {
 }
 
 /**
- * Hostname-only check — DNS doesn't carry a port. We probe the
- * permission service against `port: 0` which exercises the
- * blacklist + project-origins gates (any blacklisted hostname
- * matches regardless of port; project origins are matched by
- * full triple but the host alone is enough to block a clearly
- * denied DNS query). Whitelist matches require the full triple,
- * so a hostname-only check NEVER allows past a prompt — it just
- * decides "deny outright OR keep going with the connect".
+ * Hostname-only check — a DNS query carries a name and nothing else:
+ * no scheme, no port. So this can only act on a blacklist entry that
+ * holds for EVERY scheme and port of that host, i.e. one using the
+ * wildcard port. A per-origin ban (`https://host:443`) is enforced at
+ * connect time, where the full triple is known.
+ *
+ * Matching the host alone here would over-ban: denying
+ * `http://localhost:5111` once would kill every lookup of `localhost`,
+ * including ports the user never denied, and silently — a blacklist hit
+ * is a flat refusal, not a prompt, so nothing surfaces to undo it.
+ *
+ * Whitelist matches require the full triple, so this NEVER allows past a
+ * prompt: it decides "deny outright OR keep going with the connect".
  */
 export function checkHostnameOnly(hostname: string, source: string): 'allow' | 'deny' {
 	if (typeof hostname !== 'string' || hostname.length === 0) return 'allow'
+	// An explicitly bypassed call (a URL the user typed) is exempt here too —
+	// otherwise it dies at DNS before any bypass upstream can be consulted.
+	if (isFirewallBypassed()) return 'allow'
 	const lower = hostname.toLowerCase()
-	const blacklist = permissionService.listBlacklist()
-	for (const entry of blacklist) {
-		if (entry.host === lower) {
-			logger.warn('Firewall: blocked DNS query for blacklisted host', { hostname: lower, source })
-			return 'deny'
-		}
+	if (permissionService.isHostBannedOnEveryPort(lower)) {
+		logger.warn('Firewall: blocked DNS query for host banned on every port', { hostname: lower, source })
+		return 'deny'
 	}
 	return 'allow'
 }

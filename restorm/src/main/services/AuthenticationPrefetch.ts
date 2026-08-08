@@ -13,7 +13,8 @@ import http from 'http'
 import https from 'https'
 import { URL } from 'url'
 import Handlebars from 'handlebars'
-import { logger } from 'electron-core-ui/main'
+import { logger, withFirewallBypass } from 'electron-core-ui/main'
+import { assertSafeFetchUrl } from '../utils/urlSecurity'
 import { MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 
 export interface AuthPrefetchInput {
@@ -37,6 +38,17 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
   } catch {
     return { success: false, error: `Invalid URL: ${input.url}` }
   }
+  // The firewall used to be the de-facto gate on this path; the bypass below
+  // removes it, so the SSRF guard has to take its place. `allowPrivateHosts`
+  // matches the equally-explicit user-typed URL next door in the import
+  // source reader: loopback and RFC1918 are legitimate targets for a local
+  // auth server, while link-local / cloud-metadata stays blocked. Checked
+  // before the request is logged so a rejected target is never echoed out.
+  try {
+    assertSafeFetchUrl(input.url, { allowPrivateHosts: true })
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
   const client = parsed.protocol === 'https:' ? https : http
   const headers: Record<string, string> = {}
   for (const h of input.headers) {
@@ -58,7 +70,20 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
     bodyLength: input.body?.length ?? 0
   })
 
-  return new Promise((resolve) => {
+  // The user configured this authentication route and asked for it to run —
+  // it is as explicit as clicking Send on a request tab, and the firewall
+  // exists to gate traffic the user did NOT ask for. Without the bypass the
+  // raw `http`/`https` call below lands on the main-process interceptor and
+  // prompts (or, with no window able to answer, auto-denies), which blocks
+  // the import of any API whose document sits behind a login.
+  //
+  // Scoped to THIS call rather than held open across the import, and it does
+  // not leak: `client.request` is invoked synchronously inside the executor,
+  // so it runs within the AsyncLocalStorage scope, and that scope unwinds
+  // once this promise settles. The import's own document fetch opens and
+  // closes its own bypass the same way — `readImportSource` is awaited before
+  // `importFromContent`, so nothing downstream inherits it.
+  return withFirewallBypass(() => new Promise<AuthPrefetchResult>((resolve) => {
     const req = client.request(
       {
         method: input.method,
@@ -96,7 +121,7 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
     })
     if (input.body) req.write(input.body)
     req.end()
-  })
+  }))
 }
 
 export function resolveProducedHeaders(

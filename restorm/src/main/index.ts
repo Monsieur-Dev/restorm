@@ -27,8 +27,9 @@ import './cli/earlyQuiet'
 // the generic engine BEFORE the interceptor arms: the internal-bridge
 // endpoint to skip from the audit feed (the in-process GraphQL
 // bridge), the worker-bootstrap temp-file prefix, the e2e bypass
-// (set by the Playwright fixture via `RESTORM_USER_DATA_OVERRIDE` so
-// tests against ephemeral mock servers don't deadlock on a toast), and
+// (armed only by its own dedicated env var — see
+// `config/firewallE2EBypass.ts` for why it is not inferred from the
+// userData redirect), and
 // the internal-request predicate that exempts cross-instance MCP-bridge
 // traffic (a `tools/call` forwarded to a peer MCP-enabled instance over
 // loopback, tagged with `MCP_FORWARDED_HEADER`) — never user-facing
@@ -37,13 +38,11 @@ import './cli/earlyQuiet'
 import { app as firewallApp } from 'electron'
 import { installMainProcessInterceptor, installHardenInterceptor, configureFirewall, MCP_FORWARDED_HEADER } from 'electron-core-ui'
 import { graphQLService as firewallGraphQLService } from 'electron-core-ui/main'
+import { isFirewallE2EBypassArmed } from './config/firewallE2EBypass'
 configureFirewall({
   internalEndpointProvider: () => firewallGraphQLService.getEndpoint(),
   workerBootstrapPrefix: 'restorm-firewall-bootstrap',
-  e2eBypass: ((): boolean => {
-    const v = process.env['RESTORM_USER_DATA_OVERRIDE']
-    return typeof v === 'string' && v.length > 0
-  })(),
+  e2eBypass: isFirewallE2EBypassArmed(),
   // Dev-only: run the harden lockdown's interceptor-first ordering
   // assertion (logs a warning if a slot it's about to freeze is no longer
   // the firewall's own wrapper). Off in packaged builds.
@@ -810,9 +809,11 @@ const suppressWindow = cliArgs.cliRun?.headless === true
 // app's FIRST BrowserWindow (`electronApp.firstWindow()`); since the splash is
 // created before the main window, it would otherwise become that first window
 // and every test would drive the frameless logo splash instead of the app.
-// `RESTORM_USER_DATA_OVERRIDE` is the harness's per-launch signal (set by the
-// e2e launch helper, same gate the firewall's E2E bypass reads) — never set in
-// real launches, so the splash stays intact for users.
+// `RESTORM_USER_DATA_OVERRIDE` is the harness's per-launch signal (set by every
+// e2e launch) — never set in real launches, so the splash stays intact for
+// users. It means "this is an automated launch with an isolated profile" and
+// nothing more: the firewall's bypass is armed by its own variable, so a test
+// can keep this isolation while leaving the firewall genuinely armed.
 const isE2E = typeof process.env['RESTORM_USER_DATA_OVERRIDE'] === 'string' && process.env['RESTORM_USER_DATA_OVERRIDE'].length > 0
 const suppressSplash = suppressWindow || isE2E
 // restorm's splash content: the static logo. The window + mechanics
