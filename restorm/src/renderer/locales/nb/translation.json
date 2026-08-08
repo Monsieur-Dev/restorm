@@ -2632,6 +2632,10 @@
       "title": "Prosjekt opprettet med en nyere versjon",
       "message": "Denne filen ble opprettet med en nyere versjon av Restorm enn den du kjører. Oppdater Restorm for å åpne den.",
       "versions": "Filformat {{found}}; denne versjonen støtter opp til {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Dette er ikke en Restorm-fil",
+      "message": "Denne filen oppgir ikke noe Restorm-filformat. Den er ikke skrevet av Restorm, eller den er redigert for hånd, og kan derfor ikke åpnes."
     }
   }
 }

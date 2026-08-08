@@ -28,6 +28,16 @@ const { Given, When, Then } = createBdd(test)
 let electronApp: ElectronApplication | null = null
 let page: Page | null = null
 let copiedYaml = ''
+/** Full log text copied out of the root-placed scenario's run. */
+let rootRunLog = ''
+/**
+ * Renderer-side failures seen since the root scenario was created. The
+ * missing-scenario failure arrives as an uncaught rejection from the
+ * `scenario:engine:start` IPC call, so it never reaches a DOM assertion —
+ * without capturing it, a broken run would leave every selector-based
+ * expectation green.
+ */
+let rootRunFailures: string[] = []
 
 function requirePage(): Page {
   if (!page) throw new Error('app must be launched before driving UI steps')
@@ -98,6 +108,80 @@ When('I run the {string} scenario and copy all its logs', async ({}, scenarioNam
     expect(text, `run not complete (missing end "${endMarker}")`).toContain(endMarker)
   }).toPass({ timeout: 30000 })
   copiedYaml = normalizeRunLogYaml(text)
+})
+
+When('I create a scenario named {string} at the root of the sidebar', async ({}, name: string) => {
+  const p = requirePage()
+  rootRunFailures = []
+  p.on('pageerror', (err) => rootRunFailures.push(err.message))
+  p.on('console', (msg) => { if (msg.type() === 'error') rootRunFailures.push(msg.text()) })
+
+  // Collapse the tree so there is empty area below it — the root context menu
+  // only opens when the pointer is NOT over a row.
+  await p.locator('[data-testid="sidebar-collapse-all-button"]').click()
+  const area = p.locator('[data-testid="sidebar-empty-area"]')
+  const box = await area.boundingBox()
+  if (!box) throw new Error('sidebar empty area is not laid out')
+  await area.click({
+    button: 'right',
+    position: { x: Math.round(box.width / 2), y: Math.round(box.height - 40) }
+  })
+
+  // "Ajouter" → "Scénario". The submenu entries are keyed by parent id and the
+  // root uses the empty-string sentinel, hence the trailing dash.
+  await p.locator('#add-root-child').hover()
+  const scenarioEntry = p.locator('#add-scenario-')
+  await expect(scenarioEntry).toBeVisible({ timeout: 10000 })
+  await scenarioEntry.click()
+
+  // The new row mounts in inline-rename mode.
+  const nameInput = p.locator('[data-testid="sidebar-listview"] .list-view-row.is-selected input')
+  await expect(nameInput).toBeVisible({ timeout: 10000 })
+  await nameInput.fill(name)
+  await nameInput.press('Enter')
+
+  // Depth 0 is the load-bearing assertion: it proves the scenario is a SIBLING
+  // of the collection rather than a child of it. Without it this step would
+  // pass on a scenario created anywhere, and the whole point would be lost.
+  const row = sidebarRowByName(p, name)
+  await expect(row).toBeVisible({ timeout: 10000 })
+  expect(await row.getAttribute('data-depth'), 'the new scenario must sit at the ROOT').toBe('0')
+})
+
+When('I run the root scenario {string} from its editor', async ({}, name: string) => {
+  const p = requirePage()
+  // Creating the item opens it in a workbench tab; click the row so we are
+  // certainly driving THAT scenario's editor.
+  await sidebarRowByName(p, name).click()
+  await expect(p.locator('[data-testid="scenario-inspector-toolbar"]')).toBeVisible({ timeout: 15000 })
+  await p.locator('[data-testid="scenario-inspector-run"]').click()
+
+  // "Show all logs" first: a scenario with no user-facing `log` action emits
+  // only engine/run entries, and the copy button stays DISABLED until those are
+  // in the filter — so toggling is what makes the run readable at all.
+  const allToggle = p.locator('[data-testid="scenario-inspector-logs-all-action"]')
+  if ((await allToggle.getAttribute('aria-checked')) !== 'true') await allToggle.click()
+
+  const startMarker = `▶ ${name}`
+  const endMarker = `■ ${name}`
+  await expect(async () => {
+    await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
+    if (!electronApp) throw new Error('app not launched')
+    rootRunLog = await electronApp.evaluate(({ clipboard }) => clipboard.readText())
+    expect(rootRunLog, `clipboard missing start "${startMarker}"`).toContain(startMarker)
+    expect(rootRunLog, `run not complete (missing end "${endMarker}")`).toContain(endMarker)
+  }).toPass({ timeout: 30000 })
+})
+
+Then('the root scenario {string} ran without a missing-scenario error', async ({}, name: string) => {
+  // The engine resolved the scenario and ran it to completion: these markers
+  // are emitted by the run itself, so they cannot appear if `loadScenario`
+  // threw. This is what makes the step prove a LAUNCH, not just a click.
+  expect(rootRunLog, 'root scenario produced no run log').toContain(`▶ ${name}`)
+  expect(rootRunLog, 'root scenario never completed').toContain(`■ ${name}`)
+  // …and the failure this guards against never surfaced.
+  const missing = rootRunFailures.filter((m) => /no scenario with id/i.test(m))
+  expect(missing, `renderer reported a missing scenario: ${missing.join(' | ')}`).toEqual([])
 })
 
 Then('the setVariable run-log matches the snapshot', async () => {

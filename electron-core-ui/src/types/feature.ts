@@ -17,17 +17,8 @@ export type FeaturePlatform = 'desktop' | 'web'
  */
 export type FeatureEnvironment = 'dev' | 'prod'
 
-/**
- * Built-in strategy type literals.
- * Alias: {@link FeatureStrategyType} (kept for compatibility).
- */
+/** Built-in strategy type literals. */
 export type BuiltinFeatureStrategyType = 'Basic' | 'Platform' | 'Environment'
-
-/**
- * Available strategy types (built-in). Use `string` when accepting custom types.
- * Prefer {@link BuiltinFeatureStrategyType} in new code.
- */
-export type FeatureStrategyType = BuiltinFeatureStrategyType
 
 /**
  * Basic strategy - simple on/off toggle

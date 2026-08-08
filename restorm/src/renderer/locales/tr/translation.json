@@ -2632,6 +2632,10 @@
       "title": "Proje daha yeni bir sürümle oluşturuldu",
       "message": "Bu dosya, kullandığınızdan daha yeni bir Restorm sürümüyle oluşturuldu. Açmak için Restorm’u güncelleyin.",
       "versions": "Dosya biçimi {{found}}; bu sürüm en fazla {{current}} destekler."
+    },
+    "notARestormFile": {
+      "title": "Bu bir Restorm dosyası değil",
+      "message": "Bu dosya herhangi bir Restorm dosya biçimi belirtmiyor. Restorm tarafından oluşturulmamış ya da elle düzenlenmiş, bu yüzden açılamıyor."
     }
   }
 }

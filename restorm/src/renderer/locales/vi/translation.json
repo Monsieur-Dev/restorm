@@ -2631,6 +2631,10 @@
       "title": "Dự án được tạo bằng phiên bản mới hơn",
       "message": "Tệp này được tạo bằng phiên bản Restorm mới hơn phiên bản bạn đang dùng. Vui lòng cập nhật Restorm để mở tệp.",
       "versions": "Định dạng tệp {{found}}; phiên bản này hỗ trợ tới {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Đây không phải là tệp Restorm",
+      "message": "Tệp này không khai báo định dạng tệp Restorm. Tệp không do Restorm tạo ra hoặc đã được chỉnh sửa thủ công nên không thể mở."
     }
   }
 }

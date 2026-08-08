@@ -40,10 +40,9 @@ export interface GrpcRequest extends BaseRequest {
   callType: GrpcCallType
   requestMessage: string
   metadata: KeyValue[]
-  /** The wire transport to dispatch over. Absent (or `'grpc'`) is the
-   * existing native HTTP/2 client — fully backward-compatible with every
-   * request saved before this field existed. */
-  transport?: GrpcTransport
+  /** The wire transport to dispatch over. `'grpc'` is the native HTTP/2
+   * client and the default for a new request. */
+  transport: GrpcTransport
   /** When true, restorm ACTS AS a local gRPC mock server: it hosts an
    * `@grpc/grpc-js` server on `localhost:<port>`, loads the request's proto, and
    * answers the methods configured in `mockMethods` instead of calling out as a

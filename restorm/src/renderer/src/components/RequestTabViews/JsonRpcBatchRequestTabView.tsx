@@ -343,7 +343,9 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
     }
     const historyResponse: JsonRpcBatchExecutionResult = {
       requestId: request.id,
-      success: detail.success,
+      // The execution result keeps a boolean; the stored entry keeps the
+      // richer outcome, and only `failure` is not a success.
+      success: detail.outcome !== 'failure',
       statusCode: detail.response.statusCode,
       timings: detail.response.timings,
       requestUrl: detail.response.requestUrl,

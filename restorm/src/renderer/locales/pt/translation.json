@@ -2632,6 +2632,10 @@
       "title": "Projeto criado com uma versão mais recente",
       "message": "Este ficheiro foi criado com uma versão do Restorm mais recente do que a que está a utilizar. Atualize o Restorm para o abrir.",
       "versions": "Formato de ficheiro {{found}}; esta versão suporta até {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Isto não é um ficheiro do Restorm",
+      "message": "Este ficheiro não declara nenhum formato de ficheiro do Restorm. Não foi criado pelo Restorm ou foi editado à mão, por isso não pode ser aberto."
     }
   }
 }

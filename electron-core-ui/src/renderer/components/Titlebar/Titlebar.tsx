@@ -14,7 +14,6 @@ const Titlebar: React.FC<TitlebarProps> = ({
   leftContent,
   rightContent,
   centerContent,
-  children,  // Deprecated: use leftContent instead
   className = '',
   id,
   'data-testid': dataTestId,
@@ -108,8 +107,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
     )
   }
 
-  // Use leftContent if provided, otherwise fall back to children for backward compatibility
-  const actualLeftContent = leftContent ?? children
+  const actualLeftContent = leftContent
 
   // macOS shows application menus in the system bar, not inside the window.
   // The same JSX drives both, so the two renderings cannot drift apart.

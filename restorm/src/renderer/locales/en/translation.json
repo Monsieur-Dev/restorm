@@ -2632,6 +2632,10 @@
       "title": "Project created with a newer version",
       "message": "This file was created with a newer version of Restorm than the one you are running. Please update Restorm to open it.",
       "versions": "File format {{found}}; this version supports up to {{current}}."
+    },
+    "notARestormFile": {
+      "title": "This is not a Restorm file",
+      "message": "This file declares no Restorm file format. It was not written by Restorm, or it was edited by hand, so it cannot be opened."
     }
   }
 }

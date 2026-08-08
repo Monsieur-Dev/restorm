@@ -340,7 +340,7 @@ export type { StaticPaneProps } from './Panes'
 export { Dock } from './Panes'
 export type { DockProps, DockSide, DockHandle } from './Panes'
 export type {
-	WorkbenchState, // legacy flat types (kept for external imports)
+	WorkbenchState,
 	EditorGroup,
 	EditorTab,
 	EditorWorkbenchCallbacks,

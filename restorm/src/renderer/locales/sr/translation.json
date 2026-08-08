@@ -2633,6 +2633,10 @@
       "title": "Projekat napravljen novijom verzijom",
       "message": "Ovaj fajl je napravljen novijom verzijom Restorm-a od one koju koristite. Ažurirajte Restorm da biste ga otvorili.",
       "versions": "Format fajla {{found}}; ova verzija podržava do {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Ovo nije Restorm datoteka",
+      "message": "Ova datoteka ne navodi Restorm format datoteke. Nije je napravio Restorm ili je ručno izmenjena, pa ne može da se otvori."
     }
   }
 }

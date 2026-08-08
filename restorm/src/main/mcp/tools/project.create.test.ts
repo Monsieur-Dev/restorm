@@ -103,12 +103,12 @@ describe('create_project security guards', () => {
   it('writes with the wx flag and opens the project on the happy path', async () => {
     const r = reply(await makeMcp().invoke('create_project', { filePath: '/abs/dir/new.restorm' }))
     expect(r.isError).toBe(false)
-    expect(writeFileMock).toHaveBeenCalledWith('/abs/dir/new.restorm', '{}', { encoding: 'utf8', flag: 'wx' })
+    expect(writeFileMock).toHaveBeenCalledWith('/abs/dir/new.restorm', '{"fileFormatVersion":1,"collections":[]}', { encoding: 'utf8', flag: 'wx' })
     expect(openMock).toHaveBeenCalledWith('/abs/dir/new.restorm')
   })
 
   it('appends the .restorm extension when missing (still absolute)', async () => {
     await makeMcp().invoke('create_project', { filePath: '/abs/dir/noext' })
-    expect(writeFileMock).toHaveBeenCalledWith('/abs/dir/noext.restorm', '{}', { encoding: 'utf8', flag: 'wx' })
+    expect(writeFileMock).toHaveBeenCalledWith('/abs/dir/noext.restorm', '{"fileFormatVersion":1,"collections":[]}', { encoding: 'utf8', flag: 'wx' })
   })
 })

@@ -306,7 +306,6 @@ export type {
 
 // Re-export feature types
 export type {
-  FeatureStrategyType,
   BuiltinFeatureStrategyType,
   FeaturePlatform,
   FeatureStrategy,

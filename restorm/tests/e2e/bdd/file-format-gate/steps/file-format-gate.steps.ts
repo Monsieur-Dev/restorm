@@ -151,10 +151,16 @@ Given('a folder-mode project written by this build', async ({ launchApp }) => {
  */
 Given('its root index declares a format version beyond what this build supports', () => {
   const before = readFileSync(bytesPath, 'utf-8')
-  expect(before, 'the root index must not already declare a version').not.toMatch(
-    /^fileFormatVersion:/m
+  // The fixture declares its version like every Restorm-written project;
+  // raise THAT line rather than prepending a second one, so the file keeps
+  // exactly one root declaration and the gate reads the value under test.
+  const raised = /^fileFormatVersion: \d+$/m.test(before)
+    ? before.replace(/^fileFormatVersion: \d+$/m, 'fileFormatVersion: 9999')
+    : `fileFormatVersion: 9999\n${before}`
+  writeFileSync(bytesPath, raised, 'utf-8')
+  expect(readFileSync(bytesPath, 'utf-8'), 'exactly one root declaration').toMatch(
+    /^fileFormatVersion: 9999$/m
   )
-  writeFileSync(bytesPath, `fileFormatVersion: 9999\n${before}`, 'utf-8')
 })
 
 When('I open that project', async () => {

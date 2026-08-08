@@ -2633,6 +2633,10 @@
       "title": "Proiect creat cu o versiune mai nouă",
       "message": "Acest fișier a fost creat cu o versiune Restorm mai nouă decât cea pe care o utilizați. Actualizați Restorm pentru a-l deschide.",
       "versions": "Format de fișier {{found}}; această versiune acceptă până la {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Acesta nu este un fișier Restorm",
+      "message": "Acest fișier nu declară niciun format de fișier Restorm. Nu a fost creat de Restorm sau a fost editat manual, așa că nu poate fi deschis."
     }
   }
 }

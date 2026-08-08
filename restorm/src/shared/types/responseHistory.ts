@@ -14,13 +14,9 @@ export interface ResponseHistoryEntry {
   guid: string
   timestamp: string
   pinned: boolean
-  /**
-   * Boolean form retained for storage backward-compat — older history
-   * archives carry only this field. New entries also set `outcome`
-   * which the renderer prefers when present.
-   */
-  success: boolean
-  outcome?: ResponseHistoryOutcome
+  /** How the call ended. The single source of truth for the entry's
+   * status dot — there is no separate boolean form. */
+  outcome: ResponseHistoryOutcome
 }
 
 export interface ResponseHistoryIndex {
@@ -402,8 +398,7 @@ export interface ResponseHistoryDetail {
   guid: string
   requestId: string
   type: ResponseHistoryRequestType
-  success: boolean
-  outcome?: ResponseHistoryOutcome
+  outcome: ResponseHistoryOutcome
   timestamp: string
   pinned: boolean
   requestMeta?: ResponseHistoryRequestMeta

@@ -43,10 +43,10 @@ export interface EnvPopoverListProps {
 	 * forwards `closeTooltip` from `useStatusbarTooltip`; the Send-button
 	 * host flips its local open state. */
 	onCloseRequested?: () => void
-	/** Test-id prefix for the popover internals. Defaults to
-	 * `statusbar-env-selector` for back-compat with the original
-	 * statusbar host's selectors; the Send-button host overrides it
-	 * to disambiguate. */
+	/** Test-id prefix for the popover internals. The statusbar is the
+	 * default host, so its prefix is the default; other hosts (the
+	 * Send button, a scenario request node) override it so two popovers
+	 * on screen stay distinguishable. */
 	testIdPrefix?: string
 	/** Hide the "Apply to all requests" footer — used by hosts where the
 	 * selection is scoped to a single target (e.g. a scenario request node). */

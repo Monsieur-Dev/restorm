@@ -2631,6 +2631,10 @@
       "title": "상위 버전에서 만든 프로젝트",
       "message": "이 파일은 현재 사용 중인 Restorm보다 상위 버전에서 만들어졌습니다. 열려면 Restorm을 업데이트하세요.",
       "versions": "파일 형식 {{found}}. 이 버전은 {{current}}까지 지원합니다."
+    },
+    "notARestormFile": {
+      "title": "Restorm 파일이 아닙니다",
+      "message": "이 파일에는 Restorm 파일 형식이 명시되어 있지 않습니다. Restorm으로 작성되지 않았거나 직접 편집되었기 때문에 열 수 없습니다."
     }
   }
 }

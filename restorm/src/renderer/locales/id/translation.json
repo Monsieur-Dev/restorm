@@ -2631,6 +2631,10 @@
       "title": "Proyek dibuat dengan versi yang lebih baru",
       "message": "Berkas ini dibuat dengan versi Restorm yang lebih baru daripada yang Anda jalankan. Perbarui Restorm untuk membukanya.",
       "versions": "Format berkas {{found}}; versi ini mendukung hingga {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Ini bukan berkas Restorm",
+      "message": "Berkas ini tidak menyatakan format berkas Restorm. Berkas ini tidak dibuat oleh Restorm atau telah disunting secara manual, sehingga tidak dapat dibuka."
     }
   }
 }

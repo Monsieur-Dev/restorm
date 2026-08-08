@@ -18,16 +18,12 @@ import { getResponseHistoryDetail, getResponseHistoryList } from '../../services
 import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 
 /**
- * Resolve the dot color for a history entry. New entries carry a 3-way
- * `outcome`; older entries (pre-`outcome`) only have the boolean
- * `success`, in which case we can't distinguish 3xx-warning from
- * 2xx-ok and fall back to a binary green/red mapping.
+ * Resolve the dot color for a history entry from its 3-way `outcome`.
  */
 function outcomeDotColor(entry: ResponseHistoryEntry): string {
   if (entry.outcome === 'ok') return 'var(--testing-iconPassed)'
   if (entry.outcome === 'warning') return 'var(--editorWarning-foreground)'
-  if (entry.outcome === 'failure') return 'var(--testing-iconFailed)'
-  return entry.success ? 'var(--testing-iconPassed)' : 'var(--testing-iconFailed)'
+  return 'var(--testing-iconFailed)'
 }
 
 function formatRequestBodyValue(text: string): { text: string; language: string } {
@@ -155,7 +151,7 @@ class ResponseHistoryStore {
     if (!this.isRecord(value)) return false
     return typeof value['guid'] === 'string'
       && typeof value['timestamp'] === 'string'
-      && typeof value['success'] === 'boolean'
+      && (value['outcome'] === 'ok' || value['outcome'] === 'warning' || value['outcome'] === 'failure')
       && typeof value['pinned'] === 'boolean'
   }
 

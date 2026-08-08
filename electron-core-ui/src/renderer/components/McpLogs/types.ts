@@ -34,11 +34,6 @@ export interface McpLogCapture {
   kind: 'image' | 'video'
   /** MIME type, e.g. `image/png` or `video/webm`. */
   mimeType: string
-  /** Legacy inline base64 payload (a `data:` URL source); absent once evicted.
-   * No longer produced for new captures — both image + video are served on
-   * demand via {@link path} — but kept for forward/back-compat with any entry
-   * still carrying inline bytes. */
-  base64?: string
   /** An `ecui-media://<ns>/<file>` URL the renderer loads on demand (the renderer
    * blocks `file://`, so the temp file is streamed via the privileged scheme
    * rather than inlined): `screenshot/<file>.png` for an image, `screencast/<file>`

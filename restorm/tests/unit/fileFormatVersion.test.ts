@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
   CURRENT_FILE_FORMAT_VERSION,
+  FILE_FORMAT_MISSING_CODE,
   FILE_FORMAT_VERSION_KEY,
   checkFileFormatCompatibility,
   resolveFileFormatVersion,
-  stripLegacyFileFormatVersion
 } from '../../src/shared/config/fileFormatVersion'
 import { EnvironmentFolder } from '../../src/shared/models/EnvironmentFolder'
 import { prepareForSerialization } from '../../src/shared/utils/serialization'
@@ -68,15 +68,22 @@ describe('checkFileFormatCompatibility', () => {
     expect(checkFileFormatCompatibility(documentAtRoot(CURRENT_FILE_FORMAT_VERSION - 1)).supported).toBe(true)
   })
 
-  it('accepts a document that declares no version anywhere', () => {
+  it('refuses a document that declares no version anywhere', () => {
+    // Every document Restorm writes carries one, so "none" means the file
+    // came from something else — there is nothing to read it AS.
     const result = checkFileFormatCompatibility(documentAtRoot())
-    expect(result.supported).toBe(true)
-    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
+    expect(result.supported).toBe(false)
+    expect(result.code).toBe(FILE_FORMAT_MISSING_CODE)
+    expect(result.found).toBeNull()
   })
 
-  it('treats a malformed version as no declaration rather than as a refusal', () => {
+  it('refuses a malformed version as a missing one, not as a future one', () => {
+    // The distinction matters to the user: "not a Restorm file" sends them
+    // to the right place, "update Restorm" sends them chasing a release.
     for (const garbage of ['2', null, {}, [], Number.NaN, Number.POSITIVE_INFINITY, true]) {
-      expect(checkFileFormatCompatibility(documentAtRoot(garbage)).supported).toBe(true)
+      const result = checkFileFormatCompatibility(documentAtRoot(garbage))
+      expect(result.supported).toBe(false)
+      expect(result.code).toBe(FILE_FORMAT_MISSING_CODE)
     }
   })
 
@@ -95,8 +102,8 @@ describe('checkFileFormatCompatibility', () => {
     const result = checkFileFormatCompatibility({
       collections: [collection(), collection(CURRENT_FILE_FORMAT_VERSION + 5)]
     })
-    expect(result.supported).toBe(true)
-    expect(result.found).toBe(CURRENT_FILE_FORMAT_VERSION)
+    expect(result.supported).toBe(false)
+    expect(result.code).toBe(FILE_FORMAT_MISSING_CODE)
   })
 
   it('a collection cannot override the version the root declares', () => {
@@ -119,20 +126,22 @@ describe('checkFileFormatCompatibility', () => {
 
   it('handles a bare array of collections', () => {
     // An array has no root to read, so nothing is declared.
-    expect(checkFileFormatCompatibility([collection(CURRENT_FILE_FORMAT_VERSION + 1)]).supported).toBe(true)
-    expect(checkFileFormatCompatibility([collection()]).supported).toBe(true)
+    expect(checkFileFormatCompatibility([collection(CURRENT_FILE_FORMAT_VERSION + 1)]).supported).toBe(false)
+    expect(checkFileFormatCompatibility([collection()]).supported).toBe(false)
   })
 
   it('handles a single root handed over on its own (an importer output)', () => {
     // Whatever object it is given, the gate reads that object's own
     // top-level key — there is no second place to look.
     expect(checkFileFormatCompatibility(collection(CURRENT_FILE_FORMAT_VERSION + 1)).supported).toBe(false)
-    expect(checkFileFormatCompatibility(collection()).supported).toBe(true)
+    expect(checkFileFormatCompatibility(collection()).supported).toBe(false)
   })
 
-  it('reports an unrecognisable shape as supported', () => {
+  it('refuses an unrecognisable shape — it declares no version either', () => {
     for (const shape of [null, undefined, 42, 'text', true, { unrelated: 'x' }]) {
-      expect(checkFileFormatCompatibility(shape).supported).toBe(true)
+      const result = checkFileFormatCompatibility(shape)
+      expect(result.supported).toBe(false)
+      expect(result.code).toBe(FILE_FORMAT_MISSING_CODE)
     }
   })
 
@@ -193,53 +202,6 @@ describe('resolveFileFormatVersion', () => {
   })
 })
 
-describe('stripLegacyFileFormatVersion', () => {
-  it('removes the key a document written before the move carries on a collection', () => {
-    const root = collection(1)
-    stripLegacyFileFormatVersion(root)
-    expect(FILE_FORMAT_VERSION_KEY in root).toBe(false)
-  })
-
-  it('leaves every other property alone', () => {
-    const root = { ...collection(1), notes: 'keep me', tags: ['a'] }
-    stripLegacyFileFormatVersion(root)
-    expect(root).toEqual({ folderType: 'environment', id: 'x', name: 'C', notes: 'keep me', tags: ['a'] })
-  })
-
-  it('is a no-op when there is nothing to strip', () => {
-    const root = collection()
-    stripLegacyFileFormatVersion(root)
-    expect(root).toEqual({ folderType: 'environment', id: 'x', name: 'C' })
-  })
-
-  it('tolerates anything that is not an object', () => {
-    for (const shape of [null, undefined, 42, 'text', []]) {
-      expect(() => { stripLegacyFileFormatVersion(shape) }).not.toThrow()
-    }
-  })
-
-  it('is what makes the old key GO AWAY, and the guard is not vacuous', () => {
-    // First: prove the key really would survive. The renderer loads plain
-    // parsed objects and serialises them back wholesale, so an unknown
-    // key round-trips — a document that once had it would keep it for
-    // ever, declaring its version in a second place nothing reads.
-    const unstripped = { collections: [collection(1)] }
-    expect(
-      JSON.stringify(unstripped.collections),
-      'without the strip the stale key rides the save payload back to disk'
-    ).toContain(FILE_FORMAT_VERSION_KEY)
-
-    // Then: with the strip, the next save writes it at the root only.
-    const loaded = { collections: [collection(1)] }
-    const version = resolveFileFormatVersion(loaded, silentLogger)
-    for (const root of loaded.collections) stripLegacyFileFormatVersion(root)
-
-    const payload = { fileFormatVersion: version, collections: loaded.collections }
-    expect(payload.fileFormatVersion).toBe(CURRENT_FILE_FORMAT_VERSION)
-    expect(JSON.stringify(payload.collections)).not.toContain(FILE_FORMAT_VERSION_KEY)
-  })
-})
-
 describe('the persisted document', () => {
   /**
    * The load-then-save pipeline the renderer runs, minus React: resolve
@@ -249,7 +211,6 @@ describe('the persisted document', () => {
   function persist(parsedFromDisk: Record<string, unknown>): string {
     const version = resolveFileFormatVersion(parsedFromDisk, silentLogger)
     const collections = (parsedFromDisk['collections'] ?? []) as unknown[]
-    for (const root of collections) stripLegacyFileFormatVersion(root)
     return serialize(prepareForSerialization({ fileFormatVersion: version, collections }), 'yaml')
   }
 
@@ -270,19 +231,6 @@ describe('the persisted document', () => {
     })
 
     expect(written.match(new RegExp(`${FILE_FORMAT_VERSION_KEY}:`, 'g'))).toHaveLength(1)
-  })
-
-  it('a document written before the move comes out with the key at the root only', () => {
-    const older = {
-      collections: [
-        { ...new EnvironmentFolder({ name: 'Petstore' }).toPlainObject(), [FILE_FORMAT_VERSION_KEY]: 1 }
-      ]
-    }
-    const written = persist(older)
-
-    expect(written.split('\n')[0]).toBe(`${FILE_FORMAT_VERSION_KEY}: ${CURRENT_FILE_FORMAT_VERSION}`)
-    // Indented means "on a collection". There must be none left.
-    expect(written).not.toMatch(new RegExp(`^\\s+${FILE_FORMAT_VERSION_KEY}:`, 'm'))
   })
 
   it('carries the version a document declared rather than restamping the current one', () => {

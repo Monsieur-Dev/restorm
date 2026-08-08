@@ -10,7 +10,23 @@ import type { EnvironmentFolder, FolderItem } from '../../../shared/types/collec
  * from an up-to-date one — and wins.
  */
 export interface MirrorPayload {
+  /**
+   * Env-folders only — the renderer's own `collections` state, whose consumers
+   * (environment pickers, documentation, value-type groups) are all about
+   * collections and nothing else.
+   */
   collections: EnvironmentFolder[]
+  /**
+   * The WHOLE root, which is what gets mirrored to main.
+   *
+   * The root is not collections-only: the sidebar's "Ajouter ▸ Scénario" on the
+   * empty area creates a scenario as a sibling of a collection, and a request
+   * may sit there too. Main resolves a scenario BY ID out of this mirror when
+   * the engine starts a run, so narrowing it to env-folders left a root
+   * scenario absent from the main-side store entirely — the run then failed
+   * with "no scenario with id", which names the symptom, not the cause.
+   */
+  rootItems: FolderItem[]
   builtFromVersion: number
 }
 
@@ -38,6 +54,7 @@ export function snapshotMirrorPayload(
 ): MirrorPayload {
   return {
     collections: rootItems.filter(isEnvironmentFolder),
+    rootItems,
     builtFromVersion
   }
 }

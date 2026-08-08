@@ -10,9 +10,6 @@ import { SCENARIO_KIND_REGISTRY } from '../../../../shared/scenarioKindRegistry'
  * its `category`.
  */
 
-// ScenarioNodeCategory moved to the kind registry; re-exported for back-compat.
-export type { ScenarioNodeCategory } from '../../../../shared/scenarioKindRegistry'
-
 /** Categories rendered as a nested submenu in the add-node menu + link palette
  * (label + icon), instead of a flat separator-delimited group. Keyed off the
  * catalogue category so a new kind joins its submenu automatically. */

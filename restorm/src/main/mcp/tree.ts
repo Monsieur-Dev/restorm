@@ -104,12 +104,21 @@ export function listChildren(folder: Folder | EnvironmentFolder | Scenario): { f
  * with each item carrying its parentId. Used by `list_folders()` /
  * `list_requests()` when called without a `parentId` filter.
  */
-export function flattenTree(roots: readonly (Folder | EnvironmentFolder)[]): { folders: ListedFolder[]; requests: ListedRequest[] } {
+export function flattenTree(roots: readonly FolderItem[]): { folders: ListedFolder[]; requests: ListedRequest[] } {
   const folders: ListedFolder[] = []
   const requests: ListedRequest[] = []
   for (const root of roots) {
-    folders.push(projectFolder(root, null))
-    walkAndCollect(root, folders, requests)
+    // The root is not folders-only: the sidebar lets a scenario or a request
+    // sit there as a sibling of a collection. Dispatch per kind exactly as
+    // `walkAndCollect` does one level down, with a `null` parentId.
+    if (isScenario(root)) {
+      walkAndCollect(root, folders, requests)
+    } else if (isFolder(root) || isEnvironmentFolder(root)) {
+      folders.push(projectFolder(root, null))
+      walkAndCollect(root, folders, requests)
+    } else if (isRequest(root)) {
+      requests.push(projectRequest(root, null))
+    }
   }
   return { folders, requests }
 }
@@ -156,9 +165,19 @@ export function projectScenario(scenario: Scenario, parentId: string | null, pat
  * through folders, env-folders AND scenarios (a scenario is folder-like and
  * may nest other scenarios). Used by `list_scenarios()`.
  */
-export function flattenScenarios(roots: readonly (Folder | EnvironmentFolder)[]): ListedScenario[] {
+export function flattenScenarios(roots: readonly FolderItem[]): ListedScenario[] {
   const out: ListedScenario[] = []
-  for (const root of roots) walkForScenarios(root, root.name, root.id, out)
+  for (const root of roots) {
+    // A scenario may itself BE a root item; it has no ancestor container, so
+    // its path is just its own name and its `parentId` is null. Listing only
+    // what the roots CONTAIN would leave it out of `list_scenarios` entirely.
+    if (isScenario(root)) {
+      out.push(projectScenario(root, null, root.name))
+      walkForScenarios(root, root.name, root.id, out)
+    } else if (isFolder(root) || isEnvironmentFolder(root)) {
+      walkForScenarios(root, root.name, root.id, out)
+    }
+  }
   return out
 }
 
@@ -195,7 +214,9 @@ export interface TreeNode {
   children?: TreeNode[]
 }
 
-export function buildTree(roots: readonly (Folder | EnvironmentFolder)[]): TreeNode[] {
+export function buildTree(roots: readonly FolderItem[]): TreeNode[] {
+  // `toTreeNode` already dispatches on kind, so a root scenario / request
+  // renders as itself rather than being forced into a folder node.
   return roots.map(toTreeNode)
 }
 

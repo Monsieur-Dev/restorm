@@ -213,10 +213,15 @@ export function registerWriteTools(mcp: McpService): void {
           return errorReply(`parentId ${parentId} doesn't point at a folder`)
         }
       }
-      const created = collectionStore.createFolder(parentId, { name })
+      // `kind` only decides anything at the root, where both folder kinds are
+      // legal; nested folders are always plain. Default to the collection, the
+      // root's usual inhabitant.
+      const kindRaw = argRecord['kind']
+      const kind = kindRaw === 'folder' || kindRaw === 'env-folder' ? kindRaw : 'env-folder'
+      const created = collectionStore.createFolder(parentId, { name }, kind)
       broadcastTreeReplace()
       triggerSave()
-      return jsonReply({ id: created.id, name: created.name, parentId })
+      return jsonReply({ id: created.id, name: created.name, parentId, kind: parentId === null ? kind : 'folder' })
     }
   )
 
@@ -229,11 +234,15 @@ export function registerWriteTools(mcp: McpService): void {
         'Create a new request in a folder. `protocol` picks the request type (http / graphql / ' +
         'grpc / soap / websocket / sse / odata / auth). `socketio` and `mqtt` are also accepted: ' +
         'they are not separate request types but WebSocket requests carrying that transport ' +
-        'discriminator, and naming them here creates the matching tab directly. Returns ' +
+        'discriminator, and naming them here creates the matching tab directly. With ' +
+        '`parentFolderId` null (or omitted), creates it at the ROOT of the sidebar, as a sibling of ' +
+        'a collection — the same placement the sidebar offers. Returns ' +
         '`{ id, name, protocol, parentId }`. The created request is bare — fill in URL / method / ' +
         'headers via `update_request` or in the UI.',
       inputSchema: {
-        parentFolderId: z.string().min(1).describe('Folder or env-folder id to create the request in.'),
+        parentFolderId: z.string().min(1).optional().describe(
+          'Folder or env-folder id to create the request in. Omit to create it at the root.'
+        ),
         name: z.string().min(1).describe('Request name as it appears in the sidebar.'),
         protocol: z.enum(CREATABLE_PROTOCOLS).describe(
           'Request type, or a WebSocket transport variant (`socketio` / `mqtt`).'
@@ -242,17 +251,19 @@ export function registerWriteTools(mcp: McpService): void {
     },
     (args) => {
       const argRecord = args
-      const parentFolderId = typeof argRecord['parentFolderId'] === 'string' ? argRecord['parentFolderId'] : ''
+      const parentFolderIdRaw = argRecord['parentFolderId']
+      const parentFolderId = typeof parentFolderIdRaw === 'string' && parentFolderIdRaw.length > 0 ? parentFolderIdRaw : null
       const name = typeof argRecord['name'] === 'string' ? argRecord['name'] : ''
       const protocol = typeof argRecord['protocol'] === 'string' ? argRecord['protocol'] as CreatableProtocol : null
-      if (!parentFolderId) return errorReply('parentFolderId is required')
       if (!name) return errorReply('name is required')
       if (protocol === null || !(CREATABLE_PROTOCOLS as readonly string[]).includes(protocol)) {
         return errorReply(`protocol must be one of: ${CREATABLE_PROTOCOLS.join(', ')}`)
       }
-      const parent = collectionStore.findById(parentFolderId)
-      if (!parent || !isAnyFolder(parent)) {
-        return errorReply(`parentFolderId ${parentFolderId} doesn't point at a folder`)
+      if (parentFolderId !== null) {
+        const parent = collectionStore.findById(parentFolderId)
+        if (!parent || !isAnyFolder(parent)) {
+          return errorReply(`parentFolderId ${parentFolderId} doesn't point at a folder`)
+        }
       }
       const { type, wsProtocol } = resolveCreatableProtocol(protocol)
       const created = collectionStore.createRequest(parentFolderId, {
@@ -273,23 +284,29 @@ export function registerWriteTools(mcp: McpService): void {
       title: 'Create scenario',
       description:
         'Create a new scenario (the dataflow-graph tree item) as a child of a folder, env-folder, or ' +
-        'another scenario (scenarios double as folder-like containers). Returns `{ id, name, parentId }`. ' +
+        'another scenario (scenarios double as folder-like containers). With `parentId` null (or ' +
+        'omitted), creates it at the ROOT of the sidebar, as a sibling of a collection — the same ' +
+        'placement the sidebar\'s empty-area "add" menu offers. Returns `{ id, name, parentId }`. ' +
         'The scenario is empty (no nodes / edges / params) — use `create_scenario_node` + ' +
         '`connect_scenario_nodes` to fill it.',
       inputSchema: {
-        parentId: z.string().min(1).describe('Folder, env-folder, or scenario id to create the scenario under.'),
+        parentId: z.string().min(1).optional().describe(
+          'Folder, env-folder, or scenario id to create the scenario under. Omit to create it at the root.'
+        ),
         name: z.string().min(1).describe('Scenario name as it appears in the sidebar.')
       } as Record<string, unknown>
     },
     (args) => {
       const argRecord = args
-      const parentId = typeof argRecord['parentId'] === 'string' ? argRecord['parentId'] : ''
+      const parentIdRaw = argRecord['parentId']
+      const parentId = typeof parentIdRaw === 'string' && parentIdRaw.length > 0 ? parentIdRaw : null
       const name = typeof argRecord['name'] === 'string' ? argRecord['name'] : ''
-      if (!parentId) return errorReply('parentId is required')
       if (!name) return errorReply('name is required')
-      const parent = collectionStore.findById(parentId)
-      if (!parent || (!isAnyFolder(parent) && !isScenario(parent))) {
-        return errorReply(`parentId ${parentId} doesn't point at a folder or scenario`)
+      if (parentId !== null) {
+        const parent = collectionStore.findById(parentId)
+        if (!parent || (!isAnyFolder(parent) && !isScenario(parent))) {
+          return errorReply(`parentId ${parentId} doesn't point at a folder or scenario`)
+        }
       }
       const created = collectionStore.createScenario(parentId, { name })
       broadcastTreeReplace()

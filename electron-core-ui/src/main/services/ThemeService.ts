@@ -291,35 +291,6 @@ export class ThemeService {
   }
 
   /**
-   * Load a specific theme by ID (legacy compatibility)
-   */
-  public loadTheme(themeId: string): { name: string; type: 'dark' | 'light' | 'hcDark' | 'hcLight'; colors?: Record<string, string> } | null {
-    const result = this.getThemeWithVariables(themeId)
-    if (!result) {
-      return null
-    }
-    
-    // Convert CSS variables back to colors format for legacy compatibility
-    const colors: Record<string, string> = {}
-    for (const [cssVar, value] of Object.entries(result.variables)) {
-      // Skip base variables (non-color variables from base.yaml)
-      if (Object.keys(this.baseVariables).includes(cssVar)) {
-        continue
-      }
-      if (cssVar.startsWith('--')) {
-        const key = cssVar.slice(2).replace(/-/g, '.')
-        colors[key] = value
-      }
-    }
-
-    return {
-      name: result.theme.name,
-      type: result.theme.type ?? 'dark',
-      colors
-    }
-  }
-
-  /**
    * Convert theme colors to CSS variables (legacy compatibility)
    */
   public convertToCSSVariables(theme: { colors?: Record<string, string>; type?: 'dark' | 'light' | 'hcDark' | 'hcLight' }): ThemeVariables {

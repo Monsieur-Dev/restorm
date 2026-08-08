@@ -3,12 +3,12 @@
  * into a separate module so we can unit-test the controlled vs
  * uncontrolled branch without spinning up React.
  *
- * **Uncontrolled mode** (legacy): each `<Pane>` may pass `collapsed` /
+ * **Uncontrolled mode**: each `<Pane>` may pass `collapsed` /
  * `defaultCollapsed` purely as an *initial* value. After the user
  * toggles a header, the internal `collapsedState` becomes the source
  * of truth and the prop is ignored. State is lost on remount.
  *
- * **Controlled mode** (new — needed for restorm tab persistence):
+ * **Controlled mode** (needed for restorm tab persistence):
  * every `<Pane>` provides an explicit `collapsed` boolean. The prop
  * wins on every render. Toggles fire `onCollapsedChange` and the
  * parent updates its store; the next render hydrates the SplitView

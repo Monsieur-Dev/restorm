@@ -188,6 +188,22 @@ describe('mcp/tree', () => {
         { id: 'inner-req', name: 'inner-req', protocol: 'http', method: 'GET', parentId: 'scn' }
       ])
     })
+
+    it('handles a scenario and a request sitting AT the root, beside a collection', () => {
+      const tree = [
+        ef('coll', 'coll'),
+        sc('root-scn', 'Root scenario', { items: [r('scn-req', 'scn-req', 'http', 'PUT')] }),
+        r('root-req', 'root-req', 'http', 'GET')
+      ]
+      const { folders, requests } = flattenTree(tree)
+      // The root scenario is not a folder — but its child request is reachable,
+      // and the root request is listed with a null parent.
+      expect(folders).toEqual([{ id: 'coll', name: 'coll', kind: 'env-folder', parentId: null }])
+      expect(requests).toEqual([
+        { id: 'scn-req', name: 'scn-req', protocol: 'http', method: 'PUT', parentId: 'root-scn' },
+        { id: 'root-req', name: 'root-req', protocol: 'http', method: 'GET', parentId: null }
+      ])
+    })
   })
 
   describe('flattenScenarios', () => {
@@ -216,6 +232,19 @@ describe('mcp/tree', () => {
       expect(flattenScenarios(tree)).toEqual([
         { id: 'parent', name: 'Parent', path: 'root / Parent', tags: [], nodeCount: 0, edgeCount: 0, parentId: 'root' },
         { id: 'child', name: 'Child', path: 'root / Parent / Child', tags: [], nodeCount: 0, edgeCount: 0, parentId: 'parent' }
+      ])
+    })
+
+    it('lists a scenario placed AT the root, and its sub-scenarios', () => {
+      const tree = [
+        ef('coll', 'coll'),
+        sc('root-scn', 'Root scenario', { nodes: [{}], items: [sc('child', 'Child')] })
+      ]
+      // A root scenario has no ancestor container: its path is its own name and
+      // its parentId is null. Walking only what the roots CONTAIN would omit it.
+      expect(flattenScenarios(tree)).toEqual([
+        { id: 'root-scn', name: 'Root scenario', path: 'Root scenario', tags: [], nodeCount: 1, edgeCount: 0, parentId: null },
+        { id: 'child', name: 'Child', path: 'Root scenario / Child', tags: [], nodeCount: 0, edgeCount: 0, parentId: 'root-scn' }
       ])
     })
 
@@ -274,6 +303,19 @@ describe('mcp/tree', () => {
             }
           ]
         }
+      ])
+    })
+
+    it('renders a root-level scenario and request as themselves, not as folders', () => {
+      const tree = [
+        ef('coll', 'coll'),
+        sc('root-scn', 'Root scenario'),
+        r('root-req', 'root-req', 'odata')
+      ]
+      expect(buildTree(tree)).toEqual([
+        { id: 'coll', name: 'coll', kind: 'env-folder', children: [] },
+        { id: 'root-scn', name: 'Root scenario', kind: 'scenario', children: [] },
+        { id: 'root-req', name: 'root-req', kind: 'request', protocol: 'odata' }
       ])
     })
   })

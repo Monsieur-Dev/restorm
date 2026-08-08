@@ -211,7 +211,14 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
   // occasionally past the 30s default the pure-compute rows are fine with. Give
   // just those rows a longer copy budget so the single-shot ship-gate doesn't
   // hit a cold-bind timeout; every other row keeps the tight 30s.
-  const isServerScenario = scenarioName.endsWith(' Server')
+  // Named by BEHAVIOUR, not by a name suffix: a scenario that HOSTS a server
+  // needs the longer budget whatever it is called. `Socket.IO` opens its own
+  // socket.io server ("Server listen") before its client connects, and `Main`
+  // orchestrates sub-scenarios that do — both were timing out at 30s under a
+  // full-suite run while passing alone, which reads as flakiness and is really
+  // this predicate missing them.
+  const SERVER_HOSTING_SCENARIOS = new Set(['Socket.IO', 'Main'])
+  const isServerScenario = scenarioName.endsWith(' Server') || SERVER_HOSTING_SCENARIOS.has(scenarioName)
   let text = ''
   await expect(async () => {
     await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()

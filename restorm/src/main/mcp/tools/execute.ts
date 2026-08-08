@@ -379,7 +379,7 @@ export function flushRequestStateToContext(req: Request): void {
     data.service = grpc.service
     data.grpcMethod = grpc.method
     data.callType = grpc.callType
-    if (grpc.transport !== undefined) data.transport = grpc.transport
+    data.transport = grpc.transport
     data.requestMessage = grpc.requestMessage
     // The dynamic client is built from the request's own proto; without it the
     // execution falls back to the bundled grpcbin proto and a custom-proto

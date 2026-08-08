@@ -95,14 +95,11 @@ function formatTime(ts: number): string {
  * longer retrievable. Both images and videos are served on demand from disk via
  * an `ecui-media://` URL in `path` (the renderer blocks `file://`, so the temp
  * file is streamed through the privileged scheme instead of bloating the buffer
- * with multi-MB base64). A legacy inline `base64` payload is still honoured as a
+ * with multi-MB base64). A capture is served on demand via its `path` (
  * `data:` URL fallback for any entry that predates on-demand image serving. */
 function captureToMedia(capture: NonNullable<McpLogEntry['capture']>): ThumbnailMedia | null {
   if (capture.path) {
     return { kind: capture.kind, src: capture.path, mimeType: capture.mimeType }
-  }
-  if (capture.kind === 'image' && capture.base64) {
-    return { kind: 'image', src: `data:${capture.mimeType};base64,${capture.base64}`, mimeType: capture.mimeType }
   }
   return null
 }

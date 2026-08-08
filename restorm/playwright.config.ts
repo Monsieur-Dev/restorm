@@ -426,15 +426,6 @@ const mcpLogsDisabledTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-logs-disabled'
 })
 
-const bodyTypeMigrationTestDir = defineBddConfig({
-  features: 'tests/e2e/bdd/body-type-migration/features/**/*.feature',
-  steps: [
-    'tests/e2e/bdd/body-type-migration/steps/**/*.ts',
-    'tests/e2e/bdd/body-type-migration/fixtures/body-type-migration.fixture.ts'
-  ],
-  outputDir: '.features-gen/body-type-migration'
-})
-
 const pawImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/paw-import/features/**/*.feature',
   steps: [
@@ -863,11 +854,6 @@ export default defineConfig({
       name: 'mcp-logs-disabled',
       testDir: mcpLogsDisabledTestDir,
       timeout: 120 * 1000 // pre-seeds mcp:enabled=false (no --no-mcp flag); asserts the menu entry is disabled
-    },
-    {
-      name: 'body-type-migration',
-      testDir: bodyTypeMigrationTestDir,
-      timeout: 120 * 1000 // opens a fresh app + a legacy-spelling .restorm file
     },
     {
       name: 'sidebar-split-drop',

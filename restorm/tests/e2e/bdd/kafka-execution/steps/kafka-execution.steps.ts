@@ -292,8 +292,9 @@ Then('that history entry succeeded', async ({ callMcpTool }) => {
   if (discovery === null) throw new Error('launch first')
   if (currentRequestId === null) throw new Error('open a request first')
   const reply = await callMcpTool(discovery, 'get_response_history', { requestId: currentRequestId })
-  const payload = parsedReply(reply) as { entries?: { guid: string; success?: boolean }[] }
+  const payload = parsedReply(reply) as { entries?: { guid: string; outcome?: string }[] }
   const freshest = (payload.entries ?? [])[0]
   expect(freshest, 'no history entry found').toBeTruthy()
-  expect(freshest?.success, 'freshest history entry did not succeed').toBe(true)
+  // `outcome` is the entry's status: 'ok' | 'warning' | 'failure'.
+  expect(freshest?.outcome, 'freshest history entry did not succeed').toBe('ok')
 })

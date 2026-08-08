@@ -2632,6 +2632,10 @@
       "title": "Project gemaakt met een nieuwere versie",
       "message": "Dit bestand is gemaakt met een nieuwere versie van Restorm dan de versie die u gebruikt. Werk Restorm bij om het te openen.",
       "versions": "Bestandsformaat {{found}}; deze versie ondersteunt tot {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Dit is geen Restorm-bestand",
+      "message": "Dit bestand vermeldt geen Restorm-bestandsindeling. Het is niet door Restorm geschreven of het is handmatig bewerkt, waardoor het niet kan worden geopend."
     }
   }
 }

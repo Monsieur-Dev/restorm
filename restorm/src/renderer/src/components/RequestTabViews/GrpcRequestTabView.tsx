@@ -104,6 +104,19 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = (props) => 
   return <GrpcClientTabView {...props} />
 }
 
+/**
+ * The transport a request tab drives.
+ *
+ * `GrpcRequest.transport` is required on the model, but this component reads a
+ * request that crossed IPC as a PLAIN object — no class, so no field default
+ * ran. Normalising here is boundary validation of untrusted input, the same job
+ * `GrpcRequest.fromPlain` does on the main side; it is NOT a compatibility
+ * shim for older documents.
+ */
+function normaliseTransport(value: GrpcTransport | undefined): GrpcTransport {
+  return value ?? 'grpc'
+}
+
 const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   request,
   conflictFieldDiff,
@@ -137,7 +150,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [callType, setCallTypeState] = useState<GrpcCallType>(request.callType)
   // Named `grpcTransport` (not `transport`) to avoid colliding with this file's
   // unrelated "transport-replaced" quick-config-reload vocabulary below.
-  const [grpcTransport, setGrpcTransportState] = useState<GrpcTransport>(request.transport ?? 'grpc')
+  const [grpcTransport, setGrpcTransportState] = useState<GrpcTransport>(normaliseTransport(request.transport))
   const debouncedGrpcTransport = useDebouncedValue(grpcTransport, 250)
   const [isSending, setIsSending] = useState(false)
   const [isRefreshingReflection, setIsRefreshingReflection] = useState(false)
@@ -186,7 +199,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setUrlState(request.url)
     setRequestMessageState(request.requestMessage)
     setCallTypeState(request.callType)
-    setGrpcTransportState(request.transport ?? 'grpc')
+    setGrpcTransportState(normaliseTransport(request.transport))
     setResponse(null)
     setLiveMessages([])
   }, [request])
@@ -206,7 +219,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setUrlState(current.url)
     setRequestMessageState(current.requestMessage)
     setCallTypeState(current.callType)
-    setGrpcTransportState(current.transport ?? 'grpc')
+    setGrpcTransportState(normaliseTransport(current.transport))
     // Remount the metadata table so it re-reads the restored rows.
     setTransportEpoch((n) => n + 1)
   }, [])
@@ -235,7 +248,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       service: currentRequest.service,
       grpcMethod: currentRequest.method,
       callType: currentRequest.callType,
-      transport: currentRequest.transport ?? 'grpc',
+      transport: normaliseTransport(currentRequest.transport),
       requestMessage: currentRequest.requestMessage,
       // The execution service resolves the dynamic client from the request's own
       // proto (a reflected descriptor set, inline content, or a `.proto` path,

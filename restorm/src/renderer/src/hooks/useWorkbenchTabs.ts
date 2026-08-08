@@ -559,45 +559,15 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree]
   )
 
-  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario'; indexPath?: number[]; legacyId?: string } | null => {
-    const indexMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
-    if (indexMatch?.[1] && indexMatch[2]) {
+  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario'; itemId: string } | null => {
+    const match = /^(folder|env-folder|request|scenario)-id:(.+)$/.exec(tabId)
+    if (match?.[1] && match[2]) {
       return {
-        type: indexMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
-        indexPath: indexMatch[2].split('.').map((part) => Number(part))
-      }
-    }
-    const legacyMatch = /^(folder|env-folder|request|scenario)-id:(.+)$/.exec(tabId)
-    if (legacyMatch?.[1] && legacyMatch[2]) {
-      return {
-        type: legacyMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
-        legacyId: legacyMatch[2]
-      }
-    }
-    const oldMatch = /^(folder|env-folder|request|scenario)-(.+)$/.exec(tabId)
-    if (oldMatch?.[1] && oldMatch[2]) {
-      return {
-        type: oldMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
-        legacyId: oldMatch[2]
+        type: match[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
+        itemId: match[2]
       }
     }
     return null
-  }, [])
-
-  const findItemByIndexPath = useCallback((items: FolderItem[], indexPath: number[]): FolderItem | null => {
-    if (indexPath.length === 0) return null
-    const firstIndex = indexPath[0]
-    if (firstIndex === undefined) return null
-    let current: FolderItem | undefined = items[firstIndex]
-    for (let i = 1; i < indexPath.length; i += 1) {
-      if (!current || !isAnyFolder(current)) {
-        return null
-      }
-      const nextIndex = indexPath[i]
-      if (nextIndex === undefined) return null
-      current = current.items[nextIndex]
-    }
-    return current ?? null
   }, [])
 
   // Rebuild tab callback for workbench autosave
@@ -671,22 +641,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     if (!parsed) return null
 
     if (parsed.type === 'env-folder') {
-      if (parsed.indexPath) {
-        const item = findItemByIndexPath(rootItems, parsed.indexPath)
-        if (item && isEnvironmentFolder(item)) {
-          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
-          return {
-            id: tabId,
-            tabType: 'environment-folder',
-            title: item.name,
-            titleString: item.name,
-            folder: item,
-            breadcrumbs,
-            allowFullscreen: true
-          } as EnvironmentFolderTab
-        }
-      } else if (parsed.legacyId) {
-        const folder = findEnvironmentFolderById(rootItems, parsed.legacyId)
+      {
+        const folder = findEnvironmentFolderById(rootItems, parsed.itemId)
         if (folder) {
           const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, folder.id)
           return {
@@ -704,22 +660,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     }
 
     if (parsed.type === 'folder') {
-      if (parsed.indexPath) {
-        const item = findItemByIndexPath(rootItems, parsed.indexPath)
-        if (item && isAnyFolder(item) && !isEnvironmentFolder(item)) {
-          const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
-          return {
-            id: tabId,
-            tabType: 'folder',
-            title: item.name,
-            titleString: item.name,
-            folder: item,
-            breadcrumbs,
-            allowFullscreen: true
-          } as FolderTab
-        }
-      } else if (parsed.legacyId) {
-        const folder = findFolderById(rootItems, parsed.legacyId)
+      {
+        const folder = findFolderById(rootItems, parsed.itemId)
         if (folder && !isEnvironmentFolder(folder as FolderItem)) {
           const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, folder.id)
           return {
@@ -737,9 +679,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     }
 
     if (parsed.type === 'scenario') {
-      const item = parsed.indexPath
-        ? findItemByIndexPath(rootItems, parsed.indexPath)
-        : (parsed.legacyId ? findItemById(rootItems, parsed.legacyId) : null)
+      const item = findItemById(rootItems, parsed.itemId)
       if (item && isScenario(item)) {
         const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
         return {
@@ -755,12 +695,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       return null
     }
 
-    let requestItem: FolderItem | null = null
-    if (parsed.indexPath) {
-      requestItem = findItemByIndexPath(rootItems, parsed.indexPath)
-    } else if (parsed.legacyId) {
-      requestItem = findRequestById(rootItems, parsed.legacyId) ?? null
-    }
+    const requestItem: FolderItem | null = findRequestById(rootItems, parsed.itemId) ?? null
     if (requestItem && isRequest(requestItem)) {
       const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestItem.id)
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
@@ -947,7 +882,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       }
     }
     return null
-  }, [findItemByIndexPath, parseTabId, rootItems])
+  }, [parseTabId, rootItems])
 
   // Handle workbench state restored
   const handleStateRestored = useCallback((restoredTree: WorkbenchTree | null) => {

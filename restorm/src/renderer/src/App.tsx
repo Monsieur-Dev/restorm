@@ -1694,7 +1694,8 @@ const App: React.FC = () => {
     }
     return newId
   }, [handleAddChildItem])
-  // Back-compat shim for the bare httpRequest node (link-drag auto-create path).
+  // The link-drag auto-create path: dropping a link onto empty canvas from a
+  // bare httpRequest node creates its child request, defaulting to http-get.
   const handleCreateScenarioRequest = useCallback(
     (scenarioId: string): string | null => handleCreateScenarioChild(scenarioId, 'http-get'),
     [handleCreateScenarioChild]
@@ -2460,7 +2461,7 @@ const App: React.FC = () => {
     // `mirrorPayload`). A stale `'user'` mirror is then refused main-side
     // because its stamp is genuinely older, instead of sneaking through on a
     // stamp it never earned.
-    setCollections(mirrorPayload.collections, source, mirrorPayload.builtFromVersion)
+    setCollections(mirrorPayload.collections, source, mirrorPayload.builtFromVersion, mirrorPayload.rootItems)
   }, [mirrorPayload, setCollections, isFileServiceLoading])
 
   // Listen to test events for E2E tests (only in dev/test mode)

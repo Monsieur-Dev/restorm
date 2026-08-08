@@ -152,10 +152,6 @@ function kafkaOutcome(result: KafkaExecutionResult): ResponseHistoryOutcome {
   return result.success ? 'ok' : 'failure'
 }
 
-function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
-  return outcome !== 'failure'
-}
-
 /**
  * A JSON-RPC call can transport-succeed (HTTP 200) while the envelope
  * reports an application-level `error` — that's still a failed call from
@@ -514,8 +510,7 @@ class ResponseHistoryService {
       guid: detail.guid,
       timestamp: detail.timestamp,
       pinned: detail.pinned,
-      success: detail.success,
-      ...(detail.outcome !== undefined ? { outcome: detail.outcome } : {})
+      outcome: detail.outcome
     }
 
     const requests = index.requests.map((req) => ({ ...req, entries: [...req.entries] }))
@@ -591,7 +586,6 @@ class ResponseHistoryService {
       guid,
       requestId,
       type,
-      success: outcomeToSuccess(outcome),
       outcome,
       timestamp: now,
       pinned: false,

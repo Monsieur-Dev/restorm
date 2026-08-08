@@ -2911,8 +2911,30 @@ Then(
 // Custom value lists — label→value substitution at dispatch + live reactivity
 // ---------------------------------------------------------------------------
 
-// Stable entry ids so the entry-row testids are predictable.
-const CVL_ENTRY_ID: Record<string, string> = { Rouge: 'entry-rouge', Vert: 'entry-vert' }
+// Entry ids are whatever the app minted when the fixture was produced, so they
+// are read from the fixture rather than assumed. Hard-coding them here is what
+// tied these steps to a hand-written file: the ids only existed because someone
+// typed them, and the test broke the moment the fixture came from the product.
+/**
+ * The custom-value-lists project, PRODUCED BY THE APP (driven over MCP, then
+ * saved) rather than hand-written here. A fixture typed into a test is not
+ * what Restorm writes: it drifts the moment the serializer gains a field, and
+ * nothing says so until an unrelated test fails. Read the committed sample so
+ * the bytes under test are the bytes the product emits.
+ */
+const CVL_SAMPLE_PATH = join(__dirname, '../../../samples/custom-value-lists.restorm')
+
+const CVL_ENTRY_ID: Record<string, string> = (() => {
+  const yaml = readFileSync(CVL_SAMPLE_PATH, 'utf-8')
+  const out: Record<string, string> = {}
+  // entries are `- id: <uuid>` followed by `label: <name>`
+  const re = /-\s+id:\s*(\S+)\s*\n\s*label:\s*(\S+)/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(yaml)) !== null) {
+    if (m[1] !== undefined && m[2] !== undefined) out[m[2]] = m[1]
+  }
+  return out
+})()
 
 // The entries of a custom value list are edited in the shared key/value table.
 // Its row test ids are built by the ECUI selector helpers rather than spelled
@@ -2930,50 +2952,6 @@ function cvlRowId(label: string): string {
 
 // Single-file collection seeded on disk: one env folder with a custom
 // value list and a request whose query param is bound to that list.
-const CVL_SAMPLE_RESTORM = `collections:
-  - folderType: environment
-    name: Paint API
-    documentation: ''
-    tags: []
-    id: cv000000-0000-0000-0000-0000000000cv
-    customValueLists:
-      - id: list-couleur
-        name: Couleur
-        entries:
-          - id: entry-rouge
-            label: Rouge
-            value: 'FF0000'
-            enabled: true
-          - id: entry-vert
-            label: Vert
-            value: '00FF00'
-            enabled: true
-    environments:
-      - name: live
-        variables:
-          - key: baseUrl
-            value:
-              type: string
-              value: https://api.example.com
-            enabled: true
-    items:
-      - type: http
-        name: Paint
-        documentation: ''
-        tags: []
-        id: cv100000-0000-0000-0000-0000000000cv
-        url: '{{baseUrl}}/paint'
-        method: GET
-        headers: []
-        params:
-          - key: color
-            value:
-              type: customList
-              listId: list-couleur
-              label: Rouge
-            enabled: true
-        pathParams: []
-`
 
 function cvlSidebarRow(p: Page, name: string): Locator {
   // Exact-title match disambiguates the request "Paint" from its parent
@@ -2990,7 +2968,7 @@ Given('I open the custom-value-lists sample collection', async ({ fullWorkflowTe
   if (!electronApp) throw new Error('app must be launched')
   mkdirSync(fullWorkflowTempDir, { recursive: true })
   const workingCopy = join(fullWorkflowTempDir, 'custom-value-lists.restorm')
-  writeFileSync(workingCopy, CVL_SAMPLE_RESTORM, 'utf-8')
+  writeFileSync(workingCopy, readFileSync(CVL_SAMPLE_PATH, 'utf-8'), 'utf-8')
   await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: workingCopy })
   await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
   await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()

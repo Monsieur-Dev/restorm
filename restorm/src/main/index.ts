@@ -82,7 +82,7 @@ import { pricingUrl } from '../shared/config/site'
 import restormEnTranslation from '../renderer/locales/en/translation.json'
 import restormFrTranslation from '../renderer/locales/fr/translation.json'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
-import { checkFileFormatCompatibility, FILE_FORMAT_TOO_NEW_CODE } from '../shared/config/fileFormatVersion'
+import { checkFileFormatCompatibility } from '../shared/config/fileFormatVersion'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
@@ -575,10 +575,10 @@ initFileService({
   // locales, the renderer carries them all).
   validateOnOpen: (content) => {
     const compatibility = checkFileFormatCompatibility(content)
-    if (compatibility.supported) return { ok: true }
+    if (compatibility.supported || compatibility.code === null) return { ok: true }
     return {
       ok: false,
-      code: FILE_FORMAT_TOO_NEW_CODE,
+      code: compatibility.code,
       detail: { found: compatibility.found, current: compatibility.current }
     }
   }

@@ -16,6 +16,7 @@ import { McpService, getFileService, isFileServiceInitialized } from 'electron-c
 import { BrowserWindow } from 'electron'
 import { collectionStore } from '../../services/CollectionStore'
 import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
+import { CURRENT_FILE_FORMAT_VERSION, FILE_FORMAT_VERSION_KEY } from '../../../shared/config/fileFormatVersion'
 
 /**
  * Bounded wait for main's `CollectionStore` to actually reflect the
@@ -145,13 +146,18 @@ export function registerProjectTools(mcp: McpService): void {
         return errorReply(`Parent directory does not exist: ${parentDir}`)
       }
       try {
-        // Empty document body. FileService.open will stamp `_projectUuid`
-        // for us via `ensureFileUuid` so the renderer's preferences key
-        // off it from the very first `file:opened` broadcast.
+        // A new document, declaring the format it is written in. The version
+        // is not decoration: the compatibility gate reads it on open, and a
+        // document that declares nothing is refused — so a project created
+        // here has to state it or it could not be reopened.
+        //
+        // `FileService.open` stamps `_projectUuid` via `ensureFileUuid` so the
+        // renderer's preferences key off it from the first `file:opened`.
         // `wx` creates the file atomically and FAILS if it already exists —
-        // this both refuses to clobber an existing project (data loss) and
-        // closes the exists-check/write TOCTOU window.
-        await fs.writeFile(filePath, '{}', { encoding: 'utf8', flag: 'wx' })
+        // refusing to clobber an existing project and closing the
+        // exists-check/write TOCTOU window in one move.
+        const body = JSON.stringify({ [FILE_FORMAT_VERSION_KEY]: CURRENT_FILE_FORMAT_VERSION, collections: [] })
+        await fs.writeFile(filePath, body, { encoding: 'utf8', flag: 'wx' })
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
         return jsonReply({ filePath, opened: true })

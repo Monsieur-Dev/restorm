@@ -2632,6 +2632,10 @@
       "title": "A projekt újabb verzióval készült",
       "message": "Ez a fájl a jelenleg futtatottnál újabb Restorm-verzióval készült. A megnyitásához frissítse a Restormot.",
       "versions": "Fájlformátum: {{found}}; ez a verzió legfeljebb {{current}} formátumot támogat."
+    },
+    "notARestormFile": {
+      "title": "Ez nem Restorm-fájl",
+      "message": "Ez a fájl nem ad meg Restorm fájlformátumot. Nem a Restorm hozta létre, vagy kézzel szerkesztették, ezért nem nyitható meg."
     }
   }
 }

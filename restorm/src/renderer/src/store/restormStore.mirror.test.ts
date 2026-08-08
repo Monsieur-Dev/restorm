@@ -68,3 +68,39 @@ describe('restormStore — every mirror carries a version', () => {
     expect(calls).toHaveLength(0)
   })
 })
+
+describe('restormStore — the mirror carries the WHOLE root, not just collections', () => {
+  beforeEach(() => {
+    useRestormStore.setState({ collections: [], lastMcpVersion: 0 })
+  })
+
+  afterEach(() => {
+    ;(window as unknown as { restorm?: unknown }).restorm = undefined
+    vi.restoreAllMocks()
+  })
+
+  const envFolder = { id: 'coll', name: 'Coll', folderType: 'environment', items: [], tags: [], configuration: {}, environments: [] }
+  const rootScenario = { id: 'scn', name: 'Root scenario', type: 'scenario', tags: [], params: [], nodes: [], edges: [], items: [] }
+  const rootRequest = { id: 'req', name: 'Root request', type: 'http', url: 'https://example.test' }
+
+  it('forwards a root-level scenario and request to main', () => {
+    const calls = installApi()
+    // Main resolves a scenario BY ID out of this mirror (the engine's
+    // `loadScenario`), and the sidebar allows a scenario or a request at the
+    // root. Sending only the env-folders left a root scenario absent from the
+    // main-side store, and launching it reported "no scenario with id".
+    useRestormStore.getState().setCollections(
+      [envFolder] as never,
+      'user',
+      0,
+      [envFolder, rootScenario, rootRequest] as never
+    )
+    expect((calls[0]?.[0] as { id: string }[]).map((i) => i.id)).toEqual(['coll', 'scn', 'req'])
+  })
+
+  it('falls back to the collections it was given when no root is passed', () => {
+    const calls = installApi()
+    useRestormStore.getState().setCollections([envFolder] as never, 'user', 0)
+    expect((calls[0]?.[0] as { id: string }[]).map((i) => i.id)).toEqual(['coll'])
+  })
+})

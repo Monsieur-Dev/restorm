@@ -85,20 +85,28 @@ Given('the Firewall tab is open', async ({ page }) => {
   // The responsive MenuBar lays out in `full`, `overflow` or `hamburger` mode
   // depending on width; drive whichever path matches so the test is
   // layout-agnostic (same approach as the settings-tab suite).
-  const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
-  if (mode === 'full') {
-    await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
-  } else {
-    const overflowBtn = page
-      .locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`)
-      .first()
-    await overflowBtn.click({ force: true })
-    const viewEntry = page.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
-    await viewEntry.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
-    await viewEntry.hover()
-    await viewEntry.click({ force: true })
-  }
-  await firewallItem.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
+  //
+  // Wrapped in a retry because opening a menu is an INTERACTION, not an
+  // assertion: on a loaded host the submenu can miss the hover/click that was
+  // meant to expand it, and the entry then never appears — which reads as
+  // "the Firewall entry is missing" rather than as a dropped click. Re-opening
+  // is idempotent, so retry the whole open rather than lengthening a wait.
+  await expect(async () => {
+    const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
+    if (mode === 'full') {
+      await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
+    } else {
+      const overflowBtn = page
+        .locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`)
+        .first()
+      await overflowBtn.click({ force: true })
+      const viewEntry = page.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
+      await viewEntry.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
+      await viewEntry.hover()
+      await viewEntry.click({ force: true })
+    }
+    await firewallItem.waitFor({ state: 'visible', timeout: 5000 })
+  }).toPass({ timeout: 45_000 })
   await firewallItem.click({ force: true })
   await expect(page.locator(FIREWALL_TAB_CONTENT)).toBeVisible({ timeout: 15000 })
 })

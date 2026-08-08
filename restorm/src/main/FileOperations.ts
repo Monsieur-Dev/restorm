@@ -15,7 +15,6 @@ import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import {
   checkFileFormatCompatibility,
   resolveFileFormatVersion,
-  FILE_FORMAT_TOO_NEW_CODE,
   FILE_FORMAT_VERSION_KEY
 } from '../shared/config/fileFormatVersion'
 import { join, basename } from 'path'
@@ -623,15 +622,16 @@ export async function loadFolderStructure(
     // does for a single file, and refusing must leave the project on
     // disk untouched.
     const compatibility = checkFileFormatCompatibility(data)
-    if (!compatibility.supported) {
-      logger.warn('Refusing to open a folder project written by a newer build', {
+    if (!compatibility.supported && compatibility.code !== null) {
+      logger.warn('Refusing to open a folder project this build cannot read', {
         path: folderPath,
+        code: compatibility.code,
         found: compatibility.found,
         current: compatibility.current
       })
       broadcastOpenRejected({
         path: folderPath,
-        code: FILE_FORMAT_TOO_NEW_CODE,
+        code: compatibility.code,
         detail: { found: compatibility.found, current: compatibility.current }
       })
       return null

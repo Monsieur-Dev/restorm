@@ -113,3 +113,27 @@ Feature: MCP server end-to-end
     And I open the newly created request's tab via MCP with no delay in between
     Then the MCP open_tab reply should report the tab opened
     And the workbench should show a tab for the newly created request
+
+    # ── Creating at the ROOT of the sidebar via MCP ──
+    # The root is not collections-only: a scenario or a request may sit there
+    # as a sibling of a collection, and the sidebar's empty-area "add" menu
+    # already creates them there. The MCP surface has to express the same
+    # placement — omitting the parent means the root, not a missing argument.
+    #
+    # Creating one is only half of it: what MCP creates at the root must then
+    # be RESOLVABLE and LAUNCHABLE. Launching a root-placed scenario used to
+    # fail with "no scenario with id" because the renderer→main mirror kept
+    # only the env-folders, so main was asked to run a scenario it had never
+    # been told about. Every previous scenario here is nested, which is
+    # exactly why that shipped — hence the root-placed run below.
+    When I create a scenario named "Root scenario" at the root via MCP
+    Then MCP list_scenarios should report "Root scenario" at the root
+    When I create a request named "Root request" at the root via MCP
+    Then MCP list_requests should include the root request
+    # The third root kind. `create_folder` already accepted a missing parent,
+    # but nothing asserted that what it puts there is reported AT the root —
+    # a guard that tolerates a scenario can still choke on a bare folder.
+    When I create a folder named "Root folder" at the root via MCP
+    Then MCP list_folders should report "Root folder" at the root
+    When I add a log node to the root scenario and run it via MCP
+    Then the root scenario run should complete without a missing-scenario error

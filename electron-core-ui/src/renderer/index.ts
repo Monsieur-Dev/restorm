@@ -76,7 +76,6 @@ export type { ScrubOptions, ScrubViolation, UrlPolicy } from '../shared/privacy/
 
 export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 export type {
-  FeatureStrategyType,
   FeaturePlatform,
   FeatureStrategy,
   BasicStrategy,

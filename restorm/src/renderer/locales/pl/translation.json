@@ -2634,6 +2634,10 @@
       "title": "Projekt utworzony w nowszej wersji",
       "message": "Ten plik został utworzony w nowszej wersji Restorm niż używana. Zaktualizuj Restorm, aby go otworzyć.",
       "versions": "Format pliku {{found}}; ta wersja obsługuje do {{current}}."
+    },
+    "notARestormFile": {
+      "title": "To nie jest plik Restorm",
+      "message": "Ten plik nie deklaruje formatu pliku Restorm. Nie został utworzony przez Restorm lub był edytowany ręcznie, więc nie można go otworzyć."
     }
   }
 }

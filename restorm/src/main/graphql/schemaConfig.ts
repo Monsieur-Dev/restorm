@@ -141,7 +141,7 @@ function registerCustomTypes(): void {
 
   graphQLSchemaGenerator.registerCustomType(`type ResponseHistoryEntry {
   guid: String!
-  success: Boolean!
+  outcome: String!
   timestamp: String!
   pinned: Boolean!
 }`)
@@ -150,7 +150,7 @@ function registerCustomTypes(): void {
   guid: String!
   requestId: String!
   type: String!
-  success: Boolean!
+  outcome: String!
   timestamp: String!
   pinned: Boolean!
   response: JSON!

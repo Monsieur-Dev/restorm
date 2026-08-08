@@ -2633,6 +2633,10 @@
       "title": "Projekt stvoren novijom verzijom",
       "message": "Ova datoteka stvorena je novijom verzijom Restorma od one koju koristite. Ažurirajte Restorm da biste je otvorili.",
       "versions": "Format datoteke {{found}}; ova verzija podržava do {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Ovo nije Restorm datoteka",
+      "message": "Ova datoteka ne navodi Restorm format datoteke. Nije ju napisao Restorm ili je uređivana ručno, pa se ne može otvoriti."
     }
   }
 }

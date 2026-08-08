@@ -71,9 +71,7 @@ import { cloneForEventBus } from '../utils/cloneForEventBus'
 import {
   CURRENT_FILE_FORMAT_VERSION,
   resolveFileFormatVersion,
-  stripLegacyFileFormatVersion
 } from '../../../shared/config/fileFormatVersion'
-import { normalizeBodyTypes } from '../../../shared/config/normalizeBodyType'
 import type { Folder, EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder, isScenario } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
@@ -918,36 +916,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         clearTabDirtyState()
 
         // The document's format version, read from its root and nowhere
-        // else. A document that declares nothing there — whether it
-        // predates the field or carries it on a collection — loads as
-        // the current version. Resolved BEFORE the checksum baseline
-        // below, so dropping the stale collection-level key (just after)
-        // is part of the "loaded" snapshot and never looks like an edit.
+        // else. Resolved BEFORE the checksum baseline below so it is part
+        // of the "loaded" snapshot and never looks like an edit.
         fileFormatVersionRef.current = resolveFileFormatVersion(content, logger)
 
         const collectionsWithIds = processAfterDeserialization(collections)
-        for (const root of collectionsWithIds) {
-          // Drop the version from the collection it used to sit on. In
-          // memory only — the file keeps it until the user saves, and an
-          // open is not a save. Without this the stray key would ride
-          // the save payload back to disk (unknown keys round-trip) and
-          // the document would declare its version twice.
-          //
-          // THE ORDER HERE IS LOAD-BEARING, not incidental: resolve the
-          // version, strip, wrap reactive, THEN take the checksum
-          // baseline. Taking the baseline before the strip makes a
-          // document that carries the old key come out DIRTY on open —
-          // the tree no longer matches the baseline it was measured
-          // against — which is exactly the "opening a project changes it"
-          // behaviour this area exists to prevent. Nothing tests this
-          // sequence; moving a line here is silent until a user sees a
-          // dirty dot on a project they only looked at.
-          stripLegacyFileFormatVersion(root)
-          // Rewrite legacy camelCase `body.type` spellings to the
-          // canonical kebab-case form (same BEFORE-reactive-wrap /
-          // BEFORE-checksum-baseline contract).
-          normalizeBodyTypes(root)
-        }
         // Requests can legally live at the root (see `useImport`'s
         // empty-file branch). Folders and env-folders go through
         // `makeReactiveFolder`; root-level requests go through

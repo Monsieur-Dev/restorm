@@ -2632,6 +2632,10 @@
       "title": "Projekti u krijua me një version më të ri",
       "message": "Ky skedar u krijua me një version më të ri të Restorm sesa ai që po përdorni. Përditësoni Restorm për ta hapur.",
       "versions": "Formati i skedarit {{found}}; ky version mbështet deri në {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Ky nuk është një skedar Restorm",
+      "message": "Ky skedar nuk deklaron asnjë format skedari Restorm. Nuk është krijuar nga Restorm ose është modifikuar me dorë, prandaj nuk mund të hapet."
     }
   }
 }

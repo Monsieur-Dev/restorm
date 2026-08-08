@@ -321,35 +321,9 @@ export interface InitializeAppOptions {
 /**
  * Initialize Electron application.
  *
- * Two call forms are supported:
- * - object form: `initializeApp(appName, { createWindow, splash, … })` — use
- *   this to opt into the splash screen + other options;
- * - legacy positional form: `initializeApp(appName, createWindow, devResourcesPath, …)`
- *   — kept working for existing callers.
+ * One call form: `initializeApp(appName, { createWindow, splash, … })`.
  */
-export function initializeApp(
-  appName: string,
-  optionsOrCreateWindow: InitializeAppOptions | (() => BaseWindow | undefined),
-  devResourcesPath?: string,
-  onActivate?: () => void,
-  rendererPath?: string,
-  appSettingsConfigPath?: string,
-  appFeaturesConfigPath?: string
-): void {
-  // Normalize the two call forms into a single options object. With
-  // `exactOptionalPropertyTypes`, only include the optional keys that are
-  // actually defined rather than assigning `undefined`.
-  const options: InitializeAppOptions = typeof optionsOrCreateWindow === 'function'
-    ? {
-        createWindow: optionsOrCreateWindow,
-        ...(devResourcesPath !== undefined ? { devResourcesPath } : {}),
-        ...(onActivate !== undefined ? { onActivate } : {}),
-        ...(rendererPath !== undefined ? { rendererPath } : {}),
-        ...(appSettingsConfigPath !== undefined ? { appSettingsConfigPath } : {}),
-        ...(appFeaturesConfigPath !== undefined ? { appFeaturesConfigPath } : {})
-      }
-    : optionsOrCreateWindow
-
+export function initializeApp(appName: string, options: InitializeAppOptions): void {
   configureCommandLineSwitches()
 
   let splash: SplashWindowHandle | null = null

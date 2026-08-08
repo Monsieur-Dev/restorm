@@ -9,14 +9,6 @@ import { ScrollableElement } from '../ScrollableElement'
 import './selectBox.css'
 import './selectBoxCustom.css'
 
-// Template data interface (kept for compatibility)
-// interface SelectListTemplateData {
-//   root: HTMLElement
-//   text: HTMLElement
-//   detail: HTMLElement
-//   decoratorRight: HTMLElement
-// }
-
 const SelectBoxList: React.FC<SelectBoxListProps> = ({
   options,
   selected,

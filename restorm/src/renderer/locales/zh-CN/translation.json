@@ -2631,6 +2631,10 @@
       "title": "项目由更新版本创建",
       "message": "此文件由比您当前使用的 Restorm 更新的版本创建。请更新 Restorm 后再打开。",
       "versions": "文件格式 {{found}}；当前版本最高支持 {{current}}。"
+    },
+    "notARestormFile": {
+      "title": "这不是 Restorm 文件",
+      "message": "此文件未声明 Restorm 文件格式。它不是由 Restorm 创建的，或者被手动编辑过，因此无法打开。"
     }
   }
 }

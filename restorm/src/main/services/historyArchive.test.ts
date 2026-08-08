@@ -27,7 +27,7 @@ describe('historyArchive', () => {
     try {
       const index: HistoryArchiveIndex = {
         version: 2,
-        requests: [{ requestId: 'r1', entries: [{ guid: 'g1', timestamp: '2026-01-01T00:00:00Z', pinned: false, success: true, outcome: 'ok' }] }],
+        requests: [{ requestId: 'r1', entries: [{ guid: 'g1', timestamp: '2026-01-01T00:00:00Z', pinned: false, outcome: 'ok' }] }],
         scenarios: [{ scenarioId: 's1', runs: [{ guid: 'sr1', timestamp: '2026-01-02T00:00:00Z', pinned: true, status: 'completed', scenarioName: 'Fight' }] }]
       }
       const entries = new Map<string, string>([

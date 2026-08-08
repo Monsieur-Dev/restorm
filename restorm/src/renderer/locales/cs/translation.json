@@ -2634,6 +2634,10 @@
       "title": "Projekt vytvořen novější verzí",
       "message": "Tento soubor byl vytvořen novější verzí Restormu, než kterou používáte. Aktualizujte prosím Restorm, abyste jej mohli otevřít.",
       "versions": "Formát souboru {{found}}; tato verze podporuje až {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Toto není soubor Restormu",
+      "message": "Tento soubor neuvádí formát souboru Restormu. Nebyl vytvořen Restormem, nebo byl upraven ručně, a proto jej nelze otevřít."
     }
   }
 }

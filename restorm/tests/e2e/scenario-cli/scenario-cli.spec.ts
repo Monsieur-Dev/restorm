@@ -20,10 +20,22 @@ interface CliResult { code: number | null; stdout: string; stderr: string }
 
 function runCli(args: string[]): Promise<CliResult> {
   return new Promise((resolve, reject) => {
+    // Each invocation gets its OWN userData dir. Without it every CLI run
+    // shares the default profile and takes its single-instance lock: a second
+    // run forwards its argv to the first and quits, so the caller sees an
+    // empty stdout and a hang until the test's timeout. That made this suite
+    // pass or fail depending on what else happened to be running.
+    const isolatedUserDataDir = mkdtempSync(join(tmpdir(), 'restorm-cli-'))
     const child = spawn(ELECTRON, ['--no-sandbox', '--ozone-platform=x11', MAIN_JS, ...args], {
       // RESTORM_E2E_ENTITLEMENT_PLAN seeds Pro entitlement so the headless gate
       // is bypassed in dev builds — mirrors mcp-server.fixture.ts.
-      env: { ...process.env, TZ: 'UTC', NODE_ENV: 'development', RESTORM_E2E_ENTITLEMENT_PLAN: 'pro' }
+      env: {
+        ...process.env,
+        TZ: 'UTC',
+        NODE_ENV: 'development',
+        RESTORM_E2E_ENTITLEMENT_PLAN: 'pro',
+        RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+      }
     })
     let stdout = ''
     let stderr = ''

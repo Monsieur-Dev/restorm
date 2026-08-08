@@ -422,7 +422,7 @@ const RESPONSE_HISTORY_LIST_QUERY = `
   query ResponseHistoryList($requestId: String) {
     responseHistoryList(requestId: $requestId) {
       guid
-      success
+      outcome
       timestamp
       pinned
     }
@@ -435,7 +435,7 @@ const RESPONSE_HISTORY_DETAIL_QUERY = `
       guid
       requestId
       type
-      success
+      outcome
       timestamp
       pinned
       response
@@ -649,7 +649,7 @@ export async function deleteEnvironment(id: string): Promise<boolean> {
 
 export async function getResponseHistoryList(requestId: string): Promise<{
   guid: string
-  success: boolean
+  outcome: string
   timestamp: string
   pinned: boolean
 }[]> {
@@ -657,7 +657,7 @@ export async function getResponseHistoryList(requestId: string): Promise<{
   try {
     const result = await executeGraphQL<{ responseHistoryList: {
       guid: string
-      success: boolean
+      outcome: string
       timestamp: string
       pinned: boolean
     }[] }>(RESPONSE_HISTORY_LIST_QUERY, { requestId })
@@ -681,7 +681,7 @@ export async function getResponseHistoryDetail(guid: string): Promise<{
   guid: string
   requestId: string
   type: string
-  success: boolean
+  outcome: string
   timestamp: string
   pinned: boolean
   response: unknown
@@ -692,7 +692,7 @@ export async function getResponseHistoryDetail(guid: string): Promise<{
       guid: string
       requestId: string
       type: string
-      success: boolean
+      outcome: string
       timestamp: string
       pinned: boolean
       response: unknown
