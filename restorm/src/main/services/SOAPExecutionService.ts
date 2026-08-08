@@ -236,6 +236,10 @@ class SOAPExecutionService {
           requestId,
           success: false,
           error: `Invalid URL: ${resolvedUrl}`,
+          // Report the URL that was actually built — the response panel reads
+          // this field, and without it it falls back to the UNRESOLVED
+          // template, which reads as "the variables were never substituted".
+          requestUrl: resolvedUrl,
           timings: { startedAt, durationMs: Date.now() - startTime }
         }
       }

@@ -92,12 +92,17 @@ describe('request progress lifecycle', () => {
     it('emits a terminal event when the URL cannot be parsed', async () => {
       // The `0 Error` case: an empty / malformed URL fails `new URL()` and
       // the execution returns before any transport work happens.
-      getResolvedUrlMock.mockReturnValue({ resolvedUrl: '' })
+      getResolvedUrlMock.mockReturnValue({ resolvedUrl: 'aze/pet/1' })
 
       const result = await httpExecutionService.execute({ requestId: 'http-bad-url', method: 'DELETE' })
 
       expect(result.success).toBe(false)
       expect(result.error).toContain('Invalid URL')
+      // The RESOLVED url is reported even though it could not be parsed: the
+      // response panel reads this field, and without it the panel shows the
+      // raw `{{variable}}` template — which reads as "substitution did not
+      // happen" when it did.
+      expect(result.requestUrl).toBe('aze/pet/1')
       expect(statusesFor('http-bad-url')).toEqual(['started', 'error'])
     })
 

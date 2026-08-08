@@ -241,6 +241,12 @@ class HTTPExecutionService {
           requestId,
           success: false,
           error: `Invalid URL: ${resolvedUrl}`,
+          // Report the URL that was actually built. Every other outcome carries
+          // it, and the response panel reads it: leaving it out here made the
+          // panel fall back to the UNRESOLVED template, so a user whose
+          // variable resolved to something unusable saw `{{baseUrl}}/…` and
+          // concluded the substitution had not happened at all.
+          requestUrl: resolvedUrl,
           timings: { startedAt, durationMs: Date.now() - startTime }
         }
       }

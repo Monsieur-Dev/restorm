@@ -376,44 +376,47 @@ class ContextService {
       }
     }
 
-    // Second pass: re-resolve all ExpressionValues with the complete context.
-    // This allows an Expression defined in a parent env to reference variables
-    // that are overridden by a child env (e.g. baseUrl in root uses scheme
-    // that is overridden by sub-envs http/https).
-    for (const kv of meta.rawVariables) {
-      if (kv.enabled === false) continue
-      if (kv.key && isExpressionValue(kv.value)) {
-        const raw = kv.value.toString()
-        const reResolved = this.transformValue(raw, finalContext)
-        if (reResolved !== finalContext[kv.key]) {
-          finalContext[kv.key] = reResolved
-          if (kv.id) {
-            this.storeAndBroadcastTransformResult(kv.id, {
-              contextUsed: { ...finalContext },
-              transformedValue: reResolved,
-              rawValue: raw,
-              key: kv.key
-            })
-          }
-        }
+    // Second pass: re-resolve the chain's ExpressionValues against the COMPLETE
+    // context. An expression may reference a variable declared after it in the
+    // same environment, or one a descendant redefines (a root `baseUrl` built
+    // from a `scheme` each sub-environment overrides), and neither is visible
+    // when the row is first resolved above.
+    //
+    // Re-resolution gives an expression a complete context; it must NOT
+    // re-decide which row defines a key. Only the row that WON its key may
+    // write it back — the last enabled row of the deepest environment that
+    // defines it. Without that gate an expression a later row (a second row
+    // with the same key, which is a legitimate way to toggle between two
+    // values) or a child environment had overridden resurrects its own value
+    // here, silently undoing the override everywhere the context is read.
+    const { rows: chainRows, winners } = this.resolutionOrderedRows(parentChain, envId)
+    for (const { kv, own } of chainRows) {
+      if (!isExpressionValue(kv.value)) continue
+      const raw = kv.value.toString()
+      const reResolved = this.transformValue(raw, finalContext)
+      // DISPLAY first, and for every own row — losing rows included. A row that
+      // an override supersedes still shows its own resolved value in its own
+      // cell, and that value is only correct against the complete context: the
+      // first pass resolved it against a partial one, so a row reading
+      // `{{scheme}}://api.example.com` would otherwise keep displaying
+      // `://api.example.com` forever.
+      //
+      // A row belonging to an ancestor is displayed by that ancestor's own
+      // recompute, against that ancestor's context — broadcasting it from here
+      // would show it the value it takes in THIS environment.
+      if (own && kv.id) {
+        this.storeAndBroadcastTransformResult(kv.id, {
+          contextUsed: { ...finalContext },
+          transformedValue: reResolved,
+          rawValue: raw,
+          key: kv.key
+        })
       }
-    }
-
-    // Also re-resolve inherited parent ExpressionValues that may depend
-    // on variables overridden by this environment.
-    for (const parentId of parentChain) {
-      const parentMeta = this.environmentMeta.get(parentId)
-      if (!parentMeta) continue
-      for (const kv of parentMeta.rawVariables) {
-        if (kv.enabled === false) continue
-        if (kv.key && isExpressionValue(kv.value)) {
-          const raw = kv.value.toString()
-          const reResolved = this.transformValue(raw, finalContext)
-          if (reResolved !== finalContext[kv.key]) {
-            finalContext[kv.key] = reResolved
-          }
-        }
-      }
+      // Only the winner may write the CONTEXT — that is the ownership decision
+      // re-resolution must not make.
+      if (winners.get(kv.key) !== kv) continue
+      if (reResolved === finalContext[kv.key]) continue
+      finalContext[kv.key] = reResolved
     }
 
     // Store the result
@@ -421,6 +424,39 @@ class ContextService {
 
     // Publish context change to GraphQL subscribers
     this.publishContextChanged(envId, finalContext)
+  }
+
+  /**
+   * The enabled, keyed variable rows an environment resolves against, in the
+   * order they are applied — each ancestor root → direct parent, then the
+   * environment's own, each in row order — together with the row that WINS
+   * each key.
+   *
+   * The winner is simply the last row in that order, which is what makes both
+   * override rules one rule: a later row beats an earlier one, and a child
+   * environment beats its parent. Disabled rows are absent, so switching a
+   * duplicate row's `enabled` off hands the key back to the row above it.
+   *
+   * Rows are the live `environmentMeta` instances, so callers can compare
+   * against `winners` by identity.
+   */
+  private resolutionOrderedRows(
+    parentChain: string[],
+    envId: string
+  ): { rows: { kv: KeyValue; own: boolean }[]; winners: Map<string, KeyValue> } {
+    const rows: { kv: KeyValue; own: boolean }[] = []
+    for (const chainEnvId of [...parentChain, envId]) {
+      const chainMeta = this.environmentMeta.get(chainEnvId)
+      if (!chainMeta) continue
+      const own = chainEnvId === envId
+      for (const kv of chainMeta.rawVariables) {
+        if (kv.enabled === false || !kv.key) continue
+        rows.push({ kv, own })
+      }
+    }
+    const winners = new Map<string, KeyValue>()
+    for (const { kv } of rows) winners.set(kv.key, kv)
+    return { rows, winners }
   }
 
   /**

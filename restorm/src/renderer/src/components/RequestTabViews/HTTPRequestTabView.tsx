@@ -404,6 +404,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         scheduleSettleFlush()
         return
       }
+      // Main serializes its recomputes, so this event is fresher than any
+      // buffered own-echo — drop the buffer, or the settle flush would
+      // re-apply the stale echo over this value (e.g. an env switch right
+      // after a data push would show the OLD environment's URL forever).
+      pendingResolvedUrlRef.current = null
       setResolvedUrl(result.resolvedUrl)
     })
 
@@ -414,6 +419,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         scheduleSettleFlush()
         return
       }
+      pendingCodeSnippetsRef.current = null
       setBackendCodeSnippets(result.markdown)
     })
 
