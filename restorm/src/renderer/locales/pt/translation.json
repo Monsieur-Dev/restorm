@@ -2334,7 +2334,8 @@
       "stopListening": "Parar de escutar",
       "notListening": "Sem escutar",
       "served": "A escutar — {{count}} pedido(s) atendido(s)",
-      "listenFailed": "Falha ao iniciar o servidor simulado"
+      "listenFailed": "Falha ao iniciar o servidor simulado",
+      "portInUse": "A porta {{port}} já está sendo usada por outro aplicativo. Encerre-o ou escolha outra porta e inicie o servidor novamente."
     }
   },
   "odata": {

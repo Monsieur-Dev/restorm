@@ -2336,7 +2336,8 @@
       "stopListening": "Zastavit naslouchání",
       "notListening": "Neposlouchá",
       "served": "Naslouchá — obslouženo {{count}} požadavků",
-      "listenFailed": "Nepodařilo se spustit mock server"
+      "listenFailed": "Nepodařilo se spustit mock server",
+      "portInUse": "Port {{port}} je již používán jinou aplikací. Ukončete ji nebo zvolte jiný port a spusťte server znovu."
     }
   },
   "odata": {

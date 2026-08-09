@@ -2334,7 +2334,8 @@
       "stopListening": "Arrêter l'écoute",
       "notListening": "Pas à l'écoute",
       "served": "À l'écoute — {{count}} requête(s) servie(s)",
-      "listenFailed": "Échec du démarrage du serveur fictif"
+      "listenFailed": "Échec du démarrage du serveur fictif",
+      "portInUse": "Le port {{port}} est déjà utilisé par une autre application. Arrêtez-la ou choisissez un autre port, puis relancez le serveur."
     }
   },
   "odata": {

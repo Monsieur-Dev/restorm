@@ -950,7 +950,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     return `localhost:${port}/${rootPart.replace(/^\/+/, '')}`
   }, [])
   const setServerPort = useCallback((p: string): void => {
-    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoot))
+    setUrl(composeServerUrl(p, serverRoot))
   }, [composeServerUrl, serverRoot, setUrl])
   const setServerRoot = useCallback((p: string): void => {
     setUrl(composeServerUrl(serverPort, p))
@@ -1018,23 +1018,24 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     <div data-testid="odata-request-url-section-host">
       <div style={urlRowStyle} data-testid="odata-server-url-section">
         <span style={labelStyle}>localhost:</span>
-        <div style={serverPortWrapperStyle}>
-          <InputBox
+        <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+          <RestormVariableInputBox
             value={serverPort}
             onChange={setServerPort}
-            options={{ placeholder: '8081' }}
+            variables={urlVariables}
+            helpers={handlebarsHelpers}
+            placeholder="8081"
             data-testid="odata-server-port"
-            disabled={isListening}
           />
         </div>
         <span style={labelStyle}>/</span>
-        <div style={urlInputWrapperStyle}>
-          <InputBox
+        <div style={{ ...urlInputWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+          <RestormVariableInputBox
             value={serverRoot}
             onChange={setServerRoot}
-            options={{ placeholder: 'odata' }}
+            variables={urlVariables}
+            helpers={handlebarsHelpers}
             data-testid="odata-server-root"
-            disabled={isListening}
           />
         </div>
         <div style={sendButtonWrapperStyle}>

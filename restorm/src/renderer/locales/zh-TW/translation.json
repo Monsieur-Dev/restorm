@@ -2333,7 +2333,8 @@
       "stopListening": "停止監聽",
       "notListening": "未在監聽",
       "served": "監聽中 — 已服務 {{count}} 個請求",
-      "listenFailed": "無法啟動模擬伺服器"
+      "listenFailed": "無法啟動模擬伺服器",
+      "portInUse": "連接埠 {{port}} 已被其他應用程式佔用。請關閉該應用程式或選擇其他連接埠，然後重新啟動伺服器。"
     }
   },
   "odata": {

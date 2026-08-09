@@ -2334,7 +2334,8 @@
       "stopListening": "Stop med at lytte",
       "notListening": "Lytter ikke",
       "served": "Lytter — {{count}} anmodning(er) betjent",
-      "listenFailed": "Kunne ikke starte mock-serveren"
+      "listenFailed": "Kunne ikke starte mock-serveren",
+      "portInUse": "Port {{port}} bruges allerede af et andet program. Luk det, eller vælg en anden port, og start serveren igen."
     }
   },
   "odata": {

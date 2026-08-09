@@ -2335,7 +2335,8 @@
       "stopListening": "Oprește ascultarea",
       "notListening": "Nu ascultă",
       "served": "Ascultă — {{count}} cerere(i) servite",
-      "listenFailed": "Pornirea serverului simulat a eșuat"
+      "listenFailed": "Pornirea serverului simulat a eșuat",
+      "portInUse": "Portul {{port}} este deja folosit de o altă aplicație. Închideți-o sau alegeți alt port, apoi reporniți serverul."
     }
   },
   "odata": {

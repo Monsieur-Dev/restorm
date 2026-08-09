@@ -2333,7 +2333,8 @@
       "stopListening": "停止监听",
       "notListening": "未在监听",
       "served": "监听中 — 已服务 {{count}} 个请求",
-      "listenFailed": "无法启动模拟服务器"
+      "listenFailed": "无法启动模拟服务器",
+      "portInUse": "端口 {{port}} 已被其他应用程序占用。请关闭该应用或选择其他端口，然后重新启动服务器。"
     }
   },
   "odata": {

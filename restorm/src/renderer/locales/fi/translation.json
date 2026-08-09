@@ -2334,7 +2334,8 @@
       "stopListening": "Lopeta kuuntelu",
       "notListening": "Ei kuuntele",
       "served": "Kuuntelee — {{count}} pyyntö(ä) palveltu",
-      "listenFailed": "Mock-palvelimen käynnistys epäonnistui"
+      "listenFailed": "Mock-palvelimen käynnistys epäonnistui",
+      "portInUse": "Portti {{port}} on jo toisen sovelluksen käytössä. Sulje se tai valitse toinen portti ja käynnistä palvelin uudelleen."
     }
   },
   "odata": {

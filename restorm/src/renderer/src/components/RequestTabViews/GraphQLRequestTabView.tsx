@@ -8,7 +8,6 @@ import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
   CodeEditor,
-  InputBox,
   SplitView,
   Pane,
   ControlGroup,
@@ -419,7 +418,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     return `localhost:${port}/${cleanPath}`
   }, [])
   const setServerPort = useCallback((p: string): void => {
-    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverPath))
+    setUrl(composeServerUrl(p, serverPath))
   }, [composeServerUrl, serverPath, setUrl])
   const setServerPath = useCallback((p: string): void => {
     setUrl(composeServerUrl(serverPort, p))
@@ -920,23 +919,24 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         // SERVER MODE: localhost-fixed host + port + endpoint path.
         <>
           <span style={serverHostLabelStyle}>localhost:</span>
-          <div style={serverPortWrapperStyle}>
-            <InputBox
+          <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+            <RestormVariableInputBox
               value={serverPort}
               onChange={setServerPort}
-              options={{ placeholder: '4000' }}
+              variables={envVariables}
+              helpers={handlebarsHelpers}
+              placeholder="4000"
               data-testid="graphql-server-port-input"
-              disabled={isListening}
             />
           </div>
           <span style={serverHostLabelStyle}>/</span>
-          <div style={urlInputWrapperStyle}>
-            <InputBox
+          <div style={{ ...urlInputWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+            <RestormVariableInputBox
               value={serverPath}
               onChange={setServerPath}
-              options={{ placeholder: 'graphql' }}
+              variables={envVariables}
+              helpers={handlebarsHelpers}
               data-testid="graphql-server-path-input"
-              disabled={isListening}
             />
           </div>
           {!inWorkbenchTab && (

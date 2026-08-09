@@ -2334,7 +2334,8 @@
       "stopListening": "Empfang stoppen",
       "notListening": "Hört nicht zu",
       "served": "Hört zu — {{count}} Anfrage(n) bedient",
-      "listenFailed": "Mock-Server konnte nicht gestartet werden"
+      "listenFailed": "Mock-Server konnte nicht gestartet werden",
+      "portInUse": "Port {{port}} wird bereits von einer anderen Anwendung verwendet. Beenden Sie sie oder wählen Sie einen anderen Port und starten Sie den Server erneut."
     }
   },
   "odata": {

@@ -57,7 +57,7 @@ class GraphQLMockServerService {
    */
   async listen(requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> {
     const fullData = contextService.getRequestContext(requestId)?.fullData
-    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    const { port, path } = this.parseMockAddress(this.resolvedMockUrl(requestId, fullData?.url ?? ''))
     if (!Number.isFinite(port) || port <= 0) {
       return { success: false, listening: false, error: 'A valid localhost port is required for a GraphQL mock server' }
     }
@@ -102,7 +102,7 @@ class GraphQLMockServerService {
   }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
     const { requestId } = input
     const fullData = contextService.getRequestContext(requestId)?.fullData
-    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    const { port, path } = this.parseMockAddress(this.resolvedMockUrl(requestId, fullData?.url ?? ''))
     let fired = false
     const fireClose = (error?: string): void => {
       if (fired) return
@@ -270,6 +270,14 @@ class GraphQLMockServerService {
     replay.url = req.url
     replay.headers = req.headers
     return replay
+  }
+
+  /** The mock address with its Handlebars expressions substituted — port and
+   * path are expression fields like a client URL. Falls back to the raw url
+   * when no resolution exists, so a plain literal keeps working unchanged. */
+  private resolvedMockUrl(requestId: string, rawUrl: string): string {
+    const resolved = contextService.resolveUrlForRequest(requestId)?.resolvedUrl
+    return resolved && resolved.trim().length > 0 ? resolved : rawUrl
   }
 
   /** Split a mock address (`localhost:<port><path>`) into numeric port + path

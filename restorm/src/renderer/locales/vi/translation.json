@@ -2333,7 +2333,8 @@
       "stopListening": "Dừng lắng nghe",
       "notListening": "Không lắng nghe",
       "served": "Đang lắng nghe — đã phục vụ {{count}} yêu cầu",
-      "listenFailed": "Không thể khởi động máy chủ giả lập"
+      "listenFailed": "Không thể khởi động máy chủ giả lập",
+      "portInUse": "Cổng {{port}} đã được ứng dụng khác sử dụng. Hãy đóng ứng dụng đó hoặc chọn cổng khác, rồi khởi động lại máy chủ."
     }
   },
   "odata": {

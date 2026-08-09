@@ -2333,7 +2333,8 @@
       "stopListening": "Berhenti mendengarkan",
       "notListening": "Tidak mendengarkan",
       "served": "Mendengarkan — {{count}} permintaan dilayani",
-      "listenFailed": "Gagal memulai server mock"
+      "listenFailed": "Gagal memulai server mock",
+      "portInUse": "Port {{port}} sudah digunakan oleh aplikasi lain. Tutup aplikasi tersebut atau pilih port lain, lalu mulai ulang server."
     }
   },
   "odata": {

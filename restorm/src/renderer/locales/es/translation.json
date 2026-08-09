@@ -2334,7 +2334,8 @@
       "stopListening": "Dejar de escuchar",
       "notListening": "Sin escuchar",
       "served": "Escuchando — {{count}} solicitud(es) atendida(s)",
-      "listenFailed": "No se pudo iniciar el servidor simulado"
+      "listenFailed": "No se pudo iniciar el servidor simulado",
+      "portInUse": "El puerto {{port}} ya está siendo utilizado por otra aplicación. Deténgala o elija otro puerto y vuelva a iniciar el servidor."
     }
   },
   "odata": {

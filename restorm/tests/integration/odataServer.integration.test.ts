@@ -32,7 +32,9 @@ import { odataMockServerService, DEFAULT_ODATA_SERVICE_ROOT } from '../../src/ma
 import { contextService } from '../../src/main/services/ContextService'
 
 vi.mock('../../src/main/services/ContextService', () => ({
-  contextService: { getRequestContext: vi.fn() }
+  // resolveUrlForRequest: the service resolves the mock address's Handlebars
+  // expressions before parsing; undefined keeps the raw url.
+  contextService: { getRequestContext: vi.fn(), resolveUrlForRequest: () => undefined }
 }))
 
 const METADATA = `<?xml version="1.0" encoding="utf-8"?>

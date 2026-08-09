@@ -2335,7 +2335,8 @@
       "stopListening": "Zaustavi slušanje",
       "notListening": "Ne sluša",
       "served": "Sluša — posluženo {{count}} zahtjeva",
-      "listenFailed": "Pokretanje mock poslužitelja nije uspjelo"
+      "listenFailed": "Pokretanje mock poslužitelja nije uspjelo",
+      "portInUse": "Port {{port}} već koristi druga aplikacija. Zatvorite je ili odaberite drugi port, pa ponovno pokrenite poslužitelj."
     }
   },
   "odata": {

@@ -601,7 +601,11 @@ class ResponseHistoryService {
     const requestParams = this.getResolvedKeyValues(requestId, 'params', runContexts)
     const requestPathParams = this.getResolvedKeyValues(requestId, 'pathParams', runContexts)
 
-    const requestBodyData = this.getRequestBodyData(requestId)
+    // A mock-server route's configured body IS the body it serves — storing
+    // it as "request body" would duplicate the Response tab in the history
+    // view for every served entry. Served entries carry no request body.
+    const isMockServer = contextService.getRequestContext(requestId)?.fullData?.server === true
+    const requestBodyData = isMockServer ? undefined : this.getRequestBodyData(requestId)
     const requestBody = requestBodyData ? this.buildHttpBody(requestId, requestBodyData, requestHeaders, runContexts) : undefined
 
     let responseHeaders = this.headersRecordToKeyValues(result.headers)

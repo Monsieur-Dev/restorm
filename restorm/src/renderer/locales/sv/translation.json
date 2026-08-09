@@ -2334,7 +2334,8 @@
       "stopListening": "Sluta lyssna",
       "notListening": "Lyssnar inte",
       "served": "Lyssnar — {{count}} förfrågning(ar) betjänad(e)",
-      "listenFailed": "Det gick inte att starta mockservern"
+      "listenFailed": "Det gick inte att starta mockservern",
+      "portInUse": "Port {{port}} används redan av ett annat program. Stäng det eller välj en annan port och starta om servern."
     }
   },
   "odata": {

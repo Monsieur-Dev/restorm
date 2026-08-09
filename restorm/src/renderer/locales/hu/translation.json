@@ -2334,7 +2334,8 @@
       "stopListening": "Hallgatás leállítása",
       "notListening": "Nem figyel",
       "served": "Figyel — {{count}} kérés kiszolgálva",
-      "listenFailed": "A mock-kiszolgáló indítása sikertelen"
+      "listenFailed": "A mock-kiszolgáló indítása sikertelen",
+      "portInUse": "A(z) {{port}} portot már egy másik alkalmazás használja. Zárja be, vagy válasszon másik portot, majd indítsa újra a kiszolgálót."
     }
   },
   "odata": {

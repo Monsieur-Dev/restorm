@@ -2334,7 +2334,8 @@
       "stopListening": "Smetti di ascoltare",
       "notListening": "Non in ascolto",
       "served": "In ascolto — {{count}} richiesta/e servita/e",
-      "listenFailed": "Impossibile avviare il server mock"
+      "listenFailed": "Impossibile avviare il server mock",
+      "portInUse": "La porta {{port}} è già utilizzata da un'altra applicazione. Chiudila o scegli un'altra porta, poi riavvia il server."
     }
   },
   "odata": {

@@ -2336,7 +2336,8 @@
       "stopListening": "Zatrzymaj nasłuchiwanie",
       "notListening": "Nie nasłuchuje",
       "served": "Nasłuchuje — obsłużono {{count}} żądań",
-      "listenFailed": "Nie udało się uruchomić serwera mock"
+      "listenFailed": "Nie udało się uruchomić serwera mock",
+      "portInUse": "Port {{port}} jest już używany przez inną aplikację. Zamknij ją lub wybierz inny port, a następnie uruchom serwer ponownie."
     }
   },
   "odata": {

@@ -26,6 +26,7 @@ import { join } from 'node:path'
 import { BrowserWindow } from 'electron'
 import * as grpc from '@grpc/grpc-js'
 import { logger } from 'electron-core-ui/main'
+import { contextService } from './ContextService'
 import { collectionStore } from './CollectionStore'
 import {
   loadGrpcPackage,
@@ -268,7 +269,7 @@ class GRPCMockServerService {
     if (req.server !== true) {
       throw new Error('gRPC mock server: the bound request is not in server mode')
     }
-    const port = this.parseServerPort(req.url)
+    const port = this.parseServerPort(this.resolvedMockUrl(requestId, req.url))
     if (!Number.isFinite(port) || port <= 0) {
       throw new Error('A valid localhost port is required for a gRPC mock server')
     }
@@ -566,6 +567,14 @@ class GRPCMockServerService {
       )
     }
     return grpc.ServerCredentials.createInsecure()
+  }
+
+  /** The mock address with its Handlebars expressions substituted — port and
+   * path are expression fields like a client URL. Falls back to the raw url
+   * when no resolution exists, so a plain literal keeps working unchanged. */
+  private resolvedMockUrl(requestId: string, rawUrl: string): string {
+    const resolved = contextService.resolveUrlForRequest(requestId)?.resolvedUrl
+    return resolved && resolved.trim().length > 0 ? resolved : rawUrl
   }
 
   /** Split a mock address (`localhost:<port>`, optional scheme/path) into its

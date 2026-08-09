@@ -15,6 +15,9 @@ import type { SoapRequest, SoapMockOperation } from '../../../../shared/types/re
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { updateReactiveProperty } from './requestTabViewUtils'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
@@ -74,6 +77,8 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
   const sourceIdRef = useRef<string>(crypto.randomUUID())
 
   const { port: serverPort, route: serverRoute } = useMemo(() => parseServerUrl(url), [url])
+  const envVariables = useEnvVariables(request.id)
+  const handlebarsHelpers = useHandlebarsHelpers()
 
   const composeServerUrl = useCallback((port: string, routePart: string): string => {
     const cleanRoute = routePart.replace(/^\/+/, '')
@@ -84,7 +89,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
     setUrlState(value)
     updateReactiveProperty(request, 'url', value)
   }, [request])
-  const setServerPort = useCallback((p: string): void => { setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoute)) }, [composeServerUrl, serverRoute, setUrl])
+  const setServerPort = useCallback((p: string): void => { setUrl(composeServerUrl(p, serverRoute)) }, [composeServerUrl, serverRoute, setUrl])
   const setServerRoute = useCallback((r: string): void => { setUrl(composeServerUrl(serverPort, r)) }, [composeServerUrl, serverPort, setUrl])
 
   const setOperations = useCallback((next: SoapMockOperation[]): void => {
@@ -167,23 +172,26 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
   const urlSection = (
     <ControlGroup data-testid="soap-server-url-section">
       <span style={serverHostLabelStyle} data-testid="soap-server-host">localhost:</span>
-      <div style={serverPortWrapperStyle}>
-        <InputBox
+      <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+        <RestormVariableInputBox
           value={serverPort}
           onChange={setServerPort}
-          options={{ placeholder: '8080', ariaLabel: t('soap.server.portLabel', 'Port') }}
+          variables={envVariables}
+          helpers={handlebarsHelpers}
+          placeholder="8080"
+          ariaLabel={t('soap.server.portLabel', 'Port')}
           data-testid="soap-server-port-input"
-          disabled={isListening}
         />
       </div>
       <span style={serverHostLabelStyle}>/</span>
-      <div style={urlInputWrapperStyle}>
-        <InputBox
+      <div style={{ ...urlInputWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+        <RestormVariableInputBox
           value={serverRoute}
           onChange={setServerRoute}
-          options={{ placeholder: 'soap', ariaLabel: t('soap.server.routeLabel', 'Route') }}
+          variables={envVariables}
+          helpers={handlebarsHelpers}
+          ariaLabel={t('soap.server.routeLabel', 'Route')}
           data-testid="soap-server-route-input"
-          disabled={isListening}
         />
       </div>
       {!inWorkbenchTab && (

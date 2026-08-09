@@ -2334,7 +2334,8 @@
       "stopListening": "Dinlemeyi durdur",
       "notListening": "Dinlemiyor",
       "served": "Dinliyor — {{count}} istek karşılandı",
-      "listenFailed": "Mock sunucusu başlatılamadı"
+      "listenFailed": "Mock sunucusu başlatılamadı",
+      "portInUse": "{{port}} bağlantı noktası zaten başka bir uygulama tarafından kullanılıyor. Uygulamayı kapatın veya başka bir bağlantı noktası seçip sunucuyu yeniden başlatın."
     }
   },
   "odata": {

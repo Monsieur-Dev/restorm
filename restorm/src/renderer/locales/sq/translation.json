@@ -2334,7 +2334,8 @@
       "stopListening": "Ndalo dëgjimin",
       "notListening": "Nuk dëgjon",
       "served": "Në dëgjim — u shërbyen {{count}} kërkesa",
-      "listenFailed": "Dështoi nisja e serverit mock"
+      "listenFailed": "Dështoi nisja e serverit mock",
+      "portInUse": "Porta {{port}} është tashmë në përdorim nga një aplikacion tjetër. Mbylleni ose zgjidhni një portë tjetër, pastaj rinisni serverin."
     }
   },
   "odata": {

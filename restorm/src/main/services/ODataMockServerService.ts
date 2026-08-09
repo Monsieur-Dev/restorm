@@ -171,6 +171,14 @@ class ODataMockServerService {
     }
   }
 
+  /** The mock address with its Handlebars expressions substituted — port and
+   * path are expression fields like a client URL. Falls back to the raw url
+   * when no resolution exists, so a plain literal keeps working unchanged. */
+  private resolvedMockUrl(requestId: string, rawUrl: string): string {
+    const resolved = contextService.resolveUrlForRequest(requestId)?.resolvedUrl
+    return resolved && resolved.trim().length > 0 ? resolved : rawUrl
+  }
+
   /** Resolve the request's config, compile the CSDL into a route model, and
    * register the service-root prefix routes on the shared HTTP PortHost. */
   private async bringUpServer(
@@ -178,7 +186,7 @@ class ODataMockServerService {
     hooks: { onServed?: (summary: ServedSummary) => void; onStopped?: (error?: string) => void }
   ): Promise<void> {
     const fullData = contextService.getRequestContext(requestId)?.fullData as ODataRequest | undefined
-    const { port, serviceRoot } = parseServiceAddress(fullData?.url ?? '')
+    const { port, serviceRoot } = parseServiceAddress(this.resolvedMockUrl(requestId, fullData?.url ?? ''))
     if (!Number.isFinite(port) || port <= 0) {
       throw new Error('A valid localhost port is required for an OData mock server')
     }

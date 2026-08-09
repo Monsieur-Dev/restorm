@@ -2334,7 +2334,8 @@
       "stopListening": "Stop listening",
       "notListening": "Not listening",
       "served": "Listening — {{count}} request(s) served",
-      "listenFailed": "Failed to start the mock server"
+      "listenFailed": "Failed to start the mock server",
+      "portInUse": "Port {{port}} is already in use by another application. Stop it or pick a different port, then start the server again."
     }
   },
   "odata": {

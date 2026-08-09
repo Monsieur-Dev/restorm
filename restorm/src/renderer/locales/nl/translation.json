@@ -2334,7 +2334,8 @@
       "stopListening": "Stop met luisteren",
       "notListening": "Luistert niet",
       "served": "Luistert — {{count}} verzoek(en) bediend",
-      "listenFailed": "Kan de mockserver niet starten"
+      "listenFailed": "Kan de mockserver niet starten",
+      "portInUse": "Poort {{port}} is al in gebruik door een andere applicatie. Sluit deze of kies een andere poort en start de server opnieuw."
     }
   },
   "odata": {

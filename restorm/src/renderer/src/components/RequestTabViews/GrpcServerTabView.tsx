@@ -21,6 +21,9 @@ import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { updateReactiveProperty } from './requestTabViewUtils'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 
@@ -72,12 +75,14 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     const authority = stripped.split('/')[0] ?? ''
     return authority.split(':')[1] ?? ''
   }, [url])
+  const envVariables = useEnvVariables(request.id)
+  const handlebarsHelpers = useHandlebarsHelpers()
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
     updateReactiveProperty(request, 'url', value)
   }, [request])
   const setServerPort = useCallback((p: string): void => {
-    setUrl(`localhost:${p.replace(/[^0-9]/g, '')}`)
+    setUrl(`localhost:${p}`)
   }, [setUrl])
 
   const setProtoContent = useCallback((value: string): void => {
@@ -297,13 +302,14 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
   const urlSection = (
     <ControlGroup data-testid="grpc-server-url-section">
       <span style={serverHostLabelStyle}>localhost:</span>
-      <div style={serverPortWrapperStyle}>
-        <InputBox
+      <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+        <RestormVariableInputBox
           value={serverPort}
           onChange={setServerPort}
-          options={{ placeholder: '50051' }}
+          variables={envVariables}
+          helpers={handlebarsHelpers}
+          placeholder="50051"
           data-testid="grpc-server-port-input"
-          disabled={isListening}
         />
       </div>
       <div style={{ flex: 1 }} />
