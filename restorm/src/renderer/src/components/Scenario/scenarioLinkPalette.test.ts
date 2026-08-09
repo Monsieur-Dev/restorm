@@ -92,3 +92,27 @@ describe('linkPaletteEntries — drag from an output', () => {
     expect(entries.find((e) => e.kind === 'addToList')?.wirePort).toBe('list')
   })
 })
+
+describe('linkPaletteEntries — drag from a request env input', () => {
+  // The env input consumes an environment reference: only a variable read or a
+  // scenario input/param can produce one, so the palette narrows to those two
+  // kinds (every request-ish response output is flow-compatible and would
+  // otherwise flood the list).
+  it('offers ONLY getVariable and input, each wired through its value output', () => {
+    const entries = linkPaletteEntries(srcOf('httpRequest'), 'env', false)
+    expect(entries.map((e) => e.kind).sort()).toEqual(['getVariable', 'input'])
+    expect(entries.every((e) => e.wirePort === 'value')).toBe(true)
+  })
+
+  it('applies to every request kind carrying an env input (soapRequest)', () => {
+    const entries = linkPaletteEntries(srcOf('soapRequest'), 'env', false)
+    expect(entries.map((e) => e.kind).sort()).toEqual(['getVariable', 'input'])
+  })
+
+  // Another input handle named differently keeps the generic behaviour — the
+  // restriction keys on the `env` handle, not on "any input drag".
+  it('does not restrict a drag from a non-env input (setVariable value)', () => {
+    const entries = linkPaletteEntries(srcOf('setVariable'), 'value', false)
+    expect(entries.length).toBeGreaterThan(2)
+  })
+})

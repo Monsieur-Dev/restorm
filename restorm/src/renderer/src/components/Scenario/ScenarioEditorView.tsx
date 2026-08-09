@@ -19,7 +19,8 @@ import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
 import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, GraphCanvas, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
-import { isRequest, isScenario, isWebSocketRequest, isStompRequest, isSseRequest, isGrpcRequest, isSoapRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../../shared/types/collections'
+import { isRequest, isScenario, isWebSocketRequest, isStompRequest, isSseRequest, isGrpcRequest, isSoapRequest, isAmqpRequest, isRedisRequest, isKafkaRequest, EnvironmentValue } from '../../../../shared/types/collections'
+import { serializeValueForPersistence } from '../../../../shared/utils/valuePersistence'
 import { Badge } from '../common/Badge'
 import { requestBadgeType, requestBadgeMode } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
@@ -3257,7 +3258,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
             // wires through the port it computed.
             pickNode: (kind) => {
               const e = linkPalette.entries.find((x) => x.kind === kind)
-              return e ? () => { addLinkedNode(kind, e.wirePort) } : null
+              if (!e) return null
+              // A variable node born off a request's `env` input starts on the
+              // `environment` value kind — that's the only kind of value the
+              // dragged port consumes, so the selector shouldn't open on the
+              // generic `variable` default.
+              const config = !linkPalette.fromIsSource && linkPalette.fromHandle === 'env' && kind === 'getVariable'
+                ? { value: serializeValueForPersistence(new EnvironmentValue('')) }
+                : {}
+              return () => { addLinkedNode(kind, e.wirePort, config) }
             },
             // Child request kinds wire through the request port the filter found;
             // the sub-scenario through its own. Either may be unavailable.

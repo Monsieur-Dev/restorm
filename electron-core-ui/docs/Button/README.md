@@ -218,7 +218,11 @@ neither needed nor honoured.
 
 The glyph is also **optically centred**: a codicon's ink is not always centred
 in its em box (a paper plane's tail, a play triangle's slanted edge), so the
-rendered glyph is measured once and nudged onto its centre of mass.
+rendered glyph is measured once and nudged onto its optical centre — the
+midpoint of its ink's centre of mass and its ink's bounding-box centre. Pure
+mass-centring overshoots on thin asymmetric stroke glyphs (a step-over arrow's
+dot, a bug-shaped debug glyph); pure box-centring loses the nudge a solid
+asymmetric glyph genuinely needs; the midpoint reads as centred for both.
 
 ###### Geometry: three public custom properties
 

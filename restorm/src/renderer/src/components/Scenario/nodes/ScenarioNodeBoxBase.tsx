@@ -239,9 +239,39 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     ].join('|'),
     [allPorts, note, errors.length, connectedInputs]
   )
+  // Invalidate the measurements whenever the box's rendered size changes.
+  // `measureKey` only sees rows that CARRY a port, so a port-less row
+  // appearing (the quick-config selector row materialising on a request
+  // node) shifts every row below it without changing the key — and a node
+  // whose ports changed while its tab was hidden (`display: none`) needs a
+  // re-measure the moment it is laid out again. Both cases surface as a box
+  // resize: 0 when the tab hides, the real height when it shows or a row
+  // appears. The effects below bail out while hidden, so the resize-driven
+  // rerun on re-display is what replaces the skipped measurement.
+  const [measureTick, setMeasureTick] = useState(0)
+  useEffect(() => {
+    // jsdom (unit tests) has no ResizeObserver; the invalidation only matters
+    // in the real renderer, where it always exists.
+    if (typeof ResizeObserver === 'undefined') return undefined
+    const box = boxRef.current
+    if (!box) return undefined
+    const observer = new ResizeObserver(() => {
+      setMeasureTick((n) => n + 1)
+    })
+    observer.observe(box)
+    return () => { observer.disconnect() }
+  }, [])
   useLayoutEffect(() => {
     const box = boxRef.current
     if (!box) return
+    // Hidden subtree (inactive workbench tab, `display: none`): every
+    // `offsetTop`/`offsetHeight` reads 0 and `offsetParent` is null, so a
+    // measurement here would publish top:0 for EVERY port — handles pinned
+    // to the frame's top edge, persisting after the tab is shown because
+    // nothing else re-runs this effect. Skip; the ResizeObserver above
+    // re-triggers on re-display and the measurement runs against a real
+    // layout.
+    if (box.offsetParent === null) return
     // Walk each marker's `offsetParent` chain up to the box, summing
     // `offsetTop`. `getBoundingClientRect` would include the React Flow
     // viewport's `scale(zoom)` transform, but CSS `top` values stay in
@@ -271,7 +301,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         return prev
       })
     })
-  }, [bodyMounted, bodyOpen, measureKey, collapsed])
+  }, [bodyMounted, bodyOpen, measureKey, collapsed, measureTick])
   // Collapsed-mode handle position = vertical centre of the header. Measured
   // once per header layout so a coloured/notes-bearing header still places
   // the gathered handles correctly.
@@ -279,9 +309,11 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   useLayoutEffect(() => {
     const h = headerRef.current
     if (!h) return
+    // Same hidden-subtree guard as the row measurement above.
+    if (h.offsetParent === null) return
     const measured = h.offsetHeight / 2
     queueMicrotask(() => { setHeaderCenterY(measured) })
-  }, [boxInError, data.color, data.collapsed])
+  }, [boxInError, data.color, data.collapsed, measureTick])
 
   // Keep the box at its expanded width once collapsed — without this the
   // header alone would shrink to its content width and the box "pops"
@@ -292,11 +324,13 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     if (collapsed) return
     const box = boxRef.current
     if (!box) return
+    // Same hidden-subtree guard as the row measurement above.
+    if (box.offsetParent === null) return
     const w = box.offsetWidth
     queueMicrotask(() => {
       setExpandedWidth((prev) => (prev === w ? prev : w))
     })
-  }, [collapsed, bodyMounted, bodyOpen, measureKey])
+  }, [collapsed, bodyMounted, bodyOpen, measureKey, measureTick])
 
   // Whether a collapse/expand transition is in progress. Only true between
   // the user's click on the chevron and ANIM_MS later — never during initial

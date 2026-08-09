@@ -163,11 +163,15 @@
   margin: -8px 0;
   z-index: 2;
 }
-/* Step — same disc as Stop (27px, white ring, shadow) but blue. */
+/* Step — same disc as Stop but blue. 28px, NOT 27: with the 2px ring the
+ * content box is diameter-4, and the 14px glyph only centres on whole pixels
+ * when that is even — (24-14)/2 = 5. At 27 the margin was 4.5px and the
+ * browser's rounding parked every glyph half a pixel off, which is exactly
+ * what a square icon shows. The 36px run disc was always even, hence fine. */
 .scn-inspector-step-round.button.text-button {
   /* Same disc as the workbench bar, at this strip's own scale: the shape
    * owns the geometry, these three public properties place it. */
-  --ecui-round-diameter: 27px;
+  --ecui-round-diameter: 28px;
   --ecui-round-ring: 2px;
   --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-step-background);
@@ -182,7 +186,7 @@
 .scn-inspector-debug-round.button.text-button {
   /* Same disc as the workbench bar, at this strip's own scale: the shape
    * owns the geometry, these three public properties place it. */
-  --ecui-round-diameter: 27px;
+  --ecui-round-diameter: 28px;
   --ecui-round-ring: 2px;
   --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-debug-background);
@@ -195,7 +199,7 @@
 .scn-inspector-stop-round.button.text-button {
   /* Same disc as the workbench bar, at this strip's own scale: the shape
    * owns the geometry, these three public properties place it. */
-  --ecui-round-diameter: 27px;
+  --ecui-round-diameter: 28px;
   --ecui-round-ring: 2px;
   --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-stop-background);

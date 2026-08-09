@@ -23,14 +23,25 @@ export interface LinkPaletteEntry {
  *
  * Dragging from an INPUT: symmetric — the new node's first output the dragged
  * input accepts.
+ *
+ * Special case — a request action's `env` input: the only values that make
+ * sense to feed it are an environment reference, i.e. a variable read or a
+ * scenario input/param. Every request-ish kind's response output is
+ * flow-compatible with `env` (both are plain `value` ports with no declared
+ * dataType), so without this restriction the palette offered the whole
+ * catalogue.
  */
+const ENV_INPUT_KINDS: ReadonlySet<ScenarioNodeKind> = new Set(['getVariable', 'input'])
+
 export function linkPaletteEntries(
   src: { kind: ScenarioNodeKind; inputs: ScenarioPort[]; outputs: ScenarioPort[] },
   srcHandle: string,
   fromIsSource: boolean
 ): LinkPaletteEntry[] {
+  const fromEnvInput = !fromIsSource && srcHandle === 'env' && src.inputs.some((i) => i.id === 'env')
   const entries: LinkPaletteEntry[] = []
   for (const meta of SCENARIO_NODE_CATALOGUE) {
+    if (fromEnvInput && !ENV_INPUT_KINDS.has(meta.kind)) continue
     const { inputs, outputs } = defaultPortsForKind(meta.kind)
     let wirePort: string | undefined
     if (fromIsSource) {

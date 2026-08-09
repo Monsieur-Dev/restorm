@@ -249,3 +249,41 @@ Then('the scenario action selector does not show {string} as selected', async ({
   await focusTab(p, SCENARIO_NAME)
   await expect(selectedText(p)).not.toHaveText(name, { timeout: 10_000 })
 })
+
+// ---------------------------------------------------------------------------
+// Port-handle alignment — recompute each row's centre from live geometry and
+// compare it to the `top` the box actually applied to the matching handle. A
+// stale measurement (the hidden-tab zeros, or a value from before a port-less
+// row appeared) shows up as a mismatch here, while a fresh one agrees to the
+// pixel.
+// ---------------------------------------------------------------------------
+
+Then('every port handle of the request action node sits on its row centre', async ({}) => {
+  const p = requirePage()
+  await focusTab(p, SCENARIO_NAME)
+  await expect.poll(async () => p.evaluate(() => {
+    const box = [...document.querySelectorAll<HTMLElement>('.scn-node')]
+      .find((n) => n.offsetParent !== null && n.querySelector('[data-testid="scn-request-edit-link"]'))
+    if (!box) return 'request action node not visible'
+    const markers = [...box.querySelectorAll<HTMLElement>('[data-port-id]')]
+    if (markers.length === 0) return 'no port markers'
+    const mismatches: string[] = []
+    for (const marker of markers) {
+      const portId = marker.dataset['portId']
+      if (!portId) continue
+      let expected = marker.offsetHeight / 2
+      let cur: HTMLElement | null = marker
+      while (cur && cur !== box) {
+        expected += cur.offsetTop
+        cur = cur.offsetParent as HTMLElement | null
+      }
+      const handle = box.querySelector<HTMLElement>(`.scn-handle-positioned[data-handleid="${portId}"]`)
+      if (!handle) { mismatches.push(`${portId}: no positioned handle`); continue }
+      const applied = Number.parseFloat(handle.style.top)
+      if (!Number.isFinite(applied) || Math.abs(applied - expected) > 1.5) {
+        mismatches.push(`${portId}: applied ${String(applied)} vs row centre ${expected.toFixed(1)}`)
+      }
+    }
+    return mismatches.length === 0 ? 'aligned' : mismatches.join('; ')
+  }), { timeout: 10_000, message: 'every positioned handle should sit on its row centre' }).toBe('aligned')
+})
