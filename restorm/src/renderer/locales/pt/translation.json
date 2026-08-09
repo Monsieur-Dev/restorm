@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Nome da configuração",
     "saveButton": "Salvar",
+    "updateButton": "Atualizar com os valores atuais",
     "storageTarget": {
       "label": "Salvar no arquivo do projeto (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Carregar configuração",
       "message": "Deseja carregar a configuração \"{{name}}\"? Sua configuração atual não salva será perdida."
+    },
+    "updateConfirm": {
+      "title": "Atualizar configuração",
+      "message": "Deseja substituir a configuração \"{{name}}\" pelos valores atuais?"
     },
     "deleteConfirm": {
       "title": "Excluir configuração",

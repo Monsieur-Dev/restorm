@@ -2352,6 +2352,7 @@
     },
     "namePlaceholder": "配置名称",
     "saveButton": "保存",
+    "updateButton": "用当前值更新",
     "storageTarget": {
       "label": "保存到项目文件 (.restorm)"
     },
@@ -2364,6 +2365,10 @@
     "loadConfirm": {
       "title": "加载配置",
       "message": "是否要加载配置\"{{name}}\"？您当前未保存的配置将会丢失。"
+    },
+    "updateConfirm": {
+      "title": "更新配置",
+      "message": "要用当前值替换配置“{{name}}”吗？"
     },
     "deleteConfirm": {
       "title": "删除配置",

@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Yapılandırma adı",
     "saveButton": "Kaydet",
+    "updateButton": "Geçerli değerlerle güncelle",
     "storageTarget": {
       "label": "Proje dosyasına kaydet (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Yapılandırmayı yükle",
       "message": "\"{{name}}\" yapılandırmasını yüklemek istiyor musunuz? Mevcut kaydedilmemiş yapılandırmanız kaybolacak."
+    },
+    "updateConfirm": {
+      "title": "Yapılandırmayı güncelle",
+      "message": "\"{{name}}\" yapılandırmasını geçerli değerlerle değiştirmek istiyor musunuz?"
     },
     "deleteConfirm": {
       "title": "Yapılandırmayı sil",

@@ -2352,6 +2352,7 @@
     },
     "namePlaceholder": "Tên cấu hình",
     "saveButton": "Lưu",
+    "updateButton": "Cập nhật với giá trị hiện tại",
     "storageTarget": {
       "label": "Lưu vào tệp dự án (.restorm)"
     },
@@ -2364,6 +2365,10 @@
     "loadConfirm": {
       "title": "Tải cấu hình",
       "message": "Bạn có muốn tải cấu hình \"{{name}}\" không? Cấu hình hiện tại chưa lưu sẽ bị mất."
+    },
+    "updateConfirm": {
+      "title": "Cập nhật cấu hình",
+      "message": "Bạn có muốn thay thế cấu hình \"{{name}}\" bằng các giá trị hiện tại không?"
     },
     "deleteConfirm": {
       "title": "Xóa cấu hình",

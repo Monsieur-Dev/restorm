@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Konfigurationsname",
     "saveButton": "Speichern",
+    "updateButton": "Mit aktuellen Werten aktualisieren",
     "storageTarget": {
       "label": "In Projektdatei speichern (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Konfiguration laden",
       "message": "Möchten Sie die Konfiguration „{{name}}\" laden? Ihre aktuelle ungespeicherte Konfiguration geht verloren."
+    },
+    "updateConfirm": {
+      "title": "Konfiguration aktualisieren",
+      "message": "Möchten Sie die Konfiguration „{{name}}“ durch die aktuellen Werte ersetzen?"
     },
     "deleteConfirm": {
       "title": "Konfiguration löschen",

@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Konfigurasjonsnavn",
     "saveButton": "Lagre",
+    "updateButton": "Oppdater med gjeldende verdier",
     "storageTarget": {
       "label": "Lagre i prosjektfil (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Last inn konfigurasjon",
       "message": "Vil du laste inn konfigurasjonen \"{{name}}\"? Din nåværende ulagrede konfigurasjon vil gå tapt."
+    },
+    "updateConfirm": {
+      "title": "Oppdater konfigurasjon",
+      "message": "Vil du erstatte konfigurasjonen «{{name}}» med de gjeldende verdiene?"
     },
     "deleteConfirm": {
       "title": "Slett konfigurasjon",

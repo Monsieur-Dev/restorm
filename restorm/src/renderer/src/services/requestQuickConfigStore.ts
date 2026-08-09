@@ -264,6 +264,7 @@ export function saveProjectConfig(
   }
   // Assigning to the reactive proxy fires the set-trap → REQUEST_UPDATED.
   ;(request as unknown as Record<string, unknown>)['quickConfigs'] = [...existing]
+  notifyProjectConfigWrite(request.id)
   return saved
 }
 
@@ -274,6 +275,22 @@ export function deleteProjectConfig(request: Request, configId: string): void {
   const existing = getProjectConfigs(request)
   const next = existing.filter((c) => c.id !== configId)
   ;(request as unknown as Record<string, unknown>)['quickConfigs'] = next
+  notifyProjectConfigWrite(request.id)
+}
+
+/**
+ * Fired after every project-target config write. The renderer→main tree
+ * mirror only re-sends when the `rootItems` STATE identity changes, and a
+ * quick-config write is an in-place proxy mutation that never touches it —
+ * so without an explicit nudge the main-side store keeps a request WITHOUT
+ * the just-saved config, and the next main-driven tree replace (any MCP
+ * write) broadcasts that stale request back, silently deleting the config.
+ * App.tsx subscribes and forces a mirror re-send.
+ */
+export const QUICK_CONFIG_PROJECT_WRITE_EVENT = 'quickconfig:project-write'
+
+function notifyProjectConfigWrite(requestId: string): void {
+  eventBus.emitLocalSync(QUICK_CONFIG_PROJECT_WRITE_EVENT, { requestId })
 }
 
 // ============================================================================

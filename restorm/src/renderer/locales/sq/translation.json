@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Emri i konfigurimit",
     "saveButton": "Ruaj",
+    "updateButton": "Përditëso me vlerat aktuale",
     "storageTarget": {
       "label": "Ruaj në skedarin e projektit (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Ngarko konfigurimin",
       "message": "Dëshironi të ngarkoni konfigurimin \"{{name}}\"? Konfigurimi juaj aktual i paruajtur do të humbasë."
+    },
+    "updateConfirm": {
+      "title": "Përditëso konfigurimin",
+      "message": "Dëshironi ta zëvendësoni konfigurimin \"{{name}}\" me vlerat aktuale?"
     },
     "deleteConfirm": {
       "title": "Fshij konfigurimin",

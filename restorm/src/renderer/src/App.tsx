@@ -39,6 +39,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
+import { QUICK_CONFIG_PROJECT_WRITE_EVENT } from './services/requestQuickConfigStore'
 import { preloadScenarioViewports } from './services/scenarioViewportStore'
 import { preloadScenarioBreakpoints } from './services/scenarioBreakpointStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
@@ -2388,9 +2389,25 @@ const App: React.FC = () => {
   // assigns it BEFORE calling `setRootItems`: by the time this memo recomputes
   // for a given `rootItems`, the ref already describes THAT tree. A tree that
   // predates the replace keeps the older version and is correctly refused.
+  // A project-target quick-config write is an in-place proxy mutation:
+  // `rootItems` identity never changes, so without this nudge the mirror
+  // below would keep main on a tree WITHOUT the just-saved config — and the
+  // next main-driven tree replace would broadcast that stale tree back,
+  // silently deleting the config the user just saved.
+  const [quickConfigMirrorNudge, setQuickConfigMirrorNudge] = useState(0)
+  useEffect(() => {
+    const sub = eventBus.subscribe(QUICK_CONFIG_PROJECT_WRITE_EVENT, () => {
+      setQuickConfigMirrorNudge((n) => n + 1)
+    })
+    return () => { sub.unsubscribe() }
+  }, [])
+
   const mirrorPayload = useMemo(
-    () => snapshotMirrorPayload(rootItems, appliedMcpVersion),
-    [rootItems, appliedMcpVersion]
+    () => {
+      void quickConfigMirrorNudge
+      return snapshotMirrorPayload(rootItems, appliedMcpVersion)
+    },
+    [rootItems, appliedMcpVersion, quickConfigMirrorNudge]
   )
   const environmentFolderCollections = mirrorPayload.collections
 

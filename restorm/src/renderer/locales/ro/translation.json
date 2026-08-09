@@ -2354,6 +2354,7 @@
     },
     "namePlaceholder": "Numele configurației",
     "saveButton": "Salvează",
+    "updateButton": "Actualizează cu valorile curente",
     "storageTarget": {
       "label": "Salvează în fișierul proiectului (.restorm)"
     },
@@ -2366,6 +2367,10 @@
     "loadConfirm": {
       "title": "Încarcă configurația",
       "message": "Doriți să încărcați configurația „{{name}}\"? Configurația actuală nesalvată va fi pierdută."
+    },
+    "updateConfirm": {
+      "title": "Actualizează configurația",
+      "message": "Doriți să înlocuiți configurația „{{name}}” cu valorile curente?"
     },
     "deleteConfirm": {
       "title": "Șterge configurația",

@@ -2352,6 +2352,7 @@
     },
     "namePlaceholder": "設定名稱",
     "saveButton": "儲存",
+    "updateButton": "以目前值更新",
     "storageTarget": {
       "label": "儲存至專案檔案 (.restorm)"
     },
@@ -2364,6 +2365,10 @@
     "loadConfirm": {
       "title": "載入設定",
       "message": "是否要載入設定「{{name}}」？您目前未儲存的設定將會遺失。"
+    },
+    "updateConfirm": {
+      "title": "更新設定",
+      "message": "要以目前值取代設定「{{name}}」嗎？"
     },
     "deleteConfirm": {
       "title": "刪除設定",

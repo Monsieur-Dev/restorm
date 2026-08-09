@@ -2352,6 +2352,7 @@
     },
     "namePlaceholder": "설정 이름",
     "saveButton": "저장",
+    "updateButton": "현재 값으로 업데이트",
     "storageTarget": {
       "label": "프로젝트 파일에 저장 (.restorm)"
     },
@@ -2364,6 +2365,10 @@
     "loadConfirm": {
       "title": "설정 불러오기",
       "message": "\"{{name}}\" 설정을 불러오시겠습니까? 저장되지 않은 현재 설정이 손실됩니다."
+    },
+    "updateConfirm": {
+      "title": "구성 업데이트",
+      "message": "구성 \"{{name}}\"을(를) 현재 값으로 바꾸시겠습니까?"
     },
     "deleteConfirm": {
       "title": "설정 삭제",

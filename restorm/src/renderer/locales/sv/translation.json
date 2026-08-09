@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Konfigurationsnamn",
     "saveButton": "Spara",
+    "updateButton": "Uppdatera med aktuella värden",
     "storageTarget": {
       "label": "Spara i projektfil (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Läs in konfiguration",
       "message": "Vill du läsa in konfigurationen \"{{name}}\"? Din nuvarande osparade konfiguration kommer att gå förlorad."
+    },
+    "updateConfirm": {
+      "title": "Uppdatera konfiguration",
+      "message": "Vill du ersätta konfigurationen \"{{name}}\" med de aktuella värdena?"
     },
     "deleteConfirm": {
       "title": "Ta bort konfiguration",

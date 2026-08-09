@@ -2352,6 +2352,7 @@
     },
     "namePlaceholder": "設定名",
     "saveButton": "保存",
+    "updateButton": "現在の値で更新",
     "storageTarget": {
       "label": "プロジェクトファイルに保存 (.restorm)"
     },
@@ -2364,6 +2365,10 @@
     "loadConfirm": {
       "title": "設定を読み込む",
       "message": "設定「{{name}}」を読み込みますか？現在の未保存の設定は失われます。"
+    },
+    "updateConfirm": {
+      "title": "設定を更新",
+      "message": "設定「{{name}}」を現在の値で置き換えますか？"
     },
     "deleteConfirm": {
       "title": "設定を削除",

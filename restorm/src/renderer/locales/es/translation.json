@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Nombre de la configuración",
     "saveButton": "Guardar",
+    "updateButton": "Actualizar con los valores actuales",
     "storageTarget": {
       "label": "Guardar en el archivo del proyecto (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Cargar configuración",
       "message": "¿Desea cargar la configuración \"{{name}}\"? Su configuración actual no guardada se perderá."
+    },
+    "updateConfirm": {
+      "title": "Actualizar configuración",
+      "message": "¿Desea reemplazar la configuración «{{name}}» con los valores actuales?"
     },
     "deleteConfirm": {
       "title": "Eliminar configuración",

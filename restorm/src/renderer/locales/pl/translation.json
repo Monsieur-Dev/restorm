@@ -2355,6 +2355,7 @@
     },
     "namePlaceholder": "Nazwa konfiguracji",
     "saveButton": "Zapisz",
+    "updateButton": "Zaktualizuj bieżącymi wartościami",
     "storageTarget": {
       "label": "Zapisz w pliku projektu (.restorm)"
     },
@@ -2367,6 +2368,10 @@
     "loadConfirm": {
       "title": "Wczytaj konfigurację",
       "message": "Czy chcesz wczytać konfigurację „{{name}}\"? Twoja aktualna niezapisana konfiguracja zostanie utracona."
+    },
+    "updateConfirm": {
+      "title": "Zaktualizuj konfigurację",
+      "message": "Czy chcesz zastąpić konfigurację „{{name}}” bieżącymi wartościami?"
     },
     "deleteConfirm": {
       "title": "Usuń konfigurację",

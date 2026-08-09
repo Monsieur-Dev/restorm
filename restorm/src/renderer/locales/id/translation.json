@@ -2352,6 +2352,7 @@
     },
     "namePlaceholder": "Nama konfigurasi",
     "saveButton": "Simpan",
+    "updateButton": "Perbarui dengan nilai saat ini",
     "storageTarget": {
       "label": "Simpan ke file proyek (.restorm)"
     },
@@ -2364,6 +2365,10 @@
     "loadConfirm": {
       "title": "Muat konfigurasi",
       "message": "Apakah Anda ingin memuat konfigurasi \"{{name}}\"? Konfigurasi Anda saat ini yang belum disimpan akan hilang."
+    },
+    "updateConfirm": {
+      "title": "Perbarui konfigurasi",
+      "message": "Apakah Anda ingin mengganti konfigurasi \"{{name}}\" dengan nilai saat ini?"
     },
     "deleteConfirm": {
       "title": "Hapus konfigurasi",

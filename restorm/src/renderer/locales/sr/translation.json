@@ -2354,6 +2354,7 @@
     },
     "namePlaceholder": "Naziv konfiguracije",
     "saveButton": "Sačuvaj",
+    "updateButton": "Ažuriraj trenutnim vrednostima",
     "storageTarget": {
       "label": "Sačuvaj u datoteci projekta (.restorm)"
     },
@@ -2366,6 +2367,10 @@
     "loadConfirm": {
       "title": "Učitaj konfiguraciju",
       "message": "Da li želite da učitate konfiguraciju „{{name}}\"? Vaša trenutna nesačuvana konfiguracija će biti izgubljena."
+    },
+    "updateConfirm": {
+      "title": "Ažuriraj konfiguraciju",
+      "message": "Da li želite da zamenite konfiguraciju „{{name}}“ trenutnim vrednostima?"
     },
     "deleteConfirm": {
       "title": "Obriši konfiguraciju",

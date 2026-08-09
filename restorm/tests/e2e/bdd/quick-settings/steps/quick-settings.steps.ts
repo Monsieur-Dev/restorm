@@ -57,6 +57,10 @@ interface ProtocolMatrix {
    * be visible after Load, and (where applicable) the changed value that must
    * be gone. */
   assert: (p: Page) => Promise<void>
+  /** Mirror of `assert` for the CHANGED values — used by the pencil-update
+   * scenario, which loads a config that was overwritten with the changed
+   * fields. Only defined for the protocols that scenario exercises. */
+  assertChanged?: (p: Page) => Promise<void>
 }
 
 const kv = (key: string, value: string): { key: string; value: string; enabled: boolean } => ({ key, value, enabled: true })
@@ -154,6 +158,15 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       await expectKvTableLacksKey(p, 'http-request-headers-table', 'X-Changed-Header')
       await expectKvTableKey(p, 'http-request-query-params-table', 'savedParam')
       await expectKvTableLacksKey(p, 'http-request-query-params-table', 'changedParam')
+    },
+    assertChanged: async (p) => {
+      await expect(p.locator(`${vis('http-request-url-section')} [data-testid="url-container"]`))
+        .toHaveAttribute('data-resolved-url', /^https:\/\/changed\.example\.com\/gizmos(\?|$)/, { timeout: 10_000 })
+      await expectKvTableKey(p, 'http-request-headers-table', 'X-Changed-Header')
+      await expectKvTableKey(p, 'http-request-headers-table', 'changed-hval')
+      await expectKvTableLacksKey(p, 'http-request-headers-table', 'X-Saved-Header')
+      await expectKvTableKey(p, 'http-request-query-params-table', 'changedParam')
+      await expectKvTableLacksKey(p, 'http-request-query-params-table', 'savedParam')
     }
   },
 
@@ -493,6 +506,17 @@ When(
     // The saved config appears as a load row in the popover list.
     await expect(page.locator('[data-testid^="quick-settings-load-"]:visible').first())
       .toBeVisible({ timeout: 10_000 })
+    // The default storage target is the PROJECT file: the config lands on the
+    // request's reactive proxy renderer-side and reaches the main process via
+    // a debounced REQUEST_UPDATED. An MCP `update_request` issued before that
+    // flush rebuilds the request from a mirror that predates the save and
+    // silently drops `quickConfigs` — so anchor on the main process actually
+    // holding the config before any later step mutates the request over MCP.
+    const disco = discovery
+    await expect.poll(async () => {
+      const req = parsedReply(await callMcpTool(disco, 'get_request', { id: requestId })) as { quickConfigs?: unknown[] }
+      return Array.isArray(req.quickConfigs) && req.quickConfigs.length > 0
+    }, { timeout: 15_000, message: 'main process should hold the saved quickConfigs' }).toBe(true)
     // Dismiss the popover before mutating the editor. The popover closes on an
     // outside `mousedown` (not Escape), so click a stable element well clear of
     // it — the top-left page corner is always outside the smartbar popover.
@@ -532,6 +556,58 @@ Then(
     if (page === null) throw new Error('launch first')
     const matrix = getMatrix(matrixKey)
     await matrix.assert(page)
+  }
+)
+
+Then('the storage-target toggle targets the project file by default', async ({}) => {
+  if (page === null) throw new Error('launch first')
+  const pg = page
+  await pg.locator(vis('quick-settings-open-button')).click()
+  // The ECUI switch renders no <input>; its state lives on the `-action`
+  // div's data attributes. Checked === project-file target.
+  await expect(pg.locator(vis('quick-settings-storage-toggle-action')))
+    .toHaveAttribute('data-is-checked', 'true', { timeout: 10_000 })
+  await pg.mouse.click(8, 8)
+  await expect(pg.locator('[data-testid="quick-settings-storage-toggle"]:visible'))
+    .toHaveCount(0, { timeout: 5_000 })
+})
+
+When(
+  'I update the quick config named {string} with the current values',
+  async ({}, _configName: string) => {
+    if (page === null) throw new Error('launch first')
+    const pg = page
+    await pg.locator(vis('quick-settings-open-button')).click()
+    const updateButton = pg.locator('[data-testid^="quick-settings-update-"]:visible').first()
+    await updateButton.waitFor({ state: 'visible', timeout: 10_000 })
+    await updateButton.click()
+    // The pencil prompts a confirmation modal before overwriting; confirm it.
+    const confirmOk = pg.locator(vis('quick-settings-confirm-ok'))
+    await confirmOk.waitFor({ state: 'visible', timeout: 10_000 })
+    await confirmOk.click()
+    // Dismiss the popover (outside mousedown) before mutating the editor.
+    await pg.mouse.click(8, 8)
+    await expect(pg.locator('[data-testid^="quick-settings-update-"]:visible'))
+      .toHaveCount(0, { timeout: 5_000 })
+  }
+)
+
+When(
+  'I restore the original field matrix of the {string} request',
+  async ({ callMcpTool }, matrixKey: string) => {
+    if (discovery === null) throw new Error('launch first')
+    const matrix = getMatrix(matrixKey)
+    expect((await callMcpTool(discovery, 'update_request', { id: requestId, patch: matrix.saved })).isError ?? false).toBe(false)
+  }
+)
+
+Then(
+  'the {string} editor shows the changed values',
+  async ({}, matrixKey: string) => {
+    if (page === null) throw new Error('launch first')
+    const matrix = getMatrix(matrixKey)
+    if (!matrix.assertChanged) throw new Error(`no assertChanged for "${matrixKey}"`)
+    await matrix.assertChanged(page)
   }
 )
 

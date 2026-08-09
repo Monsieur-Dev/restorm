@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Naam van de configuratie",
     "saveButton": "Opslaan",
+    "updateButton": "Bijwerken met huidige waarden",
     "storageTarget": {
       "label": "Opslaan in projectbestand (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Configuratie laden",
       "message": "Wil je de configuratie \"{{name}}\" laden? Je huidige niet-opgeslagen configuratie gaat verloren."
+    },
+    "updateConfirm": {
+      "title": "Configuratie bijwerken",
+      "message": "Wilt u de configuratie \"{{name}}\" vervangen door de huidige waarden?"
     },
     "deleteConfirm": {
       "title": "Configuratie verwijderen",

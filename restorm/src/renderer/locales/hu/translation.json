@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Konfiguráció neve",
     "saveButton": "Mentés",
+    "updateButton": "Frissítés az aktuális értékekkel",
     "storageTarget": {
       "label": "Mentés a projektfájlba (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Konfiguráció betöltése",
       "message": "Szeretné betölteni a(z) \"{{name}}\" konfigurációt? Az aktuális mentetlen konfigurációja elvész."
+    },
+    "updateConfirm": {
+      "title": "Konfiguráció frissítése",
+      "message": "Le szeretné cserélni a(z) „{{name}}” konfigurációt az aktuális értékekre?"
     },
     "deleteConfirm": {
       "title": "Konfiguráció törlése",

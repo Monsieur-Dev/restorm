@@ -2354,6 +2354,7 @@
     },
     "namePlaceholder": "Naziv konfiguracije",
     "saveButton": "Spremi",
+    "updateButton": "Ažuriraj trenutačnim vrijednostima",
     "storageTarget": {
       "label": "Spremi u datoteku projekta (.restorm)"
     },
@@ -2366,6 +2367,10 @@
     "loadConfirm": {
       "title": "Učitaj konfiguraciju",
       "message": "Želite li učitati konfiguraciju \"{{name}}\"? Vaša trenutna nespremljena konfiguracija bit će izgubljena."
+    },
+    "updateConfirm": {
+      "title": "Ažuriraj konfiguraciju",
+      "message": "Želite li zamijeniti konfiguraciju „{{name}}” trenutačnim vrijednostima?"
     },
     "deleteConfirm": {
       "title": "Izbriši konfiguraciju",

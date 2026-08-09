@@ -73,6 +73,17 @@ Feature: Quick-settings save/load round-trips every field of every protocol
     And I load the quick config named "saved-auth"
     Then the "auth" editor shows the originally-saved values
 
+  Scenario: The pencil button replaces a saved config's values with the current ones
+    Given I launch restorm with the MCP server enabled
+    And I have a fresh "http" request named "qs-update" populated with its field matrix
+    When I open its tab and save a quick config named "to-update"
+    Then the storage-target toggle targets the project file by default
+    When I change every editable field of the "http" request
+    And I update the quick config named "to-update" with the current values
+    And I restore the original field matrix of the "http" request
+    And I load the quick config named "to-update"
+    Then the "http" editor shows the changed values
+
   Scenario: Opening the auth-key popover dismisses an open quick-config popover, and vice versa
     Given I launch restorm with the MCP server enabled
     And I have a request with an environment, an in-scope auth route, and a scenario using it

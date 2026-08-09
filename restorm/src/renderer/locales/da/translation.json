@@ -2353,6 +2353,7 @@
     },
     "namePlaceholder": "Konfigurationsnavn",
     "saveButton": "Gem",
+    "updateButton": "Opdater med aktuelle værdier",
     "storageTarget": {
       "label": "Gem i projektfil (.restorm)"
     },
@@ -2365,6 +2366,10 @@
     "loadConfirm": {
       "title": "Indlæs konfiguration",
       "message": "Vil du indlæse konfigurationen \"{{name}}\"? Din aktuelle konfiguration vil gå tabt, hvis den ikke er gemt."
+    },
+    "updateConfirm": {
+      "title": "Opdater konfiguration",
+      "message": "Vil du erstatte konfigurationen \"{{name}}\" med de aktuelle værdier?"
     },
     "deleteConfirm": {
       "title": "Slet konfiguration",

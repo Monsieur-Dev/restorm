@@ -76,12 +76,14 @@ const CONFIRM_MODAL_INITIAL: ConfirmModalState = {
 interface ConfigRowProps {
   config: QuickConfig
   onLoad: (config: QuickConfig) => void
+  onUpdate: (config: QuickConfig) => void
   onDelete: (config: QuickConfig) => void
   projectBadgeLabel: string
   settingsBadgeLabel: string
+  updateLabel: string
 }
 
-const ConfigRow: React.FC<ConfigRowProps> = ({ config, onLoad, onDelete, projectBadgeLabel, settingsBadgeLabel }) => {
+const ConfigRow: React.FC<ConfigRowProps> = ({ config, onLoad, onUpdate, onDelete, projectBadgeLabel, settingsBadgeLabel, updateLabel }) => {
   const badgeLabel = config.storageTarget === 'project' ? projectBadgeLabel : settingsBadgeLabel
   return (
     <div
@@ -116,6 +118,18 @@ const ConfigRow: React.FC<ConfigRowProps> = ({ config, onLoad, onDelete, project
           </span>
         </span>
       </Button>
+      <HeaderHoverTooltip label={updateLabel} placement="below">
+        <Button
+          secondary
+          small
+          line
+          icon="edit"
+          options={{ ariaLabel: updateLabel }}
+          style={{ flexShrink: 0, padding: '0 4px' }}
+          data-testid={`quick-settings-update-${config.id}`}
+          onClick={() => { onUpdate(config) }}
+        />
+      </HeaderHoverTooltip>
       <Button
         secondary
         small
@@ -148,8 +162,10 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
   // Opening this popover closes any sibling header popover (and vice versa).
   useExclusiveHeaderPopover(open, () => { setOpen(false) })
 
-  // Storage target: 'settings' (user-local) or 'project' (.restorm file)
-  const [storageTarget, setStorageTarget] = useState<QuickConfigStorageTarget>('settings')
+  // Storage target: 'settings' (user-local) or 'project' (.restorm file).
+  // 'project' is the default — a new config belongs to the shared .restorm
+  // file unless the user explicitly opts into user-local storage.
+  const [storageTarget, setStorageTarget] = useState<QuickConfigStorageTarget>('project')
 
   // Config name input (state drives the controlled InputBox value)
   const [configName, setConfigName] = useState('')
@@ -266,6 +282,29 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
       }
     })
   }, [t, request])
+
+  // Update config: prompt confirmation, then replace the saved fields with the
+  // request's current values. The save goes to the config's OWN storage target
+  // (same name → the backend overwrites in place, keeping the id), regardless
+  // of what the storage-target toggle currently shows.
+  const handleUpdateRequest = useCallback((config: QuickConfig): void => {
+    setConfirmModal({
+      open: true,
+      title: t('quickSettings.updateConfirm.title'),
+      message: t('quickSettings.updateConfirm.message', { name: config.name }),
+      onConfirm: () => {
+        setConfirmModal(CONFIRM_MODAL_INITIAL)
+        if (config.storageTarget === 'settings' && projectUuid) {
+          saveSettingsConfig(projectUuid, request.id, config.name, currentFields)
+          // Settings saves don't emit REQUEST_UPDATED — bump tick manually.
+          setTick((n) => n + 1)
+        } else {
+          saveProjectConfig(request, config.name, currentFields)
+          setTick((n) => n + 1)
+        }
+      }
+    })
+  }, [t, projectUuid, request, currentFields])
 
   // Delete config: prompt confirmation first. When the config is referenced by
   // one or more scenario actions (by id), name those scenarios in the message
@@ -408,9 +447,11 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
                         key={`${config.storageTarget}:${config.id}`}
                         config={config}
                         onLoad={handleLoadRequest}
+                        onUpdate={handleUpdateRequest}
                         onDelete={handleDeleteRequest}
                         projectBadgeLabel={projectBadgeLabel}
                         settingsBadgeLabel={settingsBadgeLabel}
+                        updateLabel={t('quickSettings.updateButton')}
                       />
                     ))}
                   </div>

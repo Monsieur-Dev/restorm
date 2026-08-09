@@ -2355,6 +2355,7 @@
     },
     "namePlaceholder": "Název konfigurace",
     "saveButton": "Uložit",
+    "updateButton": "Aktualizovat aktuálními hodnotami",
     "storageTarget": {
       "label": "Uložit do souboru projektu (.restorm)"
     },
@@ -2367,6 +2368,10 @@
     "loadConfirm": {
       "title": "Načíst konfiguraci",
       "message": "Chcete načíst konfiguraci „{{name}}\"? Vaše aktuální neuložená konfigurace bude ztracena."
+    },
+    "updateConfirm": {
+      "title": "Aktualizovat konfiguraci",
+      "message": "Chcete nahradit konfiguraci „{{name}}“ aktuálními hodnotami?"
     },
     "deleteConfirm": {
       "title": "Smazat konfiguraci",
