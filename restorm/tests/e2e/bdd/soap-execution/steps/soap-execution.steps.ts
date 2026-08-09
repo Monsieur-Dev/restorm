@@ -14,7 +14,8 @@
 import { createBdd } from 'playwright-bdd'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
-import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
+import { test, expect, type McpDiscovery, type McpToolReply } from './fixture'
+import { materializeSample } from '../../../helpers/testcontainers/services'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -75,9 +76,13 @@ Given(
   }
 )
 
-Given('I open the SOAP sample via MCP', async ({ callMcpTool, restormRoot }) => {
+Given('I open the SOAP sample via MCP', async ({ callMcpTool, restormRoot, services }) => {
   if (discovery === null) throw new Error('launch first')
-  const samplePath = join(restormRoot, 'tests/e2e/samples/soap-sample.restorm')
+  const samplePath = materializeSample(
+    join(restormRoot, 'tests/e2e/samples/soap-sample.restorm'),
+    join(restormRoot, 'tests/e2e/.tmp/soap-execution/soap-sample.restorm'),
+    services
+  )
   const opened = await callMcpTool(discovery, 'open_project', { filePath: samplePath })
   expect(opened.isError ?? false).toBe(false)
 

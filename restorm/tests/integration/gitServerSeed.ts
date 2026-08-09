@@ -72,6 +72,20 @@ function servedReposDirFromDocker(): string | undefined {
 
 let dockerReposDir: string | undefined
 
+/** Runtime override set by the e2e harness when a suite runs its OWN
+ * git-server container (ephemeral port, mkdtemp repos dir). Unset —
+ * the integration tests' shared-compose behavior — everything falls back
+ * to the legacy fixed port + docker-mount resolution below. */
+let configuredGitServer: { port: number; reposDir: string } | null = null
+
+export function configureGitServerForTests(port: number, reposDir: string): void {
+  configuredGitServer = { port, reposDir }
+}
+
+function gitServerPort(): number {
+  return configuredGitServer?.port ?? 9418
+}
+
 /**
  * The directory the `git-server` container ACTUALLY serves over git://.
  *
@@ -94,6 +108,7 @@ let dockerReposDir: string | undefined
  * recreating the container.
  */
 export function resolveReposDir(): string {
+  if (configuredGitServer !== null) return configuredGitServer.reposDir
   const override = process.env.RESTORM_GITSERVER_REPOS_DIR
   if (override !== undefined && override.length > 0) return override
   dockerReposDir ??= servedReposDirFromDocker() ?? CHECKOUT_REPOS_DIR
@@ -103,9 +118,11 @@ export function resolveReposDir(): string {
 export const SEED_REPO_NAME = 'seed-project.git'
 
 /** The clone URL the e2e suite's git-remote fixture hands to restorm for
- * the SHARED, read-only seed repo — the same bind-mounted path, served by
- * the `git-server` container over :9418. */
-export const GIT_SERVER_URL = `git://localhost:9418/${SEED_REPO_NAME}`
+ * the SHARED, read-only seed repo — served by the suite's own git-server
+ * container (or the legacy shared one on :9418 when none is configured). */
+export function gitServerUrl(): string {
+  return `git://localhost:${String(gitServerPort())}/${SEED_REPO_NAME}`
+}
 
 /** v1 targets the repo's DEFAULT branch (no branch management yet — see
  * docs/Git/README.md) — pinned to `main` explicitly so seeding is
@@ -205,7 +222,7 @@ export function resetGitServerSeed(reposDir: string = resolveReposDir()): void {
  * added here, mirroring `SEED_REPO_NAME`'s own convention).
  */
 export function gitServerUrlFor(repoName: string): string {
-  return `git://localhost:9418/${repoName}.git`
+  return `git://localhost:${String(gitServerPort())}/${repoName}.git`
 }
 
 /**

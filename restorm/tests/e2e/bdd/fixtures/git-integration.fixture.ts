@@ -9,7 +9,8 @@ import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
 import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
-import { GIT_SERVER_URL, seedFreshRepo, gitServerUrlFor, gitEnv } from '../../../integration/gitServerSeed'
+import { gitServerUrl, seedFreshRepo, gitServerUrlFor, gitEnv } from '../../../integration/gitServerSeed'
+import { gitServerWorkerFixture, type StartedGitServer } from '../../helpers/testcontainers/gitServer'
 
 const RESTORM_ROOT = resolve(__dirname, '../../../..')
 
@@ -74,10 +75,13 @@ function run(command: string, cwd?: string): void {
  * temp-dir wiping must stay independent so a parallel run of both doesn't
  * race-delete each other's workspace.
  */
-export const test = base.extend<GitIntegrationFixtures>({
+export const test = base.extend<GitIntegrationFixtures, { gitServer: StartedGitServer }>({
+  // This suite runs its OWN git daemon (worker-scoped, ephemeral port,
+  // mkdtemp repos dir) — the seed-module helpers are routed at it.
+  gitServer: gitServerWorkerFixture(),
   restormRoot: [RESTORM_ROOT, { option: true }],
 
-  gitIntegrationRoot: async ({}, use) => {
+  gitIntegrationRoot: async ({ gitServer: _gitServer }, use) => {
     const root = mkdtempSync(join(tmpdir(), 'restorm-git-integration-'))
     await use(root)
     rmSync(root, { recursive: true, force: true })
@@ -87,7 +91,7 @@ export const test = base.extend<GitIntegrationFixtures>({
     await use((dirName: string) => {
       const workingCopy = join(gitIntegrationRoot, dirName)
       rmSync(workingCopy, { recursive: true, force: true })
-      run(`git clone "${GIT_SERVER_URL}" "${workingCopy}"`)
+      run(`git clone "${gitServerUrl()}" "${workingCopy}"`)
       return Promise.resolve(join(workingCopy, 'api.restorm'))
     })
   },
@@ -111,7 +115,7 @@ export const test = base.extend<GitIntegrationFixtures>({
     })
   },
 
-  launchApp: async ({ restormRoot }, use, testInfo) => {
+  launchApp: async ({ restormRoot, gitServer: _gitServer }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
     let configPath: string | null = null
 

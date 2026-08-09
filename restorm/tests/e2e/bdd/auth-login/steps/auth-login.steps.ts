@@ -1,5 +1,4 @@
 import { createBdd } from 'playwright-bdd'
-import { copyFileSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import {
@@ -7,11 +6,17 @@ import {
   configureNextSaveFileDialogForE2E
 } from 'electron-core-ui/testing'
 import { test, expect, AUTH_LOGIN_TEMP_DIR } from '../../fixtures/auth-login.fixture'
+import { materializeSample, type StartedServices } from '../../../helpers/testcontainers/services'
 
 const SAMPLES_DIR = resolve(__dirname, '../../../samples')
 const AUTH_LOGIN_SAMPLE = join(SAMPLES_DIR, 'auth-login-sample.restorm')
-const AUTH_SERVICE_BASE = 'http://localhost:5110'
-const PET_SWAGGER_URL = `${AUTH_SERVICE_BASE}/swagger.json`
+
+let suiteServices: StartedServices | null = null
+const authServiceBase = (): string => {
+  if (suiteServices === null) throw new Error('open the sample first (services not captured)')
+  return suiteServices.url('auth-service')
+}
+const petSwaggerUrl = (): string => `${authServiceBase()}/swagger.json`
 const VALID_CLIENT_ID = 'VALID_CLIENT_ID'
 
 const { Given, When, Then } = createBdd(test)
@@ -45,31 +50,33 @@ async function expandRowIfCollapsed(currentPage: Page, name: string): Promise<vo
 
 /**
  * POST a test-only endpoint on the auth-service with no body. Throws a
- * helpful error when the service is unreachable so the developer knows
- * to run `docker compose up -d auth-service` before the test.
+ * helpful error when the suite's own container is unreachable.
  */
 async function postToAuthService(path: string): Promise<void> {
   try {
-    const res = await fetch(`${AUTH_SERVICE_BASE}${path}`, { method: 'POST' })
+    const res = await fetch(`${authServiceBase()}${path}`, { method: 'POST' })
     if (!res.ok) {
       throw new Error(`${path} -> ${res.status} ${res.statusText}`)
     }
   } catch (err) {
     throw new Error(
-      `Failed to reach auth-service at ${AUTH_SERVICE_BASE}${path}. ` +
-      'Start the container with `docker compose -f restorm/tests/docker/docker-compose.yml up -d auth-service` ' +
-      `before running this scenario. Underlying error: ${err instanceof Error ? err.message : String(err)}`
+      `Failed to reach the suite's auth-service container at ${authServiceBase()}${path}. ` +
+      `Underlying error: ${err instanceof Error ? err.message : String(err)}`
     )
   }
 }
 
-Given('I open the auth-login sample collection', async ({ launchApp }) => {
+Given('I open the auth-login sample collection', async ({ launchApp, services }) => {
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
+  suiteServices = services
 
-  const workingCopy = join(AUTH_LOGIN_TEMP_DIR, 'auth-login-sample.restorm')
-  copyFileSync(AUTH_LOGIN_SAMPLE, workingCopy)
+  const workingCopy = materializeSample(
+    AUTH_LOGIN_SAMPLE,
+    join(AUTH_LOGIN_TEMP_DIR, 'auth-login-sample.restorm'),
+    services
+  )
 
   await configureNextOpenDialogForE2E(requireApp(), { kind: 'openFile', path: workingCopy })
   await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
@@ -136,7 +143,7 @@ When('I open the import modal and paste the pet swagger URL', async () => {
 
   // InputBox's `data-testid` lands on a wrapper; the actual `<input>`
   // gets the same name suffixed with `-input`.
-  await p.locator('[data-testid="source-input-input"]').fill(PET_SWAGGER_URL)
+  await p.locator('[data-testid="source-input-input"]').fill(petSwaggerUrl())
 })
 
 Then('the import modal should show a 401 error', async () => {
@@ -163,7 +170,7 @@ When('I click the {string} button', async ({}, label: string) => {
 When('I configure the login request with the valid client id', async () => {
   const p = requirePage()
 
-  await p.locator('[data-testid="local-auth-form-url-input-input"]').fill(`${AUTH_SERVICE_BASE}/login`)
+  await p.locator('[data-testid="local-auth-form-url-input-input"]').fill(`${authServiceBase()}/login`)
 
   // Switch body mode to x-www-form-urlencoded so we can fill a plain
   // `client_id` row via the KeyValueTable (the service accepts either
@@ -194,7 +201,7 @@ When('I send the inline authentication request', async () => {
   // Release — this unblocks every /login currently queued on the gate
   // (the auth-service returns 200 with the OAuth-shaped payload, and
   // the renderer's auto-fill populates the Configuration tab).
-  const res = await fetch(`${AUTH_SERVICE_BASE}/releaselogins`)
+  const res = await fetch(`${authServiceBase()}/releaselogins`)
   if (!res.ok) throw new Error(`/releaselogins -> ${res.status} ${res.statusText}`)
 
   // The auto-fill path switches the form to the Configuration tab and
@@ -233,7 +240,7 @@ When('I confirm the authentication setup', async () => {
   // Release it so the modal can close and the import can re-run with
   // the resolved Bearer token.
   await p.waitForTimeout(300)
-  const res = await fetch(`${AUTH_SERVICE_BASE}/releaselogins`)
+  const res = await fetch(`${authServiceBase()}/releaselogins`)
   if (!res.ok) throw new Error(`/releaselogins -> ${res.status} ${res.statusText}`)
   await expect(p.locator('[data-testid="authentication-setup-modal"]')).not.toBeVisible({ timeout: 15000 })
 })
@@ -446,7 +453,7 @@ When('I send the pet request twice', async () => {
   // to reach the gate, then release.
   await sendBtn.click()
   await p.waitForTimeout(400)
-  await fetch(`${AUTH_SERVICE_BASE}/releaselogins`)
+  await fetch(`${authServiceBase()}/releaselogins`)
   await expect(body).toContainText('Rex', { timeout: 15000 })
 
   // 2nd send: auth cache hit — no /login should fire. Release is a
@@ -490,7 +497,7 @@ Then('the tab-header auth indicator should show the running feedback', async () 
 })
 
 When('I release the pending login', async () => {
-  const res = await fetch(`${AUTH_SERVICE_BASE}/releaselogins`)
+  const res = await fetch(`${authServiceBase()}/releaselogins`)
   if (!res.ok) throw new Error(`/releaselogins -> ${res.status} ${res.statusText}`)
 })
 
@@ -750,7 +757,7 @@ Then('the refresh import modal should show the inventory route as unchecked', as
   // gated as well. Poll /releaselogins while we wait for the tree
   // to mount so neither one stays parked on the gate.
   for (let i = 0; i < 20; i++) {
-    await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
+    await fetch(`${authServiceBase()}/releaselogins`).catch(() => undefined)
     if (await refreshTreeLocator(p).count() > 0) break
     await p.waitForTimeout(500)
   }
@@ -809,7 +816,7 @@ When('I apply the refresh', async () => {
   // service. Poll /releaselogins so the prefetch can return — the
   // modal only closes once the apply IPC resolves.
   for (let i = 0; i < 10; i++) {
-    await fetch(`${AUTH_SERVICE_BASE}/releaselogins`).catch(() => undefined)
+    await fetch(`${authServiceBase()}/releaselogins`).catch(() => undefined)
     if (await p.locator('[data-testid="import-modal"][data-refresh-mode="true"]').count() === 0) break
     await p.waitForTimeout(1000)
   }

@@ -1,3 +1,4 @@
+import { servicesWorkerFixture, type StartedServices } from '../../helpers/testcontainers/services'
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
 import { mkdirSync, rmSync } from 'fs'
@@ -16,7 +17,10 @@ export interface PostmanImportFixtures {
   launchApp: () => Promise<{ app: ElectronApplication; page: Page }>
 }
 
-export const test = base.extend<PostmanImportFixtures>({
+export const test = base.extend<PostmanImportFixtures, { services: StartedServices }>({
+  // The imported spec's request is EXECUTED against the live petstore —
+  // this suite runs its own container (worker-scoped, ephemeral port).
+  services: servicesWorkerFixture(['petstore']),
   restormRoot: [RESTORM_ROOT, { option: true }],
 
   launchApp: async ({ restormRoot }, use, testInfo) => {

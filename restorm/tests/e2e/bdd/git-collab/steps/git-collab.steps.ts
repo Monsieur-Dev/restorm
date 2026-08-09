@@ -1,3 +1,4 @@
+import { remapCanonicalPorts } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
 import { execSync } from 'child_process'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
@@ -101,7 +102,8 @@ When('{string} creates the project file {string} in his repository', async ({ co
   await p.waitForTimeout(500)
 })
 
-When('{string} imports the Petstore from {string}', async ({ collab }, actor: string, url: string) => {
+When('{string} imports the Petstore from {string}', async ({ collab, services }, actor: string, url: string) => {
+  url = remapCanonicalPorts(url, services)
   const p = collab.pageOf(actor)
 
   await p.keyboard.press('Control+I')

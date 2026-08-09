@@ -1,3 +1,4 @@
+import { materializeTextFixture } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
 import { existsSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
@@ -68,12 +69,12 @@ async function importFixture(p: Page, samplePath: string): Promise<void> {
   await p.waitForTimeout(500)
 }
 
-When('I import the HTTPie Desktop collection', async () => {
-  await importFixture(requirePage(), join(E2E_SAMPLES_DIR, 'httpie-collection.json'))
+When('I import the HTTPie Desktop collection', async ({ services }) => {
+  await importFixture(requirePage(), materializeTextFixture(join(E2E_SAMPLES_DIR, 'httpie-collection.json'), join(HTTPIE_IMPORT_TEMP_DIR, 'httpie-collection.json'), services))
 })
 
-When('I import the HTTPie CLI session', async () => {
-  await importFixture(requirePage(), join(UNIT_FIXTURES_DIR, 'session.json'))
+When('I import the HTTPie CLI session', async ({ services }) => {
+  await importFixture(requirePage(), materializeTextFixture(join(UNIT_FIXTURES_DIR, 'session.json'), join(HTTPIE_IMPORT_TEMP_DIR, 'session.json'), services))
 })
 
 Then('the sidebar should contain an environment folder named {string}', async ({}, name: string) => {

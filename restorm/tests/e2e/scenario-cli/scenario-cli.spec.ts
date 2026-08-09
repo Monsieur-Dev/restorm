@@ -5,6 +5,7 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import electronPath from 'electron'
 import { goldenPathFor, normalizeRunLogYaml, setupReferenceWorkingCopy } from '../bdd/scenario-runlog/runLogShared'
+import { startServices, type StartedServices } from '../helpers/testcontainers/services'
 
 /**
  * Headless CLI runner: spawn the BUILT app with `--run` and assert the
@@ -47,8 +48,23 @@ function runCli(args: string[]): Promise<CliResult> {
 }
 
 function freshProject(prefix: string): string {
-  return setupReferenceWorkingCopy(mkdtempSync(join(tmpdir(), prefix)))
+  return setupReferenceWorkingCopy(mkdtempSync(join(tmpdir(), prefix)), services)
 }
+
+/** The scenarios the CLI runs call these mocks (Main fans out across them). */
+let services: StartedServices
+
+test.beforeAll(async () => {
+  // Image pulls / kafka + dotnet startup dominate; cached reruns are fast.
+  test.setTimeout(300_000)
+  // Same set as the scenario-runlog suite: Main orchestrates across every
+  // protocol sub-scenario, and some dependencies (SSE) are invisible in the
+  // normalized goldens.
+  services = await startServices(['petstore', 'auth-service', 'rabbitmq', 'activemq', 'redis', 'jsonrpc', 'trpc', 'sse-server', 'grpc', 'grpcweb-mock', 'kafka'])
+})
+test.afterAll(async () => {
+  await services.stopAll()
+})
 
 const LOGS = 'Auth Service/Pet API/Main/Logs'
 const MAIN = 'Auth Service/Pet API/Main'
@@ -58,7 +74,7 @@ test.describe('headless CLI scenario runner', () => {
     const project = freshProject('restorm-cli-logs-')
     const res = await runCli(['--open', project, '--run', LOGS, '--all-logs', '--headless'])
     expect(res.code, res.stderr).toBe(0)
-    expect(normalizeRunLogYaml(res.stdout)).toBe(readFileSync(goldenPathFor('Logs'), 'utf-8'))
+    expect(normalizeRunLogYaml(res.stdout)).toBe(normalizeRunLogYaml(readFileSync(goldenPathFor('Logs'), 'utf-8')))
   })
 
   test('runs the orchestrator Main with --param, matching the golden, exit 0', async () => {
@@ -76,7 +92,7 @@ test.describe('headless CLI scenario runner', () => {
     if (process.env.UPDATE_RUNLOG_GOLDEN === '1') {
       writeFileSync(cliGolden, normalizeRunLogYaml(res.stdout))
     }
-    expect(normalizeRunLogYaml(res.stdout)).toBe(readFileSync(cliGolden, 'utf-8'))
+    expect(normalizeRunLogYaml(res.stdout)).toBe(normalizeRunLogYaml(readFileSync(cliGolden, 'utf-8')))
   })
 
   test('--out writes the run-log to a file, byte-identical to stdout', async () => {

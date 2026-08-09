@@ -1,5 +1,6 @@
+import { materializeSample } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
-import { copyFileSync, readFileSync, writeFileSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
@@ -70,13 +71,13 @@ async function runScenario(p: Page): Promise<void> {
   }
 }
 
-Given('I open the secrets-sources demo collection for run-log capture', async ({ launchApp }) => {
+Given('I open the secrets-sources demo collection for run-log capture', async ({ launchApp, services }) => {
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
 
   const workingCopy = join(SECRETS_SOURCES_TEMP_DIR, 'secrets-sources-demo.restorm')
-  copyFileSync(SECRETS_SAMPLE, workingCopy)
+  materializeSample(SECRETS_SAMPLE, workingCopy, services)
 
   await configureNextOpenDialogForE2E(requireApp(), { kind: 'openFile', path: workingCopy })
   await requirePage().locator('[data-testid="titlebar-menubar-item-file"]').click()
@@ -127,6 +128,6 @@ Then('the secret-scenario run-log matches the snapshot', async () => {
     throw new Error(`run-log golden missing: ${golden} — create it with UPDATE_RUNLOG_GOLDEN=1`)
   }
   expect(copiedYaml, `run-log drifted from ${golden} — regenerate with UPDATE_RUNLOG_GOLDEN=1 if intended`).toBe(
-    readFileSync(golden, 'utf-8')
+    normalizeRunLogYaml(readFileSync(golden, 'utf-8'))
   )
 })

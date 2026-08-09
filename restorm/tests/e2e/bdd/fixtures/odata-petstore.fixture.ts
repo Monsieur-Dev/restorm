@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { servicesWorkerFixture, type StartedServices } from '../../helpers/testcontainers/services'
 import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
@@ -21,7 +22,10 @@ export interface OdataPetstoreFixtures {
   launchApp: () => Promise<LaunchedApp>
 }
 
-export const test = base.extend<OdataPetstoreFixtures>({
+export const test = base.extend<OdataPetstoreFixtures, { services: StartedServices }>({
+  // The suites sharing this fixture run their OWN OData mocks (v4 .NET
+  // petstore + v2 node mock), worker-scoped on ephemeral ports.
+  services: servicesWorkerFixture(['odata-petstore', 'odata-v2-petstore']),
   restormRoot: [RESTORM_ROOT, { option: true }],
 
   launchApp: async ({ restormRoot }, use, testInfo) => {

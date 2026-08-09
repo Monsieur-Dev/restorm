@@ -8,10 +8,17 @@ import {
   configureNextSaveFileDialogForE2E
 } from '../../fixtures/odata-petstore.fixture'
 
-const ODATA_BATCH_URL = 'http://localhost:5100/odata/$batch'
+import type { StartedServices } from '../../../helpers/testcontainers/services'
 
-const ODATA_BASE = 'http://localhost:5100'
-const ODATA_METADATA_URL = `${ODATA_BASE}/odata/$metadata`
+let suiteServices: StartedServices | null = null
+const svc = (): StartedServices => {
+  if (suiteServices === null) throw new Error('launch first (services not captured)')
+  return suiteServices
+}
+const odataBatchUrl = (): string => `${svc().url('odata-petstore')}/odata/$batch`
+
+const odataBase = (): string => svc().url('odata-petstore')
+const odataMetadataUrl = (): string => `${odataBase()}/odata/$metadata`
 
 const { Given, When, Then } = createBdd(test)
 
@@ -42,7 +49,8 @@ async function expandRowIfCollapsed(currentPage: Page, name: string): Promise<vo
   if (expanded !== 'true') await row.click()
 }
 
-Given('a new single-file YAML collection for the OData petstore', async ({ launchApp }) => {
+Given('a new single-file YAML collection for the OData petstore', async ({ launchApp, services }) => {
+  suiteServices = services
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
@@ -62,7 +70,7 @@ When('I open the import modal and paste the OData metadata URL', async () => {
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')
   await expect(importModal).toBeVisible({ timeout: 2000 })
-  await p.locator('[data-testid="source-input-input"]').fill(ODATA_METADATA_URL)
+  await p.locator('[data-testid="source-input-input"]').fill(odataMetadataUrl())
   // Wait for the importer to fetch + parse the EDMX. The preview list
   // populating is the "ready" signal — without it, clicking Import
   // races the preview state and lands an empty tree.
@@ -243,7 +251,7 @@ When('I create a new batch request named {string}', async ({}, _name: string) =>
   await textarea.click({ force: true })
   await p.keyboard.press('Control+A')
   await p.keyboard.press('Delete')
-  await p.keyboard.type(ODATA_BATCH_URL, { delay: 5 })
+  await p.keyboard.type(odataBatchUrl(), { delay: 5 })
   await p.waitForTimeout(300)
 })
 

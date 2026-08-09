@@ -1,3 +1,4 @@
+import { remapCanonicalPorts } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs'
 import { dirname, join, resolve } from 'path'
@@ -396,9 +397,9 @@ Then(
 
 When(
   'I import the URL {string}',
-  async ({}, url: string) => {
+  async ({ services }, url: string) => {
     if (!page) throw new Error('app must be launched before importing')
-    await runImport(page, url)
+    await runImport(page, remapCanonicalPorts(url, services))
   }
 )
 

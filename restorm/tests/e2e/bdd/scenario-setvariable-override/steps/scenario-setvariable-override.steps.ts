@@ -12,12 +12,13 @@
  */
 
 import { createBdd } from 'playwright-bdd'
-import { readFileSync, writeFileSync, existsSync, copyFileSync, mkdirSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, resolve } from 'path'
 import { tmpdir } from 'os'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
-import { test, expect } from '../../fixtures/scenario-runlog.fixture'
+import { test, expect } from './fixture'
+import { materializeSample } from '../../../helpers/testcontainers/services'
 import { normalizeRunLogYaml } from '../../scenario-runlog/runLogShared'
 
 const SAMPLE = resolve(__dirname, '../../../samples/scenario-setvariable-override.restorm')
@@ -53,15 +54,14 @@ async function expandRowIfCollapsed(p: Page, name: string): Promise<void> {
   if ((await row.getAttribute('aria-expanded')) !== 'true') await row.click()
 }
 
-Given('I open the setVariable-override sample', async ({ launchApp }) => {
+Given('I open the setVariable-override sample', async ({ launchApp, services }) => {
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
 
   const dir = join(tmpdir(), `setvar-e2e-${String(process.pid)}`)
   mkdirSync(dir, { recursive: true })
-  const workingCopy = join(dir, 'scenario-setvariable-override.restorm')
-  copyFileSync(SAMPLE, workingCopy)
+  const workingCopy = materializeSample(SAMPLE, join(dir, 'scenario-setvariable-override.restorm'), services)
 
   await configureNextOpenDialogForE2E(launched.app, { kind: 'openFile', path: workingCopy })
   await requirePage().locator('[data-testid="titlebar-menubar-item-file"]').click()
@@ -195,6 +195,6 @@ Then('the setVariable run-log matches the snapshot', async () => {
     throw new Error(`run-log golden missing: ${GOLDEN} — create it with UPDATE_RUNLOG_GOLDEN=1`)
   }
   expect(copiedYaml, `run-log drifted from ${GOLDEN} — regenerate with UPDATE_RUNLOG_GOLDEN=1 if intended`).toBe(
-    readFileSync(GOLDEN, 'utf-8')
+    normalizeRunLogYaml(readFileSync(GOLDEN, 'utf-8'))
   )
 })

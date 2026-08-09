@@ -17,13 +17,20 @@
 
 import { createBdd } from 'playwright-bdd'
 import { join } from 'path'
-import { copyFileSync, mkdirSync } from 'node:fs'
 import type { Page } from '@playwright/test'
-import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
+import { test, expect, type McpDiscovery, type McpToolReply } from './fixture'
+import { materializeSample, remapCanonicalPorts, type StartedServices } from '../../../helpers/testcontainers/services'
 
 const { Given, When, Then } = createBdd(test)
 
 let discovery: McpDiscovery | null = null
+let suiteServices: StartedServices | null = null
+
+/** Canonical service ports in Gherkin args → this worker's mapped ports. */
+const remapArg = (text: string): string => {
+  if (suiteServices === null) throw new Error('open the sample first')
+  return remapCanonicalPorts(text, suiteServices)
+}
 let page: Page | null = null
 let requestsByName = new Map<string, string>()
 let currentRequestId: string | null = null
@@ -69,17 +76,19 @@ Given(
 
 Given(
   'I open the HTTP sample via MCP',
-  async ({ callMcpTool, restormRoot }) => {
+  async ({ callMcpTool, restormRoot, services }) => {
     if (discovery === null) throw new Error('launch first')
-    // Open a COPY of the sample: several scenarios mutate the project (the
-    // method combo matrix rewrites the request's method) and the renderer
-    // autosaves — pointing the app at the repo file would dirty the checkout
-    // on every run.
-    const samplePath = join(restormRoot, 'tests/e2e/samples/http-sample.restorm')
-    const tmpDir = join(restormRoot, 'tests/e2e/.tmp')
-    mkdirSync(tmpDir, { recursive: true })
-    const workingCopy = join(tmpDir, 'http-sample.working.restorm')
-    copyFileSync(samplePath, workingCopy)
+    suiteServices = services
+    // Open a materialized COPY of the sample (canonical service ports mapped
+    // to this worker's ephemeral ones): several scenarios mutate the project
+    // (the method combo matrix rewrites the request's method) and the
+    // renderer autosaves — pointing the app at the repo file would dirty the
+    // checkout on every run.
+    const workingCopy = materializeSample(
+      join(restormRoot, 'tests/e2e/samples/http-sample.restorm'),
+      join(restormRoot, 'tests/e2e/.tmp/http-execution/http-sample.working.restorm'),
+      services
+    )
     const opened = await callMcpTool(discovery, 'open_project', { filePath: workingCopy })
     expect(opened.isError ?? false).toBe(false)
 
@@ -547,6 +556,7 @@ Given(
   'the sample environment\'s {string} is the expression {string}',
   async ({ callMcpTool }, key: string, value: string) => {
     if (discovery === null) throw new Error('open the project first')
+    value = remapArg(value)
     // The type asymmetry is the whole defect: an imported variable is an
     // ExpressionValue while the row a user types over it is a StringValue, and
     // nothing in the UI distinguishes them. A fixture where every row is a
@@ -598,6 +608,7 @@ Given(
 Given(
   'a request {string} whose URL is {string}',
   async ({ callMcpTool }, name: string, url: string) => {
+    url = remapArg(url)
     if (discovery === null) throw new Error('open the project first')
     const created = await callMcpTool(discovery, 'create_request', {
       parentFolderId: envFolderId,
@@ -648,6 +659,7 @@ When(
 When(
   'I add an environment variable row {string} with value {string}',
   async ({}, key: string, value: string) => {
+    value = remapArg(value)
     if (page === null) throw new Error('launch first')
     const p = page
     const addBtn = p.locator('[data-testid="environment-folder-add-variable-button"]').first()
@@ -676,6 +688,7 @@ Then(
   'the context variables table resolves {string} to {string}',
   async ({}, varName: string, expectedValue: string) => {
     if (page === null) throw new Error('launch first')
+    expectedValue = remapArg(expectedValue)
     const p = page
     const table = p.locator('[data-testid="context-variables-table"]')
     await expect(table).toBeVisible({ timeout: 10_000 })
@@ -710,6 +723,7 @@ When(
 )
 
 Then('the resolved URL on the request tab is {string}', async ({}, expected: string) => {
+  expected = remapArg(expected)
   if (page === null) throw new Error('launch first')
   const urlContainer = page.locator('[data-testid="url-container"]:visible').first()
   await expect(urlContainer).toBeVisible({ timeout: 10_000 })
@@ -717,6 +731,7 @@ Then('the resolved URL on the request tab is {string}', async ({}, expected: str
 })
 
 Then('the URL actually sent was {string}', async ({ callMcpTool }, expected: string) => {
+  expected = remapArg(expected)
   if (discovery === null) throw new Error('launch first')
   if (currentRequestId === null) throw new Error('open a request first')
   const disco = discovery

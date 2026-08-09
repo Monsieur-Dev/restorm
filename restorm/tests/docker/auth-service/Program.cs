@@ -235,7 +235,12 @@ app.MapGet("/swagger.json", (HttpRequest req) =>
     }
 
     LogStore.Append("GET /swagger.json -> 200");
-    return Results.Content(PetOnlyOpenApiSpec(), "application/json");
+    // Advertise the address the CLIENT reached us on (the Host header):
+    // behind a published/ephemeral port the in-container listen port is
+    // not the reachable one, and the importer builds `{{host}}`/`{{port}}`
+    // from this field.
+    var advertisedHost = req.Headers.Host.Count > 0 ? req.Headers.Host.ToString() : "localhost:5110";
+    return Results.Content(PetOnlyOpenApiSpec(advertisedHost), "application/json");
 });
 
 // Test-only helpers. Not advertised in the swagger and not referenced
@@ -307,7 +312,7 @@ static bool TryGetBearerToken(HttpRequest req, out string token)
 // `{{scheme}}`, `{{host}}`, `{{port}}`, `{{baseRoute}}` variables.
 // A 3.0 `servers` array parses down to empty host, giving a useless
 // `https://` `{{baseUrl}}`.
-static string PetOnlyOpenApiSpec() => """
+static string PetOnlyOpenApiSpec(string advertisedHost) => $$"""
 {
   "swagger": "2.0",
   "info": {
@@ -315,7 +320,7 @@ static string PetOnlyOpenApiSpec() => """
     "version": "1.0.0",
     "description": "Static pet endpoint used by the auth-login e2e. Login is documented out-of-band."
   },
-  "host": "localhost:5110",
+  "host": "{{advertisedHost}}",
   "schemes": ["http"],
   "securityDefinitions": {
     "bearerAuth": {

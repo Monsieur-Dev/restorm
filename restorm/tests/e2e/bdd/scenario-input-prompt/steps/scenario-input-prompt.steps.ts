@@ -15,11 +15,12 @@
 
 import { createBdd } from 'playwright-bdd'
 import { join, resolve } from 'path'
-import { copyFileSync, mkdirSync } from 'fs'
+import { mkdirSync } from 'fs'
 import { tmpdir } from 'os'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
-import { test, expect } from '../../fixtures/scenario-runlog.fixture'
+import { test, expect } from './fixture'
+import { materializeSample } from '../../../helpers/testcontainers/services'
 
 const SAMPLE = resolve(__dirname, '../../../samples/scenario-input-prompt.restorm')
 
@@ -86,15 +87,14 @@ async function answerPetId(p: Page, value: string): Promise<void> {
   throw new Error(`no editor found for the petId prompt field (${field})`)
 }
 
-Given('I open the input-prompt sample', async ({ launchApp }) => {
+Given('I open the input-prompt sample', async ({ launchApp, services }) => {
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
 
   const dir = join(tmpdir(), `input-prompt-e2e-${String(process.pid)}`)
   mkdirSync(dir, { recursive: true })
-  const workingCopy = join(dir, 'scenario-input-prompt.restorm')
-  copyFileSync(SAMPLE, workingCopy)
+  const workingCopy = materializeSample(SAMPLE, join(dir, 'scenario-input-prompt.restorm'), services)
 
   await configureNextOpenDialogForE2E(launched.app, { kind: 'openFile', path: workingCopy })
   await requirePage().locator('[data-testid="titlebar-menubar-item-file"]').click()

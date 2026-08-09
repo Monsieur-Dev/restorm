@@ -1,3 +1,4 @@
+import { servicesWorkerFixture, type StartedServices } from '../../helpers/testcontainers/services'
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
 import { mkdirSync, writeFileSync, rmSync } from 'fs'
@@ -31,7 +32,9 @@ export interface SecretsSourcesFixtures {
   launchApp: () => Promise<LaunchedApp>
 }
 
-export const test = base.extend<SecretsSourcesFixtures>({
+export const test = base.extend<SecretsSourcesFixtures, { services: StartedServices }>({
+  // The suite runs its OWN auth-service container (worker-scoped, ephemeral port).
+  services: servicesWorkerFixture(['auth-service']),
   restormRoot: [RESTORM_ROOT, { option: true }],
 
   launchApp: async ({ restormRoot }, use, testInfo) => {

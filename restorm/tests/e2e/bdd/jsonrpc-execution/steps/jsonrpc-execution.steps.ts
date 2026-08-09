@@ -9,14 +9,17 @@
  * assertion (both share the same generic mechanisms: `BaseRequestTabView`'s
  * Tabs testids, and the `__e2eDocUpdateCount` window counter).
  *
- * The sample targets the local jsonrpc mock (:8095), a deterministic
- * zero-dependency node:http server dispatching on the envelope's `method`.
+ * The suite runs its OWN jsonrpc mock container (worker-scoped, ephemeral
+ * port) — a deterministic zero-dependency node:http server dispatching on the
+ * envelope's `method`. The committed sample speaks the canonical port; it is
+ * materialized with the mapped one before opening.
  */
 
 import { createBdd } from 'playwright-bdd'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
-import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
+import { test, expect, type McpDiscovery, type McpToolReply } from './fixture'
+import { materializeSample } from '../../../helpers/testcontainers/services'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -93,9 +96,13 @@ Given(
   }
 )
 
-Given('I open the JSON-RPC sample via MCP', async ({ callMcpTool, restormRoot }) => {
+Given('I open the JSON-RPC sample via MCP', async ({ callMcpTool, restormRoot, services }) => {
   if (discovery === null) throw new Error('launch first')
-  const samplePath = join(restormRoot, 'tests/e2e/samples/jsonrpc-sample.restorm')
+  const samplePath = materializeSample(
+    join(restormRoot, 'tests/e2e/samples/jsonrpc-sample.restorm'),
+    join(restormRoot, 'tests/e2e/.tmp/jsonrpc-execution/jsonrpc-sample.restorm'),
+    services
+  )
   const opened = await callMcpTool(discovery, 'open_project', { filePath: samplePath })
   expect(opened.isError ?? false).toBe(false)
 
@@ -111,7 +118,7 @@ Given('I open the JSON-RPC sample via MCP', async ({ callMcpTool, restormRoot })
   expect(requestsByName.get('JSON-RPC Echo'), 'JSON-RPC sample requests not loaded').toBeTruthy()
 })
 
-When('I import the JSON-RPC mock\'s OpenRPC document via MCP', async ({ callMcpTool }) => {
+When('I import the JSON-RPC mock\'s OpenRPC document via MCP', async ({ callMcpTool, services }) => {
   if (discovery === null || page === null) throw new Error('launch first')
   const disco = discovery
   const pg = page
@@ -136,7 +143,7 @@ When('I import the JSON-RPC mock\'s OpenRPC document via MCP', async ({ callMcpT
   const deadline = Date.now() + 20_000
   let stable = false
   while (Date.now() < deadline && !stable) {
-    lastImportReply = await callMcpTool(disco, 'import_from_url', { url: 'http://localhost:8095/openrpc.json' })
+    lastImportReply = await callMcpTool(disco, 'import_from_url', { url: `${services.url('jsonrpc')}/openrpc.json` })
     if (lastImportReply.isError ?? false) { await pg.waitForTimeout(500); continue }
 
     let consecutive = 0
