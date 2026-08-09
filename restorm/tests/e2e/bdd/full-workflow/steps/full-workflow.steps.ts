@@ -2142,63 +2142,96 @@ const ADD_CHILD_GROUP_REGEX: Record<string, RegExp> = {
   odata: /OData/
 }
 
-When(
-  'I add a {string} under the folder {string} via the sidebar Ajouter submenu',
-  async ({}, kind: string, parentName: string) => {
-    if (!page) throw new Error('app must be launched')
-    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
-    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
-
-    const row = page
-      .locator('[data-testid="sidebar-listview"] .list-view-row')
-      .filter({ has: page.getByText(parentName, { exact: true }) })
-      .first()
-    await expect(row).toBeVisible({ timeout: 10000 })
-    await row.click({ button: 'right' })
-    await page.waitForTimeout(200)
+/**
+ * Walk the Add flyout chain — hover "Ajouter", optionally hover a protocol
+ * group, and return the target leaf once VISIBLE — as one retriable
+ * interaction, with `openMenu` re-run on every attempt.
+ *
+ * Retrying the WHOLE walk (not just polling the assertion) is the point:
+ * under 4-worker CPU contention a hover can be swallowed or the flyout's
+ * ~300 ms open-delay timer can fire into a lagging React commit, and once
+ * that happens no amount of waiting shows the item — the end-of-test
+ * screenshots of the old one-shot version show the item RENDERED while the
+ * assertion had already died. Each attempt therefore presses Escape (a clean
+ * slate whatever half-open state the last attempt left), reopens the menu
+ * and redoes the hovers.
+ */
+const walkAddSubmenuToTarget = async (
+  openMenu: () => Promise<void>,
+  childLabel: RegExp,
+  groupLabel: RegExp | undefined
+): Promise<Locator> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  const found: { target?: Locator } = {}
+  await expect(async () => {
+    await p.keyboard.press('Escape')
+    await openMenu()
 
     // Hover the "Ajouter" / "Add" entry to reveal the nested submenu
-    // (MenuItem opens its submenu on hover after a ~300 ms delay;
-    // click doesn't open it because `hasSubmenu` short-circuits the
-    // handler). Role-based targeting gives us the accessible name
-    // directly and avoids picking up `action-label` spans further
-    // down the tree.
-    const addEntry = page
-      .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
-      .first()
-    await expect(addEntry).toBeVisible({ timeout: 15000 })
+    // (MenuItem opens its submenu on hover after a ~300 ms delay; click
+    // doesn't open it because `hasSubmenu` short-circuits the handler).
+    const addEntry = p.getByRole('menuitem', { name: /^(Add|Ajouter)$/ }).first()
+    await expect(addEntry).toBeVisible({ timeout: 3000 })
     await addEntry.hover()
-    await page.waitForTimeout(350)
+    await p.waitForTimeout(400)
 
     // The submenu is rendered in a separate `<ul role="menu">` nested
     // under the "Add" item once `showSubmenu` flips, so scope by the
     // visible submenu holder — otherwise a plain `/Folder/` match can
     // walk into the sidebar row behind the menu.
-    let submenu = page.locator('.menubar-menu-items-holder:visible').last()
-    const groupLabel = ADD_CHILD_GROUP_REGEX[kind]
+    let submenu = p.locator('.menubar-menu-items-holder:visible').last()
     if (groupLabel) {
       // Second hop: open the protocol group's own submenu.
       const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
-      await expect(groupEntry).toBeVisible({ timeout: 15000 })
+      await expect(groupEntry).toBeVisible({ timeout: 3000 })
       await groupEntry.hover()
-      await page.waitForTimeout(350)
-      submenu = page.locator('.menubar-menu-items-holder:visible').last()
+      await p.waitForTimeout(400)
+      submenu = p.locator('.menubar-menu-items-holder:visible').last()
     }
-    const target = submenu
-      .getByRole('menuitem', { name: childLabel })
-      .first()
-    await expect(target).toBeVisible({ timeout: 15000 })
-    // Dispatch the click via the DOM `click()` method. Playwright's
-    // own `.click()` sometimes no-ops here because the Badge rendered
-    // in the MenuItem's icon slot ships absolute layout that eats the
-    // hit-test at the anchor's centre, and the ContextMenu's global
-    // `mousedown` outside-listener can race Playwright's synthetic
-    // mousedown/mouseup pair. Native `click()` goes straight to the
-    // React synthetic handler.
-    await target.evaluate((el) => { (el as HTMLElement).click() })
-    // Short settle window — the reactive proxy / React commit loop
-    // needs a beat before the Then assertion polls the sidebar.
-    await page.waitForTimeout(150)
+    const candidate = submenu.getByRole('menuitem', { name: childLabel }).first()
+    await expect(candidate).toBeVisible({ timeout: 3000 })
+    found.target = candidate
+  }).toPass({ timeout: 45000 })
+  const target = found.target
+  if (target === undefined) throw new Error('submenu walk never produced a target')
+  return target
+}
+
+/** Click the leaf the walk produced. Dispatched via the DOM `click()`
+ * method: Playwright's own `.click()` sometimes no-ops here because the
+ * Badge rendered in the MenuItem's icon slot ships absolute layout that
+ * eats the hit-test at the anchor's centre, and the ContextMenu's global
+ * `mousedown` outside-listener can race Playwright's synthetic
+ * mousedown/mouseup pair. Native `click()` goes straight to the React
+ * synthetic handler. */
+const clickAddSubmenuTarget = async (target: Locator): Promise<void> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  await target.evaluate((el) => { (el as HTMLElement).click() })
+  // Short settle window — the reactive proxy / React commit loop
+  // needs a beat before the Then assertion polls the sidebar.
+  await p.waitForTimeout(150)
+}
+
+When(
+  'I add a {string} under the folder {string} via the sidebar Ajouter submenu',
+  async ({}, kind: string, parentName: string) => {
+    const p = page
+    if (!p) throw new Error('app must be launched')
+    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
+    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
+
+    const target = await walkAddSubmenuToTarget(async () => {
+      const row = p
+        .locator('[data-testid="sidebar-listview"] .list-view-row')
+        .filter({ has: p.getByText(parentName, { exact: true }) })
+        .first()
+      await expect(row).toBeVisible({ timeout: 10000 })
+      await row.click({ button: 'right' })
+      await p.waitForTimeout(200)
+    }, childLabel, ADD_CHILD_GROUP_REGEX[kind])
+    await clickAddSubmenuTarget(target)
     await dismissInlineRenameAfterCreation()
   }
 )
@@ -2263,38 +2296,14 @@ const openEmptyAreaContextMenu = async (): Promise<void> => {
   await p.waitForTimeout(200)
 }
 
-/** Open the empty-area context menu and reveal its "Ajouter" submenu —
- * the single entry the menu offers, holding every root-level creation.
- * Returns the visible submenu holder. */
-const openEmptyAreaAddSubmenu = async (): Promise<Locator> => {
-  const p = page
-  if (!p) throw new Error('app must be launched')
-  await openEmptyAreaContextMenu()
-  const addEntry = p.getByRole('menuitem', { name: /^(Add|Ajouter)$/ }).first()
-  await expect(addEntry).toBeVisible({ timeout: 5000 })
-  await addEntry.hover()
-  await p.waitForTimeout(350)
-  return p.locator('.menubar-menu-items-holder:visible').last()
-}
-
-/** Click one creation entry of the empty-area "Ajouter" submenu. Leaves the
- * new row in inline rename — callers decide whether to dismiss it. */
+/** Click one creation entry of the empty-area "Ajouter" submenu — the single
+ * entry the menu offers, holding every root-level creation. The whole
+ * open→hover(s)→target walk is retried as one interaction (see
+ * `walkAddSubmenuToTarget`). Leaves the new row in inline rename — callers
+ * decide whether to dismiss it. */
 const clickEmptyAreaAddEntry = async (label: RegExp, groupLabel?: RegExp): Promise<void> => {
-  const p = page
-  if (!p) throw new Error('app must be launched')
-  let submenu = await openEmptyAreaAddSubmenu()
-  if (groupLabel) {
-    // Second hop: open the protocol group's own submenu.
-    const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
-    await expect(groupEntry).toBeVisible({ timeout: 5000 })
-    await groupEntry.hover()
-    await p.waitForTimeout(350)
-    submenu = p.locator('.menubar-menu-items-holder:visible').last()
-  }
-  const target = submenu.getByRole('menuitem', { name: label }).first()
-  await expect(target).toBeVisible({ timeout: 5000 })
-  await target.evaluate((el) => { (el as HTMLElement).click() })
-  await p.waitForTimeout(150)
+  const target = await walkAddSubmenuToTarget(openEmptyAreaContextMenu, label, groupLabel)
+  await clickAddSubmenuTarget(target)
 }
 
 const ENV_FOLDER_ENTRY_REGEX = /^(Environment folder|Dossier de variables)$/
