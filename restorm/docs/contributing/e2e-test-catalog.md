@@ -101,8 +101,6 @@ server; — = pure UI/in-process.
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
 | sidebar-clone | 3 | Sidebar "Clone" recursive id independence: request / quick-configs / env-folder (nested request, custom value list, enum definition, cross-scenario runScenario, connectionNodeId) — clone-then-rename-the-original leaves the clone unaffected, both stay distinctly searchable | 🔌 |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
-| open-folder | 2 | Open Folder | — |
-| body-type-migration | 1 | Legacy body-type canonicalisation on load | — |
 | fully-documented-petstore | 1 | Fully-documented Petstore fixture builder | — |
 | theme-carousel-a11y | 1 | Theme preview cards keep Tab on the card only, never the abstract preview | — |
 | monaco-suggest-dismiss | 1 | A `{{...}}` suggest popup opened in one request is gone after switching tabs, and still opens in the now-active field | 🔌 |

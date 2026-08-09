@@ -219,7 +219,6 @@
     "new": "新規作成",
     "import": "インポート",
     "open": "開く",
-    "openFolder": "フォルダを開く",
     "recentFiles": "最近使ったファイル",
     "favorites": "お気に入り",
     "close": "閉じる",
@@ -854,26 +853,6 @@
     "newAriaLabel": "新しいコレクションを作成",
     "openAriaLabel": "ディスクからコレクションを開く",
     "landmarkLabel": "ようこそ"
-  },
-  "save": {
-    "title": "保存オプション",
-    "mode": {
-      "label": "保存モード",
-      "file": "単一ファイル",
-      "folder": "フォルダ構成",
-      "fileDescription": "すべてを単一のファイルに保存します",
-      "folderDescription": "ファイルを分けたフォルダ構成として保存します"
-    },
-    "format": {
-      "label": "形式",
-      "yamlDescription": "人にとって読みやすい形式",
-      "jsonDescription": "標準形式",
-      "json5Description": "JSON + コメント"
-    },
-    "preview": {
-      "label": "構成プレビュー",
-      "noDocumentation": "このソースには解析済みのドキュメントがありません。"
-    }
   },
   "common": {
     "cancel": "キャンセル",

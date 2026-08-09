@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react'
  * deep in the tree, away from the project state). */
 export interface ScenarioCliInfo {
   /** Returns the SHORTEST unambiguous `--run` value for a scenario id (bare
-   * name, breadcrumb, or folder-mode index path), or null. */
+   * name, breadcrumb, or index path), or null. */
   suggestRunTarget: (scenarioId: string) => string | null
   /** The open project's file/folder path, for the `--open` argument, or null
    * when nothing is open. */

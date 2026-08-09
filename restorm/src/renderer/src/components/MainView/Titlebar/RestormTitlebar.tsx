@@ -38,7 +38,6 @@ export interface RestormTitlebarProps {
   favorites: { path: string; name: string }[]
   onNew: () => void
   onOpen: () => void
-  onOpenFolder: () => void
   onSave: () => unknown
   onSaveAll: () => unknown
   onSaveAs: () => void
@@ -100,7 +99,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   favorites,
   onNew,
   onOpen,
-  onOpenFolder,
   onSave,
   onSaveAll,
   onSaveAs,
@@ -157,10 +155,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   const handleMenuOpen = useCallback(() => {
     onOpen()
   }, [onOpen])
-
-  const handleMenuOpenFolder = useCallback(() => {
-    onOpenFolder()
-  }, [onOpenFolder])
 
   const handleMenuSave = useCallback(() => {
     onSave()
@@ -227,7 +221,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem data-testid="titlebar-menu-item-import" title={t('menuBar.import')} shortcut="Ctrl+I" opensDialog onClick={handleImport} />
             <MenuItemSeparator data-testid="titlebar-menu-separator-2" />
             <MenuItem data-testid="titlebar-menu-item-open" title={t('menuBar.open')} shortcut="Ctrl+O" opensDialog onClick={handleMenuOpen} />
-            <MenuItem data-testid="titlebar-menu-item-open-folder" title={t('menuBar.openFolder')} opensDialog onClick={handleMenuOpenFolder} />
             {fileName && (
               <>
                 <MenuItemSeparator data-testid="titlebar-menu-separator-3" />

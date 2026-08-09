@@ -2,12 +2,6 @@ import { defineConfig } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
 
 // Define BDD configurations for each test group
-const openFolderTestDir = defineBddConfig({
-  features: 'tests/e2e/bdd/open-folder/features/**/*.feature',
-  steps: ['tests/e2e/bdd/open-folder/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-folder.fixture.ts'],
-  outputDir: '.features-gen/open-folder'
-})
-
 const fullWorkflowTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/full-workflow/features/**/*.feature',
   steps: ['tests/e2e/bdd/full-workflow/steps/**/*.ts', 'tests/e2e/bdd/fixtures/full-workflow.fixture.ts'],
@@ -557,10 +551,6 @@ export default defineConfig({
 
   /* Projects for each test group */
   projects: [
-    {
-      name: 'open-folder',
-      testDir: openFolderTestDir
-    },
     {
       name: 'full-workflow',
       testDir: fullWorkflowTestDir,

@@ -219,7 +219,6 @@
     "new": "新增",
     "import": "匯入",
     "open": "開啟",
-    "openFolder": "開啟資料夾",
     "recentFiles": "最近開啟的檔案",
     "favorites": "我的最愛",
     "close": "關閉",
@@ -854,26 +853,6 @@
     "newAriaLabel": "建立新集合",
     "openAriaLabel": "從磁碟開啟集合",
     "landmarkLabel": "歡迎"
-  },
-  "save": {
-    "title": "儲存選項",
-    "mode": {
-      "label": "儲存模式",
-      "file": "單一檔案",
-      "folder": "資料夾結構",
-      "fileDescription": "將所有內容儲存為單一檔案",
-      "folderDescription": "以資料夾結構儲存，每項使用獨立檔案"
-    },
-    "format": {
-      "label": "格式",
-      "yamlDescription": "易於閱讀",
-      "jsonDescription": "標準格式",
-      "json5Description": "JSON + 註解"
-    },
-    "preview": {
-      "label": "結構預覽",
-      "noDocumentation": "此來源沒有可解析的文件。"
-    }
   },
   "common": {
     "cancel": "取消",

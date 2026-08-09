@@ -220,7 +220,6 @@
     "new": "Ny",
     "import": "Importér",
     "open": "Åbn",
-    "openFolder": "Åbn mappe",
     "recentFiles": "Seneste filer",
     "favorites": "Favoritter",
     "close": "Luk",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Opret en ny samling",
     "openAriaLabel": "Åbn en samling fra disken",
     "landmarkLabel": "Velkomst"
-  },
-  "save": {
-    "title": "Gemmeindstillinger",
-    "mode": {
-      "label": "Gemmetilstand",
-      "file": "Enkelt fil",
-      "folder": "Mappestruktur",
-      "fileDescription": "Gem alt i en enkelt fil",
-      "folderDescription": "Gem som mappestruktur med separate filer"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Læsbar af mennesker",
-      "jsonDescription": "Standardformat",
-      "json5Description": "JSON + kommentarer"
-    },
-    "preview": {
-      "label": "Forhåndsvisning af struktur",
-      "noDocumentation": "Ingen parset dokumentation for denne kilde."
-    }
   },
   "common": {
     "cancel": "Annullér",

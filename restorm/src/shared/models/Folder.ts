@@ -5,7 +5,7 @@
 import {
   trackable,
   searchable,
-  separateFolders,
+  saveUnits,
   fileNaming,
   graphqlField,
   TreatEmptyAsUndefined
@@ -53,7 +53,7 @@ export class Folder {
 
   /** Folder contents: requests and sub-folders */
   @graphqlField({ type: 'FolderItem', isArray: true })
-  @separateFolders()
+  @saveUnits()
   items: BaseFolderItem[] = []
 
   constructor(init?: Partial<Folder>) {

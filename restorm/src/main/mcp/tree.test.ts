@@ -207,7 +207,7 @@ describe('mcp/tree', () => {
   })
 
   describe('flattenScenarios', () => {
-    it('collects scenarios anywhere in the tree with a folder-mode path + counts', () => {
+    it('collects scenarios anywhere in the tree with a breadcrumb path + counts', () => {
       const tree = [
         ef('root', 'root', [
           sc('s-top', 'Top', { nodes: [{}, {}], edges: [{}], tags: ['smoke'] }),

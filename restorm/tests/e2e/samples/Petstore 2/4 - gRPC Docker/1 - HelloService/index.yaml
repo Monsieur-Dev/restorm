@@ -1,5 +1,0 @@
-name: HelloService
-documentation: Hello service - simple greeting
-tags:
-  - service
-configuration: {}

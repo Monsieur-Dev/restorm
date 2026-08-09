@@ -156,7 +156,7 @@ describe('usePushModal', () => {
     expect(result.current.body).toBe('modified:request:Find pet by ID')
   })
 
-  it('openPushModal is a no-op for a legacy folder-mode project (no single file to diff)', async () => {
+  it('openPushModal is a no-op when the open path is not a .restorm file', async () => {
     const api = stubGitApi()
     const { result } = renderHook(() => usePushModal('/proj/folder', ROOT_ITEMS, saveBeforePushMock))
     act(() => { result.current.openPushModal() })

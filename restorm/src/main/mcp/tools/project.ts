@@ -176,14 +176,14 @@ export function registerProjectTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.openProject',
       title: 'Open an existing project',
       description:
-        'Open an existing .restorm file (single-file or folder-structure). Triggers the same ' +
+        'Open an existing .restorm project file. Triggers the same ' +
         '`file:opened` flow as the File menu, so the renderer reloads the sidebar / workbench / ' +
         'recent-files. Errors out cleanly when the path doesn\'t exist or isn\'t a valid project. ' +
         'Waits briefly for the renderer to confirm the project is loaded before replying, so an ' +
         'immediate follow-up write tool call reliably finds the newly-opened entities; a `warning` ' +
         'field means that confirmation didn\'t arrive in time and a follow-up call may need a retry.',
       inputSchema: {
-        filePath: z.string().min(1).describe('Absolute path to the .restorm file or folder to open.')
+        filePath: z.string().min(1).describe('Absolute path to the .restorm file to open.')
       } as Record<string, unknown>
     },
     async (args) => {
@@ -194,7 +194,7 @@ export function registerProjectTools(mcp: McpService): void {
       try {
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
-        const payload: Record<string, unknown> = { filePath, opened: true, isDirectory: result.isDirectory === true }
+        const payload: Record<string, unknown> = { filePath, opened: true }
         const expectedIds = expectedTopLevelEnvironmentFolderIds(result.content)
         const ready = await waitForCollectionStoreReady(expectedIds, OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS)
         if (!ready) {

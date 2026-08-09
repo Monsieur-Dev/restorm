@@ -220,7 +220,6 @@
     "new": "I ri",
     "import": "Importo",
     "open": "Hap",
-    "openFolder": "Hap dosjen",
     "recentFiles": "Skedarët e fundit",
     "favorites": "Të preferuarat",
     "close": "Mbyll",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Krijo një koleksion të ri",
     "openAriaLabel": "Hap një koleksion nga disku",
     "landmarkLabel": "Mirësevini"
-  },
-  "save": {
-    "title": "Opsionet e ruajtjes",
-    "mode": {
-      "label": "Mënyra e ruajtjes",
-      "file": "Skedar i vetëm",
-      "folder": "Strukturë dosjesh",
-      "fileDescription": "Ruaj gjithçka në një skedar të vetëm",
-      "folderDescription": "Ruaj si strukturë dosjesh me skedarë të ndarë"
-    },
-    "format": {
-      "label": "Formati",
-      "yamlDescription": "I lexueshëm nga njerëzit",
-      "jsonDescription": "Format standard",
-      "json5Description": "JSON + komente"
-    },
-    "preview": {
-      "label": "Pamja paraprake e strukturës",
-      "noDocumentation": "Asnjë dokumentacion i analizuar për këtë burim."
-    }
   },
   "common": {
     "cancel": "Anulo",

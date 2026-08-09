@@ -75,9 +75,7 @@ stale value for ever.
 Silently rewriting a file the user only opened is precisely the defect the
 identity stamp had and no longer has (see
 `electron-core-ui/docs/Architecture/Persistence.md`); this field does not
-get to reintroduce it. In folder mode the key clears on the next save-all —
-a per-unit save writes one request file and has no business rewriting a
-root index the user never touched.
+get to reintroduce it.
 
 ## It is not the application version
 
@@ -139,27 +137,17 @@ notices, which is why the gate refuses rather than trying its best.
   stop an unknown key round-tripping through the save payload for ever.
 Anything that merely *reports* on the open project — the `restorm://project`
 MCP resource — uses `resolveFileFormatVersion` too, not a separate "what does
-it literally declare" reader. In folder mode the content the app holds is
-rebuilt from the directory tree rather than read from one file, so asking what
-that object declares is not a question about the project; asking what version
-it is loaded as, is. One function, one answer, both modes agreeing.
+it literally declare" reader. One function, one answer.
 
-Both entry points consult the gate before anything is written or loaded:
+The open path consults the gate before anything is written or loaded:
 
-- **File mode** — installed as `validateOnOpen` on the `FileService` config
-  in `src/main/index.ts`. The library calls it after parsing and before
-  stamping the project UUID, so a refused file is never written to.
-- **Folder mode** — called directly in `loadFolderStructure`
-  (`src/main/FileOperations.ts`), before `ensureFolderUuid` writes to the
-  index, and on content that has had the root index's declared version
-  merged into it first. That merge is load-bearing: rebuilding a folder
-  project from its directories drops every root-index key, so without it
-  the gate would see no version at all and a future-format folder project
-  would open. Folder mode is the realistic way a user meets such a project:
-  a colleague on a newer build commits, and git brings it in.
+The gate is installed as `validateOnOpen` on the `FileService` config
+in `src/main/index.ts`. The library calls it after parsing and before
+stamping the project UUID, so a refused file is never written to.
 
-Both broadcast `file:open-rejected`; the renderer owns the message, because
-the main process ships only two locales and the renderer ships all of them.
+A refusal broadcasts `file:open-rejected`; the renderer owns the message,
+because the main process ships only two locales and the renderer ships all
+of them.
 
 ## Adding a new way to open a project
 
@@ -169,8 +157,4 @@ does not, `resolveFileFormatVersion` logs a warning saying the gate was
 bypassed — that warning is the signal that a path was added without one.
 
 A new entry point that WRITES must put the version at the root of what it
-writes. In folder mode, where the root index is not rewritten by a save,
-use `setTopLevelKey` (via `stampFolderFormatVersion` in
-`src/main/FileOperations.ts`) so the key is inserted into the file's text
-rather than through a parse/serialise round-trip that would eat comments
-and expand YAML anchors.
+writes.

@@ -4,20 +4,21 @@ import { launchRestormElectronApp, writeAppLogs } from '../../helpers/launch-res
 import { closeElectronAppForE2E } from '../../helpers/coverage'
 
 interface AutoUpdateFixtures {
-  petstoreFolderPath: string
+  petstoreProjectPath: string
 }
 
 /**
  * Fixture for the auto-update E2E: launches Restorm with the scripted update
  * mock (`RESTORM_UPDATE_MOCK`) so a check reports "no update available" without
- * a real release feed. Opening the Petstore folder activates a workbench so the
- * app toaster (where update notifications land) is mounted. Overrides only
- * `electronApp`; the base `page` fixture attaches to its first window.
+ * a real release feed. Opening the Petstore workspace project activates a
+ * workbench so the app toaster (where update notifications land) is mounted.
+ * Overrides only `electronApp`; the base `page` fixture attaches to its first
+ * window.
  */
 export const test = restormBaseTest.extend<AutoUpdateFixtures>({
-  petstoreFolderPath: async ({ restormRoot }, use) => {
+  petstoreProjectPath: async ({ restormRoot }, use) => {
     const { join } = await import('path')
-    await use(join(restormRoot, 'tests/e2e/samples/Petstore'))
+    await use(join(restormRoot, 'tests/e2e/samples/petstore-workspace.restorm'))
   },
 
   electronApp: async ({ restormRoot }, use, testInfo: TestInfo) => {

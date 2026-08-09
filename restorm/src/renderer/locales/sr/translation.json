@@ -221,7 +221,6 @@
     "new": "Novo",
     "import": "Uvezi",
     "open": "Otvori",
-    "openFolder": "Otvori fasciklu",
     "recentFiles": "Nedavne datoteke",
     "favorites": "Omiljeno",
     "close": "Zatvori",
@@ -856,26 +855,6 @@
     "newAriaLabel": "Napravi novu kolekciju",
     "openAriaLabel": "Otvori kolekciju sa diska",
     "landmarkLabel": "Dobrodošli"
-  },
-  "save": {
-    "title": "Opcije čuvanja",
-    "mode": {
-      "label": "Režim čuvanja",
-      "file": "Jedna datoteka",
-      "folder": "Struktura fascikli",
-      "fileDescription": "Sačuvaj sve u jednu datoteku",
-      "folderDescription": "Sačuvaj kao strukturu fascikli sa zasebnim datotekama"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Čitljivo čoveku",
-      "jsonDescription": "Standardni format",
-      "json5Description": "JSON + komentari"
-    },
-    "preview": {
-      "label": "Pregled strukture",
-      "noDocumentation": "Za ovaj izvor nije analizirana nikakva dokumentacija."
-    }
   },
   "common": {
     "cancel": "Otkaži",

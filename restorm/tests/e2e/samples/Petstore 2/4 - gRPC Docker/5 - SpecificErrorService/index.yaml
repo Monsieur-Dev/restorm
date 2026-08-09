@@ -1,5 +1,0 @@
-name: SpecificErrorService
-documentation: SpecificError service - return specific error codes
-tags:
-  - service
-configuration: {}

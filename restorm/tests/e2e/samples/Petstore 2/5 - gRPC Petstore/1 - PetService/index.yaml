@@ -1,5 +1,0 @@
-name: PetService
-documentation: Pet service for managing pets in the store
-tags:
-  - service
-configuration: {}

@@ -57,18 +57,13 @@ export {
   deserialize,
   detectFormat,
   filterNonSerialised,
-  generateIndexedFileName,
-  sanitizeFileName,
-  calculateIndexPadding,
   PERSISTENCE_FORMATS,
   atomicWriteFile,
   codeOf
 } from './PersistenceService'
 export type {
   PersistenceFormat,
-  PersistenceMode,
   PersistenceConfig,
-  FileNamingContext,
   SaveResult,
   LoadResult
 } from './PersistenceService'

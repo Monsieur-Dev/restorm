@@ -220,7 +220,6 @@
     "new": "Új",
     "import": "Importálás",
     "open": "Megnyitás",
-    "openFolder": "Mappa megnyitása",
     "recentFiles": "Legutóbbi fájlok",
     "favorites": "Kedvencek",
     "close": "Bezárás",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Új gyűjtemény létrehozása",
     "openAriaLabel": "Gyűjtemény megnyitása lemezről",
     "landmarkLabel": "Üdvözöljük"
-  },
-  "save": {
-    "title": "Mentési beállítások",
-    "mode": {
-      "label": "Mentési mód",
-      "file": "Egy fájl",
-      "folder": "Mappastruktúra",
-      "fileDescription": "Minden mentése egyetlen fájlba",
-      "folderDescription": "Mentés mappastruktúraként, külön fájlokkal"
-    },
-    "format": {
-      "label": "Formátum",
-      "yamlDescription": "Ember számára olvasható",
-      "jsonDescription": "Szabványos formátum",
-      "json5Description": "JSON + megjegyzések"
-    },
-    "preview": {
-      "label": "Struktúra előnézete",
-      "noDocumentation": "Ehhez a forráshoz nincs elemzett dokumentáció."
-    }
   },
   "common": {
     "cancel": "Mégse",

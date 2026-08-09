@@ -41,11 +41,8 @@ export function registerResources(mcp: McpService): void {
       const state = fileService.getState()
       const collections = collectionStore.getCollections()
       // The version the open project is LOADED AS, read from the document
-      // root — the one place it is ever read from. Reporting the resolved
-      // value rather than the raw declaration is what keeps the two modes
-      // agreeing: in folder mode the content held here is rebuilt from the
-      // directory tree, so "what does this object declare" is not a
-      // question about the project at all. `null` means no project is open.
+      // root — the one place it is ever read from. `null` means no project
+      // is open.
       const content = state.currentFile.content
       const fileFormatVersion = content === null || content === undefined
         ? null

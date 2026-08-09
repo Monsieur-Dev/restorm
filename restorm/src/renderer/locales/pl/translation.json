@@ -222,7 +222,6 @@
     "new": "Nowy",
     "import": "Importuj",
     "open": "Otwórz",
-    "openFolder": "Otwórz folder",
     "recentFiles": "Ostatnie pliki",
     "favorites": "Ulubione",
     "close": "Zamknij",
@@ -857,26 +856,6 @@
     "newAriaLabel": "Utwórz nową kolekcję",
     "openAriaLabel": "Otwórz kolekcję z dysku",
     "landmarkLabel": "Witamy"
-  },
-  "save": {
-    "title": "Opcje zapisu",
-    "mode": {
-      "label": "Tryb zapisu",
-      "file": "Pojedynczy plik",
-      "folder": "Struktura folderów",
-      "fileDescription": "Zapisz wszystko w jednym pliku",
-      "folderDescription": "Zapisz jako strukturę folderów z oddzielnymi plikami"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Czytelny dla człowieka",
-      "jsonDescription": "Format standardowy",
-      "json5Description": "JSON + komentarze"
-    },
-    "preview": {
-      "label": "Podgląd struktury",
-      "noDocumentation": "Brak przeanalizowanej dokumentacji dla tego źródła."
-    }
   },
   "common": {
     "cancel": "Anuluj",

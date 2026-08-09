@@ -219,7 +219,6 @@
     "new": "Baru",
     "import": "Impor",
     "open": "Buka",
-    "openFolder": "Buka folder",
     "recentFiles": "File terbaru",
     "favorites": "Favorit",
     "close": "Tutup",
@@ -854,26 +853,6 @@
     "newAriaLabel": "Buat koleksi baru",
     "openAriaLabel": "Buka koleksi dari disk",
     "landmarkLabel": "Selamat datang"
-  },
-  "save": {
-    "title": "Opsi penyimpanan",
-    "mode": {
-      "label": "Mode penyimpanan",
-      "file": "File tunggal",
-      "folder": "Struktur folder",
-      "fileDescription": "Simpan semuanya dalam satu file",
-      "folderDescription": "Simpan sebagai struktur folder dengan file terpisah"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Mudah dibaca manusia",
-      "jsonDescription": "Format standar",
-      "json5Description": "JSON + komentar"
-    },
-    "preview": {
-      "label": "Pratinjau struktur",
-      "noDocumentation": "Tidak ada dokumentasi yang diuraikan untuk sumber ini."
-    }
   },
   "common": {
     "cancel": "Batal",

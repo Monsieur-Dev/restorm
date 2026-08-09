@@ -219,7 +219,6 @@
     "new": "Mới",
     "import": "Nhập",
     "open": "Mở",
-    "openFolder": "Mở thư mục",
     "recentFiles": "Tệp gần đây",
     "favorites": "Yêu thích",
     "close": "Đóng",
@@ -854,26 +853,6 @@
     "newAriaLabel": "Tạo bộ sưu tập mới",
     "openAriaLabel": "Mở bộ sưu tập từ đĩa",
     "landmarkLabel": "Chào mừng"
-  },
-  "save": {
-    "title": "Tùy chọn lưu",
-    "mode": {
-      "label": "Chế độ lưu",
-      "file": "Tệp đơn",
-      "folder": "Cấu trúc thư mục",
-      "fileDescription": "Lưu mọi thứ trong một tệp duy nhất",
-      "folderDescription": "Lưu dưới dạng cấu trúc thư mục với các tệp riêng biệt"
-    },
-    "format": {
-      "label": "Định dạng",
-      "yamlDescription": "Con người đọc được",
-      "jsonDescription": "Định dạng tiêu chuẩn",
-      "json5Description": "JSON + chú thích"
-    },
-    "preview": {
-      "label": "Xem trước cấu trúc",
-      "noDocumentation": "Không có tài liệu được phân tích cho nguồn này."
-    }
   },
   "common": {
     "cancel": "Hủy",

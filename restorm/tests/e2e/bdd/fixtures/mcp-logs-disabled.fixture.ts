@@ -7,7 +7,7 @@ import { closeElectronAppForE2E, writeRendererIstanbulCoverage } from '../../hel
 import type { ElectronApplication, Page, TestInfo } from '@playwright/test'
 
 interface McpLogsDisabledFixtures {
-  petstoreFolderPath: string
+  petstoreProjectPath: string
 }
 
 /**
@@ -32,8 +32,8 @@ function seedMcpDisabledUserData(restormRoot: string): string {
  * entry must be disabled.
  */
 export const test = restormBaseTest.extend<McpLogsDisabledFixtures>({
-  petstoreFolderPath: async ({ restormRoot }, use) => {
-    await use(join(restormRoot, 'tests/e2e/samples/Petstore'))
+  petstoreProjectPath: async ({ restormRoot }, use) => {
+    await use(join(restormRoot, 'tests/e2e/samples/petstore-workspace.restorm'))
   },
 
   electronApp: async ({ restormRoot }, use, testInfo: TestInfo) => {

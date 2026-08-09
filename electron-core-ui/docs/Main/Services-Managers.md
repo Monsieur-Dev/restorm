@@ -366,7 +366,7 @@ graphQLService.getEndpoint()
 
 ### PersistenceService
 
-Advanced file persistence with folder mode support.
+Atomic single-file persistence.
 
 ```typescript
 import {
@@ -381,20 +381,13 @@ import {
 // Initialize
 initPersistenceService({
   extension: 'myapp',
-  format: 'yaml',
-  mode: 'folder',
-  indexFileName: 'index'
+  format: 'yaml'
 })
 
 const persistence = getPersistenceService()
 
-// Single file mode
-await persistence.saveToFile(data, '/path/to/file.yaml')
-const { success, data } = await persistence.loadFromFile('/path/to/file.yaml')
-
-// Folder mode (with @separateFiles/@separateFolders decorators)
-await persistence.saveToFolder(data, '/path/to/folder', { format: 'yaml' })
-const { success, data } = await persistence.loadFromFolder('/path/to/folder')
+await persistence.saveSingleFile('/path/to/file.yaml', data)
+const { success, data } = await persistence.loadSingleFile('/path/to/file.yaml')
 
 // Utilities
 serialize(data, 'yaml')        // string
@@ -404,11 +397,6 @@ detectFormat('/path/file.json') // 'json' | 'yaml' | 'json5'
 // Format constants
 PERSISTENCE_FORMATS // ['json', 'json5', 'yaml']
 ```
-
-**Decorators support:**
-- `@separateFiles()` - Array properties saved as separate files
-- `@separateFolders()` - Array properties saved as separate folders
-- `@fileNaming({ pattern: '{index} - {name}' })` - Custom file naming
 
 ---
 

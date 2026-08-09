@@ -570,8 +570,6 @@ export function ensureCoreUiWebApiShim(): void {
     onUnitDirtyChanged: (): (() => void) => () => { /* no-op */ },
     onDraftsRestored: (): (() => void) => () => { /* no-op — web build has no draft persistence. */ },
     onAutoSaveTrigger: (): (() => void) => () => { /* no-op — web build has no autosave controller. */ },
-    saveUnit: (): Promise<boolean> => Promise.resolve(false),
-    saveUnitsBatch: (): Promise<{ runtimeId: string; success: boolean }[]> => Promise.resolve([])
   }
 
   // EventBus shim for web builds (in-memory, same process)

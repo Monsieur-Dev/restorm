@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd'
-import { copyFileSync, cpSync, readFileSync, writeFileSync } from 'fs'
+import { copyFileSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, FILE_FORMAT_GATE_TEMP_DIR } from '../../fixtures/file-format-gate.fixture'
@@ -8,18 +8,10 @@ const { Given, When, Then } = createBdd(test)
 
 let page: Page | null = null
 let projectPath = ''
-/**
- * The single file whose bytes stand for "the project on disk". In file
- * mode that is the project itself; in folder mode it is the root index,
- * which is the file both the format stamp and the identity stamp write
- * to, and therefore the one a refused open must leave alone.
- */
+/** The project file whose bytes a refused open must leave alone. */
 let bytesPath = ''
 /** Bytes of that file as they stood before the open attempt. */
 let bytesBeforeOpen: Buffer | null = null
-
-/** A folder project the app wrote itself, with a root index. */
-const SOURCE_FOLDER_SAMPLE = join(__dirname, '../../../samples/Petstore')
 
 const MODAL = '[data-testid="incompatible-project-modal"]'
 
@@ -117,50 +109,6 @@ Given('its file format version is raised beyond what this build supports', () =>
   const after = before.replace(/fileFormatVersion:\s*\d+/g, 'fileFormatVersion: 9999')
   expect(after, 'the version bump must actually change the file').not.toBe(before)
   writeFileSync(projectPath, after, 'utf-8')
-})
-
-/**
- * Folder mode, which is the realistic way a user meets a future-format
- * project at all: a colleague on a newer build commits, and git brings the
- * directory in.
- *
- * It is also the mode with its own reading path — a folder project is
- * rebuilt from its directories, which drops every key the root index
- * carries, so the version has to be read from that index explicitly before
- * the gate can judge it. A file-mode scenario cannot exercise any of that.
- */
-Given('a folder-mode project written by this build', async ({ launchApp }) => {
-  const launched = await launchApp()
-  page = launched.page
-
-  projectPath = join(FILE_FORMAT_GATE_TEMP_DIR, 'folder-project')
-  cpSync(SOURCE_FOLDER_SAMPLE, projectPath, { recursive: true })
-  bytesPath = join(projectPath, 'index.yaml')
-
-  expect(readFileSync(bytesPath, 'utf-8'), 'the fixture must already have an identity').toContain(
-    '_projectUuid:'
-  )
-})
-
-/**
- * Raise the version in the project's ROOT index — the document-level file,
- * not a collection's own index. Same legitimate exception as the file-mode
- * bump: a future-format project is the one state the app cannot produce,
- * so this single line is hand-written and everything else is the app's own
- * output.
- */
-Given('its root index declares a format version beyond what this build supports', () => {
-  const before = readFileSync(bytesPath, 'utf-8')
-  // The fixture declares its version like every Restorm-written project;
-  // raise THAT line rather than prepending a second one, so the file keeps
-  // exactly one root declaration and the gate reads the value under test.
-  const raised = /^fileFormatVersion: \d+$/m.test(before)
-    ? before.replace(/^fileFormatVersion: \d+$/m, 'fileFormatVersion: 9999')
-    : `fileFormatVersion: 9999\n${before}`
-  writeFileSync(bytesPath, raised, 'utf-8')
-  expect(readFileSync(bytesPath, 'utf-8'), 'exactly one root declaration').toMatch(
-    /^fileFormatVersion: 9999$/m
-  )
 })
 
 When('I open that project', async () => {

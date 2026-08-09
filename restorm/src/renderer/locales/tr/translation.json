@@ -220,7 +220,6 @@
     "new": "Yeni",
     "import": "İçe aktar",
     "open": "Aç",
-    "openFolder": "Klasör aç",
     "recentFiles": "Son kullanılan dosyalar",
     "favorites": "Favoriler",
     "close": "Kapat",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Yeni bir koleksiyon oluştur",
     "openAriaLabel": "Diskten bir koleksiyon aç",
     "landmarkLabel": "Hoş geldiniz"
-  },
-  "save": {
-    "title": "Kaydetme seçenekleri",
-    "mode": {
-      "label": "Kaydetme modu",
-      "file": "Tek dosya",
-      "folder": "Klasör yapısı",
-      "fileDescription": "Her şeyi tek bir dosyada kaydet",
-      "folderDescription": "Ayrı dosyalarla klasör yapısı olarak kaydet"
-    },
-    "format": {
-      "label": "Biçim",
-      "yamlDescription": "İnsan tarafından okunabilir",
-      "jsonDescription": "Standart biçim",
-      "json5Description": "JSON + yorumlar"
-    },
-    "preview": {
-      "label": "Yapı önizlemesi",
-      "noDocumentation": "Bu kaynak için ayrıştırılmış belge yok."
-    }
   },
   "common": {
     "cancel": "İptal",

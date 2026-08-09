@@ -54,11 +54,3 @@ Feature: Refusing a project written by a newer build
     And no project is open
     And the project file on disk is unchanged
 
-  Scenario: A folder project whose root index declares a newer format is refused
-    Given a folder-mode project written by this build
-    And its root index declares a format version beyond what this build supports
-
-    When I open that project
-    Then the incompatible-project message is shown
-    And no project is open
-    And the project file on disk is unchanged

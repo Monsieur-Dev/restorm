@@ -29,7 +29,7 @@ export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKe
  *   1. the object has no id (legacy file written before id persistence, or
  *      an object freshly built in memory);
  *   2. the id is already in use elsewhere in the same load — e.g. the user
- *      copy-pasted a document between sub-folders in folder mode. Keeping
+ *      copy-pasted a document inside the project file. Keeping
  *      duplicate ids would make per-request persistence (env selection,
  *      workbench tab layout, …) collide between the original and the copy.
  *

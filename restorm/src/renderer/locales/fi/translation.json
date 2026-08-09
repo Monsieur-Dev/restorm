@@ -220,7 +220,6 @@
     "new": "Uusi",
     "import": "Tuo",
     "open": "Avaa",
-    "openFolder": "Avaa kansio",
     "recentFiles": "Viimeisimmät tiedostot",
     "favorites": "Suosikit",
     "close": "Sulje",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Luo uusi kokoelma",
     "openAriaLabel": "Avaa kokoelma levyltä",
     "landmarkLabel": "Tervetuloa"
-  },
-  "save": {
-    "title": "Tallennusasetukset",
-    "mode": {
-      "label": "Tallennustila",
-      "file": "Yksittäinen tiedosto",
-      "folder": "Kansiorakenne",
-      "fileDescription": "Tallenna kaikki yhteen tiedostoon",
-      "folderDescription": "Tallenna kansiorakenteena erillisillä tiedostoilla"
-    },
-    "format": {
-      "label": "Muoto",
-      "yamlDescription": "Ihmisen luettavissa",
-      "jsonDescription": "Vakiomuoto",
-      "json5Description": "JSON + kommentit"
-    },
-    "preview": {
-      "label": "Rakenteen esikatselu",
-      "noDocumentation": "Tälle lähteelle ei ole jäsennettyä dokumentaatiota."
-    }
   },
   "common": {
     "cancel": "Peruuta",

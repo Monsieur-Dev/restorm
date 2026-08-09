@@ -1,6 +1,6 @@
 # Persistence
 
-Flexible serialization supporting single file or folder-based storage,
+Flexible serialization for single-file storage,
 with an in-memory save-unit model and crash-recovery drafts.
 
 ## Formats
@@ -11,7 +11,7 @@ with an in-memory save-unit model and crash-recovery drafts.
 | YAML | `.yaml` | Human-friendly |
 | JSON5 | `.json5` | Comments, trailing commas |
 
-## Single File Mode
+## Single File Persistence
 
 All data in one file.
 
@@ -136,58 +136,9 @@ A validator that throws is treated as a refusal, not as approval — a
 document whose acceptability is unknown is exactly what the gate exists to
 keep out.
 
-## Folder Mode
+## Atomic writes
 
-Hierarchical structure based on decorators.
-
-### On-disk layout
-
-```
-collection/
-├── .ecu.conf              # Format configuration
-├── index.yaml             # Root metadata (see @separateFolders owner)
-├── 01 - Users/
-│   ├── index.yaml
-│   ├── 01 - List.yaml
-│   └── 02 - Create.yaml
-└── 02 - Products/
-    └── index.yaml
-```
-
-- Index files are named `index.<ext>` (no underscore prefix).
-- Sub-folder directory names follow `{counter} - {name}`.
-- Request (or other file-type) file names follow `{counter} - {name}.{ext}` — no type prefix (e.g. no `GET`, `SOAP`).
-- Extension is uniform across the project, driven by `PersistenceConfig.format`.
-- Counters are stable: they only move on an explicit reorder. Duplicate names within a folder are legal — the counter differentiates them.
-
-### Decorator-driven structure
-
-```typescript
-class Collection {
-  name: string
-
-  @separateFolders()
-  @fileNaming({ pattern: '{index} - {name}' })
-  folders: Folder[]
-
-  @separateFiles()
-  @fileNaming({ pattern: '{index} - {name}', idProperty: 'id' })
-  environments: Environment[]
-}
-```
-
-### Config file
-
-`.ecu.conf` at folder root stores format:
-
-```yaml
-format: yaml
-```
-
-### Atomic writes
-
-Every disk write — single-file save, index file, each unit file, and
-each re-indexed sibling — goes through `atomicWriteFile()`: serialize
+Every disk write goes through `atomicWriteFile()`: serialize
 to `<target>.<uuid>.tmp` adjacent to the target, then `fs.rename` into
 place. A crash mid-write leaves the previous target intact.
 
@@ -209,9 +160,8 @@ consults only the DIRECTORY's permissions:
 
   **It is opt-in on purpose.** The throw lands on the caller, and only a
   caller that reports failure to the user can act on it. The atomicity
-  here is *per file*: a caller writing several files in one pass (the
-  folder reorder in `saveIndexedFolder`, for instance) would be left
-  mid-operation, some files written and some not. Writers that report
+  here is *per file*: a caller writing several files in one pass would
+  be left mid-operation, some files written and some not. Writers that report
   failure **by value** (`'refused'`, `persisted: false`) or that merely
   log would turn the refusal into a silent no-op or an unexpected
   exception. So the default is the historical behaviour, and only the
@@ -232,7 +182,7 @@ Every write path therefore reports its outcome to the renderer:
 
 | Broadcast | Payload | Fired by |
 | --- | --- | --- |
-| **`file:save-failed`** | `{ path, reason, detail }` | `save()`, `saveAs()`, `saveUnit()`, `saveUnitsBatch()` |
+| **`file:save-failed`** | `{ path, reason, detail }` | `save()`, `saveAs()` |
 | **`file:save-succeeded`** | `{ path }` | the same, on the way through |
 
 `reason` is a `SaveFailureReason` — `'read-only-file'`,
@@ -258,7 +208,7 @@ A save refused because the file changed outside the app broadcasts
 nothing here — that path has its own prompt (above), and no write was
 attempted.
 
-Hosts that persist through their own IPC (folder mode, exports) report
+Hosts that persist through their own IPC (exports) report
 through `getFileService().notifySaveSucceeded(path)` /
 `notifySaveFailed(path, error)`, so the notice covers those paths too.
 Do NOT call them for a cancelled dialog or a refused precondition: those
@@ -326,14 +276,14 @@ freshly created units.
 
 Lifecycle:
 
-| Operation | In-memory effect | On save |
+| Operation | In-memory effect | On save (whole-file write + commit) |
 | --- | --- | --- |
-| **Create** | New unit, no `reference`, only `draft`. | Write new file. |
-| **Modify** | Update `draft`. | Atomic overwrite of reference file. |
-| **Delete** | `draft = Tombstone(snapshot)`. | Delete reference file. |
-| **Rename** | `draft.name` updated. | `fs.rename()` on file or folder. |
-| **Move** | Same `runtimeId`, new parent. | `fs.rename()` across folders. |
-| **Reorder** | Counters flip, siblings become dirty. | Cascade — every affected sibling saved together. |
+| **Create** | New unit, no `reference`, only `draft`. | Unit committed, draft dropped. |
+| **Modify** | Update `draft`. | Unit committed, draft dropped. |
+| **Delete** | `draft = Tombstone(snapshot)`. | Tombstone cleared. |
+| **Rename** | `draft.name` updated. | Unit committed. |
+| **Move** | Same `runtimeId`, new parent. | Unit committed. |
+| **Reorder** | Counters flip, siblings become dirty. | Every affected sibling committed together. |
 
 Undo-to-reference: if a mutation makes the draft structurally identical
 to the reference, the draft is discarded automatically.

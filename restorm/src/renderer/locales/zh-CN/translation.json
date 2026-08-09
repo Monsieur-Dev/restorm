@@ -219,7 +219,6 @@
     "new": "新建",
     "import": "导入",
     "open": "打开",
-    "openFolder": "打开文件夹",
     "recentFiles": "最近的文件",
     "favorites": "收藏",
     "close": "关闭",
@@ -854,26 +853,6 @@
     "newAriaLabel": "新建集合",
     "openAriaLabel": "从磁盘打开集合",
     "landmarkLabel": "欢迎"
-  },
-  "save": {
-    "title": "保存选项",
-    "mode": {
-      "label": "保存模式",
-      "file": "单一文件",
-      "folder": "文件夹结构",
-      "fileDescription": "将所有内容保存到一个文件中",
-      "folderDescription": "保存为文件夹结构，每项使用单独的文件"
-    },
-    "format": {
-      "label": "格式",
-      "yamlDescription": "人类可读",
-      "jsonDescription": "标准格式",
-      "json5Description": "JSON + 注释"
-    },
-    "preview": {
-      "label": "结构预览",
-      "noDocumentation": "此来源没有可解析的文档。"
-    }
   },
   "common": {
     "cancel": "取消",

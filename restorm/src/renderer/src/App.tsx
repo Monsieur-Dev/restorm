@@ -171,7 +171,6 @@ import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { suggestRunTarget } from '../../shared/scenarioRunTarget'
 import { ScenarioCliInfoProvider } from './contexts/scenarioRunTargetContext'
-import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { IncompatibleProjectModal } from './components/Modals/IncompatibleProjectModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
@@ -1149,29 +1148,18 @@ const App: React.FC = () => {
   const {
     handleMenuNew,
     handleMenuOpen,
-    handleMenuOpenFolder,
     handleMenuSaveAll,
     handleMenuSaveUnit,
     handleMenuSaveAs,
     handleMenuClose,
     handleOpenRecentFile,
-    handleSaveWithOptions,
     handleFileOpened,
-    handleFileClosed,
-    showSaveOptionsModal,
-    setShowSaveOptionsModal,
-    isOpenedAsFolder: _isOpenedAsFolder,
-    setIsOpenedAsFolder: _setIsOpenedAsFolder,
-    folderFormat: _folderFormat,
-    setFolderFormat: _setFolderFormat,
-    currentFolderPath,
-    setCurrentFolderPath: _setCurrentFolderPath
+    handleFileClosed
   } = useFileManagement({
     rootItems,
     setRootItems: setRootItemsWithPullReload,
     setWorkbenchTree,
     clearTabDirtyState,
-    registerTabDirtyState,
     markAllTabsSaved,
     t
   })
@@ -2709,7 +2697,7 @@ const App: React.FC = () => {
       if (!payload.id) return
 
       // A sub-environment isn't its own save-unit — it lives embedded in its
-      // top-level environment's content (`environments` is @separateFolders,
+      // top-level environment's content (`environments` is @saveUnits,
       // `subEnvironments` is not). Redirect the upsert onto the top-level env's
       // unit so the change is actually saved + committed; registering a
       // per-sub-env unit would create a phantom the decomposer never produces,
@@ -2983,9 +2971,9 @@ const App: React.FC = () => {
   const scenarioCliInfo = useMemo(
     () => ({
       suggestRunTarget: suggestScenarioRunTarget,
-      projectPath: filePath ?? currentFolderPath ?? null
+      projectPath: filePath ?? null
     }),
-    [suggestScenarioRunTarget, filePath, currentFolderPath]
+    [suggestScenarioRunTarget, filePath]
   )
 
   return (
@@ -3009,7 +2997,6 @@ const App: React.FC = () => {
         favorites={favorites}
         onNew={() => { navigationService.clearHistory(); void handleMenuNew() }}
         onOpen={() => { void handleMenuOpen() }}
-        onOpenFolder={() => { void handleMenuOpenFolder() }}
         onSave={smartSaveActive}
         onSaveAll={handleMenuSaveAll}
         onSaveAs={handleMenuSaveAs}
@@ -3399,14 +3386,6 @@ const App: React.FC = () => {
         onDeleteAnyway={handleDeleteRequestAnyway}
         onCancel={() => { setScenarioDelete((p) => ({ ...p, isOpen: false })) }}
       />
-
-          {/* Save Options Modal */}
-          <SaveOptionsModal
-            isOpen={showSaveOptionsModal}
-            onClose={() => { setShowSaveOptionsModal(false) }}
-            onSave={handleSaveWithOptions}
-            rootFolder={rootItems[0]}
-          />
 
           {/* Import Modal — doubles as the "Refresh from source"
               wizard when `refreshContext` is provided. The host

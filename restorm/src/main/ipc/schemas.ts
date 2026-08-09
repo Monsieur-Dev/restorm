@@ -52,12 +52,6 @@ export const openEditorArgs = z.tuple([
 
 export const saveAsFileArgs = z.tuple([z.unknown(), persistenceFormatArg])
 
-export const saveAsFolderArgs = z.tuple([
-  z.unknown(),
-  persistenceFormatArg,
-  z.string().optional()
-])
-
 // ==========================================================================
 // Secrets
 // ==========================================================================

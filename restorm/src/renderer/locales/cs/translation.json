@@ -222,7 +222,6 @@
     "new": "Nový",
     "import": "Importovat",
     "open": "Otevřít",
-    "openFolder": "Otevřít složku",
     "recentFiles": "Naposledy otevřené",
     "favorites": "Oblíbené",
     "close": "Zavřít",
@@ -857,26 +856,6 @@
     "newAriaLabel": "Vytvořit novou kolekci",
     "openAriaLabel": "Otevřít kolekci z disku",
     "landmarkLabel": "Úvodní obrazovka"
-  },
-  "save": {
-    "title": "Možnosti uložení",
-    "mode": {
-      "label": "Režim uložení",
-      "file": "Jediný soubor",
-      "folder": "Struktura složek",
-      "fileDescription": "Uložit vše do jednoho souboru",
-      "folderDescription": "Uložit jako strukturu složek se samostatnými soubory"
-    },
-    "format": {
-      "label": "Formát",
-      "yamlDescription": "Čitelné pro člověka",
-      "jsonDescription": "Standardní formát",
-      "json5Description": "JSON + komentáře"
-    },
-    "preview": {
-      "label": "Náhled struktury",
-      "noDocumentation": "Pro tento zdroj nebyla analyzována žádná dokumentace."
-    }
   },
   "common": {
     "cancel": "Zrušit",

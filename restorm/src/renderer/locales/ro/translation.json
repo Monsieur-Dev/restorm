@@ -221,7 +221,6 @@
     "new": "Nou",
     "import": "Importă",
     "open": "Deschide",
-    "openFolder": "Deschide folderul",
     "recentFiles": "Fișiere recente",
     "favorites": "Favorite",
     "close": "Închide",
@@ -856,26 +855,6 @@
     "newAriaLabel": "Creează o colecție nouă",
     "openAriaLabel": "Deschide o colecție de pe disc",
     "landmarkLabel": "Bine ați venit"
-  },
-  "save": {
-    "title": "Opțiuni de salvare",
-    "mode": {
-      "label": "Mod de salvare",
-      "file": "Fișier unic",
-      "folder": "Structură de foldere",
-      "fileDescription": "Salvează totul într-un singur fișier",
-      "folderDescription": "Salvează ca structură de foldere cu fișiere separate"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Lizibil pentru oameni",
-      "jsonDescription": "Format standard",
-      "json5Description": "JSON + comentarii"
-    },
-    "preview": {
-      "label": "Previzualizare structură",
-      "noDocumentation": "Nu există documentație analizată pentru această sursă."
-    }
   },
   "common": {
     "cancel": "Anulează",

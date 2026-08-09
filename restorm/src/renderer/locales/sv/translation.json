@@ -220,7 +220,6 @@
     "new": "Ny",
     "import": "Importera",
     "open": "Öppna",
-    "openFolder": "Öppna mapp",
     "recentFiles": "Senaste filer",
     "favorites": "Favoriter",
     "close": "Stäng",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Skapa en ny samling",
     "openAriaLabel": "Öppna en samling från disken",
     "landmarkLabel": "Välkommen"
-  },
-  "save": {
-    "title": "Sparalternativ",
-    "mode": {
-      "label": "Sparläge",
-      "file": "En enda fil",
-      "folder": "Mappstruktur",
-      "fileDescription": "Spara allt i en enda fil",
-      "folderDescription": "Spara som en mappstruktur med separata filer"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Läsbart för människor",
-      "jsonDescription": "Standardformat",
-      "json5Description": "JSON + kommentarer"
-    },
-    "preview": {
-      "label": "Förhandsgranskning av struktur",
-      "noDocumentation": "Ingen analyserad dokumentation för denna källa."
-    }
   },
   "common": {
     "cancel": "Avbryt",

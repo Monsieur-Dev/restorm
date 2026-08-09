@@ -87,15 +87,6 @@ export const fileUpsertSaveUnitArgs = z.tuple([
   })
 ])
 export const fileSaveUnitIdArgs = z.tuple([z.string()])
-const persistenceFormatSchema = z.enum(['json', 'json5', 'yaml'])
-const saveUnitEntrySchema = z.object({
-  runtimeId: z.string(),
-  content: z.unknown(),
-  absolutePath: z.string(),
-  format: persistenceFormatSchema
-})
-export const fileSaveUnitToDiskArgs = z.tuple([saveUnitEntrySchema])
-export const fileSaveUnitsBatchArgs = z.tuple([z.array(saveUnitEntrySchema)])
 
 // ==========================================================================
 // EventBus

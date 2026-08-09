@@ -1,5 +1,0 @@
-name: AddrService
-documentation: AddrService - return client address
-tags:
-  - service
-configuration: {}

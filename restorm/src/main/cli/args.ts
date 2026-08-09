@@ -13,7 +13,7 @@ import type { ArgumentsCamelCase } from 'yargs'
  * and exits with a status code reflecting the scenario outcome.
  */
 export interface CliRunOptions {
-  /** Scenario to run — its folder-mode long name (default) or its id. */
+  /** Scenario to run — its long name (default) or its id. */
   target: string
   /** How to interpret {@link target}. */
   by: 'name' | 'id'
@@ -88,7 +88,7 @@ export function parseCliArgs(): CliArgs {
     .option('open', {
       alias: 'o',
       type: 'string',
-      describe: 'Path to a file or folder to open on start'
+      describe: 'Path to a .restorm project file to open on start'
     })
     .option('clear-settings', {
       alias: 'cls',
@@ -111,13 +111,13 @@ export function parseCliArgs(): CliArgs {
     })
     .option('run', {
       type: 'string',
-      describe: 'Headless: run the named scenario from the project given by --open, stream its run-log, and exit (0 = success, non-zero = failure). Designate the scenario by its folder-mode name (default) or its id (--by id).'
+      describe: 'Headless: run the named scenario from the project given by --open, stream its run-log, and exit (0 = success, non-zero = failure). Designate the scenario by its name (default) or its id (--by id).'
     })
     .option('by', {
       type: 'string',
       choices: ['name', 'id'],
       default: 'name',
-      describe: 'How --run designates the scenario: by folder-mode name (default) or by id.'
+      describe: 'How --run designates the scenario: by name (default) or by id.'
     })
     .option('all-logs', {
       type: 'boolean',

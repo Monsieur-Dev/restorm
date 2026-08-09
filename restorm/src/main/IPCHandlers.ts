@@ -6,9 +6,9 @@ import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
-import { assertPathWithinParent, isPathContained, resolveOpenedFolderBoundary } from './utils/pathSecurity'
+import { assertPathWithinParent, isPathContained } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
-import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
+import { attachDraftStoreForFile } from './FileOperations'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
@@ -37,7 +37,7 @@ import { importGrpcFromReflection, findExistingGrpcReflectionFolder, reimportGrp
 import { queryReflection, GrpcReflectionUnsupportedError } from './services/grpc/grpcReflectionClient'
 import {
   openEditorArgs,
-  saveAsFileArgs, saveAsFolderArgs,
+  saveAsFileArgs,
   secretsReadArgs, secretsWriteArgs, secretsInvalidateArgs, secretsResolveArgs, secretsRefreshArgs,
   openPathArgs,
   revealInFolderArgs,
@@ -81,10 +81,6 @@ import {
 import { isRevealablePath } from './ipc/revealAuthority'
 
 /**
- * Get mocked folder path for E2E tests, if E2E_MOCK_SAVE_FOLDER env var is set.
- * Returns null if not in E2E mode.
- */
-/**
  * Narrow an `unknown` payload to the plain-object shape
  * `AuthenticationRequest.fromPlain` accepts. The renderer sends a
  * shallow dump of the reactive proxy over IPC; we only forward
@@ -94,16 +90,11 @@ function isPlainAuthPayload(value: unknown): value is Parameters<typeof Authenti
   return typeof value === 'object' && value !== null && 'id' in (value as Record<string, unknown>)
 }
 
-function getE2EMockedFolderPath(): string | null {
-  return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
-}
-
 /**
  * Containment root for renderer-supplied secrets / save paths. Secrets
- * live either inside the opened project FOLDER (folder mode) or next to
- * the opened `.restorm` FILE as `<file>.env` (single-file mode — the
+ * live next to the opened `.restorm` file as `<file>.env` (the
  * renderer writes `${filePath}.env`). The root is the containing
- * directory of whatever is open, in both modes.
+ * directory of the open file.
  * Returns `null` when nothing is open at all — e.g. a brand-new
  * unsaved single-file document whose path isn't registered yet. In
  * that window the renderer still legitimately writes `<file>.env`
@@ -297,8 +288,8 @@ export function registerRestormIPC(deps: {
   /**
    * Hand a save this process performed itself to the library's
    * save-outcome broadcast, so the renderer's "the last save failed"
-   * notice covers the app's OWN persistence paths (single-file save-as,
-   * folder mode) and not just the ones `FileService` runs. The failure's
+   * notice covers the app's OWN persistence paths (single-file save-as)
+   * and not just the ones `FileService` runs. The failure's
    * `code` is re-attached to a real `Error` because the classification
    * that turns it into a cause the user can act on reads it off the
    * error, and crossing this boundary as a plain result object dropped it.
@@ -387,90 +378,6 @@ export function registerRestormIPC(deps: {
     }
   })
 
-  // IPC handler to save as folder structure
-  validatedHandle('restorm:save-as-folder', saveAsFolderArgs, async (_event, [data, format, targetPath]) => {
-    logger.info('Save as folder requested', { format, targetPath })
-
-    try {
-      let folderPath: string
-
-      if (targetPath) {
-        // Re-saving into an already-opened folder (Ctrl+S). The target
-        // must stay WITHIN that folder — not merely under its parent,
-        // which would let a renderer-supplied path clobber sibling
-        // projects. Enforce that boundary ONLY once a folder is open; the
-        // INITIAL save-as (which establishes the folder) runs before any
-        // folder is open, so a null `openedFolder` has no boundary to
-        // enforce and the user-chosen target is allowed.
-        // Resolved through a method the service actually defines — that is
-        // the point of routing it via `getFilePath()`: an optional-chained
-        // call to a method the service does NOT define returns undefined,
-        // which silently reduces this whole guard to a no-op.
-        const openProject = isFileServiceInitialized() ? getFileService().getFilePath() : null
-        const openedFolder = resolveOpenedFolderBoundary(openProject)
-        // `targetPath` may legitimately equal `openedFolder` itself
-        // (a plain re-save); containment is satisfied in that case.
-        if (openedFolder && !isPathContained(openedFolder, targetPath)) {
-          logger.warn('Blocked save-as-folder - path not contained in opened folder', { targetPath })
-          return { success: false, error: 'Path traversal detected' }
-        }
-        folderPath = targetPath
-      } else {
-        // Check for E2E mock path first
-        const mockedPath = getE2EMockedFolderPath()
-        if (mockedPath) {
-          folderPath = mockedPath
-          logger.info('E2E: Using mocked folder path', { path: mockedPath })
-        } else {
-          // Show folder selection dialog (for Save As)
-          const window = BrowserWindow.fromWebContents(_event.sender)
-          if (!window) {
-            return { success: false, error: 'No window found' }
-          }
-
-          const result = await dialog.showOpenDialog(window, {
-            title: 'Select Folder for Collection',
-            properties: ['openDirectory', 'createDirectory']
-          })
-
-          if (result.canceled || !result.filePaths[0]) {
-            return { success: false, error: 'Cancelled' }
-          }
-
-          folderPath = result.filePaths[0]
-        }
-      }
-
-      // Use PersistenceService for folder mode save
-      if (!isPersistenceServiceInitialized()) {
-        return { success: false, error: 'PersistenceService not initialized' }
-      }
-
-      // Save the data using folder mode
-      // The PersistenceService will use decorators to determine file/folder structure
-      const dataObj = data as Record<string, unknown>
-      const saveResult = await saveFolderStructure(folderPath, dataObj, format)
-
-      if (saveResult.success && saveResult.path) {
-        logger.info('Folder saved successfully', { path: saveResult.path })
-        // Same invariant as save-as-file — bulk-clear drafts after
-        // a successful folder save. See `save-as-file` above for
-        // the full rationale.
-        if (isFileServiceInitialized()) {
-          await getFileService().clearAllDrafts()
-        }
-      }
-
-      reportSaveOutcome(folderPath, saveResult)
-      return saveResult
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error)
-      logger.error('Failed to save folder', { error: errorMsg })
-      reportSaveThrow(null, error)
-      return { success: false, error: errorMsg }
-    }
-  })
-
   // Dedicated drafts-clear IPC. Used by the renderer's save-all
   // flow when the in-memory checksum already matches the on-disk
   // file (`hasRealChanges === false`), so the IPC save handlers
@@ -490,66 +397,6 @@ export function registerRestormIPC(deps: {
     }
   })
 
-  // IPC handler to open folder
-  ipcMain.handle('restorm:open-folder', async (_event) => {
-    logger.info('Open folder requested')
-
-    try {
-      const window = BrowserWindow.fromWebContents(_event.sender)
-      if (!window) {
-        return { success: false, error: 'No window found' }
-      }
-
-      // Show folder selection dialog
-      const result = await dialog.showOpenDialog(window, {
-        title: 'Open Collection Folder',
-        properties: ['openDirectory']
-      })
-
-      if (result.canceled || !result.filePaths[0]) {
-        return { success: false }
-      }
-
-      const folderPath = result.filePaths[0]
-
-      // Load the folder structure
-      const loadResult = await loadFolderStructure(folderPath)
-
-      if (loadResult && isFileServiceInitialized()) {
-        logger.info('Folder loaded successfully', { path: folderPath, format: loadResult.format })
-        // Update FileService so the UI knows a file is open
-        const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
-        fileService.setOpenedFolder(folderPath, loadResult.data, loadResult.format)
-        await attachDraftStoreForFolder(folderPath, loadResult.format)
-        return { success: true, content: loadResult.data, path: folderPath, format: loadResult.format }
-      }
-
-      return { success: false, error: 'Failed to load folder' }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error)
-      logger.error('Failed to open folder', { error: errorMsg })
-      return { success: false, error: errorMsg }
-    }
-  })
-
-  // IPC handler to show folder selection dialog
-  ipcMain.handle('restorm:show-folder-dialog', async (_event) => {
-    const window = BrowserWindow.fromWebContents(_event.sender)
-    if (!window) {
-      return { canceled: true }
-    }
-
-    const result = await dialog.showOpenDialog(window, {
-      title: 'Select Folder',
-      properties: ['openDirectory', 'createDirectory']
-    })
-
-    return {
-      canceled: result.canceled,
-      filePath: result.filePaths[0]
-    }
-  })
-
   // ==========================================================================
   // Secrets IPC Handlers
   // ==========================================================================
@@ -558,9 +405,8 @@ export function registerRestormIPC(deps: {
     try {
       if (!filePath || !existsSync(filePath)) return null
 
-      // Containment: a secrets file is only ever legitimate inside the
-      // opened project folder (folder mode) or next to the opened
-      // `.restorm` file (single-file mode). Enforce that boundary —
+      // Containment: a secrets file is only ever legitimate next to the
+      // opened `.restorm` file. Enforce that boundary —
       // forbidding `..`/absolute escapes — ONLY once a root is
       // resolvable. A null root (e.g. a brand-new unsaved single-file
       // document not yet registered) has no boundary to enforce, so the
@@ -658,39 +504,25 @@ export function registerRestormIPC(deps: {
       const stats = statSync(path)
 
       if (stats.isDirectory()) {
-        // It's a directory - load as folder
-        if (!isPersistenceServiceInitialized()) {
-          return { success: false, error: 'PersistenceService not initialized' }
-        }
-
-        const loadResult = await loadFolderStructure(path)
-        if (loadResult && isFileServiceInitialized()) {
-          const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
-          fileService.setOpenedFolder(path, loadResult.data, loadResult.format)
-          await attachDraftStoreForFolder(path, loadResult.format)
-          return { success: true, isDirectory: true, content: loadResult.data, path, format: loadResult.format }
-        }
-        return { success: false, error: 'Failed to load folder' }
-      } else {
-        // It's a file - use normal file open. FileService stamps
-        // `_projectUuid` before broadcasting `file:opened` (configured
-        // via `uuidKey` on init), so the renderer sees the UUID on the
-        // very first open without extra wiring here.
-        if (!isFileServiceInitialized()) {
-          return { success: false, error: 'FileService not initialized' }
-        }
-        const fileResult = await getFileService().open(path)
-        if (fileResult.success) {
-          // Attach the crash-recovery draft store for file mode — the
-          // per-unit dirty state / draft writes must behave the same as
-          // in folder mode (only the on-disk layout of saved content
-          // differs). A `.restorm` project file is YAML on disk, and
-          // `open()` reports no format of its own, so the draft store
-          // reads and writes YAML too.
-          await attachDraftStoreForFile(path, 'yaml')
-        }
-        return fileResult
+        // A project is a single `.restorm` file; a directory is never one.
+        // Refuse loudly rather than guessing at a layout.
+        return { success: false, error: 'A project is a single file — directories cannot be opened as projects' }
       }
+      // FileService stamps `_projectUuid` before broadcasting
+      // `file:opened` (configured via `uuidKey` on init), so the renderer
+      // sees the UUID on the very first open without extra wiring here.
+      if (!isFileServiceInitialized()) {
+        return { success: false, error: 'FileService not initialized' }
+      }
+      const fileResult = await getFileService().open(path)
+      if (fileResult.success) {
+        // Attach the crash-recovery draft store — per-unit dirty state /
+        // draft writes. A `.restorm` project file is YAML on disk, and
+        // `open()` reports no format of its own, so the draft store
+        // reads and writes YAML too.
+        await attachDraftStoreForFile(path, 'yaml')
+      }
+      return fileResult
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error('Failed to open path', { path, error: errorMsg })
@@ -709,7 +541,7 @@ export function registerRestormIPC(deps: {
     // what may be handed to the OS shell — see `isRevealablePath`, which owns
     // the rule. Both inputs are read from the service rather than trusted
     // from the argument: `getFilePath()` is the same field the statusbar cell
-    // renders (folder-mode sets it to the folder, so both modes work), and
+    // renders, and
     // `getRecentFiles()` is already filtered to paths that still exist, with
     // favorites a subset of it. An uninitialised service resolves to no
     // authority at all — a refusal, not a skipped check.

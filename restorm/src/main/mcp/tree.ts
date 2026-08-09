@@ -161,7 +161,7 @@ export function projectScenario(scenario: Scenario, parentId: string | null, pat
 
 /**
  * Every scenario reachable from the roots, each with its `parentId` and a
- * folder-mode `path` (ancestor container names + the scenario name). Descends
+ * breadcrumb `path` (ancestor container names + the scenario name). Descends
  * through folders, env-folders AND scenarios (a scenario is folder-like and
  * may nest other scenarios). Used by `list_scenarios()`.
  */

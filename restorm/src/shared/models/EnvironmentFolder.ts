@@ -5,7 +5,7 @@
 import {
   trackable,
   searchable,
-  separateFolders,
+  saveUnits,
   fileNaming,
   graphqlField,
   TreatEmptyAsUndefined
@@ -62,12 +62,12 @@ export class EnvironmentFolder {
 
   /** Environment configurations for this folder */
   @graphqlField({ type: 'Environment', isArray: true })
-  @separateFolders()
+  @saveUnits()
   environments: Environment[] = []
 
   /** Folder contents: requests and sub-folders */
   @graphqlField({ type: 'FolderItem', isArray: true })
-  @separateFolders()
+  @saveUnits()
   items: BaseFolderItem[] = []
 
   /**

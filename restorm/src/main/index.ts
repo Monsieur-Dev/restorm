@@ -67,7 +67,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -118,7 +118,7 @@ import { stompExecutionService } from './services/StompExecutionService'
 import { kafkaExecutionService } from './services/KafkaExecutionService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
-import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
+import { loadProjectIntoStore, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
 import { runScenarioHeadless } from './cli/headlessRunner'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
@@ -290,7 +290,7 @@ if (cliArgs.clearSettings) {
 if (cliArgs.cliRun) {
   logger.setLevel('error')
   if (cliArgs.open === undefined) {
-    process.stderr.write('--run requires --open <project> (the .restorm file/folder containing the scenario)\n')
+    process.stderr.write('--run requires --open <project> (the .restorm file containing the scenario)\n')
     app.exit(2)
   }
 }
@@ -362,31 +362,12 @@ function createWindow(): MainWindow | undefined {
         mainWindow = null
       })
 
-      // Open a file or folder on startup. Handles both files and folders; the
-      // caller decides WHICH path (command line, or the reopen-last-file path).
+      // Open a project file on startup; the caller decides WHICH path
+      // (command line, or the reopen-last-file path).
       const openPathOnStart = (targetPath: string): void => {
-        const isDirectory = existsSync(targetPath) && statSync(targetPath).isDirectory()
-
-        if (isDirectory) {
-          logger.info('Opening folder...', { path: targetPath })
-          if (!isPersistenceServiceInitialized()) {
-            logger.warn('PersistenceService not initialized, cannot load folder')
-            return
-          }
-          void loadFolderStructure(targetPath).then(async (result) => {
-            if (result && mainWindow && isFileServiceInitialized()) {
-              logger.info('Folder loaded, sending to renderer', {
-                collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
-                format: result.format
-              })
-              // Set the file state in FileService so the UI knows a file is open
-              const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
-              fileService.setOpenedFolder(targetPath, result.data, result.format)
-              await attachDraftStoreForFolder(targetPath, result.format)
-            } else {
-              logger.error('Failed to load folder on startup', { result })
-            }
-          })
+        if (existsSync(targetPath) && statSync(targetPath).isDirectory()) {
+          // A project is a single `.restorm` file; a directory is never one.
+          logger.error('Cannot open a directory as a project', { path: targetPath })
         } else if (isFileServiceInitialized()) {
           // FileService stamps `_projectUuid` before broadcasting `file:opened`
           // (configured via `uuidKey` on init), so this stays a simple open +
@@ -585,13 +566,10 @@ initFileService({
 logger.info('File Service initialized')
 
 // Attach a crash-recovery draft store whenever a `.restorm` file is
-// opened in file mode. File mode and folder mode must behave identically
-// with respect to dirty-state tracking and draft recovery — the only
-// difference between them is the on-disk layout of the user's saved
-// content.
+// opened.
 //
 // This listener is a SAFETY NET, not the complement of the explicit
-// callers: it fires for EVERY file-mode open, including the ones that
+// callers: it fires for EVERY open, including the ones that
 // already call `attachDraftStoreForFile` themselves (`restorm:open-path`,
 // the command-line / reopen-last-file startup path). `FileService.open()`
 // publishes the new path synchronously, so this runs before the awaiting
@@ -601,9 +579,6 @@ logger.info('File Service initialized')
 // "unsaved work restored" toast fires once. Its value is covering the
 // paths that DON'T attach explicitly — the plain `file:open` IPC — without
 // each new call site having to remember to.
-//
-// Folder-mode opens never reach here (the path is a directory, filtered
-// out below); they attach through `attachDraftStoreForFolder` only.
 {
   let lastFilePath: string | null = null
   getFileService().onStateChanged((state) => {
@@ -612,8 +587,7 @@ logger.info('File Service initialized')
     lastFilePath = path
 
     // Workspace overlay path: a `.restorm` file lives alongside its
-    // workspace dir, a folder mode opens its own dir. Both flows
-    // converge here. SettingsService may not be ready yet on the
+    // workspace dir. SettingsService may not be ready yet on the
     // very first event; gate accordingly.
     if (isSettingsServiceInitialized()) {
       if (!path) {
@@ -635,9 +609,6 @@ logger.info('File Service initialized')
     // teammate's shared project) whose history is deeper than this user's cap.
     applyHistoryRetentionNow()
 
-    // Folder-mode paths point to a directory; file-mode paths end in the
-    // `.restorm` extension. Use the extension as the discriminator so we
-    // don't have to hit the filesystem on every state change.
     if (!path.endsWith('.restorm')) return
     const format = (state.currentFile.format as PersistenceFormat | undefined) ?? 'yaml'
     void attachDraftStoreForFile(path, format).catch((err: unknown) => {
@@ -648,8 +619,8 @@ logger.info('File Service initialized')
 
 // Git wiring: GitService has no notion of "the open project file" — it
 // only tracks a folder. Map the open file's containing folder the same
-// way the workspace-path resolution above does (file mode: dirname of the
-// `.restorm` path; folder mode: the path itself) and hand it to
+// way the workspace-path resolution above does (dirname of the
+// `.restorm` path) and hand it to
 // `setActiveFolder`, which starts (or stops) the repo status + watch.
 {
   let lastGitFolder: string | null = null
@@ -664,7 +635,7 @@ logger.info('File Service initialized')
   })
 }
 
-// Initialize Persistence Service for folder mode support
+// Initialize Persistence Service
 initPersistenceService({
   extension: 'restorm',
   format: 'yaml',

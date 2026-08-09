@@ -2,7 +2,7 @@ import { dialog, BrowserWindow } from 'electron'
 import { readFileSync, existsSync, statSync } from 'fs'
 import { createHash } from 'crypto'
 import { basename, extname } from 'path'
-import { atomicWriteFile, serialize as serializePersisted, type PersistenceFormat } from './PersistenceService'
+import { atomicWriteFile } from './PersistenceService'
 import {
   SaveUnitRegistry,
   DraftStore,
@@ -354,100 +354,6 @@ export class FileService {
     return this.saveUnitRegistry
   }
 
-  /**
-   * Persist a single save unit to disk:
-   *   1. Serialize the caller-supplied content (current in-memory tree
-   *      slice for the unit) to `absolutePath` atomically (temp+rename).
-   *   2. Commit the unit **only if the registry's draft still matches**
-   *      the content we just wrote. A mutation that arrived between the
-   *      caller's snapshot and this method call leaves the unit dirty
-   *      and the (newer) draft intact — the next save picks it up.
-   *   3. Delete the unit's draft file only when the commit proceeded.
-   *      The bridge's `clean → deleteDraft` transition handles it.
-   *
-   * Called from a `file:save-unit` IPC. The renderer owns the tree and
-   * therefore owns the path resolution for the unit.
-   *
-   * Note: unit writes deliberately bypass `preserveUuidMetadata` — a
-   * save-unit targets a caller-supplied absolute path (a child document,
-   * not the project root), so there's no "previous root content" to
-   * merge the UUID from. If a future refactor ever lets `saveUnit` land
-   * on the root index, add the merge back in at that site.
-   */
-  public async saveUnit(params: {
-    runtimeId: RuntimeId
-    content: unknown
-    absolutePath: string
-    format: PersistenceFormat
-  }): Promise<boolean> {
-    const outcome = await this.writeUnit(params)
-    if (outcome.ok) {
-      this.broadcastSaveSucceeded(params.absolutePath)
-      return true
-    }
-    this.broadcastSaveFailed(params.absolutePath, outcome.error)
-    return false
-  }
-
-  /**
-   * The write half of {@link saveUnit}, without the save-outcome
-   * broadcast. Split out so a batch reports ONE outcome for the whole
-   * pass: interleaving per-unit failures and successes would let a later
-   * success retract the notice for an earlier failure the user never saw.
-   */
-  private async writeUnit(params: {
-    runtimeId: RuntimeId
-    content: unknown
-    absolutePath: string
-    format: PersistenceFormat
-  }): Promise<{ ok: true } | { ok: false; error: unknown }> {
-    try {
-      const serialized = serializePersisted(params.content, params.format)
-      await atomicWriteFile(params.absolutePath, serialized, { refuseReadOnlyTarget: true })
-      const committed = this.saveUnitRegistry.commitIfDraftMatches(params.runtimeId, params.content)
-      if (!committed) {
-        logger.info('[FileService] Save completed but draft advanced — unit remains dirty', {
-          runtimeId: params.runtimeId
-        })
-      }
-      return { ok: true }
-    } catch (err: unknown) {
-      logger.error('[FileService] Failed to save unit', { runtimeId: params.runtimeId, error: String(err) })
-      return { ok: false, error: err }
-    }
-  }
-
-  /**
-   * Persist a batch of save units in one pass. Each unit is saved
-   * independently — a single failure doesn't short-circuit the rest.
-   * Returns per-unit outcomes so the caller can surface partial
-   * failures to the user.
-   *
-   * The batch reports a single save outcome: the FIRST failure, or
-   * success when every unit landed. A partially-written project is not a
-   * successful save, so one failing unit must not be papered over by the
-   * units that followed it.
-   */
-  public async saveUnitsBatch(
-    units: { runtimeId: RuntimeId; content: unknown; absolutePath: string; format: PersistenceFormat }[]
-  ): Promise<{ runtimeId: RuntimeId; success: boolean }[]> {
-    const results: { runtimeId: RuntimeId; success: boolean }[] = []
-    let firstFailure: { path: string; error: unknown } | null = null
-    for (const unit of units) {
-      const outcome = await this.writeUnit(unit)
-      results.push({ runtimeId: unit.runtimeId, success: outcome.ok })
-      if (!outcome.ok && firstFailure === null) {
-        firstFailure = { path: unit.absolutePath, error: outcome.error }
-      }
-    }
-    if (firstFailure !== null) {
-      this.broadcastSaveFailed(firstFailure.path, firstFailure.error)
-    } else if (units.length > 0) {
-      this.broadcastSaveSucceeded(this.currentFile.path)
-    }
-    return results
-  }
-
   /** Whole-registry dirty snapshot (global + per-unit). */
   public getSaveUnitsSnapshot(): {
     isDirty: boolean
@@ -667,7 +573,7 @@ export class FileService {
 
   /**
    * Report the outcome of a write the HOST performed itself — a host
-   * that persists through its own IPC path (a folder-mode save, an
+   * that persists through its own IPC path (an
    * export) still owes the user the same notice, and the renderer-side
    * state machine only knows what it is told. `error` may be anything
    * that was thrown or returned; the reason is classified from it, and
@@ -773,20 +679,19 @@ export class FileService {
   }
 
   /**
-   * Open a file (or folder if folderLoader callback is provided)
+   * Open a file
    *
    * `rejected: true` distinguishes "the host's `validateOnOpen` gate
    * refused this document" from a plain failure: the caller must not
    * report a read error, because the renderer has already been told why
    * via `file:open-rejected` and is showing that message.
    */
-  public async open(path?: string, folderLoader?: (folderPath: string) => Promise<unknown>): Promise<{ success: boolean; content?: unknown; isDirectory?: boolean; rejected?: boolean }> {
+  public async open(path?: string): Promise<{ success: boolean; content?: unknown; rejected?: boolean }> {
     let filePath = ''
 
     // Mark as loading to prevent dirty state during initialization. A single
-    // try/finally guarantees the flag is cleared on EVERY exit path (folder
-    // success, cancel, error) — it was previously left `true` on the
-    // folder-success and exception paths, wedging the service in "loading".
+    // try/finally guarantees the flag is cleared on EVERY exit path
+    // (cancel, error) so the service can't wedge in "loading".
     this._isLoading = true
 
     try {
@@ -802,19 +707,11 @@ export class FileService {
         filePath = selectedPath
       }
 
-      // Check if path is a directory
+      // A project is a single file; a directory is never one.
       const stats = statSync(filePath)
       if (stats.isDirectory()) {
-        if (folderLoader) {
-          // Use the provided folder loader callback
-          const content = await folderLoader(filePath)
-          if (content) {
-            this.setOpenedFolder(filePath, content)
-            return { success: true, content, isDirectory: true }
-          }
-        }
-        // No folder loader or loading failed - return indication that it's a directory
-        return { success: false, isDirectory: true }
+        logger.warn('FileService: refusing to open a directory as a project', { path: filePath })
+        return { success: false }
       }
 
       const format = this.detectFormat(filePath)
@@ -919,39 +816,6 @@ export class FileService {
     } finally {
       this._isLoading = false
     }
-  }
-
-  /**
-   * Set file state after loading a folder (bypasses file reading)
-   * Used when content is already loaded from a folder structure
-   * @param folderPath The path to the folder
-   * @param content The loaded content
-   * @param format Optional format to use (from config file or default)
-   */
-  public setOpenedFolder(folderPath: string, content: unknown, format?: SerializationFormat): void {
-    const name = this.getDisplayName(folderPath)
-    // Folder mode has no single file whose bytes we can digest, so the
-    // external-change guard stays inert here.
-    this.diskDigest = null
-    this.externalChangePending = false
-    
-    this.currentFile = {
-      path: folderPath,
-      name,
-      isDirty: false,
-      content,
-      format: format ?? this.config.defaultFormat,
-      contentChecksum: JSON.stringify(content)
-    }
-
-    this.addToRecentFiles(folderPath, name)
-    this.notifyStateChange()
-    this.notifyDirtyChange()
-    
-    // Broadcast file opened event
-    this.broadcastEvent('file:opened', this.getState())
-
-    logger.info('FileService: Folder opened', { path: folderPath, format: format ?? this.config.defaultFormat })
   }
 
   /**

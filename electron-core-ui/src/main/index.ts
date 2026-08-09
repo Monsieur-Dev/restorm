@@ -74,9 +74,6 @@ export {
   deserialize,
   detectFormat,
   filterNonSerialised,
-  generateIndexedFileName,
-  sanitizeFileName,
-  calculateIndexPadding,
   PERSISTENCE_FORMATS,
   atomicWriteFile,
   codeOf
@@ -236,8 +233,7 @@ export {
   trackable,
   searchable,
   NonSerialised,
-  separateFiles,
-  separateFolders,
+  saveUnits,
   fileNaming,
   graphqlType,
   graphqlField,
@@ -249,12 +245,9 @@ export {
   getSearchableProperties,
   isNonSerialised,
   getNonSerialisedProperties,
-  hasSeparateFiles,
-  getSeparateFilesConfig,
-  getSeparateFilesProperties,
-  hasSeparateFolders,
-  getSeparateFoldersConfig,
-  getSeparateFoldersProperties,
+  hasSaveUnits,
+  getSaveUnitsConfig,
+  getSaveUnitsProperties,
   getFileNamingConfig,
   generateFileName,
   isGraphQLField,
@@ -267,8 +260,7 @@ export {
 export type {
   TrackableConfig,
   SearchableConfig,
-  SeparateFilesConfig,
-  SeparateFoldersConfig,
+  SaveUnitsConfig,
   FileNamingConfig,
   GraphQLTypeConfig,
   GraphQLFieldConfig,
@@ -288,7 +280,7 @@ export type { FeatureFlippingService } from './services/FeatureFlippingService'
 export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
 export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
-export type { PersistenceFormat, PersistenceMode, PersistenceConfig, FileNamingContext, SaveResult, LoadResult } from './services/PersistenceService'
+export type { PersistenceFormat, PersistenceConfig, SaveResult, LoadResult } from './services/PersistenceService'
 export type { SchemaGeneratorConfig, RegisterClassOptions } from './services/GraphQLSchemaGenerator'
 
 // Error classes and helpers

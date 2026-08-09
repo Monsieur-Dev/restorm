@@ -220,7 +220,6 @@
     "new": "Neu",
     "import": "Importieren",
     "open": "Öffnen",
-    "openFolder": "Ordner öffnen",
     "recentFiles": "Zuletzt verwendete Dateien",
     "favorites": "Favoriten",
     "close": "Schließen",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Eine neue Sammlung erstellen",
     "openAriaLabel": "Eine Sammlung von der Festplatte öffnen",
     "landmarkLabel": "Willkommen"
-  },
-  "save": {
-    "title": "Speicheroptionen",
-    "mode": {
-      "label": "Speichermodus",
-      "file": "Einzelne Datei",
-      "folder": "Ordnerstruktur",
-      "fileDescription": "Alles in einer einzigen Datei speichern",
-      "folderDescription": "Als Ordnerstruktur mit separaten Dateien speichern"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Menschenlesbar",
-      "jsonDescription": "Standardformat",
-      "json5Description": "JSON + Kommentare"
-    },
-    "preview": {
-      "label": "Strukturvorschau",
-      "noDocumentation": "Für diese Quelle wurde keine Dokumentation analysiert."
-    }
   },
   "common": {
     "cancel": "Abbrechen",

@@ -141,15 +141,6 @@ export interface CoreUiFileApi {
     callback: (payload: { path: string | null }) => void
   ) => () => void
   onAutoSaveTrigger: (callback: () => void) => () => void
-  saveUnit: (entry: {
-    runtimeId: string
-    content: unknown
-    absolutePath: string
-    format: 'json' | 'json5' | 'yaml'
-  }) => Promise<boolean>
-  saveUnitsBatch: (
-    entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
-  ) => Promise<{ runtimeId: string; success: boolean }[]>
 }
 
 export interface CoreUiEventBusApi {

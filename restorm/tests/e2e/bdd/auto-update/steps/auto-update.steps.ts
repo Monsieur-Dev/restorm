@@ -4,23 +4,13 @@ import { listViewRowSelectorByTitle, configureNextOpenDialogForE2E } from 'elect
 
 const { Given, When, Then } = createBdd(test)
 
-Given('the app is running with the update mock', async ({ page, electronApp, petstoreFolderPath }) => {
+Given('the app is running with the update mock', async ({ page, electronApp, petstoreProjectPath }) => {
   // Open a project so a workbench (and its app toaster, where update
   // notifications render) is active — the toaster is not mounted on the welcome
-  // screen. Mirrors the settings-tab suite's folder-open flow.
-  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: petstoreFolderPath })
-  const result = await page.evaluate(async () => {
-    interface OpenFolderResult { success: boolean; error?: string }
-    const w = window as unknown as {
-      restorm?: { file?: { openFolder?: () => Promise<OpenFolderResult> } }
-    }
-    const fn = w.restorm?.file?.openFolder
-    if (typeof fn !== 'function') throw new Error('window.restorm.file.openFolder is not available')
-    return await fn()
-  })
-  if (!(result as { success?: boolean }).success) {
-    throw new Error(`openFolder returned success=false (${String((result as { error?: unknown }).error)})`)
-  }
+  // screen. Mirrors the settings-tab suite's project-open flow.
+  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: petstoreProjectPath })
+  await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
+  await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()
   await expect(
     page.locator(listViewRowSelectorByTitle('sidebar-listview', 'Swagger Petstore')).first()
   ).toBeVisible({ timeout: 15000 })

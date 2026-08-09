@@ -220,7 +220,6 @@
     "new": "Nieuw",
     "import": "Importeren",
     "open": "Openen",
-    "openFolder": "Map openen",
     "recentFiles": "Recente bestanden",
     "favorites": "Favorieten",
     "close": "Sluiten",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Een nieuwe collectie maken",
     "openAriaLabel": "Een collectie van schijf openen",
     "landmarkLabel": "Welkom"
-  },
-  "save": {
-    "title": "Opslagopties",
-    "mode": {
-      "label": "Opslagmodus",
-      "file": "Enkel bestand",
-      "folder": "Mapstructuur",
-      "fileDescription": "Alles opslaan in één bestand",
-      "folderDescription": "Opslaan als mapstructuur met afzonderlijke bestanden"
-    },
-    "format": {
-      "label": "Indeling",
-      "yamlDescription": "Leesbaar voor mensen",
-      "jsonDescription": "Standaardindeling",
-      "json5Description": "JSON + commentaar"
-    },
-    "preview": {
-      "label": "Voorbeeld van structuur",
-      "noDocumentation": "Geen geparseerde documentatie voor deze bron."
-    }
   },
   "common": {
     "cancel": "Annuleren",

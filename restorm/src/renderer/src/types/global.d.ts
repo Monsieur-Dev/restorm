@@ -176,10 +176,7 @@ declare global {
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
       file: {
         saveAsFile: (data: unknown, format: PersistenceFormat) => Promise<SaveResult>
-        saveAsFolder: (data: unknown, format: PersistenceFormat, targetPath?: string) => Promise<SaveResult>
-        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
-        showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
-        openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
+        openPath: (path: string) => Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
         revealInFolder: (path: string) => Promise<{ success: boolean; error?: string }>
         clearDrafts: () => Promise<{ success: boolean; error?: string }>
         getPathForFile: (file: File) => string

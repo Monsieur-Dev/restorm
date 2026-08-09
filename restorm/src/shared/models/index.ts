@@ -5,7 +5,7 @@
  * - Serialization behavior (@NonSerialised)
  * - Search indexing (@searchable)
  * - Change tracking (@trackable)
- * - File structure (@separateFiles, @separateFolders, @fileNaming)
+ * - Save units (@saveUnits, @fileNaming)
  */
 
 export * from './BaseDocument'

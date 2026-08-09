@@ -81,7 +81,7 @@ export function registerReadTools(mcp: McpService): void {
       title: 'List scenarios',
       description:
         'List every scenario (dataflow graph) in the open restorm project. Returns ' +
-        '`[{ id, name, path, tags, nodeCount, edgeCount, parentId }]` — `path` is the folder-mode ' +
+        '`[{ id, name, path, tags, nodeCount, edgeCount, parentId }]` — `path` is the ' +
         'breadcrumb ("<folder> / … / <name>"), a human-writable handle that avoids the uuid. ' +
         'Use `get_scenario(id)` for the full graph, `run_scenario(id)` to execute it.',
       inputSchema: {} as Record<string, unknown>

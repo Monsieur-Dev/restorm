@@ -24,18 +24,10 @@ Given('no file is open', async ({ page }) => {
   await expect(page.locator('[data-testid="welcome-new-button"]')).toBeVisible({ timeout: 15000 })
 })
 
-Given('a project folder is open', async ({ page, electronApp, petstoreFolderPath }) => {
-  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: petstoreFolderPath })
-  const result = await page.evaluate(async () => {
-    interface OpenFolderResult { success: boolean; error?: string }
-    const w = window as unknown as { restorm?: { file?: { openFolder?: () => Promise<OpenFolderResult> } } }
-    const fn = w.restorm?.file?.openFolder
-    if (typeof fn !== 'function') throw new Error('window.restorm.file.openFolder is not available')
-    return await fn()
-  })
-  if (!(result as { success?: boolean }).success) {
-    throw new Error(`openFolder returned success=false (${String((result as { error?: unknown }).error)})`)
-  }
+Given('a project folder is open', async ({ page, electronApp, petstoreProjectPath }) => {
+  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: petstoreProjectPath })
+  await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
+  await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()
   // A workbench is active once the sidebar shows the loaded collections.
   await expect(page.locator(listViewRowSelectorByTitle('sidebar-listview', 'Swagger Petstore')).first())
     .toBeVisible({ timeout: 15000 })

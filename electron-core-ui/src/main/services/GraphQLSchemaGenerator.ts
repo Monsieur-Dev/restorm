@@ -12,8 +12,6 @@
 import {
   getSearchableProperties,
   getNonSerialisedProperties,
-  getSeparateFilesProperties,
-  getSeparateFoldersProperties,
   getGraphQLFields,
   getGraphQLTypeConfig
 } from '../decorators'
@@ -177,9 +175,6 @@ class GraphQLSchemaGenerator {
   ): void {
     const nonSerialised = getNonSerialisedProperties(constructor)
     const searchableProps = getSearchableProperties(constructor)
-    const separateFilesProps = getSeparateFilesProperties(constructor)
-    const separateFoldersProps = getSeparateFoldersProperties(constructor)
-
     // Filter out non-serialised fields.
     // Exception: keep `id` even if it's NonSerialised, because it is required for GraphQL identity
     // while still being excluded from persistence files.
@@ -188,9 +183,7 @@ class GraphQLSchemaGenerator {
     // Add searchable metadata to fields
     const enrichedFields = filteredFields.map(field => ({
       ...field,
-      searchable: searchableProps.get(field.name),
-      separateFiles: separateFilesProps.has(field.name),
-      separateFolders: separateFoldersProps.has(field.name)
+      searchable: searchableProps.get(field.name)
     }))
 
     this.registeredClasses.set(typeName, {

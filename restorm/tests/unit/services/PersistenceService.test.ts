@@ -6,10 +6,7 @@ import { describe, it, expect } from 'vitest'
 import {
   serialize,
   deserialize,
-  detectFormat,
-  sanitizeFileName,
-  calculateIndexPadding,
-  generateIndexedFileName
+  detectFormat
 } from 'electron-core-ui/main'
 
 describe('PersistenceService utilities', () => {
@@ -71,76 +68,4 @@ describe('PersistenceService utilities', () => {
     })
   })
 
-  describe('sanitizeFileName', () => {
-    it('should remove invalid characters', () => {
-      const result = sanitizeFileName('test<>:"/\\|?*file')
-      // Each invalid char (<>:"/\|?*) is replaced with _
-      expect(result).toMatch(/test_+file/)
-      expect(result).not.toContain('<')
-      expect(result).not.toContain('>')
-      expect(result).not.toContain(':')
-    })
-
-    it('should trim whitespace', () => {
-      expect(sanitizeFileName('  test file  ')).toBe('test file')
-    })
-
-    it('should normalize multiple spaces', () => {
-      expect(sanitizeFileName('test   file')).toBe('test file')
-    })
-  })
-
-  describe('calculateIndexPadding', () => {
-    it('should return minimum of 2 digits', () => {
-      expect(calculateIndexPadding(5)).toBe(2)
-      expect(calculateIndexPadding(9)).toBe(2)
-    })
-
-    it('should return 2 for counts up to 99', () => {
-      expect(calculateIndexPadding(10)).toBe(2)
-      expect(calculateIndexPadding(99)).toBe(2)
-    })
-
-    it('should return 3 for counts up to 999', () => {
-      expect(calculateIndexPadding(100)).toBe(3)
-      expect(calculateIndexPadding(999)).toBe(3)
-    })
-
-    it('should return 4 for counts up to 9999', () => {
-      expect(calculateIndexPadding(1000)).toBe(4)
-    })
-  })
-
-  describe('generateIndexedFileName', () => {
-    it('should generate file name with index', () => {
-      const result = generateIndexedFileName(
-        { document: { name: 'Test', type: 'POST' }, index: 0, totalCount: 10 },
-        { pattern: '{index} - {type} - {name}', typeProperty: 'type', nameProperty: 'name' }
-      )
-      expect(result).toBe('01 - POST - Test')
-    })
-
-    it('should handle missing type gracefully', () => {
-      const result = generateIndexedFileName(
-        { document: { name: 'Test' }, index: 0, totalCount: 10 },
-        { pattern: '{index} - {name}', nameProperty: 'name' }
-      )
-      expect(result).toBe('01 - Test')
-    })
-
-    it('should use fallback for missing config', () => {
-      const result = generateIndexedFileName(
-        { document: { name: 'Test Item' }, index: 2, totalCount: 10 }
-      )
-      expect(result).toBe('03 - Test Item')
-    })
-
-    it('should pad index based on total count', () => {
-      const result = generateIndexedFileName(
-        { document: { name: 'Test' }, index: 0, totalCount: 100 },
-        { pattern: '{index} - {name}', nameProperty: 'name' }
-      )
-      expect(result).toBe('001 - Test')
-    })
-  })
 })

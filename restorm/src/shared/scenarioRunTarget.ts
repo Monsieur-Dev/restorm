@@ -1,14 +1,30 @@
 import type { FolderItem } from './types/collections'
 import { isScenario, isFolder, isEnvironmentFolder } from './types/collections'
-import { formatIndex, sanitizeName } from './folderModeNaming'
+
+/** Sibling index formatted for an index path: 1-based, padded to the sibling count's width. */
+export function formatIndex(index: number, totalCount: number): string {
+  const width = totalCount <= 0 ? 1 : String(totalCount).length
+  return String(index + 1).padStart(width, '0')
+}
+
+/** A name made filesystem-safe the way the app's own naming does. */
+export function sanitizeName(name: string): string {
+  return name
+    .replace(/[<>:"/\\|?*]/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100)
+}
 
 /**
  * The three ways a scenario can be designated to the headless CLI's `--run`,
  * computed by walking the project tree:
  *  - `name`           — the bare leaf name (`Code`)
  *  - `breadcrumbPath` — the full name path (`Auth Service/Pet API/Main/Code`)
- *  - `indexPath`      — the folder-mode on-disk path with sibling indices
- *                       (`1 - Auth Service/1 - Pet API/1 - Main/N - Code`)
+ *  - `indexPath`      — the name path with sibling indices
+ *                       (`1 - Auth Service/1 - Pet API/1 - Main/N - Code`),
+ *                       which disambiguates two same-name scenarios in the
+ *                       same container
  *
  * The UI suggests the SHORTEST unambiguous one; the resolver accepts any of the
  * three and errors explicitly when the given target is ambiguous.
@@ -21,7 +37,7 @@ export interface ScenarioTarget {
 }
 
 /** Walk all collections, producing a {@link ScenarioTarget} per scenario (incl.
- * nested sub-scenarios). Index segments mirror folder-mode save exactly. */
+ * nested sub-scenarios). */
 export function collectScenarioTargets(roots: readonly FolderItem[]): ScenarioTarget[] {
   const out: ScenarioTarget[] = []
   roots.forEach((root, i) => {

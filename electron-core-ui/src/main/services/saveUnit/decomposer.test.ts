@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { decomposeForPersistence, cleanseForPersistence } from './decomposer'
 import {
-  separateFiles,
-  separateFolders,
+  saveUnits,
   fileNaming,
   NonSerialised,
   TreatEmptyAsUndefined
@@ -44,8 +43,8 @@ class Folder {
   items: Request[] = []
   children: Folder[] = []
 }
-applyProperty(Folder, 'items', () => separateFiles())
-applyProperty(Folder, 'children', () => separateFolders())
+applyProperty(Folder, 'items', () => saveUnits())
+applyProperty(Folder, 'children', () => saveUnits())
 applyClass(Folder, () => fileNaming({
   pattern: '{index} - {name}',
   nameProperty: 'name',
@@ -58,7 +57,7 @@ class Environment {
   baseUrl = ''
   collections: Folder[] = []
 }
-applyProperty(Environment, 'collections', () => separateFolders())
+applyProperty(Environment, 'collections', () => saveUnits())
 
 describe('decomposeForPersistence', () => {
   it('produces the root index file with no separable props leaking in', () => {
@@ -82,7 +81,7 @@ describe('decomposeForPersistence', () => {
     expect('collections' in rootIndex.content).toBe(false)
   })
 
-  it('flattens separate-file items under the correct path', () => {
+  it('flattens leaf units under the correct path', () => {
     const folder = Object.assign(new Folder(), {
       id: 'f1', name: 'Users', items: [
         Object.assign(new Request(), { id: 'r1', name: 'List', url: '/users' }),
@@ -115,7 +114,7 @@ describe('decomposeForPersistence', () => {
     expect(f1?.parentId).toBe('env')
   })
 
-  it('nests @separateFolders recursively with proper parent ids', () => {
+  it('nests container units recursively with proper parent ids', () => {
     const inner = Object.assign(new Folder(), { id: 'inner', name: 'Admin', items: [], children: [] })
     const outer = Object.assign(new Folder(), { id: 'outer', name: 'Users', items: [], children: [inner] })
     const env = Object.assign(new Environment(), { id: 'env', name: 'Prod', collections: [outer] })

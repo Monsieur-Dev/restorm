@@ -62,33 +62,26 @@ user backspaces all content. Without this decorator, the checksum
 registers a change relative to a never-filled field and trips the
 dirty flag falsely.
 
-### @separateFolders()
+### @saveUnits()
 
-In folder mode, creates a subfolder for each item in an array.
+Marks an array property whose items are each their own SAVE UNIT: the
+save-unit decomposer walks them into independent entries so per-unit
+dirty state, drafts and per-unit Ctrl+S can address them individually.
+Whether an item is a container (holding further units) or a leaf is
+derived from the item's own class carrying `@saveUnits` itself.
 
 ```typescript
 class Collection {
-  @separateFolders()
+  @saveUnits()
   items: Item[]
-}
-```
-
-### @separateFiles()
-
-In folder mode, creates a separate file for each item in an array.
-
-```typescript
-class Folder {
-  @separateFiles()
-  requests: Request[]
 }
 ```
 
 ### @fileNaming(config)
 
-Defines file naming pattern for folder mode. The recommended pattern
-is `{index} - {name}` — no `{type}` prefix. The counter alone
-differentiates siblings with duplicate names.
+Defines the naming pattern the save-unit decomposer uses for unit
+identities. The recommended pattern is `{index} - {name}` — no `{type}`
+prefix. The counter alone differentiates siblings with duplicate names.
 
 ```typescript
 @fileNaming({

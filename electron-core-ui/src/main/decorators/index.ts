@@ -5,7 +5,7 @@
  * - Tracking (change detection)
  * - Search indexing
  * - Serialization behavior
- * - File structure (separate files/folders)
+ * - Save-unit boundaries (per-unit dirty state / drafts)
  * - File naming patterns
  *
  * These decorators are generic and contain no application-specific logic.
@@ -33,13 +33,9 @@ export {
   normalizeTreatEmptyAsUndefined
 } from './treatEmptyAsUndefined'
 
-// @separateFiles
-export { separateFiles, hasSeparateFiles, getSeparateFilesConfig, getSeparateFilesProperties } from './separateFiles'
-export type { SeparateFilesConfig } from './separateFiles'
-
-// @separateFolders
-export { separateFolders, hasSeparateFolders, getSeparateFoldersConfig, getSeparateFoldersProperties } from './separateFolders'
-export type { SeparateFoldersConfig } from './separateFolders'
+// @saveUnits
+export { saveUnits, hasSaveUnits, getSaveUnitsConfig, getSaveUnitsProperties } from './saveUnits'
+export type { SaveUnitsConfig } from './saveUnits'
 
 // @fileNaming
 export { fileNaming, getFileNamingConfig, generateFileName } from './fileNaming'

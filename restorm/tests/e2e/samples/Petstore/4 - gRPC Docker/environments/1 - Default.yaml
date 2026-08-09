@@ -1,6 +1,0 @@
-name: Default
-variables:
-  - key: baseUrl
-    value:
-      type: string
-      value: localhost:9000

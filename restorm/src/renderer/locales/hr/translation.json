@@ -221,7 +221,6 @@
     "new": "Novo",
     "import": "Uvezi",
     "open": "Otvori",
-    "openFolder": "Otvori mapu",
     "recentFiles": "Nedavne datoteke",
     "favorites": "Favoriti",
     "close": "Zatvori",
@@ -856,26 +855,6 @@
     "newAriaLabel": "Stvori novu kolekciju",
     "openAriaLabel": "Otvori kolekciju s diska",
     "landmarkLabel": "Dobrodošli"
-  },
-  "save": {
-    "title": "Mogućnosti spremanja",
-    "mode": {
-      "label": "Način spremanja",
-      "file": "Jedna datoteka",
-      "folder": "Struktura mapa",
-      "fileDescription": "Spremi sve u jednu datoteku",
-      "folderDescription": "Spremi kao strukturu mapa s odvojenim datotekama"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Čitljivo čovjeku",
-      "jsonDescription": "Standardni format",
-      "json5Description": "JSON + komentari"
-    },
-    "preview": {
-      "label": "Pregled strukture",
-      "noDocumentation": "Za ovaj izvor nije analizirana nikakva dokumentacija."
-    }
   },
   "common": {
     "cancel": "Odustani",

@@ -373,21 +373,6 @@ export const createCoreUIAPI = (): CoreUiApi => ({
         ipcRenderer.removeListener('file:autosave-trigger', handler)
       }
     },
-    saveUnit: async (entry: {
-      runtimeId: string
-      content: unknown
-      absolutePath: string
-      format: 'json' | 'json5' | 'yaml'
-    }): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('file:save-unit', entry)
-      return result as boolean
-    },
-    saveUnitsBatch: async (
-      entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
-    ): Promise<{ runtimeId: string; success: boolean }[]> => {
-      const result: unknown = await ipcRenderer.invoke('file:save-units-batch', entries)
-      return result as { runtimeId: string; success: boolean }[]
-    },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, state: FileServiceState): void => {
         callback(state)

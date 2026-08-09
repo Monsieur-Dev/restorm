@@ -220,7 +220,6 @@
     "new": "Nouveau",
     "import": "Importer",
     "open": "Ouvrir",
-    "openFolder": "Ouvrir un dossier",
     "recentFiles": "Fichiers récents",
     "favorites": "Favoris",
     "close": "Fermer",
@@ -855,26 +854,6 @@
     "newAriaLabel": "Créer une nouvelle collection",
     "openAriaLabel": "Ouvrir une collection depuis le disque",
     "landmarkLabel": "Accueil"
-  },
-  "save": {
-    "title": "Options d'enregistrement",
-    "mode": {
-      "label": "Mode d'enregistrement",
-      "file": "Fichier unique",
-      "folder": "Structure de dossiers",
-      "fileDescription": "Enregistrer tout dans un seul fichier",
-      "folderDescription": "Enregistrer dans une structure de dossiers avec des fichiers séparés"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Lisible par l'humain",
-      "jsonDescription": "Format standard",
-      "json5Description": "JSON + commentaires"
-    },
-    "preview": {
-      "label": "Aperçu de la structure",
-      "noDocumentation": "Aucune documentation analysée pour cette source."
-    }
   },
   "common": {
     "cancel": "Annuler",

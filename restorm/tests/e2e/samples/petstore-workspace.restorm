@@ -1,0 +1,3777 @@
+fileFormatVersion: 1
+collections:
+  - id: 68a560b2-74a1-4aa8-aac1-c2c99b794c4b
+    name: Swagger Petstore
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # Swagger Petstore
+
+      This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key &#x60;special-key&#x60; to test the authorization filters.
+
+      **Version:** 1.0.7
+
+      **Terms of Service:** [http://swagger.io/terms/](http://swagger.io/terms/)
+
+      ## Contact
+
+      - **Email:** [apiteam@swagger.io](mailto:apiteam@swagger.io)
+
+      ## License
+
+      [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+
+      ## External Documentation
+
+      [Find out more about Swagger](http://swagger.io)
+
+      **Host:** `localhost:8080`
+
+      **Base Path:** `/api`
+
+      **Schemes:** `https`, `http`
+
+      ## Models
+
+      ```mermaid
+      classDiagram
+        class Category {
+          - id? : integer
+          - name? : string
+        }
+        class Pet {
+          - id? : integer
+          - category? : Category
+          + name : string
+          + photoUrls : array<string>
+          - tags? : array<Tag>
+          - status? : string
+        }
+        class Tag {
+          - id? : integer
+          - name? : string
+        }
+        class ApiResponse {
+          - code? : integer
+          - type? : string
+          - message? : string
+        }
+        class Order {
+          - id? : integer
+          - petId? : integer
+          - quantity? : integer
+          - shipDate? : string
+          - status? : string
+          - complete? : boolean
+        }
+        class User {
+          - id? : integer
+          - username? : string
+          - firstName? : string
+          - lastName? : string
+          - email? : string
+          - password? : string
+          - phone? : string
+          - userStatus? : integer
+        }
+        Pet --> Category
+        Pet --> Tag
+      ```
+    environments:
+      - id: 518f1827-ceca-49c5-9c1b-d5f63f377a17
+        name: Default
+        subEnvironments:
+          - id: 10f76c97-e8cf-4964-a815-06e3da00c040
+            name: Production
+            variables:
+              - key: scheme
+                description: ''
+                value:
+                  type: string
+                  value: https
+              - key: domain
+                description: ''
+                value:
+                  type: string
+                  value: petstore.com
+              - key: baseUrl
+                description: ''
+                value:
+                  type: string
+                  value: '{{scheme}}://{{domain}}:{{port}}'
+        variables:
+          - key: port
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: '8080'
+          - key: scheme
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: http
+          - key: domain
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: localhost
+          - key: baseUrl
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: '{{scheme}}://{{domain}}:{{port}}'
+    items:
+      - id: 3420b328-98e1-4a16-a880-afcc4d504b8f
+        name: pet
+        configuration: {}
+        documentation: "# pet\r\n\r\nEverything about your Pets\r\n\r\n## External Documentation\r\n\r\n[Find out more](http://swagger.io)"
+        items:
+          - id: a2b361ad-8d56-408c-ad10-2613c1723c8b
+            name: Find pet by ID
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/pet/{{petId}}'
+            body:
+              type: text
+              content: ''
+            documentation: |-
+              # Find pet by ID
+
+              Returns a single pet
+
+              **Operation ID:** `getPetById`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `petId` | path | integer (int64) | Yes | ID of pet to return |
+
+              ## Types
+
+              ### Pet
+
+              **Reference:** `#/definitions/Pet`
+
+              ```mermaid
+              classDiagram
+                class Pet {
+                  - id? : integer
+                  - category? : Category
+                  + name : string
+                  + photoUrls : array<string>
+                  - tags? : array<Tag>
+                  - status? : string
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `category` | Category | No |  |
+              | `name` | string | Yes |  |
+              | `photoUrls` | array&lt;string&gt; | Yes |  |
+              | `tags` | array&lt;Tag&gt; | No |  |
+              | `status` | string | No | pet status in the store |
+
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `#/definitions/Pet`
+
+
+              ### 400
+              Invalid ID supplied
+
+
+
+              ### 404
+              Pet not found
+
+
+
+              ## Security
+
+              - **api_key**
+            headers: []
+            notes: ''
+            params: []
+            pathParams:
+              - key: petId
+                description: ID of pet to return
+                enabled: true
+                value:
+                  type: string
+                  value: '1'
+            tags:
+              - pet
+          - id: 5c1ee5a3-bd47-4fac-9c46-700b7a6a2feb
+            name: Updates a pet in the store with form data
+            type: http
+            method: POST
+            url: '{{baseUrl}}/api/pet/{{petId}}'
+            body:
+              type: x-www-form-urlencoded
+              fields:
+                - key: name
+                  description: Updated name of the pet
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+                - key: status
+                  description: Updated status of the pet
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+            documentation: |-
+              # Updates a pet in the store with form data
+
+              **Operation ID:** `updatePetWithForm`
+
+              ## Consumes
+
+              - `application/x-www-form-urlencoded`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `petId` | path | integer (int64) | Yes | ID of pet that needs to be updated |
+              | `name` | formData | string | No | Updated name of the pet |
+              | `status` | formData | string | No | Updated status of the pet |
+
+              ## Responses
+
+              ### 405
+              Invalid input
+
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            headers: []
+            params: []
+            pathParams:
+              - key: petId
+                description: ID of pet that needs to be updated
+                enabled: true
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - pet
+          - id: e2147556-b61b-4fd2-9fc2-bcd56697e1d5
+            name: Deletes a pet
+            type: http
+            method: DELETE
+            url: '{{baseUrl}}/api/pet/{{petId}}'
+            body:
+              type: text
+              content: ''
+            documentation: |-
+              # Deletes a pet
+
+              **Operation ID:** `deletePet`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `api_key` | header | string | No |  |
+              | `petId` | path | integer (int64) | Yes | Pet id to delete |
+
+              ## Responses
+
+              ### 400
+              Invalid ID supplied
+
+
+
+              ### 404
+              Pet not found
+
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            headers:
+              - key: api_key
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: ''
+            params: []
+            pathParams:
+              - key: petId
+                description: Pet id to delete
+                enabled: true
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - pet
+          - id: 8fde9cd9-493e-4609-86a3-0e7258d3457a
+            name: uploads an image
+            type: http
+            method: POST
+            url: '{{baseUrl}}/api/pet/{{petId}}/uploadImage'
+            body:
+              type: form-data
+              fields:
+                - key: additionalMetadata
+                  description: Additional data to pass to server
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+                - key: file
+                  description: file to upload
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+            documentation: |-
+              # uploads an image
+
+              **Operation ID:** `uploadFile`
+
+              ## Consumes
+
+              - `multipart/form-data`
+
+              ## Produces
+
+              - `application/json`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `petId` | path | integer (int64) | Yes | ID of pet to update |
+              | `additionalMetadata` | formData | string | No | Additional data to pass to server |
+              | `file` | formData | file | No | file to upload |
+
+              ## Types
+
+              ### ApiResponse
+
+              **Reference:** `#/definitions/ApiResponse`
+
+              ```mermaid
+              classDiagram
+                class ApiResponse {
+                  - code? : integer
+                  - type? : string
+                  - message? : string
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `code` | integer | No |  |
+              | `type` | string | No |  |
+              | `message` | string | No |  |
+
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `#/definitions/ApiResponse`
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            headers: []
+            params: []
+            pathParams:
+              - key: petId
+                description: ID of pet to update
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - pet
+          - id: 13cc7beb-524e-41ec-aa8d-ed7f31b64061
+            name: Add a new pet to the store
+            type: http
+            method: POST
+            url: '{{baseUrl}}/api/pet'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "category": {
+                    "id": 0,
+                    "name": ""
+                  },
+                  "name": "",
+                  "photoUrls": [
+                    ""
+                  ],
+                  "tags": [
+                    {
+                      "id": 0,
+                      "name": ""
+                    }
+                  ],
+                  "status": "available"
+                }
+            documentation: |-
+              # Add a new pet to the store
+
+              **Operation ID:** `addPet`
+
+              ## Consumes
+
+              - `application/json`
+              - `application/xml`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `body` | body | #/definitions/Pet | Yes | Pet object that needs to be added to the store |
+
+              ## Types
+
+              ### Pet
+
+              **Reference:** `#/definitions/Pet`
+
+              ```mermaid
+              classDiagram
+                class Pet {
+                  - id? : integer
+                  - category? : Category
+                  + name : string
+                  + photoUrls : array<string>
+                  - tags? : array<Tag>
+                  - status? : string
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `category` | Category | No |  |
+              | `name` | string | Yes |  |
+              | `photoUrls` | array&lt;string&gt; | Yes |  |
+              | `tags` | array&lt;Tag&gt; | No |  |
+              | `status` | string | No | pet status in the store |
+
+
+              ## Responses
+
+              ### 405
+              Invalid input
+
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            headers: []
+            params:
+              - key: ''
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: ''
+            pathParams: []
+            tags:
+              - pet
+          - id: 3a3e9274-0ed7-4b3f-a780-a85c0c2ad527
+            name: Update an existing pet
+            type: http
+            method: PUT
+            url: '{{baseUrl}}/api/pet'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "category": {
+                    "id": 0,
+                    "name": ""
+                  },
+                  "name": "",
+                  "photoUrls": [
+                    ""
+                  ],
+                  "tags": [
+                    {
+                      "id": 0,
+                      "name": ""
+                    }
+                  ],
+                  "status": "available"
+                }
+            documentation: |-
+              # Update an existing pet
+
+              **Operation ID:** `updatePet`
+
+              ## Consumes
+
+              - `application/json`
+              - `application/xml`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `body` | body | #/definitions/Pet | Yes | Pet object that needs to be added to the store |
+
+              ## Types
+
+              ### Pet
+
+              **Reference:** `#/definitions/Pet`
+
+              ```mermaid
+              classDiagram
+                class Pet {
+                  - id? : integer
+                  - category? : Category
+                  + name : string
+                  + photoUrls : array<string>
+                  - tags? : array<Tag>
+                  - status? : string
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `category` | Category | No |  |
+              | `name` | string | Yes |  |
+              | `photoUrls` | array&lt;string&gt; | Yes |  |
+              | `tags` | array&lt;Tag&gt; | No |  |
+              | `status` | string | No | pet status in the store |
+
+
+              ## Responses
+
+              ### 400
+              Invalid ID supplied
+
+
+
+              ### 404
+              Pet not found
+
+
+
+              ### 405
+              Validation exception
+
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - pet
+          - id: cafad4d9-6641-4935-a037-971d1210bec1
+            name: Finds Pets by status
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/pet/findByStatus'
+            documentation: |-
+              # Finds Pets by status
+
+              Multiple status values can be provided with comma separated strings
+
+              **Operation ID:** `findPetsByStatus`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `status` | query | array | Yes | Status values that need to be considered for filter |
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `array`
+
+
+              ### 400
+              Invalid status value
+
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            headers: []
+            notes: ''
+            params:
+              - key: status
+                description: Status values that need to be considered for filter
+                enabled: true
+                value:
+                  type: string
+                  value: ''
+            pathParams: []
+            tags:
+              - pet
+          - id: 0bb23239-cb74-4987-9626-f408cae751ab
+            name: Finds Pets by tags
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/pet/findByTags'
+            deprecated: true
+            documentation: |-
+              # Finds Pets by tags
+
+              Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+
+              **Operation ID:** `findPetsByTags`
+
+              > ⚠️ **Deprecated:** This endpoint is deprecated and may be removed in future versions.
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `tags` | query | array | Yes | Tags to filter by |
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `array`
+
+
+              ### 400
+              Invalid tag value
+
+
+
+              ## Security
+
+              - **petstore_auth**: `write:pets`, `read:pets`
+            headers: []
+            params:
+              - key: tags
+                description: Tags to filter by
+                value:
+                  type: string
+                  value: ''
+            pathParams: []
+            tags:
+              - pet
+        tags:
+          - pet
+      - id: ad7fe16f-6cf2-4c92-ad86-3708666a7552
+        name: store
+        configuration: {}
+        documentation: "# store\r\n\r\nAccess to Petstore orders"
+        items:
+          - id: 3b3b0588-6f71-4774-8ec1-583184a7dcf0
+            name: Returns pet inventories by status
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/store/inventory'
+            documentation: |-
+              # Returns pet inventories by status
+
+              Returns a map of status codes to quantities
+
+              **Operation ID:** `getInventory`
+
+              ## Produces
+
+              - `application/json`
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `object`
+
+
+              ## Security
+
+              - **api_key**
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - store
+          - id: 2c56d49b-3722-48ef-8975-25d2f5bc094b
+            name: Find purchase order by ID
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/store/order/{{orderId}}'
+            documentation: |-
+              # Find purchase order by ID
+
+              For valid response try integer IDs with value &gt;&#x3D; 1 and &lt;&#x3D; 10. Other values will generated exceptions
+
+              **Operation ID:** `getOrderById`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `orderId` | path | integer (int64) | Yes | ID of pet that needs to be fetched |
+
+              ## Types
+
+              ### Order
+
+              **Reference:** `#/definitions/Order`
+
+              ```mermaid
+              classDiagram
+                class Order {
+                  - id? : integer
+                  - petId? : integer
+                  - quantity? : integer
+                  - shipDate? : string
+                  - status? : string
+                  - complete? : boolean
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `petId` | integer | No |  |
+              | `quantity` | integer | No |  |
+              | `shipDate` | string | No |  |
+              | `status` | string | No | Order Status |
+              | `complete` | boolean | No |  |
+
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `#/definitions/Order`
+
+
+              ### 400
+              Invalid ID supplied
+
+
+
+              ### 404
+              Order not found
+            headers: []
+            params: []
+            pathParams:
+              - key: orderId
+                description: ID of pet that needs to be fetched
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - store
+          - id: 1cfb16a9-c3d0-4130-8324-9d34d6d94bda
+            name: Delete purchase order by ID
+            type: http
+            method: DELETE
+            url: '{{baseUrl}}/api/store/order/{{orderId}}'
+            documentation: |-
+              # Delete purchase order by ID
+
+              For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
+
+              **Operation ID:** `deleteOrder`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `orderId` | path | integer (int64) | Yes | ID of the order that needs to be deleted |
+
+              ## Responses
+
+              ### 400
+              Invalid ID supplied
+
+
+
+              ### 404
+              Order not found
+            headers: []
+            params: []
+            pathParams:
+              - key: orderId
+                description: ID of the order that needs to be deleted
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - store
+          - id: 992bf5d4-e04d-47cf-8a5d-7307dc8eb9ac
+            name: Place an order for a pet
+            type: http
+            method: POST
+            url: '{{baseUrl}}/api/store/order'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "petId": 0,
+                  "quantity": 0,
+                  "shipDate": "",
+                  "status": "placed",
+                  "complete": false
+                }
+            documentation: |-
+              # Place an order for a pet
+
+              **Operation ID:** `placeOrder`
+
+              ## Consumes
+
+              - `application/json`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `body` | body | #/definitions/Order | Yes | order placed for purchasing the pet |
+
+              ## Types
+
+              ### Order
+
+              **Reference:** `#/definitions/Order`
+
+              ```mermaid
+              classDiagram
+                class Order {
+                  - id? : integer
+                  - petId? : integer
+                  - quantity? : integer
+                  - shipDate? : string
+                  - status? : string
+                  - complete? : boolean
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `petId` | integer | No |  |
+              | `quantity` | integer | No |  |
+              | `shipDate` | string | No |  |
+              | `status` | string | No | Order Status |
+              | `complete` | boolean | No |  |
+
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `#/definitions/Order`
+
+
+              ### 400
+              Invalid Order
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - store
+        tags:
+          - store
+      - id: e90917e9-cba8-47fc-acc5-5f58f50ef4c0
+        name: user
+        configuration: {}
+        documentation: "# user\r\n\r\nOperations about user\r\n\r\n## External Documentation\r\n\r\n[Find out more about our store](http://swagger.io)"
+        items:
+          - id: ae2d567e-4bcb-44eb-9068-5a9c72368040
+            name: Creates list of users with given input array
+            type: http
+            method: POST
+            url: '{{baseUrl}}/api/user/createWithList'
+            body:
+              type: text
+              content: |-
+                [
+                  {
+                    "id": 0,
+                    "username": "",
+                    "firstName": "",
+                    "lastName": "",
+                    "email": "",
+                    "password": "",
+                    "phone": "",
+                    "userStatus": 0
+                  }
+                ]
+            documentation: |-
+              # Creates list of users with given input array
+
+              **Operation ID:** `createUsersWithListInput`
+
+              ## Consumes
+
+              - `application/json`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `body` | body |  | Yes | List of user object |
+
+              ## Responses
+
+              ### default
+              successful operation
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+          - id: 455a972a-1bc8-49b3-bfa3-478f81bc369b
+            name: Get user by user name
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/user/{{username}}'
+            documentation: |-
+              # Get user by user name
+
+              **Operation ID:** `getUserByName`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `username` | path | string | Yes | The name that needs to be fetched. Use user1 for testing.  |
+
+              ## Types
+
+              ### User
+
+              **Reference:** `#/definitions/User`
+
+              ```mermaid
+              classDiagram
+                class User {
+                  - id? : integer
+                  - username? : string
+                  - firstName? : string
+                  - lastName? : string
+                  - email? : string
+                  - password? : string
+                  - phone? : string
+                  - userStatus? : integer
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `username` | string | No |  |
+              | `firstName` | string | No |  |
+              | `lastName` | string | No |  |
+              | `email` | string | No |  |
+              | `password` | string | No |  |
+              | `phone` | string | No |  |
+              | `userStatus` | integer | No | User Status |
+
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `#/definitions/User`
+
+
+              ### 400
+              Invalid username supplied
+
+
+
+              ### 404
+              User not found
+            headers: []
+            params: []
+            pathParams:
+              - key: username
+                description: 'The name that needs to be fetched. Use user1 for testing. '
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - user
+          - id: 5c6b5b9f-e650-4295-bda7-f278df08260b
+            name: Updated user
+            type: http
+            method: PUT
+            url: '{{baseUrl}}/api/user/{{username}}'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "username": "",
+                  "firstName": "",
+                  "lastName": "",
+                  "email": "",
+                  "password": "",
+                  "phone": "",
+                  "userStatus": 0
+                }
+            documentation: |-
+              # Updated user
+
+              This can only be done by the logged in user.
+
+              **Operation ID:** `updateUser`
+
+              ## Consumes
+
+              - `application/json`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `username` | path | string | Yes | name that need to be updated |
+              | `body` | body | #/definitions/User | Yes | Updated user object |
+
+              ## Types
+
+              ### User
+
+              **Reference:** `#/definitions/User`
+
+              ```mermaid
+              classDiagram
+                class User {
+                  - id? : integer
+                  - username? : string
+                  - firstName? : string
+                  - lastName? : string
+                  - email? : string
+                  - password? : string
+                  - phone? : string
+                  - userStatus? : integer
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `username` | string | No |  |
+              | `firstName` | string | No |  |
+              | `lastName` | string | No |  |
+              | `email` | string | No |  |
+              | `password` | string | No |  |
+              | `phone` | string | No |  |
+              | `userStatus` | integer | No | User Status |
+
+
+              ## Responses
+
+              ### 400
+              Invalid user supplied
+
+
+
+              ### 404
+              User not found
+            headers: []
+            params: []
+            pathParams:
+              - key: username
+                description: name that need to be updated
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - user
+          - id: b68a0013-fb4e-45af-a0c1-f33ce0d31db1
+            name: Delete user
+            type: http
+            method: DELETE
+            url: '{{baseUrl}}/api/user/{{username}}'
+            documentation: |-
+              # Delete user
+
+              This can only be done by the logged in user.
+
+              **Operation ID:** `deleteUser`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `username` | path | string | Yes | The name that needs to be deleted |
+
+              ## Responses
+
+              ### 400
+              Invalid username supplied
+
+
+
+              ### 404
+              User not found
+            headers: []
+            params: []
+            pathParams:
+              - key: username
+                description: The name that needs to be deleted
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - user
+          - id: 0769fcd9-5d5b-444c-99ce-161ddb85e043
+            name: Create user
+            type: http
+            method: POST
+            url: '{{baseUrl}}/api/user'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "username": "",
+                  "firstName": "",
+                  "lastName": "",
+                  "email": "",
+                  "password": "",
+                  "phone": "",
+                  "userStatus": 0
+                }
+            documentation: |-
+              # Create user
+
+              This can only be done by the logged in user.
+
+              **Operation ID:** `createUser`
+
+              ## Consumes
+
+              - `application/json`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `body` | body | #/definitions/User | Yes | Created user object |
+
+              ## Types
+
+              ### User
+
+              **Reference:** `#/definitions/User`
+
+              ```mermaid
+              classDiagram
+                class User {
+                  - id? : integer
+                  - username? : string
+                  - firstName? : string
+                  - lastName? : string
+                  - email? : string
+                  - password? : string
+                  - phone? : string
+                  - userStatus? : integer
+                }
+              ```
+
+
+              | Property | Type | Required | Description |
+              |----------|------|----------|-------------|
+              | `id` | integer | No |  |
+              | `username` | string | No |  |
+              | `firstName` | string | No |  |
+              | `lastName` | string | No |  |
+              | `email` | string | No |  |
+              | `password` | string | No |  |
+              | `phone` | string | No |  |
+              | `userStatus` | integer | No | User Status |
+
+
+              ## Responses
+
+              ### default
+              successful operation
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+          - id: d8fe7017-5563-4eb4-9973-cdad19593923
+            name: Creates list of users with given input array
+            type: http
+            method: POST
+            url: '{{baseUrl}}/api/user/createWithArray'
+            body:
+              type: text
+              content: |-
+                [
+                  {
+                    "id": 0,
+                    "username": "",
+                    "firstName": "",
+                    "lastName": "",
+                    "email": "",
+                    "password": "",
+                    "phone": "",
+                    "userStatus": 0
+                  }
+                ]
+            documentation: |-
+              # Creates list of users with given input array
+
+              **Operation ID:** `createUsersWithArrayInput`
+
+              ## Consumes
+
+              - `application/json`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `body` | body |  | Yes | List of user object |
+
+              ## Responses
+
+              ### default
+              successful operation
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+          - id: 41399bcb-12f0-450b-9c4d-1e0a12f491cc
+            name: Logs user into the system
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/user/login'
+            documentation: |-
+              # Logs user into the system
+
+              **Operation ID:** `loginUser`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Parameters
+
+              | Name | Location | Type | Required | Description |
+              |------|----------|------|----------|-------------|
+              | `username` | query | string | Yes | The user name for login |
+              | `password` | query | string | Yes | The password for login in clear text |
+
+              ## Responses
+
+              ### 200
+              successful operation
+
+              **Schema:** `string`
+
+              **Headers:**
+              - `X-Expires-After`: date in UTC when token expires (string, date-time)
+              - `X-Rate-Limit`: calls per hour allowed by the user (integer, int32)
+
+              ### 400
+              Invalid username/password supplied
+            headers: []
+            params:
+              - key: username
+                description: The user name for login
+                value:
+                  type: string
+                  value: ''
+              - key: password
+                description: The password for login in clear text
+                value:
+                  type: string
+                  value: ''
+            pathParams: []
+            tags:
+              - user
+          - id: 5a5900f0-b0c8-4d6f-9255-98d06214a625
+            name: Logs out current logged in user session
+            type: http
+            method: GET
+            url: '{{baseUrl}}/api/user/logout'
+            documentation: |-
+              # Logs out current logged in user session
+
+              **Operation ID:** `logoutUser`
+
+              ## Produces
+
+              - `application/json`
+              - `application/xml`
+
+              ## Responses
+
+              ### default
+              successful operation
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+        tags:
+          - user
+    notes: ''
+    tags: []
+  - id: 01af2c98-81eb-49ef-86e3-f08c31164caf
+    name: GraphQL Docker
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # GraphQL Docker
+
+      GraphQL API
+
+      ## Types
+
+      ### User
+        - id: ID!
+        - name: String!
+        - email: String!
+        - posts: [Post!]!
+
+      ### Post
+        - id: ID!
+        - title: String!
+        - content: String!
+        - author: User!
+    environments:
+      - id: b0db2b0a-1554-4912-9405-b1a1eee88e7a
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: http://localhost:4000
+    items:
+      - id: c04ca49e-58ce-4957-adc1-ad479e218f69
+        name: Queries
+        configuration: {}
+        documentation: |-
+          # GraphQL Queries
+
+          Read operations
+        items:
+          - id: 5185631b-91de-42f5-8455-73ce31c135f9
+            name: users
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL query: users'
+            headers:
+              - key: Content-Type
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                users {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: 0414a58c-b0a7-452a-a2e0-b5a01db44133
+            name: user
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL query: user'
+            headers:
+              - key: Content-Type
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                user(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: a42a9ade-79a5-4394-81b8-52a005c48d39
+            name: posts
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL query: posts'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                posts {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+          - id: ea83d370-35ed-41ee-9450-eb69a555a84c
+            name: post
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL query: post'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                post(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: 445e535c-2195-4f7d-b360-bf8d2891f658
+            name: echo
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL query: echo'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                echo(message: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+        tags:
+          - query
+      - id: 8ee2b22a-c4ba-4b31-aa39-51dc94925b3c
+        name: Mutations
+        configuration: {}
+        documentation: |-
+          # GraphQL Mutations
+
+          Write operations
+        items:
+          - id: 42cc9550-c709-45a8-926a-624f71bb1eac
+            name: createUser
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL mutation: createUser'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                createUser(name: "example", email: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: b084cc80-273e-4078-85e5-355d514f02b2
+            name: createPost
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL mutation: createPost'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                createPost(title: "example", content: "example", authorId: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: 274b6949-d86b-492a-a2fa-75e0c42f6d8c
+            name: deleteUser
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL mutation: deleteUser'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                deleteUser(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: ba4cf8dd-be0e-452d-9f4f-fabc796889ca
+            name: deletePost
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL mutation: deletePost'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                deletePost(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+        tags:
+          - mutation
+      - id: 76c3b623-2acc-4320-9e48-166ea43ded88
+        name: Subscriptions
+        configuration: {}
+        documentation: |-
+          # GraphQL Subscriptions
+
+          Real-time operations
+        items:
+          - id: 17c9b61a-b123-450f-a5e2-77f25a3784f1
+            name: postCreated
+            type: graphql
+            url: http://localhost:4000
+            documentation: 'GraphQL subscription: postCreated'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: subscription
+            query: |-
+              subscription {
+                postCreated {
+                  # Add fields here
+                }
+              }
+            tags:
+              - subscription
+        tags:
+          - subscription
+    tags: []
+  - id: f91c793f-d9c1-4c40-94cc-176354856405
+    name: GraphQL Petstore
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # GraphQL Petstore
+
+      GraphQL API
+
+      ## Types
+
+      ### Category
+        - id: ID!
+        - name: String!
+
+      ### Tag
+        - id: ID!
+        - name: String!
+
+      ### Pet
+        - id: ID!
+        - name: String!
+        - category: Category
+        - photoUrls: [String!]!
+        - tags: [Tag!]
+        - status: PetStatus
+
+      ### Order
+        - id: ID!
+        - petId: ID!
+        - pet: Pet
+        - quantity: Int!
+        - shipDate: String
+        - status: OrderStatus
+        - complete: Boolean!
+
+      ### User
+        - id: ID!
+        - username: String!
+        - firstName: String
+        - lastName: String
+        - email: String!
+        - phone: String
+        - userStatus: Int
+
+      ### Inventory
+        - available: Int!
+        - pending: Int!
+        - sold: Int!
+
+      ### LoginResponse
+        - token: String!
+        - expiresAt: String!
+        - user: User!
+
+      ### ApiResponse
+        - code: Int!
+        - type: String!
+        - message: String!
+    environments:
+      - id: 1e460f50-2ba4-4648-a96c-eaa291ddb89c
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: http://localhost:4000
+    items:
+      - id: ce70a06d-aa00-48ea-8945-0116acefa0de
+        name: Queries
+        configuration: {}
+        documentation: |-
+          # GraphQL Queries
+
+          Read operations
+        items:
+          - id: 5348a4e8-dcee-4aed-b20c-7648e24008bf
+            name: pet
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: pet'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                pet(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: 77e6bb24-34cc-4040-b69b-3763a5202767
+            name: petsByStatus
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: petsByStatus'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                petsByStatus(status: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: b2088dac-5cb4-4b87-96a2-73735af30cd0
+            name: petsByTags
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: petsByTags'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                petsByTags(tags: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: bc5d4cfb-8716-4e99-93ce-ab3dcae60689
+            name: pets
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: pets'
+            headers:
+              - key: Content-Type
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                pets(limit: 1, offset: 1) {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: 58bff2b0-6383-459c-b145-5bbd5fa9e4e0
+            name: inventory
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: inventory'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                inventory {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+          - id: e3f8f7b0-b3ad-4f03-87f5-7625a11c7006
+            name: order
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: order'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                order(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: 213da4cb-9285-40ac-9254-3dd1be9ef1aa
+            name: user
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: user'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                user(username: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+          - id: 0a288736-effe-4114-bba4-5383eb9a860d
+            name: login
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL query: login'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: query
+            query: |-
+              query {
+                login(username: "example", password: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - query
+            variables: '{}'
+        tags:
+          - query
+      - id: af8cffa1-54af-4569-b34f-1c9173562c2f
+        name: Mutations
+        configuration: {}
+        documentation: |-
+          # GraphQL Mutations
+
+          Write operations
+        items:
+          - id: 4bde68f8-2c81-40e2-b1d2-2c8b73e4ca6b
+            name: createPet
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: createPet'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                createPet(input: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: 307f5bfd-11c6-4dee-a4f7-24fe4bbba755
+            name: updatePet
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: updatePet'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                updatePet(input: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: b02fe6f0-c25d-4a30-a34a-c905bb7ed348
+            name: updatePetForm
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: updatePetForm'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                updatePetForm(id: "example", name: "example", status: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: 773b95f8-9ff6-4b04-a833-9e888d875c90
+            name: deletePet
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: deletePet'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                deletePet(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: b30c17e1-b001-4ca7-8abe-eb1d2bec8140
+            name: uploadPetImage
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: uploadPetImage'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                uploadPetImage(petId: "example", file: "example", additionalMetadata: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: 60389aa5-49d7-424f-b20e-9161a16b310e
+            name: placeOrder
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: placeOrder'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                placeOrder(input: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: 54097c00-c987-4c6c-8506-04913fb1c11b
+            name: deleteOrder
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: deleteOrder'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                deleteOrder(id: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: d59c14a2-b424-400d-9380-b85fe5b5cd72
+            name: createUser
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: createUser'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                createUser(input: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: 946f646e-ccfc-4a7a-b5e1-e23e3c21897f
+            name: createUsers
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: createUsers'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                createUsers(inputs: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: caace1c2-1382-4851-8cac-35e842118ed5
+            name: updateUser
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: updateUser'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                updateUser(input: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: d4d76263-3605-46b9-a1d9-9450e395f459
+            name: deleteUser
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: deleteUser'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                deleteUser(username: "example") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+            variables: '{}'
+          - id: 9593fc30-adb3-44e3-b7cb-74b33b4234b0
+            name: logout
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL mutation: logout'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: mutation
+            query: |-
+              mutation {
+                logout {
+                  # Add fields here
+                }
+              }
+            tags:
+              - mutation
+        tags:
+          - mutation
+      - id: 55952d48-7985-4f3f-84ca-96a58316c451
+        name: Subscriptions
+        configuration: {}
+        documentation: |-
+          # GraphQL Subscriptions
+
+          Real-time operations
+        items:
+          - id: 12e631aa-de81-455a-bf92-075edd0b4a6e
+            name: petStatusChanged
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL subscription: petStatusChanged'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: subscription
+            query: |-
+              subscription {
+                petStatusChanged(status: "") {
+                  # Add fields here
+                }
+              }
+            tags:
+              - subscription
+            variables: '{}'
+          - id: 57bc22f1-ea39-44e6-aaa0-2d8e449d0671
+            name: orderPlaced
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL subscription: orderPlaced'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: subscription
+            query: |-
+              subscription {
+                orderPlaced {
+                  # Add fields here
+                }
+              }
+            tags:
+              - subscription
+          - id: df1ac523-9540-4b30-b449-f0f2855f7f6f
+            name: petCreated
+            type: graphql
+            url: '{{baseUrl}}'
+            documentation: 'GraphQL subscription: petCreated'
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: application/json
+            operationType: subscription
+            query: |-
+              subscription {
+                petCreated {
+                  # Add fields here
+                }
+              }
+            tags:
+              - subscription
+        tags:
+          - subscription
+    tags: []
+  - id: 7b1c2c93-b357-46ea-9639-69eb70809934
+    name: gRPC Docker
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # gRPC Docker
+
+      gRPC API
+
+      ## Messages
+
+      ### HelloRequest
+        - greeting: string
+
+      ### HelloResponse
+        - reply: string
+
+      ### HeadersResponse
+
+
+      ### IndexResponse
+        - services: repeated string
+
+      ### DummyMessage
+        - f_string: string
+        - f_strings: repeated string
+        - f_int32: int32
+        - f_int32s: repeated int32
+
+      ### SubMessage
+        - f_string: string
+
+      ### SpecificErrorRequest
+        - code: int32
+
+      ### AddrResponse
+        - addr: string
+    environments:
+      - id: cd9db1bc-4fa7-4849-87f7-17043df92421
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: localhost:9000
+    items:
+      - id: 7e978704-fa01-40e3-a019-c92ecad941e1
+        name: HelloService
+        configuration: {}
+        documentation: Hello service - simple greeting
+        items:
+          - id: 8e9e4c42-0f87-4440-afee-e3e0d0d61aa4
+            name: SayHello
+            type: grpc
+            method: SayHello
+            url: localhost:9000
+            callType: unary
+            documentation: Say hello
+            metadata: []
+            requestMessage: |-
+              {
+                "greeting": ""
+              }
+            service: grpcbin.HelloService
+            tags:
+              - unary
+        tags:
+          - service
+      - id: e233564a-5f4c-45c4-a1f3-9556b00b0ed0
+        name: HeadersService
+        configuration: {}
+        documentation: Headers service - echo headers
+        items:
+          - id: 5afd7c85-e62b-4e0f-9769-7a4edd8535bb
+            name: GetHeaders
+            type: grpc
+            method: GetHeaders
+            url: localhost:9000
+            callType: unary
+            documentation: Returns request headers
+            metadata: []
+            requestMessage: '{}'
+            service: grpcbin.HeadersService
+            tags:
+              - unary
+        tags:
+          - service
+      - id: 89ffe1d1-c2b4-4358-aa68-8db0ffec5d02
+        name: IndexService
+        configuration: {}
+        documentation: Index service - list available services
+        items:
+          - id: daa2942a-61d3-476c-888d-00f09b6ea25d
+            name: GetIndex
+            type: grpc
+            method: GetIndex
+            url: localhost:9000
+            callType: unary
+            documentation: Get server index
+            metadata: []
+            requestMessage: '{}'
+            service: grpcbin.IndexService
+            tags:
+              - unary
+        tags:
+          - service
+      - id: 2cbbefa7-f3f2-4c9b-90c3-80d0218717c3
+        name: DummyService
+        configuration: {}
+        documentation: DummyMessage service - generate dummy messages
+        items:
+          - id: 5db30af5-809a-4020-b426-926b0a053ca0
+            name: DummyUnary
+            type: grpc
+            method: DummyUnary
+            url: localhost:9000
+            callType: unary
+            documentation: Unary call
+            metadata: []
+            requestMessage: |-
+              {
+                "f_string": "",
+                "f_strings": [
+                  ""
+                ],
+                "f_int32": 0,
+                "f_int32s": [
+                  0
+                ]
+              }
+            service: grpcbin.DummyService
+            tags:
+              - unary
+          - id: a3766d2a-5ce9-4b41-9b29-868d44e56c41
+            name: DummyServerStream
+            type: grpc
+            method: DummyServerStream
+            url: localhost:9000
+            callType: server-stream
+            documentation: Server streaming
+            metadata: []
+            requestMessage: |-
+              {
+                "f_string": "",
+                "f_strings": [
+                  ""
+                ],
+                "f_int32": 0,
+                "f_int32s": [
+                  0
+                ]
+              }
+            service: grpcbin.DummyService
+            tags:
+              - server-stream
+          - id: db200434-ec74-49cb-9286-dc7e295ff3c7
+            name: DummyClientStream
+            type: grpc
+            method: DummyClientStream
+            url: localhost:9000
+            callType: client-stream
+            documentation: Client streaming
+            metadata: []
+            requestMessage: |-
+              {
+                "f_string": "",
+                "f_strings": [
+                  ""
+                ],
+                "f_int32": 0,
+                "f_int32s": [
+                  0
+                ]
+              }
+            service: grpcbin.DummyService
+            tags:
+              - client-stream
+          - id: 2db14986-ca56-46e4-89f6-c3e239ac8c27
+            name: DummyBidirectionalStream
+            type: grpc
+            method: DummyBidirectionalStream
+            url: localhost:9000
+            callType: bidirectional-stream
+            documentation: Bidirectional streaming
+            metadata: []
+            requestMessage: |-
+              {
+                "f_string": "",
+                "f_strings": [
+                  ""
+                ],
+                "f_int32": 0,
+                "f_int32s": [
+                  0
+                ]
+              }
+            service: grpcbin.DummyService
+            tags:
+              - bidirectional-stream
+        tags:
+          - service
+      - id: d816219d-dc47-49bc-badc-88596954b8e7
+        name: SpecificErrorService
+        configuration: {}
+        documentation: SpecificError service - return specific error codes
+        items:
+          - id: 7252fe38-76b0-4c90-b04a-0b52bfed75c3
+            name: SpecificError
+            type: grpc
+            method: SpecificError
+            url: localhost:9000
+            callType: unary
+            documentation: Return a specific gRPC error code
+            metadata: []
+            requestMessage: |-
+              {
+                "code": 0
+              }
+            service: grpcbin.SpecificErrorService
+            tags:
+              - unary
+        tags:
+          - service
+      - id: 5d8cf506-f119-41f9-9ab3-2c3eeadda1ca
+        name: AddrService
+        configuration: {}
+        documentation: AddrService - return client address
+        items:
+          - id: 94ac892d-4e29-4a4b-b7d7-6d7f081ae718
+            name: GetClientAddr
+            type: grpc
+            method: GetClientAddr
+            url: localhost:9000
+            callType: unary
+            documentation: Get client IP address
+            metadata: []
+            requestMessage: '{}'
+            service: grpcbin.AddrService
+            tags:
+              - unary
+        tags:
+          - service
+    tags: []
+  - id: 80137947-223f-48b7-bd49-f8861f0b5804
+    name: gRPC Petstore
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # gRPC Petstore
+
+      gRPC API
+
+      ## Messages
+
+      ### Category
+        - id: int64
+        - name: string
+
+      ### Tag
+        - id: int64
+        - name: string
+
+      ### Pet
+        - id: int64
+        - name: string
+        - category: Category
+        - photo_urls: repeated string
+        - tags: repeated Tag
+        - status: PetStatus
+
+      ### Order
+        - id: int64
+        - pet_id: int64
+        - quantity: int32
+        - ship_date: string
+        - status: OrderStatus
+        - complete: bool
+
+      ### User
+        - id: int64
+        - username: string
+        - first_name: string
+        - last_name: string
+        - email: string
+        - password: string
+        - phone: string
+        - user_status: int32
+
+      ### GetPetRequest
+        - id: int64
+
+      ### ListPetsRequest
+        - status: repeated PetStatus
+        - tags: repeated string
+        - limit: int32
+        - offset: int32
+
+      ### ListPetsResponse
+        - pets: repeated Pet
+        - total: int32
+
+      ### CreatePetRequest
+        - name: string
+        - category: Category
+        - photo_urls: repeated string
+        - tags: repeated Tag
+        - status: PetStatus
+
+      ### UpdatePetRequest
+        - id: int64
+        - name: string
+        - category: Category
+        - photo_urls: repeated string
+        - tags: repeated Tag
+        - status: PetStatus
+
+      ### DeletePetRequest
+        - id: int64
+
+      ### DeletePetResponse
+        - success: bool
+
+      ### StreamPetUpdatesRequest
+        - status_filter: repeated PetStatus
+
+      ### PetUpdate
+        - event_type: string
+        - pet: Pet
+        - timestamp: string
+
+      ### GetInventoryResponse
+
+
+      ### PlaceOrderRequest
+        - pet_id: int64
+        - quantity: int32
+        - ship_date: string
+
+      ### GetOrderRequest
+        - id: int64
+
+      ### DeleteOrderRequest
+        - id: int64
+
+      ### DeleteOrderResponse
+        - success: bool
+
+      ### CreateUserRequest
+        - username: string
+        - first_name: string
+        - last_name: string
+        - email: string
+        - password: string
+        - phone: string
+
+      ### GetUserRequest
+        - username: string
+
+      ### UpdateUserRequest
+        - username: string
+        - first_name: string
+        - last_name: string
+        - email: string
+        - password: string
+        - phone: string
+
+      ### DeleteUserRequest
+        - username: string
+
+      ### DeleteUserResponse
+        - success: bool
+
+      ### LoginRequest
+        - username: string
+        - password: string
+
+      ### LoginResponse
+        - token: string
+        - expires_at: string
+
+      ### LogoutRequest
+        - token: string
+
+      ### LogoutResponse
+        - success: bool
+    environments:
+      - id: f2229a6f-e625-4861-bb2e-7a121156b4ad
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: localhost:9000
+    items:
+      - id: 824d0186-d95d-49c0-a48b-59ef2a9fd904
+        name: PetService
+        configuration: {}
+        documentation: Pet service for managing pets in the store
+        items:
+          - id: 7651631d-de73-42ba-96a0-820abf83afad
+            name: GetPet
+            type: grpc
+            method: GetPet
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Get a single pet by ID
+            metadata: []
+            requestMessage: |-
+              {
+                "id": 0
+              }
+            service: petstore.PetService
+            tags:
+              - unary
+          - id: 25e54f55-3614-49a3-aa74-d2110aefe6f4
+            name: ListPets
+            type: grpc
+            method: ListPets
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: List all pets with optional filtering
+            metadata: []
+            requestMessage: |-
+              {
+                "status": [
+                  {}
+                ],
+                "tags": [
+                  ""
+                ],
+                "limit": 0,
+                "offset": 0
+              }
+            service: petstore.PetService
+            tags:
+              - unary
+          - id: 59eb9385-7d53-4877-bd4f-51977d1dc69a
+            name: CreatePet
+            type: grpc
+            method: CreatePet
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Create a new pet
+            metadata: []
+            requestMessage: |-
+              {
+                "name": "",
+                "category": {},
+                "photo_urls": [
+                  ""
+                ],
+                "tags": [
+                  {}
+                ],
+                "status": {}
+              }
+            service: petstore.PetService
+            tags:
+              - unary
+          - id: 2b508109-5492-4a2a-aef0-7685a1fccfe7
+            name: UpdatePet
+            type: grpc
+            method: UpdatePet
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Update an existing pet
+            metadata: []
+            requestMessage: |-
+              {
+                "id": 0,
+                "name": "",
+                "category": {},
+                "photo_urls": [
+                  ""
+                ],
+                "tags": [
+                  {}
+                ],
+                "status": {}
+              }
+            service: petstore.PetService
+            tags:
+              - unary
+          - id: c353c1e7-47fe-4aed-9039-823c1b7d1cc1
+            name: DeletePet
+            type: grpc
+            method: DeletePet
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Delete a pet
+            metadata: []
+            requestMessage: |-
+              {
+                "id": 0
+              }
+            service: petstore.PetService
+            tags:
+              - unary
+          - id: aa732fdf-7167-4993-ac3d-527fe0997fd8
+            name: StreamPetUpdates
+            type: grpc
+            method: StreamPetUpdates
+            url: '{{baseUrl}}'
+            callType: server-stream
+            documentation: Stream pet updates in real-time
+            metadata: []
+            requestMessage: |-
+              {
+                "status_filter": [
+                  {}
+                ]
+              }
+            service: petstore.PetService
+            tags:
+              - server-stream
+        tags:
+          - service
+      - id: ce36e639-4b1c-4414-a18c-95c305b5d6ea
+        name: StoreService
+        configuration: {}
+        documentation: Store service for managing orders
+        items:
+          - id: e2c9f3b5-d726-49de-8d3f-50fa7fd84c1f
+            name: GetInventory
+            type: grpc
+            method: GetInventory
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Get store inventory
+            metadata: []
+            requestMessage: '{}'
+            service: petstore.StoreService
+            tags:
+              - unary
+          - id: d034de9d-abb1-4eee-b0a4-00cae1469d36
+            name: PlaceOrder
+            type: grpc
+            method: PlaceOrder
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Place an order
+            metadata: []
+            requestMessage: |-
+              {
+                "pet_id": 0,
+                "quantity": 0,
+                "ship_date": ""
+              }
+            service: petstore.StoreService
+            tags:
+              - unary
+          - id: cc2aa116-4ed4-44fd-9c48-6f33686b6790
+            name: GetOrder
+            type: grpc
+            method: GetOrder
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Get an order by ID
+            metadata: []
+            requestMessage: |-
+              {
+                "id": 0
+              }
+            service: petstore.StoreService
+            tags:
+              - unary
+          - id: 78bb4883-d8a0-4483-a156-e86ece09e42c
+            name: DeleteOrder
+            type: grpc
+            method: DeleteOrder
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Delete an order
+            metadata: []
+            requestMessage: |-
+              {
+                "id": 0
+              }
+            service: petstore.StoreService
+            tags:
+              - unary
+        tags:
+          - service
+      - id: 562ac56f-731b-4bb4-8754-9f668bf088b1
+        name: UserService
+        configuration: {}
+        documentation: User service for managing users
+        items:
+          - id: b63c5918-1b6d-4c49-8f15-d2744b141843
+            name: CreateUser
+            type: grpc
+            method: CreateUser
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Create a new user
+            metadata: []
+            requestMessage: |-
+              {
+                "username": "",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "password": "",
+                "phone": ""
+              }
+            service: petstore.UserService
+            tags:
+              - unary
+          - id: c54ccbea-c9e4-4622-aaae-48a911175670
+            name: GetUser
+            type: grpc
+            method: GetUser
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Get user by username
+            metadata: []
+            requestMessage: |-
+              {
+                "username": ""
+              }
+            service: petstore.UserService
+            tags:
+              - unary
+          - id: 86fc6a51-3c42-463b-abdf-d0610f52588f
+            name: UpdateUser
+            type: grpc
+            method: UpdateUser
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Update user
+            metadata: []
+            requestMessage: |-
+              {
+                "username": "",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "password": "",
+                "phone": ""
+              }
+            service: petstore.UserService
+            tags:
+              - unary
+          - id: 23909c8f-062f-4b22-be05-dd46898e112f
+            name: DeleteUser
+            type: grpc
+            method: DeleteUser
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Delete user
+            metadata: []
+            requestMessage: |-
+              {
+                "username": ""
+              }
+            service: petstore.UserService
+            tags:
+              - unary
+          - id: 08488faa-2f86-484a-8fc5-0a96f47e4bc6
+            name: Login
+            type: grpc
+            method: Login
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Login user
+            metadata: []
+            requestMessage: |-
+              {
+                "username": "",
+                "password": ""
+              }
+            service: petstore.UserService
+            tags:
+              - unary
+          - id: 6b48d985-959a-46a9-907d-19121aa19e53
+            name: Logout
+            type: grpc
+            method: Logout
+            url: '{{baseUrl}}'
+            callType: unary
+            documentation: Logout user
+            metadata: []
+            requestMessage: |-
+              {
+                "token": ""
+              }
+            service: petstore.UserService
+            tags:
+              - unary
+        tags:
+          - service
+    tags: []
+  - id: 76d66e58-c3b7-48f0-99df-547dd070cfd9
+    name: SOAP Docker
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # SOAP Docker
+
+      SOAP Web Service
+
+      Namespace: http://restorm.test/castlemock
+    environments:
+      - id: e6e10a12-659b-4544-987e-c10f429ea261
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: http://localhost:8090/castlemock/mock/soap/echo
+    items:
+      - id: f60f7a89-08e4-40d0-bac4-b1dd1fcd6fd2
+        name: TestService
+        configuration: {}
+        documentation: |-
+          Castle Mock Test Services.
+                Import this WSDL into Castle Mock (http://localhost:8090/castlemock)
+                to create mock endpoints.
+        items:
+          - id: de75eefa-c5b7-484f-8125-a352469401a8
+            name: Echo
+            type: soap
+            url: http://localhost:8090/castlemock/mock/soap/echo
+            body: |-
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soap:Envelope 
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:tns="http://restorm.test/castlemock">
+                <soap:Header/>
+                <soap:Body>
+                  <tns:EchoRequest>
+                    <!-- Add request parameters here -->
+                  </tns:EchoRequest>
+                </soap:Body>
+              </soap:Envelope>
+            documentation: Echo a message back
+            headers:
+              - key: Content-Type
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
+              - key: SOAPAction
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: http://restorm.test/castlemock/Echo
+            operation: Echo
+            service: TestService
+            soapAction: http://restorm.test/castlemock/Echo
+            tags:
+              - soap
+        tags:
+          - service
+    tags: []
+  - id: d8db9800-a068-4841-a44c-3893fff880a2
+    name: SOAP Petstore
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # SOAP Petstore
+
+      SOAP Web Service
+
+      Namespace: http://petstore.example.com/wsdl
+    environments:
+      - id: c14dcd46-f67a-4b09-b618-a7b3df143547
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: http://localhost:8090/petstore/pet
+    items:
+      - id: 71bbc251-bf70-48e8-9f93-28c0653afadb
+        name: PetStoreService
+        configuration: {}
+        documentation: Petstore SOAP Web Service
+        items:
+          - id: cfc6f333-c91e-47b8-9d03-8ccd4814ebe5
+            name: GetPet
+            type: soap
+            url: http://localhost:8090/petstore/pet
+            body: |-
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soap:Envelope 
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:tns="http://petstore.example.com/wsdl">
+                <soap:Header/>
+                <soap:Body>
+                  <tns:GetPetRequest>
+                    <!-- Add request parameters here -->
+                  </tns:GetPetRequest>
+                </soap:Body>
+              </soap:Envelope>
+            documentation: Find pet by ID
+            headers:
+              - key: Content-Type
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
+              - key: SOAPAction
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: http://petstore.example.com/GetPet
+            operation: GetPet
+            service: PetStoreService
+            soapAction: http://petstore.example.com/GetPet
+            tags:
+              - soap
+          - id: 056a7e59-d128-45ba-8595-ba1e3bfc07a7
+            name: FindPetsByStatus
+            type: soap
+            url: http://localhost:8090/petstore/pet
+            body: |-
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soap:Envelope 
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:tns="http://petstore.example.com/wsdl">
+                <soap:Header/>
+                <soap:Body>
+                  <tns:FindPetsByStatusRequest>
+                    <!-- Add request parameters here -->
+                  </tns:FindPetsByStatusRequest>
+                </soap:Body>
+              </soap:Envelope>
+            documentation: Find pets by status
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
+              - key: SOAPAction
+                value:
+                  type: string
+                  value: http://petstore.example.com/FindPetsByStatus
+            operation: FindPetsByStatus
+            service: PetStoreService
+            soapAction: http://petstore.example.com/FindPetsByStatus
+            tags:
+              - soap
+          - id: 11d93697-1fbd-4ace-8a68-24fc502494b5
+            name: CreatePet
+            type: soap
+            url: http://localhost:8090/petstore/pet
+            body: |-
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soap:Envelope 
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:tns="http://petstore.example.com/wsdl">
+                <soap:Header/>
+                <soap:Body>
+                  <tns:CreatePetRequest>
+                    <!-- Add request parameters here -->
+                  </tns:CreatePetRequest>
+                </soap:Body>
+              </soap:Envelope>
+            documentation: Add a new pet to the store
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
+              - key: SOAPAction
+                value:
+                  type: string
+                  value: http://petstore.example.com/CreatePet
+            operation: CreatePet
+            service: PetStoreService
+            soapAction: http://petstore.example.com/CreatePet
+            tags:
+              - soap
+          - id: 5e89ce2c-4ddf-4582-9e3f-2db63cc7d9aa
+            name: UpdatePet
+            type: soap
+            url: http://localhost:8090/petstore/pet
+            body: |-
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soap:Envelope 
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:tns="http://petstore.example.com/wsdl">
+                <soap:Header/>
+                <soap:Body>
+                  <tns:UpdatePetRequest>
+                    <!-- Add request parameters here -->
+                  </tns:UpdatePetRequest>
+                </soap:Body>
+              </soap:Envelope>
+            documentation: Update an existing pet
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
+              - key: SOAPAction
+                value:
+                  type: string
+                  value: http://petstore.example.com/UpdatePet
+            operation: UpdatePet
+            service: PetStoreService
+            soapAction: http://petstore.example.com/UpdatePet
+            tags:
+              - soap
+          - id: 43de9677-332f-486e-83e5-8c252ced559c
+            name: DeletePet
+            type: soap
+            url: http://localhost:8090/petstore/pet
+            body: |-
+              <?xml version="1.0" encoding="UTF-8"?>
+              <soap:Envelope 
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:tns="http://petstore.example.com/wsdl">
+                <soap:Header/>
+                <soap:Body>
+                  <tns:DeletePetRequest>
+                    <!-- Add request parameters here -->
+                  </tns:DeletePetRequest>
+                </soap:Body>
+              </soap:Envelope>
+            documentation: Delete a pet
+            headers:
+              - key: Content-Type
+                value:
+                  type: string
+                  value: text/xml; charset=utf-8
+              - key: SOAPAction
+                value:
+                  type: string
+                  value: http://petstore.example.com/DeletePet
+            operation: DeletePet
+            service: PetStoreService
+            soapAction: http://petstore.example.com/DeletePet
+            tags:
+              - soap
+        tags:
+          - service
+    tags: []
+  - id: fd5957a0-ccfb-407f-afdb-de66aad22ab0
+    name: AsyncAPI Docker
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # AsyncAPI Docker
+
+      AsyncAPI specification for Docker test services.
+      Covers Socket.IO and MQTT endpoints.
+
+
+      Version: 1.0.0
+    environments:
+      - id: f2556595-4506-400a-9f9d-926fc798c932
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: localhost:1883
+    items:
+      - id: d30e1c20-ab90-4910-a0a1-496fe529b5ac
+        name: MQTT
+        configuration: {}
+        documentation: |-
+          # MQTT Channels
+
+          Message broker pub/sub
+        items:
+          - id: fae0baf4-e340-488e-90c2-10274b62119d
+            name: mqttPublishEcho
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Publish test message
+            event: test/echo
+            headers:
+              - key: s
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: s
+            message: '{}'
+            notes: |
+              ugg
+            protocol: mqtt
+            tags:
+              - publish
+              - mqtt
+          - id: 12448198-dab3-45f6-bafc-ca14cd903830
+            name: mqttSubscribeEcho
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Subscribe to test messages
+            event: test/echo
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: 8b0a6247-bf71-43cb-b2b6-2a3ebe7799ca
+            name: mqttPublishJson
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Publish JSON message
+            event: test/json
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - publish
+              - mqtt
+          - id: 1d07069c-96f7-4776-8a47-bcc8db7d9553
+            name: mqttSubscribeJson
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Subscribe to JSON messages
+            event: test/json
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: f1f4c410-1a0b-4aeb-ac0a-23c37173ba20
+            name: mqttPublishSensorData
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Publish sensor data
+            event: sensors/{sensorId}/data
+            headers: []
+            message: |-
+              {
+                "sensorId": "",
+                "value": 0,
+                "unit": "",
+                "timestamp": ""
+              }
+            protocol: mqtt
+            tags:
+              - publish
+              - mqtt
+          - id: 65647754-955c-4b2a-98ab-347574910971
+            name: mqttSubscribeSensorData
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Subscribe to sensor data
+            event: sensors/{sensorId}/data
+            headers: []
+            message: |-
+              {
+                "sensorId": "",
+                "value": 0,
+                "unit": "",
+                "timestamp": ""
+              }
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: eaf51994-256d-4a70-909e-a625af0b96f9
+            name: mqttSubscribeDeviceStatus
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Subscribe to device status updates
+            event: devices/{deviceId}/status
+            headers: []
+            message: |-
+              {
+                "deviceId": "",
+                "online": false,
+                "lastSeen": "",
+                "battery": 0
+              }
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+        tags:
+          - mqtt
+      - id: ba0bddf7-ad0d-4b47-8781-14b14306020e
+        name: Socket.IO
+        configuration: {}
+        documentation: |-
+          # Socket.IO Events
+
+          Real-time bidirectional communication
+        items:
+          - id: 00ed0d66-3d94-470b-b4f1-36c5dd1996e9
+            name: sendEcho
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Send data to be echoed
+            event: echo
+            headers: []
+            message: '{}'
+            notes: ''
+            protocol: socketio
+            tags:
+              - publish
+              - socketio
+          - id: 1661063b-11ec-4f22-8760-f7113d28cc6c
+            name: receiveEcho
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Receive echoed data
+            event: echo
+            headers: []
+            message: '{}'
+            protocol: socketio
+            tags:
+              - subscribe
+              - socketio
+          - id: 4b74f877-1fcc-4721-8b22-138931c51400
+            name: sendPing
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Send ping
+            event: ping
+            headers: []
+            message: '{}'
+            protocol: socketio
+            tags:
+              - publish
+              - socketio
+          - id: e672521d-e0b1-44a2-89a5-c35d8dc2c926
+            name: receivePong
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Receive pong with timestamp
+            event: pong
+            headers: []
+            message: |-
+              {
+                "timestamp": 0
+              }
+            protocol: socketio
+            tags:
+              - subscribe
+              - socketio
+          - id: 2b425e05-9ca9-4e8a-b753-5656ac16be46
+            name: sendBroadcast
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Send broadcast message
+            event: broadcast
+            headers: []
+            message: '{}'
+            protocol: socketio
+            tags:
+              - publish
+              - socketio
+          - id: 4289641a-5a1d-4935-890c-3de134dba44f
+            name: receiveBroadcast
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Receive broadcast from any client
+            event: broadcast
+            headers: []
+            message: |-
+              {
+                "from": "",
+                "data": {},
+                "timestamp": 0
+              }
+            protocol: socketio
+            tags:
+              - subscribe
+              - socketio
+          - id: 55e8065a-3d95-4892-b157-030d4d4b325f
+            name: joinRoom
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Join a room by name
+            event: join-room
+            headers: []
+            message: '{}'
+            protocol: socketio
+            tags:
+              - publish
+              - socketio
+          - id: 5eb175b1-7a09-481a-ab09-e141061c9119
+            name: onJoined
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Confirmation of room join
+            event: joined
+            headers: []
+            message: |-
+              {
+                "room": ""
+              }
+            protocol: socketio
+            tags:
+              - subscribe
+              - socketio
+          - id: 9a0cf8c0-bc6c-4f09-a696-f31d88208577
+            name: leaveRoom
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Leave a room by name
+            event: leave-room
+            headers: []
+            message: '{}'
+            protocol: socketio
+            tags:
+              - publish
+              - socketio
+          - id: 59d305d3-f0e0-42b7-8be8-16d8e5d57ebf
+            name: onLeft
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Confirmation of room leave
+            event: left
+            headers: []
+            message: |-
+              {
+                "room": ""
+              }
+            protocol: socketio
+            tags:
+              - subscribe
+              - socketio
+          - id: 5b70d7f5-61bf-4510-9440-06dadd4f148f
+            name: sendRoomMessage
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Send message to a room
+            event: room-message
+            headers: []
+            message: |-
+              {
+                "room": "",
+                "message": ""
+              }
+            protocol: socketio
+            tags:
+              - publish
+              - socketio
+          - id: 35bd5774-b425-4b8d-8383-8139b6699732
+            name: receiveRoomMessage
+            type: websocket
+            url: ws://localhost:3001
+            documentation: Receive message from a room
+            event: room-message
+            headers: []
+            message: |-
+              {
+                "from": "",
+                "room": "",
+                "message": "",
+                "timestamp": 0
+              }
+            protocol: socketio
+            tags:
+              - subscribe
+              - socketio
+        tags:
+          - socketio
+    tags: []
+  - id: 86dff372-0933-415b-91bd-ab7ffc4070c8
+    name: AsyncAPI Petstore
+    folderType: environment
+    configuration: {}
+    documentation: |-
+      # AsyncAPI Petstore
+
+      AsyncAPI specification for the Petstore.
+      Covers MQTT and Socket.IO event-driven operations.
+
+
+      Version: 1.0.0
+    environments:
+      - id: ca2fb2ae-3ecb-441c-8597-4160e83b22c4
+        name: Default
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: localhost:1883
+    items:
+      - id: 4123ff50-0527-4a1a-93ae-96d1116c7c29
+        name: MQTT
+        configuration: {}
+        documentation: |-
+          # MQTT Channels
+
+          Message broker pub/sub
+        items:
+          - id: b4c76550-5885-4663-a1f3-5f83d383f539
+            name: onPetCreated
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive notifications when a new pet is created
+            event: pet/created
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: aefedc4b-bca8-4469-ae67-2a2d65301a88
+            name: onPetUpdated
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive notifications when a pet is updated
+            event: pet/updated
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: 8cc56b87-4841-44c9-bee4-4c2e8fd1fc5f
+            name: onPetDeleted
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive notifications when a pet is deleted
+            event: pet/deleted
+            headers: []
+            message: |-
+              {
+                "petId": 0,
+                "timestamp": ""
+              }
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: bad4f462-e810-49bb-9310-c274e3aaadbd
+            name: onPetStatusChange
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive notifications for pets with specific status
+            event: pet/status/{status}
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: 4cb7d97b-8ec4-4b9a-82d5-c8dac8a83fd4
+            name: onOrderPlaced
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive notifications when a new order is placed
+            event: order/placed
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: ca8f0085-dc0b-48d1-91d9-92fdfe644ca2
+            name: onOrderStatusUpdate
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive status updates for a specific order
+            event: order/status/{orderId}
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: 4dc0d320-90c7-4c49-83ec-382fcabd624e
+            name: onInventoryUpdated
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive notifications when inventory changes
+            event: inventory/updated
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: 1e3588ec-be6d-42d5-a80e-dccc8cfb2253
+            name: sendEcho
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Send a message to be echoed back
+            event: echo
+            headers: []
+            message: |-
+              {
+                "message": "",
+                "data": {}
+              }
+            protocol: mqtt
+            tags:
+              - publish
+              - mqtt
+          - id: 3ba18b6a-be1d-411d-bdb0-5095d2992785
+            name: receiveEcho
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive echoed message
+            event: echo
+            headers: []
+            message: |-
+              {
+                "message": "",
+                "data": {}
+              }
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: 59e540fb-16f6-4df3-b44e-60f3acd536b3
+            name: sendPing
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Send ping request
+            event: ping
+            headers: []
+            message: '{}'
+            protocol: mqtt
+            tags:
+              - publish
+              - mqtt
+          - id: 046fc92e-32a1-4271-adfd-a87b9c397471
+            name: receivePong
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive pong response
+            event: pong
+            headers: []
+            message: |-
+              {
+                "timestamp": 0
+              }
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: 8b292f25-972c-4016-bc04-415b59ff637a
+            name: sendBroadcast
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Send message to all connected clients
+            event: broadcast
+            headers: []
+            message: |-
+              {
+                "message": "",
+                "data": {}
+              }
+            protocol: mqtt
+            tags:
+              - publish
+              - mqtt
+          - id: ed268493-1a1a-4b6b-b950-1a637b3b988c
+            name: receiveBroadcast
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive broadcast messages
+            event: broadcast
+            headers: []
+            message: |-
+              {
+                "from": "",
+                "data": {},
+                "timestamp": 0
+              }
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+          - id: bf813391-59eb-434a-8391-07f6410c2f49
+            name: sendRoomMessage
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Send message to a specific room
+            event: room/{roomName}
+            headers: []
+            message: |-
+              {
+                "from": "",
+                "room": "",
+                "message": "",
+                "timestamp": 0
+              }
+            protocol: mqtt
+            tags:
+              - publish
+              - mqtt
+          - id: cb7e3295-2b34-4a09-8fce-bebdfd6005d8
+            name: receiveRoomMessage
+            type: websocket
+            url: mqtt://localhost:1883
+            documentation: Receive messages from a room
+            event: room/{roomName}
+            headers: []
+            message: |-
+              {
+                "from": "",
+                "room": "",
+                "message": "",
+                "timestamp": 0
+              }
+            protocol: mqtt
+            tags:
+              - subscribe
+              - mqtt
+        tags:
+          - mqtt
+    tags: []
+_projectUuid: 33472c0a-8eee-4f6a-be8e-9ffca7ca2e09
