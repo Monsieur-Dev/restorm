@@ -49,6 +49,7 @@ export const RequestScenarioDeleteModal: React.FC<RequestScenarioDeleteModalProp
       onClose={onCancel}
       size="dialog"
       data-testid="request-scenario-delete-modal"
+      enterActionTestId="request-scenario-delete-confirm-button"
     >
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <p style={{ margin: 0 }}>

@@ -67,6 +67,7 @@ export function IncompatibleProjectModal(): React.JSX.Element | null {
       size="dialog"
       title={rejection.code === FILE_FORMAT_MISSING_CODE ? t('project.notARestormFile.title') : t('project.incompatible.title')}
       data-testid="incompatible-project-modal"
+      enterActionTestId="incompatible-project-dismiss"
     >
       <div className="incompatible-project" data-testid="incompatible-project-body">
         <p className="incompatible-project__message">

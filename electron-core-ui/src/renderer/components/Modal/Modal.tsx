@@ -51,6 +51,28 @@ export interface ModalProps {
    */
   scopeToSelector?: string
   /**
+   * `data-testid` of the button (inside the dialog) that a plain Enter
+   * keypress triggers — the dialog's DEFAULT action, à la OS dialogs. Without
+   * it, Enter merely activates whatever happens to hold focus (on open that
+   * is the FIRST focusable, typically Cancel — so Enter on a fresh confirm
+   * dialog dismissed it without doing the action).
+   *
+   * Enter keeps its native behaviour when the focus sits in a multiline
+   * surface (a `<textarea>`, a contenteditable, a Monaco editor): it inserts
+   * a newline there and never fires the default action. Modified Enter
+   * (Shift/Ctrl/Alt/Meta) is never intercepted. A disabled designated button
+   * is not clicked.
+   */
+  enterActionTestId?: string
+  /**
+   * `data-testid` of the element to focus when the dialog opens, instead of
+   * the default "first focusable in DOM order" (which is the header close
+   * button — so a dialog whose real entry point is a form field opened with
+   * the wrong control armed). Falls back to the default when no element
+   * matches. Only meaningful with `trapFocus` (the default).
+   */
+  initialFocusTestId?: string
+  /**
    * Move focus into the dialog on open, trap Tab inside it, and restore focus
    * to the previously-focused element on close. Defaults to `true` — the
    * correct behaviour for an actual dialog (confirmation prompts, settings,
@@ -76,6 +98,8 @@ const ModalInner: React.FC<ModalProps> = ({
   onClosed,
   'data-testid': dataTestId,
   scopeToSelector,
+  enterActionTestId,
+  initialFocusTestId,
   trapFocus = true
 }) => {
   const [isRendered, setIsRendered] = useState(isOpen)
@@ -221,9 +245,13 @@ const ModalInner: React.FC<ModalProps> = ({
         )
       ).filter((el) => el.offsetParent !== null || el === document.activeElement)
 
-    // Move focus in: first focusable child, else the dialog itself.
+    // Move focus in: the designated initial-focus element when one matches,
+    // else the first focusable child, else the dialog itself.
+    const preferred = initialFocusTestId !== undefined
+      ? dialog.querySelector<HTMLElement>(`[data-testid="${initialFocusTestId}"]`)
+      : null
     const first = focusable()[0]
-    ;(first ?? dialog).focus()
+    ;(preferred ?? first ?? dialog).focus()
 
     const handleTab = (event: KeyboardEvent): void => {
       if (event.key !== 'Tab') return
@@ -253,7 +281,45 @@ const ModalInner: React.FC<ModalProps> = ({
         previouslyFocused.focus()
       }
     }
-  }, [isOpen, isRendered, trapFocus])
+  }, [isOpen, isRendered, trapFocus, initialFocusTestId])
+
+  // Default action on Enter (see the `enterActionTestId` prop doc). A
+  // dialog-level listener, so a child that legitimately consumes Enter and
+  // stops propagation (an open dropdown, Monaco) opts out on its own; the
+  // multiline guard covers the surfaces that let Enter bubble.
+  useEffect(() => {
+    if (!isOpen || !isRendered || enterActionTestId === undefined) return
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    const handleEnter = (event: KeyboardEvent): void => {
+      if (event.key !== 'Enter') return
+      if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return
+      const target = event.target instanceof HTMLElement ? event.target : null
+      // Multiline surfaces keep their native Enter (newline), never the
+      // default action.
+      if (target && (
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.closest('.monaco-editor') !== null
+      )) return
+      const btn = dialog.querySelector<HTMLElement>(`[data-testid="${enterActionTestId}"]`)
+      if (!btn) return
+      // Respect a disabled designated button (native `disabled`, aria, or the
+      // ECUI Button's `disabled` class) — Enter then does nothing special.
+      if (
+        (btn as HTMLButtonElement).disabled ||
+        btn.getAttribute('aria-disabled') === 'true' ||
+        btn.classList.contains('disabled')
+      ) return
+      event.preventDefault()
+      event.stopPropagation()
+      btn.click()
+    }
+
+    dialog.addEventListener('keydown', handleEnter)
+    return () => { dialog.removeEventListener('keydown', handleEnter) }
+  }, [isOpen, isRendered, enterActionTestId])
 
   // Re-resolve the scoped container each time the modal OPENS. The anchor's
   // ref callback only fires on mount; without this, a container that was

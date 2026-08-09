@@ -474,6 +474,7 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
         onClose={() => { setConfirmModal(CONFIRM_MODAL_INITIAL) }}
         size="dialog"
         data-testid="quick-settings-confirm-modal"
+      enterActionTestId="quick-settings-confirm-ok"
       >
         <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <p style={{ margin: 0 }}>{confirmModal.message}</p>

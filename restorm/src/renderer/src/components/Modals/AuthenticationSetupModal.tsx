@@ -108,6 +108,7 @@ export const AuthenticationSetupModal: React.FC<AuthenticationSetupModalProps> =
       onClose={onClose}
       title={t('authSetupModal.title', 'Add an authentication route')}
       data-testid="authentication-setup-modal"
+      enterActionTestId="authentication-setup-attach"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minHeight: 0 }}>
         {currentRequest ? (

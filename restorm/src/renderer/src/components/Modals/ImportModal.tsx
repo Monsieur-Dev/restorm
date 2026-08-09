@@ -855,6 +855,8 @@ export function ImportModal({
         ? t('import.refreshTitle', 'Refresh from source')
         : t('import.title')}
       data-testid="import-modal-dialog"
+      enterActionTestId="import-button"
+      initialFocusTestId="source-input-input"
     >
       <div
         className="import-modal"

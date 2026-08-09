@@ -195,6 +195,7 @@ export const SecretRetrievalModal: React.FC<SecretRetrievalModalProps> = ({
       size="dialog"
       scopeToSelector=".restorm-workbench-tab"
       data-testid={dataTestId ? `${dataTestId}-retrieval-modal` : 'secret-retrieval-modal'}
+      {...(dataTestId ? { enterActionTestId: `${dataTestId}-retrieval-ok` } : {})}
     >
       {isOpen && (
         <SecretRetrievalModalBody
