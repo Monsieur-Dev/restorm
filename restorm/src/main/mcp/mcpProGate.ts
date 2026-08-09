@@ -24,9 +24,14 @@
  *
  * The classification below is exhaustive over every registered MCP tool (ECUI
  * built-ins + restorm domain tools); `mcpProGate.test.ts` asserts no registered
- * tool is left unclassified. An unknown / forgotten tool defaults to FREE at
- * runtime (never break a tool we failed to classify — the exhaustiveness test is
- * the real guard against a gated tool slipping through as free).
+ * tool is left unclassified. DECIDED: an unknown / forgotten tool defaults to
+ * FREE at runtime — flipping the runtime to fail-closed would make a
+ * legitimate, merely-unclassified request-driving tool paid or broken, which
+ * contradicts the Community adoption hook. The fail-closed guard lives in CI
+ * instead: the exhaustiveness test scans every `registerTool` call site
+ * recursively (restorm `mcp/**` AND `electron-core-ui/src/main/services/**`),
+ * refuses non-literal tool names, and goes RED before an unclassified tool can
+ * ship as silently free.
  */
 
 import type { McpToolGate, McpToolResult } from 'electron-core-ui'
