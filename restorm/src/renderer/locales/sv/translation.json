@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Ingen autentisering",
       "popoverLabel": "Autentiseringsväg",
+      "openRoute": "Öppna autentiseringsrutten",
       "unnamed": "Namnlös"
     },
     "contextMenu": {

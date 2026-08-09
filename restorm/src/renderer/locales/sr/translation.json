@@ -74,6 +74,7 @@
     "auth": {
       "noAuth": "Bez autentifikacije",
       "popoverLabel": "Ruta autentifikacije",
+      "openRoute": "Otvori rutu za autentifikaciju",
       "unnamed": "Bez naziva"
     },
     "contextMenu": {

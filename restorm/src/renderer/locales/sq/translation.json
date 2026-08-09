@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Pa vërtetim",
       "popoverLabel": "Rruga e vërtetimit",
+      "openRoute": "Hap rrugën e autentikimit",
       "unnamed": "Pa emër"
     },
     "contextMenu": {

@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Ingen godkendelse",
       "popoverLabel": "Godkendelsesrute",
+      "openRoute": "Åbn godkendelsesruten",
       "unnamed": "Uden navn"
     },
     "contextMenu": {

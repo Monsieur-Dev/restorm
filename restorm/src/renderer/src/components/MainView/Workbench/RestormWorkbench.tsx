@@ -1221,6 +1221,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <RequestHeaderAuthSelector
             activeRequest={request}
             envFolderItems={reactiveEnvFolder.items}
+            {...(onRequestClick ? { onOpenRoute: onRequestClick } : {})}
           />
         )
         : null

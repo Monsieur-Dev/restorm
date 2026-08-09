@@ -84,6 +84,14 @@ Feature: Quick-settings save/load round-trips every field of every protocol
     And I load the quick config named "to-update"
     Then the "http" editor shows the changed values
 
+  Scenario: The auth popover's link-external opens the authentication route in a tab
+    Given I launch restorm with the MCP server enabled
+    And I have a request with an environment, an in-scope auth route, and a scenario using it
+    When I open its tab
+    And I open the "auth-key" popover
+    And I click the auth popover's open-route link
+    Then the authentication route editor is open in the active tab
+
   Scenario: Opening the auth-key popover dismisses an open quick-config popover, and vice versa
     Given I launch restorm with the MCP server enabled
     And I have a request with an environment, an in-scope auth route, and a scenario using it

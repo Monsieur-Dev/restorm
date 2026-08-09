@@ -72,6 +72,7 @@
     "auth": {
       "noAuth": "인증 없음",
       "popoverLabel": "인증 경로",
+      "openRoute": "인증 경로 열기",
       "unnamed": "이름 없음"
     },
     "contextMenu": {

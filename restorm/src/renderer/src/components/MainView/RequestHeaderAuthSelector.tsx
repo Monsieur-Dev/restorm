@@ -52,6 +52,10 @@ export interface RequestHeaderAuthSelectorProps {
   /** The nearest ancestor env folder's items tree. Walked to find
    * every AuthenticationRequest available as a pick. */
   envFolderItems: readonly FolderItem[]
+  /** Open an auth route in a workbench tab — drives the per-row
+   * link-external affordance in the popover. Absent (preview contexts),
+   * the link is not rendered. */
+  onOpenRoute?: (requestId: string) => void
 }
 
 const NO_AUTH = '__none__'
@@ -84,13 +88,19 @@ const AuthRoutePopover: React.FC<{
   authRequests: readonly AuthenticationRequest[]
   attachedId: string | null
   onPick: (id: string) => void
-}> = ({ authRequests, attachedId, onPick }) => {
+  onOpenRoute?: ((id: string) => void) | undefined
+}> = ({ authRequests, attachedId, onPick, onOpenRoute }) => {
   const { t } = useTranslation()
   const { closeTooltip } = useStatusbarTooltip()
   const pickAndClose = useCallback((id: string): void => {
     onPick(id)
     closeTooltip()
   }, [onPick, closeTooltip])
+  const openAndClose = useCallback((id: string): void => {
+    onOpenRoute?.(id)
+    closeTooltip()
+  }, [onOpenRoute, closeTooltip])
+  const openRouteLabel = t('statusbar.auth.openRoute', 'Open the authentication route')
   return (
     <div
       role="listbox"
@@ -125,7 +135,7 @@ const AuthRoutePopover: React.FC<{
         </Button>
       </div>
       {authRequests.map((req) => (
-        <div key={req.id} role="option" aria-selected={attachedId === req.id}>
+        <div key={req.id} role="option" aria-selected={attachedId === req.id} style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
           <Button
             fullWidth
             secondary
@@ -139,11 +149,27 @@ const AuthRoutePopover: React.FC<{
             style={{
               paddingLeft: 8,
               paddingRight: 8,
+              flex: 1,
+              minWidth: 0,
               ...(attachedId === req.id ? { color: 'var(--list-activeSelectionForeground)' } : {})
             }}
           >
             {req.name || t('statusbar.auth.unnamed', 'Unnamed')}
           </Button>
+          {onOpenRoute && (
+            <HeaderHoverTooltip label={openRouteLabel} placement="below">
+              <Button
+                secondary
+                small
+                line
+                icon="link-external"
+                options={{ ariaLabel: openRouteLabel }}
+                style={{ flexShrink: 0, padding: '0 4px' }}
+                data-testid={`request-header-auth-open-${req.id}`}
+                onClick={() => { openAndClose(req.id) }}
+              />
+            </HeaderHoverTooltip>
+          )}
         </div>
       ))}
     </div>
@@ -152,7 +178,8 @@ const AuthRoutePopover: React.FC<{
 
 export const RequestHeaderAuthSelector: React.FC<RequestHeaderAuthSelectorProps> = ({
   activeRequest,
-  envFolderItems
+  envFolderItems,
+  onOpenRoute
 }) => {
   const { t } = useTranslation()
   // Auth events drive a ripple via ECUI's `pulseSignal` API on the
@@ -258,6 +285,7 @@ export const RequestHeaderAuthSelector: React.FC<RequestHeaderAuthSelectorProps>
             authRequests={authRequests}
             attachedId={attachedId}
             onPick={handlePick}
+            onOpenRoute={onOpenRoute}
           />
         </StatusbarElement>
       </span>

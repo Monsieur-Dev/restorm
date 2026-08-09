@@ -72,6 +72,7 @@
     "auth": {
       "noAuth": "認証なし",
       "popoverLabel": "認証ルート",
+      "openRoute": "認証ルートを開く",
       "unnamed": "名称未設定"
     },
     "contextMenu": {

@@ -72,6 +72,7 @@
     "auth": {
       "noAuth": "Không xác thực",
       "popoverLabel": "Tuyến xác thực",
+      "openRoute": "Mở tuyến xác thực",
       "unnamed": "Chưa đặt tên"
     },
     "contextMenu": {

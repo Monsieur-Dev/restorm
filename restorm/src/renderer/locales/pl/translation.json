@@ -75,6 +75,7 @@
     "auth": {
       "noAuth": "Brak uwierzytelniania",
       "popoverLabel": "Trasa uwierzytelniania",
+      "openRoute": "Otwórz trasę uwierzytelniania",
       "unnamed": "Bez nazwy"
     },
     "contextMenu": {

@@ -75,6 +75,7 @@
     "auth": {
       "noAuth": "Bez ověření",
       "popoverLabel": "Ověřovací trasa",
+      "openRoute": "Otevřít ověřovací trasu",
       "unnamed": "Bez názvu"
     },
     "contextMenu": {

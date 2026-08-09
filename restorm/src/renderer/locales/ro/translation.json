@@ -74,6 +74,7 @@
     "auth": {
       "noAuth": "Fără autentificare",
       "popoverLabel": "Rută de autentificare",
+      "openRoute": "Deschide ruta de autentificare",
       "unnamed": "Fără nume"
     },
     "contextMenu": {

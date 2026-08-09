@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Ei todennusta",
       "popoverLabel": "Todennusreitti",
+      "openRoute": "Avaa todennusreitti",
       "unnamed": "Nimetön"
     },
     "contextMenu": {

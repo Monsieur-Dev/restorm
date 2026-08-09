@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Kimlik doğrulama yok",
       "popoverLabel": "Kimlik doğrulama rotası",
+      "openRoute": "Kimlik doğrulama rotasını aç",
       "unnamed": "Adsız"
     },
     "contextMenu": {

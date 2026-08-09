@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Sin autenticación",
       "popoverLabel": "Ruta de autenticación",
+      "openRoute": "Abrir la ruta de autenticación",
       "unnamed": "Sin nombre"
     },
     "contextMenu": {

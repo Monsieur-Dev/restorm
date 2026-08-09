@@ -838,3 +838,19 @@ Then('no popover is open', async ({}) => {
       .toHaveCount(0, { timeout: 10_000 })
   }
 })
+
+When("I click the auth popover's open-route link", async ({}) => {
+  if (page === null) throw new Error('launch first')
+  const link = page.locator('[data-testid^="request-header-auth-open-"]:visible').first()
+  await link.waitFor({ state: 'visible', timeout: 10_000 })
+  await link.click()
+})
+
+Then('the authentication route editor is open in the active tab', async ({}) => {
+  if (page === null) throw new Error('launch first')
+  // The setup names its auth route "login"; the link must have opened AND
+  // focused its tab. (The auth editor's own fields live on sub-tabs, so the
+  // tab-strip active tab is the stable marker of "this route is open".)
+  await expect(page.locator('.tab.active:visible').filter({ hasText: 'login' }))
+    .toBeVisible({ timeout: 15_000 })
+})

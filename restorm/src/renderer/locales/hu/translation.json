@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Nincs hitelesítés",
       "popoverLabel": "Hitelesítési útvonal",
+      "openRoute": "A hitelesítési útvonal megnyitása",
       "unnamed": "Névtelen"
     },
     "contextMenu": {
