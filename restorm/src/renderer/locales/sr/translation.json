@@ -456,7 +456,11 @@
       }
     },
     "followRedirects": "Prati preusmeravanja",
-    "timeoutLabel": "Vremensko ograničenje (ms)"
+    "timeoutLabel": "Vremensko ograničenje (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopiraj razrešeni URL",
+      "copied": "Kopirano!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2314,7 +2318,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Pregled URL-a (pre razrešavanja)",
     "versionV2NotYet": "v2 (izvršavanje još nije podržano)",
     "versionV3NotYet": "v3 (izvršavanje još nije podržano)",
     "operationKindEntitySet": "Skup entiteta (GET)",

@@ -454,7 +454,11 @@
       }
     },
     "followRedirects": "리디렉션 따르기",
-    "timeoutLabel": "시간 초과 (ms)"
+    "timeoutLabel": "시간 초과 (ms)",
+    "resolvedUrlPreview": {
+      "copy": "확인된 URL 복사",
+      "copied": "복사됨!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2312,7 +2316,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL 미리보기 (확인 전)",
     "versionV2NotYet": "v2 (실행은 아직 지원되지 않음)",
     "versionV3NotYet": "v3 (실행은 아직 지원되지 않음)",
     "operationKindEntitySet": "엔터티 집합 (GET)",

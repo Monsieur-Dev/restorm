@@ -33,6 +33,7 @@ import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
 const urlInputWrapperStyle: React.CSSProperties = { flex: 2, minWidth: 0 }
@@ -434,9 +435,9 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
   }, [buildJsonRpcResponseView])
 
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="jsonrpc-url-section">
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={urlInputWrapperStyle} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+        <div style={urlInputWrapperStyle} data-testid="url-container">
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -446,7 +447,6 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
             data-testid="jsonrpc-request-url-input"
           />
         </div>
-      </HeaderHoverTooltip>
       <div style={methodInputWrapperStyle}>
         <RestormVariableInputBox
           value={method}
@@ -493,6 +493,8 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
       </SendButtonEnvSwitcher>
   )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   const handleCloseHistoryModal = useCallback(() => { setHistoryModalOpen(false) }, [])

@@ -455,7 +455,11 @@
       }
     },
     "followRedirects": "Omleidingen volgen",
-    "timeoutLabel": "Time-out (ms)"
+    "timeoutLabel": "Time-out (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Opgeloste URL kopiëren",
+      "copied": "Gekopieerd!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2313,7 +2317,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-voorbeeld (vóór resolutie)",
     "versionV2NotYet": "v2 (uitvoering nog niet ondersteund)",
     "versionV3NotYet": "v3 (uitvoering nog niet ondersteund)",
     "operationKindEntitySet": "Entiteitenset (GET)",

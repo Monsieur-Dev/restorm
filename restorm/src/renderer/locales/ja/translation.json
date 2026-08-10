@@ -454,7 +454,11 @@
       }
     },
     "followRedirects": "リダイレクトに従う",
-    "timeoutLabel": "タイムアウト (ms)"
+    "timeoutLabel": "タイムアウト (ms)",
+    "resolvedUrlPreview": {
+      "copy": "解決済みURLをコピー",
+      "copied": "コピーしました！"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2312,7 +2316,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL プレビュー (解決前)",
     "versionV2NotYet": "v2 (実行は未対応)",
     "versionV3NotYet": "v3 (実行は未対応)",
     "operationKindEntitySet": "エンティティセット (GET)",

@@ -46,7 +46,7 @@ import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { toasterService } from 'electron-core-ui/renderer'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { useIsGraphqlSubscribing } from '../../services/graphqlSubscriptionListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
@@ -957,12 +957,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         </>
       ) : (
         <>
-          <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
             <div
               style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
               data-testid="url-container"
-              data-url-resolved={resolvedUrl ? 'true' : 'false'}
-              data-resolved-url={resolvedUrl || url}
             >
               <RestormVariableInputBox
                 value={url}
@@ -973,7 +970,6 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
                 data-testid="graphql-url-input"
               />
             </div>
-          </HeaderHoverTooltip>
           {operationNames.length > 1 && (
             <div style={{ minWidth: 180 }} data-testid="graphql-operation-name-host">
               <SelectBox
@@ -1026,6 +1022,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         </>
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
     </div>
   )
 

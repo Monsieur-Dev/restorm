@@ -457,7 +457,11 @@
       }
     },
     "followRedirects": "Стежити за переадресаціями",
-    "timeoutLabel": "Час очікування (ms)"
+    "timeoutLabel": "Час очікування (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Скопіювати розвʼязаний URL",
+      "copied": "Скопійовано!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2315,7 +2319,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Попередній перегляд URL (до розв'язання)",
     "versionV2NotYet": "v2 (виконання ще не підтримується)",
     "versionV3NotYet": "v3 (виконання ще не підтримується)",
     "operationKindEntitySet": "Набір сутностей (GET)",

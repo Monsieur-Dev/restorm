@@ -456,7 +456,11 @@
       }
     },
     "followRedirects": "Urmărește redirecționările",
-    "timeoutLabel": "Expirare (ms)"
+    "timeoutLabel": "Expirare (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Copiază URL-ul rezolvat",
+      "copied": "Copiat!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2314,7 +2318,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Previzualizare URL (înainte de rezolvare)",
     "versionV2NotYet": "v2 (execuția nu este încă acceptată)",
     "versionV3NotYet": "v3 (execuția nu este încă acceptată)",
     "operationKindEntitySet": "Set de entități (GET)",

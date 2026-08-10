@@ -36,7 +36,7 @@ import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 
 const urlInputWrapperStyle: React.CSSProperties = { flex: 1, minWidth: 0 }
 const procedureInputWrapperStyle: React.CSSProperties = { width: 220, flexShrink: 0 }
@@ -493,9 +493,9 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
 
   // URL section: base URL + procedure path + kind selector + send/cancel
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="trpc-url-section">
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={urlInputWrapperStyle} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+        <div style={urlInputWrapperStyle} data-testid="url-container">
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -505,7 +505,6 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
             data-testid="trpc-url-input"
           />
         </div>
-      </HeaderHoverTooltip>
       <div style={procedureInputWrapperStyle}>
         <RestormVariableInputBox
           value={procedure}
@@ -546,6 +545,8 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
       </SendButtonEnvSwitcher>
   )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   const handleCloseHistoryModal = useCallback(() => {

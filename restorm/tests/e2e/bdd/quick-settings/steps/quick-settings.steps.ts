@@ -151,7 +151,7 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       // `data-resolved-url` carries the fully-resolved URL — the base plus any
       // resolved query params appended (`?savedParam=…`) — so match the base as
       // a prefix rather than an exact string.
-      await expect(p.locator(`${vis('http-request-url-section')} [data-testid="url-container"]`))
+      await expect(p.locator('[data-testid="url-resolved-preview"]:visible').first())
         .toHaveAttribute('data-resolved-url', /^https:\/\/saved\.example\.com\/widgets(\?|$)/, { timeout: 10_000 })
       await expectKvTableKey(p, 'http-request-headers-table', 'X-Saved-Header')
       await expectKvTableKey(p, 'http-request-headers-table', 'saved-hval')
@@ -160,7 +160,7 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       await expectKvTableLacksKey(p, 'http-request-query-params-table', 'changedParam')
     },
     assertChanged: async (p) => {
-      await expect(p.locator(`${vis('http-request-url-section')} [data-testid="url-container"]`))
+      await expect(p.locator('[data-testid="url-resolved-preview"]:visible').first())
         .toHaveAttribute('data-resolved-url', /^https:\/\/changed\.example\.com\/gizmos(\?|$)/, { timeout: 10_000 })
       await expectKvTableKey(p, 'http-request-headers-table', 'X-Changed-Header')
       await expectKvTableKey(p, 'http-request-headers-table', 'changed-hval')
@@ -185,7 +185,7 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       headers: [kv('X-Changed-GQL', 'changed-gql')]
     },
     assert: async (p) => {
-      await expect(p.locator(`${vis('graphql-url-section')} [data-testid="url-container"]`))
+      await expect(p.locator('[data-testid="url-resolved-preview"]:visible').first())
         .toHaveAttribute('data-resolved-url', 'https://saved.example.com/graphql', { timeout: 10_000 })
       await expectSurfaceContains(p, 'graphql-query-editor', 'SavedOp')
       await expectSurfaceLacks(p, 'graphql-query-editor', 'ChangedOp')
@@ -206,7 +206,7 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       headers: [kv('X-Changed-Soap', 'changed-soap')]
     },
     assert: async (p) => {
-      await expect(p.locator(`${vis('soap-url-section')} [data-testid="url-container"]`))
+      await expect(p.locator('[data-testid="url-resolved-preview"]:visible').first())
         .toHaveAttribute('data-resolved-url', 'https://saved.example.com/svc', { timeout: 10_000 })
       await expectSurfaceContains(p, 'soap-request-body-editor', 'SavedOp')
       await expectSurfaceLacks(p, 'soap-request-body-editor', 'ChangedOp')
@@ -294,7 +294,7 @@ const MATRIX: Record<string, ProtocolMatrix> = {
     },
     // GAP B surface: the headers table must remount on Load.
     assert: async (p) => {
-      await expect(p.locator(`${vis('websocket-url-section')} [data-testid="url-container"]`))
+      await expect(p.locator('[data-testid="url-resolved-preview"]:visible').first())
         .toHaveAttribute('data-resolved-url', /^wss:\/\/saved\.example\.com\/socket(\?|$)/, { timeout: 10_000 })
       // A plain `websocket` request has no event/topic field (only socketio /
       // mqtt render one), so `event` is not asserted here — it is covered by
@@ -379,7 +379,7 @@ const MATRIX: Record<string, ProtocolMatrix> = {
       // HTTP-shared fields on the default request tab. The URL is a Monaco-
       // backed VariableInputBox, so its value lives in `url-container`'s
       // `data-resolved-url` (no plain inner <input>).
-      await expect(p.locator(`${vis('http-request-url-section')} [data-testid="url-container"]`))
+      await expect(p.locator('[data-testid="url-resolved-preview"]:visible').first())
         .toHaveAttribute('data-resolved-url', /^https:\/\/saved\.example\.com\/token(\?|$)/, { timeout: 10_000 })
       await expectKvTableKey(p, 'http-request-headers-table', 'X-Saved-Auth')
       await expectKvTableLacksKey(p, 'http-request-headers-table', 'X-Changed-Auth')

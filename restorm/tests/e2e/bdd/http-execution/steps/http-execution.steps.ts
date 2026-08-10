@@ -725,7 +725,7 @@ When(
 Then('the resolved URL on the request tab is {string}', async ({}, expected: string) => {
   expected = remapArg(expected)
   if (page === null) throw new Error('launch first')
-  const urlContainer = page.locator('[data-testid="url-container"]:visible').first()
+  const urlContainer = page.locator('[data-testid="url-resolved-preview"]:visible').first()
   await expect(urlContainer).toBeVisible({ timeout: 10_000 })
   await expect(urlContainer).toHaveAttribute('data-resolved-url', expected, { timeout: 15_000 })
 })

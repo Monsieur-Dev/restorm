@@ -455,7 +455,11 @@
       }
     },
     "followRedirects": "Παρακολούθηση ανακατευθύνσεων",
-    "timeoutLabel": "Χρονικό όριο (ms)"
+    "timeoutLabel": "Χρονικό όριο (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Αντιγραφή του επιλυμένου URL",
+      "copied": "Αντιγράφηκε!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2313,7 +2317,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Προεπισκόπηση URL (πριν την επίλυση)",
     "versionV2NotYet": "v2 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
     "versionV3NotYet": "v3 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
     "operationKindEntitySet": "Σύνολο οντοτήτων (GET)",

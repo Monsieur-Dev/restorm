@@ -44,7 +44,7 @@ import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import './WebSocketChat.css'
 
@@ -736,6 +736,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
   )
 
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="kafka-url-section">
       <div style={{ width: 96 }}>
         <SelectBox
@@ -747,14 +748,12 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
           data-testid="kafka-mode-select"
         />
       </div>
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+        <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container">
           <RestormVariableInputBox
             value={url} onChange={setUrl} variables={envVariables} helpers={handlebarsHelpers}
             placeholder={t('kafka.brokersPlaceholder')} data-testid="kafka-url-input"
           />
         </div>
-      </HeaderHoverTooltip>
       <div style={{ width: 140 }}>
         <RestormVariableInputBox
           value={clientId} onChange={setClientId} variables={envVariables} helpers={handlebarsHelpers}
@@ -763,6 +762,8 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
       </div>
       {!inWorkbenchTab && actionButton}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   // Fixed action bar, anchored top-right of the workbench tab. One disc per

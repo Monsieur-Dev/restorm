@@ -455,7 +455,11 @@
       }
     },
     "followRedirects": "Yönlendirmeleri izle",
-    "timeoutLabel": "Zaman aşımı (ms)"
+    "timeoutLabel": "Zaman aşımı (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Çözümlenen URL'yi kopyala",
+      "copied": "Kopyalandı!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2313,7 +2317,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL önizlemesi (çözümlemeden önce)",
     "versionV2NotYet": "v2 (yürütme henüz desteklenmiyor)",
     "versionV3NotYet": "v3 (yürütme henüz desteklenmiyor)",
     "operationKindEntitySet": "Varlık kümesi (GET)",

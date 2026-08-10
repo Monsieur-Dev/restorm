@@ -16,6 +16,7 @@ import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
@@ -78,6 +79,21 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   const { port: serverPort, route: serverRoute } = useMemo(() => parseServerUrl(url), [url])
   const envVariables = useEnvVariables(request.id)
+  // Resolved-address preview: the main process resolves the request's URL
+  // (Handlebars substituted) and pushes updates; the fetch covers the value
+  // already cached before this tab mounted.
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  useEffect(() => {
+    const requestId = request.id
+    const unsub = window.restorm?.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    return () => { unsub?.() }
+  }, [request.id])
+
   const handlebarsHelpers = useHandlebarsHelpers()
 
   const composeServerUrl = useCallback((port: string, routePart: string): string => {
@@ -170,6 +186,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   // URL section: localhost-fixed host + port + route + Listen↔Stop toggle.
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="soap-server-url-section">
       <span style={serverHostLabelStyle} data-testid="soap-server-host">localhost:</span>
       <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
@@ -210,6 +227,8 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
       </BeamWrap>
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   // Operations editor: one row per mock operation (name + SOAPAction + Fault

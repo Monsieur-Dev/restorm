@@ -523,12 +523,11 @@ Then(
   async ({}, routeName: string) => {
     const p = requirePage()
     const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
-    // A route option carries a leading `key` codicon whose glyph leaks into
-    // the option's accessible name (e.g. "Authentication route"), so an
-    // `exact` name match fails — use a substring (non-exact) name match, which
-    // still cannot collide with the icon-less "No auth" row.
+    // Target the OPTION rows by testid: a role+name substring match collided
+    // with the per-row link-external button, whose aria-label ("Open the
+    // authentication route") contains the route's name.
     await expect(
-      popover.getByRole('button', { name: routeName })
+      popover.locator('[data-testid^="request-header-auth-option-"]').filter({ hasText: routeName })
     ).toBeVisible({ timeout: 5000 })
   }
 )
@@ -542,9 +541,9 @@ When('I pick {string} in the tab-header auth selector', async ({}, optionLabel: 
 When('I pick the {string} route in the tab-header auth selector', async ({}, routeName: string) => {
   const p = requirePage()
   const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
-  // Non-exact name match — the route option's leading `key` codicon glyph
-  // leaks into the accessible name (see the "should list" step).
-  await popover.getByRole('button', { name: routeName }).click()
+  // Option rows by testid — the row's role+name collides with the
+  // per-row link-external button's aria-label (contains the route name).
+  await popover.locator('[data-testid^="request-header-auth-option-"]').filter({ hasText: routeName }).click()
 })
 
 Then('the tab-header auth selector popover should close', async () => {

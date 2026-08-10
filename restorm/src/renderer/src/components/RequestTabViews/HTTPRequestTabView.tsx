@@ -59,7 +59,7 @@ import { findOperationForRoute } from '../../../../shared/utils/findOperationFor
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { toasterService } from 'electron-core-ui/renderer'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -1247,12 +1247,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           </div>
         </>
       ) : (
-        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
           <div
-            style={{ ...urlInputWrapperStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+            style={{ ...urlInputWrapperStyle, flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
             data-testid="url-container"
-            data-url-resolved={resolvedUrl ? 'true' : 'false'}
-            data-resolved-url={resolvedUrl || url}
           >
             <RestormVariableInputBox
               value={url}
@@ -1263,7 +1260,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
               data-testid="http-request-url-input"
             />
           </div>
-        </HeaderHoverTooltip>
       )}
       {/* Outside a workbench tab (conflict panel, auth modal) there is nothing
         * for the fixed bar to anchor to, so the button stays inline here. */}
@@ -1304,6 +1300,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         </BeamWrap>
       ))}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
     {/* Follow-redirects and the request timeout describe OUTBOUND behaviour —
       * meaningless for a mock-server route, whose whole options row hides. */}
     {httpReq && !isServer && (

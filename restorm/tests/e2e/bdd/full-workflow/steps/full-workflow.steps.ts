@@ -697,7 +697,7 @@ When('I delete the sidebar request {string}', async ({}, requestName: string) =>
 // ---------------------------------------------------------------------------
 
 Then(
-  'the active request URL tooltip should be {string}',
+  'the active request resolved URL should be {string}',
   async ({}, expectedUrl: string) => {
     if (!page) throw new Error('app must be launched')
     const currentPage = page
@@ -705,7 +705,7 @@ Then(
     // give it plenty of time to propagate through handlebars + URLResolver.
     await expect.poll(
       async () => {
-        const resolved = await currentPage.locator('[data-testid="url-container"]').first().getAttribute('data-resolved-url')
+        const resolved = await currentPage.locator('[data-testid="url-resolved-preview"]').first().getAttribute('data-resolved-url')
         return resolved ?? ''
       },
       { timeout: 30000, message: `expected URL tooltip to equal "${expectedUrl}"` }

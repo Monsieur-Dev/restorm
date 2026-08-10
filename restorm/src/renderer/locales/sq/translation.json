@@ -455,7 +455,11 @@
       }
     },
     "followRedirects": "Ndiq ridrejtimet",
-    "timeoutLabel": "Afati kohor (ms)"
+    "timeoutLabel": "Afati kohor (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopjo URL-në e zgjidhur",
+      "copied": "U kopjua!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2313,7 +2317,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Pamje paraprake e URL-së (para zgjidhjes)",
     "versionV2NotYet": "v2 (ekzekutimi ende nuk mbështetet)",
     "versionV3NotYet": "v3 (ekzekutimi ende nuk mbështetet)",
     "operationKindEntitySet": "Grup entitetesh (GET)",

@@ -454,7 +454,11 @@
       }
     },
     "followRedirects": "Theo dõi chuyển hướng",
-    "timeoutLabel": "Thời gian chờ (ms)"
+    "timeoutLabel": "Thời gian chờ (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Sao chép URL đã phân giải",
+      "copied": "Đã sao chép!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2312,7 +2316,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Xem trước URL (trước khi phân giải)",
     "versionV2NotYet": "v2 (chưa hỗ trợ thực thi)",
     "versionV3NotYet": "v3 (chưa hỗ trợ thực thi)",
     "operationKindEntitySet": "Tập thực thể (GET)",

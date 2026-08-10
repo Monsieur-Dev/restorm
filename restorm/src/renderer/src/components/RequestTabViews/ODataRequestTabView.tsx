@@ -49,7 +49,8 @@ import {
   type Tab
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
-import type { ODataRequest, ODataQueryOptions, ODataVersion, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
+import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataFilterEditor } from './ODataFilterEditor'
@@ -73,11 +74,6 @@ import { updateReactiveProperty } from './requestTabViewUtils'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { toasterService } from 'electron-core-ui/renderer'
-import {
-  serializeODataQueryOptions,
-  buildODataUrl,
-  keyValuesToPairs
-} from '../../../../shared/utils/odataQuery'
 import { normalizeODataResponse, detectODataVersionMismatch } from '../../../../shared/utils/odataResponse'
 import { extractNavigationLinks } from '../../../../shared/utils/odataNavigationLinks'
 import {
@@ -117,17 +113,6 @@ const rowStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap:
 const labelStyle: CSSProperties = { fontSize: 12, color: 'var(--descriptionForeground)' }
 const numericRowStyle: CSSProperties = { display: 'flex', gap: 16, alignItems: 'flex-start' }
 const numericItemStyle: CSSProperties = { flex: 1, minWidth: 120 }
-const previewRowStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }
-const previewValueStyle: CSSProperties = {
-  fontFamily: 'var(--font-family-mono)',
-  fontSize: 12,
-  padding: '6px 8px',
-  background: 'var(--input-background)',
-  border: '1px solid var(--input-border)',
-  borderRadius: 4,
-  wordBreak: 'break-all',
-  userSelect: 'text'
-}
 const fullHeightBoxStyle: CSSProperties = { height: '100%', boxSizing: 'border-box' }
 const editorContainerStyle: CSSProperties = {
   height: '100%',
@@ -604,37 +589,20 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   // it tracks every keystroke without waiting for the proxy write to
   // settle (see `scheduleProxyWrite`). Handlebars templates stay
   // literal — resolution happens in the main process at send time.
-  const urlPreview = useMemo(() => {
-    const liveOptions: ODataQueryOptions = {
-      ...request.queryOptions,
-      ...(filterText !== '' && { filter: filterText }),
-      ...(selectText !== '' && { select: selectText.split(',').map((s) => s.trim()).filter((s) => s !== '') }),
-      ...(topText !== '' && { top: topText }),
-      ...(skipText !== '' && { skip: skipText }),
-      ...(expandText !== '' && { expand: expandText }),
-      ...(orderbyText !== '' && { orderby: orderbyText }),
-      ...(searchText !== '' && { search: searchText }),
-      ...(formatText !== '' && { format: formatText }),
-      ...(applyText !== '' && { apply: applyText })
-    }
-    const systemPairs = serializeODataQueryOptions(liveOptions, request.odataVersion)
-    const extraPairs = keyValuesToPairs(request.params)
-    return buildODataUrl(request.url, systemPairs, extraPairs)
-  }, [
-    request.url,
-    request.odataVersion,
-    request.queryOptions,
-    request.params,
-    filterText,
-    selectText,
-    topText,
-    skipText,
-    expandText,
-    orderbyText,
-    searchText,
-    formatText,
-    applyText
-  ])
+
+  // Resolved-URL preview: the main process resolves base + OData system
+  // options + extra params (URLResolver appends them) and pushes updates.
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  useEffect(() => {
+    const requestId = request.id
+    const unsub = window.restorm?.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    return () => { unsub?.() }
+  }, [request.id])
 
   // Register request with ContextService on mount, unregister on
   // unmount. `headers` and `params` feed through refs so the effect
@@ -1056,6 +1024,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
           )}
         </div>
       </div>
+      <ResolvedUrlPreview value={resolvedUrl} />
     </div>
   )
 
@@ -1159,6 +1128,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         )}
       </div>
     </div>
+    <ResolvedUrlPreview value={resolvedUrl} />
     </div>
   )
 
@@ -1426,10 +1396,6 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         />
       </div>
 
-      <div style={previewRowStyle} data-testid="odata-request-url-preview">
-        <span style={labelStyle}>{t('odataRequestTab.urlPreview', 'URL preview (pre-resolution)')}</span>
-        <div style={previewValueStyle}>{urlPreview}</div>
-      </div>
     </div>
     </ScrollableElement>
   )

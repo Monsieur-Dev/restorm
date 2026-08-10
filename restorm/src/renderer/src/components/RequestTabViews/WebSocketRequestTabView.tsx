@@ -23,6 +23,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { MqttOptionsPanel } from './MqttOptionsPanel'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
@@ -734,6 +735,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // URL section. Server mode forces host=localhost and exposes only port + route
   // (no free URL, no environment variables); client mode keeps the full URL input.
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="websocket-url-section">
       {isMqttServer ? (
         <>
@@ -752,7 +754,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           </HeaderHoverTooltip>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="mqtt-broker-host">localhost:</span>
           <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening}>
-            <div style={{ width: 90, minWidth: 60, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+            <div style={{ width: 90, minWidth: 60, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }} data-testid="url-container">
               <RestormVariableInputBox
                 value={serverPort}
                 onChange={setMqttServerPort}
@@ -771,7 +773,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           {/* No stretch on the PORT tooltip: the stretching wrapper swallowed
             * the flex space and parked the "/" + route a full row away. */}
           <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening}>
-            <div style={{ width: 90, minWidth: 60, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+            <div style={{ width: 90, minWidth: 60, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }} data-testid="url-container">
               <RestormVariableInputBox
                 value={serverPort}
                 onChange={setServerPort}
@@ -799,7 +801,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         </>
       ) : (
         <>
-          <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
             <div
               style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
               data-testid="url-container"
@@ -815,7 +816,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
                 data-testid="websocket-url-input"
               />
             </div>
-          </HeaderHoverTooltip>
           {!inWorkbenchTab && <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>}
         </>
       )}
@@ -832,6 +832,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         />
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
   
   const handleCloseHistoryModal = useCallback(() => {

@@ -47,6 +47,7 @@ import { useIsGrpcListening } from '../../services/grpcListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { GrpcServerTabView } from './GrpcServerTabView'
 import './WebSocketChat.css'
 
@@ -700,12 +701,9 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const urlSection = (
     <>
       <ControlGroup data-testid="grpc-url-section">
-        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
           <div
             style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
             data-testid="url-container"
-            data-url-resolved={resolvedUrl ? 'true' : 'false'}
-            data-resolved-url={resolvedUrl || url}
           >
             <RestormVariableInputBox
               value={url}
@@ -716,7 +714,6 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
               data-testid="grpc-url-input"
             />
           </div>
-        </HeaderHoverTooltip>
         <div style={{ minWidth: 150 }}>
           <SelectBox
             id={`grpc-transport-${request.id}`}
@@ -795,6 +792,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         </SendButtonEnvSwitcher>
         )}
       </ControlGroup>
+      <ResolvedUrlPreview value={resolvedUrl} />
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)', display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>{request.service}/{request.method}</span>
         <HeaderHoverTooltip label={t('grpc.reflection.refresh', 'Refresh from reflection')}>

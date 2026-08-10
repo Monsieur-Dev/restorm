@@ -455,7 +455,11 @@
       }
     },
     "followRedirects": "Følg omdirigeringer",
-    "timeoutLabel": "Tidsavbrudd (ms)"
+    "timeoutLabel": "Tidsavbrudd (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopier den oppløste URL-en",
+      "copied": "Kopiert!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2313,7 +2317,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-forhåndsvisning (før oppløsning)",
     "versionV2NotYet": "v2 (kjøring støttes ennå ikke)",
     "versionV3NotYet": "v3 (kjøring støttes ennå ikke)",
     "operationKindEntitySet": "Entitetssett (GET)",

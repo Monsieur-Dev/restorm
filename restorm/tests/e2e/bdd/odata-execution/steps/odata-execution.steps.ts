@@ -95,7 +95,16 @@ async function typeIntoOdataFilter(p: Page, text: string): Promise<void> {
  * then the option row (both force-clicked, matching the ECUI selectBox
  * test step). */
 async function selectBoxOption(p: Page, testId: string, index: number): Promise<void> {
-  await p.locator(`[data-testid="${testId}-trigger"]`).first().click({ force: true })
+  // Scroll the trigger into view first: the resolved-URL preview row under
+  // the URL field pushed the lower form content down, and a dropdown opened
+  // from an off-viewport trigger puts its options off-viewport too — which
+  // even a force click refuses.
+  const trigger = p.locator(`[data-testid="${testId}-trigger"]`).first()
+  // Centre the trigger in its scroll container — the dropdown is a FIXED
+  // portal anchored below it, so a bottom-edge trigger puts the options off
+  // the viewport where nothing can scroll them back.
+  await trigger.evaluate((el) => { el.scrollIntoView({ block: 'center' }) })
+  await trigger.click({ force: true })
   await p.locator(`[data-testid="${testId}-option-${index}"]`).first().click({ force: true })
 }
 

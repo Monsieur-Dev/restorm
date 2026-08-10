@@ -455,7 +455,11 @@
       }
     },
     "followRedirects": "Átirányítások követése",
-    "timeoutLabel": "Időkorlát (ms)"
+    "timeoutLabel": "Időkorlát (ms)",
+    "resolvedUrlPreview": {
+      "copy": "A feloldott URL másolása",
+      "copied": "Másolva!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2313,7 +2317,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-előnézet (feloldás előtt)",
     "versionV2NotYet": "v2 (a végrehajtás még nem támogatott)",
     "versionV3NotYet": "v3 (a végrehajtás még nem támogatott)",
     "operationKindEntitySet": "Entitáskészlet (GET)",

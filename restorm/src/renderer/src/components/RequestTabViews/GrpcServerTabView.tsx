@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, type CSSProperties } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -22,6 +22,7 @@ import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
@@ -76,6 +77,21 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     return authority.split(':')[1] ?? ''
   }, [url])
   const envVariables = useEnvVariables(request.id)
+  // Resolved-address preview: the main process resolves the request's URL
+  // (Handlebars substituted) and pushes updates; the fetch covers the value
+  // already cached before this tab mounted.
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  useEffect(() => {
+    const requestId = request.id
+    const unsub = window.restorm?.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    return () => { unsub?.() }
+  }, [request.id])
+
   const handlebarsHelpers = useHandlebarsHelpers()
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
@@ -300,6 +316,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
   )
 
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="grpc-server-url-section">
       <span style={serverHostLabelStyle}>localhost:</span>
       <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
@@ -337,6 +354,8 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
       </BeamWrap>
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   // The response panel shows the live listening state + served count (a mock

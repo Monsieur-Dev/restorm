@@ -457,7 +457,11 @@
       }
     },
     "followRedirects": "Podążaj za przekierowaniami",
-    "timeoutLabel": "Limit czasu (ms)"
+    "timeoutLabel": "Limit czasu (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Skopiuj rozwiązany adres URL",
+      "copied": "Skopiowano!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2315,7 +2319,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Podgląd adresu URL (przed rozwiązaniem)",
     "versionV2NotYet": "v2 (wykonywanie jeszcze nieobsługiwane)",
     "versionV3NotYet": "v3 (wykonywanie jeszcze nieobsługiwane)",
     "operationKindEntitySet": "Zestaw encji (GET)",

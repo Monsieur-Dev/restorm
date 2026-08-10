@@ -455,7 +455,11 @@
       }
     },
     "followRedirects": "Seuraa uudelleenohjauksia",
-    "timeoutLabel": "Aikakatkaisu (ms)"
+    "timeoutLabel": "Aikakatkaisu (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopioi selvitetty URL",
+      "copied": "Kopioitu!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2313,7 +2317,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-esikatselu (ennen ratkaisua)",
     "versionV2NotYet": "v2 (suoritusta ei vielä tueta)",
     "versionV3NotYet": "v3 (suoritusta ei vielä tueta)",
     "operationKindEntitySet": "Entiteettijoukko (GET)",

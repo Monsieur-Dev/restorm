@@ -24,7 +24,7 @@ let requestsByName = new Map<string, string>()
 
 const CONNECT_BTN = '[data-testid="stomp-connect-button"]:visible'
 const SEND_BTN = '[data-testid="stomp-send-button"]:visible'
-const URL_CONTAINER = '[data-testid="url-container"]:visible'
+const URL_CONTAINER = '[data-testid="url-resolved-preview"]:visible'
 const URL_INPUT = '[data-testid="stomp-url-input"]:visible'
 
 function parsedReply(reply: McpToolReply): unknown {

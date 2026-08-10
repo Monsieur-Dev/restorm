@@ -457,7 +457,11 @@
       }
     },
     "followRedirects": "Sledovat přesměrování",
-    "timeoutLabel": "Časový limit (ms)"
+    "timeoutLabel": "Časový limit (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Zkopírovat vyhodnocenou URL",
+      "copied": "Zkopírováno!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -2315,7 +2319,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Náhled URL (před vyhodnocením)",
     "versionV2NotYet": "v2 (spouštění zatím není podporováno)",
     "versionV3NotYet": "v3 (spouštění zatím není podporováno)",
     "operationKindEntitySet": "Sada entit (GET)",
