@@ -24,6 +24,7 @@
       "title": "Bestand op schijf gewijzigd",
       "message": "'{{fileName}}' is buiten de applicatie gewijzigd.",
       "detail": "Herlaad om de versie op schijf te gebruiken, of behoud je versie en overschrijf die.",
+      "detailDirty": "Let op: u hebt niet-opgeslagen wijzigingen — opnieuw laden verwijdert ze.",
       "reload": "Herladen",
       "keepMine": "Mijn versie behouden"
     },

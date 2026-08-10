@@ -24,6 +24,7 @@
       "title": "File modificato sul disco",
       "message": "«{{fileName}}» è stato modificato al di fuori dell'applicazione.",
       "detail": "Ricarica per usare la versione sul disco, oppure mantieni la tua versione e sovrascrivila.",
+      "detailDirty": "Attenzione: sono presenti modifiche non salvate — ricaricare le eliminerà.",
       "reload": "Ricarica",
       "keepMine": "Mantieni la mia versione"
     },

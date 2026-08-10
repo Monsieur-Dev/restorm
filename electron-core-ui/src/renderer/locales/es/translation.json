@@ -24,6 +24,7 @@
       "title": "Archivo modificado en el disco",
       "message": "«{{fileName}}» se modificó fuera de la aplicación.",
       "detail": "Vuelve a cargar para usar la versión del disco, o conserva tu versión y sobrescríbela.",
+      "detailDirty": "Atención: tiene cambios sin guardar; recargar los descartará.",
       "reload": "Volver a cargar",
       "keepMine": "Conservar mi versión"
     },

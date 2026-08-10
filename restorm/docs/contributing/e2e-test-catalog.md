@@ -101,6 +101,7 @@ server; — = pure UI/in-process.
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
 | sidebar-clone | 3 | Sidebar "Clone" recursive id independence: request / quick-configs / env-folder (nested request, custom value list, enum definition, cross-scenario runScenario, connectionNodeId) — clone-then-rename-the-original leaves the clone unaffected, both stay distinctly searchable | 🔌 |
 | menubar-context | 3 | Contextual menu-bar menus (Requête / Serveur / Scénario) exist exactly while the matching tab is active; deleting a folder walks each subtree request bound by an OUTSIDE scenario through the used-by-scenarios dialog before deleting (box stripped on delete-anyway), and asks nothing when the binding scenario dies in the same subtree | 🔌 |
+| file-external-change | 4 | Open-file watch: an external rewrite raises the timerless reload/keep-mine toast (reload reflects disk, keep-mine actually overwrites even when not dirty), the app's own autosave never prompts, and an external secrets-sidecar write is re-applied silently | 🔌 |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
 | fully-documented-petstore | 1 | Fully-documented Petstore fixture builder | — |
 | theme-carousel-a11y | 1 | Theme preview cards keep Tab on the card only, never the abstract preview | — |

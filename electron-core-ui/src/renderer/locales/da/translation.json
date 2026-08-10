@@ -24,6 +24,7 @@
       "title": "Filen er ændret på disken",
       "message": "\"{{fileName}}\" blev ændret uden for programmet.",
       "detail": "Genindlæs for at bruge versionen på disken, eller behold din version og overskriv den.",
+      "detailDirty": "Bemærk: du har ugemte ændringer — genindlæsning kasserer dem.",
       "reload": "Genindlæs",
       "keepMine": "Behold min version"
     },

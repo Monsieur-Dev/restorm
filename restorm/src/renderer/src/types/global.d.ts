@@ -187,6 +187,7 @@ declare global {
         invalidate: (args: { source: string; params: Record<string, unknown>; scopeId?: string }) => Promise<{ success: boolean }>
         resolve: (args: { source: string; params: Record<string, unknown> }) => Promise<{ value?: string; error?: string }>
         refresh: (args: { source: string; params: Record<string, unknown> }) => Promise<{ success: boolean }>
+        onExternallyChanged: (callback: (payload: { path: string }) => void) => (() => void)
       }
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)

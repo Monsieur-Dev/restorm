@@ -79,6 +79,7 @@ import {
   miniBrowserCaptureArgs
 } from './ipc/schemas'
 import { isRevealablePath } from './ipc/revealAuthority'
+import { noteOwnSidecarBytes } from './services/secretsSidecarWatcher'
 
 /**
  * Narrow an `unknown` payload to the plain-object shape
@@ -418,9 +419,12 @@ export function registerRestormIPC(deps: {
         return null
       }
 
-      return await fs.readFile(filePath, 'utf-8')
+      const text = await fs.readFile(filePath, 'utf-8')
+      noteOwnSidecarBytes(filePath, text)
+      return text
     } catch (error) {
       logger.warn('Failed to read secrets file', { path: filePath, error: String(error) })
+      noteOwnSidecarBytes(filePath, null)
       return null
     }
   })
@@ -444,9 +448,11 @@ export function registerRestormIPC(deps: {
         if (existsSync(filePath)) {
           rmSync(filePath, { force: true })
         }
+        noteOwnSidecarBytes(filePath, null)
         return { success: true }
       }
       await fs.writeFile(filePath, content, 'utf-8')
+      noteOwnSidecarBytes(filePath, content)
       return { success: true }
     } catch (error) {
       logger.warn('Failed to write secrets file', { path: filePath, error: String(error) })

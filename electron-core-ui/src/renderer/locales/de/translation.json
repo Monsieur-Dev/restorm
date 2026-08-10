@@ -24,6 +24,7 @@
       "title": "Datei auf der Festplatte geändert",
       "message": "„{{fileName}}“ wurde außerhalb der Anwendung geändert.",
       "detail": "Neu laden, um die Version auf der Festplatte zu verwenden, oder Ihre Version behalten und sie überschreiben.",
+      "detailDirty": "Achtung: Sie haben ungespeicherte Änderungen — Neuladen verwirft sie.",
       "reload": "Neu laden",
       "keepMine": "Meine Version behalten"
     },

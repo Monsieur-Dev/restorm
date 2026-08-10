@@ -24,6 +24,7 @@
       "title": "Datoteka promijenjena na disku",
       "message": "„{{fileName}}“ izmijenjena je izvan aplikacije.",
       "detail": "Ponovno učitajte kako biste koristili verziju s diska ili zadržite svoju verziju i prepišite je.",
+      "detailDirty": "Pažnja: imate nespremljene izmjene — ponovno učitavanje će ih odbaciti.",
       "reload": "Ponovno učitaj",
       "keepMine": "Zadrži moju verziju"
     },

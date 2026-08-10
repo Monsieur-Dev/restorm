@@ -24,6 +24,7 @@
       "title": "Fichier modifié sur le disque",
       "message": "« {{fileName}} » a été modifié en dehors de l'application.",
       "detail": "Rechargez pour utiliser la version du disque, ou conservez votre version et écrasez-la.",
+      "detailDirty": "Attention : vous avez des modifications non sauvegardées — recharger les écrasera.",
       "reload": "Recharger",
       "keepMine": "Conserver ma version"
     },

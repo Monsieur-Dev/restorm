@@ -1921,7 +1921,16 @@ class ContextService {
     this.environmentMeta.clear()
     this.transformedContexts.clear()
     this.variableTransformResults.clear()
-    this.requestContexts.clear()
+    // `requestContexts` is deliberately KEPT. On a whole-file RELOAD the
+    // renderer clears the context then re-publishes every environment —
+    // but the request tabs remount on their own React schedule and may
+    // have re-registered BEFORE this clear (resolving against the stale
+    // env values). Wiping their registration here would leave the fresh
+    // ENVIRONMENT_CREATED with nobody to recalculate, freezing the
+    // resolved-URL preview one reload behind. Keeping the registrations
+    // lets `recalculateRequestsUsingEnvironment` reconverge them; a real
+    // file CLOSE unregisters each request through its tab's unmount
+    // cleanup, so nothing leaks.
     this.resolvedUrls.clear()
     this.codeSnippets.clear()
     this.availableVariablesPerField.clear()

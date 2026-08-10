@@ -24,6 +24,7 @@
       "title": "Skedari ndryshoi në disk",
       "message": "«{{fileName}}» u ndryshua jashtë aplikacionit.",
       "detail": "Ringarkoni për të përdorur versionin në disk, ose ruani versionin tuaj dhe mbishkruajeni.",
+      "detailDirty": "Kujdes: keni ndryshime të paruajtura — ringarkimi do t'i humbasë.",
       "reload": "Ringarko",
       "keepMine": "Ruaj versionin tim"
     },

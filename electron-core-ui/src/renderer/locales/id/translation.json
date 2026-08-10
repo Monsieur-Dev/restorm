@@ -24,6 +24,7 @@
       "title": "Berkas berubah di disk",
       "message": "\"{{fileName}}\" diubah di luar aplikasi.",
       "detail": "Muat ulang untuk menggunakan versi di disk, atau pertahankan versi Anda dan timpa versi tersebut.",
+      "detailDirty": "Perhatian: ada perubahan yang belum disimpan — memuat ulang akan membuangnya.",
       "reload": "Muat ulang",
       "keepMine": "Pertahankan versi saya"
     },

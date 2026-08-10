@@ -3,6 +3,7 @@ import { readFileSync, existsSync, statSync } from 'fs'
 import { createHash } from 'crypto'
 import { basename, extname } from 'path'
 import { atomicWriteFile } from './PersistenceService'
+import { watch as chokidarWatch, type FSWatcher } from 'chokidar'
 import {
   SaveUnitRegistry,
   DraftStore,
@@ -83,6 +84,7 @@ export class FileService {
   constructor(config: Partial<FileServiceConfig> = {}) {
     this.config = {
       extension: config.extension ?? '.json',
+      externalWatchDebounceMs: config.externalWatchDebounceMs ?? 250,
       defaultFormat: config.defaultFormat ?? 'json',
       maxRecentFiles: config.maxRecentFiles ?? 10,
       storagePrefix: config.storagePrefix ?? 'file_',
@@ -790,6 +792,7 @@ export class FileService {
       const name = this.getDisplayName(filePath)
       this.diskDigest = FileService.digestOf(data)
       this.externalChangePending = false
+      this.startFileWatcher(filePath)
 
       this.currentFile = {
         path: filePath,
@@ -859,6 +862,15 @@ export class FileService {
    * resolves it — by reloading, or by force-saving over it. */
   private externalChangePending = false
 
+  /** Watcher armed on the OPEN file — the PROACTIVE half of the
+   * external-change guard. The save-time check only fires when the app
+   * next writes; this one surfaces a third-party rewrite (terminal
+   * `git pull`, another editor) as soon as it lands on disk. Armed by
+   * `open()`/`saveAs()`, torn down by `close()` — never leaks across a
+   * file switch (`startFileWatcher` stops the previous one first). */
+  private fileWatcher: FSWatcher | null = null
+  private watchDebounceTimer: NodeJS.Timeout | null = null
+
   private static digestOf(data: string): string {
     return createHash('sha1').update(data).digest('hex')
   }
@@ -897,6 +909,65 @@ export class FileService {
     } catch (error: unknown) {
       logger.warn('FileService: Failed to re-baseline after an external change', { path, error: String(error) })
     }
+  }
+
+  /** Arm the on-disk watcher for the open file (stopping any previous
+   * one). Every fs event funnels into the debounced digest probe — the
+   * digest, not the event, decides: bytes matching `diskDigest` are our
+   * own write echoing back, anything else is a third party. */
+  private startFileWatcher(filePath: string): void {
+    this.stopFileWatcher()
+    try {
+      this.fileWatcher = chokidarWatch(filePath, { ignoreInitial: true })
+      this.fileWatcher.on('all', () => { this.scheduleExternalChangeProbe() })
+      this.fileWatcher.on('error', (error: unknown) => {
+        logger.warn('FileService: Open-file watcher error', { path: filePath, error: String(error) })
+      })
+    } catch (error: unknown) {
+      logger.warn('FileService: Failed to arm the open-file watcher', { path: filePath, error: String(error) })
+    }
+  }
+
+  /** Tear the on-disk watcher down (file switch, close, shutdown). */
+  private stopFileWatcher(): void {
+    if (this.watchDebounceTimer) {
+      clearTimeout(this.watchDebounceTimer)
+      this.watchDebounceTimer = null
+    }
+    if (this.fileWatcher) {
+      void this.fileWatcher.close().catch((error: unknown) => {
+        logger.warn('FileService: Failed to close the open-file watcher', { error: String(error) })
+      })
+      this.fileWatcher = null
+    }
+  }
+
+  /** Debounce the fs-event burst (atomic writes rename, editors write in
+   * chunks), then probe. A fresh event pushes the pending probe back. */
+  private scheduleExternalChangeProbe(): void {
+    if (this.watchDebounceTimer) clearTimeout(this.watchDebounceTimer)
+    this.watchDebounceTimer = setTimeout(() => {
+      this.watchDebounceTimer = null
+      this.probeExternalChange()
+    }, this.config.externalWatchDebounceMs)
+  }
+
+  /**
+   * The proactive half of the external-change guard: same detection and
+   * same broadcast as the save-time path in `save()`, minus any write.
+   * A positive read is re-checked after a second debounce window — an
+   * app save whose bytes just landed but whose `diskDigest` stamp is a
+   * microtask away must not read as a third-party rewrite.
+   */
+  private probeExternalChange(): void {
+    if (this.externalChangePending || !this.hasExternalChange()) return
+    this.watchDebounceTimer = setTimeout(() => {
+      this.watchDebounceTimer = null
+      if (this.externalChangePending || !this.hasExternalChange()) return
+      this.externalChangePending = true
+      this.broadcastEvent('file:externally-changed', { path: this.currentFile.path })
+      logger.warn('FileService: File changed on disk outside the app', { path: this.currentFile.path })
+    }, this.config.externalWatchDebounceMs)
   }
 
   /**
@@ -1001,6 +1072,7 @@ export class FileService {
       await atomicWriteFile(filePath, data, { refuseReadOnlyTarget: true })
       this.diskDigest = FileService.digestOf(data)
       this.externalChangePending = false
+      this.startFileWatcher(filePath)
 
       const name = this.getDisplayName(filePath)
       this.currentFile = {
@@ -1046,6 +1118,7 @@ export class FileService {
     // events (by design), so we reset the cached dirty flag manually.
     this.saveUnitRegistry.clear()
     this.detachDraftStore()
+    this.stopFileWatcher()
     this.diskDigest = null
     this.externalChangePending = false
 

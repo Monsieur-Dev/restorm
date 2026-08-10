@@ -24,6 +24,7 @@
       "title": "Tiedosto muuttui levyllä",
       "message": "”{{fileName}}” muutettiin sovelluksen ulkopuolella.",
       "detail": "Lataa uudelleen käyttääksesi levyllä olevaa versiota tai säilytä oma versiosi ja korvaa se.",
+      "detailDirty": "Huomio: sinulla on tallentamattomia muutoksia — uudelleenlataus hylkää ne.",
       "reload": "Lataa uudelleen",
       "keepMine": "Säilytä oma versioni"
     },

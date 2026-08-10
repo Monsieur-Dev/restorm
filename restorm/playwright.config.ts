@@ -105,6 +105,12 @@ const mcpServerTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-server'
 })
 
+const fileExternalChangeTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/file-external-change/features/**/*.feature',
+  steps: ['tests/e2e/bdd/file-external-change/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/file-external-change'
+})
+
 const menubarContextTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/menubar-context/features/**/*.feature',
   steps: ['tests/e2e/bdd/menubar-context/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
@@ -633,6 +639,11 @@ export default defineConfig({
     {
       name: 'mcp-server',
       testDir: mcpServerTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'file-external-change',
+      testDir: fileExternalChangeTestDir,
       timeout: 180 * 1000
     },
     {

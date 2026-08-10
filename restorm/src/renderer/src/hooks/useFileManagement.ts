@@ -62,7 +62,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 }
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
-import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, emitEnvironmentUpdated } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import {
@@ -769,6 +769,46 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     },
     [clearTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, buildDocument]
   )
+
+  // Silent sidecar reload. `<project>.restorm.env` is read once at open
+  // and held in memory (SecretValue instances + save baseline + main-side
+  // env context), then REWRITTEN FROM MEMORY on save — an external edit
+  // would be invisible and overwritten. The main watcher signals it; the
+  // policy here is a SILENT re-apply (no prompt — unlike the project
+  // file, reloading secret values cannot discard structural in-app work).
+  useEffect(() => window.restorm?.secrets.onExternallyChanged(() => {
+    void (async () => {
+      const path = filePath
+      if (!path) return
+      const envText = (await window.restorm?.secrets.read(`${path}.env`)) ?? ''
+      if (envText === savedEnvBaselineRef.current) return
+      const parsed = parseEnvFileDetailed(envText)
+      if (parsed.duplicates.length > 0) {
+        logger.warn('[useFileManagement] Duplicate keys in externally-changed .restorm.env (last wins)', {
+          duplicates: parsed.duplicates
+        })
+      }
+      // In-place: the SecretValue instances on the live reactive tree get
+      // the fresh plaintext (an absent key blanks its value).
+      applyEnvFileSecretsToCollections({ collections: rootItems }, parsed.vars)
+      savedEnvBaselineRef.current = envText
+      // The in-place class-field mutation emits nothing — re-publish every
+      // environment so the main-side context (Handlebars resolution) sees
+      // the new values.
+      const republish = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
+        emitEnvironmentUpdated(env, parentFolderId, parentEnvironmentId)
+        if (env.subEnvironments) {
+          for (const subEnv of env.subEnvironments) republish(subEnv, parentFolderId, env.id)
+        }
+      }
+      for (const rootItem of rootItems) {
+        if (isEnvironmentFolder(rootItem)) {
+          for (const env of rootItem.environments) republish(env, rootItem.id)
+        }
+      }
+      logger.info('[useFileManagement] Secrets sidecar reloaded after an external change')
+    })()
+  }) ?? undefined, [filePath, rootItems])
 
   // Handle file closed event
   const handleFileClosed = useCallback(() => {

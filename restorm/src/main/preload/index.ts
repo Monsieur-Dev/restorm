@@ -519,6 +519,14 @@ contextBridge.exposeInMainWorld('restorm', {
     ): Promise<{ success: boolean }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:secrets:refresh', args)
       return result as { success: boolean }
+    },
+    /** The `<project>.restorm.env` sidecar was rewritten OUTSIDE the app —
+     * the renderer silently re-reads and re-applies it (no prompt; the
+     * sidecar is memory-held and would otherwise be overwritten on save). */
+    onExternallyChanged: (callback: (payload: { path: string }) => void): (() => void) => {
+      const listener = (_event: unknown, payload: { path: string }): void => { callback(payload) }
+      ipcRenderer.on('restorm:secrets:externally-changed', listener)
+      return () => { ipcRenderer.removeListener('restorm:secrets:externally-changed', listener) }
     }
   },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {

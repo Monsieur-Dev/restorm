@@ -24,6 +24,7 @@
       "title": "Filen er endret på disken",
       "message": "«{{fileName}}» ble endret utenfor programmet.",
       "detail": "Last inn på nytt for å bruke versjonen på disken, eller behold din versjon og overskriv den.",
+      "detailDirty": "Merk: du har ulagrede endringer — omlasting forkaster dem.",
       "reload": "Last inn på nytt",
       "keepMine": "Behold min versjon"
     },

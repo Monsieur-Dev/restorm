@@ -24,6 +24,7 @@
       "title": "Dosya diskte değişti",
       "message": "\"{{fileName}}\" uygulama dışında değiştirildi.",
       "detail": "Diskteki sürümü kullanmak için yeniden yükleyin ya da kendi sürümünüzü koruyup üzerine yazın.",
+      "detailDirty": "Dikkat: kaydedilmemiş değişiklikleriniz var — yeniden yükleme bunları siler.",
       "reload": "Yeniden yükle",
       "keepMine": "Sürümümü koru"
     },

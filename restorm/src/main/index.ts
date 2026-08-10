@@ -88,6 +88,7 @@ import { existsSync, statSync } from 'fs'
 import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
+import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
 import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
@@ -632,6 +633,22 @@ logger.info('File Service initialized')
     void getGitService().setActiveFolder(folder).catch((err: unknown) => {
       logger.warn('GitService.setActiveFolder failed', { folder, error: String(err) })
     })
+  })
+}
+
+// Secrets-sidecar watch: the `<project>.restorm.env` content is held in
+// memory and rewritten from memory on save, so an external edit must be
+// silently re-applied (no prompt — unlike the project file itself). Armed
+// on the open `.restorm` path, torn down when the file closes.
+{
+  let lastSidecarProject: string | null = null
+  getFileService().onStateChanged((state) => {
+    const path = state.currentFile.path
+    const project = path?.endsWith('.restorm') === true ? path : null
+    if (project === lastSidecarProject) return
+    lastSidecarProject = project
+    if (project) armSecretsSidecarWatcher(project)
+    else disarmSecretsSidecarWatcher()
   })
 }
 

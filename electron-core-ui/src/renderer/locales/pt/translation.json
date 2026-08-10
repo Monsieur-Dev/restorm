@@ -24,6 +24,7 @@
       "title": "Ficheiro alterado no disco",
       "message": "«{{fileName}}» foi modificado fora da aplicação.",
       "detail": "Recarregue para usar a versão do disco, ou mantenha a sua versão e substitua-a.",
+      "detailDirty": "Atenção: você tem alterações não salvas — recarregar as descartará.",
       "reload": "Recarregar",
       "keepMine": "Manter a minha versão"
     },

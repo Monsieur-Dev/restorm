@@ -24,6 +24,7 @@
       "title": "File changed on disk",
       "message": "\"{{fileName}}\" was modified outside the application.",
       "detail": "Reload to use the version on disk, or keep your version and overwrite it.",
+      "detailDirty": "Warning: you have unsaved changes — reloading will discard them.",
       "reload": "Reload",
       "keepMine": "Keep my version"
     },

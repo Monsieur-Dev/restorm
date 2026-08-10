@@ -24,6 +24,7 @@
       "title": "Plik zmieniony na dysku",
       "message": "„{{fileName}}” został zmodyfikowany poza aplikacją.",
       "detail": "Wczytaj ponownie, aby użyć wersji z dysku, albo zachowaj swoją wersję i nadpisz ją.",
+      "detailDirty": "Uwaga: masz niezapisane zmiany — ponowne wczytanie je odrzuci.",
       "reload": "Wczytaj ponownie",
       "keepMine": "Zachowaj moją wersję"
     },

@@ -24,6 +24,7 @@
       "title": "Fișierul a fost modificat pe disc",
       "message": "„{{fileName}}” a fost modificat în afara aplicației.",
       "detail": "Reîncărcați pentru a folosi versiunea de pe disc sau păstrați-vă versiunea și suprascrieți-o.",
+      "detailDirty": "Atenție: aveți modificări nesalvate — reîncărcarea le va pierde.",
       "reload": "Reîncarcă",
       "keepMine": "Păstrează versiunea mea"
     },

@@ -230,10 +230,23 @@ terminal while the project is open. The in-memory tree still holds the
 pre-checkout content and autosave fires about a second later, so
 without a guard the checkout is silently undone on disk.
 
-`save()` therefore refuses to write when `hasExternalChange()` is true,
-returns `false`, and broadcasts **`file:externally-changed`** exactly
-once per divergence (a per-second autosave must not re-prompt every
-tick). The app resolves it either way:
+Detection is TWO-sided:
+
+- **Proactive** — `open()`/`saveAs()` arm a chokidar watcher on the open
+  file (torn down by `close()`, re-armed on every file switch). Fs events
+  are debounced (`externalWatchDebounceMs`, default 250 ms — atomic
+  writes rename, editors write in bursts), then the digest decides: bytes
+  matching `diskDigest` are the app's own write echoing back, anything
+  else broadcasts **`file:externally-changed`**. A positive probe is
+  re-checked after a second debounce window so a save whose digest stamp
+  is a microtask away never reads as a third-party rewrite.
+- **Save-time backstop** — `save()` refuses to write when
+  `hasExternalChange()` is true, returns `false`, and broadcasts the same
+  event.
+
+Both share a one-shot latch: the broadcast fires exactly once per
+divergence (a per-second autosave must not re-prompt every tick). The
+app resolves it either way:
 
 | Resolution | Call | Effect |
 | --- | --- | --- |
@@ -242,13 +255,13 @@ tick). The app resolves it either way:
 | — | `save(content, { force: true })` | same overwrite in one call, for callers that own the save themselves |
 
 Both paths re-arm the guard, so a *second* external rewrite prompts
-again. Folder mode leaves `diskDigest` null (no single file to digest),
-which makes the guard inert there.
+again.
 
 Renderer surface: `useFileExternallyChanged(cb)` subscribes to the
-broadcast; `useFileService()` exposes `showExternalChangeDialog()` (a
-native message box — the decision is about whose work survives, so it
-must be impossible to click past) and `acceptExternalChange()`.
+broadcast and `useFileService()` exposes `acceptExternalChange()`. The
+host decides the prompt UX — restorm shows a non-blocking, indefinite
+toast (reload / keep mine); the native `showExternalChangeDialog()`
+message box remains available for hosts that prefer a blocking prompt.
 
 ### Reorder cascade
 
