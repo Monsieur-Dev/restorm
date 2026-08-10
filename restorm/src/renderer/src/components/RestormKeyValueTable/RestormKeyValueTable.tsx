@@ -172,8 +172,50 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
 
     const next: KeyValue[] = rows.map((r) => {
       const rowId = r.id
-      const currentType = rowId ? valueTypeByRowIdRef.current.get(rowId) : undefined
+      // Three-level type lookup: id map → key map → the ORIGINAL KeyValue
+      // from `initialRows`. The maps are populated by an effect, so an
+      // `onRowsChange` fired during a mount/echo window can find them
+      // EMPTY — and a row whose id was regenerated misses the id map for
+      // good. Falling through to `new StringValue(raw)` must stay the very
+      // last resort: for a SECRET row the display string IS the plaintext,
+      // so the string fallback would persist the secret IN CLEAR in the
+      // project file (and the sidecar entry would silently vanish).
+      //
+      // Whatever the lookup finds is re-normalized through the LOCAL
+      // `normalizeValueType`: an instance minted by another copy of the
+      // valueTypes module (HMR, duplicated module graph) defeats every
+      // `instanceof` below, and a persisted POJO was never an instance at
+      // all — both would otherwise fall through to the string branch.
+      const originalValue = initialRowsRef.current?.find(
+        (ir) => (rowId !== undefined && ir.id === rowId) || (r.key !== '' && ir.key === r.key)
+      )?.value
+      const found = (rowId ? valueTypeByRowIdRef.current.get(rowId) : undefined)
+        ?? (r.key ? valueTypeByKeyRef.current.get(r.key) : undefined)
+        ?? originalValue
+      const currentType = found === undefined ? undefined : normalizeValueType(found as unknown)
       const raw = r.value
+
+      // A row whose display string is UNCHANGED passes through with its
+      // original value object. `onRowsChange` rebuilds every row on any
+      // table change (including mount/echo emits that touched nothing), and
+      // re-encoding a value we cannot positively re-type is exactly how an
+      // untouched secret gets degraded to a plain string — persisting its
+      // plaintext in the project file. Only a row the user actually edited
+      // (raw differs from the original's own display encoding) goes through
+      // the re-typing cascade below.
+      const originalNormalized = originalValue !== undefined ? normalizeValueType(originalValue as unknown) : undefined
+      if (originalNormalized?.toString() === raw) {
+        if (rowId) {
+          valueTypeByRowIdRef.current.set(rowId, originalNormalized)
+        }
+        return {
+          id: rowId,
+          key: r.key,
+          value: originalNormalized,
+          description: r.description,
+          enabled: r.enabled
+        }
+      }
 
       let nextValue: ValueType
       if (currentType instanceof DateTimeValue) {

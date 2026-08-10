@@ -70,15 +70,25 @@ export class KeyValue extends BaseKeyValue {
           break
         }
         case 'secret': {
-          const p = plain as { source?: unknown; params?: unknown }
+          const p = plain as { source?: unknown; params?: unknown; resolved?: unknown }
           // PRESERVE the secret's identity. A `type: 'secret'` discriminant must
           // always reify to a SecretValue (never degrade to StringValue, which
           // would drop source/params and break resolution on the next load) —
           // keep whatever source/params are present, even if partial.
-          value = new SecretValue(
+          const secret = new SecretValue(
             typeof p.source === 'string' ? p.source : '',
             isRecord(p.params) ? p.params : {}
           )
+          // `resolved` is memory-only (toJSON strips it) but very much alive
+          // on the wire: the sidecar loader stamps the plaintext onto the
+          // POJO, and `cloneForEventBus` deliberately carries it across IPC
+          // so the env context can substitute `{{secret}}`. Rebuilding the
+          // instance without it would blank the secret at every
+          // normalization hop.
+          if (typeof p.resolved === 'string' && p.resolved.length > 0) {
+            secret.resolved = p.resolved
+          }
+          value = secret
           break
         }
         case 'expression':

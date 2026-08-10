@@ -23,12 +23,22 @@ describe('serializeValueShape', () => {
     expect(serializeValueShape(a)).toBe(serializeValueShape(b))
   })
 
-  it('never includes the resolved plaintext', () => {
-    const v = new SecretValue('envVar', { name: 'TOKEN' })
-    v.resolved = 'super-secret-plaintext'
-    const shape = serializeValueShape(v)
-    expect(shape).not.toContain('super-secret-plaintext')
-    expect(shape).not.toContain('resolved')
+  // The resolved plaintext is document content for the `.env` sidecar: a
+  // resolved-only edit (typing the value in the retrieval modal) must change
+  // the shape so the persist/rebuild fires and the autosave writes the
+  // sidecar. It rides OUT OF BAND (after the JSON) — the persisted-JSON part
+  // still never carries it, so nothing resolved-shaped can reach the YAML.
+  it('changes when only the resolved plaintext changes, keeping it out of the JSON part', () => {
+    const empty = new SecretValue('envVar', { name: 'TOKEN' })
+    const filled = new SecretValue('envVar', { name: 'TOKEN' })
+    filled.resolved = 'super-secret-plaintext'
+
+    expect(serializeValueShape(empty)).not.toBe(serializeValueShape(filled))
+
+    const jsonPart = serializeValueShape(filled).split('#resolved=')[0]
+    expect(jsonPart).not.toContain('super-secret-plaintext')
+    expect(jsonPart).not.toContain('resolved')
+    expect(JSON.stringify(filled)).not.toContain('super-secret-plaintext')
   })
 
   it('distinguishes a recast (string -> secret) even with the same display string', () => {

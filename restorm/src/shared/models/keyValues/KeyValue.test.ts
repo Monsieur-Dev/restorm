@@ -44,3 +44,22 @@ describe('KeyValue round-trip — secret', () => {
     expect(sv.params).toEqual({})
   })
 })
+
+describe('KeyValue rehydration — in-memory resolved plaintext', () => {
+  it('carries `resolved` through fromPlain (the sidecar loader stamps it before rehydration)', () => {
+    const kv = KeyValue.fromPlain({ key: 'secret', value: { type: 'secret', source: 'envFileSecret', params: { key: 'EnvF/Dev/secret' }, resolved: 's3cr3t' } })
+    const sv = kv.value as SecretValue
+    expect(sv).toBeInstanceOf(SecretValue)
+    expect(sv.resolved).toBe('s3cr3t')
+  })
+
+  it('still strips `resolved` from persistence (memory-only field)', () => {
+    const kv = KeyValue.fromPlain({ key: 'secret', value: { type: 'secret', source: 'envFileSecret', params: {}, resolved: 's3cr3t' } })
+    expect(JSON.parse(JSON.stringify(kv.value)) as Record<string, unknown>).not.toHaveProperty('resolved')
+  })
+
+  it('leaves `resolved` unset when absent or empty', () => {
+    const kv = KeyValue.fromPlain({ key: 'k', value: { type: 'secret', source: 'envFileSecret', params: {}, resolved: '' } })
+    expect((kv.value as SecretValue).resolved).toBeUndefined()
+  })
+})

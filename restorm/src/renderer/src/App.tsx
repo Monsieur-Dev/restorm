@@ -199,6 +199,7 @@ import { StatusbarVersionPlan } from './components/MainView/StatusbarVersionPlan
 import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { copySidebarItems, readSidebarClipboard, hasSidebarClipboard } from './services/sidebarClipboard'
 import { useScenarioMenuPalette } from './services/scenarioMenuPaletteStore'
+import { envSecretsDigestOf } from './services/envSecretsDigest'
 import { useServerMenu } from './services/serverMenuStore'
 import { buildAddSubmenu } from './components/MainView/Sidebar/contextMenuBuilder'
 import { clickSendButtonWhenReady } from './hooks/useMcpRunRequest'
@@ -3085,6 +3086,15 @@ const App: React.FC = () => {
         const raw = JSON.parse(JSON.stringify(document)) as Record<string, unknown>
         const cls = classForDocument(payload.type, raw)
         draft = cleanseForPersistence(raw, cls)
+        // The JSON round-trip above stripped every secret plaintext
+        // (SecretValue.toJSON) — a secret-only edit would produce a draft
+        // identical to the reference and never mark the unit dirty (so the
+        // autosave would never write the sidecar). The digest of the LIVE
+        // document's env-file secrets makes that delta visible to the
+        // registry; it never reaches the disk (saves serialize the live
+        // tree, not drafts).
+        const digest = envSecretsDigestOf(document)
+        if (digest !== null) draft['__envSecretsDigest'] = digest
       } catch (err) {
         logger.warn('[App] upsertSaveUnit: failed to cleanse document', {
           id: runtimeId,

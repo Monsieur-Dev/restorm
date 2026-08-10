@@ -73,6 +73,7 @@ import type { EnvironmentFolder, FolderItem, Environment } from '../../../shared
 import { isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import { collectEnvFileSecretsFromCollections, applyEnvFileSecretsToCollections } from '../../../shared/utils/envFileSecrets'
+import { envSecretsDigestOf, findNodeByRuntimeId } from '../services/envSecretsDigest'
 import { serializeEnvFile, parseEnvFileDetailed } from '../../../shared/utils/dotenv'
 import type { TFunction } from 'i18next'
 
@@ -290,10 +291,18 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           if (!unit.runtimeId) continue
           if (seen.has(unit.runtimeId)) continue
           seen.add(unit.runtimeId)
+          // Mirror `doUpsert`'s digest stamp on the REFERENCE side: the
+          // decomposed content is plaintext-stripped, so without the digest
+          // a later secret-only draft would either always or never differ.
+          const liveNode = findNodeByRuntimeId(items, unit.runtimeId)
+          const digest = liveNode ? envSecretsDigestOf(liveNode) : null
+          const reference = digest !== null
+            ? { ...unit.content, __envSecretsDigest: digest }
+            : unit.content
           pending.push(hydrateSaveUnit({
             runtimeId: unit.runtimeId,
             kind: unit.kind,
-            reference: unit.content,
+            reference,
             ...(unit.parentId !== undefined && { parentId: unit.parentId })
           }))
         }
@@ -849,6 +858,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         const dataForChecksum = prepareForSerialization(buildDocument(rootItems))
         const currentChecksum = JSON.stringify(dataForChecksum)
         if (currentChecksum !== baseline) return
+        // The whole-file checksum is BLIND to secret plaintexts (toJSON
+        // strips them): a freshly typed secret value leaves the checksum
+        // at the baseline while the SIDECAR genuinely changed. Clearing
+        // the drafts here would kill the dirty transition the autosave is
+        // waiting on — and the .env write would never happen.
+        const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
+        const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+        if (envContent !== (savedEnvBaselineRef.current ?? '')) return
         await window.restorm?.file.clearDrafts()
       })()
     }, 200)

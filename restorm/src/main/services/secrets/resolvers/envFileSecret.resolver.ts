@@ -1,7 +1,9 @@
 import type { ValueSourceResolver, ResolveCtx } from '../../../../shared/secrets/ValueSource'
+import { getFileService } from 'electron-core-ui'
 import {
   getFolderSecretsEnvPath,
   loadFolderSecretsEnvFile,
+  loadProjectSidecarEnvFile,
   upsertFolderSecretsEnvEntry
 } from '../../SecretsEnvFileService'
 
@@ -22,18 +24,30 @@ export const envFileSecretResolver: ValueSourceResolver = {
   async read(params: Record<string, unknown>, _ctx: ResolveCtx): Promise<string> {
     const key = asString(params['key'])
     const folderPath = asString(params['folderPath'])
-    // An env-file secret with no owning `folderPath` has no `restorm.env` to
-    // read: it was seeded as a placeholder (e.g. by an import) but never saved
-    // into a project folder, and a single-file collection can never stamp a
-    // `folderPath` at all. There is nothing to resolve, so this is the masked
-    // empty state — resolve to `''` rather than throwing. Throwing here would
-    // abort the dispatch of any request whose env chain merely contains the
-    // unstamped secret, even when the request never references it.
-    if (folderPath === '') {
-      return ''
-    }
     if (key === '') {
+      // A placeholder seeded by an import that was never saved — nothing to
+      // resolve. `''` (the masked empty state) rather than a throw: throwing
+      // would abort the dispatch of any request whose env chain merely
+      // contains the unstamped secret.
+      if (folderPath === '') return ''
       throw new Error('envFileSecret key is empty')
+    }
+    if (folderPath === '') {
+      // Single-file mode: no `folderPath` is ever stamped — the sidecar is
+      // derived from the OPEN project (`<project>.restorm.env`). A missing
+      // sidecar or entry resolves to `''` (the value was simply never saved)
+      // instead of throwing, for the same dispatch-safety reason as above.
+      let projectPath: string | null = null
+      try {
+        projectPath = getFileService().getFilePath()
+      } catch {
+        // Not initialized (bare unit-test harness / very early boot) — same
+        // masked empty state as an absent sidecar.
+        return ''
+      }
+      if (!projectPath) return ''
+      const vars = await loadProjectSidecarEnvFile(projectPath)
+      return vars?.[key] ?? ''
     }
     const vars = await loadFolderSecretsEnvFile(folderPath)
     if (!vars || !(key in vars)) {
