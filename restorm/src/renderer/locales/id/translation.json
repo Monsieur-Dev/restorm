@@ -353,7 +353,7 @@
       "docs": "Dokumen",
       "environments": "Lingkungan",
       "notes": "Catatan",
-      "customValues": "Custom variables"
+      "customValues": "Enumerasi kustom"
     },
     "home": {
       "configureEnvs": "Konfigurasi lingkungan",
@@ -391,7 +391,7 @@
       "addEntry": "Tambah nilai",
       "label": "Label",
       "value": "Value",
-      "selectList": "Pilih sebuah daftar"
+      "selectList": "Tentukan daftar nilai yang dapat digunakan kembali untuk variabel Anda: Anda memilih label yang mudah dibaca, permintaan mengirimkan nilai terkait. Pilih atau buat enumerasi untuk memulai."
     }
   },
   "requestTab": {

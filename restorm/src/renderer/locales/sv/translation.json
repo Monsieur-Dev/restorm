@@ -354,7 +354,7 @@
       "docs": "Dokumentation",
       "environments": "Miljöer",
       "notes": "Anteckningar",
-      "customValues": "Custom variables"
+      "customValues": "Anpassade uppräkningar"
     },
     "home": {
       "configureEnvs": "Konfigurera miljöer",
@@ -392,7 +392,7 @@
       "addEntry": "Lägg till ett värde",
       "label": "Label",
       "value": "Value",
-      "selectList": "Välj en lista"
+      "selectList": "Definiera återanvändbara värdelistor för dina variabler: du väljer en läsbar etikett och requesten skickar det kopplade värdet. Välj eller skapa en uppräkning för att komma igång."
     }
   },
   "requestTab": {

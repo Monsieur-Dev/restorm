@@ -37,7 +37,7 @@ export interface CustomValueListsPanelProps {
 
 /**
  * Master-details editor for an env folder's user-defined custom value
- * lists ("Variables personnalisées"). Left: the list of named lists
+ * lists ("Énumérations personnalisées"). Left: the list of named lists
  * (add / rename / delete, new list starts in edit mode). Right: the
  * selected list's entries in the shared `KeyValueTable` primitive, which
  * carries the enable toggle, the delete affordance and drag reordering.
@@ -300,7 +300,12 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
             ) : (
               <Pane title={t('folderView.customValues.values')} collapsible={false} minSize={80} data-testid="custom-values-entries-pane">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--descriptionForeground)', fontStyle: 'italic', padding: 16 }}>
-                  {t('folderView.customValues.selectList')}
+                  {/* The empty state carries a short explanation of the feature,
+                      not just a prompt — cap the line length so the paragraph
+                      stays readable when the pane is wide. */}
+                  <span style={{ maxWidth: 520, textAlign: 'center', lineHeight: 1.5 }}>
+                    {t('folderView.customValues.selectList')}
+                  </span>
                 </div>
               </Pane>
             )}

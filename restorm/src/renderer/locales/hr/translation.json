@@ -355,7 +355,7 @@
       "docs": "Dokumentacija",
       "environments": "Okruženja",
       "notes": "Bilješke",
-      "customValues": "Custom variables"
+      "customValues": "Prilagođene enumeracije"
     },
     "home": {
       "configureEnvs": "Konfiguriraj okruženja",
@@ -393,7 +393,7 @@
       "addEntry": "Dodaj vrijednost",
       "label": "Label",
       "value": "Value",
-      "selectList": "Odaberite popis"
+      "selectList": "Definirajte ponovno upotrebljive popise vrijednosti za svoje varijable: birate čitljivu oznaku, a zahtjev šalje pridruženu vrijednost. Odaberite ili stvorite enumeraciju za početak."
     }
   },
   "requestTab": {

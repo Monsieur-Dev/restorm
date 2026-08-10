@@ -354,7 +354,7 @@
       "docs": "Dokumentáció",
       "environments": "Környezetek",
       "notes": "Jegyzetek",
-      "customValues": "Custom variables"
+      "customValues": "Egyéni felsorolások"
     },
     "home": {
       "configureEnvs": "Környezetek konfigurálása",
@@ -392,7 +392,7 @@
       "addEntry": "Érték hozzáadása",
       "label": "Label",
       "value": "Value",
-      "selectList": "Válasszon listát"
+      "selectList": "Határozzon meg újrafelhasználható értéklistákat a változóihoz: Ön egy olvasható címkét választ, a kérés pedig a hozzá tartozó értéket küldi. Kezdésként válasszon ki vagy hozzon létre egy felsorolást."
     }
   },
   "requestTab": {

@@ -354,7 +354,7 @@
       "docs": "Docs",
       "environments": "Omgevingen",
       "notes": "Notities",
-      "customValues": "Custom variables"
+      "customValues": "Aangepaste enumeraties"
     },
     "home": {
       "configureEnvs": "Omgevingen configureren",
@@ -392,7 +392,7 @@
       "addEntry": "Een waarde toevoegen",
       "label": "Label",
       "value": "Value",
-      "selectList": "Selecteer een lijst"
+      "selectList": "Definieer herbruikbare waardelijsten voor uw variabelen: u kiest een leesbaar label, het request verstuurt de bijbehorende waarde. Selecteer of maak een enumeratie om te beginnen."
     }
   },
   "requestTab": {

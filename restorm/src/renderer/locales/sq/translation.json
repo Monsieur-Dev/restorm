@@ -354,7 +354,7 @@
       "docs": "Dokumentacioni",
       "environments": "Mjedise",
       "notes": "Shënimet",
-      "customValues": "Custom variables"
+      "customValues": "Enumerime të personalizuara"
     },
     "home": {
       "configureEnvs": "Konfiguro mjediset",
@@ -392,7 +392,7 @@
       "addEntry": "Shto një vlerë",
       "label": "Label",
       "value": "Value",
-      "selectList": "Zgjidhni një listë"
+      "selectList": "Përcaktoni lista vlerash të ripërdorshme për variablat tuaja: ju zgjidhni një etiketë të lexueshme, kërkesa dërgon vlerën e lidhur. Zgjidhni ose krijoni një enumerim për të filluar."
     }
   },
   "requestTab": {

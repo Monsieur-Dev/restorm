@@ -354,7 +354,7 @@
       "docs": "Dokumentasjon",
       "environments": "Miljøer",
       "notes": "Notater",
-      "customValues": "Custom variables"
+      "customValues": "Egendefinerte enumerasjoner"
     },
     "home": {
       "configureEnvs": "Konfigurer miljøer",
@@ -392,7 +392,7 @@
       "addEntry": "Legg til en verdi",
       "label": "Label",
       "value": "Value",
-      "selectList": "Velg en liste"
+      "selectList": "Definer gjenbrukbare verdilister for variablene dine: du velger en lesbar etikett, og requesten sender den tilknyttede verdien. Velg eller opprett en enumerasjon for å komme i gang."
     }
   },
   "requestTab": {

@@ -353,7 +353,7 @@
       "docs": "文档",
       "environments": "环境",
       "notes": "笔记",
-      "customValues": "Custom variables"
+      "customValues": "自定义枚举"
     },
     "home": {
       "configureEnvs": "配置环境",
@@ -391,7 +391,7 @@
       "addEntry": "添加值",
       "label": "Label",
       "value": "Value",
-      "selectList": "选择列表"
+      "selectList": "为变量定义可复用的值列表：您选择易读的标签，请求发送关联的值。选择或创建一个枚举即可开始。"
     }
   },
   "requestTab": {

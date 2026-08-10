@@ -3026,7 +3026,7 @@ When('I open the custom variables tab on the {string} env folder', async ({}, fo
   const row = cvlSidebarRow(page, folderName)
   await expect(row).toBeVisible({ timeout: 5000 })
   await row.click()
-  await page.getByRole('tab', { name: 'Custom variables' }).click()
+  await page.getByRole('tab', { name: 'Custom enumerations' }).click()
   await expect(page.locator('[data-testid="custom-values-sash-container"]')).toBeVisible({ timeout: 10000 })
 })
 

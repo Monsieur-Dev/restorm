@@ -353,7 +353,7 @@
       "docs": "Tài liệu",
       "environments": "Môi trường",
       "notes": "Ghi chú",
-      "customValues": "Custom variables"
+      "customValues": "Kiểu liệt kê tùy chỉnh"
     },
     "home": {
       "configureEnvs": "Cấu hình môi trường",
@@ -391,7 +391,7 @@
       "addEntry": "Thêm một giá trị",
       "label": "Label",
       "value": "Value",
-      "selectList": "Chọn một danh sách"
+      "selectList": "Định nghĩa các danh sách giá trị dùng lại được cho biến của bạn: bạn chọn một nhãn dễ đọc, yêu cầu sẽ gửi giá trị tương ứng. Hãy chọn hoặc tạo một kiểu liệt kê để bắt đầu."
     }
   },
   "requestTab": {

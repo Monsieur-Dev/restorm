@@ -354,7 +354,7 @@
       "docs": "Docs",
       "environments": "Entornos",
       "notes": "Notas",
-      "customValues": "Custom variables"
+      "customValues": "Enumeraciones personalizadas"
     },
     "home": {
       "configureEnvs": "Configurar entornos",
@@ -392,7 +392,7 @@
       "addEntry": "Añadir un valor",
       "label": "Label",
       "value": "Value",
-      "selectList": "Seleccione una lista"
+      "selectList": "Defina listas de valores reutilizables para sus variables: usted elige una etiqueta legible y la petición envía el valor asociado. Seleccione o cree una enumeración para empezar."
     }
   },
   "requestTab": {

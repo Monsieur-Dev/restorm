@@ -355,7 +355,7 @@
       "docs": "Documentație",
       "environments": "Medii",
       "notes": "Notițe",
-      "customValues": "Custom variables"
+      "customValues": "Enumerări personalizate"
     },
     "home": {
       "configureEnvs": "Configurează mediile",
@@ -393,7 +393,7 @@
       "addEntry": "Adăugați o valoare",
       "label": "Label",
       "value": "Value",
-      "selectList": "Selectați o listă"
+      "selectList": "Definiți liste de valori reutilizabile pentru variabilele dvs.: alegeți o etichetă lizibilă, iar cererea trimite valoarea asociată. Selectați sau creați o enumerare pentru a începe."
     }
   },
   "requestTab": {

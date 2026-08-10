@@ -356,7 +356,7 @@
       "docs": "Dokumentace",
       "environments": "Prostředí",
       "notes": "Poznámky",
-      "customValues": "Custom variables"
+      "customValues": "Vlastní výčty"
     },
     "home": {
       "configureEnvs": "Nakonfigurovat prostředí",
@@ -394,7 +394,7 @@
       "addEntry": "Přidat hodnotu",
       "label": "Label",
       "value": "Value",
-      "selectList": "Vyberte seznam"
+      "selectList": "Definujte znovupoužitelné seznamy hodnot pro své proměnné: zvolíte čitelný popisek a požadavek odešle přiřazenou hodnotu. Vyberte nebo vytvořte výčet a začněte."
     }
   },
   "requestTab": {

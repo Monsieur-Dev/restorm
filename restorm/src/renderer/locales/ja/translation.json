@@ -353,7 +353,7 @@
       "docs": "ドキュメント",
       "environments": "環境",
       "notes": "メモ",
-      "customValues": "Custom variables"
+      "customValues": "カスタム列挙"
     },
     "home": {
       "configureEnvs": "環境を設定",
@@ -391,7 +391,7 @@
       "addEntry": "値を追加",
       "label": "Label",
       "value": "Value",
-      "selectList": "リストを選択"
+      "selectList": "変数で再利用できる値リストを定義します。読みやすいラベルを選ぶと、リクエストには対応する値が送信されます。列挙を選択するか、新しく作成して始めましょう。"
     }
   },
   "requestTab": {

@@ -354,7 +354,7 @@
       "docs": "Doku",
       "environments": "Umgebungen",
       "notes": "Notizen",
-      "customValues": "Custom variables"
+      "customValues": "Benutzerdefinierte Aufzählungen"
     },
     "home": {
       "configureEnvs": "Umgebungen konfigurieren",
@@ -392,7 +392,7 @@
       "addEntry": "Wert hinzufügen",
       "label": "Label",
       "value": "Value",
-      "selectList": "Liste auswählen"
+      "selectList": "Definieren Sie wiederverwendbare Wertelisten für Ihre Variablen: Sie wählen eine lesbare Bezeichnung, der Request sendet den zugehörigen Wert. Wählen oder erstellen Sie eine Aufzählung, um zu beginnen."
     }
   },
   "requestTab": {

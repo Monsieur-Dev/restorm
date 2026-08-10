@@ -354,7 +354,7 @@
       "docs": "Docs",
       "environments": "Environnements",
       "notes": "Notes",
-      "customValues": "Variables personnalisées"
+      "customValues": "Énumérations personnalisées"
     },
     "home": {
       "configureEnvs": "Configurer les environnements",
@@ -392,7 +392,7 @@
       "addEntry": "Ajouter une valeur",
       "label": "Libellé",
       "value": "Valeur",
-      "selectList": "Sélectionnez une liste"
+      "selectList": "Définissez des listes de valeurs réutilisables dans vos variables : vous choisissez un libellé lisible, la requête envoie la valeur associée. Sélectionnez ou créez une énumération pour commencer."
     }
   },
   "requestTab": {

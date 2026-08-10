@@ -353,7 +353,7 @@
       "docs": "文件",
       "environments": "環境",
       "notes": "備註",
-      "customValues": "Custom variables"
+      "customValues": "自訂列舉"
     },
     "home": {
       "configureEnvs": "設定環境",
@@ -391,7 +391,7 @@
       "addEntry": "新增值",
       "label": "Label",
       "value": "Value",
-      "selectList": "選擇清單"
+      "selectList": "為變數定義可重複使用的值清單：您選擇易讀的標籤，請求會送出關聯的值。選取或建立一個列舉即可開始。"
     }
   },
   "requestTab": {

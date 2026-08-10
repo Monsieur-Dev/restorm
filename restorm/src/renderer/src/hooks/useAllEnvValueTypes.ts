@@ -27,7 +27,7 @@ export function useAllEnvValueTypes(): AllEnvValueTypes {
 
   // Computed inline (not memoised) so it re-reads the live folder proxies on
   // every render — folders mutate in place, so a `FOLDER_UPDATED` event bumps
-  // `version` to force the re-read after an edit in "Variables personnalisées".
+  // `version` to force the re-read after an edit in "Énumérations personnalisées".
   void version
   return collectAllEnvValueTypes(collections)
 }

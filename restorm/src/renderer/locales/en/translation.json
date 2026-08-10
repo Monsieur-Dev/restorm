@@ -354,7 +354,7 @@
       "docs": "Docs",
       "environments": "Environments",
       "notes": "Notes",
-      "customValues": "Custom variables"
+      "customValues": "Custom enumerations"
     },
     "home": {
       "configureEnvs": "Configure environments",
@@ -392,7 +392,7 @@
       "addEntry": "Add a value",
       "label": "Label",
       "value": "Value",
-      "selectList": "Select a list"
+      "selectList": "Define reusable value lists for your variables: you pick a readable label, the request sends the associated value. Select or create an enumeration to get started."
     }
   },
   "requestTab": {

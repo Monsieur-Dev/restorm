@@ -356,7 +356,7 @@
       "docs": "Dokumentacja",
       "environments": "Środowiska",
       "notes": "Notatki",
-      "customValues": "Custom variables"
+      "customValues": "Niestandardowe wyliczenia"
     },
     "home": {
       "configureEnvs": "Skonfiguruj środowiska",
@@ -394,7 +394,7 @@
       "addEntry": "Dodaj wartość",
       "label": "Label",
       "value": "Value",
-      "selectList": "Wybierz listę"
+      "selectList": "Zdefiniuj wielokrotnego użytku listy wartości dla zmiennych: wybierasz czytelną etykietę, a żądanie wysyła powiązaną wartość. Wybierz lub utwórz wyliczenie, aby zacząć."
     }
   },
   "requestTab": {

@@ -354,7 +354,7 @@
       "docs": "Dokumentit",
       "environments": "Ympäristöt",
       "notes": "Muistiinpanot",
-      "customValues": "Custom variables"
+      "customValues": "Mukautetut luettelot"
     },
     "home": {
       "configureEnvs": "Määritä ympäristöt",
@@ -392,7 +392,7 @@
       "addEntry": "Lisää arvo",
       "label": "Label",
       "value": "Value",
-      "selectList": "Valitse lista"
+      "selectList": "Määritä muuttujillesi uudelleenkäytettäviä arvoluetteloita: valitset luettavan nimikkeen, ja pyyntö lähettää siihen liitetyn arvon. Valitse tai luo luettelo aloittaaksesi."
     }
   },
   "requestTab": {

@@ -353,7 +353,7 @@
       "docs": "문서",
       "environments": "환경",
       "notes": "메모",
-      "customValues": "Custom variables"
+      "customValues": "사용자 지정 열거형"
     },
     "home": {
       "configureEnvs": "환경 구성",
@@ -391,7 +391,7 @@
       "addEntry": "값 추가",
       "label": "Label",
       "value": "Value",
-      "selectList": "목록 선택"
+      "selectList": "변수에서 재사용할 수 있는 값 목록을 정의하세요. 읽기 쉬운 레이블을 선택하면 요청은 연결된 값을 전송합니다. 시작하려면 열거형을 선택하거나 만드세요."
     }
   },
   "requestTab": {

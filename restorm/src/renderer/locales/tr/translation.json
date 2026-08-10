@@ -354,7 +354,7 @@
       "docs": "Belgeler",
       "environments": "Ortamlar",
       "notes": "Notlar",
-      "customValues": "Custom variables"
+      "customValues": "Özel numaralandırmalar"
     },
     "home": {
       "configureEnvs": "Ortamları yapılandır",
@@ -392,7 +392,7 @@
       "addEntry": "Bir değer ekle",
       "label": "Label",
       "value": "Value",
-      "selectList": "Bir liste seçin"
+      "selectList": "Değişkenleriniz için yeniden kullanılabilir değer listeleri tanımlayın: okunabilir bir etiket seçersiniz, istek ilişkili değeri gönderir. Başlamak için bir numaralandırma seçin veya oluşturun."
     }
   },
   "requestTab": {
