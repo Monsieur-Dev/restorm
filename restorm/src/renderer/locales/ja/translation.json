@@ -1034,7 +1034,9 @@
       "sourceImportFailed": "仕様をソースから再インポートできませんでした。",
       "emptySpec": "{{url}} から取得した仕様には {{format}} の操作が 1 つも宣言されていません。適用するとこのフォルダーが空になるため、更新を拒否しました。",
       "formatNotDetected": "このソースの形式を認識できませんでした。",
-      "unsupportedFormat": "{{format}} 形式に対応するインポーターがありません。"
+      "unsupportedFormat": "{{format}} 形式に対応するインポーターがありません。",
+      "projectFormatTooNew": "このプロジェクトファイルはフォーマットバージョン {{found}} を使用していますが、このバージョンの Restorm はバージョン {{current}} までしか理解できません。インポートするには Restorm を更新してください。",
+      "projectFormatMissing": "このファイルは Restorm のフォーマットバージョンを宣言していないため、Restorm プロジェクトファイルではありません。"
     },
     "formats": {
       "swagger": {
@@ -1141,6 +1143,9 @@
       "apiBlueprint": {
         "description": "API Blueprint ドキュメント（.apib）を貼り付けてください。restorm はすべてのリソースグループとトランジションを、ドキュメント化されたメソッド／レスポンスのペアごとに1つのリクエストフォルダーへと解析します。",
         "trademark": "API Blueprint はもともと Apiary によって作成された仕様です。"
+      },
+      "restorm": {
+        "description": "別の Restorm プロジェクトを開いているプロジェクトに統合します。インポートされたフォルダー、リクエスト、環境、シナリオはすべてラップフォルダーの下に新しい ID で配置されるため、プロジェクトを自分自身にインポートしても衝突しません。"
       }
     },
     "grpcReflection": {

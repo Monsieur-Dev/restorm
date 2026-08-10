@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { FolderItem, Scenario } from '../../../shared/types/collections'
-import { deepCloneItem, cloneItemInTree, generateUniqueId, ID_REFERENCE_KEYS, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
+import { deepCloneItem, cloneItemInTree, generateUniqueId, reidentifyForest, ID_REFERENCE_KEYS, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
 
 describe('generateUniqueId', () => {
   it('produces a UUID, never colliding within a tight loop', () => {
@@ -9,6 +9,38 @@ describe('generateUniqueId', () => {
     // Date.now()+Math.random() collided within a millisecond; crypto.randomUUID never does.
     expect(ids.size).toBe(10_000)
     expect(generateUniqueId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+  })
+})
+
+describe('reidentifyForest — the forest-level pass the import flow uses', () => {
+  it('remaps a reference from one root into a SIBLING root (per-root passes would miss it)', () => {
+    const request = { type: 'http', id: 'req-a', name: 'A', method: 'GET', url: '' }
+    const folderA = { id: 'fold-a', name: 'A', tags: [], configuration: {}, items: [request] }
+    const scenarioB = {
+      type: 'scenario', id: 'scn-b', name: 'B', tags: [], params: [],
+      nodes: [{ id: 'n-1', kind: 'httpRequest', config: { requestId: 'req-a' }, inputs: [], outputs: [], position: { x: 0, y: 0 } }],
+      edges: [], items: []
+    }
+    const roots = [folderA, scenarioB]
+
+    const idMap = reidentifyForest(roots)
+
+    expect(folderA.id).not.toBe('fold-a')
+    expect(scenarioB.nodes[0]?.config.requestId).toBe((request as { id: string }).id)
+    expect(idMap.get('req-a')).toBe((request as { id: string }).id)
+  })
+
+  it('composes: a second full pass keeps the forest self-consistent', () => {
+    const request = { type: 'http', id: 'req-a', name: 'A', method: 'GET', url: '' }
+    const scenario = {
+      type: 'scenario', id: 'scn-b', name: 'B', tags: [], params: [],
+      nodes: [{ id: 'n-1', kind: 'httpRequest', config: { requestId: 'req-a' }, inputs: [], outputs: [], position: { x: 0, y: 0 } }],
+      edges: [], items: []
+    }
+    const roots = [request, scenario]
+    reidentifyForest(roots)
+    reidentifyForest(roots)
+    expect(scenario.nodes[0]?.config.requestId).toBe(request.id)
   })
 })
 

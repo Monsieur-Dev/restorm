@@ -19,6 +19,7 @@ import { createHash } from 'node:crypto'
 import * as fs from 'fs/promises'
 import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
+import type { Folder } from '../../../shared/types/collections'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
 import type { ImportErrorCode, ImportErrorParams } from '../../../shared/config/importErrors'
@@ -226,7 +227,7 @@ export function detectFormat(content: string, filePath?: string): string | null 
  * alone — POSTing `{"bio": ""}` is a legitimate "clear this field"
  * payload that the user should manage explicitly.
  */
-function disableEmptyKeyValuesInTree(folder: EnvironmentFolder): void {
+function disableEmptyKeyValuesInTree(folder: EnvironmentFolder | Folder): void {
   const visit = (item: FolderItem): void => {
     if (isRequest(item)) {
       if (isHTTPRequest(item) || isAuthenticationRequest(item)) {
@@ -292,7 +293,7 @@ export async function importFromContent(
     }
     // Await the parse result so this function stays genuinely async — callers
     // can rely on the Promise-based API even if all current parsers are sync.
-    const folder: EnvironmentFolder = await Promise.resolve(provider.parse(content, opts))
+    const folder: EnvironmentFolder | Folder = await Promise.resolve(provider.parse(content, opts))
 
     // Auto-disable empty rows across the freshly-imported tree. Most
     // specs (OpenAPI parameters with no `example` / no `default`,
@@ -300,8 +301,11 @@ export async function importFromContent(
     // to fill them in) produce KV entries whose value resolves to "".
     // Sent over the wire as `?name=&header=` they trigger regex-based
     // 422s on strict APIs. Default is now "create empty rows as
-    // disabled" — the user opts in by re-checking the row.
-    disableEmptyKeyValuesInTree(folder)
+    // disabled" — the user opts in by re-checking the row. A provider
+    // whose payload is user-authored Restorm data opts out via
+    // `preserveEmptyKeyValues` — there an empty-but-enabled row is a
+    // deliberate saved state, not generator noise.
+    if (provider.preserveEmptyKeyValues !== true) disableEmptyKeyValuesInTree(folder)
 
     // Return the folder itself as a single item, not its children
     return {

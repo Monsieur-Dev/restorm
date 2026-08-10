@@ -1035,7 +1035,9 @@
       "sourceImportFailed": "Specifikationen kunne ikke importeres igen fra sin kilde.",
       "emptySpec": "Specifikationen hentet fra {{url}} erklærer ingen {{format}}-handling. At anvende den ville tømme denne mappe, så opdateringen blev afvist.",
       "formatNotDetected": "Formatet på denne kilde blev ikke genkendt.",
-      "unsupportedFormat": "Intet importmodul understøtter formatet {{format}}."
+      "unsupportedFormat": "Intet importmodul understøtter formatet {{format}}.",
+      "projectFormatTooNew": "Denne projektfil bruger formatversion {{found}}, men denne version af Restorm forstår kun version {{current}}. Opdater Restorm for at importere den.",
+      "projectFormatMissing": "Denne fil erklærer ingen Restorm-formatversion og er derfor ikke en Restorm-projektfil."
     },
     "formats": {
       "swagger": {
@@ -1142,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Indsæt et API Blueprint-dokument (.apib) — Restorm parser hver ressourcegruppe og overgang til en mappe med anmodninger, én pr. dokumenteret metode-/svarpar.",
         "trademark": "API Blueprint er en specifikation, der oprindeligt blev skabt af Apiary."
+      },
+      "restorm": {
+        "description": "Flet et andet Restorm-projekt ind i det åbne — hver importeret mappe, request, miljø og scenarie lander i en indpakningsmappe med nye identiteter, så intet kolliderer, selv når et projekt importeres i sig selv."
       }
     },
     "grpcReflection": {

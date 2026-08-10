@@ -1034,7 +1034,9 @@
       "sourceImportFailed": "Spesifikasi tidak dapat diimpor ulang dari sumbernya.",
       "emptySpec": "Spesifikasi yang diambil dari {{url}} tidak mendeklarasikan operasi {{format}} apa pun. Menerapkannya akan mengosongkan folder ini, sehingga pembaruan ditolak.",
       "formatNotDetected": "Format sumber ini tidak dikenali.",
-      "unsupportedFormat": "Tidak ada pengimpor yang menangani format {{format}}."
+      "unsupportedFormat": "Tidak ada pengimpor yang menangani format {{format}}.",
+      "projectFormatTooNew": "Berkas proyek ini menggunakan format versi {{found}}, tetapi versi Restorm ini hanya memahami versi {{current}}. Perbarui Restorm untuk mengimpornya.",
+      "projectFormatMissing": "Berkas ini tidak mendeklarasikan versi format Restorm, jadi bukan berkas proyek Restorm."
     },
     "formats": {
       "swagger": {
@@ -1141,6 +1143,9 @@
       "apiBlueprint": {
         "description": "Tempel dokumen API Blueprint (.apib) — Restorm mengurai setiap resource group dan transition menjadi folder permintaan, satu untuk setiap pasangan metode/respons yang terdokumentasi.",
         "trademark": "API Blueprint adalah spesifikasi yang awalnya dibuat oleh Apiary."
+      },
+      "restorm": {
+        "description": "Gabungkan proyek Restorm lain ke proyek yang terbuka — setiap folder, permintaan, lingkungan, dan skenario yang diimpor masuk ke folder pembungkus dengan identitas baru agar tidak ada yang bertabrakan, bahkan saat mengimpor proyek ke dirinya sendiri."
       }
     },
     "grpcReflection": {

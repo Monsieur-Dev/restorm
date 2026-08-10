@@ -7,6 +7,7 @@ route incoming files / URLs / pasted content to the right adapter.
 
 | Format | Doc |
 | --- | --- |
+| Restorm project (`.restorm`, merge into the open project) | [`restorm.md`](./restorm.md) |
 | OpenAPI 2.0 / 3.0 / 3.1 (Swagger) | [`openapi.md`](./openapi.md) |
 | OData v2 / v3 / v4 (EDMX + JSON-CSDL) | [`odata.md`](./odata.md) |
 | HAR (HTTP Archive) | [`har.md`](./har.md) |

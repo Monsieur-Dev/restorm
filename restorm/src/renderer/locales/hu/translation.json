@@ -1035,7 +1035,9 @@
       "sourceImportFailed": "A specifikációt nem sikerült újra importálni a forrásából.",
       "emptySpec": "A(z) {{url}} címről letöltött specifikáció egyetlen {{format}} műveletet sem deklarál. Alkalmazása kiürítené ezt a mappát, ezért a frissítés elutasításra került.",
       "formatNotDetected": "A forrás formátuma nem volt felismerhető.",
-      "unsupportedFormat": "Egyetlen importáló sem kezeli a(z) {{format}} formátumot."
+      "unsupportedFormat": "Egyetlen importáló sem kezeli a(z) {{format}} formátumot.",
+      "projectFormatTooNew": "Ez a projektfájl a(z) {{found}} formátumverziót használja, de a Restorm ezen verziója csak a(z) {{current}} verziót érti. Frissítse a Restormot az importáláshoz.",
+      "projectFormatMissing": "Ez a fájl nem deklarál Restorm-formátumverziót, így nem Restorm-projektfájl."
     },
     "formats": {
       "swagger": {
@@ -1142,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Illesszen be egy API Blueprint (.apib) dokumentumot — a Restorm minden erőforráscsoportot és átmenetet egy kérésmappává elemez, dokumentált metódus-/válaszpáronként eggyel.",
         "trademark": "Az API Blueprint egy eredetileg az Apiary által létrehozott specifikáció."
+      },
+      "restorm": {
+        "description": "Olvasszon be egy másik Restorm-projektet a megnyitottba — minden importált mappa, kérés, környezet és forgatókönyv egy burkolómappába kerül, új azonosítókkal, hogy semmi ne ütközzön, még akkor sem, ha egy projektet önmagába importál."
       }
     },
     "grpcReflection": {

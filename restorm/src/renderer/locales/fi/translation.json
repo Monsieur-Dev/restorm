@@ -1035,7 +1035,9 @@
       "sourceImportFailed": "Määrittelyä ei voitu tuoda uudelleen sen lähteestä.",
       "emptySpec": "Osoitteesta {{url}} noudettu määrittely ei sisällä yhtään {{format}}-operaatiota. Sen käyttöönotto tyhjentäisi tämän kansion, joten päivitys hylättiin.",
       "formatNotDetected": "Tämän lähteen muotoa ei tunnistettu.",
-      "unsupportedFormat": "Mikään tuoja ei tue muotoa {{format}}."
+      "unsupportedFormat": "Mikään tuoja ei tue muotoa {{format}}.",
+      "projectFormatTooNew": "Tämä projektitiedosto käyttää muotoversiota {{found}}, mutta tämä Restorm-versio ymmärtää vain version {{current}}. Päivitä Restorm tuodaksesi sen.",
+      "projectFormatMissing": "Tämä tiedosto ei ilmoita Restorm-muotoversiota, joten se ei ole Restorm-projektitiedosto."
     },
     "formats": {
       "swagger": {
@@ -1142,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Liitä API Blueprint -dokumentti (.apib) — Restorm jäsentää jokaisen resurssiryhmän ja siirtymän pyyntökansioksi, yksi per dokumentoitu metodi-/vastauspari.",
         "trademark": "API Blueprint on alun perin Apiaryn luoma määrittely."
+      },
+      "restorm": {
+        "description": "Yhdistä toinen Restorm-projekti avoinna olevaan — jokainen tuotu kansio, pyyntö, ympäristö ja skenaario saapuu käärekansioon uusin tunnistein, jotta mikään ei törmää, ei edes tuotaessa projektia itseensä."
       }
     },
     "grpcReflection": {

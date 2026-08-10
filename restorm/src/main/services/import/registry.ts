@@ -1,4 +1,5 @@
 import type { EnvironmentFolder } from '../../../shared/models'
+import type { Folder } from '../../../shared/types/collections'
 
 /**
  * Every import format exposes this interface so the registry can dispatch
@@ -35,7 +36,22 @@ export interface ImportProvider {
    */
   canImport(content: string, filePath?: string, parsed?: unknown): boolean
   /**
-   * Full parse → EnvironmentFolder. Called only after `canImport` returned
+   * Skip the post-parse "disable empty key-value rows" normalization
+   * (`disableEmptyKeyValuesInTree`). That normalization is spec-import
+   * hygiene — generated placeholder headers/params a strict API would 422
+   * on — but a format whose payload is USER-AUTHORED Restorm data (the
+   * `.restorm` project import) must arrive exactly as the user saved it:
+   * an empty-but-enabled row there is a deliberate state, not generator
+   * noise. Absent (the default) means the normalization runs.
+   */
+  readonly preserveEmptyKeyValues?: boolean
+  /**
+   * Full parse → a single root folder. Most formats produce an
+   * `EnvironmentFolder` (specs carry servers/environments); a format whose
+   * payload has no environment semantics of its own at the root (the
+   * `.restorm` project import wraps the source project's collections) may
+   * return a plain `Folder` — an env-folder with zero environments would
+   * otherwise pollute every environment picker. Called only after `canImport` returned
    * true. `opts.filePath` carries the real on-disk path for file-based
    * imports (unset for URL imports) — most adapters are self-contained and
    * ignore it, but a format whose own compiler needs disk locality to
@@ -47,7 +63,7 @@ export interface ImportProvider {
    * deliberately does NOT compile at that real path; see
    * `TypeSpecImportService.ts`'s Trust model note for why.
    */
-  parse(content: string, opts: { sourceUrl?: string; filePath?: string }): EnvironmentFolder
+  parse(content: string, opts: { sourceUrl?: string; filePath?: string }): EnvironmentFolder | Folder
 
   /**
    * Optional post-import side effect, run AFTER the imported items have

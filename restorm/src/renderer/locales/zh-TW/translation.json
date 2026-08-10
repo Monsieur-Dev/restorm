@@ -1034,7 +1034,9 @@
       "sourceImportFailed": "無法從來源重新匯入此規格。",
       "emptySpec": "從 {{url}} 取得的規格未宣告任何 {{format}} 作業。套用它會清空此資料夾，因此已拒絕這次更新。",
       "formatNotDetected": "無法辨識此來源的格式。",
-      "unsupportedFormat": "沒有匯入器支援 {{format}} 格式。"
+      "unsupportedFormat": "沒有匯入器支援 {{format}} 格式。",
+      "projectFormatTooNew": "此專案檔使用格式版本 {{found}}，但目前版本的 Restorm 僅支援版本 {{current}}。請更新 Restorm 後再匯入。",
+      "projectFormatMissing": "此檔案未宣告 Restorm 格式版本，因此不是 Restorm 專案檔。"
     },
     "formats": {
       "swagger": {
@@ -1141,6 +1143,9 @@
       "apiBlueprint": {
         "description": "貼上一個 API Blueprint（.apib）文件——restorm 會將每個資源群組與 transition 解析為請求資料夾，每個已記錄的方法/回應配對產生一個請求。",
         "trademark": "API Blueprint 最初為 Apiary 所建立的規範。"
+      },
+      "restorm": {
+        "description": "將另一個 Restorm 專案合併到目前開啟的專案——匯入的每個資料夾、請求、環境與情境都會放入一個包裹資料夾，並取得全新的識別碼以避免任何衝突,即使將專案匯入到它自身也不例外。"
       }
     },
     "grpcReflection": {

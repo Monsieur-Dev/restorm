@@ -1037,7 +1037,9 @@
       "sourceImportFailed": "Nie udało się ponownie zaimportować specyfikacji z jej źródła.",
       "emptySpec": "Specyfikacja pobrana z {{url}} nie deklaruje żadnej operacji {{format}}. Zastosowanie jej opróżniłoby ten folder, więc aktualizacja została odrzucona.",
       "formatNotDetected": "Nie rozpoznano formatu tego źródła.",
-      "unsupportedFormat": "Żaden importer nie obsługuje formatu {{format}}."
+      "unsupportedFormat": "Żaden importer nie obsługuje formatu {{format}}.",
+      "projectFormatTooNew": "Ten plik projektu używa wersji formatu {{found}}, ale ta wersja Restorm rozumie tylko wersję {{current}}. Zaktualizuj Restorm, aby go zaimportować.",
+      "projectFormatMissing": "Ten plik nie deklaruje żadnej wersji formatu Restorm, więc nie jest plikiem projektu Restorm."
     },
     "formats": {
       "swagger": {
@@ -1144,6 +1146,9 @@
       "apiBlueprint": {
         "description": "Wklejcie dokument API Blueprint (.apib) — Restorm przetwarza każdą grupę zasobów i przejście na folder żądań, jedno na udokumentowaną parę metoda/odpowiedź.",
         "trademark": "API Blueprint to specyfikacja pierwotnie stworzona przez Apiary."
+      },
+      "restorm": {
+        "description": "Scal inny projekt Restorm z aktualnie otwartym — każdy zaimportowany folder, żądanie, środowisko i scenariusz trafia do folderu opakowującego, z nowymi identyfikatorami, aby nic nie kolidowało, nawet przy imporcie projektu do niego samego."
       }
     },
     "grpcReflection": {

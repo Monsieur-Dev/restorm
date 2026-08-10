@@ -1037,7 +1037,9 @@
       "sourceImportFailed": "Specifikaci se nepodařilo znovu importovat z jejího zdroje.",
       "emptySpec": "Specifikace stažená z {{url}} nedeklaruje žádnou operaci {{format}}. Jejím použitím by se tato složka vyprázdnila, aktualizace byla proto odmítnuta.",
       "formatNotDetected": "Formát tohoto zdroje nebyl rozpoznán.",
-      "unsupportedFormat": "Formát {{format}} nezpracovává žádný importér."
+      "unsupportedFormat": "Formát {{format}} nezpracovává žádný importér.",
+      "projectFormatTooNew": "Tento soubor projektu používá verzi formátu {{found}}, ale tato verze Restormu rozumí jen verzi {{current}}. Aktualizujte Restorm, abyste jej mohli importovat.",
+      "projectFormatMissing": "Tento soubor nedeklaruje žádnou verzi formátu Restorm, není to tedy soubor projektu Restorm."
     },
     "formats": {
       "swagger": {
@@ -1144,6 +1146,9 @@
       "apiBlueprint": {
         "description": "Vložte dokument API Blueprint (.apib) — Restorm rozebere každou skupinu zdrojů a přechod do složky požadavků, jeden na každou zdokumentovanou dvojici metoda/odpověď.",
         "trademark": "API Blueprint je specifikace původně vytvořená společností Apiary."
+      },
+      "restorm": {
+        "description": "Slučte jiný projekt Restorm s právě otevřeným — každá importovaná složka, požadavek, prostředí a scénář dorazí v obalové složce s novými identitami, takže nic nekoliduje, ani při importu projektu do něj samotného."
       }
     },
     "grpcReflection": {

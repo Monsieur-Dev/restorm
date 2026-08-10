@@ -63,7 +63,15 @@ export const IMPORT_ERROR_CODES = [
   /** No importer recognised the source's format. */
   'formatNotDetected',
   /** A format was named but no provider handles it. */
-  'unsupportedFormat'
+  'unsupportedFormat',
+  /** A `.restorm` project import declares a file-format version newer than
+   *  this build understands — same refusal as opening it, for the same
+   *  reason: a build cannot merge content whose format it postdates. */
+  'projectFormatTooNew',
+  /** A `.restorm` project import declares NO file-format version at its
+   *  root — same refusal as the open path: every Restorm save stamps one,
+   *  so its absence means the file is not a Restorm project. */
+  'projectFormatMissing'
 ] as const
 
 export type ImportErrorCode = typeof IMPORT_ERROR_CODES[number]

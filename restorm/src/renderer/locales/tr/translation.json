@@ -1035,7 +1035,9 @@
       "sourceImportFailed": "Belirtim kaynağından yeniden içe aktarılamadı.",
       "emptySpec": "{{url}} adresinden alınan belirtim hiçbir {{format}} işlemi tanımlamıyor. Uygulanması bu klasörü boşaltacağı için güncelleme reddedildi.",
       "formatNotDetected": "Bu kaynağın biçimi tanınmadı.",
-      "unsupportedFormat": "{{format}} biçimini işleyen bir içe aktarıcı yok."
+      "unsupportedFormat": "{{format}} biçimini işleyen bir içe aktarıcı yok.",
+      "projectFormatTooNew": "Bu proje dosyası {{found}} biçim sürümünü kullanıyor, ancak Restorm’un bu sürümü yalnızca {{current}} sürümünü anlıyor. İçe aktarmak için Restorm’u güncelleyin.",
+      "projectFormatMissing": "Bu dosya bir Restorm biçim sürümü bildirmiyor, dolayısıyla bir Restorm proje dosyası değil."
     },
     "formats": {
       "swagger": {
@@ -1142,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Bir API Blueprint (.apib) belgesi yapıştırın — Restorm her kaynak grubunu ve geçişi, belgelenen her metot/yanıt çifti için bir istek klasörüne ayrıştırır.",
         "trademark": "API Blueprint, aslen Apiary tarafından oluşturulmuş bir spesifikasyondur."
+      },
+      "restorm": {
+        "description": "Başka bir Restorm projesini açık olanla birleştirin — içe aktarılan her klasör, istek, ortam ve senaryo, hiçbir şey çakışmasın diye yeni kimliklerle bir sarmalayıcı klasöre gelir; bir projeyi kendi içine aktarırken bile."
       }
     },
     "grpcReflection": {

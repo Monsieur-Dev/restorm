@@ -1034,7 +1034,9 @@
       "sourceImportFailed": "사양을 원본에서 다시 가져올 수 없습니다.",
       "emptySpec": "{{url}}에서 가져온 사양에 {{format}} 작업이 하나도 선언되어 있지 않습니다. 적용하면 이 폴더가 비워지므로 업데이트를 거부했습니다.",
       "formatNotDetected": "이 소스의 형식을 인식하지 못했습니다.",
-      "unsupportedFormat": "{{format}} 형식을 처리하는 가져오기 모듈이 없습니다."
+      "unsupportedFormat": "{{format}} 형식을 처리하는 가져오기 모듈이 없습니다.",
+      "projectFormatTooNew": "이 프로젝트 파일은 형식 버전 {{found}}을(를) 사용하지만, 이 버전의 Restorm은 버전 {{current}}까지만 이해합니다. 가져오려면 Restorm을 업데이트하세요.",
+      "projectFormatMissing": "이 파일은 Restorm 형식 버전을 선언하지 않으므로 Restorm 프로젝트 파일이 아닙니다."
     },
     "formats": {
       "swagger": {
@@ -1141,6 +1143,9 @@
       "apiBlueprint": {
         "description": "API Blueprint(.apib) 문서를 붙여넣으세요 — restorm이 모든 리소스 그룹과 전환을 문서화된 메서드/응답 쌍마다 하나씩 요청 폴더로 분석합니다.",
         "trademark": "API Blueprint는 원래 Apiary가 만든 사양입니다."
+      },
+      "restorm": {
+        "description": "다른 Restorm 프로젝트를 열려 있는 프로젝트에 병합합니다. 가져온 모든 폴더, 요청, 환경, 시나리오는 래핑 폴더 아래에 새 식별자로 배치되어, 프로젝트를 자기 자신에 가져와도 충돌하지 않습니다."
       }
     },
     "grpcReflection": {

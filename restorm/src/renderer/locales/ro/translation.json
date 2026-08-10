@@ -1036,7 +1036,9 @@
       "sourceImportFailed": "Specificația nu a putut fi reimportată din sursa sa.",
       "emptySpec": "Specificația descărcată de la {{url}} nu declară nicio operațiune {{format}}. Aplicarea ei ar goli acest folder, deci actualizarea a fost refuzată.",
       "formatNotDetected": "Formatul acestei surse nu a fost recunoscut.",
-      "unsupportedFormat": "Niciun importator nu gestionează formatul {{format}}."
+      "unsupportedFormat": "Niciun importator nu gestionează formatul {{format}}.",
+      "projectFormatTooNew": "Acest fișier de proiect folosește versiunea de format {{found}}, dar această versiune de Restorm înțelege doar versiunea {{current}}. Actualizați Restorm pentru a-l importa.",
+      "projectFormatMissing": "Acest fișier nu declară nicio versiune de format Restorm, deci nu este un fișier de proiect Restorm."
     },
     "formats": {
       "swagger": {
@@ -1143,6 +1145,9 @@
       "apiBlueprint": {
         "description": "Lipiți un document API Blueprint (.apib) — Restorm analizează fiecare grup de resurse și tranziție într-un folder de cereri, câte una pentru fiecare pereche metodă/răspuns documentată.",
         "trademark": "API Blueprint este o specificație creată inițial de Apiary."
+      },
+      "restorm": {
+        "description": "Îmbinați un alt proiect Restorm cu cel deschis — fiecare dosar, cerere, mediu și scenariu importat ajunge într-un dosar-înveliș, cu identități noi pentru ca nimic să nu intre în coliziune, nici măcar la importul unui proiect în el însuși."
       }
     },
     "grpcReflection": {

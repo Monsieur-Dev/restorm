@@ -40,6 +40,11 @@ const harImportTestDir = defineBddConfig({
   steps: ['tests/e2e/bdd/har-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/har-import.fixture.ts'],
   outputDir: '.features-gen/har-import'
 })
+const restormImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/restorm-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/restorm-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/restorm-import.fixture.ts'],
+  outputDir: '.features-gen/restorm-import'
+})
 
 const dirtyStateTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/dirty-state/features/**/*.feature',
@@ -591,6 +596,10 @@ export default defineConfig({
     {
       name: 'har-import',
       testDir: harImportTestDir
+    },
+    {
+      name: 'restorm-import',
+      testDir: restormImportTestDir
     },
     {
       name: 'dirty-state',

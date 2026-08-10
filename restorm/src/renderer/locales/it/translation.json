@@ -1035,7 +1035,9 @@
       "sourceImportFailed": "Non è stato possibile reimportare la specifica dalla sua origine.",
       "emptySpec": "La specifica recuperata da {{url}} non dichiara alcuna operazione {{format}}. Applicarla svuoterebbe questa cartella, quindi l'aggiornamento è stato rifiutato.",
       "formatNotDetected": "Il formato di questa origine non è stato riconosciuto.",
-      "unsupportedFormat": "Nessun importatore gestisce il formato {{format}}."
+      "unsupportedFormat": "Nessun importatore gestisce il formato {{format}}.",
+      "projectFormatTooNew": "Questo file di progetto usa la versione di formato {{found}}, ma questa versione di Restorm comprende solo la versione {{current}}. Aggiorna Restorm per importarlo.",
+      "projectFormatMissing": "Questo file non dichiara alcuna versione di formato Restorm, quindi non è un file di progetto Restorm."
     },
     "formats": {
       "swagger": {
@@ -1142,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Incolli un documento API Blueprint (.apib) — Restorm analizza ogni gruppo di risorse e transizione per produrre una cartella di richieste, una per ogni coppia di metodo e risposta documentata.",
         "trademark": "API Blueprint è una specifica creata originariamente da Apiary."
+      },
+      "restorm": {
+        "description": "Unisci un altro progetto Restorm a quello aperto: ogni cartella, richiesta, ambiente e scenario importato arriva in una cartella contenitore, con identità nuove perché nulla entri in collisione, nemmeno importando un progetto in sé stesso."
       }
     },
     "grpcReflection": {

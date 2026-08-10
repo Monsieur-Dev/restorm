@@ -1035,7 +1035,9 @@
       "sourceImportFailed": "Specifikimi nuk mundi të riimportohej nga burimi i tij.",
       "emptySpec": "Specifikimi i marrë nga {{url}} nuk deklaron asnjë veprim {{format}}. Zbatimi i tij do ta zbraste këtë dosje, prandaj përditësimi u refuzua.",
       "formatNotDetected": "Formati i këtij burimi nuk u njoh.",
-      "unsupportedFormat": "Asnjë importues nuk e mbështet formatin {{format}}."
+      "unsupportedFormat": "Asnjë importues nuk e mbështet formatin {{format}}.",
+      "projectFormatTooNew": "Ky skedar projekti përdor versionin e formatit {{found}}, por ky version i Restorm kupton vetëm versionin {{current}}. Përditësoni Restorm për ta importuar.",
+      "projectFormatMissing": "Ky skedar nuk deklaron asnjë version formati Restorm, prandaj nuk është skedar projekti Restorm."
     },
     "formats": {
       "swagger": {
@@ -1142,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Ngjitni një dokument API Blueprint (.apib) — Restorm analizon çdo grup burimesh dhe kalim në një dosje kërkesash, një për çdo çift metodë/përgjigje të dokumentuar.",
         "trademark": "API Blueprint është një specifikim i krijuar fillimisht nga Apiary."
+      },
+      "restorm": {
+        "description": "Bashkoni një projekt tjetër Restorm me atë të hapur — çdo dosje, kërkesë, mjedis dhe skenar i importuar mbërrin nën një dosje mbështjellëse, me identitete të reja që asgjë të mos përplaset, as kur një projekt importohet në vetvete."
       }
     },
     "grpcReflection": {

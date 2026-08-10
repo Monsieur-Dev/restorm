@@ -1035,7 +1035,9 @@
       "sourceImportFailed": "De specificatie kon niet opnieuw vanaf de bron worden geïmporteerd.",
       "emptySpec": "De specificatie die is opgehaald van {{url}} declareert geen enkele {{format}}-bewerking. Toepassen zou deze map leegmaken, dus de update is geweigerd.",
       "formatNotDetected": "Het formaat van deze bron is niet herkend.",
-      "unsupportedFormat": "Geen enkele importer ondersteunt het formaat {{format}}."
+      "unsupportedFormat": "Geen enkele importer ondersteunt het formaat {{format}}.",
+      "projectFormatTooNew": "Dit projectbestand gebruikt formaatversie {{found}}, maar deze versie van Restorm begrijpt alleen versie {{current}}. Werk Restorm bij om het te importeren.",
+      "projectFormatMissing": "Dit bestand declareert geen Restorm-formaatversie en is dus geen Restorm-projectbestand."
     },
     "formats": {
       "swagger": {
@@ -1142,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Plak een API Blueprint-document (.apib) — Restorm parseert elke resourcegroep en overgang tot een map met verzoeken, één per gedocumenteerd methode-/antwoordpaar.",
         "trademark": "API Blueprint is een specificatie die oorspronkelijk door Apiary is gemaakt."
+      },
+      "restorm": {
+        "description": "Voeg een ander Restorm-project samen met het geopende project — elke geïmporteerde map, request, omgeving en scenario komt in een omhullende map terecht, met nieuwe identiteiten zodat niets botst, zelfs niet bij het importeren van een project in zichzelf."
       }
     },
     "grpcReflection": {

@@ -50,6 +50,7 @@ server; — = pure UI/in-process.
 | odata-import | 4 | OData multi-version metadata + JSON-CSDL | — |
 | raml-import | 4 | RAML import | — |
 | har-import | 3 | HAR (HTTP Archive) auto-detect + tree | — |
+| restorm-import | 3 | .restorm project merge — wrapper folder, self-import duplication, save+reopen | — |
 | paw-import | 3 | Paw JSON export import | 🏠 live API |
 | wadl-import | 3 | WADL import | — |
 | thrift-import | 3 | Thrift IDL (documentation-only) | — |

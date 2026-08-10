@@ -1,0 +1,105 @@
+fileFormatVersion: 1
+collections:
+  - id: envf-0000-0000-0000-000000000001
+    name: PetAPI
+    folderType: environment
+    configuration: {}
+    environments:
+      - id: env-0000-0000-0000-000000000001
+        name: Dev
+        variables:
+          - key: baseUrl
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: http://localhost:8080
+          - key: petStatus
+            description: ''
+            enabled: true
+            value:
+              type: enum
+              value: available
+              enumDefinitionId: enum-0000-0000-0000-000000000001
+        subEnvironments:
+          - id: subenv-0000-0000-0000-000000000001
+            name: Staging
+            variables:
+              - key: baseUrl
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: https://staging.example.com
+    enumDefinitions:
+      - id: enum-0000-0000-0000-000000000001
+        name: PetStatus
+        values:
+          - available
+          - pending
+          - sold
+    customValueLists:
+      - id: cvl-0000-0000-0000-000000000001
+        name: Regions
+        entries:
+          - id: cvle-0000-0000-0000-000000000001
+            label: Europe
+            value: eu
+    items:
+      - id: auth-0000-0000-0000-000000000001
+        type: auth
+        name: Login
+        url: '{{baseUrl}}/login'
+        method: POST
+        headers: []
+        params: []
+        pathParams: []
+      - id: req-0000-0000-0000-000000000001
+        type: http
+        name: GetPets
+        url: '{{baseUrl}}/pets'
+        method: GET
+        authenticationRequestId: auth-0000-0000-0000-000000000001
+        headers:
+          - key: Accept
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: ''
+        params: []
+        pathParams: []
+        quickConfigs:
+          - id: qc-0000-0000-0000-000000000001
+            name: default
+            requestId: req-0000-0000-0000-000000000001
+    tagColors: {}
+    tags: []
+  - id: scen-0000-0000-0000-000000000001
+    type: scenario
+    name: FetchFlow
+    params: []
+    nodes:
+      - id: node-0000-0000-0000-000000000001
+        kind: httpRequest
+        position:
+          x: 0
+          y: 0
+        config:
+          requestId: req-0000-0000-0000-000000000001
+      - id: node-0000-0000-0000-000000000002
+        kind: log
+        position:
+          x: 200
+          y: 0
+        config: {}
+    edges:
+      - id: edge-0000-0000-0000-000000000001
+        from:
+          nodeId: node-0000-0000-0000-000000000001
+          portId: response
+        to:
+          nodeId: node-0000-0000-0000-000000000002
+          portId: value
+    items: []
+_projectUuid: 4242e2e2-0000-0000-0000-000000000042

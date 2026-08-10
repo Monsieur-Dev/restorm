@@ -1036,7 +1036,9 @@
       "sourceImportFailed": "Specifikaciju nije bilo moguće ponovno uvesti iz njezina izvora.",
       "emptySpec": "Specifikacija dohvaćena s {{url}} ne deklarira nijednu operaciju {{format}}. Primjena bi ispraznila ovu mapu pa je ažuriranje odbijeno.",
       "formatNotDetected": "Format ovog izvora nije prepoznat.",
-      "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}."
+      "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}.",
+      "projectFormatTooNew": "Ova projektna datoteka koristi verziju formata {{found}}, ali ova verzija Restorma razumije samo verziju {{current}}. Ažurirajte Restorm da biste je uvezli.",
+      "projectFormatMissing": "Ova datoteka ne deklarira verziju formata Restorm, pa nije Restorm projektna datoteka."
     },
     "formats": {
       "swagger": {
@@ -1143,6 +1145,9 @@
       "apiBlueprint": {
         "description": "Zalijepite API Blueprint (.apib) dokument — Restorm analizira svaku grupu resursa i prijelaz u mapu zahtjeva, jedan po dokumentiranom paru metoda/odgovor.",
         "trademark": "API Blueprint je specifikacija koju je izvorno stvorio Apiary."
+      },
+      "restorm": {
+        "description": "Spojite drugi Restorm projekt s otvorenim — svaka uvezena mapa, zahtjev, okruženje i scenarij stiže u omotnu mapu, s novim identitetima da se ništa ne sudara, čak ni pri uvozu projekta u njega samog."
       }
     },
     "grpcReflection": {
