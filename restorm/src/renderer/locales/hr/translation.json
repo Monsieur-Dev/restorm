@@ -229,36 +229,24 @@
     "saveAll": "Spremi sve",
     "saveAs": "Spremi kao",
     "exit": "Izlaz",
-    "selection": "Odabir",
-    "tools": "Alati",
-    "findInCollection": "Pronađi u kolekciji",
-    "addRequest": "Dodaj zahtjev",
-    "addRequestHttp": "HTTP zahtjev",
-    "addRequestGraphql": "GraphQL zahtjev",
-    "addRequestGrpc": "gRPC zahtjev",
-    "addRequestSoap": "SOAP zahtjev",
-    "addRequestOdata": "OData zahtjev",
-    "addRequestWebsocket": "WebSocket zahtjev",
-    "addFolder": "Dodaj mapu",
-    "addEnvironmentFolder": "Dodaj mapu okruženja",
-    "addVariable": "Dodaj varijablu",
-    "addTag": "Dodaj oznaku",
-    "expandAllFolders": "Proširi sve mape",
-    "collapseAllFolders": "Sažmi sve mape",
-    "sendActiveRequest": "Pošalji zahtjev",
-    "cancelActiveRequest": "Otkaži zahtjev",
-    "generateCodeSnippet": "Generiraj isječak koda",
-    "copyAsCurl": "Kopiraj kao cURL",
-    "exportOpenApi": "Izvezi u OpenAPI",
-    "clearAuthCache": "Očisti predmemoriju autentifikacije",
-    "openLogsFolder": "Otvori mapu zapisa",
     "mcpLogs": "MCP zapisi",
+    "consoleHttp": "HTTP konzola",
     "git": "Git",
     "gitPush": "Pošalji",
     "gitPull": "Preuzmi",
     "gitRefresh": "Osvježi",
     "gitHistory": "Povijest",
-    "gitResetToServer": "Vrati na verziju poslužitelja"
+    "gitResetToServer": "Vrati na verziju poslužitelja",
+    "scenario": "Scenarij",
+    "create": "Stvori",
+    "request": "Zahtjev",
+    "server": "Poslužitelj",
+    "runSelected": "Pokreni",
+    "cancelSelected": "Otkaži",
+    "clone": "Kloniraj",
+    "delete": "Izbriši",
+    "addToFavorites": "Dodaj u favorite",
+    "removeFromFavorites": "Ukloni iz favorita"
   },
   "sidebar": {
     "addRequest": "Dodaj zahtjev",
@@ -329,7 +317,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Izreži",
+      "copy": "Kopiraj",
+      "paste": "Zalijepi"
     },
     "deleteConfirm": {
       "title": "Potvrdi brisanje",
@@ -609,6 +600,7 @@
     "disconnect": "Prekini vezu",
     "startListening": "Počni slušati",
     "stopListening": "Zaustavi slušanje",
+    "listenFailed": "Pokretanje poslužitelja nije uspjelo",
     "routePlaceholder": "Ruta (neobavezno)",
     "clientsConnected": "{{count}} klijent(a) povezano",
     "notListening": "Ne sluša"
@@ -1767,8 +1759,7 @@
       "dataFormats": "Formati podataka",
       "encoding": "Kodiranje",
       "time": "Tempiranje",
-      "algorithmie": "Algoritmi",
-      "ux": "UX"
+      "algorithmie": "Algoritmi"
     },
     "listOp": {
       "value": "lista",

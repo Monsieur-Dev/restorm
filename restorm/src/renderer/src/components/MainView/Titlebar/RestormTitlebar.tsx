@@ -1,4 +1,7 @@
 import React, { useCallback, useState } from 'react'
+import { docsUrl } from '../../../../../shared/config/site'
+import { resolveChannel } from '../../../../../shared/config/backend'
+import type { SidebarContextMenuItem } from '../Sidebar/contextMenuBuilder'
 import { useTranslation } from 'react-i18next'
 import {
   Titlebar,
@@ -11,6 +14,7 @@ import {
   eventBus,
   useSettingsModal,
   useFeature,
+  useElectronPlatform,
   type SearchResult
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
@@ -87,6 +91,32 @@ export interface RestormTitlebarProps {
   /** Open / focus the Settings singleton tab. Used only when
    * `workbenchActive` is true; otherwise the modal is shown. */
   onOpenSettingsTab: () => void
+  /** The sidebar selection the Édition / Sélection menus act on. */
+  selection?: { id: string; kind: 'env-folder' | 'folder' | 'scenario' | 'server' | 'request'; isFavorite: boolean } | null
+  /** Whether a paste payload is staged (enables Coller). */
+  canPaste?: boolean
+  onCutSelection?: () => void
+  onCopySelection?: () => void
+  onPasteSelection?: () => void
+  onCloneSelection?: () => void
+  onDeleteSelection?: () => void
+  onToggleFavoriteSelection?: () => void
+  onFocusSearch?: () => void
+  /** The add entries of the « Créer » menu — built by the host from the
+   * SAME catalogue as the sidebar context menu's « Ajouter », placement
+   * rules included (container → inside at the end; request → sibling
+   * after; no selection → root). */
+  selectionAddSubmenu?: SidebarContextMenuItem[] | null
+  /** Run/cancel handlers for the ACTIVE workbench tab's CLIENT request —
+   * the « Requête » menu shows only when this is non-null. */
+  activeRequestControls?: { onRun: () => void; onCancel: () => void } | null
+  /** Action entries mirroring the ACTIVE server editor tab's buttons —
+   * the « Serveur » menu shows only when this is non-null. */
+  activeServerMenu?: SidebarContextMenuItem[] | null
+  /** Add-node palette of the ACTIVE scenario tab (the same items as the
+   * right-click on its empty canvas) — the « Scénario » menu shows only
+   * when this is non-null. */
+  activeScenarioPalette?: SidebarContextMenuItem[] | null
 }
 
 /**
@@ -119,9 +149,25 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   gitPushPending,
   gitPullPending,
   workbenchActive,
-  onOpenSettingsTab
+  onOpenSettingsTab,
+  selection = null,
+  canPaste = false,
+  onCutSelection,
+  onCopySelection,
+  onPasteSelection,
+  onCloneSelection,
+  onDeleteSelection,
+  onToggleFavoriteSelection,
+  onFocusSearch,
+  selectionAddSubmenu = null,
+  activeRequestControls = null,
+  activeServerMenu = null,
+  activeScenarioPalette = null
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  // macOS renders the menus natively (system bar) — the Édition menu must
+  // carry the platform text-editing roles there, see the block below.
+  const isMac = useElectronPlatform() === 'darwin'
   const { showSettingsModal } = useSettingsModal()
   const { isEnabled: navigationEnabled } = useFeature('navigation')
   // The MCP-logs menu entry is disabled when the embedded MCP server isn't
@@ -193,6 +239,39 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   const [aboutOpen, setAboutOpen] = useState(false)
   const handleCloseAbout = useCallback(() => { setAboutOpen(false) }, [])
 
+  // Render a sidebar context-menu data structure as MenuBar items — the
+  // Sélection « Ajouter » submenu and the Scénario menu reuse the exact
+  // builders their surfaces use, so the two stay identical by construction.
+  const renderMenuData = useCallback(function renderData(items: SidebarContextMenuItem[], prefix: string): React.ReactNode {
+    return (
+    items.map((item, i) => {
+      if (item.isSeparator) return <MenuItemSeparator key={`${prefix}-sep-${String(i)}`} data-testid={`${prefix}-sep-${String(i)}`} />
+      return (
+        <MenuItem
+          key={`${prefix}-${item.id}`}
+          data-testid={`${prefix}-${item.id}`}
+          title={item.label}
+          {...(typeof item.icon === 'string' && item.icon.length > 0 ? { icon: <span className={`codicon codicon-${item.icon}`} aria-hidden="true" /> } : item.icon !== undefined && typeof item.icon !== 'string' ? { icon: item.icon } : {})}
+          {...(item.onClick ? { onClick: item.onClick } : {})}
+          {...(item.shortcut ? { shortcut: item.shortcut } : {})}
+          {...(item.disabled === true ? { disabled: true } : {})}
+        >
+          {item.items && item.items.length > 0 ? renderData(item.items, `${prefix}-${item.id}`) : undefined}
+        </MenuItem>
+      )
+    })
+    )
+  }, [])
+
+  // Documentation opens the website's docs page — the SAME link the About
+  // dialog shows, resolved off the app version's release channel.
+  const handleOpenDocumentation = useCallback((): void => {
+    void window.api.app.getVersion().then((version) => {
+      const url = docsUrl(resolveChannel(version), i18n.language)
+      window.open(url, '_blank', 'noopener,noreferrer')
+    })
+  }, [i18n])
+
   return (
     <>
     <Titlebar
@@ -216,21 +295,19 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       leftContent={
         <MenuBar data-testid="titlebar-menubar">
           <MenuBarItem title={t('menuBar.file')} data-testid="titlebar-menubar-item-file">
-            <MenuItem data-testid="titlebar-menu-item-new" title={t('menuBar.new')} shortcut="Ctrl+N" opensDialog onClick={handleMenuNew} />
-            <MenuItemSeparator data-testid="titlebar-menu-separator-1" />
-            <MenuItem data-testid="titlebar-menu-item-import" title={t('menuBar.import')} shortcut="Ctrl+I" opensDialog onClick={handleImport} />
+            <MenuItem data-testid="titlebar-menu-item-new" title={t('menuBar.new')} icon={<span className="codicon codicon-new-file" aria-hidden="true" />} shortcut="Ctrl+N" opensDialog onClick={handleMenuNew} />
             <MenuItemSeparator data-testid="titlebar-menu-separator-2" />
-            <MenuItem data-testid="titlebar-menu-item-open" title={t('menuBar.open')} shortcut="Ctrl+O" opensDialog onClick={handleMenuOpen} />
+            <MenuItem data-testid="titlebar-menu-item-open" title={t('menuBar.open')} icon={<span className="codicon codicon-folder-opened" aria-hidden="true" />} shortcut="Ctrl+O" opensDialog onClick={handleMenuOpen} />
             {fileName && (
               <>
                 <MenuItemSeparator data-testid="titlebar-menu-separator-3" />
-                <MenuItem data-testid="titlebar-menu-item-save" title={t('menuBar.save')} shortcut="Ctrl+S" onClick={handleMenuSave} />
-                <MenuItem data-testid="titlebar-menu-item-save-all" title={t('menuBar.saveAll')} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAll} />
-                <MenuItem data-testid="titlebar-menu-item-save-as" title={t('menuBar.saveAs')} opensDialog onClick={handleMenuSaveAs} />
+                <MenuItem data-testid="titlebar-menu-item-save" title={t('menuBar.save')} icon={<span className="codicon codicon-save" aria-hidden="true" />} shortcut="Ctrl+S" onClick={handleMenuSave} />
+                <MenuItem data-testid="titlebar-menu-item-save-all" title={t('menuBar.saveAll')} icon={<span className="codicon codicon-save-all" aria-hidden="true" />} shortcut="Ctrl+Shift+S" onClick={handleMenuSaveAll} />
+                <MenuItem data-testid="titlebar-menu-item-save-as" title={t('menuBar.saveAs')} icon={<span className="codicon codicon-save-as" aria-hidden="true" />} opensDialog onClick={handleMenuSaveAs} />
               </>
             )}
             {recentFiles.length > 0 && (
-              <MenuItem data-testid="titlebar-menu-item-recent-files" title={t('menuBar.recentFiles')}>
+              <MenuItem data-testid="titlebar-menu-item-recent-files" title={t('menuBar.recentFiles')} icon={<span className="codicon codicon-history" aria-hidden="true" />}>
                 {recentFiles.slice(0, 10).map((file, index) => (
                   <MenuItem
                     key={file.path}
@@ -242,7 +319,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               </MenuItem>
             )}
             {favorites.length > 0 && (
-              <MenuItem data-testid="titlebar-menu-item-favorites" title={t('menuBar.favorites')}>
+              <MenuItem data-testid="titlebar-menu-item-favorites" title={t('menuBar.favorites')} icon={<span className="codicon codicon-star-full" aria-hidden="true" />}>
                 {favorites.map((file, index) => (
                   <MenuItem
                     key={file.path}
@@ -256,60 +333,96 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             {fileName && (
               <>
                 <MenuItemSeparator data-testid="titlebar-menu-separator-4" />
-                <MenuItem data-testid="titlebar-menu-item-close" title={t('menuBar.close')} onClick={handleMenuClose} />
+                <MenuItem data-testid="titlebar-menu-item-close" title={t('menuBar.close')} icon={<span className="codicon codicon-close" aria-hidden="true" />} onClick={handleMenuClose} />
               </>
             )}
             <MenuItemSeparator data-testid="titlebar-menu-separator-5" />
-            <MenuItem data-testid="titlebar-menu-item-exit" title={t('menuBar.exit')} shortcut="Ctrl+Q" onClick={handleMenuExit} />
+            <MenuItem data-testid="titlebar-menu-item-exit" title={t('menuBar.exit')} icon={<span className="codicon codicon-sign-out" aria-hidden="true" />} shortcut="Ctrl+Q" onClick={handleMenuExit} />
           </MenuBarItem>
           {/* Édition / Sélection / Affichage / Outils / Aide — items
               are intentionally disabled until each gets wired up. The
               skeleton lands here so the responsive overflow logic in
               ECUI's MenuBar has the full menu surface to test against. */}
+          {/* Édition acts on the SIDEBAR selection (cut/copy/paste whole
+              items) — text-field editing keeps its native clipboard, which is
+              why none of these register Ctrl+X/C/V. The cut/copy/paste/find
+              labels resolve from the ECUI core i18n bundle (the app bundle no
+              longer carries them) — a rename there changes these entries. */}
           <MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
-            {/* `role` drives the NATIVE menu only (macOS renders menus in the
-                system bar). Declaring it lets the platform perform the edit on
-                whatever has focus — the only thing that makes ⌘C/⌘V/⌘Z work in
-                text fields — and the role owns its own enabled state, so the
-                `disabled` below applies solely to the not-yet-wired in-window
-                bar on Windows/Linux. */}
-            <MenuItem data-testid="titlebar-menu-item-undo" title={t('menuBar.undo')} shortcut="Ctrl+Z" role="undo" disabled />
-            <MenuItem data-testid="titlebar-menu-item-redo" title={t('menuBar.redo')} shortcut="Ctrl+Shift+Z" role="redo" disabled />
+            {/* macOS only: `role` drives the NATIVE menu (the in-window bar is
+                not rendered there). Declaring the roles is the only thing that
+                makes ⌘Z/⌘X/⌘C/⌘V work in text fields — the role owns its own
+                enabled state, targeting whatever has focus. The sidebar
+                entries below act on TREE items and cannot carry these roles,
+                so both blocks coexist in the mac menu. */}
+            {isMac && <MenuItem data-testid="titlebar-menu-item-native-undo" title={t('menuBar.undo')} shortcut="Ctrl+Z" role="undo" disabled />}
+            {isMac && <MenuItem data-testid="titlebar-menu-item-native-redo" title={t('menuBar.redo')} shortcut="Ctrl+Shift+Z" role="redo" disabled />}
+            {isMac && <MenuItemSeparator data-testid="titlebar-menu-separator-edit-native-1" />}
+            {isMac && <MenuItem data-testid="titlebar-menu-item-native-cut" title={t('menuBar.cut')} shortcut="Ctrl+X" role="cut" disabled />}
+            {isMac && <MenuItem data-testid="titlebar-menu-item-native-copy" title={t('menuBar.copy')} shortcut="Ctrl+C" role="copy" disabled />}
+            {isMac && <MenuItem data-testid="titlebar-menu-item-native-paste" title={t('menuBar.paste')} shortcut="Ctrl+V" role="paste" disabled />}
+            {isMac && <MenuItemSeparator data-testid="titlebar-menu-separator-edit-native-2" />}
+            <MenuItem data-testid="titlebar-menu-item-cut" title={t('menuBar.cut')} icon={<span className="codicon codicon-file-symlink-file" aria-hidden="true" />} disabled={!selection} {...(onCutSelection ? { onClick: onCutSelection } : {})} />
+            <MenuItem data-testid="titlebar-menu-item-copy" title={t('menuBar.copy')} icon={<span className="codicon codicon-files" aria-hidden="true" />} disabled={!selection} {...(onCopySelection ? { onClick: onCopySelection } : {})} />
+            <MenuItem data-testid="titlebar-menu-item-paste" title={t('menuBar.paste')} icon={<span className="codicon codicon-output" aria-hidden="true" />} disabled={!canPaste} {...(onPasteSelection ? { onClick: onPasteSelection } : {})} />
+            <MenuItem data-testid="titlebar-menu-item-clone" title={t('menuBar.clone')} icon={<span className="codicon codicon-copy" aria-hidden="true" />} disabled={!selection} {...(onCloneSelection ? { onClick: onCloneSelection } : {})} />
             <MenuItemSeparator data-testid="titlebar-menu-separator-edit-1" />
-            <MenuItem data-testid="titlebar-menu-item-cut" title={t('menuBar.cut')} shortcut="Ctrl+X" role="cut" disabled />
-            <MenuItem data-testid="titlebar-menu-item-copy" title={t('menuBar.copy')} shortcut="Ctrl+C" role="copy" disabled />
-            <MenuItem data-testid="titlebar-menu-item-paste" title={t('menuBar.paste')} shortcut="Ctrl+V" role="paste" disabled />
+            <MenuItem data-testid="titlebar-menu-item-delete" title={t('menuBar.delete')} icon={<span className="codicon codicon-trash" aria-hidden="true" />} disabled={!selection} {...(onDeleteSelection ? { onClick: onDeleteSelection } : {})} />
             <MenuItemSeparator data-testid="titlebar-menu-separator-edit-2" />
-            <MenuItem data-testid="titlebar-menu-item-find" title={t('menuBar.find')} shortcut="Ctrl+F" disabled />
-            <MenuItem data-testid="titlebar-menu-item-replace" title={t('menuBar.replace')} shortcut="Ctrl+H" disabled />
-            <MenuItem data-testid="titlebar-menu-item-find-in-collection" title={t('menuBar.findInCollection')} shortcut="Ctrl+Shift+F" disabled />
+            <MenuItem
+              data-testid="titlebar-menu-item-toggle-favorite"
+              title={selection?.isFavorite === true ? t('menuBar.removeFromFavorites') : t('menuBar.addToFavorites')}
+              icon={<span className={`codicon ${selection?.isFavorite === true ? 'codicon-star-full' : 'codicon-star-empty'}`} aria-hidden="true" />}
+              disabled={!selection}
+              {...(onToggleFavoriteSelection ? { onClick: onToggleFavoriteSelection } : {})}
+            />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-edit-3" />
+            <MenuItem data-testid="titlebar-menu-item-find" title={t('menuBar.find')} icon={<span className="codicon codicon-search" aria-hidden="true" />} shortcut="Ctrl+Shift+F" {...(onFocusSearch ? { onClick: onFocusSearch } : {})} />
           </MenuBarItem>
-          <MenuBarItem title={t('menuBar.selection')} data-testid="titlebar-menubar-item-selection">
-            <MenuItem data-testid="titlebar-menu-item-add-request" title={t('menuBar.addRequest')}>
-              <MenuItem data-testid="titlebar-menu-item-add-request-http" title={t('menuBar.addRequestHttp')} disabled />
-              <MenuItem data-testid="titlebar-menu-item-add-request-graphql" title={t('menuBar.addRequestGraphql')} disabled />
-              <MenuItem data-testid="titlebar-menu-item-add-request-grpc" title={t('menuBar.addRequestGrpc')} disabled />
-              <MenuItem data-testid="titlebar-menu-item-add-request-soap" title={t('menuBar.addRequestSoap')} disabled />
-              <MenuItem data-testid="titlebar-menu-item-add-request-odata" title={t('menuBar.addRequestOdata')} disabled />
-              <MenuItem data-testid="titlebar-menu-item-add-request-websocket" title={t('menuBar.addRequestWebsocket')} disabled />
-            </MenuItem>
-            <MenuItem data-testid="titlebar-menu-item-add-folder" title={t('menuBar.addFolder')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-add-env-folder" title={t('menuBar.addEnvironmentFolder')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-add-variable" title={t('menuBar.addVariable')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-add-tag" title={t('menuBar.addTag')} disabled />
-            <MenuItemSeparator data-testid="titlebar-menu-separator-selection-1" />
-            <MenuItem data-testid="titlebar-menu-item-expand-all" title={t('menuBar.expandAllFolders')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-collapse-all" title={t('menuBar.collapseAllFolders')} disabled />
-            <MenuItemSeparator data-testid="titlebar-menu-separator-selection-2" />
-            <MenuItem data-testid="titlebar-menu-item-send-request" title={t('menuBar.sendActiveRequest')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-cancel-request" title={t('menuBar.cancelActiveRequest')} disabled />
+          {/* Créer — Importer (moved out of Fichier), then the same add
+              entries as the sidebar context menu's « Ajouter », flattened.
+              Placement stays selection-relative: a selected container
+              receives the new item inside at the end, a selected leaf gets
+              it right after itself, no selection lands at the root. */}
+          <MenuBarItem title={t('menuBar.create')} data-testid="titlebar-menubar-item-create">
+            <MenuItem data-testid="titlebar-menu-item-import" title={t('menuBar.import')} icon={<span className="codicon codicon-cloud-download" aria-hidden="true" />} shortcut="Ctrl+I" opensDialog onClick={handleImport} />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-create-1" />
+            {selectionAddSubmenu ? renderMenuData(selectionAddSubmenu, 'titlebar-menu-item-add') : undefined}
           </MenuBarItem>
+          {/* Requête — shown only while the ACTIVE workbench tab is a CLIENT
+              request; acts on that tab (the same Send button the user sees).
+              Servers get their own « Serveur » menu below, scenarios the
+              « Scénario » one — the three are mutually exclusive, so F5/F8
+              always have exactly one owner. */}
+          {activeRequestControls && (
+            <MenuBarItem title={t('menuBar.request')} data-testid="titlebar-menubar-item-request">
+              <MenuItem data-testid="titlebar-menu-item-run-request" title={t('menuBar.runSelected')} icon={<span className="codicon codicon-play" aria-hidden="true" />} shortcut="F5" onClick={activeRequestControls.onRun} />
+              <MenuItem data-testid="titlebar-menu-item-cancel-request" title={t('menuBar.cancelSelected')} icon={<span className="codicon codicon-debug-stop" aria-hidden="true" />} shortcut="F8" onClick={activeRequestControls.onCancel} />
+            </MenuBarItem>
+          )}
+          {/* Serveur — shown only while the ACTIVE workbench tab is a server
+              editor; its entries mirror that editor's own action buttons
+              (published by the editor, so behaviour and enablement are the
+              button's, toasts included). */}
+          {activeServerMenu && (
+            <MenuBarItem title={t('menuBar.server')} data-testid="titlebar-menubar-item-server">
+              {renderMenuData(activeServerMenu, 'titlebar-menu-item-server')}
+            </MenuBarItem>
+          )}
+          {/* Scénario — shown only while the ACTIVE workbench tab is a
+              scenario editor; its items ARE the editor's empty-canvas
+              palette. */}
+          {activeScenarioPalette && (
+            <MenuBarItem title={t('menuBar.scenario')} data-testid="titlebar-menubar-item-scenario">
+              {renderMenuData(activeScenarioPalette, 'titlebar-menu-item-scenario')}
+            </MenuBarItem>
+          )}
+          {/* Affichage (the old Outils menu is gone; this menu briefly
+              carried the name « Options » during the overhaul). */}
           <MenuBarItem title={t('menuBar.view')} data-testid="titlebar-menubar-item-view">
-            <MenuItem data-testid="titlebar-menu-item-toggle-sidebar" title={t('menuBar.toggleSidebar')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-toggle-response-panel" title={t('menuBar.toggleResponsePanel')} disabled />
             <MenuItem
               data-testid="titlebar-menu-item-console"
-              title={t('menuBar.console', 'Console')}
+              title={t('menuBar.consoleHttp', 'HTTP console')}
               icon={<span className="codicon codicon-terminal" aria-hidden="true" />}
               onClick={onOpenConsole}
             />
@@ -333,27 +446,14 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               disabled={!mcpEnabled}
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
-            <MenuItem data-testid="titlebar-menu-item-zoom-in" title={t('menuBar.zoomIn')} shortcut="Ctrl++" disabled />
-            <MenuItem data-testid="titlebar-menu-item-zoom-out" title={t('menuBar.zoomOut')} shortcut="Ctrl+-" disabled />
-            <MenuItem data-testid="titlebar-menu-item-reset-zoom" title={t('menuBar.resetZoom')} shortcut="Ctrl+0" disabled />
-            <MenuItemSeparator data-testid="titlebar-menu-separator-view-2" />
             <MenuItem
               data-testid="titlebar-menu-item-settings"
               title={t('menuBar.settings')}
               icon={<span className="codicon codicon-settings-gear" aria-hidden="true" />}
               onClick={handleOpenSettings}
             />
-            <MenuItemSeparator data-testid="titlebar-menu-separator-view-3" />
-            <MenuItem data-testid="titlebar-menu-item-toggle-devtools" title={t('menuBar.toggleDevTools')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-toggle-fullscreen" title={t('menuBar.toggleFullscreen')} onClick={handleToggleFullscreen} />
-          </MenuBarItem>
-          <MenuBarItem title={t('menuBar.tools')} data-testid="titlebar-menubar-item-tools">
-            <MenuItem data-testid="titlebar-menu-item-generate-snippet" title={t('menuBar.generateCodeSnippet')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-copy-as-curl" title={t('menuBar.copyAsCurl')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-export-openapi" title={t('menuBar.exportOpenApi')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-clear-auth-cache" title={t('menuBar.clearAuthCache')} disabled />
-            <MenuItemSeparator data-testid="titlebar-menu-separator-tools-1" />
-            <MenuItem data-testid="titlebar-menu-item-open-logs" title={t('menuBar.openLogsFolder')} disabled />
+            <MenuItemSeparator data-testid="titlebar-menu-separator-view-2" />
+            <MenuItem data-testid="titlebar-menu-item-toggle-fullscreen" title={t('menuBar.toggleFullscreen')} icon={<span className="codicon codicon-screen-full" aria-hidden="true" />} onClick={handleToggleFullscreen} />
           </MenuBarItem>
           <MenuBarItem
             // A plain string, not a rich `<Badge>` node: `MenuBar`'s
@@ -412,13 +512,14 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem
               data-testid="titlebar-menu-item-about"
               title={t('menuBar.about')}
+              icon={<span className="codicon codicon-info" aria-hidden="true" />}
               onClick={() => { setAboutOpen(true) }}
             />
-            <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} disabled />
-            <MenuItem data-testid="titlebar-menu-item-keyboard-shortcuts" title={t('menuBar.keyboardShortcuts')} disabled />
+            <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} icon={<span className="codicon codicon-book" aria-hidden="true" />} onClick={handleOpenDocumentation} />
             <MenuItem
               data-testid="titlebar-menu-item-release-notes"
               title={t('menuBar.releaseNotes')}
+              icon={<span className="codicon codicon-list-unordered" aria-hidden="true" />}
               onClick={() => {
                 eventBus.emitLocalSync(RELEASE_NOTES_OPEN, { mode: 'recent' } as ReleaseNotesOpenPayload)
               }}
@@ -430,7 +531,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
                 onClick={() => { void checkForUpdates() }}
               />
             )}
-            <MenuItem data-testid="titlebar-menu-item-report-issue" title={t('menuBar.reportIssue')} disabled />
           </MenuBarItem>
         </MenuBar>
       }

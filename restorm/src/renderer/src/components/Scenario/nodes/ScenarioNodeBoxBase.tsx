@@ -54,6 +54,10 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
   onToggleCollapse?: (id: string) => void
   /** Right-click on the header opens the node context menu at the cursor. */
   onHeaderContextMenu?: (id: string, x: number, y: number) => void
+  /** Delete the edges wired into the given INPUT ports of this node — for
+   * kinds whose config change removes a port (math op switch): the edge must
+   * not survive in the persisted graph. */
+  onPruneInputEdges?: (id: string, portIds: string[]) => void
   /** Persist a patch into the node's per-kind config bag (merged + saved). */
   onSetConfig?: (id: string, config: Record<string, unknown>) => void
   /** Open a tree item (the bound request / sub-scenario) in a workbench tab,

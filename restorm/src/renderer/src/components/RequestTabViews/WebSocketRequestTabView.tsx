@@ -1,5 +1,8 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
@@ -421,6 +424,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           error: res.error,
           timings: res.timings
         }
+        if (isServer && res.error) {
+          pushServerListenErrorToast(t, t('websocket.listenFailed', 'Server failed to start'), res.error)
+        }
         setResponse(wsResponse)
         setHistoryRefreshKey(prev => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
@@ -440,6 +446,24 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const handleDisconnect = (): void => {
     void window.restorm?.websocket.disconnect(request.id)
   }
+
+  // « Serveur » menu-bar entries — the SAME actions as the toolbar discs
+  // (start ↔ stop listening toggle + send/broadcast), published while this
+  // server tab is the ACTIVE one. Handlers route through a ref so the
+  // published array only rebuilds when the rendered entries change.
+  const serverMenuOpsRef = useRef({ connect: () => { /* replaced below */ }, disconnect: () => { /* replaced below */ }, send: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { connect: handleConnect, disconnect: handleDisconnect, send: handleSend } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[] | null>(() => {
+    if (!isServer) return null
+    return [
+      isListening
+        ? { id: 'server-stop', label: t('websocket.stopListening'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.disconnect() } }
+        : { id: 'server-listen', label: t('websocket.startListening'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.connect() } },
+      { id: 'server-send', label: t('requestTab.send'), icon: 'send', ...(isListening ? {} : { disabled: true }), onClick: () => { serverMenuOpsRef.current.send() } }
+    ]
+  }, [isServer, isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab && isServer, serverMenuItems)
 
   // Request content (SplitView with Message, Headers)
   const requestContent = (

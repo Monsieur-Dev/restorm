@@ -228,36 +228,24 @@
     "saveAll": "Ruaj të gjitha",
     "saveAs": "Ruaj si",
     "exit": "Dil",
-    "selection": "Zgjedhja",
-    "tools": "Veglat",
-    "findInCollection": "Gjej në koleksion",
-    "addRequest": "Shto kërkesë",
-    "addRequestHttp": "Kërkesë HTTP",
-    "addRequestGraphql": "Kërkesë GraphQL",
-    "addRequestGrpc": "Kërkesë gRPC",
-    "addRequestSoap": "Kërkesë SOAP",
-    "addRequestOdata": "Kërkesë OData",
-    "addRequestWebsocket": "Kërkesë WebSocket",
-    "addFolder": "Shto dosje",
-    "addEnvironmentFolder": "Shto dosje mjedisi",
-    "addVariable": "Shto variabël",
-    "addTag": "Shto etiketë",
-    "expandAllFolders": "Zgjero të gjitha dosjet",
-    "collapseAllFolders": "Mbyll të gjitha dosjet",
-    "sendActiveRequest": "Dërgo kërkesën",
-    "cancelActiveRequest": "Anulo kërkesën",
-    "generateCodeSnippet": "Gjenero copëz kodi",
-    "copyAsCurl": "Kopjo si cURL",
-    "exportOpenApi": "Eksporto në OpenAPI",
-    "clearAuthCache": "Pastro memorien e vërtetimit",
-    "openLogsFolder": "Hap dosjen e regjistrave",
     "mcpLogs": "Regjistrat MCP",
+    "consoleHttp": "Konsola HTTP",
     "git": "Git",
     "gitPush": "Dërgo",
     "gitPull": "Merr",
     "gitRefresh": "Rifresko",
     "gitHistory": "Historiku",
-    "gitResetToServer": "Rikthe te versioni i serverit"
+    "gitResetToServer": "Rikthe te versioni i serverit",
+    "scenario": "Skenar",
+    "create": "Krijo",
+    "request": "Kërkesë",
+    "server": "Server",
+    "runSelected": "Ekzekuto",
+    "cancelSelected": "Anulo",
+    "clone": "Klono",
+    "delete": "Fshi",
+    "addToFavorites": "Shto te të preferuarat",
+    "removeFromFavorites": "Hiq nga të preferuarat"
   },
   "sidebar": {
     "addRequest": "Shto kërkesë",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Pre",
+      "copy": "Kopjo",
+      "paste": "Ngjit"
     },
     "deleteConfirm": {
       "title": "Konfirmo fshirjen",
@@ -608,6 +599,7 @@
     "disconnect": "Shkëput",
     "startListening": "Fillo dëgjimin",
     "stopListening": "Ndalo dëgjimin",
+    "listenFailed": "Nisja e serverit dështoi",
     "routePlaceholder": "Rruga (opsionale)",
     "clientsConnected": "{{count}} klient të lidhur",
     "notListening": "Nuk dëgjon"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Formate të dhënash",
       "encoding": "Kodim",
       "time": "Kohëmatja",
-      "algorithmie": "Algoritme",
-      "ux": "UX"
+      "algorithmie": "Algoritme"
     },
     "listOp": {
       "value": "listë",

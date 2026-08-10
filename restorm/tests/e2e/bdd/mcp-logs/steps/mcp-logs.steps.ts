@@ -43,9 +43,13 @@ async function waitForStableMenubarMode(page: Page): Promise<string> {
  * Returns true if the View dropdown actually opened — the caller retries on
  * false, which is the reliable cure for the mid-reconciliation race. */
 async function tryOpenViewMenu(page: Page): Promise<boolean> {
-  const mode = await waitForStableMenubarMode(page)
-  if (mode === 'full') {
-    await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
+  await waitForStableMenubarMode(page)
+  // Visibility beats mode: in overflow mode the View item can still sit
+  // among the VISIBLE bar items (only the tail overflows), so route on
+  // whether the in-bar button exists — not on the mode attribute.
+  const inBarView = page.locator('[data-testid="titlebar-menubar-item-view"]')
+  if (await inBarView.isVisible().catch(() => false)) {
+    await inBarView.click({ force: true })
   } else {
     const overflowBtn = page.locator(`[data-testid="${MENUBAR_TEST_ID}-overflow-button"], [data-testid="${MENUBAR_TEST_ID}-hamburger-button"]`).first()
     await overflowBtn.click({ force: true })

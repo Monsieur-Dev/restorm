@@ -59,11 +59,14 @@ When('I open Settings from the View menu', async ({ page }) => {
   // which reads as "Settings is missing". Re-opening is idempotent, so retry
   // the whole open instead of lengthening a single wait.
   await expect(async () => {
-    const liveMode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
-    if (liveMode === 'full') {
+    // Visibility beats mode: in overflow mode the View item can still sit
+    // among the VISIBLE bar items (only the tail overflows), so route on
+    // whether the in-bar button exists — not on the mode attribute.
+    const inBarView = page.locator('[data-testid="titlebar-menubar-item-view"]')
+    if (await inBarView.isVisible().catch(() => false)) {
       // Click-open the View menu (a bare hover can race the menubar becoming
       // active), then click Settings.
-      await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
+      await inBarView.click({ force: true })
     } else {
       // Open the overflow / hamburger bucket, then open the folded View entry
       // (its testid gains an `-overflow` suffix) to expand its submenu.

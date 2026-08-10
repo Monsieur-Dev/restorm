@@ -228,36 +228,24 @@
     "saveAll": "Spara alla",
     "saveAs": "Spara som",
     "exit": "Avsluta",
-    "selection": "Markering",
-    "tools": "Verktyg",
-    "findInCollection": "Sök i samling",
-    "addRequest": "Lägg till förfrågan",
-    "addRequestHttp": "HTTP-förfrågan",
-    "addRequestGraphql": "GraphQL-förfrågan",
-    "addRequestGrpc": "gRPC-förfrågan",
-    "addRequestSoap": "SOAP-förfrågan",
-    "addRequestOdata": "OData-förfrågan",
-    "addRequestWebsocket": "WebSocket-förfrågan",
-    "addFolder": "Lägg till mapp",
-    "addEnvironmentFolder": "Lägg till miljömapp",
-    "addVariable": "Lägg till variabel",
-    "addTag": "Lägg till tagg",
-    "expandAllFolders": "Expandera alla mappar",
-    "collapseAllFolders": "Fäll ihop alla mappar",
-    "sendActiveRequest": "Skicka förfrågan",
-    "cancelActiveRequest": "Avbryt förfrågan",
-    "generateCodeSnippet": "Generera kodavsnitt",
-    "copyAsCurl": "Kopiera som cURL",
-    "exportOpenApi": "Exportera till OpenAPI",
-    "clearAuthCache": "Rensa autentiseringscache",
-    "openLogsFolder": "Öppna loggmapp",
     "mcpLogs": "MCP-loggar",
+    "consoleHttp": "HTTP-konsol",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Hämta",
     "gitRefresh": "Uppdatera",
     "gitHistory": "Historik",
-    "gitResetToServer": "Återställ till serverns version"
+    "gitResetToServer": "Återställ till serverns version",
+    "scenario": "Scenario",
+    "create": "Skapa",
+    "request": "Förfrågan",
+    "server": "Server",
+    "runSelected": "Kör",
+    "cancelSelected": "Avbryt",
+    "clone": "Klona",
+    "delete": "Ta bort",
+    "addToFavorites": "Lägg till i favoriter",
+    "removeFromFavorites": "Ta bort från favoriter"
   },
   "sidebar": {
     "addRequest": "Lägg till förfrågan",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Klipp ut",
+      "copy": "Kopiera",
+      "paste": "Klistra in"
     },
     "deleteConfirm": {
       "title": "Bekräfta borttagning",
@@ -608,6 +599,7 @@
     "disconnect": "Koppla från",
     "startListening": "Börja lyssna",
     "stopListening": "Sluta lyssna",
+    "listenFailed": "Servern kunde inte startas",
     "routePlaceholder": "Rutt (valfritt)",
     "clientsConnected": "{{count}} klient(er) anslutna",
     "notListening": "Lyssnar inte"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Dataformat",
       "encoding": "Kodning",
       "time": "Tidsstyrning",
-      "algorithmie": "Algoritmer",
-      "ux": "UX"
+      "algorithmie": "Algoritmer"
     },
     "listOp": {
       "value": "lista",

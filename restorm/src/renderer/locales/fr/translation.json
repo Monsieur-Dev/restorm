@@ -228,36 +228,24 @@
     "saveAll": "Tout enregistrer",
     "saveAs": "Enregistrer sous",
     "exit": "Quitter",
-    "selection": "Sélection",
-    "tools": "Outils",
-    "findInCollection": "Rechercher dans la collection",
-    "addRequest": "Ajouter une requête",
-    "addRequestHttp": "Requête HTTP",
-    "addRequestGraphql": "Requête GraphQL",
-    "addRequestGrpc": "Requête gRPC",
-    "addRequestSoap": "Requête SOAP",
-    "addRequestOdata": "Requête OData",
-    "addRequestWebsocket": "Requête WebSocket",
-    "addFolder": "Ajouter un dossier",
-    "addEnvironmentFolder": "Ajouter un dossier d'environnement",
-    "addVariable": "Ajouter une variable",
-    "addTag": "Ajouter un tag",
-    "expandAllFolders": "Développer tous les dossiers",
-    "collapseAllFolders": "Réduire tous les dossiers",
-    "sendActiveRequest": "Envoyer la requête",
-    "cancelActiveRequest": "Annuler la requête",
-    "generateCodeSnippet": "Générer un snippet de code",
-    "copyAsCurl": "Copier en cURL",
-    "exportOpenApi": "Exporter en OpenAPI",
-    "clearAuthCache": "Vider le cache d'authentification",
-    "openLogsFolder": "Ouvrir le dossier de logs",
     "mcpLogs": "Journaux MCP",
+    "consoleHttp": "Console HTTP",
     "git": "Git",
     "gitPush": "Pousser",
     "gitPull": "Récupérer",
     "gitRefresh": "Rafraîchir",
     "gitHistory": "Historique",
-    "gitResetToServer": "Réinitialiser sur la version du serveur"
+    "gitResetToServer": "Réinitialiser sur la version du serveur",
+    "scenario": "Scénario",
+    "create": "Créer",
+    "request": "Requête",
+    "server": "Serveur",
+    "runSelected": "Exécuter",
+    "cancelSelected": "Annuler",
+    "clone": "Cloner",
+    "delete": "Supprimer",
+    "addToFavorites": "Ajouter aux favoris",
+    "removeFromFavorites": "Retirer des favoris"
   },
   "sidebar": {
     "addRequest": "Ajouter une requête",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Couper",
+      "copy": "Copier",
+      "paste": "Coller"
     },
     "deleteConfirm": {
       "title": "Confirmer la suppression",
@@ -608,6 +599,7 @@
     "disconnect": "Déconnecter",
     "startListening": "Démarrer l'écoute",
     "stopListening": "Arrêter l'écoute",
+    "listenFailed": "Échec du démarrage du serveur",
     "routePlaceholder": "Route (facultatif)",
     "clientsConnected": "{{count}} client(s) connecté(s)",
     "notListening": "Pas à l'écoute"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Formats de données",
       "encoding": "Encodage",
       "time": "Minuterie",
-      "algorithmie": "Algorithmie",
-      "ux": "UX"
+      "algorithmie": "Algorithmie"
     },
     "palette": {
       "arrangeActions": "Réorganiser les actions"

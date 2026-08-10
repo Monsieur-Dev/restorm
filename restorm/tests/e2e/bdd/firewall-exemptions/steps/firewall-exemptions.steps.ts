@@ -92,9 +92,12 @@ Given('the Firewall tab is open', async ({ page }) => {
   // "the Firewall entry is missing" rather than as a dropped click. Re-opening
   // is idempotent, so retry the whole open rather than lengthening a wait.
   await expect(async () => {
-    const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
-    if (mode === 'full') {
-      await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
+    // Visibility beats mode: in overflow mode the View item can still sit
+    // among the VISIBLE bar items (only the tail overflows), so route on
+    // whether the in-bar button exists — not on the mode attribute.
+    const inBarView = page.locator('[data-testid="titlebar-menubar-item-view"]')
+    if (await inBarView.isVisible().catch(() => false)) {
+      await inBarView.click({ force: true })
     } else {
       const overflowBtn = page
         .locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`)

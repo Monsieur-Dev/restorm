@@ -1,7 +1,8 @@
 import { createContext, useContext } from 'react'
 
 /**
- * Whether the subtree is rendered inside a workbench tab.
+ * The id of the workbench tab hosting the subtree — or null when the subtree
+ * is NOT inside a workbench tab.
  *
  * A request view is not only shown in a tab: the git-conflict modal renders
  * several of them side by side, and the auth modal renders one standalone.
@@ -15,10 +16,18 @@ import { createContext, useContext } from 'react'
  * conflict panel WITHOUT it, so the guard would silently do nothing exactly
  * where it is needed.
  *
- * Defaults to `false`: a view rendered somewhere unknown gets the layout that
+ * Carrying the tab ID (not a boolean) also lets a view compare against
+ * `WorkbenchActiveTabContext` to know whether ITS tab is the focused one —
+ * the gate the menu-bar publishers (« Serveur ») need, with zero prop
+ * threading through the protocol registry.
+ *
+ * Defaults to `null`: a view rendered somewhere unknown gets the layout that
  * needs no anchor.
  */
-export const WorkbenchTabHostContext = createContext<boolean>(false)
+export const WorkbenchTabHostContext = createContext<string | null>(null)
 
 /** True when the caller is inside a workbench tab. */
-export const useIsInWorkbenchTab = (): boolean => useContext(WorkbenchTabHostContext)
+export const useIsInWorkbenchTab = (): boolean => useContext(WorkbenchTabHostContext) !== null
+
+/** The hosting workbench tab's id, or null outside a tab. */
+export const useWorkbenchTabId = (): string | null => useContext(WorkbenchTabHostContext)

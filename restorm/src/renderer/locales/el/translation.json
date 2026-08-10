@@ -228,36 +228,24 @@
     "saveAll": "Αποθήκευση όλων",
     "saveAs": "Αποθήκευση ως",
     "exit": "Έξοδος",
-    "selection": "Επιλογή",
-    "tools": "Εργαλεία",
-    "findInCollection": "Εύρεση στη συλλογή",
-    "addRequest": "Προσθήκη αιτήματος",
-    "addRequestHttp": "Αίτημα HTTP",
-    "addRequestGraphql": "Αίτημα GraphQL",
-    "addRequestGrpc": "Αίτημα gRPC",
-    "addRequestSoap": "Αίτημα SOAP",
-    "addRequestOdata": "Αίτημα OData",
-    "addRequestWebsocket": "Αίτημα WebSocket",
-    "addFolder": "Προσθήκη φακέλου",
-    "addEnvironmentFolder": "Προσθήκη φακέλου περιβάλλοντος",
-    "addVariable": "Προσθήκη μεταβλητής",
-    "addTag": "Προσθήκη ετικέτας",
-    "expandAllFolders": "Ανάπτυξη όλων των φακέλων",
-    "collapseAllFolders": "Σύμπτυξη όλων των φακέλων",
-    "sendActiveRequest": "Αποστολή αιτήματος",
-    "cancelActiveRequest": "Ακύρωση αιτήματος",
-    "generateCodeSnippet": "Δημιουργία αποσπάσματος κώδικα",
-    "copyAsCurl": "Αντιγραφή ως cURL",
-    "exportOpenApi": "Εξαγωγή σε OpenAPI",
-    "clearAuthCache": "Εκκαθάριση μνήμης ταυτοποίησης",
-    "openLogsFolder": "Άνοιγμα φακέλου καταγραφών",
     "mcpLogs": "Αρχεία καταγραφής MCP",
+    "consoleHttp": "Κονσόλα HTTP",
     "git": "Git",
     "gitPush": "Αποστολή",
     "gitPull": "Λήψη",
     "gitRefresh": "Ανανέωση",
     "gitHistory": "Ιστορικό",
-    "gitResetToServer": "Επαναφορά στην έκδοση του διακομιστή"
+    "gitResetToServer": "Επαναφορά στην έκδοση του διακομιστή",
+    "scenario": "Σενάριο",
+    "create": "Δημιουργία",
+    "request": "Αίτημα",
+    "server": "Διακομιστής",
+    "runSelected": "Εκτέλεση",
+    "cancelSelected": "Ακύρωση",
+    "clone": "Κλωνοποίηση",
+    "delete": "Διαγραφή",
+    "addToFavorites": "Προσθήκη στα αγαπημένα",
+    "removeFromFavorites": "Αφαίρεση από τα αγαπημένα"
   },
   "sidebar": {
     "addRequest": "Προσθήκη αιτήματος",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Αποκοπή",
+      "copy": "Αντιγραφή",
+      "paste": "Επικόλληση"
     },
     "deleteConfirm": {
       "title": "Επιβεβαίωση διαγραφής",
@@ -608,6 +599,7 @@
     "disconnect": "Αποσύνδεση",
     "startListening": "Έναρξη ακρόασης",
     "stopListening": "Διακοπή ακρόασης",
+    "listenFailed": "Αποτυχία εκκίνησης του διακομιστή",
     "routePlaceholder": "Διαδρομή (προαιρετικό)",
     "clientsConnected": "{{count}} πελάτης/ες συνδεδεμένος/οι",
     "notListening": "Δεν ακούει"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Μορφές δεδομένων",
       "encoding": "Κωδικοποίηση",
       "time": "Χρονισμός",
-      "algorithmie": "Αλγόριθμοι",
-      "ux": "UX"
+      "algorithmie": "Αλγόριθμοι"
     },
     "listOp": {
       "value": "λίστα",

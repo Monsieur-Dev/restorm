@@ -105,6 +105,12 @@ const mcpServerTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-server'
 })
 
+const menubarContextTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/menubar-context/features/**/*.feature',
+  steps: ['tests/e2e/bdd/menubar-context/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/menubar-context'
+})
+
 const sidebarCloneTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/sidebar-clone/features/**/*.feature',
   steps: ['tests/e2e/bdd/sidebar-clone/steps/**/*.ts', 'tests/e2e/bdd/fixtures/sidebar-clone.fixture.ts'],
@@ -627,6 +633,11 @@ export default defineConfig({
     {
       name: 'mcp-server',
       testDir: mcpServerTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'menubar-context',
+      testDir: menubarContextTestDir,
       timeout: 180 * 1000
     },
     {

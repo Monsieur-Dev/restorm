@@ -228,36 +228,24 @@
     "saveAll": "Alles speichern",
     "saveAs": "Speichern unter",
     "exit": "Beenden",
-    "selection": "Auswahl",
-    "tools": "Werkzeuge",
-    "findInCollection": "In Sammlung suchen",
-    "addRequest": "Anfrage hinzufügen",
-    "addRequestHttp": "HTTP-Anfrage",
-    "addRequestGraphql": "GraphQL-Anfrage",
-    "addRequestGrpc": "gRPC-Anfrage",
-    "addRequestSoap": "SOAP-Anfrage",
-    "addRequestOdata": "OData-Anfrage",
-    "addRequestWebsocket": "WebSocket-Anfrage",
-    "addFolder": "Ordner hinzufügen",
-    "addEnvironmentFolder": "Umgebungsordner hinzufügen",
-    "addVariable": "Variable hinzufügen",
-    "addTag": "Tag hinzufügen",
-    "expandAllFolders": "Alle Ordner ausklappen",
-    "collapseAllFolders": "Alle Ordner einklappen",
-    "sendActiveRequest": "Anfrage senden",
-    "cancelActiveRequest": "Anfrage abbrechen",
-    "generateCodeSnippet": "Code-Snippet generieren",
-    "copyAsCurl": "Als cURL kopieren",
-    "exportOpenApi": "Als OpenAPI exportieren",
-    "clearAuthCache": "Authentifizierungs-Cache leeren",
-    "openLogsFolder": "Log-Ordner öffnen",
     "mcpLogs": "MCP-Protokolle",
+    "consoleHttp": "HTTP-Konsole",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Pull",
     "gitRefresh": "Aktualisieren",
     "gitHistory": "Verlauf",
-    "gitResetToServer": "Auf Serverversion zurücksetzen"
+    "gitResetToServer": "Auf Serverversion zurücksetzen",
+    "scenario": "Szenario",
+    "create": "Erstellen",
+    "request": "Anfrage",
+    "server": "Server",
+    "runSelected": "Ausführen",
+    "cancelSelected": "Abbrechen",
+    "clone": "Klonen",
+    "delete": "Löschen",
+    "addToFavorites": "Zu Favoriten hinzufügen",
+    "removeFromFavorites": "Aus Favoriten entfernen"
   },
   "sidebar": {
     "addRequest": "Anfrage hinzufügen",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Ausschneiden",
+      "copy": "Kopieren",
+      "paste": "Einfügen"
     },
     "deleteConfirm": {
       "title": "Löschen bestätigen",
@@ -608,6 +599,7 @@
     "disconnect": "Trennen",
     "startListening": "Empfang starten",
     "stopListening": "Empfang stoppen",
+    "listenFailed": "Server konnte nicht gestartet werden",
     "routePlaceholder": "Route (optional)",
     "clientsConnected": "{{count}} Client(s) verbunden",
     "notListening": "Hört nicht zu"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Datenformate",
       "encoding": "Kodierung",
       "time": "Zeitsteuerung",
-      "algorithmie": "Algorithmik",
-      "ux": "UX"
+      "algorithmie": "Algorithmik"
     },
     "listOp": {
       "value": "Liste",

@@ -227,36 +227,24 @@
     "saveAll": "모두 저장",
     "saveAs": "다른 이름으로 저장",
     "exit": "종료",
-    "selection": "선택",
-    "tools": "도구",
-    "findInCollection": "컬렉션에서 찾기",
-    "addRequest": "요청 추가",
-    "addRequestHttp": "HTTP 요청",
-    "addRequestGraphql": "GraphQL 요청",
-    "addRequestGrpc": "gRPC 요청",
-    "addRequestSoap": "SOAP 요청",
-    "addRequestOdata": "OData 요청",
-    "addRequestWebsocket": "WebSocket 요청",
-    "addFolder": "폴더 추가",
-    "addEnvironmentFolder": "환경 폴더 추가",
-    "addVariable": "변수 추가",
-    "addTag": "태그 추가",
-    "expandAllFolders": "모든 폴더 펼치기",
-    "collapseAllFolders": "모든 폴더 접기",
-    "sendActiveRequest": "요청 보내기",
-    "cancelActiveRequest": "요청 취소",
-    "generateCodeSnippet": "코드 스니펫 생성",
-    "copyAsCurl": "cURL로 복사",
-    "exportOpenApi": "OpenAPI로 내보내기",
-    "clearAuthCache": "인증 캐시 지우기",
-    "openLogsFolder": "로그 폴더 열기",
     "mcpLogs": "MCP 로그",
+    "consoleHttp": "HTTP 콘솔",
     "git": "Git",
     "gitPush": "푸시",
     "gitPull": "풀",
     "gitRefresh": "새로 고침",
     "gitHistory": "기록",
-    "gitResetToServer": "서버 버전으로 재설정"
+    "gitResetToServer": "서버 버전으로 재설정",
+    "scenario": "시나리오",
+    "create": "만들기",
+    "request": "요청",
+    "server": "서버",
+    "runSelected": "실행",
+    "cancelSelected": "취소",
+    "clone": "복제",
+    "delete": "삭제",
+    "addToFavorites": "즐겨찾기에 추가",
+    "removeFromFavorites": "즐겨찾기에서 제거"
   },
   "sidebar": {
     "addRequest": "요청 추가",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "잘라내기",
+      "copy": "복사",
+      "paste": "붙여넣기"
     },
     "deleteConfirm": {
       "title": "삭제 확인",
@@ -607,6 +598,7 @@
     "disconnect": "연결 끊기",
     "startListening": "수신 시작",
     "stopListening": "수신 중지",
+    "listenFailed": "서버 시작에 실패했습니다",
     "routePlaceholder": "경로 (선택)",
     "clientsConnected": "{{count}}개 클라이언트 연결됨",
     "notListening": "수신 안 함"
@@ -1765,8 +1757,7 @@
       "dataFormats": "데이터 형식",
       "encoding": "인코딩",
       "time": "타이밍",
-      "algorithmie": "알고리즘",
-      "ux": "UX"
+      "algorithmie": "알고리즘"
     },
     "listOp": {
       "value": "리스트",

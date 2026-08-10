@@ -228,36 +228,24 @@
     "saveAll": "Guardar todo",
     "saveAs": "Guardar como",
     "exit": "Salir",
-    "selection": "Selección",
-    "tools": "Herramientas",
-    "findInCollection": "Buscar en la colección",
-    "addRequest": "Añadir petición",
-    "addRequestHttp": "Petición HTTP",
-    "addRequestGraphql": "Petición GraphQL",
-    "addRequestGrpc": "Petición gRPC",
-    "addRequestSoap": "Petición SOAP",
-    "addRequestOdata": "Petición OData",
-    "addRequestWebsocket": "Petición WebSocket",
-    "addFolder": "Añadir carpeta",
-    "addEnvironmentFolder": "Añadir carpeta de entorno",
-    "addVariable": "Añadir variable",
-    "addTag": "Añadir etiqueta",
-    "expandAllFolders": "Expandir todas las carpetas",
-    "collapseAllFolders": "Contraer todas las carpetas",
-    "sendActiveRequest": "Enviar petición",
-    "cancelActiveRequest": "Cancelar petición",
-    "generateCodeSnippet": "Generar fragmento de código",
-    "copyAsCurl": "Copiar como cURL",
-    "exportOpenApi": "Exportar a OpenAPI",
-    "clearAuthCache": "Vaciar caché de autenticación",
-    "openLogsFolder": "Abrir carpeta de logs",
     "mcpLogs": "Registros MCP",
+    "consoleHttp": "Consola HTTP",
     "git": "Git",
     "gitPush": "Subir",
     "gitPull": "Descargar",
     "gitRefresh": "Actualizar",
     "gitHistory": "Historial",
-    "gitResetToServer": "Restablecer a la versión del servidor"
+    "gitResetToServer": "Restablecer a la versión del servidor",
+    "scenario": "Escenario",
+    "create": "Crear",
+    "request": "Solicitud",
+    "server": "Servidor",
+    "runSelected": "Ejecutar",
+    "cancelSelected": "Cancelar",
+    "clone": "Clonar",
+    "delete": "Eliminar",
+    "addToFavorites": "Añadir a favoritos",
+    "removeFromFavorites": "Quitar de favoritos"
   },
   "sidebar": {
     "addRequest": "Añadir petición",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Cortar",
+      "copy": "Copiar",
+      "paste": "Pegar"
     },
     "deleteConfirm": {
       "title": "Confirmar eliminación",
@@ -608,6 +599,7 @@
     "disconnect": "Desconectar",
     "startListening": "Empezar a escuchar",
     "stopListening": "Dejar de escuchar",
+    "listenFailed": "No se pudo iniciar el servidor",
     "routePlaceholder": "Ruta (opcional)",
     "clientsConnected": "{{count}} cliente(s) conectado(s)",
     "notListening": "Sin escuchar"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Formatos de datos",
       "encoding": "Codificación",
       "time": "Temporización",
-      "algorithmie": "Algoritmos",
-      "ux": "UX"
+      "algorithmie": "Algoritmos"
     },
     "listOp": {
       "value": "lista",

@@ -9,7 +9,6 @@ import {
   SplitView,
   Pane,
   ControlGroup,
-  toasterService,
   logger,
   type ISelectData
 } from 'electron-core-ui/renderer'
@@ -19,6 +18,9 @@ import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
@@ -149,7 +151,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     void window.restorm?.grpc.listen(request.id)
       .then((res) => {
         if (res.error) {
-          toasterService.push('app', { title: t('grpc.server.listenFailed', 'gRPC server failed to start'), body: res.error, durationMs: 10000 })
+          pushServerListenErrorToast(t, t('grpc.server.listenFailed', 'gRPC server failed to start'), res.error)
           logger.error('gRPC mock server failed to listen', { error: res.error })
         }
       })
@@ -159,6 +161,18 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
   const handleStop = useCallback((): void => {
     void window.restorm?.grpc.stopServer(request.id)
   }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE one.
+  const serverMenuOpsRef = React.useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[]>(() => [
+    isListening
+      ? { id: 'server-stop', label: t('grpc.server.stopListening', 'Stop server'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+      : { id: 'server-listen', label: t('grpc.server.startListening', 'Start server'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+  ], [isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab, serverMenuItems)
 
   // Track served-count updates for the banner. Skipped entirely in
   // conflict mode (see `conflictSafeLiveState.ts`) — no live subscription

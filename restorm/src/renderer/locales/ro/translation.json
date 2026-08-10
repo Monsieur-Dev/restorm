@@ -229,36 +229,24 @@
     "saveAll": "Salvează tot",
     "saveAs": "Salvează ca",
     "exit": "Ieșire",
-    "selection": "Selecție",
-    "tools": "Unelte",
-    "findInCollection": "Caută în colecție",
-    "addRequest": "Adaugă cerere",
-    "addRequestHttp": "Cerere HTTP",
-    "addRequestGraphql": "Cerere GraphQL",
-    "addRequestGrpc": "Cerere gRPC",
-    "addRequestSoap": "Cerere SOAP",
-    "addRequestOdata": "Cerere OData",
-    "addRequestWebsocket": "Cerere WebSocket",
-    "addFolder": "Adaugă folder",
-    "addEnvironmentFolder": "Adaugă folder de mediu",
-    "addVariable": "Adaugă variabilă",
-    "addTag": "Adaugă etichetă",
-    "expandAllFolders": "Extinde toate folderele",
-    "collapseAllFolders": "Restrânge toate folderele",
-    "sendActiveRequest": "Trimite cererea",
-    "cancelActiveRequest": "Anulează cererea",
-    "generateCodeSnippet": "Generează fragment de cod",
-    "copyAsCurl": "Copiază drept cURL",
-    "exportOpenApi": "Exportă în OpenAPI",
-    "clearAuthCache": "Golește memoria cache de autentificare",
-    "openLogsFolder": "Deschide folderul de jurnale",
     "mcpLogs": "Jurnale MCP",
+    "consoleHttp": "Consolă HTTP",
     "git": "Git",
     "gitPush": "Trimite",
     "gitPull": "Extrage",
     "gitRefresh": "Reîmprospătare",
     "gitHistory": "Istoric",
-    "gitResetToServer": "Resetează la versiunea serverului"
+    "gitResetToServer": "Resetează la versiunea serverului",
+    "scenario": "Scenariu",
+    "create": "Creare",
+    "request": "Cerere",
+    "server": "Server",
+    "runSelected": "Execută",
+    "cancelSelected": "Anulează",
+    "clone": "Clonează",
+    "delete": "Șterge",
+    "addToFavorites": "Adaugă la favorite",
+    "removeFromFavorites": "Elimină din favorite"
   },
   "sidebar": {
     "addRequest": "Adaugă cerere",
@@ -329,7 +317,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Decupează",
+      "copy": "Copiază",
+      "paste": "Lipește"
     },
     "deleteConfirm": {
       "title": "Confirmă ștergerea",
@@ -609,6 +600,7 @@
     "disconnect": "Deconectează",
     "startListening": "Începe ascultarea",
     "stopListening": "Oprește ascultarea",
+    "listenFailed": "Pornirea serverului a eșuat",
     "routePlaceholder": "Rută (opțional)",
     "clientsConnected": "{{count}} client(i) conectat(i)",
     "notListening": "Nu ascultă"
@@ -1767,8 +1759,7 @@
       "dataFormats": "Formate de date",
       "encoding": "Codificare",
       "time": "Sincronizare",
-      "algorithmie": "Algoritmi",
-      "ux": "UX"
+      "algorithmie": "Algoritmi"
     },
     "listOp": {
       "value": "listă",

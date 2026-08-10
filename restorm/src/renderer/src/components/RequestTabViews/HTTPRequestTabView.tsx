@@ -12,7 +12,6 @@ import {
   Pane,
   ControlGroup,
   InputBox,
-  Modal,
   Toggle,
   eventBus,
   logger,
@@ -42,6 +41,9 @@ import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { useRestormStore } from '../../store/restormStore'
@@ -190,7 +192,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   // Mock-server launch failure surfaced as a MODAL (a toast was too easy to
   // miss for "the server never started"). Holds the raw main-side error.
-  const [listenError, setListenError] = useState<string | null>(null)
   const { t } = useTranslation()
   const { formatUserDate } = useUserDateFormat()
   // `projectUuid` lives on the EnvironmentContext (mirrored from the
@@ -965,16 +966,33 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     void window.restorm?.http.listen(requestId)
       .then((res) => {
         if (res.error) {
-          setListenError(res.error)
+          pushServerListenErrorToast(t, t('http.server.listenFailed'), res.error, serverPort)
           logger.error('HTTP mock server failed to listen', { error: res.error })
         }
       })
       .catch((err: unknown) => { logger.error('HTTP mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, conflictMode])
+  }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.http.stop(request.id)
   }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE
+  // one. Handlers route through a ref so the published array only rebuilds
+  // when the rendered entry changes.
+  const serverMenuOpsRef = useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[] | null>(() => {
+    if (!isServer) return null
+    return [
+      isListening
+        ? { id: 'server-stop', label: t('http.server.stopListening'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+        : { id: 'server-listen', label: t('http.server.startListening'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+    ]
+  }, [isServer, isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab && isServer, serverMenuItems)
 
   // Track listening state + served count for the hosted mock route. Skipped
   // entirely in conflict mode (see `conflictSafeLiveState.ts`) — a static
@@ -1432,27 +1450,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         {...(activeRequestTabId !== undefined ? { activeRequestTabId } : {})}
         {...(onRequestTabChange !== undefined ? { onRequestTabChange } : {})}
       />
-      <Modal
-        title={t('http.server.listenFailed')}
-        isOpen={listenError !== null}
-        onClose={() => { setListenError(null) }}
-        size="dialog"
-        data-testid="http-server-listen-error-modal"
-        enterActionTestId="http-server-listen-error-ok"
-      >
-        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <p style={{ margin: 0, lineHeight: 1.5 }} data-testid="http-server-listen-error-message">
-            {listenError?.includes('EADDRINUSE')
-              ? t('http.server.portInUse', { port: (/:(\d+)\s*$/.exec(listenError))?.[1] ?? serverPort })
-              : listenError}
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button data-testid="http-server-listen-error-ok" onClick={() => { setListenError(null) }}>
-              {t('common.ok', 'OK')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
       <ResponseHistoryModal
         isOpen={historyModalOpen}
         onClose={handleCloseHistoryModal}

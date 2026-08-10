@@ -229,36 +229,24 @@
     "saveAll": "Sačuvaj sve",
     "saveAs": "Sačuvaj kao",
     "exit": "Izlaz",
-    "selection": "Izbor",
-    "tools": "Alati",
-    "findInCollection": "Pronađi u kolekciji",
-    "addRequest": "Dodaj zahtev",
-    "addRequestHttp": "HTTP zahtev",
-    "addRequestGraphql": "GraphQL zahtev",
-    "addRequestGrpc": "gRPC zahtev",
-    "addRequestSoap": "SOAP zahtev",
-    "addRequestOdata": "OData zahtev",
-    "addRequestWebsocket": "WebSocket zahtev",
-    "addFolder": "Dodaj fasciklu",
-    "addEnvironmentFolder": "Dodaj fasciklu okruženja",
-    "addVariable": "Dodaj promenljivu",
-    "addTag": "Dodaj oznaku",
-    "expandAllFolders": "Proširi sve fascikle",
-    "collapseAllFolders": "Skupi sve fascikle",
-    "sendActiveRequest": "Pošalji zahtev",
-    "cancelActiveRequest": "Otkaži zahtev",
-    "generateCodeSnippet": "Generiši isečak koda",
-    "copyAsCurl": "Kopiraj kao cURL",
-    "exportOpenApi": "Izvezi u OpenAPI",
-    "clearAuthCache": "Očisti keš autentifikacije",
-    "openLogsFolder": "Otvori fasciklu zapisa",
     "mcpLogs": "MCP zapisi",
+    "consoleHttp": "HTTP konzola",
     "git": "Git",
     "gitPush": "Pošalji",
     "gitPull": "Preuzmi",
     "gitRefresh": "Osveži",
     "gitHistory": "Istorija",
-    "gitResetToServer": "Vrati na verziju servera"
+    "gitResetToServer": "Vrati na verziju servera",
+    "scenario": "Scenario",
+    "create": "Kreiraj",
+    "request": "Zahtev",
+    "server": "Server",
+    "runSelected": "Pokreni",
+    "cancelSelected": "Otkaži",
+    "clone": "Kloniraj",
+    "delete": "Obriši",
+    "addToFavorites": "Dodaj u omiljeno",
+    "removeFromFavorites": "Ukloni iz omiljenog"
   },
   "sidebar": {
     "addRequest": "Dodaj zahtev",
@@ -329,7 +317,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Iseci",
+      "copy": "Kopiraj",
+      "paste": "Nalepi"
     },
     "deleteConfirm": {
       "title": "Potvrdi brisanje",
@@ -609,6 +600,7 @@
     "disconnect": "Prekini vezu",
     "startListening": "Počni slušanje",
     "stopListening": "Zaustavi slušanje",
+    "listenFailed": "Pokretanje servera nije uspelo",
     "routePlaceholder": "Ruta (opciono)",
     "clientsConnected": "{{count}} klijent(a) povezano",
     "notListening": "Ne sluša"
@@ -1767,8 +1759,7 @@
       "dataFormats": "Formati podataka",
       "encoding": "Kodiranje",
       "time": "Tajming",
-      "algorithmie": "Algoritmi",
-      "ux": "UX"
+      "algorithmie": "Algoritmi"
     },
     "listOp": {
       "value": "lista",

@@ -128,6 +128,10 @@ A `KindSpec` entry has four parts:
   `ScenarioEditorView.tsx` (`SCENARIO_SUBMENU_CATEGORIES['loops']` + the palette `flatMap`); copy that
   pattern for any future grouped family. Submenu categories are declared in
   `SCENARIO_SUBMENU_CATEGORIES` in `scenarioNodeCatalogue.ts`.
+- `paletteBreakBefore` (optional) — inserts a separator ABOVE this entry inside
+  its category's submenu, splitting a large family into visual groups (e.g. the
+  Algorithmie submenu separates If/Switch from the rest). Registry key order
+  decides the palette order; the flag only draws the divider.
 
 ### Capability flags (state ONLY the exceptions)
 

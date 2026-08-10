@@ -50,6 +50,9 @@ export interface RestormWorkbenchTabProps {
    * to the LEFT of the bookmark ribbon (e.g. a request's env selector +
    * history button). Rendered in a flex row; the wrapper positions it. */
   headerActions?: React.ReactNode
+  /** Actions rendered BEFORE the bookmark ribbon (e.g. the env selector) —
+   * the ribbon sits between this slot and `headerActions`. */
+  headerActionsLeading?: React.ReactNode
   /** Optional action anchored in the tab's top-right toolbar, between the
    * bookmark ribbon and the favourite star (e.g. the "used in scenarios"
    * button). Brings its own absolute positioning. */
@@ -83,6 +86,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   onTagColorChange,
   headerRight,
   headerActions,
+  headerActionsLeading,
   topRightAction,
   starLeftAction,
   callout,
@@ -138,7 +142,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   }, [tags, onTagsChange])
 
   return (
-    <WorkbenchTabHostContext.Provider value={true}>
+    <WorkbenchTabHostContext.Provider value={tabId ?? null}>
     <div className="restorm-workbench-tab">
       {/* Top-right cluster: optional header actions (e.g. a request's env
        * selector + history button) flow in a flex row to the LEFT of the
@@ -152,14 +156,31 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
          * visually without shifting any of them. See restormWorkbenchTab.css
          * (`.restorm-workbench-tab-action-zone`). */}
         <div className="restorm-workbench-tab-action-zone" aria-hidden="true" />
+        {/* Cluster order (left → right): leading actions (env selector) ·
+         * bookmark ribbon (tags) · remaining header actions (history,
+         * quick settings) · scenario-usage · auth-route key. The ribbon
+         * deliberately sits in SECOND position, between the env selector
+         * and the history button. */}
+        {headerActionsLeading ? (
+          <div className="restorm-workbench-tab-header-actions" data-testid={`${testIdPrefix}-header-actions-leading`}>
+            {headerActionsLeading}
+          </div>
+        ) : null}
+        <BookmarkRibbonStack
+          bookmarks={ribbonBookmarks}
+          onRename={handleRibbonRename}
+          {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
+          onRemove={handleRibbonRemove}
+          onAdd={handleRibbonAdd}
+          data-testid={`${testIdPrefix}-bookmarks`}
+        />
         {headerActions ? (
           <div className="restorm-workbench-tab-header-actions" data-testid={`${testIdPrefix}-header-actions`}>
             {headerActions}
           </div>
         ) : null}
         {/* "Used in scenarios" reverse-nav: flows in the cluster right after
-         * the header actions and BEFORE the bookmark ribbon, so it composes
-         * with the row instead of overlaying it. */}
+         * the header actions, before the auth-route key. */}
         {topRightAction ? (
           <span
             className="restorm-workbench-tab-scenario-action"
@@ -170,14 +191,6 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             {topRightAction}
           </span>
         ) : null}
-        <BookmarkRibbonStack
-          bookmarks={ribbonBookmarks}
-          onRename={handleRibbonRename}
-          {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
-          onRemove={handleRibbonRemove}
-          onAdd={handleRibbonAdd}
-          data-testid={`${testIdPrefix}-bookmarks`}
-        />
         {/* Star-left action (e.g. the auth-route key selector): the
          * rightmost item of the cluster, so it flows snug after the env
          * pill / history / ribbon and lands immediately to the LEFT of

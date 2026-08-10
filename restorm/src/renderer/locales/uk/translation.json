@@ -230,36 +230,24 @@
     "saveAll": "Зберегти все",
     "saveAs": "Зберегти як",
     "exit": "Вийти",
-    "selection": "Виділення",
-    "tools": "Інструменти",
-    "findInCollection": "Знайти в колекції",
-    "addRequest": "Додати запит",
-    "addRequestHttp": "Запит HTTP",
-    "addRequestGraphql": "Запит GraphQL",
-    "addRequestGrpc": "Запит gRPC",
-    "addRequestSoap": "Запит SOAP",
-    "addRequestOdata": "Запит OData",
-    "addRequestWebsocket": "Запит WebSocket",
-    "addFolder": "Додати теку",
-    "addEnvironmentFolder": "Додати теку середовищ",
-    "addVariable": "Додати змінну",
-    "addTag": "Додати тег",
-    "expandAllFolders": "Розгорнути всі теки",
-    "collapseAllFolders": "Згорнути всі теки",
-    "sendActiveRequest": "Надіслати запит",
-    "cancelActiveRequest": "Скасувати запит",
-    "generateCodeSnippet": "Згенерувати фрагмент коду",
-    "copyAsCurl": "Копіювати як cURL",
-    "exportOpenApi": "Експортувати в OpenAPI",
-    "clearAuthCache": "Очистити кеш автентифікації",
-    "openLogsFolder": "Відкрити теку журналів",
     "mcpLogs": "Журнали MCP",
+    "consoleHttp": "Консоль HTTP",
     "git": "Git",
     "gitPush": "Надіслати",
     "gitPull": "Отримати",
     "gitRefresh": "Оновити",
     "gitHistory": "Історія",
-    "gitResetToServer": "Скинути до версії сервера"
+    "gitResetToServer": "Скинути до версії сервера",
+    "scenario": "Сценарій",
+    "create": "Створити",
+    "request": "Запит",
+    "server": "Сервер",
+    "runSelected": "Виконати",
+    "cancelSelected": "Скасувати",
+    "clone": "Клонувати",
+    "delete": "Видалити",
+    "addToFavorites": "Додати до обраного",
+    "removeFromFavorites": "Видалити з обраного"
   },
   "sidebar": {
     "addRequest": "Додати запит",
@@ -330,7 +318,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Вирізати",
+      "copy": "Копіювати",
+      "paste": "Вставити"
     },
     "deleteConfirm": {
       "title": "Підтвердьте видалення",
@@ -610,6 +601,7 @@
     "disconnect": "Відключити",
     "startListening": "Почати слухати",
     "stopListening": "Зупинити прослуховування",
+    "listenFailed": "Не вдалося запустити сервер",
     "routePlaceholder": "Маршрут (необов'язково)",
     "clientsConnected": "{{count}} клієнт(ів) підключено",
     "notListening": "Не слухає"
@@ -1768,8 +1760,7 @@
       "dataFormats": "Формати даних",
       "encoding": "Кодування",
       "time": "Таймінг",
-      "algorithmie": "Алгоритми",
-      "ux": "UX"
+      "algorithmie": "Алгоритми"
     },
     "listOp": {
       "value": "список",

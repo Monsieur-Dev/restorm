@@ -228,36 +228,24 @@
     "saveAll": "Save All",
     "saveAs": "Save As",
     "exit": "Exit",
-    "selection": "Selection",
-    "tools": "Tools",
-    "findInCollection": "Find in Collection",
-    "addRequest": "Add Request",
-    "addRequestHttp": "HTTP Request",
-    "addRequestGraphql": "GraphQL Request",
-    "addRequestGrpc": "gRPC Request",
-    "addRequestSoap": "SOAP Request",
-    "addRequestOdata": "OData Request",
-    "addRequestWebsocket": "WebSocket Request",
-    "addFolder": "Add Folder",
-    "addEnvironmentFolder": "Add Environment Folder",
-    "addVariable": "Add Variable",
-    "addTag": "Add Tag",
-    "expandAllFolders": "Expand All Folders",
-    "collapseAllFolders": "Collapse All Folders",
-    "sendActiveRequest": "Send Request",
-    "cancelActiveRequest": "Cancel Request",
-    "generateCodeSnippet": "Generate Code Snippet",
-    "copyAsCurl": "Copy as cURL",
-    "exportOpenApi": "Export to OpenAPI",
-    "clearAuthCache": "Clear Authentication Cache",
-    "openLogsFolder": "Open Logs Folder",
     "mcpLogs": "MCP logs",
+    "consoleHttp": "HTTP console",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Pull",
     "gitRefresh": "Refresh",
     "gitHistory": "History",
-    "gitResetToServer": "Reset to the server version"
+    "gitResetToServer": "Reset to the server version",
+    "scenario": "Scenario",
+    "create": "Create",
+    "request": "Request",
+    "server": "Server",
+    "runSelected": "Run",
+    "cancelSelected": "Cancel",
+    "clone": "Clone",
+    "delete": "Delete",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites"
   },
   "sidebar": {
     "addRequest": "Add request",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste"
     },
     "deleteConfirm": {
       "title": "Confirm deletion",
@@ -608,6 +599,7 @@
     "disconnect": "Disconnect",
     "startListening": "Start listening",
     "stopListening": "Stop listening",
+    "listenFailed": "Server failed to start",
     "routePlaceholder": "Route (optional)",
     "clientsConnected": "{{count}} client(s) connected",
     "notListening": "Not listening"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Data formats",
       "encoding": "Encoding",
       "time": "Timing",
-      "algorithmie": "Algorithms",
-      "ux": "UX"
+      "algorithmie": "Algorithms"
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"

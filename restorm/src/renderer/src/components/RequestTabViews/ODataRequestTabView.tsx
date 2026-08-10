@@ -25,6 +25,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -949,16 +952,31 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     void window.restorm?.odata.listen(requestId)
       .then((res) => {
         if (res.error) {
-          toasterService.push('app', { title: t('odata.server.listenFailed', 'OData mock server failed to start'), body: res.error, durationMs: 10000 })
+          pushServerListenErrorToast(t, t('odata.server.listenFailed', 'OData mock server failed to start'), res.error, serverPort)
           logger.error('OData mock server failed to listen', { error: res.error })
         }
       })
       .catch((err: unknown) => { logger.error('OData mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, conflictMode, t])
+  }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.odata.stop(request.id)
   }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE one.
+  const serverMenuOpsRef = useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[] | null>(() => {
+    if (!isServer) return null
+    return [
+      isListening
+        ? { id: 'server-stop', label: t('odata.server.stopListening', 'Stop listening'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+        : { id: 'server-listen', label: t('odata.server.startListening', 'Start listening'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+    ]
+  }, [isServer, isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab && isServer, serverMenuItems)
 
   // Track listening state + served count for the hosted mock service.
   // Skipped entirely in conflict mode (see `conflictSafeLiveState.ts`) — a

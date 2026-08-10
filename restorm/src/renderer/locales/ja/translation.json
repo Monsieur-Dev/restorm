@@ -227,36 +227,24 @@
     "saveAll": "すべて保存",
     "saveAs": "名前を付けて保存",
     "exit": "終了",
-    "selection": "選択",
-    "tools": "ツール",
-    "findInCollection": "コレクション内を検索",
-    "addRequest": "リクエストを追加",
-    "addRequestHttp": "HTTP リクエスト",
-    "addRequestGraphql": "GraphQL リクエスト",
-    "addRequestGrpc": "gRPC リクエスト",
-    "addRequestSoap": "SOAP リクエスト",
-    "addRequestOdata": "OData リクエスト",
-    "addRequestWebsocket": "WebSocket リクエスト",
-    "addFolder": "フォルダを追加",
-    "addEnvironmentFolder": "環境フォルダを追加",
-    "addVariable": "変数を追加",
-    "addTag": "タグを追加",
-    "expandAllFolders": "すべてのフォルダを展開",
-    "collapseAllFolders": "すべてのフォルダを折りたたむ",
-    "sendActiveRequest": "リクエストを送信",
-    "cancelActiveRequest": "リクエストをキャンセル",
-    "generateCodeSnippet": "コードスニペットを生成",
-    "copyAsCurl": "cURL としてコピー",
-    "exportOpenApi": "OpenAPI にエクスポート",
-    "clearAuthCache": "認証キャッシュをクリア",
-    "openLogsFolder": "ログフォルダを開く",
     "mcpLogs": "MCP ログ",
+    "consoleHttp": "HTTPコンソール",
     "git": "Git",
     "gitPush": "プッシュ",
     "gitPull": "プル",
     "gitRefresh": "更新",
     "gitHistory": "履歴",
-    "gitResetToServer": "サーバーのバージョンに戻す"
+    "gitResetToServer": "サーバーのバージョンに戻す",
+    "scenario": "シナリオ",
+    "create": "作成",
+    "request": "リクエスト",
+    "server": "サーバー",
+    "runSelected": "実行",
+    "cancelSelected": "キャンセル",
+    "clone": "複製",
+    "delete": "削除",
+    "addToFavorites": "お気に入りに追加",
+    "removeFromFavorites": "お気に入りから削除"
   },
   "sidebar": {
     "addRequest": "リクエストを追加",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "切り取り",
+      "copy": "コピー",
+      "paste": "貼り付け"
     },
     "deleteConfirm": {
       "title": "削除の確認",
@@ -607,6 +598,7 @@
     "disconnect": "切断",
     "startListening": "リッスン開始",
     "stopListening": "リッスン停止",
+    "listenFailed": "サーバーの起動に失敗しました",
     "routePlaceholder": "ルート (任意)",
     "clientsConnected": "{{count}} クライアント接続中",
     "notListening": "リッスンしていません"
@@ -1765,8 +1757,7 @@
       "dataFormats": "データ形式",
       "encoding": "エンコード",
       "time": "タイミング",
-      "algorithmie": "アルゴリズム",
-      "ux": "UX"
+      "algorithmie": "アルゴリズム"
     },
     "listOp": {
       "value": "リスト",

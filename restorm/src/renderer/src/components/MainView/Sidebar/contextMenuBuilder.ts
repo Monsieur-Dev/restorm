@@ -15,6 +15,8 @@ export interface SidebarContextMenuItem {
   icon?: string | React.ReactNode
   shortcut?: string
   isSeparator?: boolean
+  /** Greyed-out, non-clickable entry (mirrors the ECUI ContextMenuItem flag). */
+  disabled?: boolean
   onClick?: () => void
   /** Nested items for a submenu entry. */
   items?: SidebarContextMenuItem[]
@@ -77,6 +79,14 @@ export interface BuildContextMenuOptions {
   onAddChildItem: AddChildHandler
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: ContextMenuActionHandler
+  /** Cut / copy the item to the sidebar clipboard; paste INTO/AFTER it. The
+   * handlers take the target id — the shared array-based clipboard lives in
+   * the host (multi-selection ready). */
+  onCutItem?: ContextMenuActionHandler
+  onCopyItem?: ContextMenuActionHandler
+  onPasteItem?: ContextMenuActionHandler
+  /** Whether a paste payload is staged (greys out Coller otherwise). */
+  canPaste?: () => boolean
   /** `true` when the folder identified by id has an importable
    * source attached. Drives the "Refresh from source" entry. */
   canRefreshFromSource?: (itemId: string) => boolean
@@ -334,10 +344,29 @@ export const buildEmptyAreaContextMenu = (
   ]
 }
 
+/** The Couper / Copier / Coller trio, shared by every item branch. Paste is
+ * greyed out until a copy is staged. */
+const clipboardEntries = (
+  itemId: string,
+  t: TranslateFunction,
+  onCutItem?: ContextMenuActionHandler,
+  onCopyItem?: ContextMenuActionHandler,
+  onPasteItem?: ContextMenuActionHandler,
+  canPaste?: () => boolean
+): SidebarContextMenuItem[] => {
+  if (!onCutItem && !onCopyItem && !onPasteItem) return []
+  return [
+    ...(onCutItem ? [{ id: 'cut-item', label: t('sidebar.contextMenu.cut'), icon: 'file-symlink-file', onClick: () => { onCutItem(itemId) } }] : []),
+    ...(onCopyItem ? [{ id: 'copy-item', label: t('sidebar.contextMenu.copy'), icon: 'files', onClick: () => { onCopyItem(itemId) } }] : []),
+    ...(onPasteItem ? [{ id: 'paste-item', label: t('sidebar.contextMenu.paste'), icon: 'output', ...(canPaste?.() === false ? { disabled: true } : {}), onClick: () => { onPasteItem(itemId) } }] : []),
+    { id: 'sep-clipboard', isSeparator: true, label: '' }
+  ]
+}
+
 export const buildContextMenuForItem = (
   options: BuildContextMenuOptions
 ): SidebarContextMenuItem[] => {
-  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, isItemScenario } = options
+  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario } = options
   const itemId = item.id
   // Scenarios are folder-shaped (they carry `children`) but the user
   // wants the same favourite / add-child / clone affordances they get
@@ -363,6 +392,7 @@ export const buildContextMenuForItem = (
         items: buildAddSubmenu(itemId, t, onAddChildItem)
       },
       { id: 'sep-add', isSeparator: true, label: '' },
+      ...clipboardEntries(itemId, t, onCutItem, onCopyItem, onPasteItem, canPaste),
       {
         id: 'clone-item',
         label: t('sidebar.contextMenu.clone'),
@@ -409,6 +439,7 @@ export const buildContextMenuForItem = (
         items: buildAddSubmenu(itemId, t, onAddChildItem)
       },
       { id: 'sep-add', isSeparator: true, label: '' },
+      ...clipboardEntries(itemId, t, onCutItem, onCopyItem, onPasteItem, canPaste),
       {
         id: 'clone-item',
         label: t('sidebar.contextMenu.clone'),
@@ -449,6 +480,7 @@ export const buildContextMenuForItem = (
       onClick: () => { onToggleFavorite?.(itemId) }
     },
     { id: 'sep-fav', isSeparator: true, label: '' },
+    ...clipboardEntries(itemId, t, onCutItem, onCopyItem, onPasteItem, canPaste),
     {
       id: 'clone-item',
       label: t('sidebar.contextMenu.clone'),
@@ -462,7 +494,8 @@ export const buildContextMenuForItem = (
       id: 'rename-item',
       label: t('sidebar.contextMenu.rename'),
       icon: 'edit',
-      shortcut: 'F2'
+      shortcut: 'F2',
+      onClick: () => { onRenameItem(itemId) }
     },
     { id: 'sep-item', isSeparator: true, label: '' },
     {
@@ -619,6 +652,10 @@ export interface AttachContextMenusOptions {
   onAddChildItem: AddChildHandler
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: ContextMenuActionHandler
+  onCutItem?: ContextMenuActionHandler
+  onCopyItem?: ContextMenuActionHandler
+  onPasteItem?: ContextMenuActionHandler
+  canPaste?: () => boolean
   canRefreshFromSource?: (itemId: string) => boolean
   onRefreshFromSource?: ContextMenuActionHandler
   isItemScenario?: (itemId: string) => boolean

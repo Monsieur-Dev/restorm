@@ -20,8 +20,7 @@ export const SCENARIO_SUBMENU_CATEGORIES: Partial<Record<ScenarioNodeCategory, {
   math: { labelKey: 'scenario.menuGroups.math', defaultLabel: 'Math', icon: 'symbol-operator' },
   algorithmie: { labelKey: 'scenario.menuGroups.algorithmie', defaultLabel: 'Algorithmie', icon: 'symbol-misc' },
   dataFormats: { labelKey: 'scenario.menuGroups.dataFormats', defaultLabel: 'Data formats', icon: 'file-code' },
-  encoding: { labelKey: 'scenario.menuGroups.encoding', defaultLabel: 'Encoding', icon: 'lock' },
-  ux: { labelKey: 'scenario.menuGroups.ux', defaultLabel: 'UX', icon: 'bell' }
+  encoding: { labelKey: 'scenario.menuGroups.encoding', defaultLabel: 'Encoding', icon: 'lock' }
 }
 
 export interface ScenarioNodeKindMeta {
@@ -33,6 +32,8 @@ export interface ScenarioNodeKindMeta {
   icon: string
   /** Group the kind belongs to (separators in the add-node menu). */
   category: ScenarioNodeCategory
+  /** Palette submenus: draw a separator before this entry. */
+  paletteBreakBefore?: true
 }
 
 /** Ordered catalogue — derived from the kind registry in its key order (which is
@@ -45,7 +46,8 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = (
   labelKey: spec.labelKey,
   defaultLabel: spec.defaultLabel,
   icon: spec.icon,
-  category: spec.category
+  category: spec.category,
+  ...((spec as { paletteBreakBefore?: true }).paletteBreakBefore === true ? { paletteBreakBefore: true as const } : {})
 }))
 
 const byKind = new Map(SCENARIO_NODE_CATALOGUE.map((m) => [m.kind, m]))

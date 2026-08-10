@@ -230,36 +230,24 @@
     "saveAll": "Uložit vše",
     "saveAs": "Uložit jako",
     "exit": "Ukončit",
-    "selection": "Výběr",
-    "tools": "Nástroje",
-    "findInCollection": "Najít v kolekci",
-    "addRequest": "Přidat požadavek",
-    "addRequestHttp": "Požadavek HTTP",
-    "addRequestGraphql": "Požadavek GraphQL",
-    "addRequestGrpc": "Požadavek gRPC",
-    "addRequestSoap": "Požadavek SOAP",
-    "addRequestOdata": "Požadavek OData",
-    "addRequestWebsocket": "Požadavek WebSocket",
-    "addFolder": "Přidat složku",
-    "addEnvironmentFolder": "Přidat složku prostředí",
-    "addVariable": "Přidat proměnnou",
-    "addTag": "Přidat štítek",
-    "expandAllFolders": "Rozbalit všechny složky",
-    "collapseAllFolders": "Sbalit všechny složky",
-    "sendActiveRequest": "Odeslat požadavek",
-    "cancelActiveRequest": "Zrušit požadavek",
-    "generateCodeSnippet": "Generovat ukázku kódu",
-    "copyAsCurl": "Kopírovat jako cURL",
-    "exportOpenApi": "Exportovat do OpenAPI",
-    "clearAuthCache": "Vymazat mezipaměť ověření",
-    "openLogsFolder": "Otevřít složku s logy",
     "mcpLogs": "Protokoly MCP",
+    "consoleHttp": "Konzole HTTP",
     "git": "Git",
     "gitPush": "Odeslat",
     "gitPull": "Stáhnout",
     "gitRefresh": "Obnovit",
     "gitHistory": "Historie",
-    "gitResetToServer": "Obnovit na verzi serveru"
+    "gitResetToServer": "Obnovit na verzi serveru",
+    "scenario": "Scénář",
+    "create": "Vytvořit",
+    "request": "Požadavek",
+    "server": "Server",
+    "runSelected": "Spustit",
+    "cancelSelected": "Zrušit",
+    "clone": "Duplikovat",
+    "delete": "Smazat",
+    "addToFavorites": "Přidat k oblíbeným",
+    "removeFromFavorites": "Odebrat z oblíbených"
   },
   "sidebar": {
     "addRequest": "Přidat požadavek",
@@ -330,7 +318,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Vyjmout",
+      "copy": "Kopírovat",
+      "paste": "Vložit"
     },
     "deleteConfirm": {
       "title": "Potvrdit smazání",
@@ -610,6 +601,7 @@
     "disconnect": "Odpojit",
     "startListening": "Začít naslouchat",
     "stopListening": "Zastavit naslouchání",
+    "listenFailed": "Server se nepodařilo spustit",
     "routePlaceholder": "Trasa (volitelné)",
     "clientsConnected": "{{count}} klient(ů) připojeno",
     "notListening": "Neposlouchá"
@@ -1768,8 +1760,7 @@
       "dataFormats": "Datové formáty",
       "encoding": "Kódování",
       "time": "Časování",
-      "algorithmie": "Algoritmy",
-      "ux": "UX"
+      "algorithmie": "Algoritmy"
     },
     "listOp": {
       "value": "seznam",

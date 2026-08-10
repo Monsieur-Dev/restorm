@@ -227,36 +227,24 @@
     "saveAll": "Lưu tất cả",
     "saveAs": "Lưu dưới dạng",
     "exit": "Thoát",
-    "selection": "Lựa chọn",
-    "tools": "Công cụ",
-    "findInCollection": "Tìm trong bộ sưu tập",
-    "addRequest": "Thêm yêu cầu",
-    "addRequestHttp": "Yêu cầu HTTP",
-    "addRequestGraphql": "Yêu cầu GraphQL",
-    "addRequestGrpc": "Yêu cầu gRPC",
-    "addRequestSoap": "Yêu cầu SOAP",
-    "addRequestOdata": "Yêu cầu OData",
-    "addRequestWebsocket": "Yêu cầu WebSocket",
-    "addFolder": "Thêm thư mục",
-    "addEnvironmentFolder": "Thêm thư mục môi trường",
-    "addVariable": "Thêm biến",
-    "addTag": "Thêm thẻ",
-    "expandAllFolders": "Mở rộng tất cả thư mục",
-    "collapseAllFolders": "Thu gọn tất cả thư mục",
-    "sendActiveRequest": "Gửi yêu cầu",
-    "cancelActiveRequest": "Hủy yêu cầu",
-    "generateCodeSnippet": "Tạo đoạn mã",
-    "copyAsCurl": "Sao chép dưới dạng cURL",
-    "exportOpenApi": "Xuất sang OpenAPI",
-    "clearAuthCache": "Xóa bộ nhớ đệm xác thực",
-    "openLogsFolder": "Mở thư mục nhật ký",
     "mcpLogs": "Nhật ký MCP",
+    "consoleHttp": "Bảng điều khiển HTTP",
     "git": "Git",
     "gitPush": "Đẩy",
     "gitPull": "Kéo",
     "gitRefresh": "Làm mới",
     "gitHistory": "Lịch sử",
-    "gitResetToServer": "Đặt lại về phiên bản máy chủ"
+    "gitResetToServer": "Đặt lại về phiên bản máy chủ",
+    "scenario": "Kịch bản",
+    "create": "Tạo",
+    "request": "Yêu cầu",
+    "server": "Máy chủ",
+    "runSelected": "Chạy",
+    "cancelSelected": "Hủy",
+    "clone": "Nhân bản",
+    "delete": "Xóa",
+    "addToFavorites": "Thêm vào mục yêu thích",
+    "removeFromFavorites": "Xóa khỏi mục yêu thích"
   },
   "sidebar": {
     "addRequest": "Thêm yêu cầu",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Cắt",
+      "copy": "Sao chép",
+      "paste": "Dán"
     },
     "deleteConfirm": {
       "title": "Xác nhận xóa",
@@ -607,6 +598,7 @@
     "disconnect": "Ngắt kết nối",
     "startListening": "Bắt đầu lắng nghe",
     "stopListening": "Dừng lắng nghe",
+    "listenFailed": "Không thể khởi động máy chủ",
     "routePlaceholder": "Tuyến (tùy chọn)",
     "clientsConnected": "{{count}} máy khách đã kết nối",
     "notListening": "Không lắng nghe"
@@ -1765,8 +1757,7 @@
       "dataFormats": "Định dạng dữ liệu",
       "encoding": "Mã hóa",
       "time": "Hẹn giờ",
-      "algorithmie": "Thuật toán",
-      "ux": "UX"
+      "algorithmie": "Thuật toán"
     },
     "listOp": {
       "value": "danh sách",

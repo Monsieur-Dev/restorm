@@ -227,36 +227,24 @@
     "saveAll": "Simpan semua",
     "saveAs": "Simpan sebagai",
     "exit": "Keluar",
-    "selection": "Pilihan",
-    "tools": "Alat",
-    "findInCollection": "Cari dalam koleksi",
-    "addRequest": "Tambah permintaan",
-    "addRequestHttp": "Permintaan HTTP",
-    "addRequestGraphql": "Permintaan GraphQL",
-    "addRequestGrpc": "Permintaan gRPC",
-    "addRequestSoap": "Permintaan SOAP",
-    "addRequestOdata": "Permintaan OData",
-    "addRequestWebsocket": "Permintaan WebSocket",
-    "addFolder": "Tambah folder",
-    "addEnvironmentFolder": "Tambah folder lingkungan",
-    "addVariable": "Tambah variabel",
-    "addTag": "Tambah tag",
-    "expandAllFolders": "Bentangkan semua folder",
-    "collapseAllFolders": "Ciutkan semua folder",
-    "sendActiveRequest": "Kirim permintaan",
-    "cancelActiveRequest": "Batalkan permintaan",
-    "generateCodeSnippet": "Buat cuplikan kode",
-    "copyAsCurl": "Salin sebagai cURL",
-    "exportOpenApi": "Ekspor ke OpenAPI",
-    "clearAuthCache": "Bersihkan cache autentikasi",
-    "openLogsFolder": "Buka folder log",
     "mcpLogs": "Log MCP",
+    "consoleHttp": "Konsol HTTP",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Tarik",
     "gitRefresh": "Segarkan",
     "gitHistory": "Riwayat",
-    "gitResetToServer": "Setel ulang ke versi server"
+    "gitResetToServer": "Setel ulang ke versi server",
+    "scenario": "Skenario",
+    "create": "Buat",
+    "request": "Permintaan",
+    "server": "Server",
+    "runSelected": "Jalankan",
+    "cancelSelected": "Batalkan",
+    "clone": "Klon",
+    "delete": "Hapus",
+    "addToFavorites": "Tambah ke favorit",
+    "removeFromFavorites": "Hapus dari favorit"
   },
   "sidebar": {
     "addRequest": "Tambah permintaan",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Potong",
+      "copy": "Salin",
+      "paste": "Tempel"
     },
     "deleteConfirm": {
       "title": "Konfirmasi penghapusan",
@@ -607,6 +598,7 @@
     "disconnect": "Putuskan koneksi",
     "startListening": "Mulai mendengarkan",
     "stopListening": "Berhenti mendengarkan",
+    "listenFailed": "Server gagal dimulai",
     "routePlaceholder": "Rute (opsional)",
     "clientsConnected": "{{count}} klien terhubung",
     "notListening": "Tidak mendengarkan"
@@ -1765,8 +1757,7 @@
       "dataFormats": "Format data",
       "encoding": "Enkode",
       "time": "Pewaktuan",
-      "algorithmie": "Algoritma",
-      "ux": "UX"
+      "algorithmie": "Algoritma"
     },
     "listOp": {
       "value": "daftar",

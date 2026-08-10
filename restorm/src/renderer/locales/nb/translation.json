@@ -228,36 +228,24 @@
     "saveAll": "Lagre alle",
     "saveAs": "Lagre som",
     "exit": "Avslutt",
-    "selection": "Utvalg",
-    "tools": "Verktøy",
-    "findInCollection": "Finn i samling",
-    "addRequest": "Legg til forespørsel",
-    "addRequestHttp": "HTTP-forespørsel",
-    "addRequestGraphql": "GraphQL-forespørsel",
-    "addRequestGrpc": "gRPC-forespørsel",
-    "addRequestSoap": "SOAP-forespørsel",
-    "addRequestOdata": "OData-forespørsel",
-    "addRequestWebsocket": "WebSocket-forespørsel",
-    "addFolder": "Legg til mappe",
-    "addEnvironmentFolder": "Legg til miljømappe",
-    "addVariable": "Legg til variabel",
-    "addTag": "Legg til tagg",
-    "expandAllFolders": "Utvid alle mapper",
-    "collapseAllFolders": "Skjul alle mapper",
-    "sendActiveRequest": "Send forespørsel",
-    "cancelActiveRequest": "Avbryt forespørsel",
-    "generateCodeSnippet": "Generer kodebit",
-    "copyAsCurl": "Kopier som cURL",
-    "exportOpenApi": "Eksporter til OpenAPI",
-    "clearAuthCache": "Tøm autentiseringsbuffer",
-    "openLogsFolder": "Åpne loggmappe",
     "mcpLogs": "MCP-logger",
+    "consoleHttp": "HTTP-konsoll",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Hent",
     "gitRefresh": "Oppdater",
     "gitHistory": "Historikk",
-    "gitResetToServer": "Tilbakestill til serverens versjon"
+    "gitResetToServer": "Tilbakestill til serverens versjon",
+    "scenario": "Scenario",
+    "create": "Opprett",
+    "request": "Forespørsel",
+    "server": "Server",
+    "runSelected": "Kjør",
+    "cancelSelected": "Avbryt",
+    "clone": "Klon",
+    "delete": "Slett",
+    "addToFavorites": "Legg til i favoritter",
+    "removeFromFavorites": "Fjern fra favoritter"
   },
   "sidebar": {
     "addRequest": "Legg til forespørsel",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Klipp ut",
+      "copy": "Kopier",
+      "paste": "Lim inn"
     },
     "deleteConfirm": {
       "title": "Bekreft sletting",
@@ -608,6 +599,7 @@
     "disconnect": "Koble fra",
     "startListening": "Begynn å lytte",
     "stopListening": "Slutt å lytte",
+    "listenFailed": "Serveren kunne ikke startes",
     "routePlaceholder": "Rute (valgfritt)",
     "clientsConnected": "{{count}} klient(er) tilkoblet",
     "notListening": "Lytter ikke"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Dataformater",
       "encoding": "Koding",
       "time": "Tidsstyring",
-      "algorithmie": "Algoritmer",
-      "ux": "UX"
+      "algorithmie": "Algoritmer"
     },
     "listOp": {
       "value": "liste",

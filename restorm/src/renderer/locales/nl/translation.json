@@ -228,36 +228,24 @@
     "saveAll": "Alles opslaan",
     "saveAs": "Opslaan als",
     "exit": "Afsluiten",
-    "selection": "Selectie",
-    "tools": "Hulpprogramma's",
-    "findInCollection": "Zoeken in collectie",
-    "addRequest": "Verzoek toevoegen",
-    "addRequestHttp": "HTTP-verzoek",
-    "addRequestGraphql": "GraphQL-verzoek",
-    "addRequestGrpc": "gRPC-verzoek",
-    "addRequestSoap": "SOAP-verzoek",
-    "addRequestOdata": "OData-verzoek",
-    "addRequestWebsocket": "WebSocket-verzoek",
-    "addFolder": "Map toevoegen",
-    "addEnvironmentFolder": "Omgevingsmap toevoegen",
-    "addVariable": "Variabele toevoegen",
-    "addTag": "Tag toevoegen",
-    "expandAllFolders": "Alle mappen uitvouwen",
-    "collapseAllFolders": "Alle mappen samenvouwen",
-    "sendActiveRequest": "Verzoek verzenden",
-    "cancelActiveRequest": "Verzoek annuleren",
-    "generateCodeSnippet": "Codefragment genereren",
-    "copyAsCurl": "Kopiëren als cURL",
-    "exportOpenApi": "Exporteren naar OpenAPI",
-    "clearAuthCache": "Authenticatiecache wissen",
-    "openLogsFolder": "Logbestandenmap openen",
     "mcpLogs": "MCP-logboeken",
+    "consoleHttp": "HTTP-console",
     "git": "Git",
     "gitPush": "Pushen",
     "gitPull": "Pullen",
     "gitRefresh": "Vernieuwen",
     "gitHistory": "Geschiedenis",
-    "gitResetToServer": "Terugzetten naar serverversie"
+    "gitResetToServer": "Terugzetten naar serverversie",
+    "scenario": "Scenario",
+    "create": "Aanmaken",
+    "request": "Verzoek",
+    "server": "Server",
+    "runSelected": "Uitvoeren",
+    "cancelSelected": "Annuleren",
+    "clone": "Klonen",
+    "delete": "Verwijderen",
+    "addToFavorites": "Toevoegen aan favorieten",
+    "removeFromFavorites": "Verwijderen uit favorieten"
   },
   "sidebar": {
     "addRequest": "Verzoek toevoegen",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Knippen",
+      "copy": "Kopiëren",
+      "paste": "Plakken"
     },
     "deleteConfirm": {
       "title": "Verwijderen bevestigen",
@@ -608,6 +599,7 @@
     "disconnect": "Verbinding verbreken",
     "startListening": "Begin met luisteren",
     "stopListening": "Stop met luisteren",
+    "listenFailed": "Server kon niet worden gestart",
     "routePlaceholder": "Route (optioneel)",
     "clientsConnected": "{{count}} client(s) verbonden",
     "notListening": "Luistert niet"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Dataformaten",
       "encoding": "Codering",
       "time": "Timing",
-      "algorithmie": "Algoritmen",
-      "ux": "UX"
+      "algorithmie": "Algoritmen"
     },
     "listOp": {
       "value": "lijst",

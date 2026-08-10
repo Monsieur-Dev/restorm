@@ -228,36 +228,24 @@
     "saveAll": "Gem alle",
     "saveAs": "Gem som",
     "exit": "Afslut",
-    "selection": "Markering",
-    "tools": "Værktøjer",
-    "findInCollection": "Find i samling",
-    "addRequest": "Tilføj anmodning",
-    "addRequestHttp": "HTTP-anmodning",
-    "addRequestGraphql": "GraphQL-anmodning",
-    "addRequestGrpc": "gRPC-anmodning",
-    "addRequestSoap": "SOAP-anmodning",
-    "addRequestOdata": "OData-anmodning",
-    "addRequestWebsocket": "WebSocket-anmodning",
-    "addFolder": "Tilføj mappe",
-    "addEnvironmentFolder": "Tilføj miljømappe",
-    "addVariable": "Tilføj variabel",
-    "addTag": "Tilføj tag",
-    "expandAllFolders": "Udvid alle mapper",
-    "collapseAllFolders": "Skjul alle mapper",
-    "sendActiveRequest": "Send anmodning",
-    "cancelActiveRequest": "Annullér anmodning",
-    "generateCodeSnippet": "Generér kodestump",
-    "copyAsCurl": "Kopiér som cURL",
-    "exportOpenApi": "Eksportér til OpenAPI",
-    "clearAuthCache": "Ryd godkendelsescache",
-    "openLogsFolder": "Åbn logmappe",
     "mcpLogs": "MCP-logge",
+    "consoleHttp": "HTTP-konsol",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Hent",
     "gitRefresh": "Opdater",
     "gitHistory": "Historik",
-    "gitResetToServer": "Nulstil til serverens version"
+    "gitResetToServer": "Nulstil til serverens version",
+    "scenario": "Scenarie",
+    "create": "Opret",
+    "request": "Anmodning",
+    "server": "Server",
+    "runSelected": "Kør",
+    "cancelSelected": "Annuller",
+    "clone": "Klon",
+    "delete": "Slet",
+    "addToFavorites": "Føj til favoritter",
+    "removeFromFavorites": "Fjern fra favoritter"
   },
   "sidebar": {
     "addRequest": "Tilføj anmodning",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Klip",
+      "copy": "Kopiér",
+      "paste": "Sæt ind"
     },
     "deleteConfirm": {
       "title": "Bekræft sletning",
@@ -608,6 +599,7 @@
     "disconnect": "Afbryd",
     "startListening": "Begynd at lytte",
     "stopListening": "Stop med at lytte",
+    "listenFailed": "Serveren kunne ikke startes",
     "routePlaceholder": "Rute (valgfri)",
     "clientsConnected": "{{count}} klient(er) forbundet",
     "notListening": "Lytter ikke"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Dataformater",
       "encoding": "Kodning",
       "time": "Timing",
-      "algorithmie": "Algoritmer",
-      "ux": "UX"
+      "algorithmie": "Algoritmer"
     },
     "listOp": {
       "value": "liste",

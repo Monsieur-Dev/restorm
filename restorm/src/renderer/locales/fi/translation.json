@@ -228,36 +228,24 @@
     "saveAll": "Tallenna kaikki",
     "saveAs": "Tallenna nimellä",
     "exit": "Lopeta",
-    "selection": "Valinta",
-    "tools": "Työkalut",
-    "findInCollection": "Etsi kokoelmasta",
-    "addRequest": "Lisää pyyntö",
-    "addRequestHttp": "HTTP-pyyntö",
-    "addRequestGraphql": "GraphQL-pyyntö",
-    "addRequestGrpc": "gRPC-pyyntö",
-    "addRequestSoap": "SOAP-pyyntö",
-    "addRequestOdata": "OData-pyyntö",
-    "addRequestWebsocket": "WebSocket-pyyntö",
-    "addFolder": "Lisää kansio",
-    "addEnvironmentFolder": "Lisää ympäristökansio",
-    "addVariable": "Lisää muuttuja",
-    "addTag": "Lisää tagi",
-    "expandAllFolders": "Laajenna kaikki kansiot",
-    "collapseAllFolders": "Tiivistä kaikki kansiot",
-    "sendActiveRequest": "Lähetä pyyntö",
-    "cancelActiveRequest": "Peruuta pyyntö",
-    "generateCodeSnippet": "Luo koodikatkelma",
-    "copyAsCurl": "Kopioi cURL-muodossa",
-    "exportOpenApi": "Vie OpenAPI-muotoon",
-    "clearAuthCache": "Tyhjennä todennusvälimuisti",
-    "openLogsFolder": "Avaa lokikansio",
     "mcpLogs": "MCP-lokit",
+    "consoleHttp": "HTTP-konsoli",
     "git": "Git",
     "gitPush": "Työnnä",
     "gitPull": "Nouda",
     "gitRefresh": "Päivitä",
     "gitHistory": "Historia",
-    "gitResetToServer": "Palauta palvelimen versioon"
+    "gitResetToServer": "Palauta palvelimen versioon",
+    "scenario": "Skenaario",
+    "create": "Luo",
+    "request": "Pyyntö",
+    "server": "Palvelin",
+    "runSelected": "Suorita",
+    "cancelSelected": "Peruuta",
+    "clone": "Kloonaa",
+    "delete": "Poista",
+    "addToFavorites": "Lisää suosikkeihin",
+    "removeFromFavorites": "Poista suosikeista"
   },
   "sidebar": {
     "addRequest": "Lisää pyyntö",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Leikkaa",
+      "copy": "Kopioi",
+      "paste": "Liitä"
     },
     "deleteConfirm": {
       "title": "Vahvista poisto",
@@ -608,6 +599,7 @@
     "disconnect": "Katkaise yhteys",
     "startListening": "Aloita kuuntelu",
     "stopListening": "Lopeta kuuntelu",
+    "listenFailed": "Palvelimen käynnistys epäonnistui",
     "routePlaceholder": "Reitti (valinnainen)",
     "clientsConnected": "{{count}} asiakas/asiakkaita yhdistetty",
     "notListening": "Ei kuuntele"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Datamuodot",
       "encoding": "Koodaus",
       "time": "Ajoitus",
-      "algorithmie": "Algoritmit",
-      "ux": "UX"
+      "algorithmie": "Algoritmit"
     },
     "listOp": {
       "value": "lista",

@@ -230,36 +230,24 @@
     "saveAll": "Zapisz wszystko",
     "saveAs": "Zapisz jako",
     "exit": "Zakończ",
-    "selection": "Zaznaczenie",
-    "tools": "Narzędzia",
-    "findInCollection": "Znajdź w kolekcji",
-    "addRequest": "Dodaj żądanie",
-    "addRequestHttp": "Żądanie HTTP",
-    "addRequestGraphql": "Żądanie GraphQL",
-    "addRequestGrpc": "Żądanie gRPC",
-    "addRequestSoap": "Żądanie SOAP",
-    "addRequestOdata": "Żądanie OData",
-    "addRequestWebsocket": "Żądanie WebSocket",
-    "addFolder": "Dodaj folder",
-    "addEnvironmentFolder": "Dodaj folder środowisk",
-    "addVariable": "Dodaj zmienną",
-    "addTag": "Dodaj tag",
-    "expandAllFolders": "Rozwiń wszystkie foldery",
-    "collapseAllFolders": "Zwiń wszystkie foldery",
-    "sendActiveRequest": "Wyślij żądanie",
-    "cancelActiveRequest": "Anuluj żądanie",
-    "generateCodeSnippet": "Generuj fragment kodu",
-    "copyAsCurl": "Kopiuj jako cURL",
-    "exportOpenApi": "Eksportuj do OpenAPI",
-    "clearAuthCache": "Wyczyść pamięć podręczną uwierzytelniania",
-    "openLogsFolder": "Otwórz folder dzienników",
     "mcpLogs": "Dzienniki MCP",
+    "consoleHttp": "Konsola HTTP",
     "git": "Git",
     "gitPush": "Wypchnij",
     "gitPull": "Pobierz",
     "gitRefresh": "Odśwież",
     "gitHistory": "Historia",
-    "gitResetToServer": "Przywróć wersję serwera"
+    "gitResetToServer": "Przywróć wersję serwera",
+    "scenario": "Scenariusz",
+    "create": "Utwórz",
+    "request": "Żądanie",
+    "server": "Serwer",
+    "runSelected": "Uruchom",
+    "cancelSelected": "Anuluj",
+    "clone": "Klonuj",
+    "delete": "Usuń",
+    "addToFavorites": "Dodaj do ulubionych",
+    "removeFromFavorites": "Usuń z ulubionych"
   },
   "sidebar": {
     "addRequest": "Dodaj żądanie",
@@ -330,7 +318,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Wytnij",
+      "copy": "Kopiuj",
+      "paste": "Wklej"
     },
     "deleteConfirm": {
       "title": "Potwierdź usunięcie",
@@ -610,6 +601,7 @@
     "disconnect": "Rozłącz",
     "startListening": "Rozpocznij nasłuchiwanie",
     "stopListening": "Zatrzymaj nasłuchiwanie",
+    "listenFailed": "Nie udało się uruchomić serwera",
     "routePlaceholder": "Trasa (opcjonalnie)",
     "clientsConnected": "{{count}} klient(ów) połączono",
     "notListening": "Nie nasłuchuje"
@@ -1768,8 +1760,7 @@
       "dataFormats": "Formaty danych",
       "encoding": "Kodowanie",
       "time": "Harmonogram",
-      "algorithmie": "Algorytmy",
-      "ux": "UX"
+      "algorithmie": "Algorytmy"
     },
     "listOp": {
       "value": "lista",

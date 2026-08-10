@@ -228,36 +228,24 @@
     "saveAll": "Összes mentése",
     "saveAs": "Mentés másként",
     "exit": "Kilépés",
-    "selection": "Kijelölés",
-    "tools": "Eszközök",
-    "findInCollection": "Keresés a gyűjteményben",
-    "addRequest": "Kérés hozzáadása",
-    "addRequestHttp": "HTTP-kérés",
-    "addRequestGraphql": "GraphQL-kérés",
-    "addRequestGrpc": "gRPC-kérés",
-    "addRequestSoap": "SOAP-kérés",
-    "addRequestOdata": "OData-kérés",
-    "addRequestWebsocket": "WebSocket-kérés",
-    "addFolder": "Mappa hozzáadása",
-    "addEnvironmentFolder": "Környezeti mappa hozzáadása",
-    "addVariable": "Változó hozzáadása",
-    "addTag": "Címke hozzáadása",
-    "expandAllFolders": "Összes mappa kibontása",
-    "collapseAllFolders": "Összes mappa összecsukása",
-    "sendActiveRequest": "Kérés küldése",
-    "cancelActiveRequest": "Kérés megszakítása",
-    "generateCodeSnippet": "Kódrészlet generálása",
-    "copyAsCurl": "Másolás cURL-ként",
-    "exportOpenApi": "Exportálás OpenAPI-ba",
-    "clearAuthCache": "Hitelesítési gyorsítótár ürítése",
-    "openLogsFolder": "Naplók mappa megnyitása",
     "mcpLogs": "MCP-naplók",
+    "consoleHttp": "HTTP-konzol",
     "git": "Git",
     "gitPush": "Küldés",
     "gitPull": "Letöltés",
     "gitRefresh": "Frissítés",
     "gitHistory": "Előzmények",
-    "gitResetToServer": "Visszaállítás a kiszolgáló változatára"
+    "gitResetToServer": "Visszaállítás a kiszolgáló változatára",
+    "scenario": "Forgatókönyv",
+    "create": "Létrehozás",
+    "request": "Kérés",
+    "server": "Szerver",
+    "runSelected": "Futtatás",
+    "cancelSelected": "Megszakítás",
+    "clone": "Klónozás",
+    "delete": "Törlés",
+    "addToFavorites": "Hozzáadás a kedvencekhez",
+    "removeFromFavorites": "Eltávolítás a kedvencekből"
   },
   "sidebar": {
     "addRequest": "Kérés hozzáadása",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Kivágás",
+      "copy": "Másolás",
+      "paste": "Beillesztés"
     },
     "deleteConfirm": {
       "title": "Törlés megerősítése",
@@ -608,6 +599,7 @@
     "disconnect": "Leválasztás",
     "startListening": "Hallgatás indítása",
     "stopListening": "Hallgatás leállítása",
+    "listenFailed": "A szerver indítása nem sikerült",
     "routePlaceholder": "Útvonal (nem kötelező)",
     "clientsConnected": "{{count}} kliens csatlakozva",
     "notListening": "Nem figyel"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Adatformátumok",
       "encoding": "Kódolás",
       "time": "Időzítés",
-      "algorithmie": "Algoritmusok",
-      "ux": "UX"
+      "algorithmie": "Algoritmusok"
     },
     "listOp": {
       "value": "lista",

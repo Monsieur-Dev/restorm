@@ -2654,8 +2654,20 @@ async function openTitlebarMenuItem(currentPage: Page, viewItemTestId: string): 
   // Open the View menu, then click the matching item. The titlebar
   // uses ECUI MenuBar — the dropdown only renders while the parent
   // MenuBarItem is hovered/clicked, so we click in sequence and
-  // wait for the item to appear.
-  await currentPage.locator('[data-testid="titlebar-menubar-item-view"]').click()
+  // wait for the item to appear. On a narrow bar the entry moves into
+  // the overflow/hamburger dropdown (`-overflow` suffix), so fall back
+  // there — the conditional Scénario menu can push Options over the edge.
+  const inBar = currentPage.locator('[data-testid="titlebar-menubar-item-view"]')
+  if (await inBar.isVisible().catch(() => false)) {
+    await inBar.click()
+  } else {
+    const overflowBtn = currentPage.locator('[data-testid="titlebar-menubar-overflow-button"], [data-testid="titlebar-menubar-hamburger-button"]').first()
+    await overflowBtn.click({ force: true })
+    const viewEntry = currentPage.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
+    await viewEntry.waitFor({ state: 'visible', timeout: 5_000 })
+    await viewEntry.hover()
+    await viewEntry.click({ force: true })
+  }
   const item = currentPage.locator(`[data-testid="${viewItemTestId}"]`)
   await item.waitFor({ state: 'visible', timeout: 5_000 })
   await item.click()

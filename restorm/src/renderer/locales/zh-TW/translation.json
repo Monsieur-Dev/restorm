@@ -227,36 +227,24 @@
     "saveAll": "全部儲存",
     "saveAs": "另存新檔",
     "exit": "結束",
-    "selection": "選取",
-    "tools": "工具",
-    "findInCollection": "在集合中尋找",
-    "addRequest": "新增請求",
-    "addRequestHttp": "HTTP 請求",
-    "addRequestGraphql": "GraphQL 請求",
-    "addRequestGrpc": "gRPC 請求",
-    "addRequestSoap": "SOAP 請求",
-    "addRequestOdata": "OData 請求",
-    "addRequestWebsocket": "WebSocket 請求",
-    "addFolder": "新增資料夾",
-    "addEnvironmentFolder": "新增環境資料夾",
-    "addVariable": "新增變數",
-    "addTag": "新增標籤",
-    "expandAllFolders": "展開所有資料夾",
-    "collapseAllFolders": "收合所有資料夾",
-    "sendActiveRequest": "傳送請求",
-    "cancelActiveRequest": "取消請求",
-    "generateCodeSnippet": "產生程式碼片段",
-    "copyAsCurl": "複製為 cURL",
-    "exportOpenApi": "匯出為 OpenAPI",
-    "clearAuthCache": "清除驗證快取",
-    "openLogsFolder": "開啟記錄檔資料夾",
     "mcpLogs": "MCP 記錄",
+    "consoleHttp": "HTTP 主控台",
     "git": "Git",
     "gitPush": "推送",
     "gitPull": "提取",
     "gitRefresh": "重新整理",
     "gitHistory": "歷史記錄",
-    "gitResetToServer": "重設為伺服器版本"
+    "gitResetToServer": "重設為伺服器版本",
+    "scenario": "情境",
+    "create": "新增",
+    "request": "請求",
+    "server": "伺服器",
+    "runSelected": "執行",
+    "cancelSelected": "取消",
+    "clone": "複製",
+    "delete": "刪除",
+    "addToFavorites": "加入我的最愛",
+    "removeFromFavorites": "從我的最愛移除"
   },
   "sidebar": {
     "addRequest": "新增請求",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "剪下",
+      "copy": "複製",
+      "paste": "貼上"
     },
     "deleteConfirm": {
       "title": "確認刪除",
@@ -607,6 +598,7 @@
     "disconnect": "中斷連線",
     "startListening": "開始監聽",
     "stopListening": "停止監聽",
+    "listenFailed": "伺服器啟動失敗",
     "routePlaceholder": "路由（選用）",
     "clientsConnected": "{{count}} 個用戶端已連線",
     "notListening": "未在監聽"
@@ -1765,8 +1757,7 @@
       "dataFormats": "資料格式",
       "encoding": "編碼",
       "time": "計時",
-      "algorithmie": "演算法",
-      "ux": "UX"
+      "algorithmie": "演算法"
     },
     "listOp": {
       "value": "清單",

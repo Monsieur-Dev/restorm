@@ -228,36 +228,24 @@
     "saveAll": "Tümünü kaydet",
     "saveAs": "Farklı kaydet",
     "exit": "Çık",
-    "selection": "Seçim",
-    "tools": "Araçlar",
-    "findInCollection": "Koleksiyonda bul",
-    "addRequest": "İstek ekle",
-    "addRequestHttp": "HTTP isteği",
-    "addRequestGraphql": "GraphQL isteği",
-    "addRequestGrpc": "gRPC isteği",
-    "addRequestSoap": "SOAP isteği",
-    "addRequestOdata": "OData isteği",
-    "addRequestWebsocket": "WebSocket isteği",
-    "addFolder": "Klasör ekle",
-    "addEnvironmentFolder": "Ortam klasörü ekle",
-    "addVariable": "Değişken ekle",
-    "addTag": "Etiket ekle",
-    "expandAllFolders": "Tüm klasörleri genişlet",
-    "collapseAllFolders": "Tüm klasörleri daralt",
-    "sendActiveRequest": "İsteği gönder",
-    "cancelActiveRequest": "İsteği iptal et",
-    "generateCodeSnippet": "Kod parçacığı oluştur",
-    "copyAsCurl": "cURL olarak kopyala",
-    "exportOpenApi": "OpenAPI'a dışa aktar",
-    "clearAuthCache": "Kimlik doğrulama önbelleğini temizle",
-    "openLogsFolder": "Günlük klasörünü aç",
     "mcpLogs": "MCP günlükleri",
+    "consoleHttp": "HTTP konsolu",
     "git": "Git",
     "gitPush": "Gönder",
     "gitPull": "Çek",
     "gitRefresh": "Yenile",
     "gitHistory": "Geçmiş",
-    "gitResetToServer": "Sunucu sürümüne sıfırla"
+    "gitResetToServer": "Sunucu sürümüne sıfırla",
+    "scenario": "Senaryo",
+    "create": "Oluştur",
+    "request": "İstek",
+    "server": "Sunucu",
+    "runSelected": "Çalıştır",
+    "cancelSelected": "İptal",
+    "clone": "Çoğalt",
+    "delete": "Sil",
+    "addToFavorites": "Favorilere ekle",
+    "removeFromFavorites": "Favorilerden çıkar"
   },
   "sidebar": {
     "addRequest": "İstek ekle",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Kes",
+      "copy": "Kopyala",
+      "paste": "Yapıştır"
     },
     "deleteConfirm": {
       "title": "Silmeyi onayla",
@@ -608,6 +599,7 @@
     "disconnect": "Bağlantıyı kes",
     "startListening": "Dinlemeyi başlat",
     "stopListening": "Dinlemeyi durdur",
+    "listenFailed": "Sunucu başlatılamadı",
     "routePlaceholder": "Rota (isteğe bağlı)",
     "clientsConnected": "{{count}} istemci bağlı",
     "notListening": "Dinlemiyor"
@@ -1766,8 +1758,7 @@
       "dataFormats": "Veri biçimleri",
       "encoding": "Kodlama",
       "time": "Zamanlama",
-      "algorithmie": "Algoritmalar",
-      "ux": "UX"
+      "algorithmie": "Algoritmalar"
     },
     "listOp": {
       "value": "liste",
