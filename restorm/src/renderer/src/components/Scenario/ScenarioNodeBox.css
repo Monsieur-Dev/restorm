@@ -539,6 +539,12 @@
 
 .scn-node {
   min-width: 160px;
+
+  /* Cap the box width: without it the node grows to its content's intrinsic
+   * width, so a one-line note stretches an action across the whole canvas
+   * before the text ever wraps. 460px matches the editor's other text caps
+   * (onboarding card, truncation tooltip). */
+  max-width: 460px;
   border: 1px solid var(--widget-border, #454545);
   border-radius: 6px;
   background: var(--scenarioNode-background, #2d2d30);

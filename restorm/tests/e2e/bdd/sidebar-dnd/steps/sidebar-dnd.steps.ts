@@ -403,6 +403,18 @@ Then('the scenario graph should have {int} more nodes', async ({}, extra: number
     .toBe(baselineNodeCount + extra)
 })
 
+Then('every scenario action is capped at the maximum box width', async ({}) => {
+  const p = requirePage()
+  // The cap is what keeps a one-line note from stretching an action across
+  // the whole canvas — assert the computed rule on every mounted node (a
+  // removed CSS rule turns maxWidth into 'none' and fails here).
+  const maxWidths = await p
+    .locator('[data-testid="scenario-editor"] .scn-node')
+    .evaluateAll((els) => els.map((el) => window.getComputedStyle(el).maxWidth))
+  expect(maxWidths.length).toBeGreaterThan(0)
+  for (const mw of maxWidths) expect(mw).toBe('460px')
+})
+
 Then('the two newest actions should be offset by the duplication step', async ({}) => {
   const p = requirePage()
   const nodes = p.locator('[data-testid="scenario-editor"] .react-flow__node')

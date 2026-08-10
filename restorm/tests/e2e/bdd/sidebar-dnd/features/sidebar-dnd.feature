@@ -95,6 +95,7 @@ Feature: Sidebar multi-selection and drag & drop overhaul
     And I drag the sidebar selection onto the scenario canvas
     Then the scenario graph should have 2 more nodes
     And the two newest actions should be offset by the duplication step
+    And every scenario action is capped at the maximum box width
 
   Scenario: A multi-item drag never lights the workbench split overlay
     Given the sidebar-dnd reference project is open
