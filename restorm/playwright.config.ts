@@ -455,6 +455,15 @@ const sidebarSplitDropTestDir = defineBddConfig({
   outputDir: '.features-gen/sidebar-split-drop'
 })
 
+const sidebarDndTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sidebar-dnd/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/sidebar-dnd/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/sidebar-dnd.fixture.ts'
+  ],
+  outputDir: '.features-gen/sidebar-dnd'
+})
+
 const httpieImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/httpie-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/httpie-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/httpie-import.fixture.ts'],
@@ -875,6 +884,11 @@ export default defineConfig({
       name: 'mcp-logs-disabled',
       testDir: mcpLogsDisabledTestDir,
       timeout: 120 * 1000 // pre-seeds mcp:enabled=false (no --no-mcp flag); asserts the menu entry is disabled
+    },
+    {
+      name: 'sidebar-dnd',
+      testDir: sidebarDndTestDir,
+      timeout: 120 * 1000 // opens the reference project; multi-select + drag sequences
     },
     {
       name: 'sidebar-split-drop',

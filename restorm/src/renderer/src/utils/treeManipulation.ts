@@ -44,16 +44,18 @@ export function deepCloneItem(item: FolderItem, copyLabel = 'copy'): FolderItem 
   return clone
 }
 
-/** Remove an item from its parent folder and return a copy of the item */
+/** Remove an item from its parent folder — or from the ROOT list itself when
+ * the item sits at the top level (`findItemWithParent` reports those with a
+ * null parent and an index into `rootItems`) — and return the item. */
 export function removeItemFromTree(
   rootItems: FolderItem[],
   itemId: string
 ): FolderItem | null {
   const { item, parent, index } = findItemWithParent(rootItems, itemId)
-  if (!item || !parent || index < 0) return null
+  if (!item || index < 0) return null
 
-  // Remove from parent
-  childrenArray(parent).splice(index, 1)
+  const siblings = parent ? childrenArray(parent) : rootItems
+  siblings.splice(index, 1)
   return item
 }
 
@@ -76,19 +78,22 @@ export function insertItemIntoTree(
       childrenArray(target).push(item)
       return true
     }
-    // If target can't contain the item, insert after it instead.
-    if (parent) {
-      childrenArray(parent).splice(index + 1, 0, item)
-      return true
-    }
-    return false
+    // If target can't contain the item, insert after it instead — into its
+    // parent's children, or into the root list when the target is a root
+    // item (null parent, index into `rootItems`).
+    const fallbackSiblings = parent ? childrenArray(parent) : rootItems
+    if (index < 0) return false
+    fallbackSiblings.splice(index + 1, 0, item)
+    return true
   }
 
-  // Insert before or after the target
-  if (!parent) return false
-
+  // Insert before or after the target — a null parent means the target is a
+  // ROOT item, so the insertion happens in the root list itself (this is
+  // what makes reordering/moving at the top level possible at all).
+  if (index < 0) return false
+  const siblings = parent ? childrenArray(parent) : rootItems
   const insertIndex = position === 'before' ? index : index + 1
-  childrenArray(parent).splice(insertIndex, 0, item)
+  siblings.splice(insertIndex, 0, item)
   return true
 }
 

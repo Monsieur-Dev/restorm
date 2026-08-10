@@ -148,6 +148,12 @@ colors:
     value: "#2a2d2e"
     description: List hover background
 
+  - id: list.dropBackground
+    value: "#0e4a75"
+    description: List drop target background during a drag
+
+
+
   - id: list.hoverForeground
     value: "#cccccc"
     description: List hover foreground

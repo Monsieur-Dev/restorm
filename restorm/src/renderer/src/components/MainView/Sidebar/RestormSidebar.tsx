@@ -6,6 +6,8 @@ import {
   type ListViewItemData,
   type ListViewItemEventPayload,
   type ListViewDropEventPayload,
+  type ListViewDropPosition,
+  type ContextMenuItem,
   SplitView,
   Pane,
   Button
@@ -17,6 +19,10 @@ export interface RestormSidebarProps {
   favoriteItems: ListViewItemData[]
   openDocumentItems: ListViewItemData[]
   selectedItemId: string | null
+  /** Full multi-selection (visual order) — the workspace tree runs in
+   * `selectionMode="multiple"`; `selectedItemId` stays the active anchor. */
+  selectedItemIds: string[]
+  onSelectionChange: (ids: string[], anchorId: string) => void
   activeId?: string | null
   expandedIds: string[]
   editingItemId: string | null
@@ -29,6 +35,13 @@ export interface RestormSidebarProps {
   onItemAuxClick?: (itemId: string) => void
   onItemToggle: (payload: ListViewItemEventPayload, expanded: boolean) => void
   onItemDrop: (payload: ListViewDropEventPayload) => void
+  /** Hover-time coherence check for the drag (ghost error badge + refusal). */
+  canDropSelection: (sourceIds: string[], targetId: string, position: ListViewDropPosition) => boolean
+  /** Group context menu when the right-clicked row is part of a
+   * multi-selection of more than one row. */
+  selectionContextMenuItems: (ids: string[]) => ContextMenuItem[] | null
+  /** Drop on the workspace tree's empty area — moves the rows to the root. */
+  onEmptyAreaDrop: (sources: ListViewItemEventPayload[]) => void
   onItemRename: (payload: ListViewItemEventPayload, newName: string) => void
   onDeleteRequest: (payload: ListViewItemEventPayload) => void
   onEditingStart: (itemId: string) => void
@@ -67,6 +80,8 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   favoriteItems,
   openDocumentItems,
   selectedItemId,
+  selectedItemIds,
+  onSelectionChange,
   activeId,
   expandedIds,
   editingItemId,
@@ -74,6 +89,9 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   onItemAuxClick,
   onItemToggle,
   onItemDrop,
+  canDropSelection,
+  selectionContextMenuItems,
+  onEmptyAreaDrop,
   onItemRename,
   onDeleteRequest,
   onEditingStart,
@@ -94,12 +112,27 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   const { t } = useTranslation()
   const [emptyAreaMenu, setEmptyAreaMenu] = useState<{ visible: boolean; x: number; y: number }>({ visible: false, x: 0, y: 0 })
 
-  const handleItemClick = useCallback((payload: ListViewItemEventPayload) => {
+  const handleItemClick = useCallback((payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => {
+    // A modified click (ctrl/cmd toggle, shift range) is a SELECTION
+    // gesture: the ListView already updated the multi-selection, and
+    // opening a tab for every toggled row would turn selection-building
+    // into a tab storm. Only a plain click navigates.
+    if (event.ctrlKey || event.metaKey || event.shiftKey) return
     const id = payload.item.id
     if (id) {
       onItemClick(id)
     }
   }, [onItemClick])
+
+  const handleSelectionChange = useCallback((ids: string[], payload: ListViewItemEventPayload) => {
+    onSelectionChange(ids, payload.item.id)
+  }, [onSelectionChange])
+
+  const handleCanDrop = useCallback((
+    sources: ListViewItemEventPayload[],
+    target: ListViewItemEventPayload,
+    position: ListViewDropPosition
+  ): boolean => canDropSelection(sources.map((s) => s.item.id), target.item.id, position), [canDropSelection])
 
   const handleItemAuxClick = useCallback((payload: ListViewItemEventPayload) => {
     if (!onItemAuxClick) return
@@ -152,12 +185,17 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   const handleEmptyAreaClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement
     if (target.closest('.list-view-row')) return
+    // A context menu opened over the tree renders INSIDE this wrapper —
+    // clicking one of its entries is not an empty-area click, and clearing
+    // the selection here would strip the very selection the entry acts on.
+    if (target.closest('.ecui-context-menu')) return
     onDeselectAll()
   }, [onDeselectAll])
 
   const handleEmptyAreaContextMenu = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement
     if (target.closest('.list-view-row')) return
+    if (target.closest('.ecui-context-menu')) return
     e.preventDefault()
     onDeselectAll()
     setEmptyAreaMenu({ visible: true, x: e.clientX, y: e.clientY })
@@ -288,7 +326,13 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               items={items}
               rootRole="tree"
               ariaLabel={t('sidebar.workspace')}
-              selectedIds={selectedItemId ? [selectedItemId] : []}
+              selectionMode="multiple"
+              // Fall back to the anchor when no explicit multi-selection
+              // exists: paths that only set the anchor (item creation's
+              // inline-rename, reveal-in-tree) must still render the row
+              // selected, exactly as the single-selection tree did.
+              selectedIds={selectedItemIds.length > 0 ? selectedItemIds : selectedItemId ? [selectedItemId] : []}
+              onSelectionChange={handleSelectionChange}
               activeId={activeId}
               expandedIds={expandedIds}
               isRenameable
@@ -297,6 +341,10 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               onItemClick={handleItemClick}
               onItemAuxClick={handleItemAuxClick}
               onItemDrop={onItemDrop}
+              canDrop={handleCanDrop}
+              dragExpandDelayMs={1000}
+              onEmptyAreaDrop={onEmptyAreaDrop}
+              selectionContextMenuItems={selectionContextMenuItems}
               onItemRename={onItemRename}
               editingItemId={editingItemId}
               onEditingStart={onEditingStart}

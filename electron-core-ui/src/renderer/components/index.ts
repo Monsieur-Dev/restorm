@@ -146,7 +146,7 @@ export { MosaicLayout, MosaicCard } from './Mosaic'
 export type { MosaicLayoutProps, MosaicCardProps } from './Mosaic'
 
 // ListView exports
-export { ListView, ListViewItem, LIST_VIEW_DRAG_MIME } from './ListView'
+export { ListView, ListViewItem, LIST_VIEW_DRAG_MIME, LIST_VIEW_MULTI_DRAG_MIME } from './ListView'
 export type {
   ListViewProps,
   ListViewItemProps,

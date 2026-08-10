@@ -38,6 +38,9 @@ export interface ListViewItemEventPayload {
 export interface ListViewDropEventPayload extends ListViewItemEventPayload {
   source: ListViewItemData
   sourcePath: ListViewItemPath
+  /** Every dragged row in visual order; a single-item drag carries one
+   *  entry. `source`/`sourcePath` stay the drag's anchor row. */
+  sources: ListViewItemEventPayload[]
   position: ListViewDropPosition
   originalEvent: React.DragEvent<HTMLDivElement>
 }
@@ -86,6 +89,31 @@ export interface ListViewProps {
   ) => void
   onItemDrop?: (payload: ListViewDropEventPayload) => void
   onItemContextMenu?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+
+  /** Hover-time drop validation: return false to suppress the indicator,
+   *  flip the drag ghost into its error state, and reject the drop. */
+  canDrop?: (
+    sources: ListViewItemEventPayload[],
+    target: ListViewItemEventPayload,
+    position: ListViewDropPosition
+  ) => boolean
+
+  /** Group context menu for a MULTI-selection (selectionMode="multiple"):
+   *  called with the selected ids when the right-clicked row belongs to a
+   *  selection of more than one row. Right-clicking outside the selection
+   *  collapses it to the clicked row first. */
+  selectionContextMenuItems?: (selectedIds: string[]) => ContextMenuItem[] | null
+
+  /** Delay (ms) before a collapsed container hovered during a drag expands
+   *  itself (through the normal onItemToggle path). OPT-IN: default null
+   *  (disabled); pass e.g. 1000 to enable. Leaving the hovered row (or
+   *  reaching the empty area) disarms the pending expansion. */
+  dragExpandDelayMs?: number | null
+
+  /** Drop released on the list's EMPTY AREA (below/beside the rows).
+   *  Receives every dragged row — consumers typically move them to the
+   *  top level. Absent, the empty area is not a drop target. */
+  onEmptyAreaDrop?: (sources: ListViewItemEventPayload[], originalEvent: React.DragEvent<HTMLElement>) => void
 }
 
 export interface ListViewItemProps {
@@ -151,9 +179,34 @@ const FileTree: React.FC = () => {
   - `isExpanded` controls initial open/closed state.
 - **Selection**:
   - `selectionMode` controls single vs multiple selection.
-  - `selectedIds` + `onSelectionChange` allow controlled selection.
+  - `selectedIds` + `onSelectionChange` allow controlled selection. The
+    controlled mirror is guarded by CONTENT: a parent that rebuilds the same
+    array every render does not reset an in-flight multi-selection; a prop
+    whose content actually differs always wins.
+  - In `multiple` mode: **ctrl/cmd+click** toggles a row, **shift+click**
+    selects the range from the active row, **ctrl/cmd+A** selects every
+    VISIBLE selectable row (collapsed subtrees excluded).
+  - Right-clicking a row inside a multi-selection keeps the selection (so a
+    group menu can act on it); right-clicking outside collapses it to the
+    clicked row.
 - **Drag and drop**:
-  - `onItemDrop` receives both source and target, plus position (`before` / `after` / `into`).
+  - `onItemDrop` receives the target, the anchor `source`, EVERY dragged row
+    in `sources`, plus position (`before` / `after` / `into`).
+  - A drag started on a row that belongs to a multi-selection carries the
+    whole selection; the `dataTransfer` then also carries
+    `LIST_VIEW_MULTI_DRAG_MIME` (`application/x-listview-items`) whose data
+    is the JSON array of dragged ids — its PRESENCE in `types` lets an
+    external target detect a multi-drag during `dragover`, and its payload
+    is readable at `drop`. `text/plain` keeps the anchor id.
+  - `canDrop` validates the hovered target live: invalid targets show no
+    indicator, report `dropEffect: 'none'`, and reveal an error codicon on
+    the drag ghost (`.list-view-row-drag-ghost.is-invalid`). A multi-drag's
+    ghost carries a count badge.
+  - A `drop-into` hover paints the container row with
+    `var(--list-dropBackground)` (themed in every theme family).
+  - A COLLAPSED container hovered for `dragExpandDelayMs` (opt-in — pass
+    e.g. 1000) expands itself through the normal toggle path, so controlled
+    `expandedIds` parents see it as a chevron click.
 
 ## Notes for AI Usage
 

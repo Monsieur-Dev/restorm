@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { FolderItem, Scenario } from '../../../shared/types/collections'
-import { deepCloneItem, cloneItemInTree, generateUniqueId, reidentifyForest, ID_REFERENCE_KEYS, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
+import { deepCloneItem, cloneItemInTree, generateUniqueId, reidentifyForest, removeItemFromTree, insertItemIntoTree, ID_REFERENCE_KEYS, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
 
 describe('generateUniqueId', () => {
   it('produces a UUID, never colliding within a tight loop', () => {
@@ -9,6 +9,37 @@ describe('generateUniqueId', () => {
     // Date.now()+Math.random() collided within a millisecond; crypto.randomUUID never does.
     expect(ids.size).toBe(10_000)
     expect(generateUniqueId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+  })
+})
+
+describe('root-level moves — remove/insert treat the root list as a container', () => {
+  const makeTree = (): FolderItem[] => ([
+    { id: 'root-req', type: 'http', name: 'RootReq', method: 'GET', url: '' } as unknown as FolderItem,
+    { id: 'fold-a', name: 'A', tags: [], configuration: {}, items: [] } as unknown as FolderItem,
+    { id: 'fold-b', name: 'B', tags: [], configuration: {}, items: [] } as unknown as FolderItem
+  ])
+
+  it('removes an item sitting at the ROOT (null parent, index into rootItems)', () => {
+    const roots = makeTree()
+    const removed = removeItemFromTree(roots, 'root-req')
+    expect(removed?.id).toBe('root-req')
+    expect(roots.map((r) => r.id)).toEqual(['fold-a', 'fold-b'])
+  })
+
+  it('moves a root item INTO a folder (lands at the container end)', () => {
+    const roots = makeTree()
+    const removed = removeItemFromTree(roots, 'root-req')
+    if (!removed) throw new Error('remove failed')
+    expect(insertItemIntoTree(roots, removed, 'fold-a', 'into')).toBe(true)
+    expect((roots[0] as { items: FolderItem[] }).items.map((i) => i.id)).toEqual(['root-req'])
+  })
+
+  it('reorders at the root: before/after a ROOT target splices the root list', () => {
+    const roots = makeTree()
+    const removed = removeItemFromTree(roots, 'root-req')
+    if (!removed) throw new Error('remove failed')
+    expect(insertItemIntoTree(roots, removed, 'fold-b', 'after')).toBe(true)
+    expect(roots.map((r) => r.id)).toEqual(['fold-a', 'fold-b', 'root-req'])
   })
 })
 

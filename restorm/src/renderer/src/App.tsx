@@ -126,7 +126,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
-import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting, LIST_VIEW_DRAG_MIME } from 'electron-core-ui/renderer'
+import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting, LIST_VIEW_DRAG_MIME, LIST_VIEW_MULTI_DRAG_MIME } from 'electron-core-ui/renderer'
 import type { SplitDirection } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab } from '../../shared/types/editor'
@@ -209,7 +209,8 @@ import { emitClonedSubtreeCreated } from './hooks/useItemOperations'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
 import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
 import { useItemOperations } from './hooks/useItemOperations'
-import type { AddChildKind } from './components/MainView/Sidebar/contextMenuBuilder'
+import type { AddChildKind, SidebarContextMenuItem } from './components/MainView/Sidebar/contextMenuBuilder'
+import { buildSelectionContextMenu } from './components/MainView/Sidebar/contextMenuBuilder'
 import { useRequestCreationApi } from './hooks/useRequestCreationApi'
 import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
@@ -826,6 +827,10 @@ const App: React.FC = () => {
 
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+  // Full sidebar multi-selection (visual order). `selectedItemId` stays the
+  // active anchor — single-selection consumers (menu Édition labels, paste
+  // target, add-child) keep reading it.
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
 
   // Focused group ID in the workbench
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
@@ -1582,11 +1587,19 @@ const App: React.FC = () => {
   // lives next to the modal handlers above it.
   const executeDeleteRef = useRef<(itemId: string) => void>(() => undefined)
 
+  // Remaining ids of a GROUP delete (multi-selection). Processed one by one
+  // so each item gets the same scenario-usage guards as a single delete; the
+  // dialog resolutions resume the queue through this forward ref.
+  const groupDeleteQueueRef = useRef<string[]>([])
+  const processGroupDeleteQueueRef = useRef<() => void>(() => undefined)
+
   // Advance the pending container-delete queue: the next affected request
   // gets the dialog; an exhausted queue executes the held-back deletion.
   const advanceContainerDeleteQueue = useCallback(() => {
     if (!containerDelete) {
       setScenarioDelete((p) => ({ ...p, isOpen: false }))
+      // A direct-request dialog just resolved — continue a pending group.
+      processGroupDeleteQueueRef.current()
       return
     }
     const [next, ...rest] = containerDelete.queue
@@ -1597,12 +1610,16 @@ const App: React.FC = () => {
       setContainerDelete(null)
       setScenarioDelete((p) => ({ ...p, isOpen: false }))
       executeDeleteRef.current(containerDelete.containerId)
+      // The held-back container is gone — continue a pending group.
+      processGroupDeleteQueueRef.current()
     }
   }, [containerDelete])
 
   // Use custom hooks for various concerns
   const {
     handleItemDrop,
+    canDropSelection,
+    handleEmptyAreaDrop,
     handleCloneItem,
     handleCreateRootEnvironmentFolder,
     handleAddChildItem,
@@ -2369,6 +2386,10 @@ const App: React.FC = () => {
     const parent = findItemWithParent(rootItems, itemId).parent
     const parentIsScenario = !!parent && isScenario(parent as FolderItem)
     confirmDeleteWithId(itemId)
+    // The multi-selection sheds the deleted row HERE — at the actual
+    // deletion, never earlier: clearing it when the confirmation opens
+    // would lose the user's selection on a cancelled delete.
+    setSelectedItemIds((prev) => prev.filter((id) => id !== itemId))
     if (parentIsScenario) {
       if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
       scenarioSaveTimer = setTimeout(() => {
@@ -2403,6 +2424,44 @@ const App: React.FC = () => {
   const confirmDelete = useCallback(() => {
     confirmDeleteAndPersist(deleteConfirmation.itemId)
   }, [confirmDeleteAndPersist, deleteConfirmation.itemId])
+
+  // Drain the pending GROUP delete: every id runs through the same guards a
+  // single delete gets — a request bound by scenarios raises the usage
+  // dialog, a container with bound descendants raises the container queue —
+  // and the dialog resolutions call back here (via the forward ref) to
+  // continue with the rest. Ids that vanished with an earlier container of
+  // the same batch are skipped.
+  const processGroupDeleteQueue = useCallback(() => {
+    const queue = groupDeleteQueueRef.current
+    while (queue.length > 0) {
+      const id = queue.shift()
+      if (!id) continue
+      const item = findItemById(rootItems, id)
+      if (!item) continue
+      if (isRequest(item)) {
+        const usages: RequestScenarioDeleteUsage[] = requestScenarioDeleteUsages(rootItems, id).map((u) => ({
+          scenarioId: u.scenario.id,
+          scenarioName: u.scenario.name,
+          inSubtree: u.inSubtree
+        }))
+        if (usages.length > 0) {
+          setScenarioDelete({ isOpen: true, requestId: id, requestName: item.name, usages })
+          return
+        }
+        executeDeleteAndPersist(id)
+        continue
+      }
+      const affected = collectSubtreeScenarioUsages(rootItems, id)
+      const [first, ...rest] = affected
+      if (first) {
+        setContainerDelete({ containerId: id, queue: rest })
+        setScenarioDelete({ isOpen: true, requestId: first.requestId, requestName: first.requestName, usages: first.usages })
+        return
+      }
+      executeDeleteAndPersist(id)
+    }
+  }, [rootItems, executeDeleteAndPersist])
+  useEffect(() => { processGroupDeleteQueueRef.current = processGroupDeleteQueue })
 
   // =========================================================================
   // MenuBar Édition / Sélection — actions on the SIDEBAR selection.
@@ -2492,13 +2551,59 @@ const App: React.FC = () => {
     for (const id of ids) handleCloneItem(id)
   }, [handleCloneItem])
 
+  // A MULTI-selection delete asks ONCE for the whole group — looping the
+  // per-item flow would stack setDeleteConfirmation calls where only the
+  // last modal survives, so confirming would silently delete a single item.
+  const groupDeleteIdsRef = useRef<string[] | null>(null)
   const handleDeleteItems = useCallback((ids: readonly string[]): void => {
-    for (const id of ids) handleDeleteItemChecked(id)
-  }, [handleDeleteItemChecked])
+    if (ids.length <= 1) {
+      for (const id of ids) handleDeleteItemChecked(id)
+      return
+    }
+    const items = ids.map((id) => findItemById(rootItems, id)).filter((i): i is FolderItem => i != null)
+    if (items.length === 0) return
+    groupDeleteIdsRef.current = items.map((i) => i.id)
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId: items[0]?.id ?? '',
+      // User data, not UI copy: the modal's sentence interpolates the names
+      // verbatim, so no locale key is needed for the plural case.
+      itemName: items.map((i) => i.name).join('", "'),
+      // The folder-specific sentence is singular («le dossier ... et tout
+      // son contenu») — a group reads correctly on the generic one.
+      isFolder: false
+    })
+  }, [handleDeleteItemChecked, rootItems])
 
+  // Group semantics: a mixed group gets ADDED as a whole (only the missing
+  // ones are toggled on); a group already fully favorited gets removed. A
+  // blind per-item toggle would ADD some rows while REMOVING others under a
+  // single menu entry — surprising in both directions.
   const handleFavoriteItems = useCallback((ids: readonly string[]): void => {
-    for (const id of ids) handleToggleFavorite(id)
-  }, [handleToggleFavorite])
+    const allFavorite = ids.every((id) => isItemFavorite(id))
+    for (const id of ids) {
+      if (allFavorite || !isItemFavorite(id)) handleToggleFavorite(id)
+    }
+  }, [handleToggleFavorite, isItemFavorite])
+
+  // The menu Édition acts on the FULL multi-selection when one exists, and
+  // falls back to the single anchor otherwise.
+  const editionSelectionIds = useMemo<string[]>(
+    () => (selectedItemIds.length > 0 ? selectedItemIds : (selectedItemId ? [selectedItemId] : [])),
+    [selectedItemIds, selectedItemId]
+  )
+
+  // Group context menu for a right-click INSIDE a sidebar multi-selection.
+  // Plain function on purpose: it closes over the freshest handlers (cut is
+  // itself a plain function) and the ListView calls it lazily at open time.
+  const sidebarSelectionContextMenu = (ids: string[]): SidebarContextMenuItem[] =>
+    buildSelectionContextMenu(ids, t, {
+      onCutItems: (i) => { handleCutItems(i) },
+      onCopyItems: (i) => { handleCopyItems(i) },
+      onCloneItems: (i) => { handleCloneItems(i) },
+      onDeleteItems: (i) => { handleDeleteItems(i) },
+      onToggleFavoriteItems: (i) => { handleFavoriteItems(i) }
+    }, ids.every((id) => isItemFavorite(id)))
 
   // Focus the titlebar search: the SearchBar exposes no imperative handle;
   // clicking its closed pill is the established path (the e2e suites drive
@@ -3267,7 +3372,12 @@ const App: React.FC = () => {
   const isWorkbenchExternalDrop = useCallback((event: DragEvent): boolean => {
     const types = event.dataTransfer?.types
     if (!types) return false
-    if (!Array.from(types).includes(LIST_VIEW_DRAG_MIME)) return false
+    const typeList = Array.from(types)
+    if (!typeList.includes(LIST_VIEW_DRAG_MIME)) return false
+    // A MULTI-item sidebar drag never targets the workbench surface: the
+    // split-open gesture is single-item by design, and lighting the overlay
+    // for a group would invite a drop the app cannot honour.
+    if (typeList.includes(LIST_VIEW_MULTI_DRAG_MIME)) return false
     const target = event.target
     if (target instanceof Element && target.closest('[data-testid="scenario-editor"]')) return false
     return true
@@ -3388,12 +3498,12 @@ const App: React.FC = () => {
         onOpenSettingsTab={handleOpenSettingsTab}
         selection={titlebarSelection}
         canPaste={canPasteItems}
-        onCutSelection={() => { if (selectedItemId) handleCutItems([selectedItemId]) }}
-        onCopySelection={() => { if (selectedItemId) handleCopyItems([selectedItemId]) }}
+        onCutSelection={() => { if (editionSelectionIds.length > 0) handleCutItems(editionSelectionIds) }}
+        onCopySelection={() => { if (editionSelectionIds.length > 0) handleCopyItems(editionSelectionIds) }}
         onPasteSelection={handlePasteItems}
-        onCloneSelection={() => { if (selectedItemId) handleCloneItems([selectedItemId]) }}
-        onDeleteSelection={() => { if (selectedItemId) handleDeleteItems([selectedItemId]) }}
-        onToggleFavoriteSelection={() => { if (selectedItemId) handleFavoriteItems([selectedItemId]) }}
+        onCloneSelection={() => { if (editionSelectionIds.length > 0) handleCloneItems(editionSelectionIds) }}
+        onDeleteSelection={() => { if (editionSelectionIds.length > 0) handleDeleteItems(editionSelectionIds) }}
+        onToggleFavoriteSelection={() => { if (editionSelectionIds.length > 0) handleFavoriteItems(editionSelectionIds) }}
         onFocusSearch={handleFocusSearch}
         selectionAddSubmenu={selectionAddSubmenu}
         activeRequestControls={activeRequestControls}
@@ -3433,6 +3543,11 @@ const App: React.FC = () => {
                 <RestormSidebar
                   items={sidebarItemsWithContextMenu}
                   selectedItemId={selectedItemId}
+                  selectedItemIds={selectedItemIds}
+                  onSelectionChange={(ids, anchorId) => {
+                    setSelectedItemIds(ids)
+                    setSelectedItemId(anchorId)
+                  }}
                   activeId={selectedItemId}
                   expandedIds={expandedIds}
                   editingItemId={sidebarEditingItemId}
@@ -3448,15 +3563,25 @@ const App: React.FC = () => {
                     )
                   }}
                   onItemDrop={handleItemDrop}
+                  canDropSelection={canDropSelection}
+                  onEmptyAreaDrop={handleEmptyAreaDrop}
+                  selectionContextMenuItems={sidebarSelectionContextMenu}
                   onItemRename={handleSidebarItemRename}
-                  onDeleteRequest={(payload) => { handleDeleteItemChecked(payload.item.id) }}
+                  onDeleteRequest={(payload) => {
+                    // Same contract as the menus: when the active row is part
+                    // of a multi-selection, Delete removes the whole group.
+                    const ids = selectedItemIds.length > 1 && selectedItemIds.includes(payload.item.id)
+                      ? selectedItemIds
+                      : [payload.item.id]
+                    handleDeleteItems(ids)
+                  }}
                   onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
                   onCollapseAll={() => { setExpandedIds([]) }}
                   onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
                   onAddChildItem={handleAddChildItem}
-                  onDeselectAll={() => { setSelectedItemId(null) }}
+                  onDeselectAll={() => { setSelectedItemId(null); setSelectedItemIds([]) }}
                   favoriteItems={favoriteItems}
                   openDocumentItems={openDocumentItems}
                   onFavoritesReorder={handleFavoritesReorder}
@@ -3689,8 +3814,22 @@ const App: React.FC = () => {
         isOpen={deleteConfirmation.isOpen}
         itemName={deleteConfirmation.itemName}
         isFolder={deleteConfirmation.isFolder}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+        onConfirm={() => {
+          const group = groupDeleteIdsRef.current
+          if (group) {
+            groupDeleteIdsRef.current = null
+            setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))
+            groupDeleteQueueRef.current = group
+            processGroupDeleteQueue()
+            return
+          }
+          confirmDelete()
+        }}
+        onCancel={() => {
+          groupDeleteIdsRef.current = null
+          groupDeleteQueueRef.current = []
+          cancelDelete()
+        }}
       />
 
       {/* Push modal — triggered by the statusbar repo-push button / the
@@ -3768,6 +3907,8 @@ const App: React.FC = () => {
         onCancel={() => {
           // Cancelling mid-queue aborts the whole pending container delete —
           // the remaining requests stay untouched and the container survives.
+          // A pending GROUP delete is abandoned too: the user said no.
+          groupDeleteQueueRef.current = []
           setContainerDelete(null)
           setScenarioDelete((p) => ({ ...p, isOpen: false }))
         }}

@@ -17,8 +17,8 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
-import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, GraphCanvas, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
-import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
+import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, GraphCanvas, eventBus, isUndoKeyEvent, isRedoKeyEvent, LIST_VIEW_MULTI_DRAG_MIME, type ContextMenuItem } from 'electron-core-ui/renderer'
+import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort, FolderItem } from '../../../../shared/types/collections'
 import { isRequest, isScenario, isWebSocketRequest, isStompRequest, isSseRequest, isGrpcRequest, isSoapRequest, isAmqpRequest, isRedisRequest, isKafkaRequest, EnvironmentValue } from '../../../../shared/types/collections'
 import { serializeValueForPersistence } from '../../../../shared/utils/valuePersistence'
 import { Badge } from '../common/Badge'
@@ -37,7 +37,7 @@ import { SCENARIO_NODE_CATALOGUE, SCENARIO_SUBMENU_CATEGORIES, scenarioNodeMeta,
 import type { ScenarioNodeCategory } from '../../../../shared/scenarioKindRegistry'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, edgeColorForHandle } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
-import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta } from './scenarioActionClipboard'
+import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta, PASTE_STEP } from './scenarioActionClipboard'
 import { publishScenarioMenuPalette } from '../../services/scenarioMenuPaletteStore'
 import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow, socketioConnectEventPorts } from './scenarioNodePorts'
@@ -2099,18 +2099,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     event.dataTransfer.dropEffect = 'move'
   }, [resolveBoundItem])
 
-  const onDrop = useCallback((event: React.DragEvent) => {
-    if (lockedRef.current) return
-    if (!resolveBoundItem) return
-    const itemId = event.dataTransfer.getData('text/plain')
-    if (!itemId) return
-    const item = resolveBoundItem(itemId)
-    if (!item) return
-    // Request → `request` node, Scenario → `runScenario`; folders/env-folders
-    // (anything else) are ignored. The bound id + a fallback label go in config.
-    // A Socket.IO request is special: it maps to a `socketioConnect` (the
-    // long-lived listener), seeding the connection name + the listened event
-    // from the request — NOT to a one-shot httpRequest node.
+  // Request → `request` node, Scenario → `runScenario`; folders/env-folders
+  // (anything else) yield null and are ignored. The bound id + a fallback
+  // label go in config. A Socket.IO request is special: it maps to a
+  // `socketioConnect` (the long-lived listener), seeding the connection name
+  // + the listened event from the request — NOT to a one-shot httpRequest
+  // node. Shared by the single-item drop and the multi-request fan-out.
+  const nodeSpecForDroppedItem = useCallback((item: FolderItem): { kind: ScenarioNodeKind; config: Record<string, unknown> } | null => {
     let kind: ScenarioNodeKind
     let config: Record<string, unknown>
     if (isRequest(item) && isWebSocketRequest(item) && (item as { protocol?: string }).protocol === 'socketio') {
@@ -2198,11 +2193,48 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }
     else if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
     else if (isScenario(item)) { kind = 'runScenario'; config = { scenarioId: item.id, label: item.name } }
-    else return
+    else return null
+    return { kind, config }
+  }, [])
+
+  const onDrop = useCallback((event: React.DragEvent) => {
+    if (lockedRef.current) return
+    if (!resolveBoundItem) return
+
+    // A MULTI-item sidebar drag carries every dragged id on the multi MIME
+    // (readable at drop time). Per spec it is REQUESTS-ONLY on the canvas:
+    // a group containing anything else is refused whole — no partial drop.
+    let itemIds: string[] = []
+    const multiRaw = event.dataTransfer.getData(LIST_VIEW_MULTI_DRAG_MIME)
+    if (multiRaw !== '') {
+      try {
+        const parsed: unknown = JSON.parse(multiRaw)
+        if (Array.isArray(parsed)) itemIds = parsed.filter((v): v is string => typeof v === 'string')
+      } catch { /* malformed payload → fall back to the single id below */ }
+    }
+    if (itemIds.length === 0) {
+      const single = event.dataTransfer.getData('text/plain')
+      if (!single) return
+      itemIds = [single]
+    }
+
+    const items = itemIds.map((id) => resolveBoundItem(id)).filter((i): i is FolderItem => i != null)
+    if (items.length !== itemIds.length) return
+    if (items.length > 1 && !items.every((i) => isRequest(i))) return
+
+    const specs = items
+      .map((item) => nodeSpecForDroppedItem(item))
+      .filter((spec): spec is { kind: ScenarioNodeKind; config: Record<string, unknown> } => spec !== null)
+    if (specs.length !== items.length) return
+
     event.preventDefault()
     const flow = screenToFlowPosition({ x: event.clientX, y: event.clientY })
-    addNode(kind, flow, config)
-  }, [resolveBoundItem, screenToFlowPosition, addNode])
+    // Fan multiple actions out with the same X/Y step a duplicated action
+    // uses, so a batch drop reads like a stack of copies.
+    specs.forEach((spec, index) => {
+      addNode(spec.kind, { x: flow.x + index * PASTE_STEP, y: flow.y + index * PASTE_STEP }, spec.config)
+    })
+  }, [resolveBoundItem, nodeSpecForDroppedItem, screenToFlowPosition, addNode])
 
   // Delete a node + any edges touching it.
   const deleteNode = useCallback((nodeId: string) => {
@@ -2266,7 +2298,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const clone: ScenarioNode = {
       ...src,
       id,
-      position: { x: src.position.x + 40, y: src.position.y + 40 },
+      position: { x: src.position.x + PASTE_STEP, y: src.position.y + PASTE_STEP },
       config: { ...src.config },
       inputs: src.inputs.map((p) => ({ ...p })),
       outputs: src.outputs.map((p) => ({ ...p }))
@@ -2301,7 +2333,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       const clone: ScenarioNode = {
         ...src,
         id: newId,
-        position: { x: src.position.x + 40, y: src.position.y + 40 },
+        position: { x: src.position.x + PASTE_STEP, y: src.position.y + PASTE_STEP },
         config: { ...src.config },
         inputs: src.inputs.map((p) => ({ ...p })),
         outputs: src.outputs.map((p) => ({ ...p }))

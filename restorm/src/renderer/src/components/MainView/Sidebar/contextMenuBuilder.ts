@@ -344,6 +344,52 @@ export const buildEmptyAreaContextMenu = (
   ]
 }
 
+/** Handlers for the GROUP context menu shown when the right-clicked row
+ * belongs to a multi-selection — every action receives the whole id list. */
+export interface SelectionContextMenuHandlers {
+  onCutItems: (ids: string[]) => void
+  onCopyItems: (ids: string[]) => void
+  onCloneItems: (ids: string[]) => void
+  onDeleteItems: (ids: string[]) => void
+  onToggleFavoriteItems: (ids: string[]) => void
+}
+
+/** Context menu for a MULTI-selection: only the actions that make sense on
+ * a heterogeneous group — cut / copy / clone / favorites / delete. The
+ * per-item entries (rename, add-child, paste-at, refresh) stay on the
+ * single-item menu: they each need exactly one target. */
+export const buildSelectionContextMenu = (
+  ids: string[],
+  t: TranslateFunction,
+  handlers: SelectionContextMenuHandlers,
+  /** True when EVERY selected item is already a favorite — the entry then
+   * offers removal; otherwise it offers adding the whole group. */
+  allFavorite: boolean
+): SidebarContextMenuItem[] => [
+  {
+    id: 'toggle-favorite',
+    label: allFavorite ? t('sidebar.contextMenu.removeFromFavorites') : t('sidebar.contextMenu.addToFavorites'),
+    icon: allFavorite ? 'star-full' : 'star-empty',
+    onClick: () => { handlers.onToggleFavoriteItems(ids) }
+  },
+  { id: 'sep-fav', isSeparator: true, label: '' },
+  { id: 'cut-item', label: t('sidebar.contextMenu.cut'), icon: 'file-symlink-file', onClick: () => { handlers.onCutItems(ids) } },
+  { id: 'copy-item', label: t('sidebar.contextMenu.copy'), icon: 'files', onClick: () => { handlers.onCopyItems(ids) } },
+  {
+    id: 'clone-item',
+    label: t('sidebar.contextMenu.clone'),
+    icon: 'copy',
+    onClick: () => { handlers.onCloneItems(ids) }
+  },
+  { id: 'sep-item', isSeparator: true, label: '' },
+  {
+    id: 'delete-item',
+    label: t('sidebar.contextMenu.delete'),
+    icon: 'trash',
+    onClick: () => { handlers.onDeleteItems(ids) }
+  }
+]
+
 /** The Couper / Copier / Coller trio, shared by every item branch. Paste is
  * greyed out until a copy is staged. */
 const clipboardEntries = (
