@@ -89,9 +89,15 @@ Feature: Sidebar multi-selection and drag & drop overhaul
     And I expand the sidebar row "Pet API"
     And I open the scenario "Main" as a workbench tab
     And I count the scenario graph nodes
-    When I click the sidebar row "Health"
+    # Build the selection with ctrl-clicks only, so the Main tab stays active
+    # and its canvas stays visible — a plain click would open the request's own
+    # tab, and re-activating Main afterwards would (correctly, per the
+    # sync-selection setting) move the sidebar selection back to Main. Opening
+    # Main selected it, so ctrl-click it once more to drop it: the selection
+    # dragged onto the canvas must be requests-only.
+    When I ctrl-click the sidebar row "Health"
     And I ctrl-click the sidebar row "Get Pet by Id"
-    And I activate the workbench tab "Main"
+    And I ctrl-click the sidebar row "Main"
     And I drag the sidebar selection onto the scenario canvas
     Then the scenario graph should have 2 more nodes
     And the two newest actions should be offset by the duplication step
@@ -107,3 +113,36 @@ Feature: Sidebar multi-selection and drag & drop overhaul
     And I ctrl-click the sidebar row "Get Pet by Id"
     And I drag the sidebar selection over the workbench surface
     Then no workbench drop overlay should be visible
+
+  Scenario: A request dragged from the Opened-documents pane lands on a scenario canvas
+    Given the sidebar-dnd reference project is open
+    And I collapse all sidebar rows
+    And I expand the sidebar row "Auth Service"
+    And I expand the sidebar row "Pet API"
+    And I open the request "Health" as a workbench tab
+    And I open the scenario "Main" as a workbench tab
+    And I count the scenario graph nodes
+    # "Health" now shows in the left-hand Opened pane; dragging it from THERE
+    # onto the scenario canvas must add a node, exactly as dragging it from the
+    # tree does — the scenario-drop origin is not restricted to the main tree.
+    When I drag the opened-documents row "Health" onto the scenario canvas
+    Then the scenario graph should have 1 more node
+
+  Scenario: Activating a workbench tab moves the sidebar selection to its item (sync ON by default)
+    # Regression from the multi-selection rework: the sidebar renders the
+    # selection ARRAY when it is non-empty, so a click populates it — and a
+    # later tab activation, which only moved the single anchor, left the
+    # highlight stuck on the clicked row. The "sync selection with active tab"
+    # setting (on by default) must move the highlight to the activated tab's
+    # item, leaving exactly one row selected.
+    Given the sidebar-dnd reference project is open
+    And I collapse all sidebar rows
+    And I expand the sidebar row "Auth Service"
+    And I expand the sidebar row "Pet API"
+    And I open the request "Health" as a workbench tab
+    And I open the request "Get Pet by Id" as a workbench tab
+    When I click the sidebar row "Health"
+    And I activate the workbench request tab "Get Pet by Id"
+    Then only the sidebar row "Get Pet by Id" is selected
+    When I activate the workbench request tab "Health"
+    Then only the sidebar row "Health" is selected

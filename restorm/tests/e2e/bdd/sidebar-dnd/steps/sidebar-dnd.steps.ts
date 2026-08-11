@@ -54,17 +54,17 @@ async function itemIdForRow(p: Page, name: string): Promise<string> {
  * Playwright's mouse-based dragTo is unreliable for HTML5 DnD under xvfb —
  * every drag suite here dispatches the sequence manually instead.
  */
-async function startDragFromRow(p: Page, itemId: string): Promise<void> {
-  await p.evaluate((id) => {
-    const row = document.querySelector(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${id}"]`)
-    if (!row) throw new Error(`drag source row not found: ${id}`)
+async function startDragFromRow(p: Page, itemId: string, paneTestid = 'sidebar-listview'): Promise<void> {
+  await p.evaluate(({ id, paneTestid }) => {
+    const row = document.querySelector(`[data-testid="${paneTestid}"] .list-view-row[data-item-id="${id}"]`)
+    if (!row) throw new Error(`drag source row not found in ${paneTestid}: ${id}`)
     const dt = new DataTransfer()
     ;(window as unknown as { __e2eDragDt?: DataTransfer }).__e2eDragDt = dt
     const rect = row.getBoundingClientRect()
     const ev = new DragEvent('dragstart', { bubbles: true, cancelable: true, clientX: rect.left + 10, clientY: rect.top + rect.height / 2 })
     Object.defineProperty(ev, 'dataTransfer', { value: dt })
     row.dispatchEvent(ev)
-  }, itemId)
+  }, { id: itemId, paneTestid })
 }
 
 /** Fire dragenter+dragover on a target at a relative position, reusing the
@@ -207,6 +207,18 @@ When('I ctrl-click the sidebar row {string}', async ({}, name: string) => {
   await sidebarRowByName(requirePage(), name).click({ modifiers: ['Control'] })
 })
 
+When('I activate the workbench request tab {string}', async ({}, name: string) => {
+  const p = requirePage()
+  // Click the tab by its backing item id, not a text filter: the tab label
+  // carries a method badge ("GET…") so an exact-text match is brittle, and a
+  // loose match can select the wrong `.tab`. The id comes from the sidebar row.
+  const itemId = await itemIdForRow(p, name)
+  const tab = p.locator(`.tab[data-testid*="request-id:${itemId}"]`).first()
+  await expect(tab).toBeVisible({ timeout: 10000 })
+  await tab.click()
+  await expect(tab).toHaveAttribute('data-is-active', 'true', { timeout: 10000 })
+})
+
 When('I start dragging the sidebar row {string}', async ({}, name: string) => {
   const p = requirePage()
   dragAnchorId = await itemIdForRow(p, name)
@@ -313,6 +325,17 @@ When('I drag the sidebar selection onto the scenario canvas', async ({}) => {
   await dropDragOn(p, '[data-testid="scenario-editor"] .react-flow__pane', 0.5, 0.5, anchorId)
 })
 
+When('I drag the opened-documents row {string} onto the scenario canvas', async ({}, name: string) => {
+  const p = requirePage()
+  const row = p.locator('[data-testid="sidebar-open-documents-listview"] .list-view-row')
+    .filter({ has: p.getByText(name, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 10000 })
+  const itemId = await row.getAttribute('data-item-id')
+  if (!itemId) throw new Error(`opened-documents row "${name}" has no data-item-id`)
+  await startDragFromRow(p, itemId, 'sidebar-open-documents-listview')
+  await dropDragOn(p, '[data-testid="scenario-editor"] .react-flow__pane', 0.5, 0.5, itemId)
+})
+
 When('I drag the sidebar selection over the workbench surface', async ({}) => {
   const p = requirePage()
   const anchor = p.locator('[data-testid="sidebar-listview"] .list-view-row[aria-selected="true"]').first()
@@ -327,6 +350,14 @@ Then('the sidebar rows {string} and {string} should both be selected', async ({}
   const p = requirePage()
   await expect(sidebarRowByName(p, a)).toHaveAttribute('aria-selected', 'true')
   await expect(sidebarRowByName(p, b)).toHaveAttribute('aria-selected', 'true')
+})
+
+Then('only the sidebar row {string} is selected', async ({}, name: string) => {
+  const p = requirePage()
+  await expect(sidebarRowByName(p, name)).toHaveAttribute('aria-selected', 'true', { timeout: 10000 })
+  // Exactly one selected row — the sync must MOVE the highlight, not add to it,
+  // and must not leave a stale multi-selection highlighted.
+  await expect(p.locator('[data-testid="sidebar-listview"] .list-view-row[aria-selected="true"]')).toHaveCount(1)
 })
 
 Then('the folder {string} should list {string} then {string} as its last children', async ({}, folderName: string, a: string, b: string) => {
@@ -396,7 +427,7 @@ Then('the sidebar row {string} should be expanded', async ({}, name: string) => 
   }
 })
 
-Then('the scenario graph should have {int} more nodes', async ({}, extra: number) => {
+Then('the scenario graph should have {int} more node(s)', async ({}, extra: number) => {
   const p = requirePage()
   await expect
     .poll(() => p.locator('[data-testid="scenario-editor"] .react-flow__node').count(), { timeout: 10000 })

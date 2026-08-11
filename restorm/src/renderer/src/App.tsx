@@ -3342,6 +3342,7 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
+    setSelectedItemIds,
     setExpandedIds,
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
@@ -3360,15 +3361,21 @@ const App: React.FC = () => {
   //
   // The scenario surface OWNS sidebar drops (it adds the item to the
   // graph), so the workbench split channel must NOT engage over it: we
-  // return false whenever the drag is over a scenario editor. ECUI's
-  // group handlers bubble up the real DOM from the portalled tab content,
-  // so a drag over the scenario canvas reports `event.target` inside the
-  // scenario wrapper (`data-testid="scenario-editor"`); detecting that
-  // keeps the overlay dark there and lets the scenario's own React
-  // `onDrop` add the node. (Relying on the scenario calling
-  // `stopPropagation` on its native listeners proved fragile — the React
-  // Flow pane owns the canvas drag events, so the scenario's native drop
-  // never fired and the add was lost.)
+  // return false whenever the drag is over a scenario editor, letting the
+  // scenario's own React `onDrop` add the node. (Relying on the scenario
+  // calling `stopPropagation` on its native listeners proved fragile — the
+  // React Flow pane owns the canvas drag events, so the scenario's native
+  // drop never fired and the add was lost.)
+  //
+  // Detection is by the CURSOR STACK, not `event.target`. As the pointer
+  // crosses from the sidebar into the canvas it can clip a pixel or two of
+  // non-scenario workbench first, which lights the split overlay; the
+  // overlay then renders ON TOP and becomes `event.target`, so a
+  // `.closest` on the target would miss the scenario editor beneath it and
+  // the overlay would keep swallowing the drop (open-in-split instead of
+  // add-to-graph). `elementsFromPoint` sees through the overlay to whatever
+  // is under the cursor, so the moment the scenario surface is beneath the
+  // pointer the overlay backs off — even if it was already lit.
   const isWorkbenchExternalDrop = useCallback((event: DragEvent): boolean => {
     const types = event.dataTransfer?.types
     if (!types) return false
@@ -3378,8 +3385,12 @@ const App: React.FC = () => {
     // split-open gesture is single-item by design, and lighting the overlay
     // for a group would invite a drop the app cannot honour.
     if (typeList.includes(LIST_VIEW_MULTI_DRAG_MIME)) return false
-    const target = event.target
-    if (target instanceof Element && target.closest('[data-testid="scenario-editor"]')) return false
+    const overScenario = (el: Element | null | undefined): boolean =>
+      el instanceof Element && el.closest('[data-testid="scenario-editor"]') !== null
+    // Primary: the whole element stack under the cursor (pierces the overlay).
+    if (document.elementsFromPoint(event.clientX, event.clientY).some(overScenario)) return false
+    // Fallback for drags with no usable coordinates (some synthetic events).
+    if (overScenario(event.target as Element | null)) return false
     return true
   }, [])
 
