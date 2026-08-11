@@ -31,40 +31,34 @@ async function callOk(
   return parsedReply(reply)
 }
 
-/** A WRITE paced for the bidirectional main↔renderer sync: the renderer
- * echoes every replace back to the main mirror, and a write issued while
- * the PREVIOUS write's echo is still in flight can be clobbered by it.
- * Waiting a beat after each write keeps the echoes ordered. */
+/** A plain MCP write. The artificial 500 ms pacing that used to follow each
+ * write is gone: it worked around the main↔renderer mirror clobber where a
+ * stale renderer echo (stamped the same model version as the pre-mutation tree)
+ * overwrote a fresh mutation. That is now fixed at the root — every scenario
+ * mutation bumps the model version immediately, so an in-flight stale echo is
+ * strictly older and refused. Writes no longer need to be spaced out. */
 async function pacedWrite(
   callMcpTool: (d: McpDiscovery, name: string, args?: Record<string, unknown>) => Promise<McpToolReply>,
   name: string,
   args: Record<string, unknown>
 ): Promise<unknown> {
-  const reply = await callOk(callMcpTool, name, args)
-  await page?.waitForTimeout(500)
-  return reply
+  return callOk(callMcpTool, name, args)
 }
 
-/** MCP writes land in the main store first and the renderer mirror echoes
- * back asynchronously — a same-tick follow-up can race that echo and read
- * (or clobber) a half-synced tree. Poll until the listing tool agrees the
- * ids are all there, then leave a short settle for the renderer echo. */
+/** Poll until the listing tool reports the ids — the renderer→main mirror is
+ * still asynchronous, so a same-tick follow-up read can briefly precede it. The
+ * former double-read-with-settle (which guarded against a stale echo WIPING the
+ * item after it appeared) is gone: that clobber is fixed at the root, so once an
+ * item is listed it stays listed. */
 async function waitForItemsVisible(
   callMcpTool: (d: McpDiscovery, name: string, args?: Record<string, unknown>) => Promise<McpToolReply>,
   listTool: 'list_requests' | 'list_scenarios' | 'list_folders',
   ids: string[]
 ): Promise<void> {
-  const allPresent = async (): Promise<boolean> => {
+  await expect(async () => {
     const listed = await callOk(callMcpTool, listTool, {}) as { id: string }[] | { scenarios?: { id: string }[] }
     const rows = Array.isArray(listed) ? listed : (listed.scenarios ?? [])
-    return ids.every((id) => rows.some((r) => r.id === id))
-  }
-  // Two consecutive positive reads: a single one can be a snapshot taken
-  // right before a stale renderer echo wipes the item again.
-  await expect(async () => {
-    expect(await allPresent(), `${listTool} should list ${ids.join(', ')}`).toBe(true)
-    await page?.waitForTimeout(400)
-    expect(await allPresent(), `${listTool} should STILL list ${ids.join(', ')} after a settle`).toBe(true)
+    expect(ids.every((id) => rows.some((r) => r.id === id)), `${listTool} should list ${ids.join(', ')}`).toBe(true)
   }).toPass({ timeout: 15_000 })
 }
 

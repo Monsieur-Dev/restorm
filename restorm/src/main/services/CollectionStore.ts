@@ -102,12 +102,17 @@ class CollectionStore {
   }
 
   /**
-   * Increment and return the tree version. Called by `broadcastTreeReplace`
-   * after a main-driven (MCP) mutation so a subsequent stale renderer mirror
-   * can be recognised and refused. Scenario node/edge edits mutate the live
-   * scenario object directly (never through a CollectionStore method), so the
-   * bump has to live on the broadcast — the one path EVERY MCP write shares —
-   * not on the folder/request mutators.
+   * Increment and return the tree version so a subsequent stale renderer mirror
+   * can be recognised and refused. `broadcastTreeReplace` calls it for
+   * folder/request writes. Scenario node/edge edits mutate the live scenario
+   * object directly (never through a CollectionStore method) and — critically —
+   * that in-place mutation can yield to the event loop before the broadcast
+   * runs, so the scenario tools call this the INSTANT they touch the graph
+   * (`markScenarioMutated`), not only later on the broadcast: otherwise the
+   * renderer's in-flight autosave mirror of the pre-mutation tree, stamped the
+   * SAME version, lands in that window and — since {@link setCollections} only
+   * refuses a strictly-older stamp — overwrites the freshly-created node. A
+   * second monotonic bump on the broadcast is harmless.
    */
   bumpModelVersion(): number {
     this.modelVersion += 1

@@ -126,6 +126,26 @@ export function broadcastScenario(scenario: Scenario, source?: 'arrange'): void 
   }
 }
 
+/**
+ * Bump the model version the INSTANT a scenario is mutated in place — before
+ * the mutation can yield to the event loop.
+ *
+ * Scenario node/edge edits mutate the live (reactive) scenario object directly,
+ * and that mutation can hand control back to the loop before `broadcastScenario`
+ * runs its own bump. In that window the renderer's in-flight autosave mirror of
+ * the PRE-mutation tree — stamped with the SAME model version — can land, and
+ * `CollectionStore.setCollections` only refuses a STRICTLY-older stamp, so the
+ * equal-version stale mirror is accepted and overwrites the freshly-mutated
+ * scenario (a just-created node silently vanishes). Advancing the version right
+ * at the mutation makes any such mirror strictly older → refused. Every scenario
+ * mutator calls this immediately after touching `nodes` / `edges` / `config`,
+ * then `broadcastScenario` (whose `broadcastTreeReplace` bumps once more and
+ * re-broadcasts the fresh tree — a second monotonic bump is harmless).
+ */
+function markScenarioMutated(): void {
+  collectionStore.bumpModelVersion()
+}
+
 /** Compact node view for list/get replies. Merges measured size (width/height)
  * from the open editor when available. */
 function nodeView(n: ScenarioNode, rects?: Record<string, NodeRect>): Record<string, unknown> {
@@ -287,6 +307,7 @@ export function registerScenarioTools(mcp: McpService): void {
       if (typeof args['notes'] === 'string') patch.notes = args['notes']
       if (Array.isArray(args['tags'])) patch.tags = (args['tags'] as unknown[]).filter((t): t is string => typeof t === 'string')
       const updated = collectionStore.updateScenario(id, patch)
+      markScenarioMutated()
       if (!updated) return errorReply(`updateScenario failed for ${id}`)
       broadcastScenario(updated as unknown as Scenario)
       return jsonReply({ id, name: updated.name, notes: updated.notes, tags: updated.tags })
@@ -346,6 +367,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const { inputs, outputs } = defaultPortsForKind(kind)
       const node: ScenarioNode = { id: randomUUID(), kind, config, inputs, outputs, position: { x, y } }
       scenario.nodes.push(node)
+      markScenarioMutated()
       const reply = (arranged: boolean): ReturnType<typeof jsonReply> =>
         jsonReply({ nodeId: node.id, kind, position: node.position, inputs, outputs, arranged })
       // Fast path stays synchronous (the layout is async); only `arrange`
@@ -353,6 +375,7 @@ export function registerScenarioTools(mcp: McpService): void {
       if (args['arrange'] === true) {
         return arrangeScenario(scenario).then(() => { broadcastScenario(scenario, 'arrange'); return reply(true) })
       }
+      markScenarioMutated()
       broadcastScenario(scenario)
       return reply(false)
     }
@@ -377,6 +400,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const scenario = findScenario(id)
       if (!scenario) return errorReply(`No scenario with id ${id}`)
       const moved = await arrangeScenario(scenario)
+      markScenarioMutated()
       broadcastScenario(scenario, 'arrange')
       return jsonReply({ scenarioId: id, moved })
     }
@@ -430,6 +454,7 @@ export function registerScenarioTools(mcp: McpService): void {
         if (typeof args['collapsed'] === 'boolean') { if (args['collapsed']) node.collapsed = true; else delete node.collapsed }
         if (typeof args['x'] === 'number') node.position.x = args['x']
         if (typeof args['y'] === 'number') node.position.y = args['y']
+        markScenarioMutated()
         broadcastScenario(scenario)
       } catch (err) {
         // Roll the node back to its pre-update state.
@@ -465,6 +490,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const node = scenario.nodes.find((n) => n.id === nodeId)
       if (!node) return errorReply(`No node ${nodeId} in scenario ${id}`)
       node.position = { x: Number(args['x']), y: Number(args['y']) }
+      markScenarioMutated()
       broadcastScenario(scenario)
       return jsonReply({ nodeId, position: node.position })
     }
@@ -490,6 +516,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const removedEdges = scenario.edges.filter((e) => e.from.nodeId === nodeId || e.to.nodeId === nodeId).map((e) => e.id)
       scenario.nodes = scenario.nodes.filter((n) => n.id !== nodeId)
       scenario.edges = scenario.edges.filter((e) => e.from.nodeId !== nodeId && e.to.nodeId !== nodeId)
+      markScenarioMutated()
       broadcastScenario(scenario)
       return jsonReply({ deletedNodeId: nodeId, deletedEdgeIds: removedEdges })
     }
@@ -589,6 +616,7 @@ export function registerScenarioTools(mcp: McpService): void {
         ...(typeof args['color'] === 'string' ? { color: args['color'] } : {})
       }
       scenario.edges.push(edge)
+      markScenarioMutated()
       broadcastScenario(scenario)
       return jsonReply({ edgeId: edge.id, from: edge.from, to: edge.to, ...(edge.selector !== undefined ? { selector: edge.selector } : {}) })
     }
@@ -612,6 +640,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const edgeId = typeof args['edgeId'] === 'string' ? args['edgeId'] : ''
       if (!scenario.edges.some((e) => e.id === edgeId)) return errorReply(`No edge ${edgeId} in scenario ${id}`)
       scenario.edges = scenario.edges.filter((e) => e.id !== edgeId)
+      markScenarioMutated()
       broadcastScenario(scenario)
       return jsonReply({ deletedEdgeId: edgeId })
     }
@@ -643,6 +672,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const selector = typeof args['selector'] === 'string' ? args['selector'] : ''
       if (selector === '') delete edge.selector
       else edge.selector = selector
+      markScenarioMutated()
       broadcastScenario(scenario)
       return jsonReply({ edgeId: edge.id, from: edge.from, to: edge.to, ...(edge.selector !== undefined ? { selector: edge.selector } : {}) })
     }
@@ -684,6 +714,7 @@ export function registerScenarioTools(mcp: McpService): void {
       const { inputs, outputs } = defaultPortsForKind('input')
       const node: ScenarioNode = { id: randomUUID(), kind: 'input', config, inputs, outputs, position: { x, y } }
       scenario.nodes.push(node)
+      markScenarioMutated()
       broadcastScenario(scenario)
       return jsonReply({ nodeId: node.id, kind: 'input', name, position: node.position })
     }

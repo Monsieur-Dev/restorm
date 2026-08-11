@@ -25,6 +25,9 @@ vi.mock('./import', () => ({ broadcastTreeReplace: () => { /* noop */ } }))
 vi.mock('../../services/CollectionStore', () => ({
   collectionStore: {
     findById: (id: string) => mockState.findById(id),
+    // Every scenario mutation bumps the model version at the mutation site (the
+    // stale-mirror stale-write guard); the tools call it, so the mock needs it.
+    bumpModelVersion: () => 0,
     // Mirror the real `updateScenario`: find, type-guard, shallow-assign.
     updateScenario: (id: string, updates: Record<string, unknown>) => {
       const s = mockState.findById(id)
