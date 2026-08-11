@@ -139,5 +139,3 @@ export const RegexNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
-
-export default RegexNodeBox

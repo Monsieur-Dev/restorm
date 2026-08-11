@@ -39,7 +39,7 @@ import { StringValue } from '../../../shared/types/collections'
 // CSDL (EDMX) intermediate shapes
 // ============================================================================
 
-export interface EdmProperty {
+interface EdmProperty {
   name: string
   type: string
   nullable: boolean
@@ -55,7 +55,7 @@ export interface EdmEntityType {
   navigationProperties: EdmProperty[]
 }
 
-export interface EdmEnumType {
+interface EdmEnumType {
   namespace: string
   name: string
   qualifiedName: string
@@ -80,7 +80,7 @@ interface EdmOperation {
   returnType?: string
 }
 
-export interface EdmEntitySet {
+interface EdmEntitySet {
   name: string
   entityType: string
 }
@@ -964,22 +964,6 @@ export function importOData(content: string, options: ODataImportOptions = {}): 
     apiDocumentation
   }
   return root
-}
-
-/** Fetch `$metadata` from a URL and import. */
-export async function importODataFromUrl(url: string, options: ODataImportOptions = {}): Promise<EnvironmentFolder> {
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error(`Failed to fetch OData metadata: ${response.status} ${response.statusText}`)
-  }
-  const content = await response.text()
-  return importOData(content, { ...options, sourceUrl: url })
-}
-
-/** Alias mirroring the `importSwaggerFromJson` naming so callers can
- * be symmetric. */
-export function importODataFromString(content: string, options: ODataImportOptions = {}): EnvironmentFolder {
-  return importOData(content, options)
 }
 
 // ============================================================================

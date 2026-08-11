@@ -1460,5 +1460,3 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     </>
   )
 }
-
-export default HTTPRequestTabView

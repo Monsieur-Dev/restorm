@@ -466,4 +466,4 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
 }
 
 const DateTimePicker = React.memo(DateTimePickerInner)
-export default DateTimePicker
+export { DateTimePicker }

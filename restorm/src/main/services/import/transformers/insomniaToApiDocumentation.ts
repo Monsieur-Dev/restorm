@@ -15,7 +15,7 @@ import type {
 
 // ---------- Insomnia source types (relevant subset) ----------
 
-export interface InsomniaAuthData {
+interface InsomniaAuthData {
   type: string
   username?: string
   password?: string
@@ -28,7 +28,7 @@ export interface InsomniaAuthData {
   disabled?: boolean
 }
 
-export interface InsomniaWorkspaceData {
+interface InsomniaWorkspaceData {
   _id: string
   _type: 'workspace'
   name: string
@@ -36,7 +36,7 @@ export interface InsomniaWorkspaceData {
   parentId: string | null
 }
 
-export interface InsomniaRequestGroupData {
+interface InsomniaRequestGroupData {
   _id: string
   _type: 'request_group'
   name: string
@@ -44,7 +44,7 @@ export interface InsomniaRequestGroupData {
   parentId: string | null
 }
 
-export interface InsomniaRequestData {
+interface InsomniaRequestData {
   _id: string
   _type: 'request'
   name: string
@@ -55,7 +55,7 @@ export interface InsomniaRequestData {
   authentication?: InsomniaAuthData
 }
 
-export interface InsomniaGrpcRequestData {
+interface InsomniaGrpcRequestData {
   _id: string
   _type: 'grpc_request'
   name: string
@@ -65,7 +65,7 @@ export interface InsomniaGrpcRequestData {
   url?: string
 }
 
-export interface InsomniaWebSocketRequestData {
+interface InsomniaWebSocketRequestData {
   _id: string
   _type: 'websocket_request'
   name: string
@@ -75,7 +75,7 @@ export interface InsomniaWebSocketRequestData {
   authentication?: InsomniaAuthData
 }
 
-export type InsomniaResourceData =
+type InsomniaResourceData =
   | InsomniaWorkspaceData
   | InsomniaRequestGroupData
   | InsomniaRequestData

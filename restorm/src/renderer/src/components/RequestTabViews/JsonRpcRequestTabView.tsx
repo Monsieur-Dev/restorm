@@ -552,5 +552,3 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
     </>
   )
 }
-
-export default JsonRpcRequestTabView

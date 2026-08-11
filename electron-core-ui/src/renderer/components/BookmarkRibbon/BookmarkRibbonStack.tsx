@@ -168,5 +168,3 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
     </div>
   )
 }
-
-export default BookmarkRibbonStack

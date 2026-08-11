@@ -160,5 +160,3 @@ export const SendButtonEnvSwitcher: React.FC<SendButtonEnvSwitcherProps> = ({ en
     </>
   )
 }
-
-export default SendButtonEnvSwitcher

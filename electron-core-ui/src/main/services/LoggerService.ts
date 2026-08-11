@@ -230,5 +230,3 @@ export const logger: LoggerInterface = {
     for (const transport of instance.transports) transport.level = level
   }
 }
-
-export default logger

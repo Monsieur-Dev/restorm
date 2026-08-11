@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import EnvironmentFolderHome from './EnvironmentFolderHome'
+import { EnvironmentFolderHome } from './EnvironmentFolderHome'
 import { useTranslation } from 'react-i18next'
 import {
   ListView,
@@ -1001,5 +1001,3 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
 }
 
 export const EnvironmentFolderView = React.memo(EnvironmentFolderViewInner)
-
-export default EnvironmentFolderView

@@ -11,6 +11,8 @@ const makeReactiveFolderItem = vi.hoisted(() => vi.fn((item: unknown) => item))
 vi.mock('../types/reactive', () => ({ makeReactiveFolderItem }))
 
 import { reifyItem, readTreeReplacePayload, useMcpTreeReplace } from './useMcpTreeReplace'
+import { ExpressionValue } from '../../../shared/types/valueTypes/ExpressionValue'
+import { StringValue } from '../../../shared/types/valueTypes/StringValue'
 import type { FolderItem } from '../../../shared/types/collections'
 
 describe('readTreeReplacePayload', () => {
@@ -53,6 +55,37 @@ describe('reifyItem', () => {
     expect(reifyItem(null)).toBeNull()
     expect(reifyItem('nope')).toBeNull()
     expect(reifyItem({ random: true })).toBeNull()
+  })
+
+  it('revives persisted ValueType POJOs — an MCP-written expression variable must not render as a string', () => {
+    // The payload crosses IPC as plain JSON: `{ type: 'expression' }` is a
+    // POJO, and the cell renderers pick the Monaco editor by `instanceof
+    // ExpressionValue`. Before revival was added here, such a variable
+    // rendered as a plain string input until the project was reopened.
+    const envFolder = {
+      id: 'ef',
+      name: 'Env',
+      type: 'environment-folder',
+      items: [],
+      configuration: {},
+      environments: [{
+        id: 'e1',
+        name: 'Dev',
+        variables: [
+          { key: 'baseUrl', value: { type: 'expression', value: 'https://{{host}}/api' }, enabled: true },
+          { key: 'host', value: { type: 'string', value: 'example.test' }, enabled: true }
+        ]
+      }]
+    }
+    const out = reifyItem(envFolder) as unknown as {
+      environments: { variables: { key: string; value: unknown }[] }[]
+    }
+    const variables = out.environments[0]?.variables ?? []
+    const baseUrl = variables.find((v) => v.key === 'baseUrl')
+    const host = variables.find((v) => v.key === 'host')
+    expect(baseUrl?.value).toBeInstanceOf(ExpressionValue)
+    expect((baseUrl?.value as ExpressionValue).toString()).toBe('https://{{host}}/api')
+    expect(host?.value).toBeInstanceOf(StringValue)
   })
 })
 

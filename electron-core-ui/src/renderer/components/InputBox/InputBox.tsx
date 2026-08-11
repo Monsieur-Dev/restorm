@@ -434,4 +434,4 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
 }
 
 const InputBox = React.memo(InputBoxInner)
-export default InputBox
+export { InputBox }

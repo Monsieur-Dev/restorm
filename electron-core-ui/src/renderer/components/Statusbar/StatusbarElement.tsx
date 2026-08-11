@@ -341,4 +341,4 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   )
 }
 
-export default StatusbarElement
+export { StatusbarElement }

@@ -731,5 +731,3 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
     </>
   )
 }
-
-export default AmqpRequestTabView

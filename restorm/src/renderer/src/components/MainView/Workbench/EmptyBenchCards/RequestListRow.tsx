@@ -82,5 +82,3 @@ export const RequestListRow: React.FC<RequestListRowProps> = ({
     </div>
   )
 }
-
-export default RequestListRow

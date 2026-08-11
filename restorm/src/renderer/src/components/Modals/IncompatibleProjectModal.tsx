@@ -95,5 +95,3 @@ export function IncompatibleProjectModal(): React.JSX.Element | null {
     </Modal>
   )
 }
-
-export default IncompatibleProjectModal

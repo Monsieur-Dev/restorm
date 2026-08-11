@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from './Button'
+import { Button } from './Button'
 import { ButtonWithIconProps } from './types'
 
 const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
@@ -29,4 +29,3 @@ const ButtonWithIcon: React.FC<ButtonWithIconProps> = ({
 
 const MemoizedButtonWithIcon = React.memo(ButtonWithIcon)
 export { MemoizedButtonWithIcon as ButtonWithIcon }
-export default MemoizedButtonWithIcon

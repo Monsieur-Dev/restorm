@@ -105,5 +105,3 @@ export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, 
     </div>
   )
 }
-
-export default Onboarding

@@ -19,7 +19,7 @@
 import { useState } from 'react'
 import { describe, it, expect, afterEach, beforeAll, vi } from 'vitest'
 import { render, cleanup, fireEvent, waitFor } from '@testing-library/react'
-import Modal from './Modal'
+import { Modal } from './Modal'
 
 // jsdom has no layout engine, so `offsetParent` (the Tab trap's "is this
 // element actually visible" check) always reads null regardless of the

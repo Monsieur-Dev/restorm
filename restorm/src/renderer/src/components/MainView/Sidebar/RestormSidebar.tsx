@@ -366,5 +366,3 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
     </div>
   )
 }
-
-export default RestormSidebar

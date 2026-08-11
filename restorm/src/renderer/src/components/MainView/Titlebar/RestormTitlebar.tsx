@@ -557,8 +557,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   )
 }
 
-export default RestormTitlebar
-
 /** Menu-item icon with the same pastille dot as the statusbar GIT cell —
  * the top-level "Git" MenuBarItem title stays a plain string (overflow/
  * hamburger conversion is string-only, see its own comment above), so the

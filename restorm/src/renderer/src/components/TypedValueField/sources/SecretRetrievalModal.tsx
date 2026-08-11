@@ -209,5 +209,3 @@ export const SecretRetrievalModal: React.FC<SecretRetrievalModalProps> = ({
     </Modal>
   )
 }
-
-export default SecretRetrievalModal

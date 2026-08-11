@@ -126,5 +126,3 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange, 
     />
   )
 }
-
-export default FolderView

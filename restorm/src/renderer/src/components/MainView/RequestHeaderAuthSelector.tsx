@@ -292,5 +292,3 @@ export const RequestHeaderAuthSelector: React.FC<RequestHeaderAuthSelectorProps>
     </HeaderHoverTooltip>
   )
 }
-
-export default RequestHeaderAuthSelector

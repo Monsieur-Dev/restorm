@@ -940,5 +940,3 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     </>
   )
 }
-
-export default WebSocketRequestTabView

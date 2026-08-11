@@ -245,5 +245,3 @@ export const TagsView: React.FC<TagsViewProps> = ({ tags, onChange, removeTagLab
     </div>
   )
 }
-
-export default TagsView

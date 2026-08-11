@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import Button from './Button'
+import { Button } from './Button'
 import { ButtonWithDropdownProps, IButtonOptions, defaultButtonStyles } from './types'
 
 const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
@@ -156,4 +156,3 @@ const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
 }
 
 export { ButtonWithDropdown }
-export default ButtonWithDropdown

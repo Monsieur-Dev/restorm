@@ -67,5 +67,3 @@ export const WaitNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   // `done` port (drawn by the box chrome).
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }
-
-export default WaitNodeBox

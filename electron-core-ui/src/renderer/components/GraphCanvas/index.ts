@@ -1,4 +1,4 @@
-export { GraphCanvas, default as GraphCanvasComponent } from './GraphCanvas'
+export { GraphCanvas } from './GraphCanvas'
 export type {
   GraphCanvasProps,
   GraphCanvasPanMode,

@@ -205,5 +205,3 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
     </Modal>
   )
 }
-
-export default ScenarioRunHistoryModal

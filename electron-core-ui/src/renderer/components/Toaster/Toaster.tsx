@@ -9,7 +9,7 @@ import React, {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import Workbench from '../Workbench/Workbench'
+import { Workbench } from '../Workbench/Workbench'
 import { Button } from '../Button'
 import { ScrollableElement } from '../ScrollableElement'
 import { Toast } from './Toast'

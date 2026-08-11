@@ -249,5 +249,3 @@ export const GitHistoryView: React.FC<GitHistoryViewProps> = ({
     </div>
   )
 }
-
-export default GitHistoryView

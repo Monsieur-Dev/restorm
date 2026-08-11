@@ -116,5 +116,3 @@ export const ScenarioCallersButton: React.FC<ScenarioCallersButtonProps> = ({ us
     </>
   )
 }
-
-export default ScenarioCallersButton

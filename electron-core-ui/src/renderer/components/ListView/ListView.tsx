@@ -1196,4 +1196,3 @@ const ListViewInner: React.FC<ListViewProps> = ({
 }
 
 export const ListView = React.memo(ListViewInner)
-export default ListView

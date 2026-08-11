@@ -83,5 +83,3 @@ export const ScenarioCliHelp: React.FC<{ scenarioName: string; scenarioId: strin
     </div>
   )
 }
-
-export default ScenarioCliHelp

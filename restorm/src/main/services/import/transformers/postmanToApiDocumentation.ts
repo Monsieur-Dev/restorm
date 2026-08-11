@@ -15,12 +15,12 @@ import type {
 
 // ---------- Postman source-spec types (relevant subset) ----------
 
-export interface PostmanDescriptionData {
+interface PostmanDescriptionData {
   content: string
   type?: string
 }
 
-export interface PostmanUrlData {
+interface PostmanUrlData {
   raw?: string
   host?: string[]
   path?: string[] | string
@@ -29,24 +29,24 @@ export interface PostmanUrlData {
   variable?: { key: string; value?: string; description?: string }[]
 }
 
-export interface PostmanAuthParamData {
+interface PostmanAuthParamData {
   key: string
   value?: unknown
 }
 
-export interface PostmanAuthData {
+interface PostmanAuthData {
   type: string
   [scheme: string]: PostmanAuthParamData[] | string | undefined
 }
 
-export interface PostmanRequestData {
+interface PostmanRequestData {
   method?: string
   url?: PostmanUrlData | string
   auth?: PostmanAuthData
   description?: string | PostmanDescriptionData
 }
 
-export interface PostmanResponseData {
+interface PostmanResponseData {
   name?: string
   status?: string
   code?: number
@@ -54,17 +54,17 @@ export interface PostmanResponseData {
   _postman_previewlanguage?: string
 }
 
-export interface PostmanScriptData {
+interface PostmanScriptData {
   exec?: string[]
   type?: string
 }
 
-export interface PostmanEventData {
+interface PostmanEventData {
   listen: 'prerequest' | 'test'
   script?: PostmanScriptData
 }
 
-export interface PostmanItemData {
+interface PostmanItemData {
   name: string
   description?: string | PostmanDescriptionData
   item?: PostmanItemData[]

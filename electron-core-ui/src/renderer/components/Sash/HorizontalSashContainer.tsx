@@ -204,5 +204,3 @@ export const HorizontalSashContainer: React.FC<HorizontalSashContainerProps> = (
     </div>
   )
 }
-
-export default HorizontalSashContainer

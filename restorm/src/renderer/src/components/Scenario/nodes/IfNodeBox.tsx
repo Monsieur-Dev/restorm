@@ -67,5 +67,3 @@ export const IfNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, 
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
-
-export default IfNodeBox

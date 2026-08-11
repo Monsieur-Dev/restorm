@@ -726,5 +726,3 @@ function toStompMessage(m: StompMessageItem): StompMessage {
     timestamp: m.timestamp
   }
 }
-
-export default StompRequestTabView

@@ -14,7 +14,7 @@ import type {
   PropertyDocumentation
 } from '../../../../shared/types/apiDocumentation'
 
-export interface SmithyTraitsData {
+interface SmithyTraitsData {
   http?: { method: string; uri: string }
   required?: boolean
   deprecated?: boolean
@@ -22,27 +22,27 @@ export interface SmithyTraitsData {
   documentation?: string
 }
 
-export interface SmithyMemberData {
+interface SmithyMemberData {
   name: string
   target: string
   traits: SmithyTraitsData
 }
 
-export interface SmithyStructureData {
+interface SmithyStructureData {
   kind: 'structure'
   name: string
   members: SmithyMemberData[]
   traits: SmithyTraitsData
 }
 
-export interface SmithyEnumData {
+interface SmithyEnumData {
   kind: 'enum' | 'intEnum'
   name: string
   members: { name: string; value?: string | number }[]
   traits: SmithyTraitsData
 }
 
-export interface SmithyOperationData {
+interface SmithyOperationData {
   kind: 'operation'
   name: string
   input?: string
@@ -51,7 +51,7 @@ export interface SmithyOperationData {
   traits: SmithyTraitsData
 }
 
-export interface SmithyServiceData {
+interface SmithyServiceData {
   kind: 'service'
   name: string
   version?: string
@@ -60,14 +60,14 @@ export interface SmithyServiceData {
   traits: SmithyTraitsData
 }
 
-export interface SmithyResourceData {
+interface SmithyResourceData {
   kind: 'resource'
   name: string
   operations: string[]
   resources: string[]
 }
 
-export type SmithyShapeData =
+type SmithyShapeData =
   | SmithyStructureData
   | SmithyEnumData
   | SmithyOperationData

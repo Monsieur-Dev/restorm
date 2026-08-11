@@ -225,5 +225,3 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
     </div>
   )
 }
-
-export default VerticalSashContainer

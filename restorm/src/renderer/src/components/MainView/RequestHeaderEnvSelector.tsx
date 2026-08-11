@@ -133,5 +133,3 @@ export const RequestHeaderEnvSelector: React.FC<RequestHeaderEnvSelectorProps> =
     </span>
   )
 }
-
-export default RequestHeaderEnvSelector

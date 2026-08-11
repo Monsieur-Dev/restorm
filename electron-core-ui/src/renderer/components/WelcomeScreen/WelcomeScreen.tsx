@@ -125,5 +125,3 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     </main>
   )
 }
-
-export default WelcomeScreen

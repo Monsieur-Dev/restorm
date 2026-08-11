@@ -9,13 +9,13 @@ import { z } from 'zod/v4'
 // Theme Schemas
 // ==========================================================================
 
-export const yamlVariableEntrySchema = z.object({
+const yamlVariableEntrySchema = z.object({
   id: z.string(),
   value: z.string(),
   description: z.string().optional()
 })
 
-export const yamlColorEntrySchema = z.object({
+const yamlColorEntrySchema = z.object({
   id: z.string(),
   value: z.string(),
   description: z.string().optional()
@@ -37,7 +37,7 @@ export const yamlThemeFileSchema = z.object({
 
 const themeTypeSchema = z.enum(['dark', 'light', 'hc_dark', 'hc_light'])
 
-export const themeIndexEntrySchema = z.object({
+const themeIndexEntrySchema = z.object({
   id: z.string(),
   name: z.string(),
   type: themeTypeSchema,
@@ -93,7 +93,7 @@ const featureStrategySchema = z.union([
   customStrategyFallbackSchema
 ])
 
-export const featureConfigSchema = z.object({
+const featureConfigSchema = z.object({
   Name: z.string(),
   Strategies: z.array(featureStrategySchema)
 })
@@ -112,7 +112,7 @@ export const storageFileSchema = z.record(z.string(), z.unknown())
 // Settings Schemas
 // ==========================================================================
 
-export const settingDefinitionSchema = z.object({
+const settingDefinitionSchema = z.object({
   id: z.string(),
   titleKey: z.string(),
   descriptionKey: z.string().optional(),
@@ -126,14 +126,14 @@ export const settingDefinitionSchema = z.object({
 })
 
 // Recursive schema for group items (setting or nested group)
-export const settingsGroupItemSchema: z.ZodType = z.lazy(() =>
+const settingsGroupItemSchema: z.ZodType = z.lazy(() =>
   z.union([
     z.object({ setting: settingDefinitionSchema }),
     z.object({ group: settingsGroupSchema })
   ])
 )
 
-export const settingsGroupSchema = z.object({
+const settingsGroupSchema = z.object({
   id: z.string(),
   titleKey: z.string(),
   items: z.array(settingsGroupItemSchema)

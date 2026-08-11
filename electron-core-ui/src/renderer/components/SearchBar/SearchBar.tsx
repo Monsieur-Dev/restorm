@@ -4,10 +4,10 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Tooltip from '../Tooltip/Tooltip'
+import { Tooltip } from '../Tooltip/Tooltip'
 import { MarkdownViewer } from '../MarkdownViewer/MarkdownViewer'
 import { ScrollableElement } from '../ScrollableElement'
-import InputBox from '../InputBox/InputBox'
+import { InputBox } from '../InputBox/InputBox'
 import { searchService, type SearchResult, type GroupedResults } from '../../services/SearchService'
 import { logger } from '../../services/logger'
 import { useOverlayPresence } from '../../hooks/useOverlayPresence'
@@ -597,5 +597,3 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     </div>
   )
 }
-
-export default React.memo(SearchBar)

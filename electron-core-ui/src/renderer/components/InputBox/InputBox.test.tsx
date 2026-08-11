@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, fireEvent, cleanup, act } from '@testing-library/react'
-import InputBox from './InputBox'
+import { InputBox } from './InputBox'
 
 afterEach(() => {
   cleanup()

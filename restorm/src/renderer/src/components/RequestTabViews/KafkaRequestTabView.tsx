@@ -834,5 +834,3 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
     </>
   )
 }
-
-export default KafkaRequestTabView

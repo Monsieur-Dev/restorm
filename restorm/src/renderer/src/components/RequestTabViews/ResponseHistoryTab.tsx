@@ -531,5 +531,3 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     </div>
   )
 }
-
-export default ResponseHistoryTab

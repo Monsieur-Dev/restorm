@@ -3657,5 +3657,3 @@ export const ScenarioEditorView: React.FC<ScenarioEditorViewProps> = (props) => 
     <ScenarioEditorCanvas {...props} />
   </ReactFlowProvider>
 )
-
-export default ScenarioEditorView

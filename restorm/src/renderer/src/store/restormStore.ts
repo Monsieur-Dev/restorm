@@ -506,19 +506,3 @@ function deleteEnvironmentFromList(envs: Environment[], id: string): Environment
       return env
     })
 }
-
-// ============================================================================
-// Selectors
-// ============================================================================
-
-/** Select all collections */
-export const selectCollections = (state: RestormState): EnvironmentFolder[] => state.collections
-
-/** Select editing state */
-export const selectEditingState = (state: RestormState): EditingState | null => state.editingState
-
-/** Select focused item ID */
-export const selectFocusedItemId = (state: RestormState): string | null => state.focusedItemId
-
-/** Select current event source */
-export const selectEventSource = (state: RestormState): EventSource => state.currentEventSource

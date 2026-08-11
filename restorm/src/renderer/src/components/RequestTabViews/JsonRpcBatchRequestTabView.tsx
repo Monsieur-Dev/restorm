@@ -444,5 +444,3 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
     </>
   )
 }
-
-export default JsonRpcBatchRequestTabView

@@ -1,2 +1,2 @@
-export { Vignette, default } from './Vignette'
+export { Vignette } from './Vignette'
 export type { VignetteProps, VignetteDecoration } from './Vignette'

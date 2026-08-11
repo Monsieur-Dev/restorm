@@ -325,5 +325,3 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
     </Modal>
   )
 }
-
-export default GitConflictResolutionModal

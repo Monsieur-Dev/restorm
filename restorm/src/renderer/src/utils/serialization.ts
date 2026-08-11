@@ -192,3 +192,38 @@ function dropQuickConfigTimestamps<T>(data: T): T {
 export function processAfterDeserialization<T>(data: T): T {
   return generateIds(dropQuickConfigTimestamps(data))
 }
+
+/**
+ * Rehydrate persisted ValueType POJOs (`{ type, value, … }`) into class
+ * instances, IN PLACE of nothing else — no id generation, no path bookkeeping.
+ *
+ * The `mcp:tree-replace` mirror needs exactly this half of the open-file
+ * pipeline: its payload already carries every runtime id (they MUST survive
+ * verbatim or the mirror stops matching the main-side tree), but its values
+ * are plain JSON. Without revival, `instanceof` checks downstream fail and an
+ * expression variable renders as a plain string until the project is reopened.
+ */
+export function reviveValueTypesDeep<T>(data: T): T {
+  const walk = (node: unknown): unknown => {
+    if (Array.isArray(node)) return node.map(walk)
+    if (typeof node !== 'object' || node === null) return node
+    const record = node as Record<string, unknown>
+    const isKeyValueLike = 'key' in record && 'value' in record && typeof record['key'] === 'string'
+    // Scenario-node config bags are opaque to the open-file walk too — the
+    // engine owns their shape; normalizing inside would diverge from open().
+    const isScenarioNode = 'kind' in record && 'config' in record
+    const result: Record<string, unknown> = { ...record }
+    for (const [key, v] of Object.entries(result)) {
+      if (isScenarioNode && key === 'config') continue
+      if (isKeyValueLike && key === 'value') {
+        result['value'] = normalizeValueType(v)
+        continue
+      }
+      if (typeof v === 'object' && v !== null) {
+        result[key] = walk(v)
+      }
+    }
+    return result
+  }
+  return walk(data) as T
+}

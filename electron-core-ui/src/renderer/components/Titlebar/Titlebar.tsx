@@ -170,4 +170,4 @@ const Titlebar: React.FC<TitlebarProps> = ({
   )
 }
 
-export default Titlebar
+export { Titlebar }

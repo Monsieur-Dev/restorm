@@ -125,5 +125,3 @@ export const ScenarioPackagesModal: React.FC<ScenarioPackagesModalProps> = ({ is
     </Modal>
   )
 }
-
-export default ScenarioPackagesModal

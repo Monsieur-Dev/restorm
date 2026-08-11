@@ -458,5 +458,3 @@ export function GraphCanvas<NodeType extends Node = Node, EdgeType extends Edge 
     </ReactFlowProvider>
   )
 }
-
-export default GraphCanvas

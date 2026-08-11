@@ -360,4 +360,4 @@ const MenuItem: React.FC<MenuItemProps> = ({
 // renderer import cycle). Also improves React DevTools output.
 MenuItem.displayName = 'MenuItem'
 
-export default MenuItem
+export { MenuItem }

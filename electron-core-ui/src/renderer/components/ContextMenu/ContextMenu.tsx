@@ -205,5 +205,3 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     </div>
   )
 }
-
-export default ContextMenu

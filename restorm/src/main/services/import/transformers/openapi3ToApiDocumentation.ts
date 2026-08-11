@@ -53,7 +53,7 @@ function isReference(value: unknown): value is OAS3Reference {
   return typeof value === 'object' && value !== null && '$ref' in value && typeof (value as { $ref: unknown }).$ref === 'string'
 }
 
-export interface OAS3ServerVariable {
+interface OAS3ServerVariable {
   /** Spec marks this required, but real-world JSON sometimes omits it; treat as optional. */
   default?: string
   enum?: string[]
@@ -96,7 +96,7 @@ interface OAS3Parameter {
   content?: Record<string, OAS3MediaType>
 }
 
-export interface OAS3Operation {
+interface OAS3Operation {
   tags?: string[]
   summary?: string
   description?: string
@@ -111,7 +111,7 @@ export interface OAS3Operation {
   servers?: OAS3Server[]
 }
 
-export type OAS3PathItem = Partial<Record<HttpMethod, OAS3Operation>> & {
+type OAS3PathItem = Partial<Record<HttpMethod, OAS3Operation>> & {
   parameters?: (OAS3Parameter | OAS3Reference)[]
   servers?: OAS3Server[]
   summary?: string
@@ -150,7 +150,7 @@ interface OAS3OAuthFlow {
   scopes?: Record<string, string>
 }
 
-export interface OAS3Components {
+interface OAS3Components {
   schemas?: Record<string, CommonSchema>
   parameters?: Record<string, OAS3Parameter>
   requestBodies?: Record<string, OAS3RequestBody>
@@ -216,7 +216,7 @@ function resolveParameters(spec: OAS3Spec, params: (OAS3Parameter | OAS3Referenc
 }
 
 /** Convert an OAS 3.x parameter to the version-agnostic shape `_shared` understands. */
-export function toCommonParameter(spec: OAS3Spec, p: OAS3Parameter): CommonParameter {
+function toCommonParameter(spec: OAS3Spec, p: OAS3Parameter): CommonParameter {
   let schema: CommonSchema | undefined
   if (p.schema) {
     schema = isReference(p.schema)

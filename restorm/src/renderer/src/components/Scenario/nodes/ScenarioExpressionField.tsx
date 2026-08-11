@@ -92,5 +92,3 @@ export const ScenarioExpressionField: React.FC<ScenarioExpressionFieldProps> = (
     </div>
   )
 }
-
-export default ScenarioExpressionField

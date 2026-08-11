@@ -66,5 +66,3 @@ const IconViewInner: React.FC<IconViewProps> = ({
 
 export const IconView = memo(IconViewInner)
 IconView.displayName = 'IconView'
-
-export default IconView

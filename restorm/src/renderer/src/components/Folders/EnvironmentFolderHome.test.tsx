@@ -42,7 +42,7 @@ vi.mock('../../services/favoritesStore', () => ({
   reorderFavorites: vi.fn()
 }))
 
-import EnvironmentFolderHome from './EnvironmentFolderHome'
+import { EnvironmentFolderHome } from './EnvironmentFolderHome'
 
 const MARKDOWN = 'Swagger at [https://swagger.io](https://swagger.io) — see the docs.'
 

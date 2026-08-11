@@ -40,5 +40,3 @@ export const ImportCard: React.FC<ImportCardProps> = ({ onImport }) => {
     </MosaicCard>
   )
 }
-
-export default ImportCard

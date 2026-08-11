@@ -1,7 +1,7 @@
 import React from 'react'
 import { isMacintosh } from '../../hooks/usePlatform'
-import SelectBoxNative from './selectBoxNative'
-import SelectBoxList from './selectBoxCustom'
+import { SelectBoxNative } from './selectBoxNative'
+import { SelectBoxList } from './selectBoxCustom'
 import { SelectBoxProps, defaultSelectBoxStyles } from './types'
 
 const SelectBox: React.FC<SelectBoxProps> = ({
@@ -59,4 +59,4 @@ const SelectBox: React.FC<SelectBoxProps> = ({
   )
 }
 
-export default SelectBox
+export { SelectBox }

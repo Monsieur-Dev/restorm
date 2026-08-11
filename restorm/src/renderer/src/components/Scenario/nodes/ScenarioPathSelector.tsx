@@ -173,5 +173,3 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
     </div>
   )
 }
-
-export default ScenarioPathSelector

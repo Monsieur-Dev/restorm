@@ -181,5 +181,3 @@ const GitActionIcon: React.FC<GitActionIconProps> = ({ icon, pending, tooltip, o
     </span>
   )
 }
-
-export default StatusbarGitIndicator

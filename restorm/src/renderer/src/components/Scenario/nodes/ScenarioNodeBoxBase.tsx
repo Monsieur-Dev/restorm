@@ -648,5 +648,3 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     </div>
   )
 }
-
-export default ScenarioNodeBoxBase

@@ -17,21 +17,9 @@ export function pickRandomWordmarkEffect(): WordmarkEffectId {
 }
 
 export { TextAnimate } from './TextAnimate'
-export type {
-  TextAnimateProps,
-  TextAnimateBy,
-  TextAnimateVariant
-} from './TextAnimate'
 export { DiaTextReveal } from './DiaTextReveal'
-export type { DiaTextRevealProps } from './DiaTextReveal'
 export { HyperText } from './HyperText'
-export type { HyperTextProps } from './HyperText'
 export { Text3DFlip } from './Text3DFlip'
-export type {
-  Text3DFlipProps,
-  Text3DFlipDirection,
-  Text3DFlipStaggerFrom
-} from './Text3DFlip'
 export {
   pickRandomTextAnimateProps,
   pickRandomDiaTextRevealProps,

@@ -34,5 +34,3 @@ export const ScenarioRunHistoryButton: React.FC<ScenarioRunHistoryButtonProps> =
     </HeaderHoverTooltip>
   )
 }
-
-export default ScenarioRunHistoryButton

@@ -63,5 +63,3 @@ export const ItemSecretBadges: React.FC<ItemSecretBadgesProps> = ({ itemId, 'dat
     </>
   )
 }
-
-export default ItemSecretBadges

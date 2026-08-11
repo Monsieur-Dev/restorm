@@ -1387,5 +1387,3 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 });
 
 EditorWorkbench.displayName = 'EditorWorkbench';
-
-export default EditorWorkbench;

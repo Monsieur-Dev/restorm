@@ -397,5 +397,3 @@ const TabsInner: React.FC<TabsProps> = ({
 
 export const Tabs = React.memo(TabsInner)
 Tabs.displayName = 'Tabs'
-
-export default Tabs

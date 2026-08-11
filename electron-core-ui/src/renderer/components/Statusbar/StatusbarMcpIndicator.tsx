@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import StatusbarElement from './StatusbarElement'
+import { StatusbarElement } from './StatusbarElement'
 import { Button } from '../Button'
 
 export interface StatusbarMcpIndicatorProps {
@@ -159,5 +159,3 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
     </StatusbarElement>
   )
 }
-
-export default StatusbarMcpIndicator

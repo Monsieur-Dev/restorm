@@ -35,5 +35,3 @@ export const RequestHeaderHistoryButton: React.FC<RequestHeaderHistoryButtonProp
     </HeaderHoverTooltip>
   )
 }
-
-export default RequestHeaderHistoryButton

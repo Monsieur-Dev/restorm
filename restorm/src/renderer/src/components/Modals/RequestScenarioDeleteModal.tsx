@@ -94,5 +94,3 @@ export const RequestScenarioDeleteModal: React.FC<RequestScenarioDeleteModalProp
     </Modal>
   )
 }
-
-export default RequestScenarioDeleteModal

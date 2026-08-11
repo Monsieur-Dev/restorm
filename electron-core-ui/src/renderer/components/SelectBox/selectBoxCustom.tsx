@@ -561,4 +561,4 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   )
 }
 
-export default SelectBoxList
+export { SelectBoxList }

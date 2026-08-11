@@ -9,7 +9,7 @@ import '../assets/fonts/restorm-wordmark.css'
 import './httpMethods.css'
 import './app.css'
 import './components/common/registryBadge.css'
-import LoadingScreen from './components/Welcome/LoadingScreen'
+import { LoadingScreen } from './components/Welcome/LoadingScreen'
 import { CapabilityGateHost } from './components/CapabilityGateHost'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 import { registerRendererSources } from './secrets/registerRendererSources'
@@ -62,7 +62,7 @@ try {
 // "Check now"), bound to the `update-actions` setting type in settings.yaml.
 ElectronCoreUi.registerSettingRenderer('update-actions', UpdateActionsRenderer)
 
-const App = lazy(() => import('./App'))
+const App = lazy(() => import('./App').then((m) => ({ default: m.App })))
 
 const { initializeI18n, logger, i18n } = ElectronCoreUi
 

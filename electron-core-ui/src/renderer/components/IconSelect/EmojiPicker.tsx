@@ -172,5 +172,3 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, dataTes
     </div>
   )
 }
-
-export default EmojiPicker

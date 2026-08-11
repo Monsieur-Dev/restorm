@@ -498,5 +498,3 @@ export const RequestQuickSettingsButton: React.FC<RequestQuickSettingsButtonProp
     </>
   )
 }
-
-export default RequestQuickSettingsButton

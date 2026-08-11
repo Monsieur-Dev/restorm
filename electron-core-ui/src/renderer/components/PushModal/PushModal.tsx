@@ -174,5 +174,3 @@ export const PushModal: React.FC<PushModalProps> = ({
     </Modal>
   )
 }
-
-export default PushModal

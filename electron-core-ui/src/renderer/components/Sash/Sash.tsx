@@ -343,4 +343,3 @@ const SashInner: React.FC<SashProps> = ({
 };
 
 export const Sash = React.memo(SashInner);
-export default Sash;

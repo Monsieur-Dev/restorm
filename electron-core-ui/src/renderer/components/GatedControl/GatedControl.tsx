@@ -133,5 +133,3 @@ export const GatedControl: React.FC<GatedControlProps> = ({
     </span>
   )
 }
-
-export default GatedControl

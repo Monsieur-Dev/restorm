@@ -13,7 +13,7 @@ export * from './hooks'
 export * from './contexts'
 export type { ThemeContextValue } from './contexts'
 export * from './services'
-export { initializeI18n, default as i18n } from './i18n'
+export { initializeI18n, i18n } from './i18n'
 // Utilities
 export { getContrastColor } from './utils/colorContrast'
 export { getColorFromString } from './utils/colorFromString'

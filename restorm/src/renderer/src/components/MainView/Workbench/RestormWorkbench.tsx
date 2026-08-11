@@ -2138,5 +2138,3 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 })
 
 RestormWorkbench.displayName = 'RestormWorkbench'
-
-export default RestormWorkbench

@@ -334,5 +334,3 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
     </>
   )
 }
-
-export default BookmarkRibbon

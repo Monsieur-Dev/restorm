@@ -26,8 +26,4 @@ export function ensureCodeRuntimes(): void {
   registerCodeRuntime(csharpRuntime)
 }
 
-export { getCodeRuntime, registeredCodeLanguages } from './registry'
-export type { CodeRuntime, CodeRunContext, CodeRunResult } from './types'
-
-// Re-export for the executor's convenience.
-export { ensureCodeRuntimes as default }
+export { getCodeRuntime } from './registry'

@@ -42,5 +42,3 @@ export const logger = {
     void log('error', message, meta)
   }
 }
-
-export default logger

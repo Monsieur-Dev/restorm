@@ -367,5 +367,3 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
     />
   )
 }
-
-export default SoapServerRequestTabView

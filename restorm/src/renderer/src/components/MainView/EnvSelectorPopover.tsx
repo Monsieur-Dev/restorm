@@ -236,5 +236,3 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 		</div>
 	)
 }
-
-export default EnvPopoverList

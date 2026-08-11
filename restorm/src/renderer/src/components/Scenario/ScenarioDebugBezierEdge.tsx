@@ -124,5 +124,3 @@ const BezierBeamTrail: React.FC<{ edgePath: string; durationMs: number }> = ({ e
     />
   )
 }
-
-export default ScenarioDebugBezierEdge

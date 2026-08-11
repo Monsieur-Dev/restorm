@@ -197,5 +197,3 @@ const EmptySelectionState: React.FC<{ dataTestId: string }> = ({ dataTestId }) =
     </div>
   )
 }
-
-export default ConflictResolutionView

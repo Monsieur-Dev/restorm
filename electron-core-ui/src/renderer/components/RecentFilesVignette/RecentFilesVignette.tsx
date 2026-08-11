@@ -444,5 +444,3 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
     </Vignette>
   )
 }
-
-export default RecentFilesVignette

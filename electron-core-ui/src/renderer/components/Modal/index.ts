@@ -1,5 +1,2 @@
-import Modal from './Modal'
-
-export { Modal }
+export { Modal } from './Modal'
 export type { ModalProps, ModalSize } from './Modal'
-export default Modal

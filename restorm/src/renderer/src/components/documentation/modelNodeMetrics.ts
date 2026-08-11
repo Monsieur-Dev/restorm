@@ -1,13 +1,10 @@
 import type { ModelDocumentation } from '../../../../shared/types/apiDocumentation'
 
 export const MODEL_NODE_WIDTH = 280
-export const MODEL_NODE_HEADER_HEIGHT_BASE = 36
-export const MODEL_NODE_HEADER_DESCRIPTION_HEIGHT = 18
-/** Backwards-compat alias. The base value still maps the simple
- * "no description" case so old code paths keep working. */
-export const MODEL_NODE_HEADER_HEIGHT = MODEL_NODE_HEADER_HEIGHT_BASE
-export const MODEL_NODE_PROPERTY_HEIGHT = 22
-export const MODEL_NODE_PROPERTY_LIST_PADDING_Y = 6
+const MODEL_NODE_HEADER_HEIGHT_BASE = 36
+const MODEL_NODE_HEADER_DESCRIPTION_HEIGHT = 18
+const MODEL_NODE_PROPERTY_HEIGHT = 22
+const MODEL_NODE_PROPERTY_LIST_PADDING_Y = 6
 
 /** Effective header height for the given model. Adds an extra
  * description row when the model carries a non-empty description
@@ -67,22 +64,22 @@ export function targetHandleCenterY(
   if (totalIncoming <= 1) return nodeHeight / 2
   // Reserve a fraction of the node for the handle row so the
   // outermost handles don't sit on the rounded corners.
-  const usable = nodeHeight - MODEL_NODE_HEADER_HEIGHT
-  const top = MODEL_NODE_HEADER_HEIGHT
+  const usable = nodeHeight - MODEL_NODE_HEADER_HEIGHT_BASE
+  const top = MODEL_NODE_HEADER_HEIGHT_BASE
   return top + ((incomingIndex + 1) / (totalIncoming + 1)) * usable
 }
 
 /** How many enum entries the node renders inline before collapsing
  * the rest under a "…" affordance + hover tooltip. */
-export const MODEL_NODE_ENUM_VISIBLE_MAX = 10
+const MODEL_NODE_ENUM_VISIBLE_MAX = 10
 /** Each enum bullet row takes the same vertical space as a property
  * row so the property + enum branches share metrics. */
-export const MODEL_NODE_ENUM_ROW_HEIGHT = MODEL_NODE_PROPERTY_HEIGHT
+const MODEL_NODE_ENUM_ROW_HEIGHT = MODEL_NODE_PROPERTY_HEIGHT
 
 /** Number of enum rows the node will physically render (values
  * capped at MODEL_NODE_ENUM_VISIBLE_MAX, plus an extra "…" row when
  * the source list is longer than the cap). */
-export function visibleEnumRowCount(model: ModelDocumentation): number {
+function visibleEnumRowCount(model: ModelDocumentation): number {
   if (!model.enumValues) return 0
   const len = model.enumValues.length
   if (len === 0) return 0

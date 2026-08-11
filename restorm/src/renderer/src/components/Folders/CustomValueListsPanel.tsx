@@ -320,5 +320,3 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
     />
   )
 }
-
-export default CustomValueListsPanel

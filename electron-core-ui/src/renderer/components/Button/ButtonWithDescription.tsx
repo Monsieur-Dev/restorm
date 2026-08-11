@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from './Button'
+import { Button } from './Button'
 import { ButtonWithDescriptionProps } from './types'
 
 const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
@@ -57,4 +57,3 @@ const ButtonWithDescription: React.FC<ButtonWithDescriptionProps> = ({
 
 const MemoizedButtonWithDescription = React.memo(ButtonWithDescription)
 export { MemoizedButtonWithDescription as ButtonWithDescription }
-export default MemoizedButtonWithDescription

@@ -419,5 +419,3 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     />
   )
 }
-
-export default GrpcServerTabView

@@ -61,5 +61,3 @@ export const StaticPane: React.FC<StaticPaneProps> = ({
 		</div>
 	);
 };
-
-export default StaticPane;

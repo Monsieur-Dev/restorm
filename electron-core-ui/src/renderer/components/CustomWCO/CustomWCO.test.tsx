@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, cleanup, fireEvent, act } from '@testing-library/react'
-import CustomWCO from './CustomWCO'
+import { CustomWCO } from './CustomWCO'
 
 // react-i18next is not initialised in unit tests; echo the fallback label so
 // `t('customWco.minimize', 'Minimize')` resolves to 'Minimize'.

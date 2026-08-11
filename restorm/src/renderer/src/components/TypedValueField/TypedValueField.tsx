@@ -1137,5 +1137,3 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     </>
   )
 }
-
-export default TypedValueField

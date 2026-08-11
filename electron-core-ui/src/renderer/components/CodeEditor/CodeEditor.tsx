@@ -527,5 +527,3 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     </div>
   )
 })
-
-export default CodeEditor

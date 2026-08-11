@@ -183,5 +183,3 @@ const PATTERN_BUILDERS: Record<WallpaperPatternId, () => React.ReactElement> = {
 function buildPatternElement(id: WallpaperPatternId): React.ReactElement {
   return PATTERN_BUILDERS[id]()
 }
-
-export default Wallpaper

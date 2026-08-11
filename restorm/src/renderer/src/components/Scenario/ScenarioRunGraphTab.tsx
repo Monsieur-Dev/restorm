@@ -111,5 +111,3 @@ export const ScenarioRunGraphTab: React.FC<ScenarioRunGraphTabProps> = ({ scenar
     </div>
   )
 }
-
-export default ScenarioRunGraphTab

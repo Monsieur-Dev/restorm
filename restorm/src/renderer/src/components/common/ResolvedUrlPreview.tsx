@@ -109,5 +109,3 @@ export const ResolvedUrlPreview: React.FC<ResolvedUrlPreviewProps> = ({
     </div>
   )
 }
-
-export default ResolvedUrlPreview

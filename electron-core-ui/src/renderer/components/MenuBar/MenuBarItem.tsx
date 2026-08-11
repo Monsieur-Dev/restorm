@@ -281,4 +281,4 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
 
 MenuBarItem.displayName = 'MenuBarItem'
 
-export default MenuBarItem
+export { MenuBarItem }

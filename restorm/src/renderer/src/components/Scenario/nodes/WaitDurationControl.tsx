@@ -41,5 +41,3 @@ export const WaitDurationControl: React.FC<WaitDurationControlProps> = ({ value,
     </div>
   )
 }
-
-export default WaitDurationControl

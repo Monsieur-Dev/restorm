@@ -1,2 +1,2 @@
-export { RecentFilesVignette, default } from './RecentFilesVignette'
+export { RecentFilesVignette } from './RecentFilesVignette'
 export type { RecentFilesVignetteProps } from './RecentFilesVignette'

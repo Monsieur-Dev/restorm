@@ -159,5 +159,3 @@ export const SecretSourceConfig: React.FC<SecretSourceConfigProps> = ({ value, o
 
   return null
 }
-
-export default SecretSourceConfig

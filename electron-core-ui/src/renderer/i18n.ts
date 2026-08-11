@@ -183,4 +183,4 @@ export function initializeI18n(resources: Resource, defaultLanguage = 'en'): Pro
 }
 
 // Export the i18n instance for direct use
-export default i18n
+export { i18n }

@@ -35,9 +35,7 @@
     "restorm:docker:down": "pnpm --filter restorm run docker:down"
   },
   "devDependencies": {
-    "cross-env": "^10.1.0",
     "depcheck": "^1.4.7",
-    "eslint-plugin-eslint-comments": "^3.2.0",
     "husky": "^9.1.7",
     "rimraf": "^6.1.3"
   },

@@ -526,5 +526,3 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
     </>
   )
 }
-
-export default SseRequestTabView

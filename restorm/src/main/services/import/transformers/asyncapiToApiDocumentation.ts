@@ -12,19 +12,19 @@ import type {
 
 // ---------- AsyncAPI source-spec types ----------
 
-export interface AsyncAPIServerData {
+interface AsyncAPIServerData {
   url: string
   protocol: string
   description?: string
 }
 
-export interface AsyncAPIMessagePayloadData {
+interface AsyncAPIMessagePayloadData {
   type?: string
   properties?: Record<string, { type?: string; description?: string }>
   $ref?: string
 }
 
-export interface AsyncAPIMessageData {
+interface AsyncAPIMessageData {
   name?: string
   title?: string
   summary?: string
@@ -32,14 +32,14 @@ export interface AsyncAPIMessageData {
   payload?: AsyncAPIMessagePayloadData
 }
 
-export interface AsyncAPIOperationData {
+interface AsyncAPIOperationData {
   operationId?: string
   summary?: string
   description?: string
   message?: AsyncAPIMessageData | { $ref: string }
 }
 
-export interface AsyncAPIChannelData {
+interface AsyncAPIChannelData {
   description?: string
   servers?: string[]
   publish?: AsyncAPIOperationData

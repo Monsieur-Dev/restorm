@@ -4,7 +4,7 @@ import { SettingsProvider } from '../contexts/SettingsContext'
 import type { CapabilityGate } from '../contexts/settingsContextDef'
 import { SettingsModalProvider } from './Settings'
 import { useSetting } from '../hooks/useSettings'
-import Workbench, { type WorkbenchProps } from './Workbench/Workbench'
+import { Workbench, type WorkbenchProps } from './Workbench/Workbench'
 
 /** Toggles CSS classes on documentElement based on advancedVisualEffects setting */
 const AdvancedEffectsManager: React.FC = () => {
@@ -60,5 +60,3 @@ export const ElectronCoreUiProvider: React.FC<ElectronCoreUiProviderProps> = ({
     </ThemeProvider>
   )
 }
-
-export default ElectronCoreUiProvider

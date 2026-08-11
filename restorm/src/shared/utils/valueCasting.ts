@@ -1,25 +1,23 @@
 import { DateTime } from 'luxon'
 
-export type ValueKind = 'datetime' | 'numeric' | 'color' | 'string'
-
-export interface DateTimeCast {
+interface DateTimeCast {
   kind: 'datetime'
   date: Date
   format: string
 }
 
-export interface NumericCast {
+interface NumericCast {
   kind: 'numeric'
   number: number
   format: string
 }
 
-export interface ColorCast {
+interface ColorCast {
   kind: 'color'
   color: string
 }
 
-export interface StringCast {
+interface StringCast {
   kind: 'string'
   value: string
 }

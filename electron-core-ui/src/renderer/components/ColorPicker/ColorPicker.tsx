@@ -74,4 +74,5 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   )
 }
 
-export default React.memo(ColorPicker)
+const MemoizedColorPicker = React.memo(ColorPicker)
+export { MemoizedColorPicker as ColorPicker }

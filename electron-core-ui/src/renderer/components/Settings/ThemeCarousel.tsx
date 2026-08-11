@@ -282,5 +282,3 @@ export const ThemeCarousel: React.FC<ThemeCarouselProps> = ({
     </div>
   )
 }
-
-export default ThemeCarousel

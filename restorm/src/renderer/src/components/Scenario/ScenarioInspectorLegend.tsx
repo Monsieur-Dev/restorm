@@ -129,5 +129,3 @@ export const ScenarioInspectorLegend: React.FC<{ cliScenarioName?: string; cliSc
     </div>
   )
 }
-
-export default ScenarioInspectorLegend

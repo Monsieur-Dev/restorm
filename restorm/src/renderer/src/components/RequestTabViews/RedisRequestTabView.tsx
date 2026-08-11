@@ -776,5 +776,3 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     </>
   )
 }
-
-export default RedisRequestTabView

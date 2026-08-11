@@ -274,5 +274,3 @@ export const McpLogsPanel: React.FC<McpLogsPanelProps> = ({ labels, translateToo
     </div>
   )
 }
-
-export default McpLogsPanel

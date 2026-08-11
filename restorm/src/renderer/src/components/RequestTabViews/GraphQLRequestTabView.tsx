@@ -1153,5 +1153,3 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     </>
   )
 }
-
-export default GraphQLRequestTabView

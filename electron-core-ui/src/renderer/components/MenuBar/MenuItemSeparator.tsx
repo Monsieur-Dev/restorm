@@ -27,4 +27,4 @@ const MenuItemSeparator: React.FC<MenuItemSeparatorProps> = ({
 // renderer import cycle). Also improves React DevTools output.
 MenuItemSeparator.displayName = 'MenuItemSeparator'
 
-export default MenuItemSeparator
+export { MenuItemSeparator }

@@ -121,5 +121,3 @@ export const RequestScenarioUsageButton: React.FC<RequestScenarioUsageButtonProp
     </>
   )
 }
-
-export default RequestScenarioUsageButton

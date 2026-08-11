@@ -136,5 +136,3 @@ export const StatusbarPathActionsHost: React.FC<{ filePath: string }> = ({ fileP
   const { closeTooltip } = useStatusbarTooltip()
   return <StatusbarPathActionsList filePath={filePath} onCloseRequested={closeTooltip} />
 }
-
-export default StatusbarPathActionsHost

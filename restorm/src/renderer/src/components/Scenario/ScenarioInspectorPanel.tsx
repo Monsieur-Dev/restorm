@@ -678,5 +678,3 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     </div>
   )
 }
-
-export default ScenarioInspectorPanel

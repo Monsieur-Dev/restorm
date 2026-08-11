@@ -927,8 +927,3 @@ export const SCENARIO_KINDS = Object.keys(SCENARIO_KIND_REGISTRY) as [ScenarioNo
 /** Type-narrowed registry view (the `satisfies` above keeps the literal keys; this
  * exposes it typed as the exhaustive record for value-level consumers). */
 export const REGISTRY: Record<ScenarioNodeKind, KindSpec> = SCENARIO_KIND_REGISTRY
-
-/** The spec for a kind. */
-export function kindSpec(kind: ScenarioNodeKind): KindSpec {
-  return SCENARIO_KIND_REGISTRY[kind]
-}

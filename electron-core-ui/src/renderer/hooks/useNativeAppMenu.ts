@@ -50,5 +50,3 @@ export const useNativeAppMenu = (menuJsx: React.ReactNode, enabled: boolean): vo
     return dispose
   }, [enabled])
 }
-
-export default useNativeAppMenu

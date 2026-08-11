@@ -173,5 +173,3 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialValue, on
     </MilkdownProvider>
   )
 }
-
-export default MarkdownEditor

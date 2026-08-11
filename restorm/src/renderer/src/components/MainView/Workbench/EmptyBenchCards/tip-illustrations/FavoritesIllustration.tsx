@@ -57,5 +57,3 @@ export const FavoritesIllustration: React.FC = () => {
     </div>
   )
 }
-
-export default FavoritesIllustration

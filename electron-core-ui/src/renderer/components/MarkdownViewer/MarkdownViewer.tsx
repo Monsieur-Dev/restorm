@@ -432,5 +432,3 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMerm
     </div>
   )
 }
-
-export default MarkdownViewer

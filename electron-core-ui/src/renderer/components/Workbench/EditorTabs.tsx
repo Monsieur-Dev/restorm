@@ -1,7 +1,7 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import './styles/tabs.css';
-import Tab from './Tab';
+import { Tab } from './Tab';
 import type { EditorGroup, EditorTab, EditorWorkbenchCallbacks } from './types';
 import { clearEditorDragData, computeDropIndex, getEditorDragData, setEditorDragData } from './dnd';
 import { createAuxWindow, getCurrentWindowBounds, getCursorScreenPoint, getWindowUnderCursor, sendWorkbenchTabToWindow } from './ipc';
@@ -482,5 +482,3 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 		</div>
 	);
 };
-
-export default React.memo(EditorTabs);

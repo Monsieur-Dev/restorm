@@ -1054,4 +1054,3 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
 
 const ScrollableElement = React.memo(ScrollableElementInner);
 export { ScrollableElement };
-export default ScrollableElement;

@@ -608,5 +608,3 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
     </>
   )
 }
-
-export default TrpcRequestTabView

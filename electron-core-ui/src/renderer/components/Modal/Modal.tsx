@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import Workbench from '../Workbench/Workbench'
+import { Workbench } from '../Workbench/Workbench'
 import { Button } from '../Button'
 import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import './modal.css'
@@ -462,4 +462,3 @@ const ModalInner: React.FC<ModalProps> = ({
 }
 
 export const Modal = React.memo(ModalInner)
-export default Modal

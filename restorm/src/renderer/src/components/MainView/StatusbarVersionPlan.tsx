@@ -61,5 +61,3 @@ export const StatusbarVersionPlan: React.FC = () => {
 
   return <StatusbarElement title={title} data-testid="app-statusbar-version-plan" />
 }
-
-export default StatusbarVersionPlan

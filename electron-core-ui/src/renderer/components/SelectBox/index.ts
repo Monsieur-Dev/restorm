@@ -1,6 +1,6 @@
-export { default as SelectBox } from './selectBox'
-export { default as SelectBoxNative } from './selectBoxNative'
-export { default as SelectBoxList } from './selectBoxCustom'
+export { SelectBox } from './selectBox'
+export { SelectBoxNative } from './selectBoxNative'
+export { SelectBoxList } from './selectBoxCustom'
 export type {
   ISelectBoxDelegate,
   ISelectBoxOptions,

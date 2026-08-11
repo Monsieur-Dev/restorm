@@ -288,5 +288,3 @@ const ThumbnailEnlarged: React.FC<{
     </Modal>
   )
 }
-
-export default Thumbnail

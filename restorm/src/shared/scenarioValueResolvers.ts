@@ -15,7 +15,7 @@ import { setEnumValuesResolver, setEnvironmentIdResolver } from './scenarioCliPa
 
 /** Walk a collection tree, collecting every custom value list (they live on
  * EnvironmentFolders, which can nest inside ordinary folders). */
-export function collectCustomValueLists(items: readonly FolderItem[]): CustomValueList[] {
+function collectCustomValueLists(items: readonly FolderItem[]): CustomValueList[] {
   const out: CustomValueList[] = []
   const walk = (nodes: readonly FolderItem[]): void => {
     for (const item of nodes) {
@@ -33,7 +33,7 @@ export function collectCustomValueLists(items: readonly FolderItem[]): CustomVal
 
 /** Walk a collection tree, collecting every environment (including nested
  * `subEnvironments`), keyed by id. */
-export function collectEnvironmentsById(items: readonly FolderItem[]): Map<string, Environment> {
+function collectEnvironmentsById(items: readonly FolderItem[]): Map<string, Environment> {
   const map = new Map<string, Environment>()
   const addEnv = (env: Environment): void => {
     map.set(env.id, env)
@@ -55,7 +55,7 @@ export function collectEnvironmentsById(items: readonly FolderItem[]): Map<strin
 
 /** Walk a collection tree, collecting every enum definition (they live on
  * EnvironmentFolders). */
-export function collectEnumDefinitions(items: readonly FolderItem[]): EnumDefinition[] {
+function collectEnumDefinitions(items: readonly FolderItem[]): EnumDefinition[] {
   const out: EnumDefinition[] = []
   const walk = (nodes: readonly FolderItem[]): void => {
     for (const item of nodes) {
@@ -73,14 +73,14 @@ export function collectEnumDefinitions(items: readonly FolderItem[]): EnumDefini
 
 /** The value behind a custom-list label (enabled entries only), or `undefined`
  * when the list / label is unknown. */
-export function findCustomListValue(lists: readonly CustomValueList[], listId: string, label: string): string | undefined {
+function findCustomListValue(lists: readonly CustomValueList[], listId: string, label: string): string | undefined {
   const list = lists.find((l) => l.id === listId)
   return list?.entries.find((e) => e.label === label && e.enabled !== false)?.value
 }
 
 /** Resolve an environment NAME or id to its id. An exact id wins; otherwise a
  * unique name match; an ambiguous name (or unknown token) THROWS. */
-export function resolveEnvironmentId(envs: Map<string, Environment>, token: string): string {
+function resolveEnvironmentId(envs: Map<string, Environment>, token: string): string {
   if (envs.has(token)) return token
   const byName = [...envs.values()].filter((e) => e.name === token)
   const first = byName[0]
@@ -94,7 +94,7 @@ export function resolveEnvironmentId(envs: Map<string, Environment>, token: stri
 /** The runtime/preview form of an environment value: `{ name, variables }`
  * (variables omitted when empty), mirroring the renderer resolver + the runtime
  * `conditionEval.resolveOperand`. */
-export function environmentResolvedValue(env: Environment): unknown {
+function environmentResolvedValue(env: Environment): unknown {
   const variables: Record<string, unknown> = {}
   for (const kv of env.variables) {
     if (typeof kv.key === 'string' && kv.key.length > 0) variables[kv.key] = concreteValue(kv.value)

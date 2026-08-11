@@ -280,5 +280,3 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
     </WorkbenchTabHostContext.Provider>
   )
 }
-
-export default RestormWorkbenchTab

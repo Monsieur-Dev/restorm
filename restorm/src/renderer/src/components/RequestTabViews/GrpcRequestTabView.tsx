@@ -905,5 +905,3 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     </>
   )
 }
-
-export default GrpcRequestTabView

@@ -31,5 +31,3 @@ export const CapabilityGateHost: React.FC<{ children: (gate: CapabilityGate) => 
   }), [authState])
   return <>{children(gate)}</>
 }
-
-export default CapabilityGateHost
