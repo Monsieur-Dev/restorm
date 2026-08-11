@@ -78,7 +78,7 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| odata-petstore | 4 | OData import + send + filter (petstore) | — |
+| odata-petstore | 5 | OData import + send + filter (petstore) | — |
 | scenario-code-deps | 2 | Code-node external deps (offline chained golden) | — |
 | scenario-runlog | 56 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main) | 🏠 |
 | scenario-quick-config-selector | 1 | Request-action config selector stays live | — |

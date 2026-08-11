@@ -2313,8 +2313,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2 (execution not yet supported)",
-    "versionV3NotYet": "v3 (execution not yet supported)",
     "operationKindEntitySet": "Entity set (GET)",
     "operationKindFunction": "Function (GET with inlined parameters)",
     "operationKindAction": "Action (POST with JSON body)",

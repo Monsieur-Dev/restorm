@@ -78,6 +78,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
   const variablesRef = useRef<VariableDefinition[]>(variables)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [editorMounted, setEditorMounted] = useState(false)
+  // Placeholder gate: tracks whether the EDITOR currently holds text. Keyed
+  // off the live edits (and re-synced when the `value` prop changes) rather
+  // than the prop alone — a consumer that funnels onChange into a non-React
+  // store (e.g. a reactive proxy) never re-renders, so `value` stays stale
+  // and a prop-gated placeholder would sit on top of the typed text.
+  const [editorIsEmpty, setEditorIsEmpty] = useState(value === '')
+  useEffect(() => { setEditorIsEmpty(value === '') }, [value])
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number }>({
     visible: false,
     x: 0,
@@ -271,6 +278,14 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     monacoInstance: typeof monacoEditor
   ): void => {
     editorRef.current = editor
+
+    // Undebounced emptiness tracking: the `onChange` prop is debounced, so
+    // gating the placeholder there alone would leave it painted over the
+    // first typed characters for the debounce window.
+    editor.onDidChangeModelContent(() => {
+      setEditorIsEmpty(editor.getValue() === '')
+    })
+    setEditorIsEmpty(editor.getValue() === '')
 
     const state = getProviderState()
 
@@ -485,7 +500,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
         })}
       >
         <div className="ibwrapper" style={{ display: 'flex', alignItems: 'center' }}>
-          {placeholder && !value && (
+          {placeholder && editorIsEmpty && (
             <div
               style={{
                 position: 'absolute',
@@ -518,6 +533,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
             <CodeEditor
               value={value}
               onChange={(v) => {
+                setEditorIsEmpty((v ?? '') === '')
                 onChange(v ?? '')
               }}
               language={effectiveLanguageId}

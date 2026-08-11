@@ -2312,8 +2312,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2 (chưa hỗ trợ thực thi)",
-    "versionV3NotYet": "v3 (chưa hỗ trợ thực thi)",
     "operationKindEntitySet": "Tập thực thể (GET)",
     "operationKindFunction": "Hàm (GET với tham số nội tuyến)",
     "operationKindAction": "Hành động (POST với thân JSON)",

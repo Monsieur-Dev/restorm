@@ -2315,8 +2315,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2 (виконання ще не підтримується)",
-    "versionV3NotYet": "v3 (виконання ще не підтримується)",
     "operationKindEntitySet": "Набір сутностей (GET)",
     "operationKindFunction": "Функція (GET із вбудованими параметрами)",
     "operationKindAction": "Дія (POST із тілом JSON)",

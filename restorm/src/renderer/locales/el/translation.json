@@ -2313,8 +2313,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
-    "versionV3NotYet": "v3 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
     "operationKindEntitySet": "Σύνολο οντοτήτων (GET)",
     "operationKindFunction": "Συνάρτηση (GET με ενσωματωμένες παραμέτρους)",
     "operationKindAction": "Ενέργεια (POST με σώμα JSON)",

@@ -394,3 +394,53 @@ Then('the force-absolute-batch-URLs toggle should be visible', async () => {
   await expect(p.locator('[data-testid="odata-batch-force-absolute-urls"]').first())
     .toBeVisible({ timeout: 5000 })
 })
+
+// ── URL placeholder / live preview / $count reactivity ──────────────────
+
+/** The placeholder overlay: the absolutely-positioned faded div inside the
+ * URL VariableInputBox wrapper (see ECUI VariableInputBox). */
+async function urlPlaceholderOverlayCount(p: Page): Promise<number> {
+  return p.locator('[data-testid="odata-request-url"] .ibwrapper > div').evaluateAll(
+    (els) => els.filter((el) => window.getComputedStyle(el).position === 'absolute').length
+  )
+}
+
+Then('the OData URL field shows no placeholder overlay', async ({}) => {
+  const p = requirePage()
+  await expect.poll(() => urlPlaceholderOverlayCount(p), { timeout: 5000 }).toBe(0)
+})
+
+Then('the OData URL placeholder overlay is visible', async ({}) => {
+  const p = requirePage()
+  await expect.poll(() => urlPlaceholderOverlayCount(p), { timeout: 5000 }).toBe(1)
+})
+
+When('I toggle the OData count option', async ({}) => {
+  const p = requirePage()
+  await p.locator('[data-testid="odata-request-count-action"]').click()
+})
+
+Then('the OData resolved URL preview should contain {string}', async ({}, fragment: string) => {
+  const p = requirePage()
+  await expect
+    .poll(async () => (await p
+      .locator('[data-testid="odata-request-url-section-host"] [data-testid="url-resolved-preview"]')
+      .getAttribute('data-resolved-url')) ?? '', { timeout: 10000 })
+    .toContain(fragment)
+})
+
+When('I replace the OData URL with {string}', async ({}, url: string) => {
+  const p = requirePage()
+  await p.locator('[data-testid="odata-request-url"] .variable-inputbox-editor').click()
+  await p.keyboard.press('Control+a')
+  await p.keyboard.type(url)
+  await p.waitForTimeout(600)
+})
+
+When('I clear the OData URL field', async ({}) => {
+  const p = requirePage()
+  await p.locator('[data-testid="odata-request-url"] .variable-inputbox-editor').click()
+  await p.keyboard.press('Control+a')
+  await p.keyboard.press('Delete')
+  await p.waitForTimeout(300)
+})

@@ -50,8 +50,7 @@ export function serializeODataQueryOptions(
     out.push(['$skip', options.skip])
   }
   if (options.count === true) {
-    // v4/v4.01 use `$count=true`. v2 / v3 use `$inlinecount=allpages`; the
-    // v2/v3 engine PR will flip this branch when it lands.
+    // v4/v4.01 use `$count=true`; v2 / v3 use `$inlinecount=allpages`.
     if (isV4Family(version)) {
       out.push(['$count', 'true'])
     } else {

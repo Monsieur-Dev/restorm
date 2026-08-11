@@ -2313,8 +2313,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2 (ekzekutimi ende nuk mbështetet)",
-    "versionV3NotYet": "v3 (ekzekutimi ende nuk mbështetet)",
     "operationKindEntitySet": "Grup entitetesh (GET)",
     "operationKindFunction": "Funksion (GET me parametra të integruar)",
     "operationKindAction": "Veprim (POST me trup JSON)",

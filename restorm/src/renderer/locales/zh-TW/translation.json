@@ -2312,8 +2312,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2（尚不支援執行）",
-    "versionV3NotYet": "v3（尚不支援執行）",
     "operationKindEntitySet": "實體集 (GET)",
     "operationKindFunction": "函式（帶內嵌參數的 GET）",
     "operationKindAction": "動作（帶 JSON 主體的 POST）",

@@ -249,12 +249,17 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   // with no imported spec → autocomplete degrades to no suggestions.
   const { apiDocumentation } = useApiDocumentationFromRequest(request)
 
+  // Every version is executable: the URL composer switches to
+  // `$inlinecount=allpages` outside the v4 family and the response
+  // normaliser unwraps the v2/v3 `{ d: ... }` envelope (e2e-covered against
+  // the dedicated v2 mock). The old "execution not yet supported" labels
+  // were stale leftovers from before that engine landed.
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
     { text: 'v4.01' },
-    { text: t('odataRequestTab.versionV3NotYet', 'v3 (execution not yet supported)') },
-    { text: t('odataRequestTab.versionV2NotYet', 'v2 (execution not yet supported)') }
-  ], [t])
+    { text: 'v3' },
+    { text: 'v2' }
+  ], [])
 
   const operationKindOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: t('odataRequestTab.operationKindEntitySet', 'Entity set (GET)') },
@@ -408,6 +413,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   // directly — consistent with the pattern used in HTTPRequestTabView.
   const setUrl = useCallback((next: string) => {
     updateReactiveProperty(request, 'url', next)
+    // The proxy write alone doesn't re-render this component, so the
+    // `request.url` effect never re-fires — the resolver keeps composing
+    // the STALE url and the resolved-URL preview freezes while the user
+    // types. Same forced render as setVersion / setOperationKind.
+    forceProxyRender((n) => n + 1)
   }, [request])
 
   const setVersion = useCallback((next: string) => {
@@ -551,6 +561,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   const setCount = useCallback((next: boolean) => {
     flushAllPendingProxyWrites()
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, count: next })
+    // Text fields re-render through their local state; this toggle has
+    // none, so without a forced render the queryOptions effect never
+    // re-fires and $count stays inert until some OTHER field changes.
+    forceProxyRender((n) => n + 1)
   }, [request, flushAllPendingProxyWrites])
 
   const setExpand = useCallback((next: string) => {

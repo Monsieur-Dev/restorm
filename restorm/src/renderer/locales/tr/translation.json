@@ -2313,8 +2313,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2 (yürütme henüz desteklenmiyor)",
-    "versionV3NotYet": "v3 (yürütme henüz desteklenmiyor)",
     "operationKindEntitySet": "Varlık kümesi (GET)",
     "operationKindFunction": "İşlev (satır içi parametreli GET)",
     "operationKindAction": "Eylem (JSON gövdeli POST)",

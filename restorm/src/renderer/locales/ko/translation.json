@@ -2312,8 +2312,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "versionV2NotYet": "v2 (실행은 아직 지원되지 않음)",
-    "versionV3NotYet": "v3 (실행은 아직 지원되지 않음)",
     "operationKindEntitySet": "엔터티 집합 (GET)",
     "operationKindFunction": "함수 (매개변수를 인라인한 GET)",
     "operationKindAction": "작업 (JSON 본문을 포함한 POST)",
