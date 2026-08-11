@@ -1,3 +1,6 @@
+// @vitest-environment node
+// Main-process code: the archive writer runs where Blob is Node's own (zip.js
+// streams through `Blob.stream()`, which jsdom's Blob does not implement).
 import { describe, it, expect, vi } from 'vitest'
 import { tmpdir } from 'os'
 import { join } from 'path'

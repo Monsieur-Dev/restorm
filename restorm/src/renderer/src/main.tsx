@@ -440,7 +440,10 @@ void Promise.all([initI18n(), graphqlReady])
               <CrashReportReviewHost />
               <RendererErrorBoundary onError={(error) => {
                 logger.error('Renderer crashed; showing the recovery surface', {
-                  error: error instanceof Error ? error.message : String(error)
+                  error: error instanceof Error ? error.message : String(error),
+                  // Without the stack, a boundary-caught crash is unactionable
+                  // from the logs — the message alone names no module.
+                  stack: error instanceof Error ? error.stack : undefined
                 })
               }}>
                 <Suspense fallback={<LoadingScreen />}>

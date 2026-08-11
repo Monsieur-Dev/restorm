@@ -43,7 +43,7 @@ vi.mock('./EventBusService', () => ({
 
 vi.mock('./I18nService', () => ({ i18nService: { t: vi.fn((k: string) => k) } }))
 
-vi.mock('js-yaml', () => ({ default: { load: vi.fn(), dump: vi.fn() } }))
+vi.mock('js-yaml', () => ({ load: vi.fn(), dump: vi.fn() }))
 
 import { FileService } from './FileService'
 import { makeTombstone } from './saveUnit'

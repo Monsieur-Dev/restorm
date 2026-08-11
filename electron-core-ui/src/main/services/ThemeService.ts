@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'fs'
 import { join, dirname, basename } from 'path'
-import yaml from 'js-yaml'
+import { loadYamlDocument } from '../../shared/yamlLoad'
 import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../types/theme'
 import { logger } from './LoggerService'
 import { FileSystemError, errorMeta } from '../../errors'
@@ -59,7 +59,7 @@ export class ThemeService {
     if (existsSync(basePath)) {
       try {
         const content = readFileSync(basePath, 'utf-8')
-        const raw = yaml.load(content)
+        const raw = loadYamlDocument(content)
         const parsed = yamlBaseFileSchema.safeParse(raw)
         if (!parsed.success) {
           logger.warn('Invalid base.yaml structure', { issues: parsed.error.issues.map(i => i.message).join('; ') })
@@ -85,7 +85,7 @@ export class ThemeService {
       if (existsSync(typeBasePath)) {
         try {
           const content = readFileSync(typeBasePath, 'utf-8')
-          const raw = yaml.load(content)
+          const raw = loadYamlDocument(content)
           const parsed = yamlTypeBaseFileSchema.safeParse(raw)
           if (!parsed.success) {
             logger.warn(`Invalid ${themeType}/_base.yaml structure`, { issues: parsed.error.issues.map(i => i.message).join('; ') })
@@ -258,7 +258,7 @@ export class ThemeService {
 
       // Load and apply theme-specific colors
       const content = readFileSync(themeInfo.path, 'utf-8')
-      const raw = yaml.load(content)
+      const raw = loadYamlDocument(content)
       const parsed = yamlThemeFileSchema.safeParse(raw)
       if (!parsed.success) {
         logger.warn(`Invalid theme file for "${themeId}"`, { issues: parsed.error.issues.map(i => i.message).join('; ') })

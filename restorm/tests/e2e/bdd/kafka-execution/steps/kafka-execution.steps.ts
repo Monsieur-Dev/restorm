@@ -243,11 +243,11 @@ When('I select the Kafka mode {string}', async ({}, mode: string) => {
   await page.locator(`[data-testid="kafka-mode-select-option-${index}"]`).first().click({ force: true })
 })
 
-When(/^I type (\d+) characters into the Kafka broker URL field within (\d+) ms$/, async ({}, ...args) => {
+When(/^I type (\d+) characters into the Kafka broker URL field within (\d+) ms$/, async ({}, countArg: string, windowArg: string) => {
   if (page === null) throw new Error('launch first')
   const p = page
-  const count = Number(args[0])
-  const windowMs = Number(args[1])
+  const count = Number(countArg)
+  const windowMs = Number(windowArg)
   await p.evaluate(() => { (window as unknown as DocUpdateCounterWindow).__e2eResetDocUpdateCount?.() })
   const delay = Math.max(0, Math.floor(windowMs / Math.max(1, count - 1)))
   const input = p.locator(URL_INPUT).first()
@@ -256,9 +256,9 @@ When(/^I type (\d+) characters into the Kafka broker URL field within (\d+) ms$/
   await input.pressSequentially(text, { delay })
 })
 
-Then(/^at most (\d+) document-update events are emitted for the request$/, async ({}, ...args) => {
+Then(/^at most (\d+) document-update events are emitted for the request$/, async ({}, maxArg: string) => {
   if (page === null) throw new Error('launch first')
-  const max = Number(args[0])
+  const max = Number(maxArg)
   await new Promise((r) => setTimeout(r, 300))
   const count = await page.evaluate(() => (window as unknown as DocUpdateCounterWindow).__e2eDocUpdateCount ?? 0)
   expect(count, `Debounce regression: expected <= ${max} document-update events, got ${count}`).toBeLessThanOrEqual(max)

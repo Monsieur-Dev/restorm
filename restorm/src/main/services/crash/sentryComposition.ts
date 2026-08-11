@@ -17,6 +17,7 @@ import { app, BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { crashDsn } from '../../../shared/config/observability'
 import { CRASH_IPC, type CrashArmedState } from '../../../shared/crash/crashTypes'
+import { CONSOLE_CAPTURE_LEVELS } from '../../../shared/crash/consoleCapture'
 import { readCrashConsentState } from './crashConsentState'
 import { getConsentService } from '../privacy/consentComposition'
 import { CrashReportingService, type CrashSdkPort } from './CrashReportingService'
@@ -26,6 +27,7 @@ import { observeWindowCrashes } from './windowCrashObserver'
 import { reviewCrashReport } from './crashReviewComposition'
 import { allowCrashReport } from './crashLimitComposition'
 import { toReviewRequest } from './crashReviewRequest'
+import { forwardErrorLogsToCrashReporting } from './errorLogForwarding'
 
 let instance: CrashReportingService | null = null
 
@@ -91,7 +93,17 @@ function makeSentryPort(): CrashSdkPort {
         // ATTACHMENT — native minidumps and crash screenshots. `beforeSend`
         // never sees attachment bytes, so neither can be scrubbed nor dropped by
         // the gate every other payload passes. See `sentryIntegrations.ts`.
-        integrations: (defaults) => withoutUnscrubbableIntegrations(defaults),
+        //
+        // Then ADD console capture: a main-process `console.error` becomes an
+        // event (not just a breadcrumb), so a failure that was logged but never
+        // crashed still reports. Error level only — see `consoleCapture.ts`.
+        // The app's own `logger.error` entries do not pass through `console`
+        // (winston writes to the streams); those reach the SDK through the
+        // `forwardErrorLogsToCrashReporting` bridge below.
+        integrations: (defaults) => [
+          ...withoutUnscrubbableIntegrations(defaults),
+          Sentry.captureConsoleIntegration({ levels: [...CONSOLE_CAPTURE_LEVELS] })
+        ],
         // A transport that does NOT queue to disk. The SDK's default is an
         // offline store that writes undelivered envelopes to disk and flushes
         // them at the NEXT startup — so a crash captured before a revocation
@@ -218,6 +230,27 @@ export function initCrashReporting(): CrashReportingService | null {
         message: error instanceof Error ? error.message : String(error)
       })
     })
+  })
+
+  // Bridge the app's own `logger.error` entries into reporting. Winston writes
+  // to the streams, so the SDK's console instrumentation never sees them; this
+  // is the only path by which a logged-but-survived failure reports. One
+  // registration covers both processes — the renderer's logger proxies over IPC
+  // into this same main-process logger. Armed is re-checked per entry (hot
+  // opt-out stops the flow) and the message goes through `captureMessage`, i.e.
+  // through the same scrub + budget + review gates as every other event.
+  forwardErrorLogsToCrashReporting({
+    onError: (listener) => logger.onError(listener),
+    isArmed: () => service.isArmed(),
+    capture: (message, meta) => {
+      void import('@sentry/electron/main').then((Sentry) => {
+        Sentry.captureMessage(message, {
+          level: 'error',
+          tags: { log_bridge: 'logger-error' },
+          extra: meta ?? {}
+        })
+      })
+    }
   })
 
   // Witness renderer deaths for EVERY window, including the splash — a

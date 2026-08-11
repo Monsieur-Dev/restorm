@@ -23,12 +23,20 @@
  * there is exactly one place where a payload is proven clean.
  */
 
+import { CONSOLE_CAPTURE_LEVELS } from '../../../shared/crash/consoleCapture'
 import { setRendererCrashCapture } from './rendererCrashCapture'
 
 export async function initRendererSentry(): Promise<() => Promise<void>> {
   const Sentry = await import('@sentry/electron/renderer')
 
   Sentry.init({
+    // ADDED to the SDK defaults (the array form appends, it does not replace):
+    // a renderer `console.error` — React's error reporting, a library's own
+    // failure path, anything visible in the DevTools console — becomes an
+    // event, not just a breadcrumb, so a failure the app survived still
+    // reports. Error level only; see `consoleCapture.ts`. Like every renderer
+    // event it rides IPC to the main process and through its scrubbing gate.
+    integrations: [Sentry.captureConsoleIntegration({ levels: [...CONSOLE_CAPTURE_LEVELS] })],
     // No performance tracing: it samples ordinary requests, which is exactly
     // the traffic this app must not describe to a third party.
     tracesSampleRate: 0,

@@ -8,9 +8,7 @@ vi.mock('fs', () => ({
 
 // Mock js-yaml
 vi.mock('js-yaml', () => ({
-  default: {
-    load: vi.fn()
-  }
+  load: vi.fn()
 }))
 
 // Mock logger
@@ -24,7 +22,7 @@ vi.mock('./LoggerService', () => ({
 }))
 
 import { readFileSync, existsSync } from 'fs'
-import yaml from 'js-yaml'
+import * as yaml from 'js-yaml'
 import { ThemeService } from './ThemeService'
 
 // ---------------------------------------------------------------------------

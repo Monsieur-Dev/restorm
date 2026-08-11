@@ -11,7 +11,8 @@ import { constants as fsConstants, existsSync } from 'fs'
 import { extname, dirname } from 'path'
 import crypto from 'crypto'
 import JSON5 from 'json5'
-import yaml from 'js-yaml'
+import * as yaml from 'js-yaml'
+import { loadYamlDocument } from '../../shared/yamlLoad'
 import { logger } from './LoggerService'
 import { FileSystemError } from '../../errors'
 import {
@@ -81,7 +82,7 @@ export function serialize(data: unknown, format: PersistenceFormat): string {
 export function deserialize(content: string, format: PersistenceFormat): unknown {
   switch (format) {
     case 'yaml':
-      return yaml.load(content)
+      return loadYamlDocument(content)
     case 'json5':
       return JSON5.parse(content)
     case 'json':

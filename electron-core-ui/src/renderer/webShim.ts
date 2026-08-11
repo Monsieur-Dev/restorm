@@ -10,7 +10,7 @@ import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, Cor
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
 import type { GitStatus, GitCommitResult, GitPushResult, GitResetResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitConflictCommitTimestamps, GitState } from '../types/git'
 import { NO_GIT_STATE } from '../types/git'
-import yaml from 'js-yaml'
+import { loadYamlDocument } from '../shared/yamlLoad'
 import themeIndexJson from '../../resources/themes/index.json'
 
 // Dynamically import all theme YAML files using Vite's glob import
@@ -117,7 +117,7 @@ function ensureWebBaseLoaded(): void {
 
   // base.yaml
   try {
-    const parsed = yaml.load(baseYaml) as YamlBaseFile
+    const parsed = loadYamlDocument(baseYaml) as YamlBaseFile
     if (parsed.variables) {
       for (const v of parsed.variables) {
         const cssVar = `--${v.id}`
@@ -137,7 +137,7 @@ function ensureWebBaseLoaded(): void {
 
   for (const type of Object.keys(typeBaseSources) as ThemeTypeInternal[]) {
     try {
-      const parsed = yaml.load(typeBaseSources[type]) as YamlTypeBaseFile
+      const parsed = loadYamlDocument(typeBaseSources[type]) as YamlTypeBaseFile
       if (parsed.colors) {
         for (const c of parsed.colors) {
           const cssVar = `--${c.id.replace(/\./g, '-')}`
@@ -174,7 +174,7 @@ function webLoadTheme(themeId: string): ThemeCacheValue | null {
 
   let parsed: YamlThemeFile
   try {
-    parsed = yaml.load(yamlSource) as YamlThemeFile
+    parsed = loadYamlDocument(yamlSource) as YamlThemeFile
   } catch {
     return null
   }

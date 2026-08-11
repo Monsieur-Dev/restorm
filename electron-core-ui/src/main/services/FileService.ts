@@ -12,7 +12,8 @@ import {
   ensureFileUuid,
   type DirtyReason
 } from './saveUnit'
-import yaml from 'js-yaml'
+import * as yaml from 'js-yaml'
+import { loadYamlDocument } from '../../shared/yamlLoad'
 import type {
   SerializationFormat,
   FileMetadata,
@@ -488,7 +489,7 @@ export class FileService {
   private deserialize(data: string, format: SerializationFormat): unknown {
     switch (format) {
       case 'yaml':
-        return yaml.load(data)
+        return loadYamlDocument(data)
       case 'json':
       default:
         return JSON.parse(data)

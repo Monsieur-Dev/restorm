@@ -121,6 +121,7 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
+| git-collab | 10 | Two live instances collaborating through one remote: dirty-state reactivity, behind-server handling, reset-to-server, per-field arbitration (quick settings, renames, deletions, tags, moves), terminal-checkout protection via the reload/keep-mine toast | 🐳 git-server |
 | git-status | 1 | Detect repo → GIT status-bar push button enabled | 🐳 git-server |
 | git-push-pull | 2 | Push lands on remote; collaborator pull with no conflict appears | 🐳 git-server |
 | git-conflict | 6 | Provoked conflict → 4-panel resolve (all entity kinds + field-diffs), abort-merge keeps local work, pull-available toast, commit-message generation, live-action controls disabled in the conflict panel | 🐳 git-server |

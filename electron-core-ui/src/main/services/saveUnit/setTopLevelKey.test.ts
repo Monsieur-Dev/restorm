@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import yaml from 'js-yaml'
+import * as yaml from 'js-yaml'
 import JSON5 from 'json5'
 import { setTopLevelKey } from './setTopLevelKey'
 

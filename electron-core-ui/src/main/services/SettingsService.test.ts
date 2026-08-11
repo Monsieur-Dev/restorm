@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import yaml from 'js-yaml'
+import * as yaml from 'js-yaml'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -31,9 +31,7 @@ vi.mock('./PersistenceService', () => ({
 
 // Mock js-yaml
 vi.mock('js-yaml', () => ({
-  default: {
-    load: vi.fn()
-  }
+  load: vi.fn()
 }))
 
 // Mock logger

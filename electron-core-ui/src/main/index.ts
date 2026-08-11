@@ -275,7 +275,7 @@ export { validatedHandle } from './ipc/validate'
 // Re-export types for better type inference
 export type { ThemeService } from './services/ThemeService'
 export type { StorageService } from './services/StorageService'
-export type { LoggerInterface } from './services/LoggerService'
+export type { LoggerInterface, ErrorLogListener } from './services/LoggerService'
 export type { FeatureFlippingService } from './services/FeatureFlippingService'
 export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
