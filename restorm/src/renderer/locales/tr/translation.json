@@ -1213,6 +1213,71 @@
       "previousMatch": "Önceki eşleşme",
       "nextMatch": "Sonraki eşleşme",
       "close": "Kapat"
+    },
+    "sections": {
+      "parameters": "Parametreler",
+      "responses": "Yanıtlar",
+      "models": "Modeller",
+      "enums": "Enumlar",
+      "polymorphism": "Çok biçimlilik",
+      "overview": "Genel bakış",
+      "operations": "İşlemler"
+    },
+    "table": {
+      "in": "Konum",
+      "name": "Ad",
+      "type": "Tür",
+      "required": "Zor.",
+      "operation": "İşlem",
+      "description": "Açıklama",
+      "example": "Örnek",
+      "constraints": "Kısıtlamalar"
+    },
+    "params": {
+      "empty": "Filtrelenen rotalar için gövde dışı parametre tanımlanmadı."
+    },
+    "responses": {
+      "status": "Durum",
+      "schema": "Şema",
+      "headers": "Başlıklar",
+      "empty": "Filtrelenen rotalar için yanıt tanımlanmadı."
+    },
+    "route": {
+      "requestBody": "İstek gövdesi",
+      "responseBody": "Yanıt gövdesi",
+      "security": "Güvenlik",
+      "externalDocs": "Harici belgeler",
+      "examplePayload": "Örnek yük",
+      "operationId": "operationId",
+      "addRequest": "+ İstek ekle"
+    },
+    "apiInfo": {
+      "version": "Sürüm",
+      "sourceFormat": "Kaynak biçimi",
+      "from": "kaynağı:",
+      "server": "Sunucu",
+      "contact": "İletişim",
+      "license": "Lisans",
+      "termsOfService": "Hizmet şartları",
+      "externalDocs": "Harici belgeler",
+      "tagReferences": "Etiket referansları"
+    },
+    "sidebar": {
+      "outline": "Belge taslağı"
+    },
+    "legend": {
+      "requiredProperty": "zorunlu özellik",
+      "optionalProperty": "isteğe bağlı özellik",
+      "nullableValue": "null olabilen değer",
+      "readOnly": "salt okunur (sunucu tarafından ayarlanır)",
+      "deprecatedBadge": "kullanımdan kaldırıldı",
+      "deprecatedDesc": "kaynak spesifikasyonunda kullanımdan kaldırıldı olarak bildirildi",
+      "removedBadge": "kaldırıldı",
+      "removedDesc": "son yeniden içe aktarmada yok",
+      "requiredSingleRef": "zorunlu tekil başvuru",
+      "optionalSingleRef": "isteğe bağlı tekil başvuru",
+      "requiredArrayRef": "zorunlu dizi başvurusu",
+      "optionalArrayRef": "isteğe bağlı dizi başvurusu"
     }
   },
   "scenario": {

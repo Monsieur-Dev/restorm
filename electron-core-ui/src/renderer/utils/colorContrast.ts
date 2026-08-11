@@ -1,21 +1,61 @@
 /**
- * Returns '#000000' (black) or '#ffffff' (white) depending on which
- * provides better contrast against the given background color.
+ * Returns '#000000' (black) or '#ffffff' (white) — whichever text colour is
+ * more *legible* on the given background.
  *
  * Accepts hex (`#rgb`, `#rrggbb`, or no leading `#`), `hsl(h, s%, l%)`, and
  * `rgb()` / `rgba()` — the last being what `getComputedStyle` returns, so a
  * caller can pass a colour read off a rendered element directly.
- * Uses the W3C relative luminance formula (WCAG 2.0).
+ *
+ * Uses **APCA** (Accessible Perceptual Contrast Algorithm, the WCAG 3 draft
+ * successor) rather than the WCAG 2 relative-luminance ratio. WCAG 2 is a poor
+ * predictor of *perceived* contrast for saturated mid-tones: it over-weights
+ * green and under-weights blue/red, so it picks black text on a saturated
+ * coral / teal / magenta where white is visibly cleaner. APCA models
+ * perception directly, so those cases resolve to white. We compute the APCA
+ * lightness-contrast (Lc) of black text and of white text against the
+ * background and keep whichever has the greater magnitude.
  */
 export function getContrastColor(color: string): '#000000' | '#ffffff' {
   const rgb = parseColorToRgb(color)
-  const toLinear = (c: number): number =>
-    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  const bgY = apcaScreenLuminance(rgb)
+  // Text is pure black (screen luminance 0) or pure white (1).
+  const lcOnBlack = Math.abs(apcaContrast(0, bgY))
+  const lcOnWhite = Math.abs(apcaContrast(1, bgY))
+  return lcOnWhite > lcOnBlack ? '#ffffff' : '#000000'
+}
 
-  const luminance =
-    0.2126 * toLinear(rgb[0]) + 0.7152 * toLinear(rgb[1]) + 0.0722 * toLinear(rgb[2])
+/** APCA screen luminance: a simple `^2.4` transfer (NOT the WCAG piecewise
+ * curve) on the sRGB coefficients. */
+function apcaScreenLuminance(rgb: [number, number, number]): number {
+  return 0.2126729 * Math.pow(rgb[0], 2.4) +
+    0.7151522 * Math.pow(rgb[1], 2.4) +
+    0.0721750 * Math.pow(rgb[2], 2.4)
+}
 
-  return luminance > 0.179 ? '#000000' : '#ffffff'
+/** APCA lightness-contrast (Lc, roughly −108..106) of `text` luminance against
+ * `bg` luminance, both APCA screen luminances in [0,1]. Sign encodes polarity
+ * (positive = dark text on light bg); callers here only compare magnitudes.
+ * Constants are the APCA-W3 0.1.1 "smoothed" set. */
+function apcaContrast(textY: number, bgY: number): number {
+  const BLACK_CLAMP = 1.414
+  const BLACK_THRESHOLD = 0.022
+  const DELTA_Y_MIN = 0.0005
+  const soft = (y: number): number =>
+    y < BLACK_THRESHOLD ? y + Math.pow(BLACK_THRESHOLD - y, BLACK_CLAMP) : y
+
+  const txt = soft(textY)
+  const bg = soft(bgY)
+  if (Math.abs(bg - txt) < DELTA_Y_MIN) return 0
+
+  const SCALE = 1.14
+  if (bg > txt) {
+    // Normal polarity: dark text on a lighter background.
+    const sapc = (Math.pow(bg, 0.56) - Math.pow(txt, 0.57)) * SCALE
+    return sapc < 0.1 ? 0 : (sapc - 0.027) * 100
+  }
+  // Reverse polarity: light text on a darker background.
+  const sapc = (Math.pow(bg, 0.65) - Math.pow(txt, 0.62)) * SCALE
+  return sapc > -0.1 ? 0 : (sapc + 0.027) * 100
 }
 
 const HSL_RE = /^hsl\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)%\s*,\s*(\d+(?:\.\d+)?)%\s*\)$/i

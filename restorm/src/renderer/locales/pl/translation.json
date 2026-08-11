@@ -1215,6 +1215,71 @@
       "previousMatch": "Poprzednie dopasowanie",
       "nextMatch": "Następne dopasowanie",
       "close": "Zamknij"
+    },
+    "sections": {
+      "parameters": "Parametry",
+      "responses": "Odpowiedzi",
+      "models": "Modele",
+      "enums": "Wyliczenia",
+      "polymorphism": "Polimorfizm",
+      "overview": "Przegląd",
+      "operations": "Operacje"
+    },
+    "table": {
+      "in": "W",
+      "name": "Nazwa",
+      "type": "Typ",
+      "required": "Wym.",
+      "operation": "Operacja",
+      "description": "Opis",
+      "example": "Przykład",
+      "constraints": "Ograniczenia"
+    },
+    "params": {
+      "empty": "Nie zadeklarowano parametrów spoza treści dla filtrowanych tras."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schemat",
+      "headers": "Nagłówki",
+      "empty": "Nie zadeklarowano odpowiedzi dla filtrowanych tras."
+    },
+    "route": {
+      "requestBody": "Treść żądania",
+      "responseBody": "Treść odpowiedzi",
+      "security": "Zabezpieczenia",
+      "externalDocs": "Dokumentacja zewnętrzna",
+      "examplePayload": "Przykładowy ładunek",
+      "operationId": "operationId",
+      "addRequest": "+ Dodaj żądanie"
+    },
+    "apiInfo": {
+      "version": "Wersja",
+      "sourceFormat": "Format źródłowy",
+      "from": "z",
+      "server": "Serwer",
+      "contact": "Kontakt",
+      "license": "Licencja",
+      "termsOfService": "Warunki usługi",
+      "externalDocs": "Dokumentacja zewnętrzna",
+      "tagReferences": "Odniesienia do tagów"
+    },
+    "sidebar": {
+      "outline": "Struktura dokumentacji"
+    },
+    "legend": {
+      "requiredProperty": "właściwość wymagana",
+      "optionalProperty": "właściwość opcjonalna",
+      "nullableValue": "wartość dopuszczająca null",
+      "readOnly": "tylko do odczytu (ustawiane przez serwer)",
+      "deprecatedBadge": "przestarzałe",
+      "deprecatedDesc": "zadeklarowane jako przestarzałe w specyfikacji źródłowej",
+      "removedBadge": "usunięte",
+      "removedDesc": "brak w ostatnim ponownym imporcie",
+      "requiredSingleRef": "wymagane odwołanie pojedyncze",
+      "optionalSingleRef": "opcjonalne odwołanie pojedyncze",
+      "requiredArrayRef": "wymagane odwołanie tablicowe",
+      "optionalArrayRef": "opcjonalne odwołanie tablicowe"
     }
   },
   "scenario": {

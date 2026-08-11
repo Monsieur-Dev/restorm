@@ -1213,6 +1213,71 @@
       "previousMatch": "Correspondance précédente",
       "nextMatch": "Correspondance suivante",
       "close": "Fermer"
+    },
+    "sections": {
+      "parameters": "Paramètres",
+      "responses": "Réponses",
+      "models": "Modèles",
+      "enums": "Énumérations",
+      "polymorphism": "Polymorphisme",
+      "overview": "Aperçu",
+      "operations": "Opérations"
+    },
+    "table": {
+      "in": "Dans",
+      "name": "Nom",
+      "type": "Type",
+      "required": "Req.",
+      "operation": "Opération",
+      "description": "Description",
+      "example": "Exemple",
+      "constraints": "Contraintes"
+    },
+    "params": {
+      "empty": "Aucun paramètre hors corps déclaré pour les routes filtrées."
+    },
+    "responses": {
+      "status": "Statut",
+      "schema": "Schéma",
+      "headers": "En-têtes",
+      "empty": "Aucune réponse déclarée pour les routes filtrées."
+    },
+    "route": {
+      "requestBody": "Corps de requête",
+      "responseBody": "Corps de réponse",
+      "security": "Sécurité",
+      "externalDocs": "Docs externes",
+      "examplePayload": "Exemple de charge utile",
+      "operationId": "operationId",
+      "addRequest": "+ Ajouter une requête"
+    },
+    "apiInfo": {
+      "version": "Version",
+      "sourceFormat": "Format source",
+      "from": "depuis",
+      "server": "Serveur",
+      "contact": "Contact",
+      "license": "Licence",
+      "termsOfService": "Conditions d'utilisation",
+      "externalDocs": "Docs externes",
+      "tagReferences": "Références de tags"
+    },
+    "sidebar": {
+      "outline": "Plan de la documentation"
+    },
+    "legend": {
+      "requiredProperty": "propriété requise",
+      "optionalProperty": "propriété facultative",
+      "nullableValue": "valeur nullable",
+      "readOnly": "lecture seule (définie par le serveur)",
+      "deprecatedBadge": "obsolète",
+      "deprecatedDesc": "déclaré obsolète dans la spec source",
+      "removedBadge": "supprimé",
+      "removedDesc": "absent du dernier ré-import",
+      "requiredSingleRef": "réf. unique requise",
+      "optionalSingleRef": "réf. unique facultative",
+      "requiredArrayRef": "réf. tableau requise",
+      "optionalArrayRef": "réf. tableau facultative"
     }
   },
   "scenario": {

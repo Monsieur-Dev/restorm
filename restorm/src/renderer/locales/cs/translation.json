@@ -1215,6 +1215,71 @@
       "previousMatch": "Předchozí shoda",
       "nextMatch": "Další shoda",
       "close": "Zavřít"
+    },
+    "sections": {
+      "parameters": "Parametry",
+      "responses": "Odpovědi",
+      "models": "Modely",
+      "enums": "Výčty",
+      "polymorphism": "Polymorfismus",
+      "overview": "Přehled",
+      "operations": "Operace"
+    },
+    "table": {
+      "in": "Kde",
+      "name": "Název",
+      "type": "Typ",
+      "required": "Pov.",
+      "operation": "Operace",
+      "description": "Popis",
+      "example": "Příklad",
+      "constraints": "Omezení"
+    },
+    "params": {
+      "empty": "Pro filtrované trasy nejsou deklarovány žádné parametry mimo tělo."
+    },
+    "responses": {
+      "status": "Stav",
+      "schema": "Schéma",
+      "headers": "Hlavičky",
+      "empty": "Pro filtrované trasy nejsou deklarovány žádné odpovědi."
+    },
+    "route": {
+      "requestBody": "Tělo požadavku",
+      "responseBody": "Tělo odpovědi",
+      "security": "Zabezpečení",
+      "externalDocs": "Externí dokumentace",
+      "examplePayload": "Ukázkový payload",
+      "operationId": "operationId",
+      "addRequest": "+ Přidat požadavek"
+    },
+    "apiInfo": {
+      "version": "Verze",
+      "sourceFormat": "Zdrojový formát",
+      "from": "z",
+      "server": "Server",
+      "contact": "Kontakt",
+      "license": "Licence",
+      "termsOfService": "Podmínky služby",
+      "externalDocs": "Externí dokumentace",
+      "tagReferences": "Odkazy na značky"
+    },
+    "sidebar": {
+      "outline": "Osnova dokumentace"
+    },
+    "legend": {
+      "requiredProperty": "povinná vlastnost",
+      "optionalProperty": "volitelná vlastnost",
+      "nullableValue": "hodnota s možností null",
+      "readOnly": "jen pro čtení (nastaveno serverem)",
+      "deprecatedBadge": "zastaralé",
+      "deprecatedDesc": "označeno jako zastaralé ve zdrojové specifikaci",
+      "removedBadge": "odebráno",
+      "removedDesc": "chybí v posledním reimportu",
+      "requiredSingleRef": "povinný jednotlivý odkaz",
+      "optionalSingleRef": "volitelný jednotlivý odkaz",
+      "requiredArrayRef": "povinný odkaz na pole",
+      "optionalArrayRef": "volitelný odkaz na pole"
     }
   },
   "scenario": {

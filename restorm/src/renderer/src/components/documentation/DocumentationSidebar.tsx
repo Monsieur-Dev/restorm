@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button, ScrollableElement } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type {
@@ -62,6 +63,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
   operationSlug,
   scopeTitle
 }) => {
+  const { t } = useTranslation()
   const groups = useMemo(() => groupOperations(operations), [operations])
   const nav = useDocumentationNavigation()
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
@@ -79,7 +81,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
     <aside
       className="documentation-host-sidebar"
       data-testid="documentation-host-sidebar"
-      aria-label="Documentation outline"
+      aria-label={t('documentation.sidebar.outline')}
     >
       <ScrollableElement
         className="documentation-host-sidebar__scroll"
@@ -89,7 +91,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
       {scopeTitle !== undefined && scopeTitle.length > 0 && (
         <nav
           className="documentation-host-sidebar__section documentation-host-sidebar__section--top"
-          aria-label="Overview"
+          aria-label={t('documentation.sections.overview')}
         >
           <Button
             className="documentation-host-sidebar__overview-link"
@@ -97,21 +99,21 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
             data-testid="documentation-host-sidebar-overview"
           >
             <span className="documentation-host-sidebar__overview-name">{scopeTitle}</span>
-            <span className="documentation-host-sidebar__overview-hint">Overview</span>
+            <span className="documentation-host-sidebar__overview-hint">{t('documentation.sections.overview')}</span>
           </Button>
         </nav>
       )}
       {groups.length > 0 && (
         <nav
           className="documentation-host-sidebar__section"
-          aria-label="Operations"
+          aria-label={t('documentation.sections.operations')}
         >
           <Button
             className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
             onClick={(): void => { nav?.scrollToOperations() }}
             data-testid="documentation-host-sidebar-section-operations"
           >
-            Operations
+            {t('documentation.sections.operations')}
           </Button>
           <ul className="documentation-host-sidebar__group-list">
             {groups.map((group) => {
@@ -170,7 +172,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
       {models.length > 0 && (
         <nav
           className="documentation-host-sidebar__section"
-          aria-label="Models"
+          aria-label={t('documentation.sections.models')}
         >
           <Button
             className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
@@ -180,7 +182,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
             }}
             data-testid="documentation-host-sidebar-section-models"
           >
-            Models
+            {t('documentation.sections.models')}
           </Button>
           <ul className="documentation-host-sidebar__model-list">
             {models.map((model) => (
@@ -201,7 +203,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
       {enumGroups.length > 0 && (
         <nav
           className="documentation-host-sidebar__section"
-          aria-label="Enums"
+          aria-label={t('documentation.sections.enums')}
         >
           <Button
             className="documentation-host-sidebar__section-title documentation-host-sidebar__section-title--button"
@@ -211,7 +213,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
             }}
             data-testid="documentation-host-sidebar-section-enums"
           >
-            Enums
+            {t('documentation.sections.enums')}
           </Button>
           <ul className="documentation-host-sidebar__enum-list">
             {enumGroups.map((group) => (

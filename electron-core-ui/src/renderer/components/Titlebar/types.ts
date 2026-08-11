@@ -40,6 +40,12 @@ export interface TitlebarProps {
    * hides. Defaults to 300ms when omitted. */
   searchTooltipHideDelayMs?: number
 
+  /** Forwarded to the internal SearchBar as `getResultDragData` — makes
+   * result rows draggable, returning the `dataTransfer` payload (MIME → value)
+   * for a result or `undefined` for none. Lets the host feed search results to
+   * the same drop targets as its sidebar rows. */
+  getSearchResultDragData?: (result: SearchResult) => Record<string, string> | undefined
+
   /** Optional test id for the internal CustomWCO. */
   customWcoTestId?: string
 

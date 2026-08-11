@@ -1213,6 +1213,71 @@
       "previousMatch": "Correspondência anterior",
       "nextMatch": "Próxima correspondência",
       "close": "Fechar"
+    },
+    "sections": {
+      "parameters": "Parâmetros",
+      "responses": "Respostas",
+      "models": "Modelos",
+      "enums": "Enumerações",
+      "polymorphism": "Polimorfismo",
+      "overview": "Visão geral",
+      "operations": "Operações"
+    },
+    "table": {
+      "in": "Em",
+      "name": "Nome",
+      "type": "Tipo",
+      "required": "Obr.",
+      "operation": "Operação",
+      "description": "Descrição",
+      "example": "Exemplo",
+      "constraints": "Restrições"
+    },
+    "params": {
+      "empty": "Nenhum parâmetro fora do corpo declarado para as rotas filtradas."
+    },
+    "responses": {
+      "status": "Estado",
+      "schema": "Esquema",
+      "headers": "Cabeçalhos",
+      "empty": "Nenhuma resposta declarada para as rotas filtradas."
+    },
+    "route": {
+      "requestBody": "Corpo da requisição",
+      "responseBody": "Corpo da resposta",
+      "security": "Segurança",
+      "externalDocs": "Docs externas",
+      "examplePayload": "Exemplo de payload",
+      "operationId": "operationId",
+      "addRequest": "+ Adicionar uma requisição"
+    },
+    "apiInfo": {
+      "version": "Versão",
+      "sourceFormat": "Formato de origem",
+      "from": "de",
+      "server": "Servidor",
+      "contact": "Contato",
+      "license": "Licença",
+      "termsOfService": "Termos de serviço",
+      "externalDocs": "Docs externas",
+      "tagReferences": "Referências de tags"
+    },
+    "sidebar": {
+      "outline": "Estrutura da documentação"
+    },
+    "legend": {
+      "requiredProperty": "propriedade obrigatória",
+      "optionalProperty": "propriedade opcional",
+      "nullableValue": "valor anulável",
+      "readOnly": "somente leitura (definido pelo servidor)",
+      "deprecatedBadge": "obsoleto",
+      "deprecatedDesc": "declarado obsoleto na especificação de origem",
+      "removedBadge": "removido",
+      "removedDesc": "ausente da última reimportação",
+      "requiredSingleRef": "ref. única obrigatória",
+      "optionalSingleRef": "ref. única opcional",
+      "requiredArrayRef": "ref. de array obrigatória",
+      "optionalArrayRef": "ref. de array opcional"
     }
   },
   "scenario": {

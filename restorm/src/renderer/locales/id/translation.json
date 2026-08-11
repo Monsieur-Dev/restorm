@@ -1212,6 +1212,71 @@
       "previousMatch": "Kecocokan sebelumnya",
       "nextMatch": "Kecocokan berikutnya",
       "close": "Tutup"
+    },
+    "sections": {
+      "parameters": "Parameter",
+      "responses": "Respons",
+      "models": "Model",
+      "enums": "Enum",
+      "polymorphism": "Polimorfisme",
+      "overview": "Ikhtisar",
+      "operations": "Operasi"
+    },
+    "table": {
+      "in": "Di",
+      "name": "Nama",
+      "type": "Tipe",
+      "required": "Wajib",
+      "operation": "Operasi",
+      "description": "Deskripsi",
+      "example": "Contoh",
+      "constraints": "Batasan"
+    },
+    "params": {
+      "empty": "Tidak ada parameter non-body yang dideklarasikan untuk rute yang difilter."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Skema",
+      "headers": "Header",
+      "empty": "Tidak ada respons yang dideklarasikan untuk rute yang difilter."
+    },
+    "route": {
+      "requestBody": "Body permintaan",
+      "responseBody": "Body respons",
+      "security": "Keamanan",
+      "externalDocs": "Dokumen eksternal",
+      "examplePayload": "Contoh payload",
+      "operationId": "operationId",
+      "addRequest": "+ Tambah permintaan"
+    },
+    "apiInfo": {
+      "version": "Versi",
+      "sourceFormat": "Format sumber",
+      "from": "dari",
+      "server": "Server",
+      "contact": "Kontak",
+      "license": "Lisensi",
+      "termsOfService": "Ketentuan layanan",
+      "externalDocs": "Dokumen eksternal",
+      "tagReferences": "Referensi tag"
+    },
+    "sidebar": {
+      "outline": "Kerangka dokumentasi"
+    },
+    "legend": {
+      "requiredProperty": "properti wajib",
+      "optionalProperty": "properti opsional",
+      "nullableValue": "nilai nullable",
+      "readOnly": "hanya-baca (ditetapkan server)",
+      "deprecatedBadge": "usang",
+      "deprecatedDesc": "dinyatakan usang dalam spesifikasi sumber",
+      "removedBadge": "dihapus",
+      "removedDesc": "tidak ada di impor ulang terakhir",
+      "requiredSingleRef": "referensi tunggal wajib",
+      "optionalSingleRef": "referensi tunggal opsional",
+      "requiredArrayRef": "referensi larik wajib",
+      "optionalArrayRef": "referensi larik opsional"
     }
   },
   "scenario": {

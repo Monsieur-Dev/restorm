@@ -1213,6 +1213,71 @@
       "previousMatch": "Vorige overeenkomst",
       "nextMatch": "Volgende overeenkomst",
       "close": "Sluiten"
+    },
+    "sections": {
+      "parameters": "Parameters",
+      "responses": "Antwoorden",
+      "models": "Modellen",
+      "enums": "Enums",
+      "polymorphism": "Polymorfisme",
+      "overview": "Overzicht",
+      "operations": "Operaties"
+    },
+    "table": {
+      "in": "In",
+      "name": "Naam",
+      "type": "Type",
+      "required": "Ver.",
+      "operation": "Operatie",
+      "description": "Beschrijving",
+      "example": "Voorbeeld",
+      "constraints": "Beperkingen"
+    },
+    "params": {
+      "empty": "Geen niet-body-parameters gedeclareerd voor de gefilterde routes."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schema",
+      "headers": "Headers",
+      "empty": "Geen antwoorden gedeclareerd voor de gefilterde routes."
+    },
+    "route": {
+      "requestBody": "Verzoek-body",
+      "responseBody": "Antwoord-body",
+      "security": "Beveiliging",
+      "externalDocs": "Externe docs",
+      "examplePayload": "Voorbeeld-payload",
+      "operationId": "operationId",
+      "addRequest": "+ Verzoek toevoegen"
+    },
+    "apiInfo": {
+      "version": "Versie",
+      "sourceFormat": "Bronformaat",
+      "from": "van",
+      "server": "Server",
+      "contact": "Contact",
+      "license": "Licentie",
+      "termsOfService": "Servicevoorwaarden",
+      "externalDocs": "Externe docs",
+      "tagReferences": "Tagverwijzingen"
+    },
+    "sidebar": {
+      "outline": "Documentatieoverzicht"
+    },
+    "legend": {
+      "requiredProperty": "vereiste eigenschap",
+      "optionalProperty": "optionele eigenschap",
+      "nullableValue": "nullable waarde",
+      "readOnly": "alleen-lezen (door server ingesteld)",
+      "deprecatedBadge": "verouderd",
+      "deprecatedDesc": "als verouderd gedeclareerd in de bronspecificatie",
+      "removedBadge": "verwijderd",
+      "removedDesc": "afwezig bij de laatste herimport",
+      "requiredSingleRef": "vereiste enkele ref.",
+      "optionalSingleRef": "optionele enkele ref.",
+      "requiredArrayRef": "vereiste array-ref.",
+      "optionalArrayRef": "optionele array-ref."
     }
   },
   "scenario": {

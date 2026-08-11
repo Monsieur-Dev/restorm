@@ -1213,6 +1213,71 @@
       "previousMatch": "Coincidencia anterior",
       "nextMatch": "Coincidencia siguiente",
       "close": "Cerrar"
+    },
+    "sections": {
+      "parameters": "Parámetros",
+      "responses": "Respuestas",
+      "models": "Modelos",
+      "enums": "Enumeraciones",
+      "polymorphism": "Polimorfismo",
+      "overview": "Resumen",
+      "operations": "Operaciones"
+    },
+    "table": {
+      "in": "En",
+      "name": "Nombre",
+      "type": "Tipo",
+      "required": "Obl.",
+      "operation": "Operación",
+      "description": "Descripción",
+      "example": "Ejemplo",
+      "constraints": "Restricciones"
+    },
+    "params": {
+      "empty": "No hay parámetros fuera del cuerpo declarados para las rutas filtradas."
+    },
+    "responses": {
+      "status": "Estado",
+      "schema": "Esquema",
+      "headers": "Encabezados",
+      "empty": "No hay respuestas declaradas para las rutas filtradas."
+    },
+    "route": {
+      "requestBody": "Cuerpo de la solicitud",
+      "responseBody": "Cuerpo de la respuesta",
+      "security": "Seguridad",
+      "externalDocs": "Docs externas",
+      "examplePayload": "Ejemplo de carga útil",
+      "operationId": "operationId",
+      "addRequest": "+ Añadir una solicitud"
+    },
+    "apiInfo": {
+      "version": "Versión",
+      "sourceFormat": "Formato de origen",
+      "from": "desde",
+      "server": "Servidor",
+      "contact": "Contacto",
+      "license": "Licencia",
+      "termsOfService": "Términos del servicio",
+      "externalDocs": "Docs externas",
+      "tagReferences": "Referencias de etiquetas"
+    },
+    "sidebar": {
+      "outline": "Esquema de la documentación"
+    },
+    "legend": {
+      "requiredProperty": "propiedad requerida",
+      "optionalProperty": "propiedad opcional",
+      "nullableValue": "valor anulable",
+      "readOnly": "solo lectura (definido por el servidor)",
+      "deprecatedBadge": "obsoleto",
+      "deprecatedDesc": "declarado obsoleto en la especificación de origen",
+      "removedBadge": "eliminado",
+      "removedDesc": "ausente de la última reimportación",
+      "requiredSingleRef": "ref. única requerida",
+      "optionalSingleRef": "ref. única opcional",
+      "requiredArrayRef": "ref. de arreglo requerida",
+      "optionalArrayRef": "ref. de arreglo opcional"
     }
   },
   "scenario": {

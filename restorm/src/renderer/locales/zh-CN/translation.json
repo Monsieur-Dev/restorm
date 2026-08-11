@@ -1212,6 +1212,71 @@
       "previousMatch": "上一个匹配",
       "nextMatch": "下一个匹配",
       "close": "关闭"
+    },
+    "sections": {
+      "parameters": "参数",
+      "responses": "响应",
+      "models": "模型",
+      "enums": "枚举",
+      "polymorphism": "多态",
+      "overview": "概览",
+      "operations": "操作"
+    },
+    "table": {
+      "in": "位置",
+      "name": "名称",
+      "type": "类型",
+      "required": "必填",
+      "operation": "操作",
+      "description": "描述",
+      "example": "示例",
+      "constraints": "约束"
+    },
+    "params": {
+      "empty": "筛选的路由未声明非请求体参数。"
+    },
+    "responses": {
+      "status": "状态",
+      "schema": "架构",
+      "headers": "标头",
+      "empty": "筛选的路由未声明响应。"
+    },
+    "route": {
+      "requestBody": "请求体",
+      "responseBody": "响应体",
+      "security": "安全",
+      "externalDocs": "外部文档",
+      "examplePayload": "示例负载",
+      "operationId": "operationId",
+      "addRequest": "+ 添加请求"
+    },
+    "apiInfo": {
+      "version": "版本",
+      "sourceFormat": "源格式",
+      "from": "来自",
+      "server": "服务器",
+      "contact": "联系人",
+      "license": "许可证",
+      "termsOfService": "服务条款",
+      "externalDocs": "外部文档",
+      "tagReferences": "标签引用"
+    },
+    "sidebar": {
+      "outline": "文档大纲"
+    },
+    "legend": {
+      "requiredProperty": "必需属性",
+      "optionalProperty": "可选属性",
+      "nullableValue": "可为空的值",
+      "readOnly": "只读（由服务器设置）",
+      "deprecatedBadge": "已弃用",
+      "deprecatedDesc": "在源规范中声明为已弃用",
+      "removedBadge": "已移除",
+      "removedDesc": "在最近一次重新导入中已消失",
+      "requiredSingleRef": "必需的单一引用",
+      "optionalSingleRef": "可选的单一引用",
+      "requiredArrayRef": "必需的数组引用",
+      "optionalArrayRef": "可选的数组引用"
     }
   },
   "scenario": {

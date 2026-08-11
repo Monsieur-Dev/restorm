@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import type { ModelDocumentation, PropertyDocumentation, SchemaConstraints } from '../../../../shared/types/apiDocumentation'
 import {
@@ -102,6 +103,7 @@ interface ModelNodeHeaderProps {
 }
 
 const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
+  const { t } = useTranslation()
   const hasDescription = model.description !== undefined && model.description.length > 0
   const headerHeight = modelHeaderHeight(model)
   const headerStyle: React.CSSProperties = { height: headerHeight }
@@ -112,12 +114,12 @@ const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
         <span className="documentation-host-model-node__name">{model.name}</span>
         {model.deprecated === true && (
           <span className="documentation-host-model-node__badge documentation-host-model-node__badge--deprecated">
-            deprecated
+            {t('documentation.legend.deprecatedBadge')}
           </span>
         )}
         {model.removed === true && (
           <span className="documentation-host-model-node__badge documentation-host-model-node__badge--removed">
-            removed
+            {t('documentation.legend.removedBadge')}
           </span>
         )}
       </div>

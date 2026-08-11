@@ -1215,6 +1215,71 @@
       "previousMatch": "Попередній збіг",
       "nextMatch": "Наступний збіг",
       "close": "Закрити"
+    },
+    "sections": {
+      "parameters": "Параметри",
+      "responses": "Відповіді",
+      "models": "Моделі",
+      "enums": "Переліки",
+      "polymorphism": "Поліморфізм",
+      "overview": "Огляд",
+      "operations": "Операції"
+    },
+    "table": {
+      "in": "Де",
+      "name": "Назва",
+      "type": "Тип",
+      "required": "Обов.",
+      "operation": "Операція",
+      "description": "Опис",
+      "example": "Приклад",
+      "constraints": "Обмеження"
+    },
+    "params": {
+      "empty": "Для відфільтрованих маршрутів не оголошено параметрів поза тілом."
+    },
+    "responses": {
+      "status": "Статус",
+      "schema": "Схема",
+      "headers": "Заголовки",
+      "empty": "Для відфільтрованих маршрутів не оголошено відповідей."
+    },
+    "route": {
+      "requestBody": "Тіло запиту",
+      "responseBody": "Тіло відповіді",
+      "security": "Безпека",
+      "externalDocs": "Зовнішня документація",
+      "examplePayload": "Приклад корисного навантаження",
+      "operationId": "operationId",
+      "addRequest": "+ Додати запит"
+    },
+    "apiInfo": {
+      "version": "Версія",
+      "sourceFormat": "Формат джерела",
+      "from": "з",
+      "server": "Сервер",
+      "contact": "Контакт",
+      "license": "Ліцензія",
+      "termsOfService": "Умови надання послуг",
+      "externalDocs": "Зовнішня документація",
+      "tagReferences": "Посилання на теги"
+    },
+    "sidebar": {
+      "outline": "Структура документації"
+    },
+    "legend": {
+      "requiredProperty": "обов'язкова властивість",
+      "optionalProperty": "необов'язкова властивість",
+      "nullableValue": "значення, що допускає null",
+      "readOnly": "лише для читання (встановлюється сервером)",
+      "deprecatedBadge": "застаріле",
+      "deprecatedDesc": "оголошено застарілим у вихідній специфікації",
+      "removedBadge": "видалено",
+      "removedDesc": "відсутнє в останньому повторному імпорті",
+      "requiredSingleRef": "обов'язкове одиничне посилання",
+      "optionalSingleRef": "необов'язкове одиничне посилання",
+      "requiredArrayRef": "обов'язкове посилання на масив",
+      "optionalArrayRef": "необов'язкове посилання на масив"
     }
   },
   "scenario": {

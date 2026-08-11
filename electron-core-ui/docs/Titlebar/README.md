@@ -47,6 +47,7 @@ export interface TitlebarProps {
 - **searchFn** (`(query: string) => Promise<GroupedResults[]>`) : Optional override to make E2E search deterministic.
 - **searchBarTestId** (`string`) : Optional override test id for the internal `SearchBar`.
 - **searchTooltipHideDelayMs** (`number`) : Forwarded to the internal `SearchBar` as `tooltipHideDelayMs` — the delay (default `300`) before the result tooltip hides once the pointer leaves it.
+- **getSearchResultDragData** (`(result: SearchResult) => Record<string, string> | undefined`) : Forwarded to the internal `SearchBar` as `getResultDragData` — makes result rows draggable, returning the `dataTransfer` payload (MIME → value) for a result or `undefined` for none. Lets the host feed search results to the same drop targets as its sidebar rows.
 - **customWcoTestId** (`string`) : Optional override test id for the internal `CustomWCO`.
 - **customWcoPlatform** (`string`) : Optional platform override passed to the internal `CustomWCO` (useful for deterministic web E2E harnesses).
 

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { MarkdownViewer, getColorFromString, getContrastColor, Button } from 'electron-core-ui/renderer'
 import type { OperationDocumentation, SecurityScheme } from '../../../../shared/types/apiDocumentation'
 import { Badge } from '../common/Badge'
@@ -186,6 +187,7 @@ function renderSchemeDetail(scheme: SecurityScheme, requestedScopes: string[]): 
 }
 
 export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, tagColors, onAddRequest }) => {
+  const { t } = useTranslation()
   const requestBodyType = formatBodyParameter(operation)
   const responseSchema = formatResponseSchema(operation)
   const documentedModels = useDocumentedModels()
@@ -285,7 +287,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
           data-testid={`documentation-host-route-header-add-${operation.operationId ?? operation.match.urlPattern}`}
           onClick={(): void => { onAddRequest(operation) }}
         >
-          + Add a request
+          {t('documentation.route.addRequest')}
         </Button>
       )}
 
@@ -301,13 +303,13 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
       <dl className="documentation-host-route-header__meta">
         {operation.operationId !== undefined && operation.operationId.length > 0 && (
           <>
-            <dt>operationId</dt>
+            <dt>{t('documentation.route.operationId')}</dt>
             <dd><code>{operation.operationId}</code></dd>
           </>
         )}
         {requestBodyType !== undefined && (
           <>
-            <dt>Request body</dt>
+            <dt>{t('documentation.route.requestBody')}</dt>
             <dd>
               <code>{renderSchemaLabel(requestBodyType)}</code>
               {consumes !== undefined && consumes.length > 0 && (
@@ -318,7 +320,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         )}
         {responseSchema !== undefined && (
           <>
-            <dt>Response body</dt>
+            <dt>{t('documentation.route.responseBody')}</dt>
             <dd>
               <code>{renderSchemaLabel(responseSchema)}</code>
               {produces !== undefined && produces.length > 0 && (
@@ -329,7 +331,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         )}
         {operation.security !== undefined && operation.security.length > 0 && (
           <>
-            <dt>Security</dt>
+            <dt>{t('documentation.route.security')}</dt>
             <dd>
               <ul className="documentation-host-route-header__security-list">
                 {operation.security.flatMap((requirement, idx) => {
@@ -373,7 +375,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         )}
         {operation.externalDocs !== undefined && (
           <>
-            <dt>External docs</dt>
+            <dt>{t('documentation.route.externalDocs')}</dt>
             <dd>
               <a href={operation.externalDocs.url}>
                 {operation.externalDocs.description !== undefined && operation.externalDocs.description.length > 0
@@ -391,7 +393,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
           data-testid="documentation-host-route-header-payload"
           open
         >
-          <summary>Example payload</summary>
+          <summary>{t('documentation.route.examplePayload')}</summary>
           <pre
             className="documentation-host-route-header__payload-pre"
             data-language={payloadLanguage(requestPayload)}

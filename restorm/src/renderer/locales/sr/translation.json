@@ -1214,6 +1214,71 @@
       "previousMatch": "Prethodno podudaranje",
       "nextMatch": "Sledeće podudaranje",
       "close": "Zatvori"
+    },
+    "sections": {
+      "parameters": "Parametri",
+      "responses": "Odgovori",
+      "models": "Modeli",
+      "enums": "Nabrajanja",
+      "polymorphism": "Polimorfizam",
+      "overview": "Pregled",
+      "operations": "Operacije"
+    },
+    "table": {
+      "in": "Gde",
+      "name": "Naziv",
+      "type": "Tip",
+      "required": "Obav.",
+      "operation": "Operacija",
+      "description": "Opis",
+      "example": "Primer",
+      "constraints": "Ograničenja"
+    },
+    "params": {
+      "empty": "Nema deklarisanih parametara van tela za filtrirane rute."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Šema",
+      "headers": "Zaglavlja",
+      "empty": "Nema deklarisanih odgovora za filtrirane rute."
+    },
+    "route": {
+      "requestBody": "Telo zahteva",
+      "responseBody": "Telo odgovora",
+      "security": "Bezbednost",
+      "externalDocs": "Spoljna dokumentacija",
+      "examplePayload": "Primer korisnog opterećenja",
+      "operationId": "operationId",
+      "addRequest": "+ Dodaj zahtev"
+    },
+    "apiInfo": {
+      "version": "Verzija",
+      "sourceFormat": "Format izvora",
+      "from": "iz",
+      "server": "Server",
+      "contact": "Kontakt",
+      "license": "Licenca",
+      "termsOfService": "Uslovi korišćenja",
+      "externalDocs": "Spoljna dokumentacija",
+      "tagReferences": "Reference oznaka"
+    },
+    "sidebar": {
+      "outline": "Struktura dokumentacije"
+    },
+    "legend": {
+      "requiredProperty": "obavezno svojstvo",
+      "optionalProperty": "opciono svojstvo",
+      "nullableValue": "vrednost koja dozvoljava null",
+      "readOnly": "samo za čitanje (postavlja server)",
+      "deprecatedBadge": "zastarelo",
+      "deprecatedDesc": "deklarisano kao zastarelo u izvornoj specifikaciji",
+      "removedBadge": "uklonjeno",
+      "removedDesc": "odsutno iz poslednjeg ponovnog uvoza",
+      "requiredSingleRef": "obavezna pojedinačna referenca",
+      "optionalSingleRef": "opciona pojedinačna referenca",
+      "requiredArrayRef": "obavezna referenca niza",
+      "optionalArrayRef": "opciona referenca niza"
     }
   },
   "scenario": {

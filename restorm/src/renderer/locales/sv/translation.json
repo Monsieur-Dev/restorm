@@ -1213,6 +1213,71 @@
       "previousMatch": "Föregående träff",
       "nextMatch": "Nästa träff",
       "close": "Stäng"
+    },
+    "sections": {
+      "parameters": "Parametrar",
+      "responses": "Svar",
+      "models": "Modeller",
+      "enums": "Enums",
+      "polymorphism": "Polymorfism",
+      "overview": "Översikt",
+      "operations": "Operationer"
+    },
+    "table": {
+      "in": "I",
+      "name": "Namn",
+      "type": "Typ",
+      "required": "Kr.",
+      "operation": "Operation",
+      "description": "Beskrivning",
+      "example": "Exempel",
+      "constraints": "Begränsningar"
+    },
+    "params": {
+      "empty": "Inga icke-body-parametrar deklarerade för de filtrerade rutterna."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schema",
+      "headers": "Rubriker",
+      "empty": "Inga svar deklarerade för de filtrerade rutterna."
+    },
+    "route": {
+      "requestBody": "Begäranskropp",
+      "responseBody": "Svarskropp",
+      "security": "Säkerhet",
+      "externalDocs": "Externa dokument",
+      "examplePayload": "Exempel-payload",
+      "operationId": "operationId",
+      "addRequest": "+ Lägg till en begäran"
+    },
+    "apiInfo": {
+      "version": "Version",
+      "sourceFormat": "Källformat",
+      "from": "från",
+      "server": "Server",
+      "contact": "Kontakt",
+      "license": "Licens",
+      "termsOfService": "Användarvillkor",
+      "externalDocs": "Externa dokument",
+      "tagReferences": "Taggreferenser"
+    },
+    "sidebar": {
+      "outline": "Dokumentationsöversikt"
+    },
+    "legend": {
+      "requiredProperty": "obligatorisk egenskap",
+      "optionalProperty": "valfri egenskap",
+      "nullableValue": "nullbart värde",
+      "readOnly": "skrivskyddad (satt av servern)",
+      "deprecatedBadge": "föråldrad",
+      "deprecatedDesc": "deklarerad som föråldrad i källspecifikationen",
+      "removedBadge": "borttagen",
+      "removedDesc": "saknas i senaste omimporten",
+      "requiredSingleRef": "obligatorisk enkelref.",
+      "optionalSingleRef": "valfri enkelref.",
+      "requiredArrayRef": "obligatorisk array-ref.",
+      "optionalArrayRef": "valfri array-ref."
     }
   },
   "scenario": {

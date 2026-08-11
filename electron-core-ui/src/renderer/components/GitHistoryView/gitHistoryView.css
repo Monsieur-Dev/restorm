@@ -63,9 +63,8 @@
 	font-size: 11px;
 	color: var(--descriptionForeground);
 
-	/* Keep the date clear of the overlay scrollbar, which is drawn on top of
-	   the list's right edge and would otherwise sit over the last digits. */
-	margin-right: 8px;
+	/* No scrollbar-clearance margin here: ScrollableElement now reserves a
+	   gutter for the overlay scrollbar, so the date never sits under it. */
 }
 
 .ecui-git-history-row.selected .ecui-git-history-date {

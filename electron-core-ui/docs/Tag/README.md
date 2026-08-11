@@ -57,9 +57,11 @@ When `editable` is `true`:
 
 ## Color Contrast
 
-When a custom `color` is set, the text color is automatically computed using the W3C relative luminance formula (WCAG 2.0):
+When a custom `color` is set, the text color is automatically computed by `getContrastColor()` using **APCA** (Accessible Perceptual Contrast Algorithm, the WCAG 3 draft successor):
 - Dark background → white text
 - Light background → black text
+
+APCA is used instead of the WCAG 2 relative-luminance ratio because WCAG 2 mispredicts *perceived* contrast on saturated mid-tones (it over-weights green, under-weights blue/red) — it would put dark text on a saturated coral / teal / magenta where white is visibly cleaner. `getContrastColor()` compares the APCA lightness-contrast (Lc) of black vs white text against the background and keeps the stronger one.
 
 ## CSS Classes
 

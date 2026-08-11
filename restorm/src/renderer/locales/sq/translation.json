@@ -1213,6 +1213,71 @@
       "previousMatch": "Përputhja e mëparshme",
       "nextMatch": "Përputhja tjetër",
       "close": "Mbyll"
+    },
+    "sections": {
+      "parameters": "Parametrat",
+      "responses": "Përgjigjet",
+      "models": "Modelet",
+      "enums": "Numërimet",
+      "polymorphism": "Polimorfizmi",
+      "overview": "Përmbledhje",
+      "operations": "Operacionet"
+    },
+    "table": {
+      "in": "Ku",
+      "name": "Emri",
+      "type": "Lloji",
+      "required": "Kërk.",
+      "operation": "Operacioni",
+      "description": "Përshkrimi",
+      "example": "Shembull",
+      "constraints": "Kufizimet"
+    },
+    "params": {
+      "empty": "Nuk ka parametra jashtë trupit të deklaruar për rrugët e filtruara."
+    },
+    "responses": {
+      "status": "Statusi",
+      "schema": "Skema",
+      "headers": "Titujt",
+      "empty": "Nuk ka përgjigje të deklaruara për rrugët e filtruara."
+    },
+    "route": {
+      "requestBody": "Trupi i kërkesës",
+      "responseBody": "Trupi i përgjigjes",
+      "security": "Siguria",
+      "externalDocs": "Dokumente të jashtme",
+      "examplePayload": "Shembull ngarkese",
+      "operationId": "operationId",
+      "addRequest": "+ Shto një kërkesë"
+    },
+    "apiInfo": {
+      "version": "Versioni",
+      "sourceFormat": "Formati i burimit",
+      "from": "nga",
+      "server": "Serveri",
+      "contact": "Kontakti",
+      "license": "Licenca",
+      "termsOfService": "Kushtet e shërbimit",
+      "externalDocs": "Dokumente të jashtme",
+      "tagReferences": "Referenca etiketash"
+    },
+    "sidebar": {
+      "outline": "Struktura e dokumentacionit"
+    },
+    "legend": {
+      "requiredProperty": "veti e kërkuar",
+      "optionalProperty": "veti opsionale",
+      "nullableValue": "vlerë e anulueshme",
+      "readOnly": "vetëm për lexim (caktohet nga serveri)",
+      "deprecatedBadge": "i vjetruar",
+      "deprecatedDesc": "deklaruar si i vjetruar në specifikimin burimor",
+      "removedBadge": "i hequr",
+      "removedDesc": "mungon në riimportimin e fundit",
+      "requiredSingleRef": "referencë e vetme e kërkuar",
+      "optionalSingleRef": "referencë e vetme opsionale",
+      "requiredArrayRef": "referencë vargu e kërkuar",
+      "optionalArrayRef": "referencë vargu opsionale"
     }
   },
   "scenario": {

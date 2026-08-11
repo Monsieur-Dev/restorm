@@ -1214,6 +1214,71 @@
       "previousMatch": "Prethodno podudaranje",
       "nextMatch": "Sljedeće podudaranje",
       "close": "Zatvori"
+    },
+    "sections": {
+      "parameters": "Parametri",
+      "responses": "Odgovori",
+      "models": "Modeli",
+      "enums": "Enumeracije",
+      "polymorphism": "Polimorfizam",
+      "overview": "Pregled",
+      "operations": "Operacije"
+    },
+    "table": {
+      "in": "Gdje",
+      "name": "Naziv",
+      "type": "Tip",
+      "required": "Obav.",
+      "operation": "Operacija",
+      "description": "Opis",
+      "example": "Primjer",
+      "constraints": "Ograničenja"
+    },
+    "params": {
+      "empty": "Nema deklariranih parametara izvan tijela za filtrirane rute."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Shema",
+      "headers": "Zaglavlja",
+      "empty": "Nema deklariranih odgovora za filtrirane rute."
+    },
+    "route": {
+      "requestBody": "Tijelo zahtjeva",
+      "responseBody": "Tijelo odgovora",
+      "security": "Sigurnost",
+      "externalDocs": "Vanjska dokumentacija",
+      "examplePayload": "Primjer sadržaja",
+      "operationId": "operationId",
+      "addRequest": "+ Dodaj zahtjev"
+    },
+    "apiInfo": {
+      "version": "Verzija",
+      "sourceFormat": "Format izvora",
+      "from": "iz",
+      "server": "Poslužitelj",
+      "contact": "Kontakt",
+      "license": "Licenca",
+      "termsOfService": "Uvjeti usluge",
+      "externalDocs": "Vanjska dokumentacija",
+      "tagReferences": "Reference oznaka"
+    },
+    "sidebar": {
+      "outline": "Struktura dokumentacije"
+    },
+    "legend": {
+      "requiredProperty": "obavezno svojstvo",
+      "optionalProperty": "neobavezno svojstvo",
+      "nullableValue": "vrijednost koja dopušta null",
+      "readOnly": "samo za čitanje (postavlja poslužitelj)",
+      "deprecatedBadge": "zastarjelo",
+      "deprecatedDesc": "deklarirano kao zastarjelo u izvornoj specifikaciji",
+      "removedBadge": "uklonjeno",
+      "removedDesc": "nedostaje u posljednjem ponovnom uvozu",
+      "requiredSingleRef": "obavezna pojedinačna referenca",
+      "optionalSingleRef": "neobavezna pojedinačna referenca",
+      "requiredArrayRef": "obavezna referenca niza",
+      "optionalArrayRef": "neobavezna referenca niza"
     }
   },
   "scenario": {

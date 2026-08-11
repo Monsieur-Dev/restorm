@@ -1214,6 +1214,71 @@
       "previousMatch": "Potrivirea anterioară",
       "nextMatch": "Potrivirea următoare",
       "close": "Închide"
+    },
+    "sections": {
+      "parameters": "Parametri",
+      "responses": "Răspunsuri",
+      "models": "Modele",
+      "enums": "Enumerări",
+      "polymorphism": "Polimorfism",
+      "overview": "Prezentare generală",
+      "operations": "Operațiuni"
+    },
+    "table": {
+      "in": "În",
+      "name": "Nume",
+      "type": "Tip",
+      "required": "Oblig.",
+      "operation": "Operațiune",
+      "description": "Descriere",
+      "example": "Exemplu",
+      "constraints": "Constrângeri"
+    },
+    "params": {
+      "empty": "Niciun parametru din afara corpului declarat pentru rutele filtrate."
+    },
+    "responses": {
+      "status": "Stare",
+      "schema": "Schemă",
+      "headers": "Anteturi",
+      "empty": "Niciun răspuns declarat pentru rutele filtrate."
+    },
+    "route": {
+      "requestBody": "Corpul cererii",
+      "responseBody": "Corpul răspunsului",
+      "security": "Securitate",
+      "externalDocs": "Documente externe",
+      "examplePayload": "Exemplu de payload",
+      "operationId": "operationId",
+      "addRequest": "+ Adaugă o cerere"
+    },
+    "apiInfo": {
+      "version": "Versiune",
+      "sourceFormat": "Format sursă",
+      "from": "din",
+      "server": "Server",
+      "contact": "Contact",
+      "license": "Licență",
+      "termsOfService": "Termenii serviciului",
+      "externalDocs": "Documente externe",
+      "tagReferences": "Referințe de etichete"
+    },
+    "sidebar": {
+      "outline": "Structura documentației"
+    },
+    "legend": {
+      "requiredProperty": "proprietate obligatorie",
+      "optionalProperty": "proprietate opțională",
+      "nullableValue": "valoare care acceptă null",
+      "readOnly": "doar citire (setat de server)",
+      "deprecatedBadge": "depreciat",
+      "deprecatedDesc": "declarat depreciat în specificația sursă",
+      "removedBadge": "eliminat",
+      "removedDesc": "absent din ultima reimportare",
+      "requiredSingleRef": "ref. unică obligatorie",
+      "optionalSingleRef": "ref. unică opțională",
+      "requiredArrayRef": "ref. de tablou obligatorie",
+      "optionalArrayRef": "ref. de tablou opțională"
     }
   },
   "scenario": {

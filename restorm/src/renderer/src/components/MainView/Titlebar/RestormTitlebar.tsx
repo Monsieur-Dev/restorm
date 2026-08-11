@@ -15,6 +15,7 @@ import {
   useSettingsModal,
   useFeature,
   useElectronPlatform,
+  LIST_VIEW_DRAG_MIME,
   type SearchResult
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
@@ -34,6 +35,24 @@ import { useUpdateState } from '../../../hooks/useUpdateState'
  * there so the SCENARIO badge sits next to the title instead of an
  * icon + two-line stacked breadcrumb. */
 const SEARCH_BADGED_CATEGORIES = ['request', 'scenario']
+
+/**
+ * Drag payload for a search result, so dropping a result onto a scenario or the
+ * workbench behaves exactly like dragging the matching sidebar row. Stamps the
+ * same `dataTransfer` shape the tree's `ListView` uses (`text/plain` +
+ * `LIST_VIEW_DRAG_MIME`, both the item id) — the drop targets already read that.
+ * Returns undefined for results that don't map to a draggable tree item.
+ */
+function searchResultDragData(result: SearchResult): Record<string, string> | undefined {
+  const nav = result.navigation
+  const id =
+    nav?.['type'] === 'request' ? nav['requestId'] :
+    nav?.['type'] === 'folder' ? nav['folderId'] :
+    nav?.['type'] === 'scenario' ? nav['scenarioId'] :
+    undefined
+  if (typeof id !== 'string' || id.length === 0) return undefined
+  return { 'text/plain': id, [LIST_VIEW_DRAG_MIME]: id }
+}
 
 export interface RestormTitlebarProps {
   fileName: string | null
@@ -286,6 +305,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       renderSearchTooltipContent={renderSearchTooltipContent}
       renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}
       searchBadgedCategories={SEARCH_BADGED_CATEGORIES}
+      getSearchResultDragData={searchResultDragData}
       // The search popover hosts a draggable model graph; a fast pan
       // can push the cursor past the popover bounds for a frame
       // before pointer-lock pulls it back, which would dismiss it

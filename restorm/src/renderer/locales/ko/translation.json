@@ -1212,6 +1212,71 @@
       "previousMatch": "이전 일치",
       "nextMatch": "다음 일치",
       "close": "닫기"
+    },
+    "sections": {
+      "parameters": "매개변수",
+      "responses": "응답",
+      "models": "모델",
+      "enums": "열거형",
+      "polymorphism": "다형성",
+      "overview": "개요",
+      "operations": "작업"
+    },
+    "table": {
+      "in": "위치",
+      "name": "이름",
+      "type": "유형",
+      "required": "필수",
+      "operation": "작업",
+      "description": "설명",
+      "example": "예시",
+      "constraints": "제약 조건"
+    },
+    "params": {
+      "empty": "필터링된 경로에 대해 선언된 본문 외 매개변수가 없습니다."
+    },
+    "responses": {
+      "status": "상태",
+      "schema": "스키마",
+      "headers": "헤더",
+      "empty": "필터링된 경로에 대해 선언된 응답이 없습니다."
+    },
+    "route": {
+      "requestBody": "요청 본문",
+      "responseBody": "응답 본문",
+      "security": "보안",
+      "externalDocs": "외부 문서",
+      "examplePayload": "페이로드 예시",
+      "operationId": "operationId",
+      "addRequest": "+ 요청 추가"
+    },
+    "apiInfo": {
+      "version": "버전",
+      "sourceFormat": "소스 형식",
+      "from": "출처:",
+      "server": "서버",
+      "contact": "연락처",
+      "license": "라이선스",
+      "termsOfService": "서비스 약관",
+      "externalDocs": "외부 문서",
+      "tagReferences": "태그 참조"
+    },
+    "sidebar": {
+      "outline": "문서 개요"
+    },
+    "legend": {
+      "requiredProperty": "필수 속성",
+      "optionalProperty": "선택 속성",
+      "nullableValue": "null 허용 값",
+      "readOnly": "읽기 전용 (서버 설정)",
+      "deprecatedBadge": "지원 중단",
+      "deprecatedDesc": "소스 사양에서 지원 중단으로 선언됨",
+      "removedBadge": "제거됨",
+      "removedDesc": "최근 재가져오기에서 사라짐",
+      "requiredSingleRef": "필수 단일 참조",
+      "optionalSingleRef": "선택 단일 참조",
+      "requiredArrayRef": "필수 배열 참조",
+      "optionalArrayRef": "선택 배열 참조"
     }
   },
   "scenario": {

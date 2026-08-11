@@ -1,4 +1,5 @@
 import React, { forwardRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
 import type { EnumGroup } from './enumGroups'
 
@@ -24,6 +25,7 @@ const SEE_MORE_THRESHOLD = 20
  * from blowing up the page.
  */
 export const EnumsSection = forwardRef<HTMLElement, EnumsSectionProps>(({ enumGroups, headingLevel = 1 }, ref) => {
+  const { t } = useTranslation()
   if (enumGroups.length === 0) return null
 
   return (
@@ -33,8 +35,8 @@ export const EnumsSection = forwardRef<HTMLElement, EnumsSectionProps>(({ enumGr
       data-testid="documentation-host-enums-section"
     >
       {headingLevel === 1
-        ? <h1 className="documentation-host__section-title">Enums</h1>
-        : <h2 className="documentation-host__section-title">Enums</h2>}
+        ? <h1 className="documentation-host__section-title">{t('documentation.sections.enums')}</h1>
+        : <h2 className="documentation-host__section-title">{t('documentation.sections.enums')}</h2>}
       <div className="documentation-host-enums__list">
         {enumGroups.map((group) => (
           <div

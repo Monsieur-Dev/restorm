@@ -26,6 +26,15 @@
 	position: relative;
 }
 
+/* Fill mode (`fillToViewportRight`): the root already has the target width, so
+ * the visible content box must fill it edge-to-edge instead of capping at the
+ * default 500px. */
+.tooltip[data-fill="true"] .tooltip-content {
+	max-width: none;
+	width: 100%;
+	box-sizing: border-box;
+}
+
 /* Common beak pseudo-elements */
 .tooltip-content::before,
 .tooltip-content::after {

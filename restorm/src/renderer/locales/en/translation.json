@@ -1213,6 +1213,71 @@
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
       "close": "Close"
+    },
+    "sections": {
+      "parameters": "Parameters",
+      "responses": "Responses",
+      "models": "Models",
+      "enums": "Enums",
+      "polymorphism": "Polymorphism",
+      "overview": "Overview",
+      "operations": "Operations"
+    },
+    "table": {
+      "in": "In",
+      "name": "Name",
+      "type": "Type",
+      "required": "Req.",
+      "operation": "Operation",
+      "description": "Description",
+      "example": "Example",
+      "constraints": "Constraints"
+    },
+    "params": {
+      "empty": "No non-body parameters declared for the filtered routes."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schema",
+      "headers": "Headers",
+      "empty": "No responses declared for the filtered routes."
+    },
+    "route": {
+      "requestBody": "Request body",
+      "responseBody": "Response body",
+      "security": "Security",
+      "externalDocs": "External docs",
+      "examplePayload": "Example payload",
+      "operationId": "operationId",
+      "addRequest": "+ Add a request"
+    },
+    "apiInfo": {
+      "version": "Version",
+      "sourceFormat": "Source format",
+      "from": "from",
+      "server": "Server",
+      "contact": "Contact",
+      "license": "License",
+      "termsOfService": "Terms of service",
+      "externalDocs": "External docs",
+      "tagReferences": "Tag references"
+    },
+    "sidebar": {
+      "outline": "Documentation outline"
+    },
+    "legend": {
+      "requiredProperty": "required property",
+      "optionalProperty": "optional property",
+      "nullableValue": "nullable value",
+      "readOnly": "read-only (server-set)",
+      "deprecatedBadge": "deprecated",
+      "deprecatedDesc": "declared deprecated in the source spec",
+      "removedBadge": "removed",
+      "removedDesc": "gone from the most recent re-import",
+      "requiredSingleRef": "required single ref",
+      "optionalSingleRef": "optional single ref",
+      "requiredArrayRef": "required array ref",
+      "optionalArrayRef": "optional array ref"
     }
   },
   "scenario": {

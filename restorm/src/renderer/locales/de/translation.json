@@ -1213,6 +1213,71 @@
       "previousMatch": "Vorheriger Treffer",
       "nextMatch": "Nächster Treffer",
       "close": "Schließen"
+    },
+    "sections": {
+      "parameters": "Parameter",
+      "responses": "Antworten",
+      "models": "Modelle",
+      "enums": "Enums",
+      "polymorphism": "Polymorphie",
+      "overview": "Übersicht",
+      "operations": "Operationen"
+    },
+    "table": {
+      "in": "In",
+      "name": "Name",
+      "type": "Typ",
+      "required": "Erf.",
+      "operation": "Operation",
+      "description": "Beschreibung",
+      "example": "Beispiel",
+      "constraints": "Einschränkungen"
+    },
+    "params": {
+      "empty": "Keine Nicht-Body-Parameter für die gefilterten Routen deklariert."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schema",
+      "headers": "Header",
+      "empty": "Keine Antworten für die gefilterten Routen deklariert."
+    },
+    "route": {
+      "requestBody": "Anfrage-Body",
+      "responseBody": "Antwort-Body",
+      "security": "Sicherheit",
+      "externalDocs": "Externe Docs",
+      "examplePayload": "Beispiel-Payload",
+      "operationId": "operationId",
+      "addRequest": "+ Anfrage hinzufügen"
+    },
+    "apiInfo": {
+      "version": "Version",
+      "sourceFormat": "Quellformat",
+      "from": "von",
+      "server": "Server",
+      "contact": "Kontakt",
+      "license": "Lizenz",
+      "termsOfService": "Nutzungsbedingungen",
+      "externalDocs": "Externe Docs",
+      "tagReferences": "Tag-Verweise"
+    },
+    "sidebar": {
+      "outline": "Dokumentationsübersicht"
+    },
+    "legend": {
+      "requiredProperty": "erforderliche Eigenschaft",
+      "optionalProperty": "optionale Eigenschaft",
+      "nullableValue": "nullbarer Wert",
+      "readOnly": "schreibgeschützt (vom Server gesetzt)",
+      "deprecatedBadge": "veraltet",
+      "deprecatedDesc": "in der Quellspezifikation als veraltet deklariert",
+      "removedBadge": "entfernt",
+      "removedDesc": "beim letzten Re-Import nicht mehr vorhanden",
+      "requiredSingleRef": "erforderliche Einzelreferenz",
+      "optionalSingleRef": "optionale Einzelreferenz",
+      "requiredArrayRef": "erforderliche Array-Referenz",
+      "optionalArrayRef": "optionale Array-Referenz"
     }
   },
   "scenario": {

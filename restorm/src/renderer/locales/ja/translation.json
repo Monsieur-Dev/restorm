@@ -1212,6 +1212,71 @@
       "previousMatch": "前の一致",
       "nextMatch": "次の一致",
       "close": "閉じる"
+    },
+    "sections": {
+      "parameters": "パラメーター",
+      "responses": "レスポンス",
+      "models": "モデル",
+      "enums": "列挙型",
+      "polymorphism": "ポリモーフィズム",
+      "overview": "概要",
+      "operations": "操作"
+    },
+    "table": {
+      "in": "場所",
+      "name": "名前",
+      "type": "型",
+      "required": "必須",
+      "operation": "操作",
+      "description": "説明",
+      "example": "例",
+      "constraints": "制約"
+    },
+    "params": {
+      "empty": "フィルターされたルートに対してボディ以外のパラメーターは宣言されていません。"
+    },
+    "responses": {
+      "status": "ステータス",
+      "schema": "スキーマ",
+      "headers": "ヘッダー",
+      "empty": "フィルターされたルートに対してレスポンスは宣言されていません。"
+    },
+    "route": {
+      "requestBody": "リクエストボディ",
+      "responseBody": "レスポンスボディ",
+      "security": "セキュリティ",
+      "externalDocs": "外部ドキュメント",
+      "examplePayload": "ペイロードの例",
+      "operationId": "operationId",
+      "addRequest": "+ リクエストを追加"
+    },
+    "apiInfo": {
+      "version": "バージョン",
+      "sourceFormat": "ソース形式",
+      "from": "取得元:",
+      "server": "サーバー",
+      "contact": "連絡先",
+      "license": "ライセンス",
+      "termsOfService": "利用規約",
+      "externalDocs": "外部ドキュメント",
+      "tagReferences": "タグ参照"
+    },
+    "sidebar": {
+      "outline": "ドキュメントの目次"
+    },
+    "legend": {
+      "requiredProperty": "必須プロパティ",
+      "optionalProperty": "任意プロパティ",
+      "nullableValue": "null 許容値",
+      "readOnly": "読み取り専用（サーバー設定）",
+      "deprecatedBadge": "非推奨",
+      "deprecatedDesc": "ソース仕様で非推奨と宣言",
+      "removedBadge": "削除済み",
+      "removedDesc": "最新の再インポートで消失",
+      "requiredSingleRef": "必須の単一参照",
+      "optionalSingleRef": "任意の単一参照",
+      "requiredArrayRef": "必須の配列参照",
+      "optionalArrayRef": "任意の配列参照"
     }
   },
   "scenario": {

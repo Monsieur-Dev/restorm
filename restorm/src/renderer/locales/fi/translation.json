@@ -1213,6 +1213,71 @@
       "previousMatch": "Edellinen osuma",
       "nextMatch": "Seuraava osuma",
       "close": "Sulje"
+    },
+    "sections": {
+      "parameters": "Parametrit",
+      "responses": "Vastaukset",
+      "models": "Mallit",
+      "enums": "Enumit",
+      "polymorphism": "Polymorfismi",
+      "overview": "Yleiskatsaus",
+      "operations": "Operaatiot"
+    },
+    "table": {
+      "in": "Sijainti",
+      "name": "Nimi",
+      "type": "Tyyppi",
+      "required": "Pak.",
+      "operation": "Operaatio",
+      "description": "Kuvaus",
+      "example": "Esimerkki",
+      "constraints": "Rajoitteet"
+    },
+    "params": {
+      "empty": "Suodatetuille reiteille ei ole määritelty rungon ulkopuolisia parametreja."
+    },
+    "responses": {
+      "status": "Tila",
+      "schema": "Skeema",
+      "headers": "Otsakkeet",
+      "empty": "Suodatetuille reiteille ei ole määritelty vastauksia."
+    },
+    "route": {
+      "requestBody": "Pyynnön runko",
+      "responseBody": "Vastauksen runko",
+      "security": "Suojaus",
+      "externalDocs": "Ulkoiset dokumentit",
+      "examplePayload": "Esimerkkikuorma",
+      "operationId": "operationId",
+      "addRequest": "+ Lisää pyyntö"
+    },
+    "apiInfo": {
+      "version": "Versio",
+      "sourceFormat": "Lähdemuoto",
+      "from": "lähteestä",
+      "server": "Palvelin",
+      "contact": "Yhteystiedot",
+      "license": "Lisenssi",
+      "termsOfService": "Käyttöehdot",
+      "externalDocs": "Ulkoiset dokumentit",
+      "tagReferences": "Tagien viitteet"
+    },
+    "sidebar": {
+      "outline": "Dokumentaation rakenne"
+    },
+    "legend": {
+      "requiredProperty": "pakollinen ominaisuus",
+      "optionalProperty": "valinnainen ominaisuus",
+      "nullableValue": "nollattava arvo",
+      "readOnly": "vain luku (palvelimen asettama)",
+      "deprecatedBadge": "vanhentunut",
+      "deprecatedDesc": "määritelty vanhentuneeksi lähdemäärityksessä",
+      "removedBadge": "poistettu",
+      "removedDesc": "puuttuu viimeisimmästä uudelleentuonnista",
+      "requiredSingleRef": "pakollinen yksittäisviite",
+      "optionalSingleRef": "valinnainen yksittäisviite",
+      "requiredArrayRef": "pakollinen taulukkoviite",
+      "optionalArrayRef": "valinnainen taulukkoviite"
     }
   },
   "scenario": {

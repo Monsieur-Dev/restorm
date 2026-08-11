@@ -1213,6 +1213,71 @@
       "previousMatch": "Προηγούμενο αποτέλεσμα",
       "nextMatch": "Επόμενο αποτέλεσμα",
       "close": "Κλείσιμο"
+    },
+    "sections": {
+      "parameters": "Παράμετροι",
+      "responses": "Απαντήσεις",
+      "models": "Μοντέλα",
+      "enums": "Απαριθμήσεις",
+      "polymorphism": "Πολυμορφισμός",
+      "overview": "Επισκόπηση",
+      "operations": "Λειτουργίες"
+    },
+    "table": {
+      "in": "Θέση",
+      "name": "Όνομα",
+      "type": "Τύπος",
+      "required": "Απαιτ.",
+      "operation": "Λειτουργία",
+      "description": "Περιγραφή",
+      "example": "Παράδειγμα",
+      "constraints": "Περιορισμοί"
+    },
+    "params": {
+      "empty": "Δεν δηλώθηκαν παράμετροι εκτός σώματος για τις φιλτραρισμένες διαδρομές."
+    },
+    "responses": {
+      "status": "Κατάσταση",
+      "schema": "Σχήμα",
+      "headers": "Κεφαλίδες",
+      "empty": "Δεν δηλώθηκαν απαντήσεις για τις φιλτραρισμένες διαδρομές."
+    },
+    "route": {
+      "requestBody": "Σώμα αιτήματος",
+      "responseBody": "Σώμα απάντησης",
+      "security": "Ασφάλεια",
+      "externalDocs": "Εξωτερική τεκμηρίωση",
+      "examplePayload": "Παράδειγμα φορτίου",
+      "operationId": "operationId",
+      "addRequest": "+ Προσθήκη αιτήματος"
+    },
+    "apiInfo": {
+      "version": "Έκδοση",
+      "sourceFormat": "Μορφή πηγής",
+      "from": "από",
+      "server": "Διακομιστής",
+      "contact": "Επικοινωνία",
+      "license": "Άδεια",
+      "termsOfService": "Όροι υπηρεσίας",
+      "externalDocs": "Εξωτερική τεκμηρίωση",
+      "tagReferences": "Αναφορές ετικετών"
+    },
+    "sidebar": {
+      "outline": "Διάρθρωση τεκμηρίωσης"
+    },
+    "legend": {
+      "requiredProperty": "απαιτούμενη ιδιότητα",
+      "optionalProperty": "προαιρετική ιδιότητα",
+      "nullableValue": "τιμή με δυνατότητα null",
+      "readOnly": "μόνο για ανάγνωση (ορίζεται από τον διακομιστή)",
+      "deprecatedBadge": "παρωχημένο",
+      "deprecatedDesc": "δηλωμένο ως παρωχημένο στην προδιαγραφή προέλευσης",
+      "removedBadge": "αφαιρέθηκε",
+      "removedDesc": "απουσιάζει από την τελευταία επανεισαγωγή",
+      "requiredSingleRef": "απαιτούμενη μονή αναφορά",
+      "optionalSingleRef": "προαιρετική μονή αναφορά",
+      "requiredArrayRef": "απαιτούμενη αναφορά πίνακα",
+      "optionalArrayRef": "προαιρετική αναφορά πίνακα"
     }
   },
   "scenario": {

@@ -1213,6 +1213,71 @@
       "previousMatch": "Corrispondenza precedente",
       "nextMatch": "Corrispondenza successiva",
       "close": "Chiudi"
+    },
+    "sections": {
+      "parameters": "Parametri",
+      "responses": "Risposte",
+      "models": "Modelli",
+      "enums": "Enumerazioni",
+      "polymorphism": "Polimorfismo",
+      "overview": "Panoramica",
+      "operations": "Operazioni"
+    },
+    "table": {
+      "in": "In",
+      "name": "Nome",
+      "type": "Tipo",
+      "required": "Obbl.",
+      "operation": "Operazione",
+      "description": "Descrizione",
+      "example": "Esempio",
+      "constraints": "Vincoli"
+    },
+    "params": {
+      "empty": "Nessun parametro fuori dal corpo dichiarato per le rotte filtrate."
+    },
+    "responses": {
+      "status": "Stato",
+      "schema": "Schema",
+      "headers": "Intestazioni",
+      "empty": "Nessuna risposta dichiarata per le rotte filtrate."
+    },
+    "route": {
+      "requestBody": "Corpo della richiesta",
+      "responseBody": "Corpo della risposta",
+      "security": "Sicurezza",
+      "externalDocs": "Docs esterne",
+      "examplePayload": "Esempio di payload",
+      "operationId": "operationId",
+      "addRequest": "+ Aggiungi una richiesta"
+    },
+    "apiInfo": {
+      "version": "Versione",
+      "sourceFormat": "Formato di origine",
+      "from": "da",
+      "server": "Server",
+      "contact": "Contatto",
+      "license": "Licenza",
+      "termsOfService": "Termini di servizio",
+      "externalDocs": "Docs esterne",
+      "tagReferences": "Riferimenti dei tag"
+    },
+    "sidebar": {
+      "outline": "Struttura della documentazione"
+    },
+    "legend": {
+      "requiredProperty": "proprietà obbligatoria",
+      "optionalProperty": "proprietà facoltativa",
+      "nullableValue": "valore nullable",
+      "readOnly": "sola lettura (impostata dal server)",
+      "deprecatedBadge": "obsoleto",
+      "deprecatedDesc": "dichiarato obsoleto nella specifica di origine",
+      "removedBadge": "rimosso",
+      "removedDesc": "assente dall'ultima reimportazione",
+      "requiredSingleRef": "rif. singolo obbligatorio",
+      "optionalSingleRef": "rif. singolo facoltativo",
+      "requiredArrayRef": "rif. array obbligatorio",
+      "optionalArrayRef": "rif. array facoltativo"
     }
   },
   "scenario": {

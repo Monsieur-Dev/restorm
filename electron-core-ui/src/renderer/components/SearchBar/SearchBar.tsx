@@ -41,6 +41,15 @@ export interface SearchBarProps {
    * a pannable canvas) so a brief excursion outside the bounds
    * doesn't dismiss it. */
   tooltipHideDelayMs?: number
+  /** Make result rows draggable. Given a result, return the
+   * `dataTransfer` payload to stamp (a map of MIME type → string value)
+   * or `undefined` for a non-draggable result. Lets a host wire a search
+   * result to the SAME drop targets its tree/list items feed — e.g. return
+   * `{ 'text/plain': id, '<list-view-mime>': id }` so dropping a search
+   * result onto a scenario or the workbench behaves like dragging the
+   * matching sidebar row. The component stays generic: it only stamps what
+   * the host supplies and sets `effectAllowed = 'move'`. */
+  getResultDragData?: (result: SearchResult) => Record<string, string> | undefined
 }
 
 /** Debounce delay in milliseconds */
@@ -55,7 +64,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   renderTooltipContent,
   renderBadge,
   badgedCategories = ['request'],
-  tooltipHideDelayMs = 300
+  tooltipHideDelayMs = 300,
+  getResultDragData
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -138,8 +148,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     scheduleHideTooltip()
   }, [scheduleHideTooltip])
 
-  // Prevent default handler for mouse down on results wrapper
+  // Keep focus on the search input when the pointer goes down on empty areas of
+  // the results wrapper (default mousedown would blur it). But NOT on a result
+  // row: `preventDefault()` on mousedown aborts the native HTML5 drag, so a
+  // draggable result could never start dragging. Rows carry `data-result-id`;
+  // let their gesture through untouched. Clicking a row still navigates (the
+  // click fires on mouseup and closes the popover itself).
   const handleResultsMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('[data-result-id]')) return
     e.preventDefault()
   }, [])
 
@@ -494,6 +510,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                       {!isCollapsed && group.items.map((result) => {
                         const { category, icon, title: resultTitle } = result
                         const resultKey = normalizeTestIdSegment(result.id)
+                        const dragData = getResultDragData?.(result)
 
                         return (
                           <div
@@ -505,6 +522,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                             tabIndex={0}
                             data-testid={`${rootTestId}-result-${resultKey}`}
                             data-category={category}
+                            draggable={dragData !== undefined}
+                            onDragStart={dragData !== undefined ? (event): void => {
+                              try {
+                                for (const [mime, value] of Object.entries(dragData)) {
+                                  event.dataTransfer.setData(mime, value)
+                                }
+                                event.dataTransfer.effectAllowed = 'move'
+                              } catch { /* some platforms reject custom MIME types — the text/plain entry still carries the id */ }
+                            } : undefined}
                             onClick={() => { handleResultClick(result) }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') handleResultClick(result)
@@ -586,6 +612,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             content={tooltipContent}
             side="right"
             fixedTop={25}
+            fillToViewportRight={8}
             repositionKey={hoveredResultId}
             className="search-result-tooltip"
             data-testid={tooltipTestId}

@@ -1213,6 +1213,71 @@
       "previousMatch": "Forrige treff",
       "nextMatch": "Neste treff",
       "close": "Lukk"
+    },
+    "sections": {
+      "parameters": "Parametere",
+      "responses": "Svar",
+      "models": "Modeller",
+      "enums": "Enums",
+      "polymorphism": "Polymorfi",
+      "overview": "Oversikt",
+      "operations": "Operasjoner"
+    },
+    "table": {
+      "in": "I",
+      "name": "Navn",
+      "type": "Type",
+      "required": "Påkr.",
+      "operation": "Operasjon",
+      "description": "Beskrivelse",
+      "example": "Eksempel",
+      "constraints": "Begrensninger"
+    },
+    "params": {
+      "empty": "Ingen ikke-body-parametere deklarert for de filtrerte rutene."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Skjema",
+      "headers": "Headere",
+      "empty": "Ingen svar deklarert for de filtrerte rutene."
+    },
+    "route": {
+      "requestBody": "Forespørselstekst",
+      "responseBody": "Svartekst",
+      "security": "Sikkerhet",
+      "externalDocs": "Eksterne dokumenter",
+      "examplePayload": "Eksempel-payload",
+      "operationId": "operationId",
+      "addRequest": "+ Legg til en forespørsel"
+    },
+    "apiInfo": {
+      "version": "Versjon",
+      "sourceFormat": "Kildeformat",
+      "from": "fra",
+      "server": "Server",
+      "contact": "Kontakt",
+      "license": "Lisens",
+      "termsOfService": "Vilkår for tjenesten",
+      "externalDocs": "Eksterne dokumenter",
+      "tagReferences": "Tag-referanser"
+    },
+    "sidebar": {
+      "outline": "Dokumentasjonsoversikt"
+    },
+    "legend": {
+      "requiredProperty": "påkrevd egenskap",
+      "optionalProperty": "valgfri egenskap",
+      "nullableValue": "nullbar verdi",
+      "readOnly": "skrivebeskyttet (satt av serveren)",
+      "deprecatedBadge": "utdatert",
+      "deprecatedDesc": "erklært utdatert i kildespesifikasjonen",
+      "removedBadge": "fjernet",
+      "removedDesc": "fraværende i siste reimport",
+      "requiredSingleRef": "påkrevd enkeltref.",
+      "optionalSingleRef": "valgfri enkeltref.",
+      "requiredArrayRef": "påkrevd array-ref.",
+      "optionalArrayRef": "valgfri array-ref."
     }
   },
   "scenario": {

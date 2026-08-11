@@ -1213,6 +1213,71 @@
       "previousMatch": "Előző találat",
       "nextMatch": "Következő találat",
       "close": "Bezárás"
+    },
+    "sections": {
+      "parameters": "Paraméterek",
+      "responses": "Válaszok",
+      "models": "Modellek",
+      "enums": "Felsorolások",
+      "polymorphism": "Polimorfizmus",
+      "overview": "Áttekintés",
+      "operations": "Műveletek"
+    },
+    "table": {
+      "in": "Hol",
+      "name": "Név",
+      "type": "Típus",
+      "required": "Köt.",
+      "operation": "Művelet",
+      "description": "Leírás",
+      "example": "Példa",
+      "constraints": "Megkötések"
+    },
+    "params": {
+      "empty": "A szűrt útvonalakhoz nincs törzsön kívüli paraméter megadva."
+    },
+    "responses": {
+      "status": "Állapot",
+      "schema": "Séma",
+      "headers": "Fejlécek",
+      "empty": "A szűrt útvonalakhoz nincs válasz megadva."
+    },
+    "route": {
+      "requestBody": "Kérés törzse",
+      "responseBody": "Válasz törzse",
+      "security": "Biztonság",
+      "externalDocs": "Külső dokumentáció",
+      "examplePayload": "Példa adattartalom",
+      "operationId": "operationId",
+      "addRequest": "+ Kérés hozzáadása"
+    },
+    "apiInfo": {
+      "version": "Verzió",
+      "sourceFormat": "Forrásformátum",
+      "from": "innen:",
+      "server": "Kiszolgáló",
+      "contact": "Kapcsolat",
+      "license": "Licenc",
+      "termsOfService": "Szolgáltatási feltételek",
+      "externalDocs": "Külső dokumentáció",
+      "tagReferences": "Címkehivatkozások"
+    },
+    "sidebar": {
+      "outline": "Dokumentáció vázlata"
+    },
+    "legend": {
+      "requiredProperty": "kötelező tulajdonság",
+      "optionalProperty": "opcionális tulajdonság",
+      "nullableValue": "nullázható érték",
+      "readOnly": "csak olvasható (a kiszolgáló állítja be)",
+      "deprecatedBadge": "elavult",
+      "deprecatedDesc": "a forrásspecifikációban elavultként jelölve",
+      "removedBadge": "eltávolítva",
+      "removedDesc": "hiányzik a legutóbbi újraimportálásból",
+      "requiredSingleRef": "kötelező egyedi hivatkozás",
+      "optionalSingleRef": "opcionális egyedi hivatkozás",
+      "requiredArrayRef": "kötelező tömbhivatkozás",
+      "optionalArrayRef": "opcionális tömbhivatkozás"
     }
   },
   "scenario": {

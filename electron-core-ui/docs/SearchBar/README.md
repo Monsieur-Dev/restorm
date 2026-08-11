@@ -51,8 +51,28 @@ export interface SearchBarProps {
    * dismiss the tooltip mid-interaction.
    */
   tooltipHideDelayMs?: number
+
+  /**
+   * Make result rows draggable. Return the `dataTransfer` payload to stamp
+   * (a map of MIME type → string value) for a result, or `undefined` for a
+   * non-draggable one. Lets a host feed a search result to the SAME drop
+   * targets its tree / list rows use — e.g. return
+   * `{ 'text/plain': id, 'application/x-listview-item': id }` so dropping a
+   * result onto a scenario or the workbench behaves like dragging the matching
+   * sidebar row. The component stays generic: it only stamps what the host
+   * supplies and sets `effectAllowed = 'move'`.
+   */
+  getResultDragData?: (result: SearchResult) => Record<string, string> | undefined
 }
 ```
+
+## Dragging results
+
+When `getResultDragData` is supplied, each result row becomes `draggable`. On
+`dragStart` the component writes every `MIME → value` pair the callback returns
+onto the event's `dataTransfer` and sets `effectAllowed = 'move'`. The host owns
+the payload shape, so search-result drags can target the exact same drop
+handlers as the host's tree items — the component knows nothing project-specific.
 
 ## Testing
 

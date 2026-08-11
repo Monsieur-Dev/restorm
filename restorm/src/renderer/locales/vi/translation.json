@@ -1212,6 +1212,71 @@
       "previousMatch": "Kết quả trước",
       "nextMatch": "Kết quả tiếp theo",
       "close": "Đóng"
+    },
+    "sections": {
+      "parameters": "Tham số",
+      "responses": "Phản hồi",
+      "models": "Mô hình",
+      "enums": "Kiểu liệt kê",
+      "polymorphism": "Đa hình",
+      "overview": "Tổng quan",
+      "operations": "Thao tác"
+    },
+    "table": {
+      "in": "Ở",
+      "name": "Tên",
+      "type": "Kiểu",
+      "required": "Bắt buộc",
+      "operation": "Thao tác",
+      "description": "Mô tả",
+      "example": "Ví dụ",
+      "constraints": "Ràng buộc"
+    },
+    "params": {
+      "empty": "Không có tham số ngoài phần thân được khai báo cho các tuyến đã lọc."
+    },
+    "responses": {
+      "status": "Trạng thái",
+      "schema": "Lược đồ",
+      "headers": "Tiêu đề",
+      "empty": "Không có phản hồi nào được khai báo cho các tuyến đã lọc."
+    },
+    "route": {
+      "requestBody": "Phần thân yêu cầu",
+      "responseBody": "Phần thân phản hồi",
+      "security": "Bảo mật",
+      "externalDocs": "Tài liệu bên ngoài",
+      "examplePayload": "Ví dụ payload",
+      "operationId": "operationId",
+      "addRequest": "+ Thêm yêu cầu"
+    },
+    "apiInfo": {
+      "version": "Phiên bản",
+      "sourceFormat": "Định dạng nguồn",
+      "from": "từ",
+      "server": "Máy chủ",
+      "contact": "Liên hệ",
+      "license": "Giấy phép",
+      "termsOfService": "Điều khoản dịch vụ",
+      "externalDocs": "Tài liệu bên ngoài",
+      "tagReferences": "Tham chiếu thẻ"
+    },
+    "sidebar": {
+      "outline": "Bố cục tài liệu"
+    },
+    "legend": {
+      "requiredProperty": "thuộc tính bắt buộc",
+      "optionalProperty": "thuộc tính tùy chọn",
+      "nullableValue": "giá trị cho phép null",
+      "readOnly": "chỉ đọc (do máy chủ đặt)",
+      "deprecatedBadge": "không dùng nữa",
+      "deprecatedDesc": "được khai báo là không dùng nữa trong đặc tả nguồn",
+      "removedBadge": "đã xóa",
+      "removedDesc": "không có trong lần nhập lại gần nhất",
+      "requiredSingleRef": "tham chiếu đơn bắt buộc",
+      "optionalSingleRef": "tham chiếu đơn tùy chọn",
+      "requiredArrayRef": "tham chiếu mảng bắt buộc",
+      "optionalArrayRef": "tham chiếu mảng tùy chọn"
     }
   },
   "scenario": {
