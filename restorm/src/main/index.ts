@@ -188,6 +188,26 @@ const deepLinkArgvUrl = process.argv.find((a) => isDeepLinkUrl(a))
 // a protocol handler.
 const projectArgvPath = findProjectFileInArgv(process.argv)
 const gotSingleInstanceLock = app.requestSingleInstanceLock()
+// A `--run` invocation is a deliberate headless CLI run, NEVER an OS document
+// handler — and it must be classified first, because its own `--open
+// <file>.restorm` argument looks exactly like the bare `.restorm` positional an
+// OS document-open passes (`findProjectFileInArgv` scans the whole argv). Left
+// to the document-handler branch below, a `--run` that loses the lock would
+// take its `app.exit(0)` and vanish with empty stdout — the silent failure that
+// reads as "the scenario produced nothing" and gets misattributed to whatever
+// code last changed. Instead: fail loudly, non-zero. The lock is keyed on the
+// userData directory, so a lost lock means this run shares its userData with an
+// already-running instance; the fix is to isolate it via
+// `RESTORM_USER_DATA_OVERRIDE` (the e2e harness does this per invocation).
+if (!gotSingleInstanceLock && process.argv.includes('--run')) {
+  process.stderr.write(
+    'Cannot start a headless --run: another Restorm instance already holds the ' +
+    'single-instance lock for this user-data directory.\n' +
+    'Isolate this run by setting RESTORM_USER_DATA_OVERRIDE to a dedicated ' +
+    'directory (the e2e harness does this automatically per invocation).\n'
+  )
+  app.exit(1)
+}
 if (!gotSingleInstanceLock && (deepLinkArgvUrl !== undefined || projectArgvPath !== undefined)) {
   // This process was launched by the OS to handle a deep-link URL or to open
   // a document. The primary instance received the `second-instance` event and

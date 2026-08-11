@@ -58,6 +58,13 @@ function runHeadless(project: string, token: string | undefined): Promise<CliRes
   env.RESTORM_E2E_BACKEND_VERSION = '0.0.0-preview'
   if (token !== undefined) env.RESTORM_TOKEN = token
   else delete env.RESTORM_TOKEN
+  // Isolate the userData dir per invocation. The single-instance lock is keyed
+  // on it, so without this a headless --run collides with any Restorm instance
+  // already open on the machine (a human validation window), loses the lock,
+  // and the app now exits non-zero with a clear message — which would still
+  // fail the test. A dedicated dir makes the run independent of what else runs.
+  const isolatedUserDataDir = mkdtempSync(join(tmpdir(), 'restorm-headless-gating-ud-'))
+  env.RESTORM_USER_DATA_OVERRIDE = isolatedUserDataDir
 
   return new Promise((resolve, reject) => {
     const child = spawn(

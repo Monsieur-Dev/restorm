@@ -129,8 +129,17 @@ server; — = pure UI/in-process.
 
 ## Non-BDD e2e specs
 
+Every spec here that spawns the app for a headless `--run` isolates its userData
+directory per invocation (`RESTORM_USER_DATA_OVERRIDE` → a fresh `mkdtemp`). This
+is mandatory, not optional: the single-instance lock is keyed on that directory,
+so a run sharing it with any already-open Restorm window (a human validation
+instance) loses the lock. The app now refuses such a run with a clear message and
+a non-zero exit — but the isolation is what lets these suites pass regardless of
+what else is open. No suite in this catalog requires the absence of a concurrent
+instance.
+
 | Spec | Covers |
 |---|---|
-| scenario-cli/scenario-cli.spec.ts | Headless CLI scenario runner (run-log goldens, exit codes, --param/--out) |
+| scenario-cli/scenario-cli.spec.ts | Headless CLI scenario runner (run-log goldens, exit codes, --param/--out, loud failure under a held single-instance lock) |
 | stage-gating/headless-gating.spec.ts | Capability gating in headless mode |
 | stage-gating/gating-lifecycle.spec.ts | Capability gating lifecycle |

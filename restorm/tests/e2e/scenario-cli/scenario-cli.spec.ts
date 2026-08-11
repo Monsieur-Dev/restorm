@@ -19,14 +19,17 @@ const ELECTRON = electronPath as unknown as string
 
 interface CliResult { code: number | null; stdout: string; stderr: string }
 
-function runCli(args: string[]): Promise<CliResult> {
+function runCli(args: string[], userDataDirOverride?: string): Promise<CliResult> {
   return new Promise((resolve, reject) => {
     // Each invocation gets its OWN userData dir. Without it every CLI run
     // shares the default profile and takes its single-instance lock: a second
     // run forwards its argv to the first and quits, so the caller sees an
     // empty stdout and a hang until the test's timeout. That made this suite
     // pass or fail depending on what else happened to be running.
-    const isolatedUserDataDir = mkdtempSync(join(tmpdir(), 'restorm-cli-'))
+    //
+    // A caller can force a SHARED dir (`userDataDirOverride`) to exercise the
+    // lock-conflict path deliberately.
+    const isolatedUserDataDir = userDataDirOverride ?? mkdtempSync(join(tmpdir(), 'restorm-cli-'))
     const child = spawn(ELECTRON, ['--no-sandbox', '--ozone-platform=x11', MAIN_JS, ...args], {
       // RESTORM_E2E_ENTITLEMENT_PLAN seeds Pro entitlement so the headless gate
       // is bypassed in dev builds — mirrors mcp-server.fixture.ts.
@@ -125,5 +128,34 @@ test.describe('headless CLI scenario runner', () => {
     const res = await runCli(['--run', LOGS, '--headless'])
     expect(res.code).toBe(2)
     expect(res.stderr).toContain('--run requires --open')
+  })
+
+  test('fails loudly (not silent exit 0) when the single-instance lock is held', async () => {
+    // Two processes sharing ONE userData dir: a long-lived holder takes the
+    // single-instance lock, so a headless --run against the same dir loses it.
+    // It must fail with a clear message and a non-zero code — never fall
+    // through to a normal startup that runs no scenario and exits 0 with empty
+    // stdout (the silent failure that made a held lock look like "the scenario
+    // produced nothing").
+    const sharedUserDataDir = mkdtempSync(join(tmpdir(), 'restorm-cli-shared-'))
+    const project = freshProject('restorm-cli-lock-')
+    // Holder: an ordinary windowed launch (no --run) keeps the lock for its
+    // whole lifetime. Spawned directly so the test owns the handle and can
+    // tear it down; `--inactive-window` keeps it off-screen on the shared xvfb.
+    const holder = spawn(
+      ELECTRON,
+      ['--no-sandbox', '--ozone-platform=x11', MAIN_JS, '--open', project, '--inactive-window'],
+      { env: { ...process.env, TZ: 'UTC', NODE_ENV: 'development', RESTORM_USER_DATA_OVERRIDE: sharedUserDataDir } }
+    )
+    try {
+      // Let the holder acquire the lock before the contender starts.
+      await new Promise((r) => setTimeout(r, 6000))
+      const contender = await runCli(['--open', project, '--run', LOGS, '--headless'], sharedUserDataDir)
+      expect(contender.code, contender.stdout).not.toBe(0)
+      expect(contender.stderr).toContain('single-instance lock')
+      expect(contender.stdout.trim()).toBe('')
+    } finally {
+      holder.kill('SIGKILL')
+    }
   })
 })
