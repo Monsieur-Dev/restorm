@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { OperationDocumentation } from '../../../shared/types/apiDocumentation'
+import type { OperationDocumentation, ModelDocumentation } from '../../../shared/types/apiDocumentation'
 
 export interface CreateFromOperationOptions {
   /** Id of the env folder that owns the imported `apiDocumentation`.
@@ -12,6 +12,16 @@ export interface CreateFromOperationOptions {
    * used by the folder Docs2 view where the user is already viewing
    * a specific folder. */
   parentFolderId?: string
+  /** The `models` map from the same `ApiDocumentation` the operation
+   * belongs to. Lets the builder reconstruct the request body from the
+   * referenced request-body model, matching what a normal import produces.
+   * Omitted → no body is generated (back-compat). */
+  models?: Record<string, ModelDocumentation>
+  /** The `{{name}}` base-URL prefix to prepend to the request path, resolved
+   * from the env folder's root variables (the variable whose value matches the
+   * API URL — not necessarily named `baseUrl`). Omitted → bare path, matching
+   * an import that found no server to seed. */
+  baseUrlPrefix?: string
 }
 
 export interface RequestCreationApi {

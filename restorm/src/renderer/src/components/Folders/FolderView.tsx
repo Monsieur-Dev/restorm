@@ -10,6 +10,7 @@ import { routeFromRequest } from '../../hooks/routeFromRequest'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { mergeEnumDefinitionsIntoModels } from '../documentation/mergeEnumDefinitions'
 import { useRequestCreation } from '../../contexts/useRequestCreation'
+import { resolveBaseUrlPrefix } from '../../services/buildRequestFromOperation'
 import { BaseFolderView } from './BaseFolderView'
 
 export interface FolderViewProps {
@@ -74,12 +75,20 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange, 
   const handleAddRequest = useCallback(
     (operation: OperationDocumentation): void => {
       if (!requestCreation || owningEnvFolderId === undefined) return
+      // The same `models` the docs viewer renders — so a request created here
+      // gets its body reconstructed from the referenced model (import parity).
+      const owning = findOwningEnvironmentFolder(folder.id)
+      const rawApiDoc = owning ? apiDocFromItem(owning) : undefined
+      const apiDoc = rawApiDoc ? mergeEnumDefinitionsIntoModels(rawApiDoc, owning?.enumDefinitions) : undefined
+      const baseUrlPrefix = resolveBaseUrlPrefix(owning?.environments ?? [], apiDoc?.server)
       requestCreation.createFromOperation(operation, {
         envFolderId: owningEnvFolderId,
-        parentFolderId: folder.id
+        parentFolderId: folder.id,
+        ...(apiDoc ? { models: apiDoc.models } : {}),
+        ...(baseUrlPrefix !== undefined ? { baseUrlPrefix } : {})
       })
     },
-    [requestCreation, owningEnvFolderId, folder.id]
+    [requestCreation, owningEnvFolderId, folder.id, findOwningEnvironmentFolder]
   )
 
   const docsContent = useMemo(() => {

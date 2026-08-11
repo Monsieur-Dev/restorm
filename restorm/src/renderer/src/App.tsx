@@ -1651,6 +1651,7 @@ const App: React.FC = () => {
     setRootItems,
     setExpandedIds,
     setSelectedItemId,
+    setSelectedItemIds,
     openAnyRequestTab
   })
 

@@ -251,7 +251,13 @@ export interface ResponseDocumentation {
 /** A single operation (REST path+method, SOAP op, gRPC method, GraphQL field, etc.). */
 export interface OperationDocumentation {
   match: OperationMatchCriteria
+  /** Primary tag — the FIRST of `tags`, used for folder grouping. */
   group?: string
+  /** All tags declared on the operation (OpenAPI/Swagger `tags`, and the
+   * equivalent in other specs). Surfaced as chips in the route's docs, mirroring
+   * the tag badges shown on the request's workbench tab. `group` stays the
+   * grouping key; this is the full list for display. */
+  tags?: string[]
   summary?: string
   description?: string
   operationId?: string

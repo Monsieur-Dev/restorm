@@ -563,6 +563,7 @@ export function buildOperationDocumentation(op: OperationDocumentationInput): Op
     }
   }
   if (op.tags?.[0] !== undefined) doc.group = op.tags[0]
+  if (op.tags !== undefined && op.tags.length > 0) doc.tags = op.tags
   if (op.summary !== undefined) doc.summary = op.summary
   if (op.description !== undefined) doc.description = op.description
   if (op.operationId !== undefined) doc.operationId = op.operationId

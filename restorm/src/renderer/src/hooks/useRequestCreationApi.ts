@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { eventBus } from 'electron-core-ui/renderer'
+import { eventBus, navigationService } from 'electron-core-ui/renderer'
 import type { OperationDocumentation } from '../../../shared/types/apiDocumentation'
 import type { Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder } from '../../../shared/types/collections'
@@ -15,11 +15,32 @@ interface UseRequestCreationApiOptions {
   setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
+  /** The rendered multi-selection array. The sidebar highlights THIS when it is
+   * non-empty, falling back to the `selectedItemId` anchor only when empty — so
+   * a creation that moves the selection must set both, exactly like a sidebar
+   * click (`useNavigation`'s `selectSingle`). Anchor-only leaves the new row
+   * unhighlighted the moment the user has clicked anything in the tree. */
+  setSelectedItemIds: React.Dispatch<React.SetStateAction<string[]>>
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[]) => void
 }
 
 function generateId(seed: string): string {
   return `${seed}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
+}
+
+/**
+ * Deliver a creation event on BOTH buses, like the sidebar Add path
+ * (`useItemOperations.emitBothBuses`). `emitSync` reaches the main-process
+ * subscribers (search index, ContextService); `emitLocalSync` reaches the
+ * renderer-local save-unit bridge that marks the new unit DIRTY — which is what
+ * drives autosave and the unsaved-window indicator. A main-only delivery
+ * indexes for search but never marks dirty, so a request created from the docs
+ * viewer silently vanishes on close in autosave-off mode, and prompts to save
+ * even with autosave ON. See the same note in `useItemOperations.ts`.
+ */
+function emitCreatedOnBothBuses(event: string, payload: Record<string, unknown>): void {
+  eventBus.emitSync(event, payload)
+  eventBus.emitLocalSync(event, payload)
 }
 
 function findEnvFolderById(items: FolderItem[], id: string): EnvironmentFolder | null {
@@ -72,7 +93,7 @@ function buildBreadcrumbsForRequest(
  * event emission, tab open.
  */
 export function useRequestCreationApi(opts: UseRequestCreationApiOptions): RequestCreationApi {
-  const { rootItems, setRootItems, setExpandedIds, setSelectedItemId, openAnyRequestTab } = opts
+  const { rootItems, setRootItems, setExpandedIds, setSelectedItemId, setSelectedItemIds, openAnyRequestTab } = opts
 
   const createFromOperation = useCallback(
     (operation: OperationDocumentation, options: CreateFromOperationOptions): string | undefined => {
@@ -100,7 +121,7 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
           }
           const reactiveTagFolder = makeReactiveFolder(newTagFolder)
           envFolder.items.push(reactiveTagFolder)
-          eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+          emitCreatedOnBothBuses(DocumentEvents.FOLDER_CREATED, {
             id: reactiveTagFolder.id,
             type: 'folder',
             // `cloneForEventBus` preserves `SecretValue` plaintext on
@@ -113,22 +134,29 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
         }
       }
 
-      // Build the request, mount under the target folder.
-      const request = buildRequestFromOperation(operation)
+      // Build the request, mount under the target folder. Pass the doc's
+      // models so the builder can reconstruct the request body (parity with a
+      // normal import); a Map keyed by model name is what the builder expects.
+      const models = options.models !== undefined ? new Map(Object.entries(options.models)) : undefined
+      const request = buildRequestFromOperation(operation, models, options.baseUrlPrefix)
       const reactiveRequest = makeReactiveRequest(request, targetFolder.id)
       targetFolder.items.push(reactiveRequest)
 
-      eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
+      emitCreatedOnBothBuses(DocumentEvents.REQUEST_CREATED, {
         id: reactiveRequest.id,
         type: 'request',
         document: cloneForEventBus(reactiveRequest),
         parentFolderId: targetFolder.id
       })
 
-      // Nudge the sidebar so the new row + ancestor folders show up.
+      // Nudge the sidebar so the new row + ancestor folders show up, then move
+      // the selection exactly like a sidebar click: set BOTH the anchor and the
+      // rendered array (`selectSingle`), so the new row is highlighted even
+      // after a prior multi-selection has populated the array.
       setRootItems((prev) => [...prev])
       setExpandedIds((prev) => Array.from(new Set([...prev, envFolder.id, targetFolder.id])))
       setSelectedItemId(reactiveRequest.id)
+      setSelectedItemIds([reactiveRequest.id])
 
       const crumbs = buildBreadcrumbsForRequest(
         rootItems,
@@ -137,9 +165,13 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
         reactiveRequest
       )
       openAnyRequestTab(reactiveRequest, crumbs)
+      // Route the selection through the same NavigationService a sidebar/search
+      // click uses, so history/back-forward + MRU treat a doc-created request
+      // identically (doc-built requests are always HTTP).
+      navigationService.navigateTo(reactiveRequest.id, 'sidebar', { type: 'http-request' })
       return reactiveRequest.id
     },
-    [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openAnyRequestTab]
+    [rootItems, setRootItems, setExpandedIds, setSelectedItemId, setSelectedItemIds, openAnyRequestTab]
   )
 
   return { createFromOperation }

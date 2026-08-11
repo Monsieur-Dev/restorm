@@ -38,6 +38,7 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { mergeEnumDefinitionsIntoModels } from '../documentation/mergeEnumDefinitions'
 import { useRequestCreation } from '../../contexts/useRequestCreation'
 import { consumePendingEnvFolderSubTab, subscribeEnvFolderSubTabIntent } from '../../services/envFolderTabIntent'
+import { resolveBaseUrlPrefix } from '../../services/buildRequestFromOperation'
 
 /** Generate a unique ID for a new environment */
 function generateEnvironmentId(): string {
@@ -979,14 +980,19 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
         {...(requestCreation
           ? {
             onAddRequest: (operation: OperationDocumentation): void => {
-              requestCreation.createFromOperation(operation, { envFolderId: folder.id })
+              const baseUrlPrefix = resolveBaseUrlPrefix(folder.environments, apiDocumentation.server)
+              requestCreation.createFromOperation(operation, {
+                envFolderId: folder.id,
+                models: apiDocumentation.models,
+                ...(baseUrlPrefix !== undefined ? { baseUrlPrefix } : {})
+              })
             }
           }
           : {})}
         testId="env-folder-documentation-host"
       />
     )
-  }, [apiDocumentation, requestCreation, folder.id, folder.tagColors])
+  }, [apiDocumentation, requestCreation, folder.id, folder.tagColors, folder.environments])
 
   return (
     <BaseFolderView
