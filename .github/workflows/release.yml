@@ -176,10 +176,12 @@ jobs:
         # and the website's download page both resolve those relative paths.
         run: |
           VERSION=$(node -p "require('./restorm/package.json').version")
-          # Point the feeds' file references into the version folder.
+          # Point the feeds' file references into the version folder. perl, not
+          # sed -i: BSD sed (macOS) takes -i's argument differently and silently
+          # drops -E, so the capture groups stop existing.
           for yml in restorm/dist-electron/latest*.yml; do
             [ -f "$yml" ] || continue
-            sed -i -E "s|^( *- +url: )(.+)$|\1v${VERSION}/\2|; s|^(path: )(.+)$|\1v${VERSION}/\2|" "$yml"
+            V="v${VERSION}" perl -pi -e 's|^( *- +url: )(.+)$|$1$ENV{V}/$2|; s|^(path: )(.+)$|$1$ENV{V}/$2|' "$yml"
           done
           # Binaries + blockmaps → v<version>/ …
           aws s3 cp restorm/dist-electron/ "s3://restorm-releases/v${VERSION}/" \
