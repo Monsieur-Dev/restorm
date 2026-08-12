@@ -1,13 +1,13 @@
 - message: 🔵 [<time>] ▶ Redis
 - message: ⚪ [<time>] start redisCommand
   data:
-    requestId: <uuid>
     label: SET
+    requestId: <uuid>
 - message: ⚪ [<time>] done redisCommand
   data:
     response:
       request:
-        url: redis://localhost:6379
+        url: redis://localhost:<port>
         method: SET
         headers: {}
       response:
@@ -19,14 +19,14 @@
         success: true
 - message: ⚪ [<time>] start redisCommand
   data:
-    requestId: <uuid>
     label: GET
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done redisCommand
   data:
     response:
       request:
-        url: redis://localhost:6379
+        url: redis://localhost:<port>
         method: GET
         headers: {}
       response:
@@ -39,22 +39,22 @@
 - message: ⚪ [<time>] start redisSubscribe
   data:
     connectionName: Redis subscriber
-    requestId: <uuid>
     label: Subscribe
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done redisSubscribe
 - message: ⚪ [<time>] redis-subscribe "Redis subscriber" connecting
 - message: ⚪ [<time>] redis-subscribe "Redis subscriber" connected
 - message: ⚪ [<time>] start redisCommand
   data:
-    requestId: <uuid>
     label: PUBLISH
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done redisCommand
   data:
     response:
       request:
-        url: redis://localhost:6379
+        url: redis://localhost:<port>
         method: PUBLISH
         headers: {}
       response:

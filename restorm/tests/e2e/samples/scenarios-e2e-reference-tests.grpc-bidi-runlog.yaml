@@ -1,17 +1,17 @@
 - message: 🔵 [<time>] ▶ gRPC bidi
 - message: ⚪ [<time>] start grpcConnect
   data:
-    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcConnect
 - message: ⚪ [<time>] grpc "Echo" connecting
 - message: ⚪ [<time>] grpc "Echo" connected
 - message: ⚪ [<time>] start grpcSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"f_string":"hello"}'
     label: send to Echo
+    payload: '{"f_string":"hello"}'
     in: true
 - message: ⚪ [<time>] done grpcSend
 - message: ⚪ [<time>] start wait
@@ -21,8 +21,8 @@
     in: true
 - message: ⚪ [<time>] start log
   data:
-    message: frame gRPC reçue
     level: info
+    message: frame gRPC reçue
     data:
       f_strings: []
       f_enums: []
@@ -87,8 +87,8 @@
 - message: ⚪ [<time>] grpc "Echo" closed
 - message: ⚪ [<time>] start log
   data:
-    message: stream gRPC fermé
     level: info
+    message: stream gRPC fermé
     in: true
 - message: 🔵 [<time>] stream gRPC fermé
 - message: ⚪ [<time>] done log

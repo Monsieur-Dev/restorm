@@ -1,48 +1,39 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: d9e3a9c4-6f18-43b1-8c3a-7e9b7d3f1b13
     name: STOMP Playground
-    documentation: |-
-      # STOMP Playground
-
-      A STOMP-over-WebSocket playground against the docker ActiveMQ mock
-      (`rmohr/activemq`, `ws://localhost:61614`).
-
-      - **STOMP Chat** connects, performs the CONNECT/CONNECTED handshake,
-        subscribes to `/topic/restorm-e2e-chat`, and its Send button publishes
-        the configured payload to that SAME destination — which round-trips
-        straight back through the subscription, so a single request both
-        sends and receives.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: b6e1a2c0-8f4a-4b1e-9c7d-3a2e51f0d7b1
+        name: Default
         variables:
           - key: stompHost
+            description: The docker ActiveMQ mock's STOMP-over-WebSocket port
+            enabled: true
             value:
               type: string
               value: ws://localhost:61614
-            description: The docker ActiveMQ mock's STOMP-over-WebSocket port
-        id: b6e1a2c0-8f4a-4b1e-9c7d-3a2e51f0d7b1
     items:
-      - type: stomp
+      - id: 4d2f0a91-3c6b-4e77-9a18-5b3e0c7d2f55
         name: STOMP Chat
-        documentation: Connect to the docker ActiveMQ mock, subscribe + publish on `/topic/restorm-e2e-chat`.
-        tags:
-          - stomp
+        type: stomp
         url: '{{stompHost}}'
-        stompVersion: '1.2'
         connectHeaders: []
-        subscriptions:
-          - id: sub-0
-            destination: /topic/restorm-e2e-chat
-            ackMode: auto
-        sendDestination: /topic/restorm-e2e-chat
+        documentation: Connect to the docker ActiveMQ mock, subscribe + publish on `/topic/restorm-e2e-chat`.
         sendBody: |-
           {
             "hello": "from stomp"
           }
+        sendDestination: /topic/restorm-e2e-chat
         sendHeaders: []
-        id: 4d2f0a91-3c6b-4e77-9a18-5b3e0c7d2f55
-    id: d9e3a9c4-6f18-43b1-8c3a-7e9b7d3f1b13
+        stompVersion: '1.2'
+        subscriptions:
+          - id: sub-0
+            ackMode: auto
+            destination: /topic/restorm-e2e-chat
+        tags:
+          - stomp
+    tagColors: {}
+    tags: []
 _projectUuid: b2c3d4e5-f6a7-4809-9b1c-2d3e4f5a6172

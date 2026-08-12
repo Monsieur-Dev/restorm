@@ -1,43 +1,39 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: 6b1e8f4d-2a99-4c83-91be-3d7c0e851f20
     name: OData Mock Playground
-    documentation: |-
-      # OData Mock Playground
-
-      A self-contained OData v4 mock playground: restorm HOSTS a local OData
-      service AND calls it as a client — no external service needed.
-
-      - **Pets Mock** hosts a local OData v4 service on `localhost:8088/odata`.
-        It serves `$metadata` (CSDL) + the `Pets` / `Categories` entity sets and
-        honours the system query options ($filter / $select / $orderby / $top /
-        $skip / $count / $expand). Press Listen to start serving.
-      - **Pets Consumer** is a plain OData request to
-        `http://localhost:8088/odata/Pets`. Run it (Send) once the mock is
-        listening and it receives the served collection.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: 2f6c8d10-7b41-4a92-bc05-9e3a18f04c21
+        name: Default
         variables: []
-        id: 2f6c8d10-7b41-4a92-bc05-9e3a18f04c21
     items:
-      - type: odata
+      - id: 7c3d2e91-6f88-4d21-af32-1b0a4c723101
         name: Pets Mock
+        type: odata
+        url: localhost:8088/odata
+        deprecated: false
         documentation: |-
           Hosts a local OData v4 service on `localhost:8088/odata`. Press Listen,
           then run **Pets Consumer**. Serves `$metadata` + the `Pets` /
           `Categories` collections with the query options applied.
-        tags:
-          - odata
-          - server
-        url: localhost:8088/odata
-        odataVersion: v4
-        operationKind: entity-set
-        server: true
         headers: []
-        params: []
-        queryOptions: {}
+        mockData:
+          Categories:
+            - Id: 1
+              Name: Dogs
+            - Id: 2
+              Name: Cats
+          Pets:
+            - CategoryId: 1
+              Id: 1
+              Name: Rex
+              Status: Available
+            - CategoryId: 2
+              Id: 2
+              Name: Whiskers
+              Status: Pending
         mockMetadata: |-
           <?xml version="1.0" encoding="utf-8"?>
           <edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
@@ -63,33 +59,27 @@ collections:
               </Schema>
             </edmx:DataServices>
           </edmx:Edmx>
-        mockData:
-          Pets:
-            - Id: 1
-              Name: Rex
-              Status: Available
-              CategoryId: 1
-            - Id: 2
-              Name: Whiskers
-              Status: Pending
-              CategoryId: 2
-          Categories:
-            - Id: 1
-              Name: Dogs
-            - Id: 2
-              Name: Cats
-        id: 7c3d2e91-6f88-4d21-af32-1b0a4c723101
-      - type: odata
-        name: Pets Consumer
-        documentation: Calls the local Pets Mock and shows the served collection.
-        tags:
-          - odata
-        url: http://localhost:8088/odata/Pets
         odataVersion: v4
         operationKind: entity-set
-        headers: []
         params: []
         queryOptions: {}
-        id: 7c3d2e91-6f88-4d21-af32-1b0a4c723102
-    id: 6b1e8f4d-2a99-4c83-91be-3d7c0e851f20
+        server: true
+        tags:
+          - odata
+          - server
+      - id: 7c3d2e91-6f88-4d21-af32-1b0a4c723102
+        name: Pets Consumer
+        type: odata
+        url: http://localhost:8088/odata/Pets
+        deprecated: false
+        documentation: Calls the local Pets Mock and shows the served collection.
+        headers: []
+        odataVersion: v4
+        operationKind: entity-set
+        params: []
+        queryOptions: {}
+        tags:
+          - odata
+    tagColors: {}
+    tags: []
 _projectUuid: 4f8b3d2a-9c55-4e7f-b2d3-0a1f6e849c33

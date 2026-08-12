@@ -1,16 +1,16 @@
 - message: 🔵 [<time>] ▶ SOAP Server
 - message: ⚪ [<time>] start soapListen
   data:
-    requestId: <uuid>
     connectionName: Mock Server
     label: start mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done soapListen
 - message: ⚪ [<time>] soap-server "Mock Server" connecting
 - message: ⚪ [<time>] soap-server "Mock Server" connected
 - message: ⚪ [<time>] start soapRequest
   data:
-    requestId: <uuid>
     label: call the mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] start soapClose
   data:
@@ -40,8 +40,8 @@
 - message: ⚪ [<time>] soap-server "Mock Server" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur SOAP arrêté
     level: info
+    message: serveur SOAP arrêté
     in: true
 - message: 🔵 [<time>] serveur SOAP arrêté
 - message: ⚪ [<time>] done log
@@ -51,7 +51,7 @@
   data:
     response:
       request:
-        url: http://localhost:8076/calculator
+        url: http://localhost:<port>/calculator
         method: POST
         headers: {}
       response:
@@ -70,12 +70,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse du consumer reçue
     level: info
+    message: réponse du consumer reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8076/calculator
+        url: http://localhost:<port>/calculator
         method: POST
         headers: {}
       response:
@@ -95,7 +95,7 @@
 - message: 🔵 [<time>] réponse du consumer reçue
   data:
     request:
-      url: http://localhost:8076/calculator
+      url: http://localhost:<port>/calculator
       method: POST
       headers: {}
     response:
@@ -116,7 +116,7 @@
   data:
     value:
       request:
-        url: http://localhost:8076/calculator
+        url: http://localhost:<port>/calculator
         method: POST
         headers: {}
       response:

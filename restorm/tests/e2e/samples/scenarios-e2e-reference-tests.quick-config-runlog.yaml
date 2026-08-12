@@ -1,23 +1,23 @@
 - message: 🔵 [<time>] ▶ Quick config
 - message: ⚪ [<time>] start httpListen
   data:
-    requestId: <uuid>
     connectionName: QC Mock
     label: start mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpListen
 - message: ⚪ [<time>] http-server "QC Mock" connecting
 - message: ⚪ [<time>] http-server "QC Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
-    quickConfigId: qc_f47542c5-83ca-4c6b-b39a-dda9bca8810a
     label: call the mock (QC config redirects to /pets)
+    quickConfigId: qc_f47542c5-83ca-4c6b-b39a-dda9bca8810a
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -34,11 +34,11 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse reçue (config QC appliquée)
     level: info
+    message: réponse reçue (config QC appliquée)
     data:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -55,7 +55,7 @@
         success: true
     in:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -73,7 +73,7 @@
 - message: 🔵 [<time>] réponse reçue (config QC appliquée)
   data:
     request:
-      url: http://localhost:8077/pets
+      url: http://localhost:<port>/pets
       method: GET
       headers: {}
     response:
@@ -92,7 +92,7 @@
   data:
     value:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -115,8 +115,8 @@
 - message: ⚪ [<time>] http-server "QC Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur arrêté
     level: info
+    message: serveur arrêté
     in: true
 - message: 🔵 [<time>] serveur arrêté
 - message: ⚪ [<time>] done log

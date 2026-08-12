@@ -1,22 +1,22 @@
 - message: 🔵 [<time>] ▶ OData Server
 - message: ⚪ [<time>] start odataListen
   data:
-    requestId: <uuid>
     connectionName: OData Mock
     label: start OData mock
+    requestId: <uuid>
 - message: ⚪ [<time>] done odataListen
 - message: ⚪ [<time>] odata-server "OData Mock" connecting
 - message: ⚪ [<time>] odata-server "OData Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the OData mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -34,12 +34,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse OData reçue
     level: info
+    message: réponse OData reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -58,7 +58,7 @@
 - message: 🔵 [<time>] réponse OData reçue
   data:
     request:
-      url: http://localhost:8078/odata/Pets
+      url: http://localhost:<port>/odata/Pets
       method: GET
       headers: {}
     response:
@@ -76,11 +76,11 @@
       success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the OData mock ($batch)
+    requestId: <uuid>
     in:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -100,7 +100,7 @@
   data:
     value:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -120,7 +120,7 @@
   data:
     response:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -169,12 +169,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse OData $batch reçue
     level: info
+    message: réponse OData $batch reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -224,7 +224,7 @@
 - message: 🔵 [<time>] réponse OData $batch reçue
   data:
     request:
-      url: http://localhost:8078/odata/$batch
+      url: http://localhost:<port>/odata/$batch
       method: POST
       headers:
         Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -277,7 +277,7 @@
     label: stop the OData mock
     in:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -327,15 +327,15 @@
 - message: ⚪ [<time>] odata-server "OData Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: service OData arrêté
     level: info
+    message: service OData arrêté
     in: true
 - message: 🔵 [<time>] service OData arrêté
 - message: ⚪ [<time>] done log
   data:
     value:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>

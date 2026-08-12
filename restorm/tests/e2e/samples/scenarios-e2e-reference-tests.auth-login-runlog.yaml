@@ -1,36 +1,13 @@
 - message: 🔵 [<time>] ▶ Auth login
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Clear Logs
-- message: ⚪ [<time>] done httpRequest
-  data:
-    response:
-      request:
-        url: http://localhost:5110/clear_logs
-        method: POST
-        headers: {}
-      response:
-        status: 200
-        statusText: OK
-        headers:
-          content-type: application/json; charset=utf-8
-          date: <dynamic-time>
-          server: Kestrel
-          transfer-encoding: chunked
-        body: '{"cleared":true}'
-        durationMs: <dynamic-time>
-        success: true
-- message: ⚪ [<time>] start httpRequest
-  data:
     requestId: <uuid>
-    label: Clear Tokens
-    in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/cleartokens
+        url: http://localhost:<port>/clear_logs
         method: POST
         headers: {}
       response:
@@ -46,14 +23,37 @@
         success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: d2000000-0000-0000-0000-00000000auth
-    label: Get Pet by Id
+    label: Clear Tokens
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/pet/1
+        url: http://localhost:<port>/cleartokens
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"cleared":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start httpRequest
+  data:
+    label: Get Pet by Id
+    requestId: d2000000-0000-0000-0000-00000000auth
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:<port>/pet/1
         method: GET
         headers:
           Accept: application/json
@@ -71,23 +71,23 @@
         success: true
 - message: ⚪ [<time>] start assert
   data:
-    operator: contains
     b: Rex
     message: Get Pet by Id should return Rex
+    operator: contains
     a: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
 - message: ⚪ [<time>] done assert
   data:
     then: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Login Probe
+    requestId: <uuid>
     in: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/loginprobe
+        url: http://localhost:<port>/loginprobe
         method: GET
         headers: {}
       response:
@@ -103,9 +103,9 @@
         success: true
 - message: ⚪ [<time>] start assert
   data:
-    operator: contains
     b: "probe login: VALID_CLIENT_ID -> 200"
     message: Login route should have been called
+    operator: contains
     a: '{"calls":["probe login: VALID_CLIENT_ID -> 200"]}'
 - message: ⚪ [<time>] done assert
   data:

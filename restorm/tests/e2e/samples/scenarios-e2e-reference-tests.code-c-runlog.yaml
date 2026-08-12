@@ -1,7 +1,6 @@
 - message: 🔵 [<time>] ▶ Code C#
 - message: ⚪ [<time>] start code
   data:
-    language: csharp
     code: >-
       // Fixed dataset (no input -> runs at start). Console.WriteLine -> run
       log.
@@ -15,6 +14,7 @@
       Console.WriteLine($"csharp: built {data.Count} rows");
 
       data
+    language: csharp
 - message: "🔵 [<time>] csharp: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -27,7 +27,6 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: csharp
     code: >-
       // `input` = wired value (list of records). LINQ aggregate.
 
@@ -43,6 +42,7 @@
       names)}");
 
       new Dictionary<string, object> { ["total"] = total, ["names"] = names }
+    language: csharp
     value:
       - n: a
         v: 3
@@ -61,7 +61,6 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: csharp
     code: >-
       // String summary of the previous result.
 
@@ -73,6 +72,7 @@
 
       new Dictionary<string, object> { ["lang"] = "csharp", ["summary"] =
       summary, ["total"] = input["total"] }
+    language: csharp
     value:
       total: 6
       names:

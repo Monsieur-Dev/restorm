@@ -13,7 +13,7 @@ import {
 import { Environment } from './Environment'
 import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem } from './types'
 import type { ApiDocumentation } from '../types/apiDocumentation'
-import type { ApiUpdateConfig, ImportSourceType, CustomValueList } from '../types/baseTypes'
+import type { ApiUpdateConfig, ImportSourceType, CustomValueList, EnumDefinition } from '../types/baseTypes'
 
 /**
  * Environment folder containing both items and environment configurations.
@@ -91,6 +91,13 @@ export class EnvironmentFolder {
    * the main process can read it to substitute label → value. */
   customValueLists?: CustomValueList[]
 
+  /** User-defined enum types selectable as variable value types. Like
+   * `customValueLists`, they must survive the renderer→main
+   * `collections:sync` mirror: a main-driven save persists this class's
+   * fields, so any field missing here is silently deleted from the
+   * project file on the next MCP write. */
+  enumDefinitions?: EnumDefinition[]
+
   constructor(init?: Partial<EnvironmentFolder>) {
     if (init) {
       Object.assign(this, init)
@@ -121,6 +128,7 @@ export class EnvironmentFolder {
     importSource?: ImportSourceType
     apiUpdate?: ApiUpdateConfig
     customValueLists?: CustomValueList[]
+    enumDefinitions?: EnumDefinition[]
   }): EnvironmentFolder {
     const folder = new EnvironmentFolder({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -145,6 +153,7 @@ export class EnvironmentFolder {
     if (obj.importSource) folder.importSource = obj.importSource
     if (obj.apiUpdate) folder.apiUpdate = obj.apiUpdate
     if (Array.isArray(obj.customValueLists)) folder.customValueLists = obj.customValueLists
+    if (Array.isArray(obj.enumDefinitions)) folder.enumDefinitions = obj.enumDefinitions
     return folder
   }
 
@@ -171,6 +180,7 @@ export class EnvironmentFolder {
     if (this.importSource) plain['importSource'] = this.importSource
     if (this.apiUpdate) plain['apiUpdate'] = this.apiUpdate
     if (this.customValueLists) plain['customValueLists'] = this.customValueLists
+    if (this.enumDefinitions) plain['enumDefinitions'] = this.enumDefinitions
     return plain
   }
 }

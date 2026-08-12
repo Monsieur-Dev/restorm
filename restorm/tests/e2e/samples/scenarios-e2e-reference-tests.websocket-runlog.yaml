@@ -1,17 +1,17 @@
 - message: 🔵 [<time>] ▶ WebSocket
 - message: ⚪ [<time>] start websocketConnect
   data:
-    requestId: <uuid>
     connectionName: Server
     label: Server listen
+    requestId: <uuid>
 - message: ⚪ [<time>] done websocketConnect
 - message: ⚪ [<time>] websocket "Server" connecting
 - message: ⚪ [<time>] websocket "Server" connected
 - message: ⚪ [<time>] start websocketConnect
   data:
-    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done websocketConnect
 - message: ⚪ [<time>] websocket "Echo" connecting
@@ -19,8 +19,8 @@
 - message: ⚪ [<time>] start websocketSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"hello":"world"}'
     label: send to Echo
+    payload: '{"hello":"world"}'
     in: true
 - message: ⚪ [<time>] done websocketSend
 - message: ⚪ [<time>] start wait
@@ -32,8 +32,8 @@
 - message: ⚪ [<time>] start websocketSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"hello":"from server"}'
     label: broadcast from server
+    payload: '{"hello":"from server"}'
     in: true
 - message: ⚪ [<time>] done websocketSend
 - message: ⚪ [<time>] start wait
@@ -43,8 +43,8 @@
     in: true
 - message: ⚪ [<time>] start log
   data:
-    message: message reçu
     level: info
+    message: message reçu
     data:
       hello: from server
 - message: 🔵 [<time>] message reçu
@@ -71,8 +71,8 @@
 - message: ⚪ [<time>] websocket "Echo" closed
 - message: ⚪ [<time>] start log
   data:
-    message: connexion WebSocket fermée
     level: info
+    message: connexion WebSocket fermée
     in: true
 - message: 🔵 [<time>] connexion WebSocket fermée
 - message: ⚪ [<time>] done log

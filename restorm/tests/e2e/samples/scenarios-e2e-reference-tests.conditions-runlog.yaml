@@ -2,8 +2,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 1
-    right: 2
     operator: <
+    right: 2
 - message: ⚪ [<time>] start object
 - message: ⚪ [<time>] start object
 - message: ⚪ [<time>] start object
@@ -26,8 +26,8 @@
     right: null
 - message: ⚪ [<time>] start setVariable
   data:
-    value: null
     name: null_var
+    value: null
 - message: ⚪ [<time>] start if
   data:
     left: null
@@ -60,28 +60,28 @@
 - message: 🔴 [<time>] Operator ">" cannot order null values
 - message: ⚪ [<time>] start if
   data:
+    left: null
     right:
       - 00FF00
       - 0000FF
       - FF0000
-    left: null
 - message: ⚪ [<time>] start if
   data:
+    left: null
     right: 1985-10-26T00:22:00.000Z
-    left: null
 - message: ⚪ [<time>] start if
   data:
+    left: null
     right: null
-    left: null
 - message: ⚪ [<time>] start if
   data:
+    left: null
     right:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
-    left: null
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start if
   data:
     left: abc
@@ -114,28 +114,28 @@
 - message: 🔴 [<time>] Operator ">" cannot order null values
 - message: ⚪ [<time>] start if
   data:
-    right: null
     left:
       - 0000FF
       - 00FF00
       - FF0000
+    right: null
 - message: ⚪ [<time>] start if
   data:
-    right: null
     left: 1985-10-26T00:22:00.000Z
+    right: null
 - message: ⚪ [<time>] start if
   data:
-    right: null
     left: null
+    right: null
 - message: ⚪ [<time>] start if
   data:
-    right: null
     left:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
+    right: null
 - message: ⚪ [<time>] start switch
   data:
     on: null
@@ -159,30 +159,30 @@
     on:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start switch
   data:
     on:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start switch
   data:
     on:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start if
   data:
-    right: null
     left: null
     operator: ≠
+    right: null
 - message: ⚪ [<time>] start if
   data:
     left: null
@@ -246,15 +246,15 @@
 - message: ⚪ [<time>] start if
   data:
     left: 1
-    right: 2
     operator: ≤
+    right: 2
     in:
       left: 1
       right: 2
 - message: ⚪ [<time>] start if
   data:
-    right: null
     left: null
+    right: null
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -281,9 +281,9 @@
       right:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done if
   data:
     else:
@@ -308,9 +308,9 @@
       left:
         name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       right: null
 - message: ⚪ [<time>] done switch
   data:
@@ -335,25 +335,25 @@
     case-1780563106757-232n5w:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done switch
   data:
     default:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done switch
   data:
     case-1780563106757-232n5w:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done if
   data:
     else:
@@ -380,8 +380,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 1
-    right: 1
     operator: =
+    right: 1
     in:
       left: 1
       right: 2
@@ -393,8 +393,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 2
-    right: 1
     operator: ≥
+    right: 1
     in:
       left: 1
       right: 2
@@ -406,8 +406,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 2
-    right: 1
     operator: ">"
+    right: 1
     in:
       left: 1
       right: 2
@@ -419,8 +419,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 2
-    right: 1
     operator: ≠
+    right: 1
     in:
       left: 1
       right: 2
@@ -441,17 +441,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: a
-    right: b
     operator: <
-    in: true
-- message: ⚪ [<time>] done if
-  data:
-    then: true
-- message: ⚪ [<time>] start if
-  data:
-    left: a
     right: b
-    operator: ≤
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -459,8 +450,17 @@
 - message: ⚪ [<time>] start if
   data:
     left: a
-    right: a
+    operator: ≤
+    right: b
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: a
     operator: =
+    right: a
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -468,8 +468,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: b
-    right: a
     operator: ≥
+    right: a
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -477,8 +477,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: b
-    right: a
     operator: ">"
+    right: a
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -486,8 +486,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: b
-    right: a
     operator: ≠
+    right: a
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -502,17 +502,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 1985-10-26T00:22:00.000Z
-    right: 2015-06-08T23:21:00.000Z
     operator: <
-    in: true
-- message: ⚪ [<time>] done if
-  data:
-    then: true
-- message: ⚪ [<time>] start if
-  data:
-    left: 1985-10-26T00:22:00.000Z
     right: 2015-06-08T23:21:00.000Z
-    operator: ≤
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -520,8 +511,17 @@
 - message: ⚪ [<time>] start if
   data:
     left: 1985-10-26T00:22:00.000Z
-    right: 1985-10-26T00:22:00.000Z
+    operator: ≤
+    right: 2015-06-08T23:21:00.000Z
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 1985-10-26T00:22:00.000Z
     operator: =
+    right: 1985-10-26T00:22:00.000Z
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -529,8 +529,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 2015-06-08T23:21:00.000Z
-    right: 1985-10-26T00:22:00.000Z
     operator: ≥
+    right: 1985-10-26T00:22:00.000Z
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -538,8 +538,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 2015-06-08T23:21:00.000Z
-    right: 1985-10-26T00:22:00.000Z
     operator: ">"
+    right: 1985-10-26T00:22:00.000Z
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -547,8 +547,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 2015-06-08T23:21:00.000Z
-    right: 1985-10-26T00:22:00.000Z
     operator: ≠
+    right: 1985-10-26T00:22:00.000Z
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -565,8 +565,8 @@
     left:
       - FF0000
       - 00FF00
-    right: 00FF00
     operator: contains
+    right: 00FF00
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -574,8 +574,8 @@
 - message: ⚪ [<time>] start if
   data:
     left: 1985-10-26T00:22:00.000Z
-    right: 2015-06-08T23:21:00.000Z
     operator: ≤
+    right: 2015-06-08T23:21:00.000Z
     in: true
 - message: ⚪ [<time>] done if
   data:
@@ -700,16 +700,16 @@
   data: {}
 - message: ⚪ [<time>] start log
   data:
-    message: Null comparisons are ok
     level: info
+    message: Null comparisons are ok
     in: true
 - message: 🔵 [<time>] Null comparisons are ok
 - message: ⚪ [<time>] done log
   data: {}
 - message: ⚪ [<time>] start log
   data:
-    message: Switch vs NULL is ok
     level: info
+    message: Switch vs NULL is ok
     in: true
 - message: 🔵 [<time>] Switch vs NULL is ok
 - message: ⚪ [<time>] done log

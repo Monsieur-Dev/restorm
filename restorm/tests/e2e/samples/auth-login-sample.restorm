@@ -1,38 +1,32 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: a0000000-0000-0000-0000-00000000auth
     name: Auth Service
-    documentation: ''
-    tags:
-      - auth
-    id: a0000000-0000-0000-0000-00000000auth
+    folderType: environment
+    configuration: {}
     environments:
-      - name: localhost
+      - id: b733acbe-f3de-5b8c-b458-40de5407ec74
+        name: localhost
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: http://localhost:5110
-            enabled: true
           - key: clientId
+            enabled: true
             value:
               type: string
               value: VALID_CLIENT_ID
-            enabled: true
     items:
-      - type: auth
+      - id: a1000000-0000-0000-0000-00000000auth
         name: Login
-        documentation: ''
-        tags:
-          - auth
-        id: a1000000-0000-0000-0000-00000000auth
-        url: '{{baseUrl}}/login'
+        type: auth
         method: POST
-        headers:
-          - key: Content-Type
-            value: application/json
-            enabled: true
-        params: []
+        url: '{{baseUrl}}/login'
+        authErrorCodes:
+          - 401
+          - 403
         body:
           type: text
           contentType: application/json
@@ -40,42 +34,59 @@ collections:
             {
               "client_id": "{{clientId}}"
             }
+        deprecated: false
+        documentation: ''
+        headers:
+          - key: Content-Type
+            enabled: true
+            value:
+              type: string
+              value: application/json
+        params: []
+        pathParams: []
         producedHeaders:
           - key: Authorization
+            enabled: true
             value:
               type: expression
               value: '{{auth_type}} {{auth_token}}'
-            enabled: true
-        authErrorCodes:
-          - 401
-          - 403
-      - name: Pet API
-        documentation: ''
-        tags: []
+        tags:
+          - auth
+      - id: f1000000-0000-0000-0000-00000000auth
+        name: Pet API
         configuration: {}
-        id: f1000000-0000-0000-0000-00000000auth
+        documentation: ''
         items:
-          - type: http
+          - id: d1000000-0000-0000-0000-00000000auth
             name: Health
-            documentation: 'Liveness probe — no auth required.'
-            tags: []
-            id: d1000000-0000-0000-0000-00000000auth
-            url: '{{baseUrl}}/health'
+            type: http
             method: GET
+            url: '{{baseUrl}}/health'
+            deprecated: false
+            documentation: Liveness probe — no auth required.
             headers: []
             params: []
             pathParams: []
-          - type: http
-            name: Get Pet by Id
-            documentation: 'Requires the Login auth route.'
             tags: []
-            id: d2000000-0000-0000-0000-00000000auth
-            authenticationRequestId: a1000000-0000-0000-0000-00000000auth
-            url: '{{baseUrl}}/pet/1'
+          - id: d2000000-0000-0000-0000-00000000auth
+            name: Get Pet by Id
+            type: http
             method: GET
+            url: '{{baseUrl}}/pet/1'
+            authenticationRequestId: a1000000-0000-0000-0000-00000000auth
+            deprecated: false
+            documentation: Requires the Login auth route.
             headers:
               - key: Accept
-                value: application/json
                 enabled: true
+                value:
+                  type: string
+                  value: application/json
             params: []
             pathParams: []
+            tags: []
+        tags: []
+    tagColors: {}
+    tags:
+      - auth
+_projectUuid: 365ee6c3-ea01-4c75-802e-30b8a50821c0

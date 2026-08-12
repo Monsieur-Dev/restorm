@@ -1,27 +1,27 @@
 - message: 🔵 [<time>] ▶ Socket.IO
 - message: ⚪ [<time>] start socketioConnect
   data:
-    requestId: <uuid>
     connectionName: Server
     label: Server listen
+    requestId: <uuid>
 - message: ⚪ [<time>] done socketioConnect
 - message: ⚪ [<time>] socketio "Server" connecting
 - message: ⚪ [<time>] socketio "Server" connected
 - message: ⚪ [<time>] start socketioConnect
   data:
-    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done socketioConnect
 - message: ⚪ [<time>] socketio "Echo" connecting
 - message: ⚪ [<time>] socketio "Echo" connected
 - message: ⚪ [<time>] start socketioSend
   data:
-    connectionNodeId: <uuid>
     channel: echo
-    payload: '{"hello":"world"}'
+    connectionNodeId: <uuid>
     label: send to Echo
+    payload: '{"hello":"world"}'
     in: true
 - message: ⚪ [<time>] done socketioSend
 - message: ⚪ [<time>] start wait
@@ -32,10 +32,10 @@
 - message: ⚪ [<time>] done wait
 - message: ⚪ [<time>] start socketioSend
   data:
-    connectionNodeId: <uuid>
     channel: echo
-    payload: '{"hello":"from server"}'
+    connectionNodeId: <uuid>
     label: broadcast from server
+    payload: '{"hello":"from server"}'
     in: true
 - message: ⚪ [<time>] done socketioSend
 - message: ⚪ [<time>] start wait
@@ -45,8 +45,8 @@
     in: true
 - message: ⚪ [<time>] start log
   data:
-    message: echo reçu
     level: info
+    message: echo reçu
     data:
       hello: from server
 - message: 🔵 [<time>] echo reçu
@@ -65,8 +65,8 @@
 - message: ⚪ [<time>] socketio "Echo" closed
 - message: ⚪ [<time>] start log
   data:
-    message: connexion Socket.IO fermée
     level: info
+    message: connexion Socket.IO fermée
     in: true
 - message: 🔵 [<time>] connexion Socket.IO fermée
 - message: ⚪ [<time>] done log

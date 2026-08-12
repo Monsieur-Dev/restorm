@@ -76,8 +76,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start log
   data:
-    message: cpt in DoWhile
     data: 1
+    message: cpt in DoWhile
     in: true
 - message: 🔵 [<time>] cpt in DoWhile
   data: 1
@@ -100,8 +100,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start log
   data:
-    message: cpt in DoWhile
     data: 2
+    message: cpt in DoWhile
     in: true
 - message: 🔵 [<time>] cpt in DoWhile
   data: 2
@@ -124,8 +124,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start log
   data:
-    message: cpt in DoWhile
     data: 3
+    message: cpt in DoWhile
     in: true
 - message: 🔵 [<time>] cpt in DoWhile
   data: 3
@@ -210,8 +210,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start log
   data:
-    message: cpt in While
     data: 2
+    message: cpt in While
     in: true
 - message: 🔵 [<time>] cpt in While
   data: 2
@@ -235,8 +235,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start log
   data:
-    message: cpt in While
     data: 1
+    message: cpt in While
     in: true
 - message: 🔵 [<time>] cpt in While
   data: 1
@@ -260,8 +260,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start log
   data:
-    message: cpt in While
     data: 0
+    message: cpt in While
     in: true
 - message: 🔵 [<time>] cpt in While
   data: 0
@@ -285,8 +285,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start log
   data:
-    message: cpt in While
     data: -1
+    message: cpt in While
     in: true
 - message: 🔵 [<time>] cpt in While
   data: -1

@@ -1,60 +1,49 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: c8e2a9d4-5f17-43b0-8c2a-6e9b7d3f1a02
     name: MQTT Playground
-    documentation: |-
-      # MQTT Playground
-
-      A self-contained MQTT playground: restorm HOSTS a local MQTT broker AND
-      connects to it as a client — no external Mosquitto needed.
-
-      - **MQTT Broker** hosts an aedes broker on `mqtt://localhost:1899`. It
-        subscribes internally to `restorm/e2e/chat` (so every published frame
-        surfaces in its chat) and its Send button publishes to that topic.
-      - **MQTT Chat** connects to the hosted broker, subscribes to
-        `restorm/e2e/chat` on connect, and its Send button publishes the
-        configured payload to that same topic — which round-trips straight back
-        through the subscription, so a single request both sends and receives.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: f4d1b2c0-7e3a-4c19-9b6e-2a8d51e0c7a1
+        name: Default
         variables:
           - key: brokerUrl
+            description: The restorm-hosted MQTT broker
+            enabled: true
             value:
               type: string
               value: mqtt://localhost:1899
-            description: The restorm-hosted MQTT broker
-        id: f4d1b2c0-7e3a-4c19-9b6e-2a8d51e0c7a1
     items:
-      - type: websocket
+      - id: 7a0e3f91-2c4b-4d76-9a18-5b3e0c7d2f44
         name: MQTT Broker
-        documentation: Host a local MQTT broker on `mqtt://localhost:1899`; surface + publish on `restorm/e2e/chat`.
-        tags:
-          - mqtt
+        type: websocket
         url: mqtt://localhost:1899
-        protocol: mqtt
-        server: true
+        documentation: Host a local MQTT broker on `mqtt://localhost:1899`; surface + publish on `restorm/e2e/chat`.
         event: restorm/e2e/chat
+        headers: []
         message: |-
           {
             "hello": "from broker"
           }
-        headers: []
-        id: 7a0e3f91-2c4b-4d76-9a18-5b3e0c7d2f44
-      - type: websocket
-        name: MQTT Chat
-        documentation: Connect to the hosted broker, subscribe + publish on `restorm/e2e/chat`.
+        protocol: mqtt
+        server: true
         tags:
           - mqtt
+      - id: 9c1f0a52-3b6d-4e88-bb70-1d6f4a2e9c33
+        name: MQTT Chat
+        type: websocket
         url: '{{brokerUrl}}'
-        protocol: mqtt
+        documentation: Connect to the hosted broker, subscribe + publish on `restorm/e2e/chat`.
         event: restorm/e2e/chat
+        headers: []
         message: |-
           {
             "hello": "from mqtt"
           }
-        headers: []
-        id: 9c1f0a52-3b6d-4e88-bb70-1d6f4a2e9c33
-    id: c8e2a9d4-5f17-43b0-8c2a-6e9b7d3f1a02
+        protocol: mqtt
+        tags:
+          - mqtt
+    tagColors: {}
+    tags: []
 _projectUuid: a1b2c3d4-e5f6-4708-9a0b-1c2d3e4f5061

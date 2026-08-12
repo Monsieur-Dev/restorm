@@ -1,8 +1,8 @@
 - message: 🔵 [<time>] ▶ Math
 - message: ⚪ [<time>] start math
   data:
-    op: abs
     a: -16
+    op: abs
 - message: ⚪ [<time>] done math
   data:
     result: 16
@@ -15,8 +15,8 @@
     result: 4
 - message: ⚪ [<time>] start math
   data:
-    op: min
     b: 10
+    op: min
     a: 4
 - message: ⚪ [<time>] done math
   data:
@@ -33,18 +33,18 @@
     value: 4
 - message: ⚪ [<time>] start math
   data:
+    a: 3.14159
     op: round
     precision: 3
-    a: 3.14159
     in: true
 - message: ⚪ [<time>] done math
   data:
     result: 3.142
 - message: ⚪ [<time>] start math
   data:
-    op: clamp
-    min: 0
     max: 3
+    min: 0
+    op: clamp
     a: 3.142
 - message: ⚪ [<time>] done math
   data:

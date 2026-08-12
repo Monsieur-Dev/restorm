@@ -6,8 +6,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780290655312-0z6px87
     label: Inputs/outputs
+    scenarioId: 1780290655312-0z6px87
     in: true
 - message: ⚪ [<time>] done runScenario
   data:
@@ -23,9 +23,9 @@
         obj_param4:
           name: localhost
           variables:
-            baseUrl: http://localhost:5110
+            baseUrl: http://localhost:<port>
             clientId: VALID_CLIENT_ID
-            socketUrl: http://localhost:3001
+            socketUrl: http://localhost:<port>
         obj_param5: 00FF00
         obj_param6: "#d01d1d"
         obj_param7:
@@ -46,9 +46,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -60,8 +60,8 @@
     output:color: "{{param5}}"
 - message: ⚪ [<time>] start log
   data:
-    message: Received in main
     level: info
+    message: Received in main
     data:
       obj_param1: main
       obj_param3:
@@ -71,9 +71,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -90,9 +90,9 @@
     obj_param4:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     obj_param5: 00FF00
     obj_param6: "#d01d1d"
     obj_param7:
@@ -101,8 +101,8 @@
     obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start log
   data:
-    message: statuc_output received in main
     level: info
+    message: statuc_output received in main
     data: true
 - message: 🔵 [<time>] statuc_output received in main
   data: true
@@ -117,9 +117,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -131,40 +131,40 @@
     value: true
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780260652264-uon8bia
     label: Loops
+    scenarioId: 1780260652264-uon8bia
     in: true
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780275585571-xt0vqiw
     label: Arithmetics
+    scenarioId: 1780275585571-xt0vqiw
     in: true
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780289470272-ya33ye4
     label: Logs
+    scenarioId: 1780289470272-ya33ye4
     in: true
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780387606015-te2kvqt
     label: Conditions
+    scenarioId: 1780387606015-te2kvqt
     in: true
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780545696124-73s4yub
     label: Variables & asserts
+    scenarioId: 1780545696124-73s4yub
     in: true
 - message: 🔵 [<time>] ▶ Variables & asserts
 - message: ⚪ [<time>] start setVariable
@@ -173,24 +173,24 @@
     value: abc
 - message: ⚪ [<time>] start setVariable
   data:
-    value: 10
     name: number
+    value: 10
 - message: ⚪ [<time>] start setVariable
   data:
-    value: 2026-06-04T04:02:35.000Z
     name: datetime
+    value: 2026-06-04T04:02:35.000Z
 - message: ⚪ [<time>] start setVariable
   data:
-    value: true
     name: bool
+    value: true
 - message: ⚪ [<time>] start setVariable
   data:
-    value: "#9013fe"
     name: color
+    value: "#9013fe"
 - message: ⚪ [<time>] start setVariable
   data:
-    value: 00FF00
     name: petcolor
+    value: 00FF00
 - message: ⚪ [<time>] start setVariable
   data:
     name: petcolors
@@ -199,13 +199,13 @@
       - FF0000
 - message: ⚪ [<time>] start setVariable
   data:
+    name: env
     value:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
-    name: env
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
@@ -265,15 +265,15 @@
     a:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     b:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     message: env should be localhost
     in: true
 - message: ⚪ [<time>] done assert
@@ -502,9 +502,9 @@
     b:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     message: env should be not null
     operator: ≠
     in: true
@@ -654,19 +654,19 @@
     result: true
 - message: ⚪ [<time>] start log
   data:
+    data: ""
     level: info
     message: This log should occur (object compare)
     runOnEachEvent: true
-    data: ""
     in: true
 - message: 🔵 [<time>] This log should occur (object compare)
   data: ""
 - message: ⚪ [<time>] start log
   data:
+    data: ""
     level: info
     message: This log should occur (object compare)
     runOnEachEvent: true
-    data: ""
     in: true
 - message: 🔵 [<time>] This log should occur (object compare)
   data: ""
@@ -704,44 +704,44 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780566592512-gxyr48d
     label: Templates
+    scenarioId: 1780566592512-gxyr48d
     in: true
 - message: 🔵 [<time>] ▶ Templates
 - message: ⚪ [<time>] start log
   data:
-    message: "Environment name: {{name}}"
     data:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
+    message: "Environment name: {{name}}"
 - message: "🔵 [<time>] Environment name: localhost"
   data:
     name: localhost
     variables:
-      baseUrl: http://localhost:5110
+      baseUrl: http://localhost:<port>
       clientId: VALID_CLIENT_ID
-      socketUrl: http://localhost:3001
+      socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start object
 - message: ⚪ [<time>] done log
   data:
     value:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done object
   data:
     object:
       env:
         name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       color: "#bd10e0"
 - message: ⚪ [<time>] start transform
   data:
@@ -750,9 +750,9 @@
       env:
         name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       color: "#bd10e0"
 - message: ⚪ [<time>] done transform
   data:
@@ -765,9 +765,9 @@
       env:
         name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       color: "#bd10e0"
     in: true
 - message: "🔵 [<time>] env Sub-env is #bd10e0"
@@ -775,9 +775,9 @@
     env:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     color: "#bd10e0"
 - message: ⚪ [<time>] done log
   data:
@@ -785,9 +785,9 @@
       env:
         name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       color: "#bd10e0"
 - message: 🔵 [<time>] ■ Templates
 - message: ⚪ [<time>] done runScenario
@@ -795,22 +795,22 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780566844766-gsmdkp9
     label: Lists operations
+    scenarioId: 1780566844766-gsmdkp9
     in: true
 - message: 🔵 [<time>] ▶ Lists operations
 - message: ⚪ [<time>] start setVariable
   data:
+    name: PetColors
     value:
       - 00FF00
       - 0000FF
-    name: PetColors
 - message: ⚪ [<time>] start setVariable
   data:
+    name: mylist_numbers
     value:
       - 1
       - 2
-    name: mylist_numbers
 - message: ⚪ [<time>] start object
 - message: ⚪ [<time>] start object
 - message: ⚪ [<time>] start object
@@ -824,6 +824,7 @@
     value: []
 - message: ⚪ [<time>] start setVariable
   data:
+    name: stuff
     value:
       - abc
       - 2026-06-04T17:15:02.603Z
@@ -834,16 +835,15 @@
       - null
       - name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       - - 0000FF
         - 00FF00
       - ""
-    name: stuff
 - message: ⚪ [<time>] start aggregate
   data:
-    op: min
+    field: ""
     items:
       - abc
       - 2026-06-04T17:15:02.603Z
@@ -854,17 +854,17 @@
       - null
       - name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       - - 0000FF
         - 00FF00
       - ""
-    field: ""
+    op: min
 - message: "🔴 [<time>] Cannot min a non-numeric value: undefined"
 - message: ⚪ [<time>] start aggregate
   data:
-    op: max
+    field: ""
     items:
       - abc
       - 2026-06-04T17:15:02.603Z
@@ -875,17 +875,17 @@
       - null
       - name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       - - 0000FF
         - 00FF00
       - ""
-    field: ""
+    op: max
 - message: "🔴 [<time>] Cannot max a non-numeric value: undefined"
 - message: ⚪ [<time>] start aggregate
   data:
-    op: average
+    field: ""
     items:
       - abc
       - 2026-06-04T17:15:02.603Z
@@ -896,13 +896,13 @@
       - null
       - name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       - - 0000FF
         - 00FF00
       - ""
-    field: ""
+    op: average
 - message: "🔴 [<time>] Cannot average a non-numeric value: undefined"
 - message: ⚪ [<time>] start setVariable
   data:
@@ -922,16 +922,16 @@
       - 2
 - message: ⚪ [<time>] start setVariable
   data:
+    name: petColors1
     value:
       - FF0000
       - 00FF00
-    name: petColors1
 - message: ⚪ [<time>] start setVariable
   data:
+    name: petColors2
     value:
       - 00FF00
       - FF0000
-    name: petColors2
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done object
@@ -960,7 +960,7 @@
     in: true
 - message: ⚪ [<time>] start aggregate
   data:
-    op: sum
+    field: ""
     items:
       - abc
       - 2026-06-04T17:15:02.603Z
@@ -971,18 +971,18 @@
       - null
       - name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       - - 0000FF
         - 00FF00
       - ""
-    field: ""
+    op: sum
     in: true
 - message: "🔴 [<time>] Cannot sum a non-numeric value: undefined"
 - message: ⚪ [<time>] start aggregate
   data:
-    op: min
+    field: ""
     items:
       - abc
       - 2026-06-04T17:15:02.603Z
@@ -993,13 +993,13 @@
       - null
       - name: Sub-env
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       - - 0000FF
         - 00FF00
       - ""
-    field: ""
+    op: min
     in: true
 - message: "🔴 [<time>] Cannot min a non-numeric value: undefined"
 - message: ⚪ [<time>] done setVariable
@@ -1022,8 +1022,8 @@
     result: 2
 - message: ⚪ [<time>] start log
   data:
-    message: "{{.}} colors selected"
     level: info
+    message: "{{.}} colors selected"
     data: 2
 - message: 🔵 [<time>] 2 colors selected
   data: 2
@@ -1103,13 +1103,13 @@
         price: 15
 - message: ⚪ [<time>] start aggregate
   data:
-    op: sum
     field: price
     items:
       - sku: product_1
         price: 10
       - sku: product_2
         price: 15
+    op: sum
 - message: ⚪ [<time>] done aggregate
   data:
     result: 25
@@ -1131,11 +1131,11 @@
         price: 10
 - message: ⚪ [<time>] start aggregate
   data:
-    op: average
     field: price
     items:
       - sku: product_1
         price: 10
+    op: average
 - message: ⚪ [<time>] done aggregate
   data:
     result: 10
@@ -1167,21 +1167,21 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start aggregate
   data:
-    op: average
     field: price
     items:
       - sku: product_1
         price: 10
       - sku: product_2
         price: 15
+    op: average
     in: true
 - message: ⚪ [<time>] done aggregate
   data:
     result: 12.5
 - message: ⚪ [<time>] start log
   data:
-    message: Avg basket 1
     level: warn
+    message: Avg basket 1
     data: 12.5
 - message: 🟠 [<time>] Avg basket 1
   data: 12.5
@@ -1208,21 +1208,21 @@
         price: 15
 - message: ⚪ [<time>] start aggregate
   data:
-    op: max
     field: price
     items:
       - sku: product_1
         price: 10
       - sku: product_2
         price: 15
+    op: max
     in: true
 - message: ⚪ [<time>] done aggregate
   data:
     result: 15
 - message: ⚪ [<time>] start log
   data:
-    message: Max basket 2
     level: warn
+    message: Max basket 2
     data: 15
 - message: 🟠 [<time>] Max basket 2
   data: 15
@@ -1284,8 +1284,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 1780636312910-zsddxdw
     label: Casts
+    scenarioId: 1780636312910-zsddxdw
     in: true
 - message: 🔵 [<time>] ▶ Casts
 - message: ⚪ [<time>] start cast
@@ -1488,8 +1488,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Regex
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Regex
 - message: ⚪ [<time>] start regex
@@ -1619,8 +1619,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: JSON
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ JSON
 - message: ⚪ [<time>] start json
@@ -1666,8 +1666,8 @@
     result: "[1,2,3]"
 - message: ⚪ [<time>] start json
   data:
-    op: stringify
     indent: 2
+    op: stringify
     value:
       - 1
       - 2
@@ -1721,8 +1721,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Crypto
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Crypto
 - message: ⚪ [<time>] start crypto
@@ -1774,8 +1774,8 @@
     result: ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f
 - message: ⚪ [<time>] start crypto
   data:
-    op: hmacSha256
     key: key
+    op: hmacSha256
     value: The quick brown fox jumps over the lazy dog
     in: true
 - message: ⚪ [<time>] done crypto
@@ -1810,8 +1810,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: JWT
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ JWT
 - message: ⚪ [<time>] start jwt
@@ -1861,14 +1861,14 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: DateTime
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ DateTime
 - message: ⚪ [<time>] start datetime
   data:
-    op: add
     amount: 2
+    op: add
     unit: days
     value: 2026-01-01T00:00:00.000Z
 - message: ⚪ [<time>] done datetime
@@ -1876,8 +1876,8 @@
     result: 2026-01-03T00:00:00.000Z
 - message: ⚪ [<time>] start datetime
   data:
-    op: subtract
     amount: 1
+    op: subtract
     unit: hours
     value: 2026-01-01T00:00:00.000Z
     in: true
@@ -1886,8 +1886,8 @@
     result: 2025-12-31T23:00:00.000Z
 - message: ⚪ [<time>] start datetime
   data:
-    op: format
     format: yyyy-LL-dd
+    op: format
     value: 2026-06-05T08:09:10.000Z
     in: true
 - message: ⚪ [<time>] done datetime
@@ -1896,8 +1896,8 @@
 - message: ⚪ [<time>] start datetime
   data:
     op: diff
-    unit: days
     other: 2026-01-11T00:00:00.000Z
+    unit: days
     value: 2026-01-01T00:00:00.000Z
     in: true
 - message: ⚪ [<time>] done datetime
@@ -1905,8 +1905,8 @@
     result: 10
 - message: ⚪ [<time>] start datetime
   data:
-    op: add
     amount: 1
+    op: add
     unit: days
     value: not a date
     in: true
@@ -1927,8 +1927,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: XML
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ XML
 - message: ⚪ [<time>] start xml
@@ -1973,8 +1973,8 @@
         y: 2
 - message: ⚪ [<time>] start xml
   data:
-    op: stringify
     indent: 2
+    op: stringify
     value:
       q:
         y: 2
@@ -2008,8 +2008,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: YAML
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ YAML
 - message: ⚪ [<time>] start yaml
@@ -2065,8 +2065,8 @@
       - 3
 - message: ⚪ [<time>] start yaml
   data:
-    op: stringify
     indent: 4
+    op: stringify
     value:
       - 1
       - 2
@@ -2133,42 +2133,19 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Auth login
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Auth login
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Clear Logs
-- message: ⚪ [<time>] done httpRequest
-  data:
-    response:
-      request:
-        url: http://localhost:5110/clear_logs
-        method: POST
-        headers: {}
-      response:
-        status: 200
-        statusText: OK
-        headers:
-          content-type: application/json; charset=utf-8
-          date: <dynamic-time>
-          server: Kestrel
-          transfer-encoding: chunked
-        body: '{"cleared":true}'
-        durationMs: <dynamic-time>
-        success: true
-- message: ⚪ [<time>] start httpRequest
-  data:
     requestId: <uuid>
-    label: Clear Tokens
-    in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/cleartokens
+        url: http://localhost:<port>/clear_logs
         method: POST
         headers: {}
       response:
@@ -2184,14 +2161,37 @@
         success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: d2000000-0000-0000-0000-00000000auth
-    label: Get Pet by Id
+    label: Clear Tokens
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/pet/1
+        url: http://localhost:<port>/cleartokens
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"cleared":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start httpRequest
+  data:
+    label: Get Pet by Id
+    requestId: d2000000-0000-0000-0000-00000000auth
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:<port>/pet/1
         method: GET
         headers:
           Accept: application/json
@@ -2209,23 +2209,23 @@
         success: true
 - message: ⚪ [<time>] start assert
   data:
-    operator: contains
     b: Rex
     message: Get Pet by Id should return Rex
+    operator: contains
     a: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
 - message: ⚪ [<time>] done assert
   data:
     then: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Login Probe
+    requestId: <uuid>
     in: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/loginprobe
+        url: http://localhost:<port>/loginprobe
         method: GET
         headers: {}
       response:
@@ -2241,9 +2241,9 @@
         success: true
 - message: ⚪ [<time>] start assert
   data:
-    operator: contains
     b: "probe login: VALID_CLIENT_ID -> 200"
     message: Login route should have been called
+    operator: contains
     a: '{"calls":["probe login: VALID_CLIENT_ID -> 200"]}'
 - message: ⚪ [<time>] done assert
   data:
@@ -2262,8 +2262,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Object ops
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Object ops
 - message: ⚪ [<time>] start json
@@ -2293,8 +2293,8 @@
     result: dog
 - message: ⚪ [<time>] start objectOp
   data:
-    op: pick
     keys: id,name
+    op: pick
     in: true
     value:
       id: 1
@@ -2309,8 +2309,8 @@
       name: Rex
 - message: ⚪ [<time>] start objectOp
   data:
-    op: omit
     keys: meta
+    op: omit
     in: true
     value:
       id: 1
@@ -2359,8 +2359,8 @@
 - message: ⚪ [<time>] start objectOp
   data:
     op: set
-    path: meta.age
     other: 5
+    path: meta.age
     in: true
     value:
       id: 1
@@ -2398,8 +2398,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: URL
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ URL
 - message: ⚪ [<time>] start url
@@ -2466,15 +2466,15 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Random
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Random
 - message: ⚪ [<time>] start random
   data:
-    op: int
-    min: 1
     max: 100
+    min: 1
+    op: int
     seed: "42"
 - message: ⚪ [<time>] start setVariable
   data:
@@ -2486,9 +2486,9 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start random
   data:
-    op: float
-    min: 0
     max: 1
+    min: 0
+    op: float
     seed: "7"
     in: true
 - message: ⚪ [<time>] start setVariable
@@ -2502,8 +2502,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start random
   data:
-    op: string
     length: 12
+    op: string
     seed: abc
     in: true
 - message: ⚪ [<time>] start setVariable
@@ -2525,12 +2525,12 @@
     result: true
 - message: ⚪ [<time>] start random
   data:
-    op: pick
-    seed: "3"
     items:
       - rock
       - paper
       - scissors
+    op: pick
+    seed: "3"
     in: true
 - message: ⚪ [<time>] done random
   data:
@@ -2538,17 +2538,17 @@
 - message: ⚪ [<time>] start for
   data:
     from: 1
-    to: 10
     step: 1
+    to: 10
     in: true
 - message: ⚪ [<time>] done for
 - message: "⚪ [<time>] forEach start: 9 items, batchSize=1, opening first 1"
 - message: ⚪ [<time>] forEach open item 0 (0/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 1
 - message: ⚪ [<time>] done random
   data:
@@ -2566,9 +2566,9 @@
 - message: ⚪ [<time>] forEach open item 1 (1/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 2
 - message: ⚪ [<time>] done random
   data:
@@ -2586,9 +2586,9 @@
 - message: ⚪ [<time>] forEach open item 2 (2/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 3
 - message: ⚪ [<time>] done random
   data:
@@ -2606,9 +2606,9 @@
 - message: ⚪ [<time>] forEach open item 3 (3/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 4
 - message: ⚪ [<time>] done random
   data:
@@ -2626,9 +2626,9 @@
 - message: ⚪ [<time>] forEach open item 4 (4/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 5
 - message: ⚪ [<time>] done random
   data:
@@ -2646,9 +2646,9 @@
 - message: ⚪ [<time>] forEach open item 5 (5/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 6
 - message: ⚪ [<time>] done random
   data:
@@ -2666,9 +2666,9 @@
 - message: ⚪ [<time>] forEach open item 6 (6/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 7
 - message: ⚪ [<time>] done random
   data:
@@ -2686,9 +2686,9 @@
 - message: ⚪ [<time>] forEach open item 7 (7/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 8
 - message: ⚪ [<time>] done random
   data:
@@ -2706,9 +2706,9 @@
 - message: ⚪ [<time>] forEach open item 8 (8/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 9
 - message: ⚪ [<time>] done random
   data:
@@ -2726,25 +2726,25 @@
 - message: ⚪ [<time>] start for
   data:
     from: 1
-    to: 10
     step: 1
+    to: 10
     in: 9
 - message: ⚪ [<time>] done for
 - message: "⚪ [<time>] forEach start: 9 items, batchSize=1, opening first 1"
 - message: ⚪ [<time>] forEach open item 0 (0/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 1
 - message: ⚪ [<time>] done random
   data:
     result: 20
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 20
 - message: "🟠 [<time>] Seeded random value: 20"
   data: 20
@@ -2755,17 +2755,17 @@
 - message: ⚪ [<time>] forEach open item 1 (1/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 2
 - message: ⚪ [<time>] done random
   data:
     result: 99
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 99
 - message: "🟠 [<time>] Seeded random value: 99"
   data: 99
@@ -2776,17 +2776,17 @@
 - message: ⚪ [<time>] forEach open item 2 (2/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 3
 - message: ⚪ [<time>] done random
   data:
     result: 61
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 61
 - message: "🟠 [<time>] Seeded random value: 61"
   data: 61
@@ -2797,17 +2797,17 @@
 - message: ⚪ [<time>] forEach open item 3 (3/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 4
 - message: ⚪ [<time>] done random
   data:
     result: 48
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 48
 - message: "🟠 [<time>] Seeded random value: 48"
   data: 48
@@ -2818,17 +2818,17 @@
 - message: ⚪ [<time>] forEach open item 4 (4/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 5
 - message: ⚪ [<time>] done random
   data:
     result: 78
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 78
 - message: "🟠 [<time>] Seeded random value: 78"
   data: 78
@@ -2839,17 +2839,17 @@
 - message: ⚪ [<time>] forEach open item 5 (5/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 6
 - message: ⚪ [<time>] done random
   data:
     result: 39
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 39
 - message: "🟠 [<time>] Seeded random value: 39"
   data: 39
@@ -2860,17 +2860,17 @@
 - message: ⚪ [<time>] forEach open item 6 (6/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 7
 - message: ⚪ [<time>] done random
   data:
     result: 42
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 42
 - message: "🟠 [<time>] Seeded random value: 42"
   data: 42
@@ -2881,17 +2881,17 @@
 - message: ⚪ [<time>] forEach open item 7 (7/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 8
 - message: ⚪ [<time>] done random
   data:
     result: 13
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 13
 - message: "🟠 [<time>] Seeded random value: 13"
   data: 13
@@ -2902,17 +2902,17 @@
 - message: ⚪ [<time>] forEach open item 8 (8/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 9
 - message: ⚪ [<time>] done random
   data:
     result: 93
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 93
 - message: "🟠 [<time>] Seeded random value: 93"
   data: 93
@@ -2926,8 +2926,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Throw
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Throw
 - message: ⚪ [<time>] start throw
@@ -2950,19 +2950,19 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Retry
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Retry
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Clear Flaky
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/clearflaky
+        url: http://localhost:<port>/clearflaky
         method: POST
         headers: {}
       response:
@@ -2978,24 +2978,24 @@
         success: true
 - message: ⚪ [<time>] start retry
   data:
-    maxAttempts: 5
     backoff: fixed
     delay: 10
     delayUnit: ms
+    maxAttempts: 5
     retryOnStatus: "503"
     in: true
 - message: ⚪ [<time>] done retry
 - message: ⚪ [<time>] retry attempt 1/5
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Flaky 503
+    requestId: <uuid>
     in: 1
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/flaky?fail=2&code=503
+        url: http://localhost:<port>/flaky?fail=2&code=503
         method: GET
         headers: {}
       response:
@@ -3013,14 +3013,14 @@
 - message: ⚪ [<time>] retry attempt 2/5
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Flaky 503
+    requestId: <uuid>
     in: 2
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/flaky?fail=2&code=503
+        url: http://localhost:<port>/flaky?fail=2&code=503
         method: GET
         headers: {}
       response:
@@ -3038,14 +3038,14 @@
 - message: ⚪ [<time>] retry attempt 3/5
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Flaky 503
+    requestId: <uuid>
     in: 3
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/flaky?fail=2&code=503
+        url: http://localhost:<port>/flaky?fail=2&code=503
         method: GET
         headers: {}
       response:
@@ -3070,10 +3070,10 @@
   data: {}
 - message: ⚪ [<time>] start retry
   data:
-    maxAttempts: 3
     backoff: fixed
     delay: 5
     delayUnit: ms
+    maxAttempts: 3
     retryOnError: true
     in: true
 - message: ⚪ [<time>] done retry
@@ -3108,14 +3108,14 @@
   data: {}
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Clear Flaky
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/clearflaky
+        url: http://localhost:<port>/clearflaky
         method: POST
         headers: {}
       response:
@@ -3131,24 +3131,24 @@
         success: true
 - message: ⚪ [<time>] start retry
   data:
-    maxAttempts: 3
     backoff: fixed
     delay: 5
     delayUnit: ms
+    maxAttempts: 3
     retryOnStatus: "500"
     in: true
 - message: ⚪ [<time>] done retry
 - message: ⚪ [<time>] retry attempt 1/3
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Flaky 500
+    requestId: <uuid>
     in: 1
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/flaky?fail=5&code=500
+        url: http://localhost:<port>/flaky?fail=5&code=500
         method: GET
         headers: {}
       response:
@@ -3166,14 +3166,14 @@
 - message: ⚪ [<time>] retry attempt 2/3
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Flaky 500
+    requestId: <uuid>
     in: 2
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/flaky?fail=5&code=500
+        url: http://localhost:<port>/flaky?fail=5&code=500
         method: GET
         headers: {}
       response:
@@ -3191,14 +3191,14 @@
 - message: ⚪ [<time>] retry attempt 3/3
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Flaky 500
+    requestId: <uuid>
     in: 3
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:5110/flaky?fail=5&code=500
+        url: http://localhost:<port>/flaky?fail=5&code=500
         method: GET
         headers: {}
       response:
@@ -3227,8 +3227,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: List ops
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ List ops
 - message: ⚪ [<time>] start json
@@ -3323,8 +3323,8 @@
         n: 3
 - message: ⚪ [<time>] start listOp
   data:
-    op: groupBy
     key: type
+    op: groupBy
     value:
       - type: dog
         n: 1
@@ -3383,14 +3383,14 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: CSV
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ CSV
 - message: ⚪ [<time>] start csv
   data:
-    op: parse
     header: true
+    op: parse
     value: |-
       id,name,age
       1,Rex,4
@@ -3406,8 +3406,8 @@
         age: "2"
 - message: ⚪ [<time>] start csv
   data:
-    op: stringify
     header: true
+    op: stringify
     value:
       - id: "1"
         name: Rex
@@ -3442,9 +3442,9 @@
       2,Fido,2
 - message: ⚪ [<time>] start csv
   data:
-    op: parse
-    header: true
     delimiter: ;
+    header: true
+    op: parse
     value: |-
       sku;qty
       A-1;10
@@ -3485,14 +3485,14 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Math
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Math
 - message: ⚪ [<time>] start math
   data:
-    op: abs
     a: -16
+    op: abs
 - message: ⚪ [<time>] done math
   data:
     result: 16
@@ -3505,8 +3505,8 @@
     result: 4
 - message: ⚪ [<time>] start math
   data:
-    op: min
     b: 10
+    op: min
     a: 4
 - message: ⚪ [<time>] done math
   data:
@@ -3523,18 +3523,18 @@
     value: 4
 - message: ⚪ [<time>] start math
   data:
+    a: 3.14159
     op: round
     precision: 3
-    a: 3.14159
     in: true
 - message: ⚪ [<time>] done math
   data:
     result: 3.142
 - message: ⚪ [<time>] start math
   data:
-    op: clamp
-    min: 0
     max: 3
+    min: 0
+    op: clamp
     a: 3.142
 - message: ⚪ [<time>] done math
   data:
@@ -3555,18 +3555,18 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Timer
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Timer
 - message: ⚪ [<time>] start timer
   data:
-    mode: frequency
-    frequency: 1
-    unit: s
-    stopMode: duration
     duration: 2.5
     durationUnit: s
+    frequency: 1
+    mode: frequency
+    stopMode: duration
+    unit: s
 - message: ⚪ [<time>] done timer
 - message: ⚪ [<time>] timer start (interval 1000ms, until +2500ms)
 - message: ⚪ [<time>] timer tick 0
@@ -3606,8 +3606,8 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Code TypeScript
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Code TypeScript
 - message: ⚪ [<time>] start code
@@ -3853,7 +3853,7 @@
       // restorm firewall (same network rules as an httpRequest node).
 
       return await new Promise((resolve, reject) => {
-        pm.sendRequest({ url: 'http://localhost:5110/health', method: 'GET' }, (err, res) => {
+        pm.sendRequest({ url: 'http://localhost:<port>/health', method: 'GET' }, (err, res) => {
           if (err) { reject(err); return }
           resolve({ status: res.code, body: res.text() })
         })
@@ -3885,18 +3885,18 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Code JavaScript
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Code JavaScript
 - message: ⚪ [<time>] start code
   data:
-    language: javascript
     code: |-
       // Plain JavaScript (no type annotations). console.log → run log.
       const data = [{ n: 'a', v: 3 }, { n: 'b', v: 1 }, { n: 'c', v: 2 }]
       console.log('javascript: built', data.length, 'rows')
       return data
+    language: javascript
 - message: "🔵 [<time>] javascript: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -3909,13 +3909,13 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: javascript
     code: |-
       // `input` = wired value. Curated stdlib (lodash) available as globals.
       const total = _.sumBy(input, 'v')
       const names = _.map(_.sortBy(input, 'v'), 'n')
       console.log('javascript: total =', total, 'names =', names.join(','))
       return { total, names }
+    language: javascript
     value:
       - n: a
         v: 3
@@ -3934,12 +3934,12 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: javascript
     code: |-
       // Template literal summary of the previous result.
       const summary = `${input.names.length} items summing to ${input.total}`
       console.log('javascript:', summary)
       return { lang: 'javascript', summary, total: input.total }
+    language: javascript
     value:
       total: 6
       names:
@@ -3978,18 +3978,18 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Code Python
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Code Python
 - message: ⚪ [<time>] start code
   data:
-    language: python
     code: |-
       # Fixed dataset (no input → runs at start). print(...) → run log.
       data = [{"n": "a", "v": 3}, {"n": "b", "v": 1}, {"n": "c", "v": 2}]
       print("python: built", len(data), "rows")
       data
+    language: python
 - message: "🔵 [<time>] python: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -4002,13 +4002,13 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: python
     code: |-
       # `input` = wired value (list of dicts). Aggregate + sort.
       total = sum(r["v"] for r in input)
       names = [r["n"] for r in sorted(input, key=lambda r: r["v"])]
       print("python: total =", total, "names =", ",".join(names))
       {"total": total, "names": names}
+    language: python
     value:
       - n: a
         v: 3
@@ -4027,12 +4027,12 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: python
     code: |-
       # f-strings + dict access on the previous result.
       summary = f"{len(input['names'])} items summing to {input['total']}"
       print("python:", summary)
       {"lang": "python", "summary": summary, "total": input["total"]}
+    language: python
     value:
       total: 6
       names:
@@ -4071,18 +4071,18 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Code Lua
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Code Lua
 - message: ⚪ [<time>] start code
   data:
-    language: lua
     code: |-
       -- Fixed dataset (no input → runs at start). print(...) → run log.
       local data = { {n="a", v=3}, {n="b", v=1}, {n="c", v=2} }
       print(string.format("lua: built %d rows", #data))
       return data
+    language: lua
 - message: "🔵 [<time>] lua: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -4095,13 +4095,13 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: lua
     code: |-
       -- `input` = wired value (array of tables). ipairs aggregate.
       local total = 0
       for _, r in ipairs(input) do total = total + r.v end
       print(string.format("lua: total = %d", total))
       return { total = math.floor(total), count = #input }
+    language: lua
     value:
       - n: a
         v: 3
@@ -4117,7 +4117,6 @@
       total: 6
 - message: ⚪ [<time>] start code
   data:
-    language: lua
     code: >-
       -- string.format summary of the previous result.
 
@@ -4127,6 +4126,7 @@
       print("lua: " .. msg)
 
       return { lang = "lua", summary = msg, total = math.floor(input.total) }
+    language: lua
     value:
       count: 3
       total: 6
@@ -4162,13 +4162,12 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Code Ruby
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Code Ruby
 - message: ⚪ [<time>] start code
   data:
-    language: ruby
     code: >-
       # Fixed dataset (no input → runs at start). puts → run log.
 
@@ -4178,6 +4177,7 @@
       puts "ruby: built #{data.length} rows"
 
       data
+    language: ruby
 - message: "🔵 [<time>] ruby: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -4190,13 +4190,13 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: ruby
     code: |-
       # `$input` = wired value (array of hashes). Enumerable aggregate.
       total = $input.sum { |r| r["v"] }
       names = $input.sort_by { |r| r["v"] }.map { |r| r["n"] }
       puts "ruby: total = #{total} names = #{names.join(",")}"
       { "total" => total, "names" => names }
+    language: ruby
     value:
       - n: a
         v: 3
@@ -4215,12 +4215,12 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: ruby
     code: |-
       # String interpolation summary of the previous result.
       summary = "#{$input["names"].length} items summing to #{$input["total"]}"
       puts "ruby: #{summary}"
       { "lang" => "ruby", "summary" => summary, "total" => $input["total"] }
+    language: ruby
     value:
       total: 6
       names:
@@ -4259,18 +4259,18 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Code R
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Code R
 - message: ⚪ [<time>] start code
   data:
-    language: r
     code: |-
       # Fixed numeric vector (no input → runs at start). cat → run log.
       vals <- c(3, 1, 2)
       cat(sprintf("r: built %d rows\n", length(vals)))
       vals
+    language: r
 - message: "🔵 [<time>] r: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -4280,13 +4280,13 @@
       - 2
 - message: ⚪ [<time>] start code
   data:
-    language: r
     code: |-
       # `input` = wired value. sort + sum, return a named list.
       nums <- sort(unlist(input))
       total <- sum(nums)
       cat(sprintf("r: total = %d\n", as.integer(total)))
       list(total = as.integer(total), sorted = as.integer(nums))
+    language: r
     value:
       - 3
       - 1
@@ -4302,7 +4302,6 @@
         - 3
 - message: ⚪ [<time>] start code
   data:
-    language: r
     code: >-
       # sprintf summary of the previous result.
 
@@ -4312,6 +4311,7 @@
       cat(sprintf("r: %s\n", summary))
 
       list(lang = "r", summary = summary, total = as.integer(input$total))
+    language: r
     value:
       total: 6
       sorted:
@@ -4350,13 +4350,12 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Code C#
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Code C#
 - message: ⚪ [<time>] start code
   data:
-    language: csharp
     code: >-
       // Fixed dataset (no input -> runs at start). Console.WriteLine -> run
       log.
@@ -4370,6 +4369,7 @@
       Console.WriteLine($"csharp: built {data.Count} rows");
 
       data
+    language: csharp
 - message: "🔵 [<time>] csharp: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -4382,7 +4382,6 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: csharp
     code: >-
       // `input` = wired value (list of records). LINQ aggregate.
 
@@ -4398,6 +4397,7 @@
       names)}");
 
       new Dictionary<string, object> { ["total"] = total, ["names"] = names }
+    language: csharp
     value:
       - n: a
         v: 3
@@ -4416,7 +4416,6 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: csharp
     code: >-
       // String summary of the previous result.
 
@@ -4428,6 +4427,7 @@
 
       new Dictionary<string, object> { ["lang"] = "csharp", ["summary"] =
       summary, ["total"] = input["total"] }
+    language: csharp
     value:
       total: 6
       names:
@@ -4466,33 +4466,33 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Socket.IO
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Socket.IO
 - message: ⚪ [<time>] start socketioConnect
   data:
-    requestId: <uuid>
     connectionName: Server
     label: Server listen
+    requestId: <uuid>
 - message: ⚪ [<time>] done socketioConnect
 - message: ⚪ [<time>] socketio "Server" connecting
 - message: ⚪ [<time>] socketio "Server" connected
 - message: ⚪ [<time>] start socketioConnect
   data:
-    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done socketioConnect
 - message: ⚪ [<time>] socketio "Echo" connecting
 - message: ⚪ [<time>] socketio "Echo" connected
 - message: ⚪ [<time>] start socketioSend
   data:
-    connectionNodeId: <uuid>
     channel: echo
-    payload: '{"hello":"world"}'
+    connectionNodeId: <uuid>
     label: send to Echo
+    payload: '{"hello":"world"}'
     in: true
 - message: ⚪ [<time>] done socketioSend
 - message: ⚪ [<time>] start wait
@@ -4503,10 +4503,10 @@
 - message: ⚪ [<time>] done wait
 - message: ⚪ [<time>] start socketioSend
   data:
-    connectionNodeId: <uuid>
     channel: echo
-    payload: '{"hello":"from server"}'
+    connectionNodeId: <uuid>
     label: broadcast from server
+    payload: '{"hello":"from server"}'
     in: true
 - message: ⚪ [<time>] done socketioSend
 - message: ⚪ [<time>] start wait
@@ -4516,8 +4516,8 @@
     in: true
 - message: ⚪ [<time>] start log
   data:
-    message: echo reçu
     level: info
+    message: echo reçu
     data:
       hello: from server
 - message: 🔵 [<time>] echo reçu
@@ -4536,8 +4536,8 @@
 - message: ⚪ [<time>] socketio "Echo" closed
 - message: ⚪ [<time>] start log
   data:
-    message: connexion Socket.IO fermée
     level: info
+    message: connexion Socket.IO fermée
     in: true
 - message: 🔵 [<time>] connexion Socket.IO fermée
 - message: ⚪ [<time>] done log
@@ -4556,23 +4556,23 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: WebSocket
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ WebSocket
 - message: ⚪ [<time>] start websocketConnect
   data:
-    requestId: <uuid>
     connectionName: Server
     label: Server listen
+    requestId: <uuid>
 - message: ⚪ [<time>] done websocketConnect
 - message: ⚪ [<time>] websocket "Server" connecting
 - message: ⚪ [<time>] websocket "Server" connected
 - message: ⚪ [<time>] start websocketConnect
   data:
-    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done websocketConnect
 - message: ⚪ [<time>] websocket "Echo" connecting
@@ -4580,8 +4580,8 @@
 - message: ⚪ [<time>] start websocketSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"hello":"world"}'
     label: send to Echo
+    payload: '{"hello":"world"}'
     in: true
 - message: ⚪ [<time>] done websocketSend
 - message: ⚪ [<time>] start wait
@@ -4593,8 +4593,8 @@
 - message: ⚪ [<time>] start websocketSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"hello":"from server"}'
     label: broadcast from server
+    payload: '{"hello":"from server"}'
     in: true
 - message: ⚪ [<time>] done websocketSend
 - message: ⚪ [<time>] start wait
@@ -4604,8 +4604,8 @@
     in: true
 - message: ⚪ [<time>] start log
   data:
-    message: message reçu
     level: info
+    message: message reçu
     data:
       hello: from server
 - message: 🔵 [<time>] message reçu
@@ -4632,8 +4632,8 @@
 - message: ⚪ [<time>] websocket "Echo" closed
 - message: ⚪ [<time>] start log
   data:
-    message: connexion WebSocket fermée
     level: info
+    message: connexion WebSocket fermée
     in: true
 - message: 🔵 [<time>] connexion WebSocket fermée
 - message: ⚪ [<time>] done log
@@ -4644,23 +4644,23 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: gRPC bidi
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ gRPC bidi
 - message: ⚪ [<time>] start grpcConnect
   data:
-    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcConnect
 - message: ⚪ [<time>] grpc "Echo" connecting
 - message: ⚪ [<time>] grpc "Echo" connected
 - message: ⚪ [<time>] start grpcSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"f_string":"hello"}'
     label: send to Echo
+    payload: '{"f_string":"hello"}'
     in: true
 - message: ⚪ [<time>] done grpcSend
 - message: ⚪ [<time>] start wait
@@ -4670,8 +4670,8 @@
     in: true
 - message: ⚪ [<time>] start log
   data:
-    message: frame gRPC reçue
     level: info
+    message: frame gRPC reçue
     data:
       f_strings: []
       f_enums: []
@@ -4736,8 +4736,8 @@
 - message: ⚪ [<time>] grpc "Echo" closed
 - message: ⚪ [<time>] start log
   data:
-    message: stream gRPC fermé
     level: info
+    message: stream gRPC fermé
     in: true
 - message: 🔵 [<time>] stream gRPC fermé
 - message: ⚪ [<time>] done log
@@ -4748,22 +4748,22 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: gRPC server stream
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ gRPC server stream
 - message: ⚪ [<time>] start grpcConnect
   data:
-    requestId: <uuid>
     connectionName: Ticks
     label: Server stream connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcConnect
 - message: ⚪ [<time>] grpc "Ticks" connecting
 - message: ⚪ [<time>] grpc "Ticks" connected
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -4820,8 +4820,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -4878,8 +4878,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -4936,8 +4936,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -4994,8 +4994,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -5052,8 +5052,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -5110,8 +5110,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -5168,8 +5168,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -5226,8 +5226,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -5284,8 +5284,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -5343,8 +5343,8 @@
 - message: ⚪ [<time>] grpc "Ticks" closed
 - message: ⚪ [<time>] start log
   data:
-    message: server stream terminé
     level: info
+    message: server stream terminé
     in: true
 - message: 🔵 [<time>] server stream terminé
 - message: ⚪ [<time>] done log
@@ -5355,19 +5355,19 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: gRPC unary
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ gRPC unary
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: gRPC unary call
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: localhost:9000
+        url: localhost:<port>
         method: grpcbin.GRPCBin/DummyUnary
         headers: {}
       response:
@@ -5379,8 +5379,8 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse unary
     level: info
+    message: réponse unary
     data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
 - message: 🔵 [<time>] réponse unary
   data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
@@ -5393,23 +5393,23 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: gRPC client stream
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ gRPC client stream
 - message: ⚪ [<time>] start grpcConnect
   data:
-    requestId: <uuid>
     connectionName: Chunks
     label: Client stream connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcConnect
 - message: ⚪ [<time>] grpc "Chunks" connecting
 - message: ⚪ [<time>] grpc "Chunks" connected
 - message: ⚪ [<time>] start grpcSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"f_string":"chunk"}'
     label: send chunk
+    payload: '{"f_string":"chunk"}'
     in: true
 - message: ⚪ [<time>] done grpcSend
 - message: ⚪ [<time>] start grpcClose
@@ -5422,8 +5422,8 @@
     marshaling: proto: Marshal called with nil'
 - message: ⚪ [<time>] start log
   data:
-    message: client stream terminé (statut grpcbin)
     level: info
+    message: client stream terminé (statut grpcbin)
     in: true
 - message: 🔵 [<time>] client stream terminé (statut grpcbin)
 - message: ⚪ [<time>] done log
@@ -5434,23 +5434,23 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: MQTT
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ MQTT
 - message: ⚪ [<time>] start mqttConnect
   data:
-    requestId: <uuid>
     connectionName: Broker
     label: Broker listen
+    requestId: <uuid>
 - message: ⚪ [<time>] done mqttConnect
 - message: ⚪ [<time>] mqtt "Broker" connecting
 - message: ⚪ [<time>] mqtt "Broker" connected
 - message: ⚪ [<time>] start mqttConnect
   data:
-    requestId: <uuid>
     connectionName: Chat
     label: MQTT Chat
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done mqttConnect
 - message: ⚪ [<time>] mqtt "Chat" connecting
@@ -5510,22 +5510,22 @@
       hello: from mqtt scenario
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: HTTP Server
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ HTTP Server
 - message: ⚪ [<time>] start httpListen
   data:
-    requestId: <uuid>
     connectionName: Mock Server
     label: start mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpListen
 - message: ⚪ [<time>] http-server "Mock Server" connecting
 - message: ⚪ [<time>] http-server "Mock Server" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] start httpClose
   data:
@@ -5536,7 +5536,7 @@
         method: GET
         url: /pets
         headers:
-          host: localhost:8077
+          host: localhost:<port>
           connection: keep-alive
       response:
         status: 200
@@ -5546,8 +5546,8 @@
 - message: ⚪ [<time>] http-server "Mock Server" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur HTTP arrêté
     level: info
+    message: serveur HTTP arrêté
     in: true
 - message: 🔵 [<time>] serveur HTTP arrêté
 - message: ⚪ [<time>] done log
@@ -5557,7 +5557,7 @@
   data:
     response:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -5574,12 +5574,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse du consumer reçue
     level: info
+    message: réponse du consumer reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -5597,7 +5597,7 @@
 - message: 🔵 [<time>] réponse du consumer reçue
   data:
     request:
-      url: http://localhost:8077/pets
+      url: http://localhost:<port>/pets
       method: GET
       headers: {}
     response:
@@ -5616,7 +5616,7 @@
   data:
     value:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -5637,22 +5637,22 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: SOAP Server
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ SOAP Server
 - message: ⚪ [<time>] start soapListen
   data:
-    requestId: <uuid>
     connectionName: Mock Server
     label: start mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done soapListen
 - message: ⚪ [<time>] soap-server "Mock Server" connecting
 - message: ⚪ [<time>] soap-server "Mock Server" connected
 - message: ⚪ [<time>] start soapRequest
   data:
-    requestId: <uuid>
     label: call the mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] start soapClose
   data:
@@ -5682,8 +5682,8 @@
 - message: ⚪ [<time>] soap-server "Mock Server" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur SOAP arrêté
     level: info
+    message: serveur SOAP arrêté
     in: true
 - message: 🔵 [<time>] serveur SOAP arrêté
 - message: ⚪ [<time>] done log
@@ -5693,7 +5693,7 @@
   data:
     response:
       request:
-        url: http://localhost:8076/calculator
+        url: http://localhost:<port>/calculator
         method: POST
         headers: {}
       response:
@@ -5712,12 +5712,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse du consumer reçue
     level: info
+    message: réponse du consumer reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8076/calculator
+        url: http://localhost:<port>/calculator
         method: POST
         headers: {}
       response:
@@ -5737,7 +5737,7 @@
 - message: 🔵 [<time>] réponse du consumer reçue
   data:
     request:
-      url: http://localhost:8076/calculator
+      url: http://localhost:<port>/calculator
       method: POST
       headers: {}
     response:
@@ -5758,7 +5758,7 @@
   data:
     value:
       request:
-        url: http://localhost:8076/calculator
+        url: http://localhost:<port>/calculator
         method: POST
         headers: {}
       response:
@@ -5781,28 +5781,28 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: OData Server
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ OData Server
 - message: ⚪ [<time>] start odataListen
   data:
-    requestId: <uuid>
     connectionName: OData Mock
     label: start OData mock
+    requestId: <uuid>
 - message: ⚪ [<time>] done odataListen
 - message: ⚪ [<time>] odata-server "OData Mock" connecting
 - message: ⚪ [<time>] odata-server "OData Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the OData mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -5820,12 +5820,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse OData reçue
     level: info
+    message: réponse OData reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -5844,7 +5844,7 @@
 - message: 🔵 [<time>] réponse OData reçue
   data:
     request:
-      url: http://localhost:8078/odata/Pets
+      url: http://localhost:<port>/odata/Pets
       method: GET
       headers: {}
     response:
@@ -5862,11 +5862,11 @@
       success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the OData mock ($batch)
+    requestId: <uuid>
     in:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -5886,7 +5886,7 @@
   data:
     value:
       request:
-        url: http://localhost:8078/odata/Pets
+        url: http://localhost:<port>/odata/Pets
         method: GET
         headers: {}
       response:
@@ -5906,7 +5906,7 @@
   data:
     response:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -5955,12 +5955,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse OData $batch reçue
     level: info
+    message: réponse OData $batch reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -6010,7 +6010,7 @@
 - message: 🔵 [<time>] réponse OData $batch reçue
   data:
     request:
-      url: http://localhost:8078/odata/$batch
+      url: http://localhost:<port>/odata/$batch
       method: POST
       headers:
         Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -6063,7 +6063,7 @@
     label: stop the OData mock
     in:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -6113,15 +6113,15 @@
 - message: ⚪ [<time>] odata-server "OData Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: service OData arrêté
     level: info
+    message: service OData arrêté
     in: true
 - message: 🔵 [<time>] service OData arrêté
 - message: ⚪ [<time>] done log
   data:
     value:
       request:
-        url: http://localhost:8078/odata/$batch
+        url: http://localhost:<port>/odata/$batch
         method: POST
         headers:
           Content-Type: multipart/mixed; boundary=batch_<boundary>
@@ -6177,28 +6177,28 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: gRPC Server
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ gRPC Server
 - message: ⚪ [<time>] start grpcListen
   data:
-    requestId: <uuid>
     connectionName: gRPC Mock
     label: start gRPC mock
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcListen
 - message: ⚪ [<time>] grpc-server "gRPC Mock" connecting
 - message: ⚪ [<time>] grpc-server "gRPC Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the gRPC mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: localhost:50152
+        url: localhost:<port>
         method: mock.Greeter/SayHello
         headers: {}
       response:
@@ -6210,12 +6210,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse du consumer gRPC reçue
     level: info
+    message: réponse du consumer gRPC reçue
     runOnEachEvent: false
     data:
       request:
-        url: localhost:50152
+        url: localhost:<port>
         method: mock.Greeter/SayHello
         headers: {}
       response:
@@ -6228,7 +6228,7 @@
 - message: 🔵 [<time>] réponse du consumer gRPC reçue
   data:
     request:
-      url: localhost:50152
+      url: localhost:<port>
       method: mock.Greeter/SayHello
       headers: {}
     response:
@@ -6242,7 +6242,7 @@
   data:
     value:
       request:
-        url: localhost:50152
+        url: localhost:<port>
         method: mock.Greeter/SayHello
         headers: {}
       response:
@@ -6261,8 +6261,8 @@
 - message: ⚪ [<time>] grpc-server "gRPC Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur gRPC arrêté
     level: info
+    message: serveur gRPC arrêté
     in: true
 - message: 🔵 [<time>] serveur gRPC arrêté
 - message: ⚪ [<time>] done log
@@ -6273,28 +6273,28 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: GraphQL Server
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ GraphQL Server
 - message: ⚪ [<time>] start graphqlListen
   data:
-    requestId: <uuid>
     connectionName: GraphQL Mock
     label: start GraphQL mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done graphqlListen
 - message: ⚪ [<time>] graphql-server "GraphQL Mock" connecting
 - message: ⚪ [<time>] graphql-server "GraphQL Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: query the mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -6315,12 +6315,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse GraphQL du consumer reçue
     level: info
+    message: réponse GraphQL du consumer reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -6341,7 +6341,7 @@
         success: true
     in:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -6363,7 +6363,7 @@
 - message: 🔵 [<time>] réponse GraphQL du consumer reçue
   data:
     request:
-      url: http://localhost:4222/graphql
+      url: http://localhost:<port>/graphql
       method: POST
       headers:
         Content-Type: application/json
@@ -6386,7 +6386,7 @@
   data:
     value:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -6413,8 +6413,8 @@
 - message: ⚪ [<time>] graphql-server "GraphQL Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur GraphQL arrêté
     level: info
+    message: serveur GraphQL arrêté
     in: true
 - message: 🔵 [<time>] serveur GraphQL arrêté
 - message: ⚪ [<time>] done log
@@ -6426,31 +6426,31 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: GraphQL Subscription
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ GraphQL Subscription
 - message: ⚪ [<time>] start graphqlListen
   data:
-    requestId: <uuid>
     connectionName: GraphQL Sub Mock
     label: start GraphQL mock (with subscription)
+    requestId: <uuid>
 - message: ⚪ [<time>] done graphqlListen
 - message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" connecting
 - message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" connected
 - message: ⚪ [<time>] start graphqlSubscribe
   data:
-    requestId: <uuid>
     connectionName: GraphQL Subscription
     label: subscribe to ticks
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done graphqlSubscribe
 - message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" connecting
 - message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" connected
 - message: ⚪ [<time>] start log
   data:
-    message: événement de souscription GraphQL reçu
     level: info
+    message: événement de souscription GraphQL reçu
     runOnEachEvent: false
     data:
       data:
@@ -6475,8 +6475,8 @@
 - message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" closed
 - message: ⚪ [<time>] start log
   data:
-    message: souscription GraphQL arrêtée
     level: info
+    message: souscription GraphQL arrêtée
     in: true
 - message: 🔵 [<time>] souscription GraphQL arrêtée
 - message: ⚪ [<time>] done log
@@ -6490,8 +6490,8 @@
 - message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur GraphQL arrêté
     level: info
+    message: serveur GraphQL arrêté
     in: true
 - message: 🔵 [<time>] serveur GraphQL arrêté
 - message: ⚪ [<time>] done log
@@ -6503,28 +6503,28 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: GraphQL unary
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ GraphQL unary
 - message: ⚪ [<time>] start graphqlListen
   data:
-    requestId: <uuid>
     connectionName: GraphQL Unary Mock
     label: start GraphQL mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done graphqlListen
 - message: ⚪ [<time>] graphql-server "GraphQL Unary Mock" connecting
 - message: ⚪ [<time>] graphql-server "GraphQL Unary Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: query the mock (native GraphQL)
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers: {}
       response:
@@ -6541,12 +6541,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse GraphQL unary reçue
     level: info
+    message: réponse GraphQL unary reçue
     data: '{"data":{"pets":["Rex","Whiskers"]}}'
     in:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers: {}
       response:
@@ -6574,8 +6574,8 @@
 - message: ⚪ [<time>] graphql-server "GraphQL Unary Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur GraphQL unary arrêté
     level: info
+    message: serveur GraphQL unary arrêté
     in: true
 - message: 🔵 [<time>] serveur GraphQL unary arrêté
 - message: ⚪ [<time>] done log
@@ -6587,15 +6587,15 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: SSE
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ SSE
 - message: ⚪ [<time>] start sseConnect
   data:
-    requestId: <uuid>
     connectionName: Frames
     label: SSE connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done sseConnect
 - message: ⚪ [<time>] sse "Frames" connecting
 - message: ⚪ [<time>] sse "Frames" connected
@@ -6606,8 +6606,8 @@
     in: true
 - message: ⚪ [<time>] start log
   data:
-    message: frame SSE reçue
     level: info
+    message: frame SSE reçue
     data: 1
 - message: 🔵 [<time>] frame SSE reçue
   data: 1
@@ -6616,8 +6616,8 @@
     value: 1
 - message: ⚪ [<time>] start log
   data:
-    message: frame SSE reçue
     level: info
+    message: frame SSE reçue
     data: 2
 - message: 🔵 [<time>] frame SSE reçue
   data: 2
@@ -6626,8 +6626,8 @@
     value: 2
 - message: ⚪ [<time>] start log
   data:
-    message: frame SSE reçue
     level: info
+    message: frame SSE reçue
     data: 3
 - message: 🔵 [<time>] frame SSE reçue
   data: 3
@@ -6643,8 +6643,8 @@
 - message: ⚪ [<time>] sse "Frames" closed
 - message: ⚪ [<time>] start log
   data:
-    message: stream SSE fermé
     level: info
+    message: stream SSE fermé
     in: true
 - message: 🔵 [<time>] stream SSE fermé
 - message: ⚪ [<time>] done log
@@ -6656,19 +6656,19 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Kafka
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Kafka
 - message: ⚪ [<time>] start kafkaProduce
   data:
-    requestId: <uuid>
     label: "Kafka produce (warm-up: creates the topic)"
+    requestId: <uuid>
 - message: ⚪ [<time>] done kafkaProduce
   data:
     response:
       request:
-        url: localhost:9092
+        url: localhost:<port>
         method: PRODUCE
         headers: {}
       response:
@@ -6681,22 +6681,22 @@
 - message: ⚪ [<time>] start kafkaConsume
   data:
     connectionName: Kafka consumer
-    requestId: <uuid>
     label: Kafka consume (latest)
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done kafkaConsume
 - message: ⚪ [<time>] kafka "Kafka consumer" connecting
 - message: ⚪ [<time>] kafka "Kafka consumer" connected
 - message: ⚪ [<time>] start kafkaProduce
   data:
-    requestId: <uuid>
     label: Kafka produce
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done kafkaProduce
   data:
     response:
       request:
-        url: localhost:9092
+        url: localhost:<port>
         method: PRODUCE
         headers: {}
       response:
@@ -6732,19 +6732,19 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: Redis
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ Redis
 - message: ⚪ [<time>] start redisCommand
   data:
-    requestId: <uuid>
     label: SET
+    requestId: <uuid>
 - message: ⚪ [<time>] done redisCommand
   data:
     response:
       request:
-        url: redis://localhost:6379
+        url: redis://localhost:<port>
         method: SET
         headers: {}
       response:
@@ -6756,14 +6756,14 @@
         success: true
 - message: ⚪ [<time>] start redisCommand
   data:
-    requestId: <uuid>
     label: GET
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done redisCommand
   data:
     response:
       request:
-        url: redis://localhost:6379
+        url: redis://localhost:<port>
         method: GET
         headers: {}
       response:
@@ -6776,22 +6776,22 @@
 - message: ⚪ [<time>] start redisSubscribe
   data:
     connectionName: Redis subscriber
-    requestId: <uuid>
     label: Subscribe
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done redisSubscribe
 - message: ⚪ [<time>] redis-subscribe "Redis subscriber" connecting
 - message: ⚪ [<time>] redis-subscribe "Redis subscriber" connected
 - message: ⚪ [<time>] start redisCommand
   data:
-    requestId: <uuid>
     label: PUBLISH
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done redisCommand
   data:
     response:
       request:
-        url: redis://localhost:6379
+        url: redis://localhost:<port>
         method: PUBLISH
         headers: {}
       response:
@@ -6826,15 +6826,15 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: STOMP
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ STOMP
 - message: ⚪ [<time>] start stompConnect
   data:
     connectionName: STOMP connection
-    requestId: <uuid>
     label: STOMP connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done stompConnect
 - message: ⚪ [<time>] stomp "STOMP connection" connecting
 - message: ⚪ [<time>] stomp "STOMP connection" connected
@@ -6869,15 +6869,15 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: AMQP
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ AMQP
 - message: ⚪ [<time>] start amqpConnect
   data:
     connectionName: AMQP subscriber
-    requestId: <uuid>
     label: AMQP subscribe
+    requestId: <uuid>
 - message: ⚪ [<time>] done amqpConnect
 - message: ⚪ [<time>] amqp "AMQP subscriber" connecting
 - message: ⚪ [<time>] amqp "AMQP subscriber" connected
@@ -6912,19 +6912,19 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: JSON-RPC
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ JSON-RPC
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: JSON-RPC Echo
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8095/rpc
+        url: http://localhost:<port>/rpc
         method: POST
         headers:
           Content-Type: application/json
@@ -6937,14 +6937,14 @@
         success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: JSON-RPC Batch
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8095/rpc
+        url: http://localhost:<port>/rpc
         method: POST
         headers: {}
       response:
@@ -6968,19 +6968,19 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: <uuid>
     label: tRPC
+    scenarioId: <uuid>
     in: true
 - message: 🔵 [<time>] ▶ tRPC
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: tRPC Get user
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8096/user.get?input=%7B%22id%22%3A%201%7D
+        url: http://localhost:<port>/user.get?input=%7B%22id%22%3A%201%7D
         method: ""
         headers: {}
       response:
@@ -6997,14 +6997,14 @@
         success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: tRPC Create post
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8096/echo.header?input=%7B%22name%22%3A%20%22x-test-token%22%7D
+        url: http://localhost:<port>/echo.header?input=%7B%22name%22%3A%20%22x-test-token%22%7D
         method: ""
         headers: {}
       response:

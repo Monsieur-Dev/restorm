@@ -1,50 +1,40 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: b4c5d6e7-f819-4c5d-5647-c5d6e7f81920
     name: GraphQL Playground
-    documentation: |-
-      # GraphQL Playground
-
-      A self-contained GraphQL execution matrix against the local Docker Apollo
-      server (port 4000). Covers queries, mutations, variables, fragments,
-      directives, introspection, error cases, cancellation, and Handlebars
-      env-var substitution (URL, headers, query document, variable values).
-
-      The `Default` environment defines `greeting`, `token`, and `serverUrl` so
-      every substitution surface is exercised end-to-end.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: a1b2c3d4-e5f6-4071-8293-b4c5d6e7f8a1
+        name: Default
         variables:
           - key: serverUrl
+            description: Apollo test server URL
+            enabled: true
             value:
               type: string
               value: http://localhost:4000/
-            description: Apollo test server URL
-            enabled: true
           - key: greeting
+            description: Substituted into query variable values
+            enabled: true
             value:
               type: string
               value: hello-from-env
-            description: Substituted into query variable values
-            enabled: true
           - key: token
+            description: Bearer token resolved into Authorization header
+            enabled: true
             value:
               type: string
               value: env-secret-token
-            description: Bearer token resolved into Authorization header
-            enabled: true
-        id: a1b2c3d4-e5f6-4071-8293-b4c5d6e7f8a1
     items:
-      - type: graphql
+      - id: b2c3d4e5-f607-4182-9a3b-c4d5e6f70182
         name: Users query
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Simple query — fetches all users. Proves the basic HTTP POST round-trip
           against the Apollo server at `{{serverUrl}}`.
-        tags:
-          - query
-        url: '{{serverUrl}}'
+        headers: []
         operationType: query
         query: |-
           {
@@ -54,19 +44,17 @@ collections:
               email
             }
           }
+        tags:
+          - query
         variables: '{}'
-        headers: []
-        id: b2c3d4e5-f607-4182-9a3b-c4d5e6f70182
-      - type: graphql
+      - id: c3d4e5f6-0718-4293-ab4c-d5e6f7081930
         name: User with nested and alias
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Nested fields (`User.posts`) and an alias (`a:`) in the same query.
           Proves the executor forwards the full document unchanged.
-        tags:
-          - query
-          - nested
-          - alias
-        url: '{{serverUrl}}'
+        headers: []
         operationType: query
         query: |-
           {
@@ -77,18 +65,19 @@ collections:
               }
             }
           }
+        tags:
+          - query
+          - nested
+          - alias
         variables: '{}'
-        headers: []
-        id: c3d4e5f6-0718-4293-ab4c-d5e6f7081930
-      - type: graphql
+      - id: d4e5f6a7-b819-42a3-bc4d-e5f6a7b81920
         name: User with named fragment
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Named fragment (`fragment UserFields on User`) spread on the query.
           Proves that fragment syntax passes through the executor.
-        tags:
-          - query
-          - fragment
-        url: '{{serverUrl}}'
+        headers: []
         operationType: query
         query: |-
           fragment UserFields on User {
@@ -102,17 +91,16 @@ collections:
               ...UserFields
             }
           }
-        variables: '{}'
-        headers: []
-        id: d4e5f6a7-b819-42a3-bc4d-e5f6a7b81920
-      - type: graphql
-        name: User with inline fragment
-        documentation: |-
-          Inline fragment on the User type.
         tags:
           - query
           - fragment
+        variables: '{}'
+      - id: e5f6a7b8-c920-4b3c-cd5e-f6a7b8c92031
+        name: User with inline fragment
+        type: graphql
         url: '{{serverUrl}}'
+        documentation: Inline fragment on the User type.
+        headers: []
         operationType: query
         query: |-
           {
@@ -123,18 +111,18 @@ collections:
               }
             }
           }
+        tags:
+          - query
+          - fragment
         variables: '{}'
-        headers: []
-        id: e5f6a7b8-c920-4b3c-cd5e-f6a7b8c92031
-      - type: graphql
+      - id: f6a7b8c9-d031-4c4d-de6f-a7b8c9d03142
         name: Directives include skip
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Uses `@include` and `@skip` directives driven by Boolean variables.
           `showEmail: true` → email included; `skipName: true` → name skipped.
-        tags:
-          - query
-          - directives
-        url: '{{serverUrl}}'
+        headers: []
         operationType: query
         query: |-
           query($showEmail: Boolean!, $skipName: Boolean!) {
@@ -143,71 +131,70 @@ collections:
               email @include(if: $showEmail)
             }
           }
+        tags:
+          - query
+          - directives
         variables: |-
           {
             "showEmail": true,
             "skipName": true
           }
-        headers: []
-        id: f6a7b8c9-d031-4c4d-de6f-a7b8c9d03142
-      - type: graphql
+      - id: a7b8c9d0-e142-4d5e-ef70-b8c9d0e14253
         name: Echo env variable
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           `query($m: String!) { echo(message: $m) }` with the variable value set
           to `{{greeting}}`. Proves Handlebars substitution in variable values
           reaches the server: the response must contain `hello-from-env`, not the
           literal `{{greeting}}`.
-        tags:
-          - query
-          - handlebars
-          - variables
-        url: '{{serverUrl}}'
+        headers: []
         operationType: query
         query: |-
           query($m: String!) {
             echo(message: $m)
           }
+        tags:
+          - query
+          - handlebars
+          - variables
         variables: |-
           {
             "m": "{{greeting}}"
           }
-        headers: []
-        id: a7b8c9d0-e142-4d5e-ef70-b8c9d0e14253
-      - type: graphql
+      - id: b8c9d0e1-f253-4e6f-f081-c9d0e1f25364
         name: Echo header auth
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Sends `Authorization: Bearer {{token}}` in the request headers and
           queries `echoHeader(name: "authorization")` on the server. Proves the
           env-resolved token reached the wire (the response must contain
           `env-secret-token`, not the literal `{{token}}`).
-        tags:
-          - query
-          - handlebars
-          - auth
-        url: '{{serverUrl}}'
+        headers:
+          - key: Authorization
+            enabled: true
+            value:
+              type: expression
+              value: Bearer {{token}}
         operationType: query
         query: |-
           query {
             echoHeader(name: "authorization")
           }
+        tags:
+          - query
+          - handlebars
+          - auth
         variables: '{}'
-        headers:
-          - key: Authorization
-            value:
-              type: expression
-              value: 'Bearer {{token}}'
-            enabled: true
-            id: h1i2j3k4-l5m6-4n7o-p8q9-r0s1t2u3v4w5
-        id: b8c9d0e1-f253-4e6f-f081-c9d0e1f25364
-      - type: graphql
+      - id: c9d0e1f2-a364-4f70-0192-d0e1f2a36475
         name: Create user mutation
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Simple mutation with scalar variables (`name`, `email`). Proves the
           executor serializes variables into the POST body correctly.
-        tags:
-          - mutation
-          - variables
-        url: '{{serverUrl}}'
+        headers: []
         operationType: mutation
         query: |-
           mutation($n: String!, $e: String!) {
@@ -216,23 +203,23 @@ collections:
               name
             }
           }
+        tags:
+          - mutation
+          - variables
         variables: |-
           {
             "n": "Test User",
             "e": "test@example.com"
           }
-        headers: []
-        id: c9d0e1f2-a364-4f70-0192-d0e1f2a36475
-      - type: graphql
+      - id: d0e1f2a3-b475-4081-1203-e1f2a3b47586
         name: Missing required variable
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Sends the `createUser` mutation with an empty variables object — the
           server returns a GraphQL `errors` array (required variable `$n` missing).
           Proves errors[] is surfaced distinctly from an HTTP transport error.
-        tags:
-          - mutation
-          - error
-        url: '{{serverUrl}}'
+        headers: []
         operationType: mutation
         query: |-
           mutation($n: String!, $e: String!) {
@@ -241,31 +228,31 @@ collections:
               name
             }
           }
+        tags:
+          - mutation
+          - error
         variables: '{}'
-        headers: []
-        id: d0e1f2a3-b475-4081-1203-e1f2a3b47586
-      - type: graphql
+      - id: e1f2a3b4-c586-4192-2314-f2a3b4c58697
         name: Malformed query
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Syntactically invalid GraphQL document. The server returns a `errors`
           array; the app must surface it without crashing.
+        headers: []
+        operationType: query
+        query: '{ this is not valid graphql !!!'
         tags:
           - error
-        url: '{{serverUrl}}'
-        operationType: query
-        query: |-
-          { this is not valid graphql !!!
         variables: '{}'
-        headers: []
-        id: e1f2a3b4-c586-4192-2314-f2a3b4c58697
-      - type: graphql
+      - id: f2a3b4c5-d697-42a3-3425-a3b4c5d69708
         name: Introspection
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Standard `__schema` introspection query. Proves introspection is enabled
           on the Apollo server and the response renders in the editor.
-        tags:
-          - introspection
-        url: '{{serverUrl}}'
+        headers: []
         operationType: query
         query: |-
           {
@@ -275,18 +262,17 @@ collections:
               }
             }
           }
+        tags:
+          - introspection
         variables: '{}'
-        headers: []
-        id: f2a3b4c5-d697-42a3-3425-a3b4c5d69708
-      - type: graphql
+      - id: a3b4c5d6-e708-4b4c-4536-b4c5d6e70819
         name: Network error
+        type: graphql
+        url: http://localhost:4999/
         documentation: |-
           Points at port 4999 (nothing listening). Proves a network failure is
           handled cleanly (no crash, an error surfaces in the response panel).
-        tags:
-          - error
-          - network
-        url: http://localhost:4999/
+        headers: []
         operationType: query
         query: |-
           {
@@ -294,26 +280,28 @@ collections:
               id
             }
           }
+        tags:
+          - error
+          - network
         variables: '{}'
-        headers: []
-        id: a3b4c5d6-e708-4b4c-4536-b4c5d6e70819
-      - type: graphql
+      - id: b4c5d6e7-f819-4d7e-5648-d6e7f8091930
         name: Slow cancel
+        type: graphql
+        url: '{{serverUrl}}'
         documentation: |-
           Uses `slowEcho(delayMs: 3000)` to keep the request in-flight for 3 s.
           The cancellation e2e scenario clicks Send then Cancel within that window
           and asserts 'Request cancelled' surfaces in the response panel.
-        tags:
-          - query
-          - cancel
-        url: '{{serverUrl}}'
+        headers: []
         operationType: query
         query: |-
           query {
             slowEcho(delayMs: 3000, message: "should-not-arrive")
           }
+        tags:
+          - query
+          - cancel
         variables: '{}'
-        headers: []
-        id: b4c5d6e7-f819-4d7e-5648-d6e7f8091930
-    id: b4c5d6e7-f819-4c5d-5647-c5d6e7f81920
+    tagColors: {}
+    tags: []
 _projectUuid: c5d6e7f8-0920-4d6e-6758-d6e7f8092031

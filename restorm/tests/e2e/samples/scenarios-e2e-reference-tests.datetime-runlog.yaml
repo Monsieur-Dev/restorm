@@ -1,8 +1,8 @@
 - message: 🔵 [<time>] ▶ DateTime
 - message: ⚪ [<time>] start datetime
   data:
-    op: add
     amount: 2
+    op: add
     unit: days
     value: 2026-01-01T00:00:00.000Z
 - message: ⚪ [<time>] done datetime
@@ -10,8 +10,8 @@
     result: 2026-01-03T00:00:00.000Z
 - message: ⚪ [<time>] start datetime
   data:
-    op: subtract
     amount: 1
+    op: subtract
     unit: hours
     value: 2026-01-01T00:00:00.000Z
     in: true
@@ -20,8 +20,8 @@
     result: 2025-12-31T23:00:00.000Z
 - message: ⚪ [<time>] start datetime
   data:
-    op: format
     format: yyyy-LL-dd
+    op: format
     value: 2026-06-05T08:09:10.000Z
     in: true
 - message: ⚪ [<time>] done datetime
@@ -30,8 +30,8 @@
 - message: ⚪ [<time>] start datetime
   data:
     op: diff
-    unit: days
     other: 2026-01-11T00:00:00.000Z
+    unit: days
     value: 2026-01-01T00:00:00.000Z
     in: true
 - message: ⚪ [<time>] done datetime
@@ -39,8 +39,8 @@
     result: 10
 - message: ⚪ [<time>] start datetime
   data:
-    op: add
     amount: 1
+    op: add
     unit: days
     value: not a date
     in: true

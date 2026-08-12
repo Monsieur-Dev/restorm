@@ -1,16 +1,16 @@
 - message: 🔵 [<time>] ▶ HTTP Server
 - message: ⚪ [<time>] start httpListen
   data:
-    requestId: <uuid>
     connectionName: Mock Server
     label: start mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpListen
 - message: ⚪ [<time>] http-server "Mock Server" connecting
 - message: ⚪ [<time>] http-server "Mock Server" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] start httpClose
   data:
@@ -21,7 +21,7 @@
         method: GET
         url: /pets
         headers:
-          host: localhost:8077
+          host: localhost:<port>
           connection: keep-alive
       response:
         status: 200
@@ -31,8 +31,8 @@
 - message: ⚪ [<time>] http-server "Mock Server" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur HTTP arrêté
     level: info
+    message: serveur HTTP arrêté
     in: true
 - message: 🔵 [<time>] serveur HTTP arrêté
 - message: ⚪ [<time>] done log
@@ -42,7 +42,7 @@
   data:
     response:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -59,12 +59,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse du consumer reçue
     level: info
+    message: réponse du consumer reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:
@@ -82,7 +82,7 @@
 - message: 🔵 [<time>] réponse du consumer reçue
   data:
     request:
-      url: http://localhost:8077/pets
+      url: http://localhost:<port>/pets
       method: GET
       headers: {}
     response:
@@ -101,7 +101,7 @@
   data:
     value:
       request:
-        url: http://localhost:8077/pets
+        url: http://localhost:<port>/pets
         method: GET
         headers: {}
       response:

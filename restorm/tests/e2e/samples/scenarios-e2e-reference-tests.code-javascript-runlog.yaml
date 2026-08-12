@@ -1,12 +1,12 @@
 - message: 🔵 [<time>] ▶ Code JavaScript
 - message: ⚪ [<time>] start code
   data:
-    language: javascript
     code: |-
       // Plain JavaScript (no type annotations). console.log → run log.
       const data = [{ n: 'a', v: 3 }, { n: 'b', v: 1 }, { n: 'c', v: 2 }]
       console.log('javascript: built', data.length, 'rows')
       return data
+    language: javascript
 - message: "🔵 [<time>] javascript: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -19,13 +19,13 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: javascript
     code: |-
       // `input` = wired value. Curated stdlib (lodash) available as globals.
       const total = _.sumBy(input, 'v')
       const names = _.map(_.sortBy(input, 'v'), 'n')
       console.log('javascript: total =', total, 'names =', names.join(','))
       return { total, names }
+    language: javascript
     value:
       - n: a
         v: 3
@@ -44,12 +44,12 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: javascript
     code: |-
       // Template literal summary of the previous result.
       const summary = `${input.names.length} items summing to ${input.total}`
       console.log('javascript:', summary)
       return { lang: 'javascript', summary, total: input.total }
+    language: javascript
     value:
       total: 6
       names:

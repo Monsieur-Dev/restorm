@@ -4,79 +4,6 @@ collections:
     name: Swagger Petstore
     folderType: environment
     configuration: {}
-    documentation: |-
-      # Swagger Petstore
-
-      This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key &#x60;special-key&#x60; to test the authorization filters.
-
-      **Version:** 1.0.7
-
-      **Terms of Service:** [http://swagger.io/terms/](http://swagger.io/terms/)
-
-      ## Contact
-
-      - **Email:** [apiteam@swagger.io](mailto:apiteam@swagger.io)
-
-      ## License
-
-      [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
-
-      ## External Documentation
-
-      [Find out more about Swagger](http://swagger.io)
-
-      **Host:** `localhost:8080`
-
-      **Base Path:** `/api`
-
-      **Schemes:** `https`, `http`
-
-      ## Models
-
-      ```mermaid
-      classDiagram
-        class Category {
-          - id? : integer
-          - name? : string
-        }
-        class Pet {
-          - id? : integer
-          - category? : Category
-          + name : string
-          + photoUrls : array<string>
-          - tags? : array<Tag>
-          - status? : string
-        }
-        class Tag {
-          - id? : integer
-          - name? : string
-        }
-        class ApiResponse {
-          - code? : integer
-          - type? : string
-          - message? : string
-        }
-        class Order {
-          - id? : integer
-          - petId? : integer
-          - quantity? : integer
-          - shipDate? : string
-          - status? : string
-          - complete? : boolean
-        }
-        class User {
-          - id? : integer
-          - username? : string
-          - firstName? : string
-          - lastName? : string
-          - email? : string
-          - password? : string
-          - phone? : string
-          - userStatus? : integer
-        }
-        Pet --> Category
-        Pet --> Tag
-      ```
     environments:
       - id: 518f1827-ceca-49c5-9c1b-d5f63f377a17
         name: Default
@@ -86,16 +13,19 @@ collections:
             variables:
               - key: scheme
                 description: ''
+                enabled: true
                 value:
                   type: string
                   value: https
               - key: domain
                 description: ''
+                enabled: true
                 value:
                   type: string
                   value: petstore.com
               - key: baseUrl
                 description: ''
+                enabled: true
                 value:
                   type: string
                   value: '{{scheme}}://{{domain}}:{{port}}'
@@ -138,6 +68,7 @@ collections:
             body:
               type: text
               content: ''
+            deprecated: false
             documentation: |-
               # Find pet by ID
 
@@ -238,6 +169,7 @@ collections:
                   value:
                     type: string
                     value: ''
+            deprecated: false
             documentation: |-
               # Updates a pet in the store with form data
 
@@ -289,6 +221,7 @@ collections:
             body:
               type: text
               content: ''
+            deprecated: false
             documentation: |-
               # Deletes a pet
 
@@ -358,6 +291,7 @@ collections:
                   value:
                     type: string
                     value: ''
+            deprecated: false
             documentation: |-
               # uploads an image
 
@@ -418,6 +352,7 @@ collections:
             pathParams:
               - key: petId
                 description: ID of pet to update
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -449,6 +384,7 @@ collections:
                   ],
                   "status": "available"
                 }
+            deprecated: false
             documentation: |-
               # Add a new pet to the store
 
@@ -546,6 +482,7 @@ collections:
                   ],
                   "status": "available"
                 }
+            deprecated: false
             documentation: |-
               # Update an existing pet
 
@@ -626,6 +563,7 @@ collections:
             type: http
             method: GET
             url: '{{baseUrl}}/api/pet/findByStatus'
+            deprecated: false
             documentation: |-
               # Finds Pets by status
 
@@ -718,6 +656,7 @@ collections:
             params:
               - key: tags
                 description: Tags to filter by
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -736,6 +675,7 @@ collections:
             type: http
             method: GET
             url: '{{baseUrl}}/api/store/inventory'
+            deprecated: false
             documentation: |-
               # Returns pet inventories by status
 
@@ -768,6 +708,7 @@ collections:
             type: http
             method: GET
             url: '{{baseUrl}}/api/store/order/{{orderId}}'
+            deprecated: false
             documentation: |-
               # Find purchase order by ID
 
@@ -835,6 +776,7 @@ collections:
             pathParams:
               - key: orderId
                 description: ID of pet that needs to be fetched
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -845,6 +787,7 @@ collections:
             type: http
             method: DELETE
             url: '{{baseUrl}}/api/store/order/{{orderId}}'
+            deprecated: false
             documentation: |-
               # Delete purchase order by ID
 
@@ -877,6 +820,7 @@ collections:
             pathParams:
               - key: orderId
                 description: ID of the order that needs to be deleted
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -898,6 +842,7 @@ collections:
                   "status": "placed",
                   "complete": false
                 }
+            deprecated: false
             documentation: |-
               # Place an order for a pet
 
@@ -989,6 +934,7 @@ collections:
                     "userStatus": 0
                   }
                 ]
+            deprecated: false
             documentation: |-
               # Creates list of users with given input array
 
@@ -1023,6 +969,7 @@ collections:
             type: http
             method: GET
             url: '{{baseUrl}}/api/user/{{username}}'
+            deprecated: false
             documentation: |-
               # Get user by user name
 
@@ -1092,6 +1039,7 @@ collections:
             pathParams:
               - key: username
                 description: 'The name that needs to be fetched. Use user1 for testing. '
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -1115,6 +1063,7 @@ collections:
                   "phone": "",
                   "userStatus": 0
                 }
+            deprecated: false
             documentation: |-
               # Updated user
 
@@ -1185,6 +1134,7 @@ collections:
             pathParams:
               - key: username
                 description: name that need to be updated
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -1195,6 +1145,7 @@ collections:
             type: http
             method: DELETE
             url: '{{baseUrl}}/api/user/{{username}}'
+            deprecated: false
             documentation: |-
               # Delete user
 
@@ -1227,6 +1178,7 @@ collections:
             pathParams:
               - key: username
                 description: The name that needs to be deleted
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -1250,6 +1202,7 @@ collections:
                   "phone": "",
                   "userStatus": 0
                 }
+            deprecated: false
             documentation: |-
               # Create user
 
@@ -1334,6 +1287,7 @@ collections:
                     "userStatus": 0
                   }
                 ]
+            deprecated: false
             documentation: |-
               # Creates list of users with given input array
 
@@ -1368,6 +1322,7 @@ collections:
             type: http
             method: GET
             url: '{{baseUrl}}/api/user/login'
+            deprecated: false
             documentation: |-
               # Logs user into the system
 
@@ -1402,11 +1357,13 @@ collections:
             params:
               - key: username
                 description: The user name for login
+                enabled: true
                 value:
                   type: string
                   value: ''
               - key: password
                 description: The password for login in clear text
+                enabled: true
                 value:
                   type: string
                   value: ''
@@ -1418,6 +1375,7 @@ collections:
             type: http
             method: GET
             url: '{{baseUrl}}/api/user/logout'
+            deprecated: false
             documentation: |-
               # Logs out current logged in user session
 
@@ -1440,34 +1398,18 @@ collections:
         tags:
           - user
     notes: ''
+    tagColors: {}
     tags: []
   - id: 01af2c98-81eb-49ef-86e3-f08c31164caf
     name: GraphQL Docker
     folderType: environment
     configuration: {}
-    documentation: |-
-      # GraphQL Docker
-
-      GraphQL API
-
-      ## Types
-
-      ### User
-        - id: ID!
-        - name: String!
-        - email: String!
-        - posts: [Post!]!
-
-      ### Post
-        - id: ID!
-        - title: String!
-        - content: String!
-        - author: User!
     environments:
       - id: b0db2b0a-1554-4912-9405-b1a1eee88e7a
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: http://localhost:4000
@@ -1531,6 +1473,7 @@ collections:
             documentation: 'GraphQL query: posts'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1550,6 +1493,7 @@ collections:
             documentation: 'GraphQL query: post'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1570,6 +1514,7 @@ collections:
             documentation: 'GraphQL query: echo'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1600,6 +1545,7 @@ collections:
             documentation: 'GraphQL mutation: createUser'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1620,6 +1566,7 @@ collections:
             documentation: 'GraphQL mutation: createPost'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1640,6 +1587,7 @@ collections:
             documentation: 'GraphQL mutation: deleteUser'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1660,6 +1608,7 @@ collections:
             documentation: 'GraphQL mutation: deletePost'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1690,6 +1639,7 @@ collections:
             documentation: 'GraphQL subscription: postCreated'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1704,71 +1654,18 @@ collections:
               - subscription
         tags:
           - subscription
+    tagColors: {}
     tags: []
   - id: f91c793f-d9c1-4c40-94cc-176354856405
     name: GraphQL Petstore
     folderType: environment
     configuration: {}
-    documentation: |-
-      # GraphQL Petstore
-
-      GraphQL API
-
-      ## Types
-
-      ### Category
-        - id: ID!
-        - name: String!
-
-      ### Tag
-        - id: ID!
-        - name: String!
-
-      ### Pet
-        - id: ID!
-        - name: String!
-        - category: Category
-        - photoUrls: [String!]!
-        - tags: [Tag!]
-        - status: PetStatus
-
-      ### Order
-        - id: ID!
-        - petId: ID!
-        - pet: Pet
-        - quantity: Int!
-        - shipDate: String
-        - status: OrderStatus
-        - complete: Boolean!
-
-      ### User
-        - id: ID!
-        - username: String!
-        - firstName: String
-        - lastName: String
-        - email: String!
-        - phone: String
-        - userStatus: Int
-
-      ### Inventory
-        - available: Int!
-        - pending: Int!
-        - sold: Int!
-
-      ### LoginResponse
-        - token: String!
-        - expiresAt: String!
-        - user: User!
-
-      ### ApiResponse
-        - code: Int!
-        - type: String!
-        - message: String!
     environments:
       - id: 1e460f50-2ba4-4648-a96c-eaa291ddb89c
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: http://localhost:4000
@@ -1788,6 +1685,7 @@ collections:
             documentation: 'GraphQL query: pet'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1808,6 +1706,7 @@ collections:
             documentation: 'GraphQL query: petsByStatus'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1828,6 +1727,7 @@ collections:
             documentation: 'GraphQL query: petsByTags'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1870,6 +1770,7 @@ collections:
             documentation: 'GraphQL query: inventory'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1889,6 +1790,7 @@ collections:
             documentation: 'GraphQL query: order'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1909,6 +1811,7 @@ collections:
             documentation: 'GraphQL query: user'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1929,6 +1832,7 @@ collections:
             documentation: 'GraphQL query: login'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1959,6 +1863,7 @@ collections:
             documentation: 'GraphQL mutation: createPet'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1979,6 +1884,7 @@ collections:
             documentation: 'GraphQL mutation: updatePet'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -1999,6 +1905,7 @@ collections:
             documentation: 'GraphQL mutation: updatePetForm'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2019,6 +1926,7 @@ collections:
             documentation: 'GraphQL mutation: deletePet'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2039,6 +1947,7 @@ collections:
             documentation: 'GraphQL mutation: uploadPetImage'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2059,6 +1968,7 @@ collections:
             documentation: 'GraphQL mutation: placeOrder'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2079,6 +1989,7 @@ collections:
             documentation: 'GraphQL mutation: deleteOrder'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2099,6 +2010,7 @@ collections:
             documentation: 'GraphQL mutation: createUser'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2119,6 +2031,7 @@ collections:
             documentation: 'GraphQL mutation: createUsers'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2139,6 +2052,7 @@ collections:
             documentation: 'GraphQL mutation: updateUser'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2159,6 +2073,7 @@ collections:
             documentation: 'GraphQL mutation: deleteUser'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2179,6 +2094,7 @@ collections:
             documentation: 'GraphQL mutation: logout'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2208,6 +2124,7 @@ collections:
             documentation: 'GraphQL subscription: petStatusChanged'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2228,6 +2145,7 @@ collections:
             documentation: 'GraphQL subscription: orderPlaced'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2247,6 +2165,7 @@ collections:
             documentation: 'GraphQL subscription: petCreated'
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: application/json
@@ -2261,49 +2180,18 @@ collections:
               - subscription
         tags:
           - subscription
+    tagColors: {}
     tags: []
   - id: 7b1c2c93-b357-46ea-9639-69eb70809934
     name: gRPC Docker
     folderType: environment
     configuration: {}
-    documentation: |-
-      # gRPC Docker
-
-      gRPC API
-
-      ## Messages
-
-      ### HelloRequest
-        - greeting: string
-
-      ### HelloResponse
-        - reply: string
-
-      ### HeadersResponse
-
-
-      ### IndexResponse
-        - services: repeated string
-
-      ### DummyMessage
-        - f_string: string
-        - f_strings: repeated string
-        - f_int32: int32
-        - f_int32s: repeated int32
-
-      ### SubMessage
-        - f_string: string
-
-      ### SpecificErrorRequest
-        - code: int32
-
-      ### AddrResponse
-        - addr: string
     environments:
       - id: cd9db1bc-4fa7-4849-87f7-17043df92421
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: localhost:9000
@@ -2328,6 +2216,7 @@ collections:
             service: grpcbin.HelloService
             tags:
               - unary
+            transport: grpc
         tags:
           - service
       - id: e233564a-5f4c-45c4-a1f3-9556b00b0ed0
@@ -2347,6 +2236,7 @@ collections:
             service: grpcbin.HeadersService
             tags:
               - unary
+            transport: grpc
         tags:
           - service
       - id: 89ffe1d1-c2b4-4358-aa68-8db0ffec5d02
@@ -2366,6 +2256,7 @@ collections:
             service: grpcbin.IndexService
             tags:
               - unary
+            transport: grpc
         tags:
           - service
       - id: 2cbbefa7-f3f2-4c9b-90c3-80d0218717c3
@@ -2395,6 +2286,7 @@ collections:
             service: grpcbin.DummyService
             tags:
               - unary
+            transport: grpc
           - id: a3766d2a-5ce9-4b41-9b29-868d44e56c41
             name: DummyServerStream
             type: grpc
@@ -2417,6 +2309,7 @@ collections:
             service: grpcbin.DummyService
             tags:
               - server-stream
+            transport: grpc
           - id: db200434-ec74-49cb-9286-dc7e295ff3c7
             name: DummyClientStream
             type: grpc
@@ -2439,6 +2332,7 @@ collections:
             service: grpcbin.DummyService
             tags:
               - client-stream
+            transport: grpc
           - id: 2db14986-ca56-46e4-89f6-c3e239ac8c27
             name: DummyBidirectionalStream
             type: grpc
@@ -2461,6 +2355,7 @@ collections:
             service: grpcbin.DummyService
             tags:
               - bidirectional-stream
+            transport: grpc
         tags:
           - service
       - id: d816219d-dc47-49bc-badc-88596954b8e7
@@ -2483,6 +2378,7 @@ collections:
             service: grpcbin.SpecificErrorService
             tags:
               - unary
+            transport: grpc
         tags:
           - service
       - id: 5d8cf506-f119-41f9-9ab3-2c3eeadda1ca
@@ -2502,156 +2398,21 @@ collections:
             service: grpcbin.AddrService
             tags:
               - unary
+            transport: grpc
         tags:
           - service
+    tagColors: {}
     tags: []
   - id: 80137947-223f-48b7-bd49-f8861f0b5804
     name: gRPC Petstore
     folderType: environment
     configuration: {}
-    documentation: |-
-      # gRPC Petstore
-
-      gRPC API
-
-      ## Messages
-
-      ### Category
-        - id: int64
-        - name: string
-
-      ### Tag
-        - id: int64
-        - name: string
-
-      ### Pet
-        - id: int64
-        - name: string
-        - category: Category
-        - photo_urls: repeated string
-        - tags: repeated Tag
-        - status: PetStatus
-
-      ### Order
-        - id: int64
-        - pet_id: int64
-        - quantity: int32
-        - ship_date: string
-        - status: OrderStatus
-        - complete: bool
-
-      ### User
-        - id: int64
-        - username: string
-        - first_name: string
-        - last_name: string
-        - email: string
-        - password: string
-        - phone: string
-        - user_status: int32
-
-      ### GetPetRequest
-        - id: int64
-
-      ### ListPetsRequest
-        - status: repeated PetStatus
-        - tags: repeated string
-        - limit: int32
-        - offset: int32
-
-      ### ListPetsResponse
-        - pets: repeated Pet
-        - total: int32
-
-      ### CreatePetRequest
-        - name: string
-        - category: Category
-        - photo_urls: repeated string
-        - tags: repeated Tag
-        - status: PetStatus
-
-      ### UpdatePetRequest
-        - id: int64
-        - name: string
-        - category: Category
-        - photo_urls: repeated string
-        - tags: repeated Tag
-        - status: PetStatus
-
-      ### DeletePetRequest
-        - id: int64
-
-      ### DeletePetResponse
-        - success: bool
-
-      ### StreamPetUpdatesRequest
-        - status_filter: repeated PetStatus
-
-      ### PetUpdate
-        - event_type: string
-        - pet: Pet
-        - timestamp: string
-
-      ### GetInventoryResponse
-
-
-      ### PlaceOrderRequest
-        - pet_id: int64
-        - quantity: int32
-        - ship_date: string
-
-      ### GetOrderRequest
-        - id: int64
-
-      ### DeleteOrderRequest
-        - id: int64
-
-      ### DeleteOrderResponse
-        - success: bool
-
-      ### CreateUserRequest
-        - username: string
-        - first_name: string
-        - last_name: string
-        - email: string
-        - password: string
-        - phone: string
-
-      ### GetUserRequest
-        - username: string
-
-      ### UpdateUserRequest
-        - username: string
-        - first_name: string
-        - last_name: string
-        - email: string
-        - password: string
-        - phone: string
-
-      ### DeleteUserRequest
-        - username: string
-
-      ### DeleteUserResponse
-        - success: bool
-
-      ### LoginRequest
-        - username: string
-        - password: string
-
-      ### LoginResponse
-        - token: string
-        - expires_at: string
-
-      ### LogoutRequest
-        - token: string
-
-      ### LogoutResponse
-        - success: bool
     environments:
       - id: f2229a6f-e625-4861-bb2e-7a121156b4ad
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: localhost:9000
@@ -2676,6 +2437,7 @@ collections:
             service: petstore.PetService
             tags:
               - unary
+            transport: grpc
           - id: 25e54f55-3614-49a3-aa74-d2110aefe6f4
             name: ListPets
             type: grpc
@@ -2698,6 +2460,7 @@ collections:
             service: petstore.PetService
             tags:
               - unary
+            transport: grpc
           - id: 59eb9385-7d53-4877-bd4f-51977d1dc69a
             name: CreatePet
             type: grpc
@@ -2721,6 +2484,7 @@ collections:
             service: petstore.PetService
             tags:
               - unary
+            transport: grpc
           - id: 2b508109-5492-4a2a-aef0-7685a1fccfe7
             name: UpdatePet
             type: grpc
@@ -2745,6 +2509,7 @@ collections:
             service: petstore.PetService
             tags:
               - unary
+            transport: grpc
           - id: c353c1e7-47fe-4aed-9039-823c1b7d1cc1
             name: DeletePet
             type: grpc
@@ -2760,6 +2525,7 @@ collections:
             service: petstore.PetService
             tags:
               - unary
+            transport: grpc
           - id: aa732fdf-7167-4993-ac3d-527fe0997fd8
             name: StreamPetUpdates
             type: grpc
@@ -2777,6 +2543,7 @@ collections:
             service: petstore.PetService
             tags:
               - server-stream
+            transport: grpc
         tags:
           - service
       - id: ce36e639-4b1c-4414-a18c-95c305b5d6ea
@@ -2796,6 +2563,7 @@ collections:
             service: petstore.StoreService
             tags:
               - unary
+            transport: grpc
           - id: d034de9d-abb1-4eee-b0a4-00cae1469d36
             name: PlaceOrder
             type: grpc
@@ -2813,6 +2581,7 @@ collections:
             service: petstore.StoreService
             tags:
               - unary
+            transport: grpc
           - id: cc2aa116-4ed4-44fd-9c48-6f33686b6790
             name: GetOrder
             type: grpc
@@ -2828,6 +2597,7 @@ collections:
             service: petstore.StoreService
             tags:
               - unary
+            transport: grpc
           - id: 78bb4883-d8a0-4483-a156-e86ece09e42c
             name: DeleteOrder
             type: grpc
@@ -2843,6 +2613,7 @@ collections:
             service: petstore.StoreService
             tags:
               - unary
+            transport: grpc
         tags:
           - service
       - id: 562ac56f-731b-4bb4-8754-9f668bf088b1
@@ -2870,6 +2641,7 @@ collections:
             service: petstore.UserService
             tags:
               - unary
+            transport: grpc
           - id: c54ccbea-c9e4-4622-aaae-48a911175670
             name: GetUser
             type: grpc
@@ -2885,6 +2657,7 @@ collections:
             service: petstore.UserService
             tags:
               - unary
+            transport: grpc
           - id: 86fc6a51-3c42-463b-abdf-d0610f52588f
             name: UpdateUser
             type: grpc
@@ -2905,6 +2678,7 @@ collections:
             service: petstore.UserService
             tags:
               - unary
+            transport: grpc
           - id: 23909c8f-062f-4b22-be05-dd46898e112f
             name: DeleteUser
             type: grpc
@@ -2920,6 +2694,7 @@ collections:
             service: petstore.UserService
             tags:
               - unary
+            transport: grpc
           - id: 08488faa-2f86-484a-8fc5-0a96f47e4bc6
             name: Login
             type: grpc
@@ -2936,6 +2711,7 @@ collections:
             service: petstore.UserService
             tags:
               - unary
+            transport: grpc
           - id: 6b48d985-959a-46a9-907d-19121aa19e53
             name: Logout
             type: grpc
@@ -2951,24 +2727,21 @@ collections:
             service: petstore.UserService
             tags:
               - unary
+            transport: grpc
         tags:
           - service
+    tagColors: {}
     tags: []
   - id: 76d66e58-c3b7-48f0-99df-547dd070cfd9
     name: SOAP Docker
     folderType: environment
     configuration: {}
-    documentation: |-
-      # SOAP Docker
-
-      SOAP Web Service
-
-      Namespace: http://restorm.test/castlemock
     environments:
       - id: e6e10a12-659b-4544-987e-c10f429ea261
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: http://localhost:8090/castlemock/mock/soap/echo
@@ -3018,22 +2791,18 @@ collections:
               - soap
         tags:
           - service
+    tagColors: {}
     tags: []
   - id: d8db9800-a068-4841-a44c-3893fff880a2
     name: SOAP Petstore
     folderType: environment
     configuration: {}
-    documentation: |-
-      # SOAP Petstore
-
-      SOAP Web Service
-
-      Namespace: http://petstore.example.com/wsdl
     environments:
       - id: c14dcd46-f67a-4b09-b618-a7b3df143547
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: http://localhost:8090/petstore/pet
@@ -3097,10 +2866,12 @@ collections:
             documentation: Find pets by status
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: text/xml; charset=utf-8
               - key: SOAPAction
+                enabled: true
                 value:
                   type: string
                   value: http://petstore.example.com/FindPetsByStatus
@@ -3128,10 +2899,12 @@ collections:
             documentation: Add a new pet to the store
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: text/xml; charset=utf-8
               - key: SOAPAction
+                enabled: true
                 value:
                   type: string
                   value: http://petstore.example.com/CreatePet
@@ -3159,10 +2932,12 @@ collections:
             documentation: Update an existing pet
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: text/xml; charset=utf-8
               - key: SOAPAction
+                enabled: true
                 value:
                   type: string
                   value: http://petstore.example.com/UpdatePet
@@ -3190,10 +2965,12 @@ collections:
             documentation: Delete a pet
             headers:
               - key: Content-Type
+                enabled: true
                 value:
                   type: string
                   value: text/xml; charset=utf-8
               - key: SOAPAction
+                enabled: true
                 value:
                   type: string
                   value: http://petstore.example.com/DeletePet
@@ -3204,24 +2981,18 @@ collections:
               - soap
         tags:
           - service
+    tagColors: {}
     tags: []
   - id: fd5957a0-ccfb-407f-afdb-de66aad22ab0
     name: AsyncAPI Docker
     folderType: environment
     configuration: {}
-    documentation: |-
-      # AsyncAPI Docker
-
-      AsyncAPI specification for Docker test services.
-      Covers Socket.IO and MQTT endpoints.
-
-
-      Version: 1.0.0
     environments:
       - id: f2556595-4506-400a-9f9d-926fc798c932
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: localhost:1883
@@ -3525,24 +3296,18 @@ collections:
               - socketio
         tags:
           - socketio
+    tagColors: {}
     tags: []
   - id: 86dff372-0933-415b-91bd-ab7ffc4070c8
     name: AsyncAPI Petstore
     folderType: environment
     configuration: {}
-    documentation: |-
-      # AsyncAPI Petstore
-
-      AsyncAPI specification for the Petstore.
-      Covers MQTT and Socket.IO event-driven operations.
-
-
-      Version: 1.0.0
     environments:
       - id: ca2fb2ae-3ecb-441c-8597-4160e83b22c4
         name: Default
         variables:
           - key: baseUrl
+            enabled: true
             value:
               type: string
               value: localhost:1883
@@ -3773,5 +3538,6 @@ collections:
               - mqtt
         tags:
           - mqtt
+    tagColors: {}
     tags: []
 _projectUuid: 33472c0a-8eee-4f6a-be8e-9ffca7ca2e09

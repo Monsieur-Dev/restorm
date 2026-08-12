@@ -6,14 +6,14 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: Find pet by ID
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8080/api/pet/1
+        url: http://localhost:<port>/api/pet/1
         method: GET
         headers:
           api_key: ""
@@ -36,11 +36,11 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: pet récupéré (petId surchargé par setVariable)
     level: info
+    message: pet récupéré (petId surchargé par setVariable)
     data:
       request:
-        url: http://localhost:8080/api/pet/1
+        url: http://localhost:<port>/api/pet/1
         method: GET
         headers:
           api_key: ""
@@ -63,7 +63,7 @@
         success: true
     in:
       request:
-        url: http://localhost:8080/api/pet/1
+        url: http://localhost:<port>/api/pet/1
         method: GET
         headers:
           api_key: ""
@@ -87,7 +87,7 @@
 - message: 🔵 [<time>] pet récupéré (petId surchargé par setVariable)
   data:
     request:
-      url: http://localhost:8080/api/pet/1
+      url: http://localhost:<port>/api/pet/1
       method: GET
       headers:
         api_key: ""
@@ -112,7 +112,7 @@
   data:
     value:
       request:
-        url: http://localhost:8080/api/pet/1
+        url: http://localhost:<port>/api/pet/1
         method: GET
         headers:
           api_key: ""

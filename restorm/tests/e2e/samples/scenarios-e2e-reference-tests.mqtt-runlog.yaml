@@ -1,17 +1,17 @@
 - message: 🔵 [<time>] ▶ MQTT
 - message: ⚪ [<time>] start mqttConnect
   data:
-    requestId: <uuid>
     connectionName: Broker
     label: Broker listen
+    requestId: <uuid>
 - message: ⚪ [<time>] done mqttConnect
 - message: ⚪ [<time>] mqtt "Broker" connecting
 - message: ⚪ [<time>] mqtt "Broker" connected
 - message: ⚪ [<time>] start mqttConnect
   data:
-    requestId: <uuid>
     connectionName: Chat
     label: MQTT Chat
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done mqttConnect
 - message: ⚪ [<time>] mqtt "Chat" connecting

@@ -1,12 +1,12 @@
 - message: 🔵 [<time>] ▶ Timer
 - message: ⚪ [<time>] start timer
   data:
-    mode: frequency
-    frequency: 1
-    unit: s
-    stopMode: duration
     duration: 2.5
     durationUnit: s
+    frequency: 1
+    mode: frequency
+    stopMode: duration
+    unit: s
 - message: ⚪ [<time>] done timer
 - message: ⚪ [<time>] timer start (interval 1000ms, until +2500ms)
 - message: ⚪ [<time>] timer tick 0

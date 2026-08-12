@@ -1,22 +1,22 @@
 - message: 🔵 [<time>] ▶ gRPC Server
 - message: ⚪ [<time>] start grpcListen
   data:
-    requestId: <uuid>
     connectionName: gRPC Mock
     label: start gRPC mock
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcListen
 - message: ⚪ [<time>] grpc-server "gRPC Mock" connecting
 - message: ⚪ [<time>] grpc-server "gRPC Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: call the gRPC mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: localhost:50152
+        url: localhost:<port>
         method: mock.Greeter/SayHello
         headers: {}
       response:
@@ -28,12 +28,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse du consumer gRPC reçue
     level: info
+    message: réponse du consumer gRPC reçue
     runOnEachEvent: false
     data:
       request:
-        url: localhost:50152
+        url: localhost:<port>
         method: mock.Greeter/SayHello
         headers: {}
       response:
@@ -46,7 +46,7 @@
 - message: 🔵 [<time>] réponse du consumer gRPC reçue
   data:
     request:
-      url: localhost:50152
+      url: localhost:<port>
       method: mock.Greeter/SayHello
       headers: {}
     response:
@@ -60,7 +60,7 @@
   data:
     value:
       request:
-        url: localhost:50152
+        url: localhost:<port>
         method: mock.Greeter/SayHello
         headers: {}
       response:
@@ -79,8 +79,8 @@
 - message: ⚪ [<time>] grpc-server "gRPC Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur gRPC arrêté
     level: info
+    message: serveur gRPC arrêté
     in: true
 - message: 🔵 [<time>] serveur gRPC arrêté
 - message: ⚪ [<time>] done log

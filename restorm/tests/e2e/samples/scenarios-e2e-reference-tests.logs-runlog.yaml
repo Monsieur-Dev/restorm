@@ -14,9 +14,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start log
   data:
     message: Hello {{hello}}
@@ -32,9 +32,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: 🔵 [<time>] Hello world
   data:
     hello: world
@@ -48,9 +48,9 @@
     SelectedEnv:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -65,9 +65,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start log
   data:
     message: foo {{.}}
@@ -93,9 +93,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
     in: true
 - message: "🔵 [<time>] Anwser to the universe : "
   data:
@@ -110,9 +110,9 @@
     SelectedEnv:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -127,9 +127,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start log
   data:
     message: "Marty ! It's time ! "
@@ -152,9 +152,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
     in: true
 - message: 🔵 [<time>] Fire 🔥
   data:
@@ -169,9 +169,9 @@
     SelectedEnv:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -186,9 +186,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start log
   data:
     message: "Selected color: {{color}}"
@@ -205,9 +205,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: "🔵 [<time>] Selected color: #000000"
   data:
     hello: world
@@ -221,9 +221,9 @@
     SelectedEnv:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -238,9 +238,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start log
   data:
     message: Bienvenue au Moulin {{moulin}}
@@ -257,9 +257,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: 🔵 [<time>] Bienvenue au Moulin FF0000
   data:
     hello: world
@@ -273,9 +273,9 @@
     SelectedEnv:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -290,9 +290,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start log
   data:
     message: "Original expression: {{expression}}"
@@ -309,9 +309,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: "🔵 [<time>] Original expression: My expression"
   data:
     hello: world
@@ -325,9 +325,9 @@
     SelectedEnv:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -342,9 +342,9 @@
       SelectedEnv:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] start log
   data:
     message: "Selected environment : {{name}}"
@@ -352,22 +352,22 @@
     data:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: "🔵 [<time>] Selected environment : localhost"
   data:
     name: localhost
     variables:
-      baseUrl: http://localhost:5110
+      baseUrl: http://localhost:<port>
       clientId: VALID_CLIENT_ID
-      socketUrl: http://localhost:3001
+      socketUrl: http://localhost:<port>
 - message: ⚪ [<time>] done log
   data:
     value:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
 - message: 🔵 [<time>] ■ Logs

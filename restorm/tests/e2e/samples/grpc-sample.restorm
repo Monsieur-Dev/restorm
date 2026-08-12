@@ -1,192 +1,182 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: e3c4d5e6-f708-4192-ab3c-4d5e6f708192
     name: gRPC Playground
-    documentation: |-
-      # gRPC Playground
-
-      Connects to the local grpcbin server (docker-compose service `grpc`,
-      `moul/grpcbin`, exposed on port 9000). The bundled grpcbin proto descriptor
-      resolves the `grpcbin.GRPCBin` service, so no `.proto` import is needed.
-
-      **gRPC Echo (bidi)** opens a bidirectional stream
-      (`DummyBidirectionalStreamStream`): each request message you send is echoed
-      straight back as a received frame. **gRPC Echo (server stream)** opens a
-      server stream (`DummyServerStream`): one request, a burst of echoed frames.
-
-      **gRPC-Web Unary** and **Connect Unary** exercise the `transport` toggle:
-      the same `DummyUnary` call, framed for plain HTTP/1.1 instead of native
-      HTTP/2. Neither wire format is spoken by grpcbin itself, so each has its
-      own dedicated mock: gRPC-Web targets `grpcweb-mock` (9002), Connect
-      targets `connect-mock` (8093) — there's no local image for either.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: 1b2c3d4e-5f60-4718-8293-a4b5c6d7e8f9
+        name: Default
         variables:
           - key: echoval
+            enabled: true
             value:
               type: string
               value: echo-substituted-42
-            enabled: true
-        id: 1b2c3d4e-5f60-4718-8293-a4b5c6d7e8f9
     items:
-      - type: grpc
+      - id: c3d4e5f6-0718-4293-a4b5-c6d7e8f90213
         name: gRPC Headers (metadata echo)
+        type: grpc
+        method: HeadersUnary
+        url: localhost:9000
+        callType: unary
         documentation: |-
           Calls grpcbin's HeadersUnary, which echoes the received gRPC metadata
           back in the response. A metadata value of `{{echoval}}` proves env-var
           / Handlebars substitution reaches the wire (the echoed response must
           contain the resolved value, not the literal template).
-        tags:
-          - grpc
-          - unary
-        url: localhost:9000
-        service: grpcbin.GRPCBin
-        method: HeadersUnary
-        callType: unary
-        requestMessage: '{}'
         metadata:
           - key: x-echo
+            enabled: true
             value:
               type: expression
               value: '{{echoval}}'
-            enabled: true
-        id: c3d4e5f6-0718-4293-a4b5-c6d7e8f90213
-      - type: grpc
-        name: gRPC Echo (bidi)
-        documentation: Open a bidirectional stream and echo each sent frame back.
+        requestMessage: '{}'
+        service: grpcbin.GRPCBin
         tags:
           - grpc
-          - bidirectional-stream
-        url: localhost:9000
-        service: grpcbin.GRPCBin
+          - unary
+        transport: grpc
+      - id: c1a2b3c4-d5e6-4f70-8819-2a3b4c5d6e7f
+        name: gRPC Echo (bidi)
+        type: grpc
         method: DummyBidirectionalStreamStream
+        url: localhost:9000
         callType: bidirectional-stream
+        documentation: Open a bidirectional stream and echo each sent frame back.
+        metadata: []
         requestMessage: |-
           {
             "f_string": "hello"
           }
-        metadata: []
-        id: c1a2b3c4-d5e6-4f70-8819-2a3b4c5d6e7f
-      - type: grpc
-        name: gRPC Unary
-        documentation: A single request → single response unary call (DummyUnary).
+        service: grpcbin.GRPCBin
         tags:
           - grpc
-          - unary
-        url: localhost:9000
-        service: grpcbin.GRPCBin
+          - bidirectional-stream
+        transport: grpc
+      - id: a0b1c2d3-e4f5-4061-8273-849506172839
+        name: gRPC Unary
+        type: grpc
         method: DummyUnary
+        url: localhost:9000
         callType: unary
+        documentation: A single request → single response unary call (DummyUnary).
+        metadata: []
         requestMessage: |-
           {
             "f_string": "ping"
           }
-        metadata: []
-        id: a0b1c2d3-e4f5-4061-8273-849506172839
-      - type: grpc
+        service: grpcbin.GRPCBin
+        tags:
+          - grpc
+          - unary
+        transport: grpc
+      - id: b1c2d3e4-f506-4172-8394-a5b6c7d80192
         name: gRPC Echo (client stream)
+        type: grpc
+        method: DummyClientStream
+        url: localhost:9000
+        callType: client-stream
         documentation: |-
           A stream of request messages → one final response (DummyClientStream).
           Note: moul/grpcbin's DummyClientStream returns gRPC status 13 (INTERNAL,
           "Marshal called with nil") server-side regardless of input — a known
           grpcbin quirk — so this exercises the client-stream plumbing + gRPC
           status propagation rather than a clean echo.
-        tags:
-          - grpc
-          - client-stream
-        url: localhost:9000
-        service: grpcbin.GRPCBin
-        method: DummyClientStream
-        callType: client-stream
+        metadata: []
         requestMessage: |-
           {
             "f_string": "chunk"
           }
-        metadata: []
-        id: b1c2d3e4-f506-4172-8394-a5b6c7d80192
-      - type: grpc
-        name: gRPC Echo (server stream)
-        documentation: Open a server stream — one request, a burst of echoed frames.
+        service: grpcbin.GRPCBin
         tags:
           - grpc
-          - server-stream
-        url: localhost:9000
-        service: grpcbin.GRPCBin
+          - client-stream
+        transport: grpc
+      - id: d2b3c4d5-e6f7-4081-9a2b-3c4d5e6f7081
+        name: gRPC Echo (server stream)
+        type: grpc
         method: DummyServerStream
+        url: localhost:9000
         callType: server-stream
+        documentation: Open a server stream — one request, a burst of echoed frames.
+        metadata: []
         requestMessage: |-
           {
             "f_string": "stream-me"
           }
-        metadata: []
-        id: d2b3c4d5-e6f7-4081-9a2b-3c4d5e6f7081
-      - type: grpc
+        service: grpcbin.GRPCBin
+        tags:
+          - grpc
+          - server-stream
+        transport: grpc
+      - id: f1a2b3c4-d5e6-4f70-8819-2a3b4c5d6e80
         name: gRPC-Web Unary
+        type: grpc
+        method: DummyUnary
+        url: localhost:9002
+        callType: unary
         documentation: |-
           The same DummyUnary call as "gRPC Unary", but dispatched over the
           gRPC-Web transport (binary framing over plain HTTP/1.1) against the
           dedicated `grpcweb-mock` container (9002) — grpcbin itself doesn't
           speak gRPC-Web on any port.
-        tags:
-          - grpc
-          - unary
-          - grpc-web
-        url: localhost:9002
-        service: grpcbin.GRPCBin
-        method: DummyUnary
-        callType: unary
-        transport: grpc-web
+        metadata: []
         requestMessage: |-
           {
             "f_string": "web-ping"
           }
-        metadata: []
-        id: f1a2b3c4-d5e6-4f70-8819-2a3b4c5d6e80
-      - type: grpc
+        service: grpcbin.GRPCBin
+        tags:
+          - grpc
+          - unary
+          - grpc-web
+        transport: grpc-web
+      - id: f2a3b4c5-d6e7-4f81-8920-3b4c5d6e7f81
         name: Connect Unary
+        type: grpc
+        method: DummyUnary
+        url: localhost:8093
+        callType: unary
         documentation: |-
           The same DummyUnary call again, dispatched over the Connect-RPC
           transport (JSON over plain HTTP) against the dedicated
           `connect-mock` container (8093) — there's no local Connect-RPC
           image to reuse, so this targets a hand-rolled mock instead of
           grpcbin.
-        tags:
-          - grpc
-          - unary
-          - connect
-        url: localhost:8093
-        service: grpcbin.GRPCBin
-        method: DummyUnary
-        callType: unary
-        transport: connect
+        metadata: []
         requestMessage: |-
           {
             "f_string": "connect-ping"
           }
-        metadata: []
-        id: f2a3b4c5-d6e7-4f81-8920-3b4c5d6e7f81
-      - type: grpc
+        service: grpcbin.GRPCBin
+        tags:
+          - grpc
+          - unary
+          - connect
+        transport: connect
+      - id: e5f6a7b8-c9d0-4e1f-b2c3-d4e5f6a7b8c9
         name: gRPC Error (SpecificError)
+        type: grpc
+        method: SpecificError
+        url: localhost:9000
+        callType: unary
         documentation: |-
           Calls grpcbin's SpecificError with code=3 (INVALID_ARGUMENT), exercising
           the executeUnary error branch: the response panel must surface the
           non-OK status code and the human-readable label from grpcStatusName().
-        tags:
-          - grpc
-          - unary
-          - error
-        url: localhost:9000
-        service: grpcbin.GRPCBin
-        method: SpecificError
-        callType: unary
+        metadata: []
         requestMessage: |-
           {
             "code": 3,
             "reason": "e2e-error-mapping-test"
           }
-        metadata: []
-        id: e5f6a7b8-c9d0-4e1f-b2c3-d4e5f6a7b8c9
-    id: e3c4d5e6-f708-4192-ab3c-4d5e6f708192
+        service: grpcbin.GRPCBin
+        tags:
+          - grpc
+          - unary
+          - error
+        transport: grpc
+    tagColors: {}
+    tags: []
 _projectUuid: f4d5e6f7-0819-42a3-bc4d-5e6f70819203

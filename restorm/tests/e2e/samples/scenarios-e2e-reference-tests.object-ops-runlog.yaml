@@ -26,8 +26,8 @@
     result: dog
 - message: ⚪ [<time>] start objectOp
   data:
-    op: pick
     keys: id,name
+    op: pick
     in: true
     value:
       id: 1
@@ -42,8 +42,8 @@
       name: Rex
 - message: ⚪ [<time>] start objectOp
   data:
-    op: omit
     keys: meta
+    op: omit
     in: true
     value:
       id: 1
@@ -92,8 +92,8 @@
 - message: ⚪ [<time>] start objectOp
   data:
     op: set
-    path: meta.age
     other: 5
+    path: meta.age
     in: true
     value:
       id: 1

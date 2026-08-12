@@ -1,13 +1,13 @@
 - message: 🔵 [<time>] ▶ Kafka
 - message: ⚪ [<time>] start kafkaProduce
   data:
-    requestId: <uuid>
     label: "Kafka produce (warm-up: creates the topic)"
+    requestId: <uuid>
 - message: ⚪ [<time>] done kafkaProduce
   data:
     response:
       request:
-        url: localhost:9092
+        url: localhost:<port>
         method: PRODUCE
         headers: {}
       response:
@@ -20,22 +20,22 @@
 - message: ⚪ [<time>] start kafkaConsume
   data:
     connectionName: Kafka consumer
-    requestId: <uuid>
     label: Kafka consume (latest)
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done kafkaConsume
 - message: ⚪ [<time>] kafka "Kafka consumer" connecting
 - message: ⚪ [<time>] kafka "Kafka consumer" connected
 - message: ⚪ [<time>] start kafkaProduce
   data:
-    requestId: <uuid>
     label: Kafka produce
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done kafkaProduce
   data:
     response:
       request:
-        url: localhost:9092
+        url: localhost:<port>
         method: PRODUCE
         headers: {}
       response:

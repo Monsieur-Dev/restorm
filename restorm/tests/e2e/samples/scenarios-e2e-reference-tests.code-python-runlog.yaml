@@ -1,12 +1,12 @@
 - message: 🔵 [<time>] ▶ Code Python
 - message: ⚪ [<time>] start code
   data:
-    language: python
     code: |-
       # Fixed dataset (no input → runs at start). print(...) → run log.
       data = [{"n": "a", "v": 3}, {"n": "b", "v": 1}, {"n": "c", "v": 2}]
       print("python: built", len(data), "rows")
       data
+    language: python
 - message: "🔵 [<time>] python: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -19,13 +19,13 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: python
     code: |-
       # `input` = wired value (list of dicts). Aggregate + sort.
       total = sum(r["v"] for r in input)
       names = [r["n"] for r in sorted(input, key=lambda r: r["v"])]
       print("python: total =", total, "names =", ",".join(names))
       {"total": total, "names": names}
+    language: python
     value:
       - n: a
         v: 3
@@ -44,12 +44,12 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: python
     code: |-
       # f-strings + dict access on the previous result.
       summary = f"{len(input['names'])} items summing to {input['total']}"
       print("python:", summary)
       {"lang": "python", "summary": summary, "total": input["total"]}
+    language: python
     value:
       total: 6
       names:

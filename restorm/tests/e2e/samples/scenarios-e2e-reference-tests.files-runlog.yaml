@@ -42,8 +42,8 @@
       tag: cat
 - message: ⚪ [<time>] start writeFile
   data:
-    path: scenarios-e2e-reference-tests.writefile-out.json
     mode: replace
+    path: scenarios-e2e-reference-tests.writefile-out.json
     in: true
     content: |
       { "id": 3, "name": "Pixel", "tag": "cat" }
