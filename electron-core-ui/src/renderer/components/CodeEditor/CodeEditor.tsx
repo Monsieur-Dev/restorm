@@ -193,6 +193,19 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const [monacoInstance, setMonacoInstance] = useState<typeof monacoEditor | null>(null)
   const goToDefinitionRef = useRef(onGoToDefinition)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /**
+   * Editors whose `dispose()` already ran. StrictMode's dev-only
+   * disconnect→reconnect of a moved subtree (a KeyValueTable row reorder)
+   * re-runs the effects below while `editorInstance` still points at the
+   * editor the disconnect just disposed — and any call on that instance
+   * throws `InstantiationService has been disposed`, with a follow-up
+   * `domNode` crash from renders scheduled before the dispose landed. The
+   * `onDidDispose` hook in `handleMount` records the corpse here so every
+   * effect and every DEFERRED callback (marker events, repaints) can bail
+   * synchronously — the state-clearing `setEditorInstance(null)` alone is
+   * not enough, because the re-run happens before that update renders.
+   */
+  const disposedEditorsRef = useRef(new WeakSet<object>())
   const lastValueRef = useRef<string | undefined>(props.value)
   const lastEventRef = useRef<monacoEditor.editor.IModelContentChangedEvent | undefined>(undefined)
 
@@ -261,7 +274,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
 
   // Apply settings changes to live editor instance
   useEffect(() => {
-    if (editorInstance && Object.keys(settingsOptions).length > 0) {
+    if (editorInstance && !disposedEditorsRef.current.has(editorInstance) && Object.keys(settingsOptions).length > 0) {
       editorInstance.updateOptions(settingsOptions)
     }
   }, [editorInstance, settingsOptions])
@@ -326,8 +339,14 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   useEffect(() => {
     if (!tolerateHandlebars) return
     if (!editorInstance || !monacoInstance) return
+    // The dispose→reconnect cycle re-runs this effect while the state still
+    // holds the editor the disconnect just disposed — see disposedEditorsRef.
+    if (disposedEditorsRef.current.has(editorInstance)) return
 
     const prune = (): void => {
+      // Marker events arrive on Monaco's own schedule — re-check at every
+      // deferred entry, not only when the effect armed.
+      if (disposedEditorsRef.current.has(editorInstance)) return
       const model = editorInstance.getModel()
       if (!model) return
       const markers = monacoInstance.editor.getModelMarkers({ resource: model.uri })
@@ -345,6 +364,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     }
 
     const subscription = monacoInstance.editor.onDidChangeMarkers((resources) => {
+      if (disposedEditorsRef.current.has(editorInstance)) return
       const model = editorInstance.getModel()
       if (!model) return
       const uri = model.uri.toString()
@@ -371,10 +391,15 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   useEffect(() => {
     if (!tolerateHandlebars) return
     if (!editorInstance || !monacoInstance) return
+    // Same reconnect hazard as the marker effect above: creating a
+    // decorations collection on a disposed editor is exactly the
+    // `InstantiationService has been disposed` crash.
+    if (disposedEditorsRef.current.has(editorInstance)) return
 
     const decorations = editorInstance.createDecorationsCollection([])
 
     const paint = (): void => {
+      if (disposedEditorsRef.current.has(editorInstance)) return
       const model = editorInstance.getModel()
       if (!model) {
         decorations.clear()
@@ -421,6 +446,14 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
 
   const handleMount: OnMount = (editor, monaco) => {
     const monacoTyped = monaco as typeof monacoEditor
+    // Record the dispose the moment it happens, and drop the dead instance
+    // from state so downstream effects re-run against null instead of a
+    // corpse. The WeakSet is the synchronous half of the guard: the
+    // reconnect's effect re-run happens BEFORE the state update renders.
+    editor.onDidDispose(() => {
+      disposedEditorsRef.current.add(editor)
+      setEditorInstance((current) => (current === editor ? null : current))
+    })
     setEditorInstance(editor)
     setMonacoInstance(monacoTyped)
 
@@ -492,6 +525,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   // unsaved keystrokes.
   useEffect(() => {
     if (!editorInstance) return
+    if (disposedEditorsRef.current.has(editorInstance)) return
     if (props.value === undefined) return
     if (debounceRef.current !== null) return
     if (props.value === lastEmittedValueRef.current) return
