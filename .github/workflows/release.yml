@@ -140,9 +140,17 @@ jobs:
       - name: Verify signature + notarization (macOS)
         # Runs only once the Apple secrets exist — the proof the release is
         # actually accepted by Gatekeeper, in the job log (codesign chain,
-        # notarization ticket stapled to the app, spctl assessment).
-        if: matrix.platform == 'macos' && secrets.APPLE_TEAM_ID != ''
+        # notarization ticket stapled to the app, spctl assessment). The
+        # secrets context is not allowed in `if:` expressions, so the gate
+        # reads the secret through env and exits early when it is absent.
+        if: matrix.platform == 'macos'
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          if [ -z "$APPLE_TEAM_ID" ]; then
+            echo "Apple secrets not configured — skipping signature verification (unsigned build)."
+            exit 0
+          fi
           APP="$(find restorm/dist-electron -maxdepth 3 -name '*.app' -print -quit)"
           if [ -z "$APP" ]; then echo "no .app found under dist-electron" >&2; exit 1; fi
           echo "Verifying: $APP"
