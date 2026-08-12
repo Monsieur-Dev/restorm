@@ -10,21 +10,18 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
-## v0.1.19
+## v1.0.0
 
-- Linux: the AppImage now starts reliably and applies updates without getting
-  stuck, including on distributions with a hardened sandbox.
-- macOS: Intel builds are now available alongside Apple Silicon.
+**Restorm 1.0 — the local-first API client, launched.**
 
-## v0.1.17
+Restorm is a fast, offline-first desktop client for testing and driving APIs across every major protocol.
 
-- Release notes are now shown in your language.
-- Linux, Windows and macOS desktop apps: the installer now shows Restorm's icon,
-  name and details, and the app opens with your theme applied.
+- **Protocols**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Scenarios**: chain requests visually, branch/loop, extract & reuse values, run headless in CI.
+- **Environments & variables**: `{{handlebars}}` everywhere, typed secrets, per-folder environments.
+- **Import/Export**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, code export.
+- **Git-native projects**: your `.restorm` project is a plain file — version it, diff it, resolve conflicts in-app.
+- **Local-first & private**: everything runs on your machine; an outbound firewall gates every external call.
+- **Cross-platform**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Silent background auto-update: Restorm now checks for updates on launch and
-  every few hours, downloads them in the background, and installs on the next
-  restart. A "What's new" note is shown after each update.
-- Manual "Check for updates" control and an auto-update toggle in Settings.
+Free Community edition, with Pro & Enterprise for teams.

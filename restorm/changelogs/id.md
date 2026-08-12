@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: AppImage kini berjalan dengan andal dan menerapkan pembaruan tanpa macet, termasuk pada distribusi dengan sandbox yang diperketat.
-- macOS: versi Intel kini tersedia bersama Apple Silicon.
+**Restorm 1.0 — klien API local-first, resmi dirilis.**
 
-## v0.1.17
+Restorm adalah klien desktop yang cepat dan mengutamakan mode offline untuk menguji dan menjalankan API di semua protokol utama.
 
-- Catatan rilis kini ditampilkan dalam bahasa Anda.
-- Aplikasi desktop untuk Linux, Windows, dan macOS: pemasang kini menampilkan ikon, nama, dan detail Restorm, dan aplikasi terbuka dengan tema Anda.
+- **Protokol**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Skenario**: rangkai permintaan secara visual, percabangan/perulangan, ekstrak dan gunakan ulang nilai, jalankan tanpa antarmuka di CI.
+- **Lingkungan & variabel**: `{{handlebars}}` di mana saja, secret bertipe, lingkungan per folder.
+- **Impor/Ekspor**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, ekspor kode.
+- **Proyek native Git**: proyek `.restorm` Anda adalah berkas biasa — kelola versi, bandingkan, dan selesaikan konflik di dalam aplikasi.
+- **Local-first & privat**: semuanya berjalan di komputer Anda; firewall keluar mengawasi setiap panggilan eksternal.
+- **Lintas platform**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Pembaruan otomatis diam-diam di latar belakang: Restorm memeriksa pembaruan saat diluncurkan dan secara berkala, mengunduhnya di latar belakang, dan memasangnya saat berikutnya dijalankan ulang. Catatan „Yang baru“ ditampilkan setelah setiap pembaruan.
-- Kontrol manual „Periksa pembaruan“ dan sakelar pembaruan otomatis di Pengaturan.
+Edisi Community gratis, dengan Pro & Enterprise untuk tim.

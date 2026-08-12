@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux：AppImage 現在能可靠啟動並順利套用更新，即使在具有強化沙箱的發行版上也不會卡住。
-- macOS：現在除了 Apple Silicon 外，也提供 Intel 版本。
+**Restorm 1.0 —— 本地優先的 API 用戶端，正式發布。**
 
-## v0.1.17
+Restorm 是一款快速、離線優先的桌面用戶端，可在所有主流協定上測試並驅動 API。
 
-- 發行說明現在會以您的語言顯示。
-- Linux、Windows 和 macOS 桌面應用程式：安裝程式現在會顯示 Restorm 的圖示、名稱與詳細資訊，應用程式會以您的佈景主題開啟。
+- **協定**：REST/HTTP、GraphQL、gRPC、WebSocket、SSE、SOAP、OData、MQTT、AMQP、STOMP、Kafka、Redis、tRPC、JSON-RPC。
+- **情境**：以視覺化方式串接請求，分支/迴圈，擷取並重複使用數值，在 CI 中以無介面模式執行。
+- **環境與變數**：隨處可用的 `{{handlebars}}`、具型別的密鑰、依資料夾劃分的環境。
+- **匯入/匯出**：OpenAPI、Postman、Insomnia、HAR、WSDL、GraphQL SDL、OData EDMX、curl、程式碼匯出。
+- **Git 原生專案**：你的 `.restorm` 專案就是一個普通檔案——進行版本控制、比較差異，並在應用程式內解決衝突。
+- **本地優先且私密**：一切都在你的電腦上執行；輸出防火牆會攔截每一次外部呼叫。
+- **跨平台**：Windows、macOS、Linux（.deb/.rpm/AppImage）+ npm。
 
-## v0.1.12
-
-- 背景靜默自動更新：Restorm 會在啟動時並定期檢查更新，在背景下載，並在下次重新啟動時安裝。每次更新後都會顯示「新增功能」提示。
-- 手動「檢查更新」按鈕，以及設定中的自動更新開關。
+免費的 Community 版，並為團隊提供 Pro 與 Enterprise。

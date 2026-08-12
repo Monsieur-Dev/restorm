@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: AppImage se sada pouzdano pokreće i instalira ažuriranja bez zaglavljivanja, uključujući i distribucije s očvrsnutim sandboxom.
-- macOS: uz Apple Silicon sada su dostupne i verzije za Intel.
+**Restorm 1.0 — local-first API klijent je stigao.**
 
-## v0.1.17
+Restorm je brz, offline-first stolni klijent za testiranje i pokretanje API-ja preko svih glavnih protokola.
 
-- Bilješke o izdanju sada se prikazuju na vašem jeziku.
-- Desktop aplikacije za Linux, Windows i macOS: instalacijski program sada prikazuje ikonu, naziv i pojedinosti Restorma, a aplikacija se otvara s vašom temom.
+- **Protokoli**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Scenariji**: vizualno povežite zahtjeve, grananje/petlje, izdvojite i ponovno koristite vrijednosti, pokrećite bez sučelja u CI-ju.
+- **Okruženja i varijable**: `{{handlebars}}` posvuda, tipizirane tajne, okruženja po mapi.
+- **Uvoz/Izvoz**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, izvoz koda.
+- **Projekti izvorno za Git**: vaš `.restorm` projekt je obična datoteka — verzionirajte ga, uspoređujte i rješavajte sukobe u aplikaciji.
+- **Local-first i privatno**: sve se izvodi na vašem računalu; izlazni vatrozid nadzire svaki vanjski poziv.
+- **Višeplatformski**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Tiho automatsko ažuriranje u pozadini: Restorm provjerava ažuriranja pri pokretanju i povremeno, preuzima ih u pozadini i instalira pri sljedećem ponovnom pokretanju. Nakon svakog ažuriranja prikazuje se bilješka „Novosti“.
-- Ručni gumb „Provjeri ažuriranja“ i prekidač za automatsko ažuriranje u Postavkama.
+Besplatno Community izdanje, uz Pro i Enterprise za timove.

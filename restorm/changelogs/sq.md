@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: AppImage tani niset në mënyrë të besueshme dhe i aplikon përditësimet pa ngecur, përfshirë në shpërndarjet me sandbox të forcuar.
-- macOS: Ndërtimet për Intel tani janë të disponueshme krahas Apple Silicon.
+**Restorm 1.0 — klienti API local-first, tashmë i disponueshëm.**
 
-## v0.1.17
+Restorm është një klient desktop i shpejtë, offline-first, për të testuar dhe drejtuar API-të në të gjitha protokollet kryesore.
 
-- Shënimet e versionit tani shfaqen në gjuhën tuaj.
-- Aplikacione desktop për Linux, Windows dhe macOS: instaluesi tani shfaq ikonën, emrin dhe detajet e Restorm, dhe aplikacioni hapet me temën tuaj.
+- **Protokollet**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Skenarët**: lidhni kërkesat në mënyrë vizuale, degëzim/cikël, nxirrni dhe ripërdorni vlera, ekzekutoni pa ndërfaqe në CI.
+- **Mjediset & variablat**: `{{handlebars}}` kudo, sekrete të tipizuara, mjedise për çdo dosje.
+- **Importim/Eksportim**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, eksportim kodi.
+- **Projekte nativë për Git**: projekti juaj `.restorm` është një skedar i thjeshtë — versionojeni, krahasojeni dhe zgjidhni konfliktet brenda aplikacionit.
+- **Local-first & privat**: gjithçka ekzekutohet në makinën tuaj; një mur zjarri dalës kontrollon çdo thirrje të jashtme.
+- **Ndërplatformë**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Përditësim automatik i heshtur në sfond: Restorm kontrollon për përditësime në nisje dhe periodikisht, i shkarkon në sfond dhe i instalon në rinisjen e ardhshme. Pas çdo përditësimi shfaqet një shënim „Të rejat“.
-- Butoni manual „Kontrollo për përditësime“ dhe një çelës për përditësim automatik te Cilësimet.
+Edicioni Community falas, me Pro & Enterprise për ekipet.

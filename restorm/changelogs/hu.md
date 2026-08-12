@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: az AppImage mostantól megbízhatóan indul, és elakadás nélkül telepíti a frissítéseket, még a megerősített sandboxszal rendelkező disztribúciókon is.
-- macOS: az Apple Silicon mellett mostantól Intel-változatok is elérhetők.
+**Restorm 1.0 — a local-first API-kliens megjelent.**
 
-## v0.1.17
+A Restorm egy gyors, offline-first asztali kliens API-k teszteléséhez és vezérléséhez az összes fontosabb protokollon.
 
-- A kiadási megjegyzések mostantól az Ön nyelvén jelennek meg.
-- Asztali alkalmazások Linuxra, Windowsra és macOS-re: a telepítő mostantól megjeleníti a Restorm ikonját, nevét és részleteit, és az alkalmazás az Ön témájával nyílik meg.
+- **Protokollok**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Forgatókönyvek**: fűzz össze kéréseket vizuálisan, elágazás/ciklus, értékek kinyerése és újrafelhasználása, futtatás felület nélkül CI-ben.
+- **Környezetek és változók**: `{{handlebars}}` mindenhol, típusos titkok, mappánkénti környezetek.
+- **Importálás/Exportálás**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, kódexportálás.
+- **Git-natív projektek**: a `.restorm` projekted egy egyszerű fájl — verziózd, hasonlítsd össze és oldd fel az ütközéseket az alkalmazásban.
+- **Local-first és privát**: minden a saját gépeden fut; egy kimenő tűzfal minden külső hívást ellenőriz.
+- **Platformfüggetlen**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Csendes háttérfrissítés: a Restorm indításkor és rendszeresen ellenőrzi a frissítéseket, a háttérben letölti, és a következő újraindításkor telepíti őket. Minden frissítés után „Újdonságok“ megjegyzés jelenik meg.
-- Kézi „Frissítések keresése“ gomb és automatikus frissítés kapcsoló a Beállításokban.
+Ingyenes Community kiadás, valamint Pro és Enterprise csapatoknak.

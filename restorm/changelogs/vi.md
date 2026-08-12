@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: AppImage giờ đây khởi động ổn định và áp dụng bản cập nhật mà không bị treo, kể cả trên các bản phân phối có sandbox được tăng cường.
-- macOS: Bản dựng cho Intel giờ đây đã có sẵn bên cạnh Apple Silicon.
+**Restorm 1.0 — ứng dụng khách API ưu tiên cục bộ đã ra mắt.**
 
-## v0.1.17
+Restorm là một ứng dụng khách trên máy tính, nhanh và ưu tiên hoạt động ngoại tuyến, để kiểm thử và điều khiển API trên mọi giao thức chính.
 
-- Ghi chú phát hành giờ đây được hiển thị bằng ngôn ngữ của bạn.
-- Ứng dụng máy tính cho Linux, Windows và macOS: trình cài đặt giờ đây hiển thị biểu tượng, tên và chi tiết của Restorm, và ứng dụng mở ra với giao diện của bạn.
+- **Giao thức**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Kịch bản**: liên kết các yêu cầu một cách trực quan, rẽ nhánh/lặp, trích xuất và tái sử dụng giá trị, chạy không giao diện trong CI.
+- **Môi trường & biến**: `{{handlebars}}` ở mọi nơi, secret có kiểu, môi trường theo từng thư mục.
+- **Nhập/Xuất**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, xuất mã nguồn.
+- **Dự án thuần Git**: dự án `.restorm` của bạn là một tệp thông thường — quản lý phiên bản, so sánh và giải quyết xung đột ngay trong ứng dụng.
+- **Ưu tiên cục bộ & riêng tư**: mọi thứ chạy trên máy của bạn; tường lửa đầu ra kiểm soát mọi lệnh gọi bên ngoài.
+- **Đa nền tảng**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Tự động cập nhật im lặng ở nền: Restorm kiểm tra cập nhật khi khởi động và định kỳ, tải xuống ở nền và cài đặt vào lần khởi động lại tiếp theo. Một ghi chú „Có gì mới“ được hiển thị sau mỗi lần cập nhật.
-- Nút „Kiểm tra cập nhật“ thủ công và công tắc tự động cập nhật trong Cài đặt.
+Bản Community miễn phí, cùng Pro & Enterprise cho nhóm.
