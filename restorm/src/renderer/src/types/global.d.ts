@@ -1,6 +1,7 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
+import type { AppIconMenuLabels, AppIconAction } from 'electron-core-ui/types'
 import type {
   GitStatus,
   GitCommitResult,
@@ -71,6 +72,15 @@ declare global {
       }
       file: {
         onAutoSaveTrigger: (callback: () => void) => () => void
+      }
+      /**
+       * OS application-icon menu (the Dock menu on macOS). Main builds the
+       * entries from the file state; the renderer only names the static ones,
+       * being the process that holds every shipped locale.
+       */
+      appIconMenu: {
+        setLabels: (labels: AppIconMenuLabels) => void
+        onInvoke: (callback: (action: AppIconAction) => void) => () => void
       }
       firewall: {
         onRecord: (cb: (record: unknown) => void) => () => void

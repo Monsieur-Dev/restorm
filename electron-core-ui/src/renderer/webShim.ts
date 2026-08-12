@@ -782,9 +782,18 @@ export function ensureCoreUiWebApiShim(): void {
     onInvoke: (): (() => void) => () => { /* noop in web shim: no native menu */ }
   }
 
+  // A browser tab has no application icon to hang a menu off either.
+  const appIconMenuApi = {
+    setLabels: (): void => { /* noop in web shim: no application icon */ },
+    // A browser tab has no application icon to raise a menu on, so nothing
+    // ever invokes an action here.
+    onInvoke: (): (() => void) => () => { /* noop in web shim */ }
+  }
+
   const api: CoreUiApi = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     nativeMenu: nativeMenuApi,
+    appIconMenu: appIconMenuApi,
     // A browser tab has no OS window to put fullscreen.
     toggleFullscreen: (): Promise<boolean> => Promise.resolve(false),
     theme: themeApi,

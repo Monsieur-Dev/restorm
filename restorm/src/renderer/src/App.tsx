@@ -218,6 +218,8 @@ import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useFirewallPromptToasts, useGitCliMissingToast, useGitPullAvailableToast, PushModal, AVAILABLE_LANGUAGES } from 'electron-core-ui/renderer'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
+import { useAppIconMenu } from './hooks/useAppIconMenu'
+import { useCapability } from './hooks/useCapability'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
   isFavorite as favoritesStoreIsFavorite,
@@ -467,9 +469,11 @@ const App: React.FC = () => {
   useFirewallPromptToasts()
 
   // One-time "git isn't installed" notice — GitService probes the CLI
-  // lazily on the first repo check and fires this at most once per
-  // process lifetime.
-  useGitCliMissingToast()
+  // lazily on the first repo check (and only inside an actual git repo) and
+  // fires this at most once per process lifetime. Gated on the git
+  // entitlement so a user who can't use git anyway (Community) isn't nagged
+  // to install it — the greyed git surfaces already carry the upsell.
+  useGitCliMissingToast(useCapability('git.client'))
 
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
@@ -1229,6 +1233,15 @@ const App: React.FC = () => {
     clearTabDirtyState,
     markAllTabsSaved,
     t
+  })
+
+  // Bridge the OS application-icon menu (macOS Dock) to the app: publish its
+  // translated labels to main, and run any action it forwards through the same
+  // guarded new / open-recent commands the in-app menus use (so the
+  // unsaved-work confirmation fires before the current project is replaced).
+  useAppIconMenu({
+    onNewFile: () => { navigationService.clearHistory(); void handleMenuNew() },
+    onOpenFile: (path: string) => { void handleOpenRecentFile(path) }
   })
 
   // Import modal state

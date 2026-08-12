@@ -298,6 +298,10 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       title={fileName ? `Restorm - ${fileName}${isDirty ? ' *' : ''}` : t('app.title')}
       showSearchBar
       showNavigation={navigationEnabled}
+      // macOS convention: "About" lives in the application menu, opening the
+      // in-app modal — the Help menu's own About entry is hidden there (below)
+      // to avoid the duplicate.
+      {...(isMac ? { appMenuAbout: { label: t('menuBar.about'), onClick: () => { setAboutOpen(true) } } } : {})}
       // The window-control buttons' icons are self-explanatory — drop the hover
       // tooltip (the aria-label stays for a11y).
       customWcoHoverTooltips={false}
@@ -368,7 +372,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               why none of these register Ctrl+X/C/V. The cut/copy/paste/find
               labels resolve from the ECUI core i18n bundle (the app bundle no
               longer carries them) — a rename there changes these entries. */}
-          <MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
+          {fileName && (<MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
             {/* macOS only: `role` drives the NATIVE menu (the in-window bar is
                 not rendered there). Declaring the roles is the only thing that
                 makes ⌘Z/⌘X/⌘C/⌘V work in text fields — the role owns its own
@@ -398,17 +402,17 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-edit-3" />
             <MenuItem data-testid="titlebar-menu-item-find" title={t('menuBar.find')} icon={<span className="codicon codicon-search" aria-hidden="true" />} shortcut="Ctrl+Shift+F" {...(onFocusSearch ? { onClick: onFocusSearch } : {})} />
-          </MenuBarItem>
+          </MenuBarItem>)}
           {/* Créer — Importer (moved out of Fichier), then the same add
               entries as the sidebar context menu's « Ajouter », flattened.
               Placement stays selection-relative: a selected container
               receives the new item inside at the end, a selected leaf gets
               it right after itself, no selection lands at the root. */}
-          <MenuBarItem title={t('menuBar.create')} data-testid="titlebar-menubar-item-create">
+          {fileName && (<MenuBarItem title={t('menuBar.create')} data-testid="titlebar-menubar-item-create">
             <MenuItem data-testid="titlebar-menu-item-import" title={t('menuBar.import')} icon={<span className="codicon codicon-cloud-download" aria-hidden="true" />} shortcut="Ctrl+I" opensDialog onClick={handleImport} />
             <MenuItemSeparator data-testid="titlebar-menu-separator-create-1" />
             {selectionAddSubmenu ? renderMenuData(selectionAddSubmenu, 'titlebar-menu-item-add') : undefined}
-          </MenuBarItem>
+          </MenuBarItem>)}
           {/* Requête — shown only while the ACTIVE workbench tab is a CLIENT
               request; acts on that tab (the same Send button the user sees).
               Servers get their own « Serveur » menu below, scenarios the
@@ -475,7 +479,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-2" />
             <MenuItem data-testid="titlebar-menu-item-toggle-fullscreen" title={t('menuBar.toggleFullscreen')} icon={<span className="codicon codicon-screen-full" aria-hidden="true" />} onClick={handleToggleFullscreen} />
           </MenuBarItem>
-          <MenuBarItem
+          {fileName && (<MenuBarItem
             // A plain string, not a rich `<Badge>` node: `MenuBar`'s
             // overflow/hamburger conversion (`menuBarItemToMenuItem`)
             // renders a top-level item's title through ECUI's `MenuItem`,
@@ -527,14 +531,16 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               onClick={onGitHistory}
               disabled={gitGate.locked}
             />
-          </MenuBarItem>
+          </MenuBarItem>)}
           <MenuBarItem title={t('menuBar.help')} data-testid="titlebar-menubar-item-help">
-            <MenuItem
-              data-testid="titlebar-menu-item-about"
-              title={t('menuBar.about')}
-              icon={<span className="codicon codicon-info" aria-hidden="true" />}
-              onClick={() => { setAboutOpen(true) }}
-            />
+            {!isMac && (
+              <MenuItem
+                data-testid="titlebar-menu-item-about"
+                title={t('menuBar.about')}
+                icon={<span className="codicon codicon-info" aria-hidden="true" />}
+                onClick={() => { setAboutOpen(true) }}
+              />
+            )}
             <MenuItem data-testid="titlebar-menu-item-documentation" title={t('menuBar.documentation')} icon={<span className="codicon codicon-book" aria-hidden="true" />} onClick={handleOpenDocumentation} />
             <MenuItem
               data-testid="titlebar-menu-item-release-notes"
@@ -548,6 +554,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               <MenuItem
                 data-testid="titlebar-menu-item-check-updates"
                 title={t('menuBar.checkForUpdates')}
+                icon={<span className="codicon codicon-sync" aria-hidden="true" />}
                 onClick={() => { void checkForUpdates() }}
               />
             )}

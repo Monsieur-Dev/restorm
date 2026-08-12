@@ -182,7 +182,7 @@ interface WindowApiGit {
 
 /** Native application menu (macOS renders menus in the system bar). */
 interface WindowApiNativeMenu {
-  set: (template: unknown) => Promise<boolean>
+  set: (template: unknown, about?: { id: string; label: string }) => Promise<boolean>
   clear: () => Promise<boolean>
   onInvoke: (callback: (id: string) => void) => () => void
 }

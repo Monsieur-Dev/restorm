@@ -236,6 +236,12 @@ export class GitService {
   /** Whether `folder` is inside a git working tree (any ancestor, not just
    * the tree root). */
   public async isGitRepo(folder: string): Promise<boolean> {
+    // Filesystem pre-check before touching the git CLI: a folder with no `.git`
+    // in any ancestor is not a repo, so there is no reason to probe git for it.
+    // This also keeps the one-time "git isn't installed" notice from firing
+    // when the user simply opens a file outside any repository — the probe (and
+    // its toast) only run once we know git could actually apply here.
+    if (!this.hasGitAncestor(folder)) return false
     if (!(await this.ensureGitInstalled())) return false
     return this.withFolderLock(folder, async () => {
       try {
@@ -245,6 +251,21 @@ export class GitService {
         return false
       }
     })
+  }
+
+  /**
+   * Walk up from `folder` looking for a `.git` entry — a directory in a normal
+   * clone, a file in a worktree or submodule. Purely filesystem: it never
+   * spawns git, so it is safe when the git CLI is absent.
+   */
+  private hasGitAncestor(folder: string): boolean {
+    let dir = resolve(folder)
+    for (;;) {
+      if (existsSync(join(dir, '.git'))) return true
+      const parent = resolve(dir, '..')
+      if (parent === dir) return false
+      dir = parent
+    }
   }
 
   public async getStatus(folder: string): Promise<GitStatus> {

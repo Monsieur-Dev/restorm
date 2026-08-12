@@ -18,6 +18,26 @@ export {
   FileService
 } from './FileService'
 
+export {
+  AppIconMenuService,
+  MacDockAdapter,
+  WindowsJumpListAdapter,
+  NoopAppIconMenuAdapter,
+  createDefaultAdapter,
+  initAppIconMenuService,
+  getAppIconMenuService,
+  isAppIconMenuServiceInitialized,
+  resetAppIconMenuService
+} from './AppIconMenuService'
+export type {
+  AppIconMenuLabels,
+  AppIconAction,
+  AppIconMenuEntry,
+  AppIconMenuModel,
+  AppIconMenuAdapter,
+  AppIconMenuServiceOptions
+} from './AppIconMenuService'
+
 export { getGitService, resetGitService, GitService } from './GitService'
 export type { GitServiceConfig } from './GitService'
 

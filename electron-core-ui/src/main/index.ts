@@ -28,6 +28,28 @@ export {
   FileService
 } from './services'
 
+// App-icon menu (macOS Dock + Windows jump list; the Linux adapter lands later)
+export {
+  AppIconMenuService,
+  MacDockAdapter,
+  WindowsJumpListAdapter,
+  NoopAppIconMenuAdapter,
+  createDefaultAdapter,
+  initAppIconMenuService,
+  getAppIconMenuService,
+  isAppIconMenuServiceInitialized,
+  resetAppIconMenuService
+} from './services'
+export type {
+  AppIconMenuLabels,
+  AppIconAction,
+  AppIconMenuEntry,
+  AppIconMenuModel,
+  AppIconMenuAdapter,
+  AppIconMenuServiceOptions
+} from './services'
+export { APP_ICON_MENU_SET_LABELS_CHANNEL, APP_ICON_MENU_INVOKE_CHANNEL } from '../types/appIconMenu'
+
 // Git service
 export { getGitService, resetGitService, GitService } from './services'
 export type { GitServiceConfig } from './services'
@@ -266,7 +288,7 @@ export type {
   GraphQLFieldConfig,
   AllMetadata
 } from './decorators'
-export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol, createSplashWindow, isInactiveRevealRequested, clearStartupActivationEnv } from './managers'
+export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol, createSplashWindow, isInactiveRevealRequested, clearStartupActivationEnv, registerAppIconMenuHandlers } from './managers'
 export type { WindowConfiguration, WindowState, InitializeAppOptions, SplashWindowOptions, SplashWindowHandle } from './managers'
 
 // IPC validation

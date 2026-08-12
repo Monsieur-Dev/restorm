@@ -29,7 +29,8 @@ const Titlebar: React.FC<TitlebarProps> = ({
   customWcoTestId,
   customWcoPlatform,
   customWcoHoverTooltips,
-  showNavigation
+  showNavigation,
+  appMenuAbout
 }) => {
   const rootTestId = dataTestId ?? 'titlebar'
   const leftZoneTestId = `${rootTestId}-left`
@@ -112,7 +113,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
 
   // macOS shows application menus in the system bar, not inside the window.
   // The same JSX drives both, so the two renderings cannot drift apart.
-  useNativeAppMenu(actualLeftContent, isMac)
+  useNativeAppMenu(actualLeftContent, isMac, appMenuAbout)
 
   return (
     <div

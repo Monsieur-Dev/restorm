@@ -175,6 +175,9 @@ importers:
       cobe:
         specifier: ^2.0.1
         version: 2.0.1
+      fast-xml-parser:
+        specifier: ^4.5.7
+        version: 4.5.7
       graphql:
         specifier: ^16.14.0
         version: 16.14.0

@@ -34,6 +34,13 @@ export interface CliArgs {
   open?: string
   clearSettings: boolean
   /**
+   * Start on a new, empty file. Carried by the application-icon menu's "new"
+   * entry on the platforms that relaunch the app instead of calling back into
+   * it (Windows jump lists), where the single-instance lock turns the relaunch
+   * into a `second-instance` event on the running process.
+   */
+  newFile: boolean
+  /**
    * Human-readable name identifying this MCP session. Always set (a
    * sensible auto-default is derived when neither `--mcp-session-name`
    * nor `RESTORM_MCP_SESSION_NAME` is given) so every instance is
@@ -67,6 +74,7 @@ export interface CliArgs {
 interface ParsedArgs {
   open?: string
   clearSettings?: boolean
+  new?: boolean
   mcpSessionName?: string
   mcpDiscoveryFile?: string
   inactiveWindow?: boolean
@@ -95,6 +103,11 @@ export function parseCliArgs(): CliArgs {
       type: 'boolean',
       default: false,
       describe: 'Clear user preferences before starting'
+    })
+    .option('new', {
+      type: 'boolean',
+      default: false,
+      describe: 'Start on a new, empty file. Passed by the application-icon menu on platforms whose entries relaunch the app (Windows jump lists).'
     })
     .option('mcp-session-name', {
       type: 'string',
@@ -148,6 +161,7 @@ export function parseCliArgs(): CliArgs {
   // see index.ts. There is no longer any CLI flag or env var to toggle it.
   const result: CliArgs = {
     clearSettings: Boolean(argv.clearSettings),
+    newFile: Boolean(argv.new),
     mcpSessionName: resolveMcpSessionName(argv.mcpSessionName, argv.open),
     inactiveWindow: Boolean(argv.inactiveWindow)
   }

@@ -67,7 +67,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController, initAppIconMenuService, getAppIconMenuService, registerAppIconMenuHandlers, APP_ICON_MENU_INVOKE_CHANNEL, type AppIconAction } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -160,9 +160,13 @@ if (process.platform === 'linux') {
   app.commandLine.appendSwitch('ozone-platform-hint', 'auto')
 }
 
-// Set the app name for proper taskbar icon on Linux
-// Without this, Electron 38+ may use the default "Electron" identity
-app.name = 'restorm'
+// Show "Restorm" as the application name — the macOS menu-bar title and native
+// panels, the Windows product name, and the Linux taskbar identity (without a
+// name set, Electron 38+ falls back to the default "Electron" identity). The
+// on-disk profile deliberately stays under the lowercase "restorm" directory,
+// so capitalising the display name never abandons an existing profile.
+app.name = 'Restorm'
+app.setPath('userData', join(app.getPath('appData'), 'restorm'))
 
 // ── Deep-link scheme registration (packaged OAuth callback) ─────────────────
 //
@@ -208,12 +212,16 @@ if (!gotSingleInstanceLock && process.argv.includes('--run')) {
   )
   app.exit(1)
 }
-if (!gotSingleInstanceLock && (deepLinkArgvUrl !== undefined || projectArgvPath !== undefined)) {
-  // This process was launched by the OS to handle a deep-link URL or to open
-  // a document. The primary instance received the `second-instance` event and
-  // will handle it — nothing more for this process to do. Spawned instances
-  // WITHOUT such an argument (the MCP `create_instance` tool) deliberately
-  // keep running without the lock.
+// `--new` classifies the same way: the application-icon menu's "new" entry
+// relaunches the app on the platforms whose entries can't call back into it
+// (Windows jump lists), so a `--new` that loses the lock is a request aimed at
+// the running instance, not a request for a second one.
+if (!gotSingleInstanceLock && (deepLinkArgvUrl !== undefined || projectArgvPath !== undefined || process.argv.includes('--new'))) {
+  // This process was launched by the OS to handle a deep-link URL, to open a
+  // document, or to start a new file. The primary instance received the
+  // `second-instance` event and will handle it — nothing more for this process
+  // to do. Spawned instances WITHOUT such an argument (the MCP
+  // `create_instance` tool) deliberately keep running without the lock.
   app.exit(0)
 }
 
@@ -297,8 +305,18 @@ app.on('second-instance', (_event, argv) => {
     logger.info('OS requested opening a document in the running instance', { path: documentPath })
     routeDocumentOpen(documentPath)
   }
+  // The application-icon menu's "new" entry relaunches the app with `--new` on
+  // the platforms whose entries can't call back into it (Windows jump lists);
+  // the lock funnels that relaunch here, into the instance the user meant.
+  if (argv.includes('--new')) {
+    logger.info('OS requested a new file in the running instance')
+    dispatchAppIconAction({ kind: 'new-file' })
+  }
 })
 
+// `--new` needs no cold-start branch: when no instance is running, the `--new`
+// process becomes the primary one and a fresh app already starts on an empty
+// document.
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
   clearUserSettings()
@@ -326,6 +344,30 @@ if (fileToOpenOnStart) {
 // Keep track of main window and editor windows
 let mainWindow: BrowserWindow | null = null
 const editorWindows = new Set<BrowserWindow>()
+
+/**
+ * Carry out an app-icon menu action. When a window is open, forward it to the
+ * renderer so it runs the same "new" / "open recent" command the in-app menus
+ * use — including the unsaved-work confirmation before the current project is
+ * replaced — and bring that window forward. With no window there is no
+ * renderer to guard, and no in-renderer dirty state to protect, so the
+ * service's direct path (act straight on the file service) takes over.
+ *
+ * Two callers: the menu service itself (the macOS Dock click, injected below)
+ * and the `second-instance` handler, which is where a Windows jump-list entry
+ * lands — those entries relaunch the app with arguments rather than calling
+ * back into it.
+ */
+function dispatchAppIconAction(action: AppIconAction): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.show()
+    mainWindow.focus()
+    mainWindow.webContents.send(APP_ICON_MENU_INVOKE_CHANNEL, action)
+    return
+  }
+  getAppIconMenuService().dispatchDirect(action)
+}
 
 function createWindow(): MainWindow | undefined {
   logger.info('Creating main window...')
@@ -842,6 +884,29 @@ initializeApp('restorm', {
       background: '#1a1a2e'
     }
   })
+})
+
+// Wire the application-icon menu (new file / recent files / favorites).
+// The entries are read from the main-side FileService, so the menu is
+// correct even with no window open — the normal state on macOS after the
+// last window closes. Its three static labels are pushed in by the
+// renderer, the only process holding all shipped locales, over the IPC
+// channel registered here. macOS renders it on the Dock and Windows on the
+// taskbar jump list; the Linux adapter lands later, and the default adapter
+// is a no-op there.
+void app.whenReady().then(() => {
+  initAppIconMenuService({
+    fileService: getFileService(),
+    dispatch: dispatchAppIconAction,
+    // Linux launcher integration: the installed desktop entry whose actions are
+    // extended with the current favorites, and the file type that ties recent
+    // documents back to Restorm. Both match electron-builder's `linux` config.
+    linuxDesktopFileId: 'restorm-bin.desktop',
+    linuxRecentDocumentMimeType: 'application/x-restorm'
+  })
+  getAppIconMenuService().start()
+  registerAppIconMenuHandlers()
+  logger.info('App icon menu initialized')
 })
 
 // Wire the AutoSaveController once both SettingsService (initialized

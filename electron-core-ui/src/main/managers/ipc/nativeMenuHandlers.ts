@@ -1,4 +1,4 @@
-import { Menu, ipcMain, type MenuItemConstructorOptions, type WebContents } from 'electron'
+import { app, Menu, ipcMain, type MenuItemConstructorOptions, type WebContents } from 'electron'
 import { logger } from '../../services'
 
 /**
@@ -101,6 +101,46 @@ export const toMenuItems = (nodes: NativeMenuNode[], sender: WebContents): MenuI
     return item
   })
 
+/** Validate the optional app-menu About routing crossing the bridge. */
+const asAboutRouting = (value: unknown): { id: string; label: string } | null => {
+  if (typeof value !== 'object' || value === null) return null
+  const { id, label } = value as Record<string, unknown>
+  if (typeof id !== 'string' || id.length === 0) return null
+  if (typeof label !== 'string' || label.length === 0) return null
+  return { id, label }
+}
+
+/**
+ * The application menu (the bold first entry on macOS).
+ *
+ * With no About routing this stays the plain `appMenu` role — its native About
+ * panel and all. When the host routes About to itself, the role is expanded to
+ * an explicit menu whose "About" item echoes the host id back (so the host can
+ * open its own About surface) while every other entry keeps the platform role,
+ * so Services / Hide / ⌘Q behave exactly as the role would provide.
+ */
+const buildAppMenu = (about: unknown, sender: WebContents): MenuItemConstructorOptions => {
+  const routing = asAboutRouting(about)
+  if (!routing) return { role: 'appMenu' }
+  return {
+    label: app.name,
+    submenu: [
+      {
+        label: routing.label,
+        click: (): void => { if (!sender.isDestroyed()) sender.send('native-menu:invoke', routing.id) }
+      },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideOthers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' }
+    ]
+  }
+}
+
 /**
  * Build the application menu from a renderer-supplied template.
  *
@@ -110,7 +150,7 @@ export const toMenuItems = (nodes: NativeMenuNode[], sender: WebContents): MenuI
  * the item id and the renderer runs its own handler.
  */
 export function registerNativeMenuHandlers(): void {
-  ipcMain.handle('native-menu:set', (event, template: unknown) => {
+  ipcMain.handle('native-menu:set', (event, template: unknown, about: unknown) => {
       if (!Array.isArray(template)) {
         logger.warn('native-menu:set received a non-array template; ignoring')
         return false
@@ -119,7 +159,7 @@ export function registerNativeMenuHandlers(): void {
         const appMenus = toMenuItems(template as NativeMenuNode[], event.sender)
         // macOS expects the application menu first — it carries About/Services/
         // Hide and, importantly, ⌘Q. Without it the app has no Quit item.
-        const full: MenuItemConstructorOptions[] = [{ role: 'appMenu' }, ...appMenus]
+        const full: MenuItemConstructorOptions[] = [buildAppMenu(about, event.sender), ...appMenus]
         Menu.setApplicationMenu(Menu.buildFromTemplate(full))
         return true
       } catch (error) {

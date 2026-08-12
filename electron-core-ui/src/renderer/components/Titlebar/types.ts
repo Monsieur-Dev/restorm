@@ -1,4 +1,5 @@
 import type { GroupedResults, SearchResult } from '../../services/SearchService'
+import type { AppMenuAbout } from '../../hooks/useNativeAppMenu'
 
 export interface TitlebarProps {
   icon?: string | React.ReactNode
@@ -64,4 +65,10 @@ export interface TitlebarProps {
 
   /** Show back/forward navigation buttons before the center zone */
   showNavigation?: boolean
+
+  /**
+   * macOS only: route the application-menu "About" item to the host (e.g. its
+   * own About modal) instead of Electron's native panel. Ignored off macOS.
+   */
+  appMenuAbout?: AppMenuAbout
 }
