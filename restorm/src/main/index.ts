@@ -127,13 +127,26 @@ import { registerDeepLinkSchemes, handleDeepLinkUrl, isDeepLinkUrl } from './dee
 import { findProjectFileInArgv } from './fileAssociation'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
+// Show "Restorm" as the application name — the macOS menu-bar title and native
+// panels, the Windows product name, and the Linux taskbar identity (without a
+// name set, Electron 38+ falls back to the default "Electron" identity). The
+// on-disk profile deliberately stays under the lowercase "restorm" directory,
+// so capitalising the display name never abandons an existing profile.
+app.name = 'Restorm'
+app.setPath('userData', join(app.getPath('appData'), 'restorm'))
+
 // Test-isolation hook. When `RESTORM_USER_DATA_OVERRIDE` is set,
 // redirect Electron's `userData` to a per-run repo-local dir so
 // parallel agents / tests don't share drafts, config.json, recent
 // files, etc. Must run before any code path that touches userData
 // (parseCliArgs's storage-aware `clearUserSettings`, FileService
-// construction, draft boot — all run later down this file). Unset →
-// production / dev behaviour is unchanged.
+// construction, draft boot — all run later down this file), and AFTER
+// the default lowercase-profile `setPath` above — the override loses if
+// anything re-points userData later, and with it every e2e instance
+// lands on the developer's real profile: the CLI suite then can't take
+// the single-instance lock, and window-state / recent-files / drafts
+// bleed between concurrently running tests. Unset → production / dev
+// behaviour is unchanged.
 applyUserDataOverride(app)
 
 // Allow WebGL via SwiftShader when the host GPU is blocked / unavailable.
@@ -159,14 +172,6 @@ if (process.platform === 'linux') {
   app.commandLine.appendSwitch('no-sandbox')
   app.commandLine.appendSwitch('ozone-platform-hint', 'auto')
 }
-
-// Show "Restorm" as the application name — the macOS menu-bar title and native
-// panels, the Windows product name, and the Linux taskbar identity (without a
-// name set, Electron 38+ falls back to the default "Electron" identity). The
-// on-disk profile deliberately stays under the lowercase "restorm" directory,
-// so capitalising the display name never abandons an existing profile.
-app.name = 'Restorm'
-app.setPath('userData', join(app.getPath('appData'), 'restorm'))
 
 // ── Deep-link scheme registration (packaged OAuth callback) ─────────────────
 //
