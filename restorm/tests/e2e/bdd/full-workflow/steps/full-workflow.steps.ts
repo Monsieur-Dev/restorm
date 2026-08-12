@@ -152,6 +152,17 @@ When(
     await expect(async () => {
       expect(existsSync(filePath)).toBe(true)
     }).toPass({ timeout: 10000 })
+
+    // The disk write happens in main BEFORE the renderer learns the new
+    // fileName. That flip INSERTS the file-gated menus (Edit / Create /
+    // Git) between File and View, shifting every later menubar entry to
+    // the right and registering their shortcuts only at that moment. A
+    // menu click or a Ctrl+I pressed inside that window lands on the
+    // wrong entry (the click resolves pre-shift coordinates) or on a
+    // not-yet-registered shortcut, with no retry. Settle on the Create
+    // menu — the marker that the fileName flip reached the menubar —
+    // before handing control back to the scenario.
+    await expect(page.locator('[data-testid="titlebar-menubar-item-create"]')).toBeVisible({ timeout: 10000 })
   }
 )
 
@@ -295,6 +306,10 @@ When(
 // ---------------------------------------------------------------------------
 
 async function runImport(currentPage: Page, source: string): Promise<void> {
+  // Ctrl+I is registered by the file-gated Create menu, which (re)mounts on
+  // every fileName transition (new file, open, close→reopen). Wait for it —
+  // a press before the mount lands on nothing, with no retry.
+  await expect(currentPage.locator('[data-testid="titlebar-menubar-item-create"]')).toBeVisible({ timeout: 10000 })
   // Open the import modal via Ctrl+I (same trigger the menu bar uses).
   await currentPage.keyboard.press('Control+I')
   const modal = currentPage.locator('[data-testid="import-modal"]')
