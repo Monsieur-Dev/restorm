@@ -43,12 +43,19 @@ export function generateUniqueId(): string {
  * the persisted types over time without a matching entry here, and nothing
  * caught it.
  *
- * `params` is deliberately NOT in this list even though `Scenario.params`
- * needs the same treatment: the key name collides with a REQUEST's own
- * `params` (query `KeyValue[]`), and a flat list can't tell those apart — it
- * would silently start reassigning every request's query-param ids too, a
- * materially bigger and unrelated change. See the dedicated `type ===
- * 'scenario'` branch in {@link reassignTreeIds} instead.
+ * `params` covers TWO shapes on purpose: `Scenario.params` (top-level param
+ * declarations) and a request's own query `KeyValue[]`. The two collide on
+ * the key name, which is why `params` was once handled by a dedicated
+ * scenario-only branch — reassigning request KeyValue rows was then "a
+ * materially bigger and unrelated change". Both are wanted now: a cloned
+ * request used to keep its rows' ids byte-identical to the source
+ * (transient — `generateIds`' duplicate-id dedup healed it at the next
+ * load, but until then the in-memory clone shared row identity with its
+ * source). One generic entry treats both shapes; a SECOND pass over
+ * `Scenario.params` (the old branch on top of the list entry) would be
+ * worse than redundant — the second reassignment orphans the idMap's
+ * first mapping, so references and import side-data resolve to an id the
+ * tree no longer carries.
  *
  * **What this list's completeness claim actually covers, stated precisely
  * after getting it wrong once:** it is exhaustive over `FolderItem`'s own
@@ -63,19 +70,18 @@ export function generateUniqueId(): string {
  * enumerate `FolderItem`'s containers — cannot see those by construction.
  * `quickConfigs` is one such array; it was added here only after an e2e run
  * demonstrated the duplicate-id consequence directly, not because the
- * coverage test caught it. Confirmed (by direct probe against real project
- * files) further arrays of this same out-of-union shape that this list does
- * NOT reach: `headers[]` (`KeyValue[]`, every protocol) — same class as a
- * request's own `params`/`pathParams`, duplicate ids self-heal at the next
- * load via `idPathSegment`'s `kv:<key>` dedup, tracked and deliberately
- * deferred as its own low-priority ticket rather than fixed here;
- * `StompRequest.subscriptions[].id` — looked up scoped to
+ * coverage test caught it. `headers` / `params` / `pathParams` (a request's
+ * `KeyValue[]` rows, every protocol) are the same out-of-union shape and are
+ * reassigned as a trio — a clone that refreshed its query params but kept
+ * its header ids would be a half-fix harder to reason about than none.
+ * Confirmed out-of-union arrays this list still deliberately does NOT
+ * reach: `StompRequest.subscriptions[].id` — looked up scoped to
  * `(requestId, subscriptionId)`, never globally, the same "scoped pair, not
  * a bare id" pattern that already justifies leaving scenario node ids
  * resolvable only via `(scenarioId, nodeId)`; `ODataRequest.batchSubRequests
  * [].id` — its own type doc calls it "Stable ID used by the UI for keys /
  * reordering", the same STRUCTURAL-LABEL class as `ScenarioPort.id`, not
- * instance identity. None of the three is a demonstrated live bug the way
+ * instance identity. Neither is a demonstrated live bug the way
  * `quickConfigs` was. But "probably benign" is not the same claim as
  * "exhaustively enumerated" — there may be others of this shape not yet
  * found, and nothing but a targeted probe (or another e2e run) will surface
@@ -83,7 +89,8 @@ export function generateUniqueId(): string {
 export const REASSIGNED_ID_CONTAINER_KEYS = [
   'items', 'environments', 'customValueLists',
   'enumDefinitions', 'subEnvironments', 'entries',
-  'nodes', 'edges', 'quickConfigs'
+  'nodes', 'edges', 'quickConfigs',
+  'headers', 'params', 'pathParams'
 ] as const
 
 /** Give a fresh id to this object and to every descendant that carries one and
@@ -138,11 +145,6 @@ export function reassignTreeIds(node: unknown, idMap: Map<string, string>): void
   for (const key of REASSIGNED_ID_CONTAINER_KEYS) {
     const arr = rec[key]
     if (Array.isArray(arr)) for (const child of arr) reassignTreeIds(child, idMap)
-  }
-  // Scenario.params (top-level param declarations) — see the container-list
-  // JSDoc above for why this can't just be another list entry.
-  if (rec['type'] === 'scenario' && Array.isArray(rec['params'])) {
-    for (const param of rec['params']) reassignTreeIds(param, idMap)
   }
   // An `input` scenario node's own config.params (InputParam[]) — narrow,
   // targeted lookup (not a generic descent into `config`); see the JSDoc
