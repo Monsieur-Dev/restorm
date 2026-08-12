@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Hardened-runtime entitlements for the notarized macOS build.
+
+  Restorm embeds several WASM/JIT execution engines (pyodide, webr,
+  quickjs-emscripten, wasmoon, dotnet-wasm) plus Electron/V8 itself — all of
+  which JIT-compile into writable+executable memory. Under the hardened
+  runtime (mandatory for notarization) that is forbidden unless these two
+  `cs.allow-*` entitlements are granted; without them the engines crash at
+  first execution, not at app launch, which is why the signing ticket's
+  acceptance criteria demand running one request per engine on the notarized
+  build.
+
+  `disable-library-validation` lets the app load the native Node modules
+  (`**/*.node`, asarUnpacked) — electron-builder co-signs them with the same
+  identity, but library validation would still reject any module whose
+  signing chain doesn't match the host team's exactly.
+-->
+<plist version="1.0">
+  <dict>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+  </dict>
+</plist>

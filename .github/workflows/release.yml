@@ -92,7 +92,15 @@ jobs:
       - name: Build distributables (electron-builder)
         run: |
           cd restorm
-          NODE_OPTIONS="$NODE_HEAP" pnpm run dist
+          # Notarization is opt-in per electron-builder 26 and only meaningful
+          # once the Apple credentials exist — the flag rides the same secrets
+          # that enable signing, so an uncredentialed run stays exactly the
+          # unsigned build it always was.
+          NOTARIZE_FLAG=""
+          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$APPLE_TEAM_ID" ]; then
+            NOTARIZE_FLAG="-c.mac.notarize=true"
+          fi
+          NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG
         env:
           # Source-map generation roughly doubles the renderer build's peak heap,
           # so the limit tracks whether maps are being produced at all — which is
@@ -109,9 +117,38 @@ jobs:
           # generic publish provider → electron-builder generates latest*.yml
           # (the auto-update feed) without uploading; we upload to R2 below.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Unsigned builds: stop electron-builder from hunting for a macOS
+          # Stop electron-builder from hunting the keychain for a macOS
           # signing identity (would fail the mac job with no cert installed).
+          # An EXPLICIT identity via CSC_LINK below is unaffected by this.
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          # ── Code signing (inert until the secrets exist) ──────────────
+          # macOS: Developer ID Application cert as base64 .p12 + passphrase.
+          # An unset secret yields an empty env var, which electron-builder
+          # treats as absent — the build stays unsigned, exactly as before.
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          # macOS notarization (used with -c.mac.notarize=true above).
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Windows (Azure Trusted Signing — pending the mechanism decision;
+          # wiring documented in docs/contributing/release-signing.md).
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Verify signature + notarization (macOS)
+        # Runs only once the Apple secrets exist — the proof the release is
+        # actually accepted by Gatekeeper, in the job log (codesign chain,
+        # notarization ticket stapled to the app, spctl assessment).
+        if: matrix.platform == 'macos' && secrets.APPLE_TEAM_ID != ''
+        run: |
+          APP="$(find restorm/dist-electron -maxdepth 3 -name '*.app' -print -quit)"
+          if [ -z "$APP" ]; then echo "no .app found under dist-electron" >&2; exit 1; fi
+          echo "Verifying: $APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          xcrun stapler validate "$APP"
+          spctl --assess --type execute --verbose=2 "$APP"
 
       - name: Publish to R2 (public — restorm-releases)
         run: |
