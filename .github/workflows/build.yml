@@ -59,6 +59,30 @@ jobs:
           cd electron-core-ui
           pnpm install --frozen-lockfile
 
+      # The electron package's postinstall download can fail transiently on
+      # hosted runners; unit tests that spawn Electron then die at import time
+      # with "Electron failed to install correctly" / "fetch failed". Probe
+      # the binary and re-run the official install script with retries so the
+      # test step never depends on postinstall timing.
+      - name: Ensure the Electron binary is present
+        run: |
+          cd electron-core-ui
+          for i in 1 2 3; do
+            if node -e "require('electron')" >/dev/null 2>&1; then
+              echo "Electron binary OK"
+              exit 0
+            fi
+            echo "Electron binary missing — running install.js (attempt $i)…"
+            node node_modules/electron/install.js && continue
+            sleep 10
+          done
+          if node -e "require('electron')" >/dev/null 2>&1; then
+            echo "Electron binary OK"
+            exit 0
+          fi
+          echo "Electron binary still missing after 3 attempts" >&2
+          exit 1
+
       - name: Check electron-core-ui unused dependencies
         if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |
