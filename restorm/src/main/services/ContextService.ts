@@ -1050,16 +1050,29 @@ class ContextService {
     variables: { name: string; value: string }[],
     sourceId?: string
   ): void {
+    // Collapse duplicate names to their EFFECTIVE entry — the last occurrence
+    // wins, mirroring the resolution layering (a field-local layer overrides
+    // the environment's value of the same name). Callers pass the layers
+    // concatenated (`[...envVars, ...cumulativePathParams]`), so publishing
+    // them raw put TWO entries of the same name on the wire and every
+    // first-match consumer (the Monaco hover, the completion description)
+    // showed the environment's value while the resolved URL used the row's.
+    const byName = new Map<string, { name: string; value: string }>()
+    for (const v of variables) {
+      byName.set(v.name, v)
+    }
+    const effective = Array.from(byName.values())
+
     const previous = this.availableVariablesPerField.get(variableId)
-    const hasChanged = previous?.length !== variables.length ||
-      variables.some((v, i) => {
+    const hasChanged = previous?.length !== effective.length ||
+      effective.some((v, i) => {
         const prevItem = previous[i]
         return prevItem && (prevItem.name !== v.name || prevItem.value !== v.value)
       })
 
     if (hasChanged) {
-      this.availableVariablesPerField.set(variableId, variables)
-      this.broadcastToRenderer('context:available-variables', { variableId, variables, sourceId })
+      this.availableVariablesPerField.set(variableId, effective)
+      this.broadcastToRenderer('context:available-variables', { variableId, variables: effective, sourceId })
     }
   }
 
