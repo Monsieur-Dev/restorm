@@ -13,7 +13,7 @@ import type { ArgumentsCamelCase } from 'yargs'
  * and exits with a status code reflecting the scenario outcome.
  */
 export interface CliRunOptions {
-  /** Scenario to run — its folder-mode long name (default) or its id. */
+  /** Scenario to run — its long name (default) or its id. */
   target: string
   /** How to interpret {@link target}. */
   by: 'name' | 'id'
@@ -33,6 +33,13 @@ export interface CliRunOptions {
 export interface CliArgs {
   open?: string
   clearSettings: boolean
+  /**
+   * Start on a new, empty file. Carried by the application-icon menu's "new"
+   * entry on the platforms that relaunch the app instead of calling back into
+   * it (Windows jump lists), where the single-instance lock turns the relaunch
+   * into a `second-instance` event on the running process.
+   */
+  newFile: boolean
   /**
    * Human-readable name identifying this MCP session. Always set (a
    * sensible auto-default is derived when neither `--mcp-session-name`
@@ -67,6 +74,7 @@ export interface CliArgs {
 interface ParsedArgs {
   open?: string
   clearSettings?: boolean
+  new?: boolean
   mcpSessionName?: string
   mcpDiscoveryFile?: string
   inactiveWindow?: boolean
@@ -88,13 +96,18 @@ export function parseCliArgs(): CliArgs {
     .option('open', {
       alias: 'o',
       type: 'string',
-      describe: 'Path to a file or folder to open on start'
+      describe: 'Path to a .restorm project file to open on start'
     })
     .option('clear-settings', {
       alias: 'cls',
       type: 'boolean',
       default: false,
       describe: 'Clear user preferences before starting'
+    })
+    .option('new', {
+      type: 'boolean',
+      default: false,
+      describe: 'Start on a new, empty file. Passed by the application-icon menu on platforms whose entries relaunch the app (Windows jump lists).'
     })
     .option('mcp-session-name', {
       type: 'string',
@@ -111,13 +124,13 @@ export function parseCliArgs(): CliArgs {
     })
     .option('run', {
       type: 'string',
-      describe: 'Headless: run the named scenario from the project given by --open, stream its run-log, and exit (0 = success, non-zero = failure). Designate the scenario by its folder-mode name (default) or its id (--by id).'
+      describe: 'Headless: run the named scenario from the project given by --open, stream its run-log, and exit (0 = success, non-zero = failure). Designate the scenario by its name (default) or its id (--by id).'
     })
     .option('by', {
       type: 'string',
       choices: ['name', 'id'],
       default: 'name',
-      describe: 'How --run designates the scenario: by folder-mode name (default) or by id.'
+      describe: 'How --run designates the scenario: by name (default) or by id.'
     })
     .option('all-logs', {
       type: 'boolean',
@@ -148,6 +161,7 @@ export function parseCliArgs(): CliArgs {
   // see index.ts. There is no longer any CLI flag or env var to toggle it.
   const result: CliArgs = {
     clearSettings: Boolean(argv.clearSettings),
+    newFile: Boolean(argv.new),
     mcpSessionName: resolveMcpSessionName(argv.mcpSessionName, argv.open),
     inactiveWindow: Boolean(argv.inactiveWindow)
   }

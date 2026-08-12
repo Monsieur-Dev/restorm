@@ -139,6 +139,54 @@
 .list-view-row.drop-into {
   outline: 1px dashed var(--list-activeSelectionBackground);
   outline-offset: -1px;
+
+  /* A hovered CONTAINER target changes background for the duration of the
+   * drag — `list.dropBackground` is themed in every theme family (the HC
+   * bases included), so the affordance survives palette changes. */
+  background-color: var(--list-dropBackground);
+}
+
+/* Drag ghost (the cursor-following row clone built by handleDragStart —
+ * see utils/dragPreview.ts; the clone lives OUTSIDE .list-view-root, so
+ * these selectors must not be nested under it). */
+.list-view-row-drag-ghost {
+  display: flex;
+  align-items: center;
+  background-color: var(--list-activeSelectionBackground);
+  color: var(--list-activeSelectionForeground);
+  border: 1px solid var(--focusBorder);
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+/* Count badge on a multi-item drag ("3"). */
+.list-view-drag-ghost-badge {
+  flex-shrink: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin: 0 6px;
+  border-radius: 8px;
+  background-color: var(--badge-background, var(--focusBorder));
+  color: var(--badge-foreground, var(--list-activeSelectionForeground));
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Error badge: hidden by default, revealed while the hovered target is
+ * invalid for the dragged rows (`is-invalid` is toggled by dragover
+ * validation — see ListView's canDrop prop). */
+.list-view-drag-ghost-error {
+  display: none;
+  flex-shrink: 0;
+  margin: 0 6px;
+  color: var(--errorForeground, #f48771);
+}
+
+.list-view-row-drag-ghost.is-invalid .list-view-drag-ghost-error {
+  display: inline-flex;
 }
 
 /* Inline rename input */

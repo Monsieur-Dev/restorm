@@ -74,6 +74,7 @@
     "auth": {
       "noAuth": "Fără autentificare",
       "popoverLabel": "Rută de autentificare",
+      "openRoute": "Deschide ruta de autentificare",
       "unnamed": "Fără nume"
     },
     "contextMenu": {
@@ -221,7 +222,6 @@
     "new": "Nou",
     "import": "Importă",
     "open": "Deschide",
-    "openFolder": "Deschide folderul",
     "recentFiles": "Fișiere recente",
     "favorites": "Favorite",
     "close": "Închide",
@@ -229,36 +229,24 @@
     "saveAll": "Salvează tot",
     "saveAs": "Salvează ca",
     "exit": "Ieșire",
-    "selection": "Selecție",
-    "tools": "Unelte",
-    "findInCollection": "Caută în colecție",
-    "addRequest": "Adaugă cerere",
-    "addRequestHttp": "Cerere HTTP",
-    "addRequestGraphql": "Cerere GraphQL",
-    "addRequestGrpc": "Cerere gRPC",
-    "addRequestSoap": "Cerere SOAP",
-    "addRequestOdata": "Cerere OData",
-    "addRequestWebsocket": "Cerere WebSocket",
-    "addFolder": "Adaugă folder",
-    "addEnvironmentFolder": "Adaugă folder de mediu",
-    "addVariable": "Adaugă variabilă",
-    "addTag": "Adaugă etichetă",
-    "expandAllFolders": "Extinde toate folderele",
-    "collapseAllFolders": "Restrânge toate folderele",
-    "sendActiveRequest": "Trimite cererea",
-    "cancelActiveRequest": "Anulează cererea",
-    "generateCodeSnippet": "Generează fragment de cod",
-    "copyAsCurl": "Copiază drept cURL",
-    "exportOpenApi": "Exportă în OpenAPI",
-    "clearAuthCache": "Golește memoria cache de autentificare",
-    "openLogsFolder": "Deschide folderul de jurnale",
     "mcpLogs": "Jurnale MCP",
+    "consoleHttp": "Consolă HTTP",
     "git": "Git",
     "gitPush": "Trimite",
     "gitPull": "Extrage",
     "gitRefresh": "Reîmprospătare",
     "gitHistory": "Istoric",
-    "gitResetToServer": "Resetează la versiunea serverului"
+    "gitResetToServer": "Resetează la versiunea serverului",
+    "scenario": "Scenariu",
+    "create": "Creare",
+    "request": "Cerere",
+    "server": "Server",
+    "runSelected": "Execută",
+    "cancelSelected": "Anulează",
+    "clone": "Clonează",
+    "delete": "Șterge",
+    "addToFavorites": "Adaugă la favorite",
+    "removeFromFavorites": "Elimină din favorite"
   },
   "sidebar": {
     "addRequest": "Adaugă cerere",
@@ -329,7 +317,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Decupează",
+      "copy": "Copiază",
+      "paste": "Lipește"
     },
     "deleteConfirm": {
       "title": "Confirmă ștergerea",
@@ -364,7 +355,7 @@
       "docs": "Documentație",
       "environments": "Medii",
       "notes": "Notițe",
-      "customValues": "Custom variables"
+      "customValues": "Enumerări personalizate"
     },
     "home": {
       "configureEnvs": "Configurează mediile",
@@ -402,7 +393,7 @@
       "addEntry": "Adăugați o valoare",
       "label": "Label",
       "value": "Value",
-      "selectList": "Selectați o listă"
+      "selectList": "Definiți liste de valori reutilizabile pentru variabilele dvs.: alegeți o etichetă lizibilă, iar cererea trimite valoarea asociată. Selectați sau creați o enumerare pentru a începe."
     }
   },
   "requestTab": {
@@ -456,7 +447,11 @@
       }
     },
     "followRedirects": "Urmărește redirecționările",
-    "timeoutLabel": "Expirare (ms)"
+    "timeoutLabel": "Expirare (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Copiază URL-ul rezolvat",
+      "copied": "Copiat!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -605,6 +600,7 @@
     "disconnect": "Deconectează",
     "startListening": "Începe ascultarea",
     "stopListening": "Oprește ascultarea",
+    "listenFailed": "Pornirea serverului a eșuat",
     "routePlaceholder": "Rută (opțional)",
     "clientsConnected": "{{count}} client(i) conectat(i)",
     "notListening": "Nu ascultă"
@@ -857,26 +853,6 @@
     "openAriaLabel": "Deschide o colecție de pe disc",
     "landmarkLabel": "Bine ați venit"
   },
-  "save": {
-    "title": "Opțiuni de salvare",
-    "mode": {
-      "label": "Mod de salvare",
-      "file": "Fișier unic",
-      "folder": "Structură de foldere",
-      "fileDescription": "Salvează totul într-un singur fișier",
-      "folderDescription": "Salvează ca structură de foldere cu fișiere separate"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Lizibil pentru oameni",
-      "jsonDescription": "Format standard",
-      "json5Description": "JSON + comentarii"
-    },
-    "preview": {
-      "label": "Previzualizare structură",
-      "noDocumentation": "Nu există documentație analizată pentru această sursă."
-    }
-  },
   "common": {
     "cancel": "Anulează",
     "save": "Salvează",
@@ -1060,7 +1036,9 @@
       "sourceImportFailed": "Specificația nu a putut fi reimportată din sursa sa.",
       "emptySpec": "Specificația descărcată de la {{url}} nu declară nicio operațiune {{format}}. Aplicarea ei ar goli acest folder, deci actualizarea a fost refuzată.",
       "formatNotDetected": "Formatul acestei surse nu a fost recunoscut.",
-      "unsupportedFormat": "Niciun importator nu gestionează formatul {{format}}."
+      "unsupportedFormat": "Niciun importator nu gestionează formatul {{format}}.",
+      "projectFormatTooNew": "Acest fișier de proiect folosește versiunea de format {{found}}, dar această versiune de Restorm înțelege doar versiunea {{current}}. Actualizați Restorm pentru a-l importa.",
+      "projectFormatMissing": "Acest fișier nu declară nicio versiune de format Restorm, deci nu este un fișier de proiect Restorm."
     },
     "formats": {
       "swagger": {
@@ -1167,6 +1145,9 @@
       "apiBlueprint": {
         "description": "Lipiți un document API Blueprint (.apib) — Restorm analizează fiecare grup de resurse și tranziție într-un folder de cereri, câte una pentru fiecare pereche metodă/răspuns documentată.",
         "trademark": "API Blueprint este o specificație creată inițial de Apiary."
+      },
+      "restorm": {
+        "description": "Îmbinați un alt proiect Restorm cu cel deschis — fiecare dosar, cerere, mediu și scenariu importat ajunge într-un dosar-înveliș, cu identități noi pentru ca nimic să nu intre în coliziune, nici măcar la importul unui proiect în el însuși."
       }
     },
     "grpcReflection": {
@@ -1233,6 +1214,71 @@
       "previousMatch": "Potrivirea anterioară",
       "nextMatch": "Potrivirea următoare",
       "close": "Închide"
+    },
+    "sections": {
+      "parameters": "Parametri",
+      "responses": "Răspunsuri",
+      "models": "Modele",
+      "enums": "Enumerări",
+      "polymorphism": "Polimorfism",
+      "overview": "Prezentare generală",
+      "operations": "Operațiuni"
+    },
+    "table": {
+      "in": "În",
+      "name": "Nume",
+      "type": "Tip",
+      "required": "Oblig.",
+      "operation": "Operațiune",
+      "description": "Descriere",
+      "example": "Exemplu",
+      "constraints": "Constrângeri"
+    },
+    "params": {
+      "empty": "Niciun parametru din afara corpului declarat pentru rutele filtrate."
+    },
+    "responses": {
+      "status": "Stare",
+      "schema": "Schemă",
+      "headers": "Anteturi",
+      "empty": "Niciun răspuns declarat pentru rutele filtrate."
+    },
+    "route": {
+      "requestBody": "Corpul cererii",
+      "responseBody": "Corpul răspunsului",
+      "security": "Securitate",
+      "externalDocs": "Documente externe",
+      "examplePayload": "Exemplu de payload",
+      "operationId": "operationId",
+      "addRequest": "+ Adaugă o cerere"
+    },
+    "apiInfo": {
+      "version": "Versiune",
+      "sourceFormat": "Format sursă",
+      "from": "din",
+      "server": "Server",
+      "contact": "Contact",
+      "license": "Licență",
+      "termsOfService": "Termenii serviciului",
+      "externalDocs": "Documente externe",
+      "tagReferences": "Referințe de etichete"
+    },
+    "sidebar": {
+      "outline": "Structura documentației"
+    },
+    "legend": {
+      "requiredProperty": "proprietate obligatorie",
+      "optionalProperty": "proprietate opțională",
+      "nullableValue": "valoare care acceptă null",
+      "readOnly": "doar citire (setat de server)",
+      "deprecatedBadge": "depreciat",
+      "deprecatedDesc": "declarat depreciat în specificația sursă",
+      "removedBadge": "eliminat",
+      "removedDesc": "absent din ultima reimportare",
+      "requiredSingleRef": "ref. unică obligatorie",
+      "optionalSingleRef": "ref. unică opțională",
+      "requiredArrayRef": "ref. de tablou obligatorie",
+      "optionalArrayRef": "ref. de tablou opțională"
     }
   },
   "scenario": {
@@ -1783,8 +1829,7 @@
       "dataFormats": "Formate de date",
       "encoding": "Codificare",
       "time": "Sincronizare",
-      "algorithmie": "Algoritmi",
-      "ux": "UX"
+      "algorithmie": "Algoritmi"
     },
     "listOp": {
       "value": "listă",
@@ -2334,9 +2379,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Previzualizare URL (înainte de rezolvare)",
-    "versionV2NotYet": "v2 (execuția nu este încă acceptată)",
-    "versionV3NotYet": "v3 (execuția nu este încă acceptată)",
     "operationKindEntitySet": "Set de entități (GET)",
     "operationKindFunction": "Funcție (GET cu parametri încorporați)",
     "operationKindAction": "Acțiune (POST cu corp JSON)",
@@ -2355,7 +2397,8 @@
       "stopListening": "Oprește ascultarea",
       "notListening": "Nu ascultă",
       "served": "Ascultă — {{count}} cerere(i) servite",
-      "listenFailed": "Pornirea serverului simulat a eșuat"
+      "listenFailed": "Pornirea serverului simulat a eșuat",
+      "portInUse": "Portul {{port}} este deja folosit de o altă aplicație. Închideți-o sau alegeți alt port, apoi reporniți serverul."
     }
   },
   "odata": {
@@ -2375,6 +2418,7 @@
     },
     "namePlaceholder": "Numele configurației",
     "saveButton": "Salvează",
+    "updateButton": "Actualizează cu valorile curente",
     "storageTarget": {
       "label": "Salvează în fișierul proiectului (.restorm)"
     },
@@ -2387,6 +2431,10 @@
     "loadConfirm": {
       "title": "Încarcă configurația",
       "message": "Doriți să încărcați configurația „{{name}}\"? Configurația actuală nesalvată va fi pierdută."
+    },
+    "updateConfirm": {
+      "title": "Actualizează configurația",
+      "message": "Doriți să înlocuiți configurația „{{name}}” cu valorile curente?"
     },
     "deleteConfirm": {
       "title": "Șterge configurația",
@@ -2633,6 +2681,10 @@
       "title": "Proiect creat cu o versiune mai nouă",
       "message": "Acest fișier a fost creat cu o versiune Restorm mai nouă decât cea pe care o utilizați. Actualizați Restorm pentru a-l deschide.",
       "versions": "Format de fișier {{found}}; această versiune acceptă până la {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Acesta nu este un fișier Restorm",
+      "message": "Acest fișier nu declară niciun format de fișier Restorm. Nu a fost creat de Restorm sau a fost editat manual, așa că nu poate fi deschis."
     }
   }
 }

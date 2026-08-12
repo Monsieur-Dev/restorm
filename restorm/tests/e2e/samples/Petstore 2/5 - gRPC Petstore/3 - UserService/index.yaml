@@ -1,5 +1,0 @@
-name: UserService
-documentation: User service for managing users
-tags:
-  - service
-configuration: {}

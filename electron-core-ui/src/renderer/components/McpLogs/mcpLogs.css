@@ -49,9 +49,9 @@
   display: flex;
   flex-direction: column;
 
-  /* Keep the timestamp + bubbles clear of the ECUI scrollbar on the right
-   * (pairs with the response bubble being full-width-minus-100px). */
-  padding-right: 30px;
+  /* No scrollbar-clearance padding here: ScrollableElement now reserves a
+   * gutter for the overlay scrollbar, so the timestamps + bubbles never sit
+   * under it. */
 }
 
 .ecui-mcp-logs-row {

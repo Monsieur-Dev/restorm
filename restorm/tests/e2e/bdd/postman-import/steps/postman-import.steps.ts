@@ -1,12 +1,12 @@
+import { materializeTextFixture } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
-import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { test, expect, POSTMAN_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E } from '../../fixtures/postman-import.fixture'
 
 /** The committed Postman export fixture (real `postman export` output) that the
  * unit tests also consume — one source of truth for the import surface. */
-const FIXTURE = resolve(__dirname, '../../../samples/petstore-workflow.postman_collection.json')
+const FIXTURE_SOURCE = resolve(__dirname, '../../../samples/petstore-workflow.postman_collection.json')
 const NEW_FILE = join(POSTMAN_IMPORT_TEMP_DIR, 'postman-import-test.restorm')
 
 const { Given, When, Then } = createBdd(test)
@@ -45,9 +45,9 @@ Given('a new single-file collection for Postman import', async ({ launchApp }) =
   await p.waitForTimeout(500)
 })
 
-When('I import the Postman workflow collection', async () => {
+When('I import the Postman workflow collection', async ({ services }) => {
   const p = requirePage()
-  expect(existsSync(FIXTURE), `fixture missing: ${FIXTURE}`).toBe(true)
+  const FIXTURE = materializeTextFixture(FIXTURE_SOURCE, join(POSTMAN_IMPORT_TEMP_DIR, 'petstore-workflow.postman_collection.json'), services)
 
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')

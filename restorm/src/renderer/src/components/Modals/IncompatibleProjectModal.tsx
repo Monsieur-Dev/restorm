@@ -12,11 +12,13 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Modal, Button } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import { FILE_FORMAT_TOO_NEW_CODE } from '../../../../shared/config/fileFormatVersion'
+import { FILE_FORMAT_TOO_NEW_CODE, FILE_FORMAT_MISSING_CODE } from '../../../../shared/config/fileFormatVersion'
 import './IncompatibleProjectModal.css'
 
 interface RejectionState {
   path: string
+  /** Which refusal to word the dialog as. */
+  code: typeof FILE_FORMAT_TOO_NEW_CODE | typeof FILE_FORMAT_MISSING_CODE
   found?: number
   current?: number
 }
@@ -42,9 +44,9 @@ export function IncompatibleProjectModal(): React.JSX.Element | null {
       // Only this build's format-version refusal is rendered here. Other
       // codes belong to whatever surface owns them; swallowing them into a
       // "too new" message would misreport the cause.
-      if (payload.code !== FILE_FORMAT_TOO_NEW_CODE) return
+      if (payload.code !== FILE_FORMAT_TOO_NEW_CODE && payload.code !== FILE_FORMAT_MISSING_CODE) return
       const detail = payload.detail ?? {}
-      const next: RejectionState = { path: payload.path }
+      const next: RejectionState = { path: payload.path, code: payload.code }
       if (typeof detail['found'] === 'number') next.found = detail['found']
       if (typeof detail['current'] === 'number') next.current = detail['current']
       setRejection(next)
@@ -63,11 +65,16 @@ export function IncompatibleProjectModal(): React.JSX.Element | null {
       isOpen
       onClose={handleClose}
       size="dialog"
-      title={t('project.incompatible.title')}
+      title={rejection.code === FILE_FORMAT_MISSING_CODE ? t('project.notARestormFile.title') : t('project.incompatible.title')}
       data-testid="incompatible-project-modal"
+      enterActionTestId="incompatible-project-dismiss"
     >
       <div className="incompatible-project" data-testid="incompatible-project-body">
-        <p className="incompatible-project__message">{t('project.incompatible.message')}</p>
+        <p className="incompatible-project__message">
+          {rejection.code === FILE_FORMAT_MISSING_CODE
+            ? t('project.notARestormFile.message')
+            : t('project.incompatible.message')}
+        </p>
         <p className="incompatible-project__path" data-testid="incompatible-project-path">
           {rejection.path}
         </p>
@@ -88,5 +95,3 @@ export function IncompatibleProjectModal(): React.JSX.Element | null {
     </Modal>
   )
 }
-
-export default IncompatibleProjectModal

@@ -30,7 +30,7 @@ interface FakeFolder {
 
 const mockState = {
   findById: vi.fn<(id: string) => unknown>(),
-  createScenario: vi.fn<(parentId: string, init: { name: string }) => FakeScenario>(),
+  createScenario: vi.fn<(parentId: string | null, init: { name: string }) => FakeScenario>(),
   getCollections: vi.fn<() => unknown[]>(() => [])
 }
 
@@ -51,7 +51,7 @@ vi.mock('electron', () => ({
 vi.mock('../../services/CollectionStore', () => ({
   collectionStore: {
     findById: (id: string) => mockState.findById(id),
-    createScenario: (parentId: string, init: { name: string }) => mockState.createScenario(parentId, init),
+    createScenario: (parentId: string | null, init: { name: string }) => mockState.createScenario(parentId, init),
     updateScenario: (id: string, updates: Record<string, unknown>) => updateScenarioSpy(id, updates),
     getCollections: () => mockState.getCollections(),
     updateEnvironment: (id: string, patch: Record<string, unknown>) => updateEnvironmentSpy(id, patch),
@@ -101,10 +101,30 @@ describe('create_scenario MCP tool', () => {
     registerWriteTools(mcp as unknown as McpService)
   })
 
-  it('rejects an empty parentId', () => {
+  // An absent (or empty) parentId means the ROOT of the sidebar — the same
+  // placement the sidebar's empty-area "add" menu offers. It is a legitimate
+  // destination, not a missing argument, so it must not be an error.
+  it('creates the scenario at the ROOT when parentId is omitted', () => {
+    const created: FakeScenario = { type: 'scenario', id: 'scn-root', name: 'Root scenario', nodes: [], edges: [] }
+    mockState.createScenario.mockImplementation(() => created)
+
+    const res = mcp.invoke('create_scenario', { name: 'Root scenario' })
+
+    expect(res.isError).toBeUndefined()
+    expect(mockState.createScenario).toHaveBeenCalledWith(null, { name: 'Root scenario' })
+    expect(JSON.parse(res.content[0]?.text ?? '{}')).toMatchObject({ id: 'scn-root', parentId: null })
+    // No lookup is needed for the root — there is no container to validate.
+    expect(mockState.findById).not.toHaveBeenCalled()
+  })
+
+  it('treats an empty parentId as the root rather than an error', () => {
+    const created: FakeScenario = { type: 'scenario', id: 'scn-root', name: 'New', nodes: [], edges: [] }
+    mockState.createScenario.mockImplementation(() => created)
+
     const res = mcp.invoke('create_scenario', { parentId: '', name: 'New' })
-    expect(res.isError).toBe(true)
-    expect(mockState.createScenario).not.toHaveBeenCalled()
+
+    expect(res.isError).toBeUndefined()
+    expect(mockState.createScenario).toHaveBeenCalledWith(null, { name: 'New' })
   })
 
   it('rejects an empty name', () => {

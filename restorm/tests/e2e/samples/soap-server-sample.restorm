@@ -1,62 +1,42 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: 3c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e10
     name: SOAP Mock Playground
-    documentation: |-
-      # SOAP Mock Playground
-
-      A self-contained SOAP mock playground: restorm HOSTS a local SOAP server
-      AND calls it as a client — no external service needed.
-
-      - **Calculator Mock** hosts a local SOAP mock server on `localhost:8098`.
-        It answers the `Add` operation with a canned envelope and the `Boom`
-        operation with a `<soap:Fault>`. Press Listen to start serving.
-      - **Add Consumer** posts an `Add` SOAP envelope to
-        `http://localhost:8098/calculator`; run it (Send) once the mock is
-        listening and it receives the canned response.
-      - **Fault Consumer** posts a `Boom` envelope and receives the
-        `<soap:Fault>`.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: 1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f
+        name: Default
         variables: []
-        id: 1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f
     items:
-      - type: soap
+      - id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e01
         name: Calculator Mock
+        type: soap
+        url: localhost:8098/calculator
+        body: ''
         documentation: |-
           Hosts a local SOAP mock server on `localhost:8098`. Press Listen, then
           run **Add Consumer** / **Fault Consumer**. Dispatches by the body
           operation name.
+        headers: []
+        mockOperations:
+          - name: Add
+            responseBody: <AddResponse xmlns="urn:calculator"><result>7</result></AddResponse>
+            soapAction: urn:Add
+          - name: Boom
+            isFault: true
+            responseBody: The Boom operation always fails
+        operation: ''
+        server: true
+        service: ''
+        soapAction: ''
         tags:
           - soap
           - server
-        url: localhost:8098/calculator
-        soapAction: ''
-        service: ''
-        operation: ''
-        body: ''
-        server: true
-        mockOperations:
-          - name: Add
-            soapAction: urn:Add
-            responseBody: |-
-              <AddResponse xmlns="urn:calculator"><result>7</result></AddResponse>
-          - name: Boom
-            responseBody: The Boom operation always fails
-            isFault: true
-        headers: []
-        id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e01
-      - type: soap
+      - id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e02
         name: Add Consumer
-        documentation: Posts an Add envelope to the local Calculator Mock.
-        tags:
-          - soap
+        type: soap
         url: http://localhost:8098/calculator
-        soapAction: urn:Add
-        service: Calculator
-        operation: Add
         body: |-
           <?xml version="1.0" encoding="utf-8"?>
           <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -67,17 +47,17 @@ collections:
               </Add>
             </soap:Body>
           </soap:Envelope>
+        documentation: Posts an Add envelope to the local Calculator Mock.
         headers: []
-        id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e02
-      - type: soap
-        name: Fault Consumer
-        documentation: Posts a Boom envelope to the local Calculator Mock and receives a SOAP Fault.
+        operation: Add
+        service: Calculator
+        soapAction: urn:Add
         tags:
           - soap
+      - id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e03
+        name: Fault Consumer
+        type: soap
         url: http://localhost:8098/calculator
-        soapAction: ''
-        service: Calculator
-        operation: Boom
         body: |-
           <?xml version="1.0" encoding="utf-8"?>
           <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -85,7 +65,13 @@ collections:
               <Boom xmlns="urn:calculator"/>
             </soap:Body>
           </soap:Envelope>
+        documentation: Posts a Boom envelope to the local Calculator Mock and receives a SOAP Fault.
         headers: []
-        id: 2c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e03
-    id: 3c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e10
+        operation: Boom
+        service: Calculator
+        soapAction: ''
+        tags:
+          - soap
+    tagColors: {}
+    tags: []
 _projectUuid: 4c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e20

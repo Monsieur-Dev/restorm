@@ -3,7 +3,7 @@ import { execSync } from 'child_process'
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { isGitServerSeeded, seedGitServer, seedFreshRepo, resetGitServerSeed, resolveReposDir, gitEnv, GIT_SERVER_URL, SEED_REPO_NAME } from './gitServerSeed'
+import { isGitServerSeeded, seedGitServer, seedFreshRepo, resetGitServerSeed, resolveReposDir, gitEnv, gitServerUrl, SEED_REPO_NAME } from './gitServerSeed'
 
 // Every call below injects this throwaway directory. The DEFAULT is the
 // directory the git-server container is actually serving (see
@@ -75,7 +75,8 @@ describe('gitServerSeed', () => {
   })
 
   it('exposes a clone URL matching the seeded repo name', () => {
-    expect(GIT_SERVER_URL).toBe(`git://localhost:9418/${SEED_REPO_NAME}`)
+    // Unconfigured (no testcontainers override) → the legacy compose port.
+    expect(gitServerUrl()).toBe(`git://localhost:9418/${SEED_REPO_NAME}`)
   })
 })
 

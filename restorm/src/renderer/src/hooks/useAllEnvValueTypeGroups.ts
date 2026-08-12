@@ -29,7 +29,7 @@ export function useAllEnvValueTypeGroups(): EnvValueTypeGroup[] {
   // across unrelated re-renders (a fresh array each render cascades a re-render
   // into every consuming TypedValueField — costly on a box with many fields).
   // Folders mutate in place, so a `FOLDER_UPDATED` event bumps `version` to
-  // force the re-read after an edit in "Variables personnalisées"; a new
+  // force the re-read after an edit in "Énumérations personnalisées"; a new
   // `collections` reference re-reads too.
   return useMemo(() => {
     void version // a FOLDER_UPDATED bump forces the re-read of in-place folder proxies

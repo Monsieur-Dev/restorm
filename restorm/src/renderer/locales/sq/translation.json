@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Pa vërtetim",
       "popoverLabel": "Rruga e vërtetimit",
+      "openRoute": "Hap rrugën e autentikimit",
       "unnamed": "Pa emër"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "I ri",
     "import": "Importo",
     "open": "Hap",
-    "openFolder": "Hap dosjen",
     "recentFiles": "Skedarët e fundit",
     "favorites": "Të preferuarat",
     "close": "Mbyll",
@@ -228,36 +228,24 @@
     "saveAll": "Ruaj të gjitha",
     "saveAs": "Ruaj si",
     "exit": "Dil",
-    "selection": "Zgjedhja",
-    "tools": "Veglat",
-    "findInCollection": "Gjej në koleksion",
-    "addRequest": "Shto kërkesë",
-    "addRequestHttp": "Kërkesë HTTP",
-    "addRequestGraphql": "Kërkesë GraphQL",
-    "addRequestGrpc": "Kërkesë gRPC",
-    "addRequestSoap": "Kërkesë SOAP",
-    "addRequestOdata": "Kërkesë OData",
-    "addRequestWebsocket": "Kërkesë WebSocket",
-    "addFolder": "Shto dosje",
-    "addEnvironmentFolder": "Shto dosje mjedisi",
-    "addVariable": "Shto variabël",
-    "addTag": "Shto etiketë",
-    "expandAllFolders": "Zgjero të gjitha dosjet",
-    "collapseAllFolders": "Mbyll të gjitha dosjet",
-    "sendActiveRequest": "Dërgo kërkesën",
-    "cancelActiveRequest": "Anulo kërkesën",
-    "generateCodeSnippet": "Gjenero copëz kodi",
-    "copyAsCurl": "Kopjo si cURL",
-    "exportOpenApi": "Eksporto në OpenAPI",
-    "clearAuthCache": "Pastro memorien e vërtetimit",
-    "openLogsFolder": "Hap dosjen e regjistrave",
     "mcpLogs": "Regjistrat MCP",
+    "consoleHttp": "Konsola HTTP",
     "git": "Git",
     "gitPush": "Dërgo",
     "gitPull": "Merr",
     "gitRefresh": "Rifresko",
     "gitHistory": "Historiku",
-    "gitResetToServer": "Rikthe te versioni i serverit"
+    "gitResetToServer": "Rikthe te versioni i serverit",
+    "scenario": "Skenar",
+    "create": "Krijo",
+    "request": "Kërkesë",
+    "server": "Server",
+    "runSelected": "Ekzekuto",
+    "cancelSelected": "Anulo",
+    "clone": "Klono",
+    "delete": "Fshi",
+    "addToFavorites": "Shto te të preferuarat",
+    "removeFromFavorites": "Hiq nga të preferuarat"
   },
   "sidebar": {
     "addRequest": "Shto kërkesë",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Pre",
+      "copy": "Kopjo",
+      "paste": "Ngjit"
     },
     "deleteConfirm": {
       "title": "Konfirmo fshirjen",
@@ -363,7 +354,7 @@
       "docs": "Dokumentacioni",
       "environments": "Mjedise",
       "notes": "Shënimet",
-      "customValues": "Custom variables"
+      "customValues": "Enumerime të personalizuara"
     },
     "home": {
       "configureEnvs": "Konfiguro mjediset",
@@ -401,7 +392,7 @@
       "addEntry": "Shto një vlerë",
       "label": "Label",
       "value": "Value",
-      "selectList": "Zgjidhni një listë"
+      "selectList": "Përcaktoni lista vlerash të ripërdorshme për variablat tuaja: ju zgjidhni një etiketë të lexueshme, kërkesa dërgon vlerën e lidhur. Zgjidhni ose krijoni një enumerim për të filluar."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Ndiq ridrejtimet",
-    "timeoutLabel": "Afati kohor (ms)"
+    "timeoutLabel": "Afati kohor (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopjo URL-në e zgjidhur",
+      "copied": "U kopjua!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Shkëput",
     "startListening": "Fillo dëgjimin",
     "stopListening": "Ndalo dëgjimin",
+    "listenFailed": "Nisja e serverit dështoi",
     "routePlaceholder": "Rruga (opsionale)",
     "clientsConnected": "{{count}} klient të lidhur",
     "notListening": "Nuk dëgjon"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Hap një koleksion nga disku",
     "landmarkLabel": "Mirësevini"
   },
-  "save": {
-    "title": "Opsionet e ruajtjes",
-    "mode": {
-      "label": "Mënyra e ruajtjes",
-      "file": "Skedar i vetëm",
-      "folder": "Strukturë dosjesh",
-      "fileDescription": "Ruaj gjithçka në një skedar të vetëm",
-      "folderDescription": "Ruaj si strukturë dosjesh me skedarë të ndarë"
-    },
-    "format": {
-      "label": "Formati",
-      "yamlDescription": "I lexueshëm nga njerëzit",
-      "jsonDescription": "Format standard",
-      "json5Description": "JSON + komente"
-    },
-    "preview": {
-      "label": "Pamja paraprake e strukturës",
-      "noDocumentation": "Asnjë dokumentacion i analizuar për këtë burim."
-    }
-  },
   "common": {
     "cancel": "Anulo",
     "save": "Ruaj",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "Specifikimi nuk mundi të riimportohej nga burimi i tij.",
       "emptySpec": "Specifikimi i marrë nga {{url}} nuk deklaron asnjë veprim {{format}}. Zbatimi i tij do ta zbraste këtë dosje, prandaj përditësimi u refuzua.",
       "formatNotDetected": "Formati i këtij burimi nuk u njoh.",
-      "unsupportedFormat": "Asnjë importues nuk e mbështet formatin {{format}}."
+      "unsupportedFormat": "Asnjë importues nuk e mbështet formatin {{format}}.",
+      "projectFormatTooNew": "Ky skedar projekti përdor versionin e formatit {{found}}, por ky version i Restorm kupton vetëm versionin {{current}}. Përditësoni Restorm për ta importuar.",
+      "projectFormatMissing": "Ky skedar nuk deklaron asnjë version formati Restorm, prandaj nuk është skedar projekti Restorm."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Ngjitni një dokument API Blueprint (.apib) — Restorm analizon çdo grup burimesh dhe kalim në një dosje kërkesash, një për çdo çift metodë/përgjigje të dokumentuar.",
         "trademark": "API Blueprint është një specifikim i krijuar fillimisht nga Apiary."
+      },
+      "restorm": {
+        "description": "Bashkoni një projekt tjetër Restorm me atë të hapur — çdo dosje, kërkesë, mjedis dhe skenar i importuar mbërrin nën një dosje mbështjellëse, me identitete të reja që asgjë të mos përplaset, as kur një projekt importohet në vetvete."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Përputhja e mëparshme",
       "nextMatch": "Përputhja tjetër",
       "close": "Mbyll"
+    },
+    "sections": {
+      "parameters": "Parametrat",
+      "responses": "Përgjigjet",
+      "models": "Modelet",
+      "enums": "Numërimet",
+      "polymorphism": "Polimorfizmi",
+      "overview": "Përmbledhje",
+      "operations": "Operacionet"
+    },
+    "table": {
+      "in": "Ku",
+      "name": "Emri",
+      "type": "Lloji",
+      "required": "Kërk.",
+      "operation": "Operacioni",
+      "description": "Përshkrimi",
+      "example": "Shembull",
+      "constraints": "Kufizimet"
+    },
+    "params": {
+      "empty": "Nuk ka parametra jashtë trupit të deklaruar për rrugët e filtruara."
+    },
+    "responses": {
+      "status": "Statusi",
+      "schema": "Skema",
+      "headers": "Titujt",
+      "empty": "Nuk ka përgjigje të deklaruara për rrugët e filtruara."
+    },
+    "route": {
+      "requestBody": "Trupi i kërkesës",
+      "responseBody": "Trupi i përgjigjes",
+      "security": "Siguria",
+      "externalDocs": "Dokumente të jashtme",
+      "examplePayload": "Shembull ngarkese",
+      "operationId": "operationId",
+      "addRequest": "+ Shto një kërkesë"
+    },
+    "apiInfo": {
+      "version": "Versioni",
+      "sourceFormat": "Formati i burimit",
+      "from": "nga",
+      "server": "Serveri",
+      "contact": "Kontakti",
+      "license": "Licenca",
+      "termsOfService": "Kushtet e shërbimit",
+      "externalDocs": "Dokumente të jashtme",
+      "tagReferences": "Referenca etiketash"
+    },
+    "sidebar": {
+      "outline": "Struktura e dokumentacionit"
+    },
+    "legend": {
+      "requiredProperty": "veti e kërkuar",
+      "optionalProperty": "veti opsionale",
+      "nullableValue": "vlerë e anulueshme",
+      "readOnly": "vetëm për lexim (caktohet nga serveri)",
+      "deprecatedBadge": "i vjetruar",
+      "deprecatedDesc": "deklaruar si i vjetruar në specifikimin burimor",
+      "removedBadge": "i hequr",
+      "removedDesc": "mungon në riimportimin e fundit",
+      "requiredSingleRef": "referencë e vetme e kërkuar",
+      "optionalSingleRef": "referencë e vetme opsionale",
+      "requiredArrayRef": "referencë vargu e kërkuar",
+      "optionalArrayRef": "referencë vargu opsionale"
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Formate të dhënash",
       "encoding": "Kodim",
       "time": "Kohëmatja",
-      "algorithmie": "Algoritme",
-      "ux": "UX"
+      "algorithmie": "Algoritme"
     },
     "listOp": {
       "value": "listë",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Pamje paraprake e URL-së (para zgjidhjes)",
-    "versionV2NotYet": "v2 (ekzekutimi ende nuk mbështetet)",
-    "versionV3NotYet": "v3 (ekzekutimi ende nuk mbështetet)",
     "operationKindEntitySet": "Grup entitetesh (GET)",
     "operationKindFunction": "Funksion (GET me parametra të integruar)",
     "operationKindAction": "Veprim (POST me trup JSON)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Ndalo dëgjimin",
       "notListening": "Nuk dëgjon",
       "served": "Në dëgjim — u shërbyen {{count}} kërkesa",
-      "listenFailed": "Dështoi nisja e serverit mock"
+      "listenFailed": "Dështoi nisja e serverit mock",
+      "portInUse": "Porta {{port}} është tashmë në përdorim nga një aplikacion tjetër. Mbylleni ose zgjidhni një portë tjetër, pastaj rinisni serverin."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Emri i konfigurimit",
     "saveButton": "Ruaj",
+    "updateButton": "Përditëso me vlerat aktuale",
     "storageTarget": {
       "label": "Ruaj në skedarin e projektit (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Ngarko konfigurimin",
       "message": "Dëshironi të ngarkoni konfigurimin \"{{name}}\"? Konfigurimi juaj aktual i paruajtur do të humbasë."
+    },
+    "updateConfirm": {
+      "title": "Përditëso konfigurimin",
+      "message": "Dëshironi ta zëvendësoni konfigurimin \"{{name}}\" me vlerat aktuale?"
     },
     "deleteConfirm": {
       "title": "Fshij konfigurimin",
@@ -2632,6 +2680,10 @@
       "title": "Projekti u krijua me një version më të ri",
       "message": "Ky skedar u krijua me një version më të ri të Restorm sesa ai që po përdorni. Përditësoni Restorm për ta hapur.",
       "versions": "Formati i skedarit {{found}}; ky version mbështet deri në {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Ky nuk është një skedar Restorm",
+      "message": "Ky skedar nuk deklaron asnjë format skedari Restorm. Nuk është krijuar nga Restorm ose është modifikuar me dorë, prandaj nuk mund të hapet."
     }
   }
 }

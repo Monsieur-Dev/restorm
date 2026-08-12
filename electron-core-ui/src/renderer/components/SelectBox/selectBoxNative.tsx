@@ -118,4 +118,4 @@ const SelectBoxNative: React.FC<SelectBoxNativeProps> = ({
   )
 }
 
-export default SelectBoxNative
+export { SelectBoxNative }

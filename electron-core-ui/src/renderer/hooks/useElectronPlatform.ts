@@ -35,5 +35,3 @@ export const useElectronPlatform = (override?: ElectronPlatform): ElectronPlatfo
 
   return override ?? detected
 }
-
-export default useElectronPlatform

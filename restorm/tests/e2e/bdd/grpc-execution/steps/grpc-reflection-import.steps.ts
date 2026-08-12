@@ -8,7 +8,8 @@
 
 import { createBdd } from 'playwright-bdd'
 import type { Page } from '@playwright/test'
-import { test, expect, type McpDiscovery } from '../../fixtures/mcp-server.fixture'
+import { test, expect, type McpDiscovery } from './fixture'
+import { remapCanonicalPorts } from '../../../helpers/testcontainers/services'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -87,7 +88,8 @@ When('I open the Import dialog', async () => {
     .toBeVisible({ timeout: 5000 })
 })
 
-When('I connect to {string} via gRPC reflection', async ({}, address: string) => {
+When('I connect to {string} via gRPC reflection', async ({ services }, address: string) => {
+  address = remapCanonicalPorts(address, services)
   const p = requirePage()
   await p.locator('[data-testid="import-grpc-reflection-button"]').first().click()
   const reflectionModal = p.locator('[data-testid="grpc-reflection-import-modal"]')

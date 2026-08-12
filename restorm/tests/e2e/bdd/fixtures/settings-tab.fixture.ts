@@ -1,7 +1,7 @@
 import { restormBaseTest, expect } from '../../helpers/base-fixture'
 
 interface SettingsTabFixtures {
-  petstoreFolderPath: string
+  petstoreProjectPath: string
 }
 
 /**
@@ -11,9 +11,9 @@ interface SettingsTabFixtures {
  * the same Settings entry points open a workbench tab instead.
  */
 export const test = restormBaseTest.extend<SettingsTabFixtures>({
-  petstoreFolderPath: async ({ restormRoot }, use) => {
+  petstoreProjectPath: async ({ restormRoot }, use) => {
     const { join } = await import('path')
-    await use(join(restormRoot, 'tests/e2e/samples/Petstore'))
+    await use(join(restormRoot, 'tests/e2e/samples/petstore-workspace.restorm'))
   },
 
   page: async ({ electronApp, restormRoot }, use, testInfo) => {

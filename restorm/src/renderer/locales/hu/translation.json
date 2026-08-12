@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Nincs hitelesítés",
       "popoverLabel": "Hitelesítési útvonal",
+      "openRoute": "A hitelesítési útvonal megnyitása",
       "unnamed": "Névtelen"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "Új",
     "import": "Importálás",
     "open": "Megnyitás",
-    "openFolder": "Mappa megnyitása",
     "recentFiles": "Legutóbbi fájlok",
     "favorites": "Kedvencek",
     "close": "Bezárás",
@@ -228,36 +228,24 @@
     "saveAll": "Összes mentése",
     "saveAs": "Mentés másként",
     "exit": "Kilépés",
-    "selection": "Kijelölés",
-    "tools": "Eszközök",
-    "findInCollection": "Keresés a gyűjteményben",
-    "addRequest": "Kérés hozzáadása",
-    "addRequestHttp": "HTTP-kérés",
-    "addRequestGraphql": "GraphQL-kérés",
-    "addRequestGrpc": "gRPC-kérés",
-    "addRequestSoap": "SOAP-kérés",
-    "addRequestOdata": "OData-kérés",
-    "addRequestWebsocket": "WebSocket-kérés",
-    "addFolder": "Mappa hozzáadása",
-    "addEnvironmentFolder": "Környezeti mappa hozzáadása",
-    "addVariable": "Változó hozzáadása",
-    "addTag": "Címke hozzáadása",
-    "expandAllFolders": "Összes mappa kibontása",
-    "collapseAllFolders": "Összes mappa összecsukása",
-    "sendActiveRequest": "Kérés küldése",
-    "cancelActiveRequest": "Kérés megszakítása",
-    "generateCodeSnippet": "Kódrészlet generálása",
-    "copyAsCurl": "Másolás cURL-ként",
-    "exportOpenApi": "Exportálás OpenAPI-ba",
-    "clearAuthCache": "Hitelesítési gyorsítótár ürítése",
-    "openLogsFolder": "Naplók mappa megnyitása",
     "mcpLogs": "MCP-naplók",
+    "consoleHttp": "HTTP-konzol",
     "git": "Git",
     "gitPush": "Küldés",
     "gitPull": "Letöltés",
     "gitRefresh": "Frissítés",
     "gitHistory": "Előzmények",
-    "gitResetToServer": "Visszaállítás a kiszolgáló változatára"
+    "gitResetToServer": "Visszaállítás a kiszolgáló változatára",
+    "scenario": "Forgatókönyv",
+    "create": "Létrehozás",
+    "request": "Kérés",
+    "server": "Szerver",
+    "runSelected": "Futtatás",
+    "cancelSelected": "Megszakítás",
+    "clone": "Klónozás",
+    "delete": "Törlés",
+    "addToFavorites": "Hozzáadás a kedvencekhez",
+    "removeFromFavorites": "Eltávolítás a kedvencekből"
   },
   "sidebar": {
     "addRequest": "Kérés hozzáadása",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Kivágás",
+      "copy": "Másolás",
+      "paste": "Beillesztés"
     },
     "deleteConfirm": {
       "title": "Törlés megerősítése",
@@ -363,7 +354,7 @@
       "docs": "Dokumentáció",
       "environments": "Környezetek",
       "notes": "Jegyzetek",
-      "customValues": "Custom variables"
+      "customValues": "Egyéni felsorolások"
     },
     "home": {
       "configureEnvs": "Környezetek konfigurálása",
@@ -401,7 +392,7 @@
       "addEntry": "Érték hozzáadása",
       "label": "Label",
       "value": "Value",
-      "selectList": "Válasszon listát"
+      "selectList": "Határozzon meg újrafelhasználható értéklistákat a változóihoz: Ön egy olvasható címkét választ, a kérés pedig a hozzá tartozó értéket küldi. Kezdésként válasszon ki vagy hozzon létre egy felsorolást."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Átirányítások követése",
-    "timeoutLabel": "Időkorlát (ms)"
+    "timeoutLabel": "Időkorlát (ms)",
+    "resolvedUrlPreview": {
+      "copy": "A feloldott URL másolása",
+      "copied": "Másolva!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Leválasztás",
     "startListening": "Hallgatás indítása",
     "stopListening": "Hallgatás leállítása",
+    "listenFailed": "A szerver indítása nem sikerült",
     "routePlaceholder": "Útvonal (nem kötelező)",
     "clientsConnected": "{{count}} kliens csatlakozva",
     "notListening": "Nem figyel"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Gyűjtemény megnyitása lemezről",
     "landmarkLabel": "Üdvözöljük"
   },
-  "save": {
-    "title": "Mentési beállítások",
-    "mode": {
-      "label": "Mentési mód",
-      "file": "Egy fájl",
-      "folder": "Mappastruktúra",
-      "fileDescription": "Minden mentése egyetlen fájlba",
-      "folderDescription": "Mentés mappastruktúraként, külön fájlokkal"
-    },
-    "format": {
-      "label": "Formátum",
-      "yamlDescription": "Ember számára olvasható",
-      "jsonDescription": "Szabványos formátum",
-      "json5Description": "JSON + megjegyzések"
-    },
-    "preview": {
-      "label": "Struktúra előnézete",
-      "noDocumentation": "Ehhez a forráshoz nincs elemzett dokumentáció."
-    }
-  },
   "common": {
     "cancel": "Mégse",
     "save": "Mentés",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "A specifikációt nem sikerült újra importálni a forrásából.",
       "emptySpec": "A(z) {{url}} címről letöltött specifikáció egyetlen {{format}} műveletet sem deklarál. Alkalmazása kiürítené ezt a mappát, ezért a frissítés elutasításra került.",
       "formatNotDetected": "A forrás formátuma nem volt felismerhető.",
-      "unsupportedFormat": "Egyetlen importáló sem kezeli a(z) {{format}} formátumot."
+      "unsupportedFormat": "Egyetlen importáló sem kezeli a(z) {{format}} formátumot.",
+      "projectFormatTooNew": "Ez a projektfájl a(z) {{found}} formátumverziót használja, de a Restorm ezen verziója csak a(z) {{current}} verziót érti. Frissítse a Restormot az importáláshoz.",
+      "projectFormatMissing": "Ez a fájl nem deklarál Restorm-formátumverziót, így nem Restorm-projektfájl."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Illesszen be egy API Blueprint (.apib) dokumentumot — a Restorm minden erőforráscsoportot és átmenetet egy kérésmappává elemez, dokumentált metódus-/válaszpáronként eggyel.",
         "trademark": "Az API Blueprint egy eredetileg az Apiary által létrehozott specifikáció."
+      },
+      "restorm": {
+        "description": "Olvasszon be egy másik Restorm-projektet a megnyitottba — minden importált mappa, kérés, környezet és forgatókönyv egy burkolómappába kerül, új azonosítókkal, hogy semmi ne ütközzön, még akkor sem, ha egy projektet önmagába importál."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Előző találat",
       "nextMatch": "Következő találat",
       "close": "Bezárás"
+    },
+    "sections": {
+      "parameters": "Paraméterek",
+      "responses": "Válaszok",
+      "models": "Modellek",
+      "enums": "Felsorolások",
+      "polymorphism": "Polimorfizmus",
+      "overview": "Áttekintés",
+      "operations": "Műveletek"
+    },
+    "table": {
+      "in": "Hol",
+      "name": "Név",
+      "type": "Típus",
+      "required": "Köt.",
+      "operation": "Művelet",
+      "description": "Leírás",
+      "example": "Példa",
+      "constraints": "Megkötések"
+    },
+    "params": {
+      "empty": "A szűrt útvonalakhoz nincs törzsön kívüli paraméter megadva."
+    },
+    "responses": {
+      "status": "Állapot",
+      "schema": "Séma",
+      "headers": "Fejlécek",
+      "empty": "A szűrt útvonalakhoz nincs válasz megadva."
+    },
+    "route": {
+      "requestBody": "Kérés törzse",
+      "responseBody": "Válasz törzse",
+      "security": "Biztonság",
+      "externalDocs": "Külső dokumentáció",
+      "examplePayload": "Példa adattartalom",
+      "operationId": "operationId",
+      "addRequest": "+ Kérés hozzáadása"
+    },
+    "apiInfo": {
+      "version": "Verzió",
+      "sourceFormat": "Forrásformátum",
+      "from": "innen:",
+      "server": "Kiszolgáló",
+      "contact": "Kapcsolat",
+      "license": "Licenc",
+      "termsOfService": "Szolgáltatási feltételek",
+      "externalDocs": "Külső dokumentáció",
+      "tagReferences": "Címkehivatkozások"
+    },
+    "sidebar": {
+      "outline": "Dokumentáció vázlata"
+    },
+    "legend": {
+      "requiredProperty": "kötelező tulajdonság",
+      "optionalProperty": "opcionális tulajdonság",
+      "nullableValue": "nullázható érték",
+      "readOnly": "csak olvasható (a kiszolgáló állítja be)",
+      "deprecatedBadge": "elavult",
+      "deprecatedDesc": "a forrásspecifikációban elavultként jelölve",
+      "removedBadge": "eltávolítva",
+      "removedDesc": "hiányzik a legutóbbi újraimportálásból",
+      "requiredSingleRef": "kötelező egyedi hivatkozás",
+      "optionalSingleRef": "opcionális egyedi hivatkozás",
+      "requiredArrayRef": "kötelező tömbhivatkozás",
+      "optionalArrayRef": "opcionális tömbhivatkozás"
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Adatformátumok",
       "encoding": "Kódolás",
       "time": "Időzítés",
-      "algorithmie": "Algoritmusok",
-      "ux": "UX"
+      "algorithmie": "Algoritmusok"
     },
     "listOp": {
       "value": "lista",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-előnézet (feloldás előtt)",
-    "versionV2NotYet": "v2 (a végrehajtás még nem támogatott)",
-    "versionV3NotYet": "v3 (a végrehajtás még nem támogatott)",
     "operationKindEntitySet": "Entitáskészlet (GET)",
     "operationKindFunction": "Függvény (GET beágyazott paraméterekkel)",
     "operationKindAction": "Művelet (POST JSON-törzzsel)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Hallgatás leállítása",
       "notListening": "Nem figyel",
       "served": "Figyel — {{count}} kérés kiszolgálva",
-      "listenFailed": "A mock-kiszolgáló indítása sikertelen"
+      "listenFailed": "A mock-kiszolgáló indítása sikertelen",
+      "portInUse": "A(z) {{port}} portot már egy másik alkalmazás használja. Zárja be, vagy válasszon másik portot, majd indítsa újra a kiszolgálót."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Konfiguráció neve",
     "saveButton": "Mentés",
+    "updateButton": "Frissítés az aktuális értékekkel",
     "storageTarget": {
       "label": "Mentés a projektfájlba (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Konfiguráció betöltése",
       "message": "Szeretné betölteni a(z) \"{{name}}\" konfigurációt? Az aktuális mentetlen konfigurációja elvész."
+    },
+    "updateConfirm": {
+      "title": "Konfiguráció frissítése",
+      "message": "Le szeretné cserélni a(z) „{{name}}” konfigurációt az aktuális értékekre?"
     },
     "deleteConfirm": {
       "title": "Konfiguráció törlése",
@@ -2632,6 +2680,10 @@
       "title": "A projekt újabb verzióval készült",
       "message": "Ez a fájl a jelenleg futtatottnál újabb Restorm-verzióval készült. A megnyitásához frissítse a Restormot.",
       "versions": "Fájlformátum: {{found}}; ez a verzió legfeljebb {{current}} formátumot támogat."
+    },
+    "notARestormFile": {
+      "title": "Ez nem Restorm-fájl",
+      "message": "Ez a fájl nem ad meg Restorm fájlformátumot. Nem a Restorm hozta létre, vagy kézzel szerkesztették, ezért nem nyitható meg."
     }
   }
 }

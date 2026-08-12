@@ -169,7 +169,21 @@ export class SecretHydrationService {
       // Isolate per value: a bad sub-key path on ONE secret must not throw out of
       // the loop and strand the remaining (unrelated) secrets unresolved.
       try {
-        sv.resolved = extractSubKey(payload, path)
+        const extracted = extractSubKey(payload, path)
+        // Two guards, defence in depth:
+        // - an EMPTY resolver result must never clobber a live plaintext
+        //   (the sidecar loader stamped it at open, or it travelled in over
+        //   the event bus and the resolver has nothing newer to say);
+        // - for the SIDECAR source specifically, a live plaintext ALWAYS
+        //   wins over the file: in-memory is the value the next save will
+        //   write, the file is only its past — re-reading the not-yet-saved
+        //   sidecar mid-edit would resurrect the previous value and echo it
+        //   back over the user's fresh input. The manual refresh still
+        //   re-reads the disk: it blanks `resolved` before hydrating.
+        const liveWins = sv.source === 'envFileSecret' && typeof sv.resolved === 'string' && sv.resolved !== ''
+        if (!liveWins && (extracted !== '' || sv.resolved === undefined || sv.resolved === '')) {
+          sv.resolved = extracted
+        }
       } catch (err) {
         logger.warn('[SecretHydrationService] failed to extract sub-key from a resolved secret', {
           source: sv.source,

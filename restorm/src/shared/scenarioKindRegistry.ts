@@ -28,7 +28,7 @@ import { LIST_MUTATION_DEFAULT_VALUE_ID } from './scenarioListMutationValues'
 
 /** Catalogue grouping — drives the separators / submenus in the add-node menu. */
 export type ScenarioNodeCategory =
-  | 'control' | 'composition' | 'lists' | 'loops' | 'time' | 'math' | 'compute' | 'algorithmie' | 'dataFormats' | 'encoding' | 'utility' | 'ux'
+  | 'control' | 'composition' | 'lists' | 'loops' | 'time' | 'math' | 'compute' | 'algorithmie' | 'dataFormats' | 'encoding' | 'utility'
 
 /** One port declaration in a kind's static port map (the `in` header trigger is
  * NOT listed here — it is prepended centrally for every kind that accepts an
@@ -72,6 +72,9 @@ export interface KindSpec {
   icon: string
   /** Group the kind belongs to (separators / submenus in the add-node menu). */
   category: ScenarioNodeCategory
+  /** Palette: draw a separator BEFORE this entry inside its category submenu
+   * (visual grouping inside Algorithmie / Data formats). */
+  paletteBreakBefore?: true
 
   // --- Capability flags (each defaults so only exceptions are stated) ---
   /** Carries the header input-event launch trigger (`in` port). Default true —
@@ -128,31 +131,20 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { name: 'Output name.' }
     }
   },
-  if: {
-    labelKey: 'scenario.nodes.if', defaultLabel: 'If', icon: 'git-compare', category: 'control',
-    staticPreview: true,
-    ports: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'both' }, { id: 'else', name: 'else', role: 'else', flow: 'both' }] },
+  log: {
+    labelKey: 'scenario.nodes.log', defaultLabel: 'Log', icon: 'output', category: 'control',
+    ports: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
     doc: {
-      summary: 'Branch: compares two operands with `operator`, routing the trigger value to `then` (true) or `else` (false). With no operands wired, falls back to the truthiness of the `in` signal.',
-      config: { operator: 'lt | lte | eq | gte | gt | ne | contains', left: 'Left operand (typed value; or wire the `left` port).', right: 'Right operand (typed value; or wire the `right` port).' }
+      summary: 'Writes one entry to the run log (visible via get_scenario_run_status + the inspector panel) and passes the value through. Sequence it via the `in` trigger.',
+      config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }
     }
   },
-  switch: {
-    labelKey: 'scenario.nodes.switch', defaultLabel: 'Switch', icon: 'list-tree', category: 'control',
-    staticPreview: true,
-    ports: { inputs: [{ id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'both' }] },
+  toast: {
+    labelKey: 'scenario.nodes.toast', defaultLabel: 'Toast', icon: 'bell', category: 'control',
+    ports: { inputs: [{ id: 'title', name: 'title', dataType: 'string' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [] },
     doc: {
-      summary: 'N-way branch: matches the `on` input against the case values; emits on `case-<id>` for a match, else on `default`.',
-      config: { cases: 'Array of `{ id, value }`; each gets a `case-<id>` output port.' }
-    }
-  },
-  retry: {
-    labelKey: 'scenario.nodes.retry', defaultLabel: 'Retry', icon: 'refresh', category: 'control',
-    hasErrorPort: false,
-    ports: { inputs: [{ id: 'maxAttempts', name: 'maxAttempts', dataType: 'number' }, { id: 'delay', name: 'delay', dataType: 'number' }], outputs: [{ id: 'attempt', name: 'attempt', role: 'then', flow: 'both' }, { id: 'exhausted', name: 'exhausted', role: 'else', flow: 'both' }] },
-    doc: {
-      summary: 'Re-runs the body wired off `attempt` as an ERROR-BOUNDARY scope: an unhandled error in the body (or, for an httpRequest child, a response matching `retryOnStatus` / a non-2xx when `retryOnFailure`) marks the attempt failed and re-runs it per the backoff policy, up to `maxAttempts`. Success exits via the implicit `done` port; giving up exits via `exhausted`. Wire `attempt` → the action(s) to retry.',
-      config: { maxAttempts: 'Max attempts (default 3).', backoff: 'fixed | linear | exponential.', delay: 'Base delay.', delayUnit: 'ms | s | min.', factor: 'Exponential factor (default 2).', maxDelay: 'Optional delay cap.', maxDelayUnit: 'ms | s | min.', retryOnError: 'Retry on a bubbled error (default true).', retryOnFailure: 'Retry on a non-2xx httpRequest response (default false).', retryOnStatus: 'HTTP status codes to retry on (e.g. [429, 503]).' }
+      summary: 'Emits a toast notification in the Restorm UI (renderer). The `level` drives the toast glyph + colour. Headless / CLI: no-op — the run still succeeds and `done` is emitted. Sequence it via the `in` trigger.',
+      config: { title: 'Header text (typed value; or wire `title`).', message: 'Body text below the title (typed value; or wire `message`).', level: 'info (default) | success | warning | error', duration: 'Auto-dismiss after this many SECONDS. 0 (or unset) → the toast persists until dismissed.' }
     }
   },
 
@@ -681,7 +673,7 @@ export const SCENARIO_KIND_REGISTRY = {
   math: {
     labelKey: 'scenario.nodes.math', defaultLabel: 'Math', icon: 'symbol-numeric', category: 'math',
     staticPreview: true,
-    ports: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'precision', name: 'precision', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
+    ports: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'precision', name: 'precision', dataType: 'number' }, { id: 'b', name: 'with', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
     doc: {
       summary: 'Runs a scalar op on `a` → number on `result` (complements `arithmetic`): round/floor/ceil/trunc/abs/sign/sqrt, the two-operand min/max, or the bounded clamp. A non-finite operand / negative sqrt → `error`.',
       config: { op: 'round | floor | ceil | trunc | abs | sign | sqrt | min | max | clamp', b: 'Second operand (min/max).', min: 'Lower bound (clamp).', max: 'Upper bound (clamp).', precision: 'Decimal places (round).', a: 'Inline operand when not wired.' }
@@ -689,9 +681,28 @@ export const SCENARIO_KIND_REGISTRY = {
   },
 
   // --- Algorithmie (grouped into an "Algorithmie" submenu) ---
+  if: {
+    labelKey: 'scenario.nodes.if', defaultLabel: 'If', icon: 'git-compare', category: 'algorithmie',
+    staticPreview: true,
+    ports: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'both' }, { id: 'else', name: 'else', role: 'else', flow: 'both' }] },
+    doc: {
+      summary: 'Branch: compares two operands with `operator`, routing the trigger value to `then` (true) or `else` (false). With no operands wired, falls back to the truthiness of the `in` signal.',
+      config: { operator: 'lt | lte | eq | gte | gt | ne | contains', left: 'Left operand (typed value; or wire the `left` port).', right: 'Right operand (typed value; or wire the `right` port).' }
+    }
+  },
+  switch: {
+    labelKey: 'scenario.nodes.switch', defaultLabel: 'Switch', icon: 'list-tree', category: 'algorithmie',
+    staticPreview: true,
+    ports: { inputs: [{ id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'both' }] },
+    doc: {
+      summary: 'N-way branch: matches the `on` input against the case values; emits on `case-<id>` for a match, else on `default`.',
+      config: { cases: 'Array of `{ id, value }`; each gets a `case-<id>` output port.' }
+    }
+  },
   boolean: {
     labelKey: 'scenario.nodes.boolean', defaultLabel: 'Boolean', icon: 'symbol-boolean', category: 'algorithmie',
     staticPreview: true,
+    paletteBreakBefore: true,
     ports: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean' }, { id: 'b', name: 'b', dataType: 'boolean' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'both' }] },
     doc: {
       summary: 'Boolean logic `a op b` → boolean on `result`.',
@@ -769,11 +780,57 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { op: 'extract | extractAll | test | replace | split', pattern: 'Regular-expression source.', flags: 'Flags i/m/s (g is implicit for extractAll/replace).', replacement: 'Replacement string (replace op).', value: 'Inline string when not wired.' }
     }
   },
+  random: {
+    labelKey: 'scenario.nodes.random', defaultLabel: 'Random', icon: 'wand', category: 'algorithmie',
+    staticPreview: true,
+    ports: { inputs: [{ id: 'min', name: 'min', dataType: 'number' }, { id: 'max', name: 'max', dataType: 'number' }, { id: 'seed', name: 'seed' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+    doc: {
+      summary: 'Generates a value on `result`: int/float in [min,max], string of `length`, boolean, or pick from a list. A `seed` (number or string) makes it deterministic. `pick` over an empty list → `error`. No data input.',
+      config: { op: 'int | float | string | boolean | pick', min: 'Range min (int/float).', max: 'Range max (int/float).', length: 'String length.', seed: 'Optional seed for reproducible output.', items: 'List to pick from (pick op).' }
+    }
+  },
+  retry: {
+    labelKey: 'scenario.nodes.retry', defaultLabel: 'Retry', icon: 'refresh', category: 'algorithmie',
+    hasErrorPort: false,
+    ports: { inputs: [{ id: 'maxAttempts', name: 'maxAttempts', dataType: 'number' }, { id: 'delay', name: 'delay', dataType: 'number' }], outputs: [{ id: 'attempt', name: 'attempt', role: 'then', flow: 'both' }, { id: 'exhausted', name: 'exhausted', role: 'else', flow: 'both' }] },
+    doc: {
+      summary: 'Re-runs the body wired off `attempt` as an ERROR-BOUNDARY scope: an unhandled error in the body (or, for an httpRequest child, a response matching `retryOnStatus` / a non-2xx when `retryOnFailure`) marks the attempt failed and re-runs it per the backoff policy, up to `maxAttempts`. Success exits via the implicit `done` port; giving up exits via `exhausted`. Wire `attempt` → the action(s) to retry.',
+      config: { maxAttempts: 'Max attempts (default 3).', backoff: 'fixed | linear | exponential.', delay: 'Base delay.', delayUnit: 'ms | s | min.', factor: 'Exponential factor (default 2).', maxDelay: 'Optional delay cap.', maxDelayUnit: 'ms | s | min.', retryOnError: 'Retry on a bubbled error (default true).', retryOnFailure: 'Retry on a non-2xx httpRequest response (default false).', retryOnStatus: 'HTTP status codes to retry on (e.g. [429, 503]).' }
+    }
+  },
+  assert: {
+    labelKey: 'scenario.nodes.assert', defaultLabel: 'Assert', icon: 'verified', category: 'algorithmie',
+    paletteBreakBefore: true,
+    ports: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] },
+    doc: {
+      summary: 'Asserts `actual` (vs `expected`) with `operator`, routing the trigger to `then` (pass) or `else` (fail). Beyond the shared comparators, chai-style operators: type checks, presence/emptiness, regex match, membership, deep equality and length.',
+      config: { operator: 'eq | ne | lt | lte | gt | gte | contains | isString | isNumber | isBoolean | isArray | isObject | isNull | exists | isEmpty | matchesRegex | isOneOf | deepEquals | lengthEq | lengthGt | lengthLt', a: 'Actual operand (or wire `a`).', b: 'Expected operand / pattern / list / length (binary operators).', message: 'Failure label.' }
+    }
+  },
+  throw: {
+    labelKey: 'scenario.nodes.throw', defaultLabel: 'Throw', icon: 'error', category: 'algorithmie',
+    hasDonePort: false,
+    ports: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }], outputs: [] },
+    doc: {
+      summary: 'Deliberately fails with `message` (wired or inline) — routed to the implicit `error` port, or fails the run if nothing handles it. For error branches + retry tests. No `done`/value output.',
+      config: { message: 'Failure message (typed value; or wire `message`).' }
+    }
+  },
 
   // --- Data formats (grouped into a "Data formats" submenu) ---
+  schema: {
+    labelKey: 'scenario.nodes.schema', defaultLabel: 'Schema validate', icon: 'checklist', category: 'dataFormats',
+    staticPreview: true,
+    ports: { inputs: [{ id: 'value', name: 'value' }, { id: 'schema', name: 'schema', dataType: 'string' }], outputs: [{ id: 'valid', name: 'valid', role: 'then', flow: 'both' }, { id: 'invalid', name: 'invalid', role: 'else', flow: 'both' }, { id: 'errors', name: 'errors', flow: 'both' }] },
+    doc: {
+      summary: 'Validates `value` against a JSON Schema (ajv) → routes the value to `valid` / `invalid` and emits the error list on `errors`. A malformed / missing schema → `error`.',
+      config: { schema: 'JSON Schema (a JSON string; draft-07 / 2019-09 / 2020-12).', value: 'Inline value to validate when not wired.' }
+    }
+  },
   json: {
     labelKey: 'scenario.nodes.json', defaultLabel: 'JSON', icon: 'json', category: 'dataFormats',
     staticPreview: true,
+    paletteBreakBefore: true,
     ports: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
     doc: {
       summary: 'parse → the `value` JSON string into a value (malformed JSON → `error`; an already-structured value passes through); stringify → any `value` to a JSON string on `result` (`indent>0` pretty-prints; a circular / non-serialisable value → `error`).',
@@ -837,35 +894,7 @@ export const SCENARIO_KIND_REGISTRY = {
     }
   },
 
-  // --- UX (grouped into a "UX" submenu) ---
-  toast: {
-    labelKey: 'scenario.nodes.toast', defaultLabel: 'Toast', icon: 'bell', category: 'ux',
-    ports: { inputs: [{ id: 'title', name: 'title', dataType: 'string' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [] },
-    doc: {
-      summary: 'Emits a toast notification in the Restorm UI (renderer). The `level` drives the toast glyph + colour. Headless / CLI: no-op — the run still succeeds and `done` is emitted. Sequence it via the `in` trigger.',
-      config: { title: 'Header text (typed value; or wire `title`).', message: 'Body text below the title (typed value; or wire `message`).', level: 'info (default) | success | warning | error', duration: 'Auto-dismiss after this many SECONDS. 0 (or unset) → the toast persists until dismissed.' }
-    }
-  },
-
   // --- Utilities ---
-  random: {
-    labelKey: 'scenario.nodes.random', defaultLabel: 'Random', icon: 'wand', category: 'utility',
-    staticPreview: true,
-    ports: { inputs: [{ id: 'min', name: 'min', dataType: 'number' }, { id: 'max', name: 'max', dataType: 'number' }, { id: 'seed', name: 'seed' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
-    doc: {
-      summary: 'Generates a value on `result`: int/float in [min,max], string of `length`, boolean, or pick from a list. A `seed` (number or string) makes it deterministic. `pick` over an empty list → `error`. No data input.',
-      config: { op: 'int | float | string | boolean | pick', min: 'Range min (int/float).', max: 'Range max (int/float).', length: 'String length.', seed: 'Optional seed for reproducible output.', items: 'List to pick from (pick op).' }
-    }
-  },
-  schema: {
-    labelKey: 'scenario.nodes.schema', defaultLabel: 'Schema validate', icon: 'checklist', category: 'utility',
-    staticPreview: true,
-    ports: { inputs: [{ id: 'value', name: 'value' }, { id: 'schema', name: 'schema', dataType: 'string' }], outputs: [{ id: 'valid', name: 'valid', role: 'then', flow: 'both' }, { id: 'invalid', name: 'invalid', role: 'else', flow: 'both' }, { id: 'errors', name: 'errors', flow: 'both' }] },
-    doc: {
-      summary: 'Validates `value` against a JSON Schema (ajv) → routes the value to `valid` / `invalid` and emits the error list on `errors`. A malformed / missing schema → `error`.',
-      config: { schema: 'JSON Schema (a JSON string; draft-07 / 2019-09 / 2020-12).', value: 'Inline value to validate when not wired.' }
-    }
-  },
   readFile: {
     labelKey: 'scenario.nodes.readFile', defaultLabel: 'Read file', icon: 'file', category: 'utility',
     ports: { inputs: [{ id: 'path', name: 'path', dataType: 'string' }], outputs: [{ id: 'content', name: 'content', dataType: 'string', flow: 'both' }] },
@@ -882,31 +911,6 @@ export const SCENARIO_KIND_REGISTRY = {
       config: { path: 'File path (absolute or relative to the scenario); or wire `path`.', mode: 'replace (default) | append.', content: 'Text to write (typed value; or wire `content`).' }
     }
   },
-  log: {
-    labelKey: 'scenario.nodes.log', defaultLabel: 'Log', icon: 'output', category: 'utility',
-    ports: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
-    doc: {
-      summary: 'Writes one entry to the run log (visible via get_scenario_run_status + the inspector panel) and passes the value through. Sequence it via the `in` trigger.',
-      config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }
-    }
-  },
-  assert: {
-    labelKey: 'scenario.nodes.assert', defaultLabel: 'Assert', icon: 'verified', category: 'utility',
-    ports: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] },
-    doc: {
-      summary: 'Asserts `actual` (vs `expected`) with `operator`, routing the trigger to `then` (pass) or `else` (fail). Beyond the shared comparators, chai-style operators: type checks, presence/emptiness, regex match, membership, deep equality and length.',
-      config: { operator: 'eq | ne | lt | lte | gt | gte | contains | isString | isNumber | isBoolean | isArray | isObject | isNull | exists | isEmpty | matchesRegex | isOneOf | deepEquals | lengthEq | lengthGt | lengthLt', a: 'Actual operand (or wire `a`).', b: 'Expected operand / pattern / list / length (binary operators).', message: 'Failure label.' }
-    }
-  },
-  throw: {
-    labelKey: 'scenario.nodes.throw', defaultLabel: 'Throw', icon: 'error', category: 'utility',
-    hasDonePort: false,
-    ports: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }], outputs: [] },
-    doc: {
-      summary: 'Deliberately fails with `message` (wired or inline) — routed to the implicit `error` port, or fails the run if nothing handles it. For error branches + retry tests. No `done`/value output.',
-      config: { message: 'Failure message (typed value; or wire `message`).' }
-    }
-  }
 } satisfies Record<string, KindSpec>
 
 /**
@@ -923,8 +927,3 @@ export const SCENARIO_KINDS = Object.keys(SCENARIO_KIND_REGISTRY) as [ScenarioNo
 /** Type-narrowed registry view (the `satisfies` above keeps the literal keys; this
  * exposes it typed as the exhaustive record for value-level consumers). */
 export const REGISTRY: Record<ScenarioNodeKind, KindSpec> = SCENARIO_KIND_REGISTRY
-
-/** The spec for a kind. */
-export function kindSpec(kind: ScenarioNodeKind): KindSpec {
-  return SCENARIO_KIND_REGISTRY[kind]
-}

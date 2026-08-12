@@ -201,5 +201,3 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
     </EnvironmentValuesProvider>
   )
 }
-
-export default RestormWorkbenchContainer

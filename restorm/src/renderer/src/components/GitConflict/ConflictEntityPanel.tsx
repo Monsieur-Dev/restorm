@@ -378,5 +378,3 @@ const MonacoFallback: React.FC<{ entity: FolderItem, mode: ConflictPanelMode }> 
     </div>
   )
 }
-
-export default ConflictEntityPanel

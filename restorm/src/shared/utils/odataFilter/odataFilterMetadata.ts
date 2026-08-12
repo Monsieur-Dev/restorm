@@ -15,10 +15,7 @@ import type {
   ModelDocumentation,
   PropertyDocumentation
 } from '../../types/apiDocumentation'
-import {
-  COMPARISON_OPERATORS,
-  FILTER_FUNCTIONS
-} from './odataFilterGrammar'
+import { COMPARISON_OPERATORS } from './odataFilterGrammar'
 
 /** A property + navigation suggestion for the property position. */
 export interface PropertySuggestion {
@@ -44,7 +41,7 @@ export interface ValueSuggestion {
 
 /** String-only filter functions — offered as value/leading suggestions
  * only for `Edm.String` properties. */
-export const STRING_FUNCTIONS = [
+const STRING_FUNCTIONS = [
   'contains',
   'endswith',
   'startswith',
@@ -82,7 +79,7 @@ export function resolveEntityType(
  * segment can't be resolved). The final segment of a comparison path
  * (`Customer/Name`) is a property, not a nav — callers pass only the
  * navigation portion. */
-export function resolveModelForPath(
+function resolveModelForPath(
   apiDoc: ApiDocumentation | undefined,
   rootRef: string | undefined,
   navSegments: readonly string[]
@@ -142,7 +139,7 @@ function isNavigationProperty(
 
 /** Find a property on a model by name (case-sensitive — OData property
  * names are case-sensitive). */
-export function findProperty(
+function findProperty(
   model: ModelDocumentation | undefined,
   name: string
 ): PropertyDocumentation | undefined {
@@ -170,23 +167,8 @@ export function resolvePropertyPath(
 }
 
 /** Whether a (collection-unwrapped) Edm type is the string type. */
-export function isStringType(edmType: string): boolean {
+function isStringType(edmType: string): boolean {
   return unwrapCollectionType(edmType).inner === 'Edm.String'
-}
-
-/** Whether the type is a numeric Edm primitive. */
-export function isNumericType(edmType: string): boolean {
-  const inner = unwrapCollectionType(edmType).inner
-  return (
-    inner === 'Edm.Int16' ||
-    inner === 'Edm.Int32' ||
-    inner === 'Edm.Int64' ||
-    inner === 'Edm.Byte' ||
-    inner === 'Edm.SByte' ||
-    inner === 'Edm.Decimal' ||
-    inner === 'Edm.Double' ||
-    inner === 'Edm.Single'
-  )
 }
 
 /** The applicable comparison/membership operators for a property type.
@@ -206,11 +188,6 @@ export function operatorsForType(_edmType: string, isEnum = false): string[] {
 export function functionsForType(edmType: string): string[] {
   if (isStringType(edmType)) return [...STRING_FUNCTIONS]
   return []
-}
-
-/** Whether a name is a recognised filter function (any type). */
-export function isFilterFunction(name: string): boolean {
-  return (FILTER_FUNCTIONS as readonly string[]).includes(name.toLowerCase())
 }
 
 /** Whether a name is a string-only filter function. */

@@ -293,8 +293,7 @@ Then(
     // duplicate entry) and not the same row counted twice.
     const hitAHandle = await hitA.first().elementHandle()
     const hitBHandle = await hitB.first().elementHandle()
-    const sameElement = hitAHandle !== null && hitBHandle !== null &&
-      await hitAHandle.evaluate((a, b) => a === b, hitBHandle)
+    const sameElement = await hitAHandle.evaluate((a, b) => a === b, hitBHandle)
     expect(sameElement).toBe(false)
   }
 )

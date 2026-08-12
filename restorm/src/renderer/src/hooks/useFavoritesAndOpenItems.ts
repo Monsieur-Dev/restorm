@@ -136,10 +136,16 @@ export function useFavoritesAndOpenItems(
     const item = findItemById(rootItems, id)
     if (!item) return null
     const row = folderItemToListViewItem(item, renderOptions)
-    // Strip children — both panes render flat lists.
-    const { children: _children, ...flat } = row
+    // Both panes render FLAT lists: strip the children AND the expandability
+    // that came with them. A scenario (or any container) reports
+    // `isExpandable` from its bound items, but here there are no children to
+    // reveal — so without this the row shows a disclosure chevron that
+    // expands nothing.
+    const { children: _children, isExpandable: _isExpandable, isExpanded: _isExpanded, ...flat } = row
     void _children
-    return flat
+    void _isExpandable
+    void _isExpanded
+    return { ...flat, isExpandable: false }
   }, [rootItems, renderOptions])
 
   const favoriteItems = useMemo<ListViewItemData[]>(() => {

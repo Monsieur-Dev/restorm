@@ -857,6 +857,17 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
           maxHeight: mergedOptions.fitContent ? style?.maxHeight : undefined,
           overflow: 'auto',
           position: 'relative',
+          // Reserve a gutter for the overlay scrollbar so it never sits ON TOP
+          // of the content. The scrollbars are absolutely-positioned siblings
+          // over this div's right / bottom edge; without this inset the last
+          // column of text or a trailing control renders under the thumb. Only
+          // reserved when a scrollbar is actually present (content overflows),
+          // and `border-box` keeps the `width/height: 100%` honest so children
+          // shrink into the gutter instead of overflowing. Consumers should NOT
+          // add their own scrollbar-compensation margin on top of this.
+          boxSizing: 'border-box',
+          paddingRight: showVerticalScrollbar ? mergedOptions.verticalScrollbarSize : undefined,
+          paddingBottom: showHorizontalScrollbar ? mergedOptions.horizontalScrollbarSize : undefined,
           // While the user is dragging the scrollbar thumb, the
           // mouse can wander OFF the rail and onto whatever is
           // underneath — child rows would then receive hover /
@@ -1054,4 +1065,3 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
 
 const ScrollableElement = React.memo(ScrollableElementInner);
 export { ScrollableElement };
-export default ScrollableElement;

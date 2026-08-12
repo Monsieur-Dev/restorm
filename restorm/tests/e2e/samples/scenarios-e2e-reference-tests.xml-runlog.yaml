@@ -41,8 +41,8 @@
         y: 2
 - message: ⚪ [<time>] start xml
   data:
-    op: stringify
     indent: 2
+    op: stringify
     value:
       q:
         y: 2

@@ -134,5 +134,3 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
     />
   )
 }
-
-export default RequestNodeBox

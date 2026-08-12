@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { describe, it, expect, beforeAll } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { SplitView } from './SplitView'
-import Pane from './Pane'
+import { Pane } from './Pane'
 
 /**
  * The pane header actions must stay legible at rest instead of being

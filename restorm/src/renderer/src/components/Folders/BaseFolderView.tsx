@@ -144,5 +144,3 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     </div>
   )
 }
-
-export default BaseFolderView

@@ -158,5 +158,3 @@ export const RecentActivityCard: React.FC<RecentActivityCardProps> = ({ rootItem
     </MosaicCard>
   )
 }
-
-export default RecentActivityCard

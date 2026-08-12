@@ -20,9 +20,12 @@ async function openViewMenuToMcpLogs(page: Page): Promise<void> {
     // re-click of an already-open View menu would just close it again).
     if (!(await item.isVisible())) {
       await page.keyboard.press('Escape')
-      const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
-      if (mode === 'full') {
-        await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
+      // Visibility beats mode: in overflow mode the View item can still sit
+      // among the VISIBLE bar items (only the tail overflows), so route on
+      // whether the in-bar button exists — not on the mode attribute.
+      const inBarView = page.locator('[data-testid="titlebar-menubar-item-view"]')
+      if (await inBarView.isVisible().catch(() => false)) {
+        await inBarView.click({ force: true })
       } else {
         const overflowBtn = page.locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`).first()
         await overflowBtn.click({ force: true })

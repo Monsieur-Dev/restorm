@@ -72,6 +72,7 @@
     "auth": {
       "noAuth": "无认证",
       "popoverLabel": "认证路由",
+      "openRoute": "打开身份验证路由",
       "unnamed": "未命名"
     },
     "contextMenu": {
@@ -219,7 +220,6 @@
     "new": "新建",
     "import": "导入",
     "open": "打开",
-    "openFolder": "打开文件夹",
     "recentFiles": "最近的文件",
     "favorites": "收藏",
     "close": "关闭",
@@ -227,36 +227,24 @@
     "saveAll": "全部保存",
     "saveAs": "另存为",
     "exit": "退出",
-    "selection": "选择",
-    "tools": "工具",
-    "findInCollection": "在集合中查找",
-    "addRequest": "添加请求",
-    "addRequestHttp": "HTTP 请求",
-    "addRequestGraphql": "GraphQL 请求",
-    "addRequestGrpc": "gRPC 请求",
-    "addRequestSoap": "SOAP 请求",
-    "addRequestOdata": "OData 请求",
-    "addRequestWebsocket": "WebSocket 请求",
-    "addFolder": "添加文件夹",
-    "addEnvironmentFolder": "添加环境文件夹",
-    "addVariable": "添加变量",
-    "addTag": "添加标签",
-    "expandAllFolders": "展开所有文件夹",
-    "collapseAllFolders": "折叠所有文件夹",
-    "sendActiveRequest": "发送请求",
-    "cancelActiveRequest": "取消请求",
-    "generateCodeSnippet": "生成代码片段",
-    "copyAsCurl": "复制为 cURL",
-    "exportOpenApi": "导出为 OpenAPI",
-    "clearAuthCache": "清除身份验证缓存",
-    "openLogsFolder": "打开日志文件夹",
     "mcpLogs": "MCP 日志",
+    "consoleHttp": "HTTP 控制台",
     "git": "Git",
     "gitPush": "推送",
     "gitPull": "拉取",
     "gitRefresh": "刷新",
     "gitHistory": "历史记录",
-    "gitResetToServer": "重置为服务器版本"
+    "gitResetToServer": "重置为服务器版本",
+    "scenario": "场景",
+    "create": "新建",
+    "request": "请求",
+    "server": "服务器",
+    "runSelected": "运行",
+    "cancelSelected": "取消",
+    "clone": "克隆",
+    "delete": "删除",
+    "addToFavorites": "添加到收藏",
+    "removeFromFavorites": "从收藏中移除"
   },
   "sidebar": {
     "addRequest": "添加请求",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "剪切",
+      "copy": "复制",
+      "paste": "粘贴"
     },
     "deleteConfirm": {
       "title": "确认删除",
@@ -362,7 +353,7 @@
       "docs": "文档",
       "environments": "环境",
       "notes": "笔记",
-      "customValues": "Custom variables"
+      "customValues": "自定义枚举"
     },
     "home": {
       "configureEnvs": "配置环境",
@@ -400,7 +391,7 @@
       "addEntry": "添加值",
       "label": "Label",
       "value": "Value",
-      "selectList": "选择列表"
+      "selectList": "为变量定义可复用的值列表：您选择易读的标签，请求发送关联的值。选择或创建一个枚举即可开始。"
     }
   },
   "requestTab": {
@@ -454,7 +445,11 @@
       }
     },
     "followRedirects": "跟随重定向",
-    "timeoutLabel": "超时 (毫秒)"
+    "timeoutLabel": "超时 (毫秒)",
+    "resolvedUrlPreview": {
+      "copy": "复制解析后的 URL",
+      "copied": "已复制！"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -603,6 +598,7 @@
     "disconnect": "断开连接",
     "startListening": "开始监听",
     "stopListening": "停止监听",
+    "listenFailed": "服务器启动失败",
     "routePlaceholder": "路由（可选）",
     "clientsConnected": "{{count}} 个客户端已连接",
     "notListening": "未在监听"
@@ -855,26 +851,6 @@
     "openAriaLabel": "从磁盘打开集合",
     "landmarkLabel": "欢迎"
   },
-  "save": {
-    "title": "保存选项",
-    "mode": {
-      "label": "保存模式",
-      "file": "单一文件",
-      "folder": "文件夹结构",
-      "fileDescription": "将所有内容保存到一个文件中",
-      "folderDescription": "保存为文件夹结构，每项使用单独的文件"
-    },
-    "format": {
-      "label": "格式",
-      "yamlDescription": "人类可读",
-      "jsonDescription": "标准格式",
-      "json5Description": "JSON + 注释"
-    },
-    "preview": {
-      "label": "结构预览",
-      "noDocumentation": "此来源没有可解析的文档。"
-    }
-  },
   "common": {
     "cancel": "取消",
     "save": "保存",
@@ -1058,7 +1034,9 @@
       "sourceImportFailed": "无法从源重新导入该规范。",
       "emptySpec": "从 {{url}} 获取的规范未声明任何 {{format}} 操作。应用它会清空该文件夹，因此已拒绝此次更新。",
       "formatNotDetected": "无法识别此来源的格式。",
-      "unsupportedFormat": "没有导入器支持 {{format}} 格式。"
+      "unsupportedFormat": "没有导入器支持 {{format}} 格式。",
+      "projectFormatTooNew": "此项目文件使用格式版本 {{found}}，但当前版本的 Restorm 只支持版本 {{current}}。请更新 Restorm 后再导入。",
+      "projectFormatMissing": "此文件未声明 Restorm 格式版本，因此不是 Restorm 项目文件。"
     },
     "formats": {
       "swagger": {
@@ -1165,6 +1143,9 @@
       "apiBlueprint": {
         "description": "粘贴一个 API Blueprint（.apib）文档——restorm 会将每个资源组和 transition 解析为请求文件夹，每个已记录的方法/响应对生成一个请求。",
         "trademark": "API Blueprint 最初是由 Apiary 创建的规范。"
+      },
+      "restorm": {
+        "description": "将另一个 Restorm 项目合并到当前打开的项目中——导入的每个文件夹、请求、环境和场景都会放入一个包裹文件夹，并获得全新的标识符以避免任何冲突，即使把项目导入到它自身也不例外。"
       }
     },
     "grpcReflection": {
@@ -1231,6 +1212,71 @@
       "previousMatch": "上一个匹配",
       "nextMatch": "下一个匹配",
       "close": "关闭"
+    },
+    "sections": {
+      "parameters": "参数",
+      "responses": "响应",
+      "models": "模型",
+      "enums": "枚举",
+      "polymorphism": "多态",
+      "overview": "概览",
+      "operations": "操作"
+    },
+    "table": {
+      "in": "位置",
+      "name": "名称",
+      "type": "类型",
+      "required": "必填",
+      "operation": "操作",
+      "description": "描述",
+      "example": "示例",
+      "constraints": "约束"
+    },
+    "params": {
+      "empty": "筛选的路由未声明非请求体参数。"
+    },
+    "responses": {
+      "status": "状态",
+      "schema": "架构",
+      "headers": "标头",
+      "empty": "筛选的路由未声明响应。"
+    },
+    "route": {
+      "requestBody": "请求体",
+      "responseBody": "响应体",
+      "security": "安全",
+      "externalDocs": "外部文档",
+      "examplePayload": "示例负载",
+      "operationId": "operationId",
+      "addRequest": "+ 添加请求"
+    },
+    "apiInfo": {
+      "version": "版本",
+      "sourceFormat": "源格式",
+      "from": "来自",
+      "server": "服务器",
+      "contact": "联系人",
+      "license": "许可证",
+      "termsOfService": "服务条款",
+      "externalDocs": "外部文档",
+      "tagReferences": "标签引用"
+    },
+    "sidebar": {
+      "outline": "文档大纲"
+    },
+    "legend": {
+      "requiredProperty": "必需属性",
+      "optionalProperty": "可选属性",
+      "nullableValue": "可为空的值",
+      "readOnly": "只读（由服务器设置）",
+      "deprecatedBadge": "已弃用",
+      "deprecatedDesc": "在源规范中声明为已弃用",
+      "removedBadge": "已移除",
+      "removedDesc": "在最近一次重新导入中已消失",
+      "requiredSingleRef": "必需的单一引用",
+      "optionalSingleRef": "可选的单一引用",
+      "requiredArrayRef": "必需的数组引用",
+      "optionalArrayRef": "可选的数组引用"
     }
   },
   "scenario": {
@@ -1781,8 +1827,7 @@
       "dataFormats": "数据格式",
       "encoding": "编码",
       "time": "定时",
-      "algorithmie": "算法",
-      "ux": "UX"
+      "algorithmie": "算法"
     },
     "listOp": {
       "value": "列表",
@@ -2332,9 +2377,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL 预览（解析前）",
-    "versionV2NotYet": "v2（尚不支持执行）",
-    "versionV3NotYet": "v3（尚不支持执行）",
     "operationKindEntitySet": "实体集 (GET)",
     "operationKindFunction": "函数（带内联参数的 GET）",
     "operationKindAction": "操作（带 JSON 正文的 POST）",
@@ -2353,7 +2395,8 @@
       "stopListening": "停止监听",
       "notListening": "未在监听",
       "served": "监听中 — 已服务 {{count}} 个请求",
-      "listenFailed": "无法启动模拟服务器"
+      "listenFailed": "无法启动模拟服务器",
+      "portInUse": "端口 {{port}} 已被其他应用程序占用。请关闭该应用或选择其他端口，然后重新启动服务器。"
     }
   },
   "odata": {
@@ -2373,6 +2416,7 @@
     },
     "namePlaceholder": "配置名称",
     "saveButton": "保存",
+    "updateButton": "用当前值更新",
     "storageTarget": {
       "label": "保存到项目文件 (.restorm)"
     },
@@ -2385,6 +2429,10 @@
     "loadConfirm": {
       "title": "加载配置",
       "message": "是否要加载配置\"{{name}}\"？您当前未保存的配置将会丢失。"
+    },
+    "updateConfirm": {
+      "title": "更新配置",
+      "message": "要用当前值替换配置“{{name}}”吗？"
     },
     "deleteConfirm": {
       "title": "删除配置",
@@ -2631,6 +2679,10 @@
       "title": "项目由更新版本创建",
       "message": "此文件由比您当前使用的 Restorm 更新的版本创建。请更新 Restorm 后再打开。",
       "versions": "文件格式 {{found}}；当前版本最高支持 {{current}}。"
+    },
+    "notARestormFile": {
+      "title": "这不是 Restorm 文件",
+      "message": "此文件未声明 Restorm 文件格式。它不是由 Restorm 创建的，或者被手动编辑过，因此无法打开。"
     }
   }
 }

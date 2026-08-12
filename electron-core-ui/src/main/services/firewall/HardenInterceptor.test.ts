@@ -88,6 +88,30 @@ describe('checkHostnameOnly', () => {
 		permissionService.addToBlacklist({ scheme: 'http', host: 'evil.example', port: 0 })
 		expect(checkHostnameOnly('EVIL.example', 'main-dns')).toBe('deny')
 	})
+
+	it('does NOT deny on a per-origin ban — that one is enforced at connect, where the port is known', () => {
+		// A DNS query carries no port. Denying here on a ban that only covers
+		// port 5111 would kill every other port of the same host, silently.
+		permissionService.addToBlacklist({ scheme: 'http', host: 'localhost', port: 5111 })
+		expect(checkHostnameOnly('localhost', 'main-dns')).toBe('allow')
+	})
+
+	it('denies a wildcard-port ban through the subdomain glob', () => {
+		permissionService.addToBlacklist({ scheme: 'https', host: '*.evil.example', port: 0 })
+		expect(checkHostnameOnly('api.evil.example', 'main-dns')).toBe('deny')
+		// one level only, and the bare domain is not covered
+		expect(checkHostnameOnly('a.b.evil.example', 'main-dns')).toBe('allow')
+		expect(checkHostnameOnly('evil.example', 'main-dns')).toBe('allow')
+	})
+
+	it('lets an explicitly bypassed call resolve even under a wildcard ban', async () => {
+		permissionService.addToBlacklist({ scheme: 'http', host: 'evil.example', port: 0 })
+		expect(checkHostnameOnly('evil.example', 'main-dns')).toBe('deny')
+		await withFirewallBypass(() => {
+			expect(checkHostnameOnly('evil.example', 'main-dns')).toBe('allow')
+			return Promise.resolve()
+		})
+	})
 })
 
 describe('installHardenInterceptor — idempotency', () => {

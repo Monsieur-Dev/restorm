@@ -241,3 +241,48 @@ Feature: HTTP/REST execution end-to-end
     And I click Send
     Then the response status is "200"
     And the activity beam has stopped on the tab badge and the sidebar badge
+
+  # The value that reaches the socket is the only assertion that cannot be
+  # argued with, so the three candidate values answer with three DIFFERENT
+  # status codes: 201 for the row that must win, 418 for the earlier row with
+  # the same key, 404 for the parent value the sub-environment overrides. A
+  # failure therefore names which rule broke rather than merely that one did.
+  #
+  # The parent row and the first sub-environment row are EXPRESSIONS while the
+  # winning row is a plain string. That asymmetry is the defect: it is what an
+  # imported variable plus a hand-typed override actually look like, and a
+  # fixture where every row is a string passes even with the bug present.
+  Scenario: The last enabled row of the active sub-environment reaches the wire
+    Given the sample environment's "util" is the expression "http://localhost:8082/status/404"
+    And a sub-environment "sub" of the sample environment
+    And a request "Override probe" whose URL is "{{util}}"
+    When I open the environment folder tab via MCP
+    And I select the "sub" environment in the env-folder sidebar
+    And I add an environment variable row "util" with value "http://localhost:8082/status/418"
+    And I switch the last environment variable row to Expression
+    And I add an environment variable row "util" with value "http://localhost:8082/status/201"
+    Then the context variables table resolves "util" to "http://localhost:8082/status/201"
+    When I open the "Override probe" request tab via MCP
+    And I select the "sub" environment on the active request tab
+    Then the resolved URL on the request tab is "http://localhost:8082/status/201"
+    When I click Send
+    Then the response status is "201"
+    And the URL actually sent was "http://localhost:8082/status/201"
+
+  Scenario: Disabling the winning row hands the key back to the row above it
+    Given the sample environment's "util" is the expression "http://localhost:8082/status/404"
+    And a sub-environment "sub" of the sample environment
+    And a request "Override probe" whose URL is "{{util}}"
+    When I open the environment folder tab via MCP
+    And I select the "sub" environment in the env-folder sidebar
+    And I add an environment variable row "util" with value "http://localhost:8082/status/418"
+    And I switch the last environment variable row to Expression
+    And I add an environment variable row "util" with value "http://localhost:8082/status/201"
+    And I disable the last environment variable row
+    Then the context variables table resolves "util" to "http://localhost:8082/status/418"
+    When I open the "Override probe" request tab via MCP
+    And I select the "sub" environment on the active request tab
+    Then the resolved URL on the request tab is "http://localhost:8082/status/418"
+    When I click Send
+    Then the response status is "418"
+    And the URL actually sent was "http://localhost:8082/status/418"

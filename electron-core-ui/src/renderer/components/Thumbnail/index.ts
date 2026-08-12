@@ -1,4 +1,4 @@
-export { Thumbnail, default } from './Thumbnail'
+export { Thumbnail } from './Thumbnail'
 export type {
   ThumbnailProps,
   ThumbnailMedia,

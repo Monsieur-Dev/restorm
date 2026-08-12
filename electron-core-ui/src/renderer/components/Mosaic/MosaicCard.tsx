@@ -78,5 +78,3 @@ export const MosaicCard: React.FC<MosaicCardProps> = ({
     </article>
   )
 }
-
-export default MosaicCard

@@ -25,6 +25,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -49,7 +52,8 @@ import {
   type Tab
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
-import type { ODataRequest, ODataQueryOptions, ODataVersion, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
+import type { ODataRequest, ODataVersion, ODataOperationKind, ODataBatchFormat, ODataBatchSubRequestSpec, ODataOperationParameterSpec, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { ODataBatchEditor } from './ODataBatchEditor'
 import { ODataFilterEditor } from './ODataFilterEditor'
@@ -73,11 +77,6 @@ import { updateReactiveProperty } from './requestTabViewUtils'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { toasterService } from 'electron-core-ui/renderer'
-import {
-  serializeODataQueryOptions,
-  buildODataUrl,
-  keyValuesToPairs
-} from '../../../../shared/utils/odataQuery'
 import { normalizeODataResponse, detectODataVersionMismatch } from '../../../../shared/utils/odataResponse'
 import { extractNavigationLinks } from '../../../../shared/utils/odataNavigationLinks'
 import {
@@ -117,17 +116,6 @@ const rowStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap:
 const labelStyle: CSSProperties = { fontSize: 12, color: 'var(--descriptionForeground)' }
 const numericRowStyle: CSSProperties = { display: 'flex', gap: 16, alignItems: 'flex-start' }
 const numericItemStyle: CSSProperties = { flex: 1, minWidth: 120 }
-const previewRowStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }
-const previewValueStyle: CSSProperties = {
-  fontFamily: 'var(--font-family-mono)',
-  fontSize: 12,
-  padding: '6px 8px',
-  background: 'var(--input-background)',
-  border: '1px solid var(--input-border)',
-  borderRadius: 4,
-  wordBreak: 'break-all',
-  userSelect: 'text'
-}
 const fullHeightBoxStyle: CSSProperties = { height: '100%', boxSizing: 'border-box' }
 const editorContainerStyle: CSSProperties = {
   height: '100%',
@@ -261,12 +249,17 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   // with no imported spec → autocomplete degrades to no suggestions.
   const { apiDocumentation } = useApiDocumentationFromRequest(request)
 
+  // Every version is executable: the URL composer switches to
+  // `$inlinecount=allpages` outside the v4 family and the response
+  // normaliser unwraps the v2/v3 `{ d: ... }` envelope (e2e-covered against
+  // the dedicated v2 mock). The old "execution not yet supported" labels
+  // were stale leftovers from before that engine landed.
   const odataVersionOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: 'v4' },
     { text: 'v4.01' },
-    { text: t('odataRequestTab.versionV3NotYet', 'v3 (execution not yet supported)') },
-    { text: t('odataRequestTab.versionV2NotYet', 'v2 (execution not yet supported)') }
-  ], [t])
+    { text: 'v3' },
+    { text: 'v2' }
+  ], [])
 
   const operationKindOptions = useMemo<ISelectOptionItem[]>(() => [
     { text: t('odataRequestTab.operationKindEntitySet', 'Entity set (GET)') },
@@ -420,6 +413,11 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   // directly — consistent with the pattern used in HTTPRequestTabView.
   const setUrl = useCallback((next: string) => {
     updateReactiveProperty(request, 'url', next)
+    // The proxy write alone doesn't re-render this component, so the
+    // `request.url` effect never re-fires — the resolver keeps composing
+    // the STALE url and the resolved-URL preview freezes while the user
+    // types. Same forced render as setVersion / setOperationKind.
+    forceProxyRender((n) => n + 1)
   }, [request])
 
   const setVersion = useCallback((next: string) => {
@@ -563,6 +561,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   const setCount = useCallback((next: boolean) => {
     flushAllPendingProxyWrites()
     updateReactiveProperty(request, 'queryOptions', { ...request.queryOptions, count: next })
+    // Text fields re-render through their local state; this toggle has
+    // none, so without a forced render the queryOptions effect never
+    // re-fires and $count stays inert until some OTHER field changes.
+    forceProxyRender((n) => n + 1)
   }, [request, flushAllPendingProxyWrites])
 
   const setExpand = useCallback((next: string) => {
@@ -604,37 +606,20 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
   // it tracks every keystroke without waiting for the proxy write to
   // settle (see `scheduleProxyWrite`). Handlebars templates stay
   // literal — resolution happens in the main process at send time.
-  const urlPreview = useMemo(() => {
-    const liveOptions: ODataQueryOptions = {
-      ...request.queryOptions,
-      ...(filterText !== '' && { filter: filterText }),
-      ...(selectText !== '' && { select: selectText.split(',').map((s) => s.trim()).filter((s) => s !== '') }),
-      ...(topText !== '' && { top: topText }),
-      ...(skipText !== '' && { skip: skipText }),
-      ...(expandText !== '' && { expand: expandText }),
-      ...(orderbyText !== '' && { orderby: orderbyText }),
-      ...(searchText !== '' && { search: searchText }),
-      ...(formatText !== '' && { format: formatText }),
-      ...(applyText !== '' && { apply: applyText })
-    }
-    const systemPairs = serializeODataQueryOptions(liveOptions, request.odataVersion)
-    const extraPairs = keyValuesToPairs(request.params)
-    return buildODataUrl(request.url, systemPairs, extraPairs)
-  }, [
-    request.url,
-    request.odataVersion,
-    request.queryOptions,
-    request.params,
-    filterText,
-    selectText,
-    topText,
-    skipText,
-    expandText,
-    orderbyText,
-    searchText,
-    formatText,
-    applyText
-  ])
+
+  // Resolved-URL preview: the main process resolves base + OData system
+  // options + extra params (URLResolver appends them) and pushes updates.
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  useEffect(() => {
+    const requestId = request.id
+    const unsub = window.restorm?.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    return () => { unsub?.() }
+  }, [request.id])
 
   // Register request with ContextService on mount, unregister on
   // unmount. `headers` and `params` feed through refs so the effect
@@ -950,7 +935,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     return `localhost:${port}/${rootPart.replace(/^\/+/, '')}`
   }, [])
   const setServerPort = useCallback((p: string): void => {
-    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoot))
+    setUrl(composeServerUrl(p, serverRoot))
   }, [composeServerUrl, serverRoot, setUrl])
   const setServerRoot = useCallback((p: string): void => {
     setUrl(composeServerUrl(serverPort, p))
@@ -981,16 +966,31 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     void window.restorm?.odata.listen(requestId)
       .then((res) => {
         if (res.error) {
-          toasterService.push('app', { title: t('odata.server.listenFailed', 'OData mock server failed to start'), body: res.error, durationMs: 10000 })
+          pushServerListenErrorToast(t, t('odata.server.listenFailed', 'OData mock server failed to start'), res.error, serverPort)
           logger.error('OData mock server failed to listen', { error: res.error })
         }
       })
       .catch((err: unknown) => { logger.error('OData mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, conflictMode, t])
+  }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.odata.stop(request.id)
   }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE one.
+  const serverMenuOpsRef = useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[] | null>(() => {
+    if (!isServer) return null
+    return [
+      isListening
+        ? { id: 'server-stop', label: t('odata.server.stopListening', 'Stop listening'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+        : { id: 'server-listen', label: t('odata.server.startListening', 'Start listening'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+    ]
+  }, [isServer, isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab && isServer, serverMenuItems)
 
   // Track listening state + served count for the hosted mock service.
   // Skipped entirely in conflict mode (see `conflictSafeLiveState.ts`) — a
@@ -1018,23 +1018,24 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     <div data-testid="odata-request-url-section-host">
       <div style={urlRowStyle} data-testid="odata-server-url-section">
         <span style={labelStyle}>localhost:</span>
-        <div style={serverPortWrapperStyle}>
-          <InputBox
+        <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+          <RestormVariableInputBox
             value={serverPort}
             onChange={setServerPort}
-            options={{ placeholder: '8081' }}
+            variables={urlVariables}
+            helpers={handlebarsHelpers}
+            placeholder="8081"
             data-testid="odata-server-port"
-            disabled={isListening}
           />
         </div>
         <span style={labelStyle}>/</span>
-        <div style={urlInputWrapperStyle}>
-          <InputBox
+        <div style={{ ...urlInputWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+          <RestormVariableInputBox
             value={serverRoot}
             onChange={setServerRoot}
-            options={{ placeholder: 'odata' }}
+            variables={urlVariables}
+            helpers={handlebarsHelpers}
             data-testid="odata-server-root"
-            disabled={isListening}
           />
         </div>
         <div style={sendButtonWrapperStyle}>
@@ -1055,6 +1056,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
           )}
         </div>
       </div>
+      <ResolvedUrlPreview value={resolvedUrl} />
     </div>
   )
 
@@ -1158,6 +1160,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         )}
       </div>
     </div>
+    <ResolvedUrlPreview value={resolvedUrl} />
     </div>
   )
 
@@ -1425,10 +1428,6 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         />
       </div>
 
-      <div style={previewRowStyle} data-testid="odata-request-url-preview">
-        <span style={labelStyle}>{t('odataRequestTab.urlPreview', 'URL preview (pre-resolution)')}</span>
-        <div style={previewValueStyle}>{urlPreview}</div>
-      </div>
     </div>
     </ScrollableElement>
   )

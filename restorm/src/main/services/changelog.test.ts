@@ -99,8 +99,8 @@ describe('localized changelogs', () => {
       const md = readFileSync(join(dir, f), 'utf8')
       // The updater renders the span since the previously-run version; every
       // locale must expose the newest release as a parseable `## vX.Y.Z` section.
-      const out = parseChangelogSince(md, '0.1.16', '0.1.17')
-      expect(out, `${f}: v0.1.17 section`).toContain('## v0.1.17')
+      const out = parseChangelogSince(md, '0.0.0', '1.0.0')
+      expect(out, `${f}: v1.0.0 section`).toContain('## v1.0.0')
       expect(out.trim().length, `${f}: non-empty notes`).toBeGreaterThan(0)
     }
   })

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, type CSSProperties } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -9,7 +9,6 @@ import {
   SplitView,
   Pane,
   ControlGroup,
-  toasterService,
   logger,
   type ISelectData
 } from 'electron-core-ui/renderer'
@@ -19,8 +18,15 @@ import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { updateReactiveProperty } from './requestTabViewUtils'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { useIsGrpcServerListening } from '../../services/grpcServerListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 
@@ -72,12 +78,29 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     const authority = stripped.split('/')[0] ?? ''
     return authority.split(':')[1] ?? ''
   }, [url])
+  const envVariables = useEnvVariables(request.id)
+  // Resolved-address preview: the main process resolves the request's URL
+  // (Handlebars substituted) and pushes updates; the fetch covers the value
+  // already cached before this tab mounted.
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  useEffect(() => {
+    const requestId = request.id
+    const unsub = window.restorm?.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    return () => { unsub?.() }
+  }, [request.id])
+
+  const handlebarsHelpers = useHandlebarsHelpers()
   const setUrl = useCallback((value: string): void => {
     setUrlState(value)
     updateReactiveProperty(request, 'url', value)
   }, [request])
   const setServerPort = useCallback((p: string): void => {
-    setUrl(`localhost:${p.replace(/[^0-9]/g, '')}`)
+    setUrl(`localhost:${p}`)
   }, [setUrl])
 
   const setProtoContent = useCallback((value: string): void => {
@@ -128,7 +151,7 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     void window.restorm?.grpc.listen(request.id)
       .then((res) => {
         if (res.error) {
-          toasterService.push('app', { title: t('grpc.server.listenFailed', 'gRPC server failed to start'), body: res.error, durationMs: 10000 })
+          pushServerListenErrorToast(t, t('grpc.server.listenFailed', 'gRPC server failed to start'), res.error)
           logger.error('gRPC mock server failed to listen', { error: res.error })
         }
       })
@@ -138,6 +161,18 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
   const handleStop = useCallback((): void => {
     void window.restorm?.grpc.stopServer(request.id)
   }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE one.
+  const serverMenuOpsRef = React.useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[]>(() => [
+    isListening
+      ? { id: 'server-stop', label: t('grpc.server.stopListening', 'Stop server'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+      : { id: 'server-listen', label: t('grpc.server.startListening', 'Start server'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+  ], [isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab, serverMenuItems)
 
   // Track served-count updates for the banner. Skipped entirely in
   // conflict mode (see `conflictSafeLiveState.ts`) — no live subscription
@@ -295,15 +330,17 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
   )
 
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="grpc-server-url-section">
       <span style={serverHostLabelStyle}>localhost:</span>
-      <div style={serverPortWrapperStyle}>
-        <InputBox
+      <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+        <RestormVariableInputBox
           value={serverPort}
           onChange={setServerPort}
-          options={{ placeholder: '50051' }}
+          variables={envVariables}
+          helpers={handlebarsHelpers}
+          placeholder="50051"
           data-testid="grpc-server-port-input"
-          disabled={isListening}
         />
       </div>
       <div style={{ flex: 1 }} />
@@ -331,6 +368,8 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
       </BeamWrap>
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   // The response panel shows the live listening state + served count (a mock
@@ -380,5 +419,3 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
     />
   )
 }
-
-export default GrpcServerTabView

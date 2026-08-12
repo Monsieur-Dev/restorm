@@ -50,5 +50,3 @@ export const HeaderHoverTooltip: React.FC<HeaderHoverTooltipProps> = ({
     </span>
   )
 }
-
-export default HeaderHoverTooltip

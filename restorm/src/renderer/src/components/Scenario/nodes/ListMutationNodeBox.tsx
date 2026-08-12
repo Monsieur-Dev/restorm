@@ -243,5 +243,3 @@ export const ListMutationNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ 
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
-
-export default ListMutationNodeBox

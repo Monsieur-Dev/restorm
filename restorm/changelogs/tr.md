@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: AppImage artık güvenilir şekilde başlıyor ve takılmadan güncellemeleri uyguluyor; güçlendirilmiş sandbox'a sahip dağıtımlar dahil.
-- macOS: Intel sürümleri artık Apple Silicon'ın yanı sıra kullanılabiliyor.
+**Restorm 1.0 — local-first API istemcisi yayında.**
 
-## v0.1.17
+Restorm, tüm önemli protokollerde API'leri test etmek ve çalıştırmak için hızlı, önce çevrimdışı çalışan bir masaüstü istemcisidir.
 
-- Sürüm notları artık kendi dilinizde gösteriliyor.
-- Linux, Windows ve macOS masaüstü uygulamaları: yükleyici artık Restorm'un simgesini, adını ve ayrıntılarını gösteriyor ve uygulama temanızla açılıyor.
+- **Protokoller**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Senaryolar**: istekleri görsel olarak zincirleyin, dallandırın/döngüye alın, değerleri çıkarıp yeniden kullanın, CI'da arayüzsüz çalıştırın.
+- **Ortamlar ve değişkenler**: her yerde `{{handlebars}}`, türlü gizli değerler, klasör başına ortamlar.
+- **İçe/Dışa Aktarma**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, kod dışa aktarımı.
+- **Git-yerel projeler**: `.restorm` projeniz sıradan bir dosyadır — sürümleyin, karşılaştırın ve çakışmaları uygulama içinde çözün.
+- **Local-first ve özel**: her şey kendi makinenizde çalışır; giden bir güvenlik duvarı her dış çağrıyı denetler.
+- **Çapraz platform**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Arka planda sessiz otomatik güncelleme: Restorm başlangıçta ve düzenli olarak güncellemeleri denetler, arka planda indirir ve bir sonraki yeniden başlatmada yükler. Her güncellemeden sonra bir „Yenilikler“ notu gösterilir.
-- Manuel „Güncellemeleri denetle“ düğmesi ve Ayarlar'da otomatik güncelleme anahtarı.
+Ücretsiz Community sürümü, ekipler için Pro ve Enterprise ile.

@@ -39,6 +39,7 @@ import {
 // so the path inherits the current text colour via `fill="currentColor"`,
 // which lets the same asset render dark on a light theme and light
 // on a dark theme without shipping per-theme files.
+import restormSvgRaw from '../../../../../assets/imgs/import-sources/restorm.svg?raw'
 import postmanSvgRaw from '../../../../../assets/imgs/import-sources/postman.svg?raw'
 import insomniaSvgRaw from '../../../../../assets/imgs/import-sources/insomnia.svg?raw'
 import brunoSvgRaw from '../../../../../assets/imgs/import-sources/bruno.svg?raw'
@@ -190,6 +191,14 @@ interface ImportFormat {
 }
 
 const IMPORT_FORMATS: readonly ImportFormat[] = [
+  {
+    id: 'restorm',
+    title: 'Restorm',
+    logoSrc: null,
+    inlineSvg: restormSvgRaw,
+    descriptionKey: 'import.formats.restorm.description',
+    isPro: false
+  },
   {
     id: 'swagger',
     title: 'Swagger',

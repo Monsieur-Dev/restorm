@@ -50,5 +50,3 @@ export const ResponseHistoryModal: React.FC<ResponseHistoryModalProps> = ({
     </Modal>
   )
 }
-
-export default ResponseHistoryModal

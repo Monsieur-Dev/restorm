@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, useLayoutEffect, useMemo } from 'react'
 import './menubar.css'
-import MenuBarItem from './MenuBarItem'
-import MenuItem from './MenuItem'
+import { MenuBarItem } from './MenuBarItem'
+import { MenuItem } from './MenuItem'
 import { MenuBarProps, MenuBarState, MenuBarLayoutMode } from './types'
 import { computeMenuBarLayout } from './computeMenuBarLayout'
 import { listMenuItems, focusSiblingMenuItem } from './focusSiblingMenuItem'
@@ -564,4 +564,4 @@ const MenuBar: React.FC<MenuBarProps> = ({
 // renderer import cycle). Also improves React DevTools output.
 MenuBar.displayName = 'MenuBar'
 
-export default MenuBar
+export { MenuBar }

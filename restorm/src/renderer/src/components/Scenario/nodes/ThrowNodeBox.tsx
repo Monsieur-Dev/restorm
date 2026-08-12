@@ -46,5 +46,3 @@ export const ThrowNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   const right: ScenarioNodeCell[] = []
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
-
-export default ThrowNodeBox

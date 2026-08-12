@@ -60,11 +60,20 @@ export function normalizeValueType(input: unknown): ValueType {
         return new DateTimeValue(d, typeof plain.format === 'string' ? plain.format : 'yyyy-MM-dd HH:mm:ss')
       }
       case 'secret': {
-        const p = plain as { source?: unknown; params?: unknown }
-        return new SecretValue(
+        const p = plain as { source?: unknown; params?: unknown; resolved?: unknown }
+        const secret = new SecretValue(
           typeof p.source === 'string' ? p.source : '',
           p.params && typeof p.params === 'object' ? (p.params as Record<string, unknown>) : {}
         )
+        // `resolved` is never persisted (toJSON strips it) but it IS present
+        // in memory: the sidecar loader stamps the `.restorm.env` plaintext
+        // onto the plain POJO BEFORE this rehydration runs. Dropping it here
+        // would blank every sidecar-backed secret at open — and the next
+        // save would then overwrite the sidecar entry with "".
+        if (typeof p.resolved === 'string' && p.resolved.length > 0) {
+          secret.resolved = p.resolved
+        }
+        return secret
       }
       case 'expression':
         return new ExpressionValue(typeof plain.value === 'string' ? plain.value : '')

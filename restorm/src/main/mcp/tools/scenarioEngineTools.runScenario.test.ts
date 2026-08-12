@@ -30,7 +30,9 @@ vi.mock('../../services', () => ({
   scenarioUsageService: { recordRun: (...args: unknown[]): void => { recordRunMock(...args) } }
 }))
 vi.mock('../../../shared/scenarioValidation', () => ({
-  validateScenarioModel: () => new Map()
+  validateScenarioModel: () => new Map(),
+  findOrphanScenarioEdges: () => [],
+  describeOrphanScenarioEdge: () => ''
 }))
 
 /** Minimal MCP host that captures registered handlers so a test can invoke

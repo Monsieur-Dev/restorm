@@ -70,15 +70,6 @@ interface WindowFileApi {
     onFileSaveSucceeded: (
       callback: (payload: { path: string | null }) => void
     ) => () => void
-    saveUnit: (entry: {
-      runtimeId: string
-      content: unknown
-      absolutePath: string
-      format: 'json' | 'json5' | 'yaml'
-    }) => Promise<boolean>
-    saveUnitsBatch: (
-      entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
-    ) => Promise<{ runtimeId: string; success: boolean }[]>
   }
 }
 
@@ -547,38 +538,6 @@ export const revertSaveUnit = async (runtimeId: string): Promise<void> => {
   const api = getApi()
   if (!api) return
   await api.revertSaveUnit(runtimeId)
-}
-
-/**
- * Persist a single save unit to disk atomically. Commits the unit in
- * the registry on success — dirty state clears and any draft file is
- * deleted via the registry event bridge.
- *
- * The caller supplies the absolute target path because only the
- * renderer knows the tree's on-disk layout for each unit.
- */
-export const saveUnitToDisk = async (entry: {
-  runtimeId: string
-  content: unknown
-  absolutePath: string
-  format: 'json' | 'json5' | 'yaml'
-}): Promise<boolean> => {
-  const api = getApi()
-  if (!api) return false
-  return api.saveUnit(entry)
-}
-
-/**
- * Persist a batch of save units in a single IPC round trip. Per-unit
- * failures do not short-circuit the batch — the returned array shows
- * each outcome individually.
- */
-export const saveUnitsToDiskBatch = async (
-  entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
-): Promise<{ runtimeId: string; success: boolean }[]> => {
-  const api = getApi()
-  if (!api) return []
-  return api.saveUnitsBatch(entries)
 }
 
 /**

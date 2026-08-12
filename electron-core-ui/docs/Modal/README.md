@@ -57,6 +57,19 @@ export interface ModalProps {
    */
   scopeToSelector?: string
   /**
+   * `data-testid` of the button (inside the dialog) that a plain Enter
+   * keypress triggers — the dialog's default action. See "Keyboard
+   * handling" below.
+   */
+  enterActionTestId?: string
+  /**
+   * `data-testid` of the element focused on open, instead of the default
+   * first-focusable-in-DOM-order (the header close button). Lets a dialog
+   * whose entry point is a form field open ready to type. Falls back to the
+   * default when nothing matches. Only meaningful with `trapFocus`.
+   */
+  initialFocusTestId?: string
+  /**
    * Move focus into the dialog on open, trap Tab inside it, and restore
    * focus to the previously-focused element on close. Defaults to `true`.
    * Set to `false` for a maximize-style wrapper around pre-existing content
@@ -70,6 +83,15 @@ export interface ModalProps {
 - Keyboard handling:
   - When `isOpen` is `true`, a `keydown` listener is attached to `window`.
   - Pressing `Escape` invokes `onClose()`.
+  - With `enterActionTestId` set, a plain `Enter` pressed inside the dialog clicks the designated button — the dialog's **default action**, à la OS dialogs. Without it, Enter merely activates whatever holds focus (on open that is the first focusable, typically a Cancel button — so Enter dismissed a fresh confirm dialog without doing the action). Guards: focus in a multiline surface (`<textarea>`, contenteditable, Monaco) keeps its native Enter; modified Enter (Shift/Ctrl/Alt/Meta) is never intercepted; a disabled designated button is not clicked.
+
+```tsx
+<Modal title="Delete item" isOpen={open} onClose={cancel} size="dialog" enterActionTestId="confirm-delete-ok">
+  <p>Really delete?</p>
+  <Button data-testid="confirm-delete-cancel" secondary onClick={cancel}>Cancel</Button>
+  <Button data-testid="confirm-delete-ok" onClick={doDelete}>Delete</Button>
+</Modal>
+```
 - `onClose` vs `onClosed`: `onClose` fires when the user *requests* a close (start of the fade-out); `onClosed` fires after the fade-out animation completes and the content has unmounted. Most consumers only need `onClose`.
 
 ## Focus management

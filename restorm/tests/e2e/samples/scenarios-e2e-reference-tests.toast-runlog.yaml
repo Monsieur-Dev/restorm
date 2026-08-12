@@ -1,38 +1,38 @@
 - message: 🔵 [<time>] ▶ Toast
 - message: ⚪ [<time>] start toast
   data:
-    title: Info
+    level: info
     message: Scenario started
-    level: info
+    title: Info
 - message: ⚪ [<time>] done toast
 - message: ⚪ [<time>] start toast
   data:
-    title: Success
-    message: Step completed
-    level: success
     duration: 5
+    level: success
+    message: Step completed
+    title: Success
     in: true
 - message: ⚪ [<time>] done toast
 - message: ⚪ [<time>] start toast
   data:
-    title: Warning
-    message: Check your config
     level: warning
+    message: Check your config
+    title: Warning
     in: true
 - message: ⚪ [<time>] done toast
 - message: ⚪ [<time>] start toast
   data:
-    title: Error
-    message: Something failed
     level: error
+    message: Something failed
+    title: Error
     in: true
 - message: ⚪ [<time>] done toast
 - message: ⚪ [<time>] start toast
   data:
-    title: Persistent
-    message: Stays until dismissed
-    level: info
     duration: 0
+    level: info
+    message: Stays until dismissed
+    title: Persistent
     in: true
 - message: ⚪ [<time>] done toast
 - message: 🔵 [<time>] ■ Toast

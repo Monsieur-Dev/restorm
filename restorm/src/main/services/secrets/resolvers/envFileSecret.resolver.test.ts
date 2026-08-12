@@ -1,7 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { mkdtempSync, rmSync, readFileSync, existsSync } from 'fs'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { mkdtempSync, rmSync, readFileSync, existsSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
+// Partial ECUI mock: the single-file branch asks FileService for the open
+// project path; booting the REAL service would drag electron.app into this
+// bare harness. Everything else passes through untouched.
+const mockProjectPathRef: { current: string | null } = { current: null }
+vi.mock('electron-core-ui', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getFileService: () => ({ getFilePath: () => mockProjectPathRef.current })
+}))
+
 import { envFileSecretResolver } from './envFileSecret.resolver'
 import { registerBuiltinSources, getResolver } from '../mainSourceRegistry'
 import { valueSourceRegistry } from '../../../../shared/secrets/valueSourceRegistry'
@@ -61,7 +70,24 @@ describe('envFileSecretResolver', () => {
     // contains the unstamped secret, even when the key was already computed.
     await expect(envFileSecretResolver.read({}, ctx)).resolves.toBe('')
     await expect(envFileSecretResolver.read({ key: '', folderPath: '' }, ctx)).resolves.toBe('')
+    // With a key but no folderPath, the resolver now derives the sidecar from
+    // the OPEN single-file project; with no FileService in this bare harness
+    // it still resolves to the masked empty state.
     await expect(envFileSecretResolver.read({ key: 'C/R/headers/Auth', folderPath: '' }, ctx)).resolves.toBe('')
+  })
+
+  it('reads the OPEN project sidecar in single-file mode (no folderPath stamped)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'restorm-envfile-'))
+    try {
+      const projectPath = join(dir, 'proj.restorm')
+      writeFileSync(`${projectPath}.env`, 'EnvF/Dev/secret="s3cr3t"\n', 'utf-8')
+      mockProjectPathRef.current = projectPath
+      await expect(envFileSecretResolver.read({ key: 'EnvF/Dev/secret', folderPath: '' }, ctx)).resolves.toBe('s3cr3t')
+      await expect(envFileSecretResolver.read({ key: 'EnvF/Dev/absent', folderPath: '' }, ctx)).resolves.toBe('')
+    } finally {
+      mockProjectPathRef.current = null
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 })
 

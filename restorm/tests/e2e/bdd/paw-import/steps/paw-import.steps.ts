@@ -1,5 +1,5 @@
+import { materializeTextFixture } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
-import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 import type { Page, Locator } from '@playwright/test'
 import {
@@ -12,7 +12,7 @@ import {
 // Dedicated e2e sample (not the unit-test fixture): a single request under a
 // single folder, no dynamic values, so the live-run scenario has nothing to
 // confound it — dynamic-value mapping is already exhaustively unit-tested.
-const FIXTURE = resolve(__dirname, '../../../samples/paw-petstore-e2e.json')
+const FIXTURE_SOURCE = resolve(__dirname, '../../../samples/paw-petstore-e2e.json')
 const SINGLE_FILE = join(PAW_IMPORT_TEMP_DIR, 'paw-import-test.restorm')
 
 const SEND_BTN = '[data-testid="http-request-send-button"]:visible'
@@ -57,9 +57,9 @@ Given('a new single-file YAML collection for Paw import', async ({ launchApp }) 
   await page.waitForTimeout(500)
 })
 
-When('I import the Paw sample export', async () => {
+When('I import the Paw sample export', async ({ services }) => {
+  const FIXTURE = materializeTextFixture(FIXTURE_SOURCE, join(PAW_IMPORT_TEMP_DIR, 'paw-petstore-e2e.json'), services)
   const p = requirePage()
-  expect(existsSync(FIXTURE), `fixture must exist: ${FIXTURE}`).toBe(true)
 
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')

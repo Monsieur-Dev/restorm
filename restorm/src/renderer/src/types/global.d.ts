@@ -1,6 +1,7 @@
 import type { ThemeInfo, ThemeDefinition, ThemeVariables } from 'electron-core-ui/types'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from 'electron-core-ui/types'
 import type { PersistenceFormat } from 'electron-core-ui/main'
+import type { AppIconMenuLabels, AppIconAction } from 'electron-core-ui/types'
 import type {
   GitStatus,
   GitCommitResult,
@@ -71,6 +72,15 @@ declare global {
       }
       file: {
         onAutoSaveTrigger: (callback: () => void) => () => void
+      }
+      /**
+       * OS application-icon menu (the Dock menu on macOS). Main builds the
+       * entries from the file state; the renderer only names the static ones,
+       * being the process that holds every shipped locale.
+       */
+      appIconMenu: {
+        setLabels: (labels: AppIconMenuLabels) => void
+        onInvoke: (callback: (action: AppIconAction) => void) => () => void
       }
       firewall: {
         onRecord: (cb: (record: unknown) => void) => () => void
@@ -176,10 +186,7 @@ declare global {
       getEditorFile: () => Promise<{ title: string; content?: string } | undefined>
       file: {
         saveAsFile: (data: unknown, format: PersistenceFormat) => Promise<SaveResult>
-        saveAsFolder: (data: unknown, format: PersistenceFormat, targetPath?: string) => Promise<SaveResult>
-        openFolder: () => Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
-        showFolderDialog: () => Promise<{ canceled: boolean; filePath?: string }>
-        openPath: (path: string) => Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
+        openPath: (path: string) => Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }>
         revealInFolder: (path: string) => Promise<{ success: boolean; error?: string }>
         clearDrafts: () => Promise<{ success: boolean; error?: string }>
         getPathForFile: (file: File) => string
@@ -190,6 +197,7 @@ declare global {
         invalidate: (args: { source: string; params: Record<string, unknown>; scopeId?: string }) => Promise<{ success: boolean }>
         resolve: (args: { source: string; params: Record<string, unknown> }) => Promise<{ value?: string; error?: string }>
         refresh: (args: { source: string; params: Record<string, unknown> }) => Promise<{ success: boolean }>
+        onExternallyChanged: (callback: (payload: { path: string }) => void) => (() => void)
       }
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => (() => void)

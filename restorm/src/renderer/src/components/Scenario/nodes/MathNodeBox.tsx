@@ -31,8 +31,13 @@ export const MathNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
 
   const opOptions = MATH_OPS.map((o) => ({ text: o, label: t(`scenario.math.op.${o}`, o) }))
 
-  const numberField = (cfgKey: string, captionKey: string, captionDefault: string): ScenarioNodeCell => ({
+  const numberField = (cfgKey: string, captionKey: string, captionDefault: string, port?: ScenarioNodeCell['port']): ScenarioNodeCell => ({
     id: cfgKey,
+    // `label` doubles as the wired-state caption: once a data link feeds the
+    // port, ScenarioInputCell swaps the whole content for the JSON-path
+    // selector, and only the cell's `label` survives the swap.
+    label: t(captionKey, captionDefault),
+    ...(port ? { port } : {}),
     content: (
       <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
         <div className="scn-field-caption">{t(captionKey, captionDefault)}</div>
@@ -76,7 +81,22 @@ export const MathNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
             className=""
             options={opOptions}
             selected={Math.max(0, MATH_OPS.indexOf(op))}
-            onDidSelect={(d: ISelectData) => { const next = MATH_OPS[d.index]; if (next) data.onSetConfig?.(id, { op: next }) }}
+            onDidSelect={(d: ISelectData) => {
+              const next = MATH_OPS[d.index]
+              if (!next) return
+              // The op decides which extra input ports exist. Switching away
+              // must DELETE the edges wired into the ports that disappear —
+              // otherwise the edge survives in the persisted graph and
+              // resurrects when the op comes back.
+              const portsFor = (o: MathOp): string[] => [
+                ...(o === 'round' ? ['precision'] : []),
+                ...(MATH_BINARY_OPS.includes(o) ? ['b'] : [])
+                // clamp's min/max rows are plain fields — no ports to prune.
+              ]
+              const removed = portsFor(op).filter((p) => !portsFor(next).includes(p))
+              if (removed.length > 0) data.onPruneInputEdges?.(id, removed)
+              data.onSetConfig?.(id, { op: next })
+            }}
             data-testid="scn-math-op"
           />
         </div>
@@ -87,6 +107,7 @@ export const MathNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   if (op === 'round') {
     rows.push({
       id: 'precision',
+      label: t('scenario.math.precision', 'precision'),
       port: { id: 'precision', type: 'target' },
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
@@ -102,7 +123,7 @@ export const MathNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
     })
   }
   if (MATH_BINARY_OPS.includes(op)) {
-    rows.push(numberField('b', 'scenario.math.b', 'with'))
+    rows.push(numberField('b', 'scenario.math.b', 'with', { id: 'b', type: 'target' }))
   }
   if (op === MATH_CLAMP_OP) {
     rows.push(numberField('min', 'scenario.math.min', 'min'))
@@ -115,5 +136,3 @@ export const MathNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
-
-export default MathNodeBox

@@ -31,6 +31,11 @@ export interface UseSidebarStateOptions {
   onAddChildItem: (parentId: string, kind: AddChildKind) => void
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: (itemId: string) => void
+  /** Sidebar clipboard trio — forwarded to the context-menu builder. */
+  onCutItem?: (itemId: string) => void
+  onCopyItem?: (itemId: string) => void
+  onPasteItem?: (itemId: string) => void
+  canPaste?: () => boolean
   /** `true` for an env folder that has an apiUpdate.sourceUrl
    * configured. Drives the "Refresh" right-click entry. */
   canRefreshFromSource?: (itemId: string) => boolean
@@ -42,7 +47,7 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource } = options
   const { t } = useTranslation()
 
   // Set of request ids whose URL currently resolves to a deprecated
@@ -115,11 +120,15 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       onAddChildItem,
       ...(isItemFavorite !== undefined && { isItemFavorite }),
       ...(onToggleFavorite !== undefined && { onToggleFavorite }),
+      ...(onCutItem !== undefined && { onCutItem }),
+      ...(onCopyItem !== undefined && { onCopyItem }),
+      ...(onPasteItem !== undefined && { onPasteItem }),
+      ...(canPaste !== undefined && { canPaste }),
       ...(canRefreshFromSource !== undefined && { canRefreshFromSource }),
       ...(onRefreshFromSource !== undefined && { onRefreshFromSource }),
       isItemScenario
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, isItemScenario]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario]
   )
 
   return {

@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Χωρίς έλεγχο ταυτότητας",
       "popoverLabel": "Διαδρομή ελέγχου ταυτότητας",
+      "openRoute": "Άνοιγμα της διαδρομής ελέγχου ταυτότητας",
       "unnamed": "Χωρίς όνομα"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "Νέο",
     "import": "Εισαγωγή",
     "open": "Άνοιγμα",
-    "openFolder": "Άνοιγμα φακέλου",
     "recentFiles": "Πρόσφατα αρχεία",
     "favorites": "Αγαπημένα",
     "close": "Κλείσιμο",
@@ -228,36 +228,24 @@
     "saveAll": "Αποθήκευση όλων",
     "saveAs": "Αποθήκευση ως",
     "exit": "Έξοδος",
-    "selection": "Επιλογή",
-    "tools": "Εργαλεία",
-    "findInCollection": "Εύρεση στη συλλογή",
-    "addRequest": "Προσθήκη αιτήματος",
-    "addRequestHttp": "Αίτημα HTTP",
-    "addRequestGraphql": "Αίτημα GraphQL",
-    "addRequestGrpc": "Αίτημα gRPC",
-    "addRequestSoap": "Αίτημα SOAP",
-    "addRequestOdata": "Αίτημα OData",
-    "addRequestWebsocket": "Αίτημα WebSocket",
-    "addFolder": "Προσθήκη φακέλου",
-    "addEnvironmentFolder": "Προσθήκη φακέλου περιβάλλοντος",
-    "addVariable": "Προσθήκη μεταβλητής",
-    "addTag": "Προσθήκη ετικέτας",
-    "expandAllFolders": "Ανάπτυξη όλων των φακέλων",
-    "collapseAllFolders": "Σύμπτυξη όλων των φακέλων",
-    "sendActiveRequest": "Αποστολή αιτήματος",
-    "cancelActiveRequest": "Ακύρωση αιτήματος",
-    "generateCodeSnippet": "Δημιουργία αποσπάσματος κώδικα",
-    "copyAsCurl": "Αντιγραφή ως cURL",
-    "exportOpenApi": "Εξαγωγή σε OpenAPI",
-    "clearAuthCache": "Εκκαθάριση μνήμης ταυτοποίησης",
-    "openLogsFolder": "Άνοιγμα φακέλου καταγραφών",
     "mcpLogs": "Αρχεία καταγραφής MCP",
+    "consoleHttp": "Κονσόλα HTTP",
     "git": "Git",
     "gitPush": "Αποστολή",
     "gitPull": "Λήψη",
     "gitRefresh": "Ανανέωση",
     "gitHistory": "Ιστορικό",
-    "gitResetToServer": "Επαναφορά στην έκδοση του διακομιστή"
+    "gitResetToServer": "Επαναφορά στην έκδοση του διακομιστή",
+    "scenario": "Σενάριο",
+    "create": "Δημιουργία",
+    "request": "Αίτημα",
+    "server": "Διακομιστής",
+    "runSelected": "Εκτέλεση",
+    "cancelSelected": "Ακύρωση",
+    "clone": "Κλωνοποίηση",
+    "delete": "Διαγραφή",
+    "addToFavorites": "Προσθήκη στα αγαπημένα",
+    "removeFromFavorites": "Αφαίρεση από τα αγαπημένα"
   },
   "sidebar": {
     "addRequest": "Προσθήκη αιτήματος",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Αποκοπή",
+      "copy": "Αντιγραφή",
+      "paste": "Επικόλληση"
     },
     "deleteConfirm": {
       "title": "Επιβεβαίωση διαγραφής",
@@ -363,7 +354,7 @@
       "docs": "Τεκμηρίωση",
       "environments": "Περιβάλλοντα",
       "notes": "Σημειώσεις",
-      "customValues": "Custom variables"
+      "customValues": "Προσαρμοσμένες απαριθμήσεις"
     },
     "home": {
       "configureEnvs": "Διαμόρφωση περιβαλλόντων",
@@ -401,7 +392,7 @@
       "addEntry": "Προσθήκη τιμής",
       "label": "Label",
       "value": "Value",
-      "selectList": "Επιλέξτε λίστα"
+      "selectList": "Ορίστε επαναχρησιμοποιήσιμες λίστες τιμών για τις μεταβλητές σας: επιλέγετε μια ευανάγνωστη ετικέτα και το αίτημα στέλνει τη συσχετισμένη τιμή. Επιλέξτε ή δημιουργήστε μια απαρίθμηση για να ξεκινήσετε."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Παρακολούθηση ανακατευθύνσεων",
-    "timeoutLabel": "Χρονικό όριο (ms)"
+    "timeoutLabel": "Χρονικό όριο (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Αντιγραφή του επιλυμένου URL",
+      "copied": "Αντιγράφηκε!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Αποσύνδεση",
     "startListening": "Έναρξη ακρόασης",
     "stopListening": "Διακοπή ακρόασης",
+    "listenFailed": "Αποτυχία εκκίνησης του διακομιστή",
     "routePlaceholder": "Διαδρομή (προαιρετικό)",
     "clientsConnected": "{{count}} πελάτης/ες συνδεδεμένος/οι",
     "notListening": "Δεν ακούει"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Άνοιγμα συλλογής από τον δίσκο",
     "landmarkLabel": "Καλώς ήρθατε"
   },
-  "save": {
-    "title": "Επιλογές αποθήκευσης",
-    "mode": {
-      "label": "Λειτουργία αποθήκευσης",
-      "file": "Ένα αρχείο",
-      "folder": "Δομή φακέλων",
-      "fileDescription": "Αποθηκεύστε τα πάντα σε ένα μόνο αρχείο",
-      "folderDescription": "Αποθηκεύστε ως δομή φακέλων με ξεχωριστά αρχεία"
-    },
-    "format": {
-      "label": "Μορφή",
-      "yamlDescription": "Αναγνώσιμο από ανθρώπους",
-      "jsonDescription": "Τυπική μορφή",
-      "json5Description": "JSON + σχόλια"
-    },
-    "preview": {
-      "label": "Προεπισκόπηση δομής",
-      "noDocumentation": "Δεν υπάρχει αναλυμένη τεκμηρίωση για αυτήν την πηγή."
-    }
-  },
   "common": {
     "cancel": "Ακύρωση",
     "save": "Αποθήκευση",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "Δεν ήταν δυνατή η εκ νέου εισαγωγή της προδιαγραφής από την πηγή της.",
       "emptySpec": "Η προδιαγραφή που λήφθηκε από {{url}} δεν δηλώνει καμία λειτουργία {{format}}. Η εφαρμογή της θα άδειαζε αυτόν τον φάκελο, γι' αυτό η ενημέρωση απορρίφθηκε.",
       "formatNotDetected": "Η μορφή αυτής της πηγής δεν αναγνωρίστηκε.",
-      "unsupportedFormat": "Καμία λειτουργία εισαγωγής δεν υποστηρίζει τη μορφή {{format}}."
+      "unsupportedFormat": "Καμία λειτουργία εισαγωγής δεν υποστηρίζει τη μορφή {{format}}.",
+      "projectFormatTooNew": "Αυτό το αρχείο έργου χρησιμοποιεί την έκδοση μορφής {{found}}, αλλά αυτή η έκδοση του Restorm κατανοεί μόνο την έκδοση {{current}}. Ενημερώστε το Restorm για να το εισαγάγετε.",
+      "projectFormatMissing": "Αυτό το αρχείο δεν δηλώνει έκδοση μορφής Restorm, επομένως δεν είναι αρχείο έργου Restorm."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Επικολλήστε ένα έγγραφο API Blueprint (.apib) — το Restorm αναλύει κάθε ομάδα πόρων και μετάβαση σε έναν φάκελο αιτημάτων, ένα ανά τεκμηριωμένο ζεύγος μεθόδου/απόκρισης.",
         "trademark": "Το API Blueprint είναι μια προδιαγραφή που δημιουργήθηκε αρχικά από την Apiary."
+      },
+      "restorm": {
+        "description": "Συγχωνεύστε ένα άλλο έργο Restorm με το ανοιχτό — κάθε εισαγόμενος φάκελος, αίτημα, περιβάλλον και σενάριο φτάνει σε έναν περιβάλλοντα φάκελο, με νέες ταυτότητες ώστε τίποτα να μη συγκρούεται, ακόμη κι όταν ένα έργο εισάγεται στον εαυτό του."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Προηγούμενο αποτέλεσμα",
       "nextMatch": "Επόμενο αποτέλεσμα",
       "close": "Κλείσιμο"
+    },
+    "sections": {
+      "parameters": "Παράμετροι",
+      "responses": "Απαντήσεις",
+      "models": "Μοντέλα",
+      "enums": "Απαριθμήσεις",
+      "polymorphism": "Πολυμορφισμός",
+      "overview": "Επισκόπηση",
+      "operations": "Λειτουργίες"
+    },
+    "table": {
+      "in": "Θέση",
+      "name": "Όνομα",
+      "type": "Τύπος",
+      "required": "Απαιτ.",
+      "operation": "Λειτουργία",
+      "description": "Περιγραφή",
+      "example": "Παράδειγμα",
+      "constraints": "Περιορισμοί"
+    },
+    "params": {
+      "empty": "Δεν δηλώθηκαν παράμετροι εκτός σώματος για τις φιλτραρισμένες διαδρομές."
+    },
+    "responses": {
+      "status": "Κατάσταση",
+      "schema": "Σχήμα",
+      "headers": "Κεφαλίδες",
+      "empty": "Δεν δηλώθηκαν απαντήσεις για τις φιλτραρισμένες διαδρομές."
+    },
+    "route": {
+      "requestBody": "Σώμα αιτήματος",
+      "responseBody": "Σώμα απάντησης",
+      "security": "Ασφάλεια",
+      "externalDocs": "Εξωτερική τεκμηρίωση",
+      "examplePayload": "Παράδειγμα φορτίου",
+      "operationId": "operationId",
+      "addRequest": "+ Προσθήκη αιτήματος"
+    },
+    "apiInfo": {
+      "version": "Έκδοση",
+      "sourceFormat": "Μορφή πηγής",
+      "from": "από",
+      "server": "Διακομιστής",
+      "contact": "Επικοινωνία",
+      "license": "Άδεια",
+      "termsOfService": "Όροι υπηρεσίας",
+      "externalDocs": "Εξωτερική τεκμηρίωση",
+      "tagReferences": "Αναφορές ετικετών"
+    },
+    "sidebar": {
+      "outline": "Διάρθρωση τεκμηρίωσης"
+    },
+    "legend": {
+      "requiredProperty": "απαιτούμενη ιδιότητα",
+      "optionalProperty": "προαιρετική ιδιότητα",
+      "nullableValue": "τιμή με δυνατότητα null",
+      "readOnly": "μόνο για ανάγνωση (ορίζεται από τον διακομιστή)",
+      "deprecatedBadge": "παρωχημένο",
+      "deprecatedDesc": "δηλωμένο ως παρωχημένο στην προδιαγραφή προέλευσης",
+      "removedBadge": "αφαιρέθηκε",
+      "removedDesc": "απουσιάζει από την τελευταία επανεισαγωγή",
+      "requiredSingleRef": "απαιτούμενη μονή αναφορά",
+      "optionalSingleRef": "προαιρετική μονή αναφορά",
+      "requiredArrayRef": "απαιτούμενη αναφορά πίνακα",
+      "optionalArrayRef": "προαιρετική αναφορά πίνακα"
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Μορφές δεδομένων",
       "encoding": "Κωδικοποίηση",
       "time": "Χρονισμός",
-      "algorithmie": "Αλγόριθμοι",
-      "ux": "UX"
+      "algorithmie": "Αλγόριθμοι"
     },
     "listOp": {
       "value": "λίστα",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Προεπισκόπηση URL (πριν την επίλυση)",
-    "versionV2NotYet": "v2 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
-    "versionV3NotYet": "v3 (η εκτέλεση δεν υποστηρίζεται ακόμη)",
     "operationKindEntitySet": "Σύνολο οντοτήτων (GET)",
     "operationKindFunction": "Συνάρτηση (GET με ενσωματωμένες παραμέτρους)",
     "operationKindAction": "Ενέργεια (POST με σώμα JSON)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Διακοπή ακρόασης",
       "notListening": "Δεν ακούει",
       "served": "Ακρόαση — εξυπηρετήθηκαν {{count}} αιτήματα",
-      "listenFailed": "Αποτυχία εκκίνησης του διακομιστή mock"
+      "listenFailed": "Αποτυχία εκκίνησης του διακομιστή mock",
+      "portInUse": "Η θύρα {{port}} χρησιμοποιείται ήδη από άλλη εφαρμογή. Κλείστε την ή επιλέξτε άλλη θύρα και ξεκινήστε ξανά τον διακομιστή."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Όνομα ρύθμισης",
     "saveButton": "Αποθήκευση",
+    "updateButton": "Ενημέρωση με τις τρέχουσες τιμές",
     "storageTarget": {
       "label": "Αποθήκευση στο αρχείο έργου (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Φόρτωση ρύθμισης",
       "message": "Θέλετε να φορτώσετε τη ρύθμιση \"{{name}}\"; Η τρέχουσα μη αποθηκευμένη ρύθμισή σας θα χαθεί."
+    },
+    "updateConfirm": {
+      "title": "Ενημέρωση διαμόρφωσης",
+      "message": "Θέλετε να αντικαταστήσετε τη διαμόρφωση «{{name}}» με τις τρέχουσες τιμές;"
     },
     "deleteConfirm": {
       "title": "Διαγραφή ρύθμισης",
@@ -2632,6 +2680,10 @@
       "title": "Έργο που δημιουργήθηκε με νεότερη έκδοση",
       "message": "Αυτό το αρχείο δημιουργήθηκε με νεότερη έκδοση του Restorm από αυτή που χρησιμοποιείτε. Ενημερώστε το Restorm για να το ανοίξετε.",
       "versions": "Μορφή αρχείου {{found}}· αυτή η έκδοση υποστηρίζει έως {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Αυτό δεν είναι αρχείο Restorm",
+      "message": "Αυτό το αρχείο δεν δηλώνει μορφή αρχείου Restorm. Δεν δημιουργήθηκε από το Restorm ή τροποποιήθηκε χειροκίνητα, γι' αυτό δεν μπορεί να ανοίξει."
     }
   }
 }

@@ -161,5 +161,3 @@ function buildRendered(
     effect === 'random' ? pickRandomWordmarkEffect() : effect
   return { id, element: buildEffectElement(id, text) }
 }
-
-export default Wordmark

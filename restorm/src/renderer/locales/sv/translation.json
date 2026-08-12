@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Ingen autentisering",
       "popoverLabel": "Autentiseringsväg",
+      "openRoute": "Öppna autentiseringsrutten",
       "unnamed": "Namnlös"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "Ny",
     "import": "Importera",
     "open": "Öppna",
-    "openFolder": "Öppna mapp",
     "recentFiles": "Senaste filer",
     "favorites": "Favoriter",
     "close": "Stäng",
@@ -228,36 +228,24 @@
     "saveAll": "Spara alla",
     "saveAs": "Spara som",
     "exit": "Avsluta",
-    "selection": "Markering",
-    "tools": "Verktyg",
-    "findInCollection": "Sök i samling",
-    "addRequest": "Lägg till förfrågan",
-    "addRequestHttp": "HTTP-förfrågan",
-    "addRequestGraphql": "GraphQL-förfrågan",
-    "addRequestGrpc": "gRPC-förfrågan",
-    "addRequestSoap": "SOAP-förfrågan",
-    "addRequestOdata": "OData-förfrågan",
-    "addRequestWebsocket": "WebSocket-förfrågan",
-    "addFolder": "Lägg till mapp",
-    "addEnvironmentFolder": "Lägg till miljömapp",
-    "addVariable": "Lägg till variabel",
-    "addTag": "Lägg till tagg",
-    "expandAllFolders": "Expandera alla mappar",
-    "collapseAllFolders": "Fäll ihop alla mappar",
-    "sendActiveRequest": "Skicka förfrågan",
-    "cancelActiveRequest": "Avbryt förfrågan",
-    "generateCodeSnippet": "Generera kodavsnitt",
-    "copyAsCurl": "Kopiera som cURL",
-    "exportOpenApi": "Exportera till OpenAPI",
-    "clearAuthCache": "Rensa autentiseringscache",
-    "openLogsFolder": "Öppna loggmapp",
     "mcpLogs": "MCP-loggar",
+    "consoleHttp": "HTTP-konsol",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Hämta",
     "gitRefresh": "Uppdatera",
     "gitHistory": "Historik",
-    "gitResetToServer": "Återställ till serverns version"
+    "gitResetToServer": "Återställ till serverns version",
+    "scenario": "Scenario",
+    "create": "Skapa",
+    "request": "Förfrågan",
+    "server": "Server",
+    "runSelected": "Kör",
+    "cancelSelected": "Avbryt",
+    "clone": "Klona",
+    "delete": "Ta bort",
+    "addToFavorites": "Lägg till i favoriter",
+    "removeFromFavorites": "Ta bort från favoriter"
   },
   "sidebar": {
     "addRequest": "Lägg till förfrågan",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Klipp ut",
+      "copy": "Kopiera",
+      "paste": "Klistra in"
     },
     "deleteConfirm": {
       "title": "Bekräfta borttagning",
@@ -363,7 +354,7 @@
       "docs": "Dokumentation",
       "environments": "Miljöer",
       "notes": "Anteckningar",
-      "customValues": "Custom variables"
+      "customValues": "Anpassade uppräkningar"
     },
     "home": {
       "configureEnvs": "Konfigurera miljöer",
@@ -401,7 +392,7 @@
       "addEntry": "Lägg till ett värde",
       "label": "Label",
       "value": "Value",
-      "selectList": "Välj en lista"
+      "selectList": "Definiera återanvändbara värdelistor för dina variabler: du väljer en läsbar etikett och requesten skickar det kopplade värdet. Välj eller skapa en uppräkning för att komma igång."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Följ omdirigeringar",
-    "timeoutLabel": "Tidsgräns (ms)"
+    "timeoutLabel": "Tidsgräns (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopiera den upplösta URL:en",
+      "copied": "Kopierad!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Koppla från",
     "startListening": "Börja lyssna",
     "stopListening": "Sluta lyssna",
+    "listenFailed": "Servern kunde inte startas",
     "routePlaceholder": "Rutt (valfritt)",
     "clientsConnected": "{{count}} klient(er) anslutna",
     "notListening": "Lyssnar inte"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Öppna en samling från disken",
     "landmarkLabel": "Välkommen"
   },
-  "save": {
-    "title": "Sparalternativ",
-    "mode": {
-      "label": "Sparläge",
-      "file": "En enda fil",
-      "folder": "Mappstruktur",
-      "fileDescription": "Spara allt i en enda fil",
-      "folderDescription": "Spara som en mappstruktur med separata filer"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Läsbart för människor",
-      "jsonDescription": "Standardformat",
-      "json5Description": "JSON + kommentarer"
-    },
-    "preview": {
-      "label": "Förhandsgranskning av struktur",
-      "noDocumentation": "Ingen analyserad dokumentation för denna källa."
-    }
-  },
   "common": {
     "cancel": "Avbryt",
     "save": "Spara",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "Specifikationen kunde inte importeras om från sin källa.",
       "emptySpec": "Specifikationen som hämtades från {{url}} deklarerar ingen {{format}}-operation. Att tillämpa den skulle tömma den här mappen, så uppdateringen avvisades.",
       "formatNotDetected": "Formatet på den här källan kändes inte igen.",
-      "unsupportedFormat": "Ingen importmodul hanterar formatet {{format}}."
+      "unsupportedFormat": "Ingen importmodul hanterar formatet {{format}}.",
+      "projectFormatTooNew": "Den här projektfilen använder formatversion {{found}}, men den här versionen av Restorm förstår bara version {{current}}. Uppdatera Restorm för att importera den.",
+      "projectFormatMissing": "Den här filen deklarerar ingen Restorm-formatversion och är därför ingen Restorm-projektfil."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Klistra in ett API Blueprint-dokument (.apib) — Restorm tolkar varje resursgrupp och övergång till en mapp med förfrågningar, en per dokumenterat metod-/svarspar.",
         "trademark": "API Blueprint är en specifikation som ursprungligen skapades av Apiary."
+      },
+      "restorm": {
+        "description": "Slå ihop ett annat Restorm-projekt med det öppna — varje importerad mapp, request, miljö och scenario hamnar i en omslagsmapp med nya identiteter så att inget kolliderar, inte ens när ett projekt importeras i sig självt."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Föregående träff",
       "nextMatch": "Nästa träff",
       "close": "Stäng"
+    },
+    "sections": {
+      "parameters": "Parametrar",
+      "responses": "Svar",
+      "models": "Modeller",
+      "enums": "Enums",
+      "polymorphism": "Polymorfism",
+      "overview": "Översikt",
+      "operations": "Operationer"
+    },
+    "table": {
+      "in": "I",
+      "name": "Namn",
+      "type": "Typ",
+      "required": "Kr.",
+      "operation": "Operation",
+      "description": "Beskrivning",
+      "example": "Exempel",
+      "constraints": "Begränsningar"
+    },
+    "params": {
+      "empty": "Inga icke-body-parametrar deklarerade för de filtrerade rutterna."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schema",
+      "headers": "Rubriker",
+      "empty": "Inga svar deklarerade för de filtrerade rutterna."
+    },
+    "route": {
+      "requestBody": "Begäranskropp",
+      "responseBody": "Svarskropp",
+      "security": "Säkerhet",
+      "externalDocs": "Externa dokument",
+      "examplePayload": "Exempel-payload",
+      "operationId": "operationId",
+      "addRequest": "+ Lägg till en begäran"
+    },
+    "apiInfo": {
+      "version": "Version",
+      "sourceFormat": "Källformat",
+      "from": "från",
+      "server": "Server",
+      "contact": "Kontakt",
+      "license": "Licens",
+      "termsOfService": "Användarvillkor",
+      "externalDocs": "Externa dokument",
+      "tagReferences": "Taggreferenser"
+    },
+    "sidebar": {
+      "outline": "Dokumentationsöversikt"
+    },
+    "legend": {
+      "requiredProperty": "obligatorisk egenskap",
+      "optionalProperty": "valfri egenskap",
+      "nullableValue": "nullbart värde",
+      "readOnly": "skrivskyddad (satt av servern)",
+      "deprecatedBadge": "föråldrad",
+      "deprecatedDesc": "deklarerad som föråldrad i källspecifikationen",
+      "removedBadge": "borttagen",
+      "removedDesc": "saknas i senaste omimporten",
+      "requiredSingleRef": "obligatorisk enkelref.",
+      "optionalSingleRef": "valfri enkelref.",
+      "requiredArrayRef": "obligatorisk array-ref.",
+      "optionalArrayRef": "valfri array-ref."
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Dataformat",
       "encoding": "Kodning",
       "time": "Tidsstyrning",
-      "algorithmie": "Algoritmer",
-      "ux": "UX"
+      "algorithmie": "Algoritmer"
     },
     "listOp": {
       "value": "lista",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-förhandsvisning (före upplösning)",
-    "versionV2NotYet": "v2 (körning stöds inte än)",
-    "versionV3NotYet": "v3 (körning stöds inte än)",
     "operationKindEntitySet": "Entitetsuppsättning (GET)",
     "operationKindFunction": "Funktion (GET med inbäddade parametrar)",
     "operationKindAction": "Åtgärd (POST med JSON-brödtext)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Sluta lyssna",
       "notListening": "Lyssnar inte",
       "served": "Lyssnar — {{count}} förfrågning(ar) betjänad(e)",
-      "listenFailed": "Det gick inte att starta mockservern"
+      "listenFailed": "Det gick inte att starta mockservern",
+      "portInUse": "Port {{port}} används redan av ett annat program. Stäng det eller välj en annan port och starta om servern."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Konfigurationsnamn",
     "saveButton": "Spara",
+    "updateButton": "Uppdatera med aktuella värden",
     "storageTarget": {
       "label": "Spara i projektfil (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Läs in konfiguration",
       "message": "Vill du läsa in konfigurationen \"{{name}}\"? Din nuvarande osparade konfiguration kommer att gå förlorad."
+    },
+    "updateConfirm": {
+      "title": "Uppdatera konfiguration",
+      "message": "Vill du ersätta konfigurationen \"{{name}}\" med de aktuella värdena?"
     },
     "deleteConfirm": {
       "title": "Ta bort konfiguration",
@@ -2632,6 +2680,10 @@
       "title": "Projektet skapades med en nyare version",
       "message": "Den här filen skapades med en nyare version av Restorm än den du kör. Uppdatera Restorm för att öppna den.",
       "versions": "Filformat {{found}}; den här versionen stöder upp till {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Det här är inte en Restorm-fil",
+      "message": "Den här filen anger inget Restorm-filformat. Den skapades inte av Restorm eller har redigerats för hand och kan därför inte öppnas."
     }
   }
 }

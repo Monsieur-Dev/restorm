@@ -36,7 +36,7 @@ export class Environment {
 
   /**
    * Key-value pairs for this environment. Kept inline with the
-   * environment document (no `@separateFiles`) so an env save is
+   * environment document (no `@saveUnits`) so an env save is
    * atomic: `Environment` is the save unit, not each KeyValue.
    */
   @graphqlField({ type: 'KeyValue', isArray: true })

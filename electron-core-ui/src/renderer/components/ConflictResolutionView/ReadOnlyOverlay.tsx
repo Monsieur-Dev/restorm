@@ -97,5 +97,3 @@ export const ReadOnlyOverlay: React.FC<ReadOnlyOverlayProps> = ({ children, 'dat
     </div>
   )
 }
-
-export default ReadOnlyOverlay

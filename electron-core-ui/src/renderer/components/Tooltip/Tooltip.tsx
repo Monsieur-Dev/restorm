@@ -36,6 +36,15 @@ export interface TooltipProps {
    * to trigger position recalculation when hovering different elements.
    */
   repositionKey?: string | number | null
+  /**
+   * Only with `side="right"`: stretch the tooltip so its right edge stops this
+   * many pixels short of the viewport's right edge, instead of using its CSS
+   * width. Lets a side tooltip fill the remaining horizontal space (e.g. a
+   * search-result detail panel that should reach the window edge). The
+   * viewport-overflow clamp is skipped in this mode since the width is derived
+   * from the viewport.
+   */
+  fillToViewportRight?: number
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
@@ -50,7 +59,8 @@ const Tooltip: React.FC<TooltipProps> = ({
   placement = 'auto',
   side = 'auto',
   fixedTop,
-  repositionKey
+  repositionKey,
+  fillToViewportRight
 }) => {
   const tooltipRef = useRef<HTMLDivElement>(null)
   // Tell the MiniBrowser (or any listener) that an overlay with this
@@ -59,7 +69,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   // that re-positions itself after first paint is automatically up
   // to date.
   useOverlayPresence(tooltipRef, show)
-  const [position, setPosition] = useState<{ top: number; left: number; beakLeftPercent: number; beakTopPercent: number | undefined }>({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
+  const [position, setPosition] = useState<{ top: number; left: number; beakLeftPercent: number; beakTopPercent: number | undefined; width?: number }>({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
   const [isPositioned, setIsPositioned] = useState(false)
   const [resolvedPlacement, setResolvedPlacement] = useState<'above' | 'below'>('above')
 
@@ -106,8 +116,15 @@ const Tooltip: React.FC<TooltipProps> = ({
         top = targetCenterY - tooltipHeight / 2
       }
 
-      // Clamp to viewport
-      if (left + tooltipWidth + gap > viewportWidth) {
+      // Fill mode: stretch the tooltip rightward to a fixed margin from the
+      // viewport edge instead of using its CSS width. The left stays anchored
+      // to the target, so we skip the overflow clamp (it would fight the
+      // derived width) and just guard against a non-positive result.
+      let fillWidth: number | undefined
+      if (fillToViewportRight !== undefined) {
+        fillWidth = Math.max(0, viewportWidth - left - fillToViewportRight)
+      } else if (left + tooltipWidth + gap > viewportWidth) {
+        // Clamp to viewport (default behaviour).
         left = viewportWidth - tooltipWidth - gap
       }
       if (top < gap) {
@@ -123,7 +140,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       beakTopPercent = ((targetCenterY - top) / tooltipHeight) * 100
       beakTopPercent = Math.max(10, Math.min(90, beakTopPercent))
 
-      setPosition({ top, left, beakLeftPercent: 0, beakTopPercent })
+      setPosition({ top, left, beakLeftPercent: 0, beakTopPercent, ...(fillWidth !== undefined ? { width: fillWidth } : {}) })
       setResolvedPlacement('below') // Not really used for side positioning
       setIsPositioned(true)
       return
@@ -247,7 +264,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         }
       })
     })
-  }, [targetRef, placement, side, fixedTop])
+  }, [targetRef, placement, side, fixedTop, fillToViewportRight])
 
   const prevShowRef = useRef(show)
   const prevRepositionKeyRef = useRef(repositionKey)
@@ -331,6 +348,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       {...(dataTestId && { 'data-testid': dataTestId })}
       data-placement={resolvedPlacement}
       data-side={side}
+      {...(position.width !== undefined ? { 'data-fill': 'true' } : {})}
       data-is-positioned={isPositioned ? 'true' : 'false'}
       data-top={String(Math.round(position.top))}
       data-left={String(Math.round(position.left))}
@@ -342,6 +360,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         position: 'fixed',
         top: `${position.top}px`,
         left: `${position.left}px`,
+        ...(position.width !== undefined ? { width: `${position.width}px` } : {}),
         zIndex: 10000,
         opacity: isPositioned ? 1 : 0,
         transition: isPositioned ? 'opacity 100ms linear' : 'none',
@@ -366,4 +385,4 @@ const Tooltip: React.FC<TooltipProps> = ({
   )
 }
 
-export default Tooltip
+export { Tooltip }

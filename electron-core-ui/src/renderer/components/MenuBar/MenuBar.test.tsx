@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeAll, afterEach } from 'vitest'
 import { render, fireEvent, cleanup } from '@testing-library/react'
-import MenuBar from './MenuBar'
-import MenuBarItem from './MenuBarItem'
+import { MenuBar } from './MenuBar'
+import { MenuBarItem } from './MenuBarItem'
 
 // jsdom has no ResizeObserver; the layout-mode effect only needs `observe`/
 // `disconnect` to exist, it never asserts on resize callbacks in these tests.

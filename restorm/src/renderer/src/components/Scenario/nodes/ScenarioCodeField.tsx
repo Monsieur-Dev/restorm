@@ -332,5 +332,3 @@ export const ScenarioCodeField: React.FC<ScenarioCodeFieldProps> = ({
     </div>
   )
 }
-
-export default ScenarioCodeField

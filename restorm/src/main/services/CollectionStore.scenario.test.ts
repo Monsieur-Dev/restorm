@@ -16,7 +16,7 @@ import { collectionStore } from './CollectionStore'
 function seedTree(): void {
   collectionStore.setCollections([
     {
-      type: 'environment-folder',
+      folderType: 'environment',
       id: 'root',
       name: 'Root',
       tags: [],
@@ -151,13 +151,13 @@ describe('CollectionStore.moveItem — validated reparent + reorder', () => {
   it('rejects nesting an env-folder inside a scenario or another env-folder, at any depth', () => {
     collectionStore.setCollections([
       {
-        type: 'environment-folder', id: 'root', name: 'Root', tags: [], environments: [],
+        folderType: 'environment', id: 'root', name: 'Root', tags: [], environments: [],
         items: [
           { type: 'scenario', id: 'scn', name: 'S', tags: [], params: [], nodes: [], edges: [], items: [] },
           { id: 'plain', name: 'Plain', items: [], configuration: {} }
         ]
       },
-      { type: 'environment-folder', id: 'env2', name: 'Env2', tags: [], items: [], environments: [] }
+      { folderType: 'environment', id: 'env2', name: 'Env2', tags: [], items: [], environments: [] }
     ] as unknown as Parameters<typeof collectionStore.setCollections>[0])
 
     expect(collectionStore.moveItem('env2', 'scn', 0).ok).toBe(false)   // into a scenario
@@ -173,8 +173,8 @@ describe('CollectionStore.moveItem — validated reparent + reorder', () => {
 
   it('reorders two env-folders at the root level (omit newParentId → root reorder)', () => {
     collectionStore.setCollections([
-      { type: 'environment-folder', id: 'envA', name: 'A', tags: [], items: [], environments: [] },
-      { type: 'environment-folder', id: 'envB', name: 'B', tags: [], items: [], environments: [] }
+      { folderType: 'environment', id: 'envA', name: 'A', tags: [], items: [], environments: [] },
+      { folderType: 'environment', id: 'envB', name: 'B', tags: [], items: [], environments: [] }
     ] as unknown as Parameters<typeof collectionStore.setCollections>[0])
 
     // envB is a root item; omitting newParentId reorders it within the root.

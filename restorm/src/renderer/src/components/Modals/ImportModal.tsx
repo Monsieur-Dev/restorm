@@ -855,6 +855,8 @@ export function ImportModal({
         ? t('import.refreshTitle', 'Refresh from source')
         : t('import.title')}
       data-testid="import-modal-dialog"
+      enterActionTestId="import-button"
+      initialFocusTestId="source-input-input"
     >
       <div
         className="import-modal"
@@ -1002,12 +1004,25 @@ export function ImportModal({
                 alignSelf: 'flex-start'
               }}
             >
+              {/* No `line` here: that variant is a fixed 28x28 square sized
+                  for a codicon ALONE, so a labelled button wearing it gets
+                  its icon + caption squeezed into 28px and ellipsised away.
+                  The default width is `fit-content`, which is what this
+                  chip wants — the pill sits on `align-self: flex-start`
+                  and takes the width its content needs. Not `link` either:
+                  it underlines the label and forces `--textLink-foreground`,
+                  which fights the pill's inherited colour. */}
+              {/* Accessible name leads with the visible caption, then the
+                  action — a screen-reader user searching for what they can
+                  see finds it. Composed from keys that already exist in
+                  every locale rather than introducing a new one. */}
               <Button
-                line
-                options={{ ariaLabel: t('import.editAuth', 'Edit authentication route') }}
+                options={{
+                  ariaLabel: `${t('import.authenticatedVia', 'Authenticated via {{name}}', { name: attachedAuth.name || 'auth route' })} — ${t('import.editAuth', 'Edit authentication route')}`
+                }}
                 data-testid="import-edit-auth-button"
                 onClick={() => { setShowAuthSetupModal(true) }}
-                style={{ color: 'inherit', background: 'transparent', padding: 0 }}
+                style={{ color: 'inherit', background: 'transparent', padding: 0, border: 'none', gap: 6 }}
               >
                 <i className="codicon codicon-key" aria-hidden="true" />
                 <span>{t('import.authenticatedVia', 'Authenticated via {{name}}', { name: attachedAuth.name || 'auth route' })}</span>

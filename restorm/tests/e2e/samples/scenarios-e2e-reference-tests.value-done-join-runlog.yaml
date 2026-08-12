@@ -1,0 +1,65 @@
+- message: 🔵 [<time>] ▶ Value done join
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 40
+    b: 2
+    operator: add
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "sibling branch: step 1"
+- message: "🔵 [<time>] sibling branch: step 1"
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 42
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start assert
+  data:
+    b: 42
+    message: result is 42
+    operator: eq
+    a: 42
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "sibling branch: step 2"
+    in: true
+- message: "🔵 [<time>] sibling branch: step 2"
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start transform
+  data:
+    expression: value+done join reached
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "sibling branch: step 3"
+    in: true
+- message: "🔵 [<time>] sibling branch: step 3"
+- message: ⚪ [<time>] done transform
+  data:
+    out:
+      result: value+done join reached
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "value+done join: downstream reached the end"
+    data:
+      result: value+done join reached
+    in: true
+- message: "🔵 [<time>] value+done join: downstream reached the end"
+  data:
+    result: value+done join reached
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      result: value+done join reached
+- message: 🔵 [<time>] ■ Value done join

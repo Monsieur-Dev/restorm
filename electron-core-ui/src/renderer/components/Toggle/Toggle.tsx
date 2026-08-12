@@ -251,4 +251,3 @@ const ToggleInner: React.FC<ToggleProps> = ({
 
 const Toggle = React.memo(ToggleInner);
 export { Toggle };
-export default Toggle;

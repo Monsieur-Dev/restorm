@@ -1,5 +1,5 @@
 import { readFileSync, existsSync } from 'fs'
-import yaml from 'js-yaml'
+import { loadYamlDocument } from '../../shared/yamlLoad'
 import type {
   CustomStrategyConfig,
   CustomStrategyEvaluator,
@@ -71,7 +71,7 @@ export class FeatureFlippingService {
 
     try {
       const content = readFileSync(configPath, 'utf-8')
-      const raw = yaml.load(content)
+      const raw = loadYamlDocument(content)
       const parsed = featuresYamlConfigSchema.safeParse(raw)
       if (!parsed.success) {
         const issues = parsed.error.issues.map(i => i.message).join('; ')

@@ -72,6 +72,7 @@
     "auth": {
       "noAuth": "Tanpa autentikasi",
       "popoverLabel": "Rute autentikasi",
+      "openRoute": "Buka rute autentikasi",
       "unnamed": "Tanpa nama"
     },
     "contextMenu": {
@@ -219,7 +220,6 @@
     "new": "Baru",
     "import": "Impor",
     "open": "Buka",
-    "openFolder": "Buka folder",
     "recentFiles": "File terbaru",
     "favorites": "Favorit",
     "close": "Tutup",
@@ -227,36 +227,24 @@
     "saveAll": "Simpan semua",
     "saveAs": "Simpan sebagai",
     "exit": "Keluar",
-    "selection": "Pilihan",
-    "tools": "Alat",
-    "findInCollection": "Cari dalam koleksi",
-    "addRequest": "Tambah permintaan",
-    "addRequestHttp": "Permintaan HTTP",
-    "addRequestGraphql": "Permintaan GraphQL",
-    "addRequestGrpc": "Permintaan gRPC",
-    "addRequestSoap": "Permintaan SOAP",
-    "addRequestOdata": "Permintaan OData",
-    "addRequestWebsocket": "Permintaan WebSocket",
-    "addFolder": "Tambah folder",
-    "addEnvironmentFolder": "Tambah folder lingkungan",
-    "addVariable": "Tambah variabel",
-    "addTag": "Tambah tag",
-    "expandAllFolders": "Bentangkan semua folder",
-    "collapseAllFolders": "Ciutkan semua folder",
-    "sendActiveRequest": "Kirim permintaan",
-    "cancelActiveRequest": "Batalkan permintaan",
-    "generateCodeSnippet": "Buat cuplikan kode",
-    "copyAsCurl": "Salin sebagai cURL",
-    "exportOpenApi": "Ekspor ke OpenAPI",
-    "clearAuthCache": "Bersihkan cache autentikasi",
-    "openLogsFolder": "Buka folder log",
     "mcpLogs": "Log MCP",
+    "consoleHttp": "Konsol HTTP",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Tarik",
     "gitRefresh": "Segarkan",
     "gitHistory": "Riwayat",
-    "gitResetToServer": "Setel ulang ke versi server"
+    "gitResetToServer": "Setel ulang ke versi server",
+    "scenario": "Skenario",
+    "create": "Buat",
+    "request": "Permintaan",
+    "server": "Server",
+    "runSelected": "Jalankan",
+    "cancelSelected": "Batalkan",
+    "clone": "Klon",
+    "delete": "Hapus",
+    "addToFavorites": "Tambah ke favorit",
+    "removeFromFavorites": "Hapus dari favorit"
   },
   "sidebar": {
     "addRequest": "Tambah permintaan",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Potong",
+      "copy": "Salin",
+      "paste": "Tempel"
     },
     "deleteConfirm": {
       "title": "Konfirmasi penghapusan",
@@ -362,7 +353,7 @@
       "docs": "Dokumen",
       "environments": "Lingkungan",
       "notes": "Catatan",
-      "customValues": "Custom variables"
+      "customValues": "Enumerasi kustom"
     },
     "home": {
       "configureEnvs": "Konfigurasi lingkungan",
@@ -400,7 +391,7 @@
       "addEntry": "Tambah nilai",
       "label": "Label",
       "value": "Value",
-      "selectList": "Pilih sebuah daftar"
+      "selectList": "Tentukan daftar nilai yang dapat digunakan kembali untuk variabel Anda: Anda memilih label yang mudah dibaca, permintaan mengirimkan nilai terkait. Pilih atau buat enumerasi untuk memulai."
     }
   },
   "requestTab": {
@@ -454,7 +445,11 @@
       }
     },
     "followRedirects": "Ikuti pengalihan",
-    "timeoutLabel": "Batas waktu (ms)"
+    "timeoutLabel": "Batas waktu (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Salin URL yang telah diresolusi",
+      "copied": "Disalin!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -603,6 +598,7 @@
     "disconnect": "Putuskan koneksi",
     "startListening": "Mulai mendengarkan",
     "stopListening": "Berhenti mendengarkan",
+    "listenFailed": "Server gagal dimulai",
     "routePlaceholder": "Rute (opsional)",
     "clientsConnected": "{{count}} klien terhubung",
     "notListening": "Tidak mendengarkan"
@@ -855,26 +851,6 @@
     "openAriaLabel": "Buka koleksi dari disk",
     "landmarkLabel": "Selamat datang"
   },
-  "save": {
-    "title": "Opsi penyimpanan",
-    "mode": {
-      "label": "Mode penyimpanan",
-      "file": "File tunggal",
-      "folder": "Struktur folder",
-      "fileDescription": "Simpan semuanya dalam satu file",
-      "folderDescription": "Simpan sebagai struktur folder dengan file terpisah"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Mudah dibaca manusia",
-      "jsonDescription": "Format standar",
-      "json5Description": "JSON + komentar"
-    },
-    "preview": {
-      "label": "Pratinjau struktur",
-      "noDocumentation": "Tidak ada dokumentasi yang diuraikan untuk sumber ini."
-    }
-  },
   "common": {
     "cancel": "Batal",
     "save": "Simpan",
@@ -1058,7 +1034,9 @@
       "sourceImportFailed": "Spesifikasi tidak dapat diimpor ulang dari sumbernya.",
       "emptySpec": "Spesifikasi yang diambil dari {{url}} tidak mendeklarasikan operasi {{format}} apa pun. Menerapkannya akan mengosongkan folder ini, sehingga pembaruan ditolak.",
       "formatNotDetected": "Format sumber ini tidak dikenali.",
-      "unsupportedFormat": "Tidak ada pengimpor yang menangani format {{format}}."
+      "unsupportedFormat": "Tidak ada pengimpor yang menangani format {{format}}.",
+      "projectFormatTooNew": "Berkas proyek ini menggunakan format versi {{found}}, tetapi versi Restorm ini hanya memahami versi {{current}}. Perbarui Restorm untuk mengimpornya.",
+      "projectFormatMissing": "Berkas ini tidak mendeklarasikan versi format Restorm, jadi bukan berkas proyek Restorm."
     },
     "formats": {
       "swagger": {
@@ -1165,6 +1143,9 @@
       "apiBlueprint": {
         "description": "Tempel dokumen API Blueprint (.apib) — Restorm mengurai setiap resource group dan transition menjadi folder permintaan, satu untuk setiap pasangan metode/respons yang terdokumentasi.",
         "trademark": "API Blueprint adalah spesifikasi yang awalnya dibuat oleh Apiary."
+      },
+      "restorm": {
+        "description": "Gabungkan proyek Restorm lain ke proyek yang terbuka — setiap folder, permintaan, lingkungan, dan skenario yang diimpor masuk ke folder pembungkus dengan identitas baru agar tidak ada yang bertabrakan, bahkan saat mengimpor proyek ke dirinya sendiri."
       }
     },
     "grpcReflection": {
@@ -1231,6 +1212,71 @@
       "previousMatch": "Kecocokan sebelumnya",
       "nextMatch": "Kecocokan berikutnya",
       "close": "Tutup"
+    },
+    "sections": {
+      "parameters": "Parameter",
+      "responses": "Respons",
+      "models": "Model",
+      "enums": "Enum",
+      "polymorphism": "Polimorfisme",
+      "overview": "Ikhtisar",
+      "operations": "Operasi"
+    },
+    "table": {
+      "in": "Di",
+      "name": "Nama",
+      "type": "Tipe",
+      "required": "Wajib",
+      "operation": "Operasi",
+      "description": "Deskripsi",
+      "example": "Contoh",
+      "constraints": "Batasan"
+    },
+    "params": {
+      "empty": "Tidak ada parameter non-body yang dideklarasikan untuk rute yang difilter."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Skema",
+      "headers": "Header",
+      "empty": "Tidak ada respons yang dideklarasikan untuk rute yang difilter."
+    },
+    "route": {
+      "requestBody": "Body permintaan",
+      "responseBody": "Body respons",
+      "security": "Keamanan",
+      "externalDocs": "Dokumen eksternal",
+      "examplePayload": "Contoh payload",
+      "operationId": "operationId",
+      "addRequest": "+ Tambah permintaan"
+    },
+    "apiInfo": {
+      "version": "Versi",
+      "sourceFormat": "Format sumber",
+      "from": "dari",
+      "server": "Server",
+      "contact": "Kontak",
+      "license": "Lisensi",
+      "termsOfService": "Ketentuan layanan",
+      "externalDocs": "Dokumen eksternal",
+      "tagReferences": "Referensi tag"
+    },
+    "sidebar": {
+      "outline": "Kerangka dokumentasi"
+    },
+    "legend": {
+      "requiredProperty": "properti wajib",
+      "optionalProperty": "properti opsional",
+      "nullableValue": "nilai nullable",
+      "readOnly": "hanya-baca (ditetapkan server)",
+      "deprecatedBadge": "usang",
+      "deprecatedDesc": "dinyatakan usang dalam spesifikasi sumber",
+      "removedBadge": "dihapus",
+      "removedDesc": "tidak ada di impor ulang terakhir",
+      "requiredSingleRef": "referensi tunggal wajib",
+      "optionalSingleRef": "referensi tunggal opsional",
+      "requiredArrayRef": "referensi larik wajib",
+      "optionalArrayRef": "referensi larik opsional"
     }
   },
   "scenario": {
@@ -1781,8 +1827,7 @@
       "dataFormats": "Format data",
       "encoding": "Enkode",
       "time": "Pewaktuan",
-      "algorithmie": "Algoritma",
-      "ux": "UX"
+      "algorithmie": "Algoritma"
     },
     "listOp": {
       "value": "daftar",
@@ -2332,9 +2377,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Pratinjau URL (sebelum resolusi)",
-    "versionV2NotYet": "v2 (eksekusi belum didukung)",
-    "versionV3NotYet": "v3 (eksekusi belum didukung)",
     "operationKindEntitySet": "Set entitas (GET)",
     "operationKindFunction": "Fungsi (GET dengan parameter tersemat)",
     "operationKindAction": "Aksi (POST dengan isi JSON)",
@@ -2353,7 +2395,8 @@
       "stopListening": "Berhenti mendengarkan",
       "notListening": "Tidak mendengarkan",
       "served": "Mendengarkan — {{count}} permintaan dilayani",
-      "listenFailed": "Gagal memulai server mock"
+      "listenFailed": "Gagal memulai server mock",
+      "portInUse": "Port {{port}} sudah digunakan oleh aplikasi lain. Tutup aplikasi tersebut atau pilih port lain, lalu mulai ulang server."
     }
   },
   "odata": {
@@ -2373,6 +2416,7 @@
     },
     "namePlaceholder": "Nama konfigurasi",
     "saveButton": "Simpan",
+    "updateButton": "Perbarui dengan nilai saat ini",
     "storageTarget": {
       "label": "Simpan ke file proyek (.restorm)"
     },
@@ -2385,6 +2429,10 @@
     "loadConfirm": {
       "title": "Muat konfigurasi",
       "message": "Apakah Anda ingin memuat konfigurasi \"{{name}}\"? Konfigurasi Anda saat ini yang belum disimpan akan hilang."
+    },
+    "updateConfirm": {
+      "title": "Perbarui konfigurasi",
+      "message": "Apakah Anda ingin mengganti konfigurasi \"{{name}}\" dengan nilai saat ini?"
     },
     "deleteConfirm": {
       "title": "Hapus konfigurasi",
@@ -2631,6 +2679,10 @@
       "title": "Proyek dibuat dengan versi yang lebih baru",
       "message": "Berkas ini dibuat dengan versi Restorm yang lebih baru daripada yang Anda jalankan. Perbarui Restorm untuk membukanya.",
       "versions": "Format berkas {{found}}; versi ini mendukung hingga {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Ini bukan berkas Restorm",
+      "message": "Berkas ini tidak menyatakan format berkas Restorm. Berkas ini tidak dibuat oleh Restorm atau telah disunting secara manual, sehingga tidak dapat dibuka."
     }
   }
 }

@@ -414,10 +414,11 @@
    * edge in every layout. */
   text-align: left;
   justify-content: flex-start;
-  /* Trim the pencil slot (default 24px) to just fit the 10px hint at
-   * right:4px, so a truncated title stops a hair from the bar instead of
-   * leaving a wide dead band before it. */
-  padding-right: 16px;
+  /* Reserve the pencil slot: the 10px edit hint sits at right:4px, and the
+   * title text needs a clear gap before it (a tighter slot glued the pencil
+   * to the last glyph). 26px leaves ~12px of breathing room between the title
+   * and the hint while keeping a truncated title close to the action bar. */
+  padding-right: 26px;
 }
 
 .restorm-workbench-tab-title .ecui-editable-label-text {

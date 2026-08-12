@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Ei todennusta",
       "popoverLabel": "Todennusreitti",
+      "openRoute": "Avaa todennusreitti",
       "unnamed": "Nimetön"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "Uusi",
     "import": "Tuo",
     "open": "Avaa",
-    "openFolder": "Avaa kansio",
     "recentFiles": "Viimeisimmät tiedostot",
     "favorites": "Suosikit",
     "close": "Sulje",
@@ -228,36 +228,24 @@
     "saveAll": "Tallenna kaikki",
     "saveAs": "Tallenna nimellä",
     "exit": "Lopeta",
-    "selection": "Valinta",
-    "tools": "Työkalut",
-    "findInCollection": "Etsi kokoelmasta",
-    "addRequest": "Lisää pyyntö",
-    "addRequestHttp": "HTTP-pyyntö",
-    "addRequestGraphql": "GraphQL-pyyntö",
-    "addRequestGrpc": "gRPC-pyyntö",
-    "addRequestSoap": "SOAP-pyyntö",
-    "addRequestOdata": "OData-pyyntö",
-    "addRequestWebsocket": "WebSocket-pyyntö",
-    "addFolder": "Lisää kansio",
-    "addEnvironmentFolder": "Lisää ympäristökansio",
-    "addVariable": "Lisää muuttuja",
-    "addTag": "Lisää tagi",
-    "expandAllFolders": "Laajenna kaikki kansiot",
-    "collapseAllFolders": "Tiivistä kaikki kansiot",
-    "sendActiveRequest": "Lähetä pyyntö",
-    "cancelActiveRequest": "Peruuta pyyntö",
-    "generateCodeSnippet": "Luo koodikatkelma",
-    "copyAsCurl": "Kopioi cURL-muodossa",
-    "exportOpenApi": "Vie OpenAPI-muotoon",
-    "clearAuthCache": "Tyhjennä todennusvälimuisti",
-    "openLogsFolder": "Avaa lokikansio",
     "mcpLogs": "MCP-lokit",
+    "consoleHttp": "HTTP-konsoli",
     "git": "Git",
     "gitPush": "Työnnä",
     "gitPull": "Nouda",
     "gitRefresh": "Päivitä",
     "gitHistory": "Historia",
-    "gitResetToServer": "Palauta palvelimen versioon"
+    "gitResetToServer": "Palauta palvelimen versioon",
+    "scenario": "Skenaario",
+    "create": "Luo",
+    "request": "Pyyntö",
+    "server": "Palvelin",
+    "runSelected": "Suorita",
+    "cancelSelected": "Peruuta",
+    "clone": "Kloonaa",
+    "delete": "Poista",
+    "addToFavorites": "Lisää suosikkeihin",
+    "removeFromFavorites": "Poista suosikeista"
   },
   "sidebar": {
     "addRequest": "Lisää pyyntö",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Leikkaa",
+      "copy": "Kopioi",
+      "paste": "Liitä"
     },
     "deleteConfirm": {
       "title": "Vahvista poisto",
@@ -363,7 +354,7 @@
       "docs": "Dokumentit",
       "environments": "Ympäristöt",
       "notes": "Muistiinpanot",
-      "customValues": "Custom variables"
+      "customValues": "Mukautetut luettelot"
     },
     "home": {
       "configureEnvs": "Määritä ympäristöt",
@@ -401,7 +392,7 @@
       "addEntry": "Lisää arvo",
       "label": "Label",
       "value": "Value",
-      "selectList": "Valitse lista"
+      "selectList": "Määritä muuttujillesi uudelleenkäytettäviä arvoluetteloita: valitset luettavan nimikkeen, ja pyyntö lähettää siihen liitetyn arvon. Valitse tai luo luettelo aloittaaksesi."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Seuraa uudelleenohjauksia",
-    "timeoutLabel": "Aikakatkaisu (ms)"
+    "timeoutLabel": "Aikakatkaisu (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopioi selvitetty URL",
+      "copied": "Kopioitu!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Katkaise yhteys",
     "startListening": "Aloita kuuntelu",
     "stopListening": "Lopeta kuuntelu",
+    "listenFailed": "Palvelimen käynnistys epäonnistui",
     "routePlaceholder": "Reitti (valinnainen)",
     "clientsConnected": "{{count}} asiakas/asiakkaita yhdistetty",
     "notListening": "Ei kuuntele"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Avaa kokoelma levyltä",
     "landmarkLabel": "Tervetuloa"
   },
-  "save": {
-    "title": "Tallennusasetukset",
-    "mode": {
-      "label": "Tallennustila",
-      "file": "Yksittäinen tiedosto",
-      "folder": "Kansiorakenne",
-      "fileDescription": "Tallenna kaikki yhteen tiedostoon",
-      "folderDescription": "Tallenna kansiorakenteena erillisillä tiedostoilla"
-    },
-    "format": {
-      "label": "Muoto",
-      "yamlDescription": "Ihmisen luettavissa",
-      "jsonDescription": "Vakiomuoto",
-      "json5Description": "JSON + kommentit"
-    },
-    "preview": {
-      "label": "Rakenteen esikatselu",
-      "noDocumentation": "Tälle lähteelle ei ole jäsennettyä dokumentaatiota."
-    }
-  },
   "common": {
     "cancel": "Peruuta",
     "save": "Tallenna",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "Määrittelyä ei voitu tuoda uudelleen sen lähteestä.",
       "emptySpec": "Osoitteesta {{url}} noudettu määrittely ei sisällä yhtään {{format}}-operaatiota. Sen käyttöönotto tyhjentäisi tämän kansion, joten päivitys hylättiin.",
       "formatNotDetected": "Tämän lähteen muotoa ei tunnistettu.",
-      "unsupportedFormat": "Mikään tuoja ei tue muotoa {{format}}."
+      "unsupportedFormat": "Mikään tuoja ei tue muotoa {{format}}.",
+      "projectFormatTooNew": "Tämä projektitiedosto käyttää muotoversiota {{found}}, mutta tämä Restorm-versio ymmärtää vain version {{current}}. Päivitä Restorm tuodaksesi sen.",
+      "projectFormatMissing": "Tämä tiedosto ei ilmoita Restorm-muotoversiota, joten se ei ole Restorm-projektitiedosto."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Liitä API Blueprint -dokumentti (.apib) — Restorm jäsentää jokaisen resurssiryhmän ja siirtymän pyyntökansioksi, yksi per dokumentoitu metodi-/vastauspari.",
         "trademark": "API Blueprint on alun perin Apiaryn luoma määrittely."
+      },
+      "restorm": {
+        "description": "Yhdistä toinen Restorm-projekti avoinna olevaan — jokainen tuotu kansio, pyyntö, ympäristö ja skenaario saapuu käärekansioon uusin tunnistein, jotta mikään ei törmää, ei edes tuotaessa projektia itseensä."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Edellinen osuma",
       "nextMatch": "Seuraava osuma",
       "close": "Sulje"
+    },
+    "sections": {
+      "parameters": "Parametrit",
+      "responses": "Vastaukset",
+      "models": "Mallit",
+      "enums": "Enumit",
+      "polymorphism": "Polymorfismi",
+      "overview": "Yleiskatsaus",
+      "operations": "Operaatiot"
+    },
+    "table": {
+      "in": "Sijainti",
+      "name": "Nimi",
+      "type": "Tyyppi",
+      "required": "Pak.",
+      "operation": "Operaatio",
+      "description": "Kuvaus",
+      "example": "Esimerkki",
+      "constraints": "Rajoitteet"
+    },
+    "params": {
+      "empty": "Suodatetuille reiteille ei ole määritelty rungon ulkopuolisia parametreja."
+    },
+    "responses": {
+      "status": "Tila",
+      "schema": "Skeema",
+      "headers": "Otsakkeet",
+      "empty": "Suodatetuille reiteille ei ole määritelty vastauksia."
+    },
+    "route": {
+      "requestBody": "Pyynnön runko",
+      "responseBody": "Vastauksen runko",
+      "security": "Suojaus",
+      "externalDocs": "Ulkoiset dokumentit",
+      "examplePayload": "Esimerkkikuorma",
+      "operationId": "operationId",
+      "addRequest": "+ Lisää pyyntö"
+    },
+    "apiInfo": {
+      "version": "Versio",
+      "sourceFormat": "Lähdemuoto",
+      "from": "lähteestä",
+      "server": "Palvelin",
+      "contact": "Yhteystiedot",
+      "license": "Lisenssi",
+      "termsOfService": "Käyttöehdot",
+      "externalDocs": "Ulkoiset dokumentit",
+      "tagReferences": "Tagien viitteet"
+    },
+    "sidebar": {
+      "outline": "Dokumentaation rakenne"
+    },
+    "legend": {
+      "requiredProperty": "pakollinen ominaisuus",
+      "optionalProperty": "valinnainen ominaisuus",
+      "nullableValue": "nollattava arvo",
+      "readOnly": "vain luku (palvelimen asettama)",
+      "deprecatedBadge": "vanhentunut",
+      "deprecatedDesc": "määritelty vanhentuneeksi lähdemäärityksessä",
+      "removedBadge": "poistettu",
+      "removedDesc": "puuttuu viimeisimmästä uudelleentuonnista",
+      "requiredSingleRef": "pakollinen yksittäisviite",
+      "optionalSingleRef": "valinnainen yksittäisviite",
+      "requiredArrayRef": "pakollinen taulukkoviite",
+      "optionalArrayRef": "valinnainen taulukkoviite"
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Datamuodot",
       "encoding": "Koodaus",
       "time": "Ajoitus",
-      "algorithmie": "Algoritmit",
-      "ux": "UX"
+      "algorithmie": "Algoritmit"
     },
     "listOp": {
       "value": "lista",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-esikatselu (ennen ratkaisua)",
-    "versionV2NotYet": "v2 (suoritusta ei vielä tueta)",
-    "versionV3NotYet": "v3 (suoritusta ei vielä tueta)",
     "operationKindEntitySet": "Entiteettijoukko (GET)",
     "operationKindFunction": "Funktio (GET upotetuilla parametreilla)",
     "operationKindAction": "Toiminto (POST JSON-rungolla)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Lopeta kuuntelu",
       "notListening": "Ei kuuntele",
       "served": "Kuuntelee — {{count}} pyyntö(ä) palveltu",
-      "listenFailed": "Mock-palvelimen käynnistys epäonnistui"
+      "listenFailed": "Mock-palvelimen käynnistys epäonnistui",
+      "portInUse": "Portti {{port}} on jo toisen sovelluksen käytössä. Sulje se tai valitse toinen portti ja käynnistä palvelin uudelleen."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Konfiguraation nimi",
     "saveButton": "Tallenna",
+    "updateButton": "Päivitä nykyisillä arvoilla",
     "storageTarget": {
       "label": "Tallenna projektitiedostoon (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Lataa konfiguraatio",
       "message": "Haluatko ladata konfiguraation \"{{name}}\"? Nykyinen tallentamaton konfiguraatiosi menetetään."
+    },
+    "updateConfirm": {
+      "title": "Päivitä kokoonpano",
+      "message": "Haluatko korvata kokoonpanon ”{{name}}” nykyisillä arvoilla?"
     },
     "deleteConfirm": {
       "title": "Poista konfiguraatio",
@@ -2632,6 +2680,10 @@
       "title": "Projekti luotu uudemmalla versiolla",
       "message": "Tämä tiedosto on luotu uudemmalla Restorm-versiolla kuin käytössäsi oleva. Päivitä Restorm avataksesi sen.",
       "versions": "Tiedostomuoto {{found}}; tämä versio tukee enintään {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Tämä ei ole Restorm-tiedosto",
+      "message": "Tämä tiedosto ei ilmoita Restorm-tiedostomuotoa. Sitä ei ole luonut Restorm tai sitä on muokattu käsin, joten sitä ei voi avata."
     }
   }
 }

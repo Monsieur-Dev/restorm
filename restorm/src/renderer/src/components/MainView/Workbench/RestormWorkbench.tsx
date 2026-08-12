@@ -1081,6 +1081,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           }}
           tagColors={folderTagColors}
           onTagColorChange={handleFolderTagColorChange}
+          tabId={effectiveTab.id}
         >
           <FolderView
             folder={folder}
@@ -1202,9 +1203,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // every request protocol — the quick-settings button is only mounted
     // on request tabs (this function is never called for folder/env/scenario
     // tabs, so no additional gating is required).
+    // The env selector is the cluster's LEADING slot: the bookmark ribbon
+    // (tags) renders between it and the rest (history + quick settings).
+    const requestHeaderLeadingFor = (): React.ReactNode => (
+      <RequestHeaderEnvSelector folderRequestIds={envFolderRequestIds ?? []} projectUuid={projectUuid ?? null} />
+    )
     const requestHeaderActionsFor = (id: string, reactiveReq: Request): React.ReactNode => (
       <>
-        <RequestHeaderEnvSelector folderRequestIds={envFolderRequestIds ?? []} projectUuid={projectUuid ?? null} />
         <RequestHeaderHistoryButton requestId={id} />
         <RequestQuickSettingsButton request={reactiveReq} projectUuid={projectUuid} getScenariosUsingQuickConfig={getScenariosUsingQuickConfig} />
       </>
@@ -1221,6 +1226,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           <RequestHeaderAuthSelector
             activeRequest={request}
             envFolderItems={reactiveEnvFolder.items}
+            {...(onRequestClick ? { onOpenRoute: onRequestClick } : {})}
           />
         )
         : null
@@ -1245,6 +1251,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1282,6 +1289,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1319,6 +1327,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1356,6 +1365,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1393,6 +1403,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1430,6 +1441,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1467,6 +1479,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1504,6 +1517,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1541,6 +1555,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1579,6 +1594,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1616,6 +1632,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1653,6 +1670,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1690,6 +1708,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1727,6 +1746,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -1764,6 +1784,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActionsLeading={requestHeaderLeadingFor()}
             headerActions={requestHeaderActionsFor(request.id, request)}
             topRightAction={scenarioUsageActionFor(request.id)}
             starLeftAction={starLeftActionFor(request)}
@@ -2117,5 +2138,3 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 })
 
 RestormWorkbench.displayName = 'RestormWorkbench'
-
-export default RestormWorkbench

@@ -14,21 +14,9 @@ export interface ResponseHistoryEntry {
   guid: string
   timestamp: string
   pinned: boolean
-  /**
-   * Boolean form retained for storage backward-compat — older history
-   * archives carry only this field. New entries also set `outcome`
-   * which the renderer prefers when present.
-   */
-  success: boolean
-  outcome?: ResponseHistoryOutcome
-}
-
-export interface ResponseHistoryIndex {
-  version: 2
-  requests: {
-    requestId: string
-    entries: ResponseHistoryEntry[]
-  }[]
+  /** How the call ended. The single source of truth for the entry's
+   * status dot — there is no separate boolean form. */
+  outcome: ResponseHistoryOutcome
 }
 
 export interface ResponseHistoryKeyValue {
@@ -55,7 +43,7 @@ export interface ResponseHistoryHttpBody {
   path?: string
 }
 
-export interface ResponseHistoryHttpResponse {
+interface ResponseHistoryHttpResponse {
   type: 'http'
   requestUrl: string
   requestMethod: string
@@ -76,7 +64,7 @@ export interface ResponseHistoryHttpResponse {
   error?: string
 }
 
-export interface ResponseHistoryODataResponse {
+interface ResponseHistoryODataResponse {
   type: 'odata'
   requestUrl: string
   requestMethod: string
@@ -104,7 +92,7 @@ export interface ResponseHistoryODataResponse {
   error?: string
 }
 
-export interface ResponseHistoryGraphQLResponse {
+interface ResponseHistoryGraphQLResponse {
   type: 'graphql'
   requestUrl: string
   requestHeaders: ResponseHistoryKeyValue[]
@@ -119,7 +107,7 @@ export interface ResponseHistoryGraphQLResponse {
   error?: string
 }
 
-export interface ResponseHistoryGrpcResponse {
+interface ResponseHistoryGrpcResponse {
   type: 'grpc'
   requestUrl: string
   requestMethod: string
@@ -139,13 +127,13 @@ export interface ResponseHistoryGrpcResponse {
   error?: string
 }
 
-export interface ResponseHistoryGrpcMessage {
+interface ResponseHistoryGrpcMessage {
   direction: 'sent' | 'received'
   data: string
   timestamp: string
 }
 
-export interface ResponseHistorySoapResponse {
+interface ResponseHistorySoapResponse {
   type: 'soap'
   requestUrl: string
   requestSoapAction: string
@@ -162,14 +150,14 @@ export interface ResponseHistorySoapResponse {
   error?: string
 }
 
-export interface ResponseHistoryWebSocketMessage {
+interface ResponseHistoryWebSocketMessage {
   direction: 'sent' | 'received'
   event?: string
   data: string
   timestamp: string
 }
 
-export interface ResponseHistoryWebSocketResponse {
+interface ResponseHistoryWebSocketResponse {
   type: 'websocket'
   requestUrl: string
   protocol: string
@@ -183,13 +171,13 @@ export interface ResponseHistoryWebSocketResponse {
 }
 
 /** One JSON-RPC 2.0 error object, per spec section 5.1. */
-export interface ResponseHistoryJsonRpcError {
+interface ResponseHistoryJsonRpcError {
   code: number
   message: string
   data?: unknown
 }
 
-export interface ResponseHistoryJsonRpcResponse {
+interface ResponseHistoryJsonRpcResponse {
   type: 'jsonrpc'
   requestUrl: string
   requestHeaders: ResponseHistoryKeyValue[]
@@ -216,7 +204,7 @@ export interface ResponseHistoryJsonRpcBatchChild {
   unmatched?: boolean
 }
 
-export interface ResponseHistoryJsonRpcBatchResponse {
+interface ResponseHistoryJsonRpcBatchResponse {
   type: 'jsonrpcBatch'
   requestUrl: string
   requestHeaders: ResponseHistoryKeyValue[]
@@ -229,7 +217,7 @@ export interface ResponseHistoryJsonRpcBatchResponse {
   error?: string
 }
 
-export interface ResponseHistoryTrpcResponse {
+interface ResponseHistoryTrpcResponse {
   type: 'trpc'
   requestUrl: string
   requestProcedure: string
@@ -250,14 +238,14 @@ export interface ResponseHistoryTrpcResponse {
   error?: string
 }
 
-export interface ResponseHistorySseFrame {
+interface ResponseHistorySseFrame {
   event: string
   data: string
   id?: string
   timestamp: string
 }
 
-export interface ResponseHistorySseResponse {
+interface ResponseHistorySseResponse {
   type: 'sse'
   requestUrl: string
   connected: boolean
@@ -269,7 +257,7 @@ export interface ResponseHistorySseResponse {
   error?: string
 }
 
-export interface ResponseHistoryAmqpMessage {
+interface ResponseHistoryAmqpMessage {
   direction: 'sent' | 'received'
   data: string
   exchange?: string
@@ -280,7 +268,7 @@ export interface ResponseHistoryAmqpMessage {
   timestamp: string
 }
 
-export interface ResponseHistoryAmqpResponse {
+interface ResponseHistoryAmqpResponse {
   type: 'amqp'
   requestUrl: string
   mode: 'publish' | 'subscribe' | 'browse'
@@ -293,7 +281,7 @@ export interface ResponseHistoryAmqpResponse {
   error?: string
 }
 
-export interface ResponseHistoryRedisMessage {
+interface ResponseHistoryRedisMessage {
   direction: 'sent' | 'received'
   channel?: string
   data: string
@@ -303,7 +291,7 @@ export interface ResponseHistoryRedisMessage {
 /** A Redis history entry covers BOTH modes — `mode` discriminates which fields
  * apply. Subscribe mode carries `channels` + the streamed `messages`; command
  * mode carries the resolved `command`/`args` + the raw reply. */
-export interface ResponseHistoryRedisResponse {
+interface ResponseHistoryRedisResponse {
   type: 'redis'
   requestUrl: string
   mode: 'subscribe' | 'command'
@@ -322,7 +310,7 @@ export interface ResponseHistoryRedisResponse {
   error?: string
 }
 
-export interface ResponseHistoryStompMessage {
+interface ResponseHistoryStompMessage {
   direction: 'sent' | 'received'
   command: string
   subscription?: string
@@ -332,7 +320,7 @@ export interface ResponseHistoryStompMessage {
   timestamp: string
 }
 
-export interface ResponseHistoryStompResponse {
+interface ResponseHistoryStompResponse {
   type: 'stomp'
   requestUrl: string
   connected: boolean
@@ -347,7 +335,7 @@ export interface ResponseHistoryStompResponse {
 /** One produced/consumed/browsed Kafka record. `direction` mirrors the
  * WebSocket message shape (`received` for consume/browse frames; produce has
  * no message list — its single result lives in the `produced*` fields). */
-export interface ResponseHistoryKafkaMessage {
+interface ResponseHistoryKafkaMessage {
   direction: 'received'
   topic: string
   partition: number
@@ -358,7 +346,7 @@ export interface ResponseHistoryKafkaMessage {
   timestamp: string
 }
 
-export interface ResponseHistoryKafkaResponse {
+interface ResponseHistoryKafkaResponse {
   type: 'kafka'
   /** Which lifecycle produced this entry — the three modes have distinct
    * result shapes (a single RecordMetadata vs. a peeked/streamed message
@@ -402,8 +390,7 @@ export interface ResponseHistoryDetail {
   guid: string
   requestId: string
   type: ResponseHistoryRequestType
-  success: boolean
-  outcome?: ResponseHistoryOutcome
+  outcome: ResponseHistoryOutcome
   timestamp: string
   pinned: boolean
   requestMeta?: ResponseHistoryRequestMeta

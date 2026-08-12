@@ -9,9 +9,9 @@
     param4:
       name: Sub-env
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     param6: "#000000"
     param5: 0000FF
     param7:
@@ -28,9 +28,9 @@
       param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       param6: "#abcdef"
       param5: FF0000
       param7: 00FF00,FF0000
@@ -51,9 +51,9 @@
     prop-1780469151969-7v0w3g:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     prop-1780469244879-3a6v38: FF0000
     prop-1780469259770-ffodx7: "#abcdef"
     prop-1780469273581-zsg6rn: 00FF00,FF0000
@@ -69,9 +69,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: FF0000
       obj_param6: "#abcdef"
       obj_param7: 00FF00,FF0000
@@ -88,9 +88,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: FF0000
       obj_param6: "#abcdef"
       obj_param7: 00FF00,FF0000
@@ -105,9 +105,9 @@
     obj_param4:
       name: localhost
       variables:
-        baseUrl: http://localhost:5110
+        baseUrl: http://localhost:<port>
         clientId: VALID_CLIENT_ID
-        socketUrl: http://localhost:3001
+        socketUrl: http://localhost:<port>
     obj_param5: FF0000
     obj_param6: "#abcdef"
     obj_param7: 00FF00,FF0000
@@ -123,9 +123,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: FF0000
       obj_param6: "#abcdef"
       obj_param7: 00FF00,FF0000
@@ -146,9 +146,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: FF0000
       obj_param6: "#abcdef"
       obj_param7: 00FF00,FF0000
@@ -169,9 +169,9 @@
       obj_param4:
         name: localhost
         variables:
-          baseUrl: http://localhost:5110
+          baseUrl: http://localhost:<port>
           clientId: VALID_CLIENT_ID
-          socketUrl: http://localhost:3001
+          socketUrl: http://localhost:<port>
       obj_param5: FF0000
       obj_param6: "#abcdef"
       obj_param7: 00FF00,FF0000

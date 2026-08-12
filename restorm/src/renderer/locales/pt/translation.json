@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Sem autenticação",
       "popoverLabel": "Rota de autenticação",
+      "openRoute": "Abrir a rota de autenticação",
       "unnamed": "Sem nome"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "Novo",
     "import": "Importar",
     "open": "Abrir",
-    "openFolder": "Abrir pasta",
     "recentFiles": "Ficheiros recentes",
     "favorites": "Favoritos",
     "close": "Fechar",
@@ -228,36 +228,24 @@
     "saveAll": "Guardar tudo",
     "saveAs": "Guardar como",
     "exit": "Sair",
-    "selection": "Seleção",
-    "tools": "Ferramentas",
-    "findInCollection": "Pesquisar na coleção",
-    "addRequest": "Adicionar pedido",
-    "addRequestHttp": "Pedido HTTP",
-    "addRequestGraphql": "Pedido GraphQL",
-    "addRequestGrpc": "Pedido gRPC",
-    "addRequestSoap": "Pedido SOAP",
-    "addRequestOdata": "Pedido OData",
-    "addRequestWebsocket": "Pedido WebSocket",
-    "addFolder": "Adicionar pasta",
-    "addEnvironmentFolder": "Adicionar pasta de ambiente",
-    "addVariable": "Adicionar variável",
-    "addTag": "Adicionar etiqueta",
-    "expandAllFolders": "Expandir todas as pastas",
-    "collapseAllFolders": "Recolher todas as pastas",
-    "sendActiveRequest": "Enviar pedido",
-    "cancelActiveRequest": "Cancelar pedido",
-    "generateCodeSnippet": "Gerar excerto de código",
-    "copyAsCurl": "Copiar como cURL",
-    "exportOpenApi": "Exportar para OpenAPI",
-    "clearAuthCache": "Limpar cache de autenticação",
-    "openLogsFolder": "Abrir pasta de registos",
     "mcpLogs": "Registos MCP",
+    "consoleHttp": "Console HTTP",
     "git": "Git",
     "gitPush": "Enviar",
     "gitPull": "Obter",
     "gitRefresh": "Atualizar",
     "gitHistory": "Histórico",
-    "gitResetToServer": "Repor para a versão do servidor"
+    "gitResetToServer": "Repor para a versão do servidor",
+    "scenario": "Cenário",
+    "create": "Criar",
+    "request": "Requisição",
+    "server": "Servidor",
+    "runSelected": "Executar",
+    "cancelSelected": "Cancelar",
+    "clone": "Clonar",
+    "delete": "Eliminar",
+    "addToFavorites": "Adicionar aos favoritos",
+    "removeFromFavorites": "Remover dos favoritos"
   },
   "sidebar": {
     "addRequest": "Adicionar pedido",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Cortar",
+      "copy": "Copiar",
+      "paste": "Colar"
     },
     "deleteConfirm": {
       "title": "Confirmar eliminação",
@@ -363,7 +354,7 @@
       "docs": "Docs",
       "environments": "Ambientes",
       "notes": "Notas",
-      "customValues": "Custom variables"
+      "customValues": "Enumerações personalizadas"
     },
     "home": {
       "configureEnvs": "Configurar ambientes",
@@ -401,7 +392,7 @@
       "addEntry": "Adicionar um valor",
       "label": "Label",
       "value": "Value",
-      "selectList": "Selecione uma lista"
+      "selectList": "Defina listas de valores reutilizáveis para as suas variáveis: você escolhe um rótulo legível e a requisição envia o valor associado. Selecione ou crie uma enumeração para começar."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Seguir redirecionamentos",
-    "timeoutLabel": "Tempo limite (ms)"
+    "timeoutLabel": "Tempo limite (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Copiar a URL resolvida",
+      "copied": "Copiado!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Desconectar",
     "startListening": "Começar a escutar",
     "stopListening": "Parar de escutar",
+    "listenFailed": "Falha ao iniciar o servidor",
     "routePlaceholder": "Rota (opcional)",
     "clientsConnected": "{{count}} cliente(s) conectado(s)",
     "notListening": "Sem escutar"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Abrir uma coleção a partir do disco",
     "landmarkLabel": "Bem-vindo"
   },
-  "save": {
-    "title": "Opções de gravação",
-    "mode": {
-      "label": "Modo de gravação",
-      "file": "Ficheiro único",
-      "folder": "Estrutura de pastas",
-      "fileDescription": "Guardar tudo num único ficheiro",
-      "folderDescription": "Guardar como estrutura de pastas com ficheiros separados"
-    },
-    "format": {
-      "label": "Formato",
-      "yamlDescription": "Legível para humanos",
-      "jsonDescription": "Formato padrão",
-      "json5Description": "JSON + comentários"
-    },
-    "preview": {
-      "label": "Pré-visualização da estrutura",
-      "noDocumentation": "Não há documentação analisada para esta fonte."
-    }
-  },
   "common": {
     "cancel": "Cancelar",
     "save": "Guardar",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "Não foi possível reimportar a especificação a partir da sua origem.",
       "emptySpec": "A especificação obtida de {{url}} não declara nenhuma operação {{format}}. Aplicá-la esvaziaria esta pasta, por isso a atualização foi recusada.",
       "formatNotDetected": "O formato desta origem não foi reconhecido.",
-      "unsupportedFormat": "Nenhum importador suporta o formato {{format}}."
+      "unsupportedFormat": "Nenhum importador suporta o formato {{format}}.",
+      "projectFormatTooNew": "Este arquivo de projeto usa a versão de formato {{found}}, mas esta versão do Restorm só entende a versão {{current}}. Atualize o Restorm para importá-lo.",
+      "projectFormatMissing": "Este arquivo não declara nenhuma versão de formato do Restorm, portanto não é um arquivo de projeto do Restorm."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Cole um documento API Blueprint (.apib) — o Restorm analisa cada grupo de recursos e transição para produzir uma pasta de pedidos, um por cada par de método e resposta documentados.",
         "trademark": "API Blueprint é uma especificação originalmente criada pela Apiary."
+      },
+      "restorm": {
+        "description": "Mescle outro projeto Restorm ao que está aberto — cada pasta, requisição, ambiente e cenário importado chega sob uma pasta envolvente, com identidades novas para que nada colida, nem mesmo ao importar um projeto nele próprio."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Correspondência anterior",
       "nextMatch": "Próxima correspondência",
       "close": "Fechar"
+    },
+    "sections": {
+      "parameters": "Parâmetros",
+      "responses": "Respostas",
+      "models": "Modelos",
+      "enums": "Enumerações",
+      "polymorphism": "Polimorfismo",
+      "overview": "Visão geral",
+      "operations": "Operações"
+    },
+    "table": {
+      "in": "Em",
+      "name": "Nome",
+      "type": "Tipo",
+      "required": "Obr.",
+      "operation": "Operação",
+      "description": "Descrição",
+      "example": "Exemplo",
+      "constraints": "Restrições"
+    },
+    "params": {
+      "empty": "Nenhum parâmetro fora do corpo declarado para as rotas filtradas."
+    },
+    "responses": {
+      "status": "Estado",
+      "schema": "Esquema",
+      "headers": "Cabeçalhos",
+      "empty": "Nenhuma resposta declarada para as rotas filtradas."
+    },
+    "route": {
+      "requestBody": "Corpo da requisição",
+      "responseBody": "Corpo da resposta",
+      "security": "Segurança",
+      "externalDocs": "Docs externas",
+      "examplePayload": "Exemplo de payload",
+      "operationId": "operationId",
+      "addRequest": "+ Adicionar uma requisição"
+    },
+    "apiInfo": {
+      "version": "Versão",
+      "sourceFormat": "Formato de origem",
+      "from": "de",
+      "server": "Servidor",
+      "contact": "Contato",
+      "license": "Licença",
+      "termsOfService": "Termos de serviço",
+      "externalDocs": "Docs externas",
+      "tagReferences": "Referências de tags"
+    },
+    "sidebar": {
+      "outline": "Estrutura da documentação"
+    },
+    "legend": {
+      "requiredProperty": "propriedade obrigatória",
+      "optionalProperty": "propriedade opcional",
+      "nullableValue": "valor anulável",
+      "readOnly": "somente leitura (definido pelo servidor)",
+      "deprecatedBadge": "obsoleto",
+      "deprecatedDesc": "declarado obsoleto na especificação de origem",
+      "removedBadge": "removido",
+      "removedDesc": "ausente da última reimportação",
+      "requiredSingleRef": "ref. única obrigatória",
+      "optionalSingleRef": "ref. única opcional",
+      "requiredArrayRef": "ref. de array obrigatória",
+      "optionalArrayRef": "ref. de array opcional"
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Formatos de dados",
       "encoding": "Codificação",
       "time": "Temporização",
-      "algorithmie": "Algoritmos",
-      "ux": "UX"
+      "algorithmie": "Algoritmos"
     },
     "listOp": {
       "value": "lista",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Pré-visualização da URL (antes da resolução)",
-    "versionV2NotYet": "v2 (execução ainda não suportada)",
-    "versionV3NotYet": "v3 (execução ainda não suportada)",
     "operationKindEntitySet": "Conjunto de entidades (GET)",
     "operationKindFunction": "Função (GET com parâmetros incorporados)",
     "operationKindAction": "Ação (POST com corpo JSON)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Parar de escutar",
       "notListening": "Sem escutar",
       "served": "A escutar — {{count}} pedido(s) atendido(s)",
-      "listenFailed": "Falha ao iniciar o servidor simulado"
+      "listenFailed": "Falha ao iniciar o servidor simulado",
+      "portInUse": "A porta {{port}} já está sendo usada por outro aplicativo. Encerre-o ou escolha outra porta e inicie o servidor novamente."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Nome da configuração",
     "saveButton": "Salvar",
+    "updateButton": "Atualizar com os valores atuais",
     "storageTarget": {
       "label": "Salvar no arquivo do projeto (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Carregar configuração",
       "message": "Deseja carregar a configuração \"{{name}}\"? Sua configuração atual não salva será perdida."
+    },
+    "updateConfirm": {
+      "title": "Atualizar configuração",
+      "message": "Deseja substituir a configuração \"{{name}}\" pelos valores atuais?"
     },
     "deleteConfirm": {
       "title": "Excluir configuração",
@@ -2632,6 +2680,10 @@
       "title": "Projeto criado com uma versão mais recente",
       "message": "Este ficheiro foi criado com uma versão do Restorm mais recente do que a que está a utilizar. Atualize o Restorm para o abrir.",
       "versions": "Formato de ficheiro {{found}}; esta versão suporta até {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Isto não é um ficheiro do Restorm",
+      "message": "Este ficheiro não declara nenhum formato de ficheiro do Restorm. Não foi criado pelo Restorm ou foi editado à mão, por isso não pode ser aberto."
     }
   }
 }

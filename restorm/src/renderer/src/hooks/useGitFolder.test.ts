@@ -18,9 +18,9 @@ describe('useGitFolder', () => {
     expect(result.current).toBe('C:\\Users\\demo\\project')
   })
 
-  it('returns the path itself for a legacy folder-mode project (no .restorm extension)', () => {
+  it('returns null for a path that is not a .restorm file', () => {
     const { result } = renderHook(() => useGitFolder('/home/user/projects/demo-folder'))
-    expect(result.current).toBe('/home/user/projects/demo-folder')
+    expect(result.current).toBeNull()
   })
 
   it('falls back to the raw path when a .restorm file has no path separator', () => {

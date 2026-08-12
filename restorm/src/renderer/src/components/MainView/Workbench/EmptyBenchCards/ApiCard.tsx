@@ -312,5 +312,3 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
     </MosaicCard>
   )
 }
-
-export default ApiCard

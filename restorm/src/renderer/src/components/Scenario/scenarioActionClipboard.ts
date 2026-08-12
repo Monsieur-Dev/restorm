@@ -38,7 +38,10 @@ let anchorPan: ViewportLike | null = null
 let targetCenter: Point = { x: 0, y: 0 }
 let pasteCount = 0
 
-const PASTE_STEP = 40
+/** Offset (px, flow coordinates) between an action and its copy — shared by
+ * paste, duplicate, and the multi-request sidebar drop so every "derived
+ * placement" fans out identically. */
+export const PASTE_STEP = 40
 
 function samePan(a: ViewportLike | null, b: ViewportLike | null): boolean {
   if (!a || !b) return false

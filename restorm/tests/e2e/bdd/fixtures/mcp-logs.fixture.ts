@@ -4,7 +4,7 @@ import { closeElectronAppForE2E, writeRendererIstanbulCoverage } from '../../hel
 import type { ElectronApplication, Page, TestInfo } from '@playwright/test'
 
 interface McpLogsFixtures {
-  petstoreFolderPath: string
+  petstoreProjectPath: string
 }
 
 /**
@@ -15,9 +15,9 @@ interface McpLogsFixtures {
  * `mcp:enabled` setting to false.
  */
 export const test = restormBaseTest.extend<McpLogsFixtures>({
-  petstoreFolderPath: async ({ restormRoot }, use) => {
+  petstoreProjectPath: async ({ restormRoot }, use) => {
     const { join } = await import('path')
-    await use(join(restormRoot, 'tests/e2e/samples/Petstore'))
+    await use(join(restormRoot, 'tests/e2e/samples/petstore-workspace.restorm'))
   },
 
   electronApp: async ({ restormRoot }, use, testInfo: TestInfo) => {

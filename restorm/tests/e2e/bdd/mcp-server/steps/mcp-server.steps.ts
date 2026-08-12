@@ -36,6 +36,12 @@ let selectedEnvId: string | null = null
 // The items the create → open_tab race steps build, at the bottom of the file.
 let raceFolderId: string | null = null
 let raceRequestId: string | null = null
+/** Items created at the ROOT of the sidebar (no parent passed to MCP). */
+let rootScenarioId: string | null = null
+let rootRequestId: string | null = null
+let rootFolderId: string | null = null
+/** The run log of the root-placed scenario, as returned by `run_scenario`. */
+let rootRunEntries: { message?: string }[] = []
 
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
@@ -765,5 +771,138 @@ Then(
   async () => {
     if (!page || !raceRequestId) throw new Error('open the race request tab first')
     await expect(page.locator(`[data-testid*="tab-request-id:${raceRequestId}"]`).first()).toBeVisible({ timeout: 5_000 })
+  }
+)
+
+// ── Creating at the ROOT of the sidebar via MCP ──
+
+When(
+  'I create a scenario named {string} at the root via MCP',
+  async ({ callMcpTool }, name: string) => {
+    if (!discovery) throw new Error('launch first')
+    // No `parentId`: the omission IS the root placement, not a missing arg.
+    lastReply = await callMcpTool(discovery, 'create_scenario', { name })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false, `create_scenario replied: ${JSON.stringify(lastReply)}`).toBe(false)
+    const payload = lastReplyPayload as { id: string; parentId: string | null }
+    expect(payload.parentId, 'a root creation must report a null parent').toBeNull()
+    rootScenarioId = payload.id
+  }
+)
+
+Then(
+  'MCP list_scenarios should report {string} at the root',
+  async ({ callMcpTool }, name: string) => {
+    if (!discovery || !rootScenarioId) throw new Error('create the root scenario first')
+    const reply = await callMcpTool(discovery, 'list_scenarios', {})
+    const listed = parsedReply(reply) as { id: string; name: string; path: string; parentId: string | null }[]
+    const found = listed.find((s) => s.id === rootScenarioId)
+    // Listing only what the collections CONTAIN would omit it entirely, which
+    // is how a root scenario stayed invisible to every MCP client.
+    expect(found, `root scenario missing from list_scenarios: ${JSON.stringify(listed)}`).toBeDefined()
+    expect(found?.parentId).toBeNull()
+    expect(found?.path, 'a root scenario has no ancestor container in its path').toBe(name)
+  }
+)
+
+When(
+  'I create a request named {string} at the root via MCP',
+  async ({ callMcpTool }, name: string) => {
+    if (!discovery) throw new Error('launch first')
+    lastReply = await callMcpTool(discovery, 'create_request', { name, protocol: 'http' })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false, `create_request replied: ${JSON.stringify(lastReply)}`).toBe(false)
+    const payload = lastReplyPayload as { id: string; parentId: string | null }
+    expect(payload.parentId, 'a root creation must report a null parent').toBeNull()
+    rootRequestId = payload.id
+  }
+)
+
+Then(
+  'MCP list_requests should include the root request',
+  async ({ callMcpTool }) => {
+    if (!discovery || !rootRequestId) throw new Error('create the root request first')
+    const reply = await callMcpTool(discovery, 'list_requests', {})
+    const listed = parsedReply(reply) as { id: string; parentId: string | null }[]
+    const found = listed.find((r) => r.id === rootRequestId)
+    expect(found, `root request missing from list_requests: ${JSON.stringify(listed)}`).toBeDefined()
+    expect(found?.parentId).toBeNull()
+  }
+)
+
+When(
+  'I add a log node to the root scenario and run it via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery || !rootScenarioId) throw new Error('create the root scenario first')
+    // Adding a node already exercises main-side resolution of a root item —
+    // it fails outright if the scenario cannot be found by id.
+    const added = await callMcpTool(discovery, 'create_scenario_node', {
+      scenarioId: rootScenarioId,
+      kind: 'log',
+      config: { message: 'root scenario ran', level: 'info' },
+      arrange: true
+    })
+    expect(added.isError ?? false, `create_scenario_node replied: ${JSON.stringify(added)}`).toBe(false)
+
+    // The create replied, but running immediately races the engine's view of
+    // the scenario: on a loaded host the run can start on a node set that does
+    // not hold the log node yet, and the run then completes with only its start
+    // and end markers — which reads as "the action did not run" rather than as
+    // the race it is. Assert the node is THERE before running.
+    const discoveryForList = discovery
+    const scenarioIdForList = rootScenarioId
+    await expect(async () => {
+      const listed = await callMcpTool(discoveryForList, 'list_scenario_nodes', { scenarioId: scenarioIdForList })
+      const nodes = (parsedReply(listed) as { nodes?: { kind?: string }[] }).nodes ?? []
+      expect(nodes.some((n) => n.kind === 'log'), 'the log node is not visible on the scenario yet').toBe(true)
+    }).toPass({ timeout: 10_000 })
+
+    lastReply = await callMcpTool(discovery, 'run_scenario', { scenarioId: rootScenarioId })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false, `run_scenario replied: ${JSON.stringify(lastReply)}`).toBe(false)
+    rootRunEntries = (lastReplyPayload as { log?: { message?: string }[] }).log ?? []
+  }
+)
+
+Then(
+  'the root scenario run should complete without a missing-scenario error',
+  async () => {
+    const messages = rootRunEntries.map((e) => e.message ?? '')
+    const joined = messages.join(' | ')
+    // The start/end markers only exist if the engine RESOLVED the scenario;
+    // "no scenario with id" is thrown before any of them is emitted.
+    expect(joined, `run produced no start marker: ${joined}`).toContain('▶ ')
+    expect(joined, `run never completed: ${joined}`).toContain('■ ')
+    expect(joined, 'the log action inside the root scenario did not run').toContain('root scenario ran')
+    expect(joined).not.toMatch(/no scenario with id/i)
+  }
+)
+
+When(
+  'I create a folder named {string} at the root via MCP',
+  async ({ callMcpTool }, name: string) => {
+    if (!discovery) throw new Error('launch first')
+    lastReply = await callMcpTool(discovery, 'create_folder', { name })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false, `create_folder replied: ${JSON.stringify(lastReply)}`).toBe(false)
+    const payload = lastReplyPayload as { id: string; parentId: string | null }
+    expect(payload.parentId, 'a root creation must report a null parent').toBeNull()
+    rootFolderId = payload.id
+  }
+)
+
+Then(
+  'MCP list_folders should report {string} at the root',
+  async ({ callMcpTool }, name: string) => {
+    if (!discovery || !rootFolderId) throw new Error('create the root folder first')
+    const reply = await callMcpTool(discovery, 'list_folders', {})
+    const listed = parsedReply(reply) as { id: string; name: string; kind: string; parentId: string | null }[]
+    const found = listed.find((f) => f.id === rootFolderId)
+    expect(found, `root folder missing from list_folders: ${JSON.stringify(listed)}`).toBeDefined()
+    expect(found?.name).toBe(name)
+    expect(found?.parentId).toBeNull()
+    // A folder created at the root is a collection (env-folder), which is the
+    // pre-existing behaviour the relaxed root must not have changed.
+    expect(found?.kind).toBe('env-folder')
   }
 )

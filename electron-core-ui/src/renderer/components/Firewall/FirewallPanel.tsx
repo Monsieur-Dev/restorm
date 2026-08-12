@@ -157,7 +157,7 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 						tabs={tabs}
 						activeTabId={activeTabId}
 						onTabChange={setActiveTabId}
-						keepMounted
+						mountStrategy="eager"
 					/>
 				</div>
 			</div>

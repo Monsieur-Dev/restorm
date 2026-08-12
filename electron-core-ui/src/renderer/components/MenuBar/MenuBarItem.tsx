@@ -263,6 +263,12 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
             <ul className="actions-container" role="menu">
               {React.Children.map(children, (child, index) => {
                 if (React.isValidElement(child)) {
+                  // A conditional group (`{cond && (<>…</>)}`) reaches here as a
+                  // Fragment, which accepts no prop beyond `key`/`children` —
+                  // stamping the fallback test id on it makes React warn on
+                  // every render. Pass it through untouched; its inner items
+                  // carry their own explicit test ids.
+                  if (child.type === React.Fragment) return child
                   const childTestId = (child.props as { 'data-testid'?: unknown })['data-testid']
                   return React.cloneElement(child, {
                     key: index,
@@ -281,4 +287,4 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
 
 MenuBarItem.displayName = 'MenuBarItem'
 
-export default MenuBarItem
+export { MenuBarItem }

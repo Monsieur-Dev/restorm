@@ -43,7 +43,7 @@ vi.mock('./EventBusService', () => ({
 
 vi.mock('./I18nService', () => ({ i18nService: { t: vi.fn((k: string) => k) } }))
 
-vi.mock('js-yaml', () => ({ default: { load: vi.fn(), dump: vi.fn() } }))
+vi.mock('js-yaml', () => ({ load: vi.fn(), dump: vi.fn() }))
 
 import { FileService } from './FileService'
 import { makeTombstone } from './saveUnit'
@@ -342,145 +342,6 @@ describe('FileService.cleanupOrphanedDrafts', () => {
   })
 })
 
-describe('FileService.saveUnit', () => {
-  let ctx: ReturnType<typeof newHarness>
-  beforeEach(() => { ctx = newHarness() })
-  afterEach(() => { ctx.cleanup() })
-
-  it('atomically writes the content and commits the unit', async () => {
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: { name: 'v1' } })
-    ctx.service.getSaveUnitRegistry().mutate('a', { name: 'v2' })
-    expect(ctx.service.getSaveUnitRegistry().isDirty('a')).toBe(true)
-
-    const target = join(ctx.projectPath, 'unit-a.json')
-    const ok = await ctx.service.saveUnit({
-      runtimeId: 'a',
-      content: { name: 'v2' },
-      absolutePath: target,
-      format: 'json'
-    })
-    expect(ok).toBe(true)
-    expect(JSON.parse(await fs.readFile(target, 'utf-8'))).toEqual({ name: 'v2' })
-
-    // Unit is now clean, reference reflects the draft.
-    const unit = ctx.service.getSaveUnitRegistry().get('a')
-    expect(unit?.reference).toEqual({ name: 'v2' })
-    expect(unit?.draft).toBeUndefined()
-  })
-
-  it('removes the draft file after a successful save', async () => {
-    await attach(ctx)
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: { n: 1 } })
-    ctx.service.getSaveUnitRegistry().mutate('a', { n: 2 })
-    await new Promise((r) => setTimeout(r, 80))
-    expect(existsSync(join(ctx.rootDir, 'test-proj', 'a.draft.json'))).toBe(true)
-
-    await ctx.service.saveUnit({
-      runtimeId: 'a',
-      content: { n: 2 },
-      absolutePath: join(ctx.projectPath, 'a.json'),
-      format: 'json'
-    })
-    await new Promise((r) => setTimeout(r, 60))
-    expect(existsSync(join(ctx.rootDir, 'test-proj', 'a.draft.json'))).toBe(false)
-  })
-
-  it('preserves a newer draft that arrived after the save snapshot was captured', async () => {
-    await attach(ctx)
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: { n: 1 } })
-    ctx.service.getSaveUnitRegistry().mutate('a', { n: 2 })
-
-    // Simulate a mutation landing between the caller's snapshot and the
-    // persisted commit — the commit must skip so the newer draft survives.
-    ctx.service.getSaveUnitRegistry().mutate('a', { n: 3 })
-
-    const target = join(ctx.projectPath, 'a.json')
-    const ok = await ctx.service.saveUnit({
-      runtimeId: 'a',
-      content: { n: 2 },
-      absolutePath: target,
-      format: 'json'
-    })
-    expect(ok).toBe(true)
-    // Disk reflects the snapshot we were told to save.
-    expect(JSON.parse(await fs.readFile(target, 'utf-8'))).toEqual({ n: 2 })
-    // Registry still dirty, draft advanced — ready for the next save cycle.
-    const unit = ctx.service.getSaveUnitRegistry().get('a')
-    expect(unit?.reference).toEqual({ n: 1 })
-    expect(unit?.draft).toEqual({ n: 3 })
-    expect(ctx.service.getSaveUnitRegistry().isDirty('a')).toBe(true)
-
-    // Draft file still holds the newer value — we must not have deleted it.
-    await new Promise((r) => setTimeout(r, 60))
-    const draftPath = join(ctx.rootDir, 'test-proj', 'a.draft.json')
-    expect(existsSync(draftPath)).toBe(true)
-    expect(JSON.parse(await fs.readFile(draftPath, 'utf-8'))).toEqual({ n: 3 })
-  })
-
-  it('returns false when the write fails', async () => {
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: { name: 'x' } })
-    ctx.service.getSaveUnitRegistry().mutate('a', { name: 'y' })
-
-    // Writing into a path that's blocked (parent exists as a file) triggers the error path.
-    const brokenParent = join(ctx.projectPath, 'parent-as-file')
-    await fs.writeFile(brokenParent, 'i am a file', 'utf-8')
-    const ok = await ctx.service.saveUnit({
-      runtimeId: 'a',
-      content: { name: 'y' },
-      absolutePath: join(brokenParent, 'nope.json'),
-      format: 'json'
-    })
-    expect(ok).toBe(false)
-    // Unit stays dirty so the user can retry.
-    expect(ctx.service.getSaveUnitRegistry().isDirty('a')).toBe(true)
-  })
-})
-
-describe('FileService.saveUnitsBatch', () => {
-  let ctx: ReturnType<typeof newHarness>
-  beforeEach(() => { ctx = newHarness() })
-  afterEach(() => { ctx.cleanup() })
-
-  it('saves every unit independently and returns per-unit outcomes', async () => {
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: {} })
-    ctx.service.getSaveUnitRegistry().mutate('a', { n: 1 })
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'b', kind: 'file', reference: {} })
-    ctx.service.getSaveUnitRegistry().mutate('b', { n: 2 })
-
-    const outcomes = await ctx.service.saveUnitsBatch([
-      { runtimeId: 'a', content: { n: 1 }, absolutePath: join(ctx.projectPath, 'a.json'), format: 'json' },
-      { runtimeId: 'b', content: { n: 2 }, absolutePath: join(ctx.projectPath, 'b.json'), format: 'json' }
-    ])
-
-    expect(outcomes).toEqual([
-      { runtimeId: 'a', success: true },
-      { runtimeId: 'b', success: true }
-    ])
-    expect(ctx.service.getSaveUnitRegistry().isDirty('a')).toBe(false)
-    expect(ctx.service.getSaveUnitRegistry().isDirty('b')).toBe(false)
-  })
-
-  it('a failing entry does not block the rest of the batch', async () => {
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'a', kind: 'file', reference: {} })
-    ctx.service.getSaveUnitRegistry().mutate('a', { n: 1 })
-    ctx.service.getSaveUnitRegistry().hydrate({ runtimeId: 'b', kind: 'file', reference: {} })
-    ctx.service.getSaveUnitRegistry().mutate('b', { n: 2 })
-
-    const brokenParent = join(ctx.projectPath, 'file-in-the-way')
-    await fs.writeFile(brokenParent, 'x', 'utf-8')
-
-    const outcomes = await ctx.service.saveUnitsBatch([
-      { runtimeId: 'a', content: { n: 1 }, absolutePath: join(brokenParent, 'nope.json'), format: 'json' },
-      { runtimeId: 'b', content: { n: 2 }, absolutePath: join(ctx.projectPath, 'b.json'), format: 'json' }
-    ])
-
-    expect(outcomes[0]?.success).toBe(false)
-    expect(outcomes[1]?.success).toBe(true)
-    expect(ctx.service.getSaveUnitRegistry().isDirty('a')).toBe(true)
-    expect(ctx.service.getSaveUnitRegistry().isDirty('b')).toBe(false)
-  })
-})
-
 describe('FileService — full crash-and-recover loop', () => {
   let ctx: ReturnType<typeof newHarness>
   beforeEach(() => { ctx = newHarness() })
@@ -511,17 +372,9 @@ describe('FileService — full crash-and-recover loop', () => {
     expect(restoredUnit?.draft).toEqual({ name: 'v2' })
     expect(ctx.service.getSaveUnitRegistry().isDirty('req-1')).toBe(true)
 
-    // --- Save: the draft content is persisted, the unit goes clean,
-    // the draft file disappears. ---
-    const target = join(ctx.projectPath, 'req-1.json')
-    const ok = await ctx.service.saveUnit({
-      runtimeId: 'req-1',
-      content: { name: 'v2' },
-      absolutePath: target,
-      format: 'json'
-    })
-    expect(ok).toBe(true)
-    expect(JSON.parse(await fs.readFile(target, 'utf-8'))).toEqual({ name: 'v2' })
+    // --- Save: the host persists the whole file, then commits the unit
+    // in the registry — the unit goes clean, the draft file disappears. ---
+    ctx.service.getSaveUnitRegistry().commit('req-1')
     await new Promise((r) => setTimeout(r, 60))
     expect(existsSync(draftPath)).toBe(false)
     const finalUnit = ctx.service.getSaveUnitRegistry().get('req-1')

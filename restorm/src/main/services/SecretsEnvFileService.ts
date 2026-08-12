@@ -48,6 +48,27 @@ export async function saveFolderSecretsEnvFile(
   })
 }
 
+/**
+ * Load the SINGLE-FILE project's secrets sidecar (`<project>.restorm.env`,
+ * i.e. the open `.restorm` path + `.env`). Same parse + duplicate policy as
+ * the folder variant; `null` when the sidecar doesn't exist yet.
+ */
+export async function loadProjectSidecarEnvFile(projectPath: string): Promise<Record<string, string> | null> {
+  const envPath = `${projectPath}.env`
+  let envText: string
+  try {
+    envText = await fs.readFile(envPath, 'utf-8')
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw err
+  }
+  const parsed = parseEnvFileDetailed(envText)
+  if (parsed.duplicates.length > 0) {
+    logger.warn('Duplicate keys found in the project sidecar .env (last wins)', { duplicates: parsed.duplicates })
+  }
+  return parsed.vars
+}
+
 export async function loadFolderSecretsEnvFile(folderPath: string): Promise<Record<string, string> | null> {
   const envPath = getFolderSecretsEnvPath(folderPath)
 

@@ -2,12 +2,6 @@ import { defineConfig } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
 
 // Define BDD configurations for each test group
-const openFolderTestDir = defineBddConfig({
-  features: 'tests/e2e/bdd/open-folder/features/**/*.feature',
-  steps: ['tests/e2e/bdd/open-folder/steps/**/*.ts', 'tests/e2e/bdd/fixtures/petstore-folder.fixture.ts'],
-  outputDir: '.features-gen/open-folder'
-})
-
 const fullWorkflowTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/full-workflow/features/**/*.feature',
   steps: ['tests/e2e/bdd/full-workflow/steps/**/*.ts', 'tests/e2e/bdd/fixtures/full-workflow.fixture.ts'],
@@ -45,6 +39,11 @@ const harImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/har-import/features/**/*.feature',
   steps: ['tests/e2e/bdd/har-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/har-import.fixture.ts'],
   outputDir: '.features-gen/har-import'
+})
+const restormImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/restorm-import/features/**/*.feature',
+  steps: ['tests/e2e/bdd/restorm-import/steps/**/*.ts', 'tests/e2e/bdd/fixtures/restorm-import.fixture.ts'],
+  outputDir: '.features-gen/restorm-import'
 })
 
 const dirtyStateTestDir = defineBddConfig({
@@ -109,6 +108,18 @@ const mcpServerTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/mcp-server/features/**/*.feature',
   steps: ['tests/e2e/bdd/mcp-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
   outputDir: '.features-gen/mcp-server'
+})
+
+const fileExternalChangeTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/file-external-change/features/**/*.feature',
+  steps: ['tests/e2e/bdd/file-external-change/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/file-external-change'
+})
+
+const menubarContextTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/menubar-context/features/**/*.feature',
+  steps: ['tests/e2e/bdd/menubar-context/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/menubar-context'
 })
 
 const sidebarCloneTestDir = defineBddConfig({
@@ -426,15 +437,6 @@ const mcpLogsDisabledTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-logs-disabled'
 })
 
-const bodyTypeMigrationTestDir = defineBddConfig({
-  features: 'tests/e2e/bdd/body-type-migration/features/**/*.feature',
-  steps: [
-    'tests/e2e/bdd/body-type-migration/steps/**/*.ts',
-    'tests/e2e/bdd/body-type-migration/fixtures/body-type-migration.fixture.ts'
-  ],
-  outputDir: '.features-gen/body-type-migration'
-})
-
 const pawImportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/paw-import/features/**/*.feature',
   steps: [
@@ -451,6 +453,15 @@ const sidebarSplitDropTestDir = defineBddConfig({
     'tests/e2e/bdd/fixtures/sidebar-split-drop.fixture.ts'
   ],
   outputDir: '.features-gen/sidebar-split-drop'
+})
+
+const sidebarDndTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/sidebar-dnd/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/sidebar-dnd/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/sidebar-dnd.fixture.ts'
+  ],
+  outputDir: '.features-gen/sidebar-dnd'
 })
 
 const httpieImportTestDir = defineBddConfig({
@@ -530,24 +541,24 @@ export default defineConfig({
    * (editors, browsers, parallel agents), and 4 vs 8 differ by under 1 GB.
    * What binds now is CPU, and the suite's own load-sensitivity.
    *
-   * Measured full-suite wall time: 1 worker ~52 min, 4 workers ~18 min, 8
-   * workers 15 min. The tail is long-pole projects that stay serial inside
-   * themselves (scenario-runlog, scenario-code-deps, exhaustive-doc-viewer,
-   * full-workflow), so the suite floors around 13-14 min regardless — 8 buys
-   * only ~19% over 4 while doubling the failures (11 vs 5). 4 is the useful
-   * target; higher is not worth the instability.
+   * Since the move to per-worker Testcontainers (no shared compose stack, so
+   * workers no longer contend on stateful services), measured full-suite wall
+   * time with retries:2: 4 workers 20.5 min / 0 failed / 3 flaky, 5 workers
+   * 19.3 min / 0 failed / 3 flaky, 6 workers 18.5 min / 0 failed / 2 flaky.
+   * Steady-state CPU sits around 20% on 16 cores at 6 — the binding floor is
+   * the long-pole projects that stay serial inside themselves (scenario-runlog
+   * alone is ~12 min), so raising workers further buys almost nothing.
    *
-   * 4 is the VALIDATED default: two consecutive full runs at 4 came back
-   * 353/353 with zero flaky and zero retries fired. Getting there took fixing
-   * what the parallelism was exposing rather than tuning the number — a
-   * renderer→main mirror that could wipe the collections tree during project
-   * load, a harness socket reused after the host's keep-alive closed it, and an
-   * ack budget too small for a loaded machine. Those were real defects that
-   * merely happened to surface under load; the worker count was never the bug.
+   * 6 is the measured sweet spot: fastest of the three, no failures, fewest
+   * flakes. The historical lesson stands — when a worker bump surfaces
+   * failures, they are real load-sensitivity defects to fix (a renderer→main
+   * mirror wiping the tree during load, a reused harness socket, a too-small
+   * ack budget were the actual culprits last time), not a reason to tune the
+   * number back down.
    *
    * `PW_WORKERS` overrides it either way — raise it on an idle host, or pin
    * `PW_WORKERS=1` to serialise when debugging a single suite. */
-  workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : 4,
+  workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : 6,
 
   /* Reporter */
   reporter: [
@@ -566,10 +577,6 @@ export default defineConfig({
 
   /* Projects for each test group */
   projects: [
-    {
-      name: 'open-folder',
-      testDir: openFolderTestDir
-    },
     {
       name: 'full-workflow',
       testDir: fullWorkflowTestDir,
@@ -598,6 +605,10 @@ export default defineConfig({
     {
       name: 'har-import',
       testDir: harImportTestDir
+    },
+    {
+      name: 'restorm-import',
+      testDir: restormImportTestDir
     },
     {
       name: 'dirty-state',
@@ -646,6 +657,16 @@ export default defineConfig({
     {
       name: 'mcp-server',
       testDir: mcpServerTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'file-external-change',
+      testDir: fileExternalChangeTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'menubar-context',
+      testDir: menubarContextTestDir,
       timeout: 180 * 1000
     },
     {
@@ -865,9 +886,9 @@ export default defineConfig({
       timeout: 120 * 1000 // pre-seeds mcp:enabled=false (no --no-mcp flag); asserts the menu entry is disabled
     },
     {
-      name: 'body-type-migration',
-      testDir: bodyTypeMigrationTestDir,
-      timeout: 120 * 1000 // opens a fresh app + a legacy-spelling .restorm file
+      name: 'sidebar-dnd',
+      testDir: sidebarDndTestDir,
+      timeout: 120 * 1000 // opens the reference project; multi-select + drag sequences
     },
     {
       name: 'sidebar-split-drop',

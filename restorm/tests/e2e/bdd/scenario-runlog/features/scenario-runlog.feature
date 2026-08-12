@@ -29,6 +29,7 @@ Feature: Scenario run-log end-to-end
       | Loops          |
       | Inputs/outputs |
       | Conditions     |
+      | Value done join |
       | Casts          |
       | Regex          |
       | JSON           |

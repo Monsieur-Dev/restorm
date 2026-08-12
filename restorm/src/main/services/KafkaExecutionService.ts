@@ -35,7 +35,7 @@ import type { KafkaFromOffset, KafkaSaslMechanism } from '../../shared/types/req
  * the KeyValue[] shape the history archive stores, mirroring how
  * `WebSocketExecutionService.WebSocketMessage` is a distinct local type from
  * `ResponseHistoryWebSocketMessage`). */
-export interface KafkaMessageFrame {
+interface KafkaMessageFrame {
   direction: 'received'
   topic: string
   partition: number
@@ -46,7 +46,7 @@ export interface KafkaMessageFrame {
   timestamp: string
 }
 
-export interface KafkaExecutionInput {
+interface KafkaExecutionInput {
   requestId: string
   timeout?: number
 }
@@ -56,7 +56,7 @@ interface KafkaTimings {
   durationMs: number
 }
 
-export interface KafkaProduceResult {
+interface KafkaProduceResult {
   requestId: string
   success: boolean
   kafkaMode: 'produce'
@@ -68,7 +68,7 @@ export interface KafkaProduceResult {
   timings: KafkaTimings
 }
 
-export interface KafkaBrowseResult {
+interface KafkaBrowseResult {
   requestId: string
   success: boolean
   kafkaMode: 'browse'
@@ -79,7 +79,7 @@ export interface KafkaBrowseResult {
   timings: KafkaTimings
 }
 
-export interface KafkaConsumeResult {
+interface KafkaConsumeResult {
   requestId: string
   success: boolean
   kafkaMode: 'consume'
@@ -134,7 +134,7 @@ function headersToRecord(headers: IHeaders | undefined): Record<string, string> 
   return Object.keys(out).length > 0 ? out : undefined
 }
 
-export class KafkaExecutionService {
+class KafkaExecutionService {
   private activeOperations = new Map<string, ActiveKafkaOperation>()
 
   /** Resolve every user-facing field through `ContextService` before it hits

@@ -252,5 +252,3 @@ const BreadcrumbInner: React.FC<BreadcrumbProps> = ({
 }
 
 export const Breadcrumb = React.memo(BreadcrumbInner)
-
-export default Breadcrumb

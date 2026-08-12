@@ -75,5 +75,3 @@ export const EnvironmentValueCell: React.FC<EnvironmentValueCellProps> = ({ valu
     </div>
   )
 }
-
-export default EnvironmentValueCell

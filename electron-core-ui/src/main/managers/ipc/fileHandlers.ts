@@ -4,8 +4,7 @@ import {
   fileOpenArgs, fileSaveArgs, fileSaveAsArgs,
   fileToggleFavoriteArgs, fileRemoveFromRecentArgs,
   fileChecksumArgs, fileShowUnsavedDialogArgs,
-  fileHydrateSaveUnitArgs, fileUpsertSaveUnitArgs, fileSaveUnitIdArgs,
-  fileSaveUnitToDiskArgs, fileSaveUnitsBatchArgs
+  fileHydrateSaveUnitArgs, fileUpsertSaveUnitArgs, fileSaveUnitIdArgs
 } from '../../ipc/schemas'
 import { logger, isFileServiceInitialized, getFileService } from '../../services'
 
@@ -193,13 +192,4 @@ export function registerFileHandlers(): void {
     return getFileService().getSaveUnitsSnapshot()
   })
 
-  validatedHandle('file:save-unit', fileSaveUnitToDiskArgs, async (_event, [entry]) => {
-    if (!isFileServiceInitialized()) return false
-    return getFileService().saveUnit(entry)
-  })
-
-  validatedHandle('file:save-units-batch', fileSaveUnitsBatchArgs, async (_event, [entries]) => {
-    if (!isFileServiceInitialized()) return []
-    return getFileService().saveUnitsBatch(entries)
-  })
 }

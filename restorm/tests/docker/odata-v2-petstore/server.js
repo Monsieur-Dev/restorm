@@ -234,7 +234,10 @@ function handleJsonBatch(rawBody) {
 }
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://localhost:${PORT}`)
+  // Resolve against the address the CLIENT reached us on (Host header):
+  // behind a published/ephemeral port, self-referencing links (__next)
+  // must target the reachable origin, not the in-container listen port.
+  const url = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`)
   const path = url.pathname.replace(/\/+$/, '') || '/'
   const query = url.searchParams
   const method = req.method || 'GET'

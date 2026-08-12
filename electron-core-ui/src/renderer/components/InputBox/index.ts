@@ -1,4 +1,4 @@
-export { default as InputBox } from './InputBox'
+export { InputBox } from './InputBox'
 export { MessageType } from './types'
 export type { 
   IInputOptions, 

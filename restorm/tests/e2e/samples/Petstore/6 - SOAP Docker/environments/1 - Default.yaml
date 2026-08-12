@@ -1,6 +1,0 @@
-name: Default
-variables:
-  - key: baseUrl
-    value:
-      type: string
-      value: http://localhost:8090/castlemock/mock/soap/echo

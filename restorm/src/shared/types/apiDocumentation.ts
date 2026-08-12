@@ -42,7 +42,7 @@ export interface ApiInfo {
 }
 
 /** Connection info: host, base path, schemes, XML namespace, etc. */
-export interface ApiServer {
+interface ApiServer {
   host?: string
   basePath?: string
   schemes?: string[]
@@ -81,7 +81,7 @@ export interface SchemaConstraints {
  * `ModelDocumentation.xml` — the spec uses identical fields at both
  * levels, just narrower semantics for models (root element name +
  * namespace, no attribute / wrapped flag). */
-export interface XmlHints {
+interface XmlHints {
   name?: string
   attribute?: boolean
   wrapped?: boolean
@@ -135,7 +135,7 @@ export interface PropertyDocumentation {
  * model card. `discriminator.propertyName` is the field whose value
  * picks the variant; `discriminator.mapping` maps that value to a
  * concrete model name. */
-export interface ModelComposition {
+interface ModelComposition {
   oneOf?: string[]
   anyOf?: string[]
   discriminator?: {
@@ -180,7 +180,7 @@ export interface GroupDocumentation {
  * documentation; instead the compiler resolves the route's URL + discriminants and looks
  * up the matching operation each time.
  */
-export interface OperationMatchCriteria {
+interface OperationMatchCriteria {
   /** URL pattern (e.g., `/pets/{petId}`). */
   urlPattern: string
   /** HTTP verb (GET, POST, etc.) for REST. */
@@ -251,7 +251,13 @@ export interface ResponseDocumentation {
 /** A single operation (REST path+method, SOAP op, gRPC method, GraphQL field, etc.). */
 export interface OperationDocumentation {
   match: OperationMatchCriteria
+  /** Primary tag — the FIRST of `tags`, used for folder grouping. */
   group?: string
+  /** All tags declared on the operation (OpenAPI/Swagger `tags`, and the
+   * equivalent in other specs). Surfaced as chips in the route's docs, mirroring
+   * the tag badges shown on the request's workbench tab. `group` stays the
+   * grouping key; this is the full list for display. */
+  tags?: string[]
   summary?: string
   description?: string
   operationId?: string
@@ -295,7 +301,7 @@ export interface OAuth2Flow {
  * matches the source vocabulary so the doc viewer can render
  * version-correct labels (`basic` is 2.0-only; `http` is 3.x-only,
  * etc.). */
-export type SecuritySchemeType = 'apiKey' | 'basic' | 'http' | 'oauth2' | 'openIdConnect'
+type SecuritySchemeType = 'apiKey' | 'basic' | 'http' | 'oauth2' | 'openIdConnect'
 
 export interface SecurityScheme {
   type: SecuritySchemeType

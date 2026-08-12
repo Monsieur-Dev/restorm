@@ -1,9 +1,10 @@
+import { remapCanonicalPorts } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
 import { execSync } from 'child_process'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
-import { configureNextSaveFileDialogForE2E, configureNextOpenDialogForE2E, configureNextConfirmationDialogForE2E } from 'electron-core-ui/testing'
+import { configureNextSaveFileDialogForE2E, configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect } from '../../fixtures/git-collab.fixture'
 import { gitEnv } from '../../../../integration/gitServerSeed'
 
@@ -101,7 +102,8 @@ When('{string} creates the project file {string} in his repository', async ({ co
   await p.waitForTimeout(500)
 })
 
-When('{string} imports the Petstore from {string}', async ({ collab }, actor: string, url: string) => {
+When('{string} imports the Petstore from {string}', async ({ collab, services }, actor: string, url: string) => {
+  url = remapCanonicalPorts(url, services)
   const p = collab.pageOf(actor)
 
   await p.keyboard.press('Control+I')
@@ -956,18 +958,18 @@ When(
   }
 )
 
-const EXTERNAL_CHANGE_BUTTON_KEYS = ['file.externalChange.reload', 'file.externalChange.keepMine'] as const
-
 When(
-  '{string} will answer {string} to the file-changed-on-disk question',
+  '{string} answers the file-changed-on-disk toast with {string}',
   async ({ collab }, actor: string, answer: string) => {
-    // The prompt is a native message box, so it can only be driven
-    // through the system-modals mock — configured one-shot, before the
-    // save that raises it.
-    await configureNextConfirmationDialogForE2E(collab.appOf(actor), {
-      buttonKeys: EXTERNAL_CHANGE_BUTTON_KEYS,
-      choiceKey: answer === 'reload' ? 'file.externalChange.reload' : 'file.externalChange.keepMine'
-    })
+    // The question surface for an external rewrite is the timerless
+    // reload/keep-mine TOAST (`useExternalFileChange`), not a native
+    // message box — the watcher raises it moments after the rewrite
+    // lands, and it stays up until answered.
+    const p = collab.pageOf(actor)
+    const testid = answer === 'reload' ? 'file-external-change-reload' : 'file-external-change-keep-mine'
+    const button = p.locator(`[data-testid="${testid}"]`)
+    await expect(button).toBeVisible({ timeout: 10000 })
+    await button.click()
   }
 )
 

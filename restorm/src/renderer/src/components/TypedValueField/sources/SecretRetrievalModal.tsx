@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, InputBox, Modal } from 'electron-core-ui/renderer'
+import { Button, Modal } from 'electron-core-ui/renderer'
 import { SecretValue } from '../../../../../shared/types/valueTypes/SecretValue'
 import { SecretSourceConfig } from './SecretSourceConfig'
 import './secretRetrievalModal.css'
@@ -122,18 +122,19 @@ const SecretRetrievalModalBody: React.FC<Omit<SecretRetrievalModalProps, 'isOpen
       </div>
 
       {/* Common section — the fetched value, read-only (it is the resolution
-          result, shown so the user can confirm retrieval works). */}
+          result, shown so the user can confirm retrieval works). A selectable
+          WRAPPING label, not a disabled input: the user reads and copies it,
+          never edits it, and a long value must fold instead of scrolling. */}
       <div className="secret-retrieval-value">
         <label className="secret-retrieval-label">
           {t('secrets.retrievalModal.value', 'valeur :')}
         </label>
-        <InputBox
-          value={fetchedValue}
-          disabled
-          options={{ type: 'text' }}
-          className={fetchError ? 'secret-retrieval-input-error' : ''}
+        <span
+          className={`secret-retrieval-value-text${fetchError ? ' secret-retrieval-input-error' : ''}`}
           {...(dataTestId && { 'data-testid': `${dataTestId}-retrieval-value` })}
-        />
+        >
+          {fetchedValue}
+        </span>
         {fetchError && (
           <span
             className="secret-retrieval-error"
@@ -195,6 +196,7 @@ export const SecretRetrievalModal: React.FC<SecretRetrievalModalProps> = ({
       size="dialog"
       scopeToSelector=".restorm-workbench-tab"
       data-testid={dataTestId ? `${dataTestId}-retrieval-modal` : 'secret-retrieval-modal'}
+      {...(dataTestId ? { enterActionTestId: `${dataTestId}-retrieval-ok` } : {})}
     >
       {isOpen && (
         <SecretRetrievalModalBody
@@ -207,5 +209,3 @@ export const SecretRetrievalModal: React.FC<SecretRetrievalModalProps> = ({
     </Modal>
   )
 }
-
-export default SecretRetrievalModal

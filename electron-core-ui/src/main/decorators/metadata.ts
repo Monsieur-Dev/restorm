@@ -7,8 +7,7 @@ export const METADATA_KEYS = {
   TRACKABLE: Symbol('trackable'),
   SEARCHABLE: Symbol('searchable'),
   NON_SERIALISED: Symbol('nonSerialised'),
-  SEPARATE_FILES: Symbol('separateFiles'),
-  SEPARATE_FOLDERS: Symbol('separateFolders'),
+  SAVE_UNITS: Symbol('saveUnits'),
   FILE_NAMING: Symbol('fileNaming'),
   TREAT_EMPTY_AS_UNDEFINED: Symbol('treatEmptyAsUndefined')
 } as const

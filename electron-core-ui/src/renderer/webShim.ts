@@ -10,7 +10,7 @@ import type { CoreUiApi, CoreUiThemeApi, CoreUiStorageApi, CoreUiFeatureApi, Cor
 import type { SettingValue, ResolvedSetting, SettingsGroup } from '../types/settings'
 import type { GitStatus, GitCommitResult, GitPushResult, GitResetResult, GitPullResult, GitFetchCompareResult, GitConflictVersions, GitConflictCommitTimestamps, GitState } from '../types/git'
 import { NO_GIT_STATE } from '../types/git'
-import yaml from 'js-yaml'
+import { loadYamlDocument } from '../shared/yamlLoad'
 import themeIndexJson from '../../resources/themes/index.json'
 
 // Dynamically import all theme YAML files using Vite's glob import
@@ -117,7 +117,7 @@ function ensureWebBaseLoaded(): void {
 
   // base.yaml
   try {
-    const parsed = yaml.load(baseYaml) as YamlBaseFile
+    const parsed = loadYamlDocument(baseYaml) as YamlBaseFile
     if (parsed.variables) {
       for (const v of parsed.variables) {
         const cssVar = `--${v.id}`
@@ -137,7 +137,7 @@ function ensureWebBaseLoaded(): void {
 
   for (const type of Object.keys(typeBaseSources) as ThemeTypeInternal[]) {
     try {
-      const parsed = yaml.load(typeBaseSources[type]) as YamlTypeBaseFile
+      const parsed = loadYamlDocument(typeBaseSources[type]) as YamlTypeBaseFile
       if (parsed.colors) {
         for (const c of parsed.colors) {
           const cssVar = `--${c.id.replace(/\./g, '-')}`
@@ -174,7 +174,7 @@ function webLoadTheme(themeId: string): ThemeCacheValue | null {
 
   let parsed: YamlThemeFile
   try {
-    parsed = yaml.load(yamlSource) as YamlThemeFile
+    parsed = loadYamlDocument(yamlSource) as YamlThemeFile
   } catch {
     return null
   }
@@ -570,8 +570,6 @@ export function ensureCoreUiWebApiShim(): void {
     onUnitDirtyChanged: (): (() => void) => () => { /* no-op */ },
     onDraftsRestored: (): (() => void) => () => { /* no-op — web build has no draft persistence. */ },
     onAutoSaveTrigger: (): (() => void) => () => { /* no-op — web build has no autosave controller. */ },
-    saveUnit: (): Promise<boolean> => Promise.resolve(false),
-    saveUnitsBatch: (): Promise<{ runtimeId: string; success: boolean }[]> => Promise.resolve([])
   }
 
   // EventBus shim for web builds (in-memory, same process)
@@ -784,9 +782,18 @@ export function ensureCoreUiWebApiShim(): void {
     onInvoke: (): (() => void) => () => { /* noop in web shim: no native menu */ }
   }
 
+  // A browser tab has no application icon to hang a menu off either.
+  const appIconMenuApi = {
+    setLabels: (): void => { /* noop in web shim: no application icon */ },
+    // A browser tab has no application icon to raise a menu on, so nothing
+    // ever invokes an action here.
+    onInvoke: (): (() => void) => () => { /* noop in web shim */ }
+  }
+
   const api: CoreUiApi = {
     platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? 'web',
     nativeMenu: nativeMenuApi,
+    appIconMenu: appIconMenuApi,
     // A browser tab has no OS window to put fullscreen.
     toggleFullscreen: (): Promise<boolean> => Promise.resolve(false),
     theme: themeApi,

@@ -90,5 +90,3 @@ export const QuickConfigSelectorRow: React.FC<QuickConfigSelectorRowProps> = ({ 
     </div>
   )
 }
-
-export default QuickConfigSelectorRow

@@ -1,7 +1,7 @@
 import { readFileSync, existsSync, promises as fsp } from 'fs'
 import { join } from 'path'
 import { BrowserWindow } from 'electron'
-import yaml from 'js-yaml'
+import { loadYamlDocument } from '../../shared/yamlLoad'
 import MiniSearch from 'minisearch'
 import type {
   SettingValue,
@@ -130,7 +130,7 @@ export class SettingsService {
   ): void {
     try {
       const content = readFileSync(configPath, 'utf-8')
-      const raw = yaml.load(content)
+      const raw = loadYamlDocument(content)
       const parsed = settingsYamlConfigSchema.safeParse(raw)
 
       if (!parsed.success) {

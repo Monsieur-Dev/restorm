@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest'
 import { buildNativeMenuTemplate, toAccelerator } from './menuTemplate'
-import MenuBar from '../components/MenuBar/MenuBar'
-import MenuBarItem from '../components/MenuBar/MenuBarItem'
-import MenuItem from '../components/MenuBar/MenuItem'
-import MenuItemSeparator from '../components/MenuBar/MenuItemSeparator'
+import { MenuBar } from '../components/MenuBar/MenuBar'
+import { MenuBarItem } from '../components/MenuBar/MenuBarItem'
+import { MenuItem } from '../components/MenuBar/MenuItem'
+import { MenuItemSeparator } from '../components/MenuBar/MenuItemSeparator'
 
 describe('toAccelerator', () => {
   it('maps Ctrl to CmdOrCtrl so macOS shows ⌘ and Windows/Linux keep Ctrl', () => {

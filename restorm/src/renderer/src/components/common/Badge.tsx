@@ -82,5 +82,3 @@ export const Badge: React.FC<BadgeProps> = ({ type, label, className, icon, mode
     />
   )
 }
-
-export default Badge

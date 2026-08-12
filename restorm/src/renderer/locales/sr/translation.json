@@ -74,6 +74,7 @@
     "auth": {
       "noAuth": "Bez autentifikacije",
       "popoverLabel": "Ruta autentifikacije",
+      "openRoute": "Otvori rutu za autentifikaciju",
       "unnamed": "Bez naziva"
     },
     "contextMenu": {
@@ -221,7 +222,6 @@
     "new": "Novo",
     "import": "Uvezi",
     "open": "Otvori",
-    "openFolder": "Otvori fasciklu",
     "recentFiles": "Nedavne datoteke",
     "favorites": "Omiljeno",
     "close": "Zatvori",
@@ -229,36 +229,24 @@
     "saveAll": "Sačuvaj sve",
     "saveAs": "Sačuvaj kao",
     "exit": "Izlaz",
-    "selection": "Izbor",
-    "tools": "Alati",
-    "findInCollection": "Pronađi u kolekciji",
-    "addRequest": "Dodaj zahtev",
-    "addRequestHttp": "HTTP zahtev",
-    "addRequestGraphql": "GraphQL zahtev",
-    "addRequestGrpc": "gRPC zahtev",
-    "addRequestSoap": "SOAP zahtev",
-    "addRequestOdata": "OData zahtev",
-    "addRequestWebsocket": "WebSocket zahtev",
-    "addFolder": "Dodaj fasciklu",
-    "addEnvironmentFolder": "Dodaj fasciklu okruženja",
-    "addVariable": "Dodaj promenljivu",
-    "addTag": "Dodaj oznaku",
-    "expandAllFolders": "Proširi sve fascikle",
-    "collapseAllFolders": "Skupi sve fascikle",
-    "sendActiveRequest": "Pošalji zahtev",
-    "cancelActiveRequest": "Otkaži zahtev",
-    "generateCodeSnippet": "Generiši isečak koda",
-    "copyAsCurl": "Kopiraj kao cURL",
-    "exportOpenApi": "Izvezi u OpenAPI",
-    "clearAuthCache": "Očisti keš autentifikacije",
-    "openLogsFolder": "Otvori fasciklu zapisa",
     "mcpLogs": "MCP zapisi",
+    "consoleHttp": "HTTP konzola",
     "git": "Git",
     "gitPush": "Pošalji",
     "gitPull": "Preuzmi",
     "gitRefresh": "Osveži",
     "gitHistory": "Istorija",
-    "gitResetToServer": "Vrati na verziju servera"
+    "gitResetToServer": "Vrati na verziju servera",
+    "scenario": "Scenario",
+    "create": "Kreiraj",
+    "request": "Zahtev",
+    "server": "Server",
+    "runSelected": "Pokreni",
+    "cancelSelected": "Otkaži",
+    "clone": "Kloniraj",
+    "delete": "Obriši",
+    "addToFavorites": "Dodaj u omiljeno",
+    "removeFromFavorites": "Ukloni iz omiljenog"
   },
   "sidebar": {
     "addRequest": "Dodaj zahtev",
@@ -329,7 +317,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Iseci",
+      "copy": "Kopiraj",
+      "paste": "Nalepi"
     },
     "deleteConfirm": {
       "title": "Potvrdi brisanje",
@@ -364,7 +355,7 @@
       "docs": "Dokumentacija",
       "environments": "Okruženja",
       "notes": "Beleške",
-      "customValues": "Custom variables"
+      "customValues": "Prilagođene enumeracije"
     },
     "home": {
       "configureEnvs": "Konfiguriši okruženja",
@@ -402,7 +393,7 @@
       "addEntry": "Dodaj vrednost",
       "label": "Label",
       "value": "Value",
-      "selectList": "Izaberite listu"
+      "selectList": "Definišite ponovo upotrebljive liste vrednosti za svoje promenljive: birate čitljivu oznaku, a zahtev šalje pridruženu vrednost. Izaberite ili napravite enumeraciju da biste počeli."
     }
   },
   "requestTab": {
@@ -456,7 +447,11 @@
       }
     },
     "followRedirects": "Prati preusmeravanja",
-    "timeoutLabel": "Vremensko ograničenje (ms)"
+    "timeoutLabel": "Vremensko ograničenje (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Kopiraj razrešeni URL",
+      "copied": "Kopirano!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -605,6 +600,7 @@
     "disconnect": "Prekini vezu",
     "startListening": "Počni slušanje",
     "stopListening": "Zaustavi slušanje",
+    "listenFailed": "Pokretanje servera nije uspelo",
     "routePlaceholder": "Ruta (opciono)",
     "clientsConnected": "{{count}} klijent(a) povezano",
     "notListening": "Ne sluša"
@@ -857,26 +853,6 @@
     "openAriaLabel": "Otvori kolekciju sa diska",
     "landmarkLabel": "Dobrodošli"
   },
-  "save": {
-    "title": "Opcije čuvanja",
-    "mode": {
-      "label": "Režim čuvanja",
-      "file": "Jedna datoteka",
-      "folder": "Struktura fascikli",
-      "fileDescription": "Sačuvaj sve u jednu datoteku",
-      "folderDescription": "Sačuvaj kao strukturu fascikli sa zasebnim datotekama"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Čitljivo čoveku",
-      "jsonDescription": "Standardni format",
-      "json5Description": "JSON + komentari"
-    },
-    "preview": {
-      "label": "Pregled strukture",
-      "noDocumentation": "Za ovaj izvor nije analizirana nikakva dokumentacija."
-    }
-  },
   "common": {
     "cancel": "Otkaži",
     "save": "Sačuvaj",
@@ -1060,7 +1036,9 @@
       "sourceImportFailed": "Specifikacija nije mogla ponovo da se uveze iz svog izvora.",
       "emptySpec": "Specifikacija preuzeta sa {{url}} ne deklariše nijednu operaciju {{format}}. Njena primena bi ispraznila ovu fasciklu, pa je ažuriranje odbijeno.",
       "formatNotDetected": "Format ovog izvora nije prepoznat.",
-      "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}."
+      "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}.",
+      "projectFormatTooNew": "Ova projektna datoteka koristi verziju formata {{found}}, ali ova verzija Restorma razume samo verziju {{current}}. Ažurirajte Restorm da biste je uvezli.",
+      "projectFormatMissing": "Ova datoteka ne deklariše verziju formata Restorm, pa nije Restorm projektna datoteka."
     },
     "formats": {
       "swagger": {
@@ -1167,6 +1145,9 @@
       "apiBlueprint": {
         "description": "Nalepite API Blueprint (.apib) dokument — Restorm analizira svaku grupu resursa i prelaz u folder zahteva, jedan po dokumentovanom paru metoda/odgovor.",
         "trademark": "API Blueprint je specifikacija koju je originalno napravio Apiary."
+      },
+      "restorm": {
+        "description": "Spojite drugi Restorm projekat sa otvorenim — svaka uvezena fascikla, zahtev, okruženje i scenario stižu u obuhvatnu fasciklu, sa novim identitetima da se ništa ne sudara, čak ni pri uvozu projekta u njega samog."
       }
     },
     "grpcReflection": {
@@ -1233,6 +1214,71 @@
       "previousMatch": "Prethodno podudaranje",
       "nextMatch": "Sledeće podudaranje",
       "close": "Zatvori"
+    },
+    "sections": {
+      "parameters": "Parametri",
+      "responses": "Odgovori",
+      "models": "Modeli",
+      "enums": "Nabrajanja",
+      "polymorphism": "Polimorfizam",
+      "overview": "Pregled",
+      "operations": "Operacije"
+    },
+    "table": {
+      "in": "Gde",
+      "name": "Naziv",
+      "type": "Tip",
+      "required": "Obav.",
+      "operation": "Operacija",
+      "description": "Opis",
+      "example": "Primer",
+      "constraints": "Ograničenja"
+    },
+    "params": {
+      "empty": "Nema deklarisanih parametara van tela za filtrirane rute."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Šema",
+      "headers": "Zaglavlja",
+      "empty": "Nema deklarisanih odgovora za filtrirane rute."
+    },
+    "route": {
+      "requestBody": "Telo zahteva",
+      "responseBody": "Telo odgovora",
+      "security": "Bezbednost",
+      "externalDocs": "Spoljna dokumentacija",
+      "examplePayload": "Primer korisnog opterećenja",
+      "operationId": "operationId",
+      "addRequest": "+ Dodaj zahtev"
+    },
+    "apiInfo": {
+      "version": "Verzija",
+      "sourceFormat": "Format izvora",
+      "from": "iz",
+      "server": "Server",
+      "contact": "Kontakt",
+      "license": "Licenca",
+      "termsOfService": "Uslovi korišćenja",
+      "externalDocs": "Spoljna dokumentacija",
+      "tagReferences": "Reference oznaka"
+    },
+    "sidebar": {
+      "outline": "Struktura dokumentacije"
+    },
+    "legend": {
+      "requiredProperty": "obavezno svojstvo",
+      "optionalProperty": "opciono svojstvo",
+      "nullableValue": "vrednost koja dozvoljava null",
+      "readOnly": "samo za čitanje (postavlja server)",
+      "deprecatedBadge": "zastarelo",
+      "deprecatedDesc": "deklarisano kao zastarelo u izvornoj specifikaciji",
+      "removedBadge": "uklonjeno",
+      "removedDesc": "odsutno iz poslednjeg ponovnog uvoza",
+      "requiredSingleRef": "obavezna pojedinačna referenca",
+      "optionalSingleRef": "opciona pojedinačna referenca",
+      "requiredArrayRef": "obavezna referenca niza",
+      "optionalArrayRef": "opciona referenca niza"
     }
   },
   "scenario": {
@@ -1783,8 +1829,7 @@
       "dataFormats": "Formati podataka",
       "encoding": "Kodiranje",
       "time": "Tajming",
-      "algorithmie": "Algoritmi",
-      "ux": "UX"
+      "algorithmie": "Algoritmi"
     },
     "listOp": {
       "value": "lista",
@@ -2334,9 +2379,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Pregled URL-a (pre razrešavanja)",
-    "versionV2NotYet": "v2 (izvršavanje još nije podržano)",
-    "versionV3NotYet": "v3 (izvršavanje još nije podržano)",
     "operationKindEntitySet": "Skup entiteta (GET)",
     "operationKindFunction": "Funkcija (GET sa ugrađenim parametrima)",
     "operationKindAction": "Akcija (POST sa JSON telom)",
@@ -2355,7 +2397,8 @@
       "stopListening": "Zaustavi slušanje",
       "notListening": "Ne sluša",
       "served": "Sluša — opsluženo {{count}} zahteva",
-      "listenFailed": "Pokretanje mock servera nije uspelo"
+      "listenFailed": "Pokretanje mock servera nije uspelo",
+      "portInUse": "Port {{port}} već koristi druga aplikacija. Zatvorite je ili izaberite drugi port, pa ponovo pokrenite server."
     }
   },
   "odata": {
@@ -2375,6 +2418,7 @@
     },
     "namePlaceholder": "Naziv konfiguracije",
     "saveButton": "Sačuvaj",
+    "updateButton": "Ažuriraj trenutnim vrednostima",
     "storageTarget": {
       "label": "Sačuvaj u datoteci projekta (.restorm)"
     },
@@ -2387,6 +2431,10 @@
     "loadConfirm": {
       "title": "Učitaj konfiguraciju",
       "message": "Da li želite da učitate konfiguraciju „{{name}}\"? Vaša trenutna nesačuvana konfiguracija će biti izgubljena."
+    },
+    "updateConfirm": {
+      "title": "Ažuriraj konfiguraciju",
+      "message": "Da li želite da zamenite konfiguraciju „{{name}}“ trenutnim vrednostima?"
     },
     "deleteConfirm": {
       "title": "Obriši konfiguraciju",
@@ -2633,6 +2681,10 @@
       "title": "Projekat napravljen novijom verzijom",
       "message": "Ovaj fajl je napravljen novijom verzijom Restorm-a od one koju koristite. Ažurirajte Restorm da biste ga otvorili.",
       "versions": "Format fajla {{found}}; ova verzija podržava do {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Ovo nije Restorm datoteka",
+      "message": "Ova datoteka ne navodi Restorm format datoteke. Nije je napravio Restorm ili je ručno izmenjena, pa ne može da se otvori."
     }
   }
 }

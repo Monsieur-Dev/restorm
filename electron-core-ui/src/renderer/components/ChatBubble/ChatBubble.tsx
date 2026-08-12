@@ -58,5 +58,3 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
     </div>
   )
 }
-
-export default ChatBubble

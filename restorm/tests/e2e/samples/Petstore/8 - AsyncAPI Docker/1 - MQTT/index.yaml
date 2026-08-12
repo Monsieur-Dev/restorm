@@ -1,8 +1,0 @@
-name: MQTT
-documentation: |-
-  # MQTT Channels
-
-  Message broker pub/sub
-tags:
-  - mqtt
-configuration: {}

@@ -87,6 +87,13 @@ export interface OpenRejectedPayload {
 export interface FileServiceConfig {
   /** File extension to use (e.g., '.myapp') */
   extension: string
+  /**
+   * Debounce for the open-file on-disk watcher (ms). The atomic write
+   * (temp + rename) fires several fs events per save and editors write
+   * in bursts — the probe runs once the burst settles, and a positive
+   * probe is re-checked after a second window before prompting.
+   */
+  externalWatchDebounceMs: number
   /** Default serialization format */
   defaultFormat: SerializationFormat
   /** Maximum number of recent files to track */

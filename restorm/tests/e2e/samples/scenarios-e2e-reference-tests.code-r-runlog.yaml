@@ -1,12 +1,12 @@
 - message: 🔵 [<time>] ▶ Code R
 - message: ⚪ [<time>] start code
   data:
-    language: r
     code: |-
       # Fixed numeric vector (no input → runs at start). cat → run log.
       vals <- c(3, 1, 2)
       cat(sprintf("r: built %d rows\n", length(vals)))
       vals
+    language: r
 - message: "🔵 [<time>] r: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -16,13 +16,13 @@
       - 2
 - message: ⚪ [<time>] start code
   data:
-    language: r
     code: |-
       # `input` = wired value. sort + sum, return a named list.
       nums <- sort(unlist(input))
       total <- sum(nums)
       cat(sprintf("r: total = %d\n", as.integer(total)))
       list(total = as.integer(total), sorted = as.integer(nums))
+    language: r
     value:
       - 3
       - 1
@@ -38,7 +38,6 @@
         - 3
 - message: ⚪ [<time>] start code
   data:
-    language: r
     code: >-
       # sprintf summary of the previous result.
 
@@ -48,6 +47,7 @@
       cat(sprintf("r: %s\n", summary))
 
       list(lang = "r", summary = summary, total = as.integer(input$total))
+    language: r
     value:
       total: 6
       sorted:

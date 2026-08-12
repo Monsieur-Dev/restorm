@@ -53,7 +53,13 @@ export interface RestormState {
 
   // Actions
   setLastMcpVersion: (version: number) => void
-  setCollections: (collections: EnvironmentFolder[], source?: EventSource, mcpVersion?: number) => void
+  /**
+   * `collections` is the env-folder-only state this store exposes. `rootItems`
+   * is what gets MIRRORED to main and defaults to `collections`; pass the whole
+   * root when it holds more than collections (a scenario or a request may sit
+   * there), otherwise main cannot resolve those items by id.
+   */
+  setCollections: (collections: EnvironmentFolder[], source?: EventSource, mcpVersion?: number, rootItems?: FolderItem[]) => void
   updateCollection: (id: string, updates: Partial<EnvironmentFolder>, source?: EventSource) => void
   
   // Item operations
@@ -260,7 +266,7 @@ export const useRestormStore = create<RestormState>()(
     setLastMcpVersion: (version) => { set({ lastMcpVersion: version }) },
     
     // Set collections
-    setCollections: (collections, source = 'user', mcpVersion) => {
+    setCollections: (collections, source = 'user', mcpVersion, rootItems) => {
       set({ collections, currentEventSource: source })
       // Skip the main-side mirror when MCP drove the change — main IS
       // the source in that case (the MCP write tool already mutated
@@ -292,7 +298,12 @@ export const useRestormStore = create<RestormState>()(
         // know the version their tree was built from must pass it — that is
         // strictly better than this fallback, which can only assert "as fresh
         // as the last replace we saw".
-        void api.syncCollections(cloneForEventBus(collections) as unknown[], mcpVersion ?? get().lastMcpVersion)
+        // Mirror the WHOLE root, not just the env-folders: main resolves a
+        // scenario/request by id out of this tree (the engine's `loadScenario`
+        // does exactly that), and the sidebar allows either at the root as a
+        // sibling of a collection. Sending only collections made a root
+        // scenario invisible to main, so launching it failed as "not found".
+        void api.syncCollections(cloneForEventBus(rootItems ?? collections) as unknown[], mcpVersion ?? get().lastMcpVersion)
       }
     },
     
@@ -495,19 +506,3 @@ function deleteEnvironmentFromList(envs: Environment[], id: string): Environment
       return env
     })
 }
-
-// ============================================================================
-// Selectors
-// ============================================================================
-
-/** Select all collections */
-export const selectCollections = (state: RestormState): EnvironmentFolder[] => state.collections
-
-/** Select editing state */
-export const selectEditingState = (state: RestormState): EditingState | null => state.editingState
-
-/** Select focused item ID */
-export const selectFocusedItemId = (state: RestormState): string | null => state.focusedItemId
-
-/** Select current event source */
-export const selectEventSource = (state: RestormState): EventSource => state.currentEventSource

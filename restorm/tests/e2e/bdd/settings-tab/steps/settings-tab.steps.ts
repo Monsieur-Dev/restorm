@@ -24,18 +24,10 @@ Given('no file is open', async ({ page }) => {
   await expect(page.locator('[data-testid="welcome-new-button"]')).toBeVisible({ timeout: 15000 })
 })
 
-Given('a project folder is open', async ({ page, electronApp, petstoreFolderPath }) => {
-  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: petstoreFolderPath })
-  const result = await page.evaluate(async () => {
-    interface OpenFolderResult { success: boolean; error?: string }
-    const w = window as unknown as { restorm?: { file?: { openFolder?: () => Promise<OpenFolderResult> } } }
-    const fn = w.restorm?.file?.openFolder
-    if (typeof fn !== 'function') throw new Error('window.restorm.file.openFolder is not available')
-    return await fn()
-  })
-  if (!(result as { success?: boolean }).success) {
-    throw new Error(`openFolder returned success=false (${String((result as { error?: unknown }).error)})`)
-  }
+Given('a project folder is open', async ({ page, electronApp, petstoreProjectPath }) => {
+  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: petstoreProjectPath })
+  await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
+  await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()
   // A workbench is active once the sidebar shows the loaded collections.
   await expect(page.locator(listViewRowSelectorByTitle('sidebar-listview', 'Swagger Petstore')).first())
     .toBeVisible({ timeout: 15000 })
@@ -54,34 +46,40 @@ When('I open Settings from the View menu', async ({ page }) => {
   // The responsive MenuBar lays out in `full`, `overflow`, or
   // `hamburger` mode depending on width. In `full` mode the View
   // entry sits directly on the bar; otherwise it is folded behind the
-  // overflow / hamburger button as a nested submenu. Drive whichever
-  // path matches the current mode so the test is layout-agnostic.
-  const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
+  // overflow / hamburger button as a nested submenu. The mode is read
+  // INSIDE the retry below, so a relayout between attempts is picked up.
 
   // Generous menu timeout: the menu opens deterministically (click), but the
   // submenu item render can still exceed 5s when the host is under memory
   // pressure (heavy swap intermittently starves renderer timers), so wait
   // longer for the item itself.
   const MENU_TIMEOUT = 15000
-  if (mode === 'full') {
-    // Click-open the View menu (a bare hover can race the menubar becoming
-    // active), then click Settings.
-    await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
-    await settingsItem.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
-    await settingsItem.click({ force: true })
-  } else {
-    // Open the overflow / hamburger bucket, then open the folded View entry
-    // (its testid gains an `-overflow` suffix) to expand its submenu, then
-    // click Settings. Hover + click so the submenu opens deterministically.
-    const overflowBtn = page.locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`).first()
-    await overflowBtn.click({ force: true })
-    const viewEntry = page.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
-    await viewEntry.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
-    await viewEntry.hover()
-    await viewEntry.click({ force: true })
-    await settingsItem.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
-    await settingsItem.click({ force: true })
-  }
+  // Opening a menu is an INTERACTION, not an assertion: under load the submenu
+  // can miss the hover/click meant to expand it and the entry never appears,
+  // which reads as "Settings is missing". Re-opening is idempotent, so retry
+  // the whole open instead of lengthening a single wait.
+  await expect(async () => {
+    // Visibility beats mode: in overflow mode the View item can still sit
+    // among the VISIBLE bar items (only the tail overflows), so route on
+    // whether the in-bar button exists — not on the mode attribute.
+    const inBarView = page.locator('[data-testid="titlebar-menubar-item-view"]')
+    if (await inBarView.isVisible().catch(() => false)) {
+      // Click-open the View menu (a bare hover can race the menubar becoming
+      // active), then click Settings.
+      await inBarView.click({ force: true })
+    } else {
+      // Open the overflow / hamburger bucket, then open the folded View entry
+      // (its testid gains an `-overflow` suffix) to expand its submenu.
+      const overflowBtn = page.locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`).first()
+      await overflowBtn.click({ force: true })
+      const viewEntry = page.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
+      await viewEntry.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
+      await viewEntry.hover()
+      await viewEntry.click({ force: true })
+    }
+    await settingsItem.waitFor({ state: 'visible', timeout: 5000 })
+  }).toPass({ timeout: 45_000 })
+  await settingsItem.click({ force: true })
   await page.waitForTimeout(300)
 })
 

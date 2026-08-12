@@ -25,7 +25,9 @@ vi.mock('./WebSocketExecutionService', () => ({
   websocketExecutionService: { listenHttpServer, disconnect }
 }))
 vi.mock('./ContextService', () => ({
-  contextService: { getRequestContext }
+  // resolveUrlForRequest: the service resolves the mock address's Handlebars
+  // expressions before parsing; returning undefined keeps the raw url.
+  contextService: { getRequestContext, resolveUrlForRequest: () => undefined }
 }))
 
 import { odataMockServerService } from './ODataMockServerService'

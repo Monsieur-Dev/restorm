@@ -39,6 +39,7 @@ import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import './WebSocketChat.css'
 import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
@@ -674,6 +675,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
   )
 
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="redis-url-section">
       <div style={{ width: 130, minWidth: 100 }} data-testid="redis-mode-select">
         <SelectBox
@@ -685,8 +687,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
           data-testid="redis-mode-selectbox"
         />
       </div>
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+        <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container">
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -696,7 +697,6 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
             data-testid="redis-url-input"
           />
         </div>
-      </HeaderHoverTooltip>
       <div style={{ width: 160, minWidth: 100 }}>
         <RestormVariableInputBox
           value={password}
@@ -709,6 +709,8 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
       </div>
       {!inWorkbenchTab && <SendButtonEnvSwitcher>{runButton}</SendButtonEnvSwitcher>}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   const handleCloseHistoryModal = useCallback(() => { setHistoryModalOpen(false) }, [])
@@ -774,5 +776,3 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
     </>
   )
 }
-
-export default RedisRequestTabView

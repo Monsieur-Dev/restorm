@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
+import { servicesWorkerFixture, type StartedServices } from '../../helpers/testcontainers/services'
 import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
 
@@ -21,7 +22,9 @@ export interface AuthLoginFixtures {
   launchApp: () => Promise<LaunchedApp>
 }
 
-export const test = base.extend<AuthLoginFixtures>({
+export const test = base.extend<AuthLoginFixtures, { services: StartedServices }>({
+  // The suite runs its OWN auth-service container (worker-scoped, ephemeral port).
+  services: servicesWorkerFixture(['auth-service']),
   restormRoot: [RESTORM_ROOT, { option: true }],
 
   launchApp: async ({ restormRoot }, use, testInfo) => {

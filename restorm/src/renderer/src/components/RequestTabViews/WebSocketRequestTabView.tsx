@@ -1,5 +1,8 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
@@ -7,7 +10,6 @@ import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
-  InputBox,
   SelectBox,
   CodeEditor,
   SplitView,
@@ -24,6 +26,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { MqttOptionsPanel } from './MqttOptionsPanel'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
@@ -354,7 +357,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     return `localhost:${port}${cleanRoute ? `/${cleanRoute}` : ''}`
   }, [])
   const setServerPort = useCallback((p: string): void => {
-    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoute))
+    setUrl(composeServerUrl(p, serverRoute))
   }, [composeServerUrl, serverRoute, setUrl])
   const setServerRoute = useCallback((r: string): void => {
     setUrl(composeServerUrl(serverPort, r))
@@ -370,7 +373,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setUrl(composeMqttBrokerUrl(s, serverPort))
   }, [composeMqttBrokerUrl, serverPort, setUrl])
   const setMqttServerPort = useCallback((p: string): void => {
-    setUrl(composeMqttBrokerUrl(mqttScheme, p.replace(/[^0-9]/g, '')))
+    setUrl(composeMqttBrokerUrl(mqttScheme, p))
   }, [composeMqttBrokerUrl, mqttScheme, setUrl])
 
   // Stable empty array for components that get variables via their own variableId
@@ -421,6 +424,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           error: res.error,
           timings: res.timings
         }
+        if (isServer && res.error) {
+          pushServerListenErrorToast(t, t('websocket.listenFailed', 'Server failed to start'), res.error)
+        }
         setResponse(wsResponse)
         setHistoryRefreshKey(prev => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
@@ -440,6 +446,24 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const handleDisconnect = (): void => {
     void window.restorm?.websocket.disconnect(request.id)
   }
+
+  // « Serveur » menu-bar entries — the SAME actions as the toolbar discs
+  // (start ↔ stop listening toggle + send/broadcast), published while this
+  // server tab is the ACTIVE one. Handlers route through a ref so the
+  // published array only rebuilds when the rendered entries change.
+  const serverMenuOpsRef = useRef({ connect: () => { /* replaced below */ }, disconnect: () => { /* replaced below */ }, send: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { connect: handleConnect, disconnect: handleDisconnect, send: handleSend } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[] | null>(() => {
+    if (!isServer) return null
+    return [
+      isListening
+        ? { id: 'server-stop', label: t('websocket.stopListening'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.disconnect() } }
+        : { id: 'server-listen', label: t('websocket.startListening'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.connect() } },
+      { id: 'server-send', label: t('requestTab.send'), icon: 'send', ...(isListening ? {} : { disabled: true }), onClick: () => { serverMenuOpsRef.current.send() } }
+    ]
+  }, [isServer, isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab && isServer, serverMenuItems)
 
   // Request content (SplitView with Message, Headers)
   const requestContent = (
@@ -735,6 +759,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // URL section. Server mode forces host=localhost and exposes only port + route
   // (no free URL, no environment variables); client mode keeps the full URL input.
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="websocket-url-section">
       {isMqttServer ? (
         <>
@@ -753,13 +778,14 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           </HeaderHoverTooltip>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="mqtt-broker-host">localhost:</span>
           <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening}>
-            <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-              <InputBox
+            <div style={{ width: 90, minWidth: 60, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }} data-testid="url-container">
+              <RestormVariableInputBox
                 value={serverPort}
                 onChange={setMqttServerPort}
-                options={{ placeholder: '1883' }}
+                variables={envVariables}
+                helpers={handlebarsHelpers}
+                placeholder="1883"
                 data-testid="websocket-server-port-input"
-                disabled={isListening}
               />
             </div>
           </HeaderHoverTooltip>
@@ -768,26 +794,30 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       ) : isServer ? (
         <>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="websocket-server-host">localhost:</span>
-          <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening} className="url-container-stretch">
-            <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-              <InputBox
+          {/* No stretch on the PORT tooltip: the stretching wrapper swallowed
+            * the flex space and parked the "/" + route a full row away. */}
+          <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening}>
+            <div style={{ width: 90, minWidth: 60, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }} data-testid="url-container">
+              <RestormVariableInputBox
                 value={serverPort}
                 onChange={setServerPort}
-                options={{ placeholder: '3001' }}
+                variables={envVariables}
+                helpers={handlebarsHelpers}
+                placeholder="3001"
                 data-testid="websocket-server-port-input"
-                disabled={isListening}
               />
             </div>
           </HeaderHoverTooltip>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 2px', color: 'var(--foreground-muted)' }}>/</span>
           <HeaderHoverTooltip label={t('server.configLockedWhileRunning', 'Config locked while the server is running')} suppressed={!isListening} className="url-container-stretch">
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <InputBox
+            <div style={{ flex: 1, minWidth: 0, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+              <RestormVariableInputBox
                 value={serverRoute}
                 onChange={setServerRoute}
-                options={{ placeholder: t('websocket.routePlaceholder') }}
+                variables={envVariables}
+                helpers={handlebarsHelpers}
+                placeholder={t('websocket.routePlaceholder')}
                 data-testid="websocket-server-route-input"
-                disabled={isListening}
               />
             </div>
           </HeaderHoverTooltip>
@@ -795,7 +825,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         </>
       ) : (
         <>
-          <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
             <div
               style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
               data-testid="url-container"
@@ -811,7 +840,6 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
                 data-testid="websocket-url-input"
               />
             </div>
-          </HeaderHoverTooltip>
           {!inWorkbenchTab && <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>}
         </>
       )}
@@ -828,6 +856,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         />
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
   
   const handleCloseHistoryModal = useCallback(() => {
@@ -910,5 +940,3 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     </>
   )
 }
-
-export default WebSocketRequestTabView

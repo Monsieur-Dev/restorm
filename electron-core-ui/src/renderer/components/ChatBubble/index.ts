@@ -1,2 +1,2 @@
-export { ChatBubble, default } from './ChatBubble'
+export { ChatBubble } from './ChatBubble'
 export type { ChatBubbleProps, ChatBubbleVariant } from './ChatBubble'

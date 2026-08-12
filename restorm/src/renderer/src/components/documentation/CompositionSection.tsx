@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ModelDocumentation } from '../../../../shared/types/apiDocumentation'
 import { ModelRefLink } from './ModelRefLink'
 
@@ -26,6 +27,7 @@ export interface CompositionSectionProps {
  * model in scope declares any composition.
  */
 export const CompositionSection: React.FC<CompositionSectionProps> = ({ models, testId, headingLevel = 1 }) => {
+  const { t } = useTranslation()
   const polymorphic = models.filter((m) => m.composition !== undefined)
   if (polymorphic.length === 0) return null
 
@@ -35,8 +37,8 @@ export const CompositionSection: React.FC<CompositionSectionProps> = ({ models, 
       data-testid={testId ?? 'documentation-host-composition'}
     >
       {headingLevel === 1
-        ? <h1 className="documentation-host__section-title">Polymorphism</h1>
-        : <h2 className="documentation-host__section-title">Polymorphism</h2>}
+        ? <h1 className="documentation-host__section-title">{t('documentation.sections.polymorphism')}</h1>
+        : <h2 className="documentation-host__section-title">{t('documentation.sections.polymorphism')}</h2>}
       <ul className="documentation-host-composition__list">
         {polymorphic.map((model) => {
           const c = model.composition

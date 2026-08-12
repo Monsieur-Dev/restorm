@@ -25,5 +25,3 @@ export const RequestExecutingBadge: React.FC<RequestExecutingBadgeProps> = ({ re
     </BeamWrap>
   )
 }
-
-export default RequestExecutingBadge

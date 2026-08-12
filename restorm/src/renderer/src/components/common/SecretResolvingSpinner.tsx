@@ -34,5 +34,3 @@ export const SecretResolvingSpinner: React.FC<SecretResolvingSpinnerProps> = ({
     />
   )
 }
-
-export default SecretResolvingSpinner

@@ -17,17 +17,25 @@
 
 import { createBdd } from 'playwright-bdd'
 import { join } from 'path'
-import { copyFileSync, mkdirSync } from 'node:fs'
 import type { Page } from '@playwright/test'
-import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
+import { test, expect, type McpDiscovery, type McpToolReply } from './fixture'
+import { materializeSample, remapCanonicalPorts, type StartedServices } from '../../../helpers/testcontainers/services'
 
 const { Given, When, Then } = createBdd(test)
 
 let discovery: McpDiscovery | null = null
+let suiteServices: StartedServices | null = null
+
+/** Canonical service ports in Gherkin args → this worker's mapped ports. */
+const remapArg = (text: string): string => {
+  if (suiteServices === null) throw new Error('open the sample first')
+  return remapCanonicalPorts(text, suiteServices)
+}
 let page: Page | null = null
 let requestsByName = new Map<string, string>()
 let currentRequestId: string | null = null
 let environmentId: string | null = null
+let envFolderId: string | null = null
 
 const SEND_BTN = '[data-testid="http-request-send-button"]:visible'
 const CANCEL_BTN = '[data-testid="http-request-cancel-button"]:visible'
@@ -62,22 +70,25 @@ Given(
     requestsByName = new Map()
     currentRequestId = null
     environmentId = null
+    envFolderId = null
   }
 )
 
 Given(
   'I open the HTTP sample via MCP',
-  async ({ callMcpTool, restormRoot }) => {
+  async ({ callMcpTool, restormRoot, services }) => {
     if (discovery === null) throw new Error('launch first')
-    // Open a COPY of the sample: several scenarios mutate the project (the
-    // method combo matrix rewrites the request's method) and the renderer
-    // autosaves — pointing the app at the repo file would dirty the checkout
-    // on every run.
-    const samplePath = join(restormRoot, 'tests/e2e/samples/http-sample.restorm')
-    const tmpDir = join(restormRoot, 'tests/e2e/.tmp')
-    mkdirSync(tmpDir, { recursive: true })
-    const workingCopy = join(tmpDir, 'http-sample.working.restorm')
-    copyFileSync(samplePath, workingCopy)
+    suiteServices = services
+    // Open a materialized COPY of the sample (canonical service ports mapped
+    // to this worker's ephemeral ones): several scenarios mutate the project
+    // (the method combo matrix rewrites the request's method) and the
+    // renderer autosaves — pointing the app at the repo file would dirty the
+    // checkout on every run.
+    const workingCopy = materializeSample(
+      join(restormRoot, 'tests/e2e/samples/http-sample.restorm'),
+      join(restormRoot, 'tests/e2e/.tmp/http-execution/http-sample.working.restorm'),
+      services
+    )
     const opened = await callMcpTool(discovery, 'open_project', { filePath: workingCopy })
     expect(opened.isError ?? false).toBe(false)
 
@@ -98,7 +109,7 @@ Given(
     // sample's top-level env folder first.
     const foldersReply = await callMcpTool(discovery, 'list_folders', {})
     const folders = parsedReply(foldersReply) as { id: string; kind: string }[]
-    const envFolderId = folders.find((f) => f.kind === 'env-folder')?.id
+    envFolderId = folders.find((f) => f.kind === 'env-folder')?.id ?? null
     expect(envFolderId, 'sample env folder not found').toBeTruthy()
     const envReply = await callMcpTool(discovery, 'list_environments', { envFolderId })
     const envs = parsedReply(envReply) as { environments: { id: string; name: string }[] }
@@ -512,5 +523,229 @@ Then('the request has at least {int} history entry', async ({ callMcpTool }, n: 
     const reply = await callMcpTool(disco, 'get_response_history', { requestId: reqId })
     const payload = parsedReply(reply) as { count?: number; entries?: { guid: string }[] }
     expect((payload.entries ?? []).length).toBeGreaterThanOrEqual(n)
+  }).toPass({ timeout: 15_000 })
+})
+
+// ---------------------------------------------------------------------------
+// Environment variable override — duplicate key + active sub-environment
+//
+// The defect these steps pin resolved the WRONG value while every intermediate
+// display looked plausible, so the assertions deliberately end on the wire: the
+// mock answers `/status/<code>` with that code, and the three candidate values
+// map to three distinguishable answers — 201 for the row that must win, 418 for
+// the row it overrides, 404 for the parent's value the sub-environment must
+// override. A single response status therefore says which value reached the
+// socket, and the archived `requestUrl` says it byte for byte.
+// ---------------------------------------------------------------------------
+
+const ENV_VARS_TABLE_ID = 'environment-folder-variables-table'
+const ENV_VARS_TABLE = `[data-testid="${ENV_VARS_TABLE_ID}"]`
+
+/** Clear a field and type into it, then commit with Tab. The value cell is a
+ * debounced InputBox, so the commit + a short settle are what make the edit
+ * observable to the main process. */
+async function retypeAndCommit(p: Page, locator: ReturnType<Page['locator']>, text: string): Promise<void> {
+  await locator.click()
+  await p.keyboard.press('Control+a')
+  await p.keyboard.type(text)
+  await p.keyboard.press('Tab')
+  await p.waitForTimeout(400)
+}
+
+Given(
+  'the sample environment\'s {string} is the expression {string}',
+  async ({ callMcpTool }, key: string, value: string) => {
+    if (discovery === null) throw new Error('open the project first')
+    value = remapArg(value)
+    // The type asymmetry is the whole defect: an imported variable is an
+    // ExpressionValue while the row a user types over it is a StringValue, and
+    // nothing in the UI distinguishes them. A fixture where every row is a
+    // StringValue cannot fail, because the re-resolution pass that carried the
+    // bug only ever looked at expressions.
+    const reply = await callMcpTool(discovery, 'set_env_variable', {
+      envId: environmentId,
+      key,
+      value: { type: 'expression', value }
+    })
+    expect(reply.isError ?? false).toBe(false)
+  }
+)
+
+When('I switch the last environment variable row to Expression', async () => {
+  if (page === null) throw new Error('launch first')
+  const p = page
+  const lastRow = p.locator(`${ENV_VARS_TABLE} tbody tr`).last()
+  await expect(lastRow).toBeVisible({ timeout: 10_000 })
+  // A freshly-added row is always a StringValue, so its type indicator carries
+  // the `-value-type-string` suffix; the menu it opens is where the row becomes
+  // an expression.
+  const typeBtn = lastRow.locator('[data-testid$="-value-type-string"]').first()
+  await expect(typeBtn).toBeVisible({ timeout: 10_000 })
+  await typeBtn.click()
+  const expressionItem = p.locator(`[data-testid="${ENV_VARS_TABLE_ID}-context-menu-item-expression"]`).first()
+  await expect(expressionItem).toBeVisible({ timeout: 10_000 })
+  await expressionItem.click()
+  await p.waitForTimeout(400)
+  // The conversion is what the rest of the scenario depends on, so assert it
+  // landed rather than trusting the click.
+  await expect(lastRow.locator('[data-testid$="-value-type-expression"]').first())
+    .toBeVisible({ timeout: 10_000 })
+})
+
+Given(
+  'a sub-environment {string} of the sample environment',
+  async ({ callMcpTool }, name: string) => {
+    if (discovery === null) throw new Error('open the project first')
+    const reply = await callMcpTool(discovery, 'create_environment', {
+      envFolderId,
+      name,
+      parentEnvironmentId: environmentId
+    })
+    expect(reply.isError ?? false).toBe(false)
+  }
+)
+
+Given(
+  'a request {string} whose URL is {string}',
+  async ({ callMcpTool }, name: string, url: string) => {
+    url = remapArg(url)
+    if (discovery === null) throw new Error('open the project first')
+    const created = await callMcpTool(discovery, 'create_request', {
+      parentFolderId: envFolderId,
+      name,
+      protocol: 'http'
+    })
+    expect(created.isError ?? false).toBe(false)
+    const { id } = parsedReply(created) as { id: string }
+    const updated = await callMcpTool(discovery, 'update_request', {
+      id,
+      patch: { url, method: 'GET' }
+    })
+    expect(updated.isError ?? false).toBe(false)
+    requestsByName.set(name, id)
+  }
+)
+
+When('I open the environment folder tab via MCP', async ({ callMcpTool }) => {
+  if (discovery === null || page === null) throw new Error('open the project first')
+  const p = page
+  const tab = await callMcpTool(discovery, 'open_tab', { itemId: envFolderId })
+  expect(tab.isError ?? false).toBe(false)
+  // The env-folder view opens on its "Home" sub-tab; the environment list and
+  // the variables table live behind the "Environments" one, so opening the tab
+  // is not enough to reach them.
+  const envSubTab = p.locator(`[data-testid="folder-view-${envFolderId ?? ''}-tabs-tab-environments"]`).first()
+  await envSubTab.waitFor({ state: 'visible', timeout: 20_000 })
+  await envSubTab.click()
+  await p.locator('[data-testid="environment-folder-environment-list"]').first()
+    .waitFor({ state: 'visible', timeout: 20_000 })
+})
+
+When(
+  'I select the {string} environment in the env-folder sidebar',
+  async ({}, envName: string) => {
+    if (page === null) throw new Error('launch first')
+    const row = page
+      .locator('[data-testid="environment-folder-environment-list"] .list-view-title', {
+        hasText: new RegExp(`^${envName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
+      })
+      .first()
+    await expect(row).toBeVisible({ timeout: 10_000 })
+    await row.click()
+    await page.waitForTimeout(300)
+  }
+)
+
+When(
+  'I add an environment variable row {string} with value {string}',
+  async ({}, key: string, value: string) => {
+    value = remapArg(value)
+    if (page === null) throw new Error('launch first')
+    const p = page
+    const addBtn = p.locator('[data-testid="environment-folder-add-variable-button"]').first()
+    await expect(addBtn).toBeVisible({ timeout: 10_000 })
+    // The pane header can sit over the button's hit region; bypass actionability.
+    await addBtn.click({ force: true })
+    const lastRow = p.locator(`${ENV_VARS_TABLE} tbody tr`).last()
+    await expect(lastRow).toBeVisible({ timeout: 10_000 })
+    // Columns: drag handle, enabled toggle, key, value.
+    await retypeAndCommit(p, lastRow.locator('td').nth(2).locator('input').first(), key)
+    await retypeAndCommit(p, lastRow.locator('td').nth(3).locator('input').first(), value)
+  }
+)
+
+When('I disable the last environment variable row', async () => {
+  if (page === null) throw new Error('launch first')
+  const lastRow = page.locator(`${ENV_VARS_TABLE} tbody tr`).last()
+  await expect(lastRow).toBeVisible({ timeout: 10_000 })
+  const toggle = lastRow.locator('[data-testid$="-enabled"]').first()
+  await expect(toggle).toBeVisible({ timeout: 10_000 })
+  await toggle.click()
+  await page.waitForTimeout(400)
+})
+
+Then(
+  'the context variables table resolves {string} to {string}',
+  async ({}, varName: string, expectedValue: string) => {
+    if (page === null) throw new Error('launch first')
+    expectedValue = remapArg(expectedValue)
+    const p = page
+    const table = p.locator('[data-testid="context-variables-table"]')
+    await expect(table).toBeVisible({ timeout: 10_000 })
+    await expect(async () => {
+      const rows = await table.locator('tbody tr').all()
+      const values: string[] = []
+      for (const row of rows) {
+        const name = (await row.locator('td').nth(1).textContent() ?? '').trim()
+        if (name === `{{${varName}}}`) values.push((await row.locator('td').last().textContent() ?? '').trim())
+      }
+      expect(values, `no {{${varName}}} row in the context variables table`).toHaveLength(1)
+      expect(values[0]).toBe(expectedValue)
+    }).toPass({ timeout: 15_000 })
+  }
+)
+
+When(
+  'I select the {string} environment on the active request tab',
+  async ({}, envName: string) => {
+    if (page === null) throw new Error('launch first')
+    const dropdown = page.locator('[data-testid="request-header-env-selector"]').first()
+    await expect(dropdown).toBeVisible({ timeout: 10_000 })
+    await dropdown.click()
+    const popoverList = page.locator('[data-testid="statusbar-env-selector-listview"]').first()
+    await expect(popoverList).toBeVisible({ timeout: 10_000 })
+    const item = popoverList.locator(`text="${envName}"`).first()
+    await expect(item).toBeVisible({ timeout: 10_000 })
+    await item.click()
+    await page.waitForTimeout(300)
+    await expect(dropdown).toContainText(envName, { timeout: 10_000 })
+  }
+)
+
+Then('the resolved URL on the request tab is {string}', async ({}, expected: string) => {
+  expected = remapArg(expected)
+  if (page === null) throw new Error('launch first')
+  const urlContainer = page.locator('[data-testid="url-resolved-preview"]:visible').first()
+  await expect(urlContainer).toBeVisible({ timeout: 10_000 })
+  await expect(urlContainer).toHaveAttribute('data-resolved-url', expected, { timeout: 15_000 })
+})
+
+Then('the URL actually sent was {string}', async ({ callMcpTool }, expected: string) => {
+  expected = remapArg(expected)
+  if (discovery === null) throw new Error('launch first')
+  if (currentRequestId === null) throw new Error('open a request first')
+  const disco = discovery
+  const reqId = currentRequestId
+  // The archived entry is what left the process, so it can't be talked out of
+  // disagreeing with the panel.
+  await expect(async () => {
+    const historyReply = await callMcpTool(disco, 'get_response_history', { requestId: reqId, limit: 1 })
+    const history = parsedReply(historyReply) as { entries?: { guid: string }[] }
+    const guid = history.entries?.[0]?.guid
+    expect(guid, 'no history entry for the dispatched request').toBeTruthy()
+    const detail = parsedReply(await callMcpTool(disco, 'get_response', { historyEntryId: guid })) as {
+      response?: { requestUrl?: string }
+    }
+    expect(detail.response?.requestUrl).toBe(expected)
   }).toPass({ timeout: 15_000 })
 })

@@ -2,7 +2,8 @@ import { createBdd } from 'playwright-bdd'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
-import { test, expect, SCENARIO_RUNLOG_TEMP_DIR } from '../../fixtures/scenario-runlog.fixture'
+import { test, expect } from './fixture'
+import { SCENARIO_RUNLOG_TEMP_DIR } from '../../fixtures/scenario-runlog.fixture'
 import { goldenPathFor, normalizeRunLogYaml, setupReferenceWorkingCopy } from '../runLogShared'
 
 /** Folders/containers to expand (in order) to reach the leaf scenarios in the
@@ -153,13 +154,14 @@ async function runScenarioAnsweringPrompts(p: Page): Promise<void> {
   }
 }
 
-Given('I open the scenarios reference-tests sample', async ({ launchApp }) => {
+Given('I open the scenarios reference-tests sample', async ({ launchApp, services }) => {
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
 
-  // Copy the project + its call-history zip + the readFile sidecar side by side.
-  const workingCopy = setupReferenceWorkingCopy(SCENARIO_RUNLOG_TEMP_DIR)
+  // Copy the project + its call-history zip + the readFile sidecar side by
+  // side — canonical service ports remapped to this worker's ephemeral ones.
+  const workingCopy = setupReferenceWorkingCopy(SCENARIO_RUNLOG_TEMP_DIR, services)
 
   await configureNextOpenDialogForE2E(requireApp(), { kind: 'openFile', path: workingCopy })
   await requirePage().locator('[data-testid="titlebar-menubar-item-file"]').click()
@@ -211,7 +213,14 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
   // occasionally past the 30s default the pure-compute rows are fine with. Give
   // just those rows a longer copy budget so the single-shot ship-gate doesn't
   // hit a cold-bind timeout; every other row keeps the tight 30s.
-  const isServerScenario = scenarioName.endsWith(' Server')
+  // Named by BEHAVIOUR, not by a name suffix: a scenario that HOSTS a server
+  // needs the longer budget whatever it is called. `Socket.IO` opens its own
+  // socket.io server ("Server listen") before its client connects, and `Main`
+  // orchestrates sub-scenarios that do — both were timing out at 30s under a
+  // full-suite run while passing alone, which reads as flakiness and is really
+  // this predicate missing them.
+  const SERVER_HOSTING_SCENARIOS = new Set(['Socket.IO', 'Main'])
+  const isServerScenario = scenarioName.endsWith(' Server') || SERVER_HOSTING_SCENARIOS.has(scenarioName)
   let text = ''
   await expect(async () => {
     await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
@@ -235,6 +244,6 @@ Then('the copied run-log matches the snapshot', async () => {
     throw new Error(`run-log golden missing: ${golden} — create it with UPDATE_RUNLOG_GOLDEN=1`)
   }
   expect(copiedYaml, `run-log drifted from ${golden} — regenerate with UPDATE_RUNLOG_GOLDEN=1 if intended`).toBe(
-    readFileSync(golden, 'utf-8')
+    normalizeRunLogYaml(readFileSync(golden, 'utf-8'))
   )
 })

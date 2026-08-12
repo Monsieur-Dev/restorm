@@ -335,17 +335,44 @@ class PermissionService {
 	private matches(entry: FirewallOrigin, origin: FirewallOrigin): boolean {
 		if (entry.scheme !== origin.scheme) return false
 		if (entry.port !== WILDCARD_PORT && entry.port !== origin.port) return false
-		if (entry.host === origin.host) return true
-		if (entry.host.startsWith('*.')) {
-			const suffix = entry.host.slice(2)
+		return this.hostMatches(entry.host, origin.host)
+	}
+
+	/** Host half of {@link matches}, split out so the DNS-level check can
+	 * reuse the exact same glob semantics instead of restating them. */
+	private hostMatches(entryHost: string, host: string): boolean {
+		if (entryHost === host) return true
+		if (entryHost.startsWith('*.')) {
+			const suffix = entryHost.slice(2)
 			// `*.example.com` matches `api.example.com` but NOT
 			// `example.com` (no zero-subdomain match) and NOT
 			// `a.b.example.com` (no multi-subdomain match).
-			if (!origin.host.endsWith(`.${suffix}`)) return false
-			const head = origin.host.slice(0, origin.host.length - suffix.length - 1)
+			if (!host.endsWith(`.${suffix}`)) return false
+			const head = host.slice(0, host.length - suffix.length - 1)
 			if (head.length === 0) return false
 			if (head.includes('.')) return false
 			return true
+		}
+		return false
+	}
+
+	/**
+	 * Is this host denied for EVERY scheme and port — i.e. does a blacklist
+	 * entry using the wildcard port cover it?
+	 *
+	 * A DNS query carries no scheme and no port, so it can only be refused on
+	 * a ban that holds whatever they turn out to be. A per-origin ban
+	 * (`http://host:5111`) is deliberately NOT reported here: it is enforced
+	 * at connect time, where the port is known. Answering "yes" for those
+	 * would ban every port of the host on the strength of one.
+	 */
+	isHostBannedOnEveryPort(host: string): boolean {
+		this.loadIfNeeded()
+		if (typeof host !== 'string' || host.length === 0) return false
+		const lower = host.toLowerCase()
+		for (const entry of this.blacklist) {
+			if (entry.port !== WILDCARD_PORT) continue
+			if (this.hostMatches(entry.host, lower)) return true
 		}
 		return false
 	}

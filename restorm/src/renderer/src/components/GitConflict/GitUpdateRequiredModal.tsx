@@ -59,6 +59,7 @@ export const GitUpdateRequiredModal: React.FC<GitUpdateRequiredModalProps> = ({
       size="dialog"
       dialogWidth={640}
       data-testid={dataTestId}
+      enterActionTestId={`${dataTestId}-resolve-button`}
     >
       {/* The contested entities, exposed for assertions: a count alone
         * cannot tell a correct verdict from a wrong one, and "which

@@ -497,6 +497,15 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   )
 
   const [menu, setMenu] = useState<{ visible: boolean; x: number; y: number } | null>(null)
+  // Portal host for the type-pick menu, resolved at OPEN time from the click
+  // target's NEAREST `.workbench`. A field inside a MAXIMIZED tab lives in
+  // the fullscreen Modal (portalled to document.body, above the main
+  // `.workbench` stacking context at `z-index: 1`) — a menu portalled into
+  // the MAIN workbench renders underneath it whatever its own z-index says.
+  // The Modal wraps its content in its own inner `<Workbench>`, so walking
+  // up from the click always lands in the surface the field is actually on:
+  // the modal's workbench when maximized, the main one otherwise.
+  const [menuHost, setMenuHost] = useState<Element | null>(null)
   // Precise secret-resolution error for the current value (null when healthy /
   // not a secret). Reported up by the SecretCell; drives the red control-group
   // outline + the exact-message tooltip on the cell.
@@ -542,6 +551,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
 
   const openMenu = useCallback((e: React.MouseEvent): void => {
     e.preventDefault()
+    setMenuHost((e.currentTarget as Element | null)?.closest('.workbench') ?? null)
     setMenu({ visible: true, x: e.clientX, y: e.clientY })
   }, [])
 
@@ -1122,10 +1132,8 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
           onRequestClose={closeMenu}
           {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu` })}
         />,
-        document.querySelector('.workbench') ?? document.body
+        menuHost ?? document.querySelector('.workbench') ?? document.body
       )}
     </>
   )
 }
-
-export default TypedValueField

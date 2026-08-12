@@ -1,25 +1,25 @@
 - message: 🔵 [<time>] ▶ GraphQL Subscription
 - message: ⚪ [<time>] start graphqlListen
   data:
-    requestId: <uuid>
     connectionName: GraphQL Sub Mock
     label: start GraphQL mock (with subscription)
+    requestId: <uuid>
 - message: ⚪ [<time>] done graphqlListen
 - message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" connecting
 - message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" connected
 - message: ⚪ [<time>] start graphqlSubscribe
   data:
-    requestId: <uuid>
     connectionName: GraphQL Subscription
     label: subscribe to ticks
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done graphqlSubscribe
 - message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" connecting
 - message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" connected
 - message: ⚪ [<time>] start log
   data:
-    message: événement de souscription GraphQL reçu
     level: info
+    message: événement de souscription GraphQL reçu
     runOnEachEvent: false
     data:
       data:
@@ -44,8 +44,8 @@
 - message: ⚪ [<time>] graphql-subscribe "GraphQL Subscription" closed
 - message: ⚪ [<time>] start log
   data:
-    message: souscription GraphQL arrêtée
     level: info
+    message: souscription GraphQL arrêtée
     in: true
 - message: 🔵 [<time>] souscription GraphQL arrêtée
 - message: ⚪ [<time>] done log
@@ -59,8 +59,8 @@
 - message: ⚪ [<time>] graphql-server "GraphQL Sub Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur GraphQL arrêté
     level: info
+    message: serveur GraphQL arrêté
     in: true
 - message: 🔵 [<time>] serveur GraphQL arrêté
 - message: ⚪ [<time>] done log

@@ -72,6 +72,7 @@
     "auth": {
       "noAuth": "認証なし",
       "popoverLabel": "認証ルート",
+      "openRoute": "認証ルートを開く",
       "unnamed": "名称未設定"
     },
     "contextMenu": {
@@ -219,7 +220,6 @@
     "new": "新規作成",
     "import": "インポート",
     "open": "開く",
-    "openFolder": "フォルダを開く",
     "recentFiles": "最近使ったファイル",
     "favorites": "お気に入り",
     "close": "閉じる",
@@ -227,36 +227,24 @@
     "saveAll": "すべて保存",
     "saveAs": "名前を付けて保存",
     "exit": "終了",
-    "selection": "選択",
-    "tools": "ツール",
-    "findInCollection": "コレクション内を検索",
-    "addRequest": "リクエストを追加",
-    "addRequestHttp": "HTTP リクエスト",
-    "addRequestGraphql": "GraphQL リクエスト",
-    "addRequestGrpc": "gRPC リクエスト",
-    "addRequestSoap": "SOAP リクエスト",
-    "addRequestOdata": "OData リクエスト",
-    "addRequestWebsocket": "WebSocket リクエスト",
-    "addFolder": "フォルダを追加",
-    "addEnvironmentFolder": "環境フォルダを追加",
-    "addVariable": "変数を追加",
-    "addTag": "タグを追加",
-    "expandAllFolders": "すべてのフォルダを展開",
-    "collapseAllFolders": "すべてのフォルダを折りたたむ",
-    "sendActiveRequest": "リクエストを送信",
-    "cancelActiveRequest": "リクエストをキャンセル",
-    "generateCodeSnippet": "コードスニペットを生成",
-    "copyAsCurl": "cURL としてコピー",
-    "exportOpenApi": "OpenAPI にエクスポート",
-    "clearAuthCache": "認証キャッシュをクリア",
-    "openLogsFolder": "ログフォルダを開く",
     "mcpLogs": "MCP ログ",
+    "consoleHttp": "HTTPコンソール",
     "git": "Git",
     "gitPush": "プッシュ",
     "gitPull": "プル",
     "gitRefresh": "更新",
     "gitHistory": "履歴",
-    "gitResetToServer": "サーバーのバージョンに戻す"
+    "gitResetToServer": "サーバーのバージョンに戻す",
+    "scenario": "シナリオ",
+    "create": "作成",
+    "request": "リクエスト",
+    "server": "サーバー",
+    "runSelected": "実行",
+    "cancelSelected": "キャンセル",
+    "clone": "複製",
+    "delete": "削除",
+    "addToFavorites": "お気に入りに追加",
+    "removeFromFavorites": "お気に入りから削除"
   },
   "sidebar": {
     "addRequest": "リクエストを追加",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "切り取り",
+      "copy": "コピー",
+      "paste": "貼り付け"
     },
     "deleteConfirm": {
       "title": "削除の確認",
@@ -362,7 +353,7 @@
       "docs": "ドキュメント",
       "environments": "環境",
       "notes": "メモ",
-      "customValues": "Custom variables"
+      "customValues": "カスタム列挙"
     },
     "home": {
       "configureEnvs": "環境を設定",
@@ -400,7 +391,7 @@
       "addEntry": "値を追加",
       "label": "Label",
       "value": "Value",
-      "selectList": "リストを選択"
+      "selectList": "変数で再利用できる値リストを定義します。読みやすいラベルを選ぶと、リクエストには対応する値が送信されます。列挙を選択するか、新しく作成して始めましょう。"
     }
   },
   "requestTab": {
@@ -454,7 +445,11 @@
       }
     },
     "followRedirects": "リダイレクトに従う",
-    "timeoutLabel": "タイムアウト (ms)"
+    "timeoutLabel": "タイムアウト (ms)",
+    "resolvedUrlPreview": {
+      "copy": "解決済みURLをコピー",
+      "copied": "コピーしました！"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -603,6 +598,7 @@
     "disconnect": "切断",
     "startListening": "リッスン開始",
     "stopListening": "リッスン停止",
+    "listenFailed": "サーバーの起動に失敗しました",
     "routePlaceholder": "ルート (任意)",
     "clientsConnected": "{{count}} クライアント接続中",
     "notListening": "リッスンしていません"
@@ -855,26 +851,6 @@
     "openAriaLabel": "ディスクからコレクションを開く",
     "landmarkLabel": "ようこそ"
   },
-  "save": {
-    "title": "保存オプション",
-    "mode": {
-      "label": "保存モード",
-      "file": "単一ファイル",
-      "folder": "フォルダ構成",
-      "fileDescription": "すべてを単一のファイルに保存します",
-      "folderDescription": "ファイルを分けたフォルダ構成として保存します"
-    },
-    "format": {
-      "label": "形式",
-      "yamlDescription": "人にとって読みやすい形式",
-      "jsonDescription": "標準形式",
-      "json5Description": "JSON + コメント"
-    },
-    "preview": {
-      "label": "構成プレビュー",
-      "noDocumentation": "このソースには解析済みのドキュメントがありません。"
-    }
-  },
   "common": {
     "cancel": "キャンセル",
     "save": "保存",
@@ -1058,7 +1034,9 @@
       "sourceImportFailed": "仕様をソースから再インポートできませんでした。",
       "emptySpec": "{{url}} から取得した仕様には {{format}} の操作が 1 つも宣言されていません。適用するとこのフォルダーが空になるため、更新を拒否しました。",
       "formatNotDetected": "このソースの形式を認識できませんでした。",
-      "unsupportedFormat": "{{format}} 形式に対応するインポーターがありません。"
+      "unsupportedFormat": "{{format}} 形式に対応するインポーターがありません。",
+      "projectFormatTooNew": "このプロジェクトファイルはフォーマットバージョン {{found}} を使用していますが、このバージョンの Restorm はバージョン {{current}} までしか理解できません。インポートするには Restorm を更新してください。",
+      "projectFormatMissing": "このファイルは Restorm のフォーマットバージョンを宣言していないため、Restorm プロジェクトファイルではありません。"
     },
     "formats": {
       "swagger": {
@@ -1165,6 +1143,9 @@
       "apiBlueprint": {
         "description": "API Blueprint ドキュメント（.apib）を貼り付けてください。restorm はすべてのリソースグループとトランジションを、ドキュメント化されたメソッド／レスポンスのペアごとに1つのリクエストフォルダーへと解析します。",
         "trademark": "API Blueprint はもともと Apiary によって作成された仕様です。"
+      },
+      "restorm": {
+        "description": "別の Restorm プロジェクトを開いているプロジェクトに統合します。インポートされたフォルダー、リクエスト、環境、シナリオはすべてラップフォルダーの下に新しい ID で配置されるため、プロジェクトを自分自身にインポートしても衝突しません。"
       }
     },
     "grpcReflection": {
@@ -1231,6 +1212,71 @@
       "previousMatch": "前の一致",
       "nextMatch": "次の一致",
       "close": "閉じる"
+    },
+    "sections": {
+      "parameters": "パラメーター",
+      "responses": "レスポンス",
+      "models": "モデル",
+      "enums": "列挙型",
+      "polymorphism": "ポリモーフィズム",
+      "overview": "概要",
+      "operations": "操作"
+    },
+    "table": {
+      "in": "場所",
+      "name": "名前",
+      "type": "型",
+      "required": "必須",
+      "operation": "操作",
+      "description": "説明",
+      "example": "例",
+      "constraints": "制約"
+    },
+    "params": {
+      "empty": "フィルターされたルートに対してボディ以外のパラメーターは宣言されていません。"
+    },
+    "responses": {
+      "status": "ステータス",
+      "schema": "スキーマ",
+      "headers": "ヘッダー",
+      "empty": "フィルターされたルートに対してレスポンスは宣言されていません。"
+    },
+    "route": {
+      "requestBody": "リクエストボディ",
+      "responseBody": "レスポンスボディ",
+      "security": "セキュリティ",
+      "externalDocs": "外部ドキュメント",
+      "examplePayload": "ペイロードの例",
+      "operationId": "operationId",
+      "addRequest": "+ リクエストを追加"
+    },
+    "apiInfo": {
+      "version": "バージョン",
+      "sourceFormat": "ソース形式",
+      "from": "取得元:",
+      "server": "サーバー",
+      "contact": "連絡先",
+      "license": "ライセンス",
+      "termsOfService": "利用規約",
+      "externalDocs": "外部ドキュメント",
+      "tagReferences": "タグ参照"
+    },
+    "sidebar": {
+      "outline": "ドキュメントの目次"
+    },
+    "legend": {
+      "requiredProperty": "必須プロパティ",
+      "optionalProperty": "任意プロパティ",
+      "nullableValue": "null 許容値",
+      "readOnly": "読み取り専用（サーバー設定）",
+      "deprecatedBadge": "非推奨",
+      "deprecatedDesc": "ソース仕様で非推奨と宣言",
+      "removedBadge": "削除済み",
+      "removedDesc": "最新の再インポートで消失",
+      "requiredSingleRef": "必須の単一参照",
+      "optionalSingleRef": "任意の単一参照",
+      "requiredArrayRef": "必須の配列参照",
+      "optionalArrayRef": "任意の配列参照"
     }
   },
   "scenario": {
@@ -1781,8 +1827,7 @@
       "dataFormats": "データ形式",
       "encoding": "エンコード",
       "time": "タイミング",
-      "algorithmie": "アルゴリズム",
-      "ux": "UX"
+      "algorithmie": "アルゴリズム"
     },
     "listOp": {
       "value": "リスト",
@@ -2332,9 +2377,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL プレビュー (解決前)",
-    "versionV2NotYet": "v2 (実行は未対応)",
-    "versionV3NotYet": "v3 (実行は未対応)",
     "operationKindEntitySet": "エンティティセット (GET)",
     "operationKindFunction": "関数 (パラメーターをインライン化した GET)",
     "operationKindAction": "アクション (JSON 本文を伴う POST)",
@@ -2353,7 +2395,8 @@
       "stopListening": "リッスン停止",
       "notListening": "リッスンしていません",
       "served": "待機中 — {{count}} 件のリクエストを処理",
-      "listenFailed": "モックサーバーの起動に失敗しました"
+      "listenFailed": "モックサーバーの起動に失敗しました",
+      "portInUse": "ポート {{port}} は既に別のアプリケーションで使用されています。そのアプリを終了するか別のポートを選び、サーバーを再起動してください。"
     }
   },
   "odata": {
@@ -2373,6 +2416,7 @@
     },
     "namePlaceholder": "設定名",
     "saveButton": "保存",
+    "updateButton": "現在の値で更新",
     "storageTarget": {
       "label": "プロジェクトファイルに保存 (.restorm)"
     },
@@ -2385,6 +2429,10 @@
     "loadConfirm": {
       "title": "設定を読み込む",
       "message": "設定「{{name}}」を読み込みますか？現在の未保存の設定は失われます。"
+    },
+    "updateConfirm": {
+      "title": "設定を更新",
+      "message": "設定「{{name}}」を現在の値で置き換えますか？"
     },
     "deleteConfirm": {
       "title": "設定を削除",
@@ -2631,6 +2679,10 @@
       "title": "新しいバージョンで作成されたプロジェクト",
       "message": "このファイルは、ご使用中の Restorm より新しいバージョンで作成されています。開くには Restorm を更新してください。",
       "versions": "ファイル形式 {{found}}。このバージョンが対応するのは {{current}} までです。"
+    },
+    "notARestormFile": {
+      "title": "これは Restorm のファイルではありません",
+      "message": "このファイルには Restorm のファイル形式が記載されていません。Restorm で作成されたものではないか、手作業で編集されたため、開くことができません。"
     }
   }
 }

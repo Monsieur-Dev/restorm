@@ -1,10 +1,16 @@
-import React, { useEffect, useId, useState } from 'react'
-import Particles, { initParticlesEngine } from '@tsparticles/react'
-import type { Container } from '@tsparticles/engine'
+import React, { useId } from 'react'
+import Particles, { ParticlesProvider } from '@tsparticles/react'
+import type { Container, Engine } from '@tsparticles/engine'
 import { loadSlim } from '@tsparticles/slim'
 import { motion, useAnimation } from 'motion/react'
 
 // Adapted from Aceternity UI's SparklesCore (MIT — https://ui.aceternity.com/components/sparkles)
+
+// Module-level so every Sparkles instance hands the SAME registrar to its
+// provider — the engine is global and the plugins only need loading once.
+const registerPlugins = async (engine: Engine): Promise<void> => {
+  await loadSlim(engine)
+}
 
 export interface SparklesProps {
   id?: string
@@ -28,16 +34,6 @@ export const Sparkles: React.FC<SparklesProps> = ({
   particleColor,
   particleDensity
 }) => {
-  const [init, setInit] = useState(false)
-
-  useEffect(() => {
-    void initParticlesEngine(async (engine) => {
-      await loadSlim(engine)
-    }).then(() => {
-      setInit(true)
-    })
-  }, [])
-
   const controls = useAnimation()
 
   const particlesLoaded = async (container?: Container): Promise<void> => {
@@ -54,7 +50,7 @@ export const Sparkles: React.FC<SparklesProps> = ({
 
   return (
     <motion.div animate={controls} className={rootClass} style={{ opacity: 0 }}>
-      {init && (
+      <ParticlesProvider init={registerPlugins}>
         <Particles
           id={id ?? generatedId}
           className="ecu-wallpaper-pattern-sparkles-canvas"
@@ -102,17 +98,11 @@ export const Sparkles: React.FC<SparklesProps> = ({
               },
               effect: {
                 close: true,
-                fill: true,
                 options: {}
               },
               groups: {},
               move: {
                 angle: { offset: 0, value: 90 },
-                attract: {
-                  distance: 200,
-                  enable: false,
-                  rotate: { x: 3000, y: 3000 }
-                },
                 center: { x: 50, y: 50, mode: 'percent', radius: 0 },
                 decay: 0,
                 distance: {},
@@ -132,7 +122,6 @@ export const Sparkles: React.FC<SparklesProps> = ({
                 speed: { min: 0.1, max: 1 },
                 spin: { acceleration: 0, enable: false },
                 straight: false,
-                trail: { enable: false, length: 10, fill: {} },
                 vibrate: false,
                 warp: false
               },
@@ -162,7 +151,7 @@ export const Sparkles: React.FC<SparklesProps> = ({
                 enable: false,
                 offset: { x: 0, y: 0 }
               },
-              shape: { close: true, fill: true, options: {}, type: 'circle' },
+              shape: { close: true, options: {}, type: 'circle' },
               size: {
                 value: { min: minSize ?? 1, max: maxSize ?? 3 },
                 animation: {
@@ -254,7 +243,7 @@ export const Sparkles: React.FC<SparklesProps> = ({
             detectRetina: true
           }}
         />
-      )}
+      </ParticlesProvider>
     </motion.div>
   )
 }

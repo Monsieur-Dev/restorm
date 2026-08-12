@@ -6,5 +6,3 @@ export const Pane: React.FC<SplitViewPaneProps> = (_props) => {
 	// Actual rendering is handled by SplitView by inspecting its children.
 	return null;
 };
-
-export default Pane;

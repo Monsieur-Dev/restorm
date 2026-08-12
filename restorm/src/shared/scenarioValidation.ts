@@ -3,7 +3,9 @@ import type { ScenarioNodeKind, Scenario } from './types/collections'
 import { readInputParams, INPUT_DEFAULT_PARAM_ID } from './scenarioInputParams'
 import { OBJECT_DEFAULT_PROPERTY_ID } from './scenarioObjectProps'
 import { readOutputDecls, OUTPUT_DEFAULT_DECL_ID } from './scenarioOutputDecls'
-import { outputPortFlow, inputPortFlow } from './scenarioNodePorts'
+import { LIST_MUTATION_DEFAULT_VALUE_ID } from './scenarioListMutationValues'
+import { outputPortFlow, inputPortFlow, defaultPortsForKind, socketioConnectEventPorts } from './scenarioNodePorts'
+import { hasDonePort, hasErrorPort } from './scenarioNodeCapabilities'
 
 /**
  * Per-box validation: a box is "in error" when it's in a state that prevents
@@ -585,4 +587,175 @@ export function validateScenarioModel(scenario: Pick<Scenario, 'nodes' | 'edges'
     .filter((e) => e.from.nodeId && e.to.nodeId && e.to.portId)
     .map((e) => ({ fromNodeId: e.from.nodeId, toNodeId: e.to.nodeId, toPortId: e.to.portId }))
   return validateScenarioGraph(nodes, dataLinks, connectedTargets, t, graphEdges)
+}
+
+// --- Orphan edges: a wire pointing at a port the node no longer carries ------
+
+/** The minimal node shape the orphan-edge finder reads (kind + config). */
+export interface OrphanCheckNode {
+  id: string
+  kind: ScenarioNodeKind
+  config?: Record<string, unknown>
+}
+
+/** Collect the persisted `{ id }` row ids under `config[key]` (object
+ * properties, switch cases, list-mutation value rows, …), matching how the box
+ * derives one dynamic handle per row. */
+function configRowIds(config: Record<string, unknown> | undefined, key: string): string[] {
+  const raw = config?.[key]
+  if (!Array.isArray(raw)) return []
+  const ids: string[] = []
+  for (const row of raw) {
+    const id = (row as { id?: unknown } | null)?.id
+    if (typeof id === 'string' && id !== '') ids.push(id)
+  }
+  return ids
+}
+
+/**
+ * The full set of handle ids a node CURRENTLY carries — computed the same way
+ * the box renders them, so an edge to a live handle is never mistaken for an
+ * orphan. Deliberately derived from the LIVE {@link defaultPortsForKind} (the
+ * kind registry) rather than the node's persisted `inputs` / `outputs` stamp,
+ * so renaming a static port in the registry drops its old id here and the
+ * still-persisted edge to it reads as orphaned — the case a stamp-based check
+ * would miss entirely.
+ *
+ * The predicate is NOT the declared `ports.outputs` alone: `done` and `error`
+ * are capability-derived (never listed per kind), the header `in` trigger and
+ * the `done` completion handle are universal implicit inputs, and the dynamic
+ * `object` / `switch` / list-mutation / output-decl / socketio-event handles
+ * come from config. runScenario's `param:` / `output:` ports are derived from a
+ * sub-scenario the model gate does not resolve, so they are accepted wholesale
+ * (see {@link findOrphanScenarioEdges}).
+ */
+export function scenarioNodeHandleIds(kind: ScenarioNodeKind, config: Record<string, unknown> | undefined): { inputs: Set<string>; outputs: Set<string> } {
+  const ports = defaultPortsForKind(kind)
+  const inputs = new Set<string>(ports.inputs.map((port) => port.id))
+  const outputs = new Set<string>(ports.outputs.map((port) => port.id))
+  // Universal implicit input handles: the header launch trigger `in` (already
+  // in `ports.inputs` for every kind that accepts an input event) and the
+  // `done` completion handle a flow may sequence on.
+  inputs.add('in')
+  inputs.add('done')
+  // Capability-derived output handles — drawn by the box chrome, absent from
+  // every kind's static output map.
+  if (hasDonePort(kind)) outputs.add('done')
+  if (hasErrorPort(kind)) outputs.add('error')
+  // Per-kind dynamic handles, derived from config exactly as the box does.
+  switch (kind) {
+    case 'object': {
+      const ids = configRowIds(config, 'properties')
+      for (const id of ids) inputs.add(id)
+      // An empty object still renders one default property row (a wire could
+      // target it before its name is filled in).
+      if (ids.length === 0) inputs.add(OBJECT_DEFAULT_PROPERTY_ID)
+      break
+    }
+    case 'output': {
+      const decls = readOutputDecls(config ?? {})
+      for (const decl of decls) inputs.add(decl.id)
+      if (decls.length === 0) inputs.add(OUTPUT_DEFAULT_DECL_ID)
+      break
+    }
+    case 'addToList':
+    case 'removeFromList': {
+      const ids = configRowIds(config, 'values')
+      for (const id of ids) inputs.add(id)
+      if (ids.length === 0) inputs.add(LIST_MUTATION_DEFAULT_VALUE_ID)
+      break
+    }
+    case 'switch': {
+      // A case emits on its own row id (`case-…`, or `switch-default-case` for
+      // the seeded first row) — on top of the static `default` output port.
+      for (const id of configRowIds(config, 'cases')) outputs.add(id)
+      break
+    }
+    case 'socketioConnect': {
+      for (const port of socketioConnectEventPorts(config)) outputs.add(port.id)
+      break
+    }
+    default:
+      break
+  }
+  return { inputs, outputs }
+}
+
+/** A `runScenario` node exposes one `param:<name>` input and one
+ * `output:<name>` output per named input/output node of the sub-scenario it is
+ * bound to. Resolving those needs the sibling scenario (the live collection
+ * tree), which the model-level gate deliberately does not consult, so such
+ * handles are accepted wholesale rather than risk a false orphan flag. */
+function isRunScenarioDerivedInput(kind: ScenarioNodeKind, portId: string): boolean {
+  return kind === 'runScenario' && portId.startsWith('param:')
+}
+function isRunScenarioDerivedOutput(kind: ScenarioNodeKind, portId: string): boolean {
+  return kind === 'runScenario' && portId.startsWith('output:')
+}
+
+/** One edge endpoint wired to a handle the node no longer carries. */
+export interface OrphanScenarioEdge {
+  edgeId?: string | undefined
+  nodeId: string
+  kind: ScenarioNodeKind
+  /** Which end of the edge is stale — its `source` output or its `target` input. */
+  side: 'source' | 'target'
+  portId: string
+}
+
+/**
+ * Every edge whose source or target handle no longer exists on its node.
+ *
+ * The engine's scheduler registers EVERY wired port id as a real port, so a
+ * stale target becomes a required input no source can satisfy: the node never
+ * fires, its downstream never fires, and the run still reports `completed`. The
+ * editor's load-time sanitizer only drops the dynamic `prop-` / `case-` cases
+ * and never runs headless or under MCP, so this shared predicate is what lets
+ * those run paths refuse a scenario the editor would have silently repaired.
+ */
+export function findOrphanScenarioEdges(scenario: { nodes: OrphanCheckNode[]; edges: ScenarioEdgeEndpoints[] }): OrphanScenarioEdge[] {
+  const byId = new Map<string, OrphanCheckNode>()
+  for (const node of scenario.nodes) byId.set(node.id, node)
+  const handleCache = new Map<string, { inputs: Set<string>; outputs: Set<string> }>()
+  const handlesOf = (node: OrphanCheckNode): { inputs: Set<string>; outputs: Set<string> } => {
+    let handles = handleCache.get(node.id)
+    if (!handles) { handles = scenarioNodeHandleIds(node.kind, node.config); handleCache.set(node.id, handles) }
+    return handles
+  }
+  const orphans: OrphanScenarioEdge[] = []
+  for (const edge of scenario.edges) {
+    const source = edge.from?.nodeId ? byId.get(edge.from.nodeId) : undefined
+    const sourcePort = edge.from?.portId
+    // Only judge an endpoint whose node exists — a dangling node reference is a
+    // separate concern (the reachability pass already ignores it), and we must
+    // not guess a kind we can't see.
+    if (source && typeof sourcePort === 'string' && sourcePort !== ''
+      && !isRunScenarioDerivedOutput(source.kind, sourcePort)
+      && !handlesOf(source).outputs.has(sourcePort)) {
+      orphans.push({ edgeId: edge.id, nodeId: source.id, kind: source.kind, side: 'source', portId: sourcePort })
+    }
+    const target = edge.to?.nodeId ? byId.get(edge.to.nodeId) : undefined
+    const targetPort = edge.to?.portId
+    if (target && typeof targetPort === 'string' && targetPort !== ''
+      && !isRunScenarioDerivedInput(target.kind, targetPort)
+      && !handlesOf(target).inputs.has(targetPort)) {
+      orphans.push({ edgeId: edge.id, nodeId: target.id, kind: target.kind, side: 'target', portId: targetPort })
+    }
+  }
+  return orphans
+}
+
+/** The minimal edge shape {@link findOrphanScenarioEdges} reads. */
+export interface ScenarioEdgeEndpoints {
+  id?: string
+  from?: { nodeId?: string; portId?: string }
+  to?: { nodeId?: string; portId?: string }
+}
+
+/** A plain-English, translation-free description of an orphan edge — for the
+ * engine / CLI / MCP refusal, which are agent- and developer-facing surfaces
+ * (never rendered through i18next). */
+export function describeOrphanScenarioEdge(orphan: OrphanScenarioEdge): string {
+  const end = orphan.side === 'source' ? 'source output' : 'target input'
+  return `[${orphan.nodeId}] ${orphan.kind} action is wired through a ${end} port "${orphan.portId}" that no longer exists on it`
 }

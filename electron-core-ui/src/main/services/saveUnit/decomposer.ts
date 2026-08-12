@@ -1,19 +1,18 @@
 /**
  * Class-driven, filesystem-agnostic decomposition of a tree into
- * per-save-unit persistence entries.
+ * per-save-unit entries.
  *
  * Given a root document and its class constructor, this walks the
- * tree using `@separateFiles` / `@separateFolders` / `@fileNaming`
+ * tree using `@saveUnits` / `@fileNaming`
  * metadata and produces a flat list of `{ runtimeId, absolutePath,
- * content, format, kind }` entries that a host can hand to
- * `FileService.saveUnit` or `saveUnitsBatch`.
+ * content, format, kind }` entries that feed the save-unit registry
+ * (per-unit dirty state, drafts, per-unit Ctrl+S).
  *
  * Pure — no filesystem access. Safe to import from the renderer.
  */
 
 import {
-  getSeparateFilesProperties,
-  getSeparateFoldersProperties,
+  getSaveUnitsProperties,
   getNonSerialisedProperties,
   getTreatEmptyAsUndefinedProperties,
   generateFileName,
@@ -51,16 +50,16 @@ export interface DecomposedUnit {
   content: Record<string, unknown>
   /** Serialization format (driven by the project config). */
   format: PersistenceFormat
-  /** `file` for `@separateFiles` items, `folder` for `@separateFolders` (their `index.<ext>`). */
+  /** `folder` for a unit that contains child units (its `index.<ext>`), `file` for a leaf. */
   kind: 'file' | 'folder'
   /** Parent unit's id, or `undefined` for top-level units under the root. */
   parentId?: string | undefined
 }
 
 export interface DecomposedProject {
-  /** The root `index.<ext>` — always present in folder mode. */
+  /** The root's own unit. */
   rootIndex: DecomposedUnit
-  /** Every `@separateFiles` / `@separateFolders` descendant, flattened. */
+  /** Every `@saveUnits` descendant, flattened. */
   children: DecomposedUnit[]
 }
 
@@ -101,9 +100,8 @@ export interface DecomposeOptions {
  * Produce the persistence-ready slice of a single document node —
  * the same shape the decomposer emits as `DecomposedUnit.content`
  * for the node. Two steps, in order:
- *   1. Drop properties flagged `@separateFiles` / `@separateFolders`
- *      — those are lifted into their own files, never written to the
- *      parent's index.
+ *   1. Drop properties flagged `@saveUnits` — those are lifted into
+ *      their own units, never part of the parent's own content.
  *   2. Cleanse the rest via `@NonSerialised` / `@TreatEmptyAsUndefined`.
  *
  * The DocumentEvents → upsert bridge uses this to compute the draft
@@ -115,14 +113,13 @@ export function cleanseForPersistence(
   classConstructor: object | undefined
 ): Record<string, unknown> {
   if (!classConstructor) return cleanse(data, undefined)
-  const separateFilesProps = getSeparateFilesProperties(classConstructor)
-  const separateFoldersProps = getSeparateFoldersProperties(classConstructor)
-  if (separateFilesProps.size === 0 && separateFoldersProps.size === 0) {
+  const saveUnitsProps = getSaveUnitsProperties(classConstructor)
+  if (saveUnitsProps.size === 0) {
     return cleanse(data, classConstructor)
   }
   const withoutSeparables: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(data)) {
-    if (separateFilesProps.has(key) || separateFoldersProps.has(key)) continue
+    if (saveUnitsProps.has(key)) continue
     withoutSeparables[key] = value
   }
   return cleanse(withoutSeparables, classConstructor)
@@ -206,23 +203,22 @@ function processNode(params: {
 }): Record<string, unknown> {
   const { node, nodeClass, nodePath, nodeKind, parentId, format, extension, indexFileName, idProperty, classResolver, accumulator, indexPaddingMin } = params
 
-  // Collect the two decorator maps (empty when no class is known).
-  const separateFilesProps = nodeClass ? getSeparateFilesProperties(nodeClass) : new Map<string | symbol, unknown>()
-  const separateFoldersProps = nodeClass ? getSeparateFoldersProperties(nodeClass) : new Map<string | symbol, unknown>()
+  // Collect the decorator map (empty when no class is known).
+  const saveUnitsProps = nodeClass ? getSaveUnitsProperties(nodeClass) : new Map<string | symbol, unknown>()
 
-  // Keep a shallow copy of the content with separable props removed —
-  // that's what lands in the node's own index / leaf file.
+  // Keep a shallow copy of the content with unit-bearing props removed —
+  // that's what forms the node's own content.
   const indexContent: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(node)) {
-    if (separateFilesProps.has(key) || separateFoldersProps.has(key)) continue
+    if (saveUnitsProps.has(key)) continue
     indexContent[key] = value
   }
   const cleanedIndexContent = cleanse(indexContent, nodeClass)
 
-  // Recurse into separable arrays. We don't register the root entry
+  // Recurse into unit-bearing arrays. We don't register the root entry
   // here — the caller builds the `rootIndex` outside.
   const nodeId = nodeKind === 'folder' ? getId(node, idProperty) : parentId
-  for (const [propKey] of separateFilesProps) {
+  for (const [propKey] of saveUnitsProps) {
     if (typeof propKey !== 'string') continue
     const rawItems: unknown = node[propKey]
     if (!Array.isArray(rawItems)) continue
@@ -233,41 +229,13 @@ function processNode(params: {
       if (raw === null || typeof raw !== 'object') continue
       const item = raw as Record<string, unknown>
       const itemClass = classResolver(item, nodeClass, propKey)
-      const fileName = nameItem(item, i, totalCount, itemClass, indexPaddingMin)
-      const absPath = joinPath(nodePath, `${fileName}.${extension}`)
-      accumulator.push({
-        runtimeId: getId(item, idProperty),
-        absolutePath: absPath,
-        content: cleanse(item, itemClass),
-        format,
-        kind: 'file',
-        parentId: nodeId
-      })
-    }
-  }
-
-  for (const [propKey] of separateFoldersProps) {
-    if (typeof propKey !== 'string') continue
-    const rawItems: unknown = node[propKey]
-    if (!Array.isArray(rawItems)) continue
-    const items = rawItems as unknown[]
-    const totalCount = items.length
-    for (let i = 0; i < items.length; i += 1) {
-      const raw = items[i]
-      if (raw === null || typeof raw !== 'object') continue
-      const item = raw as Record<string, unknown>
-      const itemClass = classResolver(item, nodeClass, propKey)
-      // `@separateFolders` on a mixed array (folders AND requests,
-      // typical of `Folder.items`) treats every entry as a folder by
-      // default. Inspect each entry's own class — if it exposes its
-      // own `@separateFolders` / `@separateFiles` decorators (i.e. it
-      // has children to decompose further), it's a folder; otherwise
-      // it's a leaf and should land as a `.{ext}` file in the parent
-      // directory, matching what a host-side folder-tree writer like
-      // restorm's `saveFolderStructure` produces.
+      // `@saveUnits` on a mixed array (folders AND requests, typical of
+      // `Folder.items`) treats every entry as a container by default.
+      // Inspect each entry's own class — if it exposes its own
+      // `@saveUnits` decorators (i.e. it has children to decompose
+      // further), it's a container; otherwise it's a leaf.
       const itemIsFolder = itemClass
-        ? getSeparateFilesProperties(itemClass).size > 0
-          || getSeparateFoldersProperties(itemClass).size > 0
+        ? getSaveUnitsProperties(itemClass).size > 0
         : true
       if (!itemIsFolder) {
         const fileName = nameItem(item, i, totalCount, itemClass, indexPaddingMin)

@@ -163,11 +163,15 @@
   margin: -8px 0;
   z-index: 2;
 }
-/* Step — same disc as Stop (27px, white ring, shadow) but blue. */
+/* Step — same disc as Stop but blue. 28px, NOT 27: with the 2px ring the
+ * content box is diameter-4, and the 14px glyph only centres on whole pixels
+ * when that is even — (24-14)/2 = 5. At 27 the margin was 4.5px and the
+ * browser's rounding parked every glyph half a pixel off, which is exactly
+ * what a square icon shows. The 36px run disc was always even, hence fine. */
 .scn-inspector-step-round.button.text-button {
   /* Same disc as the workbench bar, at this strip's own scale: the shape
    * owns the geometry, these three public properties place it. */
-  --ecui-round-diameter: 27px;
+  --ecui-round-diameter: 28px;
   --ecui-round-ring: 2px;
   --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-step-background);
@@ -182,7 +186,7 @@
 .scn-inspector-debug-round.button.text-button {
   /* Same disc as the workbench bar, at this strip's own scale: the shape
    * owns the geometry, these three public properties place it. */
-  --ecui-round-diameter: 27px;
+  --ecui-round-diameter: 28px;
   --ecui-round-ring: 2px;
   --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-debug-background);
@@ -195,7 +199,7 @@
 .scn-inspector-stop-round.button.text-button {
   /* Same disc as the workbench bar, at this strip's own scale: the shape
    * owns the geometry, these three public properties place it. */
-  --ecui-round-diameter: 27px;
+  --ecui-round-diameter: 28px;
   --ecui-round-ring: 2px;
   --ecui-round-glyph-size: 14px;
   background: var(--scenario-action-stop-background);
@@ -535,6 +539,12 @@
 
 .scn-node {
   min-width: 160px;
+
+  /* Cap the box width: without it the node grows to its content's intrinsic
+   * width, so a one-line note stretches an action across the whole canvas
+   * before the text ever wraps. 460px matches the editor's other text caps
+   * (onboarding card, truncation tooltip). */
+  max-width: 460px;
   border: 1px solid var(--widget-border, #454545);
   border-radius: 6px;
   background: var(--scenarioNode-background, #2d2d30);

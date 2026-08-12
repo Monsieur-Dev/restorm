@@ -12,12 +12,13 @@
  */
 
 import { createBdd } from 'playwright-bdd'
-import { readFileSync, writeFileSync, existsSync, copyFileSync, mkdirSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, resolve } from 'path'
 import { tmpdir } from 'os'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
-import { test, expect } from '../../fixtures/scenario-runlog.fixture'
+import { test, expect } from './fixture'
+import { materializeSample } from '../../../helpers/testcontainers/services'
 import { normalizeRunLogYaml } from '../../scenario-runlog/runLogShared'
 
 const SAMPLE = resolve(__dirname, '../../../samples/scenario-setvariable-override.restorm')
@@ -28,6 +29,16 @@ const { Given, When, Then } = createBdd(test)
 let electronApp: ElectronApplication | null = null
 let page: Page | null = null
 let copiedYaml = ''
+/** Full log text copied out of the root-placed scenario's run. */
+let rootRunLog = ''
+/**
+ * Renderer-side failures seen since the root scenario was created. The
+ * missing-scenario failure arrives as an uncaught rejection from the
+ * `scenario:engine:start` IPC call, so it never reaches a DOM assertion —
+ * without capturing it, a broken run would leave every selector-based
+ * expectation green.
+ */
+let rootRunFailures: string[] = []
 
 function requirePage(): Page {
   if (!page) throw new Error('app must be launched before driving UI steps')
@@ -43,15 +54,14 @@ async function expandRowIfCollapsed(p: Page, name: string): Promise<void> {
   if ((await row.getAttribute('aria-expanded')) !== 'true') await row.click()
 }
 
-Given('I open the setVariable-override sample', async ({ launchApp }) => {
+Given('I open the setVariable-override sample', async ({ launchApp, services }) => {
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
 
   const dir = join(tmpdir(), `setvar-e2e-${String(process.pid)}`)
   mkdirSync(dir, { recursive: true })
-  const workingCopy = join(dir, 'scenario-setvariable-override.restorm')
-  copyFileSync(SAMPLE, workingCopy)
+  const workingCopy = materializeSample(SAMPLE, join(dir, 'scenario-setvariable-override.restorm'), services)
 
   await configureNextOpenDialogForE2E(launched.app, { kind: 'openFile', path: workingCopy })
   await requirePage().locator('[data-testid="titlebar-menubar-item-file"]').click()
@@ -100,6 +110,80 @@ When('I run the {string} scenario and copy all its logs', async ({}, scenarioNam
   copiedYaml = normalizeRunLogYaml(text)
 })
 
+When('I create a scenario named {string} at the root of the sidebar', async ({}, name: string) => {
+  const p = requirePage()
+  rootRunFailures = []
+  p.on('pageerror', (err) => rootRunFailures.push(err.message))
+  p.on('console', (msg) => { if (msg.type() === 'error') rootRunFailures.push(msg.text()) })
+
+  // Collapse the tree so there is empty area below it — the root context menu
+  // only opens when the pointer is NOT over a row.
+  await p.locator('[data-testid="sidebar-collapse-all-button"]').click()
+  const area = p.locator('[data-testid="sidebar-empty-area"]')
+  const box = await area.boundingBox()
+  if (!box) throw new Error('sidebar empty area is not laid out')
+  await area.click({
+    button: 'right',
+    position: { x: Math.round(box.width / 2), y: Math.round(box.height - 40) }
+  })
+
+  // "Ajouter" → "Scénario". The submenu entries are keyed by parent id and the
+  // root uses the empty-string sentinel, hence the trailing dash.
+  await p.locator('#add-root-child').hover()
+  const scenarioEntry = p.locator('#add-scenario-')
+  await expect(scenarioEntry).toBeVisible({ timeout: 10000 })
+  await scenarioEntry.click()
+
+  // The new row mounts in inline-rename mode.
+  const nameInput = p.locator('[data-testid="sidebar-listview"] .list-view-row.is-selected input')
+  await expect(nameInput).toBeVisible({ timeout: 10000 })
+  await nameInput.fill(name)
+  await nameInput.press('Enter')
+
+  // Depth 0 is the load-bearing assertion: it proves the scenario is a SIBLING
+  // of the collection rather than a child of it. Without it this step would
+  // pass on a scenario created anywhere, and the whole point would be lost.
+  const row = sidebarRowByName(p, name)
+  await expect(row).toBeVisible({ timeout: 10000 })
+  expect(await row.getAttribute('data-depth'), 'the new scenario must sit at the ROOT').toBe('0')
+})
+
+When('I run the root scenario {string} from its editor', async ({}, name: string) => {
+  const p = requirePage()
+  // Creating the item opens it in a workbench tab; click the row so we are
+  // certainly driving THAT scenario's editor.
+  await sidebarRowByName(p, name).click()
+  await expect(p.locator('[data-testid="scenario-inspector-toolbar"]')).toBeVisible({ timeout: 15000 })
+  await p.locator('[data-testid="scenario-inspector-run"]').click()
+
+  // "Show all logs" first: a scenario with no user-facing `log` action emits
+  // only engine/run entries, and the copy button stays DISABLED until those are
+  // in the filter — so toggling is what makes the run readable at all.
+  const allToggle = p.locator('[data-testid="scenario-inspector-logs-all-action"]')
+  if ((await allToggle.getAttribute('aria-checked')) !== 'true') await allToggle.click()
+
+  const startMarker = `▶ ${name}`
+  const endMarker = `■ ${name}`
+  await expect(async () => {
+    await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
+    if (!electronApp) throw new Error('app not launched')
+    rootRunLog = await electronApp.evaluate(({ clipboard }) => clipboard.readText())
+    expect(rootRunLog, `clipboard missing start "${startMarker}"`).toContain(startMarker)
+    expect(rootRunLog, `run not complete (missing end "${endMarker}")`).toContain(endMarker)
+  }).toPass({ timeout: 30000 })
+})
+
+Then('the root scenario {string} ran without a missing-scenario error', async ({}, name: string) => {
+  // The engine resolved the scenario and ran it to completion: these markers
+  // are emitted by the run itself, so they cannot appear if `loadScenario`
+  // threw. This is what makes the step prove a LAUNCH, not just a click.
+  expect(rootRunLog, 'root scenario produced no run log').toContain(`▶ ${name}`)
+  expect(rootRunLog, 'root scenario never completed').toContain(`■ ${name}`)
+  // …and the failure this guards against never surfaced.
+  const missing = rootRunFailures.filter((m) => /no scenario with id/i.test(m))
+  expect(missing, `renderer reported a missing scenario: ${missing.join(' | ')}`).toEqual([])
+})
+
 Then('the setVariable run-log matches the snapshot', async () => {
   expect(copiedYaml.length).toBeGreaterThan(0)
   // Sanity: the overridden petId (1) is in the resolved URL, the env's (3) is not.
@@ -111,6 +195,71 @@ Then('the setVariable run-log matches the snapshot', async () => {
     throw new Error(`run-log golden missing: ${GOLDEN} — create it with UPDATE_RUNLOG_GOLDEN=1`)
   }
   expect(copiedYaml, `run-log drifted from ${GOLDEN} — regenerate with UPDATE_RUNLOG_GOLDEN=1 if intended`).toBe(
-    readFileSync(GOLDEN, 'utf-8')
+    normalizeRunLogYaml(readFileSync(GOLDEN, 'utf-8'))
   )
+})
+
+// ---------------------------------------------------------------------------
+// A finished run must leave the request's own values behind — display + wire.
+// ---------------------------------------------------------------------------
+
+Then('the copied run-log shows the run went to {string}', async ({}, urlPart: string) => {
+  // During the run the run's variable wins over the request's own literal row
+  // — this is the behaviour the disposable run context must PRESERVE, and it
+  // doubles as proof the run actually dispatched before the leak assertions.
+  expect(copiedYaml, `run should have dispatched to ${urlPart}`).toContain(urlPart)
+})
+
+When('I open the {string} request from the sidebar', async ({}, name: string) => {
+  const p = requirePage()
+  await expandRowIfCollapsed(p, 'Swagger Petstore')
+  await expandRowIfCollapsed(p, 'pet')
+  await sidebarRowByName(p, name).click()
+})
+
+Then('the visible resolved URL ends with {string}', async ({}, suffix: string) => {
+  const p = requirePage()
+  // Assert on what the user SEES: several request tabs can be mounted at
+  // once, and a hidden tab's preview matching would green-light a leak on the
+  // visible one. Only elements with a client rect count (`getClientRects()`
+  // is empty for `display:none` subtrees, which is what Playwright's
+  // `:visible` filters on).
+  const visiblePreview = p.locator('[data-testid="url-resolved-preview"]:visible').first()
+  await expect(async () => {
+    const resolved = await visiblePreview.getAttribute('data-resolved-url')
+    expect(resolved, 'visible resolved URL should be back on the request\'s own row value').toMatch(new RegExp(`${suffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))
+  }).toPass({ timeout: 15000 })
+})
+
+When('I send the visible request', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="http-request-send-button"]:visible').first().click()
+})
+
+Then('the visible response body shows {string}', async ({}, text: string) => {
+  const p = requirePage()
+  // The body proves which resource the wire ACTUALLY served, which is the
+  // whole point: a leaked run value here would fetch the wrong pet with a
+  // green 200. The body editor lives under the "Response" sub-tab.
+  const responseTabs = p.locator('[data-testid="base-request-tabs-response"]').first()
+  await responseTabs.waitFor({ state: 'visible', timeout: 20000 })
+  await responseTabs.locator('[role="tab"]', { hasText: 'Response' }).first().click({ timeout: 10000 })
+  const editor = p.locator('[data-testid="http-response-body-editor"]:visible').first()
+  await editor.waitFor({ state: 'visible', timeout: 20000 })
+  // Read Monaco's content layer, not the editor root — the root's innerText
+  // leads with the line-number gutter — and fold Monaco's non-breaking
+  // spaces back to plain ones before matching.
+  await expect(async () => {
+    const raw = await editor.locator('.view-lines').first().innerText()
+    expect(raw.replace(/ /g, ' ')).toContain(text)
+  }).toPass({ timeout: 20000 })
+})
+
+When('I uncheck the {string} path param row', async ({}, key: string) => {
+  const p = requirePage()
+  const table = p.locator('[data-testid="http-request-path-params-table"]:visible').first()
+  await expect(table).toBeVisible({ timeout: 15000 })
+  const row = table.locator('tbody tr').filter({ hasText: key }).first()
+  await expect(row).toBeVisible({ timeout: 10000 })
+  await row.locator('[data-testid$="-enabled"]').first().click()
 })

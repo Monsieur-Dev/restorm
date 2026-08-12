@@ -280,5 +280,3 @@ class NavigationService {
 
 /** Singleton instance of NavigationService */
 export const navigationService = new NavigationService()
-
-export default navigationService

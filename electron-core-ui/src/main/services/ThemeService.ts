@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'fs'
 import { join, dirname, basename } from 'path'
-import yaml from 'js-yaml'
+import { loadYamlDocument } from '../../shared/yamlLoad'
 import type { ThemeInfo, ThemeVariables, ThemeDefinition } from '../../types/theme'
 import { logger } from './LoggerService'
 import { FileSystemError, errorMeta } from '../../errors'
@@ -59,7 +59,7 @@ export class ThemeService {
     if (existsSync(basePath)) {
       try {
         const content = readFileSync(basePath, 'utf-8')
-        const raw = yaml.load(content)
+        const raw = loadYamlDocument(content)
         const parsed = yamlBaseFileSchema.safeParse(raw)
         if (!parsed.success) {
           logger.warn('Invalid base.yaml structure', { issues: parsed.error.issues.map(i => i.message).join('; ') })
@@ -85,7 +85,7 @@ export class ThemeService {
       if (existsSync(typeBasePath)) {
         try {
           const content = readFileSync(typeBasePath, 'utf-8')
-          const raw = yaml.load(content)
+          const raw = loadYamlDocument(content)
           const parsed = yamlTypeBaseFileSchema.safeParse(raw)
           if (!parsed.success) {
             logger.warn(`Invalid ${themeType}/_base.yaml structure`, { issues: parsed.error.issues.map(i => i.message).join('; ') })
@@ -258,7 +258,7 @@ export class ThemeService {
 
       // Load and apply theme-specific colors
       const content = readFileSync(themeInfo.path, 'utf-8')
-      const raw = yaml.load(content)
+      const raw = loadYamlDocument(content)
       const parsed = yamlThemeFileSchema.safeParse(raw)
       if (!parsed.success) {
         logger.warn(`Invalid theme file for "${themeId}"`, { issues: parsed.error.issues.map(i => i.message).join('; ') })
@@ -287,35 +287,6 @@ export class ThemeService {
       const wrappedError = new FileSystemError(`Failed to load theme ${themeId}`, 'FS_PARSE_FAILED', { cause: error })
       logger.error(`Failed to load theme ${themeId}`, errorMeta(wrappedError))
       return null
-    }
-  }
-
-  /**
-   * Load a specific theme by ID (legacy compatibility)
-   */
-  public loadTheme(themeId: string): { name: string; type: 'dark' | 'light' | 'hcDark' | 'hcLight'; colors?: Record<string, string> } | null {
-    const result = this.getThemeWithVariables(themeId)
-    if (!result) {
-      return null
-    }
-    
-    // Convert CSS variables back to colors format for legacy compatibility
-    const colors: Record<string, string> = {}
-    for (const [cssVar, value] of Object.entries(result.variables)) {
-      // Skip base variables (non-color variables from base.yaml)
-      if (Object.keys(this.baseVariables).includes(cssVar)) {
-        continue
-      }
-      if (cssVar.startsWith('--')) {
-        const key = cssVar.slice(2).replace(/-/g, '.')
-        colors[key] = value
-      }
-    }
-
-    return {
-      name: result.theme.name,
-      type: result.theme.type ?? 'dark',
-      colors
     }
   }
 

@@ -1,5 +1,0 @@
-name: store
-documentation: "# store\r\n\r\nAccess to Petstore orders"
-tags:
-  - store
-configuration: {}

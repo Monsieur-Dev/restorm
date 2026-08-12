@@ -70,5 +70,3 @@ export const RequestActionToolbar: React.FC<RequestActionToolbarProps> = ({
     </div>
   )
 }
-
-export default RequestActionToolbar

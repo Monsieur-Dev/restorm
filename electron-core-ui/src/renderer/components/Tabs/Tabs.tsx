@@ -29,17 +29,6 @@ export interface TabsProps {
   onTabChange?: (tabId: string) => void
   onTabClose?: (tabId: string) => void
   /**
-   * When true, all tab contents stay mounted (hidden with CSS) instead of being unmounted.
-   * This preserves component state when switching tabs (useful for editors like Milkdown).
-   * Requires the parent container to have a defined height.
-   * Defaults to false.
-   *
-   * Superseded by `mountStrategy`. If `mountStrategy` is set, this prop is ignored;
-   * otherwise `keepMounted: true` maps to `'eager'` and `keepMounted: false` (the
-   * default) maps to `'active-only'`.
-   */
-  keepMounted?: boolean
-  /**
    * Controls when each tab's content is mounted into the React tree:
    *  - `'active-only'` (default when `keepMounted` is false / unset): only the
    *    active tab is mounted; switching unmounts the previous tab and remounts
@@ -54,14 +43,11 @@ export interface TabsProps {
    *    tabs cost nothing. Best of both worlds for views where most users only
    *    ever interact with one or two of the tabs.
    *
-   * `mountStrategy` wins over `keepMounted` when both are passed.
    */
   mountStrategy?: 'eager' | 'lazy-once' | 'active-only'
   /**
-   * Legacy callback for tab double-click events.
-   * Consider using allowFullscreen property on individual tabs instead for fullscreen behavior.
-   * This callback is still called if provided, and the built-in fullscreen modal
-   * will also be triggered if the tab has allowFullscreen set to true.
+   * Called on a tab double-click. Independent of `allowFullscreen`: a tab
+   * carrying that flag ALSO opens the built-in fullscreen modal.
    */
   onTabDoubleClick?: (tabId: string) => void
   /** Optional test id applied to the Tabs root element. */
@@ -73,20 +59,16 @@ const TabsInner: React.FC<TabsProps> = ({
   activeTabId,
   onTabChange,
   onTabClose,
-  keepMounted = false,
   mountStrategy,
-  onTabDoubleClick: legacyDoubleClickCallback,
+  onTabDoubleClick,
   'data-testid': dataTestId
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(tabs[0]?.id ?? '')
   const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null)
   const currentActiveTab = activeTabId ?? internalActiveTab
 
-  // Resolve the effective strategy. `mountStrategy` wins; otherwise we map the
-  // legacy boolean `keepMounted` to its equivalent (`true` → `'eager'`,
-  // `false`/unset → `'active-only'`) so existing callers keep their behaviour.
-  const effectiveStrategy: 'eager' | 'lazy-once' | 'active-only' =
-    mountStrategy ?? (keepMounted ? 'eager' : 'active-only')
+  // Unset means "mount only the active tab" — the cheap default.
+  const effectiveStrategy: 'eager' | 'lazy-once' | 'active-only' = mountStrategy ?? 'active-only'
 
   // For `'lazy-once'`: track which tabs have ever been the active tab. They
   // stay mounted thereafter (visibility-hidden when not active). The initial
@@ -122,13 +104,12 @@ const TabsInner: React.FC<TabsProps> = ({
   }, [onTabClose])
 
   const handleTabDoubleClick = useCallback((tabId: string, tab: Tab): void => {
-    // Call legacy callback if provided
-    legacyDoubleClickCallback?.(tabId)
+    onTabDoubleClick?.(tabId)
     // Open fullscreen modal if allowed
     if (tab.allowFullscreen) {
       setFullscreenTabId(tabId)
     }
-  }, [legacyDoubleClickCallback])
+  }, [onTabDoubleClick])
 
   const handleFullscreenClose = useCallback((): void => {
     setFullscreenTabId(null)
@@ -416,5 +397,3 @@ const TabsInner: React.FC<TabsProps> = ({
 
 export const Tabs = React.memo(TabsInner)
 Tabs.displayName = 'Tabs'
-
-export default Tabs

@@ -232,6 +232,7 @@ describe('useItemOperations.handleItemDrop', () => {
     if (!source || !target) throw new Error('fixture tree is malformed')
     return {
       item: target, path: [], source, sourcePath: [], position: 'into',
+      sources: [{ item: source, path: [] }],
       originalEvent: {} as never
     } as never
   }

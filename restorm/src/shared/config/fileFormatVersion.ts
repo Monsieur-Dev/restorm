@@ -80,6 +80,15 @@ export const FILE_FORMAT_VERSION_KEY = 'fileFormatVersion'
  */
 export const FILE_FORMAT_TOO_NEW_CODE = 'file-format-too-new'
 
+/**
+ * Rejection code for a document that declares NO format version at its
+ * root. Distinct from {@link FILE_FORMAT_TOO_NEW_CODE} on purpose: telling
+ * someone their file "comes from a newer version" when it carries no version
+ * at all is a wrong answer, and a wrong answer sends them looking for an
+ * update that does not exist.
+ */
+export const FILE_FORMAT_MISSING_CODE = 'file-format-missing'
+
 interface VersionLogger {
   warn: (message: string, meta?: Record<string, unknown>) => void
 }
@@ -104,15 +113,16 @@ function declaredOn(node: unknown): number | null {
  * must NOT be loaded and the file must NOT be written to.
  */
 export interface FileFormatCompatibility {
-  /** `false` when the document declares a format this build cannot read. */
+  /** `false` when the document cannot be read by this build. */
   supported: boolean
+  /** Which refusal to report; `null` when the document is supported. */
+  code: typeof FILE_FORMAT_TOO_NEW_CODE | typeof FILE_FORMAT_MISSING_CODE | null
   /**
    * The `fileFormatVersion` the document declares AT ITS ROOT — the one
-   * place it is read from. Absent / malformed counts as
-   * {@link CURRENT_FILE_FORMAT_VERSION}, matching the load-time default,
-   * so this never reports less than the current version.
+   * place it is read from. `null` when it declares none, which is itself a
+   * refusal rather than a value to substitute for.
    */
-  found: number
+  found: number | null
   /** The version this build understands — for the user-facing message. */
   current: number
 }
@@ -129,19 +139,21 @@ export interface FileFormatCompatibility {
  * It consults ONE location: the document root. A version sitting anywhere
  * else is not consulted and cannot influence the verdict.
  *
- * Anything it cannot recognise is reported as supported: an unreadable
- * shape is not this gate's problem, and refusing it here would turn every
- * unrelated parse failure into a misleading "update your Restorm".
+ * A document that declares NO version is refused. Every path that writes a
+ * project stamps one, so a missing version means the file came from something
+ * other than Restorm — and guessing "it must be current" is how an unrelated
+ * YAML file gets loaded as a project and then saved over.
  */
 export function checkFileFormatCompatibility(content: unknown): FileFormatCompatibility {
   const declared = declaredOn(content)
-  const found = declared ?? CURRENT_FILE_FORMAT_VERSION
 
-  return {
-    supported: found <= CURRENT_FILE_FORMAT_VERSION,
-    found,
-    current: CURRENT_FILE_FORMAT_VERSION
+  if (declared === null) {
+    return { supported: false, code: FILE_FORMAT_MISSING_CODE, found: null, current: CURRENT_FILE_FORMAT_VERSION }
   }
+  if (declared > CURRENT_FILE_FORMAT_VERSION) {
+    return { supported: false, code: FILE_FORMAT_TOO_NEW_CODE, found: declared, current: CURRENT_FILE_FORMAT_VERSION }
+  }
+  return { supported: true, code: null, found: declared, current: CURRENT_FILE_FORMAT_VERSION }
 }
 
 /**
@@ -171,31 +183,4 @@ export function resolveFileFormatVersion(content: unknown, logger: VersionLogger
   }
 
   return resolved
-}
-
-/**
- * Drop the collection-level `fileFormatVersion` an older build wrote,
- * in memory.
- *
- * This is NOT tidiness, and it is not what makes the old key harmless —
- * no reader consults that position any more. It is what makes the key
- * actually GO AWAY. The renderer loads a project as parsed plain objects
- * and serializes them back wholesale, so unknown keys round-trip: without
- * this, every save would faithfully rewrite the stale value, and a
- * document that once had it would carry it forever, declaring its version
- * in two places while only one is read.
- *
- * Called at load — BEFORE the reactive wrap so the deletion fires no
- * document event, and BEFORE the content-checksum baseline so it is part
- * of the "loaded" snapshot and never looks like a user edit. Nothing is
- * written here: the file on disk keeps the old key until the user saves,
- * and opening a project is not a save.
- */
-export function stripLegacyFileFormatVersion(collectionRoot: unknown): void {
-  if (!isRecord(collectionRoot)) return
-  if (!Object.prototype.hasOwnProperty.call(collectionRoot, FILE_FORMAT_VERSION_KEY)) return
-  // Spelled out rather than indexed by the constant above: deleting a
-  // computed key is not allowed here. The two are kept in step by the
-  // unit test, which strips by the constant and asserts the key is gone.
-  delete collectionRoot['fileFormatVersion']
 }

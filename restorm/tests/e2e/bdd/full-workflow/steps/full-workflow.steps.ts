@@ -1,3 +1,4 @@
+import { remapCanonicalPorts } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs'
 import { dirname, join, resolve } from 'path'
@@ -151,6 +152,17 @@ When(
     await expect(async () => {
       expect(existsSync(filePath)).toBe(true)
     }).toPass({ timeout: 10000 })
+
+    // The disk write happens in main BEFORE the renderer learns the new
+    // fileName. That flip INSERTS the file-gated menus (Edit / Create /
+    // Git) between File and View, shifting every later menubar entry to
+    // the right and registering their shortcuts only at that moment. A
+    // menu click or a Ctrl+I pressed inside that window lands on the
+    // wrong entry (the click resolves pre-shift coordinates) or on a
+    // not-yet-registered shortcut, with no retry. Settle on the Create
+    // menu — the marker that the fileName flip reached the menubar —
+    // before handing control back to the scenario.
+    await expect(page.locator('[data-testid="titlebar-menubar-item-create"]')).toBeVisible({ timeout: 10000 })
   }
 )
 
@@ -294,6 +306,10 @@ When(
 // ---------------------------------------------------------------------------
 
 async function runImport(currentPage: Page, source: string): Promise<void> {
+  // Ctrl+I is registered by the file-gated Create menu, which (re)mounts on
+  // every fileName transition (new file, open, close→reopen). Wait for it —
+  // a press before the mount lands on nothing, with no retry.
+  await expect(currentPage.locator('[data-testid="titlebar-menubar-item-create"]')).toBeVisible({ timeout: 10000 })
   // Open the import modal via Ctrl+I (same trigger the menu bar uses).
   await currentPage.keyboard.press('Control+I')
   const modal = currentPage.locator('[data-testid="import-modal"]')
@@ -396,9 +412,9 @@ Then(
 
 When(
   'I import the URL {string}',
-  async ({}, url: string) => {
+  async ({ services }, url: string) => {
     if (!page) throw new Error('app must be launched before importing')
-    await runImport(page, url)
+    await runImport(page, remapCanonicalPorts(url, services))
   }
 )
 
@@ -696,7 +712,7 @@ When('I delete the sidebar request {string}', async ({}, requestName: string) =>
 // ---------------------------------------------------------------------------
 
 Then(
-  'the active request URL tooltip should be {string}',
+  'the active request resolved URL should be {string}',
   async ({}, expectedUrl: string) => {
     if (!page) throw new Error('app must be launched')
     const currentPage = page
@@ -704,7 +720,7 @@ Then(
     // give it plenty of time to propagate through handlebars + URLResolver.
     await expect.poll(
       async () => {
-        const resolved = await currentPage.locator('[data-testid="url-container"]').first().getAttribute('data-resolved-url')
+        const resolved = await currentPage.locator('[data-testid="url-resolved-preview"]').first().getAttribute('data-resolved-url')
         return resolved ?? ''
       },
       { timeout: 30000, message: `expected URL tooltip to equal "${expectedUrl}"` }
@@ -2142,63 +2158,96 @@ const ADD_CHILD_GROUP_REGEX: Record<string, RegExp> = {
   odata: /OData/
 }
 
-When(
-  'I add a {string} under the folder {string} via the sidebar Ajouter submenu',
-  async ({}, kind: string, parentName: string) => {
-    if (!page) throw new Error('app must be launched')
-    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
-    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
-
-    const row = page
-      .locator('[data-testid="sidebar-listview"] .list-view-row')
-      .filter({ has: page.getByText(parentName, { exact: true }) })
-      .first()
-    await expect(row).toBeVisible({ timeout: 10000 })
-    await row.click({ button: 'right' })
-    await page.waitForTimeout(200)
+/**
+ * Walk the Add flyout chain — hover "Ajouter", optionally hover a protocol
+ * group, and return the target leaf once VISIBLE — as one retriable
+ * interaction, with `openMenu` re-run on every attempt.
+ *
+ * Retrying the WHOLE walk (not just polling the assertion) is the point:
+ * under 4-worker CPU contention a hover can be swallowed or the flyout's
+ * ~300 ms open-delay timer can fire into a lagging React commit, and once
+ * that happens no amount of waiting shows the item — the end-of-test
+ * screenshots of the old one-shot version show the item RENDERED while the
+ * assertion had already died. Each attempt therefore presses Escape (a clean
+ * slate whatever half-open state the last attempt left), reopens the menu
+ * and redoes the hovers.
+ */
+const walkAddSubmenuToTarget = async (
+  openMenu: () => Promise<void>,
+  childLabel: RegExp,
+  groupLabel: RegExp | undefined
+): Promise<Locator> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  const found: { target?: Locator } = {}
+  await expect(async () => {
+    await p.keyboard.press('Escape')
+    await openMenu()
 
     // Hover the "Ajouter" / "Add" entry to reveal the nested submenu
-    // (MenuItem opens its submenu on hover after a ~300 ms delay;
-    // click doesn't open it because `hasSubmenu` short-circuits the
-    // handler). Role-based targeting gives us the accessible name
-    // directly and avoids picking up `action-label` spans further
-    // down the tree.
-    const addEntry = page
-      .getByRole('menuitem', { name: /^(Add|Ajouter)$/ })
-      .first()
-    await expect(addEntry).toBeVisible({ timeout: 15000 })
+    // (MenuItem opens its submenu on hover after a ~300 ms delay; click
+    // doesn't open it because `hasSubmenu` short-circuits the handler).
+    const addEntry = p.getByRole('menuitem', { name: /^(Add|Ajouter)$/ }).first()
+    await expect(addEntry).toBeVisible({ timeout: 3000 })
     await addEntry.hover()
-    await page.waitForTimeout(350)
+    await p.waitForTimeout(400)
 
     // The submenu is rendered in a separate `<ul role="menu">` nested
     // under the "Add" item once `showSubmenu` flips, so scope by the
     // visible submenu holder — otherwise a plain `/Folder/` match can
     // walk into the sidebar row behind the menu.
-    let submenu = page.locator('.menubar-menu-items-holder:visible').last()
-    const groupLabel = ADD_CHILD_GROUP_REGEX[kind]
+    let submenu = p.locator('.menubar-menu-items-holder:visible').last()
     if (groupLabel) {
       // Second hop: open the protocol group's own submenu.
       const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
-      await expect(groupEntry).toBeVisible({ timeout: 15000 })
+      await expect(groupEntry).toBeVisible({ timeout: 3000 })
       await groupEntry.hover()
-      await page.waitForTimeout(350)
-      submenu = page.locator('.menubar-menu-items-holder:visible').last()
+      await p.waitForTimeout(400)
+      submenu = p.locator('.menubar-menu-items-holder:visible').last()
     }
-    const target = submenu
-      .getByRole('menuitem', { name: childLabel })
-      .first()
-    await expect(target).toBeVisible({ timeout: 15000 })
-    // Dispatch the click via the DOM `click()` method. Playwright's
-    // own `.click()` sometimes no-ops here because the Badge rendered
-    // in the MenuItem's icon slot ships absolute layout that eats the
-    // hit-test at the anchor's centre, and the ContextMenu's global
-    // `mousedown` outside-listener can race Playwright's synthetic
-    // mousedown/mouseup pair. Native `click()` goes straight to the
-    // React synthetic handler.
-    await target.evaluate((el) => { (el as HTMLElement).click() })
-    // Short settle window — the reactive proxy / React commit loop
-    // needs a beat before the Then assertion polls the sidebar.
-    await page.waitForTimeout(150)
+    const candidate = submenu.getByRole('menuitem', { name: childLabel }).first()
+    await expect(candidate).toBeVisible({ timeout: 3000 })
+    found.target = candidate
+  }).toPass({ timeout: 45000 })
+  const target = found.target
+  if (target === undefined) throw new Error('submenu walk never produced a target')
+  return target
+}
+
+/** Click the leaf the walk produced. Dispatched via the DOM `click()`
+ * method: Playwright's own `.click()` sometimes no-ops here because the
+ * Badge rendered in the MenuItem's icon slot ships absolute layout that
+ * eats the hit-test at the anchor's centre, and the ContextMenu's global
+ * `mousedown` outside-listener can race Playwright's synthetic
+ * mousedown/mouseup pair. Native `click()` goes straight to the React
+ * synthetic handler. */
+const clickAddSubmenuTarget = async (target: Locator): Promise<void> => {
+  const p = page
+  if (!p) throw new Error('app must be launched')
+  await target.evaluate((el) => { (el as HTMLElement).click() })
+  // Short settle window — the reactive proxy / React commit loop
+  // needs a beat before the Then assertion polls the sidebar.
+  await p.waitForTimeout(150)
+}
+
+When(
+  'I add a {string} under the folder {string} via the sidebar Ajouter submenu',
+  async ({}, kind: string, parentName: string) => {
+    const p = page
+    if (!p) throw new Error('app must be launched')
+    const childLabel = ADD_CHILD_LABEL_REGEX[kind]
+    if (!childLabel) throw new Error(`unknown AddChildKind: ${kind}`)
+
+    const target = await walkAddSubmenuToTarget(async () => {
+      const row = p
+        .locator('[data-testid="sidebar-listview"] .list-view-row')
+        .filter({ has: p.getByText(parentName, { exact: true }) })
+        .first()
+      await expect(row).toBeVisible({ timeout: 10000 })
+      await row.click({ button: 'right' })
+      await p.waitForTimeout(200)
+    }, childLabel, ADD_CHILD_GROUP_REGEX[kind])
+    await clickAddSubmenuTarget(target)
     await dismissInlineRenameAfterCreation()
   }
 )
@@ -2263,38 +2312,14 @@ const openEmptyAreaContextMenu = async (): Promise<void> => {
   await p.waitForTimeout(200)
 }
 
-/** Open the empty-area context menu and reveal its "Ajouter" submenu —
- * the single entry the menu offers, holding every root-level creation.
- * Returns the visible submenu holder. */
-const openEmptyAreaAddSubmenu = async (): Promise<Locator> => {
-  const p = page
-  if (!p) throw new Error('app must be launched')
-  await openEmptyAreaContextMenu()
-  const addEntry = p.getByRole('menuitem', { name: /^(Add|Ajouter)$/ }).first()
-  await expect(addEntry).toBeVisible({ timeout: 5000 })
-  await addEntry.hover()
-  await p.waitForTimeout(350)
-  return p.locator('.menubar-menu-items-holder:visible').last()
-}
-
-/** Click one creation entry of the empty-area "Ajouter" submenu. Leaves the
- * new row in inline rename — callers decide whether to dismiss it. */
+/** Click one creation entry of the empty-area "Ajouter" submenu — the single
+ * entry the menu offers, holding every root-level creation. The whole
+ * open→hover(s)→target walk is retried as one interaction (see
+ * `walkAddSubmenuToTarget`). Leaves the new row in inline rename — callers
+ * decide whether to dismiss it. */
 const clickEmptyAreaAddEntry = async (label: RegExp, groupLabel?: RegExp): Promise<void> => {
-  const p = page
-  if (!p) throw new Error('app must be launched')
-  let submenu = await openEmptyAreaAddSubmenu()
-  if (groupLabel) {
-    // Second hop: open the protocol group's own submenu.
-    const groupEntry = submenu.getByRole('menuitem', { name: groupLabel }).first()
-    await expect(groupEntry).toBeVisible({ timeout: 5000 })
-    await groupEntry.hover()
-    await p.waitForTimeout(350)
-    submenu = p.locator('.menubar-menu-items-holder:visible').last()
-  }
-  const target = submenu.getByRole('menuitem', { name: label }).first()
-  await expect(target).toBeVisible({ timeout: 5000 })
-  await target.evaluate((el) => { (el as HTMLElement).click() })
-  await p.waitForTimeout(150)
+  const target = await walkAddSubmenuToTarget(openEmptyAreaContextMenu, label, groupLabel)
+  await clickAddSubmenuTarget(target)
 }
 
 const ENV_FOLDER_ENTRY_REGEX = /^(Environment folder|Dossier de variables)$/
@@ -2644,8 +2669,20 @@ async function openTitlebarMenuItem(currentPage: Page, viewItemTestId: string): 
   // Open the View menu, then click the matching item. The titlebar
   // uses ECUI MenuBar — the dropdown only renders while the parent
   // MenuBarItem is hovered/clicked, so we click in sequence and
-  // wait for the item to appear.
-  await currentPage.locator('[data-testid="titlebar-menubar-item-view"]').click()
+  // wait for the item to appear. On a narrow bar the entry moves into
+  // the overflow/hamburger dropdown (`-overflow` suffix), so fall back
+  // there — the conditional Scénario menu can push Options over the edge.
+  const inBar = currentPage.locator('[data-testid="titlebar-menubar-item-view"]')
+  if (await inBar.isVisible().catch(() => false)) {
+    await inBar.click()
+  } else {
+    const overflowBtn = currentPage.locator('[data-testid="titlebar-menubar-overflow-button"], [data-testid="titlebar-menubar-hamburger-button"]').first()
+    await overflowBtn.click({ force: true })
+    const viewEntry = currentPage.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
+    await viewEntry.waitFor({ state: 'visible', timeout: 5_000 })
+    await viewEntry.hover()
+    await viewEntry.click({ force: true })
+  }
   const item = currentPage.locator(`[data-testid="${viewItemTestId}"]`)
   await item.waitFor({ state: 'visible', timeout: 5_000 })
   await item.click()
@@ -2911,8 +2948,30 @@ Then(
 // Custom value lists — label→value substitution at dispatch + live reactivity
 // ---------------------------------------------------------------------------
 
-// Stable entry ids so the entry-row testids are predictable.
-const CVL_ENTRY_ID: Record<string, string> = { Rouge: 'entry-rouge', Vert: 'entry-vert' }
+// Entry ids are whatever the app minted when the fixture was produced, so they
+// are read from the fixture rather than assumed. Hard-coding them here is what
+// tied these steps to a hand-written file: the ids only existed because someone
+// typed them, and the test broke the moment the fixture came from the product.
+/**
+ * The custom-value-lists project, PRODUCED BY THE APP (driven over MCP, then
+ * saved) rather than hand-written here. A fixture typed into a test is not
+ * what Restorm writes: it drifts the moment the serializer gains a field, and
+ * nothing says so until an unrelated test fails. Read the committed sample so
+ * the bytes under test are the bytes the product emits.
+ */
+const CVL_SAMPLE_PATH = join(__dirname, '../../../samples/custom-value-lists.restorm')
+
+const CVL_ENTRY_ID: Record<string, string> = (() => {
+  const yaml = readFileSync(CVL_SAMPLE_PATH, 'utf-8')
+  const out: Record<string, string> = {}
+  // entries are `- id: <uuid>` followed by `label: <name>`
+  const re = /-\s+id:\s*(\S+)\s*\n\s*label:\s*(\S+)/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(yaml)) !== null) {
+    if (m[1] !== undefined && m[2] !== undefined) out[m[2]] = m[1]
+  }
+  return out
+})()
 
 // The entries of a custom value list are edited in the shared key/value table.
 // Its row test ids are built by the ECUI selector helpers rather than spelled
@@ -2930,50 +2989,6 @@ function cvlRowId(label: string): string {
 
 // Single-file collection seeded on disk: one env folder with a custom
 // value list and a request whose query param is bound to that list.
-const CVL_SAMPLE_RESTORM = `collections:
-  - folderType: environment
-    name: Paint API
-    documentation: ''
-    tags: []
-    id: cv000000-0000-0000-0000-0000000000cv
-    customValueLists:
-      - id: list-couleur
-        name: Couleur
-        entries:
-          - id: entry-rouge
-            label: Rouge
-            value: 'FF0000'
-            enabled: true
-          - id: entry-vert
-            label: Vert
-            value: '00FF00'
-            enabled: true
-    environments:
-      - name: live
-        variables:
-          - key: baseUrl
-            value:
-              type: string
-              value: https://api.example.com
-            enabled: true
-    items:
-      - type: http
-        name: Paint
-        documentation: ''
-        tags: []
-        id: cv100000-0000-0000-0000-0000000000cv
-        url: '{{baseUrl}}/paint'
-        method: GET
-        headers: []
-        params:
-          - key: color
-            value:
-              type: customList
-              listId: list-couleur
-              label: Rouge
-            enabled: true
-        pathParams: []
-`
 
 function cvlSidebarRow(p: Page, name: string): Locator {
   // Exact-title match disambiguates the request "Paint" from its parent
@@ -2990,7 +3005,7 @@ Given('I open the custom-value-lists sample collection', async ({ fullWorkflowTe
   if (!electronApp) throw new Error('app must be launched')
   mkdirSync(fullWorkflowTempDir, { recursive: true })
   const workingCopy = join(fullWorkflowTempDir, 'custom-value-lists.restorm')
-  writeFileSync(workingCopy, CVL_SAMPLE_RESTORM, 'utf-8')
+  writeFileSync(workingCopy, readFileSync(CVL_SAMPLE_PATH, 'utf-8'), 'utf-8')
   await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: workingCopy })
   await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
   await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()
@@ -3026,7 +3041,7 @@ When('I open the custom variables tab on the {string} env folder', async ({}, fo
   const row = cvlSidebarRow(page, folderName)
   await expect(row).toBeVisible({ timeout: 5000 })
   await row.click()
-  await page.getByRole('tab', { name: 'Custom variables' }).click()
+  await page.getByRole('tab', { name: 'Custom enumerations' }).click()
   await expect(page.locator('[data-testid="custom-values-sash-container"]')).toBeVisible({ timeout: 10000 })
 })
 

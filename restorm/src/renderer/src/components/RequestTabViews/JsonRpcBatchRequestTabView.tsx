@@ -31,7 +31,7 @@ import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { JsonRpcBatchEditor } from './JsonRpcBatchEditor'
 import { cloneForEventBus } from '../../utils/cloneForEventBus'
 
@@ -343,7 +343,9 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
     }
     const historyResponse: JsonRpcBatchExecutionResult = {
       requestId: request.id,
-      success: detail.success,
+      // The execution result keeps a boolean; the stored entry keeps the
+      // richer outcome, and only `failure` is not a success.
+      success: detail.outcome !== 'failure',
       statusCode: detail.response.statusCode,
       timings: detail.response.timings,
       requestUrl: detail.response.requestUrl,
@@ -354,9 +356,9 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
   }, [buildBatchResponseView, request.id])
 
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="jsonrpc-batch-url-section">
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={urlInputWrapperStyle} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+        <div style={urlInputWrapperStyle} data-testid="url-container">
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -366,7 +368,6 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
             data-testid="jsonrpc-batch-request-url-input"
           />
         </div>
-      </HeaderHoverTooltip>
   {!inWorkbenchTab && (
       <SendButtonEnvSwitcher>
         <BeamWrap active={isSending} size={22} borderWidth={1.5}>
@@ -384,6 +385,8 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
       </SendButtonEnvSwitcher>
   )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   const handleCloseHistoryModal = useCallback(() => { setHistoryModalOpen(false) }, [])
@@ -441,5 +444,3 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
     </>
   )
 }
-
-export default JsonRpcBatchRequestTabView

@@ -1,63 +1,53 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: d0c04fc1-a11f-459a-a25b-eb1791a50bf2
     name: Socket.IO Playground
-    documentation: |-
-      # Socket.IO Playground
-
-      A self-contained Socket.IO playground: restorm hosts the server AND
-      connects to it as a client — no external mock needed.
-
-      - **Echo Server** hosts a Socket.IO server on `localhost:3001`. It ACKs
-        every event it receives, and its Send button broadcasts the configured
-        payload to every connected client.
-      - **Echo** is a client that connects to `localhost:3001`, emits `echo`
-        (acknowledged by the server on reception), and shows whatever the server
-        broadcasts.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: d644f972-ba75-4a8a-adc0-4c0dd93f3e04
+        name: Default
         variables:
           - key: socketUrl
+            description: The locally-hosted Socket.IO server (Echo Server)
+            enabled: true
             value:
               type: string
               value: http://localhost:3001
-            description: The locally-hosted Socket.IO server (Echo Server)
-        id: d644f972-ba75-4a8a-adc0-4c0dd93f3e04
     items:
-      - type: websocket
+      - id: 83ce3cdb-22e7-4e89-95eb-9e983fade5e1
         name: Echo Server
+        type: websocket
+        url: localhost:3001
         documentation: |-
           Hosts a Socket.IO server on `localhost:3001`. Start listening, then
           connect the **Echo** client. The server ACKs every received event;
           its Send button broadcasts `greet` to all connected clients.
-        tags:
-          - socketio
-          - server
-        url: localhost:3001
-        protocol: socketio
-        server: true
         event: greet
+        headers: []
         message: |-
           {
             "hello": "from server"
           }
-        headers: []
-        id: 83ce3cdb-22e7-4e89-95eb-9e983fade5e1
-      - type: websocket
-        name: Echo
-        documentation: Connect to the local Echo Server, emit `echo`, get an ACK.
+        protocol: socketio
+        server: true
         tags:
           - socketio
+          - server
+      - id: 83ce3cdb-22e7-4e89-95eb-9e983fadb125
+        name: Echo
+        type: websocket
         url: '{{socketUrl}}'
-        protocol: socketio
+        documentation: Connect to the local Echo Server, emit `echo`, get an ACK.
         event: echo
+        headers: []
         message: |-
           {
             "hello": "world"
           }
-        headers: []
-        id: 83ce3cdb-22e7-4e89-95eb-9e983fadb125
-    id: d0c04fc1-a11f-459a-a25b-eb1791a50bf2
+        protocol: socketio
+        tags:
+          - socketio
+    tagColors: {}
+    tags: []
 _projectUuid: 370d3ca1-3211-4e4b-94f6-441c90c9a5de

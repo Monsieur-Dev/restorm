@@ -22,6 +22,7 @@ import { collectionStore } from '../../services/CollectionStore'
 import { httpExecutionService, type HTTPExecutionInput } from '../../services/HTTPExecutionService'
 import { soapExecutionService } from '../../services/SOAPExecutionService'
 import { responseHistoryService, requestUsageService } from '../../services'
+import type { ResponseHistoryOutcome } from '../../../shared/types/responseHistory'
 import { isHTTPRequest, isAuthenticationRequest, isSoapRequest } from '../../../shared/types/collections'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode } from '../../../shared/types/scenario'
@@ -206,11 +207,11 @@ type PreviewResolver = (scenarioId: string, node: ScenarioNode) => Promise<Recor
 
 /** The freshest history entry that did NOT fail — so a preview shows a real
  * successful result (an HTTP 2xx, a connected socket) instead of the latest
- * error. Entries arrive newest-first, so the first `success` is the freshest.
- * Falls back to the latest entry when none succeeded (better a stale error than
- * an empty preview). Shared by every protocol's preview resolver. */
-function freshestSuccessfulEntry<T extends { success?: boolean }>(entries: readonly T[]): T | undefined {
-  return entries.find((e) => e.success === true) ?? entries[0]
+ * error. Entries arrive newest-first, so the first non-failure is the freshest.
+ * Falls back to the latest entry when every one failed (better a stale error
+ * than an empty preview). Shared by every protocol's preview resolver. */
+function freshestSuccessfulEntry<T extends { outcome?: ResponseHistoryOutcome }>(entries: readonly T[]): T | undefined {
+  return entries.find((e) => e.outcome !== undefined && e.outcome !== 'failure') ?? entries[0]
 }
 
 /** `httpRequest` (and legacy `request`): the bound request's last SUCCESSFUL

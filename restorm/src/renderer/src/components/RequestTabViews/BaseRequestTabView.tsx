@@ -67,6 +67,10 @@ export interface BaseRequestTabViewProps {
    * auth modal doesn't hit ContextService, so snippets would always
    * be empty). */
   showCodeSnippets?: boolean
+  /** Render the response Infos tab (status/timings/headers). Default true;
+   * a mock-server tab passes false — it has no outbound exchange to
+   * describe, and the tab only showed its empty fallback. */
+  showInfos?: boolean
   /** Controlled active request-side tab id. When set, the caller
    * owns the selection (useful to programmatically jump to a tab on
    * an external event — e.g. switching to Configuration after a
@@ -130,6 +134,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   additionalRequestTabs,
   showNotes = true,
   showCodeSnippets = true,
+  showInfos = true,
   activeRequestTabId,
   onRequestTabChange,
   initialLeftRatio,
@@ -417,7 +422,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       })
     }
 
-    tabs.push({
+    if (showInfos) tabs.push({
       id: 'infos',
       label: t('requestTab.responses.tabs.infos'),
       // Scroll via the shared ecu container so a tall tree of
@@ -459,7 +464,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     }
 
     return tabs
-  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, hadResponseOnce, hadJsonOnce, t])
+  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, hadResponseOnce, hadJsonOnce, showInfos, t])
 
   // Fall back to the first available response tab when the current
   // `responseTabId` points to one that doesn't exist (e.g. we default

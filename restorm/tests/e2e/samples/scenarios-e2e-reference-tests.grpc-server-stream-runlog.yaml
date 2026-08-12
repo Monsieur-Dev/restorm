@@ -1,16 +1,16 @@
 - message: 🔵 [<time>] ▶ gRPC server stream
 - message: ⚪ [<time>] start grpcConnect
   data:
-    requestId: <uuid>
     connectionName: Ticks
     label: Server stream connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcConnect
 - message: ⚪ [<time>] grpc "Ticks" connecting
 - message: ⚪ [<time>] grpc "Ticks" connected
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -67,8 +67,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -125,8 +125,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -183,8 +183,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -241,8 +241,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -299,8 +299,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -357,8 +357,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -415,8 +415,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -473,8 +473,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -531,8 +531,8 @@
       f_float: 0
 - message: ⚪ [<time>] start log
   data:
-    message: trame reçue
     level: info
+    message: trame reçue
     data:
       f_strings: []
       f_enums: []
@@ -590,8 +590,8 @@
 - message: ⚪ [<time>] grpc "Ticks" closed
 - message: ⚪ [<time>] start log
   data:
-    message: server stream terminé
     level: info
+    message: server stream terminé
     in: true
 - message: 🔵 [<time>] server stream terminé
 - message: ⚪ [<time>] done log

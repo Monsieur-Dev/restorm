@@ -19,13 +19,23 @@
 
 import { createBdd } from 'playwright-bdd'
 import { join } from 'path'
-import { execSync } from 'child_process'
 import type { Page } from '@playwright/test'
-import { test, expect, type McpDiscovery, type McpToolReply } from '../../fixtures/mcp-server.fixture'
+import { test, expect, type McpDiscovery, type McpToolReply } from './fixture'
+import { materializeSample, type StartedServices } from '../../../helpers/testcontainers/services'
 
 const { Given, When, Then } = createBdd(test)
 
 let discovery: McpDiscovery | null = null
+let suiteServices: StartedServices | null = null
+const kafkaExec = async (command: string[], input?: string): Promise<string> => {
+  if (suiteServices === null) throw new Error('open the sample first (services not captured)')
+  const wrapped = input === undefined
+    ? command
+    : ['sh', '-c', `printf '%s' "${input.replaceAll('\n', '\\n')}" | ${command.join(' ')}`]
+  const result = await suiteServices.exec('kafka', wrapped)
+  if (result.exitCode !== 0) throw new Error(`kafka exec failed (${String(result.exitCode)}): ${result.output}`)
+  return result.output
+}
 let page: Page | null = null
 let requestsByName = new Map<string, string>()
 let currentRequestId: string | null = null
@@ -68,9 +78,14 @@ Given(
   }
 )
 
-Given('I open the Kafka sample via MCP', async ({ callMcpTool, restormRoot }) => {
+Given('I open the Kafka sample via MCP', async ({ callMcpTool, restormRoot, services }) => {
   if (discovery === null) throw new Error('launch first')
-  const samplePath = join(restormRoot, 'tests/e2e/samples/kafka-sample.restorm')
+  suiteServices = services
+  const samplePath = materializeSample(
+    join(restormRoot, 'tests/e2e/samples/kafka-sample.restorm'),
+    join(restormRoot, 'tests/e2e/.tmp/kafka-execution/kafka-sample.restorm'),
+    services
+  )
   const opened = await callMcpTool(discovery, 'open_project', { filePath: samplePath })
   expect(opened.isError ?? false).toBe(false)
 
@@ -98,16 +113,12 @@ Given('I open the Kafka sample via MCP', async ({ callMcpTool, restormRoot }) =>
  * that also invalidates `restorm-e2e-consumer`'s committed offset (tied to
  * the old topic incarnation), so the group falls back to `earliest` on the
  * fresh, exactly-3-message log regardless of what ran before it. */
-Given('the restorm-test Kafka topic is freshly reseeded', () => {
+Given('the restorm-test Kafka topic is freshly reseeded', async () => {
   const broker = 'localhost:9092'
   const topic = 'restorm-test'
-  const kafkaBin = '/opt/kafka/bin'
-  const dockerExec = (cmd: string): void => {
-    execSync(`docker exec restorm-kafka ${cmd}`, { stdio: 'pipe' })
-  }
 
   try {
-    dockerExec(`${kafkaBin}/kafka-topics.sh --bootstrap-server ${broker} --delete --topic ${topic}`)
+    await kafkaExec(['kafka-topics', '--bootstrap-server', broker, '--delete', '--topic', topic])
   } catch {
     // No topic yet on a pristine broker — fine, --create below handles it.
   }
@@ -116,20 +127,12 @@ Given('the restorm-test Kafka topic is freshly reseeded', () => {
   // recreating, else --create can race a "still exists" transient state.
   const deadline = Date.now() + 15_000
   while (Date.now() < deadline) {
-    const out = execSync(
-      `docker exec restorm-kafka ${kafkaBin}/kafka-topics.sh --bootstrap-server ${broker} --list`,
-      { encoding: 'utf-8' }
-    )
+    const out = await kafkaExec(['kafka-topics', '--bootstrap-server', broker, '--list'])
     if (!out.split('\n').includes(topic)) break
   }
 
-  dockerExec(
-    `${kafkaBin}/kafka-topics.sh --bootstrap-server ${broker} --create --if-not-exists --topic ${topic} --partitions 1 --replication-factor 1`
-  )
-  execSync(`docker exec -i restorm-kafka ${kafkaBin}/kafka-console-producer.sh --bootstrap-server ${broker} --topic ${topic}`, {
-    input: 'seed-message-1\nseed-message-2\nseed-message-3\n',
-    stdio: ['pipe', 'pipe', 'pipe']
-  })
+  await kafkaExec(['kafka-topics', '--bootstrap-server', broker, '--create', '--if-not-exists', '--topic', topic, '--partitions', '1', '--replication-factor', '1'])
+  await kafkaExec(['sh', '-c', "printf 'seed-message-1\\nseed-message-2\\nseed-message-3\\n' | kafka-console-producer --bootstrap-server localhost:9092 --topic restorm-test"])
 })
 
 When('I open the {string} request tab via MCP', async ({ callMcpTool }, name: string) => {
@@ -204,11 +207,8 @@ Then('the Kafka response panel shows at least {int} message frame', async ({}, c
 /** Produce one record straight to the broker (no restorm UI involved) so the
  * consumer tab under test stays put and receives it live — mirrors the reseed
  * step's `kafka-console-producer` path. */
-When('a record is produced to the restorm-test topic', () => {
-  execSync(
-    'docker exec -i restorm-kafka /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic restorm-test',
-    { input: 'live-message-after-consume-start\n', stdio: ['pipe', 'pipe', 'pipe'] }
-  )
+When('a record is produced to the restorm-test topic', async () => {
+  await kafkaExec(['sh', '-c', "printf 'live-message-after-consume-start\\n' | kafka-console-producer --bootstrap-server localhost:9092 --topic restorm-test"])
 })
 
 Then('the Kafka response panel shows {int} message frames', async ({}, count: number) => {
@@ -243,11 +243,11 @@ When('I select the Kafka mode {string}', async ({}, mode: string) => {
   await page.locator(`[data-testid="kafka-mode-select-option-${index}"]`).first().click({ force: true })
 })
 
-When(/^I type (\d+) characters into the Kafka broker URL field within (\d+) ms$/, async ({}, ...args) => {
+When(/^I type (\d+) characters into the Kafka broker URL field within (\d+) ms$/, async ({}, countArg: string, windowArg: string) => {
   if (page === null) throw new Error('launch first')
   const p = page
-  const count = Number(args[0])
-  const windowMs = Number(args[1])
+  const count = Number(countArg)
+  const windowMs = Number(windowArg)
   await p.evaluate(() => { (window as unknown as DocUpdateCounterWindow).__e2eResetDocUpdateCount?.() })
   const delay = Math.max(0, Math.floor(windowMs / Math.max(1, count - 1)))
   const input = p.locator(URL_INPUT).first()
@@ -256,9 +256,9 @@ When(/^I type (\d+) characters into the Kafka broker URL field within (\d+) ms$/
   await input.pressSequentially(text, { delay })
 })
 
-Then(/^at most (\d+) document-update events are emitted for the request$/, async ({}, ...args) => {
+Then(/^at most (\d+) document-update events are emitted for the request$/, async ({}, maxArg: string) => {
   if (page === null) throw new Error('launch first')
-  const max = Number(args[0])
+  const max = Number(maxArg)
   await new Promise((r) => setTimeout(r, 300))
   const count = await page.evaluate(() => (window as unknown as DocUpdateCounterWindow).__e2eDocUpdateCount ?? 0)
   expect(count, `Debounce regression: expected <= ${max} document-update events, got ${count}`).toBeLessThanOrEqual(max)
@@ -292,8 +292,9 @@ Then('that history entry succeeded', async ({ callMcpTool }) => {
   if (discovery === null) throw new Error('launch first')
   if (currentRequestId === null) throw new Error('open a request first')
   const reply = await callMcpTool(discovery, 'get_response_history', { requestId: currentRequestId })
-  const payload = parsedReply(reply) as { entries?: { guid: string; success?: boolean }[] }
+  const payload = parsedReply(reply) as { entries?: { guid: string; outcome?: string }[] }
   const freshest = (payload.entries ?? [])[0]
   expect(freshest, 'no history entry found').toBeTruthy()
-  expect(freshest?.success, 'freshest history entry did not succeed').toBe(true)
+  // `outcome` is the entry's status: 'ok' | 'warning' | 'failure'.
+  expect(freshest?.outcome, 'freshest history entry did not succeed').toBe('ok')
 })

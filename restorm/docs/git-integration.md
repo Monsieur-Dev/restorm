@@ -92,7 +92,7 @@ object in a different order and the whole file showed as changed, with the
 commit message listing every entity as *Modified*.
 
 The fix imposes a **canonical key order** at serialization time, independent of
-insertion order. `prepareForSerialization` (and the folder-mode writer) run
+insertion order. `prepareForSerialization` runs
 every object through `canonicalizeSerializedKeys`, which emits keys in a fixed,
 documented order:
 

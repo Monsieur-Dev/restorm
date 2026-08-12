@@ -17,5 +17,3 @@ import { useExclusivePopover } from 'electron-core-ui/renderer'
 export function useExclusiveHeaderPopover(open: boolean, close: () => void): void {
   useExclusivePopover(open, close)
 }
-
-export default useExclusiveHeaderPopover

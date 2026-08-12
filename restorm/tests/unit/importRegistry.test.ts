@@ -17,6 +17,10 @@ const FIXTURES = join(__dirname, 'fixtures')
 
 /** Canonical fixture for each registered format. */
 const fixtures: Record<string, { content: string; filePath?: string }> = {
+  restorm: {
+    content: readFileSync(join(FIXTURES, 'restorm', 'mini-project.restorm'), 'utf-8'),
+    filePath: 'mini-project.restorm'
+  },
   curl: {
     content: 'curl -X GET https://petstore.example.com/pets'
   },

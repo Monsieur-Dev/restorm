@@ -10,6 +10,7 @@ import type { FeatureEnvironment, FeaturePlatform } from './feature'
 import type { FileServiceState, FileMetadata, SerializationFormat, OpenRejectedPayload } from './file'
 import type { SettingValue, ResolvedSetting, SettingsGroup } from './settings'
 import type { SaveFailureReason } from '../errors'
+import type { AppIconMenuLabels, AppIconAction } from './appIconMenu'
 import type {
   GitStatus,
   GitCommitResult,
@@ -141,15 +142,6 @@ export interface CoreUiFileApi {
     callback: (payload: { path: string | null }) => void
   ) => () => void
   onAutoSaveTrigger: (callback: () => void) => () => void
-  saveUnit: (entry: {
-    runtimeId: string
-    content: unknown
-    absolutePath: string
-    format: 'json' | 'json5' | 'yaml'
-  }) => Promise<boolean>
-  saveUnitsBatch: (
-    entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
-  ) => Promise<{ runtimeId: string; success: boolean }[]>
 }
 
 export interface CoreUiEventBusApi {
@@ -275,14 +267,25 @@ export interface CoreUiGitApi {
  * definition stays in one place.
  */
 export interface CoreUiNativeMenuApi {
-  set: (template: unknown) => Promise<boolean>
+  set: (template: unknown, about?: { id: string; label: string }) => Promise<boolean>
   clear: () => Promise<boolean>
   onInvoke: (callback: (id: string) => void) => () => void
+}
+
+/**
+ * Application-icon menu (macOS Dock today). The entries themselves are built
+ * in main from the file state — the Dock outlives every window — so the
+ * renderer only supplies the translated labels for the static ones.
+ */
+export interface CoreUiAppIconMenuApi {
+  setLabels: (labels: AppIconMenuLabels) => void
+  onInvoke: (callback: (action: AppIconAction) => void) => () => void
 }
 
 export interface CoreUiApi {
   platform: string
   nativeMenu: CoreUiNativeMenuApi
+  appIconMenu: CoreUiAppIconMenuApi
   theme: CoreUiThemeApi
   i18n: CoreUiI18nApi
   logger: CoreUiLoggerApi

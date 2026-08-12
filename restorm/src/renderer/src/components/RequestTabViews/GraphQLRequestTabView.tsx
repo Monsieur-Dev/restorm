@@ -1,6 +1,9 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +11,6 @@ import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
   CodeEditor,
-  InputBox,
   SplitView,
   Pane,
   ControlGroup,
@@ -47,7 +49,7 @@ import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
 import { toasterService } from 'electron-core-ui/renderer'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { useIsGraphqlSubscribing } from '../../services/graphqlSubscriptionListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
@@ -419,7 +421,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     return `localhost:${port}/${cleanPath}`
   }, [])
   const setServerPort = useCallback((p: string): void => {
-    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverPath))
+    setUrl(composeServerUrl(p, serverPath))
   }, [composeServerUrl, serverPath, setUrl])
   const setServerPath = useCallback((p: string): void => {
     setUrl(composeServerUrl(serverPort, p))
@@ -435,16 +437,33 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     void window.restorm?.graphql.listen(requestId)
       .then((res) => {
         if (res.error) {
-          toasterService.push('app', { title: t('graphql.server.listenFailed'), body: res.error, durationMs: 10000 })
+          pushServerListenErrorToast(t, t('graphql.server.listenFailed'), res.error, serverPort)
           logger.error('GraphQL mock server failed to listen', { error: res.error })
         }
       })
       .catch((err: unknown) => { logger.error('GraphQL mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, conflictMode, t, flushUpdate])
+  }, [request.id, isListening, conflictMode, t, flushUpdate, serverPort])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.graphql.stop(request.id)
   }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE
+  // one. Handlers route through a ref so the published array only rebuilds
+  // when the rendered entry changes.
+  const serverMenuOpsRef = useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[] | null>(() => {
+    if (!isServer) return null
+    return [
+      isListening
+        ? { id: 'server-stop', label: t('graphql.server.stopListening'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+        : { id: 'server-listen', label: t('graphql.server.startListening'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+    ]
+  }, [isServer, isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab && isServer, serverMenuItems)
 
   // Track listening state + served count in server mode. Skipped entirely
   // in conflict mode (see `conflictSafeLiveState.ts`) — a static historical
@@ -920,23 +939,24 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         // SERVER MODE: localhost-fixed host + port + endpoint path.
         <>
           <span style={serverHostLabelStyle}>localhost:</span>
-          <div style={serverPortWrapperStyle}>
-            <InputBox
+          <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+            <RestormVariableInputBox
               value={serverPort}
               onChange={setServerPort}
-              options={{ placeholder: '4000' }}
+              variables={envVariables}
+              helpers={handlebarsHelpers}
+              placeholder="4000"
               data-testid="graphql-server-port-input"
-              disabled={isListening}
             />
           </div>
           <span style={serverHostLabelStyle}>/</span>
-          <div style={urlInputWrapperStyle}>
-            <InputBox
+          <div style={{ ...urlInputWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+            <RestormVariableInputBox
               value={serverPath}
               onChange={setServerPath}
-              options={{ placeholder: 'graphql' }}
+              variables={envVariables}
+              helpers={handlebarsHelpers}
               data-testid="graphql-server-path-input"
-              disabled={isListening}
             />
           </div>
           {!inWorkbenchTab && (
@@ -957,12 +977,9 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         </>
       ) : (
         <>
-          <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
             <div
               style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
               data-testid="url-container"
-              data-url-resolved={resolvedUrl ? 'true' : 'false'}
-              data-resolved-url={resolvedUrl || url}
             >
               <RestormVariableInputBox
                 value={url}
@@ -973,7 +990,6 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
                 data-testid="graphql-url-input"
               />
             </div>
-          </HeaderHoverTooltip>
           {operationNames.length > 1 && (
             <div style={{ minWidth: 180 }} data-testid="graphql-operation-name-host">
               <SelectBox
@@ -1026,6 +1042,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         </>
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
     </div>
   )
 
@@ -1136,5 +1153,3 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     </>
   )
 }
-
-export default GraphQLRequestTabView

@@ -14,7 +14,6 @@ const Titlebar: React.FC<TitlebarProps> = ({
   leftContent,
   rightContent,
   centerContent,
-  children,  // Deprecated: use leftContent instead
   className = '',
   id,
   'data-testid': dataTestId,
@@ -26,10 +25,12 @@ const Titlebar: React.FC<TitlebarProps> = ({
   searchFn,
   searchBarTestId,
   searchTooltipHideDelayMs,
+  getSearchResultDragData,
   customWcoTestId,
   customWcoPlatform,
   customWcoHoverTooltips,
-  showNavigation
+  showNavigation,
+  appMenuAbout
 }) => {
   const rootTestId = dataTestId ?? 'titlebar'
   const leftZoneTestId = `${rootTestId}-left`
@@ -108,12 +109,11 @@ const Titlebar: React.FC<TitlebarProps> = ({
     )
   }
 
-  // Use leftContent if provided, otherwise fall back to children for backward compatibility
-  const actualLeftContent = leftContent ?? children
+  const actualLeftContent = leftContent
 
   // macOS shows application menus in the system bar, not inside the window.
   // The same JSX drives both, so the two renderings cannot drift apart.
-  useNativeAppMenu(actualLeftContent, isMac)
+  useNativeAppMenu(actualLeftContent, isMac, appMenuAbout)
 
   return (
     <div
@@ -152,6 +152,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
             {...(renderSearchBadge ? { renderBadge: renderSearchBadge } : {})}
             {...(searchBadgedCategories ? { badgedCategories: searchBadgedCategories } : {})}
             {...(searchTooltipHideDelayMs !== undefined ? { tooltipHideDelayMs: searchTooltipHideDelayMs } : {})}
+            {...(getSearchResultDragData ? { getResultDragData: getSearchResultDragData } : {})}
           />
         ) : (
           centerContent ?? <span className="titlebar-title" data-testid={titleTestId}>{title}</span>
@@ -172,4 +173,4 @@ const Titlebar: React.FC<TitlebarProps> = ({
   )
 }
 
-export default Titlebar
+export { Titlebar }

@@ -11,20 +11,6 @@ export interface HandlebarsHelperDefinition {
   example?: string
 }
 
-export const handlebarsHelperCategories = [
-  'comparison',
-  'string',
-  'math',
-  'array',
-  'object',
-  'url',
-  'date',
-  'regex',
-  'misc'
-] as const
-
-export type HandlebarsHelperCategory = (typeof handlebarsHelperCategories)[number]
-
 export const handlebarsHelpersDefinitions: HandlebarsHelperDefinition[] = [
   // ============================================================================
   // Comparison Helpers
@@ -180,13 +166,6 @@ export const handlebarsHelpersDefinitions: HandlebarsHelperDefinition[] = [
 ]
 
 /**
- * Get helpers filtered by category
- */
-export function getHelpersByCategory(category: HandlebarsHelperCategory): HandlebarsHelperDefinition[] {
-  return handlebarsHelpersDefinitions.filter((h) => h.category === category)
-}
-
-/**
  * Helper definition with translated description for use in UI components
  */
 export interface TranslatedHelperDefinition {
@@ -195,26 +174,4 @@ export interface TranslatedHelperDefinition {
   description: string
   syntax: string
   example?: string
-}
-
-/**
- * Get helper definitions with translated descriptions
- * @param t - i18n translation function (t from useTranslation())
- * @returns Array of helpers with translated descriptions
- */
-export function getTranslatedHelpers(
-  t: (key: string) => string
-): TranslatedHelperDefinition[] {
-  return handlebarsHelpersDefinitions.map((h) => {
-    const result: TranslatedHelperDefinition = {
-      name: h.name,
-      category: t(`helpers.categories.${h.category}`),
-      description: t(`helpers.${h.name}`),
-      syntax: h.syntax
-    }
-    if (h.example) {
-      result.example = h.example
-    }
-    return result
-  })
 }

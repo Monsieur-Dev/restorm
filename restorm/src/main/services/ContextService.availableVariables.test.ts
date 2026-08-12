@@ -159,3 +159,58 @@ describe('ContextService available-variables env broadcast', () => {
     contextService.unregisterRequest(requestId)
   })
 })
+
+/**
+ * When a request's own row redefines a name the environment also declares,
+ * the published variable set must carry ONE entry with the EFFECTIVE value —
+ * the row's, the same layering resolution applies. Publishing both layers
+ * made every first-match consumer (the Monaco hover, the completion
+ * description) show the environment's value while the resolved URL used the
+ * row's — a tooltip that contradicted the URL right under it.
+ */
+describe('ContextService available-variables effective-value dedupe', () => {
+  const ENV_ID = 'ctx-dedupe-env'
+
+  beforeEach(() => {
+    contextService.initialize()
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_CREATED, {
+      id: ENV_ID,
+      type: 'environment',
+      parentEnvironmentId: null,
+      document: {
+        id: ENV_ID,
+        name: 'Env',
+        variables: [
+          new KeyValue({ key: 'baseUrl', value: new StringValue('https://api.example.com') }),
+          new KeyValue({ key: 'petId', value: new StringValue('3') })
+        ]
+      }
+    })
+  })
+
+  afterEach(() => {
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_DELETED, { id: ENV_ID, type: 'environment' })
+  })
+
+  it('the URL field publishes one petId carrying the row value, not the env value', () => {
+    const requestId = 'ctx-dedupe-http'
+    contextService.registerRequest(requestId, ENV_ID, { id: requestId, headers: [] })
+
+    sentBroadcasts.length = 0
+    contextService.updateFullRequestData(requestId, {
+      id: requestId,
+      requestType: 'http',
+      url: '{{baseUrl}}/pet/{{petId}}',
+      headers: [],
+      pathParams: [new KeyValue({ key: 'petId', value: new StringValue('7') })]
+    })
+
+    const urlField = fieldBroadcast(`${requestId}:url`)
+    if (urlField === undefined) throw new Error('url field broadcast missing')
+    const petEntries = urlField.variables.filter((v) => v.name === 'petId')
+    expect(petEntries, 'exactly one effective petId entry').toHaveLength(1)
+    expect(petEntries[0]?.value, 'the row value must win over the env value').toBe('7')
+
+    contextService.unregisterRequest(requestId)
+  })
+})

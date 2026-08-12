@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import StatusbarElement from '../Statusbar/StatusbarElement'
+import { StatusbarElement } from '../Statusbar/StatusbarElement'
 import { toasterService } from './ToasterService'
 import { useToasts } from './useToasts'
 

@@ -94,17 +94,17 @@ describe('GrpcRequest — mock-server persistence round-trip', () => {
 })
 
 /**
- * `transport` must default to native gRPC (undefined) for any request saved
- * before the field existed, and round-trip cleanly once set.
+ * `transport` is always set: a request that names none is the native gRPC
+ * client, and it persists that explicitly rather than by omission.
  */
-describe('GrpcRequest — transport backward compatibility', () => {
-  it('leaves transport undefined for a request that never set it', () => {
+describe('GrpcRequest — transport', () => {
+  it('defaults to native gRPC and persists it explicitly', () => {
     const client = new GrpcRequest({ id: 'c1', name: 'Client', url: 'localhost:9000', service: 's', method: 'M', callType: 'unary' })
-    expect(client.transport).toBeUndefined()
+    expect(client.transport).toBe('grpc')
     const plain = client.toPlainObject()
-    expect('transport' in plain).toBe(false)
+    expect(plain['transport']).toBe('grpc')
     const restored = GrpcRequest.fromPlain(plain as unknown as Parameters<typeof GrpcRequest.fromPlain>[0])
-    expect(restored.transport).toBeUndefined()
+    expect(restored.transport).toBe('grpc')
   })
 
   it.each(['grpc', 'grpc-web', 'connect'] as const)('round-trips transport "%s"', (transport) => {

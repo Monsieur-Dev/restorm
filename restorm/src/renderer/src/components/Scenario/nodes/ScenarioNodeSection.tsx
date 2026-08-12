@@ -73,5 +73,3 @@ export const ScenarioNodeSection: React.FC<{
     </div>
   )
 }
-
-export default ScenarioNodeSection

@@ -2,7 +2,7 @@
  * Hook for managing file operations (open, save, close)
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import {
   useFileService,
   setContentChecksum,
@@ -10,8 +10,6 @@ import {
   hasContentChanged,
   eventBus,
   logger,
-  computeChecksum,
-  saveUnitToDisk,
   decomposeForPersistence,
   hydrateSaveUnit,
   type DecomposedUnit
@@ -38,9 +36,8 @@ import { AmqpRequest } from '../../../shared/models/requests/AmqpRequest'
  * structuredClone we do for the IPC payload).
  */
 const restormClassResolver = (item: Record<string, unknown>, parentClass: object | undefined, propKey: string): object | undefined => {
-  // Environment.variables is `@separateFiles` — each row is a KeyValue
-  // that needs its own file. Without a KeyValue class here, the
-  // decomposer can't cleanse the row or name the file.
+  // Environment.variables rows are KeyValues; without a KeyValue class
+  // here the decomposer can't cleanse a row.
   if (parentClass === EnvironmentClass && propKey === 'variables') return KeyValueClass
   // Environment.subEnvironments → nested Environment.
   if (parentClass === EnvironmentClass && propKey === 'subEnvironments') return EnvironmentClass
@@ -65,20 +62,18 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 }
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
-import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, emitEnvironmentUpdated } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import {
   CURRENT_FILE_FORMAT_VERSION,
   resolveFileFormatVersion,
-  stripLegacyFileFormatVersion
 } from '../../../shared/config/fileFormatVersion'
-import { normalizeBodyTypes } from '../../../shared/config/normalizeBodyType'
-import type { Folder, EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isAnyFolder, isScenario } from '../../../shared/types/collections'
+import type { EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
-import type { SaveOptions } from '../components/Modals/SaveOptionsModal'
 import { collectEnvFileSecretsFromCollections, applyEnvFileSecretsToCollections } from '../../../shared/utils/envFileSecrets'
+import { envSecretsDigestOf, findNodeByRuntimeId } from '../services/envSecretsDigest'
 import { serializeEnvFile, parseEnvFileDetailed } from '../../../shared/utils/dotenv'
 import type { TFunction } from 'i18next'
 
@@ -87,7 +82,6 @@ export interface UseFileManagementOptions {
   setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setWorkbenchTree: React.Dispatch<React.SetStateAction<WorkbenchTree>>
   clearTabDirtyState: () => void
-  registerTabDirtyState: (id: string, checksum: string) => void
   markAllTabsSaved: () => void
   t: TFunction
 }
@@ -96,27 +90,15 @@ export interface UseFileManagementReturn {
   // File menu handlers
   handleMenuNew: () => Promise<void>
   handleMenuOpen: () => Promise<void>
-  handleMenuOpenFolder: () => Promise<void>
   handleMenuSave: () => Promise<boolean>
   handleMenuSaveAll: () => Promise<boolean>
   handleMenuSaveUnit: (runtimeId: string) => Promise<boolean>
   handleMenuSaveAs: () => void
   handleMenuClose: () => Promise<void>
   handleOpenRecentFile: (path: string) => Promise<void>
-  handleSaveWithOptions: (options: SaveOptions) => Promise<void>
   // File event handlers
   handleFileOpened: (state: { currentFile: { content: unknown; path?: string | null; format?: string } }) => void
   handleFileClosed: () => void
-  // File state
-  isOpenedAsFolder: boolean
-  setIsOpenedAsFolder: React.Dispatch<React.SetStateAction<boolean>>
-  folderFormat: PersistenceFormat
-  setFolderFormat: React.Dispatch<React.SetStateAction<PersistenceFormat>>
-  currentFolderPath: string | null
-  setCurrentFolderPath: React.Dispatch<React.SetStateAction<string | null>>
-  // Modals
-  showSaveOptionsModal: boolean
-  setShowSaveOptionsModal: (show: boolean) => void
 }
 
 export function useFileManagement(options: UseFileManagementOptions): UseFileManagementReturn {
@@ -125,7 +107,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     setRootItems,
     setWorkbenchTree,
     clearTabDirtyState,
-    registerTabDirtyState,
     markAllTabsSaved,
     t
   } = options
@@ -140,14 +121,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     close: closeFile,
     showUnsavedChangesDialog
   } = useFileService()
-
-  const [showSaveOptionsModal, setShowSaveOptionsModal] = useState(false)
-  // _setSaveOptionsIntent: intentionally unused while the modal path is bypassed — re-enable by
-  // replacing the performSave(...) calls in handleMenuSaveAs / handleMenuNew with the two commented lines.
-  const [saveOptionsIntent, _setSaveOptionsIntent] = useState<'saveAs' | 'new'>('saveAs')
-  const [isOpenedAsFolder, setIsOpenedAsFolder] = useState(false)
-  const [folderFormat, setFolderFormat] = useState<PersistenceFormat>('yaml')
-  const [currentFolderPath, setCurrentFolderPath] = useState<string | null>(null)
 
   // Track loading state
   const lastLoadedPathRef = useRef<string | null>(null)
@@ -212,15 +185,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   )
 
   /**
-   * Compose the on-disk folder name for a root collection the exact
-   * same way `saveFolderStructure` does in the main process — that's
-   * the function that physically lays out the workspace at save-all
-   * time, so per-unit saves (`handleMenuSaveUnit`) must stay aligned
-   * with its naming scheme or they end up writing to a parallel,
-   * orphan hierarchy. `getPaddingWidth` matches the main-side helper
-   * (`max(1, digits)`) — different from the generic decomposer default
-   * (`max(2, digits)`) which would produce "01 - …" where
-   * `saveFolderStructure` produces "1 - …".
+   * Compose a stable pseudo-folder name for a root collection. The
+   * decomposer only needs it so child `parentId` chains and
+   * `runtimeId → unit` lookups stay consistent across roots — nothing
+   * is written at these paths.
    */
   const rootFolderName = useCallback(
     (root: Record<string, unknown>, rootIdx: number, rootCount: number): string => {
@@ -247,23 +215,23 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
   /**
    * Walk `rootItems` with the decomposer and seed the save-unit registry
-   * with one entry per `@separateFiles` / `@separateFolders` descendant.
+   * with one entry per unit-bearing descendant.
    *
    * Called at project open (so per-unit dirty dots start clean + draft
-   * comparison has a reference) AND after a successful whole-file or
-   * whole-folder save (to mark every unit clean in lockstep).
+   * comparison has a reference) AND after a successful whole-file save
+   * (to mark every unit clean in lockstep).
    *
-   * In file mode the `absolutePath` values produced by the decomposer
-   * aren't meaningful — the save-unit API ignores them for hydration,
-   * so we use the file path itself (or an empty string if unknown) as
-   * the walk's `basePath`.
+   * The `absolutePath` values produced by the decomposer aren't
+   * meaningful — the save-unit API ignores them for hydration, so we use
+   * the file path itself (or an empty string if unknown) as the walk's
+   * `basePath`.
    */
   const hydrateSaveUnitsFromTree = useCallback(async (
     items: FolderItem[],
     /**
      * Optional basePath / format overrides. Pass these from
      * `handleFileOpened` where the freshly-known path is in scope but
-     * the closure's `currentFolderPath` / `filePath` haven't yet
+     * the closure's `filePath` hasn't yet
      * propagated through React's render cycle — without them, the
      * walker computes `basePath = ''`, the early-out fires, and leaf
      * units stay unhydrated. The first upsert from a user edit then
@@ -274,9 +242,9 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
      */
     overrides?: { basePath?: string; format?: PersistenceFormat }
   ): Promise<void> => {
-    const basePath = overrides?.basePath ?? currentFolderPath ?? filePath ?? ''
+    const basePath = overrides?.basePath ?? filePath ?? ''
     if (!basePath) return
-    const fmt = overrides?.format ?? folderFormat
+    const fmt = overrides?.format ?? 'yaml'
     try {
       // Duplicate-import guard: two imports of the same spec produce root
       // folders with identical descendant ids (envs, requests, …). A naïve
@@ -323,10 +291,18 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           if (!unit.runtimeId) continue
           if (seen.has(unit.runtimeId)) continue
           seen.add(unit.runtimeId)
+          // Mirror `doUpsert`'s digest stamp on the REFERENCE side: the
+          // decomposed content is plaintext-stripped, so without the digest
+          // a later secret-only draft would either always or never differ.
+          const liveNode = findNodeByRuntimeId(items, unit.runtimeId)
+          const digest = liveNode ? envSecretsDigestOf(liveNode) : null
+          const reference = digest !== null
+            ? { ...unit.content, __envSecretsDigest: digest }
+            : unit.content
           pending.push(hydrateSaveUnit({
             runtimeId: unit.runtimeId,
             kind: unit.kind,
-            reference: unit.content,
+            reference,
             ...(unit.parentId !== undefined && { parentId: unit.parentId })
           }))
         }
@@ -335,7 +311,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     } catch (err) {
       logger.warn('[useFileManagement] Save-unit hydration failed', { error: String(err) })
     }
-  }, [currentFolderPath, filePath, folderFormat, rootFolderName, joinFolderPath])
+  }, [filePath, rootFolderName, joinFolderPath])
 
   // Save handlers
   const handleMenuSave = useCallback(async (): Promise<boolean> => {
@@ -346,48 +322,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     const dataForChecksum = prepareForSerialization(plainData)
     const currentChecksum = JSON.stringify(dataForChecksum)
     const hasRealChanges = await hasContentChanged(currentChecksum)
-
-    if (isOpenedAsFolder && currentFolderPath) {
-      if (hasRealChanges) {
-        const result = await window.restorm?.file.saveAsFolder(
-          plainData,
-          folderFormat,
-          currentFolderPath
-        )
-        if (!result?.success) return false
-        // End-of-save-all contract (see FileService.clearAllDrafts): the tree
-        // is now fully on disk, so bulk-clear drafts AND force-clean the
-        // registry — including delete tombstones of removed units, which the
-        // re-hydration below can't reach (their ids are gone from the tree).
-        await window.restorm?.file.clearDrafts()
-      } else {
-        // No whole-file delta, but orphan `.draft.*` files may
-        // still live under `userData/drafts/<uuid>/` from earlier
-        // sessions or from runtime ids no longer in the tree. The
-        // save-IPC paths bulk-clear drafts on success; mirror that
-        // here so the post-save invariant "zero drafts on disk"
-        // holds even when nothing on disk needed rewriting.
-        await window.restorm?.file.clearDrafts()
-      }
-      // Re-baseline `hasContentChanged` to the just-saved tree
-      // using the renderer's serialization shape. FileService.save
-      // would otherwise stamp the checksum with `preserveUuidMetadata`'s
-      // output (which appends projectUuid) — diverging from the
-      // shape the renderer uses for every subsequent comparison and
-      // making `hasContentChanged` permanently report `true`. That
-      // breaks the edit-then-revert self-heal in `useEffect`s below.
-      void setContentChecksum(currentChecksum)
-      savedBaselineRef.current = currentChecksum
-      markAllTabsSaved()
-      // Re-hydrate the registry from the just-saved tree — every
-      // unit's `reference` picks up the new value, every draft is
-      // cleared, and the global isDirty flips off via the bridge.
-      // Runs even when the file on disk was unchanged: per-unit Ctrl+S
-      // may have left stale references on sibling units that this
-      // save-all needs to flush.
-      await hydrateSaveUnitsFromTree(rootItems)
-      return true
-    }
 
     // Collect from the live in-memory tree (not `plainData`).
     // `JSON.parse(JSON.stringify(rootItems))` runs every
@@ -423,36 +357,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     markAllTabsSaved()
     await hydrateSaveUnitsFromTree(rootItems)
     return true
-  }, [saveFile, rootItems, isOpenedAsFolder, folderFormat, currentFolderPath, filePath, markAllTabsSaved, hydrateSaveUnitsFromTree, buildDocument])
+  }, [saveFile, rootItems, filePath, markAllTabsSaved, hydrateSaveUnitsFromTree, buildDocument])
 
   const handleMenuSaveAll = handleMenuSave
 
   /**
-   * Decomposition cache — invalidated only when the inputs the
-   * decomposer reads change (`rootItems` identity, `currentFolderPath`,
-   * `folderFormat`). Consecutive save-unit invocations reuse the same
-   * `Map<runtimeId, DecomposedUnit>` so a Ctrl+S on a large project
-   * stays O(1) after the first miss.
-   *
-   * The invalidation is coarse on purpose: any state change that
-   * replaces `rootItems` already triggers a re-render of this hook,
-   * and the cached map would be stale regardless of which node was
-   * actually touched.
-   */
-  const decomposeCacheRef = useRef<{
-    rootItems: unknown
-    basePath: string | null
-    format: string
-    units: Map<string, DecomposedUnit>
-  } | null>(null)
-
-  /**
-   * File-mode decomposition: produces the same per-unit map as folder
-   * mode, but using a synthetic base path. The `absolutePath` on each
-   * `DecomposedUnit` is meaningless here — we only care about
-   * `runtimeId`, `kind`, `parentId` and `content` for registry
-   * hydration. Used by per-unit Ctrl+S to identify a subtree of units
-   * to commit when the whole file has been rewritten.
+   * Per-unit decomposition: the `absolutePath` on each `DecomposedUnit`
+   * is meaningless — we only care about `runtimeId`, `kind`, `parentId`
+   * and `content` for registry hydration. Used by per-unit Ctrl+S to
+   * identify a subtree of units to commit when the whole file has been
+   * rewritten.
    */
   const buildFileModeDecomposition = useCallback((): Map<string, DecomposedUnit> => {
     const units = new Map<string, DecomposedUnit>()
@@ -464,16 +378,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         : root instanceof FolderClass
           ? FolderClass
           : EnvironmentFolderClass
-      // In file mode `absolutePath` is meaningless but we still wrap
-      // each root in its own pseudo-folder so child `parentId` chains
-      // and `runtimeId → unit` lookups are consistent across roots.
+      // `absolutePath` is meaningless but we still wrap each root in its
+      // own pseudo-folder so child `parentId` chains and
+      // `runtimeId → unit` lookups are consistent across roots.
       const rootBasePath = joinFolderPath(filePath ?? '', rootFolderName(rootPojo, rootIdx, rootCount))
       const decomposed = decomposeForPersistence({
         root: rootPojo,
         rootClass,
         basePath: rootBasePath,
-        format: folderFormat,
-        extension: folderFormat,
+        format: 'yaml',
+        extension: 'yaml',
         classResolver: restormClassResolver,
         indexPaddingMin: 1
       })
@@ -481,53 +395,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       for (const child of decomposed.children) units.set(child.runtimeId, child)
     })
     return units
-  }, [rootItems, filePath, folderFormat, rootFolderName, joinFolderPath])
-
-  const getOrBuildUnitMap = useCallback((): Map<string, DecomposedUnit> => {
-    const cache = decomposeCacheRef.current
-    if (
-      cache !== null
-      && cache.rootItems === rootItems
-      && cache.basePath === currentFolderPath
-      && cache.format === folderFormat
-    ) {
-      return cache.units
-    }
-    const units = new Map<string, DecomposedUnit>()
-    if (currentFolderPath) {
-      const rootCount = rootItems.length
-      rootItems.forEach((root, rootIdx) => {
-        const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
-        const rootClass: object = root instanceof EnvironmentFolderClass
-          ? EnvironmentFolderClass
-          : root instanceof FolderClass
-            ? FolderClass
-            : EnvironmentFolderClass
-        // Wrap each root in its own `{idx} - {name}` folder to match
-        // `saveFolderStructure` (main-process save-all). The earlier
-        // version passed `currentFolderPath` directly which meant
-        // `decomposeForPersistence` treated each root's *children* as
-        // immediate descendants of the workspace root — typing + Ctrl+S
-        // on a nested request produced an orphan sibling folder at the
-        // workspace root (e.g. `04 - accounts/` alongside
-        // `1 - Microsoft.Dynamics.CRM/` instead of inside it).
-        const rootBasePath = joinFolderPath(currentFolderPath, rootFolderName(rootPojo, rootIdx, rootCount))
-        const decomposed = decomposeForPersistence({
-          root: rootPojo,
-          rootClass,
-          basePath: rootBasePath,
-          format: folderFormat,
-          extension: folderFormat,
-          classResolver: restormClassResolver,
-          indexPaddingMin: 1
-        })
-        units.set(decomposed.rootIndex.runtimeId, decomposed.rootIndex)
-        for (const child of decomposed.children) units.set(child.runtimeId, child)
-      })
-    }
-    decomposeCacheRef.current = { rootItems, basePath: currentFolderPath, format: folderFormat, units }
-    return units
-  }, [rootItems, currentFolderPath, folderFormat, rootFolderName, joinFolderPath])
+  }, [rootItems, filePath, rootFolderName, joinFolderPath])
 
   /**
    * Collect the set of save-unit ids to commit for a given Ctrl+S target.
@@ -540,7 +408,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    *     stay dirty on Ctrl+S of the parent.
    *   - Env folder tab: folder document + every environment + every
    *     nested sub-environment. Variables are rendered on this tab
-   *     even though each env is a separate `@separateFolders` file,
+   *     even though each env is its own save unit,
    *     so the user's Ctrl+S has to reach them.
    *   - Environment / sub-environment (no direct tab, but included
    *     transitively via the env folder rule).
@@ -595,93 +463,50 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    * the tab's visible content, not every descendant document.
    */
   const handleMenuSaveUnit = useCallback(async (runtimeId: string): Promise<boolean> => {
-    logger.info('[useFileManagement] handleMenuSaveUnit', {
-      runtimeId,
-      isOpenedAsFolder,
-      currentFolderPath
-    })
+    logger.info('[useFileManagement] handleMenuSaveUnit', { runtimeId })
     if (rootItems.length === 0) return false
-
-    const map = getOrBuildUnitMap()
-    const target = map.get(runtimeId)
-    if (isOpenedAsFolder && currentFolderPath && !target) {
-      // Folder mode but we couldn't locate the unit — fall back to save-all.
-      return await handleMenuSave()
-    }
 
     const subtreeIds = collectSaveSubtreeIds(runtimeId)
 
-    if (!isOpenedAsFolder || !currentFolderPath) {
-      // File mode: write the whole file, then re-hydrate only the subtree
-      // so other dirty units stay dirty.
-      const fileUnits = buildFileModeDecomposition()
-      const fileSubtreeIds = subtreeIds
+    // Write the whole file, then re-hydrate only the subtree
+    // so other dirty units stay dirty.
+    const fileUnits = buildFileModeDecomposition()
+    const fileSubtreeIds = subtreeIds
 
-      const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<string, unknown>
-      const dataForChecksum = prepareForSerialization(plainData)
-      const currentChecksum = JSON.stringify(dataForChecksum)
-      const hasRealChanges = await hasContentChanged(currentChecksum)
-      // No real disk delta → still commit the subtree's drafts so the
-      // per-tab dirty dots clear. The user pressed Ctrl+S on this tab;
-      // their expectation is "this tab is now saved".
-      const saved = hasRealChanges ? await saveFile(dataForChecksum) : true
-      if (!saved) return false
-      if (filePath) {
-        // Password values are stripped from the main-doc checksum by
-        // `SecretValue.toJSON()`, so `hasRealChanges` can't see
-        // password-only edits. Compare the sidecar content against
-        // its own baseline and write `.env` whenever the secrets
-        // changed, regardless of the main-doc verdict.
-        const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
-        const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
-        const hasEnvChanged = envContent !== (savedEnvBaselineRef.current ?? '')
-        if (hasRealChanges || hasEnvChanged) {
-          await window.restorm?.secrets.write(`${filePath}.env`, envContent)
-          savedEnvBaselineRef.current = envContent
-        }
+    const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<string, unknown>
+    const dataForChecksum = prepareForSerialization(plainData)
+    const currentChecksum = JSON.stringify(dataForChecksum)
+    const hasRealChanges = await hasContentChanged(currentChecksum)
+    // No real disk delta → still commit the subtree's drafts so the
+    // per-tab dirty dots clear. The user pressed Ctrl+S on this tab;
+    // their expectation is "this tab is now saved".
+    const saved = hasRealChanges ? await saveFile(dataForChecksum) : true
+    if (!saved) return false
+    if (filePath) {
+      // Password values are stripped from the main-doc checksum by
+      // `SecretValue.toJSON()`, so `hasRealChanges` can't see
+      // password-only edits. Compare the sidecar content against
+      // its own baseline and write `.env` whenever the secrets
+      // changed, regardless of the main-doc verdict.
+      const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
+      const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+      const hasEnvChanged = envContent !== (savedEnvBaselineRef.current ?? '')
+      if (hasRealChanges || hasEnvChanged) {
+        await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+        savedEnvBaselineRef.current = envContent
       }
-      // Re-baseline `hasContentChanged` to the renderer's shape so
-      // post-save comparisons match (see `handleMenuSave` for the
-      // full rationale).
-      void setContentChecksum(currentChecksum)
-      savedBaselineRef.current = currentChecksum
-      // Hydrate only the subtree we just "committed". Other dirty units
-      // keep their drafts so their tabs keep showing dirty dots even
-      // though the on-disk file has their content too.
-      for (const id of fileSubtreeIds) {
-        const entry = fileUnits.get(id)
-        if (!entry) continue
-        await hydrateSaveUnit({
-          runtimeId: entry.runtimeId,
-          kind: entry.kind,
-          reference: entry.content,
-          ...(entry.parentId !== undefined && { parentId: entry.parentId })
-        })
-      }
-      return true
     }
-
-    // Folder mode: persist only the subtree files.
-    const batch = Array.from(subtreeIds)
-      .map((id) => map.get(id))
-      .filter((unit): unit is DecomposedUnit => unit !== undefined)
-
-    let allOk = true
-    for (const entry of batch) {
-      const ok = await saveUnitToDisk({
-        runtimeId: entry.runtimeId,
-        content: entry.content,
-        absolutePath: entry.absolutePath,
-        format: entry.format
-      })
-      if (!ok) {
-        allOk = false
-        continue
-      }
-      // Re-hydrate the saved unit so any lingering draft (the bridge may
-      // have upserted a slightly-different shape than the decomposer's
-      // cleanse) gets wiped. The user intent on Ctrl+S is "this unit
-      // is now clean", not "maybe clean depending on diff heuristics".
+    // Re-baseline `hasContentChanged` to the renderer's shape so
+    // post-save comparisons match (see `handleMenuSave` for the
+    // full rationale).
+    void setContentChecksum(currentChecksum)
+    savedBaselineRef.current = currentChecksum
+    // Hydrate only the subtree we just "committed". Other dirty units
+    // keep their drafts so their tabs keep showing dirty dots even
+    // though the on-disk file has their content too.
+    for (const id of fileSubtreeIds) {
+      const entry = fileUnits.get(id)
+      if (!entry) continue
       await hydrateSaveUnit({
         runtimeId: entry.runtimeId,
         kind: entry.kind,
@@ -689,18 +514,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         ...(entry.parentId !== undefined && { parentId: entry.parentId })
       })
     }
-    return allOk
-  }, [isOpenedAsFolder, currentFolderPath, rootItems, getOrBuildUnitMap, handleMenuSave, saveFile, filePath, buildFileModeDecomposition, collectSaveSubtreeIds, buildDocument])
+    return true
+  }, [rootItems, saveFile, filePath, buildFileModeDecomposition, collectSaveSubtreeIds, buildDocument])
 
   /**
-   * Core save implementation shared by the direct-bypass path (File → New /
-   * File → Save as go straight here) and by the modal path (SaveOptionsModal
-   * calls handleSaveWithOptions which delegates here). Keeping both paths
-   * wired through a single function avoids duplicating the save logic and
-   * makes the modal path trivially re-activatable.
+   * Core save implementation shared by File → New and File → Save as.
    */
   const performSave = useCallback(
-    async (intent: 'new' | 'saveAs', saveOptions: SaveOptions): Promise<void> => {
+    async (intent: 'new' | 'saveAs', saveOptions: { format: PersistenceFormat }): Promise<void> => {
       const isNew = intent === 'new'
       const plainData = isNew
         // A brand-new document is written by THIS build, so it is at the
@@ -713,75 +534,39 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
       logger.info('[useFileManagement] Saving with options', {
         intent,
-        mode: saveOptions.mode,
         format: saveOptions.format
       })
 
       try {
-        if (saveOptions.mode === 'folder') {
-          const result = await window.restorm?.file.saveAsFolder(plainData, saveOptions.format)
-          if (result?.success && result.path) {
-            logger.info('[useFileManagement] Folder saved successfully', { path: result.path })
-            if (isNew) {
-              setRootItems([])
-              clearTabDirtyState()
-            }
-            setIsOpenedAsFolder(true)
-            setFolderFormat(saveOptions.format)
-            setCurrentFolderPath(result.path)
-            // Close + re-open via `openPath` so the main process properly
-            // transitions FileService into folder-mode-opened state
-            // (sets `currentFile`, fires `file:opened`, attaches the draft
-            // store). Without this the app stays at the welcome screen
-            // after a `File → New → Folder mode` and the sidebar never
-            // renders the freshly-saved (empty) collection.
-            if (isNew) {
-              await closeFile()
-              await window.restorm?.file.openPath(result.path)
-            }
-          } else {
-            logger.error('[useFileManagement] Failed to save folder', {
-              error: result?.error ?? 'Unknown error'
-            })
+        const dataForSave = prepareForSerialization(plainData)
+        const result = await window.restorm?.file.saveAsFile(dataForSave, saveOptions.format)
+        if (result?.success) {
+          logger.info('[useFileManagement] File saved successfully', { path: result.path })
+          if (result.path) {
+            const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
+            const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+            await window.restorm?.secrets.write(`${result.path}.env`, envContent)
+            savedEnvBaselineRef.current = envContent
+          }
+          if (isNew && result.path) {
+            await closeFile()
+            await openFile(result.path)
           }
         } else {
-          const dataForSave = prepareForSerialization(plainData)
-          const result = await window.restorm?.file.saveAsFile(dataForSave, saveOptions.format)
-          if (result?.success) {
-            logger.info('[useFileManagement] File saved successfully', { path: result.path })
-            setIsOpenedAsFolder(false)
-            if (result.path) {
-              const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
-              const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
-              await window.restorm?.secrets.write(`${result.path}.env`, envContent)
-              savedEnvBaselineRef.current = envContent
-            }
-            if (isNew && result.path) {
-              await closeFile()
-              await openFile(result.path)
-            }
-          } else {
-            logger.error('[useFileManagement] Failed to save file', {
-              error: result?.error ?? 'Unknown error'
-            })
-          }
+          logger.error('[useFileManagement] Failed to save file', {
+            error: result?.error ?? 'Unknown error'
+          })
         }
       } catch (error) {
         logger.error('[useFileManagement] Save error', { error: String(error) })
       }
     },
-    [rootItems, setRootItems, clearTabDirtyState, closeFile, openFile, buildDocument]
+    [rootItems, closeFile, openFile, buildDocument]
   )
 
   const handleMenuSaveAs = useCallback(() => {
-    void performSave('saveAs', { mode: 'file', format: 'yaml' })
-    // modal path disabled: _setSaveOptionsIntent('saveAs'); setShowSaveOptionsModal(true)
+    void performSave('saveAs', { format: 'yaml' })
   }, [performSave])
-
-  const handleSaveWithOptions = useCallback(
-    async (saveOptions: SaveOptions) => performSave(saveOptionsIntent, saveOptions),
-    [saveOptionsIntent, performSave]
-  )
 
   const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
     const dataForChecksum = prepareForSerialization(buildDocument(rootItems))
@@ -822,30 +607,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const handleMenuNew = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
     if (canProceed) {
-      void performSave('new', { mode: 'file', format: 'yaml' })
-      // modal path disabled: _setSaveOptionsIntent('new'); setShowSaveOptionsModal(true)
+      void performSave('new', { format: 'yaml' })
     }
   }, [checkUnsavedChanges, performSave])
 
   const handleMenuOpen = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
     if (canProceed) {
-      setIsOpenedAsFolder(false)
       await openFile()
     }
   }, [checkUnsavedChanges, openFile])
-
-  const handleMenuOpenFolder = useCallback(async () => {
-    const canProceed = await checkUnsavedChanges()
-    if (canProceed) {
-      const result = await window.restorm?.file.openFolder()
-      if (result?.success && result.path) {
-        setIsOpenedAsFolder(true)
-        setFolderFormat(result.format ?? 'yaml')
-        setCurrentFolderPath(result.path)
-      }
-    }
-  }, [checkUnsavedChanges])
 
   const handleMenuClose = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
@@ -859,7 +630,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const canProceed = await checkUnsavedChanges()
       if (canProceed) {
         await closeFile()
-        setIsOpenedAsFolder(false)
         await openFile(path)
       }
     },
@@ -880,19 +650,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         lastLoadedPathRef.current = newPath
 
         const path = state.currentFile.path ?? ''
-        const openedAsFolder = path !== '' && !/\.(json|yaml|yml|json5|restorm)$/i.test(path)
-        setIsOpenedAsFolder(openedAsFolder)
-        if (openedAsFolder) {
-          const format = state.currentFile.format as PersistenceFormat | undefined
-          setFolderFormat(format ?? 'yaml')
-          setCurrentFolderPath(path)
-        } else {
-          setCurrentFolderPath(null)
-        }
 
         const content = state.currentFile.content as Record<string, unknown> | null
         let openedEnvContent = ''
-        if (content && !openedAsFolder && path) {
+        if (content && path) {
           const envText = await window.restorm?.secrets.read(`${path}.env`)
           if (envText) {
             openedEnvContent = envText
@@ -918,36 +679,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         clearTabDirtyState()
 
         // The document's format version, read from its root and nowhere
-        // else. A document that declares nothing there — whether it
-        // predates the field or carries it on a collection — loads as
-        // the current version. Resolved BEFORE the checksum baseline
-        // below, so dropping the stale collection-level key (just after)
-        // is part of the "loaded" snapshot and never looks like an edit.
+        // else. Resolved BEFORE the checksum baseline below so it is part
+        // of the "loaded" snapshot and never looks like an edit.
         fileFormatVersionRef.current = resolveFileFormatVersion(content, logger)
 
         const collectionsWithIds = processAfterDeserialization(collections)
-        for (const root of collectionsWithIds) {
-          // Drop the version from the collection it used to sit on. In
-          // memory only — the file keeps it until the user saves, and an
-          // open is not a save. Without this the stray key would ride
-          // the save payload back to disk (unknown keys round-trip) and
-          // the document would declare its version twice.
-          //
-          // THE ORDER HERE IS LOAD-BEARING, not incidental: resolve the
-          // version, strip, wrap reactive, THEN take the checksum
-          // baseline. Taking the baseline before the strip makes a
-          // document that carries the old key come out DIRTY on open —
-          // the tree no longer matches the baseline it was measured
-          // against — which is exactly the "opening a project changes it"
-          // behaviour this area exists to prevent. Nothing tests this
-          // sequence; moving a line here is silent until a user sees a
-          // dirty dot on a project they only looked at.
-          stripLegacyFileFormatVersion(root)
-          // Rewrite legacy camelCase `body.type` spellings to the
-          // canonical kebab-case form (same BEFORE-reactive-wrap /
-          // BEFORE-checksum-baseline contract).
-          normalizeBodyTypes(root)
-        }
         // Requests can legally live at the root (see `useImport`'s
         // empty-file branch). Folders and env-folders go through
         // `makeReactiveFolder`; root-level requests go through
@@ -963,28 +699,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // → request register) gets the IPC channel first. Without
         // that, the URL resolver can race the bridge and serve a tab
         // before its env's variables have been published.
-
-        if (openedAsFolder) {
-          const registerAllItems = (items: FolderItem[]): void => {
-            for (const item of items) {
-              const itemChecksum = computeChecksum(JSON.parse(JSON.stringify(item)))
-              registerTabDirtyState(item.id, itemChecksum)
-
-              if (isAnyFolder(item)) {
-                registerAllItems((item as Folder).items)
-              }
-            }
-          }
-
-          for (const rootItem of reactiveItems) {
-            const rootChecksum = computeChecksum(JSON.parse(JSON.stringify(rootItem)))
-            registerTabDirtyState(rootItem.id, rootChecksum)
-            // Requests at root are leaves with no children to register.
-            if ('items' in rootItem) {
-              registerAllItems(rootItem.items)
-            }
-          }
-        }
 
         // Whole-file checksum baseline — still used by `hasContentChanged`
         // to skip redundant saves when nothing has been touched. Per-object
@@ -1050,11 +764,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
         // Hydrate the save-unit registry now that the env-context
         // pipeline has finished publishing its data. The `path` here
-        // is the freshly-known one — the closure's
-        // `currentFolderPath` / `filePath` still hold their previous
-        // render's values until React re-renders.
+        // is the freshly-known one — the closure's `filePath` still
+        // holds its previous render's value until React re-renders.
         if (path) {
-          const fmt = (state.currentFile.format as PersistenceFormat | undefined) ?? folderFormat
+          const fmt = (state.currentFile.format as PersistenceFormat | undefined) ?? 'yaml'
           await hydrateSaveUnitsFromTree(reactiveItems, { basePath: path, format: fmt })
         }
 
@@ -1063,8 +776,48 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         isLoadingRef.current = false
       })()
     },
-    [clearTabDirtyState, registerTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, folderFormat, buildDocument]
+    [clearTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, buildDocument]
   )
+
+  // Silent sidecar reload. `<project>.restorm.env` is read once at open
+  // and held in memory (SecretValue instances + save baseline + main-side
+  // env context), then REWRITTEN FROM MEMORY on save — an external edit
+  // would be invisible and overwritten. The main watcher signals it; the
+  // policy here is a SILENT re-apply (no prompt — unlike the project
+  // file, reloading secret values cannot discard structural in-app work).
+  useEffect(() => window.restorm?.secrets.onExternallyChanged(() => {
+    void (async () => {
+      const path = filePath
+      if (!path) return
+      const envText = (await window.restorm?.secrets.read(`${path}.env`)) ?? ''
+      if (envText === savedEnvBaselineRef.current) return
+      const parsed = parseEnvFileDetailed(envText)
+      if (parsed.duplicates.length > 0) {
+        logger.warn('[useFileManagement] Duplicate keys in externally-changed .restorm.env (last wins)', {
+          duplicates: parsed.duplicates
+        })
+      }
+      // In-place: the SecretValue instances on the live reactive tree get
+      // the fresh plaintext (an absent key blanks its value).
+      applyEnvFileSecretsToCollections({ collections: rootItems }, parsed.vars)
+      savedEnvBaselineRef.current = envText
+      // The in-place class-field mutation emits nothing — re-publish every
+      // environment so the main-side context (Handlebars resolution) sees
+      // the new values.
+      const republish = (env: Environment, parentFolderId: string, parentEnvironmentId?: string): void => {
+        emitEnvironmentUpdated(env, parentFolderId, parentEnvironmentId)
+        if (env.subEnvironments) {
+          for (const subEnv of env.subEnvironments) republish(subEnv, parentFolderId, env.id)
+        }
+      }
+      for (const rootItem of rootItems) {
+        if (isEnvironmentFolder(rootItem)) {
+          for (const env of rootItem.environments) republish(env, rootItem.id)
+        }
+      }
+      logger.info('[useFileManagement] Secrets sidecar reloaded after an external change')
+    })()
+  }) ?? undefined, [filePath, rootItems])
 
   // Handle file closed event
   const handleFileClosed = useCallback(() => {
@@ -1073,8 +826,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     // Back to the version a new document would be written at, so the
     // closed document's value cannot leak into the next one.
     fileFormatVersionRef.current = CURRENT_FILE_FORMAT_VERSION
-    setIsOpenedAsFolder(false)
-    setCurrentFolderPath(null)
     setWorkbenchTree({
       orientation: 'vertical',
       groups: []
@@ -1107,6 +858,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         const dataForChecksum = prepareForSerialization(buildDocument(rootItems))
         const currentChecksum = JSON.stringify(dataForChecksum)
         if (currentChecksum !== baseline) return
+        // The whole-file checksum is BLIND to secret plaintexts (toJSON
+        // strips them): a freshly typed secret value leaves the checksum
+        // at the baseline while the SIDECAR genuinely changed. Clearing
+        // the drafts here would kill the dirty transition the autosave is
+        // waiting on — and the .env write would never happen.
+        const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
+        const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+        if (envContent !== (savedEnvBaselineRef.current ?? '')) return
         await window.restorm?.file.clearDrafts()
       })()
     }, 200)
@@ -1139,23 +898,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   return {
     handleMenuNew,
     handleMenuOpen,
-    handleMenuOpenFolder,
     handleMenuSave,
     handleMenuSaveAll,
     handleMenuSaveUnit,
     handleMenuSaveAs,
     handleMenuClose,
     handleOpenRecentFile,
-    handleSaveWithOptions,
     handleFileOpened,
-    handleFileClosed,
-    isOpenedAsFolder,
-    setIsOpenedAsFolder,
-    folderFormat,
-    setFolderFormat,
-    currentFolderPath,
-    setCurrentFolderPath,
-    showSaveOptionsModal,
-    setShowSaveOptionsModal
+    handleFileClosed
   }
 }

@@ -45,13 +45,13 @@ import { stableImportId as generateId } from './stableImportId'
 // Smithy intermediate representation — shared by both parsers
 // ============================================================================
 
-export interface SmithyHttpTrait {
+interface SmithyHttpTrait {
   method: string
   uri: string
   code?: number
 }
 
-export interface SmithyTraits {
+interface SmithyTraits {
   http?: SmithyHttpTrait
   httpLabel?: boolean
   httpQuery?: string
@@ -63,27 +63,27 @@ export interface SmithyTraits {
   enumValue?: string | number
 }
 
-export interface SmithyMember {
+interface SmithyMember {
   name: string
   target: string
   traits: SmithyTraits
 }
 
-export interface SmithyStructureShape {
+interface SmithyStructureShape {
   kind: 'structure'
   name: string
   members: SmithyMember[]
   traits: SmithyTraits
 }
 
-export interface SmithyEnumShape {
+interface SmithyEnumShape {
   kind: 'enum' | 'intEnum'
   name: string
   members: { name: string; value?: string | number }[]
   traits: SmithyTraits
 }
 
-export interface SmithyOperationShape {
+interface SmithyOperationShape {
   kind: 'operation'
   name: string
   input?: string
@@ -92,7 +92,7 @@ export interface SmithyOperationShape {
   traits: SmithyTraits
 }
 
-export interface SmithyServiceShape {
+interface SmithyServiceShape {
   kind: 'service'
   name: string
   version?: string
@@ -101,7 +101,7 @@ export interface SmithyServiceShape {
   traits: SmithyTraits
 }
 
-export interface SmithyResourceShape {
+interface SmithyResourceShape {
   kind: 'resource'
   name: string
   /** Lifecycle refs (create/read/update/delete/list) + the explicit
@@ -111,14 +111,14 @@ export interface SmithyResourceShape {
   resources: string[]
 }
 
-export type SmithyShape =
+type SmithyShape =
   | SmithyStructureShape
   | SmithyEnumShape
   | SmithyOperationShape
   | SmithyServiceShape
   | SmithyResourceShape
 
-export interface SmithyModel {
+interface SmithyModel {
   namespace?: string
   shapes: Map<string, SmithyShape>
 }
@@ -187,7 +187,7 @@ function extractTraitsFromJson(raw: Record<string, unknown> | undefined): Smithy
 }
 
 /** Parse the JSON AST produced by `smithy build` (`smithy/1.0` namespace). */
-export function parseSmithyJsonAst(jsonText: string): SmithyModel {
+function parseSmithyJsonAst(jsonText: string): SmithyModel {
   const ast = JSON.parse(jsonText) as { smithy: string; shapes?: Record<string, SmithyAstShape> }
   const shapes = new Map<string, SmithyShape>()
   let namespace: string | undefined
@@ -443,7 +443,7 @@ function registerShape(shapes: Map<string, SmithyShape>, keyword: string, name: 
  * inside string literals aren't supported (a `//` anywhere ends the line) —
  * acceptable for the URIs / trait values this importer needs to read.
  */
-export function parseSmithyIdl(idl: string): SmithyModel {
+function parseSmithyIdl(idl: string): SmithyModel {
   const shapes = new Map<string, SmithyShape>()
   let namespace: string | undefined
   const lines = idl.split(/\r?\n/)
@@ -677,7 +677,7 @@ export interface SmithyImportOptions {
 }
 
 /** Build an `EnvironmentFolder` from an already-parsed `SmithyModel`. */
-export function importSmithyModel(model: SmithyModel, options: SmithyImportOptions = {}): EnvironmentFolder {
+function importSmithyModel(model: SmithyModel, options: SmithyImportOptions = {}): EnvironmentFolder {
   const service = findServiceShape(model)
   const name = options.name ?? service?.name ?? model.namespace ?? 'Smithy API'
   const baseUrl = options.baseUrl ?? '{{baseUrl}}'

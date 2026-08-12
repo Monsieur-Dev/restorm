@@ -1,9 +1,9 @@
 - message: 🔵 [<time>] ▶ Random
 - message: ⚪ [<time>] start random
   data:
-    op: int
-    min: 1
     max: 100
+    min: 1
+    op: int
     seed: "42"
 - message: ⚪ [<time>] start setVariable
   data:
@@ -15,9 +15,9 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start random
   data:
-    op: float
-    min: 0
     max: 1
+    min: 0
+    op: float
     seed: "7"
     in: true
 - message: ⚪ [<time>] start setVariable
@@ -31,8 +31,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start random
   data:
-    op: string
     length: 12
+    op: string
     seed: abc
     in: true
 - message: ⚪ [<time>] start setVariable
@@ -54,12 +54,12 @@
     result: true
 - message: ⚪ [<time>] start random
   data:
-    op: pick
-    seed: "3"
     items:
       - rock
       - paper
       - scissors
+    op: pick
+    seed: "3"
     in: true
 - message: ⚪ [<time>] done random
   data:
@@ -67,17 +67,17 @@
 - message: ⚪ [<time>] start for
   data:
     from: 1
-    to: 10
     step: 1
+    to: 10
     in: true
 - message: ⚪ [<time>] done for
 - message: "⚪ [<time>] forEach start: 9 items, batchSize=1, opening first 1"
 - message: ⚪ [<time>] forEach open item 0 (0/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 1
 - message: ⚪ [<time>] done random
   data:
@@ -95,9 +95,9 @@
 - message: ⚪ [<time>] forEach open item 1 (1/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 2
 - message: ⚪ [<time>] done random
   data:
@@ -115,9 +115,9 @@
 - message: ⚪ [<time>] forEach open item 2 (2/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 3
 - message: ⚪ [<time>] done random
   data:
@@ -135,9 +135,9 @@
 - message: ⚪ [<time>] forEach open item 3 (3/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 4
 - message: ⚪ [<time>] done random
   data:
@@ -155,9 +155,9 @@
 - message: ⚪ [<time>] forEach open item 4 (4/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 5
 - message: ⚪ [<time>] done random
   data:
@@ -175,9 +175,9 @@
 - message: ⚪ [<time>] forEach open item 5 (5/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 6
 - message: ⚪ [<time>] done random
   data:
@@ -195,9 +195,9 @@
 - message: ⚪ [<time>] forEach open item 6 (6/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 7
 - message: ⚪ [<time>] done random
   data:
@@ -215,9 +215,9 @@
 - message: ⚪ [<time>] forEach open item 7 (7/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 8
 - message: ⚪ [<time>] done random
   data:
@@ -235,9 +235,9 @@
 - message: ⚪ [<time>] forEach open item 8 (8/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 9
 - message: ⚪ [<time>] done random
   data:
@@ -255,25 +255,25 @@
 - message: ⚪ [<time>] start for
   data:
     from: 1
-    to: 10
     step: 1
+    to: 10
     in: 9
 - message: ⚪ [<time>] done for
 - message: "⚪ [<time>] forEach start: 9 items, batchSize=1, opening first 1"
 - message: ⚪ [<time>] forEach open item 0 (0/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 1
 - message: ⚪ [<time>] done random
   data:
     result: 20
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 20
 - message: "🟠 [<time>] Seeded random value: 20"
   data: 20
@@ -284,17 +284,17 @@
 - message: ⚪ [<time>] forEach open item 1 (1/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 2
 - message: ⚪ [<time>] done random
   data:
     result: 99
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 99
 - message: "🟠 [<time>] Seeded random value: 99"
   data: 99
@@ -305,17 +305,17 @@
 - message: ⚪ [<time>] forEach open item 2 (2/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 3
 - message: ⚪ [<time>] done random
   data:
     result: 61
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 61
 - message: "🟠 [<time>] Seeded random value: 61"
   data: 61
@@ -326,17 +326,17 @@
 - message: ⚪ [<time>] forEach open item 3 (3/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 4
 - message: ⚪ [<time>] done random
   data:
     result: 48
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 48
 - message: "🟠 [<time>] Seeded random value: 48"
   data: 48
@@ -347,17 +347,17 @@
 - message: ⚪ [<time>] forEach open item 4 (4/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 5
 - message: ⚪ [<time>] done random
   data:
     result: 78
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 78
 - message: "🟠 [<time>] Seeded random value: 78"
   data: 78
@@ -368,17 +368,17 @@
 - message: ⚪ [<time>] forEach open item 5 (5/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 6
 - message: ⚪ [<time>] done random
   data:
     result: 39
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 39
 - message: "🟠 [<time>] Seeded random value: 39"
   data: 39
@@ -389,17 +389,17 @@
 - message: ⚪ [<time>] forEach open item 6 (6/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 7
 - message: ⚪ [<time>] done random
   data:
     result: 42
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 42
 - message: "🟠 [<time>] Seeded random value: 42"
   data: 42
@@ -410,17 +410,17 @@
 - message: ⚪ [<time>] forEach open item 7 (7/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 8
 - message: ⚪ [<time>] done random
   data:
     result: 13
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 13
 - message: "🟠 [<time>] Seeded random value: 13"
   data: 13
@@ -431,17 +431,17 @@
 - message: ⚪ [<time>] forEach open item 8 (8/9 done, batch≤1)
 - message: ⚪ [<time>] start random
   data:
-    seed: "5"
-    min: 0
     max: 100
+    min: 0
+    seed: "5"
     in: 9
 - message: ⚪ [<time>] done random
   data:
     result: 93
 - message: ⚪ [<time>] start log
   data:
-    message: "Seeded random value: {{.}}"
     level: warn
+    message: "Seeded random value: {{.}}"
     data: 93
 - message: "🟠 [<time>] Seeded random value: 93"
   data: 93

@@ -2,6 +2,9 @@ import { createWriteStream, type WriteStream } from 'fs'
 import { scenarioEngine } from '../scenarioEngine/engine'
 import type { RunLogEntry } from '../scenarioEngine/types'
 import { resolveScenarioTarget } from './resolveScenario'
+import { collectionStore } from '../services/CollectionStore'
+import { findOrphanScenarioEdges, describeOrphanScenarioEdge } from '../../shared/scenarioValidation'
+import type { Scenario } from '../../shared/types/collections'
 import { serializeRunLogEntries, filterUserLogs } from '../../shared/scenarioRunLog/serializeRunLog'
 import type { CliRunOptions } from './args'
 
@@ -22,6 +25,21 @@ export async function runScenarioHeadless(cliRun: CliRunOptions): Promise<number
   if ('error' in resolved) {
     process.stderr.write(`${resolved.error}\n`)
     return 2
+  }
+
+  // Refuse a scenario carrying an edge wired to a port its node no longer has:
+  // the scheduler would register the stale port as a required input nothing can
+  // satisfy, so the node silently never fires and the run still reports
+  // `completed`. The editor's load-time sanitizer never runs headless, so this
+  // is the only gate that catches it here.
+  const scenario = collectionStore.findById(resolved.id) as unknown as Scenario | null
+  if (scenario) {
+    const orphans = findOrphanScenarioEdges(scenario)
+    if (orphans.length > 0) {
+      process.stderr.write(`cannot run scenario '${resolved.id}': ${orphans.length} orphan edge(s) wired to a port that no longer exists:\n`)
+      for (const orphan of orphans) process.stderr.write(`  ${describeOrphanScenarioEdge(orphan)}\n`)
+      return 2
+    }
   }
 
   let out: WriteStream | null = null

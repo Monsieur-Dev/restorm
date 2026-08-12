@@ -147,24 +147,4 @@ describe('FileService — reporting the outcome of a write', () => {
     expect(saved).toBe(false)
     expect(outcomes()).toEqual([])
   })
-
-  it('reports a batch of units by its first failure, never as a success', async () => {
-    // One unwritable unit among writable ones is still a project that is
-    // not on disk; letting the later successes speak would retract the
-    // notice for a failure the user never saw.
-    const good = join(dir, 'unit-ok.json')
-    const bad = join(dir, 'unit-locked.json')
-    writeFileSync(bad, '{}', 'utf-8')
-    await fs.chmod(bad, 0o444)
-
-    const results = await service.saveUnitsBatch([
-      { runtimeId: 'locked', content: { a: 1 }, absolutePath: bad, format: 'json' },
-      { runtimeId: 'ok', content: { a: 1 }, absolutePath: good, format: 'json' }
-    ])
-
-    expect(results.map((r) => r.success)).toEqual([false, true])
-    expect(outcomes()).toHaveLength(1)
-    expect(outcomes()[0]?.channel).toBe('file:save-failed')
-    expect(outcomes()[0]?.payload).toMatchObject({ path: bad, reason: 'read-only-file' })
-  })
 })

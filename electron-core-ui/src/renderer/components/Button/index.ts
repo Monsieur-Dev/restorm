@@ -1,7 +1,7 @@
-export { Button, default as ButtonComponent } from './Button'
-export { ButtonWithDescription, default as ButtonWithDescriptionComponent } from './ButtonWithDescription'
-export { ButtonWithDropdown, default as ButtonWithDropdownComponent } from './ButtonWithDropdown'
-export { ButtonWithIcon, default as ButtonWithIconComponent } from './ButtonWithIcon'
+export { Button } from './Button'
+export { ButtonWithDescription } from './ButtonWithDescription'
+export { ButtonWithDropdown } from './ButtonWithDropdown'
+export { ButtonWithIcon } from './ButtonWithIcon'
 export { defaultButtonStyles } from './types'
 export type {
   IButtonOptions,

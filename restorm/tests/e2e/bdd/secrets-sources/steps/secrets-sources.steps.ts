@@ -1,5 +1,6 @@
+import { materializeSample } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
-import { copyFileSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import { parse as parseYaml } from 'yaml'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
@@ -65,13 +66,13 @@ async function expandRowIfCollapsed(currentPage: Page, name: string): Promise<vo
   if (expanded !== 'true') await row.click()
 }
 
-Given('I open the secrets-sources demo collection', async ({ launchApp }) => {
+Given('I open the secrets-sources demo collection', async ({ launchApp, services }) => {
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
 
   const workingCopy = join(SECRETS_SOURCES_TEMP_DIR, 'secrets-sources-demo.restorm')
-  copyFileSync(SECRETS_SAMPLE, workingCopy)
+  materializeSample(SECRETS_SAMPLE, workingCopy, services)
   workingCopyPath = workingCopy
 
   await configureNextOpenDialogForE2E(requireApp(), { kind: 'openFile', path: workingCopy })

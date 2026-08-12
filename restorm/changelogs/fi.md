@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: AppImage käynnistyy nyt luotettavasti ja asentaa päivitykset jumittumatta, myös jakeluissa, joissa on vahvistettu hiekkalaatikko.
-- macOS: Apple Siliconin rinnalla on nyt saatavilla myös Intel-versiot.
+**Restorm 1.0 — local-first-API-asiakas on julkaistu.**
 
-## v0.1.17
+Restorm on nopea, offline-first-työpöytäasiakas API-rajapintojen testaamiseen ja ajamiseen kaikissa keskeisissä protokollissa.
 
-- Julkaisutiedot näytetään nyt omalla kielelläsi.
-- Työpöytäsovellukset Linuxille, Windowsille ja macOS:lle: asennusohjelma näyttää nyt Restormin kuvakkeen, nimen ja tiedot, ja sovellus avautuu teemasi mukaisesti.
+- **Protokollat**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Skenaariot**: ketjuta pyyntöjä visuaalisesti, haaroita/toista, poimi ja käytä arvoja uudelleen, aja ilman käyttöliittymää CI:ssä.
+- **Ympäristöt ja muuttujat**: `{{handlebars}}` kaikkialla, tyypitetyt salaisuudet, kansiokohtaiset ympäristöt.
+- **Tuonti/Vienti**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, koodin vienti.
+- **Git-natiiviset projektit**: `.restorm`-projektisi on tavallinen tiedosto — versioi, vertaile ja ratkaise ristiriidat sovelluksessa.
+- **Local-first ja yksityinen**: kaikki toimii omalla koneellasi; lähtevä palomuuri valvoo jokaista ulkoista kutsua.
+- **Alustariippumaton**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Hiljainen taustapäivitys: Restorm tarkistaa päivitykset käynnistyksessä ja säännöllisesti, lataa ne taustalla ja asentaa ne seuraavalla uudelleenkäynnistyksellä. Jokaisen päivityksen jälkeen näytetään „Mitä uutta“ -huomautus.
-- Manuaalinen „Tarkista päivitykset“ -painike ja automaattisen päivityksen kytkin Asetuksissa.
+Ilmainen Community-versio, sekä Pro ja Enterprise tiimeille.

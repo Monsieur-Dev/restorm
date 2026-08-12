@@ -94,5 +94,3 @@ export const ScenarioTruncatedText: React.FC<ScenarioTruncatedTextProps> = ({ te
     </span>
   )
 }
-
-export default ScenarioTruncatedText

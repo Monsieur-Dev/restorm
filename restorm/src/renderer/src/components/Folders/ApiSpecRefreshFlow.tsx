@@ -137,6 +137,7 @@ export const ApiSpecRefreshFlow: React.FC<ApiSpecRefreshFlowProps> = ({
       title={t('folderView.home.apiUpdate.refreshing')}
       size="dialog"
       data-testid={`${testIdPrefix}-modal`}
+      enterActionTestId={`${testIdPrefix}-ok`}
     >
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {phase === 'fetching' && (

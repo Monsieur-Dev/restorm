@@ -306,7 +306,9 @@
 	outline: none;
 }
 
-/* Small toolbar-style button (20x20) */
+/* Icon-only square button (28x28). Sized for a codicon ALONE — a label
+   placed inside is clipped to 28px and ellipsised, so pair `line` with a
+   caption only alongside `fullWidth`, which releases the fixed width. */
 .text-button.line-button {
 	width: 28px;
 	min-width: 28px;

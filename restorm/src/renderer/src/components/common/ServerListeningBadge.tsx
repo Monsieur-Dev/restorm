@@ -24,5 +24,3 @@ export const ServerListeningBadge: React.FC<ServerListeningBadgeProps> = ({ requ
     </BeamWrap>
   )
 }
-
-export default ServerListeningBadge

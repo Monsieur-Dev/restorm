@@ -1,13 +1,13 @@
 - message: 🔵 [<time>] ▶ JSON-RPC
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: JSON-RPC Echo
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8095/rpc
+        url: http://localhost:<port>/rpc
         method: POST
         headers:
           Content-Type: application/json
@@ -20,14 +20,14 @@
         success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: JSON-RPC Batch
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8095/rpc
+        url: http://localhost:<port>/rpc
         method: POST
         headers: {}
       response:

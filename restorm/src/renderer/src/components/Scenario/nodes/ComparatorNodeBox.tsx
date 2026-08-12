@@ -66,5 +66,3 @@ export const ComparatorNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
-
-export default ComparatorNodeBox

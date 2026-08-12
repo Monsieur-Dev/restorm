@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "No auth",
       "popoverLabel": "Authentication route",
+      "openRoute": "Open the authentication route",
       "unnamed": "Unnamed"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "New",
     "import": "Import",
     "open": "Open",
-    "openFolder": "Open Folder",
     "recentFiles": "Recent Files",
     "favorites": "Favorites",
     "close": "Close",
@@ -228,36 +228,24 @@
     "saveAll": "Save All",
     "saveAs": "Save As",
     "exit": "Exit",
-    "selection": "Selection",
-    "tools": "Tools",
-    "findInCollection": "Find in Collection",
-    "addRequest": "Add Request",
-    "addRequestHttp": "HTTP Request",
-    "addRequestGraphql": "GraphQL Request",
-    "addRequestGrpc": "gRPC Request",
-    "addRequestSoap": "SOAP Request",
-    "addRequestOdata": "OData Request",
-    "addRequestWebsocket": "WebSocket Request",
-    "addFolder": "Add Folder",
-    "addEnvironmentFolder": "Add Environment Folder",
-    "addVariable": "Add Variable",
-    "addTag": "Add Tag",
-    "expandAllFolders": "Expand All Folders",
-    "collapseAllFolders": "Collapse All Folders",
-    "sendActiveRequest": "Send Request",
-    "cancelActiveRequest": "Cancel Request",
-    "generateCodeSnippet": "Generate Code Snippet",
-    "copyAsCurl": "Copy as cURL",
-    "exportOpenApi": "Export to OpenAPI",
-    "clearAuthCache": "Clear Authentication Cache",
-    "openLogsFolder": "Open Logs Folder",
     "mcpLogs": "MCP logs",
+    "consoleHttp": "HTTP console",
     "git": "Git",
     "gitPush": "Push",
     "gitPull": "Pull",
     "gitRefresh": "Refresh",
     "gitHistory": "History",
-    "gitResetToServer": "Reset to the server version"
+    "gitResetToServer": "Reset to the server version",
+    "scenario": "Scenario",
+    "create": "Create",
+    "request": "Request",
+    "server": "Server",
+    "runSelected": "Run",
+    "cancelSelected": "Cancel",
+    "clone": "Clone",
+    "delete": "Delete",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites"
   },
   "sidebar": {
     "addRequest": "Add request",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste"
     },
     "deleteConfirm": {
       "title": "Confirm deletion",
@@ -363,7 +354,7 @@
       "docs": "Docs",
       "environments": "Environments",
       "notes": "Notes",
-      "customValues": "Custom variables"
+      "customValues": "Custom enumerations"
     },
     "home": {
       "configureEnvs": "Configure environments",
@@ -401,7 +392,7 @@
       "addEntry": "Add a value",
       "label": "Label",
       "value": "Value",
-      "selectList": "Select a list"
+      "selectList": "Define reusable value lists for your variables: you pick a readable label, the request sends the associated value. Select or create an enumeration to get started."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Follow redirects",
-    "timeoutLabel": "Timeout (ms)"
+    "timeoutLabel": "Timeout (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Copy the resolved URL",
+      "copied": "Copied!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Disconnect",
     "startListening": "Start listening",
     "stopListening": "Stop listening",
+    "listenFailed": "Server failed to start",
     "routePlaceholder": "Route (optional)",
     "clientsConnected": "{{count}} client(s) connected",
     "notListening": "Not listening"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Open a collection from disk",
     "landmarkLabel": "Welcome"
   },
-  "save": {
-    "title": "Save Options",
-    "mode": {
-      "label": "Save Mode",
-      "file": "Single File",
-      "folder": "Folder Structure",
-      "fileDescription": "Save everything in a single file",
-      "folderDescription": "Save as a folder structure with separate files"
-    },
-    "format": {
-      "label": "Format",
-      "yamlDescription": "Human readable",
-      "jsonDescription": "Standard format",
-      "json5Description": "JSON + comments"
-    },
-    "preview": {
-      "label": "Structure Preview",
-      "noDocumentation": "No parsed documentation for this source."
-    }
-  },
   "common": {
     "cancel": "Cancel",
     "save": "Save",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "The spec could not be re-imported from its source.",
       "emptySpec": "The spec fetched from {{url}} declares no {{format}} operation. Applying it would empty this folder, so the update was refused.",
       "formatNotDetected": "The format of this source was not recognised.",
-      "unsupportedFormat": "No importer handles the {{format}} format."
+      "unsupportedFormat": "No importer handles the {{format}} format.",
+      "projectFormatTooNew": "This project file uses format version {{found}}, but this version of Restorm only understands version {{current}}. Update Restorm to import it.",
+      "projectFormatMissing": "This file declares no Restorm format version, so it is not a Restorm project file."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Paste an API Blueprint (.apib) document — Restorm parses every resource group and transition into a folder of requests, one per documented method and response pair.",
         "trademark": "API Blueprint is a specification originally created by Apiary."
+      },
+      "restorm": {
+        "description": "Merge another Restorm project into the one you have open — every imported folder, request, environment and scenario arrives under a wrapping folder, with fresh identities so nothing collides, not even importing a project into itself."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
       "close": "Close"
+    },
+    "sections": {
+      "parameters": "Parameters",
+      "responses": "Responses",
+      "models": "Models",
+      "enums": "Enums",
+      "polymorphism": "Polymorphism",
+      "overview": "Overview",
+      "operations": "Operations"
+    },
+    "table": {
+      "in": "In",
+      "name": "Name",
+      "type": "Type",
+      "required": "Req.",
+      "operation": "Operation",
+      "description": "Description",
+      "example": "Example",
+      "constraints": "Constraints"
+    },
+    "params": {
+      "empty": "No non-body parameters declared for the filtered routes."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schema",
+      "headers": "Headers",
+      "empty": "No responses declared for the filtered routes."
+    },
+    "route": {
+      "requestBody": "Request body",
+      "responseBody": "Response body",
+      "security": "Security",
+      "externalDocs": "External docs",
+      "examplePayload": "Example payload",
+      "operationId": "operationId",
+      "addRequest": "+ Add a request"
+    },
+    "apiInfo": {
+      "version": "Version",
+      "sourceFormat": "Source format",
+      "from": "from",
+      "server": "Server",
+      "contact": "Contact",
+      "license": "License",
+      "termsOfService": "Terms of service",
+      "externalDocs": "External docs",
+      "tagReferences": "Tag references"
+    },
+    "sidebar": {
+      "outline": "Documentation outline"
+    },
+    "legend": {
+      "requiredProperty": "required property",
+      "optionalProperty": "optional property",
+      "nullableValue": "nullable value",
+      "readOnly": "read-only (server-set)",
+      "deprecatedBadge": "deprecated",
+      "deprecatedDesc": "declared deprecated in the source spec",
+      "removedBadge": "removed",
+      "removedDesc": "gone from the most recent re-import",
+      "requiredSingleRef": "required single ref",
+      "optionalSingleRef": "optional single ref",
+      "requiredArrayRef": "required array ref",
+      "optionalArrayRef": "optional array ref"
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Data formats",
       "encoding": "Encoding",
       "time": "Timing",
-      "algorithmie": "Algorithms",
-      "ux": "UX"
+      "algorithmie": "Algorithms"
     },
     "palette": {
       "arrangeActions": "Re-arrange actions"
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL preview (pre-resolution)",
-    "versionV2NotYet": "v2 (execution not yet supported)",
-    "versionV3NotYet": "v3 (execution not yet supported)",
     "operationKindEntitySet": "Entity set (GET)",
     "operationKindFunction": "Function (GET with inlined parameters)",
     "operationKindAction": "Action (POST with JSON body)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Stop listening",
       "notListening": "Not listening",
       "served": "Listening — {{count}} request(s) served",
-      "listenFailed": "Failed to start the mock server"
+      "listenFailed": "Failed to start the mock server",
+      "portInUse": "Port {{port}} is already in use by another application. Stop it or pick a different port, then start the server again."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Configuration name",
     "saveButton": "Save",
+    "updateButton": "Update with current values",
     "storageTarget": {
       "label": "Save to project file (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Load configuration",
       "message": "Do you want to load the configuration \"{{name}}\"? Your current unsaved configuration will be lost."
+    },
+    "updateConfirm": {
+      "title": "Update configuration",
+      "message": "Do you want to replace the configuration \"{{name}}\" with the current values?"
     },
     "deleteConfirm": {
       "title": "Delete configuration",
@@ -2632,6 +2680,10 @@
       "title": "Project created with a newer version",
       "message": "This file was created with a newer version of Restorm than the one you are running. Please update Restorm to open it.",
       "versions": "File format {{found}}; this version supports up to {{current}}."
+    },
+    "notARestormFile": {
+      "title": "This is not a Restorm file",
+      "message": "This file declares no Restorm file format. It was not written by Restorm, or it was edited by hand, so it cannot be opened."
     }
   }
 }

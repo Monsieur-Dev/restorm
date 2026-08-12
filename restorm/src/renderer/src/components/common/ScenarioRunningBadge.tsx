@@ -67,5 +67,3 @@ export const ScenarioRunningBadge: React.FC<ScenarioRunningBadgeProps> = ({ scen
     </span>
   )
 }
-
-export default ScenarioRunningBadge

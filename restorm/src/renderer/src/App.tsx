@@ -39,6 +39,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
+import { QUICK_CONFIG_PROJECT_WRITE_EVENT } from './services/requestQuickConfigStore'
 import { preloadScenarioViewports } from './services/scenarioViewportStore'
 import { preloadScenarioBreakpoints } from './services/scenarioBreakpointStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
@@ -125,7 +126,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
-import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting, LIST_VIEW_DRAG_MIME } from 'electron-core-ui/renderer'
+import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting, LIST_VIEW_DRAG_MIME, LIST_VIEW_MULTI_DRAG_MIME } from 'electron-core-ui/renderer'
 import type { SplitDirection } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab } from '../../shared/types/editor'
@@ -171,11 +172,11 @@ import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { suggestRunTarget } from '../../shared/scenarioRunTarget'
 import { ScenarioCliInfoProvider } from './contexts/scenarioRunTargetContext'
-import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { IncompatibleProjectModal } from './components/Modals/IncompatibleProjectModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
-import { removeItemFromTree } from './utils/treeManipulation'
+import { collectSubtreeScenarioUsages, type ContainerDeleteAffectedRequest } from './services/containerDeleteUsages'
+import { removeItemFromTree, insertItemIntoTree, deepCloneItem } from './utils/treeManipulation'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { allLeafKeys } from './components/Modals/importSelectionHelpers'
 import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
@@ -196,10 +197,20 @@ import {
 } from './utils/treeSearch'
 import { StatusbarVersionPlan } from './components/MainView/StatusbarVersionPlan'
 import { findItemById, findItemWithParent } from './utils/treeSearch'
+import { copySidebarItems, readSidebarClipboard, hasSidebarClipboard } from './services/sidebarClipboard'
+import { useScenarioMenuPalette } from './services/scenarioMenuPaletteStore'
+import { envSecretsDigestOf } from './services/envSecretsDigest'
+import { useServerMenu } from './services/serverMenuStore'
+import { buildAddSubmenu } from './components/MainView/Sidebar/contextMenuBuilder'
+import { clickSendButtonWhenReady } from './hooks/useMcpRunRequest'
+import { processAfterDeserialization } from './utils/serialization'
+import { makeReactiveFolderItem } from './types/reactive'
+import { emitClonedSubtreeCreated } from './hooks/useItemOperations'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
 import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
 import { useItemOperations } from './hooks/useItemOperations'
-import type { AddChildKind } from './components/MainView/Sidebar/contextMenuBuilder'
+import type { AddChildKind, SidebarContextMenuItem } from './components/MainView/Sidebar/contextMenuBuilder'
+import { buildSelectionContextMenu } from './components/MainView/Sidebar/contextMenuBuilder'
 import { useRequestCreationApi } from './hooks/useRequestCreationApi'
 import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
@@ -207,6 +218,8 @@ import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
 import { useFirewallPromptToasts, useGitCliMissingToast, useGitPullAvailableToast, PushModal, AVAILABLE_LANGUAGES } from 'electron-core-ui/renderer'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
+import { useAppIconMenu } from './hooks/useAppIconMenu'
+import { useCapability } from './hooks/useCapability'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
   isFavorite as favoritesStoreIsFavorite,
@@ -234,6 +247,7 @@ import {
   isScenario,
   isEnvironmentFolder,
   isAnyFolder,
+  isFolder,
   isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
@@ -303,6 +317,56 @@ function resolveActiveTabId(groups: GroupNode[], focusedGroupId: string | null):
   }
   visit(groups)
   return focusedActive ?? firstActive
+}
+
+/**
+ * Insert clipboard POJOs into the live tree. A CONTAINER target receives the
+ * items at its end; a leaf target receives them as siblings right after
+ * itself; no target appends at the root. Fresh runtime ids are REGENERATED
+ * for the whole pasted subtree — two items sharing an id would corrupt
+ * selection, favorites and the event pipeline. Mutates `rootItems` in place;
+ * the caller re-sets the state array to commit.
+ */
+function pasteClipboardPojos(rootItems: FolderItem[], targetId: string | null, pojos: readonly unknown[]): void {
+  const target = targetId ? findItemById(rootItems, targetId) : null
+  for (const pojo of pojos) {
+    // Fresh-id copy FIRST (deepCloneItem is a plain JSON round-trip +
+    // id-reassign), THEN ValueType rehydration — the other order would
+    // flatten the live class instances right back to inert POJOs and a
+    // pasted ExpressionValue would never substitute.
+    const cloned = deepCloneItem(JSON.parse(JSON.stringify(pojo)) as FolderItem)
+    const fresh = processAfterDeserialization<FolderItem>(cloned)
+    fresh.name = (pojo as { name?: string }).name ?? fresh.name
+    let inserted: boolean
+    if (target && (isAnyFolder(target) || isScenario(target))) {
+      inserted = insertItemIntoTree(rootItems, fresh, target.id, 'into')
+    } else if (target) {
+      inserted = insertItemIntoTree(rootItems, fresh, target.id, 'after')
+      if (!inserted) {
+        // A root-level leaf target has no parent for the sibling splice —
+        // land in the root list right after it, like cloneItemInTree does.
+        const { index } = findItemWithParent(rootItems, target.id)
+        if (index >= 0) {
+          rootItems.splice(index + 1, 0, fresh)
+          inserted = true
+        }
+      }
+    } else {
+      rootItems.push(fresh)
+      inserted = true
+    }
+    if (!inserted) continue
+    // Re-derive the ACTUAL landing parent — the 'into' path silently falls
+    // back to a sibling insert when the target can't contain the item.
+    const { parent } = findItemWithParent(rootItems, fresh.id)
+    const parentIdForEvents = parent?.id
+    const reactive = makeReactiveFolderItem(fresh, parentIdForEvents)
+    // Swap the inserted plain item for its reactive wrapper in place.
+    const siblings = parent ? ((parent as { items?: FolderItem[] }).items ?? []) : rootItems
+    const at = siblings.findIndex((i) => i.id === fresh.id)
+    if (at >= 0) siblings[at] = reactive
+    emitClonedSubtreeCreated(reactive, parentIdForEvents)
+  }
 }
 
 const App: React.FC = () => {
@@ -405,9 +469,11 @@ const App: React.FC = () => {
   useFirewallPromptToasts()
 
   // One-time "git isn't installed" notice — GitService probes the CLI
-  // lazily on the first repo check and fires this at most once per
-  // process lifetime.
-  useGitCliMissingToast()
+  // lazily on the first repo check (and only inside an actual git repo) and
+  // fires this at most once per process lifetime. Gated on the git
+  // entitlement so a user who can't use git anyway (Community) isn't nagged
+  // to install it — the greyed git surfaces already carry the upsell.
+  useGitCliMissingToast(useCapability('git.client'))
 
   const handleMenuExit = useCallback(() => {
     void window.api.closeWindow()
@@ -765,6 +831,10 @@ const App: React.FC = () => {
 
   // Selected item in the sidebar
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+  // Full sidebar multi-selection (visual order). `selectedItemId` stays the
+  // active anchor — single-selection consumers (menu Édition labels, paste
+  // target, add-child) keep reading it.
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
 
   // Focused group ID in the workbench
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
@@ -1149,31 +1219,29 @@ const App: React.FC = () => {
   const {
     handleMenuNew,
     handleMenuOpen,
-    handleMenuOpenFolder,
     handleMenuSaveAll,
     handleMenuSaveUnit,
     handleMenuSaveAs,
     handleMenuClose,
     handleOpenRecentFile,
-    handleSaveWithOptions,
     handleFileOpened,
-    handleFileClosed,
-    showSaveOptionsModal,
-    setShowSaveOptionsModal,
-    isOpenedAsFolder: _isOpenedAsFolder,
-    setIsOpenedAsFolder: _setIsOpenedAsFolder,
-    folderFormat: _folderFormat,
-    setFolderFormat: _setFolderFormat,
-    currentFolderPath,
-    setCurrentFolderPath: _setCurrentFolderPath
+    handleFileClosed
   } = useFileManagement({
     rootItems,
     setRootItems: setRootItemsWithPullReload,
     setWorkbenchTree,
     clearTabDirtyState,
-    registerTabDirtyState,
     markAllTabsSaved,
     t
+  })
+
+  // Bridge the OS application-icon menu (macOS Dock) to the app: publish its
+  // translated labels to main, and run any action it forwards through the same
+  // guarded new / open-recent commands the in-app menus use (so the
+  // unsaved-work confirmation fires before the current project is replaced).
+  useAppIconMenu({
+    onNewFile: () => { navigationService.clearHistory(); void handleMenuNew() },
+    onOpenFile: (path: string) => { void handleOpenRecentFile(path) }
   })
 
   // Import modal state
@@ -1518,9 +1586,53 @@ const App: React.FC = () => {
     usages: RequestScenarioDeleteUsage[]
   }>({ isOpen: false, requestId: '', requestName: '', usages: [] })
 
+  // A container deletion held back while the scenario-referenced requests of
+  // its subtree are resolved ONE BY ONE through the same dialog (usages from
+  // scenarios inside the deleted subtree don't count — deleting caller and
+  // callee together needs no prompt). The container delete executes only
+  // once the queue is exhausted; cancelling the dialog aborts it.
+  const [containerDelete, setContainerDelete] = useState<{
+    containerId: string
+    queue: ContainerDeleteAffectedRequest[]
+  } | null>(null)
+  // Forward ref: the executor is declared further down (it needs
+  // `confirmDeleteWithId` and the autosave nudge), but the queue advance
+  // lives next to the modal handlers above it.
+  const executeDeleteRef = useRef<(itemId: string) => void>(() => undefined)
+
+  // Remaining ids of a GROUP delete (multi-selection). Processed one by one
+  // so each item gets the same scenario-usage guards as a single delete; the
+  // dialog resolutions resume the queue through this forward ref.
+  const groupDeleteQueueRef = useRef<string[]>([])
+  const processGroupDeleteQueueRef = useRef<() => void>(() => undefined)
+
+  // Advance the pending container-delete queue: the next affected request
+  // gets the dialog; an exhausted queue executes the held-back deletion.
+  const advanceContainerDeleteQueue = useCallback(() => {
+    if (!containerDelete) {
+      setScenarioDelete((p) => ({ ...p, isOpen: false }))
+      // A direct-request dialog just resolved — continue a pending group.
+      processGroupDeleteQueueRef.current()
+      return
+    }
+    const [next, ...rest] = containerDelete.queue
+    if (next) {
+      setContainerDelete({ containerId: containerDelete.containerId, queue: rest })
+      setScenarioDelete({ isOpen: true, requestId: next.requestId, requestName: next.requestName, usages: next.usages })
+    } else {
+      setContainerDelete(null)
+      setScenarioDelete((p) => ({ ...p, isOpen: false }))
+      executeDeleteRef.current(containerDelete.containerId)
+      // The held-back container is gone — continue a pending group.
+      processGroupDeleteQueueRef.current()
+    }
+  }, [containerDelete])
+
   // Use custom hooks for various concerns
   const {
     handleItemDrop,
+    canDropSelection,
+    handleEmptyAreaDrop,
     handleCloneItem,
     handleCreateRootEnvironmentFolder,
     handleAddChildItem,
@@ -1552,6 +1664,7 @@ const App: React.FC = () => {
     setRootItems,
     setExpandedIds,
     setSelectedItemId,
+    setSelectedItemIds,
     openAnyRequestTab
   })
 
@@ -1658,8 +1771,10 @@ const App: React.FC = () => {
       scenarioSaveTimer = null
       void latestSaveAll?.().catch((err: unknown) => { logger.error('[App] move-into-scenario autosave failed', { error: String(err) }) })
     }, 600)
-    setScenarioDelete((p) => ({ ...p, isOpen: false }))
-  }, [rootItems, setRootItems])
+    // Closes the dialog — or, during a pending container delete, shows the
+    // next affected request / executes the held-back deletion.
+    advanceContainerDeleteQueue()
+  }, [rootItems, setRootItems, advanceContainerDeleteQueue])
 
   // Delete the request and strip every box that referenced it (plus the touched
   // edges) from each using scenario, even if that leaves a scenario incomplete.
@@ -1672,9 +1787,11 @@ const App: React.FC = () => {
       const edges = u.scenario.edges.filter((e) => !dropped.has(e.from.nodeId) && !dropped.has(e.to.nodeId))
       handleScenarioChange(u.scenario.id, { nodes, edges })
     }
-    setScenarioDelete((p) => ({ ...p, isOpen: false }))
     confirmDeleteWithId(requestId)
-  }, [scenarioDelete.requestId, rootItems, handleScenarioChange, confirmDeleteWithId])
+    // Closes the dialog — or, during a pending container delete, shows the
+    // next affected request / executes the held-back deletion.
+    advanceContainerDeleteQueue()
+  }, [scenarioDelete.requestId, rootItems, handleScenarioChange, confirmDeleteWithId, advanceContainerDeleteQueue])
 
   // Create a child item (request of any protocol, or a sub-scenario) under a
   // scenario from the graph editor's add palette. `silent`: no sidebar
@@ -1694,7 +1811,8 @@ const App: React.FC = () => {
     }
     return newId
   }, [handleAddChildItem])
-  // Back-compat shim for the bare httpRequest node (link-drag auto-create path).
+  // The link-drag auto-create path: dropping a link onto empty canvas from a
+  // bare httpRequest node creates its child request, defaulting to http-get.
   const handleCreateScenarioRequest = useCallback(
     (scenarioId: string): string | null => handleCreateScenarioChild(scenarioId, 'http-get'),
     [handleCreateScenarioChild]
@@ -2213,6 +2331,46 @@ const App: React.FC = () => {
     onCloseAllTabs: handleCloseAllTabs
   })
 
+  // Bump on every copy so the Édition menu's Coller enables without an async
+  // clipboard read at render time.
+  const [clipboardTick, setClipboardTick] = useState(0)
+  // Cross-window / post-restart paste: the in-memory cache dies with the
+  // window, but the marked envelope survives on the SYSTEM clipboard. Probe
+  // it on mount and whenever the window regains focus (the only moments its
+  // content can have changed from outside).
+  const [systemClipboardHasItems, setSystemClipboardHasItems] = useState(false)
+  useEffect(() => {
+    let alive = true
+    const probe = (): void => {
+      void readSidebarClipboard().then((items) => {
+        if (alive) setSystemClipboardHasItems(items !== null && items.length > 0)
+      })
+    }
+    probe()
+    window.addEventListener('focus', probe)
+    return () => { alive = false; window.removeEventListener('focus', probe) }
+  }, [])
+  const canPasteItems = useMemo(
+    () => { void clipboardTick; return hasSidebarClipboard() || systemClipboardHasItems },
+    [clipboardTick, systemClipboardHasItems]
+  )
+  // Lazy variant for the context-menu builder. Its IDENTITY changes exactly
+  // when the enablement flips, which is what invalidates the sidebar
+  // context-menu memo at the right moment — a stable function would bake a
+  // stale disabled state into the built menus.
+  const canPasteItemsFn = useCallback(() => canPasteItems, [canPasteItems])
+
+  // Stable identities for the context-menu clipboard trio: the cut/paste
+  // bodies are deliberately un-memoized (the React Compiler refuses to
+  // preserve a manual memo around them), so handing them to useSidebarState
+  // directly would invalidate its context-menu memo on EVERY App render.
+  // The ref indirection keeps the option identities constant while always
+  // dispatching to the latest closure.
+  const sidebarClipboardOpsRef = useRef<{ cut: (id: string) => void; copy: (id: string) => void; paste: (id: string) => void }>({ cut: () => undefined, copy: () => undefined, paste: () => undefined })
+  const onCutItemStable = useCallback((id: string) => { sidebarClipboardOpsRef.current.cut(id) }, [])
+  const onCopyItemStable = useCallback((id: string) => { sidebarClipboardOpsRef.current.copy(id) }, [])
+  const onPasteItemStable = useCallback((id: string) => { sidebarClipboardOpsRef.current.paste(id) }, [])
+
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
@@ -2223,6 +2381,10 @@ const App: React.FC = () => {
     onRenameItem: handleSidebarRenameItem,
     isItemFavorite,
     onToggleFavorite: handleToggleFavorite,
+    onCutItem: onCutItemStable,
+    onCopyItem: onCopyItemStable,
+    onPasteItem: onPasteItemStable,
+    canPaste: canPasteItemsFn,
     canRefreshFromSource,
     onRefreshFromSource
   })
@@ -2234,10 +2396,14 @@ const App: React.FC = () => {
   // and risking a lost deletion. Mirrors the scenario-edit autosave nudge so a
   // request deleted from a scenario behaves exactly like one deleted from a
   // folder.
-  const confirmDeleteAndPersist = useCallback((itemId: string) => {
+  const executeDeleteAndPersist = useCallback((itemId: string) => {
     const parent = findItemWithParent(rootItems, itemId).parent
     const parentIsScenario = !!parent && isScenario(parent as FolderItem)
     confirmDeleteWithId(itemId)
+    // The multi-selection sheds the deleted row HERE — at the actual
+    // deletion, never earlier: clearing it when the confirmation opens
+    // would lose the user's selection on a cancelled delete.
+    setSelectedItemIds((prev) => prev.filter((id) => id !== itemId))
     if (parentIsScenario) {
       if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
       scenarioSaveTimer = setTimeout(() => {
@@ -2246,11 +2412,297 @@ const App: React.FC = () => {
       }, 600)
     }
   }, [rootItems, confirmDeleteWithId])
+  useEffect(() => { executeDeleteRef.current = executeDeleteAndPersist }, [executeDeleteAndPersist])
+
+  // Deleting a CONTAINER whose subtree holds requests still bound by
+  // scenarios OUTSIDE it first walks those requests through the same
+  // "used by scenarios" dialog, one by one (recursively — env folders,
+  // folders, scenarios alike). The actual deletion runs after the last
+  // one is resolved. Reached from BOTH deletion paths: the plain confirm
+  // modal (its Confirm lands here) and Couper (which skips the plain
+  // confirm but keeps this flow).
+  const confirmDeleteAndPersist = useCallback((itemId: string) => {
+    const affected = collectSubtreeScenarioUsages(rootItems, itemId)
+    if (affected.length > 0) {
+      const [first, ...rest] = affected
+      if (first) {
+        setContainerDelete({ containerId: itemId, queue: rest })
+        setScenarioDelete({ isOpen: true, requestId: first.requestId, requestName: first.requestName, usages: first.usages })
+        return
+      }
+    }
+    executeDeleteAndPersist(itemId)
+  }, [rootItems, executeDeleteAndPersist])
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
   const confirmDelete = useCallback(() => {
     confirmDeleteAndPersist(deleteConfirmation.itemId)
   }, [confirmDeleteAndPersist, deleteConfirmation.itemId])
+
+  // Drain the pending GROUP delete: every id runs through the same guards a
+  // single delete gets — a request bound by scenarios raises the usage
+  // dialog, a container with bound descendants raises the container queue —
+  // and the dialog resolutions call back here (via the forward ref) to
+  // continue with the rest. Ids that vanished with an earlier container of
+  // the same batch are skipped.
+  const processGroupDeleteQueue = useCallback(() => {
+    const queue = groupDeleteQueueRef.current
+    while (queue.length > 0) {
+      const id = queue.shift()
+      if (!id) continue
+      const item = findItemById(rootItems, id)
+      if (!item) continue
+      if (isRequest(item)) {
+        const usages: RequestScenarioDeleteUsage[] = requestScenarioDeleteUsages(rootItems, id).map((u) => ({
+          scenarioId: u.scenario.id,
+          scenarioName: u.scenario.name,
+          inSubtree: u.inSubtree
+        }))
+        if (usages.length > 0) {
+          setScenarioDelete({ isOpen: true, requestId: id, requestName: item.name, usages })
+          return
+        }
+        executeDeleteAndPersist(id)
+        continue
+      }
+      const affected = collectSubtreeScenarioUsages(rootItems, id)
+      const [first, ...rest] = affected
+      if (first) {
+        setContainerDelete({ containerId: id, queue: rest })
+        setScenarioDelete({ isOpen: true, requestId: first.requestId, requestName: first.requestName, usages: first.usages })
+        return
+      }
+      executeDeleteAndPersist(id)
+    }
+  }, [rootItems, executeDeleteAndPersist])
+  useEffect(() => { processGroupDeleteQueueRef.current = processGroupDeleteQueue })
+
+  // =========================================================================
+  // MenuBar Édition / Sélection — actions on the SIDEBAR selection.
+  // Every handler takes an ARRAY of ids: single-selection today, but the
+  // upcoming ctrl+click multi-selection must not change these signatures.
+  // =========================================================================
+
+  const selectedSidebarItem = useMemo(
+    () => (selectedItemId ? findItemById(rootItems, selectedItemId) ?? null : null),
+    [rootItems, selectedItemId]
+  )
+  const selectedSidebarKind: 'env-folder' | 'folder' | 'scenario' | 'server' | 'request' | null = useMemo(() => {
+    const item = selectedSidebarItem
+    if (!item) return null
+    if (isEnvironmentFolder(item)) return 'env-folder'
+    if (isScenario(item)) return 'scenario'
+    if (isFolder(item)) return 'folder'
+    if (isRequest(item)) return (item as { server?: boolean }).server === true ? 'server' : 'request'
+    return null
+  }, [selectedSidebarItem])
+
+  const handleCopyItems = useCallback((ids: readonly string[]): void => {
+    const items = ids
+      .map((id) => findItemById(rootItems, id))
+      .filter((i): i is FolderItem => i != null)
+    if (items.length > 0) {
+      copySidebarItems(items)
+      setClipboardTick((n) => n + 1)
+    }
+  }, [rootItems])
+
+  // Cut = copy + delete WITHOUT the plain confirmation modal (the clipboard
+  // is the safety net) — but a request bound by scenarios still goes through
+  // the scenario-usage dialog, exactly like Delete.
+  // Plain function (no useCallback): the React Compiler refuses to preserve
+  // a manual memo around this closure, and its consumers wrap it in inline
+  // arrows anyway.
+  const handleCutItems = (ids: readonly string[]): void => {
+    handleCopyItems(ids)
+    for (const id of ids) {
+      const item = findItemById(rootItems, id)
+      if (!item) continue
+      if (isRequest(item)) {
+        const usages: RequestScenarioDeleteUsage[] = requestScenarioDeleteUsages(rootItems, id).map((u) => ({
+          scenarioId: u.scenario.id,
+          scenarioName: u.scenario.name,
+          inSubtree: u.inSubtree
+        }))
+        if (usages.length > 0) {
+          setScenarioDelete({ isOpen: true, requestId: id, requestName: item.name, usages })
+          continue
+        }
+      }
+      confirmDeleteAndPersist(id)
+    }
+  }
+
+  // Paste target: a selected CONTAINER receives the items at its end; a
+  // selected request/server receives them as siblings right after itself;
+  // no selection pastes at the root. Fresh runtime ids are REGENERATED for
+  // the whole pasted subtree — two items sharing an id would corrupt
+  // selection, favorites and the event pipeline.
+  const handlePasteItemsAt = (targetId: string | null): void => {
+    void readSidebarClipboard().then((pojos) => {
+      if (!pojos || pojos.length === 0) return
+      pasteClipboardPojos(rootItems, targetId, pojos)
+      setRootItems((prev) => [...prev])
+    })
+  }
+
+  // Menu-bar variant: paste relative to the sidebar SELECTION (or the root).
+  const handlePasteItems = (): void => {
+    handlePasteItemsAt(selectedItemId)
+  }
+
+  // Point the stable context-menu wrappers at the latest closures (they read
+  // fresh state; the wrappers' identities never change).
+  useEffect(() => {
+    sidebarClipboardOpsRef.current = {
+      cut: (id) => { handleCutItems([id]) },
+      copy: (id) => { handleCopyItems([id]) },
+      paste: (id) => { handlePasteItemsAt(id) }
+    }
+  })
+
+  const handleCloneItems = useCallback((ids: readonly string[]): void => {
+    for (const id of ids) handleCloneItem(id)
+  }, [handleCloneItem])
+
+  // A MULTI-selection delete asks ONCE for the whole group — looping the
+  // per-item flow would stack setDeleteConfirmation calls where only the
+  // last modal survives, so confirming would silently delete a single item.
+  const groupDeleteIdsRef = useRef<string[] | null>(null)
+  const handleDeleteItems = useCallback((ids: readonly string[]): void => {
+    if (ids.length <= 1) {
+      for (const id of ids) handleDeleteItemChecked(id)
+      return
+    }
+    const items = ids.map((id) => findItemById(rootItems, id)).filter((i): i is FolderItem => i != null)
+    if (items.length === 0) return
+    groupDeleteIdsRef.current = items.map((i) => i.id)
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId: items[0]?.id ?? '',
+      // User data, not UI copy: the modal's sentence interpolates the names
+      // verbatim, so no locale key is needed for the plural case.
+      itemName: items.map((i) => i.name).join('", "'),
+      // The folder-specific sentence is singular («le dossier ... et tout
+      // son contenu») — a group reads correctly on the generic one.
+      isFolder: false
+    })
+  }, [handleDeleteItemChecked, rootItems])
+
+  // Group semantics: a mixed group gets ADDED as a whole (only the missing
+  // ones are toggled on); a group already fully favorited gets removed. A
+  // blind per-item toggle would ADD some rows while REMOVING others under a
+  // single menu entry — surprising in both directions.
+  const handleFavoriteItems = useCallback((ids: readonly string[]): void => {
+    const allFavorite = ids.every((id) => isItemFavorite(id))
+    for (const id of ids) {
+      if (allFavorite || !isItemFavorite(id)) handleToggleFavorite(id)
+    }
+  }, [handleToggleFavorite, isItemFavorite])
+
+  // The menu Édition acts on the FULL multi-selection when one exists, and
+  // falls back to the single anchor otherwise.
+  const editionSelectionIds = useMemo<string[]>(
+    () => (selectedItemIds.length > 0 ? selectedItemIds : (selectedItemId ? [selectedItemId] : [])),
+    [selectedItemIds, selectedItemId]
+  )
+
+  // Group context menu for a right-click INSIDE a sidebar multi-selection.
+  // Plain function on purpose: it closes over the freshest handlers (cut is
+  // itself a plain function) and the ListView calls it lazily at open time.
+  const sidebarSelectionContextMenu = (ids: string[]): SidebarContextMenuItem[] =>
+    buildSelectionContextMenu(ids, t, {
+      onCutItems: (i) => { handleCutItems(i) },
+      onCopyItems: (i) => { handleCopyItems(i) },
+      onCloneItems: (i) => { handleCloneItems(i) },
+      onDeleteItems: (i) => { handleDeleteItems(i) },
+      onToggleFavoriteItems: (i) => { handleFavoriteItems(i) }
+    }, ids.every((id) => isItemFavorite(id)))
+
+  // Focus the titlebar search: the SearchBar exposes no imperative handle;
+  // clicking its closed pill is the established path (the e2e suites drive
+  // it the same way) — the open effect then focuses the input itself.
+  const handleFocusSearch = useCallback((): void => {
+    const closed = document.querySelector<HTMLElement>('[data-testid="main-titlebar-searchbar-closed"]')
+    closed?.click()
+  }, [])
+
+  // « Requête » menu (F5 / F8): run/cancel the ACTIVE workbench tab's CLIENT
+  // request through its own visible Send button — the same path the MCP
+  // bridge drives — so URL resolution, auth, history and error toasts behave
+  // exactly like a manual send. Null (menu hidden) unless the active tab is
+  // a client request; servers publish their own « Serveur » menu instead.
+  const activeRequestControls = useMemo(() => {
+    if (!activeRequest) return null
+    const item = findItemById(rootItems, activeRequest.id)
+    if (!item || !isRequest(item)) return null
+    const req = item as { id: string; type: string; server?: boolean }
+    if (req.server === true) return null
+    return {
+      onRun: (): void => { void clickSendButtonWhenReady() },
+      onCancel: (): void => {
+        const api = (window.restorm as unknown as Record<string, { cancel?: (id: string) => Promise<unknown> } | undefined>)[req.type]
+        void api?.cancel?.(req.id)
+      }
+    }
+  }, [activeRequest, rootItems])
+
+  // « Ajouter » submenu for the Sélection menu — the SAME builder the sidebar
+  // context menu uses. Placement: a container receives the new child at its
+  // end (the builder's own behaviour); a request/server targets its parent
+  // and the new item is then moved right after the selection.
+  const handleAddChildForSelection = useCallback((parentId: string, kind: AddChildKind): void => {
+    const sel = selectedSidebarItem
+    const selIsContainer = sel !== null && (isAnyFolder(sel) || isScenario(sel))
+    const newId = handleAddChildItem(parentId, kind)
+    if (newId !== null && sel && !selIsContainer) {
+      // The add lands at the target's end; move it right after the selection.
+      // Functional update: a ROOT-level add commits through setRootItems, so
+      // the closure's `rootItems` doesn't hold the new item yet — only `prev`
+      // does.
+      setRootItems((prev) => {
+        const next = [...prev]
+        let created = removeItemFromTree(next, newId)
+        if (!created) {
+          // Root-level item — removeItemFromTree needs a parent.
+          const at = next.findIndex((i) => i.id === newId)
+          if (at < 0) return prev
+          created = next.splice(at, 1)[0] ?? null
+          if (!created) return prev
+        }
+        if (!insertItemIntoTree(next, created, sel.id, 'after')) {
+          // Root-level selection has no parent for the sibling splice.
+          const { index } = findItemWithParent(next, sel.id)
+          next.splice(index >= 0 ? index + 1 : next.length, 0, created)
+        }
+        return next
+      })
+    }
+  }, [selectedSidebarItem, handleAddChildItem, setRootItems])
+
+  const selectionAddSubmenu = useMemo(() => {
+    const sel = selectedSidebarItem
+    // No selection → the root sentinel: the Créer menu always offers the
+    // full add catalogue, new items land at the end of the root list.
+    const parentTarget = sel === null
+      ? ''
+      : (isAnyFolder(sel) || isScenario(sel))
+        ? sel.id
+        : (findItemWithParent(rootItems, sel.id).parent?.id ?? '')
+    return buildAddSubmenu(parentTarget, t, handleAddChildForSelection)
+  }, [selectedSidebarItem, rootItems, t, handleAddChildForSelection])
+
+  const titlebarSelection = useMemo(() => {
+    if (!selectedSidebarItem || !selectedSidebarKind) return null
+    return {
+      id: selectedSidebarItem.id,
+      kind: selectedSidebarKind,
+      isFavorite: isItemFavorite(selectedSidebarItem.id)
+    }
+  }, [selectedSidebarItem, selectedSidebarKind, isItemFavorite])
+
+  const activeScenarioPalette = useScenarioMenuPalette()
+  const activeServerMenu = useServerMenu()
 
   // Save-and-close is handled once, by `useFileManagement`. It used to be
   // registered here as well, and `onSaveAndClose` uses `ipcRenderer.on`, so
@@ -2399,9 +2851,25 @@ const App: React.FC = () => {
   // assigns it BEFORE calling `setRootItems`: by the time this memo recomputes
   // for a given `rootItems`, the ref already describes THAT tree. A tree that
   // predates the replace keeps the older version and is correctly refused.
+  // A project-target quick-config write is an in-place proxy mutation:
+  // `rootItems` identity never changes, so without this nudge the mirror
+  // below would keep main on a tree WITHOUT the just-saved config — and the
+  // next main-driven tree replace would broadcast that stale tree back,
+  // silently deleting the config the user just saved.
+  const [quickConfigMirrorNudge, setQuickConfigMirrorNudge] = useState(0)
+  useEffect(() => {
+    const sub = eventBus.subscribe(QUICK_CONFIG_PROJECT_WRITE_EVENT, () => {
+      setQuickConfigMirrorNudge((n) => n + 1)
+    })
+    return () => { sub.unsubscribe() }
+  }, [])
+
   const mirrorPayload = useMemo(
-    () => snapshotMirrorPayload(rootItems, appliedMcpVersion),
-    [rootItems, appliedMcpVersion]
+    () => {
+      void quickConfigMirrorNudge
+      return snapshotMirrorPayload(rootItems, appliedMcpVersion)
+    },
+    [rootItems, appliedMcpVersion, quickConfigMirrorNudge]
   )
   const environmentFolderCollections = mirrorPayload.collections
 
@@ -2460,7 +2928,7 @@ const App: React.FC = () => {
     // `mirrorPayload`). A stale `'user'` mirror is then refused main-side
     // because its stamp is genuinely older, instead of sneaking through on a
     // stamp it never earned.
-    setCollections(mirrorPayload.collections, source, mirrorPayload.builtFromVersion)
+    setCollections(mirrorPayload.collections, source, mirrorPayload.builtFromVersion, mirrorPayload.rootItems)
   }, [mirrorPayload, setCollections, isFileServiceLoading])
 
   // Listen to test events for E2E tests (only in dev/test mode)
@@ -2708,7 +3176,7 @@ const App: React.FC = () => {
       if (!payload.id) return
 
       // A sub-environment isn't its own save-unit — it lives embedded in its
-      // top-level environment's content (`environments` is @separateFolders,
+      // top-level environment's content (`environments` is @saveUnits,
       // `subEnvironments` is not). Redirect the upsert onto the top-level env's
       // unit so the change is actually saved + committed; registering a
       // per-sub-env unit would create a phantom the decomposer never produces,
@@ -2737,6 +3205,15 @@ const App: React.FC = () => {
         const raw = JSON.parse(JSON.stringify(document)) as Record<string, unknown>
         const cls = classForDocument(payload.type, raw)
         draft = cleanseForPersistence(raw, cls)
+        // The JSON round-trip above stripped every secret plaintext
+        // (SecretValue.toJSON) — a secret-only edit would produce a draft
+        // identical to the reference and never mark the unit dirty (so the
+        // autosave would never write the sidecar). The digest of the LIVE
+        // document's env-file secrets makes that delta visible to the
+        // registry; it never reaches the disk (saves serialize the live
+        // tree, not drafts).
+        const digest = envSecretsDigestOf(document)
+        if (digest !== null) draft['__envSecretsDigest'] = digest
       } catch (err) {
         logger.warn('[App] upsertSaveUnit: failed to cleanse document', {
           id: runtimeId,
@@ -2879,11 +3356,11 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
+    setSelectedItemIds,
     setExpandedIds,
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   })
-
   // Patch the forward-reference ref consumed by `useMcpWorkbenchLayout`
   // (above) now that `handleTabActivate` exists.
   useEffect(() => { tabActivateForLayoutRef.current = handleTabActivate }, [handleTabActivate])
@@ -2898,21 +3375,36 @@ const App: React.FC = () => {
   //
   // The scenario surface OWNS sidebar drops (it adds the item to the
   // graph), so the workbench split channel must NOT engage over it: we
-  // return false whenever the drag is over a scenario editor. ECUI's
-  // group handlers bubble up the real DOM from the portalled tab content,
-  // so a drag over the scenario canvas reports `event.target` inside the
-  // scenario wrapper (`data-testid="scenario-editor"`); detecting that
-  // keeps the overlay dark there and lets the scenario's own React
-  // `onDrop` add the node. (Relying on the scenario calling
-  // `stopPropagation` on its native listeners proved fragile — the React
-  // Flow pane owns the canvas drag events, so the scenario's native drop
-  // never fired and the add was lost.)
+  // return false whenever the drag is over a scenario editor, letting the
+  // scenario's own React `onDrop` add the node. (Relying on the scenario
+  // calling `stopPropagation` on its native listeners proved fragile — the
+  // React Flow pane owns the canvas drag events, so the scenario's native
+  // drop never fired and the add was lost.)
+  //
+  // Detection is by the CURSOR STACK, not `event.target`. As the pointer
+  // crosses from the sidebar into the canvas it can clip a pixel or two of
+  // non-scenario workbench first, which lights the split overlay; the
+  // overlay then renders ON TOP and becomes `event.target`, so a
+  // `.closest` on the target would miss the scenario editor beneath it and
+  // the overlay would keep swallowing the drop (open-in-split instead of
+  // add-to-graph). `elementsFromPoint` sees through the overlay to whatever
+  // is under the cursor, so the moment the scenario surface is beneath the
+  // pointer the overlay backs off — even if it was already lit.
   const isWorkbenchExternalDrop = useCallback((event: DragEvent): boolean => {
     const types = event.dataTransfer?.types
     if (!types) return false
-    if (!Array.from(types).includes(LIST_VIEW_DRAG_MIME)) return false
-    const target = event.target
-    if (target instanceof Element && target.closest('[data-testid="scenario-editor"]')) return false
+    const typeList = Array.from(types)
+    if (!typeList.includes(LIST_VIEW_DRAG_MIME)) return false
+    // A MULTI-item sidebar drag never targets the workbench surface: the
+    // split-open gesture is single-item by design, and lighting the overlay
+    // for a group would invite a drop the app cannot honour.
+    if (typeList.includes(LIST_VIEW_MULTI_DRAG_MIME)) return false
+    const overScenario = (el: Element | null | undefined): boolean =>
+      el instanceof Element && el.closest('[data-testid="scenario-editor"]') !== null
+    // Primary: the whole element stack under the cursor (pierces the overlay).
+    if (document.elementsFromPoint(event.clientX, event.clientY).some(overScenario)) return false
+    // Fallback for drags with no usable coordinates (some synthetic events).
+    if (overScenario(event.target as Element | null)) return false
     return true
   }, [])
 
@@ -2982,9 +3474,9 @@ const App: React.FC = () => {
   const scenarioCliInfo = useMemo(
     () => ({
       suggestRunTarget: suggestScenarioRunTarget,
-      projectPath: filePath ?? currentFolderPath ?? null
+      projectPath: filePath ?? null
     }),
-    [suggestScenarioRunTarget, filePath, currentFolderPath]
+    [suggestScenarioRunTarget, filePath]
   )
 
   return (
@@ -3008,7 +3500,6 @@ const App: React.FC = () => {
         favorites={favorites}
         onNew={() => { navigationService.clearHistory(); void handleMenuNew() }}
         onOpen={() => { void handleMenuOpen() }}
-        onOpenFolder={() => { void handleMenuOpenFolder() }}
         onSave={smartSaveActive}
         onSaveAll={handleMenuSaveAll}
         onSaveAs={handleMenuSaveAs}
@@ -3030,6 +3521,19 @@ const App: React.FC = () => {
         gitPullPending={gitPendingFlags.pullPending}
         workbenchActive={fileName !== null}
         onOpenSettingsTab={handleOpenSettingsTab}
+        selection={titlebarSelection}
+        canPaste={canPasteItems}
+        onCutSelection={() => { if (editionSelectionIds.length > 0) handleCutItems(editionSelectionIds) }}
+        onCopySelection={() => { if (editionSelectionIds.length > 0) handleCopyItems(editionSelectionIds) }}
+        onPasteSelection={handlePasteItems}
+        onCloneSelection={() => { if (editionSelectionIds.length > 0) handleCloneItems(editionSelectionIds) }}
+        onDeleteSelection={() => { if (editionSelectionIds.length > 0) handleDeleteItems(editionSelectionIds) }}
+        onToggleFavoriteSelection={() => { if (editionSelectionIds.length > 0) handleFavoriteItems(editionSelectionIds) }}
+        onFocusSearch={handleFocusSearch}
+        selectionAddSubmenu={selectionAddSubmenu}
+        activeRequestControls={activeRequestControls}
+        activeServerMenu={activeServerMenu}
+        activeScenarioPalette={activeScenarioPalette}
       />
 
       {fileName ? (
@@ -3064,6 +3568,11 @@ const App: React.FC = () => {
                 <RestormSidebar
                   items={sidebarItemsWithContextMenu}
                   selectedItemId={selectedItemId}
+                  selectedItemIds={selectedItemIds}
+                  onSelectionChange={(ids, anchorId) => {
+                    setSelectedItemIds(ids)
+                    setSelectedItemId(anchorId)
+                  }}
                   activeId={selectedItemId}
                   expandedIds={expandedIds}
                   editingItemId={sidebarEditingItemId}
@@ -3079,15 +3588,25 @@ const App: React.FC = () => {
                     )
                   }}
                   onItemDrop={handleItemDrop}
+                  canDropSelection={canDropSelection}
+                  onEmptyAreaDrop={handleEmptyAreaDrop}
+                  selectionContextMenuItems={sidebarSelectionContextMenu}
                   onItemRename={handleSidebarItemRename}
-                  onDeleteRequest={(payload) => { handleDeleteItemChecked(payload.item.id) }}
+                  onDeleteRequest={(payload) => {
+                    // Same contract as the menus: when the active row is part
+                    // of a multi-selection, Delete removes the whole group.
+                    const ids = selectedItemIds.length > 1 && selectedItemIds.includes(payload.item.id)
+                      ? selectedItemIds
+                      : [payload.item.id]
+                    handleDeleteItems(ids)
+                  }}
                   onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
                   onCollapseAll={() => { setExpandedIds([]) }}
                   onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
                   onAddChildItem={handleAddChildItem}
-                  onDeselectAll={() => { setSelectedItemId(null) }}
+                  onDeselectAll={() => { setSelectedItemId(null); setSelectedItemIds([]) }}
                   favoriteItems={favoriteItems}
                   openDocumentItems={openDocumentItems}
                   onFavoritesReorder={handleFavoritesReorder}
@@ -3320,8 +3839,22 @@ const App: React.FC = () => {
         isOpen={deleteConfirmation.isOpen}
         itemName={deleteConfirmation.itemName}
         isFolder={deleteConfirmation.isFolder}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+        onConfirm={() => {
+          const group = groupDeleteIdsRef.current
+          if (group) {
+            groupDeleteIdsRef.current = null
+            setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))
+            groupDeleteQueueRef.current = group
+            processGroupDeleteQueue()
+            return
+          }
+          confirmDelete()
+        }}
+        onCancel={() => {
+          groupDeleteIdsRef.current = null
+          groupDeleteQueueRef.current = []
+          cancelDelete()
+        }}
       />
 
       {/* Push modal — triggered by the statusbar repo-push button / the
@@ -3396,16 +3929,15 @@ const App: React.FC = () => {
         usages={scenarioDelete.usages}
         onMoveIntoScenario={(scenarioId) => { handleMoveRequestIntoScenario(scenarioDelete.requestId, scenarioId) }}
         onDeleteAnyway={handleDeleteRequestAnyway}
-        onCancel={() => { setScenarioDelete((p) => ({ ...p, isOpen: false })) }}
+        onCancel={() => {
+          // Cancelling mid-queue aborts the whole pending container delete —
+          // the remaining requests stay untouched and the container survives.
+          // A pending GROUP delete is abandoned too: the user said no.
+          groupDeleteQueueRef.current = []
+          setContainerDelete(null)
+          setScenarioDelete((p) => ({ ...p, isOpen: false }))
+        }}
       />
-
-          {/* Save Options Modal */}
-          <SaveOptionsModal
-            isOpen={showSaveOptionsModal}
-            onClose={() => { setShowSaveOptionsModal(false) }}
-            onSave={handleSaveWithOptions}
-            rootFolder={rootItems[0]}
-          />
 
           {/* Import Modal — doubles as the "Refresh from source"
               wizard when `refreshContext` is provided. The host
@@ -3607,4 +4139,4 @@ const App: React.FC = () => {
   )
 }
 
-export default App
+export { App }

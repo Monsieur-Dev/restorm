@@ -255,5 +255,3 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
     </>
   )
 }
-
-export default ScenarioRunLogView

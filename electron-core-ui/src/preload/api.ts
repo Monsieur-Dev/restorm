@@ -15,6 +15,12 @@ import type {
   GitState
 , GitLogEntry} from '../types/git'
 import type { CoreUiApi } from '../types/api'
+import {
+  APP_ICON_MENU_SET_LABELS_CHANNEL,
+  APP_ICON_MENU_INVOKE_CHANNEL,
+  type AppIconMenuLabels,
+  type AppIconAction
+} from '../types/appIconMenu'
 import type { SaveFailureReason } from '../errors'
 
 /**
@@ -373,21 +379,6 @@ export const createCoreUIAPI = (): CoreUiApi => ({
         ipcRenderer.removeListener('file:autosave-trigger', handler)
       }
     },
-    saveUnit: async (entry: {
-      runtimeId: string
-      content: unknown
-      absolutePath: string
-      format: 'json' | 'json5' | 'yaml'
-    }): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('file:save-unit', entry)
-      return result as boolean
-    },
-    saveUnitsBatch: async (
-      entries: { runtimeId: string; content: unknown; absolutePath: string; format: 'json' | 'json5' | 'yaml' }[]
-    ): Promise<{ runtimeId: string; success: boolean }[]> => {
-      const result: unknown = await ipcRenderer.invoke('file:save-units-batch', entries)
-      return result as { runtimeId: string; success: boolean }[]
-    },
     onStateChanged: (callback: (state: FileServiceState) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, state: FileServiceState): void => {
         callback(state)
@@ -734,9 +725,13 @@ export const createCoreUIAPI = (): CoreUiApi => ({
     }
   },
   nativeMenu: {
-    /** Publish a serializable menu template (derived from the MenuBar JSX). */
-    set: async (template: unknown): Promise<boolean> => {
-      const result: unknown = await ipcRenderer.invoke('native-menu:set', template)
+    /**
+     * Publish a serializable menu template (derived from the MenuBar JSX).
+     * `about` optionally routes the macOS application-menu "About" item to the
+     * host (id echoed back via `onInvoke`) instead of Electron's native panel.
+     */
+    set: async (template: unknown, about?: { id: string; label: string }): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('native-menu:set', template, about)
       return result === true
     },
     /** Remove the application menu (non-macOS hosts render it in-window). */
@@ -756,6 +751,34 @@ export const createCoreUIAPI = (): CoreUiApi => ({
       ipcRenderer.on('native-menu:invoke', handler)
       return () => {
         ipcRenderer.removeListener('native-menu:invoke', handler)
+      }
+    }
+  },
+  appIconMenu: {
+    /**
+     * Publish the translated labels of the app-icon menu's static entries.
+     *
+     * Fire-and-forget: main rebuilds the menu on its own schedule and the
+     * renderer has nothing to do with the outcome. Re-send after a language
+     * change so the menu follows the UI.
+     */
+    setLabels: (labels: AppIconMenuLabels): void => {
+      ipcRenderer.send(APP_ICON_MENU_SET_LABELS_CHANNEL, labels)
+    },
+    /**
+     * Run an app-icon menu action the host forwarded to this window.
+     *
+     * Main sends the action here (rather than acting on it directly) so the
+     * renderer can run the same guarded new / open-recent command its in-app
+     * menus use. Returns an unsubscribe.
+     */
+    onInvoke: (callback: (action: AppIconAction) => void): (() => void) => {
+      const handler = (_event: unknown, action: AppIconAction): void => {
+        callback(action)
+      }
+      ipcRenderer.on(APP_ICON_MENU_INVOKE_CHANNEL, handler)
+      return () => {
+        ipcRenderer.removeListener(APP_ICON_MENU_INVOKE_CHANNEL, handler)
       }
     }
   }

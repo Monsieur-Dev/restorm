@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach, beforeAll } from 'vitest'
 import { render, cleanup, fireEvent } from '@testing-library/react'
-import SelectBoxList from './selectBoxCustom'
+import { SelectBoxList } from './selectBoxCustom'
 import { defaultSelectBoxStyles, type ISelectOptionItem } from './types'
 
 // jsdom ships no ResizeObserver; the open dropdown mounts a

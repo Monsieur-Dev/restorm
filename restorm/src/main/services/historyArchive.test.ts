@@ -1,3 +1,6 @@
+// @vitest-environment node
+// Main-process code: the archive writer runs where Blob is Node's own (zip.js
+// streams through `Blob.stream()`, which jsdom's Blob does not implement).
 import { describe, it, expect, vi } from 'vitest'
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -27,7 +30,7 @@ describe('historyArchive', () => {
     try {
       const index: HistoryArchiveIndex = {
         version: 2,
-        requests: [{ requestId: 'r1', entries: [{ guid: 'g1', timestamp: '2026-01-01T00:00:00Z', pinned: false, success: true, outcome: 'ok' }] }],
+        requests: [{ requestId: 'r1', entries: [{ guid: 'g1', timestamp: '2026-01-01T00:00:00Z', pinned: false, outcome: 'ok' }] }],
         scenarios: [{ scenarioId: 's1', runs: [{ guid: 'sr1', timestamp: '2026-01-02T00:00:00Z', pinned: true, status: 'completed', scenarioName: 'Fight' }] }]
       }
       const entries = new Map<string, string>([

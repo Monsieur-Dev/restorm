@@ -33,6 +33,8 @@ const SANDBOX_LIBS: { global: string; module: string; requireNames: string[] }[]
   { global: 'CryptoJS', module: 'crypto-js', requireNames: ['crypto-js', 'CryptoJS'] },
   { global: 'Ajv', module: 'ajv', requireNames: ['ajv'] },
   // Assertions — `chai.expect` / `chai.assert` (Postman's `pm.expect` IS chai).
+  // chai stays on v4: v5+ is ESM-only and its prelude touches DOM globals
+  // (`Event`) that QuickJS's browser-grade ES2020 surface does not provide.
   { global: 'chai', module: 'chai', requireNames: ['chai'] },
   // HTML/XML scraping, jQuery-style — `cheerio.load(html)`.
   { global: 'cheerio', module: 'cheerio', requireNames: ['cheerio'] },

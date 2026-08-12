@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest'
 import { render, cleanup, fireEvent, waitFor } from '@testing-library/react'
-import Thumbnail, { type ThumbnailMedia } from './Thumbnail'
+import { Thumbnail, type ThumbnailMedia } from './Thumbnail'
 
 afterEach(() => { cleanup() })
 

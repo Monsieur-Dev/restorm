@@ -44,7 +44,7 @@ type Protocol = typeof REQUEST_TYPES[number]
 export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
   http: ['documentation', 'method', 'url', 'headers', 'params', 'pathParams', 'body', 'server', 'mockStatus', 'timeout', 'followRedirects'],
   graphql: ['documentation', 'url', 'operationType', 'query', 'variables', 'operationName', 'headers', 'server', 'schema', 'mockResolvers', 'resolverScript'],
-  grpc: ['documentation', 'url', 'service', 'method', 'callType', 'requestMessage', 'metadata', 'server', 'mockMethods', 'protoContent', 'protoPath', 'protoDescriptorSet', 'reflection', 'tls', 'tlsCertPem', 'tlsKeyPem'],
+  grpc: ['documentation', 'url', 'service', 'method', 'callType', 'transport', 'requestMessage', 'metadata', 'server', 'mockMethods', 'protoContent', 'protoPath', 'protoDescriptorSet', 'reflection', 'tls', 'tlsCertPem', 'tlsKeyPem'],
   soap: ['documentation', 'url', 'soapAction', 'service', 'operation', 'body', 'headers', 'server', 'mockOperations'],
   websocket: ['documentation', 'url', 'protocol', 'event', 'message', 'headers', 'server', 'qos', 'retain', 'clientId', 'username', 'password', 'keepalive', 'mqttSubscribe', 'lwtTopic', 'lwtPayload', 'lwtQos', 'lwtRetain'],
   sse: ['documentation', 'url', 'headers', 'lastEventId'],
@@ -60,7 +60,7 @@ export const PROTOCOL_CONFIG_FIELDS: Record<Protocol, readonly string[]> = {
 }
 
 /** Read a request's protocol (`type`), narrowed to a known protocol or null. */
-export function requestProtocol(request: Request): Protocol | null {
+function requestProtocol(request: Request): Protocol | null {
   const t = (request as { type?: unknown }).type
   return typeof t === 'string' && (REQUEST_TYPES as readonly string[]).includes(t) ? (t as Protocol) : null
 }
@@ -107,7 +107,7 @@ function writeProjectConfigs(request: Request, configs: QuickConfig[]): void {
 const SETTINGS_KEY_PREFIX = 'request_quick_configs:'
 
 /** The active project's uuid (tracked by the MCP favorites bridge), or null. */
-export function activeProjectUuid(): string | null {
+function activeProjectUuid(): string | null {
   return getFavoritesSnapshot().projectUuid
 }
 
@@ -124,8 +124,8 @@ function readSettingsConfigs(projectUuid: string, requestId: string): QuickConfi
 // CRUD used by the MCP tools (writes are project-target only)
 // ============================================================================
 
-export interface QuickConfigResult { ok: true; config?: QuickConfig }
-export interface QuickConfigError { ok: false; error: string }
+interface QuickConfigResult { ok: true; config?: QuickConfig }
+interface QuickConfigError { ok: false; error: string }
 export type QuickConfigOutcome = QuickConfigResult | QuickConfigError
 
 /** All configs for a request, settings (read-only) first then project, each

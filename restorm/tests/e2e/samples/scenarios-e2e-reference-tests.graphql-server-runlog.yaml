@@ -1,22 +1,22 @@
 - message: 🔵 [<time>] ▶ GraphQL Server
 - message: ⚪ [<time>] start graphqlListen
   data:
-    requestId: <uuid>
     connectionName: GraphQL Mock
     label: start GraphQL mock server
+    requestId: <uuid>
 - message: ⚪ [<time>] done graphqlListen
 - message: ⚪ [<time>] graphql-server "GraphQL Mock" connecting
 - message: ⚪ [<time>] graphql-server "GraphQL Mock" connected
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: query the mock
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -37,12 +37,12 @@
         success: true
 - message: ⚪ [<time>] start log
   data:
-    message: réponse GraphQL du consumer reçue
     level: info
+    message: réponse GraphQL du consumer reçue
     runOnEachEvent: false
     data:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -63,7 +63,7 @@
         success: true
     in:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -85,7 +85,7 @@
 - message: 🔵 [<time>] réponse GraphQL du consumer reçue
   data:
     request:
-      url: http://localhost:4222/graphql
+      url: http://localhost:<port>/graphql
       method: POST
       headers:
         Content-Type: application/json
@@ -108,7 +108,7 @@
   data:
     value:
       request:
-        url: http://localhost:4222/graphql
+        url: http://localhost:<port>/graphql
         method: POST
         headers:
           Content-Type: application/json
@@ -135,8 +135,8 @@
 - message: ⚪ [<time>] graphql-server "GraphQL Mock" closed
 - message: ⚪ [<time>] start log
   data:
-    message: serveur GraphQL arrêté
     level: info
+    message: serveur GraphQL arrêté
     in: true
 - message: 🔵 [<time>] serveur GraphQL arrêté
 - message: ⚪ [<time>] done log

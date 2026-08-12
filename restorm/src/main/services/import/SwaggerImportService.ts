@@ -949,7 +949,7 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
 
     // Merge enum definitions into the existing environment folder
     if (enumDefs.length > 0) {
-      const existing = (options.environmentFolder.enumDefinitions ?? []) as EnumDefinition[]
+      const existing = (options.environmentFolder.enumDefinitions ?? [])
       options.environmentFolder.enumDefinitions = [...existing, ...enumDefs]
     }
 

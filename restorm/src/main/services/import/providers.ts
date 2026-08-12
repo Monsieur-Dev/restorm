@@ -10,6 +10,11 @@
  * `importProviders.push(...)` at its bottom, then add ONE line here.
  */
 
+// Restorm's own project format — a `.restorm` extension anchor plus a
+// two-root-key YAML text sniff, both narrow enough to sit first without
+// stealing anything from the spec formats below.
+import './RestormImportService'
+
 // Text-prefix formats (cheapest detection — checked before JSON parsing)
 import './CurlImportService'
 import './PowerShellImportService'

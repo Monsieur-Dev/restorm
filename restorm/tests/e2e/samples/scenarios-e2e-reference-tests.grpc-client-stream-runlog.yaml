@@ -1,17 +1,17 @@
 - message: 🔵 [<time>] ▶ gRPC client stream
 - message: ⚪ [<time>] start grpcConnect
   data:
-    requestId: <uuid>
     connectionName: Chunks
     label: Client stream connect
+    requestId: <uuid>
 - message: ⚪ [<time>] done grpcConnect
 - message: ⚪ [<time>] grpc "Chunks" connecting
 - message: ⚪ [<time>] grpc "Chunks" connected
 - message: ⚪ [<time>] start grpcSend
   data:
     connectionNodeId: <uuid>
-    payload: '{"f_string":"chunk"}'
     label: send chunk
+    payload: '{"f_string":"chunk"}'
     in: true
 - message: ⚪ [<time>] done grpcSend
 - message: ⚪ [<time>] start grpcClose
@@ -24,8 +24,8 @@
     marshaling: proto: Marshal called with nil'
 - message: ⚪ [<time>] start log
   data:
-    message: client stream terminé (statut grpcbin)
     level: info
+    message: client stream terminé (statut grpcbin)
     in: true
 - message: 🔵 [<time>] client stream terminé (statut grpcbin)
 - message: ⚪ [<time>] done log

@@ -76,6 +76,14 @@ const MESSAGE_BY_CODE: Record<ImportErrorCode, { key: string; fallback: string }
   unsupportedFormat: {
     key: 'import.error.unsupportedFormat',
     fallback: 'No importer handles the {{format}} format.'
+  },
+  projectFormatTooNew: {
+    key: 'import.error.projectFormatTooNew',
+    fallback: 'This project file uses format version {{found}}, but this version of Restorm only understands version {{current}}. Update Restorm to import it.'
+  },
+  projectFormatMissing: {
+    key: 'import.error.projectFormatMissing',
+    fallback: 'This file declares no Restorm format version, so it is not a Restorm project file.'
   }
 }
 

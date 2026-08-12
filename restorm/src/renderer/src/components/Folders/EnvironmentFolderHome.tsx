@@ -277,4 +277,5 @@ const Section: React.FC<{ title: string; icon: string; children: React.ReactNode
   </div>
 )
 
-export default React.memo(EnvironmentFolderHome)
+const MemoizedEnvironmentFolderHome = React.memo(EnvironmentFolderHome)
+export { MemoizedEnvironmentFolderHome as EnvironmentFolderHome }

@@ -10,7 +10,7 @@ import {
   trackable,
   searchable,
   fileNaming,
-  separateFolders,
+  saveUnits,
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import type { RuntimeId } from './types'
@@ -55,11 +55,10 @@ export class Scenario {
    * (rather than `[]`) when the scenario holds none, so a plain leaf scenario
    * serializes without an empty array.
    *
-   * `@separateFolders()` mirrors `Folder.items` so folder-mode persistence
+   * `@saveUnits()` mirrors `Folder.items` so the save-unit decomposition
    * walks scenario children the same way it walks folder children — each
-   * child item becomes its own folder under the scenario's directory, with
-   * the scenario's own state living in the parent `index.<ext>`. */
-  @separateFolders()
+   * child item is its own save unit (per-unit dirty state / drafts). */
+  @saveUnits()
   items?: FolderItem[]
 
   constructor(init?: Partial<Scenario>) {

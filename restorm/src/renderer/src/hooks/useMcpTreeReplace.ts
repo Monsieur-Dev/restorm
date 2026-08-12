@@ -29,6 +29,7 @@
 import type React from 'react'
 import { useEffect } from 'react'
 import { makeReactiveFolderItem } from '../types/reactive'
+import { reviveValueTypesDeep } from '../utils/serialization'
 import { collectTreeItemIds } from '../utils/treeItemIds'
 import { isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
 import type { FolderItem } from '../../../shared/types/collections'
@@ -114,11 +115,18 @@ export function reifyItem(raw: unknown): FolderItem | null {
   const item = raw as FolderItem
   // Only reify recognised items; drop malformed payload entries.
   if (!isScenario(item) && !isAnyFolder(item) && !isRequest(item)) return null
+  // The payload crosses IPC as plain JSON, so persisted ValueType POJOs
+  // (`{ type: 'expression', … }`) arrive un-revived — and the cell
+  // renderers pick their editor by `instanceof`. Without this, an
+  // expression variable written by an MCP tool renders as a plain string
+  // input until the project is reopened. Ids are untouched (they must
+  // match the main-side tree verbatim).
+  const revived = reviveValueTypesDeep(item)
   // Delegate to the shared reifier, which tests `isScenario` BEFORE the
   // folder branch. A scenario carries `items` + `configuration`, so the
   // old `'items' in r → makeReactiveFolder` shortcut mangled a top-level
   // scenario into a folder and dropped its nodes/edges.
-  return makeReactiveFolderItem(item)
+  return makeReactiveFolderItem(revived)
 }
 
 /**

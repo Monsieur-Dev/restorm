@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: AppImage se nyní spouští spolehlivě a instaluje aktualizace bez zaseknutí, a to i na distribucích se zpřísněným sandboxem.
-- macOS: vedle Apple Silicon jsou nyní k dispozici i sestavení pro Intel.
+**Restorm 1.0 — local-first API klient je tu.**
 
-## v0.1.17
+Restorm je rychlý desktopový klient fungující offline pro testování a ovládání API napříč všemi hlavními protokoly.
 
-- Poznámky k verzi se nyní zobrazují ve vašem jazyce.
-- Desktopové aplikace pro Linux, Windows a macOS: instalátor nyní zobrazuje ikonu, název a podrobnosti Restormu a aplikace se otevře s vaším motivem.
+- **Protokoly**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Scénáře**: vizuálně řetězte požadavky, větvete/opakujte, extrahujte a znovu používejte hodnoty, spouštějte bez rozhraní v CI.
+- **Prostředí a proměnné**: `{{handlebars}}` všude, typované tajné hodnoty, prostředí pro každou složku.
+- **Import/Export**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, export kódu.
+- **Projekty nativní pro Git**: váš projekt `.restorm` je běžný soubor — verzujte jej, porovnávejte a řešte konflikty přímo v aplikaci.
+- **Local-first a soukromé**: vše běží na vašem počítači; odchozí firewall hlídá každé externí volání.
+- **Multiplatformní**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Tichá automatická aktualizace na pozadí: Restorm kontroluje aktualizace při spuštění a pravidelně, stahuje je na pozadí a instaluje při příštím restartu. Po každé aktualizaci se zobrazí poznámka „Novinky“.
-- Ruční tlačítko „Zkontrolovat aktualizace“ a přepínač automatických aktualizací v Nastavení.
+Bezplatná edice Community, s Pro a Enterprise pro týmy.

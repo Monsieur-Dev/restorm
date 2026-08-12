@@ -13,20 +13,6 @@ export function valueToString(value: ValueType): string {
 }
 
 /**
- * Create a StringValue from a string (backward compatibility helper)
- */
-export function stringToValue(str: string): StringValue {
-  return new StringValue(str)
-}
-
-/**
- * Convert a KeyValue's value to string (helper for backward compatibility)
- */
-export function keyValueValueToString(kv: { value: ValueType }): string {
-  return kv.value.toString()
-}
-
-/**
  * Check if a value is a StringValue
  */
 export function isStringValue(value: ValueType): value is StringValue {

@@ -220,5 +220,3 @@ const SettingsPageFallback: React.FC<SettingsPageFallbackProps> = ({
     </div>
   )
 }
-
-export default SettingsPage

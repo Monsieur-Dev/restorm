@@ -5,6 +5,7 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import electronPath from 'electron'
 import { goldenPathFor, normalizeRunLogYaml, setupReferenceWorkingCopy } from '../bdd/scenario-runlog/runLogShared'
+import { startServices, type StartedServices } from '../helpers/testcontainers/services'
 
 /**
  * Headless CLI runner: spawn the BUILT app with `--run` and assert the
@@ -18,12 +19,27 @@ const ELECTRON = electronPath as unknown as string
 
 interface CliResult { code: number | null; stdout: string; stderr: string }
 
-function runCli(args: string[]): Promise<CliResult> {
+function runCli(args: string[], userDataDirOverride?: string): Promise<CliResult> {
   return new Promise((resolve, reject) => {
+    // Each invocation gets its OWN userData dir. Without it every CLI run
+    // shares the default profile and takes its single-instance lock: a second
+    // run forwards its argv to the first and quits, so the caller sees an
+    // empty stdout and a hang until the test's timeout. That made this suite
+    // pass or fail depending on what else happened to be running.
+    //
+    // A caller can force a SHARED dir (`userDataDirOverride`) to exercise the
+    // lock-conflict path deliberately.
+    const isolatedUserDataDir = userDataDirOverride ?? mkdtempSync(join(tmpdir(), 'restorm-cli-'))
     const child = spawn(ELECTRON, ['--no-sandbox', '--ozone-platform=x11', MAIN_JS, ...args], {
       // RESTORM_E2E_ENTITLEMENT_PLAN seeds Pro entitlement so the headless gate
       // is bypassed in dev builds — mirrors mcp-server.fixture.ts.
-      env: { ...process.env, TZ: 'UTC', NODE_ENV: 'development', RESTORM_E2E_ENTITLEMENT_PLAN: 'pro' }
+      env: {
+        ...process.env,
+        TZ: 'UTC',
+        NODE_ENV: 'development',
+        RESTORM_E2E_ENTITLEMENT_PLAN: 'pro',
+        RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir
+      }
     })
     let stdout = ''
     let stderr = ''
@@ -35,8 +51,23 @@ function runCli(args: string[]): Promise<CliResult> {
 }
 
 function freshProject(prefix: string): string {
-  return setupReferenceWorkingCopy(mkdtempSync(join(tmpdir(), prefix)))
+  return setupReferenceWorkingCopy(mkdtempSync(join(tmpdir(), prefix)), services)
 }
+
+/** The scenarios the CLI runs call these mocks (Main fans out across them). */
+let services: StartedServices
+
+test.beforeAll(async () => {
+  // Image pulls / kafka + dotnet startup dominate; cached reruns are fast.
+  test.setTimeout(300_000)
+  // Same set as the scenario-runlog suite: Main orchestrates across every
+  // protocol sub-scenario, and some dependencies (SSE) are invisible in the
+  // normalized goldens.
+  services = await startServices(['petstore', 'auth-service', 'rabbitmq', 'activemq', 'redis', 'jsonrpc', 'trpc', 'sse-server', 'grpc', 'grpcweb-mock', 'kafka'])
+})
+test.afterAll(async () => {
+  await services.stopAll()
+})
 
 const LOGS = 'Auth Service/Pet API/Main/Logs'
 const MAIN = 'Auth Service/Pet API/Main'
@@ -46,7 +77,7 @@ test.describe('headless CLI scenario runner', () => {
     const project = freshProject('restorm-cli-logs-')
     const res = await runCli(['--open', project, '--run', LOGS, '--all-logs', '--headless'])
     expect(res.code, res.stderr).toBe(0)
-    expect(normalizeRunLogYaml(res.stdout)).toBe(readFileSync(goldenPathFor('Logs'), 'utf-8'))
+    expect(normalizeRunLogYaml(res.stdout)).toBe(normalizeRunLogYaml(readFileSync(goldenPathFor('Logs'), 'utf-8')))
   })
 
   test('runs the orchestrator Main with --param, matching the golden, exit 0', async () => {
@@ -64,7 +95,7 @@ test.describe('headless CLI scenario runner', () => {
     if (process.env.UPDATE_RUNLOG_GOLDEN === '1') {
       writeFileSync(cliGolden, normalizeRunLogYaml(res.stdout))
     }
-    expect(normalizeRunLogYaml(res.stdout)).toBe(readFileSync(cliGolden, 'utf-8'))
+    expect(normalizeRunLogYaml(res.stdout)).toBe(normalizeRunLogYaml(readFileSync(cliGolden, 'utf-8')))
   })
 
   test('--out writes the run-log to a file, byte-identical to stdout', async () => {
@@ -97,5 +128,34 @@ test.describe('headless CLI scenario runner', () => {
     const res = await runCli(['--run', LOGS, '--headless'])
     expect(res.code).toBe(2)
     expect(res.stderr).toContain('--run requires --open')
+  })
+
+  test('fails loudly (not silent exit 0) when the single-instance lock is held', async () => {
+    // Two processes sharing ONE userData dir: a long-lived holder takes the
+    // single-instance lock, so a headless --run against the same dir loses it.
+    // It must fail with a clear message and a non-zero code — never fall
+    // through to a normal startup that runs no scenario and exits 0 with empty
+    // stdout (the silent failure that made a held lock look like "the scenario
+    // produced nothing").
+    const sharedUserDataDir = mkdtempSync(join(tmpdir(), 'restorm-cli-shared-'))
+    const project = freshProject('restorm-cli-lock-')
+    // Holder: an ordinary windowed launch (no --run) keeps the lock for its
+    // whole lifetime. Spawned directly so the test owns the handle and can
+    // tear it down; `--inactive-window` keeps it off-screen on the shared xvfb.
+    const holder = spawn(
+      ELECTRON,
+      ['--no-sandbox', '--ozone-platform=x11', MAIN_JS, '--open', project, '--inactive-window'],
+      { env: { ...process.env, TZ: 'UTC', NODE_ENV: 'development', RESTORM_USER_DATA_OVERRIDE: sharedUserDataDir } }
+    )
+    try {
+      // Let the holder acquire the lock before the contender starts.
+      await new Promise((r) => setTimeout(r, 6000))
+      const contender = await runCli(['--open', project, '--run', LOGS, '--headless'], sharedUserDataDir)
+      expect(contender.code, contender.stdout).not.toBe(0)
+      expect(contender.stderr).toContain('single-instance lock')
+      expect(contender.stdout.trim()).toBe('')
+    } finally {
+      holder.kill('SIGKILL')
+    }
   })
 })

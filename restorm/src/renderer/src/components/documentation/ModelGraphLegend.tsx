@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Inline legend for the badges + suffix conventions used in the
@@ -9,6 +10,7 @@ import React from 'react'
  * cold.
  */
 export const ModelGraphLegend: React.FC = () => {
+  const { t } = useTranslation()
   return (
     <ul
       className="documentation-host-model-graph-legend"
@@ -16,51 +18,51 @@ export const ModelGraphLegend: React.FC = () => {
     >
       <li className="documentation-host-model-graph-legend__item">
         <code className="documentation-host-model-graph-legend__sample">+ name</code>
-        <span className="documentation-host-model-graph-legend__label">required property</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.requiredProperty')}</span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <code className="documentation-host-model-graph-legend__sample">- name?</code>
-        <span className="documentation-host-model-graph-legend__label">optional property</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.optionalProperty')}</span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-node__property-modifier">?</span>
-        <span className="documentation-host-model-graph-legend__label">nullable value</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.nullableValue')}</span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-node__property-modifier">ro</span>
-        <span className="documentation-host-model-graph-legend__label">read-only (server-set)</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.readOnly')}</span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-node__badge documentation-host-model-node__badge--deprecated">
-          deprecated
+          {t('documentation.legend.deprecatedBadge')}
         </span>
         <span className="documentation-host-model-graph-legend__label">
-          declared deprecated in the source spec
+          {t('documentation.legend.deprecatedDesc')}
         </span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-node__badge documentation-host-model-node__badge--removed">
-          removed
+          {t('documentation.legend.removedBadge')}
         </span>
         <span className="documentation-host-model-graph-legend__label">
-          gone from the most recent re-import
+          {t('documentation.legend.removedDesc')}
         </span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-graph-legend__edge documentation-host-model-graph-legend__edge--single-required" aria-hidden="true" />
-        <span className="documentation-host-model-graph-legend__label">required single ref</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.requiredSingleRef')}</span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-graph-legend__edge documentation-host-model-graph-legend__edge--single-optional" aria-hidden="true" />
-        <span className="documentation-host-model-graph-legend__label">optional single ref</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.optionalSingleRef')}</span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-graph-legend__edge documentation-host-model-graph-legend__edge--array-required" aria-hidden="true" />
-        <span className="documentation-host-model-graph-legend__label">required array ref</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.requiredArrayRef')}</span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-graph-legend__edge documentation-host-model-graph-legend__edge--array-optional" aria-hidden="true" />
-        <span className="documentation-host-model-graph-legend__label">optional array ref</span>
+        <span className="documentation-host-model-graph-legend__label">{t('documentation.legend.optionalArrayRef')}</span>
       </li>
     </ul>
   )

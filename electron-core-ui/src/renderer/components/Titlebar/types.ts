@@ -1,4 +1,5 @@
 import type { GroupedResults, SearchResult } from '../../services/SearchService'
+import type { AppMenuAbout } from '../../hooks/useNativeAppMenu'
 
 export interface TitlebarProps {
   icon?: string | React.ReactNode
@@ -6,7 +7,6 @@ export interface TitlebarProps {
   leftContent?: React.ReactNode
   rightContent?: React.ReactNode
   centerContent?: React.ReactNode
-  children?: React.ReactNode  // Deprecated: use leftContent instead
   className?: string
   id?: string
 
@@ -41,6 +41,12 @@ export interface TitlebarProps {
    * hides. Defaults to 300ms when omitted. */
   searchTooltipHideDelayMs?: number
 
+  /** Forwarded to the internal SearchBar as `getResultDragData` — makes
+   * result rows draggable, returning the `dataTransfer` payload (MIME → value)
+   * for a result or `undefined` for none. Lets the host feed search results to
+   * the same drop targets as its sidebar rows. */
+  getSearchResultDragData?: (result: SearchResult) => Record<string, string> | undefined
+
   /** Optional test id for the internal CustomWCO. */
   customWcoTestId?: string
 
@@ -59,4 +65,10 @@ export interface TitlebarProps {
 
   /** Show back/forward navigation buttons before the center zone */
   showNavigation?: boolean
+
+  /**
+   * macOS only: route the application-menu "About" item to the host (e.g. its
+   * own About modal) instead of Electron's native panel. Ignored off macOS.
+   */
+  appMenuAbout?: AppMenuAbout
 }

@@ -12,9 +12,15 @@
  *  - the ink bounding box (what `measureText`'s `actualBoundingBox*` reports);
  *  - the alpha-weighted centroid, i.e. the centre of the ink MASS.
  *
- * The centroid is the one used. For a symmetric glyph the two agree; for an
- * asymmetric one they diverge, and the eye follows the mass — the bounding box
- * of a paper plane is centred while the shape plainly is not.
+ * The offset used is the MIDPOINT of the two corrections. Pure centroid
+ * follows the mass — right for a solid play triangle — but overshoots on
+ * stroke glyphs whose ink is thin and lopsided (`debug-step-over`'s dot
+ * dragged the arrow ~1.3px off the disc centre; `debug-alt`'s bug pushed the
+ * play tip out). Pure bounding-box centres the outline and loses the optical
+ * nudge asymmetric solids genuinely need. Splitting the difference is the
+ * classic optical-centring compromise: symmetric glyphs are unaffected (the
+ * two centres agree), and an asymmetric glyph gets half its mass correction —
+ * enough to read as centred, not enough to visibly displace its outline.
  */
 
 /** Rasterisation factor: the glyph is measured this many times larger than it
@@ -110,6 +116,10 @@ export const measureCodiconOpticalOffset = (
   let weight = 0
   let sumX = 0
   let sumY = 0
+  let minX = Infinity
+  let maxX = -Infinity
+  let minY = Infinity
+  let maxY = -Infinity
   for (let y = 0; y < extent; y += 1) {
     for (let x = 0; x < extent; x += 1) {
       const alpha = data[(y * extent + x) * 4 + 3] ?? 0
@@ -117,13 +127,19 @@ export const measureCodiconOpticalOffset = (
         weight += alpha
         sumX += alpha * (x + 0.5)
         sumY += alpha * (y + 0.5)
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
+        if (y < minY) minY = y
+        if (y > maxY) maxY = y
       }
     }
   }
   if (weight === 0) return null
 
-  const inkCentreX = sumX / weight
-  const inkCentreY = sumY / weight
+  // Optical centre = midpoint of the mass centroid and the ink bounding-box
+  // centre (see the module doc for why neither alone is right).
+  const inkCentreX = (sumX / weight + (minX + maxX + 1) / 2) / 2
+  const inkCentreY = (sumY / weight + (minY + maxY + 1) / 2) / 2
   // The box the glyph is flex-centred in: the advance width, and the 1em line
   // box sitting on the baseline.
   const boxCentreX = originX + advance / 2

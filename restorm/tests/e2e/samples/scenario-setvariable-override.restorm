@@ -1,866 +1,46 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
-    tags: []
-    tagColors: {}
-    configuration: {}
-    environments:
-      - variables:
-          - key: scheme
-            enabled: true
-            value:
-              type: string
-              value: http
-            description: ''
-          - key: host
-            enabled: true
-            value:
-              type: string
-              value: localhost
-            description: ''
-          - key: port
-            enabled: true
-            value:
-              type: numeric
-              value: 8080
-              format: decimal
-            description: ''
-          - key: baseRoute
-            enabled: true
-            value:
-              type: string
-              value: /api
-            description: ''
-          - key: baseUrl
-            enabled: true
-            value:
-              type: expression
-              value: '{{scheme}}://{{host}}:{{port}}{{baseRoute}}'
-            description: ''
-          - key: api_key
-            enabled: true
-            value:
-              type: secret
-              source: envFileSecret
-              params:
-                key: 1 - Swagger Petstore/localhost/api_key
-            description: ''
-          - key: petstore_auth_token
-            enabled: true
-            value:
-              type: secret
-              source: envFileSecret
-              params:
-                key: 1 - Swagger Petstore/localhost/petstore_auth_token
-            description: ''
-          - key: petId
-            enabled: true
-            value:
-              type: numeric
-              value: 3
-              format: decimal
-            description: ''
-        id: 69900928-0012-4000-8000-699009286990
-        name: localhost
-        subEnvironments:
-          - variables:
-              - key: scheme
-                enabled: true
-                value:
-                  type: string
-                  value: https
-                description: ''
-            id: 3d7857e7-0018-4000-8000-3d7857e73d78
-            name: https
-    items:
-      - tags: []
-        configuration: {}
-        items:
-          - documentation: ''
-            tags:
-              - pet
-            id: 6714c0d5-c480-4a9b-add4-837f2fd60021
-            name: uploads an image
-            method: POST
-            url: '{{baseUrl}}/pet/{{petId}}/uploadImage'
-            headers:
-              - key: Authorization
-                enabled: true
-                value:
-                  type: expression
-                  value: Bearer {{petstore_auth_token}}
-            params: []
-            pathParams:
-              - key: petId
-                enabled: true
-                value:
-                  type: numeric
-                  value: 0
-                  format: decimal
-                description: ID of pet to update
-            body:
-              type: form-data
-              fields:
-                - key: additionalMetadata
-                  enabled: true
-                  value:
-                    type: string
-                    value: ''
-                  description: Additional data to pass to server
-                - key: file
-                  enabled: true
-                  value:
-                    type: string
-                    value: ''
-                  description: file to upload
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - pet
-            id: 7aa71822-325a-424c-a86a-239fecfb3300
-            name: Add a new pet to the store
-            method: POST
-            url: '{{baseUrl}}/pet'
-            headers:
-              - key: Authorization
-                enabled: true
-                value:
-                  type: expression
-                  value: Bearer {{petstore_auth_token}}
-            params: []
-            pathParams: []
-            body:
-              type: text
-              content: |-
-                {
-                  "id": 0,
-                  "category": {
-                    "id": 0,
-                    "name": ""
-                  },
-                  "name": "",
-                  "photoUrls": [
-                    ""
-                  ],
-                  "tags": [
-                    {
-                      "id": 0,
-                      "name": ""
-                    }
-                  ],
-                  "status": "available"
-                }
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - pet
-            id: 936a3026-9c14-45fa-bf07-875126049cb4
-            name: Update an existing pet
-            method: PUT
-            url: '{{baseUrl}}/pet'
-            headers:
-              - key: Authorization
-                enabled: true
-                value:
-                  type: expression
-                  value: Bearer {{petstore_auth_token}}
-            params: []
-            pathParams: []
-            body:
-              type: text
-              content: |-
-                {
-                  "id": 0,
-                  "category": {
-                    "id": 0,
-                    "name": ""
-                  },
-                  "name": "",
-                  "photoUrls": [
-                    ""
-                  ],
-                  "tags": [
-                    {
-                      "id": 0,
-                      "name": ""
-                    }
-                  ],
-                  "status": "available"
-                }
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - pet
-            id: ea56da69-c8a5-4705-949c-4ae23cfb3695
-            name: Finds Pets by status
-            method: GET
-            url: '{{baseUrl}}/pet/findByStatus'
-            headers:
-              - key: Authorization
-                enabled: true
-                value:
-                  type: expression
-                  value: Bearer {{petstore_auth_token}}
-            params:
-              - key: status
-                enabled: true
-                value:
-                  type: enumList
-                  value:
-                    - available
-                  enumDefinitionId: 2b3bddb4-000f-4000-8000-2b3bddb42b3b
-                description: Status values that need to be considered for filter
-            pathParams: []
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - pet
-            id: ebc52e40-0257-413a-9cae-4a9a48ff180a
-            name: Finds Pets by tags
-            method: GET
-            url: '{{baseUrl}}/pet/findByTags'
-            headers:
-              - key: Authorization
-                enabled: true
-                value:
-                  type: expression
-                  value: Bearer {{petstore_auth_token}}
-            params:
-              - key: tags
-                enabled: false
-                value:
-                  type: string
-                  value: ''
-                description: Tags to filter by
-            pathParams: []
-            deprecated: true
-            type: http
-          - documentation: ''
-            tags:
-              - pet
-            id: 46712c9e-10ca-4e71-b0df-45cb647a035f
-            name: Find pet by ID
-            method: GET
-            url: '{{baseUrl}}/pet/{{petId}}'
-            headers:
-              - key: api_key
-                enabled: true
-                value:
-                  type: expression
-                  value: '{{api_key}}'
-            params: []
-            pathParams:
-              - key: petId
-                enabled: true
-                value:
-                  type: expression
-                  value: '{{petId}}'
-                description: ID of pet to return
-            deprecated: false
-            quickConfigs:
-              - id: qc_mqydc5lz_duo5kh
-                name: pet1
-                requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
-                storageTarget: project
-                fields:
-                  method: GET
-                  url: '{{baseUrl}}/pet/{{petId}}'
-                  headers:
-                    - key: api_key
-                      value:
-                        type: expression
-                        value: '{{api_key}}'
-                  params: []
-                  pathParams:
-                    - key: petId
-                      value:
-                        type: numeric
-                        value: 1
-                        format: decimal
-                      description: ID of pet to return
-                      enabled: true
-                createdAt: '2026-06-28T22:36:42.983Z'
-                updatedAt: '2026-06-28T22:36:42.983Z'
-              - id: qc_mqydcc2d_mdhocy
-                name: pet2
-                requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
-                storageTarget: project
-                fields:
-                  method: GET
-                  url: '{{baseUrl}}/pet/{{petId}}'
-                  headers:
-                    - key: api_key
-                      value:
-                        type: expression
-                        value: '{{api_key}}'
-                  params: []
-                  pathParams:
-                    - key: petId
-                      value:
-                        type: numeric
-                        value: 2
-                        format: decimal
-                      description: ID of pet to return
-                      enabled: true
-                createdAt: '2026-06-28T22:36:51.349Z'
-                updatedAt: '2026-06-28T22:36:51.349Z'
-            type: http
-          - documentation: ''
-            tags:
-              - pet
-            id: 425facbb-17a3-44cb-8f8a-7dbd5c4b7324
-            name: Updates a pet in the store with form data
-            method: POST
-            url: '{{baseUrl}}/pet/{{petId}}'
-            headers:
-              - key: Authorization
-                enabled: true
-                value:
-                  type: expression
-                  value: Bearer {{petstore_auth_token}}
-            params: []
-            pathParams:
-              - key: petId
-                enabled: true
-                value:
-                  type: numeric
-                  value: 0
-                  format: decimal
-                description: ID of pet that needs to be updated
-            body:
-              type: x-www-form-urlencoded
-              fields:
-                - key: name
-                  enabled: true
-                  value:
-                    type: string
-                    value: ''
-                  description: Updated name of the pet
-                - key: status
-                  enabled: true
-                  value:
-                    type: string
-                    value: ''
-                  description: Updated status of the pet
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - pet
-            id: fee9cfbc-e53f-401e-9672-1577083a7586
-            name: Deletes a pet
-            method: DELETE
-            url: '{{baseUrl}}/pet/{{petId}}'
-            headers:
-              - key: api_key
-                enabled: false
-                value:
-                  type: string
-                  value: ''
-                description: ''
-              - key: Authorization
-                enabled: true
-                value:
-                  type: expression
-                  value: Bearer {{petstore_auth_token}}
-            params: []
-            pathParams:
-              - key: petId
-                enabled: true
-                value:
-                  type: numeric
-                  value: 0
-                  format: decimal
-                description: Pet id to delete
-            deprecated: false
-            type: http
-          - type: scenario
-            tags: []
-            params: []
-            nodes:
-              - id: 6b8beab8-962c-4680-9214-fff964958da2
-                kind: setVariable
-                config:
-                  name: petId
-                  value:
-                    type: numeric
-                    value: 1
-                    format: decimal
-                inputs:
-                  - id: in
-                    name: ''
-                    dataType: any
-                    flow: signal
-                  - id: value
-                    name: value
-                    dataType: any
-                outputs: []
-                position:
-                  x: 12
-                  'y': 63
-              - id: 6507c613-9505-45db-8fdc-f632e2084e6e
-                kind: httpRequest
-                config:
-                  requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
-                  label: Find pet by ID
-                inputs:
-                  - id: in
-                    name: ''
-                    dataType: any
-                    flow: signal
-                  - id: env
-                    name: env
-                    dataType: any
-                    flow: value
-                  - id: requestOverride
-                    name: override
-                    dataType: object
-                    flow: value
-                outputs:
-                  - id: response
-                    name: response
-                    dataType: response
-                    role: response
-                    flow: both
-                position:
-                  x: 362
-                  'y': 12
-              - id: 2d3c8be4-daea-4ecc-b219-18b3d2dc95c6
-                kind: log
-                config:
-                  message: pet récupéré (petId surchargé par setVariable)
-                  level: info
-                inputs:
-                  - id: in
-                    name: ''
-                    dataType: any
-                    flow: signal
-                  - id: message
-                    name: message
-                    dataType: string
-                  - id: data
-                    name: data
-                    dataType: any
-                outputs: []
-                position:
-                  x: 712
-                  'y': 58
-            edges:
-              - id: da7c1efc-c6e8-4551-a5e3-12db14f280cf
-                from:
-                  nodeId: 6b8beab8-962c-4680-9214-fff964958da2
-                  portId: done
-                to:
-                  nodeId: 6507c613-9505-45db-8fdc-f632e2084e6e
-                  portId: in
-              - id: f3b53d44-0e4b-4107-a2cb-13237632ae77
-                from:
-                  nodeId: 6507c613-9505-45db-8fdc-f632e2084e6e
-                  portId: response
-                to:
-                  nodeId: 2d3c8be4-daea-4ecc-b219-18b3d2dc95c6
-                  portId: data
-                selector: .
-              - id: 2d6ef224-3889-4b34-aa1e-e920dd6e61bc
-                from:
-                  nodeId: 6507c613-9505-45db-8fdc-f632e2084e6e
-                  portId: response
-                to:
-                  nodeId: 2d3c8be4-daea-4ecc-b219-18b3d2dc95c6
-                  portId: in
-            name: setVariable override
-            id: 4a49cda6-6d62-4426-b198-3bc7a672fd3e
-            items: []
-        id: 75acded1-768e-46a5-b86e-efbf22d7515a
-        name: pet
-      - tags: []
-        configuration: {}
-        items:
-          - documentation: ''
-            tags:
-              - store
-            id: 9f64ae2c-2c3d-4661-baea-90448bb3e567
-            name: Place an order for a pet
-            method: POST
-            url: '{{baseUrl}}/store/order'
-            headers: []
-            params: []
-            pathParams: []
-            body:
-              type: text
-              content: |-
-                {
-                  "id": 0,
-                  "petId": 0,
-                  "quantity": 0,
-                  "shipDate": "",
-                  "status": "placed",
-                  "complete": false
-                }
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - store
-            id: 0f4df061-ff68-4712-b45e-8c2269084c9e
-            name: Find purchase order by ID
-            method: GET
-            url: '{{baseUrl}}/store/order/{{orderId}}'
-            headers: []
-            params: []
-            pathParams:
-              - key: orderId
-                enabled: true
-                value:
-                  type: numeric
-                  value: 0
-                  format: decimal
-                description: ID of pet that needs to be fetched
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - store
-            id: e2e709ca-aa21-4040-a55d-6dbef52e07fc
-            name: Delete purchase order by ID
-            method: DELETE
-            url: '{{baseUrl}}/store/order/{{orderId}}'
-            headers: []
-            params: []
-            pathParams:
-              - key: orderId
-                enabled: true
-                value:
-                  type: numeric
-                  value: 0
-                  format: decimal
-                description: ID of the order that needs to be deleted
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - store
-            id: 68132e0a-aff8-4037-9df7-65ccfab040b8
-            name: Returns pet inventories by status
-            method: GET
-            url: '{{baseUrl}}/store/inventory'
-            headers:
-              - key: api_key
-                enabled: true
-                value:
-                  type: expression
-                  value: '{{api_key}}'
-            params: []
-            pathParams: []
-            deprecated: false
-            type: http
-        id: a254f15b-1473-4a36-9bef-75e3b5d8f934
-        name: store
-      - tags: []
-        configuration: {}
-        items:
-          - documentation: ''
-            tags:
-              - user
-            id: f3389a70-5328-4df4-be91-c365f04b4dcf
-            name: Creates list of users with given input array
-            method: POST
-            url: '{{baseUrl}}/user/createWithArray'
-            headers: []
-            params: []
-            pathParams: []
-            body:
-              type: text
-              content: |-
-                [
-                  {
-                    "id": 0,
-                    "username": "",
-                    "firstName": "",
-                    "lastName": "",
-                    "email": "",
-                    "password": "",
-                    "phone": "",
-                    "userStatus": 0
-                  }
-                ]
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - user
-            id: f47d5ab7-d57b-473c-8369-3ffebc8f7b2f
-            name: Creates list of users with given input array
-            method: POST
-            url: '{{baseUrl}}/user/createWithList'
-            headers: []
-            params: []
-            pathParams: []
-            body:
-              type: text
-              content: |-
-                [
-                  {
-                    "id": 0,
-                    "username": "",
-                    "firstName": "",
-                    "lastName": "",
-                    "email": "",
-                    "password": "",
-                    "phone": "",
-                    "userStatus": 0
-                  }
-                ]
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - user
-            id: 3a2e6505-8cb9-4b0b-9fc2-64395442605c
-            name: Get user by user name
-            method: GET
-            url: '{{baseUrl}}/user/{{username}}'
-            headers: []
-            params: []
-            pathParams:
-              - key: username
-                enabled: false
-                value:
-                  type: string
-                  value: ''
-                description: 'The name that needs to be fetched. Use user1 for testing. '
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - user
-            id: c0849626-9812-4593-94d1-5d645cb36135
-            name: Updated user
-            method: PUT
-            url: '{{baseUrl}}/user/{{username}}'
-            headers: []
-            params: []
-            pathParams:
-              - key: username
-                enabled: false
-                value:
-                  type: string
-                  value: ''
-                description: name that need to be updated
-            body:
-              type: text
-              content: |-
-                {
-                  "id": 0,
-                  "username": "",
-                  "firstName": "",
-                  "lastName": "",
-                  "email": "",
-                  "password": "",
-                  "phone": "",
-                  "userStatus": 0
-                }
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - user
-            id: e0aacda4-a7d7-4495-b04b-217a3dea0f02
-            name: Delete user
-            method: DELETE
-            url: '{{baseUrl}}/user/{{username}}'
-            headers: []
-            params: []
-            pathParams:
-              - key: username
-                enabled: false
-                value:
-                  type: string
-                  value: ''
-                description: The name that needs to be deleted
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - user
-            id: cc92baab-d896-4152-9e6d-59a79eb60c1d
-            name: Logs user into the system
-            method: GET
-            url: '{{baseUrl}}/user/login'
-            headers: []
-            params:
-              - key: username
-                enabled: false
-                value:
-                  type: string
-                  value: ''
-                description: The user name for login
-              - key: password
-                enabled: false
-                value:
-                  type: string
-                  value: ''
-                description: The password for login in clear text
-            pathParams: []
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - user
-            id: 678b58b7-4b1a-4695-b8fc-c74d32570830
-            name: Logs out current logged in user session
-            method: GET
-            url: '{{baseUrl}}/user/logout'
-            headers: []
-            params: []
-            pathParams: []
-            deprecated: false
-            type: http
-          - documentation: ''
-            tags:
-              - user
-            id: 9f95943f-abcd-428e-9375-2271e0d0fb1a
-            name: Create user
-            method: POST
-            url: '{{baseUrl}}/user'
-            headers: []
-            params: []
-            pathParams: []
-            body:
-              type: text
-              content: |-
-                {
-                  "id": 0,
-                  "username": "",
-                  "firstName": "",
-                  "lastName": "",
-                  "email": "",
-                  "password": "",
-                  "phone": "",
-                  "userStatus": 0
-                }
-            deprecated: false
-            type: http
-        id: 600764df-ffd5-4737-87a4-5073083d5d97
-        name: user
-      - type: scenario
-        tags: []
-        params: []
-        nodes:
-          - id: 1782686237088-lkpx9f
-            kind: httpRequest
-            config:
-              requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
-              label: Find pet by ID
-              id: 914812ea-816b-4c6f-928d-c73dd5e01dd5
-            inputs:
-              - id: in
-                name: ''
-                dataType: any
-                flow: signal
-              - id: env
-                name: env
-                dataType: any
-                flow: value
-              - id: requestOverride
-                name: override
-                dataType: object
-                flow: value
-            outputs:
-              - id: response
-                name: response
-                dataType: response
-                role: response
-                flow: both
-            position:
-              x: 400
-              'y': 360
-          - id: 1782686258435-ap4dq1
-            kind: log
-            config: {}
-            inputs:
-              - id: in
-                name: ''
-                dataType: any
-                flow: signal
-              - id: message
-                name: message
-                dataType: string
-              - id: data
-                name: data
-                dataType: any
-            outputs: []
-            position:
-              x: 660
-              'y': 660
-          - id: 1782687588525-tcirwj
-            kind: setVariable
-            config:
-              name: petId
-              value:
-                type: numeric
-                value: 1
-                format: decimal
-            inputs:
-              - id: in
-                name: ''
-                dataType: any
-                flow: signal
-              - id: value
-                name: value
-                dataType: any
-            outputs: []
-            position:
-              x: 80
-              'y': 580
-        edges:
-          - id: e-1782686258435-nn7eyy
-            from:
-              nodeId: 1782686237088-lkpx9f
-              portId: response
-            to:
-              nodeId: 1782686258435-ap4dq1
-              portId: data
-            selector: .
-          - id: e-1782687594767-xje3cj
-            from:
-              nodeId: 1782687588525-tcirwj
-              portId: done
-            to:
-              nodeId: 1782686237088-lkpx9f
-              portId: in
-        id: 591aa9cd-cd1a-4261-b644-4132fc89c8d4
-        name: New scenario
-        items: []
-    id: 7e5e0cde-1b20-4e03-a285-1eb874dea50d
+  - id: 7e5e0cde-1b20-4e03-a285-1eb874dea50d
     name: Swagger Petstore
+    folderType: environment
     apiDocumentation:
-      sourceType: swagger
       api:
-        title: Swagger Petstore
-        description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
-        version: 1.0.7
         contact:
           email: apiteam@swagger.io
+        description: 'This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.'
+        externalDocs:
+          url: http://swagger.io
+          description: Find out more about Swagger
         license:
           name: Apache 2.0
           url: http://www.apache.org/licenses/LICENSE-2.0.html
         termsOfService: http://swagger.io/terms/
-        externalDocs:
-          description: Find out more about Swagger
-          url: http://swagger.io
+        title: Swagger Petstore
+        version: 1.0.7
+      groups:
+        pet:
+          name: pet
+          description: Everything about your Pets
+          externalDocs:
+            url: http://swagger.io
+            description: Find out more
+        store:
+          name: store
+          description: Access to Petstore orders
+        user:
+          name: user
+          description: Operations about user
+          externalDocs:
+            url: http://swagger.io
+            description: Find out more about our store
       models:
         ApiResponse:
           name: ApiResponse
           properties:
             - name: code
               type: integer
-              required: false
               format: int32
+              required: false
             - name: type
               type: string
               required: false
@@ -872,28 +52,60 @@ collections:
           properties:
             - name: id
               type: integer
-              required: false
               format: int64
+              required: false
             - name: name
               type: string
               required: false
           xml:
             name: Category
+        Order:
+          name: Order
+          properties:
+            - name: id
+              type: integer
+              format: int64
+              required: false
+            - name: petId
+              type: integer
+              format: int64
+              required: false
+            - name: quantity
+              type: integer
+              format: int32
+              required: false
+            - name: shipDate
+              type: string
+              format: date-time
+              required: false
+            - name: status
+              type: string
+              description: Order Status
+              enumValues:
+                - placed
+                - approved
+                - delivered
+              required: false
+            - name: complete
+              type: boolean
+              required: false
+          xml:
+            name: Order
         Pet:
           name: Pet
           properties:
             - name: id
               type: integer
-              required: false
               format: int64
+              required: false
             - name: category
               type: Category
               required: false
               targetModelRef: Category
             - name: name
               type: string
-              required: true
               example: doggie
+              required: true
             - name: photoUrls
               type: array<string>
               required: true
@@ -901,19 +113,19 @@ collections:
                 wrapped: true
             - name: tags
               type: array<Tag>
+              isArrayOfRef: true
               required: false
               targetModelRef: Tag
-              isArrayOfRef: true
               xml:
                 wrapped: true
             - name: status
               type: string
-              required: false
               description: pet status in the store
               enumValues:
                 - available
                 - pending
                 - sold
+              required: false
           xml:
             name: Pet
         Tag:
@@ -921,52 +133,20 @@ collections:
           properties:
             - name: id
               type: integer
-              required: false
               format: int64
+              required: false
             - name: name
               type: string
               required: false
           xml:
             name: Tag
-        Order:
-          name: Order
-          properties:
-            - name: id
-              type: integer
-              required: false
-              format: int64
-            - name: petId
-              type: integer
-              required: false
-              format: int64
-            - name: quantity
-              type: integer
-              required: false
-              format: int32
-            - name: shipDate
-              type: string
-              required: false
-              format: date-time
-            - name: status
-              type: string
-              required: false
-              description: Order Status
-              enumValues:
-                - placed
-                - approved
-                - delivered
-            - name: complete
-              type: boolean
-              required: false
-          xml:
-            name: Order
         User:
           name: User
           properties:
             - name: id
               type: integer
-              required: false
               format: int64
+              required: false
             - name: username
               type: string
               required: false
@@ -987,56 +167,41 @@ collections:
               required: false
             - name: userStatus
               type: integer
-              required: false
-              format: int32
               description: User Status
+              format: int32
+              required: false
           xml:
             name: User
-      groups:
-        pet:
-          name: pet
-          description: Everything about your Pets
-          externalDocs:
-            description: Find out more
-            url: http://swagger.io
-        store:
-          name: store
-          description: Access to Petstore orders
-        user:
-          name: user
-          description: Operations about user
-          externalDocs:
-            description: Find out more about our store
-            url: http://swagger.io
       operations:
-        - match:
-            urlPattern: /pet/{petId}/uploadImage
-            method: POST
-          group: pet
-          summary: uploads an image
-          description: ''
-          operationId: uploadFile
-          consumes:
+        - consumes:
             - multipart/form-data
-          produces:
-            - application/json
+          description: ''
+          group: pet
+          match:
+            method: POST
+            urlPattern: /pet/{petId}/uploadImage
+          operationId: uploadFile
           parameters:
             - name: petId
-              location: path
               type: integer
-              required: true
-              format: int64
               description: ID of pet to update
+              format: int64
+              location: path
+              required: true
             - name: additionalMetadata
-              location: formData
               type: string
-              required: false
               description: Additional data to pass to server
-            - name: file
               location: formData
-              type: file
               required: false
+            - name: file
+              type: file
               description: file to upload
+              location: formData
+              required: false
+          produces:
+            - application/json
+          referencedModels:
+            - ApiResponse
           responses:
             '200':
               description: successful operation
@@ -1045,27 +210,27 @@ collections:
             - petstore_auth:
                 - write:pets
                 - read:pets
-          referencedModels:
-            - ApiResponse
-        - match:
-            urlPattern: /pet
-            method: POST
-          group: pet
-          summary: Add a new pet to the store
-          description: ''
-          operationId: addPet
-          consumes:
+          summary: uploads an image
+        - consumes:
             - application/json
             - application/xml
+          description: ''
+          group: pet
+          match:
+            method: POST
+            urlPattern: /pet
+          operationId: addPet
+          parameters:
+            - name: body
+              type: Pet
+              description: Pet object that needs to be added to the store
+              location: body
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: body
-              location: body
-              type: Pet
-              required: true
-              description: Pet object that needs to be added to the store
+          referencedModels:
+            - Pet
           responses:
             '405':
               description: Invalid input
@@ -1073,27 +238,27 @@ collections:
             - petstore_auth:
                 - write:pets
                 - read:pets
-          referencedModels:
-            - Pet
-        - match:
-            urlPattern: /pet
-            method: PUT
-          group: pet
-          summary: Update an existing pet
-          description: ''
-          operationId: updatePet
-          consumes:
+          summary: Add a new pet to the store
+        - consumes:
             - application/json
             - application/xml
+          description: ''
+          group: pet
+          match:
+            method: PUT
+            urlPattern: /pet
+          operationId: updatePet
+          parameters:
+            - name: body
+              type: Pet
+              description: Pet object that needs to be added to the store
+              location: body
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: body
-              location: body
-              type: Pet
-              required: true
-              description: Pet object that needs to be added to the store
+          referencedModels:
+            - Pet
           responses:
             '400':
               description: Invalid ID supplied
@@ -1105,25 +270,25 @@ collections:
             - petstore_auth:
                 - write:pets
                 - read:pets
-          referencedModels:
-            - Pet
-        - match:
-            urlPattern: /pet/findByStatus
-            method: GET
+          summary: Update an existing pet
+        - description: Multiple status values can be provided with comma separated strings
           group: pet
-          summary: Finds Pets by status
-          description: Multiple status values can be provided with comma separated strings
+          match:
+            method: GET
+            urlPattern: /pet/findByStatus
           operationId: findPetsByStatus
+          parameters:
+            - name: status
+              type: array
+              collectionFormat: multi
+              description: Status values that need to be considered for filter
+              location: query
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: status
-              location: query
-              type: array
-              required: true
-              description: Status values that need to be considered for filter
-              collectionFormat: multi
+          referencedModels:
+            - Pet
           responses:
             '200':
               description: successful operation
@@ -1134,26 +299,26 @@ collections:
             - petstore_auth:
                 - write:pets
                 - read:pets
-          referencedModels:
-            - Pet
-        - match:
-            urlPattern: /pet/findByTags
-            method: GET
-          group: pet
-          summary: Finds Pets by tags
+          summary: Finds Pets by status
+        - deprecated: true
           description: Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+          group: pet
+          match:
+            method: GET
+            urlPattern: /pet/findByTags
           operationId: findPetsByTags
-          deprecated: true
+          parameters:
+            - name: tags
+              type: array
+              collectionFormat: multi
+              description: Tags to filter by
+              location: query
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: tags
-              location: query
-              type: array
-              required: true
-              description: Tags to filter by
-              collectionFormat: multi
+          referencedModels:
+            - Pet
           responses:
             '200':
               description: successful operation
@@ -1164,25 +329,25 @@ collections:
             - petstore_auth:
                 - write:pets
                 - read:pets
-          referencedModels:
-            - Pet
-        - match:
-            urlPattern: /pet/{petId}
-            method: GET
+          summary: Finds Pets by tags
+        - description: Returns a single pet
           group: pet
-          summary: Find pet by ID
-          description: Returns a single pet
+          match:
+            method: GET
+            urlPattern: /pet/{petId}
           operationId: getPetById
+          parameters:
+            - name: petId
+              type: integer
+              description: ID of pet to return
+              format: int64
+              location: path
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: petId
-              location: path
-              type: integer
-              required: true
-              format: int64
-              description: ID of pet to return
+          referencedModels:
+            - Pet
           responses:
             '200':
               description: successful operation
@@ -1193,37 +358,35 @@ collections:
               description: Pet not found
           security:
             - api_key: []
-          referencedModels:
-            - Pet
-        - match:
-            urlPattern: /pet/{petId}
-            method: POST
-          group: pet
-          summary: Updates a pet in the store with form data
-          description: ''
-          operationId: updatePetWithForm
-          consumes:
+          summary: Find pet by ID
+        - consumes:
             - application/x-www-form-urlencoded
+          description: ''
+          group: pet
+          match:
+            method: POST
+            urlPattern: /pet/{petId}
+          operationId: updatePetWithForm
+          parameters:
+            - name: petId
+              type: integer
+              description: ID of pet that needs to be updated
+              format: int64
+              location: path
+              required: true
+            - name: name
+              type: string
+              description: Updated name of the pet
+              location: formData
+              required: false
+            - name: status
+              type: string
+              description: Updated status of the pet
+              location: formData
+              required: false
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: petId
-              location: path
-              type: integer
-              required: true
-              format: int64
-              description: ID of pet that needs to be updated
-            - name: name
-              location: formData
-              type: string
-              required: false
-              description: Updated name of the pet
-            - name: status
-              location: formData
-              type: string
-              required: false
-              description: Updated status of the pet
           responses:
             '405':
               description: Invalid input
@@ -1231,27 +394,27 @@ collections:
             - petstore_auth:
                 - write:pets
                 - read:pets
-        - match:
-            urlPattern: /pet/{petId}
-            method: DELETE
+          summary: Updates a pet in the store with form data
+        - description: ''
           group: pet
-          summary: Deletes a pet
-          description: ''
+          match:
+            method: DELETE
+            urlPattern: /pet/{petId}
           operationId: deletePet
+          parameters:
+            - name: api_key
+              type: string
+              location: header
+              required: false
+            - name: petId
+              type: integer
+              description: Pet id to delete
+              format: int64
+              location: path
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: api_key
-              location: header
-              type: string
-              required: false
-            - name: petId
-              location: path
-              type: integer
-              required: true
-              format: int64
-              description: Pet id to delete
           responses:
             '400':
               description: Invalid ID supplied
@@ -1261,52 +424,54 @@ collections:
             - petstore_auth:
                 - write:pets
                 - read:pets
-        - match:
-            urlPattern: /store/order
-            method: POST
-          group: store
-          summary: Place an order for a pet
-          description: ''
-          operationId: placeOrder
-          consumes:
+          summary: Deletes a pet
+        - consumes:
             - application/json
+          description: ''
+          group: store
+          match:
+            method: POST
+            urlPattern: /store/order
+          operationId: placeOrder
+          parameters:
+            - name: body
+              type: Order
+              description: order placed for purchasing the pet
+              location: body
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: body
-              location: body
-              type: Order
-              required: true
-              description: order placed for purchasing the pet
+          referencedModels:
+            - Order
           responses:
             '200':
               description: successful operation
               schema: Order
             '400':
               description: Invalid Order
-          referencedModels:
-            - Order
-        - match:
-            urlPattern: /store/order/{orderId}
-            method: GET
+          summary: Place an order for a pet
+        - description: For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
           group: store
-          summary: Find purchase order by ID
-          description: For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
+          match:
+            method: GET
+            urlPattern: /store/order/{orderId}
           operationId: getOrderById
+          parameters:
+            - name: orderId
+              type: integer
+              constraints:
+                maximum: 10
+                minimum: 1
+              description: ID of pet that needs to be fetched
+              format: int64
+              location: path
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: orderId
-              location: path
-              type: integer
-              required: true
-              format: int64
-              description: ID of pet that needs to be fetched
-              constraints:
-                minimum: 1
-                maximum: 10
+          referencedModels:
+            - Order
           responses:
             '200':
               description: successful operation
@@ -1315,38 +480,36 @@ collections:
               description: Invalid ID supplied
             '404':
               description: Order not found
-          referencedModels:
-            - Order
-        - match:
-            urlPattern: /store/order/{orderId}
-            method: DELETE
+          summary: Find purchase order by ID
+        - description: For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
           group: store
-          summary: Delete purchase order by ID
-          description: For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
+          match:
+            method: DELETE
+            urlPattern: /store/order/{orderId}
           operationId: deleteOrder
+          parameters:
+            - name: orderId
+              type: integer
+              constraints:
+                minimum: 1
+              description: ID of the order that needs to be deleted
+              format: int64
+              location: path
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: orderId
-              location: path
-              type: integer
-              required: true
-              format: int64
-              description: ID of the order that needs to be deleted
-              constraints:
-                minimum: 1
           responses:
             '400':
               description: Invalid ID supplied
             '404':
               description: Order not found
-        - match:
-            urlPattern: /store/inventory
-            method: GET
+          summary: Delete purchase order by ID
+        - description: Returns a map of status codes to quantities
           group: store
-          summary: Returns pet inventories by status
-          description: Returns a map of status codes to quantities
+          match:
+            method: GET
+            urlPattern: /store/inventory
           operationId: getInventory
           produces:
             - application/json
@@ -1356,68 +519,70 @@ collections:
               schema: object
           security:
             - api_key: []
-        - match:
+          summary: Returns pet inventories by status
+        - consumes:
+            - application/json
+          description: ''
+          group: user
+          match:
+            method: POST
             urlPattern: /user/createWithArray
-            method: POST
-          group: user
-          summary: Creates list of users with given input array
-          description: ''
           operationId: createUsersWithArrayInput
-          consumes:
-            - application/json
+          parameters:
+            - name: body
+              type: array<User>
+              description: List of user object
+              location: body
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: body
-              location: body
-              type: array<User>
-              required: true
-              description: List of user object
+          referencedModels:
+            - User
           responses:
             default:
               description: successful operation
-          referencedModels:
-            - User
-        - match:
-            urlPattern: /user/createWithList
-            method: POST
-          group: user
           summary: Creates list of users with given input array
-          description: ''
-          operationId: createUsersWithListInput
-          consumes:
+        - consumes:
             - application/json
+          description: ''
+          group: user
+          match:
+            method: POST
+            urlPattern: /user/createWithList
+          operationId: createUsersWithListInput
+          parameters:
+            - name: body
+              type: array<User>
+              description: List of user object
+              location: body
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: body
-              location: body
-              type: array<User>
-              required: true
-              description: List of user object
+          referencedModels:
+            - User
           responses:
             default:
               description: successful operation
-          referencedModels:
-            - User
-        - match:
-            urlPattern: /user/{username}
-            method: GET
+          summary: Creates list of users with given input array
+        - description: ''
           group: user
-          summary: Get user by user name
-          description: ''
+          match:
+            method: GET
+            urlPattern: /user/{username}
           operationId: getUserByName
-          produces:
-            - application/json
-            - application/xml
           parameters:
             - name: username
-              location: path
               type: string
-              required: true
               description: 'The name that needs to be fetched. Use user1 for testing. '
+              location: path
+              required: true
+          produces:
+            - application/json
+            - application/xml
+          referencedModels:
+            - User
           responses:
             '200':
               description: successful operation
@@ -1426,101 +591,99 @@ collections:
               description: Invalid username supplied
             '404':
               description: User not found
-          referencedModels:
-            - User
-        - match:
-            urlPattern: /user/{username}
-            method: PUT
-          group: user
-          summary: Updated user
-          description: This can only be done by the logged in user.
-          operationId: updateUser
-          consumes:
+          summary: Get user by user name
+        - consumes:
             - application/json
+          description: This can only be done by the logged in user.
+          group: user
+          match:
+            method: PUT
+            urlPattern: /user/{username}
+          operationId: updateUser
+          parameters:
+            - name: username
+              type: string
+              description: name that need to be updated
+              location: path
+              required: true
+            - name: body
+              type: User
+              description: Updated user object
+              location: body
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: username
-              location: path
-              type: string
-              required: true
-              description: name that need to be updated
-            - name: body
-              location: body
-              type: User
-              required: true
-              description: Updated user object
+          referencedModels:
+            - User
           responses:
             '400':
               description: Invalid user supplied
             '404':
               description: User not found
-          referencedModels:
-            - User
-        - match:
-            urlPattern: /user/{username}
-            method: DELETE
+          summary: Updated user
+        - description: This can only be done by the logged in user.
           group: user
-          summary: Delete user
-          description: This can only be done by the logged in user.
+          match:
+            method: DELETE
+            urlPattern: /user/{username}
           operationId: deleteUser
+          parameters:
+            - name: username
+              type: string
+              description: The name that needs to be deleted
+              location: path
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: username
-              location: path
-              type: string
-              required: true
-              description: The name that needs to be deleted
           responses:
             '400':
               description: Invalid username supplied
             '404':
               description: User not found
-        - match:
-            urlPattern: /user/login
-            method: GET
+          summary: Delete user
+        - description: ''
           group: user
-          summary: Logs user into the system
-          description: ''
+          match:
+            method: GET
+            urlPattern: /user/login
           operationId: loginUser
+          parameters:
+            - name: username
+              type: string
+              description: The user name for login
+              location: query
+              required: true
+            - name: password
+              type: string
+              description: The password for login in clear text
+              location: query
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: username
-              location: query
-              type: string
-              required: true
-              description: The user name for login
-            - name: password
-              location: query
-              type: string
-              required: true
-              description: The password for login in clear text
           responses:
             '200':
               description: successful operation
-              schema: string
               headers:
                 X-Expires-After:
                   type: string
-                  format: date-time
                   description: date in UTC when token expires
+                  format: date-time
                 X-Rate-Limit:
                   type: integer
-                  format: int32
                   description: calls per hour allowed by the user
+                  format: int32
+              schema: string
             '400':
               description: Invalid username/password supplied
-        - match:
-            urlPattern: /user/logout
-            method: GET
+          summary: Logs user into the system
+        - description: ''
           group: user
-          summary: Logs out current logged in user session
-          description: ''
+          match:
+            method: GET
+            urlPattern: /user/logout
           operationId: logoutUser
           produces:
             - application/json
@@ -1528,52 +691,962 @@ collections:
           responses:
             default:
               description: successful operation
-        - match:
-            urlPattern: /user
-            method: POST
-          group: user
-          summary: Create user
-          description: This can only be done by the logged in user.
-          operationId: createUser
-          consumes:
+          summary: Logs out current logged in user session
+        - consumes:
             - application/json
+          description: This can only be done by the logged in user.
+          group: user
+          match:
+            method: POST
+            urlPattern: /user
+          operationId: createUser
+          parameters:
+            - name: body
+              type: User
+              description: Created user object
+              location: body
+              required: true
           produces:
             - application/json
             - application/xml
-          parameters:
-            - name: body
-              location: body
-              type: User
-              required: true
-              description: Created user object
+          referencedModels:
+            - User
           responses:
             default:
               description: successful operation
-          referencedModels:
-            - User
-      sourceUrl: http://localhost:8080/api/swagger.json
-      server:
-        host: localhost:8080
-        basePath: /api
-        schemes:
-          - https
-          - http
+          summary: Create user
       securitySchemes:
         api_key:
-          type: apiKey
           name: api_key
+          type: apiKey
           in: header
         petstore_auth:
           type: oauth2
           flows:
             - type: implicit
+              authorizationUrl: https://petstore.swagger.io/oauth/authorize
               scopes:
                 read:pets: read your pets
                 write:pets: modify pets in your account
-              authorizationUrl: https://petstore.swagger.io/oauth/authorize
-    importSource: swagger
-    apiUpdate:
+      server:
+        basePath: /api
+        host: localhost:8080
+        schemes:
+          - https
+          - http
+      sourceType: swagger
       sourceUrl: http://localhost:8080/api/swagger.json
+    apiUpdate:
       lastImportedAt: 1782686173349
       payloadChecksum: sha256:7ad2c35ade2afd0b718238f965b081710e9b7d1230f65529b91018890f401b8d
+      sourceUrl: http://localhost:8080/api/swagger.json
+    configuration: {}
+    environments:
+      - id: 69900928-0012-4000-8000-699009286990
+        name: localhost
+        subEnvironments:
+          - id: 3d7857e7-0018-4000-8000-3d7857e73d78
+            name: https
+            variables:
+              - key: scheme
+                description: ''
+                enabled: true
+                value:
+                  type: string
+                  value: https
+        variables:
+          - key: scheme
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: http
+          - key: host
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: localhost
+          - key: port
+            description: ''
+            enabled: true
+            value:
+              type: numeric
+              format: decimal
+              value: 8080
+          - key: baseRoute
+            description: ''
+            enabled: true
+            value:
+              type: string
+              value: /api
+          - key: baseUrl
+            description: ''
+            enabled: true
+            value:
+              type: expression
+              value: '{{scheme}}://{{host}}:{{port}}{{baseRoute}}'
+          - key: api_key
+            description: ''
+            enabled: true
+            value:
+              type: secret
+              params: {}
+              source: envFileSecret
+          - key: petstore_auth_token
+            description: ''
+            enabled: true
+            value:
+              type: secret
+              params: {}
+              source: envFileSecret
+          - key: petId
+            description: ''
+            enabled: true
+            value:
+              type: numeric
+              format: decimal
+              value: 3
+    importSource: swagger
+    items:
+      - id: 75acded1-768e-46a5-b86e-efbf22d7515a
+        name: pet
+        configuration: {}
+        items:
+          - id: 6714c0d5-c480-4a9b-add4-837f2fd60021
+            name: uploads an image
+            type: http
+            method: POST
+            url: '{{baseUrl}}/pet/{{petId}}/uploadImage'
+            body:
+              type: form-data
+              fields:
+                - key: additionalMetadata
+                  description: Additional data to pass to server
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+                - key: file
+                  description: file to upload
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: Authorization
+                enabled: true
+                value:
+                  type: expression
+                  value: Bearer {{petstore_auth_token}}
+            params: []
+            pathParams:
+              - key: petId
+                description: ID of pet to update
+                enabled: true
+                value:
+                  type: numeric
+                  format: decimal
+                  value: 0
+            tags:
+              - pet
+          - id: 7aa71822-325a-424c-a86a-239fecfb3300
+            name: Add a new pet to the store
+            type: http
+            method: POST
+            url: '{{baseUrl}}/pet'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "category": {
+                    "id": 0,
+                    "name": ""
+                  },
+                  "name": "",
+                  "photoUrls": [
+                    ""
+                  ],
+                  "tags": [
+                    {
+                      "id": 0,
+                      "name": ""
+                    }
+                  ],
+                  "status": "available"
+                }
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: Authorization
+                enabled: true
+                value:
+                  type: expression
+                  value: Bearer {{petstore_auth_token}}
+            params: []
+            pathParams: []
+            tags:
+              - pet
+          - id: 936a3026-9c14-45fa-bf07-875126049cb4
+            name: Update an existing pet
+            type: http
+            method: PUT
+            url: '{{baseUrl}}/pet'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "category": {
+                    "id": 0,
+                    "name": ""
+                  },
+                  "name": "",
+                  "photoUrls": [
+                    ""
+                  ],
+                  "tags": [
+                    {
+                      "id": 0,
+                      "name": ""
+                    }
+                  ],
+                  "status": "available"
+                }
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: Authorization
+                enabled: true
+                value:
+                  type: expression
+                  value: Bearer {{petstore_auth_token}}
+            params: []
+            pathParams: []
+            tags:
+              - pet
+          - id: ea56da69-c8a5-4705-949c-4ae23cfb3695
+            name: Finds Pets by status
+            type: http
+            method: GET
+            url: '{{baseUrl}}/pet/findByStatus'
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: Authorization
+                enabled: true
+                value:
+                  type: expression
+                  value: Bearer {{petstore_auth_token}}
+            params:
+              - key: status
+                description: Status values that need to be considered for filter
+                enabled: true
+                value:
+                  type: enumList
+                  enumDefinitionId: 2b3bddb4-000f-4000-8000-2b3bddb42b3b
+                  value:
+                    - available
+            pathParams: []
+            tags:
+              - pet
+          - id: ebc52e40-0257-413a-9cae-4a9a48ff180a
+            name: Finds Pets by tags
+            type: http
+            method: GET
+            url: '{{baseUrl}}/pet/findByTags'
+            deprecated: true
+            documentation: ''
+            headers:
+              - key: Authorization
+                enabled: true
+                value:
+                  type: expression
+                  value: Bearer {{petstore_auth_token}}
+            params:
+              - key: tags
+                description: Tags to filter by
+                enabled: false
+                value:
+                  type: string
+                  value: ''
+            pathParams: []
+            tags:
+              - pet
+          - id: 46712c9e-10ca-4e71-b0df-45cb647a035f
+            name: Find pet by ID
+            type: http
+            method: GET
+            url: '{{baseUrl}}/pet/{{petId}}'
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: api_key
+                enabled: true
+                value:
+                  type: expression
+                  value: '{{api_key}}'
+            params: []
+            pathParams:
+              - key: petId
+                description: ID of pet to return
+                enabled: true
+                value:
+                  type: expression
+                  value: '{{petId}}'
+            quickConfigs:
+              - id: qc_mqydc5lz_duo5kh
+                name: pet1
+                fields:
+                  method: GET
+                  url: '{{baseUrl}}/pet/{{petId}}'
+                  headers:
+                    - key: api_key
+                      value:
+                        type: expression
+                        value: '{{api_key}}'
+                  params: []
+                  pathParams:
+                    - key: petId
+                      description: ID of pet to return
+                      enabled: true
+                      value:
+                        type: numeric
+                        format: decimal
+                        value: 1
+                requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
+                storageTarget: project
+              - id: qc_mqydcc2d_mdhocy
+                name: pet2
+                fields:
+                  method: GET
+                  url: '{{baseUrl}}/pet/{{petId}}'
+                  headers:
+                    - key: api_key
+                      value:
+                        type: expression
+                        value: '{{api_key}}'
+                  params: []
+                  pathParams:
+                    - key: petId
+                      description: ID of pet to return
+                      enabled: true
+                      value:
+                        type: numeric
+                        format: decimal
+                        value: 2
+                requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
+                storageTarget: project
+            tags:
+              - pet
+          - id: 425facbb-17a3-44cb-8f8a-7dbd5c4b7324
+            name: Updates a pet in the store with form data
+            type: http
+            method: POST
+            url: '{{baseUrl}}/pet/{{petId}}'
+            body:
+              type: x-www-form-urlencoded
+              fields:
+                - key: name
+                  description: Updated name of the pet
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+                - key: status
+                  description: Updated status of the pet
+                  enabled: true
+                  value:
+                    type: string
+                    value: ''
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: Authorization
+                enabled: true
+                value:
+                  type: expression
+                  value: Bearer {{petstore_auth_token}}
+            params: []
+            pathParams:
+              - key: petId
+                description: ID of pet that needs to be updated
+                enabled: true
+                value:
+                  type: numeric
+                  format: decimal
+                  value: 0
+            tags:
+              - pet
+          - id: fee9cfbc-e53f-401e-9672-1577083a7586
+            name: Deletes a pet
+            type: http
+            method: DELETE
+            url: '{{baseUrl}}/pet/{{petId}}'
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: api_key
+                description: ''
+                enabled: false
+                value:
+                  type: string
+                  value: ''
+              - key: Authorization
+                enabled: true
+                value:
+                  type: expression
+                  value: Bearer {{petstore_auth_token}}
+            params: []
+            pathParams:
+              - key: petId
+                description: Pet id to delete
+                enabled: true
+                value:
+                  type: numeric
+                  format: decimal
+                  value: 0
+            tags:
+              - pet
+          - id: 4a49cda6-6d62-4426-b198-3bc7a672fd3e
+            name: setVariable override
+            type: scenario
+            edges:
+              - id: da7c1efc-c6e8-4551-a5e3-12db14f280cf
+                from:
+                  nodeId: 6b8beab8-962c-4680-9214-fff964958da2
+                  portId: done
+                to:
+                  nodeId: 6507c613-9505-45db-8fdc-f632e2084e6e
+                  portId: in
+              - id: f3b53d44-0e4b-4107-a2cb-13237632ae77
+                from:
+                  nodeId: 6507c613-9505-45db-8fdc-f632e2084e6e
+                  portId: response
+                selector: .
+                to:
+                  nodeId: 2d3c8be4-daea-4ecc-b219-18b3d2dc95c6
+                  portId: data
+              - id: 2d6ef224-3889-4b34-aa1e-e920dd6e61bc
+                from:
+                  nodeId: 6507c613-9505-45db-8fdc-f632e2084e6e
+                  portId: response
+                to:
+                  nodeId: 2d3c8be4-daea-4ecc-b219-18b3d2dc95c6
+                  portId: in
+            items: []
+            nodes:
+              - id: 6b8beab8-962c-4680-9214-fff964958da2
+                config:
+                  name: petId
+                  value:
+                    type: numeric
+                    format: decimal
+                    value: 1
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: value
+                    name: value
+                    dataType: any
+                kind: setVariable
+                outputs: []
+                position:
+                  x: 12
+                  'y': 63
+              - id: 6507c613-9505-45db-8fdc-f632e2084e6e
+                config:
+                  label: Find pet by ID
+                  requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: env
+                    name: env
+                    dataType: any
+                    flow: value
+                  - id: requestOverride
+                    name: override
+                    dataType: object
+                    flow: value
+                kind: httpRequest
+                outputs:
+                  - id: response
+                    name: response
+                    dataType: response
+                    flow: both
+                    role: response
+                position:
+                  x: 362
+                  'y': 12
+              - id: 2d3c8be4-daea-4ecc-b219-18b3d2dc95c6
+                config:
+                  level: info
+                  message: pet récupéré (petId surchargé par setVariable)
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: message
+                    name: message
+                    dataType: string
+                  - id: data
+                    name: data
+                    dataType: any
+                kind: log
+                outputs: []
+                position:
+                  x: 712
+                  'y': 58
+            params: []
+            tags: []
+          - id: 9f98eb95-b075-405e-b6a8-4bc9b6d4eb4a
+            name: Leak probe
+            type: http
+            method: GET
+            url: '{{baseUrl}}/pet/{{petId}}'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams:
+              - key: petId
+                description: Own literal row — must win over any finished run
+                enabled: true
+                value:
+                  type: numeric
+                  format: decimal
+                  value: 2
+            tags: []
+          - id: 53653c33-b7b5-4b01-93db-d78cc3037c42
+            name: Leak check
+            type: scenario
+            edges:
+              - id: 1245045f-bc0d-4cd0-8c4d-abd519e5a3c1
+                from:
+                  nodeId: 319cdc8c-cbe4-4372-beea-91accd6c083c
+                  portId: done
+                to:
+                  nodeId: 6fa90c64-3137-4197-b588-8bcaa6dae799
+                  portId: in
+            items: []
+            nodes:
+              - id: 319cdc8c-cbe4-4372-beea-91accd6c083c
+                config:
+                  name: petId
+                  value:
+                    type: numeric
+                    format: decimal
+                    value: 1
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: value
+                    name: value
+                    dataType: any
+                kind: setVariable
+                outputs: []
+                position:
+                  x: 12
+                  'y': 12
+              - id: 6fa90c64-3137-4197-b588-8bcaa6dae799
+                config:
+                  label: Leak probe
+                  requestId: 9f98eb95-b075-405e-b6a8-4bc9b6d4eb4a
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: env
+                    name: env
+                    dataType: any
+                    flow: value
+                  - id: requestOverride
+                    name: override
+                    dataType: object
+                    flow: value
+                kind: httpRequest
+                outputs:
+                  - id: response
+                    name: response
+                    dataType: response
+                    flow: both
+                    role: response
+                position:
+                  x: 12
+                  'y': 156
+            params: []
+            tags: []
+        tags: []
+      - id: a254f15b-1473-4a36-9bef-75e3b5d8f934
+        name: store
+        configuration: {}
+        items:
+          - id: 9f64ae2c-2c3d-4661-baea-90448bb3e567
+            name: Place an order for a pet
+            type: http
+            method: POST
+            url: '{{baseUrl}}/store/order'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "petId": 0,
+                  "quantity": 0,
+                  "shipDate": "",
+                  "status": "placed",
+                  "complete": false
+                }
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - store
+          - id: 0f4df061-ff68-4712-b45e-8c2269084c9e
+            name: Find purchase order by ID
+            type: http
+            method: GET
+            url: '{{baseUrl}}/store/order/{{orderId}}'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams:
+              - key: orderId
+                description: ID of pet that needs to be fetched
+                enabled: true
+                value:
+                  type: numeric
+                  format: decimal
+                  value: 0
+            tags:
+              - store
+          - id: e2e709ca-aa21-4040-a55d-6dbef52e07fc
+            name: Delete purchase order by ID
+            type: http
+            method: DELETE
+            url: '{{baseUrl}}/store/order/{{orderId}}'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams:
+              - key: orderId
+                description: ID of the order that needs to be deleted
+                enabled: true
+                value:
+                  type: numeric
+                  format: decimal
+                  value: 0
+            tags:
+              - store
+          - id: 68132e0a-aff8-4037-9df7-65ccfab040b8
+            name: Returns pet inventories by status
+            type: http
+            method: GET
+            url: '{{baseUrl}}/store/inventory'
+            deprecated: false
+            documentation: ''
+            headers:
+              - key: api_key
+                enabled: true
+                value:
+                  type: expression
+                  value: '{{api_key}}'
+            params: []
+            pathParams: []
+            tags:
+              - store
+        tags: []
+      - id: 600764df-ffd5-4737-87a4-5073083d5d97
+        name: user
+        configuration: {}
+        items:
+          - id: f3389a70-5328-4df4-be91-c365f04b4dcf
+            name: Creates list of users with given input array
+            type: http
+            method: POST
+            url: '{{baseUrl}}/user/createWithArray'
+            body:
+              type: text
+              content: |-
+                [
+                  {
+                    "id": 0,
+                    "username": "",
+                    "firstName": "",
+                    "lastName": "",
+                    "email": "",
+                    "password": "",
+                    "phone": "",
+                    "userStatus": 0
+                  }
+                ]
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+          - id: f47d5ab7-d57b-473c-8369-3ffebc8f7b2f
+            name: Creates list of users with given input array
+            type: http
+            method: POST
+            url: '{{baseUrl}}/user/createWithList'
+            body:
+              type: text
+              content: |-
+                [
+                  {
+                    "id": 0,
+                    "username": "",
+                    "firstName": "",
+                    "lastName": "",
+                    "email": "",
+                    "password": "",
+                    "phone": "",
+                    "userStatus": 0
+                  }
+                ]
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+          - id: 3a2e6505-8cb9-4b0b-9fc2-64395442605c
+            name: Get user by user name
+            type: http
+            method: GET
+            url: '{{baseUrl}}/user/{{username}}'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams:
+              - key: username
+                description: 'The name that needs to be fetched. Use user1 for testing. '
+                enabled: false
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - user
+          - id: c0849626-9812-4593-94d1-5d645cb36135
+            name: Updated user
+            type: http
+            method: PUT
+            url: '{{baseUrl}}/user/{{username}}'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "username": "",
+                  "firstName": "",
+                  "lastName": "",
+                  "email": "",
+                  "password": "",
+                  "phone": "",
+                  "userStatus": 0
+                }
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams:
+              - key: username
+                description: name that need to be updated
+                enabled: false
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - user
+          - id: e0aacda4-a7d7-4495-b04b-217a3dea0f02
+            name: Delete user
+            type: http
+            method: DELETE
+            url: '{{baseUrl}}/user/{{username}}'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams:
+              - key: username
+                description: The name that needs to be deleted
+                enabled: false
+                value:
+                  type: string
+                  value: ''
+            tags:
+              - user
+          - id: cc92baab-d896-4152-9e6d-59a79eb60c1d
+            name: Logs user into the system
+            type: http
+            method: GET
+            url: '{{baseUrl}}/user/login'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params:
+              - key: username
+                description: The user name for login
+                enabled: false
+                value:
+                  type: string
+                  value: ''
+              - key: password
+                description: The password for login in clear text
+                enabled: false
+                value:
+                  type: string
+                  value: ''
+            pathParams: []
+            tags:
+              - user
+          - id: 678b58b7-4b1a-4695-b8fc-c74d32570830
+            name: Logs out current logged in user session
+            type: http
+            method: GET
+            url: '{{baseUrl}}/user/logout'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+          - id: 9f95943f-abcd-428e-9375-2271e0d0fb1a
+            name: Create user
+            type: http
+            method: POST
+            url: '{{baseUrl}}/user'
+            body:
+              type: text
+              content: |-
+                {
+                  "id": 0,
+                  "username": "",
+                  "firstName": "",
+                  "lastName": "",
+                  "email": "",
+                  "password": "",
+                  "phone": "",
+                  "userStatus": 0
+                }
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams: []
+            tags:
+              - user
+        tags: []
+      - id: 591aa9cd-cd1a-4261-b644-4132fc89c8d4
+        name: New scenario
+        type: scenario
+        edges:
+          - id: e-1782686258435-nn7eyy
+            from:
+              nodeId: 1782686237088-lkpx9f
+              portId: response
+            selector: .
+            to:
+              nodeId: 1782686258435-ap4dq1
+              portId: data
+          - id: e-1782687594767-xje3cj
+            from:
+              nodeId: 1782687588525-tcirwj
+              portId: done
+            to:
+              nodeId: 1782686237088-lkpx9f
+              portId: in
+        items: []
+        nodes:
+          - id: 1782686237088-lkpx9f
+            config:
+              label: Find pet by ID
+              requestId: 46712c9e-10ca-4e71-b0df-45cb647a035f
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: env
+                name: env
+                dataType: any
+                flow: value
+              - id: requestOverride
+                name: override
+                dataType: object
+                flow: value
+            kind: httpRequest
+            outputs:
+              - id: response
+                name: response
+                dataType: response
+                flow: both
+                role: response
+            position:
+              x: 400
+              'y': 360
+          - id: 1782686258435-ap4dq1
+            config: {}
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: message
+                name: message
+                dataType: string
+              - id: data
+                name: data
+                dataType: any
+            kind: log
+            outputs: []
+            position:
+              x: 660
+              'y': 660
+          - id: 1782687588525-tcirwj
+            config:
+              name: petId
+              value:
+                type: numeric
+                format: decimal
+                value: 1
+            inputs:
+              - id: in
+                name: ''
+                dataType: any
+                flow: signal
+              - id: value
+                name: value
+                dataType: any
+            kind: setVariable
+            outputs: []
+            position:
+              x: 80
+              'y': 580
+        params: []
+        tags: []
+    tagColors: {}
+    tags: []
 _projectUuid: 495f9561-dd79-4576-9094-c2db491cc44f

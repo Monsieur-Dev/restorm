@@ -1,8 +1,8 @@
 import { execSync } from 'child_process'
 import { rmSync } from 'fs'
 import { resolve } from 'path'
-import { isDockerAvailable, areContainersRunning, startDocker } from '../integration/docker-setup'
-import { seedGitServer } from '../integration/gitServerSeed'
+import { isDockerAvailable } from '../integration/docker-setup'
+import { FIREWALL_E2E_BYPASS_ENV } from '../../src/main/config/firewallE2EBypass'
 
 /**
  * Per-test workspace dir wiped at the start of every run so a previous
@@ -50,10 +50,25 @@ function tryStartDockerDaemon(): void {
 export default async function globalSetup(): Promise<void> {
   wipeTmpDir()
 
+  // Arm the firewall's blanket bypass for the whole run. Every fixture
+  // spreads `process.env` into its `electron.launch` env, so setting it
+  // once here reaches all of them — and a fixture that wants the firewall
+  // genuinely armed can override this single key in its own env block
+  // (spread later, so it wins) without touching any other launch.
+  //
+  // Set here rather than inferred from the userData redirect: neutralising
+  // a security control should be something a reader can see named, and
+  // something one launch can decline without giving up its isolated profile.
+  process.env[FIREWALL_E2E_BYPASS_ENV] = '1'
+
+  // Every suite that needs a mock starts its OWN Testcontainers instance
+  // (see tests/e2e/helpers/testcontainers/) — the shared compose stack is
+  // no longer started, waited on, nor seeded here. Only the daemon itself
+  // must be up.
   if (!isDockerAvailable()) {
     throw new Error([
       'Docker is not available for restorm E2E tests.',
-      'Expected `docker` and `docker compose` to be installed and accessible from PATH.'
+      'Expected `docker` to be installed and accessible from PATH.'
     ].join('\n'))
   }
 
@@ -73,33 +88,4 @@ export default async function globalSetup(): Promise<void> {
     }
   }
 
-  if (!areContainersRunning()) {
-    try {
-      startDocker()
-    } catch (error) {
-      throw new Error([
-        'Docker compose services are not running for restorm E2E tests.',
-        'Tried to run `docker compose up -d`.',
-        `Error: ${String(error)}`
-      ].join('\n'))
-    }
-    if (!areContainersRunning()) {
-      throw new Error([
-        'Docker compose services are not running for restorm E2E tests.',
-        'Tried to run `docker compose up -d` but containers are still not reported as running.',
-        'Check your Docker daemon status and the compose file at tests/docker/docker-compose.yml.'
-      ].join('\n'))
-    }
-  }
-
-  // `git-server` itself always starts with the rest of the compose file
-  // (mirroring the `stomp`/activemq mock — a per-domain SKIP flag only
-  // excludes that domain's Playwright PROJECT, not its docker service).
-  // Seeding is a separate, riskier step (host-side git CLI against the
-  // bind-mounted repo) — skip it under SKIP_GIT_E2E=1 so a host opting out
-  // because its git-server mock is unreliable doesn't also fail unrelated
-  // suites' global-setup on a seed step nothing else depends on.
-  if (process.env.SKIP_GIT_E2E !== '1') {
-    seedGitServer()
-  }
 }

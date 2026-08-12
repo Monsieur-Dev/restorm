@@ -56,7 +56,7 @@ describe('writeMcpDiscoveryFile', () => {
       pid: FIXED_PID,
       startedAt: '2026-05-03T00:00:00.000Z',
       token,
-      name: 'example session'
+      name: 'example session', mcpActive: true
     }
     await writeMcpDiscoveryFile(DIR, entry)
     const parsed = await readEntry(join(DIR, `${String(FIXED_PID)}.json`))
@@ -72,7 +72,7 @@ describe('writeMcpDiscoveryFile', () => {
       pid: FIXED_PID,
       startedAt: '2026-05-03T00:00:00.000Z',
       token,
-      name: 'extra session'
+      name: 'extra session', mcpActive: true
     }, extraPath)
     try {
       const parsed = await readEntry(extraPath)
@@ -96,7 +96,7 @@ describe('findLiveSessionByName', () => {
   it('returns the live entry whose name matches verbatim', async () => {
     await writeMcpDiscoveryFile(DIR, {
       port: 40001, projectPath: null, pid: LIVE_PID,
-      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: NAME
+      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: NAME, mcpActive: true
     })
     const found = findLiveSessionByName(DIR, NAME)
     expect(found?.port).toBe(40001)
@@ -121,8 +121,8 @@ describe('findLiveSessionByName', () => {
     const sameStarted = '2026-05-03T00:00:00.000Z'
     const winnerPid = Math.max(pidA, pidB)
     const winnerPort = winnerPid === pidA ? 41001 : 41002
-    await writeMcpDiscoveryFile(DIR, { port: 41001, projectPath: null, pid: pidA, startedAt: sameStarted, token: 'tok', name: tieName })
-    await writeMcpDiscoveryFile(DIR, { port: 41002, projectPath: null, pid: pidB, startedAt: sameStarted, token: 'tok', name: tieName })
+    await writeMcpDiscoveryFile(DIR, { port: 41001, projectPath: null, pid: pidA, startedAt: sameStarted, token: 'tok', name: tieName, mcpActive: true })
+    await writeMcpDiscoveryFile(DIR, { port: 41002, projectPath: null, pid: pidB, startedAt: sameStarted, token: 'tok', name: tieName, mcpActive: true })
     try {
       const found = findLiveSessionByName(DIR, tieName)
       expect(found?.pid).toBe(winnerPid)
@@ -138,7 +138,7 @@ describe('findLiveSessionByName', () => {
     const deadName = `dead-${String(deadPid)}`
     await writeMcpDiscoveryFile(DIR, {
       port: 40002, projectPath: null, pid: deadPid,
-      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: deadName
+      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: deadName, mcpActive: true
     })
     try {
       expect(findLiveSessionByName(DIR, deadName)).toBeNull()
@@ -189,7 +189,7 @@ describe('forwardToNamedSession', () => {
   it('forwards to the matching live entry with its bearer token + forwarded header', async () => {
     await writeMcpDiscoveryFile(DIR, {
       port, projectPath: null, pid: LIVE_PID,
-      startedAt: '2026-05-03T00:00:00.000Z', token: 'secret-token', name: NAME
+      startedAt: '2026-05-03T00:00:00.000Z', token: 'secret-token', name: NAME, mcpActive: true
     })
     const result = await forwardToNamedSession(DIR, NAME, '{"jsonrpc":"2.0","id":1,"method":"tools/call"}')
     expect(result?.status).toBe(200)
@@ -332,12 +332,20 @@ describe('MCP-cut instances — dual discovery view', () => {
     expect(findLiveSessionByName(DIR, ACTIVE_NAME)?.name).toBe(ACTIVE_NAME)
   })
 
-  it('an entry without the mcpActive flag is treated as active (backward compatible)', async () => {
+  it('an entry that does not state the flag is NOT treated as active', async () => {
+    // The writer always states it. A lockfile missing it was not written by
+    // this build, so it is not an instance we know how to talk to — inferring
+    // "active" from an absence is what let a stale shape look alive.
     await writeMcpDiscoveryFile(DIR, {
       port: 40124, projectPath: null, pid: ACTIVE_PID,
-      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: ACTIVE_NAME
+      startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: ACTIVE_NAME, mcpActive: true
     })
-    expect(readAllLiveEntries(DIR).map((e) => e.name)).toContain(ACTIVE_NAME)
-    expect(findLiveSessionByName(DIR, ACTIVE_NAME)?.name).toBe(ACTIVE_NAME)
+    const lockfile = join(DIR, `${String(ACTIVE_PID)}.json`)
+    const raw = JSON.parse(await fs.readFile(lockfile, 'utf-8')) as Record<string, unknown>
+    delete raw['mcpActive']
+    await fs.writeFile(lockfile, JSON.stringify(raw), 'utf-8')
+
+    expect(readAllLiveEntries(DIR).map((e) => e.name)).not.toContain(ACTIVE_NAME)
+    expect(findLiveSessionByName(DIR, ACTIVE_NAME)).toBeNull()
   })
 })

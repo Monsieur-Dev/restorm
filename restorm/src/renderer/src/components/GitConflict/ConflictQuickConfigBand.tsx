@@ -81,5 +81,3 @@ export const ConflictQuickConfigBand: React.FC<ConflictQuickConfigBandProps> = (
     </div>
   )
 }
-
-export default ConflictQuickConfigBand

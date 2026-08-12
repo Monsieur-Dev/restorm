@@ -445,32 +445,17 @@ contextBridge.exposeInMainWorld('restorm', {
     await ipcRenderer.invoke('restorm:open-editor', file)
   },
   
-  // File operations with mode support
+  // File operations
   file: {
     /** Save as single file */
     saveAsFile: async (data: unknown, format: PersistenceFormat): Promise<SaveResult> => {
       const result: unknown = await ipcRenderer.invoke('restorm:save-as-file', data, format)
       return result as SaveResult
     },
-    /** Save as folder structure */
-    saveAsFolder: async (data: unknown, format: PersistenceFormat, targetPath?: string): Promise<SaveResult> => {
-      const result: unknown = await ipcRenderer.invoke('restorm:save-as-folder', data, format, targetPath)
-      return result as SaveResult
-    },
-    /** Open folder */
-    openFolder: async (): Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }> => {
-      const result: unknown = await ipcRenderer.invoke('restorm:open-folder')
-      return result as { success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
-    },
-    /** Show save dialog for folder selection */
-    showFolderDialog: async (): Promise<{ canceled: boolean; filePath?: string }> => {
-      const result: unknown = await ipcRenderer.invoke('restorm:show-folder-dialog')
-      return result as { canceled: boolean; filePath?: string }
-    },
-    /** Open a file or folder (smart detection) */
-    openPath: async (path: string): Promise<{ success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }> => {
+    /** Open a project file by path */
+    openPath: async (path: string): Promise<{ success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:open-path', path)
-      return result as { success: boolean; isDirectory?: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
+      return result as { success: boolean; content?: unknown; path?: string; format?: PersistenceFormat }
     },
     /** Reveal a path in the OS's native file explorer (Finder/Explorer/file manager) */
     revealInFolder: async (path: string): Promise<{ success: boolean; error?: string }> => {
@@ -534,6 +519,14 @@ contextBridge.exposeInMainWorld('restorm', {
     ): Promise<{ success: boolean }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:secrets:refresh', args)
       return result as { success: boolean }
+    },
+    /** The `<project>.restorm.env` sidecar was rewritten OUTSIDE the app —
+     * the renderer silently re-reads and re-applies it (no prompt; the
+     * sidecar is memory-held and would otherwise be overwritten on save). */
+    onExternallyChanged: (callback: (payload: { path: string }) => void): (() => void) => {
+      const listener = (_event: unknown, payload: { path: string }): void => { callback(payload) }
+      ipcRenderer.on('restorm:secrets:externally-changed', listener)
+      return () => { ipcRenderer.removeListener('restorm:secrets:externally-changed', listener) }
     }
   },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {

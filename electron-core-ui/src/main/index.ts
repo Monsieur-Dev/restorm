@@ -28,6 +28,28 @@ export {
   FileService
 } from './services'
 
+// App-icon menu (macOS Dock + Windows jump list; the Linux adapter lands later)
+export {
+  AppIconMenuService,
+  MacDockAdapter,
+  WindowsJumpListAdapter,
+  NoopAppIconMenuAdapter,
+  createDefaultAdapter,
+  initAppIconMenuService,
+  getAppIconMenuService,
+  isAppIconMenuServiceInitialized,
+  resetAppIconMenuService
+} from './services'
+export type {
+  AppIconMenuLabels,
+  AppIconAction,
+  AppIconMenuEntry,
+  AppIconMenuModel,
+  AppIconMenuAdapter,
+  AppIconMenuServiceOptions
+} from './services'
+export { APP_ICON_MENU_SET_LABELS_CHANNEL, APP_ICON_MENU_INVOKE_CHANNEL } from '../types/appIconMenu'
+
 // Git service
 export { getGitService, resetGitService, GitService } from './services'
 export type { GitServiceConfig } from './services'
@@ -74,9 +96,6 @@ export {
   deserialize,
   detectFormat,
   filterNonSerialised,
-  generateIndexedFileName,
-  sanitizeFileName,
-  calculateIndexPadding,
   PERSISTENCE_FORMATS,
   atomicWriteFile,
   codeOf
@@ -236,8 +255,7 @@ export {
   trackable,
   searchable,
   NonSerialised,
-  separateFiles,
-  separateFolders,
+  saveUnits,
   fileNaming,
   graphqlType,
   graphqlField,
@@ -249,12 +267,9 @@ export {
   getSearchableProperties,
   isNonSerialised,
   getNonSerialisedProperties,
-  hasSeparateFiles,
-  getSeparateFilesConfig,
-  getSeparateFilesProperties,
-  hasSeparateFolders,
-  getSeparateFoldersConfig,
-  getSeparateFoldersProperties,
+  hasSaveUnits,
+  getSaveUnitsConfig,
+  getSaveUnitsProperties,
   getFileNamingConfig,
   generateFileName,
   isGraphQLField,
@@ -267,14 +282,13 @@ export {
 export type {
   TrackableConfig,
   SearchableConfig,
-  SeparateFilesConfig,
-  SeparateFoldersConfig,
+  SaveUnitsConfig,
   FileNamingConfig,
   GraphQLTypeConfig,
   GraphQLFieldConfig,
   AllMetadata
 } from './decorators'
-export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol, createSplashWindow, isInactiveRevealRequested, clearStartupActivationEnv } from './managers'
+export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol, createSplashWindow, isInactiveRevealRequested, clearStartupActivationEnv, registerAppIconMenuHandlers } from './managers'
 export type { WindowConfiguration, WindowState, InitializeAppOptions, SplashWindowOptions, SplashWindowHandle } from './managers'
 
 // IPC validation
@@ -283,12 +297,12 @@ export { validatedHandle } from './ipc/validate'
 // Re-export types for better type inference
 export type { ThemeService } from './services/ThemeService'
 export type { StorageService } from './services/StorageService'
-export type { LoggerInterface } from './services/LoggerService'
+export type { LoggerInterface, ErrorLogListener } from './services/LoggerService'
 export type { FeatureFlippingService } from './services/FeatureFlippingService'
 export type { EventHandler, Subscription } from './services/EventBusService'
 export type { SearchDocument, SearchResult, SearchNavigation, GroupedResults, CategoryMeta } from './services/SearchService'
 export type { GraphQLServiceConfig, PubSub } from './services/GraphQLService'
-export type { PersistenceFormat, PersistenceMode, PersistenceConfig, FileNamingContext, SaveResult, LoadResult } from './services/PersistenceService'
+export type { PersistenceFormat, PersistenceConfig, SaveResult, LoadResult } from './services/PersistenceService'
 export type { SchemaGeneratorConfig, RegisterClassOptions } from './services/GraphQLSchemaGenerator'
 
 // Error classes and helpers
@@ -306,7 +320,6 @@ export type {
 
 // Re-export feature types
 export type {
-  FeatureStrategyType,
   BuiltinFeatureStrategyType,
   FeaturePlatform,
   FeatureStrategy,

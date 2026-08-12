@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button, Dock, type DockHandle, MarkdownViewer, ScrollableElement } from 'electron-core-ui/renderer'
 import type {
   ApiDocumentation,
@@ -95,6 +96,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   testId,
   showModelGraphMinimap = true
 }) => {
+  const { t } = useTranslation()
   /** Resolve the effective `onAddRequest` once: when `hideAddRequest`
    * is set, force-drop the callback even if a parent wired one. The
    * route block + RouteHeader treat "no callback" as "no button", so
@@ -355,8 +357,8 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           data-testid="documentation-host-models-section"
         >
           {topLevelSectionLevel === 1
-            ? <h1 className="documentation-host__section-title">Models</h1>
-            : <h2 className="documentation-host__section-title">Models</h2>}
+            ? <h1 className="documentation-host__section-title">{t('documentation.sections.models')}</h1>
+            : <h2 className="documentation-host__section-title">{t('documentation.sections.models')}</h2>}
           <ModelGraph ref={modelGraphRef} models={structuralModels} showMinimap={showModelGraphMinimap} />
           <ModelGraphLegend />
         </section>
@@ -451,6 +453,7 @@ interface RouteBlockProps {
 }
 
 const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, tagColors, onAddRequest }) => {
+  const { t } = useTranslation()
   const SectionHeading = headingLevel === 1 ? 'h1' : headingLevel === 2 ? 'h2' : 'h3'
   const opIdSlug = getOperationSlug(operation)
   return (
@@ -471,7 +474,7 @@ const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGr
           className="documentation-host__section documentation-host__section--parameters"
           data-testid={`documentation-host-parameters-section-${opIdSlug}`}
         >
-          <SectionHeading className="documentation-host__section-title">Parameters</SectionHeading>
+          <SectionHeading className="documentation-host__section-title">{t('documentation.sections.parameters')}</SectionHeading>
           <ParametersTable operations={[operation]} />
         </section>
       )}
@@ -480,7 +483,7 @@ const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGr
           className="documentation-host__section documentation-host__section--responses"
           data-testid={`documentation-host-responses-section-${opIdSlug}`}
         >
-          <SectionHeading className="documentation-host__section-title">Responses</SectionHeading>
+          <SectionHeading className="documentation-host__section-title">{t('documentation.sections.responses')}</SectionHeading>
           <ResponsesTable operations={[operation]} />
         </section>
       )}

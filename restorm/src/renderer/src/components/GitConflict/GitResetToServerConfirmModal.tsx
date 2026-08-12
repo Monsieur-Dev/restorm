@@ -36,6 +36,7 @@ export const GitResetToServerConfirmModal: React.FC<GitResetToServerConfirmModal
       size="dialog"
       dialogWidth={520}
       data-testid={dataTestId}
+      enterActionTestId={`${dataTestId}-confirm-button`}
     >
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <p style={{ margin: 0, lineHeight: 1.5 }} data-testid={`${dataTestId}-message`}>

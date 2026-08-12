@@ -57,5 +57,3 @@ export const ScenarioInputCell: React.FC<ScenarioInputCellProps> = ({ cell, node
 
   return <>{cellBody(cell)}</>
 }
-
-export default ScenarioInputCell

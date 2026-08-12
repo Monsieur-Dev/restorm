@@ -23,6 +23,17 @@ import './listView.css'
  */
 export const LIST_VIEW_DRAG_MIME = 'application/x-listview-item'
 
+/**
+ * MIME type stamped IN ADDITION to {@link LIST_VIEW_DRAG_MIME} when the drag
+ * carries MORE THAN ONE row (a drag started on a row that belongs to a
+ * multi-selection). Its data is the JSON array of the dragged ids in visual
+ * order; its mere PRESENCE in `dataTransfer.types` lets a drop target tell a
+ * multi-item drag apart during `dragover`, when the payload itself is not
+ * yet readable — e.g. a workbench that accepts single sidebar items as
+ * split-drops but must not light its overlay for a multi-item drag.
+ */
+export const LIST_VIEW_MULTI_DRAG_MIME = 'application/x-listview-items'
+
 interface FlatItem {
   item: ListViewItemData
   depth: number
@@ -191,7 +202,11 @@ const ListViewInner: React.FC<ListViewProps> = ({
   onItemMouseEnter,
   onItemMouseLeave,
   onDeleteRequest,
-  disableDrag = false
+  disableDrag = false,
+  canDrop,
+  selectionContextMenuItems,
+  dragExpandDelayMs = null,
+  onEmptyAreaDrop
 }) => {
   const rootTestId = dataTestId ?? 'list-view'
   const scrollableTestId = scrollableTestIdProp ?? `${rootTestId}-scrollable`
@@ -209,7 +224,22 @@ const ListViewInner: React.FC<ListViewProps> = ({
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [activeId, setActiveId] = useState<string | null>(null)
+  // Anchor payload + every dragged row (== [anchor] outside a multi-drag).
   const [dragSource, setDragSource] = useState<ListViewItemEventPayload | null>(null)
+  const dragSourcesRef = useRef<ListViewItemEventPayload[]>([])
+  // The live ghost element, so dragover validation can flip its error badge
+  // without re-rendering anything.
+  const dragGhostRef = useRef<HTMLElement | null>(null)
+  // Pending expand-on-hover timer for a collapsed container hovered mid-drag.
+  const dragExpandTimerRef = useRef<{ targetId: string; timer: ReturnType<typeof setTimeout> } | null>(null)
+  // Ref mirrors so the drag/context handlers can read the live selection
+  // without listing it as a dependency — every dependency added to a row
+  // handler recreates the handler on each selection change, re-rendering
+  // every row mid-interaction (a real click's mousedown→click window is
+  // wide enough for that re-render to detach the clicked node and swallow
+  // the click entirely).
+  const selectedIdsRef = useRef(selectedIds)
+  useEffect(() => { selectedIdsRef.current = selectedIds }, [selectedIds])
   const [dropIndicator, setDropIndicator] = useState<DropIndicatorState | null>(null)
   const listRef = useRef<HTMLDivElement | null>(null)
   const [contextMenu, setContextMenu] = useState<{
@@ -246,11 +276,20 @@ const ListViewInner: React.FC<ListViewProps> = ({
     }
   }, [isEditingControlled, onEditingStart, onEditingEnd])
 
-  // Controlled selection support
+  // Controlled selection support. Guarded by CONTENT, not identity: a parent
+  // that rebuilds the array every render (`selectedIds={sel ? [sel] : []}`)
+  // would otherwise clobber a ctrl+click multi-selection on the very next
+  // render — the mirror must only fire when the mirrored ids actually moved.
   React.useEffect(() => {
     if (!selectedIdsProp) return
-    const next = new Set(selectedIdsProp)
-    setSelectedIds(next)
+    setSelectedIds((prev) => {
+      if (prev.size === selectedIdsProp.length && selectedIdsProp.every((id) => prev.has(id))) {
+        return prev
+      }
+      const next = new Set(selectedIdsProp)
+      selectedIdsRef.current = next
+      return next
+    })
   }, [selectedIdsProp])
 
   // Controlled expansion support
@@ -307,6 +346,12 @@ const ListViewInner: React.FC<ListViewProps> = ({
     return flattenItems(initialItems, expandedIds)
   }, [initialItems, expandedIds])
 
+  // Ref mirror for the same reason as `selectedIdsRef` above: lets the drag
+  // handlers walk the visible rows without re-creating themselves whenever
+  // the flattened tree changes.
+  const flatItemsRef = useRef(flatItems)
+  useEffect(() => { flatItemsRef.current = flatItems }, [flatItems])
+
   // Derive editingValue: if editingState was set for a different item, compute initial value
   const editingValue = useMemo(() => {
     if (!editingItemId) return ''
@@ -358,9 +403,18 @@ const ListViewInner: React.FC<ListViewProps> = ({
   const emitSelectionChange = useCallback(
     (payload: ListViewItemEventPayload, nextSelected: Set<string>): void => {
       if (!onSelectionChange) return
-      onSelectionChange(Array.from(nextSelected), payload)
+      // Emit in VISUAL order, not Set-insertion order: consumers feed this
+      // straight into clipboard/menu actions, and ctrl+clicking A, C, B
+      // must not deliver a click-order list. Ids not currently visible
+      // (inside a collapsed subtree) keep their insertion order at the end.
+      const visualOrder = flatItems.filter((fi) => nextSelected.has(fi.item.id)).map((fi) => fi.item.id)
+      const visible = new Set(visualOrder)
+      for (const id of nextSelected) {
+        if (!visible.has(id)) visualOrder.push(id)
+      }
+      onSelectionChange(visualOrder, payload)
     },
-    [onSelectionChange]
+    [onSelectionChange, flatItems]
   )
 
   const handleToggle = useCallback(
@@ -416,47 +470,54 @@ const ListViewInner: React.FC<ListViewProps> = ({
       const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
       setActiveId(flat.item.id)
 
-      setSelectedIds((prev) => {
-        const next = new Set(prev)
-        const isSelected = next.has(flat.item.id)
+      // The next selection is computed OUTSIDE the state updater: emitting
+      // the change from inside `setSelectedIds`'s updater ran a parent
+      // setState during THIS component's render — React flags it in dev
+      // ("Cannot update a component while rendering a different component")
+      // and may drop or defer the update in production. Reading the live
+      // ref (kept in sync below) keeps rapid click→ctrl+click sequences
+      // accurate even when React batches the renders.
+      const prev = selectedIdsRef.current
+      const next = new Set(prev)
+      const isSelected = next.has(flat.item.id)
 
-        if (selectionMode === 'single') {
+      if (selectionMode === 'single') {
+        next.clear()
+        next.add(flat.item.id)
+      } else {
+        const isCtrlLike = event.metaKey || event.ctrlKey
+        const isShiftLike = event.shiftKey
+
+        if (isShiftLike && activeId) {
           next.clear()
-          next.add(flat.item.id)
-        } else {
-          const isCtrlLike = event.metaKey || event.ctrlKey
-          const isShiftLike = event.shiftKey
-
-          if (isShiftLike && activeId) {
-            next.clear()
-            const startIndex = findFlatIndexById(activeId)
-            const endIndex = findFlatIndexById(flat.item.id)
-            if (startIndex >= 0 && endIndex >= 0) {
-              const [from, to] = startIndex < endIndex ? [startIndex, endIndex] : [endIndex, startIndex]
-              for (let i = from; i <= to; i++) {
-                const fi = flatItems[i]
-                if (fi && fi.item.isSelectable !== false) {
-                  next.add(fi.item.id)
-                }
+          const startIndex = findFlatIndexById(activeId)
+          const endIndex = findFlatIndexById(flat.item.id)
+          if (startIndex >= 0 && endIndex >= 0) {
+            const [from, to] = startIndex < endIndex ? [startIndex, endIndex] : [endIndex, startIndex]
+            for (let i = from; i <= to; i++) {
+              const fi = flatItems[i]
+              if (fi && fi.item.isSelectable !== false) {
+                next.add(fi.item.id)
               }
-            } else {
-              next.add(flat.item.id)
-            }
-          } else if (isCtrlLike) {
-            if (isSelected) {
-              next.delete(flat.item.id)
-            } else {
-              next.add(flat.item.id)
             }
           } else {
-            next.clear()
             next.add(flat.item.id)
           }
+        } else if (isCtrlLike) {
+          if (isSelected) {
+            next.delete(flat.item.id)
+          } else {
+            next.add(flat.item.id)
+          }
+        } else {
+          next.clear()
+          next.add(flat.item.id)
         }
+      }
 
-        emitSelectionChange(payload, next)
-        return next
-      })
+      selectedIdsRef.current = next
+      setSelectedIds(next)
+      emitSelectionChange(payload, next)
 
       if (onItemClick) {
         onItemClick(payload, event)
@@ -562,6 +623,24 @@ const ListViewInner: React.FC<ListViewProps> = ({
         return
       }
 
+      // Select-all — every VISIBLE selectable row (collapsed subtrees stay
+      // out: selecting what the user cannot see invites surprise bulk
+      // operations). Only meaningful in multiple mode.
+      if (selectionMode === 'multiple' && (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'a') {
+        event.preventDefault()
+        const next = new Set<string>()
+        for (const fi of flatItems) {
+          if (fi.item.isSelectable !== false) next.add(fi.item.id)
+        }
+        const anchor = flatItems[currentIndex] ?? flatItems[0]
+        if (anchor) {
+          selectedIdsRef.current = next
+          setSelectedIds(next)
+          emitSelectionChange({ item: anchor.item, path: anchor.path }, next)
+        }
+        return
+      }
+
       switch (event.key) {
         case 'ArrowDown':
           nextIndex = Math.min(flatItems.length - 1, currentIndex + 1)
@@ -616,15 +695,15 @@ const ListViewInner: React.FC<ListViewProps> = ({
         setActiveId(flat.item.id)
         const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
 
-        setSelectedIds((prev) => {
-          const next = new Set(prev)
-          if (selectionMode === 'single') {
-            next.clear()
-            next.add(flat.item.id)
-          }
-          emitSelectionChange(payload, next)
-          return next
-        })
+        // Same out-of-updater emission rule as handleSelect.
+        const next = new Set(selectedIdsRef.current)
+        if (selectionMode === 'single') {
+          next.clear()
+          next.add(flat.item.id)
+        }
+        selectedIdsRef.current = next
+        setSelectedIds(next)
+        emitSelectionChange(payload, next)
       }
     },
     [flatItems, activeId, selectionMode, emitSelectionChange, findFlatIndexById, handleToggle, isRenameable, renameShortcut, startRename, editingItemId, onDeleteRequest]
@@ -634,18 +713,27 @@ const ListViewInner: React.FC<ListViewProps> = ({
     (flat: FlatItem, event: React.MouseEvent<HTMLDivElement>): void => {
       event.preventDefault()
 
-      // Select the item on right-click
+      // Select the item on right-click. In multiple mode the standard tree
+      // behaviour applies: a right-click INSIDE the current selection keeps
+      // it (so the group menu can act on it), a right-click OUTSIDE it
+      // collapses the selection to the clicked row first. Selection is read
+      // through its ref so this handler's identity doesn't follow it (see
+      // the ref-mirror comment above).
+      const liveSelected = selectedIdsRef.current
       setActiveId(flat.item.id)
-      if (selectionMode === 'single') {
+      if (selectionMode === 'single' || !liveSelected.has(flat.item.id)) {
         const next = new Set([flat.item.id])
+        selectedIdsRef.current = next
         setSelectedIds(next)
         const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
         emitSelectionChange(payload, next)
       }
 
       const hasBuiltinMenu = Array.isArray(flat.item.contextMenuItems) && flat.item.contextMenuItems.length > 0
+      const isGroupMenu = selectionMode === 'multiple' && liveSelected.size > 1 &&
+        liveSelected.has(flat.item.id) && selectionContextMenuItems !== undefined
 
-      if (hasBuiltinMenu) {
+      if (hasBuiltinMenu || isGroupMenu) {
         setContextMenu({
           visible: true,
           x: event.clientX,
@@ -659,78 +747,217 @@ const ListViewInner: React.FC<ListViewProps> = ({
         onItemContextMenu(payload, event)
       }
     },
-    [onItemContextMenu, selectionMode, emitSelectionChange]
+    [onItemContextMenu, selectionMode, emitSelectionChange, selectionContextMenuItems]
   )
+
+  const clearDragExpandTimer = useCallback((): void => {
+    if (dragExpandTimerRef.current) {
+      clearTimeout(dragExpandTimerRef.current.timer)
+      dragExpandTimerRef.current = null
+    }
+  }, [])
+
+  // Unmounting mid-drag must not leave the pending expansion firing into a
+  // dead tree (handleToggle after unmount).
+  useEffect(() => clearDragExpandTimer, [clearDragExpandTimer])
 
   const handleDragStart = useCallback(
     (flat: FlatItem, event: React.DragEvent<HTMLDivElement>): void => {
       const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+      // A drag that starts on a row belonging to a MULTI-selection carries
+      // the whole selection (visual order); any other drag carries just the
+      // grabbed row — including a drag on an unselected row while a
+      // selection exists elsewhere, which matches every desktop tree.
+      // Selection + rows come through refs so this handler's identity never
+      // follows the selection (see the ref-mirror comment above).
+      const liveSelected = selectedIdsRef.current
+      const isMultiDrag = selectionMode === 'multiple' && liveSelected.size > 1 && liveSelected.has(flat.item.id)
+      const sources: ListViewItemEventPayload[] = isMultiDrag
+        ? flatItemsRef.current.filter((fi) => liveSelected.has(fi.item.id)).map((fi) => ({ item: fi.item, path: fi.path }))
+        : [payload]
+
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.setData('text/plain', flat.item.id)
       // Marker MIME so drop targets can recognise this as a ListView item
       // drag during `dragover` (the `text/plain` payload isn't readable
       // until `drop`). `setData` can throw in locked-down environments.
       try { event.dataTransfer.setData(LIST_VIEW_DRAG_MIME, flat.item.id) } catch { /* ignore */ }
+      if (sources.length > 1) {
+        // Presence of this MIME in `types` is how a target detects a
+        // multi-item drag during dragover; its payload carries every id.
+        try {
+          event.dataTransfer.setData(LIST_VIEW_MULTI_DRAG_MIME, JSON.stringify(sources.map((s) => s.item.id)))
+        } catch { /* ignore */ }
+      }
+
       // Custom drag preview (native setDragImage is blank under Wayland).
       const row = event.currentTarget
       const rect = row.getBoundingClientRect()
       const preview = row.cloneNode(true) as HTMLElement
       preview.style.width = `${rect.width}px`
       preview.classList.add('list-view-row-drag-ghost')
+      if (sources.length > 1) {
+        const badge = document.createElement('span')
+        badge.className = 'list-view-drag-ghost-badge'
+        badge.textContent = String(sources.length)
+        preview.appendChild(badge)
+      }
+      // Error badge, hidden until a dragover validation flags the hovered
+      // target as invalid (`is-invalid` on the ghost reveals it).
+      const errorBadge = document.createElement('span')
+      errorBadge.className = 'list-view-drag-ghost-error codicon codicon-error-small'
+      errorBadge.setAttribute('aria-hidden', 'true')
+      preview.appendChild(errorBadge)
+
       startDragPreview(event, {
         preview,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
         mountInto: row.closest<HTMLElement>('.workbench')
       })
+      dragGhostRef.current = preview
+      dragSourcesRef.current = sources
       setDragSource(payload)
     },
-    []
+    [selectionMode]
   )
 
   const handleDragOver = useCallback(
     (flat: FlatItem, event: React.DragEvent<HTMLDivElement>): void => {
       if (!dragSource) return
-      event.preventDefault()
       const position = getDropPosition(event)
-      setDropIndicator({ targetId: flat.item.id, position })
-    },
-    [dragSource]
-  )
+      const target: ListViewItemEventPayload = { item: flat.item, path: flat.path }
 
-  const handleDragLeave = useCallback((): void => {
-    setDropIndicator(null)
-  }, [])
+      const isValid = canDrop === undefined || canDrop(dragSourcesRef.current, target, position)
+      dragGhostRef.current?.classList.toggle('is-invalid', !isValid)
 
-  const handleDrop = useCallback(
-    (flat: FlatItem, event: React.DragEvent<HTMLDivElement>): void => {
-      if (!dragSource || !onItemDrop) {
+      // Expand a collapsed container after a hover delay, valid target or
+      // not — mid-drag expansion is navigation, and the user may only be
+      // passing through to reach a deeper valid target.
+      if (dragExpandDelayMs !== null && !flat.isLeaf && !flat.isExpanded) {
+        if (dragExpandTimerRef.current?.targetId !== flat.item.id) {
+          clearDragExpandTimer()
+          dragExpandTimerRef.current = {
+            targetId: flat.item.id,
+            timer: setTimeout(() => {
+              dragExpandTimerRef.current = null
+              handleToggle(flat, event as unknown as React.MouseEvent<HTMLDivElement>)
+            }, dragExpandDelayMs)
+          }
+        }
+      } else if (dragExpandTimerRef.current?.targetId === flat.item.id) {
+        // The row expanded (or turned leaf) under the pending timer.
+        clearDragExpandTimer()
+      }
+
+      if (!isValid) {
+        // No preventDefault: the browser reports the row as a non-target
+        // (forbidden cursor), and the indicator stays off.
+        event.dataTransfer.dropEffect = 'none'
         setDropIndicator(null)
         return
       }
       event.preventDefault()
+      event.dataTransfer.dropEffect = 'move'
+      setDropIndicator({ targetId: flat.item.id, position })
+    },
+    [dragSource, canDrop, dragExpandDelayMs, clearDragExpandTimer, handleToggle]
+  )
+
+  const handleDragLeave = useCallback((): void => {
+    setDropIndicator(null)
+    dragGhostRef.current?.classList.remove('is-invalid')
+    // Leaving the row must also disarm the pending expand-on-hover timer —
+    // otherwise dragging PAST a collapsed container (e.g. into the empty
+    // area below the list) still pops it open a second later.
+    clearDragExpandTimer()
+  }, [clearDragExpandTimer])
+
+  const handleDragEnd = useCallback((): void => {
+    clearDragExpandTimer()
+    dragGhostRef.current = null
+    dragSourcesRef.current = []
+    setDragSource(null)
+    setDropIndicator(null)
+  }, [clearDragExpandTimer])
+
+  // Empty-area drop target (below/beside the rows). Row events bubble up to
+  // the scrollable content, so both handlers ignore anything whose target
+  // sits inside a row — the row handlers own those. Only wired when the
+  // consumer opted in via `onEmptyAreaDrop`.
+  const handleEmptyAreaDragOver = useCallback((event: React.DragEvent<HTMLElement>): void => {
+    if (!dragSource || !onEmptyAreaDrop) return
+    if (event.target instanceof Element && event.target.closest('.list-view-row')) return
+    // Hovering the empty area is never an "expand this container" gesture.
+    clearDragExpandTimer()
+    dragGhostRef.current?.classList.remove('is-invalid')
+    setDropIndicator(null)
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+  }, [dragSource, onEmptyAreaDrop, clearDragExpandTimer])
+
+  const handleEmptyAreaDrop = useCallback((event: React.DragEvent<HTMLElement>): void => {
+    if (!dragSource || !onEmptyAreaDrop) return
+    if (event.target instanceof Element && event.target.closest('.list-view-row')) return
+    event.preventDefault()
+    clearDragExpandTimer()
+    setDropIndicator(null)
+    const sources = dragSourcesRef.current.length > 0 ? dragSourcesRef.current : [dragSource]
+    onEmptyAreaDrop(sources, event)
+  }, [dragSource, onEmptyAreaDrop, clearDragExpandTimer])
+
+  const handleDrop = useCallback(
+    (flat: FlatItem, event: React.DragEvent<HTMLDivElement>): void => {
+      clearDragExpandTimer()
+      if (!dragSource || !onItemDrop) {
+        setDropIndicator(null)
+        return
+      }
       const position = getDropPosition(event)
+      const target: ListViewItemEventPayload = { item: flat.item, path: flat.path }
+      // Final validation guard — dragover already filtered, but a drop can
+      // land without a matching dragover (synthetic events in tests, odd
+      // browser timing), and a consumer-refused move must never fire.
+      if (canDrop !== undefined && !canDrop(dragSourcesRef.current, target, position)) {
+        setDropIndicator(null)
+        return
+      }
+      event.preventDefault()
       const payload: ListViewDropEventPayload = {
         item: flat.item,
         path: flat.path,
         source: dragSource.item,
         sourcePath: dragSource.path,
+        sources: dragSourcesRef.current.length > 0 ? dragSourcesRef.current : [dragSource],
         position,
         originalEvent: event
       }
       setDropIndicator(null)
       onItemDrop(payload)
     },
-    [dragSource, onItemDrop]
+    [dragSource, onItemDrop, canDrop, clearDragExpandTimer]
   )
 
   const rootClasses = ['list-view-root', className].filter(Boolean).join(' ')
 
   const contextMenuItems: ContextMenuItem[] | null = useMemo(() => {
     if (!contextMenu.visible || !contextMenu.item) return null
-    const sourceItems = contextMenu.item.item.contextMenuItems
-    if (!sourceItems || sourceItems.length === 0) return null
     const flat = contextMenu.item
+
+    // A multi-selection that includes the clicked row gets the GROUP menu:
+    // per-row entries close over one item id, which is exactly wrong when
+    // three rows are selected — the consumer's builder receives the whole
+    // selection instead. Falls through to the per-row menu when the builder
+    // declines (returns null/empty).
+    if (selectionMode === 'multiple' && selectedIds.size > 1 &&
+        selectedIds.has(flat.item.id) && selectionContextMenuItems) {
+      const orderedIds = flatItems.filter((fi) => selectedIds.has(fi.item.id)).map((fi) => fi.item.id)
+      const groupItems = selectionContextMenuItems(orderedIds)
+      if (groupItems && groupItems.length > 0) return groupItems
+    }
+
+    const sourceItems = flat.item.contextMenuItems
+    if (!sourceItems || sourceItems.length === 0) return null
     // Wrap onClick handlers to intercept 'rename-item' action
     return sourceItems.map((menuItem) => ({
       ...menuItem,
@@ -741,7 +968,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
         menuItem.onClick?.()
       }
     }))
-  }, [contextMenu, isRenameable, startRename])
+  }, [contextMenu, isRenameable, startRename, selectionMode, selectedIds, selectionContextMenuItems, flatItems])
 
   const isReady = flatItems.length > 0 || initialItems.length === 0
 
@@ -762,6 +989,10 @@ const ListViewInner: React.FC<ListViewProps> = ({
         aria-label={ariaLabel}
         tabIndex={0}
         onKeyDown={handleKeyDown}
+        {...(onEmptyAreaDrop && !disableDrag ? {
+          onDragOver: handleEmptyAreaDragOver,
+          onDrop: handleEmptyAreaDrop
+        } : {})}
       >
         {flatItems.map((flat) => {
             const { item, depth, isLeaf, isExpanded } = flat
@@ -891,6 +1122,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
                     handleDragOver(flat, event)
                   },
                   onDragLeave: handleDragLeave,
+                  onDragEnd: handleDragEnd,
                   onDrop: (event: React.DragEvent<HTMLDivElement>): void => {
                     handleDrop(flat, event)
                   }
@@ -964,4 +1196,3 @@ const ListViewInner: React.FC<ListViewProps> = ({
 }
 
 export const ListView = React.memo(ListViewInner)
-export default ListView

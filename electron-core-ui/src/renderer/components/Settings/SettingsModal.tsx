@@ -54,5 +54,3 @@ export function SettingsModalProvider({
     </SettingsModalContext.Provider>
   )
 }
-
-export default SettingsModalProvider

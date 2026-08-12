@@ -29,6 +29,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
       onClose={onCancel}
       size="dialog"
       data-testid="delete-confirmation-modal"
+      enterActionTestId="delete-confirmation-confirm-button"
     >
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <p style={{ margin: 0 }}>
@@ -48,5 +49,3 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
     </Modal>
   )
 }
-
-export default DeleteConfirmationModal

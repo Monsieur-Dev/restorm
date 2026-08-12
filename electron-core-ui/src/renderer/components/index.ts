@@ -1,7 +1,7 @@
-import CustomDropdown from './CustomDropdown'
-import Tabs from './Tabs'
-import Workbench from './Workbench/Workbench'
-import ElectronCoreUiProvider from './ElectronCoreUiProvider'
+import { CustomDropdown } from './CustomDropdown'
+import { Tabs } from './Tabs'
+import { Workbench } from './Workbench/Workbench'
+import { ElectronCoreUiProvider } from './ElectronCoreUiProvider'
 import { EditorWorkbench } from './Workbench/EditorWorkbench'
 import { MarkdownEditor } from './MarkdownEditor/MarkdownEditor'
 import { MarkdownViewer } from './MarkdownViewer/MarkdownViewer'
@@ -146,7 +146,7 @@ export { MosaicLayout, MosaicCard } from './Mosaic'
 export type { MosaicLayoutProps, MosaicCardProps } from './Mosaic'
 
 // ListView exports
-export { ListView, ListViewItem, LIST_VIEW_DRAG_MIME } from './ListView'
+export { ListView, ListViewItem, LIST_VIEW_DRAG_MIME, LIST_VIEW_MULTI_DRAG_MIME } from './ListView'
 export type {
   ListViewProps,
   ListViewItemProps,
@@ -340,7 +340,7 @@ export type { StaticPaneProps } from './Panes'
 export { Dock } from './Panes'
 export type { DockProps, DockSide, DockHandle } from './Panes'
 export type {
-	WorkbenchState, // legacy flat types (kept for external imports)
+	WorkbenchState,
 	EditorGroup,
 	EditorTab,
 	EditorWorkbenchCallbacks,

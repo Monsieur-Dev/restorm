@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { FolderItem, Scenario } from '../../../shared/types/collections'
-import { deepCloneItem, cloneItemInTree, generateUniqueId, ID_REFERENCE_KEYS, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
+import { deepCloneItem, cloneItemInTree, generateUniqueId, reidentifyForest, reassignTreeIds, removeItemFromTree, insertItemIntoTree, ID_REFERENCE_KEYS, REASSIGNED_ID_CONTAINER_KEYS } from './treeManipulation'
 
 describe('generateUniqueId', () => {
   it('produces a UUID, never colliding within a tight loop', () => {
@@ -9,6 +9,69 @@ describe('generateUniqueId', () => {
     // Date.now()+Math.random() collided within a millisecond; crypto.randomUUID never does.
     expect(ids.size).toBe(10_000)
     expect(generateUniqueId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+  })
+})
+
+describe('root-level moves — remove/insert treat the root list as a container', () => {
+  const makeTree = (): FolderItem[] => ([
+    { id: 'root-req', type: 'http', name: 'RootReq', method: 'GET', url: '' } as unknown as FolderItem,
+    { id: 'fold-a', name: 'A', tags: [], configuration: {}, items: [] } as unknown as FolderItem,
+    { id: 'fold-b', name: 'B', tags: [], configuration: {}, items: [] } as unknown as FolderItem
+  ])
+
+  it('removes an item sitting at the ROOT (null parent, index into rootItems)', () => {
+    const roots = makeTree()
+    const removed = removeItemFromTree(roots, 'root-req')
+    expect(removed?.id).toBe('root-req')
+    expect(roots.map((r) => r.id)).toEqual(['fold-a', 'fold-b'])
+  })
+
+  it('moves a root item INTO a folder (lands at the container end)', () => {
+    const roots = makeTree()
+    const removed = removeItemFromTree(roots, 'root-req')
+    if (!removed) throw new Error('remove failed')
+    expect(insertItemIntoTree(roots, removed, 'fold-a', 'into')).toBe(true)
+    expect((roots[0] as { items: FolderItem[] }).items.map((i) => i.id)).toEqual(['root-req'])
+  })
+
+  it('reorders at the root: before/after a ROOT target splices the root list', () => {
+    const roots = makeTree()
+    const removed = removeItemFromTree(roots, 'root-req')
+    if (!removed) throw new Error('remove failed')
+    expect(insertItemIntoTree(roots, removed, 'fold-b', 'after')).toBe(true)
+    expect(roots.map((r) => r.id)).toEqual(['fold-a', 'fold-b', 'root-req'])
+  })
+})
+
+describe('reidentifyForest — the forest-level pass the import flow uses', () => {
+  it('remaps a reference from one root into a SIBLING root (per-root passes would miss it)', () => {
+    const request = { type: 'http', id: 'req-a', name: 'A', method: 'GET', url: '' }
+    const folderA = { id: 'fold-a', name: 'A', tags: [], configuration: {}, items: [request] }
+    const scenarioB = {
+      type: 'scenario', id: 'scn-b', name: 'B', tags: [], params: [],
+      nodes: [{ id: 'n-1', kind: 'httpRequest', config: { requestId: 'req-a' }, inputs: [], outputs: [], position: { x: 0, y: 0 } }],
+      edges: [], items: []
+    }
+    const roots = [folderA, scenarioB]
+
+    const idMap = reidentifyForest(roots)
+
+    expect(folderA.id).not.toBe('fold-a')
+    expect(scenarioB.nodes[0]?.config.requestId).toBe((request as { id: string }).id)
+    expect(idMap.get('req-a')).toBe((request as { id: string }).id)
+  })
+
+  it('composes: a second full pass keeps the forest self-consistent', () => {
+    const request = { type: 'http', id: 'req-a', name: 'A', method: 'GET', url: '' }
+    const scenario = {
+      type: 'scenario', id: 'scn-b', name: 'B', tags: [], params: [],
+      nodes: [{ id: 'n-1', kind: 'httpRequest', config: { requestId: 'req-a' }, inputs: [], outputs: [], position: { x: 0, y: 0 } }],
+      edges: [], items: []
+    }
+    const roots = [request, scenario]
+    reidentifyForest(roots)
+    reidentifyForest(roots)
+    expect(scenario.nodes[0]?.config.requestId).toBe(request.id)
   })
 })
 
@@ -25,8 +88,8 @@ function makeScenario(): Scenario {
     name: 'My Scenario',
     tags: [],
     // A top-level param declaration (distinct from a node's own config.params
-    // below) — same key name as a Request's query `params`, scoped to
-    // type==='scenario' in reassignTreeIds (see its JSDoc).
+    // below) — same key name as a Request's query `params`; ONE generic
+    // container entry covers both shapes (see the list's JSDoc).
     params: [
       { id: 'param-1', name: 'Input', dataType: 'string', required: true }
     ],
@@ -148,13 +211,18 @@ describe('deepCloneItem', () => {
     expect(clone.params[0]?.id).not.toBe('param-1')
   })
 
-  it("does NOT touch a REQUEST's own params[] (query KeyValues) — the key-name collision with Scenario.params is scoped to type==='scenario' only", () => {
+  it("gives a REQUEST's own params[] (query KeyValues) a fresh id too — the `params` entry covers both shapes now", () => {
+    // This test used to pin the OPPOSITE: request query rows kept their ids
+    // while `params` was handled by a scenario-only branch. The clone then
+    // shared row identity with its source until the next load's dedup
+    // healed it — reassigning at the source is the fix, not the reparse.
     const request = {
       id: 'req-1', name: 'Req', type: 'http',
       params: [{ id: 'qp-1', key: 'foo', value: { type: 'string', value: 'bar' } }]
     } as unknown as FolderItem
-    const clone = deepCloneItem(request) as unknown as { params: { id: string }[] }
-    expect(clone.params[0]?.id).toBe('qp-1')
+    const clone = deepCloneItem(request) as unknown as { params: { id: string, key: string }[] }
+    expect(clone.params[0]?.id).not.toBe('qp-1')
+    expect(clone.params[0]?.key).toBe('foo')
   })
 
   it("gives an input node's config.params[] (InputParam) a fresh id — cheap to include, though nothing resolves it by id", () => {
@@ -571,7 +639,8 @@ describe('REASSIGNED_ID_CONTAINER_KEYS', () => {
     expect(REASSIGNED_ID_CONTAINER_KEYS).toEqual([
       'items', 'environments', 'customValueLists',
       'enumDefinitions', 'subEnvironments', 'entries',
-      'nodes', 'edges', 'quickConfigs'
+      'nodes', 'edges', 'quickConfigs',
+      'headers', 'params', 'pathParams'
     ])
   })
 })
@@ -737,5 +806,83 @@ describe('cloneItemInTree', () => {
     // Environment child got a fresh id too.
     const clonedEnvs = (root[1] as unknown as { environments: { id: string }[] }).environments
     expect(clonedEnvs[0]?.id).not.toBe('e1')
+  })
+})
+
+/**
+ * A cloned request's own KeyValue rows — `headers`, query `params`,
+ * `pathParams` — must land fresh ids as a trio. They used to keep the
+ * source's ids byte for byte: a request is a LEAF for the container walk,
+ * and none of the three keys was in `REASSIGNED_ID_CONTAINER_KEYS`
+ * (`params` was even deliberately excluded while it was scenario-scoped).
+ * The duplicate self-healed at the next load via `generateIds`' dedup, so
+ * the damage was transient in-memory row identity shared with the source —
+ * fixed at the source instead of relying on the next reparse.
+ */
+describe("deepCloneItem — a request's KeyValue rows (headers / params / pathParams)", () => {
+  function makeRequestWithRows(): FolderItem {
+    return {
+      id: 'req-rows', name: 'Req', type: 'http', tags: [],
+      url: '{{base}}/pet/{{petId}}',
+      headers: [
+        { id: 'h-1', key: 'api_key', value: 'k', enabled: true },
+        { id: 'h-2', key: 'accept', value: 'application/json', enabled: true }
+      ],
+      params: [
+        { id: 'q-1', key: 'limit', value: '10', enabled: true }
+      ],
+      pathParams: [
+        { id: 'pp-1', key: 'petId', value: '2', enabled: true }
+      ]
+    } as unknown as FolderItem
+  }
+
+  it('gives every row of all three containers a fresh id, none matching the source, all distinct', () => {
+    const original = makeRequestWithRows()
+    const sourceIds = ['h-1', 'h-2', 'q-1', 'pp-1']
+    const clone = deepCloneItem(original) as unknown as {
+      headers: { id: string, key: string }[]
+      params: { id: string, key: string }[]
+      pathParams: { id: string, key: string }[]
+    }
+
+    const cloneIds = [
+      ...clone.headers.map((r) => r.id),
+      ...clone.params.map((r) => r.id),
+      ...clone.pathParams.map((r) => r.id)
+    ]
+    expect(cloneIds).toHaveLength(4)
+    for (const id of cloneIds) expect(sourceIds).not.toContain(id)
+    expect(new Set(cloneIds).size).toBe(cloneIds.length)
+    // The rows themselves survive untouched — only identity moves.
+    expect(clone.headers.map((r) => r.key)).toEqual(['api_key', 'accept'])
+    expect(clone.pathParams[0]?.key).toBe('petId')
+  })
+})
+
+/**
+ * `params` became a GENERIC container entry, which also covers
+ * `Scenario.params` — previously a dedicated scenario-only branch. Running
+ * BOTH (the entry and the branch) would reassign a param twice in one pass,
+ * and the idMap would keep the FIRST mapping while the tree carries the
+ * SECOND id: every reference and import side-data lookup through the map
+ * would resolve to an id that no longer exists. This pins the single-pass
+ * property: after one pass, the map's target IS the id on the tree.
+ */
+describe('reassignTreeIds — Scenario.params is reassigned exactly once per pass', () => {
+  it('the idMap entry for a scenario param points at the id the tree actually carries', () => {
+    const scenario = {
+      type: 'scenario', id: 'scn-once', name: 'S', tags: [],
+      params: [{ id: 'param-once', name: 'Input', dataType: 'string', required: true }],
+      nodes: [], edges: []
+    } as unknown as Scenario
+    const idMap = new Map<string, string>()
+    reassignTreeIds(scenario, idMap)
+
+    const paramId = (scenario as unknown as { params: { id: string }[] }).params[0]?.id
+    expect(idMap.get('param-once')).toBe(paramId)
+    // And the map holds no orphaned intermediate hop.
+    expect([...idMap.values()]).toContain(paramId)
+    expect(idMap.size).toBe(2) // the scenario itself + its one param
   })
 })

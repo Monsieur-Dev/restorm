@@ -134,5 +134,3 @@ export const buildNativeMenuTemplate = (node: React.ReactNode): NativeMenuTempla
 
   return { template: walk(node), handlers }
 }
-
-export default buildNativeMenuTemplate

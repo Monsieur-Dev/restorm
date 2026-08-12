@@ -50,5 +50,3 @@ export const SecretErrorIndicator: React.FC<SecretErrorIndicatorProps> = ({
     </HeaderHoverTooltip>
   )
 }
-
-export default SecretErrorIndicator

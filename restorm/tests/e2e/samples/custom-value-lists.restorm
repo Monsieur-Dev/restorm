@@ -1,0 +1,45 @@
+fileFormatVersion: 1
+collections:
+  - id: ea0b4443-63a1-4f90-abe3-2dc6b74ebb58
+    name: Paint API
+    folderType: environment
+    configuration: {}
+    customValueLists:
+      - id: c395abee-67a4-4f3d-811e-cc1629a7a814
+        name: Couleur
+        entries:
+          - id: 9a7635d9-dbd0-4d28-a715-d55d5b3d0b2b
+            label: Rouge
+            value: FF0000
+          - id: e4ea0918-68ab-4058-b505-bbc8e6fc3766
+            label: Vert
+            value: 00FF00
+    environments:
+      - id: f1e4acec-36a8-4e93-a08c-d639d80adbd8
+        name: live
+        variables:
+          - key: baseUrl
+            enabled: true
+            value:
+              type: string
+              value: https://api.example.com
+    items:
+      - id: db75bba6-af59-4a68-beca-56b96d54c485
+        name: Paint
+        type: http
+        method: GET
+        url: '{{baseUrl}}/paint'
+        deprecated: false
+        documentation: ''
+        headers: []
+        params:
+          - key: color
+            enabled: true
+            value:
+              type: customList
+              label: Rouge
+              listId: c395abee-67a4-4f3d-811e-cc1629a7a814
+        pathParams: []
+        tags: []
+    tagColors: {}
+    tags: []

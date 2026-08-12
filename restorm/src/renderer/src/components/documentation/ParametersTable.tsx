@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type {
   OperationDocumentation,
   ParameterDocumentation,
@@ -84,6 +85,7 @@ function formatAdditionalExamples(p: ParameterDocumentation): { name: string; va
  * coloured by location so the eye can group them at a glance.
  */
 export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, testId }) => {
+  const { t } = useTranslation()
   const rows = useMemo<ParamRow[]>(() => {
     const out: ParamRow[] = []
     operations.forEach((op, opIdx) => {
@@ -106,7 +108,7 @@ export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, te
         className="documentation-host-parameters-table__empty"
         data-testid={testId ?? 'documentation-host-parameters-table-empty'}
       >
-        No non-body parameters declared for the filtered routes.
+        {t('documentation.params.empty')}
       </p>
     )
   }
@@ -118,16 +120,16 @@ export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, te
     >
       <thead>
         <tr>
-          <th className="documentation-host-parameters-table__th documentation-host-parameters-table__th--location">In</th>
-          <th className="documentation-host-parameters-table__th">Name</th>
-          <th className="documentation-host-parameters-table__th">Type</th>
-          <th className="documentation-host-parameters-table__th documentation-host-parameters-table__th--required">Req.</th>
+          <th className="documentation-host-parameters-table__th documentation-host-parameters-table__th--location">{t('documentation.table.in')}</th>
+          <th className="documentation-host-parameters-table__th">{t('documentation.table.name')}</th>
+          <th className="documentation-host-parameters-table__th">{t('documentation.table.type')}</th>
+          <th className="documentation-host-parameters-table__th documentation-host-parameters-table__th--required">{t('documentation.table.required')}</th>
           {showOperationColumn && (
-            <th className="documentation-host-parameters-table__th">Operation</th>
+            <th className="documentation-host-parameters-table__th">{t('documentation.table.operation')}</th>
           )}
-          <th className="documentation-host-parameters-table__th">Description</th>
-          <th className="documentation-host-parameters-table__th">Example</th>
-          <th className="documentation-host-parameters-table__th">Constraints</th>
+          <th className="documentation-host-parameters-table__th">{t('documentation.table.description')}</th>
+          <th className="documentation-host-parameters-table__th">{t('documentation.table.example')}</th>
+          <th className="documentation-host-parameters-table__th">{t('documentation.table.constraints')}</th>
         </tr>
       </thead>
       <tbody>

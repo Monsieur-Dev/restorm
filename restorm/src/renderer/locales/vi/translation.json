@@ -72,6 +72,7 @@
     "auth": {
       "noAuth": "Không xác thực",
       "popoverLabel": "Tuyến xác thực",
+      "openRoute": "Mở tuyến xác thực",
       "unnamed": "Chưa đặt tên"
     },
     "contextMenu": {
@@ -219,7 +220,6 @@
     "new": "Mới",
     "import": "Nhập",
     "open": "Mở",
-    "openFolder": "Mở thư mục",
     "recentFiles": "Tệp gần đây",
     "favorites": "Yêu thích",
     "close": "Đóng",
@@ -227,36 +227,24 @@
     "saveAll": "Lưu tất cả",
     "saveAs": "Lưu dưới dạng",
     "exit": "Thoát",
-    "selection": "Lựa chọn",
-    "tools": "Công cụ",
-    "findInCollection": "Tìm trong bộ sưu tập",
-    "addRequest": "Thêm yêu cầu",
-    "addRequestHttp": "Yêu cầu HTTP",
-    "addRequestGraphql": "Yêu cầu GraphQL",
-    "addRequestGrpc": "Yêu cầu gRPC",
-    "addRequestSoap": "Yêu cầu SOAP",
-    "addRequestOdata": "Yêu cầu OData",
-    "addRequestWebsocket": "Yêu cầu WebSocket",
-    "addFolder": "Thêm thư mục",
-    "addEnvironmentFolder": "Thêm thư mục môi trường",
-    "addVariable": "Thêm biến",
-    "addTag": "Thêm thẻ",
-    "expandAllFolders": "Mở rộng tất cả thư mục",
-    "collapseAllFolders": "Thu gọn tất cả thư mục",
-    "sendActiveRequest": "Gửi yêu cầu",
-    "cancelActiveRequest": "Hủy yêu cầu",
-    "generateCodeSnippet": "Tạo đoạn mã",
-    "copyAsCurl": "Sao chép dưới dạng cURL",
-    "exportOpenApi": "Xuất sang OpenAPI",
-    "clearAuthCache": "Xóa bộ nhớ đệm xác thực",
-    "openLogsFolder": "Mở thư mục nhật ký",
     "mcpLogs": "Nhật ký MCP",
+    "consoleHttp": "Bảng điều khiển HTTP",
     "git": "Git",
     "gitPush": "Đẩy",
     "gitPull": "Kéo",
     "gitRefresh": "Làm mới",
     "gitHistory": "Lịch sử",
-    "gitResetToServer": "Đặt lại về phiên bản máy chủ"
+    "gitResetToServer": "Đặt lại về phiên bản máy chủ",
+    "scenario": "Kịch bản",
+    "create": "Tạo",
+    "request": "Yêu cầu",
+    "server": "Máy chủ",
+    "runSelected": "Chạy",
+    "cancelSelected": "Hủy",
+    "clone": "Nhân bản",
+    "delete": "Xóa",
+    "addToFavorites": "Thêm vào mục yêu thích",
+    "removeFromFavorites": "Xóa khỏi mục yêu thích"
   },
   "sidebar": {
     "addRequest": "Thêm yêu cầu",
@@ -327,7 +315,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Cắt",
+      "copy": "Sao chép",
+      "paste": "Dán"
     },
     "deleteConfirm": {
       "title": "Xác nhận xóa",
@@ -362,7 +353,7 @@
       "docs": "Tài liệu",
       "environments": "Môi trường",
       "notes": "Ghi chú",
-      "customValues": "Custom variables"
+      "customValues": "Kiểu liệt kê tùy chỉnh"
     },
     "home": {
       "configureEnvs": "Cấu hình môi trường",
@@ -400,7 +391,7 @@
       "addEntry": "Thêm một giá trị",
       "label": "Label",
       "value": "Value",
-      "selectList": "Chọn một danh sách"
+      "selectList": "Định nghĩa các danh sách giá trị dùng lại được cho biến của bạn: bạn chọn một nhãn dễ đọc, yêu cầu sẽ gửi giá trị tương ứng. Hãy chọn hoặc tạo một kiểu liệt kê để bắt đầu."
     }
   },
   "requestTab": {
@@ -454,7 +445,11 @@
       }
     },
     "followRedirects": "Theo dõi chuyển hướng",
-    "timeoutLabel": "Thời gian chờ (ms)"
+    "timeoutLabel": "Thời gian chờ (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Sao chép URL đã phân giải",
+      "copied": "Đã sao chép!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -603,6 +598,7 @@
     "disconnect": "Ngắt kết nối",
     "startListening": "Bắt đầu lắng nghe",
     "stopListening": "Dừng lắng nghe",
+    "listenFailed": "Không thể khởi động máy chủ",
     "routePlaceholder": "Tuyến (tùy chọn)",
     "clientsConnected": "{{count}} máy khách đã kết nối",
     "notListening": "Không lắng nghe"
@@ -855,26 +851,6 @@
     "openAriaLabel": "Mở bộ sưu tập từ đĩa",
     "landmarkLabel": "Chào mừng"
   },
-  "save": {
-    "title": "Tùy chọn lưu",
-    "mode": {
-      "label": "Chế độ lưu",
-      "file": "Tệp đơn",
-      "folder": "Cấu trúc thư mục",
-      "fileDescription": "Lưu mọi thứ trong một tệp duy nhất",
-      "folderDescription": "Lưu dưới dạng cấu trúc thư mục với các tệp riêng biệt"
-    },
-    "format": {
-      "label": "Định dạng",
-      "yamlDescription": "Con người đọc được",
-      "jsonDescription": "Định dạng tiêu chuẩn",
-      "json5Description": "JSON + chú thích"
-    },
-    "preview": {
-      "label": "Xem trước cấu trúc",
-      "noDocumentation": "Không có tài liệu được phân tích cho nguồn này."
-    }
-  },
   "common": {
     "cancel": "Hủy",
     "save": "Lưu",
@@ -1058,7 +1034,9 @@
       "sourceImportFailed": "Không thể nhập lại đặc tả từ nguồn của nó.",
       "emptySpec": "Đặc tả tải về từ {{url}} không khai báo thao tác {{format}} nào. Áp dụng nó sẽ làm trống thư mục này nên bản cập nhật đã bị từ chối.",
       "formatNotDetected": "Không nhận diện được định dạng của nguồn này.",
-      "unsupportedFormat": "Không có trình nhập nào xử lý định dạng {{format}}."
+      "unsupportedFormat": "Không có trình nhập nào xử lý định dạng {{format}}.",
+      "projectFormatTooNew": "Tệp dự án này dùng phiên bản định dạng {{found}}, nhưng phiên bản Restorm này chỉ hiểu phiên bản {{current}}. Hãy cập nhật Restorm để nhập nó.",
+      "projectFormatMissing": "Tệp này không khai báo phiên bản định dạng Restorm, nên không phải là tệp dự án Restorm."
     },
     "formats": {
       "swagger": {
@@ -1165,6 +1143,9 @@
       "apiBlueprint": {
         "description": "Dán một tài liệu API Blueprint (.apib) — Restorm phân tích từng resource group và transition thành một thư mục yêu cầu, một cho mỗi cặp phương thức/phản hồi đã được ghi tài liệu.",
         "trademark": "API Blueprint là một đặc tả ban đầu được tạo ra bởi Apiary."
+      },
+      "restorm": {
+        "description": "Hợp nhất một dự án Restorm khác vào dự án đang mở — mỗi thư mục, yêu cầu, môi trường và kịch bản được nhập sẽ nằm trong một thư mục bao bọc, với định danh mới để không gì xung đột, kể cả khi nhập một dự án vào chính nó."
       }
     },
     "grpcReflection": {
@@ -1231,6 +1212,71 @@
       "previousMatch": "Kết quả trước",
       "nextMatch": "Kết quả tiếp theo",
       "close": "Đóng"
+    },
+    "sections": {
+      "parameters": "Tham số",
+      "responses": "Phản hồi",
+      "models": "Mô hình",
+      "enums": "Kiểu liệt kê",
+      "polymorphism": "Đa hình",
+      "overview": "Tổng quan",
+      "operations": "Thao tác"
+    },
+    "table": {
+      "in": "Ở",
+      "name": "Tên",
+      "type": "Kiểu",
+      "required": "Bắt buộc",
+      "operation": "Thao tác",
+      "description": "Mô tả",
+      "example": "Ví dụ",
+      "constraints": "Ràng buộc"
+    },
+    "params": {
+      "empty": "Không có tham số ngoài phần thân được khai báo cho các tuyến đã lọc."
+    },
+    "responses": {
+      "status": "Trạng thái",
+      "schema": "Lược đồ",
+      "headers": "Tiêu đề",
+      "empty": "Không có phản hồi nào được khai báo cho các tuyến đã lọc."
+    },
+    "route": {
+      "requestBody": "Phần thân yêu cầu",
+      "responseBody": "Phần thân phản hồi",
+      "security": "Bảo mật",
+      "externalDocs": "Tài liệu bên ngoài",
+      "examplePayload": "Ví dụ payload",
+      "operationId": "operationId",
+      "addRequest": "+ Thêm yêu cầu"
+    },
+    "apiInfo": {
+      "version": "Phiên bản",
+      "sourceFormat": "Định dạng nguồn",
+      "from": "từ",
+      "server": "Máy chủ",
+      "contact": "Liên hệ",
+      "license": "Giấy phép",
+      "termsOfService": "Điều khoản dịch vụ",
+      "externalDocs": "Tài liệu bên ngoài",
+      "tagReferences": "Tham chiếu thẻ"
+    },
+    "sidebar": {
+      "outline": "Bố cục tài liệu"
+    },
+    "legend": {
+      "requiredProperty": "thuộc tính bắt buộc",
+      "optionalProperty": "thuộc tính tùy chọn",
+      "nullableValue": "giá trị cho phép null",
+      "readOnly": "chỉ đọc (do máy chủ đặt)",
+      "deprecatedBadge": "không dùng nữa",
+      "deprecatedDesc": "được khai báo là không dùng nữa trong đặc tả nguồn",
+      "removedBadge": "đã xóa",
+      "removedDesc": "không có trong lần nhập lại gần nhất",
+      "requiredSingleRef": "tham chiếu đơn bắt buộc",
+      "optionalSingleRef": "tham chiếu đơn tùy chọn",
+      "requiredArrayRef": "tham chiếu mảng bắt buộc",
+      "optionalArrayRef": "tham chiếu mảng tùy chọn"
     }
   },
   "scenario": {
@@ -1781,8 +1827,7 @@
       "dataFormats": "Định dạng dữ liệu",
       "encoding": "Mã hóa",
       "time": "Hẹn giờ",
-      "algorithmie": "Thuật toán",
-      "ux": "UX"
+      "algorithmie": "Thuật toán"
     },
     "listOp": {
       "value": "danh sách",
@@ -2332,9 +2377,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Xem trước URL (trước khi phân giải)",
-    "versionV2NotYet": "v2 (chưa hỗ trợ thực thi)",
-    "versionV3NotYet": "v3 (chưa hỗ trợ thực thi)",
     "operationKindEntitySet": "Tập thực thể (GET)",
     "operationKindFunction": "Hàm (GET với tham số nội tuyến)",
     "operationKindAction": "Hành động (POST với thân JSON)",
@@ -2353,7 +2395,8 @@
       "stopListening": "Dừng lắng nghe",
       "notListening": "Không lắng nghe",
       "served": "Đang lắng nghe — đã phục vụ {{count}} yêu cầu",
-      "listenFailed": "Không thể khởi động máy chủ giả lập"
+      "listenFailed": "Không thể khởi động máy chủ giả lập",
+      "portInUse": "Cổng {{port}} đã được ứng dụng khác sử dụng. Hãy đóng ứng dụng đó hoặc chọn cổng khác, rồi khởi động lại máy chủ."
     }
   },
   "odata": {
@@ -2373,6 +2416,7 @@
     },
     "namePlaceholder": "Tên cấu hình",
     "saveButton": "Lưu",
+    "updateButton": "Cập nhật với giá trị hiện tại",
     "storageTarget": {
       "label": "Lưu vào tệp dự án (.restorm)"
     },
@@ -2385,6 +2429,10 @@
     "loadConfirm": {
       "title": "Tải cấu hình",
       "message": "Bạn có muốn tải cấu hình \"{{name}}\" không? Cấu hình hiện tại chưa lưu sẽ bị mất."
+    },
+    "updateConfirm": {
+      "title": "Cập nhật cấu hình",
+      "message": "Bạn có muốn thay thế cấu hình \"{{name}}\" bằng các giá trị hiện tại không?"
     },
     "deleteConfirm": {
       "title": "Xóa cấu hình",
@@ -2631,6 +2679,10 @@
       "title": "Dự án được tạo bằng phiên bản mới hơn",
       "message": "Tệp này được tạo bằng phiên bản Restorm mới hơn phiên bản bạn đang dùng. Vui lòng cập nhật Restorm để mở tệp.",
       "versions": "Định dạng tệp {{found}}; phiên bản này hỗ trợ tới {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Đây không phải là tệp Restorm",
+      "message": "Tệp này không khai báo định dạng tệp Restorm. Tệp không do Restorm tạo ra hoặc đã được chỉnh sửa thủ công nên không thể mở."
     }
   }
 }

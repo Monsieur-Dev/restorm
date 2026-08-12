@@ -314,5 +314,3 @@ export const EditableLabel: React.FC<EditableLabelProps> = ({
     </Tag>
   )
 }
-
-export default EditableLabel

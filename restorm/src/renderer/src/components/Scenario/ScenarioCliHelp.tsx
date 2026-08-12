@@ -28,7 +28,7 @@ export const ScenarioCliHelp: React.FC<{ scenarioName: string; scenarioId: strin
   const [byId, setById] = useState(false)
   const [allLogs, setAllLogs] = useState(false)
 
-  // Shortest unambiguous designation (bare name / breadcrumb / folder-mode index
+  // Shortest unambiguous designation (bare name / breadcrumb / index
   // path); falls back to the leaf name when the tree isn't available.
   const runName = cliInfo?.suggestRunTarget(scenarioId) ?? scenarioName
   // The real path of the open project; placeholder only when nothing is open.
@@ -83,5 +83,3 @@ export const ScenarioCliHelp: React.FC<{ scenarioName: string; scenarioId: strin
     </div>
   )
 }
-
-export default ScenarioCliHelp

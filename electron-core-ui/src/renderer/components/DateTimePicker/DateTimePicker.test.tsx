@@ -20,7 +20,7 @@ vi.mock('react-i18next', () => ({
   })
 }))
 
-import DateTimePicker from './DateTimePicker'
+import { DateTimePicker } from './DateTimePicker'
 
 afterEach(() => {
   cleanup()

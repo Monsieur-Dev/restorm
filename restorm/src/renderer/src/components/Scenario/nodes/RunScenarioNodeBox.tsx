@@ -214,5 +214,3 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
     />
   )
 }
-
-export default RunScenarioNodeBox

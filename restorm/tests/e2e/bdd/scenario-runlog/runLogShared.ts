@@ -1,6 +1,7 @@
 import { copyFileSync } from 'fs'
 import { join, resolve } from 'path'
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
+import { materializeSample, type StartedServices } from '../../helpers/testcontainers/services'
 
 /** Reference fixture + its sidecars, committed under `tests/e2e/samples`. */
 export const SAMPLES_DIR = resolve(__dirname, '../../samples')
@@ -21,9 +22,10 @@ export function goldenPathFor(scenarioName: string): string {
 /** Copy the reference project + its call-history zip + the readFile sidecar into
  * `tempDir`, returning the working-copy `.restorm` path. The same layout the
  * interactive run-log e2e AND the headless CLI need. */
-export function setupReferenceWorkingCopy(tempDir: string): string {
+export function setupReferenceWorkingCopy(tempDir: string, services?: StartedServices): string {
   const workingCopy = join(tempDir, 'scenarios-e2e-reference-tests.restorm')
-  copyFileSync(REFERENCE_SAMPLE, workingCopy)
+  if (services) materializeSample(REFERENCE_SAMPLE, workingCopy, services)
+  else copyFileSync(REFERENCE_SAMPLE, workingCopy)
   copyFileSync(REFERENCE_RESPONSES, `${workingCopy}.responses.zip`)
   copyFileSync(REFERENCE_SIDECAR, join(tempDir, 'scenarios-e2e-reference-tests.pet-sample.json'))
   return workingCopy
@@ -125,9 +127,17 @@ function normalizeData(v: unknown): unknown {
 
 /** Parse a copied/streamed run-log YAML, strip run-time noise, re-emit canonical
  * YAML. Both the live output and the golden go through this, so they compare
- * deterministically — used by the inspector copy e2e AND the headless CLI e2e. */
+ * deterministically — used by the inspector copy e2e AND the headless CLI e2e.
+ *
+ * Local service PORTS are placeholdered on BOTH sides: the suites run their
+ * mocks on ephemeral per-worker ports, while the committed goldens speak the
+ * canonical compose ones. Host + path still assert; only the port token is
+ * abstracted. */
 export function normalizeRunLogYaml(raw: string): string {
-  const entries = yamlParse(raw) as { message: string; data?: unknown }[]
+  const portless = raw
+    .replace(/localhost:\d+/g, 'localhost:<port>')
+    .replace(/127\.0\.0\.1:\d+/g, '127.0.0.1:<port>')
+  const entries = yamlParse(portless) as { message: string; data?: unknown }[]
   const normalized = entries.map((e) => {
     const message = normalizeMessage(e.message)
     return 'data' in e ? { message, data: normalizeData(e.data) } : { message }

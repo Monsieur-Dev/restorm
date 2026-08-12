@@ -83,5 +83,3 @@ export const FilterNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
-
-export default FilterNodeBox

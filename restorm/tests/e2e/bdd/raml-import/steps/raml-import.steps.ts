@@ -1,10 +1,16 @@
+import { materializeTextFixture } from '../../../helpers/testcontainers/services'
 import { createBdd } from 'playwright-bdd'
 import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { test, expect, RAML_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E } from '../../fixtures/raml-import.fixture'
 
-const FIXTURE = resolve(__dirname, '../../../../unit/fixtures/raml/petstore.raml')
+const FIXTURE_SOURCE = resolve(__dirname, '../../../../unit/fixtures/raml/petstore.raml')
+let materializedFixture: string | null = null
+const fixturePath = (): string => {
+  if (materializedFixture === null) throw new Error('fixture not materialized — the import step runs first')
+  return materializedFixture
+}
 const SINGLE_FILE = join(RAML_IMPORT_TEMP_DIR, 'raml-test.restorm')
 
 const { Given, When, Then } = createBdd(test)
@@ -59,13 +65,13 @@ Given('a new single-file collection for RAML import', async ({ launchApp }) => {
 })
 
 async function importFixture(p: Page): Promise<void> {
-  expect(existsSync(FIXTURE), `fixture must exist: ${FIXTURE}`).toBe(true)
+  expect(existsSync(fixturePath()), `fixture must exist: ${fixturePath()}`).toBe(true)
 
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')
   await expect(importModal).toBeVisible({ timeout: 5000 })
   const input = importModal.locator('textarea, input[type="text"]').first()
-  await input.fill(FIXTURE)
+  await input.fill(fixturePath())
   // RAML parsing (raml-1-parser: temp-file write + its definition-system
   // init) is heavier than the JSON-based importers this step's timeouts
   // were modeled on — give the debounced preview more room.
@@ -77,17 +83,19 @@ async function importFixture(p: Page): Promise<void> {
   await p.waitForTimeout(500)
 }
 
-When('I import the RAML petstore sample', async () => {
+When('I import the RAML petstore sample', async ({ services }) => {
+  materializedFixture = materializeTextFixture(FIXTURE_SOURCE, join(RAML_IMPORT_TEMP_DIR, 'petstore.raml'), services)
   await importFixture(requirePage())
 })
 
-When('I open the import modal and paste the RAML petstore sample', async () => {
+When('I open the import modal and paste the RAML petstore sample', async ({ services }) => {
+  materializedFixture = materializeTextFixture(FIXTURE_SOURCE, join(RAML_IMPORT_TEMP_DIR, 'petstore.raml'), services)
   const p = requirePage()
   await p.keyboard.press('Control+I')
   const importModal = p.locator('[data-testid="import-modal"]')
   await expect(importModal).toBeVisible({ timeout: 5000 })
   const input = importModal.locator('textarea, input[type="text"]').first()
-  await input.fill(FIXTURE)
+  await input.fill(fixturePath())
 })
 
 Then('the import preview should be visible', async () => {

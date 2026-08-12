@@ -27,6 +27,14 @@ export interface UseNavigationOptions {
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenNavTabOptions) => void
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
+  /**
+   * Multi-selection ids (TASK-435). The sidebar renders THIS array when it is
+   * non-empty, falling back to the single `selectedItemId` anchor only when it
+   * is empty. So any navigation that moves the selection must set BOTH — the
+   * anchor alone no longer moves the highlight once a multi-selection (or an
+   * ordinary click, which also populates the array) has happened.
+   */
+  setSelectedItemIds: React.Dispatch<React.SetStateAction<string[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
   getNearestEnvironmentsForBreadcrumbs: (rootItems: FolderItem[], breadcrumbs: BreadcrumbItem[]) => Environment[]
@@ -71,10 +79,22 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
+    setSelectedItemIds,
     setExpandedIds,
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   } = options
+
+  /**
+   * Move the sidebar selection to exactly one item — the anchor AND the
+   * rendered array — so a navigation-driven selection actually shows.
+   * Collapsing any prior multi-selection to the navigated item mirrors what
+   * an ordinary single click does.
+   */
+  const selectSingle = useCallback((itemId: string) => {
+    setSelectedItemId(itemId)
+    setSelectedItemIds([itemId])
+  }, [setSelectedItemId, setSelectedItemIds])
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -94,7 +114,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // - Always for non-workbench sources (sidebar, breadcrumb, etc.)
       // - For workbench/tab-switcher sources: handled in handleTabActivate with sync check
       if ((source !== 'workbench' && source !== 'tab-switcher') || isHistoryNavigation) {
-        setSelectedItemId(key)
+        selectSingle(key)
       }
 
       // Only open tabs for history navigation (back/forward) — direct clicks open tabs directly
@@ -124,14 +144,14 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     })
 
     return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootItems, setSelectedItemId, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
+  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootItems, selectSingle, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
     const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
     if (!item) return
 
-    setSelectedItemId(itemId)
+    selectSingle(itemId)
 
     if (isEnvironmentFolder(item)) {
       openEnvironmentFolderTab(item, breadcrumbs)
@@ -184,7 +204,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'kafka-request' })
       }
     }
-  }, [rootItems, setSelectedItemId, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, selectSingle, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Middle-click ("open in background") variant of `handleItemClick`.
   // Opens the corresponding workbench tab without focusing it, without
@@ -260,7 +280,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       const { item: foundItem, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
       if (!foundItem) return
 
-      setSelectedItemId(itemId)
+      selectSingle(itemId)
 
       if (isEnvironmentFolder(foundItem)) {
         openEnvironmentFolderTab(foundItem, breadcrumbs)
@@ -308,7 +328,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         }
       }
     },
-    [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs]
+    [rootItems, selectSingle, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs]
   )
 
   // Middle-click ("open in background") variant of the breadcrumb
@@ -419,14 +439,20 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       }
     }
 
-    // Conditionally sync sidebar selection highlight based on user setting
+    // Conditionally sync sidebar selection highlight based on user setting.
+    // The setting DEFAULTS to on, so the guard is "sync unless explicitly
+    // off": `stored !== false`. This is deliberate rather than `stored === true
+    // || stored === null` — `settings.get` returns the empty string when the
+    // key is not yet resolvable (registration timing) and `null` when the
+    // service is not up, and BOTH of those must fall back to the default-on
+    // behaviour, not be read as a falsy "off".
     void settingsPromise.then((stored) => {
-      const syncEnabled = stored !== null ? (stored as boolean) : true
+      const syncEnabled = stored !== false
       if (syncEnabled && itemId) {
-        setSelectedItemId(itemId)
+        selectSingle(itemId)
       }
     })
-  }, [parseTabId, setSelectedItemId, setExpandedIds, rootItems])
+  }, [parseTabId, selectSingle, setExpandedIds, rootItems])
 
   // Handle search result click - navigate to the selected item
   const handleSearchResultClick = useCallback((result: SearchResult) => {

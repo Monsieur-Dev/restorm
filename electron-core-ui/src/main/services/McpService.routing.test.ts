@@ -143,7 +143,7 @@ describe('McpService cross-instance routing bridge', () => {
       pid: process.pid,
       startedAt: '2026-05-03T00:00:00.000Z',
       token: 'token-b',
-      name: 'session-b'
+      name: 'session-b', mcpActive: true
     })
   })
 

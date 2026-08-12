@@ -56,5 +56,3 @@ export const WaitUntilNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   // No explicit output — sequences via the universal `done` port.
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }
-
-export default WaitUntilNodeBox

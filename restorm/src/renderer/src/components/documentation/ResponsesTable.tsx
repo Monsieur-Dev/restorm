@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type {
   OperationDocumentation,
   ResponseDocumentation
@@ -66,6 +67,7 @@ function hasDetails(resp: ResponseDocumentation): boolean {
  * source spec expand to a detail panel underneath.
  */
 export const ResponsesTable: React.FC<ResponsesTableProps> = ({ operations, testId }) => {
+  const { t } = useTranslation()
   const rows = useMemo<ResponseRow[]>(() => {
     const out: ResponseRow[] = []
     operations.forEach((op, opIdx) => {
@@ -98,7 +100,7 @@ export const ResponsesTable: React.FC<ResponsesTableProps> = ({ operations, test
         className="documentation-host-responses-table__empty"
         data-testid={testId ?? 'documentation-host-responses-table-empty'}
       >
-        No responses declared for the filtered routes.
+        {t('documentation.responses.empty')}
       </p>
     )
   }
@@ -110,11 +112,11 @@ export const ResponsesTable: React.FC<ResponsesTableProps> = ({ operations, test
     >
       <thead>
         <tr>
-          <th className="documentation-host-responses-table__th documentation-host-responses-table__th--code">Status</th>
+          <th className="documentation-host-responses-table__th documentation-host-responses-table__th--code">{t('documentation.responses.status')}</th>
           {showOperationColumn && (
-            <th className="documentation-host-responses-table__th">Operation</th>
+            <th className="documentation-host-responses-table__th">{t('documentation.table.operation')}</th>
           )}
-          <th className="documentation-host-responses-table__th">Description</th>
+          <th className="documentation-host-responses-table__th">{t('documentation.table.description')}</th>
         </tr>
       </thead>
       <tbody>
@@ -174,6 +176,7 @@ interface ResponseDetailProps {
 }
 
 const ResponseDetail: React.FC<ResponseDetailProps> = ({ response }) => {
+  const { t } = useTranslation()
   const headers = response.headers ? Object.entries(response.headers) : []
   const examples = response.examples ? Object.entries(response.examples) : []
   const documentedModels = useDocumentedModels()
@@ -183,7 +186,7 @@ const ResponseDetail: React.FC<ResponseDetailProps> = ({ response }) => {
     <div className="documentation-host-responses-detail">
       {response.schema !== undefined && response.schema.length > 0 && (
         <div className="documentation-host-responses-detail__row">
-          <span className="documentation-host-responses-detail__label">Schema</span>
+          <span className="documentation-host-responses-detail__label">{t('documentation.responses.schema')}</span>
           {linkable && schemaRef.ref !== undefined ? (
             <code className="documentation-host-responses-detail__schema">
               <ModelRefLink modelName={schemaRef.ref}>{response.schema}</ModelRefLink>
@@ -195,7 +198,7 @@ const ResponseDetail: React.FC<ResponseDetailProps> = ({ response }) => {
       )}
       {headers.length > 0 && (
         <div className="documentation-host-responses-detail__row">
-          <span className="documentation-host-responses-detail__label">Headers</span>
+          <span className="documentation-host-responses-detail__label">{t('documentation.responses.headers')}</span>
           <table className="documentation-host-responses-detail__headers">
             <tbody>
               {headers.map(([name, h]) => (

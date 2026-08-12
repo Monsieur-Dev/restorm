@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, cleanup, fireEvent } from '@testing-library/react'
-import Avatar from './Avatar'
+import { Avatar } from './Avatar'
 import { deriveInitials } from './deriveInitials'
 
 afterEach(() => { cleanup() })

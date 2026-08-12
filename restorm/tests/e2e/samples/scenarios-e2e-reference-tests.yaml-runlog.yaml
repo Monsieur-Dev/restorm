@@ -52,8 +52,8 @@
       - 3
 - message: ⚪ [<time>] start yaml
   data:
-    op: stringify
     indent: 4
+    op: stringify
     value:
       - 1
       - 2

@@ -165,7 +165,7 @@ export function extractVendorExtensions(
 }
 
 /** Render a JSON-Schema-ish node as a short human label (`array<Pet>`, `string`, `Pet`, `any`). */
-export function schemaTypeLabel(schema: CommonSchema, depth = 0): string {
+function schemaTypeLabel(schema: CommonSchema, depth = 0): string {
   if (depth > 5) return '...'
   if (schema.$ref) return refName(schema.$ref)
   if (schema.type === 'array' && schema.items) return `array<${schemaTypeLabel(schema.items, depth + 1)}>`
@@ -248,7 +248,7 @@ export interface CommonTag {
  * downstream `if (constraints)` check stays meaningful. Returns
  * `undefined` when the source schema carries no constraints at all,
  * so callers can avoid attaching an empty object. */
-export function extractSchemaConstraints(schema: CommonSchema | undefined): SchemaConstraints | undefined {
+function extractSchemaConstraints(schema: CommonSchema | undefined): SchemaConstraints | undefined {
   if (!schema) return undefined
   const out: SchemaConstraints = {}
   if (schema.minLength !== undefined) out.minLength = schema.minLength
@@ -264,7 +264,7 @@ export function extractSchemaConstraints(schema: CommonSchema | undefined): Sche
 }
 
 /** A parameter signature the metadata transformer can render. */
-export function mapParameterToDocumentation(p: CommonParameter): ParameterDocumentation {
+function mapParameterToDocumentation(p: CommonParameter): ParameterDocumentation {
   const entry: ParameterDocumentation = {
     name: p.name,
     location: p.in,
@@ -292,13 +292,13 @@ export function mapParameterToDocumentation(p: CommonParameter): ParameterDocume
 }
 
 /** Map a list of `CommonParameter` onto `ParameterDocumentation[]`. */
-export function mapParameters(params: CommonParameter[] | undefined): ParameterDocumentation[] | undefined {
+function mapParameters(params: CommonParameter[] | undefined): ParameterDocumentation[] | undefined {
   if (!params || params.length === 0) return undefined
   return params.map(mapParameterToDocumentation)
 }
 
 /** Map a `responses` map onto the documentation shape. */
-export function mapResponses(
+function mapResponses(
   responses: Record<string, CommonResponse> | undefined
 ): Record<string, ResponseDocumentation> | undefined {
   if (!responses) return undefined
@@ -346,7 +346,7 @@ function hasNullInTypeArray(schema: CommonSchema): boolean {
  * relationship diagram without having to re-parse the type label
  * string.
  */
-export function resolveModelRef(schema: CommonSchema): { ref: string; isArray: boolean } | undefined {
+function resolveModelRef(schema: CommonSchema): { ref: string; isArray: boolean } | undefined {
   if (schema.$ref) return { ref: refName(schema.$ref), isArray: false }
   if (schema.type === 'array' && schema.items?.$ref) {
     return { ref: refName(schema.items.$ref), isArray: true }
@@ -563,6 +563,7 @@ export function buildOperationDocumentation(op: OperationDocumentationInput): Op
     }
   }
   if (op.tags?.[0] !== undefined) doc.group = op.tags[0]
+  if (op.tags !== undefined && op.tags.length > 0) doc.tags = op.tags
   if (op.summary !== undefined) doc.summary = op.summary
   if (op.description !== undefined) doc.description = op.description
   if (op.operationId !== undefined) doc.operationId = op.operationId

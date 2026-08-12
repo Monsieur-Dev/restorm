@@ -240,4 +240,4 @@ const CustomWCO: React.FC<CustomWCOProps> = ({
   )
 }
 
-export default CustomWCO
+export { CustomWCO }

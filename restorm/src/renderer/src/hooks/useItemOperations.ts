@@ -4,7 +4,7 @@
 
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
+import type { ListViewDropEventPayload, ListViewDropPosition, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { isAnyFolder, isScenario, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
@@ -120,6 +120,13 @@ export interface UseItemOperationsOptions {
 
 export interface UseItemOperationsReturn {
   handleItemDrop: (payload: ListViewDropEventPayload) => void
+  /** Hover-time coherence check for a sidebar drag — the ListView `canDrop`
+   * feeds on this: same rules the drop itself enforces, so an invalid
+   * gesture is flagged (ghost error badge, no indicator) instead of being
+   * silently swallowed at release. */
+  canDropSelection: (sourceIds: string[], targetId: string, position: ListViewDropPosition) => boolean
+  /** Empty-area drop: moves the dragged rows to the END of the root list. */
+  handleEmptyAreaDrop: (sources: ListViewItemEventPayload[]) => void
   handleCloneItem: (itemId: string) => void
   handleCreateRootEnvironmentFolder: () => void
   /** Kind-agnostic add-child dispatcher bound to the sidebar's
@@ -220,61 +227,66 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
   const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab } = options
   const { t } = useTranslation()
 
-  // Handle drag & drop in the sidebar to reorder items
-  const handleItemDrop = useCallback((payload: ListViewDropEventPayload) => {
-    const sourceId = payload.source.id
-    const targetId = payload.item.id
-    const position = payload.position
+  // Coherence rules for a (possibly multi-item) sidebar drag. Shared verbatim
+  // between the hover validation (ListView's `canDrop` — ghost error badge,
+  // suppressed indicator) and the drop handler below, so what LOOKS invalid
+  // and what IS refused can never drift apart.
+  const canDropSelection = useCallback((sourceIds: string[], targetId: string, position: ListViewDropPosition): boolean => {
+    if (sourceIds.length === 0) return false
+    // An item can't land on itself.
+    if (sourceIds.includes(targetId)) return false
 
-    // Don't allow dropping an item onto itself
-    if (sourceId === targetId) return
-
-    // Don't allow dropping a root folder (they are top-level)
-    const isRootItem = rootItems.some((f) => f.id === sourceId)
-    if (isRootItem) return
-
-    // Don't allow dropping onto a root folder with 'before' or 'after' (only 'into')
-    const isTargetRootFolder = rootItems.some((f) => f.id === targetId)
-    if (isTargetRootFolder && position !== 'into') return
-
-    // Don't allow dropping a folder into one of its descendants
+    // Is `childId` anywhere inside `parentId`'s subtree?
     const isDescendant = (parentId: string, childId: string): boolean => {
       const parent = findItemById(rootItems, parentId)
-      if (!parent || !isAnyFolder(parent)) return false
-      for (const item of parent.items) {
+      if (!parent || !('items' in parent)) return false
+      for (const item of (parent.items ?? [])) {
         if (item.id === childId) return true
-        if (isAnyFolder(item) && isDescendant(item.id, childId)) return true
+        if ('items' in item && isDescendant(item.id, childId)) return true
       }
       return false
     }
-    if (isDescendant(sourceId, targetId)) return
 
-    // Resolves an item's containing folder — used AFTER the move to report
-    // where the item landed.
-    const findParentFolder = (nodes: FolderItem[], childId: string): FolderItem | null => {
-      for (const node of nodes) {
-        if (!isAnyFolder(node)) continue
-        if (node.items.some((child) => child.id === childId)) return node
-        const deeper = findParentFolder(node.items, childId)
-        if (deeper) return deeper
+    const target = findItemById(rootItems, targetId)
+    if (!target) return false
+
+    // The chain of containers the drop actually lands IN: the target itself
+    // when dropping INTO a container, its ancestors otherwise (siblings
+    // share them; 'into' a LEAF degrades to insert-after, same ancestors).
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, targetId)
+    const intoContainer = position === 'into' && (isAnyFolder(target) || isScenario(target))
+    const destinationChainIds = (intoContainer ? breadcrumbs : breadcrumbs.slice(0, -1)).map((bc) => bc.id)
+
+    for (const sourceId of sourceIds) {
+      const source = findItemById(rootItems, sourceId)
+      if (!source) return false
+      // A container can never land inside its own subtree.
+      if (isDescendant(sourceId, targetId)) return false
+      // An ENVIRONMENT FOLDER can only live outside every other environment
+      // folder and outside every scenario — checked recursively over the
+      // whole destination chain, not just the direct target: dropping one
+      // before/after a request nested in an env folder would otherwise
+      // sneak it inside. The rule covers env folders hidden anywhere in the
+      // dragged SUBTREE too (a plain folder carrying an env folder must not
+      // smuggle it in).
+      const subtreeHasEnvFolder = (node: FolderItem): boolean => {
+        if (isEnvironmentFolder(node)) return true
+        if (!('items' in node)) return false
+        return (node.items ?? []).some((child) => subtreeHasEnvFolder(child))
       }
-      return null
+      if (subtreeHasEnvFolder(source)) {
+        for (const chainId of destinationChainIds) {
+          const container = findItemById(rootItems, chainId)
+          if (container && (isEnvironmentFolder(container) || isScenario(container))) return false
+        }
+      }
     }
+    return true
+  }, [rootItems])
 
-    // Remove the item from its current position
-    const removedItem = removeItemFromTree(rootItems, sourceId)
-    if (!removedItem) return
-
-    // Insert at the new position
-    const inserted = insertItemIntoTree(rootItems, removedItem, targetId, position)
-    if (!inserted) {
-      // If insertion failed, try to restore the item (this shouldn't happen)
-      return
-    }
-
-    // Force React re-render by creating new reference
-    setRootItems((prevItems) => [...prevItems])
-
+  // Refresh breadcrumbs in EVERY open workbench tab after a tree move —
+  // shared by the row-target drop and the empty-area (move-to-root) drop.
+  const refreshAllTabBreadcrumbs = useCallback(() => {
     // Recalculate breadcrumbs for a single tab after the reorder. Returns
     // the tab unchanged for singleton tabs (Console / Firewall, which aren't
     // tied to a tree item) and when the item can no longer be located.
@@ -327,6 +339,63 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       groups: mapAllWorkbenchTabs(prevTree.groups, refreshTabBreadcrumbs)
     }))
 
+  }, [rootItems, setWorkbenchTree])
+
+  // Handle drag & drop in the sidebar to reorder / move items — including a
+  // MULTI-selection drag (payload.sources) and items sitting at the ROOT
+  // (both as source and as before/after target).
+  const handleItemDrop = useCallback((payload: ListViewDropEventPayload) => {
+    const sourceIds = (payload.sources.length > 0 ? payload.sources : [{ item: payload.source, path: payload.sourcePath }])
+      .map((s) => s.item.id)
+    const targetId = payload.item.id
+    const position = payload.position
+
+    if (!canDropSelection(sourceIds, targetId, position)) return
+
+    // Resolves an item's containing folder — used AFTER the move to report
+    // where the item landed.
+    const findParentFolder = (nodes: FolderItem[], childId: string): FolderItem | null => {
+      for (const node of nodes) {
+        if (!isAnyFolder(node)) continue
+        if (node.items.some((child) => child.id === childId)) return node
+        const deeper = findParentFolder(node.items, childId)
+        if (deeper) return deeper
+      }
+      return null
+    }
+
+    // Extract every dragged item, in visual order. A source that is itself
+    // a DESCENDANT of an earlier source has already left the tree with its
+    // container — skipping it (removeItemFromTree returns null) is what
+    // keeps "folder + its own child selected together" a single move.
+    const removedItems: FolderItem[] = []
+    for (const sourceId of sourceIds) {
+      const removed = removeItemFromTree(rootItems, sourceId)
+      if (removed) removedItems.push(removed)
+    }
+    if (removedItems.length === 0) return
+
+    // Insert at the new position, preserving the visual order of the
+    // selection: 'into' a CONTAINER appends at its end and 'before' stacks
+    // up against the target, both in iteration order; 'after' — including
+    // an 'into' on a LEAF row, which insertItemIntoTree degrades to an
+    // insert-after — would REVERSE the batch (each insert lands right
+    // behind the target), so those feed in reverse.
+    const targetItem = findItemById(rootItems, targetId)
+    const effectiveAfter = position === 'after' ||
+      (position === 'into' && targetItem !== null && !isAnyFolder(targetItem) && !isScenario(targetItem))
+    const insertionOrder = effectiveAfter ? [...removedItems].reverse() : removedItems
+    let insertedAny = false
+    for (const item of insertionOrder) {
+      if (insertItemIntoTree(rootItems, item, targetId, position)) insertedAny = true
+    }
+    if (!insertedAny) return
+
+    // Force React re-render by creating new reference
+    setRootItems((prevItems) => [...prevItems])
+
+    refreshAllTabBreadcrumbs()
+
     // Moving an item edits the TREE, not any document, so none of the
     // per-document events fire — nothing marks a dirty unit, the autosave
     // is never armed, and the reorganisation stays in memory until some
@@ -345,18 +414,60 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // draft against the wrong shape and drop its nodes), and the app
     // already persists scenario edits through a debounced whole-file save
     // for exactly that reason.
-    const movedParentId = findParentFolder(rootItems, sourceId)?.id
-    if (isScenario(removedItem)) {
-      onStructureChanged?.()
-    } else {
-      emitBothBuses(isAnyFolder(removedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
-        id: removedItem.id,
-        type: isAnyFolder(removedItem) ? 'folder' : 'request',
-        document: cloneForEventBus(removedItem),
+    let movedAScenario = false
+    for (const movedItem of removedItems) {
+      if (isScenario(movedItem)) {
+        movedAScenario = true
+        continue
+      }
+      const movedParentId = findParentFolder(rootItems, movedItem.id)?.id
+      emitBothBuses(isAnyFolder(movedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+        id: movedItem.id,
+        type: isAnyFolder(movedItem) ? 'folder' : 'request',
+        document: cloneForEventBus(movedItem),
         ...(movedParentId !== undefined ? { parentFolderId: movedParentId } : {})
       } as DocumentChangedPayload)
     }
-  }, [rootItems, setRootItems, setWorkbenchTree, onStructureChanged])
+    if (movedAScenario) onStructureChanged?.()
+  }, [rootItems, setRootItems, refreshAllTabBreadcrumbs, onStructureChanged, canDropSelection])
+
+  // Drop released on the sidebar's EMPTY AREA: move the dragged items to the
+  // END of the root list. This is what makes "drag it back to the top level"
+  // possible at all — every row is a container/sibling target, so the free
+  // space below the tree is the only root-drop surface.
+  const handleEmptyAreaDrop = useCallback((sources: ListViewItemEventPayload[]) => {
+    const sourceIds = sources.map((sourceItem) => sourceItem.item.id)
+    if (sourceIds.length === 0) return
+
+    const removedItems: FolderItem[] = []
+    for (const sourceId of sourceIds) {
+      const removed = removeItemFromTree(rootItems, sourceId)
+      if (removed) removedItems.push(removed)
+    }
+    if (removedItems.length === 0) return
+
+    for (const item of removedItems) rootItems.push(item)
+
+    setRootItems((prev) => [...prev])
+    refreshAllTabBreadcrumbs()
+
+    // Same dirty-marking contract as handleItemDrop: announce each moved
+    // item (no parentFolderId — they now live at the root), scenarios via
+    // the host's whole-file save.
+    let movedAScenario = false
+    for (const movedItem of removedItems) {
+      if (isScenario(movedItem)) {
+        movedAScenario = true
+        continue
+      }
+      emitBothBuses(isAnyFolder(movedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+        id: movedItem.id,
+        type: isAnyFolder(movedItem) ? 'folder' : 'request',
+        document: cloneForEventBus(movedItem)
+      } as DocumentChangedPayload)
+    }
+    if (movedAScenario) onStructureChanged?.()
+  }, [rootItems, setRootItems, refreshAllTabBreadcrumbs, onStructureChanged])
 
   // Handle "Clone" context menu action. Works for any item — including a
   // ROOT-level folder / environment folder (cloneItemInTree inserts the deep
@@ -495,12 +606,14 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       announceDeleted(nodeToDelete, parentOf(rootItems, itemId)?.id)
     }
 
-    // Remove the item from the tree (handles nested items)
-    const removed = removeItemFromTree(rootItems, itemId)
-    if (!removed) {
-      // Root-level item: remove directly from rootItems
-      setRootItems((prev) => prev.filter((f) => f.id !== itemId))
-    }
+    // Remove the item from the tree (handles nested items — and root items,
+    // which removeItemFromTree now splices from the root list itself).
+    removeItemFromTree(rootItems, itemId)
+    // Root-level rows are ALSO filtered inside the updater: when this delete
+    // runs from a queued dialog callback (the container-delete walk), the
+    // closure's `rootItems` can be one state-identity behind — a splice into
+    // that stale array never reaches the live state, but `prev` always does.
+    setRootItems((prev) => prev.filter((f) => f.id !== itemId))
 
     // Close any tabs that reference the deleted item — in EVERY group,
     // including tab-groups nested inside split containers (a tab dragged into
@@ -1028,6 +1141,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
   return {
     handleItemDrop,
+    canDropSelection,
+    handleEmptyAreaDrop,
     handleCloneItem,
     handleCreateRootEnvironmentFolder,
     handleAddChildItem,

@@ -47,3 +47,18 @@ Feature: Scenario request-action config selector stays live with the request pop
     When I save a quick config named "test2" in "settings" mode on the request
     Then the request popover lists a config named "test2" with the "settings" badge
     And the scenario action shows no config selector
+
+  # The selector row carries no port, so its appearance shifts every row below
+  # it (the env field) WITHOUT changing the box's port signature — and it
+  # appears while the scenario tab is hidden (the save happens on the request
+  # tab). Both were exactly the conditions under which handle positions went
+  # stale: the hidden-tab measurement published zeros, and a port-less row
+  # never re-triggered it. The handles must sit on their rows' centres after
+  # each flip.
+  Scenario: Node port handles stay on their row centres as the selector row appears and disappears
+    When I save a quick config named "porttest" in "project" mode on the request
+    Then the scenario action shows a config selector with items "none, porttest"
+    And every port handle of the request action node sits on its row centre
+    When I delete the quick config named "porttest" on the request
+    Then the scenario action shows no config selector
+    And every port handle of the request action node sits on its row centre

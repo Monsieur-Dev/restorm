@@ -323,8 +323,7 @@ describe('McpService served-call logs — passthrough exclusion', () => {
       pid: process.pid,
       startedAt: '2026-05-03T00:00:00.000Z',
       token: 'token-b',
-      name: 'logs-b'
-    })
+      name: 'logs-b', mcpActive: true })
   })
 
   afterAll(async () => {

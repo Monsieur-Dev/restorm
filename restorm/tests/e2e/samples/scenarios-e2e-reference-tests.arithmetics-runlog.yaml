@@ -1,8 +1,8 @@
 - message: 🔵 [<time>] ▶ Arithmetics
 - message: ⚪ [<time>] start arithmetic
   data:
-    b: 5
     a: 5
+    b: 5
 - message: ⚪ [<time>] done arithmetic
   data:
     result: 10
@@ -18,8 +18,8 @@
 - message: ⚪ [<time>] start arithmetic
   data:
     a: 10
-    operator: −
     b: 5
+    operator: −
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
@@ -35,9 +35,9 @@
     value: 5
 - message: ⚪ [<time>] start arithmetic
   data:
-    operator: ×
     a: 5
     b: 5
+    operator: ×
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
@@ -53,9 +53,9 @@
     value: 25
 - message: ⚪ [<time>] start arithmetic
   data:
-    operator: ÷
     a: 25
     b: 5
+    operator: ÷
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
@@ -95,16 +95,16 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start arithmetic
   data:
-    b: 5
     a: 5
+    b: 5
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
     result: 10
 - message: ⚪ [<time>] start log
   data:
-    message: 5+5 = {{.}}
     level: warn
+    message: 5+5 = {{.}}
     data: 10
 - message: 🟠 [<time>] 5+5 = 10
   data: 10
@@ -113,17 +113,17 @@
     value: 10
 - message: ⚪ [<time>] start arithmetic
   data:
-    operator: −
-    b: 5
     a: 10
+    b: 5
+    operator: −
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
     result: 5
 - message: ⚪ [<time>] start log
   data:
-    message: 10-5 = {{.}}
     level: warn
+    message: 10-5 = {{.}}
     data: 5
 - message: 🟠 [<time>] 10-5 = 5
   data: 5
@@ -132,17 +132,17 @@
     value: 5
 - message: ⚪ [<time>] start arithmetic
   data:
-    operator: ×
-    b: 5
     a: 5
+    b: 5
+    operator: ×
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
     result: 25
 - message: ⚪ [<time>] start log
   data:
-    message: 5x5 = {{.}}
     level: warn
+    message: 5x5 = {{.}}
     data: 25
 - message: 🟠 [<time>] 5x5 = 25
   data: 25
@@ -151,17 +151,17 @@
     value: 25
 - message: ⚪ [<time>] start arithmetic
   data:
-    operator: ÷
-    b: 5
     a: 25
+    b: 5
+    operator: ÷
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
     result: 5
 - message: ⚪ [<time>] start log
   data:
-    message: 25/5 = {{.}}
     level: warn
+    message: 25/5 = {{.}}
     data: 5
 - message: 🟠 [<time>] 25/5 = 5
   data: 5
@@ -170,17 +170,17 @@
     value: 5
 - message: ⚪ [<time>] start arithmetic
   data:
-    operator: "%"
-    b: 5
     a: 16
+    b: 5
+    operator: "%"
     in: true
 - message: ⚪ [<time>] done arithmetic
   data:
     result: 1
 - message: ⚪ [<time>] start log
   data:
-    message: 16%5 = {{.}}
     level: warn
+    message: 16%5 = {{.}}
     data: 1
 - message: 🟠 [<time>] 16%5 = 1
   data: 1

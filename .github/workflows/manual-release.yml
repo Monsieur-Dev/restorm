@@ -1,9 +1,13 @@
 name: Manual Release (production)
 
-# On-demand PRODUCTION release. Pick patch/minor/major → this bumps
-# restorm/package.json, commits, creates the tag vX.Y.Z and pushes it, then calls
-# release.yml, which builds the distributables and publishes them + the release
-# notes to the PUBLIC bucket (dl.restorm.app) — the only distribution channel.
+# On-demand PRODUCTION release. The repo permanently carries the NEXT version
+# with a `-preview` suffix (e.g. `1.0.1-preview`) — that suffix is what routes
+# dev/preview builds to the DEV backend (see `shared/config/backend.ts`), so it
+# must never disappear from main. This workflow: strips the suffix (patch keeps
+# the base as-is — the repo already names the next patch; minor/major increment
+# from it), commits the bare version, tags vX.Y.Z, calls release.yml (build +
+# publish to the PUBLIC bucket dl.restorm.app), and finally returns main to
+# `X.Y.(Z+1)-preview` so the very next merge builds preview again.
 #
 # (Preview builds, by contrast, happen automatically on every merge to main via
 # build-staging.yml → the private restorm-builds bucket.)
@@ -32,17 +36,17 @@ jobs:
       new_version: ${{ steps.bump.outputs.new_version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '25'
+          node-version: '26'
 
-      - name: Bump version (strip pre-release, increment)
+      - name: Resolve release version (strip -preview; patch = the base itself)
         id: bump
         run: |
           CURRENT=$(node -p "require('./restorm/package.json').version")
@@ -51,12 +55,16 @@ jobs:
           case "${{ inputs.version_type }}" in
             major) MAJ=$((MAJ + 1)); MIN=0; PAT=0 ;;
             minor) MIN=$((MIN + 1)); PAT=0 ;;
-            patch) PAT=$((PAT + 1)) ;;
+            patch)
+              # The repo already carries the next patch as `X.Y.Z-preview`, so a
+              # patch release ships that base as-is — no number is ever skipped.
+              # A bare version (no suffix — legacy state) still increments.
+              if [ "$BASE" = "$CURRENT" ]; then PAT=$((PAT + 1)); fi ;;
           esac
           NEW="${MAJ}.${MIN}.${PAT}"
           echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
           node -e "const fs=require('fs');const p='restorm/package.json';const j=JSON.parse(fs.readFileSync(p));j.version='$NEW';fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');"
-          echo "Bumped $CURRENT → $NEW"
+          echo "Releasing $CURRENT → $NEW"
 
       - name: Commit, tag and push
         run: |
@@ -67,6 +75,22 @@ jobs:
           git tag "v${{ steps.bump.outputs.new_version }}"
           git push origin HEAD:main
           git push origin "v${{ steps.bump.outputs.new_version }}"
+
+      - name: Return main to preview
+        # The tag now points at the bare version; main immediately moves on to
+        # the NEXT patch with the `-preview` suffix restored, so every dev
+        # checkout and every staging build goes back to the DEV backend. The
+        # release build below checks out the TAG, so this later commit cannot
+        # contaminate the published artifacts.
+        run: |
+          NEW="${{ steps.bump.outputs.new_version }}"
+          IFS='.' read -r MAJ MIN PAT <<< "$NEW"
+          NEXT="${MAJ}.${MIN}.$((PAT + 1))-preview"
+          node -e "const fs=require('fs');const p='restorm/package.json';const j=JSON.parse(fs.readFileSync(p));j.version='$NEXT';fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');"
+          git add restorm/package.json
+          git commit -m "chore: back to preview ($NEXT)"
+          git push origin HEAD:main
+          echo "main is now $NEXT"
 
   release:
     name: Build and publish

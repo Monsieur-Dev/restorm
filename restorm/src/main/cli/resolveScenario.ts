@@ -8,7 +8,7 @@ export type ResolveScenarioResult = { id: string } | { error: string }
 
 /**
  * Resolve a CLI `--run` target to a scenario id. By id is a direct store lookup.
- * By name accepts the bare name, the full breadcrumb, or the folder-mode index
+ * By name accepts the bare name, the full breadcrumb, or the index
  * path (see `resolveRunTarget`) — and errors EXPLICITLY when the target is
  * ambiguous (≥2 scenarios match) so the run crashes loudly with a non-zero exit.
  */

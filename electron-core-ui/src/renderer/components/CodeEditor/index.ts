@@ -1,4 +1,4 @@
-export { CodeEditor, default } from './CodeEditor'
+export { CodeEditor } from './CodeEditor'
 export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
 export { bootstrapMonaco } from './monacoBootstrap'
 export {

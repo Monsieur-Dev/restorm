@@ -11,7 +11,7 @@ import { EnumRenderer } from './renderers/EnumRenderer'
 import { ThemeRenderer } from './renderers/ThemeRenderer'
 import { getCustomRenderer } from './renderers/registry'
 import { useSettings } from '../../hooks/useSettings'
-import logger from '../../services/logger'
+import { logger } from '../../services/logger'
 import type { ResolvedSetting, SettingValue } from '../../../types/settings'
 
 export interface SettingItemProps {

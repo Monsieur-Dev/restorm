@@ -87,13 +87,13 @@ Feature: Full workflow end-to-end scenario
     # `dirty-state.feature` — this scenario only cares that the URL
     # resolver + handlebars pipeline sees the new path param.
     When I save the file with Ctrl+S
-    Then the active request URL tooltip should be "http://localhost:8080/api/pet/1"
+    Then the active request resolved URL should be "http://localhost:8080/api/pet/1"
     # Changing the path-param value must update the URL tooltip
     # reactively through the URLResolver + handlebars pipeline.
     When I fill the first path-param value with "99999"
-    Then the active request URL tooltip should be "http://localhost:8080/api/pet/99999"
+    Then the active request resolved URL should be "http://localhost:8080/api/pet/99999"
     When I fill the first path-param value with "1"
-    Then the active request URL tooltip should be "http://localhost:8080/api/pet/1"
+    Then the active request resolved URL should be "http://localhost:8080/api/pet/1"
     When I save the file with Ctrl+S
     When I open the search bar
     And I search for "pet"
@@ -110,7 +110,7 @@ Feature: Full workflow end-to-end scenario
     And a request tab for "Find pet by ID" should be open
     When I focus the "Find pet by ID" tab
     Then the active request tab should show the "localhost" environment
-    And the active request URL tooltip should be "http://localhost:8080/api/pet/1"
+    And the active request resolved URL should be "http://localhost:8080/api/pet/1"
     # When a folder was imported from any supported spec (Swagger,
     # AsyncAPI, GraphQL, gRPC, SOAP, Postman, Insomnia, Bruno) its Docs
     # tab should be populated with compiled markdown starting with the
@@ -747,14 +747,14 @@ Feature: Full workflow end-to-end scenario
     When I open the custom-list "Paint" request
     And I select the "live" environment on the active request tab
     # Use → the entry value is substituted for the label.
-    Then the active request URL tooltip should be "https://api.example.com/paint?color=FF0000"
+    Then the active request resolved URL should be "https://api.example.com/paint?color=FF0000"
 
     # Edit the value → the new value is dispatched live.
     When I open the custom variables tab on the "Paint API" env folder
     And I select the "Couleur" custom value list
     And I set the "Rouge" custom-list entry value to "0000FF"
     When I focus the custom-list "Paint" request tab
-    Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+    Then the active request resolved URL should be "https://api.example.com/paint?color=0000FF"
 
     # Reorder the values → the picker of the ALREADY-OPEN request follows,
     # without closing and reopening the tab, and the selection stays on the
@@ -765,13 +765,13 @@ Feature: Full workflow end-to-end scenario
     And I drag the "Vert" custom-list entry above "Rouge"
     When I focus the custom-list "Paint" request tab
     Then the custom-list picker of the active request should offer "Vert, Rouge"
-    And the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+    And the active request resolved URL should be "https://api.example.com/paint?color=0000FF"
 
     # Rename the list → the binding holds (resolved by id, not name).
     When I open the custom variables tab on the "Paint API" env folder
     And I rename the "Couleur" custom value list to "Teinte"
     When I focus the custom-list "Paint" request tab
-    Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+    Then the active request resolved URL should be "https://api.example.com/paint?color=0000FF"
 
     # Disable the entry → unresolvable. A param whose value resolves to nothing
     # is OMITTED rather than sent as a bare `color=`: the server reads "absent",
@@ -780,21 +780,21 @@ Feature: Full workflow end-to-end scenario
     And I select the "Teinte" custom value list
     And I uncheck the "Rouge" custom-list entry
     When I focus the custom-list "Paint" request tab
-    Then the active request URL tooltip should be "https://api.example.com/paint"
+    Then the active request resolved URL should be "https://api.example.com/paint"
 
     # Re-enable → resolution returns.
     When I open the custom variables tab on the "Paint API" env folder
     And I select the "Teinte" custom value list
     And I check the "Rouge" custom-list entry
     When I focus the custom-list "Paint" request tab
-    Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+    Then the active request resolved URL should be "https://api.example.com/paint?color=0000FF"
 
     # Delete the whole list → unresolvable, so the param is omitted entirely
     # (same rule as the unchecked entry above).
     When I open the custom variables tab on the "Paint API" env folder
     And I delete the "Teinte" custom value list
     When I focus the custom-list "Paint" request tab
-    Then the active request URL tooltip should be "https://api.example.com/paint"
+    Then the active request resolved URL should be "https://api.example.com/paint"
 
     When I close the current file and discard changes
     And I close the app

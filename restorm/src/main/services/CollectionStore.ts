@@ -56,12 +56,6 @@ export const pubsub = createPubSub<{
 }>()
 
 // ============================================================================
-// Type for collection (root folder)
-// ============================================================================
-
-type Collection = EnvironmentFolder
-
-// ============================================================================
 // Store Class
 // ============================================================================
 
@@ -69,7 +63,15 @@ type Collection = EnvironmentFolder
  * Collection Store - Manages collections in the main process
  */
 class CollectionStore {
-  private collections: Collection[] = []
+  /**
+   * The ROOT of the tree. Usually collections (env-folders), but the root is
+   * not restricted to them: the sidebar lets a scenario or a request sit there
+   * as a sibling of a collection, so this is a `FolderItem[]` — NOT an
+   * `EnvironmentFolder[]`. Declaring it as the latter is what licensed
+   * {@link setCollections} to coerce every root entry into an
+   * `EnvironmentFolder`, which kept the item's `id` but dropped what it WAS.
+   */
+  private collections: FolderItem[] = []
   /** Listeners fired after the whole collection tree is (re)set — e.g. on load.
    * Lets higher layers (ContextService) react without CollectionStore importing
    * them (no downward dependency). */
@@ -100,12 +102,17 @@ class CollectionStore {
   }
 
   /**
-   * Increment and return the tree version. Called by `broadcastTreeReplace`
-   * after a main-driven (MCP) mutation so a subsequent stale renderer mirror
-   * can be recognised and refused. Scenario node/edge edits mutate the live
-   * scenario object directly (never through a CollectionStore method), so the
-   * bump has to live on the broadcast — the one path EVERY MCP write shares —
-   * not on the folder/request mutators.
+   * Increment and return the tree version so a subsequent stale renderer mirror
+   * can be recognised and refused. `broadcastTreeReplace` calls it for
+   * folder/request writes. Scenario node/edge edits mutate the live scenario
+   * object directly (never through a CollectionStore method) and — critically —
+   * that in-place mutation can yield to the event loop before the broadcast
+   * runs, so the scenario tools call this the INSTANT they touch the graph
+   * (`markScenarioMutated`), not only later on the broadcast: otherwise the
+   * renderer's in-flight autosave mirror of the pre-mutation tree, stamped the
+   * SAME version, lands in that window and — since {@link setCollections} only
+   * refuses a strictly-older stamp — overwrites the freshly-created node. A
+   * second monotonic bump on the broadcast is harmless.
    */
   bumpModelVersion(): number {
     this.modelVersion += 1
@@ -117,9 +124,10 @@ class CollectionStore {
   // ==========================================================================
 
   /**
-   * Get all collections
+   * Get the root items of the tree — collections, plus any scenario or
+   * request the user placed at the root.
    */
-  getCollections(): Collection[] {
+  getCollections(): FolderItem[] {
     return this.collections
   }
 
@@ -135,6 +143,9 @@ class CollectionStore {
    */
   findEnvironmentById(id: string): Environment | null {
     for (const collection of this.collections) {
+      // A root entry may be a scenario or a request; only folders hold
+      // environments.
+      if (!isAnyFolder(collection)) continue
       const env = this.findEnvironmentInFolder(collection, id)
       if (env) return env
     }
@@ -149,6 +160,7 @@ class CollectionStore {
    */
   findEnvironmentFolderByEnvironmentId(envId: string): EnvironmentFolder | null {
     for (const collection of this.collections) {
+      if (!isEnvironmentFolder(collection)) continue
       if (this.findEnvironmentInFolder(collection, envId)) {
         return collection
       }
@@ -161,6 +173,8 @@ class CollectionStore {
    */
   findParentFolder(itemId: string): Folder | EnvironmentFolder | Scenario | null {
     for (const collection of this.collections) {
+      // A root request has no children to descend into.
+      if (!this.isContainer(collection)) continue
       const parent = this.findParentInFolder(collection, itemId)
       if (parent) return parent
     }
@@ -184,7 +198,7 @@ class CollectionStore {
    * trusted main-side call with no `clientVersion`) always applies. Returns
    * whether the tree was actually replaced.
    */
-  setCollections(collections: Collection[], source: 'file-load' | 'user' = 'file-load', clientVersion?: number): boolean {
+  setCollections(collections: FolderItem[], source: 'file-load' | 'user' = 'file-load', clientVersion?: number): boolean {
     if (source === 'user' && clientVersion !== undefined && clientVersion < this.modelVersion) {
       logger.warn('[CollectionStore] Refused stale renderer mirror', {
         clientVersion,
@@ -194,7 +208,7 @@ class CollectionStore {
       return false
     }
     // Convert plain objects to class instances if needed
-    this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
+    this.collections = collections.map(c => this.reifyRootItem(c))
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
     for (const cb of this.collectionsSetListeners) cb()
     return true
@@ -240,7 +254,19 @@ class CollectionStore {
   /**
    * Create a new folder
    */
-  createFolder(parentId: string | null, folderData: Partial<Folder> & { name: string }): Folder {
+  /**
+   * Create a folder. At the root (`parentId === null`) both root folder kinds
+   * are reachable: `kind: 'env-folder'` (the default — a collection, which is
+   * what the root usually holds) or `kind: 'folder'` for a plain folder
+   * sitting beside the collections, which the sidebar's empty-area "Add"
+   * submenu also offers. Nested folders are always plain folders: an
+   * environment folder only exists at the root.
+   */
+  createFolder(
+    parentId: string | null,
+    folderData: Partial<Folder> & { name: string },
+    kind: 'folder' | 'env-folder' = 'env-folder'
+  ): Folder {
     const newFolder = new Folder({
       ...folderData,
       id: folderData.id ?? this.generateId(),
@@ -249,6 +275,11 @@ class CollectionStore {
     })
 
     if (parentId === null) {
+      if (kind === 'folder') {
+        this.collections.push(newFolder)
+        this.emitFolderCreated(newFolder, parentId)
+        return newFolder
+      }
       // Create as EnvironmentFolder at root
       const envFolder = new EnvironmentFolder({
         id: newFolder.id,
@@ -421,15 +452,22 @@ class CollectionStore {
   // ==========================================================================
 
   /**
-   * Create a new request
+   * Create a new request under `parentId`, or at the ROOT of the tree when it
+   * is `null` — the root accepts a request beside a collection.
    */
-  createRequest(parentId: string, requestData: Partial<Request> & { type: Request['type']; name: string }): Request {
+  createRequest(parentId: string | null, requestData: Partial<Request> & { type: Request['type']; name: string }): Request {
     const newRequest = this.createRequestInstance(requestData)
     newRequest.id = requestData.id ?? this.generateId()
 
-    const parent = this.findById(parentId)
-    if (parent && this.isContainer(parent)) {
-      this.childItemsForWrite(parent).push(newRequest)
+    if (parentId === null) {
+      // A request may live at the ROOT, beside a collection — the sidebar
+      // offers it, so the programmatic paths must too.
+      this.collections.push(newRequest)
+    } else {
+      const parent = this.findById(parentId)
+      if (parent && this.isContainer(parent)) {
+        this.childItemsForWrite(parent).push(newRequest)
+      }
     }
 
     // Emit event
@@ -438,10 +476,11 @@ class CollectionStore {
   }
 
   /**
-   * Create a new scenario as a child of `parentId` (a folder-like container).
-   * Returns the inserted Scenario.
+   * Create a new scenario as a child of `parentId` (a folder-like container),
+   * or at the ROOT of the tree when `parentId` is `null` — the placement the
+   * sidebar's empty-area "add" menu offers. Returns the inserted Scenario.
    */
-  createScenario(parentId: string, scenarioData: Partial<Scenario> & { name: string }): Scenario {
+  createScenario(parentId: string | null, scenarioData: Partial<Scenario> & { name: string }): Scenario {
     const newScenario = new Scenario({
       ...scenarioData,
       id: scenarioData.id ?? this.generateId(),
@@ -452,9 +491,16 @@ class CollectionStore {
       edges: scenarioData.edges ?? [],
       items: scenarioData.items ?? []
     })
-    const parent = this.findById(parentId)
-    if (parent && this.isContainer(parent)) {
-      this.childItemsForWrite(parent).push(newScenario)
+    if (parentId === null) {
+      // A scenario may live at the ROOT, beside a collection — the sidebar's
+      // empty-area "add" menu creates one there, so the programmatic paths
+      // must be able to express the same placement.
+      this.collections.push(newScenario)
+    } else {
+      const parent = this.findById(parentId)
+      if (parent && this.isContainer(parent)) {
+        this.childItemsForWrite(parent).push(newScenario)
+      }
     }
     logger.debug('[CollectionStore] Scenario created', { id: newScenario.id, name: newScenario.name, parentId })
     return newScenario
@@ -670,6 +716,7 @@ class CollectionStore {
    */
   deleteEnvironment(id: string): boolean {
     for (const collection of this.collections) {
+      if (!isAnyFolder(collection)) continue
       if (this.deleteEnvironmentFromFolder(collection, id)) {
         this.emitEnvironmentDeleted(id)
         return true
@@ -814,6 +861,33 @@ class CollectionStore {
     return crypto.randomUUID()
   }
 
+  /**
+   * Reify ONE root entry. The root of the sidebar is not collections-only: a
+   * scenario or a request may sit there as a sibling of a collection, so each
+   * entry is reified by its own kind — exactly like a nested child — and only
+   * a genuine collection goes through {@link ensureEnvironmentFolderInstance}.
+   *
+   * Passing every root entry through `EnvironmentFolder.fromPlain` instead
+   * rewrote a root scenario into an env-folder. `fromPlain` carries the `id`
+   * over, so the item stayed findable — but it lost `type: 'scenario'` along
+   * with its nodes/edges/params, and every `isScenario` check downstream then
+   * rejected it. The scenario engine reports that as "no scenario with id",
+   * which reads like an absence and is not one. A root request was mangled the
+   * same way (into an empty env-folder), silently, because the renderer runs
+   * requests from its own store and never asks this one to resolve them.
+   *
+   * A plain folder is a root kind of its own and stays one. `folderType`
+   * is the discriminator every `isEnvironmentFolder` check already relies
+   * on, so a folder without it is a plain folder — normalising it into an
+   * env-folder here would have to be justified by something, and nothing
+   * downstream would recognise the result as a collection anyway.
+   */
+  private reifyRootItem(item: FolderItem): FolderItem {
+    if (typeof item !== 'object') return item
+    if (isEnvironmentFolder(item)) return this.ensureEnvironmentFolderInstance(item)
+    return this.reifyItem(item)
+  }
+
   private ensureEnvironmentFolderInstance(obj: unknown): EnvironmentFolder {
     const folder = obj instanceof EnvironmentFolder
       ? obj
@@ -853,11 +927,16 @@ class CollectionStore {
       return scenario
     }
     if (Array.isArray(rec['items'])) {
-      // Nested folder (plain object). EnvironmentFolders only ever sit
-      // at the root, so a nested `items` carrier is a plain Folder.
-      // No `fromPlain` on Folder — instantiate directly + carry over
-      // the fields we care about, then recurse.
+      // Plain folder (plain object) — nested, or sitting at the root as a
+      // sibling of a collection. An env-folder never reaches here: callers
+      // route it to `ensureEnvironmentFolderInstance` on its `folderType`.
+      //
+      // No `fromPlain` on Folder — instantiate directly. Spread EVERY field
+      // rather than picking `id`/`name`: a folder also carries
+      // `configuration`, `notes` and `icon`, and picking dropped them on
+      // each mirror round-trip.
       const reified = new Folder({
+        ...(rec as Partial<Folder>),
         id: typeof rec['id'] === 'string' ? rec['id'] : crypto.randomUUID(),
         name: typeof rec['name'] === 'string' ? rec['name'] : '',
         items: []
@@ -917,12 +996,14 @@ class CollectionStore {
     logger.debug('[CollectionStore] Folder deleted', { id })
   }
 
-  private emitRequestCreated(request: Request, parentId: string): void {
+  private emitRequestCreated(request: Request, parentId: string | null): void {
     const payload: DocumentChangedPayload = {
       id: request.id,
       type: 'request',
       document: request.toPlainObject(),
-      parentFolderId: parentId
+      // A root-level request has no parent folder — same convention as
+      // `emitRequestUpdated`, which already omits the key at the root.
+      ...(parentId !== null ? { parentFolderId: parentId } : {})
     }
     void eventBusService.emit(DocumentEvents.REQUEST_CREATED, payload)
     pubsub.publish(PUBSUB_TOPICS.REQUEST_CREATED, request)

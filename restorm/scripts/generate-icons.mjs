@@ -128,17 +128,24 @@ async function svgToPng(size) {
  *     4 bytes  data length including the 8-byte header
  *     N bytes  PNG data
  *
- * Using 'icp4'…'ic10' (PNG-native entries, supported since macOS 10.7).
+ * Type tags are the unambiguous PNG-native entries only. The legacy small
+ * types icp4/icp5/icp6 are avoided on purpose: several macOS versions read
+ * them as raw pixel data rather than PNG, which renders the small Finder /
+ * Get-Info / dock icons as colour noise while the large sizes stay correct.
+ * The @2x small types ic11/ic12/ic13/ic14 (plus ic07…ic10) are read as PNG
+ * everywhere, and macOS scales them down for any @1x slot, so every icon size
+ * shows the real artwork.
  */
 function packIcns(pngMap) {
   const entries = [
-    { tag: 'icp4', size: 16 },
-    { tag: 'icp5', size: 32 },
-    { tag: 'icp6', size: 64 },
-    { tag: 'ic07', size: 128 },
-    { tag: 'ic08', size: 256 },
-    { tag: 'ic09', size: 512 },
-    { tag: 'ic10', size: 1024 },
+    { tag: 'ic11', size: 32 },   // 16×16@2x
+    { tag: 'ic12', size: 64 },   // 32×32@2x
+    { tag: 'ic07', size: 128 },  // 128×128
+    { tag: 'ic13', size: 256 },  // 128×128@2x
+    { tag: 'ic08', size: 256 },  // 256×256
+    { tag: 'ic14', size: 512 },  // 256×256@2x
+    { tag: 'ic09', size: 512 },  // 512×512
+    { tag: 'ic10', size: 1024 }, // 512×512@2x
   ]
 
   const chunks = []

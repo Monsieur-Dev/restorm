@@ -27,6 +27,8 @@ const { fakeEditor, fakeMonacoInstance, hideContentHover, fireBlur } = vi.hoiste
 		trigger: vi.fn(),
 		getContribution: vi.fn((id: string) => (id === 'editor.contrib.contentHover' ? contribution : null)),
 		getModel: vi.fn(() => null),
+		getValue: vi.fn(() => ''),
+		onDidChangeModelContent: vi.fn(() => ({ dispose: vi.fn() })),
 		onDidBlurEditorWidget: vi.fn((cb: () => void) => {
 			blurHandler = cb
 			return { dispose: vi.fn() }

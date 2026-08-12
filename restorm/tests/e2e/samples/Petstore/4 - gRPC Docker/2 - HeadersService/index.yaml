@@ -1,5 +1,0 @@
-name: HeadersService
-documentation: Headers service - echo headers
-tags:
-  - service
-configuration: {}

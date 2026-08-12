@@ -19,5 +19,3 @@ export const ScenarioCellLabel: React.FC<{ cell: ScenarioNodeCell }> = ({ cell }
     </>
   )
 }
-
-export default ScenarioCellLabel

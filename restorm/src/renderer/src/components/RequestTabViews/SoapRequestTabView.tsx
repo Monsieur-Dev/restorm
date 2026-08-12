@@ -42,7 +42,7 @@ import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { toasterService } from 'electron-core-ui/renderer'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 
 export interface SoapRequestTabViewProps {
@@ -527,12 +527,9 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         />
       )}
       <ControlGroup data-testid="soap-url-section">
-        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
           <div
             style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
             data-testid="url-container"
-            data-url-resolved={resolvedUrl ? 'true' : 'false'}
-            data-resolved-url={resolvedUrl || url}
           >
             <RestormVariableInputBox
               value={url}
@@ -543,7 +540,6 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
               data-testid="soap-url-input"
             />
           </div>
-        </HeaderHoverTooltip>
   {!inWorkbenchTab && (
         <SendButtonEnvSwitcher>
           <BeamWrap active={isSending} size={22} borderWidth={1.5}>
@@ -561,6 +557,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         </SendButtonEnvSwitcher>
   )}
       </ControlGroup>
+      <ResolvedUrlPreview value={resolvedUrl} />
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}
       </div>
@@ -633,5 +630,3 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     </>
   )
 }
-
-export default SoapRequestTabView

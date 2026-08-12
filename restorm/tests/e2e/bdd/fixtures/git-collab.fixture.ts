@@ -1,3 +1,5 @@
+import { gitServerWorkerFixture, type StartedGitServer } from '../../helpers/testcontainers/gitServer'
+import { servicesWorkerFixture, type StartedServices } from '../../helpers/testcontainers/services'
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
 import { execSync } from 'child_process'
@@ -84,10 +86,15 @@ function run(command: string, cwd?: string): void {
 /** Deterministic-enough unique remote name per scenario: pid + worker. */
 let scenarioCounter = 0
 
-export const test = base.extend<GitCollabFixtures>({
+export const test = base.extend<GitCollabFixtures, { gitServer: StartedGitServer; services: StartedServices }>({
+  // This suite runs its OWN git daemon (worker-scoped, ephemeral port,
+  // mkdtemp repos dir) — the seed-module helpers are routed at it.
+  gitServer: gitServerWorkerFixture(),
+  // Chapter 1 imports the petstore swagger from a live URL.
+  services: servicesWorkerFixture(['petstore']),
   restormRoot: [RESTORM_ROOT, { option: true }],
 
-  collab: async ({ restormRoot }, use, testInfo) => {
+  collab: async ({ restormRoot, gitServer: _gitServer }, use, testInfo) => {
     const root = mkdtempSync(join(tmpdir(), 'restorm-git-collab-'))
     const sessions = new Map<string, CollabSession>()
     const repoDirs = new Map<string, string>()

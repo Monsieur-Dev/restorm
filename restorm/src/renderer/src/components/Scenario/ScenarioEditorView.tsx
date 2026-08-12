@@ -17,9 +17,10 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
-import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, GraphCanvas, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
-import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
-import { isRequest, isScenario, isWebSocketRequest, isStompRequest, isSseRequest, isGrpcRequest, isSoapRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../../shared/types/collections'
+import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, GraphCanvas, eventBus, isUndoKeyEvent, isRedoKeyEvent, LIST_VIEW_MULTI_DRAG_MIME, type ContextMenuItem } from 'electron-core-ui/renderer'
+import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort, FolderItem } from '../../../../shared/types/collections'
+import { isRequest, isScenario, isWebSocketRequest, isStompRequest, isSseRequest, isGrpcRequest, isSoapRequest, isAmqpRequest, isRedisRequest, isKafkaRequest, EnvironmentValue } from '../../../../shared/types/collections'
+import { serializeValueForPersistence } from '../../../../shared/utils/valuePersistence'
 import { Badge } from '../common/Badge'
 import { requestBadgeType, requestBadgeMode } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
@@ -32,10 +33,13 @@ import { getScenarioBreakpoints, toggleBreakpoint, pruneScenarioBreakpoints } fr
 import { WorkbenchActiveTabContext } from '../../contexts/WorkbenchActiveTabContext'
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
-import { SCENARIO_NODE_CATALOGUE, SCENARIO_SUBMENU_CATEGORIES, scenarioNodeMeta, type ScenarioNodeKindMeta, type ScenarioNodeCategory } from './scenarioNodeCatalogue'
+import { SCENARIO_NODE_CATALOGUE, SCENARIO_SUBMENU_CATEGORIES, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
+import type { ScenarioNodeCategory } from '../../../../shared/scenarioKindRegistry'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, edgeColorForHandle } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
-import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta } from './scenarioActionClipboard'
+import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta, PASTE_STEP } from './scenarioActionClipboard'
+import { publishScenarioMenuPalette } from '../../services/scenarioMenuPaletteStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow, socketioConnectEventPorts } from './scenarioNodePorts'
 import { isDataLink } from './scenarioPathTree'
 import { useDeselectOnRunStart } from './useDeselectOnRunStart'
@@ -462,9 +466,12 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
     if (submenu) {
       const groupMetas = metasInCategory(e.category)
       if (e.kind !== groupMetas[0]?.kind) return [] // emitted once, at the category's first kind
-      const subItems = groupMetas.flatMap((m): ContextMenuItem[] => {
+      const subItems = groupMetas.flatMap((m, mi): ContextMenuItem[] => {
         const cb = p.pickNode(m.kind)
-        return cb ? [{ id: `submenu-${m.kind}`, label: p.t(m.labelKey, m.defaultLabel), icon: m.icon, onClick: cb }] : []
+        if (!cb) return []
+        const entry: ContextMenuItem = { id: `submenu-${m.kind}`, label: p.t(m.labelKey, m.defaultLabel), icon: m.icon, onClick: cb }
+        // Intra-submenu grouping (if/switch | body | assert/throw, schema | formats).
+        return m.paletteBreakBefore === true && mi > 0 ? [sep(`submenu-sep-${m.kind}`), entry] : [entry]
       })
       return subItems.length > 0 ? [{ id: `scenario-group-${e.category}`, label: p.t(submenu.labelKey, submenu.defaultLabel), icon: submenu.icon, items: subItems }] : []
     }
@@ -479,6 +486,7 @@ interface NodeHandlers {
   onToggleCollapse: (id: string) => void
   onHeaderContextMenu: (id: string, x: number, y: number) => void
   onSetConfig: (id: string, config: Record<string, unknown>) => void
+  onPruneInputEdges: (id: string, portIds: string[]) => void
   onToggleBreakpoint: (id: string) => void
   onOpenItem?: (itemId: string) => void
 }
@@ -551,6 +559,7 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
       onToggleCollapse: handlers.onToggleCollapse,
       onHeaderContextMenu: handlers.onHeaderContextMenu,
       onSetConfig: handlers.onSetConfig,
+      onPruneInputEdges: handlers.onPruneInputEdges,
       onToggleBreakpoint: handlers.onToggleBreakpoint,
       ...(handlers.onOpenItem ? { onOpenItem: handlers.onOpenItem } : {}),
       ...(n.note !== undefined ? { note: n.note } : {}),
@@ -817,47 +826,21 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     void engine.setEngineBreakpoints([...next])
   }, [projectUuid, scenario.id, engine])
 
-  // Keyboard shortcuts — only the FOCUSED workbench tab handles them, so e.g.
-  // F5 launches just this scenario, never every open one. Ignored while typing
-  // in a field / Monaco. App scheme (not VS Code's): F5 run · F6 debug · F7
-  // step · F8 stop · Pause pause/resume · F9 toggle breakpoint(s).
-  // F5 LAUNCHES only — it never pauses a live run (the Pause key owns
-  // pause/resume, as a toggle). The inspector's play button still toggles
-  // run/pause, but the shortcut deliberately doesn't, so a double-tap of F5
-  // can't pause. F6/F7/F8 mirror the inspector handlers (onDebug/onStep/onStop).
+  // Keyboard shortcuts — only the FOCUSED workbench tab handles them. Ignored
+  // while typing in a field / Monaco. F5/F6/F7/F8 are owned by the menu bar's
+  // Scénario entries (registered only while this tab is active) and mirror
+  // the inspector buttons — so F5 TOGGLES run/pause exactly like the play
+  // button. This handler keeps only the keys the menu doesn't carry:
+  // Pause pause/resume · F9 toggle breakpoint(s).
   useEffect(() => {
     if (!isActiveTab) return undefined
     const onKey = (e: KeyboardEvent): void => {
       const el = e.target as HTMLElement | null
       if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable || el.closest('.monaco-editor'))) return
-      const hasBreakpoints = breakpointIds.size > 0
       switch (e.key) {
-        case 'F5':
-          e.preventDefault()
-          // Launch only. A live run is left untouched — pausing is the Pause
-          // key's job, so hitting F5 twice can never pause.
-          if (engine.state !== 'running' && engine.state !== 'paused') {
-            void engine.start(scenario.id, {}, false, [...breakpointIds], false)
-          }
-          break
-        case 'F6':
-          e.preventDefault()
-          if (!hasBreakpoints) break
-          if (engine.state === 'running' || engine.state === 'paused') {
-            void engine.setEngineBreakpoints([...breakpointIds])
-            void engine.enableDebug()
-            if (engine.state === 'paused') void engine.resume()
-          } else void engine.start(scenario.id, {}, false, [...breakpointIds], true)
-          break
-        case 'F7':
-          e.preventDefault()
-          if (engine.state === 'paused' || engine.state === 'running') void engine.step()
-          else void (async () => { await engine.start(scenario.id, {}, true); await engine.step() })()
-          break
-        case 'F8':
-          e.preventDefault()
-          void engine.stop()
-          break
+        // F5/F6/F7/F8 are registered by the menu bar's Scénario entries (only
+        // rendered while this tab is active), so this handler keeps only the
+        // keys the menu doesn't carry.
         case 'Pause':
           e.preventDefault()
           // Toggle: pause a running scenario, resume a paused one.
@@ -1560,8 +1543,27 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }))
   }, [setNodeConfig, setEdges])
 
-  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, ...(onOpenItem ? { onOpenItem } : {}) })
-  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, ...(onOpenItem ? { onOpenItem } : {}) } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig, onToggleBreakpoint, onOpenItem])
+  // A config change can REMOVE an input port (math op switch): the edges
+  // wired into it must leave the persisted graph too, or they resurrect the
+  // moment the port re-appears.
+  const pruneInputEdges = useCallback((nodeId: string, portIds: string[]): void => {
+    const dropped = new Set(portIds)
+    setNodes((currNodes) => {
+      setEdges((currEdges) => {
+        const kept = currEdges.filter((e) => !(e.target === nodeId && e.targetHandle !== undefined && e.targetHandle !== null && dropped.has(e.targetHandle)))
+        if (kept.length === currEdges.length) return currEdges
+        for (const e of currEdges) {
+          if (e.target === nodeId && e.targetHandle && dropped.has(e.targetHandle)) edgeStore.current.delete(e.id)
+        }
+        persist(currNodes, kept)
+        return kept
+      })
+      return currNodes
+    })
+  }, [setNodes, setEdges, persist])
+
+  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, onPruneInputEdges: pruneInputEdges, ...(onOpenItem ? { onOpenItem } : {}) })
+  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, onPruneInputEdges: pruneInputEdges, ...(onOpenItem ? { onOpenItem } : {}) } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig, onToggleBreakpoint, pruneInputEdges, onOpenItem])
 
   // Seed from the scenario only when the open scenario changes (tab switch).
   // The guard makes our own persist writes (which replace `scenario.nodes`)
@@ -2097,18 +2099,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     event.dataTransfer.dropEffect = 'move'
   }, [resolveBoundItem])
 
-  const onDrop = useCallback((event: React.DragEvent) => {
-    if (lockedRef.current) return
-    if (!resolveBoundItem) return
-    const itemId = event.dataTransfer.getData('text/plain')
-    if (!itemId) return
-    const item = resolveBoundItem(itemId)
-    if (!item) return
-    // Request → `request` node, Scenario → `runScenario`; folders/env-folders
-    // (anything else) are ignored. The bound id + a fallback label go in config.
-    // A Socket.IO request is special: it maps to a `socketioConnect` (the
-    // long-lived listener), seeding the connection name + the listened event
-    // from the request — NOT to a one-shot httpRequest node.
+  // Request → `request` node, Scenario → `runScenario`; folders/env-folders
+  // (anything else) yield null and are ignored. The bound id + a fallback
+  // label go in config. A Socket.IO request is special: it maps to a
+  // `socketioConnect` (the long-lived listener), seeding the connection name
+  // + the listened event from the request — NOT to a one-shot httpRequest
+  // node. Shared by the single-item drop and the multi-request fan-out.
+  const nodeSpecForDroppedItem = useCallback((item: FolderItem): { kind: ScenarioNodeKind; config: Record<string, unknown> } | null => {
     let kind: ScenarioNodeKind
     let config: Record<string, unknown>
     if (isRequest(item) && isWebSocketRequest(item) && (item as { protocol?: string }).protocol === 'socketio') {
@@ -2196,11 +2193,48 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }
     else if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
     else if (isScenario(item)) { kind = 'runScenario'; config = { scenarioId: item.id, label: item.name } }
-    else return
+    else return null
+    return { kind, config }
+  }, [])
+
+  const onDrop = useCallback((event: React.DragEvent) => {
+    if (lockedRef.current) return
+    if (!resolveBoundItem) return
+
+    // A MULTI-item sidebar drag carries every dragged id on the multi MIME
+    // (readable at drop time). Per spec it is REQUESTS-ONLY on the canvas:
+    // a group containing anything else is refused whole — no partial drop.
+    let itemIds: string[] = []
+    const multiRaw = event.dataTransfer.getData(LIST_VIEW_MULTI_DRAG_MIME)
+    if (multiRaw !== '') {
+      try {
+        const parsed: unknown = JSON.parse(multiRaw)
+        if (Array.isArray(parsed)) itemIds = parsed.filter((v): v is string => typeof v === 'string')
+      } catch { /* malformed payload → fall back to the single id below */ }
+    }
+    if (itemIds.length === 0) {
+      const single = event.dataTransfer.getData('text/plain')
+      if (!single) return
+      itemIds = [single]
+    }
+
+    const items = itemIds.map((id) => resolveBoundItem(id)).filter((i): i is FolderItem => i != null)
+    if (items.length !== itemIds.length) return
+    if (items.length > 1 && !items.every((i) => isRequest(i))) return
+
+    const specs = items
+      .map((item) => nodeSpecForDroppedItem(item))
+      .filter((spec): spec is { kind: ScenarioNodeKind; config: Record<string, unknown> } => spec !== null)
+    if (specs.length !== items.length) return
+
     event.preventDefault()
     const flow = screenToFlowPosition({ x: event.clientX, y: event.clientY })
-    addNode(kind, flow, config)
-  }, [resolveBoundItem, screenToFlowPosition, addNode])
+    // Fan multiple actions out with the same X/Y step a duplicated action
+    // uses, so a batch drop reads like a stack of copies.
+    specs.forEach((spec, index) => {
+      addNode(spec.kind, { x: flow.x + index * PASTE_STEP, y: flow.y + index * PASTE_STEP }, spec.config)
+    })
+  }, [resolveBoundItem, nodeSpecForDroppedItem, screenToFlowPosition, addNode])
 
   // Delete a node + any edges touching it.
   const deleteNode = useCallback((nodeId: string) => {
@@ -2264,7 +2298,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const clone: ScenarioNode = {
       ...src,
       id,
-      position: { x: src.position.x + 40, y: src.position.y + 40 },
+      position: { x: src.position.x + PASTE_STEP, y: src.position.y + PASTE_STEP },
       config: { ...src.config },
       inputs: src.inputs.map((p) => ({ ...p })),
       outputs: src.outputs.map((p) => ({ ...p }))
@@ -2299,7 +2333,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       const clone: ScenarioNode = {
         ...src,
         id: newId,
-        position: { x: src.position.x + 40, y: src.position.y + 40 },
+        position: { x: src.position.x + PASTE_STEP, y: src.position.y + PASTE_STEP },
         config: { ...src.config },
         inputs: src.inputs.map((p) => ({ ...p })),
         outputs: src.outputs.map((p) => ({ ...p }))
@@ -2333,6 +2367,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     persist(nextNodes, nextEdges)
   }, [setNodes, setEdges, persist])
 
+  // Bumped on every in-editor copy so the menu-bar publisher re-evaluates
+  // the Coller entry's enablement (the clipboard module itself is silent).
+  const [scenarioClipboardTick, setScenarioClipboardTick] = useState(0)
+
   // Copy the selected boxes + the edges BETWEEN them to the app-internal
   // clipboard, so they can be pasted into this or another scenario.
   const copyNodes = useCallback((ids: string[]) => {
@@ -2362,6 +2400,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       ? { x: (minX + maxX) / 2, y: (minY + maxY) / 2 }
       : { x: 0, y: 0 }
     setScenarioClipboard(nodes, edges, center, getViewport())
+    setScenarioClipboardTick((n) => n + 1)
   }, [getViewport])
 
   // Paste the clipboard into THIS scenario: fresh ids for every box + its
@@ -2672,6 +2711,113 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }
     return byNode
   }, [validationNodes, dataLinks, connectedTargets, graphEdges, resolveBoundItem, resolveScenario, t])
+
+  // Engine entries shared by the empty-canvas palette AND the menu bar's
+  // Scénario menu: Exécuter (with Pas à pas / Débugger as sub-entries) and
+  // Arrêter, mirroring the inspector buttons — same semantics, same enabled
+  // conditions, same F5/F7/F6/F8 shortcuts. Handlers read the LIVE engine +
+  // breakpoints through refs; the callback's identity tracks only the
+  // primitives that change the rendered entries (state, breakpoints,
+  // error count), NOT the engine object — whose identity churns once a
+  // second during a run (the run-log poll) and would republish the whole
+  // menu each tick. Declared after the `nodeErrors` memo so the error
+  // count is live from the very first publish.
+  const engineMenuRef = useRef(engine)
+  engineMenuRef.current = engine
+  const breakpointIdsRef = useRef(breakpointIds)
+  breakpointIdsRef.current = breakpointIds
+  const engineState = engine.state
+  const hasBreakpoints = breakpointIds.size > 0
+  const nodeErrorCount = nodeErrors.size
+  const buildEngineMenuEntries = useCallback((): SidebarContextMenuItem[] => {
+    const cannotStartFresh = nodeErrorCount > 0 && engineState !== 'running' && engineState !== 'paused'
+    const runIsPause = engineState === 'running'
+    const onRun = (): void => {
+      const eng = engineMenuRef.current
+      if (eng.state === 'running') { void eng.pause(); return }
+      if (eng.state === 'paused') { void eng.resume(); return }
+      void eng.start(scenario.id, {}, false, [...breakpointIdsRef.current], false)
+    }
+    const onStep = (): void => {
+      const eng = engineMenuRef.current
+      if (eng.state === 'paused' || eng.state === 'running') { void eng.step(); return }
+      void (async () => { await eng.start(scenario.id, {}, true); await eng.step() })()
+    }
+    const onDebug = (): void => {
+      const eng = engineMenuRef.current
+      const bps = breakpointIdsRef.current
+      if (bps.size === 0) return
+      if (eng.state === 'running' || eng.state === 'paused') {
+        void eng.setEngineBreakpoints([...bps])
+        void eng.enableDebug()
+        if (eng.state === 'paused') void eng.resume()
+      } else {
+        void eng.start(scenario.id, {}, false, [...bps], true)
+      }
+    }
+    return [
+      {
+        id: 'engine-run',
+        label: runIsPause ? t('scenario.inspector.pause', 'Pause') : t('scenario.inspector.run', 'Run'),
+        icon: runIsPause ? 'debug-pause' : 'play',
+        shortcut: 'F5',
+        disabled: cannotStartFresh,
+        onClick: onRun,
+        items: [
+          { id: 'engine-step', label: t('scenario.inspector.step', 'Step'), icon: 'debug-step-over', shortcut: 'F7', disabled: cannotStartFresh, onClick: onStep },
+          { id: 'engine-debug', label: t('scenario.inspector.debug', 'Debug'), icon: 'debug-alt', shortcut: 'F6', disabled: !hasBreakpoints || cannotStartFresh, onClick: onDebug }
+        ]
+      },
+      {
+        id: 'engine-stop',
+        label: t('scenario.inspector.stop', 'Stop'),
+        icon: 'debug-stop',
+        shortcut: 'F8',
+        disabled: engineState !== 'running' && engineState !== 'paused',
+        onClick: () => { void engineMenuRef.current.stop() }
+      },
+      { id: 'engine-sep', isSeparator: true, label: '' }
+    ]
+  }, [engineState, hasBreakpoints, nodeErrorCount, scenario.id, t])
+
+  // Publish this editor's empty-canvas palette to the menu bar while its
+  // tab is ACTIVE: the « Scénario » menu shows exactly these items. Handlers
+  // route through refs so the published array only rebuilds when the entries
+  // themselves change — not on every graph render. Nodes added from the menu
+  // land at the centre of the visible canvas.
+  const menuAddNodeRef = useRef(addNode)
+  menuAddNodeRef.current = addNode
+  const menuAddChildRef = useRef(addChildNode)
+  menuAddChildRef.current = addChildNode
+  const menuPasteRef = useRef(pasteNodes)
+  menuPasteRef.current = pasteNodes
+  const menuLayoutRef = useRef(runManualLayout)
+  menuLayoutRef.current = runManualLayout
+  const menuScreenToFlowRef = useRef(screenToFlowPosition)
+  menuScreenToFlowRef.current = screenToFlowPosition
+  useEffect(() => {
+    if (!isActiveTab) return undefined
+    const centerFlow = (): { x: number; y: number } =>
+      menuScreenToFlowRef.current({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
+    const items = [
+      ...buildEngineMenuEntries(),
+      // Same gate as the canvas palette: Coller is disabled until a copy
+      // staged something (scenarioClipboardTick re-runs this effect on copy).
+      { id: 'paste', label: t('scenario.node.menu.paste', 'Paste'), icon: 'copy', ...(hasScenarioClipboard() ? {} : { disabled: true }), onClick: () => { menuPasteRef.current() } },
+      { id: 'paste-sep', isSeparator: true, label: '' },
+      ...buildScenarioPaletteItems({
+        t,
+        withAddSubmenu: onCreateChild !== undefined,
+        pickNode: (kind) => () => { menuAddNodeRef.current(kind, centerFlow()) },
+        pickChild: (kind) => () => { menuAddChildRef.current(kind as AddChildKind, centerFlow()) }
+      }),
+      { id: 'arrange-sep', isSeparator: true, label: '' },
+      { id: 'arrange-actions', label: t('scenario.palette.arrangeActions', 'Re-arrange actions'), icon: 'layout', onClick: () => { menuLayoutRef.current() } }
+    ] as unknown as SidebarContextMenuItem[]
+    publishScenarioMenuPalette(items)
+    return () => { publishScenarioMenuPalette(null) }
+  }, [isActiveTab, t, onCreateChild, buildEngineMenuEntries, scenarioClipboardTick])
+
   // Flat list of every box error, with the box's display title, for the panel.
   const workflowErrors = useMemo<{ nodeId: string; title: string; error: ScenarioNodeError }[]>(() => {
     const meta = new Map(validationNodes.map((n) => [n.id, t(scenarioNodeMeta(n.kind).labelKey, scenarioNodeMeta(n.kind).defaultLabel)]))
@@ -3225,6 +3371,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           onRequestClose={() => { setPalette(null) }}
           data-testid="scenario-node-palette"
           items={[
+            ...(buildEngineMenuEntries() as unknown as ContextMenuItem[]),
             ...(hasScenarioClipboard()
               ? [
                 { id: 'paste', label: t('scenario.node.menu.paste', 'Paste'), icon: 'copy', onClick: () => { pasteNodes() } },
@@ -3256,7 +3403,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
             // wires through the port it computed.
             pickNode: (kind) => {
               const e = linkPalette.entries.find((x) => x.kind === kind)
-              return e ? () => { addLinkedNode(kind, e.wirePort) } : null
+              if (!e) return null
+              // A variable node born off a request's `env` input starts on the
+              // `environment` value kind — that's the only kind of value the
+              // dragged port consumes, so the selector shouldn't open on the
+              // generic `variable` default.
+              const config = !linkPalette.fromIsSource && linkPalette.fromHandle === 'env' && kind === 'getVariable'
+                ? { value: serializeValueForPersistence(new EnvironmentValue('')) }
+                : {}
+              return () => { addLinkedNode(kind, e.wirePort, config) }
             },
             // Child request kinds wire through the request port the filter found;
             // the sub-scenario through its own. Either may be unavailable.
@@ -3466,14 +3621,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         size="dialog"
         scopeToSelector=".restorm-workbench-tab"
         data-testid="scenario-node-note-modal"
+        enterActionTestId="scenario-node-note-save"
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 420, height: 300, boxSizing: 'border-box' }}>
           <div style={{ flex: 1, minHeight: 0, overflow: 'auto', maxWidth: '100%' }}>
             <MarkdownEditor key={noteEditorNodeId ?? 'none'} initialValue={noteDraft} onChange={setNoteDraft} data-testid="scenario-node-note-editor" />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button secondary onClick={() => { setNoteEditorNodeId(null) }}>{t('common.cancel', 'Cancel')}</Button>
-            <Button onClick={() => { if (noteEditorNodeId) setNodeNote(noteEditorNodeId, noteDraft); setNoteEditorNodeId(null) }}>{t('common.save', 'Save')}</Button>
+            <Button secondary data-testid="scenario-node-note-cancel" onClick={() => { setNoteEditorNodeId(null) }}>{t('common.cancel', 'Cancel')}</Button>
+            <Button data-testid="scenario-node-note-save" onClick={() => { if (noteEditorNodeId) setNodeNote(noteEditorNodeId, noteDraft); setNoteEditorNodeId(null) }}>{t('common.save', 'Save')}</Button>
           </div>
         </div>
       </Modal>
@@ -3501,5 +3657,3 @@ export const ScenarioEditorView: React.FC<ScenarioEditorViewProps> = (props) => 
     <ScenarioEditorCanvas {...props} />
   </ReactFlowProvider>
 )
-
-export default ScenarioEditorView

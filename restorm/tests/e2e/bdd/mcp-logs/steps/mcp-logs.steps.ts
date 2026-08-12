@@ -43,9 +43,13 @@ async function waitForStableMenubarMode(page: Page): Promise<string> {
  * Returns true if the View dropdown actually opened — the caller retries on
  * false, which is the reliable cure for the mid-reconciliation race. */
 async function tryOpenViewMenu(page: Page): Promise<boolean> {
-  const mode = await waitForStableMenubarMode(page)
-  if (mode === 'full') {
-    await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
+  await waitForStableMenubarMode(page)
+  // Visibility beats mode: in overflow mode the View item can still sit
+  // among the VISIBLE bar items (only the tail overflows), so route on
+  // whether the in-bar button exists — not on the mode attribute.
+  const inBarView = page.locator('[data-testid="titlebar-menubar-item-view"]')
+  if (await inBarView.isVisible().catch(() => false)) {
+    await inBarView.click({ force: true })
   } else {
     const overflowBtn = page.locator(`[data-testid="${MENUBAR_TEST_ID}-overflow-button"], [data-testid="${MENUBAR_TEST_ID}-hamburger-button"]`).first()
     await overflowBtn.click({ force: true })
@@ -88,18 +92,10 @@ Given('no file is open', async ({ page }) => {
   await expect(page.locator('[data-testid="welcome-new-button"]')).toBeVisible({ timeout: 15000 })
 })
 
-Given('a project folder is open', async ({ page, electronApp, petstoreFolderPath }) => {
-  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: petstoreFolderPath })
-  const result = await page.evaluate(async () => {
-    interface OpenFolderResult { success: boolean; error?: string }
-    const w = window as unknown as { restorm?: { file?: { openFolder?: () => Promise<OpenFolderResult> } } }
-    const fn = w.restorm?.file?.openFolder
-    if (typeof fn !== 'function') throw new Error('window.restorm.file.openFolder is not available')
-    return await fn()
-  })
-  if (!(result as { success?: boolean }).success) {
-    throw new Error(`openFolder returned success=false (${String((result as { error?: unknown }).error)})`)
-  }
+Given('a project folder is open', async ({ page, electronApp, petstoreProjectPath }) => {
+  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: petstoreProjectPath })
+  await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
+  await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()
   await expect(page.locator(listViewRowSelectorByTitle('sidebar-listview', 'Swagger Petstore')).first())
     .toBeVisible({ timeout: 15000 })
 })

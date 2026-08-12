@@ -41,7 +41,7 @@ function seed(): void {
 describe('resolveScenarioTarget', () => {
   beforeEach(() => { seed() })
 
-  it('resolves an exact folder-mode path', () => {
+  it('resolves an exact index path', () => {
     expect(resolveScenarioTarget('Root/Mid/Main', 'name')).toEqual({ id: 's-main' })
   })
 

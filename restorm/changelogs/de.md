@@ -1,16 +1,17 @@
 # Changelog
 
-## v0.1.19
+## v1.0.0
 
-- Linux: Das AppImage startet jetzt zuverlässig und installiert Updates, ohne hängen zu bleiben – auch auf Distributionen mit gehärteter Sandbox.
-- macOS: Neben Apple Silicon sind jetzt auch Builds für Intel verfügbar.
+**Restorm 1.0 — der local-first API-Client ist da.**
 
-## v0.1.17
+Restorm ist ein schneller, offline-first Desktop-Client zum Testen und Steuern von APIs über alle wichtigen Protokolle hinweg.
 
-- Versionshinweise werden jetzt in Ihrer Sprache angezeigt.
-- Desktop-Apps für Linux, Windows und macOS: Der Installer zeigt nun Symbol, Name und Details von Restorm an, und die App öffnet sich mit Ihrem Design.
+- **Protokolle**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
+- **Szenarien**: Anfragen visuell verketten, verzweigen/schleifen, Werte extrahieren und wiederverwenden, headless in der CI ausführen.
+- **Umgebungen & Variablen**: `{{handlebars}}` überall, typisierte Secrets, Umgebungen pro Ordner.
+- **Import/Export**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, Code-Export.
+- **Git-native Projekte**: Ihr `.restorm`-Projekt ist eine einfache Datei — versionieren, vergleichen und Konflikte direkt in der App lösen.
+- **Local-first & privat**: Alles läuft auf Ihrem Rechner; eine ausgehende Firewall kontrolliert jeden externen Aufruf.
+- **Plattformübergreifend**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
-## v0.1.12
-
-- Stille Hintergrund-Updates: Restorm sucht beim Start und regelmäßig nach Updates, lädt sie im Hintergrund herunter und installiert sie beim nächsten Neustart. Nach jedem Update wird ein „Neuigkeiten“-Hinweis angezeigt.
-- Manuelle Schaltfläche „Nach Updates suchen“ und ein Auto-Update-Schalter in den Einstellungen.
+Kostenlose Community-Edition, mit Pro & Enterprise für Teams.

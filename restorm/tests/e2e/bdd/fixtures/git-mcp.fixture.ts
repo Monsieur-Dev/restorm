@@ -1,3 +1,4 @@
+import { gitServerWorkerFixture, type StartedGitServer } from '../../helpers/testcontainers/gitServer'
 /**
  * Fixture for the `git-mcp` BDD project: launches restorm with the
  * embedded MCP server enabled AND a git-tracked project, so scenarios can
@@ -75,10 +76,13 @@ function run(command: string, cwd?: string): void {
   execSync(command, { cwd, stdio: 'ignore', env: gitEnv() })
 }
 
-export const test = base.extend<GitMcpFixtures>({
+export const test = base.extend<GitMcpFixtures, { gitServer: StartedGitServer }>({
+  // This suite runs its OWN git daemon (worker-scoped, ephemeral port,
+  // mkdtemp repos dir) — the seed-module helpers are routed at it.
+  gitServer: gitServerWorkerFixture(),
   restormRoot: [RESTORM_ROOT, { option: true }],
 
-  gitIntegrationRoot: async ({}, use) => {
+  gitIntegrationRoot: async ({ gitServer: _gitServer }, use) => {
     const root = mkdtempSync(join(tmpdir(), 'restorm-git-mcp-'))
     await use(root)
     rmSync(root, { recursive: true, force: true })
@@ -103,7 +107,7 @@ export const test = base.extend<GitMcpFixtures>({
     })
   },
 
-  launchAppWithMcp: async ({ restormRoot }, use, testInfo) => {
+  launchAppWithMcp: async ({ restormRoot, gitServer: _gitServer }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
 
     const electronExePath = electronPath as unknown as string

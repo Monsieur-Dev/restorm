@@ -50,6 +50,7 @@ server; — = pure UI/in-process.
 | odata-import | 4 | OData multi-version metadata + JSON-CSDL | — |
 | raml-import | 4 | RAML import | — |
 | har-import | 3 | HAR (HTTP Archive) auto-detect + tree | — |
+| restorm-import | 3 | .restorm project merge — wrapper folder, self-import duplication, save+reopen | — |
 | paw-import | 3 | Paw JSON export import | 🏠 live API |
 | wadl-import | 3 | WADL import | — |
 | thrift-import | 3 | Thrift IDL (documentation-only) | — |
@@ -77,9 +78,9 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
-| odata-petstore | 4 | OData import + send + filter (petstore) | — |
+| odata-petstore | 5 | OData import + send + filter (petstore) | — |
 | scenario-code-deps | 2 | Code-node external deps (offline chained golden) | — |
-| scenario-runlog | 56 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main) | 🏠 |
+| scenario-runlog | 57 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main + the value+done join, where a consumer is wired to both an upstream node's data output AND its `done` signal) | 🏠 |
 | scenario-quick-config-selector | 1 | Request-action config selector stays live | — |
 | scenario-setvariable-override | 1 | setVariable overrides an env-folder var downstream | — |
 | scenario-input-prompt | 4 | Run-parameters modal: the answer wins over the input default AND the request's own path param (string / number / enum / custom-list) | 🐳 petstore |
@@ -99,10 +100,11 @@ server; — = pure UI/in-process.
 | documentation-viewer | 4 | Documentation viewer interactions | — |
 | quick-settings | 13 | Quick-config save/load round-trip every protocol field + app-wide popover exclusivity | — |
 | sidebar-split-drop | 3 | Sidebar → workbench drag opens a split view | — |
+| sidebar-dnd | 10 | Sidebar multi-selection + drag & drop — multi-drop on container, root move (rows + empty area), incoherent refusal (own subtree, env-folder nesting), hover-expand with disarm, requests→scenario canvas, no overlay on multi, tab-activation moves the sidebar selection (sync-with-active-tab) | — |
 | sidebar-clone | 3 | Sidebar "Clone" recursive id independence: request / quick-configs / env-folder (nested request, custom value list, enum definition, cross-scenario runScenario, connectionNodeId) — clone-then-rename-the-original leaves the clone unaffected, both stay distinctly searchable | 🔌 |
+| menubar-context | 3 | Contextual menu-bar menus (Requête / Serveur / Scénario) exist exactly while the matching tab is active; deleting a folder walks each subtree request bound by an OUTSIDE scenario through the used-by-scenarios dialog before deleting (box stripped on delete-anyway), and asks nothing when the binding scenario dies in the same subtree | 🔌 |
+| file-external-change | 4 | Open-file watch: an external rewrite raises the timerless reload/keep-mine toast (reload reflects disk, keep-mine actually overwrites even when not dirty), the app's own autosave never prompts, and an external secrets-sidecar write is re-applied silently | 🔌 |
 | auth-login | 2 | Authentication routes end-to-end | 🏠 |
-| open-folder | 2 | Open Folder | — |
-| body-type-migration | 1 | Legacy body-type canonicalisation on load | — |
 | fully-documented-petstore | 1 | Fully-documented Petstore fixture builder | — |
 | theme-carousel-a11y | 1 | Theme preview cards keep Tab on the card only, never the abstract preview | — |
 | monaco-suggest-dismiss | 1 | A `{{...}}` suggest popup opened in one request is gone after switching tabs, and still opens in the now-active field | 🔌 |
@@ -119,6 +121,7 @@ server; — = pure UI/in-process.
 
 | Suite | Scen | Covers | Deps |
 |---|--:|---|---|
+| git-collab | 10 | Two live instances collaborating through one remote: dirty-state reactivity, behind-server handling, reset-to-server, per-field arbitration (quick settings, renames, deletions, tags, moves), terminal-checkout protection via the reload/keep-mine toast | 🐳 git-server |
 | git-status | 1 | Detect repo → GIT status-bar push button enabled | 🐳 git-server |
 | git-push-pull | 2 | Push lands on remote; collaborator pull with no conflict appears | 🐳 git-server |
 | git-conflict | 6 | Provoked conflict → 4-panel resolve (all entity kinds + field-diffs), abort-merge keeps local work, pull-available toast, commit-message generation, live-action controls disabled in the conflict panel | 🐳 git-server |
@@ -126,8 +129,17 @@ server; — = pure UI/in-process.
 
 ## Non-BDD e2e specs
 
+Every spec here that spawns the app for a headless `--run` isolates its userData
+directory per invocation (`RESTORM_USER_DATA_OVERRIDE` → a fresh `mkdtemp`). This
+is mandatory, not optional: the single-instance lock is keyed on that directory,
+so a run sharing it with any already-open Restorm window (a human validation
+instance) loses the lock. The app now refuses such a run with a clear message and
+a non-zero exit — but the isolation is what lets these suites pass regardless of
+what else is open. No suite in this catalog requires the absence of a concurrent
+instance.
+
 | Spec | Covers |
 |---|---|
-| scenario-cli/scenario-cli.spec.ts | Headless CLI scenario runner (run-log goldens, exit codes, --param/--out) |
+| scenario-cli/scenario-cli.spec.ts | Headless CLI scenario runner (run-log goldens, exit codes, --param/--out, loud failure under a held single-instance lock) |
 | stage-gating/headless-gating.spec.ts | Capability gating in headless mode |
 | stage-gating/gating-lifecycle.spec.ts | Capability gating lifecycle |

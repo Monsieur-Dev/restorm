@@ -88,11 +88,15 @@ async function dispatchOne(envelope) {
 // request against the very server that served the document.
 // ---------------------------------------------------------------------------
 
-function openRpcDocument() {
+function openRpcDocument(hostHeader) {
+  // Advertise the address the CLIENT reached us on (the Host header), not
+  // the in-container listen port: behind a published/ephemeral port the two
+  // differ, and a generated request must target the reachable one.
+  const host = hostHeader || `localhost:${PORT}`
   return {
     openrpc: '1.2.6',
     info: { title: 'restorm JSON-RPC mock', version: '1.0.0' },
-    servers: [{ name: 'mock', url: `http://localhost:${PORT}/rpc` }],
+    servers: [{ name: 'mock', url: `http://${host}/rpc` }],
     methods: [
       {
         name: 'echo',
@@ -142,7 +146,7 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/openrpc.json' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify(openRpcDocument(), null, 2))
+    res.end(JSON.stringify(openRpcDocument(req.headers.host), null, 2))
     return
   }
 

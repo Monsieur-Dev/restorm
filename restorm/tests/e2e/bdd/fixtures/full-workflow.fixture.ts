@@ -1,3 +1,4 @@
+import { servicesWorkerFixture, type StartedServices } from '../../helpers/testcontainers/services'
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
 import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from 'fs'
@@ -62,7 +63,10 @@ export interface FullWorkflowFixtures {
   getLogs: () => string[]
 }
 
-export const test = base.extend<FullWorkflowFixtures>({
+export const test = base.extend<FullWorkflowFixtures, { services: StartedServices }>({
+  // The suite runs its OWN petstore + OData v4 mock containers
+  // (worker-scoped, ephemeral ports).
+  services: servicesWorkerFixture(['petstore', 'odata-petstore']),
   restormRoot: [resolve(__dirname, '../../../..'), { option: true }],
 
   fullWorkflowTempDir: async ({}, use) => {

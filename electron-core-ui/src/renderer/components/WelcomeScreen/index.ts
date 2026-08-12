@@ -1,2 +1,2 @@
-export { WelcomeScreen, default } from './WelcomeScreen'
+export { WelcomeScreen } from './WelcomeScreen'
 export type { WelcomeScreenProps } from './WelcomeScreen'

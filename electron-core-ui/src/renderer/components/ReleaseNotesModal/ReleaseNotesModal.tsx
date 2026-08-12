@@ -161,5 +161,3 @@ export const ReleaseNotesModal: React.FC<ReleaseNotesModalProps> = ({
     </Modal>
   )
 }
-
-export default ReleaseNotesModal

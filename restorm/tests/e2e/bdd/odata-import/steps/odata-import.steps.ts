@@ -9,7 +9,14 @@ import {
   configureNextSaveFileDialogForE2E
 } from '../../fixtures/odata-petstore.fixture'
 
-const ODATA_V4_METADATA_URL = 'http://localhost:5100/odata/$metadata'
+import type { StartedServices } from '../../../helpers/testcontainers/services'
+
+let suiteServices: StartedServices | null = null
+const svc = (): StartedServices => {
+  if (suiteServices === null) throw new Error('launch first (services not captured)')
+  return suiteServices
+}
+const odataV4MetadataUrl = (): string => `${svc().url('odata-petstore')}/odata/$metadata`
 const ODATA_FIXTURES_DIR = resolve(__dirname, '../../../../unit/fixtures/odata')
 const IMPORT_FILE = join(ODATA_PETSTORE_TEMP_DIR, 'odata-import.restorm')
 
@@ -48,7 +55,8 @@ async function importViaModal(source: string): Promise<void> {
   await p.waitForTimeout(500)
 }
 
-Given('a new single-file YAML collection for OData import', async ({ launchApp }) => {
+Given('a new single-file YAML collection for OData import', async ({ launchApp, services }) => {
+  suiteServices = services
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
@@ -64,7 +72,7 @@ Given('a new single-file YAML collection for OData import', async ({ launchApp }
 })
 
 When('I import the OData v4 metadata URL', async () => {
-  await importViaModal(ODATA_V4_METADATA_URL)
+  await importViaModal(odataV4MetadataUrl())
 })
 
 When('I import the OData fixture file {string}', async ({}, fileName: string) => {

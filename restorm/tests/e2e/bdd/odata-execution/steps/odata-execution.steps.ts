@@ -8,9 +8,16 @@ import {
   configureNextSaveFileDialogForE2E
 } from '../../fixtures/odata-petstore.fixture'
 
-const ODATA_V4_METADATA_URL = 'http://localhost:5100/odata/$metadata'
-const ODATA_V2_METADATA_URL = 'http://localhost:5102/$metadata'
-const ODATA_V2_BASE = 'http://localhost:5102'
+import type { StartedServices } from '../../../helpers/testcontainers/services'
+
+let suiteServices: StartedServices | null = null
+const svc = (): StartedServices => {
+  if (suiteServices === null) throw new Error('launch first (services not captured)')
+  return suiteServices
+}
+const odataV4MetadataUrl = (): string => `${svc().url('odata-petstore')}/odata/$metadata`
+const odataV2MetadataUrl = (): string => `${svc().url('odata-v2-petstore')}/$metadata`
+const odataV2Base = (): string => svc().url('odata-v2-petstore')
 
 const { Given, When, Then } = createBdd(test)
 
@@ -88,7 +95,16 @@ async function typeIntoOdataFilter(p: Page, text: string): Promise<void> {
  * then the option row (both force-clicked, matching the ECUI selectBox
  * test step). */
 async function selectBoxOption(p: Page, testId: string, index: number): Promise<void> {
-  await p.locator(`[data-testid="${testId}-trigger"]`).first().click({ force: true })
+  // Scroll the trigger into view first: the resolved-URL preview row under
+  // the URL field pushed the lower form content down, and a dropdown opened
+  // from an off-viewport trigger puts its options off-viewport too — which
+  // even a force click refuses.
+  const trigger = p.locator(`[data-testid="${testId}-trigger"]`).first()
+  // Centre the trigger in its scroll container — the dropdown is a FIXED
+  // portal anchored below it, so a bottom-edge trigger puts the options off
+  // the viewport where nothing can scroll them back.
+  await trigger.evaluate((el) => { el.scrollIntoView({ block: 'center' }) })
+  await trigger.click({ force: true })
   await p.locator(`[data-testid="${testId}-option-${index}"]`).first().click({ force: true })
 }
 
@@ -104,7 +120,8 @@ async function importViaModal(source: string): Promise<void> {
   await p.waitForTimeout(500)
 }
 
-Given('a new single-file YAML collection for OData execution', async ({ launchApp }) => {
+Given('a new single-file YAML collection for OData execution', async ({ launchApp, services }) => {
+  suiteServices = services
   const launched = await launchApp()
   electronApp = launched.app
   page = launched.page
@@ -120,11 +137,11 @@ Given('a new single-file YAML collection for OData execution', async ({ launchAp
 })
 
 When('I import the OData v4 metadata URL', async () => {
-  await importViaModal(ODATA_V4_METADATA_URL)
+  await importViaModal(odataV4MetadataUrl())
 })
 
 When('I import the OData v2 metadata URL', async () => {
-  await importViaModal(ODATA_V2_METADATA_URL)
+  await importViaModal(odataV2MetadataUrl())
 })
 
 When('I open the OData request {string}', async ({}, requestName: string) => {
@@ -255,7 +272,7 @@ When('I switch the request to a JSON batch change-set with a valid POST and a fa
 
 When('I point the OData request URL at the v2 mock error path', async () => {
   const p = requirePage()
-  await typeIntoOdataUrl(p, `${ODATA_V2_BASE}/error400`)
+  await typeIntoOdataUrl(p, `${odataV2Base()}/error400`)
   // Clear any pre-filled query options so the bare error URL is sent.
   await p.waitForTimeout(300)
 })

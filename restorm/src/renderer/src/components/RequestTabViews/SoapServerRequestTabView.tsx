@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from 'react'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -8,13 +11,16 @@ import {
   ControlGroup,
   ScrollableElement,
   logger,
-  toasterService,
   type Tab
 } from 'electron-core-ui/renderer'
 import type { SoapRequest, SoapMockOperation } from '../../../../shared/types/requests/SoapRequest'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { updateReactiveProperty } from './requestTabViewUtils'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
+import { useEnvVariables } from '../../hooks/useEnvVariables'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
@@ -74,6 +80,23 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
   const sourceIdRef = useRef<string>(crypto.randomUUID())
 
   const { port: serverPort, route: serverRoute } = useMemo(() => parseServerUrl(url), [url])
+  const envVariables = useEnvVariables(request.id)
+  // Resolved-address preview: the main process resolves the request's URL
+  // (Handlebars substituted) and pushes updates; the fetch covers the value
+  // already cached before this tab mounted.
+  const [resolvedUrl, setResolvedUrl] = useState<string>('')
+  useEffect(() => {
+    const requestId = request.id
+    const unsub = window.restorm?.context.onUrlResolved((result) => {
+      if (result.requestId === requestId) setResolvedUrl(result.resolvedUrl)
+    })
+    void window.restorm?.context.getResolvedUrl(requestId).then((result) => {
+      if (result) setResolvedUrl(result.resolvedUrl)
+    })
+    return () => { unsub?.() }
+  }, [request.id])
+
+  const handlebarsHelpers = useHandlebarsHelpers()
 
   const composeServerUrl = useCallback((port: string, routePart: string): string => {
     const cleanRoute = routePart.replace(/^\/+/, '')
@@ -84,7 +107,7 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
     setUrlState(value)
     updateReactiveProperty(request, 'url', value)
   }, [request])
-  const setServerPort = useCallback((p: string): void => { setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoute)) }, [composeServerUrl, serverRoute, setUrl])
+  const setServerPort = useCallback((p: string): void => { setUrl(composeServerUrl(p, serverRoute)) }, [composeServerUrl, serverRoute, setUrl])
   const setServerRoute = useCallback((r: string): void => { setUrl(composeServerUrl(serverPort, r)) }, [composeServerUrl, serverPort, setUrl])
 
   const setOperations = useCallback((next: SoapMockOperation[]): void => {
@@ -144,14 +167,26 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
     void window.restorm?.soap.listen(requestId)
       .then((res) => {
         if (res.error) {
-          toasterService.push('app', { title: t('soap.server.listenFailed', 'Could not start the SOAP mock server'), body: res.error, durationMs: 10000 })
+          pushServerListenErrorToast(t, t('soap.server.listenFailed', 'Could not start the SOAP mock server'), res.error, serverPort)
           logger.error('SOAP mock server failed to listen', { error: res.error })
         }
       })
       .catch((err: unknown) => { logger.error('SOAP mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, conflictMode, t])
+  }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => { void window.restorm?.soap.stop(request.id) }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE one.
+  const serverMenuOpsRef = useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[]>(() => [
+    isListening
+      ? { id: 'server-stop', label: t('soap.server.stopListening', 'Stop the SOAP mock server'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+      : { id: 'server-listen', label: t('soap.server.startListening', 'Start the SOAP mock server'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+  ], [isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab, serverMenuItems)
 
   const updateOperation = useCallback((index: number, patch: Partial<SoapMockOperation>): void => {
     setOperations(operations.map((op, i) => (i === index ? { ...op, ...patch } : op)))
@@ -165,25 +200,29 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
 
   // URL section: localhost-fixed host + port + route + Listen↔Stop toggle.
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="soap-server-url-section">
       <span style={serverHostLabelStyle} data-testid="soap-server-host">localhost:</span>
-      <div style={serverPortWrapperStyle}>
-        <InputBox
+      <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+        <RestormVariableInputBox
           value={serverPort}
           onChange={setServerPort}
-          options={{ placeholder: '8080', ariaLabel: t('soap.server.portLabel', 'Port') }}
+          variables={envVariables}
+          helpers={handlebarsHelpers}
+          placeholder="8080"
+          ariaLabel={t('soap.server.portLabel', 'Port')}
           data-testid="soap-server-port-input"
-          disabled={isListening}
         />
       </div>
       <span style={serverHostLabelStyle}>/</span>
-      <div style={urlInputWrapperStyle}>
-        <InputBox
+      <div style={{ ...urlInputWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+        <RestormVariableInputBox
           value={serverRoute}
           onChange={setServerRoute}
-          options={{ placeholder: 'soap', ariaLabel: t('soap.server.routeLabel', 'Route') }}
+          variables={envVariables}
+          helpers={handlebarsHelpers}
+          ariaLabel={t('soap.server.routeLabel', 'Route')}
           data-testid="soap-server-route-input"
-          disabled={isListening}
         />
       </div>
       {!inWorkbenchTab && (
@@ -202,6 +241,8 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
       </BeamWrap>
       )}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   // Operations editor: one row per mock operation (name + SOAPAction + Fault
@@ -326,5 +367,3 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
     />
   )
 }
-
-export default SoapServerRequestTabView

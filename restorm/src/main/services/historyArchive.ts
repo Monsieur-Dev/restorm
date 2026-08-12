@@ -87,11 +87,12 @@ function parseResponseEntry(raw: Record<string, unknown>): ResponseHistoryEntry 
   const guid = typeof raw['guid'] === 'string' ? raw['guid'] : ''
   const timestamp = typeof raw['timestamp'] === 'string' ? raw['timestamp'] : ''
   const pinned = typeof raw['pinned'] === 'boolean' ? raw['pinned'] : false
-  const success = typeof raw['success'] === 'boolean' ? raw['success'] : false
   if (!guid || !timestamp) return null
   const rawOutcome = raw['outcome']
-  const outcome = rawOutcome === 'ok' || rawOutcome === 'warning' || rawOutcome === 'failure' ? rawOutcome : undefined
-  return outcome ? { guid, timestamp, pinned, success, outcome } : { guid, timestamp, pinned, success }
+  // An entry with no readable outcome is not a usable entry: the outcome is
+  // what the status dot renders, and there is no boolean to fall back on.
+  if (rawOutcome !== 'ok' && rawOutcome !== 'warning' && rawOutcome !== 'failure') return null
+  return { guid, timestamp, pinned, outcome: rawOutcome }
 }
 
 function parseScenarioRun(raw: Record<string, unknown>): ScenarioRunHistoryEntry | null {

@@ -885,7 +885,7 @@ export function importOpenAPI(
     const targetFolder = options.parentFolder ?? options.environmentFolder
     targetFolder.items = [...targetFolder.items, ...importedItems]
     if (enumDefs.length > 0) {
-      const existing = (options.environmentFolder.enumDefinitions ?? []) as EnumDefinition[]
+      const existing = (options.environmentFolder.enumDefinitions ?? [])
       options.environmentFolder.enumDefinitions = [...existing, ...enumDefs]
     }
     options.environmentFolder.apiDocumentation = apiDocumentation

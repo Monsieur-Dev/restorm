@@ -45,5 +45,3 @@ export const OperatorToggle: React.FC<OperatorToggleProps> = ({ value, onChange 
     </span>
   )
 }
-
-export default OperatorToggle

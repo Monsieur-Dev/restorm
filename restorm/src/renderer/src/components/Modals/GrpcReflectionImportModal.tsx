@@ -115,6 +115,7 @@ export const GrpcReflectionImportModal: React.FC<GrpcReflectionImportModalProps>
       onClose={handleClose}
       title={t('import.grpcReflection.title', 'gRPC server (reflection)')}
       data-testid="grpc-reflection-import-modal"
+      enterActionTestId="grpc-reflection-import-button"
     >
       <div className="import-modal" data-testid="grpc-reflection-import-modal-body">
         <p>

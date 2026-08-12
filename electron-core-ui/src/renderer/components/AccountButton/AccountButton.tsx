@@ -311,5 +311,3 @@ export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) =>
     </span>
   )
 }
-
-export default AccountButton

@@ -146,6 +146,39 @@ function getLogger(): winston.Logger {
 /** Severity threshold accepted by {@link LoggerInterface.setLevel}. */
 export type LogLevel = 'error' | 'warn' | 'info' | 'debug'
 
+/** Observer for error-level log entries. See {@link LoggerInterface.onError}. */
+export type ErrorLogListener = (message: string, meta?: Record<string, unknown>) => void
+
+const errorListeners = new Set<ErrorLogListener>()
+
+/** True while listeners are being notified — see the guard in `notifyError`. */
+let notifyingError = false
+
+/**
+ * Tell every listener about one error-level entry.
+ *
+ * Two protections, both so an observer can never break the logging it observes:
+ * a listener that throws is swallowed (the log line already reached winston),
+ * and a listener that itself logs an error is not re-entered — the nested call
+ * is written normally but not re-broadcast, which is what breaks the loop
+ * "observer logs an error about the error it observed".
+ */
+function notifyError(message: string, meta?: Record<string, unknown>): void {
+  if (notifyingError) return
+  notifyingError = true
+  try {
+    for (const listener of errorListeners) {
+      try {
+        listener(message, meta)
+      } catch {
+        // An observer must never take the logger down with it.
+      }
+    }
+  } finally {
+    notifyingError = false
+  }
+}
+
 // Define logger interface for proper type inference
 export interface LoggerInterface {
   debug: (message: string, meta?: Record<string, unknown>) => void
@@ -159,6 +192,15 @@ export interface LoggerInterface {
    * `logger.setLevel('error')` before the run so only errors surface.
    */
   setLevel: (level: LogLevel) => void
+  /**
+   * Observe every error-level entry — the seam for piping error logs into an
+   * observability sink (crash reporter, alerting, a test asserting "nothing
+   * errored"). Fires AFTER the entry reached the transports, only for `error`.
+   * Returns an unsubscribe. Listener exceptions are swallowed, and a listener
+   * that itself logs an error is not re-entered (its entry is written but not
+   * re-broadcast), so an observer can never break or loop the logger.
+   */
+  onError: (listener: ErrorLogListener) => () => void
 }
 
 // Export logging functions
@@ -174,6 +216,13 @@ export const logger: LoggerInterface = {
   },
   error: (message: string, meta?: Record<string, unknown>): void => {
     getLogger().error(message, meta)
+    notifyError(message, meta)
+  },
+  onError: (listener: ErrorLogListener): (() => void) => {
+    errorListeners.add(listener)
+    return () => {
+      errorListeners.delete(listener)
+    }
   },
   setLevel: (level: LogLevel): void => {
     const instance = getLogger()
@@ -181,5 +230,3 @@ export const logger: LoggerInterface = {
     for (const transport of instance.transports) transport.level = level
   }
 }
-
-export default logger

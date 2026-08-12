@@ -1,8 +1,8 @@
 - message: 🔵 [<time>] ▶ CSV
 - message: ⚪ [<time>] start csv
   data:
-    op: parse
     header: true
+    op: parse
     value: |-
       id,name,age
       1,Rex,4
@@ -18,8 +18,8 @@
         age: "2"
 - message: ⚪ [<time>] start csv
   data:
-    op: stringify
     header: true
+    op: stringify
     value:
       - id: "1"
         name: Rex
@@ -54,9 +54,9 @@
       2,Fido,2
 - message: ⚪ [<time>] start csv
   data:
-    op: parse
-    header: true
     delimiter: ;
+    header: true
+    op: parse
     value: |-
       sku;qty
       A-1;10

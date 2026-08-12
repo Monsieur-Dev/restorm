@@ -19,7 +19,7 @@ import { computeSpecHash } from '../apiUpdate/specHash'
 import type { ImportDiff } from './idempotent/types'
 import { collectionStore, pubsub, PUBSUB_TOPICS } from '../CollectionStore'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/types/collections'
-import { isAnyFolder, isRequest, isGrpcRequest } from '../../../shared/types/collections'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isGrpcRequest } from '../../../shared/types/collections'
 
 /** Same decode options `grpcProtoLoader.ts` uses for every other proto load,
  * so a reflection-derived package resolves identically to a file-based one. */
@@ -76,6 +76,8 @@ function sourceUrlFor(address: string): string {
 export function findExistingGrpcReflectionFolder(address: string): EnvironmentFolder | null {
   const wanted = sourceUrlFor(address)
   for (const collection of collectionStore.getCollections()) {
+    // The root may also hold scenarios / requests, which carry neither field.
+    if (!isEnvironmentFolder(collection)) continue
     if (collection.importSource === 'grpc' && collection.apiUpdate?.sourceUrl === wanted) return collection
   }
   return null

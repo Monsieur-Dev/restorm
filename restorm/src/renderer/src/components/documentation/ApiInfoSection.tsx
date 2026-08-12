@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
 import { apiSourceFormatLogo } from './apiSourceFormat'
 
@@ -16,6 +17,7 @@ export interface ApiInfoSectionProps {
  * the per-route surface.
  */
 export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation }) => {
+  const { t } = useTranslation()
   const { api, server, sourceType, sourceUrl } = apiDocumentation
   const logo = apiSourceFormatLogo(sourceType)
 
@@ -30,18 +32,18 @@ export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation
     >
       {api.version !== undefined && api.version.length > 0 && (
         <>
-          <dt>Version</dt>
+          <dt>{t('documentation.apiInfo.version')}</dt>
           <dd><code>{api.version}</code></dd>
         </>
       )}
 
       <>
-        <dt>Source format</dt>
+        <dt>{t('documentation.apiInfo.sourceFormat')}</dt>
         <dd>
           <code>{sourceType}</code>
           {sourceUrl !== undefined && sourceUrl.length > 0 && (
             <>
-              {' from '}
+              {` ${t('documentation.apiInfo.from')} `}
               <a href={sourceUrl}>{sourceUrl}</a>
             </>
           )}
@@ -50,7 +52,7 @@ export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation
 
       {server !== undefined && (server.host !== undefined || server.basePath !== undefined || (server.schemes?.length ?? 0) > 0 || server.namespace !== undefined) && (
         <>
-          <dt>Server</dt>
+          <dt>{t('documentation.apiInfo.server')}</dt>
           <dd>
             {(server.schemes?.length ?? 0) > 0 && (
               <span>{server.schemes?.join(', ')}://</span>
@@ -66,7 +68,7 @@ export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation
 
       {api.contact !== undefined && (
         <>
-          <dt>Contact</dt>
+          <dt>{t('documentation.apiInfo.contact')}</dt>
           <dd>
             {api.contact.name !== undefined && api.contact.name.length > 0 && <span>{api.contact.name}</span>}
             {api.contact.email !== undefined && api.contact.email.length > 0 && (
@@ -90,7 +92,7 @@ export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation
 
       {api.license !== undefined && (
         <>
-          <dt>License</dt>
+          <dt>{t('documentation.apiInfo.license')}</dt>
           <dd>
             {api.license.url !== undefined && api.license.url.length > 0
               ? <a href={api.license.url}>{api.license.name ?? api.license.url}</a>
@@ -103,14 +105,14 @@ export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation
 
       {api.termsOfService !== undefined && api.termsOfService.length > 0 && (
         <>
-          <dt>Terms of service</dt>
+          <dt>{t('documentation.apiInfo.termsOfService')}</dt>
           <dd><a href={api.termsOfService}>{api.termsOfService}</a></dd>
         </>
       )}
 
       {api.externalDocs !== undefined && (
         <>
-          <dt>External docs</dt>
+          <dt>{t('documentation.apiInfo.externalDocs')}</dt>
           <dd>
             <a href={api.externalDocs.url}>
               {api.externalDocs.description !== undefined && api.externalDocs.description.length > 0
@@ -123,7 +125,7 @@ export const ApiInfoSection: React.FC<ApiInfoSectionProps> = ({ apiDocumentation
 
       {Object.values(apiDocumentation.groups).some((g) => g.externalDocs !== undefined) && (
         <>
-          <dt>Tag references</dt>
+          <dt>{t('documentation.apiInfo.tagReferences')}</dt>
           <dd>
             <ul className="documentation-host-api-info__tag-refs">
               {Object.entries(apiDocumentation.groups)

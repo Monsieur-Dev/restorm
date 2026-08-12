@@ -1,13 +1,13 @@
 - message: 🔵 [<time>] ▶ tRPC
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: tRPC Get user
+    requestId: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8096/user.get?input=%7B%22id%22%3A%201%7D
+        url: http://localhost:<port>/user.get?input=%7B%22id%22%3A%201%7D
         method: ""
         headers: {}
       response:
@@ -24,14 +24,14 @@
         success: true
 - message: ⚪ [<time>] start httpRequest
   data:
-    requestId: <uuid>
     label: tRPC Create post
+    requestId: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
       request:
-        url: http://localhost:8096/echo.header?input=%7B%22name%22%3A%20%22x-test-token%22%7D
+        url: http://localhost:<port>/echo.header?input=%7B%22name%22%3A%20%22x-test-token%22%7D
         method: ""
         headers: {}
       response:

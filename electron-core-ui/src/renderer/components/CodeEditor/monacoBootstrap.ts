@@ -3,11 +3,11 @@ import { loader } from '@monaco-editor/react'
 // Vite ?worker suffix → each worker file is bundled into its own
 // chunk and exported as a constructor. The handler below picks the
 // matching worker class based on the language label Monaco passes.
-import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
-import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
-import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
-import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
-import TypeScriptWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
+import EditorWorker from 'monaco-editor/editor/editor.worker?worker'
+import JsonWorker from 'monaco-editor/language/json/json.worker?worker'
+import CssWorker from 'monaco-editor/language/css/css.worker?worker'
+import HtmlWorker from 'monaco-editor/language/html/html.worker?worker'
+import TypeScriptWorker from 'monaco-editor/language/typescript/ts.worker?worker'
 
 /**
  * One-time Monaco bootstrap. Without this, `@monaco-editor/react`

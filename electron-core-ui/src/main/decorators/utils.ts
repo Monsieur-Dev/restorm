@@ -5,8 +5,7 @@
 import { TrackableConfig, getTrackableConfig, getTrackableProperties } from './trackable'
 import { SearchableConfig, getSearchableConfig, getSearchableProperties } from './searchable'
 import { getNonSerialisedProperties } from './nonSerialised'
-import { SeparateFilesConfig, getSeparateFilesProperties } from './separateFiles'
-import { SeparateFoldersConfig, getSeparateFoldersProperties } from './separateFolders'
+import { SaveUnitsConfig, getSaveUnitsProperties } from './saveUnits'
 import { FileNamingConfig, getFileNamingConfig } from './fileNaming'
 
 /** All decorator metadata for a class */
@@ -17,8 +16,7 @@ export interface AllMetadata {
   trackableProperties: Map<string | symbol, TrackableConfig>
   searchableProperties: Map<string | symbol, SearchableConfig>
   nonSerialisedProperties: Set<string | symbol>
-  separateFilesProperties: Map<string | symbol, SeparateFilesConfig>
-  separateFoldersProperties: Map<string | symbol, SeparateFoldersConfig>
+  saveUnitsProperties: Map<string | symbol, SaveUnitsConfig>
 }
 
 /**
@@ -32,8 +30,7 @@ export function getAllMetadata(target: unknown): AllMetadata {
     trackableProperties: getTrackableProperties(target),
     searchableProperties: getSearchableProperties(target),
     nonSerialisedProperties: getNonSerialisedProperties(target),
-    separateFilesProperties: getSeparateFilesProperties(target),
-    separateFoldersProperties: getSeparateFoldersProperties(target)
+    saveUnitsProperties: getSaveUnitsProperties(target)
   }
 }
 

@@ -7,6 +7,7 @@ import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { processAfterDeserialization } from '../utils/serialization'
+import { reidentifyForest } from '../../../shared/utils/reidentifyTree'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, EnvironmentFolder, Environment, FolderItem } from '../../../shared/types/collections'
 import { isScenario } from '../../../shared/types/collections'
@@ -72,88 +73,6 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         count: items.length,
         rootItemsCount: rootItems.length
       })
-
-      // Regenerate all IDs to avoid conflicts with existing items.
-      // Keeps an `old → new` map so we can remap cross-item
-      // references (`authenticationRequestId`) in a second pass —
-      // otherwise requests wired up upstream with
-      // `authenticationRequestId: <old auth id>` point at a node
-      // that no longer exists after regeneration.
-      const idMap = new Map<string, string>()
-      const regenerateIds = (item: FolderItem): FolderItem => {
-        const newId = crypto.randomUUID()
-        idMap.set(item.id, newId)
-        if ('items' in item) {
-          const folder = item
-          return {
-            ...folder,
-            id: newId,
-            items: (folder.items ?? []).map((child) => regenerateIds(child))
-          }
-        } else {
-          const request = item
-          return {
-            ...request,
-            id: newId
-          }
-        }
-      }
-
-      // Walk a regenerated tree and fix any `authenticationRequestId`
-      // that still points at a pre-regeneration id. Runs top-down;
-      // cheap even on a 10k-route tree because it only touches
-      // already-shallow-cloned nodes.
-      const remapAuthRefs = (item: FolderItem): FolderItem => {
-        if ('items' in item) {
-          let next: FolderItem = { ...item, items: item.items.map(remapAuthRefs) }
-          // A workflow scenario (from Postman/Bruno import) binds its
-          // `httpRequest` nodes to sibling requests by `config.requestId`. Those
-          // requests were just re-id'd by regenerateIds, so remap the bindings
-          // here too — otherwise the scenario points at requests that no longer
-          // exist. The scenario's internal node/edge ids are NOT FolderItems, so
-          // regenerateIds left them stable; only this cross-reference moves.
-          const scn = next as unknown as { type?: string; nodes?: { kind: string; config?: Record<string, unknown> }[] }
-          if (scn.type === 'scenario' && Array.isArray(scn.nodes)) {
-            next = {
-              ...next,
-              nodes: scn.nodes.map((n) => {
-                const rid = n.config?.['requestId']
-                if (typeof rid === 'string') {
-                  const remappedId = idMap.get(rid)
-                  if (remappedId !== undefined && remappedId !== rid) return { ...n, config: { ...n.config, requestId: remappedId } }
-                }
-                return n
-              })
-            } as unknown as FolderItem
-          }
-          // Env folders may carry an `apiUpdate.authenticationRequestId`
-          // that points at the auth request the import flow attached.
-          // The regenerateIds pass above stamped a fresh id on the
-          // attached auth, so remap the env-folder reference here too —
-          // otherwise the refresh-from-source path looks up the auth
-          // route by the stale pre-regen id, falls back to "no auth",
-          // and the spec fetch 401's.
-          const apiUpdate = (next as unknown as { apiUpdate?: { authenticationRequestId?: string } }).apiUpdate
-          if (apiUpdate?.authenticationRequestId) {
-            const remapped = idMap.get(apiUpdate.authenticationRequestId)
-            if (remapped !== undefined && remapped !== apiUpdate.authenticationRequestId) {
-              next = {
-                ...next,
-                apiUpdate: { ...apiUpdate, authenticationRequestId: remapped }
-              } as FolderItem
-            }
-          }
-          return next
-        }
-        const current = (item as { authenticationRequestId?: string }).authenticationRequestId
-        if (current !== undefined) {
-          const remapped = idMap.get(current)
-          if (remapped !== undefined && remapped !== current) {
-            return { ...item, authenticationRequestId: remapped } as FolderItem
-          }
-        }
-        return item
-      }
 
       // Emit ENVIRONMENT_CREATED for every env (and nested sub-envs) on an
       // imported EnvironmentFolder so ContextService can register them and
@@ -240,9 +159,32 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // file loads so KeyValue ids are stable and every `ValueType`
       // becomes a real class instance before reaching the renderer's
       // `instanceof`-driven cell renderers.
-      const rehydrated = processAfterDeserialization(items)
-      const regenerated = rehydrated.map((item) => regenerateIds(item))
-      const itemsWithNewIds = regenerated.map((item) => remapAuthRefs(item))
+      const itemsWithNewIds = processAfterDeserialization(items)
+
+      // Re-identify the whole imported forest — a fresh id for EVERY
+      // id-bearing node (folders, requests, environments, sub-envs, enum
+      // definitions, custom value lists, scenario nodes/edges, quick
+      // configs) and every known reference key remapped onto the new ids,
+      // cross-item references between sibling roots included. This is the
+      // same primitive the Clone action uses; the previous inline pass only
+      // re-id'd folders/requests and remapped three reference kinds, which
+      // was enough for external specs but leaves everything else colliding
+      // when the imported tree is a full `.restorm` project (whose ids may
+      // even belong to THIS very project, when a file is imported into
+      // itself).
+      //
+      // Order matters: AFTER `processAfterDeserialization`, never before.
+      // Some importers (cURL, PowerShell, REST Client) emit a root folder
+      // WITHOUT an id; `reassignTreeIds` deliberately skips id-less nodes,
+      // and the deserialisation pass then derives a DETERMINISTIC id for
+      // them — so re-identifying first would land two successive pastes as
+      // two root folders SHARING one id. Running after the pass, every
+      // document node carries an id and gets a fresh one. (KeyValue rows
+      // stay outside the reassignment either way — `reidentifyTree`'s
+      // container list deliberately doesn't descend into `headers`/`params`/
+      // `variables`; their duplicate ids self-heal on the next load via the
+      // path-derived dedup.)
+      const idMap = reidentifyForest(itemsWithNewIds)
 
       logger.debug('[useImport] Items with new IDs', { count: itemsWithNewIds.length })
 

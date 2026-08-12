@@ -1,56 +1,45 @@
 fileFormatVersion: 1
 collections:
-  - folderType: environment
+  - id: 7cebefcd-058c-41ad-946e-8e3b2cf6ba39
     name: WebSocket Playground
-    documentation: |-
-      # WebSocket Playground
-
-      A self-contained raw-WebSocket playground: restorm hosts the server AND
-      connects to it as a client — no external mock needed.
-
-      - **WS Echo Server** hosts a raw WebSocket server on `localhost:3002`. It
-        records every frame a client sends, and its Send button broadcasts the
-        configured payload to every connected client.
-      - **WS Echo** is a client that connects to `ws://localhost:3002`, sends a
-        frame, and shows whatever the server broadcasts. Raw WS has no named
-        events or acknowledgements — every received frame is a plain message.
-    tags: []
+    folderType: environment
     configuration: {}
     environments:
-      - name: Default
+      - id: fed4ba93-ea01-4844-bb88-cc03264379f0
+        name: Default
         variables: []
-        id: fed4ba93-ea01-4844-bb88-cc03264379f0
     items:
-      - type: websocket
+      - id: a8d16c1c-879f-4acd-834c-c5d2092e9601
         name: WS Echo Server
+        type: websocket
+        url: localhost:3002
         documentation: |-
           Hosts a raw WebSocket server on `localhost:3002`. Start listening, then
           connect the **WS Echo** client. Records every received frame; its Send
           button broadcasts to all connected clients.
-        tags:
-          - websocket
-          - server
-        url: localhost:3002
-        protocol: websocket
-        server: true
+        headers: []
         message: |-
           {
             "hello": "from server"
           }
-        headers: []
-        id: a8d16c1c-879f-4acd-834c-c5d2092e9601
-      - type: websocket
-        name: WS Echo
-        documentation: Connect to the local WS Echo Server, send a frame, see the broadcast.
+        protocol: websocket
+        server: true
         tags:
           - websocket
+          - server
+      - id: a8d16c1c-879f-4acd-834c-c5d2092e967e
+        name: WS Echo
+        type: websocket
         url: ws://localhost:3002
-        protocol: websocket
+        documentation: Connect to the local WS Echo Server, send a frame, see the broadcast.
+        headers: []
         message: |-
           {
             "hello": "world"
           }
-        headers: []
-        id: a8d16c1c-879f-4acd-834c-c5d2092e967e
-    id: 7cebefcd-058c-41ad-946e-8e3b2cf6ba39
+        protocol: websocket
+        tags:
+          - websocket
+    tagColors: {}
+    tags: []
 _projectUuid: 87743c3c-74c8-408c-b00d-a22338ddc23e

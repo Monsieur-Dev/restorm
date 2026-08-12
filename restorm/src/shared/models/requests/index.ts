@@ -2,7 +2,6 @@
  * Request models index
  */
 
-export { BaseRequest } from './BaseRequest'
 export { HTTPRequest, type HTTPRequestBody } from './HTTPRequest'
 export { GraphQLRequest } from './GraphQLRequest'
 export { GrpcRequest } from './GrpcRequest'
@@ -10,9 +9,9 @@ export { SoapRequest } from './SoapRequest'
 export { WebSocketRequest } from './WebSocketRequest'
 export { SseRequest } from './SseRequest'
 export { StompRequest } from './StompRequest'
-export { ODataRequest, type ODataQueryOptions, type ODataOperationKind } from './ODataRequest'
+export { ODataRequest } from './ODataRequest'
 export { AuthenticationRequest } from './AuthenticationRequest'
-export { JsonRpcRequest, JsonRpcBatchRequest, type JsonRpcBatchCallSpec } from './JsonRpcRequest'
+export { JsonRpcRequest } from './JsonRpcRequest'
 export { TrpcRequest } from './TrpcRequest'
 export { AmqpRequest } from './AmqpRequest'
 export { RedisRequest } from './RedisRequest'

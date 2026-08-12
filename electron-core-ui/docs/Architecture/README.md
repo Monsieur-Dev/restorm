@@ -10,7 +10,7 @@ graph TB
         direction TB
         Services["Services<br/>ThemeService, FileService,<br/>StorageService, LoggerService,<br/>FeatureFlippingService, I18nService,<br/>SearchService, GraphQLService,<br/>PersistenceService, EventBusService"]
         Managers["Managers<br/>BaseWindow, IPCManager,<br/>App Lifecycle"]
-        Decorators["Decorators<br/>@trackable, @searchable,<br/>@separateFiles, @fileNaming,<br/>@graphqlType, @graphqlField"]
+        Decorators["Decorators<br/>@trackable, @searchable,<br/>@saveUnits, @fileNaming,<br/>@graphqlType, @graphqlField"]
     end
 
     subgraph "Preload (contextBridge)"
@@ -85,7 +85,7 @@ Renderer A                  Main                        Renderer B
 
 | Topic | Description |
 |-------|-------------|
-| [Decorators](./Decorators.md) | `@trackable`, `@searchable`, `@NonSerialised`, `@separateFiles`, `@separateFolders`, `@fileNaming`, `@graphqlType`, `@graphqlField` |
+| [Decorators](./Decorators.md) | `@trackable`, `@searchable`, `@NonSerialised`, `@saveUnits`, `@fileNaming`, `@graphqlType`, `@graphqlField` |
 | [GraphQL](./GraphQL.md) | Auto-generated schema from decorators, subscriptions via SSE |
 | [Persistence](./Persistence.md) | Single-file and folder-based serialization with decorator-driven structure |
 | [Events](./Events.md) | EventBus (main/renderer), Document Events, GraphQL PubSub |

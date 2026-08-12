@@ -89,5 +89,3 @@ export const MosaicLayout: React.FC<MosaicLayoutProps> = ({
     </div>
   )
 }
-
-export default MosaicLayout

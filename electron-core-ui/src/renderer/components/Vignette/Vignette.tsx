@@ -68,5 +68,3 @@ const DECORATION_BUILDERS: Record<BorderEffectId, () => React.ReactElement> = {
 function buildDecorationElement(id: BorderEffectId): React.ReactElement {
   return DECORATION_BUILDERS[id]()
 }
-
-export default Vignette

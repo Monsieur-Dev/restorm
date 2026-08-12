@@ -29,6 +29,7 @@ export interface TooltipProps {
   side?: 'auto' | 'right' | 'left'
   fixedTop?: number
   repositionKey?: string | number | null
+  fillToViewportRight?: number
 }
 ```
 
@@ -46,6 +47,7 @@ export interface TooltipProps {
 - **side** (`'auto' | 'left' | 'right'`, optional): Positions the tooltip left/right of the target.
 - **fixedTop** (`number`, optional): Fixed top position (px). When set, overrides vertical placement calculation.
 - **repositionKey** (`string | number | null`, optional): Forces repositioning when it changes.
+- **fillToViewportRight** (`number`, optional): Only with `side="right"`. Stretches the tooltip so its right edge stops this many pixels short of the viewport's right edge, instead of using its CSS width — useful for a side panel that should fill the remaining horizontal space. The viewport-overflow clamp is skipped in this mode.
 
 ## Usage
 

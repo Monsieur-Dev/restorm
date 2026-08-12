@@ -94,12 +94,10 @@ export class GrpcRequest extends BaseRequest {
   @graphqlField({ type: 'KeyValue', isArray: true })
   metadata: KeyValue[] = []
 
-  /** Wire transport (client mode only). Absent means the existing native
-   * HTTP/2 client, so a request saved before this field existed keeps its
-   * current behaviour untouched. */
-  @graphqlField({ type: 'String', nullable: true })
-  @TreatEmptyAsUndefined()
-  transport?: GrpcTransport
+  /** Wire transport (client mode only). Always set: `'grpc'` is the native
+   * HTTP/2 client and the default a new request is created with. */
+  @graphqlField({ type: 'String' })
+  transport: GrpcTransport = 'grpc'
 
   /** When true, restorm ACTS AS a local gRPC mock server (hosts an
    * `@grpc/grpc-js` server on `localhost:<port>` and answers `mockMethods`). */
@@ -208,7 +206,7 @@ export class GrpcRequest extends BaseRequest {
       callType: obj.callType ?? 'unary',
       requestMessage: obj.requestMessage ?? '',
       metadata: (obj.metadata ?? []) as KeyValue[],
-      ...(obj.transport !== undefined && { transport: obj.transport }),
+      transport: obj.transport ?? 'grpc',
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.mockMethods !== undefined && { mockMethods: obj.mockMethods.map(m => mockMethodFromPlain(m)) }),
       ...(obj.protoContent !== undefined && { protoContent: obj.protoContent }),
@@ -242,7 +240,7 @@ export class GrpcRequest extends BaseRequest {
       callType: this.callType,
       requestMessage: this.requestMessage,
       metadata: this.metadata.map(m => m.toPlainObject()),
-      ...(this.transport !== undefined && { transport: this.transport }),
+      transport: this.transport,
       ...(this.server !== undefined && { server: this.server }),
       ...(this.mockMethods !== undefined && { mockMethods: this.mockMethods.map(m => mockMethodToPlain(m)) }),
       ...(this.protoContent !== undefined && { protoContent: this.protoContent }),

@@ -243,12 +243,6 @@ export interface McpLogsTab extends BaseRestormTab {
   tabType: 'mcp-logs'
 }
 
-/** Legacy tab type for backward compatibility */
-export interface LegacyTab extends BaseRestormTab {
-  tabType?: undefined
-  content?: string
-}
-
 /** Union of all restorm tab types */
 export type RestormEditorTab =
   | FolderTab
@@ -274,7 +268,6 @@ export type RestormEditorTab =
   | MiniBrowserTab
   | SettingsTab
   | McpLogsTab
-  | LegacyTab
 
 /** Stable singleton id for the Console workbench tab.
  * `View → Console` and the focus-or-create logic both key off this. */
@@ -436,7 +429,7 @@ const REQUEST_TAB_TYPES: ReadonlySet<string> = new Set([
  * request-tab discriminants and narrows to the union that carries
  * `request`. */
 export function isAnyRequestTab(tab: RestormEditorTab): tab is AnyRequestTab {
-  return tab.tabType !== undefined && REQUEST_TAB_TYPES.has(tab.tabType)
+  return REQUEST_TAB_TYPES.has(tab.tabType)
 }
 
 /** Type guard for ConsoleTab */

@@ -1,5 +1,0 @@
-name: IndexService
-documentation: Index service - list available services
-tags:
-  - service
-configuration: {}

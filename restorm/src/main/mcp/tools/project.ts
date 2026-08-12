@@ -16,6 +16,7 @@ import { McpService, getFileService, isFileServiceInitialized } from 'electron-c
 import { BrowserWindow } from 'electron'
 import { collectionStore } from '../../services/CollectionStore'
 import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
+import { CURRENT_FILE_FORMAT_VERSION, FILE_FORMAT_VERSION_KEY } from '../../../shared/config/fileFormatVersion'
 
 /**
  * Bounded wait for main's `CollectionStore` to actually reflect the
@@ -145,13 +146,18 @@ export function registerProjectTools(mcp: McpService): void {
         return errorReply(`Parent directory does not exist: ${parentDir}`)
       }
       try {
-        // Empty document body. FileService.open will stamp `_projectUuid`
-        // for us via `ensureFileUuid` so the renderer's preferences key
-        // off it from the very first `file:opened` broadcast.
+        // A new document, declaring the format it is written in. The version
+        // is not decoration: the compatibility gate reads it on open, and a
+        // document that declares nothing is refused — so a project created
+        // here has to state it or it could not be reopened.
+        //
+        // `FileService.open` stamps `_projectUuid` via `ensureFileUuid` so the
+        // renderer's preferences key off it from the first `file:opened`.
         // `wx` creates the file atomically and FAILS if it already exists —
-        // this both refuses to clobber an existing project (data loss) and
-        // closes the exists-check/write TOCTOU window.
-        await fs.writeFile(filePath, '{}', { encoding: 'utf8', flag: 'wx' })
+        // refusing to clobber an existing project and closing the
+        // exists-check/write TOCTOU window in one move.
+        const body = JSON.stringify({ [FILE_FORMAT_VERSION_KEY]: CURRENT_FILE_FORMAT_VERSION, collections: [] })
+        await fs.writeFile(filePath, body, { encoding: 'utf8', flag: 'wx' })
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
         return jsonReply({ filePath, opened: true })
@@ -170,14 +176,14 @@ export function registerProjectTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.openProject',
       title: 'Open an existing project',
       description:
-        'Open an existing .restorm file (single-file or folder-structure). Triggers the same ' +
+        'Open an existing .restorm project file. Triggers the same ' +
         '`file:opened` flow as the File menu, so the renderer reloads the sidebar / workbench / ' +
         'recent-files. Errors out cleanly when the path doesn\'t exist or isn\'t a valid project. ' +
         'Waits briefly for the renderer to confirm the project is loaded before replying, so an ' +
         'immediate follow-up write tool call reliably finds the newly-opened entities; a `warning` ' +
         'field means that confirmation didn\'t arrive in time and a follow-up call may need a retry.',
       inputSchema: {
-        filePath: z.string().min(1).describe('Absolute path to the .restorm file or folder to open.')
+        filePath: z.string().min(1).describe('Absolute path to the .restorm file to open.')
       } as Record<string, unknown>
     },
     async (args) => {
@@ -188,7 +194,7 @@ export function registerProjectTools(mcp: McpService): void {
       try {
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
-        const payload: Record<string, unknown> = { filePath, opened: true, isDirectory: result.isDirectory === true }
+        const payload: Record<string, unknown> = { filePath, opened: true }
         const expectedIds = expectedTopLevelEnvironmentFolderIds(result.content)
         const ready = await waitForCollectionStoreReady(expectedIds, OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS)
         if (!ready) {

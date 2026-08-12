@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Geen authenticatie",
       "popoverLabel": "Authenticatieroute",
+      "openRoute": "Authenticatieroute openen",
       "unnamed": "Naamloos"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "Nieuw",
     "import": "Importeren",
     "open": "Openen",
-    "openFolder": "Map openen",
     "recentFiles": "Recente bestanden",
     "favorites": "Favorieten",
     "close": "Sluiten",
@@ -228,36 +228,24 @@
     "saveAll": "Alles opslaan",
     "saveAs": "Opslaan als",
     "exit": "Afsluiten",
-    "selection": "Selectie",
-    "tools": "Hulpprogramma's",
-    "findInCollection": "Zoeken in collectie",
-    "addRequest": "Verzoek toevoegen",
-    "addRequestHttp": "HTTP-verzoek",
-    "addRequestGraphql": "GraphQL-verzoek",
-    "addRequestGrpc": "gRPC-verzoek",
-    "addRequestSoap": "SOAP-verzoek",
-    "addRequestOdata": "OData-verzoek",
-    "addRequestWebsocket": "WebSocket-verzoek",
-    "addFolder": "Map toevoegen",
-    "addEnvironmentFolder": "Omgevingsmap toevoegen",
-    "addVariable": "Variabele toevoegen",
-    "addTag": "Tag toevoegen",
-    "expandAllFolders": "Alle mappen uitvouwen",
-    "collapseAllFolders": "Alle mappen samenvouwen",
-    "sendActiveRequest": "Verzoek verzenden",
-    "cancelActiveRequest": "Verzoek annuleren",
-    "generateCodeSnippet": "Codefragment genereren",
-    "copyAsCurl": "Kopiëren als cURL",
-    "exportOpenApi": "Exporteren naar OpenAPI",
-    "clearAuthCache": "Authenticatiecache wissen",
-    "openLogsFolder": "Logbestandenmap openen",
     "mcpLogs": "MCP-logboeken",
+    "consoleHttp": "HTTP-console",
     "git": "Git",
     "gitPush": "Pushen",
     "gitPull": "Pullen",
     "gitRefresh": "Vernieuwen",
     "gitHistory": "Geschiedenis",
-    "gitResetToServer": "Terugzetten naar serverversie"
+    "gitResetToServer": "Terugzetten naar serverversie",
+    "scenario": "Scenario",
+    "create": "Aanmaken",
+    "request": "Verzoek",
+    "server": "Server",
+    "runSelected": "Uitvoeren",
+    "cancelSelected": "Annuleren",
+    "clone": "Klonen",
+    "delete": "Verwijderen",
+    "addToFavorites": "Toevoegen aan favorieten",
+    "removeFromFavorites": "Verwijderen uit favorieten"
   },
   "sidebar": {
     "addRequest": "Verzoek toevoegen",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Knippen",
+      "copy": "Kopiëren",
+      "paste": "Plakken"
     },
     "deleteConfirm": {
       "title": "Verwijderen bevestigen",
@@ -363,7 +354,7 @@
       "docs": "Docs",
       "environments": "Omgevingen",
       "notes": "Notities",
-      "customValues": "Custom variables"
+      "customValues": "Aangepaste enumeraties"
     },
     "home": {
       "configureEnvs": "Omgevingen configureren",
@@ -401,7 +392,7 @@
       "addEntry": "Een waarde toevoegen",
       "label": "Label",
       "value": "Value",
-      "selectList": "Selecteer een lijst"
+      "selectList": "Definieer herbruikbare waardelijsten voor uw variabelen: u kiest een leesbaar label, het request verstuurt de bijbehorende waarde. Selecteer of maak een enumeratie om te beginnen."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Omleidingen volgen",
-    "timeoutLabel": "Time-out (ms)"
+    "timeoutLabel": "Time-out (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Opgeloste URL kopiëren",
+      "copied": "Gekopieerd!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Verbinding verbreken",
     "startListening": "Begin met luisteren",
     "stopListening": "Stop met luisteren",
+    "listenFailed": "Server kon niet worden gestart",
     "routePlaceholder": "Route (optioneel)",
     "clientsConnected": "{{count}} client(s) verbonden",
     "notListening": "Luistert niet"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Een collectie van schijf openen",
     "landmarkLabel": "Welkom"
   },
-  "save": {
-    "title": "Opslagopties",
-    "mode": {
-      "label": "Opslagmodus",
-      "file": "Enkel bestand",
-      "folder": "Mapstructuur",
-      "fileDescription": "Alles opslaan in één bestand",
-      "folderDescription": "Opslaan als mapstructuur met afzonderlijke bestanden"
-    },
-    "format": {
-      "label": "Indeling",
-      "yamlDescription": "Leesbaar voor mensen",
-      "jsonDescription": "Standaardindeling",
-      "json5Description": "JSON + commentaar"
-    },
-    "preview": {
-      "label": "Voorbeeld van structuur",
-      "noDocumentation": "Geen geparseerde documentatie voor deze bron."
-    }
-  },
   "common": {
     "cancel": "Annuleren",
     "save": "Opslaan",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "De specificatie kon niet opnieuw vanaf de bron worden geïmporteerd.",
       "emptySpec": "De specificatie die is opgehaald van {{url}} declareert geen enkele {{format}}-bewerking. Toepassen zou deze map leegmaken, dus de update is geweigerd.",
       "formatNotDetected": "Het formaat van deze bron is niet herkend.",
-      "unsupportedFormat": "Geen enkele importer ondersteunt het formaat {{format}}."
+      "unsupportedFormat": "Geen enkele importer ondersteunt het formaat {{format}}.",
+      "projectFormatTooNew": "Dit projectbestand gebruikt formaatversie {{found}}, maar deze versie van Restorm begrijpt alleen versie {{current}}. Werk Restorm bij om het te importeren.",
+      "projectFormatMissing": "Dit bestand declareert geen Restorm-formaatversie en is dus geen Restorm-projectbestand."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Plak een API Blueprint-document (.apib) — Restorm parseert elke resourcegroep en overgang tot een map met verzoeken, één per gedocumenteerd methode-/antwoordpaar.",
         "trademark": "API Blueprint is een specificatie die oorspronkelijk door Apiary is gemaakt."
+      },
+      "restorm": {
+        "description": "Voeg een ander Restorm-project samen met het geopende project — elke geïmporteerde map, request, omgeving en scenario komt in een omhullende map terecht, met nieuwe identiteiten zodat niets botst, zelfs niet bij het importeren van een project in zichzelf."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Vorige overeenkomst",
       "nextMatch": "Volgende overeenkomst",
       "close": "Sluiten"
+    },
+    "sections": {
+      "parameters": "Parameters",
+      "responses": "Antwoorden",
+      "models": "Modellen",
+      "enums": "Enums",
+      "polymorphism": "Polymorfisme",
+      "overview": "Overzicht",
+      "operations": "Operaties"
+    },
+    "table": {
+      "in": "In",
+      "name": "Naam",
+      "type": "Type",
+      "required": "Ver.",
+      "operation": "Operatie",
+      "description": "Beschrijving",
+      "example": "Voorbeeld",
+      "constraints": "Beperkingen"
+    },
+    "params": {
+      "empty": "Geen niet-body-parameters gedeclareerd voor de gefilterde routes."
+    },
+    "responses": {
+      "status": "Status",
+      "schema": "Schema",
+      "headers": "Headers",
+      "empty": "Geen antwoorden gedeclareerd voor de gefilterde routes."
+    },
+    "route": {
+      "requestBody": "Verzoek-body",
+      "responseBody": "Antwoord-body",
+      "security": "Beveiliging",
+      "externalDocs": "Externe docs",
+      "examplePayload": "Voorbeeld-payload",
+      "operationId": "operationId",
+      "addRequest": "+ Verzoek toevoegen"
+    },
+    "apiInfo": {
+      "version": "Versie",
+      "sourceFormat": "Bronformaat",
+      "from": "van",
+      "server": "Server",
+      "contact": "Contact",
+      "license": "Licentie",
+      "termsOfService": "Servicevoorwaarden",
+      "externalDocs": "Externe docs",
+      "tagReferences": "Tagverwijzingen"
+    },
+    "sidebar": {
+      "outline": "Documentatieoverzicht"
+    },
+    "legend": {
+      "requiredProperty": "vereiste eigenschap",
+      "optionalProperty": "optionele eigenschap",
+      "nullableValue": "nullable waarde",
+      "readOnly": "alleen-lezen (door server ingesteld)",
+      "deprecatedBadge": "verouderd",
+      "deprecatedDesc": "als verouderd gedeclareerd in de bronspecificatie",
+      "removedBadge": "verwijderd",
+      "removedDesc": "afwezig bij de laatste herimport",
+      "requiredSingleRef": "vereiste enkele ref.",
+      "optionalSingleRef": "optionele enkele ref.",
+      "requiredArrayRef": "vereiste array-ref.",
+      "optionalArrayRef": "optionele array-ref."
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Dataformaten",
       "encoding": "Codering",
       "time": "Timing",
-      "algorithmie": "Algoritmen",
-      "ux": "UX"
+      "algorithmie": "Algoritmen"
     },
     "listOp": {
       "value": "lijst",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL-voorbeeld (vóór resolutie)",
-    "versionV2NotYet": "v2 (uitvoering nog niet ondersteund)",
-    "versionV3NotYet": "v3 (uitvoering nog niet ondersteund)",
     "operationKindEntitySet": "Entiteitenset (GET)",
     "operationKindFunction": "Functie (GET met ingebedde parameters)",
     "operationKindAction": "Actie (POST met JSON-body)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Stop met luisteren",
       "notListening": "Luistert niet",
       "served": "Luistert — {{count}} verzoek(en) bediend",
-      "listenFailed": "Kan de mockserver niet starten"
+      "listenFailed": "Kan de mockserver niet starten",
+      "portInUse": "Poort {{port}} is al in gebruik door een andere applicatie. Sluit deze of kies een andere poort en start de server opnieuw."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Naam van de configuratie",
     "saveButton": "Opslaan",
+    "updateButton": "Bijwerken met huidige waarden",
     "storageTarget": {
       "label": "Opslaan in projectbestand (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Configuratie laden",
       "message": "Wil je de configuratie \"{{name}}\" laden? Je huidige niet-opgeslagen configuratie gaat verloren."
+    },
+    "updateConfirm": {
+      "title": "Configuratie bijwerken",
+      "message": "Wilt u de configuratie \"{{name}}\" vervangen door de huidige waarden?"
     },
     "deleteConfirm": {
       "title": "Configuratie verwijderen",
@@ -2632,6 +2680,10 @@
       "title": "Project gemaakt met een nieuwere versie",
       "message": "Dit bestand is gemaakt met een nieuwere versie van Restorm dan de versie die u gebruikt. Werk Restorm bij om het te openen.",
       "versions": "Bestandsformaat {{found}}; deze versie ondersteunt tot {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Dit is geen Restorm-bestand",
+      "message": "Dit bestand vermeldt geen Restorm-bestandsindeling. Het is niet door Restorm geschreven of het is handmatig bewerkt, waardoor het niet kan worden geopend."
     }
   }
 }

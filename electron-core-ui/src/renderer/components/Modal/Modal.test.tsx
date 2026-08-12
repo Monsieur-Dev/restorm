@@ -19,7 +19,7 @@
 import { useState } from 'react'
 import { describe, it, expect, afterEach, beforeAll, vi } from 'vitest'
 import { render, cleanup, fireEvent, waitFor } from '@testing-library/react'
-import Modal from './Modal'
+import { Modal } from './Modal'
 
 // jsdom has no layout engine, so `offsetParent` (the Tab trap's "is this
 // element actually visible" check) always reads null regardless of the
@@ -151,5 +151,81 @@ describe('closing without a transition', () => {
 
     await waitFor(() => { expect(onClosed).toHaveBeenCalled() }, { timeout: 2000 })
     expect(queryByTestId('m')).toBeNull()
+  })
+})
+
+describe('Modal — Enter default action (enterActionTestId)', () => {
+  function EnterHarness({ withTextarea = false, disabledOk = false }: { withTextarea?: boolean; disabledOk?: boolean }): React.JSX.Element {
+    const [isOpen, setIsOpen] = useState(true)
+    return (
+      <Modal isOpen={isOpen} onClose={() => { setIsOpen(false) }} title="Confirm" enterActionTestId="ok">
+        {withTextarea && <textarea data-testid="notes" />}
+        <button data-testid="cancel" onClick={() => { setIsOpen(false) }}>Cancel</button>
+        <button data-testid="ok" disabled={disabledOk} onClick={() => { document.body.dataset['okFired'] = 'true' }}>OK</button>
+      </Modal>
+    )
+  }
+
+  afterEach(() => { delete document.body.dataset['okFired'] })
+
+  it('a plain Enter anywhere in the dialog clicks the designated button — even with Cancel focused', async () => {
+    const { getByTestId } = render(<EnterHarness />)
+    await waitFor(() => getByTestId('modal'))
+    getByTestId('cancel').focus()
+    fireEvent.keyDown(getByTestId('cancel'), { key: 'Enter' })
+    expect(document.body.dataset['okFired']).toBe('true')
+  })
+
+  it('Enter inside a textarea keeps its native behaviour (no default action)', async () => {
+    const { getByTestId } = render(<EnterHarness withTextarea />)
+    await waitFor(() => getByTestId('modal'))
+    getByTestId('notes').focus()
+    fireEvent.keyDown(getByTestId('notes'), { key: 'Enter' })
+    expect(document.body.dataset['okFired']).toBeUndefined()
+  })
+
+  it('modified Enter is never intercepted', async () => {
+    const { getByTestId } = render(<EnterHarness />)
+    await waitFor(() => getByTestId('modal'))
+    getByTestId('cancel').focus()
+    fireEvent.keyDown(getByTestId('cancel'), { key: 'Enter', shiftKey: true })
+    fireEvent.keyDown(getByTestId('cancel'), { key: 'Enter', ctrlKey: true })
+    expect(document.body.dataset['okFired']).toBeUndefined()
+  })
+
+  it('a disabled designated button is not clicked', async () => {
+    const { getByTestId } = render(<EnterHarness disabledOk />)
+    await waitFor(() => getByTestId('modal'))
+    getByTestId('cancel').focus()
+    fireEvent.keyDown(getByTestId('cancel'), { key: 'Enter' })
+    expect(document.body.dataset['okFired']).toBeUndefined()
+  })
+})
+
+describe('Modal — initialFocusTestId', () => {
+  function FocusHarness({ withTarget = true }: { withTarget?: boolean }): React.JSX.Element {
+    const [isOpen, setIsOpen] = useState(true)
+    return (
+      <Modal isOpen={isOpen} onClose={() => { setIsOpen(false) }} title="Import" initialFocusTestId="url-field">
+        <button data-testid="first-button">Cancel</button>
+        {withTarget && <input data-testid="url-field" />}
+      </Modal>
+    )
+  }
+
+  it('focuses the designated element on open instead of the first focusable', async () => {
+    const { getByTestId } = render(<FocusHarness />)
+    await waitFor(() => getByTestId('modal'))
+    await waitFor(() => {
+      expect(document.activeElement).toBe(getByTestId('url-field'))
+    })
+  })
+
+  it('falls back to the first focusable when nothing matches', async () => {
+    const { getByTestId } = render(<FocusHarness withTarget={false} />)
+    await waitFor(() => getByTestId('modal'))
+    await waitFor(() => {
+      expect(document.activeElement).toBe(getByTestId('modal-close'))
+    })
   })
 })

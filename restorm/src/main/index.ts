@@ -27,8 +27,9 @@ import './cli/earlyQuiet'
 // the generic engine BEFORE the interceptor arms: the internal-bridge
 // endpoint to skip from the audit feed (the in-process GraphQL
 // bridge), the worker-bootstrap temp-file prefix, the e2e bypass
-// (set by the Playwright fixture via `RESTORM_USER_DATA_OVERRIDE` so
-// tests against ephemeral mock servers don't deadlock on a toast), and
+// (armed only by its own dedicated env var — see
+// `config/firewallE2EBypass.ts` for why it is not inferred from the
+// userData redirect), and
 // the internal-request predicate that exempts cross-instance MCP-bridge
 // traffic (a `tools/call` forwarded to a peer MCP-enabled instance over
 // loopback, tagged with `MCP_FORWARDED_HEADER`) — never user-facing
@@ -37,13 +38,11 @@ import './cli/earlyQuiet'
 import { app as firewallApp } from 'electron'
 import { installMainProcessInterceptor, installHardenInterceptor, configureFirewall, MCP_FORWARDED_HEADER } from 'electron-core-ui'
 import { graphQLService as firewallGraphQLService } from 'electron-core-ui/main'
+import { isFirewallE2EBypassArmed } from './config/firewallE2EBypass'
 configureFirewall({
   internalEndpointProvider: () => firewallGraphQLService.getEndpoint(),
   workerBootstrapPrefix: 'restorm-firewall-bootstrap',
-  e2eBypass: ((): boolean => {
-    const v = process.env['RESTORM_USER_DATA_OVERRIDE']
-    return typeof v === 'string' && v.length > 0
-  })(),
+  e2eBypass: isFirewallE2EBypassArmed(),
   // Dev-only: run the harden lockdown's interceptor-first ordering
   // assertion (logs a warning if a slot it's about to freeze is no longer
   // the firewall's own wrapper). Off in packaged builds.
@@ -68,7 +67,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController, initAppIconMenuService, getAppIconMenuService, registerAppIconMenuHandlers, APP_ICON_MENU_INVOKE_CHANNEL, type AppIconAction } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -82,13 +81,14 @@ import { pricingUrl } from '../shared/config/site'
 import restormEnTranslation from '../renderer/locales/en/translation.json'
 import restormFrTranslation from '../renderer/locales/fr/translation.json'
 import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
-import { checkFileFormatCompatibility, FILE_FORMAT_TOO_NEW_CODE } from '../shared/config/fileFormatVersion'
+import { checkFileFormatCompatibility } from '../shared/config/fileFormatVersion'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
+import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
 import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
@@ -119,7 +119,7 @@ import { stompExecutionService } from './services/StompExecutionService'
 import { kafkaExecutionService } from './services/KafkaExecutionService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
-import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
+import { loadProjectIntoStore, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
 import { runScenarioHeadless } from './cli/headlessRunner'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
@@ -127,13 +127,26 @@ import { registerDeepLinkSchemes, handleDeepLinkUrl, isDeepLinkUrl } from './dee
 import { findProjectFileInArgv } from './fileAssociation'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
+// Show "Restorm" as the application name — the macOS menu-bar title and native
+// panels, the Windows product name, and the Linux taskbar identity (without a
+// name set, Electron 38+ falls back to the default "Electron" identity). The
+// on-disk profile deliberately stays under the lowercase "restorm" directory,
+// so capitalising the display name never abandons an existing profile.
+app.name = 'Restorm'
+app.setPath('userData', join(app.getPath('appData'), 'restorm'))
+
 // Test-isolation hook. When `RESTORM_USER_DATA_OVERRIDE` is set,
 // redirect Electron's `userData` to a per-run repo-local dir so
 // parallel agents / tests don't share drafts, config.json, recent
 // files, etc. Must run before any code path that touches userData
 // (parseCliArgs's storage-aware `clearUserSettings`, FileService
-// construction, draft boot — all run later down this file). Unset →
-// production / dev behaviour is unchanged.
+// construction, draft boot — all run later down this file), and AFTER
+// the default lowercase-profile `setPath` above — the override loses if
+// anything re-points userData later, and with it every e2e instance
+// lands on the developer's real profile: the CLI suite then can't take
+// the single-instance lock, and window-state / recent-files / drafts
+// bleed between concurrently running tests. Unset → production / dev
+// behaviour is unchanged.
 applyUserDataOverride(app)
 
 // Allow WebGL via SwiftShader when the host GPU is blocked / unavailable.
@@ -160,10 +173,6 @@ if (process.platform === 'linux') {
   app.commandLine.appendSwitch('ozone-platform-hint', 'auto')
 }
 
-// Set the app name for proper taskbar icon on Linux
-// Without this, Electron 38+ may use the default "Electron" identity
-app.name = 'restorm'
-
 // ── Deep-link scheme registration (packaged OAuth callback) ─────────────────
 //
 // Register restorm:// (and restorm-preview:// for preview builds) as the OS
@@ -188,12 +197,36 @@ const deepLinkArgvUrl = process.argv.find((a) => isDeepLinkUrl(a))
 // a protocol handler.
 const projectArgvPath = findProjectFileInArgv(process.argv)
 const gotSingleInstanceLock = app.requestSingleInstanceLock()
-if (!gotSingleInstanceLock && (deepLinkArgvUrl !== undefined || projectArgvPath !== undefined)) {
-  // This process was launched by the OS to handle a deep-link URL or to open
-  // a document. The primary instance received the `second-instance` event and
-  // will handle it — nothing more for this process to do. Spawned instances
-  // WITHOUT such an argument (the MCP `create_instance` tool) deliberately
-  // keep running without the lock.
+// A `--run` invocation is a deliberate headless CLI run, NEVER an OS document
+// handler — and it must be classified first, because its own `--open
+// <file>.restorm` argument looks exactly like the bare `.restorm` positional an
+// OS document-open passes (`findProjectFileInArgv` scans the whole argv). Left
+// to the document-handler branch below, a `--run` that loses the lock would
+// take its `app.exit(0)` and vanish with empty stdout — the silent failure that
+// reads as "the scenario produced nothing" and gets misattributed to whatever
+// code last changed. Instead: fail loudly, non-zero. The lock is keyed on the
+// userData directory, so a lost lock means this run shares its userData with an
+// already-running instance; the fix is to isolate it via
+// `RESTORM_USER_DATA_OVERRIDE` (the e2e harness does this per invocation).
+if (!gotSingleInstanceLock && process.argv.includes('--run')) {
+  process.stderr.write(
+    'Cannot start a headless --run: another Restorm instance already holds the ' +
+    'single-instance lock for this user-data directory.\n' +
+    'Isolate this run by setting RESTORM_USER_DATA_OVERRIDE to a dedicated ' +
+    'directory (the e2e harness does this automatically per invocation).\n'
+  )
+  app.exit(1)
+}
+// `--new` classifies the same way: the application-icon menu's "new" entry
+// relaunches the app on the platforms whose entries can't call back into it
+// (Windows jump lists), so a `--new` that loses the lock is a request aimed at
+// the running instance, not a request for a second one.
+if (!gotSingleInstanceLock && (deepLinkArgvUrl !== undefined || projectArgvPath !== undefined || process.argv.includes('--new'))) {
+  // This process was launched by the OS to handle a deep-link URL, to open a
+  // document, or to start a new file. The primary instance received the
+  // `second-instance` event and will handle it — nothing more for this process
+  // to do. Spawned instances WITHOUT such an argument (the MCP
+  // `create_instance` tool) deliberately keep running without the lock.
   app.exit(0)
 }
 
@@ -277,8 +310,18 @@ app.on('second-instance', (_event, argv) => {
     logger.info('OS requested opening a document in the running instance', { path: documentPath })
     routeDocumentOpen(documentPath)
   }
+  // The application-icon menu's "new" entry relaunches the app with `--new` on
+  // the platforms whose entries can't call back into it (Windows jump lists);
+  // the lock funnels that relaunch here, into the instance the user meant.
+  if (argv.includes('--new')) {
+    logger.info('OS requested a new file in the running instance')
+    dispatchAppIconAction({ kind: 'new-file' })
+  }
 })
 
+// `--new` needs no cold-start branch: when no instance is running, the `--new`
+// process becomes the primary one and a fresh app already starts on an empty
+// document.
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
   clearUserSettings()
@@ -291,7 +334,7 @@ if (cliArgs.clearSettings) {
 if (cliArgs.cliRun) {
   logger.setLevel('error')
   if (cliArgs.open === undefined) {
-    process.stderr.write('--run requires --open <project> (the .restorm file/folder containing the scenario)\n')
+    process.stderr.write('--run requires --open <project> (the .restorm file containing the scenario)\n')
     app.exit(2)
   }
 }
@@ -306,6 +349,30 @@ if (fileToOpenOnStart) {
 // Keep track of main window and editor windows
 let mainWindow: BrowserWindow | null = null
 const editorWindows = new Set<BrowserWindow>()
+
+/**
+ * Carry out an app-icon menu action. When a window is open, forward it to the
+ * renderer so it runs the same "new" / "open recent" command the in-app menus
+ * use — including the unsaved-work confirmation before the current project is
+ * replaced — and bring that window forward. With no window there is no
+ * renderer to guard, and no in-renderer dirty state to protect, so the
+ * service's direct path (act straight on the file service) takes over.
+ *
+ * Two callers: the menu service itself (the macOS Dock click, injected below)
+ * and the `second-instance` handler, which is where a Windows jump-list entry
+ * lands — those entries relaunch the app with arguments rather than calling
+ * back into it.
+ */
+function dispatchAppIconAction(action: AppIconAction): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.show()
+    mainWindow.focus()
+    mainWindow.webContents.send(APP_ICON_MENU_INVOKE_CHANNEL, action)
+    return
+  }
+  getAppIconMenuService().dispatchDirect(action)
+}
 
 function createWindow(): MainWindow | undefined {
   logger.info('Creating main window...')
@@ -363,31 +430,12 @@ function createWindow(): MainWindow | undefined {
         mainWindow = null
       })
 
-      // Open a file or folder on startup. Handles both files and folders; the
-      // caller decides WHICH path (command line, or the reopen-last-file path).
+      // Open a project file on startup; the caller decides WHICH path
+      // (command line, or the reopen-last-file path).
       const openPathOnStart = (targetPath: string): void => {
-        const isDirectory = existsSync(targetPath) && statSync(targetPath).isDirectory()
-
-        if (isDirectory) {
-          logger.info('Opening folder...', { path: targetPath })
-          if (!isPersistenceServiceInitialized()) {
-            logger.warn('PersistenceService not initialized, cannot load folder')
-            return
-          }
-          void loadFolderStructure(targetPath).then(async (result) => {
-            if (result && mainWindow && isFileServiceInitialized()) {
-              logger.info('Folder loaded, sending to renderer', {
-                collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
-                format: result.format
-              })
-              // Set the file state in FileService so the UI knows a file is open
-              const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
-              fileService.setOpenedFolder(targetPath, result.data, result.format)
-              await attachDraftStoreForFolder(targetPath, result.format)
-            } else {
-              logger.error('Failed to load folder on startup', { result })
-            }
-          })
+        if (existsSync(targetPath) && statSync(targetPath).isDirectory()) {
+          // A project is a single `.restorm` file; a directory is never one.
+          logger.error('Cannot open a directory as a project', { path: targetPath })
         } else if (isFileServiceInitialized()) {
           // FileService stamps `_projectUuid` before broadcasting `file:opened`
           // (configured via `uuidKey` on init), so this stays a simple open +
@@ -575,10 +623,10 @@ initFileService({
   // locales, the renderer carries them all).
   validateOnOpen: (content) => {
     const compatibility = checkFileFormatCompatibility(content)
-    if (compatibility.supported) return { ok: true }
+    if (compatibility.supported || compatibility.code === null) return { ok: true }
     return {
       ok: false,
-      code: FILE_FORMAT_TOO_NEW_CODE,
+      code: compatibility.code,
       detail: { found: compatibility.found, current: compatibility.current }
     }
   }
@@ -586,13 +634,10 @@ initFileService({
 logger.info('File Service initialized')
 
 // Attach a crash-recovery draft store whenever a `.restorm` file is
-// opened in file mode. File mode and folder mode must behave identically
-// with respect to dirty-state tracking and draft recovery — the only
-// difference between them is the on-disk layout of the user's saved
-// content.
+// opened.
 //
 // This listener is a SAFETY NET, not the complement of the explicit
-// callers: it fires for EVERY file-mode open, including the ones that
+// callers: it fires for EVERY open, including the ones that
 // already call `attachDraftStoreForFile` themselves (`restorm:open-path`,
 // the command-line / reopen-last-file startup path). `FileService.open()`
 // publishes the new path synchronously, so this runs before the awaiting
@@ -602,9 +647,6 @@ logger.info('File Service initialized')
 // "unsaved work restored" toast fires once. Its value is covering the
 // paths that DON'T attach explicitly — the plain `file:open` IPC — without
 // each new call site having to remember to.
-//
-// Folder-mode opens never reach here (the path is a directory, filtered
-// out below); they attach through `attachDraftStoreForFolder` only.
 {
   let lastFilePath: string | null = null
   getFileService().onStateChanged((state) => {
@@ -613,8 +655,7 @@ logger.info('File Service initialized')
     lastFilePath = path
 
     // Workspace overlay path: a `.restorm` file lives alongside its
-    // workspace dir, a folder mode opens its own dir. Both flows
-    // converge here. SettingsService may not be ready yet on the
+    // workspace dir. SettingsService may not be ready yet on the
     // very first event; gate accordingly.
     if (isSettingsServiceInitialized()) {
       if (!path) {
@@ -636,9 +677,6 @@ logger.info('File Service initialized')
     // teammate's shared project) whose history is deeper than this user's cap.
     applyHistoryRetentionNow()
 
-    // Folder-mode paths point to a directory; file-mode paths end in the
-    // `.restorm` extension. Use the extension as the discriminator so we
-    // don't have to hit the filesystem on every state change.
     if (!path.endsWith('.restorm')) return
     const format = (state.currentFile.format as PersistenceFormat | undefined) ?? 'yaml'
     void attachDraftStoreForFile(path, format).catch((err: unknown) => {
@@ -649,8 +687,8 @@ logger.info('File Service initialized')
 
 // Git wiring: GitService has no notion of "the open project file" — it
 // only tracks a folder. Map the open file's containing folder the same
-// way the workspace-path resolution above does (file mode: dirname of the
-// `.restorm` path; folder mode: the path itself) and hand it to
+// way the workspace-path resolution above does (dirname of the
+// `.restorm` path) and hand it to
 // `setActiveFolder`, which starts (or stops) the repo status + watch.
 {
   let lastGitFolder: string | null = null
@@ -665,7 +703,23 @@ logger.info('File Service initialized')
   })
 }
 
-// Initialize Persistence Service for folder mode support
+// Secrets-sidecar watch: the `<project>.restorm.env` content is held in
+// memory and rewritten from memory on save, so an external edit must be
+// silently re-applied (no prompt — unlike the project file itself). Armed
+// on the open `.restorm` path, torn down when the file closes.
+{
+  let lastSidecarProject: string | null = null
+  getFileService().onStateChanged((state) => {
+    const path = state.currentFile.path
+    const project = path?.endsWith('.restorm') === true ? path : null
+    if (project === lastSidecarProject) return
+    lastSidecarProject = project
+    if (project) armSecretsSidecarWatcher(project)
+    else disarmSecretsSidecarWatcher()
+  })
+}
+
+// Initialize Persistence Service
 initPersistenceService({
   extension: 'restorm',
   format: 'yaml',
@@ -810,9 +864,11 @@ const suppressWindow = cliArgs.cliRun?.headless === true
 // app's FIRST BrowserWindow (`electronApp.firstWindow()`); since the splash is
 // created before the main window, it would otherwise become that first window
 // and every test would drive the frameless logo splash instead of the app.
-// `RESTORM_USER_DATA_OVERRIDE` is the harness's per-launch signal (set by the
-// e2e launch helper, same gate the firewall's E2E bypass reads) — never set in
-// real launches, so the splash stays intact for users.
+// `RESTORM_USER_DATA_OVERRIDE` is the harness's per-launch signal (set by every
+// e2e launch) — never set in real launches, so the splash stays intact for
+// users. It means "this is an automated launch with an isolated profile" and
+// nothing more: the firewall's bypass is armed by its own variable, so a test
+// can keep this isolation while leaving the firewall genuinely armed.
 const isE2E = typeof process.env['RESTORM_USER_DATA_OVERRIDE'] === 'string' && process.env['RESTORM_USER_DATA_OVERRIDE'].length > 0
 const suppressSplash = suppressWindow || isE2E
 // restorm's splash content: the static logo. The window + mechanics
@@ -833,6 +889,29 @@ initializeApp('restorm', {
       background: '#1a1a2e'
     }
   })
+})
+
+// Wire the application-icon menu (new file / recent files / favorites).
+// The entries are read from the main-side FileService, so the menu is
+// correct even with no window open — the normal state on macOS after the
+// last window closes. Its three static labels are pushed in by the
+// renderer, the only process holding all shipped locales, over the IPC
+// channel registered here. macOS renders it on the Dock and Windows on the
+// taskbar jump list; the Linux adapter lands later, and the default adapter
+// is a no-op there.
+void app.whenReady().then(() => {
+  initAppIconMenuService({
+    fileService: getFileService(),
+    dispatch: dispatchAppIconAction,
+    // Linux launcher integration: the installed desktop entry whose actions are
+    // extended with the current favorites, and the file type that ties recent
+    // documents back to Restorm. Both match electron-builder's `linux` config.
+    linuxDesktopFileId: 'restorm-bin.desktop',
+    linuxRecentDocumentMimeType: 'application/x-restorm'
+  })
+  getAppIconMenuService().start()
+  registerAppIconMenuHandlers()
+  logger.info('App icon menu initialized')
 })
 
 // Wire the AutoSaveController once both SettingsService (initialized

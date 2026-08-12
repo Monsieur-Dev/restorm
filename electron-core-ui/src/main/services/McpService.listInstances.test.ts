@@ -93,8 +93,7 @@ describe('readAllLiveEntries', () => {
   it('returns entries for alive pids with parseable lockfiles', async () => {
     await writeMcpDiscoveryFile(DIR, {
       pid: LIVE_PID, port: 49001, token: 'tok-live', name: 'live-session',
-      projectPath: '/tmp/proj.restorm', startedAt: '2026-01-01T00:00:00.000Z'
-    })
+      projectPath: '/tmp/proj.restorm', startedAt: '2026-01-01T00:00:00.000Z', mcpActive: true })
     const entries = readAllLiveEntries(DIR)
     const found = entries.find((e) => e.pid === LIVE_PID)
     expect(found).toBeDefined()
@@ -109,8 +108,7 @@ describe('readAllLiveEntries', () => {
     const deadPid = -(Math.abs(process.pid) + 3_000_000)
     await writeMcpDiscoveryFile(DIR, {
       pid: deadPid, port: 49002, token: 'tok-dead', name: 'dead-session',
-      projectPath: null, startedAt: '2026-01-01T00:00:00.000Z'
-    })
+      projectPath: null, startedAt: '2026-01-01T00:00:00.000Z', mcpActive: true })
     try {
       const entries = readAllLiveEntries(DIR)
       expect(entries.find((e) => e.pid === deadPid)).toBeUndefined()
@@ -224,7 +222,7 @@ describe('list-instances MCP tool', () => {
   it('returns a live peer with correct metadata; bearer token absent from output', async () => {
     const entry: McpDiscoveryEntry = {
       pid: PEER_PID, port: peerPort, token: PEER_TOKEN, name: PEER_NAME,
-      projectPath: '/home/user/my-project.restorm', startedAt: '2026-01-15T10:00:00.000Z'
+      projectPath: '/home/user/my-project.restorm', startedAt: '2026-01-15T10:00:00.000Z', mcpActive: true
     }
     await writeMcpDiscoveryFile(DIR, entry)
 
@@ -253,7 +251,7 @@ describe('list-instances MCP tool', () => {
     // Use a numeric filename that won't collide with the real PEER_PID lockfile.
     const unreachEntry: McpDiscoveryEntry = {
       pid: PEER_PID, port: 1, token: PEER_TOKEN, name: 'unreachable-instance',
-      projectPath: null, startedAt: '2026-01-15T09:00:00.000Z'
+      projectPath: null, startedAt: '2026-01-15T09:00:00.000Z', mcpActive: true
     }
     await fs.writeFile(join(DIR, '99999.json'), JSON.stringify(unreachEntry), 'utf8')
     try {

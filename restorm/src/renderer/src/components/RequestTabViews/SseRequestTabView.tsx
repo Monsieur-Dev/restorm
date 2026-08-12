@@ -31,7 +31,7 @@ import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import './WebSocketChat.css'
 
@@ -449,9 +449,9 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
   )
 
   const urlSection = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
     <ControlGroup data-testid="sse-url-section">
-      <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
-        <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'} data-resolved-url={resolvedUrl || url}>
+        <div style={{ flex: 1, minWidth: 0 }} data-testid="url-container">
           <RestormVariableInputBox
             value={url}
             onChange={setUrl}
@@ -461,9 +461,10 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
             data-testid="sse-request-url-input"
           />
         </div>
-      </HeaderHoverTooltip>
       {!inWorkbenchTab && <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>}
     </ControlGroup>
+    <ResolvedUrlPreview value={resolvedUrl} />
+    </div>
   )
 
   const handleCloseHistoryModal = useCallback(() => {
@@ -525,5 +526,3 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
     </>
   )
 }
-
-export default SseRequestTabView

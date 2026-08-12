@@ -133,5 +133,3 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
     />
   )
 }
-
-export default StatusbarMcpIndicator

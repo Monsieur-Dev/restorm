@@ -189,5 +189,3 @@ export const GroupedIconPicker: React.FC<GroupedIconPickerProps> = ({
     </div>
   )
 }
-
-export default GroupedIconPicker

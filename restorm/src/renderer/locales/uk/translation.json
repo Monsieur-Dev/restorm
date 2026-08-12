@@ -75,6 +75,7 @@
     "auth": {
       "noAuth": "Без автентифікації",
       "popoverLabel": "Маршрут автентифікації",
+      "openRoute": "Відкрити маршрут автентифікації",
       "unnamed": "Без назви"
     },
     "contextMenu": {
@@ -222,7 +223,6 @@
     "new": "Створити",
     "import": "Імпортувати",
     "open": "Відкрити",
-    "openFolder": "Відкрити теку",
     "recentFiles": "Останні файли",
     "favorites": "Обране",
     "close": "Закрити",
@@ -230,36 +230,24 @@
     "saveAll": "Зберегти все",
     "saveAs": "Зберегти як",
     "exit": "Вийти",
-    "selection": "Виділення",
-    "tools": "Інструменти",
-    "findInCollection": "Знайти в колекції",
-    "addRequest": "Додати запит",
-    "addRequestHttp": "Запит HTTP",
-    "addRequestGraphql": "Запит GraphQL",
-    "addRequestGrpc": "Запит gRPC",
-    "addRequestSoap": "Запит SOAP",
-    "addRequestOdata": "Запит OData",
-    "addRequestWebsocket": "Запит WebSocket",
-    "addFolder": "Додати теку",
-    "addEnvironmentFolder": "Додати теку середовищ",
-    "addVariable": "Додати змінну",
-    "addTag": "Додати тег",
-    "expandAllFolders": "Розгорнути всі теки",
-    "collapseAllFolders": "Згорнути всі теки",
-    "sendActiveRequest": "Надіслати запит",
-    "cancelActiveRequest": "Скасувати запит",
-    "generateCodeSnippet": "Згенерувати фрагмент коду",
-    "copyAsCurl": "Копіювати як cURL",
-    "exportOpenApi": "Експортувати в OpenAPI",
-    "clearAuthCache": "Очистити кеш автентифікації",
-    "openLogsFolder": "Відкрити теку журналів",
     "mcpLogs": "Журнали MCP",
+    "consoleHttp": "Консоль HTTP",
     "git": "Git",
     "gitPush": "Надіслати",
     "gitPull": "Отримати",
     "gitRefresh": "Оновити",
     "gitHistory": "Історія",
-    "gitResetToServer": "Скинути до версії сервера"
+    "gitResetToServer": "Скинути до версії сервера",
+    "scenario": "Сценарій",
+    "create": "Створити",
+    "request": "Запит",
+    "server": "Сервер",
+    "runSelected": "Виконати",
+    "cancelSelected": "Скасувати",
+    "clone": "Клонувати",
+    "delete": "Видалити",
+    "addToFavorites": "Додати до обраного",
+    "removeFromFavorites": "Видалити з обраного"
   },
   "sidebar": {
     "addRequest": "Додати запит",
@@ -330,7 +318,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Вирізати",
+      "copy": "Копіювати",
+      "paste": "Вставити"
     },
     "deleteConfirm": {
       "title": "Підтвердьте видалення",
@@ -365,7 +356,7 @@
       "docs": "Документація",
       "environments": "Середовища",
       "notes": "Нотатки",
-      "customValues": "Custom variables"
+      "customValues": "Власні переліки"
     },
     "home": {
       "configureEnvs": "Налаштувати середовища",
@@ -403,7 +394,7 @@
       "addEntry": "Додати значення",
       "label": "Label",
       "value": "Value",
-      "selectList": "Виберіть список"
+      "selectList": "Визначте багаторазові списки значень для ваших змінних: ви обираєте зрозумілу мітку, а запит надсилає пов’язане значення. Виберіть або створіть перелік, щоб почати."
     }
   },
   "requestTab": {
@@ -457,7 +448,11 @@
       }
     },
     "followRedirects": "Стежити за переадресаціями",
-    "timeoutLabel": "Час очікування (ms)"
+    "timeoutLabel": "Час очікування (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Скопіювати розвʼязаний URL",
+      "copied": "Скопійовано!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -606,6 +601,7 @@
     "disconnect": "Відключити",
     "startListening": "Почати слухати",
     "stopListening": "Зупинити прослуховування",
+    "listenFailed": "Не вдалося запустити сервер",
     "routePlaceholder": "Маршрут (необов'язково)",
     "clientsConnected": "{{count}} клієнт(ів) підключено",
     "notListening": "Не слухає"
@@ -858,26 +854,6 @@
     "openAriaLabel": "Відкрити колекцію з диска",
     "landmarkLabel": "Ласкаво просимо"
   },
-  "save": {
-    "title": "Параметри збереження",
-    "mode": {
-      "label": "Режим збереження",
-      "file": "Один файл",
-      "folder": "Структура тек",
-      "fileDescription": "Зберегти все в одному файлі",
-      "folderDescription": "Зберегти як структуру тек з окремими файлами"
-    },
-    "format": {
-      "label": "Формат",
-      "yamlDescription": "Зручний для читання людиною",
-      "jsonDescription": "Стандартний формат",
-      "json5Description": "JSON + коментарі"
-    },
-    "preview": {
-      "label": "Перегляд структури",
-      "noDocumentation": "Немає проаналізованої документації для цього джерела."
-    }
-  },
   "common": {
     "cancel": "Скасувати",
     "save": "Зберегти",
@@ -1061,7 +1037,9 @@
       "sourceImportFailed": "Не вдалося повторно імпортувати специфікацію з її джерела.",
       "emptySpec": "Специфікація, завантажена з {{url}}, не оголошує жодної операції {{format}}. Її застосування спорожнило б цю теку, тому оновлення відхилено.",
       "formatNotDetected": "Формат цього джерела не розпізнано.",
-      "unsupportedFormat": "Жоден імпортер не підтримує формат {{format}}."
+      "unsupportedFormat": "Жоден імпортер не підтримує формат {{format}}.",
+      "projectFormatTooNew": "Цей файл проєкту використовує версію формату {{found}}, але ця версія Restorm розуміє лише версію {{current}}. Оновіть Restorm, щоб імпортувати його.",
+      "projectFormatMissing": "Цей файл не декларує версію формату Restorm, отже це не файл проєкту Restorm."
     },
     "formats": {
       "swagger": {
@@ -1168,6 +1146,9 @@
       "apiBlueprint": {
         "description": "Вставте документ API Blueprint (.apib) — Restorm розбирає кожну групу ресурсів і перехід у папку запитів, один на кожну задокументовану пару метод/відповідь.",
         "trademark": "API Blueprint — специфікація, спочатку створена Apiary."
+      },
+      "restorm": {
+        "description": "Об’єднайте інший проєкт Restorm із відкритим — кожна імпортована папка, запит, середовище та сценарій потрапляють до папки-обгортки з новими ідентифікаторами, щоб нічого не конфліктувало, навіть під час імпорту проєкту в нього самого."
       }
     },
     "grpcReflection": {
@@ -1234,6 +1215,71 @@
       "previousMatch": "Попередній збіг",
       "nextMatch": "Наступний збіг",
       "close": "Закрити"
+    },
+    "sections": {
+      "parameters": "Параметри",
+      "responses": "Відповіді",
+      "models": "Моделі",
+      "enums": "Переліки",
+      "polymorphism": "Поліморфізм",
+      "overview": "Огляд",
+      "operations": "Операції"
+    },
+    "table": {
+      "in": "Де",
+      "name": "Назва",
+      "type": "Тип",
+      "required": "Обов.",
+      "operation": "Операція",
+      "description": "Опис",
+      "example": "Приклад",
+      "constraints": "Обмеження"
+    },
+    "params": {
+      "empty": "Для відфільтрованих маршрутів не оголошено параметрів поза тілом."
+    },
+    "responses": {
+      "status": "Статус",
+      "schema": "Схема",
+      "headers": "Заголовки",
+      "empty": "Для відфільтрованих маршрутів не оголошено відповідей."
+    },
+    "route": {
+      "requestBody": "Тіло запиту",
+      "responseBody": "Тіло відповіді",
+      "security": "Безпека",
+      "externalDocs": "Зовнішня документація",
+      "examplePayload": "Приклад корисного навантаження",
+      "operationId": "operationId",
+      "addRequest": "+ Додати запит"
+    },
+    "apiInfo": {
+      "version": "Версія",
+      "sourceFormat": "Формат джерела",
+      "from": "з",
+      "server": "Сервер",
+      "contact": "Контакт",
+      "license": "Ліцензія",
+      "termsOfService": "Умови надання послуг",
+      "externalDocs": "Зовнішня документація",
+      "tagReferences": "Посилання на теги"
+    },
+    "sidebar": {
+      "outline": "Структура документації"
+    },
+    "legend": {
+      "requiredProperty": "обов'язкова властивість",
+      "optionalProperty": "необов'язкова властивість",
+      "nullableValue": "значення, що допускає null",
+      "readOnly": "лише для читання (встановлюється сервером)",
+      "deprecatedBadge": "застаріле",
+      "deprecatedDesc": "оголошено застарілим у вихідній специфікації",
+      "removedBadge": "видалено",
+      "removedDesc": "відсутнє в останньому повторному імпорті",
+      "requiredSingleRef": "обов'язкове одиничне посилання",
+      "optionalSingleRef": "необов'язкове одиничне посилання",
+      "requiredArrayRef": "обов'язкове посилання на масив",
+      "optionalArrayRef": "необов'язкове посилання на масив"
     }
   },
   "scenario": {
@@ -1784,8 +1830,7 @@
       "dataFormats": "Формати даних",
       "encoding": "Кодування",
       "time": "Таймінг",
-      "algorithmie": "Алгоритми",
-      "ux": "UX"
+      "algorithmie": "Алгоритми"
     },
     "listOp": {
       "value": "список",
@@ -2335,9 +2380,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "Попередній перегляд URL (до розв'язання)",
-    "versionV2NotYet": "v2 (виконання ще не підтримується)",
-    "versionV3NotYet": "v3 (виконання ще не підтримується)",
     "operationKindEntitySet": "Набір сутностей (GET)",
     "operationKindFunction": "Функція (GET із вбудованими параметрами)",
     "operationKindAction": "Дія (POST із тілом JSON)",
@@ -2356,7 +2398,8 @@
       "stopListening": "Зупинити прослуховування",
       "notListening": "Не слухає",
       "served": "Слухає — оброблено {{count}} запит(ів)",
-      "listenFailed": "Не вдалося запустити mock-сервер"
+      "listenFailed": "Не вдалося запустити mock-сервер",
+      "portInUse": "Порт {{port}} вже використовується іншим застосунком. Закрийте його або виберіть інший порт і запустіть сервер знову."
     }
   },
   "odata": {
@@ -2376,6 +2419,7 @@
     },
     "namePlaceholder": "Назва конфігурації",
     "saveButton": "Зберегти",
+    "updateButton": "Оновити поточними значеннями",
     "storageTarget": {
       "label": "Зберегти у файл проєкту (.restorm)"
     },
@@ -2388,6 +2432,10 @@
     "loadConfirm": {
       "title": "Завантажити конфігурацію",
       "message": "Бажаєте завантажити конфігурацію «{{name}}»? Ваша поточна незбережена конфігурація буде втрачена."
+    },
+    "updateConfirm": {
+      "title": "Оновити конфігурацію",
+      "message": "Замінити конфігурацію «{{name}}» поточними значеннями?"
     },
     "deleteConfirm": {
       "title": "Видалити конфігурацію",
@@ -2634,6 +2682,10 @@
       "title": "Проєкт створено новішою версією",
       "message": "Цей файл створено новішою версією Restorm, ніж та, якою ви користуєтеся. Оновіть Restorm, щоб його відкрити.",
       "versions": "Формат файла {{found}}; ця версія підтримує до {{current}}."
+    },
+    "notARestormFile": {
+      "title": "Це не файл Restorm",
+      "message": "Цей файл не вказує формат файлу Restorm. Його створено не в Restorm або відредаговано вручну, тому його неможливо відкрити."
     }
   }
 }

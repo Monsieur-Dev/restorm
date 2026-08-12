@@ -1,7 +1,5 @@
 // Export services explicitly for better type inference
 export { logger } from './LoggerService'
-export type { LoggerInterface } from './LoggerService'
-
 export { getStorageService, StorageService } from './StorageService'
 
 export { getThemeService, ThemeService } from './ThemeService'
@@ -10,8 +8,7 @@ export {
   initFeatureService,
   getFeatureService,
   isFeatureServiceInitialized,
-  resetFeatureService,
-  FeatureFlippingService
+  resetFeatureService
 } from './FeatureFlippingService'
 
 export {
@@ -20,6 +17,26 @@ export {
   isFileServiceInitialized,
   FileService
 } from './FileService'
+
+export {
+  AppIconMenuService,
+  MacDockAdapter,
+  WindowsJumpListAdapter,
+  NoopAppIconMenuAdapter,
+  createDefaultAdapter,
+  initAppIconMenuService,
+  getAppIconMenuService,
+  isAppIconMenuServiceInitialized,
+  resetAppIconMenuService
+} from './AppIconMenuService'
+export type {
+  AppIconMenuLabels,
+  AppIconAction,
+  AppIconMenuEntry,
+  AppIconMenuModel,
+  AppIconMenuAdapter,
+  AppIconMenuServiceOptions
+} from './AppIconMenuService'
 
 export { getGitService, resetGitService, GitService } from './GitService'
 export type { GitServiceConfig } from './GitService'
@@ -32,21 +49,18 @@ export {
 export type { GitSemiPullFrequency, GitSemiPullControllerOptions } from './GitSemiPullController'
 
 export { eventBusService } from './EventBusService'
-export type { EventHandler, Subscription } from './EventBusService'
+export type { Subscription } from './EventBusService'
 
 export { i18nService } from './I18nService'
 
 export { searchService } from './SearchService'
 export type {
   SearchDocument,
-  SearchResult,
-  SearchNavigation,
-  GroupedResults,
   CategoryMeta
 } from './SearchService'
 
 export { graphQLService, createSchema, createYoga, createPubSub } from './GraphQLService'
-export type { GraphQLServiceConfig, PubSub } from './GraphQLService'
+export type { PubSub } from './GraphQLService'
 
 export {
   initPersistenceService,
@@ -57,20 +71,12 @@ export {
   deserialize,
   detectFormat,
   filterNonSerialised,
-  generateIndexedFileName,
-  sanitizeFileName,
-  calculateIndexPadding,
   PERSISTENCE_FORMATS,
   atomicWriteFile,
   codeOf
 } from './PersistenceService'
 export type {
-  PersistenceFormat,
-  PersistenceMode,
-  PersistenceConfig,
-  FileNamingContext,
-  SaveResult,
-  LoadResult
+  PersistenceFormat
 } from './PersistenceService'
 
 export {
@@ -78,16 +84,11 @@ export {
   inferGraphQLType,
   createFieldDefinitions
 } from './GraphQLSchemaGenerator'
-export type { SchemaGeneratorConfig, RegisterClassOptions } from './GraphQLSchemaGenerator'
-
 export {
   initSettingsService,
   getSettingsService,
-  isSettingsServiceInitialized,
-  SettingsService
+  isSettingsServiceInitialized
 } from './SettingsService'
-export type { SettingChangedListener } from './SettingsService'
-
 // AutoSave controller (settings: autoSave, autoSaveDelay)
 export {
   AutoSaveController,
@@ -135,7 +136,7 @@ export type {
 // MCP service — embeds an MCP server (Streamable HTTP) for AI-tooling
 // integrations. Off by default; the consuming app starts it explicitly
 // from a CLI flag. See docs/McpService/README.md for the full surface.
-export { McpService, DEFAULT_SERVED_CALL_CAP, DEFAULT_CAPTURE_RETENTION_CAP } from './McpService'
+export { McpService } from './McpService'
 export type {
   McpServiceOptions,
   McpToolConfig,
@@ -143,9 +144,7 @@ export type {
   McpToolResult,
   McpToolGate,
   McpResourceConfig,
-  McpResourceHandler,
-  McpServedCallEntry,
-  McpServedCapture
+  McpResourceHandler
 } from './McpService'
 
 // MCP cross-instance bridge — generic named-session discovery + transport.

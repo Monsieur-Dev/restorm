@@ -22,7 +22,7 @@ import { logger } from './LoggerService'
  * {@link resolveMcpDiscoveryDir} for the conventional default). The on-disk
  * lockfile format is a stable contract — external launchers (e.g. a
  * standalone `mcp-launcher` script) read it without importing this module, so
- * the JSON shape must stay backward-compatible.
+ * a change to the JSON shape has to land there in the same breath.
  */
 
 /**
@@ -61,8 +61,8 @@ export interface McpDiscoveryEntry {
    * routed to the instance whose lockfile records this exact name. */
   name: string
   /**
-   * Whether this instance is currently ACCEPTING MCP commands. `true` (or
-   * absent, for backward compatibility) → the embedded MCP server is up and
+   * Whether this instance is currently ACCEPTING MCP commands. `true` → the
+   * embedded MCP server is up and
    * the instance is in the AI-facing instance list. `false` → the user CUT
    * MCP on this instance: its HTTP endpoint is torn down and the instance
    * REFUSES MCP commands, but the lockfile is deliberately KEPT so the
@@ -72,7 +72,7 @@ export interface McpDiscoveryEntry {
    * returned by {@link readAllLiveEntries} (the AI-facing list) nor routed to
    * by {@link findLiveSessionByName}.
    */
-  mcpActive?: boolean
+  mcpActive: boolean
 }
 
 /**
@@ -201,12 +201,13 @@ export function findLiveSessionByName(dir: string, name: string): McpDiscoveryEn
       continue
     }
     if (parsed.name !== name) continue
-    // A CUT instance (mcpActive === false) REFUSES MCP commands. It keeps its
-    // lockfile only for the internal create-uniqueness view; it must NEVER be
-    // a routing target. Skipping it here makes a name-targeted forward find no
-    // match → the bridge answers a clean "no live session" error (the hard
-    // lockout — never redirected, never auto-spawned).
-    if (parsed.mcpActive === false) continue
+    // Only an instance that STATES it is accepting commands is a routing
+    // target. A CUT instance (`mcpActive: false`) keeps its lockfile for the
+    // internal create-uniqueness view but must NEVER be routed to, and an
+    // entry that states nothing was not written by this build — neither is
+    // something to forward to. Skipping both makes a name-targeted forward
+    // find no match → a clean "no live session" error.
+    if (parsed.mcpActive !== true) continue
     const pid = Number(parsed.pid)
     const port = Number(parsed.port)
     if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
@@ -268,7 +269,7 @@ export function readAllLiveEntries(dir: string): McpDiscoveryEntry[] {
     // A CUT instance is excluded from the AI-facing list: it has torn down its
     // HTTP endpoint and refuses commands, so it must not be advertised as a
     // routing target (only the internal view sees it).
-    if (parsed.mcpActive === false) continue
+    if (parsed.mcpActive !== true) continue
     const pid = Number(parsed.pid)
     const port = Number(parsed.port)
     if (!Number.isInteger(pid) || !Number.isInteger(port) || port <= 0) continue
@@ -330,8 +331,7 @@ export function readAllInstancesIncludingCut(
       name: parsed.name,
       projectPath: typeof parsed.projectPath === 'string' ? parsed.projectPath : null,
       startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : '',
-      // Absent flag = legacy active instance; only an explicit `false` is cut.
-      mcpActive: parsed.mcpActive !== false
+      mcpActive: parsed.mcpActive === true
     })
   }
   return out

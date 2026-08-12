@@ -45,5 +45,3 @@ export function useExclusivePopover(open: boolean, close: () => void): void {
     return () => { document.removeEventListener(OPEN_EVENT, onSiblingOpen) }
   }, [open, id, onSiblingOpen])
 }
-
-export default useExclusivePopover

@@ -292,5 +292,3 @@ const JsonViewerCanvas: React.FC<JsonViewerProps> = ({ json, minimapToggleLabel,
 		</div>
 	)
 }
-
-export default JsonViewer

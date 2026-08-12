@@ -28,8 +28,10 @@ describe('getContrastColor', () => {
     expect(getContrastColor('#c75000')).toBe('#ffffff')
   })
 
-  it('returns black for pure red (luminance above threshold)', () => {
-    expect(getContrastColor('#ff0000')).toBe('#000000')
+  it('returns white for pure red (perceptually cleaner than black)', () => {
+    // WCAG 2 luminance says black; APCA — and common design practice, where
+    // red buttons carry white labels — says white.
+    expect(getContrastColor('#ff0000')).toBe('#ffffff')
   })
 
   it('returns black for pure green', () => {
@@ -66,11 +68,28 @@ describe('getContrastColor with computed colours', () => {
     expect(getContrastColor('rgba(0, 0, 0, 1)')).toBe('#ffffff')
   })
 
-  it('still resolves a colour sitting right on the luminance threshold', () => {
-    // #c75000 lands at 0.1788 — just under the 0.179 cut, so it takes white.
-    // A parser that mangles the input flips this to black, which is the exact
-    // failure this guards.
+  it('resolves a saturated orange to white, identically from hex and rgb()', () => {
+    // A dark saturated orange reads best with white text; the rgb() form (what
+    // getComputedStyle returns) must resolve identically — a parser that
+    // mangles the input would flip this to black, the exact failure this guards.
     expect(getContrastColor('#c75000')).toBe('#ffffff')
     expect(getContrastColor('rgb(199, 80, 0)')).toBe('#ffffff')
+  })
+})
+
+describe('getContrastColor — APCA perception on saturated mid-tones', () => {
+  it('picks white on saturated coral / teal / magenta where WCAG 2 would pick black', () => {
+    // These are the tag palette (hsl, 65% sat, 50% light) hues where WCAG 2
+    // relative luminance mispredicts perceived contrast — e.g. the "my
+    // characters" tag at hue 13 rendered dark text on coral.
+    expect(getContrastColor('hsl(13, 65%, 50%)')).toBe('#ffffff')
+    expect(getContrastColor('hsl(200, 65%, 50%)')).toBe('#ffffff')
+    expect(getContrastColor('hsl(310, 65%, 50%)')).toBe('#ffffff')
+  })
+
+  it('still picks black on genuinely light backgrounds (greens/yellows)', () => {
+    expect(getContrastColor('hsl(94, 65%, 50%)')).toBe('#000000')
+    expect(getContrastColor('hsl(174, 65%, 50%)')).toBe('#000000')
+    expect(getContrastColor('hsl(60, 65%, 50%)')).toBe('#000000')
   })
 })

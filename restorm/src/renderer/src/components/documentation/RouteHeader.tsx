@@ -1,9 +1,11 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { MarkdownViewer, getColorFromString, getContrastColor, Button } from 'electron-core-ui/renderer'
 import type { OperationDocumentation, SecurityScheme } from '../../../../shared/types/apiDocumentation'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
-import { useDocumentedSecuritySchemes } from './documentationModels'
+import { useDocumentedSecuritySchemes, useDocumentedModels, extractModelRef } from './documentationModels'
+import { ModelRefLink } from './ModelRefLink'
 
 export interface RouteHeaderProps {
   /** The operation surfaced. */
@@ -185,8 +187,20 @@ function renderSchemeDetail(scheme: SecurityScheme, requestedScopes: string[]): 
 }
 
 export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, tagColors, onAddRequest }) => {
+  const { t } = useTranslation()
   const requestBodyType = formatBodyParameter(operation)
   const responseSchema = formatResponseSchema(operation)
+  const documentedModels = useDocumentedModels()
+  // Render a schema label (`Pet`, `array<Pet>`, `string`…) as a clickable
+  // cross-reference when it names a documented model, else plain code — the
+  // same rule the responses table uses, applied here to the Request/Response
+  // body summary rows so those model names are links too.
+  const renderSchemaLabel = (label: string): React.ReactNode => {
+    const ref = extractModelRef(label)
+    return ref.ref !== undefined && documentedModels.has(ref.ref)
+      ? <ModelRefLink modelName={ref.ref}>{label}</ModelRefLink>
+      : label
+  }
   const requestPayload = formatRequestPayload(operation)
   const consumes = operation.consumes?.join(', ')
   const produces = operation.produces?.join(', ')
@@ -198,6 +212,17 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
   const showGroupTag = showGroupChip && group !== undefined && group.length > 0
   const groupBg = showGroupTag ? (tagColors?.[group] ?? getColorFromString(group)) : undefined
   const groupFg = groupBg !== undefined ? getContrastColor(groupBg) : undefined
+
+  // Every tag on the operation, shown as coloured chips — the same tags carried
+  // on the request's workbench tab. In the interleaved all-routes view the group
+  // header already names the tag (`showGroupTag`), so the chips are the
+  // single-route addition; when interleaved we keep the existing single chip and
+  // skip the list to avoid doubling. Fall back to `[group]` for docs imported
+  // before `tags` was carried.
+  const allTags = operation.tags !== undefined && operation.tags.length > 0
+    ? operation.tags
+    : group !== undefined && group.length > 0 ? [group] : []
+  const showTagChips = !showGroupTag && allTags.length > 0
 
   return (
     <div
@@ -221,6 +246,19 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
               {group}
             </span>
           )}
+          {showTagChips && allTags.map((tag) => {
+            const bg = tagColors?.[tag] ?? getColorFromString(tag)
+            return (
+              <span
+                key={tag}
+                className="documentation-host-route-header__group-chip"
+                data-testid="documentation-host-route-header-tag-chip"
+                style={{ backgroundColor: bg, color: getContrastColor(bg) }}
+              >
+                {tag}
+              </span>
+            )
+          })}
         </SummaryHeading>
       )}
 
@@ -249,7 +287,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
           data-testid={`documentation-host-route-header-add-${operation.operationId ?? operation.match.urlPattern}`}
           onClick={(): void => { onAddRequest(operation) }}
         >
-          + Add a request
+          {t('documentation.route.addRequest')}
         </Button>
       )}
 
@@ -265,15 +303,15 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
       <dl className="documentation-host-route-header__meta">
         {operation.operationId !== undefined && operation.operationId.length > 0 && (
           <>
-            <dt>operationId</dt>
+            <dt>{t('documentation.route.operationId')}</dt>
             <dd><code>{operation.operationId}</code></dd>
           </>
         )}
         {requestBodyType !== undefined && (
           <>
-            <dt>Request body</dt>
+            <dt>{t('documentation.route.requestBody')}</dt>
             <dd>
-              <code>{requestBodyType}</code>
+              <code>{renderSchemaLabel(requestBodyType)}</code>
               {consumes !== undefined && consumes.length > 0 && (
                 <span className="documentation-host-route-header__meta-extra"> ({consumes})</span>
               )}
@@ -282,9 +320,9 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         )}
         {responseSchema !== undefined && (
           <>
-            <dt>Response body</dt>
+            <dt>{t('documentation.route.responseBody')}</dt>
             <dd>
-              <code>{responseSchema}</code>
+              <code>{renderSchemaLabel(responseSchema)}</code>
               {produces !== undefined && produces.length > 0 && (
                 <span className="documentation-host-route-header__meta-extra"> ({produces})</span>
               )}
@@ -293,7 +331,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         )}
         {operation.security !== undefined && operation.security.length > 0 && (
           <>
-            <dt>Security</dt>
+            <dt>{t('documentation.route.security')}</dt>
             <dd>
               <ul className="documentation-host-route-header__security-list">
                 {operation.security.flatMap((requirement, idx) => {
@@ -337,7 +375,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         )}
         {operation.externalDocs !== undefined && (
           <>
-            <dt>External docs</dt>
+            <dt>{t('documentation.route.externalDocs')}</dt>
             <dd>
               <a href={operation.externalDocs.url}>
                 {operation.externalDocs.description !== undefined && operation.externalDocs.description.length > 0
@@ -355,7 +393,7 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
           data-testid="documentation-host-route-header-payload"
           open
         >
-          <summary>Example payload</summary>
+          <summary>{t('documentation.route.examplePayload')}</summary>
           <pre
             className="documentation-host-route-header__payload-pre"
             data-language={payloadLanguage(requestPayload)}

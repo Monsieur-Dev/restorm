@@ -34,5 +34,3 @@ export const ServerConfigLockedHint: React.FC<ServerConfigLockedHintProps> = ({
     </div>
   )
 }
-
-export default ServerConfigLockedHint

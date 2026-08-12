@@ -41,6 +41,9 @@ import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
+import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
+import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { useRestormStore } from '../../store/restormStore'
@@ -58,7 +61,7 @@ import { findOperationForRoute } from '../../../../shared/utils/findOperationFor
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
 import { toasterService } from 'electron-core-ui/renderer'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -187,6 +190,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 }) => {
   const conflictFields = conflictFieldDiff?.fields
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  // Mock-server launch failure surfaced as a MODAL (a toast was too easy to
+  // miss for "the server never started"). Holds the raw main-side error.
   const { t } = useTranslation()
   const { formatUserDate } = useUserDateFormat()
   // `projectUuid` lives on the EnvironmentContext (mirrored from the
@@ -285,23 +290,27 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       conflictPanelFields ?? conflictFieldDiff?.fields
     )
   })
+  // Pane ids in RENDER order — the single source both the SplitView children
+  // and the collapse mapping below derive from. A mock-server route renders
+  // no path-params pane, and the positional collapse array MUST follow, or
+  // every pane after the missing one persists into the wrong key.
+  const paneOrder = useMemo<('headers' | 'pathParams' | 'params' | 'body')[]>(
+    () => ((request as HTTPRequest).server === true
+      ? ['headers', 'params', 'body']
+      : ['headers', 'pathParams', 'params', 'body']),
+    [request]
+  )
   const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
-    // SplitView fires this with the array in pane render order:
-    // headers, pathParams, params, body.
-    const next = {
-      headers: arr[0] ?? false,
-      pathParams: arr[1] ?? false,
-      params: arr[2] ?? false,
-      body: arr[3] ?? false
-    }
-    setPanelCollapsed(next)
-    if (projectUuid) {
-      setRequestPanelCollapsed(projectUuid, request.id, 'headers', next.headers)
-      setRequestPanelCollapsed(projectUuid, request.id, 'pathParams', next.pathParams)
-      setRequestPanelCollapsed(projectUuid, request.id, 'params', next.params)
-      setRequestPanelCollapsed(projectUuid, request.id, 'body', next.body)
-    }
-  }, [projectUuid, request.id])
+    // SplitView fires this with the array in pane render order (paneOrder).
+    setPanelCollapsed((prev) => {
+      const next = { ...prev }
+      paneOrder.forEach((id, i) => { next[id] = arr[i] ?? false })
+      if (projectUuid) {
+        for (const id of paneOrder) setRequestPanelCollapsed(projectUuid, request.id, id, next[id])
+      }
+      return next
+    })
+  }, [projectUuid, request.id, paneOrder])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -404,6 +413,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         scheduleSettleFlush()
         return
       }
+      // Main serializes its recomputes, so this event is fresher than any
+      // buffered own-echo — drop the buffer, or the settle flush would
+      // re-apply the stale echo over this value (e.g. an env switch right
+      // after a data push would show the OLD environment's URL forever).
+      pendingResolvedUrlRef.current = null
       setResolvedUrl(result.resolvedUrl)
     })
 
@@ -414,6 +428,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         scheduleSettleFlush()
         return
       }
+      pendingCodeSnippetsRef.current = null
       setBackendCodeSnippets(result.markdown)
     })
 
@@ -932,8 +947,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     const cleanPath = pathPart.replace(/^\/+/, '')
     return `localhost:${port}/${cleanPath}`
   }, [])
+  // No digit filtering: the port is a Handlebars expression field now
+  // (`{{port}}` must survive typing); the main process resolves + validates
+  // it at Listen time.
   const setServerPort = useCallback((p: string): void => {
-    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverPath))
+    setUrl(composeServerUrl(p, serverPath))
   }, [composeServerUrl, serverPath])
   const setServerPath = useCallback((p: string): void => {
     setUrl(composeServerUrl(serverPort, p))
@@ -948,16 +966,33 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     void window.restorm?.http.listen(requestId)
       .then((res) => {
         if (res.error) {
-          toasterService.push('app', { title: t('http.server.listenFailed'), body: res.error, durationMs: 10000 })
+          pushServerListenErrorToast(t, t('http.server.listenFailed'), res.error, serverPort)
           logger.error('HTTP mock server failed to listen', { error: res.error })
         }
       })
       .catch((err: unknown) => { logger.error('HTTP mock server listen error', { error: String(err) }) })
-  }, [request.id, isListening, conflictMode, t])
+  }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => {
     void window.restorm?.http.stop(request.id)
   }, [request.id])
+
+  // « Serveur » menu-bar entries — the SAME action as the toolbar disc
+  // (start ↔ stop toggle), published while this server tab is the ACTIVE
+  // one. Handlers route through a ref so the published array only rebuilds
+  // when the rendered entry changes.
+  const serverMenuOpsRef = useRef({ listen: () => { /* replaced below */ }, stop: () => { /* replaced below */ } })
+  useEffect(() => { serverMenuOpsRef.current = { listen: handleListen, stop: handleStop } })
+  const isActiveTab = useIsActiveWorkbenchTab()
+  const serverMenuItems = useMemo<SidebarContextMenuItem[] | null>(() => {
+    if (!isServer) return null
+    return [
+      isListening
+        ? { id: 'server-stop', label: t('http.server.stopListening'), icon: 'debug-disconnect', shortcut: 'F8', onClick: () => { serverMenuOpsRef.current.stop() } }
+        : { id: 'server-listen', label: t('http.server.startListening'), icon: 'plug', shortcut: 'F5', ...(conflictMode ? { disabled: true } : {}), onClick: () => { serverMenuOpsRef.current.listen() } }
+    ]
+  }, [isServer, isListening, conflictMode, t])
+  useServerMenuPublisher(isActiveTab && isServer, serverMenuItems)
 
   // Track listening state + served count for the hosted mock route. Skipped
   // entirely in conflict mode (see `conflictSafeLiveState.ts`) — a static
@@ -1032,7 +1067,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           />
           </div>
         </Pane>
-        <Pane
+        {/* A mock-server route has no outbound URL to substitute into — no
+          * path-params pane. `paneOrder` above mirrors this omission for the
+          * positional collapse persistence. */}
+        {!isServer && <Pane
           title={t('requestTab.tabs.pathParams')}
           initialSize={0.2}
           collapsed={panelCollapsed.pathParams}
@@ -1068,7 +1106,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             {...(conflictFieldDiff?.rowDiffs?.['pathParams'] ? { highlightRowKeys: conflictFieldDiff.rowDiffs['pathParams'] } : {})}
           />
           </div>
-        </Pane>
+        </Pane>}
         <Pane
           title={t('requestTab.tabs.params')}
           initialSize={0.2}
@@ -1199,36 +1237,37 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       </div>
       {isServer ? (
         // SERVER MODE: localhost-fixed host + port + path. The METHOD selector
-        // above doubles as the route's method.
+        // above doubles as the route's method. Port and path are Handlebars
+        // expressions like a client URL (resolved main-side at Listen time);
+        // the lock while listening goes through pointer-events since the
+        // variable box carries no disabled prop.
         <>
           <span style={serverHostLabelStyle}>localhost:</span>
-          <div style={serverPortWrapperStyle}>
-            <InputBox
+          <div style={{ ...serverPortWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+            <RestormVariableInputBox
               value={serverPort}
               onChange={setServerPort}
-              options={{ placeholder: '8080' }}
+              variables={urlVariables}
+              helpers={handlebarsHelpers}
+              placeholder="8080"
               data-testid="http-server-port-input"
-              disabled={isListening}
             />
           </div>
           <span style={serverHostLabelStyle}>/</span>
-          <div style={urlInputWrapperStyle}>
-            <InputBox
+          <div style={{ ...urlInputWrapperStyle, ...(isListening ? { pointerEvents: 'none' as const, opacity: 0.6 } : {}) }}>
+            <RestormVariableInputBox
               value={serverPath}
               onChange={setServerPath}
-              options={{ placeholder: 'pets' }}
+              variables={urlVariables}
+              helpers={handlebarsHelpers}
               data-testid="http-server-path-input"
-              disabled={isListening}
             />
           </div>
         </>
       ) : (
-        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
           <div
-            style={{ ...urlInputWrapperStyle, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
+            style={{ ...urlInputWrapperStyle, flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
             data-testid="url-container"
-            data-url-resolved={resolvedUrl ? 'true' : 'false'}
-            data-resolved-url={resolvedUrl || url}
           >
             <RestormVariableInputBox
               value={url}
@@ -1239,7 +1278,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
               data-testid="http-request-url-input"
             />
           </div>
-        </HeaderHoverTooltip>
       )}
       {/* Outside a workbench tab (conflict panel, auth modal) there is nothing
         * for the fixed bar to anchor to, so the button stays inline here. */}
@@ -1280,7 +1318,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         </BeamWrap>
       ))}
     </ControlGroup>
-    {httpReq && (
+    <ResolvedUrlPreview value={resolvedUrl} />
+    {/* Follow-redirects and the request timeout describe OUTBOUND behaviour —
+      * meaningless for a mock-server route, whose whole options row hides. */}
+    {httpReq && !isServer && (
       <div style={requestOptionsRowStyle} data-testid="http-request-options-row">
         <Toggle
           checked={followRedirects}
@@ -1399,6 +1440,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         isLoading={isSending}
         showResponse={isServer ? isListening : httpResponse !== null}
         infosContent={isServer ? undefined : infosContent}
+        showInfos={!isServer}
         responseContent={isServer ? serverResponseContent : responseContent}
         jsonData={isServer ? undefined : jsonData}
         {...(additionalRequestTabs ? { additionalRequestTabs } : {})}
@@ -1418,5 +1460,3 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     </>
   )
 }
-
-export default HTTPRequestTabView

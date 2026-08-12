@@ -276,13 +276,16 @@ Feature: Git collaboration between two live restorm instances
 
     # The app holds the project in memory and autosaves about a second after
     # any edit, so a branch checked out from a terminal used to be undone on
-    # disk without a word. The save must be refused and the choice offered.
+    # disk without a word. The save must be refused and the choice offered —
+    # through the timerless reload/keep-mine toast, the app's question
+    # surface for an external rewrite.
     When the branch "autre-branche" renaming "Fiche animal" to "Fiche autre branche" is checked out from a terminal in "branche.restorm"
-    And "Yoann" will answer "reload" to the file-changed-on-disk question
     And "Yoann" turns off the follow redirects option
     And "Yoann" saves his project
+    And "Yoann" answers the file-changed-on-disk toast with "reload"
     # Seeing the other branch's tree IS the proof of the whole chain: the
-    # save was refused, the question was raised, the mock answered
-    # "reload", and the app re-hydrated from disk. Without any one of
-    # those the sidebar would still show the pre-checkout name.
+    # save was refused (a successful save would have put the PRE-checkout
+    # bytes back on disk), the toast was raised, "reload" re-hydrated from
+    # disk. Without any one of those the sidebar would still show the
+    # pre-checkout name.
     Then "Yoann" sees the request "Fiche autre branche" in his sidebar

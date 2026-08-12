@@ -145,6 +145,7 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
       onClose={onClose}
       title={t('git.conflictResolutionTitle')}
       data-testid="git-conflict-resolution-modal"
+      enterActionTestId="git-conflict-resolution-finish"
     >
       {/* Fill the modal body entirely (it's a flex column): the footer's
         * Annuler/Terminer row must sit at the BOTTOM edge of the modal, not
@@ -324,5 +325,3 @@ export const GitConflictResolutionModal: React.FC<GitConflictResolutionModalProp
     </Modal>
   )
 }
-
-export default GitConflictResolutionModal

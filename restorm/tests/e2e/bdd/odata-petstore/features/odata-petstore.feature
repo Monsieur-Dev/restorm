@@ -23,6 +23,24 @@ Feature: OData petstore — import + send + filter
     And the OData response body should not contain "Whiskers"
     And the OData response body should not contain "PhotoUrls"
 
+  Scenario: URL placeholder, live preview and $count react immediately
+    # The URL field and the $count toggle write into the reactive request
+    # OUTSIDE React state — without a forced render the placeholder stayed
+    # painted over the typed text, the resolved-URL preview froze, and
+    # $count was inert until some other field changed.
+    Given a new single-file YAML collection for the OData petstore
+    When I open the import modal and paste the OData metadata URL
+    And I import the previewed routes
+    And I open the "List Pets" request in an OData tab
+    Then the OData URL field shows no placeholder overlay
+    When I toggle the OData count option
+    Then the OData resolved URL preview should contain "$count=true"
+    When I replace the OData URL with "https://svc.example/odata/Pets"
+    Then the OData URL field shows no placeholder overlay
+    And the OData resolved URL preview should contain "https://svc.example/odata/Pets"
+    When I clear the OData URL field
+    Then the OData URL placeholder overlay is visible
+
   Scenario: Metadata-driven $filter autocomplete suggests properties and enum values
     Given a new single-file YAML collection for the OData petstore
     When I open the import modal and paste the OData metadata URL
@@ -67,6 +85,8 @@ Feature: OData petstore — import + send + filter
     And I import the previewed routes
     And I create a new batch request named "batch-v401"
     Then the OData version selector should include "v4.01"
+    And the OData version selector should include "v3"
+    And the OData version selector should include "v2"
 
     When I select OData version "v4.01"
     Then the force-absolute-batch-URLs toggle should be visible

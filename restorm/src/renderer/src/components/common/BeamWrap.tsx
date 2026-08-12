@@ -64,5 +64,3 @@ export const BeamWrap: React.FC<BeamWrapProps> = ({ active, size = 16, borderWid
     </span>
   )
 }
-
-export default BeamWrap

@@ -130,5 +130,3 @@ export const DropdownFilterRow: React.FC<DropdownFilterRowProps> = ({
     </div>
   )
 }
-
-export default DropdownFilterRow

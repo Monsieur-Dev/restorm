@@ -36,5 +36,3 @@ export const SegmentedToggle: React.FC<SegmentedToggleProps> = ({ options, label
     </span>
   )
 }
-
-export default SegmentedToggle

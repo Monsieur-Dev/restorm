@@ -152,8 +152,6 @@ import {
   markSaveUnitDeleted,
   commitSaveUnit,
   revertSaveUnit,
-  saveUnitToDisk,
-  saveUnitsToDiskBatch,
   getSaveUnitsSnapshot,
   useDraftsRestored,
   useFileExternallyChanged,

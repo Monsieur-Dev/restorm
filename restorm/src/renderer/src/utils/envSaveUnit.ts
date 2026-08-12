@@ -4,7 +4,7 @@ import { isEnvironmentFolder } from '../../../shared/types/collections'
 /**
  * Save-unit resolution for environments.
  *
- * `EnvironmentFolder.environments` is `@separateFolders` — each TOP-LEVEL
+ * `EnvironmentFolder.environments` is `@saveUnits` — each TOP-LEVEL
  * environment is its own save-unit. `Environment.subEnvironments`, by contrast,
  * carries NO decorator, so a sub-environment lives embedded inside its
  * top-level env's content and is NOT a save-unit of its own. A change to a

@@ -38,6 +38,25 @@ const SEND_BUTTON_SELECTORS: readonly string[] = [
 ]
 
 /**
+ * Poll for the (visible) Send/Connect button of the active request tab and
+ * click it — the same open-tab-then-drive-the-real-button path the MCP
+ * `run_request` bridge uses, reused by the menu bar's "Run request" entry.
+ * Resolves true when a button was clicked, false when none appeared within
+ * the timeout (tab failed to open / unknown protocol).
+ */
+export function clickSendButtonWhenReady(timeoutMs = 5000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const startedAt = Date.now()
+    const attempt = (): void => {
+      if (clickSendButton()) { resolve(true); return }
+      if (Date.now() - startedAt >= timeoutMs) { resolve(false); return }
+      setTimeout(attempt, 50)
+    }
+    attempt()
+  })
+}
+
+/**
  * Find the Send/Connect button to click. Walks every protocol selector
  * and prefers a candidate that's actually visible (non-null
  * `offsetParent`) — split-pane / multi-tab future layouts could mount

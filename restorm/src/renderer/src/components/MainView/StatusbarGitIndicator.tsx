@@ -70,5 +70,3 @@ export const StatusbarGitIndicator: React.FC<StatusbarGitIndicatorProps> = ({ fi
     </GatedControl>
   )
 }
-
-export default StatusbarGitIndicator

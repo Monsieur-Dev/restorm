@@ -44,6 +44,7 @@ export const CrashReportDialog: React.FC<CrashReportDialogProps> = ({ request, o
       size="dialog"
       dialogWidth={640}
       data-testid="crash-report-dialog"
+      enterActionTestId="crash-report-dialog-send"
     >
       <div className="crash-report-dialog">
         <p className="crash-report-dialog-intro">{t('privacy.reportDialog.intro')}</p>

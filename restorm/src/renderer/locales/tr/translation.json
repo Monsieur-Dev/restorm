@@ -73,6 +73,7 @@
     "auth": {
       "noAuth": "Kimlik doğrulama yok",
       "popoverLabel": "Kimlik doğrulama rotası",
+      "openRoute": "Kimlik doğrulama rotasını aç",
       "unnamed": "Adsız"
     },
     "contextMenu": {
@@ -220,7 +221,6 @@
     "new": "Yeni",
     "import": "İçe aktar",
     "open": "Aç",
-    "openFolder": "Klasör aç",
     "recentFiles": "Son kullanılan dosyalar",
     "favorites": "Favoriler",
     "close": "Kapat",
@@ -228,36 +228,24 @@
     "saveAll": "Tümünü kaydet",
     "saveAs": "Farklı kaydet",
     "exit": "Çık",
-    "selection": "Seçim",
-    "tools": "Araçlar",
-    "findInCollection": "Koleksiyonda bul",
-    "addRequest": "İstek ekle",
-    "addRequestHttp": "HTTP isteği",
-    "addRequestGraphql": "GraphQL isteği",
-    "addRequestGrpc": "gRPC isteği",
-    "addRequestSoap": "SOAP isteği",
-    "addRequestOdata": "OData isteği",
-    "addRequestWebsocket": "WebSocket isteği",
-    "addFolder": "Klasör ekle",
-    "addEnvironmentFolder": "Ortam klasörü ekle",
-    "addVariable": "Değişken ekle",
-    "addTag": "Etiket ekle",
-    "expandAllFolders": "Tüm klasörleri genişlet",
-    "collapseAllFolders": "Tüm klasörleri daralt",
-    "sendActiveRequest": "İsteği gönder",
-    "cancelActiveRequest": "İsteği iptal et",
-    "generateCodeSnippet": "Kod parçacığı oluştur",
-    "copyAsCurl": "cURL olarak kopyala",
-    "exportOpenApi": "OpenAPI'a dışa aktar",
-    "clearAuthCache": "Kimlik doğrulama önbelleğini temizle",
-    "openLogsFolder": "Günlük klasörünü aç",
     "mcpLogs": "MCP günlükleri",
+    "consoleHttp": "HTTP konsolu",
     "git": "Git",
     "gitPush": "Gönder",
     "gitPull": "Çek",
     "gitRefresh": "Yenile",
     "gitHistory": "Geçmiş",
-    "gitResetToServer": "Sunucu sürümüne sıfırla"
+    "gitResetToServer": "Sunucu sürümüne sıfırla",
+    "scenario": "Senaryo",
+    "create": "Oluştur",
+    "request": "İstek",
+    "server": "Sunucu",
+    "runSelected": "Çalıştır",
+    "cancelSelected": "İptal",
+    "clone": "Çoğalt",
+    "delete": "Sil",
+    "addToFavorites": "Favorilere ekle",
+    "removeFromFavorites": "Favorilerden çıkar"
   },
   "sidebar": {
     "addRequest": "İstek ekle",
@@ -328,7 +316,10 @@
           "sse": "SSE",
           "trpc": "tRPC"
         }
-      }
+      },
+      "cut": "Kes",
+      "copy": "Kopyala",
+      "paste": "Yapıştır"
     },
     "deleteConfirm": {
       "title": "Silmeyi onayla",
@@ -363,7 +354,7 @@
       "docs": "Belgeler",
       "environments": "Ortamlar",
       "notes": "Notlar",
-      "customValues": "Custom variables"
+      "customValues": "Özel numaralandırmalar"
     },
     "home": {
       "configureEnvs": "Ortamları yapılandır",
@@ -401,7 +392,7 @@
       "addEntry": "Bir değer ekle",
       "label": "Label",
       "value": "Value",
-      "selectList": "Bir liste seçin"
+      "selectList": "Değişkenleriniz için yeniden kullanılabilir değer listeleri tanımlayın: okunabilir bir etiket seçersiniz, istek ilişkili değeri gönderir. Başlamak için bir numaralandırma seçin veya oluşturun."
     }
   },
   "requestTab": {
@@ -455,7 +446,11 @@
       }
     },
     "followRedirects": "Yönlendirmeleri izle",
-    "timeoutLabel": "Zaman aşımı (ms)"
+    "timeoutLabel": "Zaman aşımı (ms)",
+    "resolvedUrlPreview": {
+      "copy": "Çözümlenen URL'yi kopyala",
+      "copied": "Kopyalandı!"
+    }
   },
   "workbench": {
     "tabContextMenu": {
@@ -604,6 +599,7 @@
     "disconnect": "Bağlantıyı kes",
     "startListening": "Dinlemeyi başlat",
     "stopListening": "Dinlemeyi durdur",
+    "listenFailed": "Sunucu başlatılamadı",
     "routePlaceholder": "Rota (isteğe bağlı)",
     "clientsConnected": "{{count}} istemci bağlı",
     "notListening": "Dinlemiyor"
@@ -856,26 +852,6 @@
     "openAriaLabel": "Diskten bir koleksiyon aç",
     "landmarkLabel": "Hoş geldiniz"
   },
-  "save": {
-    "title": "Kaydetme seçenekleri",
-    "mode": {
-      "label": "Kaydetme modu",
-      "file": "Tek dosya",
-      "folder": "Klasör yapısı",
-      "fileDescription": "Her şeyi tek bir dosyada kaydet",
-      "folderDescription": "Ayrı dosyalarla klasör yapısı olarak kaydet"
-    },
-    "format": {
-      "label": "Biçim",
-      "yamlDescription": "İnsan tarafından okunabilir",
-      "jsonDescription": "Standart biçim",
-      "json5Description": "JSON + yorumlar"
-    },
-    "preview": {
-      "label": "Yapı önizlemesi",
-      "noDocumentation": "Bu kaynak için ayrıştırılmış belge yok."
-    }
-  },
   "common": {
     "cancel": "İptal",
     "save": "Kaydet",
@@ -1059,7 +1035,9 @@
       "sourceImportFailed": "Belirtim kaynağından yeniden içe aktarılamadı.",
       "emptySpec": "{{url}} adresinden alınan belirtim hiçbir {{format}} işlemi tanımlamıyor. Uygulanması bu klasörü boşaltacağı için güncelleme reddedildi.",
       "formatNotDetected": "Bu kaynağın biçimi tanınmadı.",
-      "unsupportedFormat": "{{format}} biçimini işleyen bir içe aktarıcı yok."
+      "unsupportedFormat": "{{format}} biçimini işleyen bir içe aktarıcı yok.",
+      "projectFormatTooNew": "Bu proje dosyası {{found}} biçim sürümünü kullanıyor, ancak Restorm’un bu sürümü yalnızca {{current}} sürümünü anlıyor. İçe aktarmak için Restorm’u güncelleyin.",
+      "projectFormatMissing": "Bu dosya bir Restorm biçim sürümü bildirmiyor, dolayısıyla bir Restorm proje dosyası değil."
     },
     "formats": {
       "swagger": {
@@ -1166,6 +1144,9 @@
       "apiBlueprint": {
         "description": "Bir API Blueprint (.apib) belgesi yapıştırın — Restorm her kaynak grubunu ve geçişi, belgelenen her metot/yanıt çifti için bir istek klasörüne ayrıştırır.",
         "trademark": "API Blueprint, aslen Apiary tarafından oluşturulmuş bir spesifikasyondur."
+      },
+      "restorm": {
+        "description": "Başka bir Restorm projesini açık olanla birleştirin — içe aktarılan her klasör, istek, ortam ve senaryo, hiçbir şey çakışmasın diye yeni kimliklerle bir sarmalayıcı klasöre gelir; bir projeyi kendi içine aktarırken bile."
       }
     },
     "grpcReflection": {
@@ -1232,6 +1213,71 @@
       "previousMatch": "Önceki eşleşme",
       "nextMatch": "Sonraki eşleşme",
       "close": "Kapat"
+    },
+    "sections": {
+      "parameters": "Parametreler",
+      "responses": "Yanıtlar",
+      "models": "Modeller",
+      "enums": "Enumlar",
+      "polymorphism": "Çok biçimlilik",
+      "overview": "Genel bakış",
+      "operations": "İşlemler"
+    },
+    "table": {
+      "in": "Konum",
+      "name": "Ad",
+      "type": "Tür",
+      "required": "Zor.",
+      "operation": "İşlem",
+      "description": "Açıklama",
+      "example": "Örnek",
+      "constraints": "Kısıtlamalar"
+    },
+    "params": {
+      "empty": "Filtrelenen rotalar için gövde dışı parametre tanımlanmadı."
+    },
+    "responses": {
+      "status": "Durum",
+      "schema": "Şema",
+      "headers": "Başlıklar",
+      "empty": "Filtrelenen rotalar için yanıt tanımlanmadı."
+    },
+    "route": {
+      "requestBody": "İstek gövdesi",
+      "responseBody": "Yanıt gövdesi",
+      "security": "Güvenlik",
+      "externalDocs": "Harici belgeler",
+      "examplePayload": "Örnek yük",
+      "operationId": "operationId",
+      "addRequest": "+ İstek ekle"
+    },
+    "apiInfo": {
+      "version": "Sürüm",
+      "sourceFormat": "Kaynak biçimi",
+      "from": "kaynağı:",
+      "server": "Sunucu",
+      "contact": "İletişim",
+      "license": "Lisans",
+      "termsOfService": "Hizmet şartları",
+      "externalDocs": "Harici belgeler",
+      "tagReferences": "Etiket referansları"
+    },
+    "sidebar": {
+      "outline": "Belge taslağı"
+    },
+    "legend": {
+      "requiredProperty": "zorunlu özellik",
+      "optionalProperty": "isteğe bağlı özellik",
+      "nullableValue": "null olabilen değer",
+      "readOnly": "salt okunur (sunucu tarafından ayarlanır)",
+      "deprecatedBadge": "kullanımdan kaldırıldı",
+      "deprecatedDesc": "kaynak spesifikasyonunda kullanımdan kaldırıldı olarak bildirildi",
+      "removedBadge": "kaldırıldı",
+      "removedDesc": "son yeniden içe aktarmada yok",
+      "requiredSingleRef": "zorunlu tekil başvuru",
+      "optionalSingleRef": "isteğe bağlı tekil başvuru",
+      "requiredArrayRef": "zorunlu dizi başvurusu",
+      "optionalArrayRef": "isteğe bağlı dizi başvurusu"
     }
   },
   "scenario": {
@@ -1782,8 +1828,7 @@
       "dataFormats": "Veri biçimleri",
       "encoding": "Kodlama",
       "time": "Zamanlama",
-      "algorithmie": "Algoritmalar",
-      "ux": "UX"
+      "algorithmie": "Algoritmalar"
     },
     "listOp": {
       "value": "liste",
@@ -2333,9 +2378,6 @@
     "skipPlaceholder": "0",
     "topPlaceholder": "50",
     "urlPlaceholder": "https://service/odata/EntitySet",
-    "urlPreview": "URL önizlemesi (çözümlemeden önce)",
-    "versionV2NotYet": "v2 (yürütme henüz desteklenmiyor)",
-    "versionV3NotYet": "v3 (yürütme henüz desteklenmiyor)",
     "operationKindEntitySet": "Varlık kümesi (GET)",
     "operationKindFunction": "İşlev (satır içi parametreli GET)",
     "operationKindAction": "Eylem (JSON gövdeli POST)",
@@ -2354,7 +2396,8 @@
       "stopListening": "Dinlemeyi durdur",
       "notListening": "Dinlemiyor",
       "served": "Dinliyor — {{count}} istek karşılandı",
-      "listenFailed": "Mock sunucusu başlatılamadı"
+      "listenFailed": "Mock sunucusu başlatılamadı",
+      "portInUse": "{{port}} bağlantı noktası zaten başka bir uygulama tarafından kullanılıyor. Uygulamayı kapatın veya başka bir bağlantı noktası seçip sunucuyu yeniden başlatın."
     }
   },
   "odata": {
@@ -2374,6 +2417,7 @@
     },
     "namePlaceholder": "Yapılandırma adı",
     "saveButton": "Kaydet",
+    "updateButton": "Geçerli değerlerle güncelle",
     "storageTarget": {
       "label": "Proje dosyasına kaydet (.restorm)"
     },
@@ -2386,6 +2430,10 @@
     "loadConfirm": {
       "title": "Yapılandırmayı yükle",
       "message": "\"{{name}}\" yapılandırmasını yüklemek istiyor musunuz? Mevcut kaydedilmemiş yapılandırmanız kaybolacak."
+    },
+    "updateConfirm": {
+      "title": "Yapılandırmayı güncelle",
+      "message": "\"{{name}}\" yapılandırmasını geçerli değerlerle değiştirmek istiyor musunuz?"
     },
     "deleteConfirm": {
       "title": "Yapılandırmayı sil",
@@ -2632,6 +2680,10 @@
       "title": "Proje daha yeni bir sürümle oluşturuldu",
       "message": "Bu dosya, kullandığınızdan daha yeni bir Restorm sürümüyle oluşturuldu. Açmak için Restorm’u güncelleyin.",
       "versions": "Dosya biçimi {{found}}; bu sürüm en fazla {{current}} destekler."
+    },
+    "notARestormFile": {
+      "title": "Bu bir Restorm dosyası değil",
+      "message": "Bu dosya herhangi bir Restorm dosya biçimi belirtmiyor. Restorm tarafından oluşturulmamış ya da elle düzenlenmiş, bu yüzden açılamıyor."
     }
   }
 }

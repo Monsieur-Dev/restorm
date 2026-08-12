@@ -28,7 +28,7 @@ import { scenarioEngine, type RunHandle } from '../../scenarioEngine/engine'
 import type { EngineEvent, RunLogEntry, RuntimeId } from '../../scenarioEngine/types'
 import { collectionStore } from '../../services/CollectionStore'
 import { scenarioUsageService } from '../../services'
-import { validateScenarioModel } from '../../../shared/scenarioValidation'
+import { validateScenarioModel, findOrphanScenarioEdges, describeOrphanScenarioEdge } from '../../../shared/scenarioValidation'
 import type { Scenario } from '../../../shared/models/Scenario'
 
 /** Minimal interpolating translator so the model validator yields readable
@@ -50,12 +50,19 @@ function findScenarioModel(id: string): Scenario | null {
 function blockingValidationSummary(scenarioId: string): string | null {
   const scenario = findScenarioModel(scenarioId)
   if (!scenario) return null
-  const byNode = validateScenarioModel(scenario, validationT)
-  if (byNode.size === 0) return null
   const lines: string[] = []
+  const byNode = validateScenarioModel(scenario, validationT)
   for (const [nodeId, errs] of byNode) {
     for (const e of errs) lines.push(`  • [${nodeId}${e.field ? `/${e.field}` : ''}] ${e.message}`)
   }
+  // Orphan edges wired to a port the node no longer carries: the scheduler
+  // would register the stale port as a required input nothing can satisfy, so
+  // the node (and its downstream) silently never fires while the run still
+  // reports `completed`. Refuse instead of running a scenario that can't work.
+  for (const orphan of findOrphanScenarioEdges(scenario)) {
+    lines.push(`  • ${describeOrphanScenarioEdge(orphan)}`)
+  }
+  if (lines.length === 0) return null
   return `Cannot run "${scenario.name || scenarioId}": ${lines.length} validation error(s) must be fixed first:\n${lines.join('\n')}`
 }
 

@@ -47,6 +47,7 @@ import { useIsGrpcListening } from '../../services/grpcListeningStore'
 import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { ResolvedUrlPreview } from '../common/ResolvedUrlPreview'
 import { GrpcServerTabView } from './GrpcServerTabView'
 import './WebSocketChat.css'
 
@@ -104,6 +105,19 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = (props) => 
   return <GrpcClientTabView {...props} />
 }
 
+/**
+ * The transport a request tab drives.
+ *
+ * `GrpcRequest.transport` is required on the model, but this component reads a
+ * request that crossed IPC as a PLAIN object — no class, so no field default
+ * ran. Normalising here is boundary validation of untrusted input, the same job
+ * `GrpcRequest.fromPlain` does on the main side; it is NOT a compatibility
+ * shim for older documents.
+ */
+function normaliseTransport(value: GrpcTransport | undefined): GrpcTransport {
+  return value ?? 'grpc'
+}
+
 const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   request,
   conflictFieldDiff,
@@ -137,7 +151,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [callType, setCallTypeState] = useState<GrpcCallType>(request.callType)
   // Named `grpcTransport` (not `transport`) to avoid colliding with this file's
   // unrelated "transport-replaced" quick-config-reload vocabulary below.
-  const [grpcTransport, setGrpcTransportState] = useState<GrpcTransport>(request.transport ?? 'grpc')
+  const [grpcTransport, setGrpcTransportState] = useState<GrpcTransport>(normaliseTransport(request.transport))
   const debouncedGrpcTransport = useDebouncedValue(grpcTransport, 250)
   const [isSending, setIsSending] = useState(false)
   const [isRefreshingReflection, setIsRefreshingReflection] = useState(false)
@@ -186,7 +200,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setUrlState(request.url)
     setRequestMessageState(request.requestMessage)
     setCallTypeState(request.callType)
-    setGrpcTransportState(request.transport ?? 'grpc')
+    setGrpcTransportState(normaliseTransport(request.transport))
     setResponse(null)
     setLiveMessages([])
   }, [request])
@@ -206,7 +220,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     setUrlState(current.url)
     setRequestMessageState(current.requestMessage)
     setCallTypeState(current.callType)
-    setGrpcTransportState(current.transport ?? 'grpc')
+    setGrpcTransportState(normaliseTransport(current.transport))
     // Remount the metadata table so it re-reads the restored rows.
     setTransportEpoch((n) => n + 1)
   }, [])
@@ -235,7 +249,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
       service: currentRequest.service,
       grpcMethod: currentRequest.method,
       callType: currentRequest.callType,
-      transport: currentRequest.transport ?? 'grpc',
+      transport: normaliseTransport(currentRequest.transport),
       requestMessage: currentRequest.requestMessage,
       // The execution service resolves the dynamic client from the request's own
       // proto (a reflected descriptor set, inline content, or a `.proto` path,
@@ -687,12 +701,9 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
   const urlSection = (
     <>
       <ControlGroup data-testid="grpc-url-section">
-        <HeaderHoverTooltip label={resolvedUrl || url} suppressed={!(resolvedUrl || url)} className="url-container-stretch">
           <div
             style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', border: '1px solid transparent', ...fieldDiffStyle(!!conflictFields?.['url']) }}
             data-testid="url-container"
-            data-url-resolved={resolvedUrl ? 'true' : 'false'}
-            data-resolved-url={resolvedUrl || url}
           >
             <RestormVariableInputBox
               value={url}
@@ -703,7 +714,6 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
               data-testid="grpc-url-input"
             />
           </div>
-        </HeaderHoverTooltip>
         <div style={{ minWidth: 150 }}>
           <SelectBox
             id={`grpc-transport-${request.id}`}
@@ -782,6 +792,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         </SendButtonEnvSwitcher>
         )}
       </ControlGroup>
+      <ResolvedUrlPreview value={resolvedUrl} />
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)', display: 'flex', alignItems: 'center', gap: 6 }}>
         <span>{request.service}/{request.method}</span>
         <HeaderHoverTooltip label={t('grpc.reflection.refresh', 'Refresh from reflection')}>
@@ -894,5 +905,3 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
     </>
   )
 }
-
-export default GrpcRequestTabView

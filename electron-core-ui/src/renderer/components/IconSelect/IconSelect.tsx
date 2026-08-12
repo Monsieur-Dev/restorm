@@ -607,4 +607,3 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
 }
 
 export const IconSelect = React.memo(IconSelectInner)
-export default IconSelect

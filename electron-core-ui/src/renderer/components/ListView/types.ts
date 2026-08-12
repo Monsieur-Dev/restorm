@@ -78,8 +78,16 @@ export interface ListViewItemEventPayload {
 }
 
 export interface ListViewDropEventPayload extends ListViewItemEventPayload {
+  /** The row the drag started from (the anchor of a multi-item drag). */
   source: ListViewItemData
   sourcePath: ListViewItemPath
+  /**
+   * Every dragged row, in visual order. A single-item drag carries exactly
+   * one entry (the anchor); a drag started on a row that belongs to a
+   * multi-selection carries the whole selection. `source`/`sourcePath`
+   * stay the anchor so single-selection consumers keep working unchanged.
+   */
+  sources: ListViewItemEventPayload[]
   position: ListViewDropPosition
   originalEvent: React.DragEvent<HTMLDivElement>
 }
@@ -227,6 +235,48 @@ export interface ListViewProps {
    * standard drag-to-reorder UX.
    */
   disableDrag?: boolean
+
+  /**
+   * Validates a drop while it is being HOVERED. Called on every dragover
+   * with the dragged rows, the hovered row, and the would-be position.
+   * Returning `false` suppresses the drop indicator, switches the drag
+   * ghost into its error state (codicon badge), reports `dropEffect:
+   * 'none'` and rejects the drop. Absent, every drop is considered valid
+   * (the consumer can still refuse it in `onItemDrop`, but without any
+   * visual feedback during the hover).
+   */
+  canDrop?: (
+    sources: ListViewItemEventPayload[],
+    target: ListViewItemEventPayload,
+    position: ListViewDropPosition
+  ) => boolean
+
+  /**
+   * Context menu for a MULTI-selection. When the selection holds more than
+   * one row and the right-clicked row belongs to it, this builder is called
+   * with the selected ids (visual order) and its result replaces the row's
+   * own `contextMenuItems`. Right-clicking OUTSIDE the selection first
+   * collapses the selection to that row (standard tree behaviour), then the
+   * per-row menu applies. Only consulted in `selectionMode="multiple"`.
+   */
+  selectionContextMenuItems?: (selectedIds: string[]) => import('../ContextMenu/ContextMenu').ContextMenuItem[] | null
+
+  /**
+   * Delay (ms) before a COLLAPSED container hovered during a drag expands
+   * itself, so the user can dive into it without dropping first. Expansion
+   * goes through the normal toggle path (`onItemToggle` fires — a
+   * controlled `expandedIds` parent sees it like a chevron click).
+   * OPT-IN: default `null` (disabled) — existing drag consumers keep their
+   * behaviour; a tree that wants mid-drag expansion passes e.g. 1000.
+   */
+  dragExpandDelayMs?: number | null
+
+  /**
+   * Drop released on the list's EMPTY AREA (below/beside the rows). Receives
+   * every dragged row — the consumer typically moves them to the top level.
+   * Absent, the empty area is not a drop target (unchanged behaviour).
+   */
+  onEmptyAreaDrop?: (sources: ListViewItemEventPayload[], originalEvent: React.DragEvent<HTMLElement>) => void
 }
 
 export interface ListViewItemProps {

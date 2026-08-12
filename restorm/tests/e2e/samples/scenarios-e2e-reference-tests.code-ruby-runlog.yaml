@@ -1,7 +1,6 @@
 - message: 🔵 [<time>] ▶ Code Ruby
 - message: ⚪ [<time>] start code
   data:
-    language: ruby
     code: >-
       # Fixed dataset (no input → runs at start). puts → run log.
 
@@ -11,6 +10,7 @@
       puts "ruby: built #{data.length} rows"
 
       data
+    language: ruby
 - message: "🔵 [<time>] ruby: built 3 rows"
 - message: ⚪ [<time>] done code
   data:
@@ -23,13 +23,13 @@
         v: 2
 - message: ⚪ [<time>] start code
   data:
-    language: ruby
     code: |-
       # `$input` = wired value (array of hashes). Enumerable aggregate.
       total = $input.sum { |r| r["v"] }
       names = $input.sort_by { |r| r["v"] }.map { |r| r["n"] }
       puts "ruby: total = #{total} names = #{names.join(",")}"
       { "total" => total, "names" => names }
+    language: ruby
     value:
       - n: a
         v: 3
@@ -48,12 +48,12 @@
         - a
 - message: ⚪ [<time>] start code
   data:
-    language: ruby
     code: |-
       # String interpolation summary of the previous result.
       summary = "#{$input["names"].length} items summing to #{$input["total"]}"
       puts "ruby: #{summary}"
       { "lang" => "ruby", "summary" => summary, "total" => $input["total"] }
+    language: ruby
     value:
       total: 6
       names:

@@ -46,7 +46,11 @@ function getSettingsConfigPath(): string {
 // Initialize Electron application
 const resourcesPath = getResourcesPath()
 const settingsConfigPath = getSettingsConfigPath()
-initializeApp('Demo', createWindow, resourcesPath, undefined, undefined, existsSync(settingsConfigPath) ? settingsConfigPath : undefined)
+initializeApp('Demo', {
+  createWindow,
+  devResourcesPath: resourcesPath,
+  ...(existsSync(settingsConfigPath) ? { appSettingsConfigPath: settingsConfigPath } : {})
+})
 
 // Store file parameters for Editor window (keyed by window ID)
 const editorWindowFiles = new Map<number, { title: string; content?: string }>()

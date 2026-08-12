@@ -249,5 +249,3 @@ export const TipsCard: React.FC<TipsCardProps> = ({ initialIndex }) => {
     </MosaicCard>
   )
 }
-
-export default TipsCard

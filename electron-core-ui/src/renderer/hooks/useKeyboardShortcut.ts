@@ -45,5 +45,3 @@ export function useKeyboardShortcut(
     }
   }, [shortcut, enabled, stableHandler])
 }
-
-export default useKeyboardShortcut

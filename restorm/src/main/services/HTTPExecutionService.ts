@@ -241,6 +241,12 @@ class HTTPExecutionService {
           requestId,
           success: false,
           error: `Invalid URL: ${resolvedUrl}`,
+          // Report the URL that was actually built. Every other outcome carries
+          // it, and the response panel reads it: leaving it out here made the
+          // panel fall back to the UNRESOLVED template, so a user whose
+          // variable resolved to something unusable saw `{{baseUrl}}/…` and
+          // concluded the substitution had not happened at all.
+          requestUrl: resolvedUrl,
           timings: { startedAt, durationMs: Date.now() - startTime }
         }
       }
@@ -534,12 +540,14 @@ class HTTPExecutionService {
   async listen(requestId: string): Promise<{ success: boolean; listening: boolean; error?: string }> {
     const fullData = contextService.getRequestContext(requestId)?.fullData
     const method = (fullData?.method ?? 'GET').toUpperCase()
-    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    const { port, path } = this.parseMockAddress(this.resolvedMockUrl(requestId, fullData?.url ?? ''))
     if (!Number.isFinite(port) || port <= 0) {
       return { success: false, listening: false, error: 'A valid localhost port is required for an HTTP mock server' }
     }
 
-    this.broadcastProgress(requestId, 'started')
+    // 'started' is broadcast only once the bind is CONFIRMED (below) — firing
+    // it optimistically flipped the UI to "listening" for a split second on a
+    // busy port, which read as "the server started then cut out on its own".
     this.servedCounts.set(requestId, 0)
 
     const result = await websocketExecutionService.listenHttpServer({
@@ -560,6 +568,8 @@ class HTTPExecutionService {
     if (!result.listening) {
       this.servedCounts.delete(requestId)
       this.broadcastProgress(requestId, 'error')
+    } else {
+      this.broadcastProgress(requestId, 'started')
     }
     return result
   }
@@ -581,7 +591,7 @@ class HTTPExecutionService {
     const { requestId } = input
     const fullData = contextService.getRequestContext(requestId)?.fullData
     const method = (fullData?.method ?? 'GET').toUpperCase()
-    const { port, path } = this.parseMockAddress(fullData?.url ?? '')
+    const { port, path } = this.parseMockAddress(this.resolvedMockUrl(requestId, fullData?.url ?? ''))
     let fired = false
     const fireClose = (error?: string): void => {
       if (fired) return
@@ -641,6 +651,16 @@ class HTTPExecutionService {
   /** Split a mock address (`localhost:<port><path>`, optional scheme) into its
    * numeric port + pathname. The path defaults to `/` and the query is dropped
    * (route matching is on the pathname only). */
+  /** The mock address with its Handlebars expressions substituted — port and
+   * path are expression fields like a client URL, and the cached resolution
+   * ContextService maintains for every request is the same value the client
+   * tooltip shows. Falls back to the raw url when no resolution exists (or it
+   * resolved empty), so a plain literal address keeps working unchanged. */
+  private resolvedMockUrl(requestId: string, rawUrl: string): string {
+    const resolved = contextService.resolveUrlForRequest(requestId)?.resolvedUrl
+    return resolved && resolved.trim().length > 0 ? resolved : rawUrl
+  }
+
   private parseMockAddress(raw: string): { port: number; path: string } {
     const stripped = raw.replace(/^[a-z]+:\/\//i, '')
     const slash = stripped.indexOf('/')
@@ -699,6 +719,18 @@ class HTTPExecutionService {
     this.servedCounts.set(requestId, served)
     this.broadcastServed(requestId, served)
     logger.info('[HTTPExecutionService] mock served', { requestId, method: req.method, url: req.url, status, served })
+    // Persist the served exchange into the response history — the same store
+    // the client Send path feeds, so the request's history button shows every
+    // response this route SENT. The inbound path is surfaced as requestUrl.
+    void responseHistoryService.storeExecutionResult(requestId, 'http', {
+      requestId,
+      success: status < 400,
+      statusCode: status,
+      headers,
+      body,
+      timings: { startedAt: new Date().toISOString(), durationMs: 0 },
+      requestUrl: req.url ?? ''
+    })
     // The served summary feeds the scenario `httpListen` node's `served` output
     // (a hosted mock has no `response` output — it serves, it does not call out).
     return {
