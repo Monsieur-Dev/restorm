@@ -110,4 +110,13 @@ describe('LinuxDesktopActionsAdapter', () => {
     expect(existsSync(overridePath())).toBe(true)
     expect(readFileSync(overridePath(), 'utf8')).toContain('Hand written')
   })
+
+  it('never overwrites a foreign override when adding favorites', () => {
+    mkdirSync(join(dataHome, 'applications'), { recursive: true })
+    writeFileSync(overridePath(), '[Desktop Entry]\nName=Hand written\n')
+    makeAdapter().apply(withFavorites([{ path: '/p.restorm', name: 'p' }]), () => undefined)
+    const out = readFileSync(overridePath(), 'utf8')
+    expect(out).toContain('Hand written')
+    expect(out).not.toContain('X-AppIconMenu-Managed')
+  })
 })

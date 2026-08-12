@@ -372,7 +372,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               why none of these register Ctrl+X/C/V. The cut/copy/paste/find
               labels resolve from the ECUI core i18n bundle (the app bundle no
               longer carries them) — a rename there changes these entries. */}
-          {fileName && (<MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
+          {/* On macOS the native roles below own ⌘Z/⌘X/⌘C/⌘V for text fields, so
+              the Edit menu must exist even with no project open — otherwise the
+              clipboard stops working in the search bar / settings inputs. The
+              selection-dependent items are gated on `fileName` instead. */}
+          {(isMac || fileName) && (<MenuBarItem title={t('menuBar.edit')} data-testid="titlebar-menubar-item-edit">
             {/* macOS only: `role` drives the NATIVE menu (the in-window bar is
                 not rendered there). Declaring the roles is the only thing that
                 makes ⌘Z/⌘X/⌘C/⌘V work in text fields — the role owns its own
@@ -385,7 +389,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             {isMac && <MenuItem data-testid="titlebar-menu-item-native-cut" title={t('menuBar.cut')} shortcut="Ctrl+X" role="cut" disabled />}
             {isMac && <MenuItem data-testid="titlebar-menu-item-native-copy" title={t('menuBar.copy')} shortcut="Ctrl+C" role="copy" disabled />}
             {isMac && <MenuItem data-testid="titlebar-menu-item-native-paste" title={t('menuBar.paste')} shortcut="Ctrl+V" role="paste" disabled />}
-            {isMac && <MenuItemSeparator data-testid="titlebar-menu-separator-edit-native-2" />}
+            {isMac && fileName && <MenuItemSeparator data-testid="titlebar-menu-separator-edit-native-2" />}
+            {fileName && (<>
             <MenuItem data-testid="titlebar-menu-item-cut" title={t('menuBar.cut')} icon={<span className="codicon codicon-file-symlink-file" aria-hidden="true" />} disabled={!selection} {...(onCutSelection ? { onClick: onCutSelection } : {})} />
             <MenuItem data-testid="titlebar-menu-item-copy" title={t('menuBar.copy')} icon={<span className="codicon codicon-files" aria-hidden="true" />} disabled={!selection} {...(onCopySelection ? { onClick: onCopySelection } : {})} />
             <MenuItem data-testid="titlebar-menu-item-paste" title={t('menuBar.paste')} icon={<span className="codicon codicon-output" aria-hidden="true" />} disabled={!canPaste} {...(onPasteSelection ? { onClick: onPasteSelection } : {})} />
@@ -402,6 +407,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-edit-3" />
             <MenuItem data-testid="titlebar-menu-item-find" title={t('menuBar.find')} icon={<span className="codicon codicon-search" aria-hidden="true" />} shortcut="Ctrl+Shift+F" {...(onFocusSearch ? { onClick: onFocusSearch } : {})} />
+            </>)}
           </MenuBarItem>)}
           {/* Créer — Importer (moved out of Fichier), then the same add
               entries as the sidebar context menu's « Ajouter », flattened.

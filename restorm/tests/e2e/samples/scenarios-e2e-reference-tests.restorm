@@ -23049,6 +23049,248 @@ collections:
                     kind: query
                     headers: []
                     type: trpc
+              - id: dc2c5c24-ebf2-4fb3-a567-7390b3ee08d6
+                name: Value done join
+                type: scenario
+                edges:
+                  - id: 13d91855-070a-4657-afd3-37b3e965620b
+                    from:
+                      nodeId: 654aa0a1-cde5-4b85-807c-2a6aa08ce20d
+                      portId: result
+                    selector: .
+                    to:
+                      nodeId: c2a147ee-9774-4af8-99ad-2c9567db085f
+                      portId: a
+                  - id: c173ddc9-99fe-4874-95a6-d4c2d060aa5f
+                    from:
+                      nodeId: 654aa0a1-cde5-4b85-807c-2a6aa08ce20d
+                      portId: done
+                    to:
+                      nodeId: c2a147ee-9774-4af8-99ad-2c9567db085f
+                      portId: in
+                  - id: 028a6d8d-6e1f-4e26-9e18-11ff3d66d7ba
+                    from:
+                      nodeId: c2a147ee-9774-4af8-99ad-2c9567db085f
+                      portId: then
+                    to:
+                      nodeId: 401aa9b3-d3db-4a62-8c1a-41c74e7233c8
+                      portId: in
+                  - id: b1313e07-2388-42a4-aefa-4eec7427d65b
+                    from:
+                      nodeId: 401aa9b3-d3db-4a62-8c1a-41c74e7233c8
+                      portId: out
+                    selector: .
+                    to:
+                      nodeId: 09a62db3-a7a3-4b8b-9aba-b8aa1dee0748
+                      portId: data
+                  - id: a68614c5-cfa4-4ecc-b485-0e734fd7e51c
+                    from:
+                      nodeId: 401aa9b3-d3db-4a62-8c1a-41c74e7233c8
+                      portId: done
+                    to:
+                      nodeId: 09a62db3-a7a3-4b8b-9aba-b8aa1dee0748
+                      portId: in
+                  - id: 2e70a77d-a7cc-4fdd-ba9d-0a26cb8aab91
+                    from:
+                      nodeId: b6a63332-b5af-499d-951f-ce1d6f9f6559
+                      portId: done
+                    to:
+                      nodeId: d83b1bed-a59a-4783-a26a-33c2f607aa7a
+                      portId: in
+                  - id: fd2b2dc1-83d8-4f41-b83f-19a37041b360
+                    from:
+                      nodeId: d83b1bed-a59a-4783-a26a-33c2f607aa7a
+                      portId: done
+                    to:
+                      nodeId: 8cb30a14-1743-4f3e-8e5a-4a7bf9d29dac
+                      portId: in
+                items: []
+                nodes:
+                  - id: 654aa0a1-cde5-4b85-807c-2a6aa08ce20d
+                    config:
+                      a:
+                        type: numeric
+                        format: decimal
+                        value: 40
+                      b:
+                        type: numeric
+                        format: decimal
+                        value: 2
+                      operator: add
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    kind: arithmetic
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 60
+                  - id: c2a147ee-9774-4af8-99ad-2c9567db085f
+                    config:
+                      b:
+                        type: numeric
+                        format: decimal
+                        value: 42
+                      message:
+                        type: string
+                        value: result is 42
+                      operator: eq
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                      - id: message
+                        name: message
+                        dataType: string
+                    kind: assert
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        flow: both
+                        role: then
+                      - id: else
+                        name: fail
+                        dataType: any
+                        flow: both
+                        role: else
+                    position:
+                      x: 380
+                      'y': 60
+                  - id: 401aa9b3-d3db-4a62-8c1a-41c74e7233c8
+                    config:
+                      expression:
+                        type: string
+                        value: value+done join reached
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                      - id: expression
+                        name: expression
+                        dataType: any
+                    kind: transform
+                    outputs:
+                      - id: out
+                        name: value
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 720
+                      'y': 60
+                  - id: 09a62db3-a7a3-4b8b-9aba-b8aa1dee0748
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: 'value+done join: downstream reached the end'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    kind: log
+                    outputs: []
+                    position:
+                      x: 1060
+                      'y': 60
+                  - id: b6a63332-b5af-499d-951f-ce1d6f9f6559
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: 'sibling branch: step 1'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    kind: log
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 320
+                  - id: d83b1bed-a59a-4783-a26a-33c2f607aa7a
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: 'sibling branch: step 2'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    kind: log
+                    outputs: []
+                    position:
+                      x: 380
+                      'y': 320
+                  - id: 8cb30a14-1743-4f3e-8e5a-4a7bf9d29dac
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: 'sibling branch: step 3'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    kind: log
+                    outputs: []
+                    position:
+                      x: 720
+                      'y': 320
+                params: []
+                tags: []
           - type: scenario
             tags: []
             params: []

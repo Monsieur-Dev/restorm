@@ -120,6 +120,13 @@ export class LinuxDesktopActionsAdapter implements AppIconMenuAdapter {
       // With no packaged entry to shadow (dev run, unusual install) we can't
       // build a faithful override without risking a broken launcher entry.
       if (base === null) return
+      // Never overwrite an override the user authored themselves: if one already
+      // exists without our marker, it is not ours to replace (symmetric with
+      // removeOverride, which only deletes a marked file).
+      if (existsSync(this.overridePath)) {
+        const existing = readFileSync(this.overridePath, 'utf8')
+        if (!existing.includes(`${MANAGED_MARKER_KEY}=true`)) return
+      }
       this.writeOverride(this.composeOverride(base, favorites))
       this.refreshDatabase()
     } catch (error) {

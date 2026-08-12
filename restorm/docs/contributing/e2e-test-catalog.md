@@ -80,7 +80,7 @@ server; — = pure UI/in-process.
 |---|--:|---|---|
 | odata-petstore | 5 | OData import + send + filter (petstore) | — |
 | scenario-code-deps | 2 | Code-node external deps (offline chained golden) | — |
-| scenario-runlog | 56 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main) | 🏠 |
+| scenario-runlog | 57 | Scenario run-log golden matrix (all node kinds + every protocol sub-scenario + Main + the value+done join, where a consumer is wired to both an upstream node's data output AND its `done` signal) | 🏠 |
 | scenario-quick-config-selector | 1 | Request-action config selector stays live | — |
 | scenario-setvariable-override | 1 | setVariable overrides an env-folder var downstream | — |
 | scenario-input-prompt | 4 | Run-parameters modal: the answer wins over the input default AND the request's own path param (string / number / enum / custom-list) | 🐳 petstore |
