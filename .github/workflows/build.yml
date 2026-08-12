@@ -15,16 +15,13 @@ name: Build and Test
 # These catch lockfile drift, uncommitted artefacts, and env issues that local
 # hooks cannot — they are the green signal that ship.sh --auto merges on.
 
+# No `push: main` trigger: every merge to main comes from a PR whose branch
+# was required to be up to date, so the merge commit's tree is identical to
+# the PR head that CI already validated — rebuilding it on push was a pure
+# duplicate. (Direct pushes to main are forbidden by project rules; the
+# staging preview build on merge lives in build-staging.yml, unchanged.)
 on:
   pull_request:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - restorm/CHANGELOG.md
-      - restorm/changelogs/**
-      - restorm/docs/**
-      - electron-core-ui/docs/**
-      - '**/*.md'
   workflow_dispatch:
     inputs:
       full_checks:
