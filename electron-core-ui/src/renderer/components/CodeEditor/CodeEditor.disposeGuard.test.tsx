@@ -23,6 +23,11 @@ import React, { StrictMode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 
+/** Flush the fake editor's async creation (a microtask, like the loader). */
+async function flushEditorInit(): Promise<void> {
+  await act(async () => { await Promise.resolve() })
+}
+
 type MarkerHandler = (resources: { toString(): string }[]) => void
 
 interface FakeModel {
@@ -105,11 +110,26 @@ const FakeMonacoEditor: React.FC<{ onMount?: (editor: unknown, monaco: unknown) 
   const onMountRef = React.useRef(onMount)
   React.useEffect(() => { onMountRef.current = onMount }, [onMount])
   React.useEffect(() => {
-    const mine = makeFakeEditor()
-    currentFake = mine
-    onMountRef.current?.(mine.editor, fakeMonaco)
-    // Mirror @monaco-editor/react: unmount disposes the editor it created.
-    return () => { mine.editor.dispose() }
+    // ASYNC creation, like the real library (its loader resolves in a
+    // microtask at best). Fidelity matters: StrictMode's initial
+    // mount→cleanup→mount double-invoke reaches the first cleanup BEFORE
+    // anything was created, so no dispose fires there — a synchronous fake
+    // disposed a live editor at first cleanup, which (combined with the
+    // component's remount-on-dispose recovery) spun mount→dispose→remount
+    // forever, a loop the real library never enters.
+    let mine: ReturnType<typeof makeFakeEditor> | null = null
+    let cancelled = false
+    queueMicrotask(() => {
+      if (cancelled) return
+      mine = makeFakeEditor()
+      currentFake = mine
+      onMountRef.current?.(mine.editor, fakeMonaco)
+    })
+    return () => {
+      // Mirror the library: cancel a pending init, dispose a live editor.
+      if (mine) mine.editor.dispose()
+      else cancelled = true
+    }
   }, [])
   return <div data-testid="fake-monaco" />
 }
@@ -128,12 +148,13 @@ beforeEach(() => {
 })
 
 describe('CodeEditor — no editor call survives a dispose', () => {
-  it('re-running the handlebars effects against a disposed editor stays silent', () => {
+  it('re-running the handlebars effects against a disposed editor stays silent', async () => {
     const view = render(
       <StrictMode>
         <CodeEditor value="{{petId}}" tolerateHandlebars={false} />
       </StrictMode>
     )
+    await flushEditorInit()
     expect(currentFake).not.toBeNull()
 
     // The reconnect scenario: the mounted editor gets disposed while React
@@ -152,12 +173,53 @@ describe('CodeEditor — no editor call survives a dispose', () => {
     }).not.toThrow()
   })
 
-  it('a deferred onDidChangeMarkers callback firing after dispose stays silent', () => {
+  it('defuses the disposed instance for OUT-OF-REACH holders and remounts a fresh editor', async () => {
+    // The real crash path runs INSIDE @monaco-editor/react: its reconnect
+    // effects call setModel / executeEdits / re-subscribe content listeners
+    // through its own refs on the editor it just disposed, and it never
+    // recreates one once its ready-latch is set. No guard in CodeEditor's
+    // effects can intercept those calls — the instance itself must become
+    // inert, and the library must be remounted for a live replacement.
+    render(
+      <StrictMode>
+        <CodeEditor value="{{petId}}" tolerateHandlebars={false} />
+      </StrictMode>
+    )
+    await flushEditorInit()
+    const mounted = currentFake
+    expect(mounted).not.toBeNull()
+
+    act(() => { mounted?.editor.dispose() })
+
+    // Library-shaped post-dispose calls on the SAME object: inert, no throw.
+    const corpse = mounted?.editor as unknown as {
+      getModel(): unknown
+      setModel(m: unknown): unknown
+      executeEdits(s: string, e: unknown[]): unknown
+      onDidChangeModelContent(cb: () => void): { dispose(): void }
+      updateOptions(o: unknown): unknown
+    }
+    expect(() => {
+      corpse.getModel()
+      corpse.setModel({})
+      corpse.executeEdits('', [])
+      corpse.onDidChangeModelContent(() => undefined).dispose()
+      corpse.updateOptions({})
+    }).not.toThrow()
+
+    // And the component remounted the library: a FRESH, live editor exists.
+    await flushEditorInit()
+    expect(currentFake).not.toBe(mounted)
+    expect(currentFake?.isDisposed()).toBe(false)
+  })
+
+  it('a deferred onDidChangeMarkers callback firing after dispose stays silent', async () => {
     render(
       <StrictMode>
         <CodeEditor value="{{petId}}" tolerateHandlebars={true} />
       </StrictMode>
     )
+    await flushEditorInit()
     expect(currentFake).not.toBeNull()
     // The subscription exists from the live phase…
     expect(markerHandlers.length).toBeGreaterThan(0)

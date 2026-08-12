@@ -16,6 +16,66 @@ import { findHandlebarsHighlightRanges, HANDLEBARS_INLINE_CLASS } from './handle
 bootstrapMonaco()
 
 /**
+ * Every editor method some holder may still call after `dispose()` — and
+ * that Monaco answers with `InstantiationService has been disposed` (then a
+ * `domNode` crash from the render it managed to schedule first).
+ *
+ * The critical holder is `@monaco-editor/react` ITSELF: under StrictMode's
+ * dev-only disconnect→reconnect of a moved subtree (a KeyValueTable row
+ * reorder), its cleanup disposes the editor but its `isEditorReady` state
+ * stays true, so on reconnect it re-runs its own internal effects —
+ * `setModel`, `executeEdits`, `updateOptions`, `onDidChangeModelContent`
+ * re-subscription — against the corpse it still holds in a ref, and never
+ * recreates the editor. No guard in OUR effects can intercept calls made
+ * inside the library, so the corpse itself is defused: on dispose, each of
+ * these methods is shadowed on the INSTANCE with an inert stub, which
+ * protects every holder of the same object at once (the library, this
+ * component, VariableInputBox, the host app).
+ */
+const DISPOSED_EDITOR_INERT_STUBS: Record<string, unknown> = {
+  getModel: () => null,
+  setModel: () => undefined,
+  getValue: () => '',
+  setValue: () => undefined,
+  getOption: () => undefined,
+  updateOptions: () => undefined,
+  executeEdits: () => false,
+  pushUndoStop: () => false,
+  revealLine: () => undefined,
+  saveViewState: () => null,
+  restoreViewState: () => undefined,
+  getPosition: () => null,
+  getDomNode: () => null,
+  layout: () => undefined,
+  focus: () => undefined,
+  hasTextFocus: () => false,
+  trigger: () => undefined,
+  getContribution: () => null,
+  createDecorationsCollection: () => ({ set: () => undefined, clear: () => undefined, getRanges: () => [] }),
+  addAction: () => ({ dispose: () => undefined }),
+  addCommand: () => null,
+  onDidChangeModelContent: () => ({ dispose: () => undefined }),
+  onDidChangeModel: () => ({ dispose: () => undefined }),
+  onKeyDown: () => ({ dispose: () => undefined }),
+  onDidPaste: () => ({ dispose: () => undefined }),
+  onDidDispose: () => ({ dispose: () => undefined })
+}
+
+/** Shadow the disposed editor's methods with inert stubs (own-property
+ * assignment — the prototype stays untouched, other editors unaffected). */
+function neuterDisposedEditor(editor: monacoEditor.editor.IStandaloneCodeEditor): void {
+  const record = editor as unknown as Record<string, unknown>
+  for (const [name, stub] of Object.entries(DISPOSED_EDITOR_INERT_STUBS)) {
+    try {
+      record[name] = stub
+    } catch {
+      // A frozen/accessor property refuses the shadow — leave that one; the
+      // effect-level guards still cover this component's own calls.
+    }
+  }
+}
+
+/**
  * Extract a Handlebars variable name at the given position in text.
  * Returns the variable name if cursor is inside {{variableName}}, otherwise null.
  */
@@ -191,6 +251,20 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
   const [autoDetectedTheme, setAutoDetectedTheme] = useState<string>(getMonacoTheme)
   const [editorInstance, setEditorInstance] = useState<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const [monacoInstance, setMonacoInstance] = useState<typeof monacoEditor | null>(null)
+  /**
+   * Bumped when the mounted editor gets disposed under this still-mounted
+   * component (StrictMode's reconnect of a moved subtree) — used as the
+   * `<Editor>` key. `@monaco-editor/react` never recreates an editor whose
+   * `isEditorReady` already latched, so without the remount the row would
+   * keep a defused-but-DEAD editor after a reorder. At a true unmount the
+   * state update is a no-op on the gone component.
+   */
+  const [editorGeneration, setEditorGeneration] = useState(0)
+  /** Content seed for a generation remount, captured (from the latest-value
+   * ref) inside the dispose handler — a ref read during RENDER is what the
+   * hooks rule forbids, and the frozen first-mount value would roll back
+   * anything typed since. */
+  const [remountSeed, setRemountSeed] = useState<string | null>(null)
   const goToDefinitionRef = useRef(onGoToDefinition)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   /**
@@ -452,7 +526,17 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     // reconnect's effect re-run happens BEFORE the state update renders.
     editor.onDidDispose(() => {
       disposedEditorsRef.current.add(editor)
+      // Defuse the instance itself: `@monaco-editor/react`'s reconnect
+      // effects call it through their own refs, out of this component's
+      // reach — see DISPOSED_EDITOR_INERT_STUBS.
+      neuterDisposedEditor(editor)
       setEditorInstance((current) => (current === editor ? null : current))
+      // And remount the library component for a FRESH editor — the library
+      // itself never recreates one once its ready-latch is set. Seed the
+      // remount with the latest content (ref read is legal here, in an
+      // event handler).
+      setRemountSeed(lastValueRef.current ?? null)
+      setEditorGeneration((generation) => generation + 1)
     })
     setEditorInstance(editor)
     setMonacoInstance(monacoTyped)
@@ -548,9 +632,15 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       <div style={{ width: '100%', height: '100%' }} {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
         <Editor
           {...editorPropsWithoutValue}
+          // Remount on a mid-life dispose (see editorGeneration) so the
+          // library builds a fresh editor instead of keeping the defused
+          // corpse it refuses to recreate.
+          key={editorGeneration}
           // Uncontrolled from @monaco-editor/react's point of view: omit `value` entirely so its
           // internal value-sync effect never runs. We push updates imperatively above.
-          defaultValue={initialValue}
+          // A generation remount seeds the fresh editor with the LATEST
+          // content (the frozen first-mount value would roll back typing).
+          defaultValue={remountSeed ?? initialValue}
           options={{ ...(props.options ?? {}), ...settingsOptions }}
           theme={currentTheme}
           onChange={handleChange}
