@@ -1208,6 +1208,86 @@ collections:
                   'y': 58
             params: []
             tags: []
+          - id: 9f98eb95-b075-405e-b6a8-4bc9b6d4eb4a
+            name: Leak probe
+            type: http
+            method: GET
+            url: '{{baseUrl}}/pet/{{petId}}'
+            deprecated: false
+            documentation: ''
+            headers: []
+            params: []
+            pathParams:
+              - key: petId
+                description: Own literal row — must win over any finished run
+                enabled: true
+                value:
+                  type: numeric
+                  format: decimal
+                  value: 2
+            tags: []
+          - id: 53653c33-b7b5-4b01-93db-d78cc3037c42
+            name: Leak check
+            type: scenario
+            edges:
+              - id: 1245045f-bc0d-4cd0-8c4d-abd519e5a3c1
+                from:
+                  nodeId: 319cdc8c-cbe4-4372-beea-91accd6c083c
+                  portId: done
+                to:
+                  nodeId: 6fa90c64-3137-4197-b588-8bcaa6dae799
+                  portId: in
+            items: []
+            nodes:
+              - id: 319cdc8c-cbe4-4372-beea-91accd6c083c
+                config:
+                  name: petId
+                  value:
+                    type: numeric
+                    format: decimal
+                    value: 1
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: value
+                    name: value
+                    dataType: any
+                kind: setVariable
+                outputs: []
+                position:
+                  x: 12
+                  'y': 12
+              - id: 6fa90c64-3137-4197-b588-8bcaa6dae799
+                config:
+                  label: Leak probe
+                  requestId: 9f98eb95-b075-405e-b6a8-4bc9b6d4eb4a
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: env
+                    name: env
+                    dataType: any
+                    flow: value
+                  - id: requestOverride
+                    name: override
+                    dataType: object
+                    flow: value
+                kind: httpRequest
+                outputs:
+                  - id: response
+                    name: response
+                    dataType: response
+                    flow: both
+                    role: response
+                position:
+                  x: 12
+                  'y': 156
+            params: []
+            tags: []
         tags: []
       - id: a254f15b-1473-4a36-9bef-75e3b5d8f934
         name: store

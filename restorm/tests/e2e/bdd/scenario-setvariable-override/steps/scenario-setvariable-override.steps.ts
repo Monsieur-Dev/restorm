@@ -198,3 +198,68 @@ Then('the setVariable run-log matches the snapshot', async () => {
     normalizeRunLogYaml(readFileSync(GOLDEN, 'utf-8'))
   )
 })
+
+// ---------------------------------------------------------------------------
+// A finished run must leave the request's own values behind — display + wire.
+// ---------------------------------------------------------------------------
+
+Then('the copied run-log shows the run went to {string}', async ({}, urlPart: string) => {
+  // During the run the run's variable wins over the request's own literal row
+  // — this is the behaviour the disposable run context must PRESERVE, and it
+  // doubles as proof the run actually dispatched before the leak assertions.
+  expect(copiedYaml, `run should have dispatched to ${urlPart}`).toContain(urlPart)
+})
+
+When('I open the {string} request from the sidebar', async ({}, name: string) => {
+  const p = requirePage()
+  await expandRowIfCollapsed(p, 'Swagger Petstore')
+  await expandRowIfCollapsed(p, 'pet')
+  await sidebarRowByName(p, name).click()
+})
+
+Then('the visible resolved URL ends with {string}', async ({}, suffix: string) => {
+  const p = requirePage()
+  // Assert on what the user SEES: several request tabs can be mounted at
+  // once, and a hidden tab's preview matching would green-light a leak on the
+  // visible one. Only elements with a client rect count (`getClientRects()`
+  // is empty for `display:none` subtrees, which is what Playwright's
+  // `:visible` filters on).
+  const visiblePreview = p.locator('[data-testid="url-resolved-preview"]:visible').first()
+  await expect(async () => {
+    const resolved = await visiblePreview.getAttribute('data-resolved-url')
+    expect(resolved, 'visible resolved URL should be back on the request\'s own row value').toMatch(new RegExp(`${suffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))
+  }).toPass({ timeout: 15000 })
+})
+
+When('I send the visible request', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="http-request-send-button"]:visible').first().click()
+})
+
+Then('the visible response body shows {string}', async ({}, text: string) => {
+  const p = requirePage()
+  // The body proves which resource the wire ACTUALLY served, which is the
+  // whole point: a leaked run value here would fetch the wrong pet with a
+  // green 200. The body editor lives under the "Response" sub-tab.
+  const responseTabs = p.locator('[data-testid="base-request-tabs-response"]').first()
+  await responseTabs.waitFor({ state: 'visible', timeout: 20000 })
+  await responseTabs.locator('[role="tab"]', { hasText: 'Response' }).first().click({ timeout: 10000 })
+  const editor = p.locator('[data-testid="http-response-body-editor"]:visible').first()
+  await editor.waitFor({ state: 'visible', timeout: 20000 })
+  // Read Monaco's content layer, not the editor root — the root's innerText
+  // leads with the line-number gutter — and fold Monaco's non-breaking
+  // spaces back to plain ones before matching.
+  await expect(async () => {
+    const raw = await editor.locator('.view-lines').first().innerText()
+    expect(raw.replace(/ /g, ' ')).toContain(text)
+  }).toPass({ timeout: 20000 })
+})
+
+When('I uncheck the {string} path param row', async ({}, key: string) => {
+  const p = requirePage()
+  const table = p.locator('[data-testid="http-request-path-params-table"]:visible').first()
+  await expect(table).toBeVisible({ timeout: 15000 })
+  const row = table.locator('tbody tr').filter({ hasText: key }).first()
+  await expect(row).toBeVisible({ timeout: 10000 })
+  await row.locator('[data-testid$="-enabled"]').first().click()
+})

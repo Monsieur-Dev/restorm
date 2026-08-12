@@ -28,3 +28,31 @@ Feature: Scenario setVariable overrides an env-folder variable for a downstream 
     When I create a scenario named "Root launch check" at the root of the sidebar
     And I run the root scenario "Root launch check" from its editor
     Then the root scenario "Root launch check" ran without a missing-scenario error
+
+  # The inverse guarantee: a run's variables must vanish WITH the run. The
+  # "Leak probe" request declares its OWN literal petId row (2); the "Leak
+  # check" scenario sets petId=1 upstream of it. During the run, the run's
+  # value wins (the run log proves /pet/1). After the run, both the DISPLAYED
+  # resolved URL and a real manual Send must be back on the request's own row
+  # — a run context that outlives its run used to keep feeding /pet/1 here,
+  # visible only on a VISIBLE tab and, worse, on the wire.
+  Scenario: a finished run leaves the request's own petId on the display and on the wire
+    Given I open the setVariable-override sample
+    When I run the "Leak check" scenario and copy all its logs
+    Then the copied run-log shows the run went to "/pet/1"
+    When I open the "Leak probe" request from the sidebar
+    Then the visible resolved URL ends with "/pet/2"
+    When I send the visible request
+    Then the visible response body shows "Cat 2"
+
+  # The ex-"unchecking does nothing" report: toggling a row always invalidated
+  # correctly — what made it LOOK broken was a leaked run value still feeding
+  # the variable, so the fallback to the env value never showed. With the
+  # disposable run context, unchecking the row right after a run must fall
+  # back to the env folder's petId (3) immediately, no close/reopen.
+  Scenario: unchecking the row right after a run falls back to the env value
+    Given I open the setVariable-override sample
+    When I run the "Leak check" scenario and copy all its logs
+    And I open the "Leak probe" request from the sidebar
+    And I uncheck the "petId" path param row
+    Then the visible resolved URL ends with "/pet/3"
