@@ -92,6 +92,16 @@ jobs:
       - name: Build distributables (electron-builder)
         run: |
           cd restorm
+          # An unset GitHub secret renders as an EMPTY env var, and
+          # electron-builder treats an empty CSC_LINK as a provided cert
+          # path — it resolves to the project dir and dies with "not a
+          # file". Strip every empty signing/telemetry var so an
+          # uncredentialed run stays a plain unsigned build.
+          for v in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD \
+                   APPLE_TEAM_ID AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET \
+                   SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_PROJECT; do
+            if [ -z "$(printenv "$v")" ]; then unset "$v"; fi
+          done
           # Notarization is opt-in per electron-builder 26 and only meaningful
           # once the Apple credentials exist — the flag rides the same secrets
           # that enable signing, so an uncredentialed run stays exactly the
@@ -159,14 +169,31 @@ jobs:
           spctl --assess --type execute --verbose=2 "$APP"
 
       - name: Publish to R2 (public — restorm-releases)
+        # Per-version layout: binaries + blockmaps live under `v<version>/`,
+        # while the `latest*.yml` update feeds stay at the bucket ROOT (their
+        # URL is what every installed app polls) with their `url:`/`path:`
+        # entries rewritten to point into the version folder — electron-updater
+        # and the website's download page both resolve those relative paths.
         run: |
-          aws s3 cp restorm/dist-electron/ "s3://restorm-releases/" \
+          VERSION=$(node -p "require('./restorm/package.json').version")
+          # Point the feeds' file references into the version folder.
+          for yml in restorm/dist-electron/latest*.yml; do
+            [ -f "$yml" ] || continue
+            sed -i -E "s|^( *- +url: )(.+)$|\1v${VERSION}/\2|; s|^(path: )(.+)$|\1v${VERSION}/\2|" "$yml"
+          done
+          # Binaries + blockmaps → v<version>/ …
+          aws s3 cp restorm/dist-electron/ "s3://restorm-releases/v${VERSION}/" \
             --recursive --endpoint-url "${R2_ENDPOINT}" \
             --exclude "*" \
             --include "*.deb" --include "*.rpm" --include "*.exe" \
             --include "*.dmg" --include "*.zip" --include "*.AppImage" \
-            --include "*.yml" --include "*.blockmap" \
-            --exclude "builder-debug.yml" \
+            --include "*.blockmap" \
+            --exclude "*/*"
+          # …and the rewritten feeds → bucket root.
+          aws s3 cp restorm/dist-electron/ "s3://restorm-releases/" \
+            --recursive --endpoint-url "${R2_ENDPOINT}" \
+            --exclude "*" \
+            --include "latest*.yml" \
             --exclude "*/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
