@@ -85,6 +85,9 @@ export const test = base.extend<DocShotsFixtures>({
           // this selects both the backend the login talks to AND the version
           // the statusbar displays. Default: the production channel.
           RESTORM_E2E_BACKEND_VERSION: process.env.DOC_SHOTS_VERSION ?? '1.0.0',
+          // Pin the MCP instance name: the statusbar shows it in every capture,
+          // and the default draws a random adjective-animal per boot.
+          RESTORM_MCP_SESSION_NAME: 'docs',
           ...(userDataOverride !== undefined ? { RESTORM_USER_DATA_OVERRIDE: userDataOverride } : {})
         }
       })

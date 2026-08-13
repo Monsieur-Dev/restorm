@@ -1,3 +1,4 @@
+import { execFileSync, spawnSync } from 'child_process'
 import { existsSync, mkdirSync, readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import type { Page } from '@playwright/test'
@@ -34,6 +35,21 @@ export async function switchAppLanguage(page: Page, locale: string): Promise<voi
   await page.waitForTimeout(600)
 }
 
+/** pngquant availability, probed once per run. */
+let pngquantAvailable: boolean | null = null
+
+/** Quantize a capture in place (deterministic for identical input, `--strip`
+ * drops timestamps) — screenshots are versioned, so size matters. A missing
+ * pngquant downgrades to raw Playwright PNGs with a single warning. */
+function optimizePng(target: string): void {
+  if (pngquantAvailable === null) {
+    pngquantAvailable = spawnSync('pngquant', ['--version']).status === 0
+    if (!pngquantAvailable) console.log('[doc-shots] pngquant not found — captures stay unoptimized')
+  }
+  if (!pngquantAvailable) return
+  execFileSync('pngquant', ['--force', '--strip', '--quality', '60-95', '--output', target, target])
+}
+
 /**
  * Capture one screenshot of the current app state per shipped locale.
  *
@@ -56,6 +72,7 @@ export async function captureForAllLocales(
     const target = targetFor(locale)
     mkdirSync(dirname(target), { recursive: true })
     await page.screenshot({ path: target })
+    optimizePng(target)
     written.push(target)
   }
   await switchAppLanguage(page, options.restore ?? 'en')

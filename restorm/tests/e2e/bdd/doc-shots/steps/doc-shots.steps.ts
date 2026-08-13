@@ -221,13 +221,14 @@ When(
     await connect(moveNode, 'done', waitNode, 'in')
     await connect(waitNode, 'done', fightNode, 'in')
 
-    // Open the editor FIRST: the auto-arranger uses the open editor's
-    // measured box sizes (falling back to estimates otherwise), so arranging
-    // with the graph on screen gives the clean final layout.
+    // Arrange BEFORE opening the editor: with the editor closed the ELK pass
+    // sizes every box from its port count — DETERMINISTIC estimates, where the
+    // open editor's live-measured sizes wobble by a pixel between runs and
+    // drag the fit-view zoom (and thus every rasterized pixel) along.
+    await callEmbeddedMcpTool(mcp, 'arrange_scenario', { scenarioId: scenario.id })
     await sidebarRowByName(p, scenarioName).click()
     await expect(p.locator('[data-testid="scenario-editor"]')).toBeVisible({ timeout: 15000 })
     await expect(p.locator('.react-flow__node')).toHaveCount(5, { timeout: 10000 })
-    await callEmbeddedMcpTool(mcp, 'arrange_scenario', { scenarioId: scenario.id })
     await p.waitForTimeout(800)
     // Fold the legend/inspector away FIRST (it changes the visible canvas
     // area), then fit the arranged graph to the final viewport.
