@@ -9,6 +9,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist/**',
+      'dist-electron/**',
       'out/**',
       'node_modules/**',
       'temp/**',
@@ -18,6 +19,9 @@ export default tseslint.config(
       'playwright-report/**',
       'test-results/**',
       '.features-gen/**',
+      // Build-time generated bundle (scripts/generate-sandbox-prelude.mts) —
+      // vendored third-party code, not ours to lint.
+      'resources/sandbox-stdlib-prelude.js',
       '*.config.ts'
     ],
   },

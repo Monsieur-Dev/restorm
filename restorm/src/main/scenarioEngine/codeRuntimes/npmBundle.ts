@@ -6,11 +6,11 @@
  * `./javascriptRuntime`).
  *
  * ## Why we cache the BUNDLE, not just the tarball
- * The curated standard library (`../codeSandbox`'s `SANDBOX_LIBS`) is bundled
+ * The curated standard library (`../sandboxStdlib`'s `SANDBOX_LIBS`) is bundled
  * ONCE with esbuild into a browser-platform IIFE before it ever reaches QuickJS
  * — a user-pinned package needs the exact same treatment: esbuild resolves the
  * package's own relative requires and substitutes the SAME `NODE_BUILTIN_SHIMS`
- * a couple of the curated libs already rely on (reused from `../codeSandbox`,
+ * a couple of the curated libs already rely on (reused from `../sandboxStdlib`,
  * not a second drifting copy). The derived `bundle.js` — not the raw tarball —
  * is what {@link ensurePackagesCached}'s generic `isCached` check scans for at
  * the package root, so a cache hit skips BOTH the network fetch AND the esbuild
@@ -130,9 +130,9 @@ function findExtractedRoot(dir: string): string {
  * statically, …). */
 async function bundlePackage(spec: PackageSpec, entryPath: string): Promise<string> {
   // Reuse the exact shim set/plugin the curated stdlib prelude bundles with —
-  // dynamic import keeps codeSandbox's heavy QuickJS import out of the
-  // install-time path (this only needs its esbuild plugin + shim table).
-  const { nodeBuiltinShimPlugin } = await import('../codeSandbox')
+  // imported from sandboxStdlib (electron-free, no QuickJS) so the
+  // install-time path stays light.
+  const { nodeBuiltinShimPlugin } = await import('../sandboxStdlib')
   try {
     const result = await esbuild({
       entryPoints: [entryPath],
