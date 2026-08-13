@@ -201,6 +201,31 @@ jobs:
             --exclude "*" \
             --include "latest*.yml" \
             --exclude "*/*"
+          # …and every installer AGAIN under `latest/` with a STABLE,
+          # version-less name — permanent direct-download URLs for the
+          # website's buttons, AppImageHub, AUR, badges. Overwritten by every
+          # release, whatever the version.
+          stable_name() {
+            case "$1" in
+              *.AppImage)      echo "Restorm.AppImage" ;;
+              *.deb)           echo "restorm_amd64.deb" ;;
+              *.rpm)           echo "restorm.x86_64.rpm" ;;
+              *.snap)          echo "restorm_amd64.snap" ;;
+              *.exe)           echo "Restorm-Setup.exe" ;;
+              *-arm64.dmg)     echo "Restorm-arm64.dmg" ;;
+              *.dmg)           echo "Restorm.dmg" ;;
+              *-arm64-mac.zip) echo "Restorm-arm64-mac.zip" ;;
+              *-mac.zip)       echo "Restorm-mac.zip" ;;
+              *)               echo "" ;;
+            esac
+          }
+          for f in restorm/dist-electron/*; do
+            [ -f "$f" ] || continue
+            dest=$(stable_name "$(basename "$f")")
+            [ -n "$dest" ] || continue
+            aws s3 cp "$f" "s3://restorm-releases/latest/${dest}" \
+              --endpoint-url "${R2_ENDPOINT}"
+          done
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
