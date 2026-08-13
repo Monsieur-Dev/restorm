@@ -3,6 +3,11 @@
 // run-log. Pure argv mutation — no network — so it's safe ahead of the firewall.
 import './cli/earlyQuiet'
 
+// LOAD-ORDER CRITICAL (esbuild): in a packaged app, point esbuild's binary
+// override at app.asar.unpacked BEFORE anything can load esbuild — it captures
+// `ESBUILD_BINARY_PATH` once at module load and never re-reads the env.
+import './scenarioEngine/esbuildBinaryPathBootstrap'
+
 // LOAD-ORDER CRITICAL: install the main-process firewall
 // interceptor (Layer B) BEFORE any other module that might trigger
 // an outgoing HTTP / HTTPS / fetch call. The monkey-patches replace

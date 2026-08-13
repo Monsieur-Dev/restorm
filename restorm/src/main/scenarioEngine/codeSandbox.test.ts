@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { afterEach, beforeEach, describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -619,5 +619,38 @@ describe('codeSandbox user-pinned npm packages (config.packages)', () => {
       packages: [{ name: 'never-installed', version: '1.0.0' }],
       packagesCacheDir: cacheDir
     })).rejects.toThrow(/no cached bundle/)
+  })
+})
+
+describe('stdlib prelude asset (packaged installs)', () => {
+  // Packaged apps load the prelude from a pre-generated file instead of
+  // bundling at runtime (the esbuild binary cannot resolve node_modules inside
+  // app.asar). RESTORM_SANDBOX_PRELUDE_PATH is the same loading path, test-set.
+  let dir: string
+  const savedEnv = process.env.RESTORM_SANDBOX_PRELUDE_PATH
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'restorm-prelude-asset-'))
+  })
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true })
+    if (savedEnv === undefined) delete process.env.RESTORM_SANDBOX_PRELUDE_PATH
+    else process.env.RESTORM_SANDBOX_PRELUDE_PATH = savedEnv
+    vi.resetModules()
+  })
+
+  it('prefers the generated asset over runtime bundling and still exposes the stdlib', async () => {
+    const { buildStdlibPrelude } = await import('./sandboxStdlib')
+    const assetPath = join(dir, 'sandbox-stdlib-prelude.js')
+    // Marker proves THIS file (not a runtime bundle) is what the sandbox ran.
+    writeFileSync(assetPath, `${await buildStdlibPrelude()}\nglobalThis.__preludeAssetMarker = 'from-asset'`)
+    process.env.RESTORM_SANDBOX_PRELUDE_PATH = assetPath
+    vi.resetModules()
+    const fresh = await import('./codeSandbox')
+    const { result } = await fresh.runCodeInSandbox({
+      code: `return { marker: globalThis.__preludeAssetMarker, lodashWorks: _.chunk([1, 2, 3, 4], 2).length }`
+    })
+    expect(result).toEqual({ marker: 'from-asset', lodashWorks: 2 })
   })
 })

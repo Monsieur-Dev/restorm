@@ -101,3 +101,4 @@ tests/e2e/samples/redis-sample.restorm.responses.zip
 tests/e2e/samples/sse-sample.restorm.responses.zip
 tests/e2e/samples/stomp-sample.restorm.responses.zip
 tests/e2e/samples/trpc-sample.restorm.responses.zip
+resources/sandbox-stdlib-prelude.js
