@@ -86,7 +86,7 @@
     "name": "Yoann Diguet",
     "email": "contact@oyo-fr.com"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=20"
   },
