@@ -66,13 +66,29 @@ jobs:
       - name: Upload the snap (stable channel)
         # Same pattern as the signing steps: rides a single secret and quietly
         # skips while it is absent, so the pipeline stays green either way.
+        # IDEMPOTENT on the binary: re-running the workflow for a version whose
+        # exact .snap is already on the store must not fail — the store rejects
+        # byte-identical duplicates ("Error checking upload uniqueness"), which
+        # is a normal state here, and the listing screenshots still need the
+        # step after this one to run.
         run: |
           if [ -z "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
             echo "SNAPCRAFT_STORE_CREDENTIALS not configured — skipping Snap Store publish."
             exit 0
           fi
           sudo snap install snapcraft --classic
-          snapcraft upload --release=stable "$SNAP_FILE"
+          set +e
+          OUTPUT=$(snapcraft upload --release=stable "$SNAP_FILE" 2>&1)
+          STATUS=$?
+          set -e
+          echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            if echo "$OUTPUT" | grep -qi "uniqueness"; then
+              echo "This exact binary is already on the store — nothing to upload, continuing."
+            else
+              exit "$STATUS"
+            fi
+          fi
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 

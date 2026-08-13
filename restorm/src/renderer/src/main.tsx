@@ -20,6 +20,32 @@ import { RendererErrorBoundary } from './components/CrashRecovery/RendererErrorB
 import { CrashReportReviewHost } from './components/Privacy/CrashReportReviewHost'
 import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
 
+// Documentation-capture mode: decorative surfaces must render identically from
+// one run to the next, so regenerated screenshots produce NO git diff when
+// nothing changed. Two global levers, armed BEFORE anything renders: a seeded
+// Math.random (every random pick — wallpaper parameters, vignette hue, tips —
+// draws the same sequence each launch) and a style sheet freezing CSS
+// animations/transitions at their first frame. Same widened-preload caution as
+// the crash-reporting block below.
+if ((window.api as Partial<Window['api']> | undefined)?.app?.docCaptureMode === true) {
+  let seed = 0x5eed
+  // mulberry32 — tiny, deterministic, plenty for decorative randomness.
+  Math.random = (): number => {
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+  const freeze = document.createElement('style')
+  freeze.textContent = `*, *::before, *::after {
+    animation-play-state: paused !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+    caret-color: transparent !important;
+  }`
+  document.head.appendChild(freeze)
+}
+
 // Populate the renderer's copy of the value-source registry (descriptors only;
 // resolvers stay main-side). Synchronous + idempotent — done once at module
 // load so the type-pick menu can enumerate secret sources before first render.
