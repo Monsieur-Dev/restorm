@@ -1,0 +1,7 @@
+# TEMPORARY (QA agent): Kubuntu = KDE Plasma directly (renders the LauncherEntry
+# quicklist, no separate KDE install) and Ubuntu-based so the .deb installs.
+# Remove when done.
+services:
+  linux:
+    environment:
+      BOOT: "https://cdimage.ubuntu.com/kubuntu/releases/24.04.4/release/kubuntu-24.04.4-desktop-amd64.iso"

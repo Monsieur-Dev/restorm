@@ -1,0 +1,10 @@
+# TEMPORARY (QA agent): bump RAM so electron-builder can pack the app without
+# a JS-heap OOM, and grow the disk so the in-place Sequoia upgrade fits
+# (the Apple Developer app — needed for the Developer Program enrollment —
+# requires macOS 15, and the upgrade wants ~26 GB free).
+# Remove this file when done.
+services:
+  macos:
+    environment:
+      RAM_SIZE: "12G"
+      DISK_SIZE: "96G"

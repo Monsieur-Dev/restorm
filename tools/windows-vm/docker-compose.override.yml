@@ -1,0 +1,6 @@
+# TEMPORARY (QA agent): expose the guest's raw VNC on 5900 so the host can drive
+# it with vncdotool (screenshots + mouse), like the macOS VM. Remove when done.
+services:
+  windows:
+    ports:
+      - "5900:5900/tcp"
