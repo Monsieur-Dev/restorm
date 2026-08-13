@@ -88,6 +88,30 @@ jobs:
           snapcraft pack snap-root --output "$SNAP_FILE"
           echo "repacked as: $(unsquashfs -cat "$SNAP_FILE" meta/snap.yaml | sed -n 's/^name: //p' | head -1)"
 
+      - name: Extract the Electron snap template (launch fix)
+        # electron-builder ships its snap template (desktop-init.sh /
+        # desktop-common.sh / desktop-gnome-specific.sh + the gnome-platform
+        # libs) as a RAW TAR at the snap root instead of extracting it, so
+        # command.sh's `exec $SNAP/desktop-init.sh …` dies at launch with
+        # "No such file or directory" — the published snap could never start.
+        # Detect the unextracted tar, unpack it in place, drop it, repack.
+        # No-op on a healthy snap.
+        run: |
+          TPL=$(unsquashfs -l "$SNAP_FILE" | grep -o 'snap-template-electron[^/]*\.tar' | head -1 || true)
+          HAS_INIT=$(unsquashfs -l "$SNAP_FILE" | grep -c 'squashfs-root/desktop-init.sh' || true)
+          if [ -z "$TPL" ] || [ "$HAS_INIT" -gt 0 ]; then
+            echo "template already extracted — nothing to do."
+            exit 0
+          fi
+          sudo apt-get install -y squashfs-tools >/dev/null 2>&1 || true
+          rm -rf snap-root-tpl
+          unsquashfs -d snap-root-tpl "$SNAP_FILE"
+          tar xf "snap-root-tpl/$TPL" -C snap-root-tpl
+          rm "snap-root-tpl/$TPL"
+          command -v snapcraft >/dev/null 2>&1 || sudo snap install snapcraft --classic
+          snapcraft pack snap-root-tpl --output "$SNAP_FILE"
+          echo "template extracted + repacked ($(du -h "$SNAP_FILE" | cut -f1))."
+
       - name: Upload the snap (stable channel)
         # Same pattern as the signing steps: rides a single secret and quietly
         # skips while it is absent, so the pipeline stays green either way.
