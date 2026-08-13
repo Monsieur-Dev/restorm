@@ -3717,6 +3717,20 @@ const App: React.FC = () => {
                 onOpenFile={(path) => { void window.restorm?.file.openPath(path) }}
                 confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}
                 onRevealInFolder={(path) => { revealPathInFolder(path) }}
+                // Documentation-capture mode pins every decorative surface to
+                // a fixed variant FAMILY (and freezes the wordmark) so
+                // captures look consistent. Note: within a family the pattern
+                // and vignette still roll per-mount parameters (hue, radius,
+                // mask, sweep phase), so pixel-identical reruns would need a
+                // deeper seam.
+                {...(window.api.app.docCaptureMode
+                  ? {
+                      wallpaperPattern: 'hexagon-pattern' as const,
+                      wordmarkEffect: 'none' as const,
+                      wordmarkStartDelay: 0,
+                      recentFilesVignetteDecoration: 'shine-border' as const
+                    }
+                  : {})}
               >
                 <Button
                   appearance="rainbow"

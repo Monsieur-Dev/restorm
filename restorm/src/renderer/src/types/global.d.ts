@@ -109,6 +109,10 @@ declare global {
       app: {
         /** The running app version (e.g. `0.1.12-preview`). */
         getVersion: () => Promise<string>
+        /** True when the app runs in documentation-capture mode: decorative
+         * surfaces (welcome wallpaper, wordmark animation, vignette frame)
+         * render a fixed, static variant so screenshots are reproducible. */
+        docCaptureMode: boolean
       }
       /** Silent auto-update surface (see `src/main/services/UpdateService.ts`). */
       update: {

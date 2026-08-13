@@ -149,7 +149,7 @@ The surface never touches the OS shell itself — it reports the row the user pi
 </WelcomeScreen>
 ```
 
-Pass any value of `WallpaperPattern`, `WordmarkEffect`, or `VignetteDecoration` (or `'random'`).
+Pass any value of `WallpaperPattern`, `WordmarkEffect`, or `VignetteDecoration` (or `'random'`). `WordmarkEffect` also accepts `'none'` to freeze the wordmark in its settled state — useful for screenshot captures where the entrance animation would make frames non-reproducible.
 
 ## Behavior
 

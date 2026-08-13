@@ -1,9 +1,10 @@
 /**
  * Far-left statusbar cell: `Restorm v<version> - <Plan>`.
  *
- * - Version comes from the main process via the `app:get-version` IPC
- *   (`app.getVersion()`), so the package.json `-preview` suffix rides preview
- *   builds for free — nothing channel-specific to compute here.
+ * - Version comes from the main process via the `app:get-version` IPC — the
+ *   same resolved version that drives backend-channel selection, so the
+ *   package.json `-preview` suffix rides preview builds for free and the
+ *   displayed version always matches the channel the app talks to.
  * - Plan reflects the live cloud entitlement (`window.api.account`): we read
  *   the current state on mount and then track `onStateChanged` so login /
  *   logout / refresh repaint the badge. Before auth resolves (or when signed

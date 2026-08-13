@@ -29,13 +29,14 @@ export type WordmarkEffectId =
   | 'hyper-text'
   | 'text-3d-flip'
 
-export type WordmarkEffect = WordmarkEffectId | 'random'
+export type WordmarkEffect = WordmarkEffectId | 'random' | 'none'
 
 export interface WordmarkProps {
   /** The text to render as the wordmark. */
   children: string
   /** Built-in effect applied to the text. Pass `'random'` to pick at mount
-   *  (and per-iteration when `loop` is on). */
+   *  (and per-iteration when `loop` is on), or `'none'` to render the text
+   *  statically in its settled (post-animation) state. */
   effect?: WordmarkEffect
   /** When true, the wordmark cycles enter → display → exit → enter forever.
    *  A new random variant is picked at every iteration. */
@@ -57,6 +58,8 @@ export interface WordmarkProps {
 | `dia-text-reveal` | Magic UI (MIT, ported, motion's `animate()` replaced by rAF + custom easing) | A horizontal gradient band sweeps across the text via `background-clip: text`, revealing it color-by-color before settling on the base color. |
 | `hyper-text` | Magic UI (MIT, ported, motion replaced by rAF + React state) | Each character starts as a random glyph from a charset (uppercase, lowercase, hex, symbols, greek, …) and progressively settles on its target glyph from left to right. |
 | `text-3d-flip` | Magic UI (MIT, ported, motion replaced by CSS keyframes with two-face cards) | Each character is a 3D card with two faces (same glyph on both); the card rotates 180° on enter / exit so the text stays visible throughout. Stagger origin is randomized (first / last / center / random). |
+
+Passing `effect="none"` skips the effect machinery entirely and renders the plain text in its settled state — the choice for screenshot/documentation captures and reduced-motion surfaces (`loop` and `data-effect` are inert in that mode).
 
 Each effect declares its own per-iteration timings (enter / display / exit). Using `loop`, the cycle runs roughly:
 

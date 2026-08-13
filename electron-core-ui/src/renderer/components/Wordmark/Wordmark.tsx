@@ -13,7 +13,7 @@ import {
 } from './effects'
 import './wordmark.css'
 
-export type WordmarkEffect = WordmarkEffectId | 'random'
+export type WordmarkEffect = WordmarkEffectId | 'random' | 'none'
 
 type Phase = 'enter' | 'display' | 'exit'
 
@@ -34,7 +34,9 @@ export interface WordmarkProps {
   /** The text to render as the wordmark. */
   children: string
   /** Built-in effect applied to the text. Pass `'random'` to pick at mount
-   *  (or per-iteration when `loop` is on). */
+   *  (or per-iteration when `loop` is on), or `'none'` to render the text
+   *  statically in its settled (post-animation) state — for screenshots,
+   *  reduced-motion surfaces, or any context where animation is unwanted. */
   effect?: WordmarkEffect
   /** When true, the wordmark cycles enter → display → exit → enter forever.
    *  A new random variant is picked at every iteration. */
@@ -156,7 +158,7 @@ function buildRendered(
   effect: WordmarkEffect | undefined,
   text: string
 ): { id: WordmarkEffectId; element: React.ReactElement } | null {
-  if (!effect) return null
+  if (!effect || effect === 'none') return null
   const id: WordmarkEffectId =
     effect === 'random' ? pickRandomWordmarkEffect() : effect
   return { id, element: buildEffectElement(id, text) }

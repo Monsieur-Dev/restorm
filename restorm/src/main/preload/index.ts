@@ -192,14 +192,20 @@ contextBridge.exposeInMainWorld('api', {
       return (await ipcRenderer.invoke(AUTH_IPC.PORTAL)) as PortalResult
     }
   },
-  // App-level metadata. `getVersion` mirrors `app.getVersion()` to the
-  // renderer (main-only otherwise) for the statusbar version cell; the
-  // package.json `-preview` suffix rides preview builds for free.
+  // App-level metadata. `getVersion` mirrors the main process's resolved
+  // backend version (packaged: `app.getVersion()`, so the `-preview` suffix
+  // rides preview builds for free; unpackaged: the same env pin that selects
+  // the backend channel) for the statusbar version cell.
   app: {
     /** The running app version, e.g. `0.1.12-preview` (suffix on preview). */
     getVersion: async (): Promise<string> => {
       return (await ipcRenderer.invoke('app:get-version')) as string
-    }
+    },
+    /** Documentation-capture mode: decorative surfaces render a fixed, static
+     * variant so screenshots are reproducible. Read synchronously from the
+     * environment at bridge-build time — the renderer needs it before the
+     * welcome screen mounts (the wallpaper picks its variant at mount). */
+    docCaptureMode: process.env['RESTORM_DOC_CAPTURE'] === '1'
   },
   // Silent auto-update surface. The renderer drives the Settings section + the
   // "update ready" / "what's new" toasts; the feed + install stay main-side.

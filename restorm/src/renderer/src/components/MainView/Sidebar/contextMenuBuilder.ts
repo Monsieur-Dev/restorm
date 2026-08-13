@@ -20,6 +20,8 @@ export interface SidebarContextMenuItem {
   onClick?: () => void
   /** Nested items for a submenu entry. */
   items?: SidebarContextMenuItem[]
+  /** Stable E2E selector — passed straight to the ECUI ContextMenuItem. */
+  'data-testid'?: string
 }
 
 export type TranslateFunction = (key: string) => string
@@ -267,18 +269,21 @@ export const buildAddSubmenu = (
     id: `add-folder-${parentId}`,
     label: t('sidebar.contextMenu.add.folder'),
     icon: 'folder',
+    'data-testid': 'sidebar-context-menu-add-folder',
     onClick: () => { onAddChildItem(parentId, 'folder') }
   },
   {
     id: `add-scenario-${parentId}`,
     label: t('sidebar.contextMenu.add.scenario'),
     icon: React.createElement(RegistryBadge, { badgeId: 'scenario' }),
+    'data-testid': 'sidebar-context-menu-add-scenario',
     onClick: () => { onAddChildItem(parentId, 'scenario') }
   },
   {
     id: `add-auth-${parentId}`,
     label: t('sidebar.contextMenu.add.auth'),
     icon: React.createElement(RegistryBadge, { badgeId: 'auth' }),
+    'data-testid': 'sidebar-context-menu-add-auth',
     onClick: () => { onAddChildItem(parentId, 'auth') }
   },
   { id: `sep-add-top-${parentId}`, isSeparator: true, label: '' },
@@ -339,6 +344,7 @@ export const buildEmptyAreaContextMenu = (
       id: 'add-root-child',
       label: t('sidebar.contextMenu.add.title'),
       icon: 'add',
+      'data-testid': 'sidebar-context-menu-add-root-child',
       items: addItems
     }
   ]
