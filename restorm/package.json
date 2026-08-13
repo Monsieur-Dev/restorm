@@ -228,7 +228,6 @@
       }
     ],
     "snap": {
-      "packageName": "restorm",
       "confinement": "strict",
       "grade": "stable",
       "summary": "Local-first API testing environment — client and server",

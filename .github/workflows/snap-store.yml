@@ -63,6 +63,31 @@ jobs:
           AWS_DEFAULT_REGION: auto
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
+      - name: Normalize the snap name to "restorm"
+        # electron-builder hardcodes the snap's name to the lowercased
+        # executableName ("restorm-bin" — the CLI wrapper wiring depends on
+        # that binary name, and SnapOptions offers no override), while the
+        # store registration is "restorm". Repack with the right identity:
+        # rewrite meta/snap.yaml's name + app key, rename the gui desktop
+        # entry, and re-pack. No-op when the name is already correct.
+        run: |
+          NAME=$(unsquashfs -cat "$SNAP_FILE" meta/snap.yaml | sed -n 's/^name: //p' | head -1)
+          echo "snap name in archive: ${NAME}"
+          if [ "$NAME" = "restorm" ]; then
+            echo "already normalized — nothing to do."
+            exit 0
+          fi
+          sudo apt-get install -y squashfs-tools >/dev/null 2>&1 || true
+          unsquashfs -d snap-root "$SNAP_FILE"
+          perl -pi -e "s/^name: \Q${NAME}\E$/name: restorm/; s/^  \Q${NAME}\E:$/  restorm:/" snap-root/meta/snap.yaml
+          if [ -f "snap-root/meta/gui/${NAME}.desktop" ]; then
+            mv "snap-root/meta/gui/${NAME}.desktop" snap-root/meta/gui/restorm.desktop
+            perl -pi -e "s/\Q${NAME}\E/restorm/g" snap-root/meta/gui/restorm.desktop
+          fi
+          sudo snap install snapcraft --classic
+          snapcraft pack snap-root --output "$SNAP_FILE"
+          echo "repacked as: $(unsquashfs -cat "$SNAP_FILE" meta/snap.yaml | sed -n 's/^name: //p' | head -1)"
+
       - name: Upload the snap (stable channel)
         # Same pattern as the signing steps: rides a single secret and quietly
         # skips while it is absent, so the pipeline stays green either way.
