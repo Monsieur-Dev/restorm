@@ -197,6 +197,27 @@ jobs:
             --exclude "*" \
             --include "latest*.yml" \
             --exclude "*/*"
+
+      - name: Publish to the Snap Store (inert until the credentials exist)
+        # Same pattern as macOS signing: the store upload rides a single
+        # secret and quietly skips while it is absent, so the release stays
+        # green with or without a Snapcraft account. The .snap itself is
+        # store-only — the R2 include list above deliberately leaves it out.
+        if: matrix.platform == 'linux'
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: |
+          if [ -z "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
+            echo "SNAPCRAFT_STORE_CREDENTIALS not configured — skipping Snap Store publish."
+            exit 0
+          fi
+          sudo snap install snapcraft --classic
+          SNAP_FILE=$(ls restorm/dist-electron/*.snap 2>/dev/null | head -1)
+          if [ -z "$SNAP_FILE" ]; then
+            echo "no .snap produced by the build" >&2
+            exit 1
+          fi
+          snapcraft upload --release=stable "$SNAP_FILE"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

@@ -227,11 +227,21 @@
         "to": "restorm-resources/com.monsieurdev.restorm.metainfo.xml"
       }
     ],
+    "snap": {
+      "confinement": "strict",
+      "grade": "stable",
+      "summary": "Local-first API testing environment — client and server",
+      "plugs": [
+        "default",
+        "password-manager-service"
+      ]
+    },
     "linux": {
       "target": [
         "AppImage",
         "deb",
-        "rpm"
+        "rpm",
+        "snap"
       ],
       "icon": "assets/icons/linux",
       "category": "Development",
