@@ -1,0 +1,94 @@
+name: Snap Store
+
+# Publishes a released build to the Snap Store WITHOUT rebuilding anything:
+# the .snap is downloaded from the public R2 release bucket (R2 → store), then
+# the listing's screenshots are refreshed from the versioned `screenshots/`
+# directory (snapcraft's CLI cannot upload screenshots — that goes through the
+# dashboard's binary-metadata API via scripts/snap-store-media.py).
+#
+# Runs automatically as the tail of a release (workflow_call from release.yml)
+# and by hand for a re-publish (workflow_dispatch with the version).
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Git ref whose package.json names the released version'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Released version to publish (e.g. 1.0.0) — its folder must exist on R2'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to the Snap Store
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          lfs: true
+
+      - name: Resolve the released version
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(node -p "require('./restorm/package.json').version")
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "Publishing v${VERSION}"
+
+      - name: Download the released .snap from R2
+        run: |
+          aws s3 cp "s3://restorm-releases/v${VERSION}/" . \
+            --recursive --endpoint-url "${R2_ENDPOINT}" \
+            --exclude "*" --include "*.snap"
+          SNAP_FILE=$(ls ./*.snap 2>/dev/null | head -1)
+          if [ -z "$SNAP_FILE" ]; then
+            echo "no .snap under s3://restorm-releases/v${VERSION}/ — was the release published with the snap included?" >&2
+            exit 1
+          fi
+          echo "SNAP_FILE=${SNAP_FILE}" >> "$GITHUB_ENV"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+
+      - name: Upload the snap (stable channel)
+        # Same pattern as the signing steps: rides a single secret and quietly
+        # skips while it is absent, so the pipeline stays green either way.
+        run: |
+          if [ -z "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
+            echo "SNAPCRAFT_STORE_CREDENTIALS not configured — skipping Snap Store publish."
+            exit 0
+          fi
+          sudo snap install snapcraft --classic
+          snapcraft upload --release=stable "$SNAP_FILE"
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+
+      - name: Refresh the listing screenshots
+        # The versioned screenshots/ directory is the source of truth — the
+        # doc-shots harness regenerates it, git records changes, and this step
+        # mirrors the English set onto the store listing (capped at 5 there).
+        run: |
+          if [ -z "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
+            echo "SNAPCRAFT_STORE_CREDENTIALS not configured — skipping listing screenshots."
+            exit 0
+          fi
+          python3 -m pip install --quiet craft-store
+          python3 scripts/snap-store-media.py restorm \
+            screenshots/en/welcome-home.png \
+            screenshots/en/request-editor.png \
+            screenshots/en/scenario-editor.png
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}

@@ -8,7 +8,6 @@
  * the user opens a different project.
  */
 
-import { app } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { registerInstanceLifecycleTools, type InstanceLifecycleHost } from './tools/instances'
 import { registerActiveStateBridge } from './tools/activeState'
@@ -29,7 +28,7 @@ import { installScenarioEngineIPC } from '../scenarioEngine/ipcBridge'
 import { registerResources } from './resources'
 import { registerGitTools } from './tools/git'
 import { createMcpProGate } from './mcpProGate'
-import { getEntitlementService } from '../services/auth/authComposition'
+import { getEntitlementService, resolveBackendVersion } from '../services/auth/authComposition'
 import { hasCapability } from '../../shared/auth/authState'
 import { resolveChannel } from '../../shared/config/backend'
 import { pricingUrl } from '../../shared/config/site'
@@ -58,7 +57,7 @@ export function registerRestormMcp(mcp: McpService, instanceHost: InstanceLifecy
           return false
         }
       },
-      pricingUrl: pricingUrl(resolveChannel(app.getVersion()))
+      pricingUrl: pricingUrl(resolveChannel(resolveBackendVersion()))
     })
   )
   registerInstanceLifecycleTools(mcp, instanceHost)

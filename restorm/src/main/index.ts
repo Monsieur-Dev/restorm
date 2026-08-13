@@ -1386,14 +1386,16 @@ ipcMain.handle('runtime:get-config', () => ({
   // restorm.app on release). Surfaced so the MCP Pro upsell link in the renderer
   // and the MCP 402 refusal's upgradeUrl (resolved main-side via the same
   // `pricingUrl`) point at the same page — one source of truth, no drift.
-  pricingUrl: pricingUrl(resolveChannel(app.getVersion()))
+  pricingUrl: pricingUrl(resolveChannel(resolveBackendVersion()))
 }))
 
 // The running app version, surfaced to the renderer for the far-left
-// statusbar version cell. `app.getVersion()` reads package.json's `version`,
-// so the `-preview` suffix rides preview builds for free (the release strips
-// it) — nothing channel-specific to compute here.
-ipcMain.handle('app:get-version', () => app.getVersion())
+// statusbar version cell. `resolveBackendVersion()` is `app.getVersion()` in
+// any packaged build (the `-preview` suffix rides preview builds for free);
+// in an UNPACKAGED run it honors the same env pin as backend-channel
+// resolution, so the displayed version always matches the channel the app is
+// actually talking to.
+ipcMain.handle('app:get-version', () => resolveBackendVersion())
 
 // MCP call-logs viewer bridge: the buffer lives in the main process (ECUI
 // McpService). The renderer pulls a snapshot, refreshes on `mcp:logs-changed`

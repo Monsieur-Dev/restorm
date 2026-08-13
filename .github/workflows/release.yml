@@ -183,12 +183,16 @@ jobs:
             [ -f "$yml" ] || continue
             V="v${VERSION}" perl -pi -e 's|^( *- +url: )(.+)$|$1$ENV{V}/$2|; s|^(path: )(.+)$|$1$ENV{V}/$2|' "$yml"
           done
-          # Binaries + blockmaps → v<version>/ …
+          # Binaries + blockmaps → v<version>/ … The .snap rides along so the
+          # snap-store workflow can publish it to the store from R2 without a
+          # rebuild (the update feeds never reference it — snaps update
+          # through the store, not electron-updater).
           aws s3 cp restorm/dist-electron/ "s3://restorm-releases/v${VERSION}/" \
             --recursive --endpoint-url "${R2_ENDPOINT}" \
             --exclude "*" \
             --include "*.deb" --include "*.rpm" --include "*.exe" \
             --include "*.dmg" --include "*.zip" --include "*.AppImage" \
+            --include "*.snap" \
             --include "*.blockmap" \
             --exclude "*/*"
           # …and the rewritten feeds → bucket root.
@@ -197,27 +201,6 @@ jobs:
             --exclude "*" \
             --include "latest*.yml" \
             --exclude "*/*"
-
-      - name: Publish to the Snap Store (inert until the credentials exist)
-        # Same pattern as macOS signing: the store upload rides a single
-        # secret and quietly skips while it is absent, so the release stays
-        # green with or without a Snapcraft account. The .snap itself is
-        # store-only — the R2 include list above deliberately leaves it out.
-        if: matrix.platform == 'linux'
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-        run: |
-          if [ -z "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
-            echo "SNAPCRAFT_STORE_CREDENTIALS not configured — skipping Snap Store publish."
-            exit 0
-          fi
-          sudo snap install snapcraft --classic
-          SNAP_FILE=$(ls restorm/dist-electron/*.snap 2>/dev/null | head -1)
-          if [ -z "$SNAP_FILE" ]; then
-            echo "no .snap produced by the build" >&2
-            exit 1
-          fi
-          snapcraft upload --release=stable "$SNAP_FILE"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -278,3 +261,15 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: auto
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+
+  snap-store:
+    name: Snap Store
+    # R2 → Snap Store, in its own reusable workflow: downloads the .snap this
+    # release just published to the version folder and uploads it + the
+    # listing screenshots. Kept out of the build matrix so the store-side
+    # logic lives in one dedicated file (also runnable by hand via dispatch).
+    needs: release
+    uses: ./.github/workflows/snap-store.yml
+    with:
+      tag: ${{ inputs.tag || github.ref }}
+    secrets: inherit

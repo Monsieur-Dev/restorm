@@ -58,6 +58,15 @@ const fileFormatGateTestDir = defineBddConfig({
   outputDir: '.features-gen/file-format-gate'
 })
 
+// Documentation-screenshot harness (website docs captures). The BDD config is
+// always defined (generation is cheap and side-effect free); the PROJECT is
+// gated on RESTORM_DOC_SHOTS=1 further down, so normal suites never run it.
+const docShotsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/doc-shots/features/**/*.feature',
+  steps: ['tests/e2e/bdd/doc-shots/steps/**/*.ts', 'tests/e2e/bdd/fixtures/doc-shots.fixture.ts'],
+  outputDir: '.features-gen/doc-shots'
+})
+
 const statusBarContextMenuTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/status-bar-context-menu/features/**/*.feature',
   steps: ['tests/e2e/bdd/status-bar-context-menu/steps/**/*.ts', 'tests/e2e/bdd/fixtures/dirty-state.fixture.ts'],
@@ -974,6 +983,23 @@ export default defineConfig({
             name: 'stage-gating',
             testDir: 'tests/e2e/stage-gating',
             timeout: 300 * 1000 // a real WorkOS login round-trip + entitlement fetch
+          }
+        ]
+      : []),
+    // Documentation-screenshot harness. It performs a REAL login (the account
+    // and channel come from DOC_SHOTS_* env vars) and captures localized
+    // screenshots for the website docs across every shipped locale, so it must
+    // NEVER run in the per-PR / pre-push suite. Include it deliberately (a
+    // Docker daemon must be up — the shared globalSetup requires one even
+    // though doc-shots itself starts no container):
+    //   RESTORM_DOC_SHOTS=1 DOC_SHOTS_EMAIL=… DOC_SHOTS_PASSWORD=… \
+    //   xvfb-run -a pnpm exec playwright test --project doc-shots
+    ...(process.env.RESTORM_DOC_SHOTS === '1'
+      ? [
+          {
+            name: 'doc-shots',
+            testDir: docShotsTestDir,
+            timeout: 2400 * 1000 // login + live OpenAPI import + 27 locales × several captures
           }
         ]
       : [])

@@ -8,7 +8,7 @@
     "name": "MonsieurDev",
     "email": "contact@restorm.app"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=20"
   },
@@ -228,6 +228,7 @@
       }
     ],
     "snap": {
+      "packageName": "restorm",
       "confinement": "strict",
       "grade": "stable",
       "summary": "Local-first API testing environment — client and server",
