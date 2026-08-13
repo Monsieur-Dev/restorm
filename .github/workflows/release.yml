@@ -298,3 +298,14 @@ jobs:
     with:
       tag: ${{ inputs.tag || github.ref }}
     secrets: inherit
+
+  npm-publish:
+    name: npm
+    # Stamps the released version onto the restorm-cli bootstrap package and
+    # publishes it — its payload is fetched from R2's latest/ at runtime, so
+    # nothing is rebuilt here either.
+    needs: release
+    uses: ./.github/workflows/npm-publish.yml
+    with:
+      tag: ${{ inputs.tag || github.ref }}
+    secrets: inherit

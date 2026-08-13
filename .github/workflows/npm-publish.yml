@@ -1,0 +1,78 @@
+name: npm publish
+
+# Publishes the `restorm-cli` bootstrap package (npm-cli/) to the npm registry
+# at the released version. Nothing is rebuilt: the package is a zero-dependency
+# launcher/downloader whose payload always comes from the public R2 bucket's
+# `latest/` folder at runtime, so publishing = stamping the release version and
+# pushing the tarball.
+#
+# The bare names `restorm` (npm typosquat guard: too similar to the existing
+# `rest-orm`) and the `@restorm` scope (owned by a third party) are both
+# unavailable — hence `restorm-cli`.
+#
+# Runs automatically as the tail of a release (workflow_call from release.yml)
+# and by hand for a re-publish (workflow_dispatch with the version).
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Git ref whose package.json names the released version'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Released version to publish (e.g. 1.0.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish restorm-cli to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Resolve the released version
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(node -p "require('./restorm/package.json').version")
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "Publishing restorm-cli@${VERSION}"
+
+      - name: Stamp the version and publish
+        # Re-publishing an existing version is a hard registry error — treat it
+        # as the idempotent no-op it is (same convention as the snap upload's
+        # "uniqueness" guard), so a release re-run stays green.
+        working-directory: npm-cli
+        run: |
+          npm version "${VERSION}" --no-git-tag-version
+          set +e
+          OUT=$(npm publish --access public 2>&1)
+          STATUS=$?
+          set -e
+          echo "$OUT"
+          if [ $STATUS -ne 0 ]; then
+            if echo "$OUT" | grep -qi "cannot publish over\|previously published"; then
+              echo "restorm-cli@${VERSION} already on the registry — nothing to do."
+              exit 0
+            fi
+            exit $STATUS
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
