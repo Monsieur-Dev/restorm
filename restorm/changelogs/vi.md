@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Bản vá đầu tiên: di chuyển trong thanh bên, tên thẻ và báo cáo sự cố.**
+
+- **Di chuyển một mục trong thanh bên không còn làm hỏng ứng dụng.** Khi mở trình duyệt mini, Cài đặt hoặc nhật ký MCP, mọi thao tác kéo trong thanh bên đều phá vỡ giao diện và chỉ khởi động lại mới khôi phục được.
+- **Đổi tên một mục giờ cập nhật mọi thẻ đang mở** — kể cả thẻ trong khung chia đôi và thẻ của mọi loại yêu cầu (gRPC, GraphQL, Redis…), vốn giữ tên cũ cho đến khi mở lại.
+- **Báo cáo sự cố lại đến được với chúng tôi.** Dù bật gửi báo cáo, 1.0.0 vẫn âm thầm không gửi gì: sự cố bạn gặp phải không cho chúng tôi biết điều gì.
+- **Hình minh họa “ngôn ngữ lập trình” hiển thị lại các logo.**
+
 ## v1.0.0
 
 **Restorm 1.0 — ứng dụng khách API ưu tiên cục bộ đã ra mắt.**

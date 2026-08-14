@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Erstes Patch — Verschieben in der Seitenleiste, Tab-Namen und Absturzberichte.**
+
+- **Das Verschieben eines Elements in der Seitenleiste bricht die App nicht mehr.** Bei geöffnetem Mini-Browser, geöffneten Einstellungen oder MCP-Protokollen zerlegte jedes Ziehen in der Seitenleiste die Oberfläche; nur ein Neustart half.
+- **Das Umbenennen eines Elements aktualisiert jetzt jeden offenen Tab** — auch Tabs in einem geteilten Bereich und Tabs jeder Anfrageart (gRPC, GraphQL, Redis…), die bis zum erneuten Öffnen ihren alten Namen behielten.
+- **Absturzberichte erreichen uns wieder.** Bei aktivierten Absturzberichten sendete 1.0.0 stillschweigend nichts: Ein Absturz bei Ihnen sagte uns nichts.
+- **Die Illustration „Code-Sprachen“ zeigt ihre Logos wieder an.**
+
 ## v1.0.0
 
 **Restorm 1.0 — der local-first API-Client ist da.**

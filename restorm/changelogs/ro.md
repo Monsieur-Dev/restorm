@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Primul patch: mutarea în bara laterală, numele filelor și rapoartele de eroare.**
+
+- **Mutarea unui element în bara laterală nu mai strică aplicația.** Cu mini-browserul, Setările sau jurnalele MCP deschise, orice tragere în bara laterală dărâma interfața și doar o repornire o readucea.
+- **Redenumirea unui element actualizează acum fiecare filă deschisă** — inclusiv filele dintr-un panou divizat și filele oricărui tip de cerere (gRPC, GraphQL, Redis…), care își păstrau vechiul nume până la redeschidere.
+- **Rapoartele de eroare ajung din nou la noi.** Cu trimiterea activată, 1.0.0 nu trimitea nimic în tăcere: o eroare pe care ați întâlnit-o nu ne spunea nimic.
+- **Ilustrația „limbaje de programare” își afișează din nou logourile.**
+
 ## v1.0.0
 
 **Restorm 1.0 — clientul API local-first a fost lansat.**

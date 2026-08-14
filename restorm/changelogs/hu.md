@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Első javítás: mozgatás az oldalsávban, lapnevek és összeomlási jelentések.**
+
+- **Egy elem mozgatása az oldalsávban többé nem töri össze az alkalmazást.** Nyitott miniböngésző, Beállítások vagy MCP-naplók mellett bármelyik húzás az oldalsávban szétverte a felületet, és csak újraindítás segített.
+- **Egy elem átnevezése mostantól minden nyitott lapot frissít** — beleértve az osztott panelen lévő lapokat és minden kéréstípus lapját (gRPC, GraphQL, Redis…), amelyek újranyitásig megtartották a régi nevüket.
+- **Az összeomlási jelentések ismét eljutnak hozzánk.** Bekapcsolt küldés mellett az 1.0.0 csendben semmit sem küldött: egy Önnél történt összeomlás semmit sem mondott nekünk.
+- **A „kódnyelvek” illusztráció ismét megjeleníti a logókat.**
+
 ## v1.0.0
 
 **Restorm 1.0 — a local-first API-kliens megjelent.**

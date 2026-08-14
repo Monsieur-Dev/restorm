@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Första rättelsen: flytt i sidopanelen, flikarnas namn och kraschrapporter.**
+
+- **Att flytta ett objekt i sidopanelen kraschar inte längre appen.** Med minisurfaren, Inställningar eller MCP-loggarna öppna rev varje drag i sidopanelen ned gränssnittet, och bara en omstart hjälpte.
+- **Att byta namn på ett objekt uppdaterar nu alla öppna flikar** — även flikar i en delad panel och flikar för alla förfrågningstyper (gRPC, GraphQL, Redis…), som behöll sitt gamla namn tills de öppnades igen.
+- **Kraschrapporter når oss igen.** Med rapportering påslagen skickade 1.0.0 tyst ingenting: en krasch hos dig berättade ingenting för oss.
+- **Illustrationen ”kodspråk” visar sina logotyper igen.**
+
 ## v1.0.0
 
 **Restorm 1.0 — den local-first API-klienten är här.**

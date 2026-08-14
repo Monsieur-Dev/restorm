@@ -18,6 +18,7 @@ shares Sections 9–12 of this playbook but skips the execution-service work.
 Before you open the PR, all of these must be true:
 
 - [ ] Architecture decided per [Section 1](#section-1--architectural-decision-tree).
+- [ ] **Per-protocol constants live in `PROTOCOL_REGISTRY`, not in a branch elsewhere** — [Section 1.6](#16--hard-rule-no-per-protocol-branch-outside-the-registry) (hard rule).
 - [ ] All UI uses `electron-core-ui` components only — [Section 2](#section-2--mandatory-ui-component-reuse-hard-rule) (hard rule).
 - [ ] Every user input supports `{{handlebars}}` and goes through `ContextService.transformValue` — [Section 3](#section-3--mandatory-handlebars--env-variable-resolution-hard-rule) (hard rule).
 - [ ] Every user input is debounced before triggering side effects — [Section 4](#section-4--mandatory-input-debouncing-hard-rule) (hard rule).
@@ -127,9 +128,15 @@ sibling registries** — no shared `switch` to hunt down and edit:
    the execution services, or the React tab views without a cycle / bundle
    leak). The entry carries: `graphqlTypeName`, `tabType`, `ipcNamespace`,
    `badge` (`{ kind: 'fixed', value }` or `{ kind: 'field', field }`),
-   `serverCapable?`, `searchIcon?`, `scenarioKinds?`. Adding the key here
-   automatically extends `REQUEST_TYPES`, the GraphQL `RequestType` enum, every
-   `z.enum(REQUEST_TYPES)` validator, and the badge / search-icon lookups.
+   `tabTitle?` (same two shapes — how the workbench tab label is composed:
+   `{ kind: 'fixed', value: 'GraphQL' }` → `GraphQL Ping`, `{ kind: 'field',
+   field: 'method' }` → `GET Ping`, **omitted** → the bare `Ping`; read it with
+   `requestTabTitle(request)`), `serverCapable?`, `searchIcon?`,
+   `scenarioKinds?`. Adding the key here automatically extends
+   `REQUEST_TYPES`, the GraphQL `RequestType` enum, every
+   `z.enum(REQUEST_TYPES)` validator, the badge / search-icon lookups, and the
+   tab label on all three paths that render one (open, session restore,
+   rename).
 
 2. **`src/shared/models/requests/requestFactory.ts`** — the class-bearing
    sibling map. Add one `REQUEST_CLASS_REGISTRY` row: your class's `fromPlain`
@@ -166,6 +173,33 @@ append point, not a hidden `switch`):
 - **Scenario nodes** — see Section 13 + `adding-a-scenario-node.md` (the scenario
   registry is its own append-only source of truth; the protocol descriptor only
   *references* the kinds a protocol owns via `scenarioKinds`).
+
+### 1.6 — Hard rule: no per-protocol branch outside the registry
+
+Once the entry exists, **nothing else in the app may switch on the request
+type** to decide a per-protocol constant. If a feature needs one, it belongs in
+`ProtocolSpec` as a new field, read through a registry helper. A chain of
+`if (isGraphQLRequest(r)) … else if (isGrpcRequest(r)) …` in a feature file is a
+review blocker, even when it is complete on the day it is written.
+
+The reason is the failure mode, not the aesthetics: such a chain is only ever
+complete for the protocols that existed when it was typed, and a protocol added
+later is silently *absent* from it — no compile error, no failing test, just a
+feature that quietly doesn't apply. The tab label is the worked example. It was
+composed by three separate chains (open a tab, restore a session, rename an
+item); the rename copy handled HTTP and nothing else, so renaming a GraphQL or
+Kafka request left the old name in its tab until the tab was closed and
+reopened. Moving the label into `tabTitle` collapsed the three chains into one
+lookup and made the omission impossible.
+
+The mechanical test: **can a new protocol be shipped by editing the registry
+plus the files Section 1.5 lists as "protocol-specific glue"?** If your change
+adds a fourth place, put the data in the registry instead. Where an exhaustive
+per-protocol map genuinely is needed (executors, request classes), type it as
+`Record<RequestType, …>` so a missing protocol is a **compile error**, and add
+it to the drift guard in `protocolRegistry.test.ts`.
+
+---
 
 ---
 
@@ -662,6 +696,7 @@ auto-populates this checklist on new PRs that opt into it (append
 review.
 
 ```
+- [ ] No per-protocol `if (isXRequest(...))` chain outside the registry + the Section 1.5 glue files.
 - [ ] Only `electron-core-ui` components used for UI (no bespoke primitives).
 - [ ] Every user input supports `{{handlebars}}` via `VariableInputBox` / Monaco contribution.
 - [ ] Every user input is resolved via `ContextService.transformValue` at execution time.

@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Pierwsza poprawka: przenoszenie w panelu bocznym, nazwy kart i raporty o awariach.**
+
+- **Przeniesienie elementu w panelu bocznym nie psuje już aplikacji.** Przy otwartej mini przeglądarce, Ustawieniach lub dziennikach MCP każde przeciągnięcie w panelu bocznym rozbijało interfejs, a pomagał tylko restart.
+- **Zmiana nazwy elementu aktualizuje teraz każdą otwartą kartę** — w tym karty w podzielonym panelu i karty każdego typu żądania (gRPC, GraphQL, Redis…), które zachowywały starą nazwę do ponownego otwarcia.
+- **Raporty o awariach znowu do nas docierają.** Przy włączonym wysyłaniu raportów wersja 1.0.0 po cichu nie wysyłała nic: napotkana awaria nic nam nie mówiła.
+- **Ilustracja „języki programowania” znów pokazuje swoje logotypy.**
+
 ## v1.0.0
 
 **Restorm 1.0 — lokalny klient API, już dostępny.**

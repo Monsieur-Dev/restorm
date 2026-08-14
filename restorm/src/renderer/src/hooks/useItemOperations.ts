@@ -28,8 +28,9 @@ import { findItemById, findItemWithParent, findItemWithBreadcrumbs, getFolderIco
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import { mapAllWorkbenchTabs, tabBackingItemId, tabReferencesItem } from '../utils/workbenchTabs'
+import { requestTabTitle } from '../../../shared/protocolRegistry'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
-import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
+import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab, RestormEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
@@ -672,74 +673,43 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
 
-    // Also update the workbench tab title and breadcrumbs (all groups)
-    setWorkbenchTree((prevTree) => {
-      const updatedGroups = prevTree.groups.map((group) => {
-        if (!isTabGroupNode(group)) return group
+    // Also update the workbench tab title and breadcrumbs, in EVERY group —
+    // `mapAllWorkbenchTabs` recurses through split containers, which a
+    // `prevTree.groups.map()` does not: a tab sitting in a split kept its old
+    // name. The title is recomposed from the protocol registry, so renaming a
+    // request refreshes its tab whatever its protocol.
+    setWorkbenchTree((prevTree) => ({ ...prevTree, groups: mapAllWorkbenchTabs(prevTree.groups, (tab) => {
+      const renamedBreadcrumbs = (restormTab: RestormEditorTab): RestormEditorTab['breadcrumbs'] =>
+        restormTab.breadcrumbs?.map((bc) => (bc.id === itemId ? { ...bc, label: newName } : bc))
 
-        const updatedTabs = group.tabs.map((tab) => {
-          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+      if (tabBackingItemId(tab) === itemId) {
+        const restormTab = tab as RestormEditorTab
+        const renamed = { ...restormTab, breadcrumbs: renamedBreadcrumbs(restormTab), contentVersion: (restormTab.contentVersion ?? 0) + 1 }
 
-          // Update tab title if it's the renamed item
-          if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) {
-            return {
-              ...restormTab,
-              title: newName,
-              titleString: newName,
-              folder: { ...restormTab.folder, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              ),
-              contentVersion: (restormTab.contentVersion ?? 0) + 1
-            }
-          }
+        if ('request' in renamed) {
+          const request = { ...renamed.request, name: newName }
+          const title = requestTabTitle(request)
+          // A request whose type the registry doesn't know keeps its old
+          // label rather than losing it — the tree item is still renamed.
+          if (title === null) return { ...renamed, request }
+          return { ...renamed, request, title, titleString: title }
+        }
+        if ('folder' in renamed) {
+          return { ...renamed, folder: { ...renamed.folder, name: newName }, title: newName, titleString: newName }
+        }
+        if ('scenario' in renamed) {
+          return { ...renamed, scenario: { ...renamed.scenario, name: newName }, title: newName, titleString: newName }
+        }
+        return renamed
+      }
 
-          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) {
-            return {
-              ...restormTab,
-              title: newName,
-              titleString: newName,
-              folder: { ...restormTab.folder, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              ),
-              contentVersion: (restormTab.contentVersion ?? 0) + 1
-            }
-          }
-
-          if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) {
-            const newTitle = `${restormTab.request.method} ${newName}`
-            return {
-              ...restormTab,
-              title: newTitle,
-              titleString: newTitle,
-              request: { ...restormTab.request, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              ),
-              contentVersion: (restormTab.contentVersion ?? 0) + 1
-            }
-          }
-
-          // Update breadcrumbs for other tabs that might reference this item
-          if (restormTab.breadcrumbs) {
-            const hasMatch = restormTab.breadcrumbs.some((bc) => bc.id === itemId)
-            if (hasMatch) {
-              const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              )
-              return { ...restormTab, breadcrumbs: updatedBreadcrumbs, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
-            }
-          }
-
-          return tab
-        })
-
-        return { ...group, tabs: updatedTabs }
-      })
-
-      return { ...prevTree, groups: updatedGroups }
-    })
+      // Not the renamed item, but it may sit UNDER it: refresh the crumb.
+      const restormTab = tab as RestormEditorTab
+      if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) {
+        return { ...restormTab, breadcrumbs: renamedBreadcrumbs(restormTab), contentVersion: (restormTab.contentVersion ?? 0) + 1 }
+      }
+      return tab
+    }) }))
 
     // Notify external listeners (sidebar Favorites + Open documents
     // panes) that an item's `name` mutated in-place. Cheap signal that

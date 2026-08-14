@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Premier correctif — déplacements dans la barre latérale, noms d'onglets et rapports d'erreur.**
+
+- **Déplacer un élément dans la barre latérale ne casse plus l'application.** Avec le mini-navigateur, les Paramètres ou les journaux MCP ouverts, faire glisser une ligne de la barre latérale démolissait l'interface, et seul un redémarrage la rétablissait.
+- **Renommer un élément met désormais à jour tous les onglets ouverts** — y compris ceux d'un panneau divisé et ceux de tous les types de requêtes (gRPC, GraphQL, Redis…), qui conservaient leur ancien nom jusqu'à réouverture.
+- **Les rapports d'erreur nous parviennent à nouveau.** Avec l'envoi de rapports activé, la 1.0.0 n'envoyait rien en silence : un plantage que vous rencontriez ne nous apprenait rien.
+- **L'illustration « langages de code » réaffiche ses logos.**
+
 ## v1.0.0
 
 **Restorm 1.0 — le client d'API local-first, lancé.**

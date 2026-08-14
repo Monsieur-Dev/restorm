@@ -312,6 +312,100 @@ describe('useItemOperations.handleItemDrop', () => {
   })
 })
 
+describe('useItemOperations.handleSidebarItemRename', () => {
+  const buildOptions = (rootItems: FolderItem[]): UseItemOperationsOptions => ({
+    rootItems,
+    setRootItems: vi.fn(),
+    setExpandedIds: vi.fn(),
+    setSelectedItemId: vi.fn(),
+    setSidebarEditingItemId: vi.fn(),
+    setWorkbenchTree: vi.fn(),
+    setDeleteConfirmation: vi.fn(),
+    openFolderTab: vi.fn(),
+    openScenarioEditorTab: vi.fn(),
+    openEnvironmentFolderTab: vi.fn(),
+    openAnyRequestTab: vi.fn(),
+    projectUuid: 'project-1'
+  })
+
+  /** Apply the rename to a workbench tree shaped as a SPLIT: a container node
+   * whose panes each hold one group. */
+  function renameInSplitLayout(itemId: string, newName: string, tabs: Record<string, unknown>[]): Record<string, unknown>[] {
+    const setWorkbenchTree = vi.fn()
+    const { result } = renderHook(() =>
+      useItemOperations({ ...buildOptions([]), setWorkbenchTree }))
+
+    act(() => {
+      result.current.handleSidebarItemRename({ item: { id: itemId } } as never, newName)
+    })
+
+    const calls = setWorkbenchTree.mock.calls
+    const updater = calls[calls.length - 1]?.[0] as
+      (previous: unknown) => { groups: { groups: { tabs: Record<string, unknown>[] }[] }[] }
+    expect(updater).toBeTypeOf('function')
+
+    const previous = {
+      groups: [{
+        id: 'split', type: 'container', direction: 'horizontal',
+        groups: [
+          { id: 'pane-1', type: 'tabs', tabs: [], activeTabId: undefined },
+          { id: 'pane-2', type: 'tabs', tabs, activeTabId: tabs[0]?.['id'] }
+        ]
+      }]
+    }
+    const next = updater(previous)
+    const pane = next.groups[0]?.groups[1]
+    expect(pane?.tabs).not.toBe(tabs)  // non-vacuity: the mapper reached INSIDE the split
+    return pane?.tabs ?? []
+  }
+
+  it('retitles a renamed request in a split pane, whatever its protocol', () => {
+    // The rename path used to walk `tree.groups` directly (so a tab inside a
+    // split kept its old name) and knew how to retitle only HTTP requests (so
+    // every other protocol kept its old name anywhere). Both come from the
+    // protocol registry now.
+    const tabs = [
+      { id: 't-kafka', tabType: 'kafka-request', title: 'Old name', titleString: 'Old name', request: { id: 'req-1', type: 'kafka', name: 'Old name' }, breadcrumbs: [] },
+      { id: 't-gql', tabType: 'graphql-request', title: 'GraphQL Other', titleString: 'GraphQL Other', request: { id: 'req-2', type: 'graphql', name: 'Other' }, breadcrumbs: [] }
+    ]
+
+    const renamed = renameInSplitLayout('req-1', 'New name', tabs)
+
+    // Kafka declares no tab-title prefix: the bare name.
+    expect(renamed[0]?.['title']).toBe('New name')
+    expect(renamed[0]?.['titleString']).toBe('New name')
+    expect((renamed[0]?.['request'] as { name: string }).name).toBe('New name')
+    // The other tab is untouched.
+    expect(renamed[1]).toBe(tabs[1])
+  })
+
+  it('keeps the protocol prefix when recomposing the title', () => {
+    const tabs = [
+      { id: 't-gql', tabType: 'graphql-request', title: 'GraphQL Old', titleString: 'GraphQL Old', request: { id: 'req-2', type: 'graphql', name: 'Old' }, breadcrumbs: [] },
+      { id: 't-http', tabType: 'http-request', title: 'GET Old', titleString: 'GET Old', request: { id: 'req-3', type: 'http', method: 'GET', name: 'Old' }, breadcrumbs: [] }
+    ]
+
+    expect(renameInSplitLayout('req-2', 'New', tabs)[0]?.['title']).toBe('GraphQL New')
+    expect(renameInSplitLayout('req-3', 'New', tabs)[1]?.['title']).toBe('GET New')
+  })
+
+  it('retitles folder and scenario tabs, and refreshes descendants breadcrumbs', () => {
+    const tabs = [
+      { id: 't-folder', tabType: 'folder', title: 'Old', titleString: 'Old', folder: { id: 'f-1', name: 'Old' }, breadcrumbs: [{ id: 'f-1', label: 'Old' }] },
+      { id: 't-scenario', tabType: 'scenario-editor', title: 'Sc', titleString: 'Sc', scenario: { id: 's-1', name: 'Sc' }, breadcrumbs: [{ id: 'f-1', label: 'Old' }] }
+    ]
+
+    const renamed = renameInSplitLayout('f-1', 'New', tabs)
+
+    expect(renamed[0]?.['title']).toBe('New')
+    expect((renamed[0]?.['folder'] as { name: string }).name).toBe('New')
+    // The scenario lives UNDER the renamed folder: its crumb follows, its
+    // own title does not.
+    expect(renamed[1]?.['title']).toBe('Sc')
+    expect(renamed[1]?.['breadcrumbs']).toEqual([{ id: 'f-1', label: 'New' }])
+  })
+})
+
 describe('useItemOperations.confirmDelete', () => {
   const buildOptions = (rootItems: FolderItem[]): UseItemOperationsOptions => ({
     rootItems,

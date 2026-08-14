@@ -39,43 +39,15 @@ import type {
 } from '../../../shared/types/collections'
 import {
   isRequest,
-  isHTTPRequest,
-  isGraphQLRequest,
-  isGrpcRequest,
-  isSoapRequest,
-  isWebSocketRequest,
-  isSseRequest,
-  isStompRequest,
-  isODataRequest,
-  isAuthenticationRequest,
-  isJsonRpcRequest,
-  isJsonRpcBatchRequest,
-  isTrpcRequest,
-  isAmqpRequest,
-  isRedisRequest,
-  isKafkaRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario
 } from '../../../shared/types/collections'
+import { protocolSpec, requestTabTitle, isRequestType } from '../../../shared/protocolRegistry'
 import type {
+  RestormEditorTab,
   FolderTab,
   EnvironmentFolderTab,
-  HTTPRequestTab,
-  GraphQLRequestTab,
-  GrpcRequestTab,
-  SoapRequestTab,
-  WebSocketRequestTab,
-  SseRequestTab,
-  StompRequestTab,
-  ODataRequestTab,
-  JsonRpcRequestTab,
-  JsonRpcBatchRequestTab,
-  AuthenticationRequestTab,
-  TrpcRequestTab,
-  AmqpRequestTab,
-  RedisRequestTab,
-  KafkaRequestTab,
   ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
@@ -489,58 +461,11 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     const requestChecksum = computeChecksum(JSON.parse(JSON.stringify(request)))
     registerTabDirtyState(request.id, requestChecksum)
 
-    // Determine tab type and title based on request type
-    let tabType: string
-    let title: string
-
-    if (isHTTPRequest(request)) {
-      tabType = 'http-request'
-      title = `${request.method} ${request.name}`
-    } else if (isGraphQLRequest(request)) {
-      tabType = 'graphql-request'
-      title = `GraphQL ${request.name}`
-    } else if (isGrpcRequest(request)) {
-      tabType = 'grpc-request'
-      title = `gRPC ${request.name}`
-    } else if (isSoapRequest(request)) {
-      tabType = 'soap-request'
-      title = `SOAP ${request.name}`
-    } else if (isWebSocketRequest(request)) {
-      tabType = 'websocket-request'
-      title = `WS ${request.name}`
-    } else if (isSseRequest(request)) {
-      tabType = 'sse-request'
-      title = `SSE ${request.name}`
-    } else if (isStompRequest(request)) {
-      tabType = 'stomp-request'
-      title = `STOMP ${request.name}`
-    } else if (isODataRequest(request)) {
-      tabType = 'odata-request'
-      title = request.name
-    } else if (isAuthenticationRequest(request)) {
-      tabType = 'auth-request'
-      title = request.name
-    } else if (isJsonRpcRequest(request)) {
-      tabType = 'jsonrpc-request'
-      title = `JSON-RPC ${request.name}`
-    } else if (isJsonRpcBatchRequest(request)) {
-      tabType = 'jsonrpc-batch-request'
-      title = `JSON-RPC Batch ${request.name}`
-    } else if (isTrpcRequest(request)) {
-      tabType = 'trpc-request'
-      title = `tRPC ${request.name}`
-    } else if (isAmqpRequest(request)) {
-      tabType = 'amqp-request'
-      title = request.name
-    } else if (isRedisRequest(request)) {
-      tabType = 'redis-request'
-      title = request.name
-    } else if (isKafkaRequest(request)) {
-      tabType = 'kafka-request'
-      title = request.name
-    } else {
-      return // Unknown request type
-    }
+    // Tab type + label both come from the protocol registry, so a new
+    // protocol declares them once there instead of growing a branch here.
+    const title = requestTabTitle(request)
+    if (title === null || !isRequestType(request.type)) return // Unknown request type
+    const tabType = protocolSpec(request.type).tabType
 
     setWorkbenchTree((prev) => {
       const newTab = {
@@ -700,185 +625,20 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestItem.id)
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
 
-      if (isHTTPRequest(requestItem)) {
+      // Same registry lookup as the open path — one declaration per
+      // protocol, no per-protocol branch to keep in sync here.
+      const title = requestTabTitle(requestItem)
+      if (title !== null && isRequestType(requestItem.type)) {
         return {
           id: tabId,
-          tabType: 'http-request',
-          title: `${requestItem.method} ${requestItem.name}`,
-          titleString: `${requestItem.method} ${requestItem.name}`,
+          tabType: protocolSpec(requestItem.type).tabType,
+          title,
+          titleString: title,
           request: requestItem,
           breadcrumbs,
           environments,
           allowFullscreen: true
-        } as HTTPRequestTab
-      }
-      if (isGraphQLRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'graphql-request',
-          title: `GraphQL ${requestItem.name}`,
-          titleString: `GraphQL ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as GraphQLRequestTab
-      }
-      if (isGrpcRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'grpc-request',
-          title: `gRPC ${requestItem.name}`,
-          titleString: `gRPC ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as GrpcRequestTab
-      }
-      if (isSoapRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'soap-request',
-          title: `SOAP ${requestItem.name}`,
-          titleString: `SOAP ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as SoapRequestTab
-      }
-      if (isWebSocketRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'websocket-request',
-          title: `WS ${requestItem.name}`,
-          titleString: `WS ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as WebSocketRequestTab
-      }
-      if (isSseRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'sse-request',
-          title: `SSE ${requestItem.name}`,
-          titleString: `SSE ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as SseRequestTab
-      }
-      if (isStompRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'stomp-request',
-          title: `STOMP ${requestItem.name}`,
-          titleString: `STOMP ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as StompRequestTab
-      }
-      if (isODataRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'odata-request',
-          title: requestItem.name,
-          titleString: requestItem.name,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as ODataRequestTab
-      }
-      if (isAuthenticationRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'auth-request',
-          title: requestItem.name,
-          titleString: requestItem.name,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as AuthenticationRequestTab
-      }
-      if (isJsonRpcRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'jsonrpc-request',
-          title: `JSON-RPC ${requestItem.name}`,
-          titleString: `JSON-RPC ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as JsonRpcRequestTab
-      }
-      if (isJsonRpcBatchRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'jsonrpc-batch-request',
-          title: `JSON-RPC Batch ${requestItem.name}`,
-          titleString: `JSON-RPC Batch ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as JsonRpcBatchRequestTab
-      }
-      if (isTrpcRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'trpc-request',
-          title: `tRPC ${requestItem.name}`,
-          titleString: `tRPC ${requestItem.name}`,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as TrpcRequestTab
-      }
-      if (isAmqpRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'amqp-request',
-          title: requestItem.name,
-          titleString: requestItem.name,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as AmqpRequestTab
-      }
-      if (isRedisRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'redis-request',
-          title: requestItem.name,
-          titleString: requestItem.name,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as RedisRequestTab
-      }
-      if (isKafkaRequest(requestItem)) {
-        return {
-          id: tabId,
-          tabType: 'kafka-request',
-          title: requestItem.name,
-          titleString: requestItem.name,
-          request: requestItem,
-          breadcrumbs,
-          environments,
-          allowFullscreen: true
-        } as KafkaRequestTab
+        } as RestormEditorTab
       }
     }
     return null

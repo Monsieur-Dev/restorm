@@ -10,6 +10,15 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.0.1
+
+**First patch — sidebar moves, tab names, and crash reports.**
+
+- **Moving an item in the sidebar no longer breaks the app.** With the mini browser, Settings or the MCP logs open, dragging any row in the sidebar tore the interface down, and only a restart brought it back.
+- **Renaming an item now updates every open tab** — including tabs in a split pane, and tabs of every request kind (gRPC, GraphQL, Redis…), which used to keep their old name until reopened.
+- **Crash reports reach us again.** With crash reporting turned on, 1.0.0 silently sent nothing: a crash you hit told us nothing.
+- **The "code languages" tip illustration shows its logos again.**
+
 ## v1.0.0
 
 **Restorm 1.0 — the local-first API client, launched.**

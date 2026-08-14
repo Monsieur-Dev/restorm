@@ -40,6 +40,20 @@ export type ProtocolBadgeSpec =
   | { readonly kind: 'fixed'; readonly value: string }
   | { readonly kind: 'field'; readonly field: string }
 
+/** How a saved request's WORKBENCH TAB LABEL is composed, before the request
+ * name. `fixed` prepends a constant word (`GraphQL Ping`); `field` prepends a
+ * discriminating field read off the request (HTTP → `method` → `GET Ping`).
+ * Omitting `tabTitle` entirely means the tab shows the bare name — the choice
+ * made for protocols whose editor already announces the kind loudly enough
+ * (OData, auth, AMQP, Redis, Kafka).
+ *
+ * Deliberately independent from {@link ProtocolBadgeSpec}: the badge is a
+ * cramped capsule (`GQL`) and the tab label is prose (`GraphQL`), and gRPC
+ * badges its call type while its tab reads `gRPC`. */
+export type ProtocolTabTitleSpec =
+  | { readonly kind: 'fixed'; readonly value: string }
+  | { readonly kind: 'field'; readonly field: string }
+
 /** Everything the shared / renderer / main layers need to know about a
  * protocol type that is NOT a class, an executor, or a React component. Each
  * optional flag carries a documented default so the registry states only a
@@ -54,6 +68,8 @@ export interface ProtocolSpec {
   ipcNamespace: string
   /** Tree/tab badge selection. */
   badge: ProtocolBadgeSpec
+  /** Workbench tab label composition. Default: the bare request name. */
+  tabTitle?: ProtocolTabTitleSpec
   /** The protocol can HOST a mock server (`request.server === true` renders the
    * SRV badge variant + a listen/stop lifecycle). Default false. */
   serverCapable?: boolean
@@ -75,6 +91,7 @@ export const PROTOCOL_REGISTRY = {
   http: {
     graphqlTypeName: 'HTTPRequest',
     tabType: 'http-request',
+    tabTitle: { kind: 'field', field: 'method' },
     ipcNamespace: 'http',
     badge: { kind: 'field', field: 'method' },
     serverCapable: true,
@@ -83,6 +100,7 @@ export const PROTOCOL_REGISTRY = {
   graphql: {
     graphqlTypeName: 'GraphQLRequest',
     tabType: 'graphql-request',
+    tabTitle: { kind: 'fixed', value: 'GraphQL' },
     ipcNamespace: 'graphql',
     badge: { kind: 'fixed', value: 'GQL' },
     serverCapable: true,
@@ -92,6 +110,7 @@ export const PROTOCOL_REGISTRY = {
   grpc: {
     graphqlTypeName: 'GrpcRequest',
     tabType: 'grpc-request',
+    tabTitle: { kind: 'fixed', value: 'gRPC' },
     ipcNamespace: 'grpc',
     badge: { kind: 'field', field: 'callType' },
     serverCapable: true,
@@ -101,6 +120,7 @@ export const PROTOCOL_REGISTRY = {
   soap: {
     graphqlTypeName: 'SoapRequest',
     tabType: 'soap-request',
+    tabTitle: { kind: 'fixed', value: 'SOAP' },
     ipcNamespace: 'soap',
     badge: { kind: 'fixed', value: 'SOAP' },
     serverCapable: true,
@@ -110,6 +130,7 @@ export const PROTOCOL_REGISTRY = {
   websocket: {
     graphqlTypeName: 'WebSocketRequest',
     tabType: 'websocket-request',
+    tabTitle: { kind: 'fixed', value: 'WS' },
     ipcNamespace: 'websocket',
     badge: { kind: 'field', field: 'protocol' },
     serverCapable: true,
@@ -123,6 +144,7 @@ export const PROTOCOL_REGISTRY = {
   sse: {
     graphqlTypeName: 'SseRequest',
     tabType: 'sse-request',
+    tabTitle: { kind: 'fixed', value: 'SSE' },
     ipcNamespace: 'sse',
     badge: { kind: 'fixed', value: 'SSE' },
     searchIcon: 'sse',
@@ -131,6 +153,7 @@ export const PROTOCOL_REGISTRY = {
   stomp: {
     graphqlTypeName: 'StompRequest',
     tabType: 'stomp-request',
+    tabTitle: { kind: 'fixed', value: 'STOMP' },
     ipcNamespace: 'stomp',
     badge: { kind: 'fixed', value: 'STOMP' },
     scenarioKinds: ['stompConnect', 'stompSend', 'stompClose']
@@ -159,6 +182,7 @@ export const PROTOCOL_REGISTRY = {
   jsonrpc: {
     graphqlTypeName: 'JsonRpcRequest',
     tabType: 'jsonrpc-request',
+    tabTitle: { kind: 'fixed', value: 'JSON-RPC' },
     ipcNamespace: 'jsonrpc',
     badge: { kind: 'fixed', value: 'RPC' }
   },
@@ -169,12 +193,14 @@ export const PROTOCOL_REGISTRY = {
   jsonrpcBatch: {
     graphqlTypeName: 'JsonRpcBatchRequest',
     tabType: 'jsonrpc-batch-request',
+    tabTitle: { kind: 'fixed', value: 'JSON-RPC Batch' },
     ipcNamespace: 'jsonrpc',
     badge: { kind: 'fixed', value: 'RPC[]' }
   },
   trpc: {
     graphqlTypeName: 'TrpcRequest',
     tabType: 'trpc-request',
+    tabTitle: { kind: 'fixed', value: 'tRPC' },
     ipcNamespace: 'trpc',
     // A tRPC call binds to the existing `httpRequest` scenario node (like
     // GraphQL / gRPC unary / OData), so it contributes no `scenarioKinds`.
@@ -208,6 +234,35 @@ export const REQUEST_TYPES = Object.keys(PROTOCOL_REGISTRY) as [RequestType, ...
 /** Look up a protocol's metadata by discriminant. */
 export function protocolSpec(type: RequestType): ProtocolSpec {
   return PROTOCOL_REGISTRY[type]
+}
+
+/** Narrow an arbitrary discriminant to a known protocol, so callers holding a
+ * loosely-typed request can branch without casting. */
+export function isRequestType(type: unknown): type is RequestType {
+  return typeof type === 'string' && type in PROTOCOL_REGISTRY
+}
+
+/**
+ * The label a workbench tab shows for a saved request, per that protocol's
+ * {@link ProtocolSpec.tabTitle}. Returns `null` for an unknown discriminant.
+ *
+ * Both the OPEN path and the RENAME path go through here. They used to compose
+ * the label separately, and the rename copy only knew about HTTP — so renaming
+ * a GraphQL or Kafka request left its tab showing the old name until it was
+ * closed and reopened.
+ */
+export function requestTabTitle(request: { type?: unknown; name?: unknown }): string | null {
+  if (!isRequestType(request.type)) return null
+  const name = typeof request.name === 'string' ? request.name : ''
+  const spec = PROTOCOL_REGISTRY[request.type] as ProtocolSpec
+  const title = spec.tabTitle
+  if (title === undefined) return name
+  if (title.kind === 'fixed') return `${title.value} ${name}`
+  // `field` — a request whose discriminating field is unset (a half-built
+  // request, an older file predating the field) falls back to the bare name
+  // rather than rendering "undefined Ping".
+  const fieldValue = (request as Record<string, unknown>)[title.field]
+  return typeof fieldValue === 'string' && fieldValue !== '' ? `${fieldValue} ${name}` : name
 }
 
 /** GraphQL union member name for a request `type` discriminant, or `null` for an
