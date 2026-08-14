@@ -138,7 +138,10 @@ describe('checkHeadlessEntitlement', () => {
     expect(await checkHeadlessEntitlement(deps)).toEqual({ granted: false, reason: 'fetch-error' })
   })
 
-  it('returns fetch-error on a non-2xx response (e.g. 401 revoked)', async () => {
+  it('tells a REJECTED token apart from an unreachable endpoint (401 vs transport)', async () => {
+    // The distinction earns its keep now that tokens can expire: a 401 is
+    // permanent, and reporting it as a network problem sends a CI owner
+    // debugging their egress rules for a token that simply ran out.
     process.env['RESTORM_TOKEN'] = 'rstk_revoked'
     const { publicSpkiPem } = await generateEdKeyPair()
     const deps: HeadlessEntitlementDeps = {
@@ -148,7 +151,7 @@ describe('checkHeadlessEntitlement', () => {
       fetchImpl: fetchHttp401(),
       now: () => NOW_MS
     }
-    expect(await checkHeadlessEntitlement(deps)).toEqual({ granted: false, reason: 'fetch-error' })
+    expect(await checkHeadlessEntitlement(deps)).toEqual({ granted: false, reason: 'token-rejected' })
   })
 
   it('returns token-invalid when the backend returns a malformed JWT', async () => {

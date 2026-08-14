@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**Vaše tokeny CLI/CI, bez opuštění aplikace.**
+
+- **Vytvářejte, prohlížejte a odvolávejte tokeny přímo v Restormu** — pro uživatele Pro a Enterprise, z tlačítka účtu v záhlaví. Konec cesty do řídicího panelu kvůli tokenu pro pipeline, kterou právě píšete.
+- **Tokeny mohou vypršet.** Při vytváření zvolte platnost: 7 až 365 dní, nebo bez vypršení jako dosud. Vypršelý token je odmítnut stejně jako odvolaný.
+- **Vaše organizace může delegovat.** Správce může konkrétnímu členovi povolit vytváření tokenů a odděleně mu zpřístupnit protokol auditu, aniž by z něj udělal správce.
+
 ## v1.0.1
 
 **První oprava: přesouvání v postranním panelu, názvy karet a hlášení o pádech.**

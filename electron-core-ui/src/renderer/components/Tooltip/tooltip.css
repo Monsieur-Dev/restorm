@@ -181,3 +181,21 @@
 	padding: 0 0.4em;
 	background-color: var(--textCodeBlock-background);
 }
+
+/* Respect a reduced-motion preference: appear at once instead of fading.
+ *
+ * `!important` because the fade is an INLINE style set by the component, and
+ * an inline declaration otherwise wins over any stylesheet rule.
+ *
+ * This also fixes a capture-time trap worth stating: an offscreen or occluded
+ * window produces no compositor frames, so a running transition never
+ * advances — the element's computed opacity stays 0 while the inline style
+ * asks for 1. A screenshot then shows nothing, and every automated visibility
+ * check still passes, because those look at the element's own box and style
+ * rather than an ancestor's animated opacity.
+ */
+@media (prefers-reduced-motion: reduce) {
+	.tooltip {
+		transition: none !important;
+	}
+}

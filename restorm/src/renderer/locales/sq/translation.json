@@ -2685,5 +2685,43 @@
       "title": "Ky nuk është një skedar Restorm",
       "message": "Ky skedar nuk deklaron asnjë format skedari Restorm. Nuk është krijuar nga Restorm ose është modifikuar me dorë, prandaj nuk mund të hapet."
     }
+  },
+  "cliTokens": {
+    "title": "Tokenat e mi CLI/CI",
+    "intro": "Një token CLI/CI i lejon një ekzekutimi pa ndërfaqe (CI, ose lokalisht me --headless) të vërtetohet si organizata juaj. Nuk jep kurrë qasje te të dhënat tuaja.",
+    "empty": "Nuk keni ende asnjë token.",
+    "never": "Kurrë",
+    "create": "Krijo token",
+    "namePlaceholder": "Etiketë (p.sh. ci-main)",
+    "nameLabel": "Etiketa e tokenit",
+    "lifetimeLabel": "Kohëzgjatja e tokenit",
+    "noExpiration": "Pa skadim",
+    "days": "{{count}} ditë",
+    "copy": "Kopjo",
+    "copied": "U kopjua",
+    "revealWarning": "Kopjojeni tani — ky token nuk do të shfaqet më kurrë.",
+    "revokeNamed": "Revoko {{name}}",
+    "column": {
+      "name": "Emri",
+      "created": "Krijuar",
+      "expires": "Skadon",
+      "lastUsed": "Përdorur së fundi",
+      "status": "Gjendja",
+      "actions": "Veprime"
+    },
+    "state": {
+      "active": "Aktiv",
+      "revoked": "I revokuar",
+      "expired": "I skaduar"
+    },
+    "failure": {
+      "signed-out": "Hyni për të menaxhuar tokenat tuaj.",
+      "forbidden": "Organizata juaj nuk ju lejon të krijoni tokena. Një administrator mund t'jua japë këtë të drejtë nga konsola e administrimit.",
+      "invalid-name": "Kjo etiketë nuk mund të përdoret. Provoni një më të shkurtër.",
+      "invalid-expiry": "Kjo kohëzgjatje nuk është e vlefshme.",
+      "not-found": "Ky token nuk ekziston më.",
+      "unavailable": "Tokenat nuk janë të disponueshëm për momentin. Provoni pas pak.",
+      "plan-required": "Ekzekutimet pa ndërfaqe janë pjesë e planit Pro. Kaloni te Pro për të krijuar tokena — ata që keni tashmë mund t'i revokoni gjithsesi."
+    }
   }
 }

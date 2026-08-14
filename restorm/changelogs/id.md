@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**Token CLI/CI Anda, tanpa keluar dari aplikasi.**
+
+- **Buat, lihat, dan cabut token langsung dari Restorm** — untuk pengguna Pro dan Enterprise, dari tombol akun di bilah judul. Tidak perlu lagi bolak-balik ke dasbor demi token untuk pipeline yang sedang Anda tulis.
+- **Token bisa kedaluwarsa.** Pilih masa berlaku saat membuatnya: 7 sampai 365 hari, atau tanpa kedaluwarsa seperti sebelumnya. Token kedaluwarsa ditolak sama seperti yang dicabut.
+- **Organisasi Anda dapat mendelegasikan.** Administrator kini dapat mengizinkan anggota tertentu membuat token, dan secara terpisah memberi akses ke log audit, tanpa menjadikannya administrator.
+
 ## v1.0.1
 
 **Perbaikan pertama: memindahkan item di bilah samping, nama tab, dan laporan kerusakan.**

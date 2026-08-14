@@ -50,6 +50,9 @@ export const BACKEND_ENDPOINTS = {
   login: 'login',
   session: 'session',
   entitlement: 'entitlement',
+  /** Org administration. The app only ever calls its token actions, which are
+   * scoped server-side to the caller's own tokens. */
+  admin: 'admin',
   checkout: 'checkout',
   'customer-portal': 'customer-portal'
 } as const

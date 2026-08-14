@@ -2685,5 +2685,43 @@
       "title": "Dette er ikke en Restorm-fil",
       "message": "Denne fil angiver ikke et Restorm-filformat. Den er ikke skrevet af Restorm eller er redigeret manuelt, og derfor kan den ikke åbnes."
     }
+  },
+  "cliTokens": {
+    "title": "Mine CLI/CI-tokens",
+    "intro": "Et CLI/CI-token lader en kørsel uden grænseflade (CI eller lokalt med --headless) autentificere sig som din organisation. Det giver aldrig adgang til dine data.",
+    "empty": "Du har endnu ingen tokens.",
+    "never": "Aldrig",
+    "create": "Opret token",
+    "namePlaceholder": "Etiket (f.eks. ci-main)",
+    "nameLabel": "Tokenetiket",
+    "lifetimeLabel": "Tokenets levetid",
+    "noExpiration": "Udløber ikke",
+    "days": "{{count}} dage",
+    "copy": "Kopiér",
+    "copied": "Kopieret",
+    "revealWarning": "Kopiér det nu — dette token vises aldrig igen.",
+    "revokeNamed": "Tilbagekald {{name}}",
+    "column": {
+      "name": "Navn",
+      "created": "Oprettet",
+      "expires": "Udløber",
+      "lastUsed": "Sidst brugt",
+      "status": "Status",
+      "actions": "Handlinger"
+    },
+    "state": {
+      "active": "Aktiv",
+      "revoked": "Tilbagekaldt",
+      "expired": "Udløbet"
+    },
+    "failure": {
+      "signed-out": "Log ind for at administrere dine tokens.",
+      "forbidden": "Din organisation tillader dig ikke at oprette tokens. En administrator kan give rettigheden i administrationskonsollen.",
+      "invalid-name": "Den etiket kan ikke bruges. Prøv en kortere.",
+      "invalid-expiry": "Den levetid er ikke gyldig.",
+      "not-found": "Det token findes ikke længere.",
+      "unavailable": "Tokens er ikke tilgængelige lige nu. Prøv igen om et øjeblik.",
+      "plan-required": "Kørsler uden grænseflade er en del af Pro-abonnementet. Skift til Pro for at oprette tokens — du kan fortsat tilbagekalde dem, du allerede har."
+    }
   }
 }

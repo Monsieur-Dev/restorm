@@ -2684,5 +2684,43 @@
       "title": "これは Restorm のファイルではありません",
       "message": "このファイルには Restorm のファイル形式が記載されていません。Restorm で作成されたものではないか、手作業で編集されたため、開くことができません。"
     }
+  },
+  "cliTokens": {
+    "title": "自分の CLI/CI トークン",
+    "intro": "CLI/CI トークンを使うと、画面のない実行（CI、またはローカルの --headless）が組織として認証できます。データへのアクセス権は一切与えません。",
+    "empty": "まだトークンがありません。",
+    "never": "なし",
+    "create": "トークンを作成",
+    "namePlaceholder": "ラベル（例: ci-main）",
+    "nameLabel": "トークンのラベル",
+    "lifetimeLabel": "トークンの有効期間",
+    "noExpiration": "無期限",
+    "days": "{{count}} 日",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "revealWarning": "今すぐコピーしてください。このトークンは二度と表示されません。",
+    "revokeNamed": "{{name}} を失効",
+    "column": {
+      "name": "名前",
+      "created": "作成",
+      "expires": "有効期限",
+      "lastUsed": "最終使用",
+      "status": "状態",
+      "actions": "操作"
+    },
+    "state": {
+      "active": "有効",
+      "revoked": "失効",
+      "expired": "期限切れ"
+    },
+    "failure": {
+      "signed-out": "トークンを管理するにはサインインしてください。",
+      "forbidden": "所属組織からトークンの作成を許可されていません。管理者が管理コンソールで権限を付与できます。",
+      "invalid-name": "このラベルは使用できません。短いものをお試しください。",
+      "invalid-expiry": "この有効期間は正しくありません。",
+      "not-found": "このトークンは既に存在しません。",
+      "unavailable": "現在トークンを利用できません。しばらくしてからお試しください。",
+      "plan-required": "画面のない実行は Pro プランに含まれます。トークンを作成するには Pro にアップグレードしてください。既存のトークンの失効は引き続き可能です。"
+    }
   }
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**CLI/CI belirteçleriniz, uygulamadan çıkmadan.**
+
+- **Belirteçleri Restorm içinde oluşturun, görün ve iptal edin** — Pro ve Enterprise kullanıcıları için, başlık çubuğundaki hesap düğmesinden. Şu anda yazdığınız hat için panele gidip gelmeye son.
+- **Belirteçlerin ömrü olabilir.** Oluştururken bir süre seçin: 7 ila 365 gün ya da eskisi gibi süresiz. Süresi dolmuş bir belirteç, iptal edilmiş biri gibi reddedilir.
+- **Kuruluşunuz yetki devredebilir.** Bir yönetici, belirli bir üyeye belirteç oluşturma izni verebilir ve ayrıca denetim günlüğüne erişim tanıyabilir — onu yönetici yapmadan.
+
 ## v1.0.1
 
 **İlk yama: kenar çubuğunda taşıma, sekme adları ve çökme raporları.**

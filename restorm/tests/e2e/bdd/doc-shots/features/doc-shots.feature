@@ -12,6 +12,10 @@ Feature: Documentation screenshots
     And I create a new project and import the ArtifactsMMO OpenAPI spec from its URL
     And I open the imported request "Action Move" from folder "My characters"
     And I capture a screenshot for every locale to "{locale}/request-editor.png"
+    # The account card and the tokens modal — the first captures this harness
+    # feeds straight into the website's documentation assets.
+    And I capture the account card for every locale to "{locale}/compte-menu-connecte.png"
+    And I capture my CLI/CI tokens for every locale to "{locale}/jetons-cli-modale.png"
     And I create a custom enumeration "character" with the value "Buffy"
     And I build the scenario "Fight" chaining an input using "character", "Action Move", a log "Character moved", a 1000 ms wait and "Action Fight"
     And I mark the scenario "Fight" as favorite

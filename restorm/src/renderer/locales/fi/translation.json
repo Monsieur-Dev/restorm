@@ -2685,5 +2685,43 @@
       "title": "Tämä ei ole Restorm-tiedosto",
       "message": "Tämä tiedosto ei ilmoita Restorm-tiedostomuotoa. Sitä ei ole luonut Restorm tai sitä on muokattu käsin, joten sitä ei voi avata."
     }
+  },
+  "cliTokens": {
+    "title": "Omat CLI/CI-tunnukseni",
+    "intro": "CLI/CI-tunnus antaa käyttöliittymättömän ajon (CI tai paikallisesti --headless) todentautua organisaationne nimissä. Se ei koskaan anna pääsyä tietoihinne.",
+    "empty": "Sinulla ei ole vielä yhtään tunnusta.",
+    "never": "Ei koskaan",
+    "create": "Luo tunnus",
+    "namePlaceholder": "Nimike (esim. ci-main)",
+    "nameLabel": "Tunnuksen nimike",
+    "lifetimeLabel": "Tunnuksen voimassaoloaika",
+    "noExpiration": "Ei vanhene",
+    "days": "{{count}} päivää",
+    "copy": "Kopioi",
+    "copied": "Kopioitu",
+    "revealWarning": "Kopioi se nyt — tätä tunnusta ei näytetä enää koskaan.",
+    "revokeNamed": "Kumoa {{name}}",
+    "column": {
+      "name": "Nimi",
+      "created": "Luotu",
+      "expires": "Vanhenee",
+      "lastUsed": "Viimeksi käytetty",
+      "status": "Tila",
+      "actions": "Toiminnot"
+    },
+    "state": {
+      "active": "Aktiivinen",
+      "revoked": "Kumottu",
+      "expired": "Vanhentunut"
+    },
+    "failure": {
+      "signed-out": "Kirjaudu sisään hallitaksesi tunnuksiasi.",
+      "forbidden": "Organisaatiosi ei salli sinun luoda tunnuksia. Ylläpitäjä voi myöntää oikeuden hallintakonsolista.",
+      "invalid-name": "Tuota nimikettä ei voi käyttää. Kokeile lyhyempää.",
+      "invalid-expiry": "Tuo voimassaoloaika ei kelpaa.",
+      "not-found": "Tuota tunnusta ei enää ole.",
+      "unavailable": "Tunnukset eivät ole juuri nyt käytettävissä. Yritä hetken kuluttua uudelleen.",
+      "plan-required": "Käyttöliittymättömät ajot kuuluvat Pro-tilaukseen. Siirry Pro-tilaukseen luodaksesi tunnuksia — voit yhä kumota jo olemassa olevat."
+    }
   }
 }

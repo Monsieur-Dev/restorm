@@ -2685,5 +2685,43 @@
       "title": "Ez nem Restorm-fájl",
       "message": "Ez a fájl nem ad meg Restorm fájlformátumot. Nem a Restorm hozta létre, vagy kézzel szerkesztették, ezért nem nyitható meg."
     }
+  },
+  "cliTokens": {
+    "title": "Saját CLI/CI tokenjeim",
+    "intro": "A CLI/CI token lehetővé teszi, hogy egy felület nélküli futtatás (CI vagy helyben --headless) az Ön szervezeteként hitelesítse magát. Soha nem ad hozzáférést az adataihoz.",
+    "empty": "Még nincs egyetlen tokenje sem.",
+    "never": "Soha",
+    "create": "Token létrehozása",
+    "namePlaceholder": "Címke (pl. ci-main)",
+    "nameLabel": "Token címkéje",
+    "lifetimeLabel": "Token élettartama",
+    "noExpiration": "Nem jár le",
+    "days": "{{count}} nap",
+    "copy": "Másolás",
+    "copied": "Másolva",
+    "revealWarning": "Másolja ki most — ez a token többé nem jelenik meg.",
+    "revokeNamed": "{{name}} visszavonása",
+    "column": {
+      "name": "Név",
+      "created": "Létrehozva",
+      "expires": "Lejár",
+      "lastUsed": "Utoljára használva",
+      "status": "Állapot",
+      "actions": "Műveletek"
+    },
+    "state": {
+      "active": "Aktív",
+      "revoked": "Visszavont",
+      "expired": "Lejárt"
+    },
+    "failure": {
+      "signed-out": "Jelentkezzen be a tokenjei kezeléséhez.",
+      "forbidden": "A szervezete nem engedélyezi Önnek tokenek létrehozását. Egy rendszergazda megadhatja ezt a jogot az adminisztrációs konzolon.",
+      "invalid-name": "Ez a címke nem használható. Próbáljon rövidebbet.",
+      "invalid-expiry": "Ez az élettartam érvénytelen.",
+      "not-found": "Ez a token már nem létezik.",
+      "unavailable": "A tokenek jelenleg nem érhetők el. Próbálja újra egy pillanat múlva.",
+      "plan-required": "A felület nélküli futtatások a Pro csomag részei. Váltson Pro-ra tokenek létrehozásához — a meglévőket továbbra is visszavonhatja."
+    }
   }
 }

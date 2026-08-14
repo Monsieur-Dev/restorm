@@ -391,12 +391,13 @@ export type { SystemHostAllowlist } from './services'
 export { registerAuthIpc, broadcastAuthState } from './services'
 
 // EntitlementService — reactive capability source of truth.
-export { EntitlementService, E2E_PRO_CAPABILITIES, seedEntitlementForE2E } from './services'
+export { EntitlementService, E2E_PRO_CAPABILITIES, seedEntitlementForE2E, SessionCallError } from './services'
 export type { EntitlementServiceDeps } from './services'
 
 // EntitlementClient — fetch, verify and cache the EdDSA entitlement JWT.
 export {
   fetchEntitlement,
+  EntitlementHttpError,
   verifyEntitlementToken,
   importEntitlementPublicKey,
   createCheckout,

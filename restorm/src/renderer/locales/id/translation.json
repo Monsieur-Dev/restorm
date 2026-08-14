@@ -2684,5 +2684,43 @@
       "title": "Ini bukan berkas Restorm",
       "message": "Berkas ini tidak menyatakan format berkas Restorm. Berkas ini tidak dibuat oleh Restorm atau telah disunting secara manual, sehingga tidak dapat dibuka."
     }
+  },
+  "cliTokens": {
+    "title": "Token CLI/CI saya",
+    "intro": "Token CLI/CI memungkinkan proses tanpa antarmuka (CI, atau --headless secara lokal) melakukan autentikasi sebagai organisasi Anda. Token ini tidak pernah memberi akses ke data Anda.",
+    "empty": "Anda belum memiliki token.",
+    "never": "Tidak pernah",
+    "create": "Buat token",
+    "namePlaceholder": "Label (mis. ci-main)",
+    "nameLabel": "Label token",
+    "lifetimeLabel": "Masa berlaku token",
+    "noExpiration": "Tanpa kedaluwarsa",
+    "days": "{{count}} hari",
+    "copy": "Salin",
+    "copied": "Disalin",
+    "revealWarning": "Salin sekarang — token ini tidak akan ditampilkan lagi.",
+    "revokeNamed": "Cabut {{name}}",
+    "column": {
+      "name": "Nama",
+      "created": "Dibuat",
+      "expires": "Kedaluwarsa",
+      "lastUsed": "Terakhir dipakai",
+      "status": "Status",
+      "actions": "Tindakan"
+    },
+    "state": {
+      "active": "Aktif",
+      "revoked": "Dicabut",
+      "expired": "Kedaluwarsa"
+    },
+    "failure": {
+      "signed-out": "Masuk untuk mengelola token Anda.",
+      "forbidden": "Organisasi Anda tidak mengizinkan Anda membuat token. Administrator dapat memberikannya dari konsol administrasi.",
+      "invalid-name": "Label itu tidak dapat digunakan. Coba yang lebih pendek.",
+      "invalid-expiry": "Masa berlaku itu tidak valid.",
+      "not-found": "Token itu sudah tidak ada.",
+      "unavailable": "Token tidak tersedia saat ini. Coba lagi sebentar.",
+      "plan-required": "Proses tanpa antarmuka termasuk dalam paket Pro. Tingkatkan ke Pro untuk membuat token — Anda tetap dapat mencabut token yang sudah ada."
+    }
   }
 }

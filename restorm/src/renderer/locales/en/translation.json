@@ -2685,5 +2685,43 @@
       "title": "This is not a Restorm file",
       "message": "This file declares no Restorm file format. It was not written by Restorm, or it was edited by hand, so it cannot be opened."
     }
+  },
+  "cliTokens": {
+    "title": "My CLI/CI tokens",
+    "intro": "A CLI/CI token lets a headless run (CI, or --headless locally) authenticate as your organization. It never grants access to your data.",
+    "empty": "You have no token yet.",
+    "never": "Never",
+    "create": "Create token",
+    "namePlaceholder": "Label (e.g. ci-main)",
+    "nameLabel": "Token label",
+    "lifetimeLabel": "Token lifetime",
+    "noExpiration": "No expiration",
+    "days": "{{count}} days",
+    "copy": "Copy",
+    "copied": "Copied",
+    "revealWarning": "Copy it now — this token will never be shown again.",
+    "revokeNamed": "Revoke {{name}}",
+    "column": {
+      "name": "Name",
+      "created": "Created",
+      "expires": "Expires",
+      "lastUsed": "Last used",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "state": {
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired"
+    },
+    "failure": {
+      "signed-out": "Sign in to manage your tokens.",
+      "forbidden": "Your organization has not allowed you to create tokens. An administrator can grant it from the admin console.",
+      "invalid-name": "That label can't be used. Try a shorter one.",
+      "invalid-expiry": "That lifetime isn't valid.",
+      "not-found": "That token no longer exists.",
+      "unavailable": "Tokens are unavailable right now. Try again in a moment.",
+      "plan-required": "Headless runs are part of the Pro plan. Upgrade to create tokens — you can still revoke the ones you already have."
+    }
   }
 }

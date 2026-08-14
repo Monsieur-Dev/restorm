@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**Dine CLI/CI-tokens, uden at forlade appen.**
+
+- **Opret, se og tilbagekald dine tokens fra Restorm** — for Pro- og Enterprise-brugere, fra kontoknappen i titellinjen. Slut med turen til dashboardet for at få et token til den pipeline, du sidder og skriver.
+- **Tokens kan udløbe.** Vælg en levetid ved oprettelsen: 7 til 365 dage, eller uden udløb som hidtil. Et udløbet token afvises på samme måde som et tilbagekaldt.
+- **Din organisation kan uddelegere.** En administrator kan lade et bestemt medlem oprette tokens og separat give adgang til revisionsloggen — uden at gøre vedkommende til administrator.
+
 ## v1.0.1
 
 **Første rettelse: flytning i sidepanelet, fanenavne og nedbrudsrapporter.**

@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**Uw CLI/CI-tokens, zonder de app te verlaten.**
+
+- **Maak, bekijk en trek uw tokens in vanuit Restorm** — voor Pro- en Enterprise-gebruikers, via de accountknop in de titelbalk. Geen omweg meer via het dashboard voor een pipeline die u nu aan het schrijven bent.
+- **Tokens kunnen verlopen.** Kies bij het aanmaken een geldigheidsduur: 7 tot 365 dagen, of niet verlopen zoals voorheen. Een verlopen token wordt net zo geweigerd als een ingetrokken token.
+- **Uw organisatie kan delegeren.** Een beheerder kan een specifiek lid tokens laten aanmaken en, los daarvan, toegang geven tot het auditlogboek, zonder er een beheerder van te maken.
+
 ## v1.0.1
 
 **Eerste patch: slepen in de zijbalk, tabbladnamen en crashrapporten.**

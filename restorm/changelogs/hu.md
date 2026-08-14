@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**A CLI/CI tokenjei, az alkalmazás elhagyása nélkül.**
+
+- **Hozzon létre, nézzen meg és vonjon vissza tokeneket a Restormban** — Pro és Enterprise felhasználóknak, a címsor fiók gombjából. Nincs többé kitérő az irányítópultra egy éppen írt folyamat tokenjéért.
+- **A tokenek lejárhatnak.** Létrehozáskor válasszon élettartamot: 7–365 nap, vagy nem jár le, mint eddig. A lejárt tokent ugyanúgy elutasítja a rendszer, mint a visszavontat.
+- **Szervezete delegálhat.** Egy rendszergazda engedélyezheti egy adott tagnak a tokenek létrehozását, és külön hozzáférést adhat az auditnaplóhoz, anélkül hogy rendszergazdát csinálna belőle.
+
 ## v1.0.1
 
 **Első javítás: mozgatás az oldalsávban, lapnevek és összeomlási jelentések.**

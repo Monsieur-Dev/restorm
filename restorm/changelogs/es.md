@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**Sus tokens CLI/CI, sin salir de la aplicación.**
+
+- **Cree, consulte y revoque sus tokens desde Restorm** —para usuarios Pro y Enterprise, desde el botón de cuenta en la barra de título—. Se acabó el viaje al panel de control para conseguir un token del pipeline que está escribiendo.
+- **Los tokens pueden caducar.** Elija una duración al crearlos: de 7 a 365 días, o sin caducidad como hasta ahora. Un token caducado se rechaza igual que uno revocado.
+- **Su organización puede delegar.** Un administrador puede permitir que un miembro concreto cree tokens y, por separado, darle acceso al registro de auditoría, sin convertirlo en administrador.
+
 ## v1.0.1
 
 **Primer parche: mover elementos en la barra lateral, nombres de pestañas e informes de fallos.**

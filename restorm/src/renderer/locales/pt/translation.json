@@ -2685,5 +2685,43 @@
       "title": "Isto não é um ficheiro do Restorm",
       "message": "Este ficheiro não declara nenhum formato de ficheiro do Restorm. Não foi criado pelo Restorm ou foi editado à mão, por isso não pode ser aberto."
     }
+  },
+  "cliTokens": {
+    "title": "Os meus tokens CLI/CI",
+    "intro": "Um token CLI/CI permite que uma execução sem interface (CI, ou --headless localmente) se autentique como a sua organização. Nunca dá acesso aos seus dados.",
+    "empty": "Ainda não tem nenhum token.",
+    "never": "Nunca",
+    "create": "Criar token",
+    "namePlaceholder": "Etiqueta (p. ex. ci-main)",
+    "nameLabel": "Etiqueta do token",
+    "lifetimeLabel": "Duração do token",
+    "noExpiration": "Sem expiração",
+    "days": "{{count}} dias",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "revealWarning": "Copie-o agora — este token nunca mais será mostrado.",
+    "revokeNamed": "Revogar {{name}}",
+    "column": {
+      "name": "Nome",
+      "created": "Criado",
+      "expires": "Expira",
+      "lastUsed": "Última utilização",
+      "status": "Estado",
+      "actions": "Ações"
+    },
+    "state": {
+      "active": "Ativo",
+      "revoked": "Revogado",
+      "expired": "Expirado"
+    },
+    "failure": {
+      "signed-out": "Inicie sessão para gerir os seus tokens.",
+      "forbidden": "A sua organização não lhe permite criar tokens. Um administrador pode conceder-lhe esse direito na consola de administração.",
+      "invalid-name": "Essa etiqueta não pode ser usada. Tente uma mais curta.",
+      "invalid-expiry": "Essa duração não é válida.",
+      "not-found": "Esse token já não existe.",
+      "unavailable": "Os tokens estão indisponíveis neste momento. Tente novamente daqui a pouco.",
+      "plan-required": "As execuções sem interface fazem parte do plano Pro. Mude para Pro para criar tokens — pode continuar a revogar os que já tem."
+    }
   }
 }

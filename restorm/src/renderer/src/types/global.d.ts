@@ -17,6 +17,11 @@ import type {
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
+import type {
+  CliTokenResult,
+  CliTokenSummary,
+  CreatedCliToken
+} from '../../../shared/cliTokens/cliTokenTypes'
 import type { CrashArmedState, CrashConsentState, CrashRecoveryNotice, CrashReviewRequest } from '../../../shared/crash/crashTypes'
 
 declare global {
@@ -113,6 +118,14 @@ declare global {
          * surfaces (welcome wallpaper, wordmark animation, vignette frame)
          * render a fixed, static variant so screenshots are reproducible. */
         docCaptureMode: boolean
+      }
+      /** The signed-in user's own CLI/CI tokens. Every call is authenticated in
+       * the MAIN process — no session credential ever reaches this side. */
+      cliTokens: {
+        list: () => Promise<CliTokenResult<CliTokenSummary[]>>
+        /** The plaintext is in this reply and nowhere else, ever. */
+        create: (name: string, expiresInDays: number | null) => Promise<CliTokenResult<CreatedCliToken>>
+        revoke: (id: string) => Promise<CliTokenResult<{ ok: true }>>
       }
       /** Silent auto-update surface (see `src/main/services/UpdateService.ts`). */
       update: {

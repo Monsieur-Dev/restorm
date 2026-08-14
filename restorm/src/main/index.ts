@@ -95,6 +95,7 @@ import { searchIndexService, contextService, responseHistoryService, requestUsag
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
 import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
 import { registerUpdateIpc } from './ipc/updateHandlers'
+import { registerCliTokenIpc } from './ipc/cliTokenHandlers'
 import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
 import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaunchInactive } from './mcp/mcpEnablement'
@@ -1414,6 +1415,7 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 
 // Auto-update IPC (window.api.update.*)
 registerUpdateIpc()
+registerCliTokenIpc()
 
 // Crash-reporting IPC (window.api.crash.*). Read-only: it lets the renderer
 // discover whether reporting is armed so its own SDK can follow, and offers no
@@ -1483,6 +1485,15 @@ if (cliArgs.cliRun && cliArgs.open !== undefined) {
               'Headless scenario runs require a Pro or Enterprise plan.\n' +
               `Your CI token is valid but the org plan does not grant scenario.headless.\n` +
               `Upgrade: ${upgradeUrl}\n`
+            )
+            break
+          case 'token-rejected':
+            // Named separately from 'fetch-error' on purpose: this one will
+            // never succeed on a retry, and expiry is now a real way to get
+            // here — a token can run out without anyone revoking it.
+            process.stderr.write(
+              'RESTORM_TOKEN was rejected: it is unknown, has been revoked, or has expired.\n' +
+              `Generate a new token from the app (account button → "My CLI/CI tokens") or your account: ${upgradeUrl}\n`
             )
             break
           case 'fetch-error':

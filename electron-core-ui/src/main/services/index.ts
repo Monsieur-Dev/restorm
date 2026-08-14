@@ -232,12 +232,13 @@ export type { SystemHostAllowlist } from './auth/avatarFirewallExemption'
 export { registerAuthIpc, broadcastAuthState } from './auth/authIpc'
 
 // EntitlementService — reactive capability source of truth.
-export { EntitlementService, E2E_PRO_CAPABILITIES, seedEntitlementForE2E } from './entitlement/EntitlementService'
-export type { EntitlementServiceDeps } from './entitlement/EntitlementService'
+export { EntitlementService, E2E_PRO_CAPABILITIES, seedEntitlementForE2E, SessionCallError } from './entitlement/EntitlementService'
+export type { EntitlementServiceDeps, E2ESeedOverrides } from './entitlement/EntitlementService'
 
 // EntitlementClient — fetch, verify and cache the EdDSA entitlement JWT.
 export {
   fetchEntitlement,
+  EntitlementHttpError,
   verifyEntitlementToken,
   importEntitlementPublicKey,
   createCheckout,

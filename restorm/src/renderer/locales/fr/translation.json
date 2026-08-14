@@ -2685,5 +2685,43 @@
       "title": "Ce n’est pas un fichier Restorm",
       "message": "Ce fichier ne déclare aucun format de fichier Restorm. Il n’a pas été écrit par Restorm, ou il a été modifié à la main : il ne peut donc pas être ouvert."
     }
+  },
+  "cliTokens": {
+    "title": "Mes jetons CLI/CI",
+    "intro": "Un jeton CLI/CI permet à une exécution sans interface (CI, ou --headless en local) de s'authentifier au nom de votre organisation. Il ne donne jamais accès à vos données.",
+    "empty": "Vous n'avez encore aucun jeton.",
+    "never": "Jamais",
+    "create": "Créer un jeton",
+    "namePlaceholder": "Libellé (ex. ci-main)",
+    "nameLabel": "Libellé du jeton",
+    "lifetimeLabel": "Durée de vie du jeton",
+    "noExpiration": "Sans expiration",
+    "days": "{{count}} jours",
+    "copy": "Copier",
+    "copied": "Copié",
+    "revealWarning": "Copiez-le maintenant — ce jeton ne sera plus jamais affiché.",
+    "revokeNamed": "Révoquer {{name}}",
+    "column": {
+      "name": "Nom",
+      "created": "Création",
+      "expires": "Expiration",
+      "lastUsed": "Dernière utilisation",
+      "status": "État",
+      "actions": "Actions"
+    },
+    "state": {
+      "active": "Actif",
+      "revoked": "Révoqué",
+      "expired": "Expiré"
+    },
+    "failure": {
+      "signed-out": "Connectez-vous pour gérer vos jetons.",
+      "forbidden": "Votre organisation ne vous autorise pas à créer des jetons. Un administrateur peut vous accorder ce droit depuis la console d'administration.",
+      "invalid-name": "Ce libellé ne peut pas être utilisé. Essayez-en un plus court.",
+      "invalid-expiry": "Cette durée de vie n'est pas valide.",
+      "not-found": "Ce jeton n'existe plus.",
+      "unavailable": "Les jetons sont indisponibles pour le moment. Réessayez dans un instant.",
+      "plan-required": "Les exécutions sans interface font partie de l'offre Pro. Passez à Pro pour créer des jetons — vous pouvez toujours révoquer ceux que vous avez déjà."
+    }
   }
 }

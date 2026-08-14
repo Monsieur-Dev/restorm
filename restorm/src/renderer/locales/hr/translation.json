@@ -2686,5 +2686,43 @@
       "title": "Ovo nije Restorm datoteka",
       "message": "Ova datoteka ne navodi Restorm format datoteke. Nije ju napisao Restorm ili je uređivana ručno, pa se ne može otvoriti."
     }
+  },
+  "cliTokens": {
+    "title": "Moji CLI/CI tokeni",
+    "intro": "CLI/CI token omogućuje izvođenju bez sučelja (CI ili lokalno s --headless) autentifikaciju kao vaša organizacija. Nikada ne daje pristup vašim podacima.",
+    "empty": "Još nemate nijedan token.",
+    "never": "Nikad",
+    "create": "Stvori token",
+    "namePlaceholder": "Oznaka (npr. ci-main)",
+    "nameLabel": "Oznaka tokena",
+    "lifetimeLabel": "Trajanje tokena",
+    "noExpiration": "Bez isteka",
+    "days": "{{count}} dana",
+    "copy": "Kopiraj",
+    "copied": "Kopirano",
+    "revealWarning": "Kopirajte ga sada — ovaj se token više nikada neće prikazati.",
+    "revokeNamed": "Opozovi {{name}}",
+    "column": {
+      "name": "Naziv",
+      "created": "Stvoreno",
+      "expires": "Ističe",
+      "lastUsed": "Zadnja upotreba",
+      "status": "Stanje",
+      "actions": "Radnje"
+    },
+    "state": {
+      "active": "Aktivan",
+      "revoked": "Opozvan",
+      "expired": "Istekao"
+    },
+    "failure": {
+      "signed-out": "Prijavite se za upravljanje svojim tokenima.",
+      "forbidden": "Vaša vam organizacija ne dopušta stvaranje tokena. Administrator vam to pravo može dodijeliti u administratorskoj konzoli.",
+      "invalid-name": "Ta se oznaka ne može koristiti. Pokušajte s kraćom.",
+      "invalid-expiry": "To trajanje nije valjano.",
+      "not-found": "Taj token više ne postoji.",
+      "unavailable": "Tokeni trenutačno nisu dostupni. Pokušajte za trenutak.",
+      "plan-required": "Izvođenja bez sučelja dio su Pro plana. Prijeđite na Pro kako biste stvarali tokene — one koje već imate možete i dalje opozvati."
+    }
   }
 }

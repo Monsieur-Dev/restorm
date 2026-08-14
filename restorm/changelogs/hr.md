@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**Vaši CLI/CI tokeni, bez izlaska iz aplikacije.**
+
+- **Stvarajte, pregledavajte i opozivajte tokene u Restormu** — za korisnike Pro i Enterprise, s gumba računa u naslovnoj traci. Nema više odlaska na nadzornu ploču po token za cjevovod koji upravo pišete.
+- **Tokeni mogu isteći.** Pri stvaranju odaberite trajanje: 7 do 365 dana ili bez isteka, kao dosad. Istekli se token odbija jednako kao opozvani.
+- **Vaša organizacija može delegirati.** Administrator može određenom članu dopustiti stvaranje tokena i zasebno mu dati pristup zapisniku revizije, bez da ga učini administratorom.
+
 ## v1.0.1
 
 **Prva zakrpa: premještanje u bočnoj traci, nazivi kartica i izvješća o rušenju.**

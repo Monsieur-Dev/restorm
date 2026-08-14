@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.2
+
+**Dina CLI/CI-token, utan att lämna appen.**
+
+- **Skapa, se och återkalla token från Restorm** — för Pro- och Enterprise-användare, från kontoknappen i namnlisten. Slut på turen till instrumentpanelen för ett token till pipelinen du skriver just nu.
+- **Token kan upphöra.** Välj livslängd när du skapar: 7 till 365 dagar, eller ingen utgång som förut. Ett utgånget token avvisas precis som ett återkallat.
+- **Din organisation kan delegera.** En administratör kan låta en viss medlem skapa token och separat ge åtkomst till granskningsloggen — utan att göra personen till administratör.
+
 ## v1.0.1
 
 **Första rättelsen: flytt i sidopanelen, flikarnas namn och kraschrapporter.**

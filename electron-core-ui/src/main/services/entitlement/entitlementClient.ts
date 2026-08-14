@@ -111,6 +111,14 @@ export async function verifyEntitlementToken(
  * @param fetchImpl injected so the caller can wrap it in `withFirewallBypass`
  *   (host-guarded) and tests can stub it — this module never references electron.
  */
+/** A non-2xx answer from the entitlement endpoint, carrying its status. */
+export class EntitlementHttpError extends Error {
+  constructor(readonly status: number) {
+    super(`entitlement: backend responded ${String(status)}`)
+    this.name = 'EntitlementHttpError'
+  }
+}
+
 export async function fetchEntitlement(
   entitlementUrl: string,
   sessionToken: string,
@@ -121,7 +129,11 @@ export async function fetchEntitlement(
     headers: { authorization: `Bearer ${sessionToken}` }
   })
   if (!res.ok) {
-    throw new Error(`entitlement: backend responded ${String(res.status)}`)
+    // Carry the status: a caller has to tell a REJECTED token (401 — unknown,
+    // revoked or expired, and no amount of retrying will change it) from an
+    // endpoint it could not reach. Advising "check your network" for a token
+    // that expired sends someone debugging the wrong thing.
+    throw new EntitlementHttpError(res.status)
   }
   const parsed = (await res.json()) as { entitlement?: unknown }
   if (typeof parsed.entitlement !== 'string' || parsed.entitlement.length === 0) {
