@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { PROTOCOL_REGISTRY, REQUEST_TYPES, protocolSpec, graphqlTypeNameForRequestType, requestTabTitle } from './protocolRegistry'
+import type { RequestType } from './protocolRegistry'
 import { REQUEST_CLASS_REGISTRY } from './models/requests/requestFactory'
 
 /**
@@ -45,6 +46,41 @@ describe('protocol registry socle', () => {
       const spec = protocolSpec(type)
       expect(spec.tabType).toMatch(/-request$/)
       expect(spec.ipcNamespace).toBeTruthy()
+    }
+  })
+
+  it('pins the exact tab label of every protocol', () => {
+    // The label is user-visible chrome, so drift is a regression a user sees:
+    // `SOAP` becoming `Soap`, `WS` becoming `WebSocket`, `gRPC` becoming
+    // `GRPC`. Written out by hand, one line per protocol — deriving these from
+    // PROTOCOL_REGISTRY would make the test agree with whatever the registry
+    // says and assert nothing at all.
+    const expected: Record<RequestType, string> = {
+      http: 'GET Ping',
+      graphql: 'GraphQL Ping',
+      grpc: 'gRPC Ping',
+      soap: 'SOAP Ping',
+      websocket: 'WS Ping',
+      sse: 'SSE Ping',
+      stomp: 'STOMP Ping',
+      odata: 'Ping',
+      redis: 'Ping',
+      auth: 'Ping',
+      jsonrpc: 'JSON-RPC Ping',
+      jsonrpcBatch: 'JSON-RPC Batch Ping',
+      trpc: 'tRPC Ping',
+      amqp: 'Ping',
+      kafka: 'Ping'
+    }
+
+    // Asserted at RUNTIME, not left to the `Record<RequestType, …>` annotation:
+    // this file sits under `src/shared`, and the typecheck project only includes
+    // `src/renderer/src`, so a missing key here would never fail the gate. The
+    // annotation still helps in-editor; this assertion is what actually holds.
+    expect(Object.keys(expected).sort()).toEqual([...REQUEST_TYPES].sort())
+
+    for (const type of REQUEST_TYPES) {
+      expect(requestTabTitle({ type, name: 'Ping', method: 'GET' }), type).toBe(expected[type])
     }
   })
 
