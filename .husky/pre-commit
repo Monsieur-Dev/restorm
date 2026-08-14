@@ -36,6 +36,12 @@ echo "🌍 Running i18n guard..."
 node scripts/check-i18n.mjs || exit 1
 echo ""
 
+# npm-cli — a standalone, zero-dependency package outside the pnpm workspace,
+# so it has no lint/typecheck lane; its own tests are the only gate it gets.
+echo "📦 npm-cli: test"
+(cd npm-cli && npm test) || exit 1
+echo ""
+
 # electron-core-ui
 echo "📦 electron-core-ui: depcheck"
 cd electron-core-ui && npx depcheck || exit 1

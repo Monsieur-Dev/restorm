@@ -44,10 +44,21 @@ export const E2E_PRO_CAPABILITIES: readonly string[] = [
   // NOTE: extend here if new Pro-feature e2e suites require additional caps.
 ]
 
+/** What a caller may override in the seeded snapshot. Everything is optional:
+ * the defaults are the ones an e2e suite wants, and a documentation-capture
+ * run wants a presentable identity instead of `e2e@test.local` — that string
+ * would otherwise end up printed in published screenshots. */
+export interface E2ESeedOverrides {
+  email?: string
+  displayName?: string
+  capabilities?: readonly string[]
+}
+
 export function seedEntitlementForE2E(
   service: EntitlementService,
   isPackaged: boolean,
-  envPlan: string | undefined
+  envPlan: string | undefined,
+  overrides: E2ESeedOverrides = {}
 ): boolean {
   // Double-guard: caller (authComposition) already checks !isPackaged, but the
   // explicit check here makes the NO-OP branch directly unit-testable without
@@ -55,10 +66,13 @@ export function seedEntitlementForE2E(
   if (isPackaged || envPlan !== 'pro') return false
   service.__seedEntitlementForTesting({
     signedIn: true,
-    user: { email: 'e2e@test.local' },
+    user: {
+      email: overrides.email ?? 'e2e@test.local',
+      ...(overrides.displayName === undefined ? {} : { name: overrides.displayName })
+    },
     plan: 'pro',
     role: 'admin',
-    capabilities: [...E2E_PRO_CAPABILITIES]
+    capabilities: [...(overrides.capabilities ?? E2E_PRO_CAPABILITIES)]
   })
   return true
 }
@@ -75,6 +89,22 @@ import {
   type EntitlementClaims
 } from './entitlementClient'
 import type { CryptoKey } from 'jose'
+
+/**
+ * A backend call made with the session JWT came back non-2xx. Carries the HTTP
+ * status and, when the body provided one, the backend's machine-readable error
+ * code — so a caller can distinguish "you are not allowed" from "it is broken"
+ * without parsing prose.
+ */
+export class SessionCallError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code?: string
+  ) {
+    super(`session call failed with ${status}${code ? ` (${code})` : ''}`)
+    this.name = 'SessionCallError'
+  }
+}
 
 export interface EntitlementServiceDeps {
   /** Secure token persistence. */
@@ -242,6 +272,50 @@ export class EntitlementService {
    * reaches the renderer). Rethrows network / backend errors so the IPC layer
    * can map them to a generic failure.
    */
+/**
+   * POST `body` to a backend endpoint with the live session JWT, and return the
+   * parsed JSON. `null` when there is no usable session — the caller prompts a
+   * login rather than guessing why the call failed.
+   *
+   * Deliberately generic: this service is the only place the session token
+   * lives, so anything needing an authenticated backend call has to come
+   * through here rather than being handed the token. What the endpoint IS, and
+   * what the body means, stay entirely the host application's business — this
+   * library knows about sessions, not about any particular product's API.
+   *
+   * The token never leaves the main process: callers pass a URL and a body and
+   * receive JSON, so no renderer path can ever obtain a credential.
+   */
+  async postWithSession<T>(url: string, body: unknown): Promise<T | null> {
+    if (
+      !this.sessionToken ||
+      isSessionExpired(this.sessionToken, nowSeconds(this.deps.now), this.deps.sessionAudience)
+    ) {
+      return null
+    }
+    const res = await this.deps.fetchImpl(url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${this.sessionToken}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+    if (!res.ok) {
+      // Surface the status so the caller can tell "you may not" from "it broke";
+      // the body may carry a machine-readable error code, so pass it along.
+      let code: string | undefined
+      try {
+        const parsed = (await res.json()) as { error?: unknown }
+        if (typeof parsed.error === 'string') code = parsed.error
+      } catch {
+        // A non-JSON error body is not itself an error worth masking the status with.
+      }
+      throw new SessionCallError(res.status, code)
+    }
+    return (await res.json()) as T
+  }
+
   async startCustomerPortal(): Promise<{ portalUrl: string | null } | null> {
     if (!this.sessionToken || isSessionExpired(this.sessionToken, nowSeconds(this.deps.now), this.deps.sessionAudience)) {
       return null

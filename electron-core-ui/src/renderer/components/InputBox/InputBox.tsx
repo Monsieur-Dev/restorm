@@ -342,6 +342,7 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
     disabled,
     readOnly,
     placeholder: currentPlaceholder,
+    ...(options.maxLength === undefined ? {} : { maxLength: options.maxLength }),
     autoCorrect: 'off' as const,
     autoCapitalize: 'off' as const,
     spellCheck: false,

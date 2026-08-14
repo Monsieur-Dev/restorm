@@ -31,11 +31,34 @@ const PLAN_LABELS: Record<PlanTier, string> = {
   enterprise: 'Enterprise'
 }
 
+/** An entry the HOST application contributes to the account card.
+ *
+ * The card knows the shape (an icon, a label, something to run) and nothing
+ * about the meaning — that is what keeps this component reusable: a host adds
+ * "my API tokens", "workspace settings" or anything else without this library
+ * gaining a single line about that product's concepts. */
+export interface AccountCardAction {
+  /** Stable identity, used as the React key and the test id suffix. */
+  id: string
+  /** Already-translated label. Translation belongs to the host, since the
+   * string is the host's. */
+  label: string
+  /** Codicon name, e.g. `key`. */
+  icon?: string
+  /** Shown only when true (default true) — lets a host hide an entry the
+   * signed-in user may not use, without unmounting the whole card. */
+  visible?: boolean
+  onSelect: () => void
+}
+
 export interface AccountButtonProps {
   /** The host app's customer dashboard URL (self-serve account / billing). When
    * provided, the card shows a "dashboard" link that opens it in the system
    * browser; omitted → no dashboard link (keeps the component host-agnostic). */
   dashboardUrl?: string
+  /** Extra entries contributed by the host app, rendered above "sign out" and
+   * only when signed in. Empty/omitted → the card is exactly as before. */
+  extraActions?: readonly AccountCardAction[]
 }
 
 /**
@@ -47,7 +70,7 @@ export interface AccountButtonProps {
  *
  * Requires the host app's preload to expose `window.api.account`.
  */
-export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) => {
+export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl, extraActions }) => {
   const { t } = useTranslation()
   // Live auth state — useAuthState handles the getState() + onStateChanged subscription.
   const authState = useAuthState()
@@ -229,6 +252,23 @@ export const AccountButton: React.FC<AccountButtonProps> = ({ dashboardUrl }) =>
                 data-testid="account-card-manage-subscription"
               >
                 {t('account.manageSubscription')}
+              </Button>
+            ))}
+
+          {(extraActions ?? [])
+            .filter((a) => a.visible !== false)
+            .map((a) => (
+              <Button
+                key={a.id}
+                link
+                {...(a.icon === undefined ? {} : { icon: a.icon })}
+                onClick={() => {
+                  setOpen(false)
+                  a.onSelect()
+                }}
+                data-testid={`account-card-${a.id}`}
+              >
+                {a.label}
               </Button>
             ))}
 

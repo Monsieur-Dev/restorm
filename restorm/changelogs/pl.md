@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.2
+
+**Twoje tokeny CLI/CI, bez opuszczania aplikacji.**
+
+- **Twórz, przeglądaj i unieważniaj tokeny w Restorm** — dla użytkowników Pro i Enterprise, z przycisku konta na pasku tytułu. Koniec z wycieczką do panelu po token do potoku, który właśnie piszesz.
+- **Tokeny mogą wygasać.** Wybierz czas życia przy tworzeniu: od 7 do 365 dni albo bez wygaśnięcia, jak dotąd. Token wygasły jest odrzucany tak samo jak unieważniony.
+- **Twoja organizacja może delegować.** Administrator może pozwolić konkretnej osobie tworzyć tokeny i osobno dać jej dostęp do dziennika audytu, bez czynienia jej administratorem.
+- **Restorm instaluje się teraz z npm.** `npm i -g restorm-cli`, a potem `restorm` — aplikacja uruchamia się w systemach Linux, macOS i Windows bez instalatora. Kompilacja jest pobierana raz, weryfikowana opublikowaną sumą kontrolną i przechowywana w pamięci podręcznej, więc potok nie pobiera jej ponownie przy każdym zadaniu.
+
 ## v1.0.1
 
 **Pierwsza poprawka: przenoszenie w panelu bocznym, nazwy kart i raporty o awariach.**

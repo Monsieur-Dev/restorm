@@ -2685,5 +2685,43 @@
       "title": "Det här är inte en Restorm-fil",
       "message": "Den här filen anger inget Restorm-filformat. Den skapades inte av Restorm eller har redigerats för hand och kan därför inte öppnas."
     }
+  },
+  "cliTokens": {
+    "title": "Mina CLI/CI-token",
+    "intro": "Ett CLI/CI-token låter en körning utan gränssnitt (CI, eller lokalt med --headless) autentisera sig som din organisation. Det ger aldrig åtkomst till dina data.",
+    "empty": "Du har inga token ännu.",
+    "never": "Aldrig",
+    "create": "Skapa token",
+    "namePlaceholder": "Etikett (t.ex. ci-main)",
+    "nameLabel": "Tokenetikett",
+    "lifetimeLabel": "Tokenets livslängd",
+    "noExpiration": "Upphör aldrig",
+    "days": "{{count}} dagar",
+    "copy": "Kopiera",
+    "copied": "Kopierat",
+    "revealWarning": "Kopiera det nu — detta token visas aldrig igen.",
+    "revokeNamed": "Återkalla {{name}}",
+    "column": {
+      "name": "Namn",
+      "created": "Skapat",
+      "expires": "Upphör",
+      "lastUsed": "Senast använt",
+      "status": "Status",
+      "actions": "Åtgärder"
+    },
+    "state": {
+      "active": "Aktivt",
+      "revoked": "Återkallat",
+      "expired": "Utgånget"
+    },
+    "failure": {
+      "signed-out": "Logga in för att hantera dina token.",
+      "forbidden": "Din organisation tillåter dig inte att skapa token. En administratör kan ge rättigheten i administrationskonsolen.",
+      "invalid-name": "Den etiketten kan inte användas. Prova en kortare.",
+      "invalid-expiry": "Den livslängden är inte giltig.",
+      "not-found": "Det tokenet finns inte längre.",
+      "unavailable": "Token är inte tillgängliga just nu. Försök igen om en stund.",
+      "plan-required": "Körningar utan gränssnitt ingår i Pro-abonnemanget. Byt till Pro för att skapa token — du kan fortfarande återkalla dem du redan har."
+    }
   }
 }

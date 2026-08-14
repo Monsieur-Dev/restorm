@@ -55,6 +55,12 @@ import {
   type UpdateState
 } from '../../shared/update/updateTypes'
 import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashRecoveryNotice, type CrashReviewRequest } from '../../shared/crash/crashTypes'
+import {
+  CLI_TOKEN_IPC,
+  type CliTokenResult,
+  type CliTokenSummary,
+  type CreatedCliToken
+} from '../../shared/cliTokens/cliTokenTypes'
 import { hookupIpc as hookupSentryIpc } from '@sentry/electron/preload-namespaced'
 
 // Expose the crash SDK's renderer↔main IPC conduit (`window.__SENTRY_IPC__`).
@@ -209,6 +215,27 @@ contextBridge.exposeInMainWorld('api', {
   },
   // Silent auto-update surface. The renderer drives the Settings section + the
   // "update ready" / "what's new" toasts; the feed + install stay main-side.
+  cliTokens: {
+    /** The signed-in user's own tokens. The backend does the scoping. */
+    list: async (): Promise<CliTokenResult<CliTokenSummary[]>> => {
+      return (await ipcRenderer.invoke(CLI_TOKEN_IPC.LIST)) as CliTokenResult<CliTokenSummary[]>
+    },
+    /** Mint a token. The plaintext comes back HERE and nowhere else, ever. */
+    create: async (
+      name: string,
+      expiresInDays: number | null
+    ): Promise<CliTokenResult<CreatedCliToken>> => {
+      return (await ipcRenderer.invoke(
+        CLI_TOKEN_IPC.CREATE,
+        name,
+        expiresInDays
+      )) as CliTokenResult<CreatedCliToken>
+    },
+    /** Revoke one of the user's own tokens. */
+    revoke: async (id: string): Promise<CliTokenResult<{ ok: true }>> => {
+      return (await ipcRenderer.invoke(CLI_TOKEN_IPC.REVOKE, id)) as CliTokenResult<{ ok: true }>
+    }
+  },
   update: {
     /** Read the current update state. */
     getState: async (): Promise<UpdateState> => {

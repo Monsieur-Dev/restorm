@@ -38,6 +38,8 @@ export interface DocShotsFixtures {
   restormRoot: string
   /** Output root for captured PNGs. */
   outRoot: string
+  /** Output root for the captures that illustrate the website documentation. */
+  websiteOut: string
   /** Locale subset parsed from `DOC_SHOTS_LOCALES`; empty = every locale. */
   localesFilter: string[]
   /** Path the app writes the WorkOS auth URL to (`RESTORM_E2E_AUTH_URL_FILE`). */
@@ -50,6 +52,23 @@ export const test = base.extend<DocShotsFixtures>({
 
   outRoot: async ({}, use) => {
     await use(process.env.DOC_SHOTS_OUT ?? resolve(RESTORM_ROOT, '../screenshots'))
+  },
+
+  /**
+   * Where the WEBSITE's documentation images live. The account card and the
+   * tokens modal illustrate documentation pages, so they land straight in the
+   * site's assets — the site stays self-contained (its build needs no
+   * credentials and clones nothing else), and an unchanged capture produces no
+   * git diff because these shots are byte-identical run over run.
+   *
+   * The other captures keep going to `screenshots/` in this repo: they feed the
+   * store listings, not the docs.
+   */
+  websiteOut: async ({}, use) => {
+    await use(
+      process.env.DOC_SHOTS_WEBSITE_OUT ??
+        resolve(RESTORM_ROOT, '../../website/src/assets/docs')
+    )
   },
 
   localesFilter: async ({}, use) => {
@@ -80,6 +99,13 @@ export const test = base.extend<DocShotsFixtures>({
         extraEnv: {
           ECUI_DISABLE_GPU: '1',
           RESTORM_DOC_CAPTURE: '1',
+          // Turns on the documentation-capture seam (feature `docs.captureSeam`,
+          // `Environment: dev`, so it cannot exist in a packaged build) AND the
+          // dev-only entitlement seed. Together they make the account-gated
+          // surfaces render with fixed sample data and no cloud round trip:
+          // the run needs no login, and two runs produce identical pixels.
+          RESTORM_DOC_SHOTS: '1',
+          RESTORM_E2E_ENTITLEMENT_PLAN: 'pro',
           RESTORM_E2E_AUTH_URL_FILE: authUrlFile,
           // Channel pin: the unpackaged run can't read the package version, so
           // this selects both the backend the login talks to AND the version
@@ -95,6 +121,23 @@ export const test = base.extend<DocShotsFixtures>({
 
       const page = await app.firstWindow()
       await page.waitForLoadState('load')
+
+      // Reduced motion, for a concrete reason rather than tidiness: this window
+      // is offscreen under xvfb and produces no compositor frames, so a CSS
+      // transition never advances. A popover that fades in stays at opacity 0
+      // for ever — its screenshot is a picture of the screen behind it, and
+      // every visibility assertion still passes.
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      // …and disable transitions outright, because the media emulation alone
+      // did NOT take effect here: the tooltip host was still measured with
+      // `opacity: 1` inline, `data-is-positioned="true"`, and a COMPUTED
+      // opacity of 0 — a transition that had started and could never advance,
+      // since an offscreen window composites no frames. Belt and braces, with
+      // the belt stated: without this, popovers photograph as empty screens
+      // and every assertion still passes.
+      await page.addStyleTag({
+        content: '*, *::before, *::after { transition: none !important; animation: none !important; }'
+      })
 
       // Fixed capture geometry — every window (the boot splash owns index 0
       // early), then again once the real window is revealed.

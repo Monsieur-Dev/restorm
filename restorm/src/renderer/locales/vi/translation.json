@@ -2684,5 +2684,43 @@
       "title": "Đây không phải là tệp Restorm",
       "message": "Tệp này không khai báo định dạng tệp Restorm. Tệp không do Restorm tạo ra hoặc đã được chỉnh sửa thủ công nên không thể mở."
     }
+  },
+  "cliTokens": {
+    "title": "Token CLI/CI của tôi",
+    "intro": "Token CLI/CI cho phép một lần chạy không giao diện (CI, hoặc --headless cục bộ) xác thực với tư cách tổ chức của bạn. Nó không bao giờ cấp quyền truy cập dữ liệu của bạn.",
+    "empty": "Bạn chưa có token nào.",
+    "never": "Không bao giờ",
+    "create": "Tạo token",
+    "namePlaceholder": "Nhãn (vd. ci-main)",
+    "nameLabel": "Nhãn token",
+    "lifetimeLabel": "Thời hạn token",
+    "noExpiration": "Không hết hạn",
+    "days": "{{count}} ngày",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "revealWarning": "Hãy sao chép ngay — token này sẽ không bao giờ hiển thị lại.",
+    "revokeNamed": "Thu hồi {{name}}",
+    "column": {
+      "name": "Tên",
+      "created": "Tạo lúc",
+      "expires": "Hết hạn",
+      "lastUsed": "Dùng lần cuối",
+      "status": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "state": {
+      "active": "Hoạt động",
+      "revoked": "Đã thu hồi",
+      "expired": "Đã hết hạn"
+    },
+    "failure": {
+      "signed-out": "Hãy đăng nhập để quản lý token của bạn.",
+      "forbidden": "Tổ chức của bạn không cho phép bạn tạo token. Quản trị viên có thể cấp quyền này trong bảng quản trị.",
+      "invalid-name": "Không dùng được nhãn đó. Hãy thử nhãn ngắn hơn.",
+      "invalid-expiry": "Thời hạn đó không hợp lệ.",
+      "not-found": "Token đó không còn tồn tại.",
+      "unavailable": "Hiện chưa dùng được token. Hãy thử lại sau giây lát.",
+      "plan-required": "Các lần chạy không giao diện thuộc gói Pro. Hãy nâng cấp lên Pro để tạo token — bạn vẫn có thể thu hồi những token đang có."
+    }
   }
 }

@@ -10,6 +10,15 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.0.2
+
+**Your CLI/CI tokens, without leaving the app.**
+
+- **Create, see and revoke your tokens from Restorm** — for Pro and Enterprise users, from the account button in the title bar. No more round trip to the dashboard to get a token for a pipeline you are setting up right now.
+- **Tokens can expire.** Choose a lifetime when you create one — 7 to 365 days, or no expiration, as before. An expired token is refused exactly like a revoked one.
+- **Your organization can delegate.** An administrator can now let a specific member create tokens, and separately let a member read the audit log, without making them an administrator.
+- **Restorm now installs itself from npm.** `npm i -g restorm-cli`, then `restorm` — the application starts on Linux, macOS and Windows without going through an installer. The build is downloaded once, checked against its published checksum and kept in a cache, so a pipeline stops re-downloading it on every job.
+
 ## v1.0.1
 
 **First patch — sidebar moves, tab names, and crash reports.**

@@ -39,3 +39,27 @@ export const TAB_DETACH_FEATURE = 'workbench.tabDetach'
 export function isTabDetachEnabled(featureService: FeatureServiceLike): boolean {
   return featureService.isEnabled(TAB_DETACH_FEATURE)
 }
+
+/** Flag gating the documentation-capture seam.
+ *
+ * @see restorm/resources/features.yaml
+ * @see restorm/src/main/services/cliTokens/cliTokenService.ts
+ */
+export const DOCS_CAPTURE_SEAM_FEATURE = 'docs.captureSeam'
+
+/**
+ * Whether the documentation-capture seam is active.
+ *
+ * TWO conditions, and both are deliberate:
+ * - the feature flag, which resolves `Environment: dev` — false in every
+ *   packaged build, so this cannot reach a user's installation;
+ * - `RESTORM_DOC_SHOTS=1`, so an ordinary developer run never silently shows
+ *   fabricated data in place of their own.
+ *
+ * Belt and braces on purpose: a seam that fakes signed-in data is exactly the
+ * kind of thing that must fail closed if either guard is ever loosened by
+ * accident.
+ */
+export function isDocsCaptureSeamEnabled(featureService: FeatureServiceLike): boolean {
+  return process.env['RESTORM_DOC_SHOTS'] === '1' && featureService.isEnabled(DOCS_CAPTURE_SEAM_FEATURE)
+}

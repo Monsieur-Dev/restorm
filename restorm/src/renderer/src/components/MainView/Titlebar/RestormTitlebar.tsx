@@ -23,6 +23,7 @@ import { RELEASE_NOTES_OPEN, type ReleaseNotesOpenPayload } from '../../releaseN
 import { DASHBOARD_URL } from '../../../../../shared/config/site'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { AboutModal } from '../../Modals/AboutModal'
+import { CliTokensModal } from '../../Modals/CliTokensModal'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
@@ -256,6 +257,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   // The About dialog is owned here: it is opened from this menu alone and has
   // no state to share with the rest of the app.
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [cliTokensOpen, setCliTokensOpen] = useState(false)
   const handleCloseAbout = useCallback(() => { setAboutOpen(false) }, [])
 
   // Render a sidebar context-menu data structure as MenuBar items — the
@@ -569,7 +571,19 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       }
       rightContent={
         <>
-          <AccountButton dashboardUrl={DASHBOARD_URL} />
+          <AccountButton
+            dashboardUrl={DASHBOARD_URL}
+            /* Contributed by the app, not built into the library: the account
+               card stays generic and knows nothing about CLI tokens. */
+            extraActions={[
+              {
+                id: 'cli-tokens',
+                icon: 'key',
+                label: t('cliTokens.title'),
+                onSelect: () => { setCliTokensOpen(true); }
+              }
+            ]}
+          />
           <HeaderHoverTooltip label={t('app.openSettings')}>
             <Button
               data-testid="titlebar-settings-button"
@@ -586,6 +600,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       }
     />
     <AboutModal isOpen={aboutOpen} onClose={handleCloseAbout} />
+    <CliTokensModal isOpen={cliTokensOpen} onClose={() => { setCliTokensOpen(false); }} />
     </>
   )
 }

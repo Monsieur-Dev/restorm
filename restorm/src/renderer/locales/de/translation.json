@@ -2685,5 +2685,43 @@
       "title": "Dies ist keine Restorm-Datei",
       "message": "Diese Datei gibt kein Restorm-Dateiformat an. Sie wurde nicht von Restorm geschrieben oder von Hand bearbeitet und kann daher nicht geöffnet werden."
     }
+  },
+  "cliTokens": {
+    "title": "Meine CLI/CI-Token",
+    "intro": "Ein CLI/CI-Token erlaubt einem Lauf ohne Oberfläche (CI oder lokal mit --headless), sich als Ihre Organisation zu authentifizieren. Es gewährt niemals Zugriff auf Ihre Daten.",
+    "empty": "Sie haben noch kein Token.",
+    "never": "Nie",
+    "create": "Token erstellen",
+    "namePlaceholder": "Bezeichnung (z. B. ci-main)",
+    "nameLabel": "Token-Bezeichnung",
+    "lifetimeLabel": "Gültigkeitsdauer",
+    "noExpiration": "Kein Ablauf",
+    "days": "{{count}} Tage",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "revealWarning": "Jetzt kopieren — dieses Token wird nie wieder angezeigt.",
+    "revokeNamed": "{{name}} widerrufen",
+    "column": {
+      "name": "Name",
+      "created": "Erstellt",
+      "expires": "Läuft ab",
+      "lastUsed": "Zuletzt verwendet",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "state": {
+      "active": "Aktiv",
+      "revoked": "Widerrufen",
+      "expired": "Abgelaufen"
+    },
+    "failure": {
+      "signed-out": "Melden Sie sich an, um Ihre Token zu verwalten.",
+      "forbidden": "Ihre Organisation erlaubt Ihnen nicht, Token zu erstellen. Eine Administratorin oder ein Administrator kann das Recht in der Verwaltungskonsole erteilen.",
+      "invalid-name": "Diese Bezeichnung ist nicht verwendbar. Versuchen Sie eine kürzere.",
+      "invalid-expiry": "Diese Gültigkeitsdauer ist ungültig.",
+      "not-found": "Dieses Token existiert nicht mehr.",
+      "unavailable": "Token sind derzeit nicht verfügbar. Versuchen Sie es gleich erneut.",
+      "plan-required": "Läufe ohne Oberfläche gehören zum Pro-Tarif. Wechseln Sie zu Pro, um Token zu erstellen — vorhandene Token können Sie weiterhin widerrufen."
+    }
   }
 }

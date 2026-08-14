@@ -15,6 +15,7 @@ import {
   permissionService,
   EntitlementService,
   seedEntitlementForE2E,
+  E2E_PRO_CAPABILITIES,
   startEntitlementAutoRefresh,
   AuthStore,
   type AuthStoreFs,
@@ -253,8 +254,28 @@ export function initEntitlementService(version: string = resolveBackendVersion()
   // Dev-only e2e seam: seed a Pro entitlement when RESTORM_E2E_ENTITLEMENT_PLAN=pro.
   // The guard inside seedEntitlementForE2E also checks isPackaged, but we pass
   // app.isPackaged explicitly so the call is a hard NO-OP in any packaged build.
-  if (seedEntitlementForE2E(instance, app.isPackaged, process.env['RESTORM_E2E_ENTITLEMENT_PLAN'])) {
-    logger.warn('⚠️ TEST entitlement seeded (plan=pro, mcp.pro cap) — dev-only, RESTORM_E2E_ENTITLEMENT_PLAN is set')
+  // The documentation-capture run seeds the same way, but with a presentable
+  // identity: `e2e@test.local` would otherwise be printed in the screenshots
+  // published on the website. `scenario.headless` joins the capabilities
+  // because the tokens surface is gated on it, and a capture must show the
+  // feature working rather than its upsell.
+  const capturingDocs = process.env['RESTORM_DOC_SHOTS'] === '1'
+  const seedOverrides = capturingDocs
+    ? {
+        email: process.env['DOC_SHOTS_IDENTITY_EMAIL'] ?? 'demo@restorm.app',
+        displayName: process.env['DOC_SHOTS_IDENTITY_NAME'] ?? 'Restorm Demo',
+        capabilities: [...E2E_PRO_CAPABILITIES, 'scenario.headless']
+      }
+    : {}
+  if (
+    seedEntitlementForE2E(
+      instance,
+      app.isPackaged,
+      process.env['RESTORM_E2E_ENTITLEMENT_PLAN'],
+      seedOverrides
+    )
+  ) {
+    logger.warn('⚠️ TEST entitlement seeded (plan=pro) — dev-only, RESTORM_E2E_ENTITLEMENT_PLAN is set')
   }
 
   // Auto-refresh the entitlement on window focus (the « S'abonner » checkout

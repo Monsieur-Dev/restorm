@@ -2684,5 +2684,43 @@
       "title": "这不是 Restorm 文件",
       "message": "此文件未声明 Restorm 文件格式。它不是由 Restorm 创建的，或者被手动编辑过，因此无法打开。"
     }
+  },
+  "cliTokens": {
+    "title": "我的 CLI/CI 令牌",
+    "intro": "CLI/CI 令牌让无界面运行（CI，或本地 --headless）以你的组织身份进行认证。它绝不授予对你数据的访问权限。",
+    "empty": "你还没有令牌。",
+    "never": "从不",
+    "create": "创建令牌",
+    "namePlaceholder": "标签（例如 ci-main）",
+    "nameLabel": "令牌标签",
+    "lifetimeLabel": "令牌有效期",
+    "noExpiration": "永不过期",
+    "days": "{{count}} 天",
+    "copy": "复制",
+    "copied": "已复制",
+    "revealWarning": "请立即复制——此令牌不会再次显示。",
+    "revokeNamed": "吊销 {{name}}",
+    "column": {
+      "name": "名称",
+      "created": "创建时间",
+      "expires": "过期时间",
+      "lastUsed": "最近使用",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "state": {
+      "active": "有效",
+      "revoked": "已吊销",
+      "expired": "已过期"
+    },
+    "failure": {
+      "signed-out": "请登录以管理你的令牌。",
+      "forbidden": "你的组织未允许你创建令牌。管理员可在管理控制台中授予该权限。",
+      "invalid-name": "该标签不可用。请换一个更短的。",
+      "invalid-expiry": "该有效期无效。",
+      "not-found": "该令牌已不存在。",
+      "unavailable": "当前无法使用令牌。请稍后重试。",
+      "plan-required": "无界面运行属于 Pro 方案。升级到 Pro 即可创建令牌——你仍然可以吊销已有的令牌。"
+    }
   }
 }

@@ -63,15 +63,38 @@ export async function captureForAllLocales(
   page: Page,
   restormRoot: string,
   targetFor: (locale: string) => string,
-  options: { locales?: string[]; restore?: string } = {}
+  options: {
+    locales?: string[]
+    restore?: string
+    /**
+     * Run after the language switch, before the shot — for surfaces that do
+     * NOT survive a language change. A popover or a modal must be reopened per
+     * locale: opening it once before the loop produces a screenshot of the
+     * screen behind it, silently, for every locale but the first.
+     */
+    beforeShot?: (locale: string) => Promise<void>
+    /**
+     * Capture THIS element instead of the whole window. A popover or a dialog
+     * occupies a small part of a 1600×1000 screen, and a full-window shot of
+     * one is mostly the screen behind it — the reader has to hunt for the
+     * subject. Full-window stays the default: for an editor view, the
+     * surroundings ARE the subject.
+     */
+    clipTo?: () => import('@playwright/test').Locator
+  } = {}
 ): Promise<string[]> {
   const locales = options.locales ?? shippedLocales(restormRoot)
   const written: string[] = []
   for (const locale of locales) {
     await switchAppLanguage(page, locale)
+    if (options.beforeShot) await options.beforeShot(locale)
     const target = targetFor(locale)
     mkdirSync(dirname(target), { recursive: true })
-    await page.screenshot({ path: target })
+    if (options.clipTo) {
+      await options.clipTo().screenshot({ path: target })
+    } else {
+      await page.screenshot({ path: target })
+    }
     optimizePng(target)
     written.push(target)
   }

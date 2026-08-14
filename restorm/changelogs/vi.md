@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.2
+
+**Token CLI/CI của bạn, không cần rời ứng dụng.**
+
+- **Tạo, xem và thu hồi token ngay trong Restorm** — dành cho người dùng Pro và Enterprise, từ nút tài khoản trên thanh tiêu đề. Không còn phải sang bảng điều khiển để lấy token cho pipeline bạn đang viết.
+- **Token có thể hết hạn.** Chọn thời hạn khi tạo: 7 đến 365 ngày, hoặc không hết hạn như trước. Token hết hạn bị từ chối giống như token đã thu hồi.
+- **Tổ chức của bạn có thể ủy quyền.** Quản trị viên có thể cho phép một thành viên cụ thể tạo token, và riêng biệt cấp quyền xem nhật ký kiểm toán, mà không cần biến họ thành quản trị viên.
+- **Restorm giờ cài đặt được từ npm.** `npm i -g restorm-cli`, rồi `restorm` — ứng dụng khởi động trên Linux, macOS và Windows mà không cần trình cài đặt. Bản dựng chỉ tải một lần, được kiểm tra bằng checksum đã công bố và lưu vào bộ nhớ đệm, nên quy trình không tải lại ở mỗi công việc.
+
 ## v1.0.1
 
 **Bản vá đầu tiên: di chuyển trong thanh bên, tên thẻ và báo cáo sự cố.**

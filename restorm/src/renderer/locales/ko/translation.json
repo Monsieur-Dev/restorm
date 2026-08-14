@@ -2684,5 +2684,43 @@
       "title": "Restorm 파일이 아닙니다",
       "message": "이 파일에는 Restorm 파일 형식이 명시되어 있지 않습니다. Restorm으로 작성되지 않았거나 직접 편집되었기 때문에 열 수 없습니다."
     }
+  },
+  "cliTokens": {
+    "title": "내 CLI/CI 토큰",
+    "intro": "CLI/CI 토큰을 사용하면 화면 없는 실행(CI 또는 로컬의 --headless)이 조직 자격으로 인증할 수 있습니다. 데이터 접근 권한은 전혀 주지 않습니다.",
+    "empty": "아직 토큰이 없습니다.",
+    "never": "없음",
+    "create": "토큰 만들기",
+    "namePlaceholder": "라벨 (예: ci-main)",
+    "nameLabel": "토큰 라벨",
+    "lifetimeLabel": "토큰 유효 기간",
+    "noExpiration": "만료 없음",
+    "days": "{{count}}일",
+    "copy": "복사",
+    "copied": "복사됨",
+    "revealWarning": "지금 복사하세요. 이 토큰은 다시 표시되지 않습니다.",
+    "revokeNamed": "{{name}} 취소",
+    "column": {
+      "name": "이름",
+      "created": "생성",
+      "expires": "만료",
+      "lastUsed": "마지막 사용",
+      "status": "상태",
+      "actions": "작업"
+    },
+    "state": {
+      "active": "활성",
+      "revoked": "취소됨",
+      "expired": "만료됨"
+    },
+    "failure": {
+      "signed-out": "토큰을 관리하려면 로그인하세요.",
+      "forbidden": "조직에서 토큰 생성을 허용하지 않았습니다. 관리자가 관리 콘솔에서 권한을 부여할 수 있습니다.",
+      "invalid-name": "이 라벨은 사용할 수 없습니다. 더 짧게 입력해 보세요.",
+      "invalid-expiry": "이 유효 기간은 올바르지 않습니다.",
+      "not-found": "이 토큰은 더 이상 존재하지 않습니다.",
+      "unavailable": "지금은 토큰을 사용할 수 없습니다. 잠시 후 다시 시도하세요.",
+      "plan-required": "화면 없는 실행은 Pro 요금제에 포함됩니다. 토큰을 만들려면 Pro로 업그레이드하세요. 기존 토큰은 계속 취소할 수 있습니다."
+    }
   }
 }

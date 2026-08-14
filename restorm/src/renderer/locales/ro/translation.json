@@ -2686,5 +2686,43 @@
       "title": "Acesta nu este un fișier Restorm",
       "message": "Acest fișier nu declară niciun format de fișier Restorm. Nu a fost creat de Restorm sau a fost editat manual, așa că nu poate fi deschis."
     }
+  },
+  "cliTokens": {
+    "title": "Jetoanele mele CLI/CI",
+    "intro": "Un jeton CLI/CI permite unei execuții fără interfață (CI sau local cu --headless) să se autentifice ca organizația dumneavoastră. Nu oferă niciodată acces la datele dumneavoastră.",
+    "empty": "Nu aveți încă niciun jeton.",
+    "never": "Niciodată",
+    "create": "Creează jeton",
+    "namePlaceholder": "Etichetă (ex. ci-main)",
+    "nameLabel": "Eticheta jetonului",
+    "lifetimeLabel": "Durata de viață a jetonului",
+    "noExpiration": "Fără expirare",
+    "days": "{{count}} zile",
+    "copy": "Copiază",
+    "copied": "Copiat",
+    "revealWarning": "Copiați-l acum — acest jeton nu va mai fi afișat niciodată.",
+    "revokeNamed": "Revocă {{name}}",
+    "column": {
+      "name": "Nume",
+      "created": "Creat",
+      "expires": "Expiră",
+      "lastUsed": "Ultima utilizare",
+      "status": "Stare",
+      "actions": "Acțiuni"
+    },
+    "state": {
+      "active": "Activ",
+      "revoked": "Revocat",
+      "expired": "Expirat"
+    },
+    "failure": {
+      "signed-out": "Autentificați-vă pentru a vă gestiona jetoanele.",
+      "forbidden": "Organizația dumneavoastră nu vă permite să creați jetoane. Un administrator vă poate acorda acest drept din consola de administrare.",
+      "invalid-name": "Această etichetă nu poate fi folosită. Încercați una mai scurtă.",
+      "invalid-expiry": "Această durată nu este validă.",
+      "not-found": "Acest jeton nu mai există.",
+      "unavailable": "Jetoanele nu sunt disponibile momentan. Încercați din nou în câteva clipe.",
+      "plan-required": "Execuțiile fără interfață fac parte din planul Pro. Treceți la Pro pentru a crea jetoane — puteți revoca în continuare pe cele pe care le aveți deja."
+    }
   }
 }

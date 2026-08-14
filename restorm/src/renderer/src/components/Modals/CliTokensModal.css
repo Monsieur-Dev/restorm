@@ -1,0 +1,128 @@
+/* "My CLI/CI tokens" modal. Colours come from the theme variables so the panel
+   follows every theme rather than pinning one palette. */
+
+.cli-tokens {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cli-tokens-intro,
+.cli-tokens-empty {
+  margin: 0;
+  color: var(--ecu-text-muted, #8a97a8);
+  font-size: 0.9rem;
+}
+
+.cli-tokens-error {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--ecu-error-bg, rgba(239, 68, 68, 0.12));
+  color: var(--ecu-error-fg, #ef4444);
+  font-size: 0.9rem;
+}
+
+/* Why editing is impossible right now. Informative rather than alarming: the
+   most common reason is "this is a Pro feature", which is an invitation, not a
+   fault — so it must not wear the colour of an error. */
+.cli-tokens-callout {
+  padding: 10px 12px;
+  border: 1px solid var(--ecu-accent, #7c5cff);
+  border-radius: 6px;
+  background: var(--ecu-accent-bg, rgba(124, 92, 255, 0.12));
+  font-size: 0.9rem;
+}
+
+/* The one moment the plaintext exists. Deliberately loud: the value is gone
+   the instant this panel is replaced, and no other surface can bring it back. */
+.cli-tokens-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--ecu-warning-fg, #eab308);
+  border-radius: 6px;
+  background: var(--ecu-warning-bg, rgba(234, 179, 8, 0.1));
+}
+
+.cli-tokens-reveal-warning {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ecu-warning-fg, #eab308);
+}
+
+.cli-tokens-reveal-value {
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: var(--ecu-input-bg, rgba(0, 0, 0, 0.25));
+  font-family: var(--ecu-font-mono, monospace);
+  font-size: 0.85rem;
+  /* A token is one long unbroken string: let it wrap rather than widen the
+     dialog or clip the tail the user is about to copy. */
+  word-break: break-all;
+}
+
+.cli-tokens-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.cli-tokens-table th {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--ecu-border, rgba(138, 151, 168, 0.25));
+  color: var(--ecu-text-muted, #8a97a8);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.cli-tokens-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--ecu-border, rgba(138, 151, 168, 0.12));
+}
+
+.cli-tokens-muted {
+  color: var(--ecu-text-muted, #8a97a8);
+}
+
+.cli-tokens-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cli-tokens-badge--active {
+  background: rgba(52, 211, 153, 0.16);
+  color: var(--ecu-success-fg, #34d399);
+}
+
+/* Revoked and expired are different facts — one was a decision, the other was
+   time running out — so they must not share a colour. */
+.cli-tokens-badge--revoked {
+  background: rgba(138, 151, 168, 0.16);
+  color: var(--ecu-text-muted, #8a97a8);
+}
+
+.cli-tokens-badge--expired {
+  background: rgba(234, 179, 8, 0.15);
+  color: var(--ecu-warning-fg, #eab308);
+}
+
+ /* A grid rather than flex: the label field and the lifetime picker are ECUI
+   components whose inner structure decides their intrinsic width, and a track
+   sizes them from the outside regardless of what they render inside. */
+.cli-tokens-create {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.cli-tokens-create .cli-tokens-lifetime {
+  min-width: 150px;
+}

@@ -2685,5 +2685,43 @@
       "title": "Bu bir Restorm dosyası değil",
       "message": "Bu dosya herhangi bir Restorm dosya biçimi belirtmiyor. Restorm tarafından oluşturulmamış ya da elle düzenlenmiş, bu yüzden açılamıyor."
     }
+  },
+  "cliTokens": {
+    "title": "CLI/CI belirteçlerim",
+    "intro": "Bir CLI/CI belirteci, arayüzsüz bir çalıştırmanın (CI veya yerelde --headless) kuruluşunuz adına kimlik doğrulamasını sağlar. Verilerinize asla erişim vermez.",
+    "empty": "Henüz belirteciniz yok.",
+    "never": "Asla",
+    "create": "Belirteç oluştur",
+    "namePlaceholder": "Etiket (örn. ci-main)",
+    "nameLabel": "Belirteç etiketi",
+    "lifetimeLabel": "Belirteç ömrü",
+    "noExpiration": "Süresiz",
+    "days": "{{count}} gün",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "revealWarning": "Şimdi kopyalayın — bu belirteç bir daha asla gösterilmeyecek.",
+    "revokeNamed": "{{name}} iptal et",
+    "column": {
+      "name": "Ad",
+      "created": "Oluşturuldu",
+      "expires": "Sona erer",
+      "lastUsed": "Son kullanım",
+      "status": "Durum",
+      "actions": "İşlemler"
+    },
+    "state": {
+      "active": "Etkin",
+      "revoked": "İptal edildi",
+      "expired": "Süresi doldu"
+    },
+    "failure": {
+      "signed-out": "Belirteçlerinizi yönetmek için oturum açın.",
+      "forbidden": "Kuruluşunuz belirteç oluşturmanıza izin vermiyor. Bir yönetici bu yetkiyi yönetim konsolundan verebilir.",
+      "invalid-name": "Bu etiket kullanılamaz. Daha kısa bir tane deneyin.",
+      "invalid-expiry": "Bu ömür geçerli değil.",
+      "not-found": "Bu belirteç artık mevcut değil.",
+      "unavailable": "Belirteçler şu anda kullanılamıyor. Birazdan tekrar deneyin.",
+      "plan-required": "Arayüzsüz çalıştırmalar Pro planın bir parçasıdır. Belirteç oluşturmak için Pro'ya geçin — hâlihazırdakileri iptal etmeye devam edebilirsiniz."
+    }
   }
 }

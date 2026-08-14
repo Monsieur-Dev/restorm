@@ -23,6 +23,7 @@
  */
 
 import {
+  EntitlementHttpError,
   fetchEntitlement,
   verifyEntitlementToken
 } from 'electron-core-ui/main'
@@ -41,8 +42,10 @@ export type HeadlessEntitlementReason =
   /** The backend returned a JWT that failed verification (wrong key / expired /
    * wrong audience / malformed), OR publicKeyConfigured is false (pre-launch). */
   | 'token-invalid'
-  /** Network error or non-2xx response from the entitlement endpoint (includes
-   * 401 Unauthorized for a revoked / unknown token). */
+  /** The backend REJECTED the token (401): unknown, revoked, or expired. A
+   * permanent condition — retrying cannot fix it. */
+  | 'token-rejected'
+  /** Network error, 5xx, or a malformed response — worth retrying. */
   | 'fetch-error'
   /** The JWT is valid but the org's plan does not include scenario.headless. */
   | 'plan-insufficient'
@@ -95,9 +98,15 @@ export async function checkHeadlessEntitlement(
   try {
     const body = await fetchEntitlement(deps.entitlementUrl, token, deps.fetchImpl)
     entitlementJwt = body.entitlement
-  } catch {
-    // Covers: network failures, non-2xx (incl. 401 revoked), missing `entitlement`
-    // field — all mapped to fetch-error so the caller can suggest retrying.
+  } catch (err) {
+    // A 401 is the backend REJECTING the token — unknown, revoked, or expired.
+    // That is permanent, so it must not be reported as a transport problem:
+    // "check your network and try again" would send a CI owner debugging their
+    // egress rules for a token that simply ran out.
+    if (err instanceof EntitlementHttpError && err.status === 401) {
+      return { granted: false, reason: 'token-rejected' }
+    }
+    // Everything else — network failure, 5xx, a malformed body — is worth a retry.
     return { granted: false, reason: 'fetch-error' }
   }
 

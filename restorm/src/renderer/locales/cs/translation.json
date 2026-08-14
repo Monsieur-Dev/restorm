@@ -2687,5 +2687,43 @@
       "title": "Toto není soubor Restormu",
       "message": "Tento soubor neuvádí formát souboru Restormu. Nebyl vytvořen Restormem, nebo byl upraven ručně, a proto jej nelze otevřít."
     }
+  },
+  "cliTokens": {
+    "title": "Moje tokeny CLI/CI",
+    "intro": "Token CLI/CI umožňuje běhu bez rozhraní (CI nebo lokálně s --headless) ověřit se jako vaše organizace. Nikdy neposkytuje přístup k vašim datům.",
+    "empty": "Zatím nemáte žádný token.",
+    "never": "Nikdy",
+    "create": "Vytvořit token",
+    "namePlaceholder": "Označení (např. ci-main)",
+    "nameLabel": "Označení tokenu",
+    "lifetimeLabel": "Platnost tokenu",
+    "noExpiration": "Bez vypršení",
+    "days": "{{count}} dní",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "revealWarning": "Zkopírujte jej nyní — tento token se už nikdy nezobrazí.",
+    "revokeNamed": "Odvolat {{name}}",
+    "column": {
+      "name": "Název",
+      "created": "Vytvořeno",
+      "expires": "Vyprší",
+      "lastUsed": "Naposledy použito",
+      "status": "Stav",
+      "actions": "Akce"
+    },
+    "state": {
+      "active": "Aktivní",
+      "revoked": "Odvolaný",
+      "expired": "Vypršelý"
+    },
+    "failure": {
+      "signed-out": "Přihlaste se, abyste mohli spravovat své tokeny.",
+      "forbidden": "Vaše organizace vám nepovoluje vytvářet tokeny. Správce vám toto právo může udělit v administrační konzoli.",
+      "invalid-name": "Toto označení nelze použít. Zkuste kratší.",
+      "invalid-expiry": "Tato platnost není platná.",
+      "not-found": "Tento token již neexistuje.",
+      "unavailable": "Tokeny jsou momentálně nedostupné. Zkuste to za chvíli.",
+      "plan-required": "Běhy bez rozhraní jsou součástí tarifu Pro. Přejděte na Pro, abyste mohli vytvářet tokeny — ty stávající můžete i nadále odvolávat."
+    }
   }
 }

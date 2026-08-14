@@ -2684,5 +2684,43 @@
       "title": "這不是 Restorm 檔案",
       "message": "此檔案未宣告 Restorm 檔案格式。它並非由 Restorm 建立，或曾被手動編輯，因此無法開啟。"
     }
+  },
+  "cliTokens": {
+    "title": "我的 CLI/CI 權杖",
+    "intro": "CLI/CI 權杖讓無介面執行（CI，或本機 --headless）以你的組織身分進行驗證。它絕不授予存取你資料的權限。",
+    "empty": "你還沒有任何權杖。",
+    "never": "從不",
+    "create": "建立權杖",
+    "namePlaceholder": "標籤（例如 ci-main）",
+    "nameLabel": "權杖標籤",
+    "lifetimeLabel": "權杖有效期",
+    "noExpiration": "永不過期",
+    "days": "{{count}} 天",
+    "copy": "複製",
+    "copied": "已複製",
+    "revealWarning": "請立即複製——此權杖不會再次顯示。",
+    "revokeNamed": "撤銷 {{name}}",
+    "column": {
+      "name": "名稱",
+      "created": "建立時間",
+      "expires": "到期時間",
+      "lastUsed": "最近使用",
+      "status": "狀態",
+      "actions": "操作"
+    },
+    "state": {
+      "active": "有效",
+      "revoked": "已撤銷",
+      "expired": "已過期"
+    },
+    "failure": {
+      "signed-out": "請登入以管理你的權杖。",
+      "forbidden": "你的組織未允許你建立權杖。管理員可在管理主控台中授予該權限。",
+      "invalid-name": "該標籤無法使用。請換一個較短的。",
+      "invalid-expiry": "該有效期無效。",
+      "not-found": "該權杖已不存在。",
+      "unavailable": "目前無法使用權杖。請稍後再試。",
+      "plan-required": "無介面執行屬於 Pro 方案。升級至 Pro 即可建立權杖——你仍然可以撤銷既有的權杖。"
+    }
   }
 }

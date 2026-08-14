@@ -2685,5 +2685,43 @@
       "title": "Dit is geen Restorm-bestand",
       "message": "Dit bestand vermeldt geen Restorm-bestandsindeling. Het is niet door Restorm geschreven of het is handmatig bewerkt, waardoor het niet kan worden geopend."
     }
+  },
+  "cliTokens": {
+    "title": "Mijn CLI/CI-tokens",
+    "intro": "Met een CLI/CI-token kan een uitvoering zonder interface (CI, of lokaal met --headless) zich namens uw organisatie authenticeren. Het geeft nooit toegang tot uw gegevens.",
+    "empty": "U hebt nog geen token.",
+    "never": "Nooit",
+    "create": "Token aanmaken",
+    "namePlaceholder": "Label (bijv. ci-main)",
+    "nameLabel": "Tokenlabel",
+    "lifetimeLabel": "Geldigheidsduur",
+    "noExpiration": "Verloopt niet",
+    "days": "{{count}} dagen",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd",
+    "revealWarning": "Kopieer het nu — dit token wordt nooit meer getoond.",
+    "revokeNamed": "{{name}} intrekken",
+    "column": {
+      "name": "Naam",
+      "created": "Aangemaakt",
+      "expires": "Verloopt",
+      "lastUsed": "Laatst gebruikt",
+      "status": "Status",
+      "actions": "Acties"
+    },
+    "state": {
+      "active": "Actief",
+      "revoked": "Ingetrokken",
+      "expired": "Verlopen"
+    },
+    "failure": {
+      "signed-out": "Meld u aan om uw tokens te beheren.",
+      "forbidden": "Uw organisatie staat u niet toe tokens aan te maken. Een beheerder kan dit recht verlenen via de beheerconsole.",
+      "invalid-name": "Dat label kan niet worden gebruikt. Probeer een korter label.",
+      "invalid-expiry": "Die geldigheidsduur is ongeldig.",
+      "not-found": "Dat token bestaat niet meer.",
+      "unavailable": "Tokens zijn nu niet beschikbaar. Probeer het zo opnieuw.",
+      "plan-required": "Uitvoeringen zonder interface horen bij het Pro-abonnement. Stap over op Pro om tokens aan te maken — bestaande tokens kunt u blijven intrekken."
+    }
   }
 }

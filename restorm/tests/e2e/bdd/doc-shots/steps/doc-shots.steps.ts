@@ -69,6 +69,17 @@ Given('I am signed in with the demo account', async ({ authUrlFile }) => {
 // e.g. `zh-cn`). Relative templates resolve against the `DOC_SHOTS_OUT` root,
 // so the same feature drives scratch runs and real website-docs captures.
 // Matches both `When` and `Then` usages — cucumber matching ignores keywords.
+/** Resolve a `{locale}` template against the output root. */
+function targetResolver(outRoot: string, template: string): (locale: string) => string {
+  if (!template.includes('{locale}')) {
+    throw new Error(`capture target must contain a {locale} placeholder, got: ${template}`)
+  }
+  return (locale) => {
+    const target = template.replace(/\{locale\}/g, localeDirName(locale))
+    return isAbsolute(target) ? target : join(outRoot, target)
+  }
+}
+
 When(
   'I capture a screenshot for every locale to {string}',
   async ({ restormRoot, outRoot, localesFilter }, template: string) => {
@@ -85,6 +96,96 @@ When(
       },
       localesFilter.length > 0 ? { locales: localesFilter } : {}
     )
+  }
+)
+
+/**
+ * Open the account card. Reopened for EVERY locale by the capture step below,
+ * not once before the loop: a language switch closes the popover, so opening
+ * it up front yields one good screenshot and 26 pictures of the screen behind
+ * it — silently, because the file is still written and the run still passes.
+ */
+async function openAccountCard(p: Page): Promise<void> {
+  const card = p.getByTestId('account-card')
+  if (await card.isVisible()) return
+  await p.getByTestId('titlebar-account-button').click()
+  await card.waitFor({ state: 'visible' })
+  // Settle, then RE-assert. The card passed a visibility check once and was
+  // absent from the resulting screenshot, so a check that only fires at open
+  // time proves nothing about the instant the shot is taken.
+  // Guard, not a wait: the popover must be OPAQUE when the shot is taken.
+  // Playwright's visibility check looks at the element's own box and style, not
+  // at an ancestor's animated opacity — so a popover mid-fade passes every
+  // assertion while photographing as an empty screen.
+  await card.evaluate(
+    (el) =>
+      new Promise<void>((resolve, reject) => {
+        const host = el.closest('.tooltip')
+        if (!host) {
+          reject(new Error('tooltip host not found'))
+          return
+        }
+        const deadline = Date.now() + 5000
+        const check = (): void => {
+          if (getComputedStyle(host).opacity === '1') {
+            resolve()
+            return
+          }
+          if (Date.now() > deadline) {
+            reject(new Error('tooltip never became opaque — the capture would show no popover'))
+            return
+          }
+          setTimeout(check, 50)
+        }
+        check()
+      })
+  )
+}
+
+/** Open the tokens modal from the account card, reopening the card if the
+ * language switch closed it. */
+async function openTokensModal(p: Page): Promise<void> {
+  if (await p.getByTestId('cli-tokens-create').isVisible()) return
+  await openAccountCard(p)
+  await p.getByTestId('account-card-cli-tokens').click()
+  // Wait for the CONTENT, not the frame: the list arrives over IPC, and a
+  // frame-only wait captures an empty dialog.
+  await p.getByTestId('cli-tokens-create').waitFor({ state: 'visible' })
+}
+
+When(
+  'I capture the account card for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => { await openAccountCard(p) },
+      // The card, not the window behind it.
+      clipTo: () => p.getByTestId('account-card-popover')
+    })
+    await p.keyboard.press('Escape')
+  }
+)
+
+// The slash is ESCAPED: in a Cucumber expression `/` means alternation, so
+// an unescaped `CLI/CI` would be read as "CLI" or "CI" and match neither.
+When(
+  'I capture my CLI\\/CI tokens for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => { await openTokensModal(p) },
+      // The dialog box itself — the dimmed application behind it carries no
+      // information the reader of this page needs.
+      // The dialog BOX (`role=dialog`), not its body: the header carries the
+      // title, which is what names the feature on the documentation page.
+      clipTo: () => p.locator('.ecu-modal-container[role="dialog"]')
+    })
+    // Closing matters for what comes AFTER: the modal is an overlay, and the
+    // scenario-building steps would otherwise click through a live dialog.
+    await p.keyboard.press('Escape')
+    await p.getByTestId('cli-tokens-create').waitFor({ state: 'hidden' })
   }
 )
 

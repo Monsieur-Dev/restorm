@@ -1,2 +1,2 @@
 export { AccountButton } from './AccountButton'
-export type { AccountButtonProps } from './AccountButton'
+export type { AccountButtonProps, AccountCardAction } from './AccountButton'

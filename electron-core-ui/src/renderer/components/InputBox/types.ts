@@ -42,6 +42,11 @@ export interface IInputOptions {
   readonly tooltip?: string
   readonly ariaLabel?: string
   readonly type?: string
+  /** Hard cap on the number of characters the field accepts, forwarded to the
+   * underlying input. For a value a server also validates, set it to the same
+   * ceiling: the server stays the authority, and the field simply stops input
+   * that could only be refused. */
+  readonly maxLength?: number
   readonly validationOptions?: IInputValidationOptions
   readonly flexibleHeight?: boolean
   readonly flexibleWidth?: boolean

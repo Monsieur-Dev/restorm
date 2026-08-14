@@ -56,3 +56,23 @@ Features:
       - Type: Entitlement
         RequiredCapabilities:
           - mcp.pro
+
+  # Documentation-capture seam. Lets the doc-shots harness render the
+  # account-gated surfaces (the account card, the CLI/CI tokens modal) with
+  # FIXED sample data and no cloud round trip, so the screenshots are
+  # reproducible run-over-run and need no login at all.
+  #
+  # Environment-gated to `dev`: the feature service resolves `prod` for every
+  # packaged build (`isDev ? 'dev' : 'prod'`), so this cannot exist in what a
+  # user installs. The consumers ALSO require an explicit opt-in env var, so
+  # an unpackaged dev run does not silently show fake data either.
+  #
+  # Why fixed data rather than the demo organisation's real tokens: a real
+  # capture would publish that org's CI token names in public documentation,
+  # and its "last used" dates would change every run — the screenshots would
+  # never be byte-identical twice, which is the whole point of this harness.
+  - Name: "docs.captureSeam"
+    Strategies:
+      - Type: Environment
+        AvailableIn:
+          - dev
