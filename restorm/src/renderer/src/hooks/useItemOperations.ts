@@ -287,9 +287,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
   // Refresh breadcrumbs in EVERY open workbench tab after a tree move —
   // shared by the row-target drop and the empty-area (move-to-root) drop.
   const refreshAllTabBreadcrumbs = useCallback(() => {
-    // Recalculate breadcrumbs for a single tab after the reorder. Returns
-    // the tab unchanged for singleton tabs (Console / Firewall, which aren't
-    // tied to a tree item) and when the item can no longer be located.
+    // Recalculate breadcrumbs for a single tab after the reorder. Returns the
+    // tab unchanged when it backs onto no tree item at all (every singleton:
+    // Console, Firewall, Settings, the mini-browser, the MCP logs) and when
+    // the item it does back onto can no longer be located.
     const refreshTabBreadcrumbs = (
       tab: EditorTab
     ): EditorTab | FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab => {
