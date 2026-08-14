@@ -7,6 +7,7 @@
 - **Crie, veja e revogue os seus tokens a partir do Restorm** — para utilizadores Pro e Enterprise, a partir do botão de conta na barra de título. Acabou a ida ao painel para obter um token do pipeline que está a escrever.
 - **Os tokens podem expirar.** Escolha uma duração ao criá-los: 7 a 365 dias, ou sem expiração como antes. Um token expirado é recusado tal como um revogado.
 - **A sua organização pode delegar.** Um administrador pode permitir que um membro específico crie tokens e, separadamente, dar-lhe acesso ao registo de auditoria, sem o tornar administrador.
+- **O Restorm agora instala-se a partir do npm.** `npm i -g restorm-cli` e depois `restorm`: a aplicação abre no Linux, macOS e Windows sem instalador. A compilação é transferida uma única vez, verificada pela soma de verificação publicada e guardada em cache, para que um pipeline deixe de a transferir em cada tarefa.
 
 ## v1.0.1
 

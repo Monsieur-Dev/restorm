@@ -7,6 +7,7 @@
 - **Belirteçleri Restorm içinde oluşturun, görün ve iptal edin** — Pro ve Enterprise kullanıcıları için, başlık çubuğundaki hesap düğmesinden. Şu anda yazdığınız hat için panele gidip gelmeye son.
 - **Belirteçlerin ömrü olabilir.** Oluştururken bir süre seçin: 7 ila 365 gün ya da eskisi gibi süresiz. Süresi dolmuş bir belirteç, iptal edilmiş biri gibi reddedilir.
 - **Kuruluşunuz yetki devredebilir.** Bir yönetici, belirli bir üyeye belirteç oluşturma izni verebilir ve ayrıca denetim günlüğüne erişim tanıyabilir — onu yönetici yapmadan.
+- **Restorm artık npm üzerinden kuruluyor.** `npm i -g restorm-cli`, ardından `restorm` — uygulama Linux, macOS ve Windows'ta kurulum sihirbazı olmadan açılır. Yapı bir kez indirilir, yayımlanan sağlama toplamıyla doğrulanır ve önbellekte tutulur; böylece bir iş akışı onu her işte yeniden indirmez.
 
 ## v1.0.1
 

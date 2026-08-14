@@ -7,6 +7,7 @@
 - **Créez, consultez et révoquez vos jetons depuis Restorm** — pour les utilisateurs Pro et Enterprise, depuis le bouton de compte dans la barre de titre. Fini l'aller-retour vers le tableau de bord pour obtenir un jeton destiné au pipeline que vous êtes en train d'écrire.
 - **Les jetons peuvent expirer.** Choisissez une durée de vie à la création — 7 à 365 jours, ou sans expiration comme auparavant. Un jeton expiré est refusé exactement comme un jeton révoqué.
 - **Votre organisation peut déléguer.** Un administrateur peut désormais autoriser un membre précis à créer des jetons, et séparément lui donner accès au journal d'audit, sans en faire un administrateur.
+- **Restorm s'installe désormais depuis npm.** `npm i -g restorm-cli`, puis `restorm` : l'application démarre sous Linux, macOS et Windows sans passer par un installeur. La build est téléchargée une seule fois, vérifiée par son empreinte publiée et conservée en cache — un pipeline ne la retélécharge plus à chaque job.
 
 ## v1.0.1
 

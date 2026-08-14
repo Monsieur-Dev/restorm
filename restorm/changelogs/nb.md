@@ -7,6 +7,7 @@
 - **Opprett, se og tilbakekall tokener fra Restorm** — for Pro- og Enterprise-brukere, fra kontoknappen i tittellinjen. Slutt på turen til dashbordet for et token til rørledningen du skriver akkurat nå.
 - **Tokener kan utløpe.** Velg levetid når du oppretter: 7 til 365 dager, eller uten utløp som før. Et utløpt token avvises på samme måte som et tilbakekalt.
 - **Organisasjonen din kan delegere.** En administrator kan la et bestemt medlem opprette tokener, og separat gi tilgang til revisjonsloggen — uten å gjøre vedkommende til administrator.
+- **Restorm installerer seg nå fra npm.** `npm i -g restorm-cli`, deretter `restorm` — programmet starter på Linux, macOS og Windows uten installasjonsprogram. Bygget lastes ned én gang, kontrolleres mot den publiserte sjekksummen og lagres i hurtiglageret, så en pipeline ikke laster det ned på nytt ved hver jobb.
 
 ## v1.0.1
 

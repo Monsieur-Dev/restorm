@@ -7,6 +7,7 @@
 - **Pravite, gledajte i opozivajte tokene iz Restorm-a** — za korisnike Pro i Enterprise, sa dugmeta naloga u naslovnoj traci. Nema više odlaska na kontrolnu tablu zbog tokena za cevovod koji upravo pišete.
 - **Tokeni mogu da isteknu.** Pri pravljenju izaberite trajanje: 7 do 365 dana ili bez isteka, kao i do sada. Istekli token se odbija isto kao opozvani.
 - **Vaša organizacija može da delegira.** Administrator može određenom članu dozvoliti pravljenje tokena i posebno mu dati pristup revizijskom dnevniku, bez da ga učini administratorom.
+- **Restorm se sada instalira sa npm-a.** `npm i -g restorm-cli`, zatim `restorm` — aplikacija se pokreće na Linuxu, macOS-u i Windowsu bez instalacionog programa. Verzija se preuzima jednom, proverava objavljenim kontrolnim zbirom i čuva u kešu, pa je cevovod ne preuzima ponovo u svakom poslu.
 
 ## v1.0.1
 

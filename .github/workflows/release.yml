@@ -173,6 +173,15 @@ jobs:
           xcrun stapler validate "$APP"
           spctl --assess --type execute --verbose=2 "$APP"
 
+      - name: Describe this platform's build for the npm launcher
+        # `restorm-cli` reads this manifest to know which file to fetch and what
+        # it must hash to, so it can cache a verified build instead of
+        # re-downloading 400 MB on every CI job. Written per platform because
+        # this step runs inside the build matrix — see the script's header.
+        run: |
+          VERSION=$(node -p "require('./restorm/package.json').version")
+          node scripts/release-manifest.mjs restorm/dist-electron "$VERSION" https://dl.restorm.app
+
       - name: Publish to R2 (public — restorm-releases)
         # Per-version layout: binaries + blockmaps live under `v<version>/`,
         # while the `latest*.yml` update feeds stay at the bucket ROOT (their
@@ -199,6 +208,7 @@ jobs:
             --include "*.dmg" --include "*.zip" --include "*.AppImage" \
             --include "*.snap" \
             --include "*.blockmap" \
+            --include "manifest-*.json" \
             --exclude "*/*"
           # …and the rewritten feeds → bucket root.
           aws s3 cp restorm/dist-electron/ "s3://restorm-releases/" \
@@ -221,6 +231,10 @@ jobs:
               *.dmg)           echo "Restorm.dmg" ;;
               *-arm64-mac.zip) echo "Restorm-arm64-mac.zip" ;;
               *-mac.zip)       echo "Restorm-mac.zip" ;;
+              # Every other zip comes from the Windows job — the portable build
+              # `restorm-cli` unpacks when no installer is present.
+              *.zip)           echo "Restorm-win.zip" ;;
+              manifest-*.json) echo "$1" ;;
               *)               echo "" ;;
             esac
           }

@@ -311,7 +311,8 @@
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "zip"
       ],
       "icon": "assets/icons/icon.ico"
     },

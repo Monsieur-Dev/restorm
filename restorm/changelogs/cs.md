@@ -7,6 +7,7 @@
 - **Vytvářejte, prohlížejte a odvolávejte tokeny přímo v Restormu** — pro uživatele Pro a Enterprise, z tlačítka účtu v záhlaví. Konec cesty do řídicího panelu kvůli tokenu pro pipeline, kterou právě píšete.
 - **Tokeny mohou vypršet.** Při vytváření zvolte platnost: 7 až 365 dní, nebo bez vypršení jako dosud. Vypršelý token je odmítnut stejně jako odvolaný.
 - **Vaše organizace může delegovat.** Správce může konkrétnímu členovi povolit vytváření tokenů a odděleně mu zpřístupnit protokol auditu, aniž by z něj udělal správce.
+- **Restorm se nyní instaluje z npm.** `npm i -g restorm-cli` a poté `restorm` — aplikace se spustí v systémech Linux, macOS i Windows bez instalátoru. Sestavení se stáhne jen jednou, ověří se zveřejněným kontrolním součtem a uloží do mezipaměti, takže je pipeline nestahuje při každé úloze znovu.
 
 ## v1.0.1
 

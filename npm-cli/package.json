@@ -1,12 +1,16 @@
 {
   "name": "restorm-cli",
   "version": "0.0.0-dev",
-  "description": "Restorm — local-first API testing environment (REST, GraphQL, gRPC, WebSocket, MQTT, Redis, AMQP…). This package launches your installed Restorm or bootstraps the right build for your platform.",
+  "description": "Restorm — local-first API testing environment (REST, GraphQL, gRPC, WebSocket, MQTT, Redis, AMQP…). Runs Restorm from a terminal or from CI: your installation if you have one, otherwise the official build, downloaded once, checksum-verified and cached.",
   "bin": {
     "restorm": "bin/restorm.js"
   },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
   "files": [
     "bin",
+    "lib",
     "README.md"
   ],
   "engines": {

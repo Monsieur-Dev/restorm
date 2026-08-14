@@ -7,6 +7,7 @@
 - **Creați, consultați și revocați jetoane din Restorm** — pentru utilizatorii Pro și Enterprise, din butonul de cont din bara de titlu. Gata cu drumul până la panoul de control pentru un jeton al fluxului pe care tocmai îl scrieți.
 - **Jetoanele pot expira.** Alegeți o durată la creare: 7 până la 365 de zile sau fără expirare, ca până acum. Un jeton expirat este refuzat la fel ca unul revocat.
 - **Organizația dumneavoastră poate delega.** Un administrator poate permite unui anumit membru să creeze jetoane și, separat, să îi dea acces la jurnalul de audit, fără a-l face administrator.
+- **Restorm se instalează acum din npm.** `npm i -g restorm-cli`, apoi `restorm` — aplicația pornește pe Linux, macOS și Windows fără program de instalare. Versiunea este descărcată o singură dată, verificată cu suma de control publicată și păstrată în cache, astfel încât o conductă să nu o mai descarce la fiecare sarcină.
 
 ## v1.0.1
 

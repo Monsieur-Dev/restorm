@@ -86,7 +86,8 @@ combined one.
    `release-notes/vX.Y.Z.md` — so any consumer reads the notes from the feed
    without needing access to this repository.
 5. Confirm the feed has the new `latest-linux.yml` / `latest.yml` /
-   `latest-mac.yml`, the matching installers, and `release-notes/vX.Y.Z.md`.
+   `latest-mac.yml`, the matching installers, `manifest-<platform>.json`, and
+   `release-notes/vX.Y.Z.md`.
 6. **Re-open the dev cycle — MANDATORY, do not skip.** Immediately bump `main`'s
    `restorm/package.json` back to the next dev version WITH a `-preview` suffix
    (e.g. after cutting `0.1.20`, set `0.1.21-preview`). The release tooling
@@ -96,6 +97,37 @@ combined one.
    `resolveChannel` keys the channel off the `-preview` suffix). A developer or
    agent testing "on dev" would then silently hit the production Supabase /
    WorkOS. Treat this bump as part of the release, not an afterthought.
+
+## The npm launcher's release manifest
+
+`restorm-cli` (the `npm-cli/` package) is not the application: it resolves one,
+in the order *system install → per-user cache → download*. That last step reads
+a manifest the release publishes, written by
+[`scripts/release-manifest.mjs`](../../scripts/release-manifest.mjs) and
+uploaded as `manifest-linux.json`, `manifest-darwin.json`, `manifest-win32.json`
+— under both `latest/` and `v<version>/`.
+
+Three properties of that file are load-bearing; changing any of them without
+changing the launcher breaks `npm i -g restorm-cli` for everyone:
+
+- **One file per platform.** The R2 upload runs inside `release.yml`'s build
+  matrix, so no job ever holds all three platforms' artifacts. A merged
+  manifest would need a fourth job that agrees with the other three.
+- **Artifact URLs point into `v<version>/`, never `latest/`.** The launcher
+  verifies the download against the `sha256` in the manifest; a mutable URL
+  would let the file and its checksum disagree during the minutes a release is
+  uploading.
+- **The npm package's version is the app version it fetches.** `npm-publish.yml`
+  stamps `restorm-cli` with the released version, and the launcher asks for
+  `v<its own version>/` first, falling back to `latest/` only on a 404. That is
+  what makes `restorm-cli@1.0.2` still run Restorm 1.0.2 a year later —
+  `RESTORM_VERSION` overrides it, `RESTORM_VERSION=latest` opts back in.
+
+Every platform therefore needs a target that runs **without an installer**:
+AppImage on Linux, the `zip` target on macOS and Windows (the Windows one exists
+for this reason alone — `nsis` cannot be unpacked and run). The launcher's own
+tests (`cd npm-cli && npm test`) cover the resolution, checksum and cache rules;
+they run in the pre-commit hook and in CI.
 
 ## Exercising auto-update locally (dev mock)
 

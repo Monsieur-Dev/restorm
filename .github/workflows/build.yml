@@ -80,6 +80,14 @@ jobs:
           echo "Electron binary still missing after 3 attempts" >&2
           exit 1
 
+      - name: Run restorm-cli launcher tests
+        # Zero dependencies and outside the pnpm workspace, so it needs no
+        # install step — and it is what decides whether `npm i -g restorm-cli`
+        # can actually start the app.
+        run: |
+          cd npm-cli
+          npm test
+
       - name: Check electron-core-ui unused dependencies
         if: ${{ vars.CI_FULL_CHECKS == 'true' || inputs.full_checks == true }}
         run: |

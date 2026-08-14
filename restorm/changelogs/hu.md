@@ -7,6 +7,7 @@
 - **Hozzon létre, nézzen meg és vonjon vissza tokeneket a Restormban** — Pro és Enterprise felhasználóknak, a címsor fiók gombjából. Nincs többé kitérő az irányítópultra egy éppen írt folyamat tokenjéért.
 - **A tokenek lejárhatnak.** Létrehozáskor válasszon élettartamot: 7–365 nap, vagy nem jár le, mint eddig. A lejárt tokent ugyanúgy elutasítja a rendszer, mint a visszavontat.
 - **Szervezete delegálhat.** Egy rendszergazda engedélyezheti egy adott tagnak a tokenek létrehozását, és külön hozzáférést adhat az auditnaplóhoz, anélkül hogy rendszergazdát csinálna belőle.
+- **A Restorm mostantól npm-ből telepíthető.** `npm i -g restorm-cli`, majd `restorm` — az alkalmazás Linuxon, macOS-en és Windowson is elindul telepítő nélkül. A build egyszer töltődik le, a közzétett ellenőrzőösszeggel igazolva, és gyorsítótárba kerül, így a folyamat nem tölti le újra minden feladatnál.
 
 ## v1.0.1
 

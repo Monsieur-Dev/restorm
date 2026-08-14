@@ -7,6 +7,7 @@
 - **Krijoni, shikoni dhe revokoni tokena nga Restorm** — për përdoruesit Pro dhe Enterprise, nga butoni i llogarisë në shiritin e titullit. Mbaroi vajtja te paneli për një token të tubacionit që po shkruani tani.
 - **Tokenat mund të skadojnë.** Zgjidhni një kohëzgjatje gjatë krijimit: 7 deri në 365 ditë, ose pa skadim si më parë. Një token i skaduar refuzohet njësoj si një i revokuar.
 - **Organizata juaj mund të delegojë.** Një administrator mund t'i lejojë një anëtari të caktuar të krijojë tokena dhe, veçmas, t'i japë qasje te regjistri i auditimit, pa e bërë administrator.
+- **Restorm tani instalohet nga npm.** `npm i -g restorm-cli`, pastaj `restorm` — aplikacioni niset në Linux, macOS dhe Windows pa program instalimi. Ndërtimi shkarkohet një herë, verifikohet me shumën e kontrollit të publikuar dhe ruhet në memorien e fshehtë, kështu që një tubacion nuk e shkarkon më në çdo punë.
 
 ## v1.0.1
 
