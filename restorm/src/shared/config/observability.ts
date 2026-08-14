@@ -73,11 +73,34 @@ export interface ObservabilityEndpoint {
 }
 
 /**
- * Environment variable carrying the Sentry DSN. Never committed: the DSN embeds
- * the project's public key, and hard-coding it would also pin the org id into
- * the repo. Absent ⇒ crash reporting is inert (no SDK, no host to exempt).
+ * Environment variable carrying the Sentry DSN. Read at RUNTIME, which makes it
+ * the developer/CI override: a packaged app launched from a desktop launcher
+ * inherits no such variable, so the shipped value is the build-time constant
+ * below instead. Absent on both ⇒ crash reporting is inert (no SDK, no host to
+ * exempt).
  */
 export const CRASH_DSN_ENV = 'RESTORM_SENTRY_DSN'
+
+/**
+ * The DSN baked in at build time (`__RESTORM_SENTRY_DSN__`, replaced by the
+ * bundler from `RESTORM_SENTRY_DSN` in the build environment; empty string when
+ * the build had none).
+ *
+ * A DSN is a PUBLIC identifier — every client that reports carries it — so
+ * shipping it in the bundle discloses nothing a user could not read from the
+ * network tab. It has to be baked in: reading only `process.env` meant every
+ * installed build resolved no DSN, so crash reporting was inert in production
+ * while the UI reported it as enabled.
+ *
+ * `typeof` guard because the constant is only defined by the app bundles —
+ * unit tests and the generator scripts import this module under plain Node.
+ */
+declare const __RESTORM_SENTRY_DSN__: string | undefined
+
+function builtInCrashDsn(): string | undefined {
+  const value = typeof __RESTORM_SENTRY_DSN__ === 'string' ? __RESTORM_SENTRY_DSN__.trim() : ''
+  return value === '' ? undefined : value
+}
 
 /**
  * Fallback crash-ingest host, used only when no DSN is configured.
@@ -113,10 +136,13 @@ export function ingestHostFromDsn(dsn: string | undefined): string | null {
   }
 }
 
-/** The configured DSN, or `undefined` when crash reporting is not provisioned. */
+/** The configured DSN, or `undefined` when crash reporting is not provisioned.
+ * The runtime environment wins so a developer can point a local build at a
+ * throwaway project; the build-time constant is what every shipped build uses. */
 export function crashDsn(env: NodeJS.ProcessEnv = process.env): string | undefined {
   const raw = env[CRASH_DSN_ENV]
-  return raw === undefined || raw.trim() === '' ? undefined : raw.trim()
+  if (raw !== undefined && raw.trim() !== '') return raw.trim()
+  return builtInCrashDsn()
 }
 
 /**

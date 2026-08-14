@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import {
   resolveObservabilityEndpoints,
   ingestHostFromDsn,
@@ -87,6 +87,31 @@ describe('crash ingest host derives from the DSN', () => {
     expect(crashDsn({ [CRASH_DSN_ENV]: `  ${DSN}  ` })).toBe(DSN)
     expect(crashDsn({})).toBeUndefined()
     expect(crashDsn({ [CRASH_DSN_ENV]: '  ' })).toBeUndefined()
+  })
+
+  // A packaged app inherits no environment, so the value the bundler baked in
+  // is the ONLY DSN a shipped build has. Reading the environment alone left
+  // every install inert while the UI advertised crash reporting as enabled.
+  describe('build-time DSN', () => {
+    const BAKED = 'https://baked@o1.ingest.de.sentry.io/2'
+    const globalScope = globalThis as { __RESTORM_SENTRY_DSN__?: string }
+
+    afterEach(() => { delete globalScope.__RESTORM_SENTRY_DSN__ })
+
+    it('falls back to the baked-in DSN when the environment carries none', () => {
+      globalScope.__RESTORM_SENTRY_DSN__ = BAKED
+      expect(crashDsn({})).toBe(BAKED)
+    })
+
+    it('lets the environment override the baked-in DSN', () => {
+      globalScope.__RESTORM_SENTRY_DSN__ = BAKED
+      expect(crashDsn({ [CRASH_DSN_ENV]: DSN })).toBe(DSN)
+    })
+
+    it('stays unprovisioned when the build baked in an empty string', () => {
+      globalScope.__RESTORM_SENTRY_DSN__ = ''
+      expect(crashDsn({})).toBeUndefined()
+    })
   })
 
   it('keeps the eligibility predicate in step with the derived host', () => {

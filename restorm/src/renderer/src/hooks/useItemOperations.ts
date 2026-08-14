@@ -27,7 +27,7 @@ import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithParent, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
-import { mapAllWorkbenchTabs, tabReferencesItem } from '../utils/workbenchTabs'
+import { mapAllWorkbenchTabs, tabBackingItemId, tabReferencesItem } from '../utils/workbenchTabs'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
@@ -293,32 +293,23 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const refreshTabBreadcrumbs = (
       tab: EditorTab
     ): EditorTab | FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab => {
-      const tabType = (tab as { tabType?: string }).tabType
-      // Singleton tabs (Console, Firewall) aren't tied to any tree item —
-      // skip them. Without this guard the `else` branch below would
-      // dereference `.request.id` on a tab that doesn't carry one and crash
-      // with "Cannot read properties of undefined (reading 'id')".
-      if (tabType === 'console' || tabType === 'firewall') {
-        return tab
-      }
+      // Which tree item this tab is bound to — via the shared helper, which
+      // reads the id off whichever payload the tab carries (`request` for
+      // every protocol tab, `folder`, or `scenario`) and yields `undefined`
+      // for tabs backed by no tree item at all.
+      //
+      // Reimplementing that extraction here is what crashed the app: this
+      // function used to skip two known singletons (Console, Firewall) by
+      // tabType and then dereference `.request.id` on everything else — so
+      // with the mini-browser, Settings or the MCP logs open, ANY sidebar
+      // drag threw "Cannot read properties of undefined (reading 'id')" out
+      // of this map and the error boundary tore the whole UI down. One
+      // source of truth means a tab kind added later cannot resurrect it.
+      const boundItemId = tabBackingItemId(tab)
+      if (boundItemId === undefined) return tab
       const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab
 
-      // Get the item ID from the tab. Scenario-editor tabs carry their
-      // payload under `scenario` (not `request` / `folder`); without this
-      // branch the breadcrumb refresh after a sidebar drag-and-drop would
-      // hit the `else` and dereference `.request.id` on the wrong shape.
-      let itemId: string
-      if (restormTab.tabType === 'folder') {
-        itemId = restormTab.folder.id
-      } else if (restormTab.tabType === 'environment-folder') {
-        itemId = restormTab.folder.id
-      } else if (restormTab.tabType === 'scenario-editor') {
-        itemId = restormTab.scenario.id
-      } else {
-        itemId = restormTab.request.id
-      }
-
-      const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, boundItemId)
       if (newBreadcrumbs.length === 0) return tab
 
       // For HTTP request tabs the environments are left as-is for now

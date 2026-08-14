@@ -122,6 +122,22 @@ const appVersion = (JSON.parse(
 const releaseName = `restorm@${appVersion}`
 
 /**
+ * Build-time constants shared by all three bundles.
+ *
+ * The crash DSN has to be BAKED IN: a packaged app launched from a desktop
+ * launcher inherits no environment, so reading `process.env` at runtime left
+ * every installed build with no DSN — crash reporting stayed inert in
+ * production while the UI reported it as enabled, and not one report ever
+ * arrived. A DSN is a public identifier (every reporting client carries it),
+ * so embedding it discloses nothing; `RESTORM_SENTRY_DSN` in the build
+ * environment supplies it, and an unconfigured build simply bakes in an empty
+ * string and stays inert as before.
+ */
+const buildTimeDefines = {
+  __RESTORM_SENTRY_DSN__: JSON.stringify(process.env.RESTORM_SENTRY_DSN ?? '')
+}
+
+/**
  * Source-map upload, per bundle. Returns an empty list when no credentials are
  * configured, so an ordinary build simply has no upload step rather than a
  * failing one.
@@ -160,6 +176,7 @@ function sentrySourcemapUpload(bundle: string): ReturnType<typeof sentryVitePlug
 
 export default defineConfig({
   main: {
+    define: buildTimeDefines,
     plugins: [
       externalizeDepsPlugin({ exclude: ['electron-core-ui'] }),
       copyTemplatesPlugin(),
@@ -187,6 +204,7 @@ export default defineConfig({
     }
   },
   preload: {
+    define: buildTimeDefines,
     // `zod` is excluded from externalization so it is BUNDLED into the preload
     // script. The preload imports the IPC output-shape schemas (../ipc/schemas),
     // which `import { z } from 'zod/v4'` as a runtime value. Left externalized,
@@ -251,6 +269,7 @@ export default defineConfig({
     publicDir: resolve(__dirname, 'assets'),
     // Define env variables for test helpers
     define: {
+      ...buildTimeDefines,
       'import.meta.env.VITE_ENABLE_TEST_HELPERS': JSON.stringify(process.env.VITE_ENABLE_TEST_HELPERS ?? 'false'),
       // Suppress Vue feature flag warnings from milkdown (which uses Vue internally)
       '__VUE_OPTIONS_API__': JSON.stringify(false),

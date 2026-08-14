@@ -18,8 +18,12 @@ vi.mock('electron-core-ui/renderer', () => ({
     subscribe: vi.fn(() => ({ unsubscribe: vi.fn() }))
   },
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-  isTabGroupNode: () => false,
-  isContainerNode: () => false
+  // Structural, exactly like the library's own one-liners ('tabs' in node /
+  // 'groups' in node). Stubbing these to `false` made every workbench-tab
+  // assertion in this file VACUOUS: the mapper returned each group untouched,
+  // so a test could not tell "left alone on purpose" from "never visited".
+  isTabGroupNode: (node: unknown) => typeof node === 'object' && node !== null && 'tabs' in node,
+  isContainerNode: (node: unknown) => typeof node === 'object' && node !== null && 'groups' in node
 }))
 
 vi.mock('../services/favoritesStore', () => ({
@@ -253,6 +257,48 @@ describe('useItemOperations.handleItemDrop', () => {
     expect((updated[0]?.payload as { parentFolderId?: string }).parentFolderId).toBe('folder-b')
     // Both buses: only the local one carries the dirty-marking bridge.
     expect(localCallsFor(DocumentEvents.REQUEST_UPDATED)).toHaveLength(1)
+  })
+
+  it('refreshes breadcrumbs without touching tabs that back onto no tree item', () => {
+    // THE regression: with the mini-browser open, dragging any sidebar row
+    // threw "Cannot read properties of undefined (reading 'id')" out of the
+    // breadcrumb refresh — the error escaped into React's render, the root
+    // boundary caught it, and the whole UI became unusable until restart.
+    // Console + Firewall were special-cased by tabType; the mini-browser,
+    // Settings and the MCP logs were not, and fell into a `.request.id`
+    // dereference.
+    const rootItems = makeTree()
+    const setWorkbenchTree = vi.fn()
+    const { result } = renderHook(() =>
+      useItemOperations({ ...buildOptions(rootItems), setWorkbenchTree }))
+
+    act(() => { result.current.handleItemDrop(dropPayload(rootItems)) })
+
+    const dropCalls = setWorkbenchTree.mock.calls
+    const updater = dropCalls[dropCalls.length - 1]?.[0] as
+      (previous: { groups: unknown[] }) => { groups: { tabs: { id: string }[] }[] }
+    expect(updater).toBeTypeOf('function')
+
+    const singletons = ['mini-browser', 'settings', 'mcp-logs', 'console', 'firewall']
+      .map((tabType, index) => ({ id: `singleton-${index}`, title: tabType, tabType }))
+    const itemBacked = { id: 'tab-req-1', tabType: 'http-request', request: { id: 'req-1' }, breadcrumbs: [] }
+    const previous = { groups: [{ id: 'g1', type: 'tabs', tabs: [...singletons, itemBacked], activeTabId: 'singleton-0' }] }
+
+    const next = updater(previous as never)
+
+    // Every singleton survives untouched, and the item-backed tab still gets
+    // its breadcrumbs recomputed (the feature this function exists for).
+    const tabs = next.groups[0]?.tabs ?? []
+    expect(tabs.map((t) => t.id)).toEqual([...singletons.map((s) => s.id), 'tab-req-1'])
+    for (const [index, singleton] of singletons.entries()) {
+      expect(tabs[index]).toBe(previous.groups[0]?.tabs[index])
+      expect(tabs[index]).toEqual(singleton)
+    }
+    // Non-vacuity: the refresh really walked this group (it rebuilds the node
+    // and the tabs array); the singletons above are preserved BY the mapper,
+    // not by it having skipped the group entirely.
+    expect(next.groups[0]).not.toBe(previous.groups[0])
+    expect(tabs).not.toBe(previous.groups[0]?.tabs)
   })
 
   it('stays silent when the drop is refused (an item onto itself)', () => {
