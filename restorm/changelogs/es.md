@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Primer parche: mover elementos en la barra lateral, nombres de pestañas e informes de fallos.**
+
+- **Mover un elemento en la barra lateral ya no rompe la aplicación.** Con el mini navegador, los Ajustes o los registros MCP abiertos, arrastrar cualquier fila de la barra lateral destrozaba la interfaz y solo un reinicio la recuperaba.
+- **Renombrar un elemento ahora actualiza todas las pestañas abiertas**, incluidas las de un panel dividido y las de cualquier tipo de petición (gRPC, GraphQL, Redis…), que conservaban su nombre anterior hasta volver a abrirlas.
+- **Los informes de fallos vuelven a llegarnos.** Con el envío de informes activado, 1.0.0 no enviaba nada en silencio: un fallo que sufrías no nos decía nada.
+- **La ilustración de «lenguajes de código» vuelve a mostrar sus logotipos.**
+
 ## v1.0.0
 
 **Restorm 1.0 — el cliente de API local-first, ya disponible.**

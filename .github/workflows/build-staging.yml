@@ -73,6 +73,11 @@ jobs:
           # decided by whether the crash-report upload is configured. See the
           # equivalent step in release.yml.
           NODE_HEAP: ${{ secrets.SENTRY_AUTH_TOKEN && '--max-old-space-size=8192' || '--max-old-space-size=4096' }}
+          # Crash reporting: the DSN is BAKED INTO the bundles here. A packaged
+          # app inherits no environment, so a build without this ships with
+          # crash reporting permanently inert — which is exactly how every
+          # v1.0.0 crash went unreported.
+          RESTORM_SENTRY_DSN: ${{ secrets.RESTORM_SENTRY_DSN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}

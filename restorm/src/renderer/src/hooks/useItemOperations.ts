@@ -27,9 +27,10 @@ import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithParent, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
-import { mapAllWorkbenchTabs, tabReferencesItem } from '../utils/workbenchTabs'
+import { mapAllWorkbenchTabs, tabBackingItemId, tabReferencesItem } from '../utils/workbenchTabs'
+import { requestTabTitle } from '../../../shared/protocolRegistry'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
-import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
+import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab, RestormEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
@@ -287,38 +288,30 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
   // Refresh breadcrumbs in EVERY open workbench tab after a tree move —
   // shared by the row-target drop and the empty-area (move-to-root) drop.
   const refreshAllTabBreadcrumbs = useCallback(() => {
-    // Recalculate breadcrumbs for a single tab after the reorder. Returns
-    // the tab unchanged for singleton tabs (Console / Firewall, which aren't
-    // tied to a tree item) and when the item can no longer be located.
+    // Recalculate breadcrumbs for a single tab after the reorder. Returns the
+    // tab unchanged when it backs onto no tree item at all (every singleton:
+    // Console, Firewall, Settings, the mini-browser, the MCP logs) and when
+    // the item it does back onto can no longer be located.
     const refreshTabBreadcrumbs = (
       tab: EditorTab
     ): EditorTab | FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab => {
-      const tabType = (tab as { tabType?: string }).tabType
-      // Singleton tabs (Console, Firewall) aren't tied to any tree item —
-      // skip them. Without this guard the `else` branch below would
-      // dereference `.request.id` on a tab that doesn't carry one and crash
-      // with "Cannot read properties of undefined (reading 'id')".
-      if (tabType === 'console' || tabType === 'firewall') {
-        return tab
-      }
+      // Which tree item this tab is bound to — via the shared helper, which
+      // reads the id off whichever payload the tab carries (`request` for
+      // every protocol tab, `folder`, or `scenario`) and yields `undefined`
+      // for tabs backed by no tree item at all.
+      //
+      // Reimplementing that extraction here is what crashed the app: this
+      // function used to skip two known singletons (Console, Firewall) by
+      // tabType and then dereference `.request.id` on everything else — so
+      // with the mini-browser, Settings or the MCP logs open, ANY sidebar
+      // drag threw "Cannot read properties of undefined (reading 'id')" out
+      // of this map and the error boundary tore the whole UI down. One
+      // source of truth means a tab kind added later cannot resurrect it.
+      const boundItemId = tabBackingItemId(tab)
+      if (boundItemId === undefined) return tab
       const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab
 
-      // Get the item ID from the tab. Scenario-editor tabs carry their
-      // payload under `scenario` (not `request` / `folder`); without this
-      // branch the breadcrumb refresh after a sidebar drag-and-drop would
-      // hit the `else` and dereference `.request.id` on the wrong shape.
-      let itemId: string
-      if (restormTab.tabType === 'folder') {
-        itemId = restormTab.folder.id
-      } else if (restormTab.tabType === 'environment-folder') {
-        itemId = restormTab.folder.id
-      } else if (restormTab.tabType === 'scenario-editor') {
-        itemId = restormTab.scenario.id
-      } else {
-        itemId = restormTab.request.id
-      }
-
-      const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, boundItemId)
       if (newBreadcrumbs.length === 0) return tab
 
       // For HTTP request tabs the environments are left as-is for now
@@ -680,74 +673,43 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
 
-    // Also update the workbench tab title and breadcrumbs (all groups)
-    setWorkbenchTree((prevTree) => {
-      const updatedGroups = prevTree.groups.map((group) => {
-        if (!isTabGroupNode(group)) return group
+    // Also update the workbench tab title and breadcrumbs, in EVERY group —
+    // `mapAllWorkbenchTabs` recurses through split containers, which a
+    // `prevTree.groups.map()` does not: a tab sitting in a split kept its old
+    // name. The title is recomposed from the protocol registry, so renaming a
+    // request refreshes its tab whatever its protocol.
+    setWorkbenchTree((prevTree) => ({ ...prevTree, groups: mapAllWorkbenchTabs(prevTree.groups, (tab) => {
+      const renamedBreadcrumbs = (restormTab: RestormEditorTab): RestormEditorTab['breadcrumbs'] =>
+        restormTab.breadcrumbs?.map((bc) => (bc.id === itemId ? { ...bc, label: newName } : bc))
 
-        const updatedTabs = group.tabs.map((tab) => {
-          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+      if (tabBackingItemId(tab) === itemId) {
+        const restormTab = tab as RestormEditorTab
+        const renamed = { ...restormTab, breadcrumbs: renamedBreadcrumbs(restormTab), contentVersion: (restormTab.contentVersion ?? 0) + 1 }
 
-          // Update tab title if it's the renamed item
-          if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) {
-            return {
-              ...restormTab,
-              title: newName,
-              titleString: newName,
-              folder: { ...restormTab.folder, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              ),
-              contentVersion: (restormTab.contentVersion ?? 0) + 1
-            }
-          }
+        if ('request' in renamed) {
+          const request = { ...renamed.request, name: newName }
+          const title = requestTabTitle(request)
+          // A request whose type the registry doesn't know keeps its old
+          // label rather than losing it — the tree item is still renamed.
+          if (title === null) return { ...renamed, request }
+          return { ...renamed, request, title, titleString: title }
+        }
+        if ('folder' in renamed) {
+          return { ...renamed, folder: { ...renamed.folder, name: newName }, title: newName, titleString: newName }
+        }
+        if ('scenario' in renamed) {
+          return { ...renamed, scenario: { ...renamed.scenario, name: newName }, title: newName, titleString: newName }
+        }
+        return renamed
+      }
 
-          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) {
-            return {
-              ...restormTab,
-              title: newName,
-              titleString: newName,
-              folder: { ...restormTab.folder, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              ),
-              contentVersion: (restormTab.contentVersion ?? 0) + 1
-            }
-          }
-
-          if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) {
-            const newTitle = `${restormTab.request.method} ${newName}`
-            return {
-              ...restormTab,
-              title: newTitle,
-              titleString: newTitle,
-              request: { ...restormTab.request, name: newName },
-              breadcrumbs: restormTab.breadcrumbs?.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              ),
-              contentVersion: (restormTab.contentVersion ?? 0) + 1
-            }
-          }
-
-          // Update breadcrumbs for other tabs that might reference this item
-          if (restormTab.breadcrumbs) {
-            const hasMatch = restormTab.breadcrumbs.some((bc) => bc.id === itemId)
-            if (hasMatch) {
-              const updatedBreadcrumbs = restormTab.breadcrumbs.map((bc) =>
-                bc.id === itemId ? { ...bc, label: newName } : bc
-              )
-              return { ...restormTab, breadcrumbs: updatedBreadcrumbs, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
-            }
-          }
-
-          return tab
-        })
-
-        return { ...group, tabs: updatedTabs }
-      })
-
-      return { ...prevTree, groups: updatedGroups }
-    })
+      // Not the renamed item, but it may sit UNDER it: refresh the crumb.
+      const restormTab = tab as RestormEditorTab
+      if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) {
+        return { ...restormTab, breadcrumbs: renamedBreadcrumbs(restormTab), contentVersion: (restormTab.contentVersion ?? 0) + 1 }
+      }
+      return tab
+    }) }))
 
     // Notify external listeners (sidebar Favorites + Open documents
     // panes) that an item's `name` mutated in-place. Cheap signal that

@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Prva zakrpa: premještanje u bočnoj traci, nazivi kartica i izvješća o rušenju.**
+
+- **Premještanje stavke u bočnoj traci više ne ruši aplikaciju.** Uz otvoren mini preglednik, Postavke ili MCP zapise, svako povlačenje u bočnoj traci raspalo bi sučelje, a pomoglo je samo ponovno pokretanje.
+- **Preimenovanje stavke sada osvježava svaku otvorenu karticu** — uključujući kartice u podijeljenom oknu i kartice svih vrsta zahtjeva (gRPC, GraphQL, Redis…), koje su zadržavale stari naziv do ponovnog otvaranja.
+- **Izvješća o rušenju ponovno stižu do nas.** Uz uključeno slanje, 1.0.0 nije slala ništa u tišini: rušenje na koje ste naišli nama nije govorilo ništa.
+- **Ilustracija „jezici koda“ ponovno prikazuje svoje logotipe.**
+
 ## v1.0.0
 
 **Restorm 1.0 — local-first API klijent je stigao.**

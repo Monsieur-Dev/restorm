@@ -203,6 +203,14 @@ export function initCrashReporting(): CrashReportingService | null {
     .sync()
     .then((decision) => {
       logger.info('Crash reporting resolved', { armed: decision.init, reason: decision.reason })
+      // An unprovisioned build cannot report anything, yet the settings UI
+      // still shows the consent toggle as on — the exact combination that let
+      // every production crash pass unnoticed. Say it out loud once at
+      // startup, at WARN, so a build shipped without a DSN is visible in the
+      // log instead of being discovered months later by its silence.
+      if (decision.reason === 'no-dsn') {
+        logger.warn('Crash reporting is UNPROVISIONED (no DSN baked in and none in the environment): nothing will ever be reported')
+      }
     })
     // Arming touches the SDK, and the SDK can throw for reasons that have
     // nothing to do with us (a malformed DSN, an Electron version it refuses).

@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**První oprava: přesouvání v postranním panelu, názvy karet a hlášení o pádech.**
+
+- **Přesunutí položky v postranním panelu už aplikaci nerozbije.** Při otevřeném mini prohlížeči, Nastavení nebo protokolech MCP jakékoli přetažení v postranním panelu rozbilo rozhraní a pomohl jen restart.
+- **Přejmenování položky nyní aktualizuje každou otevřenou kartu** — včetně karet v rozděleném panelu a karet všech typů požadavků (gRPC, GraphQL, Redis…), které si až do znovuotevření nechávaly starý název.
+- **Hlášení o pádech se k nám opět dostávají.** Se zapnutým odesíláním verze 1.0.0 tiše neodeslala nic: pád, na který jste narazili, nám nic neřekl.
+- **Ilustrace „programovací jazyky“ opět zobrazuje svá loga.**
+
 ## v1.0.0
 
 **Restorm 1.0 — local-first API klient je tu.**

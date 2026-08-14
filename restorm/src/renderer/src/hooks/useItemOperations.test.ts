@@ -18,8 +18,12 @@ vi.mock('electron-core-ui/renderer', () => ({
     subscribe: vi.fn(() => ({ unsubscribe: vi.fn() }))
   },
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-  isTabGroupNode: () => false,
-  isContainerNode: () => false
+  // Structural, exactly like the library's own one-liners ('tabs' in node /
+  // 'groups' in node). Stubbing these to `false` made every workbench-tab
+  // assertion in this file VACUOUS: the mapper returned each group untouched,
+  // so a test could not tell "left alone on purpose" from "never visited".
+  isTabGroupNode: (node: unknown) => typeof node === 'object' && node !== null && 'tabs' in node,
+  isContainerNode: (node: unknown) => typeof node === 'object' && node !== null && 'groups' in node
 }))
 
 vi.mock('../services/favoritesStore', () => ({
@@ -255,6 +259,48 @@ describe('useItemOperations.handleItemDrop', () => {
     expect(localCallsFor(DocumentEvents.REQUEST_UPDATED)).toHaveLength(1)
   })
 
+  it('refreshes breadcrumbs without touching tabs that back onto no tree item', () => {
+    // THE regression: with the mini-browser open, dragging any sidebar row
+    // threw "Cannot read properties of undefined (reading 'id')" out of the
+    // breadcrumb refresh — the error escaped into React's render, the root
+    // boundary caught it, and the whole UI became unusable until restart.
+    // Console + Firewall were special-cased by tabType; the mini-browser,
+    // Settings and the MCP logs were not, and fell into a `.request.id`
+    // dereference.
+    const rootItems = makeTree()
+    const setWorkbenchTree = vi.fn()
+    const { result } = renderHook(() =>
+      useItemOperations({ ...buildOptions(rootItems), setWorkbenchTree }))
+
+    act(() => { result.current.handleItemDrop(dropPayload(rootItems)) })
+
+    const dropCalls = setWorkbenchTree.mock.calls
+    const updater = dropCalls[dropCalls.length - 1]?.[0] as
+      (previous: { groups: unknown[] }) => { groups: { tabs: { id: string }[] }[] }
+    expect(updater).toBeTypeOf('function')
+
+    const singletons = ['mini-browser', 'settings', 'mcp-logs', 'console', 'firewall']
+      .map((tabType, index) => ({ id: `singleton-${index}`, title: tabType, tabType }))
+    const itemBacked = { id: 'tab-req-1', tabType: 'http-request', request: { id: 'req-1' }, breadcrumbs: [] }
+    const previous = { groups: [{ id: 'g1', type: 'tabs', tabs: [...singletons, itemBacked], activeTabId: 'singleton-0' }] }
+
+    const next = updater(previous as never)
+
+    // Every singleton survives untouched, and the item-backed tab still gets
+    // its breadcrumbs recomputed (the feature this function exists for).
+    const tabs = next.groups[0]?.tabs ?? []
+    expect(tabs.map((t) => t.id)).toEqual([...singletons.map((s) => s.id), 'tab-req-1'])
+    for (const [index, singleton] of singletons.entries()) {
+      expect(tabs[index]).toBe(previous.groups[0]?.tabs[index])
+      expect(tabs[index]).toEqual(singleton)
+    }
+    // Non-vacuity: the refresh really walked this group (it rebuilds the node
+    // and the tabs array); the singletons above are preserved BY the mapper,
+    // not by it having skipped the group entirely.
+    expect(next.groups[0]).not.toBe(previous.groups[0])
+    expect(tabs).not.toBe(previous.groups[0]?.tabs)
+  })
+
   it('stays silent when the drop is refused (an item onto itself)', () => {
     const rootItems = makeTree()
     const { result } = renderHook(() => useItemOperations(buildOptions(rootItems)))
@@ -263,6 +309,100 @@ describe('useItemOperations.handleItemDrop', () => {
     act(() => { result.current.handleItemDrop({ ...payload, item: payload.source } as never) })
 
     expect(callsFor(DocumentEvents.REQUEST_UPDATED)).toHaveLength(0)
+  })
+})
+
+describe('useItemOperations.handleSidebarItemRename', () => {
+  const buildOptions = (rootItems: FolderItem[]): UseItemOperationsOptions => ({
+    rootItems,
+    setRootItems: vi.fn(),
+    setExpandedIds: vi.fn(),
+    setSelectedItemId: vi.fn(),
+    setSidebarEditingItemId: vi.fn(),
+    setWorkbenchTree: vi.fn(),
+    setDeleteConfirmation: vi.fn(),
+    openFolderTab: vi.fn(),
+    openScenarioEditorTab: vi.fn(),
+    openEnvironmentFolderTab: vi.fn(),
+    openAnyRequestTab: vi.fn(),
+    projectUuid: 'project-1'
+  })
+
+  /** Apply the rename to a workbench tree shaped as a SPLIT: a container node
+   * whose panes each hold one group. */
+  function renameInSplitLayout(itemId: string, newName: string, tabs: Record<string, unknown>[]): Record<string, unknown>[] {
+    const setWorkbenchTree = vi.fn()
+    const { result } = renderHook(() =>
+      useItemOperations({ ...buildOptions([]), setWorkbenchTree }))
+
+    act(() => {
+      result.current.handleSidebarItemRename({ item: { id: itemId } } as never, newName)
+    })
+
+    const calls = setWorkbenchTree.mock.calls
+    const updater = calls[calls.length - 1]?.[0] as
+      (previous: unknown) => { groups: { groups: { tabs: Record<string, unknown>[] }[] }[] }
+    expect(updater).toBeTypeOf('function')
+
+    const previous = {
+      groups: [{
+        id: 'split', type: 'container', direction: 'horizontal',
+        groups: [
+          { id: 'pane-1', type: 'tabs', tabs: [], activeTabId: undefined },
+          { id: 'pane-2', type: 'tabs', tabs, activeTabId: tabs[0]?.['id'] }
+        ]
+      }]
+    }
+    const next = updater(previous)
+    const pane = next.groups[0]?.groups[1]
+    expect(pane?.tabs).not.toBe(tabs)  // non-vacuity: the mapper reached INSIDE the split
+    return pane?.tabs ?? []
+  }
+
+  it('retitles a renamed request in a split pane, whatever its protocol', () => {
+    // The rename path used to walk `tree.groups` directly (so a tab inside a
+    // split kept its old name) and knew how to retitle only HTTP requests (so
+    // every other protocol kept its old name anywhere). Both come from the
+    // protocol registry now.
+    const tabs = [
+      { id: 't-kafka', tabType: 'kafka-request', title: 'Old name', titleString: 'Old name', request: { id: 'req-1', type: 'kafka', name: 'Old name' }, breadcrumbs: [] },
+      { id: 't-gql', tabType: 'graphql-request', title: 'GraphQL Other', titleString: 'GraphQL Other', request: { id: 'req-2', type: 'graphql', name: 'Other' }, breadcrumbs: [] }
+    ]
+
+    const renamed = renameInSplitLayout('req-1', 'New name', tabs)
+
+    // Kafka declares no tab-title prefix: the bare name.
+    expect(renamed[0]?.['title']).toBe('New name')
+    expect(renamed[0]?.['titleString']).toBe('New name')
+    expect((renamed[0]?.['request'] as { name: string }).name).toBe('New name')
+    // The other tab is untouched.
+    expect(renamed[1]).toBe(tabs[1])
+  })
+
+  it('keeps the protocol prefix when recomposing the title', () => {
+    const tabs = [
+      { id: 't-gql', tabType: 'graphql-request', title: 'GraphQL Old', titleString: 'GraphQL Old', request: { id: 'req-2', type: 'graphql', name: 'Old' }, breadcrumbs: [] },
+      { id: 't-http', tabType: 'http-request', title: 'GET Old', titleString: 'GET Old', request: { id: 'req-3', type: 'http', method: 'GET', name: 'Old' }, breadcrumbs: [] }
+    ]
+
+    expect(renameInSplitLayout('req-2', 'New', tabs)[0]?.['title']).toBe('GraphQL New')
+    expect(renameInSplitLayout('req-3', 'New', tabs)[1]?.['title']).toBe('GET New')
+  })
+
+  it('retitles folder and scenario tabs, and refreshes descendants breadcrumbs', () => {
+    const tabs = [
+      { id: 't-folder', tabType: 'folder', title: 'Old', titleString: 'Old', folder: { id: 'f-1', name: 'Old' }, breadcrumbs: [{ id: 'f-1', label: 'Old' }] },
+      { id: 't-scenario', tabType: 'scenario-editor', title: 'Sc', titleString: 'Sc', scenario: { id: 's-1', name: 'Sc' }, breadcrumbs: [{ id: 'f-1', label: 'Old' }] }
+    ]
+
+    const renamed = renameInSplitLayout('f-1', 'New', tabs)
+
+    expect(renamed[0]?.['title']).toBe('New')
+    expect((renamed[0]?.['folder'] as { name: string }).name).toBe('New')
+    // The scenario lives UNDER the renamed folder: its crumb follows, its
+    // own title does not.
+    expect(renamed[1]?.['title']).toBe('Sc')
+    expect(renamed[1]?.['breadcrumbs']).toEqual([{ id: 'f-1', label: 'New' }])
   })
 })
 

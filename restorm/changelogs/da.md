@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Første rettelse: flytning i sidepanelet, fanenavne og nedbrudsrapporter.**
+
+- **At flytte et element i sidepanelet ødelægger ikke længere appen.** Med minibrowseren, Indstillinger eller MCP-loggene åbne rev enhver trækbevægelse i sidepanelet grænsefladen ned, og kun en genstart hjalp.
+- **Omdøbning af et element opdaterer nu alle åbne faner** — også faner i et opdelt panel og faner for alle anmodningstyper (gRPC, GraphQL, Redis…), som beholdt deres gamle navn, indtil de blev åbnet igen.
+- **Nedbrudsrapporter når frem til os igen.** Med rapportering slået til sendte 1.0.0 stiltiende ingenting: et nedbrud hos dig fortalte os intet.
+- **Illustrationen “kodesprog” viser sine logoer igen.**
+
 ## v1.0.0
 
 **Restorm 1.0 — den local-first API-klient er landet.**

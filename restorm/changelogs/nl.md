@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Eerste patch: slepen in de zijbalk, tabbladnamen en crashrapporten.**
+
+- **Een item in de zijbalk verplaatsen breekt de app niet meer.** Met de minibrowser, Instellingen of de MCP-logboeken open sloopte elk slepen in de zijbalk de interface; alleen een herstart hielp.
+- **Een item hernoemen werkt nu elk geopend tabblad bij** — ook tabbladen in een gesplitst deelvenster en tabbladen van elk aanvraagtype (gRPC, GraphQL, Redis…), die hun oude naam behielden tot ze opnieuw werden geopend.
+- **Crashrapporten bereiken ons weer.** Met crashrapportage ingeschakeld stuurde 1.0.0 stilzwijgend niets: een crash bij u vertelde ons niets.
+- **De illustratie ‘programmeertalen’ toont haar logo's weer.**
+
 ## v1.0.0
 
 **Restorm 1.0 — de local-first API-client is er.**

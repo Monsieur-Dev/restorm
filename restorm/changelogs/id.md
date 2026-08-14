@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Perbaikan pertama: memindahkan item di bilah samping, nama tab, dan laporan kerusakan.**
+
+- **Memindahkan item di bilah samping tidak lagi merusak aplikasi.** Dengan mini browser, Pengaturan, atau log MCP terbuka, menyeret baris mana pun di bilah samping merobohkan antarmuka, dan hanya memulai ulang yang memulihkannya.
+- **Mengganti nama item kini memperbarui setiap tab yang terbuka** — termasuk tab di panel terbagi dan tab semua jenis permintaan (gRPC, GraphQL, Redis…), yang sebelumnya menyimpan nama lamanya sampai dibuka kembali.
+- **Laporan kerusakan kembali sampai ke kami.** Dengan pelaporan aktif, 1.0.0 diam-diam tidak mengirim apa pun: kerusakan yang Anda alami tidak memberi tahu kami apa-apa.
+- **Ilustrasi “bahasa pemrograman” menampilkan logonya lagi.**
+
 ## v1.0.0
 
 **Restorm 1.0 — klien API local-first, resmi dirilis.**

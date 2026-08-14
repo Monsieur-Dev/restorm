@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**İlk yama: kenar çubuğunda taşıma, sekme adları ve çökme raporları.**
+
+- **Kenar çubuğunda bir öğeyi taşımak artık uygulamayı bozmuyor.** Mini tarayıcı, Ayarlar veya MCP günlükleri açıkken kenar çubuğundaki herhangi bir satırı sürüklemek arayüzü yıkıyordu ve yalnızca yeniden başlatma işe yarıyordu.
+- **Bir öğeyi yeniden adlandırmak artık açık tüm sekmeleri güncelliyor** — bölünmüş bölmedeki sekmeler ve her istek türünün sekmeleri (gRPC, GraphQL, Redis…) dâhil; bunlar yeniden açılana kadar eski adlarını koruyordu.
+- **Çökme raporları yeniden bize ulaşıyor.** Rapor gönderimi açıkken 1.0.0 sessizce hiçbir şey göndermiyordu: yaşadığınız bir çökme bize hiçbir şey anlatmıyordu.
+- **“Kod dilleri” ipucu görseli logolarını yeniden gösteriyor.**
+
 ## v1.0.0
 
 **Restorm 1.0 — local-first API istemcisi yayında.**

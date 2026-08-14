@@ -13,6 +13,10 @@
 
 ## Hard rules (must be ticked)
 
+- [ ] **Registry, not branches** — every per-protocol constant is declared in
+      `PROTOCOL_REGISTRY` (tab type, tab title, badge, IPC namespace, …) and read
+      through a registry helper. No `if (isXRequest(…))` chain outside the glue
+      files Section 1.5 lists. Section 1.6 of the playbook.
 - [ ] **UI reuse** — only `electron-core-ui` components used (no bespoke buttons,
       modals, inputs, layouts). Section 2 of the playbook.
 - [ ] **Handlebars resolution** — every user input is a `VariableInputBox` (or

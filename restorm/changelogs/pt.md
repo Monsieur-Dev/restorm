@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Primeiro patch: mover itens na barra lateral, nomes de separadores e relatórios de falhas.**
+
+- **Mover um item na barra lateral já não quebra a aplicação.** Com o mini-navegador, as Definições ou os registos MCP abertos, arrastar qualquer linha da barra lateral destruía a interface e só um reinício a recuperava.
+- **Renomear um item passa a atualizar todos os separadores abertos** — incluindo os de um painel dividido e os de qualquer tipo de pedido (gRPC, GraphQL, Redis…), que mantinham o nome antigo até serem reabertos.
+- **Os relatórios de falhas voltam a chegar-nos.** Com o envio ativado, a 1.0.0 não enviava nada em silêncio: uma falha que encontrasse não nos dizia nada.
+- **A ilustração «linguagens de código» volta a mostrar os seus logótipos.**
+
 ## v1.0.0
 
 **Restorm 1.0 — o cliente de API local-first, lançado.**

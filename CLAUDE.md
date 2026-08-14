@@ -1,5 +1,23 @@
 # Project Rules
 
+## Production era (since 2026-08-14)
+
+Restorm is **in production with real users** (restorm.app, Snap Store, npm).
+Two consequences, permanent:
+
+- **File-format discipline.** Any change to a persisted shape — `.restorm`
+  files, sidecars, settings, response archives — needs a **real
+  justification**; the default answer is "don't change the format". When an
+  evolution IS justified, handle compatibility explicitly (old files must keep
+  opening: read-side tolerance, migration on save, or a versioned field) and
+  call the change out in the ticket and the PR. The pre-launch "break the model
+  freely" rule is dead.
+- **Release-notes reflex.** Every fix and feature must answer "what goes in
+  the release notes?" during the work, not at release time. "Nothing
+  user-visible" is acceptable, but the question must be asked — and release
+  notes are translated in **all** shipped languages, same discipline as the
+  app's locales.
+
 ## Task backlog (Backlog.md submodule)
 
 The project backlog lives in **`backlog/`**, a **git submodule** → `https://github.com/oYo-fr/restorm-backlog`. Tasks are managed with [Backlog.md](https://backlog.md): one Markdown file per task under `backlog/tasks/` (active) or `backlog/completed/` (Done), YAML frontmatter, decimal IDs mirroring the epic → sub-ticket hierarchy (`TASK-70`, `TASK-70.1`, `TASK-92.4.1`). Statuses: `Backlog`, `Todo`, `In Progress`, `Done`, `Canceled`. `auto_commit: true`.

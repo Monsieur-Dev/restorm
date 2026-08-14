@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1
+
+**Prima patch: spostamenti nella barra laterale, nomi delle schede e segnalazioni di crash.**
+
+- **Spostare un elemento nella barra laterale non blocca più l'app.** Con il mini browser, le Impostazioni o i log MCP aperti, trascinare una riga qualsiasi della barra laterale distruggeva l'interfaccia e solo un riavvio la ripristinava.
+- **Rinominare un elemento ora aggiorna tutte le schede aperte**, comprese quelle in un riquadro diviso e quelle di ogni tipo di richiesta (gRPC, GraphQL, Redis…), che mantenevano il vecchio nome fino alla riapertura.
+- **Le segnalazioni di crash ci arrivano di nuovo.** Con l'invio attivo, la 1.0.0 non inviava nulla in silenzio: un crash che incontravi non ci diceva niente.
+- **L'illustrazione «linguaggi di codice» mostra di nuovo i suoi loghi.**
+
 ## v1.0.0
 
 **Restorm 1.0 — il client API local-first, ora disponibile.**
