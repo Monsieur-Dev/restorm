@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**Restorm toimii CI:ssä, ilman FUSEa.**
+
+- **`restorm-cli` toimii nyt CI-suorittimilla ja konteissa.** Linux-koontiversio puretaan liittämisen sijaan: FUSEa, jota Ubuntu ei enää toimita, ei enää tarvita.
+
 ## v1.0.2
 
 **CLI/CI-tunnuksesi ilman sovelluksesta poistumista.**

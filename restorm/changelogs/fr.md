@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**Restorm tourne en CI, sans FUSE.**
+
+- **`restorm-cli` fonctionne maintenant sur les runners de CI et dans les conteneurs.** La build Linux est dépaquetée au lieu d'être montée : plus besoin de FUSE, qu'Ubuntu ne fournit plus.
+
 ## v1.0.2
 
 **Vos jetons CLI/CI, sans quitter l'application.**

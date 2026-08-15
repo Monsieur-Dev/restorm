@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**Restorm berjalan di CI, tanpa FUSE.**
+
+- **`restorm-cli` kini berjalan di runner CI dan di dalam kontainer.** Build Linux dibongkar alih-alih dipasang: FUSE, yang tidak lagi disertakan Ubuntu, tidak diperlukan lagi.
+
 ## v1.0.2
 
 **Token CLI/CI Anda, tanpa keluar dari aplikasi.**

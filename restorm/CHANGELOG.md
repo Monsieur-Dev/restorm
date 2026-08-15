@@ -10,6 +10,12 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.0.3
+
+**Restorm runs in CI, without FUSE.**
+
+- **`restorm-cli` now works on CI runners and in containers.** The Linux build is unpacked instead of mounted, so FUSE — which Ubuntu no longer ships — is no longer needed.
+
 ## v1.0.2
 
 **Your CLI/CI tokens, without leaving the app.**

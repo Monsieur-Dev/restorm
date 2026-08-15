@@ -28,7 +28,19 @@ const args = useXvfb
   ? ['-a', '-s', '-screen 0 1920x1080x24', 'playwright', 'test', ...forwardedArgs]
   : ['test', ...forwardedArgs]
 
-const child = spawn(cmd, args, { stdio: 'inherit', shell: false })
+// Suites open their fixtures from a working copy INSIDE this checkout, so the
+// app under test sees the repository the suite itself lives in. Left alone,
+// its git integration fetches and — whenever the checkout differs from its
+// remote, which is the normal state of anyone mid-work — raises a "pull
+// available" toast over the running app. That toast is clickable, so it eats
+// the clicks aimed at whatever it covers, and tests fail by a few pixels,
+// differently from run to run. The suites that are ABOUT this behaviour clear
+// the variable when they launch (see the git-conflict fixture).
+const child = spawn(cmd, args, {
+  stdio: 'inherit',
+  shell: false,
+  env: { ...process.env, ECUI_DISABLE_GIT_REMOTE_CHECK: '1' }
+})
 child.on('exit', (code, signal) => {
   process.exit(code ?? (signal ? 1 : 0))
 })

@@ -125,7 +125,15 @@ changing the launcher breaks `npm i -g restorm-cli` for everyone:
 
 Every platform therefore needs a target that runs **without an installer**:
 AppImage on Linux, the `zip` target on macOS and Windows (the Windows one exists
-for this reason alone — `nsis` cannot be unpacked and run). The launcher's own
+for this reason alone — `nsis` cannot be unpacked and run).
+
+The AppImage is **unpacked into the cache** rather than executed as an image: an
+AppImage mounts itself with FUSE, and Ubuntu dropped `libfuse2` in 22.04, so
+every GitHub-hosted Linux runner and every plain container answers `AppImages
+require FUSE to run`. `--appimage-extract` needs no FUSE itself, and the cache
+is what makes paying for it once acceptable. Keep that in mind before changing
+the Linux target: whatever ships there must be runnable without mounting
+anything. The launcher's own
 tests (`cd npm-cli && npm test`) cover the resolution, checksum and cache rules;
 they run in the pre-commit hook and in CI.
 

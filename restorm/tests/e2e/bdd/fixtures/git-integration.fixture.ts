@@ -132,7 +132,12 @@ export const test = base.extend<GitIntegrationFixtures, { gitServer: StartedGitS
       // dev-only Pro entitlement so the gate passes in this harness (dead
       // code in packaged builds; mirrors mcp-server.fixture.ts's identical
       // need for `mcp.pro`).
-      RESTORM_E2E_ENTITLEMENT_PLAN: 'pro'
+      RESTORM_E2E_ENTITLEMENT_PLAN: 'pro',
+      // The runner turns the remote check off for every suite, because it
+      // otherwise toasts over the app whenever this checkout differs from its
+      // remote. THIS suite is the one that tests the check, so it opts back
+      // in — against its own docker git-server, not the developer's repo.
+      ECUI_DISABLE_GIT_REMOTE_CHECK: '0'
     }
 
     const launcher = async (): Promise<LaunchedApp> => {
