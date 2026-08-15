@@ -129,7 +129,7 @@ import { loadProjectIntoStore, attachDraftStoreForFile, getDraftsRootDir } from 
 import { runScenarioHeadless } from './cli/headlessRunner'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
-import { registerDeepLinkSchemes, handleDeepLinkUrl, isDeepLinkUrl } from './deepLink'
+import { registerDeepLinkSchemes, routeDeepLinkUrl, isDeepLinkUrl, initDeepLinkRelay, stopDeepLinkRelay } from './deepLink'
 import { findProjectFileInArgv } from './fileAssociation'
 // DocumentEvents are handled by FileService internally for dirty state tracking
 
@@ -241,7 +241,7 @@ if (!gotSingleInstanceLock && (deepLinkArgvUrl !== undefined || projectArgvPath 
 app.on('open-url', (event, url) => {
   event.preventDefault()
   if (isDeepLinkUrl(url)) {
-    handleDeepLinkUrl(url)
+    routeDeepLinkUrl(url)
   }
 })
 
@@ -309,7 +309,7 @@ app.on('open-file', (event, path) => {
 app.on('second-instance', (_event, argv) => {
   const url = argv.find((a) => isDeepLinkUrl(a))
   if (url !== undefined) {
-    handleDeepLinkUrl(url)
+    routeDeepLinkUrl(url)
   }
   const documentPath = findProjectFileInArgv(argv)
   if (documentPath !== undefined) {
@@ -997,6 +997,12 @@ void app.whenReady().then(() => {
     })
   }
   const entitlementService = initEntitlementService()
+  // Cross-instance deep-link relay: several instances share this userData, and
+  // the OS delivers an OAuth callback to only one of them — the relay inbox
+  // lets the instance that owns the pending login claim it. Also the moment
+  // TASK-153's open-routing lands, the URL router above keeps auth and open
+  // traffic apart.
+  initDeepLinkRelay(app.getPath('userData'))
   // Crash reporting, AFTER consent: the service reads the gate on construction,
   // so an unconsented launch never arms the SDK even briefly. It also subscribes
   // to consent changes, so a later grant arms it and a revocation tears it down
@@ -1026,6 +1032,7 @@ void app.whenReady().then(() => {
 // listener) on quit so neither outlives the process.
 app.on('before-quit', () => {
   stopEntitlementAutoRefresh()
+  stopDeepLinkRelay()
 })
 
 // Embedded MCP server. On by default — every normal launch exposes the

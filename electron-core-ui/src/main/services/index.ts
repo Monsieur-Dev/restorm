@@ -212,6 +212,8 @@ export { AUTH_IPC, SIGNED_OUT_STATE, hasCapability } from '../../shared/auth/aut
 // AuthStore — encrypted safeStorage for session + entitlement tokens.
 export { AuthStore } from './auth/authStore'
 export type { SecureStoragePort, AuthStoreFs, PersistedAuth } from './auth/authStore'
+export { startAuthStoreWatch } from './auth/authStoreWatch'
+export type { AuthStoreWatchOptions, AuthStoreWatchHandle, WatchImpl } from './auth/authStoreWatch'
 
 // SessionToken — HS256 session JWT utilities.
 export { isSessionExpired, NO_CAPABILITIES } from './auth/sessionToken'

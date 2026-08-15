@@ -141,5 +141,6 @@ instance.
 | Spec | Covers |
 |---|---|
 | scenario-cli/scenario-cli.spec.ts | Headless CLI scenario runner (run-log goldens, exit codes, --param/--out, loud failure under a held single-instance lock) |
+| auth-propagation/auth-propagation.spec.ts | Cross-instance live auth propagation: two real instances sharing one userData follow a login/logout written to the shared auth cache, live, no restart (watch → reload → broadcast). Backend-free — the session token is fabricated (decode-only client checks), so it proves the plumbing, not the JWT trust model (unit-tested separately) |
 | stage-gating/headless-gating.spec.ts | Capability gating in headless mode |
 | stage-gating/gating-lifecycle.spec.ts | Capability gating lifecycle |

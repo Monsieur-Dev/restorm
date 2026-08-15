@@ -366,6 +366,11 @@ export { AUTH_IPC, SIGNED_OUT_STATE, hasCapability } from './services'
 export { AuthStore } from './services'
 export type { SecureStoragePort, AuthStoreFs, PersistedAuth } from './services'
 
+// AuthStoreWatch — watch the shared auth cache so a login/logout in one
+// instance propagates live to the others (each re-verifies the JWT itself).
+export { startAuthStoreWatch } from './services'
+export type { AuthStoreWatchOptions, AuthStoreWatchHandle, WatchImpl } from './services'
+
 // SessionToken — HS256 session JWT utilities.
 export { isSessionExpired, NO_CAPABILITIES } from './services'
 

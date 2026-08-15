@@ -18,6 +18,8 @@ import {
   E2E_PRO_CAPABILITIES,
   startEntitlementAutoRefresh,
   AuthStore,
+  startAuthStoreWatch,
+  type AuthStoreWatchHandle,
   type AuthStoreFs,
   type SecureStoragePort,
   loopbackLogin,
@@ -106,7 +108,17 @@ function makeFsPort(): AuthStoreFs {
     },
     // 0600: readable only by the owning user — defence in depth for the plaintext
     // fallback path (no keyring), and harmless on the encrypted path.
-    write: (filePath, data) => { writeFileSync(filePath, data, { mode: 0o600 }) },
+    //
+    // Atomic (temp-write + rename): the cache is WATCHED by every other running
+    // instance for live auth propagation, and a plain writeFileSync leaves a
+    // window where a watcher reads a half-written envelope. rename() is atomic
+    // on the same filesystem, so a reader sees either the old file or the new
+    // one — never a torn middle.
+    write: (filePath, data) => {
+      const tmp = `${filePath}.tmp-${process.pid}`
+      writeFileSync(tmp, data, { mode: 0o600 })
+      renameSync(tmp, filePath)
+    },
     remove: (filePath) => {
       try {
         rmSync(filePath, { force: true })
@@ -121,6 +133,9 @@ let instance: EntitlementService | null = null
 /** Tears down the focus + interval auto-refresh triggers; set once the service is
  * built, called on app quit. */
 let stopAutoRefresh: (() => void) | null = null
+/** Watches the shared auth cache for other instances' writes; torn down with the
+ * auto-refresh on quit. */
+let storeWatch: AuthStoreWatchHandle | null = null
 
 /** Keeps the firewall's system allowlist in lock-step with the signed-in user's
  * avatar host (register on login, swap on profile change, drop on logout). */
@@ -292,6 +307,29 @@ export function initEntitlementService(version: string = resolveBackendVersion()
     }
   })
 
+  // Live cross-instance propagation: every instance shares userData, so a
+  // login/logout/plan-change persisted by one lands in the same
+  // auth-session.dat every other instance watches. The reload re-reads and
+  // RE-VERIFIES the signed entitlement locally — no state is ever pushed —
+  // and a reload caused by our own persist() dedups via statesEqual. A watch
+  // that cannot be established degrades to the old restart-to-propagate
+  // behaviour, never breaks auth.
+  storeWatch = startAuthStoreWatch({
+    filePath: join(app.getPath('userData'), AUTH_CACHE_FILE),
+    onChange: () => {
+      void service.reloadFromStore().catch((err: unknown) => {
+        logger.warn('auth: reload from shared cache failed', {
+          message: err instanceof Error ? err.message : String(err)
+        })
+      })
+    },
+    onError: (err) => {
+      logger.warn('auth: shared-cache watch unavailable — cross-instance propagation degraded to restart', {
+        message: err instanceof Error ? err.message : String(err)
+      })
+    }
+  })
+
   // Restore a cached session + entitlement and refresh in the background; never
   // let a restore failure crash startup.
   void instance.init().catch((err: unknown) => {
@@ -328,11 +366,13 @@ export function getEntitlementService(): EntitlementService {
   return instance
 }
 
-/** Stop the entitlement auto-refresh triggers (timer + focus listener). Call on
- * app quit so neither outlives the process. Idempotent. */
+/** Stop the entitlement auto-refresh triggers (timer + focus listener) and the
+ * shared-cache watch. Call on app quit so none outlives the process. Idempotent. */
 export function stopEntitlementAutoRefresh(): void {
   stopAutoRefresh?.()
   stopAutoRefresh = null
+  storeWatch?.stop()
+  storeWatch = null
 }
 
 /** Test-only reset. */

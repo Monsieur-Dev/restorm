@@ -36,11 +36,14 @@ function makeHarness(opts: {
   sessionToken?: string
   entitlementToken?: string
   fetchRejects?: boolean
+  /** Share ONE mutable cache slot between several harnesses — the shape of two
+   * instances reading and writing the same `auth-session.dat`. */
+  sharedCache?: { value: Persisted | null }
 } = {}): Harness {
   const broadcasts: AuthState[] = []
   const saved: Persisted[] = []
   const counters = { cleared: 0 }
-  let cache = opts.initialCache ?? null
+  const slot = opts.sharedCache ?? { value: opts.initialCache ?? null }
 
   const fetchMock = vi.fn((): Promise<Response> => {
     if (opts.fetchRejects) return Promise.reject(new Error('offline'))
@@ -50,9 +53,9 @@ function makeHarness(opts: {
 
   const deps: EntitlementServiceDeps = {
     store: {
-      load: () => cache,
-      save: (d) => { saved.push(d); cache = d },
-      clear: () => { counters.cleared += 1; cache = null }
+      load: () => slot.value,
+      save: (d) => { saved.push(d); slot.value = d },
+      clear: () => { counters.cleared += 1; slot.value = null }
     },
     entitlementUrl: 'https://x.supabase.co/functions/v1/entitlement',
     checkoutUrl: 'https://x.supabase.co/functions/v1/checkout',
@@ -471,5 +474,113 @@ describe('EntitlementService — seedEntitlementForE2E / __seedEntitlementForTes
     // init() must NOT trigger a network refresh (no sessionToken, seededState bypasses
     // the JWT-path condition check).
     expect(h.fetchMock.mock.calls.length).toBe(0)
+  })
+})
+
+describe('EntitlementService — reloadFromStore (cross-instance live propagation)', () => {
+  it('a login persisted by instance A becomes live in instance B on reload', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({
+      privateKey: keys.privateKey,
+      iatSeconds: IAT,
+      plan: 'pro',
+      capabilities: ['scenario.headless']
+    })
+    const shared = { value: null as Persisted | null }
+    const a = makeHarness({ now: at(10), sessionToken, entitlementToken, sharedCache: shared })
+    const b = makeHarness({ now: at(10), sharedCache: shared })
+
+    await b.service.init()
+    expect(last(b.broadcasts).signedIn).toBe(false)
+
+    await a.service.signIn()
+    // The watcher fires in B → B re-reads the shared store.
+    await b.service.reloadFromStore()
+
+    const state = last(b.broadcasts)
+    expect(state.signedIn).toBe(true)
+    expect(state.plan).toBe('pro')
+    expect(state.capabilities).toEqual(['scenario.headless'])
+    // B never talked to the network: the writer fetched, the reader verified.
+    expect(b.fetchMock.mock.calls.length).toBe(0)
+  })
+
+  it('a logout in instance A signs instance B out on reload', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT })
+    const shared = { value: null as Persisted | null }
+    const a = makeHarness({ now: at(10), sessionToken, entitlementToken, sharedCache: shared })
+    const b = makeHarness({ now: at(10), sharedCache: shared })
+
+    await a.service.signIn()
+    await b.service.reloadFromStore()
+    expect(last(b.broadcasts).signedIn).toBe(true)
+
+    a.service.signOut()
+    await b.service.reloadFromStore()
+    expect(last(b.broadcasts).signedIn).toBe(false)
+  })
+
+  it('a plan change persisted by A reaches B on reload', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const community = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'community', capabilities: [] })
+    const pro = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'pro', capabilities: ['scenario.headless'] })
+    const shared = { value: { sessionToken, entitlementToken: community } }
+    const b = makeHarness({ now: at(10), sharedCache: shared })
+    await b.service.init()
+    expect(last(b.broadcasts).plan).toBe('community')
+
+    // Instance A refreshed and persisted the upgraded entitlement.
+    shared.value = { sessionToken, entitlementToken: pro }
+    await b.service.reloadFromStore()
+    expect(last(b.broadcasts).plan).toBe('pro')
+  })
+
+  it('trust-model guard: a doctored cache grants nothing without a valid signature', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    // Signed with a DIFFERENT key than the one the service verifies against.
+    const foreign = await generateEdKeyPair()
+    const forged = await signEntitlement({
+      privateKey: foreign.privateKey,
+      iatSeconds: IAT,
+      plan: 'enterprise',
+      capabilities: ['scenario.headless', 'audit.logs']
+    })
+    const shared = { value: { sessionToken, entitlementToken: forged } }
+    const b = makeHarness({ now: at(10), sharedCache: shared })
+
+    await b.service.reloadFromStore()
+
+    const state = last(b.broadcasts)
+    expect(state.signedIn).toBe(true) // the session itself is fine
+    expect(state.plan).toBe('community') // but the forged entitlement grants NOTHING
+    expect(state.capabilities).toEqual([])
+  })
+
+  it('a reload of an identical state does not re-broadcast (self-write dedup)', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'pro' })
+    const a = makeHarness({ now: at(10), sessionToken, entitlementToken })
+
+    await a.service.signIn()
+    const broadcastsAfterLogin = a.broadcasts.length
+
+    // The fs.watch event caused by our OWN persist() lands here.
+    await a.service.reloadFromStore()
+    expect(a.broadcasts.length).toBe(broadcastsAfterLogin)
+  })
+
+  it('reload is read-only: an expired cached session is adopted as signed-out but never cleared', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const shared = { value: { sessionToken, entitlementToken: null } }
+    // 40 days later: the 30-day session is past its life.
+    const b = makeHarness({ now: at(40 * 24 * 3600), sharedCache: shared })
+
+    await b.service.reloadFromStore()
+
+    expect(last(b.broadcasts).signedIn).toBe(false)
+    // init() would clear; reload must NOT — the writer owns the file.
+    expect(b.counters.cleared).toBe(0)
+    expect(shared.value).not.toBeNull()
   })
 })
