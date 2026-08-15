@@ -855,6 +855,15 @@ export class GitService {
    * user hasn't pulled yet) must not re-toast on every tick.
    */
   public async checkForRemoteUpdate(): Promise<void> {
+    // Test seam. An automated suite usually opens its fixtures from inside the
+    // host repository's own checkout, so this check fires against whatever
+    // state that repository happens to be in — and a developer with an
+    // unpushed commit gets a "pull available" toast on top of the application
+    // under test. That toast is a real, clickable surface: it sits over
+    // whatever is beneath it and swallows the clicks aimed at it, which turns
+    // into UI failures that look like product bugs and move from run to run.
+    // Suites that are ABOUT this check clear the variable for their own launch.
+    if (process.env['ECUI_DISABLE_GIT_REMOTE_CHECK'] === '1') return
     const folder = this.activeFolder
     if (!folder || !this.state.isRepo) return
     const result = await this.fetchAndCompare(folder)

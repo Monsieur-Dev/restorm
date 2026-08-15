@@ -123,7 +123,12 @@ export const test = base.extend<GitMcpFixtures, { gitServer: StartedGitServer }>
         // The git MCP routes are Pro-gated (`git.client`, see
         // `mcpProGate.ts`) — seed the dev-only Pro entitlement so the
         // gate passes in this harness (dead code in packaged builds).
-        RESTORM_E2E_ENTITLEMENT_PLAN: 'pro'
+        RESTORM_E2E_ENTITLEMENT_PLAN: 'pro',
+        // The runner disables the remote check suite-wide (it toasts over
+        // the app whenever the developer's own checkout is ahead/behind its
+        // remote). This suite exercises that surface against its docker
+        // git-server, so it opts back in.
+        ECUI_DISABLE_GIT_REMOTE_CHECK: '0'
       }
       const discoveryPath = join(tmpdir(), `restorm-git-mcp-e2e-${String(Date.now())}-${String(Math.floor(Math.random() * 1_000_000))}.json`)
       try { rmSync(discoveryPath, { force: true }) } catch { /* fine */ }

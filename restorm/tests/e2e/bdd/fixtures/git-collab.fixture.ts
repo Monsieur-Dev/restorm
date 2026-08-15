@@ -277,7 +277,12 @@ export const test = base.extend<GitCollabFixtures, { gitServer: StartedGitServer
           RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
           ECUI_DISABLE_GPU: '1',
           // The whole git surface is Pro-gated (`git.client`).
-          RESTORM_E2E_ENTITLEMENT_PLAN: 'pro'
+          RESTORM_E2E_ENTITLEMENT_PLAN: 'pro',
+          // The runner disables the remote check suite-wide (it toasts over
+          // the app whenever the developer's own checkout is ahead/behind its
+          // remote). This suite exercises that surface against its docker
+          // git-server, so it opts back in.
+          ECUI_DISABLE_GIT_REMOTE_CHECK: '0'
         }
 
         // Bootstrap launch with --clear-settings to discover the userData
