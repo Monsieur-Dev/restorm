@@ -296,7 +296,7 @@
             "Name[zh_CN]": "新建",
             "Name[zh_TW]": "新增",
             "Icon": "document-new",
-            "Exec": "/opt/Restorm/restorm-bin --new"
+            "Exec": "AppRun --no-sandbox --new"
           }
         }
       }
