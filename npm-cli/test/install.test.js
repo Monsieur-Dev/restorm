@@ -19,17 +19,35 @@ const {
   readdirSync,
   rmSync,
   statSync,
-  utimesSync
+  utimesSync,
+  writeFileSync
 } = require('node:fs')
 const { tmpdir } = require('node:os')
 const { join } = require('node:path')
 
 const { ensureBuild, prune } = require('../lib/install')
 
-const PAYLOAD = '#!/bin/sh\necho restorm-stub\n'
+/**
+ * A stand-in for the AppImage, honouring the one part of its contract the
+ * launcher depends on: `--appimage-extract` unpacks a `squashfs-root/AppRun`
+ * next to the caller's working directory, without needing FUSE.
+ */
+const PAYLOAD = [
+  '#!/bin/sh',
+  'if [ "$1" = "--appimage-extract" ]; then',
+  '  mkdir -p squashfs-root',
+  '  printf "#!/bin/sh\\necho restorm-apprun\\n" > squashfs-root/AppRun',
+  '  chmod +x squashfs-root/AppRun',
+  '  exit 0',
+  'fi',
+  'echo restorm-stub',
+  ''
+].join('\n')
+
+const UNEXTRACTABLE = '#!/bin/sh\nexit 3\n'
 const SHA = createHash('sha256').update(PAYLOAD).digest('hex')
 
-function startServer({ sha = SHA, version = '9.9.9' } = {}) {
+function startServer({ sha = SHA, version = '9.9.9', payload = PAYLOAD } = {}) {
   const hits = { manifest: 0, artifact: 0 }
   const server = http.createServer((req, res) => {
     if (req.url === '/latest/manifest-linux.json') {
@@ -44,7 +62,7 @@ function startServer({ sha = SHA, version = '9.9.9' } = {}) {
               file: `Restorm-${version}.AppImage`,
               url: `${base(server)}/v${version}/Restorm-${version}.AppImage`,
               sha256: sha,
-              size: PAYLOAD.length,
+              size: payload.length,
               exec: 'Restorm.AppImage'
             }
           }
@@ -54,8 +72,8 @@ function startServer({ sha = SHA, version = '9.9.9' } = {}) {
     }
     if (req.url.endsWith('.AppImage')) {
       hits.artifact += 1
-      res.writeHead(200, { 'content-type': 'application/octet-stream', 'content-length': PAYLOAD.length })
-      res.end(PAYLOAD)
+      res.writeHead(200, { 'content-type': 'application/octet-stream', 'content-length': payload.length })
+      res.end(payload)
       return
     }
     res.writeHead(404).end('nope')
@@ -86,15 +104,54 @@ test('a first run downloads, verifies and caches; a second run downloads nothing
     const first = await ensureBuild(linux(env))
     assert.equal(first.cached, false)
     assert.equal(first.version, '9.9.9')
-    assert.equal(first.exe, join(cache, '9.9.9', 'linux-x64', 'Restorm.AppImage'))
-    assert.equal(readFileSync(first.exe, 'utf8'), PAYLOAD)
-    assert.ok(statSync(first.exe).mode & 0o111, 'the AppImage is made executable')
+    assert.equal(
+      first.exe,
+      join(cache, '9.9.9', 'linux-x64', 'squashfs-root', 'AppRun'),
+      'the AppImage is unpacked, so running it needs no FUSE'
+    )
+    assert.ok(statSync(first.exe).mode & 0o111, 'and what we hand back is executable')
+    assert.equal(
+      existsSync(join(cache, '9.9.9', 'linux-x64', 'Restorm.AppImage')),
+      false,
+      'the 400 MB image is dropped once unpacked — nothing reads it again'
+    )
     assert.equal(hits.artifact, 1)
 
     const second = await ensureBuild(linux(env))
     assert.equal(second.cached, true)
     assert.equal(second.exe, first.exe)
     assert.equal(hits.artifact, 1, 'the cached build is reused instead of re-downloaded')
+  })
+})
+
+test('an AppImage that refuses to unpack is still run directly', async () => {
+  // A machine with FUSE loses nothing when unpacking fails; refusing to run at
+  // all would turn a slower path into no path.
+  const sha = createHash('sha256').update(UNEXTRACTABLE).digest('hex')
+  await withServer({ sha, payload: UNEXTRACTABLE }, async ({ env, cache }) => {
+    const built = await ensureBuild(linux(env))
+    assert.equal(built.exe, join(cache, '9.9.9', 'linux-x64', 'Restorm.AppImage'))
+    assert.equal(readFileSync(built.exe, 'utf8'), UNEXTRACTABLE, 'the image itself is kept')
+
+    const again = await ensureBuild(linux(env))
+    assert.equal(again.cached, true)
+    assert.equal(again.exe, built.exe, 'and the cache remembers what to run')
+  })
+})
+
+test('a cache written by 1.0.2 is honoured, not re-downloaded', async () => {
+  // 1.0.2 wrote the bare version into the marker and ran the file the manifest
+  // named. Discarding such a cache would cost every one of those users 400 MB.
+  await withServer({}, async ({ env, cache, hits }) => {
+    const dir = join(cache, '9.9.9', 'linux-x64')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'Restorm.AppImage'), PAYLOAD)
+    writeFileSync(join(dir, '.complete'), '9.9.9\n')
+
+    const built = await ensureBuild(linux(env))
+    assert.equal(built.cached, true)
+    assert.equal(built.exe, join(dir, 'Restorm.AppImage'))
+    assert.equal(hits.artifact, 0, 'nothing was downloaded')
   })
 })
 

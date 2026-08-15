@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**沒有 FUSE，Restorm 也能在 CI 中執行。**
+
+- **`restorm-cli` 現在可以在 CI 執行器與容器中運行。** Linux 建置改為解壓縮而非掛載，因此不再需要 Ubuntu 已停止提供的 FUSE。
+
 ## v1.0.2
 
 **你的 CLI/CI 權杖，無需離開應用程式。**

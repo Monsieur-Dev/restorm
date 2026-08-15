@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**Restorm punon në CI, pa FUSE.**
+
+- **`restorm-cli` tani funksionon në runner-at e CI-së dhe në kontejnerë.** Ndërtimi për Linux shpaketohet në vend që të montohet: FUSE, që Ubuntu nuk e ofron më, nuk nevojitet.
+
 ## v1.0.2
 
 **Tokenat tuaj CLI/CI, pa dalë nga aplikacioni.**

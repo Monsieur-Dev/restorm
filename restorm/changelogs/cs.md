@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**Restorm běží v CI, bez FUSE.**
+
+- **`restorm-cli` nyní funguje na CI runnerech i v kontejnerech.** Linuxové sestavení se rozbaluje místo připojení: FUSE, který Ubuntu už nedodává, není potřeba.
+
 ## v1.0.2
 
 **Vaše tokeny CLI/CI, bez opuštění aplikace.**

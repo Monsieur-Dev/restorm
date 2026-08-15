@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**Restorm chạy trong CI, không cần FUSE.**
+
+- **`restorm-cli` giờ chạy được trên runner CI và trong container.** Bản dựng Linux được giải nén thay vì gắn kết: không còn cần FUSE, thứ mà Ubuntu đã ngừng cung cấp.
+
 ## v1.0.2
 
 **Token CLI/CI của bạn, không cần rời ứng dụng.**

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**Restorm CI'da çalışıyor, FUSE olmadan.**
+
+- **`restorm-cli` artık CI runner'larında ve konteynerlerde çalışıyor.** Linux yapısı bağlanmak yerine açılıyor: Ubuntu'nun artık sunmadığı FUSE'a gerek kalmadı.
+
 ## v1.0.2
 
 **CLI/CI belirteçleriniz, uygulamadan çıkmadan.**

@@ -16,6 +16,7 @@ const {
   createWriteStream,
   existsSync,
   mkdirSync,
+  readFileSync,
   readdirSync,
   renameSync,
   rmSync,
@@ -28,6 +29,32 @@ const { join } = require('node:path')
 const resolve = require('./resolve')
 
 const COMPLETE_MARKER = '.complete'
+
+/**
+ * What a finished install left behind: the path, relative to the cache
+ * directory, of the binary to run. Returns null when there is no completed
+ * install here.
+ *
+ * 1.0.2 wrote the bare version string into this file and always ran the file
+ * the manifest named. Such a cache is still valid — it just cannot say what to
+ * execute, so the caller falls back to the manifest, exactly as that version
+ * did. Re-downloading 400 MB to upgrade a marker format would be a poor trade.
+ */
+function readMarker(path, fallbackExec) {
+  let raw
+  try {
+    raw = readFileSync(path, 'utf8').trim()
+  } catch {
+    return null
+  }
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed.exec === 'string') return parsed.exec
+  } catch {
+    /* the 1.0.2 format: a bare version string */
+  }
+  return fallbackExec
+}
 
 /**
  * Asks for this package's own version first, and falls back to the newest
@@ -85,6 +112,33 @@ async function downloadVerified(url, dest, sha256, { fetchImpl, onProgress } = {
     )
   }
   return actual
+}
+
+/**
+ * Unpack an AppImage into the cache and return the path, relative to the cache
+ * directory, of what should actually be executed.
+ *
+ * An AppImage mounts itself with FUSE to run — and FUSE is exactly what a CI
+ * runner does not have: Ubuntu stopped shipping `libfuse2` with 22.04, so every
+ * GitHub-hosted Linux runner and every plain container answers `AppImages
+ * require FUSE to run`. Unpacking it once, here, removes that dependency for
+ * good: the extracted tree runs anywhere, and the cache is what makes paying
+ * the extraction once acceptable.
+ *
+ * `--appimage-extract` is self-contained and needs no FUSE itself. If it fails
+ * anyway, the image is kept and run directly — a machine with FUSE is no worse
+ * off than before.
+ */
+function unpackAppImage(image, dir, fileName, log) {
+  const r = spawnSync(image, ['--appimage-extract'], { cwd: dir, stdio: 'ignore' })
+  const appRun = join(dir, 'squashfs-root', 'AppRun')
+  if (r.error || r.status !== 0 || !existsSync(appRun)) {
+    if (log) log('Could not unpack the AppImage — running the image itself (this needs FUSE).')
+    return fileName
+  }
+  // The image is ~400 MB and nothing reads it once unpacked.
+  rmSync(image, { force: true })
+  return join('squashfs-root', 'AppRun')
 }
 
 function extractArchive(platform, archive, dir) {
@@ -157,11 +211,17 @@ async function ensureBuild(options = {}) {
   const root = resolve.cacheRoot(env, platform, home)
   const versionDir = join(root, version)
   const dir = join(versionDir, resolve.platformKey(platform, arch))
-  const exe = join(dir, artifact.exec)
 
-  if (existsSync(join(dir, COMPLETE_MARKER)) && existsSync(exe)) {
-    return { exe, version, cached: true }
+  // What to execute is decided at install time (an unpacked AppImage does not
+  // run through the file the manifest names), so the marker records it rather
+  // than leaving a later run to guess.
+  const cachedExec = readMarker(join(dir, COMPLETE_MARKER), artifact.exec)
+  if (cachedExec) {
+    const exe = join(dir, cachedExec)
+    if (existsSync(exe)) return { exe, version, cached: true }
   }
+
+  let installedExec = artifact.exec
 
   // Everything below happens under a private staging directory, so two runs
   // racing on the same cache (two CI jobs on one machine) cannot see each
@@ -177,9 +237,12 @@ async function ensureBuild(options = {}) {
 
     const payload = join(stage, 'payload')
     mkdirSync(payload, { recursive: true })
+    let execPath = artifact.exec
     if (artifact.kind === 'appimage') {
-      renameSync(archive, join(payload, artifact.exec))
-      chmodSync(join(payload, artifact.exec), 0o755)
+      const image = join(payload, artifact.exec)
+      renameSync(archive, image)
+      chmodSync(image, 0o755)
+      execPath = unpackAppImage(image, payload, artifact.exec, log)
     } else {
       extractArchive(platform, archive, payload)
       rmSync(archive, { force: true })
@@ -196,21 +259,24 @@ async function ensureBuild(options = {}) {
 
     // The marker goes in before the directory is published, so the name a
     // later run tests for can only appear on a finished install.
-    writeFileSync(join(payload, COMPLETE_MARKER), `${version}\n`)
+    writeFileSync(join(payload, COMPLETE_MARKER), `${JSON.stringify({ version, exec: execPath })}\n`)
     mkdirSync(versionDir, { recursive: true })
     try {
       renameSync(payload, dir)
     } catch (e) {
       // Another process published the same version first — theirs is as good
-      // as ours, and verified the same way.
-      if (!existsSync(exe)) throw e
+      // as ours, and verified the same way. Their marker decides what runs.
+      const theirs = readMarker(join(dir, COMPLETE_MARKER), artifact.exec)
+      if (!theirs) throw e
+      execPath = theirs
     }
+    installedExec = execPath
   } finally {
     rmSync(stage, { recursive: true, force: true })
   }
 
   prune(root, version, log)
-  return { exe, version, cached: false }
+  return { exe: join(dir, installedExec), version, cached: false }
 }
 
 module.exports = {

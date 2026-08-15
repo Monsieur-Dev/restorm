@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3
+
+**A Restorm fut a CI-ben, FUSE nélkül.**
+
+- **A `restorm-cli` mostantól működik CI-futtatókon és konténerekben.** A Linux-build kicsomagolásra kerül csatolás helyett: a FUSE, amelyet az Ubuntu már nem szállít, nem kell többé.
+
 ## v1.0.2
 
 **A CLI/CI tokenjei, az alkalmazás elhagyása nélkül.**
