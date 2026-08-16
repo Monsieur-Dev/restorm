@@ -8,6 +8,7 @@ import type { ListViewDropEventPayload, ListViewDropPosition, ListViewItemEventP
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { isAnyFolder, isScenario, isApiDesign, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
+import { parseDesignSectionRowId } from '../../../shared/design/designSections'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -236,6 +237,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     if (sourceIds.length === 0) return false
     // An item can't land on itself.
     if (sourceIds.includes(targetId)) return false
+    // A design's virtual section rows are not tree items and never move;
+    // a selection carrying one refuses the drop WHOLESALE (the design
+    // itself, a real item, stays draggable).
+    if (sourceIds.some((id) => parseDesignSectionRowId(id) !== null)) return false
 
     // Is `childId` anywhere inside `parentId`'s subtree?
     const isDescendant = (parentId: string, childId: string): boolean => {

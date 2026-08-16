@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Fshi",
       "clone": "Klono",
+      "openInSplit": "Hape në panel të ndarë",
       "copySuffix": "kopje",
       "rename": "Riemërto",
       "addToFavorites": "Shto te të preferuarat",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Mjedisi"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Cilësimet",
+      "models": "Modelet",
+      "enums": "Enumet",
+      "routes": "Rrugët",
+      "documentation": "Dokumentimi",
+      "notes": "Shënimet",
+      "code": "Kodi"
+    },
+    "rail": {
+      "ariaLabel": "Seksionet e dizajnit"
+    },
+    "settings": {
+      "subtitle": "Cilësimet e përgjithshme të dizajnit “{{name}}”",
+      "serve": {
+        "title": "Serveri i dizajnit",
+        "action": "Shërbeje këtë dizajn",
+        "description": "Përgjigje nga shembujt e emërtuar · validim me kufizime",
+        "comingSoon": "Serveri i dizajnit vjen së shpejti"
+      },
+      "identity": {
+        "title": "Identiteti",
+        "title_field": "Titulli",
+        "version": "Versioni i dizajnit",
+        "description": "Përshkrimi"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Shtegu bazë",
+        "defaultAuth": "Auth i parazgjedhur"
+      }
+    },
+    "auth": {
+      "none": "Asnjë",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header i çelësit API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtro…",
+      "selectPrompt": "Zgjidhni një hyrje nga lista.",
+      "editorPending": "Redaktori i këtij seksioni është rrugës."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} veti",
+      "propertyCount_other": "{{count}} veti"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} vlerë",
+      "valueCount_other": "{{count}} vlera"
+    },
+    "documentation": {
+      "empty": "Dokumentimi i dizajnit do të shërbehet këtu."
+    },
+    "code": {
+      "empty": "Gjenerimi i kodit nga ky dizajn do të jetojë këtu."
+    },
+    "statusbar": {
+      "format": "dizajn · format {{version}}"
     }
   },
   "mqtt": {

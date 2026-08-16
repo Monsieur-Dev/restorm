@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "Hapus",
       "clone": "Klon",
+      "openInSplit": "Buka di panel terpisah",
       "copySuffix": "salinan",
       "rename": "Ubah nama",
       "addToFavorites": "Tambah ke favorit",
@@ -2136,6 +2137,74 @@
       "fields": {
         "env": "Lingkungan"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Pengaturan",
+      "models": "Model",
+      "enums": "Enum",
+      "routes": "Rute",
+      "documentation": "Dokumentasi",
+      "notes": "Catatan",
+      "code": "Kode"
+    },
+    "rail": {
+      "ariaLabel": "Bagian desain"
+    },
+    "settings": {
+      "subtitle": "Pengaturan umum desain “{{name}}”",
+      "serve": {
+        "title": "Server desain",
+        "action": "Sajikan desain ini",
+        "description": "Respons dari contoh bernama · validasi dengan batasan",
+        "comingSoon": "Server desain segera hadir"
+      },
+      "identity": {
+        "title": "Identitas",
+        "title_field": "Judul",
+        "version": "Versi desain",
+        "description": "Deskripsi"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Jalur dasar",
+        "defaultAuth": "Auth bawaan"
+      }
+    },
+    "auth": {
+      "none": "Tidak ada",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header kunci API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Saring…",
+      "selectPrompt": "Pilih entri dalam daftar.",
+      "editorPending": "Editor bagian ini sedang dalam perjalanan."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} properti",
+      "propertyCount_other": "{{count}} properti"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} nilai",
+      "valueCount_other": "{{count}} nilai"
+    },
+    "documentation": {
+      "empty": "Dokumentasi desain akan disajikan di sini."
+    },
+    "code": {
+      "empty": "Pembuatan kode dari desain ini akan hidup di sini."
+    },
+    "statusbar": {
+      "format": "desain · format {{version}}"
     }
   },
   "mqtt": {

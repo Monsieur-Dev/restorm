@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Törlés",
       "clone": "Klónozás",
+      "openInSplit": "Megnyitás osztott panelen",
       "copySuffix": "másolat",
       "rename": "Átnevezés",
       "addToFavorites": "Hozzáadás a kedvencekhez",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Környezet"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Beállítások",
+      "models": "Modellek",
+      "enums": "Enumok",
+      "routes": "Útvonalak",
+      "documentation": "Dokumentáció",
+      "notes": "Jegyzetek",
+      "code": "Kód"
+    },
+    "rail": {
+      "ariaLabel": "A terv szakaszai"
+    },
+    "settings": {
+      "subtitle": "A(z) „{{name}}” API-terv általános beállításai",
+      "serve": {
+        "title": "Tervkiszolgáló",
+        "action": "A terv kiszolgálása",
+        "description": "Válaszok nevesített példákból · validálás megszorításokkal",
+        "comingSoon": "A tervkiszolgáló hamarosan érkezik"
+      },
+      "identity": {
+        "title": "Identitás",
+        "title_field": "Cím",
+        "version": "A terv verziója",
+        "description": "Leírás"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Alapútvonal",
+        "defaultAuth": "Alapértelmezett auth"
+      }
+    },
+    "auth": {
+      "none": "Nincs",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-kulcs fejléc",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Szűrés…",
+      "selectPrompt": "Válasszon egy elemet a listából.",
+      "editorPending": "A szakasz szerkesztője úton van."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} tulajdonság",
+      "propertyCount_other": "{{count}} tulajdonság"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} érték",
+      "valueCount_other": "{{count}} érték"
+    },
+    "documentation": {
+      "empty": "A terv dokumentációja itt lesz kiszolgálva."
+    },
+    "code": {
+      "empty": "A tervből történő kódgenerálás itt fog élni."
+    },
+    "statusbar": {
+      "format": "terv · formátum {{version}}"
     }
   },
   "mqtt": {

@@ -337,6 +337,9 @@ export interface ApiDesign {
   /** Spec-level security requirement, same semantics as
    * `ApiDocumentation.defaultSecurity`. */
   defaultSecurity?: Record<string, string[]>[]
+  /** Default auth contract for the whole design — the fallback a route
+   * group inherits when it declares none. Absent = `none`. */
+  defaultAuth?: DesignAuthKind
   serving?: DesignServing
   models: DesignModel[]
   enums: DesignEnum[]

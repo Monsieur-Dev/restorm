@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "削除",
       "clone": "複製",
+      "openInSplit": "分割パネルで開く",
       "copySuffix": "コピー",
       "rename": "名前を変更",
       "addToFavorites": "お気に入りに追加",
@@ -2136,6 +2137,74 @@
       "fields": {
         "env": "環境"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "設定",
+      "models": "モデル",
+      "enums": "列挙型",
+      "routes": "ルート",
+      "documentation": "ドキュメント",
+      "notes": "ノート",
+      "code": "コード"
+    },
+    "rail": {
+      "ariaLabel": "デザインのセクション"
+    },
+    "settings": {
+      "subtitle": "デザイン「{{name}}」の全般設定",
+      "serve": {
+        "title": "デザインサーバー",
+        "action": "このデザインを配信",
+        "description": "名前付きサンプルからの応答 · 制約による検証",
+        "comingSoon": "デザインサーバーは近日提供予定"
+      },
+      "identity": {
+        "title": "アイデンティティ",
+        "title_field": "タイトル",
+        "version": "デザインのバージョン",
+        "description": "説明"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "ベースパス",
+        "defaultAuth": "既定の認証"
+      }
+    },
+    "auth": {
+      "none": "なし",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "APIキーヘッダー",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "フィルター…",
+      "selectPrompt": "リストから項目を選択してください。",
+      "editorPending": "このセクションのエディターは準備中です。"
+    },
+    "models": {
+      "propertyCount_one": "{{count}} プロパティ",
+      "propertyCount_other": "{{count}} プロパティ"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} 値",
+      "valueCount_other": "{{count}} 値"
+    },
+    "documentation": {
+      "empty": "デザインのドキュメントはここで配信されます。"
+    },
+    "code": {
+      "empty": "このデザインからのコード生成はここに入ります。"
+    },
+    "statusbar": {
+      "format": "デザイン · フォーマット {{version}}"
     }
   },
   "mqtt": {

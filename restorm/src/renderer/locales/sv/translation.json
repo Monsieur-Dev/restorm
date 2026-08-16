@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Ta bort",
       "clone": "Klona",
+      "openInSplit": "Öppna i delad panel",
       "copySuffix": "kopia",
       "rename": "Byt namn",
       "addToFavorites": "Lägg till i favoriter",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Miljö"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Inställningar",
+      "models": "Modeller",
+      "enums": "Enums",
+      "routes": "Rutter",
+      "documentation": "Dokumentation",
+      "notes": "Anteckningar",
+      "code": "Kod"
+    },
+    "rail": {
+      "ariaLabel": "Designsektioner"
+    },
+    "settings": {
+      "subtitle": "Allmänna inställningar för designen “{{name}}”",
+      "serve": {
+        "title": "Designserver",
+        "action": "Servera denna design",
+        "description": "Svar från namngivna exempel · validering via begränsningar",
+        "comingSoon": "Designservern kommer snart"
+      },
+      "identity": {
+        "title": "Identitet",
+        "title_field": "Titel",
+        "version": "Designversion",
+        "description": "Beskrivning"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Bassökväg",
+        "defaultAuth": "Standard-auth"
+      }
+    },
+    "auth": {
+      "none": "Ingen",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-nyckel-header",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtrera…",
+      "selectPrompt": "Välj en post i listan.",
+      "editorPending": "Redigeraren för denna sektion är på väg."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} egenskap",
+      "propertyCount_other": "{{count}} egenskaper"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} värde",
+      "valueCount_other": "{{count}} värden"
+    },
+    "documentation": {
+      "empty": "Designdokumentationen serveras här."
+    },
+    "code": {
+      "empty": "Kodgenerering från denna design kommer här."
+    },
+    "statusbar": {
+      "format": "design · format {{version}}"
     }
   },
   "mqtt": {

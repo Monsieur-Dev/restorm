@@ -258,6 +258,7 @@
     "contextMenu": {
       "delete": "Șterge",
       "clone": "Clonează",
+      "openInSplit": "Deschide în panou divizat",
       "copySuffix": "copie",
       "rename": "Redenumește",
       "addToFavorites": "Adaugă la favorite",
@@ -2138,6 +2139,74 @@
       "fields": {
         "env": "Mediu"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Setări",
+      "models": "Modele",
+      "enums": "Enumuri",
+      "routes": "Rute",
+      "documentation": "Documentație",
+      "notes": "Notițe",
+      "code": "Cod"
+    },
+    "rail": {
+      "ariaLabel": "Secțiunile designului"
+    },
+    "settings": {
+      "subtitle": "Setările generale ale designului „{{name}}”",
+      "serve": {
+        "title": "Server de design",
+        "action": "Servește acest design",
+        "description": "Răspunsuri din exemple denumite · validare prin constrângeri",
+        "comingSoon": "Serverul de design sosește în curând"
+      },
+      "identity": {
+        "title": "Identitate",
+        "title_field": "Titlu",
+        "version": "Versiunea designului",
+        "description": "Descriere"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Cale de bază",
+        "defaultAuth": "Auth implicit"
+      }
+    },
+    "auth": {
+      "none": "Niciuna",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header cheie API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtrează…",
+      "selectPrompt": "Selectați o intrare din listă.",
+      "editorPending": "Editorul acestei secțiuni este pe drum."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} proprietate",
+      "propertyCount_other": "{{count}} proprietăți"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} valoare",
+      "valueCount_other": "{{count}} valori"
+    },
+    "documentation": {
+      "empty": "Documentația designului va fi servită aici."
+    },
+    "code": {
+      "empty": "Generarea de cod din acest design va trăi aici."
+    },
+    "statusbar": {
+      "format": "design · format {{version}}"
     }
   },
   "mqtt": {

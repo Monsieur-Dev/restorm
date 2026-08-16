@@ -35,13 +35,15 @@ import type {
   EnvironmentFolder,
   Environment,
   Request,
-  Scenario
+  Scenario,
+  ApiDesign
 } from '../../../shared/types/collections'
 import {
   isRequest,
   isEnvironmentFolder,
   isAnyFolder,
-  isScenario
+  isScenario,
+  isApiDesign
 } from '../../../shared/types/collections'
 import { protocolSpec, requestTabTitle, isRequestType } from '../../../shared/protocolRegistry'
 import type {
@@ -49,6 +51,7 @@ import type {
   FolderTab,
   EnvironmentFolderTab,
   ScenarioEditorTab,
+  DesignTab,
   ConsoleTab,
   FirewallTab,
   SettingsTab,
@@ -96,8 +99,8 @@ function findOpenTabByItemId(nodes: GroupNode[], itemId: string): { groupId: str
       continue
     }
     for (const tab of node.tabs) {
-      const t = tab as { folder?: { id?: string }; request?: { id?: string } }
-      const tabItemId = t.folder?.id ?? t.request?.id
+      const t = tab as { folder?: { id?: string }; request?: { id?: string }; scenario?: { id?: string }; design?: { id?: string } }
+      const tabItemId = t.folder?.id ?? t.request?.id ?? t.scenario?.id ?? t.design?.id
       if (typeof tabItemId === 'string' && tabItemId === itemId) {
         return { groupId: node.id, tabId: tab.id }
       }
@@ -163,9 +166,10 @@ export interface UseWorkbenchTabsReturn {
   workbenchRef: React.RefObject<RestormWorkbenchHandle | null>
   hasRestoredWorkbenchRef: React.RefObject<boolean>
   findIndexPathById: (items: FolderItem[], targetId: string) => number[] | null
-  buildTabId: (prefix: 'folder' | 'env-folder' | 'request' | 'scenario', id: string) => string
+  buildTabId: (prefix: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design', id: string) => string
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  openDesignTab: (design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   handleRebuildTab: (tabId: string) => EditorTab | null
@@ -222,8 +226,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         continue
       }
       for (const tab of node.tabs) {
-        const t = tab as { folder?: { id?: string }; request?: { id?: string } }
-        const tabItemId = t.folder?.id ?? t.request?.id
+        const t = tab as { folder?: { id?: string }; request?: { id?: string }; scenario?: { id?: string }; design?: { id?: string } }
+        const tabItemId = t.folder?.id ?? t.request?.id ?? t.scenario?.id ?? t.design?.id
         if (typeof tabItemId === 'string' && tabItemId === itemId) {
           return { groupId: node.id, tabId: tab.id }
         }
@@ -244,7 +248,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
    * compat with already-persisted workbench state; new tabs are
    * always emitted as `request-id:<uuid>`.
    */
-  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request' | 'scenario', id: string): string => {
+  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design', id: string): string => {
     return `${prefix}-id:${id}`
   }, [])
 
@@ -424,6 +428,31 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
+  // Open the API design editor in the workbench. Single tab per design:
+  // `addTabToTree`'s dedup (by tabId, then by item id) refocuses the
+  // existing tab when the design is already open.
+  const openDesignTab = useCallback((design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
+    const tabId = buildTabId('design', design.id)
+
+    setTimeout(() => {
+      const designChecksum = computeChecksum(JSON.parse(JSON.stringify(design)))
+      registerTabDirtyState(design.id, designChecksum)
+    }, 500)
+
+    setWorkbenchTree((prev) => {
+      const newTab: DesignTab = {
+        id: tabId,
+        tabType: 'design',
+        title: design.name,
+        titleString: design.name,
+        design,
+        breadcrumbs,
+        allowFullscreen: true
+      }
+      return addTabToTree(prev, tabId, newTab, options, design.id)
+    })
+  }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
+
   // Open an environment folder tab in the workbench
   const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
     const tabId = buildTabId('env-folder', folder.id)
@@ -484,11 +513,11 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree]
   )
 
-  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario'; itemId: string } | null => {
-    const match = /^(folder|env-folder|request|scenario)-id:(.+)$/.exec(tabId)
+  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design'; itemId: string } | null => {
+    const match = /^(folder|env-folder|request|scenario|design)-id:(.+)$/.exec(tabId)
     if (match?.[1] && match[2]) {
       return {
-        type: match[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
+        type: match[1] as 'folder' | 'env-folder' | 'request' | 'scenario' | 'design',
         itemId: match[2]
       }
     }
@@ -631,6 +660,23 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       return null
     }
 
+    if (parsed.type === 'design') {
+      const item = findItemById(rootItems, parsed.itemId)
+      if (item && isApiDesign(item)) {
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+        return {
+          id: tabId,
+          tabType: 'design',
+          title: item.name,
+          titleString: item.name,
+          design: item,
+          breadcrumbs,
+          allowFullscreen: true
+        } as DesignTab
+      }
+      return null
+    }
+
     const requestItem: FolderItem | null = findRequestById(rootItems, parsed.itemId) ?? null
     if (requestItem && isRequest(requestItem)) {
       const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestItem.id)
@@ -671,8 +717,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
             registerRestoredTabs(node.groups)
           } else {
             for (const tab of node.tabs) {
-              const typed = tab as { folder?: EnvironmentFolder | Folder; request?: Request }
-              const doc = typed.folder ?? typed.request
+              const typed = tab as { folder?: EnvironmentFolder | Folder; request?: Request; scenario?: Scenario; design?: ApiDesign }
+              const doc = typed.folder ?? typed.request ?? typed.scenario ?? typed.design
               if (doc) {
                 const checksum = computeChecksumSnapshot(doc)
                 registerTabDirtyState(doc.id, checksum)
@@ -720,6 +766,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     buildTabId,
     openFolderTab,
     openScenarioEditorTab,
+    openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,

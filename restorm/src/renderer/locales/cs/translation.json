@@ -259,6 +259,7 @@
     "contextMenu": {
       "delete": "Smazat",
       "clone": "Duplikovat",
+      "openInSplit": "Otevřít v rozděleném panelu",
       "copySuffix": "kopie",
       "rename": "Přejmenovat",
       "addToFavorites": "Přidat k oblíbeným",
@@ -2139,6 +2140,74 @@
       "fields": {
         "env": "Prostředí"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Nastavení",
+      "models": "Modely",
+      "enums": "Enumy",
+      "routes": "Trasy",
+      "documentation": "Dokumentace",
+      "notes": "Poznámky",
+      "code": "Kód"
+    },
+    "rail": {
+      "ariaLabel": "Sekce návrhu"
+    },
+    "settings": {
+      "subtitle": "Obecná nastavení návrhu „{{name}}“",
+      "serve": {
+        "title": "Návrhový server",
+        "action": "Servírovat tento návrh",
+        "description": "Odpovědi z pojmenovaných příkladů · validace omezeními",
+        "comingSoon": "Návrhový server brzy dorazí"
+      },
+      "identity": {
+        "title": "Identita",
+        "title_field": "Název",
+        "version": "Verze návrhu",
+        "description": "Popis"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Základní cesta",
+        "defaultAuth": "Výchozí auth"
+      }
+    },
+    "auth": {
+      "none": "Žádná",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Hlavička API klíče",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtrovat…",
+      "selectPrompt": "Vyberte položku v seznamu.",
+      "editorPending": "Editor této sekce je na cestě."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} vlastnost",
+      "propertyCount_other": "{{count}} vlastností"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} hodnota",
+      "valueCount_other": "{{count}} hodnot"
+    },
+    "documentation": {
+      "empty": "Dokumentace návrhu se bude servírovat zde."
+    },
+    "code": {
+      "empty": "Generování kódu z tohoto návrhu bude zde."
+    },
+    "statusbar": {
+      "format": "návrh · formát {{version}}"
     }
   },
   "mqtt": {

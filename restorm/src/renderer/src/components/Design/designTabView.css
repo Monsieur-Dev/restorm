@@ -1,0 +1,248 @@
+/* The Design tab: icon rail + section pane. Rail colors ride the
+ * activity-bar tokens so every theme paints it consistently. */
+
+.design-tab-view {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+
+.design-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  width: 44px;
+  flex-shrink: 0;
+  background-color: var(--activityBar-background, var(--editor-background));
+  border-right: 1px solid var(--panel-border, transparent);
+}
+
+.design-rail-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--activityBar-inactiveForeground, var(--activityBar-foreground));
+  cursor: pointer;
+}
+
+.design-rail-button .codicon {
+  font-size: 18px;
+}
+
+.design-rail-button:hover {
+  color: var(--activityBar-foreground);
+}
+
+.design-rail-button.active {
+  color: var(--activityBar-foreground);
+  border-left-color: var(--focusBorder, currentColor);
+  background-color: var(--list-activeSelectionBackground, transparent);
+}
+
+.design-section-host {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.design-section {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 24px;
+  box-sizing: border-box;
+}
+
+.design-section-scroll {
+  flex: 1;
+  min-width: 0;
+}
+
+.design-section-title {
+  margin: 0 0 4px;
+  font-size: 1.3em;
+}
+
+.design-section-subtitle {
+  margin: 0 0 16px;
+  opacity: 0.7;
+}
+
+.design-section-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.design-section-placeholder-message {
+  opacity: 0.7;
+}
+
+/* ── Settings ─────────────────────────────────────────────────────── */
+
+.design-settings-group-title {
+  margin: 20px 0 8px;
+  font-size: 0.8em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.design-serve-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 8px;
+}
+
+.design-serve-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.design-serve-title {
+  font-weight: 600;
+}
+
+.design-serve-description {
+  font-size: 0.9em;
+  opacity: 0.7;
+}
+
+.design-serve-protocols {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.design-protocol-pill {
+  padding: 2px 10px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 999px;
+  font-size: 0.85em;
+  opacity: 0.6;
+}
+
+.design-protocol-pill.active {
+  border-color: var(--focusBorder, currentColor);
+  color: var(--focusBorder, currentColor);
+  opacity: 1;
+}
+
+.design-serve-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--button-background);
+  color: var(--button-foreground);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.design-serve-spin:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.design-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  max-width: 720px;
+}
+
+.design-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.design-field-wide {
+  grid-column: span 1;
+}
+
+.design-field-full {
+  grid-column: 1 / -1;
+}
+
+.design-field-label {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* ── Entity list sections (models / enums / routes) ──────────────── */
+
+.design-entity-list-section {
+  display: flex;
+  padding: 0;
+}
+
+.design-entity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 280px;
+  flex-shrink: 0;
+  padding: 16px 12px;
+  border-right: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.design-entity-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.design-entity-list-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.design-list-detail {
+  font-size: 0.85em;
+  opacity: 0.6;
+  padding-right: 6px;
+}
+
+.design-entity-detail {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ── Notes ────────────────────────────────────────────────────────── */
+
+.design-notes-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.design-notes-section .ecu-gated,
+.design-notes-section .ecu-gated-child {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

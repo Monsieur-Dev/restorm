@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Verwijderen",
       "clone": "Klonen",
+      "openInSplit": "In gesplitst paneel openen",
       "copySuffix": "kopie",
       "rename": "Naam wijzigen",
       "addToFavorites": "Toevoegen aan favorieten",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Omgeving"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Instellingen",
+      "models": "Modellen",
+      "enums": "Enums",
+      "routes": "Routes",
+      "documentation": "Documentatie",
+      "notes": "Notities",
+      "code": "Code"
+    },
+    "rail": {
+      "ariaLabel": "Ontwerpsecties"
+    },
+    "settings": {
+      "subtitle": "Algemene instellingen van het ontwerp “{{name}}”",
+      "serve": {
+        "title": "Ontwerpserver",
+        "action": "Dit ontwerp serveren",
+        "description": "Antwoorden uit benoemde voorbeelden · validatie via constraints",
+        "comingSoon": "De ontwerpserver komt binnenkort"
+      },
+      "identity": {
+        "title": "Identiteit",
+        "title_field": "Titel",
+        "version": "Ontwerpversie",
+        "description": "Beschrijving"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Basispad",
+        "defaultAuth": "Standaard-auth"
+      }
+    },
+    "auth": {
+      "none": "Geen",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-key-header",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filteren…",
+      "selectPrompt": "Selecteer een item in de lijst.",
+      "editorPending": "De editor voor deze sectie is onderweg."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} eigenschap",
+      "propertyCount_other": "{{count}} eigenschappen"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} waarde",
+      "valueCount_other": "{{count}} waarden"
+    },
+    "documentation": {
+      "empty": "De ontwerpdocumentatie wordt hier geserveerd."
+    },
+    "code": {
+      "empty": "Codegeneratie vanuit dit ontwerp komt hier."
+    },
+    "statusbar": {
+      "format": "ontwerp · formaat {{version}}"
     }
   },
   "mqtt": {

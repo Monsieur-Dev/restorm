@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Supprimer",
       "clone": "Cloner",
+      "openInSplit": "Ouvrir dans un panneau divisé",
       "copySuffix": "copie",
       "rename": "Renommer",
       "addToFavorites": "Ajouter aux favoris",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Environnement"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Settings",
+      "models": "Modèles",
+      "enums": "Enums",
+      "routes": "Routes",
+      "documentation": "Documentation",
+      "notes": "Notes",
+      "code": "Code"
+    },
+    "rail": {
+      "ariaLabel": "Sections du design"
+    },
+    "settings": {
+      "subtitle": "Paramètres généraux du design « {{name}} »",
+      "serve": {
+        "title": "Serveur de design",
+        "action": "Servir ce design",
+        "description": "Réponses depuis les exemples nommés · validation par contraintes",
+        "comingSoon": "Le serveur de design arrive bientôt"
+      },
+      "identity": {
+        "title": "Identité",
+        "title_field": "Titre",
+        "version": "Version du design",
+        "description": "Description"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Base path",
+        "defaultAuth": "Auth par défaut"
+      }
+    },
+    "auth": {
+      "none": "Aucune",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API key header",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtrer…",
+      "selectPrompt": "Sélectionnez une entrée dans la liste.",
+      "editorPending": "L’éditeur de cette section arrive bientôt."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} prop",
+      "propertyCount_other": "{{count}} props"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} valeur",
+      "valueCount_other": "{{count}} valeurs"
+    },
+    "documentation": {
+      "empty": "La documentation du design sera servie ici."
+    },
+    "code": {
+      "empty": "La génération de code depuis ce design vivra ici."
+    },
+    "statusbar": {
+      "format": "design · format {{version}}"
     }
   },
   "mqtt": {

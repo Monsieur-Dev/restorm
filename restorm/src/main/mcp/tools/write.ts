@@ -569,7 +569,7 @@ export function registerWriteTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.setFavorite',
       title: 'Toggle (or set) the favorite flag on an item',
       description:
-        'Mark a folder, env-folder or request as favorite (or remove it). Favorites are a ' +
+        'Mark a folder, env-folder, request, scenario or design as favorite (or remove it). Favorites are a ' +
         'per-project store keyed by item id; the renderer\'s sidebar Favorites pane + the H1 ' +
         'star toggle update automatically. With `favorite: true` / `false` the state is set ' +
         'explicitly; omit it to flip the current value.',
@@ -603,7 +603,7 @@ export function registerWriteTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.deleteItem',
       title: 'Delete a folder or request',
       description:
-        'Delete a folder, env-folder or request by id. Folder deletes cascade to all child items. ' +
+        'Delete a folder, env-folder, request, scenario or design by id. Folder deletes cascade to all child items. ' +
         'No confirmation prompt — caller is responsible for guarding destructive deletes.',
       inputSchema: {
         id: z.string().min(1).describe('Item id to delete.')

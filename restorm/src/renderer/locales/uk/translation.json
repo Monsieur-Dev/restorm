@@ -259,6 +259,7 @@
     "contextMenu": {
       "delete": "Видалити",
       "clone": "Клонувати",
+      "openInSplit": "Відкрити в розділеній панелі",
       "copySuffix": "копія",
       "rename": "Перейменувати",
       "addToFavorites": "Додати до обраного",
@@ -2139,6 +2140,74 @@
       "fields": {
         "env": "Середовище"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Налаштування",
+      "models": "Моделі",
+      "enums": "Енуми",
+      "routes": "Маршрути",
+      "documentation": "Документація",
+      "notes": "Нотатки",
+      "code": "Код"
+    },
+    "rail": {
+      "ariaLabel": "Розділи дизайну"
+    },
+    "settings": {
+      "subtitle": "Загальні налаштування дизайну «{{name}}»",
+      "serve": {
+        "title": "Сервер дизайну",
+        "action": "Обслуговувати цей дизайн",
+        "description": "Відповіді з іменованих прикладів · валідація обмеженнями",
+        "comingSoon": "Сервер дизайну незабаром"
+      },
+      "identity": {
+        "title": "Ідентичність",
+        "title_field": "Назва",
+        "version": "Версія дизайну",
+        "description": "Опис"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Базовий шлях",
+        "defaultAuth": "Типова автентифікація"
+      }
+    },
+    "auth": {
+      "none": "Немає",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Заголовок ключа API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Фільтрувати…",
+      "selectPrompt": "Виберіть запис у списку.",
+      "editorPending": "Редактор цього розділу вже в дорозі."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} властивість",
+      "propertyCount_other": "{{count}} властивостей"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} значення",
+      "valueCount_other": "{{count}} значень"
+    },
+    "documentation": {
+      "empty": "Документація дизайну буде обслуговуватися тут."
+    },
+    "code": {
+      "empty": "Генерація коду з цього дизайну житиме тут."
+    },
+    "statusbar": {
+      "format": "дизайн · формат {{version}}"
     }
   },
   "mqtt": {

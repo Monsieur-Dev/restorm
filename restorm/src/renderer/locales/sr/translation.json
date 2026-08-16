@@ -258,6 +258,7 @@
     "contextMenu": {
       "delete": "Obriši",
       "clone": "Kloniraj",
+      "openInSplit": "Otvori u podeljenom panelu",
       "copySuffix": "kopija",
       "rename": "Preimenuj",
       "addToFavorites": "Dodaj u omiljeno",
@@ -2138,6 +2139,74 @@
       "fields": {
         "env": "Okruženje"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Podešavanja",
+      "models": "Modeli",
+      "enums": "Enumi",
+      "routes": "Rute",
+      "documentation": "Dokumentacija",
+      "notes": "Beleške",
+      "code": "Kod"
+    },
+    "rail": {
+      "ariaLabel": "Sekcije dizajna"
+    },
+    "settings": {
+      "subtitle": "Opšta podešavanja dizajna „{{name}}”",
+      "serve": {
+        "title": "Dizajn-server",
+        "action": "Služi ovaj dizajn",
+        "description": "Odgovori iz imenovanih primera · validacija ograničenjima",
+        "comingSoon": "Dizajn-server stiže uskoro"
+      },
+      "identity": {
+        "title": "Identitet",
+        "title_field": "Naslov",
+        "version": "Verzija dizajna",
+        "description": "Opis"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Osnovna putanja",
+        "defaultAuth": "Podrazumevani auth"
+      }
+    },
+    "auth": {
+      "none": "Nijedna",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Zaglavlje API ključa",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtriraj…",
+      "selectPrompt": "Izaberite stavku sa liste.",
+      "editorPending": "Uređivač ove sekcije je na putu."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} svojstvo",
+      "propertyCount_other": "{{count}} svojstava"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} vrednost",
+      "valueCount_other": "{{count}} vrednosti"
+    },
+    "documentation": {
+      "empty": "Dokumentacija dizajna će se služiti ovde."
+    },
+    "code": {
+      "empty": "Generisanje koda iz ovog dizajna biće ovde."
+    },
+    "statusbar": {
+      "format": "dizajn · format {{version}}"
     }
   },
   "mqtt": {

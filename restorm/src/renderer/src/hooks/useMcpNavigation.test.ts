@@ -67,6 +67,7 @@ function setup(rootItems: FolderItem[]): { rootItemsRef: { current: FolderItem[]
     openEnvironmentFolderTab: vi.fn(),
     openAnyRequestTab,
     openScenarioEditorTab: vi.fn(),
+    openDesignTab: vi.fn(),
     closeTabByItemId: vi.fn()
   }
   const { result } = renderHook(() => {

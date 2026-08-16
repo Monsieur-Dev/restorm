@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Poista",
       "clone": "Kloonaa",
+      "openInSplit": "Avaa jaetussa paneelissa",
       "copySuffix": "kopio",
       "rename": "Nimeä uudelleen",
       "addToFavorites": "Lisää suosikkeihin",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Ympäristö"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Asetukset",
+      "models": "Mallit",
+      "enums": "Enumit",
+      "routes": "Reitit",
+      "documentation": "Dokumentaatio",
+      "notes": "Muistiinpanot",
+      "code": "Koodi"
+    },
+    "rail": {
+      "ariaLabel": "Suunnitelman osiot"
+    },
+    "settings": {
+      "subtitle": "Suunnitelman ”{{name}}” yleiset asetukset",
+      "serve": {
+        "title": "Suunnitelmapalvelin",
+        "action": "Palvele tämä suunnitelma",
+        "description": "Vastaukset nimetyistä esimerkeistä · validointi rajoitteilla",
+        "comingSoon": "Suunnitelmapalvelin tulee pian"
+      },
+      "identity": {
+        "title": "Identiteetti",
+        "title_field": "Otsikko",
+        "version": "Suunnitelman versio",
+        "description": "Kuvaus"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Peruspolku",
+        "defaultAuth": "Oletus-auth"
+      }
+    },
+    "auth": {
+      "none": "Ei mitään",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-avainotsake",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Suodata…",
+      "selectPrompt": "Valitse kohde luettelosta.",
+      "editorPending": "Tämän osion editori on tulossa."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} ominaisuus",
+      "propertyCount_other": "{{count}} ominaisuutta"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} arvo",
+      "valueCount_other": "{{count}} arvoa"
+    },
+    "documentation": {
+      "empty": "Suunnitelman dokumentaatio palvellaan tässä."
+    },
+    "code": {
+      "empty": "Koodin generointi tästä suunnitelmasta tulee tähän."
+    },
+    "statusbar": {
+      "format": "suunnitelma · muoto {{version}}"
     }
   },
   "mqtt": {

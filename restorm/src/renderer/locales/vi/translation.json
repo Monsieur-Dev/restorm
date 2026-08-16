@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "Xóa",
       "clone": "Nhân bản",
+      "openInSplit": "Mở trong bảng chia đôi",
       "copySuffix": "bản sao",
       "rename": "Đổi tên",
       "addToFavorites": "Thêm vào mục yêu thích",
@@ -2136,6 +2137,74 @@
       "fields": {
         "env": "Môi trường"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Cài đặt",
+      "models": "Mô hình",
+      "enums": "Enum",
+      "routes": "Tuyến",
+      "documentation": "Tài liệu",
+      "notes": "Ghi chú",
+      "code": "Mã"
+    },
+    "rail": {
+      "ariaLabel": "Các phần của thiết kế"
+    },
+    "settings": {
+      "subtitle": "Cài đặt chung của thiết kế “{{name}}”",
+      "serve": {
+        "title": "Máy chủ thiết kế",
+        "action": "Phục vụ thiết kế này",
+        "description": "Phản hồi từ các ví dụ được đặt tên · xác thực bằng ràng buộc",
+        "comingSoon": "Máy chủ thiết kế sắp ra mắt"
+      },
+      "identity": {
+        "title": "Danh tính",
+        "title_field": "Tiêu đề",
+        "version": "Phiên bản thiết kế",
+        "description": "Mô tả"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Đường dẫn gốc",
+        "defaultAuth": "Auth mặc định"
+      }
+    },
+    "auth": {
+      "none": "Không có",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header khóa API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Lọc…",
+      "selectPrompt": "Chọn một mục trong danh sách.",
+      "editorPending": "Trình soạn thảo của phần này đang trên đường đến."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} thuộc tính",
+      "propertyCount_other": "{{count}} thuộc tính"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} giá trị",
+      "valueCount_other": "{{count}} giá trị"
+    },
+    "documentation": {
+      "empty": "Tài liệu thiết kế sẽ được phục vụ tại đây."
+    },
+    "code": {
+      "empty": "Việc sinh mã từ thiết kế này sẽ nằm ở đây."
+    },
+    "statusbar": {
+      "format": "thiết kế · định dạng {{version}}"
     }
   },
   "mqtt": {

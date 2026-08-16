@@ -193,12 +193,14 @@ import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
   findScenarioById,
+  findDesignById,
   findEnvironmentFolderById,
   findRequestById,
   findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { StatusbarVersionPlan } from './components/MainView/StatusbarVersionPlan'
+import { StatusbarDesignFormat } from './components/MainView/StatusbarDesignFormat'
 import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { copySidebarItems, readSidebarClipboard, hasSidebarClipboard } from './services/sidebarClipboard'
 import { useScenarioMenuPalette } from './services/scenarioMenuPaletteStore'
@@ -1320,6 +1322,7 @@ const App: React.FC = () => {
     hasRestoredWorkbenchRef,
     openFolderTab,
     openScenarioEditorTab,
+    openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,
@@ -1503,6 +1506,13 @@ const App: React.FC = () => {
     if (!request) return null
     return { id: request.id, path: buildRequestPath(rootItems, request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+
+  // Whether the focused workbench tab is a Design tab — drives the
+  // bottom-right "design · format 1.1" statusbar cell.
+  const activeWorkbenchTabIsDesign = useMemo<boolean>(() => {
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
+    return typeof activeTabId === 'string' && activeTabId.startsWith('design-id:')
+  }, [workbenchTree.groups, focusedGroupId])
 
   // Active scenario-editor tab (if any), so the MCP `get_current_tab` snapshot
   // can report `kind: 'scenario'` like it does for requests. Resolved the same
@@ -2005,6 +2015,7 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     openScenarioEditorTab,
+    openDesignTab,
     closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
@@ -2152,6 +2163,7 @@ const App: React.FC = () => {
     if (!push) return undefined
     const typeOf = (it: FolderItem): string => {
       if ((it as { type?: unknown }).type === 'scenario') return 'scenario'
+      if ((it as { type?: unknown }).type === 'design') return 'design'
       if ('folderType' in it && (it as { folderType?: unknown }).folderType === 'environment') return 'env-folder'
       if ('items' in it) return 'folder'
       return 'request'
@@ -2438,6 +2450,9 @@ const App: React.FC = () => {
   const onCopyItemStable = useCallback((id: string) => { sidebarClipboardOpsRef.current.copy(id) }, [])
   const onPasteItemStable = useCallback((id: string) => { sidebarClipboardOpsRef.current.paste(id) }, [])
 
+  // `openItemAtSplit` is produced by `useNavigation` further down; the
+  // sidebar menus close over this ref so hook order stays untouched.
+  const openItemAtSplitRef = useRef<(itemId: string, targetGroupId: string, zone: 'left' | 'right' | 'top' | 'bottom' | 'full') => void>(() => { /* set after useNavigation */ })
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
@@ -2453,7 +2468,11 @@ const App: React.FC = () => {
     onPasteItem: onPasteItemStable,
     canPaste: canPasteItemsFn,
     canRefreshFromSource,
-    onRefreshFromSource
+    onRefreshFromSource,
+    // The design context menu's explicit single-tab escape hatch: open
+    // the design beside the focused group. The placement helper falls
+    // back to the first group when the id no longer resolves.
+    onOpenInSplit: (itemId: string) => { openItemAtSplitRef.current(itemId, focusedGroupId ?? 'restorm-main-group', 'right') }
   })
 
   // Delete an item and, when it lived DIRECTLY under a scenario, nudge the
@@ -2951,6 +2970,7 @@ const App: React.FC = () => {
   const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
+  const getDesignByIdCb = useCallback((id: string) => findDesignById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
   // Send-time hook: request tab views call this to resolve their
@@ -3457,6 +3477,7 @@ const App: React.FC = () => {
     rootItems,
     openFolderTab,
     openScenarioEditorTab,
+    openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
@@ -3465,6 +3486,8 @@ const App: React.FC = () => {
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   })
+  // Late-bind the split opener for the sidebar context menus (see the ref above).
+  useEffect(() => { openItemAtSplitRef.current = openItemAtSplit }, [openItemAtSplit])
   // Patch the forward-reference ref consumed by `useMcpWorkbenchLayout`
   // (above) now that `handleTabActivate` exists.
   useEffect(() => { tabActivateForLayoutRef.current = handleTabActivate }, [handleTabActivate])
@@ -3778,6 +3801,7 @@ const App: React.FC = () => {
               onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
               getScenarioById={getScenarioByIdCb}
+              getDesignById={getDesignByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -3867,6 +3891,7 @@ const App: React.FC = () => {
             onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}
             getScenarioById={(id) => findScenarioById(rootItems, id)}
+            getDesignById={(id) => findDesignById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -3904,6 +3929,8 @@ const App: React.FC = () => {
          * MCP indicator carries the `right-aligned` auto margin in every
          * state (running and stopped/disabled) since it always renders. */}
         <StatusbarMcpIndicator rightAligned onViewLogs={handleOpenMcpLogs} />
+        {/* "design · format 1.1" while the focused tab is a design. */}
+        <StatusbarDesignFormat visible={activeWorkbenchTabIsDesign} />
         {/* Renders nothing unless a project is open; visible-but-locked (the
          * 3-state gate) rather than hidden once one is, regardless of
          * whether the folder happens to be a git repo. */}

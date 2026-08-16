@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Διαγραφή",
       "clone": "Κλωνοποίηση",
+      "openInSplit": "Άνοιγμα σε διαιρεμένο πλαίσιο",
       "copySuffix": "αντίγραφο",
       "rename": "Μετονομασία",
       "addToFavorites": "Προσθήκη στα αγαπημένα",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Περιβάλλον"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Ρυθμίσεις",
+      "models": "Μοντέλα",
+      "enums": "Enums",
+      "routes": "Διαδρομές",
+      "documentation": "Τεκμηρίωση",
+      "notes": "Σημειώσεις",
+      "code": "Κώδικας"
+    },
+    "rail": {
+      "ariaLabel": "Ενότητες του σχεδίου"
+    },
+    "settings": {
+      "subtitle": "Γενικές ρυθμίσεις του σχεδίου «{{name}}»",
+      "serve": {
+        "title": "Διακομιστής σχεδίου",
+        "action": "Σερβίρισμα αυτού του σχεδίου",
+        "description": "Αποκρίσεις από επώνυμα παραδείγματα · επικύρωση με περιορισμούς",
+        "comingSoon": "Ο διακομιστής σχεδίου έρχεται σύντομα"
+      },
+      "identity": {
+        "title": "Ταυτότητα",
+        "title_field": "Τίτλος",
+        "version": "Έκδοση σχεδίου",
+        "description": "Περιγραφή"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Βασική διαδρομή",
+        "defaultAuth": "Προεπιλεγμένο auth"
+      }
+    },
+    "auth": {
+      "none": "Καμία",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Κεφαλίδα κλειδιού API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Φιλτράρισμα…",
+      "selectPrompt": "Επιλέξτε μια καταχώριση από τη λίστα.",
+      "editorPending": "Ο επεξεργαστής αυτής της ενότητας έρχεται."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} ιδιότητα",
+      "propertyCount_other": "{{count}} ιδιότητες"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} τιμή",
+      "valueCount_other": "{{count}} τιμές"
+    },
+    "documentation": {
+      "empty": "Η τεκμηρίωση του σχεδίου θα σερβίρεται εδώ."
+    },
+    "code": {
+      "empty": "Η παραγωγή κώδικα από αυτό το σχέδιο θα ζει εδώ."
+    },
+    "statusbar": {
+      "format": "σχέδιο · μορφή {{version}}"
     }
   },
   "mqtt": {

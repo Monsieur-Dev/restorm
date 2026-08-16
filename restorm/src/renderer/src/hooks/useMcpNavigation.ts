@@ -33,13 +33,13 @@
 
 import { useEffect } from 'react'
 import { navigationService, logger } from 'electron-core-ui/renderer'
-import type { FolderItem, Folder, EnvironmentFolder, Request, Environment, Scenario } from '../../../shared/types/collections'
+import type { FolderItem, Folder, EnvironmentFolder, Request, Environment, Scenario, ApiDesign } from '../../../shared/types/collections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
-import { findFolderById, findEnvironmentFolderById, findRequestById, findScenarioById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
+import { findFolderById, findEnvironmentFolderById, findRequestById, findScenarioById, findDesignById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 import type { OpenTabOptions } from './useWorkbenchTabs'
 
-type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario'
+type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario' | 'design'
 
 interface RestormNavBridge {
   onMcpOpenTab: (cb: (payload: { requestId?: string; itemId: string; kind: ActiveKind }) => void) => () => void
@@ -59,6 +59,7 @@ export interface UseMcpNavigationInput {
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  openDesignTab: (design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   closeTabByItemId: (itemId: string) => void
 }
 
@@ -96,6 +97,7 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     openScenarioEditorTab,
+    openDesignTab,
     closeTabByItemId
   } = input
 
@@ -161,6 +163,14 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
           expandAncestors(itemId, items)
           navigationService.navigateTo(itemId, 'mcp', { type: 'scenario-editor' })
           ack(true)
+        } else if (kind === 'design') {
+          const d = findDesignById(items, itemId)
+          if (!d) { ack(false); return }
+          openDesignTab(d, breadcrumbs)
+          setSelectedItemId(itemId)
+          expandAncestors(itemId, items)
+          navigationService.navigateTo(itemId, 'mcp', { type: 'design' })
+          ack(true)
         } else {
           // kind === 'folder' (only remaining union arm — ActiveKind is exhaustive).
           const f = findFolderById(items, itemId)
@@ -192,5 +202,5 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
       offReveal()
       offClose()
     }
-  }, [enabled, rootItemsRef, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openScenarioEditorTab, closeTabByItemId])
+  }, [enabled, rootItemsRef, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openScenarioEditorTab, openDesignTab, closeTabByItemId])
 }

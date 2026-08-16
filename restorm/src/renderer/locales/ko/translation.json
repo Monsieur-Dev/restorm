@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "삭제",
       "clone": "복제",
+      "openInSplit": "분할 패널에서 열기",
       "copySuffix": "복사본",
       "rename": "이름 바꾸기",
       "addToFavorites": "즐겨찾기에 추가",
@@ -2136,6 +2137,74 @@
       "fields": {
         "env": "환경"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "설정",
+      "models": "모델",
+      "enums": "열거형",
+      "routes": "라우트",
+      "documentation": "문서",
+      "notes": "노트",
+      "code": "코드"
+    },
+    "rail": {
+      "ariaLabel": "디자인 섹션"
+    },
+    "settings": {
+      "subtitle": "디자인 \"{{name}}\"의 일반 설정",
+      "serve": {
+        "title": "디자인 서버",
+        "action": "이 디자인 서빙",
+        "description": "이름 있는 예시 기반 응답 · 제약 조건 검증",
+        "comingSoon": "디자인 서버가 곧 제공됩니다"
+      },
+      "identity": {
+        "title": "아이덴티티",
+        "title_field": "제목",
+        "version": "디자인 버전",
+        "description": "설명"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "기본 경로",
+        "defaultAuth": "기본 인증"
+      }
+    },
+    "auth": {
+      "none": "없음",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API 키 헤더",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "필터…",
+      "selectPrompt": "목록에서 항목을 선택하세요.",
+      "editorPending": "이 섹션의 편집기가 준비 중입니다."
+    },
+    "models": {
+      "propertyCount_one": "{{count}}개 속성",
+      "propertyCount_other": "{{count}}개 속성"
+    },
+    "enums": {
+      "valueCount_one": "{{count}}개 값",
+      "valueCount_other": "{{count}}개 값"
+    },
+    "documentation": {
+      "empty": "디자인 문서는 여기에서 제공됩니다."
+    },
+    "code": {
+      "empty": "이 디자인의 코드 생성이 여기에 들어갑니다."
+    },
+    "statusbar": {
+      "format": "디자인 · 포맷 {{version}}"
     }
   },
   "mqtt": {

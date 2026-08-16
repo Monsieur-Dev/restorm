@@ -20,7 +20,8 @@ import type {
   DesignModel,
   DesignEnum,
   DesignRouteGroup,
-  DesignServing
+  DesignServing,
+  DesignAuthKind
 } from '../types/apiDesign'
 
 @trackable()
@@ -59,6 +60,9 @@ export class ApiDesign {
   /** Spec-level security requirement. */
   defaultSecurity?: Record<string, string[]>[]
 
+  /** Default auth contract routes fall back to. */
+  defaultAuth?: DesignAuthKind
+
   /** Design-server configuration. */
   serving?: DesignServing
 
@@ -86,6 +90,7 @@ export class ApiDesign {
     server?: ApiServer
     securitySchemes?: Record<string, SecurityScheme>
     defaultSecurity?: Record<string, string[]>[]
+    defaultAuth?: DesignAuthKind
     serving?: DesignServing
     models?: DesignModel[]
     enums?: DesignEnum[]
@@ -100,6 +105,7 @@ export class ApiDesign {
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.securitySchemes !== undefined && { securitySchemes: obj.securitySchemes }),
       ...(obj.defaultSecurity !== undefined && { defaultSecurity: obj.defaultSecurity }),
+      ...(obj.defaultAuth !== undefined && { defaultAuth: obj.defaultAuth }),
       ...(obj.serving !== undefined && { serving: obj.serving }),
       models: obj.models ?? [],
       enums: obj.enums ?? [],
@@ -118,6 +124,7 @@ export class ApiDesign {
       ...(this.server !== undefined && { server: this.server }),
       ...(this.securitySchemes !== undefined && { securitySchemes: this.securitySchemes }),
       ...(this.defaultSecurity !== undefined && { defaultSecurity: this.defaultSecurity }),
+      ...(this.defaultAuth !== undefined && { defaultAuth: this.defaultAuth }),
       ...(this.serving !== undefined && { serving: this.serving }),
       models: this.models,
       enums: this.enums,

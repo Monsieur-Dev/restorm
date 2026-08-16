@@ -360,6 +360,10 @@
     "color": "var(--badge-scenario-background)",
     "icon": "circuit-board"
   },
+  "design": {
+    "color": "var(--badge-design-background)",
+    "icon": "symbol-color"
+  },
   "pro": {
     "text": "PRO"
   }

@@ -1,0 +1,371 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  GatedControl,
+  InputBox,
+  ListView,
+  MarkdownEditor,
+  ScrollableElement,
+  SelectBox,
+  useAuthState,
+  type ISelectData,
+  type ListViewItemData
+} from 'electron-core-ui/renderer'
+import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collections'
+import type { DesignSectionKey } from '../../../../shared/types/editor'
+import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
+import { isDesignEditLocked } from '../../../../shared/auth/planCapabilities'
+import { consumePendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
+import { subscribeToPro } from '../../services/subscribeToPro'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import './designTabView.css'
+
+export interface DesignTabViewProps {
+  design: ApiDesign
+  /** The workbench tab hosting this view (test ids derive from it). */
+  tabId: string
+}
+
+/**
+ * The Design tab: an icon rail on the left switching between the
+ * design's sections, one section pane on the right. ONE tab per design
+ * (single-tab policy) — the sidebar's group entries refocus this same
+ * tab through the design-section intent channel.
+ *
+ * Edits write straight onto the REACTIVE design by reassigning a
+ * top-level section (the 468-family mutation convention): the proxy
+ * emits `DESIGN_UPDATED` into the standard dirty / autosave pipeline.
+ * Editing is gated by plan: Community renders everything visible but
+ * locked (`GatedControl`), Pro and above edit freely.
+ */
+export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) => {
+  const { t } = useTranslation()
+  const authState = useAuthState()
+  const editLocked = isDesignEditLocked(authState)
+
+  const [activeSection, setActiveSection] = useState<DesignSectionKey>(
+    () => consumePendingDesignSection(design.id) ?? 'settings'
+  )
+
+  // Follow section intents while mounted — the single-tab policy means
+  // a sidebar group click usually refocuses this already-open tab. An
+  // intent staged between the state initializer and this subscription is
+  // drained on a microtask (never a synchronous state write in the
+  // effect body).
+  useEffect(() => {
+    const unsubscribe = subscribeDesignSectionIntent((designId, section) => {
+      if (designId === design.id) setActiveSection(section)
+    })
+    const pending = consumePendingDesignSection(design.id)
+    if (pending !== undefined) {
+      queueMicrotask(() => { setActiveSection(pending) })
+    }
+    return unsubscribe
+  }, [design.id])
+
+  return (
+    <div className="design-tab-view" data-testid={`design-tab-view-${design.id}`}>
+      <nav className="design-rail" aria-label={t('design.rail.ariaLabel', 'Design sections')}>
+        {DESIGN_SECTIONS.map((section) => (
+          <HeaderHoverTooltip key={section.key} label={t(section.labelKey)}>
+            <button
+              type="button"
+              className={`design-rail-button${activeSection === section.key ? ' active' : ''}`}
+              aria-label={t(section.labelKey)}
+              aria-pressed={activeSection === section.key}
+              data-testid={`design-rail-${section.key}`}
+              onClick={() => { setActiveSection(section.key) }}
+            >
+              <span className={`codicon codicon-${section.codicon}`} />
+            </button>
+          </HeaderHoverTooltip>
+        ))}
+      </nav>
+      <div className="design-section-host" data-testid={`design-section-${activeSection}`}>
+        {activeSection === 'settings' && (
+          <DesignSettingsSection design={design} editLocked={editLocked} />
+        )}
+        {(activeSection === 'models' || activeSection === 'enums' || activeSection === 'routes') && (
+          <DesignEntityListSection key={activeSection} design={design} section={activeSection} />
+        )}
+        {activeSection === 'documentation' && (
+          <DesignSectionPlaceholder
+            title={t('design.section.documentation')}
+            message={t('design.documentation.empty', 'The design documentation will be served here.')}
+          />
+        )}
+        {activeSection === 'notes' && (
+          <DesignNotesSection design={design} editLocked={editLocked} tabId={tabId} />
+        )}
+        {activeSection === 'code' && (
+          <DesignSectionPlaceholder
+            title={t('design.section.code')}
+            message={t('design.code.empty', 'Code generation from this design will live here.')}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+const DesignSectionPlaceholder: React.FC<{ title: string; message: string }> = ({ title, message }) => (
+  <div className="design-section design-section-placeholder">
+    <h2 className="design-section-title">{title}</h2>
+    <p className="design-section-placeholder-message">{message}</p>
+  </div>
+)
+
+/**
+ * Settings — design-server block on top (spin arrives with the design
+ * server), then the API identity. Every edit reassigns a top-level
+ * design key so the reactive proxy sees it.
+ */
+const AUTH_KINDS: readonly DesignAuthKind[] = ['none', 'bearer', 'apiKeyHeader', 'basic']
+
+/**
+ * Write one top-level design section through the REACTIVE proxy — the
+ * deliberate mutation path of the design pipeline (the proxy's set trap
+ * emits DESIGN_UPDATED into dirty/autosave). Lives at module scope: a
+ * component-scope assignment would read as a render-value mutation,
+ * which this is not — the design object is an external store.
+ */
+function assignDesignSection<K extends keyof ApiDesign>(design: ApiDesign, key: K, value: ApiDesign[K]): void {
+  design[key] = value
+}
+
+const DesignSettingsSection: React.FC<{ design: ApiDesign; editLocked: boolean }> = ({ design, editLocked }) => {
+  const { t } = useTranslation()
+  const authOptions = useMemo(() => [
+    { text: t('design.auth.none', 'None') },
+    { text: t('design.auth.bearer', 'Bearer (JWT)') },
+    { text: t('design.auth.apiKeyHeader', 'API key header') },
+    { text: t('design.auth.basic', 'Basic') }
+  ], [t])
+
+  const patchInfo = useCallback((patch: Partial<ApiDesign['info']>) => {
+    assignDesignSection(design, 'info', { ...design.info, ...patch })
+  }, [design])
+
+  const patchVersion = useCallback((value: string) => {
+    const { version: _dropped, ...rest } = design.info
+    assignDesignSection(design, 'info', value === '' ? rest : { ...rest, version: value })
+  }, [design])
+
+  const patchDescription = useCallback((value: string) => {
+    const { description: _dropped, ...rest } = design.info
+    assignDesignSection(design, 'info', value === '' ? rest : { ...rest, description: value })
+  }, [design])
+
+  const patchServer = useCallback((basePath: string) => {
+    const next = { ...(design.server ?? {}) }
+    if (basePath === '') {
+      delete next.basePath
+    } else {
+      next.basePath = basePath
+    }
+    assignDesignSection(design, 'server', next)
+  }, [design])
+
+  const setDefaultAuth = useCallback((auth: DesignAuthKind) => {
+    assignDesignSection(design, 'defaultAuth', auth)
+  }, [design])
+
+  const protocols = design.serving?.protocols ?? ['http']
+
+  return (
+    <ScrollableElement className="design-section-scroll">
+      <div className="design-section design-settings" data-testid="design-settings-section">
+        <h2 className="design-section-title">{t('design.section.settings')}</h2>
+        <p className="design-section-subtitle">
+          {t('design.settings.subtitle', 'General settings of the design “{{name}}”', { name: design.name })}
+        </p>
+
+        <h3 className="design-settings-group-title">{t('design.settings.serve.title', 'Design server')}</h3>
+        <div className="design-serve-block" data-testid="design-serve-block">
+          <div className="design-serve-text">
+            <span className="design-serve-title">{t('design.settings.serve.action', 'Serve this design')}</span>
+            <span className="design-serve-description">
+              {t('design.settings.serve.description', 'Responses from named examples · validation by constraints')}
+            </span>
+          </div>
+          <div className="design-serve-protocols">
+            {(['http', 'graphql', 'soap', 'odata'] as const).map((protocol) => (
+              <span
+                key={protocol}
+                className={`design-protocol-pill${protocols.includes(protocol) ? ' active' : ''}`}
+                data-testid={`design-protocol-${protocol}`}
+              >
+                {t(`design.protocol.${protocol}`)}
+              </span>
+            ))}
+          </div>
+          <HeaderHoverTooltip label={t('design.settings.serve.comingSoon', 'The design server is coming soon')}>
+            <button
+              type="button"
+              className="design-serve-spin"
+              aria-label={t('design.settings.serve.action', 'Serve this design')}
+              disabled
+              data-testid="design-serve-spin"
+            >
+              <span className="codicon codicon-play" />
+            </button>
+          </HeaderHoverTooltip>
+        </div>
+
+        <h3 className="design-settings-group-title">{t('design.settings.identity.title', 'Identity')}</h3>
+        <GatedControl locked={editLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-settings-identity-gate">
+          <div className="design-settings-grid">
+            <label className="design-field design-field-wide">
+              <span className="design-field-label">{t('design.settings.identity.title_field', 'Title')}</span>
+              <InputBox
+                value={design.info.title}
+                onChange={(value) => { patchInfo({ title: value }) }}
+                options={{ type: 'text', ariaLabel: t('design.settings.identity.title_field', 'Title') }}
+                data-testid="design-settings-title"
+              />
+            </label>
+            <label className="design-field">
+              <span className="design-field-label">{t('design.settings.identity.version', 'Design version')}</span>
+              <InputBox
+                value={design.info.version ?? ''}
+                onChange={(value) => { patchVersion(value) }}
+                options={{ type: 'text', ariaLabel: t('design.settings.identity.version', 'Design version') }}
+                data-testid="design-settings-version"
+              />
+            </label>
+            <label className="design-field design-field-full">
+              <span className="design-field-label">{t('design.settings.identity.description', 'Description')}</span>
+              <InputBox
+                value={design.info.description ?? ''}
+                onChange={(value) => { patchDescription(value) }}
+                options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.settings.identity.description', 'Description') }}
+                data-testid="design-settings-description"
+              />
+            </label>
+          </div>
+
+          <h3 className="design-settings-group-title">{t('design.settings.api.title', 'API')}</h3>
+          <div className="design-settings-grid">
+            <label className="design-field">
+              <span className="design-field-label">{t('design.settings.api.basePath', 'Base path')}</span>
+              <InputBox
+                value={design.server?.basePath ?? ''}
+                onChange={patchServer}
+                options={{ type: 'text', placeholder: '/api/v1', ariaLabel: t('design.settings.api.basePath', 'Base path') }}
+                data-testid="design-settings-base-path"
+              />
+            </label>
+            <label className="design-field">
+              <span className="design-field-label">{t('design.settings.api.defaultAuth', 'Default auth')}</span>
+              <SelectBox
+                id="design-default-auth-select"
+                className=""
+                options={authOptions}
+                selected={Math.max(0, AUTH_KINDS.indexOf(design.defaultAuth ?? 'none'))}
+                onDidSelect={(data: ISelectData) => {
+                  const picked = authOptions.findIndex((opt) => opt.text === data.selected)
+                  setDefaultAuth(AUTH_KINDS[picked] ?? 'none')
+                }}
+                selectBoxOptions={{ ariaLabel: t('design.settings.api.defaultAuth', 'Default auth'), useCustomDrawn: true }}
+                data-testid="design-settings-default-auth"
+              />
+            </label>
+          </div>
+        </GatedControl>
+      </div>
+    </ScrollableElement>
+  )
+}
+
+/**
+ * The list-driven sections (models / enums / routes): a filterable
+ * master list; the per-entity editors arrive with their own sections'
+ * tickets, so the detail pane states that plainly for now.
+ */
+const DesignEntityListSection: React.FC<{ design: ApiDesign; section: 'models' | 'enums' | 'routes' }> = ({ design, section }) => {
+  const { t } = useTranslation()
+  const [filter, setFilter] = useState('')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  const spec = DESIGN_SECTIONS.find((s) => s.key === section)
+  const entries = useMemo(() => {
+    if (section === 'models') {
+      return design.models.map((m) => ({
+        id: m.id,
+        name: m.doc.name,
+        detail: t('design.models.propertyCount', '{{count}} props', { count: m.properties.length })
+      }))
+    }
+    if (section === 'enums') {
+      return design.enums.map((e) => ({
+        id: e.id,
+        name: e.doc.name,
+        detail: t('design.enums.valueCount', '{{count}} values', { count: e.doc.enumValues?.length ?? 0 })
+      }))
+    }
+    return design.routeGroups.flatMap((group) => group.routes.map((route) => ({
+      id: route.id,
+      name: `${route.doc.match.method ?? ''} ${group.design?.basePath ?? ''}${route.doc.match.urlPattern}`.trim(),
+      detail: group.doc.name
+    })))
+  }, [design, section, t])
+
+  const rows: ListViewItemData[] = useMemo(() =>
+    entries
+      .filter((entry) => entry.name.toLowerCase().includes(filter.toLowerCase()))
+      .map((entry) => ({
+        id: entry.id,
+        title: entry.name,
+        rightActions: <span className="design-list-detail">{entry.detail}</span>
+      })), [entries, filter])
+
+  return (
+    <div className="design-section design-entity-list-section">
+      <div className="design-entity-list" data-testid={`design-${section}-list`}>
+        <div className="design-entity-list-header">
+          <h2 className="design-section-title">{spec ? t(spec.labelKey) : section}</h2>
+        </div>
+        <InputBox
+          value={filter}
+          onChange={setFilter}
+          options={{ type: 'text', placeholder: t('design.list.filter', 'Filter…'), ariaLabel: t('design.list.filter', 'Filter…') }}
+          data-testid={`design-${section}-filter`}
+        />
+        <ScrollableElement className="design-entity-list-scroll">
+          <ListView
+            items={rows}
+            selectedIds={selectedId === null ? [] : [selectedId]}
+            onItemClick={(payload) => { setSelectedId(payload.item.id) }}
+            disableDrag
+            data-testid={`design-${section}-listview`}
+          />
+        </ScrollableElement>
+      </div>
+      <div className="design-entity-detail" data-testid={`design-${section}-detail`}>
+        <p className="design-section-placeholder-message">
+          {selectedId === null
+            ? t('design.list.selectPrompt', 'Select an entry in the list.')
+            : t('design.list.editorPending', 'The editor for this section is on its way.')}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/** Notes — the same markdown surface requests and folders have. */
+const DesignNotesSection: React.FC<{ design: ApiDesign; editLocked: boolean; tabId: string }> = ({ design, editLocked, tabId }) => {
+  const { t } = useTranslation()
+  return (
+    <div className="design-section design-notes-section">
+      <h2 className="design-section-title">{t('design.section.notes')}</h2>
+      <GatedControl locked={editLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-notes-gate">
+        <MarkdownEditor
+          key={`${tabId}-notes`}
+          initialValue={design.notes ?? ''}
+          onChange={(md: string) => { assignDesignSection(design, 'notes', md) }}
+          data-testid="design-notes-editor"
+        />
+      </GatedControl>
+    </div>
+  )
+}

@@ -266,6 +266,7 @@ const DESIGN_INDEXABLE_KEYS = new Set([
   'server',
   'securitySchemes',
   'defaultSecurity',
+  'defaultAuth',
   'serving',
   'models',
   'enums',

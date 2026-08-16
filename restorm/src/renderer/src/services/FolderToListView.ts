@@ -3,10 +3,12 @@
  */
 
 import type { ListViewItemData } from 'electron-core-ui/renderer'
-import { IconView } from 'electron-core-ui/renderer'
+import { IconView, i18n } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request, ApiDesign } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
+import { DESIGN_SECTIONS, DESIGN_CODICON, designSectionRowId } from '../../../shared/design/designSections'
+
 import { requestBadgeMode } from '../utils/badgeUtils'
 import React, { type ReactNode } from 'react'
 import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
@@ -359,6 +361,40 @@ function scenarioToListViewItem(
 }
 
 /**
+ * Convert an ApiDesign to a ListViewItemData: the design node plus its
+ * VIRTUAL group entries (one per Design-tab section — never one row per
+ * model/route). The virtual rows are not tree items: their ids parse via
+ * `parseDesignSectionRowId`, clicks refocus the design tab on the
+ * section, and drag & drop refuses them wholesale.
+ */
+function designToListViewItem(
+  design: ApiDesign,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('design', 'DESIGN')
+  const isExpanded = options.expandedIds.has(design.id)
+  const children: ListViewItemData[] = DESIGN_SECTIONS.map((section) => {
+    const count = section.count(design)
+    return {
+      id: designSectionRowId(design.id, section.key),
+      title: i18n.t(section.labelKey),
+      icon: section.codicon,
+      ...(count !== null && count > 0
+        ? { rightActions: React.createElement('span', { className: 'design-section-count' }, String(count)) }
+        : {})
+    }
+  })
+  return {
+    id: design.id,
+    title: design.name,
+    isExpandable: true,
+    isExpanded,
+    icon: badge ?? DESIGN_CODICON,
+    children
+  }
+}
+
+/**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
 export function folderItemToListViewItem(
@@ -390,6 +426,10 @@ export function folderItemToListViewItem(
 
   if (isScenario(item)) {
     return { ...scenarioToListViewItem(item, options), rightActions: secretBadges(item.id) }
+  }
+
+  if (isApiDesign(item)) {
+    return designToListViewItem(item, options)
   }
 
   if (isEnvironmentFolder(item)) {
@@ -511,6 +551,10 @@ function childItemsOf(item: { items?: FolderItem[] | null }): FolderItem[] {
 }
 
 export function collectExpandableIds(item: FolderItem): string[] {
+  // A design expands into its virtual group entries — always expandable.
+  if (isApiDesign(item)) {
+    return [item.id]
+  }
   // A scenario is a container too, but it carries `type:'scenario'` and an
   // optional `items` — branch it first (an empty scenario isn't expandable).
   if (isScenario(item)) {

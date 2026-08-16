@@ -31,6 +31,7 @@ export function buildReferenceApiDesign(): ApiDesign {
       bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', description: 'JWT bearer' }
     },
     defaultSecurity: [{ bearerAuth: [] }],
+    defaultAuth: 'bearer',
     serving: { protocols: ['http', 'graphql'], port: 7480 },
     models: [
       {

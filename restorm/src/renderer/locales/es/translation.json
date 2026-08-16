@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Eliminar",
       "clone": "Clonar",
+      "openInSplit": "Abrir en panel dividido",
       "copySuffix": "copia",
       "rename": "Renombrar",
       "addToFavorites": "Añadir a favoritos",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Entorno"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Ajustes",
+      "models": "Modelos",
+      "enums": "Enums",
+      "routes": "Rutas",
+      "documentation": "Documentación",
+      "notes": "Notas",
+      "code": "Código"
+    },
+    "rail": {
+      "ariaLabel": "Secciones del diseño"
+    },
+    "settings": {
+      "subtitle": "Ajustes generales del diseño «{{name}}»",
+      "serve": {
+        "title": "Servidor de diseño",
+        "action": "Servir este diseño",
+        "description": "Respuestas desde ejemplos con nombre · validación por restricciones",
+        "comingSoon": "El servidor de diseño llegará pronto"
+      },
+      "identity": {
+        "title": "Identidad",
+        "title_field": "Título",
+        "version": "Versión del diseño",
+        "description": "Descripción"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Ruta base",
+        "defaultAuth": "Auth por defecto"
+      }
+    },
+    "auth": {
+      "none": "Ninguna",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Cabecera de API key",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtrar…",
+      "selectPrompt": "Seleccione una entrada de la lista.",
+      "editorPending": "El editor de esta sección está en camino."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} propiedad",
+      "propertyCount_other": "{{count}} propiedades"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} valor",
+      "valueCount_other": "{{count}} valores"
+    },
+    "documentation": {
+      "empty": "La documentación del diseño se servirá aquí."
+    },
+    "code": {
+      "empty": "La generación de código desde este diseño vivirá aquí."
+    },
+    "statusbar": {
+      "format": "diseño · formato {{version}}"
     }
   },
   "mqtt": {

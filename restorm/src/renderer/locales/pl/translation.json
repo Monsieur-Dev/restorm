@@ -259,6 +259,7 @@
     "contextMenu": {
       "delete": "Usuń",
       "clone": "Klonuj",
+      "openInSplit": "Otwórz w podzielonym panelu",
       "copySuffix": "kopia",
       "rename": "Zmień nazwę",
       "addToFavorites": "Dodaj do ulubionych",
@@ -2139,6 +2140,74 @@
       "fields": {
         "env": "Środowisko"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Ustawienia",
+      "models": "Modele",
+      "enums": "Enumy",
+      "routes": "Trasy",
+      "documentation": "Dokumentacja",
+      "notes": "Notatki",
+      "code": "Kod"
+    },
+    "rail": {
+      "ariaLabel": "Sekcje projektu API"
+    },
+    "settings": {
+      "subtitle": "Ogólne ustawienia projektu API „{{name}}”",
+      "serve": {
+        "title": "Serwer projektu",
+        "action": "Serwuj ten projekt API",
+        "description": "Odpowiedzi z nazwanych przykładów · walidacja ograniczeniami",
+        "comingSoon": "Serwer projektu API wkrótce"
+      },
+      "identity": {
+        "title": "Tożsamość",
+        "title_field": "Tytuł",
+        "version": "Wersja projektu",
+        "description": "Opis"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Ścieżka bazowa",
+        "defaultAuth": "Domyślne auth"
+      }
+    },
+    "auth": {
+      "none": "Brak",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Nagłówek klucza API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtruj…",
+      "selectPrompt": "Wybierz pozycję z listy.",
+      "editorPending": "Edytor tej sekcji jest w drodze."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} właściwość",
+      "propertyCount_other": "{{count}} właściwości"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} wartość",
+      "valueCount_other": "{{count}} wartości"
+    },
+    "documentation": {
+      "empty": "Dokumentacja projektu API będzie serwowana tutaj."
+    },
+    "code": {
+      "empty": "Generowanie kodu z tego projektu API pojawi się tutaj."
+    },
+    "statusbar": {
+      "format": "projekt API · format {{version}}"
     }
   },
   "mqtt": {

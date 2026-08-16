@@ -7,7 +7,7 @@ import { findItemById } from '../utils/treeSearch'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/collections'
-import { isScenario } from '../../../shared/types/collections'
+import { isScenario, isApiDesign } from '../../../shared/types/collections'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -40,6 +40,8 @@ export interface UseSidebarStateOptions {
    * configured. Drives the "Refresh" right-click entry. */
   canRefreshFromSource?: (itemId: string) => boolean
   onRefreshFromSource?: (itemId: string) => void
+  /** Open an item in a split workbench panel (design context menu). */
+  onOpenInSplit?: (itemId: string) => void
 }
 
 export interface UseSidebarStateReturn {
@@ -47,7 +49,7 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, onOpenInSplit } = options
   const { t } = useTranslation()
 
   // Set of request ids whose URL currently resolves to a deprecated
@@ -110,6 +112,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
     return item !== null && isScenario(item)
   }, [rootItems])
 
+  const isItemDesign = useCallback((itemId: string): boolean => {
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isApiDesign(item)
+  }, [rootItems])
+
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
     () => attachContextMenus({
       items: sidebarItems,
@@ -126,9 +133,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       ...(canPaste !== undefined && { canPaste }),
       ...(canRefreshFromSource !== undefined && { canRefreshFromSource }),
       ...(onRefreshFromSource !== undefined && { onRefreshFromSource }),
-      isItemScenario
+      ...(onOpenInSplit !== undefined && { onOpenInSplit }),
+      isItemScenario,
+      isItemDesign
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, onOpenInSplit, isItemScenario, isItemDesign]
   )
 
   return {

@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Sil",
       "clone": "Çoğalt",
+      "openInSplit": "Bölünmüş panelde aç",
       "copySuffix": "kopya",
       "rename": "Yeniden adlandır",
       "addToFavorites": "Favorilere ekle",
@@ -2137,6 +2138,74 @@
       "fields": {
         "env": "Ortam"
       }
+    }
+  },
+  "design": {
+    "section": {
+      "settings": "Ayarlar",
+      "models": "Modeller",
+      "enums": "Enumlar",
+      "routes": "Rotalar",
+      "documentation": "Dokümantasyon",
+      "notes": "Notlar",
+      "code": "Kod"
+    },
+    "rail": {
+      "ariaLabel": "Tasarım bölümleri"
+    },
+    "settings": {
+      "subtitle": "“{{name}}” tasarımının genel ayarları",
+      "serve": {
+        "title": "Tasarım sunucusu",
+        "action": "Bu tasarımı sun",
+        "description": "Adlandırılmış örneklerden yanıtlar · kısıtlamalarla doğrulama",
+        "comingSoon": "Tasarım sunucusu yakında geliyor"
+      },
+      "identity": {
+        "title": "Kimlik",
+        "title_field": "Başlık",
+        "version": "Tasarım sürümü",
+        "description": "Açıklama"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Temel yol",
+        "defaultAuth": "Varsayılan auth"
+      }
+    },
+    "auth": {
+      "none": "Yok",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API anahtarı başlığı",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData"
+    },
+    "list": {
+      "filter": "Filtrele…",
+      "selectPrompt": "Listeden bir öğe seçin.",
+      "editorPending": "Bu bölümün düzenleyicisi yolda."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} özellik",
+      "propertyCount_other": "{{count}} özellik"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} değer",
+      "valueCount_other": "{{count}} değer"
+    },
+    "documentation": {
+      "empty": "Tasarım dokümantasyonu burada sunulacak."
+    },
+    "code": {
+      "empty": "Bu tasarımdan kod üretimi burada yaşayacak."
+    },
+    "statusbar": {
+      "format": "tasarım · biçim {{version}}"
     }
   },
   "mqtt": {

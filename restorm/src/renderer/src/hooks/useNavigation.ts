@@ -5,9 +5,11 @@
 import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario } from '../../../shared/types/collections'
-import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
+import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario, ApiDesign } from '../../../shared/types/collections'
+import { isFolder, isRequest, isScenario, isApiDesign, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
+import { parseDesignSectionRowId } from '../../../shared/design/designSections'
+import { setPendingDesignSection } from '../services/designSectionIntent'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
 /** Control whether opening a tab moves focus to it. Mirrors
@@ -24,6 +26,7 @@ export interface UseNavigationOptions {
   rootItems: FolderItem[]
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
+  openDesignTab: (design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenNavTabOptions) => void
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
@@ -76,6 +79,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     rootItems,
     openFolderTab,
     openScenarioEditorTab,
+    openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
@@ -131,6 +135,11 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
             openFolderTab(folder, breadcrumbs)
           }
         }
+      } else if (params.type === 'design') {
+        const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, key)
+        if (item && isApiDesign(item)) {
+          openDesignTab(item, breadcrumbs)
+        }
       } else if (params.type === 'http-request' || params.type === 'graphql-request' ||
                  params.type === 'grpc-request' || params.type === 'soap-request' ||
                  params.type === 'websocket-request' || params.type === 'sse-request' ||
@@ -144,14 +153,35 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     })
 
     return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, rootItems, selectSingle, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
+  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, rootItems, selectSingle, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
+    // A design's sidebar group entries are VIRTUAL rows (not tree
+    // items): a click stages the target section, then rides the normal
+    // design open path — the single-tab policy refocuses an already-open
+    // tab, and the staged intent switches its section.
+    const sectionRow = parseDesignSectionRowId(itemId)
+    if (sectionRow !== null) {
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sectionRow.designId)
+      if (!item || !isApiDesign(item)) return
+      selectSingle(itemId)
+      setPendingDesignSection(item.id, sectionRow.section)
+      openDesignTab(item, breadcrumbs)
+      navigationService.navigateTo(item.id, 'sidebar', { type: 'design' })
+      return
+    }
+
     const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
     if (!item) return
 
     selectSingle(itemId)
+
+    if (isApiDesign(item)) {
+      openDesignTab(item, breadcrumbs)
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
+      return
+    }
 
     if (isEnvironmentFolder(item)) {
       openEnvironmentFolderTab(item, breadcrumbs)
@@ -204,7 +234,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'kafka-request' })
       }
     }
-  }, [rootItems, selectSingle, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, selectSingle, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Middle-click ("open in background") variant of `handleItemClick`.
   // Opens the corresponding workbench tab without focusing it, without
@@ -229,11 +259,16 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       return
     }
 
+    if (isApiDesign(item)) {
+      openDesignTab(item, breadcrumbs, { focus: false })
+      return
+    }
+
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
       openAnyRequestTab(item, breadcrumbs, environments, { focus: false })
     }
-  }, [rootItems, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Open a dragged sidebar item at an explicit split position. Same
   // item→tab dispatch as `handleItemClick`, but with a `placement` so the
@@ -257,11 +292,15 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       openScenarioEditorTab(item, breadcrumbs, { placement })
       return
     }
+    if (isApiDesign(item)) {
+      openDesignTab(item, breadcrumbs, { placement })
+      return
+    }
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
       openAnyRequestTab(item, breadcrumbs, environments, { placement })
     }
-  }, [rootItems, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Handle breadcrumb item click — open a workbench tab for the
   // clicked segment, not just update history. The old implementation
@@ -383,7 +422,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // Parse a tab ID to extract the item ID and type
   const parseTabId = useCallback((tabId: string): { itemId: string | null; itemType: string | null } => {
     const indexMatch = /^(env-folder|folder|request|scenario)-idx:(.+)$/.exec(tabId)
-    const idMatch = /^(env-folder|folder|request|scenario)-id:(.+)$/.exec(tabId)
+    const idMatch = /^(env-folder|folder|request|scenario|design)-id:(.+)$/.exec(tabId)
     const mapType = (prefix: string): string =>
       prefix === 'request' ? 'http-request' : prefix === 'scenario' ? 'scenario-editor' : prefix
 

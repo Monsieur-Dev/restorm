@@ -8,9 +8,10 @@ import type {
   Environment,
   EnvironmentFolder,
   Request,
-  Scenario
+  Scenario,
+  ApiDesign
 } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -175,6 +176,12 @@ function findItemByIdInTree(container: TreeContainer, id: string): FolderItem | 
 }
 
 /** Find any item (folder or request) by ID across multiple root folders */
+/** Find a design anywhere in the tree by its id. */
+export function findDesignById(rootItems: FolderItem[], id: string): ApiDesign | undefined {
+  const item = findItemById(rootItems, id)
+  return item !== null && isApiDesign(item) ? item : undefined
+}
+
 export function findItemById(rootItems: FolderItem[], id: string): FolderItem | null {
   for (const root of rootItems) {
     // Check if root itself is the item we're looking for

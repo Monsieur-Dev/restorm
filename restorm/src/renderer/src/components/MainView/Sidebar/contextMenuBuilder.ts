@@ -5,6 +5,7 @@
 import React from 'react'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { RegistryBadge } from '../../common/RegistryBadge'
+import { parseDesignSectionRowId } from '../../../../../shared/design/designSections'
 
 export interface SidebarContextMenuItem {
   id: string
@@ -98,6 +99,12 @@ export interface BuildContextMenuOptions {
    * Add submenu) so a user can bookmark / clone / delete a
    * scenario the same way a request gets those entries. */
   isItemScenario?: (itemId: string) => boolean
+  /** Flags API-design rows — routed through the design branch (no Add
+   * submenu, plus the explicit split-panel escape hatch). */
+  isItemDesign?: (itemId: string) => boolean
+  /** Open the item in a split workbench panel — the deliberate breach
+   * of the design single-tab policy. */
+  onOpenInSplit?: (itemId: string) => void
 }
 
 /** One request/server entry of the Add menu — a `kind` the `onAddChildItem`
@@ -418,8 +425,56 @@ const clipboardEntries = (
 export const buildContextMenuForItem = (
   options: BuildContextMenuOptions
 ): SidebarContextMenuItem[] => {
-  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario } = options
+  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario, isItemDesign, onOpenInSplit } = options
   const itemId = item.id
+
+  // A design's virtual section rows carry no menu of their own: every
+  // action (favourite, clone, delete…) belongs to the design node.
+  if (parseDesignSectionRowId(itemId) !== null) {
+    return []
+  }
+
+  if (isItemDesign?.(itemId) === true) {
+    const isFav = isItemFavorite?.(itemId) ?? false
+    return [
+      {
+        id: 'toggle-favorite',
+        label: isFav ? t('sidebar.contextMenu.removeFromFavorites') : t('sidebar.contextMenu.addToFavorites'),
+        icon: isFav ? 'star-full' : 'star-empty',
+        onClick: () => { onToggleFavorite?.(itemId) }
+      },
+      { id: 'sep-fav', isSeparator: true, label: '' },
+      ...(onOpenInSplit !== undefined ? [{
+        id: 'open-in-split',
+        label: t('sidebar.contextMenu.openInSplit'),
+        icon: 'split-horizontal',
+        onClick: () => { onOpenInSplit(itemId) }
+      }, { id: 'sep-split', isSeparator: true, label: '' }] : []),
+      ...clipboardEntries(itemId, t, onCutItem, onCopyItem, onPasteItem, canPaste),
+      {
+        id: 'clone-item',
+        label: t('sidebar.contextMenu.clone'),
+        icon: 'copy',
+        shortcut: 'Ctrl+D',
+        onClick: () => { onCloneItem(itemId) }
+      },
+      {
+        id: 'rename-item',
+        label: t('sidebar.contextMenu.rename'),
+        icon: 'edit',
+        shortcut: 'F2',
+        onClick: () => { onRenameItem(itemId) }
+      },
+      { id: 'sep-item', isSeparator: true, label: '' },
+      {
+        id: 'delete-item',
+        label: t('sidebar.contextMenu.delete'),
+        icon: 'trash',
+        shortcut: 'Suppr',
+        onClick: () => { onDeleteItem(itemId) }
+      }
+    ]
+  }
   // Scenarios are folder-shaped (they carry `children`) but the user
   // wants the same favourite / add-child / clone affordances they get
   // on a request — surface them via a dedicated branch above the
@@ -711,15 +766,24 @@ export interface AttachContextMenusOptions {
   canRefreshFromSource?: (itemId: string) => boolean
   onRefreshFromSource?: ContextMenuActionHandler
   isItemScenario?: (itemId: string) => boolean
+  /** Flags API-design rows — routed through the design branch (no Add
+   * submenu, plus the explicit split-panel escape hatch). */
+  isItemDesign?: (itemId: string) => boolean
+  /** Open the item in a split workbench panel — the deliberate breach
+   * of the design single-tab policy. */
+  onOpenInSplit?: (itemId: string) => void
 }
 
 export const attachContextMenus = (
   options: AttachContextMenusOptions
 ): ListViewItemData[] =>
   options.items.map((item) => {
+    const menu = buildContextMenuForItem({ ...options, item })
     const withMenu = {
       ...item,
-      contextMenuItems: buildContextMenuForItem({ ...options, item })
+      // An empty menu means "no context menu at all" (a design's virtual
+      // section rows) — omit the key so the ListView opens nothing.
+      ...(menu.length > 0 ? { contextMenuItems: menu } : {})
     } as ListViewItemData
     if (item.children && item.children.length > 0) {
       withMenu.children = attachContextMenus({ ...options, items: item.children })

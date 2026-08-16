@@ -495,6 +495,10 @@ colors:
     value: "#7c4dff"
     description: "Scenario badge (HC dark)"
 
+  - id: badge-design-background
+    value: "#1de9b6"
+    description: "API design badge (HC dark)"
+
   - id: badge-capsule-glyph-background
     value: "#4a148c"
     description: "Server-mode capsule glyph (HC dark)"
