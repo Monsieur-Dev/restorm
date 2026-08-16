@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { FolderItem } from '../../../shared/types/folderTypes'
 import { useGitFolder } from './useGitFolder'
 import { diffProjectEntities, parseProjectDocumentFields, parseProjectYaml, type GitEntityChange } from '../../../shared/git/gitCommitDiff'
-import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
+import { requiredFileFormatVersion } from '../../../shared/config/fileFormatVersion'
 import { buildCommitMessageContext } from '../../../shared/git/commitMessageContext'
 import { RESTORM_COMMIT_MESSAGE_TEMPLATE } from '../../../shared/git/commitMessageTemplates'
 import { processAfterDeserialization } from '../utils/serialization'
@@ -136,11 +136,12 @@ export function usePushModal(
       // The file has two halves: its items, and its own root-level fields.
       // Diffing only the items made a save that changed just the format
       // stamp look like no change at all — the modal listed nothing and
-      // disabled Push on a project git reported as modified. What this app
-      // writes is always the current version, so that is the "after".
+      // disabled Push on a project git reported as modified. The version a
+      // save writes is derived from the content (lazy bump), so the
+      // "after" is derived from the same tree the save will serialize.
       const entityChanges = diffProjectEntities(beforeItems, rootItems, {
         before: parseProjectDocumentFields(rawYaml),
-        after: { fileFormatVersion: CURRENT_FILE_FORMAT_VERSION }
+        after: { fileFormatVersion: requiredFileFormatVersion(rootItems) }
       })
       setChanges(entityChanges)
       setLanguageState(defaultLanguage)

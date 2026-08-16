@@ -1,0 +1,104 @@
+import { describe, it, expect } from 'vitest'
+import {
+  composeRoutePath,
+  designModelDoc,
+  designNameResolver,
+  designToApiDocumentation
+} from '../../src/shared/design/apiDesignDoc'
+import type { ApiDocumentation } from '../../src/shared/types/apiDocumentation'
+import { buildReferenceApiDesign } from './apiDesignReference'
+
+describe('composeRoutePath', () => {
+  it('joins the design, version and group bases with the relative pattern', () => {
+    expect(composeRoutePath(
+      { designBasePath: '/api', versionPrefix: '/v1', groupBasePath: '/users' },
+      '/{{id}}'
+    )).toBe('/api/v1/users/{{id}}')
+  })
+
+  it('tolerates missing segments and stray slashes', () => {
+    expect(composeRoutePath({}, '/')).toBe('/')
+    expect(composeRoutePath({ groupBasePath: 'users/' }, '{{id}}/')).toBe('/users/{{id}}')
+    expect(composeRoutePath({ designBasePath: '' }, '/pets')).toBe('/pets')
+  })
+})
+
+describe('designModelDoc', () => {
+  it('reassembles a plain ModelDocumentation and derives targetModelRef from the ID reference', () => {
+    const design = buildReferenceApiDesign()
+    const resolve = designNameResolver(design)
+    const order = design.models.find((m) => m.doc.name === 'Order')
+    if (order === undefined) throw new Error('fixture has Order')
+
+    const doc = designModelDoc(order, resolve)
+    expect(doc.name).toBe('Order')
+    expect(doc.properties.map((p) => p.name)).toEqual(['id', 'customer', 'lines'])
+    expect(doc.properties[1]?.targetModelRef).toBe('User')
+    expect(doc.properties[2]?.targetModelRef).toBe('User')
+  })
+
+  it('leaves the doc untouched on a dangling reference', () => {
+    const design = buildReferenceApiDesign()
+    const order = design.models.find((m) => m.doc.name === 'Order')
+    if (order === undefined) throw new Error('fixture has Order')
+    const customer = order.properties[1]
+    if (customer?.design?.reference === undefined) throw new Error('fixture has the reference')
+    customer.design.reference.refId = 'missing'
+    customer.doc.targetModelRef = 'Stale'
+    const doc = designModelDoc(order, designNameResolver(design))
+    expect(doc.properties[1]?.targetModelRef).toBe('Stale')
+  })
+})
+
+describe('designToApiDocumentation', () => {
+  const projection = designToApiDocumentation(buildReferenceApiDesign())
+
+  it('projects models and enums under their names', () => {
+    expect(Object.keys(projection.models).sort()).toEqual(['AdminUser', 'Order', 'User', 'UserStatus'])
+    expect(projection.models['UserStatus']?.enumValues).toEqual(['active', 'suspended', 'deleted'])
+  })
+
+  it('flattens routes onto operations with composed full paths and group tags', () => {
+    const patterns = projection.operations.map((op) => `${op.match.method ?? ''} ${op.match.urlPattern}`)
+    expect(patterns).toEqual([
+      'GET /api/v1/users/{{id}}',
+      'GET /api/v1/users',
+      'POST /api/v1/users'
+    ])
+    expect(projection.operations.every((op) => op.group === 'Users')).toBe(true)
+    expect(Object.keys(projection.groups)).toEqual(['Users'])
+  })
+
+  it('carries the API identity, server, and security through verbatim', () => {
+    const design = buildReferenceApiDesign()
+    expect(projection.api).toEqual(design.info)
+    expect(projection.server).toEqual(design.server)
+    expect(projection.securitySchemes).toEqual(design.securitySchemes)
+    expect(projection.defaultSecurity).toEqual(design.defaultSecurity)
+  })
+
+  /**
+   * Coverage drift guard: every field of `ApiDocumentation` must have a
+   * home in the design projection. If the documentation root ever gains
+   * a field (a new thing importers can produce), this fails until the
+   * design decides where that field lives — the compile-time half of
+   * the importer-coverage audit.
+   */
+  it('covers every ApiDocumentation root field', () => {
+    const covered: Record<keyof ApiDocumentation, true> = {
+      sourceType: true,      // the design is the source; projection stamps a dialect
+      sourceUrl: true,       // no remote source: deliberately absent on a design
+      api: true,             // ApiDesign.info
+      server: true,          // ApiDesign.server
+      models: true,          // ApiDesign.models + enums
+      groups: true,          // ApiDesign.routeGroups[].doc
+      operations: true,      // ApiDesign.routeGroups[].routes[].doc
+      securitySchemes: true, // ApiDesign.securitySchemes
+      defaultSecurity: true  // ApiDesign.defaultSecurity
+    }
+    // The runtime half: the projection emits no key outside the doc type.
+    for (const key of Object.keys(projection)) {
+      expect(key in covered, `projection emits unknown key ${key}`).toBe(true)
+    }
+  })
+})

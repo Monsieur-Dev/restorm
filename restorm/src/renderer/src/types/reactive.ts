@@ -9,7 +9,7 @@ import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, FolderItem, Request, Environment } from '../../../shared/types/collections'
-import { isAnyFolder, isRequest, isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest, isEnvironmentFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -651,7 +651,9 @@ export function makeReactiveFolderItem(item: FolderItem, parentFolderId?: string
   // test `isScenario` FIRST, else a scenario nested in an imported folder gets
   // mangled into a folder (its `nodes`/`edges` lost) and never renders as a
   // scenario row. Returned as-is, mirroring the root-level import path.
-  if (isScenario(item)) {
+  // A design is a typed leaf too: returned as-is so the request wrapper
+  // cannot claim it (its document events arrive with the Design tab).
+  if (isScenario(item) || isApiDesign(item)) {
     return item
   } else if (isAnyFolder(item)) {
     return makeReactiveFolder(item)

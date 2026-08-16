@@ -13,6 +13,7 @@
  */
 
 import { deriveStableId, idPathSegment } from '../../../shared/utils/stableId'
+import { isOpaqueDocumentationBag } from '../../../shared/utils/designWalk'
 import { normalizeValueType } from './normalizeValueType'
 
 export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKeys, CANONICAL_KEY_PRIORITY, ProjectTooLargeError, stringifyDocument, cloneDocumentForSerialization } from '../../../shared/utils/serialization'
@@ -104,6 +105,12 @@ export function generateIds<T>(obj: T): T {
     for (const [key, v] of Object.entries(result)) {
       if (key === 'id') continue
       if (isScenarioNode && key === 'config') continue
+      // A design entity's embedded documentation object and a named
+      // example's value map hold user CONTENT (spec examples, payloads),
+      // not document structure: stamping ids inside them would persist
+      // noise into data the user authored, and a payload shaped like an
+      // entity must not be mistaken for one.
+      if (isOpaqueDocumentationBag(record, key)) continue
       if (isKeyValueLike && key === 'value') {
         // Rehydrate persisted ValueType POJOs (`{ type, value, … }`)
         // into real class instances. The runtime UI (cell renderers,
@@ -215,6 +222,9 @@ export function reviveValueTypesDeep<T>(data: T): T {
     const result: Record<string, unknown> = { ...record }
     for (const [key, v] of Object.entries(result)) {
       if (isScenarioNode && key === 'config') continue
+      // Same exclusion as the open-file walk: a design's embedded doc /
+      // example values are opaque content, not KeyValue rows to revive.
+      if (isOpaqueDocumentationBag(record, key)) continue
       if (isKeyValueLike && key === 'value') {
         result['value'] = normalizeValueType(v)
         continue

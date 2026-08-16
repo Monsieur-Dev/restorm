@@ -74,11 +74,11 @@ import {
 import { isSaveCancellation } from '../../../shared/utils/saveResult'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import {
-  CURRENT_FILE_FORMAT_VERSION,
+  requiredFileFormatVersion,
   resolveFileFormatVersion,
 } from '../../../shared/config/fileFormatVersion'
 import type { EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import { collectEnvFileSecretsFromCollections, applyEnvFileSecretsToCollections } from '../../../shared/utils/envFileSecrets'
 import { envSecretsDigestOf, findNodeByRuntimeId } from '../services/envSecretsDigest'
@@ -163,30 +163,23 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const savedEnvBaselineRef = useRef<string | null>(null)
 
   /**
-   * On-disk format version of the open document, resolved once at load
-   * (see `resolveFileFormatVersion`) and written back at the ROOT of
-   * every save payload — a sibling of `collections`, never on a
-   * collection.
-   *
-   * Held here rather than on the tree because it describes the FILE, and
-   * the tree is only its contents. Carrying the loaded value forward,
-   * instead of stamping the current one on every save, keeps a save
-   * honest: the version says which model the bytes are in, and this
-   * build does not migrate anything, so it has no standing to claim a
-   * different one. A document that declared nothing resolves to the
-   * current version, which is how a legacy file acquires one.
-   */
-  const fileFormatVersionRef = useRef<number>(CURRENT_FILE_FORMAT_VERSION)
-
-  /**
    * The document as it is persisted: the format version at the root,
    * then the collections. Every save payload and every whole-file
    * checksum goes through here, so the shape compared at load is the
    * shape written at save.
+   *
+   * The version is DERIVED from the content being written
+   * (`requiredFileFormatVersion`): a document using no version-gated
+   * feature declares the base version whatever it declared on disk, and
+   * the first save carrying an API design is the one that moves the
+   * file to 1.1 — the lazy bump. Deriving rather than carrying the
+   * loaded value forward is also what keeps the version correct in both
+   * directions (removing the last design moves the next save back
+   * down), and keeps open→save a fixed point on any file.
    */
   const buildDocument = useCallback(
     (collections: unknown[]): Record<string, unknown> => ({
-      fileFormatVersion: fileFormatVersionRef.current,
+      fileFormatVersion: requiredFileFormatVersion(collections),
       collections
     }),
     []
@@ -560,15 +553,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const performSave = useCallback(
     async (intent: 'new' | 'saveAs', saveOptions: { format: PersistenceFormat }): Promise<void> => {
       const isNew = intent === 'new'
-
       try {
         const plainData = isNew
-          // A brand-new document is written by THIS build, so it is at the
-          // current version — not at whatever the previously open document
-          // declared. It carries the stamp from its very first save, which
-          // an empty project could not do while the version lived on a
-          // collection: it has none.
-          ? ({ fileFormatVersion: CURRENT_FILE_FORMAT_VERSION, collections: [] } as Record<string, unknown>)
+          // A brand-new document carries the stamp from its very first
+          // save. Empty collections use no version-gated feature, so the
+          // derived version is the base one — a new project stays openable
+          // by every build.
+          ? (buildDocument([]))
           : (cloneDocumentForSerialization(buildDocument(rootItems)))
 
         logger.info('[useFileManagement] Saving with options', {
@@ -741,10 +732,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
         clearTabDirtyState()
 
-        // The document's format version, read from its root and nowhere
-        // else. Resolved BEFORE the checksum baseline below so it is part
-        // of the "loaded" snapshot and never looks like an edit.
-        fileFormatVersionRef.current = resolveFileFormatVersion(content, logger)
+        // The document's format version is content-derived at save time;
+        // resolving it here is kept for its gate-bypass warning (a future
+        // version reaching this point means a load path skipped the
+        // compatibility gate).
+        resolveFileFormatVersion(content, logger)
 
         const collectionsWithIds = processAfterDeserialization(collections)
         // Requests can legally live at the root (see `useImport`'s
@@ -752,8 +744,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // `makeReactiveFolder`; root-level requests go through
         // `makeReactiveRequest` with no parent id so edits still emit
         // `REQUEST_UPDATED` into the dirty tracker / search index.
+        // A design stays unwrapped: its edit surface does not exist yet,
+        // and its document events arrive with the Design tab.
         const reactiveItems = collectionsWithIds.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isApiDesign(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
 
@@ -828,6 +822,9 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           // to hand off to).
           if (isScenario(rootItem)) {
             await searchIndexService.indexScenarioTree(rootItem)
+          } else if (isApiDesign(rootItem)) {
+            // Designs join the search index with their own indexing pass
+            // (models/routes as sub-entries), not as a request.
           } else if ('items' in rootItem) {
             await searchIndexService.indexFolderTree(rootItem)
           } else {
@@ -896,9 +893,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const handleFileClosed = useCallback(() => {
     isLoadingRef.current = false
     lastLoadedPathRef.current = null
-    // Back to the version a new document would be written at, so the
-    // closed document's value cannot leak into the next one.
-    fileFormatVersionRef.current = CURRENT_FILE_FORMAT_VERSION
     setWorkbenchTree({
       orientation: 'vertical',
       groups: []

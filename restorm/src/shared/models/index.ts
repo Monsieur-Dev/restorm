@@ -14,6 +14,7 @@ export * from './Environment'
 export * from './Folder'
 export * from './EnvironmentFolder'
 export * from './Scenario'
+export * from './ApiDesign'
 export * from './requests'
 export * from './types'
 
@@ -21,11 +22,12 @@ export * from './types'
 import { Folder } from './Folder'
 import { EnvironmentFolder } from './EnvironmentFolder'
 import { Scenario } from './Scenario'
+import { ApiDesign } from './ApiDesign'
 import type { Request } from './requests'
 import type { BaseFolderItem } from './types'
 
 /** Union type for folder items */
-export type FolderItem = Folder | EnvironmentFolder | Request | Scenario
+export type FolderItem = Folder | EnvironmentFolder | Request | Scenario | ApiDesign
 
 /** Type guard: check if item is an EnvironmentFolder */
 export function isEnvironmentFolder(item: BaseFolderItem | FolderItem): item is EnvironmentFolder {
@@ -51,8 +53,15 @@ export function isScenario(item: BaseFolderItem | FolderItem): item is Scenario 
   )
 }
 
+/** Type guard: check if item is an ApiDesign */
+export function isApiDesign(item: BaseFolderItem | FolderItem): item is ApiDesign {
+  return item instanceof ApiDesign || (
+    'type' in item && (item as { type: unknown }).type === 'design'
+  )
+}
+
 /** Type guard: check if item is a Request */
 export function isRequest(item: BaseFolderItem | FolderItem): item is Request {
-  // A Scenario also carries `type` + no `items`; exclude it.
-  return 'type' in item && !('items' in item) && !isScenario(item)
+  // A Scenario and an ApiDesign also carry `type` + no `items`; exclude them.
+  return 'type' in item && !('items' in item) && !isScenario(item) && !isApiDesign(item)
 }

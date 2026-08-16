@@ -42,7 +42,7 @@ export interface ApiInfo {
 }
 
 /** Connection info: host, base path, schemes, XML namespace, etc. */
-interface ApiServer {
+export interface ApiServer {
   host?: string
   basePath?: string
   schemes?: string[]

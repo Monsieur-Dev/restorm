@@ -246,6 +246,7 @@ import type {
 import {
   isRequest,
   isScenario,
+  isApiDesign,
   isEnvironmentFolder,
   isAnyFolder,
   isFolder,
@@ -3050,7 +3051,7 @@ const App: React.FC = () => {
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isScenario(item) || isApiDesign(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -3060,6 +3061,9 @@ const App: React.FC = () => {
           for (const rootItem of reactiveItems) {
             if (isScenario(rootItem)) {
               await searchIndexService.indexScenarioTree(rootItem)
+            } else if (isApiDesign(rootItem)) {
+              // Designs join the search index with their own indexing pass
+              // (models/routes as sub-entries), not as a request.
             } else if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
             } else {

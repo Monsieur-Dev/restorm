@@ -750,6 +750,23 @@ export function parseODataMetadata(content: string): EdmSchema {
 // ApiDocumentation transformer
 // ============================================================================
 
+/** Decompose a service root URL into the `ApiServer` shape (host /
+ * basePath / schemes) the doc types declare. An unparsable value lands
+ * whole in `host` rather than being dropped. */
+function serverFromBaseUrl(baseUrl: string): ApiDocumentation['server'] {
+  try {
+    const url = new URL(baseUrl)
+    const basePath = url.pathname.replace(/\/$/, '')
+    return {
+      host: url.host,
+      ...(basePath !== '' && { basePath }),
+      schemes: [url.protocol.replace(/:$/, '')]
+    }
+  } catch {
+    return { host: baseUrl }
+  }
+}
+
 function buildApiDocumentation(
   schema: EdmSchema,
   options: { baseUrl?: string; sourceUrl?: string; apiTitle: string }
@@ -763,7 +780,6 @@ function buildApiDocumentation(
   for (const et of schema.entityTypes) {
     models[et.qualifiedName] = {
       name: et.name,
-      type: 'object',
       description: `${et.qualifiedName} (OData entity, key: ${et.keys.join(', ')})`,
       properties: et.properties.map((p) => {
         const prop: PropertyDocumentation = {
@@ -787,31 +803,43 @@ function buildApiDocumentation(
       })
     }
   }
+  // Enum models follow the shared enum shape: top-level `enumValues`
+  // with an empty `properties` array (the form every consumer reads —
+  // the `$filter` autocomplete, the docs viewer, the design pre-fill).
   for (const enumType of schema.enumTypes) {
     models[enumType.qualifiedName] = {
       name: enumType.name,
-      type: 'enum',
       description: `${enumType.qualifiedName} (OData enum)`,
-      enum: enumType.members.map((m) => m.name)
+      properties: [],
+      enumValues: enumType.members.map((m) => m.name)
     }
   }
 
+  // Operations carry their route in `match` like every other importer —
+  // it is what `findOperationForRoute` pairs a request against, so an
+  // operation without it can never surface docs on a request tab.
   const operations: OperationDocumentation[] = []
   for (const op of schema.operations) {
     operations.push({
-      method: op.kind === 'action' ? 'POST' : 'GET',
-      path: `/${op.qualifiedName}`,
+      match: { urlPattern: `/${op.qualifiedName}`, method: op.kind === 'action' ? 'POST' : 'GET' },
       summary: `${op.kind === 'action' ? 'Action' : 'Function'} ${op.name}${op.isBound ? ' (bound)' : ''}`,
       description: op.parameters.length > 0
         ? `Parameters: ${op.parameters.map((p) => `${p.name}: ${p.type}`).join(', ')}`
         : '',
+      ...(op.parameters.length > 0 && {
+        parameters: op.parameters.map((p) => ({
+          name: p.name,
+          location: 'query',
+          type: p.type,
+          required: true
+        }))
+      }),
       group: op.kind === 'action' ? 'Actions' : 'Functions'
     })
   }
   for (const set of schema.entitySets) {
     operations.push({
-      method: 'GET',
-      path: `/${set.name}`,
+      match: { urlPattern: `/${set.name}`, method: 'GET' },
       summary: `List ${set.name}`,
       description: `Entity set of ${set.entityType}`,
       group: set.name,
@@ -827,7 +855,7 @@ function buildApiDocumentation(
       version: schema.version,
       description: `OData ${schema.version} service with ${schema.entitySets.length} entity sets, ${schema.operations.length} operations.`
     },
-    ...(options.baseUrl !== undefined ? { server: { baseUrl: options.baseUrl } } : {}),
+    ...(options.baseUrl !== undefined ? { server: serverFromBaseUrl(options.baseUrl) } : {}),
     models,
     groups: {},
     operations

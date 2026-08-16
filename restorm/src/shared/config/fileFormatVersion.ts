@@ -62,9 +62,51 @@
  * additive changes (a new optional field an older build ignores
  * harmlessly) do NOT warrant a bump, because every bump locks existing
  * users out of files made by newer builds until they update.
+ *
+ * ## Lazy bump: the version is derived from the CONTENT
+ *
+ * The version a save writes is {@link requiredFileFormatVersion} of the
+ * collections being written, not a constant: a document using no
+ * version-gated feature persists as `1` and stays openable by every
+ * build, and the file only moves to a higher version on the first save
+ * that actually carries the feature — 1.1 for an API design. The bump
+ * exists solely so an older build refuses the file cleanly instead of
+ * opening it, misunderstanding it, and saving its impoverished reading
+ * back over the user's data. Removing the last design moves the next
+ * save back down to `1` — content-derived in both directions, which is
+ * also what keeps open→save byte-stable on any file.
  */
 
-export const CURRENT_FILE_FORMAT_VERSION = 1
+/** The base format: what a document carrying no version-gated feature
+ * declares. */
+export const BASE_FILE_FORMAT_VERSION = 1
+
+/** The format carrying API designs. Numeric on purpose: the gate
+ * compares numbers, and `1.1 > 1` is exactly the refusal an older
+ * build must produce. */
+export const DESIGN_FILE_FORMAT_VERSION = 1.1
+
+export const CURRENT_FILE_FORMAT_VERSION = DESIGN_FILE_FORMAT_VERSION
+
+/**
+ * The `fileFormatVersion` a document with these collections must
+ * declare: the highest version whose feature the content actually uses.
+ *
+ * Structural on purpose (`type: 'design'` anywhere in the item tree) —
+ * this runs on the plain payload a save is about to write, after the
+ * class instances have been cloned away.
+ */
+export function requiredFileFormatVersion(collections: unknown): number {
+  return containsDesign(collections) ? DESIGN_FILE_FORMAT_VERSION : BASE_FILE_FORMAT_VERSION
+}
+
+function containsDesign(node: unknown): boolean {
+  if (Array.isArray(node)) return node.some(containsDesign)
+  if (!isRecord(node)) return false
+  if (node['type'] === 'design') return true
+  const children = node['items']
+  return Array.isArray(children) && children.some(containsDesign)
+}
 
 /**
  * Name of the top-level key. Shared so the writers that insert it into a

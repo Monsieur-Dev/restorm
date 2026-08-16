@@ -1,6 +1,6 @@
 import type { FolderItem, Request } from '../types/collections'
 import {
-  isEnvironmentFolder, isAnyFolder, isScenario,
+  isEnvironmentFolder, isAnyFolder, isScenario, isApiDesign,
   isHTTPRequest, isGraphQLRequest, isSoapRequest, isWebSocketRequest,
   isODataRequest, isAuthenticationRequest, isGrpcRequest
 } from '../types/collections'
@@ -60,6 +60,8 @@ function collectRequests(items: FolderItem[]): Request[] {
       for (const child of item.items ?? []) visit(child)
       return
     }
+    // A design declares contracts, it does not call out — no origin to collect.
+    if (isApiDesign(item)) return
     if (isHTTPRequest(item) || isGraphQLRequest(item) || isSoapRequest(item) || isWebSocketRequest(item) || isODataRequest(item) || isAuthenticationRequest(item) || isGrpcRequest(item)) {
       out.push(item as Request)
     }

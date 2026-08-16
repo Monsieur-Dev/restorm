@@ -1,0 +1,183 @@
+/**
+ * Structural validation of an API design.
+ *
+ * Issues are DATA (stable codes + the IDs of the entities involved), not
+ * messages: the Design tab renders them on the faulty row and in the
+ * sidebar error indicator, and the design server / code generation
+ * refuse to run a design that has any. Localization happens at render
+ * time from the code.
+ */
+
+import type { ApiDesign, DesignModel } from '../types/apiDesign'
+
+export type DesignIssueCode =
+  /** A property has an empty name. */
+  | 'propertyNameEmpty'
+  /** Two sibling properties spell the same name. */
+  | 'propertyNameDuplicate'
+  /** A property re-declares a name an inherited property already has. */
+  | 'propertyShadowsParent'
+  /** Two models spell the same name (spec component names collide). */
+  | 'modelNameDuplicate'
+  /** Two enums spell the same name. */
+  | 'enumNameDuplicate'
+  /** `inheritsFrom` points at no model in this design. */
+  | 'inheritanceTargetUnknown'
+  /** Following `inheritsFrom` links returns to the starting model. */
+  | 'inheritanceCycle'
+  /** A property reference points at no model/enum in this design. */
+  | 'referenceTargetUnknown'
+  /** `identifier.propertyId` points at no property of the model. */
+  | 'identifierPropertyUnknown'
+  /** A route's parameter link points at no model/property. */
+  | 'paramLinkTargetUnknown'
+  /** A route's body model points at no model in this design. */
+  | 'bodyModelUnknown'
+  /** A response's model points at no model in this design. */
+  | 'responseModelUnknown'
+  /** A response serves a named example its model does not declare. */
+  | 'responseExampleUnknown'
+
+export interface DesignIssue {
+  code: DesignIssueCode
+  /** ID path from the design root down to the faulty entity — enough
+   * for the UI to focus the row and for the sidebar to mark the
+   * sections on the way. */
+  path: string[]
+  /** The contested name/value, when one exists (duplicate names,
+   * dangling reference IDs). */
+  subject?: string
+}
+
+/** `true` when the design has no blocking issues — the gate the design
+ * server and the code generators consult before running. */
+export function isDesignValid(design: ApiDesign): boolean {
+  return validateApiDesign(design).length === 0
+}
+
+export function validateApiDesign(design: ApiDesign): DesignIssue[] {
+  const issues: DesignIssue[] = []
+  const modelById = new Map(design.models.map((m) => [m.id, m]))
+  const enumIds = new Set(design.enums.map((e) => e.id))
+
+  reportDuplicateNames(design.models.map((m) => ({ id: m.id, name: m.doc.name })), 'modelNameDuplicate', design.id, issues)
+  reportDuplicateNames(design.enums.map((e) => ({ id: e.id, name: e.doc.name })), 'enumNameDuplicate', design.id, issues)
+
+  for (const model of design.models) {
+    const path = [design.id, model.id]
+
+    const parent = model.design?.inheritsFrom
+    if (parent !== undefined && !modelById.has(parent)) {
+      issues.push({ code: 'inheritanceTargetUnknown', path, subject: parent })
+    }
+    if (parent !== undefined && detectInheritanceCycle(model, modelById)) {
+      issues.push({ code: 'inheritanceCycle', path })
+    }
+
+    const inheritedNames = inheritedPropertyNames(model, modelById)
+    const seenNames = new Set<string>()
+    for (const property of model.properties) {
+      const propertyPath = [...path, property.id]
+      const name = property.doc.name
+      if (name === '') {
+        issues.push({ code: 'propertyNameEmpty', path: propertyPath })
+      } else if (seenNames.has(name)) {
+        issues.push({ code: 'propertyNameDuplicate', path: propertyPath, subject: name })
+      } else if (inheritedNames.has(name)) {
+        issues.push({ code: 'propertyShadowsParent', path: propertyPath, subject: name })
+      }
+      seenNames.add(name)
+
+      const reference = property.design?.reference
+      if (reference !== undefined) {
+        const known = reference.target === 'model' ? modelById.has(reference.refId) : enumIds.has(reference.refId)
+        if (!known) {
+          issues.push({ code: 'referenceTargetUnknown', path: propertyPath, subject: reference.refId })
+        }
+      }
+    }
+
+    const identifier = model.design?.identifier
+    if (identifier !== undefined && !model.properties.some((p) => p.id === identifier.propertyId)) {
+      issues.push({ code: 'identifierPropertyUnknown', path, subject: identifier.propertyId })
+    }
+  }
+
+  for (const group of design.routeGroups) {
+    for (const route of group.routes) {
+      const path = [design.id, group.id, route.id]
+
+      for (const [paramName, link] of Object.entries(route.design?.paramLinks ?? {})) {
+        const model = modelById.get(link.modelId)
+        const property = model?.properties.find((p) => p.id === link.propertyId)
+        if (model === undefined || property === undefined) {
+          issues.push({ code: 'paramLinkTargetUnknown', path, subject: paramName })
+        }
+      }
+
+      const bodyModelId = route.design?.body?.modelId
+      if (bodyModelId !== undefined && !modelById.has(bodyModelId)) {
+        issues.push({ code: 'bodyModelUnknown', path, subject: bodyModelId })
+      }
+
+      for (const [code, response] of Object.entries(route.design?.responses ?? {})) {
+        const model = response.modelId !== undefined ? modelById.get(response.modelId) : undefined
+        if (response.modelId !== undefined && model === undefined) {
+          issues.push({ code: 'responseModelUnknown', path, subject: code })
+          continue
+        }
+        if (response.exampleId !== undefined) {
+          const examples = model?.examples ?? []
+          if (!examples.some((e) => e.id === response.exampleId)) {
+            issues.push({ code: 'responseExampleUnknown', path, subject: code })
+          }
+        }
+      }
+    }
+  }
+
+  return issues
+}
+
+function reportDuplicateNames(
+  entries: { id: string; name: string }[],
+  code: 'modelNameDuplicate' | 'enumNameDuplicate',
+  designId: string,
+  issues: DesignIssue[]
+): void {
+  const seen = new Set<string>()
+  for (const entry of entries) {
+    if (entry.name !== '' && seen.has(entry.name)) {
+      issues.push({ code, path: [designId, entry.id], subject: entry.name })
+    }
+    seen.add(entry.name)
+  }
+}
+
+/** Property names visible on a model through its inheritance chain
+ * (cycle-tolerant: a cycle is reported separately, the name walk just
+ * stops instead of spinning). */
+function inheritedPropertyNames(model: DesignModel, modelById: Map<string, DesignModel>): Set<string> {
+  const names = new Set<string>()
+  const visited = new Set<string>([model.id])
+  let parentId = model.design?.inheritsFrom
+  while (parentId !== undefined && !visited.has(parentId)) {
+    visited.add(parentId)
+    const parent = modelById.get(parentId)
+    if (parent === undefined) break
+    for (const property of parent.properties) names.add(property.doc.name)
+    parentId = parent.design?.inheritsFrom
+  }
+  return names
+}
+
+function detectInheritanceCycle(model: DesignModel, modelById: Map<string, DesignModel>): boolean {
+  const visited = new Set<string>([model.id])
+  let parentId = model.design?.inheritsFrom
+  while (parentId !== undefined) {
+    if (visited.has(parentId)) return true
+    visited.add(parentId)
+    parentId = modelById.get(parentId)?.design?.inheritsFrom
+  }
+  return false
+}

@@ -32,6 +32,7 @@ vi.mock('./tools/activeState', () => ({
 }))
 
 import { registerResources } from './resources'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../shared/config/fileFormatVersion'
 
 function readJson(text: string | undefined): unknown {
   if (text === undefined) throw new Error('expected text payload')
@@ -106,7 +107,7 @@ describe('resources — restorm://project', () => {
       const mcp = new FakeMcpService()
       registerResources(mcp as unknown as McpService)
       const { text } = await mcp.readBy('restorm://project')
-      expect((readJson(text) as { fileFormatVersion: unknown }).fileFormatVersion).toBe(1)
+      expect((readJson(text) as { fileFormatVersion: unknown }).fileFormatVersion).toBe(CURRENT_FILE_FORMAT_VERSION)
     }
   })
 
@@ -115,7 +116,7 @@ describe('resources — restorm://project', () => {
     // the resolved version stamped on it; file mode hands over the parsed
     // file. Two views of the same project must not disagree.
     const asFile = { collections: [collection({ fileFormatVersion: 1 })] }
-    const asFolder = { fileFormatVersion: 1, collections: [collection()] }
+    const asFolder = { fileFormatVersion: CURRENT_FILE_FORMAT_VERSION, collections: [collection()] }
     const reported: unknown[] = []
     for (const content of [asFile, asFolder]) {
       mockState.fileServiceState.mockReturnValue({

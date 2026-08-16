@@ -12,6 +12,7 @@ import {
   Folder,
   EnvironmentFolder,
   Scenario,
+  ApiDesign,
   Environment,
   KeyValue,
   isEnvironmentFolder,
@@ -913,7 +914,13 @@ class CollectionStore {
       if (item.items) item.items = item.items.map((c) => this.reifyItem(c))
       return item
     }
+    if (item instanceof ApiDesign) return item
     const rec = item as unknown as Record<string, unknown>
+    // Design leaf (plain object). Same reason as the scenario branch
+    // below: it carries a `type` the request factory would mangle.
+    if (rec['type'] === 'design') {
+      return ApiDesign.fromPlain(rec as Parameters<typeof ApiDesign.fromPlain>[0])
+    }
     // Scenario leaf (plain object). Checked before the generic
     // `type`-bearing request branch — a scenario also carries a `type`,
     // and the request factory would otherwise mis-build it as an

@@ -4,6 +4,7 @@ import { MosaicCard, Table, type TableColumn } from 'electron-core-ui/renderer'
 import {
   isEnvironmentFolder,
   isScenario,
+  isApiDesign,
   type FolderItem
 } from '../../../../../../shared/types/folderTypes'
 import type { Request as RestormRequest } from '../../../../../../shared/types/requests'
@@ -63,6 +64,8 @@ function indexItems(
     } else if (isScenario(item)) {
       out.set(item.id, { kind: 'scenario', method: 'scenario', name: item.name, apiName })
       if (item.items) indexItems(item.items, apiName, out)
+    } else if (isApiDesign(item)) {
+      // A design is neither a request row nor a container of them.
     } else if ('items' in item) {
       indexItems(item.items, apiName, out)
     } else {

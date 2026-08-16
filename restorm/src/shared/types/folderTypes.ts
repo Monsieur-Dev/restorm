@@ -1,6 +1,7 @@
 import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, CustomValueList, ImportSourceType, ApiUpdateConfig } from './baseTypes'
 import type { Request } from './requests/index'
 import type { Scenario } from './scenario'
+import type { ApiDesign } from './apiDesign'
 import type { ApiDocumentation } from './apiDocumentation'
 
 export interface Folder {
@@ -41,7 +42,7 @@ export interface EnvironmentFolder extends Folder {
   apiUpdate?: ApiUpdateConfig
 }
 
-export type FolderItem = Folder | EnvironmentFolder | Request | Scenario
+export type FolderItem = Folder | EnvironmentFolder | Request | Scenario | ApiDesign
 
 export function isEnvironmentFolder(item: FolderItem): item is EnvironmentFolder {
   // Some legacy/loaded objects may omit `configuration` at runtime; detection should rely on `folderType`.
@@ -63,8 +64,12 @@ export function isScenario(item: FolderItem): item is Scenario {
   return 'type' in item && (item as { type: string }).type === 'scenario'
 }
 
+export function isApiDesign(item: FolderItem): item is ApiDesign {
+  return 'type' in item && (item as { type: string }).type === 'design'
+}
+
 export function isRequest(item: FolderItem): item is Request {
-  // A Scenario also carries a `type` and no `items`; exclude it so request
-  // type-guards don't mis-classify scenarios.
-  return 'type' in item && !('items' in item) && !isScenario(item)
+  // A Scenario and an ApiDesign also carry a `type` and no `items`;
+  // exclude them so request type-guards don't mis-classify either.
+  return 'type' in item && !('items' in item) && !isScenario(item) && !isApiDesign(item)
 }

@@ -21,6 +21,7 @@ import { detectFormat } from '../../src/main/services/import/ImportManager'
 import { importProviders } from '../../src/main/services/import/providers'
 import { RESTORM_IMPORT_FORMAT } from '../../src/main/services/import/RestormImportService'
 import { parseImportError } from '../../src/shared/config/importErrors'
+import { CURRENT_FILE_FORMAT_VERSION } from '../../src/shared/config/fileFormatVersion'
 
 const fixturePath = join(__dirname, 'fixtures/restorm/mini-project.restorm')
 const fixture = readFileSync(fixturePath, 'utf-8')
@@ -169,7 +170,7 @@ describe('RestormImportService — file-format gate (same refusals as opening)',
     }
     const decoded = parseImportError(message)
     expect(decoded?.code).toBe('projectFormatTooNew')
-    expect(decoded?.params).toMatchObject({ found: '99', current: '1' })
+    expect(decoded?.params).toMatchObject({ found: '99', current: String(CURRENT_FILE_FORMAT_VERSION) })
   })
 
   it('refuses a document declaring NO format version, as a coded error', () => {

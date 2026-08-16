@@ -10,7 +10,7 @@ import { processAfterDeserialization } from '../utils/serialization'
 import { reidentifyForest } from '../../../shared/utils/reidentifyTree'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, EnvironmentFolder, Environment, FolderItem } from '../../../shared/types/collections'
-import { isScenario } from '../../../shared/types/collections'
+import { isScenario, isApiDesign } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
   rootItems: FolderItem[]
@@ -240,7 +240,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // and flow into the dirty tracker / search index like any
       // nested request.
       const reactiveImported = itemsWithNewIds.map((item) =>
-        isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        isScenario(item) || isApiDesign(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
       )
       setRootItems((prev) => [...prev, ...reactiveImported])
       expandAfterImport()

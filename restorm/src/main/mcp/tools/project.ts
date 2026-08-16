@@ -17,7 +17,7 @@ import { BrowserWindow } from 'electron'
 import { collectionStore } from '../../services/CollectionStore'
 import { getCollectionsSyncCount, waitForCollectionsSyncAfter } from '../../services/apiUpdate/collectionsSyncSignal'
 import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
-import { CURRENT_FILE_FORMAT_VERSION, FILE_FORMAT_VERSION_KEY } from '../../../shared/config/fileFormatVersion'
+import { requiredFileFormatVersion, FILE_FORMAT_VERSION_KEY } from '../../../shared/config/fileFormatVersion'
 
 /**
  * Bounded wait for main's `CollectionStore` to actually reflect the
@@ -163,7 +163,9 @@ export function registerProjectTools(mcp: McpService): void {
         // `wx` creates the file atomically and FAILS if it already exists —
         // refusing to clobber an existing project and closing the
         // exists-check/write TOCTOU window in one move.
-        const body = JSON.stringify({ [FILE_FORMAT_VERSION_KEY]: CURRENT_FILE_FORMAT_VERSION, collections: [] })
+        // An empty project uses no version-gated feature, so it declares the
+        // base version (lazy bump: the version is derived from the content).
+        const body = JSON.stringify({ [FILE_FORMAT_VERSION_KEY]: requiredFileFormatVersion([]), collections: [] })
         await fs.writeFile(filePath, body, { encoding: 'utf8', flag: 'wx' })
         // Capture the renderer-mirror count BEFORE opening, so the wait below
         // can key off the FILE-LOAD's post-load mirror (which fires once the

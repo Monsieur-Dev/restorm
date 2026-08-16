@@ -32,7 +32,7 @@ import type { Icon } from 'electron-core-ui/types'
 import type { Folder, EnvironmentFolder, FolderItem } from '../../../shared/types/collections'
 import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
-import { isAnyFolder, isScenario } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
 import { searchIndexService } from '../services/SearchIndexService'
 import { DocumentEvents } from '../services/DocumentEvents'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
@@ -390,7 +390,7 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       if (!effectiveIcon && foundItem && isAnyFolder(foundItem)) {
         delete foundItem.icon
         effectiveIcon = getFolderIcon(foundItem)
-      } else if (foundItem && !isScenario(foundItem)) {
+      } else if (foundItem && !isScenario(foundItem) && !isApiDesign(foundItem)) {
         if (effectiveIcon) {
           foundItem.icon = effectiveIcon
         } else {

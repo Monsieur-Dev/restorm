@@ -1065,7 +1065,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         openFolderTab(pushedItem, breadcrumbs)
       } else if (isScenario(pushedItem)) {
         openScenarioEditorTab(pushedItem, breadcrumbs)
-      } else if (!isAnyFolder(pushedItem)) {
+      } else if (isRequest(pushedItem)) {
         openAnyRequestTab(pushedItem, breadcrumbs, envs)
       }
       // Every kind this dispatcher can build lands in inline rename — folders,

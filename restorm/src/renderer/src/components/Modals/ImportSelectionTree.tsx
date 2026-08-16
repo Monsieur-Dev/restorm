@@ -9,8 +9,8 @@ import {
   importNaturalKeyForRequest
 } from '../../../../shared/utils/importNaturalKey'
 import type { FolderItem } from '../../../../shared/types/folderTypes'
-import type { Scenario } from '../../../../shared/types/collections'
-import { isAnyFolder, isRequest, isScenario } from '../../../../shared/types/collections'
+import type { Scenario, ApiDesign } from '../../../../shared/types/collections'
+import { isAnyFolder, isRequest, isScenario, isApiDesign } from '../../../../shared/types/collections'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { Badge } from '../common/Badge'
 import { collectSelectableLeafKeys } from './importSelectionHelpers'
@@ -224,9 +224,10 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
     // hazard). The renderer is purely derived from `visibleItems +
     // selection`, so it's safe to rebuild on each dependency change.
     const build = (subtree: readonly FolderItem[], path: readonly string[]): ListViewItemData[] => {
-      // Import trees only ever carry folders + requests; scenarios are
-      // never produced by a spec import, so filter them out defensively.
-      return subtree.filter((item): item is Exclude<FolderItem, Scenario> => !isScenario(item)).map((item) => {
+      // Import trees only ever carry folders + requests; scenarios and
+      // designs are never produced by a spec import, so filter them out
+      // defensively.
+      return subtree.filter((item): item is Exclude<FolderItem, Scenario | ApiDesign> => !isScenario(item) && !isApiDesign(item)).map((item) => {
         if (isAnyFolder(item)) {
           const childPath = [...path, item.name]
           const folderKey = importNaturalKeyForFolder(childPath)
