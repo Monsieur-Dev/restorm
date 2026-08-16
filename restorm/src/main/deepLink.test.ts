@@ -31,9 +31,14 @@ vi.mock('electron-core-ui/main', () => ({
 import {
   isDeepLinkUrl,
   handleDeepLinkUrl,
+  routeDeepLinkUrl,
+  initDeepLinkRelay,
   deepLinkLogin,
   resetDeepLinkStateForTests
 } from './deepLink'
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 beforeEach(() => {
   resetDeepLinkStateForTests()
@@ -76,11 +81,10 @@ describe('isDeepLinkUrl', () => {
 // ── handleDeepLinkUrl ─────────────────────────────────────────────────────────
 
 describe('handleDeepLinkUrl', () => {
-  it('logs a warning and does nothing when no login is in-flight', () => {
-    handleDeepLinkUrl('restorm://auth/callback?code=abc&state=xyz')
+  it('with no login in-flight and no relay, the callback is dropped with a warning', () => {
+    handleDeepLinkUrl('restorm://auth/callback?code=abc&state=xyzxyzxyz')
     expect(mocks.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('no login is in-flight'),
-      expect.any(Object)
+      expect.stringContaining('relay is not initialized')
     )
   })
 
@@ -103,32 +107,46 @@ describe('handleDeepLinkUrl', () => {
     expect(token).toBe('jwt-token-from-server')
   })
 
-  it('rejects when the state does not match the nonce (CSRF guard)', async () => {
+  it('a mismatched state never completes this login and leaves it pending (CSRF + fan-out)', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => ({ access_token: 'jwt-token-from-server' })
+    })
     const received = deepLinkLogin({
       loginUrl: 'https://api.example.com/login',
       sessionUrl: 'https://api.example.com/session',
       scheme: 'restorm',
       openExternal: vi.fn().mockResolvedValue(undefined),
-      fetchImpl: vi.fn()
+      fetchImpl
     })
 
-    handleDeepLinkUrl('restorm://auth/callback?code=CODE&state=WRONG_NONCE')
+    // A callback addressed to ANOTHER instance's nonce: it must neither
+    // complete nor kill OUR pending login…
+    handleDeepLinkUrl('restorm://auth/callback?code=CODE&state=SOMEONE_ELSES_NONCE')
+    expect(fetchImpl).not.toHaveBeenCalled()
 
-    await expect(received).rejects.toThrow('state mismatch')
+    // …which still completes normally when OUR callback arrives.
+    handleDeepLinkUrl('restorm://auth/callback?code=OURS&state=test-nonce-123')
+    await expect(received).resolves.toBe('jwt-token-from-server')
   })
 
-  it('rejects when the URL is malformed', async () => {
+  it('a malformed URL is dropped without killing the pending login', async () => {
     const received = deepLinkLogin({
       loginUrl: 'https://api.example.com/login',
       sessionUrl: 'https://api.example.com/session',
       scheme: 'restorm',
       openExternal: vi.fn().mockResolvedValue(undefined),
-      fetchImpl: vi.fn()
+      fetchImpl: vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => ({ access_token: 'jwt' })
+      })
     })
 
     handleDeepLinkUrl('not a url at all :::')
+    expect(mocks.logger.warn).toHaveBeenCalledWith(expect.stringContaining('malformed URL'))
 
-    await expect(received).rejects.toThrow('malformed URL')
+    handleDeepLinkUrl('restorm://auth/callback?code=OK&state=test-nonce-123')
+    await expect(received).resolves.toBe('jwt')
   })
 
   it('rejects when the code is missing', async () => {
@@ -290,5 +308,132 @@ describe('deepLinkLogin', () => {
     handleDeepLinkUrl('restorm://auth/callback?code=CODE&state=test-nonce-123')
 
     await expect(login).rejects.toThrow('missing access_token')
+  })
+})
+
+// ── cross-instance relay + URL router ────────────────────────────────────────
+
+describe('deep-link relay (cross-instance nonce-claim)', () => {
+  let inboxRoot: string
+
+  beforeEach(() => {
+    inboxRoot = mkdtempSync(join(tmpdir(), 'restorm-relay-'))
+    initDeepLinkRelay(inboxRoot)
+  })
+
+  afterEach(() => {
+    rmSync(inboxRoot, { recursive: true, force: true })
+  })
+
+  const login = (fetchImpl = vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => ({ access_token: 'jwt-relayed' })
+  })): Promise<string> =>
+    deepLinkLogin({
+      loginUrl: 'https://api.example.com/login',
+      sessionUrl: 'https://api.example.com/session',
+      scheme: 'restorm',
+      openExternal: vi.fn().mockResolvedValue(undefined),
+      fetchImpl
+    })
+
+  it('a callback with no matching local login lands in the inbox for others to claim', () => {
+    handleDeepLinkUrl('restorm://auth/callback?code=THE_CODE&state=other-instance-nonce')
+    const files = readdirSync(join(inboxRoot, 'auth-callbacks'))
+    expect(files).toEqual(['cb-other-instance-nonce.json'])
+  })
+
+  it('a login started AFTER the relay write claims and completes from the inbox', async () => {
+    // Instance P (the primary) received a callback answering OUR login before
+    // we even registered it — the eager claim inside deepLinkLogin covers this.
+    handleDeepLinkUrl('restorm://auth/callback?code=RELAYED_CODE&state=test-nonce-123')
+    const token = await login()
+    expect(token).toBe('jwt-relayed')
+    // Claim consumed the file.
+    expect(readdirSync(join(inboxRoot, 'auth-callbacks'))).toEqual([])
+  })
+
+  it('the claim is single-winner: a second claim attempt finds nothing', async () => {
+    handleDeepLinkUrl('restorm://auth/callback?code=ONCE&state=test-nonce-123')
+    await login()
+    // The file is gone; a new login with the same nonce cannot re-claim it and
+    // must wait for its own callback (i.e. the promise stays pending).
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => ({ access_token: 'jwt-fresh' })
+    })
+    let settled = false
+    const second = login(fetchImpl).finally(() => { settled = true })
+    await new Promise((r) => setTimeout(r, 20))
+    expect(settled).toBe(false)
+    expect(fetchImpl).not.toHaveBeenCalled()
+    // Complete it normally so the test leaves no dangling promise.
+    handleDeepLinkUrl('restorm://auth/callback?code=FRESH&state=test-nonce-123')
+    await second
+  })
+
+  it('a relayed callback addressed to a DIFFERENT nonce is never claimed by this instance', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => ({ access_token: 'jwt' })
+    })
+    const received = login(fetchImpl)
+    // Someone relays a callback for another instance while we wait.
+    writeFileSync(
+      join(inboxRoot, 'auth-callbacks', 'cb-not-our-nonce.json'),
+      JSON.stringify({ code: 'NOT_OURS' }),
+      { mode: 0o600 }
+    )
+    await new Promise((r) => setTimeout(r, 50))
+    expect(fetchImpl).not.toHaveBeenCalled() // no mis-dispatch
+    handleDeepLinkUrl('restorm://auth/callback?code=OURS&state=test-nonce-123')
+    await expect(received).resolves.toBe('jwt')
+  })
+
+  it('a hostile state token never becomes a filename', () => {
+    handleDeepLinkUrl('restorm://auth/callback?code=X&state=../../escape')
+    const files = readdirSync(join(inboxRoot, 'auth-callbacks'))
+    expect(files).toEqual([])
+    expect(mocks.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('malformed state or code')
+    )
+  })
+})
+
+describe('routeDeepLinkUrl (auth vs everything else)', () => {
+  it('routes restorm://auth/callback to the auth handler', async () => {
+    const received = deepLinkLogin({
+      loginUrl: 'https://api.example.com/login',
+      sessionUrl: 'https://api.example.com/session',
+      scheme: 'restorm',
+      openExternal: vi.fn().mockResolvedValue(undefined),
+      fetchImpl: vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => ({ access_token: 'jwt-routed' })
+      })
+    })
+    routeDeepLinkUrl('restorm://auth/callback?code=C&state=test-nonce-123')
+    await expect(received).resolves.toBe('jwt-routed')
+  })
+
+  it('does NOT route restorm://open?... (the future file form) to the auth handler', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => ({ access_token: 'jwt-late' })
+    })
+    const received = deepLinkLogin({
+      loginUrl: 'https://api.example.com/login',
+      sessionUrl: 'https://api.example.com/session',
+      scheme: 'restorm',
+      openExternal: vi.fn().mockResolvedValue(undefined),
+      fetchImpl
+    })
+    routeDeepLinkUrl('restorm://open?path=%2Ftmp%2Fapi.restorm&code=C&state=test-nonce-123')
+    // Even though the URL happens to carry code+state params, the router must
+    // keep it away from auth: the login stays pending, nothing was exchanged —
+    // and the relay must not have inboxed it either (it never reached auth).
+    expect(fetchImpl).not.toHaveBeenCalled()
+    routeDeepLinkUrl('restorm://auth/callback?code=C&state=test-nonce-123')
+    await received
   })
 })

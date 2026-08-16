@@ -186,7 +186,16 @@ When('I open the {string} request tab via MCP', async ({ callMcpTool }, name: st
   if (id === undefined) throw new Error(`request "${name}" missing`)
   currentRequestId = id
   const tab = await callMcpTool(discovery, 'open_tab', { itemId: id })
-  expect(tab.isError ?? false).toBe(false)
+  if (tab.isError ?? false) {
+    // Under full-suite conditions open_tab has replied "No item with id …"
+    // for an id that pollForRequestByName JUST resolved — capture both sides
+    // of that contradiction (the reply and a fresh listing) when it recurs.
+    const listing = await callMcpTool(discovery, 'list_requests', {})
+    throw new Error(
+      `open_tab(${id}) errored: ${JSON.stringify(tab.content)}; ` +
+      `list_requests immediately after: ${JSON.stringify(listing.content).slice(0, 800)}`
+    )
+  }
   // Wait for either the single-call or the batch action button to appear.
   await page.locator(`${ACTION_BTN}, ${BATCH_ACTION_BTN}`).first().waitFor({ state: 'visible', timeout: 20_000 })
 })

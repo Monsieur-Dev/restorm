@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.4
+
+**Kirjaudu kerran — kaikki ikkunat seuraavat.**
+
+- **Tilisi seuraa sinua nyt ikkunasta toiseen.** Kirjaudu sisään, ulos tai vaihda tilausta yhdessä Restorm-ikkunassa, ja kaikki muut avoimet ikkunat omaksuvat sen heti — ilman uudelleenkäynnistystä, ilman toista kirjautumista. Ja kun viimeistelet kirjautumisen selaimessa, vahvistus saapuu nyt siihen ikkunaan, joka sitä pyysi, vaikka ikkunoita olisi auki useita.
+
+Korjaukset:
+
+- **Koodisolmut käynnistyvät jälleen Intel-Maceissa** — macOS Intel -versio sisälsi Apple Siliconille käännetyn esbuild-binäärin.
+- **AppImage-käynnistimen "Uusi ikkuna" -toiminto avaa jälleen ikkunan**, ja .deb/.rpm-pakettien asentama `restorm`-komento toimii jälleen.
+- **Windows-käynnistys on siistimpi** — ikkuna latautuu nyt sovellusprotokollan kautta ilman hiljaista varamenettelyä jokaisen käynnistyksen sisäisen virheen jälkeen.
+
 ## v1.0.3
 
 **Restorm toimii CI:ssä, ilman FUSEa.**

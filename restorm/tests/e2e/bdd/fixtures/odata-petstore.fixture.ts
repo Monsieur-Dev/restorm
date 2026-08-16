@@ -1,6 +1,6 @@
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
-import { mkdirSync, writeFileSync, rmSync } from 'fs'
+import { mkdirSync, readdirSync, writeFileSync, rmSync } from 'fs'
 import { join, resolve } from 'path'
 import electronPath from 'electron'
 import { installSystemModalsMockingForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
@@ -31,8 +31,18 @@ export const test = base.extend<OdataPetstoreFixtures, { services: StartedServic
   launchApp: async ({ restormRoot }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
 
-    rmSync(ODATA_PETSTORE_TEMP_DIR, { recursive: true, force: true })
+    // Three projects (odata-petstore / odata-import / odata-execution) share
+    // this directory and run CONCURRENTLY in separate workers — wiping the
+    // whole directory here deleted the neighbor project's freshly-saved file
+    // mid-scenario (its save/recents polls then failed, full-suite only).
+    // Every file each project writes is named after the project, so
+    // per-scenario cleanup removes THIS project's leftovers and nothing else.
     mkdirSync(ODATA_PETSTORE_TEMP_DIR, { recursive: true })
+    for (const entry of readdirSync(ODATA_PETSTORE_TEMP_DIR)) {
+      if (entry.startsWith(testInfo.project.name)) {
+        rmSync(join(ODATA_PETSTORE_TEMP_DIR, entry), { recursive: true, force: true })
+      }
+    }
 
     const electronExePath = electronPath as unknown as string
     const mainJsPath = join(restormRoot, 'dist/main/index.js')

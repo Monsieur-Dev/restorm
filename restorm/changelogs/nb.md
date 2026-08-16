@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.4
+
+**Logg inn én gang — alle vinduer følger etter.**
+
+- **Kontoen din følger deg nå på tvers av vinduer.** Logg inn, logg ut eller bytt plan i ett Restorm-vindu, og alle andre åpne vinduer tar det i bruk umiddelbart — uten omstart, uten en ny innlogging. Og når du fullfører en innlogging i nettleseren, når bekreftelsen nå vinduet som ba om den, selv med flere vinduer åpne.
+
+Rettelser:
+
+- **Kodenoder starter igjen på Intel-Macer** — macOS-Intel-bygget inneholdt en esbuild-binær kompilert for Apple Silicon.
+- **AppImage-starterens handling «Nytt vindu» åpner et vindu igjen**, og kommandoen `restorm` installert av .deb/.rpm-pakkene virker igjen.
+- **Oppstarten på Windows er renere** — vinduet lastes nå via appprotokollen uten stille reserveløsning etter en intern feil ved hver start.
+
 ## v1.0.3
 
 **Restorm kjører i CI, uten FUSE.**

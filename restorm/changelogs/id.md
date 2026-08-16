@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.4
+
+**Sekali masuk — semua jendela mengikuti.**
+
+- **Akun Anda kini mengikuti Anda antar jendela.** Masuk, keluar, atau ganti paket di satu jendela Restorm, dan semua jendela lain yang terbuka langsung mengadopsinya — tanpa mulai ulang, tanpa login kedua. Dan saat Anda menyelesaikan login lewat browser, konfirmasinya kini tiba di jendela yang memintanya, bahkan dengan beberapa jendela terbuka.
+
+Perbaikan:
+
+- **Node kode kembali berjalan di Mac Intel** — build macOS Intel menyertakan biner esbuild yang dikompilasi untuk Apple Silicon.
+- **Aksi "Jendela baru" peluncur AppImage kembali membuka jendela**, dan perintah `restorm` yang dipasang paket .deb/.rpm kembali berfungsi.
+- **Startup di Windows lebih bersih** — jendela kini dimuat melalui protokol aplikasi, tanpa fallback senyap setelah galat internal di setiap peluncuran.
+
 ## v1.0.3
 
 **Restorm berjalan di CI, tanpa FUSE.**

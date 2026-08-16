@@ -191,6 +191,43 @@ export class EntitlementService {
   }
 
   /**
+   * Adopt whatever the SHARED auth cache now holds — the live-propagation path,
+   * called when another instance's write (login, logout, plan change) lands in
+   * the store this instance also reads.
+   *
+   * Three properties are deliberate:
+   *
+   * - **Read-only.** Unlike `init()`, an expired or absent cache is adopted as
+   *   signed-out but never `clear()`ed: the instance that WROTE the file owns
+   *   it, and a reader deleting it would race the writer.
+   * - **No network.** Every instance re-fetching on every propagated write
+   *   would turn one login into a thundering herd against the entitlement
+   *   endpoint. The writer already fetched; readers verify what it persisted.
+   * - **Nothing is trusted from the file but tokens.** Capabilities are
+   *   re-derived here from the signed entitlement JWT, offline-verified by THIS
+   *   instance — a doctored cache yields community, not the doctored state.
+   *
+   * A reload triggered by this instance's own `persist()` re-reads an identical
+   * state; `emit()`'s `statesEqual` dedup keeps that from re-broadcasting.
+   */
+  async reloadFromStore(): Promise<void> {
+    const cached = this.deps.store.load()
+    if (cached && !isSessionExpired(cached.sessionToken, nowSeconds(this.deps.now), this.deps.sessionAudience)) {
+      this.sessionToken = cached.sessionToken
+      if (cached.entitlementToken) {
+        const claims = await this.verifyCached(cached.entitlementToken)
+        this.entitlement = claims ? { token: cached.entitlementToken, claims } : null
+      } else {
+        this.entitlement = null
+      }
+    } else {
+      this.sessionToken = null
+      this.entitlement = null
+    }
+    this.emit()
+  }
+
+  /**
    * Sign in: run the browser loopback login, persist the session immediately
    * (so a failed entitlement fetch still leaves us signed in), then fetch +
    * verify the entitlement. Broadcasts on success. Rejects if the login flow

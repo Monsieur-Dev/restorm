@@ -1,11 +1,12 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
   ensureEsbuildBinaryResolvable,
   resetEsbuildBinaryLatchForTests,
+  resolveEsbuildSiblingRoot,
   resolvePlatformPackageJson,
   toAsarUnpackedPath
 } from './esbuildBinaryPath'
@@ -84,6 +85,51 @@ describe('ensureEsbuildBinaryResolvable', () => {
     const { asarPkgJson } = packagedLayout()
     ensureEsbuildBinaryResolvable(() => asarPkgJson)
     expect(process.env.ESBUILD_BINARY_PATH).toBeUndefined()
+  })
+
+  it('falls back to the afterPack drop under app.asar.unpacked when the platform package is absent from the archive (cross-arch build)', () => {
+    // The x64 mac app built on an arm64 runner: node_modules holds only the
+    // HOST's platform package, so the in-archive resolve throws — but
+    // afterPack placed the TARGET's package under app.asar.unpacked.
+    const { unpackedBinary } = packagedLayout()
+    ensureEsbuildBinaryResolvable(
+      () => { throw new Error('MODULE_NOT_FOUND') },
+      () => join(dir, 'app.asar', 'node_modules')
+    )
+    expect(process.env.ESBUILD_BINARY_PATH).toBe(unpackedBinary)
+  })
+
+  it('stays unset when the cross-arch fallback finds no binary either', () => {
+    ensureEsbuildBinaryResolvable(
+      () => { throw new Error('MODULE_NOT_FOUND') },
+      () => join(dir, 'app.asar', 'node_modules')
+    )
+    expect(process.env.ESBUILD_BINARY_PATH).toBeUndefined()
+  })
+
+  it('the cross-arch fallback no-ops outside any asar (dev checkout with a hole in node_modules)', () => {
+    ensureEsbuildBinaryResolvable(
+      () => { throw new Error('MODULE_NOT_FOUND') },
+      () => '/home/dev/restorm/node_modules'
+    )
+    expect(process.env.ESBUILD_BINARY_PATH).toBeUndefined()
+  })
+
+  it('stays unset when both resolvers throw', () => {
+    ensureEsbuildBinaryResolvable(
+      () => { throw new Error('MODULE_NOT_FOUND') },
+      () => { throw new Error('esbuild itself is gone') }
+    )
+    expect(process.env.ESBUILD_BINARY_PATH).toBeUndefined()
+  })
+
+  it('the default sibling-root resolver lands on the node_modules containing esbuild', () => {
+    const root = resolveEsbuildSiblingRoot()
+    expect(existsSync(join(root, 'esbuild', 'package.json'))).toBe(true)
+    // The host's platform package must be REACHABLE at root/@esbuild/<plat>-<arch>
+    // (via pnpm symlinks in dev, as a real dir in the packed app) — the path
+    // shape the cross-arch fallback derives when the archive resolve throws.
+    expect(existsSync(join(root, '@esbuild', `${process.platform}-${process.arch}`, 'package.json'))).toBe(true)
   })
 
   it('the default resolver finds the real platform package (two-hop via esbuild)', () => {

@@ -39,7 +39,19 @@ export const test = base.extend<DirtyStateFixtures>({
     const launched: { app: ElectronApplication; logs: string[] }[] = []
     let configPath: string | null = null
 
-    rmSync(DIRTY_STATE_TEMP_DIR, { recursive: true, force: true })
+    // This launcher is ALSO the status-bar-context-menu suite's fixture — and
+    // that suite runs in a PARALLEL worker. Its scenarios must not wipe
+    // dirty-state's directory: with both projects in flight, the wipe below
+    // deleted a dirty-state scenario's freshly-saved file mid-run, the
+    // welcome screen's existence-filtered Recent list went empty, and the
+    // reopen step failed (full-suite only, 6 runs in a row). The status-bar
+    // steps keep their own scratch root precisely for this reason — the wipe
+    // is dirty-state's alone. Timestamped log kept: it is what attributed
+    // the disappearance to the concurrent wipe.
+    if (testInfo.project.name === 'dirty-state') {
+      console.log(`[dirty-state.fixture] ${new Date().toISOString()} wiping ${DIRTY_STATE_TEMP_DIR} for "${testInfo.title}"`)
+      rmSync(DIRTY_STATE_TEMP_DIR, { recursive: true, force: true })
+    }
     mkdirSync(DIRTY_STATE_TEMP_DIR, { recursive: true })
 
     const electronExePath = electronPath as unknown as string

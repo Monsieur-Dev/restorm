@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.4
+
+**Egy bejelentkezés — minden ablak követi.**
+
+- **A fiókja mostantól ablakról ablakra követi.** Jelentkezzen be, ki, vagy váltson csomagot az egyik Restorm-ablakban, és az összes többi nyitott ablak azonnal átveszi — újraindítás és második bejelentkezés nélkül. És amikor a böngészőben befejez egy bejelentkezést, a megerősítés mostantól abba az ablakba érkezik, amelyik kérte, több nyitott ablak esetén is.
+
+Javítások:
+
+- **A kódcsomópontok újra elindulnak az Intel-es Maceken** — a macOS Intel build Apple Siliconra fordított esbuild binárist tartalmazott.
+- **Az AppImage-indító „Új ablak" művelete újra ablakot nyit**, és a .deb/.rpm csomagok által telepített `restorm` parancs újra működik.
+- **A Windows-indítás tisztább** — az ablak mostantól az alkalmazásprotokollon keresztül töltődik be, minden indításnál fellépő belső hiba utáni csendes tartalék nélkül.
+
 ## v1.0.3
 
 **A Restorm fut a CI-ben, FUSE nélkül.**

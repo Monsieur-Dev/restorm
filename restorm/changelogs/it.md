@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.4
+
+**Un accesso, tutte le finestre.**
+
+- **Il tuo account ora ti segue da una finestra all'altra.** Accedi, esci o cambia piano in una finestra di Restorm e tutte le altre finestre aperte lo adottano all'istante — senza riavvio, senza un secondo accesso. E quando completi un accesso dal browser, la conferma arriva ora alla finestra che l'aveva richiesta, anche con più finestre aperte.
+
+Correzioni:
+
+- **I nodi di codice ripartono sui Mac Intel** — la build macOS Intel includeva un binario esbuild compilato per Apple Silicon.
+- **L'azione «Nuova finestra» del launcher AppImage apre di nuovo una finestra**, e il comando `restorm` installato dai pacchetti .deb/.rpm funziona di nuovo.
+- **L'avvio su Windows è più pulito** — la finestra si carica ora tramite il protocollo dell'app, senza ripiego silenzioso dopo un errore interno a ogni avvio.
+
 ## v1.0.3
 
 **Restorm gira in CI, senza FUSE.**

@@ -955,6 +955,14 @@ export default defineConfig({
       testDir: 'tests/e2e/scenario-cli',
       timeout: 180 * 1000
     },
+    {
+      // Cross-instance live auth propagation — two real instances sharing one
+      // userData; the shared auth cache is written/deleted from outside and
+      // both must follow live (watch → reload → broadcast). Backend-free.
+      name: 'auth-propagation',
+      testDir: 'tests/e2e/auth-propagation',
+      timeout: 120 * 1000
+    },
     // Real-registry code-deps e2e. It installs pinned packages from the LIVE
     // registries (PyPI / npm / WebR-CRAN / RubyGems / LuaRocks), so it needs
     // network + is non-deterministic — it must NEVER run in the per-PR / pre-push

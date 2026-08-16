@@ -16,6 +16,22 @@ import { WindowConfiguration, WindowState, isDevToolsEnabled, isInactiveRevealRe
 const READY_REVEAL_SAFETY_TIMEOUT_MS = 30_000
 
 /**
+ * The `app://` URL that loads a window's entry file through the app protocol.
+ *
+ * Splits on BOTH separators, explicitly: a Windows entry path uses
+ * backslashes, which the old `split('/')` left whole — the entire absolute
+ * path (`C:\Users\…\index.html`) then rode into the app:// URL, the protocol
+ * handler failed with ERR_UNEXPECTED, and every Windows launch silently took
+ * the loadFile fallback while logging an error to crash reporting. Not
+ * `path.basename`: that helper only splits the CURRENT platform's separator,
+ * which hides the Windows behaviour from tests running on Linux.
+ */
+export function appUrlForEntryFile(file: string): string {
+  const fileName = file.split(/[\\/]/).pop()
+  return `app://./${fileName !== undefined && fileName !== '' ? fileName : 'index.html'}`
+}
+
+/**
  * BaseWindow handles window state persistence and restoration
  * with safety checks to ensure windows remain visible and accessible
  */
@@ -766,8 +782,7 @@ export abstract class BaseWindow {
         })
       } else {
         // Use app:// protocol for absolute paths to work (both dev and production)
-        const fileName = this.configuration.file.split('/').pop() ?? 'index.html'
-        const appUrl = `app://./${fileName}`
+        const appUrl = appUrlForEntryFile(this.configuration.file)
         logger.info(`BaseWindow: Loading via app:// protocol: ${appUrl}...`)
         window.loadURL(appUrl).catch((error: unknown) => {
           logger.error('Failed to load app:// URL, falling back to loadFile', { error: String(error) })

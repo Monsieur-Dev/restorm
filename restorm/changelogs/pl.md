@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.4
+
+**Jedno logowanie — wszystkie okna podążają.**
+
+- **Twoje konto podąża teraz za tobą między oknami.** Zaloguj się, wyloguj lub zmień plan w jednym oknie Restorm, a każde inne otwarte okno natychmiast to przejmie — bez restartu, bez drugiego logowania. A gdy kończysz logowanie w przeglądarce, potwierdzenie trafia teraz do okna, które o nie poprosiło, nawet przy kilku otwartych oknach.
+
+Poprawki:
+
+- **Węzły kodu znów startują na Macach z procesorem Intel** — build macOS Intel zawierał binarkę esbuild skompilowaną dla Apple Silicon.
+- **Akcja „Nowe okno" launchera AppImage znów otwiera okno**, a polecenie `restorm` instalowane przez pakiety .deb/.rpm znów działa.
+- **Start w systemie Windows jest czystszy** — okno ładuje się teraz przez protokół aplikacji, bez cichego obejścia po wewnętrznym błędzie przy każdym uruchomieniu.
+
 ## v1.0.3
 
 **Restorm działa w CI, bez FUSE.**

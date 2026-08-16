@@ -87,6 +87,42 @@ const { signedIn, user, plan, role, capabilities } = useAuthState()
 // real gate on the LIVE role, so a stale role here only affects what's shown.
 ```
 
+## Multi-instance: live propagation of the shared cache
+
+Several instances of the host app may share one `userData` — and therefore one
+auth cache. `startAuthStoreWatch` + `EntitlementService.reloadFromStore()`
+turn a login/logout/plan-change persisted by one instance into a live update
+in all the others, without a restart:
+
+```ts
+import { startAuthStoreWatch } from 'electron-core-ui/main'
+
+const watch = startAuthStoreWatch({
+  filePath: join(userData, 'auth-session.dat'),
+  onChange: () => { void entitlementService.reloadFromStore() },
+  onError: (err) => log('watch unavailable — propagation degrades to restart', err)
+})
+// on quit:
+watch.stop()
+```
+
+Contract points, all deliberate:
+
+- the watcher observes the **parent directory** (an atomic temp+rename write
+  replaces the file's inode; a file-level watch would go silent after the first
+  replacement) and debounces the event burst of one write into one callback;
+- `reloadFromStore()` is **read-only** (never `clear()`s — the writer owns the
+  file) and **network-free** (the writer already fetched; readers only verify);
+- **nothing is trusted from the file but tokens**: capabilities are re-derived
+  from the signed entitlement JWT, offline-verified by each instance — a
+  doctored cache yields community, not the doctored state;
+- a reload caused by the instance's own `persist()` re-reads an identical
+  state and is deduplicated by the broadcast's `statesEqual`.
+
+The host's `AuthStoreFs.write` MUST be atomic (temp file + rename) once a
+watcher exists — a plain `writeFileSync` lets a concurrent reader see a torn
+envelope.
+
 ## Test helpers
 
 ```ts
@@ -105,6 +141,7 @@ audience strings.
 src/shared/auth/authState.ts          — AuthState, AUTH_IPC, SIGNED_OUT_STATE
 src/main/services/auth/
   authStore.ts                        — encrypted token persistence
+  authStoreWatch.ts                   — shared-cache watch (multi-instance)
   sessionToken.ts                     — HS256 JWT utilities
   guardedFetch.ts                     — network guard (isEligibleUrl)
   loopbackLogin.ts                    — RFC 8252 flow

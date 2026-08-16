@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.4
+
+**O singură autentificare — toate ferestrele urmează.**
+
+- **Contul dvs. vă urmează acum dintr-o fereastră în alta.** Autentificați-vă, deconectați-vă sau schimbați planul într-o fereastră Restorm și toate celelalte ferestre deschise îl adoptă instantaneu — fără repornire, fără o a doua autentificare. Iar când finalizați o autentificare în browser, confirmarea ajunge acum în fereastra care a cerut-o, chiar și cu mai multe ferestre deschise.
+
+Remedieri:
+
+- **Nodurile de cod pornesc din nou pe Mac-urile Intel** — build-ul macOS Intel includea un binar esbuild compilat pentru Apple Silicon.
+- **Acțiunea „Fereastră nouă" a lansatorului AppImage deschide din nou o fereastră**, iar comanda `restorm` instalată de pachetele .deb/.rpm funcționează din nou.
+- **Pornirea pe Windows este mai curată** — fereastra se încarcă acum prin protocolul aplicației, fără o soluție de rezervă silențioasă după o eroare internă la fiecare pornire.
+
 ## v1.0.3
 
 **Restorm rulează în CI, fără FUSE.**

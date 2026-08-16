@@ -10,18 +10,18 @@
 #                             (Wayland on a Wayland session, X11 otherwise)
 #                             instead of forcing XWayland.
 
-INSTALL_DIR="/opt/restorm"
+INSTALL_DIR="/opt/Restorm"
 WRAPPER="/usr/bin/restorm"
 
 cat > "$WRAPPER" << 'WRAPPER_EOF'
 #!/bin/bash
-exec /opt/restorm/restorm-bin --no-sandbox --ozone-platform-hint=auto "$@"
+exec /opt/Restorm/restorm-bin --no-sandbox --ozone-platform-hint=auto "$@"
 WRAPPER_EOF
 
 chmod 755 "$WRAPPER"
 
 # Point the menu launcher at the wrapper. electron-builder writes the desktop
-# entry with Exec=/opt/restorm/restorm-bin (the raw binary) — launching that from
+# entry with Exec=/opt/Restorm/restorm-bin (the raw binary) — launching that from
 # the menu crashes on sandbox-restricted distros. Rewrite it to the wrapper so
 # menu and CLI launch identically. (deb/rpm only — this script never runs for the
 # AppImage, whose desktop integration is handled by its own runtime.)
@@ -32,7 +32,15 @@ chmod 755 "$WRAPPER"
 # forwards "$@" to the binary, so the path survives the extra hop.
 DESKTOP_FILE="/usr/share/applications/restorm-bin.desktop"
 if [ -f "$DESKTOP_FILE" ]; then
-  sed -i 's|^Exec=/opt/restorm/restorm-bin.*|Exec=/usr/bin/restorm %f|' "$DESKTOP_FILE"
+  sed -i 's|^Exec=/opt/Restorm/restorm-bin.*|Exec=/usr/bin/restorm %f|' "$DESKTOP_FILE"
+  # The [Desktop Action new] entry ships AppImage-flavoured (Exec=AppRun …):
+  # the desktop block is shared across every Linux target and electron-builder
+  # offers no per-target actions (its option merge even mutates the shared
+  # object, so a per-target override contaminates the sibling targets). The
+  # AppImage needs AppRun — its integrators rewrite that token to the image
+  # path — and THIS script owns making it right for deb/rpm: route the action
+  # through the same wrapper as the main entry, so it inherits --no-sandbox.
+  sed -i 's|^Exec=AppRun --no-sandbox --new$|Exec=/usr/bin/restorm --new|' "$DESKTOP_FILE"
 fi
 
 # Register the .restorm document type. electron-builder declares MimeType= on
