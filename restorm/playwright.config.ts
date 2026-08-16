@@ -58,6 +58,12 @@ const fileFormatGateTestDir = defineBddConfig({
   outputDir: '.features-gen/file-format-gate'
 })
 
+const designDirtyStateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-dirty-state/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-dirty-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-dirty-state.fixture.ts'],
+  outputDir: '.features-gen/design-dirty-state'
+})
+
 // Documentation-screenshot harness (website docs captures). The BDD config is
 // always defined (generation is cheap and side-effect free); the PROJECT is
 // gated on RESTORM_DOC_SHOTS=1 further down, so normal suites never run it.
@@ -626,6 +632,10 @@ export default defineConfig({
     {
       name: 'file-format-gate',
       testDir: fileFormatGateTestDir
+    },
+    {
+      name: 'design-dirty-state',
+      testDir: designDirtyStateTestDir
     },
     {
       name: 'status-bar-context-menu',

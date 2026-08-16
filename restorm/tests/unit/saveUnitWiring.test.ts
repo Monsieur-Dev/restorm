@@ -22,6 +22,8 @@ import {
 import { HTTPRequest } from '../../src/shared/models/requests/HTTPRequest'
 import { Folder as FolderClass } from '../../src/shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../src/shared/models/EnvironmentFolder'
+import { ApiDesign as ApiDesignClass } from '../../src/shared/models/ApiDesign'
+import { buildReferenceApiDesign } from './apiDesignReference'
 import { KeyValue } from '../../src/shared/models/KeyValue'
 import { SecretValue } from '../../src/shared/types/valueTypes/SecretValue'
 import { StringValue } from '../../src/shared/types/valueTypes/StringValue'
@@ -29,6 +31,7 @@ import { StringValue } from '../../src/shared/types/valueTypes/StringValue'
 const classResolver = (item: Record<string, unknown>, parentClass: object | undefined): object | undefined => {
   const type = item['type']
   if (type === 'http') return HTTPRequest
+  if (type === 'design') return ApiDesignClass
   if (parentClass === EnvironmentFolderClass || parentClass === FolderClass) return FolderClass
   return undefined
 }
@@ -78,6 +81,42 @@ describe('save-unit wiring (restorm ↔ lib)', () => {
     const rawItemClone = JSON.parse(JSON.stringify(request)) as Record<string, unknown>
     const bridgeDraft = cleanseForPersistence(rawItemClone, HTTPRequest)
     expect(bridgeDraft).toEqual(requestEntry?.content)
+  })
+
+  it('cleansed draft matches decomposer content for a design node (leaf unit)', () => {
+    // A design is one save unit: its models/enums/routeGroups are tab
+    // sections, never child units. The bridge's cleansed draft must be
+    // byte-for-byte the decomposer's content slice, or
+    // `commitIfDraftMatches` never matches and the unit stays dirty
+    // after every save.
+    const design = ApiDesignClass.fromPlain(buildReferenceApiDesign())
+    const folder = new EnvironmentFolderClass({
+      id: 'env-1',
+      name: 'Prod',
+      items: [design]
+    })
+
+    const rootPojo = JSON.parse(JSON.stringify(folder)) as Record<string, unknown>
+    const decomposed = decomposeForPersistence({
+      root: rootPojo,
+      rootClass: EnvironmentFolderClass,
+      basePath: '/tmp/proj',
+      format: 'yaml',
+      extension: 'yaml',
+      classResolver
+    })
+
+    const designEntry = decomposed.children.find((c) => c.runtimeId === 'design-petstore')
+    if (designEntry === undefined) throw new Error('the design must decompose as its own unit')
+    // A leaf: the design decomposes as its own unit, with no child units
+    // split out of it.
+    expect(decomposed.children.some((c) => c.parentId === 'design-petstore')).toBe(false)
+    const content = designEntry.content
+    expect(Array.isArray(content['models'])).toBe(true)
+
+    const rawItemClone = JSON.parse(JSON.stringify(design)) as Record<string, unknown>
+    const bridgeDraft = cleanseForPersistence(rawItemClone, ApiDesignClass)
+    expect(bridgeDraft).toEqual(designEntry.content)
   })
 
   it('commitIfDraftMatches succeeds when the renderer bridges the same node it later saves', () => {

@@ -19,6 +19,7 @@ import { Folder as FolderClass } from '../../../shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../../shared/models/EnvironmentFolder'
 import { Environment as EnvironmentClass } from '../../../shared/models/Environment'
 import { KeyValue as KeyValueClass } from '../../../shared/models/KeyValue'
+import { ApiDesign as ApiDesignClass } from '../../../shared/models/ApiDesign'
 import { HTTPRequest } from '../../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../../shared/models/requests/GrpcRequest'
@@ -55,6 +56,11 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
   if (type === 'odata') return ODataRequest
   if (type === 'auth') return AuthenticationRequest
   if (type === 'amqp') return AmqpRequest
+  // A design is a leaf save unit of its own: without this arm it would
+  // fall through to the folder branch below and be decomposed (and
+  // cleansed) as a Folder — a shape the save-unit bridge never produces,
+  // so its drafts would never match and the unit would stay dirty.
+  if (type === 'design') return ApiDesignClass
   // Everything without a `type` discriminator is a folder-like node.
   // Descendants of an EnvironmentFolder are regular Folders; everything
   // under a Folder stays a Folder.
@@ -63,7 +69,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 }
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
-import { makeReactiveFolder, makeReactiveRequest, emitEnvironmentUpdated } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, emitEnvironmentUpdated } from '../types/reactive'
 import {
   prepareForSerialization,
   processAfterDeserialization,
@@ -744,10 +750,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // `makeReactiveFolder`; root-level requests go through
         // `makeReactiveRequest` with no parent id so edits still emit
         // `REQUEST_UPDATED` into the dirty tracker / search index.
-        // A design stays unwrapped: its edit surface does not exist yet,
-        // and its document events arrive with the Design tab.
+        // Designs go through `makeReactiveApiDesign` so their edits emit
+        // `DESIGN_UPDATED` into the same pipeline.
         const reactiveItems = collectionsWithIds.map((item) =>
-          isApiDesign(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
 

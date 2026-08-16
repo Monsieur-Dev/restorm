@@ -50,6 +50,7 @@ import { SseRequest } from '../../shared/models/requests/SseRequest'
 import { Folder as FolderClass } from '../../shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models/EnvironmentFolder'
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
+import { ApiDesign as ApiDesignClass } from '../../shared/models/ApiDesign'
 
 /**
  * Resolve the concrete class of a document node by its `type`
@@ -102,7 +103,7 @@ function cancelScenarioSaveTimer(): void {
   latestSaveAll = null
 }
 
-const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
+const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
     if (t === 'soap') return SoapRequest
@@ -113,6 +114,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
     return HTTPRequest
   }
   if (type === 'environment') return EnvironmentClass
+  if (type === 'design') return ApiDesignClass
   // Distinguish env folders from regular folders — the decomposer
   // lifts different child arrays depending on which of the two we're
   // looking at (`environments` + `items` vs `items` only). The bridge
@@ -233,7 +235,7 @@ import {
 import { useFavoritesAndOpenItems } from './hooks/useFavoritesAndOpenItems'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
-import { makeReactiveFolder, makeReactiveRequest } from './types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from './types/reactive'
 import { searchIndexService } from './services/SearchIndexService'
 import { useRestormStore } from './store/restormStore'
 import type {
@@ -3037,6 +3039,7 @@ const App: React.FC = () => {
         setRootItems: (folders: EnvironmentFolder[]) => void
         findItemIndexPath: (nameChain: string[]) => number[] | null
         findItemIdByPath: (nameChain: string[]) => string | null
+        mutateDesign: (designName: string, patch: Record<string, unknown>) => boolean
         setEnvFolderTagColor: (folderName: string, tag: string, color: string | null) => boolean
         closeFile: () => Promise<void>
         menuClose: () => Promise<void>
@@ -3051,7 +3054,7 @@ const App: React.FC = () => {
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          isScenario(item) || isApiDesign(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -3088,6 +3091,30 @@ const App: React.FC = () => {
         // helper above intentionally skips.
         navigationService.clearHistory()
         await handleMenuCloseRef.current()
+      },
+      mutateDesign: (designName: string, patch: Record<string, unknown>): boolean => {
+        // Assign each patch key onto the REACTIVE design (found by name,
+        // anywhere in the tree) so the edit goes through the proxy's set
+        // trap — the exact path a Design-tab edit takes: DESIGN_UPDATED →
+        // save-unit draft → dirty → autosave. Top-level keys only, per the
+        // design mutation convention (see DESIGN_INDEXABLE_KEYS).
+        const findDesign = (items: FolderItem[]): FolderItem | null => {
+          for (const item of items) {
+            if (isApiDesign(item) && item.name === designName) return item
+            const children = (item as FolderItem & { items?: FolderItem[] }).items
+            if (children) {
+              const found = findDesign(children)
+              if (found) return found
+            }
+          }
+          return null
+        }
+        const design = findDesign(rootItemsRef.current)
+        if (!design) return false
+        for (const [key, value] of Object.entries(patch)) {
+          ;(design as unknown as Record<string, unknown>)[key] = value
+        }
+        return true
       },
       setEnvFolderTagColor: (folderName: string, tag: string, color: string | null): boolean => {
         // Locate the first env folder whose name matches, then delegate to
@@ -3225,7 +3252,7 @@ const App: React.FC = () => {
     // `commitIfDraftMatches` actually matches when the node hasn't
     // changed between mutate and save. `SecretValue.toJSON` strips
     // plaintext on the preceding JSON round trip.
-    const kindForType = (type: 'folder' | 'request' | 'environment'): 'folder' | 'file' =>
+    const kindForType = (type: 'folder' | 'request' | 'environment' | 'design'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'
 
     // Per-id debounce for the save-unit draft IPC. Typing in a
@@ -3371,15 +3398,19 @@ const App: React.FC = () => {
     const subscriptions = [
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleFolderOrRequestUpdated),
+      eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated),
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.DESIGN_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
+      eventBus.subscribe(DocumentEvents.DESIGN_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete),
       // Bump tab contentVersion so request tabs re-derive their live
       // env list when the env tree mutates — see comment above.
@@ -3404,7 +3435,7 @@ const App: React.FC = () => {
       upsertTimers.clear()
     }
     // `rootItems` is intentionally NOT a dep: the handlers read the live
-    // tree via `rootItemsRef.current`, so this 15-subscription effect
+    // tree via `rootItemsRef.current`, so this subscription effect
     // mounts ONCE per file/project instead of tearing down + re-subscribing
     // on every tree keystroke. `environmentFolderCollections`
     // isn't read in the effect body at all, so it's dropped too.

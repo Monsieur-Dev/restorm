@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewDropPosition, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
-import { isAnyFolder, isScenario, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isApiDesign, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -564,6 +564,16 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         emitBothBuses(DocumentEvents.REQUEST_DELETED, {
           id: node.id,
           type: 'request',
+          ...(parentId !== undefined ? { parentFolderId: parentId } : {})
+        } as DocumentDeletedPayload)
+        return
+      }
+      if (isApiDesign(node)) {
+        // A design is its own save unit: the DELETED event is what turns a
+        // sidebar delete into a tombstone the next save commits.
+        emitBothBuses(DocumentEvents.DESIGN_DELETED, {
+          id: node.id,
+          type: 'design',
           ...(parentId !== undefined ? { parentFolderId: parentId } : {})
         } as DocumentDeletedPayload)
         return

@@ -5,7 +5,7 @@
 import React, { useCallback, useState } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
-import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from '../types/reactive'
 import { processAfterDeserialization } from '../utils/serialization'
 import { reidentifyForest } from '../../../shared/utils/reidentifyTree'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
@@ -240,7 +240,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // and flow into the dirty tracker / search index like any
       // nested request.
       const reactiveImported = itemsWithNewIds.map((item) =>
-        isScenario(item) || isApiDesign(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
       )
       setRootItems((prev) => [...prev, ...reactiveImported])
       expandAfterImport()

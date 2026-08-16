@@ -96,6 +96,8 @@ server; — = pure UI/in-process.
 | settings-tab | 7 | Settings surface follows the workbench (+ Toggle keyboard focus ring) | — |
 | firewall-exemptions | 5 | The app's own phone-home destinations: the panel exposes only the whitelist/blacklist, and consent OFF ⇒ endpoint declared but not exempted / ON ⇒ exempted | — |
 | dirty-state | 6 | Dirty-state propagation across nested units | — |
+| design-dirty-state | 3 | API-design edits ride the standard dirty/autosave pipeline: dirty round-trip (edit → `*` → save → clean → reopen intact), every top-level design section marks dirty (no silent surface), autosave persists a design edit with no manual save | — |
+| file-format-gate | 6 | `fileFormatVersion` gate: current version opens, future version refused (file untouched byte-for-byte), missing/legacy-position version refused, lazy 1→1.1 bump (design-less project saves at 1; a project carrying a design opens, saves at 1.1 and reopens intact) | — |
 | status-bar-context-menu | 6 | Status bar file-path popover actions: reveal in OS file explorer, copy file name, copy full path, popover closes after each action, no-file-open state, reveal-channel path containment | — |
 | documentation-viewer | 4 | Documentation viewer interactions | — |
 | quick-settings | 13 | Quick-config save/load round-trip every protocol field + app-wide popover exclusivity | — |
