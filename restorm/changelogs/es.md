@@ -10,6 +10,7 @@ Correcciones:
 
 - **Los nodos de código vuelven a arrancar en los Mac Intel**: la build de macOS Intel incluía un binario de esbuild compilado para Apple Silicon.
 - **La acción «Nueva ventana» del lanzador AppImage vuelve a abrir una ventana**, y el comando `restorm` instalado por los paquetes .deb/.rpm vuelve a funcionar.
+- **El arranque en Windows es más limpio** — la ventana se carga ahora mediante el protocolo de la aplicación, sin un repliegue silencioso tras un error interno en cada inicio.
 
 ## v1.0.3
 

@@ -20,6 +20,7 @@ Fixes:
 
 - **Code nodes start again on Intel Macs** — the macOS Intel build shipped an esbuild binary built for Apple Silicon.
 - **The AppImage's "New window" launcher action opens a window again**, and the `restorm` command installed by the .deb/.rpm packages works again.
+- **Windows startup is cleaner** — the window now loads through the app protocol instead of silently falling back after an internal error on every launch.
 
 ## v1.0.3
 

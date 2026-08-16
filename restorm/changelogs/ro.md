@@ -10,6 +10,7 @@ Remedieri:
 
 - **Nodurile de cod pornesc din nou pe Mac-urile Intel** — build-ul macOS Intel includea un binar esbuild compilat pentru Apple Silicon.
 - **Acțiunea „Fereastră nouă" a lansatorului AppImage deschide din nou o fereastră**, iar comanda `restorm` instalată de pachetele .deb/.rpm funcționează din nou.
+- **Pornirea pe Windows este mai curată** — fereastra se încarcă acum prin protocolul aplicației, fără o soluție de rezervă silențioasă după o eroare internă la fiecare pornire.
 
 ## v1.0.3
 

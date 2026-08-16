@@ -10,6 +10,7 @@
 
 - **代码节点在 Intel Mac 上恢复运行** — macOS Intel 版本附带了为 Apple Silicon 编译的 esbuild 二进制文件。
 - **AppImage 启动器的"新建窗口"操作恢复打开窗口**，.deb/.rpm 软件包安装的 `restorm` 命令恢复可用。
+- **Windows 启动更干净了** — 窗口现在通过应用协议加载，不再在每次启动时因内部错误而静默回退。
 
 ## v1.0.3
 

@@ -10,6 +10,7 @@ Ispravke:
 
 - **Čvorovi koda ponovo se pokreću na Intel Mac računarima** — macOS Intel build je sadržao esbuild binarni fajl kompajliran za Apple Silicon.
 - **Radnja „Novi prozor" AppImage pokretača ponovo otvara prozor**, a komanda `restorm` koju instaliraju .deb/.rpm paketi ponovo radi.
+- **Pokretanje na Windows-u je čistije** — prozor se sada učitava preko aplikacionog protokola, bez tihog rezervnog rešenja posle interne greške pri svakom pokretanju.
 
 ## v1.0.3
 

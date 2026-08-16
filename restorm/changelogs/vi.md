@@ -10,6 +10,7 @@ Sửa lỗi:
 
 - **Nút mã chạy lại trên máy Mac dùng Intel** — bản dựng macOS Intel chứa tệp esbuild được biên dịch cho Apple Silicon.
 - **Hành động "Cửa sổ mới" của trình khởi chạy AppImage mở lại cửa sổ**, và lệnh `restorm` do các gói .deb/.rpm cài đặt hoạt động trở lại.
+- **Khởi động trên Windows sạch hơn** — cửa sổ giờ được tải qua giao thức ứng dụng, không còn phương án dự phòng âm thầm sau lỗi nội bộ ở mỗi lần khởi chạy.
 
 ## v1.0.3
 

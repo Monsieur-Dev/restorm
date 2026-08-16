@@ -10,6 +10,7 @@ Opravy:
 
 - **Uzly kódu na Macích s procesorem Intel opět startují** — build pro macOS Intel obsahoval binárku esbuild zkompilovanou pro Apple Silicon.
 - **Akce „Nové okno" spouštěče AppImage znovu otevře okno** a příkaz `restorm` instalovaný balíčky .deb/.rpm opět funguje.
+- **Start ve Windows je čistší** — okno se nyní načítá přes aplikační protokol, bez tichého záložního režimu po interní chybě při každém spuštění.
 
 ## v1.0.3
 

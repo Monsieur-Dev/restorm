@@ -10,6 +10,7 @@ Rettelser:
 
 - **Kodenoder starter igen på Intel-Macs** — macOS-Intel-builden indeholdt en esbuild-binær kompileret til Apple Silicon.
 - **AppImage-launcherens handling "Nyt vindue" åbner igen et vindue**, og kommandoen `restorm` installeret af .deb/.rpm-pakkerne virker igen.
+- **Opstart på Windows er renere** — vinduet indlæses nu via app-protokollen uden stille fallback efter en intern fejl ved hver start.
 
 ## v1.0.3
 

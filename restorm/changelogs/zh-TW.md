@@ -10,6 +10,7 @@
 
 - **程式碼節點在 Intel Mac 上恢復執行** — macOS Intel 版本內含為 Apple Silicon 編譯的 esbuild 二進位檔。
 - **AppImage 啟動器的「新視窗」動作恢復開啟視窗**，.deb/.rpm 套件安裝的 `restorm` 指令恢復可用。
+- **Windows 啟動更乾淨了** — 視窗現在透過應用程式協定載入，不再於每次啟動時因內部錯誤而靜默回退。
 
 ## v1.0.3
 

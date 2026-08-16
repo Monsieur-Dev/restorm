@@ -10,6 +10,7 @@ Düzeltmeler:
 
 - **Kod düğümleri Intel Mac'lerde yeniden başlıyor** — macOS Intel derlemesi Apple Silicon için derlenmiş bir esbuild ikilisi içeriyordu.
 - **AppImage başlatıcısının "Yeni pencere" eylemi yeniden pencere açıyor** ve .deb/.rpm paketlerinin kurduğu `restorm` komutu yeniden çalışıyor.
+- **Windows'ta başlangıç daha temiz** — pencere artık her başlatmada bir iç hatanın ardından sessiz bir yedeğe düşmeden uygulama protokolü üzerinden yükleniyor.
 
 ## v1.0.3
 

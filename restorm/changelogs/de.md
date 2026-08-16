@@ -10,6 +10,7 @@ Korrekturen:
 
 - **Code-Knoten starten auf Intel-Macs wieder** — der macOS-Intel-Build enthielt ein für Apple Silicon kompiliertes esbuild-Binary.
 - **Die Aktion „Neues Fenster" des AppImage-Launchers öffnet wieder ein Fenster**, und der von den .deb/.rpm-Paketen installierte Befehl `restorm` funktioniert wieder.
+- **Der Windows-Start ist sauberer** — das Fenster lädt jetzt über das App-Protokoll, ohne stillen Rückfall nach einem internen Fehler bei jedem Start.
 
 ## v1.0.3
 

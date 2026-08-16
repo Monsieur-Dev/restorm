@@ -76,7 +76,7 @@ vi.mock('path', () => ({
 }))
 
 import * as electron from 'electron'
-import { BaseWindow } from './BaseWindow'
+import { BaseWindow, appUrlForEntryFile } from './BaseWindow'
 import type { WindowConfiguration, WindowState } from './WindowManager'
 
 // Concrete subclass for testing (BaseWindow is abstract)
@@ -519,5 +519,28 @@ describe('BaseWindow', () => {
       expect(bw.showInactive).not.toHaveBeenCalled()
       expect(bw.isFocused()).toBe(true)
     })
+  })
+})
+
+describe('appUrlForEntryFile', () => {
+  it('keeps only the file name from a POSIX entry path', () => {
+    expect(appUrlForEntryFile('/opt/Restorm/resources/app.asar/dist/renderer/index.html'))
+      .toBe('app://./index.html')
+  })
+
+  it('keeps only the file name from a Windows entry path (backslashes)', () => {
+    // The regression: split('/') left the whole absolute path in the URL and
+    // every Windows launch fell back to loadFile with a crash-report error.
+    expect(appUrlForEntryFile('C:\\Users\\restorm\\AppData\\Local\\restorm\\Cache\\1.0.3\\win32-x64\\resources\\app.asar\\dist\\renderer\\index.html'))
+      .toBe('app://./index.html')
+  })
+
+  it('handles a mixed-separator path', () => {
+    expect(appUrlForEntryFile('C:/apps/restorm\\dist\\renderer/main.html')).toBe('app://./main.html')
+  })
+
+  it('falls back to index.html for an empty path', () => {
+    expect(appUrlForEntryFile('')).toBe('app://./index.html')
+    expect(appUrlForEntryFile('/trailing/slash/')).toBe('app://./index.html')
   })
 })

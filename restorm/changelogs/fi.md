@@ -10,6 +10,7 @@ Korjaukset:
 
 - **Koodisolmut käynnistyvät jälleen Intel-Maceissa** — macOS Intel -versio sisälsi Apple Siliconille käännetyn esbuild-binäärin.
 - **AppImage-käynnistimen "Uusi ikkuna" -toiminto avaa jälleen ikkunan**, ja .deb/.rpm-pakettien asentama `restorm`-komento toimii jälleen.
+- **Windows-käynnistys on siistimpi** — ikkuna latautuu nyt sovellusprotokollan kautta ilman hiljaista varamenettelyä jokaisen käynnistyksen sisäisen virheen jälkeen.
 
 ## v1.0.3
 

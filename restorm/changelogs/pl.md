@@ -10,6 +10,7 @@ Poprawki:
 
 - **Węzły kodu znów startują na Macach z procesorem Intel** — build macOS Intel zawierał binarkę esbuild skompilowaną dla Apple Silicon.
 - **Akcja „Nowe okno" launchera AppImage znów otwiera okno**, a polecenie `restorm` instalowane przez pakiety .deb/.rpm znów działa.
+- **Start w systemie Windows jest czystszy** — okno ładuje się teraz przez protokół aplikacji, bez cichego obejścia po wewnętrznym błędzie przy każdym uruchomieniu.
 
 ## v1.0.3
 

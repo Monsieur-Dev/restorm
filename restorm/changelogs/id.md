@@ -10,6 +10,7 @@ Perbaikan:
 
 - **Node kode kembali berjalan di Mac Intel** — build macOS Intel menyertakan biner esbuild yang dikompilasi untuk Apple Silicon.
 - **Aksi "Jendela baru" peluncur AppImage kembali membuka jendela**, dan perintah `restorm` yang dipasang paket .deb/.rpm kembali berfungsi.
+- **Startup di Windows lebih bersih** — jendela kini dimuat melalui protokol aplikasi, tanpa fallback senyap setelah galat internal di setiap peluncuran.
 
 ## v1.0.3
 

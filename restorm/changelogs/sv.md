@@ -10,6 +10,7 @@ Rättningar:
 
 - **Kodnoder startar igen på Intel-Macar** — macOS-Intel-bygget innehöll en esbuild-binär kompilerad för Apple Silicon.
 - **AppImage-startarens åtgärd "Nytt fönster" öppnar ett fönster igen**, och kommandot `restorm` som installeras av .deb/.rpm-paketen fungerar igen.
+- **Uppstarten på Windows är renare** — fönstret läses nu in via appprotokollet utan tyst reservlösning efter ett internt fel vid varje start.
 
 ## v1.0.3
 

@@ -10,6 +10,7 @@ Rregullime:
 
 - **Nyjet e kodit nisin sërish në Mac-et me Intel** — versioni macOS Intel përmbante një binar esbuild të përpiluar për Apple Silicon.
 - **Veprimi «Dritare e re» i nisësit AppImage hap sërish një dritare**, dhe komanda `restorm` e instaluar nga paketat .deb/.rpm funksionon sërish.
+- **Nisja në Windows është më e pastër** — dritarja tani ngarkohet përmes protokollit të aplikacionit, pa një zgjidhje rezervë të heshtur pas një gabimi të brendshëm në çdo nisje.
 
 ## v1.0.3
 

@@ -10,6 +10,7 @@ Correcties:
 
 - **Codeknooppunten starten weer op Intel-Macs** — de macOS-Intel-build bevatte een esbuild-binary die voor Apple Silicon was gecompileerd.
 - **De actie "Nieuw venster" van de AppImage-launcher opent weer een venster**, en het door de .deb/.rpm-pakketten geïnstalleerde commando `restorm` werkt weer.
+- **Opstarten op Windows is schoner** — het venster laadt nu via het app-protocol, zonder stille terugval na een interne fout bij elke start.
 
 ## v1.0.3
 
