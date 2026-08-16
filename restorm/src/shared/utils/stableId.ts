@@ -205,8 +205,10 @@ export function idPathSegment(record: Record<string, unknown>): string | null {
  *   `droute:<method>:<urlPattern>`
  * - **DesignEnum** — `doc.properties` array (an enum-shaped
  *   `ModelDocumentation`) → `denum:<doc.name>`
- * - **DesignProperty** — `doc.type` + `doc.required` (a
- *   `PropertyDocumentation`) → `dprop:<doc.name>`
+ * - **DesignProperty** — `doc.type` (a `PropertyDocumentation`; `type`
+ *   alone, deliberately — an externally-authored file may omit
+ *   `required`, and a malformed document must still classify) →
+ *   `dprop:<doc.name>`
  *
  * A design's named example is not `doc`-shaped; it is recognised by its
  * `values` map next to a `name`, a combination no other persisted shape
@@ -230,7 +232,7 @@ export function designEntitySegment(record: Record<string, unknown>): string | n
     if (Array.isArray(docRecord['properties'])) {
       return `denum:${asText(docRecord['name'])}`
     }
-    if ('type' in docRecord && 'required' in docRecord) {
+    if ('type' in docRecord) {
       return `dprop:${asText(docRecord['name'])}`
     }
     return null

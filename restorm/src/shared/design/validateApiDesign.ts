@@ -17,10 +17,22 @@ export type DesignIssueCode =
   | 'propertyNameDuplicate'
   /** A property re-declares a name an inherited property already has. */
   | 'propertyShadowsParent'
+  /** A model has an empty name. */
+  | 'modelNameEmpty'
+  /** An enum has an empty name. */
+  | 'enumNameEmpty'
+  /** A route group has an empty name. */
+  | 'groupNameEmpty'
   /** Two models spell the same name (spec component names collide). */
   | 'modelNameDuplicate'
   /** Two enums spell the same name. */
   | 'enumNameDuplicate'
+  /** A model and an enum share a name — they project into ONE spec
+   * component namespace, so one would silently overwrite the other. */
+  | 'componentNameCollision'
+  /** Two route groups spell the same name (one would overwrite the
+   * other in the projected `groups` / Swagger tags). */
+  | 'groupNameDuplicate'
   /** `inheritsFrom` points at no model in this design. */
   | 'inheritanceTargetUnknown'
   /** Following `inheritsFrom` links returns to the starting model. */
@@ -60,8 +72,45 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
   const modelById = new Map(design.models.map((m) => [m.id, m]))
   const enumIds = new Set(design.enums.map((e) => e.id))
 
-  reportDuplicateNames(design.models.map((m) => ({ id: m.id, name: m.doc.name })), 'modelNameDuplicate', design.id, issues)
-  reportDuplicateNames(design.enums.map((e) => ({ id: e.id, name: e.doc.name })), 'enumNameDuplicate', design.id, issues)
+  // Models and enums share ONE component namespace (both project under
+  // the spec's model names), so the sweep runs over their union: a
+  // within-kind duplicate keeps its specific code, a cross-kind clash
+  // gets its own.
+  const componentNames = new Map<string, 'model' | 'enum'>()
+  const componentEntries: { id: string; name: string; kind: 'model' | 'enum' }[] = [
+    ...design.models.map((m) => ({ id: m.id, name: m.doc.name, kind: 'model' as const })),
+    ...design.enums.map((e) => ({ id: e.id, name: e.doc.name, kind: 'enum' as const }))
+  ]
+  for (const entry of componentEntries) {
+    if (entry.name === '') {
+      issues.push({ code: entry.kind === 'model' ? 'modelNameEmpty' : 'enumNameEmpty', path: [design.id, entry.id] })
+      continue
+    }
+    const holder = componentNames.get(entry.name)
+    if (holder === undefined) {
+      componentNames.set(entry.name, entry.kind)
+    } else if (holder === entry.kind) {
+      issues.push({
+        code: entry.kind === 'model' ? 'modelNameDuplicate' : 'enumNameDuplicate',
+        path: [design.id, entry.id],
+        subject: entry.name
+      })
+    } else {
+      issues.push({ code: 'componentNameCollision', path: [design.id, entry.id], subject: entry.name })
+    }
+  }
+
+  const groupNames = new Set<string>()
+  for (const group of design.routeGroups) {
+    if (group.doc.name === '') {
+      issues.push({ code: 'groupNameEmpty', path: [design.id, group.id] })
+      continue
+    }
+    if (groupNames.has(group.doc.name)) {
+      issues.push({ code: 'groupNameDuplicate', path: [design.id, group.id], subject: group.doc.name })
+    }
+    groupNames.add(group.doc.name)
+  }
 
   for (const model of design.models) {
     const path = [design.id, model.id]
@@ -137,21 +186,6 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
   }
 
   return issues
-}
-
-function reportDuplicateNames(
-  entries: { id: string; name: string }[],
-  code: 'modelNameDuplicate' | 'enumNameDuplicate',
-  designId: string,
-  issues: DesignIssue[]
-): void {
-  const seen = new Set<string>()
-  for (const entry of entries) {
-    if (entry.name !== '' && seen.has(entry.name)) {
-      issues.push({ code, path: [designId, entry.id], subject: entry.name })
-    }
-    seen.add(entry.name)
-  }
 }
 
 /** Property names visible on a model through its inheritance chain

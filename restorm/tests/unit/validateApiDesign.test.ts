@@ -89,6 +89,32 @@ describe('validateApiDesign', () => {
     expect(codes(design).sort()).toEqual(['enumNameDuplicate', 'modelNameDuplicate'])
   })
 
+  it('reports a model and an enum sharing a name — one component namespace', () => {
+    const design = withModels(model('m1', 'Status'))
+    design.enums = [{ id: 'e1', doc: { name: 'Status', properties: [], enumValues: ['a'] } }]
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'componentNameCollision', path: ['d', 'e1'], subject: 'Status' }
+    ])
+  })
+
+  it('reports empty model, enum and group names', () => {
+    const design = withModels(model('m1', ''))
+    design.enums = [{ id: 'e1', doc: { name: '', properties: [], enumValues: [] } }]
+    design.routeGroups = [{ id: 'g1', doc: { name: '' }, routes: [] }]
+    expect(codes(design).sort()).toEqual(['enumNameEmpty', 'groupNameEmpty', 'modelNameEmpty'])
+  })
+
+  it('reports duplicate route group names', () => {
+    const design = withModels()
+    design.routeGroups = [
+      { id: 'g1', doc: { name: 'Users' }, routes: [] },
+      { id: 'g2', doc: { name: 'Users' }, routes: [] }
+    ]
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'groupNameDuplicate', path: ['d', 'g2'], subject: 'Users' }
+    ])
+  })
+
   it('reports an unknown inheritance target', () => {
     const design = withModels(model('m1', 'User', { design: { inheritsFrom: 'missing' } }))
     expect(codes(design)).toEqual(['inheritanceTargetUnknown'])
