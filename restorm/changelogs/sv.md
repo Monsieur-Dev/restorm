@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Logga in en gång — alla fönster följer med.**
+
+- **Ditt konto följer dig nu mellan fönstren.** Logga in, logga ut eller byt plan i ett Restorm-fönster så tar alla andra öppna fönster över det direkt — utan omstart, utan en andra inloggning. Och när du slutför en inloggning i webbläsaren når bekräftelsen nu det fönster som bad om den, även med flera fönster öppna.
+
+Rättningar:
+
+- **Kodnoder startar igen på Intel-Macar** — macOS-Intel-bygget innehöll en esbuild-binär kompilerad för Apple Silicon.
+- **AppImage-startarens åtgärd "Nytt fönster" öppnar ett fönster igen**, och kommandot `restorm` som installeras av .deb/.rpm-paketen fungerar igen.
+
 ## v1.0.3
 
 **Restorm kör i CI, utan FUSE.**

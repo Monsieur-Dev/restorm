@@ -27,8 +27,9 @@ describe('Linux sandbox launcher wrapper (afterPack)', () => {
     const hookPath = join(pkgRoot, hookRel)
     expect(existsSync(hookPath), `${hookRel} exists`).toBe(true)
     const src = readFileSync(hookPath, 'utf8')
-    // Linux-scoped
-    expect(src).toMatch(/electronPlatformName\s*!==\s*'linux'/)
+    // The wrap is Linux-scoped (the hook itself now also serves other
+    // platforms for the esbuild target-arch guarantee)
+    expect(src).toMatch(/electronPlatformName\s*===\s*'linux'[\s\S]*wrapLinuxExecutable/)
     // Injects the env var that disables the sandbox pre-JS
     expect(src).toContain('ELECTRON_DISABLE_SANDBOX=1')
     // Wraps by renaming the real binary aside and exec'ing it

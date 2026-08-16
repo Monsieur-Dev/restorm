@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Jedno přihlášení — všechna okna následují.**
+
+- **Váš účet vás nyní následuje mezi okny.** Přihlaste se, odhlaste nebo změňte plán v jednom okně Restormu a každé další otevřené okno to okamžitě převezme — bez restartu, bez druhého přihlášení. A když dokončíte přihlášení v prohlížeči, potvrzení nyní dorazí do okna, které o něj požádalo, i s několika otevřenými okny.
+
+Opravy:
+
+- **Uzly kódu na Macích s procesorem Intel opět startují** — build pro macOS Intel obsahoval binárku esbuild zkompilovanou pro Apple Silicon.
+- **Akce „Nové okno" spouštěče AppImage znovu otevře okno** a příkaz `restorm` instalovaný balíčky .deb/.rpm opět funguje.
+
 ## v1.0.3
 
 **Restorm běží v CI, bez FUSE.**

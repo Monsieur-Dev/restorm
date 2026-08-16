@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Einmal anmelden — alle Fenster folgen.**
+
+- **Ihr Konto folgt Ihnen jetzt über alle Fenster hinweg.** Melden Sie sich in einem Restorm-Fenster an oder ab oder wechseln Sie den Plan: Jedes andere offene Fenster übernimmt es sofort — ohne Neustart, ohne zweite Anmeldung. Und wenn Sie eine Anmeldung im Browser abschließen, erreicht die Bestätigung nun das Fenster, das sie angefordert hat, auch bei mehreren offenen Fenstern.
+
+Korrekturen:
+
+- **Code-Knoten starten auf Intel-Macs wieder** — der macOS-Intel-Build enthielt ein für Apple Silicon kompiliertes esbuild-Binary.
+- **Die Aktion „Neues Fenster" des AppImage-Launchers öffnet wieder ein Fenster**, und der von den .deb/.rpm-Paketen installierte Befehl `restorm` funktioniert wieder.
+
 ## v1.0.3
 
 **Restorm läuft in der CI, ohne FUSE.**

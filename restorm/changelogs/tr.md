@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Bir kez oturum açın — tüm pencereler izler.**
+
+- **Hesabınız artık pencereden pencereye sizi izliyor.** Bir Restorm penceresinde oturum açın, kapatın veya planı değiştirin; diğer tüm açık pencereler bunu anında benimser — yeniden başlatma yok, ikinci oturum açma yok. Ve tarayıcıda bir oturum açmayı tamamladığınızda, onay artık bunu isteyen pencereye ulaşıyor, birden çok pencere açıkken bile.
+
+Düzeltmeler:
+
+- **Kod düğümleri Intel Mac'lerde yeniden başlıyor** — macOS Intel derlemesi Apple Silicon için derlenmiş bir esbuild ikilisi içeriyordu.
+- **AppImage başlatıcısının "Yeni pencere" eylemi yeniden pencere açıyor** ve .deb/.rpm paketlerinin kurduğu `restorm` komutu yeniden çalışıyor.
+
 ## v1.0.3
 
 **Restorm CI'da çalışıyor, FUSE olmadan.**

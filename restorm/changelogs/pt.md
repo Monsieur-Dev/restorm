@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Inicie sessão uma vez — todas as janelas acompanham.**
+
+- **A sua conta agora acompanha-o entre janelas.** Inicie sessão, termine-a ou mude de plano numa janela do Restorm e todas as outras janelas abertas adotam-no de imediato — sem reiniciar, sem segunda autenticação. E ao concluir uma autenticação no navegador, a confirmação chega agora à janela que a pediu, mesmo com várias janelas abertas.
+
+Correções:
+
+- **Os nós de código voltam a arrancar nos Mac Intel** — a build macOS Intel incluía um binário esbuild compilado para Apple Silicon.
+- **A ação «Nova janela» do lançador AppImage volta a abrir uma janela**, e o comando `restorm` instalado pelos pacotes .deb/.rpm volta a funcionar.
+
 ## v1.0.3
 
 **O Restorm corre em CI, sem FUSE.**

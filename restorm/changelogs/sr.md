@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Jedna prijava — svi prozori slede.**
+
+- **Vaš nalog vas sada prati iz prozora u prozor.** Prijavite se, odjavite ili promenite plan u jednom prozoru Restorma i svaki drugi otvoreni prozor to odmah preuzima — bez ponovnog pokretanja, bez druge prijave. A kada završite prijavu u pregledaču, potvrda sada stiže u prozor koji ju je zatražio, čak i sa više otvorenih prozora.
+
+Ispravke:
+
+- **Čvorovi koda ponovo se pokreću na Intel Mac računarima** — macOS Intel build je sadržao esbuild binarni fajl kompajliran za Apple Silicon.
+- **Radnja „Novi prozor" AppImage pokretača ponovo otvara prozor**, a komanda `restorm` koju instaliraju .deb/.rpm paketi ponovo radi.
+
 ## v1.0.3
 
 **Restorm radi u CI-ju, bez FUSE-a.**

@@ -11,6 +11,15 @@
  * is esbuild's documented override — BUT it reads it once, at module load, so
  * the bootstrap (`esbuildBinaryPathBootstrap`) must run before anything can
  * import esbuild.
+ *
+ * A cross-arch build (the x64 mac app is built on an arm64 runner) adds a
+ * second failure mode: node_modules only ever holds the HOST's platform
+ * package, so `@esbuild/<platform>-<arch>` for the TARGET is absent from the
+ * archive entirely and the resolve itself throws. The afterPack hook
+ * (`scripts/after-pack.cjs`) drops the target's package under
+ * `app.asar.unpacked` — where the archive's resolver cannot see it — so when
+ * the in-archive resolve fails we derive that path from the `esbuild` package
+ * location instead and point `ESBUILD_BINARY_PATH` straight at it.
  */
 
 import { existsSync } from 'node:fs'
@@ -34,26 +43,51 @@ export function resolvePlatformPackageJson(): string {
   return requireFromEsbuild.resolve(`@esbuild/${process.platform}-${process.arch}/package.json`)
 }
 
+/** The `node_modules` directory that CONTAINS the `esbuild` package — the
+ * platform package's expected sibling root, derivable even when the platform
+ * package itself is absent (the cross-arch case). */
+export function resolveEsbuildSiblingRoot(): string {
+  const requireFromHere = createRequire(import.meta.url)
+  return dirname(dirname(requireFromHere.resolve('esbuild/package.json')))
+}
+
+/** The binary's path inside its platform package (win32 ships it at the
+ * package root, every other platform under bin/). */
+function binaryWithinPackage(pkgDir: string): string {
+  return process.platform === 'win32' ? join(pkgDir, 'esbuild.exe') : join(pkgDir, 'bin', 'esbuild')
+}
+
 let ensured = false
 
 /** Idempotent: when running from an asar archive, point `ESBUILD_BINARY_PATH`
  * at the unpacked native binary so esbuild's spawn works. No-ops in dev (no
  * asar in the resolved path), when the caller already set the variable, or
  * when the unpacked binary is missing (leaves esbuild's own resolution — and
- * its own clearer error — untouched). `resolve` is injectable for tests. */
-export function ensureEsbuildBinaryResolvable(resolve: () => string = resolvePlatformPackageJson): void {
+ * its own clearer error — untouched). The resolvers are injectable for tests. */
+export function ensureEsbuildBinaryResolvable(
+  resolve: () => string = resolvePlatformPackageJson,
+  resolveSiblingRoot: () => string = resolveEsbuildSiblingRoot
+): void {
   if (ensured || process.env.ESBUILD_BINARY_PATH) return
   ensured = true
-  let pkgJsonPath: string
+  let binary: string
   try {
-    pkgJsonPath = resolve()
+    const pkgJsonPath = resolve()
+    if (!/\.asar[\\/]/.test(pkgJsonPath)) return
+    binary = binaryWithinPackage(dirname(pkgJsonPath))
   } catch {
-    return
+    // The target's platform package is not in the archive at all — the
+    // cross-arch build. afterPack placed it under app.asar.unpacked; derive
+    // its location from the esbuild package, which IS in the archive.
+    let siblingRoot: string
+    try {
+      siblingRoot = resolveSiblingRoot()
+    } catch {
+      return
+    }
+    if (!/\.asar[\\/]/.test(siblingRoot)) return
+    binary = binaryWithinPackage(join(siblingRoot, '@esbuild', `${process.platform}-${process.arch}`))
   }
-  if (!/\.asar[\\/]/.test(pkgJsonPath)) return
-  const pkgDir = dirname(pkgJsonPath)
-  // Windows ships the binary at the package root; every other platform under bin/.
-  const binary = process.platform === 'win32' ? join(pkgDir, 'esbuild.exe') : join(pkgDir, 'bin', 'esbuild')
   const unpacked = toAsarUnpackedPath(binary)
   if (existsSync(unpacked)) process.env.ESBUILD_BINARY_PATH = unpacked
 }

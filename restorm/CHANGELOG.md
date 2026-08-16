@@ -10,6 +10,17 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.0.4
+
+**Sign in once — every window follows.**
+
+- **Your account now follows you across windows.** Sign in, sign out or change plan in one Restorm window, and every other open window adopts it instantly — no restart, no second login. And when you finish signing in through the browser, the confirmation now reaches the window that asked for it, even with several windows open.
+
+Fixes:
+
+- **Code nodes start again on Intel Macs** — the macOS Intel build shipped an esbuild binary built for Apple Silicon.
+- **The AppImage's "New window" launcher action opens a window again**, and the `restorm` command installed by the .deb/.rpm packages works again.
+
 ## v1.0.3
 
 **Restorm runs in CI, without FUSE.**

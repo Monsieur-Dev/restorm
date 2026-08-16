@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Një hyrje — të gjitha dritaret ndjekin.**
+
+- **Llogaria juaj tani ju ndjek nga dritarja në dritare.** Hyni, dilni ose ndryshoni planin në një dritare të Restorm dhe çdo dritare tjetër e hapur e adopton menjëherë — pa rinisje, pa një hyrje të dytë. Dhe kur përfundoni një hyrje në shfletues, konfirmimi tani mbërrin te dritarja që e kërkoi, edhe me disa dritare të hapura.
+
+Rregullime:
+
+- **Nyjet e kodit nisin sërish në Mac-et me Intel** — versioni macOS Intel përmbante një binar esbuild të përpiluar për Apple Silicon.
+- **Veprimi «Dritare e re» i nisësit AppImage hap sërish një dritare**, dhe komanda `restorm` e instaluar nga paketat .deb/.rpm funksionon sërish.
+
 ## v1.0.3
 
 **Restorm punon në CI, pa FUSE.**

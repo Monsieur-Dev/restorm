@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Eén keer aanmelden — elk venster volgt.**
+
+- **Uw account volgt u nu van venster naar venster.** Meld u aan, meld u af of wissel van abonnement in één Restorm-venster en elk ander open venster neemt het direct over — zonder herstart, zonder tweede aanmelding. En wanneer u een aanmelding in de browser afrondt, komt de bevestiging nu aan in het venster dat erom vroeg, ook met meerdere vensters open.
+
+Correcties:
+
+- **Codeknooppunten starten weer op Intel-Macs** — de macOS-Intel-build bevatte een esbuild-binary die voor Apple Silicon was gecompileerd.
+- **De actie "Nieuw venster" van de AppImage-launcher opent weer een venster**, en het door de .deb/.rpm-pakketten geïnstalleerde commando `restorm` werkt weer.
+
 ## v1.0.3
 
 **Restorm draait in CI, zonder FUSE.**

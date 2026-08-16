@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.4
+
+**Inicie sesión una vez: todas sus ventanas le siguen.**
+
+- **Su cuenta ahora le sigue entre ventanas.** Inicie sesión, ciérrela o cambie de plan en una ventana de Restorm y todas las demás ventanas abiertas lo adoptan al instante, sin reiniciar y sin una segunda conexión. Y al terminar un inicio de sesión en el navegador, la confirmación llega ahora a la ventana que la pidió, incluso con varias ventanas abiertas.
+
+Correcciones:
+
+- **Los nodos de código vuelven a arrancar en los Mac Intel**: la build de macOS Intel incluía un binario de esbuild compilado para Apple Silicon.
+- **La acción «Nueva ventana» del lanzador AppImage vuelve a abrir una ventana**, y el comando `restorm` instalado por los paquetes .deb/.rpm vuelve a funcionar.
+
 ## v1.0.3
 
 **Restorm funciona en CI, sin FUSE.**
