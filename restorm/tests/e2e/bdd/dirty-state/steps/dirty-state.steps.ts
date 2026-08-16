@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync } from 'fs'
+import { existsSync, readdirSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
@@ -128,7 +128,39 @@ When('I reopen the welcome recent file {string}', async ({}, fileName: string) =
   const recentRow = p.locator('.ecu-recent-files-vignette-section', { hasText: 'Recent' })
     .locator('.ecu-recent-files-vignette-item', { hasText: fileName })
     .first()
-  await expect(recentRow).toBeVisible({ timeout: 15000 })
+  try {
+    await expect(recentRow).toBeVisible({ timeout: 15000 })
+  } catch (err) {
+    // This assertion has failed under full-suite conditions with an EMPTY
+    // Recent section while the main log showed the file saved and opened.
+    // Capture the three states that disambiguate the failure mode: the file
+    // on disk (existence-filter input), the service's recents over IPC (main
+    // in-memory state), and the app version cell (a 'v0.0' reading marks a
+    // degraded main that also failed to read its package.json).
+    const onDisk = existsSync(join(DIRTY_STATE_TEMP_DIR, fileName))
+    let dirListing: string
+    try {
+      dirListing = JSON.stringify(readdirSync(DIRTY_STATE_TEMP_DIR))
+    } catch (e) {
+      dirListing = `dir unreadable: ${String(e)}`
+    }
+    const apiRecents = await p.evaluate(async () => {
+      const w = window as unknown as { api?: { file?: { getRecentFiles?: () => Promise<{ path: string }[]> } } }
+      try {
+        const list = await w.api?.file?.getRecentFiles?.()
+        return list ? list.map((f) => f.path) : 'api absent'
+      } catch (e) {
+        return `getRecentFiles threw: ${String(e)}`
+      }
+    })
+    const versionCell = await p.locator('[data-testid="app-statusbar-version-plan"]').textContent().catch(() => 'unreadable')
+    throw new Error(
+      `Recent row for "${fileName}" absent. Diagnostics — on disk: ${String(onDisk)}; ` +
+      `dir listing: ${dirListing}; ` +
+      `api.getRecentFiles: ${JSON.stringify(apiRecents)}; version cell: ${JSON.stringify(versionCell)}`,
+      { cause: err }
+    )
+  }
   await recentRow.click()
   await expect(p.locator('.ecu-welcome-screen')).not.toBeVisible({ timeout: 10000 })
   // Wait for the registry to re-hydrate after file:opened so the next
