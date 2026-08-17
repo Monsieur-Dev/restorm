@@ -2166,7 +2166,8 @@
         "blocked": "Javítsa a terv {{count}} validálási hibáját a kiszolgálás előtt",
         "startFailed": "A szervert nem sikerült elindítani",
         "protocolAlways": "A HTTP mindig kiszolgálásra kerül",
-        "protocolToggle": "Ez a projekció is legyen kiszolgálva"
+        "protocolToggle": "Ez a projekció is legyen kiszolgálva",
+        "stateful": "Állapottartó mód — POST/PUT/DELETE módosítja a memóriabeli tárolót (újraindításkor törlődik)"
       },
       "identity": {
         "title": "Identitás",

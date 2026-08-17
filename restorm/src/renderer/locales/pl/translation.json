@@ -2168,7 +2168,8 @@
         "blocked": "Napraw {{count}} błędy walidacji projektu przed jego serwowaniem",
         "startFailed": "Nie udało się uruchomić serwera",
         "protocolAlways": "HTTP jest zawsze serwowany",
-        "protocolToggle": "Serwuj także tę projekcję"
+        "protocolToggle": "Serwuj także tę projekcję",
+        "stateful": "Tryb stanowy — POST/PUT/DELETE modyfikują magazyn w pamięci (reset przy restarcie)"
       },
       "identity": {
         "title": "Tożsamość",

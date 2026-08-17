@@ -2166,7 +2166,8 @@
         "blocked": "Beheben Sie die {{count}} Validierungsfehler des Designs, bevor Sie es bereitstellen",
         "startFailed": "Der Server konnte nicht gestartet werden",
         "protocolAlways": "HTTP wird immer bereitgestellt",
-        "protocolToggle": "Diese Projektion ebenfalls bereitstellen"
+        "protocolToggle": "Diese Projektion ebenfalls bereitstellen",
+        "stateful": "Stateful-Modus — POST/PUT/DELETE verändern einen In-Memory-Speicher (Reset beim Neustart)"
       },
       "identity": {
         "title": "Identität",

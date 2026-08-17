@@ -2165,7 +2165,8 @@
         "blocked": "提供する前にデザインの{{count}}件の検証エラーを修正してください",
         "startFailed": "サーバーを起動できませんでした",
         "protocolAlways": "HTTP は常に提供されます",
-        "protocolToggle": "このプロジェクションも提供する"
+        "protocolToggle": "このプロジェクションも提供する",
+        "stateful": "ステートフルモード — POST/PUT/DELETE がインメモリストアを変更します（再起動でリセット）"
       },
       "identity": {
         "title": "アイデンティティ",

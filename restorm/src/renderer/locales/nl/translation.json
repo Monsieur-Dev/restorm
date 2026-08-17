@@ -2166,7 +2166,8 @@
         "blocked": "Los de {{count}} validatiefout(en) van het design op voordat u het serveert",
         "startFailed": "De server kon niet starten",
         "protocolAlways": "HTTP wordt altijd geserveerd",
-        "protocolToggle": "Deze projectie ook serveren"
+        "protocolToggle": "Deze projectie ook serveren",
+        "stateful": "Stateful-modus — POST/PUT/DELETE wijzigen een in-memory opslag (reset bij herstart)"
       },
       "identity": {
         "title": "Identiteit",

@@ -2166,7 +2166,8 @@
         "blocked": "Rregulloni {{count}} gabimet e validimit të dizajnit para se ta shërbeni",
         "startFailed": "Serveri nuk mundi të nisej",
         "protocolAlways": "HTTP shërbehet gjithmonë",
-        "protocolToggle": "Shërbeje edhe këtë projeksion"
+        "protocolToggle": "Shërbeje edhe këtë projeksion",
+        "stateful": "Modaliteti stateful — POST/PUT/DELETE ndryshojnë një depo në memorie (rivendoset në rinisje)"
       },
       "identity": {
         "title": "Identiteti",

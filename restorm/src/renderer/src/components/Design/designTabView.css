@@ -1043,3 +1043,14 @@
   display: flex;
   gap: 8px;
 }
+
+.design-serve-stateful {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.design-serve-stateful .design-field-label {
+  margin: 0;
+}

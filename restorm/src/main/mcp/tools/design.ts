@@ -263,7 +263,9 @@ export function registerDesignTools(mcp: McpService): void {
         port: z.number().int().optional(),
         latencyMs: z.number().int().optional(),
         protocols: z.array(z.enum(['graphql', 'soap', 'odata'])).optional()
-          .describe('Extra protocol projections served alongside HTTP (replaces the list; empty array = HTTP only).')
+          .describe('Extra protocol projections served alongside HTTP (replaces the list; empty array = HTTP only).'),
+        stateful: z.boolean().optional()
+          .describe('Stateful serving: POST/PUT/DELETE mutate an in-memory store seeded from the named examples (reset on restart). Absent/false = stateless (default).')
       } as Record<string, unknown>
     },
     (args) => {
@@ -306,6 +308,12 @@ export function registerDesignTools(mcp: McpService): void {
         const serving = { ...(design.serving ?? {}) }
         if (extras.length === 0) delete serving.protocols
         else serving.protocols = extras
+        design.serving = serving
+      }
+      if (typeof args['stateful'] === 'boolean') {
+        const serving = { ...(design.serving ?? {}) }
+        if (args['stateful']) serving.stateful = true
+        else delete serving.stateful
         design.serving = serving
       }
       writeDesign(design)

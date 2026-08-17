@@ -2166,7 +2166,8 @@
         "blocked": "Fix the design’s {{count}} validation issue(s) before serving",
         "startFailed": "The server could not start",
         "protocolAlways": "HTTP is always served",
-        "protocolToggle": "Serve this projection too"
+        "protocolToggle": "Serve this projection too",
+        "stateful": "Stateful mode — POST/PUT/DELETE mutate an in-memory store (reset on restart)"
       },
       "identity": {
         "title": "Identity",

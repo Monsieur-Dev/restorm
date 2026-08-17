@@ -2165,7 +2165,8 @@
         "blocked": "Perbaiki {{count}} kesalahan validasi desain sebelum menyajikannya",
         "startFailed": "Server tidak dapat dimulai",
         "protocolAlways": "HTTP selalu disajikan",
-        "protocolToggle": "Sajikan juga proyeksi ini"
+        "protocolToggle": "Sajikan juga proyeksi ini",
+        "stateful": "Mode stateful — POST/PUT/DELETE mengubah penyimpanan dalam memori (reset saat mulai ulang)"
       },
       "identity": {
         "title": "Identitas",

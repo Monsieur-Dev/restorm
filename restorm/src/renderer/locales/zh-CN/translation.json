@@ -2165,7 +2165,8 @@
         "blocked": "请先修复设计的 {{count}} 个校验错误再启动服务",
         "startFailed": "服务器无法启动",
         "protocolAlways": "HTTP 始终提供",
-        "protocolToggle": "同时提供此投影"
+        "protocolToggle": "同时提供此投影",
+        "stateful": "有状态模式 — POST/PUT/DELETE 修改内存存储（重启时重置）"
       },
       "identity": {
         "title": "标识",

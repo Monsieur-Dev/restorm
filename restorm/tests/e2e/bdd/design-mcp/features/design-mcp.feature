@@ -43,6 +43,18 @@ Feature: Design MCP exposure
     And the OData metadata describes the "User" entity
     And the served WSDL describes the "List_Users" operation
 
+  Scenario: The stateful server runs a real CRUD journey
+    Given restorm is launched with MCP for design work
+    When the agent creates a design named "Stateful API" on port 7490
+    And the agent models a "User" with an identifier, a searchable email and a "Status" enum
+    And the agent seeds a named example with email "admin@agent.io"
+    And the agent generates CRUD routes for "User"
+    And the agent enables stateful serving
+    And the agent serves the design
+    And the agent allows the served origin
+    Then a stateful POST of email "fresh@agent.io" then a GET list shows both users
+    And a stateful DELETE then a GET list drops the created user
+
   Scenario: Community edits freely but cannot serve
     Given restorm is launched with MCP without a plan
     When the agent creates a design named "Community API" on port 7485

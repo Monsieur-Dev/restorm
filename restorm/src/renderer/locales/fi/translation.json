@@ -2166,7 +2166,8 @@
         "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen sen tarjoamista",
         "startFailed": "Palvelinta ei voitu käynnistää",
         "protocolAlways": "HTTP tarjoillaan aina",
-        "protocolToggle": "Tarjoile myös tämä projektio"
+        "protocolToggle": "Tarjoile myös tämä projektio",
+        "stateful": "Tilallinen tila — POST/PUT/DELETE muokkaavat muistivarastoa (nollautuu uudelleenkäynnistyksessä)"
       },
       "identity": {
         "title": "Identiteetti",

@@ -2166,7 +2166,8 @@
         "blocked": "Rett designets {{count}} valideringsfeil før det serveres",
         "startFailed": "Serveren kunne ikke starte",
         "protocolAlways": "HTTP serveres alltid",
-        "protocolToggle": "Server også denne projeksjonen"
+        "protocolToggle": "Server også denne projeksjonen",
+        "stateful": "Stateful-modus — POST/PUT/DELETE endrer et minnelager (nullstilles ved omstart)"
       },
       "identity": {
         "title": "Identitet",

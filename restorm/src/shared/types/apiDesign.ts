@@ -329,6 +329,10 @@ export interface DesignServing {
   /** Simulated latency added to every served response, in ms.
    * Absent or 0 = answer immediately. */
   latencyMs?: number
+  /** Stateful mode (TASK-468.16): POST/PUT/DELETE mutate an ephemeral
+   * in-memory store seeded from the named examples, reset on restart.
+   * Absent/false = the default STATELESS mode (468.6). */
+  stateful?: boolean
 }
 
 /**

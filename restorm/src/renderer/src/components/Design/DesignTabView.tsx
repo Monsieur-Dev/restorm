@@ -7,6 +7,7 @@ import {
   MarkdownEditor,
   ScrollableElement,
   SelectBox,
+  Toggle,
   eventBus,
   useAuthState,
   type ISelectData
@@ -319,9 +320,10 @@ const DesignSettingsSection: React.FC<{
   const latencyMs = design.serving?.latencyMs ?? 0
   const blocked = issues.length > 0
 
-  const patchServing = useCallback((patch: { port?: number; latencyMs?: number }) => {
+  const patchServing = useCallback((patch: { port?: number; latencyMs?: number; stateful?: boolean }) => {
     const next = { ...(design.serving ?? {}), ...patch }
     if (next.latencyMs === 0) delete next.latencyMs
+    if (next.stateful !== true) delete next.stateful
     assignDesignSection(design, 'serving', next)
   }, [design])
 
@@ -460,6 +462,16 @@ const DesignSettingsSection: React.FC<{
               options={{ type: 'number', ariaLabel: t('design.settings.serve.latency', 'Simulated latency (ms)') }}
               data-testid="design-serve-latency"
             />
+          </label>
+          <label className="design-field design-field-full design-serve-stateful">
+            <Toggle
+              checked={design.serving?.stateful === true}
+              onChange={(checked) => { patchServing({ stateful: checked }) }}
+              data-testid="design-serve-stateful"
+            />
+            <span className="design-field-label">
+              {t('design.settings.serve.stateful', 'Stateful mode — POST/PUT/DELETE mutate an in-memory store (reset on restart)')}
+            </span>
           </label>
           {serverError !== null && (
             <p className="design-serve-error design-field-full" role="alert" data-testid="design-serve-error">

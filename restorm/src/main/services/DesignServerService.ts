@@ -36,7 +36,7 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import { BrowserWindow } from 'electron'
 import { createSchema, createYoga, logger } from 'electron-core-ui/main'
 import { websocketExecutionService } from './WebSocketExecutionService'
-import type { ApiDesign, DesignModel, DesignProtocol } from '../../shared/types/apiDesign'
+import type { ApiDesign, DesignModel, DesignProtocol, DesignRouteGroup } from '../../shared/types/apiDesign'
 import { validateApiDesign } from '../../shared/design/validateApiDesign'
 import { designToApiDocumentation } from '../../shared/design/apiDesignDoc'
 import { apiDocumentationToOpenApi } from '../../shared/design/openApiExport'
@@ -53,6 +53,7 @@ import {
   type RouteMatch
 } from '../../shared/design/designServing'
 import { designGraphqlResolvers, designToGraphqlSdl } from '../../shared/design/graphqlProjection'
+import { DesignStatefulStore, identifierName } from '../../shared/design/designStateful'
 import {
   buildODataRows,
   designODataEntitySets,
@@ -109,6 +110,8 @@ interface ActiveServer {
   yoga?: ReturnType<typeof createYoga>
   soapOperations?: SoapOperation[]
   odataSets?: ODataEntitySet[]
+  /** Ephemeral store, present only while the design serves STATEFUL. */
+  store?: DesignStatefulStore
 }
 
 /** The URL prefixes the non-HTTP projections claim on the served port. */
@@ -204,6 +207,7 @@ class DesignServerService {
       protocols: new Set(['http'])
     }
     projectProtocols(active)
+    if (design.serving?.stateful === true) active.store = new DesignStatefulStore(design)
 
     // `started` is broadcast only once the bind is CONFIRMED (below) —
     // firing it optimistically flips the UI to "serving" for a split
@@ -274,6 +278,11 @@ class DesignServerService {
     active.table = compileDesignRoutes(design)
     active.latencyMs = design.serving?.latencyMs ?? 0
     projectProtocols(active)
+    // Stateful toggled ON (or still on): (re)seed the store. Toggled
+    // OFF: drop it. The store is ephemeral, so a live design edit
+    // reseeding from the fresh examples is the defined behaviour.
+    if (design.serving?.stateful === true) active.store = new DesignStatefulStore(design)
+    else delete active.store
     return true
   }
 
@@ -363,7 +372,19 @@ class DesignServerService {
             this.recordServed(active, routeId, '400')
             return
           }
+          // Stateful mode: after the body passed validation, mutate the
+          // ephemeral store (forced responses already short-circuited
+          // above, so hot steering keeps priority — AC#4).
+          if (active.store !== undefined && this.serveStateful(active, match, method, query, parsed.ok ? parsed.value : {}, res)) {
+            return
+          }
         }
+      }
+
+      // Stateful reads (GET list / GET one) — write methods were handled
+      // with their body above; a bodyless write (DELETE) lands here too.
+      if (active.store !== undefined && this.serveStateful(active, match, method, query, {}, res)) {
+        return
       }
 
       this.serveDeclaredResponse(active, match, defaultResponseCode(match.entry.route), query, res)
@@ -520,6 +541,135 @@ class DesignServerService {
     // SOAP operations map 1:1 to design routes — count under the route
     // id so the run modal's per-route dashboard sees this traffic.
     this.recordServed(active, operation.route.id, '200')
+  }
+
+  /**
+   * Stateful dispatch: run the matched route against the ephemeral
+   * store. Returns true when it handled the request; false to fall back
+   * to the stateless declared response (a route the store can't map —
+   * no bound model, or a GET on a model with no identifier for a
+   * by-id path). The store was already seeded from the named examples.
+   */
+  private serveStateful(
+    active: ActiveServer,
+    match: RouteMatch,
+    method: string,
+    query: Record<string, string>,
+    body: unknown,
+    res: ServerResponse
+  ): boolean {
+    const store = active.store
+    if (store === undefined) return false
+    const { route } = match.entry
+    const responseMeta = route.design?.responses
+    const successCode = defaultResponseCode(route)
+    const successMeta = responseMeta?.[successCode]
+    const responseModel = successMeta?.modelId !== undefined
+      ? active.design.models.find((m) => m.id === successMeta.modelId)
+      : undefined
+    const bodyModel = route.design?.body?.modelId !== undefined
+      ? active.design.models.find((m) => m.id === route.design?.body?.modelId)
+      : undefined
+    // A DELETE (and often a bare 204 route) references no model on its own
+    // response or body, so fall back to the resource the sibling routes in
+    // the same group operate on — every route in a resource group targets
+    // the same model.
+    const resourceModel = responseModel ?? bodyModel ?? this.groupResourceModel(active, match.entry.group)
+    const idValue = Object.values(match.params)[0]
+    const headers = this.cacheHeaders(route.design?.cacheSeconds)
+
+    if (method === 'GET') {
+      if (resourceModel === undefined) return false
+      if (successMeta?.list === true) {
+        const requestedLimit = Number(query['limit'])
+        const requestedOffset = Number(query['offset'])
+        const page = store.list(resourceModel, {
+          ...(Number.isFinite(requestedLimit) ? { limit: requestedLimit } : {}),
+          ...(Number.isFinite(requestedOffset) ? { offset: requestedOffset } : {})
+        })
+        const payload: unknown = successMeta.paginated === true ? page : page.items
+        this.writeJson(active, res, parseStatus(successCode), headers, payload)
+        this.recordServed(active, route.id, successCode)
+        return true
+      }
+      if (idValue === undefined) return false
+      const row = store.get(resourceModel, idValue)
+      if (row === undefined) {
+        this.writeJson(active, res, 404, {}, errorEnvelope('404', `No ${resourceModel.doc.name} with id ${idValue}`))
+        this.recordServed(active, route.id, '404')
+        return true
+      }
+      this.writeJson(active, res, parseStatus(successCode), headers, row)
+      this.recordServed(active, route.id, successCode)
+      return true
+    }
+
+    if (method === 'POST') {
+      const model = bodyModel ?? responseModel
+      if (model === undefined) return false
+      const created = store.create(model, isRecord(body) ? body : {})
+      this.writeJson(active, res, parseStatus(successCode), headers, created)
+      this.recordServed(active, route.id, successCode)
+      return true
+    }
+
+    if (method === 'PUT' || method === 'PATCH') {
+      const model = resourceModel
+      if (model === undefined || idValue === undefined) return false
+      const updated = store.update(model, idValue, isRecord(body) ? body : {})
+      if (updated === undefined) {
+        this.writeJson(active, res, 404, {}, errorEnvelope('404', `No ${model.doc.name} with id ${idValue}`))
+        this.recordServed(active, route.id, '404')
+        return true
+      }
+      this.writeJson(active, res, parseStatus(successCode), headers, updated)
+      this.recordServed(active, route.id, successCode)
+      return true
+    }
+
+    if (method === 'DELETE') {
+      const model = resourceModel
+      if (model === undefined || idValue === undefined || identifierName(model) === undefined) return false
+      const removed = store.remove(model, idValue)
+      if (!removed) {
+        this.writeJson(active, res, 404, {}, errorEnvelope('404', `No ${model.doc.name} with id ${idValue}`))
+        this.recordServed(active, route.id, '404')
+        return true
+      }
+      // A DELETE route's declared success is usually 204 — honour it.
+      const code = Object.keys(responseMeta ?? {}).find((c) => c.startsWith('2')) ?? '204'
+      this.writeRaw(active, res, parseStatus(code), {}, '')
+      this.recordServed(active, route.id, code)
+      return true
+    }
+
+    return false
+  }
+
+  /** The model a route group operates on, inferred from the models its
+   * routes reference (list/detail responses or request bodies). Every
+   * route in a resource group targets the same resource, so the first
+   * referenced model is the group's — this lets a bodyless route (a
+   * DELETE returning 204) still resolve its resource. */
+  private groupResourceModel(
+    active: ActiveServer,
+    group: DesignRouteGroup
+  ): DesignModel | undefined {
+    for (const route of group.routes) {
+      const responses = route.design?.responses ?? {}
+      for (const meta of Object.values(responses)) {
+        if (meta.modelId !== undefined) {
+          const model = active.design.models.find((m) => m.id === meta.modelId)
+          if (model !== undefined) return model
+        }
+      }
+      const bodyModelId = route.design?.body?.modelId
+      if (bodyModelId !== undefined) {
+        const model = active.design.models.find((m) => m.id === bodyModelId)
+        if (model !== undefined) return model
+      }
+    }
+    return undefined
   }
 
   /** Serve the run-modal's forced choice: user body verbatim when
@@ -710,6 +860,11 @@ function soapBodyRootName(xml: string): string | undefined {
 function parseStatus(code: string): number {
   const parsed = Number.parseInt(code, 10)
   return Number.isFinite(parsed) && parsed >= 100 && parsed <= 599 ? parsed : 200
+}
+
+/** A plain JSON object (a validated request body reaching the store). */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
 function stripQuery(url: string): string {

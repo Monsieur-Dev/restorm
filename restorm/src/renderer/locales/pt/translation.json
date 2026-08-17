@@ -2166,7 +2166,8 @@
         "blocked": "Corrija os {{count}} erro(s) de validação do design antes de o servir",
         "startFailed": "O servidor não pôde iniciar",
         "protocolAlways": "HTTP é sempre servido",
-        "protocolToggle": "Servir também esta projeção"
+        "protocolToggle": "Servir também esta projeção",
+        "stateful": "Modo stateful — POST/PUT/DELETE alteram um armazenamento em memória (reiniciado ao reiniciar)"
       },
       "identity": {
         "title": "Identidade",

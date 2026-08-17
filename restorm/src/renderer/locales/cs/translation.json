@@ -2168,7 +2168,8 @@
         "blocked": "Před spuštěním opravte {{count}} chyby validace návrhu",
         "startFailed": "Server se nepodařilo spustit",
         "protocolAlways": "HTTP se servíruje vždy",
-        "protocolToggle": "Servírovat i tuto projekci"
+        "protocolToggle": "Servírovat i tuto projekci",
+        "stateful": "Stavový režim — POST/PUT/DELETE mění úložiště v paměti (reset při restartu)"
       },
       "identity": {
         "title": "Identita",

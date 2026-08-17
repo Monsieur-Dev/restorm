@@ -2167,7 +2167,8 @@
         "blocked": "Ispravite {{count}} pogrešaka validacije dizajna prije posluživanja",
         "startFailed": "Poslužitelj se nije mogao pokrenuti",
         "protocolAlways": "HTTP se uvijek servira",
-        "protocolToggle": "Serviraj i ovu projekciju"
+        "protocolToggle": "Serviraj i ovu projekciju",
+        "stateful": "Stateful način — POST/PUT/DELETE mijenjaju spremište u memoriji (resetira se pri ponovnom pokretanju)"
       },
       "identity": {
         "title": "Identitet",

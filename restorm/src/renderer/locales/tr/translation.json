@@ -2166,7 +2166,8 @@
         "blocked": "Sunmadan önce tasarımın {{count}} doğrulama hatasını düzeltin",
         "startFailed": "Sunucu başlatılamadı",
         "protocolAlways": "HTTP her zaman sunulur",
-        "protocolToggle": "Bu projeksiyonu da sun"
+        "protocolToggle": "Bu projeksiyonu da sun",
+        "stateful": "Durumlu mod — POST/PUT/DELETE bir bellek deposunu değiştirir (yeniden başlatmada sıfırlanır)"
       },
       "identity": {
         "title": "Kimlik",

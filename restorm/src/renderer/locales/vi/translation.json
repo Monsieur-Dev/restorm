@@ -2165,7 +2165,8 @@
         "blocked": "Sửa {{count}} lỗi xác thực của thiết kế trước khi phục vụ",
         "startFailed": "Không thể khởi động máy chủ",
         "protocolAlways": "HTTP luôn được phục vụ",
-        "protocolToggle": "Phục vụ cả phép chiếu này"
+        "protocolToggle": "Phục vụ cả phép chiếu này",
+        "stateful": "Chế độ stateful — POST/PUT/DELETE thay đổi kho lưu trong bộ nhớ (đặt lại khi khởi động lại)"
       },
       "identity": {
         "title": "Danh tính",

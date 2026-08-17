@@ -2165,7 +2165,8 @@
         "blocked": "제공하기 전에 디자인의 유효성 검사 오류 {{count}}건을 수정하세요",
         "startFailed": "서버를 시작할 수 없습니다",
         "protocolAlways": "HTTP는 항상 제공됩니다",
-        "protocolToggle": "이 프로젝션도 제공"
+        "protocolToggle": "이 프로젝션도 제공",
+        "stateful": "스테이트풀 모드 — POST/PUT/DELETE가 인메모리 저장소를 변경합니다 (재시작 시 초기화)"
       },
       "identity": {
         "title": "아이덴티티",

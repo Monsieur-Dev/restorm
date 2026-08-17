@@ -2165,7 +2165,8 @@
         "blocked": "請先修復設計的 {{count}} 個驗證錯誤再啟動服務",
         "startFailed": "伺服器無法啟動",
         "protocolAlways": "HTTP 始終提供",
-        "protocolToggle": "同時提供此投影"
+        "protocolToggle": "同時提供此投影",
+        "stateful": "有狀態模式 — POST/PUT/DELETE 修改記憶體儲存（重新啟動時重設）"
       },
       "identity": {
         "title": "識別",

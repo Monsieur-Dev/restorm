@@ -2166,7 +2166,8 @@
         "blocked": "Åtgärda designens {{count}} valideringsfel innan den serveras",
         "startFailed": "Servern kunde inte starta",
         "protocolAlways": "HTTP serveras alltid",
-        "protocolToggle": "Servera även denna projektion"
+        "protocolToggle": "Servera även denna projektion",
+        "stateful": "Stateful-läge — POST/PUT/DELETE ändrar ett minneslager (återställs vid omstart)"
       },
       "identity": {
         "title": "Identitet",

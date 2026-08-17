@@ -13,6 +13,7 @@ let servedPort = 0
 let requestId = ''
 let lastReply: McpToolReply | null = null
 let lastRunReply: Record<string, unknown> = {}
+let statefulCreatedId = ''
 
 function requireApp(): LaunchedMcpApp {
   if (!launched) throw new Error('launch first')
@@ -142,6 +143,50 @@ When('the agent serves the design', async () => {
 
 When('the agent tries to serve the design', async () => {
   await call('serve_design', { designId })
+})
+
+When('the agent enables stateful serving', async () => {
+  const reply = await call('update_design', { designId, stateful: true })
+  expect(reply['error']).toBeUndefined()
+})
+
+Then('a stateful POST of email {string} then a GET list shows both users', async ({}, email: string) => {
+  // POST creates a real row in the ephemeral store.
+  const created = await call('create_request', { name: 'Stateful create', protocol: 'http' })
+  const createId = created['id']
+  await call('update_request', {
+    id: createId,
+    patch: { method: 'POST', url: `http://localhost:${servedPort}/api/users`, body: { type: 'text', content: JSON.stringify({ email }) } }
+  })
+  const createReply = JSON.stringify(await call('run_request', { id: createId, timeoutMs: 20_000 }))
+  expect(createReply).toContain('20')
+  expect(createReply).toContain(email)
+  // Capture the created row's identifier from the response body (a
+  // server-minted value — uuid here, not a fixed prefix).
+  const idMatch = /"id":"([^"']+)"/.exec(createReply)
+  statefulCreatedId = idMatch?.[1] ?? ''
+  expect(statefulCreatedId).not.toBe('')
+  // The next GET list shows the seeded example AND the new row.
+  const listed = await call('create_request', { name: 'Stateful list', protocol: 'http' })
+  const listId = listed['id']
+  await call('update_request', { id: listId, patch: { method: 'GET', url: `http://localhost:${servedPort}/api/users?limit=20` } })
+  const listReply = JSON.stringify(await call('run_request', { id: listId, timeoutMs: 20_000 }))
+  expect(listReply).toContain('admin@agent.io')
+  expect(listReply).toContain(email)
+})
+
+Then('a stateful DELETE then a GET list drops the created user', async () => {
+  expect(statefulCreatedId).not.toBe('')
+  const del = await call('create_request', { name: 'Stateful delete', protocol: 'http' })
+  const delId = del['id']
+  await call('update_request', { id: delId, patch: { method: 'DELETE', url: `http://localhost:${servedPort}/api/users/${statefulCreatedId}` } })
+  const delReply = JSON.stringify(await call('run_request', { id: delId, timeoutMs: 20_000 }))
+  expect(delReply).toMatch(/20[04]/)
+  const after = await call('create_request', { name: 'Stateful list 3', protocol: 'http' })
+  const afterId = after['id']
+  await call('update_request', { id: afterId, patch: { method: 'GET', url: `http://localhost:${servedPort}/api/users?limit=20` } })
+  const afterReply = JSON.stringify(await call('run_request', { id: afterId, timeoutMs: 20_000 }))
+  expect(afterReply).not.toContain(statefulCreatedId)
 })
 
 Then('the serve call is refused as payment required', () => {
