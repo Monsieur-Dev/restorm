@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox, MessageType, Table, type IMessage, type TableColumn } from 'electron-core-ui/renderer'
+import { Button, InputBox, MessageType, Table, type IMessage, type TableColumn } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignExample, DesignModel, DesignProperty } from '../../../../shared/types/collections'
 import { resolveExampleValue, violatedConstraint } from '../../../../shared/design/designExampleValues'
 import { displayValue, parseTypedValue } from './designDisplay'
@@ -188,15 +188,14 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
         ))}
         {(
           <HeaderHoverTooltip label={t('design.examples.add', 'Add an example')}>
-            <button
-              type="button"
-              className="design-icon-button"
-              aria-label={t('design.examples.add', 'Add an example')}
+            <Button
+              secondary
+              small
+              icon="add"
+              options={{ ariaLabel: t('design.examples.add', 'Add an example') }}
               onClick={addExample}
               data-testid="design-example-add"
-            >
-              <span className="codicon codicon-add" />
-            </button>
+            />
           </HeaderHoverTooltip>
         )}
       </div>
@@ -214,15 +213,14 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
           </label>
           {(
             <HeaderHoverTooltip label={t('design.examples.delete', 'Delete the example')}>
-              <button
-                type="button"
-                className="design-icon-button"
-                aria-label={t('design.examples.delete', 'Delete the example')}
+              <Button
+                secondary
+                small
+                icon="trash"
+                options={{ ariaLabel: t('design.examples.delete', 'Delete the example') }}
                 onClick={() => { deleteExample(selected.id) }}
                 data-testid="design-example-delete"
-              >
-                <span className="codicon codicon-trash" />
-              </button>
+              />
             </HeaderHoverTooltip>
           )}
         </div>

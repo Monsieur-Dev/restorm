@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Bassökväg",
-        "defaultAuth": "Standard-auth"
+        "defaultAuth": "Standard-auth",
+        "environment": "Miljö"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Ta bort parametern",
         "auto": "auto",
         "pathEmpty": "Skriv en {{param}} i sökvägen för att skapa dess rad.",
-        "otherEmpty": "Inga query- eller header-parametrar ännu."
+        "otherEmpty": "Inga query- eller header-parametrar ännu.",
+        "nameEmpty": "En parameter behöver ett namn",
+        "nameTaken": "Det här namnet används redan"
       },
       "body": {
         "label": "Request-body",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "paginerad lista av {{name}}",
         "example": "Serverat exempel",
         "exampleAuto": "(auto genererat)",
-        "delete": "Ta bort svaret"
+        "delete": "Ta bort svaret",
+        "codeInvalid": "Ange en 3-siffrig statuskod",
+        "codeTaken": "Den här koden är redan deklarerad"
       },
       "settings": {
         "inherited": "Ärvt från gruppen",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Standard sidstorlek",
         "maxLimit": "Max sidstorlek"
       }
-    }
+    },
+    "newDesignName": "Ny API-design",
+    "createFromScratch": "Skapa en API-design",
+    "createFromDoc": "Skapa en design från detta API",
+    "fromDocName": "Design {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

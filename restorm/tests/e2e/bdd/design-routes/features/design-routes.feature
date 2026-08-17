@@ -20,19 +20,19 @@ Feature: Design routes editor
 
   Scenario: A parameter linked to a model property inherits its facts and survives a rename
     Given a Pro project carrying an API design is open in the routes editor
-    When I open the route "/{{id}}" of the group "Users"
+    When I open the route "Fetch one user" of the group "Users"
     Then the parameter "id" shows the inherited type "string uuid"
     And the parameter "id" carries the auto description badge
     When I open the models section and rename the property "id" of "User" to "uid"
     And I open the routes section
-    And I open the route "/{{id}}" of the group "Users"
+    And I open the route "Fetch one user" of the group "Users"
     Then the parameter "id" link points at "User ▸ uid"
     When I save the project
     Then the saved file still links the parameter to the property id "prop-user-id"
 
   Scenario: Responses by code — add, standard errors mint the Error model, delete
     Given a Pro project carrying an API design is open in the routes editor
-    When I open the route "/{{id}}" of the group "Users"
+    When I open the route "Fetch one user" of the group "Users"
     And I open the route responses tab
     And I add the response code "418"
     Then the response row "418" exists
@@ -46,30 +46,30 @@ Feature: Design routes editor
 
   Scenario: The body combo empties when its model is deleted
     Given a Pro project carrying an API design is open in the routes editor
-    When I open the route "POST /" of the group "Users"
+    When I open the route "Create a user" of the group "Users"
     Then the body combo shows "User"
     When I open the models section and delete the model "User"
     And I open the routes section
-    And I open the route "POST /" of the group "Users"
+    And I open the route "Create a user" of the group "Users"
     Then the body combo shows "(empty)"
 
   Scenario: Generate the CRUD from the model card
     Given a Pro project carrying an API design is open in the routes editor
     When I open the models section and generate the CRUD of "Order"
     Then the routes tree shows the group "Orders" with 5 routes
-    When I open the route "/{{id}}" of the group "Orders"
+    When I open the route "Get one Order" of the group "Orders"
     Then the parameter "id" link points at "Order ▸ id"
 
   Scenario: Searchable properties generate linked query parameters on the list route
     Given a Pro project carrying an API design is open in the routes editor
     When I open the models section and generate the search routes of "User"
     Then the routes tree shows the group "Users" with 3 routes
-    When I open the route "GET /" of the group "Users"
+    When I open the route "List users" of the group "Users"
     Then the query parameter row "email" exists
 
   Scenario: Route settings persist and the inherited block jumps to the group
     Given a Pro project carrying an API design is open in the routes editor
-    When I open the route "/{{id}}" of the group "Users"
+    When I open the route "Fetch one user" of the group "Users"
     And I open the route settings tab
     And I set the cache seconds to "120"
     And I toggle the route deprecated flag

@@ -11,9 +11,12 @@ import { Button, MosaicCard } from 'electron-core-ui/renderer'
  */
 interface ImportCardProps {
   readonly onImport: () => void
+  /** Starts a blank API design in the open project (TASK-468 entry
+   * point) — free on every plan, the plan gates running the design. */
+  readonly onCreateDesign: () => void
 }
 
-export const ImportCard: React.FC<ImportCardProps> = ({ onImport }) => {
+export const ImportCard: React.FC<ImportCardProps> = ({ onImport, onCreateDesign }) => {
   const { t } = useTranslation()
   return (
     <MosaicCard
@@ -35,6 +38,15 @@ export const ImportCard: React.FC<ImportCardProps> = ({ onImport }) => {
           data-testid="empty-bench-card-import-button"
         >
           {t('common.import', 'Import')}
+        </Button>
+        <Button
+          secondary
+          size="lg"
+          icon="symbol-color"
+          onClick={onCreateDesign}
+          data-testid="empty-bench-card-create-design-button"
+        >
+          {t('design.createFromScratch', 'Create an API design')}
         </Button>
       </div>
     </MosaicCard>

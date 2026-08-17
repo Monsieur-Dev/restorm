@@ -36,7 +36,12 @@ export function routePathParams(urlPattern: string): string[] {
 export function syncPathParams(route: DesignRoute, urlPattern: string): DesignRoute {
   const wanted = routePathParams(urlPattern)
   const parameters = route.doc.parameters ?? []
-  const kept = parameters.filter((p) => p.location !== 'path' || wanted.includes(p.name))
+  // Names are the paramLinks keys, so they must stay UNIQUE across
+  // locations: a `{{status}}` typed into the pattern claims the name —
+  // a query/header parameter spelling it is dropped rather than left
+  // sharing one link entry with the new path row.
+  const kept = parameters.filter((p) =>
+    p.location === 'path' ? wanted.includes(p.name) : !wanted.includes(p.name))
   const existingNames = new Set(kept.filter((p) => p.location === 'path').map((p) => p.name))
   const added: ParameterDocumentation[] = wanted
     .filter((name) => !existingNames.has(name))
@@ -88,9 +93,10 @@ export function identifierProperty(model: DesignModel): DesignProperty | undefin
   return model.properties.find((p) => p.doc.name === 'id')
 }
 
-/** Build the doc row of a parameter linked to a property: type/format
- * mirror the property (the UI re-derives them live; these are the
- * serialized fallbacks projections read). */
+/** Build the doc row of a parameter linked to a property. The link is
+ * the authority: the UI AND `designRouteDoc` re-derive type/format/
+ * example/description from the property live — these frozen values are
+ * only the fallback for a dangling link (which validation reports). */
 function linkedParamDoc(name: string, location: 'path' | 'query', property: DesignProperty): ParameterDocumentation {
   return {
     name,
@@ -255,13 +261,17 @@ const STANDARD_ERROR_DESCRIPTIONS: Record<(typeof STANDARD_ERROR_CODES)[number],
 export function withStandardErrorResponses(route: DesignRoute, errorModelId: string): DesignRoute {
   const docResponses = { ...(route.doc.responses ?? {}) }
   const designResponses = { ...(route.design?.responses ?? {}) }
+  let added = false
   for (const code of STANDARD_ERROR_CODES) {
     // A code the route ALREADY declares keeps its contract untouched —
     // the action only fills the gaps.
     if (code in docResponses) continue
     docResponses[code] = { description: STANDARD_ERROR_DESCRIPTIONS[code] }
     designResponses[code] = { modelId: errorModelId }
+    added = true
   }
+  // Nothing to add → nothing to rewrite (and no empty bag minted).
+  if (!added) return route
   return {
     ...route,
     doc: { ...route.doc, responses: docResponses },

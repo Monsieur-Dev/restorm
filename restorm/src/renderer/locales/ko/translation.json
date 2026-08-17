@@ -2169,7 +2169,8 @@
       "api": {
         "title": "API",
         "basePath": "기본 경로",
-        "defaultAuth": "기본 인증"
+        "defaultAuth": "기본 인증",
+        "environment": "환경"
       }
     },
     "auth": {
@@ -2391,7 +2392,9 @@
         "delete": "매개변수 삭제",
         "auto": "자동",
         "pathEmpty": "경로에 {{param}}을 입력하면 해당 행이 생성됩니다.",
-        "otherEmpty": "아직 query 또는 header 매개변수가 없습니다."
+        "otherEmpty": "아직 query 또는 header 매개변수가 없습니다.",
+        "nameEmpty": "매개변수에는 이름이 필요합니다",
+        "nameTaken": "이 이름은 이미 사용 중입니다"
       },
       "body": {
         "label": "요청 본문",
@@ -2410,7 +2413,9 @@
         "paginatedListOf": "페이지네이션된 {{name}} 목록",
         "example": "제공되는 예시",
         "exampleAuto": "(자동 생성)",
-        "delete": "응답 삭제"
+        "delete": "응답 삭제",
+        "codeInvalid": "3자리 상태 코드를 입력하세요",
+        "codeTaken": "이 코드는 이미 선언되었습니다"
       },
       "settings": {
         "inherited": "그룹에서 상속",
@@ -2426,7 +2431,11 @@
         "defaultLimit": "기본 페이지 크기",
         "maxLimit": "최대 페이지 크기"
       }
-    }
+    },
+    "newDesignName": "새 API 디자인",
+    "createFromScratch": "API 디자인 만들기",
+    "createFromDoc": "이 API에서 디자인 만들기",
+    "fromDocName": "{{name}} 디자인"
   },
   "mqtt": {
     "qos": "QoS",

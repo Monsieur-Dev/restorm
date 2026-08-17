@@ -47,6 +47,15 @@ export function parseTypedValue(property: DesignProperty, raw: string): unknown 
 }
 
 /**
+ * The raw-type variant of {@link parseTypedValue}, for surfaces whose
+ * type is a bare string rather than a full property (route parameter
+ * rows). Same branches, no reference awareness.
+ */
+export function parseTypedRaw(type: string, raw: string): unknown {
+  return parseTypedValue({ id: '', doc: { name: '', type, required: false } }, raw)
+}
+
+/**
  * The value half of the bridge, exported for unit tests: a row text
  * matching a previous value's RENDERING keeps the original (typed)
  * value — deletions and drag-reorders shift positions, so the match is

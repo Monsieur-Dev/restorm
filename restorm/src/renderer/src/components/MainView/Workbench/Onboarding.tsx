@@ -31,6 +31,7 @@ interface OnboardingProps {
   /** Opens the import modal. Wired from `App` so the import card's CTA
    *  triggers the same flow as the title-bar menu / sidebar buttons. */
   readonly onImport: () => void
+  readonly onCreateDesign: () => void
   /** Open a request in the workbench when its row is clicked in any
    *  of the card lists (favourites, top-played, last-played, recent
    *  activity). Wired to `useNavigation.handleItemClick` from `App`. */
@@ -59,7 +60,7 @@ function pickDistinctTipSeeds(count: number): number[] {
   return seeds
 }
 
-export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, onImport, onOpenRequest }) => {
+export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, onImport, onCreateDesign, onOpenRequest }) => {
   const envFolders = useMemo<EnvironmentFolder[]>(
     () => rootItems.filter(isEnvironmentFolder),
     [rootItems]
@@ -91,7 +92,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, 
             className="empty-bench-logo"
           />
           <MosaicLayout data-testid="empty-bench-mosaic">
-            <ImportCard onImport={onImport} />
+            <ImportCard onImport={onImport} onCreateDesign={onCreateDesign} />
             <RecentActivityCard rootItems={rootItems} onOpenRequest={onOpenRequest} projectUuid={projectUuid} />
             {envFolders.map((folder) => (
               <ApiCard key={folder.id} folder={folder} projectUuid={projectUuid} onOpenRequest={onOpenRequest} />

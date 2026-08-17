@@ -39,6 +39,8 @@ export interface UseSidebarStateOptions {
   /** `true` for an env folder that has an apiUpdate.sourceUrl
    * configured. Drives the "Refresh" right-click entry. */
   canRefreshFromSource?: (itemId: string) => boolean
+  canCreateDesignFromDoc?: (itemId: string) => boolean
+  onCreateDesignFromDoc?: (itemId: string) => void
   onRefreshFromSource?: (itemId: string) => void
   /** Open an item in a split workbench panel (design context menu). */
   onOpenInSplit?: (itemId: string) => void
@@ -49,7 +51,7 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, onOpenInSplit } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit } = options
   const { t, i18n } = useTranslation()
 
   // Set of request ids whose URL currently resolves to a deprecated
@@ -136,12 +138,14 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       ...(onPasteItem !== undefined && { onPasteItem }),
       ...(canPaste !== undefined && { canPaste }),
       ...(canRefreshFromSource !== undefined && { canRefreshFromSource }),
+      ...(canCreateDesignFromDoc !== undefined && { canCreateDesignFromDoc }),
+      ...(onCreateDesignFromDoc !== undefined && { onCreateDesignFromDoc }),
       ...(onRefreshFromSource !== undefined && { onRefreshFromSource }),
       ...(onOpenInSplit !== undefined && { onOpenInSplit }),
       isItemScenario,
       isItemDesign
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, onOpenInSplit, isItemScenario, isItemDesign]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit, isItemScenario, isItemDesign]
   )
 
   return {

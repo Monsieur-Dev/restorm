@@ -2171,7 +2171,8 @@
       "api": {
         "title": "API",
         "basePath": "Cale de bază",
-        "defaultAuth": "Auth implicit"
+        "defaultAuth": "Auth implicit",
+        "environment": "Mediu"
       }
     },
     "auth": {
@@ -2393,7 +2394,9 @@
         "delete": "Șterge parametrul",
         "auto": "auto",
         "pathEmpty": "Tastați un {{param}} în cale pentru a-i crea rândul.",
-        "otherEmpty": "Încă nu există parametri query sau header."
+        "otherEmpty": "Încă nu există parametri query sau header.",
+        "nameEmpty": "Un parametru are nevoie de un nume",
+        "nameTaken": "Acest nume este deja folosit"
       },
       "body": {
         "label": "Corpul cererii",
@@ -2412,7 +2415,9 @@
         "paginatedListOf": "listă paginată de {{name}}",
         "example": "Exemplu servit",
         "exampleAuto": "(auto generat)",
-        "delete": "Șterge răspunsul"
+        "delete": "Șterge răspunsul",
+        "codeInvalid": "Introduceți un cod de stare din 3 cifre",
+        "codeTaken": "Acest cod este deja declarat"
       },
       "settings": {
         "inherited": "Moștenit de la grup",
@@ -2428,7 +2433,11 @@
         "defaultLimit": "Dimensiune implicită a paginii",
         "maxLimit": "Dimensiune max. a paginii"
       }
-    }
+    },
+    "newDesignName": "Design nou de API",
+    "createFromScratch": "Creează un design de API",
+    "createFromDoc": "Creează un design din acest API",
+    "fromDocName": "Design {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

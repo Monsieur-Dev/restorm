@@ -1,7 +1,9 @@
 import React, { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Button,
   InputBox,
+  MessageType,
   SelectBox,
   Table,
   Toggle,
@@ -16,11 +18,22 @@ import type {
 import type { ParameterDocumentation } from '../../../../shared/types/apiDocumentation'
 import { composeRoutePath } from '../../../../shared/design/apiDesignDoc'
 import { syncPathParams } from '../../../../shared/design/designRoutes'
-import { displayValue } from './designDisplay'
+import { displayValue, parseTypedRaw } from './designDisplay'
 import { replaceRoute } from './designMutations'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const
+
+/** Rebuild a route with the given param links, omitting empty bags —
+ * `design: { paramLinks: {} }` must never reach the file. */
+function withParamLinks(route: DesignRoute, links: NonNullable<NonNullable<DesignRoute['design']>['paramLinks']>): DesignRoute {
+  const { paramLinks: _dropped, ...designRest } = route.design ?? {}
+  const design = Object.keys(links).length > 0 ? { ...designRest, paramLinks: links } : designRest
+  const { design: _oldDesign, ...routeRest } = route
+  const next: DesignRoute = { ...routeRest }
+  if (Object.keys(design).length > 0) next.design = design
+  return next
+}
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH'])
 const PARAM_TYPES = ['string', 'integer', 'number', 'boolean'] as const
 
@@ -90,7 +103,7 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
   const deleteParam = useCallback((name: string) => {
     const nextParameters = parameters.filter((p) => p.name !== name)
     const { [name]: _dropped, ...links } = route.design?.paramLinks ?? {}
-    commit({ ...route, doc: { ...route.doc, parameters: nextParameters }, design: { ...(route.design ?? {}), paramLinks: links } })
+    commit(withParamLinks({ ...route, doc: { ...route.doc, parameters: nextParameters } }, links))
   }, [commit, parameters, route])
 
   const addParam = useCallback(() => {
@@ -103,17 +116,22 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
     const links = { ...(route.design?.paramLinks ?? {}) }
     if (target === null) {
       const { [paramName]: _dropped, ...rest } = links
-      commit({ ...route, design: { ...(route.design ?? {}), paramLinks: rest } })
+      commit(withParamLinks(route, rest))
       return
     }
-    commit({
-      ...route,
-      design: {
-        ...(route.design ?? {}),
-        paramLinks: { ...links, [paramName]: { ...target, descriptionAuto: true } }
-      }
+    // Re-linking restores the AUTO mirror: any detached description the
+    // parameter carried is cleared, so the badge and the export can
+    // never disagree about whose text is served.
+    const parametersWithoutOwnDescription = parameters.map((p) => {
+      if (p.name !== paramName) return p
+      const { description: _ownDescription, ...rest } = p
+      return rest
     })
-  }, [commit, route])
+    commit(withParamLinks(
+      { ...route, doc: { ...route.doc, parameters: parametersWithoutOwnDescription } },
+      { ...links, [paramName]: { ...target, descriptionAuto: true } }
+    ))
+  }, [commit, parameters, route])
 
   // ── Model-property link vocabulary ─────────────────────────────────
   const linkChoices = useMemo(() => design.models.flatMap((m) =>
@@ -134,7 +152,19 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
           <InputBox
             value={param.name}
             onChange={(next) => { renameParam(param.name, next) }}
-            options={{ type: 'text', ariaLabel: t('design.routes.params.name', 'Name') }}
+            options={{
+              type: 'text',
+              ariaLabel: t('design.routes.params.name', 'Name'),
+              validationOptions: {
+                validation: (value: string) => {
+                  if (value === '') return { content: t('design.routes.params.nameEmpty', 'A parameter needs a name'), type: MessageType.ERROR }
+                  if (value !== param.name && parameters.some((other) => other.name === value)) {
+                    return { content: t('design.routes.params.nameTaken', 'This name is already used'), type: MessageType.ERROR }
+                  }
+                  return null
+                }
+              }
+            }}
             data-testid={`design-param-name-${param.name}`}
           />
         )
@@ -241,7 +271,9 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
             onChange={(next) => {
               updateParam(param.name, (p) => {
                 const { example: _dropped, ...rest } = p
-                return next === '' ? rest : { ...rest, example: next }
+                // Typed like every example field — an integer parameter
+                // stores 10, never "10".
+                return next === '' ? rest : { ...rest, example: parseTypedRaw(p.type, next) }
               })
             }}
             options={{ type: 'text', ariaLabel: t('design.schema.columns.example', 'Example') }}
@@ -288,15 +320,14 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
             {auto && <span className="design-param-auto-badge" data-testid={`design-param-auto-${param.name}`}>{t('design.routes.params.auto', 'auto')}</span>}
             {!isPath && (
               <HeaderHoverTooltip label={t('design.routes.params.delete', 'Delete the parameter')}>
-                <button
-                  type="button"
-                  className="design-icon-button"
-                  aria-label={t('design.routes.params.delete', 'Delete the parameter')}
+                <Button
+                  secondary
+                  small
+                  icon="trash"
+                  options={{ ariaLabel: t('design.routes.params.delete', 'Delete the parameter') }}
                   onClick={() => { deleteParam(param.name) }}
                   data-testid={`design-param-delete-${param.name}`}
-                >
-                  <span className="codicon codicon-trash" />
-                </button>
+                />
               </HeaderHoverTooltip>
             )}
           </div>
@@ -346,18 +377,6 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
       <p className="design-route-resolved" data-testid="design-route-resolved">{resolvedPath}</p>
 
       <div className="design-settings-grid">
-        <label className="design-field design-field-wide">
-          <span className="design-field-label">{t('design.routes.summary', 'Summary')}</span>
-          <InputBox
-            value={route.doc.summary ?? ''}
-            onChange={(next) => {
-              const { summary: _dropped, ...docRest } = route.doc
-              commit({ ...route, doc: next === '' ? docRest : { ...docRest, summary: next } })
-            }}
-            options={{ type: 'text', ariaLabel: t('design.routes.summary', 'Summary') }}
-            data-testid="design-route-summary"
-          />
-        </label>
         <label className="design-field design-field-full">
           <span className="design-field-label">{t('design.schema.fields.description', 'Description')}</span>
           <InputBox
@@ -411,15 +430,14 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
       <div className="design-route-params-header">
         <h3 className="design-settings-group-title">{t('design.routes.params.otherTitle', 'Parameters (query / header)')}</h3>
         <HeaderHoverTooltip label={t('design.routes.params.add', 'Add a parameter')}>
-          <button
-            type="button"
-            className="design-icon-button"
-            aria-label={t('design.routes.params.add', 'Add a parameter')}
+          <Button
+            secondary
+            small
+            icon="add"
+            options={{ ariaLabel: t('design.routes.params.add', 'Add a parameter') }}
             onClick={addParam}
             data-testid="design-route-add-param"
-          >
-            <span className="codicon codicon-add" />
-          </button>
+          />
         </HeaderHoverTooltip>
       </div>
       {otherParams.length === 0

@@ -46,6 +46,17 @@ describe('designRoutes', () => {
       expect(backToOne.design?.paramLinks?.['id']).toBeUndefined()
     })
 
+    it('a pattern param CLAIMS a colliding query name — links stay one-per-name', () => {
+      const withQuery = {
+        ...route,
+        doc: { ...route.doc, match: { ...route.doc.match, urlPattern: '/' }, parameters: [{ name: 'status', location: 'query', type: 'string', required: false }] }
+      }
+      const next = syncPathParams(withQuery, '/{{status}}')
+      const statusRows = (next.doc.parameters ?? []).filter((p) => p.name === 'status')
+      expect(statusRows).toHaveLength(1)
+      expect(statusRows[0]?.location).toBe('path')
+    })
+
     it('leaves query/header parameters untouched', () => {
       const withQuery = {
         ...route,

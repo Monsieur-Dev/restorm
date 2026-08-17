@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Alapútvonal",
-        "defaultAuth": "Alapértelmezett auth"
+        "defaultAuth": "Alapértelmezett auth",
+        "environment": "Környezet"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Paraméter törlése",
         "auto": "auto",
         "pathEmpty": "Írjon egy {{param}}-ot az útvonalba a sor létrehozásához.",
-        "otherEmpty": "Még nincs query vagy header paraméter."
+        "otherEmpty": "Még nincs query vagy header paraméter.",
+        "nameEmpty": "A paraméternek névre van szüksége",
+        "nameTaken": "Ez a név már foglalt"
       },
       "body": {
         "label": "Kérés törzse",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "{{name}} lapozott listája",
         "example": "Kiszolgált példa",
         "exampleAuto": "(auto generált)",
-        "delete": "Válasz törlése"
+        "delete": "Válasz törlése",
+        "codeInvalid": "Adjon meg egy 3 számjegyű státuszkódot",
+        "codeTaken": "Ez a kód már deklarálva van"
       },
       "settings": {
         "inherited": "A csoporttól örökölve",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Alapértelmezett lapméret",
         "maxLimit": "Max. lapméret"
       }
-    }
+    },
+    "newDesignName": "Új API-terv",
+    "createFromScratch": "API-terv létrehozása",
+    "createFromDoc": "Terv létrehozása ebből az API-ból",
+    "fromDocName": "{{name}} terv"
   },
   "mqtt": {
     "qos": "QoS",

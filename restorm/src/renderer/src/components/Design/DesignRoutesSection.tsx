@@ -129,16 +129,15 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
         const routeMenu: ContextMenuItem[] = [
           { id: 'delete-route', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { deleteRoute(group, route.id) } }
         ]
+        // The row reads like a request row: method badge LEFT (the icon
+        // slot), the SUMMARY as the label (an API turned into a design
+        // makes the route's name its summary), pattern as fallback.
         return {
           id: route.id,
-          title: route.doc.match.urlPattern,
+          title: route.doc.summary !== undefined && route.doc.summary !== '' ? route.doc.summary : route.doc.match.urlPattern,
+          icon: <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />,
           contextMenuItems: routeMenu,
-          rightActions: (
-            <span className="design-route-row-badges">
-              {hasIssue(route.id) && <span className="design-list-error-dot codicon codicon-error" />}
-              <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />
-            </span>
-          )
+          ...(hasIssue(route.id) ? { rightActions: <span className="design-list-error-dot codicon codicon-error" /> } : {})
         }
       })
     }
@@ -318,15 +317,14 @@ const GroupCard: React.FC<{
             data-testid={`design-group-header-description-${row.index}`}
           />
           <HeaderHoverTooltip label={t('design.routes.group.deleteHeader', 'Delete the header')}>
-            <button
-              type="button"
-              className="design-icon-button"
-              aria-label={t('design.routes.group.deleteHeader', 'Delete the header')}
+            <Button
+              secondary
+              small
+              icon="trash"
+              options={{ ariaLabel: t('design.routes.group.deleteHeader', 'Delete the header') }}
               onClick={() => { setHeaders(headers.filter((_, i) => i !== row.index)) }}
               data-testid={`design-group-header-delete-${row.index}`}
-            >
-              <span className="codicon codicon-trash" />
-            </button>
+            />
           </HeaderHoverTooltip>
         </div>
       )
@@ -360,15 +358,14 @@ const GroupCard: React.FC<{
           />
         </HeaderHoverTooltip>
         <HeaderHoverTooltip label={t('sidebar.contextMenu.delete')}>
-          <button
-            type="button"
-            className="design-icon-button"
-            aria-label={t('sidebar.contextMenu.delete')}
+          <Button
+            secondary
+            small
+            icon="trash"
+            options={{ ariaLabel: t('sidebar.contextMenu.delete') }}
             onClick={onDelete}
             data-testid="design-group-delete"
-          >
-            <span className="codicon codicon-trash" />
-          </button>
+          />
         </HeaderHoverTooltip>
       </div>
 
@@ -423,15 +420,14 @@ const GroupCard: React.FC<{
       <div className="design-route-params-header">
         <h3 className="design-settings-group-title">{t('design.routes.group.headers', 'Contract headers (inherited by routes)')}</h3>
         <HeaderHoverTooltip label={t('design.routes.group.addHeader', 'Add a header')}>
-          <button
-            type="button"
-            className="design-icon-button"
-            aria-label={t('design.routes.group.addHeader', 'Add a header')}
+          <Button
+            secondary
+            small
+            icon="add"
+            options={{ ariaLabel: t('design.routes.group.addHeader', 'Add a header') }}
             onClick={() => { setHeaders([...headers, { name: '' }]) }}
             data-testid="design-group-add-header"
-          >
-            <span className="codicon codicon-add" />
-          </button>
+          />
         </HeaderHoverTooltip>
       </div>
       {headers.length === 0
@@ -458,11 +454,24 @@ const RouteCard: React.FC<{
   const { t } = useTranslation()
   const method = route.doc.match.method ?? 'GET'
 
+  const setSummary = (next: string): void => {
+    const { summary: _dropped, ...docRest } = route.doc
+    replaceRoute(design, group.id, route.id, { ...route, doc: next === '' ? docRest : { ...docRest, summary: next } })
+  }
+
   return (
     <>
       <div className="design-model-card-header">
         <RegistryBadge badgeId={httpBadgeIdFor(method)} text={method} />
-        <h2 className="design-route-card-title">{route.doc.match.urlPattern}</h2>
+        {/* The SUMMARY is the route's display name — edited here like a
+            request's name (hover pencil), not in a form field below. */}
+        <EditableLabel
+          value={route.doc.summary ?? ''}
+          onChange={setSummary}
+          as="h2"
+          placeholder={route.doc.match.urlPattern}
+          data-testid="design-route-summary-label"
+        />
         <span className="design-route-card-group">{group.doc.name}</span>
       </div>
       <Tabs

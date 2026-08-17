@@ -2169,7 +2169,8 @@
       "api": {
         "title": "API",
         "basePath": "基礎路徑",
-        "defaultAuth": "預設驗證"
+        "defaultAuth": "預設驗證",
+        "environment": "環境"
       }
     },
     "auth": {
@@ -2391,7 +2392,9 @@
         "delete": "刪除參數",
         "auto": "自動",
         "pathEmpty": "在路徑中輸入 {{param}} 即可建立其列。",
-        "otherEmpty": "尚無 query 或 header 參數。"
+        "otherEmpty": "尚無 query 或 header 參數。",
+        "nameEmpty": "參數需要一個名稱",
+        "nameTaken": "該名稱已被使用"
       },
       "body": {
         "label": "請求主體",
@@ -2410,7 +2413,9 @@
         "paginatedListOf": "分頁的 {{name}} 清單",
         "example": "提供的範例",
         "exampleAuto": "（自動產生）",
-        "delete": "刪除回應"
+        "delete": "刪除回應",
+        "codeInvalid": "請輸入 3 位狀態碼",
+        "codeTaken": "該狀態碼已宣告"
       },
       "settings": {
         "inherited": "繼承自群組",
@@ -2426,7 +2431,11 @@
         "defaultLimit": "預設頁面大小",
         "maxLimit": "最大頁面大小"
       }
-    }
+    },
+    "newDesignName": "新的 API 設計",
+    "createFromScratch": "建立 API 設計",
+    "createFromDoc": "從此 API 建立設計",
+    "fromDocName": "{{name}} 設計"
   },
   "mqtt": {
     "qos": "QoS",

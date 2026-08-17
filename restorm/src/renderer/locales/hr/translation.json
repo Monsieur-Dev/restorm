@@ -2171,7 +2171,8 @@
       "api": {
         "title": "API",
         "basePath": "Osnovna putanja",
-        "defaultAuth": "Zadani auth"
+        "defaultAuth": "Zadani auth",
+        "environment": "Okruženje"
       }
     },
     "auth": {
@@ -2393,7 +2394,9 @@
         "delete": "Izbriši parametar",
         "auto": "auto",
         "pathEmpty": "Upišite {{param}} u putanju da biste stvorili njegov redak.",
-        "otherEmpty": "Još nema query ili header parametara."
+        "otherEmpty": "Još nema query ili header parametara.",
+        "nameEmpty": "Parametar treba ime",
+        "nameTaken": "Ovo ime je već u upotrebi"
       },
       "body": {
         "label": "Tijelo zahtjeva",
@@ -2412,7 +2415,9 @@
         "paginatedListOf": "straničena lista {{name}}",
         "example": "Posluženi primjer",
         "exampleAuto": "(auto generiran)",
-        "delete": "Izbriši odgovor"
+        "delete": "Izbriši odgovor",
+        "codeInvalid": "Unesite troznamenkasti statusni kod",
+        "codeTaken": "Ovaj kod je već deklariran"
       },
       "settings": {
         "inherited": "Naslijeđeno od grupe",
@@ -2428,7 +2433,11 @@
         "defaultLimit": "Zadana veličina stranice",
         "maxLimit": "Maks. veličina stranice"
       }
-    }
+    },
+    "newDesignName": "Novi dizajn API-ja",
+    "createFromScratch": "Izradi dizajn API-ja",
+    "createFromDoc": "Izradi dizajn iz ovog API-ja",
+    "fromDocName": "Dizajn {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

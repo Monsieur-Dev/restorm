@@ -2172,7 +2172,8 @@
       "api": {
         "title": "API",
         "basePath": "Základní cesta",
-        "defaultAuth": "Výchozí auth"
+        "defaultAuth": "Výchozí auth",
+        "environment": "Prostředí"
       }
     },
     "auth": {
@@ -2394,7 +2395,9 @@
         "delete": "Smazat parametr",
         "auto": "auto",
         "pathEmpty": "Zadejte {{param}} v cestě pro vytvoření jeho řádku.",
-        "otherEmpty": "Zatím žádné query ani header parametry."
+        "otherEmpty": "Zatím žádné query ani header parametry.",
+        "nameEmpty": "Parametr potřebuje název",
+        "nameTaken": "Tento název se již používá"
       },
       "body": {
         "label": "Tělo požadavku",
@@ -2413,7 +2416,9 @@
         "paginatedListOf": "stránkovaný seznam {{name}}",
         "example": "Servírovaný příklad",
         "exampleAuto": "(auto generovaný)",
-        "delete": "Smazat odpověď"
+        "delete": "Smazat odpověď",
+        "codeInvalid": "Zadejte třímístný stavový kód",
+        "codeTaken": "Tento kód je již deklarován"
       },
       "settings": {
         "inherited": "Děděno ze skupiny",
@@ -2429,7 +2434,11 @@
         "defaultLimit": "Výchozí velikost stránky",
         "maxLimit": "Max. velikost stránky"
       }
-    }
+    },
+    "newDesignName": "Nový návrh API",
+    "createFromScratch": "Vytvořit návrh API",
+    "createFromDoc": "Vytvořit návrh z tohoto API",
+    "fromDocName": "Návrh {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

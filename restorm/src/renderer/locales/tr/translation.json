@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Temel yol",
-        "defaultAuth": "Varsayılan auth"
+        "defaultAuth": "Varsayılan auth",
+        "environment": "Ortam"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Parametreyi sil",
         "auto": "otomatik",
         "pathEmpty": "Satırını oluşturmak için yola bir {{param}} yazın.",
-        "otherEmpty": "Henüz query veya header parametresi yok."
+        "otherEmpty": "Henüz query veya header parametresi yok.",
+        "nameEmpty": "Bir parametrenin adı olmalı",
+        "nameTaken": "Bu ad zaten kullanılıyor"
       },
       "body": {
         "label": "İstek gövdesi",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "sayfalı {{name}} listesi",
         "example": "Sunulan örnek",
         "exampleAuto": "(otomatik üretilen)",
-        "delete": "Yanıtı sil"
+        "delete": "Yanıtı sil",
+        "codeInvalid": "3 haneli bir durum kodu girin",
+        "codeTaken": "Bu kod zaten bildirilmiş"
       },
       "settings": {
         "inherited": "Gruptan miras",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Varsayılan sayfa boyutu",
         "maxLimit": "Maks. sayfa boyutu"
       }
-    }
+    },
+    "newDesignName": "Yeni API tasarımı",
+    "createFromScratch": "API tasarımı oluştur",
+    "createFromDoc": "Bu API’den bir tasarım oluştur",
+    "fromDocName": "{{name}} tasarımı"
   },
   "mqtt": {
     "qos": "QoS",

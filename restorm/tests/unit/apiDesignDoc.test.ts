@@ -101,4 +101,55 @@ describe('designToApiDocumentation', () => {
       expect(key in covered, `projection emits unknown key ${key}`).toBe(true)
     }
   })
+
+  describe('linked parameters resolve LIVE at projection (the link is the authority)', () => {
+    it('a property edit AFTER generation flows into the projected operation', () => {
+      const design = buildReferenceApiDesign()
+      // The fixture's GET /{{id}} links its id parameter to prop-user-id.
+      // Edit the property AFTER the route was authored: the projection
+      // must serve the property's current facts, not the frozen copy.
+      const models = design.models.map((m) => m.id !== 'model-user' ? m : {
+        ...m,
+        properties: m.properties.map((p) => p.id !== 'prop-user-id' ? p : {
+          ...p,
+          doc: { ...p.doc, type: 'integer', format: 'int64', description: 'Renumbered identifier.' }
+        })
+      })
+      const edited = { ...design, models }
+      const projected = designToApiDocumentation(edited)
+      const operation = projected.operations.find((op) => op.operationId === 'getUser')
+      const idParam = operation?.parameters?.find((p) => p.name === 'id')
+      expect(idParam?.type).toBe('integer')
+      expect(idParam?.format).toBe('int64')
+      // descriptionAuto is true in the fixture — the property's text wins.
+      expect(idParam?.description).toBe('Renumbered identifier.')
+    })
+
+    it('a DETACHED description survives projection while type still resolves', () => {
+      const design = buildReferenceApiDesign()
+      const groups = design.routeGroups.map((g) => ({
+        ...g,
+        routes: g.routes.map((r) => {
+          if (r.id !== 'route-user-get') return r
+          const links = r.design?.paramLinks ?? {}
+          const id = links['id']
+          if (id === undefined) return r
+          return {
+            ...r,
+            doc: {
+              ...r.doc,
+              parameters: (r.doc.parameters ?? []).map((p) => p.name === 'id' ? { ...p, description: 'My own words.' } : p)
+            },
+            design: { ...r.design, paramLinks: { ...links, id: { modelId: id.modelId, propertyId: id.propertyId } } }
+          }
+        })
+      }))
+      const projected = designToApiDocumentation({ ...design, routeGroups: groups })
+      const operation = projected.operations.find((op) => op.operationId === 'getUser')
+      const idParam = operation?.parameters?.find((p) => p.name === 'id')
+      expect(idParam?.description).toBe('My own words.')
+      expect(idParam?.type).toBe('string')
+      expect(idParam?.format).toBe('uuid')
+    })
+  })
 })

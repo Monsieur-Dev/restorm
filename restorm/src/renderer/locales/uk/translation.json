@@ -2172,7 +2172,8 @@
       "api": {
         "title": "API",
         "basePath": "Базовий шлях",
-        "defaultAuth": "Типова автентифікація"
+        "defaultAuth": "Типова автентифікація",
+        "environment": "Середовище"
       }
     },
     "auth": {
@@ -2394,7 +2395,9 @@
         "delete": "Видалити параметр",
         "auto": "авто",
         "pathEmpty": "Введіть {{param}} у шляху, щоб створити його рядок.",
-        "otherEmpty": "Ще немає query або header параметрів."
+        "otherEmpty": "Ще немає query або header параметрів.",
+        "nameEmpty": "Параметр повинен мати назву",
+        "nameTaken": "Ця назва вже використовується"
       },
       "body": {
         "label": "Тіло запиту",
@@ -2413,7 +2416,9 @@
         "paginatedListOf": "посторінковий список {{name}}",
         "example": "Поданий приклад",
         "exampleAuto": "(авто згенерований)",
-        "delete": "Видалити відповідь"
+        "delete": "Видалити відповідь",
+        "codeInvalid": "Введіть тризначний код статусу",
+        "codeTaken": "Цей код уже оголошено"
       },
       "settings": {
         "inherited": "Успадковано від групи",
@@ -2429,7 +2434,11 @@
         "defaultLimit": "Типовий розмір сторінки",
         "maxLimit": "Макс. розмір сторінки"
       }
-    }
+    },
+    "newDesignName": "Новий дизайн API",
+    "createFromScratch": "Створити дизайн API",
+    "createFromDoc": "Створити дизайн з цього API",
+    "fromDocName": "Дизайн {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

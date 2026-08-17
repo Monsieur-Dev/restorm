@@ -79,13 +79,46 @@ export function designEnumDoc(entry: DesignEnum): ModelDocumentation {
  * pattern composed from the design/group base paths. Placeholders keep
  * the Restorm `{{param}}` spelling — format-specific exporters translate
  * them.
+ *
+ * LINKED parameters resolve LIVE against their model property (the
+ * ID-based `paramLinks` are the authority): type/format/example — and
+ * the description while the mirror is auto — come from the property at
+ * projection time, exactly what the route editor displays. The values
+ * frozen into `doc.parameters` at generation time are only the
+ * fallback for a dangling link (which validation reports).
  */
 export function designRouteDoc(
   route: DesignRoute,
-  context: { designBasePath?: string; versionPrefix?: string; groupBasePath?: string }
+  context: { designBasePath?: string; versionPrefix?: string; groupBasePath?: string },
+  design?: ApiDesign
 ): OperationDocumentation {
   const full = composeRoutePath(context, route.doc.match.urlPattern)
-  return { ...route.doc, match: { ...route.doc.match, urlPattern: full } }
+  const links = route.design?.paramLinks
+  let parameters = route.doc.parameters
+  if (design !== undefined && links !== undefined && parameters !== undefined) {
+    parameters = parameters.map((parameter) => {
+      const link = links[parameter.name]
+      if (link === undefined) return parameter
+      const model = design.models.find((m) => m.id === link.modelId)
+      const property = model?.properties.find((p) => p.id === link.propertyId)
+      if (property === undefined) return parameter
+      const resolved = { ...parameter, type: property.doc.type }
+      if (property.doc.format !== undefined) resolved.format = property.doc.format
+      else delete resolved.format
+      if (property.doc.example !== undefined) resolved.example = property.doc.example
+      if (property.doc.constraints !== undefined) resolved.constraints = property.doc.constraints
+      if (link.descriptionAuto === true) {
+        if (property.doc.description !== undefined) resolved.description = property.doc.description
+        else delete resolved.description
+      }
+      return resolved
+    })
+  }
+  return {
+    ...route.doc,
+    match: { ...route.doc.match, urlPattern: full },
+    ...(parameters !== undefined ? { parameters } : {})
+  }
 }
 
 /** Compose base paths + a relative pattern into one normalized path. */
@@ -128,7 +161,7 @@ export function designToApiDocumentation(design: ApiDesign): ApiDocumentation {
           ...(design.server?.basePath !== undefined && { designBasePath: design.server.basePath }),
           ...(group.design?.versionPrefix !== undefined && { versionPrefix: group.design.versionPrefix }),
           ...(group.design?.basePath !== undefined && { groupBasePath: group.design.basePath })
-        }),
+        }, design),
         group: group.doc.name
       })
     }

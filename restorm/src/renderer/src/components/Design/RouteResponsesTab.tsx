@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Button,
   InputBox,
+  MessageType,
   SelectBox,
   Toggle,
   type ISelectData
@@ -31,6 +32,17 @@ export interface RouteResponsesTabProps {
  * errors action posts 400/401/404/500 at once, minting the shared
  * Error model on first use.
  */
+/** Rebuild a route with the given response metas, omitting empty bags —
+ * `design: { responses: {} }` must never reach the file. */
+function withResponses(route: DesignRoute, responses: Record<string, DesignResponseMeta>): DesignRoute {
+  const { responses: _dropped, ...designRest } = route.design ?? {}
+  const design = Object.keys(responses).length > 0 ? { ...designRest, responses } : designRest
+  const { design: _oldDesign, ...routeRest } = route
+  const next: DesignRoute = { ...routeRest }
+  if (Object.keys(design).length > 0) next.design = design
+  return next
+}
+
 export const RouteResponsesTab: React.FC<RouteResponsesTabProps> = ({ design, group, route }) => {
   const { t } = useTranslation()
   const [expandedCode, setExpandedCode] = useState<string | null>(null)
@@ -56,11 +68,7 @@ export const RouteResponsesTab: React.FC<RouteResponsesTabProps> = ({ design, gr
   const deleteCode = useCallback((code: string) => {
     const { [code]: _doc, ...docResponses } = route.doc.responses ?? {}
     const { [code]: _meta, ...designResponses } = route.design?.responses ?? {}
-    commit({
-      ...route,
-      doc: { ...route.doc, responses: docResponses },
-      design: { ...(route.design ?? {}), responses: designResponses }
-    })
+    commit(withResponses({ ...route, doc: { ...route.doc, responses: docResponses } }, designResponses))
     if (expandedCode === code) setExpandedCode(null)
   }, [commit, expandedCode, route])
 
@@ -80,10 +88,7 @@ export const RouteResponsesTab: React.FC<RouteResponsesTabProps> = ({ design, gr
     if (merged.list !== undefined) cleaned.list = merged.list
     if (merged.paginated !== undefined) cleaned.paginated = merged.paginated
     if (merged.exampleId !== undefined) cleaned.exampleId = merged.exampleId
-    commit({
-      ...route,
-      design: { ...(route.design ?? {}), responses: { ...(route.design?.responses ?? {}), [code]: cleaned } }
-    })
+    commit(withResponses(route, { ...(route.design?.responses ?? {}), [code]: cleaned }))
   }, [commit, route])
 
   const patchDescription = useCallback((code: string, value: string) => {
@@ -118,7 +123,20 @@ export const RouteResponsesTab: React.FC<RouteResponsesTabProps> = ({ design, gr
         <InputBox
           value={newCode}
           onChange={setNewCode}
-          options={{ type: 'text', placeholder: '404', maxLength: 3, ariaLabel: t('design.routes.responses.codePlaceholder', 'Status code') }}
+          options={{
+            type: 'text',
+            placeholder: '404',
+            maxLength: 3,
+            ariaLabel: t('design.routes.responses.codePlaceholder', 'Status code'),
+            validationOptions: {
+              validation: (value: string) => {
+                if (value === '') return null
+                if (!/^[1-5][0-9]{2}$/.test(value)) return { content: t('design.routes.responses.codeInvalid', 'Enter a 3-digit status code'), type: MessageType.ERROR }
+                if (route.doc.responses?.[value] !== undefined) return { content: t('design.routes.responses.codeTaken', 'This code is already declared'), type: MessageType.ERROR }
+                return null
+              }
+            }
+          }}
           className="design-response-code-input"
           data-testid="design-response-new-code"
         />
@@ -230,15 +248,14 @@ export const RouteResponsesTab: React.FC<RouteResponsesTabProps> = ({ design, gr
                   </label>
                 </div>
                 <HeaderHoverTooltip label={t('design.routes.responses.delete', 'Delete the response')}>
-                  <button
-                    type="button"
-                    className="design-icon-button"
-                    aria-label={t('design.routes.responses.delete', 'Delete the response')}
+                  <Button
+                    secondary
+                    small
+                    icon="trash"
+                    options={{ ariaLabel: t('design.routes.responses.delete', 'Delete the response') }}
                     onClick={() => { deleteCode(code) }}
                     data-testid={`design-response-delete-${code}`}
-                  >
-                    <span className="codicon codicon-trash" />
-                  </button>
+                  />
                 </HeaderHoverTooltip>
               </div>
             )}

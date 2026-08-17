@@ -2169,7 +2169,8 @@
       "api": {
         "title": "API",
         "basePath": "Jalur dasar",
-        "defaultAuth": "Auth bawaan"
+        "defaultAuth": "Auth bawaan",
+        "environment": "Lingkungan"
       }
     },
     "auth": {
@@ -2391,7 +2392,9 @@
         "delete": "Hapus parameter",
         "auto": "otomatis",
         "pathEmpty": "Ketik {{param}} di jalur untuk membuat barisnya.",
-        "otherEmpty": "Belum ada parameter query atau header."
+        "otherEmpty": "Belum ada parameter query atau header.",
+        "nameEmpty": "Parameter memerlukan nama",
+        "nameTaken": "Nama ini sudah dipakai"
       },
       "body": {
         "label": "Badan permintaan",
@@ -2410,7 +2413,9 @@
         "paginatedListOf": "daftar berhalaman {{name}}",
         "example": "Contoh yang disajikan",
         "exampleAuto": "(otomatis dibuat)",
-        "delete": "Hapus respons"
+        "delete": "Hapus respons",
+        "codeInvalid": "Masukkan kode status 3 digit",
+        "codeTaken": "Kode ini sudah dideklarasikan"
       },
       "settings": {
         "inherited": "Diwarisi dari grup",
@@ -2426,7 +2431,11 @@
         "defaultLimit": "Ukuran halaman bawaan",
         "maxLimit": "Ukuran halaman maks."
       }
-    }
+    },
+    "newDesignName": "Desain API baru",
+    "createFromScratch": "Buat desain API",
+    "createFromDoc": "Buat desain dari API ini",
+    "fromDocName": "Desain {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

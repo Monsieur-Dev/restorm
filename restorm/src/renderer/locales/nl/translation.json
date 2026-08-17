@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Basispad",
-        "defaultAuth": "Standaard-auth"
+        "defaultAuth": "Standaard-auth",
+        "environment": "Omgeving"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Parameter verwijderen",
         "auto": "auto",
         "pathEmpty": "Typ een {{param}} in het pad om de rij te maken.",
-        "otherEmpty": "Nog geen query- of header-parameters."
+        "otherEmpty": "Nog geen query- of header-parameters.",
+        "nameEmpty": "Een parameter heeft een naam nodig",
+        "nameTaken": "Deze naam is al in gebruik"
       },
       "body": {
         "label": "Request-body",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "gepagineerde lijst van {{name}}",
         "example": "Geserveerd voorbeeld",
         "exampleAuto": "(auto gegenereerd)",
-        "delete": "Antwoord verwijderen"
+        "delete": "Antwoord verwijderen",
+        "codeInvalid": "Voer een 3-cijferige statuscode in",
+        "codeTaken": "Deze code is al gedeclareerd"
       },
       "settings": {
         "inherited": "Geërfd van de groep",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Standaard paginagrootte",
         "maxLimit": "Max. paginagrootte"
       }
-    }
+    },
+    "newDesignName": "Nieuw API-design",
+    "createFromScratch": "Een API-design maken",
+    "createFromDoc": "Een design maken van deze API",
+    "fromDocName": "Design {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

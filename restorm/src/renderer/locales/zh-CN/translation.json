@@ -2169,7 +2169,8 @@
       "api": {
         "title": "API",
         "basePath": "基础路径",
-        "defaultAuth": "默认认证"
+        "defaultAuth": "默认认证",
+        "environment": "环境"
       }
     },
     "auth": {
@@ -2391,7 +2392,9 @@
         "delete": "删除参数",
         "auto": "自动",
         "pathEmpty": "在路径中输入 {{param}} 即可创建其行。",
-        "otherEmpty": "尚无 query 或 header 参数。"
+        "otherEmpty": "尚无 query 或 header 参数。",
+        "nameEmpty": "参数需要一个名称",
+        "nameTaken": "该名称已被使用"
       },
       "body": {
         "label": "请求体",
@@ -2410,7 +2413,9 @@
         "paginatedListOf": "分页的 {{name}} 列表",
         "example": "提供的示例",
         "exampleAuto": "（自动生成）",
-        "delete": "删除响应"
+        "delete": "删除响应",
+        "codeInvalid": "请输入 3 位状态码",
+        "codeTaken": "该状态码已声明"
       },
       "settings": {
         "inherited": "继承自分组",
@@ -2426,7 +2431,11 @@
         "defaultLimit": "默认页大小",
         "maxLimit": "最大页大小"
       }
-    }
+    },
+    "newDesignName": "新的 API 设计",
+    "createFromScratch": "创建 API 设计",
+    "createFromDoc": "从此 API 创建设计",
+    "fromDocName": "{{name}} 设计"
   },
   "mqtt": {
     "qos": "QoS",

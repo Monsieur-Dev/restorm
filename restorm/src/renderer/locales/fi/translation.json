@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Peruspolku",
-        "defaultAuth": "Oletus-auth"
+        "defaultAuth": "Oletus-auth",
+        "environment": "Ympäristö"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Poista parametri",
         "auto": "auto",
         "pathEmpty": "Kirjoita {{param}} polkuun luodaksesi sen rivin.",
-        "otherEmpty": "Ei vielä query- tai header-parametreja."
+        "otherEmpty": "Ei vielä query- tai header-parametreja.",
+        "nameEmpty": "Parametri tarvitsee nimen",
+        "nameTaken": "Tämä nimi on jo käytössä"
       },
       "body": {
         "label": "Pyynnön runko",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "sivutettu lista {{name}}",
         "example": "Tarjoiltava esimerkki",
         "exampleAuto": "(auto generoitu)",
-        "delete": "Poista vastaus"
+        "delete": "Poista vastaus",
+        "codeInvalid": "Anna 3-numeroinen tilakoodi",
+        "codeTaken": "Tämä koodi on jo määritelty"
       },
       "settings": {
         "inherited": "Peritty ryhmältä",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Oletussivukoko",
         "maxLimit": "Enimmäissivukoko"
       }
-    }
+    },
+    "newDesignName": "Uusi API-suunnitelma",
+    "createFromScratch": "Luo API-suunnitelma",
+    "createFromDoc": "Luo suunnitelma tästä API:sta",
+    "fromDocName": "Suunnitelma {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

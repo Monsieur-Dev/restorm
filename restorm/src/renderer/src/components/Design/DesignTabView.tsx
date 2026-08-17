@@ -14,6 +14,9 @@ import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
 import { validateApiDesign } from '../../../../shared/design/validateApiDesign'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
+import { useRestormStore } from '../../store/restormStore'
+import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../../shared/utils/resolveUrlAgainstEnv'
+import type { Environment } from '../../../../shared/types/collections'
 import { assignDesignSection } from './designMutations'
 import { DesignModelsSection } from './DesignModelsSection'
 import { DesignEnumsSection } from './DesignEnumsSection'
@@ -185,8 +188,44 @@ const DesignSectionPlaceholder: React.FC<{ title: string; message: string }> = (
  */
 const AUTH_KINDS: readonly DesignAuthKind[] = ['none', 'bearer', 'apiKeyHeader', 'basic']
 
+/** The raw variable map of one environment — same value coercion as the
+ * documentation matcher's `envVarsFromFolder`. */
+function envVarsFromEnvironment(env: Environment | undefined): Record<string, string> {
+  if (!env) return {}
+  const out: Record<string, string> = {}
+  for (const kv of env.variables) {
+    const v: unknown = kv.value
+    if (typeof v === 'string') out[kv.key] = v
+    else if (typeof v === 'number' || typeof v === 'boolean') out[kv.key] = String(v)
+    else if (v && typeof v === 'object') {
+      const obj = v as { value?: unknown; toString?: () => string }
+      if (typeof obj.value === 'string') out[kv.key] = obj.value
+      else if (typeof obj.value === 'number' || typeof obj.value === 'boolean') out[kv.key] = String(obj.value)
+      else if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+        const str = obj.toString()
+        if (str !== '[object Object]') out[kv.key] = str
+      }
+    }
+  }
+  return out
+}
+
 const DesignSettingsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
   const { t } = useTranslation()
+
+  // A design INSIDE an env folder resolves {{variables}} like a request
+  // does: the owning folder's environments feed the resolver, and the
+  // active environment is picked right here (defaults to the first).
+  const findOwningEnvironmentFolder = useRestormStore((state) => state.findOwningEnvironmentFolder)
+  const owningFolder = findOwningEnvironmentFolder(design.id)
+  const environments = owningFolder?.environments ?? []
+  const [activeEnvIndex, setActiveEnvIndex] = useState(0)
+  const activeEnv = environments[Math.min(activeEnvIndex, Math.max(0, environments.length - 1))]
+  // Plain per-render computation — tiny maps, and manual memoization
+  // here made the React compiler bail out of the whole component.
+  const envVars = flattenEnvVars(envVarsFromEnvironment(activeEnv))
+  const rawBaseUrl = `${design.server?.host ?? ''}${design.server?.basePath ?? ''}`
+  const resolvedBaseUrl = resolveUrlAgainstEnv(rawBaseUrl, envVars)
   const authOptions = useMemo(() => [
     { text: t('design.auth.none', 'None') },
     { text: t('design.auth.bearer', 'Bearer (JWT)') },
@@ -306,6 +345,25 @@ const DesignSettingsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
                 data-testid="design-settings-base-path"
               />
             </label>
+            {environments.length > 0 && (
+              <label className="design-field">
+                <span className="design-field-label">{t('design.settings.api.environment', 'Environment')}</span>
+                <SelectBox
+                  id="design-settings-environment"
+                  className=""
+                  options={environments.map((env) => ({ text: env.name }))}
+                  selected={Math.min(activeEnvIndex, environments.length - 1)}
+                  onDidSelect={(data: ISelectData) => { setActiveEnvIndex(data.index) }}
+                  selectBoxOptions={{ ariaLabel: t('design.settings.api.environment', 'Environment'), useCustomDrawn: true }}
+                  data-testid="design-settings-environment"
+                />
+              </label>
+            )}
+            {owningFolder !== null && rawBaseUrl !== '' && (
+              <p className="design-route-resolved design-field-full" data-testid="design-settings-resolved-base" data-resolved-url={resolvedBaseUrl}>
+                {resolvedBaseUrl}
+              </p>
+            )}
             <label className="design-field">
               <span className="design-field-label">{t('design.settings.api.defaultAuth', 'Default auth')}</span>
               <SelectBox

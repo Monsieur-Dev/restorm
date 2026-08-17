@@ -2169,7 +2169,8 @@
       "api": {
         "title": "API",
         "basePath": "ベースパス",
-        "defaultAuth": "既定の認証"
+        "defaultAuth": "既定の認証",
+        "environment": "環境"
       }
     },
     "auth": {
@@ -2391,7 +2392,9 @@
         "delete": "パラメータを削除",
         "auto": "自動",
         "pathEmpty": "パスに {{param}} を入力すると行が作成されます。",
-        "otherEmpty": "query / header パラメータはまだありません。"
+        "otherEmpty": "query / header パラメータはまだありません。",
+        "nameEmpty": "パラメータには名前が必要です",
+        "nameTaken": "この名前は既に使用されています"
       },
       "body": {
         "label": "リクエストボディ",
@@ -2410,7 +2413,9 @@
         "paginatedListOf": "{{name}} のページ付きリスト",
         "example": "提供される例",
         "exampleAuto": "（自動生成）",
-        "delete": "レスポンスを削除"
+        "delete": "レスポンスを削除",
+        "codeInvalid": "3 桁のステータスコードを入力してください",
+        "codeTaken": "このコードは既に宣言されています"
       },
       "settings": {
         "inherited": "グループから継承",
@@ -2426,7 +2431,11 @@
         "defaultLimit": "既定のページサイズ",
         "maxLimit": "最大ページサイズ"
       }
-    }
+    },
+    "newDesignName": "新しい API デザイン",
+    "createFromScratch": "API デザインを作成",
+    "createFromDoc": "この API からデザインを作成",
+    "fromDocName": "{{name}} デザイン"
   },
   "mqtt": {
     "qos": "QoS",

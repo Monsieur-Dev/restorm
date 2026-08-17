@@ -2169,7 +2169,8 @@
       "api": {
         "title": "API",
         "basePath": "Đường dẫn gốc",
-        "defaultAuth": "Auth mặc định"
+        "defaultAuth": "Auth mặc định",
+        "environment": "Môi trường"
       }
     },
     "auth": {
@@ -2391,7 +2392,9 @@
         "delete": "Xóa tham số",
         "auto": "tự động",
         "pathEmpty": "Gõ một {{param}} trong đường dẫn để tạo dòng của nó.",
-        "otherEmpty": "Chưa có tham số query hoặc header."
+        "otherEmpty": "Chưa có tham số query hoặc header.",
+        "nameEmpty": "Tham số cần có tên",
+        "nameTaken": "Tên này đã được dùng"
       },
       "body": {
         "label": "Thân yêu cầu",
@@ -2410,7 +2413,9 @@
         "paginatedListOf": "danh sách phân trang {{name}}",
         "example": "Ví dụ được phục vụ",
         "exampleAuto": "(tự động tạo)",
-        "delete": "Xóa phản hồi"
+        "delete": "Xóa phản hồi",
+        "codeInvalid": "Nhập mã trạng thái 3 chữ số",
+        "codeTaken": "Mã này đã được khai báo"
       },
       "settings": {
         "inherited": "Kế thừa từ nhóm",
@@ -2426,7 +2431,11 @@
         "defaultLimit": "Kích thước trang mặc định",
         "maxLimit": "Kích thước trang tối đa"
       }
-    }
+    },
+    "newDesignName": "Thiết kế API mới",
+    "createFromScratch": "Tạo thiết kế API",
+    "createFromDoc": "Tạo thiết kế từ API này",
+    "fromDocName": "Thiết kế {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

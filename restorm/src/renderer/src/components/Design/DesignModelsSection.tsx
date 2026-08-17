@@ -152,15 +152,14 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
               />
               {(
                 <HeaderHoverTooltip label={t('design.models.delete', 'Delete the model')}>
-                  <button
-                    type="button"
-                    className="design-icon-button"
-                    aria-label={t('design.models.delete', 'Delete the model')}
+                  <Button
+                    secondary
+                    small
+                    icon="trash"
+                    options={{ ariaLabel: t('design.models.delete', 'Delete the model') }}
                     onClick={() => { setPendingDelete(selected) }}
                     data-testid="design-model-delete"
-                  >
-                    <span className="codicon codicon-trash" />
-                  </button>
+                  />
                 </HeaderHoverTooltip>
               )}
             </div>

@@ -68,6 +68,7 @@ export type AddChildKind =
   | 'auth'
   | 'trpc'
   | 'scenario'
+  | 'design'
 
 export type AddChildHandler = (parentId: string, kind: AddChildKind) => void
 
@@ -102,6 +103,10 @@ export interface BuildContextMenuOptions {
   /** Flags API-design rows — routed through the design branch (no Add
    * submenu, plus the explicit split-panel escape hatch). */
   isItemDesign?: (itemId: string) => boolean
+  /** `true` when the folder carries an imported ApiDocumentation —
+   * drives the "Create a design from this API" prefill entry. */
+  canCreateDesignFromDoc?: (itemId: string) => boolean
+  onCreateDesignFromDoc?: (itemId: string) => void
   /** Open the item in a split workbench panel — the deliberate breach
    * of the design single-tab policy. */
   onOpenInSplit?: (itemId: string) => void
@@ -425,7 +430,7 @@ const clipboardEntries = (
 export const buildContextMenuForItem = (
   options: BuildContextMenuOptions
 ): SidebarContextMenuItem[] => {
-  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario, isItemDesign, onOpenInSplit } = options
+  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario, isItemDesign, onOpenInSplit, canCreateDesignFromDoc, onCreateDesignFromDoc } = options
   const itemId = item.id
 
   // A design's virtual section rows carry no menu of their own: every
@@ -538,6 +543,14 @@ export const buildContextMenuForItem = (
         }
       ]
       : []
+    const designFromDocEntry: SidebarContextMenuItem[] = (canCreateDesignFromDoc?.(itemId) === true && onCreateDesignFromDoc)
+      ? [{
+        id: 'create-design-from-doc',
+        label: t('design.createFromDoc'),
+        icon: 'symbol-color',
+        onClick: () => { onCreateDesignFromDoc(itemId) }
+      }]
+      : []
     return [
       {
         id: 'add-child',
@@ -564,6 +577,7 @@ export const buildContextMenuForItem = (
         }
       },
       ...refreshEntry,
+      ...designFromDocEntry,
       { id: 'sep-folder', isSeparator: true, label: '' },
       {
         id: 'delete-folder',
@@ -769,6 +783,10 @@ export interface AttachContextMenusOptions {
   /** Flags API-design rows — routed through the design branch (no Add
    * submenu, plus the explicit split-panel escape hatch). */
   isItemDesign?: (itemId: string) => boolean
+  /** `true` when the folder carries an imported ApiDocumentation —
+   * drives the "Create a design from this API" prefill entry. */
+  canCreateDesignFromDoc?: (itemId: string) => boolean
+  onCreateDesignFromDoc?: (itemId: string) => void
   /** Open the item in a split workbench panel — the deliberate breach
    * of the design single-tab policy. */
   onOpenInSplit?: (itemId: string) => void

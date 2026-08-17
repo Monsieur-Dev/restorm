@@ -2172,7 +2172,8 @@
       "api": {
         "title": "API",
         "basePath": "Ścieżka bazowa",
-        "defaultAuth": "Domyślne auth"
+        "defaultAuth": "Domyślne auth",
+        "environment": "Środowisko"
       }
     },
     "auth": {
@@ -2394,7 +2395,9 @@
         "delete": "Usuń parametr",
         "auto": "auto",
         "pathEmpty": "Wpisz {{param}} w ścieżce, aby utworzyć jego wiersz.",
-        "otherEmpty": "Brak parametrów query lub header."
+        "otherEmpty": "Brak parametrów query lub header.",
+        "nameEmpty": "Parametr wymaga nazwy",
+        "nameTaken": "Ta nazwa jest już używana"
       },
       "body": {
         "label": "Ciało żądania",
@@ -2413,7 +2416,9 @@
         "paginatedListOf": "stronicowana lista {{name}}",
         "example": "Serwowany przykład",
         "exampleAuto": "(auto generowany)",
-        "delete": "Usuń odpowiedź"
+        "delete": "Usuń odpowiedź",
+        "codeInvalid": "Wprowadź 3-cyfrowy kod statusu",
+        "codeTaken": "Ten kod jest już zadeklarowany"
       },
       "settings": {
         "inherited": "Dziedziczone z grupy",
@@ -2429,7 +2434,11 @@
         "defaultLimit": "Domyślny rozmiar strony",
         "maxLimit": "Maks. rozmiar strony"
       }
-    }
+    },
+    "newDesignName": "Nowy projekt API",
+    "createFromScratch": "Utwórz projekt API",
+    "createFromDoc": "Utwórz projekt z tego API",
+    "fromDocName": "Projekt {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

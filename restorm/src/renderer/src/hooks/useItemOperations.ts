@@ -32,7 +32,7 @@ import { mapAllWorkbenchTabs, tabBackingItemId, tabReferencesItem } from '../uti
 import { requestTabTitle } from '../../../shared/protocolRegistry'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab, RestormEditorTab } from '../../../shared/types/editor'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem, makeReactiveApiDesign } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -804,6 +804,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'auth': return 'New auth request'
       case 'trpc': return 'New tRPC request'
       case 'scenario': return 'New scenario'
+      case 'design': return t('design.newDesignName', 'New API design')
     }
   }, [t])
 
@@ -867,7 +868,26 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // `useImport` produces on import so the save-unit registry /
     // serializer / executors all pick them up without special casing.
     let pushedItem: FolderItem
-    if (kind === 'scenario') {
+    if (kind === 'design') {
+      const design: import('../../../shared/types/collections').ApiDesign = {
+        type: 'design',
+        id,
+        name,
+        tags: [],
+        info: { title: name, version: '1.0.0' },
+        models: [],
+        enums: [],
+        routeGroups: []
+      }
+      const reactive = makeReactiveApiDesign(design)
+      mountChild(reactive as unknown as FolderItem)
+      pushedItem = reactive as unknown as FolderItem
+      emitBothBuses(DocumentEvents.DESIGN_CREATED, {
+        id: reactive.id,
+        type: 'design',
+        document: cloneForEventBus(reactive as unknown as FolderItem)
+      } as DocumentChangedPayload)
+    } else if (kind === 'scenario') {
       // A scenario is a plain tree item (no execution wiring yet in
       // Phase 1). It syncs to main via `collections:sync` and reifies
       // into a `Scenario` model there; no per-item document event is
@@ -1108,6 +1128,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         openFolderTab(pushedItem, breadcrumbs)
       } else if (isScenario(pushedItem)) {
         openScenarioEditorTab(pushedItem, breadcrumbs)
+      } else if (isApiDesign(pushedItem)) {
+        openDesignTab(pushedItem, breadcrumbs)
       } else if (isRequest(pushedItem)) {
         openAnyRequestTab(pushedItem, breadcrumbs, envs)
       }
@@ -1117,7 +1139,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       startInlineRename(id)
     }
     return id
-  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, defaultNameFor, startInlineRename])
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, openDesignTab, defaultNameFor, startInlineRename])
 
   const handleCreateRootEnvironmentFolder = useCallback(() => {
     const newFolder: EnvironmentFolder = {

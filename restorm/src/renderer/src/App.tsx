@@ -179,7 +179,7 @@ import { IncompatibleProjectModal } from './components/Modals/IncompatibleProjec
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
 import { collectSubtreeScenarioUsages, type ContainerDeleteAffectedRequest } from './services/containerDeleteUsages'
-import { removeItemFromTree, insertItemIntoTree, deepCloneItem } from './utils/treeManipulation'
+import { removeItemFromTree, insertItemIntoTree, deepCloneItem, generateUniqueId } from './utils/treeManipulation'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { allLeafKeys } from './components/Modals/importSelectionHelpers'
 import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
@@ -238,6 +238,8 @@ import { useFavoritesAndOpenItems } from './hooks/useFavoritesAndOpenItems'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
 import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from './types/reactive'
+import { designFromDocumentation } from '../../shared/design/designFromDocumentation'
+import { cloneForEventBus } from './utils/cloneForEventBus'
 import { searchIndexService } from './services/SearchIndexService'
 import { useRestormStore } from './store/restormStore'
 import type {
@@ -2372,6 +2374,43 @@ const App: React.FC = () => {
     if (!folder) return
     setApiSpecRefreshFolder(folder)
   }, [rootItems])
+  // The env-folder prefill entry (TASK-468.5): an imported documentation
+  // becomes an editable design CREATED INSIDE that folder (so it resolves
+  // the folder's variables), then opens in its tab.
+  const canCreateDesignFromDoc = useCallback((id: string): boolean => {
+    const folder = rootItems.find((c): c is EnvironmentFolder => isEnvironmentFolder(c) && c.id === id)
+    return folder?.apiDocumentation !== undefined
+  }, [rootItems])
+  const onCreateDesignFromDoc = useCallback((id: string): void => {
+    const lookup = findItemWithBreadcrumbs(rootItems, id)
+    const folder = lookup.item
+    if (!folder || !isEnvironmentFolder(folder) || folder.apiDocumentation === undefined) return
+    const built = designFromDocumentation(
+      t('design.fromDocName', '{{name}} design', { name: folder.name }),
+      folder.apiDocumentation,
+      generateUniqueId
+    )
+    const reactive = makeReactiveApiDesign(built)
+    folder.items.push(reactive as unknown as FolderItem)
+    setRootItems((prev) => [...prev])
+    eventBus.emitSync(DocumentEvents.DESIGN_CREATED, {
+      id: reactive.id,
+      type: 'design',
+      document: cloneForEventBus(reactive as unknown as FolderItem),
+      parentFolderId: folder.id
+    } as DocumentChangedPayload)
+    eventBus.emitLocalSync(DocumentEvents.DESIGN_CREATED, {
+      id: reactive.id,
+      type: 'design',
+      document: cloneForEventBus(reactive as unknown as FolderItem),
+      parentFolderId: folder.id
+    } as DocumentChangedPayload)
+    setExpandedIds((prev) => Array.from(new Set([...prev, folder.id])))
+    setSelectedItemId(reactive.id)
+    const breadcrumbs = [...lookup.breadcrumbs, { id: reactive.id, label: reactive.name, icon: null }]
+    openDesignTab(reactive, breadcrumbs)
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openDesignTab, t])
+
   const openRefreshImportModal = useCallback((id: string): void => {
     const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
     if (!folder || !('name' in folder)) return
@@ -2470,6 +2509,8 @@ const App: React.FC = () => {
     canPaste: canPasteItemsFn,
     canRefreshFromSource,
     onRefreshFromSource,
+    canCreateDesignFromDoc,
+    onCreateDesignFromDoc,
     // The design context menu's explicit single-tab escape hatch: open
     // the design beside the focused group. The placement helper falls
     // back to the first group when the id no longer resolves.
@@ -3790,7 +3831,7 @@ const App: React.FC = () => {
                 // reopen on load. See `onboardingRestorePending`.
                 onboardingRestorePending
                   ? null
-                  : <Onboarding rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />
+                  : <Onboarding rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onCreateDesign={() => { handleAddChildItem('', 'design') }} onOpenRequest={handleItemClick} />
               }
               workbenchId={workbenchId}
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}

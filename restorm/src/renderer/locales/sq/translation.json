@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Shtegu bazë",
-        "defaultAuth": "Auth i parazgjedhur"
+        "defaultAuth": "Auth i parazgjedhur",
+        "environment": "Mjedisi"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Fshi parametrin",
         "auto": "auto",
         "pathEmpty": "Shkruani një {{param}} në shteg për të krijuar rreshtin e tij.",
-        "otherEmpty": "Ende asnjë parametër query ose header."
+        "otherEmpty": "Ende asnjë parametër query ose header.",
+        "nameEmpty": "Një parametër ka nevojë për emër",
+        "nameTaken": "Ky emër është tashmë në përdorim"
       },
       "body": {
         "label": "Trupi i kërkesës",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "listë e faqosur e {{name}}",
         "example": "Shembulli i shërbyer",
         "exampleAuto": "(auto i gjeneruar)",
-        "delete": "Fshi përgjigjen"
+        "delete": "Fshi përgjigjen",
+        "codeInvalid": "Shkruani një kod statusi me 3 shifra",
+        "codeTaken": "Ky kod është tashmë i deklaruar"
       },
       "settings": {
         "inherited": "Trashëguar nga grupi",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Madhësia e parazgjedhur e faqes",
         "maxLimit": "Madhësia maks. e faqes"
       }
-    }
+    },
+    "newDesignName": "Dizajn i ri i API-t",
+    "createFromScratch": "Krijo një dizajn API",
+    "createFromDoc": "Krijo një dizajn nga ky API",
+    "fromDocName": "Dizajni {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

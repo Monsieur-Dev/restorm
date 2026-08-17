@@ -19,7 +19,7 @@ import type {
 } from '../../../../shared/types/collections'
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { generateUniqueId } from '../../utils/treeManipulation'
-import { replaceModel } from './designMutations'
+import { assignDesignSection, replaceModel } from './designMutations'
 import { displayValue, parseTypedValue } from './designDisplay'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
@@ -182,9 +182,35 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
   }, [commitProperties, model.properties, onSelectProperty])
 
   const deleteProperty = useCallback((propertyId: string) => {
-    commitProperties(model.properties.filter((p) => p.id !== propertyId))
+    // The property's dependents go WITH it: route parameter links that
+    // point at it (a dangling link would silently re-bind a later
+    // CRUD generation) and the model identifier if it was this one.
+    const properties = model.properties.filter((p) => p.id !== propertyId)
+    let nextModel: DesignModel = { ...model, properties }
+    if (model.design?.identifier?.propertyId === propertyId) {
+      const { identifier: _dropped, ...designRest } = model.design
+      const { design: _oldDesign, ...modelRest } = nextModel
+      nextModel = Object.keys(designRest).length > 0 ? { ...modelRest, design: designRest } : modelRest
+    }
+    replaceModel(design, model.id, nextModel)
+    const routeGroups = design.routeGroups.map((group) => ({
+      ...group,
+      routes: group.routes.map((route) => {
+        const links = route.design?.paramLinks
+        if (links === undefined) return route
+        const keptEntries = Object.entries(links).filter(([, link]) => link.propertyId !== propertyId)
+        if (keptEntries.length === Object.keys(links).length) return route
+        const { paramLinks: _droppedLinks, ...designRest } = route.design ?? {}
+        const nextDesign = keptEntries.length > 0 ? { ...designRest, paramLinks: Object.fromEntries(keptEntries) } : designRest
+        const { design: _oldRouteDesign, ...routeRest } = route
+        return Object.keys(nextDesign).length > 0 ? { ...routeRest, design: nextDesign } : routeRest
+      })
+    }))
+    if (routeGroups.some((group, i) => group.routes.some((route, j) => route !== design.routeGroups[i]?.routes[j]))) {
+      assignDesignSection(design, 'routeGroups', routeGroups)
+    }
     if (selectedPropertyId === propertyId) onSelectProperty(null)
-  }, [commitProperties, model.properties, selectedPropertyId, onSelectProperty])
+  }, [design, model, selectedPropertyId, onSelectProperty])
 
   // Inherited properties, walked up the (cycle-tolerant) chain.
   const inherited = useMemo(() => {
@@ -541,15 +567,14 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
         </h4>
         {(
           <HeaderHoverTooltip label={t('design.schema.deleteProperty', 'Delete the property')}>
-            <button
-              type="button"
-              className="design-icon-button"
-              aria-label={t('design.schema.deleteProperty', 'Delete the property')}
+            <Button
+              secondary
+              small
+              icon="trash"
+              options={{ ariaLabel: t('design.schema.deleteProperty', 'Delete the property') }}
               onClick={onDelete}
               data-testid="design-property-delete"
-            >
-              <span className="codicon codicon-trash" />
-            </button>
+            />
           </HeaderHoverTooltip>
         )}
       </div>

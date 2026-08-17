@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Percorso base",
-        "defaultAuth": "Auth predefinita"
+        "defaultAuth": "Auth predefinita",
+        "environment": "Ambiente"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Elimina il parametro",
         "auto": "auto",
         "pathEmpty": "Digita un {{param}} nel percorso per creare la sua riga.",
-        "otherEmpty": "Ancora nessun parametro query o header."
+        "otherEmpty": "Ancora nessun parametro query o header.",
+        "nameEmpty": "Un parametro richiede un nome",
+        "nameTaken": "Questo nome è già in uso"
       },
       "body": {
         "label": "Corpo della richiesta",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "lista paginata di {{name}}",
         "example": "Esempio servito",
         "exampleAuto": "(auto generato)",
-        "delete": "Elimina la risposta"
+        "delete": "Elimina la risposta",
+        "codeInvalid": "Inserisci un codice di stato a 3 cifre",
+        "codeTaken": "Questo codice è già dichiarato"
       },
       "settings": {
         "inherited": "Ereditato dal gruppo",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Dimensione pagina predefinita",
         "maxLimit": "Dimensione pagina max"
       }
-    }
+    },
+    "newDesignName": "Nuovo design di API",
+    "createFromScratch": "Crea un design di API",
+    "createFromDoc": "Crea un design da questa API",
+    "fromDocName": "Design {{name}}"
   },
   "mqtt": {
     "qos": "QoS",

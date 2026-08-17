@@ -29,32 +29,32 @@ async function openSection(p: Page, section: 'routes' | 'models'): Promise<void>
 
 /** Resolve a route row's item id INSIDE its group: rows are flat DOM
  * siblings, so walk from the level-1 group row through its level-2
- * children, matching pattern + method badge. */
-async function routeRowId(p: Page, groupName: string, method: string, pattern: string): Promise<string> {
-  const id = await p.evaluate(({ groupName, method, pattern }) => {
+ * children, matching the row TITLE exactly (the summary — or the
+ * pattern when the route has none). Exact-name group matching avoids
+ * the "PowerUsers vs Users" substring trap. */
+async function routeRowId(p: Page, groupName: string, routeTitle: string): Promise<string> {
+  const id = await p.evaluate(({ groupName, routeTitle }) => {
     const rows = Array.from(document.querySelectorAll('[data-testid="design-routes-listview"] .list-view-row'))
     const levelOf = (row: Element): number => Number(row.getAttribute('aria-level') ?? row.closest('[aria-level]')?.getAttribute('aria-level') ?? '1')
+    const titleOf = (row: Element): string => (row.querySelector('.list-view-title')?.textContent ?? '').trim()
     let inGroup = false
     for (const row of rows) {
-      const level = levelOf(row)
-      const text = row.textContent
-      if (level === 1) {
-        inGroup = text.includes(groupName)
+      if (levelOf(row) === 1) {
+        inGroup = titleOf(row) === groupName
         continue
       }
       if (!inGroup) continue
-      const title = row.querySelector('.list-view-title')?.textContent ?? ''
-      if (title.trim() === pattern && text.includes(method)) {
+      if (titleOf(row) === routeTitle) {
         return row.getAttribute('data-item-id')
       }
     }
     return null
-  }, { groupName, method, pattern })
-  if (id === null) throw new Error(`route ${method} ${pattern} not found under group ${groupName}`)
+  }, { groupName, routeTitle })
+  if (id === null) throw new Error(`route "${routeTitle}" not found under group ${groupName}`)
   return id
 }
 
-async function openRoute(p: Page, groupName: string, method: string, pattern: string): Promise<void> {
+async function openRoute(p: Page, groupName: string, routeTitle: string): Promise<void> {
   // Ensure the group is expanded (clicking it selects + shows its card;
   // the chevron toggles expansion — click the row first, harmless).
   const groupRow = p.locator('[data-testid="design-routes-listview"] .list-view-row').filter({ has: p.getByText(groupName, { exact: true }) }).first()
@@ -65,7 +65,7 @@ async function openRoute(p: Page, groupName: string, method: string, pattern: st
     await chevron.click()
     await p.waitForTimeout(300)
   }
-  const id = await routeRowId(p, groupName, method, pattern)
+  const id = await routeRowId(p, groupName, routeTitle)
   await p.locator(`[data-testid="design-routes-listview"] .list-view-row[data-item-id="${id}"]`).click()
   await expect(p.locator('[data-testid="design-route-tabs"]')).toBeVisible({ timeout: 5000 })
   await p.waitForTimeout(300)
@@ -144,12 +144,11 @@ Then('the resolved path line reads {string}', async ({}, expected: string) => {
   await expect(p.locator('[data-testid="design-route-resolved"]')).toHaveText(expected, { timeout: 5000 })
 })
 
-When('I open the route {string} of the group {string}', async ({}, routeSpec: string, groupName: string) => {
+When('I open the route {string} of the group {string}', async ({}, routeTitle: string, groupName: string) => {
   const p = requirePage()
-  // "POST /" carries the method; a bare "/{{id}}" defaults to GET.
-  const parts = routeSpec.split(' ')
-  const [method, pattern] = parts.length === 2 ? [parts[0] ?? 'GET', parts[1] ?? '/'] : ['GET', routeSpec]
-  await openRoute(p, groupName, method, pattern)
+  // Routes are addressed by their DISPLAYED name — the summary (or the
+  // raw pattern for a summary-less route), exactly what the user reads.
+  await openRoute(p, groupName, routeTitle)
 })
 
 Then('the parameter {string} shows the inherited type {string}', async ({}, name: string, typeText: string) => {
@@ -252,11 +251,12 @@ Then('the routes tree shows the group {string} with {int} routes', async ({}, gr
   const actual = await p.evaluate((name: string) => {
     const rows = Array.from(document.querySelectorAll('[data-testid="design-routes-listview"] .list-view-row'))
     const levelOf = (row: Element): number => Number(row.getAttribute('aria-level') ?? row.closest('[aria-level]')?.getAttribute('aria-level') ?? '1')
+    const titleOf = (row: Element): string => (row.querySelector('.list-view-title')?.textContent ?? '').trim()
     let inGroup = false
     let n = 0
     for (const row of rows) {
       if (levelOf(row) === 1) {
-        inGroup = row.textContent.includes(name)
+        inGroup = titleOf(row) === name
         continue
       }
       if (inGroup) n += 1

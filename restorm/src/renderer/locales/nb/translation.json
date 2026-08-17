@@ -2170,7 +2170,8 @@
       "api": {
         "title": "API",
         "basePath": "Basissti",
-        "defaultAuth": "Standard-auth"
+        "defaultAuth": "Standard-auth",
+        "environment": "Miljø"
       }
     },
     "auth": {
@@ -2392,7 +2393,9 @@
         "delete": "Slett parameteren",
         "auto": "auto",
         "pathEmpty": "Skriv en {{param}} i stien for å opprette raden.",
-        "otherEmpty": "Ingen query- eller header-parametre ennå."
+        "otherEmpty": "Ingen query- eller header-parametre ennå.",
+        "nameEmpty": "En parameter trenger et navn",
+        "nameTaken": "Dette navnet er allerede i bruk"
       },
       "body": {
         "label": "Request-body",
@@ -2411,7 +2414,9 @@
         "paginatedListOf": "paginert liste av {{name}}",
         "example": "Servert eksempel",
         "exampleAuto": "(auto generert)",
-        "delete": "Slett svaret"
+        "delete": "Slett svaret",
+        "codeInvalid": "Skriv inn en 3-sifret statuskode",
+        "codeTaken": "Denne koden er allerede deklarert"
       },
       "settings": {
         "inherited": "Arvet fra gruppen",
@@ -2427,7 +2432,11 @@
         "defaultLimit": "Standard sidestørrelse",
         "maxLimit": "Maks sidestørrelse"
       }
-    }
+    },
+    "newDesignName": "Nytt API-design",
+    "createFromScratch": "Opprett et API-design",
+    "createFromDoc": "Opprett et design fra denne API-en",
+    "fromDocName": "Design {{name}}"
   },
   "mqtt": {
     "qos": "QoS",
