@@ -23,13 +23,20 @@
  * Dogfood: `/swagger.json` serves the design's own documentation as an
  * OpenAPI 3.0 document whose base URL is the served address — a served
  * API is self-described and therefore re-importable.
+ *
+ * Protocol projections: when `serving.protocols` enables them, the SAME
+ * port also serves a GraphQL endpoint (`/graphql`, graphql-yoga over
+ * the projected SDL + resolvers), a SOAP endpoint (`/soap`, `?wsdl`
+ * for the generated contract) and an OData v4 service (`/odata`,
+ * `$metadata` + entity sets) — all built on the same serving kernel,
+ * all guarded by the design's default auth contract.
  */
 
 import type { IncomingMessage, ServerResponse } from 'http'
 import { BrowserWindow } from 'electron'
-import { logger } from 'electron-core-ui/main'
+import { createSchema, createYoga, logger } from 'electron-core-ui/main'
 import { websocketExecutionService } from './WebSocketExecutionService'
-import type { ApiDesign, DesignModel } from '../../shared/types/apiDesign'
+import type { ApiDesign, DesignModel, DesignProtocol } from '../../shared/types/apiDesign'
 import { validateApiDesign } from '../../shared/design/validateApiDesign'
 import { designToApiDocumentation } from '../../shared/design/apiDesignDoc'
 import { apiDocumentationToOpenApi } from '../../shared/design/openApiExport'
@@ -45,6 +52,23 @@ import {
   type CompiledRoute,
   type RouteMatch
 } from '../../shared/design/designServing'
+import { designGraphqlResolvers, designToGraphqlSdl } from '../../shared/design/graphqlProjection'
+import {
+  buildODataRows,
+  designODataEntitySets,
+  designToCsdl,
+  matchODataEntity,
+  type ODataEntitySet
+} from '../../shared/design/odataProjection'
+import { applyODataQuery, type ParsedODataQueryOptions } from '../../shared/utils/odataServerQuery'
+import {
+  buildSoapFaultEnvelope,
+  buildSoapResponseEnvelope,
+  designSoapOperations,
+  designToWsdl,
+  matchSoapOperation,
+  type SoapOperation
+} from '../../shared/design/soapProjection'
 
 /** Default port a freshly-created design serves on (adjacent to the
  * HTTP mock's 8080 family, far from dev-server ranges). */
@@ -79,6 +103,44 @@ interface ActiveServer {
   /** routeId → forced response steering. */
   forced: Map<string, DesignForcedResponse>
   counters: DesignServerCounters
+  /** Enabled protocol projections ('http' is always on). */
+  protocols: Set<DesignProtocol>
+  /** graphql-yoga handler, built when the projection is enabled. */
+  yoga?: ReturnType<typeof createYoga>
+  soapOperations?: SoapOperation[]
+  odataSets?: ODataEntitySet[]
+}
+
+/** The URL prefixes the non-HTTP projections claim on the served port. */
+const GRAPHQL_PATH = '/graphql'
+const SOAP_PATH = '/soap'
+const ODATA_ROOT = '/odata'
+
+/** (Re)build the per-protocol serving artifacts from the design. */
+function projectProtocols(active: ActiveServer): void {
+  active.protocols = new Set<DesignProtocol>(['http', ...(active.design.serving?.protocols ?? [])])
+  if (active.protocols.has('graphql')) {
+    active.yoga = createYoga({
+      schema: createSchema({
+        typeDefs: designToGraphqlSdl(active.design),
+        resolvers: designGraphqlResolvers(active.design)
+      }),
+      graphqlEndpoint: GRAPHQL_PATH,
+      landingPage: false,
+      logging: {
+        debug: () => { /* dropped */ },
+        info: () => { /* dropped */ },
+        warn: (...args: unknown[]) => { logger.warn('[DesignServerService] graphql', { args }) },
+        error: (...args: unknown[]) => { logger.error('[DesignServerService] graphql', { args }) }
+      }
+    })
+  } else {
+    delete active.yoga
+  }
+  if (active.protocols.has('soap')) active.soapOperations = designSoapOperations(active.design)
+  else delete active.soapOperations
+  if (active.protocols.has('odata')) active.odataSets = designODataEntitySets(active.design)
+  else delete active.odataSets
 }
 
 /** Route key on the shared PortHost — namespaced so a design never
@@ -113,8 +175,10 @@ class DesignServerService {
       port,
       latencyMs: design.serving?.latencyMs ?? 0,
       forced: new Map(),
-      counters: { total: 0, routes: {} }
+      counters: { total: 0, routes: {} },
+      protocols: new Set(['http'])
     }
+    projectProtocols(active)
 
     // `started` is broadcast only once the bind is CONFIRMED (below) —
     // firing it optimistically flips the UI to "serving" for a split
@@ -184,6 +248,7 @@ class DesignServerService {
     active.design = design
     active.table = compileDesignRoutes(design)
     active.latencyMs = design.serving?.latencyMs ?? 0
+    projectProtocols(active)
     return true
   }
 
@@ -209,6 +274,26 @@ class DesignServerService {
       if (method === 'GET' && pathname === '/swagger.json') {
         this.writeJson(active, res, 200, {}, this.servedOpenApi(active))
         this.recordServed(active, 'swagger', '200')
+        return
+      }
+
+      // Protocol projections claim their prefixes before the HTTP route
+      // table — the design's default auth (PRESENCE, like every served
+      // credential check) guards each projection as a whole.
+      if (active.yoga !== undefined && pathname === GRAPHQL_PATH) {
+        if (!this.projectionAuthorized(active, req, res, 'graphql')) return
+        await active.yoga(req, res)
+        this.recordServed(active, 'graphql', String(res.statusCode))
+        return
+      }
+      if (active.odataSets !== undefined && (pathname === ODATA_ROOT || pathname.startsWith(`${ODATA_ROOT}/`))) {
+        if (!this.projectionAuthorized(active, req, res, 'odata')) return
+        this.serveOData(active, method, pathname, query, res)
+        return
+      }
+      if (active.soapOperations !== undefined && pathname === SOAP_PATH) {
+        if (!this.projectionAuthorized(active, req, res, 'soap')) return
+        await this.serveSoap(active, method, url, req, res)
         return
       }
 
@@ -262,6 +347,136 @@ class DesignServerService {
       this.writeJson(active, res, 500, {}, errorEnvelope('500', message))
       this.recordServed(active, 'error', '500')
     }
+  }
+
+  /** A projection enforces the design's DEFAULT auth contract (route
+   * overrides are HTTP-projection concepts). 401 + false when unmet. */
+  private projectionAuthorized(active: ActiveServer, req: IncomingMessage, res: ServerResponse, label: string): boolean {
+    const auth = active.design.defaultAuth ?? 'none'
+    if (authSatisfied(auth, req.headers, active.design)) return true
+    this.writeJson(active, res, 401, {}, errorEnvelope('401', `This service requires ${auth} credentials`))
+    this.recordServed(active, label, '401')
+    return false
+  }
+
+  // ── OData projection ──────────────────────────────────────────────
+
+  /** `/odata` service document, `/odata/$metadata` CSDL, and the
+   * entity sets (collection + by-key) with system query options. */
+  private serveOData(
+    active: ActiveServer,
+    method: string,
+    pathname: string,
+    query: Record<string, string>,
+    res: ServerResponse
+  ): void {
+    const odataHeaders = { 'OData-Version': '4.0' }
+    const base = `http://localhost:${active.port}${ODATA_ROOT}`
+    const relative = pathname.slice(ODATA_ROOT.length).replace(/^\//, '')
+
+    if (method !== 'GET') {
+      this.writeJson(active, res, 405, odataHeaders, errorEnvelope('405', 'The OData projection is read-only (stateless v1)'))
+      this.recordServed(active, 'odata', '405')
+      return
+    }
+    if (relative === '') {
+      const sets = active.odataSets ?? []
+      this.writeJson(active, res, 200, odataHeaders, {
+        '@odata.context': `${base}/$metadata`,
+        value: sets.map((set) => ({ name: set.name, kind: 'EntitySet', url: set.name }))
+      })
+      this.recordServed(active, 'odata', '200')
+      return
+    }
+    if (relative === '$metadata') {
+      this.writeRaw(active, res, 200, { 'Content-Type': 'application/xml', ...odataHeaders }, designToCsdl(active.design))
+      this.recordServed(active, 'odata:$metadata', '200')
+      return
+    }
+
+    const addressed = /^([^(/]+)(?:\((.+)\))?$/.exec(relative)
+    const set = addressed?.[1] !== undefined
+      ? (active.odataSets ?? []).find((s) => s.name === addressed[1])
+      : undefined
+    if (addressed === null || set === undefined) {
+      this.writeJson(active, res, 404, odataHeaders, errorEnvelope('404', `No entity set matches ${relative}`))
+      this.recordServed(active, 'odata', '404')
+      return
+    }
+
+    const rows = buildODataRows(active.design, set.model)
+    const key = addressed[2]
+    if (key !== undefined) {
+      const entity = matchODataEntity(active.design, set.model, rows, key)
+      if (entity === undefined) {
+        this.writeJson(active, res, 404, odataHeaders, errorEnvelope('404', `No ${set.typeName} with key ${key}`))
+        this.recordServed(active, `odata:${set.name}`, '404')
+        return
+      }
+      this.writeJson(active, res, 200, odataHeaders, {
+        '@odata.context': `${base}/$metadata#${set.name}/$entity`,
+        ...entity
+      })
+      this.recordServed(active, `odata:${set.name}`, '200')
+      return
+    }
+
+    const options: ParsedODataQueryOptions = {
+      ...(query['$filter'] !== undefined ? { filter: query['$filter'] } : {}),
+      ...(query['$select'] !== undefined ? { select: query['$select'].split(',').map((s) => s.trim()) } : {}),
+      ...(query['$orderby'] !== undefined ? { orderby: query['$orderby'] } : {}),
+      ...(parsedNonNegative(query['$top']) !== undefined ? { top: parsedNonNegative(query['$top']) } : {}),
+      ...(parsedNonNegative(query['$skip']) !== undefined ? { skip: parsedNonNegative(query['$skip']) } : {}),
+      ...(query['$count'] === 'true' ? { count: true } : {})
+    }
+    const result = applyODataQuery(rows, options)
+    this.writeJson(active, res, 200, odataHeaders, {
+      '@odata.context': `${base}/$metadata#${set.name}`,
+      ...(result.count !== undefined ? { '@odata.count': result.count } : {}),
+      value: result.value
+    })
+    this.recordServed(active, `odata:${set.name}`, '200')
+  }
+
+  // ── SOAP projection ───────────────────────────────────────────────
+
+  /** `GET /soap?wsdl` serves the generated WSDL; `POST /soap`
+   * dispatches by SOAPAction / body root and answers the operation's
+   * bound payload (fault on no match). */
+  private async serveSoap(
+    active: ActiveServer,
+    method: string,
+    url: string,
+    req: IncomingMessage,
+    res: ServerResponse
+  ): Promise<void> {
+    const xmlHeaders = { 'Content-Type': 'text/xml; charset=utf-8' }
+    const operations = active.soapOperations ?? []
+    if (method === 'GET') {
+      const address = `http://localhost:${active.port}${SOAP_PATH}`
+      this.writeRaw(active, res, 200, xmlHeaders, designToWsdl(active.design, address))
+      this.recordServed(active, 'soap:wsdl', '200')
+      return
+    }
+    if (method !== 'POST') {
+      this.writeRaw(active, res, 405, xmlHeaders, buildSoapFaultEnvelope('SOAP calls are POSTed'))
+      this.recordServed(active, 'soap', '405')
+      return
+    }
+    const body = await readBody(req)
+    const action = req.headers['soapaction']
+    const operation = matchSoapOperation(
+      operations,
+      Array.isArray(action) ? action[0] : action,
+      soapBodyRootName(body)
+    )
+    if (operation === undefined) {
+      this.writeRaw(active, res, 500, xmlHeaders, buildSoapFaultEnvelope('No operation matches this call'))
+      this.recordServed(active, 'soap', '500')
+      return
+    }
+    this.writeRaw(active, res, 200, xmlHeaders, buildSoapResponseEnvelope(active.design, operation))
+    this.recordServed(active, `soap:${operation.name}`, '200')
   }
 
   /** Serve the run-modal's forced choice: user body verbatim when
@@ -431,6 +646,21 @@ class DesignServerService {
  * same shape as the design generators' `Error` model. */
 function errorEnvelope(code: string, message: string, details?: string): Record<string, unknown> {
   return { code, message, ...(details !== undefined ? { details } : {}) }
+}
+
+/** Parse a non-negative integer query value (`$top`/`$skip`). */
+function parsedNonNegative(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined
+  const parsed = Number.parseInt(raw, 10)
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined
+}
+
+/** The local name of the first element inside the SOAP `<Body>`. */
+function soapBodyRootName(xml: string): string | undefined {
+  const body = /<(?:\w+:)?Body[^>]*>([\s\S]*?)<\/(?:\w+:)?Body>/i.exec(xml)
+  const scope = body?.[1] ?? xml
+  const root = /<\s*([\w:.-]+)[\s>/]/.exec(scope)
+  return root?.[1]
 }
 
 /** Parse a forced/declared status-code string, defaulting to 200. */

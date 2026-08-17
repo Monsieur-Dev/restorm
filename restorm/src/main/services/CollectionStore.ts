@@ -474,7 +474,18 @@ class CollectionStore {
       const existing = this.findById(payload.id)
       if (!existing || !isApiDesign(existing)) return
       const fresh = ApiDesign.fromPlain(doc as Record<string, unknown>)
-      // Same tree slot, fresh content — references held by parents stay.
+      // `fromPlain` sets the optional slots by CONDITIONAL spread, so a
+      // key the renderer removed is absent from `fresh` and a bare
+      // `Object.assign` would keep the stale value alive (and the next
+      // tree-replace would resurrect it renderer-side). Reconcile the
+      // known optional slots first, then merge into the SAME object so
+      // references held by parents stay.
+      if (!('notes' in fresh)) delete existing.notes
+      if (!('server' in fresh)) delete existing.server
+      if (!('securitySchemes' in fresh)) delete existing.securitySchemes
+      if (!('defaultSecurity' in fresh)) delete existing.defaultSecurity
+      if (!('defaultAuth' in fresh)) delete existing.defaultAuth
+      if (!('serving' in fresh)) delete existing.serving
       Object.assign(existing, fresh)
     })
   }
@@ -517,6 +528,16 @@ class CollectionStore {
     Object.assign(design, sanitizeUpdatePatch(updates, []))
     this.emitDesignUpdated(design)
     return design
+  }
+
+  /**
+   * Emit DESIGN_UPDATED for a design whose sections were mutated in
+   * place by a caller holding the store's object (the MCP design tools
+   * work this way). Without it the search index and the renderer's
+   * save-unit bridge never learn about the edit.
+   */
+  notifyDesignUpdated(design: ApiDesign): void {
+    this.emitDesignUpdated(design)
   }
 
   /** Delete a design by id (root or nested). Emits the design-typed

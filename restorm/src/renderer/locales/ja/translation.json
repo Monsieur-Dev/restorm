@@ -2163,7 +2163,9 @@
         "port": "ポート",
         "latency": "シミュレートされた遅延 (ms)",
         "blocked": "提供する前にデザインの{{count}}件の検証エラーを修正してください",
-        "startFailed": "サーバーを起動できませんでした"
+        "startFailed": "サーバーを起動できませんでした",
+        "protocolAlways": "HTTP は常に提供されます",
+        "protocolToggle": "このプロジェクションも提供する"
       },
       "identity": {
         "title": "アイデンティティ",
@@ -2464,7 +2466,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

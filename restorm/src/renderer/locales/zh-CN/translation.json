@@ -2163,7 +2163,9 @@
         "port": "端口",
         "latency": "模拟延迟（毫秒）",
         "blocked": "请先修复设计的 {{count}} 个校验错误再启动服务",
-        "startFailed": "服务器无法启动"
+        "startFailed": "服务器无法启动",
+        "protocolAlways": "HTTP 始终提供",
+        "protocolToggle": "同时提供此投影"
       },
       "identity": {
         "title": "标识",
@@ -2464,7 +2466,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

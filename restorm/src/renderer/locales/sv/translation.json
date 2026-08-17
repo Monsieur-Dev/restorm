@@ -2164,7 +2164,9 @@
         "port": "Port",
         "latency": "Simulerad latens (ms)",
         "blocked": "Åtgärda designens {{count}} valideringsfel innan den serveras",
-        "startFailed": "Servern kunde inte starta"
+        "startFailed": "Servern kunde inte starta",
+        "protocolAlways": "HTTP serveras alltid",
+        "protocolToggle": "Servera även denna projektion"
       },
       "identity": {
         "title": "Identitet",
@@ -2465,7 +2467,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

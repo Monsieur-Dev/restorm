@@ -135,6 +135,16 @@
   border-radius: 999px;
   font-size: 0.85em;
   opacity: 0.6;
+  /* The pills are now toggle BUTTONS — strip the native chrome so the
+   * pill look survives, keep the pointer on the toggleable ones. */
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.design-protocol-pill:disabled {
+  cursor: default;
 }
 
 .design-protocol-pill.active {

@@ -99,6 +99,42 @@ Then('the design reports no validation issues over MCP', async () => {
   expect(Array.isArray(reply['issues']) ? (reply['issues'] as unknown[]).length : -1).toBe(0)
 })
 
+// ── search coherence (MCP writes must feed the main index) ──────────
+
+async function designMatches(query: string): Promise<unknown[]> {
+  const reply = await call('search', { query, kinds: ['design'] })
+  return Array.isArray(reply['matches']) ? (reply['matches'] as unknown[]) : []
+}
+
+Then('searching {string} over MCP finds a design result', async ({}, query: string) => {
+  // The index feeds off the design event bus — dispatch is async, so
+  // give it a moment before declaring the write invisible.
+  let count = 0
+  for (let i = 0; i < 10 && count === 0; i++) {
+    count = (await designMatches(query)).length
+    if (count === 0) await requirePage().waitForTimeout(500)
+  }
+  expect(count).toBeGreaterThan(0)
+})
+
+When('the agent deletes the {string} enum usage and the enum itself', async ({}, enumName: string) => {
+  // The property referencing the enum goes first — deleting the enum
+  // alone would leave a dangling reference (a validation issue) and the
+  // scenario still serves this design afterwards.
+  expect((await call('delete_design_property', { designId, model: 'User', property: 'status' }))['error']).toBeUndefined()
+  expect((await call('delete_design_enum', { designId, enum: enumName }))['error']).toBeUndefined()
+})
+
+Then('searching {string} over MCP finds no design result', async ({}, query: string) => {
+  let matches: unknown[] = []
+  for (let i = 0; i < 10; i++) {
+    matches = await designMatches(query)
+    if (matches.length === 0) break
+    await requirePage().waitForTimeout(500)
+  }
+  expect(matches).toEqual([])
+})
+
 When('the agent serves the design', async () => {
   const reply = await call('serve_design', { designId })
   expect(reply['started']).toBe(true)
@@ -156,6 +192,96 @@ When('the agent stops the design server', async () => {
 Then('the design server status reports it stopped', async () => {
   const reply = await call('get_design_server_status', { designId })
   expect(reply['listening']).toBe(false)
+})
+
+// ── Protocol projections ────────────────────────────────────────────
+
+When('the agent enables the {string} projections', async ({}, list: string) => {
+  const reply = await call('update_design', { designId, protocols: list.split(',') })
+  expect(reply['error']).toBeUndefined()
+})
+
+When('the agent allows the served origin', async () => {
+  const allowed = await call('firewall_allow', { origin: `http://localhost:${servedPort}` })
+  expect(allowed['error']).toBeUndefined()
+})
+
+/** Create a protocol-typed Restorm request, patch it, run it, and hand
+ * back the run reply as text (status + body travel in it). */
+async function runProtocolRequest(name: string, protocol: string, patch: Record<string, unknown>): Promise<string> {
+  const created = await call('create_request', { name, protocol })
+  const id = created['id']
+  expect(typeof id).toBe('string')
+  const patched = await call('update_request', { id, patch })
+  expect(patched['error']).toBeUndefined()
+  const reply = await call('run_request', { id, timeoutMs: 20_000 })
+  return JSON.stringify(reply)
+}
+
+Then('a GraphQL query for the user list carries {string}', async ({}, needle: string) => {
+  const text = await runProtocolRequest('GraphQL served list', 'graphql', {
+    url: `http://localhost:${servedPort}/graphql`,
+    operationType: 'query',
+    query: '{ userList(limit: 2) { email status } }'
+  })
+  expect(text).toContain('200')
+  expect(text).toContain(needle)
+})
+
+Then('an OData read of {string} carries {string}', async ({}, set: string, needle: string) => {
+  const text = await runProtocolRequest('OData served set', 'odata', {
+    url: `http://localhost:${servedPort}/odata/${set}`,
+    operationKind: 'entity-set'
+  })
+  expect(text).toContain('200')
+  expect(text).toContain(needle)
+})
+
+Then('a SOAP call to {string} carries {string}', async ({}, operation: string, needle: string) => {
+  const envelope =
+    '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">' +
+    `<soap:Body><${operation}/></soap:Body></soap:Envelope>`
+  const text = await runProtocolRequest('SOAP served call', 'soap', {
+    url: `http://localhost:${servedPort}/soap`,
+    soapAction: '',
+    body: envelope
+  })
+  expect(text).toContain('200')
+  expect(text).toContain(needle)
+})
+
+Then('the OData metadata describes the {string} entity', async ({}, entity: string) => {
+  const text = await runProtocolRequest('OData metadata', 'http', {
+    method: 'GET',
+    url: `http://localhost:${servedPort}/odata/$metadata`
+  })
+  expect(text).toContain('EntityType')
+  expect(text).toContain(entity)
+})
+
+Then('the served WSDL describes the {string} operation', async ({}, operation: string) => {
+  const text = await runProtocolRequest('WSDL read', 'http', {
+    method: 'GET',
+    url: `http://localhost:${servedPort}/soap?wsdl`
+  })
+  expect(text).toContain('wsdl:service')
+  expect(text).toContain(operation)
+})
+
+Then('the {string} protocol pill shows enabled', async ({}, protocol: string) => {
+  await expect(requirePage().locator(`[data-testid="design-protocol-${protocol}"]`)).toHaveClass(/active/, { timeout: 5000 })
+})
+
+When('the {string} protocol pill is clicked', async ({}, protocol: string) => {
+  await requirePage().locator(`[data-testid="design-protocol-${protocol}"]`).click()
+  // Let the reactive edit commit + the autosave mirror reach main.
+  await requirePage().waitForTimeout(2000)
+})
+
+Then('the design serves the {string} projections only', async ({}, list: string) => {
+  const reply = await call('get_design', { designId })
+  const serving = reply['serving'] as { protocols?: string[] } | undefined
+  expect(serving?.protocols ?? []).toEqual(list.split(','))
 })
 
 // ── UI coherence ────────────────────────────────────────────────────

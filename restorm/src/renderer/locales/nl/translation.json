@@ -2164,7 +2164,9 @@
         "port": "Poort",
         "latency": "Gesimuleerde latentie (ms)",
         "blocked": "Los de {{count}} validatiefout(en) van het design op voordat u het serveert",
-        "startFailed": "De server kon niet starten"
+        "startFailed": "De server kon niet starten",
+        "protocolAlways": "HTTP wordt altijd geserveerd",
+        "protocolToggle": "Deze projectie ook serveren"
       },
       "identity": {
         "title": "Identiteit",
@@ -2465,7 +2467,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

@@ -2164,7 +2164,9 @@
         "port": "Port",
         "latency": "Simulert latens (ms)",
         "blocked": "Rett designets {{count}} valideringsfeil før det serveres",
-        "startFailed": "Serveren kunne ikke starte"
+        "startFailed": "Serveren kunne ikke starte",
+        "protocolAlways": "HTTP serveres alltid",
+        "protocolToggle": "Server også denne projeksjonen"
       },
       "identity": {
         "title": "Identitet",
@@ -2465,7 +2467,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

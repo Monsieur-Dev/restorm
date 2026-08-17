@@ -131,9 +131,13 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'list_custom_value_lists',
   // design domain — EDITING a design is free on every plan (the same
   // decision as the UI: the plan gates PLAYING it, not building it).
-  // Serving/steering/export sit in PRO below, aligned with
-  // DESIGN_RUN_CAPABILITY.
+  // Serving/steering sit in PRO below, aligned with
+  // DESIGN_RUN_CAPABILITY. Exporting a descriptor is free (the UI's
+  // export button carries no gate) and reading the server status is a
+  // pure read — both stay here.
   'list_designs',
+  'export_design',
+  'get_design_server_status',
   'get_design',
   'create_design',
   'create_design_from_documentation',
@@ -240,14 +244,12 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   'list_themes',
   'get_workbench_layout',
   'set_workbench_layout',
-  // design RUN surface — playing a design (serving, hot steering,
-  // descriptor export) is the paid half of the design domain, mirroring
-  // DESIGN_RUN_CAPABILITY on the UI's spin button.
+  // design RUN surface — playing a design (serving + hot steering) is
+  // the paid half of the design domain, mirroring DESIGN_RUN_CAPABILITY
+  // on the UI's spin button.
   'serve_design',
   'stop_design_server',
-  'get_design_server_status',
-  'set_design_route_response',
-  'export_design'
+  'set_design_route_response'
 ])
 
 /**

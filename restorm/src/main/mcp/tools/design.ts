@@ -26,6 +26,7 @@ import type {
   DesignExample,
   DesignModel,
   DesignProperty,
+  DesignProtocol,
   DesignRoute,
   DesignRouteGroup
 } from '../../../shared/types/apiDesign'
@@ -87,6 +88,10 @@ function isResolveError(value: unknown): value is { error: string } {
  * the served behaviour matches the renderer's.
  */
 function writeDesign(design: ApiDesign): void {
+  // The tools mutate the store's object in place — announce the edit on
+  // the design event bus (search index, save-unit bridge) exactly like
+  // the UI's autosave path does, THEN rebroadcast the tree.
+  collectionStore.notifyDesignUpdated(design)
   broadcastTreeReplace()
   triggerSave()
   if (designServerService.isListening(design.id)) {
@@ -234,7 +239,7 @@ export function registerDesignTools(mcp: McpService): void {
     {
       titleKey: 'mcpToolTitles.updateDesign',
       title: 'Update a design\'s settings',
-      description: 'Update the design-level settings: name, API title/version/description, base path, default auth, server port/latency.',
+      description: 'Update the design-level settings: name, API title/version/description, base path, default auth, server port/latency, served protocol projections.',
       inputSchema: {
         designId: z.string().min(1).describe('Design id.'),
         name: z.string().optional(),
@@ -244,7 +249,9 @@ export function registerDesignTools(mcp: McpService): void {
         basePath: z.string().optional().describe('Empty string clears it.'),
         defaultAuth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional(),
         port: z.number().int().optional(),
-        latencyMs: z.number().int().optional()
+        latencyMs: z.number().int().optional(),
+        protocols: z.array(z.enum(['graphql', 'soap', 'odata'])).optional()
+          .describe('Extra protocol projections served alongside HTTP (replaces the list; empty array = HTTP only).')
       } as Record<string, unknown>
     },
     (args) => {
@@ -278,6 +285,15 @@ export function registerDesignTools(mcp: McpService): void {
           if (args['latencyMs'] === 0) delete serving.latencyMs
           else serving.latencyMs = args['latencyMs']
         }
+        design.serving = serving
+      }
+      if (Array.isArray(args['protocols'])) {
+        const extras = args['protocols'].filter(
+          (p): p is Exclude<DesignProtocol, 'http'> => p === 'graphql' || p === 'soap' || p === 'odata'
+        )
+        const serving = { ...(design.serving ?? {}) }
+        if (extras.length === 0) delete serving.protocols
+        else serving.protocols = extras
         design.serving = serving
       }
       writeDesign(design)

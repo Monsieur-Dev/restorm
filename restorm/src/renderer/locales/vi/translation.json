@@ -2163,7 +2163,9 @@
         "port": "Cổng",
         "latency": "Độ trễ mô phỏng (ms)",
         "blocked": "Sửa {{count}} lỗi xác thực của thiết kế trước khi phục vụ",
-        "startFailed": "Không thể khởi động máy chủ"
+        "startFailed": "Không thể khởi động máy chủ",
+        "protocolAlways": "HTTP luôn được phục vụ",
+        "protocolToggle": "Phục vụ cả phép chiếu này"
       },
       "identity": {
         "title": "Danh tính",
@@ -2464,7 +2466,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

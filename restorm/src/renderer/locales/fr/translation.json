@@ -2164,7 +2164,9 @@
         "port": "Port",
         "latency": "Latence simulée (ms)",
         "blocked": "Corrigez les {{count}} erreur(s) de validation du design avant de le servir",
-        "startFailed": "Le serveur n’a pas pu démarrer"
+        "startFailed": "Le serveur n’a pas pu démarrer",
+        "protocolAlways": "HTTP est toujours servi",
+        "protocolToggle": "Servir aussi cette projection"
       },
       "identity": {
         "title": "Identité",
@@ -2465,7 +2467,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

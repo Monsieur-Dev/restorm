@@ -2164,7 +2164,9 @@
         "port": "Portti",
         "latency": "Simuloitu viive (ms)",
         "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen sen tarjoamista",
-        "startFailed": "Palvelinta ei voitu käynnistää"
+        "startFailed": "Palvelinta ei voitu käynnistää",
+        "protocolAlways": "HTTP tarjoillaan aina",
+        "protocolToggle": "Tarjoile myös tämä projektio"
       },
       "identity": {
         "title": "Identiteetti",
@@ -2465,7 +2467,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

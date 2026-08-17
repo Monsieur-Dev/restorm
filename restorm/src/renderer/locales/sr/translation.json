@@ -2165,7 +2165,9 @@
         "port": "Port",
         "latency": "Simulirana latencija (ms)",
         "blocked": "Ispravite {{count}} grešaka validacije dizajna pre posluživanja",
-        "startFailed": "Server nije mogao da se pokrene"
+        "startFailed": "Server nije mogao da se pokrene",
+        "protocolAlways": "HTTP se uvek servira",
+        "protocolToggle": "Serviraj i ovu projekciju"
       },
       "identity": {
         "title": "Identitet",
@@ -2466,7 +2468,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

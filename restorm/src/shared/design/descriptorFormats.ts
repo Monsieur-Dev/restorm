@@ -11,6 +11,13 @@
 import type { ApiDesign } from '../types/apiDesign'
 import { designToApiDocumentation } from './apiDesignDoc'
 import { apiDocumentationToOpenApi31 } from './openApiExport'
+import { designToGraphqlSdl } from './graphqlProjection'
+import { designToCsdl } from './odataProjection'
+import { designToWsdl } from './soapProjection'
+
+/** The served port the WSDL's `soap:address` points at when the design
+ * declares none — mirrors the design server's default (main-side). */
+const FALLBACK_SERVED_PORT = 4820
 
 export interface DescriptorFormat {
   /** Stable id (persists nowhere yet — combo selection is ephemeral). */
@@ -36,6 +43,30 @@ export const DESCRIPTOR_FORMATS: DescriptorFormat[] = [
     fileExtension: 'json',
     fileSlug: 'openapi',
     emit: (design) => `${JSON.stringify(apiDocumentationToOpenApi31(designToApiDocumentation(design)), null, 2)}\n`
+  },
+  {
+    id: 'graphql-sdl',
+    labelKey: 'design.export.format.graphqlSdl',
+    label: 'GraphQL SDL',
+    fileExtension: 'graphql',
+    fileSlug: 'schema',
+    emit: (design) => designToGraphqlSdl(design)
+  },
+  {
+    id: 'odata-csdl',
+    labelKey: 'design.export.format.odataCsdl',
+    label: 'OData CSDL',
+    fileExtension: 'xml',
+    fileSlug: 'metadata',
+    emit: (design) => designToCsdl(design)
+  },
+  {
+    id: 'wsdl',
+    labelKey: 'design.export.format.wsdl',
+    label: 'WSDL 1.1',
+    fileExtension: 'wsdl',
+    fileSlug: 'service',
+    emit: (design) => designToWsdl(design, `http://localhost:${design.serving?.port ?? FALLBACK_SERVED_PORT}/soap`)
   }
 ]
 

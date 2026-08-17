@@ -2164,7 +2164,9 @@
         "port": "Θύρα",
         "latency": "Προσομοιωμένη καθυστέρηση (ms)",
         "blocked": "Διορθώστε τα {{count}} σφάλματα επικύρωσης του σχεδίου πριν το σερβίρετε",
-        "startFailed": "Ο διακομιστής δεν μπόρεσε να ξεκινήσει"
+        "startFailed": "Ο διακομιστής δεν μπόρεσε να ξεκινήσει",
+        "protocolAlways": "Το HTTP σερβίρεται πάντα",
+        "protocolToggle": "Σερβίρετε και αυτή την προβολή"
       },
       "identity": {
         "title": "Ταυτότητα",
@@ -2465,7 +2467,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

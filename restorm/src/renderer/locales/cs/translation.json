@@ -2166,7 +2166,9 @@
         "port": "Port",
         "latency": "Simulovaná latence (ms)",
         "blocked": "Před spuštěním opravte {{count}} chyby validace návrhu",
-        "startFailed": "Server se nepodařilo spustit"
+        "startFailed": "Server se nepodařilo spustit",
+        "protocolAlways": "HTTP se servíruje vždy",
+        "protocolToggle": "Servírovat i tuto projekci"
       },
       "identity": {
         "title": "Identita",
@@ -2467,7 +2469,10 @@
     },
     "export": {
       "format": {
-        "openapi31": "OpenAPI 3.1"
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
       }
     }
   },

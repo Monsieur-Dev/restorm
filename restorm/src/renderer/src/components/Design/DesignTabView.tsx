@@ -11,7 +11,7 @@ import {
   useAuthState,
   type ISelectData
 } from 'electron-core-ui/renderer'
-import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collections'
+import type { ApiDesign, DesignAuthKind, DesignProtocol } from '../../../../shared/types/collections'
 import type { DesignSectionKey } from '../../../../shared/types/editor'
 import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
 import { validateApiDesign, type DesignIssue } from '../../../../shared/design/validateApiDesign'
@@ -334,6 +334,19 @@ const DesignSettingsSection: React.FC<{
     assignDesignSection(design, 'serving', next)
   }, [design])
 
+  const toggleProtocol = useCallback((protocol: DesignProtocol) => {
+    if (protocol === 'http') return
+    const current = design.serving?.protocols ?? []
+    const enabled = current.includes(protocol)
+    const nextProtocols = enabled
+      ? current.filter((p) => p !== protocol)
+      : [...current, protocol]
+    const next = { ...(design.serving ?? {}) }
+    if (nextProtocols.length === 0) delete next.protocols
+    else next.protocols = nextProtocols
+    assignDesignSection(design, 'serving', next)
+  }, [design])
+
   const toggleServer = useCallback(async () => {
     setServerError(null)
     if (serving) {
@@ -394,15 +407,24 @@ const DesignSettingsSection: React.FC<{
             </span>
           </div>
           <div className="design-serve-protocols">
-            {(['http', 'graphql', 'soap', 'odata'] as const).map((protocol) => (
-              <span
-                key={protocol}
-                className={`design-protocol-pill${protocols.includes(protocol) ? ' active' : ''}`}
-                data-testid={`design-protocol-${protocol}`}
-              >
-                {t(`design.protocol.${protocol}`)}
-              </span>
-            ))}
+            {(['http', 'graphql', 'soap', 'odata'] as const).map((protocol) => {
+              const active = protocol === 'http' || protocols.includes(protocol)
+              return (
+                <button
+                  key={protocol}
+                  type="button"
+                  className={`design-protocol-pill${active ? ' active' : ''}`}
+                  data-testid={`design-protocol-${protocol}`}
+                  disabled={protocol === 'http'}
+                  title={protocol === 'http'
+                    ? t('design.settings.serve.protocolAlways', 'HTTP is always served')
+                    : t('design.settings.serve.protocolToggle', 'Serve this projection too')}
+                  onClick={() => { toggleProtocol(protocol) }}
+                >
+                  {t(`design.protocol.${protocol}`)}
+                </button>
+              )
+            })}
           </div>
           <GatedControl locked={runLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-serve-gate">
             <HeaderHoverTooltip label={spinTooltip}>

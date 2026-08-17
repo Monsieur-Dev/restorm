@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Petstore">
+      <EnumType Name="UserStatus">
+        <Member Name="active" Value="0" />
+        <Member Name="suspended" Value="1" />
+        <Member Name="deleted" Value="2" />
+      </EnumType>
+      <EntityType Name="User">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="email" Type="Edm.String" Nullable="false" />
+        <Property Name="password" Type="Edm.String" Nullable="false" />
+        <Property Name="status" Type="Petstore.UserStatus" />
+        <Property Name="nicknames" Type="Collection(Edm.String)" />
+        <Property Name="settings" Type="Edm.String" />
+      </EntityType>
+      <EntityType Name="AdminUser">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="email" Type="Edm.String" Nullable="false" />
+        <Property Name="password" Type="Edm.String" Nullable="false" />
+        <Property Name="status" Type="Petstore.UserStatus" />
+        <Property Name="nicknames" Type="Collection(Edm.String)" />
+        <Property Name="settings" Type="Edm.String" />
+        <Property Name="scope" Type="Edm.String" Nullable="false" />
+      </EntityType>
+      <EntityType Name="Order">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.Int64" Nullable="false" />
+        <NavigationProperty Name="customer" Type="Petstore.User" />
+        <NavigationProperty Name="lines" Type="Collection(Petstore.User)" />
+      </EntityType>
+      <EntityContainer Name="PetstoreContainer">
+        <EntitySet Name="Users" EntityType="Petstore.User" />
+        <EntitySet Name="AdminUsers" EntityType="Petstore.AdminUser" />
+        <EntitySet Name="Orders" EntityType="Petstore.Order" />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
