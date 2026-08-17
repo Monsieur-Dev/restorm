@@ -6,7 +6,7 @@
  * first byte lands (no partial trees on refusal).
  */
 
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, realpathSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute, join, normalize, resolve, sep } from 'node:path'
 
 export interface GeneratedFile {
@@ -28,7 +28,11 @@ export function assertSafeRelativePath(path: string): string {
   if (normalized === '..' || normalized.startsWith(`..${sep}`) || normalized.split(sep).includes('..')) {
     throw new Error(`generated path escapes the output folder: ${path}`)
   }
-  return normalized
+  // A path that normalizes onto the root ITSELF (`.` / `./`) would make
+  // the write phase hit the directory — refuse it up front.
+  const trimmed = normalized.endsWith(sep) ? normalized.slice(0, -1) : normalized
+  if (trimmed === '.' || trimmed === '') throw new Error(`unsafe generated path: ${JSON.stringify(path)}`)
+  return trimmed
 }
 
 /** Validate EVERY path first, then write — refusal leaves no partial
@@ -40,14 +44,32 @@ export function extractGeneratedTree(files: readonly GeneratedFile[], outputRoot
     const absolute = resolve(join(root, relative))
     // Belt over braces: even a path that slipped the syntactic checks
     // must resolve INSIDE the root.
-    if (absolute !== root && !absolute.startsWith(root + sep)) {
+    if (absolute === root || !absolute.startsWith(root + sep)) {
       throw new Error(`generated path escapes the output folder: ${file.path}`)
     }
     return { absolute, relative, data: Buffer.from(file.b64, 'base64') }
   })
+  // The lexical checks above cannot see SYMLINKS: a link already
+  // sitting under the root (vendor -> /etc) would carry a write
+  // outside. After creating each parent, its REAL path must still sit
+  // under the root's real path.
+  mkdirSync(root, { recursive: true })
+  const realRoot = realpathSync(root)
   for (const target of targets) {
-    mkdirSync(dirname(target.absolute), { recursive: true })
-    writeFileSync(target.absolute, target.data)
+    try {
+      mkdirSync(dirname(target.absolute), { recursive: true })
+      const realParent = realpathSync(dirname(target.absolute))
+      if (realParent !== realRoot && !realParent.startsWith(realRoot + sep)) {
+        throw new Error(`generated path resolves outside the output folder (symlink): ${target.relative}`)
+      }
+      writeFileSync(target.absolute, target.data)
+    } catch (error) {
+      // A LATE failure is reported as what it is — an interrupted
+      // write, never a validation refusal (the refusal path above
+      // writes nothing at all).
+      const message = error instanceof Error ? error.message : String(error)
+      throw new Error(`extraction interrupted at ${target.relative}: ${message}`)
+    }
   }
   return targets.map((t) => t.relative)
 }

@@ -6,13 +6,15 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach } from 'vitest'
 import { assertSafeRelativePath, extractGeneratedTree } from '../../src/main/services/designCodegen/extractTree'
 import { parseTemplateManifest, templateArchiveUrl } from '../../src/main/services/designCodegen/templateSource'
 import { CODEGEN_CONTEXT_VERSION } from '../../src/shared/design/codegenContext'
+import { designFingerprint } from '../../src/main/services/designCodegen/DesignCodegenService'
+import { buildReferenceApiDesign } from './apiDesignReference'
 
 const b64 = (text: string): string => Buffer.from(text, 'utf8').toString('base64')
 
@@ -49,6 +51,33 @@ describe('extractGeneratedTree', () => {
     expect(() => assertSafeRelativePath('a\0b')).toThrow(/unsafe/)
     expect(assertSafeRelativePath('a/./b.txt')).toBe(join('a', 'b.txt'))
   })
+
+  it('refuses a path that normalizes onto the root itself', () => {
+    // `.` would make the write phase hit the DIRECTORY (EISDIR) after
+    // other files already landed — refused at validation instead.
+    expect(() => assertSafeRelativePath('.')).toThrow(/unsafe/)
+    expect(() => assertSafeRelativePath('./')).toThrow(/unsafe/)
+    scratch = mkdtempSync(join(tmpdir(), 'codegen-extract-'))
+    expect(() => extractGeneratedTree([
+      { path: 'ok.txt', b64: b64('fine') },
+      { path: './', b64: b64('boom') }
+    ], scratch)).toThrow(/unsafe/)
+    expect(existsSync(join(scratch, 'ok.txt'))).toBe(false)
+  })
+
+  it('refuses a write THROUGH a pre-existing symlink pointing outside', () => {
+    scratch = mkdtempSync(join(tmpdir(), 'codegen-extract-'))
+    const outside = mkdtempSync(join(tmpdir(), 'codegen-outside-'))
+    try {
+      symlinkSync(outside, join(scratch, 'vendor'))
+      expect(() => extractGeneratedTree([
+        { path: 'vendor/escape.txt', b64: b64('nope') }
+      ], scratch)).toThrow(/symlink|interrupted/)
+      expect(existsSync(join(outside, 'escape.txt'))).toBe(false)
+    } finally {
+      rmSync(outside, { recursive: true, force: true })
+    }
+  })
 })
 
 describe('parseTemplateManifest', () => {
@@ -82,5 +111,26 @@ describe('templateArchiveUrl', () => {
     expect(templateArchiveUrl('https://github.com/o/r.git', 'dev'))
       .toBe('https://codeload.github.com/o/r/tar.gz/refs/heads/dev')
     expect(() => templateArchiveUrl('not a repo')).toThrow(/not a github repository/)
+  })
+})
+
+describe('designFingerprint (staleness anchor)', () => {
+  const base = buildReferenceApiDesign()
+
+  it('ignores the codegen slot and key ordering', () => {
+    const withCodegen = { ...base, codegen: { outputDir: '/tmp/out', templateSource: { kind: 'local' as const, path: '/t' } } }
+    // Same generation-relevant content → same fingerprint despite the
+    // codegen slot the UI persists between preview and confirm.
+    expect(designFingerprint(withCodegen as never)).toBe(designFingerprint(base))
+    // Reordered top-level keys hash identically (canonical form).
+    const reordered = { routeGroups: base.routeGroups, models: base.models, enums: base.enums, ...base }
+    expect(designFingerprint(reordered as never)).toBe(designFingerprint(base))
+  })
+
+  it('changes when a generation-relevant field changes', () => {
+    const renamed = { ...base, name: `${base.name} v2` }
+    expect(designFingerprint(renamed as never)).not.toBe(designFingerprint(base))
+    const editedModel = { ...base, models: [{ ...base.models[0], doc: { ...base.models[0].doc, name: 'Renamed' } }, ...base.models.slice(1)] }
+    expect(designFingerprint(editedModel as never)).not.toBe(designFingerprint(base))
   })
 })

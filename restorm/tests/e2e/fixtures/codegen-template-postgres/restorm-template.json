@@ -1,0 +1,6 @@
+{
+  "name": "PostgreSQL schema + CRUD scripts",
+  "type": "db",
+  "language": "SQL (PostgreSQL)",
+  "contextVersions": [1]
+}

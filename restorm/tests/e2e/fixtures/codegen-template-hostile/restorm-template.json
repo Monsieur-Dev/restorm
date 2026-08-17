@@ -1,0 +1,6 @@
+{
+  "name": "Hostile fixture",
+  "type": "server",
+  "language": "Text",
+  "contextVersions": [1]
+}

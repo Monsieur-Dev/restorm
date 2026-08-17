@@ -9,6 +9,8 @@ import { test, expect, type LaunchedMcpApp, type McpToolReply } from '../../fixt
 const { Given, When, Then } = createBdd(test)
 
 const FIXTURE_TEMPLATE = resolve(__dirname, '../../../fixtures/codegen-template')
+const FIXTURE_TEMPLATE_POSTGRES = resolve(__dirname, '../../../fixtures/codegen-template-postgres')
+const FIXTURE_TEMPLATE_HOSTILE = resolve(__dirname, '../../../fixtures/codegen-template-hostile')
 
 let launched: LaunchedMcpApp | null = null
 let designId = ''
@@ -144,6 +146,39 @@ When('the agent confirms the generation over MCP', async () => {
   })
   expect(reply['error']).toBeUndefined()
   expect(reply['written']).toBe(true)
+})
+
+When('the agent generates with the local postgres template over MCP', async () => {
+  outputDir = mkdtempSync(join(tmpdir(), 'design-codegen-pg-'))
+  const reply = await callTool('generate_design_code', {
+    designId, localPath: FIXTURE_TEMPLATE_POSTGRES, confirm: true, outputDir
+  })
+  expect(reply['error']).toBeUndefined()
+  expect(reply['written']).toBe(true)
+})
+
+Then('the SQL trio sits in the output folder and carries the design', () => {
+  const schema = readFileSync(join(outputDir, 'schema.sql'), 'utf8')
+  expect(schema).toContain('CREATE TABLE IF NOT EXISTS "item"')
+  // The searchable intention became an index; required became NOT NULL.
+  expect(schema).toContain('"label" text NOT NULL')
+  expect(existsSync(join(outputDir, 'seed.sql'))).toBe(true)
+  expect(readFileSync(join(outputDir, 'crud.sql'), 'utf8')).toContain('INSERT INTO "item"')
+})
+
+When('the agent generates with the hostile template over MCP', async () => {
+  outputDir = mkdtempSync(join(tmpdir(), 'design-codegen-hostile-'))
+  const reply = await callTool('generate_design_code', {
+    designId, localPath: FIXTURE_TEMPLATE_HOSTILE, confirm: true, outputDir
+  })
+  // The SANDBOXED environment refuses the attribute traversal — a clean
+  // template error, never a crash, never an escape.
+  const err = typeof reply['error'] === 'string' ? reply['error'] : ''
+  expect(err).toMatch(/template error|SecurityError|unsafe/i)
+})
+
+Then('the generation is refused as a template error and nothing is written', () => {
+  expect(existsSync(join(outputDir, 'evil.txt'))).toBe(false)
 })
 
 Then('the generate button is disabled with the validation explanation', async () => {

@@ -1287,7 +1287,11 @@ export function registerDesignTools(mcp: McpService): void {
         if (outputDir === '') return errorReply('confirm: true needs outputDir')
         const root = resolveCodegenOutputRoot(outputDir)
         if (root === null) return errorReply('a relative outputDir needs an open project file')
-        const { written } = designCodegenService.extract(design.id, root)
+        const { written } = designCodegenService.extract(
+          design.id,
+          root,
+          design.toPlainObject() as unknown as ApiDesign
+        )
         return jsonReply({ written: true, root, files: written })
       } catch (error) {
         return errorReply(error instanceof Error ? error.message : String(error))

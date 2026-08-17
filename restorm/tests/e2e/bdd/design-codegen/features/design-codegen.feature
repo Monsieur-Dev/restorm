@@ -24,6 +24,18 @@ Feature: Design code generation
     When the agent confirms the generation over MCP
     Then the rendered project sits in the output folder
 
+  Scenario: The PostgreSQL template derives the SQL trio from the design
+    Given restorm is launched with MCP for codegen work
+    When the agent authors a valid "Db Codegen API" design
+    And the agent generates with the local postgres template over MCP
+    Then the SQL trio sits in the output folder and carries the design
+
+  Scenario: A hostile template is refused cleanly
+    Given restorm is launched with MCP for codegen work
+    When the agent authors a valid "Hostile Codegen API" design
+    And the agent generates with the hostile template over MCP
+    Then the generation is refused as a template error and nothing is written
+
   Scenario: An invalid design cannot generate
     Given restorm is launched with MCP for codegen work
     When the agent authors a "Broken API" design with a duplicate route

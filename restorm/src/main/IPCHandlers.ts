@@ -28,6 +28,8 @@ import { odataMockServerService } from './services/ODataMockServerService'
 import { designServerService } from './services/DesignServerService'
 import type { ApiDesign } from '../shared/types/apiDesign'
 import { designCodegenService } from './services/designCodegen/DesignCodegenService'
+import { collectionStore } from './services/CollectionStore'
+import { isApiDesign } from '../shared/models'
 import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
@@ -753,6 +755,9 @@ export function registerRestormIPC(deps: {
     // File close — same for any running design server: its design
     // belongs to the closing file, so the port must not outlive it.
     designServerService.closeAll()
+    // File close — pending (previewed, never extracted) generations
+    // carry whole file trees in memory; they die with their project.
+    designCodegenService.clear()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.
@@ -1389,7 +1394,12 @@ export function registerRestormIPC(deps: {
         }
         root = resolvePath(dirname(projectPath), root)
       }
-      const { written } = designCodegenService.extract(designId, root)
+      const current = collectionStore.findById(designId)
+      const { written } = designCodegenService.extract(
+        designId,
+        root,
+        current !== null && isApiDesign(current) ? (current.toPlainObject() as unknown as ApiDesign) : undefined
+      )
       return { success: true, root, written }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }

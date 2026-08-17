@@ -9,11 +9,13 @@
  * until {@link extract} is called with the user-confirmed output root.
  */
 
+import { createHash } from 'node:crypto'
 import { logger } from 'electron-core-ui/main'
 import type { ApiDesign } from '../../../shared/types/apiDesign'
 import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 import { buildCodegenContext } from '../../../shared/design/codegenContext'
-import { PYODIDE_WORKER_SRC, resolvePyodidePaths } from '../../scenarioEngine/codeRuntimes/pythonRuntime'
+import { resolvePyodidePaths } from '../../scenarioEngine/codeRuntimes/pythonRuntime'
+import { CODEGEN_WORKER_SRC } from './codegenWorker'
 import { runCodeWorker } from '../../scenarioEngine/codeRuntimes/codeWorkerHarness'
 import { COPIER_SUBSET_ENGINE_PY } from './copierSubsetEngine'
 import { ensureCodegenWheels } from './pyodideDistWheels'
@@ -43,6 +45,37 @@ export interface CodegenRunResult {
   files: GeneratedFile[]
   preview: CodegenPreviewFile[]
   log: string[]
+  /** Fingerprint of the design at GENERATION time — extraction refuses
+   * when the design has changed since (the preview showed old files). */
+  designFingerprint: string
+}
+
+/**
+ * Stable fingerprint of the design's GENERATION-RELEVANT content. The
+ * `codegen` slot (template source + output folder) is deliberately
+ * excluded: persisting it between preview and confirm — which the UI
+ * does on every folder pick — must not invalidate the preview, and it
+ * has no effect on the generated tree. Keys are canonically sorted so
+ * two serialization routes (renderer JSON vs `toPlainObject`) hash the
+ * same design identically.
+ */
+export function designFingerprint(design: ApiDesign): string {
+  const { codegen: _codegen, ...rest } = design as ApiDesign & { codegen?: unknown }
+  return createHash('sha256').update(canonicalJson(rest)).digest('hex')
+}
+
+/** Deterministic JSON: object keys sorted at every depth, arrays kept
+ * in order. Undefined values are dropped (JSON semantics). */
+function canonicalJson(value: unknown): string {
+  // A top-level `undefined` never reaches here (callers pass an object
+  // and undefined entries are filtered below); JSON.stringify is total
+  // for the remaining primitives.
+  if (value === null || typeof value !== 'object') return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter(([, v]) => v !== undefined)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalJson(v)}`).join(',')}}`
 }
 
 /** A cold Pyodide boot + wheel mount + a real template needs room; the
@@ -81,7 +114,7 @@ class DesignCodegenService {
     const context = buildCodegenContext(design)
     const wheelPaths = await ensureCodegenWheels()
 
-    const run = await runCodeWorker(PYODIDE_WORKER_SRC, COPIER_SUBSET_ENGINE_PY, {
+    const run = await runCodeWorker(CODEGEN_WORKER_SRC, COPIER_SUBSET_ENGINE_PY, {
       input: { files: template.files, context, answers },
       variables: {},
       timeoutMs: GENERATION_TIMEOUT_MS,
@@ -97,7 +130,8 @@ class DesignCodegenService {
       manifest: template.manifest,
       files,
       preview: files.map((f) => ({ path: f.path, bytes: Buffer.from(f.b64, 'base64').length })),
-      log: [...run.logs, ...(payload?.log ?? [])]
+      log: [...run.logs, ...(payload?.log ?? [])],
+      designFingerprint: designFingerprint(design)
     }
     this.pending.set(design.id, result)
     logger.info('[DesignCodegenService] generated', {
@@ -117,10 +151,16 @@ class DesignCodegenService {
    * Write the pending generation under the CONFIRMED output root.
    * Traversal-checked as a whole before the first byte lands.
    */
-  extract(designId: string, outputRoot: string): { written: string[] } {
+  extract(designId: string, outputRoot: string, currentDesign?: ApiDesign): { written: string[] } {
     const run = this.pending.get(designId)
     if (run === undefined) {
       throw new Error('no pending generation for this design — generate first')
+    }
+    // Staleness anchor: the previewed tree belongs to the design as it
+    // WAS — an edit between preview and confirm silently writing old
+    // files is exactly the trap the validation screen exists to avoid.
+    if (currentDesign !== undefined && designFingerprint(currentDesign) !== run.designFingerprint) {
+      throw new Error('the design changed since the preview — generate again')
     }
     const written = extractGeneratedTree(run.files, outputRoot)
     this.pending.delete(designId)
@@ -131,6 +171,12 @@ class DesignCodegenService {
   /** Drop a pending run (the user dismissed the validation screen). */
   discard(designId: string): void {
     this.pending.delete(designId)
+  }
+
+  /** Drop EVERY pending run — project close / app teardown (the trees
+   * carry whole file contents; they must not outlive their project). */
+  clear(): void {
+    this.pending.clear()
   }
 }
 

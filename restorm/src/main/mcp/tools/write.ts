@@ -19,6 +19,7 @@ import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
 import { designServerService } from '../../services/DesignServerService'
+import { designCodegenService } from '../../services/designCodegen/DesignCodegenService'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, isApiDesign, KeyValue, Environment, ICON_TYPES } from '../../../shared/models'
 import type { Icon } from '../../../shared/models'
 import { REQUEST_TYPES } from '../../../shared/protocolRegistry'
@@ -646,8 +647,9 @@ export function registerWriteTools(mcp: McpService): void {
       }
       if (isApiDesign(target)) {
         // Stop a running design server first — the port must not
-        // outlive the design.
+        // outlive the design — and drop any previewed generation.
         designServerService.stop(id)
+        designCodegenService.discard(id)
         const ok = collectionStore.deleteDesign(id)
         if (!ok) return errorReply(`deleteDesign failed for ${id}`)
         broadcastTreeReplace()

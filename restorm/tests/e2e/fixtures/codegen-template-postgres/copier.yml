@@ -1,0 +1,8 @@
+# Restorm official template — Copier format. The design context arrives
+# as the `ctx` answer (Restorm injects it; the CI passes it via
+# --data-file reference/answers.yml).
+schema_name:
+  type: str
+  default: public
+_subdirectory: template
+_templates_suffix: .jinja

@@ -41,7 +41,8 @@ export interface OfficialTemplate {
  * public template repository. */
 export const OFFICIAL_TEMPLATES: readonly OfficialTemplate[] = [
   { id: 'server-typescript', repo: 'Monsieur-Dev/restorm-template-server-typescript', type: 'server', stack: 'TypeScript · Express' },
-  { id: 'server-dotnet', repo: 'Monsieur-Dev/restorm-template-server-dotnet', type: 'server', stack: 'C# · ASP.NET Core' }
+  { id: 'server-dotnet', repo: 'Monsieur-Dev/restorm-template-server-dotnet', type: 'server', stack: 'C# · ASP.NET Core' },
+  { id: 'db-postgres', repo: 'Monsieur-Dev/restorm-template-db-postgres', type: 'db', stack: 'SQL · PostgreSQL' }
 ]
 
 // ── Manifest ──────────────────────────────────────────────────────────

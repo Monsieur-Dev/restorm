@@ -30,7 +30,8 @@ import { assignDesignSection } from './designMutations'
  * ids travel over IPC, the list here is only display). */
 const OFFICIAL_CHOICES = [
   { id: 'server-typescript', label: 'TypeScript · Express' },
-  { id: 'server-dotnet', label: 'C# · ASP.NET Core' }
+  { id: 'server-dotnet', label: 'C# · ASP.NET Core' },
+  { id: 'db-postgres', label: 'SQL · PostgreSQL' }
 ] as const
 
 type SourceKind = 'official' | 'repo' | 'local'

@@ -35,8 +35,20 @@ import fnmatch
 import json
 import posixpath
 
+import sys
+
+# CC1 — defense in depth over the codegen worker's empty jsglobals
+# (the REAL barrier: the invited code's js module is a frozen empty
+# object at the runtime level, unrestorable by a hook that clears
+# sys.modules and re-imports). This poisoning just makes a DIRECT
+# import js fail fast on the happy path; codegenWorker.ts is where the
+# load-bearing guarantee lives.
+sys.modules['js'] = None
+sys.modules['pyodide_js'] = None
+
 import yaml
-from jinja2 import Environment, StrictUndefined
+from jinja2 import StrictUndefined
+from jinja2.sandbox import SandboxedEnvironment
 
 TEMPLATE_ROOT = "/restorm-template"
 OUTPUT_ROOT = "/restorm-out"
@@ -126,9 +138,12 @@ def generate(input_data):
         fail("_exclude must be a list of globs")
 
     answers = collect_answers(config, provided, ctx)
-    # Copier's own Jinja defaults — the SAME whitespace behaviour in
-    # the app and in a template repo's real-Copier CI.
-    env = Environment(undefined=StrictUndefined, keep_trailing_newline=True, trim_blocks=True, lstrip_blocks=True)
+    # SANDBOXED environment (CC1): attribute traversal from a template
+    # expression is refused — real Copier sandboxes too. Whitespace
+    # settings mirror what real Copier's CI output showed EMPIRICALLY
+    # (no trim_blocks/lstrip_blocks), so both engines render the same
+    # bytes and the official repos' goldens hold for both.
+    env = SandboxedEnvironment(undefined=StrictUndefined, keep_trailing_newline=True)
 
     def render_text(text, what):
         try:
