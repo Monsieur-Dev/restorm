@@ -36,13 +36,14 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import { BrowserWindow } from 'electron'
 import { createSchema, createYoga, logger } from 'electron-core-ui/main'
 import { websocketExecutionService } from './WebSocketExecutionService'
-import type { ApiDesign, DesignModel, DesignProtocol, DesignRouteGroup } from '../../shared/types/apiDesign'
+import type { ApiDesign, DesignModel, DesignProtocol } from '../../shared/types/apiDesign'
 import { validateApiDesign } from '../../shared/design/validateApiDesign'
 import { designToApiDocumentation } from '../../shared/design/apiDesignDoc'
 import { apiDocumentationToOpenApi } from '../../shared/design/openApiExport'
 import {
   authSatisfied,
   buildListPage,
+  resolvePageWindow,
   buildModelInstance,
   compileDesignRoutes,
   defaultResponseCode,
@@ -53,7 +54,7 @@ import {
   type RouteMatch
 } from '../../shared/design/designServing'
 import { designGraphqlResolvers, designToGraphqlSdl } from '../../shared/design/graphqlProjection'
-import { DesignStatefulStore, identifierName } from '../../shared/design/designStateful'
+import { DesignStatefulStore, identifierName, identifierProperty } from '../../shared/design/designStateful'
 import {
   buildODataRows,
   designODataEntitySets,
@@ -278,11 +279,17 @@ class DesignServerService {
     active.table = compileDesignRoutes(design)
     active.latencyMs = design.serving?.latencyMs ?? 0
     projectProtocols(active)
-    // Stateful toggled ON (or still on): (re)seed the store. Toggled
-    // OFF: drop it. The store is ephemeral, so a live design edit
-    // reseeding from the fresh examples is the defined behaviour.
-    if (design.serving?.stateful === true) active.store = new DesignStatefulStore(design)
-    else delete active.store
+    // Stateful store lifecycle: SEED only on a stateless→stateful
+    // transition (or the very first start). A live design edit while
+    // serving must NOT wipe the accumulated rows — it only retargets the
+    // shape used by future operations; the store resets solely on a
+    // server restart (a fresh ActiveServer). Toggled OFF drops it.
+    if (design.serving?.stateful === true) {
+      if (active.store === undefined) active.store = new DesignStatefulStore(design)
+      else active.store.retarget(design)
+    } else {
+      delete active.store
+    }
     return true
   }
 
@@ -354,15 +361,21 @@ class DesignServerService {
         return
       }
 
-      // Inbound body validation (write methods with a bound body model).
-      const bodyModelId = match.entry.route.design?.body?.modelId
-      if (bodyModelId !== undefined && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-        const model = active.design.models.find((m) => m.id === bodyModelId)
-        if (model !== undefined) {
-          const raw = await readBody(req)
-          const parsed = parseJsonBody(raw)
+      // Read the inbound body for write methods — the stateful store
+      // needs the client payload EVEN WHEN no body model is declared (a
+      // common hand-authored POST/PATCH shape), so the body is not gated
+      // on `body.modelId`. When a body model IS bound, validate first.
+      let writeBody: Record<string, unknown> = {}
+      if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+        const raw = await readBody(req)
+        const parsed = parseJsonBody(raw)
+        const bodyModelId = match.entry.route.design?.body?.modelId
+        const bodyModel = bodyModelId !== undefined
+          ? active.design.models.find((m) => m.id === bodyModelId)
+          : undefined
+        if (bodyModel !== undefined) {
           const issues = parsed.ok
-            ? validateBodyAgainstModel(active.design, model, parsed.value)
+            ? validateBodyAgainstModel(active.design, bodyModel, parsed.value)
             : [{ property: '', code: 'notAnObject' as const, detail: 'body is not valid JSON' }]
           if (issues.length > 0) {
             const detail = issues
@@ -372,18 +385,14 @@ class DesignServerService {
             this.recordServed(active, routeId, '400')
             return
           }
-          // Stateful mode: after the body passed validation, mutate the
-          // ephemeral store (forced responses already short-circuited
-          // above, so hot steering keeps priority — AC#4).
-          if (active.store !== undefined && this.serveStateful(active, match, method, query, parsed.ok ? parsed.value : {}, res)) {
-            return
-          }
         }
+        if (parsed.ok && isRecord(parsed.value)) writeBody = parsed.value
       }
 
-      // Stateful reads (GET list / GET one) — write methods were handled
-      // with their body above; a bodyless write (DELETE) lands here too.
-      if (active.store !== undefined && this.serveStateful(active, match, method, query, {}, res)) {
+      // Stateful dispatch: writes carry their parsed body, reads pass {}.
+      // Forced responses already short-circuited above, so hot steering
+      // keeps priority over the state (AC#4).
+      if (active.store !== undefined && this.serveStateful(active, match, method, query, writeBody, res)) {
         return
       }
 
@@ -570,24 +579,21 @@ class DesignServerService {
     const bodyModel = route.design?.body?.modelId !== undefined
       ? active.design.models.find((m) => m.id === route.design?.body?.modelId)
       : undefined
-    // A DELETE (and often a bare 204 route) references no model on its own
-    // response or body, so fall back to the resource the sibling routes in
-    // the same group operate on — every route in a resource group targets
-    // the same model.
-    const resourceModel = responseModel ?? bodyModel ?? this.groupResourceModel(active, match.entry.group)
-    const idValue = Object.values(match.params)[0]
+    // Resolve the resource model + the id VALUE from the route's
+    // paramLinks (the authoritative binding of a path param to a model's
+    // identifier property), never from positional guessing.
+    const { model: resourceModel, idValue } = this.resolveStatefulResource(active, route, match, responseModel, bodyModel)
     const headers = this.cacheHeaders(route.design?.cacheSeconds)
 
     if (method === 'GET') {
       if (resourceModel === undefined) return false
       if (successMeta?.list === true) {
-        const requestedLimit = Number(query['limit'])
-        const requestedOffset = Number(query['offset'])
-        const page = store.list(resourceModel, {
-          ...(Number.isFinite(requestedLimit) ? { limit: requestedLimit } : {}),
-          ...(Number.isFinite(requestedOffset) ? { offset: requestedOffset } : {})
-        })
-        const payload: unknown = successMeta.paginated === true ? page : page.items
+        // Same clamp + envelope as the stateless list, so the toggle
+        // never changes the shape (limit/offset honoured, maxLimit capped).
+        const { limit, offset } = resolvePageWindow(route, query)
+        const page = store.list(resourceModel, { limit, offset })
+        const envelope = { items: page.items, total: page.total, limit, offset }
+        const payload: unknown = successMeta.paginated === true ? envelope : page.items
         this.writeJson(active, res, parseStatus(successCode), headers, payload)
         this.recordServed(active, route.id, successCode)
         return true
@@ -605,7 +611,7 @@ class DesignServerService {
     }
 
     if (method === 'POST') {
-      const model = bodyModel ?? responseModel
+      const model = bodyModel ?? responseModel ?? resourceModel
       if (model === undefined) return false
       const created = store.create(model, isRecord(body) ? body : {})
       this.writeJson(active, res, parseStatus(successCode), headers, created)
@@ -614,11 +620,10 @@ class DesignServerService {
     }
 
     if (method === 'PUT' || method === 'PATCH') {
-      const model = resourceModel
-      if (model === undefined || idValue === undefined) return false
-      const updated = store.update(model, idValue, isRecord(body) ? body : {})
+      if (resourceModel === undefined || idValue === undefined) return false
+      const updated = store.update(resourceModel, idValue, isRecord(body) ? body : {})
       if (updated === undefined) {
-        this.writeJson(active, res, 404, {}, errorEnvelope('404', `No ${model.doc.name} with id ${idValue}`))
+        this.writeJson(active, res, 404, {}, errorEnvelope('404', `No ${resourceModel.doc.name} with id ${idValue}`))
         this.recordServed(active, route.id, '404')
         return true
       }
@@ -628,48 +633,76 @@ class DesignServerService {
     }
 
     if (method === 'DELETE') {
-      const model = resourceModel
-      if (model === undefined || idValue === undefined || identifierName(model) === undefined) return false
-      const removed = store.remove(model, idValue)
-      if (!removed) {
-        this.writeJson(active, res, 404, {}, errorEnvelope('404', `No ${model.doc.name} with id ${idValue}`))
+      if (resourceModel === undefined || idValue === undefined || identifierName(resourceModel) === undefined) return false
+      // Capture the row before removal for a body-returning success code.
+      const removedRow = store.get(resourceModel, idValue)
+      const outcome = store.remove(resourceModel, idValue)
+      if (outcome === 'not-found') {
+        this.writeJson(active, res, 404, {}, errorEnvelope('404', `No ${resourceModel.doc.name} with id ${idValue}`))
         this.recordServed(active, route.id, '404')
         return true
       }
-      // A DELETE route's declared success is usually 204 — honour it.
-      const code = Object.keys(responseMeta ?? {}).find((c) => c.startsWith('2')) ?? '204'
-      this.writeRaw(active, res, parseStatus(code), {}, '')
-      this.recordServed(active, route.id, code)
+      if (outcome === 'restricted') {
+        this.writeJson(active, res, 409, {}, errorEnvelope('409', `Cannot delete ${resourceModel.doc.name} ${idValue}: another record still references it`))
+        this.recordServed(active, route.id, '409')
+        return true
+      }
+      // Honour the route's DECLARED success code: 204 → empty, otherwise
+      // return the removed row (a 200 delete with an empty body is what
+      // no client expects).
+      if (parseStatus(successCode) === 204) {
+        this.writeRaw(active, res, 204, {}, '')
+      } else {
+        this.writeJson(active, res, parseStatus(successCode), headers, removedRow ?? {})
+      }
+      this.recordServed(active, route.id, successCode)
       return true
     }
 
     return false
   }
 
-  /** The model a route group operates on, inferred from the models its
-   * routes reference (list/detail responses or request bodies). Every
-   * route in a resource group targets the same resource, so the first
-   * referenced model is the group's — this lets a bodyless route (a
-   * DELETE returning 204) still resolve its resource. */
-  private groupResourceModel(
+  /**
+   * The resource model a stateful route operates on, and the id VALUE for
+   * a by-id operation, resolved from the route's paramLinks. The route's
+   * own response/body model is the resource; the id param is the one whose
+   * link targets THAT model's identifier property (so a nested
+   * `/users/{userId}/orders/{orderId}` addresses the Order, not the User).
+   * A bodyless route with no response/body model (a DELETE returning 204)
+   * takes the resource from the DEEPEST path param that links a model's
+   * identifier. Returns an undefined model/id when nothing links — the
+   * caller then falls through to the stateless declared response.
+   */
+  private resolveStatefulResource(
     active: ActiveServer,
-    group: DesignRouteGroup
-  ): DesignModel | undefined {
-    for (const route of group.routes) {
-      const responses = route.design?.responses ?? {}
-      for (const meta of Object.values(responses)) {
-        if (meta.modelId !== undefined) {
-          const model = active.design.models.find((m) => m.id === meta.modelId)
-          if (model !== undefined) return model
+    route: RouteMatch['entry']['route'],
+    match: RouteMatch,
+    responseModel: DesignModel | undefined,
+    bodyModel: DesignModel | undefined
+  ): { model: DesignModel | undefined; idValue: string | undefined } {
+    const links = route.design?.paramLinks ?? {}
+    let model = responseModel ?? bodyModel
+    let idValue: string | undefined
+    if (model !== undefined) {
+      const idProp = identifierProperty(model)
+      for (const [name, link] of Object.entries(links)) {
+        if (link.modelId === model.id && (idProp === undefined || link.propertyId === idProp.id)) {
+          idValue = match.params[name]
         }
       }
-      const bodyModelId = route.design?.body?.modelId
-      if (bodyModelId !== undefined) {
-        const model = active.design.models.find((m) => m.id === bodyModelId)
-        if (model !== undefined) return model
+    } else {
+      // No own model — take the resource from the deepest identifier-linked
+      // path param (later entries in the path win: the addressed resource).
+      for (const [name, link] of Object.entries(links)) {
+        const candidate = active.design.models.find((m) => m.id === link.modelId)
+        if (candidate === undefined) continue
+        if (link.propertyId === identifierProperty(candidate)?.id) {
+          model = candidate
+          idValue = match.params[name]
+        }
       }
     }
-    return undefined
+    return { model, idValue }
   }
 
   /** Serve the run-modal's forced choice: user body verbatim when

@@ -212,6 +212,24 @@ export interface ServedPage {
   offset: number
 }
 
+/** The clamped `{limit, offset}` for a list route: the request's values
+ * bounded by the route's pagination (`defaultLimit`/`maxLimit`). Shared
+ * by the stateless {@link buildListPage} and the stateful store so both
+ * honour the same envelope and ceilings. */
+export function resolvePageWindow(
+  route: DesignRoute,
+  query: { offset?: string; limit?: string }
+): { limit: number; offset: number } {
+  const pagination = route.design?.pagination
+  const defaultLimit = pagination?.defaultLimit ?? 20
+  const maxLimit = pagination?.maxLimit ?? 100
+  const requestedLimit = Number(query.limit ?? defaultLimit)
+  const limit = Math.max(1, Math.min(Number.isFinite(requestedLimit) ? requestedLimit : defaultLimit, maxLimit))
+  const requestedOffset = Number(query.offset ?? 0)
+  const offset = Math.max(0, Number.isFinite(requestedOffset) ? requestedOffset : 0)
+  return { limit, offset }
+}
+
 /** A page of served instances: named examples first (in order), then
  * seeded instances up to the page size. */
 export function buildListPage(
@@ -220,13 +238,7 @@ export function buildListPage(
   route: DesignRoute,
   query: { offset?: string; limit?: string }
 ): ServedPage {
-  const pagination = route.design?.pagination
-  const defaultLimit = pagination?.defaultLimit ?? 20
-  const maxLimit = pagination?.maxLimit ?? 100
-  const requestedLimit = Number(query.limit ?? defaultLimit)
-  const limit = Math.max(1, Math.min(Number.isFinite(requestedLimit) ? requestedLimit : defaultLimit, maxLimit))
-  const requestedOffset = Number(query.offset ?? 0)
-  const offset = Math.max(0, Number.isFinite(requestedOffset) ? requestedOffset : 0)
+  const { limit, offset } = resolvePageWindow(route, query)
   const total = Math.max(servedTotal(model), (model.examples ?? []).length)
 
   const items: Record<string, unknown>[] = []

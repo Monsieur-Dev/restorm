@@ -11,7 +11,7 @@
 
 import { createHash } from 'node:crypto'
 import { logger } from 'electron-core-ui/main'
-import type { ApiDesign } from '../../../shared/types/apiDesign'
+import type { ApiDesign, DesignTemplateSource } from '../../../shared/types/apiDesign'
 import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 import { buildCodegenContext } from '../../../shared/design/codegenContext'
 import { resolvePyodidePaths } from '../../scenarioEngine/codeRuntimes/pythonRuntime'
@@ -28,11 +28,10 @@ import {
 } from './templateSource'
 import { extractGeneratedTree, type GeneratedFile } from './extractTree'
 
-/** Where a template comes from — the Code section's three sources. */
-export type TemplateSourceRef =
-  | { kind: 'official'; id: string }
-  | { kind: 'repo'; repo: string; ref?: string }
-  | { kind: 'local'; path: string }
+/** Where a template comes from — the Code section's three sources. Alias
+ * of the persisted {@link DesignTemplateSource} so the run's source and
+ * the design's stored source are one type (no drift between them). */
+export type TemplateSourceRef = DesignTemplateSource
 
 export interface CodegenPreviewFile {
   path: string
