@@ -143,9 +143,15 @@ export function designFromDocumentation(
     if (bodyParam !== undefined) {
       const { name: bodyModelName } = parseTypeLabel(bodyParam.type)
       const modelId = modelIdByName.get(bodyModelName)
+      const consumes = operation.consumes ?? []
       routeDesign.body = {
         ...(modelId !== undefined ? { modelId } : {}),
-        contentType: operation.consumes?.[0] ?? 'application/json'
+        contentType: consumes[0] ?? 'application/json',
+        // Preserve the FULL declared media-type set (a spec can list
+        // several) for a lossless round-trip; the editor still shows the
+        // primary `contentType`.
+        ...(consumes.length > 1 ? { contentTypes: consumes } : {}),
+        ...(bodyParam.description !== undefined ? { description: bodyParam.description } : {})
       }
     }
 

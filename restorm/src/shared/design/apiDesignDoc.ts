@@ -15,7 +15,8 @@ import type {
   ApiDocumentation,
   ModelDocumentation,
   PropertyDocumentation,
-  OperationDocumentation
+  OperationDocumentation,
+  ParameterDocumentation
 } from '../types/apiDocumentation'
 import type { ApiDesign, DesignModel, DesignEnum, DesignRoute } from '../types/apiDesign'
 
@@ -114,10 +115,36 @@ export function designRouteDoc(
       return resolved
     })
   }
+  // Project the route's body contract back into the operation as the
+  // virtual `location: 'body'` parameter (Swagger-2 spelling) plus
+  // `consumes` — the exact shape the importers synthesize from an OAS
+  // requestBody and that `apiDocumentationToOpenApi` turns back into one.
+  // Without this the body silently vanishes on the design round-trip.
+  const body = route.design?.body
+  const bodyModel = body?.modelId !== undefined && design !== undefined
+    ? design.models.find((m) => m.id === body.modelId)
+    : undefined
+  let consumes: string[] | undefined
+  if (bodyModel !== undefined) {
+    const bodyParam: ParameterDocumentation = {
+      name: 'body',
+      location: 'body',
+      type: bodyModel.doc.name,
+      required: true,
+      ...(body?.description !== undefined ? { description: body.description } : {})
+    }
+    parameters = [...(parameters ?? []), bodyParam]
+    // Emit the FULL media-type set when the design preserved one, else
+    // the single primary content type.
+    const types = body?.contentTypes
+      ?? (body?.contentType !== undefined && body.contentType !== '' ? [body.contentType] : undefined)
+    if (types !== undefined && types.length > 0) consumes = types
+  }
   return {
     ...route.doc,
     match: { ...route.doc.match, urlPattern: full },
-    ...(parameters !== undefined ? { parameters } : {})
+    ...(parameters !== undefined ? { parameters } : {}),
+    ...(consumes !== undefined ? { consumes } : {})
   }
 }
 

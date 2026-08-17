@@ -254,8 +254,12 @@ export interface RouteDesignMeta {
    * entries in `doc.parameters`; the editor renames keys in lockstep
    * with the path's `{{param}}` placeholders. */
   paramLinks?: Record<string, DesignParamLink>
-  /** Request body contract for methods that carry one. */
-  body?: { modelId?: RuntimeId; contentType?: string }
+  /** Request body contract for methods that carry one. `contentType` is
+   * the primary media type the editor shows; `contentTypes` preserves the
+   * FULL set an imported spec declared (a body can accept several) so a
+   * design→spec round-trip is lossless; `description` is the body-level
+   * doc text. */
+  body?: { modelId?: RuntimeId; contentType?: string; contentTypes?: string[]; description?: string }
   /** Status code → response design extensions. */
   responses?: Record<string, DesignResponseMeta>
   /** Pagination of list responses on this route. */
