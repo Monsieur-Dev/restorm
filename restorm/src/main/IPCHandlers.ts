@@ -1395,10 +1395,13 @@ export function registerRestormIPC(deps: {
         root = resolvePath(dirname(projectPath), root)
       }
       const current = collectionStore.findById(designId)
+      if (current === null || !isApiDesign(current)) {
+        return { success: false, error: `no design with id ${designId}` }
+      }
       const { written } = designCodegenService.extract(
         designId,
         root,
-        current !== null && isApiDesign(current) ? (current.toPlainObject() as unknown as ApiDesign) : undefined
+        current.toPlainObject() as unknown as ApiDesign
       )
       return { success: true, root, written }
     } catch (error) {

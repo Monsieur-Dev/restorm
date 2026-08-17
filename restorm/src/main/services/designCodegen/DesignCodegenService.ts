@@ -45,9 +45,21 @@ export interface CodegenRunResult {
   files: GeneratedFile[]
   preview: CodegenPreviewFile[]
   log: string[]
+  /** The template source that produced this tree — the SECOND staleness
+   * anchor (BB3 covers the design; this covers the template). */
+  source: TemplateSourceRef
   /** Fingerprint of the design at GENERATION time — extraction refuses
    * when the design has changed since (the preview showed old files). */
   designFingerprint: string
+}
+
+/** Two template source refs point at the same template. */
+function sameSource(a: TemplateSourceRef, b: TemplateSourceRef): boolean {
+  if (a.kind !== b.kind) return false
+  if (a.kind === 'official' && b.kind === 'official') return a.id === b.id
+  if (a.kind === 'repo' && b.kind === 'repo') return a.repo === b.repo && (a.ref ?? 'main') === (b.ref ?? 'main')
+  if (a.kind === 'local' && b.kind === 'local') return a.path === b.path
+  return false
 }
 
 /**
@@ -131,7 +143,8 @@ class DesignCodegenService {
       files,
       preview: files.map((f) => ({ path: f.path, bytes: Buffer.from(f.b64, 'base64').length })),
       log: [...run.logs, ...(payload?.log ?? [])],
-      designFingerprint: designFingerprint(design)
+      designFingerprint: designFingerprint(design),
+      source
     }
     this.pending.set(design.id, result)
     logger.info('[DesignCodegenService] generated', {
@@ -151,16 +164,26 @@ class DesignCodegenService {
    * Write the pending generation under the CONFIRMED output root.
    * Traversal-checked as a whole before the first byte lands.
    */
-  extract(designId: string, outputRoot: string, currentDesign?: ApiDesign): { written: string[] } {
+  extract(designId: string, outputRoot: string, currentDesign: ApiDesign): { written: string[] } {
     const run = this.pending.get(designId)
     if (run === undefined) {
       throw new Error('no pending generation for this design — generate first')
     }
-    // Staleness anchor: the previewed tree belongs to the design as it
-    // WAS — an edit between preview and confirm silently writing old
-    // files is exactly the trap the validation screen exists to avoid.
-    if (currentDesign !== undefined && designFingerprint(currentDesign) !== run.designFingerprint) {
+    // Staleness anchor #1 (BB3): the previewed tree belongs to the
+    // design as it WAS — an edit between preview and confirm silently
+    // writing old files is the trap the validation screen exists to
+    // avoid. `currentDesign` is REQUIRED so no call site can drop the
+    // check by omission (DD1).
+    if (designFingerprint(currentDesign) !== run.designFingerprint) {
       throw new Error('the design changed since the preview — generate again')
+    }
+    // Staleness anchor #2 (DD2): the SOURCE that produced the tree. The
+    // Code section persists the selected source in the design's codegen
+    // slot, so a source switch between preview and confirm must not
+    // write the previous template's tree.
+    const currentSource: TemplateSourceRef | undefined = currentDesign.codegen?.templateSource
+    if (currentSource !== undefined && !sameSource(currentSource, run.source)) {
+      throw new Error('the template source changed since the preview — generate again')
     }
     const written = extractGeneratedTree(run.files, outputRoot)
     this.pending.delete(designId)
