@@ -494,15 +494,21 @@ const DesignSettingsSection: React.FC<{
                 selectBoxOptions={{ ariaLabel: t('design.settings.export.format', 'Descriptor format'), useCustomDrawn: true }}
                 data-testid="design-export-format"
               />
-              <HeaderHoverTooltip label={t('design.settings.export.download', 'Download the descriptor')}>
-                <Button
-                  secondary
-                  icon="desktop-download"
-                  onClick={() => { void downloadDescriptor() }}
-                  options={{ ariaLabel: t('design.settings.export.download', 'Download the descriptor') }}
-                  data-testid="design-export-download"
-                />
-              </HeaderHoverTooltip>
+              <GatedControl locked={runLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-export-gate">
+                <HeaderHoverTooltip label={t('design.settings.export.download', 'Download the descriptor')}>
+                  {/* Exporting a descriptor is part of the paid run+export
+                    * surface (DESIGN_RUN_CAPABILITY). `runLocked` also
+                    * disables the button — GatedControl blocks pointers only. */}
+                  <Button
+                    secondary
+                    icon="desktop-download"
+                    onClick={() => { void downloadDescriptor() }}
+                    disabled={runLocked}
+                    options={{ ariaLabel: t('design.settings.export.download', 'Download the descriptor') }}
+                    data-testid="design-export-download"
+                  />
+                </HeaderHoverTooltip>
+              </GatedControl>
             </div>
           </label>
           {exportStatus !== null && (
