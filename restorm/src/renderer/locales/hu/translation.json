@@ -2694,7 +2694,8 @@
     "stopDesignServer": "Tervszerver leállítása",
     "getDesignServerStatus": "Tervszerver állapota",
     "setDesignRouteResponse": "Válasz kényszerítése",
-    "exportDesign": "Tervleíró exportálása"
+    "exportDesign": "Tervleíró exportálása",
+    "generateDesignCode": "Kód generálása egy tervből"
   },
   "odataFilter": {
     "detail": {

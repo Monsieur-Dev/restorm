@@ -20,6 +20,7 @@ import { subscribeToPro } from '../../services/subscribeToPro'
 import { applyServingSnapshot, isDesignServerListening, useIsDesignServerListening } from '../../services/designServerStore'
 import { DESCRIPTOR_FORMATS, descriptorFileName } from '../../../../shared/design/descriptorFormats'
 import { DesignRunModal } from './DesignRunModal'
+import { DesignCodeSection } from './DesignCodeSection'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
 import { useRestormStore } from '../../store/restormStore'
@@ -202,10 +203,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           <DesignNotesSection design={design} tabId={tabId} />
         )}
         {activeSection === 'code' && (
-          <DesignSectionPlaceholder
-            title={t('design.section.code')}
-            message={t('design.code.empty', 'Code generation from this design will live here.')}
-          />
+          <DesignCodeSection design={design} issues={issues} />
         )}
       </div>
       {runPanelOpen && (
@@ -219,13 +217,6 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     </div>
   )
 }
-
-const DesignSectionPlaceholder: React.FC<{ title: string; message: string }> = ({ title, message }) => (
-  <div className="design-section design-section-placeholder">
-    <h2 className="design-section-title">{title}</h2>
-    <p className="design-section-placeholder-message">{message}</p>
-  </div>
-)
 
 /**
  * Settings — design-server block on top (spin arrives with the design

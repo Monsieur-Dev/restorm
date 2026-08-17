@@ -2696,7 +2696,8 @@
     "stopDesignServer": "Zastavit server návrhu",
     "getDesignServerStatus": "Stav serveru návrhu",
     "setDesignRouteResponse": "Vynutit odpověď",
-    "exportDesign": "Exportovat deskriptor návrhu"
+    "exportDesign": "Exportovat deskriptor návrhu",
+    "generateDesignCode": "Vygenerovat kód z návrhu"
   },
   "odataFilter": {
     "detail": {

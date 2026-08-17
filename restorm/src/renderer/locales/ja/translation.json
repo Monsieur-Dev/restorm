@@ -2693,7 +2693,8 @@
     "stopDesignServer": "デザインサーバーを停止",
     "getDesignServerStatus": "デザインサーバーの状態",
     "setDesignRouteResponse": "レスポンスを強制",
-    "exportDesign": "デザインのディスクリプタをエクスポート"
+    "exportDesign": "デザインのディスクリプタをエクスポート",
+    "generateDesignCode": "デザインからコードを生成"
   },
   "odataFilter": {
     "detail": {

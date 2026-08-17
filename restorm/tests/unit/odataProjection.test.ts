@@ -49,6 +49,22 @@ describe('designToCsdl', () => {
     expect(schema.entitySets.map((s) => s.name)).toEqual(expect.arrayContaining(['Users', 'AdminUsers', 'Orders']))
   })
 
+  it('claims colliding sanitized enum members apart — the SDL rule, CSDL side', () => {
+    const collided = buildReferenceApiDesign()
+    collided.enums.push({
+      id: 'enum-versions',
+      doc: { name: 'ApiVersion', properties: [], enumValues: ['v1.0', 'v1-0', 'v1 0'] }
+    })
+    const xml = designToCsdl(collided)
+    expect(xml).toContain('<Member Name="v1_0" Value="0" />')
+    expect(xml).toContain('<Member Name="v1_0_2" Value="1" />')
+    expect(xml).toContain('<Member Name="v1_0_3" Value="2" />')
+    // And the round-trip keeps all three members distinct.
+    const schema = parseEdmxV4(xml)
+    const apiVersion = schema.enumTypes.find((e) => (e as { name?: string }).name === 'ApiVersion')
+    expect(apiVersion).toBeDefined()
+  })
+
   it('namespaces off the API title', () => {
     expect(designODataNamespace(design)).toBe('Petstore')
     expect(csdl).toContain('Namespace="Petstore"')

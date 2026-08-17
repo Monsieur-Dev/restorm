@@ -100,6 +100,12 @@ const designMcpTestDir = defineBddConfig({
   outputDir: '.features-gen/design-mcp'
 })
 
+const designCodegenTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-codegen/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-codegen/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-codegen'
+})
+
 const designExportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/design-export/features/**/*.feature',
   steps: ['tests/e2e/bdd/design-export/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-export.fixture.ts'],
@@ -726,6 +732,13 @@ export default defineConfig({
     {
       name: 'design-mcp',
       testDir: designMcpTestDir
+    },
+    {
+      name: 'design-codegen',
+      testDir: designCodegenTestDir,
+      // The first generation cold-boots Pyodide in a worker + provisions
+      // the engine wheels — same latitude as the other WASM runtimes.
+      timeout: 7 * 60 * 1000
     },
     {
       name: 'status-bar-context-menu',

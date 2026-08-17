@@ -1,0 +1,6 @@
+{
+  "name": "E2e fixture template",
+  "type": "server",
+  "language": "Text",
+  "contextVersions": [1]
+}

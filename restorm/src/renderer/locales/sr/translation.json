@@ -2695,7 +2695,8 @@
     "stopDesignServer": "Zaustavi server dizajna",
     "getDesignServerStatus": "Stanje servera dizajna",
     "setDesignRouteResponse": "Prinudi odgovor",
-    "exportDesign": "Izvezi deskriptor dizajna"
+    "exportDesign": "Izvezi deskriptor dizajna",
+    "generateDesignCode": "Generiši kod iz dizajna"
   },
   "odataFilter": {
     "detail": {

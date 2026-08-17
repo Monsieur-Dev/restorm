@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow, dialog, shell } from 'electron'
 import { logger, getFileService, isFileServiceInitialized, isPersistenceServiceInitialized, getPersistenceService, getFeatureService, isFeatureServiceInitialized, validatedHandle } from 'electron-core-ui'
 import { isTabDetachEnabled } from './featureFlags'
-import { join, relative, dirname } from 'path'
+import { join, relative, dirname, isAbsolute, resolve as resolvePath } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
@@ -27,6 +27,7 @@ import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
 import { designServerService } from './services/DesignServerService'
 import type { ApiDesign } from '../shared/types/apiDesign'
+import { designCodegenService } from './services/designCodegen/DesignCodegenService'
 import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
@@ -68,6 +69,7 @@ import {
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   designServerStartArgs, designServerStopArgs, designServerStatusArgs,
   designServerSetForcedArgs, designServerUpdateArgs, designExportDescriptorArgs,
+  designCodegenGenerateArgs, designCodegenExtractArgs, designCodegenDiscardArgs, designPickDirectoryArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
@@ -1352,6 +1354,64 @@ export function registerRestormIPC(deps: {
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
+  })
+
+  // ==========================================================================
+  // Design codegen IPC Handlers
+  // ==========================================================================
+
+  // Sandboxed generation: template acquisition + Pyodide run, nothing
+  // written to disk — the reply carries the PREVIEW tree the validation
+  // screen shows.
+  validatedHandle('design-codegen:generate', designCodegenGenerateArgs, async (_event, [design, source, answers]) => {
+    try {
+      const result = await designCodegenService.generate(design as ApiDesign, source, answers ?? {})
+      return {
+        success: true,
+        manifest: result.manifest,
+        preview: result.preview,
+        log: result.log
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Controlled extraction of the PENDING generation under the confirmed
+  // output folder — a relative folder resolves against the project file.
+  validatedHandle('design-codegen:extract', designCodegenExtractArgs, (_event, [designId, outputDir]) => {
+    try {
+      let root = outputDir
+      if (!isAbsolute(root)) {
+        const projectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+        if (projectPath === null || projectPath === '') {
+          return { success: false, error: 'a relative output folder needs an open project file' }
+        }
+        root = resolvePath(dirname(projectPath), root)
+      }
+      const { written } = designCodegenService.extract(designId, root)
+      return { success: true, root, written }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  validatedHandle('design-codegen:discard', designCodegenDiscardArgs, (_event, [designId]) => {
+    designCodegenService.discard(designId)
+    return { success: true }
+  })
+
+  // Output-directory picker (the Code section's Browse button).
+  validatedHandle('design:pick-directory', designPickDirectoryArgs, async (_event, [defaultPath]) => {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) return { success: false, error: 'No window found' }
+    const result = await dialog.showOpenDialog(window, {
+      title: 'Choose the output folder',
+      properties: ['openDirectory', 'createDirectory'],
+      ...(defaultPath !== undefined && defaultPath !== '' ? { defaultPath } : {})
+    })
+    if (result.canceled || result.filePaths.length === 0) return { success: false, canceled: true }
+    return { success: true, path: result.filePaths[0] }
   })
 
   // ==========================================================================

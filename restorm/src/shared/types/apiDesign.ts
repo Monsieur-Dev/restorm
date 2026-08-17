@@ -308,6 +308,19 @@ export interface DesignRouteGroup {
 }
 
 /** Design-server configuration carried by the design root. */
+/** Where the Code section's template comes from. */
+export type DesignTemplateSource =
+  | { kind: 'official'; id: string }
+  | { kind: 'repo'; repo: string; ref?: string }
+  | { kind: 'local'; path: string }
+
+/** Code-generation configuration, persisted with the design. */
+export interface DesignCodegen {
+  templateSource?: DesignTemplateSource
+  /** Output folder — absolute, or relative to the project file. */
+  outputDir?: string
+}
+
 export interface DesignServing {
   /** Protocols the design server projects onto. Absent = HTTP only. */
   protocols?: DesignProtocol[]
@@ -349,6 +362,7 @@ export interface ApiDesign {
    * group inherits when it declares none. Absent = `none`. */
   defaultAuth?: DesignAuthKind
   serving?: DesignServing
+  codegen?: DesignCodegen
   models: DesignModel[]
   enums: DesignEnum[]
   routeGroups: DesignRouteGroup[]

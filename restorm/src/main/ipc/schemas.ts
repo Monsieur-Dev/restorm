@@ -439,6 +439,22 @@ export const designServerSetForcedArgs = z.tuple([
 ])
 export const designServerUpdateArgs = z.tuple([z.unknown()])
 
+// Design codegen: sandboxed generation (design payload as-is, like the
+// design server), controlled extraction under a confirmed folder, and
+// the output-directory picker.
+export const designCodegenGenerateArgs = z.tuple([
+  z.unknown(),
+  z.union([
+    z.object({ kind: z.literal('official'), id: z.string().min(1) }),
+    z.object({ kind: z.literal('repo'), repo: z.string().min(1), ref: z.string().min(1).optional() }),
+    z.object({ kind: z.literal('local'), path: z.string().min(1) })
+  ]),
+  z.record(z.string(), z.unknown()).optional()
+])
+export const designCodegenExtractArgs = z.tuple([z.string().min(1), z.string().min(1)])
+export const designCodegenDiscardArgs = z.tuple([z.string().min(1)])
+export const designPickDirectoryArgs = z.tuple([z.string().optional()])
+
 // Design descriptor export: emitted CONTENT + suggested file name +
 // extension; the handler owns the save dialog and the write.
 export const designExportDescriptorArgs = z.tuple([

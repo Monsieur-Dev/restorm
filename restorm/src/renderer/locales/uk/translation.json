@@ -2696,7 +2696,8 @@
     "stopDesignServer": "Зупинити сервер дизайну",
     "getDesignServerStatus": "Стан сервера дизайну",
     "setDesignRouteResponse": "Примусити відповідь",
-    "exportDesign": "Експортувати дескриптор дизайну"
+    "exportDesign": "Експортувати дескриптор дизайну",
+    "generateDesignCode": "Згенерувати код із дизайну"
   },
   "odataFilter": {
     "detail": {

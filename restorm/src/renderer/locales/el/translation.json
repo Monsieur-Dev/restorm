@@ -2694,7 +2694,8 @@
     "stopDesignServer": "Διακοπή διακομιστή σχεδίου",
     "getDesignServerStatus": "Κατάσταση διακομιστή σχεδίου",
     "setDesignRouteResponse": "Εξαναγκασμός απόκρισης",
-    "exportDesign": "Εξαγωγή περιγραφέα σχεδίου"
+    "exportDesign": "Εξαγωγή περιγραφέα σχεδίου",
+    "generateDesignCode": "Δημιουργία κώδικα από ένα design"
   },
   "odataFilter": {
     "detail": {

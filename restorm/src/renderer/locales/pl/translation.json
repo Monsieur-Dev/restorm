@@ -2696,7 +2696,8 @@
     "stopDesignServer": "Zatrzymaj serwer projektu",
     "getDesignServerStatus": "Stan serwera projektu",
     "setDesignRouteResponse": "Wymuś odpowiedź",
-    "exportDesign": "Eksportuj deskryptor projektu"
+    "exportDesign": "Eksportuj deskryptor projektu",
+    "generateDesignCode": "Wygeneruj kod z projektu"
   },
   "odataFilter": {
     "detail": {

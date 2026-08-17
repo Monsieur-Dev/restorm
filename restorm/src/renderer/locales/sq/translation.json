@@ -2694,7 +2694,8 @@
     "stopDesignServer": "Ndalo një server dizajni",
     "getDesignServerStatus": "Gjendja e serverit të dizajnit",
     "setDesignRouteResponse": "Detyro një përgjigje",
-    "exportDesign": "Eksporto një përshkrues dizajni"
+    "exportDesign": "Eksporto një përshkrues dizajni",
+    "generateDesignCode": "Gjenero kod nga një dizajn"
   },
   "odataFilter": {
     "detail": {

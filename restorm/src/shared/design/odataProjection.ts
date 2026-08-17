@@ -171,8 +171,17 @@ export function designToCsdl(design: ApiDesign): string {
     const values = enum_.doc.enumValues ?? []
     if (values.length === 0) continue
     lines.push(`      <EnumType Name="${xmlEscape(sanitizeEdmName(enum_.doc.name, 'Enum'))}">`)
+    // Member names are their own namespace within the EnumType —
+    // sanitization can collapse distinct raw values (`v1.0` / `v1-0`)
+    // onto one spelling, so they claim like the entity-set names do.
+    const takenMembers = new Set<string>()
     values.forEach((value, index) => {
-      lines.push(`        <Member Name="${xmlEscape(sanitizeEdmName(String(value), `Value${index}`))}" Value="${index}" />`)
+      const base = sanitizeEdmName(String(value), `Value${index}`)
+      let name = base
+      let n = 2
+      while (takenMembers.has(name)) { name = `${base}_${n}`; n += 1 }
+      takenMembers.add(name)
+      lines.push(`        <Member Name="${xmlEscape(name)}" Value="${index}" />`)
     })
     lines.push('      </EnumType>')
   }

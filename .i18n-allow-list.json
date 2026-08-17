@@ -2,6 +2,7 @@
   "_comment": "Allow-list for scripts/check-i18n.mjs. See CONTRIBUTING.md for format and usage.",
   "dynamic_key_patterns": [
     "dateTimePicker.tokens.*",
+    "design.code.sourceKind.*",
     "helpers.*",
     "helpers.categories.*",
     "httpStatus.*",

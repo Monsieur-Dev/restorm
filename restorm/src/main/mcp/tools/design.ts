@@ -19,6 +19,9 @@ import { z } from 'zod'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { designServerService } from '../../services/DesignServerService'
+import { designCodegenService, type TemplateSourceRef } from '../../services/designCodegen/DesignCodegenService'
+import { getFileService, isFileServiceInitialized } from 'electron-core-ui'
+import { dirname, isAbsolute, resolve as resolvePath } from 'node:path'
 import { isApiDesign, isEnvironmentFolder, ApiDesign } from '../../../shared/models'
 import type {
   DesignAuthKind,
@@ -97,6 +100,15 @@ function writeDesign(design: ApiDesign): void {
   if (designServerService.isListening(design.id)) {
     designServerService.updateDesign(design.toPlainObject() as unknown as ApiDesign)
   }
+}
+
+/** Resolve an output folder: absolute as-is, relative against the
+ * project file's directory (null when no project is open). */
+function resolveCodegenOutputRoot(outputDir: string): string | null {
+  if (isAbsolute(outputDir)) return outputDir
+  const projectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+  if (projectPath === null || projectPath === '') return null
+  return resolvePath(dirname(projectPath), outputDir)
 }
 
 /** The summary a design projects into list/read replies. */
@@ -1211,6 +1223,75 @@ export function registerDesignTools(mcp: McpService): void {
       const result = await designServerService.start(design.toPlainObject() as unknown as ApiDesign)
       if (!result.success) return errorReply(result.error ?? 'the design server could not start')
       return jsonReply({ started: true, port: result.port, baseUrl: `http://localhost:${String(result.port)}` })
+    }
+  )
+
+  mcp.registerTool(
+    'generate_design_code',
+    {
+      titleKey: 'mcpToolTitles.generateDesignCode',
+      title: 'Generate code from a design',
+      description:
+        'Run a Copier-format code template against the design in the SANDBOX (Pyodide MEMFS — the template never ' +
+        'touches the machine). Template source: `officialId` (registry id, e.g. server-typescript), `repo` ' +
+        '(owner/repo on github, fetched as an archive over the firewall) or `localPath` (a folder) — exactly one. ' +
+        'Without `confirm`, replies with the PREVIEW tree only (nothing written). With `confirm: true` AND ' +
+        '`outputDir` (absolute, or relative to the project file), writes the tree under it — every path ' +
+        'traversal-checked first. Refuses an invalid design (same gate as serving) and an incompatible manifest.',
+      inputSchema: {
+        designId: z.string().min(1),
+        officialId: z.string().min(1).optional(),
+        repo: z.string().min(1).optional(),
+        ref: z.string().min(1).optional().describe('Branch of `repo` (default main).'),
+        localPath: z.string().min(1).optional(),
+        answers: z.record(z.string(), z.unknown()).optional(),
+        confirm: z.boolean().optional(),
+        outputDir: z.string().min(1).optional()
+      } as Record<string, unknown>
+    },
+    async (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const sources: TemplateSourceRef[] = []
+      if (typeof args['officialId'] === 'string') sources.push({ kind: 'official', id: args['officialId'] })
+      if (typeof args['repo'] === 'string') {
+        sources.push({
+          kind: 'repo',
+          repo: args['repo'],
+          ...(typeof args['ref'] === 'string' ? { ref: args['ref'] } : {})
+        })
+      }
+      if (typeof args['localPath'] === 'string') sources.push({ kind: 'local', path: args['localPath'] })
+      const source = sources[0]
+      if (source === undefined || sources.length > 1) {
+        return errorReply('pass exactly one of officialId / repo / localPath')
+      }
+      const answers = (args['answers'] ?? {}) as Record<string, unknown>
+      try {
+        const run = await designCodegenService.generate(
+          design.toPlainObject() as unknown as ApiDesign,
+          source,
+          answers
+        )
+        if (args['confirm'] !== true) {
+          return jsonReply({
+            generated: run.preview.length,
+            manifest: run.manifest,
+            preview: run.preview,
+            log: run.log,
+            written: false,
+            hint: 'call again with confirm: true and outputDir to write the tree'
+          })
+        }
+        const outputDir = typeof args['outputDir'] === 'string' ? args['outputDir'] : ''
+        if (outputDir === '') return errorReply('confirm: true needs outputDir')
+        const root = resolveCodegenOutputRoot(outputDir)
+        if (root === null) return errorReply('a relative outputDir needs an open project file')
+        const { written } = designCodegenService.extract(design.id, root)
+        return jsonReply({ written: true, root, files: written })
+      } catch (error) {
+        return errorReply(error instanceof Error ? error.message : String(error))
+      }
     }
   )
 

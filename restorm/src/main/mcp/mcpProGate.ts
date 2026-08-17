@@ -249,7 +249,8 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   // on the UI's spin button.
   'serve_design',
   'stop_design_server',
-  'set_design_route_response'
+  'set_design_route_response',
+  'generate_design_code'
 ])
 
 /**

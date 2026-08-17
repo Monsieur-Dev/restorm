@@ -2693,7 +2693,8 @@
     "stopDesignServer": "디자인 서버 중지",
     "getDesignServerStatus": "디자인 서버 상태",
     "setDesignRouteResponse": "응답 강제하기",
-    "exportDesign": "디자인 디스크립터 내보내기"
+    "exportDesign": "디자인 디스크립터 내보내기",
+    "generateDesignCode": "디자인에서 코드 생성"
   },
   "odataFilter": {
     "detail": {

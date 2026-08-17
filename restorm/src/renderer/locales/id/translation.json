@@ -2693,7 +2693,8 @@
     "stopDesignServer": "Hentikan server desain",
     "getDesignServerStatus": "Status server desain",
     "setDesignRouteResponse": "Paksa respons",
-    "exportDesign": "Ekspor deskriptor desain"
+    "exportDesign": "Ekspor deskriptor desain",
+    "generateDesignCode": "Hasilkan kode dari desain"
   },
   "odataFilter": {
     "detail": {

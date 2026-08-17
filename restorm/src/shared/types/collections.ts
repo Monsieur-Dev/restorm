@@ -60,6 +60,8 @@ export type {
   DesignPagination,
   DesignScalarType,
   DesignServing,
+  DesignCodegen,
+  DesignTemplateSource,
   DesignProtocol,
   DesignAuthKind,
   PropertyReference,

@@ -2693,7 +2693,8 @@
     "stopDesignServer": "Dừng máy chủ thiết kế",
     "getDesignServerStatus": "Trạng thái máy chủ thiết kế",
     "setDesignRouteResponse": "Ép một phản hồi",
-    "exportDesign": "Xuất bộ mô tả thiết kế"
+    "exportDesign": "Xuất bộ mô tả thiết kế",
+    "generateDesignCode": "Tạo mã từ một thiết kế"
   },
   "odataFilter": {
     "detail": {

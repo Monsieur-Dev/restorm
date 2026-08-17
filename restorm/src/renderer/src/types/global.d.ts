@@ -444,6 +444,16 @@ declare global {
         onServed: (callback: (data: { designId: string; routeId: string; code: string; counters: DesignServerCounters }) => void) => (() => void)
         exportDescriptor: (fileName: string, content: string, extension: string) => Promise<{ success: boolean; path?: string; canceled?: boolean; error?: string }>
       }
+      designCodegen: {
+        generate: (
+          design: unknown,
+          source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
+          answers?: Record<string, unknown>
+        ) => Promise<{ success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }>
+        extract: (designId: string, outputDir: string) => Promise<{ success: boolean; root?: string; written?: string[]; error?: string }>
+        discard: (designId: string) => Promise<void>
+        pickDirectory: (defaultPath?: string) => Promise<{ success: boolean; path?: string; canceled?: boolean }>
+      }
       jsonrpc: {
         execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>
         executeBatch: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcBatchExecutionResult>

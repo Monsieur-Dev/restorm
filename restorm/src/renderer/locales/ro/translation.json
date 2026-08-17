@@ -2695,7 +2695,8 @@
     "stopDesignServer": "Oprește un server de design",
     "getDesignServerStatus": "Starea serverului de design",
     "setDesignRouteResponse": "Forțează un răspuns",
-    "exportDesign": "Exportă un descriptor de design"
+    "exportDesign": "Exportă un descriptor de design",
+    "generateDesignCode": "Generați cod dintr-un design"
   },
   "odataFilter": {
     "detail": {

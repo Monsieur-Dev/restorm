@@ -1433,6 +1433,34 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as { success: boolean; path?: string; canceled?: boolean; error?: string }
     }
   },
+
+  designCodegen: {
+    /** Sandboxed generation — resolves with the PREVIEW tree; nothing
+     * is written until `extract` confirms an output folder. */
+    generate: async (
+      design: unknown,
+      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
+      answers?: Record<string, unknown>
+    ): Promise<{ success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:generate', design, source, answers)
+      return result as { success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }
+    },
+    /** Write the pending generation under the confirmed folder
+     * (relative resolves against the project file). */
+    extract: async (designId: string, outputDir: string): Promise<{ success: boolean; root?: string; written?: string[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:extract', designId, outputDir)
+      return result as { success: boolean; root?: string; written?: string[]; error?: string }
+    },
+    /** Drop the pending generation (validation screen dismissed). */
+    discard: async (designId: string): Promise<void> => {
+      await ipcRenderer.invoke('design-codegen:discard', designId)
+    },
+    /** Output-folder picker. */
+    pickDirectory: async (defaultPath?: string): Promise<{ success: boolean; path?: string; canceled?: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('design:pick-directory', defaultPath)
+      return result as { success: boolean; path?: string; canceled?: boolean }
+    }
+  },
   jsonrpc: {
     /** Execute a single JSON-RPC 2.0 call. Reuses the HTTP dispatcher under
      * the hood — `JsonRpcExecutionService` composes the envelope and unwraps

@@ -21,6 +21,7 @@ import type {
   DesignEnum,
   DesignRouteGroup,
   DesignServing,
+  DesignCodegen,
   DesignAuthKind
 } from '../types/apiDesign'
 
@@ -66,6 +67,9 @@ export class ApiDesign {
   /** Design-server configuration. */
   serving?: DesignServing
 
+  /** Code-generation configuration (template source, output folder). */
+  codegen?: DesignCodegen
+
   /** The design's models, in author order. */
   models: DesignModel[] = []
 
@@ -92,6 +96,7 @@ export class ApiDesign {
     defaultSecurity?: Record<string, string[]>[]
     defaultAuth?: DesignAuthKind
     serving?: DesignServing
+    codegen?: DesignCodegen
     models?: DesignModel[]
     enums?: DesignEnum[]
     routeGroups?: DesignRouteGroup[]
@@ -107,6 +112,7 @@ export class ApiDesign {
       ...(obj.defaultSecurity !== undefined && { defaultSecurity: obj.defaultSecurity }),
       ...(obj.defaultAuth !== undefined && { defaultAuth: obj.defaultAuth }),
       ...(obj.serving !== undefined && { serving: obj.serving }),
+      ...(obj.codegen !== undefined && { codegen: obj.codegen }),
       models: obj.models ?? [],
       enums: obj.enums ?? [],
       routeGroups: obj.routeGroups ?? []
@@ -126,6 +132,7 @@ export class ApiDesign {
       ...(this.defaultSecurity !== undefined && { defaultSecurity: this.defaultSecurity }),
       ...(this.defaultAuth !== undefined && { defaultAuth: this.defaultAuth }),
       ...(this.serving !== undefined && { serving: this.serving }),
+      ...(this.codegen !== undefined && { codegen: this.codegen }),
       models: this.models,
       enums: this.enums,
       routeGroups: this.routeGroups

@@ -978,3 +978,68 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* ── Code section ─────────────────────────────────────────────────── */
+
+.design-code-sources {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.design-code-output-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.design-code-output-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.design-code-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.design-code-blocked,
+.design-code-message {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.design-code-preview {
+  margin-top: 16px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.design-code-preview-list {
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+}
+
+.design-code-preview-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 1px 0;
+}
+
+.design-code-preview-bytes {
+  opacity: 0.6;
+}
+
+.design-code-preview-actions {
+  display: flex;
+  gap: 8px;
+}

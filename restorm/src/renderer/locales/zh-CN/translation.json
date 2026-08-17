@@ -2693,7 +2693,8 @@
     "stopDesignServer": "停止设计服务器",
     "getDesignServerStatus": "设计服务器状态",
     "setDesignRouteResponse": "强制响应",
-    "exportDesign": "导出设计描述文件"
+    "exportDesign": "导出设计描述文件",
+    "generateDesignCode": "从设计生成代码"
   },
   "odataFilter": {
     "detail": {

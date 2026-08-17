@@ -2694,7 +2694,8 @@
     "stopDesignServer": "Bir tasarım sunucusunu durdur",
     "getDesignServerStatus": "Tasarım sunucusu durumu",
     "setDesignRouteResponse": "Bir yanıtı zorla",
-    "exportDesign": "Bir tasarım tanımlayıcısını dışa aktar"
+    "exportDesign": "Bir tasarım tanımlayıcısını dışa aktar",
+    "generateDesignCode": "Bir tasarımdan kod üret"
   },
   "odataFilter": {
     "detail": {

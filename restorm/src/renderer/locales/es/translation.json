@@ -2694,7 +2694,8 @@
     "stopDesignServer": "Detener un servidor de diseño",
     "getDesignServerStatus": "Estado del servidor de diseño",
     "setDesignRouteResponse": "Forzar una respuesta servida",
-    "exportDesign": "Exportar un descriptor de diseño"
+    "exportDesign": "Exportar un descriptor de diseño",
+    "generateDesignCode": "Generar código desde un diseño"
   },
   "odataFilter": {
     "detail": {

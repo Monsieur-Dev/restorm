@@ -2694,7 +2694,8 @@
     "stopDesignServer": "Pysäytä suunnitelmapalvelin",
     "getDesignServerStatus": "Suunnitelmapalvelimen tila",
     "setDesignRouteResponse": "Pakota vastaus",
-    "exportDesign": "Vie suunnitelman kuvaaja"
+    "exportDesign": "Vie suunnitelman kuvaaja",
+    "generateDesignCode": "Luo koodia suunnitelmasta"
   },
   "odataFilter": {
     "detail": {
