@@ -743,7 +743,8 @@
       "environment": "Okruženja",
       "settings": "Postavke",
       "tag": "Oznake",
-      "scenario": "Scenariji"
+      "scenario": "Scenariji",
+      "design": "Dizajni API-ja"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih pojedinosti",

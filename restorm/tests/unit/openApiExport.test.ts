@@ -195,6 +195,13 @@ describe('openApiExport', () => {
     expect(reimported.server).toEqual({ basePath: '/api/v1' })
   })
 
+  it('leaves a protocol-relative server url unparsed (not a base path)', () => {
+    const spec = buildPetstoreSpec()
+    spec.servers = [{ url: '//api.example.com/v2' }]
+    const doc = openapi3ToApiDocumentation(spec)
+    expect(doc.server).toBeUndefined()
+  })
+
   it('emits oauth2 flows back under the OAS3 flow keys', () => {
     const doc = openapi3ToApiDocumentation(buildPetstoreSpec())
     const emitted = apiDocumentationToOpenApi(doc) as {

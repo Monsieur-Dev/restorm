@@ -21,4 +21,4 @@ Feature: Design documentation viewer
     Then the models section opens on the "User" model card
     When I return to the documentation section
     And I click the edit link of the "getUser" route in the documentation
-    Then the routes section opens on a route card
+    Then the routes section opens on the "Fetch one user" route card

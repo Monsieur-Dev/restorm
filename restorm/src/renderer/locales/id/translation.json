@@ -741,7 +741,8 @@
       "environment": "Lingkungan",
       "settings": "Pengaturan",
       "tag": "Tag",
-      "scenario": "Skenario"
+      "scenario": "Skenario",
+      "design": "Desain API"
     },
     "tooltip": {
       "noDetails": "Tidak ada detail yang tersedia",

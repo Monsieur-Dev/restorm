@@ -20,14 +20,19 @@ import {
 } from './DocumentEvents'
 import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
 import { protocolSpec } from '../../shared/protocolRegistry'
+import { DESIGN_CODICON } from '../../shared/design/designSections'
+import { composeRoutePath } from '../../shared/design/apiDesignDoc'
 
-/** Search categories configuration for Restorm */
+/** Search categories configuration for Restorm. Kept aligned with the
+ * renderer's map (which re-registers over this one at file open). */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
   request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
   folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
-  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 3 },
-  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 4 },
-  tag: { label: 'search.categories.tag', icon: 'tag', order: 5 }
+  scenario: { label: 'search.categories.scenario', icon: 'circuit-board', order: 3 },
+  design: { label: 'search.categories.design', icon: DESIGN_CODICON, order: 4 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 5 },
+  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 6 },
+  tag: { label: 'search.categories.tag', icon: 'tag', order: 7 }
 }
 
 /** Simplified folder type for indexing */
@@ -36,7 +41,7 @@ interface FolderData {
   name: string
   tags: string[]
   notes?: string
-  items: (FolderData | RequestData)[]
+  items: (FolderData | RequestData | DesignData)[]
   configuration?: unknown
 }
 
@@ -91,12 +96,137 @@ function isRequest(item: unknown): item is RequestData {
 interface ScenarioData {
   type: 'scenario'
   id: string
-  items?: (FolderData | RequestData | ScenarioData)[]
+  items?: (FolderData | RequestData | ScenarioData | DesignData)[]
 }
 
 /** Check if an item is a Scenario (a container, but not a folder). */
 function isScenarioData(item: unknown): item is ScenarioData {
   return typeof item === 'object' && item !== null && (item as { type?: unknown }).type === 'scenario'
+}
+
+/** Simplified API-design type for indexing — the design + its models /
+ * enums / routes each become one search document. */
+interface DesignData {
+  type: 'design'
+  id: string
+  name: string
+  tags: string[]
+  notes?: string
+  info: { title: string; description?: string; version?: string }
+  server?: { basePath?: string }
+  models: { id: string; doc: { name: string; description?: string }; properties: { doc: { name: string } }[] }[]
+  enums: { id: string; doc: { name: string; description?: string; enumValues?: unknown[] } }[]
+  routeGroups: {
+    id: string
+    doc: { name: string; description?: string }
+    design?: { basePath?: string; versionPrefix?: string }
+    routes: { id: string; doc: { summary?: string; description?: string; match: { urlPattern: string; method?: string } } }[]
+  }[]
+}
+
+/** Check if an item is an API design. MUST run before `isRequest` in
+ * every dispatch: the request guard (`'type' in item && !('items' in
+ * item)`) matches a design too, and `protocolSpec('design')` has no
+ * entry — a design falling into the request path throws and aborts
+ * the whole folder index pass. */
+function isApiDesignData(item: unknown): item is DesignData {
+  return typeof item === 'object' && item !== null && (item as { type?: unknown }).type === 'design'
+}
+
+/** The last index pass's document ids, per design. `removeDocument`
+ * only takes exact ids (no prefix removal), so deleting a design — or
+ * dropping one of its entities on an update — needs the previous
+ * sub-document ids to sweep. */
+const designSubDocIds = new Map<string, string[]>()
+
+/** Walk a design into its search documents (mirrors the renderer's
+ * `designToSearchDocuments` — the two files deliberately share no code
+ * today, same as folders/requests). */
+function designSearchDocuments(design: DesignData, parentPath: string[] = []): SearchDocument[] {
+  const path = [...parentPath, design.id]
+  const documents: SearchDocument[] = [{
+    id: design.id,
+    title: design.name,
+    ...(design.info.description !== undefined ? { description: design.info.description } : {}),
+    category: 'design',
+    icon: DESIGN_CODICON,
+    keywords: [...design.tags, design.info.title, design.info.version ?? ''].filter((s) => s !== '').join(' '),
+    navigation: { type: 'design', designId: design.id, path },
+    metadata: { tags: design.tags, ...(design.notes ? { notes: design.notes } : {}) }
+  }]
+  for (const model of design.models) {
+    documents.push({
+      id: `${design.id}::model:${model.id}`,
+      title: model.doc.name,
+      ...(model.doc.description !== undefined ? { description: model.doc.description } : {}),
+      category: 'design',
+      icon: 'symbol-class',
+      keywords: model.properties.map((p) => p.doc.name).join(' '),
+      navigation: { type: 'design', designId: design.id, section: 'models', entityId: model.id, path },
+      metadata: { breadcrumb: [design.name] }
+    })
+  }
+  for (const enumEntity of design.enums) {
+    documents.push({
+      id: `${design.id}::enum:${enumEntity.id}`,
+      title: enumEntity.doc.name,
+      ...(enumEntity.doc.description !== undefined ? { description: enumEntity.doc.description } : {}),
+      category: 'design',
+      icon: 'symbol-enum',
+      keywords: (enumEntity.doc.enumValues ?? []).map((v) => String(v)).join(' '),
+      navigation: { type: 'design', designId: design.id, section: 'enums', entityId: enumEntity.id, path },
+      metadata: { breadcrumb: [design.name] }
+    })
+  }
+  for (const group of design.routeGroups) {
+    for (const route of group.routes) {
+      const summary = route.doc.summary
+      const title = summary !== undefined && summary !== '' ? summary : route.doc.match.urlPattern
+      const fullPath = composeRoutePath({
+        ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
+        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
+        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+      }, route.doc.match.urlPattern)
+      documents.push({
+        id: `${design.id}::route:${route.id}`,
+        title,
+        ...(route.doc.description !== undefined ? { description: route.doc.description } : {}),
+        category: 'design',
+        icon: 'type-hierarchy-sub',
+        keywords: [route.doc.match.method ?? 'GET', fullPath, group.doc.name].join(' '),
+        navigation: { type: 'design', designId: design.id, section: 'routes', entityId: route.id, path },
+        metadata: { breadcrumb: [design.name] }
+      })
+    }
+  }
+  return documents
+}
+
+/** Index a design's documents, sweeping the previous pass's leftovers
+ * (a deleted model's doc must not linger after an update). */
+function indexDesignDocuments(design: DesignData, parentPath: string[] = []): void {
+  const documents = designSearchDocuments(design, parentPath)
+  const newIds = documents.map((doc) => doc.id)
+  const staleIds = (designSubDocIds.get(design.id) ?? []).filter((id) => !newIds.includes(id))
+  for (const id of staleIds) {
+    searchService.removeDocument(id)
+    publishIndexUpdate('removed', id, 'design')
+  }
+  for (const doc of documents) {
+    searchService.indexDocument(doc)
+  }
+  designSubDocIds.set(design.id, newIds)
+  publishIndexUpdate('indexed', design.id, 'design')
+}
+
+/** Remove a design + every sub-document of its last index pass. */
+function removeDesignDocuments(designId: string): void {
+  const ids = designSubDocIds.get(designId) ?? [designId]
+  for (const id of ids) {
+    searchService.removeDocument(id)
+  }
+  designSubDocIds.delete(designId)
+  publishIndexUpdate('removed', designId, 'design')
 }
 
 /**
@@ -229,12 +359,15 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): 
   searchService.indexDocument(folderToSearchDocument(folder, parentPath))
   publishIndexUpdate('indexed', folder.id, 'folder')
 
-  // Index all items
+  // Index all items. The design guard MUST run before the request
+  // guard — see `isApiDesignData`.
   for (const item of folder.items) {
     if (isFolder(item)) {
       indexFolderRecursively(item, currentPath)
     } else if (isScenarioData(item)) {
       indexScenarioRecursively(item, currentPath)
+    } else if (isApiDesignData(item)) {
+      indexDesignDocuments(item, currentPath)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, folder.id, currentPath))
       publishIndexUpdate('indexed', item.id, 'request')
@@ -255,6 +388,8 @@ function indexScenarioRecursively(scenario: ScenarioData, parentPath: string[] =
       indexFolderRecursively(item, currentPath)
     } else if (isScenarioData(item)) {
       indexScenarioRecursively(item, currentPath)
+    } else if (isApiDesignData(item)) {
+      indexDesignDocuments(item, currentPath)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, scenario.id, currentPath))
       publishIndexUpdate('indexed', item.id, 'request')
@@ -276,6 +411,8 @@ function removeFolderRecursively(folder: FolderData): void {
       removeFolderRecursively(item)
     } else if (isScenarioData(item)) {
       removeScenarioRecursively(item)
+    } else if (isApiDesignData(item)) {
+      removeDesignDocuments(item.id)
     } else {
       searchService.removeDocument(item.id)
       publishIndexUpdate('removed', item.id, 'request')
@@ -290,6 +427,8 @@ function removeScenarioRecursively(scenario: ScenarioData): void {
       removeFolderRecursively(item)
     } else if (isScenarioData(item)) {
       removeScenarioRecursively(item)
+    } else if (isApiDesignData(item)) {
+      removeDesignDocuments(item.id)
     } else {
       searchService.removeDocument(item.id)
       publishIndexUpdate('removed', item.id, 'request')
@@ -387,6 +526,34 @@ class SearchIndexService {
         logger.debug('[SearchIndexService] REQUEST_DELETED', { id: payload.id })
         searchService.removeDocument(payload.id)
         publishIndexUpdate('removed', payload.id, 'request')
+      })
+    )
+
+    // Subscribe to design events: create/update re-walk the design's
+    // documents (sweeping entities dropped since the last pass);
+    // delete removes the design + every sub-document.
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.DESIGN_CREATED, (payload) => {
+        logger.debug('[SearchIndexService] DESIGN_CREATED', { id: payload.id })
+        if (isApiDesignData(payload.document)) {
+          indexDesignDocuments(payload.document, payload.parentFolderId !== undefined ? [payload.parentFolderId] : [])
+        }
+      })
+    )
+
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.DESIGN_UPDATED, (payload) => {
+        logger.debug('[SearchIndexService] DESIGN_UPDATED', { id: payload.id })
+        if (isApiDesignData(payload.document)) {
+          indexDesignDocuments(payload.document, payload.parentFolderId !== undefined ? [payload.parentFolderId] : [])
+        }
+      })
+    )
+
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.DESIGN_DELETED, (payload) => {
+        logger.debug('[SearchIndexService] DESIGN_DELETED', { id: payload.id })
+        removeDesignDocuments(payload.id)
       })
     )
 

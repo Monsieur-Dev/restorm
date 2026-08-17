@@ -102,3 +102,7 @@ tests/e2e/samples/sse-sample.restorm.responses.zip
 tests/e2e/samples/stomp-sample.restorm.responses.zip
 tests/e2e/samples/trpc-sample.restorm.responses.zip
 resources/sandbox-stdlib-prelude.js
+
+# Stray atomic-write leftovers a full e2e run can leave next to tracked
+# response archives (the writer renames <name>.tmp-<pid>-<ts> into place).
+tests/e2e/samples/*.tmp-*

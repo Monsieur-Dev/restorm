@@ -67,6 +67,32 @@ describe('designToApiDocumentation', () => {
       'GET /v1/users',
       'POST /v1/users'
     ])
+  })
+
+  it('stacks operations in flattened route order (the edit-link contract)', () => {
+    // ORDER CONTRACT: operations[i] ↔ the i-th id of
+    // routeGroups[].routes[] flattened in declaration order — the
+    // Documentation section's edit links map back through this index.
+    const design = buildReferenceApiDesign()
+    design.routeGroups.push({
+      id: 'group-admin',
+      doc: { name: 'Admin' },
+      routes: [
+        { id: 'route-admin-list', doc: { match: { urlPattern: '/admins', method: 'GET' } } },
+        { id: 'route-admin-get', doc: { match: { urlPattern: '/admins/{{id}}', method: 'GET' } } }
+      ]
+    })
+    const doc = designToApiDocumentation(design)
+    const flattenedIds = design.routeGroups.flatMap((group) => group.routes.map((route) => route.id))
+    expect(doc.operations).toHaveLength(flattenedIds.length)
+    expect(flattenedIds).toEqual([
+      'route-user-get', 'route-user-list', 'route-user-create',
+      'route-admin-list', 'route-admin-get'
+    ])
+    // Identity check by a per-route distinguishing field.
+    expect(doc.operations.map((op) => op.match.urlPattern)).toEqual([
+      '/v1/users/{{id}}', '/v1/users', '/v1/users', '/admins', '/admins/{{id}}'
+    ])
     expect(projection.operations.every((op) => op.group === 'Users')).toBe(true)
     expect(Object.keys(projection.groups)).toEqual(['Users'])
   })

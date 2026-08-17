@@ -829,8 +829,9 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           if (isScenario(rootItem)) {
             await searchIndexService.indexScenarioTree(rootItem)
           } else if (isApiDesign(rootItem)) {
-            // Designs join the search index with their own indexing pass
-            // (models/routes as sub-entries), not as a request.
+            // A design indexes itself + its models/enums/routes as
+            // sub-entries of the design category.
+            await searchIndexService.indexDesign(rootItem)
           } else if ('items' in rootItem) {
             await searchIndexService.indexFolderTree(rootItem)
           } else {

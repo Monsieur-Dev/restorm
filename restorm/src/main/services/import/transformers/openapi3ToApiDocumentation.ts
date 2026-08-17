@@ -550,8 +550,11 @@ export function openapi3ToApiDocumentation(
     try {
       const expanded = expandServerVariables(primaryServer)
       // A RELATIVE server url (allowed by OAS 3.0, and what a hostless
-      // design export produces) carries only the base path.
-      if (expanded.startsWith('/')) {
+      // design export produces) carries only the base path. A
+      // PROTOCOL-RELATIVE url (`//host/path`) is NOT a base path — it
+      // names a host; `new URL` can't parse it baseless, so it stays
+      // skipped exactly as before.
+      if (expanded.startsWith('/') && !expanded.startsWith('//')) {
         if (expanded !== '/') result.server = { basePath: expanded }
       } else {
         const url = new URL(expanded)

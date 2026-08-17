@@ -742,7 +742,8 @@
       "environment": "Környezetek",
       "settings": "Beállítások",
       "tag": "Címkék",
-      "scenario": "Forgatókönyvek"
+      "scenario": "Forgatókönyvek",
+      "design": "API-tervek"
     },
     "tooltip": {
       "noDetails": "Nincs elérhető részlet",

@@ -142,6 +142,14 @@ export function composeRoutePath(
  * enums join `models` under their own names (the shape importers use
  * for standalone enum schemas).
  */
+/**
+ * ⚠ ORDER CONTRACT: `operations` stacks `routeGroups[]` in declaration
+ * order, each group's `routes[]` in order — no sort, no filter. The
+ * design Documentation section's edit links rely on it to map
+ * `operations[i]` back to the i-th flattened route id
+ * (`DesignDocumentationSection`), and a unit test pins it. Don't
+ * reorder, filter or clone here without updating that consumer.
+ */
 export function designToApiDocumentation(design: ApiDesign): ApiDocumentation {
   const resolve = designNameResolver(design)
   const models: Record<string, ModelDocumentation> = {}

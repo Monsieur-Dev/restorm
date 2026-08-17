@@ -742,7 +742,8 @@
       "environment": "Mjediset",
       "settings": "Parametrat",
       "tag": "Etiketat",
-      "scenario": "Skenarë"
+      "scenario": "Skenarë",
+      "design": "Dizajne API"
     },
     "tooltip": {
       "noDetails": "Asnjë detaj në dispozicion",

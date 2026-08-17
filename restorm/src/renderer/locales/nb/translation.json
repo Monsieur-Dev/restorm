@@ -742,7 +742,8 @@
       "environment": "Miljøer",
       "settings": "Innstillinger",
       "tag": "Tagger",
-      "scenario": "Scenarier"
+      "scenario": "Scenarier",
+      "design": "API-design"
     },
     "tooltip": {
       "noDetails": "Ingen detaljer tilgjengelig",

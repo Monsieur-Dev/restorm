@@ -743,7 +743,8 @@
       "environment": "Medii",
       "settings": "Setări",
       "tag": "Etichete",
-      "scenario": "Scenarii"
+      "scenario": "Scenarii",
+      "design": "Designuri API"
     },
     "tooltip": {
       "noDetails": "Niciun detaliu disponibil",

@@ -741,7 +741,8 @@
       "environment": "环境",
       "settings": "设置",
       "tag": "标签",
-      "scenario": "场景"
+      "scenario": "场景",
+      "design": "API 设计"
     },
     "tooltip": {
       "noDetails": "无可用详情",

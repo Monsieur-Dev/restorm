@@ -742,7 +742,8 @@
       "environment": "Ympäristöt",
       "settings": "Asetukset",
       "tag": "Tagit",
-      "scenario": "Skenaariot"
+      "scenario": "Skenaariot",
+      "design": "API-suunnitelmat"
     },
     "tooltip": {
       "noDetails": "Ei tietoja saatavilla",

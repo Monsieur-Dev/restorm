@@ -741,7 +741,8 @@
       "environment": "環境",
       "settings": "設定",
       "tag": "標籤",
-      "scenario": "情境"
+      "scenario": "情境",
+      "design": "API 設計"
     },
     "tooltip": {
       "noDetails": "沒有可用的詳細資料",

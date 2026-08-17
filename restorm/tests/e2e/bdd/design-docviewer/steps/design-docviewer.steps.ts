@@ -101,8 +101,11 @@ When('I click the edit link of the {string} route in the documentation', async (
   await editButton.click()
 })
 
-Then('the routes section opens on a route card', async () => {
+Then('the routes section opens on the {string} route card', async ({}, summary: string) => {
   const p = requirePage()
   await expect(p.locator('[data-testid="design-routes-section"]')).toBeVisible({ timeout: 5000 })
   await expect(p.locator('[data-testid="design-route-tabs"]')).toBeVisible({ timeout: 5000 })
+  // Name the landing route: an index drift in the edit-link mapping
+  // must land on the WRONG summary and fail here.
+  await expect(p.locator('[data-testid="design-route-summary-label"]')).toContainText(summary, { timeout: 5000 })
 })

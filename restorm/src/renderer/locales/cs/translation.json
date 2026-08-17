@@ -744,7 +744,8 @@
       "environment": "Prostředí",
       "settings": "Nastavení",
       "tag": "Štítky",
-      "scenario": "Scénáře"
+      "scenario": "Scénáře",
+      "design": "Návrhy API"
     },
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",

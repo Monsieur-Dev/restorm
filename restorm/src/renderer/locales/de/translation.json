@@ -742,7 +742,8 @@
       "environment": "Umgebungen",
       "settings": "Einstellungen",
       "tag": "Tags",
-      "scenario": "Szenarien"
+      "scenario": "Szenarien",
+      "design": "API-Designs"
     },
     "tooltip": {
       "noDetails": "Keine Details verfügbar",

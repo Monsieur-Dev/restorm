@@ -1917,3 +1917,18 @@
 .documentation-host-composition__mapping-arrow {
   color: var(--description-foreground, rgba(127, 127, 127, 0.85));
 }
+
+/* Edit affordances (rendered only when a host wires the optional
+ * onEditOperation/onEditModel callbacks — the design doc viewer):
+ * quiet chrome that reads as metadata next to the title, not as a
+ * primary action. Lives here, next to the components that render it,
+ * so any future host gets the styling for free. */
+.documentation-host-route-header__edit-button,
+.documentation-host-model-node__edit-button {
+  opacity: 0.75;
+}
+
+.documentation-host-route-header__edit-button:hover,
+.documentation-host-model-node__edit-button:hover {
+  opacity: 1;
+}

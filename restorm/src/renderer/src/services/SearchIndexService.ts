@@ -14,17 +14,20 @@ import {
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario } from '../../../shared/types/collections'
+import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, Request, ApiDesign } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
+import { DESIGN_CODICON } from '../../../shared/design/designSections'
+import { composeRoutePath } from '../../../shared/design/apiDesignDoc'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
   request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
   folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
   scenario: { label: 'search.categories.scenario', icon: 'circuit-board', order: 3 },
-  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 4 },
-  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 5 },
-  tag: { label: 'search.categories.tag', icon: 'tag', order: 6 }
+  design: { label: 'search.categories.design', icon: DESIGN_CODICON, order: 4 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 5 },
+  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 6 },
+  tag: { label: 'search.categories.tag', icon: 'tag', order: 7 }
 }
 
 /** Metadata structure for search documents in restorm */
@@ -680,6 +683,83 @@ function requestToSearchDocument(
 }
 
 /**
+ * Walk an API design into its search documents: the design itself,
+ * then one entry per model / enum / route (names + descriptions, per
+ * the ticket). Entity ids are only unique WITHIN a design, so the
+ * per-entity docs use composite ids (`<designId>::model:<id>`) that
+ * can never collide with tree item ids. Navigation carries the
+ * design's section + entity id so a click re-opens the Design tab
+ * positioned on the right card (single-tab intent channel).
+ */
+export function designToSearchDocuments(
+  design: ApiDesign,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): ReturnType<typeof collectFolderDocuments> {
+  const path = [...parentPath, design.id]
+  const breadcrumb = parentNames.length > 0 ? { breadcrumb: parentNames } : {}
+  const entityBreadcrumb = { breadcrumb: [...parentNames, design.name] }
+  const documents: ReturnType<typeof collectFolderDocuments> = [{
+    id: design.id,
+    title: design.name,
+    ...(design.info.description !== undefined ? { description: design.info.description } : {}),
+    category: 'design',
+    icon: DESIGN_CODICON,
+    keywords: [...design.tags, design.info.title, design.info.version ?? ''].filter((s) => s !== '').join(' '),
+    navigation: { type: 'design', designId: design.id, path },
+    metadata: { tags: design.tags, ...(design.notes ? { notes: design.notes } : {}), ...breadcrumb }
+  }]
+  for (const model of design.models) {
+    documents.push({
+      id: `${design.id}::model:${model.id}`,
+      title: model.doc.name,
+      ...(model.doc.description !== undefined ? { description: model.doc.description } : {}),
+      category: 'design',
+      icon: 'symbol-class',
+      keywords: model.properties.map((p) => p.doc.name).join(' '),
+      navigation: { type: 'design', designId: design.id, section: 'models', entityId: model.id, path },
+      metadata: entityBreadcrumb
+    })
+  }
+  for (const enumEntity of design.enums) {
+    documents.push({
+      id: `${design.id}::enum:${enumEntity.id}`,
+      title: enumEntity.doc.name,
+      ...(enumEntity.doc.description !== undefined ? { description: enumEntity.doc.description } : {}),
+      category: 'design',
+      icon: 'symbol-enum',
+      keywords: (enumEntity.doc.enumValues ?? []).map((v) => String(v)).join(' '),
+      navigation: { type: 'design', designId: design.id, section: 'enums', entityId: enumEntity.id, path },
+      metadata: entityBreadcrumb
+    })
+  }
+  for (const group of design.routeGroups) {
+    for (const route of group.routes) {
+      // Routes have no name field: the UI title convention is the
+      // summary, falling back to the url pattern.
+      const summary = route.doc.summary
+      const title = summary !== undefined && summary !== '' ? summary : route.doc.match.urlPattern
+      const fullPath = composeRoutePath({
+        ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
+        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
+        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+      }, route.doc.match.urlPattern)
+      documents.push({
+        id: `${design.id}::route:${route.id}`,
+        title,
+        ...(route.doc.description !== undefined ? { description: route.doc.description } : {}),
+        category: 'design',
+        icon: 'type-hierarchy-sub',
+        keywords: [route.doc.match.method ?? 'GET', fullPath, group.doc.name].join(' '),
+        navigation: { type: 'design', designId: design.id, section: 'routes', entityId: route.id, path },
+        metadata: entityBreadcrumb
+      })
+    }
+  }
+  return documents
+}
+
+/**
  * Recursively collect all documents from a folder tree
  */
 function collectFolderDocuments(
@@ -718,6 +798,8 @@ function collectFolderDocuments(
       documents.push(...collectFolderDocuments(item, currentPath, currentNames))
     } else if (isScenario(item)) {
       documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
+    } else if (isApiDesign(item)) {
+      documents.push(...designToSearchDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
       documents.push(requestToSearchDocument(item, folder.id, currentPath, currentNames))
     }
@@ -748,6 +830,8 @@ function collectScenarioDocuments(
       documents.push(...collectFolderDocuments(item, currentPath, currentNames))
     } else if (isScenario(item)) {
       documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
+    } else if (isApiDesign(item)) {
+      documents.push(...designToSearchDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
       documents.push(requestToSearchDocument(item, scenario.id, currentPath, currentNames))
     }
@@ -825,6 +909,21 @@ class SearchIndexService {
       await searchService.indexDocuments([plainDoc])
     } catch (error) {
       logger.error('[SearchIndexService] Error indexing root request', { error: String(error), requestId: request.id })
+    }
+  }
+
+  /**
+   * Index a root-level API design (its own doc + one per model /
+   * enum / route). Designs nested in folders ride the folder walk.
+   */
+  async indexDesign(design: ApiDesign): Promise<void> {
+    try {
+      const documents = designToSearchDocuments(design)
+      // Plain objects: a design is a reactive Proxy the IPC rejects.
+      const plainDocuments = JSON.parse(JSON.stringify(documents)) as typeof documents
+      await searchService.indexDocuments(plainDocuments)
+    } catch (error) {
+      logger.error('[SearchIndexService] Error indexing design', { error: String(error), designId: design.id })
     }
   }
 

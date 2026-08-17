@@ -744,7 +744,8 @@
       "environment": "Środowiska",
       "settings": "Ustawienia",
       "tag": "Tagi",
-      "scenario": "Scenariusze"
+      "scenario": "Scenariusze",
+      "design": "Projekty API"
     },
     "tooltip": {
       "noDetails": "Brak dostępnych szczegółów",

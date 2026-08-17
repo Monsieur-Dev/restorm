@@ -742,7 +742,8 @@
       "environment": "Ortamlar",
       "settings": "Ayarlar",
       "tag": "Etiketler",
-      "scenario": "Senaryolar"
+      "scenario": "Senaryolar",
+      "design": "API tasarımları"
     },
     "tooltip": {
       "noDetails": "Ayrıntı yok",

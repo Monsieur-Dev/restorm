@@ -744,7 +744,8 @@
       "environment": "Середовища",
       "settings": "Параметри",
       "tag": "Теги",
-      "scenario": "Сценарії"
+      "scenario": "Сценарії",
+      "design": "Дизайни API"
     },
     "tooltip": {
       "noDetails": "Деталі недоступні",

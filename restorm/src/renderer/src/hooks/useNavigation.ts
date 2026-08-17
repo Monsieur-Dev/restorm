@@ -10,7 +10,7 @@ import { isFolder, isRequest, isScenario, isApiDesign, isEnvironmentFolder, isHT
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import { parseDesignSectionRowId } from '../../../shared/design/designSections'
 import { setPendingDesignSection } from '../services/designSectionIntent'
-import type { BreadcrumbItem } from '../../../shared/types/editor'
+import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/editor'
 
 /** Control whether opening a tab moves focus to it. Mirrors
  * `OpenTabOptions` from `useWorkbenchTabs` — kept in this hook's own
@@ -505,6 +505,16 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       handleItemClick(result.navigation['folderId'] as string)
     } else if (result.navigation?.['type'] === 'scenario' && result.navigation['scenarioId']) {
       handleItemClick(result.navigation['scenarioId'] as string)
+    } else if (result.navigation?.['type'] === 'design' && result.navigation['designId']) {
+      // A design ENTITY result stages the section intent first, so the
+      // single-tab open lands on the right card; the design's own
+      // result carries no section and opens the tab as-is.
+      const designId = result.navigation['designId'] as string
+      const section = result.navigation['section'] as DesignSectionKey | undefined
+      if (section !== undefined) {
+        setPendingDesignSection(designId, section, result.navigation['entityId'] as string | undefined)
+      }
+      handleItemClick(designId)
     }
   }, [handleItemClick])
 

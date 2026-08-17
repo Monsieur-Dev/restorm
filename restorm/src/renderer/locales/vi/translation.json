@@ -741,7 +741,8 @@
       "environment": "Môi trường",
       "settings": "Cài đặt",
       "tag": "Thẻ",
-      "scenario": "Kịch bản"
+      "scenario": "Kịch bản",
+      "design": "Thiết kế API"
     },
     "tooltip": {
       "noDetails": "Không có chi tiết",
