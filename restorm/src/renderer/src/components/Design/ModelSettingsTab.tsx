@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SelectBox, Toggle, type ISelectData } from 'electron-core-ui/renderer'
+import { Button, SelectBox, Toggle, type ISelectData } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignModel, IdentifierStrategy, ModelDesignMeta, ModelVolumetry } from '../../../../shared/types/collections'
 import { collectModelUsages, type DesignModelUsage } from '../../../../shared/design/designUsages'
-import { replaceModel } from './designMutations'
+import { generateCrud, generateSearchParams } from '../../../../shared/design/designRoutes'
+import { generateUniqueId } from '../../utils/treeManipulation'
+import { assignDesignSection, replaceModel } from './designMutations'
 
 const STRATEGIES: readonly IdentifierStrategy[] = ['uuid', 'autoIncrement', 'ulid']
 const VOLUMETRIES: readonly (ModelVolumetry | '')[] = ['', 'hundreds', 'tenThousands', 'millions']
@@ -98,7 +100,9 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
             options={identifierOptions}
             selected={identifierIndex}
             onDidSelect={(data: ISelectData) => {
-              const index = identifierOptions.findIndex((opt) => opt.text === data.selected)
+              // By INDEX, not by label: unnamed properties all render the
+              // same "(unnamed)" text.
+              const index = data.index
               if (index <= 0) {
                 setMeta({ identifier: undefined })
                 return
@@ -138,7 +142,8 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
             options={inheritOptions}
             selected={inheritIndex}
             onDidSelect={(data: ISelectData) => {
-              const index = inheritOptions.findIndex((opt) => opt.text === data.selected)
+              // By INDEX: two homonymous models are a reported-but-legal state.
+              const index = data.index
               if (index <= 0) {
                 setMeta({ inheritsFrom: undefined })
                 return
@@ -190,6 +195,37 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
             data-testid="design-model-soft-delete"
           />
         </label>
+      </div>
+
+      <h3 className="design-settings-group-title">{t('design.modelSettings.generators', 'Routes')}</h3>
+      <div className="design-generator-actions">
+        <Button
+          secondary
+          onClick={() => {
+            const { group } = generateCrud(design, model, generateUniqueId)
+            assignDesignSection(design, 'routeGroups', [...design.routeGroups, group])
+            onJumpTo('routes', group.id)
+          }}
+          data-testid="design-model-generate-crud"
+        >
+          {t('design.modelSettings.generateCrud', 'Generate the CRUD')}
+        </Button>
+        {model.properties.some((p) => p.design?.searchable === true) && (
+          <Button
+            secondary
+            onClick={() => {
+              const { routeGroups, changed } = generateSearchParams(design, model, generateUniqueId)
+              if (!changed) return
+              assignDesignSection(design, 'routeGroups', routeGroups)
+              const target = routeGroups.find((g) => g.routes.some((r) =>
+                Object.values(r.design?.responses ?? {}).some((resp) => resp.modelId === model.id && resp.list === true)))
+              if (target !== undefined) onJumpTo('routes', target.id)
+            }}
+            data-testid="design-model-generate-search"
+          >
+            {t('design.modelSettings.generateSearch', 'Generate the search routes')}
+          </Button>
+        )}
       </div>
 
       <h3 className="design-settings-group-title">{t('design.modelSettings.usedBy', 'Used by')}</h3>

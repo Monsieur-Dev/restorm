@@ -2247,7 +2247,10 @@
         "response": "vastaus {{code}}",
         "param": "parametri {{name}}",
         "inherits": "{{name}} perii siitä"
-      }
+      },
+      "generators": "Reitit",
+      "generateCrud": "Generoi CRUD",
+      "generateSearch": "Generoi hakureitit"
     },
     "schema": {
       "addProperty": "Lisää ominaisuus",
@@ -2290,7 +2293,10 @@
       "unique": "yksilöllinen",
       "immutable": "muuttumaton",
       "searchable": "haettavissa",
-      "deprecated": "vanhentunut"
+      "deprecated": "vanhentunut",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Oletus",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Peittää perityn ominaisuuden",
       "referenceTargetUnknown": "Viitattua tyyppiä ei enää ole",
       "constraintPatternInvalid": "Virheellinen kaava (säännöllinen lauseke)",
-      "constraintMinAboveMax": "Minimi ylittää maksimin"
+      "constraintMinAboveMax": "Minimi ylittää maksimin",
+      "modelNameEmpty": "Mallilla ei ole nimeä",
+      "enumNameEmpty": "Enumilla ei ole nimeä",
+      "groupNameEmpty": "Ryhmällä ei ole nimeä",
+      "modelNameDuplicate": "Mallin nimi on jo käytössä",
+      "enumNameDuplicate": "Enumin nimi on jo käytössä",
+      "componentNameCollision": "Malli ja enum jakavat tämän nimen",
+      "groupNameDuplicate": "Ryhmän nimi on jo käytössä",
+      "inheritanceTargetUnknown": "Peritty malli ei enää ole olemassa",
+      "inheritanceCycle": "Kehämäinen perintäketju",
+      "identifierPropertyUnknown": "Tunnisteominaisuutta ei enää ole",
+      "paramLinkTargetUnknown": "Parametrilinkki osoittaa puuttuvaan ominaisuuteen",
+      "bodyModelUnknown": "Rungon mallia ei enää ole",
+      "responseModelUnknown": "Vastausmallia ei enää ole",
+      "responseExampleUnknown": "Vastaus tarjoilee puuttuvan esimerkin"
+    },
+    "traffic": {
+      "low": "Matala",
+      "medium": "Keskitaso",
+      "high": "Korkea"
+    },
+    "routes": {
+      "addGroup": "Lisää ryhmä",
+      "addRoute": "Lisää reitti",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Valitse ryhmä tai reitti, tai luo ryhmä.",
+      "deleteGroupTitle": "Poistetaanko {{name}}?",
+      "deleteGroupImpact": "Ryhmä ja sen {{count}} reittiä poistetaan.",
+      "method": "Metodi",
+      "path": "Polku",
+      "summary": "Yhteenveto",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Määrittely",
+        "responses": "Vastaukset"
+      },
+      "group": {
+        "auth": "Vaadittu auth",
+        "authInherited": "Suunnitelman oletus",
+        "versionPrefix": "Versioetuliite",
+        "headers": "Sopimusotsakkeet (reittien perimät)",
+        "headerName": "Otsake",
+        "addHeader": "Lisää otsake",
+        "deleteHeader": "Poista otsake",
+        "noHeaders": "Ei jaettua otsaketta."
+      },
+      "params": {
+        "pathTitle": "Polkuparametrit",
+        "otherTitle": "Parametrit (query / header)",
+        "name": "Nimi",
+        "location": "Sijainti",
+        "link": "Mallilinkki",
+        "noLink": "—",
+        "add": "Lisää parametri",
+        "delete": "Poista parametri",
+        "auto": "auto",
+        "pathEmpty": "Kirjoita {{param}} polkuun luodaksesi sen rivin.",
+        "otherEmpty": "Ei vielä query- tai header-parametreja."
+      },
+      "body": {
+        "label": "Pyynnön runko",
+        "empty": "(tyhjä)"
+      },
+      "responses": {
+        "add": "Lisää",
+        "codePlaceholder": "Tilakoodi",
+        "standardErrors": "+ vakiovirheet",
+        "empty": "Ei vielä määriteltyä vastausta.",
+        "emptyBody": "tyhjä runko",
+        "model": "Palautettava malli",
+        "list": "Lista",
+        "paginated": "Sivutettu",
+        "listOf": "lista {{name}}",
+        "paginatedListOf": "sivutettu lista {{name}}",
+        "example": "Tarjoiltava esimerkki",
+        "exampleAuto": "(auto generoitu)",
+        "delete": "Poista vastaus"
+      },
+      "settings": {
+        "inherited": "Peritty ryhmältä",
+        "authInherited": "Peritty ryhmältä",
+        "editGroup": "Muokkaa ryhmässä ↗",
+        "headers": "Sopimusotsakkeet",
+        "behaviour": "Käyttäytyminen",
+        "idempotent": "Idempotentti",
+        "cacheSeconds": "Välimuisti (sekuntia)",
+        "traffic": "Odotettu liikenne",
+        "authOverride": "Auth-ohitus",
+        "pagination": "Sivutus",
+        "defaultLimit": "Oletussivukoko",
+        "maxLimit": "Enimmäissivukoko"
+      }
     }
   },
   "mqtt": {

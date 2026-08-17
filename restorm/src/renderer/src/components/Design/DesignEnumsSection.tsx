@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { ApiDesign, DesignEnum, CustomValueList } from '../../../../shared/types/collections'
 import { CustomValueListsEditor } from '../Folders/CustomValueListsEditor'
 import { assignDesignSection, uniqueComponentName } from './designMutations'
-import { displayValue } from './designDisplay'
+import { bridgeEnumValues, displayValue } from './designDisplay'
 
 /**
  * The Enums section of the Design tab: the SAME master-details editor
@@ -32,20 +32,13 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
   })), [design.enums])
 
   // CustomValueList[] → enums. A row's text comes back in `label` (the
-  // value column is hidden). An untouched row keeps its ORIGINAL value
-  // (numeric enum members survive the string round-trip); an edited or
-  // new row stores the typed string.
+  // value column is hidden); `bridgeEnumValues` restores the typed
+  // originals.
   const onListsChange = useCallback((next: CustomValueList[]) => {
     const byId = new Map(design.enums.map((e) => [e.id, e]))
     const enums: DesignEnum[] = next.map((list) => {
       const existing = byId.get(list.id)
-      const previousValues = existing?.doc.enumValues ?? []
-      const values = list.entries
-        .filter((entry) => entry.label.trim() !== '')
-        .map((entry, index) => {
-          const previous = previousValues[index]
-          return previous !== undefined && displayValue(previous) === entry.label ? previous : entry.label
-        })
+      const values = bridgeEnumValues(existing?.doc.enumValues ?? [], list.entries.map((entry) => entry.label))
       if (existing !== undefined) {
         return { ...existing, doc: { ...existing.doc, name: list.name, enumValues: values } }
       }

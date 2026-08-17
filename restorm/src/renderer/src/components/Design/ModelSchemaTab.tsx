@@ -20,7 +20,7 @@ import type {
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { generateUniqueId } from '../../utils/treeManipulation'
 import { replaceModel } from './designMutations'
-import { displayValue } from './designDisplay'
+import { displayValue, parseTypedValue } from './designDisplay'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 /** The type vocabulary a property can pick from: primitives first, then
@@ -234,10 +234,10 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
     if (property.doc.required) badges.push(t('design.flags.required', 'required'))
     if (property.doc.nullable === true) badges.push(t('design.flags.nullable', 'nullable'))
     if (property.design?.unique === true) badges.push(t('design.flags.unique', 'unique'))
-    if (property.doc.readOnly === true) badges.push('readOnly')
-    if (property.design?.writeOnly === true) badges.push('writeOnly')
+    if (property.doc.readOnly === true) badges.push(t('design.flags.readOnly', 'readOnly'))
+    if (property.design?.writeOnly === true) badges.push(t('design.flags.writeOnly', 'writeOnly'))
     if (property.design?.immutable === true) badges.push(t('design.flags.immutable', 'immutable'))
-    if (property.intents?.pii === true) badges.push('PII')
+    if (property.intents?.pii === true) badges.push(t('design.flags.pii', 'PII'))
     if (property.design?.searchable === true) badges.push(t('design.flags.searchable', 'searchable'))
     if (property.doc.deprecated === true) badges.push(t('design.flags.deprecated', 'deprecated'))
     return badges
@@ -525,10 +525,10 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
     required: t('design.flags.required', 'required'),
     nullable: t('design.flags.nullable', 'nullable'),
     unique: t('design.flags.unique', 'unique'),
-    readOnly: 'readOnly',
-    writeOnly: 'writeOnly',
+    readOnly: t('design.flags.readOnly', 'readOnly'),
+    writeOnly: t('design.flags.writeOnly', 'writeOnly'),
     immutable: t('design.flags.immutable', 'immutable'),
-    pii: 'PII',
+    pii: t('design.flags.pii', 'PII'),
     searchable: t('design.flags.searchable', 'searchable'),
     deprecated: t('design.flags.deprecated', 'deprecated')
   }
@@ -579,8 +579,8 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
             options={typeChoices.map((c) => ({ text: choiceLabel(c) }))}
             selected={currentChoiceIndex}
             onDidSelect={(data: ISelectData) => {
-              const index = typeChoices.findIndex((c) => choiceLabel(c) === data.selected)
-              const picked = typeChoices[index]
+              // By INDEX: labels embed model/enum names, which can collide.
+              const picked = typeChoices[data.index]
               if (picked !== undefined) applyTypeChoice(picked)
             }}
             selectBoxOptions={{ ariaLabel: t('design.schema.fields.type', 'Type'), useCustomDrawn: true }}
@@ -616,8 +616,8 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
               options={elementChoices.map((c) => ({ text: choiceLabel(c) }))}
               selected={currentElementIndex}
               onDidSelect={(data: ISelectData) => {
-                const index = elementChoices.findIndex((c) => choiceLabel(c) === data.selected)
-                const picked = elementChoices[index]
+                // By INDEX — same collision risk as the type dropdown.
+                const picked = elementChoices[data.index]
                 if (picked !== undefined) applyElementChoice(picked)
               }}
               selectBoxOptions={{ ariaLabel: t('design.schema.fields.elementType', 'Element type'), useCustomDrawn: true }}
@@ -667,7 +667,9 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
             onChange={(value) => {
               onUpdate((p) => {
                 const { example: _dropped, ...docRest } = p.doc
-                return { ...p, doc: value === '' ? docRest : { ...docRest, example: value } }
+                // Same typed-value door as the examples tab — an integer
+                // property must store 42, never "42".
+                return { ...p, doc: value === '' ? docRest : { ...docRest, example: parseTypedValue(p, value) } }
               })
             }}
             options={{ type: 'text', ariaLabel: t('design.schema.fields.example', 'Example') }}
@@ -768,7 +770,8 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
             onChange={(value) => {
               onUpdate((p) => {
                 const { defaultValue: _dropped, ...rest } = p.design ?? {}
-                const design = value === '' ? rest : { ...rest, defaultValue: value }
+                // Typed like doc.example — an integer default stores 3, not "3".
+                const design = value === '' ? rest : { ...rest, defaultValue: parseTypedValue(p, value) }
                 return rebuiltProperty(p, p.doc, p.intents, design)
               })
             }}

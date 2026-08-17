@@ -2247,7 +2247,10 @@
         "response": "response {{code}}",
         "param": "param {{name}}",
         "inherits": "{{name}} inherits from it"
-      }
+      },
+      "generators": "Routes",
+      "generateCrud": "Generate the CRUD",
+      "generateSearch": "Generate the search routes"
     },
     "schema": {
       "addProperty": "Add a property",
@@ -2290,7 +2293,10 @@
       "unique": "unique",
       "immutable": "immutable",
       "searchable": "searchable",
-      "deprecated": "deprecated"
+      "deprecated": "deprecated",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Default",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Shadows an inherited property",
       "referenceTargetUnknown": "The referenced type no longer exists",
       "constraintPatternInvalid": "Invalid pattern (regular expression)",
-      "constraintMinAboveMax": "Min exceeds max"
+      "constraintMinAboveMax": "Min exceeds max",
+      "modelNameEmpty": "The model has no name",
+      "enumNameEmpty": "The enum has no name",
+      "groupNameEmpty": "The group has no name",
+      "modelNameDuplicate": "Duplicate model name",
+      "enumNameDuplicate": "Duplicate enum name",
+      "componentNameCollision": "A model and an enum share this name",
+      "groupNameDuplicate": "Duplicate group name",
+      "inheritanceTargetUnknown": "The inherited model no longer exists",
+      "inheritanceCycle": "Circular inheritance chain",
+      "identifierPropertyUnknown": "The identifier property no longer exists",
+      "paramLinkTargetUnknown": "A parameter link points at a missing property",
+      "bodyModelUnknown": "The body model no longer exists",
+      "responseModelUnknown": "A response model no longer exists",
+      "responseExampleUnknown": "A response serves a missing example"
+    },
+    "traffic": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "routes": {
+      "addGroup": "Add a group",
+      "addRoute": "Add a route",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Select a group or a route, or create a group.",
+      "deleteGroupTitle": "Delete {{name}}?",
+      "deleteGroupImpact": "The group and its {{count}} routes will be deleted.",
+      "method": "Method",
+      "path": "Path",
+      "summary": "Summary",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definition",
+        "responses": "Responses"
+      },
+      "group": {
+        "auth": "Required auth",
+        "authInherited": "Design default",
+        "versionPrefix": "Version prefix",
+        "headers": "Contract headers (inherited by routes)",
+        "headerName": "Header",
+        "addHeader": "Add a header",
+        "deleteHeader": "Delete the header",
+        "noHeaders": "No shared header."
+      },
+      "params": {
+        "pathTitle": "Path parameters",
+        "otherTitle": "Parameters (query / header)",
+        "name": "Name",
+        "location": "In",
+        "link": "Model link",
+        "noLink": "—",
+        "add": "Add a parameter",
+        "delete": "Delete the parameter",
+        "auto": "auto",
+        "pathEmpty": "Type a {{param}} in the path to create its row.",
+        "otherEmpty": "No query or header parameters yet."
+      },
+      "body": {
+        "label": "Request body",
+        "empty": "(empty)"
+      },
+      "responses": {
+        "add": "Add",
+        "codePlaceholder": "Status code",
+        "standardErrors": "+ standard errors",
+        "empty": "No response declared yet.",
+        "emptyBody": "empty body",
+        "model": "Returned model",
+        "list": "List",
+        "paginated": "Paginated",
+        "listOf": "list of {{name}}",
+        "paginatedListOf": "paginated list of {{name}}",
+        "example": "Served example",
+        "exampleAuto": "(seeded auto)",
+        "delete": "Delete the response"
+      },
+      "settings": {
+        "inherited": "Inherited from the group",
+        "authInherited": "Inherited from the group",
+        "editGroup": "Edit in the group ↗",
+        "headers": "Contract headers",
+        "behaviour": "Behaviour",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (seconds)",
+        "traffic": "Expected traffic",
+        "authOverride": "Auth override",
+        "pagination": "Pagination",
+        "defaultLimit": "Default page size",
+        "maxLimit": "Max page size"
+      }
     }
   },
   "mqtt": {

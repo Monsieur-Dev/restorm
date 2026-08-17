@@ -2247,7 +2247,10 @@
         "response": "svar {{code}}",
         "param": "parameter {{name}}",
         "inherits": "{{name}} ärver från den"
-      }
+      },
+      "generators": "Rutter",
+      "generateCrud": "Generera CRUD",
+      "generateSearch": "Generera sökrutter"
     },
     "schema": {
       "addProperty": "Lägg till en egenskap",
@@ -2290,7 +2293,10 @@
       "unique": "unik",
       "immutable": "oföränderlig",
       "searchable": "sökbar",
-      "deprecated": "utfasad"
+      "deprecated": "utfasad",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Standard",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Skuggar en ärvd egenskap",
       "referenceTargetUnknown": "Den refererade typen finns inte längre",
       "constraintPatternInvalid": "Ogiltigt mönster (reguljärt uttryck)",
-      "constraintMinAboveMax": "Min överstiger max"
+      "constraintMinAboveMax": "Min överstiger max",
+      "modelNameEmpty": "Modellen saknar namn",
+      "enumNameEmpty": "Enumen saknar namn",
+      "groupNameEmpty": "Gruppen saknar namn",
+      "modelNameDuplicate": "Duplicerat modellnamn",
+      "enumNameDuplicate": "Duplicerat enumnamn",
+      "componentNameCollision": "En modell och en enum delar detta namn",
+      "groupNameDuplicate": "Duplicerat gruppnamn",
+      "inheritanceTargetUnknown": "Den ärvda modellen finns inte längre",
+      "inheritanceCycle": "Cirkulär arvskedja",
+      "identifierPropertyUnknown": "Identifierar-egenskapen finns inte längre",
+      "paramLinkTargetUnknown": "En parameterlänk pekar på en saknad egenskap",
+      "bodyModelUnknown": "Body-modellen finns inte längre",
+      "responseModelUnknown": "En svarsmodell finns inte längre",
+      "responseExampleUnknown": "Ett svar serverar ett saknat exempel"
+    },
+    "traffic": {
+      "low": "Låg",
+      "medium": "Medel",
+      "high": "Hög"
+    },
+    "routes": {
+      "addGroup": "Lägg till en grupp",
+      "addRoute": "Lägg till en rutt",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Välj en grupp eller en rutt, eller skapa en grupp.",
+      "deleteGroupTitle": "Ta bort {{name}}?",
+      "deleteGroupImpact": "Gruppen och dess {{count}} rutter tas bort.",
+      "method": "Metod",
+      "path": "Sökväg",
+      "summary": "Sammanfattning",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definition",
+        "responses": "Svar"
+      },
+      "group": {
+        "auth": "Krävd auth",
+        "authInherited": "Designens standard",
+        "versionPrefix": "Versionsprefix",
+        "headers": "Kontrakt-headers (ärvda av rutter)",
+        "headerName": "Header",
+        "addHeader": "Lägg till en header",
+        "deleteHeader": "Ta bort headern",
+        "noHeaders": "Ingen delad header."
+      },
+      "params": {
+        "pathTitle": "Sökvägsparametrar",
+        "otherTitle": "Parametrar (query / header)",
+        "name": "Namn",
+        "location": "I",
+        "link": "Modellänk",
+        "noLink": "—",
+        "add": "Lägg till en parameter",
+        "delete": "Ta bort parametern",
+        "auto": "auto",
+        "pathEmpty": "Skriv en {{param}} i sökvägen för att skapa dess rad.",
+        "otherEmpty": "Inga query- eller header-parametrar ännu."
+      },
+      "body": {
+        "label": "Request-body",
+        "empty": "(tom)"
+      },
+      "responses": {
+        "add": "Lägg till",
+        "codePlaceholder": "Statuskod",
+        "standardErrors": "+ standardfel",
+        "empty": "Inget svar deklarerat ännu.",
+        "emptyBody": "tom body",
+        "model": "Returnerad modell",
+        "list": "Lista",
+        "paginated": "Paginerad",
+        "listOf": "lista av {{name}}",
+        "paginatedListOf": "paginerad lista av {{name}}",
+        "example": "Serverat exempel",
+        "exampleAuto": "(auto genererat)",
+        "delete": "Ta bort svaret"
+      },
+      "settings": {
+        "inherited": "Ärvt från gruppen",
+        "authInherited": "Ärvt från gruppen",
+        "editGroup": "Redigera i gruppen ↗",
+        "headers": "Kontrakt-headers",
+        "behaviour": "Beteende",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (sekunder)",
+        "traffic": "Förväntad trafik",
+        "authOverride": "Auth-åsidosättning",
+        "pagination": "Paginering",
+        "defaultLimit": "Standard sidstorlek",
+        "maxLimit": "Max sidstorlek"
+      }
     }
   },
   "mqtt": {

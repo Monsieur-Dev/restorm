@@ -2249,7 +2249,10 @@
         "response": "відповідь {{code}}",
         "param": "параметр {{name}}",
         "inherits": "{{name}} успадковує від неї"
-      }
+      },
+      "generators": "Маршрути",
+      "generateCrud": "Згенерувати CRUD",
+      "generateSearch": "Згенерувати маршрути пошуку"
     },
     "schema": {
       "addProperty": "Додати властивість",
@@ -2292,7 +2295,10 @@
       "unique": "унікальна",
       "immutable": "незмінна",
       "searchable": "доступна для пошуку",
-      "deprecated": "застаріла"
+      "deprecated": "застаріла",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Типовий",
@@ -2331,7 +2337,98 @@
       "propertyShadowsParent": "Затіняє успадковану властивість",
       "referenceTargetUnknown": "Тип, на який є посилання, більше не існує",
       "constraintPatternInvalid": "Некоректний шаблон (регулярний вираз)",
-      "constraintMinAboveMax": "Мін перевищує макс"
+      "constraintMinAboveMax": "Мін перевищує макс",
+      "modelNameEmpty": "Модель не має назви",
+      "enumNameEmpty": "Енум не має назви",
+      "groupNameEmpty": "Група не має назви",
+      "modelNameDuplicate": "Дубльована назва моделі",
+      "enumNameDuplicate": "Дубльована назва енуму",
+      "componentNameCollision": "Модель і енум мають однакову назву",
+      "groupNameDuplicate": "Дубльована назва групи",
+      "inheritanceTargetUnknown": "Успадкованої моделі більше не існує",
+      "inheritanceCycle": "Циклічний ланцюг успадкування",
+      "identifierPropertyUnknown": "Ідентифікаційної властивості більше не існує",
+      "paramLinkTargetUnknown": "Звʼязок параметра вказує на відсутню властивість",
+      "bodyModelUnknown": "Моделі тіла більше не існує",
+      "responseModelUnknown": "Моделі відповіді більше не існує",
+      "responseExampleUnknown": "Відповідь подає відсутній приклад"
+    },
+    "traffic": {
+      "low": "Низький",
+      "medium": "Середній",
+      "high": "Високий"
+    },
+    "routes": {
+      "addGroup": "Додати групу",
+      "addRoute": "Додати маршрут",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Виберіть групу або маршрут, або створіть групу.",
+      "deleteGroupTitle": "Видалити {{name}}?",
+      "deleteGroupImpact": "Групу та її {{count}} маршрутів буде видалено.",
+      "method": "Метод",
+      "path": "Шлях",
+      "summary": "Підсумок",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Визначення",
+        "responses": "Відповіді"
+      },
+      "group": {
+        "auth": "Обовʼязкова автентифікація",
+        "authInherited": "Типове дизайну",
+        "versionPrefix": "Префікс версії",
+        "headers": "Контрактні заголовки (успадковуються маршрутами)",
+        "headerName": "Заголовок",
+        "addHeader": "Додати заголовок",
+        "deleteHeader": "Видалити заголовок",
+        "noHeaders": "Немає спільного заголовка."
+      },
+      "params": {
+        "pathTitle": "Параметри шляху",
+        "otherTitle": "Параметри (query / header)",
+        "name": "Назва",
+        "location": "Де",
+        "link": "Звʼязок із моделлю",
+        "noLink": "—",
+        "add": "Додати параметр",
+        "delete": "Видалити параметр",
+        "auto": "авто",
+        "pathEmpty": "Введіть {{param}} у шляху, щоб створити його рядок.",
+        "otherEmpty": "Ще немає query або header параметрів."
+      },
+      "body": {
+        "label": "Тіло запиту",
+        "empty": "(порожнє)"
+      },
+      "responses": {
+        "add": "Додати",
+        "codePlaceholder": "Код статусу",
+        "standardErrors": "+ стандартні помилки",
+        "empty": "Ще немає оголошеної відповіді.",
+        "emptyBody": "порожнє тіло",
+        "model": "Повернута модель",
+        "list": "Список",
+        "paginated": "Посторінкова",
+        "listOf": "список {{name}}",
+        "paginatedListOf": "посторінковий список {{name}}",
+        "example": "Поданий приклад",
+        "exampleAuto": "(авто згенерований)",
+        "delete": "Видалити відповідь"
+      },
+      "settings": {
+        "inherited": "Успадковано від групи",
+        "authInherited": "Успадковано від групи",
+        "editGroup": "Редагувати в групі ↗",
+        "headers": "Контрактні заголовки",
+        "behaviour": "Поведінка",
+        "idempotent": "Ідемпотентний",
+        "cacheSeconds": "Кеш (секунди)",
+        "traffic": "Очікуваний трафік",
+        "authOverride": "Перевизначення автентифікації",
+        "pagination": "Пагінація",
+        "defaultLimit": "Типовий розмір сторінки",
+        "maxLimit": "Макс. розмір сторінки"
+      }
     }
   },
   "mqtt": {

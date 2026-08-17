@@ -2247,7 +2247,10 @@
         "response": "svar {{code}}",
         "param": "parameter {{name}}",
         "inherits": "{{name}} arver fra den"
-      }
+      },
+      "generators": "Ruter",
+      "generateCrud": "Generer CRUD",
+      "generateSearch": "Generer søkeruter"
     },
     "schema": {
       "addProperty": "Legg til en egenskap",
@@ -2290,7 +2293,10 @@
       "unique": "unik",
       "immutable": "uforanderlig",
       "searchable": "søkbar",
-      "deprecated": "utfaset"
+      "deprecated": "utfaset",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Standard",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Skjuler en arvet egenskap",
       "referenceTargetUnknown": "Den refererte typen finnes ikke lenger",
       "constraintPatternInvalid": "Ugyldig mønster (regulært uttrykk)",
-      "constraintMinAboveMax": "Min overstiger maks"
+      "constraintMinAboveMax": "Min overstiger maks",
+      "modelNameEmpty": "Modellen har ikke noe navn",
+      "enumNameEmpty": "Enumen har ikke noe navn",
+      "groupNameEmpty": "Gruppen har ikke noe navn",
+      "modelNameDuplicate": "Duplisert modellnavn",
+      "enumNameDuplicate": "Duplisert enumnavn",
+      "componentNameCollision": "En modell og en enum deler dette navnet",
+      "groupNameDuplicate": "Duplisert gruppenavn",
+      "inheritanceTargetUnknown": "Den arvede modellen finnes ikke lenger",
+      "inheritanceCycle": "Sirkulær arvekjede",
+      "identifierPropertyUnknown": "Identifikator-egenskapen finnes ikke lenger",
+      "paramLinkTargetUnknown": "En parameterlenke peker på en manglende egenskap",
+      "bodyModelUnknown": "Body-modellen finnes ikke lenger",
+      "responseModelUnknown": "En svarmodell finnes ikke lenger",
+      "responseExampleUnknown": "Et svar serverer et manglende eksempel"
+    },
+    "traffic": {
+      "low": "Lav",
+      "medium": "Middels",
+      "high": "Høy"
+    },
+    "routes": {
+      "addGroup": "Legg til en gruppe",
+      "addRoute": "Legg til en rute",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Velg en gruppe eller en rute, eller opprett en gruppe.",
+      "deleteGroupTitle": "Slette {{name}}?",
+      "deleteGroupImpact": "Gruppen og dens {{count}} ruter slettes.",
+      "method": "Metode",
+      "path": "Sti",
+      "summary": "Sammendrag",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definisjon",
+        "responses": "Svar"
+      },
+      "group": {
+        "auth": "Påkrevd auth",
+        "authInherited": "Designets standard",
+        "versionPrefix": "Versjonsprefiks",
+        "headers": "Kontrakt-headere (arvet av ruter)",
+        "headerName": "Header",
+        "addHeader": "Legg til en header",
+        "deleteHeader": "Slett headeren",
+        "noHeaders": "Ingen delt header."
+      },
+      "params": {
+        "pathTitle": "Stiparametre",
+        "otherTitle": "Parametre (query / header)",
+        "name": "Navn",
+        "location": "I",
+        "link": "Modellenke",
+        "noLink": "—",
+        "add": "Legg til en parameter",
+        "delete": "Slett parameteren",
+        "auto": "auto",
+        "pathEmpty": "Skriv en {{param}} i stien for å opprette raden.",
+        "otherEmpty": "Ingen query- eller header-parametre ennå."
+      },
+      "body": {
+        "label": "Request-body",
+        "empty": "(tom)"
+      },
+      "responses": {
+        "add": "Legg til",
+        "codePlaceholder": "Statuskode",
+        "standardErrors": "+ standardfeil",
+        "empty": "Ingen svar deklarert ennå.",
+        "emptyBody": "tom body",
+        "model": "Returnert modell",
+        "list": "Liste",
+        "paginated": "Paginert",
+        "listOf": "liste av {{name}}",
+        "paginatedListOf": "paginert liste av {{name}}",
+        "example": "Servert eksempel",
+        "exampleAuto": "(auto generert)",
+        "delete": "Slett svaret"
+      },
+      "settings": {
+        "inherited": "Arvet fra gruppen",
+        "authInherited": "Arvet fra gruppen",
+        "editGroup": "Rediger i gruppen ↗",
+        "headers": "Kontrakt-headere",
+        "behaviour": "Atferd",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (sekunder)",
+        "traffic": "Forventet trafikk",
+        "authOverride": "Auth-overstyring",
+        "pagination": "Paginering",
+        "defaultLimit": "Standard sidestørrelse",
+        "maxLimit": "Maks sidestørrelse"
+      }
     }
   },
   "mqtt": {

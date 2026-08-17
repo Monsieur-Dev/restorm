@@ -2247,7 +2247,10 @@
         "response": "përgjigje {{code}}",
         "param": "parametri {{name}}",
         "inherits": "{{name}} trashëgon prej tij"
-      }
+      },
+      "generators": "Rrugët",
+      "generateCrud": "Gjenero CRUD",
+      "generateSearch": "Gjenero rrugët e kërkimit"
     },
     "schema": {
       "addProperty": "Shto një veti",
@@ -2290,7 +2293,10 @@
       "unique": "unik",
       "immutable": "i pandryshueshëm",
       "searchable": "i kërkueshëm",
-      "deprecated": "i vjetruar"
+      "deprecated": "i vjetruar",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Parazgjedhja",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Mbulon një veti të trashëguar",
       "referenceTargetUnknown": "Tipi i referuar nuk ekziston më",
       "constraintPatternInvalid": "Model i pavlefshëm (shprehje e rregullt)",
-      "constraintMinAboveMax": "Min tejkalon max"
+      "constraintMinAboveMax": "Min tejkalon max",
+      "modelNameEmpty": "Modeli nuk ka emër",
+      "enumNameEmpty": "Enumi nuk ka emër",
+      "groupNameEmpty": "Grupi nuk ka emër",
+      "modelNameDuplicate": "Emër modeli i dublikuar",
+      "enumNameDuplicate": "Emër enumi i dublikuar",
+      "componentNameCollision": "Një model dhe një enum ndajnë këtë emër",
+      "groupNameDuplicate": "Emër grupi i dublikuar",
+      "inheritanceTargetUnknown": "Modeli i trashëguar nuk ekziston më",
+      "inheritanceCycle": "Zinxhir trashëgimie rrethor",
+      "identifierPropertyUnknown": "Vetia identifikuese nuk ekziston më",
+      "paramLinkTargetUnknown": "Një lidhje parametri tregon një veti që mungon",
+      "bodyModelUnknown": "Modeli i trupit nuk ekziston më",
+      "responseModelUnknown": "Një model përgjigjeje nuk ekziston më",
+      "responseExampleUnknown": "Një përgjigje shërben një shembull që mungon"
+    },
+    "traffic": {
+      "low": "I ulët",
+      "medium": "Mesatar",
+      "high": "I lartë"
+    },
+    "routes": {
+      "addGroup": "Shto një grup",
+      "addRoute": "Shto një rrugë",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Zgjidhni një grup ose një rrugë, ose krijoni një grup.",
+      "deleteGroupTitle": "Të fshihet {{name}}?",
+      "deleteGroupImpact": "Grupi dhe {{count}} rrugët e tij do të fshihen.",
+      "method": "Metoda",
+      "path": "Shtegu",
+      "summary": "Përmbledhja",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Përkufizimi",
+        "responses": "Përgjigjet"
+      },
+      "group": {
+        "auth": "Auth i kërkuar",
+        "authInherited": "Parazgjedhja e dizajnit",
+        "versionPrefix": "Prefiksi i versionit",
+        "headers": "Kokat e kontratës (të trashëguara nga rrugët)",
+        "headerName": "Koka",
+        "addHeader": "Shto një kokë",
+        "deleteHeader": "Fshi kokën",
+        "noHeaders": "Asnjë kokë e përbashkët."
+      },
+      "params": {
+        "pathTitle": "Parametrat e shtegut",
+        "otherTitle": "Parametrat (query / header)",
+        "name": "Emri",
+        "location": "Në",
+        "link": "Lidhja e modelit",
+        "noLink": "—",
+        "add": "Shto një parametër",
+        "delete": "Fshi parametrin",
+        "auto": "auto",
+        "pathEmpty": "Shkruani një {{param}} në shteg për të krijuar rreshtin e tij.",
+        "otherEmpty": "Ende asnjë parametër query ose header."
+      },
+      "body": {
+        "label": "Trupi i kërkesës",
+        "empty": "(bosh)"
+      },
+      "responses": {
+        "add": "Shto",
+        "codePlaceholder": "Kodi i statusit",
+        "standardErrors": "+ gabimet standarde",
+        "empty": "Ende asnjë përgjigje e deklaruar.",
+        "emptyBody": "trup bosh",
+        "model": "Modeli i kthyer",
+        "list": "Listë",
+        "paginated": "E faqosur",
+        "listOf": "listë e {{name}}",
+        "paginatedListOf": "listë e faqosur e {{name}}",
+        "example": "Shembulli i shërbyer",
+        "exampleAuto": "(auto i gjeneruar)",
+        "delete": "Fshi përgjigjen"
+      },
+      "settings": {
+        "inherited": "Trashëguar nga grupi",
+        "authInherited": "Trashëguar nga grupi",
+        "editGroup": "Ndrysho në grup ↗",
+        "headers": "Kokat e kontratës",
+        "behaviour": "Sjellja",
+        "idempotent": "Idempotente",
+        "cacheSeconds": "Cache (sekonda)",
+        "traffic": "Trafiku i pritur",
+        "authOverride": "Mbivendosja e auth",
+        "pagination": "Faqosja",
+        "defaultLimit": "Madhësia e parazgjedhur e faqes",
+        "maxLimit": "Madhësia maks. e faqes"
+      }
     }
   },
   "mqtt": {

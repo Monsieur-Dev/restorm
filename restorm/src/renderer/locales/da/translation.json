@@ -2247,7 +2247,10 @@
         "response": "svar {{code}}",
         "param": "parameter {{name}}",
         "inherits": "{{name}} arver fra den"
-      }
+      },
+      "generators": "Ruter",
+      "generateCrud": "Generér CRUD",
+      "generateSearch": "Generér søgeruter"
     },
     "schema": {
       "addProperty": "Tilføj en egenskab",
@@ -2290,7 +2293,10 @@
       "unique": "unik",
       "immutable": "uforanderlig",
       "searchable": "søgbar",
-      "deprecated": "udfaset"
+      "deprecated": "udfaset",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Standard",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Skygger for en nedarvet egenskab",
       "referenceTargetUnknown": "Den refererede type findes ikke længere",
       "constraintPatternInvalid": "Ugyldigt mønster (regulært udtryk)",
-      "constraintMinAboveMax": "Min overstiger max"
+      "constraintMinAboveMax": "Min overstiger max",
+      "modelNameEmpty": "Modellen har intet navn",
+      "enumNameEmpty": "Enum har intet navn",
+      "groupNameEmpty": "Gruppen har intet navn",
+      "modelNameDuplicate": "Duplikeret modelnavn",
+      "enumNameDuplicate": "Duplikeret enumnavn",
+      "componentNameCollision": "En model og en enum deler dette navn",
+      "groupNameDuplicate": "Duplikeret gruppenavn",
+      "inheritanceTargetUnknown": "Den nedarvede model findes ikke længere",
+      "inheritanceCycle": "Cirkulær arvekæde",
+      "identifierPropertyUnknown": "Identifikator-egenskaben findes ikke længere",
+      "paramLinkTargetUnknown": "Et parameterlink peger på en manglende egenskab",
+      "bodyModelUnknown": "Body-modellen findes ikke længere",
+      "responseModelUnknown": "En svarmodel findes ikke længere",
+      "responseExampleUnknown": "Et svar serverer et manglende eksempel"
+    },
+    "traffic": {
+      "low": "Lav",
+      "medium": "Middel",
+      "high": "Høj"
+    },
+    "routes": {
+      "addGroup": "Tilføj en gruppe",
+      "addRoute": "Tilføj en rute",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Vælg en gruppe eller en rute, eller opret en gruppe.",
+      "deleteGroupTitle": "Slet {{name}}?",
+      "deleteGroupImpact": "Gruppen og dens {{count}} ruter slettes.",
+      "method": "Metode",
+      "path": "Sti",
+      "summary": "Resumé",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definition",
+        "responses": "Svar"
+      },
+      "group": {
+        "auth": "Påkrævet auth",
+        "authInherited": "Designets standard",
+        "versionPrefix": "Versionspræfiks",
+        "headers": "Kontrakt-headers (nedarvet af ruter)",
+        "headerName": "Header",
+        "addHeader": "Tilføj en header",
+        "deleteHeader": "Slet headeren",
+        "noHeaders": "Ingen delt header."
+      },
+      "params": {
+        "pathTitle": "Stiparametre",
+        "otherTitle": "Parametre (query / header)",
+        "name": "Navn",
+        "location": "I",
+        "link": "Modellink",
+        "noLink": "—",
+        "add": "Tilføj en parameter",
+        "delete": "Slet parameteren",
+        "auto": "auto",
+        "pathEmpty": "Skriv en {{param}} i stien for at oprette dens række.",
+        "otherEmpty": "Ingen query- eller header-parametre endnu."
+      },
+      "body": {
+        "label": "Request-body",
+        "empty": "(tom)"
+      },
+      "responses": {
+        "add": "Tilføj",
+        "codePlaceholder": "Statuskode",
+        "standardErrors": "+ standardfejl",
+        "empty": "Intet svar deklareret endnu.",
+        "emptyBody": "tom body",
+        "model": "Returneret model",
+        "list": "Liste",
+        "paginated": "Pagineret",
+        "listOf": "liste af {{name}}",
+        "paginatedListOf": "pagineret liste af {{name}}",
+        "example": "Serveret eksempel",
+        "exampleAuto": "(auto genereret)",
+        "delete": "Slet svaret"
+      },
+      "settings": {
+        "inherited": "Nedarvet fra gruppen",
+        "authInherited": "Nedarvet fra gruppen",
+        "editGroup": "Rediger i gruppen ↗",
+        "headers": "Kontrakt-headers",
+        "behaviour": "Adfærd",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (sekunder)",
+        "traffic": "Forventet trafik",
+        "authOverride": "Auth-tilsidesættelse",
+        "pagination": "Paginering",
+        "defaultLimit": "Standard sidestørrelse",
+        "maxLimit": "Maks. sidestørrelse"
+      }
     }
   },
   "mqtt": {

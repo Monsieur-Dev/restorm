@@ -2247,7 +2247,10 @@
         "response": "yanıt {{code}}",
         "param": "parametre {{name}}",
         "inherits": "{{name}} ondan kalıt alır"
-      }
+      },
+      "generators": "Rotalar",
+      "generateCrud": "CRUD üret",
+      "generateSearch": "Arama rotalarını üret"
     },
     "schema": {
       "addProperty": "Özellik ekle",
@@ -2290,7 +2293,10 @@
       "unique": "benzersiz",
       "immutable": "değişmez",
       "searchable": "aranabilir",
-      "deprecated": "kullanımdan kalktı"
+      "deprecated": "kullanımdan kalktı",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Varsayılan",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Kalıtılan bir özelliği gölgeliyor",
       "referenceTargetUnknown": "Başvurulan tip artık yok",
       "constraintPatternInvalid": "Geçersiz desen (düzenli ifade)",
-      "constraintMinAboveMax": "Min, maksimumu aşıyor"
+      "constraintMinAboveMax": "Min, maksimumu aşıyor",
+      "modelNameEmpty": "Modelin adı yok",
+      "enumNameEmpty": "Enumun adı yok",
+      "groupNameEmpty": "Grubun adı yok",
+      "modelNameDuplicate": "Yinelenen model adı",
+      "enumNameDuplicate": "Yinelenen enum adı",
+      "componentNameCollision": "Bir model ve bir enum bu adı paylaşıyor",
+      "groupNameDuplicate": "Yinelenen grup adı",
+      "inheritanceTargetUnknown": "Miras alınan model artık yok",
+      "inheritanceCycle": "Dairesel kalıtım zinciri",
+      "identifierPropertyUnknown": "Tanımlayıcı özellik artık yok",
+      "paramLinkTargetUnknown": "Bir parametre bağlantısı eksik bir özelliği gösteriyor",
+      "bodyModelUnknown": "Gövde modeli artık yok",
+      "responseModelUnknown": "Bir yanıt modeli artık yok",
+      "responseExampleUnknown": "Bir yanıt eksik bir örnek sunuyor"
+    },
+    "traffic": {
+      "low": "Düşük",
+      "medium": "Orta",
+      "high": "Yüksek"
+    },
+    "routes": {
+      "addGroup": "Grup ekle",
+      "addRoute": "Rota ekle",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Bir grup veya rota seçin, ya da bir grup oluşturun.",
+      "deleteGroupTitle": "{{name}} silinsin mi?",
+      "deleteGroupImpact": "Grup ve {{count}} rotası silinecek.",
+      "method": "Metot",
+      "path": "Yol",
+      "summary": "Özet",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Tanım",
+        "responses": "Yanıtlar"
+      },
+      "group": {
+        "auth": "Gerekli auth",
+        "authInherited": "Tasarım varsayılanı",
+        "versionPrefix": "Sürüm öneki",
+        "headers": "Sözleşme başlıkları (rotalar tarafından miras alınır)",
+        "headerName": "Başlık",
+        "addHeader": "Başlık ekle",
+        "deleteHeader": "Başlığı sil",
+        "noHeaders": "Paylaşılan başlık yok."
+      },
+      "params": {
+        "pathTitle": "Yol parametreleri",
+        "otherTitle": "Parametreler (query / header)",
+        "name": "Ad",
+        "location": "Konum",
+        "link": "Model bağlantısı",
+        "noLink": "—",
+        "add": "Parametre ekle",
+        "delete": "Parametreyi sil",
+        "auto": "otomatik",
+        "pathEmpty": "Satırını oluşturmak için yola bir {{param}} yazın.",
+        "otherEmpty": "Henüz query veya header parametresi yok."
+      },
+      "body": {
+        "label": "İstek gövdesi",
+        "empty": "(boş)"
+      },
+      "responses": {
+        "add": "Ekle",
+        "codePlaceholder": "Durum kodu",
+        "standardErrors": "+ standart hatalar",
+        "empty": "Henüz bildirilen yanıt yok.",
+        "emptyBody": "boş gövde",
+        "model": "Dönen model",
+        "list": "Liste",
+        "paginated": "Sayfalı",
+        "listOf": "{{name}} listesi",
+        "paginatedListOf": "sayfalı {{name}} listesi",
+        "example": "Sunulan örnek",
+        "exampleAuto": "(otomatik üretilen)",
+        "delete": "Yanıtı sil"
+      },
+      "settings": {
+        "inherited": "Gruptan miras",
+        "authInherited": "Gruptan miras",
+        "editGroup": "Grupta düzenle ↗",
+        "headers": "Sözleşme başlıkları",
+        "behaviour": "Davranış",
+        "idempotent": "İdempotent",
+        "cacheSeconds": "Önbellek (saniye)",
+        "traffic": "Beklenen trafik",
+        "authOverride": "Auth geçersiz kılma",
+        "pagination": "Sayfalama",
+        "defaultLimit": "Varsayılan sayfa boyutu",
+        "maxLimit": "Maks. sayfa boyutu"
+      }
     }
   },
   "mqtt": {

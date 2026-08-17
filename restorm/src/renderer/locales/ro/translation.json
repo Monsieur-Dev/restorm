@@ -2248,7 +2248,10 @@
         "response": "răspuns {{code}}",
         "param": "parametru {{name}}",
         "inherits": "{{name}} moștenește din el"
-      }
+      },
+      "generators": "Rute",
+      "generateCrud": "Generează CRUD",
+      "generateSearch": "Generează rutele de căutare"
     },
     "schema": {
       "addProperty": "Adaugă o proprietate",
@@ -2291,7 +2294,10 @@
       "unique": "unic",
       "immutable": "imuabil",
       "searchable": "căutabil",
-      "deprecated": "depreciat"
+      "deprecated": "depreciat",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Implicit",
@@ -2330,7 +2336,98 @@
       "propertyShadowsParent": "Ascunde o proprietate moștenită",
       "referenceTargetUnknown": "Tipul referențiat nu mai există",
       "constraintPatternInvalid": "Șablon invalid (expresie regulată)",
-      "constraintMinAboveMax": "Min depășește max"
+      "constraintMinAboveMax": "Min depășește max",
+      "modelNameEmpty": "Modelul nu are nume",
+      "enumNameEmpty": "Enumul nu are nume",
+      "groupNameEmpty": "Grupul nu are nume",
+      "modelNameDuplicate": "Nume de model duplicat",
+      "enumNameDuplicate": "Nume de enum duplicat",
+      "componentNameCollision": "Un model și un enum împart acest nume",
+      "groupNameDuplicate": "Nume de grup duplicat",
+      "inheritanceTargetUnknown": "Modelul moștenit nu mai există",
+      "inheritanceCycle": "Lanț de moștenire circular",
+      "identifierPropertyUnknown": "Proprietatea identificatoare nu mai există",
+      "paramLinkTargetUnknown": "O legătură de parametru indică o proprietate lipsă",
+      "bodyModelUnknown": "Modelul corpului nu mai există",
+      "responseModelUnknown": "Un model de răspuns nu mai există",
+      "responseExampleUnknown": "Un răspuns servește un exemplu lipsă"
+    },
+    "traffic": {
+      "low": "Scăzut",
+      "medium": "Mediu",
+      "high": "Ridicat"
+    },
+    "routes": {
+      "addGroup": "Adaugă un grup",
+      "addRoute": "Adaugă o rută",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Selectați un grup sau o rută, sau creați un grup.",
+      "deleteGroupTitle": "Ștergeți {{name}}?",
+      "deleteGroupImpact": "Grupul și cele {{count}} rute ale sale vor fi șterse.",
+      "method": "Metodă",
+      "path": "Cale",
+      "summary": "Rezumat",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definiție",
+        "responses": "Răspunsuri"
+      },
+      "group": {
+        "auth": "Auth necesară",
+        "authInherited": "Implicit al designului",
+        "versionPrefix": "Prefix de versiune",
+        "headers": "Antete de contract (moștenite de rute)",
+        "headerName": "Antet",
+        "addHeader": "Adaugă un antet",
+        "deleteHeader": "Șterge antetul",
+        "noHeaders": "Niciun antet partajat."
+      },
+      "params": {
+        "pathTitle": "Parametri de cale",
+        "otherTitle": "Parametri (query / header)",
+        "name": "Nume",
+        "location": "În",
+        "link": "Legătură model",
+        "noLink": "—",
+        "add": "Adaugă un parametru",
+        "delete": "Șterge parametrul",
+        "auto": "auto",
+        "pathEmpty": "Tastați un {{param}} în cale pentru a-i crea rândul.",
+        "otherEmpty": "Încă nu există parametri query sau header."
+      },
+      "body": {
+        "label": "Corpul cererii",
+        "empty": "(gol)"
+      },
+      "responses": {
+        "add": "Adaugă",
+        "codePlaceholder": "Cod de stare",
+        "standardErrors": "+ erori standard",
+        "empty": "Niciun răspuns declarat încă.",
+        "emptyBody": "corp gol",
+        "model": "Model returnat",
+        "list": "Listă",
+        "paginated": "Paginată",
+        "listOf": "listă de {{name}}",
+        "paginatedListOf": "listă paginată de {{name}}",
+        "example": "Exemplu servit",
+        "exampleAuto": "(auto generat)",
+        "delete": "Șterge răspunsul"
+      },
+      "settings": {
+        "inherited": "Moștenit de la grup",
+        "authInherited": "Moștenit de la grup",
+        "editGroup": "Editează în grup ↗",
+        "headers": "Antete de contract",
+        "behaviour": "Comportament",
+        "idempotent": "Idempotentă",
+        "cacheSeconds": "Cache (secunde)",
+        "traffic": "Trafic așteptat",
+        "authOverride": "Suprascriere auth",
+        "pagination": "Paginare",
+        "defaultLimit": "Dimensiune implicită a paginii",
+        "maxLimit": "Dimensiune max. a paginii"
+      }
     }
   },
   "mqtt": {

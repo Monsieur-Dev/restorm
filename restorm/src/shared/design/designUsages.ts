@@ -94,7 +94,9 @@ export function removeModelFromDesign(design: ApiDesign, modelId: string): Pick<
       let next = m
       if (next.design?.inheritsFrom === modelId) {
         const { inheritsFrom: _dropped, ...rest } = next.design
-        next = { ...next, design: rest }
+        // An emptied bag disappears — never persist `design: {}`.
+        const { design: _oldDesign, ...modelRest } = next
+        next = Object.keys(rest).length > 0 ? { ...modelRest, design: rest } : modelRest
       }
       const properties = next.properties.map((p) => {
         const reference = p.design?.reference

@@ -14,6 +14,7 @@ import {
 import type { ApiDesign, DesignModel } from '../../../../shared/types/collections'
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { collectInheritanceChildren, collectModelUsages, removeModelFromDesign } from '../../../../shared/design/designUsages'
+import { generateCrud } from '../../../../shared/design/designRoutes'
 import { generateUniqueId } from '../../utils/treeManipulation'
 import { assignDesignSection, patchModel, replaceModel, uniqueComponentName } from './designMutations'
 import { ModelSchemaTab } from './ModelSchemaTab'
@@ -50,13 +51,25 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
       .map((m) => ({
         id: m.id,
         title: m.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : m.doc.name,
+        // The generator is reachable from BOTH the model card (Settings
+        // tab) and this row menu — the ticket's two entry points.
+        contextMenuItems: [{
+          id: 'generate-crud',
+          label: t('design.modelSettings.generateCrud', 'Generate the CRUD'),
+          icon: 'type-hierarchy-sub',
+          onClick: () => {
+            const { group } = generateCrud(design, m, generateUniqueId)
+            assignDesignSection(design, 'routeGroups', [...design.routeGroups, group])
+            onJumpTo('routes', group.id)
+          }
+        }],
         rightActions: (
           <span className="design-list-detail">
             {issues.some((issue) => issue.path.includes(m.id)) && <span className="design-list-error-dot codicon codicon-error" data-testid={`design-model-error-${m.id}`} />}
             {t('design.models.propertyCount', '{{count}} props', { count: m.properties.length })}
           </span>
         )
-      })), [design.models, filter, issues, t])
+      })), [design, filter, issues, t, onJumpTo])
 
   const addModel = (): void => {
     const fresh: DesignModel = {

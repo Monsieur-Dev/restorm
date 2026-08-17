@@ -2246,7 +2246,10 @@
         "response": "レスポンス {{code}}",
         "param": "パラメータ {{name}}",
         "inherits": "{{name}} が継承しています"
-      }
+      },
+      "generators": "ルート",
+      "generateCrud": "CRUD を生成",
+      "generateSearch": "検索ルートを生成"
     },
     "schema": {
       "addProperty": "プロパティを追加",
@@ -2289,7 +2292,10 @@
       "unique": "一意",
       "immutable": "不変",
       "searchable": "検索可能",
-      "deprecated": "非推奨"
+      "deprecated": "非推奨",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "デフォルト",
@@ -2328,7 +2334,98 @@
       "propertyShadowsParent": "継承したプロパティを隠しています",
       "referenceTargetUnknown": "参照先の型が存在しません",
       "constraintPatternInvalid": "無効なパターン（正規表現）",
-      "constraintMinAboveMax": "最小値が最大値を超えています"
+      "constraintMinAboveMax": "最小値が最大値を超えています",
+      "modelNameEmpty": "モデルに名前がありません",
+      "enumNameEmpty": "enum に名前がありません",
+      "groupNameEmpty": "グループに名前がありません",
+      "modelNameDuplicate": "モデル名が重複しています",
+      "enumNameDuplicate": "enum 名が重複しています",
+      "componentNameCollision": "モデルと enum がこの名前を共有しています",
+      "groupNameDuplicate": "グループ名が重複しています",
+      "inheritanceTargetUnknown": "継承元のモデルが存在しません",
+      "inheritanceCycle": "継承チェーンが循環しています",
+      "identifierPropertyUnknown": "識別子プロパティが存在しません",
+      "paramLinkTargetUnknown": "パラメータリンクが存在しないプロパティを指しています",
+      "bodyModelUnknown": "ボディのモデルが存在しません",
+      "responseModelUnknown": "レスポンスのモデルが存在しません",
+      "responseExampleUnknown": "レスポンスが存在しない例を提供しています"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "routes": {
+      "addGroup": "グループを追加",
+      "addRoute": "ルートを追加",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "グループまたはルートを選択するか、グループを作成してください。",
+      "deleteGroupTitle": "{{name}} を削除しますか？",
+      "deleteGroupImpact": "グループとその {{count}} 件のルートが削除されます。",
+      "method": "メソッド",
+      "path": "パス",
+      "summary": "概要",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "定義",
+        "responses": "レスポンス"
+      },
+      "group": {
+        "auth": "必須の認証",
+        "authInherited": "デザインの既定",
+        "versionPrefix": "バージョンプレフィックス",
+        "headers": "契約ヘッダー（ルートが継承）",
+        "headerName": "ヘッダー",
+        "addHeader": "ヘッダーを追加",
+        "deleteHeader": "ヘッダーを削除",
+        "noHeaders": "共有ヘッダーはありません。"
+      },
+      "params": {
+        "pathTitle": "パスパラメータ",
+        "otherTitle": "パラメータ（query / header）",
+        "name": "名前",
+        "location": "場所",
+        "link": "モデルリンク",
+        "noLink": "—",
+        "add": "パラメータを追加",
+        "delete": "パラメータを削除",
+        "auto": "自動",
+        "pathEmpty": "パスに {{param}} を入力すると行が作成されます。",
+        "otherEmpty": "query / header パラメータはまだありません。"
+      },
+      "body": {
+        "label": "リクエストボディ",
+        "empty": "（空）"
+      },
+      "responses": {
+        "add": "追加",
+        "codePlaceholder": "ステータスコード",
+        "standardErrors": "+ 標準エラー",
+        "empty": "レスポンスはまだ宣言されていません。",
+        "emptyBody": "空のボディ",
+        "model": "返却モデル",
+        "list": "リスト",
+        "paginated": "ページネーション",
+        "listOf": "{{name}} のリスト",
+        "paginatedListOf": "{{name}} のページ付きリスト",
+        "example": "提供される例",
+        "exampleAuto": "（自動生成）",
+        "delete": "レスポンスを削除"
+      },
+      "settings": {
+        "inherited": "グループから継承",
+        "authInherited": "グループから継承",
+        "editGroup": "グループで編集 ↗",
+        "headers": "契約ヘッダー",
+        "behaviour": "動作",
+        "idempotent": "冪等",
+        "cacheSeconds": "キャッシュ（秒）",
+        "traffic": "想定トラフィック",
+        "authOverride": "認証の上書き",
+        "pagination": "ページネーション",
+        "defaultLimit": "既定のページサイズ",
+        "maxLimit": "最大ページサイズ"
+      }
     }
   },
   "mqtt": {

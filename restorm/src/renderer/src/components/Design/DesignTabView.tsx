@@ -2,13 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   InputBox,
-  ListView,
   MarkdownEditor,
   ScrollableElement,
   SelectBox,
   eventBus,
-  type ISelectData,
-  type ListViewItemData
+  type ISelectData
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collections'
 import type { DesignSectionKey } from '../../../../shared/types/editor'
@@ -19,6 +17,7 @@ import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignS
 import { assignDesignSection } from './designMutations'
 import { DesignModelsSection } from './DesignModelsSection'
 import { DesignEnumsSection } from './DesignEnumsSection'
+import { DesignRoutesSection } from './DesignRoutesSection'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './designTabView.css'
 
@@ -53,6 +52,10 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     const intent = peekPendingDesignSection(design.id)
     return intent?.section === 'models' ? intent.entityId ?? null : null
   })
+  const [selectedRouteEntityId, setSelectedRouteEntityId] = useState<string | null>(() => {
+    const intent = peekPendingDesignSection(design.id)
+    return intent?.section === 'routes' ? intent.entityId ?? null : null
+  })
 
   // Follow section intents while mounted — the single-tab policy means
   // a sidebar group click usually refocuses this already-open tab. The
@@ -65,6 +68,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     const applyIntent = (intent: { section: DesignSectionKey; entityId?: string }): void => {
       setActiveSection(intent.section)
       if (intent.section === 'models' && intent.entityId !== undefined) setSelectedModelId(intent.entityId)
+      if (intent.section === 'routes' && intent.entityId !== undefined) setSelectedRouteEntityId(intent.entityId)
     }
     const unsubscribe = subscribeDesignSectionIntent((designId, intent) => {
       if (designId !== design.id) return
@@ -82,7 +86,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
   // reactive design in place — this tab re-renders off the proxy's own
   // DESIGN_UPDATED event, scoped to this design, without waiting for
   // any app-level refresh.
-  const [, setDesignTick] = useState(0)
+  const [designTick, setDesignTick] = useState(0)
   useEffect(() => {
     const subscription = eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, (payload) => {
       if ((payload as DocumentChangedPayload).id === design.id) setDesignTick((n) => n + 1)
@@ -90,14 +94,19 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     return () => { subscription.unsubscribe() }
   }, [design.id])
 
-  // Fresh on every render (renders are driven by the tick above): the
+  // Recomputed only when a design edit ticked — a full walk of models ×
+  // properties × routes × responses per keystroke would be waste. The
   // issues feed row-level errors, the sidebar dots and — later — the
   // design server / codegen gates.
-  const issues = validateApiDesign(design)
+  const issues = useMemo(() => {
+    void designTick
+    return validateApiDesign(design)
+  }, [design, designTick])
 
   const jumpTo = (section: 'models' | 'routes', entityId: string): void => {
     setActiveSection(section)
     if (section === 'models') setSelectedModelId(entityId)
+    if (section === 'routes') setSelectedRouteEntityId(entityId)
   }
 
   return (
@@ -135,7 +144,12 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           <DesignEnumsSection design={design} />
         )}
         {activeSection === 'routes' && (
-          <DesignEntityListSection key={activeSection} design={design} section={activeSection} />
+          <DesignRoutesSection
+            design={design}
+            issues={issues}
+            selectedEntityId={selectedRouteEntityId}
+            onSelectEntity={setSelectedRouteEntityId}
+          />
         )}
         {activeSection === 'documentation' && (
           <DesignSectionPlaceholder
@@ -310,81 +324,6 @@ const DesignSettingsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
           </div>
       </div>
     </ScrollableElement>
-  )
-}
-
-/**
- * The list-driven sections (models / enums / routes): a filterable
- * master list; the per-entity editors arrive with their own sections'
- * tickets, so the detail pane states that plainly for now.
- */
-const DesignEntityListSection: React.FC<{ design: ApiDesign; section: 'models' | 'enums' | 'routes' }> = ({ design, section }) => {
-  const { t } = useTranslation()
-  const [filter, setFilter] = useState('')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-
-  const spec = DESIGN_SECTIONS.find((s) => s.key === section)
-  const entries = useMemo(() => {
-    if (section === 'models') {
-      return design.models.map((m) => ({
-        id: m.id,
-        name: m.doc.name,
-        detail: t('design.models.propertyCount', '{{count}} props', { count: m.properties.length })
-      }))
-    }
-    if (section === 'enums') {
-      return design.enums.map((e) => ({
-        id: e.id,
-        name: e.doc.name,
-        detail: t('design.enums.valueCount', '{{count}} values', { count: e.doc.enumValues?.length ?? 0 })
-      }))
-    }
-    return design.routeGroups.flatMap((group) => group.routes.map((route) => ({
-      id: route.id,
-      name: `${route.doc.match.method ?? ''} ${group.design?.basePath ?? ''}${route.doc.match.urlPattern}`.trim(),
-      detail: group.doc.name
-    })))
-  }, [design, section, t])
-
-  const rows: ListViewItemData[] = useMemo(() =>
-    entries
-      .filter((entry) => entry.name.toLowerCase().includes(filter.toLowerCase()))
-      .map((entry) => ({
-        id: entry.id,
-        title: entry.name,
-        rightActions: <span className="design-list-detail">{entry.detail}</span>
-      })), [entries, filter])
-
-  return (
-    <div className="design-section design-entity-list-section">
-      <div className="design-entity-list" data-testid={`design-${section}-list`}>
-        <div className="design-entity-list-header">
-          <h2 className="design-section-title">{spec ? t(spec.labelKey) : section}</h2>
-        </div>
-        <InputBox
-          value={filter}
-          onChange={setFilter}
-          options={{ type: 'text', placeholder: t('design.list.filter', 'Filter…'), ariaLabel: t('design.list.filter', 'Filter…') }}
-          data-testid={`design-${section}-filter`}
-        />
-        <ScrollableElement className="design-entity-list-scroll">
-          <ListView
-            items={rows}
-            selectedIds={selectedId === null ? [] : [selectedId]}
-            onItemClick={(payload) => { setSelectedId(payload.item.id) }}
-            disableDrag
-            data-testid={`design-${section}-listview`}
-          />
-        </ScrollableElement>
-      </div>
-      <div className="design-entity-detail" data-testid={`design-${section}-detail`}>
-        <p className="design-section-placeholder-message">
-          {selectedId === null
-            ? t('design.list.selectPrompt', 'Select an entry in the list.')
-            : t('design.list.editorPending', 'The editor for this section is on its way.')}
-        </p>
-      </div>
-    </div>
   )
 }
 

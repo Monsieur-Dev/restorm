@@ -2247,7 +2247,10 @@
         "response": "antwoord {{code}}",
         "param": "parameter {{name}}",
         "inherits": "{{name}} erft ervan"
-      }
+      },
+      "generators": "Routes",
+      "generateCrud": "CRUD genereren",
+      "generateSearch": "Zoekroutes genereren"
     },
     "schema": {
       "addProperty": "Eigenschap toevoegen",
@@ -2290,7 +2293,10 @@
       "unique": "uniek",
       "immutable": "onveranderlijk",
       "searchable": "doorzoekbaar",
-      "deprecated": "verouderd"
+      "deprecated": "verouderd",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Standaard",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Verbergt een geërfde eigenschap",
       "referenceTargetUnknown": "Het gerefereerde type bestaat niet meer",
       "constraintPatternInvalid": "Ongeldig patroon (reguliere expressie)",
-      "constraintMinAboveMax": "Min overschrijdt max"
+      "constraintMinAboveMax": "Min overschrijdt max",
+      "modelNameEmpty": "Het model heeft geen naam",
+      "enumNameEmpty": "Het enum heeft geen naam",
+      "groupNameEmpty": "De groep heeft geen naam",
+      "modelNameDuplicate": "Dubbele modelnaam",
+      "enumNameDuplicate": "Dubbele enumnaam",
+      "componentNameCollision": "Een model en een enum delen deze naam",
+      "groupNameDuplicate": "Dubbele groepsnaam",
+      "inheritanceTargetUnknown": "Het geërfde model bestaat niet meer",
+      "inheritanceCycle": "Circulaire overervingsketen",
+      "identifierPropertyUnknown": "De identificerende eigenschap bestaat niet meer",
+      "paramLinkTargetUnknown": "Een parameterkoppeling wijst naar een ontbrekende eigenschap",
+      "bodyModelUnknown": "Het body-model bestaat niet meer",
+      "responseModelUnknown": "Een antwoordmodel bestaat niet meer",
+      "responseExampleUnknown": "Een antwoord serveert een ontbrekend voorbeeld"
+    },
+    "traffic": {
+      "low": "Laag",
+      "medium": "Middel",
+      "high": "Hoog"
+    },
+    "routes": {
+      "addGroup": "Groep toevoegen",
+      "addRoute": "Route toevoegen",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Selecteer een groep of route, of maak een groep.",
+      "deleteGroupTitle": "{{name}} verwijderen?",
+      "deleteGroupImpact": "De groep en zijn {{count}} routes worden verwijderd.",
+      "method": "Methode",
+      "path": "Pad",
+      "summary": "Samenvatting",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definitie",
+        "responses": "Antwoorden"
+      },
+      "group": {
+        "auth": "Vereiste auth",
+        "authInherited": "Standaard van het design",
+        "versionPrefix": "Versievoorvoegsel",
+        "headers": "Contract-headers (geërfd door routes)",
+        "headerName": "Header",
+        "addHeader": "Header toevoegen",
+        "deleteHeader": "Header verwijderen",
+        "noHeaders": "Geen gedeelde header."
+      },
+      "params": {
+        "pathTitle": "Padparameters",
+        "otherTitle": "Parameters (query en header)",
+        "name": "Naam",
+        "location": "In",
+        "link": "Modelkoppeling",
+        "noLink": "—",
+        "add": "Parameter toevoegen",
+        "delete": "Parameter verwijderen",
+        "auto": "auto",
+        "pathEmpty": "Typ een {{param}} in het pad om de rij te maken.",
+        "otherEmpty": "Nog geen query- of header-parameters."
+      },
+      "body": {
+        "label": "Request-body",
+        "empty": "(leeg)"
+      },
+      "responses": {
+        "add": "Toevoegen",
+        "codePlaceholder": "Statuscode",
+        "standardErrors": "+ standaardfouten",
+        "empty": "Nog geen antwoord gedeclareerd.",
+        "emptyBody": "lege body",
+        "model": "Geretourneerd model",
+        "list": "Lijst",
+        "paginated": "Gepagineerd",
+        "listOf": "lijst van {{name}}",
+        "paginatedListOf": "gepagineerde lijst van {{name}}",
+        "example": "Geserveerd voorbeeld",
+        "exampleAuto": "(auto gegenereerd)",
+        "delete": "Antwoord verwijderen"
+      },
+      "settings": {
+        "inherited": "Geërfd van de groep",
+        "authInherited": "Geërfd van de groep",
+        "editGroup": "Bewerken in de groep ↗",
+        "headers": "Contract-headers",
+        "behaviour": "Gedrag",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (seconden)",
+        "traffic": "Verwacht verkeer",
+        "authOverride": "Auth-override",
+        "pagination": "Paginering",
+        "defaultLimit": "Standaard paginagrootte",
+        "maxLimit": "Max. paginagrootte"
+      }
     }
   },
   "mqtt": {

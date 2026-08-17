@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { InputBox, MessageType, Table, type IMessage, type TableColumn } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignExample, DesignModel, DesignProperty } from '../../../../shared/types/collections'
 import { resolveExampleValue, violatedConstraint } from '../../../../shared/design/designExampleValues'
-import { displayValue } from './designDisplay'
+import { displayValue, parseTypedValue } from './designDisplay'
 import { generateUniqueId } from '../../utils/treeManipulation'
 import { replaceModel } from './designMutations'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
@@ -70,28 +70,12 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
     commitExamples(examples.map((e) => (e.id === exampleId ? { ...e, name } : e)))
   }
 
-  /** Parse a typed-in value according to the property's declared type,
-   * so numbers and booleans round-trip as their real JSON type. */
-  const parseValue = (property: DesignProperty, raw: string): unknown => {
-    const type = property.doc.type
-    if (type === 'integer' || type === 'number') {
-      const parsed = Number(raw)
-      return Number.isFinite(parsed) ? parsed : raw
-    }
-    if (type === 'boolean') {
-      if (raw === 'true') return true
-      if (raw === 'false') return false
-      return raw
-    }
-    return raw
-  }
-
   /** The examples editor refuses a defined value the property's own
    * constraints rule out — the field shows the message, nothing is
    * stored until the value conforms. */
   const constraintValidator = (property: DesignProperty) => (raw: string): IMessage | null => {
     if (raw === '') return null
-    const violated = violatedConstraint(property, parseValue(property, raw))
+    const violated = violatedConstraint(property, parseTypedValue(property, raw))
     if (violated === null) return null
     return {
       content: t('design.examples.constraintViolated', 'Value violates the property constraint ({{constraint}})', { constraint: violated }),
@@ -100,12 +84,12 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
   }
 
   const setDefinedValue = (owner: DesignModel, property: DesignProperty, raw: string): void => {
-    if (raw !== '' && violatedConstraint(property, parseValue(property, raw)) !== null) return
+    if (raw !== '' && violatedConstraint(property, parseTypedValue(property, raw)) !== null) return
     if (showingDefault) {
       const properties = owner.properties.map((p) => {
         if (p.id !== property.id) return p
         const { example: _dropped, ...docRest } = p.doc
-        return { ...p, doc: raw === '' ? docRest : { ...docRest, example: parseValue(p, raw) } }
+        return { ...p, doc: raw === '' ? docRest : { ...docRest, example: parseTypedValue(p, raw) } }
       })
       replaceModel(design, owner.id, { ...owner, properties })
       return
@@ -116,7 +100,7 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
       commitExamples(examples.map((e) => (e.id === selected.id ? { ...e, values: rest } : e)))
       return
     }
-    commitExamples(examples.map((e) => (e.id === selected.id ? { ...e, values: { ...values, [property.id]: parseValue(property, raw) } } : e)))
+    commitExamples(examples.map((e) => (e.id === selected.id ? { ...e, values: { ...values, [property.id]: parseTypedValue(property, raw) } } : e)))
   }
 
   interface Row { owner: DesignModel; property: DesignProperty }

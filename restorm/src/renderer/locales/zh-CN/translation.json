@@ -2246,7 +2246,10 @@
         "response": "响应 {{code}}",
         "param": "参数 {{name}}",
         "inherits": "{{name}} 继承自它"
-      }
+      },
+      "generators": "路由",
+      "generateCrud": "生成 CRUD",
+      "generateSearch": "生成搜索路由"
     },
     "schema": {
       "addProperty": "添加属性",
@@ -2289,7 +2292,10 @@
       "unique": "唯一",
       "immutable": "不可变",
       "searchable": "可搜索",
-      "deprecated": "已弃用"
+      "deprecated": "已弃用",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "默认",
@@ -2328,7 +2334,98 @@
       "propertyShadowsParent": "遮蔽了继承的属性",
       "referenceTargetUnknown": "引用的类型已不存在",
       "constraintPatternInvalid": "无效的模式（正则表达式）",
-      "constraintMinAboveMax": "最小值超过最大值"
+      "constraintMinAboveMax": "最小值超过最大值",
+      "modelNameEmpty": "模型没有名称",
+      "enumNameEmpty": "枚举没有名称",
+      "groupNameEmpty": "分组没有名称",
+      "modelNameDuplicate": "模型名称重复",
+      "enumNameDuplicate": "枚举名称重复",
+      "componentNameCollision": "一个模型和一个枚举共用此名称",
+      "groupNameDuplicate": "分组名称重复",
+      "inheritanceTargetUnknown": "继承的模型已不存在",
+      "inheritanceCycle": "继承链循环",
+      "identifierPropertyUnknown": "标识符属性已不存在",
+      "paramLinkTargetUnknown": "参数链接指向缺失的属性",
+      "bodyModelUnknown": "请求体模型已不存在",
+      "responseModelUnknown": "响应模型已不存在",
+      "responseExampleUnknown": "响应提供了缺失的示例"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "routes": {
+      "addGroup": "添加分组",
+      "addRoute": "添加路由",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "选择一个分组或路由，或创建一个分组。",
+      "deleteGroupTitle": "删除 {{name}}？",
+      "deleteGroupImpact": "该分组及其 {{count}} 条路由将被删除。",
+      "method": "方法",
+      "path": "路径",
+      "summary": "摘要",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "定义",
+        "responses": "响应"
+      },
+      "group": {
+        "auth": "所需认证",
+        "authInherited": "设计默认值",
+        "versionPrefix": "版本前缀",
+        "headers": "契约请求头（由路由继承）",
+        "headerName": "请求头",
+        "addHeader": "添加请求头",
+        "deleteHeader": "删除请求头",
+        "noHeaders": "没有共享请求头。"
+      },
+      "params": {
+        "pathTitle": "路径参数",
+        "otherTitle": "参数（query / header）",
+        "name": "名称",
+        "location": "位置",
+        "link": "模型链接",
+        "noLink": "—",
+        "add": "添加参数",
+        "delete": "删除参数",
+        "auto": "自动",
+        "pathEmpty": "在路径中输入 {{param}} 即可创建其行。",
+        "otherEmpty": "尚无 query 或 header 参数。"
+      },
+      "body": {
+        "label": "请求体",
+        "empty": "（空）"
+      },
+      "responses": {
+        "add": "添加",
+        "codePlaceholder": "状态码",
+        "standardErrors": "+ 标准错误",
+        "empty": "尚未声明任何响应。",
+        "emptyBody": "空请求体",
+        "model": "返回模型",
+        "list": "列表",
+        "paginated": "分页",
+        "listOf": "{{name}} 列表",
+        "paginatedListOf": "分页的 {{name}} 列表",
+        "example": "提供的示例",
+        "exampleAuto": "（自动生成）",
+        "delete": "删除响应"
+      },
+      "settings": {
+        "inherited": "继承自分组",
+        "authInherited": "继承自分组",
+        "editGroup": "在分组中编辑 ↗",
+        "headers": "契约请求头",
+        "behaviour": "行为",
+        "idempotent": "幂等",
+        "cacheSeconds": "缓存（秒）",
+        "traffic": "预期流量",
+        "authOverride": "认证覆盖",
+        "pagination": "分页",
+        "defaultLimit": "默认页大小",
+        "maxLimit": "最大页大小"
+      }
     }
   },
   "mqtt": {

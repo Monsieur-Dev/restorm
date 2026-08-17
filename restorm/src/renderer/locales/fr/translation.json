@@ -2247,7 +2247,10 @@
         "response": "réponse {{code}}",
         "param": "paramètre {{name}}",
         "inherits": "{{name}} en hérite"
-      }
+      },
+      "generators": "Routes",
+      "generateCrud": "Générer le CRUD",
+      "generateSearch": "Générer les routes de recherche"
     },
     "schema": {
       "addProperty": "Ajouter une propriété",
@@ -2290,7 +2293,10 @@
       "unique": "unique",
       "immutable": "immuable",
       "searchable": "recherchable",
-      "deprecated": "déprécié"
+      "deprecated": "déprécié",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Défaut",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Masque une propriété héritée",
       "referenceTargetUnknown": "Le type référencé n’existe plus",
       "constraintPatternInvalid": "Pattern invalide (expression régulière)",
-      "constraintMinAboveMax": "Le min dépasse le max"
+      "constraintMinAboveMax": "Le min dépasse le max",
+      "modelNameEmpty": "Le modèle n’a pas de nom",
+      "enumNameEmpty": "L’énum n’a pas de nom",
+      "groupNameEmpty": "Le groupe n’a pas de nom",
+      "modelNameDuplicate": "Nom de modèle en doublon",
+      "enumNameDuplicate": "Nom d’énum en doublon",
+      "componentNameCollision": "Un modèle et une énum partagent ce nom",
+      "groupNameDuplicate": "Nom de groupe en doublon",
+      "inheritanceTargetUnknown": "Le modèle hérité n’existe plus",
+      "inheritanceCycle": "Chaîne d’héritage circulaire",
+      "identifierPropertyUnknown": "La propriété identifiante n’existe plus",
+      "paramLinkTargetUnknown": "Un lien de paramètre pointe vers une propriété disparue",
+      "bodyModelUnknown": "Le modèle du corps n’existe plus",
+      "responseModelUnknown": "Un modèle de réponse n’existe plus",
+      "responseExampleUnknown": "Une réponse sert un exemple disparu"
+    },
+    "traffic": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Fort"
+    },
+    "routes": {
+      "addGroup": "Ajouter un groupe",
+      "addRoute": "Ajouter une route",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Sélectionnez un groupe ou une route, ou créez un groupe.",
+      "deleteGroupTitle": "Supprimer {{name}} ?",
+      "deleteGroupImpact": "Le groupe et ses {{count}} routes seront supprimés.",
+      "method": "Méthode",
+      "path": "Chemin",
+      "summary": "Résumé",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Définition",
+        "responses": "Réponses"
+      },
+      "group": {
+        "auth": "Auth requise",
+        "authInherited": "Défaut du design",
+        "versionPrefix": "Préfixe de version",
+        "headers": "En-têtes de contrat (hérités par les routes)",
+        "headerName": "En-tête",
+        "addHeader": "Ajouter un en-tête",
+        "deleteHeader": "Supprimer l’en-tête",
+        "noHeaders": "Aucun en-tête partagé."
+      },
+      "params": {
+        "pathTitle": "Paramètres de chemin",
+        "otherTitle": "Paramètres (query / header)",
+        "name": "Nom",
+        "location": "Dans",
+        "link": "Lien modèle",
+        "noLink": "—",
+        "add": "Ajouter un paramètre",
+        "delete": "Supprimer le paramètre",
+        "auto": "auto",
+        "pathEmpty": "Saisissez un {{param}} dans le chemin pour créer sa ligne.",
+        "otherEmpty": "Aucun paramètre query ou header pour l’instant."
+      },
+      "body": {
+        "label": "Corps de la requête",
+        "empty": "(vide)"
+      },
+      "responses": {
+        "add": "Ajouter",
+        "codePlaceholder": "Code retour",
+        "standardErrors": "+ erreurs standards",
+        "empty": "Aucune réponse déclarée pour l’instant.",
+        "emptyBody": "corps vide",
+        "model": "Modèle retourné",
+        "list": "Liste",
+        "paginated": "Paginée",
+        "listOf": "liste de {{name}}",
+        "paginatedListOf": "liste paginée de {{name}}",
+        "example": "Exemple servi",
+        "exampleAuto": "(auto seedé)",
+        "delete": "Supprimer la réponse"
+      },
+      "settings": {
+        "inherited": "Hérité du groupe",
+        "authInherited": "Hérité du groupe",
+        "editGroup": "Modifier dans le groupe ↗",
+        "headers": "En-têtes de contrat",
+        "behaviour": "Comportement",
+        "idempotent": "Idempotente",
+        "cacheSeconds": "Cache (secondes)",
+        "traffic": "Trafic attendu",
+        "authOverride": "Auth en surcharge",
+        "pagination": "Pagination",
+        "defaultLimit": "Taille de page par défaut",
+        "maxLimit": "Taille de page max"
+      }
     }
   },
   "mqtt": {

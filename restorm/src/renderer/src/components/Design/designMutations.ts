@@ -6,7 +6,7 @@
  * (deep in-place write) would be stored silently and lost on close.
  */
 
-import type { ApiDesign, DesignModel } from '../../../../shared/types/collections'
+import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
 
 export function assignDesignSection<K extends keyof ApiDesign>(design: ApiDesign, key: K, value: ApiDesign[K]): void {
   design[key] = value
@@ -20,6 +20,18 @@ export function replaceModel(design: ApiDesign, modelId: string, next: DesignMod
 /** Patch one model (by id) — shallow merge of top-level model fields. */
 export function patchModel(design: ApiDesign, modelId: string, patch: Partial<DesignModel>): void {
   assignDesignSection(design, 'models', design.models.map((m) => (m.id === modelId ? { ...m, ...patch } : m)))
+}
+
+/** Replace one route group (by id) in the design's `routeGroups`. */
+export function replaceGroup(design: ApiDesign, groupId: string, next: DesignRouteGroup): void {
+  assignDesignSection(design, 'routeGroups', design.routeGroups.map((g) => (g.id === groupId ? next : g)))
+}
+
+/** Replace one route (by id) inside its group. */
+export function replaceRoute(design: ApiDesign, groupId: string, routeId: string, next: DesignRoute): void {
+  assignDesignSection(design, 'routeGroups', design.routeGroups.map((g) => (
+    g.id === groupId ? { ...g, routes: g.routes.map((r) => (r.id === routeId ? next : r)) } : g
+  )))
 }
 
 /** A name of the form `base`, `base2`, `base3`… unused by any model or

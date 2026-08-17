@@ -2246,7 +2246,10 @@
         "response": "응답 {{code}}",
         "param": "매개변수 {{name}}",
         "inherits": "{{name}}이(가) 이를 상속합니다"
-      }
+      },
+      "generators": "라우트",
+      "generateCrud": "CRUD 생성",
+      "generateSearch": "검색 라우트 생성"
     },
     "schema": {
       "addProperty": "속성 추가",
@@ -2289,7 +2292,10 @@
       "unique": "고유",
       "immutable": "불변",
       "searchable": "검색 가능",
-      "deprecated": "사용 중단"
+      "deprecated": "사용 중단",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "기본값",
@@ -2328,7 +2334,98 @@
       "propertyShadowsParent": "상속된 속성을 가립니다",
       "referenceTargetUnknown": "참조된 타입이 더 이상 존재하지 않습니다",
       "constraintPatternInvalid": "잘못된 패턴(정규 표현식)",
-      "constraintMinAboveMax": "최솟값이 최댓값을 초과합니다"
+      "constraintMinAboveMax": "최솟값이 최댓값을 초과합니다",
+      "modelNameEmpty": "모델에 이름이 없습니다",
+      "enumNameEmpty": "enum에 이름이 없습니다",
+      "groupNameEmpty": "그룹에 이름이 없습니다",
+      "modelNameDuplicate": "모델 이름이 중복되었습니다",
+      "enumNameDuplicate": "enum 이름이 중복되었습니다",
+      "componentNameCollision": "모델과 enum이 이 이름을 공유합니다",
+      "groupNameDuplicate": "그룹 이름이 중복되었습니다",
+      "inheritanceTargetUnknown": "상속된 모델이 더 이상 없습니다",
+      "inheritanceCycle": "순환 상속 체인",
+      "identifierPropertyUnknown": "식별자 속성이 더 이상 없습니다",
+      "paramLinkTargetUnknown": "매개변수 링크가 없는 속성을 가리킵니다",
+      "bodyModelUnknown": "본문 모델이 더 이상 없습니다",
+      "responseModelUnknown": "응답 모델이 더 이상 없습니다",
+      "responseExampleUnknown": "응답이 없는 예시를 제공합니다"
+    },
+    "traffic": {
+      "low": "낮음",
+      "medium": "중간",
+      "high": "높음"
+    },
+    "routes": {
+      "addGroup": "그룹 추가",
+      "addRoute": "라우트 추가",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "그룹 또는 라우트를 선택하거나 그룹을 만드세요.",
+      "deleteGroupTitle": "{{name}}을(를) 삭제할까요?",
+      "deleteGroupImpact": "그룹과 그 {{count}}개의 라우트가 삭제됩니다.",
+      "method": "메서드",
+      "path": "경로",
+      "summary": "요약",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "정의",
+        "responses": "응답"
+      },
+      "group": {
+        "auth": "필수 인증",
+        "authInherited": "디자인 기본값",
+        "versionPrefix": "버전 접두사",
+        "headers": "계약 헤더(라우트가 상속)",
+        "headerName": "헤더",
+        "addHeader": "헤더 추가",
+        "deleteHeader": "헤더 삭제",
+        "noHeaders": "공유 헤더가 없습니다."
+      },
+      "params": {
+        "pathTitle": "경로 매개변수",
+        "otherTitle": "매개변수(query / header)",
+        "name": "이름",
+        "location": "위치",
+        "link": "모델 링크",
+        "noLink": "—",
+        "add": "매개변수 추가",
+        "delete": "매개변수 삭제",
+        "auto": "자동",
+        "pathEmpty": "경로에 {{param}}을 입력하면 해당 행이 생성됩니다.",
+        "otherEmpty": "아직 query 또는 header 매개변수가 없습니다."
+      },
+      "body": {
+        "label": "요청 본문",
+        "empty": "(비어 있음)"
+      },
+      "responses": {
+        "add": "추가",
+        "codePlaceholder": "상태 코드",
+        "standardErrors": "+ 표준 오류",
+        "empty": "아직 선언된 응답이 없습니다.",
+        "emptyBody": "빈 본문",
+        "model": "반환 모델",
+        "list": "목록",
+        "paginated": "페이지네이션",
+        "listOf": "{{name}} 목록",
+        "paginatedListOf": "페이지네이션된 {{name}} 목록",
+        "example": "제공되는 예시",
+        "exampleAuto": "(자동 생성)",
+        "delete": "응답 삭제"
+      },
+      "settings": {
+        "inherited": "그룹에서 상속",
+        "authInherited": "그룹에서 상속",
+        "editGroup": "그룹에서 편집 ↗",
+        "headers": "계약 헤더",
+        "behaviour": "동작",
+        "idempotent": "멱등",
+        "cacheSeconds": "캐시(초)",
+        "traffic": "예상 트래픽",
+        "authOverride": "인증 재정의",
+        "pagination": "페이지네이션",
+        "defaultLimit": "기본 페이지 크기",
+        "maxLimit": "최대 페이지 크기"
+      }
     }
   },
   "mqtt": {

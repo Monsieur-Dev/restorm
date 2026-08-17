@@ -564,3 +564,159 @@
   flex: 1;
   min-height: 0;
 }
+
+/* ── Routes section (468.4) ───────────────────────────────────────── */
+
+.design-route-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-route-method {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.design-route-path {
+  flex: 1;
+}
+
+.design-route-resolved {
+  margin: 4px 0 0;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  opacity: 0.6;
+}
+
+.design-route-definition,
+.design-route-settings,
+.design-route-responses {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.design-route-params-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.design-param-name {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.9em;
+}
+
+.design-param-inherited {
+  opacity: 0.6;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+}
+
+.design-param-description {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.design-param-description > :first-child {
+  flex: 1;
+}
+
+.design-param-auto-badge {
+  font-size: 0.75em;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background-color: var(--badge-background, rgba(128, 128, 128, 0.25));
+  opacity: 0.8;
+}
+
+.design-route-responses-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-response-code-input {
+  width: 80px;
+}
+
+.design-response-row {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+}
+
+.design-response-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-response-code {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-weight: 600;
+}
+
+.design-response-summary {
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-response-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.design-response-body > .design-settings-grid {
+  flex: 1;
+}
+
+.design-inherited-block {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.design-inherited-block p {
+  margin: 0;
+}
+
+.design-route-row-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 4px;
+}
+
+.design-route-card-title {
+  margin: 0;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 1.05em;
+}
+
+.design-route-card-group {
+  opacity: 0.6;
+  font-size: 0.9em;
+}
+
+.design-generator-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

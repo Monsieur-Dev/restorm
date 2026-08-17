@@ -2249,7 +2249,10 @@
         "response": "odpowiedź {{code}}",
         "param": "parametr {{name}}",
         "inherits": "{{name}} dziedziczy z niego"
-      }
+      },
+      "generators": "Trasy",
+      "generateCrud": "Wygeneruj CRUD",
+      "generateSearch": "Wygeneruj trasy wyszukiwania"
     },
     "schema": {
       "addProperty": "Dodaj właściwość",
@@ -2292,7 +2295,10 @@
       "unique": "unikalne",
       "immutable": "niezmienne",
       "searchable": "wyszukiwalne",
-      "deprecated": "wycofane"
+      "deprecated": "wycofane",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Domyślny",
@@ -2331,7 +2337,98 @@
       "propertyShadowsParent": "Przesłania odziedziczoną właściwość",
       "referenceTargetUnknown": "Typ, do którego się odwołano, już nie istnieje",
       "constraintPatternInvalid": "Nieprawidłowy wzorzec (wyrażenie regularne)",
-      "constraintMinAboveMax": "Min przekracza max"
+      "constraintMinAboveMax": "Min przekracza max",
+      "modelNameEmpty": "Model nie ma nazwy",
+      "enumNameEmpty": "Enum nie ma nazwy",
+      "groupNameEmpty": "Grupa nie ma nazwy",
+      "modelNameDuplicate": "Zduplikowana nazwa modelu",
+      "enumNameDuplicate": "Zduplikowana nazwa enuma",
+      "componentNameCollision": "Model i enum dzielą tę nazwę",
+      "groupNameDuplicate": "Zduplikowana nazwa grupy",
+      "inheritanceTargetUnknown": "Dziedziczony model już nie istnieje",
+      "inheritanceCycle": "Cykliczny łańcuch dziedziczenia",
+      "identifierPropertyUnknown": "Właściwość identyfikująca już nie istnieje",
+      "paramLinkTargetUnknown": "Powiązanie parametru wskazuje na brakującą właściwość",
+      "bodyModelUnknown": "Model ciała już nie istnieje",
+      "responseModelUnknown": "Model odpowiedzi już nie istnieje",
+      "responseExampleUnknown": "Odpowiedź serwuje brakujący przykład"
+    },
+    "traffic": {
+      "low": "Niski",
+      "medium": "Średni",
+      "high": "Wysoki"
+    },
+    "routes": {
+      "addGroup": "Dodaj grupę",
+      "addRoute": "Dodaj trasę",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Wybierz grupę lub trasę, albo utwórz grupę.",
+      "deleteGroupTitle": "Usunąć {{name}}?",
+      "deleteGroupImpact": "Grupa i jej {{count}} tras zostaną usunięte.",
+      "method": "Metoda",
+      "path": "Ścieżka",
+      "summary": "Podsumowanie",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definicja",
+        "responses": "Odpowiedzi"
+      },
+      "group": {
+        "auth": "Wymagana autoryzacja",
+        "authInherited": "Domyślne projektu",
+        "versionPrefix": "Prefiks wersji",
+        "headers": "Nagłówki kontraktu (dziedziczone przez trasy)",
+        "headerName": "Nagłówek",
+        "addHeader": "Dodaj nagłówek",
+        "deleteHeader": "Usuń nagłówek",
+        "noHeaders": "Brak wspólnego nagłówka."
+      },
+      "params": {
+        "pathTitle": "Parametry ścieżki",
+        "otherTitle": "Parametry (query / header)",
+        "name": "Nazwa",
+        "location": "W",
+        "link": "Powiązanie modelu",
+        "noLink": "—",
+        "add": "Dodaj parametr",
+        "delete": "Usuń parametr",
+        "auto": "auto",
+        "pathEmpty": "Wpisz {{param}} w ścieżce, aby utworzyć jego wiersz.",
+        "otherEmpty": "Brak parametrów query lub header."
+      },
+      "body": {
+        "label": "Ciało żądania",
+        "empty": "(puste)"
+      },
+      "responses": {
+        "add": "Dodaj",
+        "codePlaceholder": "Kod statusu",
+        "standardErrors": "+ błędy standardowe",
+        "empty": "Nie zadeklarowano jeszcze odpowiedzi.",
+        "emptyBody": "puste ciało",
+        "model": "Zwracany model",
+        "list": "Lista",
+        "paginated": "Stronicowana",
+        "listOf": "lista {{name}}",
+        "paginatedListOf": "stronicowana lista {{name}}",
+        "example": "Serwowany przykład",
+        "exampleAuto": "(auto generowany)",
+        "delete": "Usuń odpowiedź"
+      },
+      "settings": {
+        "inherited": "Dziedziczone z grupy",
+        "authInherited": "Dziedziczone z grupy",
+        "editGroup": "Edytuj w grupie ↗",
+        "headers": "Nagłówki kontraktu",
+        "behaviour": "Zachowanie",
+        "idempotent": "Idempotentna",
+        "cacheSeconds": "Cache (sekundy)",
+        "traffic": "Oczekiwany ruch",
+        "authOverride": "Nadpisanie autoryzacji",
+        "pagination": "Stronicowanie",
+        "defaultLimit": "Domyślny rozmiar strony",
+        "maxLimit": "Maks. rozmiar strony"
+      }
     }
   },
   "mqtt": {

@@ -2247,7 +2247,10 @@
         "response": "válasz {{code}}",
         "param": "paraméter {{name}}",
         "inherits": "{{name}} örököl tőle"
-      }
+      },
+      "generators": "Útvonalak",
+      "generateCrud": "CRUD generálása",
+      "generateSearch": "Keresési útvonalak generálása"
     },
     "schema": {
       "addProperty": "Tulajdonság hozzáadása",
@@ -2290,7 +2293,10 @@
       "unique": "egyedi",
       "immutable": "megváltoztathatatlan",
       "searchable": "kereshető",
-      "deprecated": "elavult"
+      "deprecated": "elavult",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Alapértelmezett",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Elfed egy örökölt tulajdonságot",
       "referenceTargetUnknown": "A hivatkozott típus már nem létezik",
       "constraintPatternInvalid": "Érvénytelen minta (reguláris kifejezés)",
-      "constraintMinAboveMax": "A min meghaladja a maxot"
+      "constraintMinAboveMax": "A min meghaladja a maxot",
+      "modelNameEmpty": "A modellnek nincs neve",
+      "enumNameEmpty": "Az enumnak nincs neve",
+      "groupNameEmpty": "A csoportnak nincs neve",
+      "modelNameDuplicate": "Ismétlődő modellnév",
+      "enumNameDuplicate": "Ismétlődő enumnév",
+      "componentNameCollision": "Egy modell és egy enum osztozik ezen a néven",
+      "groupNameDuplicate": "Ismétlődő csoportnév",
+      "inheritanceTargetUnknown": "Az örökölt modell már nem létezik",
+      "inheritanceCycle": "Körkörös öröklési lánc",
+      "identifierPropertyUnknown": "Az azonosító tulajdonság már nem létezik",
+      "paramLinkTargetUnknown": "Egy paraméterkapcsolat hiányzó tulajdonságra mutat",
+      "bodyModelUnknown": "A törzs modellje már nem létezik",
+      "responseModelUnknown": "Egy válaszmodell már nem létezik",
+      "responseExampleUnknown": "Egy válasz hiányzó példát szolgál ki"
+    },
+    "traffic": {
+      "low": "Alacsony",
+      "medium": "Közepes",
+      "high": "Magas"
+    },
+    "routes": {
+      "addGroup": "Csoport hozzáadása",
+      "addRoute": "Útvonal hozzáadása",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Válasszon egy csoportot vagy útvonalat, vagy hozzon létre egy csoportot.",
+      "deleteGroupTitle": "Törli: {{name}}?",
+      "deleteGroupImpact": "A csoport és {{count}} útvonala törlődik.",
+      "method": "Metódus",
+      "path": "Útvonal",
+      "summary": "Összefoglaló",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definíció",
+        "responses": "Válaszok"
+      },
+      "group": {
+        "auth": "Kötelező auth",
+        "authInherited": "Terv alapértelmezése",
+        "versionPrefix": "Verzióelőtag",
+        "headers": "Szerződés-fejlécek (az útvonalak öröklik)",
+        "headerName": "Fejléc",
+        "addHeader": "Fejléc hozzáadása",
+        "deleteHeader": "Fejléc törlése",
+        "noHeaders": "Nincs közös fejléc."
+      },
+      "params": {
+        "pathTitle": "Útvonal-paraméterek",
+        "otherTitle": "Paraméterek (query / header)",
+        "name": "Név",
+        "location": "Hol",
+        "link": "Modellkapcsolat",
+        "noLink": "—",
+        "add": "Paraméter hozzáadása",
+        "delete": "Paraméter törlése",
+        "auto": "auto",
+        "pathEmpty": "Írjon egy {{param}}-ot az útvonalba a sor létrehozásához.",
+        "otherEmpty": "Még nincs query vagy header paraméter."
+      },
+      "body": {
+        "label": "Kérés törzse",
+        "empty": "(üres)"
+      },
+      "responses": {
+        "add": "Hozzáadás",
+        "codePlaceholder": "Státuszkód",
+        "standardErrors": "+ szabványos hibák",
+        "empty": "Még nincs deklarált válasz.",
+        "emptyBody": "üres törzs",
+        "model": "Visszaadott modell",
+        "list": "Lista",
+        "paginated": "Lapozott",
+        "listOf": "{{name}} listája",
+        "paginatedListOf": "{{name}} lapozott listája",
+        "example": "Kiszolgált példa",
+        "exampleAuto": "(auto generált)",
+        "delete": "Válasz törlése"
+      },
+      "settings": {
+        "inherited": "A csoporttól örökölve",
+        "authInherited": "A csoporttól örökölve",
+        "editGroup": "Szerkesztés a csoportban ↗",
+        "headers": "Szerződés-fejlécek",
+        "behaviour": "Viselkedés",
+        "idempotent": "Idempotens",
+        "cacheSeconds": "Cache (másodperc)",
+        "traffic": "Várt forgalom",
+        "authOverride": "Auth felülbírálás",
+        "pagination": "Lapozás",
+        "defaultLimit": "Alapértelmezett lapméret",
+        "maxLimit": "Max. lapméret"
+      }
     }
   },
   "mqtt": {

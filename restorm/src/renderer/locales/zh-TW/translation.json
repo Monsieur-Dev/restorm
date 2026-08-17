@@ -2246,7 +2246,10 @@
         "response": "回應 {{code}}",
         "param": "參數 {{name}}",
         "inherits": "{{name}} 繼承自它"
-      }
+      },
+      "generators": "路由",
+      "generateCrud": "產生 CRUD",
+      "generateSearch": "產生搜尋路由"
     },
     "schema": {
       "addProperty": "新增屬性",
@@ -2289,7 +2292,10 @@
       "unique": "唯一",
       "immutable": "不可變",
       "searchable": "可搜尋",
-      "deprecated": "已棄用"
+      "deprecated": "已棄用",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "預設",
@@ -2328,7 +2334,98 @@
       "propertyShadowsParent": "遮蔽了繼承的屬性",
       "referenceTargetUnknown": "引用的型別已不存在",
       "constraintPatternInvalid": "無效的模式（正規表示式）",
-      "constraintMinAboveMax": "最小值超過最大值"
+      "constraintMinAboveMax": "最小值超過最大值",
+      "modelNameEmpty": "模型沒有名稱",
+      "enumNameEmpty": "列舉沒有名稱",
+      "groupNameEmpty": "群組沒有名稱",
+      "modelNameDuplicate": "模型名稱重複",
+      "enumNameDuplicate": "列舉名稱重複",
+      "componentNameCollision": "一個模型和一個列舉共用此名稱",
+      "groupNameDuplicate": "群組名稱重複",
+      "inheritanceTargetUnknown": "繼承的模型已不存在",
+      "inheritanceCycle": "繼承鏈循環",
+      "identifierPropertyUnknown": "識別碼屬性已不存在",
+      "paramLinkTargetUnknown": "參數連結指向缺失的屬性",
+      "bodyModelUnknown": "主體模型已不存在",
+      "responseModelUnknown": "回應模型已不存在",
+      "responseExampleUnknown": "回應提供了缺失的範例"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "routes": {
+      "addGroup": "新增群組",
+      "addRoute": "新增路由",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "選擇一個群組或路由，或建立一個群組。",
+      "deleteGroupTitle": "刪除 {{name}}？",
+      "deleteGroupImpact": "該群組及其 {{count}} 條路由將被刪除。",
+      "method": "方法",
+      "path": "路徑",
+      "summary": "摘要",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "定義",
+        "responses": "回應"
+      },
+      "group": {
+        "auth": "所需驗證",
+        "authInherited": "設計預設值",
+        "versionPrefix": "版本前綴",
+        "headers": "契約標頭（由路由繼承）",
+        "headerName": "標頭",
+        "addHeader": "新增標頭",
+        "deleteHeader": "刪除標頭",
+        "noHeaders": "沒有共用標頭。"
+      },
+      "params": {
+        "pathTitle": "路徑參數",
+        "otherTitle": "參數（query / header）",
+        "name": "名稱",
+        "location": "位置",
+        "link": "模型連結",
+        "noLink": "—",
+        "add": "新增參數",
+        "delete": "刪除參數",
+        "auto": "自動",
+        "pathEmpty": "在路徑中輸入 {{param}} 即可建立其列。",
+        "otherEmpty": "尚無 query 或 header 參數。"
+      },
+      "body": {
+        "label": "請求主體",
+        "empty": "（空）"
+      },
+      "responses": {
+        "add": "新增",
+        "codePlaceholder": "狀態碼",
+        "standardErrors": "+ 標準錯誤",
+        "empty": "尚未宣告任何回應。",
+        "emptyBody": "空主體",
+        "model": "回傳模型",
+        "list": "清單",
+        "paginated": "分頁",
+        "listOf": "{{name}} 清單",
+        "paginatedListOf": "分頁的 {{name}} 清單",
+        "example": "提供的範例",
+        "exampleAuto": "（自動產生）",
+        "delete": "刪除回應"
+      },
+      "settings": {
+        "inherited": "繼承自群組",
+        "authInherited": "繼承自群組",
+        "editGroup": "在群組中編輯 ↗",
+        "headers": "契約標頭",
+        "behaviour": "行為",
+        "idempotent": "冪等",
+        "cacheSeconds": "快取（秒）",
+        "traffic": "預期流量",
+        "authOverride": "驗證覆寫",
+        "pagination": "分頁",
+        "defaultLimit": "預設頁面大小",
+        "maxLimit": "最大頁面大小"
+      }
     }
   },
   "mqtt": {

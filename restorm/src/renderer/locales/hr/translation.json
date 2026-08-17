@@ -2248,7 +2248,10 @@
         "response": "odgovor {{code}}",
         "param": "parametar {{name}}",
         "inherits": "{{name}} nasljeđuje od njega"
-      }
+      },
+      "generators": "Rute",
+      "generateCrud": "Generiraj CRUD",
+      "generateSearch": "Generiraj rute pretraživanja"
     },
     "schema": {
       "addProperty": "Dodaj svojstvo",
@@ -2291,7 +2294,10 @@
       "unique": "jedinstveno",
       "immutable": "nepromjenjivo",
       "searchable": "pretraživo",
-      "deprecated": "zastarjelo"
+      "deprecated": "zastarjelo",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Zadano",
@@ -2330,7 +2336,98 @@
       "propertyShadowsParent": "Zasjenjuje naslijeđeno svojstvo",
       "referenceTargetUnknown": "Referencirani tip više ne postoji",
       "constraintPatternInvalid": "Nevažeći uzorak (regularni izraz)",
-      "constraintMinAboveMax": "Min premašuje max"
+      "constraintMinAboveMax": "Min premašuje max",
+      "modelNameEmpty": "Model nema ime",
+      "enumNameEmpty": "Enum nema ime",
+      "groupNameEmpty": "Grupa nema ime",
+      "modelNameDuplicate": "Duplicirano ime modela",
+      "enumNameDuplicate": "Duplicirano ime enuma",
+      "componentNameCollision": "Model i enum dijele ovo ime",
+      "groupNameDuplicate": "Duplicirano ime grupe",
+      "inheritanceTargetUnknown": "Naslijeđeni model više ne postoji",
+      "inheritanceCycle": "Kružni lanac nasljeđivanja",
+      "identifierPropertyUnknown": "Identifikacijsko svojstvo više ne postoji",
+      "paramLinkTargetUnknown": "Poveznica parametra pokazuje na nepostojeće svojstvo",
+      "bodyModelUnknown": "Model tijela više ne postoji",
+      "responseModelUnknown": "Model odgovora više ne postoji",
+      "responseExampleUnknown": "Odgovor poslužuje nepostojeći primjer"
+    },
+    "traffic": {
+      "low": "Nizak",
+      "medium": "Srednji",
+      "high": "Visok"
+    },
+    "routes": {
+      "addGroup": "Dodaj grupu",
+      "addRoute": "Dodaj rutu",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Odaberite grupu ili rutu, ili izradite grupu.",
+      "deleteGroupTitle": "Izbrisati {{name}}?",
+      "deleteGroupImpact": "Grupa i njezinih {{count}} ruta bit će izbrisani.",
+      "method": "Metoda",
+      "path": "Putanja",
+      "summary": "Sažetak",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definicija",
+        "responses": "Odgovori"
+      },
+      "group": {
+        "auth": "Obavezna autentikacija",
+        "authInherited": "Zadano dizajna",
+        "versionPrefix": "Prefiks verzije",
+        "headers": "Ugovorna zaglavlja (nasljeđuju ih rute)",
+        "headerName": "Zaglavlje",
+        "addHeader": "Dodaj zaglavlje",
+        "deleteHeader": "Izbriši zaglavlje",
+        "noHeaders": "Nema zajedničkog zaglavlja."
+      },
+      "params": {
+        "pathTitle": "Parametri putanje",
+        "otherTitle": "Parametri (query / header)",
+        "name": "Ime",
+        "location": "U",
+        "link": "Poveznica modela",
+        "noLink": "—",
+        "add": "Dodaj parametar",
+        "delete": "Izbriši parametar",
+        "auto": "auto",
+        "pathEmpty": "Upišite {{param}} u putanju da biste stvorili njegov redak.",
+        "otherEmpty": "Još nema query ili header parametara."
+      },
+      "body": {
+        "label": "Tijelo zahtjeva",
+        "empty": "(prazno)"
+      },
+      "responses": {
+        "add": "Dodaj",
+        "codePlaceholder": "Statusni kod",
+        "standardErrors": "+ standardne greške",
+        "empty": "Još nema deklariranog odgovora.",
+        "emptyBody": "prazno tijelo",
+        "model": "Vraćeni model",
+        "list": "Lista",
+        "paginated": "Straničena",
+        "listOf": "lista {{name}}",
+        "paginatedListOf": "straničena lista {{name}}",
+        "example": "Posluženi primjer",
+        "exampleAuto": "(auto generiran)",
+        "delete": "Izbriši odgovor"
+      },
+      "settings": {
+        "inherited": "Naslijeđeno od grupe",
+        "authInherited": "Naslijeđeno od grupe",
+        "editGroup": "Uredi u grupi ↗",
+        "headers": "Ugovorna zaglavlja",
+        "behaviour": "Ponašanje",
+        "idempotent": "Idempotentna",
+        "cacheSeconds": "Cache (sekunde)",
+        "traffic": "Očekivani promet",
+        "authOverride": "Nadjačavanje autentikacije",
+        "pagination": "Straničenje",
+        "defaultLimit": "Zadana veličina stranice",
+        "maxLimit": "Maks. veličina stranice"
+      }
     }
   },
   "mqtt": {

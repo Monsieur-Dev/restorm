@@ -2247,7 +2247,10 @@
         "response": "απόκριση {{code}}",
         "param": "παράμετρος {{name}}",
         "inherits": "Το {{name}} κληρονομεί από αυτό"
-      }
+      },
+      "generators": "Διαδρομές",
+      "generateCrud": "Δημιουργία CRUD",
+      "generateSearch": "Δημιουργία διαδρομών αναζήτησης"
     },
     "schema": {
       "addProperty": "Προσθήκη ιδιότητας",
@@ -2290,7 +2293,10 @@
       "unique": "μοναδικό",
       "immutable": "αμετάβλητο",
       "searchable": "αναζητήσιμο",
-      "deprecated": "παρωχημένο"
+      "deprecated": "παρωχημένο",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Προεπιλογή",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Επισκιάζει μια κληρονομημένη ιδιότητα",
       "referenceTargetUnknown": "Ο αναφερόμενος τύπος δεν υπάρχει πια",
       "constraintPatternInvalid": "Μη έγκυρο μοτίβο (κανονική έκφραση)",
-      "constraintMinAboveMax": "Το ελάχιστο υπερβαίνει το μέγιστο"
+      "constraintMinAboveMax": "Το ελάχιστο υπερβαίνει το μέγιστο",
+      "modelNameEmpty": "Το μοντέλο δεν έχει όνομα",
+      "enumNameEmpty": "Το enum δεν έχει όνομα",
+      "groupNameEmpty": "Η ομάδα δεν έχει όνομα",
+      "modelNameDuplicate": "Διπλότυπο όνομα μοντέλου",
+      "enumNameDuplicate": "Διπλότυπο όνομα enum",
+      "componentNameCollision": "Ένα μοντέλο και ένα enum μοιράζονται αυτό το όνομα",
+      "groupNameDuplicate": "Διπλότυπο όνομα ομάδας",
+      "inheritanceTargetUnknown": "Το κληρονομούμενο μοντέλο δεν υπάρχει πια",
+      "inheritanceCycle": "Κυκλική αλυσίδα κληρονομικότητας",
+      "identifierPropertyUnknown": "Η ιδιότητα αναγνωριστικού δεν υπάρχει πια",
+      "paramLinkTargetUnknown": "Μια σύνδεση παραμέτρου δείχνει σε ανύπαρκτη ιδιότητα",
+      "bodyModelUnknown": "Το μοντέλο του σώματος δεν υπάρχει πια",
+      "responseModelUnknown": "Ένα μοντέλο απόκρισης δεν υπάρχει πια",
+      "responseExampleUnknown": "Μια απόκριση σερβίρει ανύπαρκτο παράδειγμα"
+    },
+    "traffic": {
+      "low": "Χαμηλή",
+      "medium": "Μεσαία",
+      "high": "Υψηλή"
+    },
+    "routes": {
+      "addGroup": "Προσθήκη ομάδας",
+      "addRoute": "Προσθήκη διαδρομής",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Επιλέξτε μια ομάδα ή μια διαδρομή, ή δημιουργήστε μια ομάδα.",
+      "deleteGroupTitle": "Διαγραφή του {{name}};",
+      "deleteGroupImpact": "Η ομάδα και οι {{count}} διαδρομές της θα διαγραφούν.",
+      "method": "Μέθοδος",
+      "path": "Διαδρομή",
+      "summary": "Περίληψη",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Ορισμός",
+        "responses": "Αποκρίσεις"
+      },
+      "group": {
+        "auth": "Απαιτούμενη αυθεντικοποίηση",
+        "authInherited": "Προεπιλογή σχεδίου",
+        "versionPrefix": "Πρόθεμα έκδοσης",
+        "headers": "Κεφαλίδες συμβολαίου (κληρονομούνται από τις διαδρομές)",
+        "headerName": "Κεφαλίδα",
+        "addHeader": "Προσθήκη κεφαλίδας",
+        "deleteHeader": "Διαγραφή κεφαλίδας",
+        "noHeaders": "Καμία κοινή κεφαλίδα."
+      },
+      "params": {
+        "pathTitle": "Παράμετροι διαδρομής",
+        "otherTitle": "Παράμετροι (query / header)",
+        "name": "Όνομα",
+        "location": "Σε",
+        "link": "Σύνδεση μοντέλου",
+        "noLink": "—",
+        "add": "Προσθήκη παραμέτρου",
+        "delete": "Διαγραφή παραμέτρου",
+        "auto": "αυτόματο",
+        "pathEmpty": "Πληκτρολογήστε ένα {{param}} στη διαδρομή για να δημιουργηθεί η γραμμή του.",
+        "otherEmpty": "Δεν υπάρχουν ακόμη παράμετροι query ή header."
+      },
+      "body": {
+        "label": "Σώμα αιτήματος",
+        "empty": "(κενό)"
+      },
+      "responses": {
+        "add": "Προσθήκη",
+        "codePlaceholder": "Κωδικός κατάστασης",
+        "standardErrors": "+ τυπικά σφάλματα",
+        "empty": "Καμία δηλωμένη απόκριση ακόμη.",
+        "emptyBody": "κενό σώμα",
+        "model": "Επιστρεφόμενο μοντέλο",
+        "list": "Λίστα",
+        "paginated": "Σελιδοποιημένη",
+        "listOf": "λίστα από {{name}}",
+        "paginatedListOf": "σελιδοποιημένη λίστα από {{name}}",
+        "example": "Σερβιριζόμενο παράδειγμα",
+        "exampleAuto": "(αυτόματο)",
+        "delete": "Διαγραφή απόκρισης"
+      },
+      "settings": {
+        "inherited": "Κληρονομείται από την ομάδα",
+        "authInherited": "Κληρονομείται από την ομάδα",
+        "editGroup": "Επεξεργασία στην ομάδα ↗",
+        "headers": "Κεφαλίδες συμβολαίου",
+        "behaviour": "Συμπεριφορά",
+        "idempotent": "Ταυτοδύναμη",
+        "cacheSeconds": "Cache (δευτερόλεπτα)",
+        "traffic": "Αναμενόμενη κίνηση",
+        "authOverride": "Παράκαμψη αυθεντικοποίησης",
+        "pagination": "Σελιδοποίηση",
+        "defaultLimit": "Προεπιλεγμένο μέγεθος σελίδας",
+        "maxLimit": "Μέγιστο μέγεθος σελίδας"
+      }
     }
   },
   "mqtt": {

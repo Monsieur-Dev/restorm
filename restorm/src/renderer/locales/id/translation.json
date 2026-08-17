@@ -2246,7 +2246,10 @@
         "response": "respons {{code}}",
         "param": "parameter {{name}}",
         "inherits": "{{name}} mewarisinya"
-      }
+      },
+      "generators": "Rute",
+      "generateCrud": "Hasilkan CRUD",
+      "generateSearch": "Hasilkan rute pencarian"
     },
     "schema": {
       "addProperty": "Tambah properti",
@@ -2289,7 +2292,10 @@
       "unique": "unik",
       "immutable": "tak berubah",
       "searchable": "dapat dicari",
-      "deprecated": "usang"
+      "deprecated": "usang",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Bawaan",
@@ -2328,7 +2334,98 @@
       "propertyShadowsParent": "Menutupi properti warisan",
       "referenceTargetUnknown": "Tipe yang dirujuk sudah tidak ada",
       "constraintPatternInvalid": "Pola tidak valid (ekspresi reguler)",
-      "constraintMinAboveMax": "Min melebihi maks"
+      "constraintMinAboveMax": "Min melebihi maks",
+      "modelNameEmpty": "Model tidak memiliki nama",
+      "enumNameEmpty": "Enum tidak memiliki nama",
+      "groupNameEmpty": "Grup tidak memiliki nama",
+      "modelNameDuplicate": "Nama model duplikat",
+      "enumNameDuplicate": "Nama enum duplikat",
+      "componentNameCollision": "Sebuah model dan enum berbagi nama ini",
+      "groupNameDuplicate": "Nama grup duplikat",
+      "inheritanceTargetUnknown": "Model yang diwarisi sudah tidak ada",
+      "inheritanceCycle": "Rantai pewarisan melingkar",
+      "identifierPropertyUnknown": "Properti pengenal sudah tidak ada",
+      "paramLinkTargetUnknown": "Tautan parameter menunjuk properti yang hilang",
+      "bodyModelUnknown": "Model badan sudah tidak ada",
+      "responseModelUnknown": "Model respons sudah tidak ada",
+      "responseExampleUnknown": "Respons menyajikan contoh yang hilang"
+    },
+    "traffic": {
+      "low": "Rendah",
+      "medium": "Sedang",
+      "high": "Tinggi"
+    },
+    "routes": {
+      "addGroup": "Tambah grup",
+      "addRoute": "Tambah rute",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Pilih grup atau rute, atau buat grup.",
+      "deleteGroupTitle": "Hapus {{name}}?",
+      "deleteGroupImpact": "Grup dan {{count}} rutenya akan dihapus.",
+      "method": "Metode",
+      "path": "Jalur",
+      "summary": "Ringkasan",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definisi",
+        "responses": "Respons"
+      },
+      "group": {
+        "auth": "Auth wajib",
+        "authInherited": "Bawaan desain",
+        "versionPrefix": "Prefiks versi",
+        "headers": "Header kontrak (diwarisi oleh rute)",
+        "headerName": "Header",
+        "addHeader": "Tambah header",
+        "deleteHeader": "Hapus header",
+        "noHeaders": "Tidak ada header bersama."
+      },
+      "params": {
+        "pathTitle": "Parameter jalur",
+        "otherTitle": "Parameter (query / header)",
+        "name": "Nama",
+        "location": "Di",
+        "link": "Tautan model",
+        "noLink": "—",
+        "add": "Tambah parameter",
+        "delete": "Hapus parameter",
+        "auto": "otomatis",
+        "pathEmpty": "Ketik {{param}} di jalur untuk membuat barisnya.",
+        "otherEmpty": "Belum ada parameter query atau header."
+      },
+      "body": {
+        "label": "Badan permintaan",
+        "empty": "(kosong)"
+      },
+      "responses": {
+        "add": "Tambah",
+        "codePlaceholder": "Kode status",
+        "standardErrors": "+ galat standar",
+        "empty": "Belum ada respons yang dideklarasikan.",
+        "emptyBody": "badan kosong",
+        "model": "Model yang dikembalikan",
+        "list": "Daftar",
+        "paginated": "Berhalaman",
+        "listOf": "daftar {{name}}",
+        "paginatedListOf": "daftar berhalaman {{name}}",
+        "example": "Contoh yang disajikan",
+        "exampleAuto": "(otomatis dibuat)",
+        "delete": "Hapus respons"
+      },
+      "settings": {
+        "inherited": "Diwarisi dari grup",
+        "authInherited": "Diwarisi dari grup",
+        "editGroup": "Edit di grup ↗",
+        "headers": "Header kontrak",
+        "behaviour": "Perilaku",
+        "idempotent": "Idempoten",
+        "cacheSeconds": "Cache (detik)",
+        "traffic": "Lalu lintas yang diharapkan",
+        "authOverride": "Penimpaan auth",
+        "pagination": "Penomoran halaman",
+        "defaultLimit": "Ukuran halaman bawaan",
+        "maxLimit": "Ukuran halaman maks."
+      }
     }
   },
   "mqtt": {

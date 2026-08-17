@@ -2249,7 +2249,10 @@
         "response": "odpověď {{code}}",
         "param": "parametr {{name}}",
         "inherits": "{{name}} z něj dědí"
-      }
+      },
+      "generators": "Trasy",
+      "generateCrud": "Vygenerovat CRUD",
+      "generateSearch": "Vygenerovat vyhledávací trasy"
     },
     "schema": {
       "addProperty": "Přidat vlastnost",
@@ -2292,7 +2295,10 @@
       "unique": "unikátní",
       "immutable": "neměnné",
       "searchable": "vyhledatelné",
-      "deprecated": "zastaralé"
+      "deprecated": "zastaralé",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Výchozí",
@@ -2331,7 +2337,98 @@
       "propertyShadowsParent": "Zastiňuje zděděnou vlastnost",
       "referenceTargetUnknown": "Odkazovaný typ už neexistuje",
       "constraintPatternInvalid": "Neplatný vzor (regulární výraz)",
-      "constraintMinAboveMax": "Min překračuje max"
+      "constraintMinAboveMax": "Min překračuje max",
+      "modelNameEmpty": "Model nemá název",
+      "enumNameEmpty": "Enum nemá název",
+      "groupNameEmpty": "Skupina nemá název",
+      "modelNameDuplicate": "Duplicitní název modelu",
+      "enumNameDuplicate": "Duplicitní název enumu",
+      "componentNameCollision": "Model a enum sdílejí tento název",
+      "groupNameDuplicate": "Duplicitní název skupiny",
+      "inheritanceTargetUnknown": "Děděný model už neexistuje",
+      "inheritanceCycle": "Cyklický řetězec dědičnosti",
+      "identifierPropertyUnknown": "Identifikační vlastnost už neexistuje",
+      "paramLinkTargetUnknown": "Vazba parametru ukazuje na chybějící vlastnost",
+      "bodyModelUnknown": "Model těla už neexistuje",
+      "responseModelUnknown": "Model odpovědi už neexistuje",
+      "responseExampleUnknown": "Odpověď servíruje chybějící příklad"
+    },
+    "traffic": {
+      "low": "Nízký",
+      "medium": "Střední",
+      "high": "Vysoký"
+    },
+    "routes": {
+      "addGroup": "Přidat skupinu",
+      "addRoute": "Přidat trasu",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Vyberte skupinu nebo trasu, nebo skupinu vytvořte.",
+      "deleteGroupTitle": "Smazat {{name}}?",
+      "deleteGroupImpact": "Skupina a jejích {{count}} tras budou smazány.",
+      "method": "Metoda",
+      "path": "Cesta",
+      "summary": "Shrnutí",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definice",
+        "responses": "Odpovědi"
+      },
+      "group": {
+        "auth": "Vyžadovaná autentizace",
+        "authInherited": "Výchozí návrhu",
+        "versionPrefix": "Prefix verze",
+        "headers": "Kontraktové hlavičky (děděné trasami)",
+        "headerName": "Hlavička",
+        "addHeader": "Přidat hlavičku",
+        "deleteHeader": "Smazat hlavičku",
+        "noHeaders": "Žádná sdílená hlavička."
+      },
+      "params": {
+        "pathTitle": "Parametry cesty",
+        "otherTitle": "Parametry (query / header)",
+        "name": "Název",
+        "location": "V",
+        "link": "Vazba na model",
+        "noLink": "—",
+        "add": "Přidat parametr",
+        "delete": "Smazat parametr",
+        "auto": "auto",
+        "pathEmpty": "Zadejte {{param}} v cestě pro vytvoření jeho řádku.",
+        "otherEmpty": "Zatím žádné query ani header parametry."
+      },
+      "body": {
+        "label": "Tělo požadavku",
+        "empty": "(prázdné)"
+      },
+      "responses": {
+        "add": "Přidat",
+        "codePlaceholder": "Stavový kód",
+        "standardErrors": "+ standardní chyby",
+        "empty": "Zatím žádná deklarovaná odpověď.",
+        "emptyBody": "prázdné tělo",
+        "model": "Vrácený model",
+        "list": "Seznam",
+        "paginated": "Stránkovaný",
+        "listOf": "seznam {{name}}",
+        "paginatedListOf": "stránkovaný seznam {{name}}",
+        "example": "Servírovaný příklad",
+        "exampleAuto": "(auto generovaný)",
+        "delete": "Smazat odpověď"
+      },
+      "settings": {
+        "inherited": "Děděno ze skupiny",
+        "authInherited": "Děděno ze skupiny",
+        "editGroup": "Upravit ve skupině ↗",
+        "headers": "Kontraktové hlavičky",
+        "behaviour": "Chování",
+        "idempotent": "Idempotentní",
+        "cacheSeconds": "Cache (sekundy)",
+        "traffic": "Očekávaný provoz",
+        "authOverride": "Přepsání autentizace",
+        "pagination": "Stránkování",
+        "defaultLimit": "Výchozí velikost stránky",
+        "maxLimit": "Max. velikost stránky"
+      }
     }
   },
   "mqtt": {

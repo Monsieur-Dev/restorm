@@ -2246,7 +2246,10 @@
         "response": "phản hồi {{code}}",
         "param": "tham số {{name}}",
         "inherits": "{{name}} kế thừa từ nó"
-      }
+      },
+      "generators": "Tuyến",
+      "generateCrud": "Tạo CRUD",
+      "generateSearch": "Tạo các tuyến tìm kiếm"
     },
     "schema": {
       "addProperty": "Thêm thuộc tính",
@@ -2289,7 +2292,10 @@
       "unique": "duy nhất",
       "immutable": "bất biến",
       "searchable": "tìm kiếm được",
-      "deprecated": "ngừng dùng"
+      "deprecated": "ngừng dùng",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Mặc định",
@@ -2328,7 +2334,98 @@
       "propertyShadowsParent": "Che khuất một thuộc tính kế thừa",
       "referenceTargetUnknown": "Kiểu được tham chiếu không còn tồn tại",
       "constraintPatternInvalid": "Mẫu không hợp lệ (biểu thức chính quy)",
-      "constraintMinAboveMax": "Min vượt quá max"
+      "constraintMinAboveMax": "Min vượt quá max",
+      "modelNameEmpty": "Mô hình chưa có tên",
+      "enumNameEmpty": "Enum chưa có tên",
+      "groupNameEmpty": "Nhóm chưa có tên",
+      "modelNameDuplicate": "Tên mô hình trùng lặp",
+      "enumNameDuplicate": "Tên enum trùng lặp",
+      "componentNameCollision": "Một mô hình và một enum dùng chung tên này",
+      "groupNameDuplicate": "Tên nhóm trùng lặp",
+      "inheritanceTargetUnknown": "Mô hình kế thừa không còn tồn tại",
+      "inheritanceCycle": "Chuỗi kế thừa vòng tròn",
+      "identifierPropertyUnknown": "Thuộc tính định danh không còn tồn tại",
+      "paramLinkTargetUnknown": "Một liên kết tham số trỏ đến thuộc tính bị thiếu",
+      "bodyModelUnknown": "Mô hình thân không còn tồn tại",
+      "responseModelUnknown": "Một mô hình phản hồi không còn tồn tại",
+      "responseExampleUnknown": "Một phản hồi phục vụ ví dụ bị thiếu"
+    },
+    "traffic": {
+      "low": "Thấp",
+      "medium": "Trung bình",
+      "high": "Cao"
+    },
+    "routes": {
+      "addGroup": "Thêm nhóm",
+      "addRoute": "Thêm tuyến",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Chọn một nhóm hoặc một tuyến, hoặc tạo nhóm mới.",
+      "deleteGroupTitle": "Xóa {{name}}?",
+      "deleteGroupImpact": "Nhóm và {{count}} tuyến của nó sẽ bị xóa.",
+      "method": "Phương thức",
+      "path": "Đường dẫn",
+      "summary": "Tóm tắt",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Định nghĩa",
+        "responses": "Phản hồi"
+      },
+      "group": {
+        "auth": "Auth bắt buộc",
+        "authInherited": "Mặc định của thiết kế",
+        "versionPrefix": "Tiền tố phiên bản",
+        "headers": "Header hợp đồng (các tuyến kế thừa)",
+        "headerName": "Header",
+        "addHeader": "Thêm header",
+        "deleteHeader": "Xóa header",
+        "noHeaders": "Không có header chung."
+      },
+      "params": {
+        "pathTitle": "Tham số đường dẫn",
+        "otherTitle": "Tham số (query / header)",
+        "name": "Tên",
+        "location": "Tại",
+        "link": "Liên kết mô hình",
+        "noLink": "—",
+        "add": "Thêm tham số",
+        "delete": "Xóa tham số",
+        "auto": "tự động",
+        "pathEmpty": "Gõ một {{param}} trong đường dẫn để tạo dòng của nó.",
+        "otherEmpty": "Chưa có tham số query hoặc header."
+      },
+      "body": {
+        "label": "Thân yêu cầu",
+        "empty": "(trống)"
+      },
+      "responses": {
+        "add": "Thêm",
+        "codePlaceholder": "Mã trạng thái",
+        "standardErrors": "+ lỗi chuẩn",
+        "empty": "Chưa có phản hồi nào được khai báo.",
+        "emptyBody": "thân trống",
+        "model": "Mô hình trả về",
+        "list": "Danh sách",
+        "paginated": "Phân trang",
+        "listOf": "danh sách {{name}}",
+        "paginatedListOf": "danh sách phân trang {{name}}",
+        "example": "Ví dụ được phục vụ",
+        "exampleAuto": "(tự động tạo)",
+        "delete": "Xóa phản hồi"
+      },
+      "settings": {
+        "inherited": "Kế thừa từ nhóm",
+        "authInherited": "Kế thừa từ nhóm",
+        "editGroup": "Sửa trong nhóm ↗",
+        "headers": "Header hợp đồng",
+        "behaviour": "Hành vi",
+        "idempotent": "Bất biến (idempotent)",
+        "cacheSeconds": "Cache (giây)",
+        "traffic": "Lưu lượng dự kiến",
+        "authOverride": "Ghi đè auth",
+        "pagination": "Phân trang",
+        "defaultLimit": "Kích thước trang mặc định",
+        "maxLimit": "Kích thước trang tối đa"
+      }
     }
   },
   "mqtt": {

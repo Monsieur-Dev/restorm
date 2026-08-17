@@ -2247,7 +2247,10 @@
         "response": "Antwort {{code}}",
         "param": "Parameter {{name}}",
         "inherits": "{{name}} erbt davon"
-      }
+      },
+      "generators": "Routen",
+      "generateCrud": "CRUD generieren",
+      "generateSearch": "Suchrouten generieren"
     },
     "schema": {
       "addProperty": "Eigenschaft hinzufügen",
@@ -2290,7 +2293,10 @@
       "unique": "eindeutig",
       "immutable": "unveränderlich",
       "searchable": "durchsuchbar",
-      "deprecated": "veraltet"
+      "deprecated": "veraltet",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
     },
     "examples": {
       "defaultPill": "Standard",
@@ -2329,7 +2335,98 @@
       "propertyShadowsParent": "Überdeckt eine geerbte Eigenschaft",
       "referenceTargetUnknown": "Der referenzierte Typ existiert nicht mehr",
       "constraintPatternInvalid": "Ungültiges Muster (regulärer Ausdruck)",
-      "constraintMinAboveMax": "Min überschreitet Max"
+      "constraintMinAboveMax": "Min überschreitet Max",
+      "modelNameEmpty": "Das Modell hat keinen Namen",
+      "enumNameEmpty": "Das Enum hat keinen Namen",
+      "groupNameEmpty": "Die Gruppe hat keinen Namen",
+      "modelNameDuplicate": "Doppelter Modellname",
+      "enumNameDuplicate": "Doppelter Enum-Name",
+      "componentNameCollision": "Ein Modell und ein Enum teilen diesen Namen",
+      "groupNameDuplicate": "Doppelter Gruppenname",
+      "inheritanceTargetUnknown": "Das geerbte Modell existiert nicht mehr",
+      "inheritanceCycle": "Zirkuläre Vererbungskette",
+      "identifierPropertyUnknown": "Die Identifikator-Eigenschaft existiert nicht mehr",
+      "paramLinkTargetUnknown": "Ein Parameter-Link zeigt auf eine fehlende Eigenschaft",
+      "bodyModelUnknown": "Das Body-Modell existiert nicht mehr",
+      "responseModelUnknown": "Ein Antwortmodell existiert nicht mehr",
+      "responseExampleUnknown": "Eine Antwort serviert ein fehlendes Beispiel"
+    },
+    "traffic": {
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch"
+    },
+    "routes": {
+      "addGroup": "Gruppe hinzufügen",
+      "addRoute": "Route hinzufügen",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Wählen Sie eine Gruppe oder Route aus, oder erstellen Sie eine Gruppe.",
+      "deleteGroupTitle": "{{name}} löschen?",
+      "deleteGroupImpact": "Die Gruppe und ihre {{count}} Routen werden gelöscht.",
+      "method": "Methode",
+      "path": "Pfad",
+      "summary": "Zusammenfassung",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definition",
+        "responses": "Antworten"
+      },
+      "group": {
+        "auth": "Erforderliche Auth",
+        "authInherited": "Design-Standard",
+        "versionPrefix": "Versionspräfix",
+        "headers": "Vertrags-Header (von Routen geerbt)",
+        "headerName": "Header",
+        "addHeader": "Header hinzufügen",
+        "deleteHeader": "Header löschen",
+        "noHeaders": "Kein gemeinsamer Header."
+      },
+      "params": {
+        "pathTitle": "Pfadparameter",
+        "otherTitle": "Parameter (Query / Header)",
+        "name": "Name",
+        "location": "In",
+        "link": "Modell-Verknüpfung",
+        "noLink": "—",
+        "add": "Parameter hinzufügen",
+        "delete": "Parameter löschen",
+        "auto": "auto",
+        "pathEmpty": "Geben Sie ein {{param}} im Pfad ein, um seine Zeile zu erstellen.",
+        "otherEmpty": "Noch keine Query- oder Header-Parameter."
+      },
+      "body": {
+        "label": "Request-Body",
+        "empty": "(leer)"
+      },
+      "responses": {
+        "add": "Hinzufügen",
+        "codePlaceholder": "Statuscode",
+        "standardErrors": "+ Standardfehler",
+        "empty": "Noch keine Antwort deklariert.",
+        "emptyBody": "leerer Body",
+        "model": "Zurückgegebenes Modell",
+        "list": "Liste",
+        "paginated": "Paginiert",
+        "listOf": "Liste von {{name}}",
+        "paginatedListOf": "paginierte Liste von {{name}}",
+        "example": "Serviertes Beispiel",
+        "exampleAuto": "(generiert)",
+        "delete": "Antwort löschen"
+      },
+      "settings": {
+        "inherited": "Von der Gruppe geerbt",
+        "authInherited": "Von der Gruppe geerbt",
+        "editGroup": "In der Gruppe bearbeiten ↗",
+        "headers": "Vertrags-Header",
+        "behaviour": "Verhalten",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (Sekunden)",
+        "traffic": "Erwarteter Traffic",
+        "authOverride": "Auth-Override",
+        "pagination": "Paginierung",
+        "defaultLimit": "Standard-Seitengröße",
+        "maxLimit": "Max. Seitengröße"
+      }
     }
   },
   "mqtt": {
