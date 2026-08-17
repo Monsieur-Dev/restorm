@@ -1285,7 +1285,8 @@
       "optionalSingleRef": "선택 단일 참조",
       "requiredArrayRef": "필수 배열 참조",
       "optionalArrayRef": "선택 배열 참조"
-    }
+    },
+    "editEntity": "디자이너에서 편집"
   },
   "scenario": {
     "editor": {
@@ -2222,9 +2223,7 @@
       "newName": "NewEnum",
       "selectPrompt": "enum을 선택하거나 새로 만드세요 — 속성 타입으로 사용할 수 있는 닫힌 값 집합입니다."
     },
-    "documentation": {
-      "empty": "디자인 문서는 여기에서 제공됩니다."
-    },
+    "documentation": {},
     "code": {
       "empty": "이 디자인의 코드 생성이 여기에 들어갑니다."
     },

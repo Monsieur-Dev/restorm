@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "optionele enkele ref.",
       "requiredArrayRef": "vereiste array-ref.",
       "optionalArrayRef": "optionele array-ref."
-    }
+    },
+    "editEntity": "Bewerken in de designer"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype."
     },
-    "documentation": {
-      "empty": "De ontwerpdocumentatie wordt hier geserveerd."
-    },
+    "documentation": {},
     "code": {
       "empty": "Codegeneratie vanuit dit ontwerp komt hier."
     },

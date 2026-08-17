@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "referencë e vetme opsionale",
       "requiredArrayRef": "referencë vargu e kërkuar",
       "optionalArrayRef": "referencë vargu opsionale"
-    }
+    },
+    "editEntity": "Përpuno në dizajner"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie."
     },
-    "documentation": {
-      "empty": "Dokumentimi i dizajnit do të shërbehet këtu."
-    },
+    "documentation": {},
     "code": {
       "empty": "Gjenerimi i kodit nga ky dizajn do të jetojë këtu."
     },

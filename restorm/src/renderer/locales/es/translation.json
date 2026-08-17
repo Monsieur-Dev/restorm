@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "ref. única opcional",
       "requiredArrayRef": "ref. de arreglo requerida",
       "optionalArrayRef": "ref. de arreglo opcional"
-    }
+    },
+    "editEntity": "Editar en el diseñador"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Seleccione un enum o cree uno — un conjunto cerrado de valores usable como tipo de propiedad."
     },
-    "documentation": {
-      "empty": "La documentación del diseño se servirá aquí."
-    },
+    "documentation": {},
     "code": {
       "empty": "La generación de código desde este diseño vivirá aquí."
     },

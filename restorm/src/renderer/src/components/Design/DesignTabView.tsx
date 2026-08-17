@@ -28,7 +28,9 @@ import { assignDesignSection } from './designMutations'
 import { DesignModelsSection } from './DesignModelsSection'
 import { DesignEnumsSection } from './DesignEnumsSection'
 import { DesignRoutesSection } from './DesignRoutesSection'
+import { DesignDocumentationSection } from './DesignDocumentationSection'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { BeamWrap } from '../common/BeamWrap'
 import './designTabView.css'
 
 export interface DesignTabViewProps {
@@ -121,10 +123,12 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     return validateApiDesign(design)
   }, [design, designTick])
 
-  const jumpTo = (section: 'models' | 'routes', entityId: string): void => {
+  const jumpTo = (section: 'models' | 'routes' | 'enums', entityId: string): void => {
     setActiveSection(section)
     if (section === 'models') setSelectedModelId(entityId)
     if (section === 'routes') setSelectedRouteEntityId(entityId)
+    // 'enums' has no per-entity selection — switching the section is
+    // the whole jump.
   }
 
   // Run panel (scoped to THIS tab): opened by a successful spin, closed
@@ -191,10 +195,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           />
         )}
         {activeSection === 'documentation' && (
-          <DesignSectionPlaceholder
-            title={t('design.section.documentation')}
-            message={t('design.documentation.empty', 'The design documentation will be served here.')}
-          />
+          <DesignDocumentationSection design={design} designTick={designTick} onJumpTo={jumpTo} />
         )}
         {activeSection === 'notes' && (
           <DesignNotesSection design={design} tabId={tabId} />
@@ -373,15 +374,20 @@ const DesignSettingsSection: React.FC<{
           </div>
           <GatedControl locked={runLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-serve-gate">
             <HeaderHoverTooltip label={spinTooltip}>
-              <Button
-                appearance="round"
-                icon={serving ? 'debug-stop' : 'play'}
-                onClick={() => { void toggleServer() }}
-                disabled={!serving && blocked}
-                className={`design-serve-spin${serving ? ' design-serve-spin-active' : ''}`}
-                options={{ ariaLabel: spinTooltip }}
-                data-testid="design-serve-spin"
-              />
+              <BeamWrap active={serving} size={26} borderWidth={1.5}>
+                {/* `runLocked` must ALSO disable the button: GatedControl
+                  * blocks pointers only (pointer-events) — a focusable
+                  * button still activates on Enter/Space. */}
+                <Button
+                  appearance="round"
+                  icon={serving ? 'debug-stop' : 'play'}
+                  onClick={() => { void toggleServer() }}
+                  disabled={runLocked || (!serving && blocked)}
+                  className={`design-serve-spin${serving ? ' design-serve-spin-active' : ''}`}
+                  options={{ ariaLabel: spinTooltip }}
+                  data-testid="design-serve-spin"
+                />
+              </BeamWrap>
             </HeaderHoverTooltip>
           </GatedControl>
         </div>

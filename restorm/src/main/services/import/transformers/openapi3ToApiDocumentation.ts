@@ -549,16 +549,22 @@ export function openapi3ToApiDocumentation(
   if (primaryServer) {
     try {
       const expanded = expandServerVariables(primaryServer)
-      const url = new URL(expanded)
-      const schemes = url.protocol ? [url.protocol.replace(/:$/, '')] : undefined
-      result.server = {
-        ...(url.host ? { host: url.host } : {}),
-        ...(url.pathname && url.pathname !== '/' ? { basePath: url.pathname } : {}),
-        ...(schemes ? { schemes } : {})
+      // A RELATIVE server url (allowed by OAS 3.0, and what a hostless
+      // design export produces) carries only the base path.
+      if (expanded.startsWith('/')) {
+        if (expanded !== '/') result.server = { basePath: expanded }
+      } else {
+        const url = new URL(expanded)
+        const schemes = url.protocol ? [url.protocol.replace(/:$/, '')] : undefined
+        result.server = {
+          ...(url.host ? { host: url.host } : {}),
+          ...(url.pathname && url.pathname !== '/' ? { basePath: url.pathname } : {}),
+          ...(schemes ? { schemes } : {})
+        }
       }
     } catch {
-      // The server URL might be relative or contain unresolved variables —
-      // skip gracefully rather than fail the whole import.
+      // The server URL might contain unresolved variables — skip
+      // gracefully rather than fail the whole import.
     }
   }
 

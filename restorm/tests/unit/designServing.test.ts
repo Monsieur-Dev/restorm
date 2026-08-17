@@ -98,6 +98,9 @@ describe('designServing', () => {
     it('checks credential PRESENCE, not validity', () => {
       expect(authSatisfied('none', {}, design)).toBe(true)
       expect(authSatisfied('bearer', { authorization: 'Bearer anything' }, design)).toBe(true)
+      // RFC 7235: the scheme token is case-insensitive.
+      expect(authSatisfied('bearer', { authorization: 'bearer lowercase' }, design)).toBe(true)
+      expect(authSatisfied('basic', { authorization: 'BASIC dXNlcjpwdw==' }, design)).toBe(true)
       expect(authSatisfied('bearer', { authorization: 'Bearer' }, design)).toBe(false)
       expect(authSatisfied('bearer', {}, design)).toBe(false)
       expect(authSatisfied('basic', { authorization: 'Basic dXNlcjpwdw==' }, design)).toBe(true)

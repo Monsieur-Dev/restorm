@@ -115,9 +115,13 @@ class DesignServerService {
       forced: new Map(),
       counters: { total: 0, routes: {} }
     }
-    this.servers.set(design.id, active)
-    this.broadcastProgress(design.id, 'started')
 
+    // `started` is broadcast only once the bind is CONFIRMED (below) —
+    // firing it optimistically flips the UI to "serving" for a split
+    // second on a busy port (the beam lights, the run panel opens, then
+    // everything cuts out). Same rule as HTTPExecutionService. The
+    // request handler closes over `active` directly, so a request
+    // landing before the map insert still dispatches.
     const result = await websocketExecutionService.listenHttpServer({
       requestId: hostKey(design.id),
       method: '*',
@@ -131,10 +135,11 @@ class DesignServerService {
       }
     })
     if (!result.listening) {
-      this.servers.delete(design.id)
-      this.broadcastProgress(design.id, 'error')
+      // Never announced as started — no progress event to walk back.
       return { success: false, listening: false, port, error: result.error ?? `failed to bind port ${port}` }
     }
+    this.servers.set(design.id, active)
+    this.broadcastProgress(design.id, 'started')
     logger.info('[DesignServerService] design server listening', { designId: design.id, port, routes: active.table.length })
     return { success: true, listening: true, port }
   }

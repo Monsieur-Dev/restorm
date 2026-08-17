@@ -1288,7 +1288,8 @@
       "optionalSingleRef": "volitelný jednotlivý odkaz",
       "requiredArrayRef": "povinný odkaz na pole",
       "optionalArrayRef": "volitelný odkaz na pole"
-    }
+    },
+    "editEntity": "Upravit v návrháři"
   },
   "scenario": {
     "editor": {
@@ -2225,9 +2226,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Vyberte enum, nebo nějaký vytvořte — uzavřená množina hodnot použitelná jako typ vlastnosti."
     },
-    "documentation": {
-      "empty": "Dokumentace návrhu se bude servírovat zde."
-    },
+    "documentation": {},
     "code": {
       "empty": "Generování kódu z tohoto návrhu bude zde."
     },

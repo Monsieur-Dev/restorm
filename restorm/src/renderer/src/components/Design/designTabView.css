@@ -164,6 +164,34 @@
   font-size: 0.9em;
 }
 
+/* Documentation section: the DocumentationHost owns its own scroll +
+ * sidebar dock — the wrapper fills the section host (a flex ROW: it
+ * must claim the width via flex, the stretch default gives height). */
+.design-doc-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.design-doc-section > .documentation-host {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Edit affordances of the design doc viewer: quiet chrome that reads
+ * as metadata next to the title, not as a primary action. */
+.documentation-host-route-header__edit-button,
+.documentation-host-model-node__edit-button {
+  opacity: 0.75;
+}
+
+.documentation-host-route-header__edit-button:hover,
+.documentation-host-model-node__edit-button:hover {
+  opacity: 1;
+}
+
 /* ── Run panel — the tab-scoped overlay of a serving design ───────── */
 
 .design-run-modal {

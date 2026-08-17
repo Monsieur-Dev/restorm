@@ -182,6 +182,19 @@ describe('openApiExport', () => {
     expect(reimported).toEqual(original)
   })
 
+  // The UI only exposes a BASE PATH field — a hostless design's server
+  // block is `{ basePath }` and the emitter must still open the
+  // `servers` channel (relative url), or a re-import loses the prefix.
+  it('round-trips a hostless base path through a relative server url', () => {
+    const original = openapi3ToApiDocumentation(buildPetstoreSpec())
+    delete original.server
+    original.server = { basePath: '/api/v1' }
+    const emitted = apiDocumentationToOpenApi(original) as { servers?: { url: string }[] }
+    expect(emitted.servers).toEqual([{ url: '/api/v1' }])
+    const reimported = openapi3ToApiDocumentation(emitted as unknown as OAS3Spec)
+    expect(reimported.server).toEqual({ basePath: '/api/v1' })
+  })
+
   it('emits oauth2 flows back under the OAS3 flow keys', () => {
     const doc = openapi3ToApiDocumentation(buildPetstoreSpec())
     const emitted = apiDocumentationToOpenApi(doc) as {

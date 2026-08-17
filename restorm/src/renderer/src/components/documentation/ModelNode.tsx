@@ -9,8 +9,10 @@ import {
   targetHandleCenterY,
   targetHandleIdForIncomingEdge
 } from './modelNodeMetrics'
+import { Button } from 'electron-core-ui/renderer'
 import { DelayedTooltip } from './DelayedTooltip'
 import { ModelRefLink } from './ModelRefLink'
+import { useDocumentationEdit } from './documentationModels'
 
 export interface ModelNodeData extends Record<string, unknown> {
   model: ModelDocumentation
@@ -104,6 +106,7 @@ interface ModelNodeHeaderProps {
 
 const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
   const { t } = useTranslation()
+  const { editModel } = useDocumentationEdit()
   const hasDescription = model.description !== undefined && model.description.length > 0
   const headerHeight = modelHeaderHeight(model)
   const headerStyle: React.CSSProperties = { height: headerHeight }
@@ -112,6 +115,17 @@ const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
     <>
       <div className="documentation-host-model-node__title-row">
         <span className="documentation-host-model-node__name">{model.name}</span>
+        {editModel !== undefined && (
+          <Button
+            secondary
+            small
+            icon="edit"
+            className="documentation-host-model-node__edit-button"
+            options={{ ariaLabel: t('documentation.editEntity', 'Edit in the designer') }}
+            data-testid={`documentation-model-edit-${model.name}`}
+            onClick={() => { editModel(model.name) }}
+          />
+        )}
         {model.deprecated === true && (
           <span className="documentation-host-model-node__badge documentation-host-model-node__badge--deprecated">
             {t('documentation.legend.deprecatedBadge')}

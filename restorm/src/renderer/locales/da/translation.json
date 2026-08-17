@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "valgfri enkeltref.",
       "requiredArrayRef": "påkrævet array-ref.",
       "optionalArrayRef": "valgfri array-ref."
-    }
+    },
+    "editEntity": "Rediger i designeren"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Vælg en enum, eller opret en — et lukket sæt værdier, der kan bruges som egenskabstype."
     },
-    "documentation": {
-      "empty": "Designdokumentationen serveres her."
-    },
+    "documentation": {},
     "code": {
       "empty": "Kodegenerering fra dette design kommer her."
     },

@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "valfri enkelref.",
       "requiredArrayRef": "obligatorisk array-ref.",
       "optionalArrayRef": "valfri array-ref."
-    }
+    },
+    "editEntity": "Redigera i designern"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Välj en enum eller skapa en — en sluten uppsättning värden som kan användas som egenskapstyp."
     },
-    "documentation": {
-      "empty": "Designdokumentationen serveras här."
-    },
+    "documentation": {},
     "code": {
       "empty": "Kodgenerering från denna design kommer här."
     },

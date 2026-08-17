@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "optional single ref",
       "requiredArrayRef": "required array ref",
       "optionalArrayRef": "optional array ref"
-    }
+    },
+    "editEntity": "Edit in the designer"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Select an enum, or create one — a closed set of values usable as a property type."
     },
-    "documentation": {
-      "empty": "The design documentation will be served here."
-    },
+    "documentation": {},
     "code": {
       "empty": "Code generation from this design will live here."
     },

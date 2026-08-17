@@ -16,6 +16,24 @@ export function useDocumentedModels(): Set<string> {
 }
 
 /**
+ * Edit affordances of the surrounding `DocumentationHost`, when its
+ * documentation is EDITABLE somewhere else in the app (the design doc
+ * viewer: the doc stays the readable view, editing lives in the design
+ * cards). Absent callbacks (the default) render no edit chrome — the
+ * imported-API doc surfaces stay purely descriptive.
+ */
+export interface DocumentationEditApi {
+  /** Jump to the editable card of the model carrying this name. */
+  editModel?: (modelName: string) => void
+}
+
+export const DocumentationEditContext = createContext<DocumentationEditApi>({})
+
+export function useDocumentationEdit(): DocumentationEditApi {
+  return useContext(DocumentationEditContext)
+}
+
+/**
  * Map of named security schemes for the surrounding
  * `DocumentationHost`. The `RouteHeader` consults this so a
  * scheme name on the operation can be rendered with the full

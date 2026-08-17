@@ -1285,7 +1285,8 @@
       "optionalSingleRef": "任意の単一参照",
       "requiredArrayRef": "必須の配列参照",
       "optionalArrayRef": "任意の配列参照"
-    }
+    },
+    "editEntity": "デザイナーで編集"
   },
   "scenario": {
     "editor": {
@@ -2222,9 +2223,7 @@
       "newName": "NewEnum",
       "selectPrompt": "enum を選択するか、作成してください — プロパティの型として使える閉じた値の集合です。"
     },
-    "documentation": {
-      "empty": "デザインのドキュメントはここで配信されます。"
-    },
+    "documentation": {},
     "code": {
       "empty": "このデザインからのコード生成はここに入ります。"
     },

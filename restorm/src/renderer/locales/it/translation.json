@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "rif. singolo facoltativo",
       "requiredArrayRef": "rif. array obbligatorio",
       "optionalArrayRef": "rif. array facoltativo"
-    }
+    },
+    "editEntity": "Modifica nel designer"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Seleziona un enum o creane uno — un insieme chiuso di valori usabile come tipo di proprietà."
     },
-    "documentation": {
-      "empty": "La documentazione del design sarà servita qui."
-    },
+    "documentation": {},
     "code": {
       "empty": "La generazione di codice da questo design vivrà qui."
     },

@@ -120,8 +120,10 @@ export function authSatisfied(kind: DesignAuthKind, headers: Record<string, stri
     if (Array.isArray(raw)) return raw[0] ?? ''
     return raw ?? ''
   }
-  if (kind === 'bearer') return /^Bearer\s+\S+/.test(header('authorization'))
-  if (kind === 'basic') return /^Basic\s+\S+/.test(header('authorization'))
+  // RFC 7235: the auth-scheme token is case-insensitive — a client
+  // sending `bearer abc` carries a present credential.
+  if (kind === 'bearer') return /^Bearer\s+\S+/i.test(header('authorization'))
+  if (kind === 'basic') return /^Basic\s+\S+/i.test(header('authorization'))
   return header(apiKeyHeaderName(design)).trim() !== ''
 }
 

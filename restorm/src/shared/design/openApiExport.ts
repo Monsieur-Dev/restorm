@@ -282,14 +282,21 @@ export function apiDocumentationToOpenApi(doc: ApiDocumentation): Json {
 
   const document: Json = {
     openapi: '3.0.3',
-    info,
-    paths
+    info
   }
+  // `server.basePath` is the base path's ONLY carrier (operation paths
+  // are relative by design), so `servers` must be emitted whenever host
+  // OR basePath exists — a hostless design (the UI only exposes a base
+  // path field) emits a RELATIVE server url, which OAS 3.0 allows.
+  // Emitted in the conventional field order (before `paths`).
   if (doc.server?.host !== undefined) {
     const scheme = doc.server.schemes?.[0] ?? 'http'
     const hostWithScheme = /^[a-z]+:\/\//.test(doc.server.host) ? doc.server.host : `${scheme}://${doc.server.host}`
     document['servers'] = [{ url: `${hostWithScheme}${doc.server.basePath ?? ''}` }]
+  } else if (doc.server?.basePath !== undefined && doc.server.basePath !== '') {
+    document['servers'] = [{ url: doc.server.basePath }]
   }
+  document['paths'] = paths
   const components: Json = {}
   if (Object.keys(schemas).length > 0) components['schemas'] = schemas
   if (doc.securitySchemes !== undefined && Object.keys(doc.securitySchemes).length > 0) {

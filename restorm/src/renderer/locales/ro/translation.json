@@ -1287,7 +1287,8 @@
       "optionalSingleRef": "ref. unică opțională",
       "requiredArrayRef": "ref. de tablou obligatorie",
       "optionalArrayRef": "ref. de tablou opțională"
-    }
+    },
+    "editEntity": "Editează în designer"
   },
   "scenario": {
     "editor": {
@@ -2224,9 +2225,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate."
     },
-    "documentation": {
-      "empty": "Documentația designului va fi servită aici."
-    },
+    "documentation": {},
     "code": {
       "empty": "Generarea de cod din acest design va trăi aici."
     },

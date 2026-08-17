@@ -48,6 +48,7 @@ Feature: Design server
     Then the response status is "200"
     And the response body contains "openapi"
     And the response body contains "/v1/users/{id}"
+    And the response body contains "http://localhost:7482/api"
 
   Scenario: An invalid design cannot be served
     Given a Pro project carrying a servable API design is open on its settings

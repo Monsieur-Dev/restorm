@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "réf. unique facultative",
       "requiredArrayRef": "réf. tableau requise",
       "optionalArrayRef": "réf. tableau facultative"
-    }
+    },
+    "editEntity": "Modifier dans le designer"
   },
   "scenario": {
     "tab": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Sélectionnez une énum, ou créez-en une — un ensemble fermé de valeurs utilisable comme type de propriété."
     },
-    "documentation": {
-      "empty": "La documentation du design sera servie ici."
-    },
+    "documentation": {},
     "code": {
       "empty": "La génération de code depuis ce design vivra ici."
     },

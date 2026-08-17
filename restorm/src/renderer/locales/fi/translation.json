@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "valinnainen yksittäisviite",
       "requiredArrayRef": "pakollinen taulukkoviite",
       "optionalArrayRef": "valinnainen taulukkoviite"
-    }
+    },
+    "editEntity": "Muokkaa suunnittelutilassa"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä."
     },
-    "documentation": {
-      "empty": "Suunnitelman dokumentaatio palvellaan tässä."
-    },
+    "documentation": {},
     "code": {
       "empty": "Koodin generointi tästä suunnitelmasta tulee tähän."
     },

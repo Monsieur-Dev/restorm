@@ -1287,7 +1287,8 @@
       "optionalSingleRef": "opciona pojedinačna referenca",
       "requiredArrayRef": "obavezna referenca niza",
       "optionalArrayRef": "opciona referenca niza"
-    }
+    },
+    "editEntity": "Uredi u dizajneru"
   },
   "scenario": {
     "editor": {
@@ -2224,9 +2225,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Izaberite enum ili ga napravite — zatvoren skup vrednosti upotrebljiv kao tip svojstva."
     },
-    "documentation": {
-      "empty": "Dokumentacija dizajna će se služiti ovde."
-    },
+    "documentation": {},
     "code": {
       "empty": "Generisanje koda iz ovog dizajna biće ovde."
     },

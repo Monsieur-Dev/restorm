@@ -1288,7 +1288,8 @@
       "optionalSingleRef": "opcjonalne odwołanie pojedyncze",
       "requiredArrayRef": "wymagane odwołanie tablicowe",
       "optionalArrayRef": "opcjonalne odwołanie tablicowe"
-    }
+    },
+    "editEntity": "Edytuj w projektancie"
   },
   "scenario": {
     "editor": {
@@ -2225,9 +2226,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości."
     },
-    "documentation": {
-      "empty": "Dokumentacja projektu API będzie serwowana tutaj."
-    },
+    "documentation": {},
     "code": {
       "empty": "Generowanie kodu z tego projektu API pojawi się tutaj."
     },

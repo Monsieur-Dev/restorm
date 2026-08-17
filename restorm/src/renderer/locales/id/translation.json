@@ -1285,7 +1285,8 @@
       "optionalSingleRef": "referensi tunggal opsional",
       "requiredArrayRef": "referensi larik wajib",
       "optionalArrayRef": "referensi larik opsional"
-    }
+    },
+    "editEntity": "Edit di desainer"
   },
   "scenario": {
     "editor": {
@@ -2222,9 +2223,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti."
     },
-    "documentation": {
-      "empty": "Dokumentasi desain akan disajikan di sini."
-    },
+    "documentation": {},
     "code": {
       "empty": "Pembuatan kode dari desain ini akan hidup di sini."
     },

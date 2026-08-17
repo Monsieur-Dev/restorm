@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "opcionális egyedi hivatkozás",
       "requiredArrayRef": "kötelező tömbhivatkozás",
       "optionalArrayRef": "opcionális tömbhivatkozás"
-    }
+    },
+    "editEntity": "Szerkesztés a tervezőben"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható."
     },
-    "documentation": {
-      "empty": "A terv dokumentációja itt lesz kiszolgálva."
-    },
+    "documentation": {},
     "code": {
       "empty": "A tervből történő kódgenerálás itt fog élni."
     },

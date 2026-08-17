@@ -1285,7 +1285,8 @@
       "optionalSingleRef": "tham chiếu đơn tùy chọn",
       "requiredArrayRef": "tham chiếu mảng bắt buộc",
       "optionalArrayRef": "tham chiếu mảng tùy chọn"
-    }
+    },
+    "editEntity": "Chỉnh sửa trong trình thiết kế"
   },
   "scenario": {
     "editor": {
@@ -2222,9 +2223,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Chọn một enum, hoặc tạo mới — tập giá trị đóng dùng được làm kiểu thuộc tính."
     },
-    "documentation": {
-      "empty": "Tài liệu thiết kế sẽ được phục vụ tại đây."
-    },
+    "documentation": {},
     "code": {
       "empty": "Việc sinh mã từ thiết kế này sẽ nằm ở đây."
     },

@@ -31,6 +31,10 @@ export interface RouteHeaderProps {
    * route docs surface the button so a reader can spawn a fresh
    * pre-configured request from any route shown. */
   onAddRequest?: (operation: OperationDocumentation) => void
+  /** Optional callback wiring an "Edit" button below the title —
+   * the design doc viewer uses it to jump from the readable doc to
+   * the operation's editable route card. Only rendered when defined. */
+  onEdit?: (operation: OperationDocumentation) => void
 }
 
 function formatBodyParameter(operation: OperationDocumentation): string | undefined {
@@ -186,7 +190,7 @@ function renderSchemeDetail(scheme: SecurityScheme, requestedScopes: string[]): 
   return lines.length > 0 ? <>{lines}</> : null
 }
 
-export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, tagColors, onAddRequest }) => {
+export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, tagColors, onAddRequest, onEdit }) => {
   const { t } = useTranslation()
   const requestBodyType = formatBodyParameter(operation)
   const responseSchema = formatResponseSchema(operation)
@@ -289,6 +293,18 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         >
           {t('documentation.route.addRequest')}
         </Button>
+      )}
+
+      {onEdit !== undefined && (
+        <Button
+          secondary
+          small
+          icon="edit"
+          className="documentation-host-route-header__edit-button"
+          options={{ ariaLabel: t('documentation.editEntity', 'Edit in the designer') }}
+          data-testid={`documentation-host-route-header-edit-${operation.operationId ?? operation.match.urlPattern}`}
+          onClick={(): void => { onEdit(operation) }}
+        />
       )}
 
       {operation.description !== undefined && operation.description.length > 0 && (

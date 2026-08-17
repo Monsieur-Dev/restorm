@@ -1286,7 +1286,8 @@
       "optionalSingleRef": "isteğe bağlı tekil başvuru",
       "requiredArrayRef": "zorunlu dizi başvurusu",
       "optionalArrayRef": "isteğe bağlı dizi başvurusu"
-    }
+    },
+    "editEntity": "Tasarımcıda düzenle"
   },
   "scenario": {
     "editor": {
@@ -2223,9 +2224,7 @@
       "newName": "NewEnum",
       "selectPrompt": "Bir enum seçin veya oluşturun — özellik tipi olarak kullanılabilen kapalı bir değer kümesi."
     },
-    "documentation": {
-      "empty": "Tasarım dokümantasyonu burada sunulacak."
-    },
+    "documentation": {},
     "code": {
       "empty": "Bu tasarımdan kod üretimi burada yaşayacak."
     },

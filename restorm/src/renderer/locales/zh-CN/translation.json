@@ -1285,7 +1285,8 @@
       "optionalSingleRef": "可选的单一引用",
       "requiredArrayRef": "必需的数组引用",
       "optionalArrayRef": "可选的数组引用"
-    }
+    },
+    "editEntity": "在设计器中编辑"
   },
   "scenario": {
     "editor": {
@@ -2222,9 +2223,7 @@
       "newName": "NewEnum",
       "selectPrompt": "选择一个枚举，或创建一个 —— 可用作属性类型的封闭值集合。"
     },
-    "documentation": {
-      "empty": "设计文档将在此提供。"
-    },
+    "documentation": {},
     "code": {
       "empty": "从此设计生成代码将在此进行。"
     },

@@ -1285,7 +1285,8 @@
       "optionalSingleRef": "選用的單一參照",
       "requiredArrayRef": "必要的陣列參照",
       "optionalArrayRef": "選用的陣列參照"
-    }
+    },
+    "editEntity": "在設計工具中編輯"
   },
   "scenario": {
     "editor": {
@@ -2222,9 +2223,7 @@
       "newName": "NewEnum",
       "selectPrompt": "選擇一個列舉，或建立一個 —— 可用作屬性型別的封閉值集合。"
     },
-    "documentation": {
-      "empty": "設計文件將在此提供。"
-    },
+    "documentation": {},
     "code": {
       "empty": "從此設計產生程式碼將在此進行。"
     },
