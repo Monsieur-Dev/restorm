@@ -2142,7 +2142,7 @@
   },
   "design": {
     "section": {
-      "settings": "Settings",
+      "settings": "Paramètres",
       "models": "Modèles",
       "enums": "Enums",
       "routes": "Routes",
@@ -2169,14 +2169,14 @@
       },
       "api": {
         "title": "API",
-        "basePath": "Base path",
+        "basePath": "Chemin de base",
         "defaultAuth": "Auth par défaut"
       }
     },
     "auth": {
       "none": "Aucune",
       "bearer": "Bearer (JWT)",
-      "apiKeyHeader": "API key header",
+      "apiKeyHeader": "Clé d'API (en-tête)",
       "basic": "Basic"
     },
     "protocol": {
@@ -2191,8 +2191,8 @@
       "editorPending": "L’éditeur de cette section arrive bientôt."
     },
     "models": {
-      "propertyCount_one": "{{count}} prop",
-      "propertyCount_other": "{{count}} props",
+      "propertyCount_one": "{{count}} propriété",
+      "propertyCount_other": "{{count}} propriétés",
       "add": "Ajouter un modèle",
       "delete": "Supprimer le modèle",
       "deleteTitle": "Supprimer {{name}} ?",

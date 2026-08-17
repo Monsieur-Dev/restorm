@@ -2,9 +2,9 @@ Feature: The Design tab shell
   A design opens in ONE workbench tab. Its sidebar node expands into
   GROUP entries only (one per section, never one row per model); opening
   a group refocuses the same tab on that section, the internal icon rail
-  switches sections, the smartbar star favourites the design, its
-  virtual sub-entries never drag, and editing is a Pro affordance —
-  Community sees everything, locked.
+  switches sections, the smartbar star favourites the design, and its
+  virtual sub-entries never drag. Editing is free on every plan — the
+  plan gates RUNNING the design (serve, codegen), not designing it.
 
   Scenario: One tab per design, refocused on the section a group entry names
     Given a Pro project carrying an API design is open
@@ -51,10 +51,10 @@ Feature: The Design tab shell
     And I click the design in the favorites pane
     Then the design tab is the active tab
 
-  Scenario: Community reads, Pro edits
+  Scenario: Community designs freely — no edit gate on the tab
     Given a Community project carrying an API design is open
     When I click the design row in the sidebar
-    Then the design settings are locked behind the Pro gate
+    Then the design settings are editable
     Given a Pro project carrying an API design is open
     When I click the design row in the sidebar
     Then the design settings are editable

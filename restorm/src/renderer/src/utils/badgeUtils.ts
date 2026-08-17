@@ -72,7 +72,7 @@ const TYPE_TO_BASE: Partial<Record<BadgeType, string>> = {
   WS: 'ws', MQTT: 'mqtt', SIO: 'sio', STOMP: 'stomp',
   SSE: 'sse', KAFKA: 'kafka', ODATA: 'odata', tRPC: 'trpc',
   RPC: 'rpc', 'RPC[]': 'rpc_batch',
-  REDIS: 'redis', AUTH: 'auth', AMQP: 'amqp', SCENARIO: 'scenario', PRO: 'pro'
+  REDIS: 'redis', AUTH: 'auth', AMQP: 'amqp', SCENARIO: 'scenario', DESIGN: 'design', PRO: 'pro'
 }
 
 /** Generic action suffix per codicon (send / connect / close). Kafka and the
@@ -195,6 +195,9 @@ export function mapToBadgeType(value: string): BadgeType {
 
   // Scenario (dataflow graph)
   if (normalized === 'scenario') return 'SCENARIO'
+
+  // API design
+  if (normalized === 'design') return 'DESIGN'
 
   // Fallback: try to use value as-is if it's a valid BadgeType
   return value.toUpperCase() as BadgeType

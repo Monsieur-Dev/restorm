@@ -111,6 +111,7 @@ export interface UseItemOperationsOptions {
   openScenarioEditorTab: (scenario: import('../../../shared/types/collections').Scenario, breadcrumbs: BreadcrumbItem[]) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
+  openDesignTab: (design: import('../../../shared/types/collections').ApiDesign, breadcrumbs: BreadcrumbItem[]) => void
   /** Project UUID. When the deleted subtree contains favorited items,
    * each id is removed from the favorites store under this key. */
   projectUuid: string | null
@@ -206,12 +207,32 @@ export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: stri
     for (const child of item.items) emitClonedSubtreeCreated(child, item.id)
     return
   }
+  if (isApiDesign(item)) {
+    emitBothBuses(DocumentEvents.DESIGN_CREATED, {
+      id: item.id,
+      type: 'design',
+      document: cloneForEventBus(item),
+      ...(parentFolderId !== undefined ? { parentFolderId } : {})
+    } as DocumentChangedPayload)
+    return
+  }
   emitBothBuses(DocumentEvents.REQUEST_CREATED, {
     id: item.id,
     type: 'request',
     document: cloneForEventBus(item),
     ...(parentFolderId !== undefined ? { parentFolderId } : {})
   } as DocumentChangedPayload)
+}
+
+/** The update event + payload type an item announces when it MOVES.
+ * Designs and folders carry their own save-unit document kinds —
+ * announcing a design as 'request' would have the save-unit bridge
+ * cleanse its draft against the HTTP request shape and drop every
+ * design section, leaving the unit dirty forever. */
+function movedItemAnnouncement(item: FolderItem): { event: (typeof DocumentEvents)[keyof typeof DocumentEvents]; type: DocumentChangedPayload['type'] } {
+  if (isAnyFolder(item)) return { event: DocumentEvents.FOLDER_UPDATED, type: 'folder' }
+  if (isApiDesign(item)) return { event: DocumentEvents.DESIGN_UPDATED, type: 'design' }
+  return { event: DocumentEvents.REQUEST_UPDATED, type: 'request' }
 }
 
 export function useItemOperations(options: UseItemOperationsOptions): UseItemOperationsReturn {
@@ -226,7 +247,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     projectUuid,
     onStructureChanged
   } = options
-  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab } = options
+  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab } = options
   const { t } = useTranslation()
 
   // Coherence rules for a (possibly multi-item) sidebar drag. Shared verbatim
@@ -419,9 +440,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         continue
       }
       const movedParentId = findParentFolder(rootItems, movedItem.id)?.id
-      emitBothBuses(isAnyFolder(movedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+      const announcement = movedItemAnnouncement(movedItem)
+      emitBothBuses(announcement.event, {
         id: movedItem.id,
-        type: isAnyFolder(movedItem) ? 'folder' : 'request',
+        type: announcement.type,
         document: cloneForEventBus(movedItem),
         ...(movedParentId !== undefined ? { parentFolderId: movedParentId } : {})
       } as DocumentChangedPayload)
@@ -458,9 +480,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         movedAScenario = true
         continue
       }
-      emitBothBuses(isAnyFolder(movedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+      const announcement = movedItemAnnouncement(movedItem)
+      emitBothBuses(announcement.event, {
         id: movedItem.id,
-        type: isAnyFolder(movedItem) ? 'folder' : 'request',
+        type: announcement.type,
         document: cloneForEventBus(movedItem)
       } as DocumentChangedPayload)
     }
@@ -502,12 +525,14 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         openEnvironmentFolderTab(reactiveClone, breadcrumbs)
       } else if (isFolder(reactiveClone)) {
         openFolderTab(reactiveClone, breadcrumbs)
+      } else if (isApiDesign(reactiveClone)) {
+        openDesignTab(reactiveClone, breadcrumbs)
       } else if (isRequest(reactiveClone)) {
         const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
         openAnyRequestTab(reactiveClone, breadcrumbs, envs)
       }
     }
-  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab])
+  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
@@ -714,6 +739,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         }
         if ('scenario' in renamed) {
           return { ...renamed, scenario: { ...renamed.scenario, name: newName }, title: newName, titleString: newName }
+        }
+        if ('design' in renamed) {
+          return { ...renamed, design: { ...renamed.design, name: newName }, title: newName, titleString: newName }
         }
         return renamed
       }

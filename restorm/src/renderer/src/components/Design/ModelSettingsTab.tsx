@@ -11,7 +11,6 @@ const VOLUMETRIES: readonly (ModelVolumetry | '')[] = ['', 'hundreds', 'tenThous
 export interface ModelSettingsTabProps {
   design: ApiDesign
   model: DesignModel
-  editLocked: boolean
   onJumpTo: (section: 'models' | 'routes', entityId: string) => void
 }
 
@@ -21,7 +20,7 @@ export interface ModelSettingsTabProps {
  * delete), inheritance (cycle-safe choices only) and the "Used by"
  * jump list.
  */
-export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, model, editLocked, onJumpTo }) => {
+export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, model, onJumpTo }) => {
   const { t } = useTranslation()
 
   const setMeta = (patch: { [K in keyof ModelDesignMeta]?: ModelDesignMeta[K] | undefined }): void => {
@@ -109,7 +108,6 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
               setMeta({ identifier: { propertyId: property.id, strategy: model.design?.identifier?.strategy ?? 'uuid' } })
             }}
             selectBoxOptions={{ ariaLabel: t('design.modelSettings.identifierProperty', 'Identifier property'), useCustomDrawn: true }}
-            disabled={editLocked}
             data-testid="design-model-identifier-property"
           />
         </label>
@@ -128,7 +126,6 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
                 setMeta({ identifier: { ...identifier, strategy: picked } })
               }}
               selectBoxOptions={{ ariaLabel: t('design.modelSettings.identifierStrategy', 'Strategy'), useCustomDrawn: true }}
-              disabled={editLocked}
               data-testid="design-model-identifier-strategy"
             />
           </label>
@@ -150,7 +147,6 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
               if (parent !== undefined) setMeta({ inheritsFrom: parent.id })
             }}
             selectBoxOptions={{ ariaLabel: t('design.modelSettings.inheritsFrom', 'Inherits from'), useCustomDrawn: true }}
-            disabled={editLocked}
             data-testid="design-model-inherits"
           />
         </label>
@@ -173,7 +169,6 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
                 : { ...modelRest, intents: { ...(model.intents ?? {}), volumetry: picked } })
             }}
             selectBoxOptions={{ ariaLabel: t('design.modelSettings.volumetry', 'Expected volume'), useCustomDrawn: true }}
-            disabled={editLocked}
             data-testid="design-model-volumetry"
           />
         </label>
@@ -182,7 +177,6 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
           <Toggle
             checked={model.design?.timestamps === true}
             onChange={(checked) => { setMeta({ timestamps: checked ? true : undefined }) }}
-            disabled={editLocked}
             aria-label={t('design.modelSettings.timestamps', 'Timestamps')}
             data-testid="design-model-timestamps"
           />
@@ -192,7 +186,6 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
           <Toggle
             checked={model.design?.softDelete === true}
             onChange={(checked) => { setMeta({ softDelete: checked ? true : undefined }) }}
-            disabled={editLocked}
             aria-label={t('design.modelSettings.softDelete', 'Soft delete')}
             data-testid="design-model-soft-delete"
           />

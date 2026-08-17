@@ -14,7 +14,7 @@ import { displayValue } from './designDisplay'
  * single column (no label/value split, no enable toggle), the row text
  * IS the enum value.
  */
-export const DesignEnumsSection: React.FC<{ design: ApiDesign; editLocked: boolean }> = ({ design, editLocked }) => {
+export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
   const { t } = useTranslation()
 
   // DesignEnum → CustomValueList. Row ids derive from (enum, index):
@@ -78,7 +78,6 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign; editLocked: boole
         }}
         showEnabledToggle={false}
         showValue={false}
-        disabled={editLocked}
         testIdPrefix="design-enums"
       />
     </div>

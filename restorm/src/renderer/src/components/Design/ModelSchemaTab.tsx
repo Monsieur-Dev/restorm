@@ -147,7 +147,6 @@ function typeChoiceOf(property: DesignProperty): TypeChoice {
 export interface ModelSchemaTabProps {
   design: ApiDesign
   model: DesignModel
-  editLocked: boolean
   issues: readonly DesignIssue[]
   selectedPropertyId: string | null
   onSelectProperty: (propertyId: string | null) => void
@@ -159,7 +158,7 @@ export interface ModelSchemaTabProps {
  * read-only and dimmed, then own rows), the add-property action, and
  * the click-to-edit panel of the selected property.
  */
-export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, editLocked, issues, selectedPropertyId, onSelectProperty, onJumpToModel }) => {
+export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, issues, selectedPropertyId, onSelectProperty, onJumpToModel }) => {
   const { t } = useTranslation()
 
   const propertyIssueCodes = useCallback((propertyId: string) =>
@@ -343,7 +342,7 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, e
         getRowId={(row) => row.property.id}
         data-testid="design-properties-table"
       />
-      {!editLocked && (
+      {(
         <Button
           icon="add"
           secondary
@@ -358,7 +357,6 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, e
           key={selected.id}
           design={design}
           property={selected}
-          editLocked={editLocked}
           issueCodes={propertyIssueCodes(selected.id)}
           onUpdate={(update) => { updateProperty(selected.id, update) }}
           onDelete={() => { deleteProperty(selected.id) }}
@@ -371,13 +369,12 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, e
 interface PropertyPanelProps {
   design: ApiDesign
   property: DesignProperty
-  editLocked: boolean
   issueCodes: readonly string[]
   onUpdate: (update: (p: DesignProperty) => DesignProperty) => void
   onDelete: () => void
 }
 
-const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLocked, issueCodes, onUpdate, onDelete }) => {
+const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCodes, onUpdate, onDelete }) => {
   const { t } = useTranslation()
 
   // ── Type vocabulary ────────────────────────────────────────────────
@@ -542,7 +539,7 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
         <h4 className="design-property-panel-title">
           {t('design.schema.panelTitle', 'Property: {{name}}', { name: property.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : property.doc.name })}
         </h4>
-        {!editLocked && (
+        {(
           <HeaderHoverTooltip label={t('design.schema.deleteProperty', 'Delete the property')}>
             <button
               type="button"
@@ -571,7 +568,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
             value={property.doc.name}
             onChange={(value) => { onUpdate((p) => ({ ...p, doc: { ...p.doc, name: value } })) }}
             options={{ type: 'text', ariaLabel: t('design.schema.fields.name', 'Name') }}
-            disabled={editLocked}
             data-testid="design-property-name"
           />
         </label>
@@ -588,7 +584,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
               if (picked !== undefined) applyTypeChoice(picked)
             }}
             selectBoxOptions={{ ariaLabel: t('design.schema.fields.type', 'Type'), useCustomDrawn: true }}
-            disabled={editLocked}
             data-testid="design-property-type"
           />
         </label>
@@ -608,7 +603,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 })
               }}
               selectBoxOptions={{ ariaLabel: t('design.schema.fields.format', 'Format'), useCustomDrawn: true }}
-              disabled={editLocked}
               data-testid="design-property-format"
             />
           </label>
@@ -627,7 +621,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 if (picked !== undefined) applyElementChoice(picked)
               }}
               selectBoxOptions={{ ariaLabel: t('design.schema.fields.elementType', 'Element type'), useCustomDrawn: true }}
-              disabled={editLocked}
               data-testid="design-property-element-type"
             />
           </label>
@@ -649,7 +642,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 })
               }}
               selectBoxOptions={{ ariaLabel: t('design.schema.fields.onDelete', 'On delete'), useCustomDrawn: true }}
-              disabled={editLocked}
               data-testid="design-property-ondelete"
             />
           </label>
@@ -665,7 +657,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
               })
             }}
             options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.schema.fields.description', 'Description') }}
-            disabled={editLocked}
             data-testid="design-property-description"
           />
         </label>
@@ -680,7 +671,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
               })
             }}
             options={{ type: 'text', ariaLabel: t('design.schema.fields.example', 'Example') }}
-            disabled={editLocked}
             data-testid="design-property-example"
           />
         </label>
@@ -693,7 +683,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
             <Toggle
               checked={flag.get(property)}
               onChange={(checked) => { onUpdate((p) => flag.set(p, checked)) }}
-              disabled={editLocked}
               aria-label={flagLabels[flag.key] ?? flag.key}
               data-testid={`design-flag-${flag.key}`}
             />
@@ -713,7 +702,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
               })
             }}
             options={{ type: 'text', ariaLabel: t('design.schema.fields.deprecationMessage', 'Deprecation message') }}
-            disabled={editLocked}
             data-testid="design-property-deprecation-message"
           />
         </label>
@@ -728,7 +716,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 value={property.doc.constraints?.minLength === undefined ? '' : String(property.doc.constraints.minLength)}
                 onChange={(value) => { patchConstraints({ minLength: numberOrUndefined(value) }) }}
                 options={{ type: 'number', ariaLabel: t('design.schema.fields.minLength', 'Min length'), validationOptions: { validation: minMaxValidator(() => property.doc.constraints?.maxLength, true) } }}
-                disabled={editLocked}
                 data-testid="design-property-min-length"
               />
             </label>
@@ -738,7 +725,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 value={property.doc.constraints?.maxLength === undefined ? '' : String(property.doc.constraints.maxLength)}
                 onChange={(value) => { patchConstraints({ maxLength: numberOrUndefined(value) }) }}
                 options={{ type: 'number', ariaLabel: t('design.schema.fields.maxLength', 'Max length'), validationOptions: { validation: minMaxValidator(() => property.doc.constraints?.minLength, false) } }}
-                disabled={editLocked}
                 data-testid="design-property-max-length"
               />
             </label>
@@ -748,7 +734,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 value={property.doc.constraints?.pattern ?? ''}
                 onChange={(value) => { patchConstraints({ pattern: value === '' ? undefined : value }) }}
                 options={{ type: 'text', ariaLabel: t('design.schema.fields.pattern', 'Pattern'), validationOptions: { validation: patternValidator } }}
-                disabled={editLocked}
                 data-testid="design-property-pattern"
               />
             </label>
@@ -762,7 +747,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 value={property.doc.constraints?.minimum === undefined ? '' : String(property.doc.constraints.minimum)}
                 onChange={(value) => { patchConstraints({ minimum: numberOrUndefined(value) }) }}
                 options={{ type: 'number', ariaLabel: t('design.schema.fields.minimum', 'Minimum'), validationOptions: { validation: minMaxValidator(() => property.doc.constraints?.maximum, true) } }}
-                disabled={editLocked}
                 data-testid="design-property-minimum"
               />
             </label>
@@ -772,7 +756,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
                 value={property.doc.constraints?.maximum === undefined ? '' : String(property.doc.constraints.maximum)}
                 onChange={(value) => { patchConstraints({ maximum: numberOrUndefined(value) }) }}
                 options={{ type: 'number', ariaLabel: t('design.schema.fields.maximum', 'Maximum'), validationOptions: { validation: minMaxValidator(() => property.doc.constraints?.minimum, false) } }}
-                disabled={editLocked}
                 data-testid="design-property-maximum"
               />
             </label>
@@ -790,7 +773,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, editLoc
               })
             }}
             options={{ type: 'text', ariaLabel: t('design.schema.fields.default', 'Default') }}
-            disabled={editLocked}
             data-testid="design-property-default"
           />
         </label>

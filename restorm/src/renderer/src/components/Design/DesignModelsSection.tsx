@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import {
   Button,
   EditableLabel,
-  GatedControl,
   InputBox,
   ListView,
   MarkdownEditor,
@@ -16,7 +15,6 @@ import type { ApiDesign, DesignModel } from '../../../../shared/types/collection
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { collectInheritanceChildren, collectModelUsages, removeModelFromDesign } from '../../../../shared/design/designUsages'
 import { generateUniqueId } from '../../utils/treeManipulation'
-import { subscribeToPro } from '../../services/subscribeToPro'
 import { assignDesignSection, patchModel, replaceModel, uniqueComponentName } from './designMutations'
 import { ModelSchemaTab } from './ModelSchemaTab'
 import { ModelExamplesTab } from './ModelExamplesTab'
@@ -25,7 +23,6 @@ import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 export interface DesignModelsSectionProps {
   design: ApiDesign
-  editLocked: boolean
   issues: readonly DesignIssue[]
   selectedModelId: string | null
   onSelectModel: (modelId: string | null) => void
@@ -39,7 +36,7 @@ export interface DesignModelsSectionProps {
  * first shows the impact (usages + inheritance children) and only
  * then strips it from the whole design.
  */
-export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design, editLocked, issues, selectedModelId, onSelectModel, onJumpTo }) => {
+export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design, issues, selectedModelId, onSelectModel, onJumpTo }) => {
   const { t } = useTranslation()
   const [filter, setFilter] = useState('')
   const [pendingDelete, setPendingDelete] = useState<DesignModel | null>(null)
@@ -94,7 +91,7 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
       <div className="design-entity-list" data-testid="design-models-list">
         <div className="design-entity-list-header">
           <h2 className="design-section-title">{t('design.section.models')}</h2>
-          {!editLocked && (
+          {(
             <HeaderHoverTooltip label={t('design.models.add', 'Add a model')}>
               <Button
                 secondary
@@ -136,11 +133,11 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
                 value={selected.doc.name}
                 onChange={(next) => { patchModel(design, selected.id, { doc: { ...selected.doc, name: next } }) }}
                 as="h2"
-                editable={!editLocked}
+                editable
                 placeholder={t('design.schema.unnamed', '(unnamed)')}
                 data-testid="design-model-name"
               />
-              {!editLocked && (
+              {(
                 <HeaderHoverTooltip label={t('design.models.delete', 'Delete the model')}>
                   <button
                     type="button"
@@ -165,7 +162,6 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
                     <ModelSchemaTab
                       design={design}
                       model={selected}
-                      editLocked={editLocked}
                       issues={issues}
                       selectedPropertyId={selectedPropertyId}
                       onSelectProperty={setSelectedPropertyId}
@@ -176,29 +172,27 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
                 {
                   id: 'examples',
                   label: t('design.models.tabs.examples', 'Examples'),
-                  content: <ModelExamplesTab design={design} model={selected} editLocked={editLocked} />
+                  content: <ModelExamplesTab design={design} model={selected} />
                 },
                 {
                   id: 'settings',
                   label: t('design.models.tabs.settings', 'Settings'),
-                  content: <ModelSettingsTab design={design} model={selected} editLocked={editLocked} onJumpTo={onJumpTo} />
+                  content: <ModelSettingsTab design={design} model={selected} onJumpTo={onJumpTo} />
                 },
                 {
                   id: 'notes',
                   label: t('design.models.tabs.notes', 'Notes'),
                   content: (
                     <div className="design-model-notes">
-                      <GatedControl locked={editLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-model-notes-gate">
-                        <MarkdownEditor
-                          key={`${selected.id}-notes`}
-                          initialValue={selected.notes ?? ''}
-                          onChange={(md: string) => {
-                            const { notes: _dropped, ...modelRest } = selected
-                            replaceModel(design, selected.id, md === '' ? modelRest : { ...modelRest, notes: md })
-                          }}
-                          data-testid="design-model-notes-editor"
-                        />
-                      </GatedControl>
+                      <MarkdownEditor
+                        key={`${selected.id}-notes`}
+                        initialValue={selected.notes ?? ''}
+                        onChange={(md: string) => {
+                          const { notes: _dropped, ...modelRest } = selected
+                          replaceModel(design, selected.id, md === '' ? modelRest : { ...modelRest, notes: md })
+                        }}
+                        data-testid="design-model-notes-editor"
+                      />
                     </div>
                   )
                 }

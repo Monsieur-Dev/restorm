@@ -89,7 +89,8 @@ import {
   emitFolderCreated,
   emitFolderDeleted,
   emitRequestCreated,
-  emitRequestDeleted
+  emitRequestDeleted,
+  DESIGN_INDEXABLE_KEYS
 } from '../../src/renderer/src/types/reactive'
 import { buildReferenceApiDesign } from './apiDesignReference'
 import type { Folder, HTTPRequest, EnvironmentFolder, Environment, Request, ApiDesign } from '../../src/shared/types/collections'
@@ -618,11 +619,19 @@ describe('Reactive Document System', () => {
       server: { host: 'example.com' },
       securitySchemes: { basicAuth: { type: 'basic' } },
       defaultSecurity: [{ basicAuth: [] }],
+      defaultAuth: 'basic',
       serving: { port: 9000 },
       models: [],
       enums: [],
       routeGroups: []
     }
+
+    it('the mutation table covers EXACTLY the indexable design keys', () => {
+      // Hardcoding the list here once omitted `defaultAuth` — the very
+      // key its branch added. Deriving the assertion from the source
+      // set makes a future key impossible to forget.
+      expect(Object.keys(MUTATIONS).sort()).toEqual([...DESIGN_INDEXABLE_KEYS].sort())
+    })
 
     it.each(Object.keys(MUTATIONS))('setting "%s" emits DESIGN_UPDATED on both buses', (key) => {
       const design = makeReactiveApiDesign(buildReferenceApiDesign())

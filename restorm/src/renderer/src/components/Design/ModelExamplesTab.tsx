@@ -16,7 +16,6 @@ const DEFAULT_PILL = 'default'
 export interface ModelExamplesTabProps {
   design: ApiDesign
   model: DesignModel
-  editLocked: boolean
 }
 
 /**
@@ -24,7 +23,7 @@ export interface ModelExamplesTabProps {
  * then the value table of the selected example — defined values
  * editable in place, absent ones showing their seeded auto value.
  */
-export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, model, editLocked }) => {
+export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, model }) => {
   const { t } = useTranslation()
   const [selectedId, setSelectedId] = useState<string>(DEFAULT_PILL)
 
@@ -160,7 +159,6 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
               ariaLabel: row.property.doc.name,
               validationOptions: { validation: constraintValidator(row.property) }
             }}
-            disabled={editLocked}
             data-testid={`design-example-value-${row.property.id}`}
           />
         )
@@ -204,7 +202,7 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
             {example.name}
           </button>
         ))}
-        {!editLocked && (
+        {(
           <HeaderHoverTooltip label={t('design.examples.add', 'Add an example')}>
             <button
               type="button"
@@ -227,11 +225,10 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
               value={selected.name}
               onChange={(value) => { renameExample(selected.id, value) }}
               options={{ type: 'text', ariaLabel: t('design.examples.name', 'Example name') }}
-              disabled={editLocked}
               data-testid="design-example-name"
             />
           </label>
-          {!editLocked && (
+          {(
             <HeaderHoverTooltip label={t('design.examples.delete', 'Delete the example')}>
               <button
                 type="button"

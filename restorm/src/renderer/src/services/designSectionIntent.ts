@@ -45,6 +45,14 @@ export function consumePendingDesignSection(designId: string): DesignSectionInte
   return value
 }
 
+/** Read WITHOUT clearing — for React state initializers, which
+ *  StrictMode double-invokes in dev builds: a consuming initializer
+ *  would drain the map on the throwaway first call and hand the real
+ *  one nothing. The mount effect does the consuming. */
+export function peekPendingDesignSection(designId: string): DesignSectionIntent | undefined {
+  return pendingByDesignId.get(designId)
+}
+
 /** Subscribe to live intent updates — covers the already-mounted tab. */
 export function subscribeDesignSectionIntent(handler: Subscriber): () => void {
   subscribers.add(handler)

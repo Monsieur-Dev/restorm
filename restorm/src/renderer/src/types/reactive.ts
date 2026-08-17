@@ -258,7 +258,7 @@ const ENVIRONMENT_INDEXABLE_KEYS = new Set([
  * deep in-place mutation would be stored silently (applied on screen,
  * lost on close). The Design tab and every design test helper follow
  * this convention. */
-const DESIGN_INDEXABLE_KEYS = new Set([
+export const DESIGN_INDEXABLE_KEYS = new Set([
   'name',
   'notes',
   'tags',

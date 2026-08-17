@@ -26,18 +26,19 @@
 export const CRASH_OPT_OUT_CAPABILITY = 'crash.optOut'
 
 /**
- * Gates EDITING an API design (the Design tab and every design mutation
- * surface). Locked for `community`, unlocked for every paid plan: the
- * free tier can open a design and read everything — the gate renders
- * editors greyed-with-upsell — while designing is a paid feature. A pure
- * function of the plan tier, hence a pseudo-capability rather than a
- * backend-minted one.
+ * Gates RUNNING an API design: spinning up the design server and
+ * generating code from it. Locked for `community`, unlocked for every
+ * paid plan. Deliberately NOT an editing gate (Yoann, 2026-08-17):
+ * the free tier designs freely — what a subscription buys is playing
+ * the design (design server, 468.6) and turning it into code (468.10).
+ * A pure function of the plan tier, hence a pseudo-capability rather
+ * than a backend-minted one.
  */
-export const DESIGN_EDIT_CAPABILITY = 'design.edit'
+export const DESIGN_RUN_CAPABILITY = 'design.run'
 
-/** The one shared reading of the design-edit gate, so the Design tab,
- * the settings machinery and any future mutation surface can never
- * disagree on who may edit. */
-export function isDesignEditLocked(authState: { plan?: string | null | undefined }): boolean {
+/** The one shared reading of the design-run gate, so the serve button,
+ * the code generators and the settings machinery can never disagree on
+ * who may run a design. */
+export function isDesignRunLocked(authState: { plan?: string | null | undefined }): boolean {
   return (authState.plan ?? 'community') === 'community'
 }

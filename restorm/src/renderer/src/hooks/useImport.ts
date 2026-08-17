@@ -142,6 +142,14 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             document: cloneForEventBus(folder)
           })
           emitNestedEnvironments(folder)
+        } else if (isApiDesign(item)) {
+          // A design has its own save-unit document kind — announcing it
+          // as 'request' would cleanse its draft against the wrong shape.
+          eventBus.emitSync(DocumentEvents.DESIGN_CREATED, {
+            id: item.id,
+            type: 'design',
+            document: cloneForEventBus(item)
+          })
         } else {
           const request = item
           eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {

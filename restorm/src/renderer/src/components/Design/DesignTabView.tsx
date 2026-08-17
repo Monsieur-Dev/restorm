@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  GatedControl,
   InputBox,
   ListView,
   MarkdownEditor,
   ScrollableElement,
   SelectBox,
   eventBus,
-  useAuthState,
   type ISelectData,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
@@ -16,10 +14,8 @@ import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collect
 import type { DesignSectionKey } from '../../../../shared/types/editor'
 import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
 import { validateApiDesign } from '../../../../shared/design/validateApiDesign'
-import { isDesignEditLocked } from '../../../../shared/auth/planCapabilities'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
-import { consumePendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
-import { subscribeToPro } from '../../services/subscribeToPro'
+import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
 import { assignDesignSection } from './designMutations'
 import { DesignModelsSection } from './DesignModelsSection'
 import { DesignEnumsSection } from './DesignEnumsSection'
@@ -41,34 +37,39 @@ export interface DesignTabViewProps {
  * Edits write straight onto the REACTIVE design by reassigning a
  * top-level section (the 468-family mutation convention): the proxy
  * emits `DESIGN_UPDATED` into the standard dirty / autosave pipeline.
- * Editing is gated by plan: Community renders everything visible but
- * locked (`GatedControl`), Pro and above edit freely.
+ * Editing is free on every plan (Yoann, 2026-08-17) — what the plan
+ * gates is RUNNING the design (serve, codegen), via
+ * `DESIGN_RUN_CAPABILITY` on those buttons when they land.
  */
 export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) => {
   const { t } = useTranslation()
-  const authState = useAuthState()
-  const editLocked = isDesignEditLocked(authState)
-
-  const initialIntent = useMemo(() => consumePendingDesignSection(design.id), [design.id])
+  // PEEK only in the initializers: StrictMode double-invokes them in dev
+  // builds, so a consuming read would drain the map on the throwaway
+  // call. The mount effect below does the consuming.
   const [activeSection, setActiveSection] = useState<DesignSectionKey>(
-    () => initialIntent?.section ?? 'settings'
+    () => peekPendingDesignSection(design.id)?.section ?? 'settings'
   )
-  const [selectedModelId, setSelectedModelId] = useState<string | null>(
-    () => (initialIntent?.section === 'models' ? initialIntent.entityId ?? null : null)
-  )
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(() => {
+    const intent = peekPendingDesignSection(design.id)
+    return intent?.section === 'models' ? intent.entityId ?? null : null
+  })
 
   // Follow section intents while mounted — the single-tab policy means
-  // a sidebar group click usually refocuses this already-open tab. An
-  // intent staged between the state initializer and this subscription is
-  // drained on a microtask (never a synchronous state write in the
-  // effect body).
+  // a sidebar group click usually refocuses this already-open tab. The
+  // live subscriber ALSO consumes the staged entry: without that, an
+  // intent applied to an already-mounted tab would linger in the map
+  // and replay on the next open. A pending intent staged between the
+  // initializer and this subscription is drained on a microtask (never
+  // a synchronous state write in the effect body).
   useEffect(() => {
     const applyIntent = (intent: { section: DesignSectionKey; entityId?: string }): void => {
       setActiveSection(intent.section)
       if (intent.section === 'models' && intent.entityId !== undefined) setSelectedModelId(intent.entityId)
     }
     const unsubscribe = subscribeDesignSectionIntent((designId, intent) => {
-      if (designId === design.id) applyIntent(intent)
+      if (designId !== design.id) return
+      consumePendingDesignSection(design.id)
+      applyIntent(intent)
     })
     const pending = consumePendingDesignSection(design.id)
     if (pending !== undefined) {
@@ -119,12 +120,11 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
       </nav>
       <div className="design-section-host" data-testid={`design-section-${activeSection}`}>
         {activeSection === 'settings' && (
-          <DesignSettingsSection design={design} editLocked={editLocked} />
+          <DesignSettingsSection design={design} />
         )}
         {activeSection === 'models' && (
           <DesignModelsSection
             design={design}
-            editLocked={editLocked}
             issues={issues}
             selectedModelId={selectedModelId}
             onSelectModel={setSelectedModelId}
@@ -132,7 +132,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           />
         )}
         {activeSection === 'enums' && (
-          <DesignEnumsSection design={design} editLocked={editLocked} />
+          <DesignEnumsSection design={design} />
         )}
         {activeSection === 'routes' && (
           <DesignEntityListSection key={activeSection} design={design} section={activeSection} />
@@ -144,7 +144,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           />
         )}
         {activeSection === 'notes' && (
-          <DesignNotesSection design={design} editLocked={editLocked} tabId={tabId} />
+          <DesignNotesSection design={design} tabId={tabId} />
         )}
         {activeSection === 'code' && (
           <DesignSectionPlaceholder
@@ -171,7 +171,7 @@ const DesignSectionPlaceholder: React.FC<{ title: string; message: string }> = (
  */
 const AUTH_KINDS: readonly DesignAuthKind[] = ['none', 'bearer', 'apiKeyHeader', 'basic']
 
-const DesignSettingsSection: React.FC<{ design: ApiDesign; editLocked: boolean }> = ({ design, editLocked }) => {
+const DesignSettingsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
   const { t } = useTranslation()
   const authOptions = useMemo(() => [
     { text: t('design.auth.none', 'None') },
@@ -251,7 +251,6 @@ const DesignSettingsSection: React.FC<{ design: ApiDesign; editLocked: boolean }
         </div>
 
         <h3 className="design-settings-group-title">{t('design.settings.identity.title', 'Identity')}</h3>
-        <GatedControl locked={editLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-settings-identity-gate">
           <div className="design-settings-grid">
             <label className="design-field design-field-wide">
               <span className="design-field-label">{t('design.settings.identity.title_field', 'Title')}</span>
@@ -309,7 +308,6 @@ const DesignSettingsSection: React.FC<{ design: ApiDesign; editLocked: boolean }
               />
             </label>
           </div>
-        </GatedControl>
       </div>
     </ScrollableElement>
   )
@@ -391,19 +389,17 @@ const DesignEntityListSection: React.FC<{ design: ApiDesign; section: 'models' |
 }
 
 /** Notes — the same markdown surface requests and folders have. */
-const DesignNotesSection: React.FC<{ design: ApiDesign; editLocked: boolean; tabId: string }> = ({ design, editLocked, tabId }) => {
+const DesignNotesSection: React.FC<{ design: ApiDesign; tabId: string }> = ({ design, tabId }) => {
   const { t } = useTranslation()
   return (
     <div className="design-section design-notes-section">
       <h2 className="design-section-title">{t('design.section.notes')}</h2>
-      <GatedControl locked={editLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-notes-gate">
-        <MarkdownEditor
-          key={`${tabId}-notes`}
-          initialValue={design.notes ?? ''}
-          onChange={(md: string) => { assignDesignSection(design, 'notes', md) }}
-          data-testid="design-notes-editor"
-        />
-      </GatedControl>
+      <MarkdownEditor
+        key={`${tabId}-notes`}
+        initialValue={design.notes ?? ''}
+        onChange={(md: string) => { assignDesignSection(design, 'notes', md) }}
+        data-testid="design-notes-editor"
+      />
     </div>
   )
 }

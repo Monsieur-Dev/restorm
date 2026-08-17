@@ -36,6 +36,8 @@ export type BadgeType =
   | 'AMQP'
   // Scenario (dataflow graph) — renders a circuit-board codicon
   | 'SCENARIO'
+  // API design — renders the symbol-color codicon
+  | 'DESIGN'
   // Marketing tier — shown next to import-format names that require a
   // paid plan. Distinct gold gradient so it doesn't read as a
   // protocol badge.
@@ -71,7 +73,7 @@ export const Badge: React.FC<BadgeProps> = ({ type, label, className, icon, mode
   // Icon-only badges (auth, scenario) never show text. Otherwise a known type
   // takes its label from the registry; an unknown type (custom HTTP verb →
   // `http_other`) shows the raw verb verbatim.
-  const iconOnly = type === 'AUTH' || type === 'SCENARIO'
+  const iconOnly = type === 'AUTH' || type === 'SCENARIO' || type === 'DESIGN'
   const text = iconOnly ? undefined : label ?? (isKnownBadgeType(type) ? undefined : type)
   return (
     <RegistryBadge

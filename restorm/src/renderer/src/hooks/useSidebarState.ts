@@ -50,7 +50,7 @@ export interface UseSidebarStateReturn {
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
   const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, onOpenInSplit } = options
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   // Set of request ids whose URL currently resolves to a deprecated
   // operation in their owning env folder's apiDocumentation. Lives
@@ -63,6 +63,10 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   // updateCount is used as a dependency to force re-computation when items are mutated in-place
   const sidebarItems: ListViewItemData[] = useMemo(() => {
     void updateCount
+    // A design node's section rows freeze `i18n.t(...)` labels into their
+    // titles — the first translated strings ever baked into sidebar rows —
+    // so a language switch must rebuild them.
+    void i18n.language
     const expandedSet = new Set(expandedIds)
     const renderOptions = {
       expandedIds: expandedSet,
@@ -98,7 +102,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds])
+  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, i18n.language])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread

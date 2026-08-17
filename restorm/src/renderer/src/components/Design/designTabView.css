@@ -239,14 +239,6 @@
   min-height: 0;
 }
 
-.design-notes-section .ecu-gated,
-.design-notes-section .ecu-gated-child {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
 /* ── Models section (468.3) ───────────────────────────────────────── */
 
 .design-model-card {
@@ -522,14 +514,6 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-}
-
-.design-model-notes .ecu-gated,
-.design-model-notes .ecu-gated-child {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 /* ── Error dots (sidebar + lists) ─────────────────────────────────── */

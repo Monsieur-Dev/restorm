@@ -1451,7 +1451,7 @@ const App: React.FC = () => {
   // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
   // or the legacy `request-<id>` form) to its item id.
   const resolveTabItemId = useCallback((tabId: string): string | null => {
-    const idxMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+    const idxMatch = /^(folder|env-folder|request|scenario|design)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (idxMatch?.[2]) {
       const indexPath = idxMatch[2].split('.').map((n) => Number(n))
       // Don't default a bad/missing segment to index 0 — that silently resolves
@@ -1473,7 +1473,7 @@ const App: React.FC = () => {
       }
       return null
     }
-    const legacyMatch = /^(folder|env-folder|request|scenario)-(?:id:)?(.+)$/.exec(tabId)
+    const legacyMatch = /^(folder|env-folder|request|scenario|design)-(?:id:)?(.+)$/.exec(tabId)
     return legacyMatch?.[2] ?? null
   }, [rootItems])
 
@@ -1729,6 +1729,7 @@ const App: React.FC = () => {
     openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    openDesignTab,
     projectUuid,
     // A moved SCENARIO has no save-unit document of its own, so nothing
     // marks it unsaved. Route it through the same debounced whole-file

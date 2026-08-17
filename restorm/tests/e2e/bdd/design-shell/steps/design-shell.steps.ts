@@ -190,6 +190,22 @@ Then('dropping there leaves the tree unchanged', async () => {
   // (a refused drop writes nothing).
   await expect(sidebarRow(p, sectionRowId('models'))).toBeVisible()
   expect(readFileSync(projectPath, 'utf-8')).toBe(before)
+  // The file-byte check alone cannot distinguish a refused drop from an
+  // accepted one (a drop only mutates memory until a save). Assert the
+  // IN-MEMORY tree too: the design still lives at the root, not under
+  // the env folder.
+  const placement = await p.evaluate((envName: string) => {
+    const helpers = (window as unknown as {
+      __restormTestHelpers?: { findItemIndexPath?: (chain: string[]) => number[] | null }
+    }).__restormTestHelpers
+    if (!helpers?.findItemIndexPath) throw new Error('findItemIndexPath helper not exposed')
+    return {
+      atRoot: helpers.findItemIndexPath(['Petstore design']) !== null,
+      underEnvFolder: helpers.findItemIndexPath([envName, 'Petstore design']) !== null
+    }
+  }, ENV_FOLDER_NAME)
+  expect(placement.atRoot, 'the design must still sit at the root').toBe(true)
+  expect(placement.underEnvFolder, 'the design must NOT have moved under the env folder').toBe(false)
 })
 
 // ── Favorites ─────────────────────────────────────────────────────────
@@ -228,14 +244,9 @@ Then('the design tab is the active tab', async () => {
   await expect(activeTab).toHaveCount(1, { timeout: 5000 })
 })
 
-// ── Community / Pro gate ─────────────────────────────────────────────
-
-Then('the design settings are locked behind the Pro gate', async () => {
-  const p = requirePage()
-  await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
-  // GatedControl wraps the identity form in `.ecu-gated` when locked.
-  await expect(p.locator('[data-testid="design-settings-section"] .ecu-gated').first()).toBeVisible({ timeout: 5000 })
-})
+// ── No edit gate — every plan designs freely ─────────────────────────
+// (Yoann, 2026-08-17: the plan gates RUNNING the design — serve/codegen
+// buttons, asserted by their own suites when they land — not editing.)
 
 Then('the design settings are editable', async () => {
   const p = requirePage()

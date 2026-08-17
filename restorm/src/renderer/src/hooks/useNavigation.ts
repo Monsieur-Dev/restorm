@@ -165,7 +165,11 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     if (sectionRow !== null) {
       const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sectionRow.designId)
       if (!item || !isApiDesign(item)) return
-      selectSingle(itemId)
+      // Select the DESIGN, not the virtual row: the selection anchor
+      // feeds paste targets and the favorites store, which must never
+      // see an id that is not a tree item (a virtual anchor resolves to
+      // null and menu-bar Paste would drop the clipboard at the root).
+      selectSingle(item.id)
       setPendingDesignSection(item.id, sectionRow.section)
       openDesignTab(item, breadcrumbs)
       navigationService.navigateTo(item.id, 'sidebar', { type: 'design' })
