@@ -2176,6 +2176,13 @@
         "basePath": "Jalur dasar",
         "defaultAuth": "Auth bawaan",
         "environment": "Lingkungan"
+      },
+      "export": {
+        "title": "Ekspor",
+        "format": "Format deskriptor",
+        "download": "Unduh deskriptor",
+        "saved": "Deskriptor disimpan di {{path}}",
+        "failed": "Ekspor gagal"
       }
     },
     "auth": {
@@ -2352,7 +2359,9 @@
       "paramLinkTargetUnknown": "Tautan parameter menunjuk properti yang hilang",
       "bodyModelUnknown": "Model badan sudah tidak ada",
       "responseModelUnknown": "Model respons sudah tidak ada",
-      "responseExampleUnknown": "Respons menyajikan contoh yang hilang"
+      "responseExampleUnknown": "Respons menyajikan contoh yang hilang",
+      "routeResponsesMissing": "Rute tidak mendeklarasikan respons apa pun",
+      "routePathDuplicate": "Rute lain sudah menjawab metode dan jalur ini"
     },
     "traffic": {
       "low": "Rendah",
@@ -2452,6 +2461,11 @@
       "customBody": "Isi respons kustom",
       "customBodyPlaceholder": "Isi respons opsional (JSON)",
       "customApply": "Paksa"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

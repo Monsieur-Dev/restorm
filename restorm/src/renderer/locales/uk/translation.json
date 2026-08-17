@@ -2179,6 +2179,13 @@
         "basePath": "Базовий шлях",
         "defaultAuth": "Типова автентифікація",
         "environment": "Середовище"
+      },
+      "export": {
+        "title": "Експорт",
+        "format": "Формат дескриптора",
+        "download": "Завантажити дескриптор",
+        "saved": "Дескриптор збережено в {{path}}",
+        "failed": "Експорт не вдався"
       }
     },
     "auth": {
@@ -2355,7 +2362,9 @@
       "paramLinkTargetUnknown": "Звʼязок параметра вказує на відсутню властивість",
       "bodyModelUnknown": "Моделі тіла більше не існує",
       "responseModelUnknown": "Моделі відповіді більше не існує",
-      "responseExampleUnknown": "Відповідь подає відсутній приклад"
+      "responseExampleUnknown": "Відповідь подає відсутній приклад",
+      "routeResponsesMissing": "Маршрут не оголошує жодної відповіді",
+      "routePathDuplicate": "Інший маршрут уже відповідає на цей метод і шлях"
     },
     "traffic": {
       "low": "Низький",
@@ -2455,6 +2464,11 @@
       "customBody": "Власне тіло відповіді",
       "customBodyPlaceholder": "Необов’язкове тіло відповіді (JSON)",
       "customApply": "Примусити"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

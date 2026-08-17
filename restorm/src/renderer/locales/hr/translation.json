@@ -2178,6 +2178,13 @@
         "basePath": "Osnovna putanja",
         "defaultAuth": "Zadani auth",
         "environment": "Okruženje"
+      },
+      "export": {
+        "title": "Izvoz",
+        "format": "Format deskriptora",
+        "download": "Preuzmi deskriptor",
+        "saved": "Deskriptor spremljen u {{path}}",
+        "failed": "Izvoz nije uspio"
       }
     },
     "auth": {
@@ -2354,7 +2361,9 @@
       "paramLinkTargetUnknown": "Poveznica parametra pokazuje na nepostojeće svojstvo",
       "bodyModelUnknown": "Model tijela više ne postoji",
       "responseModelUnknown": "Model odgovora više ne postoji",
-      "responseExampleUnknown": "Odgovor poslužuje nepostojeći primjer"
+      "responseExampleUnknown": "Odgovor poslužuje nepostojeći primjer",
+      "routeResponsesMissing": "Ruta ne deklarira nijedan odgovor",
+      "routePathDuplicate": "Druga ruta već odgovara na ovu metodu i putanju"
     },
     "traffic": {
       "low": "Nizak",
@@ -2454,6 +2463,11 @@
       "customBody": "Prilagođeno tijelo odgovora",
       "customBodyPlaceholder": "Neobavezno tijelo odgovora (JSON)",
       "customApply": "Prisili"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

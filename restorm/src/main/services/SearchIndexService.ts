@@ -96,6 +96,7 @@ function isRequest(item: unknown): item is RequestData {
 interface ScenarioData {
   type: 'scenario'
   id: string
+  name?: string
   items?: (FolderData | RequestData | ScenarioData | DesignData)[]
 }
 
@@ -142,8 +143,11 @@ const designSubDocIds = new Map<string, string[]>()
 /** Walk a design into its search documents (mirrors the renderer's
  * `designToSearchDocuments` — the two files deliberately share no code
  * today, same as folders/requests). */
-function designSearchDocuments(design: DesignData, parentPath: string[] = []): SearchDocument[] {
+function designSearchDocuments(design: DesignData, parentPath: string[] = [], parentNames: string[] = []): SearchDocument[] {
   const path = [...parentPath, design.id]
+  // Same breadcrumb convention as the renderer walker: the design doc
+  // carries its parents, each entity carries parents + the design.
+  const entityBreadcrumb = { breadcrumb: [...parentNames, design.name] }
   const documents: SearchDocument[] = [{
     id: design.id,
     title: design.name,
@@ -152,7 +156,11 @@ function designSearchDocuments(design: DesignData, parentPath: string[] = []): S
     icon: DESIGN_CODICON,
     keywords: [...design.tags, design.info.title, design.info.version ?? ''].filter((s) => s !== '').join(' '),
     navigation: { type: 'design', designId: design.id, path },
-    metadata: { tags: design.tags, ...(design.notes ? { notes: design.notes } : {}) }
+    metadata: {
+      tags: design.tags,
+      ...(design.notes ? { notes: design.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
   }]
   for (const model of design.models) {
     documents.push({
@@ -163,7 +171,7 @@ function designSearchDocuments(design: DesignData, parentPath: string[] = []): S
       icon: 'symbol-class',
       keywords: model.properties.map((p) => p.doc.name).join(' '),
       navigation: { type: 'design', designId: design.id, section: 'models', entityId: model.id, path },
-      metadata: { breadcrumb: [design.name] }
+      metadata: entityBreadcrumb
     })
   }
   for (const enumEntity of design.enums) {
@@ -175,7 +183,7 @@ function designSearchDocuments(design: DesignData, parentPath: string[] = []): S
       icon: 'symbol-enum',
       keywords: (enumEntity.doc.enumValues ?? []).map((v) => String(v)).join(' '),
       navigation: { type: 'design', designId: design.id, section: 'enums', entityId: enumEntity.id, path },
-      metadata: { breadcrumb: [design.name] }
+      metadata: entityBreadcrumb
     })
   }
   for (const group of design.routeGroups) {
@@ -195,7 +203,7 @@ function designSearchDocuments(design: DesignData, parentPath: string[] = []): S
         icon: 'type-hierarchy-sub',
         keywords: [route.doc.match.method ?? 'GET', fullPath, group.doc.name].join(' '),
         navigation: { type: 'design', designId: design.id, section: 'routes', entityId: route.id, path },
-        metadata: { breadcrumb: [design.name] }
+        metadata: entityBreadcrumb
       })
     }
   }
@@ -204,10 +212,14 @@ function designSearchDocuments(design: DesignData, parentPath: string[] = []): S
 
 /** Index a design's documents, sweeping the previous pass's leftovers
  * (a deleted model's doc must not linger after an update). */
-function indexDesignDocuments(design: DesignData, parentPath: string[] = []): void {
-  const documents = designSearchDocuments(design, parentPath)
+function indexDesignDocuments(design: DesignData, parentPath: string[] = [], parentNames: string[] = []): void {
+  const documents = designSearchDocuments(design, parentPath, parentNames)
   const newIds = documents.map((doc) => doc.id)
-  const staleIds = (designSubDocIds.get(design.id) ?? []).filter((id) => !newIds.includes(id))
+  // Set lookup: DESIGN_UPDATED fires on every debounced edit while a
+  // design tab is open, and a realistic design carries hundreds of
+  // entities — the O(n²) includes-in-filter shape would burn there.
+  const newIdSet = new Set(newIds)
+  const staleIds = (designSubDocIds.get(design.id) ?? []).filter((id) => !newIdSet.has(id))
   for (const id of staleIds) {
     searchService.removeDocument(id)
     publishIndexUpdate('removed', id, 'design')
@@ -352,8 +364,9 @@ function publishIndexUpdate(action: 'indexed' | 'removed', documentId: string, d
 /**
  * Recursively index a folder and all its contents
  */
-function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): void {
+function indexFolderRecursively(folder: FolderData, parentPath: string[] = [], parentNames: string[] = []): void {
   const currentPath = [...parentPath, folder.id]
+  const currentNames = [...parentNames, folder.name]
 
   // Index the folder
   searchService.indexDocument(folderToSearchDocument(folder, parentPath))
@@ -363,11 +376,11 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): 
   // guard — see `isApiDesignData`.
   for (const item of folder.items) {
     if (isFolder(item)) {
-      indexFolderRecursively(item, currentPath)
+      indexFolderRecursively(item, currentPath, currentNames)
     } else if (isScenarioData(item)) {
-      indexScenarioRecursively(item, currentPath)
+      indexScenarioRecursively(item, currentPath, currentNames)
     } else if (isApiDesignData(item)) {
-      indexDesignDocuments(item, currentPath)
+      indexDesignDocuments(item, currentPath, currentNames)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, folder.id, currentPath))
       publishIndexUpdate('indexed', item.id, 'request')
@@ -381,15 +394,16 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): 
  * scenario in their path — keeping scenario-child requests searchable after a
  * project is reopened, not just at creation time.
  */
-function indexScenarioRecursively(scenario: ScenarioData, parentPath: string[] = []): void {
+function indexScenarioRecursively(scenario: ScenarioData, parentPath: string[] = [], parentNames: string[] = []): void {
   const currentPath = [...parentPath, scenario.id]
+  const currentNames = scenario.name !== undefined ? [...parentNames, scenario.name] : parentNames
   for (const item of scenario.items ?? []) {
     if (isFolder(item)) {
-      indexFolderRecursively(item, currentPath)
+      indexFolderRecursively(item, currentPath, currentNames)
     } else if (isScenarioData(item)) {
-      indexScenarioRecursively(item, currentPath)
+      indexScenarioRecursively(item, currentPath, currentNames)
     } else if (isApiDesignData(item)) {
-      indexDesignDocuments(item, currentPath)
+      indexDesignDocuments(item, currentPath, currentNames)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, scenario.id, currentPath))
       publishIndexUpdate('indexed', item.id, 'request')
@@ -592,6 +606,10 @@ class SearchIndexService {
    */
   clearIndex(): void {
     searchService.clearIndex()
+    // The per-design sub-document ledger exists to make removals
+    // EXACT — it must reset with the index it describes, or entries
+    // from a previous project linger for the whole session.
+    designSubDocIds.clear()
   }
 }
 

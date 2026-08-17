@@ -1,0 +1,42 @@
+/**
+ * The design's exportable DESCRIPTOR formats — the registry behind the
+ * Settings export combo. One entry per emittable dialect; the first is
+ * OpenAPI 3.1, the projection mechanics are shared with the served
+ * /swagger.json (3.0) and future protocol descriptors reuse the same
+ * shape (WSDL, OData CSDL, … — the multi-protocol ticket serves THESE
+ * projections too). Deliberately intent-free: volumetry/PII and every
+ * other design-only intention stays OUT of exported descriptors.
+ */
+
+import type { ApiDesign } from '../types/apiDesign'
+import { designToApiDocumentation } from './apiDesignDoc'
+import { apiDocumentationToOpenApi31 } from './openApiExport'
+
+export interface DescriptorFormat {
+  /** Stable id (persists nowhere yet — combo selection is ephemeral). */
+  id: string
+  /** i18n key of the combo label. */
+  labelKey: string
+  /** English fallback label (a dialect name — identical across locales). */
+  label: string
+  /** Extension of the downloaded file (no dot). */
+  fileExtension: string
+  /** Emit the design's descriptor as file content. */
+  emit: (design: ApiDesign) => string
+}
+
+export const DESCRIPTOR_FORMATS: DescriptorFormat[] = [
+  {
+    id: 'openapi31',
+    labelKey: 'design.export.format.openapi31',
+    label: 'OpenAPI 3.1',
+    fileExtension: 'json',
+    emit: (design) => `${JSON.stringify(apiDocumentationToOpenApi31(designToApiDocumentation(design)), null, 2)}\n`
+  }
+]
+
+/** Default file name of a design's exported descriptor. */
+export function descriptorFileName(design: ApiDesign, format: DescriptorFormat): string {
+  const slug = design.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'api-design'
+  return `${slug}.${format.id === 'openapi31' ? 'openapi' : format.id}.${format.fileExtension}`
+}

@@ -94,3 +94,25 @@ When('I rename the {string} model to {string} from the models section', async ({
   // the main-side reindex — give it a beat.
   await p.waitForTimeout(1500)
 })
+
+When('I delete the {string} model from the models section', async ({}, name: string) => {
+  const p = requirePage()
+  await p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${DESIGN_ID}"]`).click()
+  await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
+  await p.locator('[data-testid="design-rail-models"]').click()
+  await p.mouse.move(700, 450)
+  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: name }).first().click()
+  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(name, { timeout: 5000 })
+  await p.locator('[data-testid="design-model-delete"]').click()
+  await expect(p.locator('[data-testid="design-model-delete-modal"]')).toBeVisible({ timeout: 5000 })
+  await p.locator('[data-testid="design-model-delete-confirm"]').click()
+  // Deletion rides the debounced DESIGN_UPDATED — give the reindex a beat.
+  await p.waitForTimeout(1500)
+})
+
+Then('the design category lists no result named {string}', async ({}, name: string) => {
+  const p = requirePage()
+  // The DELETION exercised the sub-document sweep: the exact-titled
+  // result must be gone (other fuzzy hits may remain in the list).
+  await expect(designResults(p, name)).toHaveCount(0, { timeout: 10000 })
+})

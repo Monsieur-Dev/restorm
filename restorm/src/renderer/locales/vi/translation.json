@@ -2176,6 +2176,13 @@
         "basePath": "Đường dẫn gốc",
         "defaultAuth": "Auth mặc định",
         "environment": "Môi trường"
+      },
+      "export": {
+        "title": "Xuất",
+        "format": "Định dạng bộ mô tả",
+        "download": "Tải xuống bộ mô tả",
+        "saved": "Đã lưu bộ mô tả vào {{path}}",
+        "failed": "Xuất thất bại"
       }
     },
     "auth": {
@@ -2352,7 +2359,9 @@
       "paramLinkTargetUnknown": "Một liên kết tham số trỏ đến thuộc tính bị thiếu",
       "bodyModelUnknown": "Mô hình thân không còn tồn tại",
       "responseModelUnknown": "Một mô hình phản hồi không còn tồn tại",
-      "responseExampleUnknown": "Một phản hồi phục vụ ví dụ bị thiếu"
+      "responseExampleUnknown": "Một phản hồi phục vụ ví dụ bị thiếu",
+      "routeResponsesMissing": "Tuyến không khai báo phản hồi nào",
+      "routePathDuplicate": "Một tuyến khác đã trả lời phương thức và đường dẫn này"
     },
     "traffic": {
       "low": "Thấp",
@@ -2452,6 +2461,11 @@
       "customBody": "Nội dung phản hồi tùy chỉnh",
       "customBodyPlaceholder": "Nội dung phản hồi tùy chọn (JSON)",
       "customApply": "Ép buộc"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

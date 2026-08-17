@@ -2178,6 +2178,13 @@
         "basePath": "Cale de bază",
         "defaultAuth": "Auth implicit",
         "environment": "Mediu"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Formatul descriptorului",
+        "download": "Descarcă descriptorul",
+        "saved": "Descriptor salvat în {{path}}",
+        "failed": "Exportul a eșuat"
       }
     },
     "auth": {
@@ -2354,7 +2361,9 @@
       "paramLinkTargetUnknown": "O legătură de parametru indică o proprietate lipsă",
       "bodyModelUnknown": "Modelul corpului nu mai există",
       "responseModelUnknown": "Un model de răspuns nu mai există",
-      "responseExampleUnknown": "Un răspuns servește un exemplu lipsă"
+      "responseExampleUnknown": "Un răspuns servește un exemplu lipsă",
+      "routeResponsesMissing": "Ruta nu declară niciun răspuns",
+      "routePathDuplicate": "O altă rută răspunde deja acestei metode și căi"
     },
     "traffic": {
       "low": "Scăzut",
@@ -2454,6 +2463,11 @@
       "customBody": "Corp de răspuns personalizat",
       "customBodyPlaceholder": "Corp de răspuns opțional (JSON)",
       "customApply": "Forțează"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

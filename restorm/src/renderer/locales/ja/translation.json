@@ -2176,6 +2176,13 @@
         "basePath": "ベースパス",
         "defaultAuth": "既定の認証",
         "environment": "環境"
+      },
+      "export": {
+        "title": "エクスポート",
+        "format": "ディスクリプタ形式",
+        "download": "ディスクリプタをダウンロード",
+        "saved": "ディスクリプタを {{path}} に保存しました",
+        "failed": "エクスポートに失敗しました"
       }
     },
     "auth": {
@@ -2352,7 +2359,9 @@
       "paramLinkTargetUnknown": "パラメータリンクが存在しないプロパティを指しています",
       "bodyModelUnknown": "ボディのモデルが存在しません",
       "responseModelUnknown": "レスポンスのモデルが存在しません",
-      "responseExampleUnknown": "レスポンスが存在しない例を提供しています"
+      "responseExampleUnknown": "レスポンスが存在しない例を提供しています",
+      "routeResponsesMissing": "ルートがレスポンスを宣言していません",
+      "routePathDuplicate": "別のルートが既にこのメソッドとパスに応答しています"
     },
     "traffic": {
       "low": "低",
@@ -2452,6 +2461,11 @@
       "customBody": "カスタムレスポンスボディ",
       "customBodyPlaceholder": "任意のレスポンスボディ (JSON)",
       "customApply": "強制"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

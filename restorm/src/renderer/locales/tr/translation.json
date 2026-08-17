@@ -2177,6 +2177,13 @@
         "basePath": "Temel yol",
         "defaultAuth": "Varsayılan auth",
         "environment": "Ortam"
+      },
+      "export": {
+        "title": "Dışa aktar",
+        "format": "Tanımlayıcı biçimi",
+        "download": "Tanımlayıcıyı indir",
+        "saved": "Tanımlayıcı {{path}} konumuna kaydedildi",
+        "failed": "Dışa aktarma başarısız oldu"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Bir parametre bağlantısı eksik bir özelliği gösteriyor",
       "bodyModelUnknown": "Gövde modeli artık yok",
       "responseModelUnknown": "Bir yanıt modeli artık yok",
-      "responseExampleUnknown": "Bir yanıt eksik bir örnek sunuyor"
+      "responseExampleUnknown": "Bir yanıt eksik bir örnek sunuyor",
+      "routeResponsesMissing": "Rota hiçbir yanıt bildirmiyor",
+      "routePathDuplicate": "Başka bir rota bu yöntem ve yola zaten yanıt veriyor"
     },
     "traffic": {
       "low": "Düşük",
@@ -2453,6 +2462,11 @@
       "customBody": "Özel yanıt gövdesi",
       "customBodyPlaceholder": "İsteğe bağlı yanıt gövdesi (JSON)",
       "customApply": "Zorla"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

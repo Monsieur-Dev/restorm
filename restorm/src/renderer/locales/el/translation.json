@@ -2177,6 +2177,13 @@
         "basePath": "Βασική διαδρομή",
         "defaultAuth": "Προεπιλεγμένο auth",
         "environment": "Περιβάλλον"
+      },
+      "export": {
+        "title": "Εξαγωγή",
+        "format": "Μορφή περιγραφέα",
+        "download": "Λήψη του περιγραφέα",
+        "saved": "Ο περιγραφέας αποθηκεύτηκε στο {{path}}",
+        "failed": "Η εξαγωγή απέτυχε"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Μια σύνδεση παραμέτρου δείχνει σε ανύπαρκτη ιδιότητα",
       "bodyModelUnknown": "Το μοντέλο του σώματος δεν υπάρχει πια",
       "responseModelUnknown": "Ένα μοντέλο απόκρισης δεν υπάρχει πια",
-      "responseExampleUnknown": "Μια απόκριση σερβίρει ανύπαρκτο παράδειγμα"
+      "responseExampleUnknown": "Μια απόκριση σερβίρει ανύπαρκτο παράδειγμα",
+      "routeResponsesMissing": "Η διαδρομή δεν δηλώνει καμία απόκριση",
+      "routePathDuplicate": "Μια άλλη διαδρομή απαντά ήδη σε αυτήν τη μέθοδο και διαδρομή"
     },
     "traffic": {
       "low": "Χαμηλή",
@@ -2453,6 +2462,11 @@
       "customBody": "Προσαρμοσμένο σώμα απόκρισης",
       "customBodyPlaceholder": "Προαιρετικό σώμα απόκρισης (JSON)",
       "customApply": "Εξαναγκασμός"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

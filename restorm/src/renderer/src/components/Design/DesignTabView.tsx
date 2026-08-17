@@ -18,6 +18,7 @@ import { validateApiDesign, type DesignIssue } from '../../../../shared/design/v
 import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { isDesignServerListening, useIsDesignServerListening } from '../../services/designServerStore'
+import { DESCRIPTOR_FORMATS, descriptorFileName } from '../../../../shared/design/descriptorFormats'
 import { DesignRunModal } from './DesignRunModal'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
@@ -345,6 +346,27 @@ const DesignSettingsSection: React.FC<{
       ? t('design.settings.serve.blocked', 'Fix the design’s {{count}} validation issue(s) before serving', { count: issues.length })
       : t('design.settings.serve.action', 'Serve this design')
 
+  // ── Descriptor export (combo + download) ──────────────────────────
+  const [exportFormatIndex, setExportFormatIndex] = useState(0)
+  const [exportStatus, setExportStatus] = useState<string | null>(null)
+  const downloadDescriptor = useCallback(async () => {
+    const format = DESCRIPTOR_FORMATS[exportFormatIndex] ?? DESCRIPTOR_FORMATS[0]
+    if (format === undefined) return
+    setExportStatus(null)
+    // Emit from a PLAIN clone — the emitter walks the whole design and
+    // the reactive proxy has no business crossing that hot loop.
+    const plain = JSON.parse(JSON.stringify(design)) as ApiDesign
+    const content = format.emit(plain)
+    const result = await window.restorm?.designServer.exportDescriptor(
+      descriptorFileName(plain, format), content, format.fileExtension
+    )
+    if (result?.success === true && result.path !== undefined) {
+      setExportStatus(t('design.settings.export.saved', 'Descriptor saved to {{path}}', { path: result.path }))
+    } else if (result?.canceled !== true) {
+      setExportStatus(result?.error ?? t('design.settings.export.failed', 'The export failed'))
+    }
+  }, [design, exportFormatIndex, t])
+
   return (
     <ScrollableElement className="design-section-scroll">
       <div className="design-section design-settings" data-testid="design-settings-section">
@@ -419,6 +441,38 @@ const DesignSettingsSection: React.FC<{
           {serverError !== null && (
             <p className="design-serve-error design-field-full" role="alert" data-testid="design-serve-error">
               {serverError}
+            </p>
+          )}
+        </div>
+
+        <h3 className="design-settings-group-title">{t('design.settings.export.title', 'Export')}</h3>
+        <div className="design-settings-grid design-export-fields">
+          <label className="design-field design-field-wide">
+            <span className="design-field-label">{t('design.settings.export.format', 'Descriptor format')}</span>
+            <div className="design-export-row">
+              <SelectBox
+                id="design-export-format"
+                className=""
+                options={DESCRIPTOR_FORMATS.map((format) => ({ text: t(format.labelKey, format.label) }))}
+                selected={Math.min(exportFormatIndex, DESCRIPTOR_FORMATS.length - 1)}
+                onDidSelect={(data: ISelectData) => { setExportFormatIndex(data.index) }}
+                selectBoxOptions={{ ariaLabel: t('design.settings.export.format', 'Descriptor format'), useCustomDrawn: true }}
+                data-testid="design-export-format"
+              />
+              <HeaderHoverTooltip label={t('design.settings.export.download', 'Download the descriptor')}>
+                <Button
+                  secondary
+                  icon="desktop-download"
+                  onClick={() => { void downloadDescriptor() }}
+                  options={{ ariaLabel: t('design.settings.export.download', 'Download the descriptor') }}
+                  data-testid="design-export-download"
+                />
+              </HeaderHoverTooltip>
+            </div>
+          </label>
+          {exportStatus !== null && (
+            <p className="design-export-status design-field-full" data-testid="design-export-status">
+              {exportStatus}
             </p>
           )}
         </div>

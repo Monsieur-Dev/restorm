@@ -2177,6 +2177,13 @@
         "basePath": "Alapútvonal",
         "defaultAuth": "Alapértelmezett auth",
         "environment": "Környezet"
+      },
+      "export": {
+        "title": "Exportálás",
+        "format": "Leíró formátuma",
+        "download": "Leíró letöltése",
+        "saved": "Leíró mentve ide: {{path}}",
+        "failed": "Az exportálás sikertelen"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Egy paraméterkapcsolat hiányzó tulajdonságra mutat",
       "bodyModelUnknown": "A törzs modellje már nem létezik",
       "responseModelUnknown": "Egy válaszmodell már nem létezik",
-      "responseExampleUnknown": "Egy válasz hiányzó példát szolgál ki"
+      "responseExampleUnknown": "Egy válasz hiányzó példát szolgál ki",
+      "routeResponsesMissing": "Az útvonal nem deklarál választ",
+      "routePathDuplicate": "Egy másik útvonal már válaszol erre a metódusra és útvonalra"
     },
     "traffic": {
       "low": "Alacsony",
@@ -2453,6 +2462,11 @@
       "customBody": "Egyéni választörzs",
       "customBodyPlaceholder": "Opcionális választörzs (JSON)",
       "customApply": "Kényszerítés"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

@@ -442,6 +442,7 @@ declare global {
         update: (design: unknown) => Promise<boolean>
         onProgress: (callback: (event: { designId: string; status: 'started' | 'completed' | 'error' }) => void) => (() => void)
         onServed: (callback: (data: { designId: string; routeId: string; code: string; counters: DesignServerCounters }) => void) => (() => void)
+        exportDescriptor: (fileName: string, content: string, extension: string) => Promise<{ success: boolean; path?: string; canceled?: boolean; error?: string }>
       }
       jsonrpc: {
         execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>

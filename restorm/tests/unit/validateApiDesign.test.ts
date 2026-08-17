@@ -158,7 +158,11 @@ describe('validateApiDesign', () => {
       doc: { name: 'Users' },
       routes: [{
         id: 'r1',
-        doc: { match: { urlPattern: '/{{id}}', method: 'GET' } },
+        doc: {
+          match: { urlPattern: '/{{id}}', method: 'GET' },
+          // Declared so `routeResponsesMissing` stays out of this test.
+          responses: { '200': {}, '201': {} }
+        },
         design: {
           paramLinks: { id: { modelId: 'm1', propertyId: 'missing' } },
           body: { modelId: 'missing' },
@@ -174,6 +178,42 @@ describe('validateApiDesign', () => {
       'paramLinkTargetUnknown',
       'responseExampleUnknown',
       'responseModelUnknown'
+    ])
+  })
+
+  it('reports a route declaring no response at all', () => {
+    const design = withModels(model('m1', 'User'))
+    design.routeGroups = [{
+      id: 'g1',
+      doc: { name: 'Users' },
+      routes: [{ id: 'r1', doc: { match: { urlPattern: '/', method: 'GET' } } }]
+    }]
+    expect(codes(design)).toEqual(['routeResponsesMissing'])
+  })
+
+  it('reports two routes resolving to the same method + composed path', () => {
+    const design = withModels(model('m1', 'User'))
+    design.routeGroups = [
+      {
+        id: 'g1',
+        doc: { name: 'Users' },
+        design: { basePath: '/users' },
+        routes: [{ id: 'r1', doc: { match: { urlPattern: '/', method: 'GET' }, responses: { '200': {} } } }]
+      },
+      {
+        id: 'g2',
+        doc: { name: 'PowerUsers' },
+        design: { basePath: '/users' },
+        routes: [
+          // Same surface as g1's list route — flagged on the SECOND claimant.
+          { id: 'r2', doc: { match: { urlPattern: '/', method: 'GET' }, responses: { '200': {} } } },
+          // Same path, different METHOD — legal.
+          { id: 'r3', doc: { match: { urlPattern: '/', method: 'POST' }, responses: { '201': {} } } }
+        ]
+      }
+    ]
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'routePathDuplicate', path: ['d', 'g2', 'r2'], subject: 'GET /users' }
     ])
   })
 })

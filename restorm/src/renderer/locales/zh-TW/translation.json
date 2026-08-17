@@ -2176,6 +2176,13 @@
         "basePath": "基礎路徑",
         "defaultAuth": "預設驗證",
         "environment": "環境"
+      },
+      "export": {
+        "title": "匯出",
+        "format": "描述檔格式",
+        "download": "下載描述檔",
+        "saved": "描述檔已儲存至 {{path}}",
+        "failed": "匯出失敗"
       }
     },
     "auth": {
@@ -2352,7 +2359,9 @@
       "paramLinkTargetUnknown": "參數連結指向缺失的屬性",
       "bodyModelUnknown": "主體模型已不存在",
       "responseModelUnknown": "回應模型已不存在",
-      "responseExampleUnknown": "回應提供了缺失的範例"
+      "responseExampleUnknown": "回應提供了缺失的範例",
+      "routeResponsesMissing": "該路由未宣告任何回應",
+      "routePathDuplicate": "另一條路由已回應此方法與路徑"
     },
     "traffic": {
       "low": "低",
@@ -2452,6 +2461,11 @@
       "customBody": "自訂回應主體",
       "customBodyPlaceholder": "選用回應主體 (JSON)",
       "customApply": "強制"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

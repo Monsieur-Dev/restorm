@@ -2177,6 +2177,13 @@
         "basePath": "Shtegu bazë",
         "defaultAuth": "Auth i parazgjedhur",
         "environment": "Mjedisi"
+      },
+      "export": {
+        "title": "Eksport",
+        "format": "Formati i përshkruesit",
+        "download": "Shkarko përshkruesin",
+        "saved": "Përshkruesi u ruajt në {{path}}",
+        "failed": "Eksporti dështoi"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Një lidhje parametri tregon një veti që mungon",
       "bodyModelUnknown": "Modeli i trupit nuk ekziston më",
       "responseModelUnknown": "Një model përgjigjeje nuk ekziston më",
-      "responseExampleUnknown": "Një përgjigje shërben një shembull që mungon"
+      "responseExampleUnknown": "Një përgjigje shërben një shembull që mungon",
+      "routeResponsesMissing": "Rruga nuk deklaron asnjë përgjigje",
+      "routePathDuplicate": "Një rrugë tjetër i përgjigjet tashmë kësaj metode dhe shtegu"
     },
     "traffic": {
       "low": "I ulët",
@@ -2453,6 +2462,11 @@
       "customBody": "Trup përgjigjeje i personalizuar",
       "customBodyPlaceholder": "Trup përgjigjeje opsional (JSON)",
       "customApply": "Detyro"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

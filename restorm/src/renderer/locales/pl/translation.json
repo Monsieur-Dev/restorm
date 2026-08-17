@@ -2179,6 +2179,13 @@
         "basePath": "Ścieżka bazowa",
         "defaultAuth": "Domyślne auth",
         "environment": "Środowisko"
+      },
+      "export": {
+        "title": "Eksport",
+        "format": "Format deskryptora",
+        "download": "Pobierz deskryptor",
+        "saved": "Deskryptor zapisany w {{path}}",
+        "failed": "Eksport nie powiódł się"
       }
     },
     "auth": {
@@ -2355,7 +2362,9 @@
       "paramLinkTargetUnknown": "Powiązanie parametru wskazuje na brakującą właściwość",
       "bodyModelUnknown": "Model ciała już nie istnieje",
       "responseModelUnknown": "Model odpowiedzi już nie istnieje",
-      "responseExampleUnknown": "Odpowiedź serwuje brakujący przykład"
+      "responseExampleUnknown": "Odpowiedź serwuje brakujący przykład",
+      "routeResponsesMissing": "Trasa nie deklaruje żadnej odpowiedzi",
+      "routePathDuplicate": "Inna trasa już odpowiada na tę metodę i ścieżkę"
     },
     "traffic": {
       "low": "Niski",
@@ -2455,6 +2464,11 @@
       "customBody": "Własna treść odpowiedzi",
       "customBodyPlaceholder": "Opcjonalna treść odpowiedzi (JSON)",
       "customApply": "Wymuś"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

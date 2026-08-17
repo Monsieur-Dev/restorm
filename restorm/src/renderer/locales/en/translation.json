@@ -2177,6 +2177,13 @@
         "basePath": "Base path",
         "defaultAuth": "Default auth",
         "environment": "Environment"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Descriptor format",
+        "download": "Download the descriptor",
+        "saved": "Descriptor saved to {{path}}",
+        "failed": "The export failed"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "A parameter link points at a missing property",
       "bodyModelUnknown": "The body model no longer exists",
       "responseModelUnknown": "A response model no longer exists",
-      "responseExampleUnknown": "A response serves a missing example"
+      "responseExampleUnknown": "A response serves a missing example",
+      "routeResponsesMissing": "The route declares no response",
+      "routePathDuplicate": "Another route already answers this method and path"
     },
     "traffic": {
       "low": "Low",
@@ -2453,6 +2462,11 @@
       "customBody": "Custom response body",
       "customBodyPlaceholder": "Optional response body (JSON)",
       "customApply": "Force"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

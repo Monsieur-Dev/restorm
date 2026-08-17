@@ -2179,6 +2179,13 @@
         "basePath": "Základní cesta",
         "defaultAuth": "Výchozí auth",
         "environment": "Prostředí"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Formát deskriptoru",
+        "download": "Stáhnout deskriptor",
+        "saved": "Deskriptor uložen do {{path}}",
+        "failed": "Export se nezdařil"
       }
     },
     "auth": {
@@ -2355,7 +2362,9 @@
       "paramLinkTargetUnknown": "Vazba parametru ukazuje na chybějící vlastnost",
       "bodyModelUnknown": "Model těla už neexistuje",
       "responseModelUnknown": "Model odpovědi už neexistuje",
-      "responseExampleUnknown": "Odpověď servíruje chybějící příklad"
+      "responseExampleUnknown": "Odpověď servíruje chybějící příklad",
+      "routeResponsesMissing": "Trasa nedeklaruje žádnou odpověď",
+      "routePathDuplicate": "Jiná trasa již odpovídá na tuto metodu a cestu"
     },
     "traffic": {
       "low": "Nízký",
@@ -2455,6 +2464,11 @@
       "customBody": "Vlastní tělo odpovědi",
       "customBodyPlaceholder": "Volitelné tělo odpovědi (JSON)",
       "customApply": "Vynutit"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

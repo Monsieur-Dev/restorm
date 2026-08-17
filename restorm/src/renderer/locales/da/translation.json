@@ -2177,6 +2177,13 @@
         "basePath": "Basissti",
         "defaultAuth": "Standard-auth",
         "environment": "Miljø"
+      },
+      "export": {
+        "title": "Eksport",
+        "format": "Deskriptorformat",
+        "download": "Download deskriptoren",
+        "saved": "Deskriptor gemt i {{path}}",
+        "failed": "Eksporten mislykkedes"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Et parameterlink peger på en manglende egenskab",
       "bodyModelUnknown": "Body-modellen findes ikke længere",
       "responseModelUnknown": "En svarmodel findes ikke længere",
-      "responseExampleUnknown": "Et svar serverer et manglende eksempel"
+      "responseExampleUnknown": "Et svar serverer et manglende eksempel",
+      "routeResponsesMissing": "Ruten erklærer intet svar",
+      "routePathDuplicate": "En anden rute besvarer allerede denne metode og sti"
     },
     "traffic": {
       "low": "Lav",
@@ -2453,6 +2462,11 @@
       "customBody": "Brugerdefineret svartekst",
       "customBodyPlaceholder": "Valgfri svartekst (JSON)",
       "customApply": "Gennemtving"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

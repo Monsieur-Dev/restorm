@@ -439,6 +439,14 @@ export const designServerSetForcedArgs = z.tuple([
 ])
 export const designServerUpdateArgs = z.tuple([z.unknown()])
 
+// Design descriptor export: emitted CONTENT + suggested file name +
+// extension; the handler owns the save dialog and the write.
+export const designExportDescriptorArgs = z.tuple([
+  z.string().min(1),
+  z.string(),
+  z.string().min(1).max(10)
+])
+
 // ==========================================================================
 // WebSocket Execution
 // ==========================================================================

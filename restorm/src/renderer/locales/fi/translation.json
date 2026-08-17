@@ -2177,6 +2177,13 @@
         "basePath": "Peruspolku",
         "defaultAuth": "Oletus-auth",
         "environment": "Ympäristö"
+      },
+      "export": {
+        "title": "Vienti",
+        "format": "Kuvaajan muoto",
+        "download": "Lataa kuvaaja",
+        "saved": "Kuvaaja tallennettu kohteeseen {{path}}",
+        "failed": "Vienti epäonnistui"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Parametrilinkki osoittaa puuttuvaan ominaisuuteen",
       "bodyModelUnknown": "Rungon mallia ei enää ole",
       "responseModelUnknown": "Vastausmallia ei enää ole",
-      "responseExampleUnknown": "Vastaus tarjoilee puuttuvan esimerkin"
+      "responseExampleUnknown": "Vastaus tarjoilee puuttuvan esimerkin",
+      "routeResponsesMissing": "Reitti ei määrittele yhtään vastausta",
+      "routePathDuplicate": "Toinen reitti vastaa jo tähän metodiin ja polkuun"
     },
     "traffic": {
       "low": "Matala",
@@ -2453,6 +2462,11 @@
       "customBody": "Mukautettu vastausrunko",
       "customBodyPlaceholder": "Valinnainen vastausrunko (JSON)",
       "customApply": "Pakota"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

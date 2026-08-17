@@ -2177,6 +2177,13 @@
         "basePath": "Basispad",
         "defaultAuth": "Standaard-auth",
         "environment": "Omgeving"
+      },
+      "export": {
+        "title": "Exporteren",
+        "format": "Descriptorformaat",
+        "download": "Descriptor downloaden",
+        "saved": "Descriptor opgeslagen in {{path}}",
+        "failed": "De export is mislukt"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Een parameterkoppeling wijst naar een ontbrekende eigenschap",
       "bodyModelUnknown": "Het body-model bestaat niet meer",
       "responseModelUnknown": "Een antwoordmodel bestaat niet meer",
-      "responseExampleUnknown": "Een antwoord serveert een ontbrekend voorbeeld"
+      "responseExampleUnknown": "Een antwoord serveert een ontbrekend voorbeeld",
+      "routeResponsesMissing": "De route declareert geen respons",
+      "routePathDuplicate": "Een andere route beantwoordt deze methode en dit pad al"
     },
     "traffic": {
       "low": "Laag",
@@ -2453,6 +2462,11 @@
       "customBody": "Aangepaste responsbody",
       "customBodyPlaceholder": "Optionele responsbody (JSON)",
       "customApply": "Forceren"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

@@ -2177,6 +2177,13 @@
         "basePath": "Bassökväg",
         "defaultAuth": "Standard-auth",
         "environment": "Miljö"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Deskriptorformat",
+        "download": "Ladda ner deskriptorn",
+        "saved": "Deskriptor sparad i {{path}}",
+        "failed": "Exporten misslyckades"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "En parameterlänk pekar på en saknad egenskap",
       "bodyModelUnknown": "Body-modellen finns inte längre",
       "responseModelUnknown": "En svarsmodell finns inte längre",
-      "responseExampleUnknown": "Ett svar serverar ett saknat exempel"
+      "responseExampleUnknown": "Ett svar serverar ett saknat exempel",
+      "routeResponsesMissing": "Rutten deklarerar inget svar",
+      "routePathDuplicate": "En annan rutt besvarar redan denna metod och sökväg"
     },
     "traffic": {
       "low": "Låg",
@@ -2453,6 +2462,11 @@
       "customBody": "Anpassad svarskropp",
       "customBodyPlaceholder": "Valfri svarskropp (JSON)",
       "customApply": "Tvinga"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

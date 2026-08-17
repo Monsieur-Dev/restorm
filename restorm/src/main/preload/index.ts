@@ -1425,6 +1425,12 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('design-server:served', handler)
       }
+    },
+    /** Export an emitted descriptor: save dialog + write. The renderer
+     * emits (it owns the design); the main process owns the disk. */
+    exportDescriptor: async (fileName: string, content: string, extension: string): Promise<{ success: boolean; path?: string; canceled?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design:export-descriptor', fileName, content, extension)
+      return result as { success: boolean; path?: string; canceled?: boolean; error?: string }
     }
   },
   jsonrpc: {

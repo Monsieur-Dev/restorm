@@ -164,6 +164,26 @@
   font-size: 0.9em;
 }
 
+/* Export group: the format combo with the download button glued to
+ * its right (the ticket's "combo + bouton à côté"). */
+.design-export-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-export-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.design-export-status {
+  margin: 4px 0 0;
+  font-size: 0.9em;
+  opacity: 0.8;
+  word-break: break-all;
+}
+
 /* Documentation section: the DocumentationHost owns its own scroll +
  * sidebar dock — the wrapper fills the section host (a flex ROW: it
  * must claim the width via flex, the stretch default gives height). */

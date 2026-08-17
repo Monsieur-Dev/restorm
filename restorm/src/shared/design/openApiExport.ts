@@ -23,6 +23,13 @@ import type {
 
 type Json = Record<string, unknown>
 
+/** Emission target. 3.0 is the served /swagger.json dialect; 3.1 is
+ * the downloadable descriptor (468.7). The differences the design
+ * shapes can produce: the version string, `nullable` (3.0 keyword vs
+ * a `['T','null']` type array in 3.1) and boolean Swagger-2-style
+ * `exclusiveMinimum`/`exclusiveMaximum` (numeric in 3.1). */
+type OasTarget = '3.0' | '3.1'
+
 /** `{{param}}` (Restorm request spelling) → `{param}` (spec spelling).
  * Single-brace paths pass through unchanged. */
 export function restormPathToSpec(urlPattern: string): string {
@@ -38,10 +45,31 @@ const CONSTRAINT_KEYS = [
   'exclusiveMinimum', 'exclusiveMaximum', 'pattern', 'multipleOf', 'uniqueItems'
 ] as const
 
-function applyConstraints(schema: Json, constraints: PropertyDocumentation['constraints']): void {
+function applyConstraints(schema: Json, constraints: PropertyDocumentation['constraints'], target: OasTarget): void {
   if (constraints === undefined) return
   for (const key of CONSTRAINT_KEYS) {
     if (constraints[key] !== undefined) schema[key] = constraints[key]
+  }
+  if (target === '3.1') {
+    // JSON Schema 2020-12: exclusive bounds are NUMBERS. A boolean
+    // `true` (Swagger 2.0 style, paired with minimum/maximum) converts
+    // to the numeric form; `false` just drops.
+    if (typeof schema['exclusiveMinimum'] === 'boolean') {
+      if (schema['exclusiveMinimum'] && typeof schema['minimum'] === 'number') {
+        schema['exclusiveMinimum'] = schema['minimum']
+        delete schema['minimum']
+      } else {
+        delete schema['exclusiveMinimum']
+      }
+    }
+    if (typeof schema['exclusiveMaximum'] === 'boolean') {
+      if (schema['exclusiveMaximum'] && typeof schema['maximum'] === 'number') {
+        schema['exclusiveMaximum'] = schema['maximum']
+        delete schema['maximum']
+      } else {
+        delete schema['exclusiveMaximum']
+      }
+    }
   }
 }
 
@@ -70,7 +98,17 @@ function xmlNode(xml: NonNullable<ModelDocumentation['xml']>): Json {
   return node
 }
 
-function propertySchema(property: PropertyDocumentation, knownComponents: Set<string>): Json {
+/** Mark a schema nullable in the target's dialect. */
+function markNullable(schema: Json, target: OasTarget): void {
+  if (target === '3.0') {
+    schema['nullable'] = true
+    return
+  }
+  // 3.1: nullability is a type union.
+  if (typeof schema['type'] === 'string') schema['type'] = [schema['type'], 'null']
+}
+
+function propertySchema(property: PropertyDocumentation, knownComponents: Set<string>, target: OasTarget): Json {
   // A referenced property is the bare $ref (array-of-ref wraps it) —
   // the importer reads no siblings off a pure reference, so none are
   // emitted; every other shape carries its facets.
@@ -79,7 +117,7 @@ function propertySchema(property: PropertyDocumentation, knownComponents: Set<st
     if (property.isArrayOfRef === true) {
       const wrapper: Json = { type: 'array', items: ref }
       if (property.xml !== undefined) wrapper['xml'] = xmlNode(property.xml)
-      applyConstraints(wrapper, property.constraints)
+      applyConstraints(wrapper, property.constraints, target)
       return wrapper
     }
     return ref
@@ -88,16 +126,16 @@ function propertySchema(property: PropertyDocumentation, knownComponents: Set<st
   if (property.format !== undefined) schema['format'] = property.format
   if (property.description !== undefined) schema['description'] = property.description
   if (property.example !== undefined) schema['example'] = property.example
-  if (property.nullable === true) schema['nullable'] = true
+  if (property.nullable === true) markNullable(schema, target)
   if (property.readOnly === true) schema['readOnly'] = true
   if (property.deprecated === true) schema['deprecated'] = true
   if (Array.isArray(property.enumValues) && property.enumValues.length > 0) schema['enum'] = property.enumValues
-  applyConstraints(schema, property.constraints)
+  applyConstraints(schema, property.constraints, target)
   if (property.xml !== undefined) schema['xml'] = xmlNode(property.xml)
   return schema
 }
 
-function modelSchema(model: ModelDocumentation, knownComponents: Set<string>): Json {
+function modelSchema(model: ModelDocumentation, knownComponents: Set<string>, target: OasTarget): Json {
   // Enum-shaped component → a bare enum schema.
   if (Array.isArray(model.enumValues) && model.enumValues.length > 0 && model.properties.length === 0) {
     const first = model.enumValues[0]
@@ -112,7 +150,7 @@ function modelSchema(model: ModelDocumentation, knownComponents: Set<string>): J
   const required: string[] = []
   for (const property of model.properties) {
     if (property.name === '') continue
-    properties[property.name] = propertySchema(property, knownComponents)
+    properties[property.name] = propertySchema(property, knownComponents, target)
     if (property.required) required.push(property.name)
   }
   const schema: Json = { type: 'object' }
@@ -139,11 +177,11 @@ function modelSchema(model: ModelDocumentation, knownComponents: Set<string>): J
 
 // ── Operations ────────────────────────────────────────────────────────
 
-function parameterNode(parameter: ParameterDocumentation, knownComponents: Set<string>): Json {
+function parameterNode(parameter: ParameterDocumentation, knownComponents: Set<string>, target: OasTarget): Json {
   const schema = typeLabelToSchema(parameter.type, knownComponents)
   if (parameter.format !== undefined) schema['format'] = parameter.format
   if (Array.isArray(parameter.enumValues) && parameter.enumValues.length > 0) schema['enum'] = parameter.enumValues
-  applyConstraints(schema, parameter.constraints)
+  applyConstraints(schema, parameter.constraints, target)
   const node: Json = {
     name: parameter.name,
     in: parameter.location,
@@ -165,7 +203,7 @@ function contentNode(contentTypes: string[], schema: Json | undefined): Json {
   return content
 }
 
-function operationNode(operation: OperationDocumentation, knownComponents: Set<string>): Json {
+function operationNode(operation: OperationDocumentation, knownComponents: Set<string>, target: OasTarget): Json {
   const parameters = (operation.parameters ?? []).filter((p) => p.location !== 'body')
   const bodyParam = (operation.parameters ?? []).find((p) => p.location === 'body')
 
@@ -177,7 +215,7 @@ function operationNode(operation: OperationDocumentation, knownComponents: Set<s
   if (operation.operationId !== undefined) node['operationId'] = operation.operationId
   if (operation.deprecated === true) node['deprecated'] = true
   if (operation.externalDocs !== undefined) node['externalDocs'] = operation.externalDocs
-  if (parameters.length > 0) node['parameters'] = parameters.map((p) => parameterNode(p, knownComponents))
+  if (parameters.length > 0) node['parameters'] = parameters.map((p) => parameterNode(p, knownComponents, target))
   if (bodyParam !== undefined) {
     const contentTypes = operation.consumes !== undefined && operation.consumes.length > 0
       ? operation.consumes
@@ -256,13 +294,24 @@ function securitySchemeNode(scheme: SecurityScheme): Json {
 
 // ── Document ──────────────────────────────────────────────────────────
 
-/** The whole documentation as an OpenAPI 3.0 document (plain JSON). */
+/** The whole documentation as an OpenAPI 3.0 document (plain JSON) —
+ * the served /swagger.json dialect. */
 export function apiDocumentationToOpenApi(doc: ApiDocumentation): Json {
+  return emitOpenApi(doc, '3.0')
+}
+
+/** The whole documentation as an OpenAPI 3.1 document (plain JSON) —
+ * the downloadable descriptor. */
+export function apiDocumentationToOpenApi31(doc: ApiDocumentation): Json {
+  return emitOpenApi(doc, '3.1')
+}
+
+function emitOpenApi(doc: ApiDocumentation, target: OasTarget): Json {
   const knownComponents = new Set(Object.keys(doc.models))
 
   const schemas: Json = {}
   for (const [name, model] of Object.entries(doc.models)) {
-    schemas[name] = modelSchema(model, knownComponents)
+    schemas[name] = modelSchema(model, knownComponents, target)
   }
 
   const paths: Json = {}
@@ -270,7 +319,7 @@ export function apiDocumentationToOpenApi(doc: ApiDocumentation): Json {
     const path = restormPathToSpec(operation.match.urlPattern)
     const method = (operation.match.method ?? 'GET').toLowerCase()
     const existing = (paths[path] ?? {}) as Json
-    existing[method] = operationNode(operation, knownComponents)
+    existing[method] = operationNode(operation, knownComponents, target)
     paths[path] = existing
   }
 
@@ -281,7 +330,7 @@ export function apiDocumentationToOpenApi(doc: ApiDocumentation): Json {
   if (doc.api.license !== undefined) info['license'] = doc.api.license
 
   const document: Json = {
-    openapi: '3.0.3',
+    openapi: target === '3.1' ? '3.1.0' : '3.0.3',
     info
   }
   // `server.basePath` is the base path's ONLY carrier (operation paths

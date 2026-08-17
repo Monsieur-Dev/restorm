@@ -2176,6 +2176,13 @@
         "basePath": "기본 경로",
         "defaultAuth": "기본 인증",
         "environment": "환경"
+      },
+      "export": {
+        "title": "내보내기",
+        "format": "디스크립터 형식",
+        "download": "디스크립터 다운로드",
+        "saved": "디스크립터를 {{path}} 에 저장했습니다",
+        "failed": "내보내기에 실패했습니다"
       }
     },
     "auth": {
@@ -2352,7 +2359,9 @@
       "paramLinkTargetUnknown": "매개변수 링크가 없는 속성을 가리킵니다",
       "bodyModelUnknown": "본문 모델이 더 이상 없습니다",
       "responseModelUnknown": "응답 모델이 더 이상 없습니다",
-      "responseExampleUnknown": "응답이 없는 예시를 제공합니다"
+      "responseExampleUnknown": "응답이 없는 예시를 제공합니다",
+      "routeResponsesMissing": "라우트가 응답을 선언하지 않았습니다",
+      "routePathDuplicate": "다른 라우트가 이미 이 메서드와 경로에 응답합니다"
     },
     "traffic": {
       "low": "낮음",
@@ -2452,6 +2461,11 @@
       "customBody": "사용자 지정 응답 본문",
       "customBodyPlaceholder": "선택적 응답 본문 (JSON)",
       "customApply": "강제"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

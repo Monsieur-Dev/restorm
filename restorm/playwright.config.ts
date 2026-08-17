@@ -94,6 +94,12 @@ const designServerTestDir = defineBddConfig({
   outputDir: '.features-gen/design-server'
 })
 
+const designExportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-export/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-export/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-export.fixture.ts'],
+  outputDir: '.features-gen/design-export'
+})
+
 const designSearchTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/design-search/features/**/*.feature',
   steps: ['tests/e2e/bdd/design-search/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-search.fixture.ts'],
@@ -706,6 +712,10 @@ export default defineConfig({
     {
       name: 'design-search',
       testDir: designSearchTestDir
+    },
+    {
+      name: 'design-export',
+      testDir: designExportTestDir
     },
     {
       name: 'status-bar-context-menu',

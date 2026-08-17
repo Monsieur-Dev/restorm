@@ -67,7 +67,7 @@ import {
   grpcReflectImportArgs, grpcReflectQueryArgs,
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   designServerStartArgs, designServerStopArgs, designServerStatusArgs,
-  designServerSetForcedArgs, designServerUpdateArgs,
+  designServerSetForcedArgs, designServerUpdateArgs, designExportDescriptorArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
@@ -1330,6 +1330,28 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('design-server:update', designServerUpdateArgs, (_event, [design]) => {
     return designServerService.updateDesign(design as ApiDesign)
+  })
+
+  // Design descriptor export: save-dialog + write of an already-emitted
+  // descriptor (the renderer owns the emission, next to the design).
+  validatedHandle('design:export-descriptor', designExportDescriptorArgs, async (_event, [fileName, content, extension]) => {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) return { success: false, error: 'No window found' }
+    const result = await dialog.showSaveDialog(window, {
+      title: 'Export descriptor',
+      defaultPath: fileName,
+      filters: [{ name: extension.toUpperCase(), extensions: [extension] }]
+    })
+    if (result.canceled || !result.filePath) {
+      return { success: false, canceled: true }
+    }
+    try {
+      await fs.writeFile(result.filePath, content, 'utf-8')
+      logger.info('[IPC] design descriptor exported', { path: result.filePath })
+      return { success: true, path: result.filePath }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
   })
 
   // ==========================================================================

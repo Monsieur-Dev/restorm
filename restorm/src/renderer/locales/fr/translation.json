@@ -2177,6 +2177,13 @@
         "basePath": "Chemin de base",
         "defaultAuth": "Auth par défaut",
         "environment": "Environnement"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Format du descripteur",
+        "download": "Télécharger le descripteur",
+        "saved": "Descripteur enregistré dans {{path}}",
+        "failed": "L’export a échoué"
       }
     },
     "auth": {
@@ -2353,7 +2360,9 @@
       "paramLinkTargetUnknown": "Un lien de paramètre pointe vers une propriété disparue",
       "bodyModelUnknown": "Le modèle du corps n’existe plus",
       "responseModelUnknown": "Un modèle de réponse n’existe plus",
-      "responseExampleUnknown": "Une réponse sert un exemple disparu"
+      "responseExampleUnknown": "Une réponse sert un exemple disparu",
+      "routeResponsesMissing": "La route ne déclare aucune réponse",
+      "routePathDuplicate": "Une autre route répond déjà à cette méthode et ce chemin"
     },
     "traffic": {
       "low": "Faible",
@@ -2453,6 +2462,11 @@
       "customBody": "Corps de réponse personnalisé",
       "customBodyPlaceholder": "Corps de réponse optionnel (JSON)",
       "customApply": "Forcer"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1"
+      }
     }
   },
   "mqtt": {

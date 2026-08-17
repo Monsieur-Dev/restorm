@@ -24,8 +24,11 @@ Feature: Design search indexing
     And I click the design search result named "AdminUser"
     Then the models section opens on the "AdminUser" model card
 
-  Scenario: A rename reindexes without phantom results
+  Scenario: Rename and delete reindex without phantom results
     Given a project carrying an API design is open for searching
     When I rename the "User" model to "Customer" from the models section
     And I search the titlebar for "Customer"
     Then the design category lists a result named "Customer"
+    When I delete the "Customer" model from the models section
+    And I search the titlebar for "Customer"
+    Then the design category lists no result named "Customer"

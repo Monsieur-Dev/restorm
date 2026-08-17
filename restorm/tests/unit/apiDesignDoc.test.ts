@@ -89,9 +89,11 @@ describe('designToApiDocumentation', () => {
       'route-user-get', 'route-user-list', 'route-user-create',
       'route-admin-list', 'route-admin-get'
     ])
-    // Identity check by a per-route distinguishing field.
-    expect(doc.operations.map((op) => op.match.urlPattern)).toEqual([
-      '/v1/users/{{id}}', '/v1/users', '/v1/users', '/admins', '/admins/{{id}}'
+    // Identity check by method+pattern — two routes share /v1/users, so
+    // the pattern alone would let a GET↔POST index swap pass.
+    expect(doc.operations.map((op) => `${op.match.method ?? ''} ${op.match.urlPattern}`)).toEqual([
+      'GET /v1/users/{{id}}', 'GET /v1/users', 'POST /v1/users',
+      'GET /admins', 'GET /admins/{{id}}'
     ])
     expect(projection.operations.every((op) => op.group === 'Users')).toBe(true)
     expect(Object.keys(projection.groups)).toEqual(['Users'])

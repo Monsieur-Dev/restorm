@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { apiDocumentationToOpenApi, restormPathToSpec } from '../../src/shared/design/openApiExport'
+import SwaggerParser from '@apidevtools/swagger-parser'
+import { apiDocumentationToOpenApi, apiDocumentationToOpenApi31, restormPathToSpec } from '../../src/shared/design/openApiExport'
 import {
   openapi3ToApiDocumentation,
   type OAS3Spec
@@ -232,5 +233,44 @@ describe('openApiExport', () => {
     const getUser = reimported.operations.find((op) => op.operationId === 'getUser')
     expect(getUser?.match.urlPattern).toBe('/v1/users/{id}')
     expect(getUser?.parameters?.[0]?.name).toBe('id')
+  })
+
+  // ── OpenAPI 3.1 target (the downloadable descriptor) ──────────────
+
+  it('emits a VALID OpenAPI 3.1 document for the reference design', async () => {
+    const doc = designToApiDocumentation(buildReferenceApiDesign())
+    const emitted = apiDocumentationToOpenApi31(doc)
+    expect(emitted['openapi']).toBe('3.1.0')
+    // The real linter (AC: the export is validated, not eyeballed).
+    // structuredClone: SwaggerParser dereferences in place.
+    await expect(SwaggerParser.validate(structuredClone(emitted) as never)).resolves.toBeDefined()
+  })
+
+  it('speaks the 3.1 dialect where it differs from 3.0', () => {
+    const doc = {
+      sourceType: 'openapi' as const,
+      api: { title: 'Dialects', version: '1.0.0' },
+      models: {
+        M: {
+          name: 'M',
+          properties: [
+            { name: 'a', type: 'string', required: false, nullable: true },
+            { name: 'b', type: 'integer', required: false, constraints: { minimum: 1, exclusiveMinimum: true } }
+          ]
+        }
+      },
+      groups: {},
+      operations: []
+    }
+    const props31 = ((apiDocumentationToOpenApi31(doc) as { components: { schemas: { M: { properties: Record<string, Record<string, unknown>> } } } }).components.schemas.M).properties
+    expect(props31['a']?.['type']).toEqual(['string', 'null'])
+    expect(props31['b']?.['exclusiveMinimum']).toBe(1)
+    expect(props31['b']?.['minimum']).toBeUndefined()
+
+    const props30 = ((apiDocumentationToOpenApi(doc) as { components: { schemas: { M: { properties: Record<string, Record<string, unknown>> } } } }).components.schemas.M).properties
+    expect(props30['a']?.['nullable']).toBe(true)
+    expect(props30['a']?.['type']).toBe('string')
+    expect(props30['b']?.['minimum']).toBe(1)
+    expect(props30['b']?.['exclusiveMinimum']).toBe(true)
   })
 })

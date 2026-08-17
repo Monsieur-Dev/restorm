@@ -9,6 +9,7 @@
  */
 
 import type { ApiDesign, DesignModel } from '../types/apiDesign'
+import { composeRoutePath } from './apiDesignDoc'
 
 export type DesignIssueCode =
   /** A property has an empty name. */
@@ -53,6 +54,14 @@ export type DesignIssueCode =
   | 'constraintPatternInvalid'
   /** A property's min bound exceeds its max (length or value). */
   | 'constraintMinAboveMax'
+  /** A route declares no response at all. OpenAPI requires at least
+   * one per operation — exporting would synthesize a 200 the design
+   * never declared. */
+  | 'routeResponsesMissing'
+  /** Two routes resolve to the same METHOD + composed path (e.g. two
+   * groups sharing a base path) — the exported `paths` map and the
+   * served route table can only keep one. */
+  | 'routePathDuplicate'
 
 export interface DesignIssue {
   code: DesignIssueCode
@@ -174,9 +183,28 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
     }
   }
 
+  // One HTTP surface per METHOD + composed path across ALL groups: the
+  // exported `paths[path][method]` and the served route table both key
+  // on it, and would silently drop the second claimant. The design
+  // base path is omitted — it prefixes every route equally.
+  const routeSurfaces = new Set<string>()
   for (const group of design.routeGroups) {
     for (const route of group.routes) {
       const path = [design.id, group.id, route.id]
+
+      if (Object.keys(route.doc.responses ?? {}).length === 0) {
+        issues.push({ code: 'routeResponsesMissing', path })
+      }
+
+      const surface = `${route.doc.match.method ?? 'GET'} ${composeRoutePath({
+        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
+        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+      }, route.doc.match.urlPattern)}`
+      if (routeSurfaces.has(surface)) {
+        issues.push({ code: 'routePathDuplicate', path, subject: surface })
+      } else {
+        routeSurfaces.add(surface)
+      }
 
       for (const [paramName, link] of Object.entries(route.design?.paramLinks ?? {})) {
         const model = modelById.get(link.modelId)
