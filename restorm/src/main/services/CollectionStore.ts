@@ -450,6 +450,96 @@ class CollectionStore {
   }
 
   // ==========================================================================
+  // Mutations - API designs
+  // ==========================================================================
+
+  private designIngestionStarted = false
+
+  /**
+   * Ingest RENDERER-side design edits into main's copy. Unlike request
+   * row edits (deliberately unmirrored — the whole-tree replace hazard),
+   * a design edit already crosses to main as a DESIGN_UPDATED event
+   * carrying the full document; folding it into main's tree keeps this
+   * copy current, so an MCP design write starts from the renderer's
+   * latest state instead of clobbering an unsaved edit on the next
+   * tree broadcast. Idempotent for main's own emissions (re-assigning
+   * an identical document is a no-op in effect).
+   */
+  startDesignIngestion(): void {
+    if (this.designIngestionStarted) return
+    this.designIngestionStarted = true
+    eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.DESIGN_UPDATED, (payload) => {
+      const doc = payload.document
+      if (doc === undefined || (doc as { type?: unknown }).type !== 'design') return
+      const existing = this.findById(payload.id)
+      if (!existing || !isApiDesign(existing)) return
+      const fresh = ApiDesign.fromPlain(doc as Record<string, unknown>)
+      // Same tree slot, fresh content — references held by parents stay.
+      Object.assign(existing, fresh)
+    })
+  }
+
+  /**
+   * Create a new API design under `parentId` (any container) or at the
+   * ROOT when `null` — the same placements the sidebar offers. Emits a
+   * design-typed created event so search indexes it and the renderer's
+   * upsert re-instantiates it with the right class.
+   */
+  createDesign(parentId: string | null, designData: Partial<ApiDesign> & { name: string }): ApiDesign {
+    const newDesign = ApiDesign.fromPlain({
+      ...designData,
+      id: designData.id ?? this.generateId(),
+      name: designData.name
+    })
+    if (parentId === null) {
+      this.collections.push(newDesign)
+    } else {
+      const parent = this.findById(parentId)
+      if (parent && this.isContainer(parent)) {
+        this.childItemsForWrite(parent).push(newDesign)
+      }
+    }
+    this.emitDesignCreated(newDesign, parentId)
+    logger.debug('[CollectionStore] Design created', { id: newDesign.id, name: newDesign.name, parentId })
+    return newDesign
+  }
+
+  /**
+   * Update a design in place and emit the design-typed updated event
+   * (NEVER a request-typed one — the renderer would cleanse the draft
+   * against the HTTP-request shape and drop every design section).
+   * Sections mutate by REASSIGNMENT (`design.models = [...]`), same
+   * convention as the renderer's `assignDesignSection`.
+   */
+  updateDesign(id: string, updates: Partial<ApiDesign>): ApiDesign | null {
+    const design = this.findById(id)
+    if (!design || !isApiDesign(design)) return null
+    Object.assign(design, sanitizeUpdatePatch(updates, []))
+    this.emitDesignUpdated(design)
+    return design
+  }
+
+  /** Delete a design by id (root or nested). Emits the design-typed
+   * deleted event so the search sub-documents sweep. */
+  deleteDesign(id: string): boolean {
+    const design = this.findById(id)
+    if (!design || !isApiDesign(design)) return false
+    const parent = this.findParentFolder(id)
+    if (!parent) {
+      const index = this.collections.findIndex((c) => c.id === id)
+      if (index === -1) return false
+      this.collections.splice(index, 1)
+    } else {
+      const siblings = this.childItemsForWrite(parent)
+      const index = siblings.findIndex((item) => item.id === id)
+      if (index === -1) return false
+      siblings.splice(index, 1)
+    }
+    this.emitDesignDeleted(id)
+    return true
+  }
+
+  // ==========================================================================
   // Mutations - Requests
   // ==========================================================================
 
@@ -1043,6 +1133,23 @@ class CollectionStore {
     void eventBusService.emit(DocumentEvents.REQUEST_UPDATED, payload)
     pubsub.publish(PUBSUB_TOPICS.REQUEST_UPDATED, request)
     logger.debug('[CollectionStore] Request updated', { id: request.id, name: request.name })
+  }
+
+  private emitDesignCreated(design: ApiDesign, parentId: string | null): void {
+    const payload: DocumentChangedPayload = {
+      id: design.id,
+      type: 'design',
+      document: design.toPlainObject(),
+      ...(parentId !== null ? { parentFolderId: parentId } : {})
+    }
+    void eventBusService.emit(DocumentEvents.DESIGN_CREATED, payload)
+    logger.debug('[CollectionStore] Design created event', { id: design.id, name: design.name })
+  }
+
+  private emitDesignDeleted(id: string): void {
+    const payload: DocumentDeletedPayload = { id, type: 'design' }
+    void eventBusService.emit(DocumentEvents.DESIGN_DELETED, payload)
+    logger.debug('[CollectionStore] Design deleted event', { id })
   }
 
   private emitDesignUpdated(design: ApiDesign): void {

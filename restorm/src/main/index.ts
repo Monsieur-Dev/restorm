@@ -841,6 +841,12 @@ app.on('before-quit', () => {
 
 // Initialize Search Index Service (listens to document events from renderer)
 searchIndexService.initialize()
+// Renderer design edits fold into main's tree (MCP design writes must
+// start from the renderer's latest state — see startDesignIngestion).
+// Lazy import, matching this file's other CollectionStore access.
+void import('./services/CollectionStore').then(({ collectionStore }) => {
+  collectionStore.startDesignIngestion()
+})
 logger.info('Search Index Service initialized')
 
 // Initialize Context Service (manages Handlebars context and resolved values)

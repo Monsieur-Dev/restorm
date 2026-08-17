@@ -24,3 +24,4 @@ Feature: Design descriptor export
     When I spin the design server from the settings
     And I import the served descriptor from "http://localhost:7482/swagger.json"
     Then the sidebar carries an imported environment folder named "Petstore"
+    And the imported folder exposes the design's operation surface

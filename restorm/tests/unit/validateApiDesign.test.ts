@@ -216,4 +216,20 @@ describe('validateApiDesign', () => {
       { code: 'routePathDuplicate', path: ['d', 'g2', 'r2'], subject: 'GET /users' }
     ])
   })
+
+  it('sees through parameter names — {{id}} and {{userId}} are one surface', () => {
+    const design = withModels(model('m1', 'User'))
+    design.routeGroups = [{
+      id: 'g1',
+      doc: { name: 'Users' },
+      design: { basePath: '/users' },
+      routes: [
+        { id: 'r1', doc: { match: { urlPattern: '/{{id}}', method: 'GET' }, responses: { '200': {} } } },
+        { id: 'r2', doc: { match: { urlPattern: '/{{userId}}', method: 'GET' }, responses: { '200': {} } } }
+      ]
+    }]
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'routePathDuplicate', path: ['d', 'g1', 'r2'], subject: 'GET /users/{*}' }
+    ])
+  })
 })

@@ -18,7 +18,8 @@ import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
-import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment, ICON_TYPES } from '../../../shared/models'
+import { designServerService } from '../../services/DesignServerService'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, isApiDesign, KeyValue, Environment, ICON_TYPES } from '../../../shared/models'
 import type { Icon } from '../../../shared/models'
 import { REQUEST_TYPES } from '../../../shared/protocolRegistry'
 import { isSoapRequest } from '../../../shared/types/requests/index'
@@ -356,7 +357,14 @@ export function registerWriteTools(mcp: McpService): void {
         broadcastScenario(updated)
         return jsonReply({ id, kind: 'scenario', name: updated.name })
       }
-      return errorReply(`Item ${id} is not a folder, env-folder, request or scenario`)
+      if (isApiDesign(target)) {
+        const updated = collectionStore.updateDesign(id, { name: newName })
+        if (!updated) return errorReply(`updateDesign failed for ${id}`)
+        broadcastTreeReplace()
+        triggerSave()
+        return jsonReply({ id, kind: 'design', name: updated.name })
+      }
+      return errorReply(`Item ${id} is not a folder, env-folder, request, scenario or design`)
     }
   )
 
@@ -636,7 +644,17 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: isEnvironmentFolder(target) ? 'env-folder' : 'folder', deleted: true })
       }
-      return errorReply(`Item ${id} is not a folder, env-folder, scenario or request`)
+      if (isApiDesign(target)) {
+        // Stop a running design server first — the port must not
+        // outlive the design.
+        designServerService.stop(id)
+        const ok = collectionStore.deleteDesign(id)
+        if (!ok) return errorReply(`deleteDesign failed for ${id}`)
+        broadcastTreeReplace()
+        triggerSave()
+        return jsonReply({ id, kind: 'design', deleted: true })
+      }
+      return errorReply(`Item ${id} is not a folder, env-folder, scenario, design or request`)
     }
   )
 

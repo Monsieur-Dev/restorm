@@ -105,3 +105,20 @@ export function isDesignServerListening(designId: string): boolean {
   ensureSubscription()
   return serving.has(designId)
 }
+
+/**
+ * Fold a polled `status()` snapshot into the store. The progress
+ * subscription is LAZY (armed by the first React subscriber), so a
+ * `started` fired before any design surface mounted — an MCP
+ * `serve_design` on a closed tab — would otherwise be missed for the
+ * whole session. Mount-time reconciliation closes that window.
+ */
+export function applyServingSnapshot(designId: string, listening: boolean): void {
+  ensureSubscription()
+  if (listening && !serving.has(designId)) {
+    serving.add(designId)
+    notify()
+  } else if (!listening && serving.delete(designId)) {
+    notify()
+  }
+}

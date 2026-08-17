@@ -21,6 +21,9 @@ export interface DescriptorFormat {
   label: string
   /** Extension of the downloaded file (no dot). */
   fileExtension: string
+  /** Dialect infix of the default file name (`<design>.<fileSlug>.<ext>`)
+   * — declarative, so new formats never edit the naming helper. */
+  fileSlug: string
   /** Emit the design's descriptor as file content. */
   emit: (design: ApiDesign) => string
 }
@@ -31,6 +34,7 @@ export const DESCRIPTOR_FORMATS: DescriptorFormat[] = [
     labelKey: 'design.export.format.openapi31',
     label: 'OpenAPI 3.1',
     fileExtension: 'json',
+    fileSlug: 'openapi',
     emit: (design) => `${JSON.stringify(apiDocumentationToOpenApi31(designToApiDocumentation(design)), null, 2)}\n`
   }
 ]
@@ -38,5 +42,5 @@ export const DESCRIPTOR_FORMATS: DescriptorFormat[] = [
 /** Default file name of a design's exported descriptor. */
 export function descriptorFileName(design: ApiDesign, format: DescriptorFormat): string {
   const slug = design.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'api-design'
-  return `${slug}.${format.id === 'openapi31' ? 'openapi' : format.id}.${format.fileExtension}`
+  return `${slug}.${format.fileSlug}.${format.fileExtension}`
 }

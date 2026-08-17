@@ -5,6 +5,7 @@ import {
   openapi3ToApiDocumentation,
   type OAS3Spec
 } from '../../src/main/services/import/transformers/openapi3ToApiDocumentation'
+import { openapi31ToApiDocumentation } from '../../src/main/services/import/transformers/openapi31ToApiDocumentation'
 import { designToApiDocumentation } from '../../src/shared/design/apiDesignDoc'
 import { buildReferenceApiDesign } from './apiDesignReference'
 
@@ -131,6 +132,8 @@ function buildPetstoreSpec(): OAS3Spec {
             id: { type: 'integer', format: 'int64', readOnly: true },
             category: { $ref: '#/components/schemas/Category' },
             name: { type: 'string', example: 'doggie', minLength: 1, maxLength: 64 },
+            nickname: { type: 'string', nullable: true },
+            age: { type: 'integer', minimum: 0, exclusiveMinimum: true },
             photoUrls: {
               type: 'array',
               items: { type: 'string' },
@@ -272,5 +275,15 @@ describe('openApiExport', () => {
     expect(props30['a']?.['type']).toBe('string')
     expect(props30['b']?.['minimum']).toBe(1)
     expect(props30['b']?.['exclusiveMinimum']).toBe(true)
+  })
+
+  // The 3.1 twin of the 3.0 round-trip: emit in the 3.1 dialect, run it
+  // through the 3.1 importer (which normalizes type unions and numeric
+  // exclusive bounds back) — STRICT equality, the 468.17 foundation.
+  it('round-trips the petstore documentation through the 3.1 emit + 3.1 re-import', () => {
+    const original = openapi3ToApiDocumentation(buildPetstoreSpec())
+    const emitted = apiDocumentationToOpenApi31(original)
+    const reimported = openapi31ToApiDocumentation(structuredClone(emitted) as never)
+    expect(reimported).toEqual(original)
   })
 })

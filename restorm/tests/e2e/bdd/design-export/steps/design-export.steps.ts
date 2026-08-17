@@ -172,3 +172,27 @@ Then('the sidebar carries an imported environment folder named {string}', async 
   // /swagger.json is a genuinely importable spec.
   await expect(sidebar.getByText(name, { exact: true }).first()).toBeVisible({ timeout: 10000 })
 })
+
+Then('the imported folder exposes the design\'s operation surface', async () => {
+  const p = requirePage()
+  const sidebar = p.locator('[data-testid="sidebar-listview"]')
+  // Equivalence surface: the imported folder re-creates the design's
+  // group as a sub-folder and one request per route, named by summary.
+  // (Field-level strict equivalence is 468.17's round-trip job.)
+  const expandByExactText = async (text: string): Promise<void> => {
+    const row = sidebar.locator('[role="treeitem"]').filter({ has: p.getByText(text, { exact: true }) }).first()
+    await expect(row).toBeVisible({ timeout: 5000 })
+    if ((await row.getAttribute('aria-expanded')) === 'false') {
+      await row.locator('.list-view-item-title-toggle, [data-testid$="-toggle"]').first().click().catch(() => undefined)
+      await p.waitForTimeout(300)
+    }
+  }
+  await expandByExactText('Petstore')
+  await expandByExactText('Users')
+  // "List users" is skipped on purpose: the sample project pre-authors
+  // a request with that exact name, which would satisfy the assertion
+  // vacuously. The two remaining summaries only exist via the import.
+  for (const summary of ['Fetch one user', 'Create a user']) {
+    await expect(sidebar.getByText(summary, { exact: true }).first()).toBeVisible({ timeout: 5000 })
+  }
+})

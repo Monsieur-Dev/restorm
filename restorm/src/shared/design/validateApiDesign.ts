@@ -196,10 +196,15 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
         issues.push({ code: 'routeResponsesMissing', path })
       }
 
-      const surface = `${route.doc.match.method ?? 'GET'} ${composeRoutePath({
+      // Parameter names are NOT part of the HTTP surface: `/u/{{id}}`
+      // and `/u/{{userId}}` are the same templated path (OpenAPI
+      // forbids the pair, and the served route table would leave the
+      // second one unreachable) — normalize them to a fixed token.
+      const composed = composeRoutePath({
         ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
         ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
-      }, route.doc.match.urlPattern)}`
+      }, route.doc.match.urlPattern).replace(/\{\{[^{}]*\}\}/g, '{*}')
+      const surface = `${route.doc.match.method ?? 'GET'} ${composed}`
       if (routeSurfaces.has(surface)) {
         issues.push({ code: 'routePathDuplicate', path, subject: surface })
       } else {

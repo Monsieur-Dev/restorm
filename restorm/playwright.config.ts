@@ -94,6 +94,12 @@ const designServerTestDir = defineBddConfig({
   outputDir: '.features-gen/design-server'
 })
 
+const designMcpTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-mcp/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-mcp/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-mcp'
+})
+
 const designExportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/design-export/features/**/*.feature',
   steps: ['tests/e2e/bdd/design-export/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-export.fixture.ts'],
@@ -716,6 +722,10 @@ export default defineConfig({
     {
       name: 'design-export',
       testDir: designExportTestDir
+    },
+    {
+      name: 'design-mcp',
+      testDir: designMcpTestDir
     },
     {
       name: 'status-bar-context-menu',

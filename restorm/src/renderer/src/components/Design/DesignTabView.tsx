@@ -17,7 +17,7 @@ import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
 import { validateApiDesign, type DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { subscribeToPro } from '../../services/subscribeToPro'
-import { isDesignServerListening, useIsDesignServerListening } from '../../services/designServerStore'
+import { applyServingSnapshot, isDesignServerListening, useIsDesignServerListening } from '../../services/designServerStore'
 import { DESCRIPTOR_FORMATS, descriptorFileName } from '../../../../shared/design/descriptorFormats'
 import { DesignRunModal } from './DesignRunModal'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
@@ -312,6 +312,16 @@ const DesignSettingsSection: React.FC<{
 
   // ── Design server (the spin) ──────────────────────────────────────
   const serving = useIsDesignServerListening(design.id)
+  // Reconcile with the main-side truth on mount: an MCP serve_design
+  // fired before any design surface existed never reached the lazy
+  // progress subscription — poll once so the spin reflects reality.
+  useEffect(() => {
+    let cancelled = false
+    void window.restorm?.designServer.status(design.id).then((status) => {
+      if (!cancelled) applyServingSnapshot(design.id, status.listening)
+    })
+    return () => { cancelled = true }
+  }, [design.id])
   const [serverError, setServerError] = useState<string | null>(null)
   const runLocked = isDesignRunLocked(useAuthState())
   const port = design.serving?.port ?? 4820

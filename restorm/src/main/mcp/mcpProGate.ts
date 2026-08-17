@@ -129,6 +129,34 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'update_custom_value_list',
   'delete_custom_value_list',
   'list_custom_value_lists',
+  // design domain — EDITING a design is free on every plan (the same
+  // decision as the UI: the plan gates PLAYING it, not building it).
+  // Serving/steering/export sit in PRO below, aligned with
+  // DESIGN_RUN_CAPABILITY.
+  'list_designs',
+  'get_design',
+  'create_design',
+  'create_design_from_documentation',
+  'update_design',
+  'delete_design',
+  'create_design_model',
+  'update_design_model',
+  'delete_design_model',
+  'set_design_property',
+  'delete_design_property',
+  'create_design_enum',
+  'update_design_enum',
+  'delete_design_enum',
+  'set_design_example',
+  'delete_design_example',
+  'create_design_route_group',
+  'update_design_route_group',
+  'delete_design_route_group',
+  'create_design_route',
+  'update_design_route',
+  'delete_design_route',
+  'generate_design_crud',
+  'generate_design_search_routes',
   'set_favorite',
   // application settings — the generic read/write routes over every setting
   'get_settings',
@@ -211,7 +239,15 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   'get_current_theme',
   'list_themes',
   'get_workbench_layout',
-  'set_workbench_layout'
+  'set_workbench_layout',
+  // design RUN surface — playing a design (serving, hot steering,
+  // descriptor export) is the paid half of the design domain, mirroring
+  // DESIGN_RUN_CAPABILITY on the UI's spin button.
+  'serve_design',
+  'stop_design_server',
+  'get_design_server_status',
+  'set_design_route_response',
+  'export_design'
 ])
 
 /**

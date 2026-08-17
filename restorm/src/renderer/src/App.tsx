@@ -1527,6 +1527,17 @@ const App: React.FC = () => {
     return findScenarioById(rootItems, itemId) ? itemId : null
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
+  // Active design tab (if any) — the MCP `get_current_tab` snapshot
+  // reports `kind: 'design'` like it does for requests and scenarios.
+  const activeDesignId = useMemo<string | null>(() => {
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
+    if (!activeTabId) return null
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return null
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isApiDesign(item) ? itemId : null
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
   // menu-bar's KeyboardShortcutService didn't intercept (e.g. when the
   // menu isn't mounted). Same routing as the menu bar: Ctrl+S → smart
@@ -1998,8 +2009,8 @@ const App: React.FC = () => {
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
     tabId: mcpActiveTabId,
-    itemId: activeRequest?.id ?? activeScenarioId ?? null,
-    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : null,
+    itemId: activeRequest?.id ?? activeScenarioId ?? activeDesignId ?? null,
+    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : activeDesignId ? 'design' : null,
     envByFolder: {}
   })
   // `handleCloseTabById` is declared further down (it depends on

@@ -98,7 +98,11 @@ function xmlNode(xml: NonNullable<ModelDocumentation['xml']>): Json {
   return node
 }
 
-/** Mark a schema nullable in the target's dialect. */
+/** Mark a schema nullable in the target's dialect. Known asymmetries
+ * (same family as the bare-$ref rule in `propertySchema`): a typeless
+ * schema (`any`/`''` → `{}`) has no type to union with `null`, so its
+ * nullability is silently dropped in 3.1 — as it is on a pure $ref
+ * property in both dialects. */
 function markNullable(schema: Json, target: OasTarget): void {
   if (target === '3.0') {
     schema['nullable'] = true

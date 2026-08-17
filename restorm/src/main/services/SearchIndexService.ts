@@ -18,7 +18,7 @@ import {
   type DocumentChangedPayload,
   type DocumentDeletedPayload
 } from './DocumentEvents'
-import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
+import { pubsub, PUBSUB_TOPICS, collectionStore } from './CollectionStore'
 import { protocolSpec } from '../../shared/protocolRegistry'
 import { DESIGN_CODICON } from '../../shared/design/designSections'
 import { composeRoutePath } from '../../shared/design/apiDesignDoc'
@@ -545,12 +545,28 @@ class SearchIndexService {
 
     // Subscribe to design events: create/update re-walk the design's
     // documents (sweeping entities dropped since the last pass);
-    // delete removes the design + every sub-document.
+    // delete removes the design + every sub-document. Parent NAMES are
+    // resolved from the live store so the event path emits the same
+    // breadcrumbs as the load-time walk (they'd otherwise diverge on
+    // the first edit — the event only carries `parentFolderId`).
+    const designAncestry = (designId: string): { path: string[]; names: string[] } => {
+      const path: string[] = []
+      const names: string[] = []
+      let parent = collectionStore.findParentFolder(designId)
+      while (parent !== null) {
+        path.unshift(parent.id)
+        names.unshift(parent.name)
+        parent = collectionStore.findParentFolder(parent.id)
+      }
+      return { path, names }
+    }
+
     this.subscriptions.push(
       eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.DESIGN_CREATED, (payload) => {
         logger.debug('[SearchIndexService] DESIGN_CREATED', { id: payload.id })
         if (isApiDesignData(payload.document)) {
-          indexDesignDocuments(payload.document, payload.parentFolderId !== undefined ? [payload.parentFolderId] : [])
+          const ancestry = designAncestry(payload.id)
+          indexDesignDocuments(payload.document, ancestry.path, ancestry.names)
         }
       })
     )
@@ -559,7 +575,8 @@ class SearchIndexService {
       eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.DESIGN_UPDATED, (payload) => {
         logger.debug('[SearchIndexService] DESIGN_UPDATED', { id: payload.id })
         if (isApiDesignData(payload.document)) {
-          indexDesignDocuments(payload.document, payload.parentFolderId !== undefined ? [payload.parentFolderId] : [])
+          const ancestry = designAncestry(payload.id)
+          indexDesignDocuments(payload.document, ancestry.path, ancestry.names)
         }
       })
     )

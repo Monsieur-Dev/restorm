@@ -31,6 +31,12 @@ SCENARIOS (the dataflow engine)
 - Execution model: data-driven. A node fires when all its WIRED inputs have arrived (unwired inputs are not awaited). Nodes with no inputs start immediately, in parallel. Branch with 'if'/'switch'; iterate with 'forEach'/'for'; loop with 'while'/'doWhile' (the 'if' mechanism + a user-wired edge back into the node). 'log' writes to the run log.
 - Run + observe: run_scenario returns a runId. get_scenario_run_status(runId) returns status + the full run log (incl. sub-scenario runs) DURING and after the run. list_scenario_runs finds runs you didn't start (e.g. a Play-button run from the UI). stop_scenario_run cancels.
 
+API DESIGNS (design an API, then serve it)
+- A *design* is an editable API blueprint: models (typed properties, named examples, inheritance), enums, route groups + routes (parameter->property links, per-code responses, input body). Build one from scratch (create_design, create_design_model, set_design_property, create_design_enum, create_design_route_group, create_design_route) or derive it from an imported API's env folder (create_design_from_documentation). Entities resolve by id OR unique name.
+- Generators do the boring parts: generate_design_crud(model) mints a plural group + 5 linked routes; generate_design_search_routes(model) adds query params for every searchable property. set_design_example seeds the data the server responds with.
+- get_design returns the full structure PLUS validation issues (stable codes + entity paths) — fix them before serving; serve_design refuses an invalid design and echoes the issues.
+- serve_design spins a local HTTP server of the whole design: named examples served, inputs constraint-validated (400), group auth enforced by PRESENCE (401), /swagger.json self-description. get_design_server_status reports per-route/per-code call counters; set_design_route_response force-steers a route's answer (or resets it) while serving; stop_design_server frees the port. export_design returns the OpenAPI 3.1 descriptor.
+
 INSTANCES (multiple windows)
 - Several restorm instances can run at once, each addressed by session name via the reserved \`__session\` key on any tool call. list-instances shows every instance that ACCEPTS MCP, with its open fileName + name — call it before targeting one.
 - There is NO auto-spawn: if no instance is reachable you get a clear error. Use create_instance to launch one explicitly (optionally for a file / with a name). Creation is refused if another instance already has that name OR that file open (one instance per file).

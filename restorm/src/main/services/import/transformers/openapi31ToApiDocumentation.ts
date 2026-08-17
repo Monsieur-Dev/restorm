@@ -60,6 +60,20 @@ export function normalizeSchema31To30(schema: CommonSchema): CommonSchema {
     // Else: leave the array alone — `_shared`'s schemaTypeLabel handles arrays.
   }
 
+  // Numeric exclusive bounds (JSON Schema 2020-12) → the Swagger-2
+  // boolean-plus-bound spelling the doc layer stores. Makes the 3.1
+  // emit→re-import loop STRICT: the emitter converts
+  // `{minimum: n, exclusiveMinimum: true}` to `{exclusiveMinimum: n}`,
+  // and this walks it back.
+  if (typeof out.exclusiveMinimum === 'number' && out.minimum === undefined) {
+    out.minimum = out.exclusiveMinimum
+    out.exclusiveMinimum = true
+  }
+  if (typeof out.exclusiveMaximum === 'number' && out.maximum === undefined) {
+    out.maximum = out.exclusiveMaximum
+    out.exclusiveMaximum = true
+  }
+
   // examples plural → example singular (when no example was already set).
   if (out.examples !== undefined && out.example === undefined) {
     if (Array.isArray(out.examples) && out.examples.length > 0) {
