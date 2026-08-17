@@ -8,6 +8,7 @@ import type { Icon } from 'electron-core-ui/types'
 import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request, ApiDesign } from '../../../shared/types/collections'
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
 import { DESIGN_SECTIONS, DESIGN_CODICON, designSectionRowId } from '../../../shared/design/designSections'
+import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 
 import { requestBadgeMode } from '../utils/badgeUtils'
 import React, { type ReactNode } from 'react'
@@ -373,14 +374,37 @@ function designToListViewItem(
 ): ListViewItemData {
   const badge = options.renderProtocolBadge?.('design', 'DESIGN')
   const isExpanded = options.expandedIds.has(design.id)
+
+  // Validation drives the end-of-row error dots: each issue's path[1]
+  // is the faulty entity's id, which maps back to the section holding
+  // it. The design node itself gets a dot when ANY section has one.
+  const issues = validateApiDesign(design)
+  const modelIds = new Set(design.models.map((m) => m.id))
+  const enumIds = new Set(design.enums.map((e) => e.id))
+  const sectionsInError = new Set<string>()
+  for (const issue of issues) {
+    const entityId = issue.path[1]
+    if (entityId === undefined) continue
+    if (modelIds.has(entityId)) sectionsInError.add('models')
+    else if (enumIds.has(entityId)) sectionsInError.add('enums')
+    else sectionsInError.add('routes')
+  }
+  const errorDot = (testId: string): ReactNode => React.createElement('span', {
+    className: 'design-error-dot codicon codicon-error',
+    'data-testid': testId
+  })
+
   const children: ListViewItemData[] = DESIGN_SECTIONS.map((section) => {
     const count = section.count(design)
+    const parts: ReactNode[] = []
+    if (sectionsInError.has(section.key)) parts.push(errorDot(`design-section-error-${section.key}`))
+    if (count !== null && count > 0) parts.push(String(count))
     return {
       id: designSectionRowId(design.id, section.key),
       title: i18n.t(section.labelKey),
       icon: section.codicon,
-      ...(count !== null && count > 0
-        ? { rightActions: React.createElement('span', { className: 'design-section-count' }, String(count)) }
+      ...(parts.length > 0
+        ? { rightActions: React.createElement('span', { className: 'design-section-count' }, ...parts) }
         : {})
     }
   })
@@ -390,7 +414,8 @@ function designToListViewItem(
     isExpandable: true,
     isExpanded,
     icon: badge ?? DESIGN_CODICON,
-    children
+    children,
+    ...(issues.length > 0 ? { rightActions: errorDot(`design-error-${design.id}`) } : {})
   }
 }
 

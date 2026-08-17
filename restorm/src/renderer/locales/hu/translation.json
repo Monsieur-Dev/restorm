@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} tulajdonság",
-      "propertyCount_other": "{{count}} tulajdonság"
+      "propertyCount_other": "{{count}} tulajdonság",
+      "add": "Modell hozzáadása",
+      "delete": "Modell törlése",
+      "deleteTitle": "Törli: {{name}}?",
+      "deleteNoImpact": "Ezt a modellt sehol sem használják.",
+      "deleteImpactIntro": "A modell törlése frissíti:",
+      "deleteImpactChild": "{{name}} elveszíti az öröklését (saját tulajdonságai megmaradnak)",
+      "newName": "NewModel",
+      "selectPrompt": "Válasszon egy modellt, vagy hozzon létre egyet.",
+      "tabs": {
+        "schema": "Séma",
+        "examples": "Példák",
+        "settings": "Beállítások",
+        "notes": "Jegyzetek"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} érték",
-      "valueCount_other": "{{count}} érték"
+      "valueCount_other": "{{count}} érték",
+      "lists": "Enumok",
+      "values": "Értékek",
+      "addEnum": "Enum hozzáadása",
+      "addValue": "Érték hozzáadása",
+      "valueHeader": "Érték",
+      "newName": "NewEnum",
+      "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható."
     },
     "documentation": {
       "empty": "A terv dokumentációja itt lesz kiszolgálva."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "terv · formátum {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Azonosság",
+      "identifierProperty": "Azonosító tulajdonság",
+      "identifierStrategy": "Stratégia",
+      "inheritsFrom": "Ettől örököl",
+      "noIdentifier": "(nincs)",
+      "noParent": "(nincs)",
+      "storage": "Tárolás és életciklus",
+      "volumetry": "Várt volumen",
+      "volumetryUnset": "(nem megadott)",
+      "timestamps": "Időbélyegek (létrehozva/módosítva)",
+      "softDelete": "Puha törlés",
+      "usedBy": "Használja",
+      "usedByNone": "Ezt a modellt még nem használják.",
+      "usage": {
+        "body": "törzs",
+        "response": "válasz {{code}}",
+        "param": "paraméter {{name}}",
+        "inherits": "{{name}} örököl tőle"
+      }
+    },
+    "schema": {
+      "addProperty": "Tulajdonság hozzáadása",
+      "deleteProperty": "Tulajdonság törlése",
+      "columns": {
+        "property": "Tulajdonság",
+        "type": "Típus",
+        "flags": "Attribútumok",
+        "example": "Példa"
+      },
+      "unnamed": "(névtelen)",
+      "nameMissing": "hiányzó név",
+      "panelTitle": "Tulajdonság: {{name}}",
+      "jumpToParent": "{{name}} megnyitása",
+      "typeModel": "modell",
+      "typeEnum": "enum",
+      "noFormat": "(nincs)",
+      "invalidPattern": "Érvénytelen reguláris kifejezés",
+      "minAboveMax": "A min meghaladja a maxot",
+      "fields": {
+        "name": "Név",
+        "type": "Típus",
+        "format": "Formátum",
+        "elementType": "Elemtípus",
+        "onDelete": "Törléskor",
+        "description": "Leírás",
+        "example": "Példa",
+        "default": "Alapértelmezett",
+        "deprecationMessage": "Elavulási üzenet",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Min. hossz",
+        "maxLength": "Max. hossz",
+        "pattern": "Minta"
+      }
+    },
+    "flags": {
+      "required": "kötelező",
+      "nullable": "nullable",
+      "unique": "egyedi",
+      "immutable": "megváltoztathatatlan",
+      "searchable": "kereshető",
+      "deprecated": "elavult"
+    },
+    "examples": {
+      "defaultPill": "Alapértelmezett",
+      "add": "Példa hozzáadása",
+      "delete": "Példa törlése",
+      "name": "Példa neve",
+      "newName": "Példa",
+      "defaultHint": "Az alapértelmezett értékek az egyes tulajdonságokból származnak (üres = automatikusan generált).",
+      "namedHint": "Írjon be egy értéket a definiálásához; hagyja üresen a generált megtartásához.",
+      "columns": {
+        "value": "Érték",
+        "origin": "Eredet"
+      },
+      "auto": "auto",
+      "defined": "definiált",
+      "constraintViolated": "Az érték megsérti a tulajdonság megkötését ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Korlátozás (tiltás, amíg használatban van)",
+      "cascade": "Kaszkád törlés",
+      "setNull": "Null értékre állítás"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Automatikus növelés",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Több száz",
+      "tenThousands": "Több tízezer",
+      "millions": "Több millió"
+    },
+    "issue": {
+      "propertyNameEmpty": "A tulajdonságnak nincs neve",
+      "propertyNameDuplicate": "Ismétlődő tulajdonságnév",
+      "propertyShadowsParent": "Elfed egy örökölt tulajdonságot",
+      "referenceTargetUnknown": "A hivatkozott típus már nem létezik",
+      "constraintPatternInvalid": "Érvénytelen minta (reguláris kifejezés)",
+      "constraintMinAboveMax": "A min meghaladja a maxot"
     }
   },
   "mqtt": {

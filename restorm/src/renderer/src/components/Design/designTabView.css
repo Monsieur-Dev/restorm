@@ -246,3 +246,337 @@
   display: flex;
   flex-direction: column;
 }
+
+/* ── Models section (468.3) ───────────────────────────────────────── */
+
+.design-model-card {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px 20px;
+}
+
+.design-model-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-model-card-header h2 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.design-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.design-icon-button:hover {
+  background-color: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.design-schema-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.design-prop-cell {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 24px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.design-prop-cell.inherited {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.design-prop-cell.selected {
+  background-color: var(--list-activeSelectionBackground, rgba(90, 120, 200, 0.25));
+}
+
+.design-prop-cell.has-issue {
+  color: var(--errorForeground, #f14c4c);
+}
+
+.design-prop-missing-name {
+  color: var(--errorForeground, #f14c4c);
+  font-style: italic;
+}
+
+.design-prop-inherited-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.design-prop-jump {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  color: var(--textLink-foreground, #4daafc);
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.design-prop-type {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.9em;
+}
+
+.design-prop-format {
+  opacity: 0.6;
+}
+
+.design-prop-flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.design-flag-badge {
+  font-size: 0.75em;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background-color: var(--badge-background, rgba(128, 128, 128, 0.25));
+  color: var(--badge-foreground, inherit);
+}
+
+.design-prop-example {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-property-panel {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.design-property-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.design-property-panel-title {
+  margin: 0;
+  font-size: 1em;
+}
+
+.design-property-issues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-property-issue {
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.85em;
+}
+
+.design-property-flags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
+.design-flag-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* ── Examples tab ─────────────────────────────────────────────────── */
+
+.design-examples-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.design-example-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-pill {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 12px;
+  padding: 3px 12px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.design-pill.active {
+  background-color: var(--button-background, #0e639c);
+  color: var(--button-foreground, #ffffff);
+  border-color: transparent;
+}
+
+.design-example-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.design-examples-hint {
+  margin: 0;
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.design-example-prop.inherited {
+  opacity: 0.7;
+}
+
+.design-example-prop-owner {
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
+.design-example-origin {
+  font-size: 0.8em;
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+.design-example-origin.auto {
+  background-color: var(--badge-background, rgba(128, 128, 128, 0.25));
+  opacity: 0.7;
+}
+
+.design-example-origin.defined {
+  background-color: var(--button-background, #0e639c);
+  color: var(--button-foreground, #ffffff);
+}
+
+/* ── Model settings tab ───────────────────────────────────────────── */
+
+.design-model-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.design-usage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-usage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 12px;
+  padding: 3px 10px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.design-usage-chip:hover {
+  background-color: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+/* ── Notes tab of a model ─────────────────────────────────────────── */
+
+.design-model-notes {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.design-model-notes .ecu-gated,
+.design-model-notes .ecu-gated-child {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Error dots (sidebar + lists) ─────────────────────────────────── */
+
+.design-error-dot,
+.design-list-error-dot {
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.9em;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ── Delete-impact modal ──────────────────────────────────────────── */
+
+.design-delete-modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.design-delete-modal-body p {
+  margin: 0;
+}
+
+.design-delete-impact-list {
+  margin: 0;
+  padding-left: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.design-delete-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Enums section ────────────────────────────────────────────────── */
+
+.design-enums-section {
+  display: flex;
+  padding: 0;
+  min-height: 0;
+}
+
+.design-enums-section > * {
+  flex: 1;
+  min-height: 0;
+}

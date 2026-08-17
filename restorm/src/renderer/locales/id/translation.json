@@ -2191,11 +2191,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} properti",
-      "propertyCount_other": "{{count}} properti"
+      "propertyCount_other": "{{count}} properti",
+      "add": "Tambah model",
+      "delete": "Hapus model",
+      "deleteTitle": "Hapus {{name}}?",
+      "deleteNoImpact": "Model ini tidak digunakan di mana pun.",
+      "deleteImpactIntro": "Menghapus model ini akan memperbarui:",
+      "deleteImpactChild": "{{name}} kehilangan pewarisannya (properti miliknya tetap ada)",
+      "newName": "NewModel",
+      "selectPrompt": "Pilih model, atau buat satu.",
+      "tabs": {
+        "schema": "Skema",
+        "examples": "Contoh",
+        "settings": "Pengaturan",
+        "notes": "Catatan"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} nilai",
-      "valueCount_other": "{{count}} nilai"
+      "valueCount_other": "{{count}} nilai",
+      "lists": "Enum",
+      "values": "Nilai",
+      "addEnum": "Tambah enum",
+      "addValue": "Tambah nilai",
+      "valueHeader": "Nilai",
+      "newName": "NewEnum",
+      "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti."
     },
     "documentation": {
       "empty": "Dokumentasi desain akan disajikan di sini."
@@ -2205,6 +2226,109 @@
     },
     "statusbar": {
       "format": "desain · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitas",
+      "identifierProperty": "Properti pengenal",
+      "identifierStrategy": "Strategi",
+      "inheritsFrom": "Mewarisi dari",
+      "noIdentifier": "(tidak ada)",
+      "noParent": "(tidak ada)",
+      "storage": "Penyimpanan & siklus hidup",
+      "volumetry": "Volume yang diharapkan",
+      "volumetryUnset": "(tidak ditentukan)",
+      "timestamps": "Stempel waktu (dibuat/diubah)",
+      "softDelete": "Hapus lunak",
+      "usedBy": "Digunakan oleh",
+      "usedByNone": "Model ini belum digunakan.",
+      "usage": {
+        "body": "body",
+        "response": "respons {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} mewarisinya"
+      }
+    },
+    "schema": {
+      "addProperty": "Tambah properti",
+      "deleteProperty": "Hapus properti",
+      "columns": {
+        "property": "Properti",
+        "type": "Tipe",
+        "flags": "Atribut",
+        "example": "Contoh"
+      },
+      "unnamed": "(tanpa nama)",
+      "nameMissing": "nama tidak ada",
+      "panelTitle": "Properti: {{name}}",
+      "jumpToParent": "Buka {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(tidak ada)",
+      "invalidPattern": "Ekspresi reguler tidak valid",
+      "minAboveMax": "Min melebihi maks",
+      "fields": {
+        "name": "Nama",
+        "type": "Tipe",
+        "format": "Format",
+        "elementType": "Tipe elemen",
+        "onDelete": "Saat dihapus",
+        "description": "Deskripsi",
+        "example": "Contoh",
+        "default": "Bawaan",
+        "deprecationMessage": "Pesan penghentian",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Panjang min.",
+        "maxLength": "Panjang maks.",
+        "pattern": "Pola"
+      }
+    },
+    "flags": {
+      "required": "wajib",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "tak berubah",
+      "searchable": "dapat dicari",
+      "deprecated": "usang"
+    },
+    "examples": {
+      "defaultPill": "Bawaan",
+      "add": "Tambah contoh",
+      "delete": "Hapus contoh",
+      "name": "Nama contoh",
+      "newName": "Contoh",
+      "defaultHint": "Nilai bawaan berasal dari tiap properti (kosong = dibuat otomatis).",
+      "namedHint": "Ketik nilai untuk mendefinisikannya; biarkan kosong untuk mempertahankan yang dibuat otomatis.",
+      "columns": {
+        "value": "Nilai",
+        "origin": "Asal"
+      },
+      "auto": "otomatis",
+      "defined": "didefinisikan",
+      "constraintViolated": "Nilai melanggar batasan properti ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Batasi (larang selagi digunakan)",
+      "cascade": "Hapus berantai",
+      "setNull": "Setel ke null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Kenaikan otomatis",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Ratusan",
+      "tenThousands": "Puluhan ribu",
+      "millions": "Jutaan"
+    },
+    "issue": {
+      "propertyNameEmpty": "Properti tidak memiliki nama",
+      "propertyNameDuplicate": "Nama properti duplikat",
+      "propertyShadowsParent": "Menutupi properti warisan",
+      "referenceTargetUnknown": "Tipe yang dirujuk sudah tidak ada",
+      "constraintPatternInvalid": "Pola tidak valid (ekspresi reguler)",
+      "constraintMinAboveMax": "Min melebihi maks"
     }
   },
   "mqtt": {

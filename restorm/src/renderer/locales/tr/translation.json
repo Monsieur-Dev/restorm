@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} özellik",
-      "propertyCount_other": "{{count}} özellik"
+      "propertyCount_other": "{{count}} özellik",
+      "add": "Model ekle",
+      "delete": "Modeli sil",
+      "deleteTitle": "{{name}} silinsin mi?",
+      "deleteNoImpact": "Bu model hiçbir yerde kullanılmıyor.",
+      "deleteImpactIntro": "Bu modelin silinmesi şunları güncelleyecek:",
+      "deleteImpactChild": "{{name}} kalıtımını kaybeder (kendi özellikleri kalır)",
+      "newName": "NewModel",
+      "selectPrompt": "Bir model seçin veya oluşturun.",
+      "tabs": {
+        "schema": "Şema",
+        "examples": "Örnekler",
+        "settings": "Ayarlar",
+        "notes": "Notlar"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} değer",
-      "valueCount_other": "{{count}} değer"
+      "valueCount_other": "{{count}} değer",
+      "lists": "Enumlar",
+      "values": "Değerler",
+      "addEnum": "Enum ekle",
+      "addValue": "Değer ekle",
+      "valueHeader": "Değer",
+      "newName": "NewEnum",
+      "selectPrompt": "Bir enum seçin veya oluşturun — özellik tipi olarak kullanılabilen kapalı bir değer kümesi."
     },
     "documentation": {
       "empty": "Tasarım dokümantasyonu burada sunulacak."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "tasarım · biçim {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Kimlik",
+      "identifierProperty": "Tanımlayıcı özellik",
+      "identifierStrategy": "Strateji",
+      "inheritsFrom": "Şundan kalıt alır",
+      "noIdentifier": "(yok)",
+      "noParent": "(yok)",
+      "storage": "Depolama ve yaşam döngüsü",
+      "volumetry": "Beklenen hacim",
+      "volumetryUnset": "(belirtilmemiş)",
+      "timestamps": "Zaman damgaları (oluşturuldu/değiştirildi)",
+      "softDelete": "Yumuşak silme",
+      "usedBy": "Kullanan",
+      "usedByNone": "Bu model henüz kullanılmıyor.",
+      "usage": {
+        "body": "gövde",
+        "response": "yanıt {{code}}",
+        "param": "parametre {{name}}",
+        "inherits": "{{name}} ondan kalıt alır"
+      }
+    },
+    "schema": {
+      "addProperty": "Özellik ekle",
+      "deleteProperty": "Özelliği sil",
+      "columns": {
+        "property": "Özellik",
+        "type": "Tip",
+        "flags": "Nitelikler",
+        "example": "Örnek"
+      },
+      "unnamed": "(adsız)",
+      "nameMissing": "ad eksik",
+      "panelTitle": "Özellik: {{name}}",
+      "jumpToParent": "{{name}} aç",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(yok)",
+      "invalidPattern": "Geçersiz düzenli ifade",
+      "minAboveMax": "Min, maksimumu aşıyor",
+      "fields": {
+        "name": "Ad",
+        "type": "Tip",
+        "format": "Biçim",
+        "elementType": "Öğe tipi",
+        "onDelete": "Silme davranışı",
+        "description": "Açıklama",
+        "example": "Örnek",
+        "default": "Varsayılan",
+        "deprecationMessage": "Kullanımdan kaldırma mesajı",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Min. uzunluk",
+        "maxLength": "Maks. uzunluk",
+        "pattern": "Desen"
+      }
+    },
+    "flags": {
+      "required": "zorunlu",
+      "nullable": "nullable",
+      "unique": "benzersiz",
+      "immutable": "değişmez",
+      "searchable": "aranabilir",
+      "deprecated": "kullanımdan kalktı"
+    },
+    "examples": {
+      "defaultPill": "Varsayılan",
+      "add": "Örnek ekle",
+      "delete": "Örneği sil",
+      "name": "Örnek adı",
+      "newName": "Örnek",
+      "defaultHint": "Varsayılan değerler her özellikten gelir (boş = otomatik üretilir).",
+      "namedHint": "Tanımlamak için bir değer yazın; üretileni korumak için boş bırakın.",
+      "columns": {
+        "value": "Değer",
+        "origin": "Köken"
+      },
+      "auto": "otomatik",
+      "defined": "tanımlı",
+      "constraintViolated": "Değer, özelliğin kısıtını ihlal ediyor ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Kısıtla (kullanımdayken yasakla)",
+      "cascade": "Basamaklı silme",
+      "setNull": "Null yap"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Otomatik artış",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Yüzlerce",
+      "tenThousands": "On binlerce",
+      "millions": "Milyonlarca"
+    },
+    "issue": {
+      "propertyNameEmpty": "Özelliğin adı yok",
+      "propertyNameDuplicate": "Yinelenen özellik adı",
+      "propertyShadowsParent": "Kalıtılan bir özelliği gölgeliyor",
+      "referenceTargetUnknown": "Başvurulan tip artık yok",
+      "constraintPatternInvalid": "Geçersiz desen (düzenli ifade)",
+      "constraintMinAboveMax": "Min, maksimumu aşıyor"
     }
   },
   "mqtt": {

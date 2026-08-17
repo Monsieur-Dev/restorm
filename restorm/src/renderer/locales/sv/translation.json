@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} egenskap",
-      "propertyCount_other": "{{count}} egenskaper"
+      "propertyCount_other": "{{count}} egenskaper",
+      "add": "Lägg till en modell",
+      "delete": "Ta bort modellen",
+      "deleteTitle": "Ta bort {{name}}?",
+      "deleteNoImpact": "Den här modellen används ingenstans.",
+      "deleteImpactIntro": "Att ta bort den här modellen uppdaterar:",
+      "deleteImpactChild": "{{name}} förlorar sitt arv (egna egenskaper behålls)",
+      "newName": "NewModel",
+      "selectPrompt": "Välj en modell eller skapa en.",
+      "tabs": {
+        "schema": "Schema",
+        "examples": "Exempel",
+        "settings": "Inställningar",
+        "notes": "Anteckningar"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} värde",
-      "valueCount_other": "{{count}} värden"
+      "valueCount_other": "{{count}} värden",
+      "lists": "Enums",
+      "values": "Värden",
+      "addEnum": "Lägg till en enum",
+      "addValue": "Lägg till ett värde",
+      "valueHeader": "Värde",
+      "newName": "NewEnum",
+      "selectPrompt": "Välj en enum eller skapa en — en sluten uppsättning värden som kan användas som egenskapstyp."
     },
     "documentation": {
       "empty": "Designdokumentationen serveras här."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitet",
+      "identifierProperty": "Identifierande egenskap",
+      "identifierStrategy": "Strategi",
+      "inheritsFrom": "Ärver från",
+      "noIdentifier": "(ingen)",
+      "noParent": "(ingen)",
+      "storage": "Lagring & livscykel",
+      "volumetry": "Förväntad volym",
+      "volumetryUnset": "(ospecificerad)",
+      "timestamps": "Tidsstämplar (skapad/ändrad)",
+      "softDelete": "Mjuk borttagning",
+      "usedBy": "Används av",
+      "usedByNone": "Den här modellen används inte ännu.",
+      "usage": {
+        "body": "body",
+        "response": "svar {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} ärver från den"
+      }
+    },
+    "schema": {
+      "addProperty": "Lägg till en egenskap",
+      "deleteProperty": "Ta bort egenskapen",
+      "columns": {
+        "property": "Egenskap",
+        "type": "Typ",
+        "flags": "Attribut",
+        "example": "Exempel"
+      },
+      "unnamed": "(namnlös)",
+      "nameMissing": "namn saknas",
+      "panelTitle": "Egenskap: {{name}}",
+      "jumpToParent": "Öppna {{name}}",
+      "typeModel": "modell",
+      "typeEnum": "enum",
+      "noFormat": "(inget)",
+      "invalidPattern": "Ogiltigt reguljärt uttryck",
+      "minAboveMax": "Min överstiger max",
+      "fields": {
+        "name": "Namn",
+        "type": "Typ",
+        "format": "Format",
+        "elementType": "Elementtyp",
+        "onDelete": "Vid borttagning",
+        "description": "Beskrivning",
+        "example": "Exempel",
+        "default": "Standard",
+        "deprecationMessage": "Utfasningsmeddelande",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Min. längd",
+        "maxLength": "Max. längd",
+        "pattern": "Mönster"
+      }
+    },
+    "flags": {
+      "required": "obligatorisk",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "oföränderlig",
+      "searchable": "sökbar",
+      "deprecated": "utfasad"
+    },
+    "examples": {
+      "defaultPill": "Standard",
+      "add": "Lägg till ett exempel",
+      "delete": "Ta bort exemplet",
+      "name": "Exemplets namn",
+      "newName": "Exempel",
+      "defaultHint": "Standardvärden kommer från varje egenskap (tomt = genereras automatiskt).",
+      "namedHint": "Skriv ett värde för att definiera det; lämna tomt för att behålla det genererade.",
+      "columns": {
+        "value": "Värde",
+        "origin": "Ursprung"
+      },
+      "auto": "auto",
+      "defined": "definierat",
+      "constraintViolated": "Värdet bryter mot egenskapens begränsning ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Begränsa (förbjud medan den används)",
+      "cascade": "Kaskadborttagning",
+      "setNull": "Sätt till null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hundratals",
+      "tenThousands": "Tiotusentals",
+      "millions": "Miljoner"
+    },
+    "issue": {
+      "propertyNameEmpty": "Egenskapen saknar namn",
+      "propertyNameDuplicate": "Duplicerat egenskapsnamn",
+      "propertyShadowsParent": "Skuggar en ärvd egenskap",
+      "referenceTargetUnknown": "Den refererade typen finns inte längre",
+      "constraintPatternInvalid": "Ogiltigt mönster (reguljärt uttryck)",
+      "constraintMinAboveMax": "Min överstiger max"
     }
   },
   "mqtt": {

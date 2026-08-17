@@ -2191,11 +2191,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}}개 속성",
-      "propertyCount_other": "{{count}}개 속성"
+      "propertyCount_other": "{{count}}개 속성",
+      "add": "모델 추가",
+      "delete": "모델 삭제",
+      "deleteTitle": "{{name}}을(를) 삭제할까요?",
+      "deleteNoImpact": "이 모델은 어디에서도 사용되지 않습니다.",
+      "deleteImpactIntro": "이 모델을 삭제하면 다음이 업데이트됩니다:",
+      "deleteImpactChild": "{{name}}이(가) 상속을 잃습니다(자체 속성은 유지됨)",
+      "newName": "NewModel",
+      "selectPrompt": "모델을 선택하거나 새로 만드세요.",
+      "tabs": {
+        "schema": "스키마",
+        "examples": "예시",
+        "settings": "설정",
+        "notes": "노트"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}}개 값",
-      "valueCount_other": "{{count}}개 값"
+      "valueCount_other": "{{count}}개 값",
+      "lists": "Enum",
+      "values": "값",
+      "addEnum": "enum 추가",
+      "addValue": "값 추가",
+      "valueHeader": "값",
+      "newName": "NewEnum",
+      "selectPrompt": "enum을 선택하거나 새로 만드세요 — 속성 타입으로 사용할 수 있는 닫힌 값 집합입니다."
     },
     "documentation": {
       "empty": "디자인 문서는 여기에서 제공됩니다."
@@ -2205,6 +2226,109 @@
     },
     "statusbar": {
       "format": "디자인 · 포맷 {{version}}"
+    },
+    "modelSettings": {
+      "identity": "아이덴티티",
+      "identifierProperty": "식별자 속성",
+      "identifierStrategy": "전략",
+      "inheritsFrom": "상속 원본",
+      "noIdentifier": "(없음)",
+      "noParent": "(없음)",
+      "storage": "저장소 및 수명 주기",
+      "volumetry": "예상 볼륨",
+      "volumetryUnset": "(미지정)",
+      "timestamps": "타임스탬프(생성/수정)",
+      "softDelete": "소프트 삭제",
+      "usedBy": "사용처",
+      "usedByNone": "이 모델은 아직 사용되지 않습니다.",
+      "usage": {
+        "body": "본문",
+        "response": "응답 {{code}}",
+        "param": "매개변수 {{name}}",
+        "inherits": "{{name}}이(가) 이를 상속합니다"
+      }
+    },
+    "schema": {
+      "addProperty": "속성 추가",
+      "deleteProperty": "속성 삭제",
+      "columns": {
+        "property": "속성",
+        "type": "타입",
+        "flags": "플래그",
+        "example": "예시"
+      },
+      "unnamed": "(이름 없음)",
+      "nameMissing": "이름 없음",
+      "panelTitle": "속성: {{name}}",
+      "jumpToParent": "{{name}} 열기",
+      "typeModel": "모델",
+      "typeEnum": "enum",
+      "noFormat": "(없음)",
+      "invalidPattern": "잘못된 정규 표현식",
+      "minAboveMax": "최솟값이 최댓값을 초과합니다",
+      "fields": {
+        "name": "이름",
+        "type": "타입",
+        "format": "형식",
+        "elementType": "요소 타입",
+        "onDelete": "삭제 시 동작",
+        "description": "설명",
+        "example": "예시",
+        "default": "기본값",
+        "deprecationMessage": "사용 중단 메시지",
+        "minimum": "최솟값",
+        "maximum": "최댓값",
+        "minLength": "최소 길이",
+        "maxLength": "최대 길이",
+        "pattern": "패턴"
+      }
+    },
+    "flags": {
+      "required": "필수",
+      "nullable": "nullable",
+      "unique": "고유",
+      "immutable": "불변",
+      "searchable": "검색 가능",
+      "deprecated": "사용 중단"
+    },
+    "examples": {
+      "defaultPill": "기본값",
+      "add": "예시 추가",
+      "delete": "예시 삭제",
+      "name": "예시 이름",
+      "newName": "예시",
+      "defaultHint": "기본값은 각 속성에서 옵니다(비어 있음 = 자동 생성).",
+      "namedHint": "값을 입력하면 정의됩니다. 비워 두면 생성된 값이 유지됩니다.",
+      "columns": {
+        "value": "값",
+        "origin": "출처"
+      },
+      "auto": "자동",
+      "defined": "정의됨",
+      "constraintViolated": "값이 속성의 제약 조건을 위반합니다({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "제한(사용 중에는 금지)",
+      "cascade": "연쇄 삭제",
+      "setNull": "null로 설정"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "자동 증가",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "수백",
+      "tenThousands": "수만",
+      "millions": "수백만"
+    },
+    "issue": {
+      "propertyNameEmpty": "속성에 이름이 없습니다",
+      "propertyNameDuplicate": "속성 이름이 중복되었습니다",
+      "propertyShadowsParent": "상속된 속성을 가립니다",
+      "referenceTargetUnknown": "참조된 타입이 더 이상 존재하지 않습니다",
+      "constraintPatternInvalid": "잘못된 패턴(정규 표현식)",
+      "constraintMinAboveMax": "최솟값이 최댓값을 초과합니다"
     }
   },
   "mqtt": {

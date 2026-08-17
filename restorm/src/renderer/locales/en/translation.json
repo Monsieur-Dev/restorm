@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} prop",
-      "propertyCount_other": "{{count}} props"
+      "propertyCount_other": "{{count}} props",
+      "add": "Add a model",
+      "delete": "Delete the model",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteNoImpact": "This model is not used anywhere.",
+      "deleteImpactIntro": "Deleting this model will update:",
+      "deleteImpactChild": "{{name}} loses its inheritance (its own properties stay)",
+      "newName": "NewModel",
+      "selectPrompt": "Select a model, or create one.",
+      "tabs": {
+        "schema": "Schema",
+        "examples": "Examples",
+        "settings": "Settings",
+        "notes": "Notes"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} value",
-      "valueCount_other": "{{count}} values"
+      "valueCount_other": "{{count}} values",
+      "lists": "Enums",
+      "values": "Values",
+      "addEnum": "Add an enum",
+      "addValue": "Add a value",
+      "valueHeader": "Value",
+      "newName": "NewEnum",
+      "selectPrompt": "Select an enum, or create one — a closed set of values usable as a property type."
     },
     "documentation": {
       "empty": "The design documentation will be served here."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identity",
+      "identifierProperty": "Identifier property",
+      "identifierStrategy": "Strategy",
+      "inheritsFrom": "Inherits from",
+      "noIdentifier": "(none)",
+      "noParent": "(none)",
+      "storage": "Storage & lifecycle",
+      "volumetry": "Expected volume",
+      "volumetryUnset": "(unspecified)",
+      "timestamps": "Timestamps (created/updated)",
+      "softDelete": "Soft delete",
+      "usedBy": "Used by",
+      "usedByNone": "This model is not used yet.",
+      "usage": {
+        "body": "body",
+        "response": "response {{code}}",
+        "param": "param {{name}}",
+        "inherits": "{{name}} inherits from it"
+      }
+    },
+    "schema": {
+      "addProperty": "Add a property",
+      "deleteProperty": "Delete the property",
+      "columns": {
+        "property": "Property",
+        "type": "Type",
+        "flags": "Flags",
+        "example": "Example"
+      },
+      "unnamed": "(unnamed)",
+      "nameMissing": "name missing",
+      "panelTitle": "Property: {{name}}",
+      "jumpToParent": "Open {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(none)",
+      "invalidPattern": "Invalid regular expression",
+      "minAboveMax": "Min exceeds max",
+      "fields": {
+        "name": "Name",
+        "type": "Type",
+        "format": "Format",
+        "elementType": "Element type",
+        "onDelete": "On delete",
+        "description": "Description",
+        "example": "Example",
+        "default": "Default",
+        "deprecationMessage": "Deprecation message",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Min length",
+        "maxLength": "Max length",
+        "pattern": "Pattern"
+      }
+    },
+    "flags": {
+      "required": "required",
+      "nullable": "nullable",
+      "unique": "unique",
+      "immutable": "immutable",
+      "searchable": "searchable",
+      "deprecated": "deprecated"
+    },
+    "examples": {
+      "defaultPill": "Default",
+      "add": "Add an example",
+      "delete": "Delete the example",
+      "name": "Example name",
+      "newName": "Example",
+      "defaultHint": "Default values come from each property (empty = generated automatically).",
+      "namedHint": "Type a value to define it; leave empty to keep the generated one.",
+      "columns": {
+        "value": "Value",
+        "origin": "Origin"
+      },
+      "auto": "auto",
+      "defined": "defined",
+      "constraintViolated": "Value violates the property constraint ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Restrict (forbid while used)",
+      "cascade": "Cascade delete",
+      "setNull": "Set to null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-increment",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hundreds",
+      "tenThousands": "Tens of thousands",
+      "millions": "Millions"
+    },
+    "issue": {
+      "propertyNameEmpty": "The property has no name",
+      "propertyNameDuplicate": "Duplicate property name",
+      "propertyShadowsParent": "Shadows an inherited property",
+      "referenceTargetUnknown": "The referenced type no longer exists",
+      "constraintPatternInvalid": "Invalid pattern (regular expression)",
+      "constraintMinAboveMax": "Min exceeds max"
     }
   },
   "mqtt": {

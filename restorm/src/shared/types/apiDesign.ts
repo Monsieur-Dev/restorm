@@ -201,6 +201,9 @@ export interface DesignModel {
   examples?: DesignExample[]
   intents?: ModelIntents
   design?: ModelDesignMeta
+  /** Free-form notes (the model card's Notes tab) — working notes,
+   * distinct from `doc.description` which is published. */
+  notes?: string
 }
 
 /**
@@ -276,6 +279,8 @@ export interface DesignRoute {
   doc: OperationDocumentation
   intents?: RouteIntents
   design?: RouteDesignMeta
+  /** Free-form notes (the route card's Notes tab). */
+  notes?: string
 }
 
 /** Design-only facts on a route group. */

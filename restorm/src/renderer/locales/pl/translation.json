@@ -2194,11 +2194,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} właściwość",
-      "propertyCount_other": "{{count}} właściwości"
+      "propertyCount_other": "{{count}} właściwości",
+      "add": "Dodaj model",
+      "delete": "Usuń model",
+      "deleteTitle": "Usunąć {{name}}?",
+      "deleteNoImpact": "Ten model nie jest nigdzie używany.",
+      "deleteImpactIntro": "Usunięcie tego modelu zaktualizuje:",
+      "deleteImpactChild": "{{name}} traci dziedziczenie (własne właściwości pozostają)",
+      "newName": "NewModel",
+      "selectPrompt": "Wybierz model lub utwórz nowy.",
+      "tabs": {
+        "schema": "Schemat",
+        "examples": "Przykłady",
+        "settings": "Ustawienia",
+        "notes": "Notatki"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} wartość",
-      "valueCount_other": "{{count}} wartości"
+      "valueCount_other": "{{count}} wartości",
+      "lists": "Enumy",
+      "values": "Wartości",
+      "addEnum": "Dodaj enum",
+      "addValue": "Dodaj wartość",
+      "valueHeader": "Wartość",
+      "newName": "NewEnum",
+      "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości."
     },
     "documentation": {
       "empty": "Dokumentacja projektu API będzie serwowana tutaj."
@@ -2208,6 +2229,109 @@
     },
     "statusbar": {
       "format": "projekt API · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Tożsamość",
+      "identifierProperty": "Właściwość identyfikująca",
+      "identifierStrategy": "Strategia",
+      "inheritsFrom": "Dziedziczy z",
+      "noIdentifier": "(brak)",
+      "noParent": "(brak)",
+      "storage": "Przechowywanie i cykl życia",
+      "volumetry": "Oczekiwany wolumen",
+      "volumetryUnset": "(nieokreślony)",
+      "timestamps": "Znaczniki czasu (utworzono/zmieniono)",
+      "softDelete": "Miękkie usuwanie",
+      "usedBy": "Używany przez",
+      "usedByNone": "Ten model nie jest jeszcze używany.",
+      "usage": {
+        "body": "body",
+        "response": "odpowiedź {{code}}",
+        "param": "parametr {{name}}",
+        "inherits": "{{name}} dziedziczy z niego"
+      }
+    },
+    "schema": {
+      "addProperty": "Dodaj właściwość",
+      "deleteProperty": "Usuń właściwość",
+      "columns": {
+        "property": "Właściwość",
+        "type": "Typ",
+        "flags": "Atrybuty",
+        "example": "Przykład"
+      },
+      "unnamed": "(bez nazwy)",
+      "nameMissing": "brak nazwy",
+      "panelTitle": "Właściwość: {{name}}",
+      "jumpToParent": "Otwórz {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(brak)",
+      "invalidPattern": "Nieprawidłowe wyrażenie regularne",
+      "minAboveMax": "Min przekracza max",
+      "fields": {
+        "name": "Nazwa",
+        "type": "Typ",
+        "format": "Format",
+        "elementType": "Typ elementów",
+        "onDelete": "Przy usunięciu",
+        "description": "Opis",
+        "example": "Przykład",
+        "default": "Domyślna",
+        "deprecationMessage": "Komunikat o wycofaniu",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Długość min",
+        "maxLength": "Długość max",
+        "pattern": "Wzorzec"
+      }
+    },
+    "flags": {
+      "required": "wymagane",
+      "nullable": "nullable",
+      "unique": "unikalne",
+      "immutable": "niezmienne",
+      "searchable": "wyszukiwalne",
+      "deprecated": "wycofane"
+    },
+    "examples": {
+      "defaultPill": "Domyślny",
+      "add": "Dodaj przykład",
+      "delete": "Usuń przykład",
+      "name": "Nazwa przykładu",
+      "newName": "Przykład",
+      "defaultHint": "Wartości domyślne pochodzą z każdej właściwości (puste = generowane automatycznie).",
+      "namedHint": "Wpisz wartość, aby ją zdefiniować; pozostaw puste, aby zachować wygenerowaną.",
+      "columns": {
+        "value": "Wartość",
+        "origin": "Pochodzenie"
+      },
+      "auto": "auto",
+      "defined": "zdefiniowana",
+      "constraintViolated": "Wartość narusza ograniczenie właściwości ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Ogranicz (zabroń, dopóki używany)",
+      "cascade": "Usuwanie kaskadowe",
+      "setNull": "Ustaw na null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrementacja",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Setki",
+      "tenThousands": "Dziesiątki tysięcy",
+      "millions": "Miliony"
+    },
+    "issue": {
+      "propertyNameEmpty": "Właściwość nie ma nazwy",
+      "propertyNameDuplicate": "Zduplikowana nazwa właściwości",
+      "propertyShadowsParent": "Przesłania odziedziczoną właściwość",
+      "referenceTargetUnknown": "Typ, do którego się odwołano, już nie istnieje",
+      "constraintPatternInvalid": "Nieprawidłowy wzorzec (wyrażenie regularne)",
+      "constraintMinAboveMax": "Min przekracza max"
     }
   },
   "mqtt": {

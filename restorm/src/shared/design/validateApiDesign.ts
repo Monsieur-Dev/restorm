@@ -49,6 +49,10 @@ export type DesignIssueCode =
   | 'responseModelUnknown'
   /** A response serves a named example its model does not declare. */
   | 'responseExampleUnknown'
+  /** A property constraint pattern is not a valid regular expression. */
+  | 'constraintPatternInvalid'
+  /** A property's min bound exceeds its max (length or value). */
+  | 'constraintMinAboveMax'
 
 export interface DesignIssue {
   code: DesignIssueCode
@@ -142,6 +146,24 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
         const known = reference.target === 'model' ? modelById.has(reference.refId) : enumIds.has(reference.refId)
         if (!known) {
           issues.push({ code: 'referenceTargetUnknown', path: propertyPath, subject: reference.refId })
+        }
+      }
+
+      const constraints = property.doc.constraints
+      if (constraints !== undefined) {
+        if (typeof constraints.pattern === 'string' && constraints.pattern !== '') {
+          try {
+            new RegExp(constraints.pattern)
+          } catch {
+            issues.push({ code: 'constraintPatternInvalid', path: propertyPath, subject: constraints.pattern })
+          }
+        }
+        const lengthInverted = typeof constraints.minLength === 'number' && typeof constraints.maxLength === 'number' &&
+          constraints.minLength > constraints.maxLength
+        const valueInverted = typeof constraints.minimum === 'number' && typeof constraints.maximum === 'number' &&
+          constraints.minimum > constraints.maximum
+        if (lengthInverted || valueInverted) {
+          issues.push({ code: 'constraintMinAboveMax', path: propertyPath, subject: name })
         }
       }
     }

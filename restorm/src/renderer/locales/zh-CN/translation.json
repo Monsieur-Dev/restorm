@@ -2191,11 +2191,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} 个属性",
-      "propertyCount_other": "{{count}} 个属性"
+      "propertyCount_other": "{{count}} 个属性",
+      "add": "添加模型",
+      "delete": "删除模型",
+      "deleteTitle": "删除 {{name}}？",
+      "deleteNoImpact": "此模型未在任何地方使用。",
+      "deleteImpactIntro": "删除此模型将更新：",
+      "deleteImpactChild": "{{name}} 将失去继承（其自身属性保留）",
+      "newName": "NewModel",
+      "selectPrompt": "选择一个模型，或创建一个。",
+      "tabs": {
+        "schema": "结构",
+        "examples": "示例",
+        "settings": "设置",
+        "notes": "笔记"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} 个值",
-      "valueCount_other": "{{count}} 个值"
+      "valueCount_other": "{{count}} 个值",
+      "lists": "枚举",
+      "values": "值",
+      "addEnum": "添加枚举",
+      "addValue": "添加值",
+      "valueHeader": "值",
+      "newName": "NewEnum",
+      "selectPrompt": "选择一个枚举，或创建一个 —— 可用作属性类型的封闭值集合。"
     },
     "documentation": {
       "empty": "设计文档将在此提供。"
@@ -2205,6 +2226,109 @@
     },
     "statusbar": {
       "format": "设计 · 格式 {{version}}"
+    },
+    "modelSettings": {
+      "identity": "标识",
+      "identifierProperty": "标识符属性",
+      "identifierStrategy": "策略",
+      "inheritsFrom": "继承自",
+      "noIdentifier": "（无）",
+      "noParent": "（无）",
+      "storage": "存储与生命周期",
+      "volumetry": "预期数据量",
+      "volumetryUnset": "（未指定）",
+      "timestamps": "时间戳（创建/修改）",
+      "softDelete": "软删除",
+      "usedBy": "使用方",
+      "usedByNone": "此模型尚未被使用。",
+      "usage": {
+        "body": "请求体",
+        "response": "响应 {{code}}",
+        "param": "参数 {{name}}",
+        "inherits": "{{name}} 继承自它"
+      }
+    },
+    "schema": {
+      "addProperty": "添加属性",
+      "deleteProperty": "删除属性",
+      "columns": {
+        "property": "属性",
+        "type": "类型",
+        "flags": "标志",
+        "example": "示例"
+      },
+      "unnamed": "（未命名）",
+      "nameMissing": "缺少名称",
+      "panelTitle": "属性：{{name}}",
+      "jumpToParent": "打开 {{name}}",
+      "typeModel": "模型",
+      "typeEnum": "枚举",
+      "noFormat": "（无）",
+      "invalidPattern": "无效的正则表达式",
+      "minAboveMax": "最小值超过最大值",
+      "fields": {
+        "name": "名称",
+        "type": "类型",
+        "format": "格式",
+        "elementType": "元素类型",
+        "onDelete": "删除时",
+        "description": "描述",
+        "example": "示例",
+        "default": "默认值",
+        "deprecationMessage": "弃用消息",
+        "minimum": "最小值",
+        "maximum": "最大值",
+        "minLength": "最小长度",
+        "maxLength": "最大长度",
+        "pattern": "模式"
+      }
+    },
+    "flags": {
+      "required": "必填",
+      "nullable": "可空",
+      "unique": "唯一",
+      "immutable": "不可变",
+      "searchable": "可搜索",
+      "deprecated": "已弃用"
+    },
+    "examples": {
+      "defaultPill": "默认",
+      "add": "添加示例",
+      "delete": "删除示例",
+      "name": "示例名称",
+      "newName": "示例",
+      "defaultHint": "默认值来自各个属性（留空 = 自动生成）。",
+      "namedHint": "输入值即可定义；留空则保留自动生成的值。",
+      "columns": {
+        "value": "值",
+        "origin": "来源"
+      },
+      "auto": "自动",
+      "defined": "已定义",
+      "constraintViolated": "该值违反了属性约束（{{constraint}}）"
+    },
+    "onDelete": {
+      "restrict": "限制（使用中禁止删除）",
+      "cascade": "级联删除",
+      "setNull": "置为 null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "自增",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "数百",
+      "tenThousands": "数万",
+      "millions": "数百万"
+    },
+    "issue": {
+      "propertyNameEmpty": "属性没有名称",
+      "propertyNameDuplicate": "属性名称重复",
+      "propertyShadowsParent": "遮蔽了继承的属性",
+      "referenceTargetUnknown": "引用的类型已不存在",
+      "constraintPatternInvalid": "无效的模式（正则表达式）",
+      "constraintMinAboveMax": "最小值超过最大值"
     }
   },
   "mqtt": {

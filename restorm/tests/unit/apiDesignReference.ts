@@ -92,7 +92,8 @@ export function buildReferenceApiDesign(): ApiDesign {
           identifier: { propertyId: 'prop-user-id', strategy: 'uuid' },
           timestamps: true,
           softDelete: true
-        }
+        },
+        notes: 'Core account model.'
       },
       {
         id: 'model-admin',
@@ -171,7 +172,8 @@ export function buildReferenceApiDesign(): ApiDesign {
               responses: { '200': { modelId: 'model-user', exampleId: 'example-user-admin' } },
               cacheSeconds: 60,
               idempotent: true
-            }
+            },
+            notes: 'Hot path — cache aggressively.'
           },
           {
             id: 'route-user-list',

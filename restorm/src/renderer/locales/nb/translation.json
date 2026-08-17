@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} egenskap",
-      "propertyCount_other": "{{count}} egenskaper"
+      "propertyCount_other": "{{count}} egenskaper",
+      "add": "Legg til en modell",
+      "delete": "Slett modellen",
+      "deleteTitle": "Slette {{name}}?",
+      "deleteNoImpact": "Denne modellen brukes ingen steder.",
+      "deleteImpactIntro": "Sletting av denne modellen oppdaterer:",
+      "deleteImpactChild": "{{name}} mister arven sin (egne egenskaper beholdes)",
+      "newName": "NewModel",
+      "selectPrompt": "Velg en modell, eller opprett en.",
+      "tabs": {
+        "schema": "Skjema",
+        "examples": "Eksempler",
+        "settings": "Innstillinger",
+        "notes": "Notater"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} verdi",
-      "valueCount_other": "{{count}} verdier"
+      "valueCount_other": "{{count}} verdier",
+      "lists": "Enums",
+      "values": "Verdier",
+      "addEnum": "Legg til en enum",
+      "addValue": "Legg til en verdi",
+      "valueHeader": "Verdi",
+      "newName": "NewEnum",
+      "selectPrompt": "Velg en enum, eller opprett en — et lukket sett verdier som kan brukes som egenskapstype."
     },
     "documentation": {
       "empty": "Designdokumentasjonen serveres her."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitet",
+      "identifierProperty": "Identifiserende egenskap",
+      "identifierStrategy": "Strategi",
+      "inheritsFrom": "Arver fra",
+      "noIdentifier": "(ingen)",
+      "noParent": "(ingen)",
+      "storage": "Lagring og livssyklus",
+      "volumetry": "Forventet volum",
+      "volumetryUnset": "(uspesifisert)",
+      "timestamps": "Tidsstempler (opprettet/endret)",
+      "softDelete": "Myk sletting",
+      "usedBy": "Brukes av",
+      "usedByNone": "Denne modellen brukes ikke ennå.",
+      "usage": {
+        "body": "body",
+        "response": "svar {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} arver fra den"
+      }
+    },
+    "schema": {
+      "addProperty": "Legg til en egenskap",
+      "deleteProperty": "Slett egenskapen",
+      "columns": {
+        "property": "Egenskap",
+        "type": "Type",
+        "flags": "Attributter",
+        "example": "Eksempel"
+      },
+      "unnamed": "(uten navn)",
+      "nameMissing": "navn mangler",
+      "panelTitle": "Egenskap: {{name}}",
+      "jumpToParent": "Åpne {{name}}",
+      "typeModel": "modell",
+      "typeEnum": "enum",
+      "noFormat": "(ingen)",
+      "invalidPattern": "Ugyldig regulært uttrykk",
+      "minAboveMax": "Min overstiger maks",
+      "fields": {
+        "name": "Navn",
+        "type": "Type",
+        "format": "Format",
+        "elementType": "Elementtype",
+        "onDelete": "Ved sletting",
+        "description": "Beskrivelse",
+        "example": "Eksempel",
+        "default": "Standard",
+        "deprecationMessage": "Utfasingsmelding",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Min. lengde",
+        "maxLength": "Maks. lengde",
+        "pattern": "Mønster"
+      }
+    },
+    "flags": {
+      "required": "påkrevd",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "uforanderlig",
+      "searchable": "søkbar",
+      "deprecated": "utfaset"
+    },
+    "examples": {
+      "defaultPill": "Standard",
+      "add": "Legg til et eksempel",
+      "delete": "Slett eksemplet",
+      "name": "Eksemplets navn",
+      "newName": "Eksempel",
+      "defaultHint": "Standardverdier kommer fra hver egenskap (tom = generert automatisk).",
+      "namedHint": "Skriv en verdi for å definere den; la stå tom for å beholde den genererte.",
+      "columns": {
+        "value": "Verdi",
+        "origin": "Opprinnelse"
+      },
+      "auto": "auto",
+      "defined": "definert",
+      "constraintViolated": "Verdien bryter egenskapens begrensning ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Begrens (forby mens den brukes)",
+      "cascade": "Kaskadesletting",
+      "setNull": "Sett til null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hundrevis",
+      "tenThousands": "Titusenvis",
+      "millions": "Millioner"
+    },
+    "issue": {
+      "propertyNameEmpty": "Egenskapen har ikke noe navn",
+      "propertyNameDuplicate": "Duplisert egenskapsnavn",
+      "propertyShadowsParent": "Skjuler en arvet egenskap",
+      "referenceTargetUnknown": "Den refererte typen finnes ikke lenger",
+      "constraintPatternInvalid": "Ugyldig mønster (regulært uttrykk)",
+      "constraintMinAboveMax": "Min overstiger maks"
     }
   },
   "mqtt": {

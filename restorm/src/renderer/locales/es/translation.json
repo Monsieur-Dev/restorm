@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} propiedad",
-      "propertyCount_other": "{{count}} propiedades"
+      "propertyCount_other": "{{count}} propiedades",
+      "add": "Añadir un modelo",
+      "delete": "Eliminar el modelo",
+      "deleteTitle": "¿Eliminar {{name}}?",
+      "deleteNoImpact": "Este modelo no se usa en ninguna parte.",
+      "deleteImpactIntro": "Eliminar este modelo actualizará:",
+      "deleteImpactChild": "{{name}} pierde su herencia (sus propias propiedades se conservan)",
+      "newName": "NewModel",
+      "selectPrompt": "Seleccione un modelo o cree uno.",
+      "tabs": {
+        "schema": "Esquema",
+        "examples": "Ejemplos",
+        "settings": "Ajustes",
+        "notes": "Notas"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} valor",
-      "valueCount_other": "{{count}} valores"
+      "valueCount_other": "{{count}} valores",
+      "lists": "Enums",
+      "values": "Valores",
+      "addEnum": "Añadir un enum",
+      "addValue": "Añadir un valor",
+      "valueHeader": "Valor",
+      "newName": "NewEnum",
+      "selectPrompt": "Seleccione un enum o cree uno — un conjunto cerrado de valores usable como tipo de propiedad."
     },
     "documentation": {
       "empty": "La documentación del diseño se servirá aquí."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "diseño · formato {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identidad",
+      "identifierProperty": "Propiedad identificadora",
+      "identifierStrategy": "Estrategia",
+      "inheritsFrom": "Hereda de",
+      "noIdentifier": "(ninguna)",
+      "noParent": "(ninguno)",
+      "storage": "Almacenamiento y ciclo de vida",
+      "volumetry": "Volumen esperado",
+      "volumetryUnset": "(sin especificar)",
+      "timestamps": "Marcas de tiempo (creado/modificado)",
+      "softDelete": "Borrado suave",
+      "usedBy": "Usado por",
+      "usedByNone": "Este modelo aún no se usa.",
+      "usage": {
+        "body": "cuerpo",
+        "response": "respuesta {{code}}",
+        "param": "parámetro {{name}}",
+        "inherits": "{{name}} hereda de él"
+      }
+    },
+    "schema": {
+      "addProperty": "Añadir una propiedad",
+      "deleteProperty": "Eliminar la propiedad",
+      "columns": {
+        "property": "Propiedad",
+        "type": "Tipo",
+        "flags": "Atributos",
+        "example": "Ejemplo"
+      },
+      "unnamed": "(sin nombre)",
+      "nameMissing": "falta el nombre",
+      "panelTitle": "Propiedad: {{name}}",
+      "jumpToParent": "Abrir {{name}}",
+      "typeModel": "modelo",
+      "typeEnum": "enum",
+      "noFormat": "(ninguno)",
+      "invalidPattern": "Expresión regular no válida",
+      "minAboveMax": "El mínimo supera el máximo",
+      "fields": {
+        "name": "Nombre",
+        "type": "Tipo",
+        "format": "Formato",
+        "elementType": "Tipo de elemento",
+        "onDelete": "Al eliminar",
+        "description": "Descripción",
+        "example": "Ejemplo",
+        "default": "Predeterminado",
+        "deprecationMessage": "Mensaje de obsolescencia",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "minLength": "Longitud mínima",
+        "maxLength": "Longitud máxima",
+        "pattern": "Patrón"
+      }
+    },
+    "flags": {
+      "required": "requerido",
+      "nullable": "anulable",
+      "unique": "único",
+      "immutable": "inmutable",
+      "searchable": "buscable",
+      "deprecated": "obsoleto"
+    },
+    "examples": {
+      "defaultPill": "Predeterminado",
+      "add": "Añadir un ejemplo",
+      "delete": "Eliminar el ejemplo",
+      "name": "Nombre del ejemplo",
+      "newName": "Ejemplo",
+      "defaultHint": "Los valores predeterminados provienen de cada propiedad (vacío = generado automáticamente).",
+      "namedHint": "Escriba un valor para definirlo; déjelo vacío para conservar el generado.",
+      "columns": {
+        "value": "Valor",
+        "origin": "Origen"
+      },
+      "auto": "auto",
+      "defined": "definido",
+      "constraintViolated": "El valor viola la restricción de la propiedad ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Restringir (prohibir mientras se use)",
+      "cascade": "Borrado en cascada",
+      "setNull": "Establecer a null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Autoincremento",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Cientos",
+      "tenThousands": "Decenas de miles",
+      "millions": "Millones"
+    },
+    "issue": {
+      "propertyNameEmpty": "La propiedad no tiene nombre",
+      "propertyNameDuplicate": "Nombre de propiedad duplicado",
+      "propertyShadowsParent": "Oculta una propiedad heredada",
+      "referenceTargetUnknown": "El tipo referenciado ya no existe",
+      "constraintPatternInvalid": "Patrón no válido (expresión regular)",
+      "constraintMinAboveMax": "El mínimo supera el máximo"
     }
   },
   "mqtt": {

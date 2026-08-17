@@ -2193,11 +2193,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} proprietate",
-      "propertyCount_other": "{{count}} proprietăți"
+      "propertyCount_other": "{{count}} proprietăți",
+      "add": "Adaugă un model",
+      "delete": "Șterge modelul",
+      "deleteTitle": "Ștergeți {{name}}?",
+      "deleteNoImpact": "Acest model nu este folosit nicăieri.",
+      "deleteImpactIntro": "Ștergerea acestui model va actualiza:",
+      "deleteImpactChild": "{{name}} își pierde moștenirea (propriile proprietăți rămân)",
+      "newName": "NewModel",
+      "selectPrompt": "Selectați un model sau creați unul.",
+      "tabs": {
+        "schema": "Schemă",
+        "examples": "Exemple",
+        "settings": "Setări",
+        "notes": "Note"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} valoare",
-      "valueCount_other": "{{count}} valori"
+      "valueCount_other": "{{count}} valori",
+      "lists": "Enumuri",
+      "values": "Valori",
+      "addEnum": "Adaugă un enum",
+      "addValue": "Adaugă o valoare",
+      "valueHeader": "Valoare",
+      "newName": "NewEnum",
+      "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate."
     },
     "documentation": {
       "empty": "Documentația designului va fi servită aici."
@@ -2207,6 +2228,109 @@
     },
     "statusbar": {
       "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitate",
+      "identifierProperty": "Proprietate identificatoare",
+      "identifierStrategy": "Strategie",
+      "inheritsFrom": "Moștenește din",
+      "noIdentifier": "(niciuna)",
+      "noParent": "(niciunul)",
+      "storage": "Stocare și ciclu de viață",
+      "volumetry": "Volum așteptat",
+      "volumetryUnset": "(nespecificat)",
+      "timestamps": "Marcaje de timp (creat/modificat)",
+      "softDelete": "Ștergere soft",
+      "usedBy": "Folosit de",
+      "usedByNone": "Acest model nu este încă folosit.",
+      "usage": {
+        "body": "corp",
+        "response": "răspuns {{code}}",
+        "param": "parametru {{name}}",
+        "inherits": "{{name}} moștenește din el"
+      }
+    },
+    "schema": {
+      "addProperty": "Adaugă o proprietate",
+      "deleteProperty": "Șterge proprietatea",
+      "columns": {
+        "property": "Proprietate",
+        "type": "Tip",
+        "flags": "Atribute",
+        "example": "Exemplu"
+      },
+      "unnamed": "(fără nume)",
+      "nameMissing": "lipsește numele",
+      "panelTitle": "Proprietate: {{name}}",
+      "jumpToParent": "Deschide {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(niciunul)",
+      "invalidPattern": "Expresie regulată invalidă",
+      "minAboveMax": "Min depășește max",
+      "fields": {
+        "name": "Nume",
+        "type": "Tip",
+        "format": "Format",
+        "elementType": "Tipul elementelor",
+        "onDelete": "La ștergere",
+        "description": "Descriere",
+        "example": "Exemplu",
+        "default": "Implicit",
+        "deprecationMessage": "Mesaj de depreciere",
+        "minimum": "Minim",
+        "maximum": "Maxim",
+        "minLength": "Lungime min.",
+        "maxLength": "Lungime max.",
+        "pattern": "Șablon"
+      }
+    },
+    "flags": {
+      "required": "obligatoriu",
+      "nullable": "nullable",
+      "unique": "unic",
+      "immutable": "imuabil",
+      "searchable": "căutabil",
+      "deprecated": "depreciat"
+    },
+    "examples": {
+      "defaultPill": "Implicit",
+      "add": "Adaugă un exemplu",
+      "delete": "Șterge exemplul",
+      "name": "Numele exemplului",
+      "newName": "Exemplu",
+      "defaultHint": "Valorile implicite provin din fiecare proprietate (gol = generat automat).",
+      "namedHint": "Tastați o valoare pentru a o defini; lăsați gol pentru a păstra valoarea generată.",
+      "columns": {
+        "value": "Valoare",
+        "origin": "Origine"
+      },
+      "auto": "auto",
+      "defined": "definit",
+      "constraintViolated": "Valoarea încalcă restricția proprietății ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Restricționează (interzice cât timp e folosit)",
+      "cascade": "Ștergere în cascadă",
+      "setNull": "Setează la null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-incrementare",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Sute",
+      "tenThousands": "Zeci de mii",
+      "millions": "Milioane"
+    },
+    "issue": {
+      "propertyNameEmpty": "Proprietatea nu are nume",
+      "propertyNameDuplicate": "Nume de proprietate duplicat",
+      "propertyShadowsParent": "Ascunde o proprietate moștenită",
+      "referenceTargetUnknown": "Tipul referențiat nu mai există",
+      "constraintPatternInvalid": "Șablon invalid (expresie regulată)",
+      "constraintMinAboveMax": "Min depășește max"
     }
   },
   "mqtt": {

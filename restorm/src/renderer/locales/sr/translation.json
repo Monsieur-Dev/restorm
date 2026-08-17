@@ -2193,11 +2193,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} svojstvo",
-      "propertyCount_other": "{{count}} svojstava"
+      "propertyCount_other": "{{count}} svojstava",
+      "add": "Dodaj model",
+      "delete": "Obriši model",
+      "deleteTitle": "Obrisati {{name}}?",
+      "deleteNoImpact": "Ovaj model se nigde ne koristi.",
+      "deleteImpactIntro": "Brisanje ovog modela će ažurirati:",
+      "deleteImpactChild": "{{name}} gubi nasleđivanje (sopstvena svojstva ostaju)",
+      "newName": "NewModel",
+      "selectPrompt": "Izaberite model ili ga napravite.",
+      "tabs": {
+        "schema": "Šema",
+        "examples": "Primeri",
+        "settings": "Podešavanja",
+        "notes": "Beleške"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} vrednost",
-      "valueCount_other": "{{count}} vrednosti"
+      "valueCount_other": "{{count}} vrednosti",
+      "lists": "Enumi",
+      "values": "Vrednosti",
+      "addEnum": "Dodaj enum",
+      "addValue": "Dodaj vrednost",
+      "valueHeader": "Vrednost",
+      "newName": "NewEnum",
+      "selectPrompt": "Izaberite enum ili ga napravite — zatvoren skup vrednosti upotrebljiv kao tip svojstva."
     },
     "documentation": {
       "empty": "Dokumentacija dizajna će se služiti ovde."
@@ -2207,6 +2228,109 @@
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitet",
+      "identifierProperty": "Identifikaciono svojstvo",
+      "identifierStrategy": "Strategija",
+      "inheritsFrom": "Nasleđuje od",
+      "noIdentifier": "(nijedno)",
+      "noParent": "(nijedan)",
+      "storage": "Skladištenje i životni ciklus",
+      "volumetry": "Očekivani obim",
+      "volumetryUnset": "(neodređeno)",
+      "timestamps": "Vremenske oznake (kreirano/izmenjeno)",
+      "softDelete": "Meko brisanje",
+      "usedBy": "Koristi se u",
+      "usedByNone": "Ovaj model se još ne koristi.",
+      "usage": {
+        "body": "telo",
+        "response": "odgovor {{code}}",
+        "param": "parametar {{name}}",
+        "inherits": "{{name}} nasleđuje od njega"
+      }
+    },
+    "schema": {
+      "addProperty": "Dodaj svojstvo",
+      "deleteProperty": "Obriši svojstvo",
+      "columns": {
+        "property": "Svojstvo",
+        "type": "Tip",
+        "flags": "Atributi",
+        "example": "Primer"
+      },
+      "unnamed": "(bez imena)",
+      "nameMissing": "nedostaje ime",
+      "panelTitle": "Svojstvo: {{name}}",
+      "jumpToParent": "Otvori {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(nijedan)",
+      "invalidPattern": "Neispravan regularni izraz",
+      "minAboveMax": "Min premašuje maks",
+      "fields": {
+        "name": "Ime",
+        "type": "Tip",
+        "format": "Format",
+        "elementType": "Tip elemenata",
+        "onDelete": "Pri brisanju",
+        "description": "Opis",
+        "example": "Primer",
+        "default": "Podrazumevano",
+        "deprecationMessage": "Poruka o zastarelosti",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Min. dužina",
+        "maxLength": "Maks. dužina",
+        "pattern": "Šablon"
+      }
+    },
+    "flags": {
+      "required": "obavezno",
+      "nullable": "nullable",
+      "unique": "jedinstveno",
+      "immutable": "nepromenljivo",
+      "searchable": "pretraživo",
+      "deprecated": "zastarelo"
+    },
+    "examples": {
+      "defaultPill": "Podrazumevano",
+      "add": "Dodaj primer",
+      "delete": "Obriši primer",
+      "name": "Ime primera",
+      "newName": "Primer",
+      "defaultHint": "Podrazumevane vrednosti dolaze iz svakog svojstva (prazno = automatski generisano).",
+      "namedHint": "Unesite vrednost da je definišete; ostavite prazno da zadržite generisanu.",
+      "columns": {
+        "value": "Vrednost",
+        "origin": "Poreklo"
+      },
+      "auto": "auto",
+      "defined": "definisano",
+      "constraintViolated": "Vrednost krši ograničenje svojstva ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Ograniči (zabrani dok se koristi)",
+      "cascade": "Kaskadno brisanje",
+      "setNull": "Postavi na null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Stotine",
+      "tenThousands": "Desetine hiljada",
+      "millions": "Milioni"
+    },
+    "issue": {
+      "propertyNameEmpty": "Svojstvo nema ime",
+      "propertyNameDuplicate": "Duplirano ime svojstva",
+      "propertyShadowsParent": "Zaklanja nasleđeno svojstvo",
+      "referenceTargetUnknown": "Referencirani tip više ne postoji",
+      "constraintPatternInvalid": "Neispravan šablon (regularni izraz)",
+      "constraintMinAboveMax": "Min premašuje maks"
     }
   },
   "mqtt": {

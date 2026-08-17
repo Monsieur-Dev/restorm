@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} ιδιότητα",
-      "propertyCount_other": "{{count}} ιδιότητες"
+      "propertyCount_other": "{{count}} ιδιότητες",
+      "add": "Προσθήκη μοντέλου",
+      "delete": "Διαγραφή μοντέλου",
+      "deleteTitle": "Διαγραφή του {{name}};",
+      "deleteNoImpact": "Αυτό το μοντέλο δεν χρησιμοποιείται πουθενά.",
+      "deleteImpactIntro": "Η διαγραφή αυτού του μοντέλου θα ενημερώσει:",
+      "deleteImpactChild": "Το {{name}} χάνει την κληρονομικότητά του (οι δικές του ιδιότητες παραμένουν)",
+      "newName": "NewModel",
+      "selectPrompt": "Επιλέξτε ένα μοντέλο ή δημιουργήστε ένα.",
+      "tabs": {
+        "schema": "Σχήμα",
+        "examples": "Παραδείγματα",
+        "settings": "Ρυθμίσεις",
+        "notes": "Σημειώσεις"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} τιμή",
-      "valueCount_other": "{{count}} τιμές"
+      "valueCount_other": "{{count}} τιμές",
+      "lists": "Enums",
+      "values": "Τιμές",
+      "addEnum": "Προσθήκη enum",
+      "addValue": "Προσθήκη τιμής",
+      "valueHeader": "Τιμή",
+      "newName": "NewEnum",
+      "selectPrompt": "Επιλέξτε ένα enum ή δημιουργήστε ένα — ένα κλειστό σύνολο τιμών που χρησιμοποιείται ως τύπος ιδιότητας."
     },
     "documentation": {
       "empty": "Η τεκμηρίωση του σχεδίου θα σερβίρεται εδώ."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "σχέδιο · μορφή {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Ταυτότητα",
+      "identifierProperty": "Ιδιότητα αναγνωριστικού",
+      "identifierStrategy": "Στρατηγική",
+      "inheritsFrom": "Κληρονομεί από",
+      "noIdentifier": "(καμία)",
+      "noParent": "(κανένα)",
+      "storage": "Αποθήκευση & κύκλος ζωής",
+      "volumetry": "Αναμενόμενος όγκος",
+      "volumetryUnset": "(απροσδιόριστος)",
+      "timestamps": "Χρονοσημάνσεις (δημιουργία/τροποποίηση)",
+      "softDelete": "Ήπια διαγραφή",
+      "usedBy": "Χρησιμοποιείται από",
+      "usedByNone": "Αυτό το μοντέλο δεν χρησιμοποιείται ακόμη.",
+      "usage": {
+        "body": "σώμα",
+        "response": "απόκριση {{code}}",
+        "param": "παράμετρος {{name}}",
+        "inherits": "Το {{name}} κληρονομεί από αυτό"
+      }
+    },
+    "schema": {
+      "addProperty": "Προσθήκη ιδιότητας",
+      "deleteProperty": "Διαγραφή ιδιότητας",
+      "columns": {
+        "property": "Ιδιότητα",
+        "type": "Τύπος",
+        "flags": "Χαρακτηριστικά",
+        "example": "Παράδειγμα"
+      },
+      "unnamed": "(χωρίς όνομα)",
+      "nameMissing": "λείπει το όνομα",
+      "panelTitle": "Ιδιότητα: {{name}}",
+      "jumpToParent": "Άνοιγμα {{name}}",
+      "typeModel": "μοντέλο",
+      "typeEnum": "enum",
+      "noFormat": "(κανένα)",
+      "invalidPattern": "Μη έγκυρη κανονική έκφραση",
+      "minAboveMax": "Το ελάχιστο υπερβαίνει το μέγιστο",
+      "fields": {
+        "name": "Όνομα",
+        "type": "Τύπος",
+        "format": "Μορφή",
+        "elementType": "Τύπος στοιχείων",
+        "onDelete": "Κατά τη διαγραφή",
+        "description": "Περιγραφή",
+        "example": "Παράδειγμα",
+        "default": "Προεπιλογή",
+        "deprecationMessage": "Μήνυμα απαξίωσης",
+        "minimum": "Ελάχιστο",
+        "maximum": "Μέγιστο",
+        "minLength": "Ελάχιστο μήκος",
+        "maxLength": "Μέγιστο μήκος",
+        "pattern": "Μοτίβο"
+      }
+    },
+    "flags": {
+      "required": "υποχρεωτικό",
+      "nullable": "nullable",
+      "unique": "μοναδικό",
+      "immutable": "αμετάβλητο",
+      "searchable": "αναζητήσιμο",
+      "deprecated": "παρωχημένο"
+    },
+    "examples": {
+      "defaultPill": "Προεπιλογή",
+      "add": "Προσθήκη παραδείγματος",
+      "delete": "Διαγραφή παραδείγματος",
+      "name": "Όνομα παραδείγματος",
+      "newName": "Παράδειγμα",
+      "defaultHint": "Οι προεπιλεγμένες τιμές προέρχονται από κάθε ιδιότητα (κενό = αυτόματη δημιουργία).",
+      "namedHint": "Πληκτρολογήστε μια τιμή για να την ορίσετε· αφήστε κενό για να διατηρήσετε τη δημιουργημένη.",
+      "columns": {
+        "value": "Τιμή",
+        "origin": "Προέλευση"
+      },
+      "auto": "αυτόματο",
+      "defined": "ορισμένο",
+      "constraintViolated": "Η τιμή παραβιάζει τον περιορισμό της ιδιότητας ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Περιορισμός (απαγόρευση όσο χρησιμοποιείται)",
+      "cascade": "Διαδοχική διαγραφή",
+      "setNull": "Ορισμός σε null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Αυτόματη αύξηση",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Εκατοντάδες",
+      "tenThousands": "Δεκάδες χιλιάδες",
+      "millions": "Εκατομμύρια"
+    },
+    "issue": {
+      "propertyNameEmpty": "Η ιδιότητα δεν έχει όνομα",
+      "propertyNameDuplicate": "Διπλότυπο όνομα ιδιότητας",
+      "propertyShadowsParent": "Επισκιάζει μια κληρονομημένη ιδιότητα",
+      "referenceTargetUnknown": "Ο αναφερόμενος τύπος δεν υπάρχει πια",
+      "constraintPatternInvalid": "Μη έγκυρο μοτίβο (κανονική έκφραση)",
+      "constraintMinAboveMax": "Το ελάχιστο υπερβαίνει το μέγιστο"
     }
   },
   "mqtt": {

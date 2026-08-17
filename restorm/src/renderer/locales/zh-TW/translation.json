@@ -2191,11 +2191,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} 個屬性",
-      "propertyCount_other": "{{count}} 個屬性"
+      "propertyCount_other": "{{count}} 個屬性",
+      "add": "新增模型",
+      "delete": "刪除模型",
+      "deleteTitle": "刪除 {{name}}？",
+      "deleteNoImpact": "此模型未在任何地方使用。",
+      "deleteImpactIntro": "刪除此模型將更新：",
+      "deleteImpactChild": "{{name}} 將失去繼承（其自身屬性保留）",
+      "newName": "NewModel",
+      "selectPrompt": "選擇一個模型，或建立一個。",
+      "tabs": {
+        "schema": "結構",
+        "examples": "範例",
+        "settings": "設定",
+        "notes": "筆記"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} 個值",
-      "valueCount_other": "{{count}} 個值"
+      "valueCount_other": "{{count}} 個值",
+      "lists": "列舉",
+      "values": "值",
+      "addEnum": "新增列舉",
+      "addValue": "新增值",
+      "valueHeader": "值",
+      "newName": "NewEnum",
+      "selectPrompt": "選擇一個列舉，或建立一個 —— 可用作屬性型別的封閉值集合。"
     },
     "documentation": {
       "empty": "設計文件將在此提供。"
@@ -2205,6 +2226,109 @@
     },
     "statusbar": {
       "format": "設計 · 格式 {{version}}"
+    },
+    "modelSettings": {
+      "identity": "識別",
+      "identifierProperty": "識別碼屬性",
+      "identifierStrategy": "策略",
+      "inheritsFrom": "繼承自",
+      "noIdentifier": "（無）",
+      "noParent": "（無）",
+      "storage": "儲存與生命週期",
+      "volumetry": "預期資料量",
+      "volumetryUnset": "（未指定）",
+      "timestamps": "時間戳記（建立/修改）",
+      "softDelete": "軟刪除",
+      "usedBy": "使用方",
+      "usedByNone": "此模型尚未被使用。",
+      "usage": {
+        "body": "請求主體",
+        "response": "回應 {{code}}",
+        "param": "參數 {{name}}",
+        "inherits": "{{name}} 繼承自它"
+      }
+    },
+    "schema": {
+      "addProperty": "新增屬性",
+      "deleteProperty": "刪除屬性",
+      "columns": {
+        "property": "屬性",
+        "type": "型別",
+        "flags": "旗標",
+        "example": "範例"
+      },
+      "unnamed": "（未命名）",
+      "nameMissing": "缺少名稱",
+      "panelTitle": "屬性：{{name}}",
+      "jumpToParent": "開啟 {{name}}",
+      "typeModel": "模型",
+      "typeEnum": "列舉",
+      "noFormat": "（無）",
+      "invalidPattern": "無效的正規表示式",
+      "minAboveMax": "最小值超過最大值",
+      "fields": {
+        "name": "名稱",
+        "type": "型別",
+        "format": "格式",
+        "elementType": "元素型別",
+        "onDelete": "刪除時",
+        "description": "描述",
+        "example": "範例",
+        "default": "預設值",
+        "deprecationMessage": "棄用訊息",
+        "minimum": "最小值",
+        "maximum": "最大值",
+        "minLength": "最小長度",
+        "maxLength": "最大長度",
+        "pattern": "模式"
+      }
+    },
+    "flags": {
+      "required": "必填",
+      "nullable": "可為空",
+      "unique": "唯一",
+      "immutable": "不可變",
+      "searchable": "可搜尋",
+      "deprecated": "已棄用"
+    },
+    "examples": {
+      "defaultPill": "預設",
+      "add": "新增範例",
+      "delete": "刪除範例",
+      "name": "範例名稱",
+      "newName": "範例",
+      "defaultHint": "預設值來自各個屬性（留空 = 自動產生）。",
+      "namedHint": "輸入值即可定義；留空則保留自動產生的值。",
+      "columns": {
+        "value": "值",
+        "origin": "來源"
+      },
+      "auto": "自動",
+      "defined": "已定義",
+      "constraintViolated": "該值違反了屬性約束（{{constraint}}）"
+    },
+    "onDelete": {
+      "restrict": "限制（使用中禁止刪除）",
+      "cascade": "串聯刪除",
+      "setNull": "設為 null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "自動遞增",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "數百",
+      "tenThousands": "數萬",
+      "millions": "數百萬"
+    },
+    "issue": {
+      "propertyNameEmpty": "屬性沒有名稱",
+      "propertyNameDuplicate": "屬性名稱重複",
+      "propertyShadowsParent": "遮蔽了繼承的屬性",
+      "referenceTargetUnknown": "引用的型別已不存在",
+      "constraintPatternInvalid": "無效的模式（正規表示式）",
+      "constraintMinAboveMax": "最小值超過最大值"
     }
   },
   "mqtt": {

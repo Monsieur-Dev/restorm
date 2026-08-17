@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} egenskab",
-      "propertyCount_other": "{{count}} egenskaber"
+      "propertyCount_other": "{{count}} egenskaber",
+      "add": "Tilføj en model",
+      "delete": "Slet modellen",
+      "deleteTitle": "Slet {{name}}?",
+      "deleteNoImpact": "Denne model bruges ingen steder.",
+      "deleteImpactIntro": "Sletning af denne model opdaterer:",
+      "deleteImpactChild": "{{name}} mister sin arv (egne egenskaber bevares)",
+      "newName": "NewModel",
+      "selectPrompt": "Vælg en model, eller opret en.",
+      "tabs": {
+        "schema": "Skema",
+        "examples": "Eksempler",
+        "settings": "Indstillinger",
+        "notes": "Noter"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} værdi",
-      "valueCount_other": "{{count}} værdier"
+      "valueCount_other": "{{count}} værdier",
+      "lists": "Enums",
+      "values": "Værdier",
+      "addEnum": "Tilføj en enum",
+      "addValue": "Tilføj en værdi",
+      "valueHeader": "Værdi",
+      "newName": "NewEnum",
+      "selectPrompt": "Vælg en enum, eller opret en — et lukket sæt værdier, der kan bruges som egenskabstype."
     },
     "documentation": {
       "empty": "Designdokumentationen serveres her."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitet",
+      "identifierProperty": "Identificerende egenskab",
+      "identifierStrategy": "Strategi",
+      "inheritsFrom": "Arver fra",
+      "noIdentifier": "(ingen)",
+      "noParent": "(ingen)",
+      "storage": "Lagring & livscyklus",
+      "volumetry": "Forventet volumen",
+      "volumetryUnset": "(uspecificeret)",
+      "timestamps": "Tidsstempler (oprettet/ændret)",
+      "softDelete": "Blød sletning",
+      "usedBy": "Bruges af",
+      "usedByNone": "Denne model bruges ikke endnu.",
+      "usage": {
+        "body": "body",
+        "response": "svar {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} arver fra den"
+      }
+    },
+    "schema": {
+      "addProperty": "Tilføj en egenskab",
+      "deleteProperty": "Slet egenskaben",
+      "columns": {
+        "property": "Egenskab",
+        "type": "Type",
+        "flags": "Attributter",
+        "example": "Eksempel"
+      },
+      "unnamed": "(uden navn)",
+      "nameMissing": "navn mangler",
+      "panelTitle": "Egenskab: {{name}}",
+      "jumpToParent": "Åbn {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(ingen)",
+      "invalidPattern": "Ugyldigt regulært udtryk",
+      "minAboveMax": "Min overstiger max",
+      "fields": {
+        "name": "Navn",
+        "type": "Type",
+        "format": "Format",
+        "elementType": "Elementtype",
+        "onDelete": "Ved sletning",
+        "description": "Beskrivelse",
+        "example": "Eksempel",
+        "default": "Standard",
+        "deprecationMessage": "Udfasningsbesked",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Min. længde",
+        "maxLength": "Max. længde",
+        "pattern": "Mønster"
+      }
+    },
+    "flags": {
+      "required": "påkrævet",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "uforanderlig",
+      "searchable": "søgbar",
+      "deprecated": "udfaset"
+    },
+    "examples": {
+      "defaultPill": "Standard",
+      "add": "Tilføj et eksempel",
+      "delete": "Slet eksemplet",
+      "name": "Eksemplets navn",
+      "newName": "Eksempel",
+      "defaultHint": "Standardværdier kommer fra hver egenskab (tom = genereret automatisk).",
+      "namedHint": "Skriv en værdi for at definere den; lad stå tom for at beholde den genererede.",
+      "columns": {
+        "value": "Værdi",
+        "origin": "Oprindelse"
+      },
+      "auto": "auto",
+      "defined": "defineret",
+      "constraintViolated": "Værdien overtræder egenskabens begrænsning ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Begræns (forbyd mens den bruges)",
+      "cascade": "Kaskadesletning",
+      "setNull": "Sæt til null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hundredvis",
+      "tenThousands": "Titusindvis",
+      "millions": "Millioner"
+    },
+    "issue": {
+      "propertyNameEmpty": "Egenskaben har intet navn",
+      "propertyNameDuplicate": "Duplikeret egenskabsnavn",
+      "propertyShadowsParent": "Skygger for en nedarvet egenskab",
+      "referenceTargetUnknown": "Den refererede type findes ikke længere",
+      "constraintPatternInvalid": "Ugyldigt mønster (regulært udtryk)",
+      "constraintMinAboveMax": "Min overstiger max"
     }
   },
   "mqtt": {

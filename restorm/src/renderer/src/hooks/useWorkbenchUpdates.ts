@@ -70,15 +70,20 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
   // rebuild per event would be wasteful.
   const requestUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
-    const subscription = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, () => {
+    const bump = (): void => {
       if (requestUpdateTimerRef.current !== null) clearTimeout(requestUpdateTimerRef.current)
       requestUpdateTimerRef.current = setTimeout(() => {
         requestUpdateTimerRef.current = null
         setUpdateCount(n => n + 1)
       }, 250)
-    })
+    }
+    const requestSubscription = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, bump)
+    // Design edits move the sidebar too (section-row counts, error
+    // dots), through the same debounced counter.
+    const designSubscription = eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, bump)
     return () => {
-      subscription.unsubscribe()
+      requestSubscription.unsubscribe()
+      designSubscription.unsubscribe()
       if (requestUpdateTimerRef.current !== null) clearTimeout(requestUpdateTimerRef.current)
     }
   }, [])

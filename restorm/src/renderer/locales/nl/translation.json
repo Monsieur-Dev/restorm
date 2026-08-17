@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} eigenschap",
-      "propertyCount_other": "{{count}} eigenschappen"
+      "propertyCount_other": "{{count}} eigenschappen",
+      "add": "Model toevoegen",
+      "delete": "Model verwijderen",
+      "deleteTitle": "{{name}} verwijderen?",
+      "deleteNoImpact": "Dit model wordt nergens gebruikt.",
+      "deleteImpactIntro": "Het verwijderen van dit model werkt bij:",
+      "deleteImpactChild": "{{name}} verliest zijn overerving (eigen eigenschappen blijven)",
+      "newName": "NewModel",
+      "selectPrompt": "Selecteer een model of maak er een.",
+      "tabs": {
+        "schema": "Schema",
+        "examples": "Voorbeelden",
+        "settings": "Instellingen",
+        "notes": "Notities"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} waarde",
-      "valueCount_other": "{{count}} waarden"
+      "valueCount_other": "{{count}} waarden",
+      "lists": "Enums",
+      "values": "Waarden",
+      "addEnum": "Enum toevoegen",
+      "addValue": "Waarde toevoegen",
+      "valueHeader": "Waarde",
+      "newName": "NewEnum",
+      "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype."
     },
     "documentation": {
       "empty": "De ontwerpdocumentatie wordt hier geserveerd."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "ontwerp · formaat {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identiteit",
+      "identifierProperty": "Identificerende eigenschap",
+      "identifierStrategy": "Strategie",
+      "inheritsFrom": "Erft van",
+      "noIdentifier": "(geen)",
+      "noParent": "(geen)",
+      "storage": "Opslag & levenscyclus",
+      "volumetry": "Verwacht volume",
+      "volumetryUnset": "(niet opgegeven)",
+      "timestamps": "Tijdstempels (aangemaakt/gewijzigd)",
+      "softDelete": "Soft delete",
+      "usedBy": "Gebruikt door",
+      "usedByNone": "Dit model wordt nog niet gebruikt.",
+      "usage": {
+        "body": "body",
+        "response": "antwoord {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} erft ervan"
+      }
+    },
+    "schema": {
+      "addProperty": "Eigenschap toevoegen",
+      "deleteProperty": "Eigenschap verwijderen",
+      "columns": {
+        "property": "Eigenschap",
+        "type": "Type",
+        "flags": "Attributen",
+        "example": "Voorbeeld"
+      },
+      "unnamed": "(naamloos)",
+      "nameMissing": "naam ontbreekt",
+      "panelTitle": "Eigenschap: {{name}}",
+      "jumpToParent": "{{name}} openen",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(geen)",
+      "invalidPattern": "Ongeldige reguliere expressie",
+      "minAboveMax": "Min overschrijdt max",
+      "fields": {
+        "name": "Naam",
+        "type": "Type",
+        "format": "Formaat",
+        "elementType": "Elementtype",
+        "onDelete": "Bij verwijdering",
+        "description": "Beschrijving",
+        "example": "Voorbeeld",
+        "default": "Standaard",
+        "deprecationMessage": "Afkeuringsbericht",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Minimale lengte",
+        "maxLength": "Maximale lengte",
+        "pattern": "Patroon"
+      }
+    },
+    "flags": {
+      "required": "verplicht",
+      "nullable": "nullable",
+      "unique": "uniek",
+      "immutable": "onveranderlijk",
+      "searchable": "doorzoekbaar",
+      "deprecated": "verouderd"
+    },
+    "examples": {
+      "defaultPill": "Standaard",
+      "add": "Voorbeeld toevoegen",
+      "delete": "Voorbeeld verwijderen",
+      "name": "Naam van het voorbeeld",
+      "newName": "Voorbeeld",
+      "defaultHint": "Standaardwaarden komen van elke eigenschap (leeg = automatisch gegenereerd).",
+      "namedHint": "Typ een waarde om die vast te leggen; laat leeg om de gegenereerde te behouden.",
+      "columns": {
+        "value": "Waarde",
+        "origin": "Herkomst"
+      },
+      "auto": "auto",
+      "defined": "gedefinieerd",
+      "constraintViolated": "De waarde schendt de beperking van de eigenschap ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Beperken (verbieden zolang in gebruik)",
+      "cascade": "Trapsgewijs verwijderen",
+      "setNull": "Op null zetten"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-increment",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Honderden",
+      "tenThousands": "Tienduizenden",
+      "millions": "Miljoenen"
+    },
+    "issue": {
+      "propertyNameEmpty": "De eigenschap heeft geen naam",
+      "propertyNameDuplicate": "Dubbele eigenschapsnaam",
+      "propertyShadowsParent": "Verbergt een geërfde eigenschap",
+      "referenceTargetUnknown": "Het gerefereerde type bestaat niet meer",
+      "constraintPatternInvalid": "Ongeldig patroon (reguliere expressie)",
+      "constraintMinAboveMax": "Min overschrijdt max"
     }
   },
   "mqtt": {

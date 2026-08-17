@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} veti",
-      "propertyCount_other": "{{count}} veti"
+      "propertyCount_other": "{{count}} veti",
+      "add": "Shto një model",
+      "delete": "Fshi modelin",
+      "deleteTitle": "Të fshihet {{name}}?",
+      "deleteNoImpact": "Ky model nuk përdoret askund.",
+      "deleteImpactIntro": "Fshirja e këtij modeli do të përditësojë:",
+      "deleteImpactChild": "{{name}} humb trashëgiminë e tij (vetitë e veta mbeten)",
+      "newName": "NewModel",
+      "selectPrompt": "Zgjidhni një model ose krijoni një.",
+      "tabs": {
+        "schema": "Skema",
+        "examples": "Shembuj",
+        "settings": "Cilësimet",
+        "notes": "Shënime"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} vlerë",
-      "valueCount_other": "{{count}} vlera"
+      "valueCount_other": "{{count}} vlera",
+      "lists": "Enumet",
+      "values": "Vlerat",
+      "addEnum": "Shto një enum",
+      "addValue": "Shto një vlerë",
+      "valueHeader": "Vlera",
+      "newName": "NewEnum",
+      "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie."
     },
     "documentation": {
       "empty": "Dokumentimi i dizajnit do të shërbehet këtu."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identiteti",
+      "identifierProperty": "Vetia identifikuese",
+      "identifierStrategy": "Strategjia",
+      "inheritsFrom": "Trashëgon nga",
+      "noIdentifier": "(asnjë)",
+      "noParent": "(asnjë)",
+      "storage": "Ruajtja & cikli i jetës",
+      "volumetry": "Vëllimi i pritur",
+      "volumetryUnset": "(i papërcaktuar)",
+      "timestamps": "Vulat kohore (krijuar/ndryshuar)",
+      "softDelete": "Fshirje e butë",
+      "usedBy": "Përdoret nga",
+      "usedByNone": "Ky model nuk përdoret ende.",
+      "usage": {
+        "body": "trupi",
+        "response": "përgjigje {{code}}",
+        "param": "parametri {{name}}",
+        "inherits": "{{name}} trashëgon prej tij"
+      }
+    },
+    "schema": {
+      "addProperty": "Shto një veti",
+      "deleteProperty": "Fshi vetinë",
+      "columns": {
+        "property": "Vetia",
+        "type": "Tipi",
+        "flags": "Atributet",
+        "example": "Shembull"
+      },
+      "unnamed": "(pa emër)",
+      "nameMissing": "mungon emri",
+      "panelTitle": "Vetia: {{name}}",
+      "jumpToParent": "Hap {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(asnjë)",
+      "invalidPattern": "Shprehje e rregullt e pavlefshme",
+      "minAboveMax": "Min tejkalon max",
+      "fields": {
+        "name": "Emri",
+        "type": "Tipi",
+        "format": "Formati",
+        "elementType": "Tipi i elementeve",
+        "onDelete": "Në fshirje",
+        "description": "Përshkrimi",
+        "example": "Shembull",
+        "default": "Parazgjedhja",
+        "deprecationMessage": "Mesazhi i vjetrimit",
+        "minimum": "Minimumi",
+        "maximum": "Maksimumi",
+        "minLength": "Gjatësia min.",
+        "maxLength": "Gjatësia max.",
+        "pattern": "Modeli (pattern)"
+      }
+    },
+    "flags": {
+      "required": "i detyrueshëm",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "i pandryshueshëm",
+      "searchable": "i kërkueshëm",
+      "deprecated": "i vjetruar"
+    },
+    "examples": {
+      "defaultPill": "Parazgjedhja",
+      "add": "Shto një shembull",
+      "delete": "Fshi shembullin",
+      "name": "Emri i shembullit",
+      "newName": "Shembull",
+      "defaultHint": "Vlerat e parazgjedhura vijnë nga secila veti (bosh = gjenerohet automatikisht).",
+      "namedHint": "Shkruani një vlerë për ta përcaktuar; lëreni bosh për të mbajtur atë të gjeneruarën.",
+      "columns": {
+        "value": "Vlera",
+        "origin": "Origjina"
+      },
+      "auto": "auto",
+      "defined": "e përcaktuar",
+      "constraintViolated": "Vlera shkel kufizimin e vetisë ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Kufizo (ndalo sa është në përdorim)",
+      "cascade": "Fshirje kaskadë",
+      "setNull": "Vendos në null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Qindra",
+      "tenThousands": "Dhjetëra mijëra",
+      "millions": "Miliona"
+    },
+    "issue": {
+      "propertyNameEmpty": "Vetia nuk ka emër",
+      "propertyNameDuplicate": "Emër vetie i dublikuar",
+      "propertyShadowsParent": "Mbulon një veti të trashëguar",
+      "referenceTargetUnknown": "Tipi i referuar nuk ekziston më",
+      "constraintPatternInvalid": "Model i pavlefshëm (shprehje e rregullt)",
+      "constraintMinAboveMax": "Min tejkalon max"
     }
   },
   "mqtt": {

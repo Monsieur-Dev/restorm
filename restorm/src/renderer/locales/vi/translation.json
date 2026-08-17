@@ -2191,11 +2191,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} thuộc tính",
-      "propertyCount_other": "{{count}} thuộc tính"
+      "propertyCount_other": "{{count}} thuộc tính",
+      "add": "Thêm mô hình",
+      "delete": "Xóa mô hình",
+      "deleteTitle": "Xóa {{name}}?",
+      "deleteNoImpact": "Mô hình này không được dùng ở đâu cả.",
+      "deleteImpactIntro": "Việc xóa mô hình này sẽ cập nhật:",
+      "deleteImpactChild": "{{name}} mất kế thừa (các thuộc tính riêng vẫn giữ)",
+      "newName": "NewModel",
+      "selectPrompt": "Chọn một mô hình, hoặc tạo mới.",
+      "tabs": {
+        "schema": "Lược đồ",
+        "examples": "Ví dụ",
+        "settings": "Cài đặt",
+        "notes": "Ghi chú"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} giá trị",
-      "valueCount_other": "{{count}} giá trị"
+      "valueCount_other": "{{count}} giá trị",
+      "lists": "Enum",
+      "values": "Giá trị",
+      "addEnum": "Thêm enum",
+      "addValue": "Thêm giá trị",
+      "valueHeader": "Giá trị",
+      "newName": "NewEnum",
+      "selectPrompt": "Chọn một enum, hoặc tạo mới — tập giá trị đóng dùng được làm kiểu thuộc tính."
     },
     "documentation": {
       "empty": "Tài liệu thiết kế sẽ được phục vụ tại đây."
@@ -2205,6 +2226,109 @@
     },
     "statusbar": {
       "format": "thiết kế · định dạng {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Danh tính",
+      "identifierProperty": "Thuộc tính định danh",
+      "identifierStrategy": "Chiến lược",
+      "inheritsFrom": "Kế thừa từ",
+      "noIdentifier": "(không có)",
+      "noParent": "(không có)",
+      "storage": "Lưu trữ & vòng đời",
+      "volumetry": "Khối lượng dự kiến",
+      "volumetryUnset": "(chưa xác định)",
+      "timestamps": "Dấu thời gian (tạo/sửa)",
+      "softDelete": "Xóa mềm",
+      "usedBy": "Được dùng bởi",
+      "usedByNone": "Mô hình này chưa được dùng.",
+      "usage": {
+        "body": "body",
+        "response": "phản hồi {{code}}",
+        "param": "tham số {{name}}",
+        "inherits": "{{name}} kế thừa từ nó"
+      }
+    },
+    "schema": {
+      "addProperty": "Thêm thuộc tính",
+      "deleteProperty": "Xóa thuộc tính",
+      "columns": {
+        "property": "Thuộc tính",
+        "type": "Kiểu",
+        "flags": "Cờ",
+        "example": "Ví dụ"
+      },
+      "unnamed": "(chưa đặt tên)",
+      "nameMissing": "thiếu tên",
+      "panelTitle": "Thuộc tính: {{name}}",
+      "jumpToParent": "Mở {{name}}",
+      "typeModel": "mô hình",
+      "typeEnum": "enum",
+      "noFormat": "(không có)",
+      "invalidPattern": "Biểu thức chính quy không hợp lệ",
+      "minAboveMax": "Min vượt quá max",
+      "fields": {
+        "name": "Tên",
+        "type": "Kiểu",
+        "format": "Định dạng",
+        "elementType": "Kiểu phần tử",
+        "onDelete": "Khi xóa",
+        "description": "Mô tả",
+        "example": "Ví dụ",
+        "default": "Mặc định",
+        "deprecationMessage": "Thông báo ngừng dùng",
+        "minimum": "Tối thiểu",
+        "maximum": "Tối đa",
+        "minLength": "Độ dài tối thiểu",
+        "maxLength": "Độ dài tối đa",
+        "pattern": "Mẫu (pattern)"
+      }
+    },
+    "flags": {
+      "required": "bắt buộc",
+      "nullable": "nullable",
+      "unique": "duy nhất",
+      "immutable": "bất biến",
+      "searchable": "tìm kiếm được",
+      "deprecated": "ngừng dùng"
+    },
+    "examples": {
+      "defaultPill": "Mặc định",
+      "add": "Thêm ví dụ",
+      "delete": "Xóa ví dụ",
+      "name": "Tên ví dụ",
+      "newName": "Ví dụ",
+      "defaultHint": "Giá trị mặc định lấy từ từng thuộc tính (trống = tạo tự động).",
+      "namedHint": "Nhập một giá trị để xác định; để trống để giữ giá trị được tạo.",
+      "columns": {
+        "value": "Giá trị",
+        "origin": "Nguồn gốc"
+      },
+      "auto": "tự động",
+      "defined": "đã xác định",
+      "constraintViolated": "Giá trị vi phạm ràng buộc của thuộc tính ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Hạn chế (cấm khi đang dùng)",
+      "cascade": "Xóa dây chuyền",
+      "setNull": "Đặt thành null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Tự tăng",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hàng trăm",
+      "tenThousands": "Hàng chục nghìn",
+      "millions": "Hàng triệu"
+    },
+    "issue": {
+      "propertyNameEmpty": "Thuộc tính chưa có tên",
+      "propertyNameDuplicate": "Tên thuộc tính trùng lặp",
+      "propertyShadowsParent": "Che khuất một thuộc tính kế thừa",
+      "referenceTargetUnknown": "Kiểu được tham chiếu không còn tồn tại",
+      "constraintPatternInvalid": "Mẫu không hợp lệ (biểu thức chính quy)",
+      "constraintMinAboveMax": "Min vượt quá max"
     }
   },
   "mqtt": {

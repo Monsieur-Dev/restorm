@@ -2191,11 +2191,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} プロパティ",
-      "propertyCount_other": "{{count}} プロパティ"
+      "propertyCount_other": "{{count}} プロパティ",
+      "add": "モデルを追加",
+      "delete": "モデルを削除",
+      "deleteTitle": "{{name}} を削除しますか？",
+      "deleteNoImpact": "このモデルはどこでも使用されていません。",
+      "deleteImpactIntro": "このモデルを削除すると以下が更新されます：",
+      "deleteImpactChild": "{{name}} は継承を失います（固有のプロパティは残ります）",
+      "newName": "NewModel",
+      "selectPrompt": "モデルを選択するか、作成してください。",
+      "tabs": {
+        "schema": "スキーマ",
+        "examples": "例",
+        "settings": "設定",
+        "notes": "ノート"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} 値",
-      "valueCount_other": "{{count}} 値"
+      "valueCount_other": "{{count}} 値",
+      "lists": "Enum",
+      "values": "値",
+      "addEnum": "enum を追加",
+      "addValue": "値を追加",
+      "valueHeader": "値",
+      "newName": "NewEnum",
+      "selectPrompt": "enum を選択するか、作成してください — プロパティの型として使える閉じた値の集合です。"
     },
     "documentation": {
       "empty": "デザインのドキュメントはここで配信されます。"
@@ -2205,6 +2226,109 @@
     },
     "statusbar": {
       "format": "デザイン · フォーマット {{version}}"
+    },
+    "modelSettings": {
+      "identity": "アイデンティティ",
+      "identifierProperty": "識別子プロパティ",
+      "identifierStrategy": "戦略",
+      "inheritsFrom": "継承元",
+      "noIdentifier": "（なし）",
+      "noParent": "（なし）",
+      "storage": "ストレージとライフサイクル",
+      "volumetry": "想定ボリューム",
+      "volumetryUnset": "（未指定）",
+      "timestamps": "タイムスタンプ（作成/更新）",
+      "softDelete": "論理削除",
+      "usedBy": "使用箇所",
+      "usedByNone": "このモデルはまだ使用されていません。",
+      "usage": {
+        "body": "ボディ",
+        "response": "レスポンス {{code}}",
+        "param": "パラメータ {{name}}",
+        "inherits": "{{name}} が継承しています"
+      }
+    },
+    "schema": {
+      "addProperty": "プロパティを追加",
+      "deleteProperty": "プロパティを削除",
+      "columns": {
+        "property": "プロパティ",
+        "type": "型",
+        "flags": "フラグ",
+        "example": "例"
+      },
+      "unnamed": "（名前なし）",
+      "nameMissing": "名前がありません",
+      "panelTitle": "プロパティ：{{name}}",
+      "jumpToParent": "{{name}} を開く",
+      "typeModel": "モデル",
+      "typeEnum": "enum",
+      "noFormat": "（なし）",
+      "invalidPattern": "無効な正規表現です",
+      "minAboveMax": "最小値が最大値を超えています",
+      "fields": {
+        "name": "名前",
+        "type": "型",
+        "format": "フォーマット",
+        "elementType": "要素の型",
+        "onDelete": "削除時の動作",
+        "description": "説明",
+        "example": "例",
+        "default": "デフォルト",
+        "deprecationMessage": "非推奨メッセージ",
+        "minimum": "最小値",
+        "maximum": "最大値",
+        "minLength": "最小長",
+        "maxLength": "最大長",
+        "pattern": "パターン"
+      }
+    },
+    "flags": {
+      "required": "必須",
+      "nullable": "nullable",
+      "unique": "一意",
+      "immutable": "不変",
+      "searchable": "検索可能",
+      "deprecated": "非推奨"
+    },
+    "examples": {
+      "defaultPill": "デフォルト",
+      "add": "例を追加",
+      "delete": "例を削除",
+      "name": "例の名前",
+      "newName": "例",
+      "defaultHint": "デフォルト値は各プロパティに由来します（空 = 自動生成）。",
+      "namedHint": "値を入力すると定義されます。空のままにすると生成値が使われます。",
+      "columns": {
+        "value": "値",
+        "origin": "由来"
+      },
+      "auto": "自動",
+      "defined": "定義済み",
+      "constraintViolated": "値がプロパティの制約に違反しています（{{constraint}}）"
+    },
+    "onDelete": {
+      "restrict": "制限（使用中は禁止）",
+      "cascade": "カスケード削除",
+      "setNull": "null に設定"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "自動増分",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "数百",
+      "tenThousands": "数万",
+      "millions": "数百万"
+    },
+    "issue": {
+      "propertyNameEmpty": "プロパティに名前がありません",
+      "propertyNameDuplicate": "プロパティ名が重複しています",
+      "propertyShadowsParent": "継承したプロパティを隠しています",
+      "referenceTargetUnknown": "参照先の型が存在しません",
+      "constraintPatternInvalid": "無効なパターン（正規表現）",
+      "constraintMinAboveMax": "最小値が最大値を超えています"
     }
   },
   "mqtt": {

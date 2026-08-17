@@ -2192,11 +2192,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} ominaisuus",
-      "propertyCount_other": "{{count}} ominaisuutta"
+      "propertyCount_other": "{{count}} ominaisuutta",
+      "add": "Lisää malli",
+      "delete": "Poista malli",
+      "deleteTitle": "Poistetaanko {{name}}?",
+      "deleteNoImpact": "Tätä mallia ei käytetä missään.",
+      "deleteImpactIntro": "Tämän mallin poistaminen päivittää:",
+      "deleteImpactChild": "{{name}} menettää perintänsä (omat ominaisuudet säilyvät)",
+      "newName": "NewModel",
+      "selectPrompt": "Valitse malli tai luo uusi.",
+      "tabs": {
+        "schema": "Skeema",
+        "examples": "Esimerkit",
+        "settings": "Asetukset",
+        "notes": "Muistiinpanot"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} arvo",
-      "valueCount_other": "{{count}} arvoa"
+      "valueCount_other": "{{count}} arvoa",
+      "lists": "Enumit",
+      "values": "Arvot",
+      "addEnum": "Lisää enum",
+      "addValue": "Lisää arvo",
+      "valueHeader": "Arvo",
+      "newName": "NewEnum",
+      "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä."
     },
     "documentation": {
       "empty": "Suunnitelman dokumentaatio palvellaan tässä."
@@ -2206,6 +2227,109 @@
     },
     "statusbar": {
       "format": "suunnitelma · muoto {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identiteetti",
+      "identifierProperty": "Tunnisteominaisuus",
+      "identifierStrategy": "Strategia",
+      "inheritsFrom": "Perii mallista",
+      "noIdentifier": "(ei mitään)",
+      "noParent": "(ei mitään)",
+      "storage": "Tallennus ja elinkaari",
+      "volumetry": "Odotettu volyymi",
+      "volumetryUnset": "(määrittämätön)",
+      "timestamps": "Aikaleimat (luotu/muokattu)",
+      "softDelete": "Pehmeä poisto",
+      "usedBy": "Käyttäjät",
+      "usedByNone": "Tätä mallia ei vielä käytetä.",
+      "usage": {
+        "body": "body",
+        "response": "vastaus {{code}}",
+        "param": "parametri {{name}}",
+        "inherits": "{{name}} perii siitä"
+      }
+    },
+    "schema": {
+      "addProperty": "Lisää ominaisuus",
+      "deleteProperty": "Poista ominaisuus",
+      "columns": {
+        "property": "Ominaisuus",
+        "type": "Tyyppi",
+        "flags": "Attribuutit",
+        "example": "Esimerkki"
+      },
+      "unnamed": "(nimetön)",
+      "nameMissing": "nimi puuttuu",
+      "panelTitle": "Ominaisuus: {{name}}",
+      "jumpToParent": "Avaa {{name}}",
+      "typeModel": "malli",
+      "typeEnum": "enum",
+      "noFormat": "(ei mitään)",
+      "invalidPattern": "Virheellinen säännöllinen lauseke",
+      "minAboveMax": "Minimi ylittää maksimin",
+      "fields": {
+        "name": "Nimi",
+        "type": "Tyyppi",
+        "format": "Muoto",
+        "elementType": "Alkioiden tyyppi",
+        "onDelete": "Poistettaessa",
+        "description": "Kuvaus",
+        "example": "Esimerkki",
+        "default": "Oletus",
+        "deprecationMessage": "Vanhentumisviesti",
+        "minimum": "Minimi",
+        "maximum": "Maksimi",
+        "minLength": "Vähimmäispituus",
+        "maxLength": "Enimmäispituus",
+        "pattern": "Kaava"
+      }
+    },
+    "flags": {
+      "required": "pakollinen",
+      "nullable": "nullable",
+      "unique": "yksilöllinen",
+      "immutable": "muuttumaton",
+      "searchable": "haettavissa",
+      "deprecated": "vanhentunut"
+    },
+    "examples": {
+      "defaultPill": "Oletus",
+      "add": "Lisää esimerkki",
+      "delete": "Poista esimerkki",
+      "name": "Esimerkin nimi",
+      "newName": "Esimerkki",
+      "defaultHint": "Oletusarvot tulevat kustakin ominaisuudesta (tyhjä = generoidaan automaattisesti).",
+      "namedHint": "Kirjoita arvo määrittääksesi sen; jätä tyhjäksi säilyttääksesi generoidun.",
+      "columns": {
+        "value": "Arvo",
+        "origin": "Alkuperä"
+      },
+      "auto": "auto",
+      "defined": "määritetty",
+      "constraintViolated": "Arvo rikkoo ominaisuuden rajoitetta ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Rajoita (estä käytön aikana)",
+      "cascade": "Vyörytetty poisto",
+      "setNull": "Aseta nulliksi"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Automaattinen kasvatus",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Satoja",
+      "tenThousands": "Kymmeniätuhansia",
+      "millions": "Miljoonia"
+    },
+    "issue": {
+      "propertyNameEmpty": "Ominaisuudella ei ole nimeä",
+      "propertyNameDuplicate": "Ominaisuuden nimi on jo käytössä",
+      "propertyShadowsParent": "Peittää perityn ominaisuuden",
+      "referenceTargetUnknown": "Viitattua tyyppiä ei enää ole",
+      "constraintPatternInvalid": "Virheellinen kaava (säännöllinen lauseke)",
+      "constraintMinAboveMax": "Minimi ylittää maksimin"
     }
   },
   "mqtt": {

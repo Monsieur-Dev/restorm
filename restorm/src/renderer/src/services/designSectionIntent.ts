@@ -1,11 +1,11 @@
 /**
  * Cross-component channel for "open the design tab AND focus section
- * X" navigation. The opener (a sidebar group row under a design node)
- * stages the target section here, then triggers the normal design-tab
- * open path; the matching `DesignTabView` consumes the staged value
- * once it mounts (or immediately, when it is already mounted — the
- * single-tab policy means clicking a group row usually refocuses an
- * open tab with no remount).
+ * X (and optionally entity Y in it)" navigation. The opener (a sidebar
+ * group row under a design node, a "Used by" chip) stages the target
+ * here, then triggers the normal design-tab open path; the matching
+ * `DesignTabView` consumes the staged value once it mounts (or
+ * immediately, when it is already mounted — the single-tab policy means
+ * clicking a group row usually refocuses an open tab with no remount).
  *
  * Same rationale as `envFolderTabIntent.ts`: the view may not be
  * mounted when the opener fires, so a fire-and-forget event would be
@@ -16,23 +16,30 @@
 
 import type { DesignSectionKey } from '../../../shared/types/editor'
 
-const pendingByDesignId = new Map<string, DesignSectionKey>()
-type Subscriber = (designId: string, section: DesignSectionKey) => void
-const subscribers = new Set<Subscriber>()
-
-/** Stage a section for the next render of the design with `designId`.
- *  Call just BEFORE triggering the normal open flow
- *  (`handleItemClick(designId)`); `DesignTabView` drains the entry via
- *  `consumePendingDesignSection`. */
-export function setPendingDesignSection(designId: string, section: DesignSectionKey): void {
-  if (!designId) return
-  pendingByDesignId.set(designId, section)
-  for (const sub of subscribers) sub(designId, section)
+export interface DesignSectionIntent {
+  section: DesignSectionKey
+  /** Entity to select inside the section (model id, route id…). */
+  entityId?: string
 }
 
-/** Read + clear the staged section for a design. `undefined` when
+const pendingByDesignId = new Map<string, DesignSectionIntent>()
+type Subscriber = (designId: string, intent: DesignSectionIntent) => void
+const subscribers = new Set<Subscriber>()
+
+/** Stage a section (and optional entity) for the next render of the
+ *  design with `designId`. Call just BEFORE triggering the normal open
+ *  flow (`handleItemClick(designId)`); `DesignTabView` drains the entry
+ *  via `consumePendingDesignSection`. */
+export function setPendingDesignSection(designId: string, section: DesignSectionKey, entityId?: string): void {
+  if (!designId) return
+  const intent: DesignSectionIntent = entityId === undefined ? { section } : { section, entityId }
+  pendingByDesignId.set(designId, intent)
+  for (const sub of subscribers) sub(designId, intent)
+}
+
+/** Read + clear the staged intent for a design. `undefined` when
  *  nothing is pending. */
-export function consumePendingDesignSection(designId: string): DesignSectionKey | undefined {
+export function consumePendingDesignSection(designId: string): DesignSectionIntent | undefined {
   const value = pendingByDesignId.get(designId)
   if (value !== undefined) pendingByDesignId.delete(designId)
   return value

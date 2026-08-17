@@ -7,6 +7,7 @@ import {
   MarkdownEditor,
   ScrollableElement,
   SelectBox,
+  eventBus,
   useAuthState,
   type ISelectData,
   type ListViewItemData
@@ -14,9 +15,14 @@ import {
 import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collections'
 import type { DesignSectionKey } from '../../../../shared/types/editor'
 import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
+import { validateApiDesign } from '../../../../shared/design/validateApiDesign'
 import { isDesignEditLocked } from '../../../../shared/auth/planCapabilities'
+import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { consumePendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
 import { subscribeToPro } from '../../services/subscribeToPro'
+import { assignDesignSection } from './designMutations'
+import { DesignModelsSection } from './DesignModelsSection'
+import { DesignEnumsSection } from './DesignEnumsSection'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import './designTabView.css'
 
@@ -43,8 +49,12 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
   const authState = useAuthState()
   const editLocked = isDesignEditLocked(authState)
 
+  const initialIntent = useMemo(() => consumePendingDesignSection(design.id), [design.id])
   const [activeSection, setActiveSection] = useState<DesignSectionKey>(
-    () => consumePendingDesignSection(design.id) ?? 'settings'
+    () => initialIntent?.section ?? 'settings'
+  )
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(
+    () => (initialIntent?.section === 'models' ? initialIntent.entityId ?? null : null)
   )
 
   // Follow section intents while mounted — the single-tab policy means
@@ -53,15 +63,41 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
   // drained on a microtask (never a synchronous state write in the
   // effect body).
   useEffect(() => {
-    const unsubscribe = subscribeDesignSectionIntent((designId, section) => {
-      if (designId === design.id) setActiveSection(section)
+    const applyIntent = (intent: { section: DesignSectionKey; entityId?: string }): void => {
+      setActiveSection(intent.section)
+      if (intent.section === 'models' && intent.entityId !== undefined) setSelectedModelId(intent.entityId)
+    }
+    const unsubscribe = subscribeDesignSectionIntent((designId, intent) => {
+      if (designId === design.id) applyIntent(intent)
     })
     const pending = consumePendingDesignSection(design.id)
     if (pending !== undefined) {
-      queueMicrotask(() => { setActiveSection(pending) })
+      queueMicrotask(() => { applyIntent(pending) })
     }
     return unsubscribe
   }, [design.id])
+
+  // Structural edits (add a property, delete a model…) mutate the
+  // reactive design in place — this tab re-renders off the proxy's own
+  // DESIGN_UPDATED event, scoped to this design, without waiting for
+  // any app-level refresh.
+  const [, setDesignTick] = useState(0)
+  useEffect(() => {
+    const subscription = eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, (payload) => {
+      if ((payload as DocumentChangedPayload).id === design.id) setDesignTick((n) => n + 1)
+    })
+    return () => { subscription.unsubscribe() }
+  }, [design.id])
+
+  // Fresh on every render (renders are driven by the tick above): the
+  // issues feed row-level errors, the sidebar dots and — later — the
+  // design server / codegen gates.
+  const issues = validateApiDesign(design)
+
+  const jumpTo = (section: 'models' | 'routes', entityId: string): void => {
+    setActiveSection(section)
+    if (section === 'models') setSelectedModelId(entityId)
+  }
 
   return (
     <div className="design-tab-view" data-testid={`design-tab-view-${design.id}`}>
@@ -85,7 +121,20 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
         {activeSection === 'settings' && (
           <DesignSettingsSection design={design} editLocked={editLocked} />
         )}
-        {(activeSection === 'models' || activeSection === 'enums' || activeSection === 'routes') && (
+        {activeSection === 'models' && (
+          <DesignModelsSection
+            design={design}
+            editLocked={editLocked}
+            issues={issues}
+            selectedModelId={selectedModelId}
+            onSelectModel={setSelectedModelId}
+            onJumpTo={jumpTo}
+          />
+        )}
+        {activeSection === 'enums' && (
+          <DesignEnumsSection design={design} editLocked={editLocked} />
+        )}
+        {activeSection === 'routes' && (
           <DesignEntityListSection key={activeSection} design={design} section={activeSection} />
         )}
         {activeSection === 'documentation' && (
@@ -121,17 +170,6 @@ const DesignSectionPlaceholder: React.FC<{ title: string; message: string }> = (
  * design key so the reactive proxy sees it.
  */
 const AUTH_KINDS: readonly DesignAuthKind[] = ['none', 'bearer', 'apiKeyHeader', 'basic']
-
-/**
- * Write one top-level design section through the REACTIVE proxy — the
- * deliberate mutation path of the design pipeline (the proxy's set trap
- * emits DESIGN_UPDATED into dirty/autosave). Lives at module scope: a
- * component-scope assignment would read as a render-value mutation,
- * which this is not — the design object is an external store.
- */
-function assignDesignSection<K extends keyof ApiDesign>(design: ApiDesign, key: K, value: ApiDesign[K]): void {
-  design[key] = value
-}
 
 const DesignSettingsSection: React.FC<{ design: ApiDesign; editLocked: boolean }> = ({ design, editLocked }) => {
   const { t } = useTranslation()

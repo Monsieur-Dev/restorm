@@ -2194,11 +2194,32 @@
     },
     "models": {
       "propertyCount_one": "{{count}} властивість",
-      "propertyCount_other": "{{count}} властивостей"
+      "propertyCount_other": "{{count}} властивостей",
+      "add": "Додати модель",
+      "delete": "Видалити модель",
+      "deleteTitle": "Видалити {{name}}?",
+      "deleteNoImpact": "Ця модель ніде не використовується.",
+      "deleteImpactIntro": "Видалення цієї моделі оновить:",
+      "deleteImpactChild": "{{name}} втрачає успадкування (власні властивості залишаються)",
+      "newName": "NewModel",
+      "selectPrompt": "Виберіть модель або створіть нову.",
+      "tabs": {
+        "schema": "Схема",
+        "examples": "Приклади",
+        "settings": "Налаштування",
+        "notes": "Нотатки"
+      }
     },
     "enums": {
       "valueCount_one": "{{count}} значення",
-      "valueCount_other": "{{count}} значень"
+      "valueCount_other": "{{count}} значень",
+      "lists": "Енуми",
+      "values": "Значення",
+      "addEnum": "Додати енум",
+      "addValue": "Додати значення",
+      "valueHeader": "Значення",
+      "newName": "NewEnum",
+      "selectPrompt": "Виберіть енум або створіть новий — закритий набір значень, який можна використовувати як тип властивості."
     },
     "documentation": {
       "empty": "Документація дизайну буде обслуговуватися тут."
@@ -2208,6 +2229,109 @@
     },
     "statusbar": {
       "format": "дизайн · формат {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Ідентичність",
+      "identifierProperty": "Ідентифікаційна властивість",
+      "identifierStrategy": "Стратегія",
+      "inheritsFrom": "Успадковує від",
+      "noIdentifier": "(немає)",
+      "noParent": "(немає)",
+      "storage": "Зберігання та життєвий цикл",
+      "volumetry": "Очікуваний обсяг",
+      "volumetryUnset": "(не вказано)",
+      "timestamps": "Часові мітки (створено/змінено)",
+      "softDelete": "М’яке видалення",
+      "usedBy": "Використовується в",
+      "usedByNone": "Ця модель ще не використовується.",
+      "usage": {
+        "body": "тіло",
+        "response": "відповідь {{code}}",
+        "param": "параметр {{name}}",
+        "inherits": "{{name}} успадковує від неї"
+      }
+    },
+    "schema": {
+      "addProperty": "Додати властивість",
+      "deleteProperty": "Видалити властивість",
+      "columns": {
+        "property": "Властивість",
+        "type": "Тип",
+        "flags": "Атрибути",
+        "example": "Приклад"
+      },
+      "unnamed": "(без назви)",
+      "nameMissing": "відсутня назва",
+      "panelTitle": "Властивість: {{name}}",
+      "jumpToParent": "Відкрити {{name}}",
+      "typeModel": "модель",
+      "typeEnum": "enum",
+      "noFormat": "(немає)",
+      "invalidPattern": "Некоректний регулярний вираз",
+      "minAboveMax": "Мін перевищує макс",
+      "fields": {
+        "name": "Назва",
+        "type": "Тип",
+        "format": "Формат",
+        "elementType": "Тип елементів",
+        "onDelete": "При видаленні",
+        "description": "Опис",
+        "example": "Приклад",
+        "default": "Типове",
+        "deprecationMessage": "Повідомлення про застарілість",
+        "minimum": "Мінімум",
+        "maximum": "Максимум",
+        "minLength": "Мін. довжина",
+        "maxLength": "Макс. довжина",
+        "pattern": "Шаблон"
+      }
+    },
+    "flags": {
+      "required": "обов’язкова",
+      "nullable": "nullable",
+      "unique": "унікальна",
+      "immutable": "незмінна",
+      "searchable": "доступна для пошуку",
+      "deprecated": "застаріла"
+    },
+    "examples": {
+      "defaultPill": "Типовий",
+      "add": "Додати приклад",
+      "delete": "Видалити приклад",
+      "name": "Назва прикладу",
+      "newName": "Приклад",
+      "defaultHint": "Типові значення походять з кожної властивості (порожньо = генерується автоматично).",
+      "namedHint": "Введіть значення, щоб визначити його; залиште порожнім, щоб зберегти згенероване.",
+      "columns": {
+        "value": "Значення",
+        "origin": "Походження"
+      },
+      "auto": "авто",
+      "defined": "визначено",
+      "constraintViolated": "Значення порушує обмеження властивості ({{constraint}})"
+    },
+    "onDelete": {
+      "restrict": "Обмежити (заборонити, поки використовується)",
+      "cascade": "Каскадне видалення",
+      "setNull": "Встановити в null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Автоінкремент",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Сотні",
+      "tenThousands": "Десятки тисяч",
+      "millions": "Мільйони"
+    },
+    "issue": {
+      "propertyNameEmpty": "Властивість не має назви",
+      "propertyNameDuplicate": "Дубльована назва властивості",
+      "propertyShadowsParent": "Затіняє успадковану властивість",
+      "referenceTargetUnknown": "Тип, на який є посилання, більше не існує",
+      "constraintPatternInvalid": "Некоректний шаблон (регулярний вираз)",
+      "constraintMinAboveMax": "Мін перевищує макс"
     }
   },
   "mqtt": {
