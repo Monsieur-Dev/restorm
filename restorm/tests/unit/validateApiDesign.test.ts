@@ -232,4 +232,37 @@ describe('validateApiDesign', () => {
       { code: 'routePathDuplicate', path: ['d', 'g1', 'r2'], subject: 'GET /users/{*}' }
     ])
   })
+
+  it('flags a route composing onto an enabled projection endpoint', () => {
+    const design = withModels(model('m1', 'User'))
+    design.serving = { protocols: ['graphql'] }
+    design.routeGroups = [{
+      id: 'g1',
+      doc: { name: 'Misc' },
+      routes: [
+        { id: 'r1', doc: { match: { urlPattern: '/graphql', method: 'POST' }, responses: { '200': {} } } }
+      ]
+    }]
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'routePathReserved', path: ['d', 'g1', 'r1'], subject: '/graphql' }
+    ])
+    // The same route is fine while the projection stays off.
+    design.serving = {}
+    expect(validateApiDesign(design)).toEqual([])
+  })
+
+  it('always reserves /swagger.json, base path included', () => {
+    const design = withModels(model('m1', 'User'))
+    design.server = { basePath: '/swagger.json' }
+    design.routeGroups = [{
+      id: 'g1',
+      doc: { name: 'Misc' },
+      routes: [
+        { id: 'r1', doc: { match: { urlPattern: '/', method: 'GET' }, responses: { '200': {} } } }
+      ]
+    }]
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'routePathReserved', path: ['d', 'g1', 'r1'], subject: '/swagger.json' }
+    ])
+  })
 })

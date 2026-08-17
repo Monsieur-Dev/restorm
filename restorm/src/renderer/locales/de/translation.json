@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Die Code-Generierung aus diesem Design entsteht hier."
+      "empty": "Die Code-Generierung aus diesem Design entsteht hier.",
+      "subtitle": "Erzeugen Sie ein Projekt aus diesem Design — in einer Sandbox gerendert, erst nach Bestätigung des Baums geschrieben",
+      "sourceTitle": "Template",
+      "sourceKind": {
+        "official": "Offiziell",
+        "repo": "Repository",
+        "local": "Lokaler Ordner"
+      },
+      "official": "Offizielles Template",
+      "repo": "Repository (owner/repo)",
+      "local": "Lokaler Template-Ordner",
+      "output": "Ausgabeordner (absolut oder relativ zum Projekt)",
+      "browse": "Ausgabeordner wählen",
+      "generate": "Projekt generieren",
+      "generating": "Generierung in der Sandbox…",
+      "blocked": "Beheben Sie die {{count}} Validierungsfehler des Designs vor der Generierung",
+      "failed": "Die Generierung ist fehlgeschlagen",
+      "outputMissing": "Wählen Sie zuerst einen Ausgabeordner",
+      "extracted": "{{count}} Datei(en) nach {{root}} geschrieben",
+      "preview": "{{name}} hat {{count}} Datei(en) erzeugt — bestätigen Sie das Schreiben",
+      "confirm": "In den Ausgabeordner schreiben",
+      "discard": "Verwerfen"
     },
     "statusbar": {
       "format": "Design · Format {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Ein Antwortmodell existiert nicht mehr",
       "responseExampleUnknown": "Eine Antwort serviert ein fehlendes Beispiel",
       "routeResponsesMissing": "Die Route deklariert keine Antwort",
-      "routePathDuplicate": "Eine andere Route beantwortet diese Methode und diesen Pfad bereits"
+      "routePathDuplicate": "Eine andere Route beantwortet diese Methode und diesen Pfad bereits",
+      "routePathReserved": "Der Design-Server reserviert diesen Pfad — die Route würde nie antworten"
     },
     "traffic": {
       "low": "Niedrig",

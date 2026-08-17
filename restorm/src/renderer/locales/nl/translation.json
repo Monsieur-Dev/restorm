@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Codegeneratie vanuit dit ontwerp komt hier."
+      "empty": "Codegeneratie vanuit dit ontwerp komt hier.",
+      "subtitle": "Genereer een project uit dit design — gerenderd in een sandbox, pas geschreven na bevestiging van de boom",
+      "sourceTitle": "Template",
+      "sourceKind": {
+        "official": "Officieel",
+        "repo": "Repository",
+        "local": "Lokale map"
+      },
+      "official": "Officieel template",
+      "repo": "Repository (owner/repo)",
+      "local": "Lokale templatemap",
+      "output": "Uitvoermap (absoluut of relatief aan het project)",
+      "browse": "Kies de uitvoermap",
+      "generate": "Project genereren",
+      "generating": "Genereren in de sandbox…",
+      "blocked": "Los eerst de {{count}} validatiefout(en) van het design op",
+      "failed": "De generatie is mislukt",
+      "outputMissing": "Kies eerst een uitvoermap",
+      "extracted": "{{count}} bestand(en) geschreven naar {{root}}",
+      "preview": "{{name}} genereerde {{count}} bestand(en) — bevestig om ze te schrijven",
+      "confirm": "Naar de uitvoermap schrijven",
+      "discard": "Verwerpen"
     },
     "statusbar": {
       "format": "ontwerp · formaat {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Een antwoordmodel bestaat niet meer",
       "responseExampleUnknown": "Een antwoord serveert een ontbrekend voorbeeld",
       "routeResponsesMissing": "De route declareert geen respons",
-      "routePathDuplicate": "Een andere route beantwoordt deze methode en dit pad al"
+      "routePathDuplicate": "Een andere route beantwoordt deze methode en dit pad al",
+      "routePathReserved": "De designserver reserveert dit pad — de route zou nooit antwoorden"
     },
     "traffic": {
       "low": "Laag",

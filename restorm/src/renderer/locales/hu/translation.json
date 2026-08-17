@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "A tervből történő kódgenerálás itt fog élni."
+      "empty": "A tervből történő kódgenerálás itt fog élni.",
+      "subtitle": "Generáljon projektet ebből a tervből — sandboxban renderelve, csak a fa jóváhagyása után íródik ki",
+      "sourceTitle": "Sablon",
+      "sourceKind": {
+        "official": "Hivatalos",
+        "repo": "Repository",
+        "local": "Helyi mappa"
+      },
+      "official": "Hivatalos sablon",
+      "repo": "Repository (owner/repo)",
+      "local": "Helyi sablonmappa",
+      "output": "Kimeneti mappa (abszolút, vagy a projekthez képest relatív)",
+      "browse": "Kimeneti mappa kiválasztása",
+      "generate": "Projekt generálása",
+      "generating": "Generálás a sandboxban…",
+      "blocked": "Javítsa a terv {{count}} validálási hibáját a generálás előtt",
+      "failed": "A generálás nem sikerült",
+      "outputMissing": "Először válasszon kimeneti mappát",
+      "extracted": "{{count}} fájl kiírva ide: {{root}}",
+      "preview": "{{name}} {{count}} fájlt generált — erősítse meg a kiírást",
+      "confirm": "Írás a kimeneti mappába",
+      "discard": "Elvetés"
     },
     "statusbar": {
       "format": "terv · formátum {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Egy válaszmodell már nem létezik",
       "responseExampleUnknown": "Egy válasz hiányzó példát szolgál ki",
       "routeResponsesMissing": "Az útvonal nem deklarál választ",
-      "routePathDuplicate": "Egy másik útvonal már válaszol erre a metódusra és útvonalra"
+      "routePathDuplicate": "Egy másik útvonal már válaszol erre a metódusra és útvonalra",
+      "routePathReserved": "A design szerver fenntartja ezt az útvonalat — a route soha nem válaszolna"
     },
     "traffic": {
       "low": "Alacsony",

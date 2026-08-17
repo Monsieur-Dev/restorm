@@ -16,8 +16,8 @@
  * `createSchema`) is main-process territory; this module stays pure.
  */
 
-import type { ApiDesign, DesignEnum, DesignModel, DesignResponseMeta, DesignRoute } from '../types/apiDesign'
-import { buildListPage, buildModelInstance, servedProperties } from './designServing'
+import type { ApiDesign, DesignEnum, DesignModel, DesignResponseMeta, DesignRoute, DesignRouteGroup } from '../types/apiDesign'
+import { authSatisfied, buildListPage, buildModelInstance, effectiveAuth, servedProperties } from './designServing'
 import { routePathParams } from './designRoutes'
 
 // ── Names ─────────────────────────────────────────────────────────────
@@ -76,9 +76,18 @@ export function designGraphqlNames(design: ApiDesign): GraphqlNames {
   }
   for (const enum_ of design.enums) {
     names.enums.set(enum_.id, claim(upperFirst(sanitizeGraphqlName(enum_.doc.name, 'Enum'))))
+    // Enum VALUES are the third GraphQL namespace — sanitization can
+    // collapse distinct raw values (`v1.0` / `v1-0`) onto one spelling,
+    // so they claim like types and fields do.
     const values = new Map<string, string>()
+    const takenValues = new Set<string>()
     ;(enum_.doc.enumValues ?? []).forEach((value, index) => {
-      values.set(String(value), sanitizeEnumValue(String(value), index))
+      const base = sanitizeEnumValue(String(value), index)
+      let name = base
+      let n = 2
+      while (takenValues.has(name)) { name = `${base}_${n}`; n += 1 }
+      takenValues.add(name)
+      values.set(String(value), name)
     })
     names.enumValues.set(enum_.id, values)
   }
@@ -128,6 +137,8 @@ export interface GraphqlOperation {
   /** SDL return type, e.g. `[User!]!` or `User`. */
   returnType: string
   route: DesignRoute
+  /** The group the route lives in (its auth contract applies). */
+  group: DesignRouteGroup
   /** Response model (absent on DELETE-shaped mutations). */
   model?: DesignModel
   /** Body model whose writable properties form the `input` argument. */
@@ -165,7 +176,11 @@ export function designGraphqlOperations(design: ApiDesign): GraphqlOperation[] {
       const params = routePathParams(route.doc.match.urlPattern)
 
       if (method === 'GET') {
-        if (responseModel === undefined) continue
+        // Same exclusion criterion as the TYPE emitter: a model whose
+        // served surface is empty never gets a `type` block, so an
+        // operation returning it would reference an unknown type and
+        // the SDL would not build.
+        if (responseModel === undefined || servedProperties(design, responseModel).length === 0) continue
         const typeName = names.models.get(responseModel.id) ?? 'String'
         const list = responseMeta?.list === true
         const base = lowerFirst(sanitizeGraphqlName(
@@ -180,6 +195,7 @@ export function designGraphqlOperations(design: ApiDesign): GraphqlOperation[] {
           args,
           returnType: list ? `[${typeName}!]!` : typeName,
           route,
+          group,
           model: responseModel,
           list
         })
@@ -187,7 +203,10 @@ export function designGraphqlOperations(design: ApiDesign): GraphqlOperation[] {
       }
 
       if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
-        const model = responseModel ?? bodyModel
+        const boundModel = responseModel ?? bodyModel
+        const model = boundModel !== undefined && servedProperties(design, boundModel).length > 0
+          ? boundModel
+          : undefined
         if (method !== 'DELETE' && model === undefined) continue
         const typeName = model !== undefined ? names.models.get(model.id) ?? 'String' : 'Boolean'
         // A model-less DELETE names off its summary (`Delete a User` →
@@ -208,6 +227,7 @@ export function designGraphqlOperations(design: ApiDesign): GraphqlOperation[] {
           args,
           returnType: method === 'DELETE' ? 'Boolean' : typeName,
           route,
+          group,
           list: false
         }
         if (model !== undefined && method !== 'DELETE') operation.model = model
@@ -352,8 +372,40 @@ export function designGraphqlResolvers(design: ApiDesign): DesignResolverMap {
 
 type ResolverArgs = Record<string, unknown>
 
+/** The slice of graphql-yoga's context the resolvers read: the WHATWG
+ * request whose headers carry the caller's credentials. */
+interface ResolverContext {
+  request?: { headers?: { get?: (name: string) => string | null } }
+}
+
+/** Flatten the fetch-style headers into the Node-style record
+ * `authSatisfied` reads (the two header names auth can live in). */
+function headersRecord(design: ApiDesign, context: ResolverContext | undefined): Record<string, string> {
+  const headers = context?.request?.headers
+  if (headers?.get === undefined) return {}
+  const record: Record<string, string> = {}
+  const authorization = headers.get('authorization')
+  if (authorization !== null) record['authorization'] = authorization
+  for (const scheme of Object.values(design.securitySchemes ?? {})) {
+    if (scheme.type === 'apiKey' && scheme.in === 'header' && typeof scheme.name === 'string') {
+      const value = headers.get(scheme.name)
+      if (value !== null) record[scheme.name.toLowerCase()] = value
+    }
+  }
+  const apiKey = headers.get('x-api-key')
+  if (apiKey !== null) record['x-api-key'] = apiKey
+  return record
+}
+
 function buildResolver(design: ApiDesign, names: GraphqlNames, operation: GraphqlOperation) {
-  return (_parent: unknown, rawArgs: ResolverArgs | undefined): unknown => {
+  return (_parent: unknown, rawArgs: ResolverArgs | undefined, context?: ResolverContext): unknown => {
+    // Same contract as the HTTP projection: the route's EFFECTIVE auth
+    // (route override, then group, then design default) — presence of
+    // the right credential shape, any value.
+    const auth = effectiveAuth(design, operation.group, operation.route)
+    if (!authSatisfied(auth, headersRecord(design, context), design)) {
+      throw new Error(`This operation requires ${auth} credentials`)
+    }
     const args = rawArgs ?? {}
     const model = operation.model
     if (operation.kind === 'mutation' && model === undefined) return true

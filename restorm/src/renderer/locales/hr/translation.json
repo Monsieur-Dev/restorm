@@ -2237,7 +2237,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generiranje koda iz ovog dizajna bit će ovdje."
+      "empty": "Generiranje koda iz ovog dizajna bit će ovdje.",
+      "subtitle": "Generirajte projekt iz ovog dizajna — renderirano u sandboxu, zapisano tek nakon potvrde stabla",
+      "sourceTitle": "Predložak",
+      "sourceKind": {
+        "official": "Službeni",
+        "repo": "Repozitorij",
+        "local": "Lokalna mapa"
+      },
+      "official": "Službeni predložak",
+      "repo": "Repozitorij (owner/repo)",
+      "local": "Lokalna mapa predloška",
+      "output": "Izlazna mapa (apsolutna ili relativna prema projektu)",
+      "browse": "Odaberite izlaznu mapu",
+      "generate": "Generiraj projekt",
+      "generating": "Generiranje u sandboxu…",
+      "blocked": "Ispravite {{count}} pogrešku/pogreške validacije dizajna prije generiranja",
+      "failed": "Generiranje nije uspjelo",
+      "outputMissing": "Najprije odaberite izlaznu mapu",
+      "extracted": "{{count}} datoteka zapisano u {{root}}",
+      "preview": "{{name}} je generirao {{count}} datoteka — potvrdite zapis",
+      "confirm": "Zapiši u izlaznu mapu",
+      "discard": "Odbaci"
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2365,7 +2386,8 @@
       "responseModelUnknown": "Model odgovora više ne postoji",
       "responseExampleUnknown": "Odgovor poslužuje nepostojeći primjer",
       "routeResponsesMissing": "Ruta ne deklarira nijedan odgovor",
-      "routePathDuplicate": "Druga ruta već odgovara na ovu metodu i putanju"
+      "routePathDuplicate": "Druga ruta već odgovara na ovu metodu i putanju",
+      "routePathReserved": "Dizajnerski poslužitelj rezervira ovu putanju — ruta nikada ne bi odgovorila"
     },
     "traffic": {
       "low": "Nizak",

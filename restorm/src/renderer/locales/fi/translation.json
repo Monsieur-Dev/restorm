@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Koodin generointi tästä suunnitelmasta tulee tähän."
+      "empty": "Koodin generointi tästä suunnitelmasta tulee tähän.",
+      "subtitle": "Luo projekti tästä suunnitelmasta — renderöidään hiekkalaatikossa, kirjoitetaan vasta puun vahvistuksen jälkeen",
+      "sourceTitle": "Mallipohja",
+      "sourceKind": {
+        "official": "Virallinen",
+        "repo": "Repositorio",
+        "local": "Paikallinen kansio"
+      },
+      "official": "Virallinen mallipohja",
+      "repo": "Repositorio (owner/repo)",
+      "local": "Paikallinen mallipohjakansio",
+      "output": "Tuloskansio (absoluuttinen tai suhteessa projektiin)",
+      "browse": "Valitse tuloskansio",
+      "generate": "Luo projekti",
+      "generating": "Luodaan hiekkalaatikossa…",
+      "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen luontia",
+      "failed": "Luonti epäonnistui",
+      "outputMissing": "Valitse ensin tuloskansio",
+      "extracted": "{{count}} tiedosto(a) kirjoitettu kansioon {{root}}",
+      "preview": "{{name}} loi {{count}} tiedosto(a) — vahvista kirjoitus",
+      "confirm": "Kirjoita tuloskansioon",
+      "discard": "Hylkää"
     },
     "statusbar": {
       "format": "suunnitelma · muoto {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Vastausmallia ei enää ole",
       "responseExampleUnknown": "Vastaus tarjoilee puuttuvan esimerkin",
       "routeResponsesMissing": "Reitti ei määrittele yhtään vastausta",
-      "routePathDuplicate": "Toinen reitti vastaa jo tähän metodiin ja polkuun"
+      "routePathDuplicate": "Toinen reitti vastaa jo tähän metodiin ja polkuun",
+      "routePathReserved": "Design-palvelin varaa tämän polun — reitti ei koskaan vastaisi"
     },
     "traffic": {
       "low": "Matala",

@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Bu tasarımdan kod üretimi burada yaşayacak."
+      "empty": "Bu tasarımdan kod üretimi burada yaşayacak.",
+      "subtitle": "Bu tasarımdan bir proje üretin — sandbox içinde işlenir, yalnızca ağacı onayladıktan sonra yazılır",
+      "sourceTitle": "Şablon",
+      "sourceKind": {
+        "official": "Resmî",
+        "repo": "Depo",
+        "local": "Yerel klasör"
+      },
+      "official": "Resmî şablon",
+      "repo": "Depo (owner/repo)",
+      "local": "Yerel şablon klasörü",
+      "output": "Çıktı klasörü (mutlak veya projeye göreli)",
+      "browse": "Çıktı klasörünü seç",
+      "generate": "Projeyi üret",
+      "generating": "Sandbox içinde üretiliyor…",
+      "blocked": "Üretmeden önce tasarımın {{count}} doğrulama hatasını düzeltin",
+      "failed": "Üretim başarısız oldu",
+      "outputMissing": "Önce bir çıktı klasörü seçin",
+      "extracted": "{{count}} dosya {{root}} klasörüne yazıldı",
+      "preview": "{{name}} {{count}} dosya üretti — yazmak için onaylayın",
+      "confirm": "Çıktı klasörüne yaz",
+      "discard": "Vazgeç"
     },
     "statusbar": {
       "format": "tasarım · biçim {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Bir yanıt modeli artık yok",
       "responseExampleUnknown": "Bir yanıt eksik bir örnek sunuyor",
       "routeResponsesMissing": "Rota hiçbir yanıt bildirmiyor",
-      "routePathDuplicate": "Başka bir rota bu yöntem ve yola zaten yanıt veriyor"
+      "routePathDuplicate": "Başka bir rota bu yöntem ve yola zaten yanıt veriyor",
+      "routePathReserved": "Tasarım sunucusu bu yolu ayırıyor — rota asla yanıt vermez"
     },
     "traffic": {
       "low": "Düşük",

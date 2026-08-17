@@ -2235,7 +2235,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "從此設計產生程式碼將在此進行。"
+      "empty": "從此設計產生程式碼將在此進行。",
+      "subtitle": "從此設計產生專案 — 在沙箱中渲染，僅在確認檔案樹後寫入",
+      "sourceTitle": "範本",
+      "sourceKind": {
+        "official": "官方",
+        "repo": "儲存庫",
+        "local": "本機資料夾"
+      },
+      "official": "官方範本",
+      "repo": "儲存庫（owner/repo）",
+      "local": "本機範本資料夾",
+      "output": "輸出資料夾（絕對路徑或相對於專案）",
+      "browse": "選擇輸出資料夾",
+      "generate": "產生專案",
+      "generating": "正在沙箱中產生…",
+      "blocked": "產生前請修正設計的 {{count}} 個驗證錯誤",
+      "failed": "產生失敗",
+      "outputMissing": "請先選擇輸出資料夾",
+      "extracted": "已將 {{count}} 個檔案寫入 {{root}}",
+      "preview": "{{name}} 產生了 {{count}} 個檔案 — 確認後寫入",
+      "confirm": "寫入輸出資料夾",
+      "discard": "捨棄"
     },
     "statusbar": {
       "format": "設計 · 格式 {{version}}"
@@ -2363,7 +2384,8 @@
       "responseModelUnknown": "回應模型已不存在",
       "responseExampleUnknown": "回應提供了缺失的範例",
       "routeResponsesMissing": "該路由未宣告任何回應",
-      "routePathDuplicate": "另一條路由已回應此方法與路徑"
+      "routePathDuplicate": "另一條路由已回應此方法與路徑",
+      "routePathReserved": "設計伺服器保留此路徑 — 該路由將永遠不會回應"
     },
     "traffic": {
       "low": "低",

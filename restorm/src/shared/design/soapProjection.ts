@@ -13,7 +13,7 @@
  * as every other projection.
  */
 
-import type { ApiDesign, DesignModel, DesignRoute } from '../types/apiDesign'
+import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../types/apiDesign'
 import { buildModelInstance } from './designServing'
 
 // ── Names ─────────────────────────────────────────────────────────────
@@ -44,6 +44,8 @@ export interface SoapOperation {
   name: string
   soapAction: string
   route: DesignRoute
+  /** The group the route lives in (its auth contract applies). */
+  group: DesignRouteGroup
   /** Bound success-response model (absent = empty ack payload). */
   model?: DesignModel
   /** Whether the response is a list of instances. */
@@ -81,6 +83,7 @@ export function designSoapOperations(design: ApiDesign): SoapOperation[] {
         name,
         soapAction: `${namespace}#${name}`,
         route,
+        group,
         list: meta?.list === true
       }
       if (model !== undefined) operation.model = model

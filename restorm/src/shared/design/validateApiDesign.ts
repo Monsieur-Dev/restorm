@@ -62,6 +62,10 @@ export type DesignIssueCode =
    * groups sharing a base path) — the exported `paths` map and the
    * served route table can only keep one. */
   | 'routePathDuplicate'
+  /** A route's served path collides with a path the design server
+   * reserves (`/swagger.json`, or an enabled projection's endpoint:
+   * `/graphql`, `/soap`, `/odata`) — the route would never answer. */
+  | 'routePathReserved'
 
 export interface DesignIssue {
   code: DesignIssueCode
@@ -209,6 +213,26 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
         issues.push({ code: 'routePathDuplicate', path, subject: surface })
       } else {
         routeSurfaces.add(surface)
+      }
+
+      // The design server owns some paths on the port: /swagger.json
+      // always, each projection's endpoint when enabled. A route that
+      // composes onto one of them (WITH the design base path — the
+      // served table binds full paths) would be shadowed by the
+      // dispatcher and never answer.
+      const served = composeRoutePath({
+        ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
+        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
+        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+      }, route.doc.match.urlPattern)
+      const protocols = design.serving?.protocols ?? []
+      const reserved =
+        served === '/swagger.json' ||
+        (protocols.includes('graphql') && served === '/graphql') ||
+        (protocols.includes('soap') && served === '/soap') ||
+        (protocols.includes('odata') && (served === '/odata' || served.startsWith('/odata/')))
+      if (reserved) {
+        issues.push({ code: 'routePathReserved', path, subject: served })
       }
 
       for (const [paramName, link] of Object.entries(route.design?.paramLinks ?? {})) {

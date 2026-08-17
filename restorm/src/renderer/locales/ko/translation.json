@@ -2235,7 +2235,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "이 디자인의 코드 생성이 여기에 들어갑니다."
+      "empty": "이 디자인의 코드 생성이 여기에 들어갑니다.",
+      "subtitle": "이 디자인에서 프로젝트 생성 — 샌드박스에서 렌더링되며 트리 확인 후에만 기록됩니다",
+      "sourceTitle": "템플릿",
+      "sourceKind": {
+        "official": "공식",
+        "repo": "저장소",
+        "local": "로컬 폴더"
+      },
+      "official": "공식 템플릿",
+      "repo": "저장소 (owner/repo)",
+      "local": "로컬 템플릿 폴더",
+      "output": "출력 폴더 (절대 경로 또는 프로젝트 기준 상대 경로)",
+      "browse": "출력 폴더 선택",
+      "generate": "프로젝트 생성",
+      "generating": "샌드박스에서 생성 중…",
+      "blocked": "생성 전에 디자인의 검증 오류 {{count}}건을 수정하세요",
+      "failed": "생성에 실패했습니다",
+      "outputMissing": "먼저 출력 폴더를 선택하세요",
+      "extracted": "{{count}}개 파일을 {{root}}에 기록했습니다",
+      "preview": "{{name}}이(가) {{count}}개 파일을 생성 — 기록을 확인하세요",
+      "confirm": "출력 폴더에 기록",
+      "discard": "버리기"
     },
     "statusbar": {
       "format": "디자인 · 포맷 {{version}}"
@@ -2363,7 +2384,8 @@
       "responseModelUnknown": "응답 모델이 더 이상 없습니다",
       "responseExampleUnknown": "응답이 없는 예시를 제공합니다",
       "routeResponsesMissing": "라우트가 응답을 선언하지 않았습니다",
-      "routePathDuplicate": "다른 라우트가 이미 이 메서드와 경로에 응답합니다"
+      "routePathDuplicate": "다른 라우트가 이미 이 메서드와 경로에 응답합니다",
+      "routePathReserved": "디자인 서버가 이 경로를 예약합니다 — 라우트는 응답하지 않습니다"
     },
     "traffic": {
       "low": "낮음",

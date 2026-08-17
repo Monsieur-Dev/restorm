@@ -2238,7 +2238,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generování kódu z tohoto návrhu bude zde."
+      "empty": "Generování kódu z tohoto návrhu bude zde.",
+      "subtitle": "Vygenerujte projekt z tohoto návrhu — vykresleno v sandboxu, zapsáno až po potvrzení stromu",
+      "sourceTitle": "Šablona",
+      "sourceKind": {
+        "official": "Oficiální",
+        "repo": "Repozitář",
+        "local": "Místní složka"
+      },
+      "official": "Oficiální šablona",
+      "repo": "Repozitář (owner/repo)",
+      "local": "Místní složka šablony",
+      "output": "Výstupní složka (absolutní, nebo relativní k projektu)",
+      "browse": "Zvolit výstupní složku",
+      "generate": "Vygenerovat projekt",
+      "generating": "Generuje se v sandboxu…",
+      "blocked": "Před generováním opravte {{count}} chyb(y) validace návrhu",
+      "failed": "Generování selhalo",
+      "outputMissing": "Nejprve zvolte výstupní složku",
+      "extracted": "{{count}} soubor(ů) zapsáno do {{root}}",
+      "preview": "{{name}} vygenerovala {{count}} soubor(ů) — potvrďte zápis",
+      "confirm": "Zapsat do výstupní složky",
+      "discard": "Zahodit"
     },
     "statusbar": {
       "format": "návrh · formát {{version}}"
@@ -2366,7 +2387,8 @@
       "responseModelUnknown": "Model odpovědi už neexistuje",
       "responseExampleUnknown": "Odpověď servíruje chybějící příklad",
       "routeResponsesMissing": "Trasa nedeklaruje žádnou odpověď",
-      "routePathDuplicate": "Jiná trasa již odpovídá na tuto metodu a cestu"
+      "routePathDuplicate": "Jiná trasa již odpovídá na tuto metodu a cestu",
+      "routePathReserved": "Design server si tuto cestu vyhrazuje — trasa by nikdy neodpověděla"
     },
     "traffic": {
       "low": "Nízký",

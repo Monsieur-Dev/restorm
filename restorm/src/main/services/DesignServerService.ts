@@ -119,28 +119,53 @@ const ODATA_ROOT = '/odata'
 /** (Re)build the per-protocol serving artifacts from the design. */
 function projectProtocols(active: ActiveServer): void {
   active.protocols = new Set<DesignProtocol>(['http', ...(active.design.serving?.protocols ?? [])])
+  // Each projection is guarded INDIVIDUALLY: a projection that fails to
+  // build logs + disables itself, the others (and HTTP) keep serving —
+  // and the caller never sees a half-applied state.
+  delete active.yoga
   if (active.protocols.has('graphql')) {
-    active.yoga = createYoga({
-      schema: createSchema({
-        typeDefs: designToGraphqlSdl(active.design),
-        resolvers: designGraphqlResolvers(active.design)
-      }),
-      graphqlEndpoint: GRAPHQL_PATH,
-      landingPage: false,
-      logging: {
-        debug: () => { /* dropped */ },
-        info: () => { /* dropped */ },
-        warn: (...args: unknown[]) => { logger.warn('[DesignServerService] graphql', { args }) },
-        error: (...args: unknown[]) => { logger.error('[DesignServerService] graphql', { args }) }
-      }
-    })
-  } else {
-    delete active.yoga
+    try {
+      active.yoga = createYoga({
+        schema: createSchema({
+          typeDefs: designToGraphqlSdl(active.design),
+          resolvers: designGraphqlResolvers(active.design)
+        }),
+        graphqlEndpoint: GRAPHQL_PATH,
+        landingPage: false,
+        logging: {
+          debug: () => { /* dropped */ },
+          info: () => { /* dropped */ },
+          warn: (...args: unknown[]) => { logger.warn('[DesignServerService] graphql', { args }) },
+          error: (...args: unknown[]) => { logger.error('[DesignServerService] graphql', { args }) }
+        }
+      })
+    } catch (err) {
+      logger.error('[DesignServerService] graphql projection failed to build — disabled for this run', {
+        designId: active.designId,
+        error: err instanceof Error ? err.message : String(err)
+      })
+    }
   }
-  if (active.protocols.has('soap')) active.soapOperations = designSoapOperations(active.design)
-  else delete active.soapOperations
-  if (active.protocols.has('odata')) active.odataSets = designODataEntitySets(active.design)
-  else delete active.odataSets
+  try {
+    if (active.protocols.has('soap')) active.soapOperations = designSoapOperations(active.design)
+    else delete active.soapOperations
+  } catch (err) {
+    delete active.soapOperations
+    logger.error('[DesignServerService] soap projection failed to build — disabled for this run', {
+      designId: active.designId,
+      error: err instanceof Error ? err.message : String(err)
+    })
+  }
+  try {
+    if (active.protocols.has('odata')) active.odataSets = designODataEntitySets(active.design)
+    else delete active.odataSets
+  } catch (err) {
+    delete active.odataSets
+    logger.error('[DesignServerService] odata projection failed to build — disabled for this run', {
+      designId: active.designId,
+      error: err instanceof Error ? err.message : String(err)
+    })
+  }
 }
 
 /** Route key on the shared PortHost — namespaced so a design never
@@ -288,7 +313,7 @@ class DesignServerService {
       }
       if (active.odataSets !== undefined && (pathname === ODATA_ROOT || pathname.startsWith(`${ODATA_ROOT}/`))) {
         if (!this.projectionAuthorized(active, req, res, 'odata')) return
-        this.serveOData(active, method, pathname, query, res)
+        this.serveOData(active, method, pathname, query, req.headers, res)
         return
       }
       if (active.soapOperations !== undefined && pathname === SOAP_PATH) {
@@ -368,6 +393,7 @@ class DesignServerService {
     method: string,
     pathname: string,
     query: Record<string, string>,
+    headers: IncomingMessage['headers'],
     res: ServerResponse
   ): void {
     const odataHeaders = { 'OData-Version': '4.0' }
@@ -404,6 +430,14 @@ class DesignServerService {
       return
     }
 
+    // The set's data is as protected as the routes serving its model:
+    // when any route declares a non-none auth, one of those contracts
+    // must be satisfied (the design default was already checked).
+    if (set.auths.length > 0 && !set.auths.some((auth) => authSatisfied(auth, headers, active.design))) {
+      this.writeJson(active, res, 401, odataHeaders, errorEnvelope('401', `This entity set requires ${set.auths.join(' or ')} credentials`))
+      this.recordServed(active, `odata:${set.name}`, '401')
+      return
+    }
     const rows = buildODataRows(active.design, set.model)
     const key = addressed[2]
     if (key !== undefined) {
@@ -475,8 +509,17 @@ class DesignServerService {
       this.recordServed(active, 'soap', '500')
       return
     }
+    // The route's EFFECTIVE auth applies — same contract as HTTP.
+    const auth = effectiveAuth(active.design, operation.group, operation.route)
+    if (!authSatisfied(auth, req.headers, active.design)) {
+      this.writeRaw(active, res, 401, xmlHeaders, buildSoapFaultEnvelope(`This operation requires ${auth} credentials`))
+      this.recordServed(active, operation.route.id, '401')
+      return
+    }
     this.writeRaw(active, res, 200, xmlHeaders, buildSoapResponseEnvelope(active.design, operation))
-    this.recordServed(active, `soap:${operation.name}`, '200')
+    // SOAP operations map 1:1 to design routes — count under the route
+    // id so the run modal's per-route dashboard sees this traffic.
+    this.recordServed(active, operation.route.id, '200')
   }
 
   /** Serve the run-modal's forced choice: user body verbatim when

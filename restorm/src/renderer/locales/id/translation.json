@@ -2235,7 +2235,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Pembuatan kode dari desain ini akan hidup di sini."
+      "empty": "Pembuatan kode dari desain ini akan hidup di sini.",
+      "subtitle": "Hasilkan proyek dari desain ini — dirender dalam sandbox, ditulis hanya setelah pohon dikonfirmasi",
+      "sourceTitle": "Templat",
+      "sourceKind": {
+        "official": "Resmi",
+        "repo": "Repositori",
+        "local": "Folder lokal"
+      },
+      "official": "Templat resmi",
+      "repo": "Repositori (owner/repo)",
+      "local": "Folder templat lokal",
+      "output": "Folder keluaran (absolut, atau relatif terhadap proyek)",
+      "browse": "Pilih folder keluaran",
+      "generate": "Hasilkan proyek",
+      "generating": "Menghasilkan di sandbox…",
+      "blocked": "Perbaiki {{count}} kesalahan validasi desain sebelum menghasilkan",
+      "failed": "Pembuatan gagal",
+      "outputMissing": "Pilih folder keluaran terlebih dahulu",
+      "extracted": "{{count}} berkas ditulis ke {{root}}",
+      "preview": "{{name}} menghasilkan {{count}} berkas — konfirmasi untuk menulisnya",
+      "confirm": "Tulis ke folder keluaran",
+      "discard": "Buang"
     },
     "statusbar": {
       "format": "desain · format {{version}}"
@@ -2363,7 +2384,8 @@
       "responseModelUnknown": "Model respons sudah tidak ada",
       "responseExampleUnknown": "Respons menyajikan contoh yang hilang",
       "routeResponsesMissing": "Rute tidak mendeklarasikan respons apa pun",
-      "routePathDuplicate": "Rute lain sudah menjawab metode dan jalur ini"
+      "routePathDuplicate": "Rute lain sudah menjawab metode dan jalur ini",
+      "routePathReserved": "Server desain mencadangkan jalur ini — rute tidak akan pernah menjawab"
     },
     "traffic": {
       "low": "Rendah",

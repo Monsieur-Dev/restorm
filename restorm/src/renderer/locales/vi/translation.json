@@ -2235,7 +2235,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Việc sinh mã từ thiết kế này sẽ nằm ở đây."
+      "empty": "Việc sinh mã từ thiết kế này sẽ nằm ở đây.",
+      "subtitle": "Tạo một dự án từ thiết kế này — kết xuất trong sandbox, chỉ ghi sau khi xác nhận cây tệp",
+      "sourceTitle": "Mẫu",
+      "sourceKind": {
+        "official": "Chính thức",
+        "repo": "Kho mã",
+        "local": "Thư mục cục bộ"
+      },
+      "official": "Mẫu chính thức",
+      "repo": "Kho mã (owner/repo)",
+      "local": "Thư mục mẫu cục bộ",
+      "output": "Thư mục đầu ra (tuyệt đối hoặc tương đối với dự án)",
+      "browse": "Chọn thư mục đầu ra",
+      "generate": "Tạo dự án",
+      "generating": "Đang tạo trong sandbox…",
+      "blocked": "Sửa {{count}} lỗi xác thực của thiết kế trước khi tạo",
+      "failed": "Tạo thất bại",
+      "outputMissing": "Hãy chọn thư mục đầu ra trước",
+      "extracted": "Đã ghi {{count}} tệp vào {{root}}",
+      "preview": "{{name}} đã tạo {{count}} tệp — xác nhận để ghi",
+      "confirm": "Ghi vào thư mục đầu ra",
+      "discard": "Bỏ"
     },
     "statusbar": {
       "format": "thiết kế · định dạng {{version}}"
@@ -2363,7 +2384,8 @@
       "responseModelUnknown": "Một mô hình phản hồi không còn tồn tại",
       "responseExampleUnknown": "Một phản hồi phục vụ ví dụ bị thiếu",
       "routeResponsesMissing": "Tuyến không khai báo phản hồi nào",
-      "routePathDuplicate": "Một tuyến khác đã trả lời phương thức và đường dẫn này"
+      "routePathDuplicate": "Một tuyến khác đã trả lời phương thức và đường dẫn này",
+      "routePathReserved": "Máy chủ thiết kế giữ đường dẫn này — route sẽ không bao giờ trả lời"
     },
     "traffic": {
       "low": "Thấp",

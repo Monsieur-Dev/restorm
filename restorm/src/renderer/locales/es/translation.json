@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "La generación de código desde este diseño vivirá aquí."
+      "empty": "La generación de código desde este diseño vivirá aquí.",
+      "subtitle": "Genere un proyecto desde este diseño — renderizado en una sandbox, escrito solo tras confirmar el árbol",
+      "sourceTitle": "Plantilla",
+      "sourceKind": {
+        "official": "Oficial",
+        "repo": "Repositorio",
+        "local": "Carpeta local"
+      },
+      "official": "Plantilla oficial",
+      "repo": "Repositorio (owner/repo)",
+      "local": "Carpeta local de la plantilla",
+      "output": "Carpeta de salida (absoluta o relativa al proyecto)",
+      "browse": "Elegir la carpeta de salida",
+      "generate": "Generar el proyecto",
+      "generating": "Generando en la sandbox…",
+      "blocked": "Corrija los {{count}} error(es) de validación del diseño antes de generar",
+      "failed": "La generación falló",
+      "outputMissing": "Elija primero una carpeta de salida",
+      "extracted": "{{count}} archivo(s) escritos en {{root}}",
+      "preview": "{{name}} generó {{count}} archivo(s) — confirme para escribirlos",
+      "confirm": "Escribir en la carpeta de salida",
+      "discard": "Descartar"
     },
     "statusbar": {
       "format": "diseño · formato {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Un modelo de respuesta ya no existe",
       "responseExampleUnknown": "Una respuesta sirve un ejemplo inexistente",
       "routeResponsesMissing": "La ruta no declara ninguna respuesta",
-      "routePathDuplicate": "Otra ruta ya responde a este método y ruta"
+      "routePathDuplicate": "Otra ruta ya responde a este método y ruta",
+      "routePathReserved": "El servidor de diseño reserva esta ruta — la ruta nunca respondería"
     },
     "traffic": {
       "low": "Bajo",

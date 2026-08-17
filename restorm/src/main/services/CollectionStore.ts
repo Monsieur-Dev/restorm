@@ -486,6 +486,7 @@ class CollectionStore {
       if (!('defaultSecurity' in fresh)) delete existing.defaultSecurity
       if (!('defaultAuth' in fresh)) delete existing.defaultAuth
       if (!('serving' in fresh)) delete existing.serving
+      if (!('codegen' in fresh)) delete existing.codegen
       Object.assign(existing, fresh)
     })
   }

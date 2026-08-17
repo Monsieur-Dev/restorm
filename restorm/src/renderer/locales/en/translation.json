@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Code generation from this design will live here."
+      "empty": "Code generation from this design will live here.",
+      "subtitle": "Generate a project from this design — rendered in a sandbox, written only after you confirm the tree",
+      "sourceTitle": "Template",
+      "sourceKind": {
+        "official": "Official",
+        "repo": "Repository",
+        "local": "Local folder"
+      },
+      "official": "Official template",
+      "repo": "Repository (owner/repo)",
+      "local": "Local template folder",
+      "output": "Output folder (absolute, or relative to the project)",
+      "browse": "Choose the output folder",
+      "generate": "Generate the project",
+      "generating": "Generating in the sandbox…",
+      "blocked": "Fix the design’s {{count}} validation issue(s) before generating",
+      "failed": "The generation failed",
+      "outputMissing": "Choose an output folder first",
+      "extracted": "{{count}} file(s) written to {{root}}",
+      "preview": "{{name}} generated {{count}} file(s) — confirm to write them",
+      "confirm": "Write to the output folder",
+      "discard": "Discard"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "A response model no longer exists",
       "responseExampleUnknown": "A response serves a missing example",
       "routeResponsesMissing": "The route declares no response",
-      "routePathDuplicate": "Another route already answers this method and path"
+      "routePathDuplicate": "Another route already answers this method and path",
+      "routePathReserved": "The design server reserves this path — the route would never answer"
     },
     "traffic": {
       "low": "Low",

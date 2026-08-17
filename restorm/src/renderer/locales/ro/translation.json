@@ -2237,7 +2237,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generarea de cod din acest design va trăi aici."
+      "empty": "Generarea de cod din acest design va trăi aici.",
+      "subtitle": "Generați un proiect din acest design — randat într-un sandbox, scris doar după confirmarea arborelui",
+      "sourceTitle": "Șablon",
+      "sourceKind": {
+        "official": "Oficial",
+        "repo": "Repository",
+        "local": "Folder local"
+      },
+      "official": "Șablon oficial",
+      "repo": "Repository (owner/repo)",
+      "local": "Folderul local al șablonului",
+      "output": "Folder de ieșire (absolut sau relativ la proiect)",
+      "browse": "Alegeți folderul de ieșire",
+      "generate": "Generați proiectul",
+      "generating": "Se generează în sandbox…",
+      "blocked": "Corectați cele {{count}} erori de validare ale designului înainte de generare",
+      "failed": "Generarea a eșuat",
+      "outputMissing": "Alegeți mai întâi un folder de ieșire",
+      "extracted": "{{count}} fișier(e) scrise în {{root}}",
+      "preview": "{{name}} a generat {{count}} fișier(e) — confirmați scrierea",
+      "confirm": "Scrieți în folderul de ieșire",
+      "discard": "Renunțați"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2365,7 +2386,8 @@
       "responseModelUnknown": "Un model de răspuns nu mai există",
       "responseExampleUnknown": "Un răspuns servește un exemplu lipsă",
       "routeResponsesMissing": "Ruta nu declară niciun răspuns",
-      "routePathDuplicate": "O altă rută răspunde deja acestei metode și căi"
+      "routePathDuplicate": "O altă rută răspunde deja acestei metode și căi",
+      "routePathReserved": "Serverul de design rezervă această cale — ruta nu ar răspunde niciodată"
     },
     "traffic": {
       "low": "Scăzut",

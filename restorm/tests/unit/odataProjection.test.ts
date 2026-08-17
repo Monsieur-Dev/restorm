@@ -64,6 +64,15 @@ describe('entity sets and served rows', () => {
     expect(new Set(sets.map((s) => s.name)).size).toBe(sets.length)
   })
 
+  it('mirrors the routes auth contracts onto the set', () => {
+    // Every route binding User sits in the bearer-auth Users group
+    // (the POST overrides to none — none is not a REQUIREMENT).
+    const users = sets.find((s) => s.name === 'Users')
+    expect(users?.auths).toEqual(['bearer'])
+    // Order is not bound by any route — no requirement.
+    expect(sets.find((s) => s.name === 'Orders')?.auths).toEqual([])
+  })
+
   it('keys on the declared identifier', () => {
     const users = sets.find((s) => s.name === 'Users')
     expect(users !== undefined && odataKeyPropertyName(design, users.model)).toBe('id')

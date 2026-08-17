@@ -2238,7 +2238,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generowanie kodu z tego projektu API pojawi się tutaj."
+      "empty": "Generowanie kodu z tego projektu API pojawi się tutaj.",
+      "subtitle": "Wygeneruj projekt z tego projektu API — renderowany w piaskownicy, zapisany dopiero po potwierdzeniu drzewa",
+      "sourceTitle": "Szablon",
+      "sourceKind": {
+        "official": "Oficjalny",
+        "repo": "Repozytorium",
+        "local": "Folder lokalny"
+      },
+      "official": "Oficjalny szablon",
+      "repo": "Repozytorium (owner/repo)",
+      "local": "Lokalny folder szablonu",
+      "output": "Folder wyjściowy (bezwzględny lub względny do projektu)",
+      "browse": "Wybierz folder wyjściowy",
+      "generate": "Wygeneruj projekt",
+      "generating": "Generowanie w piaskownicy…",
+      "blocked": "Napraw {{count}} błąd/błędy walidacji przed generowaniem",
+      "failed": "Generowanie nie powiodło się",
+      "outputMissing": "Najpierw wybierz folder wyjściowy",
+      "extracted": "{{count}} plik(ów) zapisano w {{root}}",
+      "preview": "{{name}} wygenerował {{count}} plik(ów) — potwierdź zapis",
+      "confirm": "Zapisz do folderu wyjściowego",
+      "discard": "Odrzuć"
     },
     "statusbar": {
       "format": "projekt API · format {{version}}"
@@ -2366,7 +2387,8 @@
       "responseModelUnknown": "Model odpowiedzi już nie istnieje",
       "responseExampleUnknown": "Odpowiedź serwuje brakujący przykład",
       "routeResponsesMissing": "Trasa nie deklaruje żadnej odpowiedzi",
-      "routePathDuplicate": "Inna trasa już odpowiada na tę metodę i ścieżkę"
+      "routePathDuplicate": "Inna trasa już odpowiada na tę metodę i ścieżkę",
+      "routePathReserved": "Serwer projektu rezerwuje tę ścieżkę — trasa nigdy by nie odpowiedziała"
     },
     "traffic": {
       "low": "Niski",

@@ -2235,7 +2235,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "このデザインからのコード生成はここに入ります。"
+      "empty": "このデザインからのコード生成はここに入ります。",
+      "subtitle": "このデザインからプロジェクトを生成 — サンドボックスでレンダリングし、ツリー確認後にのみ書き込みます",
+      "sourceTitle": "テンプレート",
+      "sourceKind": {
+        "official": "公式",
+        "repo": "リポジトリ",
+        "local": "ローカルフォルダー"
+      },
+      "official": "公式テンプレート",
+      "repo": "リポジトリ（owner/repo）",
+      "local": "ローカルテンプレートフォルダー",
+      "output": "出力フォルダー（絶対、またはプロジェクト相対）",
+      "browse": "出力フォルダーを選択",
+      "generate": "プロジェクトを生成",
+      "generating": "サンドボックスで生成中…",
+      "blocked": "生成前にデザインの {{count}} 件の検証エラーを修正してください",
+      "failed": "生成に失敗しました",
+      "outputMissing": "まず出力フォルダーを選択してください",
+      "extracted": "{{count}} 個のファイルを {{root}} に書き込みました",
+      "preview": "{{name}} が {{count}} 個のファイルを生成 — 書き込みを確認してください",
+      "confirm": "出力フォルダーへ書き込む",
+      "discard": "破棄"
     },
     "statusbar": {
       "format": "デザイン · フォーマット {{version}}"
@@ -2363,7 +2384,8 @@
       "responseModelUnknown": "レスポンスのモデルが存在しません",
       "responseExampleUnknown": "レスポンスが存在しない例を提供しています",
       "routeResponsesMissing": "ルートがレスポンスを宣言していません",
-      "routePathDuplicate": "別のルートが既にこのメソッドとパスに応答しています"
+      "routePathDuplicate": "別のルートが既にこのメソッドとパスに応答しています",
+      "routePathReserved": "デザインサーバーがこのパスを予約しています — ルートは決して応答しません"
     },
     "traffic": {
       "low": "低",

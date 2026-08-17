@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Kodgenerering från denna design kommer här."
+      "empty": "Kodgenerering från denna design kommer här.",
+      "subtitle": "Generera ett projekt från denna design — renderat i en sandbox, skrivet först efter att trädet bekräftats",
+      "sourceTitle": "Mall",
+      "sourceKind": {
+        "official": "Officiell",
+        "repo": "Repository",
+        "local": "Lokal mapp"
+      },
+      "official": "Officiell mall",
+      "repo": "Repository (owner/repo)",
+      "local": "Lokal mallmapp",
+      "output": "Utdatamapp (absolut eller relativ till projektet)",
+      "browse": "Välj utdatamapp",
+      "generate": "Generera projektet",
+      "generating": "Genererar i sandboxen…",
+      "blocked": "Åtgärda designens {{count}} valideringsfel före generering",
+      "failed": "Genereringen misslyckades",
+      "outputMissing": "Välj först en utdatamapp",
+      "extracted": "{{count}} fil(er) skrivna till {{root}}",
+      "preview": "{{name}} genererade {{count}} fil(er) — bekräfta för att skriva dem",
+      "confirm": "Skriv till utdatamappen",
+      "discard": "Släng"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "En svarsmodell finns inte längre",
       "responseExampleUnknown": "Ett svar serverar ett saknat exempel",
       "routeResponsesMissing": "Rutten deklarerar inget svar",
-      "routePathDuplicate": "En annan rutt besvarar redan denna metod och sökväg"
+      "routePathDuplicate": "En annan rutt besvarar redan denna metod och sökväg",
+      "routePathReserved": "Designservern reserverar denna sökväg — rutten skulle aldrig svara"
     },
     "traffic": {
       "low": "Låg",

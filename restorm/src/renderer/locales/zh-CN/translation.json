@@ -2235,7 +2235,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "从此设计生成代码将在此进行。"
+      "empty": "从此设计生成代码将在此进行。",
+      "subtitle": "从此设计生成项目 — 在沙箱中渲染，仅在确认文件树后写入",
+      "sourceTitle": "模板",
+      "sourceKind": {
+        "official": "官方",
+        "repo": "仓库",
+        "local": "本地文件夹"
+      },
+      "official": "官方模板",
+      "repo": "仓库（owner/repo）",
+      "local": "本地模板文件夹",
+      "output": "输出文件夹（绝对路径或相对于项目）",
+      "browse": "选择输出文件夹",
+      "generate": "生成项目",
+      "generating": "正在沙箱中生成…",
+      "blocked": "生成前请修复设计的 {{count}} 个验证错误",
+      "failed": "生成失败",
+      "outputMissing": "请先选择输出文件夹",
+      "extracted": "已将 {{count}} 个文件写入 {{root}}",
+      "preview": "{{name}} 生成了 {{count}} 个文件 — 确认后写入",
+      "confirm": "写入输出文件夹",
+      "discard": "丢弃"
     },
     "statusbar": {
       "format": "设计 · 格式 {{version}}"
@@ -2363,7 +2384,8 @@
       "responseModelUnknown": "响应模型已不存在",
       "responseExampleUnknown": "响应提供了缺失的示例",
       "routeResponsesMissing": "该路由未声明任何响应",
-      "routePathDuplicate": "另一条路由已响应此方法和路径"
+      "routePathDuplicate": "另一条路由已响应此方法和路径",
+      "routePathReserved": "设计服务器保留此路径 — 该路由将永远不会响应"
     },
     "traffic": {
       "low": "低",

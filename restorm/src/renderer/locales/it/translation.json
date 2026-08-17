@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "La generazione di codice da questo design vivrà qui."
+      "empty": "La generazione di codice da questo design vivrà qui.",
+      "subtitle": "Genera un progetto da questo design — renderizzato in una sandbox, scritto solo dopo la conferma dell’albero",
+      "sourceTitle": "Template",
+      "sourceKind": {
+        "official": "Ufficiale",
+        "repo": "Repository",
+        "local": "Cartella locale"
+      },
+      "official": "Template ufficiale",
+      "repo": "Repository (owner/repo)",
+      "local": "Cartella locale del template",
+      "output": "Cartella di output (assoluta o relativa al progetto)",
+      "browse": "Scegli la cartella di output",
+      "generate": "Genera il progetto",
+      "generating": "Generazione nella sandbox…",
+      "blocked": "Correggi i {{count}} errori di validazione del design prima di generare",
+      "failed": "La generazione non è riuscita",
+      "outputMissing": "Scegli prima una cartella di output",
+      "extracted": "{{count}} file scritti in {{root}}",
+      "preview": "{{name}} ha generato {{count}} file — conferma per scriverli",
+      "confirm": "Scrivi nella cartella di output",
+      "discard": "Annulla"
     },
     "statusbar": {
       "format": "design · formato {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Un modello di risposta non esiste più",
       "responseExampleUnknown": "Una risposta serve un esempio mancante",
       "routeResponsesMissing": "La rotta non dichiara alcuna risposta",
-      "routePathDuplicate": "Un’altra rotta risponde già a questo metodo e percorso"
+      "routePathDuplicate": "Un’altra rotta risponde già a questo metodo e percorso",
+      "routePathReserved": "Il server di design riserva questo percorso — la rotta non risponderebbe mai"
     },
     "traffic": {
       "low": "Basso",

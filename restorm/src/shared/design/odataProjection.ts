@@ -11,8 +11,8 @@
  * `odataServerQuery` operate on deterministic rows.
  */
 
-import type { ApiDesign, DesignModel } from '../types/apiDesign'
-import { buildModelInstance, servedProperties, servedTotal } from './designServing'
+import type { ApiDesign, DesignAuthKind, DesignModel } from '../types/apiDesign'
+import { buildModelInstance, effectiveAuth, servedProperties, servedTotal } from './designServing'
 import { pluralize } from './designRoutes'
 
 /** Served collections stay bounded: query options page WITHIN this. */
@@ -38,6 +38,10 @@ export interface ODataEntitySet {
   /** EntityType name, e.g. `User`. */
   typeName: string
   model: DesignModel
+  /** The distinct non-`none` auth contracts of the routes serving this
+   * model — the set's data is as protected as its routes: a caller must
+   * satisfy ONE of them (the design default applies when empty). */
+  auths: DesignAuthKind[]
 }
 
 /** One EntitySet per model, collision-free. */
@@ -50,9 +54,25 @@ export function designODataEntitySets(design: ApiDesign): ODataEntitySet[] {
     let n = 2
     while (taken.has(name)) { name = `${sanitizeEdmName(pluralize(typeName), `${typeName}Set`)}${n}`; n += 1 }
     taken.add(name)
-    sets.push({ name, typeName, model })
+    sets.push({ name, typeName, model, auths: modelRouteAuths(design, model) })
   }
   return sets
+}
+
+/** The distinct non-`none` effective auths of every route whose success
+ * response binds this model. */
+function modelRouteAuths(design: ApiDesign, model: DesignModel): DesignAuthKind[] {
+  const auths = new Set<DesignAuthKind>()
+  for (const group of design.routeGroups) {
+    for (const route of group.routes) {
+      const responses = route.design?.responses ?? {}
+      const binds = Object.values(responses).some((meta) => meta.modelId === model.id)
+      if (!binds) continue
+      const auth = effectiveAuth(design, group, route)
+      if (auth !== 'none') auths.add(auth)
+    }
+  }
+  return [...auths]
 }
 
 /** The model's key property NAME across its inheritance chain: the

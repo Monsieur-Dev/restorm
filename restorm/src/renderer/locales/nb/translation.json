@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Kodegenerering fra dette designet kommer her."
+      "empty": "Kodegenerering fra dette designet kommer her.",
+      "subtitle": "Generer et prosjekt fra dette designet — rendret i en sandkasse, skrevet først etter at treet er bekreftet",
+      "sourceTitle": "Mal",
+      "sourceKind": {
+        "official": "Offisiell",
+        "repo": "Repository",
+        "local": "Lokal mappe"
+      },
+      "official": "Offisiell mal",
+      "repo": "Repository (owner/repo)",
+      "local": "Lokal malmappe",
+      "output": "Utdatamappe (absolutt eller relativ til prosjektet)",
+      "browse": "Velg utdatamappe",
+      "generate": "Generer prosjektet",
+      "generating": "Genererer i sandkassen…",
+      "blocked": "Rett designets {{count}} valideringsfeil før generering",
+      "failed": "Genereringen mislyktes",
+      "outputMissing": "Velg først en utdatamappe",
+      "extracted": "{{count}} fil(er) skrevet til {{root}}",
+      "preview": "{{name}} genererte {{count}} fil(er) — bekreft for å skrive dem",
+      "confirm": "Skriv til utdatamappen",
+      "discard": "Forkast"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "En svarmodell finnes ikke lenger",
       "responseExampleUnknown": "Et svar serverer et manglende eksempel",
       "routeResponsesMissing": "Ruten erklærer ikke noe svar",
-      "routePathDuplicate": "En annen rute besvarer allerede denne metoden og stien"
+      "routePathDuplicate": "En annen rute besvarer allerede denne metoden og stien",
+      "routePathReserved": "Designserveren reserverer denne stien — ruten ville aldri svare"
     },
     "traffic": {
       "low": "Lav",

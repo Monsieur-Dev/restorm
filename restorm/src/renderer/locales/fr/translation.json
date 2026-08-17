@@ -2236,7 +2236,28 @@
     },
     "documentation": {},
     "code": {
-      "empty": "La génération de code depuis ce design vivra ici."
+      "empty": "La génération de code depuis ce design vivra ici.",
+      "subtitle": "Générez un projet depuis ce design — rendu dans une sandbox, écrit seulement après validation de l’arborescence",
+      "sourceTitle": "Template",
+      "sourceKind": {
+        "official": "Officiel",
+        "repo": "Dépôt",
+        "local": "Dossier local"
+      },
+      "official": "Template officiel",
+      "repo": "Dépôt (owner/repo)",
+      "local": "Dossier local du template",
+      "output": "Dossier de sortie (absolu, ou relatif au projet)",
+      "browse": "Choisir le dossier de sortie",
+      "generate": "Générer le projet",
+      "generating": "Génération dans la sandbox…",
+      "blocked": "Corrigez les {{count}} erreur(s) de validation du design avant de générer",
+      "failed": "La génération a échoué",
+      "outputMissing": "Choisissez d’abord un dossier de sortie",
+      "extracted": "{{count}} fichier(s) écrits dans {{root}}",
+      "preview": "{{name}} a généré {{count}} fichier(s) — confirmez pour les écrire",
+      "confirm": "Écrire dans le dossier de sortie",
+      "discard": "Abandonner"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2364,7 +2385,8 @@
       "responseModelUnknown": "Un modèle de réponse n’existe plus",
       "responseExampleUnknown": "Une réponse sert un exemple disparu",
       "routeResponsesMissing": "La route ne déclare aucune réponse",
-      "routePathDuplicate": "Une autre route répond déjà à cette méthode et ce chemin"
+      "routePathDuplicate": "Une autre route répond déjà à cette méthode et ce chemin",
+      "routePathReserved": "Le serveur de design réserve ce chemin — la route ne répondrait jamais"
     },
     "traffic": {
       "low": "Faible",
