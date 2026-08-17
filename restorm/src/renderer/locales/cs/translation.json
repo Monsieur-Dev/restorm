@@ -2161,7 +2161,10 @@
         "title": "Návrhový server",
         "action": "Servírovat tento návrh",
         "description": "Odpovědi z pojmenovaných příkladů · validace omezeními",
-        "comingSoon": "Návrhový server brzy dorazí"
+        "port": "Port",
+        "latency": "Simulovaná latence (ms)",
+        "blocked": "Před spuštěním opravte {{count}} chyby validace návrhu",
+        "startFailed": "Server se nepodařilo spustit"
       },
       "identity": {
         "title": "Identita",
@@ -2438,7 +2441,21 @@
     "newDesignName": "Nový návrh API",
     "createFromScratch": "Vytvořit návrh API",
     "createFromDoc": "Vytvořit návrh z tohoto API",
-    "fromDocName": "Návrh {{name}}"
+    "fromDocName": "Návrh {{name}}",
+    "run": {
+      "listening": "Běží na http://localhost:{{port}}",
+      "stopped": "Server zastaven",
+      "totalCalls": "{{count}} volání v tomto běhu",
+      "stop": "Zastavit server",
+      "close": "Zavřít tento panel",
+      "forcedPill": "vynuceno {{code}}",
+      "defaultReturn": "Odpověď návrhu (výchozí)",
+      "codeReturn": "Odpovědět {{code}}",
+      "customCode": "Vlastní stavový kód",
+      "customBody": "Vlastní tělo odpovědi",
+      "customBodyPlaceholder": "Volitelné tělo odpovědi (JSON)",
+      "customApply": "Vynutit"
+    }
   },
   "mqtt": {
     "qos": "QoS",

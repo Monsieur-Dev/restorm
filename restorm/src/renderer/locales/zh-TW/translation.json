@@ -2158,7 +2158,10 @@
         "title": "設計伺服器",
         "action": "提供此設計",
         "description": "來自具名範例的回應 · 依約束驗證",
-        "comingSoon": "設計伺服器即將推出"
+        "port": "連接埠",
+        "latency": "模擬延遲（毫秒）",
+        "blocked": "請先修復設計的 {{count}} 個驗證錯誤再啟動服務",
+        "startFailed": "伺服器無法啟動"
       },
       "identity": {
         "title": "識別",
@@ -2435,7 +2438,21 @@
     "newDesignName": "新的 API 設計",
     "createFromScratch": "建立 API 設計",
     "createFromDoc": "從此 API 建立設計",
-    "fromDocName": "{{name}} 設計"
+    "fromDocName": "{{name}} 設計",
+    "run": {
+      "listening": "正在 http://localhost:{{port}} 上提供服務",
+      "stopped": "伺服器已停止",
+      "totalCalls": "本次執行 {{count}} 次呼叫",
+      "stop": "停止伺服器",
+      "close": "關閉此面板",
+      "forcedPill": "強制 {{code}}",
+      "defaultReturn": "設計回應（預設）",
+      "codeReturn": "回應 {{code}}",
+      "customCode": "自訂狀態碼",
+      "customBody": "自訂回應主體",
+      "customBodyPlaceholder": "選用回應主體 (JSON)",
+      "customApply": "強制"
+    }
   },
   "mqtt": {
     "qos": "QoS",

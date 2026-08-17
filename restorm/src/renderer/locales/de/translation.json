@@ -2159,7 +2159,10 @@
         "title": "Design-Server",
         "action": "Dieses Design bereitstellen",
         "description": "Antworten aus benannten Beispielen · Validierung per Constraints",
-        "comingSoon": "Der Design-Server kommt bald"
+        "port": "Port",
+        "latency": "Simulierte Latenz (ms)",
+        "blocked": "Beheben Sie die {{count}} Validierungsfehler des Designs, bevor Sie es bereitstellen",
+        "startFailed": "Der Server konnte nicht gestartet werden"
       },
       "identity": {
         "title": "Identität",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Neues API-Design",
     "createFromScratch": "API-Design erstellen",
     "createFromDoc": "Design aus dieser API erstellen",
-    "fromDocName": "Design {{name}}"
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Bereitgestellt auf http://localhost:{{port}}",
+      "stopped": "Server gestoppt",
+      "totalCalls": "{{count}} Aufruf(e) in diesem Lauf",
+      "stop": "Server stoppen",
+      "close": "Dieses Panel schließen",
+      "forcedPill": "erzwungen {{code}}",
+      "defaultReturn": "Design-Antwort (Standard)",
+      "codeReturn": "Mit {{code}} antworten",
+      "customCode": "Eigener Statuscode",
+      "customBody": "Eigener Antworttext",
+      "customBodyPlaceholder": "Optionaler Antworttext (JSON)",
+      "customApply": "Erzwingen"
+    }
   },
   "mqtt": {
     "qos": "QoS",

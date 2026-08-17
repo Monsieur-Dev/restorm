@@ -1,21 +1,28 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Button,
+  GatedControl,
   InputBox,
   MarkdownEditor,
   ScrollableElement,
   SelectBox,
   eventBus,
+  useAuthState,
   type ISelectData
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collections'
 import type { DesignSectionKey } from '../../../../shared/types/editor'
 import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
-import { validateApiDesign } from '../../../../shared/design/validateApiDesign'
+import { validateApiDesign, type DesignIssue } from '../../../../shared/design/validateApiDesign'
+import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
+import { subscribeToPro } from '../../services/subscribeToPro'
+import { isDesignServerListening, useIsDesignServerListening } from '../../services/designServerStore'
+import { DesignRunModal } from './DesignRunModal'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
 import { useRestormStore } from '../../store/restormStore'
-import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../../shared/utils/resolveUrlAgainstEnv'
+import { resolveUrlAgainstEnv, flattenEnvVars, coerceEnvVarValue } from '../../../../shared/utils/resolveUrlAgainstEnv'
 import type { Environment } from '../../../../shared/types/collections'
 import { assignDesignSection } from './designMutations'
 import { DesignModelsSection } from './DesignModelsSection'
@@ -92,10 +99,18 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
   const [designTick, setDesignTick] = useState(0)
   useEffect(() => {
     const subscription = eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, (payload) => {
-      if ((payload as DocumentChangedPayload).id === design.id) setDesignTick((n) => n + 1)
+      if ((payload as DocumentChangedPayload).id !== design.id) return
+      setDesignTick((n) => n + 1)
+      // Serving? Push the fresh shape to the running server so edits
+      // take effect on the next request — the AC#10 hot loop. The
+      // JSON round-trip strips the reactive proxy (the contextBridge
+      // rejects proxied objects).
+      if (isDesignServerListening(design.id)) {
+        void window.restorm?.designServer.update(JSON.parse(JSON.stringify(design)))
+      }
     })
     return () => { subscription.unsubscribe() }
-  }, [design.id])
+  }, [design])
 
   // Recomputed only when a design edit ticked — a full walk of models ×
   // properties × routes × responses per keystroke would be waste. The
@@ -111,6 +126,20 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     if (section === 'models') setSelectedModelId(entityId)
     if (section === 'routes') setSelectedRouteEntityId(entityId)
   }
+
+  // Run panel (scoped to THIS tab): opened by a successful spin, closed
+  // by hand; survives section switches so the counters stay in sight
+  // while editing routes. The stop keeps the panel open ("Server
+  // stopped") — the state stays readable until the user dismisses it.
+  // Open from the start when the design is ALREADY serving: the panel
+  // state is tab-local and a tab switch remounts this view, so a
+  // serving design re-shows its panel on return (lazy imperative read —
+  // no effect, no cascading render). A manual close then sticks.
+  const [runPanelOpen, setRunPanelOpen] = useState(() => isDesignServerListening(design.id))
+  const [servedPort, setServedPort] = useState<number | null>(null)
+  const stopServer = useCallback(() => {
+    void window.restorm?.designServer.stop(design.id)
+  }, [design.id])
 
   return (
     <div className="design-tab-view" data-testid={`design-tab-view-${design.id}`}>
@@ -132,7 +161,14 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
       </nav>
       <div className="design-section-host" data-testid={`design-section-${activeSection}`}>
         {activeSection === 'settings' && (
-          <DesignSettingsSection design={design} />
+          <DesignSettingsSection
+            design={design}
+            issues={issues}
+            onServerStarted={(port) => {
+              setServedPort(port)
+              setRunPanelOpen(true)
+            }}
+          />
         )}
         {activeSection === 'models' && (
           <DesignModelsSection
@@ -170,6 +206,14 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           />
         )}
       </div>
+      {runPanelOpen && (
+        <DesignRunModal
+          design={design}
+          port={servedPort ?? design.serving?.port ?? 4820}
+          onStop={stopServer}
+          onClose={() => { setRunPanelOpen(false) }}
+        />
+      )}
     </div>
   )
 }
@@ -194,29 +238,30 @@ function envVarsFromEnvironment(env: Environment | undefined): Record<string, st
   if (!env) return {}
   const out: Record<string, string> = {}
   for (const kv of env.variables) {
-    const v: unknown = kv.value
-    if (typeof v === 'string') out[kv.key] = v
-    else if (typeof v === 'number' || typeof v === 'boolean') out[kv.key] = String(v)
-    else if (v && typeof v === 'object') {
-      const obj = v as { value?: unknown; toString?: () => string }
-      if (typeof obj.value === 'string') out[kv.key] = obj.value
-      else if (typeof obj.value === 'number' || typeof obj.value === 'boolean') out[kv.key] = String(obj.value)
-      else if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
-        const str = obj.toString()
-        if (str !== '[object Object]') out[kv.key] = str
-      }
-    }
+    const coerced = coerceEnvVarValue(kv.value)
+    if (coerced !== undefined) out[kv.key] = coerced
   }
   return out
 }
 
-const DesignSettingsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
+const DesignSettingsSection: React.FC<{
+  design: ApiDesign
+  issues: DesignIssue[]
+  onServerStarted: (port: number) => void
+}> = ({ design, issues, onServerStarted }) => {
   const { t } = useTranslation()
 
   // A design INSIDE an env folder resolves {{variables}} like a request
   // does: the owning folder's environments feed the resolver, and the
   // active environment is picked right here (defaults to the first).
+  // Subscribe to the COLLECTIONS DATA, not just the stable finder
+  // function: selecting the function alone subscribes to nothing that
+  // ever changes, so the store mirror landing an effect later would
+  // never re-render this section (the zustand flavour of "a ref keeps
+  // data fresh but cannot notify").
+  const storeCollections = useRestormStore((state) => state.collections)
   const findOwningEnvironmentFolder = useRestormStore((state) => state.findOwningEnvironmentFolder)
+  void storeCollections
   const owningFolder = findOwningEnvironmentFolder(design.id)
   const environments = owningFolder?.environments ?? []
   const [activeEnvIndex, setActiveEnvIndex] = useState(0)
@@ -263,6 +308,42 @@ const DesignSettingsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
 
   const protocols = design.serving?.protocols ?? ['http']
 
+  // ── Design server (the spin) ──────────────────────────────────────
+  const serving = useIsDesignServerListening(design.id)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const runLocked = isDesignRunLocked(useAuthState())
+  const port = design.serving?.port ?? 4820
+  const latencyMs = design.serving?.latencyMs ?? 0
+  const blocked = issues.length > 0
+
+  const patchServing = useCallback((patch: { port?: number; latencyMs?: number }) => {
+    const next = { ...(design.serving ?? {}), ...patch }
+    if (next.latencyMs === 0) delete next.latencyMs
+    assignDesignSection(design, 'serving', next)
+  }, [design])
+
+  const toggleServer = useCallback(async () => {
+    setServerError(null)
+    if (serving) {
+      await window.restorm?.designServer.stop(design.id)
+      return
+    }
+    // The JSON round-trip strips the reactive proxy — the
+    // contextBridge rejects proxied objects.
+    const result = await window.restorm?.designServer.start(JSON.parse(JSON.stringify(design)))
+    if (result?.success !== true) {
+      setServerError(result?.error ?? t('design.settings.serve.startFailed', 'The server could not start'))
+      return
+    }
+    onServerStarted(result.port)
+  }, [design, onServerStarted, serving, t])
+
+  const spinTooltip = serving
+    ? t('design.run.stop', 'Stop the server')
+    : blocked
+      ? t('design.settings.serve.blocked', 'Fix the design’s {{count}} validation issue(s) before serving', { count: issues.length })
+      : t('design.settings.serve.action', 'Serve this design')
+
   return (
     <ScrollableElement className="design-section-scroll">
       <div className="design-section design-settings" data-testid="design-settings-section">
@@ -290,17 +371,50 @@ const DesignSettingsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
               </span>
             ))}
           </div>
-          <HeaderHoverTooltip label={t('design.settings.serve.comingSoon', 'The design server is coming soon')}>
-            <button
-              type="button"
-              className="design-serve-spin"
-              aria-label={t('design.settings.serve.action', 'Serve this design')}
-              disabled
-              data-testid="design-serve-spin"
-            >
-              <span className="codicon codicon-play" />
-            </button>
-          </HeaderHoverTooltip>
+          <GatedControl locked={runLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="design-serve-gate">
+            <HeaderHoverTooltip label={spinTooltip}>
+              <Button
+                appearance="round"
+                icon={serving ? 'debug-stop' : 'play'}
+                onClick={() => { void toggleServer() }}
+                disabled={!serving && blocked}
+                className={`design-serve-spin${serving ? ' design-serve-spin-active' : ''}`}
+                options={{ ariaLabel: spinTooltip }}
+                data-testid="design-serve-spin"
+              />
+            </HeaderHoverTooltip>
+          </GatedControl>
+        </div>
+        <div className="design-settings-grid design-serve-fields">
+          <label className="design-field">
+            <span className="design-field-label">{t('design.settings.serve.port', 'Port')}</span>
+            <InputBox
+              value={String(port)}
+              onChange={(value) => {
+                const parsed = Number.parseInt(value, 10)
+                if (Number.isFinite(parsed) && parsed > 0 && parsed <= 65535) patchServing({ port: parsed })
+              }}
+              options={{ type: 'number', ariaLabel: t('design.settings.serve.port', 'Port') }}
+              data-testid="design-serve-port"
+            />
+          </label>
+          <label className="design-field">
+            <span className="design-field-label">{t('design.settings.serve.latency', 'Simulated latency (ms)')}</span>
+            <InputBox
+              value={String(latencyMs)}
+              onChange={(value) => {
+                const parsed = Number.parseInt(value, 10)
+                if (Number.isFinite(parsed) && parsed >= 0) patchServing({ latencyMs: parsed })
+              }}
+              options={{ type: 'number', ariaLabel: t('design.settings.serve.latency', 'Simulated latency (ms)') }}
+              data-testid="design-serve-latency"
+            />
+          </label>
+          {serverError !== null && (
+            <p className="design-serve-error design-field-full" role="alert" data-testid="design-serve-error">
+              {serverError}
+            </p>
+          )}
         </div>
 
         <h3 className="design-settings-group-title">{t('design.settings.identity.title', 'Identity')}</h3>

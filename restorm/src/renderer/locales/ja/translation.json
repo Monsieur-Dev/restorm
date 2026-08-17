@@ -2158,7 +2158,10 @@
         "title": "デザインサーバー",
         "action": "このデザインを配信",
         "description": "名前付きサンプルからの応答 · 制約による検証",
-        "comingSoon": "デザインサーバーは近日提供予定"
+        "port": "ポート",
+        "latency": "シミュレートされた遅延 (ms)",
+        "blocked": "提供する前にデザインの{{count}}件の検証エラーを修正してください",
+        "startFailed": "サーバーを起動できませんでした"
       },
       "identity": {
         "title": "アイデンティティ",
@@ -2435,7 +2438,21 @@
     "newDesignName": "新しい API デザイン",
     "createFromScratch": "API デザインを作成",
     "createFromDoc": "この API からデザインを作成",
-    "fromDocName": "{{name}} デザイン"
+    "fromDocName": "{{name}} デザイン",
+    "run": {
+      "listening": "http://localhost:{{port}} で提供中",
+      "stopped": "サーバー停止",
+      "totalCalls": "この実行で{{count}}回の呼び出し",
+      "stop": "サーバーを停止",
+      "close": "このパネルを閉じる",
+      "forcedPill": "強制 {{code}}",
+      "defaultReturn": "デザインのレスポンス（デフォルト）",
+      "codeReturn": "{{code}} で応答",
+      "customCode": "カスタムステータスコード",
+      "customBody": "カスタムレスポンスボディ",
+      "customBodyPlaceholder": "任意のレスポンスボディ (JSON)",
+      "customApply": "強制"
+    }
   },
   "mqtt": {
     "qos": "QoS",

@@ -2160,7 +2160,10 @@
         "title": "Server de design",
         "action": "Servește acest design",
         "description": "Răspunsuri din exemple denumite · validare prin constrângeri",
-        "comingSoon": "Serverul de design sosește în curând"
+        "port": "Port",
+        "latency": "Latență simulată (ms)",
+        "blocked": "Corectați cele {{count}} erori de validare ale designului înainte de a-l servi",
+        "startFailed": "Serverul nu a putut porni"
       },
       "identity": {
         "title": "Identitate",
@@ -2437,7 +2440,21 @@
     "newDesignName": "Design nou de API",
     "createFromScratch": "Creează un design de API",
     "createFromDoc": "Creează un design din acest API",
-    "fromDocName": "Design {{name}}"
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Servește pe http://localhost:{{port}}",
+      "stopped": "Server oprit",
+      "totalCalls": "{{count}} apeluri în această rulare",
+      "stop": "Oprește serverul",
+      "close": "Închide acest panou",
+      "forcedPill": "forțat {{code}}",
+      "defaultReturn": "Răspunsul designului (implicit)",
+      "codeReturn": "Răspunde {{code}}",
+      "customCode": "Cod de stare personalizat",
+      "customBody": "Corp de răspuns personalizat",
+      "customBodyPlaceholder": "Corp de răspuns opțional (JSON)",
+      "customApply": "Forțează"
+    }
   },
   "mqtt": {
     "qos": "QoS",

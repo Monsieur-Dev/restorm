@@ -25,6 +25,8 @@ import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPEx
 import { grpcExecutionService, normalizeAddress as normalizeGrpcAddress, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
+import { designServerService } from './services/DesignServerService'
+import type { ApiDesign } from '../shared/types/apiDesign'
 import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
@@ -64,6 +66,8 @@ import {
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
   grpcReflectImportArgs, grpcReflectQueryArgs,
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
+  designServerStartArgs, designServerStopArgs, designServerStatusArgs,
+  designServerSetForcedArgs, designServerUpdateArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
@@ -744,6 +748,9 @@ export function registerRestormIPC(deps: {
     // File close — same for any hosted OData mock service (its routes on the
     // shared HTTP PortHost): release the port so it doesn't outlive the file.
     odataMockServerService.closeAll()
+    // File close — same for any running design server: its design
+    // belongs to the closing file, so the port must not outlive it.
+    designServerService.closeAll()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.
@@ -1299,6 +1306,30 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('odata:is-listening', odataIsListeningArgs, (_event, [requestId]) => {
     return odataMockServerService.isListening(requestId)
+  })
+
+  // Design server: spin/stop a design's HTTP projection on the shared
+  // PortHost, poll its status, hot-steer a route's forced response,
+  // and push design edits live (autosave while serving). The design
+  // payload crosses as-is — the service re-validates before serving.
+  validatedHandle('design-server:start', designServerStartArgs, async (_event, [design]) => {
+    return await designServerService.start(design as ApiDesign)
+  })
+
+  validatedHandle('design-server:stop', designServerStopArgs, (_event, [designId]) => {
+    return designServerService.stop(designId)
+  })
+
+  validatedHandle('design-server:status', designServerStatusArgs, (_event, [designId]) => {
+    return designServerService.status(designId)
+  })
+
+  validatedHandle('design-server:set-forced', designServerSetForcedArgs, (_event, [designId, routeId, forced]) => {
+    return designServerService.setForced(designId, routeId, forced)
+  })
+
+  validatedHandle('design-server:update', designServerUpdateArgs, (_event, [design]) => {
+    return designServerService.updateDesign(design as ApiDesign)
   })
 
   // ==========================================================================

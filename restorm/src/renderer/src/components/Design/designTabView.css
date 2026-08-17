@@ -5,6 +5,8 @@
   display: flex;
   height: 100%;
   min-height: 0;
+  /* Anchor for the tab-scoped run panel overlay. */
+  position: relative;
 }
 
 .design-rail {
@@ -141,23 +143,233 @@
   opacity: 1;
 }
 
-.design-serve-spin {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 50%;
-  background-color: var(--button-background);
-  color: var(--button-foreground);
-  cursor: pointer;
+/* The spin is an ECUI round Button (possibly wrapped in the Community
+ * gate); neither may shrink away from the block's right edge. */
+.design-serve-block .ecu-gated,
+.design-serve-block .design-serve-spin {
   flex-shrink: 0;
 }
 
-.design-serve-spin:disabled {
-  opacity: 0.5;
-  cursor: default;
+.design-serve-spin-active {
+  color: var(--errorForeground, #f14c4c);
+}
+
+.design-serve-fields {
+  margin-top: 10px;
+}
+
+.design-serve-error {
+  margin: 4px 0 0;
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.9em;
+}
+
+/* ── Run panel — the tab-scoped overlay of a serving design ───────── */
+
+.design-run-modal {
+  position: absolute;
+  top: 44px;
+  right: 16px;
+  width: min(440px, calc(100% - 80px));
+  max-height: calc(100% - 88px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 8px;
+  background-color: var(--editor-background, var(--panel-background));
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  z-index: 20;
+}
+
+.design-run-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+}
+
+.design-run-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--descriptionForeground, #888);
+  flex-shrink: 0;
+}
+
+.design-run-status-dot.listening {
+  background-color: var(--testing-iconPassed, #2ea043);
+}
+
+.design-run-title {
+  font-weight: 600;
+  font-size: 0.95em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-total {
+  font-size: 0.85em;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.design-run-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.design-run-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.design-run-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+}
+
+.design-run-route {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.design-run-route-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-run-route-header:hover {
+  background-color: var(--listHoverBackground);
+}
+
+.design-run-route-title {
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-route-path {
+  font-size: 0.85em;
+  opacity: 0.6;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-forced-pill {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--errorForeground, #f14c4c);
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.8em;
+  flex-shrink: 0;
+}
+
+.design-run-route-count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9em;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.design-run-returns {
+  list-style: none;
+  margin: 0;
+  padding: 4px 8px 8px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.design-run-return {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+}
+
+.design-run-return.selected {
+  background-color: var(--listActiveSelectionBackground, rgba(128, 128, 128, 0.15));
+}
+
+.design-run-return-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-run-return-label {
+  flex-shrink: 0;
+}
+
+.design-run-return-detail {
+  font-size: 0.85em;
+  opacity: 0.6;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-return-count {
+  margin-left: auto;
+  padding-right: 8px;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85em;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.design-run-return-custom {
+  align-items: flex-start;
+  padding: 4px 6px;
+}
+
+.design-run-custom-fields {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.design-run-custom-code {
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.design-run-custom-body {
+  flex: 1;
+  min-width: 0;
 }
 
 .design-settings-grid {

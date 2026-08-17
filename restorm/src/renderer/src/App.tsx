@@ -2374,9 +2374,9 @@ const App: React.FC = () => {
     if (!folder) return
     setApiSpecRefreshFolder(folder)
   }, [rootItems])
-  // The env-folder prefill entry (TASK-468.5): an imported documentation
-  // becomes an editable design CREATED INSIDE that folder (so it resolves
-  // the folder's variables), then opens in its tab.
+  // The env-folder prefill entry: an imported documentation becomes an
+  // editable design CREATED INSIDE that folder (so it resolves the
+  // folder's variables), then opens in its tab.
   const canCreateDesignFromDoc = useCallback((id: string): boolean => {
     const folder = rootItems.find((c): c is EnvironmentFolder => isEnvironmentFolder(c) && c.id === id)
     return folder?.apiDocumentation !== undefined
@@ -2390,7 +2390,7 @@ const App: React.FC = () => {
       folder.apiDocumentation,
       generateUniqueId
     )
-    const reactive = makeReactiveApiDesign(built)
+    const reactive = makeReactiveApiDesign(built, folder.id)
     folder.items.push(reactive as unknown as FolderItem)
     setRootItems((prev) => [...prev])
     eventBus.emitSync(DocumentEvents.DESIGN_CREATED, {
@@ -2615,11 +2615,12 @@ const App: React.FC = () => {
     () => (selectedItemId ? findItemById(rootItems, selectedItemId) ?? null : null),
     [rootItems, selectedItemId]
   )
-  const selectedSidebarKind: 'env-folder' | 'folder' | 'scenario' | 'server' | 'request' | null = useMemo(() => {
+  const selectedSidebarKind: 'env-folder' | 'folder' | 'scenario' | 'design' | 'server' | 'request' | null = useMemo(() => {
     const item = selectedSidebarItem
     if (!item) return null
     if (isEnvironmentFolder(item)) return 'env-folder'
     if (isScenario(item)) return 'scenario'
+    if (isApiDesign(item)) return 'design'
     if (isFolder(item)) return 'folder'
     if (isRequest(item)) return (item as { server?: boolean }).server === true ? 'server' : 'request'
     return null

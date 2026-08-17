@@ -15,25 +15,15 @@ import type { EnvironmentFolder, FolderItem, Request } from '../../../shared/typ
 import { isAnyFolder, isEnvironmentFolder, isRequest } from '../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
 import { findOperationForRoute, type RouteLike } from '../../../shared/utils/findOperationForRoute'
-import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/resolveUrlAgainstEnv'
+import { resolveUrlAgainstEnv, flattenEnvVars, coerceEnvVarValue } from '../../../shared/utils/resolveUrlAgainstEnv'
 
 function envVarsFromFolder(folder: EnvironmentFolder): Record<string, string> {
   const env = folder.environments[0]
   if (!env) return {}
   const out: Record<string, string> = {}
   for (const kv of env.variables) {
-    const v: unknown = kv.value
-    if (typeof v === 'string') out[kv.key] = v
-    else if (typeof v === 'number' || typeof v === 'boolean') out[kv.key] = String(v)
-    else if (v && typeof v === 'object') {
-      const obj = v as { value?: unknown; toString?: () => string }
-      if (typeof obj.value === 'string') out[kv.key] = obj.value
-      else if (typeof obj.value === 'number' || typeof obj.value === 'boolean') out[kv.key] = String(obj.value)
-      else if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
-        const s = obj.toString()
-        if (s !== '[object Object]') out[kv.key] = s
-      }
-    }
+    const coerced = coerceEnvVarValue(kv.value)
+    if (coerced !== undefined) out[kv.key] = coerced
   }
   return out
 }

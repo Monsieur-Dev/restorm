@@ -2159,7 +2159,10 @@
         "title": "Designserver",
         "action": "Servér dette design",
         "description": "Svar fra navngivne eksempler · validering via begrænsninger",
-        "comingSoon": "Designserveren kommer snart"
+        "port": "Port",
+        "latency": "Simuleret latenstid (ms)",
+        "blocked": "Ret designets {{count}} valideringsfejl, før det serveres",
+        "startFailed": "Serveren kunne ikke starte"
       },
       "identity": {
         "title": "Identitet",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Nyt API-design",
     "createFromScratch": "Opret et API-design",
     "createFromDoc": "Opret et design ud fra denne API",
-    "fromDocName": "Design {{name}}"
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Serverer på http://localhost:{{port}}",
+      "stopped": "Server stoppet",
+      "totalCalls": "{{count}} kald i denne kørsel",
+      "stop": "Stop serveren",
+      "close": "Luk dette panel",
+      "forcedPill": "tvunget {{code}}",
+      "defaultReturn": "Designsvar (standard)",
+      "codeReturn": "Svar {{code}}",
+      "customCode": "Brugerdefineret statuskode",
+      "customBody": "Brugerdefineret svartekst",
+      "customBodyPlaceholder": "Valgfri svartekst (JSON)",
+      "customApply": "Gennemtving"
+    }
   },
   "mqtt": {
     "qos": "QoS",

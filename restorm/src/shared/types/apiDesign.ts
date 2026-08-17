@@ -313,6 +313,9 @@ export interface DesignServing {
   protocols?: DesignProtocol[]
   /** Fixed listen port; absent = picked at spin time. */
   port?: number
+  /** Simulated latency added to every served response, in ms.
+   * Absent or 0 = answer immediately. */
+  latencyMs?: number
 }
 
 /**

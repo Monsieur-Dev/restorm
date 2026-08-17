@@ -157,8 +157,12 @@ export function designToApiDocumentation(design: ApiDesign): ApiDocumentation {
     groups[group.doc.name] = group.doc
     for (const route of group.routes) {
       operations.push({
+        // The design's base path is NOT composed into operation paths:
+        // it belongs to the base URL and travels in `server.basePath`
+        // (exactly where the spec importers put it) — composing it here
+        // too would double-count it on a re-import round-trip. Serving
+        // is different: `compileDesignRoutes` binds full paths.
         ...designRouteDoc(route, {
-          ...(design.server?.basePath !== undefined && { designBasePath: design.server.basePath }),
           ...(group.design?.versionPrefix !== undefined && { versionPrefix: group.design.versionPrefix }),
           ...(group.design?.basePath !== undefined && { groupBasePath: group.design.basePath })
         }, design),

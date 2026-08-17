@@ -489,11 +489,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
-    // Design tab: design badge + name
+    // Design tab: design badge (beamed while its server serves) + name
     if (isDesignTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <RegistryBadge badgeId="design" />
+          <RequestExecutingBadge requestId={restormTab.design.id}>
+            <RegistryBadge badgeId="design" />
+          </RequestExecutingBadge>
           <span>{restormTab.design.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
@@ -899,10 +901,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       }
       const updatedGroups = updateGroups(tree.groups)
 
-      // Record navigation synchronously so history is up-to-date for next Ctrl+Tab
+      // Record navigation synchronously so history is up-to-date for next Ctrl+Tab.
+      // The type must match the tab's real kind: a design (or scenario)
+      // entry typed 'http-request' would fail the isRequest branch on a
+      // later Back/Forward and never reopen its tab — and navigateTo
+      // short-circuits on same-key, so handleTabActivate can't repair it.
       if (found.itemId) {
         const tabType = tabId.startsWith('env-folder') ? 'environment-folder'
           : tabId.startsWith('folder') ? 'folder'
+          : tabId.startsWith('design') ? 'design'
+          : tabId.startsWith('scenario') ? 'scenario-editor'
           : 'http-request'
         navigationService.navigateTo(found.itemId, 'tab-switcher', { type: tabType })
       }

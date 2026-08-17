@@ -32,7 +32,7 @@ export function buildReferenceApiDesign(): ApiDesign {
     },
     defaultSecurity: [{ bearerAuth: [] }],
     defaultAuth: 'bearer',
-    serving: { protocols: ['http', 'graphql'], port: 7480 },
+    serving: { protocols: ['http', 'graphql'], port: 7480, latencyMs: 25 },
     models: [
       {
         id: 'model-user',

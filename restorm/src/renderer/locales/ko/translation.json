@@ -2158,7 +2158,10 @@
         "title": "디자인 서버",
         "action": "이 디자인 서빙",
         "description": "이름 있는 예시 기반 응답 · 제약 조건 검증",
-        "comingSoon": "디자인 서버가 곧 제공됩니다"
+        "port": "포트",
+        "latency": "시뮬레이션 지연 (ms)",
+        "blocked": "제공하기 전에 디자인의 유효성 검사 오류 {{count}}건을 수정하세요",
+        "startFailed": "서버를 시작할 수 없습니다"
       },
       "identity": {
         "title": "아이덴티티",
@@ -2435,7 +2438,21 @@
     "newDesignName": "새 API 디자인",
     "createFromScratch": "API 디자인 만들기",
     "createFromDoc": "이 API에서 디자인 만들기",
-    "fromDocName": "{{name}} 디자인"
+    "fromDocName": "{{name}} 디자인",
+    "run": {
+      "listening": "http://localhost:{{port}} 에서 제공 중",
+      "stopped": "서버 중지됨",
+      "totalCalls": "이 실행에서 {{count}}회 호출",
+      "stop": "서버 중지",
+      "close": "이 패널 닫기",
+      "forcedPill": "강제 {{code}}",
+      "defaultReturn": "디자인 응답 (기본값)",
+      "codeReturn": "{{code}} 응답",
+      "customCode": "사용자 지정 상태 코드",
+      "customBody": "사용자 지정 응답 본문",
+      "customBodyPlaceholder": "선택적 응답 본문 (JSON)",
+      "customApply": "강제"
+    }
   },
   "mqtt": {
     "qos": "QoS",

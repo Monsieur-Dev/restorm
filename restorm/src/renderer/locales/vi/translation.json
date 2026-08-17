@@ -2158,7 +2158,10 @@
         "title": "Máy chủ thiết kế",
         "action": "Phục vụ thiết kế này",
         "description": "Phản hồi từ các ví dụ được đặt tên · xác thực bằng ràng buộc",
-        "comingSoon": "Máy chủ thiết kế sắp ra mắt"
+        "port": "Cổng",
+        "latency": "Độ trễ mô phỏng (ms)",
+        "blocked": "Sửa {{count}} lỗi xác thực của thiết kế trước khi phục vụ",
+        "startFailed": "Không thể khởi động máy chủ"
       },
       "identity": {
         "title": "Danh tính",
@@ -2435,7 +2438,21 @@
     "newDesignName": "Thiết kế API mới",
     "createFromScratch": "Tạo thiết kế API",
     "createFromDoc": "Tạo thiết kế từ API này",
-    "fromDocName": "Thiết kế {{name}}"
+    "fromDocName": "Thiết kế {{name}}",
+    "run": {
+      "listening": "Đang phục vụ tại http://localhost:{{port}}",
+      "stopped": "Máy chủ đã dừng",
+      "totalCalls": "{{count}} lượt gọi trong lần chạy này",
+      "stop": "Dừng máy chủ",
+      "close": "Đóng bảng này",
+      "forcedPill": "ép buộc {{code}}",
+      "defaultReturn": "Phản hồi của thiết kế (mặc định)",
+      "codeReturn": "Trả lời {{code}}",
+      "customCode": "Mã trạng thái tùy chỉnh",
+      "customBody": "Nội dung phản hồi tùy chỉnh",
+      "customBodyPlaceholder": "Nội dung phản hồi tùy chọn (JSON)",
+      "customApply": "Ép buộc"
+    }
   },
   "mqtt": {
     "qos": "QoS",

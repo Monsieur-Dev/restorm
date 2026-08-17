@@ -1377,6 +1377,56 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
+  designServer: {
+    /** Spin a design's HTTP server. Resolves once the port is bound (or
+     * the bind fails — port conflict, invalid design). The design
+     * travels whole: the main process owns no collection state. */
+    start: async (design: unknown): Promise<{ success: boolean; listening: boolean; port: number; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:start', design)
+      return result as { success: boolean; listening: boolean; port: number; error?: string }
+    },
+    /** Stop the design's server, freeing its port. */
+    stop: async (designId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:stop', designId)
+      return result as boolean
+    },
+    /** Listening state + this run's counters. */
+    status: async (designId: string): Promise<{ listening: boolean; port?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:status', designId)
+      return result as { listening: boolean; port?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }
+    },
+    /** Hot-steer one route's response (run modal): `null` clears. */
+    setForced: async (designId: string, routeId: string, forced: { code: string; body?: string } | null): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:set-forced', designId, routeId, forced)
+      return result as boolean
+    },
+    /** Push the design's fresh shape while serving (autosave). */
+    update: async (design: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:update', design)
+      return result as boolean
+    },
+    /** Progress stream: a design is "serving" between `started` and
+     * `completed`/`error` — drives the beam like every other server. */
+    onProgress: (callback: (event: { designId: string; status: 'started' | 'completed' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { designId: string; status: 'started' | 'completed' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('design-server:progress', handler)
+      return () => {
+        ipcRenderer.removeListener('design-server:progress', handler)
+      }
+    },
+    /** Per-served-request counter stream feeding the run modal. */
+    onServed: (callback: (data: { designId: string; routeId: string; code: string; counters: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { designId: string; routeId: string; code: string; counters: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('design-server:served', handler)
+      return () => {
+        ipcRenderer.removeListener('design-server:served', handler)
+      }
+    }
+  },
   jsonrpc: {
     /** Execute a single JSON-RPC 2.0 call. Reuses the HTTP dispatcher under
      * the hood — `JsonRpcExecutionService` composes the envelope and unwraps

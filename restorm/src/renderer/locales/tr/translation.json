@@ -2159,7 +2159,10 @@
         "title": "Tasarım sunucusu",
         "action": "Bu tasarımı sun",
         "description": "Adlandırılmış örneklerden yanıtlar · kısıtlamalarla doğrulama",
-        "comingSoon": "Tasarım sunucusu yakında geliyor"
+        "port": "Bağlantı noktası",
+        "latency": "Simüle edilmiş gecikme (ms)",
+        "blocked": "Sunmadan önce tasarımın {{count}} doğrulama hatasını düzeltin",
+        "startFailed": "Sunucu başlatılamadı"
       },
       "identity": {
         "title": "Kimlik",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Yeni API tasarımı",
     "createFromScratch": "API tasarımı oluştur",
     "createFromDoc": "Bu API’den bir tasarım oluştur",
-    "fromDocName": "{{name}} tasarımı"
+    "fromDocName": "{{name}} tasarımı",
+    "run": {
+      "listening": "http://localhost:{{port}} üzerinde sunuluyor",
+      "stopped": "Sunucu durduruldu",
+      "totalCalls": "Bu çalıştırmada {{count}} çağrı",
+      "stop": "Sunucuyu durdur",
+      "close": "Bu paneli kapat",
+      "forcedPill": "zorlandı {{code}}",
+      "defaultReturn": "Tasarım yanıtı (varsayılan)",
+      "codeReturn": "{{code}} ile yanıtla",
+      "customCode": "Özel durum kodu",
+      "customBody": "Özel yanıt gövdesi",
+      "customBodyPlaceholder": "İsteğe bağlı yanıt gövdesi (JSON)",
+      "customApply": "Zorla"
+    }
   },
   "mqtt": {
     "qos": "QoS",

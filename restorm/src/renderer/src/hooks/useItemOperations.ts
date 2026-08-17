@@ -879,13 +879,22 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         enums: [],
         routeGroups: []
       }
-      const reactive = makeReactiveApiDesign(design)
+      // Same parent bookkeeping as the request branch: the proxy stamps
+      // parentFolderId onto every event, and the save-unit registers
+      // under its real parent.
+      const designParentId = isRoot
+        ? undefined
+        : (parent && (isAnyFolder(parent) || isScenario(parent)) ? parent.id : undefined)
+      const reactive = designParentId !== undefined
+        ? makeReactiveApiDesign(design, designParentId)
+        : makeReactiveApiDesign(design)
       mountChild(reactive as unknown as FolderItem)
       pushedItem = reactive as unknown as FolderItem
       emitBothBuses(DocumentEvents.DESIGN_CREATED, {
         id: reactive.id,
         type: 'design',
-        document: cloneForEventBus(reactive as unknown as FolderItem)
+        document: cloneForEventBus(reactive as unknown as FolderItem),
+        ...(designParentId !== undefined ? { parentFolderId: designParentId } : {})
       } as DocumentChangedPayload)
     } else if (kind === 'scenario') {
       // A scenario is a plain tree item (no execution wiring yet in

@@ -2159,7 +2159,10 @@
         "title": "Servidor de design",
         "action": "Servir este design",
         "description": "Respostas de exemplos nomeados · validação por restrições",
-        "comingSoon": "O servidor de design chega em breve"
+        "port": "Porta",
+        "latency": "Latência simulada (ms)",
+        "blocked": "Corrija os {{count}} erro(s) de validação do design antes de o servir",
+        "startFailed": "O servidor não pôde iniciar"
       },
       "identity": {
         "title": "Identidade",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Novo design de API",
     "createFromScratch": "Criar um design de API",
     "createFromDoc": "Criar um design a partir desta API",
-    "fromDocName": "Design {{name}}"
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "A servir em http://localhost:{{port}}",
+      "stopped": "Servidor parado",
+      "totalCalls": "{{count}} chamada(s) nesta execução",
+      "stop": "Parar o servidor",
+      "close": "Fechar este painel",
+      "forcedPill": "forçado {{code}}",
+      "defaultReturn": "Resposta do design (padrão)",
+      "codeReturn": "Responder {{code}}",
+      "customCode": "Código de estado personalizado",
+      "customBody": "Corpo de resposta personalizado",
+      "customBodyPlaceholder": "Corpo de resposta opcional (JSON)",
+      "customApply": "Forçar"
+    }
   },
   "mqtt": {
     "qos": "QoS",

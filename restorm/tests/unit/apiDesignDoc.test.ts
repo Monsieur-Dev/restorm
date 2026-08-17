@@ -60,10 +60,12 @@ describe('designToApiDocumentation', () => {
 
   it('flattens routes onto operations with composed full paths and group tags', () => {
     const patterns = projection.operations.map((op) => `${op.match.method ?? ''} ${op.match.urlPattern}`)
+    // No `/api` prefix: the design base path travels in `server.basePath`
+    // (base-URL territory), never in operation paths — importer parity.
     expect(patterns).toEqual([
-      'GET /api/v1/users/{{id}}',
-      'GET /api/v1/users',
-      'POST /api/v1/users'
+      'GET /v1/users/{{id}}',
+      'GET /v1/users',
+      'POST /v1/users'
     ])
     expect(projection.operations.every((op) => op.group === 'Users')).toBe(true)
     expect(Object.keys(projection.groups)).toEqual(['Users'])

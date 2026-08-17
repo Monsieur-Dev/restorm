@@ -2161,7 +2161,10 @@
         "title": "Сервер дизайну",
         "action": "Обслуговувати цей дизайн",
         "description": "Відповіді з іменованих прикладів · валідація обмеженнями",
-        "comingSoon": "Сервер дизайну незабаром"
+        "port": "Порт",
+        "latency": "Імітована затримка (мс)",
+        "blocked": "Виправте {{count}} помилок валідації дизайну перед його запуском",
+        "startFailed": "Сервер не вдалося запустити"
       },
       "identity": {
         "title": "Ідентичність",
@@ -2438,7 +2441,21 @@
     "newDesignName": "Новий дизайн API",
     "createFromScratch": "Створити дизайн API",
     "createFromDoc": "Створити дизайн з цього API",
-    "fromDocName": "Дизайн {{name}}"
+    "fromDocName": "Дизайн {{name}}",
+    "run": {
+      "listening": "Обслуговує на http://localhost:{{port}}",
+      "stopped": "Сервер зупинено",
+      "totalCalls": "{{count}} викликів у цьому запуску",
+      "stop": "Зупинити сервер",
+      "close": "Закрити цю панель",
+      "forcedPill": "примусово {{code}}",
+      "defaultReturn": "Відповідь дизайну (за замовчуванням)",
+      "codeReturn": "Відповісти {{code}}",
+      "customCode": "Власний код статусу",
+      "customBody": "Власне тіло відповіді",
+      "customBodyPlaceholder": "Необов’язкове тіло відповіді (JSON)",
+      "customApply": "Примусити"
+    }
   },
   "mqtt": {
     "qos": "QoS",

@@ -2158,7 +2158,10 @@
         "title": "Server desain",
         "action": "Sajikan desain ini",
         "description": "Respons dari contoh bernama · validasi dengan batasan",
-        "comingSoon": "Server desain segera hadir"
+        "port": "Port",
+        "latency": "Latensi tersimulasi (ms)",
+        "blocked": "Perbaiki {{count}} kesalahan validasi desain sebelum menyajikannya",
+        "startFailed": "Server tidak dapat dimulai"
       },
       "identity": {
         "title": "Identitas",
@@ -2435,7 +2438,21 @@
     "newDesignName": "Desain API baru",
     "createFromScratch": "Buat desain API",
     "createFromDoc": "Buat desain dari API ini",
-    "fromDocName": "Desain {{name}}"
+    "fromDocName": "Desain {{name}}",
+    "run": {
+      "listening": "Melayani di http://localhost:{{port}}",
+      "stopped": "Server dihentikan",
+      "totalCalls": "{{count}} panggilan pada eksekusi ini",
+      "stop": "Hentikan server",
+      "close": "Tutup panel ini",
+      "forcedPill": "dipaksa {{code}}",
+      "defaultReturn": "Respons desain (bawaan)",
+      "codeReturn": "Jawab {{code}}",
+      "customCode": "Kode status kustom",
+      "customBody": "Isi respons kustom",
+      "customBodyPlaceholder": "Isi respons opsional (JSON)",
+      "customApply": "Paksa"
+    }
   },
   "mqtt": {
     "qos": "QoS",

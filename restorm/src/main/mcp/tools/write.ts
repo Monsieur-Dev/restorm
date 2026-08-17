@@ -364,9 +364,9 @@ export function registerWriteTools(mcp: McpService): void {
     'move_item',
     {
       titleKey: 'mcpToolTitles.moveItem',
-      title: 'Move a folder, request or scenario to a new parent or position',
+      title: 'Move a folder, request, scenario or design to a new parent or position',
       description:
-        'Reparent and/or reorder an existing sidebar item (request, folder, env-folder or scenario). ' +
+        'Reparent and/or reorder an existing sidebar item (request, folder, env-folder, scenario or API design). ' +
         'With `newParentId`, the item moves under that container (folder, env-folder or scenario); omit ' +
         'it to keep the current parent and only change the position. `index` is the 0-based slot among ' +
         'the destination parent\'s children, interpreted AFTER the item leaves its current spot (so moving ' +

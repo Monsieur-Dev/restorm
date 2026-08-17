@@ -2158,7 +2158,10 @@
         "title": "设计服务器",
         "action": "服务此设计",
         "description": "来自命名示例的响应 · 按约束验证",
-        "comingSoon": "设计服务器即将推出"
+        "port": "端口",
+        "latency": "模拟延迟（毫秒）",
+        "blocked": "请先修复设计的 {{count}} 个校验错误再启动服务",
+        "startFailed": "服务器无法启动"
       },
       "identity": {
         "title": "标识",
@@ -2435,7 +2438,21 @@
     "newDesignName": "新的 API 设计",
     "createFromScratch": "创建 API 设计",
     "createFromDoc": "从此 API 创建设计",
-    "fromDocName": "{{name}} 设计"
+    "fromDocName": "{{name}} 设计",
+    "run": {
+      "listening": "正在 http://localhost:{{port}} 上提供服务",
+      "stopped": "服务器已停止",
+      "totalCalls": "本次运行 {{count}} 次调用",
+      "stop": "停止服务器",
+      "close": "关闭此面板",
+      "forcedPill": "强制 {{code}}",
+      "defaultReturn": "设计响应（默认）",
+      "codeReturn": "返回 {{code}}",
+      "customCode": "自定义状态码",
+      "customBody": "自定义响应体",
+      "customBodyPlaceholder": "可选响应体 (JSON)",
+      "customApply": "强制"
+    }
   },
   "mqtt": {
     "qos": "QoS",

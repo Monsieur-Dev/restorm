@@ -2159,7 +2159,10 @@
         "title": "Ontwerpserver",
         "action": "Dit ontwerp serveren",
         "description": "Antwoorden uit benoemde voorbeelden · validatie via constraints",
-        "comingSoon": "De ontwerpserver komt binnenkort"
+        "port": "Poort",
+        "latency": "Gesimuleerde latentie (ms)",
+        "blocked": "Los de {{count}} validatiefout(en) van het design op voordat u het serveert",
+        "startFailed": "De server kon niet starten"
       },
       "identity": {
         "title": "Identiteit",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Nieuw API-design",
     "createFromScratch": "Een API-design maken",
     "createFromDoc": "Een design maken van deze API",
-    "fromDocName": "Design {{name}}"
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Serveert op http://localhost:{{port}}",
+      "stopped": "Server gestopt",
+      "totalCalls": "{{count}} aanroep(en) in deze run",
+      "stop": "Server stoppen",
+      "close": "Dit paneel sluiten",
+      "forcedPill": "geforceerd {{code}}",
+      "defaultReturn": "Designrespons (standaard)",
+      "codeReturn": "Antwoord {{code}}",
+      "customCode": "Aangepaste statuscode",
+      "customBody": "Aangepaste responsbody",
+      "customBodyPlaceholder": "Optionele responsbody (JSON)",
+      "customApply": "Forceren"
+    }
   },
   "mqtt": {
     "qos": "QoS",

@@ -116,7 +116,7 @@ export interface RestormTitlebarProps {
    * `workbenchActive` is true; otherwise the modal is shown. */
   onOpenSettingsTab: () => void
   /** The sidebar selection the Édition / Sélection menus act on. */
-  selection?: { id: string; kind: 'env-folder' | 'folder' | 'scenario' | 'server' | 'request'; isFavorite: boolean } | null
+  selection?: { id: string; kind: 'env-folder' | 'folder' | 'scenario' | 'design' | 'server' | 'request'; isFavorite: boolean } | null
   /** Whether a paste payload is staged (enables Coller). */
   canPaste?: boolean
   onCutSelection?: () => void

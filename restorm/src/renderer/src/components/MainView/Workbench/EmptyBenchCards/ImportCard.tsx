@@ -11,8 +11,8 @@ import { Button, MosaicCard } from 'electron-core-ui/renderer'
  */
 interface ImportCardProps {
   readonly onImport: () => void
-  /** Starts a blank API design in the open project (TASK-468 entry
-   * point) — free on every plan, the plan gates running the design. */
+  /** Starts a blank API design in the open project — free on every
+   * plan, the plan gates RUNNING the design. */
   readonly onCreateDesign: () => void
 }
 

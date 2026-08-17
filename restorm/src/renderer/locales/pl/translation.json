@@ -2161,7 +2161,10 @@
         "title": "Serwer projektu",
         "action": "Serwuj ten projekt API",
         "description": "Odpowiedzi z nazwanych przykładów · walidacja ograniczeniami",
-        "comingSoon": "Serwer projektu API wkrótce"
+        "port": "Port",
+        "latency": "Symulowane opóźnienie (ms)",
+        "blocked": "Napraw {{count}} błędy walidacji projektu przed jego serwowaniem",
+        "startFailed": "Nie udało się uruchomić serwera"
       },
       "identity": {
         "title": "Tożsamość",
@@ -2438,7 +2441,21 @@
     "newDesignName": "Nowy projekt API",
     "createFromScratch": "Utwórz projekt API",
     "createFromDoc": "Utwórz projekt z tego API",
-    "fromDocName": "Projekt {{name}}"
+    "fromDocName": "Projekt {{name}}",
+    "run": {
+      "listening": "Serwuje na http://localhost:{{port}}",
+      "stopped": "Serwer zatrzymany",
+      "totalCalls": "{{count}} wywołań w tym uruchomieniu",
+      "stop": "Zatrzymaj serwer",
+      "close": "Zamknij ten panel",
+      "forcedPill": "wymuszono {{code}}",
+      "defaultReturn": "Odpowiedź projektu (domyślna)",
+      "codeReturn": "Odpowiedz {{code}}",
+      "customCode": "Własny kod statusu",
+      "customBody": "Własna treść odpowiedzi",
+      "customBodyPlaceholder": "Opcjonalna treść odpowiedzi (JSON)",
+      "customApply": "Wymuś"
+    }
   },
   "mqtt": {
     "qos": "QoS",

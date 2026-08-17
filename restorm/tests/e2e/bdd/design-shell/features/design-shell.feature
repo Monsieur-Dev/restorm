@@ -55,6 +55,7 @@ Feature: The Design tab shell
     Given a Community project carrying an API design is open
     When I click the design row in the sidebar
     Then the design settings are editable
+    And the design serve spin is plan-gated
     Given a Pro project carrying an API design is open
     When I click the design row in the sidebar
     Then the design settings are editable

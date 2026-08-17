@@ -2159,7 +2159,10 @@
         "title": "Suunnitelmapalvelin",
         "action": "Palvele tämä suunnitelma",
         "description": "Vastaukset nimetyistä esimerkeistä · validointi rajoitteilla",
-        "comingSoon": "Suunnitelmapalvelin tulee pian"
+        "port": "Portti",
+        "latency": "Simuloitu viive (ms)",
+        "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen sen tarjoamista",
+        "startFailed": "Palvelinta ei voitu käynnistää"
       },
       "identity": {
         "title": "Identiteetti",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Uusi API-suunnitelma",
     "createFromScratch": "Luo API-suunnitelma",
     "createFromDoc": "Luo suunnitelma tästä API:sta",
-    "fromDocName": "Suunnitelma {{name}}"
+    "fromDocName": "Suunnitelma {{name}}",
+    "run": {
+      "listening": "Palvelee osoitteessa http://localhost:{{port}}",
+      "stopped": "Palvelin pysäytetty",
+      "totalCalls": "{{count}} kutsua tässä ajossa",
+      "stop": "Pysäytä palvelin",
+      "close": "Sulje tämä paneeli",
+      "forcedPill": "pakotettu {{code}}",
+      "defaultReturn": "Suunnitelman vastaus (oletus)",
+      "codeReturn": "Vastaa {{code}}",
+      "customCode": "Mukautettu tilakoodi",
+      "customBody": "Mukautettu vastausrunko",
+      "customBodyPlaceholder": "Valinnainen vastausrunko (JSON)",
+      "customApply": "Pakota"
+    }
   },
   "mqtt": {
     "qos": "QoS",

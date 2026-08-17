@@ -2159,7 +2159,10 @@
         "title": "Tervkiszolgáló",
         "action": "A terv kiszolgálása",
         "description": "Válaszok nevesített példákból · validálás megszorításokkal",
-        "comingSoon": "A tervkiszolgáló hamarosan érkezik"
+        "port": "Port",
+        "latency": "Szimulált késleltetés (ms)",
+        "blocked": "Javítsa a terv {{count}} validálási hibáját a kiszolgálás előtt",
+        "startFailed": "A szervert nem sikerült elindítani"
       },
       "identity": {
         "title": "Identitás",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Új API-terv",
     "createFromScratch": "API-terv létrehozása",
     "createFromDoc": "Terv létrehozása ebből az API-ból",
-    "fromDocName": "{{name}} terv"
+    "fromDocName": "{{name}} terv",
+    "run": {
+      "listening": "Kiszolgálás itt: http://localhost:{{port}}",
+      "stopped": "Szerver leállítva",
+      "totalCalls": "{{count}} hívás ebben a futásban",
+      "stop": "Szerver leállítása",
+      "close": "Panel bezárása",
+      "forcedPill": "kényszerítve {{code}}",
+      "defaultReturn": "Terv válasza (alapértelmezett)",
+      "codeReturn": "Válasz: {{code}}",
+      "customCode": "Egyéni státuszkód",
+      "customBody": "Egyéni választörzs",
+      "customBodyPlaceholder": "Opcionális választörzs (JSON)",
+      "customApply": "Kényszerítés"
+    }
   },
   "mqtt": {
     "qos": "QoS",

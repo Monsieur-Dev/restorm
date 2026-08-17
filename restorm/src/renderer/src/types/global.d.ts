@@ -434,6 +434,15 @@ declare global {
         isListening: (requestId: string) => Promise<boolean>
         onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
+      designServer: {
+        start: (design: unknown) => Promise<{ success: boolean; listening: boolean; port: number; error?: string }>
+        stop: (designId: string) => Promise<boolean>
+        status: (designId: string) => Promise<{ listening: boolean; port?: number; counters?: DesignServerCounters }>
+        setForced: (designId: string, routeId: string, forced: { code: string; body?: string } | null) => Promise<boolean>
+        update: (design: unknown) => Promise<boolean>
+        onProgress: (callback: (event: { designId: string; status: 'started' | 'completed' | 'error' }) => void) => (() => void)
+        onServed: (callback: (data: { designId: string; routeId: string; code: string; counters: DesignServerCounters }) => void) => (() => void)
+      }
       jsonrpc: {
         execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>
         executeBatch: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcBatchExecutionResult>
@@ -1285,6 +1294,13 @@ export interface AmqpExecutionResult {
 }
 
 /** AMQP message data for streaming */
+/** Per-run design-server call counters (mirrors the main-side shape in
+ * `DesignServerService`). */
+export interface DesignServerCounters {
+  total: number
+  routes: Record<string, { total: number; byCode: Record<string, number> }>
+}
+
 export interface AmqpMessageData {
   requestId: string
   message: AmqpMessageItem

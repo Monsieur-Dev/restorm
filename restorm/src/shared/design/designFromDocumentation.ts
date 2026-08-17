@@ -3,9 +3,12 @@
  * folder's imported `ApiDocumentation` — the reverse of the
  * `apiDesignDoc` projection. Doc objects are carried VERBATIM into the
  * design entities (a design embeds doc shapes by construction), so no
- * field is lost; the design-only extensions are DERIVED where the doc
- * carries the fact (references from `targetModelRef`, bodies and
- * response models from the documented schemas).
+ * doc field is lost; the design-only extensions are DERIVED where the
+ * doc carries the fact (references from `targetModelRef`, bodies and
+ * response models from the documented schemas). One derivation gap:
+ * a response whose schema names an ENUM-shaped component keeps its
+ * doc `schema` string but gets no design-side model link (the meta
+ * only points at models) — the projection still emits the schema.
  */
 
 import type {

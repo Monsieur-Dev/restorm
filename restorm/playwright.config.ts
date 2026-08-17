@@ -88,6 +88,12 @@ const designCreationTestDir = defineBddConfig({
   outputDir: '.features-gen/design-creation'
 })
 
+const designServerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-server/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-server.fixture.ts'],
+  outputDir: '.features-gen/design-server'
+})
+
 // Documentation-screenshot harness (website docs captures). The BDD config is
 // always defined (generation is cheap and side-effect free); the PROJECT is
 // gated on RESTORM_DOC_SHOTS=1 further down, so normal suites never run it.
@@ -676,6 +682,10 @@ export default defineConfig({
     {
       name: 'design-creation',
       testDir: designCreationTestDir
+    },
+    {
+      name: 'design-server',
+      testDir: designServerTestDir
     },
     {
       name: 'status-bar-context-menu',

@@ -372,7 +372,10 @@ function designToListViewItem(
   design: ApiDesign,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  const badge = options.renderProtocolBadge?.('design', 'DESIGN')
+  // Wrapped in the executing-beam like a request's badge: the beam runs
+  // while the design server serves (the design id rides the same
+  // activity store surfaces as a request id).
+  const badge = withExecutingBeam(design.id, options.renderProtocolBadge?.('design', 'DESIGN'))
   const isExpanded = options.expandedIds.has(design.id)
 
   // Validation drives the end-of-row error dots: each issue's path[1]

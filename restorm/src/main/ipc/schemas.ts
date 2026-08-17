@@ -425,6 +425,20 @@ export const odataListenArgs = z.tuple([requestIdArg])
 export const odataStopArgs = z.tuple([requestIdArg])
 export const odataIsListeningArgs = z.tuple([requestIdArg])
 
+// Design server: spin a design's HTTP projection, stop it, poll its
+// status, hot-steer a route's forced response, push design edits live.
+// The design payload travels as-is (the renderer owns the shape; the
+// service re-validates with `validateApiDesign` before serving).
+export const designServerStartArgs = z.tuple([z.unknown()])
+export const designServerStopArgs = z.tuple([z.string()])
+export const designServerStatusArgs = z.tuple([z.string()])
+export const designServerSetForcedArgs = z.tuple([
+  z.string(),
+  z.string(),
+  z.object({ code: z.string(), body: z.string().optional() }).nullable()
+])
+export const designServerUpdateArgs = z.tuple([z.unknown()])
+
 // ==========================================================================
 // WebSocket Execution
 // ==========================================================================

@@ -2160,7 +2160,10 @@
         "title": "Dizajn-poslužitelj",
         "action": "Poslužuj ovaj dizajn",
         "description": "Odgovori iz imenovanih primjera · validacija ograničenjima",
-        "comingSoon": "Dizajn-poslužitelj stiže uskoro"
+        "port": "Port",
+        "latency": "Simulirana latencija (ms)",
+        "blocked": "Ispravite {{count}} pogrešaka validacije dizajna prije posluživanja",
+        "startFailed": "Poslužitelj se nije mogao pokrenuti"
       },
       "identity": {
         "title": "Identitet",
@@ -2437,7 +2440,21 @@
     "newDesignName": "Novi dizajn API-ja",
     "createFromScratch": "Izradi dizajn API-ja",
     "createFromDoc": "Izradi dizajn iz ovog API-ja",
-    "fromDocName": "Dizajn {{name}}"
+    "fromDocName": "Dizajn {{name}}",
+    "run": {
+      "listening": "Poslužuje na http://localhost:{{port}}",
+      "stopped": "Poslužitelj zaustavljen",
+      "totalCalls": "{{count}} poziva u ovom pokretanju",
+      "stop": "Zaustavi poslužitelj",
+      "close": "Zatvori ovu ploču",
+      "forcedPill": "prisilno {{code}}",
+      "defaultReturn": "Odgovor dizajna (zadano)",
+      "codeReturn": "Odgovori {{code}}",
+      "customCode": "Prilagođeni statusni kod",
+      "customBody": "Prilagođeno tijelo odgovora",
+      "customBodyPlaceholder": "Neobavezno tijelo odgovora (JSON)",
+      "customApply": "Prisili"
+    }
   },
   "mqtt": {
     "qos": "QoS",

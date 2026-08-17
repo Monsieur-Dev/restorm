@@ -251,10 +251,23 @@ Then('the design tab is the active tab', async () => {
 Then('the design settings are editable', async () => {
   const p = requirePage()
   await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
-  await expect(p.locator('[data-testid="design-settings-section"] .ecu-gated')).toHaveCount(0)
+  // The RUN gate on the serve spin is the one legitimate Community gate
+  // (the plan gates PLAYING a design, never editing). Editing surfaces
+  // stay gate-free on EVERY plan: no `.ecu-gated` outside the serve
+  // block. This step runs for both the Community and the Pro launch.
+  const settingsSection = p.locator('[data-testid="design-settings-section"]')
+  await expect(settingsSection).toBeVisible({ timeout: 10000 })
+  await expect(settingsSection.locator('.ecu-gated:not([data-testid="design-serve-gate"])')).toHaveCount(0)
   const titleInput = p.locator('[data-testid="design-settings-title-input"]')
   await expect(titleInput).toBeVisible({ timeout: 5000 })
   await expect(titleInput).toBeEnabled()
+})
+
+// Community-only: playing the design IS gated — the serve spin sits
+// behind the plan gate (visible-but-locked, with the upsell).
+Then('the design serve spin is plan-gated', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="design-serve-gate"]')).toHaveCount(1, { timeout: 5000 })
 })
 
 // ── Split panel ───────────────────────────────────────────────────────

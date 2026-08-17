@@ -2159,7 +2159,10 @@
         "title": "Serveri i dizajnit",
         "action": "Shërbeje këtë dizajn",
         "description": "Përgjigje nga shembujt e emërtuar · validim me kufizime",
-        "comingSoon": "Serveri i dizajnit vjen së shpejti"
+        "port": "Porta",
+        "latency": "Vonesë e simuluar (ms)",
+        "blocked": "Rregulloni {{count}} gabimet e validimit të dizajnit para se ta shërbeni",
+        "startFailed": "Serveri nuk mundi të nisej"
       },
       "identity": {
         "title": "Identiteti",
@@ -2436,7 +2439,21 @@
     "newDesignName": "Dizajn i ri i API-t",
     "createFromScratch": "Krijo një dizajn API",
     "createFromDoc": "Krijo një dizajn nga ky API",
-    "fromDocName": "Dizajni {{name}}"
+    "fromDocName": "Dizajni {{name}}",
+    "run": {
+      "listening": "Shërben në http://localhost:{{port}}",
+      "stopped": "Serveri u ndal",
+      "totalCalls": "{{count}} thirrje në këtë ekzekutim",
+      "stop": "Ndalo serverin",
+      "close": "Mbyll këtë panel",
+      "forcedPill": "i detyruar {{code}}",
+      "defaultReturn": "Përgjigja e dizajnit (parazgjedhje)",
+      "codeReturn": "Përgjigju {{code}}",
+      "customCode": "Kod statusi i personalizuar",
+      "customBody": "Trup përgjigjeje i personalizuar",
+      "customBodyPlaceholder": "Trup përgjigjeje opsional (JSON)",
+      "customApply": "Detyro"
+    }
   },
   "mqtt": {
     "qos": "QoS",

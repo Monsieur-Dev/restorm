@@ -18,6 +18,7 @@ import {
   isEnvironmentFolder,
   isAnyFolder,
   isScenario,
+  isApiDesign,
   type FolderItem,
   type Request
 } from '../../shared/models'
@@ -590,12 +591,17 @@ class CollectionStore {
     id: string,
     newParentId: string | undefined,
     index: number | undefined
-  ): { ok: true; kind: 'request' | 'folder' | 'env-folder' | 'scenario'; parentId: string | null; index: number } | { ok: false; error: string } {
+  ): { ok: true; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design'; parentId: string | null; index: number } | { ok: false; error: string } {
     const item = this.findById(id)
     if (!item) return { ok: false, error: `No item with id ${id}` }
 
-    const kind: 'request' | 'folder' | 'env-folder' | 'scenario' =
-      isScenario(item) ? 'scenario' : isEnvironmentFolder(item) ? 'env-folder' : isAnyFolder(item) ? 'folder' : 'request'
+    // A design must NOT fall through to 'request': emitting it with a
+    // request-typed update would make the renderer cleanse the draft
+    // against the HTTP-request shape and drop every design section.
+    const kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' =
+      isScenario(item) ? 'scenario'
+        : isApiDesign(item) ? 'design'
+          : isEnvironmentFolder(item) ? 'env-folder' : isAnyFolder(item) ? 'folder' : 'request'
     const explicitParent = newParentId !== undefined && newParentId.length > 0
     const currentParent = this.findParentFolder(id)
     const isRootItem = currentParent === null && this.collections.some((c) => c.id === id)
@@ -612,6 +618,7 @@ class CollectionStore {
         : Math.max(0, Math.min(index, this.collections.length))
       this.collections.splice(target, 0, removed)
       if (kind === 'request') this.emitRequestUpdated(removed as unknown as Request)
+      else if (kind === 'design') this.emitDesignUpdated(removed as unknown as ApiDesign)
       else this.emitFolderUpdated(removed as Folder | EnvironmentFolder)
       return { ok: true, kind, parentId: null, index: target }
     }
@@ -658,6 +665,7 @@ class CollectionStore {
     }
     this.childItemsForWrite(dest).splice(targetIndex, 0, item)
     if (kind === 'request') this.emitRequestUpdated(item as Request)
+    else if (kind === 'design') this.emitDesignUpdated(item as ApiDesign)
     else this.emitFolderUpdated(item as Folder | EnvironmentFolder)
     return { ok: true, kind, parentId: destId, index: targetIndex }
   }
@@ -1035,6 +1043,21 @@ class CollectionStore {
     void eventBusService.emit(DocumentEvents.REQUEST_UPDATED, payload)
     pubsub.publish(PUBSUB_TOPICS.REQUEST_UPDATED, request)
     logger.debug('[CollectionStore] Request updated', { id: request.id, name: request.name })
+  }
+
+  private emitDesignUpdated(design: ApiDesign): void {
+    // The design-typed sibling of `emitRequestUpdated`: the renderer's
+    // upsert re-instantiates via `ApiDesignClass`, so no section is
+    // cleansed away. Same parent lookup for navigation re-keying.
+    const parent = this.findParentFolder(design.id)
+    const payload: DocumentChangedPayload = {
+      id: design.id,
+      type: 'design',
+      document: design.toPlainObject(),
+      ...(parent ? { parentFolderId: parent.id } : {})
+    }
+    void eventBusService.emit(DocumentEvents.DESIGN_UPDATED, payload)
+    logger.debug('[CollectionStore] Design updated', { id: design.id, name: design.name })
   }
 
   private emitRequestDeleted(id: string): void {
