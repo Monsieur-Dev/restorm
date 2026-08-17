@@ -251,13 +251,16 @@ Then('the design tab is the active tab', async () => {
 Then('the design settings are editable', async () => {
   const p = requirePage()
   await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
-  // The RUN gate on the serve spin is the one legitimate Community gate
-  // (the plan gates PLAYING a design, never editing). Editing surfaces
-  // stay gate-free on EVERY plan: no `.ecu-gated` outside the serve
-  // block. This step runs for both the Community and the Pro launch.
+  // The RUN + EXPORT surface is the legitimate Community gate (the plan
+  // gates PLAYING and EXPORTING a design, never editing). Editing
+  // surfaces stay gate-free on EVERY plan: no `.ecu-gated` outside the
+  // serve and export blocks. This step runs for both the Community and
+  // the Pro launch.
   const settingsSection = p.locator('[data-testid="design-settings-section"]')
   await expect(settingsSection).toBeVisible({ timeout: 10000 })
-  await expect(settingsSection.locator('.ecu-gated:not([data-testid="design-serve-gate"])')).toHaveCount(0)
+  await expect(
+    settingsSection.locator('.ecu-gated:not([data-testid="design-serve-gate"]):not([data-testid="design-export-gate"])')
+  ).toHaveCount(0)
   const titleInput = p.locator('[data-testid="design-settings-title-input"]')
   await expect(titleInput).toBeVisible({ timeout: 5000 })
   await expect(titleInput).toBeEnabled()
