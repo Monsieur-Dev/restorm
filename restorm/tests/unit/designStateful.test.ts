@@ -87,6 +87,18 @@ describe('DesignStatefulStore', () => {
     expect(store.remove(User, id)).toBe('not-found')
   })
 
+  it('retarget swaps the design shape but keeps the accumulated rows (a live edit does not reset)', () => {
+    const design = buildReferenceApiDesign()
+    const store = new DesignStatefulStore(design)
+    const User = model(design, 'User')
+    store.create(User, { email: 'kept@example.com' })
+    expect(store.list(User, {}).total).toBe(2) // seed + created
+    // A live design edit while serving retargets the shape; the store is
+    // ephemeral but resets only on restart, never on an edit.
+    store.retarget(buildReferenceApiDesign())
+    expect(store.list(User, {}).total).toBe(2)
+  })
+
   it('does not take readOnly properties from the body', () => {
     const design = buildReferenceApiDesign()
     const store = new DesignStatefulStore(design)

@@ -684,16 +684,25 @@ class DesignServerService {
     let model = responseModel ?? bodyModel
     let idValue: string | undefined
     if (model !== undefined) {
+      // Only an id param linked to the resource's OWN identifier sets the
+      // id — a model without an identifier leaves idValue undefined so the
+      // by-id branches fall through to the stateless response (as the
+      // docstring promises), rather than 404-ing on a non-existent key.
       const idProp = identifierProperty(model)
-      for (const [name, link] of Object.entries(links)) {
-        if (link.modelId === model.id && (idProp === undefined || link.propertyId === idProp.id)) {
-          idValue = match.params[name]
+      if (idProp !== undefined) {
+        for (const [name, link] of Object.entries(links)) {
+          if (link.modelId === model.id && link.propertyId === idProp.id) {
+            idValue = match.params[name]
+          }
         }
       }
     } else {
       // No own model — take the resource from the deepest identifier-linked
-      // path param (later entries in the path win: the addressed resource).
-      for (const [name, link] of Object.entries(links)) {
+      // path param. Iterate TRUE path order (match.params), not paramLinks
+      // key order, so the addressed (last) resource wins in a nested path.
+      for (const name of Object.keys(match.params)) {
+        const link = links[name]
+        if (link === undefined) continue
         const candidate = active.design.models.find((m) => m.id === link.modelId)
         if (candidate === undefined) continue
         if (link.propertyId === identifierProperty(candidate)?.id) {
