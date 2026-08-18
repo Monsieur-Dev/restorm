@@ -158,6 +158,11 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'delete_design_route',
   'generate_design_crud',
   'generate_design_search_routes',
+  // editing a design's template list + reading the template authoring
+  // contract are free (like all design editing); only RUNNING a template
+  // (generate_design_code) is Pro.
+  'set_design_templates',
+  'get_design_template_contract',
   'set_favorite',
   // application settings — the generic read/write routes over every setting
   'get_settings',

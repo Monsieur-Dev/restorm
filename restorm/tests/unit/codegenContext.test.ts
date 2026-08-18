@@ -10,6 +10,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { buildCodegenContext, CODEGEN_CONTEXT_VERSION } from '../../src/shared/design/codegenContext'
+import { CODEGEN_CONTEXT_SCHEMA } from '../../src/shared/design/codegenContextSchema'
 import { validateAgainstSchema } from '../../src/shared/schemaValidate'
 import { buildReferenceApiDesign } from './apiDesignReference'
 
@@ -23,11 +24,17 @@ describe('buildCodegenContext', () => {
     await expect(`${JSON.stringify(context, null, 2)}\n`).toMatchFileSnapshot('./goldens/petstore.codegen-context.json')
   })
 
-  it('validates against the PUBLISHED JSON Schema', () => {
-    const schemaText = readFileSync(SCHEMA_PATH, 'utf8')
-    const result = validateAgainstSchema(context, schemaText)
+  it('validates against the bundled JSON Schema', () => {
+    const result = validateAgainstSchema(context, JSON.stringify(CODEGEN_CONTEXT_SCHEMA))
     expect(result.errors).toEqual([])
     expect(result.valid).toBe(true)
+  })
+
+  it('keeps the bundled schema in sync with the published docs artifact', () => {
+    // The MCP `get_design_template_contract` tool returns the BUNDLED schema
+    // (the docs folder is not packaged); this guards the two from drifting.
+    const published = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'))
+    expect(CODEGEN_CONTEXT_SCHEMA).toEqual(published)
   })
 
   it('stamps the context version', () => {

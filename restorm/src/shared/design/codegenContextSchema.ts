@@ -1,0 +1,220 @@
+/**
+ * Runtime-available copy of the code-generation context JSON Schema
+ * (TASK-468.20). The published, human-facing artifact lives at
+ * `docs/contributing/design-codegen-context.schema.json`; this module is the
+ * BUNDLED source of truth so the MCP `get_design_template_contract` tool and
+ * the codegen context test can reach the schema without a filesystem read (the
+ * docs folder is not packaged with the app). A unit test asserts the two never
+ * drift. Bump alongside {@link CODEGEN_CONTEXT_VERSION}.
+ */
+export const CODEGEN_CONTEXT_SCHEMA = {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://restorm.dev/schemas/design-codegen-context/v1.json",
+  "title": "Restorm design codegen context (v1)",
+  "description": "The JSON context a Restorm code-generation template receives. Cross-references travel by NAME (never by internal id); paths come both group-relative and fully composed, `{param}` spelling.",
+  "type": "object",
+  "required": ["contextVersion", "design", "enums", "models", "groups"],
+  "properties": {
+    "contextVersion": { "const": 1 },
+    "design": {
+      "type": "object",
+      "required": ["name", "defaultAuth"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "description": { "type": "string" },
+        "basePath": { "type": "string" },
+        "defaultAuth": { "enum": ["none", "bearer", "apiKeyHeader", "basic"] }
+      },
+      "additionalProperties": false
+    },
+    "enums": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "values"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "values": { "type": "array", "items": { "type": ["string", "number"] } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "properties", "examples"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "inherits": { "type": "string", "description": "Parent model name (single inheritance); its properties are NOT repeated here." },
+          "identifier": {
+            "type": "object",
+            "required": ["property", "strategy"],
+            "properties": {
+              "property": { "type": "string" },
+              "strategy": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "timestamps": { "const": true },
+          "softDelete": { "const": true },
+          "volumetry": { "type": "string" },
+          "properties": { "type": "array", "items": { "$ref": "#/definitions/property" } },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "values"],
+              "properties": {
+                "name": { "type": "string" },
+                "values": { "type": "object" }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "headers", "routes"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "basePath": { "type": "string" },
+          "versionPrefix": { "type": "string" },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string" },
+                "example": { "type": "string" },
+                "description": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "routes": { "type": "array", "items": { "$ref": "#/definitions/route" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "property": {
+      "type": "object",
+      "required": ["name", "type", "required"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "description": "Scalar label: string / integer / number / boolean / array / map / any — or the referenced component's label." },
+        "format": { "type": "string" },
+        "required": { "type": "boolean" },
+        "readOnly": { "const": true },
+        "writeOnly": { "const": true },
+        "nullable": { "const": true },
+        "description": { "type": "string" },
+        "example": {},
+        "default": {},
+        "enum": { "type": "string", "description": "Referenced enum NAME." },
+        "references": {
+          "type": "object",
+          "required": ["model"],
+          "properties": {
+            "model": { "type": "string" },
+            "onDelete": { "type": "string" },
+            "array": { "const": true }
+          },
+          "additionalProperties": false
+        },
+        "arrayOf": { "type": "string" },
+        "unique": { "const": true },
+        "searchable": { "const": true },
+        "immutable": { "const": true },
+        "pii": { "const": true },
+        "constraints": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "route": {
+      "type": "object",
+      "required": ["method", "path", "fullPath", "params", "responses", "auth"],
+      "properties": {
+        "method": { "type": "string" },
+        "path": { "type": "string", "description": "Group-relative, {param} spelling." },
+        "fullPath": { "type": "string", "description": "Fully composed served path, {param} spelling." },
+        "summary": { "type": "string" },
+        "description": { "type": "string" },
+        "operationId": { "type": "string" },
+        "params": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "property": {
+                "type": "object",
+                "required": ["model", "property"],
+                "properties": {
+                  "model": { "type": "string" },
+                  "property": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "body": {
+          "type": "object",
+          "required": ["model"],
+          "properties": {
+            "model": { "type": "string" },
+            "contentType": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "responses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code"],
+            "properties": {
+              "code": { "type": "string" },
+              "description": { "type": "string" },
+              "model": { "type": "string" },
+              "list": { "const": true },
+              "paginated": { "const": true },
+              "example": { "type": "string", "description": "Named example bound to this response." }
+            },
+            "additionalProperties": false
+          }
+        },
+        "auth": { "enum": ["none", "bearer", "apiKeyHeader", "basic"], "description": "The EFFECTIVE contract this route enforces." },
+        "pagination": {
+          "type": "object",
+          "required": ["style"],
+          "properties": {
+            "style": { "type": "string" },
+            "defaultLimit": { "type": "number" },
+            "maxLimit": { "type": "number" }
+          },
+          "additionalProperties": false
+        },
+        "idempotent": { "const": true },
+        "cacheSeconds": { "type": "number" },
+        "deprecated": { "const": true }
+      },
+      "additionalProperties": false
+    }
+  }
+} as const

@@ -318,10 +318,29 @@ export type DesignTemplateSource =
   | { kind: 'repo'; repo: string; ref?: string }
   | { kind: 'local'; path: string }
 
+/** One configured code-generation target: a template source plus the output
+ * folder it writes to. A design carries a LIST of these so a single design can
+ * be generated into several projects (the app, then the DB, then the backend…),
+ * each from its own template and into its own folder. */
+export interface DesignCodegenTemplate {
+  id: RuntimeId
+  source: DesignTemplateSource
+  /** Output folder — absolute, or relative to the project file. */
+  outputDir?: string
+  /** Friendly label shown on the list row (official title / repo name / folder
+   * basename). Optional — the UI derives a fallback from the source. */
+  label?: string
+}
+
 /** Code-generation configuration, persisted with the design. */
 export interface DesignCodegen {
+  /** The configured template targets, in author order (TASK-468.20). */
+  templates?: DesignCodegenTemplate[]
+  /** Legacy pre-468.20 single-source shape. Read-migrated into a one-entry
+   * `templates` list on load and never re-emitted (see ApiDesign.fromPlain). */
   templateSource?: DesignTemplateSource
-  /** Output folder — absolute, or relative to the project file. */
+  /** Legacy pre-468.20 single output folder. Migrated onto the sole
+   * `templates` entry. */
   outputDir?: string
 }
 

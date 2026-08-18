@@ -2696,7 +2696,9 @@
     "getDesignServerStatus": "Design server status",
     "setDesignRouteResponse": "Force a served response",
     "exportDesign": "Export a design descriptor",
-    "generateDesignCode": "Generate code from a design"
+    "generateDesignCode": "Generate code from a design",
+    "getDesignTemplateContract": "Get the code-template contract",
+    "setDesignTemplates": "Set a design's code templates"
   },
   "odataFilter": {
     "detail": {

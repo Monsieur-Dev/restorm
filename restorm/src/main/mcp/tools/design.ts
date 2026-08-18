@@ -31,8 +31,16 @@ import type {
   DesignProperty,
   DesignProtocol,
   DesignRoute,
-  DesignRouteGroup
+  DesignRouteGroup,
+  DesignCodegenTemplate,
+  DesignTemplateSource
 } from '../../../shared/types/apiDesign'
+import {
+  OFFICIAL_TEMPLATES,
+  MANIFEST_SCHEMA
+} from '../../services/designCodegen/templateSource'
+import { CODEGEN_CONTEXT_VERSION } from '../../../shared/design/codegenContext'
+import { CODEGEN_CONTEXT_SCHEMA } from '../../../shared/design/codegenContextSchema'
 import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 import { designFromDocumentation } from '../../../shared/design/designFromDocumentation'
 import { generateCrud, generateSearchParams, syncPathParams } from '../../../shared/design/designRoutes'
@@ -1304,6 +1312,109 @@ export function registerDesignTools(mcp: McpService): void {
       } catch (error) {
         return errorReply(error instanceof Error ? error.message : String(error))
       }
+    }
+  )
+
+  mcp.registerTool(
+    'get_design_template_contract',
+    {
+      titleKey: 'mcpToolTitles.getDesignTemplateContract',
+      title: 'Get the code-template contract',
+      description:
+        'The CONTRACT a Restorm code-generation template must satisfy — enough for an agent to AUTHOR a ' +
+        'template and generate with it. Returns: the current context version, the `restorm-template.json` ' +
+        'manifest JSON-Schema, the JSON-Schema of the `ctx` object a template receives, the engine notes, ' +
+        'and the embedded official templates (id, repo, stack, description). Pair with generate_design_code ' +
+        '(officialId / repo / localPath) to run a template against a design.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () =>
+      jsonReply({
+        contextVersion: CODEGEN_CONTEXT_VERSION,
+        manifest: {
+          filename: 'restorm-template.json',
+          schema: JSON.parse(MANIFEST_SCHEMA) as Record<string, unknown>,
+          note: `contextVersions must include ${CODEGEN_CONTEXT_VERSION} or generation is refused before anything renders.`
+        },
+        contextSchema: CODEGEN_CONTEXT_SCHEMA,
+        engine: {
+          name: 'copier',
+          rendered:
+            'Copier-format templates rendered by a sandboxed Jinja2 subset (Pyodide MEMFS) — the template never touches the machine.',
+          conventions: [
+            'copier.yml at the template root declares the template questions/answers.',
+            '`_templates_suffix: .jinja` — files ending in .jinja are rendered, others copied verbatim.',
+            '`_subdirectory` and `_exclude` are honoured.',
+            'the design projection is passed as the `ctx` answer (its shape is `contextSchema`).'
+          ]
+        },
+        officialTemplates: OFFICIAL_TEMPLATES,
+        docs: 'docs/contributing/adding-a-code-template.md'
+      })
+  )
+
+  mcp.registerTool(
+    'set_design_templates',
+    {
+      titleKey: 'mcpToolTitles.setDesignTemplates',
+      title: 'Set a design\'s code templates',
+      description:
+        'Persist the design\'s LIST of code-generation targets (TASK-468.20) and save the project. Replaces ' +
+        '`codegen.templates` wholesale (order preserved). Each entry names exactly one source — `officialId`, ' +
+        '`repo` (+optional `ref`) or `localPath` — plus an optional `outputDir` (absolute or project-relative) ' +
+        'and `label`. Pass an empty array to clear the list. Read the current list back from get_design.',
+      inputSchema: {
+        designId: z.string().min(1),
+        templates: z
+          .array(
+            z.object({
+              officialId: z.string().min(1).optional(),
+              repo: z.string().min(1).optional(),
+              ref: z.string().min(1).optional().describe('Branch of `repo` (default main).'),
+              localPath: z.string().min(1).optional(),
+              outputDir: z.string().min(1).optional(),
+              label: z.string().optional()
+            })
+          )
+          .describe('The full replacement list; each entry has exactly one source.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const rawList = Array.isArray(args['templates'])
+        ? (args['templates'] as Record<string, unknown>[])
+        : []
+      const templates: DesignCodegenTemplate[] = []
+      for (const raw of rawList) {
+        const provided = (['officialId', 'repo', 'localPath'] as const).filter(
+          (k) => typeof raw[k] === 'string'
+        ).length
+        let source: DesignTemplateSource | null = null
+        if (typeof raw['officialId'] === 'string') {
+          source = { kind: 'official', id: raw['officialId'] }
+        } else if (typeof raw['repo'] === 'string') {
+          source = {
+            kind: 'repo',
+            repo: raw['repo'],
+            ...(typeof raw['ref'] === 'string' ? { ref: raw['ref'] } : {})
+          }
+        } else if (typeof raw['localPath'] === 'string') {
+          source = { kind: 'local', path: raw['localPath'] }
+        }
+        if (source === null || provided !== 1) {
+          return errorReply('each template needs exactly one of officialId / repo / localPath')
+        }
+        templates.push({
+          id: newId(),
+          source,
+          ...(typeof raw['outputDir'] === 'string' ? { outputDir: raw['outputDir'] } : {}),
+          ...(typeof raw['label'] === 'string' ? { label: raw['label'] } : {})
+        })
+      }
+      design.codegen = { templates }
+      writeDesign(design)
+      return jsonReply({ templates })
     }
   )
 

@@ -35,14 +35,35 @@ export interface OfficialTemplate {
   type: 'server' | 'db'
   /** Display language/stack label. */
   stack: string
+  /** One-line description shown under the repo name in the library modal
+   * (TASK-468.20) and returned by the MCP template-contract tool. */
+  description: string
 }
 
 /** The embedded registry (AC#8's half (a)) — one entry per official
  * public template repository. */
 export const OFFICIAL_TEMPLATES: readonly OfficialTemplate[] = [
-  { id: 'server-typescript', repo: 'Monsieur-Dev/restorm-template-server-typescript', type: 'server', stack: 'TypeScript · Express' },
-  { id: 'server-dotnet', repo: 'Monsieur-Dev/restorm-template-server-dotnet', type: 'server', stack: 'C# · ASP.NET Core' },
-  { id: 'db-postgres', repo: 'Monsieur-Dev/restorm-template-db-postgres', type: 'db', stack: 'SQL · PostgreSQL' }
+  {
+    id: 'server-typescript',
+    repo: 'Monsieur-Dev/restorm-template-server-typescript',
+    type: 'server',
+    stack: 'TypeScript · Express',
+    description: 'REST server in TypeScript on Express — typed routes, models and request validation.'
+  },
+  {
+    id: 'server-dotnet',
+    repo: 'Monsieur-Dev/restorm-template-server-dotnet',
+    type: 'server',
+    stack: 'C# · ASP.NET Core',
+    description: 'Minimal-API server in C# / ASP.NET Core — endpoints, DTOs and validation.'
+  },
+  {
+    id: 'db-postgres',
+    repo: 'Monsieur-Dev/restorm-template-db-postgres',
+    type: 'db',
+    stack: 'SQL · PostgreSQL',
+    description: 'PostgreSQL schema, seed data and CRUD scripts derived from the design.'
+  }
 ]
 
 // ── Manifest ──────────────────────────────────────────────────────────
@@ -54,7 +75,7 @@ export interface TemplateManifest {
   contextVersions: number[]
 }
 
-const MANIFEST_SCHEMA = JSON.stringify({
+export const MANIFEST_SCHEMA = JSON.stringify({
   $schema: 'http://json-schema.org/draft-07/schema#',
   type: 'object',
   required: ['name', 'type', 'language', 'contextVersions'],
