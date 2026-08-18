@@ -253,6 +253,7 @@ export const DesignCodeSection: React.FC<{
                   </GatedControl>
                   <Button
                     icon="trash"
+                    disabled={generating && activeId === tpl.id}
                     onClick={() => { removeTemplate(tpl.id) }}
                     options={{ ariaLabel: t('design.code.remove', 'Remove this template') }}
                     data-testid={`design-code-remove-${tpl.id}`}

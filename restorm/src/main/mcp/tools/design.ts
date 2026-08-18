@@ -1405,6 +1405,11 @@ export function registerDesignTools(mcp: McpService): void {
         if (source === null || provided !== 1) {
           return errorReply('each template needs exactly one of officialId / repo / localPath')
         }
+        if (source.kind === 'official' && !OFFICIAL_TEMPLATES.some((t) => t.id === source.id)) {
+          return errorReply(
+            `unknown official template id "${source.id}" — call get_design_template_contract for the list`
+          )
+        }
         templates.push({
           id: newId(),
           source,
@@ -1412,7 +1417,9 @@ export function registerDesignTools(mcp: McpService): void {
           ...(typeof raw['label'] === 'string' ? { label: raw['label'] } : {})
         })
       }
-      design.codegen = { templates }
+      // Canonical write: an empty list clears the slot (matches the renderer
+      // and the load-time migration, which never persist `{ templates: [] }`).
+      design.codegen = templates.length > 0 ? { templates } : undefined
       writeDesign(design)
       return jsonReply({ templates })
     }
