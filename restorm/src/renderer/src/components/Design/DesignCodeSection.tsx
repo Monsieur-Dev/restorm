@@ -163,8 +163,9 @@ export const DesignCodeSection: React.FC<{
       }
       const result = await window.restorm?.designCodegen.extract(design.id, outputDir)
       if (result?.success === true) {
+        // Keep this row active (activeId) so its confirmation message renders;
+        // only the preview is cleared.
         setPreview(null)
-        setActiveId(null)
         setMessage(
           t('design.code.extracted', '{{count}} file(s) written to {{root}}', {
             count: result.written?.length ?? 0,

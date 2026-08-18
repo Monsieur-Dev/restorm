@@ -268,6 +268,7 @@ export const DESIGN_INDEXABLE_KEYS = new Set([
   'defaultSecurity',
   'defaultAuth',
   'serving',
+  'codegen',
   'models',
   'enums',
   'routeGroups'

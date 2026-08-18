@@ -621,6 +621,7 @@ describe('Reactive Document System', () => {
       defaultSecurity: [{ basicAuth: [] }],
       defaultAuth: 'basic',
       serving: { port: 9000 },
+      codegen: { templates: [{ id: 't1', source: { kind: 'local', path: '/tpl' } }] },
       models: [],
       enums: [],
       routeGroups: []
