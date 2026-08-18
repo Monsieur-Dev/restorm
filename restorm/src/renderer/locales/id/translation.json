@@ -2236,8 +2236,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Pembuatan kode dari desain ini akan hidup di sini.",
-      "subtitle": "Hasilkan proyek dari desain ini — dirender dalam sandbox, ditulis hanya setelah pohon dikonfirmasi",
+      "empty": "Belum ada templat — tambahkan satu untuk menghasilkan kode dari desain ini.",
+      "subtitle": "Hasilkan proyek dari desain ini — dirender dalam sandbox, ditulis hanya setelah Anda mengonfirmasi pohonnya",
       "sourceTitle": "Templat",
       "sourceKind": {
         "official": "Resmi",
@@ -2257,7 +2257,23 @@
       "extracted": "{{count}} berkas ditulis ke {{root}}",
       "preview": "{{name}} menghasilkan {{count}} berkas — konfirmasi untuk menulisnya",
       "confirm": "Tulis ke folder keluaran",
-      "discard": "Buang"
+      "discard": "Buang",
+      "generateOne": "Hasilkan proyek ini",
+      "remove": "Hapus templat ini",
+      "addTemplate": "Tambahkan templat",
+      "library": {
+        "title": "Pustaka templat",
+        "recent": "Baru digunakan",
+        "official": "Templat resmi",
+        "custom": "Kustom",
+        "add": "Tambah",
+        "officialTag": "Resmi",
+        "officialDesc": {
+          "server-typescript": "Server REST dalam TypeScript di Express — rute bertipe, model, dan validasi permintaan.",
+          "server-dotnet": "Server Minimal-API dalam C# / ASP.NET Core — endpoint, DTO, dan validasi.",
+          "db-postgres": "Skema PostgreSQL, data seed, dan skrip CRUD dari desain."
+        }
+      }
     },
     "statusbar": {
       "format": "desain · format {{version}}"
@@ -2695,7 +2711,9 @@
     "getDesignServerStatus": "Status server desain",
     "setDesignRouteResponse": "Paksa respons",
     "exportDesign": "Ekspor deskriptor desain",
-    "generateDesignCode": "Hasilkan kode dari desain"
+    "generateDesignCode": "Hasilkan kode dari desain",
+    "getDesignTemplateContract": "Dapatkan kontrak templat kode",
+    "setDesignTemplates": "Tetapkan templat kode desain"
   },
   "odataFilter": {
     "detail": {

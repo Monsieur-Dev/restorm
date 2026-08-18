@@ -2236,8 +2236,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "从此设计生成代码将在此进行。",
-      "subtitle": "从此设计生成项目 — 在沙箱中渲染，仅在确认文件树后写入",
+      "empty": "尚无模板 — 添加一个以从此设计生成代码。",
+      "subtitle": "从此设计生成项目 — 在沙盒中渲染，仅在你确认目录树后写入",
       "sourceTitle": "模板",
       "sourceKind": {
         "official": "官方",
@@ -2257,7 +2257,23 @@
       "extracted": "已将 {{count}} 个文件写入 {{root}}",
       "preview": "{{name}} 生成了 {{count}} 个文件 — 确认后写入",
       "confirm": "写入输出文件夹",
-      "discard": "丢弃"
+      "discard": "丢弃",
+      "generateOne": "生成此项目",
+      "remove": "移除此模板",
+      "addTemplate": "添加模板",
+      "library": {
+        "title": "模板库",
+        "recent": "最近使用",
+        "official": "官方模板",
+        "custom": "自定义",
+        "add": "添加",
+        "officialTag": "官方",
+        "officialDesc": {
+          "server-typescript": "基于 Express 的 TypeScript REST 服务器 — 类型化路由、模型和请求校验。",
+          "server-dotnet": "基于 C# / ASP.NET Core 的 Minimal-API 服务器 — 端点、DTO 和校验。",
+          "db-postgres": "来自设计的 PostgreSQL 架构、种子数据和 CRUD 脚本。"
+        }
+      }
     },
     "statusbar": {
       "format": "设计 · 格式 {{version}}"
@@ -2695,7 +2711,9 @@
     "getDesignServerStatus": "设计服务器状态",
     "setDesignRouteResponse": "强制响应",
     "exportDesign": "导出设计描述文件",
-    "generateDesignCode": "从设计生成代码"
+    "generateDesignCode": "从设计生成代码",
+    "getDesignTemplateContract": "获取代码模板契约",
+    "setDesignTemplates": "设置设计的代码模板"
   },
   "odataFilter": {
     "detail": {

@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Koodin generointi tästä suunnitelmasta tulee tähän.",
-      "subtitle": "Luo projekti tästä suunnitelmasta — renderöidään hiekkalaatikossa, kirjoitetaan vasta puun vahvistuksen jälkeen",
+      "empty": "Ei vielä mallia — lisää malli luodaksesi koodia tästä suunnitelmasta.",
+      "subtitle": "Luo projekteja tästä suunnitelmasta — renderöity hiekkalaatikossa, kirjoitetaan vasta kun vahvistat puun",
       "sourceTitle": "Mallipohja",
       "sourceKind": {
         "official": "Virallinen",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} tiedosto(a) kirjoitettu kansioon {{root}}",
       "preview": "{{name}} loi {{count}} tiedosto(a) — vahvista kirjoitus",
       "confirm": "Kirjoita tuloskansioon",
-      "discard": "Hylkää"
+      "discard": "Hylkää",
+      "generateOne": "Luo tämä projekti",
+      "remove": "Poista tämä malli",
+      "addTemplate": "Lisää malli",
+      "library": {
+        "title": "Mallikirjasto",
+        "recent": "Viimeksi käytetyt",
+        "official": "Viralliset mallit",
+        "custom": "Mukautettu",
+        "add": "Lisää",
+        "officialTag": "Virallinen",
+        "officialDesc": {
+          "server-typescript": "REST-palvelin TypeScriptillä Expressin päällä — tyypitetyt reitit, mallit ja pyyntöjen validointi.",
+          "server-dotnet": "Minimal-API-palvelin C# / ASP.NET Core -ympäristössä — endpointit, DTO:t ja validointi.",
+          "db-postgres": "PostgreSQL-skeema, seed-data ja CRUD-skriptit suunnitelmasta."
+        }
+      }
     },
     "statusbar": {
       "format": "suunnitelma · muoto {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Suunnitelmapalvelimen tila",
     "setDesignRouteResponse": "Pakota vastaus",
     "exportDesign": "Vie suunnitelman kuvaaja",
-    "generateDesignCode": "Luo koodia suunnitelmasta"
+    "generateDesignCode": "Luo koodia suunnitelmasta",
+    "getDesignTemplateContract": "Hae koodimallien sopimus",
+    "setDesignTemplates": "Määritä suunnitelman koodimallit"
   },
   "odataFilter": {
     "detail": {

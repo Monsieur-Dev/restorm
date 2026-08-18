@@ -2236,8 +2236,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "このデザインからのコード生成はここに入ります。",
-      "subtitle": "このデザインからプロジェクトを生成 — サンドボックスでレンダリングし、ツリー確認後にのみ書き込みます",
+      "empty": "テンプレートがまだありません — 追加してこのデザインからコードを生成しましょう。",
+      "subtitle": "このデザインからプロジェクトを生成します — サンドボックスでレンダリングされ、ツリーを確認した後にのみ書き込まれます",
       "sourceTitle": "テンプレート",
       "sourceKind": {
         "official": "公式",
@@ -2257,7 +2257,23 @@
       "extracted": "{{count}} 個のファイルを {{root}} に書き込みました",
       "preview": "{{name}} が {{count}} 個のファイルを生成 — 書き込みを確認してください",
       "confirm": "出力フォルダーへ書き込む",
-      "discard": "破棄"
+      "discard": "破棄",
+      "generateOne": "このプロジェクトを生成",
+      "remove": "このテンプレートを削除",
+      "addTemplate": "テンプレートを追加",
+      "library": {
+        "title": "テンプレートライブラリ",
+        "recent": "最近使用したもの",
+        "official": "公式テンプレート",
+        "custom": "カスタム",
+        "add": "追加",
+        "officialTag": "公式",
+        "officialDesc": {
+          "server-typescript": "Express 上の TypeScript による REST サーバー — 型付きルート、モデル、リクエスト検証。",
+          "server-dotnet": "C# / ASP.NET Core による Minimal-API サーバー — エンドポイント、DTO、検証。",
+          "db-postgres": "デザインからの PostgreSQL スキーマ、シードデータ、CRUD スクリプト。"
+        }
+      }
     },
     "statusbar": {
       "format": "デザイン · フォーマット {{version}}"
@@ -2695,7 +2711,9 @@
     "getDesignServerStatus": "デザインサーバーの状態",
     "setDesignRouteResponse": "レスポンスを強制",
     "exportDesign": "デザインのディスクリプタをエクスポート",
-    "generateDesignCode": "デザインからコードを生成"
+    "generateDesignCode": "デザインからコードを生成",
+    "getDesignTemplateContract": "コードテンプレートの契約を取得",
+    "setDesignTemplates": "デザインのコードテンプレートを設定"
   },
   "odataFilter": {
     "detail": {

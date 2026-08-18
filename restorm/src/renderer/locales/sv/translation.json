@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Kodgenerering från denna design kommer här.",
-      "subtitle": "Generera ett projekt från denna design — renderat i en sandbox, skrivet först efter att trädet bekräftats",
+      "empty": "Ingen mall ännu — lägg till en för att generera kod från denna design.",
+      "subtitle": "Generera projekt från denna design — renderad i en sandlåda, skriven först när du bekräftar trädet",
       "sourceTitle": "Mall",
       "sourceKind": {
         "official": "Officiell",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} fil(er) skrivna till {{root}}",
       "preview": "{{name}} genererade {{count}} fil(er) — bekräfta för att skriva dem",
       "confirm": "Skriv till utdatamappen",
-      "discard": "Släng"
+      "discard": "Släng",
+      "generateOne": "Generera detta projekt",
+      "remove": "Ta bort denna mall",
+      "addTemplate": "Lägg till en mall",
+      "library": {
+        "title": "Mallbibliotek",
+        "recent": "Nyligen använda",
+        "official": "Officiella mallar",
+        "custom": "Anpassad",
+        "add": "Lägg till",
+        "officialTag": "Officiell",
+        "officialDesc": {
+          "server-typescript": "REST-server i TypeScript på Express — typade rutter, modeller och validering av förfrågningar.",
+          "server-dotnet": "Minimal-API-server i C# / ASP.NET Core — slutpunkter, DTO:er och validering.",
+          "db-postgres": "PostgreSQL-schema, seed-data och CRUD-skript från designen."
+        }
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Designserverns status",
     "setDesignRouteResponse": "Tvinga ett svar",
     "exportDesign": "Exportera en designdeskriptor",
-    "generateDesignCode": "Generera kod från en design"
+    "generateDesignCode": "Generera kod från en design",
+    "getDesignTemplateContract": "Hämta kontraktet för kodmallar",
+    "setDesignTemplates": "Ange en designs kodmallar"
   },
   "odataFilter": {
     "detail": {

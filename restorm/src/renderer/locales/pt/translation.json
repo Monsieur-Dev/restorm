@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "A geração de código a partir deste design viverá aqui.",
-      "subtitle": "Gere um projeto a partir deste design — renderizado numa sandbox, gravado apenas após confirmar a árvore",
+      "empty": "Ainda sem template — adicione um para gerar código a partir deste design.",
+      "subtitle": "Gere projetos a partir deste design — renderizado numa sandbox, escrito apenas após confirmar a árvore",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Oficial",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} ficheiro(s) escritos em {{root}}",
       "preview": "{{name}} gerou {{count}} ficheiro(s) — confirme para os escrever",
       "confirm": "Escrever na pasta de saída",
-      "discard": "Descartar"
+      "discard": "Descartar",
+      "generateOne": "Gerar este projeto",
+      "remove": "Remover este template",
+      "addTemplate": "Adicionar um template",
+      "library": {
+        "title": "Biblioteca de templates",
+        "recent": "Usados recentemente",
+        "official": "Templates oficiais",
+        "custom": "Personalizado",
+        "add": "Adicionar",
+        "officialTag": "Oficial",
+        "officialDesc": {
+          "server-typescript": "Servidor REST em TypeScript sobre Express — rotas tipadas, modelos e validação de pedidos.",
+          "server-dotnet": "Servidor Minimal-API em C# / ASP.NET Core — endpoints, DTOs e validação.",
+          "db-postgres": "Esquema PostgreSQL, dados de seed e scripts CRUD a partir do design."
+        }
+      }
     },
     "statusbar": {
       "format": "design · formato {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Estado do servidor de design",
     "setDesignRouteResponse": "Forçar uma resposta servida",
     "exportDesign": "Exportar um descritor de design",
-    "generateDesignCode": "Gerar código a partir de um design"
+    "generateDesignCode": "Gerar código a partir de um design",
+    "getDesignTemplateContract": "Obter o contrato dos templates de código",
+    "setDesignTemplates": "Definir os templates de código de um design"
   },
   "odataFilter": {
     "detail": {

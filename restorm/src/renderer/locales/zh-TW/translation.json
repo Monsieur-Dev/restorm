@@ -2236,8 +2236,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "從此設計產生程式碼將在此進行。",
-      "subtitle": "從此設計產生專案 — 在沙箱中渲染，僅在確認檔案樹後寫入",
+      "empty": "尚無範本 — 新增一個以從此設計產生程式碼。",
+      "subtitle": "從此設計產生專案 — 在沙箱中算繪，僅在你確認目錄樹後寫入",
       "sourceTitle": "範本",
       "sourceKind": {
         "official": "官方",
@@ -2257,7 +2257,23 @@
       "extracted": "已將 {{count}} 個檔案寫入 {{root}}",
       "preview": "{{name}} 產生了 {{count}} 個檔案 — 確認後寫入",
       "confirm": "寫入輸出資料夾",
-      "discard": "捨棄"
+      "discard": "捨棄",
+      "generateOne": "產生此專案",
+      "remove": "移除此範本",
+      "addTemplate": "新增範本",
+      "library": {
+        "title": "範本庫",
+        "recent": "最近使用",
+        "official": "官方範本",
+        "custom": "自訂",
+        "add": "新增",
+        "officialTag": "官方",
+        "officialDesc": {
+          "server-typescript": "基於 Express 的 TypeScript REST 伺服器 — 型別化路由、模型與請求驗證。",
+          "server-dotnet": "基於 C# / ASP.NET Core 的 Minimal-API 伺服器 — 端點、DTO 與驗證。",
+          "db-postgres": "來自設計的 PostgreSQL 結構描述、種子資料與 CRUD 指令碼。"
+        }
+      }
     },
     "statusbar": {
       "format": "設計 · 格式 {{version}}"
@@ -2695,7 +2711,9 @@
     "getDesignServerStatus": "設計伺服器狀態",
     "setDesignRouteResponse": "強制回應",
     "exportDesign": "匯出設計描述檔",
-    "generateDesignCode": "從設計產生程式碼"
+    "generateDesignCode": "從設計產生程式碼",
+    "getDesignTemplateContract": "取得程式碼範本合約",
+    "setDesignTemplates": "設定設計的程式碼範本"
   },
   "odataFilter": {
     "detail": {

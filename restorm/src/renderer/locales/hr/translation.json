@@ -2238,8 +2238,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generiranje koda iz ovog dizajna bit će ovdje.",
-      "subtitle": "Generirajte projekt iz ovog dizajna — renderirano u sandboxu, zapisano tek nakon potvrde stabla",
+      "empty": "Još nema predloška — dodajte ga za generiranje koda iz ovog dizajna.",
+      "subtitle": "Generirajte projekte iz ovog dizajna — prikazani u sandboxu, zapisani tek nakon što potvrdite stablo",
       "sourceTitle": "Predložak",
       "sourceKind": {
         "official": "Službeni",
@@ -2259,7 +2259,23 @@
       "extracted": "{{count}} datoteka zapisano u {{root}}",
       "preview": "{{name}} je generirao {{count}} datoteka — potvrdite zapis",
       "confirm": "Zapiši u izlaznu mapu",
-      "discard": "Odbaci"
+      "discard": "Odbaci",
+      "generateOne": "Generiraj ovaj projekt",
+      "remove": "Ukloni ovaj predložak",
+      "addTemplate": "Dodaj predložak",
+      "library": {
+        "title": "Biblioteka predložaka",
+        "recent": "Nedavno korišteno",
+        "official": "Službeni predlošci",
+        "custom": "Prilagođeno",
+        "add": "Dodaj",
+        "officialTag": "Službeno",
+        "officialDesc": {
+          "server-typescript": "REST poslužitelj u TypeScriptu na Expressu — tipizirane rute, modeli i validacija zahtjeva.",
+          "server-dotnet": "Minimal-API poslužitelj u C# / ASP.NET Core — endpointi, DTO-ovi i validacija.",
+          "db-postgres": "PostgreSQL shema, seed podaci i CRUD skripte iz dizajna."
+        }
+      }
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2697,7 +2713,9 @@
     "getDesignServerStatus": "Stanje poslužitelja dizajna",
     "setDesignRouteResponse": "Prisili odgovor",
     "exportDesign": "Izvezi deskriptor dizajna",
-    "generateDesignCode": "Generiraj kod iz dizajna"
+    "generateDesignCode": "Generiraj kod iz dizajna",
+    "getDesignTemplateContract": "Dohvati ugovor predložaka koda",
+    "setDesignTemplates": "Postavi predloške koda dizajna"
   },
   "odataFilter": {
     "detail": {

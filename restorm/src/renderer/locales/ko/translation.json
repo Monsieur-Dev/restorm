@@ -2236,8 +2236,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "이 디자인의 코드 생성이 여기에 들어갑니다.",
-      "subtitle": "이 디자인에서 프로젝트 생성 — 샌드박스에서 렌더링되며 트리 확인 후에만 기록됩니다",
+      "empty": "아직 템플릿이 없습니다 — 하나를 추가하여 이 디자인에서 코드를 생성하세요.",
+      "subtitle": "이 디자인에서 프로젝트를 생성합니다 — 샌드박스에서 렌더링되며 트리를 확인한 후에만 작성됩니다",
       "sourceTitle": "템플릿",
       "sourceKind": {
         "official": "공식",
@@ -2257,7 +2257,23 @@
       "extracted": "{{count}}개 파일을 {{root}}에 기록했습니다",
       "preview": "{{name}}이(가) {{count}}개 파일을 생성 — 기록을 확인하세요",
       "confirm": "출력 폴더에 기록",
-      "discard": "버리기"
+      "discard": "버리기",
+      "generateOne": "이 프로젝트 생성",
+      "remove": "이 템플릿 제거",
+      "addTemplate": "템플릿 추가",
+      "library": {
+        "title": "템플릿 라이브러리",
+        "recent": "최근 사용됨",
+        "official": "공식 템플릿",
+        "custom": "사용자 지정",
+        "add": "추가",
+        "officialTag": "공식",
+        "officialDesc": {
+          "server-typescript": "Express 기반 TypeScript REST 서버 — 타입이 지정된 라우트, 모델 및 요청 검증.",
+          "server-dotnet": "C# / ASP.NET Core 기반 Minimal-API 서버 — 엔드포인트, DTO 및 검증.",
+          "db-postgres": "디자인에서 생성된 PostgreSQL 스키마, 시드 데이터 및 CRUD 스크립트."
+        }
+      }
     },
     "statusbar": {
       "format": "디자인 · 포맷 {{version}}"
@@ -2695,7 +2711,9 @@
     "getDesignServerStatus": "디자인 서버 상태",
     "setDesignRouteResponse": "응답 강제하기",
     "exportDesign": "디자인 디스크립터 내보내기",
-    "generateDesignCode": "디자인에서 코드 생성"
+    "generateDesignCode": "디자인에서 코드 생성",
+    "getDesignTemplateContract": "코드 템플릿 계약 가져오기",
+    "setDesignTemplates": "디자인의 코드 템플릿 설정"
   },
   "odataFilter": {
     "detail": {

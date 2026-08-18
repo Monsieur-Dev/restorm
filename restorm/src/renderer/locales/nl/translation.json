@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Codegeneratie vanuit dit ontwerp komt hier.",
-      "subtitle": "Genereer een project uit dit design — gerenderd in een sandbox, pas geschreven na bevestiging van de boom",
+      "empty": "Nog geen template — voeg er een toe om code te genereren vanuit dit ontwerp.",
+      "subtitle": "Genereer projecten vanuit dit ontwerp — weergegeven in een sandbox, pas geschreven nadat je de structuur bevestigt",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Officieel",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} bestand(en) geschreven naar {{root}}",
       "preview": "{{name}} genereerde {{count}} bestand(en) — bevestig om ze te schrijven",
       "confirm": "Naar de uitvoermap schrijven",
-      "discard": "Verwerpen"
+      "discard": "Verwerpen",
+      "generateOne": "Dit project genereren",
+      "remove": "Deze template verwijderen",
+      "addTemplate": "Een template toevoegen",
+      "library": {
+        "title": "Templatebibliotheek",
+        "recent": "Onlangs gebruikt",
+        "official": "Officiële templates",
+        "custom": "Aangepast",
+        "add": "Toevoegen",
+        "officialTag": "Officieel",
+        "officialDesc": {
+          "server-typescript": "REST-server in TypeScript op Express — getypeerde routes, modellen en validatie van aanvragen.",
+          "server-dotnet": "Minimal-API-server in C# / ASP.NET Core — endpoints, DTO's en validatie.",
+          "db-postgres": "PostgreSQL-schema, seed-data en CRUD-scripts vanuit het ontwerp."
+        }
+      }
     },
     "statusbar": {
       "format": "ontwerp · formaat {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Status van de designserver",
     "setDesignRouteResponse": "Een respons forceren",
     "exportDesign": "Een designdescriptor exporteren",
-    "generateDesignCode": "Code genereren uit een design"
+    "generateDesignCode": "Code genereren uit een design",
+    "getDesignTemplateContract": "Het contract van de code-templates ophalen",
+    "setDesignTemplates": "De code-templates van een ontwerp instellen"
   },
   "odataFilter": {
     "detail": {

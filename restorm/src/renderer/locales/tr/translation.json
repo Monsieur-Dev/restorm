@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Bu tasarımdan kod üretimi burada yaşayacak.",
-      "subtitle": "Bu tasarımdan bir proje üretin — sandbox içinde işlenir, yalnızca ağacı onayladıktan sonra yazılır",
+      "empty": "Henüz şablon yok — bu tasarımdan kod oluşturmak için bir tane ekleyin.",
+      "subtitle": "Bu tasarımdan projeler oluşturun — bir sandbox'ta işlenir, yalnızca ağacı onayladıktan sonra yazılır",
       "sourceTitle": "Şablon",
       "sourceKind": {
         "official": "Resmî",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} dosya {{root}} klasörüne yazıldı",
       "preview": "{{name}} {{count}} dosya üretti — yazmak için onaylayın",
       "confirm": "Çıktı klasörüne yaz",
-      "discard": "Vazgeç"
+      "discard": "Vazgeç",
+      "generateOne": "Bu projeyi oluştur",
+      "remove": "Bu şablonu kaldır",
+      "addTemplate": "Şablon ekle",
+      "library": {
+        "title": "Şablon kitaplığı",
+        "recent": "Son kullanılanlar",
+        "official": "Resmi şablonlar",
+        "custom": "Özel",
+        "add": "Ekle",
+        "officialTag": "Resmi",
+        "officialDesc": {
+          "server-typescript": "Express üzerinde TypeScript ile REST sunucusu — türlendirilmiş rotalar, modeller ve istek doğrulama.",
+          "server-dotnet": "C# / ASP.NET Core ile Minimal-API sunucusu — uç noktalar, DTO'lar ve doğrulama.",
+          "db-postgres": "Tasarımdan PostgreSQL şeması, seed verileri ve CRUD betikleri."
+        }
+      }
     },
     "statusbar": {
       "format": "tasarım · biçim {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Tasarım sunucusu durumu",
     "setDesignRouteResponse": "Bir yanıtı zorla",
     "exportDesign": "Bir tasarım tanımlayıcısını dışa aktar",
-    "generateDesignCode": "Bir tasarımdan kod üret"
+    "generateDesignCode": "Bir tasarımdan kod üret",
+    "getDesignTemplateContract": "Kod şablonları sözleşmesini al",
+    "setDesignTemplates": "Bir tasarımın kod şablonlarını ayarla"
   },
   "odataFilter": {
     "detail": {

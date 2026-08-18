@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "La generazione di codice da questo design vivrà qui.",
-      "subtitle": "Genera un progetto da questo design — renderizzato in una sandbox, scritto solo dopo la conferma dell’albero",
+      "empty": "Ancora nessun template — aggiungine uno per generare codice da questo design.",
+      "subtitle": "Genera progetti da questo design — renderizzato in una sandbox, scritto solo dopo la conferma dell'albero",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Ufficiale",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} file scritti in {{root}}",
       "preview": "{{name}} ha generato {{count}} file — conferma per scriverli",
       "confirm": "Scrivi nella cartella di output",
-      "discard": "Annulla"
+      "discard": "Annulla",
+      "generateOne": "Genera questo progetto",
+      "remove": "Rimuovi questo template",
+      "addTemplate": "Aggiungi un template",
+      "library": {
+        "title": "Libreria di template",
+        "recent": "Usati di recente",
+        "official": "Template ufficiali",
+        "custom": "Personalizzato",
+        "add": "Aggiungi",
+        "officialTag": "Ufficiale",
+        "officialDesc": {
+          "server-typescript": "Server REST in TypeScript su Express — rotte tipizzate, modelli e validazione delle richieste.",
+          "server-dotnet": "Server Minimal-API in C# / ASP.NET Core — endpoint, DTO e validazione.",
+          "db-postgres": "Schema PostgreSQL, dati seed e script CRUD dal design."
+        }
+      }
     },
     "statusbar": {
       "format": "design · formato {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Stato del server di design",
     "setDesignRouteResponse": "Forza una risposta servita",
     "exportDesign": "Esporta un descrittore di design",
-    "generateDesignCode": "Genera codice da un design"
+    "generateDesignCode": "Genera codice da un design",
+    "getDesignTemplateContract": "Ottieni il contratto dei template di codice",
+    "setDesignTemplates": "Imposta i template di codice di un design"
   },
   "odataFilter": {
     "detail": {

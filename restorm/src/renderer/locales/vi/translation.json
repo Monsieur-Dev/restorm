@@ -2236,8 +2236,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Việc sinh mã từ thiết kế này sẽ nằm ở đây.",
-      "subtitle": "Tạo một dự án từ thiết kế này — kết xuất trong sandbox, chỉ ghi sau khi xác nhận cây tệp",
+      "empty": "Chưa có mẫu nào — thêm một mẫu để tạo mã từ thiết kế này.",
+      "subtitle": "Tạo dự án từ thiết kế này — được kết xuất trong sandbox, chỉ ghi sau khi bạn xác nhận cây thư mục",
       "sourceTitle": "Mẫu",
       "sourceKind": {
         "official": "Chính thức",
@@ -2257,7 +2257,23 @@
       "extracted": "Đã ghi {{count}} tệp vào {{root}}",
       "preview": "{{name}} đã tạo {{count}} tệp — xác nhận để ghi",
       "confirm": "Ghi vào thư mục đầu ra",
-      "discard": "Bỏ"
+      "discard": "Bỏ",
+      "generateOne": "Tạo dự án này",
+      "remove": "Xóa mẫu này",
+      "addTemplate": "Thêm mẫu",
+      "library": {
+        "title": "Thư viện mẫu",
+        "recent": "Đã dùng gần đây",
+        "official": "Mẫu chính thức",
+        "custom": "Tùy chỉnh",
+        "add": "Thêm",
+        "officialTag": "Chính thức",
+        "officialDesc": {
+          "server-typescript": "Máy chủ REST bằng TypeScript trên Express — tuyến định kiểu, mô hình và xác thực yêu cầu.",
+          "server-dotnet": "Máy chủ Minimal-API bằng C# / ASP.NET Core — endpoint, DTO và xác thực.",
+          "db-postgres": "Lược đồ PostgreSQL, dữ liệu seed và tập lệnh CRUD từ thiết kế."
+        }
+      }
     },
     "statusbar": {
       "format": "thiết kế · định dạng {{version}}"
@@ -2695,7 +2711,9 @@
     "getDesignServerStatus": "Trạng thái máy chủ thiết kế",
     "setDesignRouteResponse": "Ép một phản hồi",
     "exportDesign": "Xuất bộ mô tả thiết kế",
-    "generateDesignCode": "Tạo mã từ một thiết kế"
+    "generateDesignCode": "Tạo mã từ một thiết kế",
+    "getDesignTemplateContract": "Lấy hợp đồng của mẫu mã nguồn",
+    "setDesignTemplates": "Đặt các mẫu mã nguồn của thiết kế"
   },
   "odataFilter": {
     "detail": {

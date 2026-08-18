@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Kodegenerering fra dette design kommer her.",
-      "subtitle": "Generér et projekt fra dette design — renderet i en sandbox, først skrevet efter bekræftelse af træet",
+      "empty": "Ingen skabelon endnu — tilføj en for at generere kode fra dette design.",
+      "subtitle": "Generér projekter fra dette design — gengivet i en sandbox, skrevet først når du bekræfter træet",
       "sourceTitle": "Skabelon",
       "sourceKind": {
         "official": "Officiel",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} fil(er) skrevet til {{root}}",
       "preview": "{{name}} genererede {{count}} fil(er) — bekræft for at skrive dem",
       "confirm": "Skriv til outputmappen",
-      "discard": "Kassér"
+      "discard": "Kassér",
+      "generateOne": "Generér dette projekt",
+      "remove": "Fjern denne skabelon",
+      "addTemplate": "Tilføj en skabelon",
+      "library": {
+        "title": "Skabelonbibliotek",
+        "recent": "Senest brugt",
+        "official": "Officielle skabeloner",
+        "custom": "Brugerdefineret",
+        "add": "Tilføj",
+        "officialTag": "Officiel",
+        "officialDesc": {
+          "server-typescript": "REST-server i TypeScript på Express — typede ruter, modeller og validering af anmodninger.",
+          "server-dotnet": "Minimal-API-server i C# / ASP.NET Core — endpoints, DTO'er og validering.",
+          "db-postgres": "PostgreSQL-skema, seed-data og CRUD-scripts fra designet."
+        }
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Designserverens status",
     "setDesignRouteResponse": "Gennemtving et svar",
     "exportDesign": "Eksportér en designdeskriptor",
-    "generateDesignCode": "Generér kode fra et design"
+    "generateDesignCode": "Generér kode fra et design",
+    "getDesignTemplateContract": "Hent kontrakten for kodeskabeloner",
+    "setDesignTemplates": "Angiv et designs kodeskabeloner"
   },
   "odataFilter": {
     "detail": {

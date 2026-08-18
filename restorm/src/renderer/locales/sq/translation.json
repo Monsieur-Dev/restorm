@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Gjenerimi i kodit nga ky dizajn do të jetojë këtu.",
-      "subtitle": "Gjeneroni një projekt nga ky dizajn — renderohet në sandbox, shkruhet vetëm pas konfirmimit të pemës",
+      "empty": "Ende asnjë shabllon — shtoni një për të gjeneruar kod nga ky dizajn.",
+      "subtitle": "Gjeneroni projekte nga ky dizajn — të renderuara në një sandbox, të shkruara vetëm pasi konfirmoni pemën",
       "sourceTitle": "Shabllon",
       "sourceKind": {
         "official": "Zyrtar",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} skedar(ë) u shkruan në {{root}}",
       "preview": "{{name}} gjeneroi {{count}} skedar(ë) — konfirmoni shkrimin",
       "confirm": "Shkruaj në dosjen e daljes",
-      "discard": "Hidh"
+      "discard": "Hidh",
+      "generateOne": "Gjenero këtë projekt",
+      "remove": "Hiq këtë shabllon",
+      "addTemplate": "Shto një shabllon",
+      "library": {
+        "title": "Biblioteka e shablloneve",
+        "recent": "Përdorur së fundmi",
+        "official": "Shabllone zyrtare",
+        "custom": "I personalizuar",
+        "add": "Shto",
+        "officialTag": "Zyrtare",
+        "officialDesc": {
+          "server-typescript": "Server REST në TypeScript mbi Express — rrugë të tipizuara, modele dhe validim kërkesash.",
+          "server-dotnet": "Server Minimal-API në C# / ASP.NET Core — endpoint-e, DTO dhe validim.",
+          "db-postgres": "Skemë PostgreSQL, të dhëna seed dhe skripte CRUD nga dizajni."
+        }
+      }
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Gjendja e serverit të dizajnit",
     "setDesignRouteResponse": "Detyro një përgjigje",
     "exportDesign": "Eksporto një përshkrues dizajni",
-    "generateDesignCode": "Gjenero kod nga një dizajn"
+    "generateDesignCode": "Gjenero kod nga një dizajn",
+    "getDesignTemplateContract": "Merr kontratën e shablloneve të kodit",
+    "setDesignTemplates": "Cakto shabllonet e kodit të një dizajni"
   },
   "odataFilter": {
     "detail": {

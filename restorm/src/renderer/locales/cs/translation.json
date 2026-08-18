@@ -2239,8 +2239,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generování kódu z tohoto návrhu bude zde.",
-      "subtitle": "Vygenerujte projekt z tohoto návrhu — vykresleno v sandboxu, zapsáno až po potvrzení stromu",
+      "empty": "Zatím žádná šablona — přidejte ji pro generování kódu z tohoto návrhu.",
+      "subtitle": "Generujte projekty z tohoto návrhu — vykreslené v sandboxu, zapsané až po potvrzení stromu",
       "sourceTitle": "Šablona",
       "sourceKind": {
         "official": "Oficiální",
@@ -2260,7 +2260,23 @@
       "extracted": "{{count}} soubor(ů) zapsáno do {{root}}",
       "preview": "{{name}} vygenerovala {{count}} soubor(ů) — potvrďte zápis",
       "confirm": "Zapsat do výstupní složky",
-      "discard": "Zahodit"
+      "discard": "Zahodit",
+      "generateOne": "Vygenerovat tento projekt",
+      "remove": "Odebrat tuto šablonu",
+      "addTemplate": "Přidat šablonu",
+      "library": {
+        "title": "Knihovna šablon",
+        "recent": "Naposledy použité",
+        "official": "Oficiální šablony",
+        "custom": "Vlastní",
+        "add": "Přidat",
+        "officialTag": "Oficiální",
+        "officialDesc": {
+          "server-typescript": "Server REST v TypeScriptu na Express — typované trasy, modely a validace požadavků.",
+          "server-dotnet": "Server Minimal-API v C# / ASP.NET Core — endpointy, DTO a validace.",
+          "db-postgres": "Schéma PostgreSQL, počáteční data a CRUD skripty z návrhu."
+        }
+      }
     },
     "statusbar": {
       "format": "návrh · formát {{version}}"
@@ -2698,7 +2714,9 @@
     "getDesignServerStatus": "Stav serveru návrhu",
     "setDesignRouteResponse": "Vynutit odpověď",
     "exportDesign": "Exportovat deskriptor návrhu",
-    "generateDesignCode": "Vygenerovat kód z návrhu"
+    "generateDesignCode": "Vygenerovat kód z návrhu",
+    "getDesignTemplateContract": "Získat kontrakt šablon kódu",
+    "setDesignTemplates": "Nastavit šablony kódu návrhu"
   },
   "odataFilter": {
     "detail": {

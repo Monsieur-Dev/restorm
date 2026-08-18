@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "La generación de código desde este diseño vivirá aquí.",
-      "subtitle": "Genere un proyecto desde este diseño — renderizado en una sandbox, escrito solo tras confirmar el árbol",
+      "empty": "Aún no hay plantilla — añade una para generar código a partir de este diseño.",
+      "subtitle": "Genera proyectos a partir de este diseño — renderizado en un sandbox, escrito solo tras confirmar el árbol",
       "sourceTitle": "Plantilla",
       "sourceKind": {
         "official": "Oficial",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} archivo(s) escritos en {{root}}",
       "preview": "{{name}} generó {{count}} archivo(s) — confirme para escribirlos",
       "confirm": "Escribir en la carpeta de salida",
-      "discard": "Descartar"
+      "discard": "Descartar",
+      "generateOne": "Generar este proyecto",
+      "remove": "Eliminar esta plantilla",
+      "addTemplate": "Añadir una plantilla",
+      "library": {
+        "title": "Biblioteca de plantillas",
+        "recent": "Usadas recientemente",
+        "official": "Plantillas oficiales",
+        "custom": "Personalizado",
+        "add": "Añadir",
+        "officialTag": "Oficial",
+        "officialDesc": {
+          "server-typescript": "Servidor REST en TypeScript sobre Express — rutas tipadas, modelos y validación de solicitudes.",
+          "server-dotnet": "Servidor Minimal-API en C# / ASP.NET Core — endpoints, DTOs y validación.",
+          "db-postgres": "Esquema PostgreSQL, datos de seed y scripts CRUD a partir del diseño."
+        }
+      }
     },
     "statusbar": {
       "format": "diseño · formato {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Estado del servidor de diseño",
     "setDesignRouteResponse": "Forzar una respuesta servida",
     "exportDesign": "Exportar un descriptor de diseño",
-    "generateDesignCode": "Generar código desde un diseño"
+    "generateDesignCode": "Generar código desde un diseño",
+    "getDesignTemplateContract": "Obtener el contrato de las plantillas de código",
+    "setDesignTemplates": "Definir las plantillas de código de un diseño"
   },
   "odataFilter": {
     "detail": {

@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "A tervből történő kódgenerálás itt fog élni.",
-      "subtitle": "Generáljon projektet ebből a tervből — sandboxban renderelve, csak a fa jóváhagyása után íródik ki",
+      "empty": "Még nincs sablon — adjon hozzá egyet, hogy kódot generáljon ebből a tervből.",
+      "subtitle": "Projektek generálása ebből a tervből — sandboxban renderelve, csak a fa megerősítése után írva",
       "sourceTitle": "Sablon",
       "sourceKind": {
         "official": "Hivatalos",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} fájl kiírva ide: {{root}}",
       "preview": "{{name}} {{count}} fájlt generált — erősítse meg a kiírást",
       "confirm": "Írás a kimeneti mappába",
-      "discard": "Elvetés"
+      "discard": "Elvetés",
+      "generateOne": "Projekt generálása",
+      "remove": "Sablon eltávolítása",
+      "addTemplate": "Sablon hozzáadása",
+      "library": {
+        "title": "Sablonkönyvtár",
+        "recent": "Nemrég használt",
+        "official": "Hivatalos sablonok",
+        "custom": "Egyéni",
+        "add": "Hozzáadás",
+        "officialTag": "Hivatalos",
+        "officialDesc": {
+          "server-typescript": "REST szerver TypeScriptben Expressen — típusos útvonalak, modellek és kérésvalidáció.",
+          "server-dotnet": "Minimal-API szerver C# / ASP.NET Core alatt — végpontok, DTO-k és validáció.",
+          "db-postgres": "PostgreSQL séma, seed adatok és CRUD szkriptek a tervből."
+        }
+      }
     },
     "statusbar": {
       "format": "terv · formátum {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Tervszerver állapota",
     "setDesignRouteResponse": "Válasz kényszerítése",
     "exportDesign": "Tervleíró exportálása",
-    "generateDesignCode": "Kód generálása egy tervből"
+    "generateDesignCode": "Kód generálása egy tervből",
+    "getDesignTemplateContract": "Kódsablonok szerződésének lekérése",
+    "setDesignTemplates": "Egy terv kódsablonjainak beállítása"
   },
   "odataFilter": {
     "detail": {

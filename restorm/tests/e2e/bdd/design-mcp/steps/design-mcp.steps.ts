@@ -369,3 +369,43 @@ Then('the design spin button shows the idle state', async () => {
   const p = requirePage()
   await expect(p.locator('[data-testid="design-serve-spin"]')).not.toHaveClass(/design-serve-spin-active/, { timeout: 10000 })
 })
+
+Then('the template contract over MCP carries the manifest schema, the context schema and the official templates', async () => {
+  const reply = await call('get_design_template_contract', {})
+  expect(reply['error']).toBeUndefined()
+  expect(reply['contextVersion']).toBe(1)
+  const manifest = reply['manifest'] as { schema?: { required?: string[] } }
+  expect(manifest.schema?.required).toEqual(
+    expect.arrayContaining(['name', 'type', 'language', 'contextVersions'])
+  )
+  const contextSchema = reply['contextSchema'] as { required?: string[] }
+  expect(contextSchema.required).toEqual(expect.arrayContaining(['contextVersion', 'design', 'models']))
+  const official = reply['officialTemplates'] as { id: string; description: string }[]
+  expect(official.map((entry) => entry.id)).toEqual(
+    expect.arrayContaining(['server-typescript', 'server-dotnet', 'db-postgres'])
+  )
+  expect(official.every((entry) => typeof entry.description === 'string' && entry.description.length > 0)).toBe(true)
+})
+
+When("the agent sets the design's templates to a repo and a local folder", async () => {
+  const reply = await call('set_design_templates', {
+    designId,
+    templates: [
+      { repo: 'acme/restorm-template-thing', outputDir: './out/app' },
+      { localPath: '/tmp/my-template', label: 'My template' }
+    ]
+  })
+  expect(reply['error']).toBeUndefined()
+})
+
+Then('the design carries those two templates over MCP', async () => {
+  const reply = await call('get_design', { designId })
+  const codegen = reply['codegen'] as {
+    templates?: { source: { kind: string; repo?: string; path?: string }; outputDir?: string; label?: string }[]
+  }
+  expect(codegen.templates).toHaveLength(2)
+  expect(codegen.templates?.[0]?.source).toEqual({ kind: 'repo', repo: 'acme/restorm-template-thing' })
+  expect(codegen.templates?.[0]?.outputDir).toBe('./out/app')
+  expect(codegen.templates?.[1]?.source).toEqual({ kind: 'local', path: '/tmp/my-template' })
+  expect(codegen.templates?.[1]?.label).toBe('My template')
+})

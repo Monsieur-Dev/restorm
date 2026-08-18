@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Η παραγωγή κώδικα από αυτό το σχέδιο θα ζει εδώ.",
-      "subtitle": "Δημιουργήστε ένα έργο από αυτό το design — αποδίδεται σε sandbox, γράφεται μόνο μετά την επιβεβαίωση του δέντρου",
+      "empty": "Κανένα πρότυπο ακόμη — προσθέστε ένα για να δημιουργήσετε κώδικα από αυτό το σχέδιο.",
+      "subtitle": "Δημιουργήστε έργα από αυτό το σχέδιο — αποδίδονται σε sandbox, εγγράφονται μόνο αφού επιβεβαιώσετε το δέντρο",
       "sourceTitle": "Πρότυπο",
       "sourceKind": {
         "official": "Επίσημο",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} αρχείο(-α) γράφτηκαν στο {{root}}",
       "preview": "Το {{name}} δημιούργησε {{count}} αρχείο(-α) — επιβεβαιώστε την εγγραφή",
       "confirm": "Εγγραφή στον φάκελο εξόδου",
-      "discard": "Απόρριψη"
+      "discard": "Απόρριψη",
+      "generateOne": "Δημιουργία αυτού του έργου",
+      "remove": "Αφαίρεση αυτού του προτύπου",
+      "addTemplate": "Προσθήκη προτύπου",
+      "library": {
+        "title": "Βιβλιοθήκη προτύπων",
+        "recent": "Πρόσφατα χρησιμοποιημένα",
+        "official": "Επίσημα πρότυπα",
+        "custom": "Προσαρμοσμένο",
+        "add": "Προσθήκη",
+        "officialTag": "Επίσημο",
+        "officialDesc": {
+          "server-typescript": "Διακομιστής REST σε TypeScript με Express — τυποποιημένες διαδρομές, μοντέλα και επικύρωση αιτημάτων.",
+          "server-dotnet": "Διακομιστής Minimal-API σε C# / ASP.NET Core — endpoints, DTO και επικύρωση.",
+          "db-postgres": "Σχήμα PostgreSQL, δεδομένα seed και σενάρια CRUD από το σχέδιο."
+        }
+      }
     },
     "statusbar": {
       "format": "σχέδιο · μορφή {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Κατάσταση διακομιστή σχεδίου",
     "setDesignRouteResponse": "Εξαναγκασμός απόκρισης",
     "exportDesign": "Εξαγωγή περιγραφέα σχεδίου",
-    "generateDesignCode": "Δημιουργία κώδικα από ένα design"
+    "generateDesignCode": "Δημιουργία κώδικα από ένα design",
+    "getDesignTemplateContract": "Λήψη του συμβολαίου προτύπων κώδικα",
+    "setDesignTemplates": "Ορισμός των προτύπων κώδικα ενός σχεδίου"
   },
   "odataFilter": {
     "detail": {

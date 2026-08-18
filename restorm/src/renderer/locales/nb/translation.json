@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Kodegenerering fra dette designet kommer her.",
-      "subtitle": "Generer et prosjekt fra dette designet — rendret i en sandkasse, skrevet først etter at treet er bekreftet",
+      "empty": "Ingen mal ennå — legg til en for å generere kode fra dette designet.",
+      "subtitle": "Generer prosjekter fra dette designet — gjengitt i en sandkasse, skrevet først når du bekrefter treet",
       "sourceTitle": "Mal",
       "sourceKind": {
         "official": "Offisiell",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} fil(er) skrevet til {{root}}",
       "preview": "{{name}} genererte {{count}} fil(er) — bekreft for å skrive dem",
       "confirm": "Skriv til utdatamappen",
-      "discard": "Forkast"
+      "discard": "Forkast",
+      "generateOne": "Generer dette prosjektet",
+      "remove": "Fjern denne malen",
+      "addTemplate": "Legg til en mal",
+      "library": {
+        "title": "Malbibliotek",
+        "recent": "Nylig brukt",
+        "official": "Offisielle maler",
+        "custom": "Egendefinert",
+        "add": "Legg til",
+        "officialTag": "Offisiell",
+        "officialDesc": {
+          "server-typescript": "REST-server i TypeScript på Express — typede ruter, modeller og validering av forespørsler.",
+          "server-dotnet": "Minimal-API-server i C# / ASP.NET Core — endepunkter, DTO-er og validering.",
+          "db-postgres": "PostgreSQL-skjema, seed-data og CRUD-skript fra designet."
+        }
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Status for designserveren",
     "setDesignRouteResponse": "Tving et svar",
     "exportDesign": "Eksporter en designdeskriptor",
-    "generateDesignCode": "Generer kode fra et design"
+    "generateDesignCode": "Generer kode fra et design",
+    "getDesignTemplateContract": "Hent kontrakten for kodemaler",
+    "setDesignTemplates": "Angi et designs kodemaler"
   },
   "odataFilter": {
     "detail": {

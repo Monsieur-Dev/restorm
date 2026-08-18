@@ -2238,8 +2238,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generarea de cod din acest design va trăi aici.",
-      "subtitle": "Generați un proiect din acest design — randat într-un sandbox, scris doar după confirmarea arborelui",
+      "empty": "Încă niciun șablon — adaugă unul pentru a genera cod din acest design.",
+      "subtitle": "Generează proiecte din acest design — randate într-un sandbox, scrise doar după ce confirmi arborele",
       "sourceTitle": "Șablon",
       "sourceKind": {
         "official": "Oficial",
@@ -2259,7 +2259,23 @@
       "extracted": "{{count}} fișier(e) scrise în {{root}}",
       "preview": "{{name}} a generat {{count}} fișier(e) — confirmați scrierea",
       "confirm": "Scrieți în folderul de ieșire",
-      "discard": "Renunțați"
+      "discard": "Renunțați",
+      "generateOne": "Generează acest proiect",
+      "remove": "Elimină acest șablon",
+      "addTemplate": "Adaugă un șablon",
+      "library": {
+        "title": "Bibliotecă de șabloane",
+        "recent": "Utilizate recent",
+        "official": "Șabloane oficiale",
+        "custom": "Personalizat",
+        "add": "Adaugă",
+        "officialTag": "Oficial",
+        "officialDesc": {
+          "server-typescript": "Server REST în TypeScript pe Express — rute tipizate, modele și validarea cererilor.",
+          "server-dotnet": "Server Minimal-API în C# / ASP.NET Core — endpointuri, DTO-uri și validare.",
+          "db-postgres": "Schemă PostgreSQL, date seed și scripturi CRUD din design."
+        }
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2697,7 +2713,9 @@
     "getDesignServerStatus": "Starea serverului de design",
     "setDesignRouteResponse": "Forțează un răspuns",
     "exportDesign": "Exportă un descriptor de design",
-    "generateDesignCode": "Generați cod dintr-un design"
+    "generateDesignCode": "Generați cod dintr-un design",
+    "getDesignTemplateContract": "Obține contractul șabloanelor de cod",
+    "setDesignTemplates": "Setează șabloanele de cod ale unui design"
   },
   "odataFilter": {
     "detail": {

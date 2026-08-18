@@ -2238,8 +2238,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generisanje koda iz ovog dizajna biće ovde.",
-      "subtitle": "Generišite projekat iz ovog dizajna — renderovano u sandbox-u, upisano tek posle potvrde stabla",
+      "empty": "Još nema šablona — dodajte ga da generišete kod iz ovog dizajna.",
+      "subtitle": "Generišite projekte iz ovog dizajna — prikazani u sandboxu, zapisani tek nakon što potvrdite stablo",
       "sourceTitle": "Šablon",
       "sourceKind": {
         "official": "Zvanični",
@@ -2259,7 +2259,23 @@
       "extracted": "{{count}} fajl(ova) upisano u {{root}}",
       "preview": "{{name}} je generisao {{count}} fajl(ova) — potvrdite upis",
       "confirm": "Upiši u izlaznu fasciklu",
-      "discard": "Odbaci"
+      "discard": "Odbaci",
+      "generateOne": "Generiši ovaj projekat",
+      "remove": "Ukloni ovaj šablon",
+      "addTemplate": "Dodaj šablon",
+      "library": {
+        "title": "Biblioteka šablona",
+        "recent": "Nedavno korišćeno",
+        "official": "Zvanični šabloni",
+        "custom": "Prilagođeno",
+        "add": "Dodaj",
+        "officialTag": "Zvanično",
+        "officialDesc": {
+          "server-typescript": "REST server u TypeScriptu na Express-u — tipizirane rute, modeli i validacija zahteva.",
+          "server-dotnet": "Minimal-API server u C# / ASP.NET Core — endpointi, DTO-ovi i validacija.",
+          "db-postgres": "PostgreSQL šema, seed podaci i CRUD skripte iz dizajna."
+        }
+      }
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2697,7 +2713,9 @@
     "getDesignServerStatus": "Stanje servera dizajna",
     "setDesignRouteResponse": "Prinudi odgovor",
     "exportDesign": "Izvezi deskriptor dizajna",
-    "generateDesignCode": "Generiši kod iz dizajna"
+    "generateDesignCode": "Generiši kod iz dizajna",
+    "getDesignTemplateContract": "Preuzmi ugovor šablona koda",
+    "setDesignTemplates": "Postavi šablone koda dizajna"
   },
   "odataFilter": {
     "detail": {

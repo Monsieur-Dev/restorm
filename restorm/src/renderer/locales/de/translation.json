@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Die Code-Generierung aus diesem Design entsteht hier.",
-      "subtitle": "Erzeugen Sie ein Projekt aus diesem Design — in einer Sandbox gerendert, erst nach Bestätigung des Baums geschrieben",
+      "empty": "Noch kein Template — fügen Sie eines hinzu, um Code aus diesem Design zu generieren.",
+      "subtitle": "Projekte aus diesem Design generieren — in einer Sandbox gerendert, erst nach Bestätigung des Baums geschrieben",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Offiziell",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} Datei(en) nach {{root}} geschrieben",
       "preview": "{{name}} hat {{count}} Datei(en) erzeugt — bestätigen Sie das Schreiben",
       "confirm": "In den Ausgabeordner schreiben",
-      "discard": "Verwerfen"
+      "discard": "Verwerfen",
+      "generateOne": "Dieses Projekt generieren",
+      "remove": "Dieses Template entfernen",
+      "addTemplate": "Template hinzufügen",
+      "library": {
+        "title": "Template-Bibliothek",
+        "recent": "Zuletzt verwendet",
+        "official": "Offizielle Templates",
+        "custom": "Benutzerdefiniert",
+        "add": "Hinzufügen",
+        "officialTag": "Offiziell",
+        "officialDesc": {
+          "server-typescript": "REST-Server in TypeScript auf Express — typisierte Routen, Modelle und Anfragevalidierung.",
+          "server-dotnet": "Minimal-API-Server in C# / ASP.NET Core — Endpunkte, DTOs und Validierung.",
+          "db-postgres": "PostgreSQL-Schema, Seed-Daten und CRUD-Skripte aus dem Design."
+        }
+      }
     },
     "statusbar": {
       "format": "Design · Format {{version}}"
@@ -2696,7 +2712,9 @@
     "getDesignServerStatus": "Design-Server-Status",
     "setDesignRouteResponse": "Eine Antwort erzwingen",
     "exportDesign": "Einen Design-Deskriptor exportieren",
-    "generateDesignCode": "Code aus einem Design generieren"
+    "generateDesignCode": "Code aus einem Design generieren",
+    "getDesignTemplateContract": "Vertrag der Code-Templates abrufen",
+    "setDesignTemplates": "Code-Templates eines Designs festlegen"
   },
   "odataFilter": {
     "detail": {

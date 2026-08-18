@@ -2239,8 +2239,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Generowanie kodu z tego projektu API pojawi się tutaj.",
-      "subtitle": "Wygeneruj projekt z tego projektu API — renderowany w piaskownicy, zapisany dopiero po potwierdzeniu drzewa",
+      "empty": "Brak szablonu — dodaj jeden, aby wygenerować kod z tego projektu.",
+      "subtitle": "Generuj projekty z tego projektu — renderowane w piaskownicy, zapisywane dopiero po potwierdzeniu drzewa",
       "sourceTitle": "Szablon",
       "sourceKind": {
         "official": "Oficjalny",
@@ -2260,7 +2260,23 @@
       "extracted": "{{count}} plik(ów) zapisano w {{root}}",
       "preview": "{{name}} wygenerował {{count}} plik(ów) — potwierdź zapis",
       "confirm": "Zapisz do folderu wyjściowego",
-      "discard": "Odrzuć"
+      "discard": "Odrzuć",
+      "generateOne": "Wygeneruj ten projekt",
+      "remove": "Usuń ten szablon",
+      "addTemplate": "Dodaj szablon",
+      "library": {
+        "title": "Biblioteka szablonów",
+        "recent": "Ostatnio używane",
+        "official": "Oficjalne szablony",
+        "custom": "Niestandardowy",
+        "add": "Dodaj",
+        "officialTag": "Oficjalny",
+        "officialDesc": {
+          "server-typescript": "Serwer REST w TypeScript na Express — typowane trasy, modele i walidacja żądań.",
+          "server-dotnet": "Serwer Minimal-API w C# / ASP.NET Core — punkty końcowe, DTO i walidacja.",
+          "db-postgres": "Schemat PostgreSQL, dane seed i skrypty CRUD z projektu."
+        }
+      }
     },
     "statusbar": {
       "format": "projekt API · format {{version}}"
@@ -2698,7 +2714,9 @@
     "getDesignServerStatus": "Stan serwera projektu",
     "setDesignRouteResponse": "Wymuś odpowiedź",
     "exportDesign": "Eksportuj deskryptor projektu",
-    "generateDesignCode": "Wygeneruj kod z projektu"
+    "generateDesignCode": "Wygeneruj kod z projektu",
+    "getDesignTemplateContract": "Pobierz kontrakt szablonów kodu",
+    "setDesignTemplates": "Ustaw szablony kodu projektu"
   },
   "odataFilter": {
     "detail": {
