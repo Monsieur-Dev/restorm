@@ -22,8 +22,32 @@ import type {
   DesignRouteGroup,
   DesignServing,
   DesignCodegen,
+  DesignCodegenTemplate,
   DesignAuthKind
 } from '../types/apiDesign'
+import { generateUniqueId } from '../utils/reidentifyTree'
+
+/**
+ * Normalize a persisted `codegen` slot into the current LIST shape
+ * (TASK-468.20). A pre-468.20 file carried a single `templateSource` (+ a
+ * single `outputDir`); we migrate it into a one-entry `templates` list and
+ * never re-emit the legacy fields. A file already in list shape is returned
+ * untouched. Returns `undefined` for an empty slot so we never persist `{}`.
+ */
+function normalizeCodegen(codegen: DesignCodegen): DesignCodegen | undefined {
+  if (codegen.templates !== undefined) {
+    return codegen.templates.length > 0 ? { templates: codegen.templates } : undefined
+  }
+  if (codegen.templateSource !== undefined) {
+    const entry: DesignCodegenTemplate = {
+      id: generateUniqueId(),
+      source: codegen.templateSource,
+      ...(codegen.outputDir !== undefined && { outputDir: codegen.outputDir })
+    }
+    return { templates: [entry] }
+  }
+  return undefined
+}
 
 @trackable()
 @searchable()
@@ -101,6 +125,7 @@ export class ApiDesign {
     enums?: DesignEnum[]
     routeGroups?: DesignRouteGroup[]
   }): ApiDesign {
+    const codegen = obj.codegen !== undefined ? normalizeCodegen(obj.codegen) : undefined
     return new ApiDesign({
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
@@ -112,7 +137,7 @@ export class ApiDesign {
       ...(obj.defaultSecurity !== undefined && { defaultSecurity: obj.defaultSecurity }),
       ...(obj.defaultAuth !== undefined && { defaultAuth: obj.defaultAuth }),
       ...(obj.serving !== undefined && { serving: obj.serving }),
-      ...(obj.codegen !== undefined && { codegen: obj.codegen }),
+      ...(codegen !== undefined && { codegen }),
       models: obj.models ?? [],
       enums: obj.enums ?? [],
       routeGroups: obj.routeGroups ?? []

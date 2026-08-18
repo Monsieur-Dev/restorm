@@ -85,21 +85,31 @@ When('the design tab is opened on the code section', async () => {
   await expect(p.locator('[data-testid="design-code-section"]')).toBeVisible({ timeout: 5000 })
 })
 
-When('the local fixture template is selected', async () => {
+When('the local fixture template is added', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-code-source-local"]').click()
-  await p.locator('[data-testid="design-code-local-input"]').fill(FIXTURE_TEMPLATE)
+  // Open the template library, pick the Custom tab, point it at the local
+  // fixture and add it — the modal closes and one template row appears.
+  await p.locator('[data-testid="design-code-add"]').click()
+  await expect(p.locator('[data-testid="design-template-library-modal"]')).toBeVisible({ timeout: 5000 })
+  await p.locator('[data-testid="design-template-library-tabs-tab-custom"]').click()
+  await p.locator('[data-testid="design-template-library-local-input"]').fill(FIXTURE_TEMPLATE)
+  await p.locator('[data-testid="design-template-library-local-add"]').click()
+  await expect(
+    p.locator('[data-testid="design-code-template-list"] .design-code-template')
+  ).toHaveCount(1, { timeout: 5000 })
 })
 
 When('the output folder is picked through the system dialog', async () => {
   outputDir = mkdtempSync(join(tmpdir(), 'design-codegen-out-'))
   await configureNextOpenDialogForE2E(requireApp().app, { kind: 'openFolder', path: outputDir })
-  await requirePage().locator('[data-testid="design-code-browse"]').click()
-  await expect(requirePage().locator('[data-testid="design-code-output-input"]')).toHaveValue(outputDir, { timeout: 5000 })
+  await requirePage().locator('[data-testid^="design-code-browse-"]').click()
+  await expect(
+    requirePage().locator('[data-testid^="design-code-output-"][data-testid$="-input"]')
+  ).toHaveValue(outputDir, { timeout: 5000 })
 })
 
 When('the generation is launched', async () => {
-  await requirePage().locator('[data-testid="design-code-generate"]').click()
+  await requirePage().locator('[data-testid^="design-code-generate-"]').click()
 })
 
 Then('the preview lists the generated files', async () => {
@@ -183,12 +193,12 @@ Then('the generation is refused as a template error and nothing is written', () 
 
 Then('the generate button is disabled with the validation explanation', async () => {
   const p = requirePage()
-  await expect(p.locator('[data-testid="design-code-generate"]')).toBeDisabled()
+  await expect(p.locator('[data-testid^="design-code-generate-"]')).toBeDisabled()
   await expect(p.locator('[data-testid="design-code-blocked"]')).toBeVisible()
 })
 
 Then('the generate control is plan-gated', async () => {
   const p = requirePage()
-  await expect(p.locator('[data-testid="design-code-gate"]')).toBeVisible()
-  await expect(p.locator('[data-testid="design-code-generate"]')).toBeDisabled()
+  await expect(p.locator('[data-testid^="design-code-gate-"]')).toBeVisible()
+  await expect(p.locator('[data-testid^="design-code-generate-"]')).toBeDisabled()
 })

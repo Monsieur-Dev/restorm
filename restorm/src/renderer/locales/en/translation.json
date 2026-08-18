@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Code generation from this design will live here.",
-      "subtitle": "Generate a project from this design — rendered in a sandbox, written only after you confirm the tree",
+      "empty": "No template yet — add one to generate code from this design.",
+      "subtitle": "Generate projects from this design — rendered in a sandbox, written only after you confirm the tree",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Official",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} file(s) written to {{root}}",
       "preview": "{{name}} generated {{count}} file(s) — confirm to write them",
       "confirm": "Write to the output folder",
-      "discard": "Discard"
+      "discard": "Discard",
+      "generateOne": "Generate this project",
+      "remove": "Remove this template",
+      "addTemplate": "Add a template",
+      "library": {
+        "title": "Template library",
+        "recent": "Recently used",
+        "official": "Official templates",
+        "custom": "Custom",
+        "add": "Add",
+        "officialTag": "Official",
+        "officialDesc": {
+          "server-typescript": "REST server in TypeScript on Express — typed routes, models and validation.",
+          "server-dotnet": "Minimal-API server in C# / ASP.NET Core — endpoints, DTOs and validation.",
+          "db-postgres": "PostgreSQL schema, seed data and CRUD scripts from the design."
+        }
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"

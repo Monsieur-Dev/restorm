@@ -2237,8 +2237,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "La génération de code depuis ce design vivra ici.",
-      "subtitle": "Générez un projet depuis ce design — rendu dans une sandbox, écrit seulement après validation de l’arborescence",
+      "empty": "Aucun template pour l'instant — ajoutez-en un pour générer du code depuis ce design.",
+      "subtitle": "Générez des projets depuis ce design — rendu dans une sandbox, écrit seulement après validation de l'arborescence",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Officiel",
@@ -2258,7 +2258,23 @@
       "extracted": "{{count}} fichier(s) écrits dans {{root}}",
       "preview": "{{name}} a généré {{count}} fichier(s) — confirmez pour les écrire",
       "confirm": "Écrire dans le dossier de sortie",
-      "discard": "Abandonner"
+      "discard": "Abandonner",
+      "generateOne": "Générer ce projet",
+      "remove": "Supprimer ce template",
+      "addTemplate": "Ajouter un template",
+      "library": {
+        "title": "Librairie de templates",
+        "recent": "Récemment utilisés",
+        "official": "Templates officiels",
+        "custom": "Personnalisé",
+        "add": "Ajouter",
+        "officialTag": "Officiel",
+        "officialDesc": {
+          "server-typescript": "Serveur REST en TypeScript sur Express — routes typées, modèles et validation.",
+          "server-dotnet": "Serveur Minimal-API en C# / ASP.NET Core — endpoints, DTOs et validation.",
+          "db-postgres": "Schéma PostgreSQL, données de seed et scripts CRUD depuis le design."
+        }
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"

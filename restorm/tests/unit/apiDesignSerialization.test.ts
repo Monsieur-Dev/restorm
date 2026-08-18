@@ -5,6 +5,7 @@ import { processAfterDeserialization } from '../../src/renderer/src/utils/serial
 import { requiredFileFormatVersion, BASE_FILE_FORMAT_VERSION, DESIGN_FILE_FORMAT_VERSION } from '../../src/shared/config/fileFormatVersion'
 import { idPathSegment } from '../../src/shared/utils/stableId'
 import type { ApiDesign } from '../../src/shared/types/apiDesign'
+import { ApiDesign as ApiDesignModel } from '../../src/shared/models/ApiDesign'
 import { buildReferenceApiDesign } from './apiDesignReference'
 
 /**
@@ -198,5 +199,38 @@ describe('API design — the doc and example bags are opaque to the walks', () =
     const loaded = processAfterDeserialization([design])
     const value = loaded[0]?.models[0]?.examples?.[0]?.values['prop-user-settings'] as Record<string, unknown>
     expect('id' in value).toBe(false)
+  })
+})
+
+describe('API design — codegen template migration (TASK-468.20)', () => {
+  it('migrates a legacy single templateSource into a one-entry templates list', () => {
+    const design = ApiDesignModel.fromPlain({
+      name: 'X',
+      codegen: { templateSource: { kind: 'official', id: 'server-typescript' }, outputDir: './out' }
+    })
+    expect(design.codegen?.templates).toHaveLength(1)
+    const entry = design.codegen?.templates?.[0]
+    expect(entry?.source).toEqual({ kind: 'official', id: 'server-typescript' })
+    expect(entry?.outputDir).toBe('./out')
+    expect(typeof entry?.id).toBe('string')
+    // The legacy fields are dropped and never re-emitted on save.
+    const codegen = design.toPlainObject()['codegen'] as Record<string, unknown>
+    expect(codegen['templateSource']).toBeUndefined()
+    expect(codegen['outputDir']).toBeUndefined()
+    expect(Array.isArray(codegen['templates'])).toBe(true)
+  })
+
+  it('keeps a list-shaped codegen untouched', () => {
+    const templates = [
+      { id: 'a', source: { kind: 'repo' as const, repo: 'owner/repo' }, outputDir: './srv' },
+      { id: 'b', source: { kind: 'local' as const, path: '/tmp/tpl' } }
+    ]
+    const design = ApiDesignModel.fromPlain({ name: 'X', codegen: { templates } })
+    expect(design.codegen?.templates).toEqual(templates)
+  })
+
+  it('drops an empty codegen slot rather than persisting {}', () => {
+    expect(ApiDesignModel.fromPlain({ name: 'X', codegen: {} }).codegen).toBeUndefined()
+    expect(ApiDesignModel.fromPlain({ name: 'X', codegen: { templates: [] } }).codegen).toBeUndefined()
   })
 })

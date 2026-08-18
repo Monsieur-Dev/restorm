@@ -61,6 +61,7 @@ export type {
   DesignScalarType,
   DesignServing,
   DesignCodegen,
+  DesignCodegenTemplate,
   DesignTemplateSource,
   DesignProtocol,
   DesignAuthKind,

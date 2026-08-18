@@ -9,7 +9,7 @@ Feature: Design code generation
     Given restorm is launched with MCP for codegen work
     When the agent authors a valid "Codegen API" design
     And the design tab is opened on the code section
-    And the local fixture template is selected
+    And the local fixture template is added
     And the output folder is picked through the system dialog
     And the generation is launched
     Then the preview lists the generated files
@@ -40,10 +40,12 @@ Feature: Design code generation
     Given restorm is launched with MCP for codegen work
     When the agent authors a "Broken API" design with a duplicate route
     And the design tab is opened on the code section
+    And the local fixture template is added
     Then the generate button is disabled with the validation explanation
 
   Scenario: Community sees the generation gate
     Given restorm is launched with MCP for codegen work without a plan
     When the agent authors a valid "Community API" design
     And the design tab is opened on the code section
+    And the local fixture template is added
     Then the generate control is plan-gated

@@ -176,13 +176,15 @@ class DesignCodegenService {
     if (designFingerprint(currentDesign) !== run.designFingerprint) {
       throw new Error('the design changed since the preview — generate again')
     }
-    // Staleness anchor #2 (DD2): the SOURCE that produced the tree. The
-    // Code section persists the selected source in the design's codegen
-    // slot, so a source switch between preview and confirm must not
-    // write the previous template's tree.
-    const currentSource: TemplateSourceRef | undefined = currentDesign.codegen?.templateSource
-    if (currentSource !== undefined && !sameSource(currentSource, run.source)) {
-      throw new Error('the template source changed since the preview — generate again')
+    // Staleness anchor #2 (DD2, updated for the template LIST — TASK-468.20):
+    // the previewed tree belongs to ONE template. If that source is no longer
+    // among the design's configured templates (the row was removed or its
+    // source re-pointed between preview and confirm), refuse to write its
+    // stale tree. Skipped when the design carries no list (a transient MCP
+    // generate that never persisted a template).
+    const templates = currentDesign.codegen?.templates ?? []
+    if (templates.length > 0 && !templates.some((tpl) => sameSource(tpl.source, run.source))) {
+      throw new Error('the template that produced this preview is no longer configured — generate again')
     }
     const written = extractGeneratedTree(run.files, outputRoot)
     this.pending.delete(designId)
