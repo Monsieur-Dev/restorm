@@ -138,6 +138,11 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
   const withIdLink = (meta: NonNullable<DesignRoute['design']>): NonNullable<DesignRoute['design']> =>
     idLinks !== undefined ? { ...meta, paramLinks: idLinks } : meta
 
+  /** Pick "a"/"an" for a summary like "Create an Author" so the generated
+   * copy reads naturally when the model name starts with a vowel sound. */
+  const article = (name: string): string =>
+    /^[aeiou]/i.test(name.trim()) ? 'an' : 'a'
+
   const list: DesignRoute = {
     id: newId(),
     doc: {
@@ -173,7 +178,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     id: newId(),
     doc: {
       match: { urlPattern: '/', method: 'POST' },
-      summary: `Create a ${model.doc.name}`,
+      summary: `Create ${article(model.doc.name)} ${model.doc.name}`,
       responses: { '201': { description: 'Created.' } }
     },
     design: {
@@ -186,7 +191,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     id: newId(),
     doc: {
       match: { urlPattern: '/{{id}}', method: 'PUT' },
-      summary: `Update a ${model.doc.name}`,
+      summary: `Update ${article(model.doc.name)} ${model.doc.name}`,
       parameters: idParamDoc(),
       responses: {
         '200': { description: `The updated ${model.doc.name}.` },
@@ -204,7 +209,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     id: newId(),
     doc: {
       match: { urlPattern: '/{{id}}', method: 'DELETE' },
-      summary: `Delete a ${model.doc.name}`,
+      summary: `Delete ${article(model.doc.name)} ${model.doc.name}`,
       parameters: idParamDoc(),
       responses: {
         '204': { description: 'Deleted.' },

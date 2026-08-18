@@ -328,7 +328,9 @@ Then('no sidebar group should expose a route-count pastille', async () => {
 
 Then('the sidebar method pill for the GET operation should render with white text', async () => {
   const p = requirePage()
-  const pill = p.locator('.documentation-host-sidebar__method--get').first()
+  const pill = p
+    .locator('.documentation-host-sidebar__op-list .registry-badge[data-badge-id="http_get"]')
+    .first()
   await expect(pill).toBeVisible({ timeout: 10000 })
   const color = await pill.evaluate((el) => getComputedStyle(el).color)
   // Accept any rgb whose components are all >= 240 — the value should

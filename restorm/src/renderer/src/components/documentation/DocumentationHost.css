@@ -1765,33 +1765,6 @@
   background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
 }
 
-.documentation-host-sidebar__method {
-  flex: 0 0 auto;
-  font-family: var(--monaco-monospace-font, monospace);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  /* Nudge the verb text down 1 px so it lines up visually with the
-   * cap-height of the operation summary text alongside it. The
-   * monospace pill sits a hair higher than the proportional summary
-   * font without this. */
-  padding: 2px 4px 0;
-  border-radius: 2px;
-  background: var(--badge-background, rgba(127, 127, 127, 0.2));
-  color: var(--badge-foreground, var(--editor-foreground));
-}
-
-/* Method-pill text is fixed white on every coloured background so the
- * sidebar reads the same on light + dark themes. Uses the canonical
- * per-verb badge tokens for consistency with Badge.css / httpMethods.css. */
-.documentation-host-sidebar__method--get { background: var(--badge-get-background); color: var(--badge-on-accent, #fff); }
-.documentation-host-sidebar__method--post { background: var(--badge-post-background); color: var(--badge-on-accent, #fff); }
-.documentation-host-sidebar__method--put { background: var(--badge-put-background); color: var(--badge-on-accent, #fff); }
-.documentation-host-sidebar__method--patch { background: var(--badge-patch-background); color: var(--badge-on-accent, #fff); }
-.documentation-host-sidebar__method--delete { background: var(--badge-delete-background); color: var(--badge-on-accent, #fff); }
-.documentation-host-sidebar__method--head,
-.documentation-host-sidebar__method--options { background: rgba(127, 127, 127, 0.4); color: var(--dock-foreground, var(--editor-foreground)); }
-
 .documentation-host-sidebar__op-summary {
   flex: 1 1 auto;
   white-space: nowrap;
