@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package petstore;
+
+message Empty {}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string password = 3;
+  // enum: active | suspended | deleted
+  string status = 4;
+  repeated string nicknames = 5;
+  string settings = 6;
+}
+
+message AdminUser {
+  string id = 1;
+  string email = 2;
+  string password = 3;
+  // enum: active | suspended | deleted
+  string status = 4;
+  repeated string nicknames = 5;
+  string settings = 6;
+  string scope = 7;
+}
+
+message Order {
+  int64 id = 1;
+  User customer = 2;
+  repeated User lines = 3;
+}
+
+message UserList {
+  repeated User items = 1;
+  int32 total = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message ListUsersRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message CreateAUserRequest {
+  User body = 1;
+}
+
+service PetstoreService {
+  rpc GetUser (GetUserRequest) returns (User);
+  rpc ListUsers (ListUsersRequest) returns (UserList);
+  rpc CreateAUser (CreateAUserRequest) returns (User);
+}

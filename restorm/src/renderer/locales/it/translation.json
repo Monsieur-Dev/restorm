@@ -2199,7 +2199,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Filtra…",
@@ -2270,8 +2271,10 @@
         "add": "Aggiungi",
         "officialTag": "Ufficiale",
         "officialDesc": {
-          "server-typescript": "Server REST in TypeScript su Express — rotte tipizzate, modelli e validazione delle richieste.",
-          "server-dotnet": "Server Minimal-API in C# / ASP.NET Core — endpoint, DTO e validazione.",
+          "server-rest-typescript": "Server REST in TypeScript su Express — rotte tipizzate, modelli e validazione delle richieste.",
+          "server-rest-dotnet": "Server Minimal-API in C# / ASP.NET Core — endpoint, DTO e validazione.",
+          "server-grpc-typescript": "Server gRPC in TypeScript — servizio .proto, messaggi tipizzati e stub del server.",
+          "server-grpc-dotnet": "Server gRPC in C# / .NET — servizio .proto, messaggi e stub del server.",
           "db-postgres": "Schema PostgreSQL, dati seed e script CRUD dal design."
         }
       }

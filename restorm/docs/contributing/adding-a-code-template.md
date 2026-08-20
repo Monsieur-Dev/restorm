@@ -85,8 +85,10 @@ Both real Copier and the sandbox pass the context as **plain dicts**, so:
 
 ## The official repos
 
-- [`Monsieur-Dev/restorm-template-server-typescript`](https://github.com/Monsieur-Dev/restorm-template-server-typescript) — Express + TypeScript
-- [`Monsieur-Dev/restorm-template-server-dotnet`](https://github.com/Monsieur-Dev/restorm-template-server-dotnet) — ASP.NET Core minimal APIs
+- [`Monsieur-Dev/restorm-template-server-rest-typescript`](https://github.com/Monsieur-Dev/restorm-template-server-rest-typescript) — REST, Express + TypeScript
+- [`Monsieur-Dev/restorm-template-server-rest-dotnet`](https://github.com/Monsieur-Dev/restorm-template-server-rest-dotnet) — REST, ASP.NET Core minimal APIs
+- [`Monsieur-Dev/restorm-template-server-grpc-typescript`](https://github.com/Monsieur-Dev/restorm-template-server-grpc-typescript) — gRPC, TypeScript
+- [`Monsieur-Dev/restorm-template-server-grpc-dotnet`](https://github.com/Monsieur-Dev/restorm-template-server-grpc-dotnet) — gRPC, C# / .NET
 
 Each carries: `copier.yml` + `template/`, the manifest, a `reference/`
 answers file built from the petstore reference design, the context

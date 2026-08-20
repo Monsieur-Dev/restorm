@@ -2199,7 +2199,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Szűrés…",
@@ -2270,8 +2271,10 @@
         "add": "Hozzáadás",
         "officialTag": "Hivatalos",
         "officialDesc": {
-          "server-typescript": "REST szerver TypeScriptben Expressen — típusos útvonalak, modellek és kérésvalidáció.",
-          "server-dotnet": "Minimal-API szerver C# / ASP.NET Core alatt — végpontok, DTO-k és validáció.",
+          "server-rest-typescript": "REST szerver TypeScriptben Expressen — típusos útvonalak, modellek és kérésvalidáció.",
+          "server-rest-dotnet": "Minimal-API szerver C# / ASP.NET Core alatt — végpontok, DTO-k és validáció.",
+          "server-grpc-typescript": "gRPC-kiszolgáló TypeScriptben — .proto szolgáltatás, típusos üzenetek és kiszolgálói csonkok.",
+          "server-grpc-dotnet": "gRPC-kiszolgáló C# / .NET környezetben — .proto szolgáltatás, üzenetek és kiszolgálói csonkok.",
           "db-postgres": "PostgreSQL séma, seed adatok és CRUD szkriptek a tervből."
         }
       }

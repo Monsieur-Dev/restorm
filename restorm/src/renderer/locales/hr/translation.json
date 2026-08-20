@@ -2200,7 +2200,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Filtriraj…",
@@ -2271,8 +2272,10 @@
         "add": "Dodaj",
         "officialTag": "Službeno",
         "officialDesc": {
-          "server-typescript": "REST poslužitelj u TypeScriptu na Expressu — tipizirane rute, modeli i validacija zahtjeva.",
-          "server-dotnet": "Minimal-API poslužitelj u C# / ASP.NET Core — endpointi, DTO-ovi i validacija.",
+          "server-rest-typescript": "REST poslužitelj u TypeScriptu na Expressu — tipizirane rute, modeli i validacija zahtjeva.",
+          "server-rest-dotnet": "Minimal-API poslužitelj u C# / ASP.NET Core — endpointi, DTO-ovi i validacija.",
+          "server-grpc-typescript": "gRPC poslužitelj u TypeScriptu — .proto usluga, tipizirane poruke i poslužiteljski stubovi.",
+          "server-grpc-dotnet": "gRPC poslužitelj u C# / .NET — .proto usluga, poruke i poslužiteljski stubovi.",
           "db-postgres": "PostgreSQL shema, seed podaci i CRUD skripte iz dizajna."
         }
       }

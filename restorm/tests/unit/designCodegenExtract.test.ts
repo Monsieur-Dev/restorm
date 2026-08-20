@@ -106,8 +106,8 @@ describe('parseTemplateManifest', () => {
 
 describe('templateArchiveUrl', () => {
   it('builds the codeload tarball URL from owner/repo or a github URL', () => {
-    expect(templateArchiveUrl('Monsieur-Dev/restorm-template-server-typescript'))
-      .toBe('https://codeload.github.com/Monsieur-Dev/restorm-template-server-typescript/tar.gz/refs/heads/main')
+    expect(templateArchiveUrl('Monsieur-Dev/restorm-template-server-rest-typescript'))
+      .toBe('https://codeload.github.com/Monsieur-Dev/restorm-template-server-rest-typescript/tar.gz/refs/heads/main')
     expect(templateArchiveUrl('https://github.com/o/r.git', 'dev'))
       .toBe('https://codeload.github.com/o/r/tar.gz/refs/heads/dev')
     expect(() => templateArchiveUrl('not a repo')).toThrow(/not a github repository/)

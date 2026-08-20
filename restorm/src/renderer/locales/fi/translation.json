@@ -2199,7 +2199,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Suodata…",
@@ -2270,8 +2271,10 @@
         "add": "Lisää",
         "officialTag": "Virallinen",
         "officialDesc": {
-          "server-typescript": "REST-palvelin TypeScriptillä Expressin päällä — tyypitetyt reitit, mallit ja pyyntöjen validointi.",
-          "server-dotnet": "Minimal-API-palvelin C# / ASP.NET Core -ympäristössä — endpointit, DTO:t ja validointi.",
+          "server-rest-typescript": "REST-palvelin TypeScriptillä Expressin päällä — tyypitetyt reitit, mallit ja pyyntöjen validointi.",
+          "server-rest-dotnet": "Minimal-API-palvelin C# / ASP.NET Core -ympäristössä — endpointit, DTO:t ja validointi.",
+          "server-grpc-typescript": "gRPC-palvelin TypeScriptillä — .proto-palvelu, tyypitetyt viestit ja palvelintynkät.",
+          "server-grpc-dotnet": "gRPC-palvelin C# / .NET -ympäristössä — .proto-palvelu, viestit ja palvelintynkät.",
           "db-postgres": "PostgreSQL-skeema, seed-data ja CRUD-skriptit suunnitelmasta."
         }
       }

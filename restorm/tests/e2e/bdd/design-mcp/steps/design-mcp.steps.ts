@@ -382,7 +382,7 @@ Then('the template contract over MCP carries the manifest schema, the context sc
   expect(contextSchema.required).toEqual(expect.arrayContaining(['contextVersion', 'design', 'models']))
   const official = reply['officialTemplates'] as { id: string; description: string }[]
   expect(official.map((entry) => entry.id)).toEqual(
-    expect.arrayContaining(['server-typescript', 'server-dotnet', 'db-postgres'])
+    expect.arrayContaining(['server-rest-typescript', 'server-rest-dotnet', 'db-postgres'])
   )
   expect(official.every((entry) => typeof entry.description === 'string' && entry.description.length > 0)).toBe(true)
 })

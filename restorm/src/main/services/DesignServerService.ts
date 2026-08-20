@@ -33,7 +33,11 @@
  */
 
 import type { IncomingMessage, ServerResponse } from 'http'
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { BrowserWindow } from 'electron'
+import * as grpc from '@grpc/grpc-js'
 import { createSchema, createYoga, logger } from 'electron-core-ui/main'
 import { websocketExecutionService } from './WebSocketExecutionService'
 import type { ApiDesign, DesignModel, DesignProtocol } from '../../shared/types/apiDesign'
@@ -71,10 +75,26 @@ import {
   matchSoapOperation,
   type SoapOperation
 } from '../../shared/design/soapProjection'
+import {
+  buildGrpcResponse,
+  designGrpcMethods,
+  designProtoPackage,
+  designProtoServiceName,
+  designToProto,
+  type GrpcMethod
+} from '../../shared/design/grpcProjection'
 
 /** Default port a freshly-created design serves on (adjacent to the
  * HTTP mock's 8080 family, far from dev-server ranges). */
 export const DEFAULT_DESIGN_SERVER_PORT = 4820
+
+/** Default port the gRPC projection's separate HTTP/2 server binds —
+ * adjacent to the HTTP default so a design's two servers stay grouped. */
+export const DEFAULT_DESIGN_GRPC_PORT = 4821
+
+/** Grace window for a graceful gRPC shutdown to drain in-flight calls
+ * before the server is force-stopped (ms). */
+const GRPC_SHUTDOWN_GRACE_MS = 2000
 
 const JSON_CONTENT_TYPE = 'application/json'
 
@@ -111,6 +131,14 @@ interface ActiveServer {
   yoga?: ReturnType<typeof createYoga>
   soapOperations?: SoapOperation[]
   odataSets?: ODataEntitySet[]
+  /** The gRPC projection's separate HTTP/2 server, present only while
+   * 'grpc' is enabled and its bind succeeded. */
+  grpcServer?: grpc.Server
+  /** The port the gRPC server actually bound. */
+  grpcPort?: number
+  /** The `.proto` text the live gRPC server was built from — lets an
+   * autosave skip a rebuild when the projected proto is unchanged. */
+  grpcProto?: string
   /** Ephemeral store, present only while the design serves STATEFUL. */
   store?: DesignStatefulStore
 }
@@ -233,6 +261,10 @@ class DesignServerService {
       return { success: false, listening: false, port, error: result.error ?? `failed to bind port ${port}` }
     }
     this.servers.set(design.id, active)
+    // The gRPC projection binds its OWN HTTP/2 port. Like the other
+    // projections it self-disables on failure (logged) rather than
+    // failing the whole spin — HTTP keeps serving regardless.
+    await this.syncGrpcProjection(active)
     this.broadcastProgress(design.id, 'started')
     logger.info('[DesignServerService] design server listening', { designId: design.id, port, routes: active.table.length })
     return { success: true, listening: true, port }
@@ -240,8 +272,11 @@ class DesignServerService {
 
   /** Stop the design's server, freeing the port. Idempotent. */
   stop(designId: string): boolean {
-    if (!this.servers.has(designId)) return false
+    const active = this.servers.get(designId)
+    if (active === undefined) return false
     this.servers.delete(designId)
+    // Free the separate gRPC port too (best-effort, graceful).
+    void this.teardownGrpc(active)
     return websocketExecutionService.disconnect(hostKey(designId))
   }
 
@@ -249,10 +284,15 @@ class DesignServerService {
     return this.servers.has(designId)
   }
 
-  status(designId: string): { listening: boolean; port?: number; counters?: DesignServerCounters } {
+  status(designId: string): { listening: boolean; port?: number; grpcPort?: number; counters?: DesignServerCounters } {
     const active = this.servers.get(designId)
     if (active === undefined) return { listening: false }
-    return { listening: true, port: active.port, counters: active.counters }
+    return {
+      listening: true,
+      port: active.port,
+      ...(active.grpcPort !== undefined ? { grpcPort: active.grpcPort } : {}),
+      counters: active.counters
+    }
   }
 
   /** Hot-steer one route's response (run modal). `null` clears the
@@ -279,6 +319,10 @@ class DesignServerService {
     active.table = compileDesignRoutes(design)
     active.latencyMs = design.serving?.latencyMs ?? 0
     projectProtocols(active)
+    // Rebuild / tear down the gRPC server to match the fresh design.
+    // Fire-and-forget: the renderer's autosave push doesn't await the
+    // (async) HTTP/2 rebind, and a failure self-disables like the others.
+    void this.syncGrpcProjection(active)
     // Stateful store lifecycle: SEED only on a stateless→stateful
     // transition (or the very first start). A live design edit while
     // serving must NOT wipe the accumulated rows — it only retargets the
@@ -550,6 +594,140 @@ class DesignServerService {
     // SOAP operations map 1:1 to design routes — count under the route
     // id so the run modal's per-route dashboard sees this traffic.
     this.recordServed(active, operation.route.id, '200')
+  }
+
+  // ── gRPC projection (separate HTTP/2 server) ──────────────────────
+
+  /**
+   * Bring the gRPC projection in line with the current design: bind an
+   * `@grpc/grpc-js` server on the design's gRPC port when 'grpc' is
+   * enabled, tear it down when it isn't, and skip a rebuild when the
+   * projected `.proto` is byte-identical to the live one (a no-op
+   * autosave must not churn the port). Failures self-disable (logged) —
+   * the HTTP server and the other projections are unaffected.
+   */
+  private async syncGrpcProjection(active: ActiveServer): Promise<void> {
+    if (!active.protocols.has('grpc')) {
+      await this.teardownGrpc(active)
+      return
+    }
+    let proto: string
+    try {
+      proto = designToProto(active.design)
+    } catch (err) {
+      await this.teardownGrpc(active)
+      logger.error('[DesignServerService] grpc projection failed to build — disabled for this run', {
+        designId: active.designId,
+        error: err instanceof Error ? err.message : String(err)
+      })
+      return
+    }
+    if (active.grpcServer !== undefined && active.grpcProto === proto) return
+    await this.teardownGrpc(active)
+    try {
+      await this.bringUpGrpc(active, proto)
+    } catch (err) {
+      logger.error('[DesignServerService] grpc projection failed to bind — disabled for this run', {
+        designId: active.designId,
+        error: err instanceof Error ? err.message : String(err)
+      })
+    }
+  }
+
+  /** Load the projected proto, register one unary handler per route, add
+   * reflection, and bind the HTTP/2 port. */
+  private async bringUpGrpc(active: ActiveServer, proto: string): Promise<void> {
+    const port = active.design.serving?.grpcPort ?? DEFAULT_DESIGN_GRPC_PORT
+    const methods = designGrpcMethods(active.design)
+    const file = materialiseProtoText(proto)
+    const protoLoader = await import('@grpc/proto-loader')
+    const pkgDef = protoLoader.loadSync(file, {
+      keepCase: true, longs: String, enums: String, defaults: true, oneofs: true, includeDirs: []
+    })
+    const root = grpc.loadPackageDefinition(pkgDef)
+    const service = resolveGrpcService(root, designProtoPackage(active.design), designProtoServiceName(active.design))
+    if (service === undefined) {
+      throw new Error('the projected proto exposes no service')
+    }
+    const server = new grpc.Server()
+    server.addService(service, this.buildGrpcHandlers(active, methods))
+    // Server reflection (best-effort): a client can call without the
+    // `.proto`. Loaded lazily so a failure never fails the bind.
+    try {
+      const { ReflectionService } = await import('@grpc/reflection')
+      new ReflectionService(pkgDef).addToServer(server)
+    } catch (err) {
+      logger.warn('[DesignServerService] grpc reflection unavailable', {
+        designId: active.designId,
+        error: err instanceof Error ? err.message : String(err)
+      })
+    }
+    const boundPort = await new Promise<number>((resolve, reject) => {
+      server.bindAsync(`127.0.0.1:${port}`, grpc.ServerCredentials.createInsecure(), (err, p) => {
+        if (err) { reject(err); return }
+        resolve(p)
+      })
+    })
+    active.grpcServer = server
+    active.grpcPort = boundPort
+    active.grpcProto = proto
+    logger.info('[DesignServerService] design grpc projection listening', {
+      designId: active.designId, port: boundPort, methods: methods.length
+    })
+  }
+
+  /** Gracefully stop the gRPC server (force-fallback), freeing its port. */
+  private async teardownGrpc(active: ActiveServer): Promise<void> {
+    const server = active.grpcServer
+    delete active.grpcServer
+    delete active.grpcPort
+    delete active.grpcProto
+    if (server === undefined) return
+    await new Promise<void>((resolve) => {
+      const fallback = setTimeout(() => {
+        try { server.forceShutdown() } catch { /* already down */ }
+        resolve()
+      }, GRPC_SHUTDOWN_GRACE_MS)
+      try {
+        server.tryShutdown(() => { clearTimeout(fallback); resolve() })
+      } catch {
+        clearTimeout(fallback)
+        try { server.forceShutdown() } catch { /* already down */ }
+        resolve()
+      }
+    })
+  }
+
+  /** One unary handler per route; each answers via the shared serving
+   * kernel and enforces the design's DEFAULT auth (presence) via call
+   * metadata, exactly like the other projections. */
+  private buildGrpcHandlers(active: ActiveServer, methods: GrpcMethod[]): grpc.UntypedServiceImplementation {
+    const handlers: grpc.UntypedServiceImplementation = {}
+    for (const method of methods) {
+      handlers[method.name] = this.grpcUnaryHandler(active, method)
+    }
+    return handlers
+  }
+
+  private grpcUnaryHandler(active: ActiveServer, method: GrpcMethod): grpc.handleUnaryCall<object, object> {
+    return (call, callback) => {
+      const auth = active.design.defaultAuth ?? 'none'
+      if (!authSatisfied(auth, grpcMetadataToHeaders(call.metadata), active.design)) {
+        this.recordServed(active, method.route.id, '401')
+        const message = `This service requires ${auth} credentials`
+        callback({ name: 'DesignServerGrpc', message, code: grpc.status.UNAUTHENTICATED, details: message }, null)
+        return
+      }
+      try {
+        const response = buildGrpcResponse(active.design, method, isRecord(call.request) ? call.request : {})
+        callback(null, response)
+        this.recordServed(active, method.route.id, '200')
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        this.recordServed(active, method.route.id, '500')
+        callback({ name: 'DesignServerGrpc', message, code: grpc.status.INTERNAL, details: message }, null)
+      }
+    }
   }
 
   /**
@@ -907,6 +1085,44 @@ function parseStatus(code: string): number {
 /** A plain JSON object (a validated request body reaching the store). */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+/** Write projected `.proto` text to a temp file the proto-loader reads. */
+function materialiseProtoText(proto: string): string {
+  const dir = mkdtempSync(join(tmpdir(), 'restorm-design-grpc-'))
+  const file = join(dir, 'design.proto')
+  writeFileSync(file, proto, 'utf8')
+  return file
+}
+
+/** Descend a (possibly dotted) package path to the named service's
+ * definition; undefined when the loaded proto shapes it differently. */
+function resolveGrpcService(
+  root: grpc.GrpcObject,
+  pkg: string,
+  serviceName: string
+): grpc.ServiceDefinition | undefined {
+  let node: grpc.GrpcObject = root
+  for (const segment of pkg.split('.')) {
+    if (segment === '') continue
+    const next: unknown = node[segment]
+    if (next === undefined || typeof next === 'function') return undefined
+    node = next as grpc.GrpcObject
+  }
+  const ctor: unknown = node[serviceName]
+  if (typeof ctor !== 'function') return undefined
+  return (ctor as grpc.ServiceClientConstructor).service
+}
+
+/** Flatten gRPC call metadata to an HTTP-headers-shaped map so the
+ * shared auth-presence check treats a gRPC call like every other
+ * projection (a `bearer`/`apiKey` credential arrives as call metadata). */
+function grpcMetadataToHeaders(metadata: grpc.Metadata): IncomingMessage['headers'] {
+  const headers: Record<string, string> = {}
+  for (const [key, value] of Object.entries(metadata.getMap())) {
+    headers[key.toLowerCase()] = typeof value === 'string' ? value : value.toString('utf8')
+  }
+  return headers
 }
 
 function stripQuery(url: string): string {

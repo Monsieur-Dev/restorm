@@ -2198,7 +2198,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "篩選…",
@@ -2269,8 +2270,10 @@
         "add": "新增",
         "officialTag": "官方",
         "officialDesc": {
-          "server-typescript": "基於 Express 的 TypeScript REST 伺服器 — 型別化路由、模型與請求驗證。",
-          "server-dotnet": "基於 C# / ASP.NET Core 的 Minimal-API 伺服器 — 端點、DTO 與驗證。",
+          "server-rest-typescript": "基於 Express 的 TypeScript REST 伺服器 — 型別化路由、模型與請求驗證。",
+          "server-rest-dotnet": "基於 C# / ASP.NET Core 的 Minimal-API 伺服器 — 端點、DTO 與驗證。",
+          "server-grpc-typescript": "以 TypeScript 編寫的 gRPC 伺服器 —— .proto 服務、具型別的訊息與伺服器樁。",
+          "server-grpc-dotnet": "以 C# / .NET 編寫的 gRPC 伺服器 —— .proto 服務、訊息與伺服器樁。",
           "db-postgres": "來自設計的 PostgreSQL 結構描述、種子資料與 CRUD 指令碼。"
         }
       }

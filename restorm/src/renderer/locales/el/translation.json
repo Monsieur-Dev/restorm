@@ -2199,7 +2199,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Φιλτράρισμα…",
@@ -2270,8 +2271,10 @@
         "add": "Προσθήκη",
         "officialTag": "Επίσημο",
         "officialDesc": {
-          "server-typescript": "Διακομιστής REST σε TypeScript με Express — τυποποιημένες διαδρομές, μοντέλα και επικύρωση αιτημάτων.",
-          "server-dotnet": "Διακομιστής Minimal-API σε C# / ASP.NET Core — endpoints, DTO και επικύρωση.",
+          "server-rest-typescript": "Διακομιστής REST σε TypeScript με Express — τυποποιημένες διαδρομές, μοντέλα και επικύρωση αιτημάτων.",
+          "server-rest-dotnet": "Διακομιστής Minimal-API σε C# / ASP.NET Core — endpoints, DTO και επικύρωση.",
+          "server-grpc-typescript": "Διακομιστής gRPC σε TypeScript — υπηρεσία .proto, τυποποιημένα μηνύματα και server stubs.",
+          "server-grpc-dotnet": "Διακομιστής gRPC σε C# / .NET — υπηρεσία .proto, μηνύματα και server stubs.",
           "db-postgres": "Σχήμα PostgreSQL, δεδομένα seed και σενάρια CRUD από το σχέδιο."
         }
       }

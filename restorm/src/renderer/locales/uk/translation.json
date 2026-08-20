@@ -2201,7 +2201,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Фільтрувати…",
@@ -2272,8 +2273,10 @@
         "add": "Додати",
         "officialTag": "Офіційний",
         "officialDesc": {
-          "server-typescript": "Сервер REST на TypeScript з Express — типізовані маршрути, моделі та валідація запитів.",
-          "server-dotnet": "Сервер Minimal-API на C# / ASP.NET Core — ендпоінти, DTO та валідація.",
+          "server-rest-typescript": "Сервер REST на TypeScript з Express — типізовані маршрути, моделі та валідація запитів.",
+          "server-rest-dotnet": "Сервер Minimal-API на C# / ASP.NET Core — ендпоінти, DTO та валідація.",
+          "server-grpc-typescript": "Сервер gRPC на TypeScript — служба .proto, типізовані повідомлення та серверні заглушки.",
+          "server-grpc-dotnet": "Сервер gRPC на C# / .NET — служба .proto, повідомлення та серверні заглушки.",
           "db-postgres": "Схема PostgreSQL, початкові дані та CRUD-скрипти з дизайну."
         }
       }

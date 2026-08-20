@@ -44,18 +44,32 @@ export interface OfficialTemplate {
  * public template repository. */
 export const OFFICIAL_TEMPLATES: readonly OfficialTemplate[] = [
   {
-    id: 'server-typescript',
-    repo: 'Monsieur-Dev/restorm-template-server-typescript',
+    id: 'server-rest-typescript',
+    repo: 'Monsieur-Dev/restorm-template-server-rest-typescript',
     type: 'server',
-    stack: 'TypeScript · Express',
+    stack: 'REST · TypeScript · Express',
     description: 'REST server in TypeScript on Express — typed routes, models and request validation.'
   },
   {
-    id: 'server-dotnet',
-    repo: 'Monsieur-Dev/restorm-template-server-dotnet',
+    id: 'server-rest-dotnet',
+    repo: 'Monsieur-Dev/restorm-template-server-rest-dotnet',
     type: 'server',
-    stack: 'C# · ASP.NET Core',
-    description: 'Minimal-API server in C# / ASP.NET Core — endpoints, DTOs and validation.'
+    stack: 'REST · C# · ASP.NET Core',
+    description: 'Minimal-API REST server in C# / ASP.NET Core — endpoints, DTOs and validation.'
+  },
+  {
+    id: 'server-grpc-typescript',
+    repo: 'Monsieur-Dev/restorm-template-server-grpc-typescript',
+    type: 'server',
+    stack: 'gRPC · TypeScript',
+    description: 'gRPC server in TypeScript — .proto service, typed messages and server stubs.'
+  },
+  {
+    id: 'server-grpc-dotnet',
+    repo: 'Monsieur-Dev/restorm-template-server-grpc-dotnet',
+    type: 'server',
+    stack: 'gRPC · C# / .NET',
+    description: 'gRPC server in C# / .NET — .proto service, messages and server stubs.'
   },
   {
     id: 'db-postgres',

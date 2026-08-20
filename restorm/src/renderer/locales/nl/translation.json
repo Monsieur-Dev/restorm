@@ -2199,7 +2199,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Filteren…",
@@ -2270,8 +2271,10 @@
         "add": "Toevoegen",
         "officialTag": "Officieel",
         "officialDesc": {
-          "server-typescript": "REST-server in TypeScript op Express — getypeerde routes, modellen en validatie van aanvragen.",
-          "server-dotnet": "Minimal-API-server in C# / ASP.NET Core — endpoints, DTO's en validatie.",
+          "server-rest-typescript": "REST-server in TypeScript op Express — getypeerde routes, modellen en validatie van aanvragen.",
+          "server-rest-dotnet": "Minimal-API-server in C# / ASP.NET Core — endpoints, DTO's en validatie.",
+          "server-grpc-typescript": "gRPC-server in TypeScript — .proto-service, getypeerde berichten en server-stubs.",
+          "server-grpc-dotnet": "gRPC-server in C# / .NET — .proto-service, berichten en server-stubs.",
           "db-postgres": "PostgreSQL-schema, seed-data en CRUD-scripts vanuit het ontwerp."
         }
       }

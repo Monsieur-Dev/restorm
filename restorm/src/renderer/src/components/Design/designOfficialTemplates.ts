@@ -15,14 +15,24 @@ export interface OfficialChoice {
 
 export const OFFICIAL_CHOICES: readonly OfficialChoice[] = [
   {
-    id: 'server-typescript',
-    repo: 'Monsieur-Dev/restorm-template-server-typescript',
-    stack: 'TypeScript · Express'
+    id: 'server-rest-typescript',
+    repo: 'Monsieur-Dev/restorm-template-server-rest-typescript',
+    stack: 'REST · TypeScript · Express'
   },
   {
-    id: 'server-dotnet',
-    repo: 'Monsieur-Dev/restorm-template-server-dotnet',
-    stack: 'C# · ASP.NET Core'
+    id: 'server-rest-dotnet',
+    repo: 'Monsieur-Dev/restorm-template-server-rest-dotnet',
+    stack: 'REST · C# · ASP.NET Core'
+  },
+  {
+    id: 'server-grpc-typescript',
+    repo: 'Monsieur-Dev/restorm-template-server-grpc-typescript',
+    stack: 'gRPC · TypeScript'
+  },
+  {
+    id: 'server-grpc-dotnet',
+    repo: 'Monsieur-Dev/restorm-template-server-grpc-dotnet',
+    stack: 'gRPC · C# / .NET'
   },
   {
     id: 'db-postgres',

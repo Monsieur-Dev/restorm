@@ -78,7 +78,7 @@ export type ReferenceOnDelete = 'restrict' | 'cascade' | 'setNull'
 export type DesignAuthKind = 'none' | 'bearer' | 'apiKeyHeader' | 'basic'
 
 /** Protocols a design server can project the design onto. */
-export type DesignProtocol = 'http' | 'graphql' | 'soap' | 'odata'
+export type DesignProtocol = 'http' | 'graphql' | 'soap' | 'odata' | 'grpc'
 
 /** List pagination concept — protocol-agnostic on purpose: each
  * projection maps it natively (HTTP query params + envelope, OData
@@ -349,6 +349,11 @@ export interface DesignServing {
   protocols?: DesignProtocol[]
   /** Fixed listen port; absent = picked at spin time. */
   port?: number
+  /** Fixed port for the gRPC projection's separate HTTP/2 server (gRPC
+   * cannot share the HTTP/1.1 port the other projections ride). Absent =
+   * a default adjacent to `port`. Only used when `protocols` enables
+   * 'grpc'. */
+  grpcPort?: number
   /** Simulated latency added to every served response, in ms.
    * Absent or 0 = answer immediately. */
   latencyMs?: number

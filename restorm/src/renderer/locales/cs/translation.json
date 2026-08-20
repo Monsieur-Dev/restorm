@@ -2201,7 +2201,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Filtrovat…",
@@ -2272,8 +2273,10 @@
         "add": "Přidat",
         "officialTag": "Oficiální",
         "officialDesc": {
-          "server-typescript": "Server REST v TypeScriptu na Express — typované trasy, modely a validace požadavků.",
-          "server-dotnet": "Server Minimal-API v C# / ASP.NET Core — endpointy, DTO a validace.",
+          "server-rest-typescript": "Server REST v TypeScriptu na Express — typované trasy, modely a validace požadavků.",
+          "server-rest-dotnet": "Server Minimal-API v C# / ASP.NET Core — endpointy, DTO a validace.",
+          "server-grpc-typescript": "gRPC server v TypeScriptu — služba .proto, typované zprávy a serverové stuby.",
+          "server-grpc-dotnet": "gRPC server v C# / .NET — služba .proto, zprávy a serverové stuby.",
           "db-postgres": "Schéma PostgreSQL, počáteční data a CRUD skripty z návrhu."
         }
       }

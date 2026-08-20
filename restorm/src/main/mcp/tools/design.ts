@@ -269,8 +269,10 @@ export function registerDesignTools(mcp: McpService): void {
         basePath: z.string().optional().describe('Empty string clears it.'),
         defaultAuth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional(),
         port: z.number().int().optional(),
+        grpcPort: z.number().int().optional()
+          .describe('Port for the gRPC projection\'s separate HTTP/2 server (only used when protocols include grpc).'),
         latencyMs: z.number().int().optional(),
-        protocols: z.array(z.enum(['graphql', 'soap', 'odata'])).optional()
+        protocols: z.array(z.enum(['graphql', 'soap', 'odata', 'grpc'])).optional()
           .describe('Extra protocol projections served alongside HTTP (replaces the list; empty array = HTTP only).'),
         stateful: z.boolean().optional()
           .describe('Stateful serving: POST/PUT/DELETE mutate an in-memory store seeded from the named examples (reset on restart). Absent/false = stateless (default).')
@@ -300,9 +302,10 @@ export function registerDesignTools(mcp: McpService): void {
       if (typeof args['defaultAuth'] === 'string' && (AUTH_KINDS as readonly string[]).includes(args['defaultAuth'])) {
         design.defaultAuth = args['defaultAuth'] as DesignAuthKind
       }
-      if (typeof args['port'] === 'number' || typeof args['latencyMs'] === 'number') {
+      if (typeof args['port'] === 'number' || typeof args['grpcPort'] === 'number' || typeof args['latencyMs'] === 'number') {
         const serving = { ...(design.serving ?? {}) }
         if (typeof args['port'] === 'number') serving.port = args['port']
+        if (typeof args['grpcPort'] === 'number') serving.grpcPort = args['grpcPort']
         if (typeof args['latencyMs'] === 'number') {
           if (args['latencyMs'] === 0) delete serving.latencyMs
           else serving.latencyMs = args['latencyMs']
@@ -311,7 +314,7 @@ export function registerDesignTools(mcp: McpService): void {
       }
       if (Array.isArray(args['protocols'])) {
         const extras = args['protocols'].filter(
-          (p): p is Exclude<DesignProtocol, 'http'> => p === 'graphql' || p === 'soap' || p === 'odata'
+          (p): p is Exclude<DesignProtocol, 'http'> => p === 'graphql' || p === 'soap' || p === 'odata' || p === 'grpc'
         )
         const serving = { ...(design.serving ?? {}) }
         if (extras.length === 0) delete serving.protocols
@@ -1238,7 +1241,15 @@ export function registerDesignTools(mcp: McpService): void {
       }
       const result = await designServerService.start(design.toPlainObject() as unknown as ApiDesign)
       if (!result.success) return errorReply(result.error ?? 'the design server could not start')
-      return jsonReply({ started: true, port: result.port, baseUrl: `http://localhost:${String(result.port)}` })
+      const status = designServerService.status(design.id)
+      return jsonReply({
+        started: true,
+        port: result.port,
+        baseUrl: `http://localhost:${String(result.port)}`,
+        ...(status.grpcPort !== undefined
+          ? { grpcPort: status.grpcPort, grpcTarget: `127.0.0.1:${String(status.grpcPort)}` }
+          : {})
+      })
     }
   )
 
@@ -1249,7 +1260,7 @@ export function registerDesignTools(mcp: McpService): void {
       title: 'Generate code from a design',
       description:
         'Run a Copier-format code template against the design in the SANDBOX (Pyodide MEMFS — the template never ' +
-        'touches the machine). Template source: `officialId` (registry id, e.g. server-typescript), `repo` ' +
+        'touches the machine). Template source: `officialId` (registry id, e.g. server-rest-typescript), `repo` ' +
         '(owner/repo on github, fetched as an archive over the firewall) or `localPath` (a folder) — exactly one. ' +
         'Without `confirm`, replies with the PREVIEW tree only (nothing written). With `confirm: true` AND ' +
         '`outputDir` (absolute, or relative to the project file), writes the tree under it — every path ' +
@@ -1445,7 +1456,7 @@ export function registerDesignTools(mcp: McpService): void {
     {
       titleKey: 'mcpToolTitles.getDesignServerStatus',
       title: 'Design server status',
-      description: 'Whether the design\'s server is listening, its port, and this run\'s per-route/per-code call counters.',
+      description: 'Whether the design\'s server is listening, its HTTP port (plus the gRPC port when that projection is on), and this run\'s per-route/per-code call counters.',
       inputSchema: { designId: z.string().min(1) } as Record<string, unknown>
     },
     (args) => {

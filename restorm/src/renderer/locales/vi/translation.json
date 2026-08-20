@@ -2198,7 +2198,8 @@
       "http": "HTTP",
       "graphql": "GraphQL",
       "soap": "SOAP",
-      "odata": "OData"
+      "odata": "OData",
+      "grpc": "gRPC"
     },
     "list": {
       "filter": "Lọc…",
@@ -2269,8 +2270,10 @@
         "add": "Thêm",
         "officialTag": "Chính thức",
         "officialDesc": {
-          "server-typescript": "Máy chủ REST bằng TypeScript trên Express — tuyến định kiểu, mô hình và xác thực yêu cầu.",
-          "server-dotnet": "Máy chủ Minimal-API bằng C# / ASP.NET Core — endpoint, DTO và xác thực.",
+          "server-rest-typescript": "Máy chủ REST bằng TypeScript trên Express — tuyến định kiểu, mô hình và xác thực yêu cầu.",
+          "server-rest-dotnet": "Máy chủ Minimal-API bằng C# / ASP.NET Core — endpoint, DTO và xác thực.",
+          "server-grpc-typescript": "Máy chủ gRPC bằng TypeScript — dịch vụ .proto, thông điệp có kiểu và stub máy chủ.",
+          "server-grpc-dotnet": "Máy chủ gRPC bằng C# / .NET — dịch vụ .proto, thông điệp và stub máy chủ.",
           "db-postgres": "Lược đồ PostgreSQL, dữ liệu seed và tập lệnh CRUD từ thiết kế."
         }
       }

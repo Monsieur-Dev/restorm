@@ -400,7 +400,7 @@ const DesignSettingsSection: React.FC<{
             </span>
           </div>
           <div className="design-serve-protocols">
-            {(['http', 'graphql', 'soap', 'odata'] as const).map((protocol) => {
+            {(['http', 'graphql', 'soap', 'odata', 'grpc'] as const).map((protocol) => {
               const active = protocol === 'http' || protocols.includes(protocol)
               return (
                 <button
