@@ -176,16 +176,73 @@ export function designGrpcMethods(design: ApiDesign): GrpcMethod[] {
 
 // ── .proto emission ───────────────────────────────────────────────────
 
-function messageFields(design: ApiDesign, model: DesignModel): string[] {
+/** A name allocator that suffixes collisions (`Foo`, `Foo2`, `Foo3`). */
+function makeUniquifier(reserved: readonly string[]): (base: string) => string {
+  const taken = new Set<string>(reserved)
+  return (base) => {
+    let name = base
+    let n = 2
+    while (taken.has(name)) { name = `${base}${String(n)}`; n += 1 }
+    taken.add(name)
+    return name
+  }
+}
+
+/**
+ * Collision-free proto type names for one design. Message, list-wrapper
+ * and per-method request names are allocated from ONE pool (reserving the
+ * built-in `Empty`), so two models that sanitize to the same identifier —
+ * or a model literally named `Empty`, or a request that shadows a message
+ * — never emit a duplicate `message` (which would make proto-loader throw
+ * and silently disable the whole gRPC projection).
+ */
+interface ProtoNames {
+  /** model.id → message name. */
+  message: Map<string, string>
+  /** model.id → `<Message>List` wrapper name. */
+  list: Map<string, string>
+  /** request message name per method (index-aligned with `methods`). */
+  request: string[]
+}
+
+function buildProtoNames(design: ApiDesign, methods: GrpcMethod[]): ProtoNames {
+  const uniq = makeUniquifier(['Empty'])
+  const message = new Map<string, string>()
+  for (const model of design.models) {
+    message.set(model.id, uniq(protoTypeName(model.doc.name, 'Message')))
+  }
+  const list = new Map<string, string>()
+  for (const m of methods) {
+    if (m.list && m.model !== undefined && !list.has(m.model.id)) {
+      const base = message.get(m.model.id) ?? protoTypeName(m.model.doc.name, 'Message')
+      list.set(m.model.id, uniq(`${base}List`))
+    }
+  }
+  const request = methods.map((m) => uniq(`${m.name}Request`))
+  return { message, list, request }
+}
+
+/** Emit a message's fields, deduping field names within the message
+ * (an inherited property re-declared by a child, or two names that
+ * sanitize alike, would otherwise repeat a field name → invalid proto). */
+function messageFields(design: ApiDesign, model: DesignModel, names: ProtoNames): string[] {
   const lines: string[] = []
+  const takenFields = new Set<string>()
   let n = 1
   for (const { property } of servedProperties(design, model)) {
     const ft = protoFieldType(design, property)
-    const field = protoIdent(property.doc.name, `field_${String(n)}`)
+    let field = protoIdent(property.doc.name, `field_${String(n)}`)
+    if (takenFields.has(field)) {
+      let k = 2
+      while (takenFields.has(`${field}_${String(k)}`)) k += 1
+      field = `${field}_${String(k)}`
+    }
+    takenFields.add(field)
+    const type = ft.model !== undefined ? (names.message.get(ft.model.id) ?? ft.type) : ft.type
     if (ft.enumValues !== undefined && ft.enumValues.length > 0) {
       lines.push(`  // enum: ${ft.enumValues.join(' | ')}`)
     }
-    lines.push(`  ${ft.repeated ? 'repeated ' : ''}${ft.type} ${field} = ${String(n)};`)
+    lines.push(`  ${ft.repeated ? 'repeated ' : ''}${type} ${field} = ${String(n)};`)
     n += 1
   }
   return lines
@@ -195,25 +252,27 @@ function messageFields(design: ApiDesign, model: DesignModel): string[] {
 export function designToProto(design: ApiDesign): string {
   const pkg = designProtoPackage(design)
   const methods = designGrpcMethods(design)
+  const names = buildProtoNames(design, methods)
   const out: string[] = ['syntax = "proto3";', '', `package ${pkg};`, '', 'message Empty {}', '']
 
   // One message per model.
   for (const model of design.models) {
-    out.push(`message ${protoTypeName(model.doc.name, 'Message')} {`)
-    out.push(...messageFields(design, model))
+    out.push(`message ${names.message.get(model.id) ?? protoTypeName(model.doc.name, 'Message')} {`)
+    out.push(...messageFields(design, model, names))
     out.push('}', '')
   }
 
   // A List wrapper for every model returned as a list.
-  const listModels = new Map<string, DesignModel>()
+  const emittedWrappers = new Set<string>()
   for (const m of methods) {
-    if (m.list && m.model !== undefined) listModels.set(m.model.id, m.model)
-  }
-  for (const model of listModels.values()) {
-    const t = protoTypeName(model.doc.name, 'Message')
+    if (!m.list || m.model === undefined) continue
+    const wrapper = names.list.get(m.model.id)
+    if (wrapper === undefined || emittedWrappers.has(wrapper)) continue
+    emittedWrappers.add(wrapper)
+    const item = names.message.get(m.model.id) ?? protoTypeName(m.model.doc.name, 'Message')
     out.push(
-      `message ${t}List {`,
-      `  repeated ${t} items = 1;`,
+      `message ${wrapper} {`,
+      `  repeated ${item} items = 1;`,
       '  int32 total = 2;',
       '  int32 limit = 3;',
       '  int32 offset = 4;',
@@ -222,28 +281,44 @@ export function designToProto(design: ApiDesign): string {
     )
   }
 
-  // One request message per method: path params, pagination (lists), body.
-  for (const m of methods) {
-    out.push(`message ${m.requestType} {`)
+  // One request message per method: path params, pagination (lists), body —
+  // deduping field names (a path param literally named `limit`/`offset`/
+  // `body` would otherwise collide with the ones added here).
+  methods.forEach((m, i) => {
+    out.push(`message ${names.request[i]} {`)
+    const takenFields = new Set<string>()
     let n = 1
-    for (const p of m.pathParams) { out.push(`  string ${p} = ${String(n)};`); n += 1 }
-    if (m.list) {
-      out.push(`  int32 limit = ${String(n)};`); n += 1
-      out.push(`  int32 offset = ${String(n)};`); n += 1
+    const emit = (type: string, base: string): void => {
+      let field = base
+      if (takenFields.has(field)) {
+        let k = 2
+        while (takenFields.has(`${field}_${String(k)}`)) k += 1
+        field = `${field}_${String(k)}`
+      }
+      takenFields.add(field)
+      out.push(`  ${type} ${field} = ${String(n)};`)
+      n += 1
     }
+    for (const p of m.pathParams) emit('string', p)
+    if (m.list) { emit('int32', 'limit'); emit('int32', 'offset') }
     const bodyId = m.route.design?.body?.modelId
     const bodyModel = bodyId !== undefined ? design.models.find((md) => md.id === bodyId) : undefined
     if (bodyModel !== undefined) {
-      out.push(`  ${protoTypeName(bodyModel.doc.name, 'Message')} body = ${String(n)};`)
+      emit(names.message.get(bodyModel.id) ?? protoTypeName(bodyModel.doc.name, 'Message'), 'body')
     }
     out.push('}', '')
-  }
+  })
 
   // The service.
   out.push(`service ${designProtoServiceName(design)} {`)
-  for (const m of methods) {
-    out.push(`  rpc ${m.name} (${m.requestType}) returns (${m.responseType});`)
-  }
+  methods.forEach((m, i) => {
+    const response = m.model === undefined
+      ? 'Empty'
+      : m.list
+        ? (names.list.get(m.model.id) ?? 'Empty')
+        : (names.message.get(m.model.id) ?? 'Empty')
+    out.push(`  rpc ${m.name} (${names.request[i]}) returns (${response});`)
+  })
   out.push('}', '')
   return out.join('\n')
 }
@@ -270,8 +345,11 @@ function protoScalarOrMessage(design: ApiDesign, ft: FieldType, value: unknown):
       const n = typeof value === 'string' ? Number(value) : NaN
       return Number.isFinite(n) ? n : 0
     }
-    case 'double':
-      return typeof value === 'number' ? value : 0
+    case 'double': {
+      if (typeof value === 'number') return value
+      const d = typeof value === 'string' ? Number(value) : NaN
+      return Number.isFinite(d) ? d : 0
+    }
     default:
       return isObject(value) || Array.isArray(value) ? JSON.stringify(value) : scalarToString(value)
   }

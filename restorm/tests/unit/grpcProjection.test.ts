@@ -110,4 +110,33 @@ describe('buildGrpcResponse', () => {
     const get = pick('GetUser')
     expect(buildGrpcResponse(design, get, { id: '7' })).toEqual(buildGrpcResponse(design, get, { id: '7' }))
   })
+
+  it('coerces a string-valued number field to a double (not 0)', () => {
+    const d = buildReferenceApiDesign()
+    const user = d.models.find((m) => m.id === 'model-user')
+    expect(user).toBeDefined()
+    user?.properties.push({ id: 'prop-user-price', doc: { name: 'price', type: 'number' } } as never)
+    const example = user?.examples?.[0]
+    if (example !== undefined) example.values['prop-user-price'] = '3.14'
+    const get = designGrpcMethods(d).find((m) => m.name === 'GetUser')
+    expect(get).toBeDefined()
+    const response = get !== undefined ? buildGrpcResponse(d, get, { id: 'x' }) : {}
+    expect(response['price']).toBe(3.14)
+  })
+})
+
+describe('designToProto — name collisions', () => {
+  it('dedupes colliding message names and stays loadable', () => {
+    const design = buildReferenceApiDesign()
+    // A model literally named `Empty` (collides with the built-in), plus a
+    // model whose name sanitizes to the same identifier as `User`.
+    design.models.push({ id: 'm-empty', doc: { name: 'Empty' }, properties: [{ id: 'm-empty-id', doc: { name: 'id', type: 'string' } }] } as never)
+    design.models.push({ id: 'm-lower', doc: { name: 'user' }, properties: [{ id: 'm-lower-id', doc: { name: 'id', type: 'string' } }] } as never)
+    const proto = designToProto(design)
+    // Still a valid contract the loader accepts (a duplicate `message` would throw).
+    expect(() => loadProto(proto)).not.toThrow()
+    // No duplicate `message X {` declaration.
+    const names = [...proto.matchAll(/^message (\w+) \{/gm)].map((m) => m[1])
+    expect(names.length).toBe(new Set(names).size)
+  })
 })

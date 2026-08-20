@@ -33,9 +33,9 @@
  */
 
 import type { IncomingMessage, ServerResponse } from 'http'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { BrowserWindow } from 'electron'
 import * as grpc from '@grpc/grpc-js'
 import { createSchema, createYoga, logger } from 'electron-core-ui/main'
@@ -139,6 +139,9 @@ interface ActiveServer {
   /** The `.proto` text the live gRPC server was built from — lets an
    * autosave skip a rebuild when the projected proto is unchanged. */
   grpcProto?: string
+  /** Serializes gRPC (re)builds so overlapping autosaves never race the
+   * bind against a previous server's graceful shutdown (EADDRINUSE). */
+  grpcSync?: Promise<void>
   /** Ephemeral store, present only while the design serves STATEFUL. */
   store?: DesignStatefulStore
 }
@@ -606,7 +609,20 @@ class DesignServerService {
    * autosave must not churn the port). Failures self-disable (logged) —
    * the HTTP server and the other projections are unaffected.
    */
-  private async syncGrpcProjection(active: ActiveServer): Promise<void> {
+  private syncGrpcProjection(active: ActiveServer): Promise<void> {
+    // Chain onto the previous sync so a rebuild never binds while the
+    // prior server is still inside its graceful shutdown (EADDRINUSE).
+    const next = (active.grpcSync ?? Promise.resolve()).then(() => this.runGrpcSync(active))
+    active.grpcSync = next.catch(() => undefined)
+    return next
+  }
+
+  private async runGrpcSync(active: ActiveServer): Promise<void> {
+    // The design may have been stopped while this sync was queued.
+    if (!this.servers.has(active.designId)) {
+      await this.teardownGrpc(active)
+      return
+    }
     if (!active.protocols.has('grpc')) {
       await this.teardownGrpc(active)
       return
@@ -626,6 +642,9 @@ class DesignServerService {
     await this.teardownGrpc(active)
     try {
       await this.bringUpGrpc(active, proto)
+      // Stopped mid-bring-up? Tear the just-bound server back down so the
+      // port never leaks past a stop() that raced this rebuild.
+      if (!this.servers.has(active.designId)) await this.teardownGrpc(active)
     } catch (err) {
       logger.error('[DesignServerService] grpc projection failed to bind — disabled for this run', {
         designId: active.designId,
@@ -644,6 +663,10 @@ class DesignServerService {
     const pkgDef = protoLoader.loadSync(file, {
       keepCase: true, longs: String, enums: String, defaults: true, oneofs: true, includeDirs: []
     })
+    // `loadSync` read the file into `pkgDef`; nothing needs it afterwards
+    // (reflection works off `pkgDef`), so drop the temp dir immediately
+    // rather than leaking one per proto-changing rebuild.
+    try { rmSync(dirname(file), { recursive: true, force: true }) } catch { /* best-effort */ }
     const root = grpc.loadPackageDefinition(pkgDef)
     const service = resolveGrpcService(root, designProtoPackage(active.design), designProtoServiceName(active.design))
     if (service === undefined) {
