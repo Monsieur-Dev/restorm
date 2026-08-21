@@ -15,6 +15,7 @@ import https from 'node:https'
 import { BrowserWindow } from 'electron'
 import { logger, withFirewallBypassSync } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { attachSessionCookies, captureSessionCookies } from './cookieRequestHelpers'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
@@ -424,6 +425,9 @@ class SseExecutionService {
         request?.destroy()
       }, resolved.timeout)
 
+      // Attach the active environment's session cookies to the SSE connect
+      // (the initial GET is a normal HTTP request; cookie-auth'd streams work).
+      attachSessionCookies(resolved.requestId, url.href, headers)
       request = withFirewallBypassSync(() => httpModule.request(url, { method: 'GET', headers }))
       request.on('response', (response: IncomingMessage) => {
         clearTimeout(connectTimer)
@@ -447,6 +451,8 @@ class SseExecutionService {
         const isFirstConnect = !everConnected
         everConnected = true
         reconnectAttempts = 0
+        // Capture any Set-Cookie the server sent on the SSE response head.
+        captureSessionCookies(resolved.requestId, url.href, response.headers['set-cookie'])
         if (isFirstConnect) callbacks.onConnect()
         response.setEncoding('utf8')
         response.on('data', (chunk: string) => {

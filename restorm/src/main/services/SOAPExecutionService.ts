@@ -10,6 +10,7 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { attachSessionCookies, captureSessionCookies } from './cookieRequestHelpers'
 import { websocketExecutionService } from './WebSocketExecutionService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
@@ -297,7 +298,8 @@ class SOAPExecutionService {
         headers,
         body,
         timeout,
-        signal: abortController.signal
+        signal: abortController.signal,
+        requestId
       })
 
       const durationMs = Date.now() - startTime
@@ -567,9 +569,12 @@ class SOAPExecutionService {
     body: string
     timeout: number
     signal: AbortSignal
+    requestId?: string
   }): Promise<{ statusCode: number; headers: Record<string, string | string[]>; body: string }> {
     return new Promise((resolve, reject) => {
-      const { url, headers, body, timeout, signal } = options
+      const { url, headers, body, timeout, signal, requestId } = options
+      // Attach the active environment's session cookies (SOAP over HTTP).
+      attachSessionCookies(requestId, url.href, headers)
       
       const isHttps = url.protocol === 'https:'
       const httpModule = isHttps ? https : http
@@ -615,6 +620,8 @@ class SOAPExecutionService {
               responseHeaders[key] = value
             }
           }
+          // Capture any Set-Cookie into the active environment's jar.
+          captureSessionCookies(requestId, url.href, response.headers['set-cookie'])
 
           resolve({
             statusCode: response.statusCode ?? 0,
