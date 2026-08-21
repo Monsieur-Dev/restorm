@@ -473,6 +473,12 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               onClick={onOpenMiniBrowser}
             />
             <MenuItem
+              data-testid="titlebar-menu-item-cookies"
+              title={t('cookies.title', 'Cookies')}
+              icon={<span className="codicon codicon-globe" aria-hidden="true" />}
+              onClick={() => { setCookieManagerOpen(true); }}
+            />
+            <MenuItem
               data-testid="titlebar-menu-item-mcp-logs"
               title={t('menuBar.mcpLogs')}
               icon={<span className="codicon codicon-mcp" aria-hidden="true" />}
@@ -583,12 +589,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
                 icon: 'key',
                 label: t('cliTokens.title'),
                 onSelect: () => { setCliTokensOpen(true); }
-              },
-              {
-                id: 'cookies',
-                icon: 'globe',
-                label: t('cookies.title', 'Cookies'),
-                onSelect: () => { setCookieManagerOpen(true); }
               }
             ]}
           />

@@ -55,7 +55,23 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.85rem;
+  /* Fixed layout with shared column widths so every per-origin table lines
+     up column-for-column instead of each sizing itself independently. */
+  table-layout: fixed;
 }
+
+.cookie-manager-table th:nth-child(1),
+.cookie-manager-table td:nth-child(1) { width: 16%; }
+.cookie-manager-table th:nth-child(2),
+.cookie-manager-table td:nth-child(2) { width: 30%; }
+.cookie-manager-table th:nth-child(3),
+.cookie-manager-table td:nth-child(3) { width: 8%; }
+.cookie-manager-table th:nth-child(4),
+.cookie-manager-table td:nth-child(4) { width: 20%; }
+.cookie-manager-table th:nth-child(5),
+.cookie-manager-table td:nth-child(5) { width: 18%; }
+.cookie-manager-table th:nth-child(6),
+.cookie-manager-table td:nth-child(6) { width: 44px; }
 
 .cookie-manager-table th {
   text-align: left;
@@ -71,6 +87,9 @@
 
 .cookie-manager-name {
   font-family: var(--ecu-font-mono, monospace);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cookie-manager-value {
@@ -87,6 +106,8 @@
 .cookie-manager-muted {
   color: var(--ecu-text-muted, #8a97a8);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cookie-manager-flags {
