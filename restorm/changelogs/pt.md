@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookies, feitos como deve ser — um frasco por ambiente.**
+
+- **Cada ambiente mantém os seus próprios cookies.** Inicie sessão na sua API de desenvolvimento e na sua API de produção a partir de dois ambientes e as sessões nunca se cruzam — um cookie capturado num só volta a ser enviado apenas nesse mesmo. A validade, o `Path`, o `Domain` e os subdomínios, `Secure`, `HttpOnly` e `SameSite` passam a ser respeitados, em vez de descartados.
+- **Veja e edite o que está guardado.** Um novo Gestor de Cookies — **Ver → Cookies** — lista os cookies de cada ambiente agrupados por origem: edite um valor, elimine um, limpe uma origem ou o frasco inteiro, ou adicione um cookie manualmente. Quando uma resposta define cookies, um selo 🍪 na resposta abre o gestor diretamente nessa origem.
+- **Os inícios de sessão por cookie simplesmente funcionam.** Um pedido que devolve `Set-Cookie` é capturado e reproduzido automaticamente nas chamadas protegidas que se seguem — incluindo ao longo da execução de um cenário, onde cada passo partilha o frasco do ambiente.
+- **Para além do REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC e SSE passam a enviar e a guardar cookies, e o WebSocket, o Socket.IO e o STOMP transportam-nos no handshake da ligação.
+- **Os cookies podem usar as suas variáveis.** Escreva `{{token}}` num cookie que adicione manualmente e este é resolvido em relação ao ambiente ativo quando o pedido é enviado.
+
 ## v1.0.4
 
 **Inicie sessão uma vez — todas as janelas acompanham.**

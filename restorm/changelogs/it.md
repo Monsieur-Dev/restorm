@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**I cookie, gestiti come si deve — un contenitore per ogni ambiente.**
+
+- **Ogni ambiente conserva i propri cookie.** Accedi alla tua API di sviluppo e alla tua API di produzione da due ambienti diversi: le loro sessioni non si incrociano mai — un cookie catturato in uno viene rimandato solo in quello. Scadenza, `Path`, `Domain` e sottodomini, `Secure`, `HttpOnly` e `SameSite` ora vengono rispettati, non scartati.
+- **Guarda e modifica ciò che è memorizzato.** Un nuovo Gestore Cookie — **Visualizza → Cookie** — elenca i cookie di ogni ambiente raggruppati per origine: modifica un valore, eliminane uno, svuota un'origine o l'intero contenitore, oppure aggiungi un cookie a mano. Quando una risposta imposta dei cookie, un chip 🍪 sulla risposta apre il gestore direttamente su quell'origine.
+- **I login con i cookie funzionano e basta.** Una richiesta che restituisce `Set-Cookie` viene catturata e ritrasmessa automaticamente nelle chiamate protette che seguono — anche durante l'esecuzione di uno scenario, dove ogni passaggio condivide il contenitore dell'ambiente.
+- **Oltre il REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC e SSE ora inviano e memorizzano tutti i cookie, mentre WebSocket, Socket.IO e STOMP li trasportano nell'handshake di connessione.
+- **I cookie possono usare le tue variabili.** Digita `{{token}}` in un cookie che aggiungi a mano e verrà risolto in base all'ambiente attivo quando la richiesta parte.
+
 ## v1.0.4
 
 **Un accesso, tutte le finestre.**

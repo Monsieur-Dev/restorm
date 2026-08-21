@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie-t, të bëra si duhet — një kavanoz për çdo mjedis.**
+
+- **Çdo mjedis i ruan cookie-t e veta.** Identifikohu në API-n tënde të zhvillimit dhe në atë të prodhimit nga dy mjedise dhe sesionet e tyre nuk ndërthuren kurrë — një cookie e kapur në njërin ridërgohet vetëm në atë. Skadimi, `Path`, `Domain` dhe nëndomenet, `Secure`, `HttpOnly` dhe `SameSite` tani respektohen, jo hidhen tej.
+- **Shih dhe modifiko atë që është ruajtur.** Një Menaxhues i ri i Cookie-ve — **Pamja → Cookie-t** — rendit cookie-t e çdo mjedisi të grupuara sipas origjinës: modifiko një vlerë, fshij një, pastro një origjinë ose të gjithë kavanozin, ose shto një cookie me dorë. Kur një përgjigje vendos cookie, një distinktiv 🍪 mbi përgjigjen e hap menaxhuesin drejtpërdrejt në atë origjinë.
+- **Identifikimet me cookie thjesht funksionojnë.** Një kërkesë që kthen `Set-Cookie` kapet dhe riluhet automatikisht në thirrjet e mbrojtura që pasojnë — përfshirë gjatë ekzekutimit të një skenari, ku çdo hap ndan të njëjtin kavanoz të mjedisit.
+- **Përtej REST-it.** GraphQL, SOAP, OData, JSON-RPC, tRPC dhe SSE tani dërgojnë dhe ruajnë cookie, ndërsa WebSocket, Socket.IO dhe STOMP i mbartin gjatë shtrëngimit të duarve të lidhjes.
+- **Cookie-t mund të përdorin variablat e tua.** Shkruaj `{{token}}` në një cookie që e shton me dorë dhe ajo zgjidhet sipas mjedisit aktiv kur niset kërkesa.
+
 ## v1.0.4
 
 **Një hyrje — të gjitha dritaret ndjekin.**

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Evästeet, kunnolla toteutettuna – oma purkki jokaiselle ympäristölle.**
+
+- **Jokainen ympäristö pitää omat evästeensä.** Kirjaudu kehitys-API:isi ja tuotanto-API:isi kahdesta ympäristöstä, eivätkä niiden istunnot koskaan mene ristiin – yhdessä talteen otettu eväste lähetetään takaisin vain siinä samassa. Vanheneminen, `Path`, `Domain` ja alitoimialueet, `Secure`, `HttpOnly` ja `SameSite` otetaan nyt huomioon eikä niitä enää hylätä.
+- **Näe ja muokkaa tallennettua.** Uusi evästehallinta – **Näytä → Evästeet** – listaa kunkin ympäristön evästeet alkuperän mukaan ryhmiteltyinä: muokkaa arvoa, poista yksittäinen, tyhjennä alkuperä tai koko purkki, tai lisää eväste käsin. Kun vastaus asettaa evästeitä, vastauksen 🍪-merkki avaa hallinnan suoraan kyseiseen alkuperään.
+- **Evästekirjautumiset vain toimivat.** Pyyntö, joka palauttaa `Set-Cookie`, otetaan talteen ja lähetetään automaattisesti uudelleen seuraavissa suojatuissa kutsuissa – myös läpi skenaarioajon, jossa jokainen vaihe jakaa ympäristön purkin.
+- **REST-rajapintaa laajemmin.** GraphQL, SOAP, OData, JSON-RPC, tRPC ja SSE lähettävät ja tallentavat nyt evästeitä, ja WebSocket, Socket.IO ja STOMP kuljettavat ne yhteyden kättelyssä (handshake).
+- **Evästeet voivat käyttää muuttujiasi.** Kirjoita `{{token}}` käsin lisäämääsi evästeeseen, niin se ratkaistaan aktiivista ympäristöä vasten, kun pyyntö lähtee.
+
 ## v1.0.4
 
 **Kirjaudu kerran — kaikki ikkunat seuraavat.**

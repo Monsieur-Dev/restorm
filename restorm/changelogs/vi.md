@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie, làm đúng cách — mỗi môi trường một hũ riêng.**
+
+- **Mỗi môi trường giữ cookie riêng của mình.** Đăng nhập vào API dev và API prod từ hai môi trường khác nhau, phiên của chúng không bao giờ lẫn lộn — một cookie thu được ở môi trường này chỉ được gửi lại trong chính môi trường đó. Thời hạn, `Path`, `Domain` cùng các tên miền phụ, `Secure`, `HttpOnly` và `SameSite` giờ đây được tôn trọng chứ không bị bỏ qua.
+- **Xem và chỉnh sửa những gì đã lưu.** Trình quản lý Cookie mới — **Xem → Cookie** — liệt kê cookie của từng môi trường được nhóm theo nguồn gốc: chỉnh một giá trị, xóa một cookie, dọn sạch một nguồn hoặc cả hũ, hoặc thêm cookie thủ công. Khi một phản hồi đặt cookie, huy hiệu 🍪 trên phản hồi sẽ mở trình quản lý ngay tại nguồn gốc đó.
+- **Đăng nhập bằng cookie hoạt động ngon lành.** Một yêu cầu trả về `Set-Cookie` sẽ được thu lại và tự động phát lại ở các lệnh gọi được bảo vệ tiếp theo — kể cả trong suốt một lần chạy kịch bản, nơi mỗi bước dùng chung hũ cookie của môi trường.
+- **Vượt ra ngoài REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC và SSE giờ đều gửi và lưu cookie, còn WebSocket, Socket.IO và STOMP mang chúng theo trong quá trình bắt tay kết nối.
+- **Cookie có thể dùng biến của bạn.** Gõ `{{token}}` vào một cookie bạn thêm thủ công và nó sẽ được phân giải theo môi trường đang hoạt động khi yêu cầu được gửi đi.
+
 ## v1.0.4
 
 **Đăng nhập một lần — mọi cửa sổ đều theo.**

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie-k, ahogy kell — környezetenként külön tároló.**
+
+- **Minden környezet a saját cookie-jait tartja meg.** Jelentkezz be a dev API-dba és a prod API-dba két külön környezetből, és a munkameneteik sosem keverednek — az egyikben elmentett cookie mindig csak abban megy vissza. A lejárat, a `Path`, a `Domain` és az aldomainek, a `Secure`, a `HttpOnly` és a `SameSite` mostantól érvényesül, nem vész el.
+- **Lásd és szerkeszd, mi van eltárolva.** Az új Cookie-kezelő — **Nézet → Cookie-k** — minden környezet cookie-jait eredet szerint csoportosítva sorolja fel: szerkeszthetsz egy értéket, törölhetsz egyet, kiüríthetsz egy eredetet vagy az egész tárolót, vagy kézzel is hozzáadhatsz cookie-t. Amikor egy válasz cookie-kat állít be, a válaszon megjelenő 🍪 jelvény egyből az adott eredetnél nyitja meg a kezelőt.
+- **A cookie-alapú bejelentkezés egyszerűen működik.** A `Set-Cookie`-t visszaadó kérést a rendszer elmenti, és automatikusan újrajátssza az utána következő védett hívásokon — akár egy forgatókönyv futása során is, ahol minden lépés ugyanazt a környezeti tárolót használja.
+- **Túl a REST-en.** A GraphQL, a SOAP, az OData, a JSON-RPC, a tRPC és az SSE mostantól mind küld és tárol cookie-kat, a WebSocket, a Socket.IO és a STOMP pedig a kapcsolat kézfogásán viszi őket.
+- **A cookie-k használhatják a változóidat.** Írj `{{token}}`-t egy kézzel hozzáadott cookie-ba, és az az aktív környezet alapján oldódik fel, amikor a kérés elindul.
+
 ## v1.0.4
 
 **Egy bejelentkezés — minden ablak követi.**

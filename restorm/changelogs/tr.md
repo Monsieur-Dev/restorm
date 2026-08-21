@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Çerezler artık gerektiği gibi çalışıyor — her ortam için ayrı bir kavanoz.**
+
+- **Her ortam kendi çerezlerini saklar.** Dev API'nize ve prod API'nize iki ayrı ortamdan giriş yapın; oturumları asla birbirine karışmaz — birinde yakalanan bir çerez yalnızca o ortamda geri gönderilir. Son kullanma tarihi, `Path`, `Domain` ve alt alan adları, `Secure`, `HttpOnly` ve `SameSite` artık göz ardı edilmiyor, gereğince uygulanıyor.
+- **Saklananları görün ve düzenleyin.** Yeni bir Çerez Yöneticisi — **Görünüm → Çerezler** — her ortamın çerezlerini kaynağa göre gruplayarak listeler: bir değeri düzenleyin, birini silin, bir kaynağı ya da tüm kavanozu temizleyin veya elle çerez ekleyin. Bir yanıt çerez ayarladığında, yanıtın üzerindeki bir 🍪 rozeti yöneticiyi doğrudan o kaynakta açar.
+- **Çerezli oturum açmalar sorunsuz çalışır.** `Set-Cookie` döndüren bir istek yakalanır ve ardından gelen korumalı çağrılarda otomatik olarak yeniden gönderilir — her adımın ortamın kavanozunu paylaştığı bir senaryo çalıştırması boyunca da geçerlidir.
+- **REST'in ötesinde.** GraphQL, SOAP, OData, JSON-RPC, tRPC ve SSE artık çerez gönderip saklıyor; WebSocket, Socket.IO ve STOMP ise bunları bağlantı el sıkışması sırasında taşıyor.
+- **Çerezler değişkenlerinizi kullanabilir.** Elle eklediğiniz bir çereze `{{token}}` yazın; istek gönderildiğinde etkin ortama göre çözümlenir.
+
 ## v1.0.4
 
 **Bir kez oturum açın — tüm pencereler izler.**

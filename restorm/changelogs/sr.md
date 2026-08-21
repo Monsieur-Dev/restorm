@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Kolačići, urađeni kako treba — po jedna tegla za svako okruženje.**
+
+- **Svako okruženje čuva sopstvene kolačiće.** Prijavi se na svoj razvojni i produkcioni API iz dva okruženja i njihove sesije se nikada ne mešaju — kolačić uhvaćen u jednom šalje se nazad samo u tom istom. Isticanje, `Path`, `Domain` i poddomeni, `Secure`, `HttpOnly` i `SameSite` sada se poštuju, a ne odbacuju.
+- **Vidi i uredi ono što je sačuvano.** Novi Upravljač kolačićima — **Prikaz → Kolačići** — prikazuje kolačiće svakog okruženja grupisane po poreklu: uredi vrednost, obriši jedan, očisti poreklo ili celu teglu, ili dodaj kolačić ručno. Kada odgovor postavi kolačiće, oznaka 🍪 na odgovoru otvara upravljača direktno na tom poreklu.
+- **Prijave putem kolačića jednostavno rade.** Zahtev koji vraća `Set-Cookie` hvata se i automatski ponavlja u zaštićenim pozivima koji slede — uključujući i tokom izvršavanja scenarija, gde svaki korak deli istu teglu okruženja.
+- **Više od REST-a.** GraphQL, SOAP, OData, JSON-RPC, tRPC i SSE sada šalju i čuvaju kolačiće, a WebSocket, Socket.IO i STOMP ih nose tokom rukovanja pri uspostavljanju veze.
+- **Kolačići mogu koristiti tvoje promenljive.** Ukucaj `{{token}}` u kolačić koji dodaješ ručno i on se razrešava prema aktivnom okruženju kada zahtev bude poslat.
+
 ## v1.0.4
 
 **Jedna prijava — svi prozori slede.**

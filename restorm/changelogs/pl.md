@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Ciasteczka zrobione jak należy — osobny słoik dla każdego środowiska.**
+
+- **Każde środowisko przechowuje własne ciasteczka.** Zaloguj się do swojego API deweloperskiego i produkcyjnego z dwóch środowisk, a ich sesje nigdy się nie przenikają — ciasteczko przechwycone w jednym jest odsyłane wyłącznie w tym samym. Wygasanie, `Path`, `Domain` i subdomeny, `Secure`, `HttpOnly` oraz `SameSite` są teraz respektowane, a nie odrzucane.
+- **Zobacz i edytuj to, co zapisane.** Nowy Menedżer ciasteczek — **Widok → Ciasteczka** — wyświetla ciasteczka każdego środowiska pogrupowane według źródła: zmień wartość, usuń pojedyncze, wyczyść źródło lub cały słoik albo dodaj ciasteczko ręcznie. Gdy odpowiedź ustawia ciasteczka, plakietka 🍪 przy odpowiedzi otwiera menedżera od razu na tym źródle.
+- **Logowanie przez ciasteczka po prostu działa.** Żądanie, które zwraca `Set-Cookie`, jest przechwytywane i automatycznie odtwarzane w kolejnych chronionych wywołaniach — również w trakcie uruchomienia scenariusza, gdzie każdy krok korzysta ze wspólnego słoika środowiska.
+- **Więcej niż REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC i SSE wysyłają i przechowują teraz ciasteczka, a WebSocket, Socket.IO i STOMP przenoszą je podczas nawiązywania połączenia.
+- **Ciasteczka mogą korzystać z Twoich zmiennych.** Wpisz `{{token}}` w ręcznie dodanym ciasteczku, a jego wartość zostanie rozwinięta względem aktywnego środowiska w chwili wysłania żądania.
+
 ## v1.0.4
 
 **Jedno logowanie — wszystkie okna podążają.**

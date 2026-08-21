@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie-uri, făcute cum trebuie — câte un borcan pentru fiecare mediu.**
+
+- **Fiecare mediu își păstrează propriile cookie-uri.** Autentifică-te la API-ul tău de dezvoltare și la cel de producție din două medii, iar sesiunile lor nu se amestecă niciodată — un cookie capturat într-unul este retrimis doar în acela. Expirarea, `Path`, `Domain` și subdomeniile, `Secure`, `HttpOnly` și `SameSite` sunt acum respectate, nu ignorate.
+- **Vezi și editează ce este stocat.** Un nou Manager de cookie-uri — **Vizualizare → Cookie-uri** — listează cookie-urile fiecărui mediu grupate după origine: editează o valoare, șterge unul, golește o origine sau întregul borcan ori adaugă un cookie manual. Când un răspuns setează cookie-uri, o insignă 🍪 pe răspuns deschide managerul direct pe acea origine.
+- **Autentificările prin cookie funcționează pur și simplu.** O cerere care returnează `Set-Cookie` este capturată și reluată automat în apelurile protejate care urmează — inclusiv pe parcursul rulării unui scenariu, unde fiecare pas folosește același borcan al mediului.
+- **Dincolo de REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC și SSE trimit și stochează acum cookie-uri, iar WebSocket, Socket.IO și STOMP le transportă în timpul handshake-ului conexiunii.
+- **Cookie-urile pot folosi variabilele tale.** Scrie `{{token}}` într-un cookie adăugat manual, iar acesta este rezolvat în funcție de mediul activ atunci când cererea este trimisă.
+
 ## v1.0.4
 
 **O singură autentificare — toate ferestrele urmează.**

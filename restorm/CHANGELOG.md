@@ -10,6 +10,16 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.0.5
+
+**Cookies, done properly — one jar per environment.**
+
+- **Every environment keeps its own cookies.** Sign in against your dev API and your prod API from two environments and their sessions never cross — a cookie captured in one is only ever sent back in that one. Expiry, `Path`, `Domain` and sub-domains, `Secure`, `HttpOnly` and `SameSite` are honoured now, not discarded.
+- **See and edit what's stored.** A new Cookie Manager — **View → Cookies** — lists each environment's cookies grouped by origin: edit a value, delete one, clear an origin or the whole jar, or add a cookie by hand. When a response sets cookies, a 🍪 chip on the response opens the manager straight on that origin.
+- **Cookie logins just work.** A request that returns `Set-Cookie` is captured and replayed automatically on the protected calls that follow — including across a scenario run, where every step shares the environment's jar.
+- **Beyond REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC and SSE all send and store cookies now, and WebSocket, Socket.IO and STOMP carry them on the connection handshake.
+- **Cookies can use your variables.** Type `{{token}}` in a cookie you add by hand and it resolves against the active environment when the request goes out.
+
 ## v1.0.4
 
 **Sign in once — every window follows.**

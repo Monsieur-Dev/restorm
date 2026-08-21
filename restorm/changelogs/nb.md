@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookies, gjort på riktig måte — én beholder per miljø.**
+
+- **Hvert miljø beholder sine egne cookies.** Logg inn mot dev-API-et og prod-API-et ditt fra to miljøer, og øktene deres krysses aldri — en cookie som fanges opp i det ene, sendes bare tilbake i akkurat det. Utløp, `Path`, `Domain` og subdomener, `Secure`, `HttpOnly` og `SameSite` respekteres nå, i stedet for å forkastes.
+- **Se og rediger det som er lagret.** En ny Cookie-behandler — **Vis → Cookies** — viser hvert miljøs cookies gruppert etter opprinnelse: rediger en verdi, slett en, tøm en opprinnelse eller hele beholderen, eller legg til en cookie for hånd. Når et svar setter cookies, åpner en 🍪-brikke på svaret behandleren rett på den opprinnelsen.
+- **Cookie-innlogging bare virker.** En forespørsel som returnerer `Set-Cookie` fanges opp og spilles av automatisk på de beskyttede kallene som følger — også gjennom en scenariokjøring, der hvert steg deler miljøets beholder.
+- **Mer enn REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC og SSE sender og lagrer nå alle cookies, og WebSocket, Socket.IO og STOMP tar dem med på tilkoblingshåndtrykket.
+- **Cookies kan bruke variablene dine.** Skriv `{{token}}` i en cookie du legger til for hånd, så løses den mot det aktive miljøet når forespørselen sendes.
+
 ## v1.0.4
 
 **Logg inn én gang — alle vinduer følger etter.**

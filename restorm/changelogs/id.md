@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie, ditangani dengan benar — satu wadah untuk tiap environment.**
+
+- **Setiap environment menyimpan cookie-nya sendiri.** Masuk ke API dev dan API prod-mu dari dua environment, dan sesi keduanya tidak pernah bercampur — cookie yang terekam di satu environment hanya dikirim kembali di environment itu. Masa berlaku, `Path`, `Domain` beserta subdomain, `Secure`, `HttpOnly`, dan `SameSite` kini dihormati, bukan diabaikan.
+- **Lihat dan ubah apa yang tersimpan.** Cookie Manager baru — **Tampilan → Cookie** — menampilkan cookie tiap environment yang dikelompokkan berdasarkan origin: ubah nilai, hapus salah satu, bersihkan satu origin atau seluruh wadah, atau tambahkan cookie secara manual. Saat sebuah respons menyetel cookie, chip 🍪 pada respons membuka manager langsung ke origin tersebut.
+- **Login berbasis cookie langsung berfungsi.** Permintaan yang mengembalikan `Set-Cookie` akan terekam dan diputar ulang otomatis pada panggilan terproteksi berikutnya — termasuk selama satu skenario berjalan, di mana setiap langkah berbagi wadah cookie environment yang sama.
+- **Lebih dari sekadar REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC, dan SSE kini semuanya mengirim dan menyimpan cookie, sementara WebSocket, Socket.IO, dan STOMP membawanya pada handshake koneksi.
+- **Cookie bisa memakai variabelmu.** Ketik `{{token}}` pada cookie yang kamu tambahkan manual, dan nilainya akan di-resolve terhadap environment aktif saat permintaan dikirim.
+
 ## v1.0.4
 
 **Sekali masuk — semua jendela mengikuti.**

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookies, netjes geregeld — één pot per omgeving.**
+
+- **Elke omgeving houdt haar eigen cookies bij.** Meld u vanuit twee omgevingen aan bij uw dev-API en uw prod-API, en hun sessies raken nooit vermengd — een cookie die in de ene wordt vastgelegd, wordt alleen in die ene weer meegestuurd. Vervaldatum, `Path`, `Domain` en subdomeinen, `Secure`, `HttpOnly` en `SameSite` worden nu gerespecteerd in plaats van weggegooid.
+- **Bekijk en bewerk wat er is opgeslagen.** Een nieuwe Cookiebeheerder — **Beeld → Cookies** — toont de cookies van elke omgeving, gegroepeerd per oorsprong: bewerk een waarde, verwijder er een, wis een oorsprong of de hele pot, of voeg handmatig een cookie toe. Wanneer een respons cookies instelt, opent een 🍪-chip op de respons de beheerder direct op die oorsprong.
+- **Inloggen met cookies werkt gewoon.** Een verzoek dat `Set-Cookie` teruggeeft, wordt vastgelegd en automatisch opnieuw meegestuurd bij de beschermde aanroepen die volgen — ook tijdens een scenario-uitvoering, waarbij elke stap dezelfde cookiepot van de omgeving deelt.
+- **Verder dan REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC en SSE versturen en bewaren nu allemaal cookies, en WebSocket, Socket.IO en STOMP dragen ze mee tijdens de verbindingshandshake.
+- **Cookies kunnen uw variabelen gebruiken.** Typ `{{token}}` in een cookie die u handmatig toevoegt, en die wordt tegen de actieve omgeving omgezet zodra het verzoek uitgaat.
+
 ## v1.0.4
 
 **Eén keer aanmelden — elk venster volgt.**

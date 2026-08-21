@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie，终于处理得当——每个环境各有一罐。**
+
+- **每个环境都保留自己的 Cookie。**从两个环境分别登录你的开发 API 和生产 API，它们的会话绝不会串门——在一个环境中捕获的 Cookie 只会回传到那个环境。过期时间、`Path`、`Domain` 及其子域、`Secure`、`HttpOnly` 和 `SameSite` 如今都会得到遵循，而不再被丢弃。
+- **查看并编辑已存内容。**全新的 Cookie 管理器——**视图 → Cookie**——按来源分组列出每个环境的 Cookie：编辑某个值、删除某一条、清空某个来源或整罐，也可以手动添加 Cookie。当响应设置了 Cookie 时，响应上的 🍪 徽标会直接打开该来源对应的管理器。
+- **Cookie 登录开箱即用。**返回 `Set-Cookie` 的请求会被捕获，并在随后受保护的调用中自动重放——在整个场景运行过程中也是如此，其中每一步都共享该环境的 Cookie 罐。
+- **不止于 REST。**GraphQL、SOAP、OData、JSON-RPC、tRPC 和 SSE 现在都能发送并存储 Cookie，而 WebSocket、Socket.IO 和 STOMP 则会在连接握手时携带它们。
+- **Cookie 可以使用你的变量。**在手动添加的 Cookie 中输入 `{{token}}`，请求发出时它会依据当前活动环境进行解析。
+
 ## v1.0.4
 
 **登录一次，所有窗口同步。**

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Cookies, konečně pořádně – jedna sklenice pro každé prostředí.**
+
+- **Každé prostředí si drží vlastní cookies.** Přihlaste se ke svému vývojovému API i produkčnímu API ze dvou prostředí a jejich relace se nikdy nezkříží – cookie zachycená v jednom se posílá zpět jen v tomtéž. Platnost, `Path`, `Domain` i subdomény, `Secure`, `HttpOnly` a `SameSite` se nyní respektují, místo aby se zahazovaly.
+- **Podívejte se a upravte, co je uložené.** Nový Správce cookies – **Zobrazit → Cookies** – vypisuje cookies každého prostředí seskupené podle původu: upravte hodnotu, jednu smažte, vyprázdněte původ nebo celou sklenici, nebo přidejte cookie ručně. Když odpověď nastaví cookies, štítek 🍪 u odpovědi otevře správce rovnou na daném původu.
+- **Přihlášení přes cookies prostě funguje.** Požadavek, který vrátí `Set-Cookie`, se zachytí a automaticky znovu odešle u navazujících chráněných volání – i napříč během scénáře, kde každý krok sdílí sklenici prostředí.
+- **Nejen REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC i SSE nyní posílají a ukládají cookies a WebSocket, Socket.IO a STOMP je nesou už při navazování spojení (handshake).
+- **Cookies mohou využívat vaše proměnné.** Napište `{{token}}` do cookie, kterou přidáte ručně, a při odeslání požadavku se vyhodnotí vůči aktivnímu prostředí.
+
 ## v1.0.4
 
 **Jedno přihlášení — všechna okna následují.**

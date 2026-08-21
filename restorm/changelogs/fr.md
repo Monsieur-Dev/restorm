@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.5
+
+**Les cookies, bien faits — un bocal par environnement.**
+
+- **Chaque environnement conserve ses propres cookies.** Connectez-vous à votre API de dev et à votre API de prod depuis deux environnements : leurs sessions ne se croisent jamais — un cookie capturé dans l'un n'est renvoyé que dans celui-là. L'expiration, `Path`, `Domain` et les sous-domaines, `Secure`, `HttpOnly` et `SameSite` sont désormais respectés, plus jetés.
+- **Voyez et modifiez ce qui est stocké.** Un nouveau Gestionnaire de cookies — **Affichage → Cookies** — liste les cookies de chaque environnement groupés par origine : modifiez une valeur, supprimez-en un, videz une origine ou tout le bocal, ou ajoutez un cookie à la main. Quand une réponse pose des cookies, une pastille 🍪 sur la réponse ouvre le gestionnaire directement sur cette origine.
+- **Les connexions par cookie fonctionnent, tout simplement.** Une requête qui renvoie `Set-Cookie` est capturée puis rejouée automatiquement sur les appels protégés qui suivent — y compris au fil d'un scénario, où chaque étape partage le bocal de l'environnement.
+- **Au-delà de REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC et SSE envoient et stockent désormais les cookies, et WebSocket, Socket.IO et STOMP les portent lors de la poignée de main de connexion.
+- **Les cookies peuvent utiliser vos variables.** Saisissez `{{token}}` dans un cookie ajouté à la main : il est résolu selon l'environnement actif au moment de l'envoi de la requête.
+
 ## v1.0.4
 
 **Une connexion, toutes vos fenêtres.**
