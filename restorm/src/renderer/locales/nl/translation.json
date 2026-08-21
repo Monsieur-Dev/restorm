@@ -2723,5 +2723,28 @@
       "unavailable": "Tokens zijn nu niet beschikbaar. Probeer het zo opnieuw.",
       "plan-required": "Uitvoeringen zonder interface horen bij het Pro-abonnement. Stap over op Pro om tokens aan te maken — bestaande tokens kunt u blijven intrekken."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Omgeving",
+    "noEnvironment": "Geen omgeving",
+    "clearAll": "Alles wissen",
+    "empty": "Er zijn nog geen cookies opgeslagen voor deze omgeving.",
+    "clearOrigin": "Cookies voor {{domain}} wissen",
+    "session": "Sessie",
+    "valueOf": "Waarde van {{name}}",
+    "save": "Opslaan",
+    "deleteNamed": "{{name}} verwijderen",
+    "add": "Toevoegen",
+    "column": {
+      "name": "Naam",
+      "value": "Waarde",
+      "path": "Pad",
+      "expires": "Verloopt",
+      "flags": "Vlaggen",
+      "actions": "Acties",
+      "domain": "Domein"
+    },
+    "openFor": "Cookiebeheer openen voor {{domain}}"
   }
 }

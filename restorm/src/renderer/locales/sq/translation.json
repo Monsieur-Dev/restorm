@@ -2723,5 +2723,28 @@
       "unavailable": "Tokenat nuk janë të disponueshëm për momentin. Provoni pas pak.",
       "plan-required": "Ekzekutimet pa ndërfaqe janë pjesë e planit Pro. Kaloni te Pro për të krijuar tokena — ata që keni tashmë mund t'i revokoni gjithsesi."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Mjedisi",
+    "noEnvironment": "Pa mjedis",
+    "clearAll": "Pastro të gjitha",
+    "empty": "Ende nuk ka cookie të ruajtura për këtë mjedis.",
+    "clearOrigin": "Pastro cookie-t për {{domain}}",
+    "session": "Sesioni",
+    "valueOf": "Vlera e {{name}}",
+    "save": "Ruaj",
+    "deleteNamed": "Fshi {{name}}",
+    "add": "Shto",
+    "column": {
+      "name": "Emri",
+      "value": "Vlera",
+      "path": "Rruga",
+      "expires": "Skadon",
+      "flags": "Flamujt",
+      "actions": "Veprimet",
+      "domain": "Domeni"
+    },
+    "openFor": "Hap menaxherin e cookie-ve për {{domain}}"
   }
 }

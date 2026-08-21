@@ -2725,5 +2725,28 @@
       "unavailable": "Tokeny są teraz niedostępne. Spróbuj za chwilę.",
       "plan-required": "Uruchomienia bez interfejsu są częścią planu Pro. Przejdź na Pro, aby tworzyć tokeny — nadal możesz unieważniać te, które już masz."
     }
+  },
+  "cookies": {
+    "title": "Pliki cookie",
+    "environment": "Środowisko",
+    "noEnvironment": "Brak środowiska",
+    "clearAll": "Wyczyść wszystko",
+    "empty": "Dla tego środowiska nie zapisano jeszcze żadnych plików cookie.",
+    "clearOrigin": "Wyczyść pliki cookie dla {{domain}}",
+    "session": "Sesja",
+    "valueOf": "Wartość {{name}}",
+    "save": "Zapisz",
+    "deleteNamed": "Usuń {{name}}",
+    "add": "Dodaj",
+    "column": {
+      "name": "Nazwa",
+      "value": "Wartość",
+      "path": "Ścieżka",
+      "expires": "Wygasa",
+      "flags": "Flagi",
+      "actions": "Akcje",
+      "domain": "Domena"
+    },
+    "openFor": "Otwórz menedżera plików cookie dla {{domain}}"
   }
 }

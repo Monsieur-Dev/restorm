@@ -2725,5 +2725,28 @@
       "unavailable": "Tokeny jsou momentálně nedostupné. Zkuste to za chvíli.",
       "plan-required": "Běhy bez rozhraní jsou součástí tarifu Pro. Přejděte na Pro, abyste mohli vytvářet tokeny — ty stávající můžete i nadále odvolávat."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Prostředí",
+    "noEnvironment": "Žádné prostředí",
+    "clearAll": "Vymazat vše",
+    "empty": "Pro toto prostředí zatím nejsou uloženy žádné cookies.",
+    "clearOrigin": "Vymazat cookies pro {{domain}}",
+    "session": "Relace",
+    "valueOf": "Hodnota {{name}}",
+    "save": "Uložit",
+    "deleteNamed": "Odstranit {{name}}",
+    "add": "Přidat",
+    "column": {
+      "name": "Název",
+      "value": "Hodnota",
+      "path": "Cesta",
+      "expires": "Vyprší",
+      "flags": "Příznaky",
+      "actions": "Akce",
+      "domain": "Doména"
+    },
+    "openFor": "Otevřít správce cookies pro {{domain}}"
   }
 }

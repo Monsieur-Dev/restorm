@@ -2722,5 +2722,28 @@
       "unavailable": "現在トークンを利用できません。しばらくしてからお試しください。",
       "plan-required": "画面のない実行は Pro プランに含まれます。トークンを作成するには Pro にアップグレードしてください。既存のトークンの失効は引き続き可能です。"
     }
+  },
+  "cookies": {
+    "title": "Cookie",
+    "environment": "環境",
+    "noEnvironment": "環境なし",
+    "clearAll": "すべて消去",
+    "empty": "この環境にはまだ Cookie が保存されていません。",
+    "clearOrigin": "{{domain}} の Cookie を消去",
+    "session": "セッション",
+    "valueOf": "{{name}} の値",
+    "save": "保存",
+    "deleteNamed": "{{name}} を削除",
+    "add": "追加",
+    "column": {
+      "name": "名前",
+      "value": "値",
+      "path": "パス",
+      "expires": "有効期限",
+      "flags": "フラグ",
+      "actions": "操作",
+      "domain": "ドメイン"
+    },
+    "openFor": "{{domain}} の Cookie マネージャーを開く"
   }
 }

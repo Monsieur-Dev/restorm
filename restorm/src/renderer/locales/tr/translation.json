@@ -2723,5 +2723,28 @@
       "unavailable": "Belirteçler şu anda kullanılamıyor. Birazdan tekrar deneyin.",
       "plan-required": "Arayüzsüz çalıştırmalar Pro planın bir parçasıdır. Belirteç oluşturmak için Pro'ya geçin — hâlihazırdakileri iptal etmeye devam edebilirsiniz."
     }
+  },
+  "cookies": {
+    "title": "Çerezler",
+    "environment": "Ortam",
+    "noEnvironment": "Ortam yok",
+    "clearAll": "Tümünü temizle",
+    "empty": "Bu ortam için henüz kayıtlı çerez yok.",
+    "clearOrigin": "{{domain}} için çerezleri temizle",
+    "session": "Oturum",
+    "valueOf": "{{name}} değeri",
+    "save": "Kaydet",
+    "deleteNamed": "{{name}} sil",
+    "add": "Ekle",
+    "column": {
+      "name": "Ad",
+      "value": "Değer",
+      "path": "Yol",
+      "expires": "Sona erme",
+      "flags": "Bayraklar",
+      "actions": "İşlemler",
+      "domain": "Alan adı"
+    },
+    "openFor": "{{domain}} için Çerez Yöneticisi'ni aç"
   }
 }

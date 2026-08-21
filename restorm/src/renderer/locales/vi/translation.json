@@ -2722,5 +2722,28 @@
       "unavailable": "Hiện chưa dùng được token. Hãy thử lại sau giây lát.",
       "plan-required": "Các lần chạy không giao diện thuộc gói Pro. Hãy nâng cấp lên Pro để tạo token — bạn vẫn có thể thu hồi những token đang có."
     }
+  },
+  "cookies": {
+    "title": "Cookie",
+    "environment": "Môi trường",
+    "noEnvironment": "Không có môi trường",
+    "clearAll": "Xóa tất cả",
+    "empty": "Chưa có cookie nào được lưu cho môi trường này.",
+    "clearOrigin": "Xóa cookie cho {{domain}}",
+    "session": "Phiên",
+    "valueOf": "Giá trị của {{name}}",
+    "save": "Lưu",
+    "deleteNamed": "Xóa {{name}}",
+    "add": "Thêm",
+    "column": {
+      "name": "Tên",
+      "value": "Giá trị",
+      "path": "Đường dẫn",
+      "expires": "Hết hạn",
+      "flags": "Cờ",
+      "actions": "Hành động",
+      "domain": "Miền"
+    },
+    "openFor": "Mở Trình quản lý Cookie cho {{domain}}"
   }
 }

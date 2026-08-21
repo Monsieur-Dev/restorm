@@ -2722,5 +2722,28 @@
       "unavailable": "지금은 토큰을 사용할 수 없습니다. 잠시 후 다시 시도하세요.",
       "plan-required": "화면 없는 실행은 Pro 요금제에 포함됩니다. 토큰을 만들려면 Pro로 업그레이드하세요. 기존 토큰은 계속 취소할 수 있습니다."
     }
+  },
+  "cookies": {
+    "title": "쿠키",
+    "environment": "환경",
+    "noEnvironment": "환경 없음",
+    "clearAll": "모두 지우기",
+    "empty": "이 환경에 저장된 쿠키가 아직 없습니다.",
+    "clearOrigin": "{{domain}}의 쿠키 지우기",
+    "session": "세션",
+    "valueOf": "{{name}}의 값",
+    "save": "저장",
+    "deleteNamed": "{{name}} 삭제",
+    "add": "추가",
+    "column": {
+      "name": "이름",
+      "value": "값",
+      "path": "경로",
+      "expires": "만료",
+      "flags": "플래그",
+      "actions": "작업",
+      "domain": "도메인"
+    },
+    "openFor": "{{domain}}의 쿠키 관리자 열기"
   }
 }

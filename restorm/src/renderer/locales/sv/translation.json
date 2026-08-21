@@ -2723,5 +2723,28 @@
       "unavailable": "Token är inte tillgängliga just nu. Försök igen om en stund.",
       "plan-required": "Körningar utan gränssnitt ingår i Pro-abonnemanget. Byt till Pro för att skapa token — du kan fortfarande återkalla dem du redan har."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Miljö",
+    "noEnvironment": "Ingen miljö",
+    "clearAll": "Rensa alla",
+    "empty": "Inga cookies har sparats för den här miljön ännu.",
+    "clearOrigin": "Rensa cookies för {{domain}}",
+    "session": "Session",
+    "valueOf": "Värde för {{name}}",
+    "save": "Spara",
+    "deleteNamed": "Ta bort {{name}}",
+    "add": "Lägg till",
+    "column": {
+      "name": "Namn",
+      "value": "Värde",
+      "path": "Sökväg",
+      "expires": "Upphör",
+      "flags": "Flaggor",
+      "actions": "Åtgärder",
+      "domain": "Domän"
+    },
+    "openFor": "Öppna cookiehanteraren för {{domain}}"
   }
 }

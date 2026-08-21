@@ -2723,5 +2723,28 @@
       "unavailable": "A tokenek jelenleg nem érhetők el. Próbálja újra egy pillanat múlva.",
       "plan-required": "A felület nélküli futtatások a Pro csomag részei. Váltson Pro-ra tokenek létrehozásához — a meglévőket továbbra is visszavonhatja."
     }
+  },
+  "cookies": {
+    "title": "Sütik",
+    "environment": "Környezet",
+    "noEnvironment": "Nincs környezet",
+    "clearAll": "Összes törlése",
+    "empty": "Ehhez a környezethez még nincsenek tárolt sütik.",
+    "clearOrigin": "Sütik törlése ehhez: {{domain}}",
+    "session": "Munkamenet",
+    "valueOf": "{{name}} értéke",
+    "save": "Mentés",
+    "deleteNamed": "{{name}} törlése",
+    "add": "Hozzáadás",
+    "column": {
+      "name": "Név",
+      "value": "Érték",
+      "path": "Útvonal",
+      "expires": "Lejár",
+      "flags": "Jelzők",
+      "actions": "Műveletek",
+      "domain": "Tartomány"
+    },
+    "openFor": "Sütikezelő megnyitása ehhez: {{domain}}"
   }
 }

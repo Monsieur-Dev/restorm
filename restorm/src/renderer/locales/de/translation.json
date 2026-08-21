@@ -2723,5 +2723,28 @@
       "unavailable": "Token sind derzeit nicht verfügbar. Versuchen Sie es gleich erneut.",
       "plan-required": "Läufe ohne Oberfläche gehören zum Pro-Tarif. Wechseln Sie zu Pro, um Token zu erstellen — vorhandene Token können Sie weiterhin widerrufen."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Umgebung",
+    "noEnvironment": "Keine Umgebung",
+    "clearAll": "Alle löschen",
+    "empty": "Für diese Umgebung sind noch keine Cookies gespeichert.",
+    "clearOrigin": "Cookies für {{domain}} löschen",
+    "session": "Sitzung",
+    "valueOf": "Wert von {{name}}",
+    "save": "Speichern",
+    "deleteNamed": "{{name}} löschen",
+    "add": "Hinzufügen",
+    "column": {
+      "name": "Name",
+      "value": "Wert",
+      "path": "Pfad",
+      "expires": "Läuft ab",
+      "flags": "Flags",
+      "actions": "Aktionen",
+      "domain": "Domain"
+    },
+    "openFor": "Cookie-Manager für {{domain}} öffnen"
   }
 }

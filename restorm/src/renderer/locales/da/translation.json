@@ -2723,5 +2723,28 @@
       "unavailable": "Tokens er ikke tilgængelige lige nu. Prøv igen om et øjeblik.",
       "plan-required": "Kørsler uden grænseflade er en del af Pro-abonnementet. Skift til Pro for at oprette tokens — du kan fortsat tilbagekalde dem, du allerede har."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Miljø",
+    "noEnvironment": "Intet miljø",
+    "clearAll": "Ryd alle",
+    "empty": "Der er endnu ikke gemt nogen cookies for dette miljø.",
+    "clearOrigin": "Ryd cookies for {{domain}}",
+    "session": "Session",
+    "valueOf": "Værdi af {{name}}",
+    "save": "Gem",
+    "deleteNamed": "Slet {{name}}",
+    "add": "Tilføj",
+    "column": {
+      "name": "Navn",
+      "value": "Værdi",
+      "path": "Sti",
+      "expires": "Udløber",
+      "flags": "Flag",
+      "actions": "Handlinger",
+      "domain": "Domæne"
+    },
+    "openFor": "Åbn cookie-håndteringen for {{domain}}"
   }
 }

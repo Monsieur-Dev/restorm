@@ -2723,5 +2723,28 @@
       "unavailable": "Tunnukset eivät ole juuri nyt käytettävissä. Yritä hetken kuluttua uudelleen.",
       "plan-required": "Käyttöliittymättömät ajot kuuluvat Pro-tilaukseen. Siirry Pro-tilaukseen luodaksesi tunnuksia — voit yhä kumota jo olemassa olevat."
     }
+  },
+  "cookies": {
+    "title": "Evästeet",
+    "environment": "Ympäristö",
+    "noEnvironment": "Ei ympäristöä",
+    "clearAll": "Tyhjennä kaikki",
+    "empty": "Tähän ympäristöön ei ole vielä tallennettu evästeitä.",
+    "clearOrigin": "Tyhjennä evästeet kohteelle {{domain}}",
+    "session": "Istunto",
+    "valueOf": "{{name}} arvo",
+    "save": "Tallenna",
+    "deleteNamed": "Poista {{name}}",
+    "add": "Lisää",
+    "column": {
+      "name": "Nimi",
+      "value": "Arvo",
+      "path": "Polku",
+      "expires": "Vanhenee",
+      "flags": "Liput",
+      "actions": "Toiminnot",
+      "domain": "Verkkotunnus"
+    },
+    "openFor": "Avaa evästeiden hallinta kohteelle {{domain}}"
   }
 }

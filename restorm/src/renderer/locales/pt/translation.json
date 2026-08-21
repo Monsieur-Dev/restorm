@@ -2723,5 +2723,28 @@
       "unavailable": "Os tokens estão indisponíveis neste momento. Tente novamente daqui a pouco.",
       "plan-required": "As execuções sem interface fazem parte do plano Pro. Mude para Pro para criar tokens — pode continuar a revogar os que já tem."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Ambiente",
+    "noEnvironment": "Sem ambiente",
+    "clearAll": "Limpar tudo",
+    "empty": "Ainda não há cookies armazenados para este ambiente.",
+    "clearOrigin": "Limpar cookies de {{domain}}",
+    "session": "Sessão",
+    "valueOf": "Valor de {{name}}",
+    "save": "Guardar",
+    "deleteNamed": "Eliminar {{name}}",
+    "add": "Adicionar",
+    "column": {
+      "name": "Nome",
+      "value": "Valor",
+      "path": "Caminho",
+      "expires": "Expira",
+      "flags": "Sinalizadores",
+      "actions": "Ações",
+      "domain": "Domínio"
+    },
+    "openFor": "Abrir o gestor de cookies para {{domain}}"
   }
 }

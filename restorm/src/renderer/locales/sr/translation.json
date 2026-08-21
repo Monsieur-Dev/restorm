@@ -2724,5 +2724,28 @@
       "unavailable": "Tokeni trenutno nisu dostupni. Pokušajte za trenutak.",
       "plan-required": "Izvršavanja bez interfejsa deo su Pro plana. Pređite na Pro da biste pravili tokene — one koje već imate i dalje možete opozvati."
     }
+  },
+  "cookies": {
+    "title": "Kolačići",
+    "environment": "Okruženje",
+    "noEnvironment": "Bez okruženja",
+    "clearAll": "Obriši sve",
+    "empty": "Za ovo okruženje još nema sačuvanih kolačića.",
+    "clearOrigin": "Obriši kolačiće za {{domain}}",
+    "session": "Sesija",
+    "valueOf": "Vrednost stavke {{name}}",
+    "save": "Sačuvaj",
+    "deleteNamed": "Obriši {{name}}",
+    "add": "Dodaj",
+    "column": {
+      "name": "Naziv",
+      "value": "Vrednost",
+      "path": "Putanja",
+      "expires": "Ističe",
+      "flags": "Zastavice",
+      "actions": "Radnje",
+      "domain": "Domen"
+    },
+    "openFor": "Otvori upravljač kolačićima za {{domain}}"
   }
 }

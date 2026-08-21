@@ -2724,5 +2724,28 @@
       "unavailable": "Jetoanele nu sunt disponibile momentan. Încercați din nou în câteva clipe.",
       "plan-required": "Execuțiile fără interfață fac parte din planul Pro. Treceți la Pro pentru a crea jetoane — puteți revoca în continuare pe cele pe care le aveți deja."
     }
+  },
+  "cookies": {
+    "title": "Cookie-uri",
+    "environment": "Mediu",
+    "noEnvironment": "Fără mediu",
+    "clearAll": "Șterge tot",
+    "empty": "Nu există încă cookie-uri stocate pentru acest mediu.",
+    "clearOrigin": "Șterge cookie-urile pentru {{domain}}",
+    "session": "Sesiune",
+    "valueOf": "Valoarea {{name}}",
+    "save": "Salvează",
+    "deleteNamed": "Șterge {{name}}",
+    "add": "Adaugă",
+    "column": {
+      "name": "Nume",
+      "value": "Valoare",
+      "path": "Cale",
+      "expires": "Expiră",
+      "flags": "Indicatori",
+      "actions": "Acțiuni",
+      "domain": "Domeniu"
+    },
+    "openFor": "Deschide managerul de cookie-uri pentru {{domain}}"
   }
 }

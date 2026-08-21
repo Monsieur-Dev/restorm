@@ -2722,5 +2722,28 @@
       "unavailable": "目前無法使用權杖。請稍後再試。",
       "plan-required": "無介面執行屬於 Pro 方案。升級至 Pro 即可建立權杖——你仍然可以撤銷既有的權杖。"
     }
+  },
+  "cookies": {
+    "title": "Cookie",
+    "environment": "環境",
+    "noEnvironment": "無環境",
+    "clearAll": "全部清除",
+    "empty": "此環境尚未儲存任何 Cookie。",
+    "clearOrigin": "清除 {{domain}} 的 Cookie",
+    "session": "工作階段",
+    "valueOf": "{{name}} 的值",
+    "save": "儲存",
+    "deleteNamed": "刪除 {{name}}",
+    "add": "新增",
+    "column": {
+      "name": "名稱",
+      "value": "值",
+      "path": "路徑",
+      "expires": "到期",
+      "flags": "旗標",
+      "actions": "動作",
+      "domain": "網域"
+    },
+    "openFor": "開啟 {{domain}} 的 Cookie 管理器"
   }
 }

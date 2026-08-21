@@ -2722,5 +2722,28 @@
       "unavailable": "当前无法使用令牌。请稍后重试。",
       "plan-required": "无界面运行属于 Pro 方案。升级到 Pro 即可创建令牌——你仍然可以吊销已有的令牌。"
     }
+  },
+  "cookies": {
+    "title": "Cookie",
+    "environment": "环境",
+    "noEnvironment": "无环境",
+    "clearAll": "全部清除",
+    "empty": "此环境尚未存储任何 Cookie。",
+    "clearOrigin": "清除 {{domain}} 的 Cookie",
+    "session": "会话",
+    "valueOf": "{{name}} 的值",
+    "save": "保存",
+    "deleteNamed": "删除 {{name}}",
+    "add": "添加",
+    "column": {
+      "name": "名称",
+      "value": "值",
+      "path": "路径",
+      "expires": "过期时间",
+      "flags": "标志",
+      "actions": "操作",
+      "domain": "域"
+    },
+    "openFor": "打开 {{domain}} 的 Cookie 管理器"
   }
 }

@@ -2722,5 +2722,28 @@
       "unavailable": "Token tidak tersedia saat ini. Coba lagi sebentar.",
       "plan-required": "Proses tanpa antarmuka termasuk dalam paket Pro. Tingkatkan ke Pro untuk membuat token — Anda tetap dapat mencabut token yang sudah ada."
     }
+  },
+  "cookies": {
+    "title": "Cookie",
+    "environment": "Lingkungan",
+    "noEnvironment": "Tanpa lingkungan",
+    "clearAll": "Hapus semua",
+    "empty": "Belum ada cookie yang disimpan untuk lingkungan ini.",
+    "clearOrigin": "Hapus cookie untuk {{domain}}",
+    "session": "Sesi",
+    "valueOf": "Nilai {{name}}",
+    "save": "Simpan",
+    "deleteNamed": "Hapus {{name}}",
+    "add": "Tambah",
+    "column": {
+      "name": "Nama",
+      "value": "Nilai",
+      "path": "Jalur",
+      "expires": "Kedaluwarsa",
+      "flags": "Bendera",
+      "actions": "Tindakan",
+      "domain": "Domain"
+    },
+    "openFor": "Buka Pengelola Cookie untuk {{domain}}"
   }
 }
