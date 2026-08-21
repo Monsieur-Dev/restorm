@@ -2744,6 +2744,7 @@
       "flags": "Attributs",
       "actions": "Actions",
       "domain": "Domaine"
-    }
+    },
+    "openFor": "Ouvrir le gestionnaire de cookies pour {{domain}}"
   }
 }

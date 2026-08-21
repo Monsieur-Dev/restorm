@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { docsUrl } from '../../../../../shared/config/site'
 import { resolveChannel } from '../../../../../shared/config/backend'
 import type { SidebarContextMenuItem } from '../Sidebar/contextMenuBuilder'
@@ -20,6 +20,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
 import { RELEASE_NOTES_OPEN, type ReleaseNotesOpenPayload } from '../../releaseNotesEvents'
+import { COOKIE_MANAGER_OPEN, type CookieManagerOpenPayload } from '../../cookieManagerEvents'
 import { DASHBOARD_URL } from '../../../../../shared/config/site'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { AboutModal } from '../../Modals/AboutModal'
@@ -260,6 +261,17 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   const [aboutOpen, setAboutOpen] = useState(false)
   const [cliTokensOpen, setCliTokensOpen] = useState(false)
   const [cookieManagerOpen, setCookieManagerOpen] = useState(false)
+  const [cookieFocusDomain, setCookieFocusDomain] = useState<string | undefined>(undefined)
+
+  // A response panel's "cookies" chip opens the manager here, pre-filtered on
+  // the response origin (the manager is mounted in the titlebar as a singleton).
+  useEffect(() => {
+    const sub = eventBus.subscribe<CookieManagerOpenPayload>(COOKIE_MANAGER_OPEN, (payload) => {
+      setCookieFocusDomain(payload.focusDomain)
+      setCookieManagerOpen(true)
+    })
+    return () => { sub.unsubscribe() }
+  }, [])
   const handleCloseAbout = useCallback(() => { setAboutOpen(false) }, [])
 
   // Render a sidebar context-menu data structure as MenuBar items — the
@@ -609,7 +621,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
     />
     <AboutModal isOpen={aboutOpen} onClose={handleCloseAbout} />
     <CliTokensModal isOpen={cliTokensOpen} onClose={() => { setCliTokensOpen(false); }} />
-    <CookieManagerModal isOpen={cookieManagerOpen} onClose={() => { setCookieManagerOpen(false); }} />
+    <CookieManagerModal isOpen={cookieManagerOpen} onClose={() => { setCookieManagerOpen(false); setCookieFocusDomain(undefined); }} {...(cookieFocusDomain !== undefined ? { focusDomain: cookieFocusDomain } : {})} />
     </>
   )
 }

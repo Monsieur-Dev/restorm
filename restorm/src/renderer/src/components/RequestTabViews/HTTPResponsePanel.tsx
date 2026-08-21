@@ -4,12 +4,28 @@ import {
   Button,
   CodeEditor,
   ListView,
+  eventBus,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
 import type { HTTPResponse, KeyValue } from '../../../../shared/types/collections'
 import type { OperationDocumentation } from '../../../../shared/types/apiDocumentation'
 import { ResponseInfoStatusCodeTooltip } from '../documentation/StatusCodeTooltip'
 import { statusCodeColor } from '../documentation/statusCodeColor'
+import { COOKIE_MANAGER_OPEN, type CookieManagerOpenPayload } from '../cookieManagerEvents'
+
+const cookieChipStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 4,
+  padding: '0 8px',
+  height: 18,
+  borderRadius: 9,
+  border: 'none',
+  cursor: 'pointer',
+  fontSize: '0.78em',
+  background: 'var(--badge-background)',
+  color: 'var(--badge-foreground)'
+}
 
 const flexRowStyle: CSSProperties = { display: 'flex', gap: 8 }
 const boldLabelStyle: CSSProperties = { fontWeight: 600 }
@@ -206,6 +222,37 @@ export function buildHttpResponseViewData(
           )
         })
       }
+    }
+    // A response that set cookies gets a chip that deep-links to the Cookie
+    // Manager, pre-filtered on this response's origin — so "what did this call
+    // store?" is one click away.
+    const setCookieCount = response.responseHeaders.filter((h) => h.key.toLowerCase() === 'set-cookie').length
+    if (setCookieCount > 0) {
+      let focusDomain: string | undefined
+      try { focusDomain = new URL(response.requestUrl).hostname } catch { focusDomain = undefined }
+      const openManager = (): void => {
+        eventBus.emitLocalSync(COOKIE_MANAGER_OPEN, { ...(focusDomain !== undefined ? { focusDomain } : {}) } as CookieManagerOpenPayload)
+      }
+      generalItems.push({
+        id: 'general-cookies',
+        icon: 'blank',
+        title: (
+          <span style={flexRowStyle}>
+            <span style={boldLabelStyle}>{labels ? labels.t('cookies.title') : 'Cookies'}</span>
+            <span
+              role="button"
+              tabIndex={0}
+              data-testid="response-cookies-chip"
+              style={cookieChipStyle}
+              title={labels ? labels.t('cookies.openFor', { domain: focusDomain ?? '' }) : 'Open Cookie Manager'}
+              onClick={openManager}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openManager() } }}
+            >
+              🍪 {setCookieCount}
+            </span>
+          </span>
+        )
+      })
     }
     if (response.contentType) {
       generalItems.push({ id: 'general-content-type', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Content-Type</span><span>{response.contentType}</span></span> })
