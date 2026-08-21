@@ -13,6 +13,7 @@ import { BrowserWindow } from 'electron'
 import { request as undiciRequest, type Dispatcher } from 'undici'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { cookieJarService } from './CookieJarService'
 import type { ResolutionContexts, TransformedContext } from './ContextServiceTypes'
 import { websocketExecutionService } from './WebSocketExecutionService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
@@ -130,17 +131,12 @@ class HTTPExecutionService {
    * mode). Drives the "served N requests" banner. */
   private servedCounts = new Map<string, number>()
 
-  /**
-   * Session cookie jar: origin (`scheme://host:port`) → cookie
-   * name → value. Populated from `Set-Cookie` response headers and
-   * re-attached as a `Cookie` request header on subsequent requests to
-   * the same origin within this app session. Process-lifetime scoped
-   * (cleared when a new collection is opened, alongside the auth cache),
-   * which matches the ticket's "stored and re-sent across requests in
-   * the same session" requirement without persisting credentials to
-   * disk.
-   */
-  private cookieJar = new Map<string, Map<string, string>>()
+  /** The jar-key for a request = its active environment id (per-env
+   * isolation). Absent request / no env → the shared default jar. */
+  private cookieEnvKey(requestId?: string): string {
+    if (requestId === undefined) return ''
+    return contextService.getRequestContext(requestId)?.environmentId ?? ''
+  }
 
   /**
    * Execute an HTTP request using the resolved URL and data from ContextService
@@ -430,7 +426,8 @@ class HTTPExecutionService {
         body,
         timeout,
         signal: abortController.signal,
-        followRedirects
+        followRedirects,
+        requestId
       })
 
       // Auth-error-code retry: if the downstream status is one the
@@ -783,9 +780,13 @@ class HTTPExecutionService {
     timeout: number
     signal: AbortSignal
     followRedirects?: boolean
+    /** Drives cookie-jar scoping (per active environment) + `{{var}}`
+     * resolution of jar-injected cookie values. Absent = the default jar. */
+    requestId?: string
   }): Promise<{ statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string; bodyIsBase64?: boolean }> {
     const { followRedirects = true } = options
     const MAX_REDIRECTS = 10
+    const envKey = this.cookieEnvKey(options.requestId)
 
     let currentUrl = options.url
     let currentMethod = options.method
@@ -794,11 +795,26 @@ class HTTPExecutionService {
     // 302-on-POST collapses the method to GET, and refresh the Cookie
     // header for each origin in the chain.
     let currentHeaders: Record<string, string> = { ...options.headers }
+    let previousOrigin: string | undefined
 
     for (let hop = 0; ; hop++) {
-      // Attach any stored cookies for this origin (re-sent across
-      // requests in the session). A user-supplied Cookie header wins.
-      this.applyCookies(currentUrl, currentHeaders)
+      // A cross-origin redirect must NOT forward the previous origin's
+      // Cookie header verbatim (a manual auth cookie leaking to another
+      // host). Drop any Cookie header on an origin change so the jar
+      // re-populates for the new origin below.
+      if (previousOrigin !== undefined && currentUrl.origin !== previousOrigin) {
+        currentHeaders = Object.fromEntries(
+          Object.entries(currentHeaders).filter(([k]) => k.toLowerCase() !== 'cookie')
+        )
+      }
+      // Attach the active environment's stored cookies for this origin
+      // (tough-cookie honours domain/path/expiry). A user-supplied Cookie
+      // header wins; a jar-injected one has its `{{var}}` resolved against
+      // the active environment (user-authored cookies may template).
+      const cookieString = cookieJarService.applyCookies(envKey, currentUrl.href, currentHeaders)
+      if (cookieString !== undefined && options.requestId !== undefined && cookieString.includes('{{')) {
+        currentHeaders['Cookie'] = contextService.resolveValue(cookieString, options.requestId)
+      }
 
       const response = await this.dispatchOnce({
         url: currentUrl,
@@ -817,8 +833,9 @@ class HTTPExecutionService {
         bypassFirewall: hop <= 1
       })
 
-      // Store any Set-Cookie the server returned for this origin.
-      this.storeCookies(currentUrl, response.headers['set-cookie'])
+      // Store any Set-Cookie the server returned into this environment's jar.
+      cookieJarService.storeCookies(envKey, currentUrl.href, response.headers['set-cookie'])
+      previousOrigin = currentUrl.origin
 
       const isRedirect = response.statusCode >= 300 && response.statusCode < 400
       const locationRaw = response.headers.location
@@ -862,44 +879,6 @@ class HTTPExecutionService {
     }
   }
 
-  /** Apply stored session cookies for `url`'s origin to `headers`
-   * (does not overwrite a user-supplied Cookie header). */
-  private applyCookies(url: URL, headers: Record<string, string>): void {
-    const hasCookie = Object.keys(headers).some((k) => k.toLowerCase() === 'cookie')
-    if (hasCookie) return
-    const jar = this.cookieJar.get(this.originKey(url))
-    if (!jar || jar.size === 0) return
-    headers['Cookie'] = Array.from(jar.entries()).map(([k, v]) => `${k}=${v}`).join('; ')
-  }
-
-  /** Store `Set-Cookie` values from a response into the session jar,
-   * keyed by the response origin. */
-  private storeCookies(url: URL, setCookie: string | string[] | undefined): void {
-    if (!setCookie) return
-    const values = Array.isArray(setCookie) ? setCookie : [setCookie]
-    const key = this.originKey(url)
-    let jar = this.cookieJar.get(key)
-    if (!jar) {
-      jar = new Map<string, string>()
-      this.cookieJar.set(key, jar)
-    }
-    for (const raw of values) {
-      // The cookie pair is the first `;`-separated segment; the rest are
-      // attributes (Path, HttpOnly, …) we don't need for re-send.
-      const pair = raw.split(';')[0]
-      const eq = pair.indexOf('=')
-      if (eq <= 0) continue
-      const name = pair.slice(0, eq).trim()
-      const value = pair.slice(eq + 1).trim()
-      if (name) jar.set(name, value)
-    }
-  }
-
-  /** Origin key (`scheme://host:port`) for cookie scoping. */
-  private originKey(url: URL): string {
-    return `${url.protocol}//${url.host}`
-  }
-
   /** Drop Content-Type / Content-Length when a redirect collapses to GET. */
   private stripBodyHeaders(headers: Record<string, string>): Record<string, string> {
     const out: Record<string, string> = {}
@@ -911,9 +890,10 @@ class HTTPExecutionService {
     return out
   }
 
-  /** Clear the session cookie jar (called when a new collection opens). */
+  /** Clear every environment's cookie jar (called when a new collection
+   * opens). Delegates to the shared {@link cookieJarService}. */
   clearCookies(): void {
-    this.cookieJar.clear()
+    cookieJarService.clear()
   }
 
   /**
