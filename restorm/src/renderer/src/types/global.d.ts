@@ -23,6 +23,7 @@ import type {
   CreatedCliToken
 } from '../../../shared/cliTokens/cliTokenTypes'
 import type { CrashArmedState, CrashConsentState, CrashRecoveryNotice, CrashReviewRequest } from '../../../shared/crash/crashTypes'
+import type { CookieInput, CookieRow } from '../../../shared/cookies/cookieTypes'
 
 declare global {
   interface Window {
@@ -126,6 +127,15 @@ declare global {
         /** The plaintext is in this reply and nowhere else, ever. */
         create: (name: string, expiresInDays: number | null) => Promise<CliTokenResult<CreatedCliToken>>
         revoke: (id: string) => Promise<CliTokenResult<{ ok: true }>>
+      }
+      /** Per-environment session cookie jar (Cookie Manager). `envKey` = the
+       * active environment's id, or '' for the default jar. */
+      cookies: {
+        list: (envKey: string) => Promise<CookieRow[]>
+        add: (envKey: string, input: CookieInput) => Promise<CookieRow[]>
+        remove: (envKey: string, domain: string, path: string, key: string) => Promise<CookieRow[]>
+        clearDomain: (envKey: string, domain: string) => Promise<CookieRow[]>
+        clear: (envKey?: string) => Promise<CookieRow[]>
       }
       /** Silent auto-update surface (see `src/main/services/UpdateService.ts`). */
       update: {

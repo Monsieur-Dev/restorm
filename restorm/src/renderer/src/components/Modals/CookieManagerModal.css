@@ -1,0 +1,126 @@
+/* Cookie Manager modal. Colours come from the theme variables so the panel
+   follows every theme rather than pinning one palette. */
+
+.cookie-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cookie-manager-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cookie-manager-env-label {
+  color: var(--ecu-text-muted, #8a97a8);
+  font-size: 0.9rem;
+}
+
+.cookie-manager-env {
+  min-width: 220px;
+}
+
+.cookie-manager-spacer {
+  flex: 1;
+}
+
+.cookie-manager-empty {
+  margin: 0;
+  color: var(--ecu-text-muted, #8a97a8);
+  font-size: 0.9rem;
+}
+
+.cookie-manager-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cookie-manager-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px;
+  border-bottom: 1px solid var(--ecu-border, rgba(255, 255, 255, 0.08));
+}
+
+.cookie-manager-group-domain {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cookie-manager-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.cookie-manager-table th {
+  text-align: left;
+  padding: 4px 8px;
+  color: var(--ecu-text-muted, #8a97a8);
+  font-weight: 500;
+}
+
+.cookie-manager-table td {
+  padding: 4px 8px;
+  vertical-align: middle;
+}
+
+.cookie-manager-name {
+  font-family: var(--ecu-font-mono, monospace);
+}
+
+.cookie-manager-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 240px;
+}
+
+.cookie-manager-value > :first-child {
+  flex: 1;
+}
+
+.cookie-manager-muted {
+  color: var(--ecu-text-muted, #8a97a8);
+  white-space: nowrap;
+}
+
+.cookie-manager-flags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.cookie-manager-flag {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--ecu-accent-bg, rgba(124, 92, 255, 0.12));
+  color: var(--ecu-accent, #7c5cff);
+  font-size: 0.72rem;
+}
+
+.cookie-manager-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--ecu-border, rgba(255, 255, 255, 0.08));
+}
+
+.cookie-manager-add > :nth-child(1),
+.cookie-manager-add > :nth-child(3) {
+  flex: 1;
+}
+
+.cookie-manager-add > :nth-child(2) {
+  flex: 2;
+}
+
+.cookie-manager-add > :nth-child(4) {
+  width: 90px;
+  flex: none;
+}

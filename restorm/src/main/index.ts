@@ -96,6 +96,7 @@ import { activateHistoryRetention, applyHistoryRetentionNow } from './services/h
 import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
 import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerCliTokenIpc } from './ipc/cliTokenHandlers'
+import { registerCookieIpc } from './ipc/cookieHandlers'
 import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
 import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaunchInactive } from './mcp/mcpEnablement'
@@ -1423,6 +1424,7 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 // Auto-update IPC (window.api.update.*)
 registerUpdateIpc()
 registerCliTokenIpc()
+registerCookieIpc()
 
 // Crash-reporting IPC (window.api.crash.*). Read-only: it lets the renderer
 // discover whether reporting is armed so its own SDK can follow, and offers no

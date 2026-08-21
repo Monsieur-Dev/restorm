@@ -2723,5 +2723,27 @@
       "unavailable": "Les jetons sont indisponibles pour le moment. Réessayez dans un instant.",
       "plan-required": "Les exécutions sans interface font partie de l'offre Pro. Passez à Pro pour créer des jetons — vous pouvez toujours révoquer ceux que vous avez déjà."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Environnement",
+    "noEnvironment": "Aucun environnement",
+    "clearAll": "Tout vider",
+    "empty": "Aucun cookie stocké pour cet environnement pour l'instant.",
+    "clearOrigin": "Vider les cookies de {{domain}}",
+    "session": "Session",
+    "valueOf": "Valeur de {{name}}",
+    "save": "Enregistrer",
+    "deleteNamed": "Supprimer {{name}}",
+    "add": "Ajouter",
+    "column": {
+      "name": "Nom",
+      "value": "Valeur",
+      "path": "Chemin",
+      "expires": "Expiration",
+      "flags": "Attributs",
+      "actions": "Actions",
+      "domain": "Domaine"
+    }
   }
 }

@@ -24,6 +24,7 @@ import { DASHBOARD_URL } from '../../../../../shared/config/site'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { AboutModal } from '../../Modals/AboutModal'
 import { CliTokensModal } from '../../Modals/CliTokensModal'
+import { CookieManagerModal } from '../../Modals/CookieManagerModal'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
@@ -258,6 +259,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   // no state to share with the rest of the app.
   const [aboutOpen, setAboutOpen] = useState(false)
   const [cliTokensOpen, setCliTokensOpen] = useState(false)
+  const [cookieManagerOpen, setCookieManagerOpen] = useState(false)
   const handleCloseAbout = useCallback(() => { setAboutOpen(false) }, [])
 
   // Render a sidebar context-menu data structure as MenuBar items — the
@@ -581,6 +583,12 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
                 icon: 'key',
                 label: t('cliTokens.title'),
                 onSelect: () => { setCliTokensOpen(true); }
+              },
+              {
+                id: 'cookies',
+                icon: 'globe',
+                label: t('cookies.title', 'Cookies'),
+                onSelect: () => { setCookieManagerOpen(true); }
               }
             ]}
           />
@@ -601,6 +609,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
     />
     <AboutModal isOpen={aboutOpen} onClose={handleCloseAbout} />
     <CliTokensModal isOpen={cliTokensOpen} onClose={() => { setCliTokensOpen(false); }} />
+    <CookieManagerModal isOpen={cookieManagerOpen} onClose={() => { setCookieManagerOpen(false); }} />
     </>
   )
 }

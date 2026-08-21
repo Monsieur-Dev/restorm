@@ -55,6 +55,7 @@ import {
   type UpdateState
 } from '../../shared/update/updateTypes'
 import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashRecoveryNotice, type CrashReviewRequest } from '../../shared/crash/crashTypes'
+import { COOKIE_IPC, type CookieInput, type CookieRow } from '../../shared/cookies/cookieTypes'
 import {
   CLI_TOKEN_IPC,
   type CliTokenResult,
@@ -234,6 +235,26 @@ contextBridge.exposeInMainWorld('api', {
     /** Revoke one of the user's own tokens. */
     revoke: async (id: string): Promise<CliTokenResult<{ ok: true }>> => {
       return (await ipcRenderer.invoke(CLI_TOKEN_IPC.REVOKE, id)) as CliTokenResult<{ ok: true }>
+    }
+  },
+  // Per-environment session cookie jar (Cookie Manager). `envKey` is the
+  // active environment's id, or '' for the default jar. Mutations return
+  // the fresh list.
+  cookies: {
+    list: async (envKey: string): Promise<CookieRow[]> => {
+      return (await ipcRenderer.invoke(COOKIE_IPC.LIST, envKey)) as CookieRow[]
+    },
+    add: async (envKey: string, input: CookieInput): Promise<CookieRow[]> => {
+      return (await ipcRenderer.invoke(COOKIE_IPC.ADD, envKey, input)) as CookieRow[]
+    },
+    remove: async (envKey: string, domain: string, path: string, key: string): Promise<CookieRow[]> => {
+      return (await ipcRenderer.invoke(COOKIE_IPC.REMOVE, envKey, domain, path, key)) as CookieRow[]
+    },
+    clearDomain: async (envKey: string, domain: string): Promise<CookieRow[]> => {
+      return (await ipcRenderer.invoke(COOKIE_IPC.CLEAR_DOMAIN, envKey, domain)) as CookieRow[]
+    },
+    clear: async (envKey?: string): Promise<CookieRow[]> => {
+      return (await ipcRenderer.invoke(COOKIE_IPC.CLEAR, envKey)) as CookieRow[]
     }
   },
   update: {

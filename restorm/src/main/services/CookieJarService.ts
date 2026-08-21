@@ -19,34 +19,9 @@
 
 import { Cookie, CookieJar } from 'tough-cookie'
 import { logger } from 'electron-core-ui/main'
+import type { CookieInput, CookieRow } from '../../shared/cookies/cookieTypes'
 
-/** A cookie flattened for the renderer's Cookie Manager. */
-export interface CookieRow {
-  key: string
-  value: string
-  domain: string
-  path: string
-  /** ISO string, or null for a session cookie (no expiry). */
-  expires: string | null
-  secure: boolean
-  httpOnly: boolean
-  sameSite: string | null
-  /** true = host-only (no Domain attribute); false = domain cookie. */
-  hostOnly: boolean
-}
-
-/** A user-authored cookie to inject (Cookie Manager "add"). */
-export interface CookieInput {
-  key: string
-  value: string
-  domain: string
-  path?: string
-  /** ISO string; omitted/empty = session cookie. */
-  expires?: string
-  secure?: boolean
-  httpOnly?: boolean
-  sameSite?: string
-}
+export type { CookieInput, CookieRow }
 
 /** Synthesize an https URL for a domain so tough-cookie can scope a
  * user-added cookie (Secure cookies need an https context). */
