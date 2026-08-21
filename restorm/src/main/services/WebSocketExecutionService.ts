@@ -18,6 +18,7 @@ import type { AedesPublishPacket } from 'aedes'
 import { BrowserWindow } from 'electron'
 import { logger, withFirewallBypassSync } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { attachSessionCookies, captureSessionCookies } from './cookieRequestHelpers'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
@@ -1434,6 +1435,8 @@ class WebSocketExecutionService {
         // Wrap the synchronous `io(...)` itself (the socket connect fires
         // inside it); a wrap around the public method would have unwound
         // before this `await`-resumed continuation runs.
+        // Attach the environment jar's cookies to the engine.io handshake.
+        attachSessionCookies(requestId, resolved.resolvedUrl, resolved.headers)
         socket = withFirewallBypassSync(() => io(resolved.resolvedUrl, {
           extraHeaders: Object.keys(resolved.headers).length > 0 ? resolved.headers : undefined,
           forceNew: true,
@@ -1540,8 +1543,12 @@ class WebSocketExecutionService {
 
       let ws: WebSocket
       try {
+        // Attach the environment jar's cookies to the upgrade request, capture
+        // Set-Cookie from the 101 handshake.
+        attachSessionCookies(requestId, resolved.resolvedUrl, resolved.headers)
         // User-initiated connect — pre-authorise (see the socket.io path).
         ws = withFirewallBypassSync(() => new WebSocket(resolved.resolvedUrl, { headers: resolved.headers }))
+        ws.on('upgrade', (res) => { captureSessionCookies(requestId, resolved.resolvedUrl, res.headers['set-cookie']) })
       } catch (err) {
         fireClose((err as Error).message || 'Connection failed')
         return
@@ -1981,8 +1988,12 @@ class WebSocketExecutionService {
       let connected = false
 
       try {
+        // Attach the environment jar's cookies to the upgrade request (connection
+        // auth), and capture any Set-Cookie the 101 handshake returns.
+        attachSessionCookies(requestId, resolvedUrl, headers)
         // User-initiated connect — pre-authorise (see the socket.io path).
         const ws = withFirewallBypassSync(() => new WebSocket(resolvedUrl, { headers }))
+        ws.on('upgrade', (res) => { captureSessionCookies(requestId, resolvedUrl, res.headers['set-cookie']) })
 
         const connection: ActiveConnection = { requestId, kind: 'websocket', ws, startTime, messages }
         this.activeConnections.set(requestId, connection)
@@ -2090,6 +2101,8 @@ class WebSocketExecutionService {
       let socket: Socket
       try {
         // User-initiated connect — pre-authorise (see the streaming path).
+        // Attach the environment jar's cookies to the engine.io handshake.
+        attachSessionCookies(requestId, resolvedUrl, headers)
         socket = withFirewallBypassSync(() => io(resolvedUrl, {
           // Default transports (polling → upgrade to websocket). Forcing
           // websocket-only breaks the engine.io handshake in the Electron main

@@ -21,6 +21,7 @@ import { BrowserWindow } from 'electron'
 import { createClient } from 'graphql-sse'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { attachSessionCookies } from './cookieRequestHelpers'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
@@ -187,6 +188,11 @@ class GraphQLSubscriptionService {
 
       logger.info('[GraphQLSubscriptionService] Subscribing', { requestId, url: resolved.url })
       this.broadcastProgress(requestId, 'started')
+
+      // Attach the environment jar's cookies to the subscribe request (auth on
+      // subscribe). graphql-sse's default fetch does not surface the response to
+      // us, so Set-Cookie on the SSE stream is not captured here — attach only.
+      attachSessionCookies(requestId, resolved.url, resolved.headers)
 
       // Distinct-connections mode (the graphql-yoga default): one SSE connection
       // per subscribe, on the same GraphQL endpoint URL. Electron's main process
