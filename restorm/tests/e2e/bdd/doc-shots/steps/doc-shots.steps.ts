@@ -189,6 +189,59 @@ When(
   }
 )
 
+/** Open the Cookie jar workbench tab (View ▸ Cookie jar) and select the
+ * default "No environment" jar, where the seeded cookies live. Idempotent: a
+ * language switch keeps the workbench tab open, so this reopens only when the
+ * panel is absent, then re-selects the root node whose cookies we captured. */
+async function openCookieJar(p: Page): Promise<void> {
+  const panel = p.getByTestId('cookie-jar')
+  if (!(await panel.isVisible())) {
+    await p.locator('[data-testid="titlebar-menubar-item-view"]').click()
+    await p.locator('[data-testid="titlebar-menu-item-cookies"]').click()
+    await panel.waitFor({ state: 'visible' })
+  }
+  // The default "No environment" jar holds the seeded cookies.
+  await p.getByTestId('cookie-jar-tree-node-root').click()
+  await expect(p.getByTestId('cookie-jar-panes')).toBeVisible({ timeout: 10000 })
+}
+
+// A FIXED far-future expiry keeps the capture byte-identical run over run —
+// a relative `now + 7d` would render a different date every day and churn the
+// committed screenshots.
+const SEEDED_EXPIRY = '2035-06-01T00:00:00.000Z'
+
+When('I seed the cookie jar with example cookies', async () => {
+  const mcp = requireMcp()
+  const add = (input: Record<string, unknown>): Promise<unknown> => callEmbeddedMcpTool(mcp, 'add_cookie', input)
+  // A realistic spread: three origins, secure/httpOnly/SameSite flags, one
+  // persistent + two session cookies — the same set the cookie-manager e2e uses.
+  await add({ key: 'session_id', value: 's3cr3t-a1b2c3d4', domain: 'api.example.com', path: '/', secure: true, httpOnly: true, sameSite: 'Lax', expires: SEEDED_EXPIRY })
+  await add({ key: 'csrftoken', value: 'k9f2m1', domain: 'api.example.com', path: '/', secure: true })
+  await add({ key: 'theme', value: 'dark', domain: 'app.example.com', path: '/' })
+  await add({ key: 'cart', value: 'sku-42,sku-77', domain: 'shop.example.com', path: '/checkout' })
+})
+
+When('I open the Cookie jar', async () => {
+  await openCookieJar(requirePage())
+})
+
+When(
+  'I capture the Cookie jar for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      // The workbench tab survives a language switch, but re-assert it and the
+      // root selection per locale so a stray repaint can't photograph an empty
+      // or wrong-jar panel silently.
+      beforeShot: async () => { await openCookieJar(p) },
+      // The panel itself — the workbench chrome behind it carries nothing the
+      // documentation reader needs.
+      clipTo: () => p.getByTestId('cookie-jar')
+    })
+  }
+)
+
 When('I create a new project and import the ArtifactsMMO OpenAPI spec from its URL', async () => {
   const p = requirePage()
   // The project's absolute path shows in the status bar of every subsequent

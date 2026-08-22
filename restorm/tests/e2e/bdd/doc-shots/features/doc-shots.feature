@@ -12,6 +12,11 @@ Feature: Documentation screenshots
     And I create a new project and import the ArtifactsMMO OpenAPI spec from its URL
     And I open the imported request "Action Move" from folder "My characters"
     And I capture a screenshot for every locale to "{locale}/request-editor.png"
+    # The Cookie jar tool — seeded with example cookies, then captured per
+    # locale straight into the website's documentation assets.
+    And I seed the cookie jar with example cookies
+    And I open the Cookie jar
+    And I capture the Cookie jar for every locale to "{locale}/cookies-pot-cookies.png"
     # The account card and the tokens modal — the first captures this harness
     # feeds straight into the website's documentation assets.
     And I capture the account card for every locale to "{locale}/compte-menu-connecte.png"
