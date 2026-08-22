@@ -427,7 +427,8 @@
         "response": "Yanıt",
         "infos": "Bilgiler",
         "requestBody": "İstek gövdesi",
-        "graph": "Grafik"
+        "graph": "Grafik",
+        "cookies": "Çerezler"
       },
       "infos": {
         "sentAt": "Gönderilme",
@@ -443,6 +444,11 @@
         "select": "Ayrıntıları görüntülemek için bir yanıt seçin",
         "pin": "Yanıtı sabitle",
         "unpin": "Yanıt sabitlemesini kaldır"
+      },
+      "cookies": {
+        "sent": "Gönderilen",
+        "received": "Alınan",
+        "none": "Yok"
       }
     },
     "followRedirects": "Yönlendirmeleri izle",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Senaryoyu güncelle",
     "updateScenarioNode": "Senaryo düğümünü güncelle",
     "createInstance": "Yeni bir örnek oluştur",
-    "terminateInstance": "Bir örneği sonlandır"
+    "terminateInstance": "Bir örneği sonlandır",
+    "listCookies": "Çerezleri listele",
+    "addCookie": "Çerez ekle",
+    "removeCookie": "Çerezi kaldır",
+    "clearCookieDomain": "Bir alan adı için çerezleri temizle",
+    "clearCookies": "Tüm çerezleri temizle"
   },
   "odataFilter": {
     "detail": {
@@ -2745,6 +2756,18 @@
       "actions": "İşlemler",
       "domain": "Alan adı"
     },
-    "openFor": "{{domain}} için Çerez Yöneticisi'ni aç"
+    "openFor": "{{domain}} için Çerez Yöneticisi'ni aç",
+    "addTitle": "Çerez ekle",
+    "addForOrigin": "{{domain}} için çerez ekle",
+    "cancel": "İptal",
+    "confirmTitle": "Onayla",
+    "confirmDelete": "\"{{name}}\" çerezi silinsin mi?",
+    "confirmClearOrigin": "{{domain}} için tüm çerezler silinsin mi?",
+    "confirmClearAll": "Bu ortamdaki tüm çerezler silinsin mi?",
+    "deleteButton": "Sil",
+    "editTitle": "Çerez düzenle",
+    "editNamed": "{{name}} düzenle",
+    "confirmReplace": "\"{{name}}\" adlı bir çerez burada zaten var. Değiştirilsin mi?",
+    "replaceButton": "Değiştir"
   }
 }

@@ -57,6 +57,11 @@ interface ResponseHistoryHttpResponse {
   responseBody: string
   contentType?: string
   contentLength?: number
+  /** Cookies sent with the request / received across the redirect chain, so a
+   * past response can still populate the Cookies tab. Additive + optional: old
+   * records simply lack them (no file-format version bump). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   timings: {
     startedAt: string
     durationMs: number
@@ -65,6 +70,9 @@ interface ResponseHistoryHttpResponse {
 }
 
 interface ResponseHistoryODataResponse {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   type: 'odata'
   requestUrl: string
   requestMethod: string
@@ -93,6 +101,9 @@ interface ResponseHistoryODataResponse {
 }
 
 interface ResponseHistoryGraphQLResponse {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   type: 'graphql'
   requestUrl: string
   requestHeaders: ResponseHistoryKeyValue[]
@@ -134,6 +145,9 @@ interface ResponseHistoryGrpcMessage {
 }
 
 interface ResponseHistorySoapResponse {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   type: 'soap'
   requestUrl: string
   requestSoapAction: string
@@ -163,6 +177,8 @@ interface ResponseHistoryWebSocketResponse {
   protocol: string
   connected: boolean
   messages: ResponseHistoryWebSocketMessage[]
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   timings: {
     startedAt: string
     durationMs: number
@@ -178,6 +194,9 @@ interface ResponseHistoryJsonRpcError {
 }
 
 interface ResponseHistoryJsonRpcResponse {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   type: 'jsonrpc'
   requestUrl: string
   requestHeaders: ResponseHistoryKeyValue[]
@@ -205,6 +224,9 @@ export interface ResponseHistoryJsonRpcBatchChild {
 }
 
 interface ResponseHistoryJsonRpcBatchResponse {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   type: 'jsonrpcBatch'
   requestUrl: string
   requestHeaders: ResponseHistoryKeyValue[]
@@ -218,6 +240,9 @@ interface ResponseHistoryJsonRpcBatchResponse {
 }
 
 interface ResponseHistoryTrpcResponse {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   type: 'trpc'
   requestUrl: string
   requestProcedure: string
@@ -246,6 +271,9 @@ interface ResponseHistorySseFrame {
 }
 
 interface ResponseHistorySseResponse {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: ResponseHistoryKeyValue[]
+  receivedCookies?: ResponseHistoryKeyValue[]
   type: 'sse'
   requestUrl: string
   connected: boolean

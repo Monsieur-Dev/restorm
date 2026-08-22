@@ -55,7 +55,7 @@ import type {
   McpLogsTab,
   BreadcrumbItem
 } from '../../../shared/types/editor'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, COOKIE_JAR_TAB_ID, type MiniBrowserTab, type CookieJarTab } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
   rootItems: FolderItem[]
@@ -561,6 +561,17 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         titleString: 'MCP logs',
         allowFullscreen: true
       } as McpLogsTab
+    }
+    // Cookie jar singleton — same shell pattern; without this branch the tab
+    // silently dropped on every file reopen (the bug the others document).
+    if (tabId === COOKIE_JAR_TAB_ID) {
+      return {
+        id: COOKIE_JAR_TAB_ID,
+        tabType: 'cookie-jar',
+        title: 'Cookie jar',
+        titleString: 'Cookie jar',
+        allowFullscreen: true
+      } as CookieJarTab
     }
     const parsed = parseTabId(tabId)
     if (!parsed) return null

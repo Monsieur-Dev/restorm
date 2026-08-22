@@ -427,7 +427,8 @@
         "response": "Antwoord",
         "infos": "Info",
         "requestBody": "Verzoekbody",
-        "graph": "Grafiek"
+        "graph": "Grafiek",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Verzonden op",
@@ -443,6 +444,11 @@
         "select": "Selecteer een antwoord om details te bekijken",
         "pin": "Antwoord vastmaken",
         "unpin": "Antwoord losmaken"
+      },
+      "cookies": {
+        "sent": "Verzonden",
+        "received": "Ontvangen",
+        "none": "Geen"
       }
     },
     "followRedirects": "Omleidingen volgen",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Een scenario bijwerken",
     "updateScenarioNode": "Een scenarioknooppunt bijwerken",
     "createInstance": "Een nieuwe instantie maken",
-    "terminateInstance": "Een instantie beëindigen"
+    "terminateInstance": "Een instantie beëindigen",
+    "listCookies": "Cookies opsommen",
+    "addCookie": "Een cookie toevoegen",
+    "removeCookie": "Een cookie verwijderen",
+    "clearCookieDomain": "Cookies voor een domein wissen",
+    "clearCookies": "Alle cookies wissen"
   },
   "odataFilter": {
     "detail": {
@@ -2745,6 +2756,18 @@
       "actions": "Acties",
       "domain": "Domein"
     },
-    "openFor": "Cookiebeheer openen voor {{domain}}"
+    "openFor": "Cookiebeheer openen voor {{domain}}",
+    "addTitle": "Een cookie toevoegen",
+    "addForOrigin": "Een cookie toevoegen voor {{domain}}",
+    "cancel": "Annuleren",
+    "confirmTitle": "Bevestigen",
+    "confirmDelete": "De cookie \"{{name}}\" verwijderen?",
+    "confirmClearOrigin": "Alle cookies voor {{domain}} verwijderen?",
+    "confirmClearAll": "Alle cookies in deze omgeving verwijderen?",
+    "deleteButton": "Verwijderen",
+    "editTitle": "Een cookie bewerken",
+    "editNamed": "{{name}} bewerken",
+    "confirmReplace": "Er bestaat hier al een cookie met de naam \"{{name}}\". Vervangen?",
+    "replaceButton": "Vervangen"
   }
 }

@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Cookies – endlich richtig gemacht: ein Cookie-Glas pro Umgebung.**
+**Cookie jar — ein Cookie-Glas pro Umgebung.**
 
 - **Jede Umgebung behält ihre eigenen Cookies.** Melden Sie sich aus zwei Umgebungen an Ihrer Dev-API und Ihrer Prod-API an – ihre Sitzungen vermischen sich nie: Ein in der einen erfasstes Cookie wird auch nur an diese zurückgesendet. Ablaufdatum, `Path`, `Domain` samt Subdomains, `Secure`, `HttpOnly` und `SameSite` werden jetzt beachtet statt verworfen.
-- **Sehen und bearbeiten Sie, was gespeichert ist.** Ein neuer Cookie-Manager – **Ansicht → Cookies** – listet die Cookies jeder Umgebung, nach Ursprung gruppiert: Bearbeiten Sie einen Wert, löschen Sie ein Cookie, leeren Sie einen Ursprung oder das ganze Glas, oder fügen Sie ein Cookie von Hand hinzu. Wenn eine Antwort Cookies setzt, öffnet ein 🍪-Chip an der Antwort den Manager direkt bei diesem Ursprung.
+- **Lernen Sie die Cookie jar kennen.** Ein neuer Tab der Arbeitsfläche — **Ansicht ▸ Cookie jar** — listet die Cookies jeder Umgebung, nach Domain gruppiert in einklappbaren Bereichen: Bearbeiten Sie einen Wert, löschen Sie eines, leeren Sie eine Domain oder das ganze Glas, oder fügen Sie ein Cookie von Hand hinzu. Er aktualisiert sich live, während Ihre Anfragen Cookies setzen.
+- **Sehen Sie, was jede Anfrage gesendet und empfangen hat.** Jede Anfrage hat jetzt einen **Cookies**-Tab neben Antwort und Infos, der die mit dem Aufruf gesendeten Cookies und die zurückempfangenen Cookies zeigt — einschließlich der bei einer Weiterleitung gesetzten Cookies, die die endgültige Antwort nie erreichen. Er ist auch bei früheren Antworten in Ihrem Verlauf vorhanden.
 - **Cookie-Logins funktionieren einfach.** Eine Anfrage, die `Set-Cookie` zurückgibt, wird erfasst und bei den folgenden geschützten Aufrufen automatisch wieder mitgesendet – auch über einen ganzen Szenario-Lauf hinweg, bei dem jeder Schritt dasselbe Glas der Umgebung nutzt.
-- **Mehr als nur REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC und SSE senden und speichern jetzt alle Cookies, und WebSocket, Socket.IO und STOMP übertragen sie beim Verbindungs-Handshake.
+- **Cookies bleiben erhalten wie im Browser.** Cookies mit einem Ablaufdatum werden pro Projekt gespeichert und beim erneuten Öffnen wieder geladen; Sitzungs-Cookies werden beim Neustart verworfen — genau wie es ein Browser täte.
+- **Mehr als nur REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC und SSE senden und speichern jetzt alle Cookies, und WebSocket überträgt sie beim Verbindungs-Handshake.
 - **Cookies können Ihre Variablen nutzen.** Tippen Sie `{{token}}` in ein von Hand hinzugefügtes Cookie, und es wird beim Absenden der Anfrage gegen die aktive Umgebung aufgelöst.
+
+Korrekturen:
+
+- **Das automatische Speichern erfasst jetzt auch Umgebungen in Ordnern.** Das Hinzufügen oder Umbenennen einer Unterumgebung wird im Modus für automatisches Speichern sofort gespeichert — keine „Vor dem Schließen speichern?“-Abfrage mehr für eine Änderung, die ohnehin auf der Festplatte landen sollte.
 
 ## v1.0.4
 

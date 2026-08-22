@@ -426,7 +426,8 @@
         "response": "响应",
         "infos": "信息",
         "requestBody": "请求正文",
-        "graph": "图表"
+        "graph": "图表",
+        "cookies": "Cookie"
       },
       "infos": {
         "sentAt": "发送时间",
@@ -442,6 +443,11 @@
         "select": "选择一个响应以查看详情",
         "pin": "固定响应",
         "unpin": "取消固定响应"
+      },
+      "cookies": {
+        "sent": "已发送",
+        "received": "已接收",
+        "none": "无"
       }
     },
     "followRedirects": "跟随重定向",
@@ -2295,7 +2301,12 @@
     "updateScenario": "更新场景",
     "updateScenarioNode": "更新场景节点",
     "createInstance": "创建新实例",
-    "terminateInstance": "终止实例"
+    "terminateInstance": "终止实例",
+    "listCookies": "列出 Cookie",
+    "addCookie": "添加 Cookie",
+    "removeCookie": "删除 Cookie",
+    "clearCookieDomain": "清除某个域的 Cookie",
+    "clearCookies": "清除所有 Cookie"
   },
   "odataFilter": {
     "detail": {
@@ -2744,6 +2755,18 @@
       "actions": "操作",
       "domain": "域"
     },
-    "openFor": "打开 {{domain}} 的 Cookie 管理器"
+    "openFor": "打开 {{domain}} 的 Cookie 管理器",
+    "addTitle": "添加 Cookie",
+    "addForOrigin": "为 {{domain}} 添加 Cookie",
+    "cancel": "取消",
+    "confirmTitle": "确认",
+    "confirmDelete": "删除 Cookie “{{name}}”？",
+    "confirmClearOrigin": "删除 {{domain}} 的所有 Cookie？",
+    "confirmClearAll": "删除此环境中的每一个 Cookie？",
+    "deleteButton": "删除",
+    "editTitle": "编辑 Cookie",
+    "editNamed": "编辑 {{name}}",
+    "confirmReplace": "此处已存在名为 “{{name}}” 的 Cookie。是否替换？",
+    "replaceButton": "替换"
   }
 }

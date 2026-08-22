@@ -7,6 +7,7 @@
  * cookie rows; every mutation returns the fresh list so the modal can
  * re-render without a second round trip.
  */
+import { BrowserWindow } from 'electron'
 import { z } from 'zod'
 import { validatedHandle } from 'electron-core-ui'
 import { COOKIE_IPC } from '../../shared/cookies/cookieTypes'
@@ -29,6 +30,13 @@ const clearDomainArgs = z.tuple([z.string(), z.string()])
 const clearArgs = z.tuple([z.string().optional()])
 
 export function registerCookieIpc(): void {
+  // Push a live-refresh to every window whenever a jar mutates — a request
+  // captured a Set-Cookie, or the UI added / removed / cleared cookies.
+  cookieJarService.setChangeNotifier(() => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.send(COOKIE_IPC.CHANGED)
+    }
+  })
   validatedHandle(COOKIE_IPC.LIST, envKeyArgs, (_event, [envKey]) => cookieJarService.list(envKey))
   validatedHandle(COOKIE_IPC.ADD, addArgs, (_event, [envKey, input]) => {
     cookieJarService.addCookie(envKey, input)

@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Cookies, gjort på rätt sätt — en burk per miljö.**
+**Cookie jar — en burk cookies per miljö.**
 
 - **Varje miljö har sina egna cookies.** Logga in mot ditt dev-API och ditt prod-API från två miljöer, och deras sessioner blandas aldrig — en cookie som fångas i den ena skickas bara tillbaka i just den. Utgång, `Path`, `Domain` och underdomäner, `Secure`, `HttpOnly` och `SameSite` respekteras nu i stället för att kastas bort.
-- **Se och redigera det som lagras.** En ny Cookie-hanterare — **Visa → Cookies** — listar varje miljös cookies grupperade efter ursprung: redigera ett värde, ta bort en, rensa ett ursprung eller hela burken, eller lägg till en cookie för hand. När ett svar sätter cookies öppnar en 🍪-bricka på svaret hanteraren direkt på det ursprunget.
+- **Möt Cookie jar.** En ny flik i arbetsytan — **Visa ▸ Cookie jar** — listar varje miljös cookies grupperade efter domän i hopfällbara paneler: redigera ett värde, ta bort en, rensa en domän eller hela burken, eller lägg till en cookie för hand. Den uppdateras i realtid när dina förfrågningar sätter cookies.
+- **Se vad varje förfrågan skickade och tog emot.** Varje förfrågan har nu en **Cookies**-flik bredvid Svar och Info, som visar de cookies som skickades med anropet och de cookies som togs emot tillbaka — inklusive cookies som sätts vid en omdirigering och aldrig når det slutliga svaret. Den finns även på tidigare svar i din historik.
 - **Cookie-inloggningar bara fungerar.** En förfrågan som returnerar `Set-Cookie` fångas och spelas upp automatiskt i de skyddade anrop som följer — även genom en scenariokörning, där varje steg delar miljöns burk.
-- **Bortom REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC och SSE skickar och lagrar nu cookies, och WebSocket, Socket.IO och STOMP bär med dem i anslutningens handskakning.
+- **Cookies består som i en webbläsare.** Cookies med en utgång sparas per projekt och läses in igen när du öppnar det på nytt; sessionscookies kastas när du startar om — precis som en webbläsare skulle göra.
+- **Bortom REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC och SSE skickar och lagrar nu cookies, och WebSocket bär med dem i anslutningens handskakning.
 - **Cookies kan använda dina variabler.** Skriv `{{token}}` i en cookie som du lägger till för hand, så löses den mot den aktiva miljön när förfrågan skickas.
+
+Rättningar:
+
+- **Autospar omfattar nu miljöer inuti mappar.** Att lägga till eller byta namn på en undermiljö sparas direkt i autospar-läget — inget mer ”spara innan stängning?”-meddelande för en ändring som ändå var tänkt att ligga på disk.
 
 ## v1.0.4
 

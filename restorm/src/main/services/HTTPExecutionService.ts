@@ -14,6 +14,8 @@ import { request as undiciRequest, type Dispatcher } from 'undici'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { cookieJarService } from './CookieJarService'
+import { parseCookiePairs, parseSetCookies } from './cookieRequestHelpers'
+import type { CookiePair } from '../../shared/cookies/cookieTypes'
 import type { ResolutionContexts, TransformedContext } from './ContextServiceTypes'
 import { websocketExecutionService } from './WebSocketExecutionService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
@@ -113,6 +115,10 @@ export interface HTTPExecutionResult {
    * Surfaced so the renderer's response panel can show the auth
    * headers that were merged in at dispatch time. */
   requestHeaders?: Record<string, string>
+  /** Cookies sent with the request / received across the redirect chain,
+   * for the response-side Cookies tab. */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 /** Active request info */
@@ -484,6 +490,8 @@ class HTTPExecutionService {
         // Clone `headers` so downstream mutations on the request
         // path don't retroactively edit the result we're returning.
         requestHeaders: { ...headers },
+        ...(result.sentCookies.length > 0 ? { sentCookies: result.sentCookies } : {}),
+        ...(result.receivedCookies.length > 0 ? { receivedCookies: result.receivedCookies } : {}),
         timings: { startedAt, durationMs }
       }
     } catch (err) {
@@ -783,10 +791,16 @@ class HTTPExecutionService {
     /** Drives cookie-jar scoping (per active environment) + `{{var}}`
      * resolution of jar-injected cookie values. Absent = the default jar. */
     requestId?: string
-  }): Promise<{ statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string; bodyIsBase64?: boolean }> {
+  }): Promise<{ statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string; bodyIsBase64?: boolean; sentCookies: CookiePair[]; receivedCookies: CookiePair[] }> {
     const { followRedirects = true } = options
     const MAX_REDIRECTS = 10
     const envKey = this.cookieEnvKey(options.requestId)
+
+    // Accumulated for the response-side Cookies tab: what the initial request
+    // sent (hop 0's effective Cookie header) and everything received across the
+    // whole redirect chain (each hop's Set-Cookie).
+    const sentCookies: CookiePair[] = []
+    const receivedCookies: CookiePair[] = []
 
     let currentUrl = options.url
     let currentMethod = options.method
@@ -815,6 +829,12 @@ class HTTPExecutionService {
       if (cookieString !== undefined && options.requestId !== undefined && cookieString.includes('{{')) {
         currentHeaders['Cookie'] = contextService.resolveValue(cookieString, options.requestId)
       }
+      if (hop === 0) {
+        // The effective Cookie header actually sent with the user's request
+        // (jar-injected or user-supplied — whichever `applyCookies` left in place).
+        const sentHeader = Object.entries(currentHeaders).find(([k]) => k.toLowerCase() === 'cookie')?.[1]
+        if (sentHeader) sentCookies.push(...parseCookiePairs(sentHeader))
+      }
 
       const response = await this.dispatchOnce({
         url: currentUrl,
@@ -835,6 +855,9 @@ class HTTPExecutionService {
 
       // Store any Set-Cookie the server returned into this environment's jar.
       cookieJarService.storeCookies(envKey, currentUrl.href, response.headers['set-cookie'])
+      // Also surface every Set-Cookie (this hop included, so redirects that set
+      // a cookie before the final 200 are still shown in the Cookies tab).
+      receivedCookies.push(...parseSetCookies(response.headers['set-cookie']))
       previousOrigin = currentUrl.origin
 
       const isRedirect = response.statusCode >= 300 && response.statusCode < 400
@@ -844,7 +867,7 @@ class HTTPExecutionService {
       if (!followRedirects || !isRedirect || !location) {
         // Strip Set-Cookie from the surfaced headers? No — keep them so
         // the user can SEE what was set; the jar already captured them.
-        return response
+        return { ...response, sentCookies, receivedCookies }
       }
 
       // Too many redirects: stop and surface an explicit, user-facing error

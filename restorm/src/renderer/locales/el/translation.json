@@ -427,7 +427,8 @@
         "response": "Απάντηση",
         "infos": "Πληροφορίες",
         "requestBody": "Σώμα αιτήματος",
-        "graph": "Γράφημα"
+        "graph": "Γράφημα",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Στάλθηκε στις",
@@ -443,6 +444,11 @@
         "select": "Επιλέξτε μια απάντηση για να δείτε τις λεπτομέρειες",
         "pin": "Καρφίτσωμα απάντησης",
         "unpin": "Ξεκαρφίτσωμα απάντησης"
+      },
+      "cookies": {
+        "sent": "Απεσταλμένα",
+        "received": "Ληφθέντα",
+        "none": "Κανένα"
       }
     },
     "followRedirects": "Παρακολούθηση ανακατευθύνσεων",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Ενημέρωση σεναρίου",
     "updateScenarioNode": "Ενημέρωση κόμβου σεναρίου",
     "createInstance": "Δημιουργία νέας περίπτωσης",
-    "terminateInstance": "Τερματισμός περίπτωσης"
+    "terminateInstance": "Τερματισμός περίπτωσης",
+    "listCookies": "Λίστα cookies",
+    "addCookie": "Προσθήκη cookie",
+    "removeCookie": "Αφαίρεση cookie",
+    "clearCookieDomain": "Εκκαθάριση cookies για έναν τομέα",
+    "clearCookies": "Εκκαθάριση όλων των cookies"
   },
   "odataFilter": {
     "detail": {
@@ -2745,6 +2756,18 @@
       "actions": "Ενέργειες",
       "domain": "Τομέας"
     },
-    "openFor": "Άνοιγμα διαχείρισης cookies για {{domain}}"
+    "openFor": "Άνοιγμα διαχείρισης cookies για {{domain}}",
+    "addTitle": "Προσθήκη cookie",
+    "addForOrigin": "Προσθήκη cookie για {{domain}}",
+    "cancel": "Ακύρωση",
+    "confirmTitle": "Επιβεβαίωση",
+    "confirmDelete": "Διαγραφή του cookie «{{name}}»;",
+    "confirmClearOrigin": "Εκκαθάριση όλων των cookies για {{domain}};",
+    "confirmClearAll": "Εκκαθάριση όλων των cookies σε αυτό το περιβάλλον;",
+    "deleteButton": "Διαγραφή",
+    "editTitle": "Επεξεργασία cookie",
+    "editNamed": "Επεξεργασία {{name}}",
+    "confirmReplace": "Υπάρχει ήδη ένα cookie με το όνομα «{{name}}» εδώ. Να αντικατασταθεί;",
+    "replaceButton": "Αντικατάσταση"
   }
 }

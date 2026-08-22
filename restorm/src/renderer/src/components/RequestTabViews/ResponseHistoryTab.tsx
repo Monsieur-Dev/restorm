@@ -176,6 +176,7 @@ export interface ResponseHistoryTabProps {
   buildResponseView: (detail: ResponseHistoryDetail) => {
     infosContent?: React.ReactNode | undefined
     responseContent?: React.ReactNode | undefined
+    cookiesContent?: React.ReactNode | undefined
     jsonData?: unknown
   }
 }
@@ -271,8 +272,8 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     })
   }, [entries, formatDate, handleTogglePin, t])
 
-  const { infosContent, responseContent, jsonData } = useMemo(() => {
-    if (!selectedDetail) return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+  const { infosContent, responseContent, cookiesContent, jsonData } = useMemo(() => {
+    if (!selectedDetail) return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
     return buildResponseView(selectedDetail)
   }, [selectedDetail, buildResponseView])
 
@@ -404,6 +405,20 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
       )
     })
 
+    // Cookies tab for a past response — the stored sent/received cookies.
+    if (cookiesContent) {
+      tabs.push({
+        id: 'cookies',
+        label: t('requestTab.responses.tabs.cookies'),
+        useScrollableElement: true,
+        content: (
+          <div style={{ boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
+            {cookiesContent}
+          </div>
+        )
+      })
+    }
+
     if (formattedJson) {
       tabs.push({
         id: 'graph',
@@ -420,7 +435,7 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
     }
 
     return tabs
-  }, [selectedDetail, responseContent, infosContent, formattedJson, isDarkTheme, t, entries.length, requestBodyPayload])
+  }, [selectedDetail, responseContent, infosContent, cookiesContent, formattedJson, isDarkTheme, t, entries.length, requestBodyPayload])
 
   const resolvedActiveTabId = useMemo(() => {
     if (responseTabs.some((tab) => tab.id === activeTabId)) return activeTabId

@@ -427,7 +427,8 @@
         "response": "Svar",
         "infos": "Info",
         "requestBody": "Forespørsels-body",
-        "graph": "Graf"
+        "graph": "Graf",
+        "cookies": "Informasjonskapsler"
       },
       "infos": {
         "sentAt": "Sendt",
@@ -443,6 +444,11 @@
         "select": "Velg et svar for å se detaljer",
         "pin": "Fest svar",
         "unpin": "Løsne svar"
+      },
+      "cookies": {
+        "sent": "Sendt",
+        "received": "Mottatt",
+        "none": "Ingen"
       }
     },
     "followRedirects": "Følg omdirigeringer",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Oppdater et scenario",
     "updateScenarioNode": "Oppdater en scenarionode",
     "createInstance": "Opprett en ny instans",
-    "terminateInstance": "Avslutt en instans"
+    "terminateInstance": "Avslutt en instans",
+    "listCookies": "List informasjonskapsler",
+    "addCookie": "Legg til en informasjonskapsel",
+    "removeCookie": "Slett en informasjonskapsel",
+    "clearCookieDomain": "Tøm informasjonskapsler for et domene",
+    "clearCookies": "Tøm alle informasjonskapsler"
   },
   "odataFilter": {
     "detail": {
@@ -2745,6 +2756,18 @@
       "actions": "Handlinger",
       "domain": "Domene"
     },
-    "openFor": "Åpne informasjonskapsel-behandleren for {{domain}}"
+    "openFor": "Åpne informasjonskapsel-behandleren for {{domain}}",
+    "addTitle": "Legg til en informasjonskapsel",
+    "addForOrigin": "Legg til en informasjonskapsel for {{domain}}",
+    "cancel": "Avbryt",
+    "confirmTitle": "Bekreft",
+    "confirmDelete": "Slette informasjonskapselen «{{name}}»?",
+    "confirmClearOrigin": "Slette alle informasjonskapsler for {{domain}}?",
+    "confirmClearAll": "Slette alle informasjonskapsler i dette miljøet?",
+    "deleteButton": "Slett",
+    "editTitle": "Rediger en informasjonskapsel",
+    "editNamed": "Rediger {{name}}",
+    "confirmReplace": "En informasjonskapsel med navnet «{{name}}» finnes allerede her. Erstatte den?",
+    "replaceButton": "Erstatt"
   }
 }

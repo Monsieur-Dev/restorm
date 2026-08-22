@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Cookie, làm đúng cách — mỗi môi trường một hũ riêng.**
+**Cookie jar — mỗi môi trường một hũ cookie riêng.**
 
 - **Mỗi môi trường giữ cookie riêng của mình.** Đăng nhập vào API dev và API prod từ hai môi trường khác nhau, phiên của chúng không bao giờ lẫn lộn — một cookie thu được ở môi trường này chỉ được gửi lại trong chính môi trường đó. Thời hạn, `Path`, `Domain` cùng các tên miền phụ, `Secure`, `HttpOnly` và `SameSite` giờ đây được tôn trọng chứ không bị bỏ qua.
-- **Xem và chỉnh sửa những gì đã lưu.** Trình quản lý Cookie mới — **Xem → Cookie** — liệt kê cookie của từng môi trường được nhóm theo nguồn gốc: chỉnh một giá trị, xóa một cookie, dọn sạch một nguồn hoặc cả hũ, hoặc thêm cookie thủ công. Khi một phản hồi đặt cookie, huy hiệu 🍪 trên phản hồi sẽ mở trình quản lý ngay tại nguồn gốc đó.
+- **Làm quen với Cookie jar.** Một tab không gian làm việc mới — **Xem ▸ Cookie jar** — liệt kê cookie của từng môi trường được nhóm theo tên miền trong các ngăn có thể thu gọn: chỉnh một giá trị, xóa một cookie, dọn sạch một tên miền hoặc cả hũ, hoặc thêm cookie thủ công. Nó làm mới trực tiếp mỗi khi các yêu cầu của bạn thiết lập cookie.
+- **Xem mỗi yêu cầu đã gửi và nhận những gì.** Giờ đây mỗi yêu cầu đều có một tab **Cookies** bên cạnh Response và Info, hiển thị các cookie được gửi kèm lời gọi và các cookie nhận về — kể cả cookie được thiết lập trong một lần chuyển hướng, vốn không bao giờ đến được phản hồi cuối cùng. Nó cũng có mặt trên các phản hồi trong quá khứ ở lịch sử của bạn.
 - **Đăng nhập bằng cookie hoạt động ngon lành.** Một yêu cầu trả về `Set-Cookie` sẽ được thu lại và tự động phát lại ở các lệnh gọi được bảo vệ tiếp theo — kể cả trong suốt một lần chạy kịch bản, nơi mỗi bước dùng chung hũ cookie của môi trường.
-- **Vượt ra ngoài REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC và SSE giờ đều gửi và lưu cookie, còn WebSocket, Socket.IO và STOMP mang chúng theo trong quá trình bắt tay kết nối.
+- **Cookie được lưu giữ như trong trình duyệt.** Cookie có thời hạn được lưu theo từng dự án và được tải lại khi bạn mở lại dự án; cookie phiên bị loại bỏ khi bạn khởi động lại — đúng như một trình duyệt sẽ làm.
+- **Vượt ra ngoài REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC và SSE giờ đều gửi và lưu cookie, còn WebSocket mang chúng theo trong quá trình bắt tay kết nối.
 - **Cookie có thể dùng biến của bạn.** Gõ `{{token}}` vào một cookie bạn thêm thủ công và nó sẽ được phân giải theo môi trường đang hoạt động khi yêu cầu được gửi đi.
+
+Sửa lỗi:
+
+- **Tự động lưu giờ bao gồm cả các môi trường bên trong thư mục.** Ở chế độ tự động lưu, việc thêm hoặc đổi tên một môi trường con được lưu ngay lập tức — không còn lời nhắc «lưu trước khi đóng?» cho một thay đổi vốn đã phải được ghi xuống đĩa.
 
 ## v1.0.4
 

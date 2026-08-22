@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Cookies, feitos como deve ser — um frasco por ambiente.**
+**O Cookie jar — um frasco de cookies por ambiente.**
 
 - **Cada ambiente mantém os seus próprios cookies.** Inicie sessão na sua API de desenvolvimento e na sua API de produção a partir de dois ambientes e as sessões nunca se cruzam — um cookie capturado num só volta a ser enviado apenas nesse mesmo. A validade, o `Path`, o `Domain` e os subdomínios, `Secure`, `HttpOnly` e `SameSite` passam a ser respeitados, em vez de descartados.
-- **Veja e edite o que está guardado.** Um novo Gestor de Cookies — **Ver → Cookies** — lista os cookies de cada ambiente agrupados por origem: edite um valor, elimine um, limpe uma origem ou o frasco inteiro, ou adicione um cookie manualmente. Quando uma resposta define cookies, um selo 🍪 na resposta abre o gestor diretamente nessa origem.
+- **Conheça o Cookie jar.** Um novo separador do plano de trabalho — **Ver ▸ Cookie jar** — lista os cookies de cada ambiente agrupados por domínio em painéis recolhíveis: edite um valor, elimine um, limpe um domínio ou o frasco inteiro, ou adicione um cookie manualmente. Atualiza-se em direto à medida que os seus pedidos definem cookies.
+- **Veja o que cada pedido enviou e recebeu.** Cada pedido tem agora um separador **Cookies** ao lado de Resposta e Informações, que mostra os cookies enviados com a chamada e os cookies recebidos — incluindo os cookies definidos numa redireção que nunca chegam à resposta final. Está também presente nas respostas passadas do seu histórico.
 - **Os inícios de sessão por cookie simplesmente funcionam.** Um pedido que devolve `Set-Cookie` é capturado e reproduzido automaticamente nas chamadas protegidas que se seguem — incluindo ao longo da execução de um cenário, onde cada passo partilha o frasco do ambiente.
-- **Para além do REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC e SSE passam a enviar e a guardar cookies, e o WebSocket, o Socket.IO e o STOMP transportam-nos no handshake da ligação.
+- **Os cookies persistem como num navegador.** Os cookies com uma validade são guardados por projeto e recarregados quando o reabre; os cookies de sessão são descartados quando reinicia — exatamente como faria um navegador.
+- **Para além do REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC e SSE passam a enviar e a guardar cookies, e o WebSocket transporta-os no handshake da ligação.
 - **Os cookies podem usar as suas variáveis.** Escreva `{{token}}` num cookie que adicione manualmente e este é resolvido em relação ao ambiente ativo quando o pedido é enviado.
+
+Correções:
+
+- **A gravação automática abrange agora os ambientes dentro de pastas.** Adicionar ou renomear um subambiente é gravado de imediato no modo de gravação automática — sem mais o pedido «guardar antes de fechar?» para uma alteração que já se destinava a estar no disco.
 
 ## v1.0.4
 

@@ -2,7 +2,10 @@
  * CookieJarService — the real (tough-cookie) cookie engine: per-environment
  * isolation, expiry, Path/Domain scoping, and the Cookie Manager mutations.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 vi.mock('electron-core-ui/main', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
@@ -83,5 +86,45 @@ describe('CookieJarService', () => {
     cookieJarService.clear(ENV_A)
     expect(cookieHeader(ENV_A, URL_A)).toBeUndefined()
     expect(cookieHeader(ENV_B, URL_A)).toBe('b=2')
+  })
+})
+
+describe('CookieJarService persistence', () => {
+  let dir: string
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'cookie-persist-'))
+    cookieJarService.setPersistBaseDir(dir)
+    cookieJarService.setProject('proj-1')
+  })
+
+  afterEach(() => {
+    // Reset the project (so later non-persistence tests keep projectId null) and
+    // drop the temp dir.
+    cookieJarService.setProject(null)
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('reloads persistent cookies but drops session cookies on reopen', () => {
+    const future = new Date(Date.now() + 3600_000).toUTCString()
+    cookieJarService.storeCookies(ENV_A, URL_A, `persistent=1; Expires=${future}`)
+    cookieJarService.storeCookies(ENV_A, URL_A, 'session=2') // no Expires → session
+    cookieJarService.flush()
+    // Close (flush + clear in-memory) then reopen the same project.
+    cookieJarService.setProject(null)
+    cookieJarService.setProject('proj-1')
+    expect(cookieJarService.list(ENV_A).map((r) => r.key)).toEqual(['persistent'])
+  })
+
+  it('isolates persisted cookies by project id', () => {
+    const future = new Date(Date.now() + 3600_000).toUTCString()
+    cookieJarService.storeCookies(ENV_A, URL_A, `a=1; Expires=${future}`)
+    cookieJarService.flush()
+    // A different project sees nothing…
+    cookieJarService.setProject('proj-2')
+    expect(cookieJarService.list(ENV_A)).toEqual([])
+    // …and the original still has its cookie on reopen.
+    cookieJarService.setProject('proj-1')
+    expect(cookieJarService.list(ENV_A).map((r) => r.key)).toEqual(['a'])
   })
 })

@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Cookie-uri, făcute cum trebuie — câte un borcan pentru fiecare mediu.**
+**Cookie jar — câte un borcan de cookie-uri pentru fiecare mediu.**
 
-- **Fiecare mediu își păstrează propriile cookie-uri.** Autentifică-te la API-ul tău de dezvoltare și la cel de producție din două medii, iar sesiunile lor nu se amestecă niciodată — un cookie capturat într-unul este retrimis doar în acela. Expirarea, `Path`, `Domain` și subdomeniile, `Secure`, `HttpOnly` și `SameSite` sunt acum respectate, nu ignorate.
-- **Vezi și editează ce este stocat.** Un nou Manager de cookie-uri — **Vizualizare → Cookie-uri** — listează cookie-urile fiecărui mediu grupate după origine: editează o valoare, șterge unul, golește o origine sau întregul borcan ori adaugă un cookie manual. Când un răspuns setează cookie-uri, o insignă 🍪 pe răspuns deschide managerul direct pe acea origine.
+- **Fiecare mediu își păstrează propriile cookie-uri.** Autentificați-vă la API-ul dvs. de dezvoltare și la cel de producție din două medii, iar sesiunile lor nu se amestecă niciodată — un cookie capturat într-unul este retrimis doar în acela. Expirarea, `Path`, `Domain` și subdomeniile, `Secure`, `HttpOnly` și `SameSite` sunt acum respectate, nu ignorate.
+- **Faceți cunoștință cu Cookie jar.** O nouă filă a spațiului de lucru — **Vizualizare ▸ Cookie jar** — listează cookie-urile fiecărui mediu grupate după domeniu în panouri pliabile: editați o valoare, ștergeți unul, goliți un domeniu sau întregul borcan ori adăugați un cookie manual. Se reîmprospătează în direct pe măsură ce cererile dvs. setează cookie-uri.
+- **Vedeți ce a trimis și a primit fiecare cerere.** Fiecare cerere are acum o filă **Cookie-uri** lângă Răspuns și Informații, care arată cookie-urile trimise cu apelul și cookie-urile primite înapoi — inclusiv cookie-urile setate la o redirecționare, care nu ajung niciodată la răspunsul final. Este prezentă și pe răspunsurile trecute din istoricul dvs.
 - **Autentificările prin cookie funcționează pur și simplu.** O cerere care returnează `Set-Cookie` este capturată și reluată automat în apelurile protejate care urmează — inclusiv pe parcursul rulării unui scenariu, unde fiecare pas folosește același borcan al mediului.
-- **Dincolo de REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC și SSE trimit și stochează acum cookie-uri, iar WebSocket, Socket.IO și STOMP le transportă în timpul handshake-ului conexiunii.
-- **Cookie-urile pot folosi variabilele tale.** Scrie `{{token}}` într-un cookie adăugat manual, iar acesta este rezolvat în funcție de mediul activ atunci când cererea este trimisă.
+- **Cookie-urile persistă precum într-un browser.** Cookie-urile cu o dată de expirare sunt salvate pentru fiecare proiect și reîncărcate când îl redeschideți; cookie-urile de sesiune sunt eliminate la repornire — exact cum ar face un browser.
+- **Dincolo de REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC și SSE trimit și stochează acum cookie-uri, iar WebSocket le transportă în timpul handshake-ului conexiunii.
+- **Cookie-urile pot folosi variabilele dvs.** Scrieți `{{token}}` într-un cookie adăugat manual, iar acesta este rezolvat în funcție de mediul activ atunci când cererea este trimisă.
+
+Remedieri:
+
+- **Salvarea automată acoperă acum mediile din interiorul folderelor.** Adăugarea sau redenumirea unui submediu este salvată imediat în modul de salvare automată — fără a mai apărea întrebarea „salvați înainte de închidere?” pentru o modificare care oricum trebuia să ajungă pe disc.
 
 ## v1.0.4
 

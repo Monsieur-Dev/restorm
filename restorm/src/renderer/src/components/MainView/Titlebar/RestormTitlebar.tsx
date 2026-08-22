@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { docsUrl } from '../../../../../shared/config/site'
 import { resolveChannel } from '../../../../../shared/config/backend'
 import type { SidebarContextMenuItem } from '../Sidebar/contextMenuBuilder'
@@ -12,6 +12,7 @@ import {
   Button,
   AccountButton,
   eventBus,
+  IconView,
   useSettingsModal,
   useFeature,
   useElectronPlatform,
@@ -20,12 +21,10 @@ import {
 } from 'electron-core-ui/renderer'
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
 import { RELEASE_NOTES_OPEN, type ReleaseNotesOpenPayload } from '../../releaseNotesEvents'
-import { COOKIE_MANAGER_OPEN, type CookieManagerOpenPayload } from '../../cookieManagerEvents'
 import { DASHBOARD_URL } from '../../../../../shared/config/site'
 import { HeaderHoverTooltip } from '../HeaderHoverTooltip'
 import { AboutModal } from '../../Modals/AboutModal'
 import { CliTokensModal } from '../../Modals/CliTokensModal'
-import { CookieManagerModal } from '../../Modals/CookieManagerModal'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
@@ -82,6 +81,9 @@ export interface RestormTitlebarProps {
    * as Console, but no specific placement constraint — the host
    * just appends to the focused group. */
   onOpenFirewall: () => void
+  /** Open / focus the Cookie jar singleton workbench tab. Wired to the
+   * `View → Cookie jar` menu item. */
+  onOpenCookieJar: () => void
   /** Open / focus the Mini browser singleton tab. Wired to
    * `View → Mini browser`. Same singleton-or-focus pattern as
    * Firewall. */
@@ -161,6 +163,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onSearchResultClick,
   onOpenConsole,
   onOpenFirewall,
+  onOpenCookieJar,
   onOpenMiniBrowser,
   onOpenMcpLogs,
   onGitPush,
@@ -260,18 +263,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   // no state to share with the rest of the app.
   const [aboutOpen, setAboutOpen] = useState(false)
   const [cliTokensOpen, setCliTokensOpen] = useState(false)
-  const [cookieManagerOpen, setCookieManagerOpen] = useState(false)
-  const [cookieFocusDomain, setCookieFocusDomain] = useState<string | undefined>(undefined)
-
-  // A response panel's "cookies" chip opens the manager here, pre-filtered on
-  // the response origin (the manager is mounted in the titlebar as a singleton).
-  useEffect(() => {
-    const sub = eventBus.subscribe<CookieManagerOpenPayload>(COOKIE_MANAGER_OPEN, (payload) => {
-      setCookieFocusDomain(payload.focusDomain)
-      setCookieManagerOpen(true)
-    })
-    return () => { sub.unsubscribe() }
-  }, [])
   const handleCloseAbout = useCallback(() => { setAboutOpen(false) }, [])
 
   // Render a sidebar context-menu data structure as MenuBar items — the
@@ -486,9 +477,9 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             />
             <MenuItem
               data-testid="titlebar-menu-item-cookies"
-              title={t('cookies.title', 'Cookies')}
-              icon={<span className="codicon codicon-globe" aria-hidden="true" />}
-              onClick={() => { setCookieManagerOpen(true); }}
+              title="Cookie jar"
+              icon={<IconView icon={{ type: 'material', value: 'mdiCookie' }} size={16} />}
+              onClick={onOpenCookieJar}
             />
             <MenuItem
               data-testid="titlebar-menu-item-mcp-logs"
@@ -621,7 +612,6 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
     />
     <AboutModal isOpen={aboutOpen} onClose={handleCloseAbout} />
     <CliTokensModal isOpen={cliTokensOpen} onClose={() => { setCliTokensOpen(false); }} />
-    <CookieManagerModal isOpen={cookieManagerOpen} onClose={() => { setCookieManagerOpen(false); setCookieFocusDomain(undefined); }} {...(cookieFocusDomain !== undefined ? { focusDomain: cookieFocusDomain } : {})} />
     </>
   )
 }

@@ -144,6 +144,12 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
  * and ALL low-level app/UI automation, inspection, capture + devtools.
  */
 export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
+  // cookie jar (read + mutate the per-environment cookie store)
+  'list_cookies',
+  'add_cookie',
+  'remove_cookie',
+  'clear_cookie_domain',
+  'clear_cookies',
   // scenario domain (authoring + execution + read-only)
   'create_scenario',
   'list_scenarios',

@@ -248,6 +248,8 @@ const resolveRequestPreview: PreviewResolver = async (_scenarioId, node) => {
       ...(r.contentType ? { contentType: r.contentType } : {}),
       ...(r.contentLength != null ? { contentLength: r.contentLength } : {}),
       durationMs: r.timings.durationMs,
+      ...(r.sentCookies?.length ? { sentCookies: r.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(r.receivedCookies?.length ? { receivedCookies: r.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(r.error ? { error: r.error } : {})
     }
   }
@@ -326,6 +328,8 @@ const resolveSoapPreview: PreviewResolver = async (_scenarioId, node) => {
       headers: r.responseHeaders,
       body: r.responseBody,
       durationMs: r.timings.durationMs,
+      ...(r.sentCookies?.length ? { sentCookies: r.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(r.receivedCookies?.length ? { receivedCookies: r.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(r.fault ? { fault: r.fault } : {}),
       ...(r.error ? { error: r.error } : {})
     }

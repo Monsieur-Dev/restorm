@@ -426,7 +426,8 @@
         "response": "Respons",
         "infos": "Info",
         "requestBody": "Body permintaan",
-        "graph": "Grafik"
+        "graph": "Grafik",
+        "cookies": "Cookie"
       },
       "infos": {
         "sentAt": "Dikirim pada",
@@ -442,6 +443,11 @@
         "select": "Pilih respons untuk melihat detail",
         "pin": "Sematkan respons",
         "unpin": "Lepas sematan respons"
+      },
+      "cookies": {
+        "sent": "Dikirim",
+        "received": "Diterima",
+        "none": "Tidak ada"
       }
     },
     "followRedirects": "Ikuti pengalihan",
@@ -2295,7 +2301,12 @@
     "updateScenario": "Perbarui skenario",
     "updateScenarioNode": "Perbarui simpul skenario",
     "createInstance": "Buat instans baru",
-    "terminateInstance": "Akhiri instans"
+    "terminateInstance": "Akhiri instans",
+    "listCookies": "Daftar cookie",
+    "addCookie": "Tambah cookie",
+    "removeCookie": "Hapus cookie",
+    "clearCookieDomain": "Hapus cookie untuk sebuah domain",
+    "clearCookies": "Hapus semua cookie"
   },
   "odataFilter": {
     "detail": {
@@ -2744,6 +2755,18 @@
       "actions": "Tindakan",
       "domain": "Domain"
     },
-    "openFor": "Buka Pengelola Cookie untuk {{domain}}"
+    "openFor": "Buka Pengelola Cookie untuk {{domain}}",
+    "addTitle": "Tambah cookie",
+    "addForOrigin": "Tambah cookie untuk {{domain}}",
+    "cancel": "Batal",
+    "confirmTitle": "Konfirmasi",
+    "confirmDelete": "Hapus cookie \"{{name}}\"?",
+    "confirmClearOrigin": "Hapus semua cookie untuk {{domain}}?",
+    "confirmClearAll": "Hapus semua cookie di lingkungan ini?",
+    "deleteButton": "Hapus",
+    "editTitle": "Edit cookie",
+    "editNamed": "Edit {{name}}",
+    "confirmReplace": "Sudah ada cookie bernama \"{{name}}\" di sini. Ganti?",
+    "replaceButton": "Ganti"
   }
 }

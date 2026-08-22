@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Evästeet, kunnolla toteutettuna – oma purkki jokaiselle ympäristölle.**
+**Cookie jar – yksi evästepurkki jokaiselle ympäristölle.**
 
 - **Jokainen ympäristö pitää omat evästeensä.** Kirjaudu kehitys-API:isi ja tuotanto-API:isi kahdesta ympäristöstä, eivätkä niiden istunnot koskaan mene ristiin – yhdessä talteen otettu eväste lähetetään takaisin vain siinä samassa. Vanheneminen, `Path`, `Domain` ja alitoimialueet, `Secure`, `HttpOnly` ja `SameSite` otetaan nyt huomioon eikä niitä enää hylätä.
-- **Näe ja muokkaa tallennettua.** Uusi evästehallinta – **Näytä → Evästeet** – listaa kunkin ympäristön evästeet alkuperän mukaan ryhmiteltyinä: muokkaa arvoa, poista yksittäinen, tyhjennä alkuperä tai koko purkki, tai lisää eväste käsin. Kun vastaus asettaa evästeitä, vastauksen 🍪-merkki avaa hallinnan suoraan kyseiseen alkuperään.
+- **Tässä on Cookie jar.** Uusi työtila-välilehti – **Näytä ▸ Cookie jar** – listaa kaikkien ympäristöjen evästeet verkkotunnuksen mukaan ryhmiteltyinä pienennettävissä paneeleissa: muokkaa arvoa, poista yksittäinen, tyhjennä verkkotunnus tai koko purkki, tai lisää eväste käsin. Se päivittyy reaaliaikaisesti, kun pyyntösi asettavat evästeitä.
+- **Näe, mitä kukin pyyntö lähetti ja vastaanotti.** Jokaisella pyynnöllä on nyt **Evästeet**-välilehti Vastaus- ja Tiedot-välilehtien vieressä, ja se näyttää kutsun mukana lähetetyt evästeet sekä takaisin vastaanotetut evästeet – mukaan lukien uudelleenohjauksessa asetetut evästeet, jotka eivät koskaan päädy lopulliseen vastaukseen. Se löytyy myös historian aiemmista vastauksista.
 - **Evästekirjautumiset vain toimivat.** Pyyntö, joka palauttaa `Set-Cookie`, otetaan talteen ja lähetetään automaattisesti uudelleen seuraavissa suojatuissa kutsuissa – myös läpi skenaarioajon, jossa jokainen vaihe jakaa ympäristön purkin.
-- **REST-rajapintaa laajemmin.** GraphQL, SOAP, OData, JSON-RPC, tRPC ja SSE lähettävät ja tallentavat nyt evästeitä, ja WebSocket, Socket.IO ja STOMP kuljettavat ne yhteyden kättelyssä (handshake).
+- **Evästeet säilyvät kuten selaimessa.** Vanhenemisajan sisältävät evästeet tallennetaan projektikohtaisesti ja ladataan uudelleen, kun avaat projektin uudelleen; istuntoevästeet hylätään, kun käynnistät sovelluksen uudelleen – täsmälleen kuten selain tekisi.
+- **REST-rajapintaa laajemmin.** GraphQL, SOAP, OData, JSON-RPC, tRPC ja SSE lähettävät ja tallentavat nyt evästeitä, ja WebSocket kuljettaa ne yhteyden kättelyssä (handshake).
 - **Evästeet voivat käyttää muuttujiasi.** Kirjoita `{{token}}` käsin lisäämääsi evästeeseen, niin se ratkaistaan aktiivista ympäristöä vasten, kun pyyntö lähtee.
+
+Korjaukset:
+
+- **Automaattitallennus kattaa nyt kansioiden sisällä olevat ympäristöt.** Alaympäristön lisääminen tai uudelleennimeäminen tallentuu heti automaattitallennustilassa – ei enää ”tallennetaanko ennen sulkemista?” -kehotetta muutokselle, jonka oli jo tarkoitus olla levyllä.
 
 ## v1.0.4
 

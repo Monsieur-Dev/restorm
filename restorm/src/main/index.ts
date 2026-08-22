@@ -97,6 +97,7 @@ import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './service
 import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerCliTokenIpc } from './ipc/cliTokenHandlers'
 import { registerCookieIpc } from './ipc/cookieHandlers'
+import { cookieJarService } from './services/CookieJarService'
 import { registerCrashIpc } from './ipc/crashHandlers'
 import { registerRestormMcp } from './mcp'
 import { isHeadlessHost as isHeadlessHostPure, isMcpEnabledForLaunch, shouldLaunchInactive } from './mcp/mcpEnablement'
@@ -674,7 +675,12 @@ logger.info('File Service initialized')
       }
     }
 
-    if (!path) return
+    if (!path) {
+      // File closed: flush the closing project's persistent cookies to disk and
+      // drop the in-memory jars (they reload on the next open).
+      cookieJarService.setProject(null)
+      return
+    }
 
     // Bring the newly-opened project's history archive within the retention
     // cap. This is the pass that matters: the archive lives next to the
@@ -686,9 +692,15 @@ logger.info('File Service initialized')
 
     if (!path.endsWith('.restorm')) return
     const format = (state.currentFile.format as PersistenceFormat | undefined) ?? 'yaml'
-    void attachDraftStoreForFile(path, format).catch((err: unknown) => {
-      logger.warn('attachDraftStoreForFile failed', { path, error: String(err) })
-    })
+    void attachDraftStoreForFile(path, format)
+      .then((projectId) => {
+        // Same stable id used for crash-recovery drafts keys the per-project
+        // cookie jar: load this project's persistent cookies from disk.
+        cookieJarService.setProject(projectId)
+      })
+      .catch((err: unknown) => {
+        logger.warn('attachDraftStoreForFile failed', { path, error: String(err) })
+      })
   })
 }
 
@@ -788,6 +800,9 @@ void app.whenReady().then(() => {
 // requests hanging while the app is being torn down.
 app.on('before-quit', () => {
   permissionService.denyAllPending()
+  // Flush any pending persistent cookies to disk before the process exits, so
+  // the last edits within the debounce window aren't lost on quit.
+  cookieJarService.flush()
   // Drop every resolved credential so no plaintext lingers in memory
   // past the app's lifetime.
   secretHydrationService.clearAll()
@@ -1425,6 +1440,9 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 registerUpdateIpc()
 registerCliTokenIpc()
 registerCookieIpc()
+// Persistent cookies live under the user data dir, keyed by project id (set on
+// open via `onStateChanged` below). Session cookies stay in memory only.
+cookieJarService.setPersistBaseDir(join(app.getPath('userData'), 'cookies'))
 
 // Crash-reporting IPC (window.api.crash.*). Read-only: it lets the renderer
 // discover whether reporting is armed so its own SDK can follow, and offers no

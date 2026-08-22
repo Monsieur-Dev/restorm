@@ -620,6 +620,10 @@ class ResponseHistoryService {
     // isn't in the collection (e.g. an ephemeral auth run), there's
     // no producedHeaders list to consult and we leave the body as-is.
     let responseBody = result.body ?? ''
+    // Cookies for the response-side Cookies tab (name→value). Redacted alongside
+    // the headers below when this is an auth request whose token echoes back.
+    let sentCookiesKv: ResponseHistoryKeyValue[] = (result.sentCookies ?? []).map((c) => ({ key: c.name, value: c.value }))
+    let receivedCookiesKv: ResponseHistoryKeyValue[] = (result.receivedCookies ?? []).map((c) => ({ key: c.name, value: c.value }))
     const collectionItem = collectionStore.findById(requestId)
     if (collectionItem && isRequest(collectionItem) && isAuthenticationRequest(collectionItem)) {
       const produced = collectionItem.producedHeaders.map((h) => ({
@@ -634,6 +638,8 @@ class ResponseHistoryService {
       const tokenValues = collectTokenValues(responseBody, produced)
       responseBody = redactTokensFromBody(responseBody, produced, tokenValues)
       responseHeaders = redactTokensFromHeaders(responseHeaders, tokenValues)
+      sentCookiesKv = redactTokensFromHeaders(sentCookiesKv, tokenValues)
+      receivedCookiesKv = redactTokensFromHeaders(receivedCookiesKv, tokenValues)
     }
 
     return {
@@ -650,6 +656,8 @@ class ResponseHistoryService {
       responseBody,
       ...(contentType ? { contentType } : {}),
       ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
+      ...(sentCookiesKv.length > 0 ? { sentCookies: sentCookiesKv } : {}),
+      ...(receivedCookiesKv.length > 0 ? { receivedCookies: receivedCookiesKv } : {}),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
     }
@@ -702,6 +710,8 @@ class ResponseHistoryService {
 
     return {
       type: 'odata',
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       requestUrl: resolvedUrl,
       requestMethod,
       requestHeaders,
@@ -756,6 +766,8 @@ class ResponseHistoryService {
 
     return {
       type: 'graphql',
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       requestUrl: resolvedUrl,
       requestHeaders,
       statusCode: result.statusCode ?? 0,
@@ -775,6 +787,8 @@ class ResponseHistoryService {
 
     return {
       type: 'jsonrpc',
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       requestUrl: resolvedUrl,
       requestHeaders,
       method,
@@ -812,6 +826,8 @@ class ResponseHistoryService {
 
     return {
       type: 'jsonrpcBatch',
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       requestUrl: resolvedUrl,
       requestHeaders,
       statusCode: result.statusCode ?? 0,
@@ -831,6 +847,8 @@ class ResponseHistoryService {
 
     return {
       type: 'trpc',
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       requestUrl: resolvedUrl,
       requestProcedure,
       requestKind,
@@ -885,6 +903,8 @@ class ResponseHistoryService {
 
     return {
       type: 'soap',
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       requestUrl: resolvedUrl,
       requestSoapAction: soapAction,
       requestBody,
@@ -946,6 +966,8 @@ class ResponseHistoryService {
         event: msg.event,
         timestamp: msg.timestamp
       })),
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
     }
@@ -956,6 +978,8 @@ class ResponseHistoryService {
 
     return {
       type: 'sse',
+      ...(result.sentCookies?.length ? { sentCookies: result.sentCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
+      ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies.map((c) => ({ key: c.name, value: c.value })) } : {}),
       requestUrl: resolvedUrl,
       connected: result.connected,
       frames: result.frames.map((frame) => ({

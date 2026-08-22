@@ -51,6 +51,9 @@ export interface BaseRequestTabViewProps {
   infosContent?: ReactNode | undefined
   /** Content for the "Response" tab in response panel */
   responseContent?: ReactNode | undefined
+  /** Content for the "Cookies" tab in the response panel (cookies sent +
+   * received for this request/env). When provided, the tab is shown. */
+  cookiesContent?: ReactNode | undefined
   /** JSON data for the Graph tab (if any) */
   jsonData?: unknown
   /** Extra request-side tabs inserted after the "Request" tab and
@@ -130,6 +133,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
   showResponse,
   infosContent,
   responseContent,
+  cookiesContent,
   jsonData,
   additionalRequestTabs,
   showNotes = true,
@@ -446,6 +450,21 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       )
     })
 
+    // Cookies tab — sent + received cookies for this request/env. Shown only
+    // when the caller wires it (the HTTP-ish protocols), right after Infos.
+    if (cookiesContent) {
+      tabs.push({
+        id: 'cookies',
+        label: t('requestTab.responses.tabs.cookies'),
+        useScrollableElement: true,
+        content: (
+          <div style={{ boxSizing: 'border-box', padding: '8px 0px 0px 8px' }}>
+            {cookiesContent}
+          </div>
+        )
+      })
+    }
+
     // Show Graph tab once it has been seen at least once
     if (formattedJson || hadJsonOnce) {
       tabs.push({
@@ -464,7 +483,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     }
 
     return tabs
-  }, [showResponse, isLoading, infosContent, responseContent, formattedJson, isDarkTheme, hadResponseOnce, hadJsonOnce, showInfos, t])
+  }, [showResponse, isLoading, infosContent, responseContent, cookiesContent, formattedJson, isDarkTheme, hadResponseOnce, hadJsonOnce, showInfos, t])
 
   // Fall back to the first available response tab when the current
   // `responseTabId` points to one that doesn't exist (e.g. we default

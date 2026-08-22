@@ -29,6 +29,8 @@ import type { TrpcRequest, KeyValue, ResponseHistoryDetail } from '../../../../s
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { TrpcExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { buildCookiesContent } from './HTTPResponsePanel'
+import type { CookiePair } from '../../../../shared/cookies/cookieTypes'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
@@ -60,6 +62,8 @@ interface TrpcResponseViewData {
   rawEnvelope?: string | undefined
   headers?: Record<string, string | string[]> | undefined
   error?: string
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
@@ -327,7 +331,9 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
           data: res.data,
           rawEnvelope: res.rawBody,
           headers: res.headers,
-          ...(res.error ? { error: res.error } : {})
+          ...(res.error ? { error: res.error } : {}),
+          ...(res.sentCookies ? { sentCookies: res.sentCookies } : {}),
+          ...(res.receivedCookies ? { receivedCookies: res.receivedCookies } : {})
         })
         setHistoryRefreshKey(prev => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
@@ -399,10 +405,10 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
       </div>
     ) : null
 
-    return { infosContent, responseContent, jsonData: resp ? (resp.error ? { error: resp.error } : resp.data) : undefined }
+    return { infosContent, responseContent, cookiesContent: buildCookiesContent(resp), jsonData: resp ? (resp.error ? { error: resp.error } : resp.data) : undefined }
   }, [t])
 
-  const { infosContent, responseContent } = useMemo(
+  const { infosContent, responseContent, cookiesContent } = useMemo(
     () => buildTrpcResponseView(response, showRawEnvelope),
     [buildTrpcResponseView, response, showRawEnvelope]
   )
@@ -419,6 +425,8 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
       data: detail.response.data,
       rawEnvelope: detail.response.rawEnvelope,
       headers: undefined,
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildTrpcResponseView(historyResponse, false)
@@ -596,6 +604,7 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
         showResponse={response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
+        cookiesContent={cookiesContent}
         jsonData={response ? (response.error ? { error: response.error } : response.data) : undefined}
       />
       <ResponseHistoryModal

@@ -374,11 +374,19 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     }
   }, [folder.id, localEnvironments, selectedEnvId, updateEnvironments])
 
-  // Handler for renaming an environment
+  // Handler for renaming an environment. `renameEnvironmentById` rebuilds a new
+  // POJO (so no env-proxy `name` set-trap fires) and `folder.environments` is
+  // non-indexable (so the folder-proxy stays silent) — without an explicit emit
+  // the rename produced NO document event at all: it was never marked dirty
+  // (so autosave never fired) and consumers reading `useAllEnvironments` (the
+  // env picker, the Cookie jar tree) kept the stale name. Emit ENVIRONMENT_UPDATED
+  // like the icon/color handlers so it persists and every consumer follows.
   const handleRenameEnvironment = useCallback((envId: string, newName: string) => {
     const newEnvironments = renameEnvironmentById(localEnvironments, envId, newName)
     updateEnvironments(newEnvironments)
-  }, [localEnvironments, updateEnvironments])
+    const renamed = findEnvironmentById(newEnvironments, envId)
+    if (renamed) emitEnvironmentUpdated(renamed, folder.id)
+  }, [folder.id, localEnvironments, updateEnvironments])
 
   // Handler for changing an environment's icon. Emits
   // ENVIRONMENT_UPDATED explicitly for the same reason as the other

@@ -429,7 +429,8 @@
         "response": "Odpověď",
         "infos": "Informace",
         "requestBody": "Tělo požadavku",
-        "graph": "Graf"
+        "graph": "Graf",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Odesláno",
@@ -445,6 +446,11 @@
         "select": "Vyberte odpověď pro zobrazení detailů",
         "pin": "Připnout odpověď",
         "unpin": "Odepnout odpověď"
+      },
+      "cookies": {
+        "sent": "Odeslané",
+        "received": "Přijaté",
+        "none": "Žádné"
       }
     },
     "followRedirects": "Sledovat přesměrování",
@@ -2298,7 +2304,12 @@
     "updateScenario": "Aktualizovat scénář",
     "updateScenarioNode": "Aktualizovat uzel scénáře",
     "createInstance": "Vytvořit novou instanci",
-    "terminateInstance": "Ukončit instanci"
+    "terminateInstance": "Ukončit instanci",
+    "listCookies": "Vypsat cookies",
+    "addCookie": "Přidat cookie",
+    "removeCookie": "Odstranit cookie",
+    "clearCookieDomain": "Vymazat cookies pro doménu",
+    "clearCookies": "Vymazat všechny cookies"
   },
   "odataFilter": {
     "detail": {
@@ -2747,6 +2758,18 @@
       "actions": "Akce",
       "domain": "Doména"
     },
-    "openFor": "Otevřít správce cookies pro {{domain}}"
+    "openFor": "Otevřít správce cookies pro {{domain}}",
+    "addTitle": "Přidat cookie",
+    "addForOrigin": "Přidat cookie pro {{domain}}",
+    "cancel": "Zrušit",
+    "confirmTitle": "Potvrdit",
+    "confirmDelete": "Odstranit cookie „{{name}}“?",
+    "confirmClearOrigin": "Vymazat všechny cookies pro {{domain}}?",
+    "confirmClearAll": "Vymazat všechny cookies v tomto prostředí?",
+    "deleteButton": "Odstranit",
+    "editTitle": "Upravit cookie",
+    "editNamed": "Upravit {{name}}",
+    "confirmReplace": "Cookie s názvem „{{name}}“ zde již existuje. Nahradit ji?",
+    "replaceButton": "Nahradit"
   }
 }

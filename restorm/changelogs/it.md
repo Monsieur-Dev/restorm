@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**I cookie, gestiti come si deve — un contenitore per ogni ambiente.**
+**Cookie jar — un contenitore di cookie per ogni ambiente.**
 
 - **Ogni ambiente conserva i propri cookie.** Accedi alla tua API di sviluppo e alla tua API di produzione da due ambienti diversi: le loro sessioni non si incrociano mai — un cookie catturato in uno viene rimandato solo in quello. Scadenza, `Path`, `Domain` e sottodomini, `Secure`, `HttpOnly` e `SameSite` ora vengono rispettati, non scartati.
-- **Guarda e modifica ciò che è memorizzato.** Un nuovo Gestore Cookie — **Visualizza → Cookie** — elenca i cookie di ogni ambiente raggruppati per origine: modifica un valore, eliminane uno, svuota un'origine o l'intero contenitore, oppure aggiungi un cookie a mano. Quando una risposta imposta dei cookie, un chip 🍪 sulla risposta apre il gestore direttamente su quell'origine.
+- **Ecco il Cookie jar.** Una nuova scheda del workbench — **Visualizza ▸ Cookie jar** — elenca i cookie di ogni ambiente raggruppati per dominio in pannelli comprimibili: modifica un valore, eliminane uno, svuota un dominio o l'intero contenitore, oppure aggiungi un cookie a mano. Si aggiorna in diretta man mano che le tue richieste impostano cookie.
+- **Guarda cosa ha inviato e ricevuto ogni richiesta.** Ogni richiesta ha ora una scheda **Cookie** accanto a Risposta e Info, che mostra i cookie inviati con la chiamata e i cookie ricevuti in risposta — compresi i cookie impostati su un reindirizzamento che non raggiungono mai la risposta finale. C'è anche sulle risposte passate nella tua cronologia.
 - **I login con i cookie funzionano e basta.** Una richiesta che restituisce `Set-Cookie` viene catturata e ritrasmessa automaticamente nelle chiamate protette che seguono — anche durante l'esecuzione di uno scenario, dove ogni passaggio condivide il contenitore dell'ambiente.
-- **Oltre il REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC e SSE ora inviano e memorizzano tutti i cookie, mentre WebSocket, Socket.IO e STOMP li trasportano nell'handshake di connessione.
+- **I cookie persistono come in un browser.** I cookie con una scadenza vengono salvati per progetto e ricaricati quando lo riapri; i cookie di sessione vengono scartati al riavvio — esattamente come farebbe un browser.
+- **Oltre il REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC e SSE ora inviano e memorizzano tutti i cookie, mentre WebSocket li trasporta nell'handshake di connessione.
 - **I cookie possono usare le tue variabili.** Digita `{{token}}` in un cookie che aggiungi a mano e verrà risolto in base all'ambiente attivo quando la richiesta parte.
+
+Correzioni:
+
+- **Il salvataggio automatico ora copre gli ambienti dentro le cartelle.** L'aggiunta o la ridenominazione di un sotto-ambiente viene salvata subito in modalità salvataggio automatico — niente più richiesta «salvare prima di chiudere?» per una modifica che doveva già stare su disco.
 
 ## v1.0.4
 

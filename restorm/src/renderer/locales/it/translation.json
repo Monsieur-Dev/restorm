@@ -427,7 +427,8 @@
         "response": "Risposta",
         "infos": "Info",
         "requestBody": "Corpo della richiesta",
-        "graph": "Grafico"
+        "graph": "Grafico",
+        "cookies": "Cookie"
       },
       "infos": {
         "sentAt": "Inviato il",
@@ -443,6 +444,11 @@
         "select": "Seleziona una risposta per vederne i dettagli",
         "pin": "Fissa la risposta",
         "unpin": "Sblocca la risposta"
+      },
+      "cookies": {
+        "sent": "Inviati",
+        "received": "Ricevuti",
+        "none": "Nessuno"
       }
     },
     "followRedirects": "Segui i reindirizzamenti",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Aggiorna uno scenario",
     "updateScenarioNode": "Aggiorna un nodo dello scenario",
     "createInstance": "Crea una nuova istanza",
-    "terminateInstance": "Termina un’istanza"
+    "terminateInstance": "Termina un’istanza",
+    "listCookies": "Elenca i cookie",
+    "addCookie": "Aggiungi un cookie",
+    "removeCookie": "Rimuovi un cookie",
+    "clearCookieDomain": "Cancella i cookie di un dominio",
+    "clearCookies": "Cancella tutti i cookie"
   },
   "odataFilter": {
     "detail": {
@@ -2745,6 +2756,18 @@
       "actions": "Azioni",
       "domain": "Dominio"
     },
-    "openFor": "Apri la gestione dei cookie per {{domain}}"
+    "openFor": "Apri la gestione dei cookie per {{domain}}",
+    "addTitle": "Aggiungi un cookie",
+    "addForOrigin": "Aggiungi un cookie per {{domain}}",
+    "cancel": "Annulla",
+    "confirmTitle": "Conferma",
+    "confirmDelete": "Eliminare il cookie «{{name}}»?",
+    "confirmClearOrigin": "Eliminare tutti i cookie per {{domain}}?",
+    "confirmClearAll": "Eliminare tutti i cookie di questo ambiente?",
+    "deleteButton": "Elimina",
+    "editTitle": "Modifica un cookie",
+    "editNamed": "Modifica {{name}}",
+    "confirmReplace": "Esiste già un cookie di nome «{{name}}» qui. Sostituirlo?",
+    "replaceButton": "Sostituisci"
   }
 }

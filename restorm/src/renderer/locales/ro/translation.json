@@ -428,7 +428,8 @@
         "response": "Răspuns",
         "infos": "Informații",
         "requestBody": "Corpul cererii",
-        "graph": "Grafic"
+        "graph": "Grafic",
+        "cookies": "Cookie-uri"
       },
       "infos": {
         "sentAt": "Trimis la",
@@ -444,6 +445,11 @@
         "select": "Selectați un răspuns pentru a vedea detaliile",
         "pin": "Fixează răspunsul",
         "unpin": "Defixează răspunsul"
+      },
+      "cookies": {
+        "sent": "Trimise",
+        "received": "Primite",
+        "none": "Niciunul"
       }
     },
     "followRedirects": "Urmărește redirecționările",
@@ -2297,7 +2303,12 @@
     "updateScenario": "Actualizează un scenariu",
     "updateScenarioNode": "Actualizează un nod de scenariu",
     "createInstance": "Creă o instanță nouă",
-    "terminateInstance": "Închide o instanță"
+    "terminateInstance": "Închide o instanță",
+    "listCookies": "Listează cookie-urile",
+    "addCookie": "Adaugă un cookie",
+    "removeCookie": "Elimină un cookie",
+    "clearCookieDomain": "Șterge cookie-urile unui domeniu",
+    "clearCookies": "Șterge toate cookie-urile"
   },
   "odataFilter": {
     "detail": {
@@ -2746,6 +2757,18 @@
       "actions": "Acțiuni",
       "domain": "Domeniu"
     },
-    "openFor": "Deschide managerul de cookie-uri pentru {{domain}}"
+    "openFor": "Deschide managerul de cookie-uri pentru {{domain}}",
+    "addTitle": "Adaugă un cookie",
+    "addForOrigin": "Adaugă un cookie pentru {{domain}}",
+    "cancel": "Anulează",
+    "confirmTitle": "Confirmare",
+    "confirmDelete": "Ștergeți cookie-ul „{{name}}”?",
+    "confirmClearOrigin": "Ștergeți toate cookie-urile pentru {{domain}}?",
+    "confirmClearAll": "Ștergeți toate cookie-urile din acest mediu?",
+    "deleteButton": "Șterge",
+    "editTitle": "Editează un cookie",
+    "editNamed": "Editează {{name}}",
+    "confirmReplace": "Există deja aici un cookie numit „{{name}}”. Îl înlocuiți?",
+    "replaceButton": "Înlocuiește"
   }
 }

@@ -16,6 +16,7 @@ import { registerReadTools } from './tools/read'
 import { registerNavigationTools } from './tools/navigation'
 import { registerProjectTools } from './tools/project'
 import { registerWriteTools } from './tools/write'
+import { registerCookieTools } from './tools/cookies'
 import { registerQuickConfigTools } from './tools/quickConfig'
 import { registerImportTools } from './tools/import'
 import { registerExecutionTools } from './tools/execute'
@@ -69,6 +70,7 @@ export function registerRestormMcp(mcp: McpService, instanceHost: InstanceLifecy
   registerQuickConfigTools(mcp)
   registerImportTools(mcp)
   registerExecutionTools(mcp)
+  registerCookieTools(mcp)
   registerWorkbenchTabTools(mcp)
   registerWorkbenchLayoutTools(mcp)
   registerScenarioTools(mcp)

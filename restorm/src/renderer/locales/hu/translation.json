@@ -427,7 +427,8 @@
         "response": "Válasz",
         "infos": "Információk",
         "requestBody": "Kérés törzse",
-        "graph": "Grafikon"
+        "graph": "Grafikon",
+        "cookies": "Sütik"
       },
       "infos": {
         "sentAt": "Elküldve",
@@ -443,6 +444,11 @@
         "select": "Válasszon egy választ a részletek megtekintéséhez",
         "pin": "Válasz rögzítése",
         "unpin": "Rögzítés feloldása"
+      },
+      "cookies": {
+        "sent": "Elküldött",
+        "received": "Fogadott",
+        "none": "Nincs"
       }
     },
     "followRedirects": "Átirányítások követése",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Forgatókönyv frissítése",
     "updateScenarioNode": "Forgatókönyv-csomópont frissítése",
     "createInstance": "Új példány létrehozása",
-    "terminateInstance": "Példány bezárása"
+    "terminateInstance": "Példány bezárása",
+    "listCookies": "Sütik listázása",
+    "addCookie": "Süti hozzáadása",
+    "removeCookie": "Süti eltávolítása",
+    "clearCookieDomain": "Tartomány sütijeinek törlése",
+    "clearCookies": "Összes süti törlése"
   },
   "odataFilter": {
     "detail": {
@@ -2745,6 +2756,18 @@
       "actions": "Műveletek",
       "domain": "Tartomány"
     },
-    "openFor": "Sütikezelő megnyitása ehhez: {{domain}}"
+    "openFor": "Sütikezelő megnyitása ehhez: {{domain}}",
+    "addTitle": "Süti hozzáadása",
+    "addForOrigin": "Süti hozzáadása ehhez: {{domain}}",
+    "cancel": "Mégse",
+    "confirmTitle": "Megerősítés",
+    "confirmDelete": "Törli a(z) „{{name}}” sütit?",
+    "confirmClearOrigin": "Törli az összes sütit ehhez: {{domain}}?",
+    "confirmClearAll": "Törli az összes sütit ebben a környezetben?",
+    "deleteButton": "Törlés",
+    "editTitle": "Süti szerkesztése",
+    "editNamed": "{{name}} szerkesztése",
+    "confirmReplace": "Már létezik itt egy „{{name}}” nevű süti. Lecseréli?",
+    "replaceButton": "Csere"
   }
 }

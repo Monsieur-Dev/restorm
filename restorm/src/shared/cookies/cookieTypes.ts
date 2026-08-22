@@ -11,8 +11,17 @@ export const COOKIE_IPC = {
   ADD: 'cookie:add',
   REMOVE: 'cookie:remove',
   CLEAR_DOMAIN: 'cookie:clear-domain',
-  CLEAR: 'cookie:clear'
+  CLEAR: 'cookie:clear',
+  /** main → renderer push: a jar mutated (Set-Cookie captured, add/remove/clear). */
+  CHANGED: 'cookie:changed'
 } as const
+
+/** A plain name→value cookie pair, for the per-request response Cookies tab
+ * (cookies sent with the request / received in the response). */
+export interface CookiePair {
+  name: string
+  value: string
+}
 
 /** A cookie flattened for the Cookie Manager. */
 export interface CookieRow {

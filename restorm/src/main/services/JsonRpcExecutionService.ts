@@ -12,6 +12,7 @@ import { randomUUID } from 'crypto'
 import { httpExecutionService, type HTTPExecutionResult } from './HTTPExecutionService'
 import { contextService } from './ContextService'
 import type { ResolutionContexts } from './ContextServiceTypes'
+import type { CookiePair } from '../../shared/cookies/cookieTypes'
 
 /** One resolved JSON-RPC error object, per spec section 5.1. */
 export interface JsonRpcErrorShape {
@@ -49,6 +50,8 @@ export interface JsonRpcExecutionResult {
   timings: { startedAt: string; durationMs: number }
   requestUrl?: string
   requestHeaders?: Record<string, string>
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 export interface JsonRpcBatchChildResult {
@@ -70,6 +73,8 @@ export interface JsonRpcBatchExecutionResult {
   children: JsonRpcBatchChildResult[]
   timings: { startedAt: string; durationMs: number }
   requestUrl?: string
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 /** One child call as read off the registered request's `fullData`. */
@@ -183,7 +188,9 @@ class JsonRpcExecutionService {
       timings: httpResult.timings,
       ...(httpResult.requestUrl !== undefined ? { requestUrl: httpResult.requestUrl } : {}),
       ...(httpResult.requestHeaders !== undefined ? { requestHeaders: httpResult.requestHeaders } : {}),
-      ...(httpResult.body !== undefined ? { rawBody: httpResult.body } : {})
+      ...(httpResult.body !== undefined ? { rawBody: httpResult.body } : {}),
+      ...(httpResult.sentCookies ? { sentCookies: httpResult.sentCookies } : {}),
+      ...(httpResult.receivedCookies ? { receivedCookies: httpResult.receivedCookies } : {})
     }
     if (notificationMode) {
       return { ...base, notificationSent: true }
@@ -269,7 +276,9 @@ class JsonRpcExecutionService {
       ...(httpResult.body !== undefined ? { rawBody: httpResult.body } : {}),
       children: childResults,
       timings: httpResult.timings,
-      ...(httpResult.requestUrl !== undefined ? { requestUrl: httpResult.requestUrl } : {})
+      ...(httpResult.requestUrl !== undefined ? { requestUrl: httpResult.requestUrl } : {}),
+      ...(httpResult.sentCookies ? { sentCookies: httpResult.sentCookies } : {}),
+      ...(httpResult.receivedCookies ? { receivedCookies: httpResult.receivedCookies } : {})
     }
   }
 

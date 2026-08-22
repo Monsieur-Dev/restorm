@@ -24,6 +24,7 @@ import type { JsonRpcBatchRequest, JsonRpcBatchCallSpec, KeyValue, ResponseHisto
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { JsonRpcBatchExecutionResult, JsonRpcBatchChildResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { buildCookiesContent } from './HTTPResponsePanel'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
@@ -305,7 +306,7 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
   ), [t])
 
   const buildBatchResponseView = useCallback((resp: JsonRpcBatchExecutionResult | null) => {
-    if (!resp) return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+    if (!resp) return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
     const infosContent = (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }} data-testid="jsonrpc-batch-response-infos">
         <div style={{ display: 'flex', gap: 8 }}>
@@ -329,17 +330,17 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
         </div>
       </ScrollableElement>
     )
-    return { infosContent, responseContent, jsonData: { children: resp.children } }
+    return { infosContent, responseContent, cookiesContent: buildCookiesContent(resp), jsonData: { children: resp.children } }
   }, [renderChildResult])
 
-  const { infosContent, responseContent, jsonData } = useMemo(
+  const { infosContent, responseContent, cookiesContent, jsonData } = useMemo(
     () => buildBatchResponseView(response),
     [buildBatchResponseView, response]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'jsonrpcBatch') {
-      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+      return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
     }
     const historyResponse: JsonRpcBatchExecutionResult = {
       requestId: request.id,
@@ -350,6 +351,8 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
       timings: detail.response.timings,
       requestUrl: detail.response.requestUrl,
       children: detail.response.children,
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(detail.response.error !== undefined ? { transportError: detail.response.error } : {})
     }
     return buildBatchResponseView(historyResponse)
@@ -432,6 +435,7 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
         showResponse={response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
+        cookiesContent={cookiesContent}
         jsonData={jsonData}
       />
       <ResponseHistoryModal

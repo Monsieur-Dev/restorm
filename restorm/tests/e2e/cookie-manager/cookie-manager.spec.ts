@@ -25,7 +25,7 @@ import { mkdirSync, rmSync, copyFileSync } from 'fs'
 import { randomUUID } from 'crypto'
 import { launchRestormElectronApp, writeAppLogs } from '../helpers/launch-restorm'
 
-const MODAL = '[data-testid="cookie-manager"]'
+const MODAL = '[data-testid="cookie-jar"]'
 
 /** Open the manager from the View menu, tolerating the responsive
  *  full / overflow / hamburger layouts (mirrors the settings-tab helper). */
@@ -48,7 +48,7 @@ async function openCookieManager(page: Page): Promise<void> {
     await cookiesItem.waitFor({ state: 'visible', timeout: 5000 })
   }).toPass({ timeout: 45000 })
   await cookiesItem.click({ force: true })
-  await expect(page.locator(MODAL)).toBeVisible({ timeout: 5000 })
+  await expect(page.locator(MODAL)).toBeVisible({ timeout: 15000 })
 }
 
 /** Seed a realistic set of cookies into the default (No environment) jar. */
@@ -84,29 +84,38 @@ test('Cookie Manager: reachable signed-out, renders the jar, edits and clears', 
     await openCookieManager(page)
 
     // The four seeded cookies land under three origin groups.
-    await expect(page.locator('[data-testid="cookie-manager-group-api.example.com"]')).toBeVisible()
-    await expect(page.locator('[data-testid="cookie-manager-group-app.example.com"]')).toBeVisible()
-    await expect(page.locator('[data-testid="cookie-manager-group-shop.example.com"]')).toBeVisible()
+    await expect(page.locator('[data-testid="cookie-jar-group-api.example.com"]')).toBeVisible()
+    await expect(page.locator('[data-testid="cookie-jar-group-app.example.com"]')).toBeVisible()
+    await expect(page.locator('[data-testid="cookie-jar-group-shop.example.com"]')).toBeVisible()
     await expect(page.locator('[data-testid="cookie-row-api.example.com-/-session_id"]')).toBeVisible()
 
     // Flags render (Secure / HttpOnly on the session cookie).
-    const flags = page.locator('[data-testid="cookie-row-api.example.com-/-session_id"] .cookie-manager-flag')
+    const flags = page.locator('[data-testid="cookie-row-api.example.com-/-session_id"] .cookie-jar-flag')
     await expect(flags.filter({ hasText: 'Secure' })).toBeVisible()
     await expect(flags.filter({ hasText: 'HttpOnly' })).toBeVisible()
 
     // Native capture of the populated manager (design shot + evidence).
-    const shot = join(testInfo.outputDir, 'cookie-manager.png')
+    const shot = join(testInfo.outputDir, 'cookie-jar.png')
     await page.locator(MODAL).screenshot({ path: shot })
-    copyFileSync(shot, join(restormRoot, 'tests/e2e/.tmp/cookie-manager.png'))
+    copyFileSync(shot, join(restormRoot, 'tests/e2e/.tmp/cookie-jar.png'))
 
-    // Edit a value: type into the input, the inline save button appears, click it.
+    // Live-refresh: a cookie added to the jar AFTER the panel is open appears
+    // without reopening (the main process pushes `cookie:changed`).
+    await page.evaluate(async () => {
+      await (window as unknown as { api: { cookies: { add: (k: string, i: unknown) => Promise<unknown> } } }).api.cookies.add('', { key: 'live', value: '1', domain: 'live.example.com', path: '/' })
+    })
+    await expect(page.locator('[data-testid="cookie-jar-group-live.example.com"]')).toBeVisible({ timeout: 10000 })
+
+    // Edit a value through the edit modal (the table value is read-only text
+    // now — editing happens in the modal, opened by the per-row pencil).
     // ECUI InputBox forwards its data-testid to the inner <input> as `${id}-input`.
-    const valueInput = page.locator('[data-testid="cookie-value-theme-input"]')
-    await valueInput.click()
-    await valueInput.fill('solarized')
-    const saveBtn = page.locator('[data-testid="cookie-manager-group-app.example.com"] .codicon-check').first()
-    await saveBtn.click({ force: true })
-    // The edited value survives a reload of the list (round-trips through the jar).
+    await page.locator('[data-testid="cookie-edit-theme"]').click()
+    const editValue = page.locator('[data-testid="cookie-add-modal-value-input"]')
+    await expect(editValue).toBeVisible({ timeout: 10000 })
+    await editValue.fill('solarized')
+    await page.locator('[data-testid="cookie-add-modal-submit"]').click()
+    // The modal closes and the edited value round-trips through the jar.
+    await expect(page.locator('[data-testid="cookie-add-modal-domain-input"]')).toBeHidden({ timeout: 10000 })
     await expect
       .poll(async () =>
         page.evaluate(async () =>
@@ -116,21 +125,35 @@ test('Cookie Manager: reachable signed-out, renders the jar, edits and clears', 
       )
       .toBe('solarized')
 
-    // Delete one cookie from a group.
-    await page.locator('[data-testid="cookie-delete-csrftoken"]').click({ force: true })
+    // Add a cookie by hand through the global "+" modal. The modal must open
+    // FRESH (add mode — empty domain), not carrying the just-edited cookie.
+    await page.locator('[data-testid="cookie-jar-add-global"]').click()
+    const addDomain = page.locator('[data-testid="cookie-add-modal-domain-input"]')
+    await expect(addDomain).toBeVisible({ timeout: 10000 })
+    await expect(addDomain).toHaveValue('')
+    await addDomain.fill('new.example.com')
+    await page.locator('[data-testid="cookie-add-modal-name-input"]').fill('added')
+    await page.locator('[data-testid="cookie-add-modal-value-input"]').fill('v1')
+    await page.locator('[data-testid="cookie-add-modal-submit"]').click()
+    await expect(page.locator('[data-testid="cookie-jar-group-new.example.com"]')).toBeVisible({ timeout: 10000 })
+    // The add left the previously-edited cookie's origin untouched.
+    await expect(page.locator('[data-testid="cookie-jar-group-app.example.com"]')).toBeVisible()
+
+    // Delete one cookie — now behind a confirmation dialog.
+    await page.locator('[data-testid="cookie-delete-csrftoken"]').click()
+    await page.locator('[data-testid="cookie-jar-confirm-ok"]').click()
     await expect(page.locator('[data-testid="cookie-row-api.example.com-/-csrftoken"]')).toHaveCount(0)
     await expect(page.locator('[data-testid="cookie-row-api.example.com-/-session_id"]')).toBeVisible()
 
-    // Clear a whole origin.
-    await page.locator('[data-testid="cookie-manager-clear-origin-shop.example.com"]').click({ force: true })
-    await expect(page.locator('[data-testid="cookie-manager-group-shop.example.com"]')).toHaveCount(0)
+    // Clear a whole origin — confirmation dialog.
+    await page.locator('[data-testid="cookie-jar-clear-origin-shop.example.com"]').click()
+    await page.locator('[data-testid="cookie-jar-confirm-ok"]').click()
+    await expect(page.locator('[data-testid="cookie-jar-group-shop.example.com"]')).toHaveCount(0)
 
-    // Per-environment isolation is observable in the selector: the default jar
-    // is populated, but the empty state shows for a jar that was never seeded.
-    // (With no environments defined the selector holds only "No environment";
-    // clearing the default jar surfaces the empty message.)
-    await page.locator('[data-testid="cookie-manager-clear-all"]').click({ force: true })
-    await expect(page.locator('[data-testid="cookie-manager-empty"]')).toBeVisible()
+    // Clear the whole jar — confirmation → empty state.
+    await page.locator('[data-testid="cookie-jar-clear-all"]').click()
+    await page.locator('[data-testid="cookie-jar-confirm-ok"]').click()
+    await expect(page.locator('[data-testid="cookie-jar-empty"]')).toBeVisible()
   } finally {
     writeAppLogs(app, testInfo.outputDir)
     await app.close().catch(() => undefined)

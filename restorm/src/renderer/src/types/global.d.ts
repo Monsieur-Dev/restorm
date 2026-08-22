@@ -23,7 +23,7 @@ import type {
   CreatedCliToken
 } from '../../../shared/cliTokens/cliTokenTypes'
 import type { CrashArmedState, CrashConsentState, CrashRecoveryNotice, CrashReviewRequest } from '../../../shared/crash/crashTypes'
-import type { CookieInput, CookieRow } from '../../../shared/cookies/cookieTypes'
+import type { CookieInput, CookieRow, CookiePair } from '../../../shared/cookies/cookieTypes'
 
 declare global {
   interface Window {
@@ -136,6 +136,8 @@ declare global {
         remove: (envKey: string, domain: string, path: string, key: string) => Promise<CookieRow[]>
         clearDomain: (envKey: string, domain: string) => Promise<CookieRow[]>
         clear: (envKey?: string) => Promise<CookieRow[]>
+        /** Subscribe to main-process jar mutations (live-refresh); returns an unsubscribe. */
+        onChanged: (callback: () => void) => () => void
       }
       /** Silent auto-update surface (see `src/main/services/UpdateService.ts`). */
       update: {
@@ -709,6 +711,9 @@ export interface HTTPExecutionResult {
   requestUrl?: string
   /** Headers actually sent (includes any auth injection). */
   requestHeaders?: Record<string, string>
+  /** Cookies sent with the request / received across the redirect chain. */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 /** HTTP progress data */
@@ -739,6 +744,9 @@ export interface GraphQLExecutionInput {
 
 /** GraphQL execution result */
 export interface GraphQLExecutionResult {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
   requestId: string
   success: boolean
   statusCode?: number
@@ -763,6 +771,9 @@ export interface JsonRpcErrorShape {
 /** JSON-RPC execution result — `result` on success, `error` when the
  * envelope reports a JSON-RPC-level failure (still a successful HTTP call). */
 export interface JsonRpcExecutionResult {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
   requestId: string
   success: boolean
   statusCode?: number
@@ -792,6 +803,9 @@ export interface JsonRpcBatchChildResult {
 
 /** JSON-RPC batch execution result. */
 export interface JsonRpcBatchExecutionResult {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
   requestId: string
   success: boolean
   statusCode?: number
@@ -817,6 +831,9 @@ export interface TrpcExecutionInput {
  * response panel shows by default; `rawBody` is the full `[{ result: { data
  * } }]` wire envelope, for the "Show raw envelope" toggle. */
 export interface TrpcExecutionResult {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
   requestId: string
   success: boolean
   statusCode?: number
@@ -841,6 +858,9 @@ export interface SOAPExecutionInput {
 
 /** SOAP execution result */
 export interface SOAPExecutionResult {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
   requestId: string
   success: boolean
   statusCode?: number
@@ -919,6 +939,8 @@ export interface WebSocketExecutionResult {
     durationMs: number
   }
   requestUrl?: string
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 /** WebSocket message data for streaming */
@@ -961,6 +983,9 @@ export interface SseFrameItem {
 
 /** SSE execution result */
 export interface SseExecutionResult {
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
   requestId: string
   success: boolean
   connected: boolean

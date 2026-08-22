@@ -427,7 +427,8 @@
         "response": "Antwort",
         "infos": "Infos",
         "requestBody": "Anfrage-Body",
-        "graph": "Graph"
+        "graph": "Graph",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Gesendet am",
@@ -443,6 +444,11 @@
         "select": "Wählen Sie eine Antwort, um die Details anzuzeigen",
         "pin": "Antwort anheften",
         "unpin": "Antwort lösen"
+      },
+      "cookies": {
+        "sent": "Gesendet",
+        "received": "Empfangen",
+        "none": "Keine"
       }
     },
     "followRedirects": "Weiterleitungen folgen",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Szenario aktualisieren",
     "updateScenarioNode": "Szenario-Knoten aktualisieren",
     "createInstance": "Eine neue Instanz erstellen",
-    "terminateInstance": "Eine Instanz beenden"
+    "terminateInstance": "Eine Instanz beenden",
+    "listCookies": "Cookies auflisten",
+    "addCookie": "Cookie hinzufügen",
+    "removeCookie": "Cookie entfernen",
+    "clearCookieDomain": "Cookies für eine Domain löschen",
+    "clearCookies": "Alle Cookies löschen"
   },
   "odataFilter": {
     "detail": {
@@ -2745,6 +2756,18 @@
       "actions": "Aktionen",
       "domain": "Domain"
     },
-    "openFor": "Cookie-Manager für {{domain}} öffnen"
+    "openFor": "Cookie-Manager für {{domain}} öffnen",
+    "addTitle": "Cookie hinzufügen",
+    "addForOrigin": "Cookie für {{domain}} hinzufügen",
+    "cancel": "Abbrechen",
+    "confirmTitle": "Bestätigen",
+    "confirmDelete": "Das Cookie „{{name}}“ löschen?",
+    "confirmClearOrigin": "Alle Cookies für {{domain}} löschen?",
+    "confirmClearAll": "Alle Cookies in dieser Umgebung löschen?",
+    "deleteButton": "Löschen",
+    "editTitle": "Cookie bearbeiten",
+    "editNamed": "{{name}} bearbeiten",
+    "confirmReplace": "Hier existiert bereits ein Cookie mit dem Namen „{{name}}“. Ersetzen?",
+    "replaceButton": "Ersetzen"
   }
 }

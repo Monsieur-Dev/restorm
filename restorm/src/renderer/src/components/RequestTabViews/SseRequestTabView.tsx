@@ -20,6 +20,7 @@ import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyVal
 import type { SseRequest, SseFrame, SseResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { buildCookiesContent } from './HTTPResponsePanel'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
@@ -239,7 +240,9 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
           connected: res.connected,
           frames: res.frames,
           error: res.error,
-          timings: res.timings
+          timings: res.timings,
+          ...(res.sentCookies && res.sentCookies.length > 0 ? { sentCookies: res.sentCookies } : {}),
+          ...(res.receivedCookies && res.receivedCookies.length > 0 ? { receivedCookies: res.receivedCookies } : {})
         }
         setResponse(sseResponse)
         setHistoryRefreshKey(prev => prev + 1)
@@ -358,7 +361,7 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
   }, [t, expandedFrames, toggleFrameExpanded, showAllFrames, formatUserDate])
 
   const buildSseResponseView = useCallback((resp: SseResponse | null) => {
-    if (!resp) return { infosContent: null, responseContent: null, jsonData: undefined }
+    if (!resp) return { infosContent: null, responseContent: null, cookiesContent: null, jsonData: undefined }
     const infosContent = (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -387,7 +390,7 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
         )}
       </div>
     )
-    return { infosContent, responseContent: renderFrameList(resp.frames), jsonData: undefined }
+    return { infosContent, responseContent: renderFrameList(resp.frames), cookiesContent: buildCookiesContent(resp), jsonData: undefined }
   }, [t, renderFrameList])
 
   // Live view: prefer the streaming frames; fall back to the resolved response.
@@ -401,11 +404,13 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
       connected: isListening || (response?.connected ?? false),
       frames: liveFrames.length > 0 ? liveFrames : (response?.frames ?? []),
       timings: response?.timings ?? { startedAt: '', durationMs: 0 },
-      ...(response?.error ? { error: response.error } : {})
+      ...(response?.error ? { error: response.error } : {}),
+      ...(response?.sentCookies ? { sentCookies: response.sentCookies } : {}),
+      ...(response?.receivedCookies ? { receivedCookies: response.receivedCookies } : {})
     }
   }, [isListening, liveFrames, response, request.id, resolvedUrl, url])
 
-  const { infosContent, responseContent } = useMemo(
+  const { infosContent, responseContent, cookiesContent } = useMemo(
     () => buildSseResponseView(liveResponse),
     [buildSseResponseView, liveResponse]
   )
@@ -427,6 +432,8 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
         timestamp: frame.timestamp
       })),
       timings: detail.response.timings,
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildSseResponseView(historyResponse)
@@ -515,6 +522,7 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
         showResponse={isListening || liveFrames.length > 0 || response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
+        cookiesContent={cookiesContent}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

@@ -18,6 +18,7 @@
 import { contextService } from './ContextService'
 import type { ResolutionContexts } from './ContextServiceTypes'
 import { httpExecutionService, type HTTPExecutionInput } from './HTTPExecutionService'
+import type { CookiePair } from '../../shared/cookies/cookieTypes'
 import { composeTrpcRequestBody, unwrapTrpcEnvelope, unwrapTrpcError } from '../../shared/utils/trpcRequestBody'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
@@ -50,6 +51,9 @@ export interface TrpcExecutionResult {
   }
   requestUrl?: string
   requestHeaders?: Record<string, string>
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 class TrpcExecutionService {
@@ -88,7 +92,9 @@ class TrpcExecutionService {
       error: result.error ?? unwrapTrpcError(result.body),
       timings: result.timings,
       requestUrl: result.requestUrl,
-      requestHeaders: result.requestHeaders
+      requestHeaders: result.requestHeaders,
+      ...(result.sentCookies ? { sentCookies: result.sentCookies } : {}),
+      ...(result.receivedCookies ? { receivedCookies: result.receivedCookies } : {})
     }
   }
 

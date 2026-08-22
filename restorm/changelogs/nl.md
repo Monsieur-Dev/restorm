@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Cookies, netjes geregeld — één pot per omgeving.**
+**Cookie jar — één pot cookies per omgeving.**
 
 - **Elke omgeving houdt haar eigen cookies bij.** Meld u vanuit twee omgevingen aan bij uw dev-API en uw prod-API, en hun sessies raken nooit vermengd — een cookie die in de ene wordt vastgelegd, wordt alleen in die ene weer meegestuurd. Vervaldatum, `Path`, `Domain` en subdomeinen, `Secure`, `HttpOnly` en `SameSite` worden nu gerespecteerd in plaats van weggegooid.
-- **Bekijk en bewerk wat er is opgeslagen.** Een nieuwe Cookiebeheerder — **Beeld → Cookies** — toont de cookies van elke omgeving, gegroepeerd per oorsprong: bewerk een waarde, verwijder er een, wis een oorsprong of de hele pot, of voeg handmatig een cookie toe. Wanneer een respons cookies instelt, opent een 🍪-chip op de respons de beheerder direct op die oorsprong.
+- **Maak kennis met de Cookie jar.** Een nieuw werkbanktabblad — **Beeld ▸ Cookie jar** — toont de cookies van elke omgeving, gegroepeerd per domein in inklapbare deelvensters: bewerk een waarde, verwijder er een, wis een domein of de hele pot, of voeg handmatig een cookie toe. Het ververst live terwijl uw verzoeken cookies instellen.
+- **Zie wat elk verzoek verzond en ontving.** Elk verzoek heeft nu een **Cookies**-tabblad naast Antwoord en Info, dat de cookies toont die met de aanroep zijn verzonden en de cookies die zijn terugontvangen — inclusief cookies die bij een omleiding worden ingesteld en die het uiteindelijke antwoord nooit bereiken. Het is er ook bij eerdere antwoorden in uw geschiedenis.
 - **Inloggen met cookies werkt gewoon.** Een verzoek dat `Set-Cookie` teruggeeft, wordt vastgelegd en automatisch opnieuw meegestuurd bij de beschermde aanroepen die volgen — ook tijdens een scenario-uitvoering, waarbij elke stap dezelfde cookiepot van de omgeving deelt.
-- **Verder dan REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC en SSE versturen en bewaren nu allemaal cookies, en WebSocket, Socket.IO en STOMP dragen ze mee tijdens de verbindingshandshake.
+- **Cookies blijven bewaard zoals in een browser.** Cookies met een vervaldatum worden per project opgeslagen en opnieuw geladen wanneer u het project heropent; sessiecookies worden weggegooid wanneer u herstart — precies zoals een browser zou doen.
+- **Verder dan REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC en SSE versturen en bewaren nu allemaal cookies, en WebSocket draagt ze mee tijdens de verbindingshandshake.
 - **Cookies kunnen uw variabelen gebruiken.** Typ `{{token}}` in een cookie die u handmatig toevoegt, en die wordt tegen de actieve omgeving omgezet zodra het verzoek uitgaat.
+
+Correcties:
+
+- **Automatisch opslaan omvat nu ook omgevingen binnen mappen.** Een subomgeving toevoegen of hernoemen wordt in de modus voor automatisch opslaan meteen bewaard — geen "opslaan voor het sluiten?"-vraag meer voor een wijziging die al op schijf hoorde te staan.
 
 ## v1.0.4
 

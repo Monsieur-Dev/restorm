@@ -429,7 +429,8 @@
         "response": "Odpowiedź",
         "infos": "Informacje",
         "requestBody": "Treść żądania",
-        "graph": "Wykres"
+        "graph": "Wykres",
+        "cookies": "Pliki cookie"
       },
       "infos": {
         "sentAt": "Wysłano",
@@ -445,6 +446,11 @@
         "select": "Wybierz odpowiedź, aby zobaczyć szczegóły",
         "pin": "Przypnij odpowiedź",
         "unpin": "Odepnij odpowiedź"
+      },
+      "cookies": {
+        "sent": "Wysłane",
+        "received": "Otrzymane",
+        "none": "Brak"
       }
     },
     "followRedirects": "Podążaj za przekierowaniami",
@@ -2298,7 +2304,12 @@
     "updateScenario": "Zaktualizuj scenariusz",
     "updateScenarioNode": "Zaktualizuj węzeł scenariusza",
     "createInstance": "Utwórz nową instancję",
-    "terminateInstance": "Zakończ instancję"
+    "terminateInstance": "Zakończ instancję",
+    "listCookies": "Wypisz pliki cookie",
+    "addCookie": "Dodaj plik cookie",
+    "removeCookie": "Usuń plik cookie",
+    "clearCookieDomain": "Wyczyść pliki cookie dla domeny",
+    "clearCookies": "Wyczyść wszystkie pliki cookie"
   },
   "odataFilter": {
     "detail": {
@@ -2747,6 +2758,18 @@
       "actions": "Akcje",
       "domain": "Domena"
     },
-    "openFor": "Otwórz menedżera plików cookie dla {{domain}}"
+    "openFor": "Otwórz menedżera plików cookie dla {{domain}}",
+    "addTitle": "Dodaj plik cookie",
+    "addForOrigin": "Dodaj plik cookie dla {{domain}}",
+    "cancel": "Anuluj",
+    "confirmTitle": "Potwierdź",
+    "confirmDelete": "Usunąć plik cookie „{{name}}”?",
+    "confirmClearOrigin": "Usunąć wszystkie pliki cookie dla {{domain}}?",
+    "confirmClearAll": "Usunąć wszystkie pliki cookie w tym środowisku?",
+    "deleteButton": "Usuń",
+    "editTitle": "Edytuj plik cookie",
+    "editNamed": "Edytuj {{name}}",
+    "confirmReplace": "Plik cookie o nazwie „{{name}}” już tutaj istnieje. Zastąpić go?",
+    "replaceButton": "Zastąp"
   }
 }

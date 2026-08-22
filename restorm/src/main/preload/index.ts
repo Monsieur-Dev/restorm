@@ -255,6 +255,11 @@ contextBridge.exposeInMainWorld('api', {
     },
     clear: async (envKey?: string): Promise<CookieRow[]> => {
       return (await ipcRenderer.invoke(COOKIE_IPC.CLEAR, envKey)) as CookieRow[]
+    },
+    onChanged: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on(COOKIE_IPC.CHANGED, handler)
+      return () => { ipcRenderer.removeListener(COOKIE_IPC.CHANGED, handler) }
     }
   },
   update: {

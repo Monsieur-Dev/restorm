@@ -426,7 +426,8 @@
         "response": "Phản hồi",
         "infos": "Thông tin",
         "requestBody": "Body yêu cầu",
-        "graph": "Đồ thị"
+        "graph": "Đồ thị",
+        "cookies": "Cookie"
       },
       "infos": {
         "sentAt": "Đã gửi lúc",
@@ -442,6 +443,11 @@
         "select": "Chọn một phản hồi để xem chi tiết",
         "pin": "Ghim phản hồi",
         "unpin": "Bỏ ghim phản hồi"
+      },
+      "cookies": {
+        "sent": "Đã gửi",
+        "received": "Đã nhận",
+        "none": "Không có"
       }
     },
     "followRedirects": "Theo dõi chuyển hướng",
@@ -2295,7 +2301,12 @@
     "updateScenario": "Cập nhật kịch bản",
     "updateScenarioNode": "Cập nhật nút kịch bản",
     "createInstance": "Tạo một phiên bản mới",
-    "terminateInstance": "Kết thúc một phiên bản"
+    "terminateInstance": "Kết thúc một phiên bản",
+    "listCookies": "Liệt kê cookie",
+    "addCookie": "Thêm cookie",
+    "removeCookie": "Xóa cookie",
+    "clearCookieDomain": "Xóa cookie cho một miền",
+    "clearCookies": "Xóa tất cả cookie"
   },
   "odataFilter": {
     "detail": {
@@ -2744,6 +2755,18 @@
       "actions": "Hành động",
       "domain": "Miền"
     },
-    "openFor": "Mở Trình quản lý Cookie cho {{domain}}"
+    "openFor": "Mở Trình quản lý Cookie cho {{domain}}",
+    "addTitle": "Thêm cookie",
+    "addForOrigin": "Thêm cookie cho {{domain}}",
+    "cancel": "Hủy",
+    "confirmTitle": "Xác nhận",
+    "confirmDelete": "Xóa cookie \"{{name}}\"?",
+    "confirmClearOrigin": "Xóa tất cả cookie cho {{domain}}?",
+    "confirmClearAll": "Xóa mọi cookie trong môi trường này?",
+    "deleteButton": "Xóa",
+    "editTitle": "Chỉnh sửa cookie",
+    "editNamed": "Chỉnh sửa {{name}}",
+    "confirmReplace": "Đã có một cookie tên \"{{name}}\" ở đây. Thay thế nó?",
+    "replaceButton": "Thay thế"
   }
 }

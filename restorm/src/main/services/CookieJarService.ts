@@ -9,14 +9,20 @@
  * expired cookie ages out, a Path-scoped cookie only rides its path, and
  * a Domain cookie reaches its sub-domains.
  *
- * Process-lifetime scoped, never persisted to disk, cleared when a new
- * collection opens (same posture as before — no credentials on disk).
+ * Persisted per project: PERSISTENT cookies (those with an Expires) are
+ * written to `<userData>/cookies/<projectId>.json` and reloaded when the
+ * project reopens, so they survive an app restart the way a browser keeps
+ * them. SESSION cookies (no Expires) live only in memory and are dropped on
+ * restart. Jars swap wholesale on `setProject` (open / close / switch), which
+ * flushes the outgoing project before loading the incoming one.
  *
  * Values are stored verbatim: a captured `Set-Cookie` is literal, while a
  * user-authored cookie may embed `{{var}}` — the caller resolves those
  * against the active environment at send time (the jar stays dumb).
  */
 
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { Cookie, CookieJar } from 'tough-cookie'
 import { logger } from 'electron-core-ui/main'
 import type { CookieInput, CookieRow } from '../../shared/cookies/cookieTypes'
@@ -33,6 +39,115 @@ function urlForDomain(domain: string, path: string, secure: boolean): string {
 class CookieJarService {
   /** environmentId (or a stable fallback) → jar. */
   private jars = new Map<string, CookieJar>()
+
+  /** Notified after every jar mutation so the main process can push a
+   * `cookie:changed` to the renderer (live-refresh of the Cookie jar).
+   * Injected from the IPC layer to keep this service electron-free. */
+  private notifyChanged: () => void = () => {
+    // No-op until the IPC layer injects a notifier via setChangeNotifier().
+  }
+
+  setChangeNotifier(fn: () => void): void {
+    this.notifyChanged = fn
+  }
+
+  // ── Persistence ──────────────────────────────────────────────────────────
+  /** Base directory for the per-project cookie files (`<baseDir>/<id>.json`).
+   * Injected from the main wiring (`app.getPath('userData')/cookies`) so the
+   * service stays electron-free and unit tests never touch disk (null → all
+   * persistence is a no-op). */
+  private persistBaseDir: string | null = null
+  /** The open project's id — the persistence file key; null when no project is
+   * open (persistence disabled). */
+  private projectId: string | null = null
+  private persistTimer: ReturnType<typeof setTimeout> | null = null
+
+  setPersistBaseDir(dir: string): void {
+    this.persistBaseDir = dir
+  }
+
+  /**
+   * Swap the active jars to `projectId`'s, flushing the outgoing project's
+   * persistent cookies to disk first. Called on file open (id = the project
+   * uuid), close and switch (id = null / the next uuid). A reopen of the same
+   * project therefore round-trips its persistent cookies through disk.
+   */
+  setProject(projectId: string | null): void {
+    if (this.persistTimer) { clearTimeout(this.persistTimer); this.persistTimer = null }
+    this.persistNow()
+    this.jars.clear()
+    this.projectId = projectId
+    if (projectId !== null) this.loadFromDisk(projectId)
+    // Refresh any open Cookie jar panel to the new project's cookies.
+    this.notifyChanged()
+  }
+
+  /** Flush pending persistent cookies immediately (e.g. on app quit). */
+  flush(): void {
+    if (this.persistTimer) { clearTimeout(this.persistTimer); this.persistTimer = null }
+    this.persistNow()
+  }
+
+  private persistFile(projectId: string): string | null {
+    return this.persistBaseDir === null ? null : join(this.persistBaseDir, `${projectId}.json`)
+  }
+
+  /** Debounced disk write of the current project's persistent cookies. */
+  private schedulePersist(): void {
+    if (this.persistBaseDir === null || this.projectId === null) return
+    if (this.persistTimer) clearTimeout(this.persistTimer)
+    this.persistTimer = setTimeout(() => { this.persistTimer = null; this.persistNow() }, 400)
+  }
+
+  /** Write the current project's PERSISTENT (expiring) cookies to disk. Session
+   * cookies are intentionally omitted so they don't survive a restart. */
+  private persistNow(): void {
+    const baseDir = this.persistBaseDir
+    const projectId = this.projectId
+    if (baseDir === null || projectId === null) return
+    try {
+      const jars: Record<string, unknown> = {}
+      for (const [envKey, jar] of this.jars) {
+        const serialized = jar.serializeSync()
+        const cookies = serialized.cookies.filter((c) => typeof c.expires === 'string' && c.expires !== 'Infinity')
+        if (cookies.length > 0) jars[envKey] = { ...serialized, cookies }
+      }
+      mkdirSync(baseDir, { recursive: true })
+      writeFileSync(join(baseDir, `${projectId}.json`), JSON.stringify({ version: 1, jars }))
+    } catch (err) {
+      logger.warn('[CookieJarService] persist failed', { projectId, error: String(err) })
+    }
+  }
+
+  /** Load a project's persisted cookies, pruning any that already expired. */
+  private loadFromDisk(projectId: string): void {
+    const file = this.persistFile(projectId)
+    if (file === null || !existsSync(file)) return
+    try {
+      const parsed = JSON.parse(readFileSync(file, 'utf8')) as { jars?: Record<string, { cookies?: { expires?: string }[] }> }
+      const now = Date.now()
+      for (const [envKey, serialized] of Object.entries(parsed.jars ?? {})) {
+        const cookies = (serialized.cookies ?? []).filter(
+          (c) => typeof c.expires === 'string' && c.expires !== 'Infinity' && Date.parse(c.expires) > now
+        )
+        if (cookies.length === 0) continue
+        try {
+          this.jars.set(envKey, CookieJar.deserializeSync({ ...serialized, cookies } as Parameters<typeof CookieJar.deserializeSync>[0]))
+        } catch (err) {
+          logger.warn('[CookieJarService] load jar failed', { envKey, error: String(err) })
+        }
+      }
+    } catch (err) {
+      logger.warn('[CookieJarService] load failed', { projectId, error: String(err) })
+    }
+  }
+
+  /** Broadcast the live-refresh AND schedule a debounced disk write. Every
+   * mutation path funnels through here. */
+  private afterMutation(): void {
+    this.notifyChanged()
+    this.schedulePersist()
+  }
 
   private jarFor(envKey: string): CookieJar {
     let jar = this.jars.get(envKey)
@@ -78,6 +193,7 @@ class CookieJarService {
         logger.warn('[CookieJarService] setCookie failed', { url, error: String(err) })
       }
     }
+    this.afterMutation()
   }
 
   /** Every cookie in the environment's jar, flattened for the UI. */
@@ -124,16 +240,19 @@ class CookieJarService {
     } catch (err) {
       logger.warn('[CookieJarService] addCookie failed', { key: input.key, error: String(err) })
     }
+    this.afterMutation()
   }
 
   /** Remove one cookie (domain + path + name). */
   removeCookie(envKey: string, domain: string, path: string, key: string): void {
     this.rebuildFiltered(envKey, (c) => !(c.domain === domain && c.path === path && c.key === key))
+    this.afterMutation()
   }
 
   /** Remove every cookie for a domain (the Cookie Manager's "clear origin"). */
   clearDomain(envKey: string, domain: string): void {
     this.rebuildFiltered(envKey, (c) => c.domain !== domain)
+    this.afterMutation()
   }
 
   /** Rebuild an environment's jar keeping only the cookies that pass
@@ -151,10 +270,12 @@ class CookieJarService {
     }
   }
 
-  /** Clear one environment's jar, or (no arg) every jar. */
+  /** Clear one environment's jar, or (no arg) every jar. A user-driven clear
+   * (UI / MCP), so it persists — the emptied state is written to disk. */
   clear(envKey?: string): void {
     if (envKey === undefined) this.jars.clear()
     else this.jars.delete(envKey)
+    this.afterMutation()
   }
 }
 

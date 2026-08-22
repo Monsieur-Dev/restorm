@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Cookies, gjort på riktig måte — én beholder per miljø.**
+**Cookie jar — én krukke med cookies per miljø.**
 
 - **Hvert miljø beholder sine egne cookies.** Logg inn mot dev-API-et og prod-API-et ditt fra to miljøer, og øktene deres krysses aldri — en cookie som fanges opp i det ene, sendes bare tilbake i akkurat det. Utløp, `Path`, `Domain` og subdomener, `Secure`, `HttpOnly` og `SameSite` respekteres nå, i stedet for å forkastes.
-- **Se og rediger det som er lagret.** En ny Cookie-behandler — **Vis → Cookies** — viser hvert miljøs cookies gruppert etter opprinnelse: rediger en verdi, slett en, tøm en opprinnelse eller hele beholderen, eller legg til en cookie for hånd. Når et svar setter cookies, åpner en 🍪-brikke på svaret behandleren rett på den opprinnelsen.
-- **Cookie-innlogging bare virker.** En forespørsel som returnerer `Set-Cookie` fanges opp og spilles av automatisk på de beskyttede kallene som følger — også gjennom en scenariokjøring, der hvert steg deler miljøets beholder.
-- **Mer enn REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC og SSE sender og lagrer nå alle cookies, og WebSocket, Socket.IO og STOMP tar dem med på tilkoblingshåndtrykket.
+- **Møt Cookie jar.** En ny arbeidsbenkfane — **Vis ▸ Cookie jar** — lister hvert miljøs cookies gruppert etter domene i sammenleggbare ruter: rediger en verdi, slett en, tøm et domene eller hele krukken, eller legg til en cookie for hånd. Den oppdateres direkte etter hvert som forespørslene dine setter cookies.
+- **Se hva hver forespørsel sendte og mottok.** Hver forespørsel har nå en **Cookies**-fane ved siden av Svar og Info, som viser cookiene som ble sendt med kallet og cookiene som ble mottatt tilbake — medregnet cookies satt ved en omdirigering, som aldri når det endelige svaret. Den finnes også på tidligere svar i historikken din.
+- **Cookie-innlogging bare virker.** En forespørsel som returnerer `Set-Cookie` fanges opp og spilles av automatisk på de beskyttede kallene som følger — også gjennom en scenariokjøring, der hvert steg deler miljøets krukke.
+- **Cookies bevares som i en nettleser.** Cookies med et utløp lagres per prosjekt og lastes inn på nytt når du åpner det igjen; øktcookies forkastes når du starter på nytt — akkurat slik en nettleser ville gjort.
+- **Mer enn REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC og SSE sender og lagrer nå alle cookies, og WebSocket tar dem med på tilkoblingshåndtrykket.
 - **Cookies kan bruke variablene dine.** Skriv `{{token}}` i en cookie du legger til for hånd, så løses den mot det aktive miljøet når forespørselen sendes.
+
+Rettelser:
+
+- **Automatisk lagring dekker nå miljøer inne i mapper.** Å legge til eller gi nytt navn til et undermiljø lagres med det samme i modus for automatisk lagring — ikke mer «lagre før lukking?»-spørsmål for en endring som allerede var ment å ligge på disk.
 
 ## v1.0.4
 

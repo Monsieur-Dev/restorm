@@ -2,13 +2,19 @@
 
 ## v1.0.5
 
-**Kolačići, kako treba – jedna staklenka po okruženju.**
+**Cookie jar – jedna staklenka kolačića po okruženju.**
 
 - **Svako okruženje čuva vlastite kolačiće.** Prijavite se na svoj razvojni API i produkcijski API iz dva okruženja i njihove se sesije nikad ne miješaju – kolačić zabilježen u jednom šalje se natrag samo u tom istom. Istek, `Path`, `Domain` i poddomene, `Secure`, `HttpOnly` i `SameSite` sada se poštuju umjesto da se odbacuju.
-- **Vidite i uredite što je pohranjeno.** Novi Upravitelj kolačića – **Prikaz → Kolačići** – navodi kolačiće svakog okruženja grupirane po izvoru: uredite vrijednost, obrišite jedan, ispraznite izvor ili cijelu staklenku, ili dodajte kolačić ručno. Kad odgovor postavi kolačiće, oznaka 🍪 na odgovoru otvara upravitelja izravno na tom izvoru.
+- **Predstavljamo Cookie jar.** Nova kartica radne površine – **Prikaz ▸ Cookie jar** – navodi kolačiće svih okruženja grupirane po domeni u sklopivim panelima: uredite vrijednost, izbrišite jedan, ispraznite domenu ili cijelu staklenku, ili dodajte kolačić ručno. Osvježava se uživo dok vaši zahtjevi postavljaju kolačiće.
+- **Vidite što je svaki zahtjev poslao i primio.** Svaki zahtjev sada ima karticu **Kolačići** uz Odgovor i Informacije, koja prikazuje kolačiće poslane s pozivom i kolačiće primljene natrag – uključujući kolačiće postavljene pri preusmjeravanju koji nikada ne stignu do konačnog odgovora. Tu je i na prošlim odgovorima iz vaše povijesti.
 - **Prijave putem kolačića jednostavno rade.** Zahtjev koji vraća `Set-Cookie` bilježi se i automatski ponovno šalje na zaštićenim pozivima koji slijede – uključujući tijekom izvođenja scenarija, gdje svaki korak dijeli staklenku okruženja.
-- **Više od REST-a.** GraphQL, SOAP, OData, JSON-RPC, tRPC i SSE sada svi šalju i pohranjuju kolačiće, a WebSocket, Socket.IO i STOMP nose ih pri rukovanju (handshake) prilikom uspostave veze.
+- **Kolačići su trajni kao u pregledniku.** Kolačići s istekom spremaju se po projektu i ponovno učitavaju kad ga ponovno otvorite; sesijski kolačići odbacuju se pri ponovnom pokretanju – točno kao što bi to učinio preglednik.
+- **Više od REST-a.** GraphQL, SOAP, OData, JSON-RPC, tRPC i SSE sada svi šalju i pohranjuju kolačiće, a WebSocket ih nosi pri rukovanju (handshake) prilikom uspostave veze.
 - **Kolačići mogu koristiti vaše varijable.** Upišite `{{token}}` u kolačić koji dodate ručno i on će se razriješiti prema aktivnom okruženju kad zahtjev krene.
+
+Ispravci:
+
+- **Automatsko spremanje sada obuhvaća okruženja unutar mapa.** Dodavanje ili preimenovanje podokruženja odmah se sprema u načinu automatskog spremanja – nema više upita „spremiti prije zatvaranja?” za promjenu koja je ionako trebala biti na disku.
 
 ## v1.0.4
 
