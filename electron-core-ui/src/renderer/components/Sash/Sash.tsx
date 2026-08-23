@@ -162,7 +162,7 @@ const SashInner: React.FC<SashProps> = ({
 		// done here on purpose: consumers that own a layout containing
 		// heavy embeds should hide their tab contents wholesale via the
 		// Sash's `onStart` / `onEnd` callbacks — see the workbench in
-		// restorm for the pattern. Per-element muting at this layer
+		// the host app for the pattern. Per-element muting at this layer
 		// would only address part of the relayout problem.
 		const iframes = document.getElementsByTagName('iframe');
 		for (const iframe of iframes) {

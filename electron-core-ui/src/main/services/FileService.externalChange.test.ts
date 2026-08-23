@@ -37,7 +37,7 @@ describe('FileService — a file rewritten outside the app', () => {
   let service: FileService
 
   beforeEach(async () => {
-    dir = mkdtempSync(join(tmpdir(), 'restorm-extchange-'))
+    dir = mkdtempSync(join(tmpdir(), 'ecui-extchange-'))
     filePath = join(dir, 'project.json')
     writeFileSync(filePath, JSON.stringify({ name: 'ours' }), 'utf-8')
     service = new FileService({ storagePrefix: 'test_', extension: '.json' })
@@ -134,7 +134,7 @@ describe('FileService — the open-file watcher (proactive detection)', () => {
   const externallyChanged = (): [string, ...unknown[]][] => sent.filter(([ch]) => ch === 'file:externally-changed')
 
   beforeEach(async () => {
-    dir = mkdtempSync(join(tmpdir(), 'restorm-extwatch-'))
+    dir = mkdtempSync(join(tmpdir(), 'ecui-extwatch-'))
     filePath = join(dir, 'project.json')
     writeFileSync(filePath, JSON.stringify({ name: 'ours' }), 'utf-8')
     sent = []

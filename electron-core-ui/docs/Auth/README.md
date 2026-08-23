@@ -25,10 +25,10 @@ adopt without writing auth boilerplate. It covers:
 
 All host-specific strings are **injected**:
 
-| injected dep | where | restorm default |
+| injected dep | where | example host default |
 |---|---|---|
-| `sessionAudience: string` | `EntitlementServiceDeps` | `'restorm-session'` |
-| `entitlementAudience: string` | `EntitlementServiceDeps` | `'restorm-entitlement'` |
+| `sessionAudience: string` | `EntitlementServiceDeps` | `'myapp-session'` |
+| `entitlementAudience: string` | `EntitlementServiceDeps` | `'myapp-entitlement'` |
 | `isEligibleUrl: (url: string) => boolean` | `GuardedFetchDeps` | `isBackendFunctionsUrl(url, host)` |
 | `successHtml?: string` | `LoopbackLoginDeps` | generic success page |
 | `errorHtml?: string` | `LoopbackLoginDeps` | generic error page |
@@ -132,7 +132,7 @@ const keys = await generateEdKeyPair()
 const token = await signEntitlement({ privateKey: keys.privateKey, plan: 'pro', capabilities: ['my.feature'] })
 ```
 
-`ENTITLEMENT_AUD` / `SESSION_AUD` are the restorm defaults; override for other
+`ENTITLEMENT_AUD` / `SESSION_AUD` are the example host defaults; override for other
 audience strings.
 
 ## File map

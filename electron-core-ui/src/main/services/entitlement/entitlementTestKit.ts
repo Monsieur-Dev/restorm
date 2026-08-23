@@ -14,8 +14,8 @@
 import * as jose from 'jose'
 import type { PlanTier } from '../../../shared/auth/authState'
 
-export const ENTITLEMENT_AUD = 'restorm-entitlement'
-export const SESSION_AUD = 'restorm-session'
+export const ENTITLEMENT_AUD = 'ecui-entitlement'
+export const SESSION_AUD = 'ecui-session'
 
 export interface EdKeyPair {
   privateKey: jose.CryptoKey

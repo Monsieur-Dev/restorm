@@ -52,7 +52,7 @@ export interface SettingDefinition {
   featureDisabledDefault?: SettingValue | undefined
   /**
    * When `true`, the setting can only be edited at the user level — a
-   * workspace `.restorm/settings.json` (or whatever the host wires) is
+   * the host's workspace settings file (or whatever the host wires) is
    * not allowed to override it. Useful for machine-identity values
    * like locale or, eventually, account credentials. Defaults to
    * `false`: every setting is workspace-overridable unless flagged.

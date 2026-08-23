@@ -4,7 +4,7 @@
 
 ## Forbidden
 
-- **NEVER** import from `restorm` or `demo` projects
+- **NEVER** import from the host app or sibling consumer projects (e.g. `demo`)
 - **NEVER** reference project-specific types, interfaces, or models
 - **NEVER** hardcode project-specific values (URLs, IDs, names)
 - **NEVER** add features that are not generalizable

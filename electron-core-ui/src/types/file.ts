@@ -107,7 +107,7 @@ export interface FileServiceConfig {
    * renderer doesn't need to round-trip it on every payload.
    *
    * Defaults to `_uuid`. Host apps that already ship a bespoke key on
-   * disk (e.g. restorm's `_projectUuid`) should set this explicitly.
+   * disk (e.g. the host's `_projectUuid`) should set this explicitly.
    */
   uuidKey?: string
   /**

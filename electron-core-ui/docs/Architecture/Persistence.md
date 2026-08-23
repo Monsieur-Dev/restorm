@@ -120,7 +120,7 @@ same bug elsewhere. The stamp inside `open()` is wrapped in a try/catch, so
 a **read-only** file never announced itself — the write failed, a warning
 was logged, and the document opened normally. The harm was confined to the
 files where the write *succeeded*. Host apps that stamp **outside** a catch
-get the opposite and louder failure: restorm's folder-mode loader called
+get the opposite and louder failure: one host's folder-mode loader called
 `ensureFolderUuid` inside a `try` whose `catch` returns `null`, so a
 read-only project directory made the entire open fail silently — no
 document, no message. Both shapes are worth checking for whenever a read
@@ -259,7 +259,7 @@ again.
 
 Renderer surface: `useFileExternallyChanged(cb)` subscribes to the
 broadcast and `useFileService()` exposes `acceptExternalChange()`. The
-host decides the prompt UX — restorm shows a non-blocking, indefinite
+host decides the prompt UX — one host shows a non-blocking, indefinite
 toast (reload / keep mine); the native `showExternalChangeDialog()`
 message box remains available for hosts that prefer a blocking prompt.
 
@@ -334,8 +334,8 @@ work survives a hard crash.
 > **Test isolation.** `<userData>` resolves via Electron's
 > `app.getPath('userData')` — `~/.config/<appName>/` on Linux,
 > `~/Library/Application Support/<appName>/` on macOS,
-> `%APPDATA%/<appName>/` on Windows. Restorm's main entrypoint reads
-> the **`RESTORM_USER_DATA_OVERRIDE`** environment variable very early
+> `%APPDATA%/<appName>/` on Windows. The host's main entrypoint reads
+> the host's user-data-override environment variable (**`<APP>_USER_DATA_OVERRIDE`**) very early
 > (before any storage consumer initialises) and, if non-blank, calls
 > `app.setPath('userData', <override>)`. After that call every
 > downstream consumer of `app.getPath('userData')` — `StorageService`,

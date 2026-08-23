@@ -72,7 +72,7 @@ installHardenInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController, initAppIconMenuService, getAppIconMenuService, registerAppIconMenuHandlers, APP_ICON_MENU_INVOKE_CHANNEL, type AppIconAction } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, FileService, getSettingsService, isSettingsServiceInitialized, setWorkspaceDirName, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher, getGitService, initGitSemiPullController, getGitSemiPullController, initAppIconMenuService, getAppIconMenuService, registerAppIconMenuHandlers, APP_ICON_MENU_INVOKE_CHANNEL, type AppIconAction } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 import { resolveChannel, endpointUrl } from '../shared/config/backend'
 import { entitlementPublicKeyPem, isEntitlementPublicKeyConfigured } from './services/entitlement/keys'
@@ -156,6 +156,10 @@ app.setPath('userData', join(app.getPath('appData'), 'restorm'))
 // bleed between concurrently running tests. Unset → production / dev
 // behaviour is unchanged.
 applyUserDataOverride(app)
+
+// Name the per-project settings dotfolder ECUI writes/reads (the library is
+// brand-agnostic and defaults to a neutral name). Set before any project opens.
+setWorkspaceDirName('.restorm')
 
 // Allow WebGL via SwiftShader when the host GPU is blocked / unavailable.
 // Without this, Chromium silently disables WebGL on machines where VA-API

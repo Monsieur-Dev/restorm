@@ -6,7 +6,7 @@ import { signSession } from '../entitlement/entitlementTestKit'
 const IAT = 1_700_000_000
 // Local audience constant — SESSION_AUDIENCE is no longer exported by ECUI's
 // sessionToken (it is injected by the caller). Use the test kit's value.
-const SESSION_AUD = 'restorm-session'
+const SESSION_AUD = 'ecui-session'
 
 describe('sessionToken', () => {
   let token: string
@@ -65,7 +65,7 @@ describe('sessionToken', () => {
 
   it('treats a malformed / missing-exp / wrong-aud token as expired', async () => {
     expect(isSessionExpired('garbage', IAT, SESSION_AUD)).toBe(true)
-    const wrongAud = await signSession({ secret: 'a-secret-at-least-32-bytes-long-xxxxxx', iatSeconds: IAT, audience: 'restorm-state' })
+    const wrongAud = await signSession({ secret: 'a-secret-at-least-32-bytes-long-xxxxxx', iatSeconds: IAT, audience: 'example-state' })
     expect(isSessionExpired(wrongAud, IAT + 10, SESSION_AUD)).toBe(true)
   })
 })

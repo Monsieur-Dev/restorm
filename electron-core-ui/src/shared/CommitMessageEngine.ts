@@ -4,14 +4,14 @@ import Handlebars from 'handlebars'
  * The commit-message template pair for one language. Both are Handlebars
  * template STRINGS — this engine only knows how to compile + render them
  * against a context object; it has no notion of "requests" / "scenarios" /
- * any Restorm-specific entity. The host (restorm) owns:
+ * any host-specific entity. The host owns:
  *
  * - computing the structural diff (what changed, grouped one line per
  *   entity — never per field / per reposition),
  * - translating each change + the aggregate summary into the target
  *   language (a host-owned i18n concern, independent of the app's active
  *   UI language — see `docs/Git/README.md`),
- * - providing the two templates below (restorm-provided, not
+ * - providing the two templates below (host-provided, not
  *   user-overridable in v1) and the context they render against.
  *
  * Kept deliberately thin: the "engine" is exactly `Handlebars.compile`, so

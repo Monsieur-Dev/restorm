@@ -488,7 +488,7 @@ setupIPC(devResourcesPath, appSettingsConfigPath)
 
 ## Workspace overlay
 
-A hosting app can activate a per-project settings overlay by calling `SettingsService.setWorkspacePath(absoluteDir)` whenever it opens a file or folder. The service then loads `<absoluteDir>/.restorm/settings.json` (sparse JSON, only overridden keys) and treats those values as a layer on top of the user file. Effective-value priority is `workspace > user > default`. Call `unsetWorkspacePath()` on close.
+A hosting app can activate a per-project settings overlay by calling `SettingsService.setWorkspacePath(absoluteDir)` whenever it opens a file or folder. The service then loads the host's workspace settings file (`<absoluteDir>/<workspace dotfolder>/settings.json`, sparse JSON, only overridden keys) and treats those values as a layer on top of the user file. Effective-value priority is `workspace > user > default`. Call `unsetWorkspacePath()` on close.
 
 ```typescript
 // In your main-process file/folder open handler:
@@ -497,7 +497,7 @@ getSettingsService().setWorkspacePath(dirname(filePath))
 getSettingsService().unsetWorkspacePath()
 ```
 
-The Settings UI surfaces this through two tabs at the top of `SettingsPage`: **User** (default) and **Workspace** (disabled when no project is open). Reads / writes / resets on the User tab go to the user file; on the Workspace tab they go to `<workspace>/.restorm/settings.json`. Writes are debounced ~200 ms and atomically committed via temp-rename. The file is auto-deleted when the workspace overlay becomes empty.
+The Settings UI surfaces this through two tabs at the top of `SettingsPage`: **User** (default) and **Workspace** (disabled when no project is open). Reads / writes / resets on the User tab go to the user file; on the Workspace tab they go to the host's workspace settings file (`<workspace>/<workspace dotfolder>/settings.json`). Writes are debounced ~200 ms and atomically committed via temp-rename. The file is auto-deleted when the workspace overlay becomes empty.
 
 A setting flagged `userOnly: true` in the YAML schema can never be overridden at the workspace scope — `appearance.language` is the canonical example (locale is a per-machine preference, not a project decision). The Workspace tab hides such settings entirely with a "{N} user-only settings hidden on this tab" footer; if a workspace JSON file is hand-edited to carry a `userOnly` key, the load step ignores it with a warning.
 

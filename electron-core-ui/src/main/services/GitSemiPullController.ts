@@ -16,7 +16,7 @@ export interface GitSemiPullControllerOptions {
 
 // Storage key composed by SettingsService as `<groupPath>:<settingId>` —
 // the setting itself is registered in the host app's own settings config
-// (restorm: `resources/settings.yaml`'s `git` group), not ECUI's defaults,
+// (in the host app: `resources/settings.yaml`'s `git` group), not ECUI's defaults,
 // same as `AutoSaveController`'s `files:autoSave` lives in ECUI's — the
 // controller only needs the key to exist somewhere in the merged tree.
 const SETTING_FREQUENCY = 'git:semiPullFrequency'

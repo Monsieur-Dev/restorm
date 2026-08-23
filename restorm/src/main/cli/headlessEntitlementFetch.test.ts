@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { generateEdKeyPair, signEntitlement } from 'electron-core-ui/main'
-import { checkHeadlessEntitlement, type HeadlessEntitlementDeps } from './headlessEntitlementFetch'
+import { checkHeadlessEntitlement, ENTITLEMENT_AUDIENCE, type HeadlessEntitlementDeps } from './headlessEntitlementFetch'
 
 /**
  * Fixed "current time" for all tests: 1 000 000 epoch-seconds (ms for `now()`).
@@ -43,7 +43,7 @@ describe('checkHeadlessEntitlement', () => {
   it('returns token-missing when RESTORM_TOKEN is not set', async () => {
     delete process.env['RESTORM_TOKEN']
     const { privateKey, publicSpkiPem } = await generateEdKeyPair()
-    const jwt = await signEntitlement({ privateKey, iatSeconds: NOW_S, capabilities: ['scenario.headless'] })
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE, privateKey, iatSeconds: NOW_S, capabilities: ['scenario.headless'] })
     const deps: HeadlessEntitlementDeps = {
       entitlementUrl: 'https://example.com/entitlement',
       publicKeyPem: publicSpkiPem,
@@ -57,7 +57,7 @@ describe('checkHeadlessEntitlement', () => {
   it('returns token-missing when RESTORM_TOKEN is blank', async () => {
     process.env['RESTORM_TOKEN'] = '   '
     const { privateKey, publicSpkiPem } = await generateEdKeyPair()
-    const jwt = await signEntitlement({ privateKey, iatSeconds: NOW_S, capabilities: ['scenario.headless'] })
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE, privateKey, iatSeconds: NOW_S, capabilities: ['scenario.headless'] })
     const deps: HeadlessEntitlementDeps = {
       entitlementUrl: 'https://example.com/entitlement',
       publicKeyPem: publicSpkiPem,
@@ -71,7 +71,7 @@ describe('checkHeadlessEntitlement', () => {
   it('grants when token is valid and plan includes scenario.headless', async () => {
     process.env['RESTORM_TOKEN'] = 'rstk_valid'
     const { privateKey, publicSpkiPem } = await generateEdKeyPair()
-    const jwt = await signEntitlement({
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE,
       privateKey,
       iatSeconds: NOW_S,
       plan: 'pro',
@@ -90,7 +90,7 @@ describe('checkHeadlessEntitlement', () => {
   it('grants for enterprise plan too', async () => {
     process.env['RESTORM_TOKEN'] = 'rstk_enterprise'
     const { privateKey, publicSpkiPem } = await generateEdKeyPair()
-    const jwt = await signEntitlement({
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE,
       privateKey,
       iatSeconds: NOW_S,
       plan: 'enterprise',
@@ -109,7 +109,7 @@ describe('checkHeadlessEntitlement', () => {
   it('returns plan-insufficient when token is valid but plan lacks scenario.headless', async () => {
     process.env['RESTORM_TOKEN'] = 'rstk_community'
     const { privateKey, publicSpkiPem } = await generateEdKeyPair()
-    const jwt = await signEntitlement({
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE,
       privateKey,
       iatSeconds: NOW_S,
       plan: 'community',
@@ -171,7 +171,7 @@ describe('checkHeadlessEntitlement', () => {
     process.env['RESTORM_TOKEN'] = 'rstk_forged'
     const { privateKey: attackerKey } = await generateEdKeyPair()
     const { publicSpkiPem: trustedKey } = await generateEdKeyPair()
-    const jwt = await signEntitlement({
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE,
       privateKey: attackerKey,
       iatSeconds: NOW_S,
       plan: 'pro',
@@ -191,7 +191,7 @@ describe('checkHeadlessEntitlement', () => {
     process.env['RESTORM_TOKEN'] = 'rstk_expired'
     const { privateKey, publicSpkiPem } = await generateEdKeyPair()
     // graceSeconds: 1 → exp = NOW_S + 1; current clock = NOW_S + 2 → expired
-    const jwt = await signEntitlement({
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE,
       privateKey,
       iatSeconds: NOW_S,
       graceSeconds: 1,
@@ -210,7 +210,7 @@ describe('checkHeadlessEntitlement', () => {
   it('returns token-invalid when publicKeyConfigured is false (prod pre-launch)', async () => {
     process.env['RESTORM_TOKEN'] = 'rstk_valid'
     const { privateKey, publicSpkiPem } = await generateEdKeyPair()
-    const jwt = await signEntitlement({ privateKey, iatSeconds: NOW_S, capabilities: ['scenario.headless'] })
+    const jwt = await signEntitlement({ audience: ENTITLEMENT_AUDIENCE, privateKey, iatSeconds: NOW_S, capabilities: ['scenario.headless'] })
     const deps: HeadlessEntitlementDeps = {
       entitlementUrl: 'https://example.com/entitlement',
       publicKeyPem: publicSpkiPem,

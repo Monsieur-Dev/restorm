@@ -61,7 +61,7 @@ export interface RecentFilesVignetteProps {
 
 #### Usage
 
-Drop it inside any positioned ancestor — the panel is just a `Vignette`, so it doesn't anchor itself anywhere. The example below mirrors the welcome layout used by Restorm: panel pinned to the bottom-left corner, Wallpaper behind, hero / actions stacked centrally.
+Drop it inside any positioned ancestor — the panel is just a `Vignette`, so it doesn't anchor itself anywhere. The example below mirrors a typical welcome layout used by a host app: panel pinned to the bottom-left corner, Wallpaper behind, hero / actions stacked centrally.
 
 ```tsx
 import React from 'react'

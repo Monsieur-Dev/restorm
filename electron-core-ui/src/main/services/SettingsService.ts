@@ -21,13 +21,20 @@ import { FileSystemError, errorMeta } from '../../errors'
 import { i18nService } from './I18nService'
 
 /**
- * Subdirectory + filename used inside a workspace path for the
- * project-scoped settings overlay. Hosted apps don't change this —
- * the convention is shared across consumers so a `.restorm/`
- * directory is recognisable on disk regardless of which app produced
- * it.
+ * Subdirectory used inside a workspace path for the project-scoped settings
+ * overlay. The host names it via {@link setWorkspaceDirName} at startup (the
+ * library stays brand-agnostic); this neutral default applies until then.
  */
-const WORKSPACE_DIR = '.restorm'
+let workspaceDirName = '.workspace'
+
+/**
+ * Set the workspace settings subdirectory name (e.g. the host's own dotfolder).
+ * Call once at startup, before any {@link SettingsService.setWorkspacePath}.
+ */
+export function setWorkspaceDirName(name: string): void {
+  workspaceDirName = name
+}
+
 const WORKSPACE_FILE = 'settings.json'
 
 /** Debounce window for sparse workspace-file writes (ms). */
@@ -67,8 +74,8 @@ export class SettingsService {
   })
   /**
    * Active workspace path (an absolute directory, e.g. the directory
-   * containing a `.restorm` file or folder). When set, the service
-   * loads `<path>/.restorm/settings.json` as a sparse override on
+   * containing the host's workspace dotfolder). When set, the service
+   * loads `<path>/<workspace-dir>/settings.json` as a sparse override on
    * top of the user-level values. `null` means no project is open
    * and the workspace layer is empty.
    */
@@ -308,7 +315,7 @@ export class SettingsService {
 
   /**
    * Activate a workspace overlay rooted at `absoluteDir`. Loads
-   * `<absoluteDir>/.restorm/settings.json` synchronously if present;
+   * `<absoluteDir>/<workspace-dir>/settings.json` synchronously if present;
    * keys flagged `userOnly` are dropped with a warning. Re-calling
    * with the same path is a no-op (idempotent). Renderers receive
    * `'settings:workspace-changed'` so they can re-resolve every
@@ -432,7 +439,7 @@ export class SettingsService {
   // ── Workspace internals ─────────────────────────────────────────────
 
   private workspaceFilePath(): string | null {
-    return this.workspacePath ? join(this.workspacePath, WORKSPACE_DIR, WORKSPACE_FILE) : null
+    return this.workspacePath ? join(this.workspacePath, workspaceDirName, WORKSPACE_FILE) : null
   }
 
   private scheduleWorkspaceFlush(): void {

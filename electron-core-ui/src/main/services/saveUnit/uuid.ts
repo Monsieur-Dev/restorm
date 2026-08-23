@@ -10,7 +10,7 @@
  *
  * The library intentionally does **not** hardcode a domain name into
  * the key it writes to disk — the caller passes `uuidKey` (defaulted to
- * `_uuid`) so each host app can own its on-disk vocabulary (restorm
+ * `_uuid`) so each host app can own its on-disk vocabulary (one host
  * uses `_projectUuid`, another app could use `_documentUuid`, etc.)
  * without pulling library terminology into its file format.
  *

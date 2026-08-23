@@ -1,6 +1,6 @@
 import { test as base } from 'playwright-bdd'
 import { type ElectronApplication, type Page, expect } from '@playwright/test'
-import { cpSync, mkdirSync, rmSync } from 'fs'
+import { cpSync, mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'fs'
 import { join, resolve } from 'path'
 import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
 import { launchRestormElectronApp, writeAppLogs } from '../../helpers/launch-restorm'
@@ -91,6 +91,25 @@ export const test = base.extend<DocShotsFixtures>({
     if (seedProfile !== undefined && seedProfile.length > 0) {
       userDataOverride = join(DOC_SHOTS_TEMP_DIR, 'userdata')
       cpSync(seedProfile, userDataOverride, { recursive: true })
+      // Normalise the copied profile so captures are reproducible regardless of
+      // the seed's accumulated state: an empty recent-files list (the welcome
+      // vignette must be empty, per the harness contract) and a fixed window
+      // size. We edit the persisted config rather than teaching the library any
+      // doc-capture behaviour.
+      const cfgPath = join(userDataOverride, 'config.json')
+      try {
+        const cfg = existsSync(cfgPath)
+          ? (JSON.parse(readFileSync(cfgPath, 'utf-8')) as Record<string, unknown>)
+          : {}
+        cfg.restorm_recent = []
+        const windows = (cfg.windows ?? {}) as Record<string, unknown>
+        windows.main = { width: 1280, height: 1000, x: 0, y: 0, fullscreen: false }
+        cfg.windows = windows
+        writeFileSync(cfgPath, JSON.stringify(cfg, null, 2))
+      } catch {
+        // A malformed/missing config just means the app falls back to defaults;
+        // the capture still succeeds, only its determinism may suffer.
+      }
     }
 
     const launcher = async (): Promise<{ app: ElectronApplication; page: Page }> => {
@@ -144,7 +163,7 @@ export const test = base.extend<DocShotsFixtures>({
       const resize = async (): Promise<void> => {
         await app.evaluate(({ BrowserWindow }) => {
           for (const win of BrowserWindow.getAllWindows()) {
-            win.setSize(1600, 1000)
+            win.setSize(1280, 1000)
             win.center()
           }
         })

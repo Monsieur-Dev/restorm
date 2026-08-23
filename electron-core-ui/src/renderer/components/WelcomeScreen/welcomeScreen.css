@@ -59,7 +59,9 @@
  * font-family rules (also 0,2,0) that would otherwise override this via
  * inheritance. Source order ensures our rule wins on tied specificity. */
 .ecu-welcome-screen .ecu-welcome-screen-wordmark {
-  font-family: 'Restorm Wordmark', sans-serif;
+  /* The host provides the wordmark font by setting --ecu-wordmark-font-family
+   * (with its own @font-face); the library stays brand-agnostic. */
+  font-family: var(--ecu-wordmark-font-family, sans-serif);
   font-size: 120px;
   font-weight: 700;
   letter-spacing: -0.04em;

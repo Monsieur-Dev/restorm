@@ -84,7 +84,7 @@
 	color: var(--tab-activeForeground);
 }
 
-/* Fade the label-name (which carries the method badge in restorm-style
+/* Fade the label-name (which carries the method badge in host-style
  * tabs) for non-prominent tabs:
  *  - every tab in an unfocused group (`.tabs-container.dimmed`), and
  *  - every inactive tab in *any* group.

@@ -21,7 +21,7 @@ All three components add `.ecu-border-effect` on their root — a single utility
 - inherits its parent's `border-radius` so the effect's bounds match the container's silhouette,
 - never intercepts pointer events (`pointer-events: none`).
 
-Consumers that need to ride a non-rectangular silhouette (e.g. a speech bubble with a comic-book tail) can keep `.ecu-border-effect` and override `inset`, `mask`, and `offset-path` via inline style — see Restorm's `ImportFormatShowcase` for a worked example.
+Consumers that need to ride a non-rectangular silhouette (e.g. a speech bubble with a comic-book tail) can keep `.ecu-border-effect` and override `inset`, `mask`, and `offset-path` via inline style — see the host's `ImportFormatShowcase` for a worked example.
 
 ## Public API
 

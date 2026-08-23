@@ -26,7 +26,7 @@ const FOREIGN_XBEL = `<?xml version="1.0" encoding="UTF-8"?>
 // portal) with only its own generic application attributed.
 const PORTAL_XBEL = `<?xml version="1.0" encoding="UTF-8"?>
 <xbel version="1.0" xmlns:bookmark="http://www.freedesktop.org/standards/desktop-bookmarks" xmlns:mime="http://www.freedesktop.org/standards/shared-mime-info">
-  <bookmark href="file:///home/u/a.restorm" added="2020-01-01T00:00:00Z" modified="2020-01-01T00:00:00Z" visited="2020-01-01T00:00:00Z">
+  <bookmark href="file:///home/u/a.app" added="2020-01-01T00:00:00Z" modified="2020-01-01T00:00:00Z" visited="2020-01-01T00:00:00Z">
     <info><metadata owner="http://freedesktop.org">
       <bookmark:applications><bookmark:application name="xdg-desktop-portal-gtk" exec="'gio open %u'" modified="2020-01-01T00:00:00Z" count="1"/></bookmark:applications>
     </metadata></info>
@@ -40,15 +40,15 @@ const model = (): AppIconMenuModel => ({
       id: FAVORITES_ENTRY_ID,
       label: 'Favorites',
       enabled: true,
-      submenu: [{ id: 'f', label: 'fav', enabled: true, action: { kind: 'open-file', path: '/home/u/favx.restorm' } }]
+      submenu: [{ id: 'f', label: 'fav', enabled: true, action: { kind: 'open-file', path: '/home/u/favx.app' } }]
     },
     {
       id: RECENT_FILES_ENTRY_ID,
       label: 'Recent',
       enabled: true,
       submenu: [
-        { id: 'r1', label: 'a.restorm', enabled: true, action: { kind: 'open-file', path: '/home/u/a.restorm' } },
-        { id: 'r2', label: 'b.restorm', enabled: true, action: { kind: 'open-file', path: '/home/u/b.restorm' } }
+        { id: 'r1', label: 'a.app', enabled: true, action: { kind: 'open-file', path: '/home/u/a.app' } },
+        { id: 'r2', label: 'b.app', enabled: true, action: { kind: 'open-file', path: '/home/u/b.app' } }
       ]
     }
   ]
@@ -75,15 +75,15 @@ describe('LinuxRecentDocumentsAdapter', () => {
   it('writes the recent files as XBEL bookmarks tagged with the app', () => {
     makeAdapter().apply(model(), () => undefined)
     const out = xbel()
-    expect(out).toContain('file:///home/u/a.restorm')
-    expect(out).toContain('file:///home/u/b.restorm')
+    expect(out).toContain('file:///home/u/a.app')
+    expect(out).toContain('file:///home/u/b.app')
     expect(out).toContain('name="TestApp"')
     expect(out).toContain('type="application/x-test"')
   })
 
   it('leaves favorites out of the recent-documents store', () => {
     makeAdapter().apply(model(), () => undefined)
-    expect(xbel()).not.toContain('favx.restorm')
+    expect(xbel()).not.toContain('favx.app')
   })
 
   it('preserves bookmarks that belong to other applications', () => {
@@ -92,7 +92,7 @@ describe('LinuxRecentDocumentsAdapter', () => {
     const out = xbel()
     expect(out).toContain('file:///other/thing.txt')
     expect(out).toContain('name="OtherApp"')
-    expect(out).toContain('file:///home/u/a.restorm')
+    expect(out).toContain('file:///home/u/a.app')
   })
 
   it('derives the exec from the installed .desktop so it matches the launcher', () => {
@@ -124,7 +124,7 @@ describe('LinuxRecentDocumentsAdapter', () => {
     expect(out).toContain('name="xdg-desktop-portal-gtk"')
     expect(out).toContain('name="TestApp"')
     // still exactly one bookmark for that file — merged, not duplicated
-    expect(out.match(/href="file:\/\/\/home\/u\/a\.restorm"/g)?.length).toBe(1)
+    expect(out.match(/href="file:\/\/\/home\/u\/a\.app"/g)?.length).toBe(1)
   })
 
   it('clear() drops our entries but keeps foreign ones', () => {
@@ -134,6 +134,6 @@ describe('LinuxRecentDocumentsAdapter', () => {
     adapter.clear()
     const out = xbel()
     expect(out).toContain('file:///other/thing.txt')
-    expect(out).not.toContain('file:///home/u/a.restorm')
+    expect(out).not.toContain('file:///home/u/a.app')
   })
 })

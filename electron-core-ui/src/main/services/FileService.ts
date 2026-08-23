@@ -730,7 +730,7 @@ export class FileService {
       // so a read-only file merely logged a warning here and opened
       // anyway. The damage is on the paths where the write SUCCEEDS.
       // (Host apps should note the asymmetry: a host that stamps outside
-      // a catch — restorm's folder-mode loader did — turns the same
+      // a catch — as one host's folder-mode loader did — turns the same
       // read-only directory into a whole open that fails and returns
       // nothing, with no message at all.)
       let data = readFileSync(filePath, 'utf-8')

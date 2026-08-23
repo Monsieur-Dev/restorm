@@ -114,7 +114,7 @@ export { registerSettingRenderer, unregisterSettingRenderer } from './components
 export type { CapabilityGate } from './contexts/settingsContextDef'
 // The canonical settings storage-key builder — any renderer code hardcoding
 // a settings key outside the YAML-driven `useSetting()` path (e.g. a host
-// hook like restorm's `usePushModal.ts`) must go through this rather than
+// hook like the host's `usePushModal.ts`) must go through this rather than
 // re-deriving the `<group>:<id>` format by hand, or it silently reads/
 // writes a DIFFERENT storage entry than the one the Settings UI row uses.
 export { buildSettingsStorageKey } from '../types/settings'

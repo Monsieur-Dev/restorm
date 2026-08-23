@@ -34,7 +34,7 @@ const HEADLESS_CAPABILITY = 'scenario.headless'
 
 /** Audience pinned to the restorm entitlement JWT. Must equal the backend
  * `AUD_ENTITLEMENT` constant in `cloud/supabase/functions/_shared/entitlement.ts`. */
-const ENTITLEMENT_AUDIENCE = 'restorm-entitlement'
+export const ENTITLEMENT_AUDIENCE = 'restorm-entitlement'
 
 export type HeadlessEntitlementReason =
   /** RESTORM_TOKEN env var is absent or blank. */

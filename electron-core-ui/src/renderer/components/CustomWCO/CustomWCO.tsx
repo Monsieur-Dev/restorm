@@ -13,7 +13,7 @@ export interface CustomWCOProps {
    * Show the styled hover tooltip (Minimize / Maximize / Restore / Close) on the
    * window-control buttons. Default `true`. Set `false` to hide it — the buttons
    * keep their `aria-label` for a11y and never fall back to the native `title`;
-   * the icons are self-explanatory. (Restorm opts out via the Titlebar's
+   * the icons are self-explanatory. (The host app opts out via the Titlebar's
    * `customWcoHoverTooltips`.)
    */
   hoverTooltips?: boolean

@@ -85,7 +85,7 @@ function toGitStatus(result: StatusResult): GitStatus {
 /**
  * Generic git plumbing on top of `simple-git`. Operates on a single
  * "active folder" at a time (mirrors `FileService`'s single active file —
- * a Restorm project is one YAML file, so there is exactly one candidate
+ * a host project is one YAML file, so there is exactly one candidate
  * repo folder open at once). Callers pass the folder explicitly on every
  * primitive so the service stays reusable for one-off calls (e.g. the
  * MCP routes) that don't go through the active-folder lifecycle at all.
@@ -715,7 +715,7 @@ export class GitService {
   // ==========================================================================
 
   /**
-   * Set the folder whose git state is tracked + watched. Restorm's
+   * Set the folder whose git state is tracked + watched. The host's
    * injection point: the host maps "the file the user has open" to "its
    * containing folder" and calls this on every `file:opened` /
    * `file:closed` — GitService itself has no notion of a project file.

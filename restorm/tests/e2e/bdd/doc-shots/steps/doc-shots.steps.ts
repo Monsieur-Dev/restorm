@@ -196,8 +196,24 @@ When(
 async function openCookieJar(p: Page): Promise<void> {
   const panel = p.getByTestId('cookie-jar')
   if (!(await panel.isVisible())) {
-    await p.locator('[data-testid="titlebar-menubar-item-view"]').click()
-    await p.locator('[data-testid="titlebar-menu-item-cookies"]').click()
+    // The View menu lives in the menubar at wide widths and collapses into an
+    // overflow/hamburger button at the narrow doc-capture width — tolerate both.
+    const cookiesItem = p.locator('[data-testid="titlebar-menu-item-cookies"]')
+    const inBarView = p.locator('[data-testid="titlebar-menubar-item-view"]')
+    if (await inBarView.isVisible().catch(() => false)) {
+      await inBarView.click({ force: true })
+    } else {
+      await p
+        .locator('[data-testid="titlebar-menubar-overflow-button"], [data-testid="titlebar-menubar-hamburger-button"]')
+        .first()
+        .click({ force: true })
+      const viewEntry = p.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
+      await viewEntry.waitFor({ state: 'visible', timeout: 15000 })
+      await viewEntry.hover()
+      await viewEntry.click({ force: true })
+    }
+    await cookiesItem.waitFor({ state: 'visible', timeout: 5000 })
+    await cookiesItem.click({ force: true })
     await panel.waitFor({ state: 'visible' })
   }
   // The default "No environment" jar holds the seeded cookies.
@@ -390,11 +406,26 @@ When(
     await p.waitForTimeout(400)
     await p.locator('.react-flow__controls-fitview').click()
     await p.waitForTimeout(800)
+    await dismissExternalChangeToast(p)
   }
 )
+
+/** Authoring through the embedded MCP writes the project to disk, which the
+ * open-file watcher reports as an external change — a toast that must not ride
+ * into the scenario capture. Dismiss it (keeping the in-editor version) if it
+ * showed; a no-op when it didn't. */
+async function dismissExternalChangeToast(p: Page): Promise<void> {
+  const keepMine = p.getByTestId('file-external-change-keep-mine')
+  if (await keepMine.isVisible().catch(() => false)) {
+    await keepMine.click({ force: true })
+    await p.getByTestId('file-external-change-keep-mine').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => undefined)
+  }
+}
 
 When('I mark the scenario {string} as favorite', async ({}, _scenarioName: string) => {
   if (fightScenarioId === null) throw new Error('build the scenario first')
   await callEmbeddedMcpTool(requireMcp(), 'set_favorite', { itemId: fightScenarioId, favorite: true })
   await requirePage().waitForTimeout(500)
+  // set_favorite autosaves too — clear any external-change toast before capture.
+  await dismissExternalChangeToast(requirePage())
 })

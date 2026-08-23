@@ -74,7 +74,7 @@ import {
 } from 'electron-core-ui/testing'
 
 await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: '/tmp/sample' })
-await configureNextSaveFileDialogForE2E(electronApp, { kind: 'saveFile', path: '/tmp/output.restorm' })
+await configureNextSaveFileDialogForE2E(electronApp, { kind: 'saveFile', path: '/tmp/output.myapp' })
 
 await configureNextConfirmationDialogForE2E(electronApp, {
   buttonKeys: ['file.unsavedChanges.save', 'file.unsavedChanges.dontSave', 'file.unsavedChanges.cancel'],

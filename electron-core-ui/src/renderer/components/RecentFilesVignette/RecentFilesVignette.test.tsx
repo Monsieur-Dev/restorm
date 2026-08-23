@@ -69,13 +69,13 @@ function withHeadTruncation(truncated: boolean, run: () => void): void {
 }
 
 const FAVORITE: FileMetadata = {
-  path: '/home/user/Documents/Projects/enterprise/backend/api-collections/payments.restorm',
+  path: '/home/user/Documents/Projects/enterprise/backend/api-collections/payments.app',
   name: 'payments',
   lastOpened: 2,
   isFavorite: true
 }
 const RECENT: FileMetadata = {
-  path: '/home/user/workspace/checkout/regression.restorm',
+  path: '/home/user/workspace/checkout/regression.app',
   name: 'regression',
   lastOpened: 1,
   isFavorite: false
@@ -129,9 +129,9 @@ describe('RecentFilesVignette rows', () => {
     for (const row of rendered) {
       expect(row.nameBeforePath).toBe(true)
     }
-    expect(rendered[0]?.name).toBe('payments.restorm')
+    expect(rendered[0]?.name).toBe('payments.app')
     expect(rendered[0]?.path).toBe('/home/user/Documents/Projects/enterprise/backend/api-collections')
-    expect(rendered[1]?.name).toBe('regression.restorm')
+    expect(rendered[1]?.name).toBe('regression.app')
     expect(rendered[1]?.path).toBe('/home/user/workspace/checkout')
   })
 
@@ -180,12 +180,12 @@ describe('RecentFilesVignette rows', () => {
 
   it('omits the path line for a bare filename with no directory', () => {
     fileService.favorites = []
-    fileService.recentFiles = [{ path: 'orphan.restorm', name: 'orphan', lastOpened: 1, isFavorite: false }]
+    fileService.recentFiles = [{ path: 'orphan.app', name: 'orphan', lastOpened: 1, isFavorite: false }]
     try {
       render(<RecentFilesVignette onOpenFile={vi.fn()} />)
       const rendered = rows()
       expect(rendered).toHaveLength(1)
-      expect(rendered[0]?.name).toBe('orphan.restorm')
+      expect(rendered[0]?.name).toBe('orphan.app')
       expect(document.querySelector('.ecu-recent-files-vignette-item-path')).toBeNull()
     } finally {
       fileService.favorites = [FAVORITE]

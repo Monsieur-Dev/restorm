@@ -22,7 +22,7 @@ import { McpService, type McpToolGate, type McpToolResult } from './McpService'
 /**
  * A minimal gate that treats one named tool as gated and refuses it unless the
  * (mutable) `pro` flag is set — mirrors the real host gate's shape without
- * pulling in restorm's entitlement machinery.
+ * pulling in the host app's entitlement machinery.
  */
 function makeGate(gatedName: string, state: { pro: boolean }): McpToolGate {
   return {

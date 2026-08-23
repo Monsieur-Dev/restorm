@@ -65,10 +65,10 @@ function makeFileApi(): MockFileApi {
       onOk = callback
       return () => { onOk = null }
     }),
-    fail: (reason = 'read-only-file', path: string | null = '/tmp/project.restorm') => {
+    fail: (reason = 'read-only-file', path: string | null = '/tmp/project.app') => {
       onFail?.({ path, reason, detail: 'EACCES: permission denied' })
     },
-    succeed: () => { onOk?.({ path: '/tmp/project.restorm' }) }
+    succeed: () => { onOk?.({ path: '/tmp/project.app' }) }
   }
 }
 

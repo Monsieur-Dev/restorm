@@ -47,7 +47,7 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
 - **`GitSemiPullController`** (main process) — reads the `git:
   semiPullFrequency` setting (presets `15m`/`30m`/`1h`/`4h`/`12h`/`24h`/
   `off`, default `1h` — the setting itself is host-registered, e.g.
-  restorm's `resources/settings.yaml`, same split as `AutoSaveController`'s
+  the host's `resources/settings.yaml`, same split as `AutoSaveController`'s
   `files:autoSave`) and calls `checkForRemoteUpdate()` on that schedule.
   Reschedules immediately on a setting change. Mirrors
   `AutoSaveController`'s shape (`start()`/`stop()`, a settings
@@ -73,10 +73,10 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   nothing. `onPull` is the host's
   injection point — this hook only knows a newer version was detected,
   never how to actually pull (conflict handling belongs to the host's own
-  pull flow, e.g. restorm's `useGitActions`/`useGitPullConflict`).
+  pull flow, e.g. the host's `useGitActions`/`useGitPullConflict`).
 - **`renderCommitMessage`** (`CommitMessageEngine`) — a thin Handlebars
   wrapper (`Handlebars.compile`, cached per template string) that renders a
-  `{ title, body }` commit-message pair from a restorm-provided
+  `{ title, body }` commit-message pair from a host-provided
   `CommitMessageTemplates` pair + an arbitrary context object. Knows nothing
   about requests/scenarios/diffs — see "Commit-message generation" below.
   Process-neutral (`src/shared/CommitMessageEngine.ts`, pure Handlebars, no
@@ -90,11 +90,11 @@ newer-remote-version detection, conflict-blob retrieval, and a debounced
   72-character counter (visual only, never blocks), a multiline body field,
   and Cancel/Push buttons. Fully controlled — the host owns every value and
   the actual git calls; see "Commit-message generation" below for how
-  restorm drives it.
+  the host drives it.
 - **`ConflictResolutionView`** + **`fieldDiffStyle`** — the conflict-
   resolution 4-panel shell + diff-highlight framework. See "Conflict
   resolution" below. **WIP** — the shell + list/empty-state behavior are
-  built and tested; the restorm-side entity→tab-view wiring (read-only
+  built and tested; the host-side entity→tab-view wiring (read-only
   panels, field-level diff computation, per-entity YAML isolation) is not
   yet implemented.
 
@@ -107,13 +107,13 @@ at a **higher layer**, not on the service itself:
 
 | concern | who owns it | where |
 |---|---|---|
-| Which folder is "active" (the repo to track + watch) | host app | calls `setActiveFolder(folder)` — restorm maps "the open project file" → `dirname(filePath)` |
+| Which folder is "active" (the repo to track + watch) | host app | calls `setActiveFolder(folder)` — the host maps "the open project file" → `dirname(filePath)` |
 | Parsing the single-file YAML project into entities | host app | the conflict-resolution UI (per-entity 4-panel view) |
-| Semantic diff / commit-message generation | host app + a generic ECUI templating engine | `renderCommitMessage` (generic) + restorm's differ/context builder (host) |
+| Semantic diff / commit-message generation | host app + a generic ECUI templating engine | `renderCommitMessage` (generic) + the host's differ/context builder (host) |
 | Per-entity conflict rendering (request / scenario / folder tab-views) | host app | the conflict-resolution UI |
 | Toast wording | ECUI, self-contained | `git.cliMissing.*` / `git.pullAvailable.*` i18n keys in ECUI's own `locales/` |
 | Reacting to "Pull now" (plain pull vs. opening conflict resolution) | host app | `useGitPullAvailableToast(onPull, isBehind?)`'s `onPull` callback |
-| The CRON frequency setting's visible YAML registration | host app | restorm's `resources/settings.yaml` `git` group (`GitSemiPullController` just reads the `git:semiPullFrequency` key, wherever it's registered) |
+| The CRON frequency setting's visible YAML registration | host app | the host's `resources/settings.yaml` `git` group (`GitSemiPullController` just reads the `git:semiPullFrequency` key, wherever it's registered) |
 
 `GitServiceConfig.watchDebounceMs` is the one generic tuning knob (default
 500ms) — everything else about *what* changed and *how to show it* is
@@ -124,9 +124,9 @@ decided above this layer.
 The Push modal's title/body are produced by a three-layer pipeline, split
 exactly along the ECUI/host line above:
 
-1. **The differ** (host-owned, restorm: `shared/git/gitCommitDiff.ts` —
+1. **The differ** (host-owned, e.g. `shared/git/gitCommitDiff.ts` —
    process-neutral, see below) — `diffProjectEntities(beforeItems,
-   afterItems)` does a deterministic structural diff of the Restorm project
+   afterItems)` does a deterministic structural diff of the host's project
    tree, grouped ONE change per entity (request / scenario / folder /
    environment folder) — never per field, never per scenario-node
    reposition. Diffs by the entity's persisted `id`, not array position, so
@@ -137,7 +137,7 @@ exactly along the ECUI/host line above:
    no-op (main-process / MCP callers only need JSON-safe data); the renderer
    passes `processAfterDeserialization` explicitly to get real `ValueType`
    class instances for the live UI.
-2. **The context builder** (host-owned, restorm: `shared/git/
+2. **The context builder** (host-owned, e.g. `shared/git/
    commitMessageContext.ts`) — `buildCommitMessageContext(changes, t)`
    turns the structural diff into `{ titleSummary, lines }`: a single
    changed entity gets a natural sentence ("Update to the request «X»"); several
@@ -147,7 +147,7 @@ exactly along the ECUI/host line above:
    app's own active UI language, so a French-UI user can still generate an
    English commit message (or vice versa) without switching the whole app.
 3. **The render engine** (ECUI-generic, process-neutral: `renderCommitMessage`
-   + `CommitMessageEngine`) — compiles restorm's Handlebars templates
+   + `CommitMessageEngine`) — compiles the host's Handlebars templates
    (`shared/git/commitMessageTemplates.ts`, one structural shape reused for
    every language — the localization already happened in step 2) against
    that context, producing the final `{ title, body }` pair.
@@ -157,12 +157,12 @@ Both the renderer's Push modal and the main-process `git_commit_push` /
 difference is which `t` / rehydrate callbacks they pass in (see the MCP
 routes' own file for its main-process-safe wiring).
 
-`usePushModal(filePath, rootItems)` (restorm) glues all three together +
+`usePushModal(filePath, rootItems)` (host) glues all three together +
 owns the modal's open/closed state, the "apply this language by default"
 setting sync, and the actual stage → commit → push sequence:
 
 ```tsx
-// renderer (restorm) — App.tsx
+// renderer (host) — App.tsx
 import { PushModal, AVAILABLE_LANGUAGES } from 'electron-core-ui/renderer'
 import { usePushModal } from './hooks/usePushModal'
 
@@ -185,7 +185,7 @@ const pushModal = usePushModal(filePath, rootItems)
 />
 ```
 
-Two settings persist the language preference (`useSetting`, restorm's
+Two settings persist the language preference (`useSetting`, the host's
 `resources/settings.yaml` under the `git` group): `commitMessageLanguage`
 (the default, English) and `applyCommitMessageLanguageByDefault` (a
 toggle — when on, picking a language in the Push modal also updates the
@@ -199,7 +199,7 @@ silently drift onto two different storage entries.
 
 ## Conflict resolution (4-panel shell)
 
-**Status: WIP.** The shell, the diff-highlight framework, and restorm's
+**Status: WIP.** The shell, the diff-highlight framework, and the host's
 entity dispatcher are built and tested. Field-level diff + tab preselect
 (`conflictFieldDiff.ts`) are wired for folders/environment-folders (the
 `notes` field), HTTP/auth requests (a bespoke, per-field breakdown: url/
@@ -249,7 +249,7 @@ and falling back to a "select a conflict" empty state in all three
 content panels before a selection exists. It owns NOTHING about what an
 "entity" is — rendering the right tab-view per entity type, read-only vs.
 editable, tab highlighting/hiding, and what "use this version" actually
-copies are entirely the host's job, per the same ECUI/restorm split as
+copies are entirely the host's job, per the same ECUI/host split as
 the rest of this feature.
 
 `fieldDiffStyle(differs: boolean)` is the companion diff-highlight
@@ -261,7 +261,7 @@ error state already uses — spread it onto a field's `style` whenever the
 host's own diff computation says that field differs between the user and
 server versions.
 
-`ReadOnlyOverlay` is how restorm's `MyEntityPanel` above achieves "EXACTLY
+`ReadOnlyOverlay` is how the host's `MyEntityPanel` above achieves "EXACTLY
 the normal entity panel, read-only" without a bespoke `readOnly` prop
 threaded through every protocol view: it renders the host's UNMODIFIED
 panel and blocks every MUTATING interaction at the wrapper (capture-phase
@@ -277,8 +277,8 @@ scoped `pointer-events: none` CSS rule on form controls hard-blocks the
 value-editing surfaces one level deeper as a defensive fallback. The KV
 sections' initial expansion mirrors the field-diff exactly (differing
 sections open, identical ones closed — `conflictPanelExpansion.ts` host-
-side), which keeps the differences above the fold in all three columns. restorm's actual dispatcher
-(`restorm/src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx`)
+side), which keeps the differences above the fold in all three columns. The host's actual dispatcher
+(`<host>/src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx`)
 picks the right panel per entity kind — folder / environment-folder /
 scenario / every request protocol (HTTP, auth, GraphQL, gRPC, SOAP,
 WebSocket, OData) reuses its exact live tab-view component; only a
@@ -304,7 +304,7 @@ at that moment. GraphQL additionally uses it to disable an auto
 collections store with no user click — the clone must never silently
 diverge from the ours/theirs/resolved snapshot the user is looking at.
 
-`conflictFieldDiff.ts` is restorm's field-diff computation half of AC#9:
+`conflictFieldDiff.ts` is the host's field-diff computation half of AC#9:
 `computeEntityFieldDiff(kind, ours, theirs)` returns `{ fields, rowDiffs?,
 preselectTabId }` for kinds it knows how to diff, or `undefined` for scenarios
 (never, by design). `GitConflictResolutionModal` computes it ONCE per conflict
@@ -314,7 +314,7 @@ applies in `readOnly` mode (user/server, per AC#4), while `preselectTabId`
 applies to every panel regardless of mode (AC#5). For HTTP/auth requests
 `rowDiffs` additionally names, per KV section (headers/params/pathParams),
 the exact row KEYS that differ (compared id-agnostically and order-agnostically)
-— `HTTPRequestTabView` forwards each section's keys to its `RestormKeyValueTable`
+— `HTTPRequestTabView` forwards each section's keys to its `KeyValueTable`
 as `highlightRowKeys`, which borders just those rows with `fieldDiffStyle`, so a
 one-row-in-twenty change is pinpointed instead of only bordering the whole
 section. A conflicting KV section also starts EXPANDED (via
@@ -343,7 +343,7 @@ this panel in the first place.
 ## Pro gating
 
 The whole feature is gated behind a `git.client` entitlement capability —
-generic infrastructure, restorm-specific wiring, same split as everywhere
+generic infrastructure, host-specific wiring, same split as everywhere
 else in this doc:
 
 - `GatedControl`'s `showSubscribeLink` prop (generic, ECUI) distinguishes
@@ -355,7 +355,7 @@ else in this doc:
   Architecture/Settings.md`'s "Capability-gated settings" section) grey
   out `resources/settings.yaml`'s `git` group in Community via the same
   `GatedControl`.
-- restorm's `useGitGateState()` hook computes the 3-state model (Pro+git
+- the host's `useGitGateState()` hook computes the 3-state model (Pro+git
   → enabled; Pro+no-git → informational lock; Community, regardless of
   the folder → the standard Pro upsell) that drives the status-bar entry,
   the title-bar Git menu, and the Settings→Git capability check alike —
@@ -426,13 +426,13 @@ src/main/testing/conflictResolutionSelectors.ts                          — con
 src/renderer/locales/*/translation.json          — `git.cliMissing.*` + `git.pullAvailable.*` + `pushModal.*` + `conflictResolution.*` (all 27 locales)
 ```
 
-restorm's side of the commit-message pipeline (host-injected, not part of
+The host's side of the commit-message pipeline (host-injected, not part of
 this library):
 
 ```
 src/shared/git/gitCommitDiff.ts                     — diffProjectEntities / parseProjectYaml (the semantic differ; process-neutral, no rehydration by default — see below)
 src/shared/git/commitMessageContext.ts              — buildCommitMessageContext (diff → { titleSummary, lines })
-src/shared/git/commitMessageTemplates.ts            — RESTORM_COMMIT_MESSAGE_TEMPLATE (the Handlebars templates)
+src/shared/git/commitMessageTemplates.ts            — the host's commit-message template constant (the Handlebars templates)
 src/shared/git/gitConflictModel.ts                  — identifyConflictingEntities (which entities genuinely conflict)
 src/shared/git/gitConflictMerge.ts                  — buildMergedProjectTree (the final write-back tree)
 src/shared/git/apiDocumentationConflict.ts          — resolveApiDocumentationConflict (version/timestamp auto-resolve)
@@ -444,10 +444,10 @@ resources/settings.yaml                             — the `git` settings group
 src/renderer/locales/*/translation.json             — `git.diff.*`, `git.commitTitle.*`, `git.push{Failed,Succeeded}*` (all 27 locales)
 src/renderer/src/services/conflictEntityClone.ts    — cloneEntityForResolution (the editable resolved copy)
 src/renderer/src/components/GitConflict/ConflictEntityPanel.tsx — the entity→panel dispatcher
-src/shared/auth/authState.ts                        — the `git.client` entry in restorm's Capability union
+src/shared/auth/authState.ts                        — the `git.client` entry in the host's Capability union
 src/renderer/src/hooks/useGitGateState.ts           — the 3-state Pro-gate
 src/renderer/src/components/GitCapabilityGateHost.tsx — reactive CapabilityGate builder, mounted in main.tsx
 src/renderer/src/components/MainView/StatusbarGitIndicator.tsx      — GatedControl wrapping
-src/renderer/src/components/MainView/Titlebar/RestormTitlebar.tsx   — Git menu disable + Pro badge
+src/renderer/src/components/MainView/Titlebar/HostTitlebar.tsx   — Git menu disable + Pro badge
 src/renderer/locales/*/translation.json             — `git.gate.initGitFolder` (all 27 locales)
 ```

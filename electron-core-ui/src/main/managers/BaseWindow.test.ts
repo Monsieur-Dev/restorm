@@ -524,19 +524,19 @@ describe('BaseWindow', () => {
 
 describe('appUrlForEntryFile', () => {
   it('keeps only the file name from a POSIX entry path', () => {
-    expect(appUrlForEntryFile('/opt/Restorm/resources/app.asar/dist/renderer/index.html'))
+    expect(appUrlForEntryFile('/opt/ExampleApp/resources/app.asar/dist/renderer/index.html'))
       .toBe('app://./index.html')
   })
 
   it('keeps only the file name from a Windows entry path (backslashes)', () => {
     // The regression: split('/') left the whole absolute path in the URL and
     // every Windows launch fell back to loadFile with a crash-report error.
-    expect(appUrlForEntryFile('C:\\Users\\restorm\\AppData\\Local\\restorm\\Cache\\1.0.3\\win32-x64\\resources\\app.asar\\dist\\renderer\\index.html'))
+    expect(appUrlForEntryFile('C:\\Users\\exampleapp\\AppData\\Local\\exampleapp\\Cache\\1.0.3\\win32-x64\\resources\\app.asar\\dist\\renderer\\index.html'))
       .toBe('app://./index.html')
   })
 
   it('handles a mixed-separator path', () => {
-    expect(appUrlForEntryFile('C:/apps/restorm\\dist\\renderer/main.html')).toBe('app://./main.html')
+    expect(appUrlForEntryFile('C:/apps/exampleapp\\dist\\renderer/main.html')).toBe('app://./main.html')
   })
 
   it('falls back to index.html for an empty path', () => {

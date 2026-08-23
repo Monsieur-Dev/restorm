@@ -44,7 +44,7 @@ describe('FileService — reporting the outcome of a write', () => {
 
   beforeEach(async () => {
     sent.length = 0
-    dir = mkdtempSync(join(tmpdir(), 'restorm-saveoutcome-'))
+    dir = mkdtempSync(join(tmpdir(), 'ecui-saveoutcome-'))
     filePath = join(dir, 'project.json')
     writeFileSync(filePath, JSON.stringify({ name: 'v1' }), 'utf-8')
     service = new FileService({ storagePrefix: 'test_', extension: '.json' })

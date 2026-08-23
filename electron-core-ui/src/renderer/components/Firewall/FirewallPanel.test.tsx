@@ -57,7 +57,7 @@ function installFirewallApi(): {
 /** Mount and wait for the store's first read to settle (the panel renders a
  * loading placeholder until then). */
 async function mountPanel(): Promise<void> {
-  render(<FirewallPanel appName="Restorm" />)
+  render(<FirewallPanel appName="ExampleApp" />)
   await screen.findByTestId('firewall-tabs')
 }
 
@@ -82,7 +82,7 @@ describe('FirewallPanel', () => {
     expect(screen.getByTestId('firewall-panel')).not.toBeNull()
     expect(screen.getByText('Firewall')).not.toBeNull()
     // The app name is interpolated into the intro rather than baked in.
-    expect(screen.getByTestId('firewall-panel').textContent).toContain('Restorm')
+    expect(screen.getByTestId('firewall-panel').textContent).toContain('ExampleApp')
     expect(screen.getByText('Whitelist (0)')).not.toBeNull()
     expect(screen.getByText('Blacklist (0)')).not.toBeNull()
   })

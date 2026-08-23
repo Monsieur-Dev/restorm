@@ -93,13 +93,13 @@ describe('readAllLiveEntries', () => {
   it('returns entries for alive pids with parseable lockfiles', async () => {
     await writeMcpDiscoveryFile(DIR, {
       pid: LIVE_PID, port: 49001, token: 'tok-live', name: 'live-session',
-      projectPath: '/tmp/proj.restorm', startedAt: '2026-01-01T00:00:00.000Z', mcpActive: true })
+      projectPath: '/tmp/proj.app', startedAt: '2026-01-01T00:00:00.000Z', mcpActive: true })
     const entries = readAllLiveEntries(DIR)
     const found = entries.find((e) => e.pid === LIVE_PID)
     expect(found).toBeDefined()
     expect(found?.name).toBe('live-session')
     expect(found?.port).toBe(49001)
-    expect(found?.projectPath).toBe('/tmp/proj.restorm')
+    expect(found?.projectPath).toBe('/tmp/proj.app')
     // Token must be present so the tool handler can use it for the HTTP probe.
     expect(found?.token).toBe('tok-live')
   })
@@ -222,7 +222,7 @@ describe('list-instances MCP tool', () => {
   it('returns a live peer with correct metadata; bearer token absent from output', async () => {
     const entry: McpDiscoveryEntry = {
       pid: PEER_PID, port: peerPort, token: PEER_TOKEN, name: PEER_NAME,
-      projectPath: '/home/user/my-project.restorm', startedAt: '2026-01-15T10:00:00.000Z', mcpActive: true
+      projectPath: '/home/user/my-project.app', startedAt: '2026-01-15T10:00:00.000Z', mcpActive: true
     }
     await writeMcpDiscoveryFile(DIR, entry)
 
@@ -238,8 +238,8 @@ describe('list-instances MCP tool', () => {
     expect(inst?.pid).toBe(PEER_PID)
     expect(inst?.name).toBe(PEER_NAME)
     // The open file's NAME (basename) is surfaced alongside the full path.
-    expect(inst?.fileName).toBe('my-project.restorm')
-    expect(inst?.projectPath).toBe('/home/user/my-project.restorm')
+    expect(inst?.fileName).toBe('my-project.app')
+    expect(inst?.projectPath).toBe('/home/user/my-project.app')
     expect(inst?.endpoint).toBe(`127.0.0.1:${String(peerPort)}`)
     expect(inst?.startedAt).toBe('2026-01-15T10:00:00.000Z')
     // Bearer token must not appear anywhere in the serialised response.

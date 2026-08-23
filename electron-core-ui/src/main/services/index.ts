@@ -87,7 +87,8 @@ export {
 export {
   initSettingsService,
   getSettingsService,
-  isSettingsServiceInitialized
+  isSettingsServiceInitialized,
+  setWorkspaceDirName
 } from './SettingsService'
 // AutoSave controller (settings: autoSave, autoSaveDelay)
 export {

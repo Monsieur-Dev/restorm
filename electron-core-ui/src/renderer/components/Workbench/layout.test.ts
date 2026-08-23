@@ -281,7 +281,7 @@ describe('serializeWorkbenchLayout / applyWorkbenchLayout', () => {
 	// singleton becomes the active tab.
 	it('resolves singleton activeTabId through the spec→canonical id map', () => {
 		// A rebuilder that returns a tab with a canonical id distinct from the spec id.
-		// This mirrors how restorm's `resolveRebuildTabId` maps `tabType: 'firewall'`
+		// This mirrors how the host app's `resolveRebuildTabId` maps `tabType: 'firewall'`
 		// → `FIREWALL_TAB_ID = 'firewall:singleton'` regardless of the spec `id`.
 		const canonicalId = 'firewall:singleton';
 		const rebuildSingleton = (lt: LayoutTab): EditorTab | null => {

@@ -159,7 +159,7 @@ describe('ReleaseNotesModal — reveal mechanism', () => {
   // Every form below resolves to an image node further down the pipeline than a
   // scrub of the markdown text could reach, so each one is asserted separately.
   it.each([
-    ['an inline remote image', '![shot](https://dl.restorm.app/x.png)'],
+    ['an inline remote image', '![shot](https://example.com/x.png)'],
     ['a full reference-style image', '![shot][s]\n\n[s]: https://evil.example/x.png'],
     ['a collapsed reference image', '![shot][]\n\n[shot]: https://evil.example/x.png'],
     ['a shortcut reference image', '![shot]\n\n[shot]: https://evil.example/x.png'],

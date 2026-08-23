@@ -3,7 +3,7 @@
  * panel an array of `ConsoleRecord` — typically intercepted network
  * traffic from a firewall / proxy layer. The fields are intentionally
  * a minimal, widened shape: any app-specific record type (e.g.
- * restorm's `RequestRecord`) that carries these fields structurally
+ * the host's `RequestRecord`) that carries these fields structurally
  * satisfies `ConsoleRecord` with no conversion.
  *
  * The optional fields use `?:` (property may be absent) rather than

@@ -186,7 +186,7 @@ export interface KeyValueTableProps {
    * column: typing into an empty value re-enables the row, clearing a
    * non-empty value disables it. Off by default — consumers that
    * legitimately want a checked-but-empty row (e.g. `?filter=` to
-   * reset a server-side default) should leave this off. Restorm
+   * reset a server-side default) should leave this off. The host app
    * passes it on for HTTP-style tables so users don't accidentally
    * send `?name=&drop=` to APIs that 422 on empty parameters.
    */

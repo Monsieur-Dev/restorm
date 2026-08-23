@@ -10,14 +10,14 @@ import './miniBrowserPanel.css'
  * Host-provided driver that talks to whatever Electron-side service
  * owns the embedded web content. `MiniBrowserPanel` only renders the
  * toolbar + an empty placeholder slot; the actual web content lives
- * outside this component's React subtree (in restorm: a
+ * outside this component's React subtree (in the host app: a
  * `WebContentsView` in the main process) and is positioned by the
  * host on `setBounds(tabId, rect)` calls driven by this panel's
  * `ResizeObserver`.
  *
- * Generic by design: ECUI doesn't know about restorm's IPC bridge, so
- * the host (restorm) implements this interface against
- * `window.restorm.miniBrowser.*` and passes the adapter in. A
+ * Generic by design: ECUI doesn't know about the host's IPC bridge, so
+ * the host app implements this interface against
+ * `window.<host>.miniBrowser.*` and passes the adapter in. A
  * different consumer could implement it against a fully renderer-side
  * `<webview>` if that fit their constraints — at the cost of losing
  * the "no reload on DOM re-parenting" guarantee that the
@@ -78,7 +78,7 @@ export interface MiniBrowserPanelProps {
 /**
  * Toolbar-only Mini browser: address bar, back / refresh / go, and a
  * placeholder slot whose layout rect the host's `MiniBrowserDriver`
- * uses to position an out-of-React-tree content view (in restorm: a
+ * uses to position an out-of-React-tree content view (in the host app: a
  * main-process `WebContentsView`). The embedded page is NOT a child
  * of this component — that's deliberate: putting the page inside the
  * React tree (as a `<webview>` tag) meant Chromium tore down the

@@ -8,7 +8,7 @@
  * toggles a header, the internal `collapsedState` becomes the source
  * of truth and the prop is ignored. State is lost on remount.
  *
- * **Controlled mode** (needed for restorm tab persistence):
+ * **Controlled mode** (needed for the host's tab persistence):
  * every `<Pane>` provides an explicit `collapsed` boolean. The prop
  * wins on every render. Toggles fire `onCollapsedChange` and the
  * parent updates its store; the next render hydrates the SplitView

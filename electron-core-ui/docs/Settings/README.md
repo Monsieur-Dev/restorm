@@ -116,7 +116,7 @@ A scrollable theme preview component used by `ThemeRenderer` (in `SettingsView`)
 | `className` | `string` | Optional class merged with `theme-carousel`. |
 | `data-testid` | `string` | Root test id (defaults to `theme-carousel`). |
 | `scrollableTestId` | `string` | Inner `ScrollableElement` test id (defaults to `{data-testid}-scrollable`). |
-| `onSelect` | `(themeId: string) => void` | Override the click handler. Without it, clicking a tile calls `setTheme` directly. The Settings UI passes a callback that routes the choice through `setSetting` / `setWorkspaceSetting`, so a tile picked on the Workspace tab lands in `<dir>/.restorm/settings.json` instead of bypassing the overlay. |
+| `onSelect` | `(themeId: string) => void` | Override the click handler. Without it, clicking a tile calls `setTheme` directly. The Settings UI passes a callback that routes the choice through `setSetting` / `setWorkspaceSetting`, so a tile picked on the Workspace tab lands in the host's workspace settings file (`<dir>/<workspace dotfolder>/settings.json`) instead of bypassing the overlay. |
 
 ## Feature-Gated Settings
 

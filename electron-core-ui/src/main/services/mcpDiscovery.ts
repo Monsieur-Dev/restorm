@@ -366,12 +366,12 @@ export function probeMcpEndpoint(port: number, token: string, timeoutMs = 800): 
       'Accept': 'application/json, text/event-stream',
       'Content-Length': Buffer.byteLength(payload),
       'Authorization': `Bearer ${token}`,
-      // Tag this as restorm's own inter-instance MCP-infra traffic so the
+      // Tag this as the host's own inter-instance MCP-infra traffic so the
       // main-process firewall exempts it (see `internalRequestPredicate`).
       // Without it, the list-instances discovery probe to a peer's loopback
       // MCP endpoint surfaces as an "Outbound request blocked" prompt and the
       // peer is never reported. It's the same exemption the cross-instance
-      // forward already carries — a probe is just as much restorm's own infra,
+      // forward already carries — a probe is just as much the host's own infra,
       // not a user/dependency request. The receiver only reads this header to
       // skip RE-forwarding a `tools/call`; an `initialize` probe never forwards,
       // so tagging it is inert on the receiving side.
