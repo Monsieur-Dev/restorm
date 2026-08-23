@@ -2223,7 +2223,10 @@
         "examples": "Beispiele",
         "settings": "Einstellungen",
         "notes": "Notizen"
-      }
+      },
+      "addSubModel": "Untermodell hinzufügen",
+      "collapseAll": "Alle einklappen",
+      "expandAll": "Alle ausklappen"
     },
     "enums": {
       "valueCount_one": "{{count}} Wert",
@@ -2234,7 +2237,8 @@
       "addValue": "Wert hinzufügen",
       "valueHeader": "Wert",
       "newName": "NewEnum",
-      "selectPrompt": "Wählen Sie ein Enum aus oder erstellen Sie eines — eine geschlossene Wertemenge als Eigenschaftstyp."
+      "selectPrompt": "Wählen Sie ein Enum aus oder erstellen Sie eines — eine geschlossene Wertemenge als Eigenschaftstyp.",
+      "nameHeader": "Name"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "gRPC-Server in TypeScript — .proto-Service, typisierte Nachrichten und Server-Stubs.",
           "server-grpc-dotnet": "gRPC-Server in C# / .NET — .proto-Service, Nachrichten und Server-Stubs.",
           "db-postgres": "PostgreSQL-Schema, Seed-Daten und CRUD-Skripte aus dem Design."
-        }
-      }
+        },
+        "added": "Template hinzugefügt",
+        "done": "Fertig"
+      },
+      "extractedTitle": "Dateien geschrieben",
+      "openOutput": "Ausgabeordner öffnen",
+      "removeConfirm": "Das Template „{{name}}“ wird aus diesem Design entfernt (bereits generierte Dateien auf der Festplatte bleiben unberührt).",
+      "removeTitle": "Dieses Template entfernen?"
     },
     "statusbar": {
       "format": "Design · Format {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Minimale Länge",
         "maxLength": "Maximale Länge",
         "pattern": "Muster"
-      }
+      },
+      "generatedProperties": "Generierte Eigenschaften",
+      "inheritedProperties": "Geerbte Eigenschaften",
+      "ownProperties": "Eigene Eigenschaften"
     },
     "flags": {
       "required": "erforderlich",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Schreibrouten mit Authentifizierung schützen",
+      "authWritesHint": "bearer-Authentifizierung bei Erstellen, Aktualisieren und Löschen verlangen; Lesezugriffe bleiben öffentlich.",
+      "generate": "Generieren",
+      "replace": "Vorhandene Routen ersetzen",
+      "replaceHint": "Für dieses Modell existieren bereits Routen. Ersetzen Sie sie, um Duplikate zu vermeiden; deaktiviert lassen, um einen zweiten Satz hinzuzufügen.",
+      "title": "CRUD für {{name}} generieren"
     }
   },
   "mqtt": {

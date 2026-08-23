@@ -2224,7 +2224,10 @@
         "examples": "Primjeri",
         "settings": "Postavke",
         "notes": "Bilješke"
-      }
+      },
+      "addSubModel": "Dodaj podmodel",
+      "collapseAll": "Sažmi sve",
+      "expandAll": "Proširi sve"
     },
     "enums": {
       "valueCount_one": "{{count}} vrijednost",
@@ -2235,7 +2238,8 @@
       "addValue": "Dodaj vrijednost",
       "valueHeader": "Vrijednost",
       "newName": "NewEnum",
-      "selectPrompt": "Odaberite enum ili ga izradite — zatvoren skup vrijednosti upotrebljiv kao tip svojstva."
+      "selectPrompt": "Odaberite enum ili ga izradite — zatvoren skup vrijednosti upotrebljiv kao tip svojstva.",
+      "nameHeader": "Naziv"
     },
     "documentation": {},
     "code": {
@@ -2277,8 +2281,14 @@
           "server-grpc-typescript": "gRPC poslužitelj u TypeScriptu — .proto usluga, tipizirane poruke i poslužiteljski stubovi.",
           "server-grpc-dotnet": "gRPC poslužitelj u C# / .NET — .proto usluga, poruke i poslužiteljski stubovi.",
           "db-postgres": "PostgreSQL shema, seed podaci i CRUD skripte iz dizajna."
-        }
-      }
+        },
+        "added": "Template dodan",
+        "done": "Gotovo"
+      },
+      "extractedTitle": "Datoteke zapisane",
+      "openOutput": "Otvori izlaznu mapu",
+      "removeConfirm": "Template „{{name}}“ bit će uklonjen iz ovog dizajna (već generirane datoteke na disku ostaju netaknute).",
+      "removeTitle": "Ukloniti ovaj Template?"
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2340,7 +2350,10 @@
         "minLength": "Min. duljina",
         "maxLength": "Max. duljina",
         "pattern": "Uzorak"
-      }
+      },
+      "generatedProperties": "Generirana svojstva",
+      "inheritedProperties": "Naslijeđena svojstva",
+      "ownProperties": "Vlastita svojstva"
     },
     "flags": {
       "required": "obavezno",
@@ -2515,6 +2528,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Zaštiti rute za pisanje autentifikacijom",
+      "authWritesHint": "Zahtijevaj bearer autentifikaciju pri stvaranju, ažuriranju i brisanju; čitanja ostaju javna.",
+      "generate": "Generiraj",
+      "replace": "Zamijeni postojeće rute",
+      "replaceHint": "Za ovaj model već postoje rute. Zamijenite ih kako biste izbjegli duplikate; ostavite isključeno da dodate drugi skup.",
+      "title": "Generiraj CRUD za {{name}}"
     }
   },
   "mqtt": {

@@ -2223,7 +2223,10 @@
         "examples": "Példák",
         "settings": "Beállítások",
         "notes": "Jegyzetek"
-      }
+      },
+      "addSubModel": "Almodell hozzáadása",
+      "collapseAll": "Összes összecsukása",
+      "expandAll": "Összes kibontása"
     },
     "enums": {
       "valueCount_one": "{{count}} érték",
@@ -2234,7 +2237,8 @@
       "addValue": "Érték hozzáadása",
       "valueHeader": "Érték",
       "newName": "NewEnum",
-      "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható."
+      "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható.",
+      "nameHeader": "Név"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "gRPC-kiszolgáló TypeScriptben — .proto szolgáltatás, típusos üzenetek és kiszolgálói csonkok.",
           "server-grpc-dotnet": "gRPC-kiszolgáló C# / .NET környezetben — .proto szolgáltatás, üzenetek és kiszolgálói csonkok.",
           "db-postgres": "PostgreSQL séma, seed adatok és CRUD szkriptek a tervből."
-        }
-      }
+        },
+        "added": "Template hozzáadva",
+        "done": "Kész"
+      },
+      "extractedTitle": "Fájlok kiírva",
+      "openOutput": "Kimeneti mappa megnyitása",
+      "removeConfirm": "A(z) „{{name}}“ Template eltávolításra kerül erről a tervről (a lemezen már legenerált fájlok érintetlenül maradnak).",
+      "removeTitle": "Eltávolítja ezt a Template-et?"
     },
     "statusbar": {
       "format": "terv · formátum {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Min. hossz",
         "maxLength": "Max. hossz",
         "pattern": "Minta"
-      }
+      },
+      "generatedProperties": "Generált tulajdonságok",
+      "inheritedProperties": "Örökölt tulajdonságok",
+      "ownProperties": "Saját tulajdonságok"
     },
     "flags": {
       "required": "kötelező",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Írási útvonalak védelme hitelesítéssel",
+      "authWritesHint": "bearer hitelesítés megkövetelése létrehozásnál, frissítésnél és törlésnél; az olvasások nyilvánosak maradnak.",
+      "generate": "Generálás",
+      "replace": "A meglévő útvonalak cseréje",
+      "replaceHint": "Ehhez a modellhez már léteznek útvonalak. Cserélje le őket a duplikátumok elkerülése érdekében; hagyja kikapcsolva egy második készlet hozzáadásához.",
+      "title": "CRUD generálása ehhez: {{name}}"
     }
   },
   "mqtt": {

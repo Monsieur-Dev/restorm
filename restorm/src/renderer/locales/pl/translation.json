@@ -2225,7 +2225,10 @@
         "examples": "Przykłady",
         "settings": "Ustawienia",
         "notes": "Notatki"
-      }
+      },
+      "addSubModel": "Dodaj podmodel",
+      "collapseAll": "Zwiń wszystko",
+      "expandAll": "Rozwiń wszystko"
     },
     "enums": {
       "valueCount_one": "{{count}} wartość",
@@ -2236,7 +2239,8 @@
       "addValue": "Dodaj wartość",
       "valueHeader": "Wartość",
       "newName": "NewEnum",
-      "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości."
+      "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości.",
+      "nameHeader": "Nazwa"
     },
     "documentation": {},
     "code": {
@@ -2278,8 +2282,14 @@
           "server-grpc-typescript": "Serwer gRPC w TypeScript — usługa .proto, typowane komunikaty i stuby serwera.",
           "server-grpc-dotnet": "Serwer gRPC w C# / .NET — usługa .proto, komunikaty i stuby serwera.",
           "db-postgres": "Schemat PostgreSQL, dane seed i skrypty CRUD z projektu."
-        }
-      }
+        },
+        "added": "Dodano Template",
+        "done": "Gotowe"
+      },
+      "extractedTitle": "Pliki zapisane",
+      "openOutput": "Otwórz folder wyjściowy",
+      "removeConfirm": "Template „{{name}}“ zostanie usunięty z tego projektu (już wygenerowane pliki na dysku pozostaną nienaruszone).",
+      "removeTitle": "Usunąć ten Template?"
     },
     "statusbar": {
       "format": "projekt API · format {{version}}"
@@ -2341,7 +2351,10 @@
         "minLength": "Długość min",
         "maxLength": "Długość max",
         "pattern": "Wzorzec"
-      }
+      },
+      "generatedProperties": "Wygenerowane właściwości",
+      "inheritedProperties": "Odziedziczone właściwości",
+      "ownProperties": "Własne właściwości"
     },
     "flags": {
       "required": "wymagane",
@@ -2516,6 +2529,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Chroń trasy zapisu uwierzytelnianiem",
+      "authWritesHint": "Wymagaj uwierzytelniania bearer przy tworzeniu, aktualizacji i usuwaniu; odczyty pozostają publiczne.",
+      "generate": "Wygeneruj",
+      "replace": "Zastąp istniejące trasy",
+      "replaceHint": "Dla tego modelu już istnieją trasy. Zastąp je, aby uniknąć duplikatów; pozostaw wyłączone, aby dodać drugi zestaw.",
+      "title": "Wygeneruj CRUD dla {{name}}"
     }
   },
   "mqtt": {

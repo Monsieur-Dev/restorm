@@ -3581,12 +3581,16 @@ const App: React.FC = () => {
     // split-open gesture is single-item by design, and lighting the overlay
     // for a group would invite a drop the app cannot honour.
     if (typeList.includes(LIST_VIEW_MULTI_DRAG_MIME)) return false
-    const overScenario = (el: Element | null | undefined): boolean =>
-      el instanceof Element && el.closest('[data-testid="scenario-editor"]') !== null
+    // In-workbench editors that own their OWN ListView drag (scenario canvas,
+    // the design entity lists) must not have that drag hijacked by the split
+    // overlay — otherwise their internal reorder is swallowed. Refuse the
+    // external-drop channel while the cursor sits over one of them.
+    const overReorderScope = (el: Element | null | undefined): boolean =>
+      el instanceof Element && el.closest('[data-testid="scenario-editor"], .design-tab-view') !== null
     // Primary: the whole element stack under the cursor (pierces the overlay).
-    if (document.elementsFromPoint(event.clientX, event.clientY).some(overScenario)) return false
+    if (document.elementsFromPoint(event.clientX, event.clientY).some(overReorderScope)) return false
     // Fallback for drags with no usable coordinates (some synthetic events).
-    if (overScenario(event.target as Element | null)) return false
+    if (overReorderScope(event.target as Element | null)) return false
     return true
   }, [])
 
@@ -3787,6 +3791,7 @@ const App: React.FC = () => {
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
                   onCollapseAll={() => { setExpandedIds([]) }}
+                  onExpandAll={() => { setExpandedIds(allFolderIdsRef.current.slice()) }}
                   onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
                   onAddChildItem={handleAddChildItem}
                   onDeselectAll={() => { setSelectedItemId(null); setSelectedItemIds([]) }}

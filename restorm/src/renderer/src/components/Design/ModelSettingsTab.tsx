@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, SelectBox, Toggle, type ISelectData } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignModel, IdentifierStrategy, ModelDesignMeta, ModelVolumetry } from '../../../../shared/types/collections'
 import { collectModelUsages, type DesignModelUsage } from '../../../../shared/design/designUsages'
-import { generateCrud, generateSearchParams } from '../../../../shared/design/designRoutes'
+import { generateSearchParams } from '../../../../shared/design/designRoutes'
 import { generateUniqueId } from '../../utils/treeManipulation'
 import { assignDesignSection, replaceModel } from './designMutations'
 
@@ -14,6 +14,9 @@ export interface ModelSettingsTabProps {
   design: ApiDesign
   model: DesignModel
   onJumpTo: (section: 'models' | 'routes', entityId: string) => void
+  /** Open the CRUD-generation modal (replace existing? protect writes?)
+   * owned by the parent Models section, so both entry points share it. */
+  onGenerateCrud: (model: DesignModel) => void
 }
 
 /**
@@ -22,7 +25,7 @@ export interface ModelSettingsTabProps {
  * delete), inheritance (cycle-safe choices only) and the "Used by"
  * jump list.
  */
-export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, model, onJumpTo }) => {
+export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, model, onJumpTo, onGenerateCrud }) => {
   const { t } = useTranslation()
 
   const setMeta = (patch: { [K in keyof ModelDesignMeta]?: ModelDesignMeta[K] | undefined }): void => {
@@ -201,11 +204,7 @@ export const ModelSettingsTab: React.FC<ModelSettingsTabProps> = ({ design, mode
       <div className="design-generator-actions">
         <Button
           secondary
-          onClick={() => {
-            const { group } = generateCrud(design, model, generateUniqueId)
-            assignDesignSection(design, 'routeGroups', [...design.routeGroups, group])
-            onJumpTo('routes', group.id)
-          }}
+          onClick={() => { onGenerateCrud(model) }}
           data-testid="design-model-generate-crud"
         >
           {t('design.modelSettings.generateCrud', 'Generate the CRUD')}

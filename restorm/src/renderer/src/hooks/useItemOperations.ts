@@ -706,8 +706,16 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
     // Find and update the reactive object directly (triggers search re-indexing)
     const foundItem = findItemById(rootItems, itemId)
+    const previousName = foundItem?.name
     if (foundItem) {
       foundItem.name = newName
+      // A design's published API title (`info.title`, what serving/export/
+      // codegen stamp) tracks its sidebar name until the user edits the
+      // title independently. While they're in lockstep, carry the rename
+      // into the title so it never ships the stale default.
+      if (isApiDesign(foundItem) && foundItem.info.title === previousName) {
+        foundItem.info = { ...foundItem.info, title: newName }
+      }
     }
 
     // Force React re-render by creating new reference
@@ -741,7 +749,13 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
           return { ...renamed, scenario: { ...renamed.scenario, name: newName }, title: newName, titleString: newName }
         }
         if ('design' in renamed) {
-          return { ...renamed, design: { ...renamed.design, name: newName }, title: newName, titleString: newName }
+          // Keep the open Settings "Title" field in step with the rename
+          // while it hasn't diverged from the (old) name — mirrors the
+          // model-level lockstep sync above.
+          const info = renamed.design.info.title === previousName
+            ? { ...renamed.design.info, title: newName }
+            : renamed.design.info
+          return { ...renamed, design: { ...renamed.design, name: newName, info }, title: newName, titleString: newName }
         }
         return renamed
       }

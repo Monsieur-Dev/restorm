@@ -292,6 +292,13 @@ export const buildAddSubmenu = (
     onClick: () => { onAddChildItem(parentId, 'scenario') }
   },
   {
+    id: `add-design-${parentId}`,
+    label: t('sidebar.contextMenu.add.design'),
+    icon: React.createElement(RegistryBadge, { badgeId: 'design' }),
+    'data-testid': 'sidebar-context-menu-add-design',
+    onClick: () => { onAddChildItem(parentId, 'design') }
+  },
+  {
     id: `add-auth-${parentId}`,
     label: t('sidebar.contextMenu.add.auth'),
     icon: React.createElement(RegistryBadge, { badgeId: 'auth' }),

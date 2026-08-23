@@ -2222,7 +2222,10 @@
         "examples": "範例",
         "settings": "設定",
         "notes": "筆記"
-      }
+      },
+      "addSubModel": "新增子模型",
+      "collapseAll": "全部收合",
+      "expandAll": "全部展開"
     },
     "enums": {
       "valueCount_one": "{{count}} 個值",
@@ -2233,7 +2236,8 @@
       "addValue": "新增值",
       "valueHeader": "值",
       "newName": "NewEnum",
-      "selectPrompt": "選擇一個列舉，或建立一個 —— 可用作屬性型別的封閉值集合。"
+      "selectPrompt": "選擇一個列舉，或建立一個 —— 可用作屬性型別的封閉值集合。",
+      "nameHeader": "名稱"
     },
     "documentation": {},
     "code": {
@@ -2275,8 +2279,14 @@
           "server-grpc-typescript": "以 TypeScript 編寫的 gRPC 伺服器 —— .proto 服務、具型別的訊息與伺服器樁。",
           "server-grpc-dotnet": "以 C# / .NET 編寫的 gRPC 伺服器 —— .proto 服務、訊息與伺服器樁。",
           "db-postgres": "來自設計的 PostgreSQL 結構描述、種子資料與 CRUD 指令碼。"
-        }
-      }
+        },
+        "added": "已新增 Template",
+        "done": "完成"
+      },
+      "extractedTitle": "已寫入檔案",
+      "openOutput": "開啟輸出資料夾",
+      "removeConfirm": "Template「{{name}}」將從此設計中移除（磁碟上已產生的檔案維持不變）。",
+      "removeTitle": "移除此 Template？"
     },
     "statusbar": {
       "format": "設計 · 格式 {{version}}"
@@ -2338,7 +2348,10 @@
         "minLength": "最小長度",
         "maxLength": "最大長度",
         "pattern": "模式"
-      }
+      },
+      "generatedProperties": "產生的屬性",
+      "inheritedProperties": "繼承的屬性",
+      "ownProperties": "自有屬性"
     },
     "flags": {
       "required": "必填",
@@ -2513,6 +2526,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "使用身分驗證保護寫入路由",
+      "authWritesHint": "在建立、更新和刪除時要求 bearer 驗證；讀取維持公開。",
+      "generate": "產生",
+      "replace": "取代現有路由",
+      "replaceHint": "此模型已存在路由。取代它們以避免重複；保持關閉則新增第二組。",
+      "title": "為 {{name}} 產生 CRUD"
     }
   },
   "mqtt": {

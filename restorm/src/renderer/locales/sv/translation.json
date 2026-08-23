@@ -2223,7 +2223,10 @@
         "examples": "Exempel",
         "settings": "Inställningar",
         "notes": "Anteckningar"
-      }
+      },
+      "addSubModel": "Lägg till en undermodell",
+      "collapseAll": "Fäll ihop alla",
+      "expandAll": "Expandera alla"
     },
     "enums": {
       "valueCount_one": "{{count}} värde",
@@ -2234,7 +2237,8 @@
       "addValue": "Lägg till ett värde",
       "valueHeader": "Värde",
       "newName": "NewEnum",
-      "selectPrompt": "Välj en enum eller skapa en — en sluten uppsättning värden som kan användas som egenskapstyp."
+      "selectPrompt": "Välj en enum eller skapa en — en sluten uppsättning värden som kan användas som egenskapstyp.",
+      "nameHeader": "Namn"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "gRPC-server i TypeScript — .proto-tjänst, typade meddelanden och server-stubbar.",
           "server-grpc-dotnet": "gRPC-server i C# / .NET — .proto-tjänst, meddelanden och server-stubbar.",
           "db-postgres": "PostgreSQL-schema, seed-data och CRUD-skript från designen."
-        }
-      }
+        },
+        "added": "Template tillagt",
+        "done": "Klart"
+      },
+      "extractedTitle": "Filer skrivna",
+      "openOutput": "Öppna utdatamappen",
+      "removeConfirm": "Template ”{{name}}” tas bort från den här designen (redan genererade filer på disken lämnas orörda).",
+      "removeTitle": "Ta bort detta Template?"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Min. längd",
         "maxLength": "Max. längd",
         "pattern": "Mönster"
-      }
+      },
+      "generatedProperties": "Genererade egenskaper",
+      "inheritedProperties": "Ärvda egenskaper",
+      "ownProperties": "Egna egenskaper"
     },
     "flags": {
       "required": "obligatorisk",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Skydda skrivrutter med autentisering",
+      "authWritesHint": "Kräv bearer-autentisering vid skapa, uppdatera och ta bort; läsningar förblir offentliga.",
+      "generate": "Generera",
+      "replace": "Ersätt de befintliga rutterna",
+      "replaceHint": "Det finns redan rutter för den här modellen. Ersätt dem för att undvika dubbletter; lämna av för att lägga till en andra uppsättning.",
+      "title": "Generera CRUD för {{name}}"
     }
   },
   "mqtt": {

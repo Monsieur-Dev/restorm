@@ -2223,7 +2223,10 @@
         "examples": "Esempi",
         "settings": "Impostazioni",
         "notes": "Note"
-      }
+      },
+      "addSubModel": "Aggiungi un sotto-modello",
+      "collapseAll": "Comprimi tutto",
+      "expandAll": "Espandi tutto"
     },
     "enums": {
       "valueCount_one": "{{count}} valore",
@@ -2234,7 +2237,8 @@
       "addValue": "Aggiungi un valore",
       "valueHeader": "Valore",
       "newName": "NewEnum",
-      "selectPrompt": "Seleziona un enum o creane uno — un insieme chiuso di valori usabile come tipo di proprietà."
+      "selectPrompt": "Seleziona un enum o creane uno — un insieme chiuso di valori usabile come tipo di proprietà.",
+      "nameHeader": "Nome"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "Server gRPC in TypeScript — servizio .proto, messaggi tipizzati e stub del server.",
           "server-grpc-dotnet": "Server gRPC in C# / .NET — servizio .proto, messaggi e stub del server.",
           "db-postgres": "Schema PostgreSQL, dati seed e script CRUD dal design."
-        }
-      }
+        },
+        "added": "Template aggiunto",
+        "done": "Fatto"
+      },
+      "extractedTitle": "File scritti",
+      "openOutput": "Apri la cartella di output",
+      "removeConfirm": "Il Template «{{name}}» verrà rimosso da questo design (i file già generati su disco restano invariati).",
+      "removeTitle": "Rimuovere questo Template?"
     },
     "statusbar": {
       "format": "design · formato {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Lunghezza minima",
         "maxLength": "Lunghezza massima",
         "pattern": "Pattern"
-      }
+      },
+      "generatedProperties": "Proprietà generate",
+      "inheritedProperties": "Proprietà ereditate",
+      "ownProperties": "Proprietà proprie"
     },
     "flags": {
       "required": "richiesto",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Proteggi le route di scrittura con l’autenticazione",
+      "authWritesHint": "Richiedi l’autenticazione bearer per creazione, aggiornamento ed eliminazione; le letture restano pubbliche.",
+      "generate": "Genera",
+      "replace": "Sostituisci le route esistenti",
+      "replaceHint": "Per questo modello esistono già delle route. Sostituiscile per evitare duplicati; lascia disattivato per aggiungere un secondo set.",
+      "title": "Genera CRUD per {{name}}"
     }
   },
   "mqtt": {

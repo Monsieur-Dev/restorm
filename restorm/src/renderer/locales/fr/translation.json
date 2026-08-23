@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Design d'API"
       },
       "cut": "Couper",
       "copy": "Copier",
@@ -336,7 +337,8 @@
       "moveInto": "Déplacer dans ce scénario",
       "affectsNote": "Supprimer cette requête la retirera aussi de ces scénarios.",
       "deleteAnyway": "Supprimer quand même"
-    }
+    },
+    "expandAll": "Tout déplier"
   },
   "environment": {
     "newName": "Nouvel environnement",
@@ -2223,7 +2225,10 @@
         "examples": "Exemples",
         "settings": "Réglages",
         "notes": "Notes"
-      }
+      },
+      "addSubModel": "Ajouter un sous-modèle",
+      "expandAll": "Tout déplier",
+      "collapseAll": "Tout replier"
     },
     "enums": {
       "valueCount_one": "{{count}} valeur",
@@ -2234,7 +2239,8 @@
       "addValue": "Ajouter une valeur",
       "valueHeader": "Valeur",
       "newName": "NewEnum",
-      "selectPrompt": "Sélectionnez une énum, ou créez-en une — un ensemble fermé de valeurs utilisable comme type de propriété."
+      "selectPrompt": "Sélectionnez une énum, ou créez-en une — un ensemble fermé de valeurs utilisable comme type de propriété.",
+      "nameHeader": "Nom"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2282,14 @@
           "server-grpc-typescript": "Serveur gRPC en TypeScript — service .proto, messages typés et stubs serveur.",
           "server-grpc-dotnet": "Serveur gRPC en C# / .NET — service .proto, messages et stubs serveur.",
           "db-postgres": "Schéma PostgreSQL, données de seed et scripts CRUD depuis le design."
-        }
-      }
+        },
+        "added": "Template ajouté",
+        "done": "Terminé"
+      },
+      "openOutput": "Ouvrir le dossier de sortie",
+      "extractedTitle": "Fichiers écrits",
+      "removeTitle": "Retirer ce template ?",
+      "removeConfirm": "Le template « {{name}} » sera retiré de ce design (les fichiers déjà générés sur le disque ne sont pas touchés)."
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2339,7 +2351,10 @@
         "minLength": "Longueur min",
         "maxLength": "Longueur max",
         "pattern": "Pattern"
-      }
+      },
+      "inheritedProperties": "Propriétés héritées",
+      "ownProperties": "Propriétés propres",
+      "generatedProperties": "Propriétés générées"
     },
     "flags": {
       "required": "requis",
@@ -2514,6 +2529,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "title": "Générer le CRUD pour {{name}}",
+      "replace": "Remplacer les routes existantes",
+      "replaceHint": "Des routes existent déjà pour ce modèle. Remplacez-les pour éviter les doublons ; laissez désactivé pour ajouter un second jeu.",
+      "authWrites": "Protéger les routes d'écriture par authentification",
+      "authWritesHint": "Exiger une authentification bearer sur la création, la mise à jour et la suppression ; les lectures restent publiques.",
+      "generate": "Générer"
     }
   },
   "mqtt": {

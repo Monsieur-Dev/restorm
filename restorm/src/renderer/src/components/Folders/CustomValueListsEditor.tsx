@@ -4,11 +4,13 @@ import {
   ListView,
   type ListViewItemData,
   type ListViewItemEventPayload,
+  type ListViewDropEventPayload,
   type ContextMenuItem,
   VerticalSashContainer,
   SplitView,
   Pane,
   Button,
+  InputBox,
   KeyValueTable,
   type KeyValueTableHandle,
   type KeyValueTableRow
@@ -35,6 +37,7 @@ export interface CustomValueListsWording {
   newListName: string
   keyHeader: string
   valueHeader: string
+  filterPlaceholder: string
 }
 
 export interface CustomValueListsEditorProps {
@@ -57,6 +60,12 @@ export interface CustomValueListsEditorProps {
   disabled?: boolean
   /** Test-id prefix (default `custom-values`, the historical ids). */
   testIdPrefix?: string
+  /** Show a filter field above the lists (design enums opt in; the env
+   * folder keeps its filter-free list). */
+  filterable?: boolean
+  /** Allow drag-reordering the lists (design enums opt in; env folders keep
+   * their pick-only list — reorder there would fight the workbench overlay). */
+  reorderableLists?: boolean
 }
 
 /**
@@ -77,7 +86,9 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
   showEnabledToggle = true,
   showValue = true,
   disabled = false,
-  testIdPrefix = 'custom-values'
+  testIdPrefix = 'custom-values',
+  filterable = false,
+  reorderableLists = false
 }) => {
   const { t } = useTranslation()
   const words: CustomValueListsWording = {
@@ -88,8 +99,10 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
     selectList: wording?.selectList ?? t('folderView.customValues.selectList'),
     newListName: wording?.newListName ?? t('folderView.customValues.newListName'),
     keyHeader: wording?.keyHeader ?? t('folderView.customValues.label'),
-    valueHeader: wording?.valueHeader ?? t('folderView.customValues.value')
+    valueHeader: wording?.valueHeader ?? t('folderView.customValues.value'),
+    filterPlaceholder: wording?.filterPlaceholder ?? t('design.list.filter', 'Filter…')
   }
+  const [listFilter, setListFilter] = useState('')
 
   const [lists, setLists] = useState<CustomValueList[]>(() => listsProp)
   const [selectedId, setSelectedId] = useState<string | null>(() => listsProp[0]?.id ?? null)
@@ -136,6 +149,23 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
     if (!trimmed) return
     persist(listsRef.current.map((l) => (l.id === id ? { ...l, name: trimmed } : l)))
   }, [persist])
+
+  // Flat drag-reorder (opt-in via `reorderableLists`): move the dragged list
+  // before/after the drop target. `into` is meaningless for a flat list.
+  const handleListReorder = useCallback((payload: ListViewDropEventPayload) => {
+    if (disabled || payload.sources.length !== 1 || payload.position === 'into') return
+    const draggedId = payload.source.id
+    const targetId = payload.item.id
+    if (!draggedId || !targetId || draggedId === targetId) return
+    const arr = [...listsRef.current]
+    const from = arr.findIndex((l) => l.id === draggedId)
+    if (from < 0 || arr.findIndex((l) => l.id === targetId) < 0) return
+    const [moved] = arr.splice(from, 1)
+    if (moved === undefined) return
+    const insertAt = arr.findIndex((l) => l.id === targetId) + (payload.position === 'after' ? 1 : 0)
+    arr.splice(insertAt, 0, moved)
+    persist(arr)
+  }, [disabled, persist])
 
   const handleDelete = useCallback((id: string) => {
     const next = listsRef.current.filter((l) => l.id !== id)
@@ -212,6 +242,14 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
     () => lists.map((l) => ({ id: l.id, title: l.name, isExpandable: false, isExpanded: false, contextMenuItems })),
     [lists, contextMenuItems]
   )
+  const visibleItems: ListViewItemData[] = useMemo(() => {
+    const term = listFilter.trim().toLowerCase()
+    if (term === '') return items
+    // Filter on the source list NAME (a string), not the row title (a
+    // ReactNode) — stringifying the latter yields '[object Object]'.
+    const keep = new Set(lists.filter((l) => l.name.toLowerCase().includes(term)).map((l) => l.id))
+    return items.filter((i) => keep.has(i.id))
+  }, [items, lists, listFilter])
 
   return (
     <VerticalSashContainer
@@ -242,8 +280,16 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
                 </HeaderHoverTooltip>
               )}
             >
+              {filterable && (
+                <InputBox
+                  value={listFilter}
+                  onChange={setListFilter}
+                  options={{ type: 'text', placeholder: words.filterPlaceholder, ariaLabel: words.filterPlaceholder }}
+                  data-testid={`${testIdPrefix}-list-filter`}
+                />
+              )}
               <ListView
-                items={items}
+                items={visibleItems}
                 rootRole="tree"
                 ariaLabel={words.listsTitle}
                 selectedIds={selectedId ? [selectedId] : []}
@@ -251,14 +297,13 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
                 onEditingStart={(id) => { if (!disabled) setEditingId(id) }}
                 onEditingEnd={() => { setEditingId(null) }}
                 isRenameable={!disabled}
-                // A closed door, not a deferred feature: the lists are picked,
-                // not arranged, and there is no order here worth dragging. Not
-                // wiring `onItemDrop` would NOT have been enough — a draggable
-                // row starts a real HTML5 drag stamped with the ListView marker
-                // MIME, and the workbench's drop zone claims any gesture
-                // carrying it, darkening the whole editor and swallowing the
-                // release. The drag has to be refused at its source.
-                disableDrag
+                // Reorder is OPT-IN (`reorderableLists`). When off, drag is
+                // refused at its source: a draggable row starts a real HTML5
+                // drag stamped with the ListView marker MIME, and outside a
+                // reorder-scoped host (see App's `isWorkbenchExternalDrop`) the
+                // workbench split overlay claims the gesture and swallows it.
+                disableDrag={!reorderableLists}
+                {...(reorderableLists ? { onItemDrop: handleListReorder } : {})}
                 data-testid={`${testIdPrefix}-list`}
                 onItemClick={(payload) => { if (payload.item.id) setSelectedId(payload.item.id) }}
                 onItemRename={(payload: ListViewItemEventPayload, newValue: string) => { handleRename(payload.item.id, newValue) }}

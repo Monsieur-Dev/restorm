@@ -2222,7 +2222,10 @@
         "examples": "例",
         "settings": "設定",
         "notes": "ノート"
-      }
+      },
+      "addSubModel": "サブモデルを追加",
+      "collapseAll": "すべて折りたたむ",
+      "expandAll": "すべて展開"
     },
     "enums": {
       "valueCount_one": "{{count}} 値",
@@ -2233,7 +2236,8 @@
       "addValue": "値を追加",
       "valueHeader": "値",
       "newName": "NewEnum",
-      "selectPrompt": "enum を選択するか、作成してください — プロパティの型として使える閉じた値の集合です。"
+      "selectPrompt": "enum を選択するか、作成してください — プロパティの型として使える閉じた値の集合です。",
+      "nameHeader": "名前"
     },
     "documentation": {},
     "code": {
@@ -2275,8 +2279,14 @@
           "server-grpc-typescript": "TypeScript による gRPC サーバー — .proto サービス、型付きメッセージ、サーバースタブ。",
           "server-grpc-dotnet": "C# / .NET による gRPC サーバー — .proto サービス、メッセージ、サーバースタブ。",
           "db-postgres": "デザインからの PostgreSQL スキーマ、シードデータ、CRUD スクリプト。"
-        }
-      }
+        },
+        "added": "Template を追加しました",
+        "done": "完了"
+      },
+      "extractedTitle": "ファイルを書き込みました",
+      "openOutput": "出力フォルダーを開く",
+      "removeConfirm": "Template「{{name}}」がこのデザインから削除されます（ディスク上に生成済みのファイルはそのまま残ります）。",
+      "removeTitle": "この Template を削除しますか？"
     },
     "statusbar": {
       "format": "デザイン · フォーマット {{version}}"
@@ -2338,7 +2348,10 @@
         "minLength": "最小長",
         "maxLength": "最大長",
         "pattern": "パターン"
-      }
+      },
+      "generatedProperties": "生成されたプロパティ",
+      "inheritedProperties": "継承されたプロパティ",
+      "ownProperties": "固有のプロパティ"
     },
     "flags": {
       "required": "必須",
@@ -2513,6 +2526,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "書き込みルートを認証で保護する",
+      "authWritesHint": "作成・更新・削除で bearer 認証を必須にします。読み取りは公開のままです。",
+      "generate": "生成",
+      "replace": "既存のルートを置き換える",
+      "replaceHint": "このモデルにはすでにルートが存在します。重複を避けるには置き換えてください。オフのままにすると 2 つ目のセットを追加します。",
+      "title": "{{name}} の CRUD を生成"
     }
   },
   "mqtt": {

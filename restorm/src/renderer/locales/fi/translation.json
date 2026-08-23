@@ -2223,7 +2223,10 @@
         "examples": "Esimerkit",
         "settings": "Asetukset",
         "notes": "Muistiinpanot"
-      }
+      },
+      "addSubModel": "Lisää alimalli",
+      "collapseAll": "Tiivistä kaikki",
+      "expandAll": "Laajenna kaikki"
     },
     "enums": {
       "valueCount_one": "{{count}} arvo",
@@ -2234,7 +2237,8 @@
       "addValue": "Lisää arvo",
       "valueHeader": "Arvo",
       "newName": "NewEnum",
-      "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä."
+      "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä.",
+      "nameHeader": "Nimi"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "gRPC-palvelin TypeScriptillä — .proto-palvelu, tyypitetyt viestit ja palvelintynkät.",
           "server-grpc-dotnet": "gRPC-palvelin C# / .NET -ympäristössä — .proto-palvelu, viestit ja palvelintynkät.",
           "db-postgres": "PostgreSQL-skeema, seed-data ja CRUD-skriptit suunnitelmasta."
-        }
-      }
+        },
+        "added": "Template lisätty",
+        "done": "Valmis"
+      },
+      "extractedTitle": "Tiedostot kirjoitettu",
+      "openOutput": "Avaa tuloskansio",
+      "removeConfirm": "Template ”{{name}}” poistetaan tästä suunnitelmasta (levylle jo luodut tiedostot jäävät koskematta).",
+      "removeTitle": "Poistetaanko tämä Template?"
     },
     "statusbar": {
       "format": "suunnitelma · muoto {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Vähimmäispituus",
         "maxLength": "Enimmäispituus",
         "pattern": "Kaava"
-      }
+      },
+      "generatedProperties": "Luodut ominaisuudet",
+      "inheritedProperties": "Perityt ominaisuudet",
+      "ownProperties": "Omat ominaisuudet"
     },
     "flags": {
       "required": "pakollinen",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Suojaa kirjoitusreitit todennuksella",
+      "authWritesHint": "Vaadi bearer-todennus luonnissa, päivityksessä ja poistossa; luku pysyy julkisena.",
+      "generate": "Luo",
+      "replace": "Korvaa olemassa olevat reitit",
+      "replaceHint": "Tälle mallille on jo reittejä. Korvaa ne välttääksesi kaksoiskappaleet; jätä pois päältä lisätäksesi toisen joukon.",
+      "title": "Luo CRUD kohteelle {{name}}"
     }
   },
   "mqtt": {

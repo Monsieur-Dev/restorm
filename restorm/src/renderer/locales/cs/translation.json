@@ -2225,7 +2225,10 @@
         "examples": "Příklady",
         "settings": "Nastavení",
         "notes": "Poznámky"
-      }
+      },
+      "addSubModel": "Přidat podmodel",
+      "collapseAll": "Sbalit vše",
+      "expandAll": "Rozbalit vše"
     },
     "enums": {
       "valueCount_one": "{{count}} hodnota",
@@ -2236,7 +2239,8 @@
       "addValue": "Přidat hodnotu",
       "valueHeader": "Hodnota",
       "newName": "NewEnum",
-      "selectPrompt": "Vyberte enum, nebo nějaký vytvořte — uzavřená množina hodnot použitelná jako typ vlastnosti."
+      "selectPrompt": "Vyberte enum, nebo nějaký vytvořte — uzavřená množina hodnot použitelná jako typ vlastnosti.",
+      "nameHeader": "Název"
     },
     "documentation": {},
     "code": {
@@ -2278,8 +2282,14 @@
           "server-grpc-typescript": "gRPC server v TypeScriptu — služba .proto, typované zprávy a serverové stuby.",
           "server-grpc-dotnet": "gRPC server v C# / .NET — služba .proto, zprávy a serverové stuby.",
           "db-postgres": "Schéma PostgreSQL, počáteční data a CRUD skripty z návrhu."
-        }
-      }
+        },
+        "added": "Template přidán",
+        "done": "Hotovo"
+      },
+      "extractedTitle": "Soubory zapsány",
+      "openOutput": "Otevřít výstupní složku",
+      "removeConfirm": "Template „{{name}}“ bude z tohoto návrhu odebrán (již vygenerované soubory na disku zůstanou nedotčené).",
+      "removeTitle": "Odebrat tento Template?"
     },
     "statusbar": {
       "format": "návrh · formát {{version}}"
@@ -2341,7 +2351,10 @@
         "minLength": "Min. délka",
         "maxLength": "Max. délka",
         "pattern": "Vzor"
-      }
+      },
+      "generatedProperties": "Vygenerované vlastnosti",
+      "inheritedProperties": "Zděděné vlastnosti",
+      "ownProperties": "Vlastní vlastnosti"
     },
     "flags": {
       "required": "povinné",
@@ -2516,6 +2529,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Chránit zapisovací trasy autentizací",
+      "authWritesHint": "Vyžadovat bearer autentizaci pro vytvoření, úpravu a smazání; čtení zůstává veřejné.",
+      "generate": "Vygenerovat",
+      "replace": "Nahradit existující trasy",
+      "replaceHint": "Pro tento model už trasy existují. Nahraďte je, abyste předešli duplicitám; ponechte vypnuté pro přidání druhé sady.",
+      "title": "Vygenerovat CRUD pro {{name}}"
     }
   },
   "mqtt": {

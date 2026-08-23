@@ -23,24 +23,33 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
   const lists: CustomValueList[] = useMemo(() => design.enums.map((e) => ({
     id: e.id,
     name: e.doc.name,
+    // `label` = the member NAME (code identifier, defaults to the value),
+    // `value` = the WIRE value. Two columns via `showValue`.
     entries: (e.doc.enumValues ?? []).map((value, index) => ({
       id: `${e.id}:${index}`,
-      label: displayValue(value),
+      label: e.memberNames?.[index] !== undefined && e.memberNames[index] !== '' ? e.memberNames[index] : displayValue(value),
       value: displayValue(value),
       enabled: true
     }))
   })), [design.enums])
 
-  // CustomValueList[] → enums. A row's text comes back in `label` (the
-  // value column is hidden); `bridgeEnumValues` restores the typed
-  // originals.
+  // CustomValueList[] → enums. A member exists when it has a non-empty VALUE;
+  // its NAME (label) defaults to the value. `bridgeEnumValues` restores the
+  // typed originals for the wire values; the names ride alongside in
+  // `memberNames` (design-only, index-aligned).
   const onListsChange = useCallback((next: CustomValueList[]) => {
     const byId = new Map(design.enums.map((e) => [e.id, e]))
     const enums: DesignEnum[] = next.map((list) => {
       const existing = byId.get(list.id)
-      const values = bridgeEnumValues(existing?.doc.enumValues ?? [], list.entries.map((entry) => entry.label))
+      const members = list.entries.filter((entry) => entry.value.trim() !== '')
+      const values = bridgeEnumValues(existing?.doc.enumValues ?? [], members.map((entry) => entry.value))
+      const names = members.map((entry) => (entry.label.trim() !== '' ? entry.label : entry.value))
+      // Only persist names when at least one differs from its value — a
+      // pure value-only enum stays free of the extra field.
+      const memberNames = names.some((name, i) => name !== values[i]?.toString()) ? { memberNames: names } : {}
       if (existing !== undefined) {
-        return { ...existing, doc: { ...existing.doc, name: list.name, enumValues: values } }
+        const { memberNames: _drop, ...rest } = existing
+        return { ...rest, doc: { ...existing.doc, name: list.name, enumValues: values }, ...memberNames }
       }
       return {
         id: list.id,
@@ -48,7 +57,8 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
           name: uniqueComponentName(design, list.name),
           properties: [],
           enumValues: values
-        }
+        },
+        ...memberNames
       }
     })
     assignDesignSection(design, 'enums', enums)
@@ -67,10 +77,14 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
           addEntry: t('design.enums.addValue', 'Add a value'),
           selectList: t('design.enums.selectPrompt', 'Select an enum, or create one — a closed set of values usable as a property type.'),
           newListName: t('design.enums.newName', 'NewEnum'),
-          keyHeader: t('design.enums.valueHeader', 'Value')
+          keyHeader: t('design.enums.nameHeader', 'Name'),
+          valueHeader: t('design.enums.valueHeader', 'Value'),
+          filterPlaceholder: t('design.list.filter', 'Filter…')
         }}
         showEnabledToggle={false}
-        showValue={false}
+        showValue
+        filterable
+        reorderableLists
         testIdPrefix="design-enums"
       />
     </div>

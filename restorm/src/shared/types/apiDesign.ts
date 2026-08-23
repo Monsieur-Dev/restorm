@@ -217,6 +217,14 @@ export interface DesignModel {
 export interface DesignEnum {
   id: RuntimeId
   doc: ModelDocumentation
+  /**
+   * Optional code-identifier NAME per value, aligned by index with
+   * `doc.enumValues`. Design-only (never leaves via the shared
+   * `enumValues`): it feeds code generation (member identifiers) and the
+   * OpenAPI `x-enum-varnames` extension. Absent / empty → the name defaults
+   * to the rendered value, so value-only enums keep working unchanged.
+   */
+  memberNames?: string[]
 }
 
 /** A link binding a route parameter to a model property: the parameter

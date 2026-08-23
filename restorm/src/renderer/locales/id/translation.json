@@ -2222,7 +2222,10 @@
         "examples": "Contoh",
         "settings": "Pengaturan",
         "notes": "Catatan"
-      }
+      },
+      "addSubModel": "Tambah sub-model",
+      "collapseAll": "Ciutkan semua",
+      "expandAll": "Perluas semua"
     },
     "enums": {
       "valueCount_one": "{{count}} nilai",
@@ -2233,7 +2236,8 @@
       "addValue": "Tambah nilai",
       "valueHeader": "Nilai",
       "newName": "NewEnum",
-      "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti."
+      "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti.",
+      "nameHeader": "Nama"
     },
     "documentation": {},
     "code": {
@@ -2275,8 +2279,14 @@
           "server-grpc-typescript": "Server gRPC dalam TypeScript — layanan .proto, pesan bertipe, dan stub server.",
           "server-grpc-dotnet": "Server gRPC dalam C# / .NET — layanan .proto, pesan, dan stub server.",
           "db-postgres": "Skema PostgreSQL, data seed, dan skrip CRUD dari desain."
-        }
-      }
+        },
+        "added": "Template ditambahkan",
+        "done": "Selesai"
+      },
+      "extractedTitle": "File ditulis",
+      "openOutput": "Buka folder keluaran",
+      "removeConfirm": "Template “{{name}}” akan dihapus dari desain ini (file yang sudah dihasilkan di disk tidak diubah).",
+      "removeTitle": "Hapus Template ini?"
     },
     "statusbar": {
       "format": "desain · format {{version}}"
@@ -2338,7 +2348,10 @@
         "minLength": "Panjang min.",
         "maxLength": "Panjang maks.",
         "pattern": "Pola"
-      }
+      },
+      "generatedProperties": "Properti yang dihasilkan",
+      "inheritedProperties": "Properti warisan",
+      "ownProperties": "Properti sendiri"
     },
     "flags": {
       "required": "wajib",
@@ -2513,6 +2526,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Lindungi rute tulis dengan autentikasi",
+      "authWritesHint": "Wajibkan autentikasi bearer pada create, update, dan delete; baca tetap publik.",
+      "generate": "Hasilkan",
+      "replace": "Ganti rute yang ada",
+      "replaceHint": "Rute untuk model ini sudah ada. Ganti untuk menghindari duplikat; biarkan nonaktif untuk menambah set kedua.",
+      "title": "Hasilkan CRUD untuk {{name}}"
     }
   },
   "mqtt": {

@@ -405,7 +405,10 @@ function designToListViewItem(
     return {
       id: designSectionRowId(design.id, section.key),
       title: i18n.t(section.labelKey),
-      icon: section.codicon,
+      icon: toListViewIcon(section.icon, ''),
+      // Virtual section rows are navigation shortcuts, not movable entities —
+      // never draggable (a drag would carry no meaningful item id).
+      draggable: false,
       ...(parts.length > 0
         ? { rightActions: React.createElement('span', { className: 'design-section-count' }, ...parts) }
         : {})

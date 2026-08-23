@@ -43,7 +43,7 @@ import { CODEGEN_CONTEXT_VERSION } from '../../../shared/design/codegenContext'
 import { CODEGEN_CONTEXT_SCHEMA } from '../../../shared/design/codegenContextSchema'
 import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 import { designFromDocumentation } from '../../../shared/design/designFromDocumentation'
-import { generateCrud, generateSearchParams, syncPathParams } from '../../../shared/design/designRoutes'
+import { generateCrud, findCrudGroupForModel, generateSearchParams, syncPathParams } from '../../../shared/design/designRoutes'
 import { removeModelFromDesign } from '../../../shared/design/designUsages'
 import { DESCRIPTOR_FORMATS } from '../../../shared/design/descriptorFormats'
 import { broadcastTreeReplace } from './import'
@@ -1177,7 +1177,9 @@ export function registerDesignTools(mcp: McpService): void {
         'linked to the model\'s identifier property.',
       inputSchema: {
         designId: z.string().min(1),
-        model: z.string().min(1).describe('Model id or name.')
+        model: z.string().min(1).describe('Model id or name.'),
+        replaceExisting: z.boolean().optional().describe('When a CRUD group already exists for this model (same plural base path), replace it instead of appending a duplicate set. Default false (appends).'),
+        authWrites: z.boolean().optional().describe('Gate the write routes (create/update/delete) behind bearer auth; reads stay public. Default false.')
       } as Record<string, unknown>
     },
     (args) => {
@@ -1185,10 +1187,14 @@ export function registerDesignTools(mcp: McpService): void {
       if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
       const resolved = resolveEntity(design.models, typeof args['model'] === 'string' ? args['model'] : '', (m) => m.doc.name, 'model')
       if (isResolveError(resolved)) return errorReply(resolved.error)
-      const { group } = generateCrud(design, resolved, newId)
-      design.routeGroups = [...design.routeGroups, group]
+      const authWrites = args['authWrites'] === true
+      const { group } = generateCrud(design, resolved, newId, { authWrites })
+      const existing = args['replaceExisting'] === true ? findCrudGroupForModel(design, resolved) : undefined
+      design.routeGroups = existing !== undefined
+        ? design.routeGroups.map((g) => (g.id === existing.id ? group : g))
+        : [...design.routeGroups, group]
       writeDesign(design)
-      return jsonReply({ designId: design.id, groupId: group.id, routes: group.routes.length })
+      return jsonReply({ designId: design.id, groupId: group.id, routes: group.routes.length, replaced: existing !== undefined })
     }
   )
 

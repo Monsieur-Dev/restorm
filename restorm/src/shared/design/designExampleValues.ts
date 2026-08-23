@@ -53,6 +53,18 @@ export function generateExampleValue(design: ApiDesign, _model: DesignModel, pro
   const rng = mulberry32(hashString(seed))
   const doc = property.doc
 
+  // An array property yields an ARRAY of element values, never a scalar —
+  // the element type is the primitive `arrayItems.type`, or the enum the
+  // reference points at. (A nested-model array is left to the caller's
+  // instance builder; here it degrades to element scalars.) Recursion is
+  // bounded: the element property is never itself typed `array`.
+  if (doc.type === 'array') {
+    const count = 1 + Math.floor(rng() * 3)
+    const element = arrayElementProperty(property)
+    return Array.from({ length: count }, (_v, i) =>
+      generateExampleValue(design, _model, element, `${seed}#${i}`))
+  }
+
   // An enum-typed property picks one of its enum's values.
   const reference = property.design?.reference
   if (reference?.target === 'enum') {
@@ -94,6 +106,33 @@ export function generateExampleValue(design: ApiDesign, _model: DesignModel, pro
   if (typeof minLength === 'number' && value.length < minLength) value = value.padEnd(minLength, 'x')
   if (typeof maxLength === 'number' && value.length > maxLength) value = value.slice(0, maxLength)
   return value
+}
+
+/** Project an array property onto a single-element property: the element
+ * carries the primitive `arrayItems` type (or the reference the array is
+ * of), with all array-ness stripped so the value generator treats it as a
+ * scalar/enum element. */
+function arrayElementProperty(property: DesignProperty): DesignProperty {
+  const { arrayItems: _items, ...designRest } = property.design ?? {}
+  const reference = property.design?.reference
+  if (reference !== undefined) {
+    // enum/model array element: keep the reference (the enum branch fires
+    // on it), drop the array flag, and force a non-array type so the value
+    // generator can't recurse into this same branch.
+    const { isArrayOfRef: _flag, ...docRest } = property.doc
+    return {
+      ...property,
+      doc: { ...docRest, type: 'string' },
+      design: designRest
+    }
+  }
+  const itemType = property.design?.arrayItems?.type ?? 'string'
+  const { format: _dropFormat, ...docRest } = property.doc
+  return {
+    ...property,
+    doc: { ...docRest, type: itemType },
+    design: designRest
+  }
 }
 
 export type ExampleValueViolation = 'pattern' | 'minimum' | 'maximum' | 'minLength' | 'maxLength'

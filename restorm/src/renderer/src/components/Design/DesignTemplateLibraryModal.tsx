@@ -3,12 +3,13 @@
  * button. Three tabs let the user pick a template source to append to the
  * design's list: recently-used (user MRU), the official registry (repo name +
  * description), and a custom repository / local folder. Picking a source adds
- * it and closes; the actual generation happens per-row back in the section.
+ * it and keeps the modal open (a toast confirms) so several stacks — app,
+ * DB, backend — go in without reopening; "Done" closes.
  */
 
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, InputBox, Modal, Tabs, type Tab } from 'electron-core-ui/renderer'
+import { Button, InputBox, Modal, Tabs, toasterService, type Tab } from 'electron-core-ui/renderer'
 import type { DesignTemplateSource } from '../../../../shared/types/collections'
 import { OFFICIAL_CHOICES } from './designOfficialTemplates'
 import type { RecentTemplate } from './designCodegenRecents'
@@ -26,7 +27,13 @@ export const DesignTemplateLibraryModal: React.FC<{
 
   const add = (source: DesignTemplateSource, label: string): void => {
     onAdd(source, label)
-    onClose()
+    // Stay open — a design often stacks several templates. Confirm with a
+    // non-blocking toast; the user closes via "Done" when finished.
+    toasterService.push('app', {
+      id: 'design-template-added',
+      title: t('design.code.library.added', 'Template added'),
+      body: label
+    })
   }
 
   /** Human summary of a source, for the recent-row second line. */
@@ -158,6 +165,11 @@ export const DesignTemplateLibraryModal: React.FC<{
       data-testid="design-template-library-modal"
     >
       <Tabs tabs={tabs} data-testid="design-template-library-tabs" />
+      <div className="design-template-library__footer">
+        <Button onClick={onClose} data-testid="design-template-library-done">
+          {t('design.code.library.done', 'Done')}
+        </Button>
+      </div>
     </Modal>
   )
 }

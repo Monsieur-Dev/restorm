@@ -2223,7 +2223,10 @@
         "examples": "Shembuj",
         "settings": "Cilësimet",
         "notes": "Shënime"
-      }
+      },
+      "addSubModel": "Shto një nën-model",
+      "collapseAll": "Palos të gjitha",
+      "expandAll": "Zgjero të gjitha"
     },
     "enums": {
       "valueCount_one": "{{count}} vlerë",
@@ -2234,7 +2237,8 @@
       "addValue": "Shto një vlerë",
       "valueHeader": "Vlera",
       "newName": "NewEnum",
-      "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie."
+      "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie.",
+      "nameHeader": "Emri"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "Server gRPC në TypeScript — shërbim .proto, mesazhe të tipizuara dhe stub-e serveri.",
           "server-grpc-dotnet": "Server gRPC në C# / .NET — shërbim .proto, mesazhe dhe stub-e serveri.",
           "db-postgres": "Skemë PostgreSQL, të dhëna seed dhe skripte CRUD nga dizajni."
-        }
-      }
+        },
+        "added": "Template u shtua",
+        "done": "U krye"
+      },
+      "extractedTitle": "Skedarët u shkruan",
+      "openOutput": "Hap dosjen e daljes",
+      "removeConfirm": "Template «{{name}}» do të hiqet nga ky dizajn (skedarët tashmë të gjeneruar në disk mbeten të paprekur).",
+      "removeTitle": "Të hiqet ky Template?"
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Gjatësia min.",
         "maxLength": "Gjatësia max.",
         "pattern": "Modeli (pattern)"
-      }
+      },
+      "generatedProperties": "Veti të gjeneruara",
+      "inheritedProperties": "Veti të trashëguara",
+      "ownProperties": "Veti vetjake"
     },
     "flags": {
       "required": "i detyrueshëm",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Mbroji rrugët e shkrimit me vërtetim",
+      "authWritesHint": "Kërko vërtetim bearer për krijim, përditësim dhe fshirje; leximet mbeten publike.",
+      "generate": "Gjenero",
+      "replace": "Zëvendëso rrugët ekzistuese",
+      "replaceHint": "Ekzistojnë tashmë rrugë për këtë model. Zëvendësoji për të shmangur dublikatat; lëre të çaktivizuar për të shtuar një grup të dytë.",
+      "title": "Gjenero CRUD për {{name}}"
     }
   },
   "mqtt": {

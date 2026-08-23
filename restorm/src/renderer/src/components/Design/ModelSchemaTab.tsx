@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -250,10 +250,18 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
   }, [design, t])
 
   interface Row { property: DesignProperty; inheritedFrom?: DesignModel }
-  const rows: Row[] = useMemo(() => [
-    ...inherited.map(({ parent, property }) => ({ property, inheritedFrom: parent })),
-    ...model.properties.map((property) => ({ property }))
-  ], [inherited, model.properties])
+  // Two distinct groups: inherited rows are read-only and NEVER reorderable
+  // (a separate table with no drag handle), own rows reorder among themselves.
+  // Keeping them in separate tables also stops an own row being dropped into
+  // the inherited block.
+  const inheritedRows: Row[] = useMemo(
+    () => inherited.map(({ parent, property }) => ({ property, inheritedFrom: parent })),
+    [inherited]
+  )
+  const ownRows: Row[] = useMemo(
+    () => model.properties.map((property) => ({ property })),
+    [model.properties]
+  )
 
   const flagBadges = useCallback((property: DesignProperty): string[] => {
     const badges: string[] = []
@@ -362,10 +370,32 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
 
   return (
     <div className="design-schema-tab" data-testid={`design-model-schema-${model.id}`}>
+      {inheritedRows.length > 0 && (
+        <>
+          <h4 className="design-settings-group-title">{t('design.schema.inheritedProperties', 'Inherited properties')}</h4>
+          <Table<Row>
+            columns={columns}
+            rows={inheritedRows}
+            getRowId={(row) => row.property.id}
+            data-testid="design-properties-table-inherited"
+          />
+          <h4 className="design-settings-group-title">{t('design.schema.ownProperties', 'Own properties')}</h4>
+        </>
+      )}
       <Table<Row>
         columns={columns}
-        rows={rows}
+        rows={ownRows}
         getRowId={(row) => row.property.id}
+        reorderable
+        onRowsReorder={(orderedIds) => {
+          // This table holds only own rows, so the ordered ids map straight to
+          // the reordered own-property list. The guard is belt-and-braces.
+          const ownById = new Map(model.properties.map((p) => [p.id, p]))
+          const reordered = orderedIds
+            .map((id) => ownById.get(id))
+            .filter((p): p is DesignProperty => p !== undefined)
+          if (reordered.length === model.properties.length) commitProperties(reordered)
+        }}
         data-testid="design-properties-table"
       />
       {(
@@ -377,6 +407,18 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
         >
           {t('design.schema.addProperty', 'Add a property')}
         </Button>
+      )}
+      {model.design?.timestamps === true && (
+        <div className="design-generated-props" data-testid="design-generated-props">
+          <h4 className="design-settings-group-title">{t('design.schema.generatedProperties', 'Generated properties')}</h4>
+          {['createdAt', 'updatedAt'].map((name) => (
+            <div key={name} className="design-generated-prop">
+              <span className="design-generated-prop-name">{name}</span>
+              <span className="design-prop-type">date-time</span>
+              <span className="design-flag-badge">{t('design.flags.readOnly', 'readOnly')}</span>
+            </div>
+          ))}
+        </div>
       )}
       {selected !== null && (
         <PropertyPanel
@@ -402,6 +444,25 @@ interface PropertyPanelProps {
 
 const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCodes, onUpdate, onDelete }) => {
   const { t } = useTranslation()
+
+  // A freshly added property arrives unnamed and immediately flagged; drop
+  // the caret straight into the Name field (like the model-create inline
+  // edit) so the user types the name instead of hunting for the flash of
+  // error. The panel is keyed by property id, so this mount == a new
+  // selection; only steal focus while the name is still empty.
+  const panelRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    // Only while still unnamed: on mount of a freshly added property the
+    // name is '' → focus it; the first keystroke makes it non-empty and
+    // this early-returns, so typing never re-steals focus. (The panel is
+    // keyed by property id, so a different selection is a fresh mount.)
+    if (property.doc.name !== '') return
+    const host = panelRef.current?.querySelector('[data-testid="design-property-name"]')
+    const input = host instanceof HTMLInputElement || host instanceof HTMLTextAreaElement
+      ? host
+      : host?.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea')
+    input?.focus()
+  }, [property.doc.name])
 
   // ── Type vocabulary ────────────────────────────────────────────────
   const typeChoices: TypeChoice[] = useMemo(() => [
@@ -560,7 +621,7 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
   }
 
   return (
-    <div className="design-property-panel" data-testid={`design-property-panel-${property.id}`}>
+    <div className="design-property-panel" ref={panelRef} data-testid={`design-property-panel-${property.id}`}>
       <div className="design-property-panel-header">
         <h4 className="design-property-panel-title">
           {t('design.schema.panelTitle', 'Property: {{name}}', { name: property.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : property.doc.name })}

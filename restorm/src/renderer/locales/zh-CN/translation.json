@@ -2222,7 +2222,10 @@
         "examples": "示例",
         "settings": "设置",
         "notes": "笔记"
-      }
+      },
+      "addSubModel": "添加子模型",
+      "collapseAll": "全部折叠",
+      "expandAll": "全部展开"
     },
     "enums": {
       "valueCount_one": "{{count}} 个值",
@@ -2233,7 +2236,8 @@
       "addValue": "添加值",
       "valueHeader": "值",
       "newName": "NewEnum",
-      "selectPrompt": "选择一个枚举，或创建一个 —— 可用作属性类型的封闭值集合。"
+      "selectPrompt": "选择一个枚举，或创建一个 —— 可用作属性类型的封闭值集合。",
+      "nameHeader": "名称"
     },
     "documentation": {},
     "code": {
@@ -2275,8 +2279,14 @@
           "server-grpc-typescript": "TypeScript 编写的 gRPC 服务器 —— .proto 服务、带类型的消息和服务器桩。",
           "server-grpc-dotnet": "C# / .NET 编写的 gRPC 服务器 —— .proto 服务、消息和服务器桩。",
           "db-postgres": "来自设计的 PostgreSQL 架构、种子数据和 CRUD 脚本。"
-        }
-      }
+        },
+        "added": "已添加 Template",
+        "done": "完成"
+      },
+      "extractedTitle": "已写入文件",
+      "openOutput": "打开输出文件夹",
+      "removeConfirm": "Template“{{name}}”将从此设计中移除（磁盘上已生成的文件保持不变）。",
+      "removeTitle": "移除此 Template？"
     },
     "statusbar": {
       "format": "设计 · 格式 {{version}}"
@@ -2338,7 +2348,10 @@
         "minLength": "最小长度",
         "maxLength": "最大长度",
         "pattern": "模式"
-      }
+      },
+      "generatedProperties": "生成的属性",
+      "inheritedProperties": "继承的属性",
+      "ownProperties": "自有属性"
     },
     "flags": {
       "required": "必填",
@@ -2513,6 +2526,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "使用身份验证保护写入路由",
+      "authWritesHint": "在创建、更新和删除时要求 bearer 认证；读取保持公开。",
+      "generate": "生成",
+      "replace": "替换现有路由",
+      "replaceHint": "此模型已存在路由。替换它们以避免重复；保持关闭则添加第二组。",
+      "title": "为 {{name}} 生成 CRUD"
     }
   },
   "mqtt": {

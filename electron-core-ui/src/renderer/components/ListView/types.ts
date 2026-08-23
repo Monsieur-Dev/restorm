@@ -24,6 +24,12 @@ export interface ListViewItemData {
    */
   isExpandable?: boolean
   /**
+   * Whether this specific row can be dragged. Defaults to true. Set false for
+   * rows that are not real, movable entities (e.g. virtual section entries) so
+   * they never start a drag even when the list otherwise allows dragging.
+   */
+  draggable?: boolean
+  /**
    * Whether the item can be selected. Defaults to true.
    */
   isSelectable?: boolean

@@ -453,6 +453,7 @@ declare global {
         extract: (designId: string, outputDir: string) => Promise<{ success: boolean; root?: string; written?: string[]; error?: string }>
         discard: (designId: string) => Promise<void>
         pickDirectory: (defaultPath?: string) => Promise<{ success: boolean; path?: string; canceled?: boolean }>
+        revealOutput: (designId: string, outputDir: string) => Promise<{ success: boolean; error?: string }>
       }
       jsonrpc: {
         execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>

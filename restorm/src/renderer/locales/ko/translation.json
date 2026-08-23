@@ -2222,7 +2222,10 @@
         "examples": "예시",
         "settings": "설정",
         "notes": "노트"
-      }
+      },
+      "addSubModel": "하위 모델 추가",
+      "collapseAll": "모두 접기",
+      "expandAll": "모두 펼치기"
     },
     "enums": {
       "valueCount_one": "{{count}}개 값",
@@ -2233,7 +2236,8 @@
       "addValue": "값 추가",
       "valueHeader": "값",
       "newName": "NewEnum",
-      "selectPrompt": "enum을 선택하거나 새로 만드세요 — 속성 타입으로 사용할 수 있는 닫힌 값 집합입니다."
+      "selectPrompt": "enum을 선택하거나 새로 만드세요 — 속성 타입으로 사용할 수 있는 닫힌 값 집합입니다.",
+      "nameHeader": "이름"
     },
     "documentation": {},
     "code": {
@@ -2275,8 +2279,14 @@
           "server-grpc-typescript": "TypeScript 기반 gRPC 서버 — .proto 서비스, 형식화된 메시지 및 서버 스텁.",
           "server-grpc-dotnet": "C# / .NET 기반 gRPC 서버 — .proto 서비스, 메시지 및 서버 스텁.",
           "db-postgres": "디자인에서 생성된 PostgreSQL 스키마, 시드 데이터 및 CRUD 스크립트."
-        }
-      }
+        },
+        "added": "Template 추가됨",
+        "done": "완료"
+      },
+      "extractedTitle": "파일 작성됨",
+      "openOutput": "출력 폴더 열기",
+      "removeConfirm": "Template “{{name}}”이(가) 이 디자인에서 제거됩니다(디스크에 이미 생성된 파일은 그대로 유지됩니다).",
+      "removeTitle": "이 Template을(를) 제거하시겠습니까?"
     },
     "statusbar": {
       "format": "디자인 · 포맷 {{version}}"
@@ -2338,7 +2348,10 @@
         "minLength": "최소 길이",
         "maxLength": "최대 길이",
         "pattern": "패턴"
-      }
+      },
+      "generatedProperties": "생성된 속성",
+      "inheritedProperties": "상속된 속성",
+      "ownProperties": "고유 속성"
     },
     "flags": {
       "required": "필수",
@@ -2513,6 +2526,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "쓰기 라우트를 인증으로 보호",
+      "authWritesHint": "생성, 수정, 삭제에 bearer 인증을 요구합니다. 읽기는 공개로 유지됩니다.",
+      "generate": "생성",
+      "replace": "기존 라우트 교체",
+      "replaceHint": "이 모델에는 이미 라우트가 있습니다. 중복을 피하려면 교체하세요. 끄면 두 번째 세트를 추가합니다.",
+      "title": "{{name}}에 대한 CRUD 생성"
     }
   },
   "mqtt": {

@@ -2223,7 +2223,10 @@
         "examples": "Eksempler",
         "settings": "Innstillinger",
         "notes": "Notater"
-      }
+      },
+      "addSubModel": "Legg til en undermodell",
+      "collapseAll": "Skjul alle",
+      "expandAll": "Utvid alle"
     },
     "enums": {
       "valueCount_one": "{{count}} verdi",
@@ -2234,7 +2237,8 @@
       "addValue": "Legg til en verdi",
       "valueHeader": "Verdi",
       "newName": "NewEnum",
-      "selectPrompt": "Velg en enum, eller opprett en — et lukket sett verdier som kan brukes som egenskapstype."
+      "selectPrompt": "Velg en enum, eller opprett en — et lukket sett verdier som kan brukes som egenskapstype.",
+      "nameHeader": "Navn"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "gRPC-server i TypeScript — .proto-tjeneste, typede meldinger og server-stubber.",
           "server-grpc-dotnet": "gRPC-server i C# / .NET — .proto-tjeneste, meldinger og server-stubber.",
           "db-postgres": "PostgreSQL-skjema, seed-data og CRUD-skript fra designet."
-        }
-      }
+        },
+        "added": "Template lagt til",
+        "done": "Ferdig"
+      },
+      "extractedTitle": "Filer skrevet",
+      "openOutput": "Åpne utdatamappen",
+      "removeConfirm": "Template «{{name}}» fjernes fra dette designet (allerede genererte filer på disken forblir urørt).",
+      "removeTitle": "Fjerne dette Template?"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Min. lengde",
         "maxLength": "Maks. lengde",
         "pattern": "Mønster"
-      }
+      },
+      "generatedProperties": "Genererte egenskaper",
+      "inheritedProperties": "Arvede egenskaper",
+      "ownProperties": "Egne egenskaper"
     },
     "flags": {
       "required": "påkrevd",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Beskytt skriveruter med autentisering",
+      "authWritesHint": "Krev bearer-autentisering ved opprettelse, oppdatering og sletting; lesing forblir offentlig.",
+      "generate": "Generer",
+      "replace": "Erstatt de eksisterende rutene",
+      "replaceHint": "Det finnes allerede ruter for denne modellen. Erstatt dem for å unngå duplikater; la det være av for å legge til et nytt sett.",
+      "title": "Generer CRUD for {{name}}"
     }
   },
   "mqtt": {

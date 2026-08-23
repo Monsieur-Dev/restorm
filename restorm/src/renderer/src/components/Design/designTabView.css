@@ -452,22 +452,45 @@
   padding: 0;
 }
 
+/* The entity list is a StaticPane (standard uppercase header + actions, like
+   the sidebar / ENUMS panes). Root keeps the fixed width + divider; the pane
+   body flex-fills so the tree scrolls within the full height. */
 .design-entity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   width: 280px;
   flex-shrink: 0;
-  padding: 16px 12px;
   border-right: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
   box-sizing: border-box;
   min-height: 0;
+}
+
+.design-entity-list .static-pane-body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Dim the header actions until the pane is hovered/focused — matches the
+   SplitView Pane behaviour of the sidebar / ENUMS panes (StaticPane keeps them
+   opaque by default, which reads inconsistently here). */
+.design-entity-list .static-pane-header-actions {
+  opacity: 0.5;
+  transition: opacity 0.15s ease-out;
+}
+
+.design-entity-list:hover .static-pane-header-actions,
+.design-entity-list .static-pane-header-actions:focus-within {
+  opacity: 1;
 }
 
 .design-entity-list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.design-entity-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .design-entity-list-scroll {
@@ -1107,4 +1130,68 @@
 
 .design-serve-stateful .design-field-label {
   margin: 0;
+}
+
+/* Enums section: give the SplitView pane bodies the same 8px inner padding AND
+   the 8px column gap as the Models StaticPane, so the left list (filter + tree)
+   reads identically across sections. */
+.design-enums-section .split-view2 .split-view-view-body {
+  padding: 8px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* CRUD generation modal — replace-existing + protect-writes toggles. */
+.design-crud-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 420px;
+  max-width: 520px;
+}
+
+.design-crud-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.design-crud-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.design-crud-option-label {
+  font-weight: 600;
+}
+
+.design-crud-option-hint {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.design-crud-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Generated (timestamps) properties — read-only surfacing in the schema tab. */
+.design-generated-props {
+  margin-top: 12px;
+  opacity: 0.85;
+}
+
+.design-generated-prop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 6px;
+}
+
+.design-generated-prop-name {
+  min-width: 120px;
+  font-family: var(--monaco-monospace-font, monospace);
 }

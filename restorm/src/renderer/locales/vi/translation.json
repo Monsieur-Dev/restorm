@@ -2222,7 +2222,10 @@
         "examples": "Ví dụ",
         "settings": "Cài đặt",
         "notes": "Ghi chú"
-      }
+      },
+      "addSubModel": "Thêm mô hình con",
+      "collapseAll": "Thu gọn tất cả",
+      "expandAll": "Mở rộng tất cả"
     },
     "enums": {
       "valueCount_one": "{{count}} giá trị",
@@ -2233,7 +2236,8 @@
       "addValue": "Thêm giá trị",
       "valueHeader": "Giá trị",
       "newName": "NewEnum",
-      "selectPrompt": "Chọn một enum, hoặc tạo mới — tập giá trị đóng dùng được làm kiểu thuộc tính."
+      "selectPrompt": "Chọn một enum, hoặc tạo mới — tập giá trị đóng dùng được làm kiểu thuộc tính.",
+      "nameHeader": "Tên"
     },
     "documentation": {},
     "code": {
@@ -2275,8 +2279,14 @@
           "server-grpc-typescript": "Máy chủ gRPC bằng TypeScript — dịch vụ .proto, thông điệp có kiểu và stub máy chủ.",
           "server-grpc-dotnet": "Máy chủ gRPC bằng C# / .NET — dịch vụ .proto, thông điệp và stub máy chủ.",
           "db-postgres": "Lược đồ PostgreSQL, dữ liệu seed và tập lệnh CRUD từ thiết kế."
-        }
-      }
+        },
+        "added": "Đã thêm Template",
+        "done": "Xong"
+      },
+      "extractedTitle": "Đã ghi tệp",
+      "openOutput": "Mở thư mục đầu ra",
+      "removeConfirm": "Template “{{name}}” sẽ bị xóa khỏi thiết kế này (các tệp đã tạo trên đĩa vẫn được giữ nguyên).",
+      "removeTitle": "Xóa Template này?"
     },
     "statusbar": {
       "format": "thiết kế · định dạng {{version}}"
@@ -2338,7 +2348,10 @@
         "minLength": "Độ dài tối thiểu",
         "maxLength": "Độ dài tối đa",
         "pattern": "Mẫu (pattern)"
-      }
+      },
+      "generatedProperties": "Thuộc tính đã tạo",
+      "inheritedProperties": "Thuộc tính kế thừa",
+      "ownProperties": "Thuộc tính riêng"
     },
     "flags": {
       "required": "bắt buộc",
@@ -2513,6 +2526,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Bảo vệ các tuyến ghi bằng xác thực",
+      "authWritesHint": "Yêu cầu xác thực bearer khi tạo, cập nhật và xóa; đọc vẫn công khai.",
+      "generate": "Tạo",
+      "replace": "Thay thế các tuyến hiện có",
+      "replaceHint": "Đã có các tuyến cho mô hình này. Thay thế chúng để tránh trùng lặp; để tắt nếu muốn thêm một bộ thứ hai.",
+      "title": "Tạo CRUD cho {{name}}"
     }
   },
   "mqtt": {

@@ -57,3 +57,11 @@
   flex: 1;
   min-width: 0;
 }
+
+.design-template-library__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--vscode-widget-border, transparent);
+}

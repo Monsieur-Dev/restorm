@@ -13,7 +13,8 @@ import type {
   DesignProperty,
   DesignRoute,
   DesignRouteGroup,
-  DesignParamLink
+  DesignParamLink,
+  DesignAuthKind
 } from '../types/apiDesign'
 import type { ParameterDocumentation } from '../types/apiDocumentation'
 
@@ -120,7 +121,27 @@ export interface GeneratedCrud {
  * passes its id factory so shared code stays free of environment
  * randomness).
  */
-export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () => string): GeneratedCrud {
+/** The base path a CRUD group for this model gets — `/plural`, lowercased.
+ * Shared so callers can detect a pre-existing generation. */
+export function crudBasePath(model: DesignModel): string {
+  return `/${pluralize(model.doc.name).toLowerCase()}`
+}
+
+/** The CRUD group already generated for this model, if any — matched by
+ * the conventional base path so a second generation can offer to replace
+ * it instead of silently duplicating every route. */
+export function findCrudGroupForModel(design: ApiDesign, model: DesignModel): DesignRouteGroup | undefined {
+  const basePath = crudBasePath(model)
+  return design.routeGroups.find((group) => group.design?.basePath === basePath)
+}
+
+export interface GenerateCrudOptions {
+  /** Gate the write routes (POST/PUT/PATCH/DELETE) behind bearer auth so
+   * the reads stay public without editing each route by hand. */
+  authWrites?: boolean
+}
+
+export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () => string, options?: GenerateCrudOptions): GeneratedCrud {
   const plural = pluralize(model.doc.name)
   const basePath = `/${plural.toLowerCase()}`
   const idProperty = identifierProperty(model)
@@ -224,11 +245,18 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
   // The group name joins the model/enum component namespace visually
   // (Swagger tags) — collide-and-rename is the user's call; validation
   // reports duplicates.
+  // Optionally gate the writes (POST/PUT/DELETE) behind bearer auth; the
+  // reads (list/read) stay on the inherited contract.
+  const withAuth = (route: DesignRoute): DesignRoute =>
+    options?.authWrites === true
+      ? { ...route, design: { ...(route.design ?? {}), authOverride: 'bearer' as DesignAuthKind } }
+      : route
+
   const group: DesignRouteGroup = {
     id: newId(),
     doc: { name: plural, description: `${model.doc.name} management.` },
     design: { basePath },
-    routes: [list, read, create, update, remove]
+    routes: [list, read, withAuth(create), withAuth(update), withAuth(remove)]
   }
   return { group }
 }

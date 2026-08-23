@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Button,
   GatedControl,
+  IconView,
   InputBox,
   MarkdownEditor,
   ScrollableElement,
@@ -10,6 +11,7 @@ import {
   Toggle,
   eventBus,
   useAuthState,
+  usePersistedState,
   type ISelectData
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignAuthKind, DesignProtocol } from '../../../../shared/types/collections'
@@ -60,8 +62,12 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
   // PEEK only in the initializers: StrictMode double-invokes them in dev
   // builds, so a consuming read would drain the map on the throwaway
   // call. The mount effect below does the consuming.
-  const [activeSection, setActiveSection] = useState<DesignSectionKey>(
-    () => peekPendingDesignSection(design.id)?.section ?? 'settings'
+  // Persisted per design (user setting, NOT the .restorm file): the last section
+  // is restored across tab switches AND file reopen. A pending navigation intent
+  // still wins via the mount effect below.
+  const [activeSection, setActiveSection] = usePersistedState<DesignSectionKey>(
+    `design-active-section:${design.id}`,
+    peekPendingDesignSection(design.id)?.section ?? 'settings'
   )
   const [selectedModelId, setSelectedModelId] = useState<string | null>(() => {
     const intent = peekPendingDesignSection(design.id)
@@ -95,7 +101,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
       queueMicrotask(() => { applyIntent(pending) })
     }
     return unsubscribe
-  }, [design.id])
+  }, [design.id, setActiveSection])
 
   // Structural edits (add a property, delete a model…) mutate the
   // reactive design in place — this tab re-renders off the proxy's own
@@ -161,7 +167,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
               data-testid={`design-rail-${section.key}`}
               onClick={() => { setActiveSection(section.key) }}
             >
-              <span className={`codicon codicon-${section.codicon}`} />
+              <IconView icon={section.icon} size={16} />
             </button>
           </HeaderHoverTooltip>
         ))}

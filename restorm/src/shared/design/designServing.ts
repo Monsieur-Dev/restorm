@@ -268,12 +268,24 @@ export function validateBodyAgainstModel(design: ApiDesign, model: DesignModel, 
   }
   const record = body as Record<string, unknown>
   const issues: ServedBodyIssue[] = []
+  // A server-minted identifier is never supplied by the client — the store
+  // mints it on create and it rides in the path on update — so it must not
+  // be a *required* body field. A declared identifier always carries a
+  // generation strategy (there is no natural-key strategy); a bare
+  // `id`-named property with no declared identifier stays a required
+  // natural key. Resolve across the inheritance chain so a subtype's
+  // inherited id counts too.
+  const mintedIdPropertyIds = new Set<string>()
+  for (const { owner } of servedProperties(design, model)) {
+    const declared = owner.design?.identifier
+    if (declared !== undefined) mintedIdPropertyIds.add(declared.propertyId)
+  }
   for (const { property } of servedProperties(design, model)) {
     const name = property.doc.name
     if (name === '') continue
     const value = record[name]
     if (value === undefined) {
-      if (property.doc.required && property.doc.readOnly !== true) {
+      if (property.doc.required && property.doc.readOnly !== true && !mintedIdPropertyIds.has(property.id)) {
         issues.push({ property: name, code: 'required' })
       }
       continue

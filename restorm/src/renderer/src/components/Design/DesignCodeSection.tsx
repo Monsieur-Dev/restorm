@@ -15,7 +15,9 @@ import {
   Button,
   GatedControl,
   InputBox,
+  Modal,
   ScrollableElement,
+  toasterService,
   useAuthState
 } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
@@ -54,6 +56,7 @@ export const DesignCodeSection: React.FC<{
   const [generating, setGenerating] = useState(false)
   const [preview, setPreview] = useState<PreviewState | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null)
 
   useEffect(() => {
     void loadRecentTemplates().then(setRecents)
@@ -163,15 +166,19 @@ export const DesignCodeSection: React.FC<{
       }
       const result = await window.restorm?.designCodegen.extract(design.id, outputDir)
       if (result?.success === true) {
-        // Keep this row active (activeId) so its confirmation message renders;
-        // only the preview is cleared.
-        setPreview(null)
-        setMessage(
-          t('design.code.extracted', '{{count}} file(s) written to {{root}}', {
+        // Files are on disk — dismiss the whole confirm panel and report the
+        // result in a non-blocking toast instead of an inline message.
+        toasterService.push('app', {
+          id: 'design-codegen-written',
+          title: t('design.code.extractedTitle', 'Files written'),
+          body: t('design.code.extracted', '{{count}} file(s) written to {{root}}', {
             count: result.written?.length ?? 0,
             root: result.root ?? outputDir
           })
-        )
+        })
+        setPreview(null)
+        setActiveId(null)
+        setMessage(null)
       } else {
         setMessage(result?.error ?? t('design.code.failed', 'The generation failed'))
       }
@@ -226,8 +233,22 @@ export const DesignCodeSection: React.FC<{
                     options={{ ariaLabel: t('design.code.browse', 'Choose the output folder') }}
                     data-testid={`design-code-browse-${tpl.id}`}
                   />
+                  <Button
+                    icon="link-external"
+                    disabled={(tpl.outputDir ?? '').trim() === ''}
+                    onClick={() => { void window.restorm?.designCodegen.revealOutput(tpl.id, (tpl.outputDir ?? '').trim()) }}
+                    options={{ ariaLabel: t('design.code.openOutput', 'Open the output folder') }}
+                    data-testid={`design-code-open-output-${tpl.id}`}
+                  />
                 </div>
                 <div className="design-code-template-actions">
+                  <Button
+                    icon="trash"
+                    disabled={generating && activeId === tpl.id}
+                    onClick={() => { setPendingDelete(tpl.id) }}
+                    options={{ ariaLabel: t('design.code.remove', 'Remove this template') }}
+                    data-testid={`design-code-remove-${tpl.id}`}
+                  />
                   <GatedControl
                     locked={runLocked}
                     onSubscribe={() => { void subscribeToPro() }}
@@ -251,13 +272,6 @@ export const DesignCodeSection: React.FC<{
                       />
                     </HeaderHoverTooltip>
                   </GatedControl>
-                  <Button
-                    icon="trash"
-                    disabled={generating && activeId === tpl.id}
-                    onClick={() => { removeTemplate(tpl.id) }}
-                    options={{ ariaLabel: t('design.code.remove', 'Remove this template') }}
-                    data-testid={`design-code-remove-${tpl.id}`}
-                  />
                 </div>
               </div>
 
@@ -319,6 +333,33 @@ export const DesignCodeSection: React.FC<{
           onAdd={addTemplate}
           recents={recents}
         />
+
+        {pendingDelete !== null && (
+          <Modal
+            title={t('design.code.removeTitle', 'Remove this template?')}
+            isOpen
+            onClose={() => { setPendingDelete(null) }}
+            size="dialog"
+            data-testid="design-code-remove-modal"
+            enterActionTestId="design-code-remove-confirm"
+          >
+            <div className="design-delete-modal-body">
+              <p>
+                {t('design.code.removeConfirm', 'The template “{{name}}” will be removed from this design (generated files on disk are left untouched).', {
+                  name: (() => { const tpl = templates.find((x) => x.id === pendingDelete); return tpl ? labelFor(tpl) : '' })()
+                })}
+              </p>
+              <div className="design-delete-modal-actions">
+                <Button secondary onClick={() => { setPendingDelete(null) }} data-testid="design-code-remove-cancel">
+                  {t('sidebar.deleteConfirm.cancel')}
+                </Button>
+                <Button onClick={() => { const id = pendingDelete; setPendingDelete(null); removeTemplate(id) }} data-testid="design-code-remove-confirm">
+                  {t('sidebar.deleteConfirm.confirm')}
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
       </div>
     </ScrollableElement>
   )

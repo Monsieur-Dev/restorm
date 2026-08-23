@@ -6,11 +6,14 @@
 
 import type { DesignSectionKey } from '../types/editor'
 import type { ApiDesign } from '../types/apiDesign'
+import type { Icon } from 'electron-core-ui/types'
 
 export interface DesignSectionSpec {
   key: DesignSectionKey
-  /** Codicon name (without the `codicon-` prefix). */
-  codicon: string
+  /** The section icon for the rail + the sidebar row. A full `Icon` (not
+   * just a codicon name) so a section can draw a library glyph — Routes
+   * uses the Phosphor road, Models the type-hierarchy boxes. */
+  icon: Icon
   /** i18n key of the section label (`design.section.<key>`). */
   labelKey: string
   /** Number badge shown on the sidebar row, when the section lists
@@ -19,14 +22,14 @@ export interface DesignSectionSpec {
 }
 
 export const DESIGN_SECTIONS: readonly DesignSectionSpec[] = [
-  { key: 'settings', codicon: 'settings-gear', labelKey: 'design.section.settings', count: () => null },
-  { key: 'models', codicon: 'symbol-class', labelKey: 'design.section.models', count: (d) => d.models.length },
-  { key: 'enums', codicon: 'symbol-enum', labelKey: 'design.section.enums', count: (d) => d.enums.length },
-  { key: 'routes', codicon: 'type-hierarchy-sub', labelKey: 'design.section.routes', count: (d) => d.routeGroups.reduce((n, g) => n + g.routes.length, 0) },
-  { key: 'documentation', codicon: 'book', labelKey: 'design.section.documentation', count: () => null },
-  { key: 'notes', codicon: 'note', labelKey: 'design.section.notes', count: () => null },
-  { key: 'code', codicon: 'code', labelKey: 'design.section.code', count: () => null }
-] as const
+  { key: 'settings', icon: { type: 'codicon', value: 'settings-gear' }, labelKey: 'design.section.settings', count: () => null },
+  { key: 'models', icon: { type: 'codicon', value: 'type-hierarchy-sub' }, labelKey: 'design.section.models', count: (d) => d.models.length },
+  { key: 'enums', icon: { type: 'codicon', value: 'symbol-enum' }, labelKey: 'design.section.enums', count: (d) => d.enums.length },
+  { key: 'routes', icon: { type: 'phosphor', value: 'RoadHorizon' }, labelKey: 'design.section.routes', count: (d) => d.routeGroups.reduce((n, g) => n + g.routes.length, 0) },
+  { key: 'documentation', icon: { type: 'codicon', value: 'book' }, labelKey: 'design.section.documentation', count: () => null },
+  { key: 'notes', icon: { type: 'codicon', value: 'note' }, labelKey: 'design.section.notes', count: () => null },
+  { key: 'code', icon: { type: 'codicon', value: 'code' }, labelKey: 'design.section.code', count: () => null }
+]
 
 /** The design's own codicon, everywhere it appears (sidebar, tab,
  * search, badges). */

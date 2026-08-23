@@ -2223,7 +2223,10 @@
         "examples": "Eksempler",
         "settings": "Indstillinger",
         "notes": "Noter"
-      }
+      },
+      "addSubModel": "Tilføj en undermodel",
+      "collapseAll": "Skjul alle",
+      "expandAll": "Udvid alle"
     },
     "enums": {
       "valueCount_one": "{{count}} værdi",
@@ -2234,7 +2237,8 @@
       "addValue": "Tilføj en værdi",
       "valueHeader": "Værdi",
       "newName": "NewEnum",
-      "selectPrompt": "Vælg en enum, eller opret en — et lukket sæt værdier, der kan bruges som egenskabstype."
+      "selectPrompt": "Vælg en enum, eller opret en — et lukket sæt værdier, der kan bruges som egenskabstype.",
+      "nameHeader": "Navn"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "gRPC-server i TypeScript — .proto-tjeneste, typede beskeder og server-stubs.",
           "server-grpc-dotnet": "gRPC-server i C# / .NET — .proto-tjeneste, beskeder og server-stubs.",
           "db-postgres": "PostgreSQL-skema, seed-data og CRUD-scripts fra designet."
-        }
-      }
+        },
+        "added": "Template tilføjet",
+        "done": "Færdig"
+      },
+      "extractedTitle": "Filer skrevet",
+      "openOutput": "Åbn outputmappen",
+      "removeConfirm": "Template “{{name}}” fjernes fra dette design (allerede genererede filer på disken forbliver urørte).",
+      "removeTitle": "Fjern dette Template?"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Min. længde",
         "maxLength": "Max. længde",
         "pattern": "Mønster"
-      }
+      },
+      "generatedProperties": "Genererede egenskaber",
+      "inheritedProperties": "Nedarvede egenskaber",
+      "ownProperties": "Egne egenskaber"
     },
     "flags": {
       "required": "påkrævet",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Beskyt skrive-ruter med godkendelse",
+      "authWritesHint": "Kræv bearer-godkendelse ved oprettelse, opdatering og sletning; læsninger forbliver offentlige.",
+      "generate": "Generér",
+      "replace": "Erstat de eksisterende ruter",
+      "replaceHint": "Der findes allerede ruter for denne model. Erstat dem for at undgå dubletter; lad være slået fra for at tilføje et ekstra sæt.",
+      "title": "Generér CRUD for {{name}}"
     }
   },
   "mqtt": {

@@ -2223,7 +2223,10 @@
         "examples": "Örnekler",
         "settings": "Ayarlar",
         "notes": "Notlar"
-      }
+      },
+      "addSubModel": "Alt model ekle",
+      "collapseAll": "Tümünü daralt",
+      "expandAll": "Tümünü genişlet"
     },
     "enums": {
       "valueCount_one": "{{count}} değer",
@@ -2234,7 +2237,8 @@
       "addValue": "Değer ekle",
       "valueHeader": "Değer",
       "newName": "NewEnum",
-      "selectPrompt": "Bir enum seçin veya oluşturun — özellik tipi olarak kullanılabilen kapalı bir değer kümesi."
+      "selectPrompt": "Bir enum seçin veya oluşturun — özellik tipi olarak kullanılabilen kapalı bir değer kümesi.",
+      "nameHeader": "Ad"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "TypeScript ile gRPC sunucusu — .proto hizmeti, tipli mesajlar ve sunucu stub'ları.",
           "server-grpc-dotnet": "C# / .NET ile gRPC sunucusu — .proto hizmeti, mesajlar ve sunucu stub'ları.",
           "db-postgres": "Tasarımdan PostgreSQL şeması, seed verileri ve CRUD betikleri."
-        }
-      }
+        },
+        "added": "Template eklendi",
+        "done": "Bitti"
+      },
+      "extractedTitle": "Dosyalar yazıldı",
+      "openOutput": "Çıktı klasörünü aç",
+      "removeConfirm": "“{{name}}” Template’i bu tasarımdan kaldırılacak (diskte önceden oluşturulan dosyalara dokunulmaz).",
+      "removeTitle": "Bu Template kaldırılsın mı?"
     },
     "statusbar": {
       "format": "tasarım · biçim {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Min. uzunluk",
         "maxLength": "Maks. uzunluk",
         "pattern": "Desen"
-      }
+      },
+      "generatedProperties": "Üretilen özellikler",
+      "inheritedProperties": "Devralınan özellikler",
+      "ownProperties": "Kendi özellikleri"
     },
     "flags": {
       "required": "zorunlu",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Yazma rotalarını kimlik doğrulamayla koru",
+      "authWritesHint": "Oluşturma, güncelleme ve silmede bearer kimlik doğrulaması iste; okumalar herkese açık kalır.",
+      "generate": "Üret",
+      "replace": "Mevcut rotaları değiştir",
+      "replaceHint": "Bu model için zaten rotalar var. Yinelenenleri önlemek için değiştirin; ikinci bir set eklemek için kapalı bırakın.",
+      "title": "{{name}} için CRUD üret"
     }
   },
   "mqtt": {

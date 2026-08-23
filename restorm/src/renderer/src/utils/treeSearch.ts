@@ -224,6 +224,13 @@ function findItemWithBreadcrumbsInTree(
         // Leaf request — last breadcrumb, no icon.
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: null }] }
       }
+    } else if (isApiDesign(item)) {
+      // An API design's section rows are virtual, so it's a childless leaf
+      // in the data tree — found like a request (without this branch a nested
+      // design resolves to null and the sidebar click never opens its tab).
+      if (item.id === id) {
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: null }] }
+      }
     }
   }
 

@@ -2223,7 +2223,10 @@
         "examples": "Voorbeelden",
         "settings": "Instellingen",
         "notes": "Notities"
-      }
+      },
+      "addSubModel": "Submodel toevoegen",
+      "collapseAll": "Alles inklappen",
+      "expandAll": "Alles uitklappen"
     },
     "enums": {
       "valueCount_one": "{{count}} waarde",
@@ -2234,7 +2237,8 @@
       "addValue": "Waarde toevoegen",
       "valueHeader": "Waarde",
       "newName": "NewEnum",
-      "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype."
+      "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype.",
+      "nameHeader": "Naam"
     },
     "documentation": {},
     "code": {
@@ -2276,8 +2280,14 @@
           "server-grpc-typescript": "gRPC-server in TypeScript — .proto-service, getypeerde berichten en server-stubs.",
           "server-grpc-dotnet": "gRPC-server in C# / .NET — .proto-service, berichten en server-stubs.",
           "db-postgres": "PostgreSQL-schema, seed-data en CRUD-scripts vanuit het ontwerp."
-        }
-      }
+        },
+        "added": "Template toegevoegd",
+        "done": "Klaar"
+      },
+      "extractedTitle": "Bestanden geschreven",
+      "openOutput": "Uitvoermap openen",
+      "removeConfirm": "De Template “{{name}}” wordt uit dit ontwerp verwijderd (reeds gegenereerde bestanden op schijf blijven ongewijzigd).",
+      "removeTitle": "Deze Template verwijderen?"
     },
     "statusbar": {
       "format": "ontwerp · formaat {{version}}"
@@ -2339,7 +2349,10 @@
         "minLength": "Minimale lengte",
         "maxLength": "Maximale lengte",
         "pattern": "Patroon"
-      }
+      },
+      "generatedProperties": "Gegenereerde eigenschappen",
+      "inheritedProperties": "Overgeërfde eigenschappen",
+      "ownProperties": "Eigen eigenschappen"
     },
     "flags": {
       "required": "verplicht",
@@ -2514,6 +2527,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Schrijfroutes beveiligen met authenticatie",
+      "authWritesHint": "Vereis bearer-authenticatie bij aanmaken, bijwerken en verwijderen; leesacties blijven openbaar.",
+      "generate": "Genereren",
+      "replace": "De bestaande routes vervangen",
+      "replaceHint": "Voor dit model bestaan al routes. Vervang ze om duplicaten te voorkomen; laat uit om een tweede set toe te voegen.",
+      "title": "CRUD genereren voor {{name}}"
     }
   },
   "mqtt": {

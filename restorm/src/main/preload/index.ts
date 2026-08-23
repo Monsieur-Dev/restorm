@@ -1459,6 +1459,11 @@ contextBridge.exposeInMainWorld('restorm', {
     pickDirectory: async (defaultPath?: string): Promise<{ success: boolean; path?: string; canceled?: boolean }> => {
       const result: unknown = await ipcRenderer.invoke('design:pick-directory', defaultPath)
       return result as { success: boolean; path?: string; canceled?: boolean }
+    },
+    /** Open the codegen output folder in the OS file explorer. */
+    revealOutput: async (designId: string, outputDir: string): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:reveal-output', designId, outputDir)
+      return result as { success: boolean; error?: string }
     }
   },
   jsonrpc: {

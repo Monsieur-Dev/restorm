@@ -9,8 +9,10 @@ import {
   Modal,
   ScrollableElement,
   SelectBox,
+  StaticPane,
   Table,
   Tabs,
+  usePersistedState,
   type ContextMenuItem,
   type ISelectData,
   type ListViewItemData,
@@ -54,8 +56,16 @@ interface Selection {
  */
 export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design, issues, selectedEntityId, onSelectEntity }) => {
   const { t } = useTranslation()
-  const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>(() => design.routeGroups.map((g) => g.id))
+  // Persisted per design (user setting, NOT the .restorm file): the fold state
+  // of the route groups survives tab switches AND file reopen.
+  const [expandedGroupIds, setExpandedGroupIds] = usePersistedState<string[]>(
+    `design-routes-expanded:${design.id}`,
+    design.routeGroups.map((g) => g.id)
+  )
   const [pendingDeleteGroup, setPendingDeleteGroup] = useState<DesignRouteGroup | null>(null)
+  const [filter, setFilter] = useState('')
+  const expandAll = (): void => { setExpandedGroupIds(design.routeGroups.map((g) => g.id)) }
+  const collapseAll = (): void => { setExpandedGroupIds([]) }
 
   // Plain per-render resolution (cheap linear scan) — memoizing it made
   // the React compiler bail out of the whole component.
@@ -83,7 +93,7 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
     assignDesignSection(design, 'routeGroups', [...design.routeGroups, fresh])
     setExpandedGroupIds((prev) => [...prev, fresh.id])
     onSelectEntity(fresh.id)
-  }, [design, onSelectEntity, t])
+  }, [design, onSelectEntity, t, setExpandedGroupIds])
 
   const addRoute = useCallback((group: DesignRouteGroup) => {
     const fresh: DesignRoute = {
@@ -96,7 +106,7 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
     replaceGroup(design, group.id, { ...group, routes: [...group.routes, fresh] })
     setExpandedGroupIds((prev) => (prev.includes(group.id) ? prev : [...prev, group.id]))
     onSelectEntity(fresh.id)
-  }, [design, onSelectEntity])
+  }, [design, onSelectEntity, setExpandedGroupIds])
 
   const deleteRoute = useCallback((group: DesignRouteGroup, routeId: string) => {
     replaceGroup(design, group.id, { ...group, routes: group.routes.filter((r) => r.id !== routeId) })
@@ -113,56 +123,99 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
   // ── Tree rows ──────────────────────────────────────────────────────
   const rows: ListViewItemData[] = useMemo(() => {
     const hasIssue = (entityId: string): boolean => issues.some((issue) => issue.path.includes(entityId))
-    return design.routeGroups.map((group) => {
-    const groupMenu: ContextMenuItem[] = [
-      { id: 'add-route', label: t('design.routes.addRoute', 'Add a route'), icon: 'add', onClick: () => { addRoute(group) } },
-      { id: 'delete-group', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { setPendingDeleteGroup(group) } }
-    ]
-    return {
-      id: group.id,
-      title: group.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : group.doc.name,
-      isExpandable: true,
-      isExpanded: expandedGroupIds.includes(group.id),
-      contextMenuItems: groupMenu,
-      ...(hasIssue(group.id) ? { rightActions: <span className="design-list-error-dot codicon codicon-error" /> } : {}),
-      children: group.routes.map((route) => {
-        const routeMenu: ContextMenuItem[] = [
-          { id: 'delete-route', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { deleteRoute(group, route.id) } }
-        ]
-        // The row reads like a request row: method badge LEFT (the icon
-        // slot), the SUMMARY as the label (an API turned into a design
-        // makes the route's name its summary), pattern as fallback.
-        return {
-          id: route.id,
-          title: route.doc.summary !== undefined && route.doc.summary !== '' ? route.doc.summary : route.doc.match.urlPattern,
-          icon: <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />,
-          contextMenuItems: routeMenu,
-          ...(hasIssue(route.id) ? { rightActions: <span className="design-list-error-dot codicon codicon-error" /> } : {})
-        }
+    const term = filter.trim().toLowerCase()
+    const routeTitle = (route: DesignRouteGroup['routes'][number]): string =>
+      route.doc.summary !== undefined && route.doc.summary !== '' ? route.doc.summary : route.doc.match.urlPattern
+    const out: ListViewItemData[] = []
+    for (const group of design.routeGroups) {
+      const groupMatches = term === '' || group.doc.name.toLowerCase().includes(term)
+      // A matching group shows all its routes; otherwise only routes that match.
+      const visibleRoutes = term === '' || groupMatches
+        ? group.routes
+        : group.routes.filter((r) => routeTitle(r).toLowerCase().includes(term))
+      if (term !== '' && !groupMatches && visibleRoutes.length === 0) continue
+      const groupMenu: ContextMenuItem[] = [
+        { id: 'add-route', label: t('design.routes.addRoute', 'Add a route'), icon: 'add', onClick: () => { addRoute(group) } },
+        { id: 'delete-group', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { setPendingDeleteGroup(group) } }
+      ]
+      out.push({
+        id: group.id,
+        title: group.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : group.doc.name,
+        isExpandable: true,
+        // While filtering, keep matching groups open so hits are visible.
+        isExpanded: term !== '' ? true : expandedGroupIds.includes(group.id),
+        contextMenuItems: groupMenu,
+        ...(hasIssue(group.id) ? { rightActions: <span className="design-list-error-dot codicon codicon-error" /> } : {}),
+        children: visibleRoutes.map((route) => {
+          const routeMenu: ContextMenuItem[] = [
+            { id: 'delete-route', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { deleteRoute(group, route.id) } }
+          ]
+          // The row reads like a request row: method badge LEFT (the icon
+          // slot), the SUMMARY as the label (an API turned into a design
+          // makes the route's name its summary), pattern as fallback.
+          return {
+            id: route.id,
+            title: routeTitle(route),
+            icon: <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />,
+            contextMenuItems: routeMenu,
+            ...(hasIssue(route.id) ? { rightActions: <span className="design-list-error-dot codicon codicon-error" /> } : {})
+          }
+        })
       })
     }
-    })
-  }, [design.routeGroups, expandedGroupIds, issues, t, addRoute, deleteRoute])
+    return out
+  }, [design.routeGroups, expandedGroupIds, issues, t, addRoute, deleteRoute, filter])
 
   const selectedGroup = selection?.group ?? null
   const selectedRoute = selection?.route ?? null
 
   return (
     <div className="design-section design-entity-list-section" data-testid="design-routes-section">
-      <div className="design-entity-list" data-testid="design-routes-list">
-        <div className="design-entity-list-header">
-          <h2 className="design-section-title">{t('design.section.routes')}</h2>
-          <HeaderHoverTooltip label={t('design.routes.addGroup', 'Add a group')}>
-            <Button
-              secondary
-              small
-              icon="add"
-              options={{ ariaLabel: t('design.routes.addGroup', 'Add a group') }}
-              onClick={addGroup}
-              data-testid="design-routes-add-group"
-            />
-          </HeaderHoverTooltip>
-        </div>
+      <StaticPane
+        className="design-entity-list"
+        data-testid="design-routes-list"
+        title={t('design.section.routes')}
+        headerActions={
+          <>
+            <HeaderHoverTooltip label={t('design.models.collapseAll', 'Collapse all')}>
+              <Button
+                secondary
+                small
+                icon="collapse-all"
+                options={{ ariaLabel: t('design.models.collapseAll', 'Collapse all') }}
+                onClick={collapseAll}
+                data-testid="design-routes-collapse-all"
+              />
+            </HeaderHoverTooltip>
+            <HeaderHoverTooltip label={t('design.models.expandAll', 'Expand all')}>
+              <Button
+                secondary
+                small
+                icon="expand-all"
+                options={{ ariaLabel: t('design.models.expandAll', 'Expand all') }}
+                onClick={expandAll}
+                data-testid="design-routes-expand-all"
+              />
+            </HeaderHoverTooltip>
+            <HeaderHoverTooltip label={t('design.routes.addGroup', 'Add a group')}>
+              <Button
+                secondary
+                small
+                icon="add"
+                options={{ ariaLabel: t('design.routes.addGroup', 'Add a group') }}
+                onClick={addGroup}
+                data-testid="design-routes-add-group"
+              />
+            </HeaderHoverTooltip>
+          </>
+        }
+      >
+        <InputBox
+          value={filter}
+          onChange={setFilter}
+          options={{ type: 'text', placeholder: t('design.list.filter', 'Filter…'), ariaLabel: t('design.list.filter', 'Filter…') }}
+          data-testid="design-routes-filter"
+        />
         <ScrollableElement className="design-entity-list-scroll">
           <ListView
             items={rows}
@@ -179,7 +232,7 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
             data-testid="design-routes-listview"
           />
         </ScrollableElement>
-      </div>
+      </StaticPane>
 
       <div className="design-entity-detail design-model-card" data-testid="design-routes-detail">
         {selection === null && (

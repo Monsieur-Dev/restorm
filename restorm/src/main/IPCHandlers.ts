@@ -1414,6 +1414,26 @@ export function registerRestormIPC(deps: {
     return { success: true }
   })
 
+  // Open the codegen output folder in the OS file explorer. Reuses the extract
+  // args (designId, outputDir) + the same relative→project-dir resolution, so
+  // it opens exactly the folder codegen would write to.
+  validatedHandle('design-codegen:reveal-output', designCodegenExtractArgs, async (_event, [_designId, outputDir]) => {
+    try {
+      let root = outputDir
+      if (!isAbsolute(root)) {
+        const projectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+        if (projectPath === null || projectPath === '') {
+          return { success: false, error: 'a relative output folder needs an open project file' }
+        }
+        root = resolvePath(dirname(projectPath), root)
+      }
+      const err = await shell.openPath(root)
+      return err === '' ? { success: true } : { success: false, error: err }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
   // Output-directory picker (the Code section's Browse button).
   validatedHandle('design:pick-directory', designPickDirectoryArgs, async (_event, [defaultPath]) => {
     const window = BrowserWindow.fromWebContents(_event.sender)

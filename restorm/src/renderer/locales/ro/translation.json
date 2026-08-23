@@ -2224,7 +2224,10 @@
         "examples": "Exemple",
         "settings": "Setări",
         "notes": "Note"
-      }
+      },
+      "addSubModel": "Adaugă un submodel",
+      "collapseAll": "Restrânge tot",
+      "expandAll": "Extinde tot"
     },
     "enums": {
       "valueCount_one": "{{count}} valoare",
@@ -2235,7 +2238,8 @@
       "addValue": "Adaugă o valoare",
       "valueHeader": "Valoare",
       "newName": "NewEnum",
-      "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate."
+      "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate.",
+      "nameHeader": "Nume"
     },
     "documentation": {},
     "code": {
@@ -2277,8 +2281,14 @@
           "server-grpc-typescript": "Server gRPC în TypeScript — serviciu .proto, mesaje tipizate și stub-uri de server.",
           "server-grpc-dotnet": "Server gRPC în C# / .NET — serviciu .proto, mesaje și stub-uri de server.",
           "db-postgres": "Schemă PostgreSQL, date seed și scripturi CRUD din design."
-        }
-      }
+        },
+        "added": "Template adăugat",
+        "done": "Gata"
+      },
+      "extractedTitle": "Fișiere scrise",
+      "openOutput": "Deschide folderul de ieșire",
+      "removeConfirm": "Template-ul „{{name}}“ va fi eliminat din acest design (fișierele deja generate pe disc rămân neatinse).",
+      "removeTitle": "Eliminați acest Template?"
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2340,7 +2350,10 @@
         "minLength": "Lungime min.",
         "maxLength": "Lungime max.",
         "pattern": "Șablon"
-      }
+      },
+      "generatedProperties": "Proprietăți generate",
+      "inheritedProperties": "Proprietăți moștenite",
+      "ownProperties": "Proprietăți proprii"
     },
     "flags": {
       "required": "obligatoriu",
@@ -2515,6 +2528,14 @@
         "odataCsdl": "OData CSDL",
         "wsdl": "WSDL 1.1"
       }
+    },
+    "crud": {
+      "authWrites": "Protejați rutele de scriere cu autentificare",
+      "authWritesHint": "Solicitați autentificare bearer la creare, actualizare și ștergere; citirile rămân publice.",
+      "generate": "Generați",
+      "replace": "Înlocuiți rutele existente",
+      "replaceHint": "Există deja rute pentru acest model. Înlocuiți-le pentru a evita duplicatele; lăsați dezactivat pentru a adăuga un al doilea set.",
+      "title": "Generați CRUD pentru {{name}}"
     }
   },
   "mqtt": {
