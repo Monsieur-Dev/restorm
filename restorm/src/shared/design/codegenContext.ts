@@ -83,8 +83,13 @@ export interface CodegenModel {
   timestamps?: boolean
   softDelete?: boolean
   volumetry?: string
-  /** OWN properties only — inherited ones come from `inherits`. */
+  /** OWN properties only — inherited ones come from `inherits`. Use this
+   * for the type declaration so `extends {{ inherits }}` stays clean. */
   properties: CodegenProperty[]
+  /** Own + inherited properties, flattened (root ancestor first). Use this
+   * whenever a COMPLETE instance is needed — seed/example data, DB columns,
+   * full request/response bodies — so inherited fields are never dropped. */
+  allProperties: CodegenProperty[]
   examples: { name: string; values: Record<string, unknown> }[]
 }
 
@@ -191,14 +196,27 @@ function projectModel(design: ApiDesign, model: DesignModel): CodegenModel {
   const identifierName = identifierId !== undefined
     ? model.properties.find((p) => p.id === identifierId)?.doc.name
     : undefined
+  // Flatten the inheritance chain (root ancestor first, cycle-tolerant) so
+  // templates have every field of a complete instance without re-walking
+  // `inherits` themselves — the seed/example gap the walkthrough found.
+  const chain: DesignModel[] = []
+  const visited = new Set<string>()
+  let current: DesignModel | undefined = model
+  while (current !== undefined && !visited.has(current.id)) {
+    visited.add(current.id)
+    chain.unshift(current)
+    const parentId: string | undefined = current.design?.inheritsFrom
+    current = parentId === undefined ? undefined : design.models.find((m) => m.id === parentId)
+  }
   const out: CodegenModel = {
     name: model.doc.name,
     properties: model.properties.map((p) => projectProperty(design, p)),
+    allProperties: chain.flatMap((m) => m.properties).map((p) => projectProperty(design, p)),
     examples: (model.examples ?? []).map((example) => ({
       name: example.name,
       values: Object.fromEntries(
         Object.entries(example.values).map(([propertyId, value]) => {
-          const name = model.properties.find((p) => p.id === propertyId)?.doc.name ?? propertyId
+          const name = chain.flatMap((m) => m.properties).find((p) => p.id === propertyId)?.doc.name ?? propertyId
           return [name, value]
         })
       )

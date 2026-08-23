@@ -228,7 +228,10 @@ export const TipsCard: React.FC<TipsCardProps> = ({ initialIndex }) => {
 
   return (
     <MosaicCard
-      title={t('tips.cardTitle', 'Tips & tricks')}
+      // The header carries the CURRENT tip's own title so several tip cards
+      // on the board read as distinct entries instead of a wall of identical
+      // "Tips & tricks" headers.
+      title={t(`tips.${currentKey}.title`)}
       titleBackgroundColor="#eab308"
       data-testid="empty-bench-card-tips"
     >
@@ -238,9 +241,6 @@ export const TipsCard: React.FC<TipsCardProps> = ({ initialIndex }) => {
         data-tip-key={currentKey}
         data-phase={phase}
       >
-        <span className="empty-bench-tip__title">
-          {t(`tips.${currentKey}.title`)}
-        </span>
         <span className="empty-bench-tip__body">
           {t(`tips.${currentKey}.body`)}
         </span>

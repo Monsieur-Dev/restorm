@@ -45,7 +45,7 @@ export const CODEGEN_CONTEXT_SCHEMA = {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "properties", "examples"],
+        "required": ["name", "properties", "allProperties", "examples"],
         "properties": {
           "name": { "type": "string" },
           "description": { "type": "string" },
@@ -62,7 +62,8 @@ export const CODEGEN_CONTEXT_SCHEMA = {
           "timestamps": { "const": true },
           "softDelete": { "const": true },
           "volumetry": { "type": "string" },
-          "properties": { "type": "array", "items": { "$ref": "#/definitions/property" } },
+          "properties": { "type": "array", "items": { "$ref": "#/definitions/property" }, "description": "OWN properties only — use for the type declaration (`extends inherits`)." },
+          "allProperties": { "type": "array", "items": { "$ref": "#/definitions/property" }, "description": "Own + inherited properties, flattened (root ancestor first). Use for a complete instance: seed/example data, DB columns, full request/response shapes." },
           "examples": {
             "type": "array",
             "items": {
