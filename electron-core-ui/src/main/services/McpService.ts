@@ -93,7 +93,7 @@ export interface McpServiceOptions {
    * object when MCP runs in "no auth" mode.
    *
    * The token is opaque to the service: caller picks the entropy + the
-   * propagation channel (e.g. restorm writes it into its discovery file
+   * propagation channel (e.g. the host writes it into its discovery file
    * so the MCP launcher reads it back transparently).
    */
   authToken?: string
@@ -216,7 +216,7 @@ export interface McpToolGate {
   isGated(toolName: string): boolean
   /**
    * Host-branded suffix appended to a gated tool's `tools/list` description
-   * (e.g. ` (Restorm Pro)`), so an agent enumerating tools sees the tool exists
+   * (e.g. ` (<Host> Pro)`), so an agent enumerating tools sees the tool exists
    * but needs an upgrade. Include any leading space.
    */
   readonly gatedDescriptionSuffix: string
@@ -252,7 +252,7 @@ export interface McpResourceConfig {
  * Resource handler returns either an inline text payload (most common
  * — JSON descriptions of project state) or a base64 blob for binary
  * content. The handler receives the parsed `URL` so it can pull
- * variables from a templated URI (e.g. `restorm://request/{id}`).
+ * variables from a templated URI (e.g. `app://request/{id}`).
  */
 export type McpResourceHandler = (uri: URL) => Promise<{
   text?: string
@@ -1094,8 +1094,8 @@ export class McpService {
 
   /**
    * Register a resource. Each request gets a fresh `McpServer` populated
-   * with the registry. Pass an exact URI (`restorm://project`) for a
-   * static resource or a URI template (`restorm://request/{id}`) — the
+   * with the registry. Pass an exact URI (`app://project`) for a
+   * static resource or a URI template (`app://request/{id}`) — the
    * SDK matches templates with `path-to-regexp` style placeholders, and
    * the handler receives the parsed `URL` so it can pull the bound
    * variables itself. The handler defaults `mimeType` to
@@ -3348,7 +3348,7 @@ export class McpService {
             return out
           }
           // Annotate a gated tool's `tools/list` description with the host's
-          // marker (e.g. " (Restorm Pro)") so an agent enumerating tools sees it
+          // marker (e.g. " (<Host> Pro)") so an agent enumerating tools sees it
           // exists but needs an upgrade — the tool stays listed (discoverability
           // of the upsell), never hidden.
           const config = this.annotateConfigForGate(tool.name, tool.config)

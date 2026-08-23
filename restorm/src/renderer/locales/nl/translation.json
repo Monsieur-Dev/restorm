@@ -427,7 +427,8 @@
         "response": "Antwoord",
         "infos": "Info",
         "requestBody": "Verzoekbody",
-        "graph": "Grafiek"
+        "graph": "Grafiek",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Verzonden op",
@@ -443,6 +444,11 @@
         "select": "Selecteer een antwoord om details te bekijken",
         "pin": "Antwoord vastmaken",
         "unpin": "Antwoord losmaken"
+      },
+      "cookies": {
+        "sent": "Verzonden",
+        "received": "Ontvangen",
+        "none": "Geen"
       }
     },
     "followRedirects": "Omleidingen volgen",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Een scenario bijwerken",
     "updateScenarioNode": "Een scenarioknooppunt bijwerken",
     "createInstance": "Een nieuwe instantie maken",
-    "terminateInstance": "Een instantie beëindigen"
+    "terminateInstance": "Een instantie beëindigen",
+    "listCookies": "Cookies opsommen",
+    "addCookie": "Een cookie toevoegen",
+    "removeCookie": "Een cookie verwijderen",
+    "clearCookieDomain": "Cookies voor een domein wissen",
+    "clearCookies": "Alle cookies wissen"
   },
   "odataFilter": {
     "detail": {
@@ -2723,5 +2734,40 @@
       "unavailable": "Tokens zijn nu niet beschikbaar. Probeer het zo opnieuw.",
       "plan-required": "Uitvoeringen zonder interface horen bij het Pro-abonnement. Stap over op Pro om tokens aan te maken — bestaande tokens kunt u blijven intrekken."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Omgeving",
+    "noEnvironment": "Geen omgeving",
+    "clearAll": "Alles wissen",
+    "empty": "Er zijn nog geen cookies opgeslagen voor deze omgeving.",
+    "clearOrigin": "Cookies voor {{domain}} wissen",
+    "session": "Sessie",
+    "valueOf": "Waarde van {{name}}",
+    "save": "Opslaan",
+    "deleteNamed": "{{name}} verwijderen",
+    "add": "Toevoegen",
+    "column": {
+      "name": "Naam",
+      "value": "Waarde",
+      "path": "Pad",
+      "expires": "Verloopt",
+      "flags": "Vlaggen",
+      "actions": "Acties",
+      "domain": "Domein"
+    },
+    "openFor": "Cookiebeheer openen voor {{domain}}",
+    "addTitle": "Een cookie toevoegen",
+    "addForOrigin": "Een cookie toevoegen voor {{domain}}",
+    "cancel": "Annuleren",
+    "confirmTitle": "Bevestigen",
+    "confirmDelete": "De cookie \"{{name}}\" verwijderen?",
+    "confirmClearOrigin": "Alle cookies voor {{domain}} verwijderen?",
+    "confirmClearAll": "Alle cookies in deze omgeving verwijderen?",
+    "deleteButton": "Verwijderen",
+    "editTitle": "Een cookie bewerken",
+    "editNamed": "{{name}} bewerken",
+    "confirmReplace": "Er bestaat hier al een cookie met de naam \"{{name}}\". Vervangen?",
+    "replaceButton": "Vervangen"
   }
 }

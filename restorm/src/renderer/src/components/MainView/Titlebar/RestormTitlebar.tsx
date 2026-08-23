@@ -12,6 +12,7 @@ import {
   Button,
   AccountButton,
   eventBus,
+  IconView,
   useSettingsModal,
   useFeature,
   useElectronPlatform,
@@ -80,6 +81,9 @@ export interface RestormTitlebarProps {
    * as Console, but no specific placement constraint — the host
    * just appends to the focused group. */
   onOpenFirewall: () => void
+  /** Open / focus the Cookie jar singleton workbench tab. Wired to the
+   * `View → Cookie jar` menu item. */
+  onOpenCookieJar: () => void
   /** Open / focus the Mini browser singleton tab. Wired to
    * `View → Mini browser`. Same singleton-or-focus pattern as
    * Firewall. */
@@ -159,6 +163,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onSearchResultClick,
   onOpenConsole,
   onOpenFirewall,
+  onOpenCookieJar,
   onOpenMiniBrowser,
   onOpenMcpLogs,
   onGitPush,
@@ -469,6 +474,12 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               title={t('menuBar.miniBrowser', 'Mini browser')}
               icon={<span className="codicon codicon-browser" aria-hidden="true" />}
               onClick={onOpenMiniBrowser}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-cookies"
+              title="Cookie jar"
+              icon={<IconView icon={{ type: 'material', value: 'mdiCookie' }} size={16} />}
+              onClick={onOpenCookieJar}
             />
             <MenuItem
               data-testid="titlebar-menu-item-mcp-logs"

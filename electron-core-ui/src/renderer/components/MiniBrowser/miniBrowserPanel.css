@@ -48,7 +48,7 @@
 
 /* The empty placeholder slot that the host content view is
  * positioned over. The slot itself has no painted background — the
- * content view (main-process WebContentsView in restorm) sits on top
+ * content view (main-process WebContentsView in the host app) sits on top
  * of it. When the user hasn't navigated yet, `data-empty` is set and
  * the slot shows the "enter an address" hint instead. */
 .mini-browser-panel__slot {

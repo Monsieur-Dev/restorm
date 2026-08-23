@@ -10,7 +10,7 @@ import type React from 'react'
  * Purely a style computation — no component wrapper, because every
  * protocol's field components (`InputBox`, key-value tables, body
  * editors, …) already accept a `style` prop the same way `NumberInput`
- * conditionally spreads one in; the host (restorm) computes `differs` per
+ * conditionally spreads one in; the host app computes `differs` per
  * field from its own entity-diff logic and spreads this in alongside its
  * existing style.
  */

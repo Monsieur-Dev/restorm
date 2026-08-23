@@ -30,6 +30,7 @@ import type { RestormEditorTab } from '../../../shared/types/editor'
 import {
   CONSOLE_TAB_ID,
   MCP_LOGS_TAB_ID,
+  COOKIE_JAR_TAB_ID,
   FIREWALL_TAB_ID,
   MINI_BROWSER_TAB_ID,
   SETTINGS_TAB_ID
@@ -65,7 +66,8 @@ const SPECIAL_TAB_IDS: Record<string, string> = {
   firewall: FIREWALL_TAB_ID,
   'mini-browser': MINI_BROWSER_TAB_ID,
   settings: SETTINGS_TAB_ID,
-  'mcp-logs': MCP_LOGS_TAB_ID
+  'mcp-logs': MCP_LOGS_TAB_ID,
+  'cookie-jar': COOKIE_JAR_TAB_ID
 }
 
 /** Map a request `tabType` to the tab-id prefix `parseTabId` understands. */

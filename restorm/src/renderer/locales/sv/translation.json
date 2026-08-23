@@ -427,7 +427,8 @@
         "response": "Svar",
         "infos": "Info",
         "requestBody": "Förfrågans kropp",
-        "graph": "Graf"
+        "graph": "Graf",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Skickat",
@@ -443,6 +444,11 @@
         "select": "Välj ett svar för att se detaljer",
         "pin": "Nåla fast svar",
         "unpin": "Lossa svar"
+      },
+      "cookies": {
+        "sent": "Skickade",
+        "received": "Mottagna",
+        "none": "Inga"
       }
     },
     "followRedirects": "Följ omdirigeringar",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Uppdatera ett scenario",
     "updateScenarioNode": "Uppdatera en scenarionod",
     "createInstance": "Skapa en ny instans",
-    "terminateInstance": "Avsluta en instans"
+    "terminateInstance": "Avsluta en instans",
+    "listCookies": "Lista cookies",
+    "addCookie": "Lägg till en cookie",
+    "removeCookie": "Ta bort en cookie",
+    "clearCookieDomain": "Rensa cookies för en domän",
+    "clearCookies": "Rensa alla cookies"
   },
   "odataFilter": {
     "detail": {
@@ -2723,5 +2734,40 @@
       "unavailable": "Token är inte tillgängliga just nu. Försök igen om en stund.",
       "plan-required": "Körningar utan gränssnitt ingår i Pro-abonnemanget. Byt till Pro för att skapa token — du kan fortfarande återkalla dem du redan har."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Miljö",
+    "noEnvironment": "Ingen miljö",
+    "clearAll": "Rensa alla",
+    "empty": "Inga cookies har sparats för den här miljön ännu.",
+    "clearOrigin": "Rensa cookies för {{domain}}",
+    "session": "Session",
+    "valueOf": "Värde för {{name}}",
+    "save": "Spara",
+    "deleteNamed": "Ta bort {{name}}",
+    "add": "Lägg till",
+    "column": {
+      "name": "Namn",
+      "value": "Värde",
+      "path": "Sökväg",
+      "expires": "Upphör",
+      "flags": "Flaggor",
+      "actions": "Åtgärder",
+      "domain": "Domän"
+    },
+    "openFor": "Öppna cookiehanteraren för {{domain}}",
+    "addTitle": "Lägg till en cookie",
+    "addForOrigin": "Lägg till en cookie för {{domain}}",
+    "cancel": "Avbryt",
+    "confirmTitle": "Bekräfta",
+    "confirmDelete": "Ta bort cookien ”{{name}}”?",
+    "confirmClearOrigin": "Ta bort alla cookies för {{domain}}?",
+    "confirmClearAll": "Ta bort alla cookies i den här miljön?",
+    "deleteButton": "Ta bort",
+    "editTitle": "Redigera en cookie",
+    "editNamed": "Redigera {{name}}",
+    "confirmReplace": "Det finns redan en cookie med namnet ”{{name}}” här. Ersätta den?",
+    "replaceButton": "Ersätt"
   }
 }

@@ -23,6 +23,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useEnvVariables } from '../../hooks/useEnvVariables'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import { buildCookiesContent } from './HTTPResponsePanel'
 import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { SOAPExecutionResult } from '../../types/global.d'
@@ -289,6 +290,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
               : [{ id: key, key, value: new StringValue(val), enabled: true, description: '' }]
           ),
           fault: res.fault,
+          ...(res.sentCookies && res.sentCookies.length > 0 ? { sentCookies: res.sentCookies } : {}),
+          ...(res.receivedCookies && res.receivedCookies.length > 0 ? { receivedCookies: res.receivedCookies } : {}),
           timings: res.timings
         }
         setResponse(soapResponse)
@@ -463,17 +466,17 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       </div>
     ) : null
 
-    return { infosContent, responseContent, jsonData: undefined }
+    return { infosContent, responseContent, cookiesContent: buildCookiesContent(resp), jsonData: undefined }
   }, [t])
 
-  const { infosContent, responseContent } = useMemo(
+  const { infosContent, responseContent, cookiesContent } = useMemo(
     () => buildSoapResponseView(response, { service: request.service, operation: request.operation, soapAction: request.soapAction }),
     [buildSoapResponseView, response, request.service, request.operation, request.soapAction]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'soap') {
-      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+      return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
     }
     const historyResponse: SoapResponse = {
       id: detail.guid,
@@ -488,6 +491,8 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
       responseHeaders: toKeyValuesFromHistory(detail.response.responseHeaders),
       fault: detail.response.fault,
       timings: detail.response.timings,
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildSoapResponseView(historyResponse, detail.requestMeta)
@@ -614,6 +619,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         showResponse={response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
+        cookiesContent={cookiesContent}
         showCodeSnippets={showCodeSnippets}
         notesDiffers={!!conflictFields?.['notes']}
         {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}

@@ -34,6 +34,7 @@ import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, R
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { buildCookiesContent } from './HTTPResponsePanel'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
@@ -422,7 +423,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             timestamp: m.timestamp
           })),
           error: res.error,
-          timings: res.timings
+          timings: res.timings,
+          ...(res.sentCookies ? { sentCookies: res.sentCookies } : {}),
+          ...(res.receivedCookies ? { receivedCookies: res.receivedCookies } : {})
         }
         if (isServer && res.error) {
           pushServerListenErrorToast(t, t('websocket.listenFailed', 'Server failed to start'), res.error)
@@ -627,7 +630,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     resp: WebSocketResponse | null,
     meta?: { protocol?: string | undefined; event?: string | undefined }
   ) => {
-    if (!resp) return { infosContent: null, responseContent: null, jsonData: undefined }
+    if (!resp) return { infosContent: null, responseContent: null, cookiesContent: null, jsonData: undefined }
     const infosContent = (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -667,7 +670,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       </div>
     )
 
-    return { infosContent, responseContent: renderChat(resp.messages, meta?.protocol), jsonData: undefined }
+    return { infosContent, responseContent: renderChat(resp.messages, meta?.protocol), cookiesContent: buildCookiesContent(resp), jsonData: undefined }
   }, [t, renderChat])
 
   // Live view: prefer the streaming frames; fall back to the resolved response.
@@ -682,11 +685,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       connected: isListening || (response?.connected ?? false),
       messages: liveMessages.length > 0 ? liveMessages : (response?.messages ?? []),
       timings: response?.timings ?? { startedAt: '', durationMs: 0 },
-      ...(response?.error ? { error: response.error } : {})
+      ...(response?.error ? { error: response.error } : {}),
+      ...(response?.sentCookies ? { sentCookies: response.sentCookies } : {}),
+      ...(response?.receivedCookies ? { receivedCookies: response.receivedCookies } : {})
     }
   }, [isListening, liveMessages, response, request.id, request.protocol, resolvedUrl, url])
 
-  const { infosContent, responseContent } = useMemo(
+  const { infosContent, responseContent, cookiesContent } = useMemo(
     () => buildWebSocketResponseView(liveResponse, { protocol: request.protocol, event: request.event }),
     [buildWebSocketResponseView, liveResponse, request.protocol, request.event]
   )
@@ -713,7 +718,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'websocket') {
-      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+      return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
     }
     const historyResponse: WebSocketResponse = {
       id: detail.guid,
@@ -729,7 +734,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         timestamp: msg.timestamp
       })),
       timings: detail.response.timings,
-      ...(detail.response.error ? { error: detail.response.error } : {})
+      ...(detail.response.error ? { error: detail.response.error } : {}),
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {})
     }
     return buildWebSocketResponseView(historyResponse, detail.requestMeta)
   }, [buildWebSocketResponseView, request.id])
@@ -924,6 +931,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         showResponse={isListening || liveMessages.length > 0 || response !== null}
         infosContent={infosContent}
         responseContent={serverResponseContent}
+        {...(isServer || cookiesContent == null ? {} : { cookiesContent })}
         showCodeSnippets={showCodeSnippets}
         notesDiffers={!!conflictFields?.['notes']}
         {...(defaultActiveTabId !== undefined ? { defaultActiveTabId } : {})}

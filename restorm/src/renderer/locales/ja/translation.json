@@ -426,7 +426,8 @@
         "response": "レスポンス",
         "infos": "情報",
         "requestBody": "リクエストボディ",
-        "graph": "グラフ"
+        "graph": "グラフ",
+        "cookies": "Cookie"
       },
       "infos": {
         "sentAt": "送信日時",
@@ -442,6 +443,11 @@
         "select": "詳細を表示するレスポンスを選択してください",
         "pin": "レスポンスをピン留め",
         "unpin": "ピン留めを解除"
+      },
+      "cookies": {
+        "sent": "送信済み",
+        "received": "受信済み",
+        "none": "なし"
       }
     },
     "followRedirects": "リダイレクトに従う",
@@ -2295,7 +2301,12 @@
     "updateScenario": "シナリオを更新",
     "updateScenarioNode": "シナリオノードを更新",
     "createInstance": "新しいインスタンスを作成",
-    "terminateInstance": "インスタンスを終了"
+    "terminateInstance": "インスタンスを終了",
+    "listCookies": "Cookie を一覧表示",
+    "addCookie": "Cookie を追加",
+    "removeCookie": "Cookie を削除",
+    "clearCookieDomain": "ドメインの Cookie を消去",
+    "clearCookies": "すべての Cookie を消去"
   },
   "odataFilter": {
     "detail": {
@@ -2722,5 +2733,40 @@
       "unavailable": "現在トークンを利用できません。しばらくしてからお試しください。",
       "plan-required": "画面のない実行は Pro プランに含まれます。トークンを作成するには Pro にアップグレードしてください。既存のトークンの失効は引き続き可能です。"
     }
+  },
+  "cookies": {
+    "title": "Cookie",
+    "environment": "環境",
+    "noEnvironment": "環境なし",
+    "clearAll": "すべて消去",
+    "empty": "この環境にはまだ Cookie が保存されていません。",
+    "clearOrigin": "{{domain}} の Cookie を消去",
+    "session": "セッション",
+    "valueOf": "{{name}} の値",
+    "save": "保存",
+    "deleteNamed": "{{name}} を削除",
+    "add": "追加",
+    "column": {
+      "name": "名前",
+      "value": "値",
+      "path": "パス",
+      "expires": "有効期限",
+      "flags": "フラグ",
+      "actions": "操作",
+      "domain": "ドメイン"
+    },
+    "openFor": "{{domain}} の Cookie マネージャーを開く",
+    "addTitle": "Cookie を追加",
+    "addForOrigin": "{{domain}} の Cookie を追加",
+    "cancel": "キャンセル",
+    "confirmTitle": "確認",
+    "confirmDelete": "Cookie \"{{name}}\" を削除しますか？",
+    "confirmClearOrigin": "{{domain}} のすべての Cookie を削除しますか？",
+    "confirmClearAll": "この環境のすべての Cookie を削除しますか？",
+    "deleteButton": "削除",
+    "editTitle": "Cookie を編集",
+    "editNamed": "{{name}} を編集",
+    "confirmReplace": "\"{{name}}\" という名前の Cookie がすでにここに存在します。置き換えますか？",
+    "replaceButton": "置き換え"
   }
 }

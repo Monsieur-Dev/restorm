@@ -866,7 +866,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
             timings: result.timings,
             ...(request.body && { requestBody: request.body }),
             ...(contentType && { contentType }),
-            ...(contentLength !== undefined && !isNaN(contentLength) && { contentLength })
+            ...(contentLength !== undefined && !isNaN(contentLength) && { contentLength }),
+            ...(result.sentCookies && result.sentCookies.length > 0 ? { sentCookies: result.sentCookies } : {}),
+            ...(result.receivedCookies && result.receivedCookies.length > 0 ? { receivedCookies: result.receivedCookies } : {})
           }
           setHttpResponse(response)
           setHistoryRefreshKey(prev => prev + 1)
@@ -1180,14 +1182,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     [t, formatUserDate]
   )
 
-  const { infosContent, responseContent, jsonData } = useMemo(
+  const { infosContent, responseContent, cookiesContent, jsonData } = useMemo(
     () => buildHttpResponseViewData(httpResponse, matchedOperation, responseViewLabels),
     [httpResponse, matchedOperation, responseViewLabels]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'http') {
-      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+      return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
     }
     const historyResponse: HTTPResponse = {
       id: detail.guid,
@@ -1205,6 +1207,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       responseBody: detail.response.responseBody,
       ...(detail.response.contentType ? { contentType: detail.response.contentType } : {}),
       ...(detail.response.contentLength !== undefined ? { contentLength: detail.response.contentLength } : {}),
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       timings: detail.response.timings,
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
@@ -1442,6 +1446,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         infosContent={isServer ? undefined : infosContent}
         showInfos={!isServer}
         responseContent={isServer ? serverResponseContent : responseContent}
+        cookiesContent={isServer ? undefined : cookiesContent}
         jsonData={isServer ? undefined : jsonData}
         {...(additionalRequestTabs ? { additionalRequestTabs } : {})}
         showCodeSnippets={showCodeSnippets}

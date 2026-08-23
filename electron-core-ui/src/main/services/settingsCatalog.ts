@@ -35,7 +35,7 @@ import type {
 /**
  * The two writable layers. `user` is the global, app-wide layer (persisted by
  * `StorageService`); `workspace` is the per-project overlay
- * (`<workspace>/.restorm/settings.json`). Mirrors `SettingValueSource` minus
+ * (the host's workspace settings file). Mirrors `SettingValueSource` minus
  * `default`, which is computed and cannot be written to.
  */
 export type SettingsScope = 'user' | 'workspace'

@@ -204,7 +204,7 @@
    * ancestor. Callers that need to flush the ribbons' top edge with
    * a border rendered *above* the ancestor (e.g. a tab-bar bottom
    * border) can override `top` to a small negative value from their
-   * own CSS — see `restormWorkbenchTab.css`. */
+   * own CSS — see the host's workbench-tab CSS. */
   top: 0;
   right: 20px;
   display: flex;

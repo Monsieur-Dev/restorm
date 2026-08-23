@@ -77,8 +77,8 @@ export interface ConflictResolutionViewProps {
  * neighbours (the injected panels fill height and scroll via their own ECUI
  * scrollables). This component owns none of the entity-specific rendering:
  * `renderUserPanel`/`renderServerPanel`/`renderResolvedPanel` are host-injected
- * (restorm plugs in its entity→tab-view mapping — request/scenario/folder/
- * environment-folder/… — per `docs/Git/README.md`'s ECUI/restorm split).
+ * (the host plugs in its entity→tab-view mapping — request/scenario/folder/
+ * environment-folder/… — per `docs/Git/README.md`'s ECUI/host split).
  * Selecting a conflict-list row and the two "use this version" buttons are the
  * only interactions this component itself handles; everything else (field-
  * level diff highlighting, what "use this version" actually copies) is the

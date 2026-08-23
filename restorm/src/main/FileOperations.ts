@@ -69,10 +69,10 @@ export async function loadProjectIntoStore(targetPath: string): Promise<void> {
 export async function attachDraftStoreForFile(
   filePath: string,
   format: PersistenceFormat
-): Promise<void> {
+): Promise<string | null> {
   if (!isFileServiceInitialized()) {
     logger.warn('attachDraftStoreForFile: FileService not initialized')
-    return
+    return null
   }
   // Map the project file's extension to a persistence format string
   // the draft store can use. `.restorm` files are YAML under the hood.
@@ -95,7 +95,7 @@ export async function attachDraftStoreForFile(
         'No crash-recovery drafts for this project: its identity could not be stored without rewriting the file',
         { path: filePath }
       )
-      return
+      return null
     }
 
     const fileService = getFileService()
@@ -109,7 +109,10 @@ export async function attachDraftStoreForFile(
     if (restored > 0) {
       logger.info('Drafts restored for file', { path: filePath, count: restored })
     }
+    // The stable project id, reused as the per-project cookie persistence key.
+    return uuid
   } catch (error) {
     logger.error('Failed to attach draft store (file mode)', { path: filePath, error: String(error) })
+    return null
   }
 }

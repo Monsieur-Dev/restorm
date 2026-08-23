@@ -57,7 +57,7 @@ interface McpServiceOptions {
    * The token is opaque to the service: caller picks the entropy and the
    * propagation channel. The standard recipe is "32 hex chars from
    * `crypto.randomBytes(16)`, written into a discovery file the launcher
-   * reads back" — see consuming app `restorm` for a worked example.
+   * reads back" — see the consuming host app for a worked example.
    */
   authToken?: string
 
@@ -114,8 +114,8 @@ The remux shells out to **ffmpeg**, resolved in this order:
    `<video>` duration self-corrects as it buffers.
 
 So ffmpeg is an **optional** dependency: install it (or have it on `PATH`) for
-the cleaner MP4, otherwise the feature still works on WebM. Restorm relies on a
-system ffmpeg and does not bundle one.
+the cleaner MP4, otherwise the feature still works on WebM. The host app may rely on a
+system ffmpeg and not bundle one.
 
 #### Cross-instance routing bridge
 
@@ -466,7 +466,7 @@ Returns a snapshot of the active `BrowserWindow`. Useful as a quick diagnostic b
 ```jsonc
 {
   "id": 1,
-  "title": "Restorm",
+  "title": "MyApp",
   "bounds": { "x": 0, "y": 0, "width": 1400, "height": 819 },
   "contentBounds": { "x": 0, "y": 32, "width": 1400, "height": 787 },
   "isFocused": true,
@@ -568,7 +568,7 @@ Per-step `waitFor` overrides the implicit settle. Pick one shape:
 }
 ```
 
-When a step is `screencast-stop`, the recorded `.webm` is read from disk and inlined as a `resource` content part (base64 `blob` + `video/webm` `mimeType`), so a `screencast-start → actions → screencast-stop` chain returns the video bytes without a follow-up file read. Not to be confused with consuming-app tools like restorm's `run_request_batch`, which batches HTTP / protocol requests.
+When a step is `screencast-stop`, the recorded `.webm` is read from disk and inlined as a `resource` content part (base64 `blob` + `video/webm` `mimeType`), so a `screencast-start → actions → screencast-stop` chain returns the video bytes without a follow-up file read. Not to be confused with consuming-app tools like the host's `run_request_batch`, which batches HTTP / protocol requests.
 
 ### `open_mini_browser`
 
@@ -649,7 +649,7 @@ Returns every active `BrowserWindow` with its `id` (= `webContents.id`), `title`
   "windows": [
     {
       "id": 1,
-      "title": "Restorm",
+      "title": "MyApp",
       "bounds": { "x": 16, "y": 10, "width": 1400, "height": 819 },
       "isFocused": true,
       "isVisible": true,
@@ -675,7 +675,7 @@ Pair with the `windowId` parameter that every renderer-facing tool now accepts (
 
 Return every running instance of this app that has an active MCP endpoint. Only instances whose endpoint actually answers an authenticated `initialize` probe are reported — stale lockfiles from crashed runs are silently skipped. The bearer token is never included in the output.
 
-Requires `McpServiceOptions.discoveryDir` to be set (restorm wires this from the `RESTORM_MCP_DIR` env var / the conventional default). Returns an empty list when the option is absent or the directory is empty.
+Requires `McpServiceOptions.discoveryDir` to be set (the host wires this from its `<APP>_MCP_DIR` env var / the conventional default). Returns an empty list when the option is absent or the directory is empty.
 
 ```jsonc
 {
@@ -684,13 +684,13 @@ Requires `McpServiceOptions.discoveryDir` to be set (restorm wires this from the
     {
       "pid": 12345,
       "name": "my-project — feature/add-widget",
-      "projectPath": "/home/user/projects/my-project.restorm",
+      "projectPath": "/home/user/projects/my-project.myapp",
       "endpoint": "127.0.0.1:39271",
       "startedAt": "2026-06-19T08:00:00.000Z"
     },
     {
       "pid": 12399,
-      "name": "restorm",
+      "name": "myapp",
       "projectPath": null,
       "endpoint": "127.0.0.1:41003",
       "startedAt": "2026-06-19T07:45:00.000Z"
@@ -699,7 +699,7 @@ Requires `McpServiceOptions.discoveryDir` to be set (restorm wires this from the
 }
 ```
 
-Use `__session: "<name>"` on any subsequent `tools/call` to target a specific instance (see [Cross-instance bridge](#cross-instance-bridge) above). The `name` comes from `--mcp-session-name` or `RESTORM_MCP_SESSION_NAME` set at launch time.
+Use `__session: "<name>"` on any subsequent `tools/call` to target a specific instance (see [Cross-instance bridge](#cross-instance-bridge) above). The `name` comes from `--mcp-session-name` or the host's `<APP>_MCP_SESSION_NAME` env var set at launch time.
 
 ### `drag-drop`
 
@@ -724,7 +724,7 @@ dragstart (source)
 }
 ```
 
-Why the walk + sustained hovers matter: many apps gate the drop indicator on the drag actually moving across nested zones (not just teleporting to the target), and on the cursor sitting still long enough for a debounced overlay to materialize. The default `steps: 10` + `sustainedHovers: 5` is enough to drive restorm's editor-group split overlay; tune up if your app needs more.
+Why the walk + sustained hovers matter: many apps gate the drop indicator on the drag actually moving across nested zones (not just teleporting to the target), and on the cursor sitting still long enough for a debounced overlay to materialize. The default `steps: 10` + `sustainedHovers: 5` is enough to drive the host's editor-group split overlay; tune up if your app needs more.
 
 Use to reorder workbench tabs, split editor groups (drop near a group edge), reorder tree nodes — anything wired through HTML5 drag-and-drop. Verified against editor-group split.
 
@@ -773,7 +773,7 @@ All four require the host to have initialised `SettingsService`, and return `Set
 | `scope` | Layer |
 |---------|-------|
 | `user` (default) | The global, app-wide layer, persisted by `StorageService`. |
-| `workspace` | The per-project overlay (`<workspace>/.restorm/settings.json`), available only while a project is open. |
+| `workspace` | The per-project overlay (the host's workspace settings file, `<workspace>/<workspace dotfolder>/settings.json`), available only while a project is open. |
 
 Reading or writing the `workspace` scope with no project open is an error naming the reason. A setting declared `userOnly` (locale, for instance) reports `editableScopes: ["user"]` and refuses a workspace write.
 
@@ -877,7 +877,7 @@ Drops the value held at the requested scope so the setting falls back to the lay
 
 ## System dialog bypass
 
-Restorm-style apps trigger native modal dialogs (`dialog.showSaveDialog`, `showOpenDialog`, `showMessageBox`) deep inside their main-process logic — for example, to ask "where do you want to save this?" when the user picks **File → Save**. Those dialogs **block the main process** until the user clicks. An MCP client can't see / dismiss them, so any tool whose code path eventually hits one would hang.
+Host-style apps trigger native modal dialogs (`dialog.showSaveDialog`, `showOpenDialog`, `showMessageBox`) deep inside their main-process logic — for example, to ask "where do you want to save this?" when the user picks **File → Save**. Those dialogs **block the main process** until the user clicks. An MCP client can't see / dismiss them, so any tool whose code path eventually hits one would hang.
 
 `McpService` patches `electron.dialog.show*` once at `start()` time. The wrapper checks an `AsyncLocalStorage` flag :
 
@@ -902,7 +902,7 @@ The token closes two attacks loopback alone leaves open:
 1. **Other local processes** — any process on the same machine can POST to `http://127.0.0.1:<port>/` and call tools. Without a token, a rogue script gets full control over the user's app.
 2. **CSRF from a browser tab** — a malicious site can issue `fetch('http://127.0.0.1:<port>/', { method: 'POST', mode: 'no-cors' })` and trigger mutations even though it can't read the response. The bearer header is blocked by CORS, so requiring it shuts the vector down.
 
-The recommended propagation channel is "consuming app generates a per-process random token, writes it into a discovery file, the launcher reads it back and injects the header." See the restorm consumer (`restorm/src/main/index.ts`, which calls the discovery helpers above) + `scripts/mcp-launcher.mjs` for a worked example. The token rotates on every app restart — no persistent secret on disk.
+The recommended propagation channel is "consuming app generates a per-process random token, writes it into a discovery file, the launcher reads it back and injects the header." See the host consumer (`<host>/src/main/index.ts`, which calls the discovery helpers above) + `scripts/mcp-launcher.mjs` for a worked example. The token rotates on every app restart — no persistent secret on disk.
 
 ## Discovery from Claude Code
 
@@ -933,7 +933,7 @@ A packaged production binary opening a TCP port — even on loopback — surpris
 import { readMcpDiscoveryWithRetry, callMcpToolOverJsonRpc, postMcpJsonRpc, type McpDiscovery } from 'electron-core-ui/testing'
 
 // After launching the host with `--mcp-discovery-file=<path>` (or reading
-// the default `os.tmpdir()/restorm-mcp/<pid>.json` location):
+// the default `os.tmpdir()/<app>-mcp/<pid>.json` location):
 const discovery: McpDiscovery = await readMcpDiscoveryWithRetry(discoveryPath)
 
 // `tools/call` convenience wrapper — throws on an MCP-level error reply:
@@ -943,7 +943,7 @@ const reply = await callMcpToolOverJsonRpc(discovery, 'screenshot', {})
 const listReply = await postMcpJsonRpc(discovery, { method: 'tools/list' })
 ```
 
-`postMcpJsonRpc` handles both the plain-JSON and SSE-framed (`event: message\ndata: …`) reply shapes the Streamable-HTTP transport can return, transparently. Consuming apps build their own Playwright fixture around these primitives (launch the host, resolve the discovery file, expose `callMcpTool`/`rawJsonRpc` as fixtures) — see restorm's `tests/e2e/bdd/fixtures/mcp-server.fixture.ts` for a worked example.
+`postMcpJsonRpc` handles both the plain-JSON and SSE-framed (`event: message\ndata: …`) reply shapes the Streamable-HTTP transport can return, transparently. Consuming apps build their own Playwright fixture around these primitives (launch the host, resolve the discovery file, expose `callMcpTool`/`rawJsonRpc` as fixtures) — see the host's `tests/e2e/bdd/fixtures/mcp-server.fixture.ts` for a worked example.
 
 ### Long synchronous gaps between calls
 

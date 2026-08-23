@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie jar — jedna sklenice cookies pro každé prostředí.**
+
+- **Každé prostředí si drží vlastní cookies.** Přihlaste se ke svému vývojovému API i produkčnímu API ze dvou prostředí a jejich relace se nikdy nezkříží – cookie zachycená v jednom se posílá zpět jen v tomtéž. Platnost, `Path`, `Domain` i subdomény, `Secure`, `HttpOnly` a `SameSite` se nyní respektují, místo aby se zahazovaly.
+- **Představujeme Cookie jar.** Nová karta pracovní plochy — **Zobrazení ▸ Cookie jar** — vypisuje cookies každého prostředí seskupené podle domény ve sbalitelných panelech: upravte hodnotu, jednu smažte, vyprázdněte doménu nebo celou sklenici, nebo přidejte cookie ručně. Obnovuje se živě, jak vaše požadavky nastavují cookies.
+- **Uvidíte, co každý požadavek odeslal a přijal.** Každý požadavek má nyní kartu **Cookies** vedle karet Odpověď a Informace, která zobrazuje cookies odeslané s voláním a cookies přijaté zpět — včetně cookies nastavených při přesměrování, které se do finální odpovědi nikdy nedostanou. Je k dispozici i u minulých odpovědí ve vaší historii.
+- **Přihlášení přes cookies prostě funguje.** Požadavek, který vrátí `Set-Cookie`, se zachytí a automaticky znovu odešle u navazujících chráněných volání – i napříč během scénáře, kde každý krok sdílí sklenici prostředí.
+- **Cookies přetrvávají jako v prohlížeči.** Cookies s platností se ukládají pro každý projekt a znovu načtou, když jej otevřete; relační cookies se při restartu zahodí — přesně jako v prohlížeči.
+- **Nejen REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC i SSE nyní posílají a ukládají cookies a WebSocket je nese už při navazování spojení (handshake).
+- **Cookies mohou využívat vaše proměnné.** Napište `{{token}}` do cookie, kterou přidáte ručně, a při odeslání požadavku se vyhodnotí vůči aktivnímu prostředí.
+
+Opravy:
+
+- **Automatické ukládání nyní pokrývá i prostředí ve složkách.** Přidání nebo přejmenování podprostředí se v režimu automatického ukládání uloží okamžitě — už žádná výzva „uložit před zavřením?“ u změny, která už měla být na disku.
+
 ## v1.0.4
 
 **Jedno přihlášení — všechna okna následují.**

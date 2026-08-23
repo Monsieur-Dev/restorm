@@ -427,7 +427,8 @@
         "response": "Svar",
         "infos": "Info",
         "requestBody": "Anmodnings-body",
-        "graph": "Graf"
+        "graph": "Graf",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Sendt den",
@@ -443,6 +444,11 @@
         "select": "Vælg et svar for at se detaljer",
         "pin": "Fastgør svar",
         "unpin": "Frigør svar"
+      },
+      "cookies": {
+        "sent": "Sendt",
+        "received": "Modtaget",
+        "none": "Ingen"
       }
     },
     "followRedirects": "Følg omdirigeringer",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Opdater et scenarie",
     "updateScenarioNode": "Opdater en scenarieknude",
     "createInstance": "Opret en ny instans",
-    "terminateInstance": "Afslut en instans"
+    "terminateInstance": "Afslut en instans",
+    "listCookies": "Vis cookies",
+    "addCookie": "Tilføj en cookie",
+    "removeCookie": "Fjern en cookie",
+    "clearCookieDomain": "Ryd cookies for et domæne",
+    "clearCookies": "Ryd alle cookies"
   },
   "odataFilter": {
     "detail": {
@@ -2723,5 +2734,40 @@
       "unavailable": "Tokens er ikke tilgængelige lige nu. Prøv igen om et øjeblik.",
       "plan-required": "Kørsler uden grænseflade er en del af Pro-abonnementet. Skift til Pro for at oprette tokens — du kan fortsat tilbagekalde dem, du allerede har."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Miljø",
+    "noEnvironment": "Intet miljø",
+    "clearAll": "Ryd alle",
+    "empty": "Der er endnu ikke gemt nogen cookies for dette miljø.",
+    "clearOrigin": "Ryd cookies for {{domain}}",
+    "session": "Session",
+    "valueOf": "Værdi af {{name}}",
+    "save": "Gem",
+    "deleteNamed": "Slet {{name}}",
+    "add": "Tilføj",
+    "column": {
+      "name": "Navn",
+      "value": "Værdi",
+      "path": "Sti",
+      "expires": "Udløber",
+      "flags": "Flag",
+      "actions": "Handlinger",
+      "domain": "Domæne"
+    },
+    "openFor": "Åbn cookie-håndteringen for {{domain}}",
+    "addTitle": "Tilføj en cookie",
+    "addForOrigin": "Tilføj en cookie for {{domain}}",
+    "cancel": "Annullér",
+    "confirmTitle": "Bekræft",
+    "confirmDelete": "Slet cookien \"{{name}}\"?",
+    "confirmClearOrigin": "Ryd alle cookies for {{domain}}?",
+    "confirmClearAll": "Ryd alle cookies i dette miljø?",
+    "deleteButton": "Slet",
+    "editTitle": "Rediger en cookie",
+    "editNamed": "Rediger {{name}}",
+    "confirmReplace": "Der findes allerede en cookie ved navn \"{{name}}\" her. Vil du erstatte den?",
+    "replaceButton": "Erstat"
   }
 }

@@ -156,9 +156,9 @@ describe('GitService', () => {
       // no business committing those.
       mockGit.commit.mockResolvedValue({ commit: 'abc123' })
 
-      await service.commit('/proj', 'Update request X', ['api.restorm'])
+      await service.commit('/proj', 'Update request X', ['api.app'])
 
-      expect(mockGit.commit).toHaveBeenCalledWith('Update request X', ['api.restorm'])
+      expect(mockGit.commit).toHaveBeenCalledWith('Update request X', ['api.app'])
     })
 
     it('commits the whole index when no path is given', async () => {
@@ -335,14 +335,14 @@ describe('GitService', () => {
   describe('getFileAtHead', () => {
     it('reads the file content at HEAD', async () => {
       mockGit.show.mockResolvedValue('collections:\n  - name: foo\n')
-      const result = await service.getFileAtHead('/proj', 'api.restorm')
-      expect(mockGit.show).toHaveBeenCalledWith(['HEAD:api.restorm'])
+      const result = await service.getFileAtHead('/proj', 'api.app')
+      expect(mockGit.show).toHaveBeenCalledWith(['HEAD:api.app'])
       expect(result).toBe('collections:\n  - name: foo\n')
     })
 
     it('resolves to null for a path that does not exist at HEAD (never committed)', async () => {
       mockGit.show.mockRejectedValue(new Error('path does not exist in HEAD'))
-      const result = await service.getFileAtHead('/proj', 'api.restorm')
+      const result = await service.getFileAtHead('/proj', 'api.app')
       expect(result).toBeNull()
     })
 
@@ -693,7 +693,7 @@ describe('GitService absolute-folder guard', () => {
     // operate on process.cwd() — the source repository in dev/e2e.
     await expect(service.getStatus('')).rejects.toThrow(/non-absolute/)
     await expect(service.getStatus('relative/dir')).rejects.toThrow(/non-absolute/)
-    await expect(service.writeResolvedConflict('', 'api.restorm', 'x')).rejects.toThrow(/non-absolute/)
+    await expect(service.writeResolvedConflict('', 'api.app', 'x')).rejects.toThrow(/non-absolute/)
   })
 })
 

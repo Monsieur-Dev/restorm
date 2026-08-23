@@ -963,6 +963,13 @@ export default defineConfig({
       testDir: 'tests/e2e/auth-propagation',
       timeout: 120 * 1000
     },
+    {
+      // Cookie Manager modal — seeds the per-environment jar over the real
+      // `window.api.cookies` IPC and drives the manager UI. Backend-free.
+      name: 'cookie-manager',
+      testDir: 'tests/e2e/cookie-manager',
+      timeout: 120 * 1000
+    },
     // Real-registry code-deps e2e. It installs pinned packages from the LIVE
     // registries (PyPI / npm / WebR-CRAN / RubyGems / LuaRocks), so it needs
     // network + is non-deterministic — it must NEVER run in the per-PR / pre-push

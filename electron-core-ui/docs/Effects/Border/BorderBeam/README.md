@@ -72,7 +72,7 @@ Returns a coherent vibrant-gradient set: random size (40-90 px), duration (5-11 
 
 The trail's `offset-path` defaults to `rect(0 auto auto 0 round size)` — a rounded rectangle matching the parent's border-box. To trace a non-rectangular silhouette (e.g. a speech bubble with a tail), override `offset-path` and `mask` via inline style on the rendered DOM and feed an SVG `path()` or a custom mask url. The `.ecu-border-beam` and `.ecu-border-beam-trail` classes are the stable hooks to target.
 
-See `restorm/src/renderer/src/components/Modals/ImportFormatShowcase.tsx` for a worked example: a `ResizeObserver` measures the bubble, a path traces both the rounded rect and the comic-book tail, and an SVG-stroked mask clips the trail to a thin band along that outline.
+See the host's `src/renderer/src/components/Modals/ImportFormatShowcase.tsx` for a worked example: a `ResizeObserver` measures the bubble, a path traces both the rounded rect and the comic-book tail, and an SVG-stroked mask clips the trail to a thin band along that outline.
 
 ## Reduced motion
 

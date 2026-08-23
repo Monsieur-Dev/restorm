@@ -428,7 +428,8 @@
         "response": "Odgovor",
         "infos": "Informacije",
         "requestBody": "Tijelo zahtjeva",
-        "graph": "Graf"
+        "graph": "Graf",
+        "cookies": "Kolačići"
       },
       "infos": {
         "sentAt": "Poslano",
@@ -444,6 +445,11 @@
         "select": "Odaberite odgovor za prikaz detalja",
         "pin": "Prikvači odgovor",
         "unpin": "Otkvači odgovor"
+      },
+      "cookies": {
+        "sent": "Poslani",
+        "received": "Primljeni",
+        "none": "Nema"
       }
     },
     "followRedirects": "Prati preusmjeravanja",
@@ -2297,7 +2303,12 @@
     "updateScenario": "Ažuriraj scenarij",
     "updateScenarioNode": "Ažuriraj čvor scenarija",
     "createInstance": "Stvori novu instancu",
-    "terminateInstance": "Zatvori instancu"
+    "terminateInstance": "Zatvori instancu",
+    "listCookies": "Popiši kolačiće",
+    "addCookie": "Dodaj kolačić",
+    "removeCookie": "Ukloni kolačić",
+    "clearCookieDomain": "Očisti kolačiće domene",
+    "clearCookies": "Očisti sve kolačiće"
   },
   "odataFilter": {
     "detail": {
@@ -2724,5 +2735,40 @@
       "unavailable": "Tokeni trenutačno nisu dostupni. Pokušajte za trenutak.",
       "plan-required": "Izvođenja bez sučelja dio su Pro plana. Prijeđite na Pro kako biste stvarali tokene — one koje već imate možete i dalje opozvati."
     }
+  },
+  "cookies": {
+    "title": "Kolačići",
+    "environment": "Okruženje",
+    "noEnvironment": "Bez okruženja",
+    "clearAll": "Očisti sve",
+    "empty": "Za ovo okruženje još nema pohranjenih kolačića.",
+    "clearOrigin": "Očisti kolačiće za {{domain}}",
+    "session": "Sesija",
+    "valueOf": "Vrijednost stavke {{name}}",
+    "save": "Spremi",
+    "deleteNamed": "Izbriši {{name}}",
+    "add": "Dodaj",
+    "column": {
+      "name": "Naziv",
+      "value": "Vrijednost",
+      "path": "Putanja",
+      "expires": "Istječe",
+      "flags": "Oznake",
+      "actions": "Radnje",
+      "domain": "Domena"
+    },
+    "openFor": "Otvori upravitelj kolačića za {{domain}}",
+    "addTitle": "Dodaj kolačić",
+    "addForOrigin": "Dodaj kolačić za {{domain}}",
+    "cancel": "Odustani",
+    "confirmTitle": "Potvrdi",
+    "confirmDelete": "Izbrisati kolačić „{{name}}”?",
+    "confirmClearOrigin": "Izbrisati sve kolačiće za {{domain}}?",
+    "confirmClearAll": "Izbrisati sve kolačiće u ovom okruženju?",
+    "deleteButton": "Izbriši",
+    "editTitle": "Uredi kolačić",
+    "editNamed": "Uredi {{name}}",
+    "confirmReplace": "Ovdje već postoji kolačić naziva „{{name}}”. Zamijeniti ga?",
+    "replaceButton": "Zamijeni"
   }
 }

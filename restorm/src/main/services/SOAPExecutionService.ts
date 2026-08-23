@@ -10,6 +10,8 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { attachSessionCookies, captureSessionCookies } from './cookieRequestHelpers'
+import type { CookiePair } from '../../shared/cookies/cookieTypes'
 import { websocketExecutionService } from './WebSocketExecutionService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
@@ -44,6 +46,9 @@ export interface SOAPExecutionResult {
     durationMs: number
   }
   requestUrl?: string
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 /** Active request info */
@@ -297,7 +302,8 @@ class SOAPExecutionService {
         headers,
         body,
         timeout,
-        signal: abortController.signal
+        signal: abortController.signal,
+        requestId
       })
 
       const durationMs = Date.now() - startTime
@@ -316,6 +322,8 @@ class SOAPExecutionService {
         headers: result.headers,
         fault,
         requestUrl: resolvedUrl,
+        ...(result.sentCookies.length > 0 ? { sentCookies: result.sentCookies } : {}),
+        ...(result.receivedCookies.length > 0 ? { receivedCookies: result.receivedCookies } : {}),
         timings: { startedAt, durationMs }
       }
     } catch (err) {
@@ -567,9 +575,12 @@ class SOAPExecutionService {
     body: string
     timeout: number
     signal: AbortSignal
-  }): Promise<{ statusCode: number; headers: Record<string, string | string[]>; body: string }> {
+    requestId?: string
+  }): Promise<{ statusCode: number; headers: Record<string, string | string[]>; body: string; sentCookies: CookiePair[]; receivedCookies: CookiePair[] }> {
     return new Promise((resolve, reject) => {
-      const { url, headers, body, timeout, signal } = options
+      const { url, headers, body, timeout, signal, requestId } = options
+      // Attach the active environment's session cookies (SOAP over HTTP).
+      const sentCookies = attachSessionCookies(requestId, url.href, headers)
       
       const isHttps = url.protocol === 'https:'
       const httpModule = isHttps ? https : http
@@ -615,11 +626,15 @@ class SOAPExecutionService {
               responseHeaders[key] = value
             }
           }
+          // Capture any Set-Cookie into the active environment's jar.
+          const receivedCookies = captureSessionCookies(requestId, url.href, response.headers['set-cookie'])
 
           resolve({
             statusCode: response.statusCode ?? 0,
             headers: responseHeaders,
-            body: bodyString
+            body: bodyString,
+            sentCookies,
+            receivedCookies
           })
         })
 

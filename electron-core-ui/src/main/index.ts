@@ -105,6 +105,7 @@ export {
 export {
   initSettingsService,
   getSettingsService,
+  setWorkspaceDirName,
   isSettingsServiceInitialized
 } from './services'
 

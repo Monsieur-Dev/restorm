@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie jar — környezetenként egy cookie-tároló.**
+
+- **Minden környezet a saját cookie-jait tartja meg.** Jelentkezz be a dev API-dba és a prod API-dba két külön környezetből, és a munkameneteik sosem keverednek — az egyikben elmentett cookie mindig csak abban megy vissza. A lejárat, a `Path`, a `Domain` és az aldomainek, a `Secure`, a `HttpOnly` és a `SameSite` mostantól érvényesül, nem vész el.
+- **Íme a Cookie jar.** Egy új munkaterület-lap — **Nézet ▸ Cookie jar** — minden környezet cookie-jait domain szerint csoportosítva sorolja fel összecsukható paneleken: szerkessz egy értéket, törölj egyet, üríts ki egy domaint vagy az egész tárolót, vagy adj hozzá cookie-t kézzel. Élőben frissül, ahogy a kéréseid cookie-kat állítanak be.
+- **Lásd, mit küldött és kapott az egyes kérések.** Minden kérés mostantól kap egy **Sütik** lapot a Válasz és az Információk mellett, amely megmutatja a hívással elküldött cookie-kat és a visszakapott cookie-kat — beleértve az átirányításkor beállított, a végső válaszba soha el nem jutó cookie-kat is. Ott van az előzményeid korábbi válaszain is.
+- **A cookie-alapú bejelentkezés egyszerűen működik.** A `Set-Cookie`-t visszaadó kérést a rendszer elmenti, és automatikusan újrajátssza az utána következő védett hívásokon — akár egy forgatókönyv futása során is, ahol minden lépés ugyanazt a környezeti tárolót használja.
+- **A cookie-k úgy maradnak meg, mint a böngészőben.** A lejárattal rendelkező cookie-k projektenként mentődnek, és újratöltődnek, amikor újra megnyitod; a munkamenet-cookie-k eldobódnak, amikor újraindítod — pontosan úgy, ahogy egy böngésző tenné.
+- **Túl a REST-en.** A GraphQL, a SOAP, az OData, a JSON-RPC, a tRPC és az SSE mostantól mind küld és tárol cookie-kat, a WebSocket pedig a kapcsolat kézfogásán viszi őket.
+- **A cookie-k használhatják a változóidat.** Írj `{{token}}`-t egy kézzel hozzáadott cookie-ba, és az az aktív környezet alapján oldódik fel, amikor a kérés elindul.
+
+Javítások:
+
+- **Az automatikus mentés mostantól a mappákon belüli környezetekre is kiterjed.** Egy alkörnyezet hozzáadása vagy átnevezése automatikus mentés módban azonnal mentődik — nincs többé „mentés bezárás előtt?” kérdés egy olyan változtatásnál, aminek amúgy is a lemezen volt a helye.
+
 ## v1.0.4
 
 **Egy bejelentkezés — minden ablak követi.**

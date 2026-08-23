@@ -70,6 +70,6 @@ The reveal reads its anchor from `--ecu-theme-reveal-x` / `--ecu-theme-reveal-y`
 
 ## Testing
 
-The transition runs entirely in the browser's compositor and finishes within 600ms. End-to-end tests that pick a theme via `ThemeCarousel` should still poll for the post-transition state attribute (`data-selected-theme-id` on the carousel root) — the existing 5s polling window in `restorm`'s e2e steps is well within the transition duration.
+The transition runs entirely in the browser's compositor and finishes within 600ms. End-to-end tests that pick a theme via `ThemeCarousel` should still poll for the post-transition state attribute (`data-selected-theme-id` on the carousel root) — the existing 5s polling window in the host's e2e steps is well within the transition duration.
 
 When asserting the absence of animation (e.g. tests running with `prefers-reduced-motion`), call `runThemeRevealTransition` directly and check that `apply` ran synchronously by the time the returned promise resolves.

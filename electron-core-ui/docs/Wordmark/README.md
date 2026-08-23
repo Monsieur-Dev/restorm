@@ -82,7 +82,7 @@ import { Wordmark } from 'electron-core-ui/renderer'
 export const Brand: React.FC = () => {
   return (
     <Wordmark effect="random" loop style={{ fontSize: 96, fontWeight: 800 }}>
-      Restorm
+      MyApp
     </Wordmark>
   )
 }

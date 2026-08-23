@@ -429,7 +429,8 @@
         "response": "Відповідь",
         "infos": "Інформація",
         "requestBody": "Тіло запиту",
-        "graph": "Граф"
+        "graph": "Граф",
+        "cookies": "Файли cookie"
       },
       "infos": {
         "sentAt": "Надіслано",
@@ -445,6 +446,11 @@
         "select": "Виберіть відповідь, щоб переглянути деталі",
         "pin": "Закріпити відповідь",
         "unpin": "Відкріпити відповідь"
+      },
+      "cookies": {
+        "sent": "Надіслані",
+        "received": "Отримані",
+        "none": "Немає"
       }
     },
     "followRedirects": "Стежити за переадресаціями",
@@ -2298,7 +2304,12 @@
     "updateScenario": "Оновити сценарій",
     "updateScenarioNode": "Оновити вузол сценарію",
     "createInstance": "Створити новий екземпляр",
-    "terminateInstance": "Завершити екземпляр"
+    "terminateInstance": "Завершити екземпляр",
+    "listCookies": "Список файлів cookie",
+    "addCookie": "Додати файл cookie",
+    "removeCookie": "Видалити файл cookie",
+    "clearCookieDomain": "Очистити файли cookie для домену",
+    "clearCookies": "Очистити всі файли cookie"
   },
   "odataFilter": {
     "detail": {
@@ -2725,5 +2736,40 @@
       "unavailable": "Токени зараз недоступні. Спробуйте за мить.",
       "plan-required": "Запуски без інтерфейсу входять до тарифу Pro. Перейдіть на Pro, щоб створювати токени — наявні ви й далі можете відкликати."
     }
+  },
+  "cookies": {
+    "title": "Файли cookie",
+    "environment": "Середовище",
+    "noEnvironment": "Без середовища",
+    "clearAll": "Очистити все",
+    "empty": "Для цього середовища ще не збережено жодних файлів cookie.",
+    "clearOrigin": "Очистити файли cookie для {{domain}}",
+    "session": "Сеанс",
+    "valueOf": "Значення {{name}}",
+    "save": "Зберегти",
+    "deleteNamed": "Видалити {{name}}",
+    "add": "Додати",
+    "column": {
+      "name": "Назва",
+      "value": "Значення",
+      "path": "Шлях",
+      "expires": "Термін дії",
+      "flags": "Прапорці",
+      "actions": "Дії",
+      "domain": "Домен"
+    },
+    "openFor": "Відкрити менеджер файлів cookie для {{domain}}",
+    "addTitle": "Додати файл cookie",
+    "addForOrigin": "Додати файл cookie для {{domain}}",
+    "cancel": "Скасувати",
+    "confirmTitle": "Підтвердити",
+    "confirmDelete": "Видалити файл cookie «{{name}}»?",
+    "confirmClearOrigin": "Видалити всі файли cookie для {{domain}}?",
+    "confirmClearAll": "Видалити всі файли cookie в цьому середовищі?",
+    "deleteButton": "Видалити",
+    "editTitle": "Редагувати файл cookie",
+    "editNamed": "Редагувати {{name}}",
+    "confirmReplace": "Файл cookie з назвою «{{name}}» уже існує тут. Замінити його?",
+    "replaceButton": "Замінити"
   }
 }

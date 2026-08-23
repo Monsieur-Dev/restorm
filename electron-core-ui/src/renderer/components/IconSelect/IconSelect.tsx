@@ -600,7 +600,12 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
             </div>
           )}
         </div>,
-        document.body
+        // Portal into the `.workbench` root when present (else `document.body`) —
+        // the SAME root the ECUI `Tooltip` / `ContextMenu` portal to. A body-level
+        // popup sits in a different stacking root than a workbench-level tooltip,
+        // so at equal z-index the popup covered the icon tooltip; sharing the root
+        // lets the later-rendered tooltip paint above the picker.
+        document.querySelector('.workbench') ?? document.body
       )}
     </div>
   )

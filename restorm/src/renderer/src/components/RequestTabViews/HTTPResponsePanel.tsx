@@ -1,4 +1,5 @@
 import { type CSSProperties, type ReactNode } from 'react'
+import i18n from 'i18next'
 import type { TFunction } from 'i18next'
 import {
   Button,
@@ -7,6 +8,7 @@ import {
   type ListViewItemData
 } from 'electron-core-ui/renderer'
 import type { HTTPResponse, KeyValue } from '../../../../shared/types/collections'
+import type { CookiePair } from '../../../../shared/cookies/cookieTypes'
 import type { OperationDocumentation } from '../../../../shared/types/apiDocumentation'
 import { ResponseInfoStatusCodeTooltip } from '../documentation/StatusCodeTooltip'
 import { statusCodeColor } from '../documentation/statusCodeColor'
@@ -125,7 +127,51 @@ function requestBodyToListItems(
 export interface HTTPResponseViewResult {
   infosContent: ReactNode | null
   responseContent: ReactNode | null
+  cookiesContent: ReactNode | null
   jsonData: unknown
+}
+
+/** Build a Sent/Received cookies tree for the response-side Cookies tab.
+ * Structurally typed on just the two cookie arrays so every protocol's response
+ * (all extend `BaseResponse`) can reuse it, not only HTTP. */
+export function buildCookiesContent(
+  response: { sentCookies?: CookiePair[] | undefined; receivedCookies?: CookiePair[] | undefined } | null
+): ReactNode | null {
+  if (!response) return null
+  // Localize via the global i18n instance so every protocol view gets the
+  // translated section labels without threading its own `t` in.
+  const tr = (key: string, fallback: string): string => i18n.t(key, { defaultValue: fallback })
+  const pairRows = (pairs: CookiePair[], prefix: string): ListViewItemData[] =>
+    pairs.map((c, i) => ({
+      id: `${prefix}-${i}`,
+      icon: 'blank',
+      title: (
+        <span style={flexRowStyle} data-testid={`${prefix}-row`} data-cookie-name={c.name}>
+          <span style={kvKeyStyle}>{c.name}</span>
+          <span style={kvValueStyle}>{c.value}</span>
+        </span>
+      )
+    }))
+  const section = (pairs: CookiePair[], id: string, label: string, icon: string, prefix: string): ListViewItemData => ({
+    id,
+    title: `${label} (${pairs.length})`,
+    icon,
+    isExpandable: true,
+    isExpanded: true,
+    children: pairs.length > 0
+      ? pairRows(pairs, prefix)
+      : [{ id: `${id}-empty`, icon: 'blank', title: <span style={kvValueStyle}>{tr('requestTab.responses.cookies.none', 'None')}</span> }]
+  })
+  const items: ListViewItemData[] = [
+    // 'call-outgoing' = sent (like the Infos request-headers group), 'call-incoming' = received.
+    section(response.sentCookies ?? [], 'cookies-sent', tr('requestTab.responses.cookies.sent', 'Sent'), 'call-outgoing', 'cookie-sent'),
+    section(response.receivedCookies ?? [], 'cookies-received', tr('requestTab.responses.cookies.received', 'Received'), 'call-incoming', 'cookie-received')
+  ]
+  return (
+    <div style={fullHeightBoxStyle}>
+      <ListView items={items} rootRole="tree" ariaLabel="Cookies sent and received" data-testid="http-response-cookies-list" />
+    </div>
+  )
 }
 
 /**
@@ -207,6 +253,8 @@ export function buildHttpResponseViewData(
         })
       }
     }
+    // (The old cookies chip that deep-linked to the global Cookie jar lived
+    // here; it's superseded by the dedicated per-request Cookies tab.)
     if (response.contentType) {
       generalItems.push({ id: 'general-content-type', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Content-Type</span><span>{response.contentType}</span></span> })
     }
@@ -318,5 +366,7 @@ export function buildHttpResponseViewData(
     }
   })()
 
-  return { infosContent, responseContent, jsonData }
+  const cookiesContent = buildCookiesContent(response)
+
+  return { infosContent, responseContent, cookiesContent, jsonData }
 }

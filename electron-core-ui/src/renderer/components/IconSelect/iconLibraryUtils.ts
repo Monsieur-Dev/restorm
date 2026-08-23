@@ -38,11 +38,23 @@ export const getIconoirNames = (): string[] => {
 // =============================================================================
 
 /**
+ * Non-icon members re-exported from the `@phosphor-icons/react` barrel.
+ * `IconContext` is a React context and `IconBase` is the internal base
+ * component (a forwardRef that reads `weights.get(...)` off a Map it only
+ * receives from a real icon). Both slip past the loose `isReactComponent`
+ * check, and rendering either as an icon crashes the app
+ * (`Cannot read properties of undefined (reading 'get')`) — so keep them out
+ * of the picker. (`SSR` is a namespace object and is already excluded by the
+ * component check, listed here for clarity.)
+ */
+const PHOSPHOR_NON_ICON_EXPORTS = new Set(['IconBase', 'IconContext', 'SSR'])
+
+/**
  * Get all Phosphor icon names (sorted alphabetically)
  */
 export const getPhosphorNames = (): string[] => {
   return Object.keys(PhosphorIcons)
-    .filter(key => /^[A-Z]/.test(key) && !key.endsWith('Icon') && isReactComponent((PhosphorIcons as Record<string, unknown>)[key]))
+    .filter(key => /^[A-Z]/.test(key) && !key.endsWith('Icon') && !PHOSPHOR_NON_ICON_EXPORTS.has(key) && isReactComponent((PhosphorIcons as Record<string, unknown>)[key]))
     .sort()
 }
 

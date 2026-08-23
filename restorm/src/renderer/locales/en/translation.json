@@ -427,7 +427,8 @@
         "response": "Response",
         "infos": "Infos",
         "requestBody": "Request body",
-        "graph": "Graph"
+        "graph": "Graph",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Sent At",
@@ -443,6 +444,11 @@
         "select": "Select a response to view details",
         "pin": "Pin response",
         "unpin": "Unpin response"
+      },
+      "cookies": {
+        "sent": "Sent",
+        "received": "Received",
+        "none": "None"
       }
     },
     "followRedirects": "Follow redirects",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Update a scenario",
     "updateScenarioNode": "Update a scenario node",
     "createInstance": "Create a new instance",
-    "terminateInstance": "Terminate an instance"
+    "terminateInstance": "Terminate an instance",
+    "listCookies": "List cookies",
+    "addCookie": "Add a cookie",
+    "removeCookie": "Remove a cookie",
+    "clearCookieDomain": "Clear cookies for a domain",
+    "clearCookies": "Clear all cookies"
   },
   "odataFilter": {
     "detail": {
@@ -2723,5 +2734,40 @@
       "unavailable": "Tokens are unavailable right now. Try again in a moment.",
       "plan-required": "Headless runs are part of the Pro plan. Upgrade to create tokens — you can still revoke the ones you already have."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Environment",
+    "noEnvironment": "No environment",
+    "clearAll": "Clear all",
+    "empty": "No cookies stored for this environment yet.",
+    "clearOrigin": "Clear cookies for {{domain}}",
+    "session": "Session",
+    "valueOf": "Value of {{name}}",
+    "save": "Save",
+    "deleteNamed": "Delete {{name}}",
+    "add": "Add",
+    "column": {
+      "name": "Name",
+      "value": "Value",
+      "path": "Path",
+      "expires": "Expires",
+      "flags": "Flags",
+      "actions": "Actions",
+      "domain": "Domain"
+    },
+    "openFor": "Open the Cookie Manager for {{domain}}",
+    "addTitle": "Add a cookie",
+    "addForOrigin": "Add a cookie for {{domain}}",
+    "cancel": "Cancel",
+    "confirmTitle": "Confirm",
+    "confirmDelete": "Delete the cookie \"{{name}}\"?",
+    "confirmClearOrigin": "Delete all cookies for {{domain}}?",
+    "confirmClearAll": "Delete every cookie in this environment?",
+    "deleteButton": "Delete",
+    "editTitle": "Edit a cookie",
+    "editNamed": "Edit {{name}}",
+    "confirmReplace": "A cookie named \"{{name}}\" already exists here. Replace it?",
+    "replaceButton": "Replace"
   }
 }

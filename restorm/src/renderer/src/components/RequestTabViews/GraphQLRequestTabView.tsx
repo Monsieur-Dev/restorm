@@ -55,6 +55,7 @@ import { conflictSafeBoolean } from '../../services/conflictSafeLiveState'
 import type { EntityFieldDiff } from '../../services/conflictFieldDiff'
 import { detectGraphqlOperationType } from '../../../../shared/utils/detectGraphqlOperationType'
 import { useUserDateFormat } from '../../hooks/useUserDateFormat'
+import { buildCookiesContent } from './HTTPResponsePanel'
 import './GraphQLSubscriptionEvents.css'
 
 /** One payload pushed by a subscription, kept in the live append-only list. */
@@ -579,6 +580,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           errors: res.errors,
           responseHeaders: [],
           timings: res.timings,
+          ...(res.sentCookies && res.sentCookies.length > 0 ? { sentCookies: res.sentCookies } : {}),
+          ...(res.receivedCookies && res.receivedCookies.length > 0 ? { receivedCookies: res.receivedCookies } : {}),
           // Propagate transport / network / cancellation error so the response
           // panel can surface it (e.g. 'Request cancelled', ECONNREFUSED).
           ...(res.error ? { error: res.error } : {})
@@ -807,10 +810,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       </div>
     ) : null
 
-    return { infosContent, responseContent, jsonData: resp ? { data: resp.data, errors: resp.errors } : undefined }
+    return { infosContent, responseContent, cookiesContent: buildCookiesContent(resp), jsonData: resp ? { data: resp.data, errors: resp.errors } : undefined }
   }, [])
 
-  const { infosContent, responseContent } = useMemo(
+  const { infosContent, responseContent, cookiesContent } = useMemo(
     () => buildGraphqlResponseView(response),
     [buildGraphqlResponseView, response]
   )
@@ -899,6 +902,8 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       errors: detail.response.errors,
       responseHeaders: toKeyValuesFromHistory(detail.response.responseHeaders),
       timings: detail.response.timings,
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
     return buildGraphqlResponseView(historyResponse)
@@ -1136,6 +1141,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         showResponse={isServer ? isListening : (isSubscription ? (isSubscribing || subscriptionEvents.length > 0) : response !== null)}
         infosContent={isServer ? undefined : (isSubscription ? subscriptionInfosContent : infosContent)}
         responseContent={isServer ? serverResponseContent : (isSubscription ? subscriptionContent : responseContent)}
+        cookiesContent={isServer ? undefined : cookiesContent}
         jsonData={isServer || isSubscription ? undefined : (response ? { data: response.data, errors: response.errors } : undefined)}
         showCodeSnippets={showCodeSnippets}
         notesDiffers={!!conflictFields?.['notes']}

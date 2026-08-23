@@ -189,6 +189,75 @@ When(
   }
 )
 
+/** Open the Cookie jar workbench tab (View ▸ Cookie jar) and select the
+ * default "No environment" jar, where the seeded cookies live. Idempotent: a
+ * language switch keeps the workbench tab open, so this reopens only when the
+ * panel is absent, then re-selects the root node whose cookies we captured. */
+async function openCookieJar(p: Page): Promise<void> {
+  const panel = p.getByTestId('cookie-jar')
+  if (!(await panel.isVisible())) {
+    // The View menu lives in the menubar at wide widths and collapses into an
+    // overflow/hamburger button at the narrow doc-capture width — tolerate both.
+    const cookiesItem = p.locator('[data-testid="titlebar-menu-item-cookies"]')
+    const inBarView = p.locator('[data-testid="titlebar-menubar-item-view"]')
+    if (await inBarView.isVisible().catch(() => false)) {
+      await inBarView.click({ force: true })
+    } else {
+      await p
+        .locator('[data-testid="titlebar-menubar-overflow-button"], [data-testid="titlebar-menubar-hamburger-button"]')
+        .first()
+        .click({ force: true })
+      const viewEntry = p.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
+      await viewEntry.waitFor({ state: 'visible', timeout: 15000 })
+      await viewEntry.hover()
+      await viewEntry.click({ force: true })
+    }
+    await cookiesItem.waitFor({ state: 'visible', timeout: 5000 })
+    await cookiesItem.click({ force: true })
+    await panel.waitFor({ state: 'visible' })
+  }
+  // The default "No environment" jar holds the seeded cookies.
+  await p.getByTestId('cookie-jar-tree-node-root').click()
+  await expect(p.getByTestId('cookie-jar-panes')).toBeVisible({ timeout: 10000 })
+}
+
+// A FIXED far-future expiry keeps the capture byte-identical run over run —
+// a relative `now + 7d` would render a different date every day and churn the
+// committed screenshots.
+const SEEDED_EXPIRY = '2035-06-01T00:00:00.000Z'
+
+When('I seed the cookie jar with example cookies', async () => {
+  const mcp = requireMcp()
+  const add = (input: Record<string, unknown>): Promise<unknown> => callEmbeddedMcpTool(mcp, 'add_cookie', input)
+  // A realistic spread: three origins, secure/httpOnly/SameSite flags, one
+  // persistent + two session cookies — the same set the cookie-manager e2e uses.
+  await add({ key: 'session_id', value: 's3cr3t-a1b2c3d4', domain: 'api.example.com', path: '/', secure: true, httpOnly: true, sameSite: 'Lax', expires: SEEDED_EXPIRY })
+  await add({ key: 'csrftoken', value: 'k9f2m1', domain: 'api.example.com', path: '/', secure: true })
+  await add({ key: 'theme', value: 'dark', domain: 'app.example.com', path: '/' })
+  await add({ key: 'cart', value: 'sku-42,sku-77', domain: 'shop.example.com', path: '/checkout' })
+})
+
+When('I open the Cookie jar', async () => {
+  await openCookieJar(requirePage())
+})
+
+When(
+  'I capture the Cookie jar for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      // The workbench tab survives a language switch, but re-assert it and the
+      // root selection per locale so a stray repaint can't photograph an empty
+      // or wrong-jar panel silently.
+      beforeShot: async () => { await openCookieJar(p) },
+      // The panel itself — the workbench chrome behind it carries nothing the
+      // documentation reader needs.
+      clipTo: () => p.getByTestId('cookie-jar')
+    })
+  }
+)
+
 When('I create a new project and import the ArtifactsMMO OpenAPI spec from its URL', async () => {
   const p = requirePage()
   // The project's absolute path shows in the status bar of every subsequent
@@ -337,11 +406,26 @@ When(
     await p.waitForTimeout(400)
     await p.locator('.react-flow__controls-fitview').click()
     await p.waitForTimeout(800)
+    await dismissExternalChangeToast(p)
   }
 )
+
+/** Authoring through the embedded MCP writes the project to disk, which the
+ * open-file watcher reports as an external change — a toast that must not ride
+ * into the scenario capture. Dismiss it (keeping the in-editor version) if it
+ * showed; a no-op when it didn't. */
+async function dismissExternalChangeToast(p: Page): Promise<void> {
+  const keepMine = p.getByTestId('file-external-change-keep-mine')
+  if (await keepMine.isVisible().catch(() => false)) {
+    await keepMine.click({ force: true })
+    await p.getByTestId('file-external-change-keep-mine').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => undefined)
+  }
+}
 
 When('I mark the scenario {string} as favorite', async ({}, _scenarioName: string) => {
   if (fightScenarioId === null) throw new Error('build the scenario first')
   await callEmbeddedMcpTool(requireMcp(), 'set_favorite', { itemId: fightScenarioId, favorite: true })
   await requirePage().waitForTimeout(500)
+  // set_favorite autosaves too — clear any external-change toast before capture.
+  await dismissExternalChangeToast(requirePage())
 })

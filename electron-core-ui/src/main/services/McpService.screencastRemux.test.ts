@@ -61,7 +61,7 @@ describe('remuxScreencastToMp4 (ffmpeg present → mp4, absent → webm fallback
   })
 
   it('invokes the injected ffmpeg path when the app provides one', () => {
-    const injected = '/opt/restorm/resources/ffmpeg'
+    const injected = '/opt/exampleapp/resources/ffmpeg'
     spawnSyncMock.mockImplementation(() => {
       writeFileSync(mp4Path, 'x')
       return { status: 0, error: undefined }

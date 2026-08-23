@@ -243,6 +243,20 @@ export interface McpLogsTab extends BaseRestormTab {
   tabType: 'mcp-logs'
 }
 
+/** Tab displaying the Cookie jar: the global view of every stored cookie,
+ * grouped per environment. Singleton, identified by `tabId`
+ * `cookie-jar:singleton`. Master-detail — an environment treeview on the left
+ * (Root "No environment" → env-folders → environments/sub-environments) and the
+ * cookie table for the selected environment on the right. Mounted by
+ * `RestormWorkbench`'s `renderTabContent` branch to a `<CookieJarPanel />`.
+ * Opened from `View → Cookie jar` and the response-panel "🍪" chip (which
+ * pre-selects the response's origin). */
+export interface CookieJarTab extends BaseRestormTab {
+  tabType: 'cookie-jar'
+  /** Origin to surface first when opened from a response chip. */
+  focusDomain?: string
+}
+
 /** Union of all restorm tab types */
 export type RestormEditorTab =
   | FolderTab
@@ -268,6 +282,7 @@ export type RestormEditorTab =
   | MiniBrowserTab
   | SettingsTab
   | McpLogsTab
+  | CookieJarTab
 
 /** Stable singleton id for the Console workbench tab.
  * `View → Console` and the focus-or-create logic both key off this. */
@@ -292,12 +307,17 @@ export const SETTINGS_TAB_ID = 'settings:singleton'
  * key from this stable id keeps the tab in the Ctrl+Tab MRU ordering. */
 export const MCP_LOGS_TAB_ID = 'mcp-logs:singleton'
 
+/** Stable singleton id for the Cookie jar workbench tab. `View → Cookie jar`
+ * and the response-panel cookie chip both open-or-focus this tab. */
+export const COOKIE_JAR_TAB_ID = 'cookie-jar:singleton'
+
 /** Every stable singleton tab id. These tabs have no entry in the project
  * tree, so anything that addresses a tab by item id has to recognise them
  * separately. */
 export const SINGLETON_TAB_IDS = [
   CONSOLE_TAB_ID,
   FIREWALL_TAB_ID,
+  COOKIE_JAR_TAB_ID,
   MINI_BROWSER_TAB_ID,
   SETTINGS_TAB_ID,
   MCP_LOGS_TAB_ID
@@ -454,4 +474,9 @@ export function isSettingsTab(tab: RestormEditorTab): tab is SettingsTab {
 
 export function isMcpLogsTab(tab: RestormEditorTab): tab is McpLogsTab {
   return tab.tabType === 'mcp-logs'
+}
+
+/** Type guard for CookieJarTab */
+export function isCookieJarTab(tab: RestormEditorTab): tab is CookieJarTab {
+  return tab.tabType === 'cookie-jar'
 }

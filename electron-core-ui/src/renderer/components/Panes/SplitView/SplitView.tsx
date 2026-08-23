@@ -363,7 +363,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 	// Fully-controlled mode: every pane provides an explicit `collapsed`
 	// prop. In that case the parent owns the truth on every render —
 	// the prop wins over the internal state, and toggles only fire
-	// `onCollapsedChange`. This is what restorm needs so that a remount
+	// `onCollapsedChange`. This is what the host needs so that a remount
 	// of the workbench tab (e.g. response panel appears → BaseRequestTabView
 	// swaps `<div>` for `<VerticalSashContainer>`, unmounting the
 	// SplitView) doesn't drop the user's collapsed selections — the

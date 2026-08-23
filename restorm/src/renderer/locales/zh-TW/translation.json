@@ -426,7 +426,8 @@
         "response": "回應",
         "infos": "資訊",
         "requestBody": "請求內文",
-        "graph": "圖表"
+        "graph": "圖表",
+        "cookies": "Cookie"
       },
       "infos": {
         "sentAt": "傳送時間",
@@ -442,6 +443,11 @@
         "select": "選取一筆回應以檢視詳細資料",
         "pin": "釘選回應",
         "unpin": "取消釘選回應"
+      },
+      "cookies": {
+        "sent": "已傳送",
+        "received": "已接收",
+        "none": "無"
       }
     },
     "followRedirects": "跟隨重新導向",
@@ -2295,7 +2301,12 @@
     "updateScenario": "更新情境",
     "updateScenarioNode": "更新情境節點",
     "createInstance": "建立新實例",
-    "terminateInstance": "終止實例"
+    "terminateInstance": "終止實例",
+    "listCookies": "列出 Cookie",
+    "addCookie": "新增 Cookie",
+    "removeCookie": "刪除 Cookie",
+    "clearCookieDomain": "清除某個網域的 Cookie",
+    "clearCookies": "清除所有 Cookie"
   },
   "odataFilter": {
     "detail": {
@@ -2722,5 +2733,40 @@
       "unavailable": "目前無法使用權杖。請稍後再試。",
       "plan-required": "無介面執行屬於 Pro 方案。升級至 Pro 即可建立權杖——你仍然可以撤銷既有的權杖。"
     }
+  },
+  "cookies": {
+    "title": "Cookie",
+    "environment": "環境",
+    "noEnvironment": "無環境",
+    "clearAll": "全部清除",
+    "empty": "此環境尚未儲存任何 Cookie。",
+    "clearOrigin": "清除 {{domain}} 的 Cookie",
+    "session": "工作階段",
+    "valueOf": "{{name}} 的值",
+    "save": "儲存",
+    "deleteNamed": "刪除 {{name}}",
+    "add": "新增",
+    "column": {
+      "name": "名稱",
+      "value": "值",
+      "path": "路徑",
+      "expires": "到期",
+      "flags": "旗標",
+      "actions": "動作",
+      "domain": "網域"
+    },
+    "openFor": "開啟 {{domain}} 的 Cookie 管理器",
+    "addTitle": "新增 Cookie",
+    "addForOrigin": "為 {{domain}} 新增 Cookie",
+    "cancel": "取消",
+    "confirmTitle": "確認",
+    "confirmDelete": "刪除 Cookie「{{name}}」？",
+    "confirmClearOrigin": "刪除 {{domain}} 的所有 Cookie？",
+    "confirmClearAll": "刪除此環境中的每一個 Cookie？",
+    "deleteButton": "刪除",
+    "editTitle": "編輯 Cookie",
+    "editNamed": "編輯 {{name}}",
+    "confirmReplace": "此處已存在名為「{{name}}」的 Cookie。是否取代？",
+    "replaceButton": "取代"
   }
 }

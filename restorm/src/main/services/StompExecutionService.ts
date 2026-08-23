@@ -15,6 +15,7 @@ import WebSocket from 'ws'
 import { BrowserWindow } from 'electron'
 import { logger, withFirewallBypassSync } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { attachSessionCookies, captureSessionCookies } from './cookieRequestHelpers'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
@@ -222,7 +223,14 @@ class StompExecutionService {
     // Electron's `ws` only accepts self-signed certs against `wss://` when
     // told to — acceptable for connecting to a local/dev/test broker (e.g.
     // the docker ActiveMQ mock), not a hardening concern for a client tool.
-    const wsOptions = resolvedUrl.startsWith('wss://') ? { rejectUnauthorized: false } : {}
+    // Attach the environment jar's cookies to the STOMP-over-WebSocket upgrade
+    // request (connection auth), and capture Set-Cookie from the 101 handshake.
+    const cookieHeaders: Record<string, string> = {}
+    attachSessionCookies(requestId, resolvedUrl, cookieHeaders)
+    const wsOptions = {
+      ...(resolvedUrl.startsWith('wss://') ? { rejectUnauthorized: false } : {}),
+      ...(Object.keys(cookieHeaders).length > 0 ? { headers: cookieHeaders } : {})
+    }
     // User-initiated connect — pre-authorise it so the firewall interceptor
     // sees the raw-socket connect as `allow`, mirroring the HTTP/WS runners.
     // Must OFFER the STOMP subprotocol: ActiveMQ / Spring brokers negotiate a
@@ -231,6 +239,7 @@ class StompExecutionService {
     // ("Server sent a subprotocol but none was requested" → close 1006) —
     // without this the handshake never reaches CONNECTED.
     const ws = withFirewallBypassSync(() => new WebSocket(resolvedUrl, ['v12.stomp', 'v11.stomp', 'v10.stomp'], wsOptions))
+    ws.on('upgrade', (res) => { captureSessionCookies(requestId, resolvedUrl, res.headers['set-cookie']) })
     const conn: ActiveStompConnection = { requestId, ws, connected: false, subscriptions: resolved.subscriptions, startTime: resolved.startTime, messages: [] }
     this.activeConnections.set(requestId, conn)
 

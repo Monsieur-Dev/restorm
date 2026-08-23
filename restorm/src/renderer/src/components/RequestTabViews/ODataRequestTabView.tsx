@@ -71,6 +71,8 @@ import { useAuthRequestResolver } from '../../contexts/authRequestResolverContex
 import type { KeyValueData } from '../../types/global.d'
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { buildCookiesContent } from './HTTPResponsePanel'
+import type { CookiePair } from '../../../../shared/cookies/cookieTypes'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { updateReactiveProperty } from './requestTabViewUtils'
@@ -187,6 +189,9 @@ interface ODataResponseViewData {
   batchWarnings?: string[]
   /** @odata.deltaLink captured from the response for delta tracking. */
   odataDeltaLink?: string
+  /** Cookies sent with the request / received in the response (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 export interface ODataRequestTabViewProps {
@@ -879,7 +884,9 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
           ...(result.error !== undefined && { error: result.error }),
           ...(batchSubResponses !== undefined && { batchSubResponses }),
           ...(capturedBatchWarnings.length > 0 && { batchWarnings: capturedBatchWarnings }),
-          ...(sendNormalized?.deltaLink !== undefined && { odataDeltaLink: sendNormalized.deltaLink })
+          ...(sendNormalized?.deltaLink !== undefined && { odataDeltaLink: sendNormalized.deltaLink }),
+          ...(result.sentCookies && result.sentCookies.length > 0 ? { sentCookies: result.sentCookies } : {}),
+          ...(result.receivedCookies && result.receivedCookies.length > 0 ? { receivedCookies: result.receivedCookies } : {})
         })
         setHistoryRefreshKey((prev) => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId } as RequestHistoryEventPayload)
@@ -2153,9 +2160,16 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
     })
   }, [response, request.odataVersion, request.operationKind, buildResponseView])
 
+  // Cookies tab — sent/received cookies for this request/env (live response).
+  const cookiesContent = useMemo(
+    () => buildCookiesContent(response ? { sentCookies: response.sentCookies, receivedCookies: response.receivedCookies } : null),
+    [response]
+  )
+
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail): {
     infosContent?: React.ReactNode | undefined
     responseContent?: React.ReactNode | undefined
+    cookiesContent?: React.ReactNode | undefined
     jsonData?: unknown
   } => {
     if (detail.response.type === 'odata') {
@@ -2182,6 +2196,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
       return {
         responseContent: view.responseContent,
         infosContent: view.infosContent,
+        cookiesContent: buildCookiesContent({
+          sentCookies: r.sentCookies?.map((c) => ({ name: c.key, value: c.value })),
+          receivedCookies: r.receivedCookies?.map((c) => ({ name: c.key, value: c.value }))
+        }),
         jsonData: view.jsonData
       }
     }
@@ -2209,10 +2227,14 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
       return {
         responseContent: view.responseContent,
         infosContent: view.infosContent,
+        cookiesContent: buildCookiesContent({
+          sentCookies: r.sentCookies?.map((c) => ({ name: c.key, value: c.value })),
+          receivedCookies: r.receivedCookies?.map((c) => ({ name: c.key, value: c.value }))
+        }),
         jsonData: view.jsonData
       }
     }
-    return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+    return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
   }, [buildResponseView, request.odataVersion, request.operationKind])
 
   const handleCloseHistoryModal = useCallback(() => {
@@ -2282,6 +2304,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
         showResponse={isServer ? isListening : response !== null}
         {...(isServer ? { responseContent: serverResponseContent } : responseContent !== undefined ? { responseContent } : {})}
         {...(isServer ? {} : infosContent !== undefined ? { infosContent } : {})}
+        {...(isServer || cookiesContent === null ? {} : { cookiesContent })}
         {...(isServer ? {} : jsonData !== undefined ? { jsonData } : {})}
         showCodeSnippets={showCodeSnippets}
         notesDiffers={!!conflictFields?.['notes']}

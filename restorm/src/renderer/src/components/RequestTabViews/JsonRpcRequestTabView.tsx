@@ -25,6 +25,8 @@ import type { JsonRpcRequest, KeyValue, ResponseHistoryDetail } from '../../../.
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { JsonRpcExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
+import { buildCookiesContent } from './HTTPResponsePanel'
+import type { CookiePair } from '../../../../shared/cookies/cookieTypes'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { updateReactiveProperty } from './requestTabViewUtils'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
@@ -54,6 +56,8 @@ interface JsonRpcResponseView {
   result?: unknown
   error?: { code: number; message: string; data?: unknown }
   transportError?: string
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ request }) => {
@@ -264,7 +268,9 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
           ...(res.notificationSent !== undefined ? { notificationSent: res.notificationSent } : {}),
           ...(res.result !== undefined ? { result: res.result } : {}),
           ...(res.error !== undefined ? { error: res.error } : {}),
-          ...(res.transportError !== undefined ? { transportError: res.transportError } : {})
+          ...(res.transportError !== undefined ? { transportError: res.transportError } : {}),
+          ...(res.sentCookies ? { sentCookies: res.sentCookies } : {}),
+          ...(res.receivedCookies ? { receivedCookies: res.receivedCookies } : {})
         })
         setHistoryRefreshKey(prev => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
@@ -344,7 +350,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
   const buildJsonRpcResponseView = useCallback((resp: JsonRpcResponseView | null) => {
-    if (!resp) return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+    if (!resp) return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
 
     const infosContent = (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }} data-testid="jsonrpc-response-infos">
@@ -409,18 +415,19 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
     return {
       infosContent,
       responseContent,
+      cookiesContent: buildCookiesContent(resp),
       jsonData: resp.notificationSent ? undefined : (resp.error !== undefined ? { error: resp.error } : { result: resp.result })
     }
   }, [t])
 
-  const { infosContent, responseContent, jsonData } = useMemo(
+  const { infosContent, responseContent, cookiesContent, jsonData } = useMemo(
     () => buildJsonRpcResponseView(response),
     [buildJsonRpcResponseView, response]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'jsonrpc') {
-      return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
+      return { infosContent: undefined, responseContent: undefined, cookiesContent: undefined, jsonData: undefined }
     }
     const historyResponse: JsonRpcResponseView = {
       requestUrl: detail.response.requestUrl,
@@ -429,6 +436,8 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
       ...(detail.response.notificationSent !== undefined ? { notificationSent: detail.response.notificationSent } : {}),
       ...(detail.response.result !== undefined ? { result: detail.response.result } : {}),
       ...(detail.response.rpcError !== undefined ? { error: detail.response.rpcError } : {}),
+      ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
+      ...(detail.response.receivedCookies ? { receivedCookies: detail.response.receivedCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),
       ...(detail.response.error !== undefined ? { transportError: detail.response.error } : {})
     }
     return buildJsonRpcResponseView(historyResponse)
@@ -540,6 +549,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
         showResponse={response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
+        cookiesContent={cookiesContent}
         jsonData={jsonData}
       />
       <ResponseHistoryModal

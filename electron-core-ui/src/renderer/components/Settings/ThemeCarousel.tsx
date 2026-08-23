@@ -19,7 +19,7 @@ interface ThemeCarouselProps {
    * routes through the scope-aware `setSetting` /
    * `setWorkspaceSetting` flow instead — without that override, a
    * theme picked from the Workspace tab never lands in
-   * `<dir>/.restorm/settings.json`.
+   * the host's workspace settings file.
    */
   onSelect?: (themeId: string) => void
 }

@@ -749,10 +749,13 @@ export function registerRestormIPC(deps: {
     // Resolved secrets are equally collection-scoped: drop every cached
     // credential so a freshly opened file re-fetches from its providers.
     secretHydrationService.clearAll()
-    // Session cookies (Set-Cookie store / Cookie re-send) are likewise
-    // scoped to the open collection — clear the jar so a freshly opened
-    // file starts with no inherited cookies.
-    httpExecutionService.clearCookies()
+    // Cookies are now persisted per project and swapped by the file-open
+    // lifecycle: `index.ts`'s `onStateChanged` calls `cookieJarService.setProject`
+    // (null on close → flush persistent cookies to disk + drop the in-memory
+    // jars; the project id on the next open → reload them). Clearing the jar
+    // here would erase the just-saved persistent cookies, so it's intentionally
+    // gone — session cookies still don't survive because only expiring cookies
+    // are written to disk.
   })
 
   // ==========================================================================

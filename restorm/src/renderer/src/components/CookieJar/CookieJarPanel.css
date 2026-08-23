@@ -1,0 +1,263 @@
+/* Cookie jar workbench tab — master-detail. Colours from theme variables so
+   the panel follows every theme. */
+
+.cookie-jar {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  background: var(--editor-background);
+  color: var(--foreground);
+}
+
+/* ── Left: environment treeview ─────────────────────────────────────────── */
+.cookie-jar-tree {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--panel-border, rgba(255, 255, 255, 0.08));
+  box-sizing: border-box;
+}
+
+.cookie-jar-tree-inner {
+  padding: 6px 0;
+}
+
+.cookie-jar-tree-folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 2px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--descriptionForeground, #8a97a8);
+}
+
+.cookie-jar-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.cookie-jar-tree-node:hover {
+  background: var(--list-hoverBackground, rgba(255, 255, 255, 0.06));
+}
+
+.cookie-jar-tree-node.selected {
+  background: var(--list-activeSelectionBackground, rgba(124, 92, 255, 0.25));
+  color: var(--list-activeSelectionForeground, inherit);
+}
+
+.cookie-jar-tree-node-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Right: cookie detail ───────────────────────────────────────────────── */
+.cookie-jar-detail {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cookie-jar-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--panel-border, rgba(255, 255, 255, 0.08));
+}
+
+.cookie-jar-detail-title {
+  font-weight: 600;
+}
+
+.cookie-jar-spacer {
+  flex: 1;
+}
+
+.cookie-jar-detail-body {
+  padding: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.cookie-jar-empty {
+  margin: 0;
+  color: var(--descriptionForeground, #8a97a8);
+  font-size: 0.9rem;
+}
+
+/* The detail body is a scrollable stack of content-sized StaticPanes (one per
+   domain) — each hugs its rows, and the whole list scrolls (ScrollableElement). */
+.cookie-jar-panes-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.cookie-jar-panes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+/* The collapse toggle in a pane header: chevron + domain, fills the header row
+   so the whole title area is clickable. */
+.cookie-jar-pane-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.cookie-jar-pane-domain {
+  font-weight: 600;
+}
+
+.cookie-jar-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  /* Fixed layout with a shared colgroup → columns line up across every pane. */
+  table-layout: fixed;
+  /* Keep the value column ≥ 100px even in a narrow tab: the fixed columns sum
+     to 648px, so a 748px table floor leaves the value column at least 100px;
+     below that the pane list scrolls horizontally rather than squishing it. */
+  min-width: 748px;
+}
+
+/* Shared column widths (identical in every pane) — the value column takes the
+   remaining space, sitting just before the actions per Yoann's ordering. */
+.cj-col-name { width: 160px; }
+.cj-col-path { width: 72px; }
+.cj-col-expires { width: 150px; }
+.cj-col-flags { width: 190px; }
+.cj-col-value { width: auto; }
+.cj-col-actions { width: 76px; }
+
+/* Single-line columns (name / path / expiry) ellipsize on overflow; value and
+   flags wrap instead (see below), so the row grows rather than clipping. */
+.cookie-jar-table th,
+.cookie-jar-name,
+.cookie-jar-muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cells whose text the user can select / copy (name, path, expiry, value). */
+.cookie-jar-selectable {
+  user-select: text;
+  cursor: text;
+}
+
+.cookie-jar-table th {
+  text-align: left;
+  padding: 4px 8px;
+  color: var(--descriptionForeground, #8a97a8);
+  font-weight: 500;
+}
+
+.cookie-jar-table td {
+  padding: 4px 8px;
+  vertical-align: middle;
+}
+
+/* Tinted icon badge for an environment node in the treeview. */
+.cookie-jar-env-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.cookie-jar-name {
+  font-family: var(--monospace-font, monospace);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The value is plain, selectable (non-editable) text that greedily fills the
+   column; long token values wrap rather than stretch the table. */
+.cookie-jar-value-text {
+  display: block;
+  user-select: text;
+  cursor: text;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-family: var(--monospace-font, monospace);
+  font-size: 0.82rem;
+}
+
+/* Actions column stays a normal table cell (so it aligns on the row); the two
+   icon buttons sit in an inline-flex wrapper — putting `display:flex` on the
+   <td> itself drops it out of the row. */
+.cookie-jar-actions-cell {
+  text-align: right;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.cookie-jar-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cookie-jar-muted {
+  color: var(--descriptionForeground, #8a97a8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cookie-jar-flags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.cookie-jar-flag {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--badge-background, rgba(124, 92, 255, 0.12));
+  color: var(--badge-foreground, #7c5cff);
+  font-size: 0.72rem;
+}
+
+
+.cookie-jar-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px;
+}
+
+.cookie-jar-confirm-message {
+  margin: 0;
+}
+
+.cookie-jar-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

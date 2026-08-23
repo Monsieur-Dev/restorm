@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie jar — jeden słoik ciasteczek na środowisko.**
+
+- **Każde środowisko przechowuje własne ciasteczka.** Zaloguj się do swojego API deweloperskiego i produkcyjnego z dwóch środowisk, a ich sesje nigdy się nie przenikają — ciasteczko przechwycone w jednym jest odsyłane wyłącznie w tym samym. Wygasanie, `Path`, `Domain` i subdomeny, `Secure`, `HttpOnly` oraz `SameSite` są teraz respektowane, a nie odrzucane.
+- **Poznaj Cookie jar.** Nowa zakładka warsztatu — **Widok ▸ Cookie jar** — wyświetla ciasteczka każdego środowiska pogrupowane według domeny w zwijanych panelach: zmień wartość, usuń pojedyncze, wyczyść domenę lub cały słoik albo dodaj ciasteczko ręcznie. Odświeża się na żywo, w miarę jak Twoje żądania ustawiają ciasteczka.
+- **Zobacz, co każde żądanie wysłało i otrzymało.** Każde żądanie ma teraz zakładkę **Cookies** obok Odpowiedzi i Informacji, pokazującą ciasteczka wysłane wraz z wywołaniem oraz ciasteczka otrzymane w odpowiedzi — w tym ciasteczka ustawione przy przekierowaniu, które nigdy nie trafiają do końcowej odpowiedzi. Jest dostępna także dla wcześniejszych odpowiedzi z Twojej historii.
+- **Logowanie przez ciasteczka po prostu działa.** Żądanie, które zwraca `Set-Cookie`, jest przechwytywane i automatycznie odtwarzane w kolejnych chronionych wywołaniach — również w trakcie uruchomienia scenariusza, gdzie każdy krok korzysta ze wspólnego słoika środowiska.
+- **Ciasteczka są utrwalane jak w przeglądarce.** Ciasteczka z datą wygaśnięcia są zapisywane osobno dla każdego projektu i wczytywane ponownie po jego otwarciu; ciasteczka sesyjne są odrzucane przy ponownym uruchomieniu — dokładnie tak, jak zrobiłaby to przeglądarka.
+- **Więcej niż REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC i SSE wysyłają i przechowują teraz ciasteczka, a WebSocket przenosi je podczas nawiązywania połączenia.
+- **Ciasteczka mogą korzystać z Twoich zmiennych.** Wpisz `{{token}}` w ręcznie dodanym ciasteczku, a jego wartość zostanie rozwinięta względem aktywnego środowiska w chwili wysłania żądania.
+
+Poprawki:
+
+- **Automatyczny zapis obejmuje teraz środowiska wewnątrz folderów.** Dodanie lub zmiana nazwy podśrodowiska jest w trybie automatycznego zapisu zapisywane od razu — koniec z pytaniem „zapisać przed zamknięciem?" o zmianę, która i tak miała już znaleźć się na dysku.
+
 ## v1.0.4
 
 **Jedno logowanie — wszystkie okna podążają.**

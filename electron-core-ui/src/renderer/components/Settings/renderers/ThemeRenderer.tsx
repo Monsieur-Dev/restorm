@@ -8,7 +8,7 @@ import type { SettingRendererProps } from './types'
  * this the carousel called `window.api.theme.set` directly and
  * bypassed the Workspace overlay (the user could pick a theme from
  * the Workspace tab and it'd never land in
- * `<dir>/.restorm/settings.json`).
+ * the host's workspace settings file).
  */
 export const ThemeRenderer: React.FC<SettingRendererProps> = ({ onChange }) => {
   const handleSelect = useCallback((themeId: string) => {

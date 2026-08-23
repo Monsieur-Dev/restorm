@@ -121,7 +121,7 @@ export async function callMcpToolOverJsonRpc(discovery: McpDiscovery, name: stri
 }
 
 /** Poll for the discovery file a launched host writes on boot (`--mcp-
- * discovery-file=<path>` or the default `os.tmpdir()/restorm-mcp/<pid>.json`
+ * discovery-file=<path>` or the default host-named temp dir `os.tmpdir()/<host>-mcp/<pid>.json`
  * location) — main-process boot finishes writing it asynchronously, so a
  * bare `existsSync` right after launch is a race. */
 export async function readMcpDiscoveryWithRetry(path: string, timeoutMs = 15_000): Promise<McpDiscovery> {

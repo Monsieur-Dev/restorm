@@ -427,7 +427,8 @@
         "response": "Përgjigjja",
         "infos": "Informacione",
         "requestBody": "Trupi i kërkesës",
-        "graph": "Grafiku"
+        "graph": "Grafiku",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Dërguar më",
@@ -443,6 +444,11 @@
         "select": "Zgjidh një përgjigje për të parë detajet",
         "pin": "Fikso përgjigjen",
         "unpin": "Hiq fiksimin e përgjigjes"
+      },
+      "cookies": {
+        "sent": "Të dërguara",
+        "received": "Të marra",
+        "none": "Asnjë"
       }
     },
     "followRedirects": "Ndiq ridrejtimet",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Përditëso një skenar",
     "updateScenarioNode": "Përditëso një nyje skenari",
     "createInstance": "Krijo një instancë të re",
-    "terminateInstance": "Mbyll një instancë"
+    "terminateInstance": "Mbyll një instancë",
+    "listCookies": "Listo cookie-t",
+    "addCookie": "Shto një cookie",
+    "removeCookie": "Hiq një cookie",
+    "clearCookieDomain": "Pastro cookie-t e një domeni",
+    "clearCookies": "Pastro të gjitha cookie-t"
   },
   "odataFilter": {
     "detail": {
@@ -2723,5 +2734,40 @@
       "unavailable": "Tokenat nuk janë të disponueshëm për momentin. Provoni pas pak.",
       "plan-required": "Ekzekutimet pa ndërfaqe janë pjesë e planit Pro. Kaloni te Pro për të krijuar tokena — ata që keni tashmë mund t'i revokoni gjithsesi."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Mjedisi",
+    "noEnvironment": "Pa mjedis",
+    "clearAll": "Pastro të gjitha",
+    "empty": "Ende nuk ka cookie të ruajtura për këtë mjedis.",
+    "clearOrigin": "Pastro cookie-t për {{domain}}",
+    "session": "Sesioni",
+    "valueOf": "Vlera e {{name}}",
+    "save": "Ruaj",
+    "deleteNamed": "Fshi {{name}}",
+    "add": "Shto",
+    "column": {
+      "name": "Emri",
+      "value": "Vlera",
+      "path": "Rruga",
+      "expires": "Skadon",
+      "flags": "Flamujt",
+      "actions": "Veprimet",
+      "domain": "Domeni"
+    },
+    "openFor": "Hap menaxherin e cookie-ve për {{domain}}",
+    "addTitle": "Shto një cookie",
+    "addForOrigin": "Shto një cookie për {{domain}}",
+    "cancel": "Anulo",
+    "confirmTitle": "Konfirmim",
+    "confirmDelete": "Ta fshini cookie-n «{{name}}»?",
+    "confirmClearOrigin": "T'i fshini të gjitha cookie-t për {{domain}}?",
+    "confirmClearAll": "T'i fshini të gjitha cookie-t e këtij mjedisi?",
+    "deleteButton": "Fshi",
+    "editTitle": "Redakto një cookie",
+    "editNamed": "Redakto {{name}}",
+    "confirmReplace": "Këtu ekziston tashmë një cookie me emrin «{{name}}». Ta zëvendësoni?",
+    "replaceButton": "Zëvendëso"
   }
 }

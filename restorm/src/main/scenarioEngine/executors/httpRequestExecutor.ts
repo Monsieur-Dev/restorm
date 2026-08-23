@@ -190,6 +190,8 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
             headers: result.headers ?? {},
             body: result.body,
             durationMs: result.timings.durationMs,
+            ...(result.sentCookies?.length ? { sentCookies: result.sentCookies } : {}),
+            ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies } : {}),
             // `success` reflects the HTTP status class (2xx), like the web
             // `Response.ok`, NOT mere transport completion — so an `if`/`assert`
             // wired to `response.success` treats a 4xx/5xx as a failure. A
@@ -237,6 +239,8 @@ async function runGraphqlUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
             headers: result.headers ?? {},
             body,
             durationMs: result.timings.durationMs,
+            ...(result.sentCookies?.length ? { sentCookies: result.sentCookies } : {}),
+            ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies } : {}),
             success: result.success,
             ...(result.error !== undefined ? { error: result.error } : {})
           }
@@ -276,6 +280,8 @@ async function runJsonRpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): 
             headers: {},
             body,
             durationMs: result.timings.durationMs,
+            ...(result.sentCookies?.length ? { sentCookies: result.sentCookies } : {}),
+            ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies } : {}),
             success: result.success && result.error === undefined,
             ...(result.transportError !== undefined ? { error: result.transportError } : {})
           }
@@ -309,6 +315,8 @@ async function runJsonRpcBatch(req: Request, ctx: Parameters<NodeExecutor>[1]): 
             headers: {},
             body,
             durationMs: result.timings.durationMs,
+            ...(result.sentCookies?.length ? { sentCookies: result.sentCookies } : {}),
+            ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies } : {}),
             success: result.success,
             ...(result.transportError !== undefined ? { error: result.transportError } : {})
           }
@@ -345,6 +353,8 @@ async function runTrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Pro
             headers: result.headers ?? {},
             body: JSON.stringify(result.data !== undefined ? result.data : null),
             durationMs: result.timings.durationMs,
+            ...(result.sentCookies?.length ? { sentCookies: result.sentCookies } : {}),
+            ...(result.receivedCookies?.length ? { receivedCookies: result.receivedCookies } : {}),
             success: result.success,
             ...(result.error !== undefined ? { error: result.error } : {})
           }

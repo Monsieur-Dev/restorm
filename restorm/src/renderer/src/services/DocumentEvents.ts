@@ -81,7 +81,14 @@ export const DocumentEvents = {
    * `requestExecutingStore`.
    */
   REQUEST_EXECUTION_STARTED: 'request:execution:started',
-  REQUEST_EXECUTION_ENDED: 'request:execution:ended'
+  REQUEST_EXECUTION_ENDED: 'request:execution:ended',
+  /**
+   * The per-environment cookie jar changed — a response captured a Set-Cookie,
+   * or a jar was edited/cleared. The main process broadcasts it after any jar
+   * mutation; the Cookie jar tab and per-request Cookies tabs re-read their
+   * list so an open view follows a live capture without polling.
+   */
+  COOKIES_CHANGED: 'cookies:changed'
 } as const
 
 export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEvents]

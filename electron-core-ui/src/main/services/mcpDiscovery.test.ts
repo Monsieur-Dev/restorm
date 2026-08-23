@@ -240,7 +240,7 @@ describe('probeMcpEndpoint', () => {
     expect(received?.auth).toBe('Bearer probe-token')
   })
 
-  // The probe must carry the x-mcp-forwarded marker so restorm's main-process
+  // The probe must carry the x-mcp-forwarded marker so the host app's main-process
   // firewall recognises it as the app's own inter-instance MCP-infra traffic
   // and exempts it (no "outbound request blocked" prompt). Without this the
   // list-instances discovery probe to a peer would be firewall-gated and the
@@ -278,15 +278,15 @@ describe('MCP-cut instances — dual discovery view', () => {
 
   async function writeActive(): Promise<void> {
     await writeMcpDiscoveryFile(DIR, {
-      port: 40123, projectPath: '/tmp/active.restorm', pid: ACTIVE_PID,
+      port: 40123, projectPath: '/tmp/active.app', pid: ACTIVE_PID,
       startedAt: '2026-05-03T00:00:00.000Z', token: 'tok', name: ACTIVE_NAME, mcpActive: true
     })
   }
-  // Mirrors restorm's cut-marker write: port 0, mcpActive:false, and an EMPTY
+  // Mirrors the host app's cut-marker write: port 0, mcpActive:false, and an EMPTY
   // token (defence-in-depth — a cut instance never persists a usable secret).
   async function writeCut(): Promise<void> {
     await writeMcpDiscoveryFile(DIR, {
-      port: 0, projectPath: '/tmp/cut.restorm', pid: CUT_PID,
+      port: 0, projectPath: '/tmp/cut.app', pid: CUT_PID,
       startedAt: '2026-05-03T00:00:01.000Z', token: '', name: CUT_NAME, mcpActive: false
     })
   }
@@ -309,7 +309,7 @@ describe('MCP-cut instances — dual discovery view', () => {
     expect(active?.mcpActive).toBe(true)
     expect(cut?.mcpActive).toBe(false)
     // The internal view carries the open file for the create-uniqueness check.
-    expect(cut?.projectPath).toBe('/tmp/cut.restorm')
+    expect(cut?.projectPath).toBe('/tmp/cut.app')
     // ...and never the bearer token (collision-only view).
     expect(cut).not.toHaveProperty('token')
   })

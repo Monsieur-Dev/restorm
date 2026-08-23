@@ -129,7 +129,7 @@ import type { WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 
 import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting, LIST_VIEW_DRAG_MIME, LIST_VIEW_MULTI_DRAG_MIME } from 'electron-core-ui/renderer'
 import type { SplitDirection } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab } from '../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, COOKIE_JAR_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab, type CookieJarTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 import { pruneOrphanTabs, tabMatchesItem } from './utils/workbenchTabs'
 import { findTopLevelEnvironment } from './utils/envSaveUnit'
@@ -137,6 +137,7 @@ import { snapshotMirrorPayload } from './utils/mirrorPayload'
 
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
+import { COOKIE_MANAGER_OPEN, type CookieManagerOpenPayload } from './components/cookieManagerEvents'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { UpdateNotifications } from './components/UpdateNotifications'
 import { CrashConsentPrompt } from './components/Privacy/CrashConsentPrompt'
@@ -1022,6 +1023,69 @@ const App: React.FC = () => {
       return { ...prev, groups: [newGroup] }
     })
   }, [setWorkbenchTree, focusedGroupId])
+
+  /**
+   * `View → Cookie jar` handler (and the response-panel cookie chip). Singleton
+   * tab (id = `cookie-jar:singleton`), same focus-or-create pattern as Firewall.
+   * `focusDomain` (from a chip) pre-selects the jar holding that origin.
+   */
+  const handleOpenCookieJar = useCallback((focusDomain?: string) => {
+    navigationService.navigateTo(COOKIE_JAR_TAB_ID, 'workbench', { type: 'special' })
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, COOKIE_JAR_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: COOKIE_JAR_TAB_ID }))
+        }
+      }
+      const cookieJarTab: CookieJarTab = {
+        id: COOKIE_JAR_TAB_ID,
+        tabType: 'cookie-jar',
+        title: 'Cookie jar',
+        titleString: 'Cookie jar',
+        allowFullscreen: true,
+        ...(focusDomain !== undefined ? { focusDomain } : {})
+      }
+      const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) return node
+          if (isContainerNode(node)) {
+            const inner = findFirstTabGroup(node.groups)
+            if (inner !== null) return inner
+          }
+        }
+        return null
+      }
+      const targetId = focusedGroupId !== null && hasGroupWithId(prev.groups, focusedGroupId)
+        ? focusedGroupId
+        : (findFirstTabGroup(prev.groups)?.id ?? null)
+      if (targetId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, targetId, group => ({
+            ...group,
+            tabs: [...group.tabs, cookieJarTab],
+            activeTabId: COOKIE_JAR_TAB_ID
+          }))
+        }
+      }
+      const newGroup: TabGroupNode = {
+        id: `cookie-jar-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [cookieJarTab],
+        activeTabId: COOKIE_JAR_TAB_ID
+      }
+      return { ...prev, groups: [newGroup] }
+    })
+  }, [setWorkbenchTree, focusedGroupId])
+
+  // The response-panel "🍪" chip asks to open the Cookie jar on a given origin.
+  useEffect(() => {
+    const sub = eventBus.subscribe<CookieManagerOpenPayload>(COOKIE_MANAGER_OPEN, (payload) => {
+      handleOpenCookieJar(payload.focusDomain)
+    })
+    return () => { sub.unsubscribe() }
+  }, [handleOpenCookieJar])
 
   /**
    * Settings handler used when a workbench is active. Singleton tab
@@ -3188,8 +3252,16 @@ const App: React.FC = () => {
       let document: unknown = payload.document
       let parentId = payload.parentFolderId
       if (payload.type === 'environment' && payload.parentEnvironmentId !== undefined) {
+        // Resolve the top-level owner from the PARENT env id, which always
+        // already exists in the tree — NOT from the just-created sub-env id,
+        // which a CREATE event can race ahead of `rootItemsRef` (the ref is
+        // synced by an effect that runs after the synchronous emit), leaving
+        // the owner unresolved → the change was silently skipped, so a new
+        // sub-env never marked its owner dirty and autosave never ran. Mirrors
+        // the delete path below; falls back to the node's own id for safety.
         const topEnv = payload.parentFolderId !== undefined
-          ? findTopLevelEnvironment(rootItemsRef.current, payload.parentFolderId, payload.id)
+          ? (findTopLevelEnvironment(rootItemsRef.current, payload.parentFolderId, payload.parentEnvironmentId)
+              ?? findTopLevelEnvironment(rootItemsRef.current, payload.parentFolderId, payload.id))
           : null
         if (!topEnv || topEnv.id === payload.id) {
           logger.warn('[App] upsertSaveUnit: sub-env owner not resolved, skipping', { id: payload.id })
@@ -3510,6 +3582,7 @@ const App: React.FC = () => {
         onSearchResultClick={handleSearchResultClick}
         onOpenConsole={handleOpenConsole}
         onOpenFirewall={handleOpenFirewall}
+        onOpenCookieJar={handleOpenCookieJar}
         onOpenMiniBrowser={handleOpenMiniBrowser}
         onOpenMcpLogs={handleOpenMcpLogs}
         onGitPush={handleGitPush}

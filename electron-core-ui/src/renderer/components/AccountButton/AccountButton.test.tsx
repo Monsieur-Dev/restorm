@@ -13,7 +13,7 @@ const PRO: AuthState = { signedIn: true, user: { email: 'a@b.com' }, plan: 'pro'
 const MEMBER_PRO: AuthState = { signedIn: true, user: { email: 'seat@b.com' }, plan: 'pro', role: 'member', capabilities: [] }
 const MEMBER_COMMUNITY: AuthState = { signedIn: true, user: { email: 'seat@b.com' }, plan: 'community', role: 'member', capabilities: [] }
 
-const DASHBOARD = 'https://my.restorm.app'
+const DASHBOARD = 'https://my.example.com'
 
 const account = {
   login: vi.fn(() => Promise.resolve(SIGNED_OUT)),

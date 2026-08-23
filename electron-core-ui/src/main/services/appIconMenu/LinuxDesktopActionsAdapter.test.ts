@@ -81,13 +81,13 @@ describe('LinuxDesktopActionsAdapter', () => {
   })
 
   it('writes a user override that appends favorites to the packaged actions', () => {
-    makeAdapter().apply(withFavorites([{ path: '/home/u/proj.restorm', name: 'proj' }]), () => undefined)
+    makeAdapter().apply(withFavorites([{ path: '/home/u/proj.app', name: 'proj' }]), () => undefined)
     const out = readFileSync(overridePath(), 'utf8')
     expect(out).toContain('Actions=new;fav0;')
     expect(out).toContain('[Desktop Action fav0]')
     expect(out).toContain('Name=proj')
     expect(out).toContain('Icon=emblem-favorite')
-    expect(out).toContain('Exec=/opt/TestApp/testapp-bin "/home/u/proj.restorm"')
+    expect(out).toContain('Exec=/opt/TestApp/testapp-bin "/home/u/proj.app"')
     // packaged fields + the static "new" action are carried over untouched
     expect(out).toContain('StartupWMClass=testapp')
     expect(out).toContain('[Desktop Action new]')
@@ -97,7 +97,7 @@ describe('LinuxDesktopActionsAdapter', () => {
 
   it('removes its own override when there are no favorites', () => {
     const adapter = makeAdapter()
-    adapter.apply(withFavorites([{ path: '/p.restorm', name: 'p' }]), () => undefined)
+    adapter.apply(withFavorites([{ path: '/p.app', name: 'p' }]), () => undefined)
     expect(existsSync(overridePath())).toBe(true)
     adapter.apply(noFavorites(), () => undefined)
     expect(existsSync(overridePath())).toBe(false)
@@ -114,7 +114,7 @@ describe('LinuxDesktopActionsAdapter', () => {
   it('never overwrites a foreign override when adding favorites', () => {
     mkdirSync(join(dataHome, 'applications'), { recursive: true })
     writeFileSync(overridePath(), '[Desktop Entry]\nName=Hand written\n')
-    makeAdapter().apply(withFavorites([{ path: '/p.restorm', name: 'p' }]), () => undefined)
+    makeAdapter().apply(withFavorites([{ path: '/p.app', name: 'p' }]), () => undefined)
     const out = readFileSync(overridePath(), 'utf8')
     expect(out).toContain('Hand written')
     expect(out).not.toContain('X-AppIconMenu-Managed')

@@ -71,7 +71,7 @@ describe('verifyEntitlementToken', () => {
     const token = await signEntitlement({
       privateKey: keys.privateKey,
       iatSeconds: IAT,
-      audience: 'restorm-session'
+      audience: 'ecui-session'
     })
     await expect(verifyEntitlementToken(token, keys.publicSpkiPem, { now: at(60), audience: ENTITLEMENT_AUD })).rejects.toThrow()
   })

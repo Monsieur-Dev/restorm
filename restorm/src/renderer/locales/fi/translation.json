@@ -427,7 +427,8 @@
         "response": "Vastaus",
         "infos": "Tiedot",
         "requestBody": "Pyynnön sisältö",
-        "graph": "Kaavio"
+        "graph": "Kaavio",
+        "cookies": "Evästeet"
       },
       "infos": {
         "sentAt": "Lähetetty",
@@ -443,6 +444,11 @@
         "select": "Valitse vastaus nähdäksesi yksityiskohdat",
         "pin": "Kiinnitä vastaus",
         "unpin": "Poista kiinnitys"
+      },
+      "cookies": {
+        "sent": "Lähetetyt",
+        "received": "Vastaanotetut",
+        "none": "Ei mitään"
       }
     },
     "followRedirects": "Seuraa uudelleenohjauksia",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Päivitä skenaario",
     "updateScenarioNode": "Päivitä skenaarion solmu",
     "createInstance": "Luo uusi instanssi",
-    "terminateInstance": "Lopeta instanssi"
+    "terminateInstance": "Lopeta instanssi",
+    "listCookies": "Luettele evästeet",
+    "addCookie": "Lisää eväste",
+    "removeCookie": "Poista eväste",
+    "clearCookieDomain": "Tyhjennä verkkotunnuksen evästeet",
+    "clearCookies": "Tyhjennä kaikki evästeet"
   },
   "odataFilter": {
     "detail": {
@@ -2723,5 +2734,40 @@
       "unavailable": "Tunnukset eivät ole juuri nyt käytettävissä. Yritä hetken kuluttua uudelleen.",
       "plan-required": "Käyttöliittymättömät ajot kuuluvat Pro-tilaukseen. Siirry Pro-tilaukseen luodaksesi tunnuksia — voit yhä kumota jo olemassa olevat."
     }
+  },
+  "cookies": {
+    "title": "Evästeet",
+    "environment": "Ympäristö",
+    "noEnvironment": "Ei ympäristöä",
+    "clearAll": "Tyhjennä kaikki",
+    "empty": "Tähän ympäristöön ei ole vielä tallennettu evästeitä.",
+    "clearOrigin": "Tyhjennä evästeet kohteelle {{domain}}",
+    "session": "Istunto",
+    "valueOf": "{{name}} arvo",
+    "save": "Tallenna",
+    "deleteNamed": "Poista {{name}}",
+    "add": "Lisää",
+    "column": {
+      "name": "Nimi",
+      "value": "Arvo",
+      "path": "Polku",
+      "expires": "Vanhenee",
+      "flags": "Liput",
+      "actions": "Toiminnot",
+      "domain": "Verkkotunnus"
+    },
+    "openFor": "Avaa evästeiden hallinta kohteelle {{domain}}",
+    "addTitle": "Lisää eväste",
+    "addForOrigin": "Lisää eväste kohteelle {{domain}}",
+    "cancel": "Peruuta",
+    "confirmTitle": "Vahvista",
+    "confirmDelete": "Poistetaanko eväste ”{{name}}”?",
+    "confirmClearOrigin": "Poistetaanko kaikki kohteen {{domain}} evästeet?",
+    "confirmClearAll": "Poistetaanko kaikki tämän ympäristön evästeet?",
+    "deleteButton": "Poista",
+    "editTitle": "Muokkaa evästettä",
+    "editNamed": "Muokkaa {{name}}",
+    "confirmReplace": "Täällä on jo eväste nimeltä ”{{name}}”. Korvataanko se?",
+    "replaceButton": "Korvaa"
   }
 }

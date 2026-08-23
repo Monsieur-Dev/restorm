@@ -755,7 +755,7 @@ describe('SettingsService', () => {
     function createWithWorkspaceFile(fileContents: string | null): SettingsService {
       const cfg = makeWorkspaceConfig()
       const settingsPath = '/fake/settings.yaml'
-      const workspaceFile = '/proj/.restorm/settings.json'
+      const workspaceFile = '/proj/.workspace/settings.json'
       vi.mocked(existsSync).mockImplementation((p: Parameters<typeof existsSync>[0]) => {
         const s = String(p)
         if (s === settingsPath) return true
@@ -778,7 +778,7 @@ describe('SettingsService', () => {
       expect(s.getWorkspaceValues()).toEqual({})
     })
 
-    it('loads keys from .restorm/settings.json on setWorkspacePath', () => {
+    it('loads keys from .workspace/settings.json on setWorkspacePath', () => {
       const s = createWithWorkspaceFile(JSON.stringify({ 'general:fontSize': 16 }))
       s.setWorkspacePath('/proj')
       expect(s.getWorkspacePath()).toBe('/proj')
@@ -895,7 +895,7 @@ describe('SettingsService', () => {
       s.resetWorkspaceValue('general:fontSize')
       vi.advanceTimersByTime(200)
       await vi.waitFor(() => {
-        expect(mockFsUnlink).toHaveBeenCalledWith('/proj/.restorm/settings.json')
+        expect(mockFsUnlink).toHaveBeenCalledWith('/proj/.workspace/settings.json')
       })
       expect(mockAtomicWriteFile).not.toHaveBeenCalled()
     })
@@ -923,7 +923,7 @@ describe('SettingsService', () => {
       })
       const firstCall = mockAtomicWriteFile.mock.calls[0]
       if (!firstCall) throw new Error('expected at least one atomic write')
-      expect(firstCall[0]).toBe('/proj/.restorm/settings.json')
+      expect(firstCall[0]).toBe('/proj/.workspace/settings.json')
       expect(JSON.parse(firstCall[1])).toEqual({ 'general:fontSize': 22 })
     })
 
@@ -934,20 +934,20 @@ describe('SettingsService', () => {
       s.setWorkspacePath('/proj')
       // Second call should not have re-read the workspace file.
       const calls = vi.mocked(readFileSync).mock.calls.map((c) => String(c[0]))
-      expect(calls).not.toContain('/proj/.restorm/settings.json')
+      expect(calls).not.toContain('/proj/.workspace/settings.json')
     })
 
     it('switching workspace path replaces the overlay', () => {
       const cfg = makeWorkspaceConfig()
       vi.mocked(existsSync).mockImplementation((p: Parameters<typeof existsSync>[0]) => {
         const s = String(p)
-        return s === '/fake/settings.yaml' || s === '/p1/.restorm/settings.json' || s === '/p2/.restorm/settings.json'
+        return s === '/fake/settings.yaml' || s === '/p1/.workspace/settings.json' || s === '/p2/.workspace/settings.json'
       })
       vi.mocked(readFileSync).mockImplementation((p: Parameters<typeof readFileSync>[0]) => {
         const s = String(p)
         if (s === '/fake/settings.yaml') return 'yaml'
-        if (s === '/p1/.restorm/settings.json') return JSON.stringify({ 'general:fontSize': 11 })
-        if (s === '/p2/.restorm/settings.json') return JSON.stringify({ 'general:fontSize': 22 })
+        if (s === '/p1/.workspace/settings.json') return JSON.stringify({ 'general:fontSize': 11 })
+        if (s === '/p2/.workspace/settings.json') return JSON.stringify({ 'general:fontSize': 22 })
         return ''
       })
       vi.mocked(yaml.load).mockReturnValue(cfg)

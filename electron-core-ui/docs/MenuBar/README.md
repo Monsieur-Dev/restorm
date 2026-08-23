@@ -594,7 +594,7 @@ Two consequences worth knowing:
 - **The role owns enablement.** An item carrying a role ignores `disabled` in the
   native menu — the platform enables it exactly when it applies (there is a
   selection to copy, something to undo…). So a host can mark an item `disabled`
-  for its own in-window bar, as restorm does for its not-yet-wired Edit menu,
+  for its own in-window bar, as a host might for a not-yet-wired Edit menu,
   without killing the native shortcut.
 - **The library never infers a role from an item's identity.** The role travels
   in the template because the alternative — mapping well-known `data-testid`s to

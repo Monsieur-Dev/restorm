@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie jar — një kavanoz cookie-sh për çdo mjedis.**
+
+- **Çdo mjedis i ruan cookie-t e veta.** Identifikohuni në API-n tuaj të zhvillimit dhe në atë të prodhimit nga dy mjedise dhe sesionet e tyre nuk ndërthuren kurrë — një cookie e kapur në njërin ridërgohet vetëm në atë. Skadimi, `Path`, `Domain` dhe nëndomenet, `Secure`, `HttpOnly` dhe `SameSite` tani respektohen, jo hidhen tej.
+- **Njihuni me Cookie jar.** Një skedë e re e hapësirës së punës — **Pamja ▸ Cookie jar** — rendit cookie-t e çdo mjedisi të grupuara sipas domenit në panele të palosshme: modifikoni një vlerë, fshini një, pastroni një domen ose të gjithë kavanozin, ose shtoni një cookie me dorë. Rifreskohet në kohë reale ndërsa kërkesat tuaja vendosin cookie.
+- **Shihni çfarë dërgoi dhe mori çdo kërkesë.** Çdo kërkesë tani ka një skedë **Cookies** pranë Përgjigjes dhe Informacioneve, që tregon cookie-t e dërguara me thirrjen dhe cookie-t e marra prapa — përfshirë cookie-t e vendosura gjatë një ridrejtimi, që nuk arrijnë kurrë te përgjigjja përfundimtare. Është e pranishme edhe në përgjigjet e kaluara në historikun tuaj.
+- **Identifikimet me cookie thjesht funksionojnë.** Një kërkesë që kthen `Set-Cookie` kapet dhe riluhet automatikisht në thirrjet e mbrojtura që pasojnë — përfshirë gjatë ekzekutimit të një skenari, ku çdo hap ndan të njëjtin kavanoz të mjedisit.
+- **Cookie-t qëndrojnë si te një shfletues.** Cookie-t me një skadim ruhen për çdo projekt dhe ringarkohen kur e rihapni; cookie-t e sesionit hidhen kur e riniseni — pikërisht ashtu si do të bënte një shfletues.
+- **Përtej REST-it.** GraphQL, SOAP, OData, JSON-RPC, tRPC dhe SSE tani dërgojnë dhe ruajnë cookie, ndërsa WebSocket i mbart gjatë shtrëngimit të duarve të lidhjes.
+- **Cookie-t mund të përdorin variablat tuaja.** Shkruani `{{token}}` në një cookie që e shtoni me dorë dhe ajo zgjidhet sipas mjedisit aktiv kur niset kërkesa.
+
+Rregullime:
+
+- **Ruajtja automatike tani mbulon mjediset brenda dosjeve.** Shtimi ose riemërtimi i një nën-mjedisi ruhet menjëherë në modalitetin e ruajtjes automatike — pa më asnjë pyetje «të ruhet para mbylljes?» për një ndryshim që gjithsesi duhej të ishte në disk.
+
 ## v1.0.4
 
 **Një hyrje — të gjitha dritaret ndjekin.**

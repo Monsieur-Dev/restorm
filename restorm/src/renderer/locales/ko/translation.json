@@ -426,7 +426,8 @@
         "response": "응답",
         "infos": "정보",
         "requestBody": "요청 본문",
-        "graph": "그래프"
+        "graph": "그래프",
+        "cookies": "쿠키"
       },
       "infos": {
         "sentAt": "보낸 시각",
@@ -442,6 +443,11 @@
         "select": "자세히 보려면 응답을 선택하세요",
         "pin": "응답 고정",
         "unpin": "응답 고정 해제"
+      },
+      "cookies": {
+        "sent": "보냄",
+        "received": "받음",
+        "none": "없음"
       }
     },
     "followRedirects": "리디렉션 따르기",
@@ -2295,7 +2301,12 @@
     "updateScenario": "시나리오 업데이트",
     "updateScenarioNode": "시나리오 노드 업데이트",
     "createInstance": "새 인스턴스 만들기",
-    "terminateInstance": "인스턴스 종료"
+    "terminateInstance": "인스턴스 종료",
+    "listCookies": "쿠키 목록",
+    "addCookie": "쿠키 추가",
+    "removeCookie": "쿠키 삭제",
+    "clearCookieDomain": "도메인의 쿠키 지우기",
+    "clearCookies": "모든 쿠키 지우기"
   },
   "odataFilter": {
     "detail": {
@@ -2722,5 +2733,40 @@
       "unavailable": "지금은 토큰을 사용할 수 없습니다. 잠시 후 다시 시도하세요.",
       "plan-required": "화면 없는 실행은 Pro 요금제에 포함됩니다. 토큰을 만들려면 Pro로 업그레이드하세요. 기존 토큰은 계속 취소할 수 있습니다."
     }
+  },
+  "cookies": {
+    "title": "쿠키",
+    "environment": "환경",
+    "noEnvironment": "환경 없음",
+    "clearAll": "모두 지우기",
+    "empty": "이 환경에 저장된 쿠키가 아직 없습니다.",
+    "clearOrigin": "{{domain}}의 쿠키 지우기",
+    "session": "세션",
+    "valueOf": "{{name}}의 값",
+    "save": "저장",
+    "deleteNamed": "{{name}} 삭제",
+    "add": "추가",
+    "column": {
+      "name": "이름",
+      "value": "값",
+      "path": "경로",
+      "expires": "만료",
+      "flags": "플래그",
+      "actions": "작업",
+      "domain": "도메인"
+    },
+    "openFor": "{{domain}}의 쿠키 관리자 열기",
+    "addTitle": "쿠키 추가",
+    "addForOrigin": "{{domain}}의 쿠키 추가",
+    "cancel": "취소",
+    "confirmTitle": "확인",
+    "confirmDelete": "쿠키 \"{{name}}\"을(를) 삭제하시겠습니까?",
+    "confirmClearOrigin": "{{domain}}의 모든 쿠키를 삭제하시겠습니까?",
+    "confirmClearAll": "이 환경의 모든 쿠키를 삭제하시겠습니까?",
+    "deleteButton": "삭제",
+    "editTitle": "쿠키 편집",
+    "editNamed": "{{name}} 편집",
+    "confirmReplace": "\"{{name}}\"(이)라는 이름의 쿠키가 이미 여기 있습니다. 바꾸시겠습니까?",
+    "replaceButton": "바꾸기"
   }
 }

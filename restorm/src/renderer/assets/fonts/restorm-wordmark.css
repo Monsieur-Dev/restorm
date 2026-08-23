@@ -17,3 +17,9 @@
   font-style: normal;
   font-display: block;
 }
+
+/* Hand the wordmark font to the (brand-agnostic) ECUI welcome screen, which
+ * reads it from this custom property — see welcomeScreen.css. */
+.ecu-welcome-screen-wordmark {
+  --ecu-wordmark-font-family: 'Restorm Wordmark';
+}

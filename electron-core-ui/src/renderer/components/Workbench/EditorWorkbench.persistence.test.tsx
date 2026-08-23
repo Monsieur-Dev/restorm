@@ -58,7 +58,7 @@ const oneTabTree = (id: string): WorkbenchTree => ({
 	groups: [{ id: 'g1', tabs: [tab(id)], activeTabId: id }]
 })
 
-/** Controlled host that owns the tree (mirrors how restorm drives the
+/** Controlled host that owns the tree (mirrors how the host app drives the
  * workbench) and lets the test flip `workbenchId` between renders. */
 const Harness: React.FC<{ workbenchId: string }> = ({ workbenchId }) => {
 	const [tree, setTree] = useState<WorkbenchTree>(oneTabTree('A'))

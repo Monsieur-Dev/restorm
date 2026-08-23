@@ -4,7 +4,7 @@ import type { GitState } from '../../types/git'
 
 /**
  * Subscribe to the live git state for the active folder (the folder
- * containing the currently open Restorm project file — see
+ * containing the currently open host project file — see
  * `window.api.git.setActiveFolder`).
  *
  * Initialises to {@link NO_GIT_STATE}, reads the current snapshot once on

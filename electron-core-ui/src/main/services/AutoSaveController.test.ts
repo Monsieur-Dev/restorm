@@ -66,7 +66,7 @@ interface FakeFile {
   emitStateChanged: () => void
 }
 
-function makeFakeFile(initialDirty: boolean, initialPath: string | null = '/tmp/file.restorm'): FakeFile {
+function makeFakeFile(initialDirty: boolean, initialPath: string | null = '/tmp/file.app'): FakeFile {
   let dirty = initialDirty
   let path: string | null = initialPath
   const dirtyCallbacks = new Set<(d: boolean) => void>()
@@ -417,9 +417,9 @@ describe('AutoSaveController', () => {
     file.emitStateChanged()
 
     // Reopen with a fresh path; state change fires with path=<new>.
-    // Registry is clean on hydrate (matches restorm's real flow); no
+    // Registry is clean on hydrate (matches the host app's real flow); no
     // autosave should fire just from opening.
-    file.setFilePath('/tmp/another.restorm')
+    file.setFilePath('/tmp/another.app')
     file.emitStateChanged()
     vi.advanceTimersByTime(2000)
     expect(trigger).toHaveBeenCalledTimes(1)
@@ -459,7 +459,7 @@ describe('AutoSaveController', () => {
     // A file is opened (path becomes non-null) while the snapshot is still
     // dirty. onStateChanged fires; the resync branch sees afterDelay + dirty
     // → arms the timer immediately without needing a new onDirtyChanged.
-    file.setFilePath('/tmp/restored.restorm')
+    file.setFilePath('/tmp/restored.app')
     file.emitStateChanged()
     vi.advanceTimersByTime(999)
     expect(trigger).not.toHaveBeenCalled()
@@ -511,7 +511,7 @@ describe('AutoSaveController', () => {
     expect(trigger).not.toHaveBeenCalled()
 
     // Once a file opens, the next dirty event should fire normally.
-    file.setFilePath('/tmp/just-opened.restorm')
+    file.setFilePath('/tmp/just-opened.app')
     file.setDirty(false)
     file.setDirty(true)
     vi.advanceTimersByTime(1000)

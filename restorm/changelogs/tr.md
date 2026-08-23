@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.0.5
+
+**Cookie jar — her ortam için bir çerez kavanozu.**
+
+- **Her ortam kendi çerezlerini saklar.** Dev API'nize ve prod API'nize iki ayrı ortamdan giriş yapın; oturumları asla birbirine karışmaz — birinde yakalanan bir çerez yalnızca o ortamda geri gönderilir. Son kullanma tarihi, `Path`, `Domain` ve alt alan adları, `Secure`, `HttpOnly` ve `SameSite` artık göz ardı edilmiyor, gereğince uygulanıyor.
+- **Cookie jar ile tanışın.** Yeni bir çalışma tezgahı sekmesi — **Görünüm ▸ Cookie jar** — her ortamın çerezlerini açılıp kapanan bölmelerde etki alanına göre gruplayarak listeler: bir değeri düzenleyin, birini silin, bir etki alanını ya da tüm kavanozu temizleyin veya elle çerez ekleyin. İstekleriniz çerez ayarladıkça canlı olarak yenilenir.
+- **Her isteğin ne gönderip ne aldığını görün.** Artık her istekte, Response ve Info'nun yanında bir **Cookies** sekmesi var; çağrıyla birlikte gönderilen çerezleri ve geri alınan çerezleri gösterir — nihai yanıta asla ulaşmayan, bir yönlendirmede ayarlanan çerezler de dâhil. Geçmişinizdeki eski yanıtlarda da bulunur.
+- **Çerezli oturum açmalar sorunsuz çalışır.** `Set-Cookie` döndüren bir istek yakalanır ve ardından gelen korumalı çağrılarda otomatik olarak yeniden gönderilir — her adımın ortamın kavanozunu paylaştığı bir senaryo çalıştırması boyunca da geçerlidir.
+- **Çerezler bir tarayıcıdaki gibi kalıcıdır.** Son kullanma tarihi olan çerezler proje başına kaydedilir ve projeyi yeniden açtığınızda yeniden yüklenir; oturum çerezleri ise uygulamayı yeniden başlattığınızda atılır — tıpkı bir tarayıcının yapacağı gibi.
+- **REST'in ötesinde.** GraphQL, SOAP, OData, JSON-RPC, tRPC ve SSE artık çerez gönderip saklıyor; WebSocket ise bunları bağlantı el sıkışması sırasında taşıyor.
+- **Çerezler değişkenlerinizi kullanabilir.** Elle eklediğiniz bir çereze `{{token}}` yazın; istek gönderildiğinde etkin ortama göre çözümlenir.
+
+Düzeltmeler:
+
+- **Otomatik kaydetme artık klasörlerin içindeki ortamları da kapsıyor.** Otomatik kaydetme modunda bir alt ortam eklemek ya da yeniden adlandırmak hemen kaydedilir — zaten diske yazılması amaçlanan bir değişiklik için artık «kapatmadan önce kaydedilsin mi?» istemi yok.
+
 ## v1.0.4
 
 **Bir kez oturum açın — tüm pencereler izler.**

@@ -29,7 +29,7 @@ export const MAX_RETRY_DELAY_MS = 15_000
 /**
  * Symmetric jitter applied to the computed delay, expressed as a fraction
  * of the delay itself. 0.3 = ±30 %. Prevents the 6 concurrent subscriptions
- * restorm opens from all hitting the server in the same tick after an
+ * the host opens from all hitting the server in the same tick after an
  * outage (thundering herd). Tuned on the higher side because the first
  * retry is only 500 ms and we need enough spread to meaningfully de-sync
  * the streams — AWS-style "full jitter" would also work but empirically

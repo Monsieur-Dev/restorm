@@ -95,7 +95,7 @@ function Workbench() {
   side="bottom"
   defaultSize={200}
   defaultCollapsed
-  storageKey="restorm.console-dock"
+  storageKey="myapp.console-dock"
   panel={<ConsoleLog />}
 >
   <MainView />

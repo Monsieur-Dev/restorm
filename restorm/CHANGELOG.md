@@ -10,6 +10,22 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.0.5
+
+**The Cookie jar — one jar of cookies per environment.**
+
+- **Every environment keeps its own cookies.** Sign in against your dev API and your prod API from two environments and their sessions never cross — a cookie captured in one is only ever sent back in that one. Expiry, `Path`, `Domain` and sub-domains, `Secure`, `HttpOnly` and `SameSite` are honoured now, not discarded.
+- **Meet the Cookie jar.** A new workbench tab — **View ▸ Cookie jar** — lists every environment's cookies grouped by domain in collapsible panes: edit a value, delete one, clear a domain or the whole jar, or add a cookie by hand. It refreshes live as your requests set cookies.
+- **See what each request sent and received.** Every request now has a **Cookies** tab beside Response and Info, showing the cookies sent with the call and the cookies received back — including cookies set on a redirect that never reach the final response. It's there on past responses in your history too.
+- **Cookie logins just work.** A request that returns `Set-Cookie` is captured and replayed automatically on the protected calls that follow — including across a scenario run, where every step shares the environment's jar.
+- **Cookies persist like a browser's.** Cookies with an expiry are saved per project and reloaded when you reopen it; session cookies are dropped when you restart — exactly as a browser would.
+- **Beyond REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC and SSE all send and store cookies now, and WebSocket carries them on the connection handshake.
+- **Cookies can use your variables.** Type `{{token}}` in a cookie you add by hand and it resolves against the active environment when the request goes out.
+
+Fixes:
+
+- **Autosave now covers environments inside folders.** Adding or renaming a sub-environment is saved right away in autosave mode — no more "save before closing?" prompt for a change that was already meant to be on disk.
+
 ## v1.0.4
 
 **Sign in once — every window follows.**

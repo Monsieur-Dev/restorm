@@ -15,6 +15,8 @@ import https from 'node:https'
 import { BrowserWindow } from 'electron'
 import { logger, withFirewallBypassSync } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { attachSessionCookies, captureSessionCookies } from './cookieRequestHelpers'
+import type { CookiePair } from '../../shared/cookies/cookieTypes'
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
@@ -57,6 +59,9 @@ export interface SseExecutionResult {
     durationMs: number
   }
   requestUrl?: string
+  /** Cookies sent on the SSE connect / received on its response head (Cookies tab). */
+  sentCookies?: CookiePair[]
+  receivedCookies?: CookiePair[]
 }
 
 interface ActiveSseConnection {
@@ -263,9 +268,10 @@ class SseExecutionService {
 
     return new Promise((resolve) => {
       let connectedOnce = false
+      let connectCookies: { sent: CookiePair[]; received: CookiePair[] } | undefined
       const frames: SseMessage[] = []
       const controller = this.startStream(resolved, {
-        onConnect: () => { connectedOnce = true },
+        onConnect: (cookies) => { connectedOnce = true; connectCookies = cookies },
         onFrame: (frame) => {
           frames.push(frame)
           this.broadcastMessage(requestId, frame)
@@ -280,6 +286,7 @@ class SseExecutionService {
             frames,
             ...(error !== undefined ? { error } : {}),
             requestUrl: resolved.resolvedUrl,
+            ...(connectCookies ? { sentCookies: connectCookies.sent, receivedCookies: connectCookies.received } : {}),
             timings: { startedAt: resolved.startedAt, durationMs: Date.now() - resolved.startTime }
           }
           this.persistHistory(requestId, result)
@@ -332,8 +339,9 @@ class SseExecutionService {
       if (wasClosed()) { fireClose(); return }
 
       const frames: SseMessage[] = []
+      let connectCookies: { sent: CookiePair[]; received: CookiePair[] } | undefined
       const controller = this.startStream(resolved, {
-        onConnect: () => { input.onConnect() },
+        onConnect: (cookies) => { connectCookies = cookies; input.onConnect() },
         onFrame: (frame) => {
           frames.push(frame)
           this.broadcastMessage(requestId, frame)
@@ -351,6 +359,7 @@ class SseExecutionService {
             frames,
             ...(error !== undefined ? { error } : {}),
             requestUrl: resolved.resolvedUrl,
+            ...(connectCookies ? { sentCookies: connectCookies.sent, receivedCookies: connectCookies.received } : {}),
             timings: { startedAt: resolved.startedAt, durationMs: Date.now() - resolved.startTime }
           })
           fireClose(error)
@@ -376,7 +385,7 @@ class SseExecutionService {
   private startStream(
     resolved: ResolvedSseExecution,
     callbacks: {
-      onConnect: () => void
+      onConnect: (cookies: { sent: CookiePair[]; received: CookiePair[] }) => void
       onFrame: (frame: SseMessage) => void
       onClose: (error?: string) => void
     }
@@ -424,6 +433,9 @@ class SseExecutionService {
         request?.destroy()
       }, resolved.timeout)
 
+      // Attach the active environment's session cookies to the SSE connect
+      // (the initial GET is a normal HTTP request; cookie-auth'd streams work).
+      const sentCookies = attachSessionCookies(resolved.requestId, url.href, headers)
       request = withFirewallBypassSync(() => httpModule.request(url, { method: 'GET', headers }))
       request.on('response', (response: IncomingMessage) => {
         clearTimeout(connectTimer)
@@ -447,7 +459,9 @@ class SseExecutionService {
         const isFirstConnect = !everConnected
         everConnected = true
         reconnectAttempts = 0
-        if (isFirstConnect) callbacks.onConnect()
+        // Capture any Set-Cookie the server sent on the SSE response head.
+        const receivedCookies = captureSessionCookies(resolved.requestId, url.href, response.headers['set-cookie'])
+        if (isFirstConnect) callbacks.onConnect({ sent: sentCookies, received: receivedCookies })
         response.setEncoding('utf8')
         response.on('data', (chunk: string) => {
           const frames = parser.feed(chunk)

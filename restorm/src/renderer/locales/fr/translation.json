@@ -427,7 +427,8 @@
         "response": "Réponse",
         "infos": "Infos",
         "requestBody": "Corps de la requête",
-        "graph": "Graphe"
+        "graph": "Graphe",
+        "cookies": "Cookies"
       },
       "infos": {
         "sentAt": "Envoyé le",
@@ -443,6 +444,11 @@
         "select": "Sélectionnez une réponse pour voir le détail",
         "pin": "Épingler la réponse",
         "unpin": "Désépingler la réponse"
+      },
+      "cookies": {
+        "sent": "Envoyés",
+        "received": "Reçus",
+        "none": "Aucun"
       }
     },
     "followRedirects": "Suivre les redirections",
@@ -2296,7 +2302,12 @@
     "updateScenario": "Mettre à jour un scénario",
     "updateScenarioNode": "Mettre à jour un nœud de scénario",
     "createInstance": "Créer une nouvelle instance",
-    "terminateInstance": "Fermer une instance"
+    "terminateInstance": "Fermer une instance",
+    "listCookies": "Lister les cookies",
+    "addCookie": "Ajouter un cookie",
+    "removeCookie": "Supprimer un cookie",
+    "clearCookieDomain": "Vider les cookies d'un domaine",
+    "clearCookies": "Vider tous les cookies"
   },
   "odataFilter": {
     "detail": {
@@ -2723,5 +2734,40 @@
       "unavailable": "Les jetons sont indisponibles pour le moment. Réessayez dans un instant.",
       "plan-required": "Les exécutions sans interface font partie de l'offre Pro. Passez à Pro pour créer des jetons — vous pouvez toujours révoquer ceux que vous avez déjà."
     }
+  },
+  "cookies": {
+    "title": "Cookies",
+    "environment": "Environnement",
+    "noEnvironment": "Aucun environnement",
+    "clearAll": "Tout vider",
+    "empty": "Aucun cookie stocké pour cet environnement pour l'instant.",
+    "clearOrigin": "Vider les cookies de {{domain}}",
+    "session": "Session",
+    "valueOf": "Valeur de {{name}}",
+    "save": "Enregistrer",
+    "deleteNamed": "Supprimer {{name}}",
+    "add": "Ajouter",
+    "column": {
+      "name": "Nom",
+      "value": "Valeur",
+      "path": "Chemin",
+      "expires": "Expiration",
+      "flags": "Attributs",
+      "actions": "Actions",
+      "domain": "Domaine"
+    },
+    "openFor": "Ouvrir le gestionnaire de cookies pour {{domain}}",
+    "addTitle": "Ajouter un cookie",
+    "addForOrigin": "Ajouter un cookie pour {{domain}}",
+    "cancel": "Annuler",
+    "confirmTitle": "Confirmer",
+    "confirmDelete": "Supprimer le cookie « {{name}} » ?",
+    "confirmClearOrigin": "Supprimer tous les cookies de {{domain}} ?",
+    "confirmClearAll": "Supprimer tous les cookies de cet environnement ?",
+    "deleteButton": "Supprimer",
+    "editTitle": "Modifier un cookie",
+    "editNamed": "Modifier {{name}}",
+    "confirmReplace": "Un cookie nommé « {{name}} » existe déjà à cet endroit. Le remplacer ?",
+    "replaceButton": "Remplacer"
   }
 }

@@ -26,6 +26,7 @@ import {
   isScenarioEditorTab,
   isConsoleTab,
   isFirewallTab,
+  isCookieJarTab,
   isMiniBrowserTab,
   isSettingsTab,
   isMcpLogsTab
@@ -41,6 +42,7 @@ import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
 import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
 import { getFolderIcon } from '../../../utils/treeSearch'
+import { CookieJarPanel } from '../../CookieJar/CookieJarPanel'
 import { DocumentEvents } from '../../../services/DocumentEvents'
 import { Badge } from '../../common/Badge'
 import { RegistryBadge } from '../../common/RegistryBadge'
@@ -779,6 +781,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <IconView icon={{ type: 'codicon', value: 'mcp' }} size={14} />
           <span>{t('mcpLogs.title')}</span>
+        </span>
+      )
+    }
+
+    // Cookie jar tab — singleton, no dirty indicator (the jar lives in the main
+    // process, not workbench autosave). The name is a constant technical term.
+    if (isCookieJarTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'material', value: 'mdiCookie' }} size={14} />
+          <span>Cookie jar</span>
         </span>
       )
     }
@@ -1848,6 +1861,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return (
         <div style={{ height: '100%', overflow: 'hidden' }} data-testid="mcp-logs-tab-content">
           <McpLogsPanel labels={mcpLogsLabels} translateToolTitle={t} />
+        </div>
+      )
+    }
+
+    // Cookie jar tab — singleton, identified by `tabType: 'cookie-jar'`. Mounts
+    // the master-detail `<CookieJarPanel />` (env treeview + cookie table). No
+    // breadcrumbs, same as Console / Firewall.
+    if (isCookieJarTab(effectiveTab)) {
+      return (
+        <div style={{ height: '100%', overflow: 'hidden' }} data-testid="cookie-jar-tab-content">
+          <CookieJarPanel {...(effectiveTab.focusDomain !== undefined ? { focusDomain: effectiveTab.focusDomain } : {})} />
         </div>
       )
     }
