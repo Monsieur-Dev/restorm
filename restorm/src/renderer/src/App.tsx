@@ -40,6 +40,7 @@ import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
 import { QUICK_CONFIG_PROJECT_WRITE_EVENT } from './services/requestQuickConfigStore'
 import { preloadScenarioViewports } from './services/scenarioViewportStore'
+import { setClientTabCloser } from './services/designClientsStore'
 import { preloadScenarioBreakpoints } from './services/scenarioBreakpointStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
@@ -2317,6 +2318,12 @@ const App: React.FC = () => {
   }, [])
   // Patch the forward-reference ref consumed by `useMcpNavigation` (above).
   useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
+  // Let the transient-clients store close the tabs its requests opened when a
+  // served design's clients are dropped (server stopped / regenerated).
+  useEffect(() => {
+    setClientTabCloser(closeTabByItemIdStable)
+    return () => { setClientTabCloser(null) }
+  }, [closeTabByItemIdStable])
 
   // Close-others / close-to-the-right are scoped to the group containing
   // the targeted tab — the usual editor semantics. The Workspace stays
@@ -3527,6 +3534,7 @@ const App: React.FC = () => {
     openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    selectedItemId,
     setSelectedItemId,
     setSelectedItemIds,
     setExpandedIds,

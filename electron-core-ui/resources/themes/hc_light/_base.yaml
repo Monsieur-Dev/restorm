@@ -510,8 +510,8 @@ colors:
     description: "Scenario badge (HC light)"
 
   - id: badge-design-background
-    value: "#00695c"
-    description: "API design badge (HC light)"
+    value: "#1565c0"
+    description: "API design badge (HC light, blue)"
 
   - id: badge-capsule-glyph-background
     value: "#311b92"

@@ -2153,7 +2153,8 @@
       "documentation": "Documentation",
       "notes": "Notes",
       "code": "Code",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Clients"
     },
     "rail": {
       "ariaLabel": "Design sections"
@@ -2543,6 +2544,13 @@
     },
     "server": {
       "subtitle": "Serve this design as a live mock and watch every call."
+    },
+    "clients": {
+      "subtitle": "Ready-to-run client requests for every protocol this design serves.",
+      "startPrompt": "Start the server to generate the clients.",
+      "generated": "Clients generated — open them under Clients in the sidebar.",
+      "importing": "Importing clients…",
+      "refresh": "Regenerate the clients"
     }
   },
   "mqtt": {

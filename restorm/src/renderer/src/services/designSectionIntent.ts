@@ -58,3 +58,35 @@ export function subscribeDesignSectionIntent(handler: Subscriber): () => void {
   subscribers.add(handler)
   return () => { subscribers.delete(handler) }
 }
+
+// ── Active section (where a mounted design tab IS right now) ──────────────
+// Distinct from the one-shot pending intent above: this is the durable "the
+// tab is currently showing section X", published by `DesignTabView` whenever
+// its active section changes. It lets the sidebar highlight the matching
+// section row no matter how the tab was focused — a row click, a tab switch
+// (`handleTabActivate` reads it), or back/forward.
+const activeByDesignId = new Map<string, DesignSectionKey>()
+type ActiveSubscriber = (designId: string, section: DesignSectionKey) => void
+const activeSubscribers = new Set<ActiveSubscriber>()
+
+/** Record the section a design tab is currently showing, notifying
+ *  subscribers (e.g. the tab breadcrumb) when it actually changes. */
+export function setActiveDesignSection(designId: string, section: DesignSectionKey): void {
+  if (!designId) return
+  if (activeByDesignId.get(designId) === section) return
+  activeByDesignId.set(designId, section)
+  for (const sub of activeSubscribers) sub(designId, section)
+}
+
+/** The section a design tab is currently showing, or `undefined` when the
+ *  design has no live tab. */
+export function getActiveDesignSection(designId: string): DesignSectionKey | undefined {
+  return activeByDesignId.get(designId)
+}
+
+/** Subscribe to active-section changes — the breadcrumb reads this to keep
+ *  its trailing section segment live. */
+export function subscribeActiveDesignSection(handler: ActiveSubscriber): () => void {
+  activeSubscribers.add(handler)
+  return () => { activeSubscribers.delete(handler) }
+}

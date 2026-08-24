@@ -437,7 +437,7 @@ declare global {
       designServer: {
         start: (design: unknown) => Promise<{ success: boolean; listening: boolean; port: number; error?: string }>
         stop: (designId: string) => Promise<boolean>
-        status: (designId: string) => Promise<{ listening: boolean; port?: number; counters?: DesignServerCounters }>
+        status: (designId: string) => Promise<{ listening: boolean; port?: number; grpcPort?: number; counters?: DesignServerCounters }>
         setForced: (designId: string, routeId: string, forced: { code: string; body?: string } | null) => Promise<boolean>
         update: (design: unknown) => Promise<boolean>
         onProgress: (callback: (event: { designId: string; status: 'started' | 'completed' | 'error' }) => void) => (() => void)

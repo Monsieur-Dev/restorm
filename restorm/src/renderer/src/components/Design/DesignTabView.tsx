@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import {
   Button,
   GatedControl,
-  IconView,
   InputBox,
   MarkdownEditor,
   ScrollableElement,
@@ -15,18 +14,18 @@ import {
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collections'
 import type { DesignSectionKey } from '../../../../shared/types/editor'
-import { DESIGN_SECTIONS } from '../../../../shared/design/designSections'
 import { validateApiDesign } from '../../../../shared/design/validateApiDesign'
 import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { isDesignServerListening } from '../../services/designServerStore'
 import { DESCRIPTOR_FORMATS, descriptorFileName } from '../../../../shared/design/descriptorFormats'
 import { DesignServerSection } from './DesignServerSection'
+import { DesignClientsSection } from './DesignClientsSection'
 import { resolveServedDesign, servedEnvVars } from './designServeResolve'
 import { resolveUrlAgainstEnv } from '../../../../shared/utils/resolveUrlAgainstEnv'
 import { DesignCodeSection } from './DesignCodeSection'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
-import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent } from '../../services/designSectionIntent'
+import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent, setActiveDesignSection } from '../../services/designSectionIntent'
 import { useRestormStore } from '../../store/restormStore'
 import { assignDesignSection } from './designMutations'
 import { DesignModelsSection } from './DesignModelsSection'
@@ -59,7 +58,6 @@ export interface DesignTabViewProps {
  * `DESIGN_RUN_CAPABILITY` on those buttons when they land.
  */
 export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) => {
-  const { t } = useTranslation()
   // PEEK only in the initializers: StrictMode double-invokes them in dev
   // builds, so a consuming read would drain the map on the throwaway
   // call. The mount effect below does the consuming.
@@ -70,6 +68,12 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     `design-active-section:${design.id}`,
     peekPendingDesignSection(design.id)?.section ?? 'settings'
   )
+  // Publish where the tab IS so the sidebar highlights the matching section
+  // row — even when the tab is refocused from another tab (handleTabActivate
+  // reads this) rather than from a fresh row click.
+  useEffect(() => {
+    setActiveDesignSection(design.id, activeSection)
+  }, [design.id, activeSection])
   const [selectedModelId, setSelectedModelId] = useState<string | null>(() => {
     const intent = peekPendingDesignSection(design.id)
     return intent?.section === 'models' ? intent.entityId ?? null : null
@@ -163,22 +167,6 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
 
   return (
     <div className="design-tab-view" data-testid={`design-tab-view-${design.id}`}>
-      <nav className="design-rail" aria-label={t('design.rail.ariaLabel', 'Design sections')}>
-        {DESIGN_SECTIONS.map((section) => (
-          <HeaderHoverTooltip key={section.key} label={t(section.labelKey)}>
-            <button
-              type="button"
-              className={`design-rail-button${activeSection === section.key ? ' active' : ''}`}
-              aria-label={t(section.labelKey)}
-              aria-pressed={activeSection === section.key}
-              data-testid={`design-rail-${section.key}`}
-              onClick={() => { setActiveSection(section.key) }}
-            >
-              <IconView icon={section.icon} size={16} />
-            </button>
-          </HeaderHoverTooltip>
-        ))}
-      </nav>
       <div className="design-section-host" data-testid={`design-section-${activeSection}`}>
         {activeSection === 'settings' && (
           <DesignSettingsSection design={design} envVars={envVars} hasEnvFolder={owningFolder !== null} />
@@ -212,6 +200,9 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
             onPickEnv={setActiveEnvIndex}
             envVars={envVars}
           />
+        )}
+        {activeSection === 'clients' && (
+          <DesignClientsSection design={design} />
         )}
         {activeSection === 'documentation' && (
           <DesignDocumentationSection design={design} designTick={designTick} onJumpTo={jumpTo} />
@@ -429,10 +420,8 @@ const DesignSettingsSection: React.FC<{
 
 /** Notes — the same markdown surface requests and folders have. */
 const DesignNotesSection: React.FC<{ design: ApiDesign; tabId: string }> = ({ design, tabId }) => {
-  const { t } = useTranslation()
   return (
     <div className="design-section design-notes-section">
-      <h2 className="design-section-title">{t('design.section.notes')}</h2>
       <MarkdownEditor
         key={`${tabId}-notes`}
         initialValue={design.notes ?? ''}

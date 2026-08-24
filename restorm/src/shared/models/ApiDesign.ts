@@ -69,10 +69,6 @@ export class ApiDesign {
   @TreatEmptyAsUndefined()
   notes?: string
 
-  /** Tags for categorization and filtering. */
-  @searchable.property({ weight: 1.5, filterable: true })
-  tags: string[] = []
-
   /** The API's published identity (title, version, contact, license). */
   info: ApiInfo = { title: '' }
 
@@ -113,7 +109,6 @@ export class ApiDesign {
     id?: RuntimeId
     name?: string
     notes?: string
-    tags?: string[]
     info?: ApiInfo
     server?: ApiServer
     securitySchemes?: Record<string, SecurityScheme>
@@ -130,7 +125,6 @@ export class ApiDesign {
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
-      tags: obj.tags ?? [],
       info: obj.info ?? { title: '' },
       ...(obj.server !== undefined && { server: obj.server }),
       ...(obj.securitySchemes !== undefined && { securitySchemes: obj.securitySchemes }),
@@ -150,7 +144,6 @@ export class ApiDesign {
       id: this.id,
       name: this.name,
       notes: this.notes,
-      tags: this.tags,
       info: this.info,
       ...(this.server !== undefined && { server: this.server }),
       ...(this.securitySchemes !== undefined && { securitySchemes: this.securitySchemes }),

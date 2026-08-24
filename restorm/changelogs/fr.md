@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+**Concevez votre API, servez-la comme un mock, et générez ses clients — sans quitter Restorm.**
+
+- **Un designer d'API visuel.** Modélisez votre API à la main — modèles, enums, routes, exemples nommés, contraintes — sans écrire une ligne de spec.
+- **Servez-la en mock, en un clic, sur 5 protocoles à la fois.** Le design devient un serveur qui répond en HTTP, GraphQL, SOAP, OData et gRPC simultanément. Les réponses viennent de vos exemples nommés (ou de données réalistes générées depuis vos modèles), avec validation par contraintes, latence simulée et mode stateful.
+- **Des clients prêts à l'emploi, générés automatiquement.** Pendant que le mock tourne, la section Clients crée de vraies requêtes exécutables pour chaque protocole activé, pointées sur les endpoints du mock. Un clic les ouvre et tape le serveur — plus besoin de réimporter votre API ailleurs pour la tester.
+- **Exportez le descripteur** (OpenAPI et autres) et **générez du code** depuis votre design, rendu dans un bac à sable et écrit sur disque seulement après confirmation.
+- **À l'import, les corps de requête se pré-remplissent** : GraphQL sélectionne les champs scalaires du type de retour, gRPC déplie les messages imbriqués — la requête part exécutable direct.
+
 ## v1.0.6
 
 Correctifs :

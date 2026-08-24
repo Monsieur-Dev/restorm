@@ -2,7 +2,7 @@
  * Hook for managing sidebar state and list view items
  */
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { findItemById } from '../utils/treeSearch'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
@@ -17,6 +17,7 @@ import { httpBadgeIdFor, isKnownHttpMethod } from '../../../shared/utils/httpMet
 import { mapToBadgeType, requestBadgeId } from '../utils/badgeUtils'
 import type { Request } from '../../../shared/types/collections'
 import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
+import { getDesignClientsVersion, subscribeDesignClients } from '../services/designClientsStore'
 
 export interface UseSidebarStateOptions {
   rootItems: FolderItem[]
@@ -60,11 +61,17 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   // is explicit, and the dim re-evaluates as soon as the user edits
   // a URL — no persisted `request.deprecated` flag involved.
   const deprecatedRequestIds = useDeprecatedRequestIds(rootItems, updateCount)
+  // The transient client trees hang under each design's Clients row; bump the
+  // item memo when they (re)generate or clear, so those rows appear/vanish.
+  const designClientsVersion = useSyncExternalStore(subscribeDesignClients, getDesignClientsVersion)
 
   // Convert root folders to ListView items
   // updateCount is used as a dependency to force re-computation when items are mutated in-place
   const sidebarItems: ListViewItemData[] = useMemo(() => {
     void updateCount
+    // Read indirectly by `designToListViewItem` (the Clients rows) from the
+    // client store — touch the version so the memo rebuilds when it changes.
+    void designClientsVersion
     // A design node's section rows freeze `i18n.t(...)` labels into their
     // titles — the first translated strings ever baked into sidebar rows —
     // so a language switch must rebuild them.
@@ -104,7 +111,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, i18n.language])
+  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, designClientsVersion, i18n.language])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread

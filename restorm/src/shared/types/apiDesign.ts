@@ -388,7 +388,6 @@ export interface ApiDesign {
   name: string
   /** Free-form notes (the Notes section). */
   notes?: string
-  tags: string[]
   /** The API's published identity — the same doc object importers
    * produce (`ApiDocumentation.api`). */
   info: ApiInfo

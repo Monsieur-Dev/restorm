@@ -71,6 +71,13 @@ export interface RestormWorkbenchTabProps {
    * via `onToggleFavorite`. Both must be set for the toggle to appear. */
   isFavorite?: boolean
   onToggleFavorite?: () => void
+  /** When false, the H1 title is read-only (no inline rename / pencil) —
+   * used for the design tab's section pages, whose H1 is a section label,
+   * not a renameable entity. Defaults to true. */
+  titleEditable?: boolean
+  /** When false, the tag/bookmark ribbon is hidden — designs carry no
+   * bookmarks. Defaults to true. */
+  showBookmarks?: boolean
   children: React.ReactNode
 }
 
@@ -93,6 +100,8 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   tabId,
   isFavorite,
   onToggleFavorite,
+  titleEditable = true,
+  showBookmarks = true,
   children
 }) => {
   const { t } = useTranslation()
@@ -166,14 +175,16 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             {headerActionsLeading}
           </div>
         ) : null}
-        <BookmarkRibbonStack
-          bookmarks={ribbonBookmarks}
-          onRename={handleRibbonRename}
-          {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
-          onRemove={handleRibbonRemove}
-          onAdd={handleRibbonAdd}
-          data-testid={`${testIdPrefix}-bookmarks`}
-        />
+        {showBookmarks ? (
+          <BookmarkRibbonStack
+            bookmarks={ribbonBookmarks}
+            onRename={handleRibbonRename}
+            {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
+            onRemove={handleRibbonRemove}
+            onAdd={handleRibbonAdd}
+            data-testid={`${testIdPrefix}-bookmarks`}
+          />
+        ) : null}
         {headerActions ? (
           <div className="restorm-workbench-tab-header-actions" data-testid={`${testIdPrefix}-header-actions`}>
             {headerActions}
@@ -269,6 +280,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
             as="h1"
             value={lastItem.label}
             onChange={handleTitleRename}
+            editable={titleEditable}
             className="restorm-workbench-tab-title"
             data-testid={`${testIdPrefix}-title`}
           />

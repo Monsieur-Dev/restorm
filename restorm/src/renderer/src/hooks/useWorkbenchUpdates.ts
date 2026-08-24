@@ -92,7 +92,8 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
   const handleTagsChange = useCallback((targetId: string, newTags: string[]) => {
     // Find and update the reactive object directly (triggers search re-indexing)
     const item = findItemById(rootItems, targetId)
-    if (item) {
+    // Designs carry no tags (union member without the field), so guard it.
+    if (item && 'tags' in item) {
       item.tags = newTags
     }
 

@@ -1391,9 +1391,9 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     },
     /** Listening state + this run's counters. */
-    status: async (designId: string): Promise<{ listening: boolean; port?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }> => {
+    status: async (designId: string): Promise<{ listening: boolean; port?: number; grpcPort?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }> => {
       const result: unknown = await ipcRenderer.invoke('design-server:status', designId)
-      return result as { listening: boolean; port?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }
+      return result as { listening: boolean; port?: number; grpcPort?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }
     },
     /** Hot-steer one route's response (run modal): `null` clears. */
     setForced: async (designId: string, routeId: string, forced: { code: string; body?: string } | null): Promise<boolean> => {

@@ -195,7 +195,6 @@ export const DesignCodeSection: React.FC<{
   return (
     <ScrollableElement className="design-section-scroll">
       <div className="design-section design-code" data-testid="design-code-section">
-        <h2 className="design-section-title">{t('design.section.code')}</h2>
         <p className="design-section-subtitle">
           {t(
             'design.code.subtitle',

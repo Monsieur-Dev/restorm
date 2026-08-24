@@ -10,6 +10,16 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.1.0
+
+**Design your API, serve it as a mock, and generate its clients — without leaving Restorm.**
+
+- **A visual API designer.** Model your API by hand — models, enums, routes, named examples, constraints — without writing a line of spec.
+- **Serve it as a mock, in one click, across 5 protocols at once.** The design becomes a server that answers in HTTP, GraphQL, SOAP, OData and gRPC simultaneously. Responses come from your named examples (or realistic data generated from your models), with constraint validation, simulated latency and a stateful mode.
+- **Ready-to-run clients, generated automatically.** While the mock runs, the Clients section creates real, runnable requests for every enabled protocol, pointed at the mock's endpoints. One click opens a request and hits the server — no more re-importing your API elsewhere to test it.
+- **Export the descriptor** (OpenAPI and others) and **generate code** from your design, rendered in a sandbox and written to disk only after you confirm.
+- **On import, request bodies pre-fill**: GraphQL selects the return type's scalar fields, gRPC expands nested messages — the request runs as-is.
+
 ## v1.0.6
 
 Fixes:

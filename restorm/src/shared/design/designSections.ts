@@ -27,10 +27,17 @@ export const DESIGN_SECTIONS: readonly DesignSectionSpec[] = [
   { key: 'enums', icon: { type: 'codicon', value: 'symbol-enum' }, labelKey: 'design.section.enums', count: (d) => d.enums.length },
   { key: 'routes', icon: { type: 'phosphor', value: 'RoadHorizon' }, labelKey: 'design.section.routes', count: (d) => d.routeGroups.reduce((n, g) => n + g.routes.length, 0) },
   { key: 'server', icon: { type: 'codicon', value: 'server-process' }, labelKey: 'design.section.server', count: () => null },
+  { key: 'clients', icon: { type: 'codicon', value: 'plug' }, labelKey: 'design.section.clients', count: () => null },
   { key: 'documentation', icon: { type: 'codicon', value: 'book' }, labelKey: 'design.section.documentation', count: () => null },
   { key: 'notes', icon: { type: 'codicon', value: 'note' }, labelKey: 'design.section.notes', count: () => null },
   { key: 'code', icon: { type: 'codicon', value: 'code' }, labelKey: 'design.section.code', count: () => null }
 ]
+
+/** Sections shown as rows under a design in the sidebar — every section
+ * EXCEPT Settings, which has no dedicated row: clicking the design node
+ * itself opens its settings (the old "Paramètres" row is gone). */
+export const SIDEBAR_DESIGN_SECTIONS: readonly DesignSectionSpec[] =
+  DESIGN_SECTIONS.filter((section) => section.key !== 'settings')
 
 /** The design's own codicon, everywhere it appears (sidebar, tab,
  * search, badges). */

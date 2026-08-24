@@ -705,9 +705,9 @@ export function designToSearchDocuments(
     ...(design.info.description !== undefined ? { description: design.info.description } : {}),
     category: 'design',
     icon: DESIGN_CODICON,
-    keywords: [...design.tags, design.info.title, design.info.version ?? ''].filter((s) => s !== '').join(' '),
+    keywords: [design.info.title, design.info.version ?? ''].filter((s) => s !== '').join(' '),
     navigation: { type: 'design', designId: design.id, path },
-    metadata: { tags: design.tags, ...(design.notes ? { notes: design.notes } : {}), ...breadcrumb }
+    metadata: { ...(design.notes ? { notes: design.notes } : {}), ...breadcrumb }
   }]
   for (const model of design.models) {
     documents.push({

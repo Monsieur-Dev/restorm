@@ -15,6 +15,7 @@ import { useAuthState } from 'electron-core-ui/renderer'
 import { resolveUrlAgainstEnv } from '../../../../shared/utils/resolveUrlAgainstEnv'
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { applyServingSnapshot, useIsDesignServerListening } from '../../services/designServerStore'
+import { generateDesignClients, clearDesignClients, getDesignClients } from '../../services/designClientsStore'
 import { useRestormStore } from '../../store/restormStore'
 import { useDesignEnvVariables } from '../../hooks/useDesignEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -60,10 +61,16 @@ export const DesignServerSection: React.FC<{
   useEffect(() => {
     let cancelled = false
     void window.restorm?.designServer.status(design.id).then((status) => {
-      if (!cancelled) applyServingSnapshot(design.id, status.listening)
+      if (cancelled) return
+      applyServingSnapshot(design.id, status.listening)
+      // Reload / MCP-served: the transient clients live only in memory, so
+      // regenerate them when a design is found already serving with none held.
+      if (status.listening && status.port !== undefined && getDesignClients(design.id).length === 0) {
+        void generateDesignClients(design, status.port)
+      }
     })
     return () => { cancelled = true }
-  }, [design.id])
+  }, [design])
 
   const [serverError, setServerError] = useState<string | null>(null)
   const [servedPort, setServedPort] = useState<number | null>(null)
@@ -102,6 +109,9 @@ export const DesignServerSection: React.FC<{
     setServerError(null)
     if (serving) {
       await window.restorm?.designServer.stop(design.id)
+      // Drop the generated clients (their tabs are closed by the App-level
+      // stop handler that watches the serving state).
+      clearDesignClients(design.id)
       return
     }
     // Resolve base-path / port {{variables}} against the ACTIVE environment
@@ -115,6 +125,8 @@ export const DesignServerSection: React.FC<{
       return
     }
     setServedPort(result.port)
+    // Dogfood: import the mock's own metadata into transient client bundles.
+    void generateDesignClients(design, result.port)
   }, [design, serving, t, activeEnvIndex])
 
   const spinTooltip = serving
@@ -131,7 +143,6 @@ export const DesignServerSection: React.FC<{
   return (
     <ScrollableElement className="design-section-scroll">
       <div className="design-section design-server" data-testid="design-server-section">
-        <h2 className="design-section-title">{t('design.section.server')}</h2>
         <p className="design-section-subtitle">
           {t('design.server.subtitle', 'Serve this design as a live mock and watch every call.')}
         </p>

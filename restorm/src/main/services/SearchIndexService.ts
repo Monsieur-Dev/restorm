@@ -154,10 +154,9 @@ function designSearchDocuments(design: DesignData, parentPath: string[] = [], pa
     ...(design.info.description !== undefined ? { description: design.info.description } : {}),
     category: 'design',
     icon: DESIGN_CODICON,
-    keywords: [...design.tags, design.info.title, design.info.version ?? ''].filter((s) => s !== '').join(' '),
+    keywords: [design.info.title, design.info.version ?? ''].filter((s) => s !== '').join(' '),
     navigation: { type: 'design', designId: design.id, path },
     metadata: {
-      tags: design.tags,
       ...(design.notes ? { notes: design.notes } : {}),
       ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }

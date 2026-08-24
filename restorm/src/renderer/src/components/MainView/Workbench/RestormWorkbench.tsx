@@ -47,7 +47,7 @@ import { CookieJarPanel } from '../../CookieJar/CookieJarPanel'
 import { DocumentEvents } from '../../../services/DocumentEvents'
 import { Badge } from '../../common/Badge'
 import { RegistryBadge } from '../../common/RegistryBadge'
-import { DesignTabView } from '../../Design/DesignTabView'
+import { DesignWorkbenchTab } from './DesignWorkbenchTab'
 import { httpBadgeIdFor } from '../../../../../shared/utils/httpMethod'
 import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
 import { ServerListeningBadge } from '../../common/ServerListeningBadge'
@@ -1103,35 +1103,24 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       // stored snapshot is disconnected from the reactive model, and
       // edits must flow through the reactive proxy to turn dirty.
       const design = getDesignById?.(effectiveTab.design.id) ?? effectiveTab.design
-      const dsgTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
-      const dsgEnvFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
-      const handleDsgTagColorChange = dsgEnvFolderId && onTagColorChange
-        ? (tag: string, color: string | null): void => { onTagColorChange(dsgEnvFolderId, tag, color) }
-        : undefined
       const dsgFav = onToggleFavorite
         ? { isFavorite: isItemFavorite?.(design.id) ?? false, onToggleFavorite: () => { onToggleFavorite(design.id) } }
         : {}
-      // Same last-crumb icon strip as scenarios: the design badge already
-      // conveys the kind everywhere it matters.
-      const dsgBreadcrumbs = breadcrumbs.map((crumb, i) =>
-        i === breadcrumbs.length - 1 ? { ...crumb, icon: null } : crumb
-      )
+      // The design tab enriches its own breadcrumb with the active section
+      // (see DesignWorkbenchTab) — pass the raw [path, design] trail; the
+      // last-crumb icon strip happens there, per section. Designs carry no
+      // tags/bookmarks, so none of that wiring is threaded.
       return (
-        <RestormWorkbenchTab
-          breadcrumbs={dsgBreadcrumbs}
+        <DesignWorkbenchTab
+          design={design}
+          breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbAuxClick={onBreadcrumbAuxClick}
           onBreadcrumbRename={onItemRename}
           onBreadcrumbIconChange={onItemIconChange}
-          tags={design.tags}
-          onTagsChange={(nextTags) => { onTagsChange?.(design.id, nextTags) }}
-          tagColors={dsgTagColors}
-          {...(handleDsgTagColorChange ? { onTagColorChange: handleDsgTagColorChange } : {})}
           tabId={effectiveTab.id}
           {...dsgFav}
-        >
-          <DesignTabView design={design} tabId={effectiveTab.id} />
-        </RestormWorkbenchTab>
+        />
       )
     }
 

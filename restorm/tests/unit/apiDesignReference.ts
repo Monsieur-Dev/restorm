@@ -16,7 +16,6 @@ export function buildReferenceApiDesign(): ApiDesign {
     id: 'design-petstore',
     name: 'Petstore design',
     notes: 'Reference design used by the serialization tests.',
-    tags: ['design', 'reference'],
     info: {
       title: 'Petstore',
       description: 'A pet store API designed in Restorm.',

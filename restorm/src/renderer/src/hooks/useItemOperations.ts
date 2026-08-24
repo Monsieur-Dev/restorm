@@ -887,7 +887,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         type: 'design',
         id,
         name,
-        tags: [],
         info: { title: name, version: '1.0.0' },
         models: [],
         enums: [],

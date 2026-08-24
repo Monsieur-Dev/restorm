@@ -183,7 +183,6 @@ export function designFromDocumentation(
     type: 'design',
     id: newId(),
     name,
-    tags: [],
     info: doc.api,
     ...(doc.server !== undefined ? { server: doc.server } : {}),
     ...(doc.securitySchemes !== undefined ? { securitySchemes: doc.securitySchemes } : {}),

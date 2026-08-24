@@ -7,7 +7,8 @@ import { IconView, i18n } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request, ApiDesign } from '../../../shared/types/collections'
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
-import { DESIGN_SECTIONS, DESIGN_CODICON, designSectionRowId } from '../../../shared/design/designSections'
+import { SIDEBAR_DESIGN_SECTIONS, DESIGN_CODICON, designSectionRowId } from '../../../shared/design/designSections'
+import { getDesignClients, designClientRowId } from './designClientsStore'
 import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 
 import { requestBadgeMode } from '../utils/badgeUtils'
@@ -368,6 +369,42 @@ function scenarioToListViewItem(
  * `parseDesignSectionRowId`, clicks refocus the design tab on the
  * section, and drag & drop refuses them wholesale.
  */
+/** Namespace a converted client row (and its whole subtree) so the sidebar id
+ *  marks it as a TRANSIENT client node, never colliding with a tree item, and
+ *  so the click handler can route it back to the client store. */
+function prefixClientRow(node: ListViewItemData, designId: string, expanded: Set<string>): ListViewItemData {
+  const id = designClientRowId(designId, node.id)
+  const children = node.children?.map((child) => prefixClientRow(child, designId, expanded))
+  return {
+    ...node,
+    id,
+    // Transient rows are never persisted, so never draggable.
+    draggable: false,
+    ...(children ? { children, isExpanded: expanded.has(id) } : {})
+  }
+}
+
+/** One folder per served protocol, each holding that protocol's imported
+ *  (transient) client requests — the children hung under the Clients row while
+ *  the design is served. Empty when the server is stopped. */
+function designClientsChildren(design: ApiDesign, options: FolderToListViewOptions): ListViewItemData[] {
+  return getDesignClients(design.id).map((bundle) => {
+    const folderId = designClientRowId(design.id, `proto:${bundle.protocol}`)
+    const children = bundle.items.map((item) =>
+      prefixClientRow(folderItemToListViewItem(item, options), design.id, options.expandedIds)
+    )
+    return {
+      id: folderId,
+      title: i18n.t(`design.protocol.${bundle.protocol}`),
+      icon: toListViewIcon({ type: 'codicon', value: 'folder' }, ''),
+      draggable: false,
+      isExpandable: children.length > 0,
+      isExpanded: options.expandedIds.has(folderId),
+      children
+    }
+  })
+}
+
 function designToListViewItem(
   design: ApiDesign,
   options: FolderToListViewOptions
@@ -397,18 +434,25 @@ function designToListViewItem(
     'data-testid': testId
   })
 
-  const children: ListViewItemData[] = DESIGN_SECTIONS.map((section) => {
+  const children: ListViewItemData[] = SIDEBAR_DESIGN_SECTIONS.map((section) => {
     const count = section.count(design)
     const parts: ReactNode[] = []
     if (sectionsInError.has(section.key)) parts.push(errorDot(`design-section-error-${section.key}`))
     if (count !== null && count > 0) parts.push(String(count))
+    const rowId = designSectionRowId(design.id, section.key)
+    // The Clients row is the one section that grows children: the transient
+    // per-protocol client requests, present only while the design is served.
+    const clientChildren = section.key === 'clients' ? designClientsChildren(design, options) : []
     return {
-      id: designSectionRowId(design.id, section.key),
+      id: rowId,
       title: i18n.t(section.labelKey),
       icon: toListViewIcon(section.icon, ''),
       // Virtual section rows are navigation shortcuts, not movable entities —
       // never draggable (a drag would carry no meaningful item id).
       draggable: false,
+      ...(clientChildren.length > 0
+        ? { isExpandable: true, isExpanded: options.expandedIds.has(rowId), children: clientChildren }
+        : {}),
       ...(parts.length > 0
         ? { rightActions: React.createElement('span', { className: 'design-section-count' }, ...parts) }
         : {})
