@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Genererte egenskaper",
       "inheritedProperties": "Arvede egenskaper",
-      "ownProperties": "Egne egenskaper"
+      "ownProperties": "Egne egenskaper",
+      "tabs": {
+        "property": "Egenskap"
+      }
     },
     "flags": {
       "required": "påkrevd",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Velg én eller flere maler i «</> Code»-delen — her definerer du deretter variablene som brukes ved generering.",
         "generalTitle": "Generelle variabler",
         "scope": {
-          "general": "Generelt"
+          "general": "Generelt",
+          "property": "Modellegenskap"
         },
         "discover": "Oppdag variablene denne malen bruker",
         "undeclared": "Brukt, men ikke deklarert: {{names}}",

@@ -277,6 +277,7 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
           <ListView
             items={rows}
             selectedIds={selectedModelId === null ? [] : [selectedModelId]}
+            expandOnChevronOnly
             onItemClick={(payload) => { onSelectModel(payload.item.id); setSelectedPropertyId(null) }}
             editingItemId={editingId}
             onEditingStart={(id) => { setEditingId(id) }}

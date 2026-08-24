@@ -109,7 +109,7 @@ export const MANIFEST_SCHEMA = JSON.stringify({
         required: ['name', 'scope', 'type'],
         properties: {
           name: { type: 'string', minLength: 1 },
-          scope: { enum: ['project', 'model', 'route'] },
+          scope: { enum: ['project', 'model', 'property', 'route'] },
           type: { enum: ['string', 'boolean', 'number', 'enum'] },
           options: { type: 'array', items: { type: 'string' } },
           default: { type: 'string' },

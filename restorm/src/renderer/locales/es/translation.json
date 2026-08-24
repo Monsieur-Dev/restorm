@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Propiedades generadas",
       "inheritedProperties": "Propiedades heredadas",
-      "ownProperties": "Propiedades propias"
+      "ownProperties": "Propiedades propias",
+      "tabs": {
+        "property": "Propiedad"
+      }
     },
     "flags": {
       "required": "requerido",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Elige una o varias plantillas en la sección «</> Code»: aquí definirás después las variables usadas por la generación.",
         "generalTitle": "Variables generales",
         "scope": {
-          "general": "General"
+          "general": "General",
+          "property": "Propiedad del modelo"
         },
         "discover": "Descubrir las variables que usa esta plantilla",
         "undeclared": "Usadas pero no declaradas: {{names}}",

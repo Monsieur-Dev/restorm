@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Üretilen özellikler",
       "inheritedProperties": "Devralınan özellikler",
-      "ownProperties": "Kendi özellikleri"
+      "ownProperties": "Kendi özellikleri",
+      "tabs": {
+        "property": "Özellik"
+      }
     },
     "flags": {
       "required": "zorunlu",
@@ -2555,7 +2558,8 @@
         "noTemplates": "“</> Code” bölümünde bir veya daha fazla şablon seçin — ardından üretimde kullanılan değişkenleri burada tanımlarsınız.",
         "generalTitle": "Genel değişkenler",
         "scope": {
-          "general": "Genel"
+          "general": "Genel",
+          "property": "Model özelliği"
         },
         "discover": "Bu şablonun kullandığı değişkenleri keşfet",
         "undeclared": "Kullanılan ama bildirilmeyen: {{names}}",

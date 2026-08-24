@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Gegenereerde eigenschappen",
       "inheritedProperties": "Overgeërfde eigenschappen",
-      "ownProperties": "Eigen eigenschappen"
+      "ownProperties": "Eigen eigenschappen",
+      "tabs": {
+        "property": "Eigenschap"
+      }
     },
     "flags": {
       "required": "verplicht",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Kies een of meer sjablonen in de sectie ‘</> Code’ — hier definieer je vervolgens de variabelen die de generatie gebruikt.",
         "generalTitle": "Algemene variabelen",
         "scope": {
-          "general": "Algemeen"
+          "general": "Algemeen",
+          "property": "Modeleigenschap"
         },
         "discover": "Ontdek de variabelen die dit sjabloon gebruikt",
         "undeclared": "Gebruikt maar niet gedeclareerd: {{names}}",

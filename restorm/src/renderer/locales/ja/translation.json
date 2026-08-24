@@ -2355,7 +2355,10 @@
       },
       "generatedProperties": "生成されたプロパティ",
       "inheritedProperties": "継承されたプロパティ",
-      "ownProperties": "固有のプロパティ"
+      "ownProperties": "固有のプロパティ",
+      "tabs": {
+        "property": "プロパティ"
+      }
     },
     "flags": {
       "required": "必須",
@@ -2554,7 +2557,8 @@
         "noTemplates": "「</> Code」セクションで 1 つ以上のテンプレートを選択すると、生成で使う変数をここで定義できます。",
         "generalTitle": "全般変数",
         "scope": {
-          "general": "全般"
+          "general": "全般",
+          "property": "モデルのプロパティ"
         },
         "discover": "このテンプレートが使う変数を検出",
         "undeclared": "使用されているが未宣言: {{names}}",

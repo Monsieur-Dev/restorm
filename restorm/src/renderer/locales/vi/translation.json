@@ -2355,7 +2355,10 @@
       },
       "generatedProperties": "Thuộc tính đã tạo",
       "inheritedProperties": "Thuộc tính kế thừa",
-      "ownProperties": "Thuộc tính riêng"
+      "ownProperties": "Thuộc tính riêng",
+      "tabs": {
+        "property": "Thuộc tính"
+      }
     },
     "flags": {
       "required": "bắt buộc",
@@ -2554,7 +2557,8 @@
         "noTemplates": "Chọn một hoặc nhiều mẫu trong phần “</> Code” — sau đó bạn sẽ định nghĩa tại đây các biến dùng cho việc tạo mã.",
         "generalTitle": "Biến chung",
         "scope": {
-          "general": "Chung"
+          "general": "Chung",
+          "property": "Thuộc tính mô hình"
         },
         "discover": "Khám phá các biến mà mẫu này sử dụng",
         "undeclared": "Được dùng nhưng chưa khai báo: {{names}}",

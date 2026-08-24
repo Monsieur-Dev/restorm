@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Generált tulajdonságok",
       "inheritedProperties": "Örökölt tulajdonságok",
-      "ownProperties": "Saját tulajdonságok"
+      "ownProperties": "Saját tulajdonságok",
+      "tabs": {
+        "property": "Tulajdonság"
+      }
     },
     "flags": {
       "required": "kötelező",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Válasszon egy vagy több sablont a „</> Code” szakaszban — itt adhatja meg a generálás során használt változókat.",
         "generalTitle": "Általános változók",
         "scope": {
-          "general": "Általános"
+          "general": "Általános",
+          "property": "Modell tulajdonsága"
         },
         "discover": "A sablon által használt változók felderítése",
         "undeclared": "Használt, de nem deklarált: {{names}}",

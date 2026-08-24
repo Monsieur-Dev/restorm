@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Veti të gjeneruara",
       "inheritedProperties": "Veti të trashëguara",
-      "ownProperties": "Veti vetjake"
+      "ownProperties": "Veti vetjake",
+      "tabs": {
+        "property": "Veti"
+      }
     },
     "flags": {
       "required": "i detyrueshëm",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Zgjidhni një ose më shumë shabllone në seksionin «</> Code» — pastaj do të përcaktoni këtu variablat e përdorura nga gjenerimi.",
         "generalTitle": "Variabla të përgjithshme",
         "scope": {
-          "general": "Të përgjithshme"
+          "general": "Të përgjithshme",
+          "property": "Veti e modelit"
         },
         "discover": "Zbulo variablat që përdor ky shabllon",
         "undeclared": "Të përdorura por të padeklaruara: {{names}}",

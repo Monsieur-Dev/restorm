@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListView, StaticPane, type ListViewItemData } from 'electron-core-ui/renderer'
-import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
+import type { ApiDesign, DesignModel, DesignProperty, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
 import type { TemplateVariableScope } from '../../../../shared/design/templateVariables'
 import { useCodegenContextVariables } from '../../hooks/useCodegenContextVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -14,8 +14,14 @@ import { DesignCodegenVariablesPanels } from './DesignCodegenVariablesPanels'
 function pickSampleEntity(
   design: ApiDesign,
   scope: TemplateVariableScope
-): { model?: DesignModel; group?: DesignRouteGroup; route?: DesignRoute } {
+): { model?: DesignModel; property?: DesignProperty; group?: DesignRouteGroup; route?: DesignRoute } {
   if (scope === 'model') return design.models[0] !== undefined ? { model: design.models[0] } : {}
+  if (scope === 'property') {
+    for (const model of design.models) {
+      if (model.properties[0] !== undefined) return { model, property: model.properties[0] }
+    }
+    return {}
+  }
   if (scope === 'route') {
     for (const group of design.routeGroups) {
       if (group.routes[0] !== undefined) return { group, route: group.routes[0] }
@@ -62,6 +68,7 @@ export const DesignCodegenGeneralVariables: React.FC<{ design: ApiDesign }> = ({
   const items: ListViewItemData[] = [
     { id: 'project', title: t('design.codegen.vars.scope.general', 'General'), icon: <span className="codicon codicon-globe" aria-hidden="true" /> },
     { id: 'model', title: t('design.section.models'), icon: <span className="codicon codicon-symbol-class" aria-hidden="true" /> },
+    { id: 'property', title: t('design.codegen.vars.scope.property', 'Model property'), icon: <span className="codicon codicon-symbol-field" aria-hidden="true" /> },
     { id: 'route', title: t('design.section.routes'), icon: <span className="codicon codicon-symbol-event" aria-hidden="true" /> }
   ]
 

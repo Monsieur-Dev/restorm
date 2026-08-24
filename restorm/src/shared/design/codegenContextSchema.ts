@@ -143,7 +143,8 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         "searchable": { "const": true },
         "immutable": { "const": true },
         "pii": { "const": true },
-        "constraints": { "type": "object" }
+        "constraints": { "type": "object" },
+        "vars": { "type": "object", "additionalProperties": true, "description": "Resolved PROPERTY-scope user variables (evaluated per property)." }
       },
       "additionalProperties": false
     },

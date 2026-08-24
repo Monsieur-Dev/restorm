@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Luodut ominaisuudet",
       "inheritedProperties": "Perityt ominaisuudet",
-      "ownProperties": "Omat ominaisuudet"
+      "ownProperties": "Omat ominaisuudet",
+      "tabs": {
+        "property": "Ominaisuus"
+      }
     },
     "flags": {
       "required": "pakollinen",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Valitse yksi tai useampi malli osiossa ”</> Code” — määrität sitten tässä luonnissa käytettävät muuttujat.",
         "generalTitle": "Yleiset muuttujat",
         "scope": {
-          "general": "Yleiset"
+          "general": "Yleiset",
+          "property": "Mallin ominaisuus"
         },
         "discover": "Tunnista tämän mallin käyttämät muuttujat",
         "undeclared": "Käytössä mutta ei määritelty: {{names}}",

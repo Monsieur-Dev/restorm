@@ -143,6 +143,10 @@ export interface PropertyDesignMeta {
   searchable?: boolean
   /** Human message accompanying `doc.deprecated`. */
   deprecationMessage?: string
+  /** Per-template PROPERTY-scope code-generation variable overrides for THIS
+   * property: templateId → (variable name → Handlebars expression). Overrides
+   * the template's global "Property" value; empty/absent inherits it. */
+  codegenVars?: Record<RuntimeId, Record<string, string>>
 }
 
 /**

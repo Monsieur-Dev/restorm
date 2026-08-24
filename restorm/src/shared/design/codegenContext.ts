@@ -17,6 +17,7 @@
 import type {
   ApiDesign,
   DesignModel,
+  DesignProperty,
   DesignRoute,
   DesignRouteGroup
 } from '../types/apiDesign'
@@ -47,6 +48,7 @@ export interface CodegenVarsBinding {
   values?: TemplateVarValues
   /** Per-entity override lookups (this design's stored values for the template). */
   modelOverrides?: (modelId: string) => Record<string, string> | undefined
+  propertyOverrides?: (propertyId: string) => Record<string, string> | undefined
   routeOverrides?: (routeId: string) => Record<string, string> | undefined
   evaluate: (expression: string, context: Record<string, unknown>) => string
   errors: CodegenVarError[]
@@ -99,6 +101,9 @@ export interface CodegenProperty {
   immutable?: boolean
   pii?: boolean
   constraints?: Record<string, unknown>
+  /** Resolved PROPERTY-scope user variables (`ctx.models[].properties[].vars.<name>`),
+   * evaluated per property. Absent when the template declares none. */
+  vars?: Record<string, unknown>
 }
 
 export interface CodegenModel {
@@ -224,6 +229,29 @@ function projectProperty(design: ApiDesign, property: DesignModel['properties'][
   return out
 }
 
+/** Resolve PROPERTY-scope variables for one projected property and attach them
+ * (mutates `propCtx.vars`). The override lives on the property's own design meta
+ * (so an inherited property carries the override from where it is declared). */
+function resolvePropertyVars(
+  src: DesignModel['properties'][number],
+  propCtx: CodegenProperty,
+  modelCtx: CodegenModel,
+  designCtx: CodegenContext['design'],
+  binding: CodegenVarsBinding
+): void {
+  const resolved = resolveScopeVars({
+    decls: binding.decls,
+    scope: 'property',
+    global: binding.values?.property,
+    overrides: binding.propertyOverrides?.(src.id),
+    evalContext: { design: designCtx, model: modelCtx, property: propCtx },
+    entity: `${modelCtx.name}.${propCtx.name}`,
+    evaluate: binding.evaluate
+  })
+  binding.errors.push(...resolved.errors)
+  if (Object.keys(resolved.values).length > 0) propCtx.vars = resolved.values
+}
+
 function projectModel(
   design: ApiDesign,
   model: DesignModel,
@@ -246,10 +274,11 @@ function projectModel(
     const parentId: string | undefined = current.design?.inheritsFrom
     current = parentId === undefined ? undefined : design.models.find((m) => m.id === parentId)
   }
+  const chainProps = chain.flatMap((m) => m.properties)
   const out: CodegenModel = {
     name: model.doc.name,
     properties: model.properties.map((p) => projectProperty(design, p)),
-    allProperties: chain.flatMap((m) => m.properties).map((p) => projectProperty(design, p)),
+    allProperties: chainProps.map((p) => projectProperty(design, p)),
     examples: (model.examples ?? []).map((example) => ({
       name: example.name,
       values: Object.fromEntries(
@@ -281,6 +310,18 @@ function projectModel(
     })
     binding.errors.push(...resolved.errors)
     if (Object.keys(resolved.values).length > 0) out.vars = resolved.values
+    // Property-scope variables resolve per property, against {design, model,
+    // property}. Own + inherited lists hold distinct projected objects but map
+    // 1:1 (by index) onto their source arrays, so the override is read from the
+    // property where it is declared.
+    out.properties.forEach((propCtx, i) => {
+      const src = model.properties[i]
+      if (src !== undefined) resolvePropertyVars(src, propCtx, out, designCtx, binding)
+    })
+    out.allProperties.forEach((propCtx, i) => {
+      const src = chainProps[i]
+      if (src !== undefined) resolvePropertyVars(src, propCtx, out, designCtx, binding)
+    })
   }
   return out
 }
@@ -385,14 +426,21 @@ function designContext(design: ApiDesign): CodegenContext['design'] {
  * The Handlebars eval-context slice a variable's expression is evaluated
  * against for one entity — and, flattened, exactly the set of contextual
  * variables the value editor should offer. `{design}` for project scope,
- * `{design, model}` for a model, `{design, group, route}` for a route.
+ * `{design, model}` for a model, `{design, model, property}` for a property,
+ * `{design, group, route}` for a route.
  */
 export function codegenEvalContext(
   design: ApiDesign,
-  entity: { model?: DesignModel; group?: DesignRouteGroup; route?: DesignRoute }
+  entity: { model?: DesignModel; property?: DesignProperty; group?: DesignRouteGroup; route?: DesignRoute }
 ): Record<string, unknown> {
   const out: Record<string, unknown> = { design: designContext(design) }
-  if (entity.model !== undefined) out['model'] = projectModel(design, entity.model)
+  if (entity.model !== undefined) {
+    const modelCtx = projectModel(design, entity.model)
+    out['model'] = modelCtx
+    if (entity.property !== undefined) {
+      out['property'] = projectProperty(design, entity.property)
+    }
+  }
   if (entity.group !== undefined && entity.route !== undefined) {
     const group: CodegenGroup = {
       name: entity.group.doc.name,

@@ -120,10 +120,42 @@ describe('buildCodegenContext — user variables (vars)', () => {
     expect(errors).toEqual([])
   })
 
+  it('resolves property-scope vars per property into ctx.models[].properties[].vars', () => {
+    const errors: CodegenVarError[] = []
+    const ctx = buildCodegenContext(buildReferenceApiDesign(), {
+      decls: [{ name: 'col', scope: 'property', type: 'string', default: '{{property.name}}' }],
+      evaluate,
+      errors
+    })
+    const user = ctx.models.find((m) => m.name === 'User')
+    expect(user?.properties.find((p) => p.name === 'email')?.vars).toEqual({ col: 'email' })
+    expect(user?.properties.find((p) => p.name === 'id')?.vars).toEqual({ col: 'id' })
+    // Inherited properties carry the resolved var in `allProperties` too.
+    const admin = ctx.models.find((m) => m.name === 'AdminUser')
+    expect(admin?.allProperties.find((p) => p.name === 'email')?.vars).toEqual({ col: 'email' })
+    expect(errors).toEqual([])
+  })
+
+  it('applies the cascade for property scope: a per-property override beats the global', () => {
+    const errors: CodegenVarError[] = []
+    const ctx = buildCodegenContext(buildReferenceApiDesign(), {
+      decls: [{ name: 'db', scope: 'property', type: 'string', default: 'default' }],
+      values: { property: { db: 'global' } }, // every property → 'global'
+      propertyOverrides: (id) => (id === 'prop-user-email' ? { db: 'override' } : undefined),
+      evaluate,
+      errors
+    })
+    const user = ctx.models.find((m) => m.name === 'User')
+    expect(user?.properties.find((p) => p.name === 'email')?.vars).toEqual({ db: 'override' })
+    expect(user?.properties.find((p) => p.name === 'id')?.vars).toEqual({ db: 'global' })
+    expect(errors).toEqual([])
+  })
+
   it('leaves the context free of vars when no binding is passed', () => {
     const ctx = buildCodegenContext(buildReferenceApiDesign())
     expect(ctx.design.vars).toBeUndefined()
     expect(ctx.models.every((m) => m.vars === undefined)).toBe(true)
+    expect(ctx.models.flatMap((m) => m.properties).every((p) => p.vars === undefined)).toBe(true)
     expect(ctx.groups.flatMap((g) => g.routes).every((r) => r.vars === undefined)).toBe(true)
   })
 })

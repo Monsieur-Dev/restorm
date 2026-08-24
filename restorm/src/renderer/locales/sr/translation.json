@@ -2357,7 +2357,10 @@
       },
       "generatedProperties": "Generisana svojstva",
       "inheritedProperties": "Nasleđena svojstva",
-      "ownProperties": "Sopstvena svojstva"
+      "ownProperties": "Sopstvena svojstva",
+      "tabs": {
+        "property": "Svojstvo"
+      }
     },
     "flags": {
       "required": "obavezno",
@@ -2556,7 +2559,8 @@
         "noTemplates": "Izaberite jedan ili više šablona u odeljku „</> Code“ — ovde ćete zatim definisati promenljive korišćene pri generisanju.",
         "generalTitle": "Opšte promenljive",
         "scope": {
-          "general": "Opšte"
+          "general": "Opšte",
+          "property": "Svojstvo modela"
         },
         "discover": "Otkrij promenljive koje ovaj šablon koristi",
         "undeclared": "Korišćene ali nedeklarisane: {{names}}",

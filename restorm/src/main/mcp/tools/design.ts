@@ -1601,6 +1601,47 @@ export function registerDesignTools(mcp: McpService): void {
   )
 
   mcp.registerTool(
+    'set_design_property_variables',
+    {
+      titleKey: 'mcpToolTitles.setDesignPropertyVariables',
+      title: 'Set a property\'s codegen variable overrides',
+      description:
+        'Persist a model property\'s per-template PROPERTY-scope code-generation variable overrides — the ' +
+        'property\'s "Génération de code" tab. Values are Handlebars expressions (evaluated for THIS property at ' +
+        'generate time, with {design, model, property} in scope) and override the template\'s global "Property" ' +
+        'values. Replaces this property\'s map for the template wholesale; pass an empty object to clear it ' +
+        '(inherit the global).',
+      inputSchema: {
+        designId: z.string().min(1),
+        model: z.string().min(1).describe('Model id or name.'),
+        property: z.string().min(1).describe('Property id or name (of the model).'),
+        template: z.string().min(1).describe('Template id or label.'),
+        variables: z.record(z.string(), z.string()).describe('Variable name → Handlebars expression. Empty object inherits the global.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const model = resolveEntity(design.models, typeof args['model'] === 'string' ? args['model'] : '', (m) => m.doc.name, 'model')
+      if (isResolveError(model)) return errorReply(model.error)
+      const property = resolveEntity(model.properties, typeof args['property'] === 'string' ? args['property'] : '', (p) => p.doc.name, 'property')
+      if (isResolveError(property)) return errorReply(property.error)
+      const tpl = findTemplate(design, typeof args['template'] === 'string' ? args['template'] : '')
+      if (isResolveError(tpl)) return errorReply(tpl.error)
+      const variables = readStringRecord(args['variables'])
+      const { [tpl.id]: _drop, ...rest } = property.design?.codegenVars ?? {}
+      const codegenVars = Object.keys(variables).length === 0 ? rest : { ...rest, [tpl.id]: variables }
+      const nextMeta = { ...(property.design ?? {}) }
+      if (Object.keys(codegenVars).length > 0) nextMeta.codegenVars = codegenVars
+      else delete nextMeta.codegenVars
+      if (Object.keys(nextMeta).length > 0) property.design = nextMeta
+      else delete property.design
+      writeDesign(design)
+      return jsonReply({ designId: design.id, modelId: model.id, propertyId: property.id, templateId: tpl.id, variables })
+    }
+  )
+
+  mcp.registerTool(
     'stop_design_server',
     {
       titleKey: 'mcpToolTitles.stopDesignServer',

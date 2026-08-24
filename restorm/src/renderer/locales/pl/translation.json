@@ -2358,7 +2358,10 @@
       },
       "generatedProperties": "Wygenerowane właściwości",
       "inheritedProperties": "Odziedziczone właściwości",
-      "ownProperties": "Własne właściwości"
+      "ownProperties": "Własne właściwości",
+      "tabs": {
+        "property": "Właściwość"
+      }
     },
     "flags": {
       "required": "wymagane",
@@ -2557,7 +2560,8 @@
         "noTemplates": "Wybierz jeden lub więcej szablonów w sekcji „</> Code” — tutaj zdefiniujesz zmienne używane podczas generowania.",
         "generalTitle": "Zmienne ogólne",
         "scope": {
-          "general": "Ogólne"
+          "general": "Ogólne",
+          "property": "Właściwość modelu"
         },
         "discover": "Wykryj zmienne używane przez ten szablon",
         "undeclared": "Używane, ale niezadeklarowane: {{names}}",

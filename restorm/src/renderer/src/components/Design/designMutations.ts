@@ -6,7 +6,7 @@
  * (deep in-place write) would be stored silently and lost on close.
  */
 
-import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
+import type { ApiDesign, DesignModel, DesignProperty, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
 import type { TemplateVariableScope, TemplateVarValues } from '../../../../shared/design/templateVariables'
 
 export function assignDesignSection<K extends keyof ApiDesign>(design: ApiDesign, key: K, value: ApiDesign[K]): void {
@@ -21,6 +21,13 @@ export function replaceModel(design: ApiDesign, modelId: string, next: DesignMod
 /** Patch one model (by id) — shallow merge of top-level model fields. */
 export function patchModel(design: ApiDesign, modelId: string, patch: Partial<DesignModel>): void {
   assignDesignSection(design, 'models', design.models.map((m) => (m.id === modelId ? { ...m, ...patch } : m)))
+}
+
+/** Replace one property (by id) inside its model's `properties` array. */
+export function replaceProperty(design: ApiDesign, modelId: string, propertyId: string, next: DesignProperty): void {
+  assignDesignSection(design, 'models', design.models.map((m) => (
+    m.id === modelId ? { ...m, properties: m.properties.map((p) => (p.id === propertyId ? next : p)) } : m
+  )))
 }
 
 /** Replace one route group (by id) in the design's `routeGroups`. */
@@ -50,7 +57,7 @@ export function setTemplateScopeVariables(
   const templates = (design.codegen?.templates ?? []).map((template) => {
     if (template.id !== templateId) return template
     const nextVars: TemplateVarValues = {}
-    for (const s of ['project', 'model', 'route'] as const) {
+    for (const s of ['project', 'model', 'property', 'route'] as const) {
       const v = s === scope ? values : template.variables?.[s]
       if (v !== undefined && Object.keys(v).length > 0) nextVars[s] = v
     }

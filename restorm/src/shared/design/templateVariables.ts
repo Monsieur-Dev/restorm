@@ -13,9 +13,11 @@
  */
 
 /** Where a variable is defined and evaluated. `project` → once, into
- * `ctx.design.vars`; `model` → per model, into `ctx.models[].vars`; `route` →
- * per route, into `ctx.groups[].routes[].vars`. (`enum` scope is deferred.) */
-export type TemplateVariableScope = 'project' | 'model' | 'route'
+ * `ctx.design.vars`; `model` → per model, into `ctx.models[].vars`; `property`
+ * → per model property, into `ctx.models[].properties[].vars` (and
+ * `allProperties[]`); `route` → per route, into `ctx.groups[].routes[].vars`.
+ * (`enum` scope is deferred.) */
+export type TemplateVariableScope = 'project' | 'model' | 'property' | 'route'
 /** Drives value coercion + the value editor's validation. */
 export type TemplateVariableType = 'string' | 'boolean' | 'number' | 'enum'
 
@@ -38,6 +40,7 @@ export interface TemplateVariableDecl {
 export interface TemplateVarValues {
   project?: Record<string, string>
   model?: Record<string, string>
+  property?: Record<string, string>
   route?: Record<string, string>
 }
 

@@ -6,6 +6,7 @@ import {
   MessageType,
   SelectBox,
   Table,
+  Tabs,
   Toggle,
   type IMessage,
   type ISelectData,
@@ -22,6 +23,7 @@ import { generateUniqueId } from '../../utils/treeManipulation'
 import { assignDesignSection, replaceModel } from './designMutations'
 import { displayValue, parseTypedValue } from './designDisplay'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { DesignPropertyCodegenTab } from './DesignPropertyCodegenTab'
 
 /** The type vocabulary a property can pick from: primitives first, then
  * the design's models and enums (ID-referenced). */
@@ -424,6 +426,7 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
         <PropertyPanel
           key={selected.id}
           design={design}
+          model={model}
           property={selected}
           issueCodes={propertyIssueCodes(selected.id)}
           onUpdate={(update) => { updateProperty(selected.id, update) }}
@@ -436,13 +439,14 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
 
 interface PropertyPanelProps {
   design: ApiDesign
+  model: DesignModel
   property: DesignProperty
   issueCodes: readonly string[]
   onUpdate: (update: (p: DesignProperty) => DesignProperty) => void
   onDelete: () => void
 }
 
-const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCodes, onUpdate, onDelete }) => {
+const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, model, property, issueCodes, onUpdate, onDelete }) => {
   const { t } = useTranslation()
 
   // A freshly added property arrives unnamed and immediately flagged; drop
@@ -647,6 +651,15 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
         </div>
       )}
 
+      <Tabs
+        data-testid="design-property-tabs"
+        mountStrategy="lazy-once"
+        tabs={[
+          {
+            id: 'property',
+            label: t('design.schema.tabs.property', 'Property'),
+            content: (
+              <>
       <div className="design-settings-grid design-property-grid">
         <label className="design-field">
           <span className="design-field-label">{t('design.schema.fields.name', 'Name')}</span>
@@ -866,6 +879,16 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, property, issueCo
           />
         </label>
       </div>
+              </>
+            )
+          },
+          {
+            id: 'codegen',
+            label: t('design.codegen.vars.tab', 'Code generation'),
+            content: <DesignPropertyCodegenTab design={design} model={model} property={property} />
+          }
+        ]}
+      />
     </div>
   )
 }

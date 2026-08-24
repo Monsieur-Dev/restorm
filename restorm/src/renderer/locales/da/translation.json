@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Genererede egenskaber",
       "inheritedProperties": "Nedarvede egenskaber",
-      "ownProperties": "Egne egenskaber"
+      "ownProperties": "Egne egenskaber",
+      "tabs": {
+        "property": "Egenskab"
+      }
     },
     "flags": {
       "required": "påkrævet",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Vælg en eller flere skabeloner i afsnittet “</> Code” — her definerer du derefter de variabler, der bruges ved generering.",
         "generalTitle": "Generelle variabler",
         "scope": {
-          "general": "Generelt"
+          "general": "Generelt",
+          "property": "Modelegenskab"
         },
         "discover": "Find de variabler, denne skabelon bruger",
         "undeclared": "Brugt, men ikke deklareret: {{names}}",

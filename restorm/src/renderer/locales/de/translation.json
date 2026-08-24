@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Generierte Eigenschaften",
       "inheritedProperties": "Geerbte Eigenschaften",
-      "ownProperties": "Eigene Eigenschaften"
+      "ownProperties": "Eigene Eigenschaften",
+      "tabs": {
+        "property": "Eigenschaft"
+      }
     },
     "flags": {
       "required": "erforderlich",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Wählen Sie eine oder mehrere Vorlagen im Bereich „</> Code“ – hier definieren Sie dann die von der Generierung verwendeten Variablen.",
         "generalTitle": "Allgemeine Variablen",
         "scope": {
-          "general": "Allgemein"
+          "general": "Allgemein",
+          "property": "Modelleigenschaft"
         },
         "discover": "Vom Template verwendete Variablen erkennen",
         "undeclared": "Verwendet, aber nicht deklariert: {{names}}",

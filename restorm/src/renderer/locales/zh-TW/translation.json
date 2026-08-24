@@ -2355,7 +2355,10 @@
       },
       "generatedProperties": "產生的屬性",
       "inheritedProperties": "繼承的屬性",
-      "ownProperties": "自有屬性"
+      "ownProperties": "自有屬性",
+      "tabs": {
+        "property": "屬性"
+      }
     },
     "flags": {
       "required": "必填",
@@ -2554,7 +2557,8 @@
         "noTemplates": "在「</> Code」區段選擇一個或多個範本 — 接著在此定義產生時使用的變數。",
         "generalTitle": "一般變數",
         "scope": {
-          "general": "一般"
+          "general": "一般",
+          "property": "模型屬性"
         },
         "discover": "探索此範本使用的變數",
         "undeclared": "已使用但未宣告：{{names}}",

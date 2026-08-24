@@ -2355,7 +2355,10 @@
       },
       "generatedProperties": "生成的属性",
       "inheritedProperties": "继承的属性",
-      "ownProperties": "自有属性"
+      "ownProperties": "自有属性",
+      "tabs": {
+        "property": "属性"
+      }
     },
     "flags": {
       "required": "必填",
@@ -2554,7 +2557,8 @@
         "noTemplates": "在“</> Code”部分选择一个或多个模板 — 然后在此定义生成所用的变量。",
         "generalTitle": "常规变量",
         "scope": {
-          "general": "常规"
+          "general": "常规",
+          "property": "模型属性"
         },
         "discover": "发现此模板使用的变量",
         "undeclared": "已使用但未声明：{{names}}",

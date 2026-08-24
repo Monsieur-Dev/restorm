@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { VariableDefinition } from 'electron-core-ui/renderer'
-import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../../../shared/types/collections'
+import type { ApiDesign, DesignModel, DesignProperty, DesignRoute, DesignRouteGroup } from '../../../shared/types/collections'
 import { codegenEvalContext } from '../../../shared/design/codegenContext'
 import { flattenToVariableDefinitions } from '../components/Design/codegenContextVariables'
 import { useDesignEnvVariables } from './useDesignEnvVariables'
@@ -16,7 +16,7 @@ import { useDesignEnvVariables } from './useDesignEnvVariables'
  */
 export function useCodegenContextVariables(
   design: ApiDesign,
-  entity: { model?: DesignModel; group?: DesignRouteGroup; route?: DesignRoute }
+  entity: { model?: DesignModel; property?: DesignProperty; group?: DesignRouteGroup; route?: DesignRoute }
 ): VariableDefinition[] {
   const envVars = useDesignEnvVariables(design.id)
   const contextVars = flattenToVariableDefinitions(codegenEvalContext(design, entity))

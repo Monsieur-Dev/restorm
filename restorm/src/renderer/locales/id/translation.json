@@ -2355,7 +2355,10 @@
       },
       "generatedProperties": "Properti yang dihasilkan",
       "inheritedProperties": "Properti warisan",
-      "ownProperties": "Properti sendiri"
+      "ownProperties": "Properti sendiri",
+      "tabs": {
+        "property": "Properti"
+      }
     },
     "flags": {
       "required": "wajib",
@@ -2554,7 +2557,8 @@
         "noTemplates": "Pilih satu atau beberapa templat di bagian “</> Code” — lalu tentukan variabel yang digunakan pembuatan di sini.",
         "generalTitle": "Variabel umum",
         "scope": {
-          "general": "Umum"
+          "general": "Umum",
+          "property": "Properti model"
         },
         "discover": "Temukan variabel yang digunakan templat ini",
         "undeclared": "Digunakan tetapi tidak dideklarasikan: {{names}}",

@@ -2356,7 +2356,10 @@
       },
       "generatedProperties": "Genererade egenskaper",
       "inheritedProperties": "Ärvda egenskaper",
-      "ownProperties": "Egna egenskaper"
+      "ownProperties": "Egna egenskaper",
+      "tabs": {
+        "property": "Egenskap"
+      }
     },
     "flags": {
       "required": "obligatorisk",
@@ -2555,7 +2558,8 @@
         "noTemplates": "Välj en eller flera mallar i avsnittet ”</> Code” — här definierar du sedan variablerna som används vid generering.",
         "generalTitle": "Allmänna variabler",
         "scope": {
-          "general": "Allmänt"
+          "general": "Allmänt",
+          "property": "Modellegenskap"
         },
         "discover": "Upptäck variablerna som den här mallen använder",
         "undeclared": "Använda men inte deklarerade: {{names}}",

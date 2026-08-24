@@ -153,6 +153,14 @@ class DesignCodegenService {
           modelOverrides: (modelId) => templateRow === undefined
             ? undefined
             : design.models.find((m) => m.id === modelId)?.design?.codegenVars?.[templateRow.id],
+          propertyOverrides: (propertyId) => {
+            if (templateRow === undefined) return undefined
+            for (const m of design.models) {
+              const p = m.properties.find((prop) => prop.id === propertyId)
+              if (p !== undefined) return p.design?.codegenVars?.[templateRow.id]
+            }
+            return undefined
+          },
           routeOverrides: (routeId) => {
             if (templateRow === undefined) return undefined
             for (const g of design.routeGroups) {

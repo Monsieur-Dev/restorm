@@ -2358,7 +2358,10 @@
       },
       "generatedProperties": "Vygenerované vlastnosti",
       "inheritedProperties": "Zděděné vlastnosti",
-      "ownProperties": "Vlastní vlastnosti"
+      "ownProperties": "Vlastní vlastnosti",
+      "tabs": {
+        "property": "Vlastnost"
+      }
     },
     "flags": {
       "required": "povinné",
@@ -2557,7 +2560,8 @@
         "noTemplates": "Vyberte jednu nebo více šablon v sekci „</> Code“ — zde poté definujete proměnné použité při generování.",
         "generalTitle": "Obecné proměnné",
         "scope": {
-          "general": "Obecné"
+          "general": "Obecné",
+          "property": "Vlastnost modelu"
         },
         "discover": "Zjistit proměnné použité touto šablonou",
         "undeclared": "Použité, ale nedeklarované: {{names}}",

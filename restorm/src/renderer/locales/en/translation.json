@@ -2359,7 +2359,10 @@
       },
       "inheritedProperties": "Inherited properties",
       "ownProperties": "Own properties",
-      "generatedProperties": "Generated properties"
+      "generatedProperties": "Generated properties",
+      "tabs": {
+        "property": "Property"
+      }
     },
     "flags": {
       "required": "required",
@@ -2582,7 +2585,8 @@
         "noTemplates": "Choose one or more templates in the “</> Code” section — you’ll then define the variables used by generation here.",
         "generalTitle": "General variables",
         "scope": {
-          "general": "General"
+          "general": "General",
+          "property": "Model property"
         },
         "discover": "Discover the variables this template uses",
         "undeclared": "Used but not declared: {{names}}",
@@ -2794,6 +2798,7 @@
     "setDesignTemplates": "Set a design's code templates",
     "setDesignTemplateVariables": "Set a template's global codegen variables",
     "setDesignModelVariables": "Set a model's codegen overrides",
+    "setDesignPropertyVariables": "Set a property's codegen overrides",
     "setDesignRouteVariables": "Set a route's codegen overrides"
   },
   "odataFilter": {

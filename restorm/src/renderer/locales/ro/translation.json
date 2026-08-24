@@ -2357,7 +2357,10 @@
       },
       "generatedProperties": "Proprietăți generate",
       "inheritedProperties": "Proprietăți moștenite",
-      "ownProperties": "Proprietăți proprii"
+      "ownProperties": "Proprietăți proprii",
+      "tabs": {
+        "property": "Proprietate"
+      }
     },
     "flags": {
       "required": "obligatoriu",
@@ -2556,7 +2559,8 @@
         "noTemplates": "Alege unul sau mai multe șabloane în secțiunea „</> Code” — apoi definești aici variabilele folosite la generare.",
         "generalTitle": "Variabile generale",
         "scope": {
-          "general": "General"
+          "general": "General",
+          "property": "Proprietate a modelului"
         },
         "discover": "Descoperă variabilele folosite de acest șablon",
         "undeclared": "Folosite dar nedeclarate: {{names}}",
