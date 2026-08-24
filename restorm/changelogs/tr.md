@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+**API'nizi tasarlayın, mock olarak sunun ve istemcilerini üretin — Restorm'dan çıkmadan.**
+
+- **Görsel bir API tasarımcısı.** API'nizi elle modelleyin — modeller, enum'lar, rotalar, adlandırılmış örnekler, kısıtlamalar — tek satır spesifikasyon yazmadan.
+- **Tek tıklamayla, aynı anda 5 protokolde mock olarak sunun.** Tasarım, HTTP, GraphQL, SOAP, OData ve gRPC'de aynı anda yanıt veren bir sunucuya dönüşür. Yanıtlar adlandırılmış örneklerinizden (ya da modellerinizden üretilen gerçekçi verilerden) gelir; kısıtlama doğrulaması, simüle edilmiş gecikme ve durum bilgili (stateful) bir mod içerir.
+- **Çalıştırmaya hazır istemciler, otomatik üretilir.** Mock çalışırken Clients bölümü, etkin her protokol için mock'un uç noktalarına yönlendirilmiş gerçek, çalıştırılabilir istekler oluşturur. Tek tıklama bir isteği açar ve sunucuya vurur — test etmek için API'nizi başka bir yere yeniden içe aktarmaya son.
+- **Tanımlayıcıyı dışa aktarın** (OpenAPI ve diğerleri) ve tasarımınızdan **kod üretin**; bu kod bir sanal alanda oluşturulur ve yalnızca siz onayladıktan sonra diske yazılır.
+- **İçe aktarımda istek gövdeleri önceden doldurulur**: GraphQL dönüş tipinin skaler alanlarını seçer, gRPC iç içe mesajları açar — istek olduğu gibi çalışır.
+
 ## v1.0.6
 
 Düzeltmeler:

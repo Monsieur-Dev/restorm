@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+**Navrhněte své API, obsloužíte je jako mock a vygenerujte jeho klienty — aniž byste opustili Restorm.**
+
+- **Vizuální designer API.** Modelujte své API ručně — modely, enumy, cesty, pojmenované příklady, omezení — bez jediného řádku specifikace.
+- **Obsloužíte je jako mock, jedním kliknutím, na 5 protokolech naráz.** Návrh se stane serverem, který odpovídá v HTTP, GraphQL, SOAP, OData a gRPC současně. Odpovědi pocházejí z vašich pojmenovaných příkladů (nebo z realistických dat vygenerovaných z vašich modelů), s validací omezení, simulovanou latencí a stavovým režimem.
+- **Klienti připravení ke spuštění, generovaní automaticky.** Zatímco mock běží, sekce Clients vytváří skutečné, spustitelné požadavky pro každý zapnutý protokol, mířené na endpointy mocku. Jedno kliknutí otevře požadavek a klepne na server — už žádné opětovné importování vašeho API jinam, abyste je otestovali.
+- **Exportujte deskriptor** (OpenAPI a další) a **generujte kód** ze svého návrhu, vykreslený v izolovaném prostředí a zapsaný na disk až po vašem potvrzení.
+- **Při importu se těla požadavků předvyplní**: GraphQL vybere skalární pole návratového typu, gRPC rozbalí vnořené zprávy — požadavek se spustí tak, jak je.
+
 ## v1.0.6
 
 Opravy:

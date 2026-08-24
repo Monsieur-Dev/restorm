@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+**Tervezze meg az API-ját, szolgálja ki mockként, és generálja a klienseit — anélkül, hogy elhagyná a Restormot.**
+
+- **Vizuális API-tervező.** Modellezze az API-ját kézzel — modellek, enumok, útvonalak, elnevezett példák, megszorítások — anélkül, hogy egyetlen sor specifikációt is írna.
+- **Szolgálja ki mockként, egyetlen kattintással, egyszerre 5 protokollon.** A tervből kiszolgáló lesz, amely egyszerre válaszol HTTP-ben, GraphQL-ben, SOAP-ban, OData-ban és gRPC-ben. A válaszok az elnevezett példáiból származnak (vagy a modelljeiből generált valósághű adatokból), megszorítás-ellenőrzéssel, szimulált késleltetéssel és állapottal rendelkező móddal.
+- **Futtatásra kész kliensek, automatikusan generálva.** Amíg a mock fut, a Clients szakasz valódi, futtatható kéréseket hoz létre minden engedélyezett protokollhoz, a mock végpontjaira irányítva. Egy kattintás megnyit egy kérést, és eltalálja a kiszolgálót — nincs többé újraimportálás máshová, hogy tesztelhesse az API-ját.
+- **Exportálja a leírót** (OpenAPI és mások), és **generáljon kódot** a tervéből, amely egy homokozóban jelenik meg, és csak a megerősítése után íródik lemezre.
+- **Importáláskor a kérések törzsei előre kitöltődnek**: a GraphQL kiválasztja a visszatérési típus skalármezőit, a gRPC kibontja a beágyazott üzeneteket — a kérés úgy futtatható, ahogy van.
+
 ## v1.0.6
 
 Javítások:

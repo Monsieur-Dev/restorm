@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+**Rancang API Anda, sajikan sebagai mock, dan hasilkan kliennya — tanpa meninggalkan Restorm.**
+
+- **Perancang API visual.** Modelkan API Anda secara manual — model, enum, rute, contoh bernama, batasan — tanpa menulis satu baris spesifikasi pun.
+- **Sajikan sebagai mock, dalam satu klik, di 5 protokol sekaligus.** Rancangan menjadi server yang menjawab dalam HTTP, GraphQL, SOAP, OData, dan gRPC secara bersamaan. Respons berasal dari contoh bernama Anda (atau data realistis yang dihasilkan dari model Anda), dengan validasi batasan, latensi tersimulasi, dan mode stateful.
+- **Klien siap jalan, dihasilkan secara otomatis.** Saat mock berjalan, bagian Clients membuat permintaan nyata yang dapat dijalankan untuk setiap protokol yang diaktifkan, diarahkan ke endpoint mock. Satu klik membuka permintaan dan menghantam server — tak perlu lagi mengimpor ulang API Anda di tempat lain untuk mengujinya.
+- **Ekspor deskriptor** (OpenAPI dan lainnya) dan **hasilkan kode** dari rancangan Anda, dirender dalam sandbox dan ditulis ke disk hanya setelah Anda mengonfirmasi.
+- **Saat mengimpor, badan permintaan terisi otomatis**: GraphQL memilih field skalar dari tipe kembalian, gRPC membentangkan pesan bersarang — permintaan berjalan apa adanya.
+
 ## v1.0.6
 
 Perbaikan:
