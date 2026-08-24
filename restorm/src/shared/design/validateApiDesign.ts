@@ -9,7 +9,7 @@
  */
 
 import type { ApiDesign, DesignModel } from '../types/apiDesign'
-import { composeRoutePath } from './apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from './apiDesignDoc'
 
 export type DesignIssueCode =
   /** A property has an empty name. */
@@ -205,8 +205,7 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
       // forbids the pair, and the served route table would leave the
       // second one unreachable) — normalize them to a fixed token.
       const composed = composeRoutePath({
-        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+        groupBasePath: groupChainBasePath(design, group)
       }, route.doc.match.urlPattern).replace(/\{\{[^{}]*\}\}/g, '{*}')
       const surface = `${route.doc.match.method ?? 'GET'} ${composed}`
       if (routeSurfaces.has(surface)) {
@@ -223,8 +222,7 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
       // and never answer.
       const served = composeRoutePath({
         ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+        groupBasePath: groupChainBasePath(design, group)
       }, route.doc.match.urlPattern)
       const swaggerUnderBase = composeRoutePath({
         ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {})

@@ -311,12 +311,20 @@ export interface RouteGroupDesignMeta {
  * A group of routes ("resource folder"): carries the base path and the
  * contract routes inherit. Projected to tags in OpenAPI, to folders
  * when materialized into test requests.
+ *
+ * Groups nest: `parentId` points at another group in the SAME flat
+ * `routeGroups` array (absent = a root group). A nested group's base path
+ * COMPOSES under its ancestors — the full served path is
+ * `serverBasePath + [ancestors' versionPrefix+basePath, root→self] + routePattern`.
+ * The group's display NAME (a tag) stays independent of its `basePath`.
  */
 export interface DesignRouteGroup {
   id: RuntimeId
   doc: GroupDocumentation
   design?: RouteGroupDesignMeta
   routes: DesignRoute[]
+  /** Parent group id (same `routeGroups` array); absent = a root group. */
+  parentId?: RuntimeId
 }
 
 /** Design-server configuration carried by the design root. */

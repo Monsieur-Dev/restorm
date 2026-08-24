@@ -18,7 +18,7 @@ import type {
   OperationDocumentation,
   ParameterDocumentation
 } from '../types/apiDocumentation'
-import type { ApiDesign, DesignModel, DesignEnum, DesignRoute } from '../types/apiDesign'
+import type { ApiDesign, DesignModel, DesignEnum, DesignRoute, DesignRouteGroup } from '../types/apiDesign'
 
 /**
  * Resolvers from entity IDs to exported names. Kept as an interface so a
@@ -161,6 +161,44 @@ export function ensureLeadingSlash(path: string): string {
   return `/${path}`
 }
 
+/**
+ * The group's own ancestor chain, root → self (a group is always last). Follows
+ * `parentId` in the flat `routeGroups` array; cycle- and orphan-guarded.
+ */
+export function groupAncestryChain(design: ApiDesign, group: DesignRouteGroup): DesignRouteGroup[] {
+  const byId = new Map(design.routeGroups.map((g) => [g.id, g]))
+  const chain: DesignRouteGroup[] = []
+  const seen = new Set<string>()
+  let current: DesignRouteGroup | undefined = group
+  while (current !== undefined && !seen.has(current.id)) {
+    seen.add(current.id)
+    chain.unshift(current)
+    current = current.parentId !== undefined ? byId.get(current.parentId) : undefined
+  }
+  return chain
+}
+
+/**
+ * The composed group base-path segment for `group` INCLUDING its ancestors:
+ * each group on the chain (root → self) contributes its `versionPrefix` then its
+ * `basePath`. Feed the result as {@link composeRoutePath}'s `groupBasePath` — a
+ * root group yields exactly `versionPrefix/basePath` as before, so flat designs
+ * are unchanged.
+ */
+export function groupChainBasePath(design: ApiDesign, group: DesignRouteGroup): string {
+  const parts: string[] = []
+  const push = (segment: string | undefined): void => {
+    if (segment === undefined) return
+    const trimmed = segment.replace(/^\/+|\/+$/g, '')
+    if (trimmed !== '') parts.push(trimmed)
+  }
+  for (const g of groupAncestryChain(design, group)) {
+    push(g.design?.versionPrefix)
+    push(g.design?.basePath)
+  }
+  return parts.join('/')
+}
+
 /** Compose base paths + a relative pattern into one normalized path. */
 export function composeRoutePath(
   context: { designBasePath?: string; versionPrefix?: string; groupBasePath?: string },
@@ -210,10 +248,9 @@ export function designToApiDocumentation(design: ApiDesign): ApiDocumentation {
         // (exactly where the spec importers put it) — composing it here
         // too would double-count it on a re-import round-trip. Serving
         // is different: `compileDesignRoutes` binds full paths.
-        ...designRouteDoc(route, {
-          ...(group.design?.versionPrefix !== undefined && { versionPrefix: group.design.versionPrefix }),
-          ...(group.design?.basePath !== undefined && { groupBasePath: group.design.basePath })
-        }, design),
+        // The group base path folds the whole ancestor chain (version+base per
+        // group), so a nested group composes under its parents.
+        ...designRouteDoc(route, { groupBasePath: groupChainBasePath(design, group) }, design),
         group: group.doc.name
       })
     }

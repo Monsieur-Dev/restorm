@@ -8,7 +8,7 @@
  */
 
 import type { ApiDesign, DesignRoute, DesignRouteGroup } from '../types/apiDesign'
-import { composeRoutePath } from './apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from './apiDesignDoc'
 import { routePathParams } from './designRoutes'
 import { resolveUrlAgainstEnv } from '../utils/resolveUrlAgainstEnv'
 import { designGraphqlOperations } from './graphqlProjection'
@@ -54,8 +54,7 @@ export function designRouteProjections(
   const method = (route.doc.match.method ?? 'GET').toUpperCase()
   const httpPath = resolveDesignPath(composeRoutePath({
     ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-    ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-    ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+    groupBasePath: groupChainBasePath(design, group)
   }, route.doc.match.urlPattern), envVars)
 
   const gqlOp = designGraphqlOperations(design).find((o) => o.route === route)

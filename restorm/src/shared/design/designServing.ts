@@ -15,7 +15,7 @@ import type {
   DesignRoute,
   DesignRouteGroup
 } from '../types/apiDesign'
-import { composeRoutePath } from './apiDesignDoc'
+import { composeRoutePath, groupAncestryChain, groupChainBasePath } from './apiDesignDoc'
 import { resolveExampleValue, violatedConstraint } from './designExampleValues'
 
 // ── Route table ───────────────────────────────────────────────────────
@@ -37,8 +37,7 @@ export function compileDesignRoutes(design: ApiDesign): CompiledRoute[] {
     for (const route of group.routes) {
       const pattern = composeRoutePath({
         ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+        groupBasePath: groupChainBasePath(design, group)
       }, route.doc.match.urlPattern)
       const segments = pattern
         .split('/')
@@ -91,10 +90,18 @@ export function matchDesignRoute(table: CompiledRoute[], method: string, path: s
 
 // ── Auth ──────────────────────────────────────────────────────────────
 
-/** The auth contract a route actually enforces: its own override, else
- * the group's, else the design default, else none. */
+/** The auth contract a route actually enforces: its own override, else the
+ * nearest ancestor group's auth (self → root), else the design default, else
+ * none. (Enforcement is now off — auth is declarative — but this still feeds
+ * the descriptor + code templates.) */
 export function effectiveAuth(design: ApiDesign, group: DesignRouteGroup, route: DesignRoute): DesignAuthKind {
-  return route.design?.authOverride ?? group.design?.auth ?? design.defaultAuth ?? 'none'
+  if (route.design?.authOverride !== undefined) return route.design.authOverride
+  const chain = groupAncestryChain(design, group)
+  for (let i = chain.length - 1; i >= 0; i -= 1) {
+    const auth = chain[i]?.design?.auth
+    if (auth !== undefined) return auth
+  }
+  return design.defaultAuth ?? 'none'
 }
 
 /** The header an apiKeyHeader contract reads — the first apiKey scheme's

@@ -2506,7 +2506,8 @@
         "pagination": "Pagination",
         "defaultLimit": "Default page size",
         "maxLimit": "Max page size"
-      }
+      },
+      "addSubgroup": "Add a sub-group"
     },
     "newDesignName": "New API design",
     "createFromScratch": "Create an API design",

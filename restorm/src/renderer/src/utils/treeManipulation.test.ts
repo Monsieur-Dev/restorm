@@ -781,7 +781,8 @@ describe('ID_REFERENCE_KEYS', () => {
     { key: 'modelId', declaredIn: 'shared/types/apiDesign.ts — DesignParamLink / RouteDesignMeta.body / DesignResponseMeta', target: 'DesignModel.id' },
     { key: 'propertyId', declaredIn: 'shared/types/apiDesign.ts — DesignParamLink + ModelDesignMeta.identifier', target: 'DesignProperty.id' },
     { key: 'inheritsFrom', declaredIn: 'shared/types/apiDesign.ts — ModelDesignMeta.inheritsFrom', target: 'DesignModel.id' },
-    { key: 'exampleId', declaredIn: 'shared/types/apiDesign.ts — DesignResponseMeta.exampleId', target: 'DesignExample.id' }
+    { key: 'exampleId', declaredIn: 'shared/types/apiDesign.ts — DesignResponseMeta.exampleId', target: 'DesignExample.id' },
+    { key: 'parentId', declaredIn: 'shared/types/apiDesign.ts — DesignRouteGroup.parentId', target: 'the parent DesignRouteGroup.id (sub-groups)' }
   ]
 
   for (const { key, declaredIn, target } of liveReferenceFields) {

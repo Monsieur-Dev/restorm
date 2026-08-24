@@ -20,7 +20,7 @@ import type {
   DesignRoute,
   DesignRouteGroup
 } from '../types/apiDesign'
-import { composeRoutePath } from './apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from './apiDesignDoc'
 import { routePathParams } from './designRoutes'
 import { effectiveAuth } from './designServing'
 
@@ -238,8 +238,7 @@ function projectRoute(design: ApiDesign, group: DesignRouteGroup, route: DesignR
   const meta = route.design
   const fullPattern = composeRoutePath({
     ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-    ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-    ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+    groupBasePath: groupChainBasePath(design, group)
   }, route.doc.match.urlPattern)
   const out: CodegenRoute = {
     method: (route.doc.match.method ?? 'GET').toUpperCase(),

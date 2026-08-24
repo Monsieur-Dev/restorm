@@ -17,7 +17,7 @@ import {
 import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, Request, ApiDesign } from '../../../shared/types/collections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
 import { DESIGN_CODICON } from '../../../shared/design/designSections'
-import { composeRoutePath } from '../../../shared/design/apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from '../../../shared/design/apiDesignDoc'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
@@ -741,8 +741,7 @@ export function designToSearchDocuments(
       const title = summary !== undefined && summary !== '' ? summary : route.doc.match.urlPattern
       const fullPath = composeRoutePath({
         ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+        groupBasePath: groupChainBasePath(design, group)
       }, route.doc.match.urlPattern)
       documents.push({
         id: `${design.id}::route:${route.id}`,

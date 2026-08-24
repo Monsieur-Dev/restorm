@@ -6,7 +6,7 @@ import {
   MessageType
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
-import { composeRoutePath } from '../../../../shared/design/apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from '../../../../shared/design/apiDesignDoc'
 import { httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { useDesignServerCounters, useIsDesignServerListening } from '../../services/designServerStore'
@@ -105,8 +105,7 @@ const RunRouteRow: React.FC<RunRouteRowProps> = ({ design, group, route, callCou
   const method = route.doc.match.method ?? 'GET'
   const fullPath = composeRoutePath({
     ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-    ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-    ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+    groupBasePath: groupChainBasePath(design, group)
   }, route.doc.match.urlPattern)
   const declaredCodes = Object.keys(route.doc.responses ?? {}).sort()
   const forcedCustom = forced !== undefined && !declaredCodes.includes(forced.code) ? forced : undefined

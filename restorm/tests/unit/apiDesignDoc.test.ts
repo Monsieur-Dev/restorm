@@ -4,9 +4,11 @@ import {
   designModelDoc,
   designNameResolver,
   designToApiDocumentation,
-  ensureLeadingSlash
+  ensureLeadingSlash,
+  groupChainBasePath
 } from '../../src/shared/design/apiDesignDoc'
 import type { ApiDocumentation } from '../../src/shared/types/apiDocumentation'
+import type { ApiDesign, DesignRouteGroup } from '../../src/shared/types/apiDesign'
 import { buildReferenceApiDesign } from './apiDesignReference'
 
 describe('composeRoutePath', () => {
@@ -21,6 +23,42 @@ describe('composeRoutePath', () => {
     expect(composeRoutePath({}, '/')).toBe('/')
     expect(composeRoutePath({ groupBasePath: 'users/' }, '{{id}}/')).toBe('/users/{{id}}')
     expect(composeRoutePath({ designBasePath: '' }, '/pets')).toBe('/pets')
+  })
+})
+
+describe('groupChainBasePath (nested route groups)', () => {
+  const mkGroup = (id: string, basePath: string, opts: Partial<DesignRouteGroup> & { versionPrefix?: string } = {}): DesignRouteGroup => ({
+    id,
+    doc: { name: id },
+    design: { basePath, ...(opts.versionPrefix !== undefined ? { versionPrefix: opts.versionPrefix } : {}) },
+    routes: [],
+    ...(opts.parentId !== undefined ? { parentId: opts.parentId } : {})
+  })
+  const mkDesign = (routeGroups: DesignRouteGroup[]): ApiDesign =>
+    ({ id: 'd', info: { title: 'D' }, models: [], enums: [], routeGroups }) as unknown as ApiDesign
+
+  const root = mkGroup('root', '/houses', { versionPrefix: '/v1' })
+  const child = mkGroup('child', '/rooms', { parentId: 'root' })
+  const grandchild = mkGroup('grandchild', '/beds', { parentId: 'child' })
+  const nested = mkDesign([root, child, grandchild])
+
+  it('folds the ancestor chain (version + base per group) into one segment', () => {
+    expect(groupChainBasePath(nested, root)).toBe('v1/houses')
+    expect(groupChainBasePath(nested, child)).toBe('v1/houses/rooms')
+    expect(groupChainBasePath(nested, grandchild)).toBe('v1/houses/rooms/beds')
+  })
+
+  it('composes a nested route to the full path', () => {
+    expect(composeRoutePath({ designBasePath: '/api', groupBasePath: groupChainBasePath(nested, grandchild) }, '/{{id}}'))
+      .toBe('/api/v1/houses/rooms/beds/{{id}}')
+  })
+
+  it('is cycle- and orphan-safe', () => {
+    const a = mkGroup('a', '/a', { parentId: 'b' })
+    const b = mkGroup('b', '/b', { parentId: 'a' })
+    expect(() => groupChainBasePath(mkDesign([a, b]), a)).not.toThrow()
+    const orphan = mkGroup('x', '/x', { parentId: 'gone' })
+    expect(groupChainBasePath(mkDesign([orphan]), orphan)).toBe('x')
   })
 })
 

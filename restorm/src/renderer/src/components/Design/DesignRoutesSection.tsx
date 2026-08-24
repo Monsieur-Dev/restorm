@@ -29,6 +29,7 @@ import { httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { generateUniqueId } from '../../utils/treeManipulation'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { assignDesignSection, replaceGroup, replaceRoute } from './designMutations'
+import { applyRoutesDrop, canRoutesDrop, type RoutesDropPosition } from '../../../../shared/design/routesDrop'
 import { RouteDefinitionTab } from './RouteDefinitionTab'
 import { RouteResponsesTab } from './RouteResponsesTab'
 import { RouteSettingsTab } from './RouteSettingsTab'
@@ -80,7 +81,7 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
   }
   const selection = resolveSelection()
 
-  const addGroup = useCallback(() => {
+  const createGroup = useCallback((parentId?: string) => {
     const taken = new Set(design.routeGroups.map((g) => g.doc.name))
     let name = t('design.routes.newGroupName', 'NewGroup')
     for (let i = 2; taken.has(name); i++) name = `${t('design.routes.newGroupName', 'NewGroup')}${i}`
@@ -88,12 +89,14 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
       id: generateUniqueId(),
       doc: { name },
       design: { basePath: `/${name.toLowerCase()}` },
-      routes: []
+      routes: [],
+      ...(parentId !== undefined ? { parentId } : {})
     }
     assignDesignSection(design, 'routeGroups', [...design.routeGroups, fresh])
-    setExpandedGroupIds((prev) => [...prev, fresh.id])
+    setExpandedGroupIds((prev) => (parentId !== undefined && !prev.includes(parentId) ? [...prev, parentId, fresh.id] : [...prev, fresh.id]))
     onSelectEntity(fresh.id)
   }, [design, onSelectEntity, t, setExpandedGroupIds])
+  const addGroup = useCallback(() => { createGroup() }, [createGroup])
 
   const addRoute = useCallback((group: DesignRouteGroup) => {
     const fresh: DesignRoute = {
@@ -113,58 +116,99 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
     if (selectedEntityId === routeId) onSelectEntity(group.id)
   }, [design, onSelectEntity, selectedEntityId])
 
+  // ── Drag & drop: reorder + reparent groups, reorder + move routes ──
+  // The tree-walking logic lives in the pure, unit-tested `routesDrop` module;
+  // these callbacks only adapt the ECUI ListView payloads to it and write the
+  // result through the one design-mutation door.
+  const canDropInRoutes = useCallback((sources: { item: ListViewItemData }[], target: { item: ListViewItemData }, position: RoutesDropPosition): boolean => {
+    const sourceId = sources[0]?.item.id
+    if (sourceId === undefined) return false
+    return canRoutesDrop(design.routeGroups, { sourceId, targetId: target.item.id, position })
+  }, [design.routeGroups])
+
+  const handleRoutesDrop = useCallback((payload: { source: ListViewItemData; item: ListViewItemData; position: RoutesDropPosition }) => {
+    const next = applyRoutesDrop(design.routeGroups, {
+      sourceId: payload.source.id,
+      targetId: payload.item.id,
+      position: payload.position
+    })
+    if (next !== null) assignDesignSection(design, 'routeGroups', next)
+  }, [design])
+
   const confirmDeleteGroup = useCallback(() => {
     if (pendingDeleteGroup === null) return
-    assignDesignSection(design, 'routeGroups', design.routeGroups.filter((g) => g.id !== pendingDeleteGroup.id))
-    if (selection?.group.id === pendingDeleteGroup.id) onSelectEntity(null)
+    // Deleting a group takes its whole subtree with it (its descendant
+    // sub-groups would otherwise be orphaned by their dangling parentId).
+    const doomed = new Set<string>([pendingDeleteGroup.id])
+    let grew = true
+    while (grew) {
+      grew = false
+      for (const g of design.routeGroups) {
+        if (g.parentId !== undefined && doomed.has(g.parentId) && !doomed.has(g.id)) { doomed.add(g.id); grew = true }
+      }
+    }
+    assignDesignSection(design, 'routeGroups', design.routeGroups.filter((g) => !doomed.has(g.id)))
+    if (selection !== null && doomed.has(selection.group.id)) onSelectEntity(null)
     setPendingDeleteGroup(null)
   }, [design, onSelectEntity, pendingDeleteGroup, selection])
 
-  // ── Tree rows ──────────────────────────────────────────────────────
+  // ── Tree rows (groups nest sub-groups, then their routes) ──────────
   const rows: ListViewItemData[] = useMemo(() => {
     const hasIssue = (entityId: string): boolean => issues.some((issue) => issue.path.includes(entityId))
+    const errorDot = <span className="design-list-error-dot codicon codicon-error" />
     const term = filter.trim().toLowerCase()
     const routeTitle = (route: DesignRouteGroup['routes'][number]): string =>
       route.doc.summary !== undefined && route.doc.summary !== '' ? route.doc.summary : route.doc.match.urlPattern
-    const out: ListViewItemData[] = []
-    for (const group of design.routeGroups) {
+    const childGroupsOf = (parentId: string | undefined): DesignRouteGroup[] =>
+      design.routeGroups.filter((g) => g.parentId === parentId)
+
+    const routeNode = (group: DesignRouteGroup, route: DesignRoute): ListViewItemData => ({
+      // A route row reads like a request row: method badge LEFT (icon slot),
+      // SUMMARY as the label, pattern as fallback.
+      id: route.id,
+      title: routeTitle(route),
+      icon: <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />,
+      draggable: true,
+      contextMenuItems: [
+        { id: 'delete-route', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { deleteRoute(group, route.id) } }
+      ],
+      ...(hasIssue(route.id) ? { rightActions: errorDot } : {})
+    })
+
+    const buildGroup = (group: DesignRouteGroup, ancestorMatches: boolean): ListViewItemData | null => {
       const groupMatches = term === '' || group.doc.name.toLowerCase().includes(term)
-      // A matching group shows all its routes; otherwise only routes that match.
-      const visibleRoutes = term === '' || groupMatches
+      const effMatch = ancestorMatches || groupMatches
+      const subNodes = childGroupsOf(group.id)
+        .map((g) => buildGroup(g, effMatch))
+        .filter((n): n is ListViewItemData => n !== null)
+      const visibleRoutes = term === '' || effMatch
         ? group.routes
         : group.routes.filter((r) => routeTitle(r).toLowerCase().includes(term))
-      if (term !== '' && !groupMatches && visibleRoutes.length === 0) continue
+      if (term !== '' && !groupMatches && subNodes.length === 0 && visibleRoutes.length === 0) return null
       const groupMenu: ContextMenuItem[] = [
         { id: 'add-route', label: t('design.routes.addRoute', 'Add a route'), icon: 'add', onClick: () => { addRoute(group) } },
+        { id: 'add-subgroup', label: t('design.routes.addSubgroup', 'Add a sub-group'), icon: 'new-folder', onClick: () => { createGroup(group.id) } },
         { id: 'delete-group', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { setPendingDeleteGroup(group) } }
       ]
-      out.push({
+      return {
         id: group.id,
         title: group.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : group.doc.name,
+        icon: <span className="codicon codicon-folder" aria-hidden="true" />,
         isExpandable: true,
         // While filtering, keep matching groups open so hits are visible.
         isExpanded: term !== '' ? true : expandedGroupIds.includes(group.id),
         contextMenuItems: groupMenu,
-        ...(hasIssue(group.id) ? { rightActions: <span className="design-list-error-dot codicon codicon-error" /> } : {}),
-        children: visibleRoutes.map((route) => {
-          const routeMenu: ContextMenuItem[] = [
-            { id: 'delete-route', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { deleteRoute(group, route.id) } }
-          ]
-          // The row reads like a request row: method badge LEFT (the icon
-          // slot), the SUMMARY as the label (an API turned into a design
-          // makes the route's name its summary), pattern as fallback.
-          return {
-            id: route.id,
-            title: routeTitle(route),
-            icon: <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />,
-            contextMenuItems: routeMenu,
-            ...(hasIssue(route.id) ? { rightActions: <span className="design-list-error-dot codicon codicon-error" /> } : {})
-          }
-        })
-      })
+        draggable: true,
+        ...(hasIssue(group.id) ? { rightActions: errorDot } : {}),
+        // The group's own routes first, then its sub-groups.
+        children: [...visibleRoutes.map((route) => routeNode(group, route)), ...subNodes]
+      }
     }
-    return out
-  }, [design.routeGroups, expandedGroupIds, issues, t, addRoute, deleteRoute, filter])
+
+    return childGroupsOf(undefined)
+      .map((g) => buildGroup(g, false))
+      .filter((n): n is ListViewItemData => n !== null)
+  }, [design.routeGroups, expandedGroupIds, issues, t, addRoute, deleteRoute, createGroup, filter])
 
   const selectedGroup = selection?.group ?? null
   const selectedRoute = selection?.route ?? null
@@ -222,13 +266,17 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
             rootRole="tree"
             ariaLabel={t('design.section.routes')}
             selectedIds={selectedEntityId === null ? [] : [selectedEntityId]}
+            // A row click SELECTS (opens the group/route panel); only the
+            // chevron folds — like the sidebar.
+            expandOnChevronOnly
             onItemClick={(payload) => { onSelectEntity(payload.item.id) }}
             onItemToggle={(payload, expanded) => {
               setExpandedGroupIds((prev) => (
                 expanded ? [...prev.filter((id) => id !== payload.item.id), payload.item.id] : prev.filter((id) => id !== payload.item.id)
               ))
             }}
-            disableDrag
+            onItemDrop={handleRoutesDrop}
+            canDrop={canDropInRoutes}
             data-testid="design-routes-listview"
           />
         </ScrollableElement>

@@ -15,7 +15,7 @@ import type {
   DesignRouteGroup,
   RouteTraffic
 } from '../../../../shared/types/collections'
-import { composeRoutePath } from '../../../../shared/design/apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from '../../../../shared/design/apiDesignDoc'
 import { replaceRoute } from './designMutations'
 
 const AUTH_KINDS: readonly DesignAuthKind[] = ['none', 'bearer', 'apiKeyHeader', 'basic']
@@ -63,8 +63,7 @@ export const RouteSettingsTab: React.FC<RouteSettingsTabProps> = ({ design, grou
   const inheritedAuth = group.design?.auth ?? design.defaultAuth ?? 'none'
   const inheritedBase = composeRoutePath({
     ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-    ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-    ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+    groupBasePath: groupChainBasePath(design, group)
   }, '/')
   const inheritedHeaders = group.design?.headers ?? []
 

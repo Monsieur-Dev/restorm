@@ -18,7 +18,7 @@ import type {
   DesignRouteGroup
 } from '../../../../shared/types/collections'
 import type { ParameterDocumentation } from '../../../../shared/types/apiDocumentation'
-import { composeRoutePath } from '../../../../shared/design/apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from '../../../../shared/design/apiDesignDoc'
 import { syncPathParams } from '../../../../shared/design/designRoutes'
 import { designRouteProjections, resolveDesignPath } from '../../../../shared/design/designProjections'
 import { flattenEnvVars } from '../../../../shared/utils/resolveUrlAgainstEnv'
@@ -364,8 +364,7 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
 
   const resolvedPath = resolveDesignPath(composeRoutePath({
     ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-    ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-    ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+    groupBasePath: groupChainBasePath(design, group)
   }, route.doc.match.urlPattern), envMap)
 
   const method = route.doc.match.method ?? 'GET'

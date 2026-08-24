@@ -21,7 +21,7 @@ import {
 import { pubsub, PUBSUB_TOPICS, collectionStore } from './CollectionStore'
 import { protocolSpec } from '../../shared/protocolRegistry'
 import { DESIGN_CODICON } from '../../shared/design/designSections'
-import { composeRoutePath } from '../../shared/design/apiDesignDoc'
+import { composeRoutePath, groupChainBasePath } from '../../shared/design/apiDesignDoc'
 
 /** Search categories configuration for Restorm. Kept aligned with the
  * renderer's map (which re-registers over this one at file open). */
@@ -191,8 +191,7 @@ function designSearchDocuments(design: DesignData, parentPath: string[] = [], pa
       const title = summary !== undefined && summary !== '' ? summary : route.doc.match.urlPattern
       const fullPath = composeRoutePath({
         ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
-        ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
-        ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
+        groupBasePath: groupChainBasePath(design, group)
       }, route.doc.match.urlPattern)
       documents.push({
         id: `${design.id}::route:${route.id}`,

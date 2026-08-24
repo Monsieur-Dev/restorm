@@ -227,6 +227,9 @@ export const ID_REFERENCE_KEYS = new Set<string>([
   'propertyId',
   'inheritsFrom',
   'exampleId',
+  // A route group's parent (`DesignRouteGroup.parentId` → another group in the
+  // same design) — so a reidentified paste/clone keeps its sub-group nesting.
+  'parentId',
   // A scenario action's picked quick-config (`QUICK_CONFIG_ID_KEY`,
   // `shared/scenarioActionOverride.ts`). Resolved SCOPED to the request that
   // owns the config, so a clone still naming the original's id resolves to
