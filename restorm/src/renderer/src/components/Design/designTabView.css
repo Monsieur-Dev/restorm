@@ -1256,3 +1256,163 @@
   font-size: 0.85em;
   opacity: 0.85;
 }
+
+/* ── Clients section ─────────────────────────────────────────────── */
+
+/* Server off: a single centered invitation with a link to the Server page.
+   `.design-section-host` is a flex ROW, so `flex: 1` is what fills the width —
+   `justify-content` then centers horizontally, `align-items` vertically. */
+.design-clients-empty {
+  flex: 1;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.design-clients-empty-text {
+  margin: 0;
+  max-width: 30rem;
+  font-size: 0.95em;
+  opacity: 0.85;
+}
+
+.design-clients-server-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--link-foreground, #4daafc);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.design-clients-server-link:hover {
+  color: var(--link-active-foreground, var(--link-foreground, #4daafc));
+}
+
+/* Server on. */
+.design-clients-live-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.design-clients-tree {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* One client row = operation name + its description in grey, on one line. */
+.design-clients-row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.design-clients-row-op {
+  flex: 0 0 auto;
+}
+
+.design-clients-row-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9em;
+  opacity: 0.55;
+}
+
+.design-clients-importing {
+  margin-top: 12px;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Active-descriptor accordions (served design). */
+.design-descriptors {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+
+.design-descriptor {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.design-descriptor-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--badge-background, rgba(128, 128, 128, 0.08));
+}
+
+.design-descriptor-toggle {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-descriptor-proto {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  min-width: 3.5rem;
+}
+
+.design-descriptor-url {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+.design-descriptor-copy {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.design-descriptor-copy:hover {
+  opacity: 1;
+  background: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.15));
+}
+
+.design-descriptor-body {
+  height: 320px;
+  border-top: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+}

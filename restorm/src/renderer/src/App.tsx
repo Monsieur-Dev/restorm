@@ -40,7 +40,7 @@ import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
 import { QUICK_CONFIG_PROJECT_WRITE_EVENT } from './services/requestQuickConfigStore'
 import { preloadScenarioViewports } from './services/scenarioViewportStore'
-import { setClientTabCloser } from './services/designClientsStore'
+import { setClientTabCloser, setClientTabOpener, designClientRowAncestorIds } from './services/designClientsStore'
 import { preloadScenarioBreakpoints } from './services/scenarioBreakpointStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
@@ -2324,6 +2324,23 @@ const App: React.FC = () => {
     setClientTabCloser(closeTabByItemIdStable)
     return () => { setClientTabCloser(null) }
   }, [closeTabByItemIdStable])
+  // Let the Clients PAGE open a transient client in a tab — same no-env,
+  // synthetic-breadcrumb open the sidebar rows use (URLs baked absolute).
+  useEffect(() => {
+    setClientTabOpener((request, breadcrumbs, rowId) => {
+      openAnyRequestTab(request as Parameters<typeof openAnyRequestTab>[0], breadcrumbs, [])
+      // Mirror a sidebar click: select the row and expand its branch so the
+      // sidebar highlights + scrolls to the client we just opened. The main
+      // tree's highlight reads `selectedItemIds` (multi) FIRST, so set both —
+      // otherwise a stale multi-selection (e.g. the Clients section row we
+      // clicked to get here) keeps the highlight.
+      setSelectedItemId(rowId)
+      setSelectedItemIds([rowId])
+      const ancestors = designClientRowAncestorIds(rowId)
+      if (ancestors.length > 0) setExpandedIds((prev) => Array.from(new Set([...prev, ...ancestors])))
+    })
+    return () => { setClientTabOpener(null) }
+  }, [openAnyRequestTab, setSelectedItemId, setSelectedItemIds, setExpandedIds])
 
   // Close-others / close-to-the-right are scoped to the group containing
   // the targeted tab — the usual editor semantics. The Workspace stays

@@ -3,7 +3,8 @@ import {
   composeRoutePath,
   designModelDoc,
   designNameResolver,
-  designToApiDocumentation
+  designToApiDocumentation,
+  ensureLeadingSlash
 } from '../../src/shared/design/apiDesignDoc'
 import type { ApiDocumentation } from '../../src/shared/types/apiDocumentation'
 import { buildReferenceApiDesign } from './apiDesignReference'
@@ -20,6 +21,20 @@ describe('composeRoutePath', () => {
     expect(composeRoutePath({}, '/')).toBe('/')
     expect(composeRoutePath({ groupBasePath: 'users/' }, '{{id}}/')).toBe('/users/{{id}}')
     expect(composeRoutePath({ designBasePath: '' }, '/pets')).toBe('/pets')
+  })
+})
+
+describe('ensureLeadingSlash', () => {
+  it('roots a slash-less base path', () => {
+    expect(ensureLeadingSlash('api/v1')).toBe('/api/v1')
+    expect(ensureLeadingSlash('v2')).toBe('/v2')
+  })
+
+  it('leaves an already-rooted path, a variable, a full URL and empty untouched', () => {
+    expect(ensureLeadingSlash('/api/v1')).toBe('/api/v1')
+    expect(ensureLeadingSlash('{{baseRoute}}')).toBe('{{baseRoute}}')
+    expect(ensureLeadingSlash('https://api.example.com/v1')).toBe('https://api.example.com/v1')
+    expect(ensureLeadingSlash('')).toBe('')
   })
 })
 

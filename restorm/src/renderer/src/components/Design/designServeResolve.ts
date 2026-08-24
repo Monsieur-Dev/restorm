@@ -1,5 +1,6 @@
 import type { ApiDesign, Environment } from '../../../../shared/types/collections'
 import { resolveUrlAgainstEnv, flattenEnvVars, coerceEnvVarValue } from '../../../../shared/utils/resolveUrlAgainstEnv'
+import { ensureLeadingSlash } from '../../../../shared/design/apiDesignDoc'
 
 /** The raw variable map of one environment — same value coercion as the
  * documentation matcher's `envVarsFromFolder`. */
@@ -29,7 +30,10 @@ export function servedEnvVars(env: Environment | undefined): Record<string, stri
 export function resolveServedDesign(design: ApiDesign, envVars: Record<string, string>): ApiDesign {
   const snapshot = JSON.parse(JSON.stringify(design)) as ApiDesign
   if (snapshot.server?.basePath !== undefined && snapshot.server.basePath !== '') {
-    snapshot.server.basePath = resolveUrlAgainstEnv(snapshot.server.basePath, envVars)
+    // Resolve `{{variable}}` then root the path — the main-side server (and the
+    // descriptor it serves) get `/api/v1`, never a slash-less `api/v1` that
+    // wouldn't match, without ever rewriting what the user typed in the field.
+    snapshot.server.basePath = ensureLeadingSlash(resolveUrlAgainstEnv(snapshot.server.basePath, envVars))
   }
   const rawPort = snapshot.serving?.port
   if (snapshot.serving !== undefined && rawPort !== undefined) {

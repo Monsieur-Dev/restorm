@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import type { ApiDesign, DesignProtocol, FolderItem, EnvironmentFolder } from '../../../shared/types/collections'
+import { designSectionRowId } from '../../../shared/design/designSections'
 import { apiKeyHeaderName } from '../../../shared/design/designServing'
 import { designToGraphqlSdl } from '../../../shared/design/graphqlProjection'
 import { processAfterDeserialization } from '../utils/serialization'
@@ -92,6 +93,58 @@ export function useDesignClients(designId: string): ClientBundle[] {
 let tabCloser: ((requestId: string) => void) | null = null
 export function setClientTabCloser(fn: ((requestId: string) => void) | null): void {
   tabCloser = fn
+}
+
+/** App-registered opener — the workbench's `openAnyRequestTab` bound to the
+ *  no-environment, synthetic-breadcrumb form these transient requests need
+ *  (their URLs are already baked absolute). Lets the Clients PAGE open a client
+ *  in a tab without threading the workbench tab API down through the design
+ *  tab. Mirrors {@link setClientTabCloser}. */
+interface ClientTabBreadcrumb { id: string; label: string }
+type ClientTabOpener = (request: FolderItem, breadcrumbs: ClientTabBreadcrumb[], rowId: string) => void
+let tabOpener: ClientTabOpener | null = null
+export function setClientTabOpener(fn: ClientTabOpener | null): void {
+  tabOpener = fn
+}
+
+/** Open a transient client request in a workbench tab via the app-registered
+ *  opener — no-op when nothing is registered yet. `rowId` is the sidebar row id
+ *  (`design-client:…`) so the opener can also select + reveal it in the tree. */
+export function openDesignClientTab(request: FolderItem, breadcrumbs: ClientTabBreadcrumb[], rowId: string): void {
+  tabOpener?.(request, breadcrumbs, rowId)
+}
+
+/** Sidebar row ids to expand so a client row (its prefixed `rowId`) is REVEALED:
+ *  the design node, its Clients section, the protocol folder, and any
+ *  intermediate request-group folders on the path down to the leaf. Lets the
+ *  Clients PAGE select a client and have the sidebar scroll it into view even
+ *  when its branch was collapsed. */
+export function designClientRowAncestorIds(rowId: string): string[] {
+  const parsed = parseDesignClientRowId(rowId)
+  if (parsed === null) return []
+  const { designId, itemId } = parsed
+  const ids: string[] = [designId, designSectionRowId(designId, 'clients')]
+  const findPath = (items: FolderItem[], acc: string[]): string[] | null => {
+    for (const item of items) {
+      const children = (item as { items?: FolderItem[] }).items
+      if (Array.isArray(children)) {
+        const hit = findPath(children, [...acc, item.id])
+        if (hit !== null) return hit
+      } else if (item.id === itemId) {
+        return acc
+      }
+    }
+    return null
+  }
+  for (const bundle of getDesignClients(designId)) {
+    const path = findPath(bundle.items, [])
+    if (path !== null) {
+      ids.push(designClientRowId(designId, `proto:${bundle.protocol}`))
+      for (const folderId of path) ids.push(designClientRowId(designId, folderId))
+      break
+    }
+  }
+  return ids
 }
 
 /** Drop a design's generated clients (server stopped / a fresh regenerate),

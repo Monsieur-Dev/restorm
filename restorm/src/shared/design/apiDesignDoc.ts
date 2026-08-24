@@ -148,6 +148,19 @@ export function designRouteDoc(
   }
 }
 
+/**
+ * A base path is a path, so it must be rooted with `/` — but the user may type
+ * `api/v1` without one. Add it silently at resolution/serve time (we never
+ * rewrite what they typed in the field). Left untouched: an empty value, an
+ * already-rooted path, a `{{variable}}` that didn't resolve (it carries its own
+ * leading slash), and a full URL someone pasted.
+ */
+export function ensureLeadingSlash(path: string): string {
+  if (path === '' || path.startsWith('/') || path.startsWith('{{')) return path
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(path)) return path
+  return `/${path}`
+}
+
 /** Compose base paths + a relative pattern into one normalized path. */
 export function composeRoutePath(
   context: { designBasePath?: string; versionPrefix?: string; groupBasePath?: string },

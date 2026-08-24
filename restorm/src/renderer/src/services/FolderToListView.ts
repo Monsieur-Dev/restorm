@@ -375,10 +375,13 @@ function scenarioToListViewItem(
 function prefixClientRow(node: ListViewItemData, designId: string, expanded: Set<string>): ListViewItemData {
   const id = designClientRowId(designId, node.id)
   const children = node.children?.map((child) => prefixClientRow(child, designId, expanded))
+  // Drop the context menu the request/folder adapters attached: none of the
+  // per-item actions (cut/copy/paste/clone/rename/delete) mean anything on a
+  // generated client. Transient rows are also never draggable.
+  const { contextMenuItems: _droppedMenu, ...rest } = node
   return {
-    ...node,
+    ...rest,
     id,
-    // Transient rows are never persisted, so never draggable.
     draggable: false,
     ...(children ? { children, isExpanded: expanded.has(id) } : {})
   }
@@ -387,7 +390,7 @@ function prefixClientRow(node: ListViewItemData, designId: string, expanded: Set
 /** One folder per served protocol, each holding that protocol's imported
  *  (transient) client requests — the children hung under the Clients row while
  *  the design is served. Empty when the server is stopped. */
-function designClientsChildren(design: ApiDesign, options: FolderToListViewOptions): ListViewItemData[] {
+export function designClientsChildren(design: ApiDesign, options: FolderToListViewOptions): ListViewItemData[] {
   return getDesignClients(design.id).map((bundle) => {
     const folderId = designClientRowId(design.id, `proto:${bundle.protocol}`)
     const children = bundle.items.map((item) =>

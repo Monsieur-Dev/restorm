@@ -2554,15 +2554,19 @@
       "subtitle": "Servez ce design comme un mock live et observez chaque appel."
     },
     "clients": {
-      "subtitle": "Des requêtes clientes prêtes à lemploi pour chaque protocole servi par ce design.",
+      "subtitle": "Votre serveur de design d'API est en cours d'exécution et sert les routes que vous y avez définies. Les requêtes ci-dessous appellent directement ces routes : ouvrez-en une pour la tester. Elles sont éphémères et disparaissent à l'arrêt du serveur.",
       "startPrompt": "Lancez le serveur pour générer les clients.",
       "generated": "Clients générés — ouvrez-les sous Clients dans la barre latérale.",
       "importing": "Import des clients…",
-      "refresh": "Régénérer les clients"
+      "refresh": "Régénérer les clients",
+      "startServerPrompt": "Lancez le <serverLink>serveur de design</serverLink> pour accéder aux requêtes clientes auto générées depuis le modèle."
     },
     "projections": {
       "title": "Projections",
       "hint": "La même opération, telle que chaque protocole servi l'expose."
+    },
+    "descriptors": {
+      "copy": "Copier l'URL"
     }
   },
   "mqtt": {

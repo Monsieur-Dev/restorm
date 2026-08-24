@@ -2554,15 +2554,19 @@
       "subtitle": "Serve this design as a live mock and watch every call."
     },
     "clients": {
-      "subtitle": "Ready-to-run client requests for every protocol this design serves.",
+      "subtitle": "Your API design server is running and serving the routes you defined. The requests below call those routes directly — open one to test it. They are ephemeral and vanish when the server stops.",
       "startPrompt": "Start the server to generate the clients.",
       "generated": "Clients generated — open them under Clients in the sidebar.",
       "importing": "Importing clients…",
-      "refresh": "Regenerate the clients"
+      "refresh": "Regenerate the clients",
+      "startServerPrompt": "Start the <serverLink>design server</serverLink> to access client requests auto-generated from the model."
     },
     "projections": {
       "title": "Projections",
       "hint": "The same operation, as each served protocol exposes it."
+    },
+    "descriptors": {
+      "copy": "Copy the URL"
     }
   },
   "mqtt": {

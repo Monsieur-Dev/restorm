@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -23,6 +23,7 @@ import { DesignServerSection } from './DesignServerSection'
 import { DesignClientsSection } from './DesignClientsSection'
 import { resolveServedDesign, servedEnvVars } from './designServeResolve'
 import { resolveUrlAgainstEnv } from '../../../../shared/utils/resolveUrlAgainstEnv'
+import { ensureLeadingSlash } from '../../../../shared/design/apiDesignDoc'
 import { DesignCodeSection } from './DesignCodeSection'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent, setActiveDesignSection } from '../../services/designSectionIntent'
@@ -62,11 +63,16 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
   // builds, so a consuming read would drain the map on the throwaway
   // call. The mount effect below does the consuming.
   // Persisted per design (user setting, NOT the .restorm file): the last section
-  // is restored across tab switches AND file reopen. A pending navigation intent
-  // still wins via the mount effect below.
+  // is restored across tab switches AND file reopen — EXCEPT when a navigation
+  // intent opened this tab (a sidebar section click): then the click's section
+  // is the initial value AND the async storage restore is ignored (`onRestore`),
+  // so the persisted section can't land late and steal the sidebar selection off
+  // the clicked one.
+  const openedFromSectionIntent = useRef(peekPendingDesignSection(design.id) !== undefined)
   const [activeSection, setActiveSection] = usePersistedState<DesignSectionKey>(
     `design-active-section:${design.id}`,
-    peekPendingDesignSection(design.id)?.section ?? 'settings'
+    peekPendingDesignSection(design.id)?.section ?? 'settings',
+    { onRestore: (stored) => openedFromSectionIntent.current ? undefined : stored }
   )
   // Publish where the tab IS so the sidebar highlights the matching section
   // row — even when the tab is refocused from another tab (handleTabActivate
@@ -82,31 +88,36 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     const intent = peekPendingDesignSection(design.id)
     return intent?.section === 'routes' ? intent.entityId ?? null : null
   })
+  // The Clients section can be SCOPED to one client folder (a `design-client:`
+  // row id): clicking a protocol/sub-folder in the sidebar shows just that
+  // folder's descriptor + child tree. `null` = the whole Clients view.
+  const [clientsScopeId, setClientsScopeId] = useState<string | null>(() => {
+    const intent = peekPendingDesignSection(design.id)
+    return intent?.section === 'clients' ? intent.entityId ?? null : null
+  })
 
-  // Follow section intents while mounted — the single-tab policy means
-  // a sidebar group click usually refocuses this already-open tab. The
-  // live subscriber ALSO consumes the staged entry: without that, an
-  // intent applied to an already-mounted tab would linger in the map
-  // and replay on the next open. A pending intent staged between the
-  // initializer and this subscription is drained on a microtask (never
-  // a synchronous state write in the effect body).
+  const applyIntent = useCallback((intent: { section: DesignSectionKey; entityId?: string }): void => {
+    setActiveSection(intent.section)
+    if (intent.section === 'models' && intent.entityId !== undefined) setSelectedModelId(intent.entityId)
+    if (intent.section === 'routes' && intent.entityId !== undefined) setSelectedRouteEntityId(intent.entityId)
+    // Clients scope follows the intent's entity — including its ABSENCE, which
+    // resets to the full view (a click on the Clients section root).
+    if (intent.section === 'clients') setClientsScopeId(intent.entityId ?? null)
+  }, [setActiveSection])
+
+  // Follow section intents while THIS tab stays mounted — the single-tab policy
+  // refocuses an already-open tab on a sidebar section click. On mount, DRAIN
+  // the pending intent that opened this tab (the lazy initializers already
+  // reflect it): leaving it staged would replay on the next open. No state
+  // write here — the initial section already IS the intent's section.
   useEffect(() => {
-    const applyIntent = (intent: { section: DesignSectionKey; entityId?: string }): void => {
-      setActiveSection(intent.section)
-      if (intent.section === 'models' && intent.entityId !== undefined) setSelectedModelId(intent.entityId)
-      if (intent.section === 'routes' && intent.entityId !== undefined) setSelectedRouteEntityId(intent.entityId)
-    }
-    const unsubscribe = subscribeDesignSectionIntent((designId, intent) => {
+    consumePendingDesignSection(design.id)
+    return subscribeDesignSectionIntent((designId, intent) => {
       if (designId !== design.id) return
       consumePendingDesignSection(design.id)
       applyIntent(intent)
     })
-    const pending = consumePendingDesignSection(design.id)
-    if (pending !== undefined) {
-      queueMicrotask(() => { applyIntent(pending) })
-    }
-    return unsubscribe
-  }, [design.id, setActiveSection])
+  }, [design.id, applyIntent])
 
   // Structural edits (add a property, delete a model…) mutate the
   // reactive design in place — this tab re-renders off the proxy's own
@@ -202,7 +213,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           />
         )}
         {activeSection === 'clients' && (
-          <DesignClientsSection design={design} />
+          <DesignClientsSection design={design} scopeId={clientsScopeId} />
         )}
         {activeSection === 'documentation' && (
           <DesignDocumentationSection design={design} designTick={designTick} onJumpTo={jumpTo} />
@@ -277,8 +288,13 @@ const DesignSettingsSection: React.FC<{
 
   // A resolved preview of the base path, echoing the field against the
   // environment picked in the Server section — sits right under the field.
+  // The base path is rooted here (the same slash the server adds at serve time),
+  // so a user who typed `api/v1` sees the served `/api/v1` without the field
+  // itself being rewritten under their cursor.
   const rawBaseUrl = `${design.server?.host ?? ''}${design.server?.basePath ?? ''}`
-  const resolvedBaseUrl = resolveUrlAgainstEnv(rawBaseUrl, envVars)
+  const resolvedHost = resolveUrlAgainstEnv(design.server?.host ?? '', envVars)
+  const resolvedBasePath = ensureLeadingSlash(resolveUrlAgainstEnv(design.server?.basePath ?? '', envVars))
+  const resolvedBaseUrl = `${resolvedHost}${resolvedBasePath}`
 
   // ── Descriptor export (combo + download) ──────────────────────────
   const [exportFormatIndex, setExportFormatIndex] = useState(0)

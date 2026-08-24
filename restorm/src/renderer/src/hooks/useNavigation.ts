@@ -190,23 +190,33 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   // Handle item click in the sidebar - use navigation service
   const handleItemClick = useCallback((itemId: string) => {
-    // A transient client row (under a served design's Clients section): a
-    // request opens as a normal request tab from the client store's object
-    // (it isn't in rootItems); a folder row just toggles, so we no-op here.
+    // A transient client row (under a served design's Clients section). A leaf
+    // request opens as a normal request tab from the client store's object (it
+    // isn't in rootItems); a FOLDER row (a protocol root or a sub-folder) opens
+    // the Clients section SCOPED to that folder — its descriptor (protocol root
+    // only) + its child tree.
     const clientRow = parseDesignClientRowId(itemId)
     if (clientRow !== null) {
       const request = findClientRequest(clientRow.designId, clientRow.itemId)
-      if (request === undefined || !isRequest(request)) return
-      const { item: designItem } = findItemWithBreadcrumbs(rootItems, clientRow.designId)
-      const designName = designItem !== null && isApiDesign(designItem) ? designItem.name : 'Clients'
-      // The client URLs were baked to absolute at import time, so no env is
-      // needed. SYNTHETIC breadcrumbs (ids not in the tree) keep the workbench
-      // env re-sync from ever attaching the design's own env to these tabs.
-      openAnyRequestTab(
-        request,
-        [{ id: `design-client-root:${clientRow.designId}`, label: designName }, { id: itemId, label: request.name }],
-        []
-      )
+      if (request !== undefined && isRequest(request)) {
+        const { item: designItem } = findItemWithBreadcrumbs(rootItems, clientRow.designId)
+        const designName = designItem !== null && isApiDesign(designItem) ? designItem.name : 'Clients'
+        // The client URLs were baked to absolute at import time, so no env is
+        // needed. SYNTHETIC breadcrumbs (ids not in the tree) keep the workbench
+        // env re-sync from ever attaching the design's own env to these tabs.
+        openAnyRequestTab(
+          request,
+          [{ id: `design-client-root:${clientRow.designId}`, label: designName }, { id: itemId, label: request.name }],
+          []
+        )
+        return
+      }
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, clientRow.designId)
+      if (!item || !isApiDesign(item)) return
+      selectSingle(itemId)
+      setPendingDesignSection(item.id, 'clients', itemId)
+      openDesignTab(item, breadcrumbs)
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
 
