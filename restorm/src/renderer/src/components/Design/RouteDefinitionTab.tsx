@@ -5,9 +5,11 @@ import {
   InputBox,
   MessageType,
   SelectBox,
+  StaticPane,
   Table,
   Toggle,
   type ISelectData,
+  type ISelectOptionItem,
   type TableColumn
 } from 'electron-core-ui/renderer'
 import type {
@@ -18,11 +20,14 @@ import type {
 import type { ParameterDocumentation } from '../../../../shared/types/apiDocumentation'
 import { composeRoutePath } from '../../../../shared/design/apiDesignDoc'
 import { syncPathParams } from '../../../../shared/design/designRoutes'
+import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { displayValue, parseTypedRaw } from './designDisplay'
 import { replaceRoute } from './designMutations'
+import { RegistryBadge } from '../common/RegistryBadge'
+import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { useDesignEnvVariables } from '../../hooks/useDesignEnvVariables'
+import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
-
-const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const
 
 /** Rebuild a route with the given param links, omitting empty bags —
  * `design: { paramLinks: {} }` must never reach the file. */
@@ -53,6 +58,11 @@ export interface RouteDefinitionTabProps {
  */
 export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, group, route }) => {
   const { t } = useTranslation()
+  // Variables of the env-folder that contains the design — the same
+  // autocomplete the request URL offers, so a route path can carry
+  // `{{variables}}` alongside its `{{pathParam}}` placeholders.
+  const envVariables = useDesignEnvVariables(design.id)
+  const handlebarsHelpers = useHandlebarsHelpers()
 
   const commit = useCallback((next: DesignRoute) => {
     replaceRoute(design, group.id, route.id, next)
@@ -343,6 +353,17 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
   }, route.doc.match.urlPattern)
 
   const method = route.doc.match.method ?? 'GET'
+  // The method combo mirrors the request editor: verb badges + free-text
+  // entry (a custom verb the known set doesn't list is appended so it stays
+  // selected).
+  const methodOptions = useMemo<ISelectOptionItem[]>(() => {
+    const verbs: string[] = [...KNOWN_HTTP_METHODS]
+    if (!verbs.includes(method)) verbs.push(method)
+    return verbs.map((verb) => ({
+      text: verb,
+      label: <RegistryBadge badgeId={httpBadgeIdFor(verb)} text={verb} />
+    }))
+  }, [method])
   const bodyModels = useMemo(() => design.models.map((m) => ({ id: m.id, name: m.doc.name })), [design.models])
   const bodyOptions = [{ text: t('design.routes.body.empty', '(empty)') }, ...bodyModels.map((m) => ({ text: m.name }))]
   const bodyIndex = route.design?.body?.modelId === undefined
@@ -356,20 +377,23 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
           <SelectBox
             id={`design-route-method-${route.id}`}
             className=""
-            options={METHODS.map((m) => ({ text: m }))}
-            selected={Math.max(0, METHODS.indexOf(method as typeof METHODS[number]))}
+            options={methodOptions}
+            selected={Math.max(0, methodOptions.findIndex((opt) => opt.text === method))}
             onDidSelect={(data: ISelectData) => {
               patchDoc({ match: { ...route.doc.match, method: data.selected } })
             }}
-            selectBoxOptions={{ ariaLabel: t('design.routes.method', 'Method'), useCustomDrawn: true }}
+            selectBoxOptions={{ ariaLabel: t('design.routes.method', 'Method'), useCustomDrawn: true, editable: true }}
             data-testid="design-route-method"
           />
         </div>
         <div className="design-route-path">
-          <InputBox
+          <RestormVariableInputBox
             value={route.doc.match.urlPattern}
             onChange={(next) => { commit(syncPathParams(route, next)) }}
-            options={{ type: 'text', placeholder: '/{{id}}', ariaLabel: t('design.routes.path', 'Path') }}
+            variables={envVariables}
+            helpers={handlebarsHelpers}
+            placeholder="/{{id}}"
+            ariaLabel={t('design.routes.path', 'Path')}
             data-testid="design-route-path"
           />
         </div>
@@ -416,39 +440,47 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
         </label>
       )}
 
-      <h3 className="design-settings-group-title">{t('design.routes.params.pathTitle', 'Path parameters')}</h3>
-      {pathParams.length === 0
-        ? <p className="design-section-placeholder-message">{t('design.routes.params.pathEmpty', 'Type a {{param}} in the path to create its row.', { param: '{{param}}' })}</p>
-        : (
-          <Table<ParameterDocumentation>
-            columns={paramColumns(true)}
-            rows={pathParams}
-            getRowId={(p) => `path-${p.name}`}
-          />
-        )}
+      <StaticPane
+        title={t('design.routes.params.pathTitle', 'Path parameters')}
+        className="design-route-params-pane"
+      >
+        {pathParams.length === 0
+          ? <p className="design-section-placeholder-message">{t('design.routes.params.pathEmpty', 'Type a {{param}} in the path to create its row.', { param: '{{param}}' })}</p>
+          : (
+            <Table<ParameterDocumentation>
+              columns={paramColumns(true)}
+              rows={pathParams}
+              getRowId={(p) => `path-${p.name}`}
+            />
+          )}
+      </StaticPane>
 
-      <div className="design-route-params-header">
-        <h3 className="design-settings-group-title">{t('design.routes.params.otherTitle', 'Parameters (query / header)')}</h3>
-        <HeaderHoverTooltip label={t('design.routes.params.add', 'Add a parameter')}>
-          <Button
-            secondary
-            small
-            icon="add"
-            options={{ ariaLabel: t('design.routes.params.add', 'Add a parameter') }}
-            onClick={addParam}
-            data-testid="design-route-add-param"
-          />
-        </HeaderHoverTooltip>
-      </div>
-      {otherParams.length === 0
-        ? <p className="design-section-placeholder-message">{t('design.routes.params.otherEmpty', 'No query or header parameters yet.')}</p>
-        : (
-          <Table<ParameterDocumentation>
-            columns={paramColumns(false)}
-            rows={otherParams}
-            getRowId={(p) => `other-${p.name}`}
-          />
-        )}
+      <StaticPane
+        title={t('design.routes.params.otherTitle', 'Parameters (query / header)')}
+        className="design-route-params-pane"
+        headerActions={
+          <HeaderHoverTooltip label={t('design.routes.params.add', 'Add a parameter')}>
+            <Button
+              secondary
+              small
+              icon="add"
+              options={{ ariaLabel: t('design.routes.params.add', 'Add a parameter') }}
+              onClick={addParam}
+              data-testid="design-route-add-param"
+            />
+          </HeaderHoverTooltip>
+        }
+      >
+        {otherParams.length === 0
+          ? <p className="design-section-placeholder-message">{t('design.routes.params.otherEmpty', 'No query or header parameters yet.')}</p>
+          : (
+            <Table<ParameterDocumentation>
+              columns={paramColumns(false)}
+              rows={otherParams}
+              getRowId={(p) => `other-${p.name}`}
+            />
+          )}
+      </StaticPane>
     </div>
   )
 }

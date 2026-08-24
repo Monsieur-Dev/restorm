@@ -2150,7 +2150,8 @@
       "routes": "Ruter",
       "documentation": "Dokumentasjon",
       "notes": "Notater",
-      "code": "Kode"
+      "code": "Kode",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Designseksjoner"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "definert",
-      "constraintViolated": "Verdien bryter egenskapens begrensning ({{constraint}})"
+      "constraintViolated": "Verdien bryter egenskapens begrensning ({{constraint}})",
+      "deleteTitle": "Slette dette eksempelet?",
+      "deleteConfirm": "Eksempelet «{{name}}» blir slettet."
     },
     "onDelete": {
       "restrict": "Begrens (forby mens den brukes)",
@@ -2535,6 +2538,9 @@
       "replace": "Erstatt de eksisterende rutene",
       "replaceHint": "Det finnes allerede ruter for denne modellen. Erstatt dem for å unngå duplikater; la det være av for å legge til et nytt sett.",
       "title": "Generer CRUD for {{name}}"
+    },
+    "server": {
+      "subtitle": "Server dette designet som en live-mock, og følg med på hvert kall."
     }
   },
   "mqtt": {

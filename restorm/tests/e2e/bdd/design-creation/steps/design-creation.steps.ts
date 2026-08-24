@@ -139,7 +139,8 @@ Then('the routes tree shows the group {string} with {int} routes', async ({}, gr
 
 Then('the resolved base line reads {string}', async ({}, expected: string) => {
   const p = requirePage()
-  // The Settings section hosts the resolved-base preview.
+  // The Settings section hosts the resolved-base preview, under the base-path
+  // field; the environment that resolves it is picked in the Server section.
   await p.locator('[data-testid="design-rail-settings"]').click()
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-settings-resolved-base"]')).toHaveText(expected, { timeout: 5000 })
@@ -147,8 +148,9 @@ Then('the resolved base line reads {string}', async ({}, expected: string) => {
 
 When('I pick the design environment {string}', async ({}, envName: string) => {
   const p = requirePage()
-  await p.locator('[data-testid="design-settings-environment-trigger"]').click()
-  const dropdown = p.locator('[data-testid="design-settings-environment-dropdown"]')
+  await p.locator('[data-testid="design-rail-server"]').click()
+  await p.locator('[data-testid="design-server-environment-trigger"]').click()
+  const dropdown = p.locator('[data-testid="design-server-environment-dropdown"]')
   await expect(dropdown).toBeVisible({ timeout: 5000 })
   await dropdown.locator('.select-option').filter({ hasText: envName }).first().click()
   await p.waitForTimeout(400)

@@ -212,19 +212,17 @@
 
 /* ── Run panel — the tab-scoped overlay of a serving design ───────── */
 
-.design-run-modal {
-  position: absolute;
-  top: 44px;
-  right: 16px;
-  width: min(440px, calc(100% - 80px));
-  max-height: calc(100% - 88px);
+/* The run panel is now INLINE in the Server section (below the serve
+ * controls) — a bordered card in normal flow, no longer an absolute overlay
+ * that masks the rest of the tab. */
+.design-run-panel {
   display: flex;
   flex-direction: column;
+  margin-top: 16px;
   border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
   border-radius: 8px;
   background-color: var(--editor-background, var(--panel-background));
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-  z-index: 20;
+  overflow: hidden;
 }
 
 .design-run-header {

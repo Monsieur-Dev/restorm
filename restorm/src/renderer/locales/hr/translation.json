@@ -2151,7 +2151,8 @@
       "routes": "Rute",
       "documentation": "Dokumentacija",
       "notes": "Bilješke",
-      "code": "Kod"
+      "code": "Kod",
+      "server": "Poslužitelj"
     },
     "rail": {
       "ariaLabel": "Sekcije dizajna"
@@ -2380,7 +2381,9 @@
       },
       "auto": "auto",
       "defined": "definirano",
-      "constraintViolated": "Vrijednost krši ograničenje svojstva ({{constraint}})"
+      "constraintViolated": "Vrijednost krši ograničenje svojstva ({{constraint}})",
+      "deleteTitle": "Izbrisati ovaj primjer?",
+      "deleteConfirm": "Primjer „{{name}}” bit će izbrisan."
     },
     "onDelete": {
       "restrict": "Ograniči (zabrani dok se koristi)",
@@ -2536,6 +2539,9 @@
       "replace": "Zamijeni postojeće rute",
       "replaceHint": "Za ovaj model već postoje rute. Zamijenite ih kako biste izbjegli duplikate; ostavite isključeno da dodate drugi skup.",
       "title": "Generiraj CRUD za {{name}}"
+    },
+    "server": {
+      "subtitle": "Poslužite ovaj dizajn kao živi mock i pratite svaki poziv."
     }
   },
   "mqtt": {

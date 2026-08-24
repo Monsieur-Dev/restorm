@@ -2150,7 +2150,8 @@
       "routes": "Routes",
       "documentation": "Documentatie",
       "notes": "Notities",
-      "code": "Code"
+      "code": "Code",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Ontwerpsecties"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "gedefinieerd",
-      "constraintViolated": "De waarde schendt de beperking van de eigenschap ({{constraint}})"
+      "constraintViolated": "De waarde schendt de beperking van de eigenschap ({{constraint}})",
+      "deleteTitle": "Dit voorbeeld verwijderen?",
+      "deleteConfirm": "Het voorbeeld “{{name}}” wordt verwijderd."
     },
     "onDelete": {
       "restrict": "Beperken (verbieden zolang in gebruik)",
@@ -2535,6 +2538,9 @@
       "replace": "De bestaande routes vervangen",
       "replaceHint": "Voor dit model bestaan al routes. Vervang ze om duplicaten te voorkomen; laat uit om een tweede set toe te voegen.",
       "title": "CRUD genereren voor {{name}}"
+    },
+    "server": {
+      "subtitle": "Serveer dit ontwerp als een live-mock en volg elke aanroep."
     }
   },
   "mqtt": {

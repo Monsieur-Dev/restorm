@@ -2150,7 +2150,8 @@
       "routes": "Ruter",
       "documentation": "Dokumentation",
       "notes": "Noter",
-      "code": "Kode"
+      "code": "Kode",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Designsektioner"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "defineret",
-      "constraintViolated": "Værdien overtræder egenskabens begrænsning ({{constraint}})"
+      "constraintViolated": "Værdien overtræder egenskabens begrænsning ({{constraint}})",
+      "deleteTitle": "Slet dette eksempel?",
+      "deleteConfirm": "Eksemplet “{{name}}” slettes."
     },
     "onDelete": {
       "restrict": "Begræns (forbyd mens den bruges)",
@@ -2535,6 +2538,9 @@
       "replace": "Erstat de eksisterende ruter",
       "replaceHint": "Der findes allerede ruter for denne model. Erstat dem for at undgå dubletter; lad være slået fra for at tilføje et ekstra sæt.",
       "title": "Generér CRUD for {{name}}"
+    },
+    "server": {
+      "subtitle": "Servér dette design som en live-mock, og følg hvert kald."
     }
   },
   "mqtt": {

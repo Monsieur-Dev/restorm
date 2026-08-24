@@ -92,7 +92,7 @@ When('the agent seeds a named example with email {string}', async ({}, email: st
 
 When('the agent generates CRUD routes for {string}', async ({}, modelName: string) => {
   const reply = await call('generate_design_crud', { designId, model: modelName })
-  expect(reply['routes']).toBe(5)
+  expect(reply['routes']).toBe(6)
 })
 
 Then('the design reports no validation issues over MCP', async () => {
@@ -362,11 +362,13 @@ When('the design tab is opened', async () => {
 
 Then('the design spin button shows the serving state', async () => {
   const p = requirePage()
+  await p.locator('[data-testid="design-rail-server"]').click()
   await expect(p.locator('[data-testid="design-serve-spin"]')).toHaveClass(/design-serve-spin-active/, { timeout: 10000 })
 })
 
 Then('the design spin button shows the idle state', async () => {
   const p = requirePage()
+  await p.locator('[data-testid="design-rail-server"]').click()
   await expect(p.locator('[data-testid="design-serve-spin"]')).not.toHaveClass(/design-serve-spin-active/, { timeout: 10000 })
 })
 

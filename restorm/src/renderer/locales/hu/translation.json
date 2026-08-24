@@ -2150,7 +2150,8 @@
       "routes": "Útvonalak",
       "documentation": "Dokumentáció",
       "notes": "Jegyzetek",
-      "code": "Kód"
+      "code": "Kód",
+      "server": "Kiszolgáló"
     },
     "rail": {
       "ariaLabel": "A terv szakaszai"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "definiált",
-      "constraintViolated": "Az érték megsérti a tulajdonság megkötését ({{constraint}})"
+      "constraintViolated": "Az érték megsérti a tulajdonság megkötését ({{constraint}})",
+      "deleteTitle": "Törli ezt a példát?",
+      "deleteConfirm": "A(z) „{{name}}” példa törlődik."
     },
     "onDelete": {
       "restrict": "Korlátozás (tiltás, amíg használatban van)",
@@ -2535,6 +2538,9 @@
       "replace": "A meglévő útvonalak cseréje",
       "replaceHint": "Ehhez a modellhez már léteznek útvonalak. Cserélje le őket a duplikátumok elkerülése érdekében; hagyja kikapcsolva egy második készlet hozzáadásához.",
       "title": "CRUD generálása ehhez: {{name}}"
+    },
+    "server": {
+      "subtitle": "Szolgálja ki ezt a tervet élő mockként, és figyelje minden hívást."
     }
   },
   "mqtt": {

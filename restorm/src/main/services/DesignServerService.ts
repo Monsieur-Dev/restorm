@@ -20,9 +20,10 @@
  * the same way via {@link updateDesign} (the renderer pushes the fresh
  * design on every autosave while serving).
  *
- * Dogfood: `/swagger.json` serves the design's own documentation as an
- * OpenAPI 3.0 document whose base URL is the served address — a served
- * API is self-described and therefore re-importable.
+ * Dogfood: `{basePath}/swagger.json` (e.g. `/api/v1/swagger.json`, like a
+ * classic API — with `/swagger.json` kept as a root discovery alias) serves
+ * the design's own documentation as an OpenAPI 3.0 document whose base URL is
+ * the served address — a served API is self-described and re-importable.
  *
  * Protocol projections: when `serving.protocols` enables them, the SAME
  * port also serves a GraphQL endpoint (`/graphql`, graphql-yoga over
@@ -42,7 +43,7 @@ import { createSchema, createYoga, logger } from 'electron-core-ui/main'
 import { websocketExecutionService } from './WebSocketExecutionService'
 import type { ApiDesign, DesignModel, DesignProtocol } from '../../shared/types/apiDesign'
 import { validateApiDesign } from '../../shared/design/validateApiDesign'
-import { designToApiDocumentation } from '../../shared/design/apiDesignDoc'
+import { composeRoutePath, designToApiDocumentation } from '../../shared/design/apiDesignDoc'
 import { apiDocumentationToOpenApi } from '../../shared/design/openApiExport'
 import {
   authSatisfied,
@@ -219,7 +220,13 @@ class DesignServerService {
    * and surfaces a port conflict as a clean error.
    */
   async start(design: ApiDesign): Promise<{ success: boolean; listening: boolean; port: number; error?: string }> {
-    const port = design.serving?.port ?? DEFAULT_DESIGN_SERVER_PORT
+    // The renderer resolves a `{{variable}}` port to a number before serving,
+    // but a design served straight from disk or MCP may still carry a string
+    // (a literal "8080" or an unresolved expression) — coerce, falling back
+    // to the default when it isn't a usable port number.
+    const rawPort = design.serving?.port
+    const parsedPort = typeof rawPort === 'number' ? rawPort : typeof rawPort === 'string' ? Number.parseInt(rawPort, 10) : NaN
+    const port = Number.isFinite(parsedPort) && parsedPort > 0 && parsedPort <= 65535 ? parsedPort : DEFAULT_DESIGN_SERVER_PORT
     if (this.servers.has(design.id)) {
       return { success: true, listening: true, port: this.servers.get(design.id)?.port ?? port }
     }
@@ -359,7 +366,12 @@ class DesignServerService {
     const query = parseQuery(url)
 
     try {
-      if (method === 'GET' && pathname === '/swagger.json') {
+      // The descriptor lives UNDER the design base path — like a classic
+      // API (`/api/v1/swagger.json`), consistent with where the routes are
+      // served. The bare root path stays a discovery alias; with no base
+      // path the two collapse to the same `/swagger.json`.
+      const swaggerUnderBase = composeRoutePath({ designBasePath: active.design.server?.basePath }, 'swagger.json')
+      if (method === 'GET' && (pathname === swaggerUnderBase || pathname === '/swagger.json')) {
         this.writeJson(active, res, 200, {}, this.servedOpenApi(active))
         this.recordServed(active, 'swagger', '200')
         return

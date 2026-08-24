@@ -2149,7 +2149,8 @@
       "routes": "라우트",
       "documentation": "문서",
       "notes": "노트",
-      "code": "코드"
+      "code": "코드",
+      "server": "서버"
     },
     "rail": {
       "ariaLabel": "디자인 섹션"
@@ -2378,7 +2379,9 @@
       },
       "auto": "자동",
       "defined": "정의됨",
-      "constraintViolated": "값이 속성의 제약 조건을 위반합니다({{constraint}})"
+      "constraintViolated": "값이 속성의 제약 조건을 위반합니다({{constraint}})",
+      "deleteTitle": "이 예시를 삭제하시겠습니까?",
+      "deleteConfirm": "예시 “{{name}}”이(가) 삭제됩니다."
     },
     "onDelete": {
       "restrict": "제한(사용 중에는 금지)",
@@ -2534,6 +2537,9 @@
       "replace": "기존 라우트 교체",
       "replaceHint": "이 모델에는 이미 라우트가 있습니다. 중복을 피하려면 교체하세요. 끄면 두 번째 세트를 추가합니다.",
       "title": "{{name}}에 대한 CRUD 생성"
+    },
+    "server": {
+      "subtitle": "이 디자인을 라이브 목으로 서빙하고 모든 호출을 확인하세요."
     }
   },
   "mqtt": {

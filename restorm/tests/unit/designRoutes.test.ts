@@ -83,7 +83,7 @@ describe('designRoutes', () => {
     expect(identifierProperty(admin)).toBeUndefined()
   })
 
-  describe('generateCrud — the five-route convention', () => {
+  describe('generateCrud — the six-route convention', () => {
     const design = buildReferenceApiDesign()
     const user = design.models.find((m) => m.id === 'model-user')
     if (user === undefined) throw new Error('fixture model missing')
@@ -92,10 +92,10 @@ describe('designRoutes', () => {
     it('names the group after the plural and bases it accordingly', () => {
       expect(group.doc.name).toBe('Users')
       expect(group.design?.basePath).toBe('/users')
-      expect(group.routes).toHaveLength(5)
+      expect(group.routes).toHaveLength(6)
     })
 
-    it('produces list/read/create/update/delete with the expected contracts', () => {
+    it('produces list/read/create/update/patch/delete with the expected contracts', () => {
       const byKey = (method: string, pattern: string): (typeof group.routes)[number] | undefined =>
         group.routes.find((r) => r.doc.match.method === method && r.doc.match.urlPattern === pattern)
 
@@ -115,6 +115,11 @@ describe('designRoutes', () => {
       const update = byKey('PUT', '/{{id}}')
       expect(update?.design?.body?.modelId).toBe(user.id)
       expect(update?.design?.paramLinks?.['id']?.propertyId).toBe('prop-user-id')
+
+      const patch = byKey('PATCH', '/{{id}}')
+      expect(patch?.design?.body).toEqual({ modelId: user.id, contentType: 'application/json' })
+      expect(patch?.design?.responses?.['200']?.modelId).toBe(user.id)
+      expect(patch?.design?.paramLinks?.['id']?.propertyId).toBe('prop-user-id')
 
       const remove = byKey('DELETE', '/{{id}}')
       expect(remove?.doc.responses?.['204']).toBeDefined()

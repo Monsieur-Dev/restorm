@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, InputBox, MessageType, Table, type IMessage, type TableColumn } from 'electron-core-ui/renderer'
+import { Button, InputBox, MessageType, Modal, Table, type IMessage, type TableColumn } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignExample, DesignModel, DesignProperty } from '../../../../shared/types/collections'
 import { resolveExampleValue, violatedConstraint } from '../../../../shared/design/designExampleValues'
 import { displayValue, parseTypedValue } from './designDisplay'
@@ -26,6 +26,8 @@ export interface ModelExamplesTabProps {
 export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, model }) => {
   const { t } = useTranslation()
   const [selectedId, setSelectedId] = useState<string>(DEFAULT_PILL)
+  // The example pending deletion (its id), or null when no confirmation is open.
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null)
 
   const examples = model.examples ?? []
   const selected = examples.find((e) => e.id === selectedId)
@@ -218,7 +220,7 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
                 small
                 icon="trash"
                 options={{ ariaLabel: t('design.examples.delete', 'Delete the example') }}
-                onClick={() => { deleteExample(selected.id) }}
+                onClick={() => { setPendingDelete(selected.id) }}
                 data-testid="design-example-delete"
               />
             </HeaderHoverTooltip>
@@ -237,6 +239,33 @@ export const ModelExamplesTab: React.FC<ModelExamplesTabProps> = ({ design, mode
         rows={rows}
         getRowId={(row) => row.property.id}
       />
+
+      {pendingDelete !== null && (
+        <Modal
+          title={t('design.examples.deleteTitle', 'Delete this example?')}
+          isOpen
+          onClose={() => { setPendingDelete(null) }}
+          size="dialog"
+          data-testid="design-example-delete-modal"
+          enterActionTestId="design-example-delete-confirm"
+        >
+          <div className="design-delete-modal-body">
+            <p>
+              {t('design.examples.deleteConfirm', 'The example “{{name}}” will be deleted.', {
+                name: examples.find((e) => e.id === pendingDelete)?.name ?? ''
+              })}
+            </p>
+            <div className="design-delete-modal-actions">
+              <Button secondary onClick={() => { setPendingDelete(null) }} data-testid="design-example-delete-cancel">
+                {t('sidebar.deleteConfirm.cancel')}
+              </Button>
+              <Button onClick={() => { const id = pendingDelete; setPendingDelete(null); deleteExample(id) }} data-testid="design-example-delete-confirm">
+                {t('sidebar.deleteConfirm.confirm')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

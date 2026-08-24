@@ -200,6 +200,7 @@ export type DesignSectionKey =
   | 'models'
   | 'enums'
   | 'routes'
+  | 'server'
   | 'documentation'
   | 'notes'
   | 'code'

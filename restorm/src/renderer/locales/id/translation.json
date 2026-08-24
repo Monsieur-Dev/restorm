@@ -2149,7 +2149,8 @@
       "routes": "Rute",
       "documentation": "Dokumentasi",
       "notes": "Catatan",
-      "code": "Kode"
+      "code": "Kode",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Bagian desain"
@@ -2378,7 +2379,9 @@
       },
       "auto": "otomatis",
       "defined": "didefinisikan",
-      "constraintViolated": "Nilai melanggar batasan properti ({{constraint}})"
+      "constraintViolated": "Nilai melanggar batasan properti ({{constraint}})",
+      "deleteTitle": "Hapus contoh ini?",
+      "deleteConfirm": "Contoh “{{name}}” akan dihapus."
     },
     "onDelete": {
       "restrict": "Batasi (larang selagi digunakan)",
@@ -2534,6 +2537,9 @@
       "replace": "Ganti rute yang ada",
       "replaceHint": "Rute untuk model ini sudah ada. Ganti untuk menghindari duplikat; biarkan nonaktif untuk menambah set kedua.",
       "title": "Hasilkan CRUD untuk {{name}}"
+    },
+    "server": {
+      "subtitle": "Sajikan desain ini sebagai mock langsung dan pantau setiap panggilan."
     }
   },
   "mqtt": {

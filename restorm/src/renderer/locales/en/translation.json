@@ -2152,7 +2152,8 @@
       "routes": "Routes",
       "documentation": "Documentation",
       "notes": "Notes",
-      "code": "Code"
+      "code": "Code",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Design sections"
@@ -2381,7 +2382,9 @@
       },
       "auto": "auto",
       "defined": "defined",
-      "constraintViolated": "Value violates the property constraint ({{constraint}})"
+      "constraintViolated": "Value violates the property constraint ({{constraint}})",
+      "deleteTitle": "Delete this example?",
+      "deleteConfirm": "The example “{{name}}” will be deleted."
     },
     "onDelete": {
       "restrict": "Restrict (forbid while used)",
@@ -2537,6 +2540,9 @@
       "authWrites": "Protect write routes with authentication",
       "authWritesHint": "Require bearer auth on create, update and delete; reads stay public.",
       "generate": "Generate"
+    },
+    "server": {
+      "subtitle": "Serve this design as a live mock and watch every call."
     }
   },
   "mqtt": {

@@ -3,22 +3,18 @@ import { useTranslation } from 'react-i18next'
 import {
   Button,
   InputBox,
-  MessageType,
-  ScrollableElement
+  MessageType
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
 import { composeRoutePath } from '../../../../shared/design/apiDesignDoc'
 import { httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { useDesignServerCounters, useIsDesignServerListening } from '../../services/designServerStore'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
-export interface DesignRunModalProps {
+export interface DesignRunPanelProps {
   design: ApiDesign
-  /** The served port (settings echo — shown in the header). */
+  /** The served port (echo — shown in the header while listening). */
   port: number
-  onStop: () => void
-  onClose: () => void
 }
 
 /** One route's chosen return: absent = the design's default response. */
@@ -28,16 +24,16 @@ interface ForcedChoice {
 }
 
 /**
- * The run overlay, SCOPED TO THE TAB (an absolute panel inside the
- * design tab, like the scenario run-log panel): the live face of a
- * serving design. Lists every route with its per-run call counter;
- * each route expands into the list of returns it can serve — the
- * design's default response, every declared status code, plus a
- * user-defined code with an optional custom body — where clicking a
- * bullet FORCES that return (effective on the next request, no
- * restart) and each bullet shows how many calls it answered this run.
+ * The live run panel, rendered INLINE in the Server section (below the
+ * "Serve this design" controls): the live face of a serving design. Lists
+ * every route with its per-run call counter; each route expands into the
+ * list of returns it can serve — the design's default response, every
+ * declared status code, plus a user-defined code with an optional custom
+ * body — where clicking a bullet FORCES that return (effective on the next
+ * request, no restart) and each bullet shows how many calls it answered
+ * this run. Starting / stopping is the spin above; this panel only reflects.
  */
-export const DesignRunModal: React.FC<DesignRunModalProps> = ({ design, port, onStop, onClose }) => {
+export const DesignRunPanel: React.FC<DesignRunPanelProps> = ({ design, port }) => {
   const { t } = useTranslation()
   const listening = useIsDesignServerListening(design.id)
   const counters = useDesignServerCounters(design.id)
@@ -52,7 +48,7 @@ export const DesignRunModal: React.FC<DesignRunModalProps> = ({ design, port, on
   }, [design.id])
 
   return (
-    <div className="design-run-modal" data-testid="design-run-modal">
+    <div className="design-run-panel" data-testid="design-run-modal">
       <div className="design-run-header">
         <span className={`design-run-status-dot${listening ? ' listening' : ''}`} aria-hidden="true" />
         <span className="design-run-title">
@@ -63,52 +59,28 @@ export const DesignRunModal: React.FC<DesignRunModalProps> = ({ design, port, on
         <span className="design-run-total" data-testid="design-run-total">
           {t('design.run.totalCalls', '{{count}} call(s) this run', { count: counters.total })}
         </span>
-        <div className="design-run-header-actions">
-          {listening && (
-            <HeaderHoverTooltip label={t('design.run.stop', 'Stop the server')}>
-              <Button
-                appearance="round"
-                icon="debug-stop"
-                onClick={onStop}
-                options={{ ariaLabel: t('design.run.stop', 'Stop the server') }}
-                data-testid="design-run-stop"
-              />
-            </HeaderHoverTooltip>
-          )}
-          <HeaderHoverTooltip label={t('design.run.close', 'Close this panel')}>
-            <Button
-              small
-              icon="close"
-              onClick={onClose}
-              options={{ ariaLabel: t('design.run.close', 'Close this panel') }}
-              data-testid="design-run-close"
-            />
-          </HeaderHoverTooltip>
-        </div>
       </div>
 
-      <ScrollableElement className="design-run-scroll">
-        <div className="design-run-routes">
-          {design.routeGroups.map((group) => (
-            <React.Fragment key={group.id}>
-              {group.routes.map((route) => (
-                <RunRouteRow
-                  key={route.id}
-                  design={design}
-                  group={group}
-                  route={route}
-                  callCount={counters.routes[route.id]?.total ?? 0}
-                  byCode={counters.routes[route.id]?.byCode ?? {}}
-                  expanded={expandedRouteId === route.id}
-                  onToggle={() => { setExpandedRouteId(expandedRouteId === route.id ? null : route.id) }}
-                  forced={forcedByRoute[route.id]}
-                  onForce={(choice) => { applyForced(route.id, choice) }}
-                />
-              ))}
-            </React.Fragment>
-          ))}
-        </div>
-      </ScrollableElement>
+      <div className="design-run-routes">
+        {design.routeGroups.map((group) => (
+          <React.Fragment key={group.id}>
+            {group.routes.map((route) => (
+              <RunRouteRow
+                key={route.id}
+                design={design}
+                group={group}
+                route={route}
+                callCount={counters.routes[route.id]?.total ?? 0}
+                byCode={counters.routes[route.id]?.byCode ?? {}}
+                expanded={expandedRouteId === route.id}
+                onToggle={() => { setExpandedRouteId(expandedRouteId === route.id ? null : route.id) }}
+                forced={forcedByRoute[route.id]}
+                onForce={(choice) => { applyForced(route.id, choice) }}
+              />
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   )
 }

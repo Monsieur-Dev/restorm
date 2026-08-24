@@ -215,19 +215,24 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
         routeSurfaces.add(surface)
       }
 
-      // The design server owns some paths on the port: /swagger.json
-      // always, each projection's endpoint when enabled. A route that
-      // composes onto one of them (WITH the design base path — the
-      // served table binds full paths) would be shadowed by the
-      // dispatcher and never answer.
+      // The design server owns some paths on the port: the descriptor
+      // (`{basePath}/swagger.json`, with the root `/swagger.json` kept as a
+      // discovery alias) always, each projection's endpoint when enabled. A
+      // route that composes onto one of them (WITH the design base path — the
+      // served table binds full paths) would be shadowed by the dispatcher
+      // and never answer.
       const served = composeRoutePath({
         ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
         ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
         ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
       }, route.doc.match.urlPattern)
+      const swaggerUnderBase = composeRoutePath({
+        ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {})
+      }, 'swagger.json')
       const protocols = design.serving?.protocols ?? []
       const reserved =
         served === '/swagger.json' ||
+        served === swaggerUnderBase ||
         (protocols.includes('graphql') && served === '/graphql') ||
         (protocols.includes('soap') && served === '/soap') ||
         (protocols.includes('odata') && (served === '/odata' || served.startsWith('/odata/')))

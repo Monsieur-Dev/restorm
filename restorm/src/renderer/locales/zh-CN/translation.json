@@ -2149,7 +2149,8 @@
       "routes": "路由",
       "documentation": "文档",
       "notes": "笔记",
-      "code": "代码"
+      "code": "代码",
+      "server": "服务器"
     },
     "rail": {
       "ariaLabel": "设计分区"
@@ -2378,7 +2379,9 @@
       },
       "auto": "自动",
       "defined": "已定义",
-      "constraintViolated": "该值违反了属性约束（{{constraint}}）"
+      "constraintViolated": "该值违反了属性约束（{{constraint}}）",
+      "deleteTitle": "删除此示例？",
+      "deleteConfirm": "示例“{{name}}”将被删除。"
     },
     "onDelete": {
       "restrict": "限制（使用中禁止删除）",
@@ -2534,6 +2537,9 @@
       "replace": "替换现有路由",
       "replaceHint": "此模型已存在路由。替换它们以避免重复；保持关闭则添加第二组。",
       "title": "为 {{name}} 生成 CRUD"
+    },
+    "server": {
+      "subtitle": "将此设计作为实时模拟提供，并观察每次调用。"
     }
   },
   "mqtt": {

@@ -66,7 +66,7 @@ export const DESCRIPTOR_FORMATS: DescriptorFormat[] = [
     label: 'WSDL 1.1',
     fileExtension: 'wsdl',
     fileSlug: 'service',
-    emit: (design) => designToWsdl(design, `http://localhost:${design.serving?.port ?? FALLBACK_SERVED_PORT}/soap`)
+    emit: (design) => designToWsdl(design, `http://localhost:${typeof design.serving?.port === 'number' ? design.serving.port : FALLBACK_SERVED_PORT}/soap`)
   }
 ]
 

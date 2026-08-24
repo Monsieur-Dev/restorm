@@ -2152,7 +2152,8 @@
       "routes": "Trasy",
       "documentation": "Dokumentacja",
       "notes": "Notatki",
-      "code": "Kod"
+      "code": "Kod",
+      "server": "Serwer"
     },
     "rail": {
       "ariaLabel": "Sekcje projektu API"
@@ -2381,7 +2382,9 @@
       },
       "auto": "auto",
       "defined": "zdefiniowana",
-      "constraintViolated": "Wartość narusza ograniczenie właściwości ({{constraint}})"
+      "constraintViolated": "Wartość narusza ograniczenie właściwości ({{constraint}})",
+      "deleteTitle": "Usunąć ten przykład?",
+      "deleteConfirm": "Przykład „{{name}}” zostanie usunięty."
     },
     "onDelete": {
       "restrict": "Ogranicz (zabroń, dopóki używany)",
@@ -2537,6 +2540,9 @@
       "replace": "Zastąp istniejące trasy",
       "replaceHint": "Dla tego modelu już istnieją trasy. Zastąp je, aby uniknąć duplikatów; pozostaw wyłączone, aby dodać drugi zestaw.",
       "title": "Wygeneruj CRUD dla {{name}}"
+    },
+    "server": {
+      "subtitle": "Serwuj ten projekt jako aktywny mock i obserwuj każde wywołanie."
     }
   },
   "mqtt": {

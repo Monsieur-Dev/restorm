@@ -2150,7 +2150,8 @@
       "routes": "Rotalar",
       "documentation": "Dokümantasyon",
       "notes": "Notlar",
-      "code": "Kod"
+      "code": "Kod",
+      "server": "Sunucu"
     },
     "rail": {
       "ariaLabel": "Tasarım bölümleri"
@@ -2379,7 +2380,9 @@
       },
       "auto": "otomatik",
       "defined": "tanımlı",
-      "constraintViolated": "Değer, özelliğin kısıtını ihlal ediyor ({{constraint}})"
+      "constraintViolated": "Değer, özelliğin kısıtını ihlal ediyor ({{constraint}})",
+      "deleteTitle": "Bu örnek silinsin mi?",
+      "deleteConfirm": "“{{name}}” örneği silinecek."
     },
     "onDelete": {
       "restrict": "Kısıtla (kullanımdayken yasakla)",
@@ -2535,6 +2538,9 @@
       "replace": "Mevcut rotaları değiştir",
       "replaceHint": "Bu model için zaten rotalar var. Yinelenenleri önlemek için değiştirin; ikinci bir set eklemek için kapalı bırakın.",
       "title": "{{name}} için CRUD üret"
+    },
+    "server": {
+      "subtitle": "Bu tasarımı canlı bir mock olarak sun ve her çağrıyı izle."
     }
   },
   "mqtt": {

@@ -2149,7 +2149,8 @@
       "routes": "Tuyến",
       "documentation": "Tài liệu",
       "notes": "Ghi chú",
-      "code": "Mã"
+      "code": "Mã",
+      "server": "Máy chủ"
     },
     "rail": {
       "ariaLabel": "Các phần của thiết kế"
@@ -2378,7 +2379,9 @@
       },
       "auto": "tự động",
       "defined": "đã xác định",
-      "constraintViolated": "Giá trị vi phạm ràng buộc của thuộc tính ({{constraint}})"
+      "constraintViolated": "Giá trị vi phạm ràng buộc của thuộc tính ({{constraint}})",
+      "deleteTitle": "Xóa ví dụ này?",
+      "deleteConfirm": "Ví dụ “{{name}}” sẽ bị xóa."
     },
     "onDelete": {
       "restrict": "Hạn chế (cấm khi đang dùng)",
@@ -2534,6 +2537,9 @@
       "replace": "Thay thế các tuyến hiện có",
       "replaceHint": "Đã có các tuyến cho mô hình này. Thay thế chúng để tránh trùng lặp; để tắt nếu muốn thêm một bộ thứ hai.",
       "title": "Tạo CRUD cho {{name}}"
+    },
+    "server": {
+      "subtitle": "Phục vụ thiết kế này như một mock trực tiếp và theo dõi mọi lệnh gọi."
     }
   },
   "mqtt": {

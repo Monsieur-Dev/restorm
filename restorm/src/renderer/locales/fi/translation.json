@@ -2150,7 +2150,8 @@
       "routes": "Reitit",
       "documentation": "Dokumentaatio",
       "notes": "Muistiinpanot",
-      "code": "Koodi"
+      "code": "Koodi",
+      "server": "Palvelin"
     },
     "rail": {
       "ariaLabel": "Suunnitelman osiot"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "määritetty",
-      "constraintViolated": "Arvo rikkoo ominaisuuden rajoitetta ({{constraint}})"
+      "constraintViolated": "Arvo rikkoo ominaisuuden rajoitetta ({{constraint}})",
+      "deleteTitle": "Poistetaanko tämä esimerkki?",
+      "deleteConfirm": "Esimerkki ”{{name}}” poistetaan."
     },
     "onDelete": {
       "restrict": "Rajoita (estä käytön aikana)",
@@ -2535,6 +2538,9 @@
       "replace": "Korvaa olemassa olevat reitit",
       "replaceHint": "Tälle mallille on jo reittejä. Korvaa ne välttääksesi kaksoiskappaleet; jätä pois päältä lisätäksesi toisen joukon.",
       "title": "Luo CRUD kohteelle {{name}}"
+    },
+    "server": {
+      "subtitle": "Palvele tätä suunnitelmaa live-mockina ja seuraa jokaista kutsua."
     }
   },
   "mqtt": {

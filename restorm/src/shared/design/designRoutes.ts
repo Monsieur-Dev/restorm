@@ -169,6 +169,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     doc: {
       match: { urlPattern: '/', method: 'GET' },
       summary: `List ${plural}`,
+      description: `Return a paginated list of ${plural}.`,
       responses: { '200': { description: `A page of ${plural}.` } }
     },
     design: {
@@ -183,6 +184,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     doc: {
       match: { urlPattern: '/{{id}}', method: 'GET' },
       summary: `Get one ${model.doc.name}`,
+      description: `Fetch a single ${model.doc.name} by its identifier.`,
       parameters: idParamDoc(),
       responses: {
         '200': { description: `The ${model.doc.name}.` },
@@ -200,6 +202,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     doc: {
       match: { urlPattern: '/', method: 'POST' },
       summary: `Create ${article(model.doc.name)} ${model.doc.name}`,
+      description: `Create a new ${model.doc.name}.`,
       responses: { '201': { description: 'Created.' } }
     },
     design: {
@@ -213,6 +216,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     doc: {
       match: { urlPattern: '/{{id}}', method: 'PUT' },
       summary: `Update ${article(model.doc.name)} ${model.doc.name}`,
+      description: `Replace an existing ${model.doc.name} in full.`,
       parameters: idParamDoc(),
       responses: {
         '200': { description: `The updated ${model.doc.name}.` },
@@ -226,11 +230,30 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     })
   }
 
+  const patch: DesignRoute = {
+    id: newId(),
+    doc: {
+      match: { urlPattern: '/{{id}}', method: 'PATCH' },
+      summary: `Partially update ${article(model.doc.name)} ${model.doc.name}`,
+      description: `Apply a partial update to an existing ${model.doc.name}.`,
+      parameters: idParamDoc(),
+      responses: {
+        '200': { description: `The updated ${model.doc.name}.` },
+        '404': { description: 'Not found.' }
+      }
+    },
+    design: withIdLink({
+      body: { modelId: model.id, contentType: 'application/json' },
+      responses: { '200': { modelId: model.id } }
+    })
+  }
+
   const remove: DesignRoute = {
     id: newId(),
     doc: {
       match: { urlPattern: '/{{id}}', method: 'DELETE' },
       summary: `Delete ${article(model.doc.name)} ${model.doc.name}`,
+      description: `Delete a ${model.doc.name} by its identifier.`,
       parameters: idParamDoc(),
       responses: {
         '204': { description: 'Deleted.' },
@@ -256,7 +279,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     id: newId(),
     doc: { name: plural, description: `${model.doc.name} management.` },
     design: { basePath },
-    routes: [list, read, withAuth(create), withAuth(update), withAuth(remove)]
+    routes: [list, read, withAuth(create), withAuth(update), withAuth(patch), withAuth(remove)]
   }
   return { group }
 }

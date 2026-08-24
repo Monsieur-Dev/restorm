@@ -268,7 +268,7 @@ export function registerDesignTools(mcp: McpService): void {
         description: z.string().optional(),
         basePath: z.string().optional().describe('Empty string clears it.'),
         defaultAuth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional(),
-        port: z.number().int().optional(),
+        port: z.union([z.number().int(), z.string()]).optional().describe('Design-server port: an integer, or a "{{variable}}" expression resolved against the design\'s env-folder at serve time.'),
         grpcPort: z.number().int().optional()
           .describe('Port for the gRPC projection\'s separate HTTP/2 server (only used when protocols include grpc).'),
         latencyMs: z.number().int().optional(),
@@ -302,9 +302,18 @@ export function registerDesignTools(mcp: McpService): void {
       if (typeof args['defaultAuth'] === 'string' && (AUTH_KINDS as readonly string[]).includes(args['defaultAuth'])) {
         design.defaultAuth = args['defaultAuth'] as DesignAuthKind
       }
-      if (typeof args['port'] === 'number' || typeof args['grpcPort'] === 'number' || typeof args['latencyMs'] === 'number') {
+      const portArg = args['port']
+      if (typeof portArg === 'number' || typeof portArg === 'string' || typeof args['grpcPort'] === 'number' || typeof args['latencyMs'] === 'number') {
         const serving = { ...(design.serving ?? {}) }
-        if (typeof args['port'] === 'number') serving.port = args['port']
+        if (typeof portArg === 'number') serving.port = portArg
+        else if (typeof portArg === 'string') {
+          // A "{{variable}}" expression (or a literal integer typed as a
+          // string) — a plain integer is normalised to a number, an empty
+          // string clears the fixed port.
+          const trimmed = portArg.trim()
+          if (trimmed === '') delete serving.port
+          else serving.port = /^\d+$/.test(trimmed) ? Number.parseInt(trimmed, 10) : trimmed
+        }
         if (typeof args['grpcPort'] === 'number') serving.grpcPort = args['grpcPort']
         if (typeof args['latencyMs'] === 'number') {
           if (args['latencyMs'] === 0) delete serving.latencyMs

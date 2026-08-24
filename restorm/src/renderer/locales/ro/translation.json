@@ -2151,7 +2151,8 @@
       "routes": "Rute",
       "documentation": "Documentație",
       "notes": "Notițe",
-      "code": "Cod"
+      "code": "Cod",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Secțiunile designului"
@@ -2380,7 +2381,9 @@
       },
       "auto": "auto",
       "defined": "definit",
-      "constraintViolated": "Valoarea încalcă restricția proprietății ({{constraint}})"
+      "constraintViolated": "Valoarea încalcă restricția proprietății ({{constraint}})",
+      "deleteTitle": "Ștergeți acest exemplu?",
+      "deleteConfirm": "Exemplul „{{name}}” va fi șters."
     },
     "onDelete": {
       "restrict": "Restricționează (interzice cât timp e folosit)",
@@ -2536,6 +2539,9 @@
       "replace": "Înlocuiți rutele existente",
       "replaceHint": "Există deja rute pentru acest model. Înlocuiți-le pentru a evita duplicatele; lăsați dezactivat pentru a adăuga un al doilea set.",
       "title": "Generați CRUD pentru {{name}}"
+    },
+    "server": {
+      "subtitle": "Servește acest design ca un mock live și urmărește fiecare apel."
     }
   },
   "mqtt": {

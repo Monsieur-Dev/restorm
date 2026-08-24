@@ -355,8 +355,10 @@ export interface DesignCodegen {
 export interface DesignServing {
   /** Protocols the design server projects onto. Absent = HTTP only. */
   protocols?: DesignProtocol[]
-  /** Fixed listen port; absent = picked at spin time. */
-  port?: number
+  /** Fixed listen port; absent = picked at spin time. A string carries a
+   * `{{variable}}` expression resolved (against the design's env-folder)
+   * to a number right before the server binds. */
+  port?: number | string
   /** Fixed port for the gRPC projection's separate HTTP/2 server (gRPC
    * cannot share the HTTP/1.1 port the other projections ride). Absent =
    * a default adjacent to `port`. Only used when `protocols` enables

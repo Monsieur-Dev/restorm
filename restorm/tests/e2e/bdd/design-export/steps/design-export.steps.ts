@@ -148,6 +148,7 @@ Then('the exported document matches the imported Petstore shape', () => {
 
 When('I spin the design server from the settings', async () => {
   const p = requirePage()
+  await p.locator('[data-testid="design-rail-server"]').click()
   await p.locator('[data-testid="design-serve-spin"]').click()
   await expect(p.locator('[data-testid="design-run-modal"]')).toBeVisible({ timeout: 10000 })
 })

@@ -2150,7 +2150,8 @@
       "routes": "Route",
       "documentation": "Documentazione",
       "notes": "Note",
-      "code": "Codice"
+      "code": "Codice",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Sezioni del design"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "definito",
-      "constraintViolated": "Il valore viola il vincolo della proprietà ({{constraint}})"
+      "constraintViolated": "Il valore viola il vincolo della proprietà ({{constraint}})",
+      "deleteTitle": "Eliminare questo esempio?",
+      "deleteConfirm": "L'esempio «{{name}}» verrà eliminato."
     },
     "onDelete": {
       "restrict": "Limita (vieta finché usato)",
@@ -2535,6 +2538,9 @@
       "replace": "Sostituisci le route esistenti",
       "replaceHint": "Per questo modello esistono già delle route. Sostituiscile per evitare duplicati; lascia disattivato per aggiungere un secondo set.",
       "title": "Genera CRUD per {{name}}"
+    },
+    "server": {
+      "subtitle": "Servi questo design come mock live e osserva ogni chiamata."
     }
   },
   "mqtt": {

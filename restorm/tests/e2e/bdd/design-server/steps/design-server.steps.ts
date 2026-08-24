@@ -76,7 +76,8 @@ Given('a Pro project carrying a servable API design is open on its settings', as
   await expect(sidebarRow(p, DESIGN_ID)).toBeVisible({ timeout: 10000 })
   await p.waitForTimeout(800)
   await focusDesignTab(p)
-  // The Design tab lands on Settings; the serve block sits on top.
+  // The serve controls + run panel now live in their own Server section.
+  await p.locator('[data-testid="design-rail-server"]').click()
   await expect(p.locator('[data-testid="design-serve-block"]')).toBeVisible({ timeout: 5000 })
 })
 
@@ -102,7 +103,8 @@ When('I try to spin the design server', async () => {
 
 When('I stop the design server from the run panel', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-run-stop"]').click()
+  // The spin above the inline run panel is the single start/stop control.
+  await p.locator('[data-testid="design-serve-spin"]').click()
   await p.waitForTimeout(500)
 })
 
@@ -123,9 +125,9 @@ Then('the serving beam runs on the design sidebar badge', async () => {
 Then('the run panel reports the server stopped', async () => {
   const p = requirePage()
   await expect(p.locator('[data-testid="design-run-modal"]')).toBeVisible()
-  // The stop button only renders while listening; its absence IS the
-  // stopped state (no i18n coupling).
-  await expect(p.locator('[data-testid="design-run-stop"]')).toHaveCount(0, { timeout: 10000 })
+  // The status dot loses its `listening` modifier when the server stops —
+  // its absence IS the stopped state (no i18n coupling).
+  await expect(p.locator('.design-run-status-dot.listening')).toHaveCount(0, { timeout: 10000 })
   // And the beam winds down on the sidebar badge.
   const beam = p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${DESIGN_ID}"] .ecu-border-beam`)
   await expect(beam).toHaveCount(0, { timeout: 20000 })
@@ -169,6 +171,7 @@ Then('the response body contains {string}', async ({}, needle: string) => {
 Then('the run panel counts calls on the design routes', async () => {
   const p = requirePage()
   await focusDesignTab(p)
+  await p.locator('[data-testid="design-rail-server"]').click()
   await expect(p.locator('[data-testid="design-run-modal"]')).toBeVisible({ timeout: 10000 })
   // List route answered twice (200 with auth, then 401 without), the
   // single fetch once, the invalid create once.
@@ -210,9 +213,9 @@ async function openModel(p: Page, modelName: string): Promise<void> {
   await expect(p.locator('[data-testid="design-model-name"]')).toContainText(modelName, { timeout: 5000 })
 }
 
-/** Back to the Settings section (where the spin button lives). */
+/** Back to the Server section (where the spin button + run panel live). */
 async function backToSettings(p: Page): Promise<void> {
-  await p.locator('[data-testid="design-rail-settings"]').click()
+  await p.locator('[data-testid="design-rail-server"]').click()
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-serve-block"]')).toBeVisible({ timeout: 5000 })
 }

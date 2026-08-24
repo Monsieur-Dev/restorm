@@ -2150,7 +2150,8 @@
       "routes": "Rrugët",
       "documentation": "Dokumentimi",
       "notes": "Shënimet",
-      "code": "Kodi"
+      "code": "Kodi",
+      "server": "Serveri"
     },
     "rail": {
       "ariaLabel": "Seksionet e dizajnit"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "e përcaktuar",
-      "constraintViolated": "Vlera shkel kufizimin e vetisë ({{constraint}})"
+      "constraintViolated": "Vlera shkel kufizimin e vetisë ({{constraint}})",
+      "deleteTitle": "Të fshihet ky shembull?",
+      "deleteConfirm": "Shembulli «{{name}}» do të fshihet."
     },
     "onDelete": {
       "restrict": "Kufizo (ndalo sa është në përdorim)",
@@ -2535,6 +2538,9 @@
       "replace": "Zëvendëso rrugët ekzistuese",
       "replaceHint": "Ekzistojnë tashmë rrugë për këtë model. Zëvendësoji për të shmangur dublikatat; lëre të çaktivizuar për të shtuar një grup të dytë.",
       "title": "Gjenero CRUD për {{name}}"
+    },
+    "server": {
+      "subtitle": "Shërbeje këtë dizajn si një mock live dhe ndiq çdo thirrje."
     }
   },
   "mqtt": {

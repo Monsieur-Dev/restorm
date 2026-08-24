@@ -2150,7 +2150,8 @@
       "routes": "Rotas",
       "documentation": "Documentação",
       "notes": "Notas",
-      "code": "Código"
+      "code": "Código",
+      "server": "Servidor"
     },
     "rail": {
       "ariaLabel": "Seções do design"
@@ -2379,7 +2380,9 @@
       },
       "auto": "auto",
       "defined": "definido",
-      "constraintViolated": "O valor viola a restrição da propriedade ({{constraint}})"
+      "constraintViolated": "O valor viola a restrição da propriedade ({{constraint}})",
+      "deleteTitle": "Eliminar este exemplo?",
+      "deleteConfirm": "O exemplo «{{name}}» será eliminado."
     },
     "onDelete": {
       "restrict": "Restringir (proibir enquanto usado)",
@@ -2535,6 +2538,9 @@
       "replace": "Substituir as rotas existentes",
       "replaceHint": "Já existem rotas para este modelo. Substitua-as para evitar duplicados; deixe desativado para adicionar um segundo conjunto.",
       "title": "Gerar CRUD para {{name}}"
+    },
+    "server": {
+      "subtitle": "Sirva este design como um mock ao vivo e observe cada chamada."
     }
   },
   "mqtt": {

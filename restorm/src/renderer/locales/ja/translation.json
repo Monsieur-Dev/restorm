@@ -2149,7 +2149,8 @@
       "routes": "ルート",
       "documentation": "ドキュメント",
       "notes": "ノート",
-      "code": "コード"
+      "code": "コード",
+      "server": "サーバー"
     },
     "rail": {
       "ariaLabel": "デザインのセクション"
@@ -2378,7 +2379,9 @@
       },
       "auto": "自動",
       "defined": "定義済み",
-      "constraintViolated": "値がプロパティの制約に違反しています（{{constraint}}）"
+      "constraintViolated": "値がプロパティの制約に違反しています（{{constraint}}）",
+      "deleteTitle": "この例を削除しますか？",
+      "deleteConfirm": "例「{{name}}」が削除されます。"
     },
     "onDelete": {
       "restrict": "制限（使用中は禁止）",
@@ -2534,6 +2537,9 @@
       "replace": "既存のルートを置き換える",
       "replaceHint": "このモデルにはすでにルートが存在します。重複を避けるには置き換えてください。オフのままにすると 2 つ目のセットを追加します。",
       "title": "{{name}} の CRUD を生成"
+    },
+    "server": {
+      "subtitle": "このデザインをライブモックとして配信し、すべての呼び出しを監視します。"
     }
   },
   "mqtt": {

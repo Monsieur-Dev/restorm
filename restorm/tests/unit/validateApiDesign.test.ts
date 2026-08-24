@@ -265,4 +265,19 @@ describe('validateApiDesign', () => {
       { code: 'routePathReserved', path: ['d', 'g1', 'r1'], subject: '/swagger.json' }
     ])
   })
+
+  it('reserves the descriptor UNDER the base path too', () => {
+    const design = withModels(model('m1', 'User'))
+    design.server = { basePath: '/api/v1' }
+    design.routeGroups = [{
+      id: 'g1',
+      doc: { name: 'Misc' },
+      routes: [
+        { id: 'r1', doc: { match: { urlPattern: '/swagger.json', method: 'GET' }, responses: { '200': {} } } }
+      ]
+    }]
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'routePathReserved', path: ['d', 'g1', 'r1'], subject: '/api/v1/swagger.json' }
+    ])
+  })
 })

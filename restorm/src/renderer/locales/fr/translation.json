@@ -2152,7 +2152,8 @@
       "routes": "Routes",
       "documentation": "Documentation",
       "notes": "Notes",
-      "code": "Code"
+      "code": "Code",
+      "server": "Serveur"
     },
     "rail": {
       "ariaLabel": "Sections du design"
@@ -2381,7 +2382,9 @@
       },
       "auto": "auto",
       "defined": "défini",
-      "constraintViolated": "La valeur viole la contrainte de la propriété ({{constraint}})"
+      "constraintViolated": "La valeur viole la contrainte de la propriété ({{constraint}})",
+      "deleteTitle": "Supprimer cet exemple ?",
+      "deleteConfirm": "L'exemple « {{name}} » sera supprimé."
     },
     "onDelete": {
       "restrict": "Interdire si utilisé",
@@ -2537,6 +2540,9 @@
       "authWrites": "Protéger les routes d'écriture par authentification",
       "authWritesHint": "Exiger une authentification bearer sur la création, la mise à jour et la suppression ; les lectures restent publiques.",
       "generate": "Générer"
+    },
+    "server": {
+      "subtitle": "Servez ce design comme un mock live et observez chaque appel."
     }
   },
   "mqtt": {

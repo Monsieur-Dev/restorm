@@ -2152,7 +2152,8 @@
       "routes": "Trasy",
       "documentation": "Dokumentace",
       "notes": "Poznámky",
-      "code": "Kód"
+      "code": "Kód",
+      "server": "Server"
     },
     "rail": {
       "ariaLabel": "Sekce návrhu"
@@ -2381,7 +2382,9 @@
       },
       "auto": "auto",
       "defined": "definováno",
-      "constraintViolated": "Hodnota porušuje omezení vlastnosti ({{constraint}})"
+      "constraintViolated": "Hodnota porušuje omezení vlastnosti ({{constraint}})",
+      "deleteTitle": "Smazat tento příklad?",
+      "deleteConfirm": "Příklad „{{name}}“ bude smazán."
     },
     "onDelete": {
       "restrict": "Omezit (zakázat, dokud se používá)",
@@ -2537,6 +2540,9 @@
       "replace": "Nahradit existující trasy",
       "replaceHint": "Pro tento model už trasy existují. Nahraďte je, abyste předešli duplicitám; ponechte vypnuté pro přidání druhé sady.",
       "title": "Vygenerovat CRUD pro {{name}}"
+    },
+    "server": {
+      "subtitle": "Servírujte tento návrh jako živý mock a sledujte každé volání."
     }
   },
   "mqtt": {

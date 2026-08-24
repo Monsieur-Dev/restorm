@@ -200,7 +200,6 @@ import {
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { StatusbarVersionPlan } from './components/MainView/StatusbarVersionPlan'
-import { StatusbarDesignFormat } from './components/MainView/StatusbarDesignFormat'
 import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { copySidebarItems, readSidebarClipboard, hasSidebarClipboard } from './services/sidebarClipboard'
 import { useScenarioMenuPalette } from './services/scenarioMenuPaletteStore'
@@ -1508,13 +1507,6 @@ const App: React.FC = () => {
     if (!request) return null
     return { id: request.id, path: buildRequestPath(rootItems, request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
-
-  // Whether the focused workbench tab is a Design tab — drives the
-  // bottom-right "design · format 1.1" statusbar cell.
-  const activeWorkbenchTabIsDesign = useMemo<boolean>(() => {
-    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
-    return typeof activeTabId === 'string' && activeTabId.startsWith('design-id:')
-  }, [workbenchTree.groups, focusedGroupId])
 
   // Active scenario-editor tab (if any), so the MCP `get_current_tab` snapshot
   // can report `kind: 'scenario'` like it does for requests. Resolved the same
@@ -3989,8 +3981,6 @@ const App: React.FC = () => {
          * MCP indicator carries the `right-aligned` auto margin in every
          * state (running and stopped/disabled) since it always renders. */}
         <StatusbarMcpIndicator rightAligned onViewLogs={handleOpenMcpLogs} />
-        {/* "design · format 1.1" while the focused tab is a design. */}
-        <StatusbarDesignFormat visible={activeWorkbenchTabIsDesign} />
         {/* Renders nothing unless a project is open; visible-but-locked (the
          * 3-state gate) rather than hidden once one is, regardless of
          * whether the folder happens to be a git repo. */}
