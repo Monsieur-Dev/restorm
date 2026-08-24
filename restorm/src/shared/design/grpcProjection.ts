@@ -18,6 +18,7 @@
 
 import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../types/apiDesign'
 import { buildListPage, buildModelInstance, resolvePageWindow, servedProperties } from './designServing'
+import { operationVerb } from '../utils/httpMethod'
 
 type Property = DesignModel['properties'][number]
 
@@ -138,20 +139,25 @@ export function designGrpcMethods(design: ApiDesign): GrpcMethod[] {
   for (const group of design.routeGroups) {
     for (const route of group.routes) {
       const method = (route.doc.match.method ?? 'GET').toUpperCase()
-      const seed = route.doc.operationId
-        ?? route.doc.summary
-        ?? `${upperFirst(method.toLowerCase())}${protoTypeName(route.doc.match.urlPattern, 'Route')}`
-      const base = protoTypeName(seed, 'Call')
-      let name = base
-      let n = 2
-      while (taken.has(name)) { name = `${base}${n}`; n += 1 }
-      taken.add(name)
 
       const responses = route.design?.responses ?? {}
       const codes = Object.keys(responses).filter((c) => c.startsWith('2')).sort()
       const meta = codes[0] !== undefined ? responses[codes[0]] : undefined
       const model = meta?.modelId !== undefined ? design.models.find((m) => m.id === meta.modelId) : undefined
       const list = meta?.list === true
+
+      // Method-driven name (like GraphQL): an explicit operationId wins, else a
+      // bound model gives `${verb}${Model}` so the name tracks the HTTP method;
+      // a model-less route keeps its summary / method+path.
+      const seed = route.doc.operationId
+        ?? (model !== undefined
+          ? `${operationVerb(method, list)}${protoTypeName(model.doc.name, 'Message')}`
+          : route.doc.summary ?? `${upperFirst(method.toLowerCase())}${protoTypeName(route.doc.match.urlPattern, 'Route')}`)
+      const base = protoTypeName(seed, 'Call')
+      let name = base
+      let n = 2
+      while (taken.has(name)) { name = `${base}${n}`; n += 1 }
+      taken.add(name)
 
       const entry: GrpcMethod = {
         name,

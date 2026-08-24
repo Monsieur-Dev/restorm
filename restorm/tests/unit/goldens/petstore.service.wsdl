@@ -10,17 +10,17 @@
   <wsdl:message name="GetUserResponse">
     <wsdl:part name="parameters" element="tns:GetUserResponse" />
   </wsdl:message>
-  <wsdl:message name="List_usersRequest">
-    <wsdl:part name="parameters" element="tns:List_users" />
+  <wsdl:message name="ListUserRequest">
+    <wsdl:part name="parameters" element="tns:ListUser" />
   </wsdl:message>
-  <wsdl:message name="List_usersResponse">
-    <wsdl:part name="parameters" element="tns:List_usersResponse" />
+  <wsdl:message name="ListUserResponse">
+    <wsdl:part name="parameters" element="tns:ListUserResponse" />
   </wsdl:message>
-  <wsdl:message name="Create_a_userRequest">
-    <wsdl:part name="parameters" element="tns:Create_a_user" />
+  <wsdl:message name="PostUserRequest">
+    <wsdl:part name="parameters" element="tns:PostUser" />
   </wsdl:message>
-  <wsdl:message name="Create_a_userResponse">
-    <wsdl:part name="parameters" element="tns:Create_a_userResponse" />
+  <wsdl:message name="PostUserResponse">
+    <wsdl:part name="parameters" element="tns:PostUserResponse" />
   </wsdl:message>
   <wsdl:portType name="PetstoreServicePortType">
     <wsdl:operation name="GetUser">
@@ -28,15 +28,15 @@
       <wsdl:input message="tns:GetUserRequest" />
       <wsdl:output message="tns:GetUserResponse" />
     </wsdl:operation>
-    <wsdl:operation name="List_users">
+    <wsdl:operation name="ListUser">
       <wsdl:documentation>List users</wsdl:documentation>
-      <wsdl:input message="tns:List_usersRequest" />
-      <wsdl:output message="tns:List_usersResponse" />
+      <wsdl:input message="tns:ListUserRequest" />
+      <wsdl:output message="tns:ListUserResponse" />
     </wsdl:operation>
-    <wsdl:operation name="Create_a_user">
+    <wsdl:operation name="PostUser">
       <wsdl:documentation>Create a user</wsdl:documentation>
-      <wsdl:input message="tns:Create_a_userRequest" />
-      <wsdl:output message="tns:Create_a_userResponse" />
+      <wsdl:input message="tns:PostUserRequest" />
+      <wsdl:output message="tns:PostUserResponse" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="PetstoreServiceBinding" type="tns:PetstoreServicePortType">
@@ -46,13 +46,13 @@
       <wsdl:input><soap:body use="literal" /></wsdl:input>
       <wsdl:output><soap:body use="literal" /></wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="List_users">
-      <soap:operation soapAction="urn:restorm:design:petstore#List_users" />
+    <wsdl:operation name="ListUser">
+      <soap:operation soapAction="urn:restorm:design:petstore#ListUser" />
       <wsdl:input><soap:body use="literal" /></wsdl:input>
       <wsdl:output><soap:body use="literal" /></wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="Create_a_user">
-      <soap:operation soapAction="urn:restorm:design:petstore#Create_a_user" />
+    <wsdl:operation name="PostUser">
+      <soap:operation soapAction="urn:restorm:design:petstore#PostUser" />
       <wsdl:input><soap:body use="literal" /></wsdl:input>
       <wsdl:output><soap:body use="literal" /></wsdl:output>
     </wsdl:operation>

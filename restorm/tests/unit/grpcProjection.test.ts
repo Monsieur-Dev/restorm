@@ -60,13 +60,13 @@ describe('designGrpcMethods', () => {
   const design = buildReferenceApiDesign()
   const methods = designGrpcMethods(design)
 
-  it('derives one unary rpc per route, named from operationId then summary', () => {
+  it('derives one unary rpc per route, named from operationId then method+type', () => {
     const byName = new Map(methods.map((m) => [m.name, m]))
-    expect([...byName.keys()].sort()).toEqual(['CreateAUser', 'GetUser', 'ListUsers'])
+    expect([...byName.keys()].sort()).toEqual(['GetUser', 'ListUser', 'PostUser'])
   })
 
   it('marks the list route and wraps its response type', () => {
-    const list = designGrpcMethods(design).find((m) => m.name === 'ListUsers')
+    const list = designGrpcMethods(design).find((m) => m.name === 'ListUser')
     expect(list?.list).toBe(true)
     expect(list?.responseType).toBe('UserList')
   })
@@ -98,7 +98,7 @@ describe('buildGrpcResponse', () => {
   })
 
   it('answers a list route with the pagination envelope', () => {
-    const response = buildGrpcResponse(design, pick('ListUsers'), { limit: 2, offset: 0 })
+    const response = buildGrpcResponse(design, pick('ListUser'), { limit: 2, offset: 0 })
     expect(Array.isArray(response['items'])).toBe(true)
     expect((response['items'] as unknown[]).length).toBeLessThanOrEqual(2)
     expect(typeof response['total']).toBe('number')

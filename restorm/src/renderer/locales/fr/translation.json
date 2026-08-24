@@ -2540,7 +2540,15 @@
       "replaceHint": "Des routes existent déjà pour ce modèle. Remplacez-les pour éviter les doublons ; laissez désactivé pour ajouter un second jeu.",
       "authWrites": "Protéger les routes d'écriture par authentification",
       "authWritesHint": "Exiger une authentification bearer sur la création, la mise à jour et la suppression ; les lectures restent publiques.",
-      "generate": "Générer"
+      "generate": "Générer",
+      "projections": {
+        "title": "Un modèle, tous les protocoles — ce CRUD est aussi servi en :",
+        "http": "{{count}} routes REST",
+        "graphql": "{{queries}} requêtes / {{mutations}} mutations en GraphQL",
+        "grpc": "{{count}} méthodes gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} opérations SOAP"
+      }
     },
     "server": {
       "subtitle": "Servez ce design comme un mock live et observez chaque appel."
@@ -2551,6 +2559,10 @@
       "generated": "Clients générés — ouvrez-les sous Clients dans la barre latérale.",
       "importing": "Import des clients…",
       "refresh": "Régénérer les clients"
+    },
+    "projections": {
+      "title": "Projections",
+      "hint": "La même opération, telle que chaque protocole servi l'expose."
     }
   },
   "mqtt": {

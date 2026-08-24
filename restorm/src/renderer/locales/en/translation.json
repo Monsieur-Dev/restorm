@@ -2540,7 +2540,15 @@
       "replaceHint": "Routes already exist for this model. Replace them to avoid duplicates; leave off to add a second set.",
       "authWrites": "Protect write routes with authentication",
       "authWritesHint": "Require bearer auth on create, update and delete; reads stay public.",
-      "generate": "Generate"
+      "generate": "Generate",
+      "projections": {
+        "title": "One model, every protocol — this CRUD is also served as:",
+        "http": "{{count}} REST routes",
+        "graphql": "{{queries}} queries / {{mutations}} mutations in GraphQL",
+        "grpc": "{{count}} gRPC methods",
+        "odata": "{{count}} OData entity set",
+        "soap": "{{count}} SOAP operations"
+      }
     },
     "server": {
       "subtitle": "Serve this design as a live mock and watch every call."
@@ -2551,6 +2559,10 @@
       "generated": "Clients generated — open them under Clients in the sidebar.",
       "importing": "Importing clients…",
       "refresh": "Regenerate the clients"
+    },
+    "projections": {
+      "title": "Projections",
+      "hint": "The same operation, as each served protocol exposes it."
     }
   },
   "mqtt": {

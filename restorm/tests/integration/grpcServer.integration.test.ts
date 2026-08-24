@@ -60,7 +60,7 @@ type UnaryFn = (
   md: grpc.Metadata,
   cb: (err: grpc.ServiceError | null, res: Record<string, unknown>) => void
 ) => void
-type DesignClient = grpc.Client & { GetUser: UnaryFn; ListUsers: UnaryFn }
+type DesignClient = grpc.Client & { GetUser: UnaryFn; ListUser: UnaryFn }
 
 function makeClient(design: ApiDesign, grpcPort: number): DesignClient {
   const file = join(mkdtempSync(join(tmpdir(), 'restorm-grpc-itest-')), 'design.proto')
@@ -120,7 +120,7 @@ describe('DesignServerService — gRPC projection', () => {
   })
 
   it('answers a list call with the pagination envelope', async () => {
-    const { err, res } = await call(client, client.ListUsers, { limit: 2, offset: 0 }, bearer())
+    const { err, res } = await call(client, client.ListUser, { limit: 2, offset: 0 }, bearer())
     expect(err).toBeNull()
     expect(Array.isArray(res['items'])).toBe(true)
     expect(typeof res['total']).toBe('number')

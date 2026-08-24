@@ -15,6 +15,7 @@
 
 import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../types/apiDesign'
 import { buildModelInstance } from './designServing'
+import { operationVerb } from '../utils/httpMethod'
 
 // ── Names ─────────────────────────────────────────────────────────────
 
@@ -61,16 +62,6 @@ export function designSoapOperations(design: ApiDesign): SoapOperation[] {
   for (const group of design.routeGroups) {
     for (const route of group.routes) {
       const method = (route.doc.match.method ?? 'GET').toUpperCase()
-      // operationId first, the summary second, the method+path last —
-      // WSDL operation names should read like verbs.
-      const seed = route.doc.operationId
-        ?? route.doc.summary
-        ?? `${upperFirst(method.toLowerCase())}${sanitizeXmlName(route.doc.match.urlPattern, 'Route')}`
-      const base = upperFirst(sanitizeXmlName(seed, 'Operation'))
-      let name = base
-      let n = 2
-      while (taken.has(name)) { name = `${base}${n}`; n += 1 }
-      taken.add(name)
 
       const responses = route.design?.responses ?? {}
       const codes = Object.keys(responses).filter((code) => code.startsWith('2')).sort()
@@ -78,13 +69,28 @@ export function designSoapOperations(design: ApiDesign): SoapOperation[] {
       const model = meta?.modelId !== undefined
         ? design.models.find((m) => m.id === meta.modelId)
         : undefined
+      const list = meta?.list === true
+
+      // Method-driven name (like GraphQL): an explicit operationId wins, else a
+      // bound model gives `${verb}${Model}` so the WSDL operation tracks the HTTP
+      // method instead of freezing a stale summary; a model-less route keeps its
+      // summary / method+path.
+      const seed = route.doc.operationId
+        ?? (model !== undefined
+          ? `${operationVerb(method, list)}${sanitizeXmlName(model.doc.name, 'Operation')}`
+          : route.doc.summary ?? `${upperFirst(method.toLowerCase())}${sanitizeXmlName(route.doc.match.urlPattern, 'Route')}`)
+      const base = upperFirst(sanitizeXmlName(seed, 'Operation'))
+      let name = base
+      let n = 2
+      while (taken.has(name)) { name = `${base}${n}`; n += 1 }
+      taken.add(name)
 
       const operation: SoapOperation = {
         name,
         soapAction: `${namespace}#${name}`,
         route,
         group,
-        list: meta?.list === true
+        list
       }
       if (model !== undefined) operation.model = model
       if (route.doc.summary !== undefined && route.doc.summary !== '') operation.documentation = route.doc.summary

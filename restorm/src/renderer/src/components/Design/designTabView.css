@@ -1193,3 +1193,66 @@
   min-width: 120px;
   font-family: var(--monaco-monospace-font, monospace);
 }
+
+/* Projections panel — the same route as each served protocol exposes it. */
+.design-projections-hint {
+  margin: 0 0 8px;
+}
+
+.design-route-projections {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.design-projection-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+}
+
+.design-projection-proto {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.design-projection-sig {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.design-projection-inactive .design-projection-sig {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+/* CRUD modal — the multi-protocol surface the generated group will expose. */
+.design-crud-projections {
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  background: var(--badge-background, rgba(128, 128, 128, 0.08));
+}
+
+.design-crud-projections-title {
+  display: block;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.design-crud-projections-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85em;
+  opacity: 0.85;
+}

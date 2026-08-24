@@ -19,6 +19,7 @@ import type { ApiDesign, DesignModel, DesignRouteGroup } from '../../../../share
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { collectInheritanceChildren, collectModelUsages, removeModelFromDesign } from '../../../../shared/design/designUsages'
 import { generateCrud, findCrudGroupForModel } from '../../../../shared/design/designRoutes'
+import { summarizeGroupProjections } from '../../../../shared/design/designProjections'
 import { generateUniqueId } from '../../utils/treeManipulation'
 import { assignDesignSection, patchModel, replaceModel, uniqueComponentName } from './designMutations'
 import { ModelSchemaTab } from './ModelSchemaTab'
@@ -422,6 +423,7 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
 
       {crudModel !== null && (
         <CrudGenerationModal
+          design={design}
           model={crudModel}
           existingGroup={findCrudGroupForModel(design, crudModel)}
           onClose={() => { setCrudModel(null) }}
@@ -449,15 +451,25 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
  * two frictions the usability pass surfaced.
  */
 const CrudGenerationModal: React.FC<{
+  design: ApiDesign
   model: DesignModel
   existingGroup: DesignRouteGroup | undefined
   onClose: () => void
   onConfirm: (options: { replace: boolean; authWrites: boolean }) => void
-}> = ({ model, existingGroup, onClose, onConfirm }) => {
+}> = ({ design, model, existingGroup, onClose, onConfirm }) => {
   const { t } = useTranslation()
   const hasExisting = existingGroup !== undefined
   const [replace, setReplace] = useState(true)
   const [authWrites, setAuthWrites] = useState(false)
+
+  // Preview the multi-protocol surface this CRUD creates, by generating the
+  // group in memory (pure) and running the same projections the server uses.
+  // authWrites doesn't change the projected shape, so it's not a dependency.
+  const projections = useMemo(() => {
+    let n = 0
+    const { group } = generateCrud(design, model, () => `crud-preview-${n++}`)
+    return summarizeGroupProjections({ ...design, routeGroups: [...design.routeGroups, group] }, group)
+  }, [design, model])
 
   return (
     <Modal
@@ -499,6 +511,18 @@ const CrudGenerationModal: React.FC<{
             </span>
           </span>
         </label>
+        <div className="design-crud-projections" data-testid="design-crud-projections">
+          <span className="design-crud-projections-title">
+            {t('design.crud.projections.title', 'One model, every protocol — this CRUD is also served as:')}
+          </span>
+          <ul className="design-crud-projections-list">
+            <li>{t('design.crud.projections.http', '{{count}} REST routes', { count: projections.http })}</li>
+            <li>{t('design.crud.projections.graphql', '{{queries}} queries / {{mutations}} mutations in GraphQL', { queries: projections.graphqlQueries, mutations: projections.graphqlMutations })}</li>
+            <li>{t('design.crud.projections.grpc', '{{count}} gRPC methods', { count: projections.grpc })}</li>
+            <li>{t('design.crud.projections.odata', '{{count}} OData entity set', { count: projections.odataEntitySets })}</li>
+            <li>{t('design.crud.projections.soap', '{{count}} SOAP operations', { count: projections.soap })}</li>
+          </ul>
+        </div>
         <div className="design-crud-modal-actions">
           <Button secondary onClick={onClose} data-testid="design-crud-cancel">
             {t('sidebar.deleteConfirm.cancel')}

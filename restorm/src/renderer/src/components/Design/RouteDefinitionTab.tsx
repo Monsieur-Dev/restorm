@@ -20,6 +20,8 @@ import type {
 import type { ParameterDocumentation } from '../../../../shared/types/apiDocumentation'
 import { composeRoutePath } from '../../../../shared/design/apiDesignDoc'
 import { syncPathParams } from '../../../../shared/design/designRoutes'
+import { designRouteProjections, resolveDesignPath } from '../../../../shared/design/designProjections'
+import { flattenEnvVars } from '../../../../shared/utils/resolveUrlAgainstEnv'
 import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { displayValue, parseTypedRaw } from './designDisplay'
 import { replaceRoute } from './designMutations'
@@ -64,6 +66,15 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
   const envVariables = useDesignEnvVariables(design.id)
   const handlebarsHelpers = useHandlebarsHelpers()
 
+  // Resolve `{{baseUrl}}`-style handlebars against the design's environment
+  // folder (values may themselves reference other vars → flatten first), the
+  // same way a served request would. Path-params like `{{id}}` aren't env vars,
+  // so they stay as placeholders.
+  const envMap = useMemo(
+    () => flattenEnvVars(Object.fromEntries(envVariables.map((v) => [v.name, v.value]))),
+    [envVariables]
+  )
+
   const commit = useCallback((next: DesignRoute) => {
     replaceRoute(design, group.id, route.id, next)
   }, [design, group.id, route.id])
@@ -75,6 +86,11 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
   const parameters = useMemo(() => route.doc.parameters ?? [], [route.doc.parameters])
   const pathParams = parameters.filter((p) => p.location === 'path')
   const otherParams = parameters.filter((p) => p.location !== 'path')
+
+  // How this one route is exposed across every protocol the design can serve —
+  // read back from the same projections the served endpoints use. `replaceRoute`
+  // swaps the route object on every edit, so this recomputes as the user types.
+  const projections = useMemo(() => designRouteProjections(design, group, route, envMap), [design, group, route, envMap])
 
   const linkFor = (name: string): { modelName: string; propertyName: string; example: unknown; type: string; format?: string; description?: string } | null => {
     const link = route.design?.paramLinks?.[name]
@@ -346,11 +362,11 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
     }
   ]
 
-  const resolvedPath = composeRoutePath({
+  const resolvedPath = resolveDesignPath(composeRoutePath({
     ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
     ...(group.design?.versionPrefix !== undefined ? { versionPrefix: group.design.versionPrefix } : {}),
     ...(group.design?.basePath !== undefined ? { groupBasePath: group.design.basePath } : {})
-  }, route.doc.match.urlPattern)
+  }, route.doc.match.urlPattern), envMap)
 
   const method = route.doc.match.method ?? 'GET'
   // The method combo mirrors the request editor: verb badges + free-text
@@ -480,6 +496,24 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
               getRowId={(p) => `other-${p.name}`}
             />
           )}
+      </StaticPane>
+
+      <StaticPane title={t('design.projections.title', 'Projections')} className="design-route-projections-pane">
+        <p className="design-section-placeholder-message design-projections-hint">
+          {t('design.projections.hint', 'The same operation, as each served protocol exposes it.')}
+        </p>
+        <div className="design-route-projections" data-testid="design-route-projections">
+          {([['http', projections.http], ['graphql', projections.graphql], ['soap', projections.soap], ['odata', projections.odata], ['grpc', projections.grpc]] as const).map(([proto, sig]) => (
+            <div
+              key={proto}
+              className={`design-projection-row${sig === null ? ' design-projection-inactive' : ''}`}
+              data-testid={`design-projection-${proto}`}
+            >
+              <span className="design-projection-proto">{t(`design.protocol.${proto}`)}</span>
+              <code className="design-projection-sig">{sig ?? '—'}</code>
+            </div>
+          ))}
+        </div>
       </StaticPane>
     </div>
   )

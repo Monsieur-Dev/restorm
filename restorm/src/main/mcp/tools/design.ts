@@ -44,6 +44,7 @@ import { CODEGEN_CONTEXT_SCHEMA } from '../../../shared/design/codegenContextSch
 import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 import { designFromDocumentation } from '../../../shared/design/designFromDocumentation'
 import { generateCrud, findCrudGroupForModel, generateSearchParams, syncPathParams } from '../../../shared/design/designRoutes'
+import { summarizeGroupProjections } from '../../../shared/design/designProjections'
 import { removeModelFromDesign } from '../../../shared/design/designUsages'
 import { DESCRIPTOR_FORMATS } from '../../../shared/design/descriptorFormats'
 import { broadcastTreeReplace } from './import'
@@ -1203,7 +1204,15 @@ export function registerDesignTools(mcp: McpService): void {
         ? design.routeGroups.map((g) => (g.id === existing.id ? group : g))
         : [...design.routeGroups, group]
       writeDesign(design)
-      return jsonReply({ designId: design.id, groupId: group.id, routes: group.routes.length, replaced: existing !== undefined })
+      return jsonReply({
+        designId: design.id,
+        groupId: group.id,
+        routes: group.routes.length,
+        replaced: existing !== undefined,
+        // The multi-protocol surface these routes project onto automatically —
+        // the same projections the served endpoints expose.
+        projections: summarizeGroupProjections(design, group)
+      })
     }
   )
 
