@@ -62,6 +62,7 @@ import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
 import { RequestScenarioUsageButton } from './RequestScenarioUsageButton'
 import { RequestHeaderEnvSelector } from '../RequestHeaderEnvSelector'
+import { DesignHeaderEnvSelector } from '../DesignHeaderEnvSelector'
 import { RequestHeaderHistoryButton } from '../RequestHeaderHistoryButton'
 import { RequestHeaderAuthSelector } from '../RequestHeaderAuthSelector'
 import { RequestQuickSettingsButton } from '../RequestQuickSettingsButton'
@@ -1110,17 +1111,31 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       // (see DesignWorkbenchTab) — pass the raw [path, design] trail; the
       // last-crumb icon strip happens there, per section. Designs carry no
       // tags/bookmarks, so none of that wiring is threaded.
+      //
+      // A design resolves {{variables}} against a chosen environment just like a
+      // request: wrap it in the same EnvironmentProvider (env list read live off
+      // the owning env folder) and mount the header env selector. The selection
+      // is scoped per-design (`requestId: design.id` in the persistence key).
+      const dsgEnvFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
+      const dsgReactiveFolder = dsgEnvFolderId ? getEnvironmentFolderById?.(dsgEnvFolderId) : undefined
+      const dsgEnvironments = dsgReactiveFolder?.environments
+      const dsgPersistenceKey = (projectUuid && dsgEnvFolderId)
+        ? { projectUuid, envFolderId: dsgEnvFolderId, requestId: design.id }
+        : undefined
       return (
-        <DesignWorkbenchTab
-          design={design}
-          breadcrumbs={breadcrumbs}
-          onBreadcrumbClick={onBreadcrumbClick}
-          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
-          onBreadcrumbRename={onItemRename}
-          onBreadcrumbIconChange={onItemIconChange}
-          tabId={effectiveTab.id}
-          {...dsgFav}
-        />
+        <EnvironmentProvider environments={dsgEnvironments} persistenceKey={dsgPersistenceKey}>
+          <DesignWorkbenchTab
+            design={design}
+            breadcrumbs={breadcrumbs}
+            onBreadcrumbClick={onBreadcrumbClick}
+            onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+            onBreadcrumbRename={onItemRename}
+            onBreadcrumbIconChange={onItemIconChange}
+            tabId={effectiveTab.id}
+            headerActionsLeading={<DesignHeaderEnvSelector />}
+            {...dsgFav}
+          />
+        </EnvironmentProvider>
       )
     }
 

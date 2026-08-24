@@ -28,6 +28,8 @@ import { DesignCodeSection } from './DesignCodeSection'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent, setActiveDesignSection } from '../../services/designSectionIntent'
 import { useRestormStore } from '../../store/restormStore'
+import { useOptionalEnvironmentContext } from '../../contexts/useEnvironmentContext'
+import { findEnvironmentById } from '../../services/environmentSelectionStore'
 import { assignDesignSection } from './designMutations'
 import { DesignModelsSection } from './DesignModelsSection'
 import { DesignEnumsSection } from './DesignEnumsSection'
@@ -119,6 +121,23 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     })
   }, [design.id, applyIntent])
 
+  // Environment resolution is SHARED across sections: the base-path/port
+  // previews resolve against the environment picked in the design smart-bar
+  // selector (the shared EnvironmentProvider mounted around this tab in
+  // RestormWorkbench). Subscribe to the collections DATA, not just the finder,
+  // so a later mirror re-renders the environment list. Optional context so a
+  // provider-less render (tests) still falls back to the first env.
+  const storeCollections = useRestormStore((state) => state.collections)
+  const findOwningEnvironmentFolder = useRestormStore((state) => state.findOwningEnvironmentFolder)
+  void storeCollections
+  const owningFolder = findOwningEnvironmentFolder(design.id)
+  const environments = owningFolder?.environments ?? []
+  const envContext = useOptionalEnvironmentContext()
+  const activeEnv = (envContext?.selectedEnvId != null
+    ? findEnvironmentById(environments, envContext.selectedEnvId)
+    : undefined) ?? environments[0]
+  const envVars = servedEnvVars(activeEnv)
+
   // Structural edits (add a property, delete a model…) mutate the
   // reactive design in place — this tab re-renders off the proxy's own
   // DESIGN_UPDATED event, scoped to this design, without waiting for
@@ -131,18 +150,15 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
       // Serving? Push the fresh shape to the running server so edits
       // take effect on the next request — the AC#10 hot loop. The
       // JSON round-trip strips the reactive proxy (the contextBridge
-      // rejects proxied objects).
+      // rejects proxied objects). Resolve against the CURRENTLY selected
+      // environment; the port is fixed for the server's lifetime, so the base
+      // path is what a hot edit needs kept resolved.
       if (isDesignServerListening(design.id)) {
-        // Resolve the serve-config variables against the owning folder's
-        // first environment (the tab's active-env selection is section-local;
-        // the port is fixed for the server's lifetime, so the base path is
-        // what a hot edit needs kept resolved).
-        const folder = useRestormStore.getState().findOwningEnvironmentFolder(design.id)
-        void window.restorm?.designServer.update(resolveServedDesign(design, servedEnvVars(folder?.environments[0])))
+        void window.restorm?.designServer.update(resolveServedDesign(design, servedEnvVars(activeEnv)))
       }
     })
     return () => { subscription.unsubscribe() }
-  }, [design])
+  }, [design, activeEnv])
 
   // Recomputed only when a design edit ticked — a full walk of models ×
   // properties × routes × responses per keystroke would be waste. The
@@ -152,21 +168,6 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     void designTick
     return validateApiDesign(design)
   }, [design, designTick])
-
-  // Environment resolution is SHARED by two sections: the Server section
-  // picks the active environment, the Settings section previews the resolved
-  // base path against it. The selection lives HERE so it survives switching
-  // between them (each section unmounts when left; this parent persists).
-  // Subscribe to the collections DATA, not just the finder, so a later mirror
-  // re-renders the environment list.
-  const storeCollections = useRestormStore((state) => state.collections)
-  const findOwningEnvironmentFolder = useRestormStore((state) => state.findOwningEnvironmentFolder)
-  void storeCollections
-  const owningFolder = findOwningEnvironmentFolder(design.id)
-  const environments = owningFolder?.environments ?? []
-  const [activeEnvIndex, setActiveEnvIndex] = useState(0)
-  const activeEnv = environments[Math.min(activeEnvIndex, Math.max(0, environments.length - 1))]
-  const envVars = servedEnvVars(activeEnv)
 
   const jumpTo = (section: 'models' | 'routes' | 'enums', entityId: string): void => {
     setActiveSection(section)
@@ -206,9 +207,6 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
           <DesignServerSection
             design={design}
             issues={issues}
-            environments={environments}
-            activeEnvIndex={activeEnvIndex}
-            onPickEnv={setActiveEnvIndex}
             envVars={envVars}
           />
         )}
@@ -321,9 +319,6 @@ const DesignSettingsSection: React.FC<{
     <ScrollableElement className="design-section-scroll">
       <div className="design-section design-settings" data-testid="design-settings-section">
         <h2 className="design-section-title">{t('design.section.settings')}</h2>
-        <p className="design-section-subtitle">
-          {t('design.settings.subtitle', 'General settings of the design “{{name}}”', { name: design.name })}
-        </p>
 
         <h3 className="design-settings-group-title">{t('design.settings.export.title', 'Export')}</h3>
         <div className="design-settings-grid design-export-fields">

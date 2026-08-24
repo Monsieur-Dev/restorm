@@ -140,7 +140,7 @@ Then('the routes tree shows the group {string} with {int} routes', async ({}, gr
 Then('the resolved base line reads {string}', async ({}, expected: string) => {
   const p = requirePage()
   // The Settings section hosts the resolved-base preview, under the base-path
-  // field; the environment that resolves it is picked in the Server section.
+  // field; the environment that resolves it is picked in the smart-bar selector.
   await p.locator('[data-testid="design-rail-settings"]').click()
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-settings-resolved-base"]')).toHaveText(expected, { timeout: 5000 })
@@ -148,11 +148,12 @@ Then('the resolved base line reads {string}', async ({}, expected: string) => {
 
 When('I pick the design environment {string}', async ({}, envName: string) => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-server"]').click()
-  await p.locator('[data-testid="design-server-environment-trigger"]').click()
-  const dropdown = p.locator('[data-testid="design-server-environment-dropdown"]')
-  await expect(dropdown).toBeVisible({ timeout: 5000 })
-  await dropdown.locator('.select-option').filter({ hasText: envName }).first().click()
+  // The environment is picked in the design smart-bar selector (shared with the
+  // request env selector), visible from any section — no need to open Server.
+  await p.locator('[data-testid="design-header-env-selector"]').click()
+  const popover = p.locator('[data-testid="design-header-env-selector-listview"]')
+  await expect(popover).toBeVisible({ timeout: 5000 })
+  await popover.locator('[role="option"]').filter({ hasText: envName }).first().click()
   await p.waitForTimeout(400)
 })
 

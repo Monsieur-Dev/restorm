@@ -4,11 +4,9 @@ import {
   GatedControl,
   InputBox,
   ScrollableElement,
-  SelectBox,
-  Toggle,
-  type ISelectData
+  Toggle
 } from 'electron-core-ui/renderer'
-import type { ApiDesign, DesignProtocol, DesignServing, Environment } from '../../../../shared/types/collections'
+import type { ApiDesign, DesignProtocol, DesignServing } from '../../../../shared/types/collections'
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { useAuthState } from 'electron-core-ui/renderer'
@@ -16,11 +14,10 @@ import { resolveUrlAgainstEnv } from '../../../../shared/utils/resolveUrlAgainst
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { applyServingSnapshot, useIsDesignServerListening } from '../../services/designServerStore'
 import { generateDesignClients, clearDesignClients, getDesignClients } from '../../services/designClientsStore'
-import { useRestormStore } from '../../store/restormStore'
 import { useDesignEnvVariables } from '../../hooks/useDesignEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { assignDesignSection } from './designMutations'
-import { servedEnvVars, resolveServedDesign } from './designServeResolve'
+import { resolveServedDesign } from './designServeResolve'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
@@ -38,14 +35,10 @@ const SERVE_PROTOCOLS = ['http', 'graphql', 'soap', 'odata', 'grpc'] as const
 export const DesignServerSection: React.FC<{
   design: ApiDesign
   issues: DesignIssue[]
-  /** The owning env folder's environments — the selector below picks the active one. */
-  environments: Environment[]
-  /** Active environment index, owned by the parent so Settings' base-path preview stays in sync. */
-  activeEnvIndex: number
-  onPickEnv: (index: number) => void
-  /** Resolved variable map of the active environment (for the port preview). */
+  /** Resolved variable map of the active environment (picked in the design
+   * smart-bar env selector; used for the port preview and serve resolution). */
   envVars: Record<string, string>
-}> = ({ design, issues, environments, activeEnvIndex, onPickEnv, envVars }) => {
+}> = ({ design, issues, envVars }) => {
   const { t } = useTranslation()
 
   // A design INSIDE an env folder resolves {{variables}} like a request; the
@@ -115,11 +108,9 @@ export const DesignServerSection: React.FC<{
       return
     }
     // Resolve base-path / port {{variables}} against the ACTIVE environment
-    // (read fresh so the mutable env map never lives in this callback's deps),
+    // (the smart-bar selection, already resolved into `envVars` by the parent),
     // then start. resolveServedDesign also strips the reactive proxy.
-    const envs = useRestormStore.getState().findOwningEnvironmentFolder(design.id)?.environments ?? []
-    const activeEnvNow = envs[Math.min(activeEnvIndex, Math.max(0, envs.length - 1))]
-    const result = await window.restorm?.designServer.start(resolveServedDesign(design, servedEnvVars(activeEnvNow)))
+    const result = await window.restorm?.designServer.start(resolveServedDesign(design, envVars))
     if (result?.success !== true) {
       setServerError(result?.error ?? t('design.settings.serve.startFailed', 'The server could not start'))
       return
@@ -127,7 +118,7 @@ export const DesignServerSection: React.FC<{
     setServedPort(result.port)
     // Dogfood: import the mock's own metadata into transient client bundles.
     void generateDesignClients(design, result.port)
-  }, [design, serving, t, activeEnvIndex])
+  }, [design, serving, t, envVars])
 
   const spinTooltip = serving
     ? t('design.run.stop', 'Stop the server')
@@ -215,20 +206,6 @@ export const DesignServerSection: React.FC<{
               data-testid="design-serve-latency"
             />
           </label>
-          {environments.length > 0 && (
-            <label className="design-field">
-              <span className="design-field-label">{t('design.settings.api.environment', 'Environment')}</span>
-              <SelectBox
-                id="design-server-environment"
-                className=""
-                options={environments.map((env) => ({ text: env.name }))}
-                selected={Math.min(activeEnvIndex, environments.length - 1)}
-                onDidSelect={(data: ISelectData) => { onPickEnv(data.index) }}
-                selectBoxOptions={{ ariaLabel: t('design.settings.api.environment', 'Environment'), useCustomDrawn: true }}
-                data-testid="design-server-environment"
-              />
-            </label>
-          )}
           <label className="design-field design-field-full design-serve-stateful">
             <Toggle
               checked={design.serving?.stateful === true}
