@@ -33,6 +33,7 @@ import { applyRoutesDrop, canRoutesDrop, type RoutesDropPosition } from '../../.
 import { RouteDefinitionTab } from './RouteDefinitionTab'
 import { RouteResponsesTab } from './RouteResponsesTab'
 import { RouteSettingsTab } from './RouteSettingsTab'
+import { DesignRouteCodegenTab } from './DesignRouteCodegenTab'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 const AUTH_KINDS: readonly DesignAuthKind[] = ['none', 'bearer', 'apiKeyHeader', 'basic']
@@ -593,6 +594,11 @@ const RouteCard: React.FC<{
             id: 'settings',
             label: t('design.models.tabs.settings', 'Settings'),
             content: <RouteSettingsTab design={design} group={group} route={route} onOpenGroup={onOpenGroup} />
+          },
+          {
+            id: 'codegen',
+            label: t('design.codegen.vars.tab', 'Code generation'),
+            content: <DesignRouteCodegenTab design={design} group={group} route={route} />
           },
           {
             id: 'notes',

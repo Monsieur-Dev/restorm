@@ -17,10 +17,12 @@ import {
   InputBox,
   Modal,
   ScrollableElement,
+  Tabs,
   toasterService,
   useAuthState
 } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { DesignCodegenGeneralVariables } from './DesignCodegenGeneralVariables'
 import { RoundActionButton } from '../common/RoundActionButton'
 import type {
   ApiDesign,
@@ -192,9 +194,9 @@ export const DesignCodeSection: React.FC<{
     setActiveId(null)
   }, [design.id])
 
-  return (
+  const templateTab = (
     <ScrollableElement className="design-section-scroll">
-      <div className="design-section design-code" data-testid="design-code-section">
+      <div className="design-code-template-tab">
         <p className="design-section-subtitle">
           {t(
             'design.code.subtitle',
@@ -325,41 +327,58 @@ export const DesignCodeSection: React.FC<{
             </span>
           )}
         </div>
-
-        <DesignTemplateLibraryModal
-          isOpen={libraryOpen}
-          onClose={() => { setLibraryOpen(false) }}
-          onAdd={addTemplate}
-          recents={recents}
-        />
-
-        {pendingDelete !== null && (
-          <Modal
-            title={t('design.code.removeTitle', 'Remove this template?')}
-            isOpen
-            onClose={() => { setPendingDelete(null) }}
-            size="dialog"
-            data-testid="design-code-remove-modal"
-            enterActionTestId="design-code-remove-confirm"
-          >
-            <div className="design-delete-modal-body">
-              <p>
-                {t('design.code.removeConfirm', 'The template “{{name}}” will be removed from this design (generated files on disk are left untouched).', {
-                  name: (() => { const tpl = templates.find((x) => x.id === pendingDelete); return tpl ? labelFor(tpl) : '' })()
-                })}
-              </p>
-              <div className="design-delete-modal-actions">
-                <Button secondary onClick={() => { setPendingDelete(null) }} data-testid="design-code-remove-cancel">
-                  {t('sidebar.deleteConfirm.cancel')}
-                </Button>
-                <Button onClick={() => { const id = pendingDelete; setPendingDelete(null); removeTemplate(id) }} data-testid="design-code-remove-confirm">
-                  {t('sidebar.deleteConfirm.confirm')}
-                </Button>
-              </div>
-            </div>
-          </Modal>
-        )}
       </div>
     </ScrollableElement>
+  )
+
+  return (
+    <div className="design-section design-code" data-testid="design-code-section">
+      <Tabs
+        data-testid="design-code-tabs"
+        mountStrategy="lazy-once"
+        tabs={[
+          { id: 'template', label: t('design.code.tabs.template', 'Template'), content: templateTab },
+          {
+            id: 'variables',
+            label: t('design.codegen.vars.generalTitle', 'General variables'),
+            content: <DesignCodegenGeneralVariables design={design} />
+          }
+        ]}
+      />
+
+      <DesignTemplateLibraryModal
+        isOpen={libraryOpen}
+        onClose={() => { setLibraryOpen(false) }}
+        onAdd={addTemplate}
+        recents={recents}
+      />
+
+      {pendingDelete !== null && (
+        <Modal
+          title={t('design.code.removeTitle', 'Remove this template?')}
+          isOpen
+          onClose={() => { setPendingDelete(null) }}
+          size="dialog"
+          data-testid="design-code-remove-modal"
+          enterActionTestId="design-code-remove-confirm"
+        >
+          <div className="design-delete-modal-body">
+            <p>
+              {t('design.code.removeConfirm', 'The template “{{name}}” will be removed from this design (generated files on disk are left untouched).', {
+                name: (() => { const tpl = templates.find((x) => x.id === pendingDelete); return tpl ? labelFor(tpl) : '' })()
+              })}
+            </p>
+            <div className="design-delete-modal-actions">
+              <Button secondary onClick={() => { setPendingDelete(null) }} data-testid="design-code-remove-cancel">
+                {t('sidebar.deleteConfirm.cancel')}
+              </Button>
+              <Button onClick={() => { const id = pendingDelete; setPendingDelete(null); removeTemplate(id) }} data-testid="design-code-remove-confirm">
+                {t('sidebar.deleteConfirm.confirm')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
   )
 }

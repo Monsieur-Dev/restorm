@@ -2289,7 +2289,10 @@
       "extractedTitle": "Datoteke zapisane",
       "openOutput": "Otvori izlaznu mapu",
       "removeConfirm": "Template „{{name}}“ bit će uklonjen iz ovog dizajna (već generirane datoteke na disku ostaju netaknute).",
-      "removeTitle": "Ukloniti ovaj Template?"
+      "removeTitle": "Ukloniti ovaj Template?",
+      "tabs": {
+        "template": "Predložak"
+      }
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2542,6 +2545,23 @@
     },
     "server": {
       "subtitle": "Poslužite ovaj dizajn kao živi mock i pratite svaki poziv."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generiranje koda",
+        "name": "Varijabla",
+        "value": "Vrijednost (Handlebars)",
+        "add": "Dodaj varijablu",
+        "none": "Još nema varijabli — dodajte jednu iz zaglavlja ovog predloška.",
+        "noTemplates": "Odaberite jedan ili više predložaka u odjeljku „</> Code“ — ovdje ćete zatim definirati varijable korištene pri generiranju.",
+        "generalTitle": "Opće varijable",
+        "scope": {
+          "general": "Općenito"
+        },
+        "discover": "Otkrij varijable koje ovaj predložak koristi",
+        "undeclared": "Korištene, ali nedeklarirane: {{names}}",
+        "allDeclared": "Sve varijable koje ovaj predložak koristi su deklarirane."
+      }
     }
   },
   "mqtt": {

@@ -2291,7 +2291,10 @@
       "openOutput": "Open the output folder",
       "extractedTitle": "Files written",
       "removeTitle": "Remove this template?",
-      "removeConfirm": "The template “{{name}}” will be removed from this design (generated files on disk are left untouched)."
+      "removeConfirm": "The template “{{name}}” will be removed from this design (generated files on disk are left untouched).",
+      "tabs": {
+        "template": "Template"
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2568,6 +2571,23 @@
     },
     "descriptors": {
       "copy": "Copy the URL"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Code generation",
+        "name": "Variable",
+        "value": "Value (Handlebars)",
+        "add": "Add a variable",
+        "none": "No variables yet — add one from this template’s header.",
+        "noTemplates": "Choose one or more templates in the “</> Code” section — you’ll then define the variables used by generation here.",
+        "generalTitle": "General variables",
+        "scope": {
+          "general": "General"
+        },
+        "discover": "Discover the variables this template uses",
+        "undeclared": "Used but not declared: {{names}}",
+        "allDeclared": "Every variable this template uses is declared."
+      }
     }
   },
   "mqtt": {
@@ -2771,7 +2791,10 @@
     "exportDesign": "Export a design descriptor",
     "generateDesignCode": "Generate code from a design",
     "getDesignTemplateContract": "Get the code-template contract",
-    "setDesignTemplates": "Set a design's code templates"
+    "setDesignTemplates": "Set a design's code templates",
+    "setDesignTemplateVariables": "Set a template's global codegen variables",
+    "setDesignModelVariables": "Set a model's codegen overrides",
+    "setDesignRouteVariables": "Set a route's codegen overrides"
   },
   "odataFilter": {
     "detail": {

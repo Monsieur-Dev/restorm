@@ -7,6 +7,7 @@
  */
 
 import type { ApiDesign, DesignModel, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
+import type { TemplateVariableScope, TemplateVarValues } from '../../../../shared/design/templateVariables'
 
 export function assignDesignSection<K extends keyof ApiDesign>(design: ApiDesign, key: K, value: ApiDesign[K]): void {
   design[key] = value
@@ -32,6 +33,31 @@ export function replaceRoute(design: ApiDesign, groupId: string, routeId: string
   assignDesignSection(design, 'routeGroups', design.routeGroups.map((g) => (
     g.id === groupId ? { ...g, routes: g.routes.map((r) => (r.id === routeId ? next : r)) } : g
   )))
+}
+
+/**
+ * Set a template's GLOBAL variable values for one scope (the "Variables
+ * générales" master-detail): `design.codegen.templates[id].variables[scope]`.
+ * Empty scopes are pruned, and an empty `variables` object is dropped entirely,
+ * so the persisted design stays free of `{}` cruft.
+ */
+export function setTemplateScopeVariables(
+  design: ApiDesign,
+  templateId: string,
+  scope: TemplateVariableScope,
+  values: Record<string, string>
+): void {
+  const templates = (design.codegen?.templates ?? []).map((template) => {
+    if (template.id !== templateId) return template
+    const nextVars: TemplateVarValues = {}
+    for (const s of ['project', 'model', 'route'] as const) {
+      const v = s === scope ? values : template.variables?.[s]
+      if (v !== undefined && Object.keys(v).length > 0) nextVars[s] = v
+    }
+    const { variables: _dropped, ...rest } = template
+    return Object.keys(nextVars).length > 0 ? { ...rest, variables: nextVars } : rest
+  })
+  assignDesignSection(design, 'codegen', { ...design.codegen, templates })
 }
 
 /** A name of the form `base`, `base2`, `base3`… unused by any model or

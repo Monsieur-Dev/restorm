@@ -2287,7 +2287,10 @@
       "extractedTitle": "Đã ghi tệp",
       "openOutput": "Mở thư mục đầu ra",
       "removeConfirm": "Template “{{name}}” sẽ bị xóa khỏi thiết kế này (các tệp đã tạo trên đĩa vẫn được giữ nguyên).",
-      "removeTitle": "Xóa Template này?"
+      "removeTitle": "Xóa Template này?",
+      "tabs": {
+        "template": "Mẫu"
+      }
     },
     "statusbar": {
       "format": "thiết kế · định dạng {{version}}"
@@ -2540,6 +2543,23 @@
     },
     "server": {
       "subtitle": "Phục vụ thiết kế này như một mock trực tiếp và theo dõi mọi lệnh gọi."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Tạo mã",
+        "name": "Biến",
+        "value": "Giá trị (Handlebars)",
+        "add": "Thêm biến",
+        "none": "Chưa có biến nào — thêm một biến từ tiêu đề của mẫu này.",
+        "noTemplates": "Chọn một hoặc nhiều mẫu trong phần “</> Code” — sau đó bạn sẽ định nghĩa tại đây các biến dùng cho việc tạo mã.",
+        "generalTitle": "Biến chung",
+        "scope": {
+          "general": "Chung"
+        },
+        "discover": "Khám phá các biến mà mẫu này sử dụng",
+        "undeclared": "Được dùng nhưng chưa khai báo: {{names}}",
+        "allDeclared": "Mọi biến mà mẫu này sử dụng đều đã được khai báo."
+      }
     }
   },
   "mqtt": {

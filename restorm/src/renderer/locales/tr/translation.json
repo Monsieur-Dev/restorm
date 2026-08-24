@@ -2288,7 +2288,10 @@
       "extractedTitle": "Dosyalar yazıldı",
       "openOutput": "Çıktı klasörünü aç",
       "removeConfirm": "“{{name}}” Template’i bu tasarımdan kaldırılacak (diskte önceden oluşturulan dosyalara dokunulmaz).",
-      "removeTitle": "Bu Template kaldırılsın mı?"
+      "removeTitle": "Bu Template kaldırılsın mı?",
+      "tabs": {
+        "template": "Şablon"
+      }
     },
     "statusbar": {
       "format": "tasarım · biçim {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Bu tasarımı canlı bir mock olarak sun ve her çağrıyı izle."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kod üretimi",
+        "name": "Değişken",
+        "value": "Değer (Handlebars)",
+        "add": "Değişken ekle",
+        "none": "Henüz değişken yok — bu şablonun başlığından ekleyin.",
+        "noTemplates": "“</> Code” bölümünde bir veya daha fazla şablon seçin — ardından üretimde kullanılan değişkenleri burada tanımlarsınız.",
+        "generalTitle": "Genel değişkenler",
+        "scope": {
+          "general": "Genel"
+        },
+        "discover": "Bu şablonun kullandığı değişkenleri keşfet",
+        "undeclared": "Kullanılan ama bildirilmeyen: {{names}}",
+        "allDeclared": "Bu şablonun kullandığı her değişken bildirildi."
+      }
     }
   },
   "mqtt": {

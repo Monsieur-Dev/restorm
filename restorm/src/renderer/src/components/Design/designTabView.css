@@ -1416,3 +1416,42 @@
   height: 320px;
   border-top: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
 }
+
+/* ── Code-generation variables (per-entity tabs + Variables générales) ── */
+.design-codegen-vars-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 2px 12px;
+}
+.design-codegen-vars-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  text-align: center;
+  color: var(--descriptionForeground, var(--foreground));
+  opacity: 0.85;
+}
+.design-codegen-vars-empty-state p {
+  max-width: 46ch;
+  margin: 0;
+  line-height: 1.55;
+}
+.design-codegen-vars-pane .static-pane-body {
+  padding: 10px 12px;
+}
+/* The "Variables générales" master-detail reuses the entity list/detail layout;
+   the detail side scrolls its per-template panes. */
+.design-codegen-general .design-entity-detail {
+  overflow: auto;
+  padding: 12px 14px;
+}
+
+.design-codegen-vars-discovery {
+  margin: 8px 2px 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--descriptionForeground, var(--foreground));
+  opacity: 0.9;
+}

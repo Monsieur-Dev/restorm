@@ -2288,7 +2288,10 @@
       "extractedTitle": "Skedarët u shkruan",
       "openOutput": "Hap dosjen e daljes",
       "removeConfirm": "Template «{{name}}» do të hiqet nga ky dizajn (skedarët tashmë të gjeneruar në disk mbeten të paprekur).",
-      "removeTitle": "Të hiqet ky Template?"
+      "removeTitle": "Të hiqet ky Template?",
+      "tabs": {
+        "template": "Shablloni"
+      }
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Shërbeje këtë dizajn si një mock live dhe ndiq çdo thirrje."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Gjenerimi i kodit",
+        "name": "Variabël",
+        "value": "Vlera (Handlebars)",
+        "add": "Shto një variabël",
+        "none": "Ende asnjë variabël — shtoni një nga kreu i këtij shablloni.",
+        "noTemplates": "Zgjidhni një ose më shumë shabllone në seksionin «</> Code» — pastaj do të përcaktoni këtu variablat e përdorura nga gjenerimi.",
+        "generalTitle": "Variabla të përgjithshme",
+        "scope": {
+          "general": "Të përgjithshme"
+        },
+        "discover": "Zbulo variablat që përdor ky shabllon",
+        "undeclared": "Të përdorura por të padeklaruara: {{names}}",
+        "allDeclared": "Të gjitha variablat që përdor ky shabllon janë të deklaruara."
+      }
     }
   },
   "mqtt": {

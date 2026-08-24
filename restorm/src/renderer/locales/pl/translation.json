@@ -2290,7 +2290,10 @@
       "extractedTitle": "Pliki zapisane",
       "openOutput": "Otwórz folder wyjściowy",
       "removeConfirm": "Template „{{name}}“ zostanie usunięty z tego projektu (już wygenerowane pliki na dysku pozostaną nienaruszone).",
-      "removeTitle": "Usunąć ten Template?"
+      "removeTitle": "Usunąć ten Template?",
+      "tabs": {
+        "template": "Szablon"
+      }
     },
     "statusbar": {
       "format": "projekt API · format {{version}}"
@@ -2543,6 +2546,23 @@
     },
     "server": {
       "subtitle": "Serwuj ten projekt jako aktywny mock i obserwuj każde wywołanie."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generowanie kodu",
+        "name": "Zmienna",
+        "value": "Wartość (Handlebars)",
+        "add": "Dodaj zmienną",
+        "none": "Brak zmiennych — dodaj jedną z nagłówka tego szablonu.",
+        "noTemplates": "Wybierz jeden lub więcej szablonów w sekcji „</> Code” — tutaj zdefiniujesz zmienne używane podczas generowania.",
+        "generalTitle": "Zmienne ogólne",
+        "scope": {
+          "general": "Ogólne"
+        },
+        "discover": "Wykryj zmienne używane przez ten szablon",
+        "undeclared": "Używane, ale niezadeklarowane: {{names}}",
+        "allDeclared": "Wszystkie zmienne używane przez ten szablon są zadeklarowane."
+      }
     }
   },
   "mqtt": {

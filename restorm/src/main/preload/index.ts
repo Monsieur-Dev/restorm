@@ -1445,6 +1445,22 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('design-codegen:generate', design, source, answers)
       return result as { success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }
     },
+    /** The variables a template DECLARES in its manifest — for the design's
+     * variable editors to pre-fill (cached per source in the main process). */
+    getVariables: async (
+      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:variables', source)
+      return result as { success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }
+    },
+    /** DISCOVERY: the variable names a template's files actually reference —
+     * acquires the whole template (cached), for flagging undeclared-but-used. */
+    getUsedVariables: async (
+      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; used?: string[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:used-variables', source)
+      return result as { success: boolean; used?: string[]; error?: string }
+    },
     /** Write the pending generation under the confirmed folder
      * (relative resolves against the project file). */
     extract: async (designId: string, outputDir: string): Promise<{ success: boolean; root?: string; written?: string[]; error?: string }> => {

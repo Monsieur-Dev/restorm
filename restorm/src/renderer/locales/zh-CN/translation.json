@@ -2287,7 +2287,10 @@
       "extractedTitle": "已写入文件",
       "openOutput": "打开输出文件夹",
       "removeConfirm": "Template“{{name}}”将从此设计中移除（磁盘上已生成的文件保持不变）。",
-      "removeTitle": "移除此 Template？"
+      "removeTitle": "移除此 Template？",
+      "tabs": {
+        "template": "模板"
+      }
     },
     "statusbar": {
       "format": "设计 · 格式 {{version}}"
@@ -2540,6 +2543,23 @@
     },
     "server": {
       "subtitle": "将此设计作为实时模拟提供，并观察每次调用。"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "代码生成",
+        "name": "变量",
+        "value": "值 (Handlebars)",
+        "add": "添加变量",
+        "none": "暂无变量 — 从该模板的标题栏添加一个。",
+        "noTemplates": "在“</> Code”部分选择一个或多个模板 — 然后在此定义生成所用的变量。",
+        "generalTitle": "常规变量",
+        "scope": {
+          "general": "常规"
+        },
+        "discover": "发现此模板使用的变量",
+        "undeclared": "已使用但未声明：{{names}}",
+        "allDeclared": "此模板使用的每个变量都已声明。"
+      }
     }
   },
   "mqtt": {

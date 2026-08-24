@@ -2288,7 +2288,10 @@
       "extractedTitle": "Fájlok kiírva",
       "openOutput": "Kimeneti mappa megnyitása",
       "removeConfirm": "A(z) „{{name}}“ Template eltávolításra kerül erről a tervről (a lemezen már legenerált fájlok érintetlenül maradnak).",
-      "removeTitle": "Eltávolítja ezt a Template-et?"
+      "removeTitle": "Eltávolítja ezt a Template-et?",
+      "tabs": {
+        "template": "Sablon"
+      }
     },
     "statusbar": {
       "format": "terv · formátum {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Szolgálja ki ezt a tervet élő mockként, és figyelje minden hívást."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kódgenerálás",
+        "name": "Változó",
+        "value": "Érték (Handlebars)",
+        "add": "Változó hozzáadása",
+        "none": "Még nincsenek változók — adjon hozzá egyet a sablon fejlécéből.",
+        "noTemplates": "Válasszon egy vagy több sablont a „</> Code” szakaszban — itt adhatja meg a generálás során használt változókat.",
+        "generalTitle": "Általános változók",
+        "scope": {
+          "general": "Általános"
+        },
+        "discover": "A sablon által használt változók felderítése",
+        "undeclared": "Használt, de nem deklarált: {{names}}",
+        "allDeclared": "A sablon által használt összes változó deklarált."
+      }
     }
   },
   "mqtt": {

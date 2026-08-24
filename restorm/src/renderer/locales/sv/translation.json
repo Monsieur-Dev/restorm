@@ -2288,7 +2288,10 @@
       "extractedTitle": "Filer skrivna",
       "openOutput": "Öppna utdatamappen",
       "removeConfirm": "Template ”{{name}}” tas bort från den här designen (redan genererade filer på disken lämnas orörda).",
-      "removeTitle": "Ta bort detta Template?"
+      "removeTitle": "Ta bort detta Template?",
+      "tabs": {
+        "template": "Mall"
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Servera den här designen som en live-mock och följ varje anrop."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kodgenerering",
+        "name": "Variabel",
+        "value": "Värde (Handlebars)",
+        "add": "Lägg till en variabel",
+        "none": "Inga variabler ännu — lägg till en från den här mallens rubrik.",
+        "noTemplates": "Välj en eller flera mallar i avsnittet ”</> Code” — här definierar du sedan variablerna som används vid generering.",
+        "generalTitle": "Allmänna variabler",
+        "scope": {
+          "general": "Allmänt"
+        },
+        "discover": "Upptäck variablerna som den här mallen använder",
+        "undeclared": "Använda men inte deklarerade: {{names}}",
+        "allDeclared": "Alla variabler som den här mallen använder är deklarerade."
+      }
     }
   },
   "mqtt": {

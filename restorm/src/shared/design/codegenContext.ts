@@ -23,10 +23,34 @@ import type {
 import { composeRoutePath, groupChainBasePath } from './apiDesignDoc'
 import { routePathParams } from './designRoutes'
 import { effectiveAuth } from './designServing'
+import {
+  resolveScopeVars,
+  type TemplateVariableDecl,
+  type TemplateVarValues,
+  type CodegenVarError
+} from './templateVariables'
 
 /** Bump ONLY with a documented migration note — template manifests
  * pin the versions they understand. */
 export const CODEGEN_CONTEXT_VERSION = 1
+
+/**
+ * Everything needed to resolve a template's user-declared variables into the
+ * context, injected into {@link buildCodegenContext}. Absent → the context
+ * carries no `vars` (existing behaviour). The Handlebars `evaluate` is injected
+ * so this shared module stays engine-free; `errors` is appended to in place and
+ * surfaced to the user (never thrown).
+ */
+export interface CodegenVarsBinding {
+  decls: readonly TemplateVariableDecl[]
+  /** Global values (per template), one map per scope. */
+  values?: TemplateVarValues
+  /** Per-entity override lookups (this design's stored values for the template). */
+  modelOverrides?: (modelId: string) => Record<string, string> | undefined
+  routeOverrides?: (routeId: string) => Record<string, string> | undefined
+  evaluate: (expression: string, context: Record<string, unknown>) => string
+  errors: CodegenVarError[]
+}
 
 export interface CodegenContext {
   contextVersion: number
@@ -36,6 +60,9 @@ export interface CodegenContext {
     description?: string
     basePath?: string
     defaultAuth: string
+    /** Resolved PROJECT-scope user variables a custom template declared in its
+     * manifest (`ctx.design.vars.<name>`). Absent when the template declares none. */
+    vars?: Record<string, unknown>
   }
   enums: CodegenEnum[]
   models: CodegenModel[]
@@ -91,6 +118,9 @@ export interface CodegenModel {
    * full request/response bodies — so inherited fields are never dropped. */
   allProperties: CodegenProperty[]
   examples: { name: string; values: Record<string, unknown> }[]
+  /** Resolved MODEL-scope user variables (`ctx.models[].vars.<name>`), evaluated
+   * per model. Absent when the template declares none. */
+  vars?: Record<string, unknown>
 }
 
 export interface CodegenRouteResponse {
@@ -122,6 +152,9 @@ export interface CodegenRoute {
   idempotent?: boolean
   cacheSeconds?: number
   deprecated?: boolean
+  /** Resolved ROUTE-scope user variables (`ctx.groups[].routes[].vars.<name>`),
+   * evaluated per route. Absent when the template declares none. */
+  vars?: Record<string, unknown>
 }
 
 export interface CodegenGroup {
@@ -191,7 +224,12 @@ function projectProperty(design: ApiDesign, property: DesignModel['properties'][
   return out
 }
 
-function projectModel(design: ApiDesign, model: DesignModel): CodegenModel {
+function projectModel(
+  design: ApiDesign,
+  model: DesignModel,
+  binding?: CodegenVarsBinding,
+  designCtx?: CodegenContext['design']
+): CodegenModel {
   const identifierId = model.design?.identifier?.propertyId
   const identifierName = identifierId !== undefined
     ? model.properties.find((p) => p.id === identifierId)?.doc.name
@@ -231,10 +269,30 @@ function projectModel(design: ApiDesign, model: DesignModel): CodegenModel {
   if (model.design?.timestamps === true) out.timestamps = true
   if (model.design?.softDelete === true) out.softDelete = true
   if (model.intents?.volumetry !== undefined) out.volumetry = model.intents.volumetry
+  if (binding !== undefined && designCtx !== undefined) {
+    const resolved = resolveScopeVars({
+      decls: binding.decls,
+      scope: 'model',
+      global: binding.values?.model,
+      overrides: binding.modelOverrides?.(model.id),
+      evalContext: { design: designCtx, model: out },
+      entity: model.doc.name,
+      evaluate: binding.evaluate
+    })
+    binding.errors.push(...resolved.errors)
+    if (Object.keys(resolved.values).length > 0) out.vars = resolved.values
+  }
   return out
 }
 
-function projectRoute(design: ApiDesign, group: DesignRouteGroup, route: DesignRoute): CodegenRoute {
+function projectRoute(
+  design: ApiDesign,
+  group: DesignRouteGroup,
+  route: DesignRoute,
+  binding?: CodegenVarsBinding,
+  designCtx?: CodegenContext['design'],
+  groupCtx?: Omit<CodegenGroup, 'routes'>
+): CodegenRoute {
   const meta = route.design
   const fullPattern = composeRoutePath({
     ...(design.server?.basePath !== undefined ? { designBasePath: design.server.basePath } : {}),
@@ -295,21 +353,86 @@ function projectRoute(design: ApiDesign, group: DesignRouteGroup, route: DesignR
   if (meta?.idempotent === true) out.idempotent = true
   if (typeof meta?.cacheSeconds === 'number' && meta.cacheSeconds > 0) out.cacheSeconds = meta.cacheSeconds
   if (route.doc.deprecated === true) out.deprecated = true
+  if (binding !== undefined && designCtx !== undefined) {
+    const resolved = resolveScopeVars({
+      decls: binding.decls,
+      scope: 'route',
+      global: binding.values?.route,
+      overrides: binding.routeOverrides?.(route.id),
+      evalContext: { design: designCtx, ...(groupCtx !== undefined ? { group: groupCtx } : {}), route: out },
+      entity: route.doc.summary ?? out.fullPath,
+      evaluate: binding.evaluate
+    })
+    binding.errors.push(...resolved.errors)
+    if (Object.keys(resolved.values).length > 0) out.vars = resolved.values
+  }
+  return out
+}
+
+/** The `design` slice of the context — shared by the full builder and the
+ * per-entity eval-context helper. */
+function designContext(design: ApiDesign): CodegenContext['design'] {
+  return {
+    name: design.info.title !== '' ? design.info.title : design.name,
+    ...(design.info.version !== undefined ? { version: design.info.version } : {}),
+    ...(design.info.description !== undefined ? { description: design.info.description } : {}),
+    ...(design.server?.basePath !== undefined ? { basePath: design.server.basePath } : {}),
+    defaultAuth: design.defaultAuth ?? 'none'
+  }
+}
+
+/**
+ * The Handlebars eval-context slice a variable's expression is evaluated
+ * against for one entity — and, flattened, exactly the set of contextual
+ * variables the value editor should offer. `{design}` for project scope,
+ * `{design, model}` for a model, `{design, group, route}` for a route.
+ */
+export function codegenEvalContext(
+  design: ApiDesign,
+  entity: { model?: DesignModel; group?: DesignRouteGroup; route?: DesignRoute }
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { design: designContext(design) }
+  if (entity.model !== undefined) out['model'] = projectModel(design, entity.model)
+  if (entity.group !== undefined && entity.route !== undefined) {
+    const group: CodegenGroup = {
+      name: entity.group.doc.name,
+      headers: (entity.group.design?.headers ?? []).map((h) => ({
+        name: h.name,
+        ...(h.example !== undefined ? { example: h.example } : {}),
+        ...(h.description !== undefined ? { description: h.description } : {})
+      })),
+      routes: []
+    }
+    if (entity.group.doc.description !== undefined) group.description = entity.group.doc.description
+    if (entity.group.design?.basePath !== undefined) group.basePath = entity.group.design.basePath
+    if (entity.group.design?.versionPrefix !== undefined) group.versionPrefix = entity.group.design.versionPrefix
+    const { routes: _routes, ...groupCtx } = group
+    out['group'] = groupCtx
+    out['route'] = projectRoute(design, entity.group, entity.route)
+  }
   return out
 }
 
 /** Build the template context from a design — deterministic, complete,
- * and free of internal ids. */
-export function buildCodegenContext(design: ApiDesign): CodegenContext {
+ * and free of internal ids. Pass `binding` to also resolve a template's
+ * user-declared variables into `ctx.*.vars` (see {@link CodegenVarsBinding}). */
+export function buildCodegenContext(design: ApiDesign, binding?: CodegenVarsBinding): CodegenContext {
+  const designCtx: CodegenContext['design'] = designContext(design)
+  // Project-scope variables resolve once, against the design context.
+  if (binding !== undefined) {
+    const resolved = resolveScopeVars({
+      decls: binding.decls,
+      scope: 'project',
+      global: binding.values?.project,
+      evalContext: { design: designCtx },
+      evaluate: binding.evaluate
+    })
+    binding.errors.push(...resolved.errors)
+    if (Object.keys(resolved.values).length > 0) designCtx.vars = resolved.values
+  }
   return {
     contextVersion: CODEGEN_CONTEXT_VERSION,
-    design: {
-      name: design.info.title !== '' ? design.info.title : design.name,
-      ...(design.info.version !== undefined ? { version: design.info.version } : {}),
-      ...(design.info.description !== undefined ? { description: design.info.description } : {}),
-      ...(design.server?.basePath !== undefined ? { basePath: design.server.basePath } : {}),
-      defaultAuth: design.defaultAuth ?? 'none'
-    },
+    design: designCtx,
     enums: design.enums
       .filter((e) => (e.doc.enumValues ?? []).length > 0)
       .map((e) => ({
@@ -317,7 +440,7 @@ export function buildCodegenContext(design: ApiDesign): CodegenContext {
         ...(e.doc.description !== undefined ? { description: e.doc.description } : {}),
         values: (e.doc.enumValues ?? []).map((v) => (typeof v === 'number' ? v : String(v)))
       })),
-    models: design.models.map((m) => projectModel(design, m)),
+    models: design.models.map((m) => projectModel(design, m, binding, designCtx)),
     groups: design.routeGroups.map((group) => {
       const out: CodegenGroup = {
         name: group.doc.name,
@@ -326,11 +449,15 @@ export function buildCodegenContext(design: ApiDesign): CodegenContext {
           ...(h.example !== undefined ? { example: h.example } : {}),
           ...(h.description !== undefined ? { description: h.description } : {})
         })),
-        routes: group.routes.map((route) => projectRoute(design, group, route))
+        routes: []
       }
       if (group.doc.description !== undefined) out.description = group.doc.description
       if (group.design?.basePath !== undefined) out.basePath = group.design.basePath
       if (group.design?.versionPrefix !== undefined) out.versionPrefix = group.design.versionPrefix
+      // Routes project AFTER the group's own fields so route-scope variables can
+      // read `group.*` in their eval context.
+      const { routes: _routes, ...groupCtx } = out
+      out.routes = group.routes.map((route) => projectRoute(design, group, route, binding, designCtx, groupCtx))
       return out
     })
   }

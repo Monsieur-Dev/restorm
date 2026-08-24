@@ -2287,7 +2287,10 @@
       "extractedTitle": "已寫入檔案",
       "openOutput": "開啟輸出資料夾",
       "removeConfirm": "Template「{{name}}」將從此設計中移除（磁碟上已產生的檔案維持不變）。",
-      "removeTitle": "移除此 Template？"
+      "removeTitle": "移除此 Template？",
+      "tabs": {
+        "template": "範本"
+      }
     },
     "statusbar": {
       "format": "設計 · 格式 {{version}}"
@@ -2540,6 +2543,23 @@
     },
     "server": {
       "subtitle": "將此設計作為即時模擬提供，並觀察每次呼叫。"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "程式碼產生",
+        "name": "變數",
+        "value": "值 (Handlebars)",
+        "add": "新增變數",
+        "none": "尚無變數 — 從此範本的標題列新增一個。",
+        "noTemplates": "在「</> Code」區段選擇一個或多個範本 — 接著在此定義產生時使用的變數。",
+        "generalTitle": "一般變數",
+        "scope": {
+          "general": "一般"
+        },
+        "discover": "探索此範本使用的變數",
+        "undeclared": "已使用但未宣告：{{names}}",
+        "allDeclared": "此範本使用的每個變數都已宣告。"
+      }
     }
   },
   "mqtt": {

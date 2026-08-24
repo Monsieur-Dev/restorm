@@ -24,6 +24,8 @@ import { withFirewallBypass } from 'electron-core-ui'
 import { httpGetBytes } from '../../scenarioEngine/codeRuntimes/depsInstaller'
 import { validateAgainstSchema } from '../../../shared/schemaValidate'
 import { CODEGEN_CONTEXT_VERSION } from '../../../shared/design/codegenContext'
+import type { TemplateVariableDecl } from '../../../shared/design/templateVariables'
+export type { TemplateVariableDecl, TemplateVariableScope, TemplateVariableType } from '../../../shared/design/templateVariables'
 import { assertSafeRelativePath, type GeneratedFile } from './extractTree'
 
 // ── Official registry ─────────────────────────────────────────────────
@@ -87,6 +89,8 @@ export interface TemplateManifest {
   type: 'server' | 'db'
   language: string
   contextVersions: number[]
+  /** User variables the template exposes for code generation (optional). */
+  variables?: TemplateVariableDecl[]
 }
 
 export const MANIFEST_SCHEMA = JSON.stringify({
@@ -97,7 +101,23 @@ export const MANIFEST_SCHEMA = JSON.stringify({
     name: { type: 'string', minLength: 1 },
     type: { enum: ['server', 'db'] },
     language: { type: 'string', minLength: 1 },
-    contextVersions: { type: 'array', items: { type: 'integer' }, minItems: 1 }
+    contextVersions: { type: 'array', items: { type: 'integer' }, minItems: 1 },
+    variables: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['name', 'scope', 'type'],
+        properties: {
+          name: { type: 'string', minLength: 1 },
+          scope: { enum: ['project', 'model', 'route'] },
+          type: { enum: ['string', 'boolean', 'number', 'enum'] },
+          options: { type: 'array', items: { type: 'string' } },
+          default: { type: 'string' },
+          description: { type: 'string' }
+        },
+        additionalProperties: true
+      }
+    }
   },
   additionalProperties: true
 })
@@ -180,6 +200,66 @@ export function templateArchiveUrl(repo: string, ref = 'main'): string {
     throw new Error(`not a github repository reference: ${repo}`)
   }
   return `https://codeload.github.com/${cleaned}/tar.gz/refs/heads/${ref}`
+}
+
+/** `owner/repo` (or a full github URL) → the raw URL of its ROOT manifest. */
+export function rawManifestUrl(repo: string, ref = 'main'): string {
+  const cleaned = repo
+    .replace(/^https?:\/\/github\.com\//, '')
+    .replace(/\.git$/, '')
+    .replace(/\/+$/, '')
+  if (!/^[\w.-]+\/[\w.-]+$/.test(cleaned)) {
+    throw new Error(`not a github repository reference: ${repo}`)
+  }
+  return `https://raw.githubusercontent.com/${cleaned}/${ref}/restorm-template.json`
+}
+
+/** Extract just the DECLARED variables from a manifest's JSON text — a lenient
+ * parse for the variable editors' pre-fill (no context-version enforcement,
+ * which only matters at generation time). */
+export function readManifestVariables(text: string): TemplateVariableDecl[] {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    throw new Error('restorm-template.json is not valid JSON')
+  }
+  const result = validateAgainstSchema(parsed, MANIFEST_SCHEMA)
+  if (!result.valid) {
+    throw new Error(`restorm-template.json is invalid: ${result.errors.join('; ')}`)
+  }
+  return (parsed as TemplateManifest).variables ?? []
+}
+
+/** The declared variables of a LOCAL template — reads only its manifest file. */
+export function readLocalManifestVariables(path: string): TemplateVariableDecl[] {
+  return readManifestVariables(readFileSync(join(path, 'restorm-template.json'), 'utf-8'))
+}
+
+/** The declared variables of a REMOTE template — fetches ONLY the manifest file
+ * (not the whole tarball), over the firewall bypass. */
+export async function fetchRemoteManifestVariables(repo: string, ref = 'main'): Promise<TemplateVariableDecl[]> {
+  const bytes = await withFirewallBypass(() => httpGetBytes(rawManifestUrl(repo, ref)))
+  return readManifestVariables(Buffer.from(bytes).toString('utf-8'))
+}
+
+/**
+ * DISCOVERY (the introspection "filet"): the user-variable names a template's
+ * text ACTUALLY references — every `.vars.<name>` (dot) and `.vars['<name>']`
+ * (bracket) access across its Jinja files, whatever object it hangs off
+ * (`ctx.design`, a `{% for m in ctx.models %}` loop var, `route`…). A heuristic
+ * regex, not a full Jinja AST, but it catches the standard access patterns; the
+ * UI reconciles the result with the DECLARED variables to flag undeclared ones.
+ */
+const VAR_ACCESS_RE = /\.vars\.([A-Za-z_]\w*)|\.vars\[\s*['"]([^'"\]]+)['"]\s*\]/g
+export function scanUsedVariables(text: string): string[] {
+  const names = new Set<string>()
+  let match: RegExpExecArray | null
+  while ((match = VAR_ACCESS_RE.exec(text)) !== null) {
+    const name = match[1] ?? match[2]
+    if (name !== undefined && name !== '') names.add(name)
+  }
+  return [...names].sort()
 }
 
 /** Sources (a)+(b): fetch a repository tarball and read the template

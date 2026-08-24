@@ -2287,7 +2287,10 @@
       "extractedTitle": "ファイルを書き込みました",
       "openOutput": "出力フォルダーを開く",
       "removeConfirm": "Template「{{name}}」がこのデザインから削除されます（ディスク上に生成済みのファイルはそのまま残ります）。",
-      "removeTitle": "この Template を削除しますか？"
+      "removeTitle": "この Template を削除しますか？",
+      "tabs": {
+        "template": "テンプレート"
+      }
     },
     "statusbar": {
       "format": "デザイン · フォーマット {{version}}"
@@ -2540,6 +2543,23 @@
     },
     "server": {
       "subtitle": "このデザインをライブモックとして配信し、すべての呼び出しを監視します。"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "コード生成",
+        "name": "変数",
+        "value": "値 (Handlebars)",
+        "add": "変数を追加",
+        "none": "まだ変数がありません — このテンプレートのヘッダーから追加してください。",
+        "noTemplates": "「</> Code」セクションで 1 つ以上のテンプレートを選択すると、生成で使う変数をここで定義できます。",
+        "generalTitle": "全般変数",
+        "scope": {
+          "general": "全般"
+        },
+        "discover": "このテンプレートが使う変数を検出",
+        "undeclared": "使用されているが未宣言: {{names}}",
+        "allDeclared": "このテンプレートが使うすべての変数は宣言済みです。"
+      }
     }
   },
   "mqtt": {

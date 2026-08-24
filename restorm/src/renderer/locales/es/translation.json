@@ -2288,7 +2288,10 @@
       "extractedTitle": "Archivos escritos",
       "openOutput": "Abrir la carpeta de salida",
       "removeConfirm": "El Template «{{name}}» se eliminará de este diseño (los archivos ya generados en el disco no se modifican).",
-      "removeTitle": "¿Eliminar este Template?"
+      "removeTitle": "¿Eliminar este Template?",
+      "tabs": {
+        "template": "Plantilla"
+      }
     },
     "statusbar": {
       "format": "diseño · formato {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Sirve este diseño como un mock en vivo y observa cada llamada."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generación de código",
+        "name": "Variable",
+        "value": "Valor (Handlebars)",
+        "add": "Añadir una variable",
+        "none": "Aún no hay variables: añade una desde la cabecera de esta plantilla.",
+        "noTemplates": "Elige una o varias plantillas en la sección «</> Code»: aquí definirás después las variables usadas por la generación.",
+        "generalTitle": "Variables generales",
+        "scope": {
+          "general": "General"
+        },
+        "discover": "Descubrir las variables que usa esta plantilla",
+        "undeclared": "Usadas pero no declaradas: {{names}}",
+        "allDeclared": "Todas las variables que usa esta plantilla están declaradas."
+      }
     }
   },
   "mqtt": {

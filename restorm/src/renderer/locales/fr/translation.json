@@ -2291,7 +2291,10 @@
       "openOutput": "Ouvrir le dossier de sortie",
       "extractedTitle": "Fichiers écrits",
       "removeTitle": "Retirer ce template ?",
-      "removeConfirm": "Le template « {{name}} » sera retiré de ce design (les fichiers déjà générés sur le disque ne sont pas touchés)."
+      "removeConfirm": "Le template « {{name}} » sera retiré de ce design (les fichiers déjà générés sur le disque ne sont pas touchés).",
+      "tabs": {
+        "template": "Modèle"
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2568,6 +2571,23 @@
     },
     "descriptors": {
       "copy": "Copier l'URL"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Génération de code",
+        "name": "Variable",
+        "value": "Valeur (Handlebars)",
+        "add": "Ajouter une variable",
+        "none": "Aucune variable pour l’instant — ajoutez-en une depuis l’en-tête de ce template.",
+        "noTemplates": "Choisissez un ou plusieurs templates dans la section « </> Code » — vous pourrez ensuite définir ici les variables utilisées par la génération.",
+        "generalTitle": "Variables générales",
+        "scope": {
+          "general": "Général"
+        },
+        "discover": "Découvrir les variables utilisées par ce template",
+        "undeclared": "Utilisées mais non déclarées : {{names}}",
+        "allDeclared": "Toutes les variables utilisées par ce template sont déclarées."
+      }
     }
   },
   "mqtt": {
@@ -2771,7 +2791,10 @@
     "exportDesign": "Exporter un descripteur de design",
     "generateDesignCode": "Générer du code depuis un design",
     "getDesignTemplateContract": "Obtenir le contrat des templates de code",
-    "setDesignTemplates": "Définir les templates de code d'un design"
+    "setDesignTemplates": "Définir les templates de code d'un design",
+    "setDesignTemplateVariables": "Définir les variables codegen globales d'un template",
+    "setDesignModelVariables": "Définir les overrides codegen d'un modèle",
+    "setDesignRouteVariables": "Définir les overrides codegen d'une route"
   },
   "odataFilter": {
     "detail": {

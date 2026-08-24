@@ -2287,7 +2287,10 @@
       "extractedTitle": "File ditulis",
       "openOutput": "Buka folder keluaran",
       "removeConfirm": "Template “{{name}}” akan dihapus dari desain ini (file yang sudah dihasilkan di disk tidak diubah).",
-      "removeTitle": "Hapus Template ini?"
+      "removeTitle": "Hapus Template ini?",
+      "tabs": {
+        "template": "Templat"
+      }
     },
     "statusbar": {
       "format": "desain · format {{version}}"
@@ -2540,6 +2543,23 @@
     },
     "server": {
       "subtitle": "Sajikan desain ini sebagai mock langsung dan pantau setiap panggilan."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Pembuatan kode",
+        "name": "Variabel",
+        "value": "Nilai (Handlebars)",
+        "add": "Tambah variabel",
+        "none": "Belum ada variabel — tambahkan satu dari header templat ini.",
+        "noTemplates": "Pilih satu atau beberapa templat di bagian “</> Code” — lalu tentukan variabel yang digunakan pembuatan di sini.",
+        "generalTitle": "Variabel umum",
+        "scope": {
+          "general": "Umum"
+        },
+        "discover": "Temukan variabel yang digunakan templat ini",
+        "undeclared": "Digunakan tetapi tidak dideklarasikan: {{names}}",
+        "allDeclared": "Semua variabel yang digunakan templat ini sudah dideklarasikan."
+      }
     }
   },
   "mqtt": {

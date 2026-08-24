@@ -24,7 +24,8 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         "version": { "type": "string" },
         "description": { "type": "string" },
         "basePath": { "type": "string" },
-        "defaultAuth": { "enum": ["none", "bearer", "apiKeyHeader", "basic"] }
+        "defaultAuth": { "enum": ["none", "bearer", "apiKeyHeader", "basic"] },
+        "vars": { "type": "object", "additionalProperties": true, "description": "Resolved PROJECT-scope user variables a custom template declared in its manifest." }
       },
       "additionalProperties": false
     },
@@ -75,7 +76,8 @@ export const CODEGEN_CONTEXT_SCHEMA = {
               },
               "additionalProperties": false
             }
-          }
+          },
+          "vars": { "type": "object", "additionalProperties": true, "description": "Resolved MODEL-scope user variables (evaluated per model)." }
         },
         "additionalProperties": false
       }
@@ -213,7 +215,8 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         },
         "idempotent": { "const": true },
         "cacheSeconds": { "type": "number" },
-        "deprecated": { "const": true }
+        "deprecated": { "const": true },
+        "vars": { "type": "object", "additionalProperties": true, "description": "Resolved ROUTE-scope user variables (evaluated per route)." }
       },
       "additionalProperties": false
     }

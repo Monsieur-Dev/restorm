@@ -71,7 +71,7 @@ import {
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   designServerStartArgs, designServerStopArgs, designServerStatusArgs,
   designServerSetForcedArgs, designServerUpdateArgs, designExportDescriptorArgs,
-  designCodegenGenerateArgs, designCodegenExtractArgs, designCodegenDiscardArgs, designPickDirectoryArgs,
+  designCodegenGenerateArgs, designCodegenVariablesArgs, designCodegenExtractArgs, designCodegenDiscardArgs, designPickDirectoryArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
@@ -1377,6 +1377,26 @@ export function registerRestormIPC(deps: {
         preview: result.preview,
         log: result.log
       }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // The variables a template DECLARES (for the design's variable editors to
+  // pre-fill). Cached per source in the service.
+  validatedHandle('design-codegen:variables', designCodegenVariablesArgs, async (_event, [source]) => {
+    try {
+      return { success: true, variables: await designCodegenService.getTemplateVariables(source) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // DISCOVERY: the variable names a template's files actually reference (acquires
+  // the whole template, cached). The UI flags undeclared-but-used ones.
+  validatedHandle('design-codegen:used-variables', designCodegenVariablesArgs, async (_event, [source]) => {
+    try {
+      return { success: true, used: await designCodegenService.getTemplateUsedVariables(source) }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }

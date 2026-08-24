@@ -35,6 +35,7 @@ import type {
   DesignCodegenTemplate,
   DesignTemplateSource
 } from '../../../shared/types/apiDesign'
+import type { TemplateVariableScope, TemplateVarValues } from '../../../shared/design/templateVariables'
 import {
   OFFICIAL_TEMPLATES,
   MANIFEST_SCHEMA
@@ -855,14 +856,15 @@ export function registerDesignTools(mcp: McpService): void {
     {
       titleKey: 'mcpToolTitles.createDesignRouteGroup',
       title: 'Create a route group',
-      description: 'Add a route group (base path, version prefix, auth contract) to a design.',
+      description: 'Add a route group (base path, version prefix, auth contract) to a design. Pass `parent` to make it a SUB-GROUP whose composed base path nests under the parent chain.',
       inputSchema: {
         designId: z.string().min(1),
         name: z.string().min(1).describe('Group name (a Swagger tag).'),
         basePath: z.string().optional().describe('Group base path, e.g. /users.'),
         versionPrefix: z.string().optional().describe('e.g. /v1.'),
         auth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional(),
-        description: z.string().optional()
+        description: z.string().optional(),
+        parent: z.string().optional().describe('Parent group id or name — makes this a SUB-GROUP nested under it.')
       } as Record<string, unknown>
     },
     (args) => {
@@ -870,6 +872,12 @@ export function registerDesignTools(mcp: McpService): void {
       if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
       const name = typeof args['name'] === 'string' ? args['name'] : ''
       if (!name) return errorReply('name is required')
+      let parentId: string | undefined
+      if (typeof args['parent'] === 'string' && args['parent'] !== '') {
+        const parent = resolveEntity(design.routeGroups, args['parent'], (g) => g.doc.name, 'route group')
+        if (isResolveError(parent)) return errorReply(parent.error)
+        parentId = parent.id
+      }
       const meta: DesignRouteGroup['design'] = {
         ...(typeof args['basePath'] === 'string' && args['basePath'] !== '' ? { basePath: args['basePath'] } : {}),
         ...(typeof args['versionPrefix'] === 'string' && args['versionPrefix'] !== '' ? { versionPrefix: args['versionPrefix'] } : {}),
@@ -879,11 +887,12 @@ export function registerDesignTools(mcp: McpService): void {
         id: newId(),
         doc: { name, ...(typeof args['description'] === 'string' && args['description'] !== '' ? { description: args['description'] } : {}) },
         ...(Object.keys(meta).length > 0 ? { design: meta } : {}),
+        ...(parentId !== undefined ? { parentId } : {}),
         routes: []
       }
       design.routeGroups = [...design.routeGroups, group]
       writeDesign(design)
-      return jsonReply({ designId: design.id, groupId: group.id, name })
+      return jsonReply({ designId: design.id, groupId: group.id, name, ...(parentId !== undefined ? { parentId } : {}) })
     }
   )
 
@@ -892,7 +901,7 @@ export function registerDesignTools(mcp: McpService): void {
     {
       titleKey: 'mcpToolTitles.updateDesignRouteGroup',
       title: 'Update a route group',
-      description: 'Update a group\'s name, description, base path, version prefix or auth (by id or name).',
+      description: 'Update a group\'s name, description, base path, version prefix or auth (by id or name). Pass `parent` to reparent it (sub-groups): a group id/name to nest under, or an empty string to promote it back to a root group.',
       inputSchema: {
         designId: z.string().min(1),
         group: z.string().min(1).describe('Group id or name.'),
@@ -900,7 +909,8 @@ export function registerDesignTools(mcp: McpService): void {
         description: z.string().optional(),
         basePath: z.string().optional().describe('Empty clears.'),
         versionPrefix: z.string().optional().describe('Empty clears.'),
-        auth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional()
+        auth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional(),
+        parent: z.string().optional().describe('Reparent under this group id or name; empty string promotes to a root group. A group cannot become its own descendant.')
       } as Record<string, unknown>
     },
     (args) => {
@@ -908,6 +918,19 @@ export function registerDesignTools(mcp: McpService): void {
       if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
       const resolved = resolveEntity(design.routeGroups, typeof args['group'] === 'string' ? args['group'] : '', (g) => g.doc.name, 'route group')
       if (isResolveError(resolved)) return errorReply(resolved.error)
+      let reparent: { parentId?: string } | undefined
+      if (typeof args['parent'] === 'string') {
+        if (args['parent'] === '') {
+          reparent = {} // promote to root
+        } else {
+          const parent = resolveEntity(design.routeGroups, args['parent'], (g) => g.doc.name, 'route group')
+          if (isResolveError(parent)) return errorReply(parent.error)
+          if (groupSubtreeIds(design.routeGroups, resolved.id).has(parent.id)) {
+            return errorReply('a group cannot become its own descendant')
+          }
+          reparent = { parentId: parent.id }
+        }
+      }
       const doc = { ...resolved.doc }
       if (typeof args['name'] === 'string' && args['name'] !== '') doc.name = args['name']
       if (typeof args['description'] === 'string') {
@@ -929,9 +952,13 @@ export function registerDesignTools(mcp: McpService): void {
       const next: DesignRouteGroup = { ...resolved, doc }
       if (Object.keys(meta).length > 0) next.design = meta
       else delete next.design
+      if (reparent !== undefined) {
+        if (reparent.parentId !== undefined) next.parentId = reparent.parentId
+        else delete next.parentId
+      }
       design.routeGroups = design.routeGroups.map((g) => (g.id === resolved.id ? next : g))
       writeDesign(design)
-      return jsonReply({ designId: design.id, groupId: resolved.id, name: doc.name })
+      return jsonReply({ designId: design.id, groupId: resolved.id, name: doc.name, ...(next.parentId !== undefined ? { parentId: next.parentId } : {}) })
     }
   )
 
@@ -940,7 +967,7 @@ export function registerDesignTools(mcp: McpService): void {
     {
       titleKey: 'mcpToolTitles.deleteDesignRouteGroup',
       title: 'Delete a route group',
-      description: 'Delete a route group and every route it carries (by id or name).',
+      description: 'Delete a route group and every route it carries (by id or name). Cascades to its SUB-GROUPS (their whole subtree) so none are left orphaned.',
       inputSchema: {
         designId: z.string().min(1),
         group: z.string().min(1).describe('Group id or name.')
@@ -951,9 +978,10 @@ export function registerDesignTools(mcp: McpService): void {
       if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
       const resolved = resolveEntity(design.routeGroups, typeof args['group'] === 'string' ? args['group'] : '', (g) => g.doc.name, 'route group')
       if (isResolveError(resolved)) return errorReply(resolved.error)
-      design.routeGroups = design.routeGroups.filter((g) => g.id !== resolved.id)
+      const doomed = groupSubtreeIds(design.routeGroups, resolved.id)
+      design.routeGroups = design.routeGroups.filter((g) => !doomed.has(g.id))
       writeDesign(design)
-      return jsonReply({ designId: design.id, groupId: resolved.id, deleted: true })
+      return jsonReply({ designId: design.id, groupId: resolved.id, deleted: true, groupsRemoved: doomed.size })
     }
   )
 
@@ -1461,6 +1489,118 @@ export function registerDesignTools(mcp: McpService): void {
   )
 
   mcp.registerTool(
+    'set_design_template_variables',
+    {
+      titleKey: 'mcpToolTitles.setDesignTemplateVariables',
+      title: 'Set a template\'s global codegen variables',
+      description:
+        'Persist a configured template\'s GLOBAL code-generation variable values for one scope ' +
+        '(project / model / route) — the "Variables générales" surface, applied to every entity of the scope. ' +
+        'Values are Handlebars expressions, evaluated per entity at generate time. Replaces that scope\'s map ' +
+        'wholesale; pass an empty object to clear it. Per-entity values (set_design_model_variables / ' +
+        'set_design_route_variables) override these. Read them back from get_design (codegen.templates[].variables).',
+      inputSchema: {
+        designId: z.string().min(1),
+        template: z.string().min(1).describe('Template id or label.'),
+        scope: z.enum(['project', 'model', 'route']),
+        variables: z.record(z.string(), z.string()).describe('Variable name → Handlebars expression. Empty object clears the scope.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const tpl = findTemplate(design, typeof args['template'] === 'string' ? args['template'] : '')
+      if (isResolveError(tpl)) return errorReply(tpl.error)
+      const scope = args['scope'] as TemplateVariableScope
+      const variables = readStringRecord(args['variables'])
+      const nextVars: TemplateVarValues = {}
+      for (const s of ['project', 'model', 'route'] as const) {
+        const v = s === scope ? variables : tpl.variables?.[s]
+        if (v !== undefined && Object.keys(v).length > 0) nextVars[s] = v
+      }
+      if (Object.keys(nextVars).length > 0) tpl.variables = nextVars
+      else delete tpl.variables
+      writeDesign(design)
+      return jsonReply({ designId: design.id, templateId: tpl.id, scope, variables })
+    }
+  )
+
+  mcp.registerTool(
+    'set_design_model_variables',
+    {
+      titleKey: 'mcpToolTitles.setDesignModelVariables',
+      title: 'Set a model\'s codegen variable overrides',
+      description:
+        'Persist a model\'s per-template MODEL-scope code-generation variable overrides — the model\'s ' +
+        '"Génération de code" tab. Values are Handlebars expressions (evaluated for THIS model at generate time) ' +
+        'and override the template\'s global "Models" values. Replaces this model\'s map for the template ' +
+        'wholesale; pass an empty object to clear it (inherit the global).',
+      inputSchema: {
+        designId: z.string().min(1),
+        model: z.string().min(1).describe('Model id or name.'),
+        template: z.string().min(1).describe('Template id or label.'),
+        variables: z.record(z.string(), z.string()).describe('Variable name → Handlebars expression. Empty object inherits the global.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const model = resolveEntity(design.models, typeof args['model'] === 'string' ? args['model'] : '', (m) => m.doc.name, 'model')
+      if (isResolveError(model)) return errorReply(model.error)
+      const tpl = findTemplate(design, typeof args['template'] === 'string' ? args['template'] : '')
+      if (isResolveError(tpl)) return errorReply(tpl.error)
+      const variables = readStringRecord(args['variables'])
+      const { [tpl.id]: _drop, ...rest } = model.design?.codegenVars ?? {}
+      const codegenVars = Object.keys(variables).length === 0 ? rest : { ...rest, [tpl.id]: variables }
+      const nextMeta = { ...(model.design ?? {}) }
+      if (Object.keys(codegenVars).length > 0) nextMeta.codegenVars = codegenVars
+      else delete nextMeta.codegenVars
+      if (Object.keys(nextMeta).length > 0) model.design = nextMeta
+      else delete model.design
+      writeDesign(design)
+      return jsonReply({ designId: design.id, modelId: model.id, templateId: tpl.id, variables })
+    }
+  )
+
+  mcp.registerTool(
+    'set_design_route_variables',
+    {
+      titleKey: 'mcpToolTitles.setDesignRouteVariables',
+      title: 'Set a route\'s codegen variable overrides',
+      description:
+        'Persist a route\'s per-template ROUTE-scope code-generation variable overrides — the route\'s ' +
+        '"Génération de code" tab. Values are Handlebars expressions (evaluated for THIS route at generate time) ' +
+        'and override the template\'s global "Routes" values. Replaces this route\'s map for the template ' +
+        'wholesale; pass an empty object to clear it (inherit the global).',
+      inputSchema: {
+        designId: z.string().min(1),
+        route: z.string().min(1).describe('Route id or summary.'),
+        template: z.string().min(1).describe('Template id or label.'),
+        variables: z.record(z.string(), z.string()).describe('Variable name → Handlebars expression. Empty object inherits the global.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const located = findRoute(design, typeof args['route'] === 'string' ? args['route'] : '')
+      if (isResolveError(located)) return errorReply(located.error)
+      const tpl = findTemplate(design, typeof args['template'] === 'string' ? args['template'] : '')
+      if (isResolveError(tpl)) return errorReply(tpl.error)
+      const route = located.route
+      const variables = readStringRecord(args['variables'])
+      const { [tpl.id]: _drop, ...rest } = route.design?.codegenVars ?? {}
+      const codegenVars = Object.keys(variables).length === 0 ? rest : { ...rest, [tpl.id]: variables }
+      const nextMeta = { ...(route.design ?? {}) }
+      if (Object.keys(codegenVars).length > 0) nextMeta.codegenVars = codegenVars
+      else delete nextMeta.codegenVars
+      if (Object.keys(nextMeta).length > 0) route.design = nextMeta
+      else delete route.design
+      writeDesign(design)
+      return jsonReply({ designId: design.id, routeId: route.id, templateId: tpl.id, variables })
+    }
+  )
+
+  mcp.registerTool(
     'stop_design_server',
     {
       titleKey: 'mcpToolTitles.stopDesignServer',
@@ -1564,4 +1704,35 @@ function findRoute(design: ApiDesign, ref: string): { group: DesignRouteGroup; r
   if (matches.length === 1) return matches[0] as { group: DesignRouteGroup; route: DesignRoute }
   if (matches.length > 1) return { error: `route summary "${ref}" is ambiguous — use the id` }
   return { error: `No route with id or summary "${ref}"` }
+}
+
+/** A group's id plus every descendant's id (following `parentId`), cycle-safe.
+ * Powers the cascade delete and the reparent cycle guard for sub-groups. */
+function groupSubtreeIds(groups: readonly DesignRouteGroup[], rootId: string): Set<string> {
+  const ids = new Set<string>([rootId])
+  let grew = true
+  while (grew) {
+    grew = false
+    for (const g of groups) {
+      if (g.parentId !== undefined && ids.has(g.parentId) && !ids.has(g.id)) { ids.add(g.id); grew = true }
+    }
+  }
+  return ids
+}
+
+/** Resolve a configured code-generation template by id or label. */
+function findTemplate(design: ApiDesign, ref: string): DesignCodegenTemplate | { error: string } {
+  if (ref === '') return { error: 'template is required' }
+  return resolveEntity(design.codegen?.templates ?? [], ref, (t) => t.label ?? '', 'template')
+}
+
+/** Coerce an MCP arg (zod-validated `record(string, string)`) to a plain map. */
+function readStringRecord(value: unknown): Record<string, string> {
+  const out: Record<string, string> = {}
+  if (value !== null && typeof value === 'object') {
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      if (typeof val === 'string') out[key] = val
+    }
+  }
+  return out
 }

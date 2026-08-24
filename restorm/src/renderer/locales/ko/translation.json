@@ -2287,7 +2287,10 @@
       "extractedTitle": "파일 작성됨",
       "openOutput": "출력 폴더 열기",
       "removeConfirm": "Template “{{name}}”이(가) 이 디자인에서 제거됩니다(디스크에 이미 생성된 파일은 그대로 유지됩니다).",
-      "removeTitle": "이 Template을(를) 제거하시겠습니까?"
+      "removeTitle": "이 Template을(를) 제거하시겠습니까?",
+      "tabs": {
+        "template": "템플릿"
+      }
     },
     "statusbar": {
       "format": "디자인 · 포맷 {{version}}"
@@ -2540,6 +2543,23 @@
     },
     "server": {
       "subtitle": "이 디자인을 라이브 목으로 서빙하고 모든 호출을 확인하세요."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "코드 생성",
+        "name": "변수",
+        "value": "값 (Handlebars)",
+        "add": "변수 추가",
+        "none": "아직 변수가 없습니다 — 이 템플릿의 헤더에서 추가하세요.",
+        "noTemplates": "“</> Code” 섹션에서 하나 이상의 템플릿을 선택하면 생성에 사용되는 변수를 여기서 정의할 수 있습니다.",
+        "generalTitle": "일반 변수",
+        "scope": {
+          "general": "일반"
+        },
+        "discover": "이 템플릿이 사용하는 변수 검색",
+        "undeclared": "사용되었지만 선언되지 않음: {{names}}",
+        "allDeclared": "이 템플릿이 사용하는 모든 변수가 선언되어 있습니다."
+      }
     }
   },
   "mqtt": {

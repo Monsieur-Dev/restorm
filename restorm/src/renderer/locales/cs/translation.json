@@ -2290,7 +2290,10 @@
       "extractedTitle": "Soubory zapsány",
       "openOutput": "Otevřít výstupní složku",
       "removeConfirm": "Template „{{name}}“ bude z tohoto návrhu odebrán (již vygenerované soubory na disku zůstanou nedotčené).",
-      "removeTitle": "Odebrat tento Template?"
+      "removeTitle": "Odebrat tento Template?",
+      "tabs": {
+        "template": "Šablona"
+      }
     },
     "statusbar": {
       "format": "návrh · formát {{version}}"
@@ -2543,6 +2546,23 @@
     },
     "server": {
       "subtitle": "Servírujte tento návrh jako živý mock a sledujte každé volání."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generování kódu",
+        "name": "Proměnná",
+        "value": "Hodnota (Handlebars)",
+        "add": "Přidat proměnnou",
+        "none": "Zatím žádné proměnné — přidejte jednu z hlavičky této šablony.",
+        "noTemplates": "Vyberte jednu nebo více šablon v sekci „</> Code“ — zde poté definujete proměnné použité při generování.",
+        "generalTitle": "Obecné proměnné",
+        "scope": {
+          "general": "Obecné"
+        },
+        "discover": "Zjistit proměnné použité touto šablonou",
+        "undeclared": "Použité, ale nedeklarované: {{names}}",
+        "allDeclared": "Všechny proměnné použité touto šablonou jsou deklarované."
+      }
     }
   },
   "mqtt": {

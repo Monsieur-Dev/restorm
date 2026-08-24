@@ -2288,7 +2288,10 @@
       "extractedTitle": "Filer skrevet",
       "openOutput": "Åpne utdatamappen",
       "removeConfirm": "Template «{{name}}» fjernes fra dette designet (allerede genererte filer på disken forblir urørt).",
-      "removeTitle": "Fjerne dette Template?"
+      "removeTitle": "Fjerne dette Template?",
+      "tabs": {
+        "template": "Mal"
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Server dette designet som en live-mock, og følg med på hvert kall."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kodegenerering",
+        "name": "Variabel",
+        "value": "Verdi (Handlebars)",
+        "add": "Legg til en variabel",
+        "none": "Ingen variabler ennå — legg til en fra denne malens topptekst.",
+        "noTemplates": "Velg én eller flere maler i «</> Code»-delen — her definerer du deretter variablene som brukes ved generering.",
+        "generalTitle": "Generelle variabler",
+        "scope": {
+          "general": "Generelt"
+        },
+        "discover": "Oppdag variablene denne malen bruker",
+        "undeclared": "Brukt, men ikke deklarert: {{names}}",
+        "allDeclared": "Alle variablene denne malen bruker er deklarert."
+      }
     }
   },
   "mqtt": {

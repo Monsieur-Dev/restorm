@@ -46,6 +46,7 @@
  */
 
 import type { RuntimeId } from './baseTypes'
+import type { TemplateVarValues } from '../design/templateVariables'
 import type {
   ApiInfo,
   ApiServer,
@@ -173,6 +174,10 @@ export interface ModelDesignMeta {
   /** Parent model this one inherits from. The child DISPLAYS the
    * parent's properties read-only; cycles are invalid. */
   inheritsFrom?: RuntimeId
+  /** Per-template MODEL-scope code-generation variable overrides for THIS model:
+   * templateId → (variable name → Handlebars expression). Overrides the
+   * template's global "Models" value; empty/absent inherits it. */
+  codegenVars?: Record<RuntimeId, Record<string, string>>
 }
 
 /**
@@ -277,6 +282,10 @@ export interface RouteDesignMeta {
   cacheSeconds?: number
   /** Overrides the group's auth contract; absent = inherited. */
   authOverride?: DesignAuthKind
+  /** Per-template ROUTE-scope code-generation variable overrides for THIS route:
+   * templateId → (variable name → Handlebars expression). Overrides the
+   * template's global "Routes" value; empty/absent inherits it. */
+  codegenVars?: Record<RuntimeId, Record<string, string>>
 }
 
 /**
@@ -346,6 +355,12 @@ export interface DesignCodegenTemplate {
   /** Friendly label shown on the list row (official title / repo name / folder
    * basename). Optional — the UI derives a fallback from the source. */
   label?: string
+  /** GLOBAL values for the variables this template declares — one map per scope
+   * (varName → Handlebars expression), applied to every entity of that scope.
+   * A per-entity value ({@link ModelDesignMeta.codegenVars} /
+   * {@link RouteDesignMeta.codegenVars}) overrides it; the manifest default is
+   * the base. */
+  variables?: TemplateVarValues
 }
 
 /** Code-generation configuration, persisted with the design. */

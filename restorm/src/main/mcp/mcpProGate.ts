@@ -163,6 +163,11 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   // (generate_design_code) is Pro.
   'set_design_templates',
   'get_design_template_contract',
+  // authoring the per-scope codegen variable values is design editing (free);
+  // only RUNNING a template (generate_design_code) is Pro.
+  'set_design_template_variables',
+  'set_design_model_variables',
+  'set_design_route_variables',
   'set_favorite',
   // application settings — the generic read/write routes over every setting
   'get_settings',

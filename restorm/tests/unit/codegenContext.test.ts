@@ -12,6 +12,8 @@ import { join } from 'path'
 import { buildCodegenContext, CODEGEN_CONTEXT_VERSION } from '../../src/shared/design/codegenContext'
 import { CODEGEN_CONTEXT_SCHEMA } from '../../src/shared/design/codegenContextSchema'
 import { validateAgainstSchema } from '../../src/shared/schemaValidate'
+import { resolveWithContextPriority } from '../../src/shared/utils/handlebars/resolveWithContextPriority'
+import type { CodegenVarError } from '../../src/shared/design/templateVariables'
 import { buildReferenceApiDesign } from './apiDesignReference'
 
 const SCHEMA_PATH = join(__dirname, '../../docs/contributing/design-codegen-context.schema.json')
@@ -77,5 +79,51 @@ describe('buildCodegenContext', () => {
     expect(user?.timestamps).toBe(true)
     expect(user?.properties.find((p) => p.name === 'email')?.pii).toBe(true)
     expect(user?.properties.find((p) => p.name === 'email')?.searchable).toBe(true)
+  })
+})
+
+describe('buildCodegenContext — user variables (vars)', () => {
+  const evaluate = (expression: string, ctx: Record<string, unknown>): string =>
+    resolveWithContextPriority(expression, ctx)
+
+  it('resolves project / model / route vars into ctx.*.vars against each entity context', () => {
+    const errors: CodegenVarError[] = []
+    const ctx = buildCodegenContext(buildReferenceApiDesign(), {
+      decls: [
+        { name: 'apiTitle', scope: 'project', type: 'string', default: '{{design.name}}' },
+        { name: 'table', scope: 'model', type: 'string', default: '{{model.name}}' },
+        { name: 'verb', scope: 'route', type: 'string', default: '{{route.method}}' }
+      ],
+      evaluate,
+      errors
+    })
+    expect(ctx.design.vars).toEqual({ apiTitle: ctx.design.name })
+    expect(ctx.models.find((m) => m.name === 'User')?.vars).toEqual({ table: 'User' })
+    const routes = ctx.groups.flatMap((g) => g.routes)
+    expect(routes.find((r) => r.fullPath.endsWith('/{id}'))?.vars).toEqual({ verb: 'GET' })
+    expect(routes.find((r) => r.method === 'POST')?.vars).toEqual({ verb: 'POST' })
+    expect(errors).toEqual([])
+  })
+
+  it('applies the cascade: a per-route override beats the global value', () => {
+    const errors: CodegenVarError[] = []
+    const ctx = buildCodegenContext(buildReferenceApiDesign(), {
+      decls: [{ name: 'useCache', scope: 'route', type: 'boolean', default: 'false' }],
+      values: { route: { useCache: 'true' } }, // global: every route caches
+      routeOverrides: (id) => (id === 'route-user-create' ? { useCache: 'false' } : undefined),
+      evaluate,
+      errors
+    })
+    const routes = ctx.groups.flatMap((g) => g.routes)
+    expect(routes.find((r) => r.method === 'POST')?.vars).toEqual({ useCache: false })
+    expect(routes.filter((r) => r.method === 'GET').every((r) => (r.vars as { useCache?: boolean } | undefined)?.useCache === true)).toBe(true)
+    expect(errors).toEqual([])
+  })
+
+  it('leaves the context free of vars when no binding is passed', () => {
+    const ctx = buildCodegenContext(buildReferenceApiDesign())
+    expect(ctx.design.vars).toBeUndefined()
+    expect(ctx.models.every((m) => m.vars === undefined)).toBe(true)
+    expect(ctx.groups.flatMap((g) => g.routes).every((r) => r.vars === undefined)).toBe(true)
   })
 })

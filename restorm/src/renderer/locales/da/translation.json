@@ -2288,7 +2288,10 @@
       "extractedTitle": "Filer skrevet",
       "openOutput": "Åbn outputmappen",
       "removeConfirm": "Template “{{name}}” fjernes fra dette design (allerede genererede filer på disken forbliver urørte).",
-      "removeTitle": "Fjern dette Template?"
+      "removeTitle": "Fjern dette Template?",
+      "tabs": {
+        "template": "Skabelon"
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Servér dette design som en live-mock, og følg hvert kald."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kodegenerering",
+        "name": "Variabel",
+        "value": "Værdi (Handlebars)",
+        "add": "Tilføj en variabel",
+        "none": "Ingen variabler endnu — tilføj en fra denne skabelons overskrift.",
+        "noTemplates": "Vælg en eller flere skabeloner i afsnittet “</> Code” — her definerer du derefter de variabler, der bruges ved generering.",
+        "generalTitle": "Generelle variabler",
+        "scope": {
+          "general": "Generelt"
+        },
+        "discover": "Find de variabler, denne skabelon bruger",
+        "undeclared": "Brugt, men ikke deklareret: {{names}}",
+        "allDeclared": "Alle variabler, denne skabelon bruger, er deklareret."
+      }
     }
   },
   "mqtt": {

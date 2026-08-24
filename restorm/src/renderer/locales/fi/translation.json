@@ -2288,7 +2288,10 @@
       "extractedTitle": "Tiedostot kirjoitettu",
       "openOutput": "Avaa tuloskansio",
       "removeConfirm": "Template ”{{name}}” poistetaan tästä suunnitelmasta (levylle jo luodut tiedostot jäävät koskematta).",
-      "removeTitle": "Poistetaanko tämä Template?"
+      "removeTitle": "Poistetaanko tämä Template?",
+      "tabs": {
+        "template": "Malli"
+      }
     },
     "statusbar": {
       "format": "suunnitelma · muoto {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Palvele tätä suunnitelmaa live-mockina ja seuraa jokaista kutsua."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Koodin luonti",
+        "name": "Muuttuja",
+        "value": "Arvo (Handlebars)",
+        "add": "Lisää muuttuja",
+        "none": "Ei vielä muuttujia — lisää yksi tämän mallin otsikosta.",
+        "noTemplates": "Valitse yksi tai useampi malli osiossa ”</> Code” — määrität sitten tässä luonnissa käytettävät muuttujat.",
+        "generalTitle": "Yleiset muuttujat",
+        "scope": {
+          "general": "Yleiset"
+        },
+        "discover": "Tunnista tämän mallin käyttämät muuttujat",
+        "undeclared": "Käytössä mutta ei määritelty: {{names}}",
+        "allDeclared": "Kaikki tämän mallin käyttämät muuttujat on määritelty."
+      }
     }
   },
   "mqtt": {

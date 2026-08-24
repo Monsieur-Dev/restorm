@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach } from 'vitest'
 import { assertSafeRelativePath, extractGeneratedTree } from '../../src/main/services/designCodegen/extractTree'
-import { parseTemplateManifest, templateArchiveUrl } from '../../src/main/services/designCodegen/templateSource'
+import { parseTemplateManifest, templateArchiveUrl, rawManifestUrl, readManifestVariables, scanUsedVariables } from '../../src/main/services/designCodegen/templateSource'
 import { CODEGEN_CONTEXT_VERSION } from '../../src/shared/design/codegenContext'
 import { designFingerprint } from '../../src/main/services/designCodegen/DesignCodegenService'
 import { buildReferenceApiDesign } from './apiDesignReference'
@@ -102,6 +102,26 @@ describe('parseTemplateManifest', () => {
     expect(() => parseTemplateManifest('{"name": ""}')).toThrow(/invalid/)
     expect(() => parseTemplateManifest('not json')).toThrow(/not valid JSON/)
   })
+
+  it('accepts declared user variables (name/scope/type + optional default, options)', () => {
+    const withVars = {
+      ...valid,
+      variables: [
+        { name: 'cache_type', scope: 'project', type: 'enum', options: ['none', 'memory', 'redis'], default: 'none' },
+        { name: 'useCache', scope: 'route', type: 'boolean', default: 'false', description: 'Cache this route.' }
+      ]
+    }
+    const parsed = parseTemplateManifest(JSON.stringify(withVars))
+    expect(parsed.variables?.map((v) => v.name)).toEqual(['cache_type', 'useCache'])
+    expect(parsed.variables?.[0]?.scope).toBe('project')
+  })
+
+  it('refuses a variable with an unknown scope or type', () => {
+    const badScope = { ...valid, variables: [{ name: 'x', scope: 'enum', type: 'string' }] }
+    expect(() => parseTemplateManifest(JSON.stringify(badScope))).toThrow(/invalid/)
+    const badType = { ...valid, variables: [{ name: 'x', scope: 'route', type: 'json' }] }
+    expect(() => parseTemplateManifest(JSON.stringify(badType))).toThrow(/invalid/)
+  })
 })
 
 describe('templateArchiveUrl', () => {
@@ -111,6 +131,56 @@ describe('templateArchiveUrl', () => {
     expect(templateArchiveUrl('https://github.com/o/r.git', 'dev'))
       .toBe('https://codeload.github.com/o/r/tar.gz/refs/heads/dev')
     expect(() => templateArchiveUrl('not a repo')).toThrow(/not a github repository/)
+  })
+})
+
+describe('rawManifestUrl', () => {
+  it('builds the raw manifest URL from owner/repo or a github URL', () => {
+    expect(rawManifestUrl('owner/repo'))
+      .toBe('https://raw.githubusercontent.com/owner/repo/main/restorm-template.json')
+    expect(rawManifestUrl('https://github.com/o/r.git', 'v2'))
+      .toBe('https://raw.githubusercontent.com/o/r/v2/restorm-template.json')
+    expect(() => rawManifestUrl('nope')).toThrow(/not a github repository/)
+  })
+})
+
+describe('readManifestVariables', () => {
+  const base = { name: 'X', type: 'server', language: 'ts', contextVersions: [1] }
+
+  it('extracts the declared variables', () => {
+    const text = JSON.stringify({ ...base, variables: [{ name: 'cache', scope: 'route', type: 'boolean' }] })
+    expect(readManifestVariables(text)).toEqual([{ name: 'cache', scope: 'route', type: 'boolean' }])
+  })
+
+  it('returns [] when the manifest declares none', () => {
+    expect(readManifestVariables(JSON.stringify(base))).toEqual([])
+  })
+
+  it('is lenient on the context version (pre-fill still shows the keys)', () => {
+    const text = JSON.stringify({ ...base, contextVersions: [999], variables: [{ name: 'x', scope: 'project', type: 'string' }] })
+    expect(readManifestVariables(text).map((v) => v.name)).toEqual(['x'])
+  })
+
+  it('throws on invalid JSON or a malformed manifest', () => {
+    expect(() => readManifestVariables('not json')).toThrow(/not valid JSON/)
+    expect(() => readManifestVariables('{"name":""}')).toThrow(/invalid/)
+  })
+})
+
+describe('scanUsedVariables (discovery)', () => {
+  it('finds dot- and bracket-access .vars usages, whatever the object', () => {
+    const tpl = [
+      '{{ ctx.design.vars.cache_type }}',
+      "{% for m in ctx.models %}{{ m.vars.table_prefix }}{% endfor %}",
+      "{{ route.vars['use_cache'] }}",
+      '{{ ctx.design.vars["region"] }}'
+    ].join('\n')
+    expect(scanUsedVariables(tpl)).toEqual(['cache_type', 'region', 'table_prefix', 'use_cache'])
+  })
+
+  it('dedupes and returns [] when nothing references .vars', () => {
+    expect(scanUsedVariables('{{ ctx.design.name }} {{ x.vars.a }} {{ y.vars.a }}')).toEqual(['a'])
+    expect(scanUsedVariables('no variables here {{ ctx.models }}')).toEqual([])
   })
 })
 

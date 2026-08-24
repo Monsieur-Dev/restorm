@@ -13,7 +13,9 @@ import { createHash } from 'node:crypto'
 import { logger } from 'electron-core-ui/main'
 import type { ApiDesign, DesignTemplateSource } from '../../../shared/types/apiDesign'
 import { validateApiDesign } from '../../../shared/design/validateApiDesign'
-import { buildCodegenContext } from '../../../shared/design/codegenContext'
+import { buildCodegenContext, type CodegenVarsBinding } from '../../../shared/design/codegenContext'
+import type { CodegenVarError } from '../../../shared/design/templateVariables'
+import { resolveTemplate } from '../request/resolveTemplate'
 import { resolvePyodidePaths } from '../../scenarioEngine/codeRuntimes/pythonRuntime'
 import { CODEGEN_WORKER_SRC } from './codegenWorker'
 import { runCodeWorker } from '../../scenarioEngine/codeRuntimes/codeWorkerHarness'
@@ -22,9 +24,13 @@ import { ensureCodegenWheels } from './pyodideDistWheels'
 import {
   acquireLocalTemplate,
   acquireRemoteTemplate,
+  fetchRemoteManifestVariables,
+  readLocalManifestVariables,
+  scanUsedVariables,
   OFFICIAL_TEMPLATES,
   type AcquiredTemplate,
-  type TemplateManifest
+  type TemplateManifest,
+  type TemplateVariableDecl
 } from './templateSource'
 import { extractGeneratedTree, type GeneratedFile } from './extractTree'
 
@@ -50,6 +56,17 @@ export interface CodegenRunResult {
   /** Fingerprint of the design at GENERATION time — extraction refuses
    * when the design has changed since (the preview showed old files). */
   designFingerprint: string
+  /** Per-variable resolution failures (bad Handlebars expression or a value
+   * that didn't fit the declared type) — surfaced to the user, never silent.
+   * Absent / empty when every declared variable resolved. */
+  variableErrors?: CodegenVarError[]
+}
+
+/** A stable cache key for a template source. */
+function sourceCacheKey(source: TemplateSourceRef): string {
+  if (source.kind === 'official') return `official:${source.id}`
+  if (source.kind === 'repo') return `repo:${source.repo}@${source.ref ?? 'main'}`
+  return `local:${source.path}`
 }
 
 /** Two template source refs point at the same template. */
@@ -122,7 +139,38 @@ class DesignCodegenService {
       throw new Error(`design has ${issues.length} validation issue(s) — fix them before generating code`)
     }
     const template = await this.acquire(source)
-    const context = buildCodegenContext(design)
+    // User-declared template variables: values live on the matching configured
+    // template row (globals) + on each model/route (per-entity overrides). Build
+    // the binding only when the template declares variables; the Handlebars
+    // evaluation is the same resolver requests use.
+    const decls = template.manifest.variables ?? []
+    const templateRow = design.codegen?.templates?.find((t) => sameSource(t.source, source))
+    const variableErrors: CodegenVarError[] = []
+    const binding: CodegenVarsBinding | undefined = decls.length > 0
+      ? {
+          decls,
+          ...(templateRow?.variables !== undefined ? { values: templateRow.variables } : {}),
+          modelOverrides: (modelId) => templateRow === undefined
+            ? undefined
+            : design.models.find((m) => m.id === modelId)?.design?.codegenVars?.[templateRow.id],
+          routeOverrides: (routeId) => {
+            if (templateRow === undefined) return undefined
+            for (const g of design.routeGroups) {
+              const r = g.routes.find((rt) => rt.id === routeId)
+              if (r !== undefined) return r.design?.codegenVars?.[templateRow.id]
+            }
+            return undefined
+          },
+          evaluate: (expression, ctx) => resolveTemplate(expression, ctx),
+          errors: variableErrors
+        }
+      : undefined
+    const context = buildCodegenContext(design, binding)
+    if (variableErrors.length > 0) {
+      logger.warn('[DesignCodegenService] template variables failed to resolve', {
+        designId: design.id, count: variableErrors.length
+      })
+    }
     const wheelPaths = await ensureCodegenWheels()
 
     const run = await runCodeWorker(CODEGEN_WORKER_SRC, COPIER_SUBSET_ENGINE_PY, {
@@ -143,7 +191,8 @@ class DesignCodegenService {
       preview: files.map((f) => ({ path: f.path, bytes: Buffer.from(f.b64, 'base64').length })),
       log: [...run.logs, ...(payload?.log ?? [])],
       designFingerprint: designFingerprint(design),
-      source
+      source,
+      ...(variableErrors.length > 0 ? { variableErrors } : {})
     }
     this.pending.set(design.id, result)
     logger.info('[DesignCodegenService] generated', {
@@ -152,6 +201,59 @@ class DesignCodegenService {
       files: files.length
     })
     return result
+  }
+
+  /** Per-source cache of a template's declared variables — acquiring a remote
+   * template is expensive, and the UI asks for these each time a codegen tab
+   * opens. Cleared with the pending runs on {@link clear}. */
+  private readonly variablesCache = new Map<string, TemplateVariableDecl[]>()
+
+  /**
+   * The variables a template DECLARES in its manifest (for the design's
+   * variable editors to pre-fill). Acquires the template (cached per source) and
+   * returns `manifest.variables ?? []`. Never throws for a missing declaration —
+   * only for an unreachable / invalid template.
+   */
+  async getTemplateVariables(source: TemplateSourceRef): Promise<TemplateVariableDecl[]> {
+    const key = sourceCacheKey(source)
+    const cached = this.variablesCache.get(key)
+    if (cached !== undefined) return cached
+    // Fetch ONLY the manifest (not the whole template) — a local read or a raw
+    // single-file GitHub fetch, so opening a codegen tab never downloads a tarball.
+    let variables: TemplateVariableDecl[]
+    if (source.kind === 'local') {
+      variables = readLocalManifestVariables(source.path)
+    } else {
+      const repo = source.kind === 'official'
+        ? OFFICIAL_TEMPLATES.find((t) => t.id === source.id)?.repo
+        : source.repo
+      if (repo === undefined) throw new Error(`unknown official template: ${source.id}`)
+      variables = await fetchRemoteManifestVariables(repo, source.kind === 'repo' ? (source.ref ?? 'main') : 'main')
+    }
+    this.variablesCache.set(key, variables)
+    return variables
+  }
+
+  private readonly usedVarsCache = new Map<string, string[]>()
+
+  /**
+   * DISCOVERY: the user-variable names a template's files actually reference
+   * (`.vars.<name>`). Unlike {@link getTemplateVariables} this needs the whole
+   * template, so it acquires it (cached). The UI reconciles this with the
+   * DECLARED set to flag undeclared-but-used variables.
+   */
+  async getTemplateUsedVariables(source: TemplateSourceRef): Promise<string[]> {
+    const key = sourceCacheKey(source)
+    const cached = this.usedVarsCache.get(key)
+    if (cached !== undefined) return cached
+    const template = await this.acquire(source)
+    const names = new Set<string>()
+    for (const file of template.files) {
+      for (const name of scanUsedVariables(Buffer.from(file.b64, 'base64').toString('utf-8'))) names.add(name)
+    }
+    const used = [...names].sort()
+    this.usedVarsCache.set(key, used)
+    return used
   }
 
   /** The pending (not yet extracted) run for a design, if any. */
@@ -201,6 +303,8 @@ class DesignCodegenService {
    * carry whole file contents; they must not outlive their project). */
   clear(): void {
     this.pending.clear()
+    this.variablesCache.clear()
+    this.usedVarsCache.clear()
   }
 }
 

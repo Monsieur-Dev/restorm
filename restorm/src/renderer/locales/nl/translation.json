@@ -2288,7 +2288,10 @@
       "extractedTitle": "Bestanden geschreven",
       "openOutput": "Uitvoermap openen",
       "removeConfirm": "De Template “{{name}}” wordt uit dit ontwerp verwijderd (reeds gegenereerde bestanden op schijf blijven ongewijzigd).",
-      "removeTitle": "Deze Template verwijderen?"
+      "removeTitle": "Deze Template verwijderen?",
+      "tabs": {
+        "template": "Sjabloon"
+      }
     },
     "statusbar": {
       "format": "ontwerp · formaat {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Serveer dit ontwerp als een live-mock en volg elke aanroep."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Codegeneratie",
+        "name": "Variabele",
+        "value": "Waarde (Handlebars)",
+        "add": "Variabele toevoegen",
+        "none": "Nog geen variabelen — voeg er een toe via de kop van dit sjabloon.",
+        "noTemplates": "Kies een of meer sjablonen in de sectie ‘</> Code’ — hier definieer je vervolgens de variabelen die de generatie gebruikt.",
+        "generalTitle": "Algemene variabelen",
+        "scope": {
+          "general": "Algemeen"
+        },
+        "discover": "Ontdek de variabelen die dit sjabloon gebruikt",
+        "undeclared": "Gebruikt maar niet gedeclareerd: {{names}}",
+        "allDeclared": "Alle variabelen die dit sjabloon gebruikt zijn gedeclareerd."
+      }
     }
   },
   "mqtt": {

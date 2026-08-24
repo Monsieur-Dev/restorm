@@ -2288,7 +2288,10 @@
       "extractedTitle": "Ficheiros escritos",
       "openOutput": "Abrir a pasta de saída",
       "removeConfirm": "O Template «{{name}}» será removido deste design (os ficheiros já gerados no disco não são alterados).",
-      "removeTitle": "Remover este Template?"
+      "removeTitle": "Remover este Template?",
+      "tabs": {
+        "template": "Modelo"
+      }
     },
     "statusbar": {
       "format": "design · formato {{version}}"
@@ -2541,6 +2544,23 @@
     },
     "server": {
       "subtitle": "Sirva este design como um mock ao vivo e observe cada chamada."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Geração de código",
+        "name": "Variável",
+        "value": "Valor (Handlebars)",
+        "add": "Adicionar uma variável",
+        "none": "Ainda não há variáveis — adicione uma no cabeçalho deste modelo.",
+        "noTemplates": "Escolha um ou mais modelos na secção «</> Code» — aqui definirá depois as variáveis usadas pela geração.",
+        "generalTitle": "Variáveis gerais",
+        "scope": {
+          "general": "Geral"
+        },
+        "discover": "Descobrir as variáveis que este modelo usa",
+        "undeclared": "Usadas mas não declaradas: {{names}}",
+        "allDeclared": "Todas as variáveis que este modelo usa estão declaradas."
+      }
     }
   },
   "mqtt": {

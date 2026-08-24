@@ -2289,7 +2289,10 @@
       "extractedTitle": "Fișiere scrise",
       "openOutput": "Deschide folderul de ieșire",
       "removeConfirm": "Template-ul „{{name}}“ va fi eliminat din acest design (fișierele deja generate pe disc rămân neatinse).",
-      "removeTitle": "Eliminați acest Template?"
+      "removeTitle": "Eliminați acest Template?",
+      "tabs": {
+        "template": "Șablon"
+      }
     },
     "statusbar": {
       "format": "design · format {{version}}"
@@ -2542,6 +2545,23 @@
     },
     "server": {
       "subtitle": "Servește acest design ca un mock live și urmărește fiecare apel."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generare cod",
+        "name": "Variabilă",
+        "value": "Valoare (Handlebars)",
+        "add": "Adaugă o variabilă",
+        "none": "Încă nu există variabile — adaugă una din antetul acestui șablon.",
+        "noTemplates": "Alege unul sau mai multe șabloane în secțiunea „</> Code” — apoi definești aici variabilele folosite la generare.",
+        "generalTitle": "Variabile generale",
+        "scope": {
+          "general": "General"
+        },
+        "discover": "Descoperă variabilele folosite de acest șablon",
+        "undeclared": "Folosite dar nedeclarate: {{names}}",
+        "allDeclared": "Toate variabilele folosite de acest șablon sunt declarate."
+      }
     }
   },
   "mqtt": {

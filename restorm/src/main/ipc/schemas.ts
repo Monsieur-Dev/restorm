@@ -451,6 +451,14 @@ export const designCodegenGenerateArgs = z.tuple([
   ]),
   z.record(z.string(), z.unknown()).optional()
 ])
+export const designCodegenVariablesArgs = z.tuple([
+  z.union([
+    z.object({ kind: z.literal('official'), id: z.string().min(1) }),
+    z.object({ kind: z.literal('repo'), repo: z.string().min(1), ref: z.string().min(1).optional() }),
+    z.object({ kind: z.literal('local'), path: z.string().min(1) })
+  ])
+])
+
 export const designCodegenExtractArgs = z.tuple([z.string().min(1), z.string().min(1)])
 export const designCodegenDiscardArgs = z.tuple([z.string().min(1)])
 export const designPickDirectoryArgs = z.tuple([z.string().optional()])

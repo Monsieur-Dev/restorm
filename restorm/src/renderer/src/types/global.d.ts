@@ -450,6 +450,12 @@ declare global {
           source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
           answers?: Record<string, unknown>
         ) => Promise<{ success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }>
+        getVariables: (
+          source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+        ) => Promise<{ success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }>
+        getUsedVariables: (
+          source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+        ) => Promise<{ success: boolean; used?: string[]; error?: string }>
         extract: (designId: string, outputDir: string) => Promise<{ success: boolean; root?: string; written?: string[]; error?: string }>
         discard: (designId: string) => Promise<void>
         pickDirectory: (defaultPath?: string) => Promise<{ success: boolean; path?: string; canceled?: boolean }>

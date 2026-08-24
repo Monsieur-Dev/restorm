@@ -25,6 +25,7 @@ import { assignDesignSection, patchModel, replaceModel, uniqueComponentName } fr
 import { ModelSchemaTab } from './ModelSchemaTab'
 import { ModelExamplesTab } from './ModelExamplesTab'
 import { ModelSettingsTab } from './ModelSettingsTab'
+import { DesignModelCodegenTab } from './DesignModelCodegenTab'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
 export interface DesignModelsSectionProps {
@@ -355,6 +356,11 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
                   id: 'settings',
                   label: t('design.models.tabs.settings', 'Settings'),
                   content: <ModelSettingsTab design={design} model={selected} onJumpTo={onJumpTo} onGenerateCrud={setCrudModel} />
+                },
+                {
+                  id: 'codegen',
+                  label: t('design.codegen.vars.tab', 'Code generation'),
+                  content: <DesignModelCodegenTab design={design} model={selected} />
                 },
                 {
                   id: 'notes',
