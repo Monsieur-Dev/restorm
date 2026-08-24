@@ -28,7 +28,7 @@ Feature: Design server
     Then the response status is "400"
     And the response body contains "password"
     When I run the "List users without auth" request
-    Then the response status is "401"
+    Then the response status is "200"
     And the run panel counts calls on the design routes
 
   Scenario: Hot steering forces a route's response without restart

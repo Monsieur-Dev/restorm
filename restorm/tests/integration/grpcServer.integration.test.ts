@@ -5,8 +5,8 @@
  * which binds a separate `@grpc/grpc-js` HTTP/2 server on its own port —
  * and drives it with a real gRPC client loaded from the projected
  * `.proto`, proving the full loop: a unary by-id call answers the bound
- * example, a list call answers the pagination envelope, the design's
- * default auth is enforced through call metadata, and the port frees on
+ * example, a list call answers the pagination envelope, auth is declarative
+ * only (an unauthenticated call is still served), and the port frees on
  * stop. Only the surrounding singletons (electron / logger / the
  * WebSocketExecution->CollectionStore import chain) are stubbed.
  */
@@ -128,10 +128,10 @@ describe('DesignServerService — gRPC projection', () => {
     expect(res['offset']).toBe(0)
   })
 
-  it('enforces the default auth: an unauthenticated call is rejected', async () => {
-    const { err } = await call(client, client.GetUser, { id: '1' }, new grpc.Metadata())
-    expect(err).not.toBeNull()
-    expect(err?.code).toBe(grpc.status.UNAUTHENTICATED)
+  it('serves an unauthenticated call — auth is declarative, never enforced', async () => {
+    const { err, res } = await call(client, client.GetUser, { id: '1' }, new grpc.Metadata())
+    expect(err).toBeNull()
+    expect(res).not.toBeNull()
   })
 
   it('frees the gRPC port after stop', async () => {

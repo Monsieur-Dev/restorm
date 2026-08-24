@@ -46,13 +46,11 @@ import { validateApiDesign } from '../../shared/design/validateApiDesign'
 import { composeRoutePath, designToApiDocumentation } from '../../shared/design/apiDesignDoc'
 import { apiDocumentationToOpenApi } from '../../shared/design/openApiExport'
 import {
-  authSatisfied,
   buildListPage,
   resolvePageWindow,
   buildModelInstance,
   compileDesignRoutes,
   defaultResponseCode,
-  effectiveAuth,
   matchDesignRoute,
   validateBodyAgainstModel,
   type CompiledRoute,
@@ -377,22 +375,18 @@ class DesignServerService {
         return
       }
 
-      // Protocol projections claim their prefixes before the HTTP route
-      // table — the design's default auth (PRESENCE, like every served
-      // credential check) guards each projection as a whole.
+      // Protocol projections claim their prefixes before the HTTP route table.
+      // Auth is declarative only (see below) — projections are served openly.
       if (active.yoga !== undefined && pathname === GRAPHQL_PATH) {
-        if (!this.projectionAuthorized(active, req, res, 'graphql')) return
         await active.yoga(req, res)
         this.recordServed(active, 'graphql', String(res.statusCode))
         return
       }
       if (active.odataSets !== undefined && (pathname === ODATA_ROOT || pathname.startsWith(`${ODATA_ROOT}/`))) {
-        if (!this.projectionAuthorized(active, req, res, 'odata')) return
         this.serveOData(active, method, pathname, query, req.headers, res)
         return
       }
       if (active.soapOperations !== undefined && pathname === SOAP_PATH) {
-        if (!this.projectionAuthorized(active, req, res, 'soap')) return
         await this.serveSoap(active, method, url, req, res)
         return
       }
@@ -405,13 +399,10 @@ class DesignServerService {
       }
       const routeId = match.entry.route.id
 
-      // Auth: PRESENCE of the right credential shape, any value.
-      const auth = effectiveAuth(active.design, match.entry.group, match.entry.route)
-      if (!authSatisfied(auth, req.headers, active.design)) {
-        this.writeJson(active, res, 401, {}, errorEnvelope('401', `This route requires ${auth} credentials`))
-        this.recordServed(active, routeId, '401')
-        return
-      }
+      // Auth is DECLARATIVE only: the design records which routes require
+      // credentials (it rides through to the descriptor + code templates), but
+      // the mock never rejects a call for it — a generated/hand-written client
+      // shouldn't need to solve auth just to try a route (Yoann, 2026-08-24).
 
       // Hot steering: a forced response short-circuits everything else.
       const forced = active.forced.get(routeId)
@@ -463,16 +454,6 @@ class DesignServerService {
     }
   }
 
-  /** A projection enforces the design's DEFAULT auth contract (route
-   * overrides are HTTP-projection concepts). 401 + false when unmet. */
-  private projectionAuthorized(active: ActiveServer, req: IncomingMessage, res: ServerResponse, label: string): boolean {
-    const auth = active.design.defaultAuth ?? 'none'
-    if (authSatisfied(auth, req.headers, active.design)) return true
-    this.writeJson(active, res, 401, {}, errorEnvelope('401', `This service requires ${auth} credentials`))
-    this.recordServed(active, label, '401')
-    return false
-  }
-
   // ── OData projection ──────────────────────────────────────────────
 
   /** `/odata` service document, `/odata/$metadata` CSDL, and the
@@ -519,14 +500,8 @@ class DesignServerService {
       return
     }
 
-    // The set's data is as protected as the routes serving its model:
-    // when any route declares a non-none auth, one of those contracts
-    // must be satisfied (the design default was already checked).
-    if (set.auths.length > 0 && !set.auths.some((auth) => authSatisfied(auth, headers, active.design))) {
-      this.writeJson(active, res, 401, odataHeaders, errorEnvelope('401', `This entity set requires ${set.auths.join(' or ')} credentials`))
-      this.recordServed(active, `odata:${set.name}`, '401')
-      return
-    }
+    // Auth is declarative only — the entity set is served without a credential
+    // check (see the HTTP dispatch note).
     const rows = buildODataRows(active.design, set.model)
     const key = addressed[2]
     if (key !== undefined) {
@@ -598,13 +573,8 @@ class DesignServerService {
       this.recordServed(active, 'soap', '500')
       return
     }
-    // The route's EFFECTIVE auth applies — same contract as HTTP.
-    const auth = effectiveAuth(active.design, operation.group, operation.route)
-    if (!authSatisfied(auth, req.headers, active.design)) {
-      this.writeRaw(active, res, 401, xmlHeaders, buildSoapFaultEnvelope(`This operation requires ${auth} credentials`))
-      this.recordServed(active, operation.route.id, '401')
-      return
-    }
+    // Auth is declarative only — the operation is served without a credential
+    // check (see the HTTP dispatch note).
     this.writeRaw(active, res, 200, xmlHeaders, buildSoapResponseEnvelope(active.design, operation))
     // SOAP operations map 1:1 to design routes — count under the route
     // id so the run modal's per-route dashboard sees this traffic.
@@ -746,13 +716,7 @@ class DesignServerService {
 
   private grpcUnaryHandler(active: ActiveServer, method: GrpcMethod): grpc.handleUnaryCall<object, object> {
     return (call, callback) => {
-      const auth = active.design.defaultAuth ?? 'none'
-      if (!authSatisfied(auth, grpcMetadataToHeaders(call.metadata), active.design)) {
-        this.recordServed(active, method.route.id, '401')
-        const message = `This service requires ${auth} credentials`
-        callback({ name: 'DesignServerGrpc', message, code: grpc.status.UNAUTHENTICATED, details: message }, null)
-        return
-      }
+      // Auth is declarative only — no credential check (see the HTTP dispatch note).
       try {
         const response = buildGrpcResponse(active.design, method, isRecord(call.request) ? call.request : {})
         callback(null, response)
@@ -1147,17 +1111,6 @@ function resolveGrpcService(
   const ctor: unknown = node[serviceName]
   if (typeof ctor !== 'function') return undefined
   return (ctor as grpc.ServiceClientConstructor).service
-}
-
-/** Flatten gRPC call metadata to an HTTP-headers-shaped map so the
- * shared auth-presence check treats a gRPC call like every other
- * projection (a `bearer`/`apiKey` credential arrives as call metadata). */
-function grpcMetadataToHeaders(metadata: grpc.Metadata): IncomingMessage['headers'] {
-  const headers: Record<string, string> = {}
-  for (const [key, value] of Object.entries(metadata.getMap())) {
-    headers[key.toLowerCase()] = typeof value === 'string' ? value : value.toString('utf8')
-  }
-  return headers
 }
 
 function stripQuery(url: string): string {

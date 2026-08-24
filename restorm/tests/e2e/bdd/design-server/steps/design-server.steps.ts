@@ -173,8 +173,8 @@ Then('the run panel counts calls on the design routes', async () => {
   await focusDesignTab(p)
   await p.locator('[data-testid="design-rail-server"]').click()
   await expect(p.locator('[data-testid="design-run-modal"]')).toBeVisible({ timeout: 10000 })
-  // List route answered twice (200 with auth, then 401 without), the
-  // single fetch once, the invalid create once.
+  // List route answered twice (once with auth, once without — both 200, auth
+  // is declarative only), the single fetch once, the invalid create once.
   await expect(p.locator('[data-testid="design-run-count-route-user-list"]')).toHaveText('2', { timeout: 10000 })
   await expect(p.locator('[data-testid="design-run-count-route-user-get"]')).toHaveText('1')
   await expect(p.locator('[data-testid="design-run-count-route-user-create"]')).toHaveText('1')
