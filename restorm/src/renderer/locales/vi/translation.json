@@ -2293,7 +2293,12 @@
       },
       "questions": {
         "title": "Câu hỏi mẫu"
-      }
+      },
+      "errorTitle": "Tạo mã thất bại",
+      "source": "Nguồn",
+      "destination": "Đích",
+      "expand": "Mở rộng",
+      "collapse": "Thu gọn"
     },
     "statusbar": {
       "format": "thiết kế · định dạng {{version}}"

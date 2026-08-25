@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Sablonkérdések"
-      }
+      },
+      "errorTitle": "A generálás sikertelen",
+      "source": "Forrás",
+      "destination": "Cél",
+      "expand": "Kibontás",
+      "collapse": "Összecsukás"
     },
     "statusbar": {
       "format": "terv · formátum {{version}}"

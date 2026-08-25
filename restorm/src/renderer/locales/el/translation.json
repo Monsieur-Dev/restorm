@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Ερωτήσεις προτύπου"
-      }
+      },
+      "errorTitle": "Η δημιουργία απέτυχε",
+      "source": "Πηγή",
+      "destination": "Προορισμός",
+      "expand": "Ανάπτυξη",
+      "collapse": "Σύμπτυξη"
     },
     "statusbar": {
       "format": "σχέδιο · μορφή {{version}}"

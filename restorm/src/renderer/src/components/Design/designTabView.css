@@ -1009,68 +1009,74 @@
 }
 
 .design-code-template-list {
-  list-style: none;
   margin: 8px 0 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Each template is an ECUI StaticPane; stack its body's blocks. */
+.design-code-template .static-pane-body {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.design-code-template {
-  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
-  border-radius: 4px;
-  padding: 10px 12px;
-}
-
-.design-code-template-head {
-  display: flex;
-  align-items: center;
+/* Top row: the play button (left column) and the source/destination fields
+   (right, full width), on the same line. */
+.design-code-template-top {
+  display: grid;
+  grid-template-columns: auto 1fr;
   gap: 12px;
+  align-items: start;
 }
 
-.design-code-template-text {
+.design-code-template-fields {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
   min-width: 0;
-  flex: 0 0 auto;
-  max-width: 40%;
 }
 
-.design-code-template-title {
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.design-code-field-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-.design-code-template-source {
+.design-code-field-label {
   font-size: 0.82em;
   opacity: 0.7;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
-.design-code-template-output {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex: 1 1 auto;
+.design-code-source-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--monospace-font-family, ui-monospace, monospace);
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+.design-code-destination {
   min-width: 0;
 }
 
-.design-code-template-output > :first-child {
+.design-code-destination .inputbox {
   flex: 1;
   min-width: 0;
 }
 
-.design-code-template-actions {
+.design-code-template-play {
   display: flex;
-  gap: 6px;
-  align-items: center;
-  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .design-code-questions {
@@ -1102,6 +1108,29 @@
 .design-code-message {
   font-size: 0.9em;
   opacity: 0.8;
+}
+
+.design-code-error {
+  margin-top: 12px;
+  border: 1px solid var(--vscode-inputValidation-errorBorder, rgba(224, 108, 117, 0.6));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.design-code-error-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--vscode-inputValidation-errorForeground, var(--vscode-errorForeground, #e06c75));
+  background: var(--vscode-inputValidation-errorBackground, rgba(224, 108, 117, 0.12));
+  border-bottom: 1px solid var(--vscode-inputValidation-errorBorder, rgba(224, 108, 117, 0.6));
+}
+
+.design-code-error-head .codicon {
+  color: inherit;
 }
 
 .design-code-preview {

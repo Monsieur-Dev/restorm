@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Pyetjet e shabllonit"
-      }
+      },
+      "errorTitle": "Gjenerimi dështoi",
+      "source": "Burimi",
+      "destination": "Destinacioni",
+      "expand": "Zgjero",
+      "collapse": "Palos"
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"

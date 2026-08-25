@@ -2296,7 +2296,12 @@
       },
       "questions": {
         "title": "Pytania szablonu"
-      }
+      },
+      "errorTitle": "Generowanie nie powiodło się",
+      "source": "Źródło",
+      "destination": "Cel",
+      "expand": "Rozwiń",
+      "collapse": "Zwiń"
     },
     "statusbar": {
       "format": "projekt API · format {{version}}"

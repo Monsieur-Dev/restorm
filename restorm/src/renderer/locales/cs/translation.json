@@ -2296,7 +2296,12 @@
       },
       "questions": {
         "title": "Otázky šablony"
-      }
+      },
+      "errorTitle": "Generování selhalo",
+      "source": "Zdroj",
+      "destination": "Cíl",
+      "expand": "Rozbalit",
+      "collapse": "Sbalit"
     },
     "statusbar": {
       "format": "návrh · formát {{version}}"

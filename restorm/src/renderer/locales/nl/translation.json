@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Sjabloonvragen"
-      }
+      },
+      "errorTitle": "Genereren mislukt",
+      "source": "Bron",
+      "destination": "Bestemming",
+      "expand": "Uitvouwen",
+      "collapse": "Inklappen"
     },
     "statusbar": {
       "format": "ontwerp · formaat {{version}}"

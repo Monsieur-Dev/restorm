@@ -45,3 +45,8 @@ export const OFFICIAL_CHOICES: readonly OfficialChoice[] = [
 export function officialLabel(id: string): string {
   return OFFICIAL_CHOICES.find((choice) => choice.id === id)?.stack ?? id
 }
+
+/** The `owner/repo` on github for an official id (undefined if unknown). */
+export function officialRepo(id: string): string | undefined {
+  return OFFICIAL_CHOICES.find((choice) => choice.id === id)?.repo
+}

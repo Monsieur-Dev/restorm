@@ -199,7 +199,7 @@ def generate(input_data):
     if recorded:
         answers_path = posixpath.join(OUTPUT_ROOT, ".copier-answers.yml")
         with open(answers_path, "w", encoding="utf-8") as f:
-            f.write("# Changes here will be overwritten by a re-generation.\n")
+            f.write("# Changes here will be overwritten by a re-generation." + chr(10))
             yaml.safe_dump(recorded, f, default_flow_style=False, sort_keys=True, allow_unicode=True)
         log.append("wrote .copier-answers.yml")
 

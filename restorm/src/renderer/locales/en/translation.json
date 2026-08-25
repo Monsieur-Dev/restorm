@@ -2297,7 +2297,12 @@
       },
       "questions": {
         "title": "Template questions"
-      }
+      },
+      "errorTitle": "Generation failed",
+      "source": "Source",
+      "destination": "Destination",
+      "expand": "Expand",
+      "collapse": "Collapse"
     },
     "statusbar": {
       "format": "design · format {{version}}"

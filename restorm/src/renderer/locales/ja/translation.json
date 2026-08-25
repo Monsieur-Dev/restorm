@@ -2293,7 +2293,12 @@
       },
       "questions": {
         "title": "テンプレートの質問"
-      }
+      },
+      "errorTitle": "生成に失敗しました",
+      "source": "ソース",
+      "destination": "出力先",
+      "expand": "展開",
+      "collapse": "折りたたむ"
     },
     "statusbar": {
       "format": "デザイン · フォーマット {{version}}"

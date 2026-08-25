@@ -2295,7 +2295,12 @@
       },
       "questions": {
         "title": "Întrebările șablonului"
-      }
+      },
+      "errorTitle": "Generarea a eșuat",
+      "source": "Sursă",
+      "destination": "Destinație",
+      "expand": "Extinde",
+      "collapse": "Restrânge"
     },
     "statusbar": {
       "format": "design · format {{version}}"

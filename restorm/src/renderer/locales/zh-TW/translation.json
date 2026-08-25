@@ -2293,7 +2293,12 @@
       },
       "questions": {
         "title": "範本問題"
-      }
+      },
+      "errorTitle": "產生失敗",
+      "source": "來源",
+      "destination": "目標",
+      "expand": "展開",
+      "collapse": "摺疊"
     },
     "statusbar": {
       "format": "設計 · 格式 {{version}}"

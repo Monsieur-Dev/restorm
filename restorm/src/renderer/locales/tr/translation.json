@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Şablon soruları"
-      }
+      },
+      "errorTitle": "Oluşturma başarısız oldu",
+      "source": "Kaynak",
+      "destination": "Hedef",
+      "expand": "Genişlet",
+      "collapse": "Daralt"
     },
     "statusbar": {
       "format": "tasarım · biçim {{version}}"

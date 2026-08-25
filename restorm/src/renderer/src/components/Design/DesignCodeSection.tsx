@@ -13,10 +13,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
+  ControlGroup,
   GatedControl,
   InputBox,
   Modal,
   ScrollableElement,
+  StaticPane,
   Tabs,
   toasterService,
   useAuthState
@@ -24,6 +26,8 @@ import {
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DesignCodegenGeneralVariables } from './DesignCodegenGeneralVariables'
 import { DesignTemplateQuestions } from './DesignTemplateQuestions'
+import { DesignCodeErrorView } from './DesignCodeErrorView'
+import { useCollapsedCodeTemplates } from '../../hooks/useCollapsedCodeTemplates'
 import { RoundActionButton } from '../common/RoundActionButton'
 import type {
   ApiDesign,
@@ -35,7 +39,7 @@ import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { generateUniqueId } from '../../../../shared/utils/reidentifyTree'
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { assignDesignSection } from './designMutations'
-import { officialLabel } from './designOfficialTemplates'
+import { officialLabel, officialRepo } from './designOfficialTemplates'
 import { DesignTemplateLibraryModal } from './DesignTemplateLibraryModal'
 import { loadRecentTemplates, pushRecentTemplate, type RecentTemplate } from './designCodegenRecents'
 
@@ -59,6 +63,10 @@ export const DesignCodeSection: React.FC<{
   const [generating, setGenerating] = useState(false)
   const [preview, setPreview] = useState<PreviewState | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  // A generation/extraction FAILURE (often a multi-line sandbox traceback) —
+  // shown read-only in a CodeEditor so it stays legible, separate from the short
+  // `message` info line.
+  const [errorText, setErrorText] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   // Current Copier answers per template, lifted from the questions form so
   // generate can pass them (they are persisted to the output's .copier-answers
@@ -67,6 +75,8 @@ export const DesignCodeSection: React.FC<{
   const onAnswersChange = useCallback((templateId: string, answers: Record<string, unknown>): void => {
     setAnswersByTemplate((prev) => ({ ...prev, [templateId]: answers }))
   }, [])
+  // Collapsed/expanded state of each template pane, persisted in the user profile.
+  const { isCollapsed, toggle: toggleCollapsed } = useCollapsedCodeTemplates()
 
   useEffect(() => {
     void loadRecentTemplates().then(setRecents)
@@ -91,13 +101,18 @@ export const DesignCodeSection: React.FC<{
     []
   )
 
-  const sourceSummary = useCallback(
+  // The GitHub repo URL (or local path) shown on the "Source" line.
+  const sourceUrl = useCallback(
     (source: DesignTemplateSource): string => {
-      if (source.kind === 'official') return t('design.code.library.officialTag', 'Official')
-      if (source.kind === 'repo') return source.repo
-      return source.path
+      if (source.kind === 'local') return source.path
+      if (source.kind === 'repo') {
+        const url = `https://github.com/${source.repo}`
+        return source.ref !== undefined && source.ref !== '' ? `${url} @ ${source.ref}` : url
+      }
+      const repo = officialRepo(source.id)
+      return repo !== undefined ? `https://github.com/${repo}` : officialLabel(source.id)
     },
-    [t]
+    []
   )
 
   const addTemplate = useCallback(
@@ -149,6 +164,7 @@ export const DesignCodeSection: React.FC<{
     async (tpl: DesignCodegenTemplate) => {
       setActiveId(tpl.id)
       setMessage(null)
+      setErrorText(null)
       setPreview(null)
       setGenerating(true)
       try {
@@ -159,7 +175,7 @@ export const DesignCodeSection: React.FC<{
           setPreview({ manifest: result.manifest, preview: result.preview, log: result.log ?? [] })
           void pushRecentTemplate({ source: tpl.source, label: labelFor(tpl) })
         } else {
-          setMessage(result?.error ?? t('design.code.failed', 'The generation failed'))
+          setErrorText(result?.error ?? t('design.code.failed', 'The generation failed'))
         }
       } finally {
         setGenerating(false)
@@ -191,7 +207,7 @@ export const DesignCodeSection: React.FC<{
         setActiveId(null)
         setMessage(null)
       } else {
-        setMessage(result?.error ?? t('design.code.failed', 'The generation failed'))
+        setErrorText(result?.error ?? t('design.code.failed', 'The generation failed'))
       }
     },
     [design.id, t]
@@ -201,6 +217,7 @@ export const DesignCodeSection: React.FC<{
     void window.restorm?.designCodegen.discard(design.id)
     setPreview(null)
     setActiveId(null)
+    setErrorText(null)
   }, [design.id])
 
   const templateTab = (
@@ -219,46 +236,41 @@ export const DesignCodeSection: React.FC<{
           </p>
         )}
 
-        <ul className="design-code-template-list" data-testid="design-code-template-list">
+        <div className="design-code-template-list" data-testid="design-code-template-list">
           {templates.map((tpl) => (
-            <li key={tpl.id} className="design-code-template" data-testid={`design-code-template-${tpl.id}`}>
-              <div className="design-code-template-head">
-                <div className="design-code-template-text">
-                  <span className="design-code-template-title">{labelFor(tpl)}</span>
-                  <span className="design-code-template-source">{sourceSummary(tpl.source)}</span>
-                </div>
-                <div className="design-code-template-output">
-                  <InputBox
-                    value={tpl.outputDir ?? ''}
-                    onChange={(value) => { updateOutput(tpl.id, value) }}
-                    options={{
-                      ariaLabel: t('design.code.output', 'Output folder (absolute, or relative to the project)'),
-                      placeholder: t('design.code.output', 'Output folder (absolute, or relative to the project)')
-                    }}
-                    data-testid={`design-code-output-${tpl.id}`}
-                  />
+            <StaticPane
+              key={tpl.id}
+              className="design-code-template"
+              data-testid={`design-code-template-${tpl.id}`}
+              title={labelFor(tpl)}
+              headerActions={
+                <>
                   <Button
-                    icon="folder-opened"
-                    onClick={() => { void browse(tpl.id, tpl.outputDir) }}
-                    options={{ ariaLabel: t('design.code.browse', 'Choose the output folder') }}
-                    data-testid={`design-code-browse-${tpl.id}`}
+                    secondary
+                    small
+                    icon={isCollapsed(tpl.id) ? 'chevron-right' : 'chevron-down'}
+                    options={{ ariaLabel: isCollapsed(tpl.id) ? t('design.code.expand', 'Expand') : t('design.code.collapse', 'Collapse') }}
+                    onClick={() => { toggleCollapsed(tpl.id) }}
+                    data-testid={`design-code-collapse-${tpl.id}`}
                   />
-                  <Button
-                    icon="link-external"
-                    disabled={(tpl.outputDir ?? '').trim() === ''}
-                    onClick={() => { void window.restorm?.designCodegen.revealOutput(tpl.id, (tpl.outputDir ?? '').trim()) }}
-                    options={{ ariaLabel: t('design.code.openOutput', 'Open the output folder') }}
-                    data-testid={`design-code-open-output-${tpl.id}`}
-                  />
-                </div>
-                <div className="design-code-template-actions">
-                  <Button
-                    icon="trash"
-                    disabled={generating && activeId === tpl.id}
-                    onClick={() => { setPendingDelete(tpl.id) }}
-                    options={{ ariaLabel: t('design.code.remove', 'Remove this template') }}
-                    data-testid={`design-code-remove-${tpl.id}`}
-                  />
+                  <HeaderHoverTooltip label={t('design.code.remove', 'Remove this template')}>
+                    <Button
+                      secondary
+                      small
+                      icon="trash"
+                      disabled={generating && activeId === tpl.id}
+                      options={{ ariaLabel: t('design.code.remove', 'Remove this template') }}
+                      onClick={() => { setPendingDelete(tpl.id) }}
+                      data-testid={`design-code-remove-${tpl.id}`}
+                    />
+                  </HeaderHoverTooltip>
+                </>
+              }
+            >
+              {!isCollapsed(tpl.id) && (
+                <>
+              <div className="design-code-template-top">
+                <div className="design-code-template-play">
                   <GatedControl
                     locked={runLocked}
                     onSubscribe={() => { void subscribeToPro() }}
@@ -283,12 +295,49 @@ export const DesignCodeSection: React.FC<{
                     </HeaderHoverTooltip>
                   </GatedControl>
                 </div>
+                <div className="design-code-template-fields">
+                  <div className="design-code-field-row">
+                    <span className="design-code-field-label">{t('design.code.source', 'Source')}</span>
+                    <span className="design-code-source-value" title={sourceUrl(tpl.source)}>{sourceUrl(tpl.source)}</span>
+                  </div>
+                  <div className="design-code-field-row">
+                    <span className="design-code-field-label">{t('design.code.destination', 'Destination')}</span>
+                    <ControlGroup className="design-code-destination">
+                      <InputBox
+                        value={tpl.outputDir ?? ''}
+                        onChange={(value) => { updateOutput(tpl.id, value) }}
+                        options={{
+                          ariaLabel: t('design.code.output', 'Output folder (absolute, or relative to the project)'),
+                          placeholder: t('design.code.output', 'Output folder (absolute, or relative to the project)')
+                        }}
+                        data-testid={`design-code-output-${tpl.id}`}
+                      />
+                      <Button
+                        icon="folder-opened"
+                        onClick={() => { void browse(tpl.id, tpl.outputDir) }}
+                        options={{ ariaLabel: t('design.code.browse', 'Choose the output folder') }}
+                        data-testid={`design-code-browse-${tpl.id}`}
+                      />
+                      <Button
+                        icon="link-external"
+                        disabled={(tpl.outputDir ?? '').trim() === ''}
+                        onClick={() => { void window.restorm?.designCodegen.revealOutput(tpl.id, (tpl.outputDir ?? '').trim()) }}
+                        options={{ ariaLabel: t('design.code.openOutput', 'Open the output folder') }}
+                        data-testid={`design-code-open-output-${tpl.id}`}
+                      />
+                    </ControlGroup>
+                  </div>
+                </div>
               </div>
 
               <DesignTemplateQuestions template={tpl} onAnswersChange={onAnswersChange} />
 
               {activeId === tpl.id && message !== null && (
                 <p className="design-code-message" data-testid="design-code-message">{message}</p>
+              )}
+
+              {activeId === tpl.id && errorText !== null && (
+                <DesignCodeErrorView text={errorText} />
               )}
 
               {activeId === tpl.id && preview !== null && (
@@ -320,9 +369,11 @@ export const DesignCodeSection: React.FC<{
                   </div>
                 </div>
               )}
-            </li>
+                </>
+              )}
+            </StaticPane>
           ))}
-        </ul>
+        </div>
 
         <div className="design-code-actions">
           <Button

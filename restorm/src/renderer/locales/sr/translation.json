@@ -2295,7 +2295,12 @@
       },
       "questions": {
         "title": "Pitanja šablona"
-      }
+      },
+      "errorTitle": "Generisanje nije uspelo",
+      "source": "Izvor",
+      "destination": "Odredište",
+      "expand": "Proširi",
+      "collapse": "Skupi"
     },
     "statusbar": {
       "format": "dizajn · format {{version}}"

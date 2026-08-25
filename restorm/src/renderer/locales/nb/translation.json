@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Malspørsmål"
-      }
+      },
+      "errorTitle": "Genereringen mislyktes",
+      "source": "Kilde",
+      "destination": "Mål",
+      "expand": "Utvid",
+      "collapse": "Skjul"
     },
     "statusbar": {
       "format": "design · format {{version}}"

@@ -2297,7 +2297,12 @@
       },
       "questions": {
         "title": "Questions du template"
-      }
+      },
+      "errorTitle": "Échec de la génération",
+      "source": "Source",
+      "destination": "Destination",
+      "expand": "Déplier",
+      "collapse": "Replier"
     },
     "statusbar": {
       "format": "design · format {{version}}"

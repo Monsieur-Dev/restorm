@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Preguntas de la plantilla"
-      }
+      },
+      "errorTitle": "Error en la generación",
+      "source": "Origen",
+      "destination": "Destino",
+      "expand": "Expandir",
+      "collapse": "Contraer"
     },
     "statusbar": {
       "format": "diseño · formato {{version}}"

@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Mallin kysymykset"
-      }
+      },
+      "errorTitle": "Luonti epäonnistui",
+      "source": "Lähde",
+      "destination": "Kohde",
+      "expand": "Laajenna",
+      "collapse": "Tiivistä"
     },
     "statusbar": {
       "format": "suunnitelma · muoto {{version}}"

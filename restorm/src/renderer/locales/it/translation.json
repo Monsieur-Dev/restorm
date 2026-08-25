@@ -2294,7 +2294,12 @@
       },
       "questions": {
         "title": "Domande del modello"
-      }
+      },
+      "errorTitle": "Generazione non riuscita",
+      "source": "Origine",
+      "destination": "Destinazione",
+      "expand": "Espandi",
+      "collapse": "Comprimi"
     },
     "statusbar": {
       "format": "design · formato {{version}}"

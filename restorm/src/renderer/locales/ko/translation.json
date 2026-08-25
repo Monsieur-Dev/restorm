@@ -2293,7 +2293,12 @@
       },
       "questions": {
         "title": "템플릿 질문"
-      }
+      },
+      "errorTitle": "생성 실패",
+      "source": "소스",
+      "destination": "대상",
+      "expand": "펼치기",
+      "collapse": "접기"
     },
     "statusbar": {
       "format": "디자인 · 포맷 {{version}}"

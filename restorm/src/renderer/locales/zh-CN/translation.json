@@ -2293,7 +2293,12 @@
       },
       "questions": {
         "title": "模板问题"
-      }
+      },
+      "errorTitle": "生成失败",
+      "source": "源",
+      "destination": "目标",
+      "expand": "展开",
+      "collapse": "折叠"
     },
     "statusbar": {
       "format": "设计 · 格式 {{version}}"

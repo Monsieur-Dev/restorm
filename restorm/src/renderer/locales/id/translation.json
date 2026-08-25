@@ -2293,7 +2293,12 @@
       },
       "questions": {
         "title": "Pertanyaan templat"
-      }
+      },
+      "errorTitle": "Pembuatan gagal",
+      "source": "Sumber",
+      "destination": "Tujuan",
+      "expand": "Perluas",
+      "collapse": "Ciutkan"
     },
     "statusbar": {
       "format": "desain · format {{version}}"

@@ -2296,7 +2296,12 @@
       },
       "questions": {
         "title": "Питання шаблону"
-      }
+      },
+      "errorTitle": "Помилка генерації",
+      "source": "Джерело",
+      "destination": "Призначення",
+      "expand": "Розгорнути",
+      "collapse": "Згорнути"
     },
     "statusbar": {
       "format": "дизайн · формат {{version}}"
