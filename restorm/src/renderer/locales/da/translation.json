@@ -2291,6 +2291,9 @@
       "removeTitle": "Fjern dette Template?",
       "tabs": {
         "template": "Skabelon"
+      },
+      "questions": {
+        "title": "Skabelonspørgsmål"
       }
     },
     "statusbar": {

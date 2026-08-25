@@ -23,6 +23,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DesignCodegenGeneralVariables } from './DesignCodegenGeneralVariables'
+import { DesignTemplateQuestions } from './DesignTemplateQuestions'
 import { RoundActionButton } from '../common/RoundActionButton'
 import type {
   ApiDesign,
@@ -59,6 +60,13 @@ export const DesignCodeSection: React.FC<{
   const [preview, setPreview] = useState<PreviewState | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
+  // Current Copier answers per template, lifted from the questions form so
+  // generate can pass them (they are persisted to the output's .copier-answers
+  // .yml, never on the design). Keyed by template id.
+  const [answersByTemplate, setAnswersByTemplate] = useState<Record<string, Record<string, unknown>>>({})
+  const onAnswersChange = useCallback((templateId: string, answers: Record<string, unknown>): void => {
+    setAnswersByTemplate((prev) => ({ ...prev, [templateId]: answers }))
+  }, [])
 
   useEffect(() => {
     void loadRecentTemplates().then(setRecents)
@@ -145,7 +153,8 @@ export const DesignCodeSection: React.FC<{
       setGenerating(true)
       try {
         const plain = JSON.parse(JSON.stringify(design)) as ApiDesign
-        const result = await window.restorm?.designCodegen.generate(plain, tpl.source)
+        const answers = answersByTemplate[tpl.id]
+        const result = await window.restorm?.designCodegen.generate(plain, tpl.source, answers)
         if (result?.success === true && result.preview !== undefined && result.manifest !== undefined) {
           setPreview({ manifest: result.manifest, preview: result.preview, log: result.log ?? [] })
           void pushRecentTemplate({ source: tpl.source, label: labelFor(tpl) })
@@ -156,7 +165,7 @@ export const DesignCodeSection: React.FC<{
         setGenerating(false)
       }
     },
-    [design, labelFor, t]
+    [design, labelFor, t, answersByTemplate]
   )
 
   const confirmExtract = useCallback(
@@ -275,6 +284,8 @@ export const DesignCodeSection: React.FC<{
                   </GatedControl>
                 </div>
               </div>
+
+              <DesignTemplateQuestions template={tpl} onAnswersChange={onAnswersChange} />
 
               {activeId === tpl.id && message !== null && (
                 <p className="design-code-message" data-testid="design-code-message">{message}</p>

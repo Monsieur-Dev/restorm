@@ -2291,6 +2291,9 @@
       "removeTitle": "Poistetaanko tämä Template?",
       "tabs": {
         "template": "Malli"
+      },
+      "questions": {
+        "title": "Mallin kysymykset"
       }
     },
     "statusbar": {

@@ -1073,6 +1073,24 @@
   flex: 0 0 auto;
 }
 
+.design-code-questions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.design-code-question {
+  display: flex;
+  flex-direction: column;
+}
+
+.design-code-question-help {
+  font-size: 0.85em;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
 .design-code-actions {
   display: flex;
   align-items: center;

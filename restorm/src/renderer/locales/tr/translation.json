@@ -2291,6 +2291,9 @@
       "removeTitle": "Bu Template kaldırılsın mı?",
       "tabs": {
         "template": "Şablon"
+      },
+      "questions": {
+        "title": "Şablon soruları"
       }
     },
     "statusbar": {

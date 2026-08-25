@@ -1405,7 +1405,8 @@ export function registerDesignTools(mcp: McpService): void {
           rendered:
             'Copier-format templates rendered by a sandboxed Jinja2 subset (Pyodide MEMFS) — the template never touches the machine.',
           conventions: [
-            'copier.yml at the template root declares the template questions/answers.',
+            'copier.yml at the template root declares the template QUESTIONS (whole-generation answers, e.g. project_slug) — distinct from the per-entity `.vars.` codegen variables in the manifest.',
+            'answer the questions via generate_design_code\'s `answers`; the effective answers are written to `.copier-answers.yml` in the output folder (Copier round-trip) and reloaded from there next time.',
             '`_templates_suffix: .jinja` — files ending in .jinja are rendered, others copied verbatim.',
             '`_subdirectory` and `_exclude` are honoured.',
             'the design projection is passed as the `ctx` answer (its shape is `contextSchema`).'

@@ -2294,6 +2294,9 @@
       "removeConfirm": "Le template « {{name}} » sera retiré de ce design (les fichiers déjà générés sur le disque ne sont pas touchés).",
       "tabs": {
         "template": "Modèle"
+      },
+      "questions": {
+        "title": "Questions du template"
       }
     },
     "statusbar": {

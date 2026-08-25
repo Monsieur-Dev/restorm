@@ -2291,6 +2291,9 @@
       "removeTitle": "¿Eliminar este Template?",
       "tabs": {
         "template": "Plantilla"
+      },
+      "questions": {
+        "title": "Preguntas de la plantilla"
       }
     },
     "statusbar": {

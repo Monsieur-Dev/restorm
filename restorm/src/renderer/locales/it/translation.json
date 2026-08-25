@@ -2291,6 +2291,9 @@
       "removeTitle": "Rimuovere questo Template?",
       "tabs": {
         "template": "Modello"
+      },
+      "questions": {
+        "title": "Domande del modello"
       }
     },
     "statusbar": {

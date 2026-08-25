@@ -2294,6 +2294,9 @@
       "removeConfirm": "The template “{{name}}” will be removed from this design (generated files on disk are left untouched).",
       "tabs": {
         "template": "Template"
+      },
+      "questions": {
+        "title": "Template questions"
       }
     },
     "statusbar": {

@@ -2290,6 +2290,9 @@
       "removeTitle": "移除此 Template？",
       "tabs": {
         "template": "範本"
+      },
+      "questions": {
+        "title": "範本問題"
       }
     },
     "statusbar": {

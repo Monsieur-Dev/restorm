@@ -1461,6 +1461,20 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('design-codegen:used-variables', source)
       return result as { success: boolean; used?: string[]; error?: string }
     },
+    /** The Copier questions a template declares in its copier.yml (fetches only
+     * that file, cached) — the whole-generation answers the user fills. */
+    getQuestions: async (
+      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:questions', source)
+      return result as { success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }
+    },
+    /** The answers a previous generation saved in an output folder
+     * (`.copier-answers.yml`); relative resolves against the project file. */
+    readAnswers: async (outputDir: string): Promise<{ success: boolean; answers?: Record<string, unknown>; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:read-answers', outputDir)
+      return result as { success: boolean; answers?: Record<string, unknown>; error?: string }
+    },
     /** Write the pending generation under the confirmed folder
      * (relative resolves against the project file). */
     extract: async (designId: string, outputDir: string): Promise<{ success: boolean; root?: string; written?: string[]; error?: string }> => {

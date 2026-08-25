@@ -461,6 +461,8 @@ export const designCodegenVariablesArgs = z.tuple([
 
 export const designCodegenExtractArgs = z.tuple([z.string().min(1), z.string().min(1)])
 export const designCodegenDiscardArgs = z.tuple([z.string().min(1)])
+/** Read the Copier answers saved in an output folder (`.copier-answers.yml`). */
+export const designCodegenReadAnswersArgs = z.tuple([z.string().min(1)])
 export const designPickDirectoryArgs = z.tuple([z.string().optional()])
 
 // Design descriptor export: emitted CONTENT + suggested file name +

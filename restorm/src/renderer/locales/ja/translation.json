@@ -2290,6 +2290,9 @@
       "removeTitle": "この Template を削除しますか？",
       "tabs": {
         "template": "テンプレート"
+      },
+      "questions": {
+        "title": "テンプレートの質問"
       }
     },
     "statusbar": {

@@ -190,6 +190,19 @@ def generate(input_data):
 
     run_hook("post_gen.py", answers, ctx, log)
 
+    # Copier-compatible answers file: record the questions' answers (never the
+    # injected ctx answer nor _-prefixed meta) into the output tree, so
+    # re-opening / re-generating into the same folder — and the real copier
+    # tool — can reload them. Only written when the template actually asks
+    # something, so a question-less template keeps a clean tree (goldens hold).
+    recorded = {k: v for k, v in answers.items() if k != "ctx" and not str(k).startswith("_")}
+    if recorded:
+        answers_path = posixpath.join(OUTPUT_ROOT, ".copier-answers.yml")
+        with open(answers_path, "w", encoding="utf-8") as f:
+            f.write("# Changes here will be overwritten by a re-generation.\n")
+            yaml.safe_dump(recorded, f, default_flow_style=False, sort_keys=True, allow_unicode=True)
+        log.append("wrote .copier-answers.yml")
+
     out = []
     for dirpath, _dirnames, filenames in os.walk(OUTPUT_ROOT):
         for filename in sorted(filenames):

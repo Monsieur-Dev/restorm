@@ -2291,6 +2291,9 @@
       "removeTitle": "Eltávolítja ezt a Template-et?",
       "tabs": {
         "template": "Sablon"
+      },
+      "questions": {
+        "title": "Sablonkérdések"
       }
     },
     "statusbar": {

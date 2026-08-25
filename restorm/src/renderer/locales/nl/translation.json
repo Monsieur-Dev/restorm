@@ -2291,6 +2291,9 @@
       "removeTitle": "Deze Template verwijderen?",
       "tabs": {
         "template": "Sjabloon"
+      },
+      "questions": {
+        "title": "Sjabloonvragen"
       }
     },
     "statusbar": {

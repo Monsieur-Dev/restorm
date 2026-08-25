@@ -2293,6 +2293,9 @@
       "removeTitle": "Usunąć ten Template?",
       "tabs": {
         "template": "Szablon"
+      },
+      "questions": {
+        "title": "Pytania szablonu"
       }
     },
     "statusbar": {

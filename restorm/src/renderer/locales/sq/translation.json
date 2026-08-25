@@ -2291,6 +2291,9 @@
       "removeTitle": "Të hiqet ky Template?",
       "tabs": {
         "template": "Shablloni"
+      },
+      "questions": {
+        "title": "Pyetjet e shabllonit"
       }
     },
     "statusbar": {

@@ -20,6 +20,7 @@ import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { x as tarExtract } from 'tar'
 import { Readable } from 'node:stream'
+import { parse as yamlParse } from 'yaml'
 import { withFirewallBypass } from 'electron-core-ui'
 import { httpGetBytes } from '../../scenarioEngine/codeRuntimes/depsInstaller'
 import { validateAgainstSchema } from '../../../shared/schemaValidate'
@@ -241,6 +242,143 @@ export function readLocalManifestVariables(path: string): TemplateVariableDecl[]
 export async function fetchRemoteManifestVariables(repo: string, ref = 'main'): Promise<TemplateVariableDecl[]> {
   const bytes = await withFirewallBypass(() => httpGetBytes(rawManifestUrl(repo, ref)))
   return readManifestVariables(Buffer.from(bytes).toString('utf-8'))
+}
+
+// ── Copier questions (template answers) ───────────────────────────────
+
+/** A `copier.yml` question surfaced to the user for a whole-generation answer
+ * — Copier's own template parametrization (distinct from `.vars.` codegen
+ * variables, which are per-entity Handlebars). `_`-prefixed Copier meta keys
+ * (`_subdirectory`, `_templates_suffix`…) are NOT questions and never appear. */
+export interface TemplateQuestion {
+  key: string
+  /** Copier answer type; drives the value editor. Unknown types fall back to `str`. */
+  type: 'str' | 'int' | 'float' | 'bool' | 'yaml' | 'json'
+  /** The template's default answer (used to pre-fill and to prune redundant saves). */
+  default?: unknown
+  help?: string
+  /** Allowed values (a Copier `choices` list, or the values of a choices map). */
+  choices?: (string | number)[]
+  multiline?: boolean
+  placeholder?: string
+  secret?: boolean
+}
+
+const COPIER_TYPES = new Set(['str', 'int', 'float', 'bool', 'yaml', 'json'])
+function normalizeQuestionType(raw: unknown): TemplateQuestion['type'] {
+  return typeof raw === 'string' && COPIER_TYPES.has(raw) ? raw as TemplateQuestion['type'] : 'str'
+}
+function inferQuestionType(literal: unknown): TemplateQuestion['type'] {
+  if (typeof literal === 'boolean') return 'bool'
+  if (typeof literal === 'number') return Number.isInteger(literal) ? 'int' : 'float'
+  return 'str'
+}
+/** Copier `choices` is a list (`[a, b]`) or a map (`{Label: value}`); either way
+ * we surface the selectable VALUES as scalars. */
+function normalizeChoices(raw: unknown): (string | number)[] | undefined {
+  const scalar = (v: unknown): string | number | undefined =>
+    typeof v === 'string' || typeof v === 'number' ? v : undefined
+  if (Array.isArray(raw)) {
+    const out = raw.map(scalar).filter((v): v is string | number => v !== undefined)
+    return out.length > 0 ? out : undefined
+  }
+  if (raw !== null && typeof raw === 'object') {
+    const out = Object.values(raw as Record<string, unknown>).map(scalar).filter((v): v is string | number => v !== undefined)
+    return out.length > 0 ? out : undefined
+  }
+  return undefined
+}
+
+/** Extract the user-facing questions from a `copier.yml`'s YAML text — lenient
+ * (no schema enforcement): a mapping of key → spec, skipping `_`-prefixed meta
+ * keys. A bare `key: value` shorthand becomes a typed question defaulting to
+ * that value. */
+export function readCopierQuestions(text: string): TemplateQuestion[] {
+  let parsed: unknown
+  try {
+    parsed = yamlParse(text)
+  } catch {
+    throw new Error('copier.yml is not valid YAML')
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return []
+  const out: TemplateQuestion[] = []
+  for (const [key, spec] of Object.entries(parsed as Record<string, unknown>)) {
+    if (key.startsWith('_')) continue // Copier meta keys are not questions
+    if (spec !== null && typeof spec === 'object' && !Array.isArray(spec)) {
+      const s = spec as Record<string, unknown>
+      const q: TemplateQuestion = { key, type: normalizeQuestionType(s['type']) }
+      if ('default' in s) q.default = s['default']
+      if (typeof s['help'] === 'string') q.help = s['help']
+      const choices = normalizeChoices(s['choices'])
+      if (choices !== undefined) q.choices = choices
+      if (s['multiline'] === true) q.multiline = true
+      if (typeof s['placeholder'] === 'string') q.placeholder = s['placeholder']
+      if (s['secret'] === true) q.secret = true
+      out.push(q)
+    } else {
+      out.push({ key, type: inferQuestionType(spec), default: spec })
+    }
+  }
+  return out
+}
+
+/** `owner/repo` (or a full github URL) → the raw URL of a root file. */
+function rawRepoFileUrl(repo: string, ref: string, file: string): string {
+  const cleaned = repo
+    .replace(/^https?:\/\/github\.com\//, '')
+    .replace(/\.git$/, '')
+    .replace(/\/+$/, '')
+  if (!/^[\w.-]+\/[\w.-]+$/.test(cleaned)) {
+    throw new Error(`not a github repository reference: ${repo}`)
+  }
+  return `https://raw.githubusercontent.com/${cleaned}/${ref}/${file}`
+}
+
+/** The Copier questions of a LOCAL template — reads only its copier.yml/.yaml
+ * (absent → no questions). */
+export function readLocalCopierQuestions(path: string): TemplateQuestion[] {
+  for (const file of ['copier.yml', 'copier.yaml']) {
+    try {
+      return readCopierQuestions(readFileSync(join(path, file), 'utf-8'))
+    } catch { /* try the next filename, else none */ }
+  }
+  return []
+}
+
+/** Read the answers saved by a previous generation from an output folder's
+ * `.copier-answers.yml` (Copier round-trip). Meta keys (`_`-prefixed) are
+ * stripped. Absent / unreadable / non-mapping → `{}` (fall back to defaults). */
+export function readAnswersFile(outputRoot: string): Record<string, unknown> {
+  let text: string
+  try {
+    text = readFileSync(join(outputRoot, '.copier-answers.yml'), 'utf-8')
+  } catch {
+    return {}
+  }
+  let parsed: unknown
+  try {
+    parsed = yamlParse(text)
+  } catch {
+    return {}
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+  const out: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    if (!key.startsWith('_')) out[key] = value
+  }
+  return out
+}
+
+/** The Copier questions of a REMOTE template — fetches ONLY the copier.yml
+ * (not the whole tarball), over the firewall bypass; absent → no questions. */
+export async function fetchRemoteCopierQuestions(repo: string, ref = 'main'): Promise<TemplateQuestion[]> {
+  for (const file of ['copier.yml', 'copier.yaml']) {
+    try {
+      const bytes = await withFirewallBypass(() => httpGetBytes(rawRepoFileUrl(repo, ref, file)))
+      return readCopierQuestions(Buffer.from(bytes).toString('utf-8'))
+    } catch { /* try the next filename, else none */ }
+  }
+  return []
 }
 
 /**

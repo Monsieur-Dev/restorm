@@ -2291,6 +2291,9 @@
       "removeTitle": "Dieses Template entfernen?",
       "tabs": {
         "template": "Vorlage"
+      },
+      "questions": {
+        "title": "Vorlagenfragen"
       }
     },
     "statusbar": {

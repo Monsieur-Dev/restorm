@@ -6,12 +6,12 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach } from 'vitest'
 import { assertSafeRelativePath, extractGeneratedTree } from '../../src/main/services/designCodegen/extractTree'
-import { parseTemplateManifest, templateArchiveUrl, rawManifestUrl, readManifestVariables, scanUsedVariables } from '../../src/main/services/designCodegen/templateSource'
+import { parseTemplateManifest, templateArchiveUrl, rawManifestUrl, readManifestVariables, scanUsedVariables, readCopierQuestions, readAnswersFile } from '../../src/main/services/designCodegen/templateSource'
 import { CODEGEN_CONTEXT_VERSION } from '../../src/shared/design/codegenContext'
 import { designFingerprint } from '../../src/main/services/designCodegen/DesignCodegenService'
 import { buildReferenceApiDesign } from './apiDesignReference'
@@ -181,6 +181,53 @@ describe('scanUsedVariables (discovery)', () => {
   it('dedupes and returns [] when nothing references .vars', () => {
     expect(scanUsedVariables('{{ ctx.design.name }} {{ x.vars.a }} {{ y.vars.a }}')).toEqual(['a'])
     expect(scanUsedVariables('no variables here {{ ctx.models }}')).toEqual([])
+  })
+})
+
+describe('readCopierQuestions (Copier questions)', () => {
+  it('reads typed questions with defaults + help, skipping `_`-prefixed meta', () => {
+    const yml = [
+      'project_slug:',
+      '  type: str',
+      '  default: restorm-api',
+      '  help: The project folder name',
+      'retries:',
+      '  type: int',
+      '  default: 3',
+      '_subdirectory: template',
+      '_templates_suffix: .jinja'
+    ].join('\n')
+    expect(readCopierQuestions(yml)).toEqual([
+      { key: 'project_slug', type: 'str', default: 'restorm-api', help: 'The project folder name' },
+      { key: 'retries', type: 'int', default: 3 }
+    ])
+  })
+
+  it('surfaces choices and a bare `key: value` shorthand (type inferred)', () => {
+    const yml = [
+      'db:',
+      '  type: str',
+      '  choices: [postgres, mysql]',
+      'debug: false'
+    ].join('\n')
+    expect(readCopierQuestions(yml)).toEqual([
+      { key: 'db', type: 'str', choices: ['postgres', 'mysql'] },
+      { key: 'debug', type: 'bool', default: false }
+    ])
+  })
+
+  it('is lenient: returns [] for empty / non-mapping input', () => {
+    expect(readCopierQuestions('')).toEqual([])
+    expect(readCopierQuestions('- a\n- b')).toEqual([])
+  })
+})
+
+describe('readAnswersFile (Copier round-trip)', () => {
+  it('reads saved answers, stripping `_`-prefixed meta; absent → {}', () => {
+    scratch = mkdtempSync(join(tmpdir(), 'codegen-answers-'))
+    expect(readAnswersFile(scratch)).toEqual({})
+    writeFileSync(join(scratch, '.copier-answers.yml'), 'project_slug: my-api\n_src_path: gh:x\n')
+    expect(readAnswersFile(scratch)).toEqual({ project_slug: 'my-api' })
   })
 })
 

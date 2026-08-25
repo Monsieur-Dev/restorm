@@ -2291,6 +2291,9 @@
       "removeTitle": "Αφαίρεση αυτού του Template;",
       "tabs": {
         "template": "Πρότυπο"
+      },
+      "questions": {
+        "title": "Ερωτήσεις προτύπου"
       }
     },
     "statusbar": {

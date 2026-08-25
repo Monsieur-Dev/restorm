@@ -2293,6 +2293,9 @@
       "removeTitle": "Вилучити цей Template?",
       "tabs": {
         "template": "Шаблон"
+      },
+      "questions": {
+        "title": "Питання шаблону"
       }
     },
     "statusbar": {

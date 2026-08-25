@@ -71,7 +71,7 @@ import {
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
   designServerStartArgs, designServerStopArgs, designServerStatusArgs,
   designServerSetForcedArgs, designServerUpdateArgs, designExportDescriptorArgs,
-  designCodegenGenerateArgs, designCodegenVariablesArgs, designCodegenExtractArgs, designCodegenDiscardArgs, designPickDirectoryArgs,
+  designCodegenGenerateArgs, designCodegenVariablesArgs, designCodegenExtractArgs, designCodegenDiscardArgs, designCodegenReadAnswersArgs, designPickDirectoryArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
@@ -1397,6 +1397,35 @@ export function registerRestormIPC(deps: {
   validatedHandle('design-codegen:used-variables', designCodegenVariablesArgs, async (_event, [source]) => {
     try {
       return { success: true, used: await designCodegenService.getTemplateUsedVariables(source) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // The Copier QUESTIONS a template declares in its copier.yml (fetches only that
+  // file, cached) — the template's whole-generation parametrization.
+  validatedHandle('design-codegen:questions', designCodegenVariablesArgs, async (_event, [source]) => {
+    try {
+      return { success: true, questions: await designCodegenService.getTemplateQuestions(source) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Read the answers a previous generation saved in an output folder
+  // (`.copier-answers.yml`) — a relative folder resolves against the project
+  // file, exactly like extract/reveal. Absent → {} (the UI uses copier defaults).
+  validatedHandle('design-codegen:read-answers', designCodegenReadAnswersArgs, (_event, [outputDir]) => {
+    try {
+      let root = outputDir
+      if (!isAbsolute(root)) {
+        const projectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+        if (projectPath === null || projectPath === '') {
+          return { success: false, error: 'a relative output folder needs an open project file' }
+        }
+        root = resolvePath(dirname(projectPath), root)
+      }
+      return { success: true, answers: designCodegenService.readAnswers(root) }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }

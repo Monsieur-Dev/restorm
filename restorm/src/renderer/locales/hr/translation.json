@@ -2292,6 +2292,9 @@
       "removeTitle": "Ukloniti ovaj Template?",
       "tabs": {
         "template": "Predložak"
+      },
+      "questions": {
+        "title": "Pitanja predloška"
       }
     },
     "statusbar": {

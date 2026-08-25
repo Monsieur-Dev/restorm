@@ -2291,6 +2291,9 @@
       "removeTitle": "Fjerne dette Template?",
       "tabs": {
         "template": "Mal"
+      },
+      "questions": {
+        "title": "Malspørsmål"
       }
     },
     "statusbar": {

@@ -2292,6 +2292,9 @@
       "removeTitle": "Eliminați acest Template?",
       "tabs": {
         "template": "Șablon"
+      },
+      "questions": {
+        "title": "Întrebările șablonului"
       }
     },
     "statusbar": {

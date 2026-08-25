@@ -26,10 +26,14 @@ import {
   acquireRemoteTemplate,
   fetchRemoteManifestVariables,
   readLocalManifestVariables,
+  fetchRemoteCopierQuestions,
+  readLocalCopierQuestions,
+  readAnswersFile,
   scanUsedVariables,
   OFFICIAL_TEMPLATES,
   type AcquiredTemplate,
   type TemplateManifest,
+  type TemplateQuestion,
   type TemplateVariableDecl
 } from './templateSource'
 import { extractGeneratedTree, type GeneratedFile } from './extractTree'
@@ -242,6 +246,42 @@ class DesignCodegenService {
     return variables
   }
 
+  private readonly questionsCache = new Map<string, TemplateQuestion[]>()
+
+  /**
+   * The Copier QUESTIONS a template declares in its `copier.yml` — the
+   * template's own whole-generation parametrization (e.g. `project_slug`),
+   * distinct from the per-entity `.vars.` codegen variables. Fetches ONLY the
+   * copier.yml (cached per source); a template without one returns `[]`.
+   */
+  async getTemplateQuestions(source: TemplateSourceRef): Promise<TemplateQuestion[]> {
+    const key = sourceCacheKey(source)
+    const cached = this.questionsCache.get(key)
+    if (cached !== undefined) return cached
+    let questions: TemplateQuestion[]
+    if (source.kind === 'local') {
+      questions = readLocalCopierQuestions(source.path)
+    } else {
+      const repo = source.kind === 'official'
+        ? OFFICIAL_TEMPLATES.find((t) => t.id === source.id)?.repo
+        : source.repo
+      if (repo === undefined) throw new Error(`unknown official template: ${source.id}`)
+      questions = await fetchRemoteCopierQuestions(repo, source.kind === 'repo' ? (source.ref ?? 'main') : 'main')
+    }
+    this.questionsCache.set(key, questions)
+    return questions
+  }
+
+  /**
+   * The answers a previous generation saved in an output folder's
+   * `.copier-answers.yml` (Copier round-trip). NOT cached — it is re-read every
+   * time the output folder is (re)selected, so switching targets reloads that
+   * folder's answers. Absent → `{}` (the UI then falls back to copier defaults).
+   */
+  readAnswers(outputRoot: string): Record<string, unknown> {
+    return readAnswersFile(outputRoot)
+  }
+
   private readonly usedVarsCache = new Map<string, string[]>()
 
   /**
@@ -312,6 +352,7 @@ class DesignCodegenService {
   clear(): void {
     this.pending.clear()
     this.variablesCache.clear()
+    this.questionsCache.clear()
     this.usedVarsCache.clear()
   }
 }

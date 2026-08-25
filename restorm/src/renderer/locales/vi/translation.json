@@ -2290,6 +2290,9 @@
       "removeTitle": "Xóa Template này?",
       "tabs": {
         "template": "Mẫu"
+      },
+      "questions": {
+        "title": "Câu hỏi mẫu"
       }
     },
     "statusbar": {

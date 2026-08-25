@@ -2291,6 +2291,9 @@
       "removeTitle": "Ta bort detta Template?",
       "tabs": {
         "template": "Mall"
+      },
+      "questions": {
+        "title": "Mallfrågor"
       }
     },
     "statusbar": {

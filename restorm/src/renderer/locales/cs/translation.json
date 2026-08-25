@@ -2293,6 +2293,9 @@
       "removeTitle": "Odebrat tento Template?",
       "tabs": {
         "template": "Šablona"
+      },
+      "questions": {
+        "title": "Otázky šablony"
       }
     },
     "statusbar": {

@@ -2290,6 +2290,9 @@
       "removeTitle": "이 Template을(를) 제거하시겠습니까?",
       "tabs": {
         "template": "템플릿"
+      },
+      "questions": {
+        "title": "템플릿 질문"
       }
     },
     "statusbar": {

@@ -2290,6 +2290,9 @@
       "removeTitle": "Hapus Template ini?",
       "tabs": {
         "template": "Templat"
+      },
+      "questions": {
+        "title": "Pertanyaan templat"
       }
     },
     "statusbar": {
