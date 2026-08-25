@@ -259,6 +259,8 @@ export interface TemplateQuestion {
   help?: string
   /** Allowed values (a Copier `choices` list, or the values of a choices map). */
   choices?: (string | number)[]
+  /** Copier `multiselect: true` — pick several of `choices`. */
+  multiselect?: boolean
   multiline?: boolean
   placeholder?: string
   secret?: boolean
@@ -311,6 +313,7 @@ export function readCopierQuestions(text: string): TemplateQuestion[] {
       if (typeof s['help'] === 'string') q.help = s['help']
       const choices = normalizeChoices(s['choices'])
       if (choices !== undefined) q.choices = choices
+      if (s['multiselect'] === true) q.multiselect = true
       if (s['multiline'] === true) q.multiline = true
       if (typeof s['placeholder'] === 'string') q.placeholder = s['placeholder']
       if (s['secret'] === true) q.secret = true

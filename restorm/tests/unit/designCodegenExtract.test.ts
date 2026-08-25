@@ -216,6 +216,13 @@ describe('readCopierQuestions (Copier questions)', () => {
     ])
   })
 
+  it('captures multiselect + choices', () => {
+    const yml = ['features:', '  type: str', '  multiselect: true', '  choices: [auth, cache, search]'].join('\n')
+    expect(readCopierQuestions(yml)).toEqual([
+      { key: 'features', type: 'str', choices: ['auth', 'cache', 'search'], multiselect: true }
+    ])
+  })
+
   it('is lenient: returns [] for empty / non-mapping input', () => {
     expect(readCopierQuestions('')).toEqual([])
     expect(readCopierQuestions('- a\n- b')).toEqual([])

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox, SelectBox, Toggle, type ISelectData } from 'electron-core-ui/renderer'
+import { CodeEditor, InputBox, MultiSelectCombo, SelectBox, Toggle, type ISelectData } from 'electron-core-ui/renderer'
 import type { DesignCodegenTemplate } from '../../../../shared/types/collections'
 
 /** One Copier question, as surfaced by the main process (`copier.yml`). */
@@ -10,6 +10,7 @@ interface CopierQuestion {
   default?: unknown
   help?: string
   choices?: (string | number)[]
+  multiselect?: boolean
   multiline?: boolean
   placeholder?: string
   secret?: boolean
@@ -20,6 +21,12 @@ function toDisplay(value: unknown): string {
   if (typeof value === 'string') return value
   if (typeof value === 'number' || typeof value === 'boolean') return String(value)
   return JSON.stringify(value)
+}
+
+/** A multiselect answer as a list of scalar strings (from an array, or empty). */
+function toStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((v): v is string | number => typeof v === 'string' || typeof v === 'number').map(String)
 }
 
 /** Coerce an edited string back to the question's type (mirrors Copier's typing
@@ -104,7 +111,7 @@ export const DesignTemplateQuestions: React.FC<{
       <h4 className="design-settings-group-title">{t('design.code.questions.title', 'Template questions')}</h4>
       {questions.map((q) => (
         <div key={q.key} className="design-code-question" data-testid={`design-code-question-${template.id}-${q.key}`}>
-          <label className="design-field">
+          <div className="design-field">
             <span className="design-field-label">{q.key}</span>
             {q.help !== undefined && q.help !== '' && (
               <span className="design-code-question-help">{q.help}</span>
@@ -118,34 +125,56 @@ export const DesignTemplateQuestions: React.FC<{
                   data-testid={`design-code-answer-${template.id}-${q.key}`}
                 />
                 )
-              : q.choices !== undefined && q.choices.length > 0
+              : q.multiselect === true && q.choices !== undefined && q.choices.length > 0
                 ? (
-                  <SelectBox
-                    id={`design-code-answer-${template.id}-${q.key}`}
-                    className=""
-                    options={q.choices.map((c) => ({ text: String(c) }))}
-                    selected={Math.max(0, q.choices.findIndex((c) => String(c) === toDisplay(values[q.key])))}
-                    onDidSelect={(data: ISelectData) => {
-                      const picked = q.choices?.[data.index]
-                      if (picked !== undefined) setValue(q.key, picked)
-                    }}
-                    selectBoxOptions={{ ariaLabel: q.key, useCustomDrawn: true }}
+                  <MultiSelectCombo
+                    options={q.choices.map((c) => ({ value: String(c), label: String(c) }))}
+                    selected={toStringList(values[q.key])}
+                    onChange={(next) => { setValue(q.key, next) }}
+                    placeholder={q.placeholder ?? q.key}
                     data-testid={`design-code-answer-${template.id}-${q.key}`}
                   />
                   )
-                : (
-                  <InputBox
-                    value={toDisplay(values[q.key])}
-                    onChange={(value) => { setValue(q.key, coerce(value, q.type)) }}
-                    options={{
-                      type: 'text',
-                      ariaLabel: q.key,
-                      ...(q.placeholder !== undefined ? { placeholder: q.placeholder } : {})
-                    }}
-                    data-testid={`design-code-answer-${template.id}-${q.key}`}
-                  />
-                  )}
-          </label>
+                : q.choices !== undefined && q.choices.length > 0
+                  ? (
+                    <SelectBox
+                      id={`design-code-answer-${template.id}-${q.key}`}
+                      className=""
+                      options={q.choices.map((c) => ({ text: String(c) }))}
+                      selected={Math.max(0, q.choices.findIndex((c) => String(c) === toDisplay(values[q.key])))}
+                      onDidSelect={(data: ISelectData) => {
+                        const picked = q.choices?.[data.index]
+                        if (picked !== undefined) setValue(q.key, picked)
+                      }}
+                      selectBoxOptions={{ ariaLabel: q.key, useCustomDrawn: true }}
+                      data-testid={`design-code-answer-${template.id}-${q.key}`}
+                    />
+                    )
+                  : q.type === 'json' || q.type === 'yaml'
+                    ? (
+                      <div className="design-code-answer-editor" data-testid={`design-code-answer-${template.id}-${q.key}`}>
+                        <CodeEditor
+                          value={toDisplay(values[q.key])}
+                          language={q.type}
+                          height="120px"
+                          onChange={(value) => { setValue(q.key, value ?? '') }}
+                          options={{ minimap: { enabled: false }, lineNumbers: 'off', scrollBeyondLastLine: false, folding: false }}
+                        />
+                      </div>
+                      )
+                    : (
+                      <InputBox
+                        value={toDisplay(values[q.key])}
+                        onChange={(value) => { setValue(q.key, coerce(value, q.type)) }}
+                        options={{
+                          type: 'text',
+                          ariaLabel: q.key,
+                          ...(q.placeholder !== undefined ? { placeholder: q.placeholder } : {})
+                        }}
+                        data-testid={`design-code-answer-${template.id}-${q.key}`}
+                      />
+                      )}
+          </div>
         </div>
       ))}
     </div>

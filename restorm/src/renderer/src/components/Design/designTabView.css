@@ -1008,19 +1008,42 @@
   margin: 8px 0 12px;
 }
 
-.design-code-template-list {
-  margin: 8px 0 0;
-  padding: 0;
+/* The Template tab fills its Tabs panel so the SplitView can distribute height
+   among the template panes (like the sidebar's SplitView). */
+.design-code-template-tab {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  height: 100%;
+  min-height: 0;
 }
 
-/* Each template is an ECUI StaticPane; stack its body's blocks. */
-.design-code-template .static-pane-body {
+.design-code-template-tab > .design-section-subtitle,
+.design-code-template-tab > .design-code-actions,
+.design-code-template-tab > .design-code-empty {
+  flex: 0 0 auto;
+}
+
+/* The SplitView of template panes fills the space between the subtitle and the
+   add-template row. */
+.design-code-template-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 8px 0;
+}
+
+/* Scrollable root inside each pane, so tall content (questions, preview,
+   error) scrolls within the pane instead of pushing the layout. */
+.design-code-template-scroll {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Each template pane's body: stacked blocks, scrolling inside the pane. */
+.design-code-template-body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 4px 2px 8px;
 }
 
 /* Top row: the play button (left column) and the source/destination fields
@@ -1095,6 +1118,13 @@
   font-size: 0.85em;
   opacity: 0.7;
   margin-bottom: 4px;
+}
+
+/* json/yaml answers edit in a bordered CodeEditor. */
+.design-code-answer-editor {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .design-code-actions {

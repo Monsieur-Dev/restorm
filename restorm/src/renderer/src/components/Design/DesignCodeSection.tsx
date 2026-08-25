@@ -17,8 +17,9 @@ import {
   GatedControl,
   InputBox,
   Modal,
+  Pane,
   ScrollableElement,
-  StaticPane,
+  SplitView,
   Tabs,
   toasterService,
   useAuthState
@@ -75,8 +76,12 @@ export const DesignCodeSection: React.FC<{
   const onAnswersChange = useCallback((templateId: string, answers: Record<string, unknown>): void => {
     setAnswersByTemplate((prev) => ({ ...prev, [templateId]: answers }))
   }, [])
-  // Collapsed/expanded state of each template pane, persisted in the user profile.
-  const { isCollapsed, toggle: toggleCollapsed } = useCollapsedCodeTemplates()
+  // Collapsed/expanded state of each template pane, persisted in the user
+  // profile. `loaded` gates the SplitView (its panes read defaultCollapsed once).
+  const { loaded: collapseLoaded, collapsedIds, setCollapsedIds } = useCollapsedCodeTemplates()
+  const onPaneCollapsedChange = useCallback((mask: boolean[]): void => {
+    setCollapsedIds(templates.filter((_, i) => mask[i] === true).map((tpl) => tpl.id))
+  }, [templates, setCollapsedIds])
 
   useEffect(() => {
     void loadRecentTemplates().then(setRecents)
@@ -201,7 +206,8 @@ export const DesignCodeSection: React.FC<{
           body: t('design.code.extracted', '{{count}} file(s) written to {{root}}', {
             count: result.written?.length ?? 0,
             root: result.root ?? outputDir
-          })
+          }),
+          durationMs: 5000
         })
         setPreview(null)
         setActiveId(null)
@@ -221,8 +227,7 @@ export const DesignCodeSection: React.FC<{
   }, [design.id])
 
   const templateTab = (
-    <ScrollableElement className="design-section-scroll">
-      <div className="design-code-template-tab">
+    <div className="design-code-template-tab">
         <p className="design-section-subtitle">
           {t(
             'design.code.subtitle',
@@ -236,39 +241,36 @@ export const DesignCodeSection: React.FC<{
           </p>
         )}
 
-        <div className="design-code-template-list" data-testid="design-code-template-list">
+        {collapseLoaded && templates.length > 0 && (
+        <SplitView
+          className="design-code-template-list"
+          data-testid="design-code-template-list"
+          orientation="vertical"
+          onCollapsedChange={onPaneCollapsedChange}
+        >
           {templates.map((tpl) => (
-            <StaticPane
+            <Pane
               key={tpl.id}
-              className="design-code-template"
-              data-testid={`design-code-template-${tpl.id}`}
               title={labelFor(tpl)}
+              minSize={44}
+              defaultCollapsed={collapsedIds.has(tpl.id)}
+              alwaysShowHeaderActions
               headerActions={
-                <>
+                <HeaderHoverTooltip label={t('design.code.remove', 'Remove this template')}>
                   <Button
                     secondary
                     small
-                    icon={isCollapsed(tpl.id) ? 'chevron-right' : 'chevron-down'}
-                    options={{ ariaLabel: isCollapsed(tpl.id) ? t('design.code.expand', 'Expand') : t('design.code.collapse', 'Collapse') }}
-                    onClick={() => { toggleCollapsed(tpl.id) }}
-                    data-testid={`design-code-collapse-${tpl.id}`}
+                    icon="trash"
+                    disabled={generating && activeId === tpl.id}
+                    options={{ ariaLabel: t('design.code.remove', 'Remove this template') }}
+                    onClick={() => { setPendingDelete(tpl.id) }}
+                    data-testid={`design-code-remove-${tpl.id}`}
                   />
-                  <HeaderHoverTooltip label={t('design.code.remove', 'Remove this template')}>
-                    <Button
-                      secondary
-                      small
-                      icon="trash"
-                      disabled={generating && activeId === tpl.id}
-                      options={{ ariaLabel: t('design.code.remove', 'Remove this template') }}
-                      onClick={() => { setPendingDelete(tpl.id) }}
-                      data-testid={`design-code-remove-${tpl.id}`}
-                    />
-                  </HeaderHoverTooltip>
-                </>
+                </HeaderHoverTooltip>
               }
             >
-              {!isCollapsed(tpl.id) && (
-                <>
+              <ScrollableElement className="design-code-template-scroll">
+              <div className="design-code-template-body" data-testid={`design-code-template-${tpl.id}`}>
               <div className="design-code-template-top">
                 <div className="design-code-template-play">
                   <GatedControl
@@ -369,11 +371,12 @@ export const DesignCodeSection: React.FC<{
                   </div>
                 </div>
               )}
-                </>
-              )}
-            </StaticPane>
+              </div>
+              </ScrollableElement>
+            </Pane>
           ))}
-        </div>
+        </SplitView>
+        )}
 
         <div className="design-code-actions">
           <Button
@@ -389,8 +392,7 @@ export const DesignCodeSection: React.FC<{
             </span>
           )}
         </div>
-      </div>
-    </ScrollableElement>
+    </div>
   )
 
   return (

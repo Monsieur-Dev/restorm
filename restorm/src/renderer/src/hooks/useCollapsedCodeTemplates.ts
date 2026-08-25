@@ -6,6 +6,10 @@ import { useCallback, useEffect, useState } from 'react'
  * a JSON array of collapsed template ids — `SettingValue` is scalar, so it is
  * stored as a string). Template ids are globally unique, so a single key scopes
  * naturally per design. Cross-window changes arrive via `onSettingChanged`.
+ *
+ * `loaded` gates the first render: the SplitView reads each pane's
+ * `defaultCollapsed` once at mount, so the persisted set must be in hand before
+ * the panes mount.
  */
 const STORAGE_KEY = 'design.codegen:collapsedTemplates'
 
@@ -32,30 +36,35 @@ function parseIds(raw: unknown): string[] {
   }
 }
 
-export function useCollapsedCodeTemplates(): { isCollapsed: (id: string) => boolean; toggle: (id: string) => void } {
+export function useCollapsedCodeTemplates(): {
+  loaded: boolean
+  collapsedIds: Set<string>
+  setCollapsedIds: (ids: string[]) => void
+} {
   const [ids, setIds] = useState<Set<string>>(new Set())
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     const api = settingsApi()
-    if (api === undefined) return
     let cancelled = false
-    void api.get(STORAGE_KEY)
-      .then((raw) => { if (!cancelled) setIds(new Set(parseIds(raw))) })
-      .catch(() => { /* keep the default (all expanded) */ })
-    const cleanup = api.onSettingChanged((key, value) => {
+    // Resolve the initial value through a Promise (empty when the service is
+    // absent) so state is only set from an async callback, then unblock render.
+    const load: Promise<unknown> = api === undefined ? Promise.resolve('') : api.get(STORAGE_KEY).catch(() => '')
+    void load.then((raw) => {
+      if (cancelled) return
+      setIds(new Set(parseIds(raw)))
+      setLoaded(true)
+    })
+    const cleanup = api?.onSettingChanged((key, value) => {
       if (key === STORAGE_KEY) setIds(new Set(parseIds(value)))
     })
-    return () => { cancelled = true; cleanup() }
+    return () => { cancelled = true; cleanup?.() }
   }, [])
 
-  const toggle = useCallback((id: string): void => {
-    const next = new Set(ids)
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    setIds(next)
-    void settingsApi()?.set(STORAGE_KEY, JSON.stringify([...next]))
-  }, [ids])
+  const setCollapsedIds = useCallback((next: string[]): void => {
+    setIds(new Set(next))
+    void settingsApi()?.set(STORAGE_KEY, JSON.stringify(next))
+  }, [])
 
-  const isCollapsed = useCallback((id: string): boolean => ids.has(id), [ids])
-  return { isCollapsed, toggle }
+  return { loaded, collapsedIds: ids, setCollapsedIds }
 }

@@ -1465,9 +1465,9 @@ contextBridge.exposeInMainWorld('restorm', {
      * that file, cached) — the whole-generation answers the user fills. */
     getQuestions: async (
       source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
-    ): Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }> => {
+    ): Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('design-codegen:questions', source)
-      return result as { success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }
+      return result as { success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }
     },
     /** The answers a previous generation saved in an output folder
      * (`.copier-answers.yml`); relative resolves against the project file. */
