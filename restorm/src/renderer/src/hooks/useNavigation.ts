@@ -9,7 +9,7 @@ import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scena
 import { isFolder, isRequest, isScenario, isApiDesign, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import { parseDesignSectionRowId, designSectionRowId } from '../../../shared/design/designSections'
-import { setPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection } from '../services/designSectionIntent'
+import { setPendingDesignSection, peekPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection } from '../services/designSectionIntent'
 import { parseDesignClientRowId, findClientRequest } from '../services/designClientsStore'
 import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/editor'
 
@@ -248,7 +248,10 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     if (isApiDesign(item)) {
       // The design node itself opens Settings — the old "Paramètres" section
       // row is gone, so clicking the design IS how you reach its settings.
-      setPendingDesignSection(item.id, 'settings')
+      // But a caller (e.g. a search result) may have already staged a section
+      // to land on; only default to Settings when nothing is pending, so that
+      // intent isn't clobbered.
+      if (peekPendingDesignSection(item.id) === undefined) setPendingDesignSection(item.id, 'settings')
       openDesignTab(item, breadcrumbs)
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return

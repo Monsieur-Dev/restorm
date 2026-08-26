@@ -4,6 +4,7 @@ import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_ROUTES_TEMP_DIR } from '../../fixtures/design-routes.fixture'
 import { openDesignSection } from '../../../support/designNav'
+import { fillVariableInput } from '../../../support/designGuiDriver'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -123,10 +124,10 @@ When('I add a route to the selected group', async () => {
 
 When('I set the route path to {string}', async ({}, path: string) => {
   const p = requirePage()
-  const input = p.locator('[data-testid="design-route-path-input"]')
-  await input.click()
-  await input.fill(path)
-  await input.blur()
+  // The path is a RestormVariableInputBox (Monaco), testid `design-route-path`
+  // → editor `design-route-path-codeeditor` (no `-input`). Typing fires
+  // syncPathParams, which auto-creates/removes the path-param rows.
+  await fillVariableInput(p, 'design-route-path', path)
   await p.waitForTimeout(500)
 })
 
@@ -217,6 +218,10 @@ When('I open the models section and generate the CRUD of {string}', async ({}, m
   await p.waitForTimeout(400)
   await p.locator('[data-testid="design-model-tabs"] [role="tab"][data-tab-id="settings"]').click()
   await p.locator('[data-testid="design-model-generate-crud"]').click()
+  // Generation opens a confirm modal (replace / auth-writes options); confirm it.
+  await expect(p.locator('[data-testid="design-crud-modal"]')).toBeVisible({ timeout: 5000 })
+  await p.locator('[data-testid="design-crud-confirm"]').click()
+  await expect(p.locator('[data-testid="design-crud-modal"]')).toHaveCount(0, { timeout: 5000 })
   // The generator jumps to the routes section on the fresh group.
   await expect(p.locator('[data-testid="design-routes-section"]')).toBeVisible({ timeout: 5000 })
 })

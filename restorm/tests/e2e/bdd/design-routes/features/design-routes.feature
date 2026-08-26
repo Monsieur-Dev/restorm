@@ -56,7 +56,7 @@ Feature: Design routes editor
   Scenario: Generate the CRUD from the model card
     Given a Pro project carrying an API design is open in the routes editor
     When I open the models section and generate the CRUD of "Order"
-    Then the routes tree shows the group "Orders" with 5 routes
+    Then the routes tree shows the group "Orders" with 6 routes
     When I open the route "Get one Order" of the group "Orders"
     Then the parameter "id" link points at "Order ▸ id"
 

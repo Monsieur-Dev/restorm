@@ -140,9 +140,10 @@ Then('the routes tree shows the group {string} with {int} routes', async ({}, gr
 
 Then('the resolved base line reads {string}', async ({}, expected: string) => {
   const p = requirePage()
-  // The Settings section hosts the resolved-base preview, under the base-path
-  // field; the environment that resolves it is picked in the smart-bar selector.
-  await openSectionOfOpenDesign(p, 'settings')
+  // Settings has no sidebar row (SIDEBAR_DESIGN_SECTIONS excludes it); the
+  // design NODE itself opens Settings, which hosts the resolved-base preview.
+  const testid = await p.locator('[data-testid^="design-tab-view-"]').first().getAttribute('data-testid')
+  await sidebarRow(p, (testid ?? '').replace('design-tab-view-', '')).click()
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-settings-resolved-base"]')).toHaveText(expected, { timeout: 5000 })
 })

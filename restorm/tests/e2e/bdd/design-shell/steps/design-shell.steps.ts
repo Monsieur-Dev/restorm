@@ -75,7 +75,9 @@ When('I expand the design node', async () => {
   if (await collapsedChevron.count() > 0) {
     await collapsedChevron.click()
   }
-  await expect(sidebarRow(p, sectionRowId('settings'))).toBeVisible({ timeout: 5000 })
+  // `settings` is not a sidebar row (SIDEBAR_DESIGN_SECTIONS excludes it); the
+  // first real section row is `models`. Its presence proves the node expanded.
+  await expect(sidebarRow(p, sectionRowId('models'))).toBeVisible({ timeout: 5000 })
 })
 
 When('I click the design group entry {string}', async ({}, section: string) => {
@@ -271,6 +273,8 @@ Then('the design settings are editable', async () => {
 // behind the plan gate (visible-but-locked, with the upsell).
 Then('the design serve spin is plan-gated', async () => {
   const p = requirePage()
+  // The serve spin (and its plan gate) lives in the Server section, not Settings.
+  await openDesignSection(p, DESIGN_ID, 'server')
   await expect(p.locator('[data-testid="design-serve-gate"]')).toHaveCount(1, { timeout: 5000 })
 })
 

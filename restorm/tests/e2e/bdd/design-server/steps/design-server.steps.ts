@@ -186,6 +186,9 @@ When('I force the {string} route to answer 404', async ({}, routeSummary: string
   const routeId = ROUTE_IDS[routeSummary]
   if (routeId === undefined) throw new Error(`unknown sample route "${routeSummary}"`)
   await focusDesignTab(p)
+  // Focusing the design node opens Settings, which unmounts the run panel; the
+  // run panel lives only in the Server section, so re-open it.
+  await openDesignSection(p, DESIGN_ID, 'server')
   await p.locator(`[data-testid="design-run-route-header-${routeId}"]`).click()
   await p.locator(`[data-testid="design-run-return-404-${routeId}"]`).click()
   await expect(p.locator(`[data-testid="design-run-forced-pill-${routeId}"]`)).toBeVisible({ timeout: 5000 })
@@ -196,6 +199,7 @@ When('I reset the {string} route to the design response', async ({}, routeSummar
   const routeId = ROUTE_IDS[routeSummary]
   if (routeId === undefined) throw new Error(`unknown sample route "${routeSummary}"`)
   await focusDesignTab(p)
+  await openDesignSection(p, DESIGN_ID, 'server')
   const header = p.locator(`[data-testid="design-run-route-header-${routeId}"]`)
   const defaultBullet = p.locator(`[data-testid="design-run-return-default-${routeId}"]`)
   if (!(await defaultBullet.isVisible().catch(() => false))) {

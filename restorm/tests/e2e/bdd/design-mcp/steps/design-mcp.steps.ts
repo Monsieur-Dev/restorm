@@ -315,7 +315,10 @@ Then('the served WSDL describes the {string} operation', async ({}, operation: s
 })
 
 Then('the {string} protocol pill shows enabled', async ({}, protocol: string) => {
-  await expect(requirePage().locator(`[data-testid="design-protocol-${protocol}"]`)).toHaveClass(/active/, { timeout: 5000 })
+  const p = requirePage()
+  // The protocol pills live in the Server section; the tab opens on Settings.
+  await openDesignSection(p, designId, 'server')
+  await expect(p.locator(`[data-testid="design-protocol-${protocol}"]`)).toHaveClass(/active/, { timeout: 5000 })
 })
 
 When('the {string} protocol pill is clicked', async ({}, protocol: string) => {
