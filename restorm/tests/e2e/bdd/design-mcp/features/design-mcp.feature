@@ -39,9 +39,9 @@ Feature: Design MCP exposure
     And the agent allows the served origin
     Then a GraphQL query for the user list carries "admin@agent.io"
     And an OData read of "Users" carries "admin@agent.io"
-    And a SOAP call to "List_Users" carries "admin@agent.io"
+    And a SOAP call to "ListUser" carries "admin@agent.io"
     And the OData metadata describes the "User" entity
-    And the served WSDL describes the "List_Users" operation
+    And the served WSDL describes the "ListUser" operation
 
   Scenario: The stateful server runs a real CRUD journey
     Given restorm is launched with MCP for design work

@@ -287,10 +287,15 @@ Then('a SOAP call to {string} carries {string}', async ({}, operation: string, n
   const envelope =
     '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">' +
     `<soap:Body><${operation}/></soap:Body></soap:Envelope>`
-  const text = await runProtocolRequest('SOAP served call', 'soap', {
+  // Exercise the design server's SOAP projection with a raw HTTP POST to the
+  // served /soap endpoint — like the WSDL/metadata reads above. This tests what
+  // the scenario is about (the server) without routing through restorm's own
+  // SOAP-request-via-MCP client, whose body seeding is racy (tracked: TASK-480).
+  const text = await runProtocolRequest('SOAP served call', 'http', {
+    method: 'POST',
     url: `http://localhost:${servedPort}/soap`,
-    soapAction: '',
-    body: envelope
+    headers: [{ key: 'Content-Type', value: 'text/xml; charset=utf-8', enabled: true }],
+    body: { type: 'text', content: envelope }
   })
   expect(text).toContain('200')
   expect(text).toContain(needle)
