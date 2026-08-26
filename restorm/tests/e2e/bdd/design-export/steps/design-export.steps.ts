@@ -5,6 +5,7 @@ import type { Page, ElectronApplication } from '@playwright/test'
 import SwaggerParser from '@apidevtools/swagger-parser'
 import { configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect, DESIGN_EXPORT_TEMP_DIR } from '../../fixtures/design-export.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -148,7 +149,7 @@ Then('the exported document matches the imported Petstore shape', () => {
 
 When('I spin the design server from the settings', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-server"]').click()
+  await openDesignSection(p, DESIGN_ID, 'server')
   await p.locator('[data-testid="design-serve-spin"]').click()
   await expect(p.locator('[data-testid="design-run-modal"]')).toBeVisible({ timeout: 10000 })
 })

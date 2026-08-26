@@ -4,6 +4,7 @@ import { createServer, type Server } from 'net'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_SERVER_TEMP_DIR } from '../../fixtures/design-server.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -77,7 +78,7 @@ Given('a Pro project carrying a servable API design is open on its settings', as
   await p.waitForTimeout(800)
   await focusDesignTab(p)
   // The serve controls + run panel now live in their own Server section.
-  await p.locator('[data-testid="design-rail-server"]').click()
+  await openDesignSection(p, DESIGN_ID, 'server')
   await expect(p.locator('[data-testid="design-serve-block"]')).toBeVisible({ timeout: 5000 })
 })
 
@@ -171,7 +172,7 @@ Then('the response body contains {string}', async ({}, needle: string) => {
 Then('the run panel counts calls on the design routes', async () => {
   const p = requirePage()
   await focusDesignTab(p)
-  await p.locator('[data-testid="design-rail-server"]').click()
+  await openDesignSection(p, DESIGN_ID, 'server')
   await expect(p.locator('[data-testid="design-run-modal"]')).toBeVisible({ timeout: 10000 })
   // List route answered twice (once with auth, once without — both 200, auth
   // is declarative only), the single fetch once, the invalid create once.
@@ -206,7 +207,7 @@ When('I reset the {string} route to the design response', async ({}, routeSummar
 
 /** Open the models section and select the model card by its name. */
 async function openModel(p: Page, modelName: string): Promise<void> {
-  await p.locator('[data-testid="design-rail-models"]').click()
+  await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
   await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: modelName }).first().click()
@@ -215,7 +216,7 @@ async function openModel(p: Page, modelName: string): Promise<void> {
 
 /** Back to the Server section (where the spin button + run panel live). */
 async function backToSettings(p: Page): Promise<void> {
-  await p.locator('[data-testid="design-rail-server"]').click()
+  await openDesignSection(p, DESIGN_ID, 'server')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-serve-block"]')).toBeVisible({ timeout: 5000 })
 }

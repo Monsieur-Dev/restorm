@@ -3,6 +3,7 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_ROUTES_TEMP_DIR } from '../../fixtures/design-routes.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -22,7 +23,7 @@ function sidebarRow(p: Page, itemId: string): ReturnType<Page['locator']> {
 }
 
 async function openSection(p: Page, section: 'routes' | 'models'): Promise<void> {
-  await p.locator(`[data-testid="design-rail-${section}"]`).click()
+  await openDesignSection(p, DESIGN_ID, section)
   await p.mouse.move(700, 450)
   await expect(p.locator(`[data-testid="design-${section}-section"]`)).toBeVisible({ timeout: 5000 })
 }

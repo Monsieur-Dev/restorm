@@ -2216,6 +2216,8 @@
       "deleteNoImpact": "이 모델은 어디에서도 사용되지 않습니다.",
       "deleteImpactIntro": "이 모델을 삭제하면 다음이 업데이트됩니다:",
       "deleteImpactChild": "{{name}}이(가) 상속을 잃습니다(자체 속성은 유지됨)",
+      "description": "설명",
+      "descriptionPlaceholder": "이 모델이 나타내는 것 (선택 사항)",
       "newName": "NewModel",
       "selectPrompt": "모델을 선택하거나 새로 만드세요.",
       "tabs": {
@@ -2238,7 +2240,9 @@
       "valueHeader": "값",
       "newName": "NewEnum",
       "selectPrompt": "enum을 선택하거나 새로 만드세요 — 속성 타입으로 사용할 수 있는 닫힌 값 집합입니다.",
-      "nameHeader": "이름"
+      "nameHeader": "이름",
+      "description": "설명",
+      "descriptionPlaceholder": "이 열거형이 나타내는 것 (선택 사항)"
     },
     "documentation": {},
     "code": {

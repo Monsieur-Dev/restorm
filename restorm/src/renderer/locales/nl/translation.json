@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Dit model wordt nergens gebruikt.",
       "deleteImpactIntro": "Het verwijderen van dit model werkt bij:",
       "deleteImpactChild": "{{name}} verliest zijn overerving (eigen eigenschappen blijven)",
+      "description": "Beschrijving",
+      "descriptionPlaceholder": "Wat dit model vertegenwoordigt (optioneel)",
       "newName": "NewModel",
       "selectPrompt": "Selecteer een model of maak er een.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Waarde",
       "newName": "NewEnum",
       "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype.",
-      "nameHeader": "Naam"
+      "nameHeader": "Naam",
+      "description": "Beschrijving",
+      "descriptionPlaceholder": "Wat deze enum vertegenwoordigt (optioneel)"
     },
     "documentation": {},
     "code": {

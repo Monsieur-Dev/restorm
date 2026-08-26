@@ -391,7 +391,11 @@ const DesignSettingsSection: React.FC<{
 
           <h3 className="design-settings-group-title">{t('design.settings.api.title', 'API')}</h3>
           <div className="design-settings-grid">
-            <label className="design-field">
+            {/* A div, not a label: a <label> binds to its first labelable
+                descendant, which for a Monaco variable input is the editor's
+                READ-ONLY IME textarea — so clicking the field would focus a dead
+                element instead of the editor. `ariaLabel` carries the a11y name. */}
+            <div className="design-field">
               <span className="design-field-label">{t('design.settings.api.basePath', 'Base path')}</span>
               <RestormVariableInputBox
                 value={design.server?.basePath ?? ''}
@@ -402,7 +406,7 @@ const DesignSettingsSection: React.FC<{
                 ariaLabel={t('design.settings.api.basePath', 'Base path')}
                 data-testid="design-settings-base-path"
               />
-            </label>
+            </div>
             {hasEnvFolder && rawBaseUrl !== '' && (
               <p className="design-route-resolved design-field-full" data-testid="design-settings-resolved-base" data-resolved-url={resolvedBaseUrl}>
                 {resolvedBaseUrl}

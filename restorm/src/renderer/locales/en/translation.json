@@ -2220,6 +2220,8 @@
       "deleteNoImpact": "This model is not used anywhere.",
       "deleteImpactIntro": "Deleting this model will update:",
       "deleteImpactChild": "{{name}} loses its inheritance (its own properties stay)",
+      "description": "Description",
+      "descriptionPlaceholder": "What this model represents (optional)",
       "newName": "NewModel",
       "selectPrompt": "Select a model, or create one.",
       "tabs": {
@@ -2242,7 +2244,9 @@
       "valueHeader": "Value",
       "newName": "NewEnum",
       "selectPrompt": "Select an enum, or create one — a closed set of values usable as a property type.",
-      "nameHeader": "Name"
+      "nameHeader": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "What this enum represents (optional)"
     },
     "documentation": {},
     "code": {

@@ -106,6 +106,24 @@ const designCodegenTestDir = defineBddConfig({
   outputDir: '.features-gen/design-codegen'
 })
 
+const designReconstructTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-reconstruct/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-reconstruct/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-reconstruct'
+})
+
+const designCodegenUpdateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-codegen-update/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-codegen-update/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-codegen-update'
+})
+
+const designReconstructGuiTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-reconstruct-gui/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-reconstruct-gui/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-reconstruct-gui'
+})
+
 const designExportTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/design-export/features/**/*.feature',
   steps: ['tests/e2e/bdd/design-export/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-export.fixture.ts'],
@@ -739,6 +757,24 @@ export default defineConfig({
       // The first generation cold-boots Pyodide in a worker + provisions
       // the engine wheels — same latitude as the other WASM runtimes.
       timeout: 7 * 60 * 1000
+    },
+    {
+      name: 'design-reconstruct',
+      testDir: designReconstructTestDir,
+      // Reconstruction issues a few hundred MCP calls in sequence.
+      timeout: 7 * 60 * 1000
+    },
+    {
+      name: 'design-codegen-update',
+      testDir: designCodegenUpdateTestDir,
+      // Two Pyodide generations (cold-boot on the first).
+      timeout: 7 * 60 * 1000
+    },
+    {
+      name: 'design-reconstruct-gui',
+      testDir: designReconstructGuiTestDir,
+      // Reconstructs the design click-by-click through the GUI.
+      timeout: 10 * 60 * 1000
     },
     {
       name: 'status-bar-context-menu',

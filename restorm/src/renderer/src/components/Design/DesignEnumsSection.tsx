@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { InputBox } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignEnum, CustomValueList } from '../../../../shared/types/collections'
 import { CustomValueListsEditor } from '../Folders/CustomValueListsEditor'
 import { assignDesignSection, uniqueComponentName } from './designMutations'
@@ -64,11 +65,43 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
     assignDesignSection(design, 'enums', enums)
   }, [design])
 
+  // Enum-level description: a concern the shared list model doesn't carry, so
+  // it rides in the values pane via the editor's `renderSelectedListExtra`
+  // slot and writes straight to the selected enum's `doc.description`.
+  const setEnumDescription = useCallback((enumId: string, description: string) => {
+    const enums = design.enums.map((e) => {
+      if (e.id !== enumId) return e
+      const trimmed = description.trim()
+      if (trimmed === '') {
+        const { description: _drop, ...docRest } = e.doc
+        return { ...e, doc: docRest }
+      }
+      return { ...e, doc: { ...e.doc, description } }
+    })
+    assignDesignSection(design, 'enums', enums)
+  }, [design])
+
+  const renderDescription = useCallback((enumId: string): React.ReactNode => {
+    const current = design.enums.find((e) => e.id === enumId)?.doc.description ?? ''
+    return (
+      <label className="design-field design-enum-description">
+        <span className="design-field-label">{t('design.enums.description', 'Description')}</span>
+        <InputBox
+          value={current}
+          onChange={(value) => { setEnumDescription(enumId, value) }}
+          options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.enums.description', 'Description'), placeholder: t('design.enums.descriptionPlaceholder', 'What this enum represents (optional)') }}
+          data-testid="design-enum-description"
+        />
+      </label>
+    )
+  }, [design.enums, setEnumDescription, t])
+
   return (
     <div className="design-section design-enums-section" data-testid="design-enums-section">
       <CustomValueListsEditor
         lists={lists}
         onListsChange={onListsChange}
+        renderSelectedListExtra={renderDescription}
         entriesPersistenceId={`design-enums:${design.id}`}
         wording={{
           listsTitle: t('design.enums.lists', 'Enums'),

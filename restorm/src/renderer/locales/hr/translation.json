@@ -2218,6 +2218,8 @@
       "deleteNoImpact": "Ovaj se model nigdje ne koristi.",
       "deleteImpactIntro": "Brisanje ovog modela ažurirat će:",
       "deleteImpactChild": "{{name}} gubi nasljeđivanje (vlastita svojstva ostaju)",
+      "description": "Opis",
+      "descriptionPlaceholder": "Što ovaj model predstavlja (neobavezno)",
       "newName": "NewModel",
       "selectPrompt": "Odaberite model ili ga izradite.",
       "tabs": {
@@ -2240,7 +2242,9 @@
       "valueHeader": "Vrijednost",
       "newName": "NewEnum",
       "selectPrompt": "Odaberite enum ili ga izradite — zatvoren skup vrijednosti upotrebljiv kao tip svojstva.",
-      "nameHeader": "Naziv"
+      "nameHeader": "Naziv",
+      "description": "Opis",
+      "descriptionPlaceholder": "Što ovaj enum predstavlja (neobavezno)"
     },
     "documentation": {},
     "code": {

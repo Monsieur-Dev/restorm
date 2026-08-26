@@ -3,6 +3,7 @@ import { copyFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_SEARCH_TEMP_DIR } from '../../fixtures/design-search.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -80,7 +81,7 @@ When('I rename the {string} model to {string} from the models section', async ({
   const p = requirePage()
   await p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${DESIGN_ID}"]`).click()
   await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
-  await p.locator('[data-testid="design-rail-models"]').click()
+  await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
   await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: from }).first().click()
@@ -99,7 +100,7 @@ When('I delete the {string} model from the models section', async ({}, name: str
   const p = requirePage()
   await p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${DESIGN_ID}"]`).click()
   await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
-  await p.locator('[data-testid="design-rail-models"]').click()
+  await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 450)
   await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: name }).first().click()
   await expect(p.locator('[data-testid="design-model-name"]')).toContainText(name, { timeout: 5000 })

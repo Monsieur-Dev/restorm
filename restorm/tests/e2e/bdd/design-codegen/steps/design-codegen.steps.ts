@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import type { Page } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect, type LaunchedMcpApp, type McpToolReply } from '../../fixtures/design-mcp.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -81,7 +82,7 @@ When('the design tab is opened on the code section', async () => {
   const p = requirePage()
   await callTool('open_tab', { itemId: designId, kind: 'design' })
   await expect(p.locator(`[data-testid="design-tab-view-${designId}"]`)).toBeVisible({ timeout: 10000 })
-  await p.locator('[data-testid="design-rail-code"]').click()
+  await openDesignSection(p, designId, 'code')
   await expect(p.locator('[data-testid="design-code-section"]')).toBeVisible({ timeout: 5000 })
 })
 
@@ -95,8 +96,14 @@ When('the local fixture template is added', async () => {
   await p.locator('[data-testid="design-template-library-local-input"]').fill(FIXTURE_TEMPLATE)
   await p.locator('[data-testid="design-template-library-local-add"]').click()
   await expect(
-    p.locator('[data-testid="design-code-template-list"] .design-code-template')
+    p.locator('[data-testid="design-code-template-list"] .design-code-template-body')
   ).toHaveCount(1, { timeout: 5000 })
+  // The library is a MULTI-add surface: it stays open (closed via Done). Close
+  // it so it stops covering the code section behind it. In headless the footer
+  // sits under its own scroll overlay, so dispatch the click straight to the
+  // Done button element (fires onClose regardless of what paints on top).
+  await p.locator('[data-testid="design-template-library-done"]').dispatchEvent('click')
+  await expect(p.locator('[data-testid="design-template-library-modal"]')).toHaveCount(0, { timeout: 5000 })
 })
 
 When('the output folder is picked through the system dialog', async () => {
@@ -123,7 +130,8 @@ Then('the preview lists the generated files', async () => {
 
 When('the generated tree is confirmed', async () => {
   await requirePage().locator('[data-testid="design-code-confirm"]').click()
-  await expect(requirePage().locator('[data-testid="design-code-message"]')).toBeVisible({ timeout: 30_000 })
+  // On success the preview panel is dismissed (the result surfaces as a toast).
+  await expect(requirePage().locator('[data-testid="design-code-preview"]')).toHaveCount(0, { timeout: 30_000 })
 })
 
 Then('the rendered project sits in the output folder', () => {

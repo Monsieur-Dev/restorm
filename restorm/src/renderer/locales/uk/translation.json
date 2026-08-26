@@ -2219,6 +2219,8 @@
       "deleteNoImpact": "Ця модель ніде не використовується.",
       "deleteImpactIntro": "Видалення цієї моделі оновить:",
       "deleteImpactChild": "{{name}} втрачає успадкування (власні властивості залишаються)",
+      "description": "Опис",
+      "descriptionPlaceholder": "Що представляє ця модель (необов'язково)",
       "newName": "NewModel",
       "selectPrompt": "Виберіть модель або створіть нову.",
       "tabs": {
@@ -2241,7 +2243,9 @@
       "valueHeader": "Значення",
       "newName": "NewEnum",
       "selectPrompt": "Виберіть енум або створіть новий — закритий набір значень, який можна використовувати як тип властивості.",
-      "nameHeader": "Назва"
+      "nameHeader": "Назва",
+      "description": "Опис",
+      "descriptionPlaceholder": "Що представляє це перелічення (необов'язково)"
     },
     "documentation": {},
     "code": {

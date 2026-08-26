@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Bu model hiçbir yerde kullanılmıyor.",
       "deleteImpactIntro": "Bu modelin silinmesi şunları güncelleyecek:",
       "deleteImpactChild": "{{name}} kalıtımını kaybeder (kendi özellikleri kalır)",
+      "description": "Açıklama",
+      "descriptionPlaceholder": "Bu modelin neyi temsil ettiği (isteğe bağlı)",
       "newName": "NewModel",
       "selectPrompt": "Bir model seçin veya oluşturun.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Değer",
       "newName": "NewEnum",
       "selectPrompt": "Bir enum seçin veya oluşturun — özellik tipi olarak kullanılabilen kapalı bir değer kümesi.",
-      "nameHeader": "Ad"
+      "nameHeader": "Ad",
+      "description": "Açıklama",
+      "descriptionPlaceholder": "Bu enum'un neyi temsil ettiği (isteğe bağlı)"
     },
     "documentation": {},
     "code": {

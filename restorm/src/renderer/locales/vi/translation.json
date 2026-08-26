@@ -2216,6 +2216,8 @@
       "deleteNoImpact": "Mô hình này không được dùng ở đâu cả.",
       "deleteImpactIntro": "Việc xóa mô hình này sẽ cập nhật:",
       "deleteImpactChild": "{{name}} mất kế thừa (các thuộc tính riêng vẫn giữ)",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Model này đại diện cho điều gì (tùy chọn)",
       "newName": "NewModel",
       "selectPrompt": "Chọn một mô hình, hoặc tạo mới.",
       "tabs": {
@@ -2238,7 +2240,9 @@
       "valueHeader": "Giá trị",
       "newName": "NewEnum",
       "selectPrompt": "Chọn một enum, hoặc tạo mới — tập giá trị đóng dùng được làm kiểu thuộc tính.",
-      "nameHeader": "Tên"
+      "nameHeader": "Tên",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Enum này đại diện cho điều gì (tùy chọn)"
     },
     "documentation": {},
     "code": {

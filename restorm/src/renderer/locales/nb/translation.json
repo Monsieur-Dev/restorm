@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Denne modellen brukes ingen steder.",
       "deleteImpactIntro": "Sletting av denne modellen oppdaterer:",
       "deleteImpactChild": "{{name}} mister arven sin (egne egenskaper beholdes)",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hva denne modellen representerer (valgfritt)",
       "newName": "NewModel",
       "selectPrompt": "Velg en modell, eller opprett en.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Verdi",
       "newName": "NewEnum",
       "selectPrompt": "Velg en enum, eller opprett en — et lukket sett verdier som kan brukes som egenskapstype.",
-      "nameHeader": "Navn"
+      "nameHeader": "Navn",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hva denne enumen representerer (valgfritt)"
     },
     "documentation": {},
     "code": {

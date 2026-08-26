@@ -2218,6 +2218,8 @@
       "deleteNoImpact": "Acest model nu este folosit nicăieri.",
       "deleteImpactIntro": "Ștergerea acestui model va actualiza:",
       "deleteImpactChild": "{{name}} își pierde moștenirea (propriile proprietăți rămân)",
+      "description": "Descriere",
+      "descriptionPlaceholder": "Ce reprezintă acest model (opțional)",
       "newName": "NewModel",
       "selectPrompt": "Selectați un model sau creați unul.",
       "tabs": {
@@ -2240,7 +2242,9 @@
       "valueHeader": "Valoare",
       "newName": "NewEnum",
       "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate.",
-      "nameHeader": "Nume"
+      "nameHeader": "Nume",
+      "description": "Descriere",
+      "descriptionPlaceholder": "Ce reprezintă acest enum (opțional)"
     },
     "documentation": {},
     "code": {

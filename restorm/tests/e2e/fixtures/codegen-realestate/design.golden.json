@@ -1,0 +1,2433 @@
+{
+  "id": "2f6824f6-e925-46f7-af06-023aa8c3bfa5",
+  "name": "RealEstate",
+  "type": "design",
+  "codegen": {
+    "templates": [
+      {
+        "id": "622fcecf-cecc-4ed1-a136-a23bce9e22c6",
+        "label": "REST · TypeScript · Express",
+        "outputDir": "/home/yoann/Bureau/RealEstate-gen/ts",
+        "source": {
+          "id": "server-rest-typescript",
+          "kind": "official"
+        }
+      },
+      {
+        "id": "4b184110-b10a-4bbe-ab53-bd4a9a8b2024",
+        "label": "Variable Test Template",
+        "source": {
+          "kind": "local",
+          "path": "/home/yoann/Bureau/Tests restorm/codegen-vars-test-template"
+        }
+      }
+    ]
+  },
+  "enums": [
+    {
+      "id": "4beb18a8-2f89-4d67-b447-636bed8ede5e",
+      "doc": {
+        "name": "CityArea",
+        "enumValues": [
+          "Niort",
+          "Niort - Centre",
+          "Niort - Nord"
+        ],
+        "properties": []
+      }
+    },
+    {
+      "id": "3057835d-d530-4eb6-9e5f-9f3a20090b4c",
+      "doc": {
+        "name": "OfferStatus",
+        "description": "Lifecycle of a purchase offer.",
+        "enumValues": [
+          "Pending",
+          "Accepted",
+          "Rejected",
+          "Withdrawn"
+        ],
+        "properties": []
+      }
+    },
+    {
+      "id": "8a3d0ee8-5f24-4a2c-b709-1cc7b8603347",
+      "doc": {
+        "name": "EnergyRating",
+        "enumValues": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G"
+        ],
+        "properties": []
+      }
+    },
+    {
+      "id": "ede0d29b-ca55-41fe-962a-1f47607ecf63",
+      "doc": {
+        "name": "Condition",
+        "enumValues": [
+          "New",
+          "GoodCondition",
+          "Average",
+          "ToRenovate",
+          "Ruin"
+        ],
+        "properties": []
+      }
+    },
+    {
+      "id": "b4f3d591-e784-493b-9594-8b297f240f2e",
+      "doc": {
+        "name": "ListingStatus",
+        "enumValues": [
+          "Available",
+          "UnderOffer",
+          "Sold",
+          "Withdrawn"
+        ],
+        "properties": []
+      }
+    }
+  ],
+  "info": {
+    "title": "RealEstate",
+    "version": "1.0.0"
+  },
+  "models": [
+    {
+      "id": "2ea86c46-fc2f-4356-8bec-5e5ea8e88f3d",
+      "design": {
+        "identifier": {
+          "propertyId": "c66d0534-9351-47dd-b049-d7d93bd72639",
+          "strategy": "uuid"
+        },
+        "timestamps": true
+      },
+      "doc": {
+        "name": "Property",
+        "description": "Base type shared by every real-estate listing: identity, price, surface, free-text description, media, geolocation, address and status. Land, House and Apartment inherit from it."
+      },
+      "properties": [
+        {
+          "id": "c66d0534-9351-47dd-b049-d7d93bd72639",
+          "design": {
+            "immutable": true,
+            "unique": true
+          },
+          "doc": {
+            "name": "id",
+            "type": "string",
+            "description": "Server-generated unique identifier (UUID). Read-only and immutable.",
+            "format": "uuid",
+            "readOnly": true,
+            "required": true
+          }
+        },
+        {
+          "id": "43fb4dce-94cc-46fe-8aef-7076742fdbf5",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "name",
+            "type": "string",
+            "required": true
+          }
+        },
+        {
+          "id": "b089a49d-86be-4629-9e61-f66de6c6b644",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "price",
+            "type": "number",
+            "required": true
+          }
+        },
+        {
+          "id": "3fb77cfd-aafc-4988-9e43-b473e53d1a7a",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "surface",
+            "type": "number",
+            "required": false
+          }
+        },
+        {
+          "id": "0c7fe7a2-ebac-4f1e-bb5c-926be36281cd",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "description",
+            "type": "string",
+            "required": false
+          }
+        },
+        {
+          "id": "4038a91e-cb88-4d86-8574-d332c145db0b",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "reference",
+            "type": "string",
+            "required": false
+          }
+        },
+        {
+          "id": "8e6a79ac-5e92-4fa4-87ce-8557b845897b",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "photos",
+            "type": "array",
+            "required": false
+          }
+        },
+        {
+          "id": "6c4038fb-09fc-4685-b9d1-f48bdb3ab9b0",
+          "design": {
+            "reference": {
+              "refId": "ae877d9b-233a-46bf-9f18-3a32e269b053",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "location",
+            "type": "GeoPoint",
+            "required": false,
+            "targetModelRef": "GeoPoint"
+          }
+        },
+        {
+          "id": "f9cefa82-8b92-45f1-81d1-4f2be9d083ee",
+          "design": {
+            "reference": {
+              "refId": "04479426-7c1e-4556-9c02-ddf7797a71d1",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "address",
+            "type": "Address",
+            "required": false,
+            "targetModelRef": "Address"
+          }
+        },
+        {
+          "id": "48a4e2a0-e955-46b1-bb50-852824ba1dd5",
+          "design": {
+            "reference": {
+              "refId": "4beb18a8-2f89-4d67-b447-636bed8ede5e",
+              "target": "enum"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "city",
+            "type": "string",
+            "required": true,
+            "targetModelRef": "CityArea"
+          }
+        },
+        {
+          "id": "8183d672-9076-46c6-ab51-ee10c2646337",
+          "design": {
+            "reference": {
+              "refId": "4beb18a8-2f89-4d67-b447-636bed8ede5e",
+              "target": "enum"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "neighborhood",
+            "type": "string",
+            "required": false,
+            "targetModelRef": "CityArea"
+          }
+        },
+        {
+          "id": "bd89cf35-6234-4453-9418-eea9bd1a3026",
+          "design": {
+            "reference": {
+              "refId": "b4f3d591-e784-493b-9594-8b297f240f2e",
+              "target": "enum"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "listingStatus",
+            "type": "string",
+            "required": true,
+            "targetModelRef": "ListingStatus"
+          }
+        },
+        {
+          "id": "0f90da7a-6eff-4a65-adf8-d880c399294e",
+          "design": {
+            "reference": {
+              "refId": "8a3d0ee8-5f24-4a2c-b709-1cc7b8603347",
+              "target": "enum"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "energyRating",
+            "type": "string",
+            "required": false,
+            "targetModelRef": "EnergyRating"
+          }
+        },
+        {
+          "id": "8a78038f-1d04-47fb-81c0-864de5e93a82",
+          "design": {
+            "reference": {
+              "refId": "aed52c92-0851-42eb-be6c-66985e979813",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "agencies",
+            "type": "array<Agency>",
+            "description": "Agencies this property is listed with (zero or more).",
+            "isArrayOfRef": true,
+            "required": false,
+            "targetModelRef": "Agency"
+          }
+        }
+      ]
+    },
+    {
+      "id": "01d3dee7-25dd-4bd6-8c16-d04338eb348d",
+      "design": {
+        "inheritsFrom": "2ea86c46-fc2f-4356-8bec-5e5ea8e88f3d"
+      },
+      "doc": {
+        "name": "Land",
+        "description": "A plot of land for sale."
+      },
+      "examples": [
+        {
+          "id": "4e162c7c-e7b1-4c84-92b5-91d3bcf4a3f8",
+          "name": "Test",
+          "values": {}
+        }
+      ],
+      "properties": []
+    },
+    {
+      "id": "ae877d9b-233a-46bf-9f18-3a32e269b053",
+      "doc": {
+        "name": "GeoPoint",
+        "description": "A geographic coordinate."
+      },
+      "properties": [
+        {
+          "id": "6274bf0e-6664-42b4-a32c-8b3931ce9278",
+          "doc": {
+            "name": "latitude",
+            "type": "number",
+            "required": true
+          }
+        },
+        {
+          "id": "a3474624-1bd5-4daf-b4f0-c5e4f0a361c4",
+          "doc": {
+            "name": "longitude",
+            "type": "number",
+            "required": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "04479426-7c1e-4556-9c02-ddf7797a71d1",
+      "doc": {
+        "name": "Address",
+        "description": "A postal address."
+      },
+      "properties": [
+        {
+          "id": "721067cc-c730-4cf8-a1dc-040a8eaed0f6",
+          "doc": {
+            "name": "streetNumber",
+            "type": "string",
+            "required": false
+          }
+        },
+        {
+          "id": "110b8b65-0c0e-45a0-a15f-75f505edd8b8",
+          "doc": {
+            "name": "street",
+            "type": "string",
+            "required": true
+          }
+        },
+        {
+          "id": "c92a69c7-0283-4d01-9731-1f8edb1db21c",
+          "doc": {
+            "name": "complement",
+            "type": "string",
+            "required": false
+          }
+        },
+        {
+          "id": "68cab94e-5473-4d3c-b9f0-c01d026f0f57",
+          "doc": {
+            "name": "postalCode",
+            "type": "string",
+            "required": true
+          }
+        },
+        {
+          "id": "6b986fa0-6980-49cd-acc6-a9e756a2be21",
+          "doc": {
+            "name": "city",
+            "type": "string",
+            "required": true
+          }
+        },
+        {
+          "id": "e7286947-20de-47ee-914f-23b54b977031",
+          "doc": {
+            "name": "country",
+            "type": "string",
+            "required": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "41880db2-2d28-4918-8a98-eadf1ca2b412",
+      "design": {
+        "inheritsFrom": "2ea86c46-fc2f-4356-8bec-5e5ea8e88f3d"
+      },
+      "doc": {
+        "name": "House",
+        "description": "A house for sale."
+      },
+      "properties": [
+        {
+          "id": "516c8c05-38b2-4e5b-986d-bed0c420720a",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "floors",
+            "type": "integer",
+            "required": false
+          }
+        },
+        {
+          "id": "3558cb42-882b-44d9-b14a-3750b35e87c2",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "propertyTax",
+            "type": "number",
+            "required": false
+          }
+        },
+        {
+          "id": "cd96c2f9-b093-4222-84e4-aa74c0eaf47c",
+          "design": {
+            "reference": {
+              "refId": "ede0d29b-ca55-41fe-962a-1f47607ecf63",
+              "target": "enum"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "condition",
+            "type": "string",
+            "required": false,
+            "targetModelRef": "Condition"
+          }
+        },
+        {
+          "id": "622832f1-82f0-467e-880e-593a3eec7195",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "numberOfRooms",
+            "type": "integer",
+            "required": false
+          }
+        },
+        {
+          "id": "21f3258e-0d7d-4c36-a6a6-183ebd2d20e7",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "numberOfBedrooms",
+            "type": "integer",
+            "required": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "435b91d4-e44f-4379-a892-e8ee67630b0c",
+      "design": {
+        "inheritsFrom": "2ea86c46-fc2f-4356-8bec-5e5ea8e88f3d"
+      },
+      "doc": {
+        "name": "Apartment",
+        "description": "An apartment for sale."
+      },
+      "properties": [
+        {
+          "id": "64c4a550-d0ef-4e6d-960c-b5cad87da2d9",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "floor",
+            "type": "integer",
+            "required": false
+          }
+        },
+        {
+          "id": "5713d6ee-8d23-46ac-b1de-6708cc3d1bc5",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "coOwnershipCharges",
+            "type": "number",
+            "required": false
+          }
+        },
+        {
+          "id": "fbc7c34a-bb5d-496d-9216-60851fc14206",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "hasBalcony",
+            "type": "boolean",
+            "required": false
+          }
+        },
+        {
+          "id": "8e625173-de39-4033-9ab3-31a83cc49e94",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "numberOfRooms",
+            "type": "integer",
+            "required": false
+          }
+        },
+        {
+          "id": "b0a0fda2-9b7c-4640-ab34-7924438a7996",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "numberOfBedrooms",
+            "type": "integer",
+            "required": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "aed52c92-0851-42eb-be6c-66985e979813",
+      "design": {
+        "identifier": {
+          "propertyId": "97dfab59-f0f0-4647-b365-01fb8b5c0dec",
+          "strategy": "uuid"
+        },
+        "timestamps": true
+      },
+      "doc": {
+        "name": "Agency",
+        "description": "A real-estate agency that lists properties for sale."
+      },
+      "examples": [
+        {
+          "id": "6e7ccee5-a968-4ae7-bc64-a77f0a4e3cc3",
+          "name": "Century 21 Niort",
+          "values": {
+            "8ae7e3e6-1f9b-43e9-85e5-ecc18f5083c7": "Century 21 Niort"
+          }
+        },
+        {
+          "id": "782b37fc-3f1b-41ff-90d0-86987923c5b7",
+          "name": "Laforet Poitiers",
+          "values": {
+            "8ae7e3e6-1f9b-43e9-85e5-ecc18f5083c7": "Laforêt Poitiers"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "id": "97dfab59-f0f0-4647-b365-01fb8b5c0dec",
+          "design": {
+            "immutable": true,
+            "unique": true
+          },
+          "doc": {
+            "name": "id",
+            "type": "string",
+            "description": "Server-generated unique identifier (UUID).",
+            "format": "uuid",
+            "readOnly": true,
+            "required": true
+          }
+        },
+        {
+          "id": "8ae7e3e6-1f9b-43e9-85e5-ecc18f5083c7",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "name",
+            "type": "string",
+            "required": true
+          }
+        },
+        {
+          "id": "ad284842-ad83-47be-aaef-64f1acc89933",
+          "design": {
+            "reference": {
+              "refId": "04479426-7c1e-4556-9c02-ddf7797a71d1",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "address",
+            "type": "Address",
+            "required": false,
+            "targetModelRef": "Address"
+          }
+        }
+      ]
+    },
+    {
+      "id": "809422c6-28f9-4248-a75a-093e84333898",
+      "design": {
+        "identifier": {
+          "propertyId": "53ac327e-8078-4f34-b2a7-01118aaa49d9",
+          "strategy": "uuid"
+        },
+        "timestamps": true
+      },
+      "doc": {
+        "name": "Client",
+        "description": "A prospective buyer who can make offers on properties."
+      },
+      "examples": [
+        {
+          "id": "eb5387a7-570d-43ed-aa67-afeaf4bc5abe",
+          "name": "Jean Dupont",
+          "values": {
+            "7f40033c-2fa5-43cc-bfd5-5c2ea83353cc": "Jean",
+            "9ad4658b-d30f-4451-89f2-4b8229f587a0": "Dupont"
+          }
+        },
+        {
+          "id": "fb9c76f5-b38e-4502-9f94-f90ffcabc784",
+          "name": "Marie Martin",
+          "values": {
+            "7f40033c-2fa5-43cc-bfd5-5c2ea83353cc": "Marie",
+            "9ad4658b-d30f-4451-89f2-4b8229f587a0": "Martin"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "id": "53ac327e-8078-4f34-b2a7-01118aaa49d9",
+          "design": {
+            "immutable": true,
+            "unique": true
+          },
+          "doc": {
+            "name": "id",
+            "type": "string",
+            "description": "Server-generated unique identifier (UUID).",
+            "format": "uuid",
+            "readOnly": true,
+            "required": true
+          }
+        },
+        {
+          "id": "9ad4658b-d30f-4451-89f2-4b8229f587a0",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "lastName",
+            "type": "string",
+            "required": true
+          }
+        },
+        {
+          "id": "7f40033c-2fa5-43cc-bfd5-5c2ea83353cc",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "firstName",
+            "type": "string",
+            "required": true
+          }
+        },
+        {
+          "id": "35ff247e-0376-48c4-bbc3-c5b50b71b594",
+          "design": {
+            "reference": {
+              "refId": "04479426-7c1e-4556-9c02-ddf7797a71d1",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "address",
+            "type": "Address",
+            "required": false,
+            "targetModelRef": "Address"
+          }
+        }
+      ]
+    },
+    {
+      "id": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+      "design": {
+        "identifier": {
+          "propertyId": "f75c31f2-32b7-4bf6-b59d-0df766253a7b",
+          "strategy": "uuid"
+        },
+        "timestamps": true
+      },
+      "doc": {
+        "name": "PurchaseOffer",
+        "description": "A client's offer to buy a property through an agency."
+      },
+      "examples": [
+        {
+          "id": "8c971b74-9794-467a-aba4-76b81417b3a6",
+          "name": "Accepted offer",
+          "values": {
+            "18582e10-3746-4285-b8fc-c6c9c6862266": 285000,
+            "beba4791-2d4d-49e5-8f2b-4949bf066144": "Accepted"
+          }
+        },
+        {
+          "id": "ab8a84c7-a19c-4c0b-971e-b521e8cb30e8",
+          "name": "Pending offer",
+          "values": {
+            "18582e10-3746-4285-b8fc-c6c9c6862266": 250000,
+            "beba4791-2d4d-49e5-8f2b-4949bf066144": "Pending"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "id": "f75c31f2-32b7-4bf6-b59d-0df766253a7b",
+          "design": {
+            "immutable": true,
+            "unique": true
+          },
+          "doc": {
+            "name": "id",
+            "type": "string",
+            "description": "Server-generated unique identifier (UUID).",
+            "format": "uuid",
+            "readOnly": true,
+            "required": true
+          }
+        },
+        {
+          "id": "d8754329-4648-4f5a-a9cf-4ad9061cabde",
+          "design": {
+            "reference": {
+              "refId": "2ea86c46-fc2f-4356-8bec-5e5ea8e88f3d",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "property",
+            "type": "Property",
+            "required": true,
+            "targetModelRef": "Property"
+          }
+        },
+        {
+          "id": "0ea8bcf0-c12e-49b4-bb89-f9bf76e8605d",
+          "design": {
+            "reference": {
+              "refId": "809422c6-28f9-4248-a75a-093e84333898",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "client",
+            "type": "Client",
+            "required": true,
+            "targetModelRef": "Client"
+          }
+        },
+        {
+          "id": "749f1c4c-6034-4d49-a1dc-fbfe0d86d798",
+          "design": {
+            "reference": {
+              "refId": "aed52c92-0851-42eb-be6c-66985e979813",
+              "target": "model"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "agency",
+            "type": "Agency",
+            "required": true,
+            "targetModelRef": "Agency"
+          }
+        },
+        {
+          "id": "18582e10-3746-4285-b8fc-c6c9c6862266",
+          "design": {
+            "searchable": true
+          },
+          "doc": {
+            "name": "amount",
+            "type": "number",
+            "description": "Offered amount in the listing currency.",
+            "required": true
+          }
+        },
+        {
+          "id": "beba4791-2d4d-49e5-8f2b-4949bf066144",
+          "design": {
+            "reference": {
+              "refId": "3057835d-d530-4eb6-9e5f-9f3a20090b4c",
+              "target": "enum"
+            },
+            "searchable": true
+          },
+          "doc": {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "targetModelRef": "OfferStatus"
+          }
+        }
+      ]
+    }
+  ],
+  "routeGroups": [
+    {
+      "id": "176e1847-6f02-492c-ac72-a20124b84619",
+      "design": {
+        "basePath": "/houses"
+      },
+      "doc": {
+        "name": "Houses",
+        "description": "House management."
+      },
+      "routes": [
+        {
+          "id": "b48bf90f-40ac-430f-907b-c91c2cee9dc9",
+          "design": {
+            "idempotent": true,
+            "pagination": {
+              "defaultLimit": 20,
+              "maxLimit": 100,
+              "style": "offset"
+            },
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Return a paginated list of Houses.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "200": {
+                "description": "A page of Houses."
+              }
+            },
+            "summary": "List Houses"
+          }
+        },
+        {
+          "id": "f1bc20bd-699c-42dc-b340-84a0d60367db",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412"
+            },
+            "responses": {
+              "201": {
+                "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412"
+              }
+            }
+          },
+          "doc": {
+            "description": "Create a new House.",
+            "match": {
+              "method": "POST",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "201": {
+                "description": "Created."
+              }
+            },
+            "summary": "Create a House"
+          }
+        },
+        {
+          "id": "b0f75614-1839-490d-8f1e-a611635d3001",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412"
+            },
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412"
+              }
+            }
+          },
+          "doc": {
+            "description": "Replace an existing House in full.",
+            "match": {
+              "method": "PUT",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated House."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Update a House"
+          }
+        },
+        {
+          "id": "3771058f-84db-43ac-9798-31b2476ca8f0",
+          "design": {
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412"
+              }
+            }
+          },
+          "doc": {
+            "description": "Fetch a single House by its identifier.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The House."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Get one House"
+          }
+        },
+        {
+          "id": "a35d2755-5d8a-40cc-860e-c3b3e58ab69f",
+          "design": {
+            "authOverride": "bearer",
+            "idempotent": true
+          },
+          "doc": {
+            "description": "Delete a House by its identifier.",
+            "match": {
+              "method": "DELETE",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Deleted."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Delete a House"
+          }
+        },
+        {
+          "id": "b5d25f99-044b-47f7-9d4f-c3c09a38635d",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412"
+            },
+            "responses": {
+              "200": {
+                "modelId": "41880db2-2d28-4918-8a98-eadf1ca2b412"
+              }
+            }
+          },
+          "doc": {
+            "description": "Apply a partial update to an existing House.",
+            "match": {
+              "method": "PATCH",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated House."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Partially update a House"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fb183525-2195-44c5-bc13-3196c07cb343",
+      "design": {
+        "basePath": "/lands"
+      },
+      "doc": {
+        "name": "Lands",
+        "description": "Land management."
+      },
+      "routes": [
+        {
+          "id": "c7fadec0-797d-4570-9c37-8c16e5f51bda",
+          "design": {
+            "idempotent": true,
+            "pagination": {
+              "defaultLimit": 20,
+              "maxLimit": 100,
+              "style": "offset"
+            },
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Return a paginated list of Lands.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "200": {
+                "description": "A page of Lands."
+              }
+            },
+            "summary": "List Lands"
+          }
+        },
+        {
+          "id": "76553f57-570a-4a65-8d5b-845739e9ac86",
+          "design": {
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d"
+              }
+            }
+          },
+          "doc": {
+            "description": "Fetch a single Land by its identifier.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The Land."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Get one Land"
+          }
+        },
+        {
+          "id": "a6b02a4d-3a66-42d5-95c3-58ffdd421d70",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d"
+            },
+            "responses": {
+              "201": {
+                "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d"
+              }
+            }
+          },
+          "doc": {
+            "description": "Create a new Land.",
+            "match": {
+              "method": "POST",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "201": {
+                "description": "Created."
+              }
+            },
+            "summary": "Create a Land"
+          }
+        },
+        {
+          "id": "212cb3a6-d23b-4c3d-8d7f-35fba7fd34d7",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d"
+            },
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d"
+              }
+            }
+          },
+          "doc": {
+            "description": "Replace an existing Land in full.",
+            "match": {
+              "method": "PUT",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Land."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Update a Land"
+          }
+        },
+        {
+          "id": "1dd2e87a-be5a-4b47-8f6a-c4ec34cf3925",
+          "design": {
+            "authOverride": "bearer",
+            "idempotent": true
+          },
+          "doc": {
+            "description": "Delete a Land by its identifier.",
+            "match": {
+              "method": "DELETE",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Deleted."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Delete a Land"
+          }
+        },
+        {
+          "id": "af7ab550-7b9b-4b7b-9e08-33d3e26b0941",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d"
+            },
+            "responses": {
+              "200": {
+                "modelId": "01d3dee7-25dd-4bd6-8c16-d04338eb348d"
+              }
+            }
+          },
+          "doc": {
+            "description": "Apply a partial update to an existing Land.",
+            "match": {
+              "method": "PATCH",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Land."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Partially update a Land"
+          }
+        }
+      ]
+    },
+    {
+      "id": "b6e61a4c-698d-4bc9-8e1f-afd01f92adda",
+      "design": {
+        "basePath": "/apartments"
+      },
+      "doc": {
+        "name": "Apartments",
+        "description": "Apartment management."
+      },
+      "routes": [
+        {
+          "id": "3e25fd09-5011-445d-951e-f9c26f4eb273",
+          "design": {
+            "idempotent": true,
+            "pagination": {
+              "defaultLimit": 20,
+              "maxLimit": 100,
+              "style": "offset"
+            },
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Return a paginated list of Apartments.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "200": {
+                "description": "A page of Apartments."
+              }
+            },
+            "summary": "List Apartments"
+          }
+        },
+        {
+          "id": "e45778f4-5e35-416d-a9e8-ef6b0f30f659",
+          "design": {
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c"
+              }
+            }
+          },
+          "doc": {
+            "description": "Fetch a single Apartment by its identifier.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The Apartment."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Get one Apartment"
+          }
+        },
+        {
+          "id": "59ad4995-fd0b-40bf-92cf-3fe258dc7d98",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c"
+            },
+            "responses": {
+              "201": {
+                "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c"
+              }
+            }
+          },
+          "doc": {
+            "description": "Create a new Apartment.",
+            "match": {
+              "method": "POST",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "201": {
+                "description": "Created."
+              }
+            },
+            "summary": "Create an Apartment"
+          }
+        },
+        {
+          "id": "b74f2c97-22f3-420b-9f86-cea6666543f9",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c"
+            },
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c"
+              }
+            }
+          },
+          "doc": {
+            "description": "Replace an existing Apartment in full.",
+            "match": {
+              "method": "PUT",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Apartment."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Update an Apartment"
+          }
+        },
+        {
+          "id": "a4765b42-fabc-4f4f-85bd-aa17570cb55d",
+          "design": {
+            "authOverride": "bearer",
+            "idempotent": true
+          },
+          "doc": {
+            "description": "Delete an Apartment by its identifier.",
+            "match": {
+              "method": "DELETE",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Deleted."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Delete an Apartment"
+          }
+        },
+        {
+          "id": "bf56284d-33cc-4392-82bc-e8a4375c9523",
+          "design": {
+            "authOverride": "bearer",
+            "body": {
+              "contentType": "application/json",
+              "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c"
+            },
+            "responses": {
+              "200": {
+                "modelId": "435b91d4-e44f-4379-a892-e8ee67630b0c"
+              }
+            }
+          },
+          "doc": {
+            "description": "Apply a partial update to an existing Apartment.",
+            "match": {
+              "method": "PATCH",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Apartment."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Partially update an Apartment"
+          }
+        }
+      ]
+    },
+    {
+      "id": "81c7f9be-c729-44b6-abc2-dfb4e6cc0a92",
+      "design": {
+        "basePath": "/agencies"
+      },
+      "doc": {
+        "name": "Agencies",
+        "description": "Agency management."
+      },
+      "routes": [
+        {
+          "id": "5f943ebe-9e01-471f-a633-427f95e532e3",
+          "design": {
+            "idempotent": true,
+            "pagination": {
+              "defaultLimit": 20,
+              "maxLimit": 100,
+              "style": "offset"
+            },
+            "paramLinks": {
+              "name": {
+                "descriptionAuto": true,
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813",
+                "propertyId": "8ae7e3e6-1f9b-43e9-85e5-ecc18f5083c7"
+              },
+              "address": {
+                "descriptionAuto": true,
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813",
+                "propertyId": "ad284842-ad83-47be-aaef-64f1acc89933"
+              }
+            },
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Return a paginated list of Agencies.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/"
+            },
+            "parameters": [
+              {
+                "name": "name",
+                "type": "string",
+                "location": "query",
+                "required": false
+              },
+              {
+                "name": "address",
+                "type": "Address",
+                "location": "query",
+                "required": false
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "A page of Agencies."
+              }
+            },
+            "summary": "List Agencies"
+          }
+        },
+        {
+          "id": "89397986-7eeb-47ca-913a-df255909cfc7",
+          "design": {
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813",
+                "propertyId": "97dfab59-f0f0-4647-b365-01fb8b5c0dec"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813"
+              }
+            }
+          },
+          "doc": {
+            "description": "Fetch a single Agency by its identifier.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The Agency."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Get one Agency"
+          }
+        },
+        {
+          "id": "66cd4d8f-6666-4c26-a420-a47bdf4f91e9",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "aed52c92-0851-42eb-be6c-66985e979813"
+            },
+            "responses": {
+              "201": {
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813"
+              }
+            }
+          },
+          "doc": {
+            "description": "Create a new Agency.",
+            "match": {
+              "method": "POST",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "201": {
+                "description": "Created."
+              }
+            },
+            "summary": "Create an Agency"
+          }
+        },
+        {
+          "id": "0565d332-c72a-47d6-bc7e-4d7df13fd573",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "aed52c92-0851-42eb-be6c-66985e979813"
+            },
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813",
+                "propertyId": "97dfab59-f0f0-4647-b365-01fb8b5c0dec"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813"
+              }
+            }
+          },
+          "doc": {
+            "description": "Replace an existing Agency in full.",
+            "match": {
+              "method": "PUT",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Agency."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Update an Agency"
+          }
+        },
+        {
+          "id": "2405e6ae-2ff9-4425-8817-dcfd94500d95",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "aed52c92-0851-42eb-be6c-66985e979813"
+            },
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813",
+                "propertyId": "97dfab59-f0f0-4647-b365-01fb8b5c0dec"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813"
+              }
+            }
+          },
+          "doc": {
+            "description": "Apply a partial update to an existing Agency.",
+            "match": {
+              "method": "PATCH",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Agency."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Partially update an Agency"
+          }
+        },
+        {
+          "id": "5ce9bb73-eed4-4d74-81a6-cccc5423d51c",
+          "design": {
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "aed52c92-0851-42eb-be6c-66985e979813",
+                "propertyId": "97dfab59-f0f0-4647-b365-01fb8b5c0dec"
+              }
+            }
+          },
+          "doc": {
+            "description": "Delete an Agency by its identifier.",
+            "match": {
+              "method": "DELETE",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Deleted."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Delete an Agency"
+          }
+        },
+        {
+          "id": "7b51c7e6-8ae5-4ff6-b1b4-6853e416a72f",
+          "design": {
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "2ea86c46-fc2f-4356-8bec-5e5ea8e88f3d",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Properties currently listed with this agency.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}/properties"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "A page of the agency's properties."
+              }
+            },
+            "summary": "List the agency's properties"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d29fffe8-ddf6-499e-bb64-755970b2ae42",
+      "design": {
+        "basePath": "/clients"
+      },
+      "doc": {
+        "name": "Clients",
+        "description": "Client management."
+      },
+      "routes": [
+        {
+          "id": "3cb10fe7-e01d-4a35-ac70-fb8961ae7a5a",
+          "design": {
+            "idempotent": true,
+            "pagination": {
+              "defaultLimit": 20,
+              "maxLimit": 100,
+              "style": "offset"
+            },
+            "paramLinks": {
+              "address": {
+                "descriptionAuto": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "propertyId": "35ff247e-0376-48c4-bbc3-c5b50b71b594"
+              },
+              "firstName": {
+                "descriptionAuto": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "propertyId": "7f40033c-2fa5-43cc-bfd5-5c2ea83353cc"
+              },
+              "lastName": {
+                "descriptionAuto": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "propertyId": "9ad4658b-d30f-4451-89f2-4b8229f587a0"
+              }
+            },
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Return a paginated list of Clients.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/"
+            },
+            "parameters": [
+              {
+                "name": "lastName",
+                "type": "string",
+                "location": "query",
+                "required": false
+              },
+              {
+                "name": "firstName",
+                "type": "string",
+                "location": "query",
+                "required": false
+              },
+              {
+                "name": "address",
+                "type": "Address",
+                "location": "query",
+                "required": false
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "A page of Clients."
+              }
+            },
+            "summary": "List Clients"
+          }
+        },
+        {
+          "id": "7f1833cb-301e-44a6-8cfd-b60497740d9c",
+          "design": {
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "propertyId": "53ac327e-8078-4f34-b2a7-01118aaa49d9"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898"
+              }
+            }
+          },
+          "doc": {
+            "description": "Fetch a single Client by its identifier.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The Client."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Get one Client"
+          }
+        },
+        {
+          "id": "658515e3-387a-4d37-92e4-3214293f2af4",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "809422c6-28f9-4248-a75a-093e84333898"
+            },
+            "responses": {
+              "201": {
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898"
+              }
+            }
+          },
+          "doc": {
+            "description": "Create a new Client.",
+            "match": {
+              "method": "POST",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "201": {
+                "description": "Created."
+              }
+            },
+            "summary": "Create a Client"
+          }
+        },
+        {
+          "id": "dcbc3b38-34c5-48a3-aa31-90e76bf7e174",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "809422c6-28f9-4248-a75a-093e84333898"
+            },
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "propertyId": "53ac327e-8078-4f34-b2a7-01118aaa49d9"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898"
+              }
+            }
+          },
+          "doc": {
+            "description": "Replace an existing Client in full.",
+            "match": {
+              "method": "PUT",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Client."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Update a Client"
+          }
+        },
+        {
+          "id": "ffebd6fe-e2de-4e6c-b71d-5b130ee61615",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "809422c6-28f9-4248-a75a-093e84333898"
+            },
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "propertyId": "53ac327e-8078-4f34-b2a7-01118aaa49d9"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898"
+              }
+            }
+          },
+          "doc": {
+            "description": "Apply a partial update to an existing Client.",
+            "match": {
+              "method": "PATCH",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated Client."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Partially update a Client"
+          }
+        },
+        {
+          "id": "ff61664f-5669-44d7-bb3c-5df51e952723",
+          "design": {
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "809422c6-28f9-4248-a75a-093e84333898",
+                "propertyId": "53ac327e-8078-4f34-b2a7-01118aaa49d9"
+              }
+            }
+          },
+          "doc": {
+            "description": "Delete a Client by its identifier.",
+            "match": {
+              "method": "DELETE",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Deleted."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Delete a Client"
+          }
+        },
+        {
+          "id": "e4dd465a-4661-42aa-af83-2097018e10da",
+          "design": {
+            "idempotent": true,
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Purchase offers placed by this client.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}/offers"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "A page of the client's offers."
+              }
+            },
+            "summary": "List the client's purchase offers"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cddea308-db5c-4591-8966-b574766ba3ca",
+      "design": {
+        "basePath": "/purchaseoffers"
+      },
+      "doc": {
+        "name": "PurchaseOffers",
+        "description": "PurchaseOffer management."
+      },
+      "routes": [
+        {
+          "id": "04a0b99f-d980-4675-8a0f-369667bfba11",
+          "design": {
+            "idempotent": true,
+            "pagination": {
+              "defaultLimit": 20,
+              "maxLimit": 100,
+              "style": "offset"
+            },
+            "paramLinks": {
+              "agency": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "749f1c4c-6034-4d49-a1dc-fbfe0d86d798"
+              },
+              "amount": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "18582e10-3746-4285-b8fc-c6c9c6862266"
+              },
+              "client": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "0ea8bcf0-c12e-49b4-bb89-f9bf76e8605d"
+              },
+              "property": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "d8754329-4648-4f5a-a9cf-4ad9061cabde"
+              },
+              "status": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "beba4791-2d4d-49e5-8f2b-4949bf066144"
+              }
+            },
+            "responses": {
+              "200": {
+                "list": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "paginated": true
+              }
+            }
+          },
+          "doc": {
+            "description": "Return a paginated list of PurchaseOffers.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/"
+            },
+            "parameters": [
+              {
+                "name": "property",
+                "type": "Property",
+                "location": "query",
+                "required": false
+              },
+              {
+                "name": "client",
+                "type": "Client",
+                "location": "query",
+                "required": false
+              },
+              {
+                "name": "agency",
+                "type": "Agency",
+                "location": "query",
+                "required": false
+              },
+              {
+                "name": "amount",
+                "type": "number",
+                "description": "Offered amount in the listing currency.",
+                "location": "query",
+                "required": false
+              },
+              {
+                "name": "status",
+                "type": "string",
+                "location": "query",
+                "required": false
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "A page of PurchaseOffers."
+              }
+            },
+            "summary": "List PurchaseOffers"
+          }
+        },
+        {
+          "id": "8222fec9-70a2-4126-994e-c876db9ba0d3",
+          "design": {
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "f75c31f2-32b7-4bf6-b59d-0df766253a7b"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0"
+              }
+            }
+          },
+          "doc": {
+            "description": "Fetch a single PurchaseOffer by its identifier.",
+            "match": {
+              "method": "GET",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The PurchaseOffer."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Get one PurchaseOffer"
+          }
+        },
+        {
+          "id": "87dbdd73-673f-4fec-a7e0-c00fe4e3f84c",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0"
+            },
+            "responses": {
+              "201": {
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0"
+              }
+            }
+          },
+          "doc": {
+            "description": "Create a new PurchaseOffer.",
+            "match": {
+              "method": "POST",
+              "urlPattern": "/"
+            },
+            "responses": {
+              "201": {
+                "description": "Created."
+              }
+            },
+            "summary": "Create a PurchaseOffer"
+          }
+        },
+        {
+          "id": "537c3f98-1fff-4d64-b112-f38ae1786921",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0"
+            },
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "f75c31f2-32b7-4bf6-b59d-0df766253a7b"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0"
+              }
+            }
+          },
+          "doc": {
+            "description": "Replace an existing PurchaseOffer in full.",
+            "match": {
+              "method": "PUT",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated PurchaseOffer."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Update a PurchaseOffer"
+          }
+        },
+        {
+          "id": "d9e3acb1-2b50-4e69-94cb-5d23f66148e3",
+          "design": {
+            "body": {
+              "contentType": "application/json",
+              "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0"
+            },
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "f75c31f2-32b7-4bf6-b59d-0df766253a7b"
+              }
+            },
+            "responses": {
+              "200": {
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0"
+              }
+            }
+          },
+          "doc": {
+            "description": "Apply a partial update to an existing PurchaseOffer.",
+            "match": {
+              "method": "PATCH",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "The updated PurchaseOffer."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Partially update a PurchaseOffer"
+          }
+        },
+        {
+          "id": "2cf44acc-b168-4e00-9ee0-1c727449d97b",
+          "design": {
+            "idempotent": true,
+            "paramLinks": {
+              "id": {
+                "descriptionAuto": true,
+                "modelId": "8bf6a6e3-02e2-48c4-acd4-251e124a48b0",
+                "propertyId": "f75c31f2-32b7-4bf6-b59d-0df766253a7b"
+              }
+            }
+          },
+          "doc": {
+            "description": "Delete a PurchaseOffer by its identifier.",
+            "match": {
+              "method": "DELETE",
+              "urlPattern": "/{{id}}"
+            },
+            "parameters": [
+              {
+                "name": "id",
+                "type": "string",
+                "description": "Server-generated unique identifier (UUID).",
+                "format": "uuid",
+                "location": "path",
+                "required": true
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Deleted."
+              },
+              "404": {
+                "description": "Not found."
+              }
+            },
+            "summary": "Delete a PurchaseOffer"
+          }
+        }
+      ]
+    }
+  ],
+  "server": {
+    "basePath": "{{baseRoute}}"
+  },
+  "serving": {
+    "port": "{{port}}",
+    "protocols": [
+      "graphql"
+    ]
+  }
+}

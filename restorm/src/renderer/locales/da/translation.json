@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Denne model bruges ingen steder.",
       "deleteImpactIntro": "Sletning af denne model opdaterer:",
       "deleteImpactChild": "{{name}} mister sin arv (egne egenskaber bevares)",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hvad denne model repræsenterer (valgfrit)",
       "newName": "NewModel",
       "selectPrompt": "Vælg en model, eller opret en.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Værdi",
       "newName": "NewEnum",
       "selectPrompt": "Vælg en enum, eller opret en — et lukket sæt værdier, der kan bruges som egenskabstype.",
-      "nameHeader": "Navn"
+      "nameHeader": "Navn",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hvad denne enum repræsenterer (valgfrit)"
     },
     "documentation": {},
     "code": {

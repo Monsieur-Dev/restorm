@@ -1,0 +1,12 @@
+{
+  "name": "All question types (test)",
+  "type": "server",
+  "language": "Text",
+  "contextVersions": [1],
+  "variables": [
+    { "name": "api_prefix", "scope": "project", "type": "string", "default": "/api", "description": "Base path prefix for the whole API." },
+    { "name": "table_name", "scope": "model", "type": "string", "default": "{{model.name}}", "description": "Storage table name for the model." },
+    { "name": "column_name", "scope": "property", "type": "string", "default": "{{property.name}}", "description": "Column name for the property." },
+    { "name": "cache_ttl", "scope": "route", "type": "number", "default": "0", "description": "Cache lifetime (seconds) for the route." }
+  ]
+}

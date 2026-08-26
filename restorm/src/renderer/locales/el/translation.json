@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Αυτό το μοντέλο δεν χρησιμοποιείται πουθενά.",
       "deleteImpactIntro": "Η διαγραφή αυτού του μοντέλου θα ενημερώσει:",
       "deleteImpactChild": "Το {{name}} χάνει την κληρονομικότητά του (οι δικές του ιδιότητες παραμένουν)",
+      "description": "Περιγραφή",
+      "descriptionPlaceholder": "Τι αντιπροσωπεύει αυτό το μοντέλο (προαιρετικό)",
       "newName": "NewModel",
       "selectPrompt": "Επιλέξτε ένα μοντέλο ή δημιουργήστε ένα.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Τιμή",
       "newName": "NewEnum",
       "selectPrompt": "Επιλέξτε ένα enum ή δημιουργήστε ένα — ένα κλειστό σύνολο τιμών που χρησιμοποιείται ως τύπος ιδιότητας.",
-      "nameHeader": "Όνομα"
+      "nameHeader": "Όνομα",
+      "description": "Περιγραφή",
+      "descriptionPlaceholder": "Τι αντιπροσωπεύει αυτό το enum (προαιρετικό)"
     },
     "documentation": {},
     "code": {

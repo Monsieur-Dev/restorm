@@ -2219,6 +2219,8 @@
       "deleteNoImpact": "Ten model nie jest nigdzie używany.",
       "deleteImpactIntro": "Usunięcie tego modelu zaktualizuje:",
       "deleteImpactChild": "{{name}} traci dziedziczenie (własne właściwości pozostają)",
+      "description": "Opis",
+      "descriptionPlaceholder": "Co reprezentuje ten model (opcjonalnie)",
       "newName": "NewModel",
       "selectPrompt": "Wybierz model lub utwórz nowy.",
       "tabs": {
@@ -2241,7 +2243,9 @@
       "valueHeader": "Wartość",
       "newName": "NewEnum",
       "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości.",
-      "nameHeader": "Nazwa"
+      "nameHeader": "Nazwa",
+      "description": "Opis",
+      "descriptionPlaceholder": "Co reprezentuje ten enum (opcjonalnie)"
     },
     "documentation": {},
     "code": {

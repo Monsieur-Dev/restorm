@@ -2220,6 +2220,8 @@
       "deleteNoImpact": "Ce modèle n’est utilisé nulle part.",
       "deleteImpactIntro": "La suppression de ce modèle mettra à jour :",
       "deleteImpactChild": "{{name}} perd son héritage (ses propres propriétés restent)",
+      "description": "Description",
+      "descriptionPlaceholder": "Ce que ce modèle représente (facultatif)",
       "newName": "NewModel",
       "selectPrompt": "Sélectionnez un modèle, ou créez-en un.",
       "tabs": {
@@ -2242,7 +2244,9 @@
       "valueHeader": "Valeur",
       "newName": "NewEnum",
       "selectPrompt": "Sélectionnez une énum, ou créez-en une — un ensemble fermé de valeurs utilisable comme type de propriété.",
-      "nameHeader": "Nom"
+      "nameHeader": "Nom",
+      "description": "Description",
+      "descriptionPlaceholder": "Ce que cette énum représente (facultatif)"
     },
     "documentation": {},
     "code": {

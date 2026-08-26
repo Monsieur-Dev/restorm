@@ -3,6 +3,7 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_CREATION_TEMP_DIR } from '../../fixtures/design-creation.fixture'
+import { openSectionOfOpenDesign } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -80,7 +81,7 @@ When("I create a design from the env folder's context menu", async () => {
 
 When('I open the models section of the open design', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-models"]').click()
+  await openSectionOfOpenDesign(p, 'models')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
 })
@@ -94,7 +95,7 @@ Then('the models list of the open design offers {string}', async ({}, name: stri
 
 Then('the enums list of the open design offers {string}', async ({}, name: string) => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-enums"]').click()
+  await openSectionOfOpenDesign(p, 'enums')
   await p.mouse.move(700, 450)
   await expect(
     p.locator('[data-testid="design-enums-list"] .list-view-row').filter({ has: p.getByText(name, { exact: true }) })
@@ -103,7 +104,7 @@ Then('the enums list of the open design offers {string}', async ({}, name: strin
 
 When('I open the routes section of the open design', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-routes"]').click()
+  await openSectionOfOpenDesign(p, 'routes')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-routes-section"]')).toBeVisible({ timeout: 5000 })
 })
@@ -141,7 +142,7 @@ Then('the resolved base line reads {string}', async ({}, expected: string) => {
   const p = requirePage()
   // The Settings section hosts the resolved-base preview, under the base-path
   // field; the environment that resolves it is picked in the smart-bar selector.
-  await p.locator('[data-testid="design-rail-settings"]').click()
+  await openSectionOfOpenDesign(p, 'settings')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-settings-resolved-base"]')).toHaveText(expected, { timeout: 5000 })
 })

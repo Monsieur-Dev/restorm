@@ -657,6 +657,37 @@
   justify-content: space-between;
 }
 
+/* Lightweight, content-sizing tab strip for the property panel — the ECUI
+   Tabs fills its host's height, which collapses to 0 inside this
+   content-height flex column. These buttons just toggle which section renders. */
+.design-property-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+}
+
+.design-property-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 6px 10px;
+  color: var(--vscode-foreground);
+  font: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.design-property-tab:hover {
+  opacity: 1;
+}
+
+.design-property-tab.is-active {
+  opacity: 1;
+  border-bottom-color: var(--vscode-focusBorder, #007acc);
+}
+
 .design-property-panel-title {
   margin: 0;
   font-size: 1em;
@@ -842,6 +873,11 @@
 .design-enums-section > * {
   flex: 1;
   min-height: 0;
+}
+
+/* Enum-level description sits above the values table in the values pane. */
+.design-enum-description {
+  margin-bottom: 8px;
 }
 
 /* ── Routes section (468.4) ───────────────────────────────────────── */

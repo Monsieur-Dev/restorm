@@ -66,6 +66,11 @@ export interface CustomValueListsEditorProps {
   /** Allow drag-reordering the lists (design enums opt in; env folders keep
    * their pick-only list — reorder there would fight the workbench overlay). */
   reorderableLists?: boolean
+  /** Optional slot rendered in the values pane, above the entries table, for
+   * the currently-selected list. Design enums use it to edit the enum-level
+   * description — a concern the shared list model doesn't carry, so it stays
+   * with the caller rather than in this editor. */
+  renderSelectedListExtra?: (listId: string) => React.ReactNode
 }
 
 /**
@@ -88,7 +93,8 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
   disabled = false,
   testIdPrefix = 'custom-values',
   filterable = false,
-  reorderableLists = false
+  reorderableLists = false,
+  renderSelectedListExtra
 }) => {
   const { t } = useTranslation()
   const words: CustomValueListsWording = {
@@ -336,6 +342,7 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
                 )}
               >
                 <div style={{ padding: 8, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                  {renderSelectedListExtra?.(selected.id)}
                   {/* A list with no values shows the table's own empty row rather
                       than an italic "no values yet" line: the row is where the
                       user types the first value, and a placeholder next to it

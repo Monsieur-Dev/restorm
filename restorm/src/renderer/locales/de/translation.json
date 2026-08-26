@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Dieses Modell wird nirgendwo verwendet.",
       "deleteImpactIntro": "Das Löschen dieses Modells aktualisiert:",
       "deleteImpactChild": "{{name}} verliert seine Vererbung (eigene Eigenschaften bleiben)",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Was dieses Modell darstellt (optional)",
       "newName": "NewModel",
       "selectPrompt": "Wählen Sie ein Modell aus oder erstellen Sie eines.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Wert",
       "newName": "NewEnum",
       "selectPrompt": "Wählen Sie ein Enum aus oder erstellen Sie eines — eine geschlossene Wertemenge als Eigenschaftstyp.",
-      "nameHeader": "Name"
+      "nameHeader": "Name",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Was dieses Enum darstellt (optional)"
     },
     "documentation": {},
     "code": {

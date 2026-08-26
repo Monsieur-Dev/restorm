@@ -2216,6 +2216,8 @@
       "deleteNoImpact": "Model ini tidak digunakan di mana pun.",
       "deleteImpactIntro": "Menghapus model ini akan memperbarui:",
       "deleteImpactChild": "{{name}} kehilangan pewarisannya (properti miliknya tetap ada)",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Apa yang diwakili model ini (opsional)",
       "newName": "NewModel",
       "selectPrompt": "Pilih model, atau buat satu.",
       "tabs": {
@@ -2238,7 +2240,9 @@
       "valueHeader": "Nilai",
       "newName": "NewEnum",
       "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti.",
-      "nameHeader": "Nama"
+      "nameHeader": "Nama",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Apa yang diwakili enum ini (opsional)"
     },
     "documentation": {},
     "code": {

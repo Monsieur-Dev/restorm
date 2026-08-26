@@ -2216,6 +2216,8 @@
       "deleteNoImpact": "此模型未在任何地方使用。",
       "deleteImpactIntro": "删除此模型将更新：",
       "deleteImpactChild": "{{name}} 将失去继承（其自身属性保留）",
+      "description": "描述",
+      "descriptionPlaceholder": "此模型表示的内容（可选）",
       "newName": "NewModel",
       "selectPrompt": "选择一个模型，或创建一个。",
       "tabs": {
@@ -2238,7 +2240,9 @@
       "valueHeader": "值",
       "newName": "NewEnum",
       "selectPrompt": "选择一个枚举，或创建一个 —— 可用作属性类型的封闭值集合。",
-      "nameHeader": "名称"
+      "nameHeader": "名称",
+      "description": "描述",
+      "descriptionPlaceholder": "此枚举表示的内容（可选）"
     },
     "documentation": {},
     "code": {

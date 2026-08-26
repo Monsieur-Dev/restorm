@@ -2219,6 +2219,8 @@
       "deleteNoImpact": "Tento model se nikde nepoužívá.",
       "deleteImpactIntro": "Smazání tohoto modelu aktualizuje:",
       "deleteImpactChild": "{{name}} ztrácí dědičnost (vlastní vlastnosti zůstávají)",
+      "description": "Popis",
+      "descriptionPlaceholder": "Co tento model představuje (volitelné)",
       "newName": "NewModel",
       "selectPrompt": "Vyberte model, nebo nějaký vytvořte.",
       "tabs": {
@@ -2241,7 +2243,9 @@
       "valueHeader": "Hodnota",
       "newName": "NewEnum",
       "selectPrompt": "Vyberte enum, nebo nějaký vytvořte — uzavřená množina hodnot použitelná jako typ vlastnosti.",
-      "nameHeader": "Název"
+      "nameHeader": "Název",
+      "description": "Popis",
+      "descriptionPlaceholder": "Co tento výčet představuje (volitelné)"
     },
     "documentation": {},
     "code": {

@@ -3,6 +3,7 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_MODELS_TEMP_DIR } from '../../fixtures/design-models.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -45,7 +46,7 @@ async function pickSelectOption(p: Page, selectTestId: string, optionText: strin
 async function openModelsSection(p: Page): Promise<void> {
   await sidebarRow(p, DESIGN_ID).click()
   await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
-  await p.locator('[data-testid="design-rail-models"]').click()
+  await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 400)
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
 }
@@ -302,14 +303,14 @@ When('I confirm the model deletion', async () => {
 
 When('I open the enums section', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-enums"]').click()
+  await openDesignSection(p, DESIGN_ID, 'enums')
   await p.mouse.move(700, 400)
   await expect(p.locator('[data-testid="design-enums-section"]')).toBeVisible({ timeout: 5000 })
 })
 
 When('I open the models section', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-models"]').click()
+  await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 400)
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
 })

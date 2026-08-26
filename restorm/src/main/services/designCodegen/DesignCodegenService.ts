@@ -36,7 +36,7 @@ import {
   type TemplateQuestion,
   type TemplateVariableDecl
 } from './templateSource'
-import { extractGeneratedTree, type GeneratedFile } from './extractTree'
+import { extractGeneratedTreeMerging, type GeneratedFile } from './extractTree'
 
 /** Where a template comes from — the Code section's three sources. Alias
  * of the persisted {@link DesignTemplateSource} so the run's source and
@@ -313,7 +313,7 @@ class DesignCodegenService {
    * Write the pending generation under the CONFIRMED output root.
    * Traversal-checked as a whole before the first byte lands.
    */
-  extract(designId: string, outputRoot: string, currentDesign: ApiDesign): { written: string[] } {
+  extract(designId: string, outputRoot: string, currentDesign: ApiDesign): { written: string[]; conflicts: string[] } {
     const run = this.pending.get(designId)
     if (run === undefined) {
       throw new Error('no pending generation for this design — generate first')
@@ -336,10 +336,10 @@ class DesignCodegenService {
     if (templates.length > 0 && !templates.some((tpl) => sameSource(tpl.source, run.source))) {
       throw new Error('the template that produced this preview is no longer configured — generate again')
     }
-    const written = extractGeneratedTree(run.files, outputRoot)
+    const { written, conflicts } = extractGeneratedTreeMerging(run.files, outputRoot)
     this.pending.delete(designId)
-    logger.info('[DesignCodegenService] extracted', { designId, outputRoot, files: written.length })
-    return { written }
+    logger.info('[DesignCodegenService] extracted', { designId, outputRoot, files: written.length, conflicts: conflicts.length })
+    return { written, conflicts }
   }
 
   /** Drop a pending run (the user dismissed the validation screen). */

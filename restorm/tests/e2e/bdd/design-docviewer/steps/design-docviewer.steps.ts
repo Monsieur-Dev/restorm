@@ -3,6 +3,7 @@ import { copyFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_DOCVIEWER_TEMP_DIR } from '../../fixtures/design-docviewer.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -17,7 +18,7 @@ function requirePage(): Page {
 }
 
 async function openSection(p: Page, section: 'documentation' | 'models'): Promise<void> {
-  await p.locator(`[data-testid="design-rail-${section}"]`).click()
+  await openDesignSection(p, DESIGN_ID, section)
   await p.mouse.move(700, 450)
   await p.waitForTimeout(300)
 }

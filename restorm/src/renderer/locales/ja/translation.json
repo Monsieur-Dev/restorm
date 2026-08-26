@@ -2216,6 +2216,8 @@
       "deleteNoImpact": "このモデルはどこでも使用されていません。",
       "deleteImpactIntro": "このモデルを削除すると以下が更新されます：",
       "deleteImpactChild": "{{name}} は継承を失います（固有のプロパティは残ります）",
+      "description": "説明",
+      "descriptionPlaceholder": "このモデルが表すもの（任意）",
       "newName": "NewModel",
       "selectPrompt": "モデルを選択するか、作成してください。",
       "tabs": {
@@ -2238,7 +2240,9 @@
       "valueHeader": "値",
       "newName": "NewEnum",
       "selectPrompt": "enum を選択するか、作成してください — プロパティの型として使える閉じた値の集合です。",
-      "nameHeader": "名前"
+      "nameHeader": "名前",
+      "description": "説明",
+      "descriptionPlaceholder": "この列挙型が表すもの（任意）"
     },
     "documentation": {},
     "code": {

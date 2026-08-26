@@ -3,6 +3,7 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_SHELL_TEMP_DIR } from '../../fixtures/design-shell.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -97,7 +98,7 @@ Then('exactly one design tab is open', async () => {
 
 When('I click the rail icon {string}', async ({}, section: string) => {
   const p = requirePage()
-  await p.locator(`[data-testid="design-rail-${section}"]`).click()
+  await openDesignSection(p, DESIGN_ID, section)
   await p.waitForTimeout(300)
 })
 

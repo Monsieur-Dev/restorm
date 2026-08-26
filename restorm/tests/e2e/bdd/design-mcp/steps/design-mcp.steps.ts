@@ -4,6 +4,7 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, type LaunchedMcpApp, type McpToolReply } from '../../fixtures/design-mcp.fixture'
+import { openDesignSection } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -362,13 +363,13 @@ When('the design tab is opened', async () => {
 
 Then('the design spin button shows the serving state', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-server"]').click()
+  await openDesignSection(p, designId, 'server')
   await expect(p.locator('[data-testid="design-serve-spin"]')).toHaveClass(/design-serve-spin-active/, { timeout: 10000 })
 })
 
 Then('the design spin button shows the idle state', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-rail-server"]').click()
+  await openDesignSection(p, designId, 'server')
   await expect(p.locator('[data-testid="design-serve-spin"]')).not.toHaveClass(/design-serve-spin-active/, { timeout: 10000 })
 })
 

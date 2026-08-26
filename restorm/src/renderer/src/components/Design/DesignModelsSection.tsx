@@ -330,6 +330,23 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
                 </HeaderHoverTooltip>
               )}
             </div>
+            <label className="design-field design-field-full design-model-description">
+              <span className="design-field-label">{t('design.models.description', 'Description')}</span>
+              <InputBox
+                value={selected.doc.description ?? ''}
+                onChange={(next) => {
+                  const trimmed = next.trim()
+                  if (trimmed === '') {
+                    const { description: _drop, ...docRest } = selected.doc
+                    patchModel(design, selected.id, { doc: docRest })
+                  } else {
+                    patchModel(design, selected.id, { doc: { ...selected.doc, description: next } })
+                  }
+                }}
+                options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.models.description', 'Description'), placeholder: t('design.models.descriptionPlaceholder', 'What this model represents (optional)') }}
+                data-testid="design-model-description"
+              />
+            </label>
             <Tabs
               data-testid="design-model-tabs"
               mountStrategy="lazy-once"

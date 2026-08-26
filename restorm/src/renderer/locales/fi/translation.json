@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Tätä mallia ei käytetä missään.",
       "deleteImpactIntro": "Tämän mallin poistaminen päivittää:",
       "deleteImpactChild": "{{name}} menettää perintänsä (omat ominaisuudet säilyvät)",
+      "description": "Kuvaus",
+      "descriptionPlaceholder": "Mitä tämä malli edustaa (valinnainen)",
       "newName": "NewModel",
       "selectPrompt": "Valitse malli tai luo uusi.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Arvo",
       "newName": "NewEnum",
       "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä.",
-      "nameHeader": "Nimi"
+      "nameHeader": "Nimi",
+      "description": "Kuvaus",
+      "descriptionPlaceholder": "Mitä tämä enum edustaa (valinnainen)"
     },
     "documentation": {},
     "code": {

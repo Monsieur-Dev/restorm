@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Ky model nuk përdoret askund.",
       "deleteImpactIntro": "Fshirja e këtij modeli do të përditësojë:",
       "deleteImpactChild": "{{name}} humb trashëgiminë e tij (vetitë e veta mbeten)",
+      "description": "Përshkrimi",
+      "descriptionPlaceholder": "Çfarë përfaqëson ky model (opsionale)",
       "newName": "NewModel",
       "selectPrompt": "Zgjidhni një model ose krijoni një.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Vlera",
       "newName": "NewEnum",
       "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie.",
-      "nameHeader": "Emri"
+      "nameHeader": "Emri",
+      "description": "Përshkrimi",
+      "descriptionPlaceholder": "Çfarë përfaqëson ky enum (opsionale)"
     },
     "documentation": {},
     "code": {

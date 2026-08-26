@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -6,7 +6,6 @@ import {
   MessageType,
   SelectBox,
   Table,
-  Tabs,
   Toggle,
   type IMessage,
   type ISelectData,
@@ -448,6 +447,7 @@ interface PropertyPanelProps {
 
 const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, model, property, issueCodes, onUpdate, onDelete }) => {
   const { t } = useTranslation()
+  const [propTab, setPropTab] = useState<'property' | 'codegen'>('property')
 
   // A freshly added property arrives unnamed and immediately flagged; drop
   // the caret straight into the Name field (like the model-create inline
@@ -651,15 +651,30 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, model, property, 
         </div>
       )}
 
-      <Tabs
-        data-testid="design-property-tabs"
-        mountStrategy="lazy-once"
-        tabs={[
-          {
-            id: 'property',
-            label: t('design.schema.tabs.property', 'Property'),
-            content: (
-              <>
+      <div className="design-property-tabs" role="tablist" data-testid="design-property-tabs">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={propTab === 'property'}
+          className={`design-property-tab${propTab === 'property' ? ' is-active' : ''}`}
+          onClick={() => { setPropTab('property') }}
+          data-testid="design-property-tab-property"
+        >
+          {t('design.schema.tabs.property', 'Property')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={propTab === 'codegen'}
+          className={`design-property-tab${propTab === 'codegen' ? ' is-active' : ''}`}
+          onClick={() => { setPropTab('codegen') }}
+          data-testid="design-property-tab-codegen"
+        >
+          {t('design.codegen.vars.tab', 'Code generation')}
+        </button>
+      </div>
+      {propTab === 'property' && (
+        <>
       <div className="design-settings-grid design-property-grid">
         <label className="design-field">
           <span className="design-field-label">{t('design.schema.fields.name', 'Name')}</span>
@@ -879,16 +894,11 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, model, property, 
           />
         </label>
       </div>
-              </>
-            )
-          },
-          {
-            id: 'codegen',
-            label: t('design.codegen.vars.tab', 'Code generation'),
-            content: <DesignPropertyCodegenTab design={design} model={model} property={property} />
-          }
-        ]}
-      />
+        </>
+      )}
+      {propTab === 'codegen' && (
+        <DesignPropertyCodegenTab design={design} model={model} property={property} />
+      )}
     </div>
   )
 }

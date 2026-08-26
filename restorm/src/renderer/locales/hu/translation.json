@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Ezt a modellt sehol sem használják.",
       "deleteImpactIntro": "A modell törlése frissíti:",
       "deleteImpactChild": "{{name}} elveszíti az öröklését (saját tulajdonságai megmaradnak)",
+      "description": "Leírás",
+      "descriptionPlaceholder": "Mit képvisel ez a modell (opcionális)",
       "newName": "NewModel",
       "selectPrompt": "Válasszon egy modellt, vagy hozzon létre egyet.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Érték",
       "newName": "NewEnum",
       "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható.",
-      "nameHeader": "Név"
+      "nameHeader": "Név",
+      "description": "Leírás",
+      "descriptionPlaceholder": "Mit képvisel ez az enum (opcionális)"
     },
     "documentation": {},
     "code": {

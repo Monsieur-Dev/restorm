@@ -253,7 +253,7 @@ export function generateCrud(_design: ApiDesign, model: DesignModel, newId: () =
     doc: {
       match: { urlPattern: '/{{id}}', method: 'DELETE' },
       summary: `Delete ${article(model.doc.name)} ${model.doc.name}`,
-      description: `Delete a ${model.doc.name} by its identifier.`,
+      description: `Delete ${article(model.doc.name)} ${model.doc.name} by its identifier.`,
       parameters: idParamDoc(),
       responses: {
         '204': { description: 'Deleted.' },

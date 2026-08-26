@@ -2217,6 +2217,8 @@
       "deleteNoImpact": "Den här modellen används ingenstans.",
       "deleteImpactIntro": "Att ta bort den här modellen uppdaterar:",
       "deleteImpactChild": "{{name}} förlorar sitt arv (egna egenskaper behålls)",
+      "description": "Beskrivning",
+      "descriptionPlaceholder": "Vad denna modell representerar (valfritt)",
       "newName": "NewModel",
       "selectPrompt": "Välj en modell eller skapa en.",
       "tabs": {
@@ -2239,7 +2241,9 @@
       "valueHeader": "Värde",
       "newName": "NewEnum",
       "selectPrompt": "Välj en enum eller skapa en — en sluten uppsättning värden som kan användas som egenskapstyp.",
-      "nameHeader": "Namn"
+      "nameHeader": "Namn",
+      "description": "Beskrivning",
+      "descriptionPlaceholder": "Vad denna enum representerar (valfritt)"
     },
     "documentation": {},
     "code": {
