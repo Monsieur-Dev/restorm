@@ -28,6 +28,45 @@ root:
 Restorm refuses an incompatible template **before rendering anything**,
 with a message naming both versions.
 
+## Declaring variables (optional)
+
+A template can also **declare user-facing variables** — the values it needs
+that the design itself doesn't carry (a package name, a namespace, whether to
+emit Docker…). Add a `variables` array to the manifest; the user fills each
+value in the design's **Code generation** panel (as a Handlebars expression),
+and the resolved value lands in `ctx` for the template to read.
+
+```json
+{
+  "name": "Express + TypeScript server",
+  "type": "server",
+  "language": "TypeScript",
+  "contextVersions": [1],
+  "variables": [
+    { "name": "packageName", "scope": "project",  "type": "string",  "default": "my-api", "description": "npm package name" },
+    { "name": "tableName",   "scope": "model",    "type": "string",  "description": "SQL table for this model" },
+    { "name": "indexed",     "scope": "property", "type": "boolean", "default": "false" },
+    { "name": "cache",       "scope": "route",    "type": "enum",    "options": ["none", "short", "long"], "default": "none" }
+  ]
+}
+```
+
+Each entry is `{ name, scope, type, default?, description?, options? }`:
+
+- **scope** — `project` (evaluated once), `model`, `property` or `route`
+  (evaluated per entity). It decides where the value appears:
+  `ctx.design.vars.<name>` · `model.vars.<name>` · `property.vars.<name>` ·
+  `route.vars.<name>`.
+- **type** — `string` · `boolean` · `number` · `enum` (with `options`). The
+  user's expression is evaluated then coerced to this type.
+- **default** — a literal or Handlebars expression used when the user leaves
+  the value empty (globally and per-entity). An unresolved required value
+  surfaces as a generation error — never a silent blank.
+
+A **"Discover the variables this template uses"** action in the app scans your
+`.jinja` files for `vars.<name>` reads and flags any used-but-not-declared, so
+keep the manifest and the templates in sync.
+
 ## The context
 
 The template receives the design as the **`ctx`** answer — a flattened,
@@ -89,6 +128,7 @@ Both real Copier and the sandbox pass the context as **plain dicts**, so:
 - [`Monsieur-Dev/restorm-template-server-rest-dotnet`](https://github.com/Monsieur-Dev/restorm-template-server-rest-dotnet) — REST, ASP.NET Core minimal APIs
 - [`Monsieur-Dev/restorm-template-server-grpc-typescript`](https://github.com/Monsieur-Dev/restorm-template-server-grpc-typescript) — gRPC, TypeScript
 - [`Monsieur-Dev/restorm-template-server-grpc-dotnet`](https://github.com/Monsieur-Dev/restorm-template-server-grpc-dotnet) — gRPC, C# / .NET
+- [`Monsieur-Dev/restorm-template-db-postgres`](https://github.com/Monsieur-Dev/restorm-template-db-postgres) — SQL schema, PostgreSQL
 
 Each carries: `copier.yml` + `template/`, the manifest, a `reference/`
 answers file built from the petstore reference design, the context

@@ -182,6 +182,7 @@ When a ticket asks you to add a new execution protocol (REST, GraphQL, gRPC, MQT
 
 - Execution protocols → [`restorm/docs/contributing/adding-a-protocol.md`](restorm/docs/contributing/adding-a-protocol.md)
 - Import-only formats → [`restorm/docs/contributing/adding-an-import.md`](restorm/docs/contributing/adding-an-import.md)
+- API-designer code templates → [`restorm/docs/contributing/adding-a-code-template.md`](restorm/docs/contributing/adding-a-code-template.md) — the `restorm-template.json` manifest (incl. declared `variables`), the `ctx` context + schema, the Copier-subset engine, and the official `Monsieur-Dev/restorm-template-*` repos. Agents get the same contract at runtime from the `get_design_template_contract` MCP tool.
 
 The playbook is authoritative for: file layout, the three hard rules (UI reuse, Handlebars resolution, input debouncing), Docker mock conventions, the E2E scenario matrix, the response-panel UI checks, the documentation checklist, and the per-PR review checklist. Diverging from it without explicit ticket-level approval is a review-blocker.
 
