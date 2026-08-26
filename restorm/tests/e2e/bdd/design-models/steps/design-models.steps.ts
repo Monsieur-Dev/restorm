@@ -39,7 +39,13 @@ async function pickSelectOption(p: Page, selectTestId: string, optionText: strin
   await p.locator(`[data-testid="${selectTestId}-trigger"]`).click()
   const dropdown = p.locator(`[data-testid="${selectTestId}-dropdown"]`)
   await expect(dropdown).toBeVisible({ timeout: 5000 })
-  await dropdown.locator('.select-option').filter({ hasText: optionText }).first().click()
+  const option = dropdown.locator('.select-option').filter({ hasText: optionText }).first()
+  // The dropdown is portaled and can overflow the window, leaving the option
+  // outside the viewport where a plain click times out — scroll it in and
+  // dispatch the click so it isn't blocked by the viewport actionability check.
+  await expect(option).toBeAttached({ timeout: 5000 })
+  await option.scrollIntoViewIfNeeded().catch(() => undefined)
+  await option.dispatchEvent('click')
   await p.waitForTimeout(300)
 }
 
