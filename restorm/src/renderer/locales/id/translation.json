@@ -2317,6 +2317,13 @@
       "storage": "Penyimpanan & siklus hidup",
       "volumetry": "Volume yang diharapkan",
       "volumetryUnset": "(tidak ditentukan)",
+      "operationalProfile": "Profil operasional",
+      "accessPattern": "Profil baca/tulis",
+      "traffic": "Frekuensi akses",
+      "freshness": "Toleransi kesegaran",
+      "sensitivity": "Sensitivitas data",
+      "retention": "Retensi / siklus hidup",
+      "profileUnset": "(tidak ditentukan)",
       "timestamps": "Stempel waktu (dibuat/diubah)",
       "softDelete": "Hapus lunak",
       "usedBy": "Digunakan oleh",
@@ -2416,6 +2423,33 @@
       "tenThousands": "Puluhan ribu",
       "millions": "Jutaan"
     },
+    "accessPattern": {
+      "readHeavy": "Dominan baca",
+      "writeHeavy": "Dominan tulis",
+      "balanced": "Seimbang",
+      "appendOnly": "Hanya tambah"
+    },
+    "traffic": {
+      "low": "Rendah",
+      "medium": "Sedang",
+      "high": "Tinggi"
+    },
+    "freshness": {
+      "strong": "Konsistensi kuat",
+      "shortCache": "Cache singkat OK",
+      "longCache": "Cache lama OK"
+    },
+    "sensitivity": {
+      "public": "Publik",
+      "internal": "Internal",
+      "confidential": "Rahasia",
+      "pii": "Data pribadi (PII)"
+    },
+    "retention": {
+      "permanent": "Permanen",
+      "archivable": "Dapat diarsipkan",
+      "ephemeral": "Sementara (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Properti tidak memiliki nama",
       "propertyNameDuplicate": "Nama properti duplikat",
@@ -2440,11 +2474,6 @@
       "routeResponsesMissing": "Rute tidak mendeklarasikan respons apa pun",
       "routePathDuplicate": "Rute lain sudah menjawab metode dan jalur ini",
       "routePathReserved": "Server desain mencadangkan jalur ini — rute tidak akan pernah menjawab"
-    },
-    "traffic": {
-      "low": "Rendah",
-      "medium": "Sedang",
-      "high": "Tinggi"
     },
     "routes": {
       "addGroup": "Tambah grup",

@@ -2318,6 +2318,13 @@
       "storage": "Lagring og livssyklus",
       "volumetry": "Forventet volum",
       "volumetryUnset": "(uspesifisert)",
+      "operationalProfile": "Driftsprofil",
+      "accessPattern": "Lese-/skriveprofil",
+      "traffic": "Tilgangsfrekvens",
+      "freshness": "Ferskhetstoleranse",
+      "sensitivity": "Datafølsomhet",
+      "retention": "Oppbevaring / livssyklus",
+      "profileUnset": "(uspesifisert)",
       "timestamps": "Tidsstempler (opprettet/endret)",
       "softDelete": "Myk sletting",
       "usedBy": "Brukes av",
@@ -2417,6 +2424,33 @@
       "tenThousands": "Titusenvis",
       "millions": "Millioner"
     },
+    "accessPattern": {
+      "readHeavy": "Lesetungt",
+      "writeHeavy": "Skrivetungt",
+      "balanced": "Balansert",
+      "appendOnly": "Kun tillegg"
+    },
+    "traffic": {
+      "low": "Lav",
+      "medium": "Middels",
+      "high": "Høy"
+    },
+    "freshness": {
+      "strong": "Sterk konsistens",
+      "shortCache": "Kort cache OK",
+      "longCache": "Lang cache OK"
+    },
+    "sensitivity": {
+      "public": "Offentlig",
+      "internal": "Intern",
+      "confidential": "Konfidensiell",
+      "pii": "Personopplysninger (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Arkiverbar",
+      "ephemeral": "Kortvarig (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Egenskapen har ikke noe navn",
       "propertyNameDuplicate": "Duplisert egenskapsnavn",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "Ruten erklærer ikke noe svar",
       "routePathDuplicate": "En annen rute besvarer allerede denne metoden og stien",
       "routePathReserved": "Designserveren reserverer denne stien — ruten ville aldri svare"
-    },
-    "traffic": {
-      "low": "Lav",
-      "medium": "Middels",
-      "high": "Høy"
     },
     "routes": {
       "addGroup": "Legg til en gruppe",

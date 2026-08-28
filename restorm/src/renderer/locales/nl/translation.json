@@ -2318,6 +2318,13 @@
       "storage": "Opslag & levenscyclus",
       "volumetry": "Verwacht volume",
       "volumetryUnset": "(niet opgegeven)",
+      "operationalProfile": "Operationeel profiel",
+      "accessPattern": "Lees-/schrijfprofiel",
+      "traffic": "Toegangsfrequentie",
+      "freshness": "Versheidstolerantie",
+      "sensitivity": "Gegevensgevoeligheid",
+      "retention": "Bewaring / levenscyclus",
+      "profileUnset": "(niet opgegeven)",
       "timestamps": "Tijdstempels (aangemaakt/gewijzigd)",
       "softDelete": "Soft delete",
       "usedBy": "Gebruikt door",
@@ -2417,6 +2424,33 @@
       "tenThousands": "Tienduizenden",
       "millions": "Miljoenen"
     },
+    "accessPattern": {
+      "readHeavy": "Leeszwaar",
+      "writeHeavy": "Schrijfzwaar",
+      "balanced": "Gebalanceerd",
+      "appendOnly": "Alleen toevoegen"
+    },
+    "traffic": {
+      "low": "Laag",
+      "medium": "Middel",
+      "high": "Hoog"
+    },
+    "freshness": {
+      "strong": "Sterke consistentie",
+      "shortCache": "Korte cache OK",
+      "longCache": "Lange cache OK"
+    },
+    "sensitivity": {
+      "public": "Openbaar",
+      "internal": "Intern",
+      "confidential": "Vertrouwelijk",
+      "pii": "Persoonsgegevens (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Archiveerbaar",
+      "ephemeral": "Kortstondig (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "De eigenschap heeft geen naam",
       "propertyNameDuplicate": "Dubbele eigenschapsnaam",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "De route declareert geen respons",
       "routePathDuplicate": "Een andere route beantwoordt deze methode en dit pad al",
       "routePathReserved": "De designserver reserveert dit pad — de route zou nooit antwoorden"
-    },
-    "traffic": {
-      "low": "Laag",
-      "medium": "Middel",
-      "high": "Hoog"
     },
     "routes": {
       "addGroup": "Groep toevoegen",

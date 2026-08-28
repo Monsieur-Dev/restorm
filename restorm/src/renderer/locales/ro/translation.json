@@ -2319,6 +2319,13 @@
       "storage": "Stocare și ciclu de viață",
       "volumetry": "Volum așteptat",
       "volumetryUnset": "(nespecificat)",
+      "operationalProfile": "Profil operațional",
+      "accessPattern": "Profil citire/scriere",
+      "traffic": "Frecvența accesului",
+      "freshness": "Toleranță la prospețime",
+      "sensitivity": "Sensibilitatea datelor",
+      "retention": "Retenție / ciclu de viață",
+      "profileUnset": "(nespecificat)",
       "timestamps": "Marcaje de timp (creat/modificat)",
       "softDelete": "Ștergere soft",
       "usedBy": "Folosit de",
@@ -2418,6 +2425,33 @@
       "tenThousands": "Zeci de mii",
       "millions": "Milioane"
     },
+    "accessPattern": {
+      "readHeavy": "Preponderent citire",
+      "writeHeavy": "Preponderent scriere",
+      "balanced": "Echilibrat",
+      "appendOnly": "Doar adăugare"
+    },
+    "traffic": {
+      "low": "Scăzut",
+      "medium": "Mediu",
+      "high": "Ridicat"
+    },
+    "freshness": {
+      "strong": "Consistență puternică",
+      "shortCache": "Cache scurt OK",
+      "longCache": "Cache lung OK"
+    },
+    "sensitivity": {
+      "public": "Public",
+      "internal": "Intern",
+      "confidential": "Confidențial",
+      "pii": "Date personale (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Arhivabil",
+      "ephemeral": "Efemer (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Proprietatea nu are nume",
       "propertyNameDuplicate": "Nume de proprietate duplicat",
@@ -2442,11 +2476,6 @@
       "routeResponsesMissing": "Ruta nu declară niciun răspuns",
       "routePathDuplicate": "O altă rută răspunde deja acestei metode și căi",
       "routePathReserved": "Serverul de design rezervă această cale — ruta nu ar răspunde niciodată"
-    },
-    "traffic": {
-      "low": "Scăzut",
-      "medium": "Mediu",
-      "high": "Ridicat"
     },
     "routes": {
       "addGroup": "Adaugă un grup",

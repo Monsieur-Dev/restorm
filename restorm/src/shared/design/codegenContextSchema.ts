@@ -62,7 +62,12 @@ export const CODEGEN_CONTEXT_SCHEMA = {
           },
           "timestamps": { "const": true },
           "softDelete": { "const": true },
-          "volumetry": { "type": "string" },
+          "volumetry": { "type": "string", "description": "Expected row-count order of magnitude: hundreds / tenThousands / millions." },
+          "accessPattern": { "enum": ["readHeavy", "writeHeavy", "balanced", "appendOnly"], "description": "Read/write profile of the resource." },
+          "traffic": { "enum": ["low", "medium", "high"], "description": "Expected access frequency (traffic)." },
+          "freshness": { "enum": ["strong", "shortCache", "longCache"], "description": "How stale the resource may be served (freshness tolerance)." },
+          "sensitivity": { "enum": ["public", "internal", "confidential", "pii"], "description": "Data classification of the resource." },
+          "retention": { "enum": ["permanent", "archivable", "ephemeral"], "description": "Retention / lifecycle." },
           "properties": { "type": "array", "items": { "$ref": "#/definitions/property" }, "description": "OWN properties only — use for the type declaration (`extends inherits`)." },
           "allProperties": { "type": "array", "items": { "$ref": "#/definitions/property" }, "description": "Own + inherited properties, flattened (root ancestor first). Use for a complete instance: seed/example data, DB columns, full request/response shapes." },
           "examples": {

@@ -2317,6 +2317,13 @@
       "storage": "저장소 및 수명 주기",
       "volumetry": "예상 볼륨",
       "volumetryUnset": "(미지정)",
+      "operationalProfile": "운영 프로파일",
+      "accessPattern": "읽기/쓰기 프로파일",
+      "traffic": "접근 빈도",
+      "freshness": "신선도 허용치",
+      "sensitivity": "데이터 민감도",
+      "retention": "보존 / 수명 주기",
+      "profileUnset": "(미지정)",
       "timestamps": "타임스탬프(생성/수정)",
       "softDelete": "소프트 삭제",
       "usedBy": "사용처",
@@ -2416,6 +2423,33 @@
       "tenThousands": "수만",
       "millions": "수백만"
     },
+    "accessPattern": {
+      "readHeavy": "읽기 위주",
+      "writeHeavy": "쓰기 위주",
+      "balanced": "균형",
+      "appendOnly": "추가 전용"
+    },
+    "traffic": {
+      "low": "낮음",
+      "medium": "중간",
+      "high": "높음"
+    },
+    "freshness": {
+      "strong": "강한 일관성",
+      "shortCache": "짧은 캐시 가능",
+      "longCache": "긴 캐시 가능"
+    },
+    "sensitivity": {
+      "public": "공개",
+      "internal": "내부",
+      "confidential": "기밀",
+      "pii": "개인정보(PII)"
+    },
+    "retention": {
+      "permanent": "영구",
+      "archivable": "보관 가능",
+      "ephemeral": "임시(TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "속성에 이름이 없습니다",
       "propertyNameDuplicate": "속성 이름이 중복되었습니다",
@@ -2440,11 +2474,6 @@
       "routeResponsesMissing": "라우트가 응답을 선언하지 않았습니다",
       "routePathDuplicate": "다른 라우트가 이미 이 메서드와 경로에 응답합니다",
       "routePathReserved": "디자인 서버가 이 경로를 예약합니다 — 라우트는 응답하지 않습니다"
-    },
-    "traffic": {
-      "low": "낮음",
-      "medium": "중간",
-      "high": "높음"
     },
     "routes": {
       "addGroup": "그룹 추가",

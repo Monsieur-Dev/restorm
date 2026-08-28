@@ -376,7 +376,12 @@ export function registerDesignTools(mcp: McpService): void {
         name: z.string().min(1).describe('Model name (a spec component name — unique across models and enums).'),
         description: z.string().optional(),
         inheritsFrom: z.string().optional().describe('Parent model id or name.'),
-        volumetry: z.enum(['hundreds', 'tenThousands', 'millions']).optional(),
+        volumetry: z.enum(['hundreds', 'tenThousands', 'millions']).optional().describe('Operational profile: expected row-count order of magnitude.'),
+        accessPattern: z.enum(['readHeavy', 'writeHeavy', 'balanced', 'appendOnly']).optional().describe('Operational profile: read/write profile.'),
+        traffic: z.enum(['low', 'medium', 'high']).optional().describe('Operational profile: expected access frequency.'),
+        freshness: z.enum(['strong', 'shortCache', 'longCache']).optional().describe('Operational profile: freshness tolerance (strong = must be fresh).'),
+        sensitivity: z.enum(['public', 'internal', 'confidential', 'pii']).optional().describe('Operational profile: data classification.'),
+        retention: z.enum(['permanent', 'archivable', 'ephemeral']).optional().describe('Operational profile: retention / lifecycle.'),
         timestamps: z.boolean().optional(),
         softDelete: z.boolean().optional()
       } as Record<string, unknown>
@@ -396,7 +401,13 @@ export function registerDesignTools(mcp: McpService): void {
         id: newId(),
         doc: { name, ...(typeof args['description'] === 'string' && args['description'] !== '' ? { description: args['description'] } : {}) },
         properties: [],
-        ...(typeof args['volumetry'] === 'string' ? { intents: { volumetry: args['volumetry'] as 'hundreds' } } : {}),
+        ...((): { intents?: DesignModel['intents'] } => {
+          const intents: Record<string, string> = {}
+          for (const k of ['volumetry', 'accessPattern', 'traffic', 'freshness', 'sensitivity', 'retention'] as const) {
+            if (typeof args[k] === 'string' && args[k] !== '') intents[k] = args[k]
+          }
+          return Object.keys(intents).length > 0 ? { intents: intents as DesignModel['intents'] } : {}
+        })(),
         ...(inheritsFrom !== undefined || args['timestamps'] === true || args['softDelete'] === true
           ? {
               design: {
@@ -418,7 +429,7 @@ export function registerDesignTools(mcp: McpService): void {
     {
       titleKey: 'mcpToolTitles.updateDesignModel',
       title: 'Update a design model',
-      description: 'Update a model\'s settings: name, description, inheritance, identifier, volumetry, timestamps, soft delete.',
+      description: 'Update a model\'s settings: name, description, inheritance, identifier, the operational profile (volumetry, accessPattern, traffic, freshness, sensitivity, retention), timestamps, soft delete.',
       inputSchema: {
         designId: z.string().min(1),
         model: z.string().min(1).describe('Model id or name.'),
@@ -427,7 +438,12 @@ export function registerDesignTools(mcp: McpService): void {
         inheritsFrom: z.string().optional().describe('Parent model id or name; empty string detaches.'),
         identifierProperty: z.string().optional().describe('Property id or name serving as identifier.'),
         identifierStrategy: z.enum(['uuid', 'autoIncrement', 'custom']).optional(),
-        volumetry: z.enum(['hundreds', 'tenThousands', 'millions']).optional(),
+        volumetry: z.enum(['hundreds', 'tenThousands', 'millions']).optional().describe('Operational profile: expected row-count order of magnitude.'),
+        accessPattern: z.enum(['readHeavy', 'writeHeavy', 'balanced', 'appendOnly']).optional().describe('Operational profile: read/write profile.'),
+        traffic: z.enum(['low', 'medium', 'high']).optional().describe('Operational profile: expected access frequency.'),
+        freshness: z.enum(['strong', 'shortCache', 'longCache']).optional().describe('Operational profile: freshness tolerance.'),
+        sensitivity: z.enum(['public', 'internal', 'confidential', 'pii']).optional().describe('Operational profile: data classification.'),
+        retention: z.enum(['permanent', 'archivable', 'ephemeral']).optional().describe('Operational profile: retention / lifecycle.'),
         timestamps: z.boolean().optional(),
         softDelete: z.boolean().optional()
       } as Record<string, unknown>
@@ -458,7 +474,9 @@ export function registerDesignTools(mcp: McpService): void {
         const strategy = typeof args['identifierStrategy'] === 'string' ? args['identifierStrategy'] : 'uuid'
         model.design.identifier = { propertyId: property.id, strategy: strategy as 'uuid' }
       }
-      if (typeof args['volumetry'] === 'string') model.intents.volumetry = args['volumetry'] as 'hundreds'
+      for (const k of ['volumetry', 'accessPattern', 'traffic', 'freshness', 'sensitivity', 'retention'] as const) {
+        if (typeof args[k] === 'string' && args[k] !== '') (model.intents as Record<string, string>)[k] = args[k]
+      }
       if (typeof args['timestamps'] === 'boolean') {
         if (args['timestamps']) model.design.timestamps = true
         else delete model.design.timestamps

@@ -2317,6 +2317,13 @@
       "storage": "儲存與生命週期",
       "volumetry": "預期資料量",
       "volumetryUnset": "（未指定）",
+      "operationalProfile": "運行特徵",
+      "accessPattern": "讀寫特徵",
+      "traffic": "存取頻率",
+      "freshness": "新鮮度容忍",
+      "sensitivity": "資料敏感度",
+      "retention": "保留 / 生命週期",
+      "profileUnset": "（未指定）",
       "timestamps": "時間戳記（建立/修改）",
       "softDelete": "軟刪除",
       "usedBy": "使用方",
@@ -2416,6 +2423,33 @@
       "tenThousands": "數萬",
       "millions": "數百萬"
     },
+    "accessPattern": {
+      "readHeavy": "讀多寫少",
+      "writeHeavy": "寫多讀少",
+      "balanced": "讀寫均衡",
+      "appendOnly": "僅附加"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "freshness": {
+      "strong": "強一致性",
+      "shortCache": "可短快取",
+      "longCache": "可長快取"
+    },
+    "sensitivity": {
+      "public": "公開",
+      "internal": "內部",
+      "confidential": "機密",
+      "pii": "個人資料（PII）"
+    },
+    "retention": {
+      "permanent": "永久",
+      "archivable": "可封存",
+      "ephemeral": "臨時（TTL）"
+    },
     "issue": {
       "propertyNameEmpty": "屬性沒有名稱",
       "propertyNameDuplicate": "屬性名稱重複",
@@ -2440,11 +2474,6 @@
       "routeResponsesMissing": "該路由未宣告任何回應",
       "routePathDuplicate": "另一條路由已回應此方法與路徑",
       "routePathReserved": "設計伺服器保留此路徑 — 該路由將永遠不會回應"
-    },
-    "traffic": {
-      "low": "低",
-      "medium": "中",
-      "high": "高"
     },
     "routes": {
       "addGroup": "新增群組",

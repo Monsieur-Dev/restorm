@@ -2321,6 +2321,13 @@
       "storage": "Stockage et cycle de vie",
       "volumetry": "Volumétrie attendue",
       "volumetryUnset": "(non précisée)",
+      "operationalProfile": "Profil opérationnel",
+      "accessPattern": "Profil lecture/écriture",
+      "traffic": "Intensité du trafic",
+      "freshness": "Tolérance à la fraîcheur",
+      "sensitivity": "Sensibilité des données",
+      "retention": "Rétention / cycle de vie",
+      "profileUnset": "(non renseigné)",
       "timestamps": "Horodatages (créé/modifié)",
       "softDelete": "Suppression douce",
       "usedBy": "Utilisé par",
@@ -2420,6 +2427,33 @@
       "tenThousands": "Des dizaines de milliers",
       "millions": "Des millions"
     },
+    "accessPattern": {
+      "readHeavy": "Lecture dominante",
+      "writeHeavy": "Écriture dominante",
+      "balanced": "Équilibré",
+      "appendOnly": "Ajout seul"
+    },
+    "traffic": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Fort"
+    },
+    "freshness": {
+      "strong": "Cohérence forte",
+      "shortCache": "Cache court OK",
+      "longCache": "Cache long OK"
+    },
+    "sensitivity": {
+      "public": "Public",
+      "internal": "Interne",
+      "confidential": "Confidentiel",
+      "pii": "Données personnelles (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Archivable",
+      "ephemeral": "Éphémère (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "La propriété n’a pas de nom",
       "propertyNameDuplicate": "Nom de propriété en doublon",
@@ -2444,11 +2478,6 @@
       "routeResponsesMissing": "La route ne déclare aucune réponse",
       "routePathDuplicate": "Une autre route répond déjà à cette méthode et ce chemin",
       "routePathReserved": "Le serveur de design réserve ce chemin — la route ne répondrait jamais"
-    },
-    "traffic": {
-      "low": "Faible",
-      "medium": "Moyen",
-      "high": "Fort"
     },
     "routes": {
       "addGroup": "Ajouter un groupe",

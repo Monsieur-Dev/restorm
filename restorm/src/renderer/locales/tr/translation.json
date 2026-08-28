@@ -2318,6 +2318,13 @@
       "storage": "Depolama ve yaşam döngüsü",
       "volumetry": "Beklenen hacim",
       "volumetryUnset": "(belirtilmemiş)",
+      "operationalProfile": "Operasyonel profil",
+      "accessPattern": "Okuma/yazma profili",
+      "traffic": "Erişim sıklığı",
+      "freshness": "Tazelik toleransı",
+      "sensitivity": "Veri hassasiyeti",
+      "retention": "Saklama / yaşam döngüsü",
+      "profileUnset": "(belirtilmemiş)",
       "timestamps": "Zaman damgaları (oluşturuldu/değiştirildi)",
       "softDelete": "Yumuşak silme",
       "usedBy": "Kullanan",
@@ -2417,6 +2424,33 @@
       "tenThousands": "On binlerce",
       "millions": "Milyonlarca"
     },
+    "accessPattern": {
+      "readHeavy": "Ağırlıklı okuma",
+      "writeHeavy": "Ağırlıklı yazma",
+      "balanced": "Dengeli",
+      "appendOnly": "Yalnızca ekleme"
+    },
+    "traffic": {
+      "low": "Düşük",
+      "medium": "Orta",
+      "high": "Yüksek"
+    },
+    "freshness": {
+      "strong": "Güçlü tutarlılık",
+      "shortCache": "Kısa önbellek OK",
+      "longCache": "Uzun önbellek OK"
+    },
+    "sensitivity": {
+      "public": "Genel",
+      "internal": "Dahili",
+      "confidential": "Gizli",
+      "pii": "Kişisel veri (PII)"
+    },
+    "retention": {
+      "permanent": "Kalıcı",
+      "archivable": "Arşivlenebilir",
+      "ephemeral": "Geçici (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Özelliğin adı yok",
       "propertyNameDuplicate": "Yinelenen özellik adı",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "Rota hiçbir yanıt bildirmiyor",
       "routePathDuplicate": "Başka bir rota bu yöntem ve yola zaten yanıt veriyor",
       "routePathReserved": "Tasarım sunucusu bu yolu ayırıyor — rota asla yanıt vermez"
-    },
-    "traffic": {
-      "low": "Düşük",
-      "medium": "Orta",
-      "high": "Yüksek"
     },
     "routes": {
       "addGroup": "Grup ekle",

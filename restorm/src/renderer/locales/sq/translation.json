@@ -2318,6 +2318,13 @@
       "storage": "Ruajtja & cikli i jetës",
       "volumetry": "Vëllimi i pritur",
       "volumetryUnset": "(i papërcaktuar)",
+      "operationalProfile": "Profili operacional",
+      "accessPattern": "Profili lexim/shkrim",
+      "traffic": "Frekuenca e aksesit",
+      "freshness": "Toleranca e freskisë",
+      "sensitivity": "Ndjeshmëria e të dhënave",
+      "retention": "Ruajtja / cikli i jetës",
+      "profileUnset": "(i papërcaktuar)",
       "timestamps": "Vulat kohore (krijuar/ndryshuar)",
       "softDelete": "Fshirje e butë",
       "usedBy": "Përdoret nga",
@@ -2417,6 +2424,33 @@
       "tenThousands": "Dhjetëra mijëra",
       "millions": "Miliona"
     },
+    "accessPattern": {
+      "readHeavy": "Kryesisht lexim",
+      "writeHeavy": "Kryesisht shkrim",
+      "balanced": "I balancuar",
+      "appendOnly": "Vetëm shtim"
+    },
+    "traffic": {
+      "low": "I ulët",
+      "medium": "Mesatar",
+      "high": "I lartë"
+    },
+    "freshness": {
+      "strong": "Konsistencë e fortë",
+      "shortCache": "Cache i shkurtër OK",
+      "longCache": "Cache i gjatë OK"
+    },
+    "sensitivity": {
+      "public": "Publik",
+      "internal": "I brendshëm",
+      "confidential": "Konfidencial",
+      "pii": "Të dhëna personale (PII)"
+    },
+    "retention": {
+      "permanent": "I përhershëm",
+      "archivable": "I arkivueshëm",
+      "ephemeral": "Kalimtar (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Vetia nuk ka emër",
       "propertyNameDuplicate": "Emër vetie i dublikuar",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "Rruga nuk deklaron asnjë përgjigje",
       "routePathDuplicate": "Një rrugë tjetër i përgjigjet tashmë kësaj metode dhe shtegu",
       "routePathReserved": "Serveri i dizajnit e rezervon këtë shteg — rruga nuk do të përgjigjej kurrë"
-    },
-    "traffic": {
-      "low": "I ulët",
-      "medium": "Mesatar",
-      "high": "I lartë"
     },
     "routes": {
       "addGroup": "Shto një grup",

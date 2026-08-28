@@ -71,6 +71,16 @@ Feature: Design models and enums editor
     And I set the property type to "NewEnum (enum)"
     Then the property row "tier" shows the type "enum → NewEnum"
 
+  Scenario: A model's operational profile is set from the settings tab and persists
+    Given a Pro project carrying an API design is open in the models editor
+    When I open the model "User" settings tab
+    And I set the model profile "design-model-access-pattern" to "Lecture dominante"
+    And I set the model profile "design-model-sensitivity" to "Données personnelles (PII)"
+    And I open the model "Order"
+    And I open the model "User" settings tab
+    Then the model profile "design-model-access-pattern" shows "Lecture dominante"
+    And the model profile "design-model-sensitivity" shows "Données personnelles (PII)"
+
   Scenario: Named examples refuse constraint-violating values and seed the rest
     Given a Pro project carrying an API design is open in the models editor
     When I open the model "User" examples tab

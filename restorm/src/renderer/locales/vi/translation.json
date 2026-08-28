@@ -2317,6 +2317,13 @@
       "storage": "Lưu trữ & vòng đời",
       "volumetry": "Khối lượng dự kiến",
       "volumetryUnset": "(chưa xác định)",
+      "operationalProfile": "Hồ sơ vận hành",
+      "accessPattern": "Hồ sơ đọc/ghi",
+      "traffic": "Tần suất truy cập",
+      "freshness": "Dung sai độ mới",
+      "sensitivity": "Độ nhạy cảm dữ liệu",
+      "retention": "Lưu giữ / vòng đời",
+      "profileUnset": "(chưa xác định)",
       "timestamps": "Dấu thời gian (tạo/sửa)",
       "softDelete": "Xóa mềm",
       "usedBy": "Được dùng bởi",
@@ -2416,6 +2423,33 @@
       "tenThousands": "Hàng chục nghìn",
       "millions": "Hàng triệu"
     },
+    "accessPattern": {
+      "readHeavy": "Chủ yếu đọc",
+      "writeHeavy": "Chủ yếu ghi",
+      "balanced": "Cân bằng",
+      "appendOnly": "Chỉ thêm mới"
+    },
+    "traffic": {
+      "low": "Thấp",
+      "medium": "Trung bình",
+      "high": "Cao"
+    },
+    "freshness": {
+      "strong": "Nhất quán mạnh",
+      "shortCache": "Cache ngắn OK",
+      "longCache": "Cache dài OK"
+    },
+    "sensitivity": {
+      "public": "Công khai",
+      "internal": "Nội bộ",
+      "confidential": "Bảo mật",
+      "pii": "Dữ liệu cá nhân (PII)"
+    },
+    "retention": {
+      "permanent": "Vĩnh viễn",
+      "archivable": "Có thể lưu trữ",
+      "ephemeral": "Tạm thời (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Thuộc tính chưa có tên",
       "propertyNameDuplicate": "Tên thuộc tính trùng lặp",
@@ -2440,11 +2474,6 @@
       "routeResponsesMissing": "Tuyến không khai báo phản hồi nào",
       "routePathDuplicate": "Một tuyến khác đã trả lời phương thức và đường dẫn này",
       "routePathReserved": "Máy chủ thiết kế giữ đường dẫn này — route sẽ không bao giờ trả lời"
-    },
-    "traffic": {
-      "low": "Thấp",
-      "medium": "Trung bình",
-      "high": "Cao"
     },
     "routes": {
       "addGroup": "Thêm nhóm",

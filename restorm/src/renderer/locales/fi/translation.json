@@ -2318,6 +2318,13 @@
       "storage": "Tallennus ja elinkaari",
       "volumetry": "Odotettu volyymi",
       "volumetryUnset": "(määrittämätön)",
+      "operationalProfile": "Toimintaprofiili",
+      "accessPattern": "Luku-/kirjoitusprofiili",
+      "traffic": "Käyttötiheys",
+      "freshness": "Tuoreustoleranssi",
+      "sensitivity": "Tietojen arkaluonteisuus",
+      "retention": "Säilytys / elinkaari",
+      "profileUnset": "(määrittämätön)",
       "timestamps": "Aikaleimat (luotu/muokattu)",
       "softDelete": "Pehmeä poisto",
       "usedBy": "Käyttäjät",
@@ -2417,6 +2424,33 @@
       "tenThousands": "Kymmeniätuhansia",
       "millions": "Miljoonia"
     },
+    "accessPattern": {
+      "readHeavy": "Lukupainotteinen",
+      "writeHeavy": "Kirjoituspainotteinen",
+      "balanced": "Tasapainoinen",
+      "appendOnly": "Vain lisäys"
+    },
+    "traffic": {
+      "low": "Matala",
+      "medium": "Keskitaso",
+      "high": "Korkea"
+    },
+    "freshness": {
+      "strong": "Vahva eheys",
+      "shortCache": "Lyhyt välimuisti OK",
+      "longCache": "Pitkä välimuisti OK"
+    },
+    "sensitivity": {
+      "public": "Julkinen",
+      "internal": "Sisäinen",
+      "confidential": "Luottamuksellinen",
+      "pii": "Henkilötiedot (PII)"
+    },
+    "retention": {
+      "permanent": "Pysyvä",
+      "archivable": "Arkistoitava",
+      "ephemeral": "Väliaikainen (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Ominaisuudella ei ole nimeä",
       "propertyNameDuplicate": "Ominaisuuden nimi on jo käytössä",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "Reitti ei määrittele yhtään vastausta",
       "routePathDuplicate": "Toinen reitti vastaa jo tähän metodiin ja polkuun",
       "routePathReserved": "Design-palvelin varaa tämän polun — reitti ei koskaan vastaisi"
-    },
-    "traffic": {
-      "low": "Matala",
-      "medium": "Keskitaso",
-      "high": "Korkea"
     },
     "routes": {
       "addGroup": "Lisää ryhmä",

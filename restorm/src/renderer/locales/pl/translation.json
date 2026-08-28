@@ -2320,6 +2320,13 @@
       "storage": "Przechowywanie i cykl życia",
       "volumetry": "Oczekiwany wolumen",
       "volumetryUnset": "(nieokreślony)",
+      "operationalProfile": "Profil operacyjny",
+      "accessPattern": "Profil odczytu/zapisu",
+      "traffic": "Częstotliwość dostępu",
+      "freshness": "Tolerancja świeżości",
+      "sensitivity": "Wrażliwość danych",
+      "retention": "Przechowywanie / cykl życia",
+      "profileUnset": "(nieokreślony)",
       "timestamps": "Znaczniki czasu (utworzono/zmieniono)",
       "softDelete": "Miękkie usuwanie",
       "usedBy": "Używany przez",
@@ -2419,6 +2426,33 @@
       "tenThousands": "Dziesiątki tysięcy",
       "millions": "Miliony"
     },
+    "accessPattern": {
+      "readHeavy": "Głównie odczyt",
+      "writeHeavy": "Głównie zapis",
+      "balanced": "Zrównoważony",
+      "appendOnly": "Tylko dopisywanie"
+    },
+    "traffic": {
+      "low": "Niski",
+      "medium": "Średni",
+      "high": "Wysoki"
+    },
+    "freshness": {
+      "strong": "Silna spójność",
+      "shortCache": "Krótki cache OK",
+      "longCache": "Długi cache OK"
+    },
+    "sensitivity": {
+      "public": "Publiczne",
+      "internal": "Wewnętrzne",
+      "confidential": "Poufne",
+      "pii": "Dane osobowe (PII)"
+    },
+    "retention": {
+      "permanent": "Trwałe",
+      "archivable": "Archiwizowalne",
+      "ephemeral": "Ulotne (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Właściwość nie ma nazwy",
       "propertyNameDuplicate": "Zduplikowana nazwa właściwości",
@@ -2443,11 +2477,6 @@
       "routeResponsesMissing": "Trasa nie deklaruje żadnej odpowiedzi",
       "routePathDuplicate": "Inna trasa już odpowiada na tę metodę i ścieżkę",
       "routePathReserved": "Serwer projektu rezerwuje tę ścieżkę — trasa nigdy by nie odpowiedziała"
-    },
-    "traffic": {
-      "low": "Niski",
-      "medium": "Średni",
-      "high": "Wysoki"
     },
     "routes": {
       "addGroup": "Dodaj grupę",

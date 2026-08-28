@@ -388,3 +388,28 @@ Then('the example value input of {string} reports a constraint violation', async
   // the current draft.
   await expect(p.locator(`[data-testid="design-example-value-${propId}-message"]`)).toBeVisible({ timeout: 5000 })
 })
+
+// ── Operational-profile intents (model settings) ──────────────────────
+// The e2e app may run in French OR English (CI falls back to English), so
+// match each option against both wordings — same tactic as the delete-rule step.
+const PROFILE_LABEL_ALIASES: Record<string, RegExp> = {
+  'Lecture dominante': /Lecture dominante|Read-heavy/,
+  'Écriture dominante': /Écriture dominante|Write-heavy/,
+  'Données personnelles (PII)': /Données personnelles \(PII\)|Personal data \(PII\)/
+}
+
+When('I set the model profile {string} to {string}', async ({}, testid: string, label: string) => {
+  const p = requirePage()
+  const matcher = PROFILE_LABEL_ALIASES[label] ?? label
+  // Reuse the hardened picker: the dropdown is portaled and can overflow the
+  // window, so a plain click on a lower option times out.
+  await pickSelectOption(p, testid, matcher)
+  // The trigger reflects the pick once the model doc is updated.
+  await expect(p.locator(`[data-testid="${testid}-trigger"]`)).toContainText(matcher, { timeout: 5000 })
+})
+
+Then('the model profile {string} shows {string}', async ({}, testid: string, label: string) => {
+  const p = requirePage()
+  const matcher = PROFILE_LABEL_ALIASES[label] ?? label
+  await expect(p.locator(`[data-testid="${testid}-trigger"]`)).toContainText(matcher, { timeout: 5000 })
+})

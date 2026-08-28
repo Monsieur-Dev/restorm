@@ -80,6 +80,35 @@ describe('buildCodegenContext', () => {
     expect(user?.properties.find((p) => p.name === 'email')?.pii).toBe(true)
     expect(user?.properties.find((p) => p.name === 'email')?.searchable).toBe(true)
   })
+
+  it('projects every operational-profile intent into the model context, and omits the unset ones', () => {
+    // Mutate a FRESH reference design (never the golden one) so the golden
+    // match above stays intent-light and this asserts the full projection.
+    const d = buildReferenceApiDesign()
+    const user = d.models.find((m) => m.doc.name === 'User')
+    if (!user) throw new Error('reference design is missing the User model')
+    user.intents = {
+      ...(user.intents ?? {}),
+      accessPattern: 'readHeavy',
+      traffic: 'high',
+      freshness: 'longCache',
+      sensitivity: 'pii',
+      retention: 'archivable'
+    }
+    const ctx = buildCodegenContext(d)
+    const u = ctx.models.find((m) => m.name === 'User')
+    expect(u?.accessPattern).toBe('readHeavy')
+    expect(u?.traffic).toBe('high')
+    expect(u?.freshness).toBe('longCache')
+    expect(u?.sensitivity).toBe('pii')
+    expect(u?.retention).toBe('archivable')
+    // An unset intent must be ABSENT (presence-based, like the other flags).
+    const order = ctx.models.find((m) => m.name === 'Order')
+    expect(order?.accessPattern).toBeUndefined()
+    expect(order?.sensitivity).toBeUndefined()
+    // The context still validates against the bundled schema with the new fields.
+    expect(validateAgainstSchema(ctx, JSON.stringify(CODEGEN_CONTEXT_SCHEMA)).valid).toBe(true)
+  })
 })
 
 describe('buildCodegenContext — user variables (vars)', () => {

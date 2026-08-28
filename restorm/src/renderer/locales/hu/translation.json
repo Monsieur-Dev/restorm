@@ -2318,6 +2318,13 @@
       "storage": "Tárolás és életciklus",
       "volumetry": "Várt volumen",
       "volumetryUnset": "(nem megadott)",
+      "operationalProfile": "Működési profil",
+      "accessPattern": "Olvasási/írási profil",
+      "traffic": "Hozzáférési gyakoriság",
+      "freshness": "Frissesség-tűrés",
+      "sensitivity": "Adatérzékenység",
+      "retention": "Megőrzés / életciklus",
+      "profileUnset": "(nem megadott)",
       "timestamps": "Időbélyegek (létrehozva/módosítva)",
       "softDelete": "Puha törlés",
       "usedBy": "Használja",
@@ -2417,6 +2424,33 @@
       "tenThousands": "Több tízezer",
       "millions": "Több millió"
     },
+    "accessPattern": {
+      "readHeavy": "Olvasás-túlsúlyos",
+      "writeHeavy": "Írás-túlsúlyos",
+      "balanced": "Kiegyensúlyozott",
+      "appendOnly": "Csak hozzáfűzés"
+    },
+    "traffic": {
+      "low": "Alacsony",
+      "medium": "Közepes",
+      "high": "Magas"
+    },
+    "freshness": {
+      "strong": "Erős konzisztencia",
+      "shortCache": "Rövid gyorsítótár OK",
+      "longCache": "Hosszú gyorsítótár OK"
+    },
+    "sensitivity": {
+      "public": "Nyilvános",
+      "internal": "Belső",
+      "confidential": "Bizalmas",
+      "pii": "Személyes adatok (PII)"
+    },
+    "retention": {
+      "permanent": "Állandó",
+      "archivable": "Archiválható",
+      "ephemeral": "Ideiglenes (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "A tulajdonságnak nincs neve",
       "propertyNameDuplicate": "Ismétlődő tulajdonságnév",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "Az útvonal nem deklarál választ",
       "routePathDuplicate": "Egy másik útvonal már válaszol erre a metódusra és útvonalra",
       "routePathReserved": "A design szerver fenntartja ezt az útvonalat — a route soha nem válaszolna"
-    },
-    "traffic": {
-      "low": "Alacsony",
-      "medium": "Közepes",
-      "high": "Magas"
     },
     "routes": {
       "addGroup": "Csoport hozzáadása",

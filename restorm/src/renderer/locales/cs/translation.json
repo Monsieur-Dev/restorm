@@ -2320,6 +2320,13 @@
       "storage": "Úložiště a životní cyklus",
       "volumetry": "Očekávaný objem",
       "volumetryUnset": "(neurčeno)",
+      "operationalProfile": "Provozní profil",
+      "accessPattern": "Profil čtení/zápisu",
+      "traffic": "Frekvence přístupu",
+      "freshness": "Tolerance aktuálnosti",
+      "sensitivity": "Citlivost dat",
+      "retention": "Uchovávání / životní cyklus",
+      "profileUnset": "(neurčeno)",
       "timestamps": "Časová razítka (vytvořeno/upraveno)",
       "softDelete": "Měkké mazání",
       "usedBy": "Používá se v",
@@ -2419,6 +2426,33 @@
       "tenThousands": "Desetitisíce",
       "millions": "Miliony"
     },
+    "accessPattern": {
+      "readHeavy": "Převážně čtení",
+      "writeHeavy": "Převážně zápis",
+      "balanced": "Vyvážené",
+      "appendOnly": "Pouze přidávání"
+    },
+    "traffic": {
+      "low": "Nízký",
+      "medium": "Střední",
+      "high": "Vysoký"
+    },
+    "freshness": {
+      "strong": "Silná konzistence",
+      "shortCache": "Krátká cache OK",
+      "longCache": "Dlouhá cache OK"
+    },
+    "sensitivity": {
+      "public": "Veřejné",
+      "internal": "Interní",
+      "confidential": "Důvěrné",
+      "pii": "Osobní údaje (PII)"
+    },
+    "retention": {
+      "permanent": "Trvalé",
+      "archivable": "Archivovatelné",
+      "ephemeral": "Dočasné (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Vlastnost nemá název",
       "propertyNameDuplicate": "Duplicitní název vlastnosti",
@@ -2443,11 +2477,6 @@
       "routeResponsesMissing": "Trasa nedeklaruje žádnou odpověď",
       "routePathDuplicate": "Jiná trasa již odpovídá na tuto metodu a cestu",
       "routePathReserved": "Design server si tuto cestu vyhrazuje — trasa by nikdy neodpověděla"
-    },
-    "traffic": {
-      "low": "Nízký",
-      "medium": "Střední",
-      "high": "Vysoký"
     },
     "routes": {
       "addGroup": "Přidat skupinu",

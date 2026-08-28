@@ -2319,6 +2319,13 @@
       "storage": "Pohrana i životni ciklus",
       "volumetry": "Očekivani volumen",
       "volumetryUnset": "(neodređeno)",
+      "operationalProfile": "Operativni profil",
+      "accessPattern": "Profil čitanja/pisanja",
+      "traffic": "Učestalost pristupa",
+      "freshness": "Tolerancija svježine",
+      "sensitivity": "Osjetljivost podataka",
+      "retention": "Zadržavanje / životni ciklus",
+      "profileUnset": "(neodređeno)",
       "timestamps": "Vremenske oznake (stvoreno/izmijenjeno)",
       "softDelete": "Meko brisanje",
       "usedBy": "Koristi se u",
@@ -2418,6 +2425,33 @@
       "tenThousands": "Deseci tisuća",
       "millions": "Milijuni"
     },
+    "accessPattern": {
+      "readHeavy": "Pretežno čitanje",
+      "writeHeavy": "Pretežno pisanje",
+      "balanced": "Uravnoteženo",
+      "appendOnly": "Samo dodavanje"
+    },
+    "traffic": {
+      "low": "Nizak",
+      "medium": "Srednji",
+      "high": "Visok"
+    },
+    "freshness": {
+      "strong": "Jaka dosljednost",
+      "shortCache": "Kratki cache OK",
+      "longCache": "Dugi cache OK"
+    },
+    "sensitivity": {
+      "public": "Javno",
+      "internal": "Interno",
+      "confidential": "Povjerljivo",
+      "pii": "Osobni podaci (PII)"
+    },
+    "retention": {
+      "permanent": "Trajno",
+      "archivable": "Arhivirljivo",
+      "ephemeral": "Kratkotrajno (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Svojstvo nema ime",
       "propertyNameDuplicate": "Duplicirano ime svojstva",
@@ -2442,11 +2476,6 @@
       "routeResponsesMissing": "Ruta ne deklarira nijedan odgovor",
       "routePathDuplicate": "Druga ruta već odgovara na ovu metodu i putanju",
       "routePathReserved": "Dizajnerski poslužitelj rezervira ovu putanju — ruta nikada ne bi odgovorila"
-    },
-    "traffic": {
-      "low": "Nizak",
-      "medium": "Srednji",
-      "high": "Visok"
     },
     "routes": {
       "addGroup": "Dodaj grupu",

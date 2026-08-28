@@ -66,6 +66,26 @@ export type ModelVolumetry = 'hundreds' | 'tenThousands' | 'millions'
  * design-server behaviour hints. */
 export type RouteTraffic = 'low' | 'medium' | 'high'
 
+/** Read/write profile of a resource — how a codegen template shapes caching,
+ * read replicas, CQRS, index and append-only strategies. */
+export type ModelAccessPattern = 'readHeavy' | 'writeHeavy' | 'balanced' | 'appendOnly'
+
+/** Expected access frequency (traffic) on a resource — caching layer,
+ * rate-limiting, pooling, dedicated infrastructure. */
+export type ModelTraffic = RouteTraffic
+
+/** How stale a resource may be served — whether a template caches it, and how
+ * long. `strong` = must be fresh (no cache). */
+export type ModelFreshness = 'strong' | 'shortCache' | 'longCache'
+
+/** Data-classification of a resource — encryption at rest, audit, masking,
+ * no-store headers. (Property-level `pii` marks a single field; this classifies
+ * the whole resource.) */
+export type ModelSensitivity = 'public' | 'internal' | 'confidential' | 'pii'
+
+/** Retention / lifecycle of a resource — TTL, cold storage, purge. */
+export type ModelRetention = 'permanent' | 'archivable' | 'ephemeral'
+
 /** How a model's identifier is produced. Feeds column DDL, generated
  * code and the design server's object resolution. */
 export type IdentifierStrategy = 'uuid' | 'autoIncrement' | 'ulid'
@@ -161,9 +181,23 @@ export interface DesignProperty {
   design?: PropertyDesignMeta
 }
 
-/** Intention metadata on a model. */
+/** Intention metadata on a model — the "operational profile" of the resource.
+ * Every field is optional (absent = "no expectation stated") and feeds the code
+ * generators via the codegen context; none affect the served mock except
+ * {@link ModelVolumetry} (the served list total). */
 export interface ModelIntents {
+  /** Expected order of magnitude for the row count. */
   volumetry?: ModelVolumetry
+  /** Read/write profile (read-heavy, write-heavy, balanced, append-only). */
+  accessPattern?: ModelAccessPattern
+  /** Expected access frequency / traffic. */
+  traffic?: ModelTraffic
+  /** How stale the resource may be served (freshness tolerance). */
+  freshness?: ModelFreshness
+  /** Data classification / sensitivity of the resource. */
+  sensitivity?: ModelSensitivity
+  /** Retention / lifecycle. */
+  retention?: ModelRetention
 }
 
 /** Design-only structural facts on a model. */

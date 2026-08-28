@@ -2320,6 +2320,13 @@
       "storage": "Зберігання та життєвий цикл",
       "volumetry": "Очікуваний обсяг",
       "volumetryUnset": "(не вказано)",
+      "operationalProfile": "Операційний профіль",
+      "accessPattern": "Профіль читання/запису",
+      "traffic": "Частота доступу",
+      "freshness": "Допустима давність даних",
+      "sensitivity": "Чутливість даних",
+      "retention": "Зберігання / життєвий цикл",
+      "profileUnset": "(не вказано)",
       "timestamps": "Часові мітки (створено/змінено)",
       "softDelete": "М’яке видалення",
       "usedBy": "Використовується в",
@@ -2419,6 +2426,33 @@
       "tenThousands": "Десятки тисяч",
       "millions": "Мільйони"
     },
+    "accessPattern": {
+      "readHeavy": "Переважно читання",
+      "writeHeavy": "Переважно запис",
+      "balanced": "Збалансований",
+      "appendOnly": "Лише додавання"
+    },
+    "traffic": {
+      "low": "Низький",
+      "medium": "Середній",
+      "high": "Високий"
+    },
+    "freshness": {
+      "strong": "Сувора узгодженість",
+      "shortCache": "Коротке кешування OK",
+      "longCache": "Довге кешування OK"
+    },
+    "sensitivity": {
+      "public": "Публічні",
+      "internal": "Внутрішні",
+      "confidential": "Конфіденційні",
+      "pii": "Персональні дані (PII)"
+    },
+    "retention": {
+      "permanent": "Постійні",
+      "archivable": "Архівовані",
+      "ephemeral": "Тимчасові (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Властивість не має назви",
       "propertyNameDuplicate": "Дубльована назва властивості",
@@ -2443,11 +2477,6 @@
       "routeResponsesMissing": "Маршрут не оголошує жодної відповіді",
       "routePathDuplicate": "Інший маршрут уже відповідає на цей метод і шлях",
       "routePathReserved": "Сервер дизайну резервує цей шлях — маршрут ніколи б не відповів"
-    },
-    "traffic": {
-      "low": "Низький",
-      "medium": "Середній",
-      "high": "Високий"
     },
     "routes": {
       "addGroup": "Додати групу",

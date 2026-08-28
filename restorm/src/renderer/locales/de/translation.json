@@ -2318,6 +2318,13 @@
       "storage": "Speicherung & Lebenszyklus",
       "volumetry": "Erwartetes Volumen",
       "volumetryUnset": "(nicht angegeben)",
+      "operationalProfile": "Betriebsprofil",
+      "accessPattern": "Lese-/Schreibprofil",
+      "traffic": "Zugriffshäufigkeit",
+      "freshness": "Aktualitätstoleranz",
+      "sensitivity": "Datensensibilität",
+      "retention": "Aufbewahrung / Lebenszyklus",
+      "profileUnset": "(nicht angegeben)",
       "timestamps": "Zeitstempel (erstellt/geändert)",
       "softDelete": "Soft Delete",
       "usedBy": "Verwendet von",
@@ -2417,6 +2424,33 @@
       "tenThousands": "Zehntausende",
       "millions": "Millionen"
     },
+    "accessPattern": {
+      "readHeavy": "Leselastig",
+      "writeHeavy": "Schreiblastig",
+      "balanced": "Ausgewogen",
+      "appendOnly": "Nur Anhängen"
+    },
+    "traffic": {
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch"
+    },
+    "freshness": {
+      "strong": "Starke Konsistenz",
+      "shortCache": "Kurzes Caching OK",
+      "longCache": "Langes Caching OK"
+    },
+    "sensitivity": {
+      "public": "Öffentlich",
+      "internal": "Intern",
+      "confidential": "Vertraulich",
+      "pii": "Personenbezogene Daten (PII)"
+    },
+    "retention": {
+      "permanent": "Dauerhaft",
+      "archivable": "Archivierbar",
+      "ephemeral": "Kurzlebig (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Die Eigenschaft hat keinen Namen",
       "propertyNameDuplicate": "Doppelter Eigenschaftsname",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "Die Route deklariert keine Antwort",
       "routePathDuplicate": "Eine andere Route beantwortet diese Methode und diesen Pfad bereits",
       "routePathReserved": "Der Design-Server reserviert diesen Pfad — die Route würde nie antworten"
-    },
-    "traffic": {
-      "low": "Niedrig",
-      "medium": "Mittel",
-      "high": "Hoch"
     },
     "routes": {
       "addGroup": "Gruppe hinzufügen",

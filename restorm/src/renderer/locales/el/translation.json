@@ -2318,6 +2318,13 @@
       "storage": "Αποθήκευση & κύκλος ζωής",
       "volumetry": "Αναμενόμενος όγκος",
       "volumetryUnset": "(απροσδιόριστος)",
+      "operationalProfile": "Λειτουργικό προφίλ",
+      "accessPattern": "Προφίλ ανάγνωσης/εγγραφής",
+      "traffic": "Συχνότητα πρόσβασης",
+      "freshness": "Ανοχή φρεσκάδας",
+      "sensitivity": "Ευαισθησία δεδομένων",
+      "retention": "Διατήρηση / κύκλος ζωής",
+      "profileUnset": "(απροσδιόριστος)",
       "timestamps": "Χρονοσημάνσεις (δημιουργία/τροποποίηση)",
       "softDelete": "Ήπια διαγραφή",
       "usedBy": "Χρησιμοποιείται από",
@@ -2417,6 +2424,33 @@
       "tenThousands": "Δεκάδες χιλιάδες",
       "millions": "Εκατομμύρια"
     },
+    "accessPattern": {
+      "readHeavy": "Κυρίως ανάγνωση",
+      "writeHeavy": "Κυρίως εγγραφή",
+      "balanced": "Ισορροπημένο",
+      "appendOnly": "Μόνο προσθήκη"
+    },
+    "traffic": {
+      "low": "Χαμηλή",
+      "medium": "Μεσαία",
+      "high": "Υψηλή"
+    },
+    "freshness": {
+      "strong": "Ισχυρή συνέπεια",
+      "shortCache": "Σύντομη cache OK",
+      "longCache": "Μεγάλη cache OK"
+    },
+    "sensitivity": {
+      "public": "Δημόσιο",
+      "internal": "Εσωτερικό",
+      "confidential": "Εμπιστευτικό",
+      "pii": "Προσωπικά δεδομένα (PII)"
+    },
+    "retention": {
+      "permanent": "Μόνιμο",
+      "archivable": "Αρχειοθετήσιμο",
+      "ephemeral": "Εφήμερο (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "Η ιδιότητα δεν έχει όνομα",
       "propertyNameDuplicate": "Διπλότυπο όνομα ιδιότητας",
@@ -2441,11 +2475,6 @@
       "routeResponsesMissing": "Η διαδρομή δεν δηλώνει καμία απόκριση",
       "routePathDuplicate": "Μια άλλη διαδρομή απαντά ήδη σε αυτήν τη μέθοδο και διαδρομή",
       "routePathReserved": "Ο διακομιστής σχεδίασης δεσμεύει αυτή τη διαδρομή — η διαδρομή δεν θα απαντούσε ποτέ"
-    },
-    "traffic": {
-      "low": "Χαμηλή",
-      "medium": "Μεσαία",
-      "high": "Υψηλή"
     },
     "routes": {
       "addGroup": "Προσθήκη ομάδας",

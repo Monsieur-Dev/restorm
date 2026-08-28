@@ -114,7 +114,18 @@ export interface CodegenModel {
   identifier?: { property: string; strategy: string }
   timestamps?: boolean
   softDelete?: boolean
+  /** Operational profile of the resource (each present only when stated).
+   * `volumetry`: hundreds/tenThousands/millions. `accessPattern`:
+   * readHeavy/writeHeavy/balanced/appendOnly. `traffic`: low/medium/high.
+   * `freshness`: strong/shortCache/longCache. `sensitivity`:
+   * public/internal/confidential/pii. `retention`:
+   * permanent/archivable/ephemeral. */
   volumetry?: string
+  accessPattern?: string
+  traffic?: string
+  freshness?: string
+  sensitivity?: string
+  retention?: string
   /** OWN properties only — inherited ones come from `inherits`. Use this
    * for the type declaration so `extends {{ inherits }}` stays clean. */
   properties: CodegenProperty[]
@@ -298,6 +309,11 @@ function projectModel(
   if (model.design?.timestamps === true) out.timestamps = true
   if (model.design?.softDelete === true) out.softDelete = true
   if (model.intents?.volumetry !== undefined) out.volumetry = model.intents.volumetry
+  if (model.intents?.accessPattern !== undefined) out.accessPattern = model.intents.accessPattern
+  if (model.intents?.traffic !== undefined) out.traffic = model.intents.traffic
+  if (model.intents?.freshness !== undefined) out.freshness = model.intents.freshness
+  if (model.intents?.sensitivity !== undefined) out.sensitivity = model.intents.sensitivity
+  if (model.intents?.retention !== undefined) out.retention = model.intents.retention
   if (binding !== undefined && designCtx !== undefined) {
     const resolved = resolveScopeVars({
       decls: binding.decls,

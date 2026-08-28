@@ -2321,6 +2321,13 @@
       "storage": "Storage & lifecycle",
       "volumetry": "Expected volume",
       "volumetryUnset": "(unspecified)",
+      "operationalProfile": "Operational profile",
+      "accessPattern": "Read/write profile",
+      "traffic": "Access frequency",
+      "freshness": "Freshness tolerance",
+      "sensitivity": "Data sensitivity",
+      "retention": "Retention / lifecycle",
+      "profileUnset": "(unspecified)",
       "timestamps": "Timestamps (created/updated)",
       "softDelete": "Soft delete",
       "usedBy": "Used by",
@@ -2420,6 +2427,33 @@
       "tenThousands": "Tens of thousands",
       "millions": "Millions"
     },
+    "accessPattern": {
+      "readHeavy": "Read-heavy",
+      "writeHeavy": "Write-heavy",
+      "balanced": "Balanced",
+      "appendOnly": "Append-only"
+    },
+    "traffic": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "freshness": {
+      "strong": "Strong consistency",
+      "shortCache": "Short cache OK",
+      "longCache": "Long cache OK"
+    },
+    "sensitivity": {
+      "public": "Public",
+      "internal": "Internal",
+      "confidential": "Confidential",
+      "pii": "Personal data (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Archivable",
+      "ephemeral": "Ephemeral (TTL)"
+    },
     "issue": {
       "propertyNameEmpty": "The property has no name",
       "propertyNameDuplicate": "Duplicate property name",
@@ -2444,11 +2478,6 @@
       "routeResponsesMissing": "The route declares no response",
       "routePathDuplicate": "Another route already answers this method and path",
       "routePathReserved": "The design server reserves this path — the route would never answer"
-    },
-    "traffic": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High"
     },
     "routes": {
       "addGroup": "Add a group",

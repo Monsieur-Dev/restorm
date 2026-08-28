@@ -2317,6 +2317,13 @@
       "storage": "存储与生命周期",
       "volumetry": "预期数据量",
       "volumetryUnset": "（未指定）",
+      "operationalProfile": "运行特征",
+      "accessPattern": "读写特征",
+      "traffic": "访问频率",
+      "freshness": "新鲜度容忍",
+      "sensitivity": "数据敏感度",
+      "retention": "保留 / 生命周期",
+      "profileUnset": "（未指定）",
       "timestamps": "时间戳（创建/修改）",
       "softDelete": "软删除",
       "usedBy": "使用方",
@@ -2416,6 +2423,33 @@
       "tenThousands": "数万",
       "millions": "数百万"
     },
+    "accessPattern": {
+      "readHeavy": "读多写少",
+      "writeHeavy": "写多读少",
+      "balanced": "读写均衡",
+      "appendOnly": "仅追加"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "freshness": {
+      "strong": "强一致性",
+      "shortCache": "可短缓存",
+      "longCache": "可长缓存"
+    },
+    "sensitivity": {
+      "public": "公开",
+      "internal": "内部",
+      "confidential": "机密",
+      "pii": "个人数据（PII）"
+    },
+    "retention": {
+      "permanent": "永久",
+      "archivable": "可归档",
+      "ephemeral": "临时（TTL）"
+    },
     "issue": {
       "propertyNameEmpty": "属性没有名称",
       "propertyNameDuplicate": "属性名称重复",
@@ -2440,11 +2474,6 @@
       "routeResponsesMissing": "该路由未声明任何响应",
       "routePathDuplicate": "另一条路由已响应此方法和路径",
       "routePathReserved": "设计服务器保留此路径 — 该路由将永远不会响应"
-    },
-    "traffic": {
-      "low": "低",
-      "medium": "中",
-      "high": "高"
     },
     "routes": {
       "addGroup": "添加分组",
