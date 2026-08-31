@@ -64,6 +64,7 @@ import { DocumentEvents, type DocumentChangedPayload } from '../services/Documen
 import { searchIndexService } from '../services/SearchIndexService'
 import { makeReactiveFolder, makeReactiveRequest, emitEnvironmentUpdated } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+import { isSaveCancellation } from '../../../shared/utils/saveResult'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import {
   CURRENT_FILE_FORMAT_VERSION,
@@ -552,6 +553,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             await closeFile()
             await openFile(result.path)
           }
+        } else if (isSaveCancellation(result)) {
+          // The user dismissed the "Save as" dialog — a normal choice, not a
+          // failure. Logging it as an error turns every cancel into a Sentry
+          // event that drowns the real ones.
+          logger.info('[useFileManagement] Save cancelled by the user')
         } else {
           logger.error('[useFileManagement] Failed to save file', {
             error: result?.error ?? 'Unknown error'

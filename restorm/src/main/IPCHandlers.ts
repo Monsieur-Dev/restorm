@@ -15,6 +15,7 @@ import { authPrefetchOneShot, resolveProducedHeaders } from './services/Authenti
 import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
 import { StringValue, ExpressionValue, CustomListValue, CustomListMultiValue, SecretValue } from '../shared/types/valueTypes'
 import type { KeyValue } from '../shared/types/baseTypes'
+import { SAVE_CANCELLED } from '../shared/utils/saveResult'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { graphqlMockServerService } from './services/GraphQLMockServerService'
@@ -335,7 +336,7 @@ export function registerRestormIPC(deps: {
       })
 
       if (result.canceled || !result.filePath) {
-        return { success: false, error: 'Cancelled' }
+        return { success: false, error: SAVE_CANCELLED }
       }
 
       // Use PersistenceService for single file save
