@@ -14,7 +14,6 @@ import {
   usePersistedState,
   eventBus,
   logger,
-  computeChecksum,
   useDirtyState,
   navigationService,
   upsertSaveUnit,
@@ -131,6 +130,7 @@ import type { SplitDirection } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, COOKIE_JAR_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab, type CookieJarTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
+import { computeChecksumSnapshot } from './utils/computeChecksumSnapshot'
 import { pruneOrphanTabs, tabMatchesItem } from './utils/workbenchTabs'
 import { findTopLevelEnvironment } from './utils/envSaveUnit'
 import { snapshotMirrorPayload } from './utils/mirrorPayload'
@@ -3172,10 +3172,7 @@ const App: React.FC = () => {
 
     const handleFolderOrRequestUpdated = (payload: DocumentChangedPayload): void => {
       const doc = payload.document
-      scheduleChecksumUpdate(payload.id, () => {
-        const serialized = JSON.parse(JSON.stringify(doc)) as FolderItem
-        return computeChecksum(serialized)
-      })
+      scheduleChecksumUpdate(payload.id, () => computeChecksumSnapshot(doc))
     }
 
     // For environments, we need to update the parent folder's dirty state
@@ -3203,14 +3200,14 @@ const App: React.FC = () => {
       // dirty-state). Keep the snapshot.
       for (const rootFolder of rootItemsRef.current) {
         if (rootFolder.id === parentFolderId) {
-          scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder))
+          scheduleChecksumUpdate(parentFolderId, () => computeChecksumSnapshot(rootFolder))
           return
         }
         // Only search in folders, not Requests
         if ('items' in rootFolder) {
           const found = findFolder(rootFolder.items)
           if (found) {
-            scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(found)) as Folder))
+            scheduleChecksumUpdate(parentFolderId, () => computeChecksumSnapshot(found))
             return
           }
         }

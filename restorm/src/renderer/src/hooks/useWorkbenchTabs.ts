@@ -6,7 +6,6 @@ import { useCallback, useRef } from 'react'
 import {
   isContainerNode,
   isTabGroupNode,
-  computeChecksum,
   insertTabAt,
   normalizeTree,
   removeTab,
@@ -29,6 +28,7 @@ import {
   findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from '../utils/treeSearch'
+import { computeChecksumSnapshot } from '../utils/computeChecksumSnapshot'
 import type {
   Folder,
   FolderItem,
@@ -383,7 +383,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     const tabId = buildTabId('folder', folder.id)
 
     setTimeout(() => {
-      const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)) as Folder)
+      const folderChecksum = computeChecksumSnapshot(folder)
       registerTabDirtyState(folder.id, folderChecksum)
     }, 500)
 
@@ -406,7 +406,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     const tabId = buildTabId('scenario', scenario.id)
 
     setTimeout(() => {
-      const scenarioChecksum = computeChecksum(JSON.parse(JSON.stringify(scenario)))
+      const scenarioChecksum = computeChecksumSnapshot(scenario)
       registerTabDirtyState(scenario.id, scenarioChecksum)
     }, 500)
 
@@ -434,7 +434,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     // state, creating a baseline that never matches subsequent updates.
     // A short deferral lets the first render cycle settle.
     setTimeout(() => {
-      const folderChecksum = computeChecksum(JSON.parse(JSON.stringify(folder)))
+      const folderChecksum = computeChecksumSnapshot(folder)
       registerTabDirtyState(folder.id, folderChecksum)
     }, 500)
 
@@ -458,7 +458,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     const tabId = buildTabId('request', request.id)
 
     // Register initial checksum for dirty state tracking
-    const requestChecksum = computeChecksum(JSON.parse(JSON.stringify(request)))
+    const requestChecksum = computeChecksumSnapshot(request)
     registerTabDirtyState(request.id, requestChecksum)
 
     // Tab type + label both come from the protocol registry, so a new
@@ -674,7 +674,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
               const typed = tab as { folder?: EnvironmentFolder | Folder; request?: Request }
               const doc = typed.folder ?? typed.request
               if (doc) {
-                const checksum = computeChecksum(JSON.parse(JSON.stringify(doc)))
+                const checksum = computeChecksumSnapshot(doc)
                 registerTabDirtyState(doc.id, checksum)
               }
             }
