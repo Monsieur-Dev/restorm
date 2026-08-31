@@ -1189,7 +1189,7 @@
       "documentation": "文件"
     },
     "title": "匯入請求",
-    "largeApiHint": "此 API 很大。為讓專案保持輕量、快速，只匯入你需要的路由——在下方取消勾選其餘部分。"
+    "largeApiHint": "此 API 很大。為讓專案保持輕量，只勾選你需要的路由，並在下方取消勾選其餘部分。未匯入的會保留在文件中——你可以隨時新增。"
   },
   "emptyBench": {
     "importCard": {

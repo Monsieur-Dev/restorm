@@ -1190,7 +1190,7 @@
       "documentation": "Dokumentáció"
     },
     "title": "Kérések importálása",
-    "largeApiHint": "Ez az API nagy. Hogy a projekt gyors és könnyű maradjon, csak a szükséges útvonalakat importálja — a többit lent törölje."
+    "largeApiHint": "Ez az API nagy. Hogy a projekt könnyű maradjon, csak a szükséges útvonalakat jelölje be, a többiről lent vegye le a pipát. A kihagyottak a dokumentációban maradnak — bármikor hozzáadhatja őket."
   },
   "emptyBench": {
     "importCard": {

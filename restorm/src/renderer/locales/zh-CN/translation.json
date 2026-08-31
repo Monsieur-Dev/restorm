@@ -1189,7 +1189,7 @@
       "documentation": "文档"
     },
     "title": "导入请求",
-    "largeApiHint": "此 API 很大。为保持项目轻量、快速，只导入你需要的路由——在下方取消勾选其余部分。"
+    "largeApiHint": "此 API 很大。为保持项目轻量，只勾选你需要的路由，并在下方取消勾选其余部分。未导入的会保留在文档中——你可以随时添加。"
   },
   "emptyBench": {
     "importCard": {

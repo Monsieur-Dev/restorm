@@ -1190,7 +1190,7 @@
       "documentation": "Dokumentaatio"
     },
     "title": "Tuo pyyntöjä",
-    "largeApiHint": "Tämä API on suuri. Pidä projektisi kevyenä ja nopeana tuomalla vain tarvitsemasi reitit — poista muiden valinta alta."
+    "largeApiHint": "Tämä API on suuri. Pidä projektisi kevyenä: valitse vain tarvitsemasi reitit ja poista muiden valinta alta. Pois jättämäsi säilyvät dokumentaatiossa — voit lisätä ne milloin tahansa."
   },
   "emptyBench": {
     "importCard": {

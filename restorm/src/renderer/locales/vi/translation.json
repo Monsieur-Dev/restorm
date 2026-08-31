@@ -1189,7 +1189,7 @@
       "documentation": "Tài liệu"
     },
     "title": "Nhập yêu cầu",
-    "largeApiHint": "API này lớn. Để giữ dự án nhẹ và nhanh, chỉ nhập những tuyến bạn cần — bỏ chọn phần còn lại bên dưới."
+    "largeApiHint": "API này lớn. Để giữ dự án nhẹ, chỉ tích những tuyến bạn cần và bỏ tích phần còn lại bên dưới. Những tuyến bạn bỏ qua vẫn nằm trong tài liệu — bạn có thể thêm chúng bất cứ lúc nào."
   },
   "emptyBench": {
     "importCard": {

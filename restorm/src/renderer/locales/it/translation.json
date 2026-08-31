@@ -1190,7 +1190,7 @@
       "documentation": "Documentazione"
     },
     "title": "Importa richieste",
-    "largeApiHint": "Questa API è grande. Per mantenere il progetto leggero e veloce, importa solo le route che ti servono — deseleziona le altre qui sotto."
+    "largeApiHint": "Questa API è grande. Per mantenere leggero il progetto, seleziona solo le route che ti servono e deseleziona le altre qui sotto. Quelle che escludi restano nella documentazione: puoi aggiungerle in qualsiasi momento."
   },
   "emptyBench": {
     "importCard": {

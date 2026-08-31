@@ -1191,7 +1191,7 @@
       "documentation": "Dokumentacija"
     },
     "title": "Uvezi zahtjeve",
-    "largeApiHint": "Ovaj API je velik. Da projekt ostane lagan i brz, uvezite samo rute koje trebate — ostale ispod odznačite."
+    "largeApiHint": "Ovaj API je velik. Da projekt ostane lagan, označite samo rute koje trebate, a ostale ispod odznačite. One koje izostavite ostaju u dokumentaciji — možete ih dodati u bilo kojem trenutku."
   },
   "emptyBench": {
     "importCard": {

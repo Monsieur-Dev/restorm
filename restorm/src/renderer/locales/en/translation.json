@@ -1190,7 +1190,7 @@
       "documentation": "Documentation"
     },
     "title": "Import Requests",
-    "largeApiHint": "This API is large. To keep your project light and fast, import only the routes you need — uncheck the rest below."
+    "largeApiHint": "This API is large. To keep your project light, tick only the routes you need and untick the rest below. The ones you leave out stay in the documentation — you can add them anytime."
   },
   "emptyBench": {
     "importCard": {

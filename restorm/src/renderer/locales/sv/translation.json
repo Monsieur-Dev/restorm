@@ -1190,7 +1190,7 @@
       "documentation": "Dokumentation"
     },
     "title": "Importera förfrågningar",
-    "largeApiHint": "Detta API är stort. Håll projektet lätt och snabbt genom att bara importera de rutter du behöver — avmarkera resten nedan."
+    "largeApiHint": "Detta API är stort. Håll projektet lätt: kryssa bara i de rutter du behöver och avmarkera resten nedan. De du utelämnar finns kvar i dokumentationen — du kan lägga till dem när som helst."
   },
   "emptyBench": {
     "importCard": {

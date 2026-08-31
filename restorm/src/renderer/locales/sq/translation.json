@@ -1190,7 +1190,7 @@
       "documentation": "Dokumentim"
     },
     "title": "Importo kërkesa",
-    "largeApiHint": "Ky API është i madh. Për ta mbajtur projektin të lehtë e të shpejtë, importoni vetëm rrugët që ju duhen — çzgjidhni të tjerat më poshtë."
+    "largeApiHint": "Ky API është i madh. Për ta mbajtur projektin të lehtë, zgjidhni vetëm rrugët që ju duhen dhe çzgjidhni të tjerat më poshtë. Ato që lini jashtë mbeten në dokumentacion — mund t'i shtoni në çdo kohë."
   },
   "emptyBench": {
     "importCard": {

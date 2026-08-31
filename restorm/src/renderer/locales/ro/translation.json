@@ -1191,7 +1191,7 @@
       "documentation": "Documentație"
     },
     "title": "Importă cereri",
-    "largeApiHint": "Acest API este mare. Pentru a păstra proiectul ușor și rapid, importați doar rutele de care aveți nevoie — debifați-le pe celelalte mai jos."
+    "largeApiHint": "Acest API este mare. Pentru a păstra proiectul ușor, bifați doar rutele de care aveți nevoie și debifați-le pe celelalte mai jos. Cele pe care le lăsați deoparte rămân în documentație — le puteți adăuga oricând."
   },
   "emptyBench": {
     "importCard": {

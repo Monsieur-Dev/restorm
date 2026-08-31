@@ -1190,7 +1190,7 @@
       "documentation": "Belgeler"
     },
     "title": "İstekleri içe aktar",
-    "largeApiHint": "Bu API büyük. Projenizi hafif ve hızlı tutmak için yalnızca ihtiyacınız olan rotaları içe aktarın — gerisinin işaretini aşağıda kaldırın."
+    "largeApiHint": "Bu API büyük. Projenizi hafif tutmak için yalnızca ihtiyacınız olan rotaları işaretleyin ve aşağıda gerisinin işaretini kaldırın. Dışarıda bıraktıklarınız belgelerde kalır — istediğiniz zaman ekleyebilirsiniz."
   },
   "emptyBench": {
     "importCard": {
