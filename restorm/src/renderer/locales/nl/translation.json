@@ -1189,7 +1189,8 @@
       "routes": "Routes",
       "documentation": "Documentatie"
     },
-    "title": "Verzoeken importeren"
+    "title": "Verzoeken importeren",
+    "largeApiHint": "Deze API is groot. Houd je project licht en snel door alleen de routes te importeren die je nodig hebt — vink de rest hieronder uit."
   },
   "emptyBench": {
     "importCard": {

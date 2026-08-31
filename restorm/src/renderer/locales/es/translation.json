@@ -1189,7 +1189,8 @@
       "routes": "Rutas",
       "documentation": "Documentación"
     },
-    "title": "Importar peticiones"
+    "title": "Importar peticiones",
+    "largeApiHint": "Esta API es grande. Para mantener tu proyecto ligero y rápido, importa solo las rutas que necesites: desmarca las demás abajo."
   },
   "emptyBench": {
     "importCard": {

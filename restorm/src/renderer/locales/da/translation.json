@@ -1189,7 +1189,8 @@
       "routes": "Ruter",
       "documentation": "Dokumentation"
     },
-    "title": "Importér anmodninger"
+    "title": "Importér anmodninger",
+    "largeApiHint": "Denne API er stor. Hold dit projekt let og hurtigt ved kun at importere de ruter, du har brug for — fravælg resten nedenfor."
   },
   "emptyBench": {
     "importCard": {

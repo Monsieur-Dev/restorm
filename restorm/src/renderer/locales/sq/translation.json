@@ -1189,7 +1189,8 @@
       "routes": "Rrugët",
       "documentation": "Dokumentim"
     },
-    "title": "Importo kërkesa"
+    "title": "Importo kërkesa",
+    "largeApiHint": "Ky API është i madh. Për ta mbajtur projektin të lehtë e të shpejtë, importoni vetëm rrugët që ju duhen — çzgjidhni të tjerat më poshtë."
   },
   "emptyBench": {
     "importCard": {

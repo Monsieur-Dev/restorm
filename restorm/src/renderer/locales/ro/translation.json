@@ -1190,7 +1190,8 @@
       "routes": "Rute",
       "documentation": "Documentație"
     },
-    "title": "Importă cereri"
+    "title": "Importă cereri",
+    "largeApiHint": "Acest API este mare. Pentru a păstra proiectul ușor și rapid, importați doar rutele de care aveți nevoie — debifați-le pe celelalte mai jos."
   },
   "emptyBench": {
     "importCard": {

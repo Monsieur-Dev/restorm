@@ -58,3 +58,23 @@ export function allLeafKeys(items: readonly FolderItem[]): Set<string> {
 export function leafCount(items: readonly FolderItem[]): number {
   return walkImportTreeWithKeys(items).filter((e) => !isAnyFolder(e.item)).length
 }
+
+/**
+ * Above this many importable routes, the import modal nudges the user to
+ * bring in only what they need. A collection with thousands of routes bloats
+ * the sidebar and, at the extreme, can make the whole project too large to
+ * serialize to disk — importing selectively is the cure at the source.
+ */
+export const LARGE_IMPORT_LEAF_THRESHOLD = 200
+
+/**
+ * True when a parsed import preview is large enough to warrant the
+ * "import only the routes you need" hint. Measures the same leaf count the
+ * Import button shows, so the hint and the button always agree.
+ */
+export function isLargeImport(
+  items: readonly FolderItem[],
+  threshold: number = LARGE_IMPORT_LEAF_THRESHOLD
+): boolean {
+  return leafCount(items) > threshold
+}

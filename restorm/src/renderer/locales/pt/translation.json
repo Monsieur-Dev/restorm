@@ -1189,7 +1189,8 @@
       "routes": "Rotas",
       "documentation": "Documentação"
     },
-    "title": "Importar pedidos"
+    "title": "Importar pedidos",
+    "largeApiHint": "Esta API é grande. Para manter o seu projeto leve e rápido, importe apenas as rotas de que precisa — desmarque as restantes abaixo."
   },
   "emptyBench": {
     "importCard": {

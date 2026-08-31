@@ -1189,7 +1189,8 @@
       "routes": "Routes",
       "documentation": "Documentation"
     },
-    "title": "Importer des requêtes"
+    "title": "Importer des requêtes",
+    "largeApiHint": "Cette API est volumineuse. Pour garder votre projet léger et rapide, n'importez que les routes dont vous avez besoin — décochez le reste ci-dessous."
   },
   "emptyBench": {
     "importCard": {

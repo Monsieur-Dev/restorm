@@ -1189,7 +1189,8 @@
       "routes": "Reitit",
       "documentation": "Dokumentaatio"
     },
-    "title": "Tuo pyyntöjä"
+    "title": "Tuo pyyntöjä",
+    "largeApiHint": "Tämä API on suuri. Pidä projektisi kevyenä ja nopeana tuomalla vain tarvitsemasi reitit — poista muiden valinta alta."
   },
   "emptyBench": {
     "importCard": {

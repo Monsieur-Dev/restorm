@@ -1191,7 +1191,8 @@
       "routes": "Trasy",
       "documentation": "Dokumentace"
     },
-    "title": "Importovat požadavky"
+    "title": "Importovat požadavky",
+    "largeApiHint": "Toto API je rozsáhlé. Aby byl projekt lehký a rychlý, importujte jen potřebné trasy — ostatní níže odznačte."
   },
   "emptyBench": {
     "importCard": {

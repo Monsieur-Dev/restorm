@@ -1189,7 +1189,8 @@
       "routes": "Rotalar",
       "documentation": "Belgeler"
     },
-    "title": "İstekleri içe aktar"
+    "title": "İstekleri içe aktar",
+    "largeApiHint": "Bu API büyük. Projenizi hafif ve hızlı tutmak için yalnızca ihtiyacınız olan rotaları içe aktarın — gerisinin işaretini aşağıda kaldırın."
   },
   "emptyBench": {
     "importCard": {

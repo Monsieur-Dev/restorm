@@ -1188,7 +1188,8 @@
       "routes": "路由",
       "documentation": "文档"
     },
-    "title": "导入请求"
+    "title": "导入请求",
+    "largeApiHint": "此 API 很大。为保持项目轻量、快速，只导入你需要的路由——在下方取消勾选其余部分。"
   },
   "emptyBench": {
     "importCard": {

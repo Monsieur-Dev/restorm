@@ -1188,7 +1188,8 @@
       "routes": "Tuyến",
       "documentation": "Tài liệu"
     },
-    "title": "Nhập yêu cầu"
+    "title": "Nhập yêu cầu",
+    "largeApiHint": "API này lớn. Để giữ dự án nhẹ và nhanh, chỉ nhập những tuyến bạn cần — bỏ chọn phần còn lại bên dưới."
   },
   "emptyBench": {
     "importCard": {

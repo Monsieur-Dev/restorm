@@ -1190,7 +1190,8 @@
       "routes": "Rute",
       "documentation": "Dokumentacija"
     },
-    "title": "Uvezi zahtjeve"
+    "title": "Uvezi zahtjeve",
+    "largeApiHint": "Ovaj API je velik. Da projekt ostane lagan i brz, uvezite samo rute koje trebate — ostale ispod odznačite."
   },
   "emptyBench": {
     "importCard": {

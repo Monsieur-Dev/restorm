@@ -1188,7 +1188,8 @@
       "routes": "경로",
       "documentation": "문서"
     },
-    "title": "요청 가져오기"
+    "title": "요청 가져오기",
+    "largeApiHint": "이 API는 큽니다. 프로젝트를 가볍고 빠르게 유지하려면 필요한 라우트만 가져오세요 — 나머지는 아래에서 선택 해제하세요."
   },
   "emptyBench": {
     "importCard": {
