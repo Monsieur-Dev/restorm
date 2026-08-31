@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Rregullime:
+
+- **Një projekt shumë i madh tani dështon në ruajtje me një mesazh të qartë në vend që të ngrijë.** Nëse një projekt bëhet shumë i madh për t'u shkruar në disk njëherësh — gjë që mund të ndodhë pas importimit të një skeme API pazakonisht të madhe — Restorm ju njofton qartë se është shumë i madh për t'u ruajtur, në vend që të rrëzohet ose të dështojë në heshtje.
+- **Raportim më i qartë i gabimeve prapa skenave.** Anulimi i dritares «Ruaj si» nuk regjistrohet më si gabim, dhe një importim i dështuar tani raporton shkakun e vërtetë — kështu problemet e vërteta gjenden dhe rregullohen më lehtë.
+
 ## v1.0.5
 
 **Cookie jar — një kavanoz cookie-sh për çdo mjedis.**

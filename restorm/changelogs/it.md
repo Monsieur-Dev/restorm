@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Correzioni:
+
+- **Un progetto molto grande ora fallisce il salvataggio con un messaggio chiaro anziché bloccarsi.** Se un progetto diventa troppo grande per essere scritto su disco in un unico blocco — cosa che può accadere dopo aver importato uno schema di API insolitamente grande — Restorm ti avvisa chiaramente che è troppo grande da salvare, invece di andare in crash o fallire in silenzio.
+- **Segnalazione degli errori più chiara dietro le quinte.** L'annullamento della finestra «Salva con nome» non viene più registrato come errore e un'importazione fallita ora riporta la causa reale, così i problemi veri sono più facili da individuare e correggere.
+
 ## v1.0.5
 
 **Cookie jar — un contenitore di cookie per ogni ambiente.**

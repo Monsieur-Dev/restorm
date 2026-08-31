@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Korrekturen:
+
+- **Ein sehr großes Projekt scheitert beim Speichern jetzt mit einer klaren Meldung, statt einzufrieren.** Wird ein Projekt zu groß, um am Stück auf die Festplatte geschrieben zu werden — was nach dem Import eines ungewöhnlich großen API-Schemas passieren kann —, sagt Restorm klar, dass es zu groß zum Speichern ist, anstatt abzustürzen oder still zu scheitern.
+- **Klarere Fehlerberichte im Hintergrund.** Das Abbrechen eines „Speichern unter“-Dialogs wird nicht mehr als Fehler erfasst, und ein fehlgeschlagener Import meldet nun seine tatsächliche Ursache — so lassen sich echte Probleme leichter erkennen und beheben.
+
 ## v1.0.5
 
 **Cookie jar — ein Cookie-Glas pro Umgebung.**

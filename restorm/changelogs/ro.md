@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Remedieri:
+
+- **Un proiect foarte mare eșuează acum la salvare cu un mesaj clar, în loc să se blocheze.** Dacă un proiect devine prea mare pentru a fi scris pe disc dintr-o dată — ceea ce se poate întâmpla după importul unei scheme API neobișnuit de mari — Restorm vă spune clar că este prea mare pentru a fi salvat, în loc să se blocheze sau să eșueze în tăcere.
+- **Raportare a erorilor mai clară în culise.** Anularea ferestrei „Salvare ca” nu mai este înregistrată ca eroare, iar un import eșuat își raportează acum cauza reală — astfel, problemele reale sunt mai ușor de depistat și de remediat.
+
 ## v1.0.5
 
 **Cookie jar — câte un borcan de cookie-uri pentru fiecare mediu.**

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Opravy:
+
+- **Velmi velký projekt se nyní neuloží s jasnou zprávou místo zamrznutí.** Pokud je projekt příliš velký na zápis na disk najednou — což se může stát po importu neobvykle velkého schématu API — Restorm vás jasně upozorní, že je příliš velký na uložení, místo aby spadl nebo tiše selhal.
+- **Přehlednější hlášení chyb na pozadí.** Zrušení dialogu „Uložit jako“ se už nezaznamenává jako chyba a neúspěšný import nyní hlásí svou skutečnou příčinu — skutečné problémy tak lze snáz odhalit a opravit.
+
 ## v1.0.5
 
 **Cookie jar — jedna sklenice cookies pro každé prostředí.**

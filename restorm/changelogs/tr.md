@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Düzeltmeler:
+
+- **Çok büyük bir proje artık donmak yerine net bir mesajla kaydedilemiyor.** Bir proje tek seferde diske yazılamayacak kadar büyürse — ki bu, alışılmadık ölçüde büyük bir API şemasını içe aktardıktan sonra olabilir — Restorm çökmek ya da sessizce başarısız olmak yerine, kaydedilemeyecek kadar büyük olduğunu açıkça bildirir.
+- **Perde arkasında daha net hata raporlama.** «Farklı Kaydet» iletişim kutusunu iptal etmek artık hata olarak kaydedilmiyor ve başarısız bir içe aktarma artık gerçek nedenini bildiriyor — böylece gerçek sorunları fark etmek ve düzeltmek kolaylaşıyor.
+
 ## v1.0.5
 
 **Cookie jar — her ortam için bir çerez kavanozu.**
