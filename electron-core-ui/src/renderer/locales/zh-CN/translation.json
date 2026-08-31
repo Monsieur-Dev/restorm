@@ -20,6 +20,10 @@
       "dontSave": "不保存",
       "cancel": "取消"
     },
+    "projectTooLarge": {
+      "title": "项目过大，无法保存",
+      "body": "此项目过大，无法写入磁盘。请删除未使用的集合，或将其拆分为多个文件，然后重试。"
+    },
     "externalChange": {
       "title": "磁盘上的文件已更改",
       "message": "“{{fileName}}”已在应用程序外部被修改。",

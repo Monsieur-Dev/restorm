@@ -20,6 +20,10 @@
       "dontSave": "Kaydetme",
       "cancel": "İptal"
     },
+    "projectTooLarge": {
+      "title": "Proje kaydedilemeyecek kadar büyük",
+      "body": "Bu proje diske yazılamayacak kadar büyük. Kullanılmayan koleksiyonları kaldırın veya birden çok dosyaya bölün, ardından yeniden deneyin."
+    },
     "externalChange": {
       "title": "Dosya diskte değişti",
       "message": "\"{{fileName}}\" uygulama dışında değiştirildi.",

@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { stripIds, prepareForSerialization } from './serialization'
+import {
+  stripIds,
+  prepareForSerialization,
+  stringifyDocument,
+  cloneDocumentForSerialization,
+  ProjectTooLargeError
+} from './serialization'
 
 describe('stripIds', () => {
   it('removes the id from a key-value-shaped object (has both key and value)', () => {
@@ -70,5 +76,53 @@ describe('timestamps survive serialization', () => {
 
     expect(config?.createdAt).toBeInstanceOf(Date)
     expect(JSON.stringify(config?.createdAt)).toBe('"2026-07-22T04:32:01.569Z"')
+  })
+})
+
+describe('stringifyDocument (oversized-project guard)', () => {
+  it('serializes a normal document unchanged', () => {
+    expect(stringifyDocument({ a: 1, b: 'x' })).toBe('{"a":1,"b":"x"}')
+  })
+
+  it('converts the max-string-length RangeError into a ProjectTooLargeError', () => {
+    // A real oversized document makes JSON.stringify throw
+    // `RangeError: Invalid string length`. We simulate that exact failure
+    // with a `toJSON` that throws it (building a 512 MB string in a unit
+    // test is neither feasible nor necessary — the guard keys off the
+    // RangeError, not the size).
+    const oversized = {
+      toJSON(): never {
+        throw new RangeError('Invalid string length')
+      }
+    }
+    expect(() => stringifyDocument(oversized)).toThrow(ProjectTooLargeError)
+  })
+
+  it('rethrows a non-RangeError (a genuine bug) unchanged', () => {
+    const circular: Record<string, unknown> = {}
+    circular.self = circular
+    // Circular references throw a TypeError, not a RangeError — that is a
+    // real defect and must NOT be masked as "project too large".
+    expect(() => stringifyDocument(circular)).toThrow(TypeError)
+    expect(() => stringifyDocument(circular)).not.toThrow(ProjectTooLargeError)
+  })
+})
+
+describe('cloneDocumentForSerialization', () => {
+  it('deep-clones through JSON', () => {
+    const src = { a: { b: 1 }, list: [1, 2] }
+    const clone = cloneDocumentForSerialization(src)
+    expect(clone).toEqual(src)
+    expect(clone).not.toBe(src)
+    expect(clone.a).not.toBe(src.a)
+  })
+
+  it('surfaces an oversized document as ProjectTooLargeError, not a raw crash', () => {
+    const oversized = {
+      toJSON(): never {
+        throw new RangeError('Invalid string length')
+      }
+    }
+    expect(() => cloneDocumentForSerialization(oversized)).toThrow(ProjectTooLargeError)
   })
 })

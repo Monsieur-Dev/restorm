@@ -20,6 +20,10 @@
       "dontSave": "Neukládat",
       "cancel": "Zrušit"
     },
+    "projectTooLarge": {
+      "title": "Projekt je příliš velký na uložení",
+      "body": "Tento projekt je příliš velký na zápis na disk. Odeberte nepoužívané kolekce nebo jej rozdělte do několika souborů a zkuste to znovu."
+    },
     "externalChange": {
       "title": "Soubor změněn na disku",
       "message": "„{{fileName}}“ byl změněn mimo aplikaci.",

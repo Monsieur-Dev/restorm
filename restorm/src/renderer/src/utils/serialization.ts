@@ -15,7 +15,7 @@
 import { deriveStableId, idPathSegment } from '../../../shared/utils/stableId'
 import { normalizeValueType } from './normalizeValueType'
 
-export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKeys, CANONICAL_KEY_PRIORITY } from '../../../shared/utils/serialization'
+export { generateId, stripIds, prepareForSerialization, canonicalizeSerializedKeys, CANONICAL_KEY_PRIORITY, ProjectTooLargeError, stringifyDocument, cloneDocumentForSerialization } from '../../../shared/utils/serialization'
 
 /**
  * Recursively generate 'id' properties for all objects that should have them.

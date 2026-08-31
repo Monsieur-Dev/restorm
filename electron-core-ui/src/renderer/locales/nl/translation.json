@@ -20,6 +20,10 @@
       "dontSave": "Niet opslaan",
       "cancel": "Annuleren"
     },
+    "projectTooLarge": {
+      "title": "Project te groot om op te slaan",
+      "body": "Dit project is te groot om naar schijf te schrijven. Verwijder ongebruikte collecties of splits het over meerdere bestanden en probeer het opnieuw."
+    },
     "externalChange": {
       "title": "Bestand op schijf gewijzigd",
       "message": "'{{fileName}}' is buiten de applicatie gewijzigd.",

@@ -20,6 +20,10 @@
       "dontSave": "Ne spremaj",
       "cancel": "Odustani"
     },
+    "projectTooLarge": {
+      "title": "Projekt je prevelik za spremanje",
+      "body": "Ovaj projekt je prevelik za zapisivanje na disk. Uklonite nekorištene zbirke ili ga podijelite na više datoteka pa pokušajte ponovno."
+    },
     "externalChange": {
       "title": "Datoteka promijenjena na disku",
       "message": "„{{fileName}}“ izmijenjena je izvan aplikacije.",

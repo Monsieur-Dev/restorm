@@ -20,6 +20,10 @@
       "dontSave": "不儲存",
       "cancel": "取消"
     },
+    "projectTooLarge": {
+      "title": "專案過大，無法儲存",
+      "body": "此專案過大，無法寫入磁碟。請移除未使用的集合，或將其拆分為多個檔案，然後重試。"
+    },
     "externalChange": {
       "title": "磁碟上的檔案已變更",
       "message": "「{{fileName}}」已在應用程式外部被修改。",
