@@ -11,7 +11,12 @@
  */
 export function errorMeta(error: unknown): { error: string; stack?: string } {
   if (error instanceof Error) {
-    return { error: error.message, stack: error.stack }
+    // Assign `stack` only when it exists rather than passing `undefined`
+    // through: under the repo's `exactOptionalPropertyTypes`, an explicit
+    // `stack: undefined` is not assignable to the optional `stack?: string`.
+    return error.stack !== undefined
+      ? { error: error.message, stack: error.stack }
+      : { error: error.message }
   }
   return { error: String(error) }
 }
