@@ -435,7 +435,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     const tabId = buildTabId('design', design.id)
 
     setTimeout(() => {
-      const designChecksum = computeChecksum(JSON.parse(JSON.stringify(design)))
+      const designChecksum = computeChecksumSnapshot(design)
       registerTabDirtyState(design.id, designChecksum)
     }, 500)
 
