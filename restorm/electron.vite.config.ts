@@ -107,6 +107,22 @@ const sourcemapMode =
   process.env.VITE_COVERAGE === 'true' ? true : sentryUploadConfigured ? ('hidden' as const) : false
 
 /**
+ * The renderer is the exception. Sourcemapping the full renderer bundle
+ * (RestormWorkbench ~6 MB + mermaid / cytoscape / katex / milkdown-lottie /
+ * the 27 locales) exhausts a 16 GB CI runner during map generation — the
+ * kernel OOM-kills the build ("Killed"). Even splitting the locales into
+ * per-chunk files was not enough; the rest of the bundle still overflows.
+ * So a Sentry-upload build does NOT emit renderer maps (main + preload, which
+ * are small, still do — they cover main-process crashes). Coverage keeps the
+ * plain `true` (istanbul remapping reads the sourceMappingURL comment).
+ *
+ * Renderer symbolication is therefore OFF until a larger CI runner (>16 GB) or
+ * aggressive lazy-loading of the heavy third-party chunks brings peak memory
+ * back under the runner ceiling — tracked as a follow-up.
+ */
+const rendererSourcemapMode = process.env.VITE_COVERAGE === 'true' ? (true as const) : false
+
+/**
  * The release name stacks are attributed to. Must match what the crash reporter
  * sets at runtime (`restorm@<version>` in `services/crash/sentryComposition.ts`)
  * — a mismatch uploads the maps under a name no event ever carries, which fails
@@ -241,7 +257,7 @@ export default defineConfig({
     root: resolve(__dirname, 'src/renderer'),
     build: {
       outDir: 'dist/renderer',
-      sourcemap: sourcemapMode,
+      sourcemap: rendererSourcemapMode,
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/renderer/index.html'),
