@@ -118,7 +118,7 @@ jobs:
           # 4 GB path is the long-standing default and stays the cost until the
           # credentials exist; without this the first credentialed release would
           # OOM instead of publishing.
-          NODE_HEAP: ${{ secrets.SENTRY_AUTH_TOKEN && '--max-old-space-size=8192' || '--max-old-space-size=4096' }}
+          NODE_HEAP: ${{ secrets.SENTRY_AUTH_TOKEN && '--max-old-space-size=12288' || '--max-old-space-size=4096' }}
           # Crash-report source maps: absent ⇒ the build emits none and the
           # upload step is skipped, and the build stays green either way.
           # Crash reporting: the DSN is BAKED INTO the bundles here. A packaged
