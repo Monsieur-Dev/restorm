@@ -72,7 +72,7 @@ jobs:
           # Raised only while source maps are actually being produced, which is
           # decided by whether the crash-report upload is configured. See the
           # equivalent step in release.yml.
-          NODE_HEAP: ${{ secrets.SENTRY_AUTH_TOKEN && '--max-old-space-size=12288' || '--max-old-space-size=4096' }}
+          NODE_HEAP: ${{ secrets.SENTRY_AUTH_TOKEN && '--max-old-space-size=8192' || '--max-old-space-size=4096' }}
           # Crash reporting: the DSN is BAKED INTO the bundles here. A packaged
           # app inherits no environment, so a build without this ships with
           # crash reporting permanently inert — which is exactly how every

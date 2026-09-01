@@ -246,6 +246,19 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'src/renderer/index.html'),
           editor: resolve(__dirname, 'src/renderer/editor.html')
+        },
+        output: {
+          // Split each locale's translation.json into its own chunk. The 27
+          // locales are statically imported and were otherwise bundled into a
+          // single ~36 MB chunk, whose sourcemap generation exhausted the
+          // release runner's memory (heap OOM at 8 GB; OS OOM at 12 GB — the
+          // window is unworkable). Per-locale chunks (~1 MB each) keep peak
+          // sourcemap memory bounded, so sourcemaps stay enabled everywhere.
+          manualChunks(id: string): string | undefined {
+            const m = /[/\\]locales[/\\]([^/\\]+)[/\\]translation\.json$/.exec(id)
+            if (m) return `locale-${m[1]}`
+            return undefined
+          }
         }
       }
     },
