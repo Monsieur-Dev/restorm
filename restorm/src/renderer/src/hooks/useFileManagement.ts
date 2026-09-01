@@ -10,6 +10,7 @@ import {
   hasContentChanged,
   eventBus,
   logger,
+  toasterService,
   decomposeForPersistence,
   hydrateSaveUnit,
   type DecomposedUnit
@@ -63,7 +64,14 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
 import { makeReactiveFolder, makeReactiveRequest, emitEnvironmentUpdated } from '../types/reactive'
-import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+import {
+  prepareForSerialization,
+  processAfterDeserialization,
+  cloneDocumentForSerialization,
+  stringifyDocument,
+  ProjectTooLargeError
+} from '../utils/serialization'
+import { isSaveCancellation } from '../../../shared/utils/saveResult'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import {
   CURRENT_FILE_FORMAT_VERSION,
@@ -258,7 +266,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       for (let rootIdx = 0; rootIdx < rootCount; rootIdx += 1) {
         const root = items[rootIdx]
         if (!root) continue
-        const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
+        const rootPojo = cloneDocumentForSerialization(root) as unknown as Record<string, unknown>
         const rootClass: object = root instanceof EnvironmentFolderClass
           ? EnvironmentFolderClass
           : root instanceof FolderClass
@@ -313,14 +321,33 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     }
   }, [filePath, rootFolderName, joinFolderPath])
 
+  // A project whose serialized form exceeds the max JS string length cannot
+  // be written to disk. Tell the user plainly instead of failing silently or
+  // crashing the renderer with an unhandled RangeError.
+  const notifyProjectTooLarge = useCallback((): void => {
+    toasterService.push('app', {
+      title: t('file.projectTooLarge.title'),
+      body: t('file.projectTooLarge.body'),
+      durationMs: 8000
+    })
+  }, [t])
+
   // Save handlers
   const handleMenuSave = useCallback(async (): Promise<boolean> => {
-    const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<
-      string,
-      unknown
-    >
-    const dataForChecksum = prepareForSerialization(plainData)
-    const currentChecksum = JSON.stringify(dataForChecksum)
+    let plainData: Record<string, unknown>
+    let dataForChecksum: Record<string, unknown>
+    let currentChecksum: string
+    try {
+      plainData = cloneDocumentForSerialization(buildDocument(rootItems))
+      dataForChecksum = prepareForSerialization(plainData)
+      currentChecksum = stringifyDocument(dataForChecksum)
+    } catch (error) {
+      if (error instanceof ProjectTooLargeError) {
+        notifyProjectTooLarge()
+        return false
+      }
+      throw error
+    }
     const hasRealChanges = await hasContentChanged(currentChecksum)
 
     // Collect from the live in-memory tree (not `plainData`).
@@ -357,7 +384,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     markAllTabsSaved()
     await hydrateSaveUnitsFromTree(rootItems)
     return true
-  }, [saveFile, rootItems, filePath, markAllTabsSaved, hydrateSaveUnitsFromTree, buildDocument])
+  }, [saveFile, rootItems, filePath, markAllTabsSaved, hydrateSaveUnitsFromTree, buildDocument, notifyProjectTooLarge])
 
   const handleMenuSaveAll = handleMenuSave
 
@@ -372,7 +399,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     const units = new Map<string, DecomposedUnit>()
     const rootCount = rootItems.length
     rootItems.forEach((root, rootIdx) => {
-      const rootPojo = JSON.parse(JSON.stringify(root)) as Record<string, unknown>
+      const rootPojo = cloneDocumentForSerialization(root) as unknown as Record<string, unknown>
       const rootClass: object = root instanceof EnvironmentFolderClass
         ? EnvironmentFolderClass
         : root instanceof FolderClass
@@ -467,15 +494,25 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     if (rootItems.length === 0) return false
 
     const subtreeIds = collectSaveSubtreeIds(runtimeId)
-
-    // Write the whole file, then re-hydrate only the subtree
-    // so other dirty units stay dirty.
-    const fileUnits = buildFileModeDecomposition()
     const fileSubtreeIds = subtreeIds
 
-    const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<string, unknown>
-    const dataForChecksum = prepareForSerialization(plainData)
-    const currentChecksum = JSON.stringify(dataForChecksum)
+    let fileUnits: Map<string, DecomposedUnit>
+    let dataForChecksum: Record<string, unknown>
+    let currentChecksum: string
+    try {
+      // Write the whole file, then re-hydrate only the subtree
+      // so other dirty units stay dirty.
+      fileUnits = buildFileModeDecomposition()
+      const plainData = cloneDocumentForSerialization(buildDocument(rootItems))
+      dataForChecksum = prepareForSerialization(plainData)
+      currentChecksum = stringifyDocument(dataForChecksum)
+    } catch (error) {
+      if (error instanceof ProjectTooLargeError) {
+        notifyProjectTooLarge()
+        return false
+      }
+      throw error
+    }
     const hasRealChanges = await hasContentChanged(currentChecksum)
     // No real disk delta → still commit the subtree's drafts so the
     // per-tab dirty dots clear. The user pressed Ctrl+S on this tab;
@@ -515,7 +552,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       })
     }
     return true
-  }, [rootItems, saveFile, filePath, buildFileModeDecomposition, collectSaveSubtreeIds, buildDocument])
+  }, [rootItems, saveFile, filePath, buildFileModeDecomposition, collectSaveSubtreeIds, buildDocument, notifyProjectTooLarge])
 
   /**
    * Core save implementation shared by File → New and File → Save as.
@@ -523,21 +560,22 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   const performSave = useCallback(
     async (intent: 'new' | 'saveAs', saveOptions: { format: PersistenceFormat }): Promise<void> => {
       const isNew = intent === 'new'
-      const plainData = isNew
-        // A brand-new document is written by THIS build, so it is at the
-        // current version — not at whatever the previously open document
-        // declared. It carries the stamp from its very first save, which
-        // an empty project could not do while the version lived on a
-        // collection: it has none.
-        ? ({ fileFormatVersion: CURRENT_FILE_FORMAT_VERSION, collections: [] } as Record<string, unknown>)
-        : (JSON.parse(JSON.stringify(buildDocument(rootItems))) as Record<string, unknown>)
-
-      logger.info('[useFileManagement] Saving with options', {
-        intent,
-        format: saveOptions.format
-      })
 
       try {
+        const plainData = isNew
+          // A brand-new document is written by THIS build, so it is at the
+          // current version — not at whatever the previously open document
+          // declared. It carries the stamp from its very first save, which
+          // an empty project could not do while the version lived on a
+          // collection: it has none.
+          ? ({ fileFormatVersion: CURRENT_FILE_FORMAT_VERSION, collections: [] } as Record<string, unknown>)
+          : (cloneDocumentForSerialization(buildDocument(rootItems)))
+
+        logger.info('[useFileManagement] Saving with options', {
+          intent,
+          format: saveOptions.format
+        })
+
         const dataForSave = prepareForSerialization(plainData)
         const result = await window.restorm?.file.saveAsFile(dataForSave, saveOptions.format)
         if (result?.success) {
@@ -552,16 +590,25 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             await closeFile()
             await openFile(result.path)
           }
+        } else if (isSaveCancellation(result)) {
+          // The user dismissed the "Save as" dialog — a normal choice, not a
+          // failure. Logging it as an error turns every cancel into a Sentry
+          // event that drowns the real ones.
+          logger.info('[useFileManagement] Save cancelled by the user')
         } else {
           logger.error('[useFileManagement] Failed to save file', {
             error: result?.error ?? 'Unknown error'
           })
         }
       } catch (error) {
+        if (error instanceof ProjectTooLargeError) {
+          notifyProjectTooLarge()
+          return
+        }
         logger.error('[useFileManagement] Save error', { error: String(error) })
       }
     },
-    [rootItems, closeFile, openFile, buildDocument]
+    [rootItems, closeFile, openFile, buildDocument, notifyProjectTooLarge]
   )
 
   const handleMenuSaveAs = useCallback(() => {
@@ -569,8 +616,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   }, [performSave])
 
   const checkUnsavedChanges = useCallback(async (): Promise<boolean> => {
-    const dataForChecksum = prepareForSerialization(buildDocument(rootItems))
-    const currentChecksum = JSON.stringify(dataForChecksum)
+    let currentChecksum: string
+    try {
+      currentChecksum = stringifyDocument(prepareForSerialization(buildDocument(rootItems)))
+    } catch (error) {
+      if (error instanceof ProjectTooLargeError) {
+        notifyProjectTooLarge()
+        return false
+      }
+      throw error
+    }
     const hasRealChanges = await hasContentChanged(currentChecksum)
 
     if (!hasRealChanges) return true
@@ -585,8 +640,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     })
     if (result === 'cancel') return false
     if (result === 'save') {
-      const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as unknown
-      const dataForSave = prepareForSerialization(plainData)
+      let dataForSave: unknown
+      try {
+        dataForSave = prepareForSerialization(cloneDocumentForSerialization(buildDocument(rootItems)) as unknown)
+      } catch (error) {
+        if (error instanceof ProjectTooLargeError) {
+          notifyProjectTooLarge()
+          return false
+        }
+        throw error
+      }
       const saved = await saveFile(dataForSave)
       if (saved && filePath) {
         const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
@@ -602,7 +665,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     // and the next launch reads them as a recovery candidate.
     await window.restorm?.file.clearDrafts()
     return true
-  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName, filePath, buildDocument])
+  }, [showUnsavedChangesDialog, rootItems, saveFile, t, fileName, filePath, buildDocument, notifyProjectTooLarge])
 
   const handleMenuNew = useCallback(async () => {
     const canProceed = await checkUnsavedChanges()
@@ -704,10 +767,20 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // to skip redundant saves when nothing has been touched. Per-object
         // dirty state lives in the save-unit registry now, so we no longer
         // feed a parallel checksum map.
-        const dataForChecksum = prepareForSerialization(buildDocument(reactiveItems))
-        const baselineChecksum = JSON.stringify(dataForChecksum)
-        void setContentChecksum(baselineChecksum)
-        savedBaselineRef.current = baselineChecksum
+        try {
+          const baselineChecksum = stringifyDocument(prepareForSerialization(buildDocument(reactiveItems)))
+          void setContentChecksum(baselineChecksum)
+          savedBaselineRef.current = baselineChecksum
+        } catch (error) {
+          // A project too large to serialize can still be opened, but it has
+          // no save baseline — tell the user, and leave the baseline unset so
+          // `hasContentChanged` treats it as dirty rather than crashing open.
+          if (error instanceof ProjectTooLargeError) {
+            notifyProjectTooLarge()
+          } else {
+            throw error
+          }
+        }
 
         await searchIndexService.clearIndex()
         await window.restorm?.context.clearAll()
@@ -776,7 +849,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         isLoadingRef.current = false
       })()
     },
-    [clearTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, buildDocument]
+    [clearTabDirtyState, setRootItems, hydrateSaveUnitsFromTree, buildDocument, notifyProjectTooLarge]
   )
 
   // Silent sidecar reload. `<project>.restorm.env` is read once at open
@@ -855,8 +928,18 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     if (baseline === null) return
     const timer = setTimeout(() => {
       void (async () => {
-        const dataForChecksum = prepareForSerialization(buildDocument(rootItems))
-        const currentChecksum = JSON.stringify(dataForChecksum)
+        let currentChecksum: string
+        try {
+          currentChecksum = stringifyDocument(prepareForSerialization(buildDocument(rootItems)))
+        } catch (error) {
+          // Background dirty-dot reconciliation: if the project is too large
+          // to serialize there is nothing to reconcile and no user action to
+          // report. Swallow it so it never surfaces as an unhandled rejection
+          // out of this timer — a real save reports the size problem to the
+          // user with a clear toast.
+          if (error instanceof ProjectTooLargeError) return
+          throw error
+        }
         if (currentChecksum !== baseline) return
         // The whole-file checksum is BLIND to secret plaintexts (toJSON
         // strips them): a freshly typed secret value leaves the checksum
@@ -875,8 +958,19 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   // Save-and-close handler
   useEffect(() => {
     const handleSaveAndClose = async (): Promise<void> => {
-      const plainData = JSON.parse(JSON.stringify(buildDocument(rootItems))) as unknown
-      const dataForSave = prepareForSerialization(plainData)
+      let dataForSave: unknown
+      try {
+        dataForSave = prepareForSerialization(cloneDocumentForSerialization(buildDocument(rootItems)) as unknown)
+      } catch (error) {
+        if (error instanceof ProjectTooLargeError) {
+          // Can't serialize to save-then-close: tell the user and DON'T
+          // force the window closed, so their work isn't lost to a close
+          // they can't complete.
+          notifyProjectTooLarge()
+          return
+        }
+        throw error
+      }
       const saved = await saveFile(dataForSave)
       if (saved) {
         if (filePath) {
@@ -893,7 +987,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     })
 
     return cleanup
-  }, [rootItems, saveFile, filePath, buildDocument])
+  }, [rootItems, saveFile, filePath, buildDocument, notifyProjectTooLarge])
 
   return {
     handleMenuNew,

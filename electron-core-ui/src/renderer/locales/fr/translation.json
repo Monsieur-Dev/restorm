@@ -20,6 +20,10 @@
       "dontSave": "Ne pas enregistrer",
       "cancel": "Annuler"
     },
+    "projectTooLarge": {
+      "title": "Projet trop volumineux pour être enregistré",
+      "body": "Ce projet est trop volumineux pour être écrit sur le disque. Supprimez les collections inutilisées ou répartissez-le sur plusieurs fichiers, puis réessayez."
+    },
     "externalChange": {
       "title": "Fichier modifié sur le disque",
       "message": "« {{fileName}} » a été modifié en dehors de l'application.",

@@ -20,6 +20,10 @@
       "dontSave": "Nie zapisuj",
       "cancel": "Anuluj"
     },
+    "projectTooLarge": {
+      "title": "Projekt zbyt duży, aby go zapisać",
+      "body": "Ten projekt jest zbyt duży, aby zapisać go na dysku. Usuń nieużywane kolekcje lub podziel go na kilka plików, a następnie spróbuj ponownie."
+    },
     "externalChange": {
       "title": "Plik zmieniony na dysku",
       "message": "„{{fileName}}” został zmodyfikowany poza aplikacją.",

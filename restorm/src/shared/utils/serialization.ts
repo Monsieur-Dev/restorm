@@ -141,6 +141,54 @@ export function canonicalizeSerializedKeys<T>(data: T): T {
 }
 
 /**
+ * Thrown when a document is too large to serialize: `JSON.stringify` of a
+ * graph whose text would exceed V8's maximum string length (~512 MB) throws
+ * `RangeError: Invalid string length`. That is a real ceiling a normal
+ * project never reaches, but a pathological import (e.g. a gRPC reflection
+ * schema that fans out enormously) can. We convert the opaque RangeError into
+ * this typed, user-actionable failure so the save path can tell the user
+ * "this project is too large to save" instead of logging an inscrutable error
+ * or crashing the renderer with an unhandled exception.
+ */
+export class ProjectTooLargeError extends Error {
+  constructor(cause?: unknown) {
+    super('The project is too large to serialize')
+    this.name = 'ProjectTooLargeError'
+    if (cause !== undefined) (this as { cause?: unknown }).cause = cause
+  }
+}
+
+/**
+ * `JSON.stringify` guarded against the oversized-document `RangeError`.
+ *
+ * A document large enough that its serialized text exceeds the max JS string
+ * length makes `JSON.stringify` throw `RangeError: Invalid string length`.
+ * Left raw, that surfaces as an opaque logged error or an unhandled renderer
+ * crash. Here it becomes a {@link ProjectTooLargeError} the save path can
+ * catch and turn into a clear message; any other stringify error (a circular
+ * reference, a throwing `toJSON`) is a genuine bug and is rethrown unchanged.
+ */
+export function stringifyDocument(data: unknown): string {
+  try {
+    return JSON.stringify(data)
+  } catch (error) {
+    if (error instanceof RangeError) throw new ProjectTooLargeError(error)
+    throw error
+  }
+}
+
+/**
+ * Deep-clone a document graph through JSON, guarded by {@link
+ * stringifyDocument}. This is the `JSON.parse(JSON.stringify(x))` idiom the
+ * save paths use to run every `toJSON()` and produce a plain POJO — the
+ * `stringify` half is exactly where an oversized project throws, so the
+ * guard lives here rather than being repeated at each call site.
+ */
+export function cloneDocumentForSerialization<T>(data: T): T {
+  return JSON.parse(stringifyDocument(data)) as T
+}
+
+/**
  * Prepare collections data for serialization (save to file).
  * Strips all runtime-only id properties.
  *

@@ -1189,7 +1189,8 @@
       "routes": "Útvonalak",
       "documentation": "Dokumentáció"
     },
-    "title": "Kérések importálása"
+    "title": "Kérések importálása",
+    "largeApiHint": "Ez az API nagy. Hogy a projekt könnyű maradjon, csak a szükséges útvonalakat jelölje be, a többiről lent vegye le a pipát. A kihagyottak a dokumentációban maradnak — bármikor hozzáadhatja őket."
   },
   "emptyBench": {
     "importCard": {

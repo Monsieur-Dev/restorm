@@ -20,6 +20,10 @@
       "dontSave": "Mos ruaj",
       "cancel": "Anulo"
     },
+    "projectTooLarge": {
+      "title": "Projekti është shumë i madh për t'u ruajtur",
+      "body": "Ky projekt është shumë i madh për t'u shkruar në disk. Hiqni koleksionet e papërdorura ose ndajeni në disa skedarë dhe provoni përsëri."
+    },
     "externalChange": {
       "title": "Skedari ndryshoi në disk",
       "message": "«{{fileName}}» u ndryshua jashtë aplikacionit.",

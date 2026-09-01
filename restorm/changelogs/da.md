@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Rettelser:
+
+- **Et meget stort projekt fejler nu ved lagring med en klar besked i stedet for at fryse.** Hvis et projekt bliver for stort til at skrive til disken i én omgang — hvilket kan ske efter import af et usædvanligt stort API-skema — fortæller Restorm dig nu tydeligt, at det er for stort til at gemme, i stedet for at gå ned eller fejle i stilhed.
+- **Tydeligere fejlrapportering bag kulisserne.** Annullering af dialogen »Gem som« registreres ikke længere som en fejl, og en mislykket import angiver nu sin reelle årsag — så de rigtige problemer er lettere at opdage og rette.
+
 ## v1.0.5
 
 **Cookie jar — én krukke cookies pr. miljø.**

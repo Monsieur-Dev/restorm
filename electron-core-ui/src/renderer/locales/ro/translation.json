@@ -20,6 +20,10 @@
       "dontSave": "Nu salva",
       "cancel": "Anulează"
     },
+    "projectTooLarge": {
+      "title": "Proiect prea mare pentru a fi salvat",
+      "body": "Acest proiect este prea mare pentru a fi scris pe disc. Eliminați colecțiile nefolosite sau împărțiți-l în mai multe fișiere, apoi încercați din nou."
+    },
     "externalChange": {
       "title": "Fișierul a fost modificat pe disc",
       "message": "„{{fileName}}” a fost modificat în afara aplicației.",

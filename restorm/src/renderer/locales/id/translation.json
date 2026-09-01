@@ -1188,7 +1188,8 @@
       "routes": "Rute",
       "documentation": "Dokumentasi"
     },
-    "title": "Impor permintaan"
+    "title": "Impor permintaan",
+    "largeApiHint": "API ini besar. Agar proyek tetap ringan, centang hanya rute yang Anda perlukan dan hapus centang sisanya di bawah. Yang Anda lewatkan tetap ada di dokumentasi — Anda bisa menambahkannya kapan saja."
   },
   "emptyBench": {
     "importCard": {

@@ -38,7 +38,8 @@
 
 .import-loading,
 .import-error,
-.import-no-results {
+.import-no-results,
+.import-large-hint {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -51,6 +52,13 @@
   background: var(--inputValidation-infoBackground);
   border: 1px solid var(--inputValidation-infoBorder);
   color: var(--inputValidation-infoForeground);
+}
+
+.import-large-hint {
+  background: var(--inputValidation-infoBackground);
+  border: 1px solid var(--inputValidation-infoBorder);
+  color: var(--inputValidation-infoForeground);
+  margin-bottom: 8px;
 }
 
 .import-error {

@@ -1189,7 +1189,8 @@
       "routes": "Ruter",
       "documentation": "Dokumentasjon"
     },
-    "title": "Importer forespørsler"
+    "title": "Importer forespørsler",
+    "largeApiHint": "Denne API-en er stor. Hold prosjektet lett: kryss av bare for rutene du trenger, og fjern haken på resten nedenfor. De du utelater, blir liggende i dokumentasjonen — du kan legge dem til når som helst."
   },
   "emptyBench": {
     "importCard": {

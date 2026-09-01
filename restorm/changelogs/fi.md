@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Korjaukset:
+
+- **Erittäin suuri projekti epäonnistuu nyt tallennuksessa selkeällä viestillä jäätymisen sijaan.** Jos projekti kasvaa liian suureksi kirjoitettavaksi levylle yhdellä kertaa — mikä voi tapahtua epätavallisen suuren API-skeeman tuonnin jälkeen — Restorm kertoo selkeästi, että se on liian suuri tallennettavaksi, sen sijaan että kaatuisi tai epäonnistuisi hiljaa.
+- **Selkeämpi virheraportointi taustalla.** ”Tallenna nimellä” -valintaikkunan peruuttamista ei enää kirjata virheeksi, ja epäonnistunut tuonti ilmoittaa nyt todellisen syynsä — niin todelliset ongelmat on helpompi havaita ja korjata.
+
 ## v1.0.5
 
 **Cookie jar – yksi evästepurkki jokaiselle ympäristölle.**

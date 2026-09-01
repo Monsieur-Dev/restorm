@@ -20,6 +20,10 @@
       "dontSave": "Nemoj sačuvati",
       "cancel": "Otkaži"
     },
+    "projectTooLarge": {
+      "title": "Projekat je prevelik za čuvanje",
+      "body": "Ovaj projekat je prevelik da bi se upisao na disk. Uklonite nekorišćene kolekcije ili ga podelite na više datoteka, pa pokušajte ponovo."
+    },
     "externalChange": {
       "title": "Datoteka je promenjena na disku",
       "message": "„{{fileName}}“ je izmenjena izvan aplikacije.",

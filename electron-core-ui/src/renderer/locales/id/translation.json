@@ -20,6 +20,10 @@
       "dontSave": "Jangan simpan",
       "cancel": "Batal"
     },
+    "projectTooLarge": {
+      "title": "Proyek terlalu besar untuk disimpan",
+      "body": "Proyek ini terlalu besar untuk ditulis ke disk. Hapus koleksi yang tidak digunakan atau bagi menjadi beberapa berkas, lalu coba lagi."
+    },
     "externalChange": {
       "title": "Berkas berubah di disk",
       "message": "\"{{fileName}}\" diubah di luar aplikasi.",

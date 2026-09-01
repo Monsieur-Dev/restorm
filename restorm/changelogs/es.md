@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Correcciones:
+
+- **Un proyecto muy grande ahora falla al guardar con un mensaje claro en lugar de congelarse.** Si un proyecto crece demasiado para escribirse en el disco de una sola vez —algo que puede ocurrir tras importar un esquema de API inusualmente grande—, Restorm te avisa claramente de que es demasiado grande para guardarlo, en vez de bloquearse o fallar en silencio.
+- **Informes de errores más claros entre bastidores.** Cancelar el diálogo «Guardar como» ya no se registra como un error, y una importación fallida ahora informa de su causa real, de modo que los problemas de verdad son más fáciles de detectar y corregir.
+
 ## v1.0.5
 
 **Cookie jar — un tarro de cookies por entorno.**

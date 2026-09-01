@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Rettelser:
+
+- **Et svært stort prosjekt feiler nå ved lagring med en tydelig melding i stedet for å fryse.** Hvis et prosjekt blir for stort til å skrives til disk i én omgang — noe som kan skje etter import av et uvanlig stort API-skjema — sier Restorm nå tydelig fra at det er for stort til å lagres, i stedet for å krasje eller feile i stillhet.
+- **Tydeligere feilrapportering bak kulissene.** Å avbryte dialogen «Lagre som» registreres ikke lenger som en feil, og en mislykket import melder nå sin egentlige årsak — slik at de reelle problemene er lettere å oppdage og rette.
+
 ## v1.0.5
 
 **Cookie jar — én krukke med cookies per miljø.**

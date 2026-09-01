@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Sửa lỗi:
+
+- **Một dự án rất lớn giờ đây không lưu được kèm thông báo rõ ràng thay vì bị treo.** Nếu một dự án trở nên quá lớn để ghi vào đĩa trong một lần — điều có thể xảy ra sau khi nhập một lược đồ API lớn bất thường — Restorm sẽ báo rõ rằng nó quá lớn để lưu, thay vì bị sập hoặc thất bại âm thầm.
+- **Báo lỗi rõ ràng hơn ở hậu trường.** Việc hủy hộp thoại "Lưu thành" không còn bị ghi nhận là lỗi, và một lần nhập thất bại giờ đây báo đúng nguyên nhân thực sự — nhờ vậy các vấn đề thật sự dễ phát hiện và khắc phục hơn.
+
 ## v1.0.5
 
 **Cookie jar — mỗi môi trường một hũ cookie riêng.**

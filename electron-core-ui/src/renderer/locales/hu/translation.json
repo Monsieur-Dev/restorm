@@ -20,6 +20,10 @@
       "dontSave": "Ne mentse",
       "cancel": "Mégse"
     },
+    "projectTooLarge": {
+      "title": "A projekt túl nagy a mentéshez",
+      "body": "Ez a projekt túl nagy ahhoz, hogy lemezre lehessen írni. Távolítsa el a nem használt gyűjteményeket, vagy ossza szét több fájlba, majd próbálja újra."
+    },
     "externalChange": {
       "title": "A fájl megváltozott a lemezen",
       "message": "A(z) „{{fileName}}” fájlt az alkalmazáson kívül módosították.",

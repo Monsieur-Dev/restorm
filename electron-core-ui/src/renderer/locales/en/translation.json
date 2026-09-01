@@ -20,6 +20,10 @@
       "dontSave": "Don't Save",
       "cancel": "Cancel"
     },
+    "projectTooLarge": {
+      "title": "Project too large to save",
+      "body": "This project is too large to write to disk. Remove unused collections or split it across several files, then try again."
+    },
     "externalChange": {
       "title": "File changed on disk",
       "message": "\"{{fileName}}\" was modified outside the application.",

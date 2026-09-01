@@ -20,6 +20,10 @@
       "dontSave": "Ikke lagre",
       "cancel": "Avbryt"
     },
+    "projectTooLarge": {
+      "title": "Prosjektet er for stort til å lagre",
+      "body": "Dette prosjektet er for stort til å skrives til disk. Fjern ubrukte samlinger eller del det opp i flere filer, og prøv igjen."
+    },
     "externalChange": {
       "title": "Filen er endret på disken",
       "message": "«{{fileName}}» ble endret utenfor programmet.",

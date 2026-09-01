@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Correctifs :
+
+- **Un très gros projet échoue désormais à l'enregistrement avec un message clair, au lieu de se figer.** Si un projet devient trop volumineux pour être écrit sur le disque d'un seul tenant — ce qui peut arriver après l'import d'un schéma d'API inhabituellement gros — Restorm vous prévient clairement qu'il est trop volumineux pour être enregistré, plutôt que de planter ou d'échouer en silence.
+- **Un rapport d'erreurs plus clair en coulisses.** L'annulation d'une boîte « Enregistrer sous » n'est plus consignée comme une erreur, et un import échoué remonte désormais sa cause réelle — les vrais problèmes sont ainsi plus faciles à repérer et à corriger.
+
 ## v1.0.5
 
 **Le Cookie jar — un bocal de cookies par environnement.**

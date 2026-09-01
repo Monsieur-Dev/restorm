@@ -15,6 +15,7 @@ import { isAbsolute, dirname } from 'node:path'
 import { McpService, getFileService, isFileServiceInitialized } from 'electron-core-ui/main'
 import { BrowserWindow } from 'electron'
 import { collectionStore } from '../../services/CollectionStore'
+import { getCollectionsSyncCount, waitForCollectionsSyncAfter } from '../../services/apiUpdate/collectionsSyncSignal'
 import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
 import { CURRENT_FILE_FORMAT_VERSION, FILE_FORMAT_VERSION_KEY } from '../../../shared/config/fileFormatVersion'
 
@@ -44,6 +45,12 @@ import { CURRENT_FILE_FORMAT_VERSION, FILE_FORMAT_VERSION_KEY } from '../../../s
  */
 const OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS = 3_000
 const OPEN_PROJECT_COLLECTIONS_READY_POLL_INTERVAL_MS = 50
+
+/** Bounded wait for the renderer's post-load `collections:sync` after a fresh
+ * (empty) project open — see the barrier in `create_project` and
+ * `collectionsSyncSignal`. Long enough to cover a loaded renderer under e2e
+ * load; on timeout `create_project` replies with a `warning` rather than hang. */
+const CREATE_PROJECT_RENDERER_SETTLE_TIMEOUT_MS = 3_000
 
 /** The ids `CollectionStore` needs to contain for `filePath`'s content to
  * be considered "landed" — the top-level environment folders, since
@@ -158,9 +165,24 @@ export function registerProjectTools(mcp: McpService): void {
         // exists-check/write TOCTOU window in one move.
         const body = JSON.stringify({ [FILE_FORMAT_VERSION_KEY]: CURRENT_FILE_FORMAT_VERSION, collections: [] })
         await fs.writeFile(filePath, body, { encoding: 'utf8', flag: 'wx' })
+        // Capture the renderer-mirror count BEFORE opening, so the wait below
+        // can key off the FILE-LOAD's post-load mirror (which fires once the
+        // renderer flips out of its loading state), not a pre-existing sync.
+        const syncBefore = getCollectionsSyncCount()
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
-        return jsonReply({ filePath, opened: true })
+        // A brand-new project is EMPTY, so `waitForCollectionStoreReady` (which
+        // only waits for top-level environment-folder ids) has nothing to wait
+        // for and would return instantly — leaving the renderer's empty-project
+        // file-load still in flight. An immediate follow-up MCP write would then
+        // race that load: the load's late `setRootItems([])` tears the renderer
+        // tree back to empty at the write's version and mirrors a clobber into
+        // the main store. Block on the renderer's post-load mirror instead so
+        // the file-load has demonstrably settled before we reply. Bounded — on
+        // timeout we reply anyway (a follow-up write may just need a retry),
+        // never hanging.
+        const settled = await waitForCollectionsSyncAfter(syncBefore, CREATE_PROJECT_RENDERER_SETTLE_TIMEOUT_MS)
+        return jsonReply(settled ? { filePath, opened: true } : { filePath, opened: true, warning: 'renderer load confirmation timed out' })
       } catch (err) {
         if (err instanceof Error && (err as NodeJS.ErrnoException).code === 'EEXIST') {
           return errorReply(`A file already exists at ${filePath} — refusing to overwrite it. Choose a new path or open the existing project.`)
@@ -192,6 +214,7 @@ export function registerProjectTools(mcp: McpService): void {
       if (!filePath) return errorReply('filePath is required')
       if (!isFileServiceInitialized()) return errorReply('FileService not initialised')
       try {
+        const syncBefore = getCollectionsSyncCount()
         const result = await getFileService().open(filePath)
         if (!result.success) return errorReply(`FileService.open failed for ${filePath}`)
         const payload: Record<string, unknown> = { filePath, opened: true }
@@ -199,6 +222,16 @@ export function registerProjectTools(mcp: McpService): void {
         const ready = await waitForCollectionStoreReady(expectedIds, OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS)
         if (!ready) {
           payload['warning'] = `Project opened, but main's collection store wasn't confirmed synced within ${String(OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS)}ms — an immediate follow-up write tool call may not find newly-opened entities yet.`
+        }
+        // A project with NO top-level environment folders leaves `expectedIds`
+        // empty, so the wait above returned instantly with the renderer's
+        // file-load possibly still in flight — the same race `create_project`
+        // guards against. Also block on the renderer's post-load mirror; when
+        // the env-folder wait already observed the load this is instant (a sync
+        // has arrived since `syncBefore`), so it only actually waits for the
+        // env-folder-less case.
+        if (!payload['warning'] && !(await waitForCollectionsSyncAfter(syncBefore, OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS))) {
+          payload['warning'] = `Project opened, but the renderer's post-load mirror wasn't confirmed within ${String(OPEN_PROJECT_COLLECTIONS_READY_TIMEOUT_MS)}ms — an immediate follow-up write tool call may need a retry.`
         }
         return jsonReply(payload)
       } catch (err) {

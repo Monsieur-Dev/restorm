@@ -10,6 +10,7 @@ import {
   collectionsUpdateFolderCustomValueListsArgs
 } from '../../ipc/schemas'
 import { collectionStore } from '../CollectionStore'
+import { noteCollectionsSync } from './collectionsSyncSignal'
 import { contextService } from '../ContextService'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { detectFormat, importFromContent } from '../import/ImportManager'
@@ -183,6 +184,11 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
   )
 
   validatedHandle('collections:sync', collectionsSyncArgs, (_event, [collections, mcpVersion]) => {
+    // Signal "the renderer mirrored" the INSTANT the sync arrives — before the
+    // stale-write guard decides applied/refused — so `create_project` /
+    // `open_project` can wait for the renderer's post-load mirror and never let
+    // a follow-up write race the file-load (see collectionsSyncSignal).
+    noteCollectionsSync()
     const applied = collectionStore.setCollections(
       collections as Parameters<typeof collectionStore.setCollections>[0],
       'user',

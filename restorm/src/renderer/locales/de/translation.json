@@ -1189,7 +1189,8 @@
       "routes": "Routen",
       "documentation": "Dokumentation"
     },
-    "title": "Anfragen importieren"
+    "title": "Anfragen importieren",
+    "largeApiHint": "Diese API ist umfangreich. Damit Ihr Projekt schlank bleibt, wählen Sie nur die benötigten Routen aus und entfernen Sie unten die Häkchen bei den übrigen. Die weggelassenen bleiben in der Dokumentation — Sie können sie jederzeit hinzufügen."
   },
   "emptyBench": {
     "importCard": {

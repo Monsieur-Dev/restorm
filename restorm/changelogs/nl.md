@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Correcties:
+
+- **Een heel groot project mislukt bij het opslaan nu met een duidelijke melding in plaats van vast te lopen.** Als een project te groot wordt om in één keer naar schijf te schrijven — wat kan gebeuren na het importeren van een ongewoon groot API-schema — laat Restorm nu duidelijk weten dat het te groot is om op te slaan, in plaats van vast te lopen of stilletjes te mislukken.
+- **Duidelijkere foutrapportage achter de schermen.** Het annuleren van een dialoogvenster 'Opslaan als' wordt niet langer als fout geregistreerd, en een mislukte import vermeldt nu de werkelijke oorzaak — zo zijn echte problemen makkelijker op te sporen en te verhelpen.
+
 ## v1.0.5
 
 **Cookie jar — één pot cookies per omgeving.**

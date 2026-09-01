@@ -15,6 +15,8 @@ import { authPrefetchOneShot, resolveProducedHeaders } from './services/Authenti
 import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
 import { StringValue, ExpressionValue, CustomListValue, CustomListMultiValue, SecretValue } from '../shared/types/valueTypes'
 import type { KeyValue } from '../shared/types/baseTypes'
+import { errorMeta } from '../shared/utils/errorMeta'
+import { SAVE_CANCELLED } from '../shared/utils/saveResult'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { graphqlMockServerService } from './services/GraphQLMockServerService'
@@ -335,7 +337,7 @@ export function registerRestormIPC(deps: {
       })
 
       if (result.canceled || !result.filePath) {
-        return { success: false, error: 'Cancelled' }
+        return { success: false, error: SAVE_CANCELLED }
       }
 
       // Use PersistenceService for single file save
@@ -1252,7 +1254,10 @@ export function registerRestormIPC(deps: {
       return { success: true, folder }
     } catch (error) {
       const unsupported = error instanceof GrpcReflectionUnsupportedError
-      logger.error('[IPC] gRPC reflection import error:', error)
+      // Pass the cause as STRUCTURED metadata, not a second positional arg:
+      // the logger's second parameter is a metadata object, so a raw Error
+      // handed there is dropped and Sentry shows "No error message".
+      logger.error('[IPC] gRPC reflection import error', errorMeta(error))
       return {
         success: false,
         unsupported,
@@ -1271,7 +1276,7 @@ export function registerRestormIPC(deps: {
       return { success: true, services, protoDescriptorSet: fileDescriptorSet.toString('base64') }
     } catch (error) {
       const unsupported = error instanceof GrpcReflectionUnsupportedError
-      logger.error('[IPC] gRPC reflection query error:', error)
+      logger.error('[IPC] gRPC reflection query error', errorMeta(error))
       return {
         success: false,
         unsupported,

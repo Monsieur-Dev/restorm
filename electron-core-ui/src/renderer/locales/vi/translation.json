@@ -20,6 +20,10 @@
       "dontSave": "Không lưu",
       "cancel": "Hủy"
     },
+    "projectTooLarge": {
+      "title": "Dự án quá lớn để lưu",
+      "body": "Dự án này quá lớn để ghi vào đĩa. Hãy xóa các bộ sưu tập không dùng đến hoặc chia nhỏ thành nhiều tệp, rồi thử lại."
+    },
     "externalChange": {
       "title": "Tệp đã thay đổi trên đĩa",
       "message": "\"{{fileName}}\" đã bị sửa đổi bên ngoài ứng dụng.",

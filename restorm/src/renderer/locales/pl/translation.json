@@ -1191,7 +1191,8 @@
       "routes": "Trasy",
       "documentation": "Dokumentacja"
     },
-    "title": "Importuj żądania"
+    "title": "Importuj żądania",
+    "largeApiHint": "To API jest duże. Aby projekt pozostał lekki, zaznacz tylko potrzebne trasy, a pozostałe poniżej odznacz. Te pominięte pozostają w dokumentacji — możesz je dodać w dowolnej chwili."
   },
   "emptyBench": {
     "importCard": {

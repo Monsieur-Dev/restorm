@@ -28,7 +28,7 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { ImportFormatShowcase } from './ImportFormatShowcase'
 import { GrpcReflectionImportModal } from './GrpcReflectionImportModal'
 import { ImportSelectionTree } from './ImportSelectionTree'
-import { allLeafKeys } from './importSelectionHelpers'
+import { allLeafKeys, isLargeImport } from './importSelectionHelpers'
 import { describeImportError, flattenImportError, type DisplayedImportError } from './importErrorDisplay'
 import { filterImportTreeBySelection } from '../../../../shared/utils/importNaturalKey'
 import type { ImportMeta } from '../../hooks/useImport'
@@ -1258,6 +1258,12 @@ const ImportPreviewTabs: React.FC<ImportPreviewTabsProps> = ({
     return undefined
   }, [previewItems])
 
+  // A large parsed preview (thousands of routes from a reflection / OpenAPI
+  // import) bloats the sidebar and can even push the whole project past the
+  // size it can be serialized at. Nudge the user toward the selection they
+  // already have below rather than importing everything.
+  const showLargeImportHint = useMemo(() => isLargeImport(previewItems), [previewItems])
+
   const previewTabs: Tab[] = [
     {
       id: 'routes',
@@ -1268,6 +1274,14 @@ const ImportPreviewTabs: React.FC<ImportPreviewTabsProps> = ({
           className="import-preview-routes-tab"
           data-testid="import-preview-tabs-tabpanel-routes"
         >
+          {showLargeImportHint && (
+            <div className="import-large-hint" data-testid="import-large-hint" role="note">
+              {t(
+                'import.largeApiHint',
+                'This API is large. To keep your project light and fast, import only the routes you need — uncheck the rest below.'
+              )}
+            </div>
+          )}
           <div className="import-preview-header">
             <div className="import-preview-actions">
               <Button

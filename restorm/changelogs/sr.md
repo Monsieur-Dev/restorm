@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Ispravke:
+
+- **Veoma velik projekat sada ne uspeva pri čuvanju uz jasnu poruku umesto da se zamrzne.** Ako projekat postane prevelik da bi se odjednom upisao na disk — što se može desiti nakon uvoza neobično velike API šeme — Restorm vas jasno obaveštava da je prevelik za čuvanje, umesto da se sruši ili tiho zakaže.
+- **Jasnije prijavljivanje grešaka u pozadini.** Otkazivanje dijaloga „Sačuvaj kao” više se ne beleži kao greška, a neuspeli uvoz sada prijavljuje svoj stvarni uzrok — pa se pravi problemi lakše uočavaju i ispravljaju.
+
 ## v1.0.5
 
 **Cookie jar — po jedna tegla kolačića za svako okruženje.**

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Perbaikan:
+
+- **Proyek yang sangat besar kini gagal disimpan dengan pesan yang jelas alih-alih membeku.** Jika proyek menjadi terlalu besar untuk ditulis ke disk sekaligus — yang bisa terjadi setelah mengimpor skema API yang luar biasa besar — Restorm kini memberi tahu Anda dengan jelas bahwa proyek terlalu besar untuk disimpan, alih-alih macet atau gagal diam-diam.
+- **Pelaporan kesalahan yang lebih jelas di balik layar.** Membatalkan dialog "Simpan sebagai" tidak lagi dicatat sebagai kesalahan, dan impor yang gagal kini melaporkan penyebab sebenarnya — sehingga masalah yang sesungguhnya lebih mudah ditemukan dan diperbaiki.
+
 ## v1.0.5
 
 **Cookie jar — satu wadah cookie untuk tiap environment.**

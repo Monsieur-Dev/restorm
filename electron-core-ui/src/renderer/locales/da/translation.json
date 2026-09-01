@@ -20,6 +20,10 @@
       "dontSave": "Gem ikke",
       "cancel": "Annullér"
     },
+    "projectTooLarge": {
+      "title": "Projektet er for stort til at gemme",
+      "body": "Dette projekt er for stort til at skrive til disken. Fjern ubrugte samlinger, eller opdel det i flere filer, og prøv igen."
+    },
     "externalChange": {
       "title": "Filen er ændret på disken",
       "message": "\"{{fileName}}\" blev ændret uden for programmet.",

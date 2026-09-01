@@ -20,6 +20,10 @@
       "dontSave": "Älä tallenna",
       "cancel": "Peruuta"
     },
+    "projectTooLarge": {
+      "title": "Projekti on liian suuri tallennettavaksi",
+      "body": "Tämä projekti on liian suuri kirjoitettavaksi levylle. Poista käyttämättömät kokoelmat tai jaa se useaan tiedostoon ja yritä uudelleen."
+    },
     "externalChange": {
       "title": "Tiedosto muuttui levyllä",
       "message": "”{{fileName}}” muutettiin sovelluksen ulkopuolella.",

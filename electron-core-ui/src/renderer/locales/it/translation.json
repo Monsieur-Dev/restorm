@@ -20,6 +20,10 @@
       "dontSave": "Non salvare",
       "cancel": "Annulla"
     },
+    "projectTooLarge": {
+      "title": "Progetto troppo grande per il salvataggio",
+      "body": "Questo progetto è troppo grande per essere scritto su disco. Rimuovi le raccolte inutilizzate o suddividilo in più file, quindi riprova."
+    },
     "externalChange": {
       "title": "File modificato sul disco",
       "message": "«{{fileName}}» è stato modificato al di fuori dell'applicazione.",

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Javítások:
+
+- **Egy nagyon nagy projekt mentése mostantól egyértelmű üzenettel hiúsul meg, ahelyett hogy lefagyna.** Ha egy projekt túl nagyra nő ahhoz, hogy egyben lemezre lehessen írni — ami egy szokatlanul nagy API-séma importálása után előfordulhat — a Restorm világosan jelzi, hogy túl nagy a mentéshez, ahelyett hogy összeomlana vagy csendben hibázna.
+- **Áttekinthetőbb hibajelentés a háttérben.** A „Mentés másként” párbeszédablak megszakítása többé nem naplózódik hibaként, egy sikertelen import pedig mostantól a valódi okát jelzi — így a valódi problémák könnyebben észrevehetők és javíthatók.
+
 ## v1.0.5
 
 **Cookie jar — környezetenként egy cookie-tároló.**

@@ -10,6 +10,13 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.0.6
+
+Fixes:
+
+- **A very large project now fails to save with a clear message instead of freezing.** If a project grows too big to write to disk in one piece — which can happen after importing an unusually large API schema — Restorm now tells you plainly that it is too large to save, rather than crashing or failing silently.
+- **Clearer error reporting behind the scenes.** Cancelling a "Save as" dialog is no longer recorded as an error, and a failed import now reports its real cause — so the genuine problems are easier to spot and fix.
+
 ## v1.0.5
 
 **The Cookie jar — one jar of cookies per environment.**

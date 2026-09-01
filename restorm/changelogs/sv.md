@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Rättningar:
+
+- **Ett mycket stort projekt misslyckas nu med att sparas med ett tydligt meddelande i stället för att frysa.** Om ett projekt blir för stort för att skrivas till disk i ett svep — vilket kan hända efter import av ett ovanligt stort API-schema — talar Restorm nu tydligt om att det är för stort för att sparas, i stället för att krascha eller misslyckas tyst.
+- **Tydligare felrapportering bakom kulisserna.** Att avbryta dialogrutan ”Spara som” registreras inte längre som ett fel, och en misslyckad import rapporterar nu sin verkliga orsak — så att de verkliga problemen är lättare att upptäcka och åtgärda.
+
 ## v1.0.5
 
 **Cookie jar — en burk cookies per miljö.**

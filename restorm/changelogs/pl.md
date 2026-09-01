@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Poprawki:
+
+- **Bardzo duży projekt kończy się teraz niepowodzeniem zapisu z czytelnym komunikatem, zamiast się zawieszać.** Jeśli projekt stanie się zbyt duży, aby zapisać go na dysku w całości — co może się zdarzyć po zaimportowaniu wyjątkowo dużego schematu API — Restorm wyraźnie informuje, że jest zbyt duży do zapisania, zamiast się zawieszać lub po cichu zawodzić.
+- **Czytelniejsze raportowanie błędów w tle.** Anulowanie okna „Zapisz jako” nie jest już zapisywane jako błąd, a nieudany import podaje teraz swoją rzeczywistą przyczynę — dzięki czemu prawdziwe problemy łatwiej wykryć i naprawić.
+
 ## v1.0.5
 
 **Cookie jar — jeden słoik ciasteczek na środowisko.**

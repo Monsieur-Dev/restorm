@@ -20,6 +20,10 @@
       "dontSave": "Spara inte",
       "cancel": "Avbryt"
     },
+    "projectTooLarge": {
+      "title": "Projektet är för stort för att spara",
+      "body": "Det här projektet är för stort för att skrivas till disk. Ta bort oanvända samlingar eller dela upp det i flera filer och försök igen."
+    },
     "externalChange": {
       "title": "Filen har ändrats på disken",
       "message": "”{{fileName}}” ändrades utanför programmet.",

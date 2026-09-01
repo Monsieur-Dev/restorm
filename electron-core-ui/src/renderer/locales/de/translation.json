@@ -20,6 +20,10 @@
       "dontSave": "Nicht speichern",
       "cancel": "Abbrechen"
     },
+    "projectTooLarge": {
+      "title": "Projekt zu groß zum Speichern",
+      "body": "Dieses Projekt ist zu groß, um auf die Festplatte geschrieben zu werden. Entfernen Sie nicht verwendete Sammlungen oder teilen Sie es auf mehrere Dateien auf und versuchen Sie es erneut."
+    },
     "externalChange": {
       "title": "Datei auf der Festplatte geändert",
       "message": "„{{fileName}}“ wurde außerhalb der Anwendung geändert.",

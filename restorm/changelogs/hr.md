@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.6
+
+Ispravci:
+
+- **Vrlo velik projekt sada ne uspijeva pri spremanju uz jasnu poruku umjesto zamrzavanja.** Ako projekt postane prevelik da bi se odjednom zapisao na disk — što se može dogoditi nakon uvoza neobično velike API sheme — Restorm vas jasno obavještava da je prevelik za spremanje, umjesto da se sruši ili tiho zakaže.
+- **Jasnije prijavljivanje pogrešaka u pozadini.** Odustajanje od dijaloga „Spremi kao” više se ne bilježi kao pogreška, a neuspjeli uvoz sada prijavljuje svoj stvarni uzrok — pa se stvarni problemi lakše uočavaju i ispravljaju.
+
 ## v1.0.5
 
 **Cookie jar – jedna staklenka kolačića po okruženju.**
