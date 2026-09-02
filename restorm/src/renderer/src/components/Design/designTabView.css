@@ -1153,6 +1153,11 @@
   flex: 0 0 auto;
 }
 
+/* Breathing room between the section's tab strip and the intro line. */
+.design-code-template-tab > .design-section-subtitle {
+  margin-top: 12px;
+}
+
 /* The SplitView of template panes fills the space between the subtitle and the
    add-template row. */
 .design-code-template-list {
@@ -1219,10 +1224,18 @@
 
 .design-code-destination {
   min-width: 0;
+  width: 100%;
+}
+
+/* The InputBox is wrapped in an unclassed div by the component; grow that
+   wrapper (the actual ControlGroup flex child) so the field fills the row. */
+.design-code-destination > div:has(> .inputbox) {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .design-code-destination .inputbox {
-  flex: 1;
+  width: 100%;
   min-width: 0;
 }
 

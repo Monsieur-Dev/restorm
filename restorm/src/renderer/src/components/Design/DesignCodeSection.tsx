@@ -282,14 +282,16 @@ export const DesignCodeSection: React.FC<{
                       label={
                         blocked
                           ? t('design.code.blocked', 'Fix the design’s {{count}} validation issue(s) before generating', { count: issues.length })
-                          : t('design.code.generateOne', 'Generate this project')
+                          : (tpl.outputDir ?? '').trim() === ''
+                            ? t('design.code.outputMissing', 'Choose an output folder first')
+                            : t('design.code.generateOne', 'Generate this project')
                       }
                     >
                       <RoundActionButton
                         icon={generating && activeId === tpl.id ? 'loading' : 'run'}
                         tone="run"
                         size="secondary"
-                        disabled={runLocked || blocked || generating}
+                        disabled={runLocked || blocked || generating || (tpl.outputDir ?? '').trim() === ''}
                         onClick={() => { void generate(tpl) }}
                         ariaLabel={t('design.code.generateOne', 'Generate this project')}
                         data-testid={`design-code-generate-${tpl.id}`}
