@@ -561,8 +561,90 @@
 .design-schema-tab {
   display: flex;
   flex-direction: column;
-  gap: 10px;
   min-height: 0;
+  height: 100%;
+  /* Width query context for the master-detail breakpoint below. */
+  container-type: inline-size;
+}
+
+/* Master-detail: property panes on one side, the selected-property panel on the
+   other. Row when there's width for it, column (detail beneath) when narrow. */
+.design-schema-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* One scroll region for BOTH property panes (the ECUI ScrollableElement root). */
+.design-schema-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The panes stack at their natural (content) height inside the scroll region. */
+.design-schema-panes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Wide: fixed-width column, top-aligned and sized to its content; it only grows
+   up to the available height, past which its content scrolls (ECUI
+   ScrollableElement) — i.e. a scrollbar appears only when the window is short. */
+.design-schema-detail {
+  flex: 0 0 400px;
+  align-self: flex-start;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.design-schema-detail-scroll {
+  min-height: 0;
+  min-width: 0;
+}
+
+@container (max-width: 820px) {
+  .design-schema-layout {
+    flex-direction: column;
+  }
+
+  /* Narrow: beneath the list, sized to its content but capped so the list keeps
+     a usable share; the detail scrolls internally past that cap. */
+  .design-schema-detail {
+    flex: 0 1 auto;
+    align-self: stretch;
+    width: 100%;
+    max-height: 55%;
+  }
+}
+
+/* Collapsible/static property panes reuse the sidebar pane look (StaticPane) —
+   header + body only, no surrounding frame. */
+.design-schema-pane .static-pane-header {
+  cursor: default;
+}
+
+.design-schema-pane-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-schema-pane-toggle .codicon {
+  font-size: 14px;
 }
 
 .design-prop-cell {
@@ -581,8 +663,20 @@
   cursor: default;
 }
 
-.design-prop-cell.selected {
+/* Selection highlights the whole row as one continuous rectangle (background on
+   the row's cells, not the inner per-column boxes). */
+.design-schema-tab tr.ecu-table-row:has(.design-prop-cell.selected) > td {
   background-color: var(--list-activeSelectionBackground, rgba(90, 120, 200, 0.25));
+}
+
+.design-schema-tab tr.ecu-table-row:has(.design-prop-cell.selected) > td:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.design-schema-tab tr.ecu-table-row:has(.design-prop-cell.selected) > td:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .design-prop-cell.has-issue {

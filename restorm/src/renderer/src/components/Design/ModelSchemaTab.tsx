@@ -4,7 +4,9 @@ import {
   Button,
   InputBox,
   MessageType,
+  ScrollableElement,
   SelectBox,
+  StaticPane,
   Table,
   Toggle,
   type IMessage,
@@ -161,6 +163,10 @@ export interface ModelSchemaTabProps {
  */
 export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, issues, selectedPropertyId, onSelectProperty, onJumpToModel }) => {
   const { t } = useTranslation()
+
+  // Inherited properties are secondary context — collapsed by default so the
+  // model's own properties lead. The pane sizes to its content when expanded.
+  const [inheritedCollapsed, setInheritedCollapsed] = useState(true)
 
   const propertyIssueCodes = useCallback((propertyId: string) =>
     issues.filter((issue) => issue.path.includes(propertyId)).map((issue) => issue.code), [issues])
@@ -369,69 +375,109 @@ export const ModelSchemaTab: React.FC<ModelSchemaTabProps> = ({ design, model, i
 
   const selected = model.properties.find((p) => p.id === selectedPropertyId) ?? null
 
+  const toggleInherited = useCallback(() => { setInheritedCollapsed((v) => !v) }, [])
+
+  const detailPanel = selected !== null ? (
+    <PropertyPanel
+      key={selected.id}
+      design={design}
+      model={model}
+      property={selected}
+      issueCodes={propertyIssueCodes(selected.id)}
+      onUpdate={(update) => { updateProperty(selected.id, update) }}
+      onDelete={() => { deleteProperty(selected.id) }}
+    />
+  ) : null
+
   return (
     <div className="design-schema-tab" data-testid={`design-model-schema-${model.id}`}>
-      {inheritedRows.length > 0 && (
-        <>
-          <h4 className="design-settings-group-title">{t('design.schema.inheritedProperties', 'Inherited properties')}</h4>
-          <Table<Row>
-            columns={columns}
-            rows={inheritedRows}
-            getRowId={(row) => row.property.id}
-            data-testid="design-properties-table-inherited"
-          />
-          <h4 className="design-settings-group-title">{t('design.schema.ownProperties', 'Own properties')}</h4>
-        </>
-      )}
-      <Table<Row>
-        columns={columns}
-        rows={ownRows}
-        getRowId={(row) => row.property.id}
-        reorderable
-        onRowsReorder={(orderedIds) => {
-          // This table holds only own rows, so the ordered ids map straight to
-          // the reordered own-property list. The guard is belt-and-braces.
-          const ownById = new Map(model.properties.map((p) => [p.id, p]))
-          const reordered = orderedIds
-            .map((id) => ownById.get(id))
-            .filter((p): p is DesignProperty => p !== undefined)
-          if (reordered.length === model.properties.length) commitProperties(reordered)
-        }}
-        data-testid="design-properties-table"
-      />
-      {(
-        <Button
-          icon="add"
-          secondary
-          onClick={addProperty}
-          data-testid="design-add-property"
-        >
-          {t('design.schema.addProperty', 'Add a property')}
-        </Button>
-      )}
-      {model.design?.timestamps === true && (
-        <div className="design-generated-props" data-testid="design-generated-props">
-          <h4 className="design-settings-group-title">{t('design.schema.generatedProperties', 'Generated properties')}</h4>
-          {['createdAt', 'updatedAt'].map((name) => (
-            <div key={name} className="design-generated-prop">
-              <span className="design-generated-prop-name">{name}</span>
-              <span className="design-prop-type">date-time</span>
-              <span className="design-flag-badge">{t('design.flags.readOnly', 'readOnly')}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      {selected !== null && (
-        <PropertyPanel
-          key={selected.id}
-          design={design}
-          model={model}
-          property={selected}
-          issueCodes={propertyIssueCodes(selected.id)}
-          onUpdate={(update) => { updateProperty(selected.id, update) }}
-          onDelete={() => { deleteProperty(selected.id) }}
-        />
-      )}
+      <div className="design-schema-layout">
+        <ScrollableElement className="design-schema-main">
+          <div className="design-schema-panes">
+          {inheritedRows.length > 0 && (
+            <StaticPane
+              className="design-schema-pane design-schema-pane--inherited"
+              title={
+                <span
+                  className="design-schema-pane-toggle"
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!inheritedCollapsed}
+                  onClick={toggleInherited}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleInherited() }
+                  }}
+                  data-testid="design-inherited-pane-toggle"
+                >
+                  <i
+                    className={`codicon ${inheritedCollapsed ? 'codicon-chevron-right' : 'codicon-chevron-down'}`}
+                    aria-hidden
+                  />
+                  {t('design.schema.inheritedProperties', 'Inherited properties')}
+                </span>
+              }
+            >
+              {!inheritedCollapsed && (
+                <Table<Row>
+                  columns={columns}
+                  rows={inheritedRows}
+                  getRowId={(row) => row.property.id}
+                  data-testid="design-properties-table-inherited"
+                />
+              )}
+            </StaticPane>
+          )}
+          <StaticPane
+            className="design-schema-pane design-schema-pane--own"
+            title={t('design.schema.ownProperties', 'Own properties')}
+          >
+            <Table<Row>
+              columns={columns}
+              rows={ownRows}
+              getRowId={(row) => row.property.id}
+              reorderable
+              onRowsReorder={(orderedIds) => {
+                // This table holds only own rows, so the ordered ids map straight to
+                // the reordered own-property list. The guard is belt-and-braces.
+                const ownById = new Map(model.properties.map((p) => [p.id, p]))
+                const reordered = orderedIds
+                  .map((id) => ownById.get(id))
+                  .filter((p): p is DesignProperty => p !== undefined)
+                if (reordered.length === model.properties.length) commitProperties(reordered)
+              }}
+              data-testid="design-properties-table"
+            />
+            <Button
+              icon="add"
+              secondary
+              onClick={addProperty}
+              data-testid="design-add-property"
+            >
+              {t('design.schema.addProperty', 'Add a property')}
+            </Button>
+            {model.design?.timestamps === true && (
+              <div className="design-generated-props" data-testid="design-generated-props">
+                <h4 className="design-settings-group-title">{t('design.schema.generatedProperties', 'Generated properties')}</h4>
+                {['createdAt', 'updatedAt'].map((name) => (
+                  <div key={name} className="design-generated-prop">
+                    <span className="design-generated-prop-name">{name}</span>
+                    <span className="design-prop-type">date-time</span>
+                    <span className="design-flag-badge">{t('design.flags.readOnly', 'readOnly')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </StaticPane>
+          </div>
+        </ScrollableElement>
+        {detailPanel !== null && (
+          <div className="design-schema-detail" data-testid="design-schema-detail">
+            <ScrollableElement className="design-schema-detail-scroll">
+              {detailPanel}
+            </ScrollableElement>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

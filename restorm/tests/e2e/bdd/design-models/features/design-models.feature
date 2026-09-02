@@ -33,6 +33,7 @@ Feature: Design models and enums editor
   Scenario: Inheritance shows parent properties read-only and refuses cycles
     Given a Pro project carrying an API design is open in the models editor
     When I open the model "AdminUser"
+    And I expand the inherited properties pane
     Then the inherited property row "email" is read-only with a jump to the parent
     When I click the jump on the inherited row "email"
     Then the model card shows "User"

@@ -215,6 +215,16 @@ When('I close the design tab and reopen the design on the models section', async
 
 // ── Inheritance ───────────────────────────────────────────────────────
 
+When('I expand the inherited properties pane', async () => {
+  const p = requirePage()
+  const toggle = p.locator('[data-testid="design-inherited-pane-toggle"]')
+  await expect(toggle).toBeVisible({ timeout: 5000 })
+  if ((await toggle.getAttribute('aria-expanded')) === 'false') {
+    await toggle.click()
+    await p.waitForTimeout(200)
+  }
+})
+
 Then('the inherited property row {string} is read-only with a jump to the parent', async ({}, name: string) => {
   const p = requirePage()
   const cell = p.locator('.design-prop-cell.inherited').filter({ has: p.getByText(name, { exact: true }) }).first()
@@ -263,7 +273,10 @@ When('I click the used-by entry {string}', async ({}, label: string) => {
 
 Then('the model card has no inherited rows', async () => {
   const p = requirePage()
-  await expect(p.locator('.design-prop-cell.inherited')).toHaveCount(0, { timeout: 5000 })
+  // With no inherited properties the inherited pane is not rendered at all
+  // (rather than rendered-but-empty), so assert on the pane itself — this stays
+  // correct whether or not the pane would have been collapsed.
+  await expect(p.locator('.design-schema-pane--inherited')).toHaveCount(0, { timeout: 5000 })
 })
 
 // ── Validation errors ─────────────────────────────────────────────────
