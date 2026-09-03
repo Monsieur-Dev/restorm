@@ -24,7 +24,9 @@ import { designRouteProjections, resolveDesignPath } from '../../../../shared/de
 import { flattenEnvVars } from '../../../../shared/utils/resolveUrlAgainstEnv'
 import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { displayValue, parseTypedRaw } from './designDisplay'
-import { replaceRoute } from './designMutations'
+import { assignDesignSection, replaceRoute, uniqueComponentName } from './designMutations'
+import { generateUniqueId } from '../../utils/treeManipulation'
+import { DesignEnumValuesEditor } from './DesignEnumValuesEditor'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useDesignEnvVariables } from '../../hooks/useDesignEnvVariables'
@@ -34,9 +36,18 @@ import { DesignTagsEditor } from './DesignTagsEditor'
 
 /** Rebuild a route with the given param links, omitting empty bags —
  * `design: { paramLinks: {} }` must never reach the file. */
-function withParamLinks(route: DesignRoute, links: NonNullable<NonNullable<DesignRoute['design']>['paramLinks']>): DesignRoute {
-  const { paramLinks: _dropped, ...designRest } = route.design ?? {}
-  const design = Object.keys(links).length > 0 ? { ...designRest, paramLinks: links } : designRest
+/** Rebuild a route with its two param-name-keyed bags (model links + enum
+ * refs), dropping either when empty and the whole `design` block when it ends
+ * up empty — so a route never carries a stray `{}`. */
+function withParamMaps(
+  route: DesignRoute,
+  links: NonNullable<NonNullable<DesignRoute['design']>['paramLinks']>,
+  enumRefs: NonNullable<NonNullable<DesignRoute['design']>['paramEnumRefs']>
+): DesignRoute {
+  const { paramLinks: _l, paramEnumRefs: _e, ...designRest } = route.design ?? {}
+  const design: NonNullable<DesignRoute['design']> = { ...designRest }
+  if (Object.keys(links).length > 0) design.paramLinks = links
+  if (Object.keys(enumRefs).length > 0) design.paramEnumRefs = enumRefs
   const { design: _oldDesign, ...routeRest } = route
   const next: DesignRoute = { ...routeRest }
   if (Object.keys(design).length > 0) next.design = design
@@ -44,6 +55,14 @@ function withParamLinks(route: DesignRoute, links: NonNullable<NonNullable<Desig
 }
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH'])
 const PARAM_TYPES = ['string', 'integer', 'number', 'boolean'] as const
+
+/** Title-case the alphanumeric words of a name for a synthesized enum name
+ * (e.g. `Finds pets by status` + `status` → `FindsPetsByStatusStatus`). */
+function pascalCaseName(input: string): string {
+  return (input.match(/[A-Za-z0-9]+/g) ?? [])
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('')
+}
 
 export interface RouteDefinitionTabProps {
   design: ApiDesign
@@ -117,20 +136,36 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
   const renameParam = useCallback((oldName: string, newName: string) => {
     if (newName === '' || parameters.some((p) => p.name === newName)) return
     const nextParameters = parameters.map((p) => (p.name === oldName ? { ...p, name: newName } : p))
-    const links = { ...(route.design?.paramLinks ?? {}) }
-    const moved = links[oldName]
-    if (moved !== undefined) {
-      const { [oldName]: _dropped, ...rest } = links
-      commit({ ...route, doc: { ...route.doc, parameters: nextParameters }, design: { ...(route.design ?? {}), paramLinks: { ...rest, [newName]: moved } } })
-      return
+    // The two param-name-keyed bags (model links + enum refs) must follow the
+    // rename in lockstep, exactly like the path `{{param}}` placeholders.
+    const moveKey = <V,>(map: Record<string, V> | undefined): Record<string, V> | undefined => {
+      const value = map?.[oldName]
+      if (map === undefined || value === undefined) return map
+      const next: Record<string, V> = {}
+      for (const [key, entry] of Object.entries(map)) {
+        if (key !== oldName) next[key] = entry
+      }
+      next[newName] = value
+      return next
     }
-    patchDoc({ parameters: nextParameters })
-  }, [commit, patchDoc, parameters, route])
+    const design = { ...(route.design ?? {}) }
+    const paramLinks = moveKey(design.paramLinks)
+    const paramEnumRefs = moveKey(design.paramEnumRefs)
+    const nextDesign: NonNullable<DesignRoute['design']> = { ...design }
+    if (paramLinks !== undefined) nextDesign.paramLinks = paramLinks
+    if (paramEnumRefs !== undefined) nextDesign.paramEnumRefs = paramEnumRefs
+    commit({
+      ...route,
+      doc: { ...route.doc, parameters: nextParameters },
+      ...(Object.keys(nextDesign).length > 0 ? { design: nextDesign } : {})
+    })
+  }, [commit, parameters, route])
 
   const deleteParam = useCallback((name: string) => {
     const nextParameters = parameters.filter((p) => p.name !== name)
-    const { [name]: _dropped, ...links } = route.design?.paramLinks ?? {}
-    commit(withParamLinks({ ...route, doc: { ...route.doc, parameters: nextParameters } }, links))
+    const { [name]: _l, ...links } = route.design?.paramLinks ?? {}
+    const { [name]: _e, ...enumRefs } = route.design?.paramEnumRefs ?? {}
+    commit(withParamMaps({ ...route, doc: { ...route.doc, parameters: nextParameters } }, links, enumRefs))
   }, [commit, parameters, route])
 
   const addParam = useCallback(() => {
@@ -141,24 +176,86 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
 
   const setLink = useCallback((paramName: string, target: { modelId: string; propertyId: string } | null) => {
     const links = { ...(route.design?.paramLinks ?? {}) }
+    const enumRefs = { ...(route.design?.paramEnumRefs ?? {}) }
     if (target === null) {
       const { [paramName]: _dropped, ...rest } = links
-      commit(withParamLinks(route, rest))
+      commit(withParamMaps(route, rest, enumRefs))
       return
     }
-    // Re-linking restores the AUTO mirror: any detached description the
-    // parameter carried is cleared, so the badge and the export can
-    // never disagree about whose text is served.
+    // A model link and an enum reference are mutually exclusive — clear the
+    // enum ref when linking to a property. Re-linking also restores the AUTO
+    // mirror: any detached description the parameter carried is cleared, so the
+    // badge and the export can never disagree about whose text is served.
+    const { [paramName]: _clearedEnum, ...enumRest } = enumRefs
     const parametersWithoutOwnDescription = parameters.map((p) => {
       if (p.name !== paramName) return p
       const { description: _ownDescription, ...rest } = p
       return rest
     })
-    commit(withParamLinks(
+    commit(withParamMaps(
       { ...route, doc: { ...route.doc, parameters: parametersWithoutOwnDescription } },
-      { ...links, [paramName]: { ...target, descriptionAuto: true } }
+      { ...links, [paramName]: { ...target, descriptionAuto: true } },
+      enumRest
     ))
   }, [commit, parameters, route])
+
+  // ── Parameter enum: inline values, named-enum reference, extract ────
+  const setParamEnumValues = useCallback((paramName: string, values: unknown[]) => {
+    updateParam(paramName, (p) => {
+      const { enumValues: _dropped, ...rest } = p
+      return values.length > 0 ? { ...rest, enumValues: values } : rest
+    })
+  }, [updateParam])
+
+  const paramEnumRefId = useCallback((name: string): string | undefined => route.design?.paramEnumRefs?.[name], [route.design])
+
+  const setParamEnumRef = useCallback((paramName: string, enumId: string | null) => {
+    const links = { ...(route.design?.paramLinks ?? {}) }
+    const { [paramName]: _dropped, ...enumRest } = route.design?.paramEnumRefs ?? {}
+    // Selecting a named enum clears any model link + inline values (the
+    // component is the single source); clearing it just drops the ref.
+    const { [paramName]: _clearedLink, ...linkRest } = links
+    const nextParams = enumId === null
+      ? parameters
+      : parameters.map((p) => {
+        if (p.name !== paramName) return p
+        const { enumValues: _e, ...rest } = p
+        return rest
+      })
+    commit(withParamMaps(
+      { ...route, doc: { ...route.doc, parameters: nextParams } },
+      enumId === null ? links : linkRest,
+      enumId === null ? enumRest : { ...enumRest, [paramName]: enumId }
+    ))
+  }, [commit, parameters, route])
+
+  const setParamPrimitiveType = useCallback((paramName: string, type: string) => {
+    // Set the scalar type AND clear any enum reference for this param in a
+    // single commit (the two live in doc vs design — separate commits race).
+    const links = { ...(route.design?.paramLinks ?? {}) }
+    const { [paramName]: _dropped, ...enumRest } = route.design?.paramEnumRefs ?? {}
+    const nextParams = parameters.map((p) => (p.name === paramName ? { ...p, type } : p))
+    commit(withParamMaps({ ...route, doc: { ...route.doc, parameters: nextParams } }, links, enumRest))
+  }, [commit, parameters, route])
+
+  const extractParamToEnum = useCallback((paramName: string) => {
+    const param = parameters.find((p) => p.name === paramName)
+    const values = param?.enumValues ?? []
+    if (values.length === 0) return
+    const sameValues = (a: unknown[], b: unknown[]): boolean =>
+      a.length === b.length && a.every((v, i) => String(v) === String(b[i]))
+    const existing = design.enums.find((e) => sameValues(e.doc.enumValues ?? [], values))
+    let enumId: string
+    if (existing !== undefined) {
+      enumId = existing.id
+    } else {
+      enumId = generateUniqueId()
+      const seed = `${pascalCaseName(route.doc.summary ?? route.doc.match.urlPattern)}${pascalCaseName(paramName)}` || 'Enum'
+      const name = uniqueComponentName(design, seed)
+      assignDesignSection(design, 'enums', [...design.enums, { id: enumId, doc: { name, properties: [], enumValues: values } }])
+    }
+    setParamEnumRef(paramName, enumId)
+  }, [design, parameters, route, setParamEnumRef])
 
   // ── Model-property link vocabulary ─────────────────────────────────
   const linkChoices = useMemo(() => design.models.flatMap((m) =>
@@ -217,7 +314,7 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
       id: 'type',
       header: t('design.schema.columns.type', 'Type'),
       autoWidth: false,
-      defaultWidth: 110,
+      defaultWidth: 200,
       renderCell: (param) => {
         const link = linkFor(param.name)
         if (link !== null) {
@@ -227,16 +324,56 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
             </span>
           )
         }
+        // Type vocabulary: primitives, then the design's named enums. Selecting
+        // an enum stores a reference (paramEnumRefs); selecting a primitive
+        // clears it — both in ONE commit so the two writes can't race.
+        const enumRefId = paramEnumRefId(param.name)
+        const options = [...PARAM_TYPES.map((type) => ({ text: type })), ...design.enums.map((e) => ({ text: `${e.doc.name} (${t('design.schema.typeEnum', 'enum')})` }))]
+        const selected = enumRefId !== undefined
+          ? Math.max(0, PARAM_TYPES.length + design.enums.findIndex((e) => e.id === enumRefId))
+          : Math.max(0, PARAM_TYPES.indexOf(param.type as typeof PARAM_TYPES[number]))
+        const values = enumRefId === undefined ? (param.enumValues ?? []) : []
+        const canInline = enumRefId === undefined && (param.type === 'string' || param.type === 'integer' || param.type === 'number')
         return (
-          <SelectBox
-            id={`design-param-type-${route.id}-${param.name}`}
-            className=""
-            options={PARAM_TYPES.map((type) => ({ text: type }))}
-            selected={Math.max(0, PARAM_TYPES.indexOf(param.type as typeof PARAM_TYPES[number]))}
-            onDidSelect={(data: ISelectData) => { updateParam(param.name, (p) => ({ ...p, type: data.selected })) }}
-            selectBoxOptions={{ ariaLabel: t('design.schema.columns.type', 'Type'), useCustomDrawn: true }}
-            data-testid={`design-param-type-${param.name}`}
-          />
+          <div className="design-param-type-cell">
+            <SelectBox
+              id={`design-param-type-${route.id}-${param.name}`}
+              className=""
+              options={options}
+              selected={selected}
+              onDidSelect={(data: ISelectData) => {
+                if (data.index < PARAM_TYPES.length) setParamPrimitiveType(param.name, PARAM_TYPES[data.index] ?? 'string')
+                else {
+                  const picked = design.enums[data.index - PARAM_TYPES.length]
+                  if (picked !== undefined) setParamEnumRef(param.name, picked.id)
+                }
+              }}
+              selectBoxOptions={{ ariaLabel: t('design.schema.columns.type', 'Type'), useCustomDrawn: true }}
+              data-testid={`design-param-type-${param.name}`}
+            />
+            {canInline && (
+              <div className="design-enum-inline-row">
+                <DesignEnumValuesEditor
+                  values={values}
+                  onChange={(next) => { setParamEnumValues(param.name, next) }}
+                  parseValue={(raw) => parseTypedRaw(param.type, raw)}
+                  data-testid={`design-param-enum-values-${param.name}`}
+                />
+                {values.length > 0 && (
+                  <HeaderHoverTooltip label={t('design.enum.extract', 'Extract to a named enum')}>
+                    <Button
+                      secondary
+                      small
+                      icon="export"
+                      options={{ ariaLabel: t('design.enum.extract', 'Extract to a named enum') }}
+                      onClick={() => { extractParamToEnum(param.name) }}
+                      data-testid={`design-param-enum-extract-${param.name}`}
+                    />
+                  </HeaderHoverTooltip>
+                )}
+              </div>
+            )}
+          </div>
         )
       }
     },

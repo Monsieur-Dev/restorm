@@ -305,6 +305,12 @@ export interface RouteDesignMeta {
    * entries in `doc.parameters`; the editor renames keys in lockstep
    * with the path's `{{param}}` placeholders. */
   paramLinks?: Record<string, DesignParamLink>
+  /** Parameter name → referenced named-enum id. A param can reference a
+   * first-class {@link DesignEnum} (its allowed values live once, in the Enums
+   * section) instead of carrying inline `doc.enumValues`; the projection emits
+   * a `$ref` to the enum component. Keys match `doc.parameters[].name` and are
+   * renamed in lockstep like {@link paramLinks}. */
+  paramEnumRefs?: Record<string, RuntimeId>
   /** Request body contract for methods that carry one. `contentType` is
    * the primary media type the editor shows; `contentTypes` preserves the
    * FULL set an imported spec declared (a body can accept several) so a

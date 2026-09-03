@@ -95,24 +95,39 @@ export function designRouteDoc(
 ): OperationDocumentation {
   const full = composeRoutePath(context, route.doc.match.urlPattern)
   const links = route.design?.paramLinks
+  const enumRefs = route.design?.paramEnumRefs
   let parameters = route.doc.parameters
-  if (design !== undefined && links !== undefined && parameters !== undefined) {
+  if (design !== undefined && parameters !== undefined && (links !== undefined || enumRefs !== undefined)) {
     parameters = parameters.map((parameter) => {
-      const link = links[parameter.name]
-      if (link === undefined) return parameter
-      const model = design.models.find((m) => m.id === link.modelId)
-      const property = model?.properties.find((p) => p.id === link.propertyId)
-      if (property === undefined) return parameter
-      const resolved = { ...parameter, type: property.doc.type }
-      if (property.doc.format !== undefined) resolved.format = property.doc.format
-      else delete resolved.format
-      if (property.doc.example !== undefined) resolved.example = property.doc.example
-      if (property.doc.constraints !== undefined) resolved.constraints = property.doc.constraints
-      if (link.descriptionAuto === true) {
-        if (property.doc.description !== undefined) resolved.description = property.doc.description
-        else delete resolved.description
+      const link = links?.[parameter.name]
+      if (link !== undefined) {
+        const model = design.models.find((m) => m.id === link.modelId)
+        const property = model?.properties.find((p) => p.id === link.propertyId)
+        if (property !== undefined) {
+          const resolved = { ...parameter, type: property.doc.type }
+          if (property.doc.format !== undefined) resolved.format = property.doc.format
+          else delete resolved.format
+          if (property.doc.example !== undefined) resolved.example = property.doc.example
+          if (property.doc.constraints !== undefined) resolved.constraints = property.doc.constraints
+          if (link.descriptionAuto === true) {
+            if (property.doc.description !== undefined) resolved.description = property.doc.description
+            else delete resolved.description
+          }
+          return resolved
+        }
       }
-      return resolved
+      // A named-enum reference projects the param's type to the enum NAME so the
+      // exporter emits a `$ref` to the enum component; the inline values (if any
+      // lingered) give way to the component.
+      const enumId = enumRefs?.[parameter.name]
+      if (enumId !== undefined) {
+        const enumEntity = design.enums.find((e) => e.id === enumId)
+        if (enumEntity !== undefined) {
+          const { enumValues: _dropped, ...rest } = parameter
+          return { ...rest, type: enumEntity.doc.name }
+        }
+      }
+      return parameter
     })
   }
   // Project the route's body contract back into the operation as the

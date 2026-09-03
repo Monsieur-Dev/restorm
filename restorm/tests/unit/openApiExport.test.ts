@@ -262,6 +262,31 @@ describe('openApiExport', () => {
     expect(reimported.models['Pet']?.properties.find((p) => p.name === 'status')?.enumValues).toEqual(['available', 'pending', 'sold'])
   })
 
+  it('emits a $ref for a parameter that references a named enum', () => {
+    const design = {
+      id: 'd',
+      info: { title: 'T', version: '1.0.0' },
+      models: [],
+      enums: [{ id: 'e1', doc: { name: 'PetStatus', properties: [], enumValues: ['available', 'sold'] } }],
+      routeGroups: [{
+        id: 'g',
+        doc: { name: 'Pets' },
+        routes: [{
+          id: 'r',
+          doc: { match: { urlPattern: '/pets', method: 'GET' }, parameters: [{ name: 'status', location: 'query', type: 'string', required: false }] },
+          design: { paramEnumRefs: { status: 'e1' } }
+        }]
+      }]
+    } as unknown as ApiDesign
+    const emitted = apiDocumentationToOpenApi(designToApiDocumentation(design))
+    const params = ((emitted as { paths: Record<string, { get: { parameters: { name: string; schema: Record<string, unknown> }[] } }> }).paths['/pets']).get.parameters
+    const status = params.find((p) => p.name === 'status')
+    expect(status?.schema['$ref']).toBe('#/components/schemas/PetStatus')
+    // The enum component it points at is emitted.
+    const schemas = (emitted as { components: { schemas: Record<string, { enum?: unknown[] }> } }).components.schemas
+    expect(schemas['PetStatus']?.enum).toEqual(['available', 'sold'])
+  })
+
   // ── OpenAPI 3.1 target (the downloadable descriptor) ──────────────
 
   it('emits a VALID OpenAPI 3.1 document for the reference design', async () => {

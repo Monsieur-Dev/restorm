@@ -278,3 +278,28 @@ describe('tags — group + route union', () => {
     expect(designToApiDocumentation(design).operations[0]?.tags).toBeUndefined()
   })
 })
+
+describe('parameter enum reference', () => {
+  it('projects a param’s named-enum reference to the enum name and drops inline values', () => {
+    const design = {
+      id: 'd',
+      info: { title: 'T' },
+      models: [],
+      enums: [{ id: 'e1', doc: { name: 'PetStatus', properties: [], enumValues: ['available', 'sold'] } }],
+      routeGroups: [{
+        id: 'g',
+        doc: { name: 'Pets' },
+        routes: [{
+          id: 'r',
+          doc: { match: { urlPattern: '/', method: 'GET' }, parameters: [{ name: 'status', location: 'query', type: 'string', required: false, enumValues: ['stale'] }] },
+          design: { paramEnumRefs: { status: 'e1' } }
+        }]
+      }]
+    } as unknown as ApiDesign
+    const status = designToApiDocumentation(design).operations[0]?.parameters?.find((p) => p.name === 'status')
+    // The type becomes the enum name (→ a $ref on export) and the inline values
+    // give way to the shared component.
+    expect(status?.type).toBe('PetStatus')
+    expect(status?.enumValues).toBeUndefined()
+  })
+})
