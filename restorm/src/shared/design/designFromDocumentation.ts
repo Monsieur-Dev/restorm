@@ -27,6 +27,7 @@ import type {
   OperationDocumentation,
   SecurityScheme
 } from '../types/apiDocumentation'
+import { unionTags } from './apiDesignDoc'
 
 /** `{param}` (spec spelling) → `{{param}}` (Restorm request spelling).
  * Already-doubled braces are left alone. */
@@ -63,6 +64,37 @@ export function defaultAuthFromSecurity(
   if (scheme.type === 'basic') return 'basic'
   if (scheme.type === 'apiKey' && scheme.in === 'header') return 'apiKeyHeader'
   return undefined
+}
+
+/**
+ * Hoist a tag shared by EVERY route of a group onto the group itself and drop
+ * it from the routes — the reverse of the projection's group∪route union, so a
+ * tag repeated across a group's whole surface reads once at the group level
+ * instead of on every route. Only groups with ≥2 routes are factored (a lone
+ * route has no duplication to hoist), and a group with any tag-less route
+ * shares nothing. Mutates the groups in place; clones each group `doc` before
+ * writing so a shared imported doc object isn't touched.
+ */
+function factorCommonTags(groups: DesignRouteGroup[]): void {
+  for (const group of groups) {
+    if (group.routes.length < 2) continue
+    const tagSets = group.routes.map((route) => new Set(route.doc.tags ?? []))
+    if (tagSets.some((set) => set.size === 0)) continue
+    const [first, ...rest] = tagSets
+    if (first === undefined) continue
+    const common = [...first].filter((tag) => rest.every((set) => set.has(tag)))
+    if (common.length === 0) continue
+    const shared = new Set(common)
+    group.doc = { ...group.doc, tags: unionTags(group.doc.tags, common) }
+    for (const route of group.routes) {
+      const remaining = (route.doc.tags ?? []).filter((tag) => !shared.has(tag))
+      if (remaining.length > 0) route.doc = { ...route.doc, tags: remaining }
+      else if (route.doc.tags !== undefined) {
+        const { tags: _hoisted, ...rest } = route.doc
+        route.doc = rest
+      }
+    }
+  }
 }
 
 export function designFromDocumentation(
@@ -194,6 +226,8 @@ export function designFromDocumentation(
     if (Object.keys(routeDesign).length > 0) route.design = routeDesign
     group.routes.push(route)
   }
+
+  factorCommonTags(groups)
 
   const defaultAuth = defaultAuthFromSecurity(doc.defaultSecurity, doc.securitySchemes)
 

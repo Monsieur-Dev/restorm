@@ -5,6 +5,7 @@ import {
   isEnumShapedModel,
   defaultAuthFromSecurity
 } from '../../src/shared/design/designFromDocumentation'
+import { designToApiDocumentation } from '../../src/shared/design/apiDesignDoc'
 import type { ApiDocumentation } from '../../src/shared/types/apiDocumentation'
 
 let counter = 0
@@ -172,5 +173,41 @@ describe('designFromDocumentation', () => {
   it('round-trips through serialization untouched (plain JSON design)', () => {
     const design = designFromDocumentation('X', buildReferenceDoc(), newId)
     expect(JSON.parse(JSON.stringify(design))).toEqual(design)
+  })
+})
+
+describe('tag factoring (doc → design)', () => {
+  const twoOps = (tagsA: string[], tagsB: string[]): ApiDocumentation => ({
+    sourceType: 'openapi',
+    api: { title: 'T' },
+    models: {},
+    groups: { Pets: { name: 'Pets' } },
+    operations: [
+      { match: { urlPattern: '/pets', method: 'GET' }, group: 'Pets', tags: tagsA },
+      { match: { urlPattern: '/pets/{id}', method: 'GET' }, group: 'Pets', tags: tagsB }
+    ]
+  })
+
+  it('hoists a tag shared by every route onto the group and drops it from the routes', () => {
+    const design = designFromDocumentation('X', twoOps(['pets', 'list'], ['pets', 'detail']), newId)
+    const group = design.routeGroups[0]
+    expect(group?.doc.tags).toEqual(['pets'])
+    expect(group?.routes.map((r) => r.doc.tags)).toEqual([['list'], ['detail']])
+  })
+
+  it('leaves tags on the routes when a route in the group does not share them', () => {
+    const design = designFromDocumentation('X', twoOps(['pets', 'list'], ['detail']), newId)
+    const group = design.routeGroups[0]
+    expect(group?.doc.tags).toBeUndefined()
+    expect(group?.routes.map((r) => r.doc.tags)).toEqual([['pets', 'list'], ['detail']])
+  })
+
+  it('round-trips: the union projection restores every operation tag', () => {
+    const design = designFromDocumentation('X', twoOps(['pets', 'list'], ['pets', 'detail']), newId)
+    const reprojected = designToApiDocumentation(design)
+    // 'pets' hoisted to the group comes back on both operations via the union;
+    // the route-specific tag stays on its own operation.
+    expect(reprojected.operations[0]?.tags).toEqual(['pets', 'list'])
+    expect(reprojected.operations[1]?.tags).toEqual(['pets', 'detail'])
   })
 })
