@@ -2144,6 +2144,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Enum vrijednosti",
+      "addValue": "Dodaj vrijednost…",
+      "removeValue": "Ukloni vrijednost",
+      "extract": "Izdvoji u imenovani enum"
+    },
     "tags": {
       "add": "Dodaj oznaku…",
       "remove": "Ukloni oznaku",

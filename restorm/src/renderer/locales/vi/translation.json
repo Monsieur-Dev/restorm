@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Giá trị enum",
+      "addValue": "Thêm một giá trị…",
+      "removeValue": "Xóa giá trị",
+      "extract": "Trích xuất thành enum có tên"
+    },
     "tags": {
       "add": "Thêm thẻ…",
       "remove": "Xóa thẻ",

@@ -21,10 +21,11 @@ import type {
 } from '../../../../shared/types/collections'
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { generateUniqueId } from '../../utils/treeManipulation'
-import { assignDesignSection, replaceModel } from './designMutations'
+import { assignDesignSection, replaceModel, uniqueComponentName } from './designMutations'
 import { displayValue, parseTypedValue } from './designDisplay'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DesignPropertyCodegenTab } from './DesignPropertyCodegenTab'
+import { DesignEnumValuesEditor } from './DesignEnumValuesEditor'
 
 /** The type vocabulary a property can pick from: primitives first, then
  * the design's models and enums (ID-referenced). */
@@ -36,6 +37,14 @@ type TypeChoice =
   | { kind: 'enum'; id: string; name: string }
 
 const PRIMITIVES = ['string', 'integer', 'number', 'boolean'] as const
+
+/** Title-case the alphanumeric words of a name for a synthesized enum name
+ * (e.g. `Pet` + `status` → `PetStatus`). */
+function pascalCase(input: string): string {
+  return (input.match(/[A-Za-z0-9]+/g) ?? [])
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('')
+}
 const STRING_FORMATS = ['', 'email', 'uuid', 'date', 'date-time', 'uri', 'hostname', 'ipv4', 'password', 'byte'] as const
 const ON_DELETE: readonly ReferenceOnDelete[] = ['restrict', 'cascade', 'setNull']
 
@@ -617,6 +626,43 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, model, property, 
   const isString = choice.kind === 'primitive' && property.doc.type === 'string'
   const isNumeric = choice.kind === 'primitive' && (property.doc.type === 'integer' || property.doc.type === 'number')
   const isModelRef = property.design?.reference?.target === 'model'
+  // A plain string/number scalar can carry an INLINE enum (anonymous allowed
+  // set) — the same shape the spec importers keep on `doc.enumValues`. A ref
+  // (model/enum), array, map or boolean cannot.
+  const canInlineEnum = choice.kind === 'primitive' && (isString || isNumeric)
+  const inlineEnumValues = property.doc.enumValues ?? []
+
+  const setInlineEnumValues = useCallback((values: unknown[]) => {
+    onUpdate((p) => {
+      const { enumValues: _dropped, ...docRest } = p.doc
+      return { ...p, doc: values.length > 0 ? { ...docRest, enumValues: values } : docRest }
+    })
+  }, [onUpdate])
+
+  // Promote an inline enum to a first-class named entity: reuse an existing
+  // enum with the IDENTICAL value set (dedup) or mint one named after the
+  // model+property, then rewrite the property to reference it and drop the
+  // inline values. Mirrors the enum-reference write in `applyTypeChoice`.
+  const extractToEnum = useCallback(() => {
+    const values = property.doc.enumValues ?? []
+    if (values.length === 0) return
+    const sameValues = (a: unknown[], b: unknown[]): boolean =>
+      a.length === b.length && a.every((v, i) => String(v) === String(b[i]))
+    const existing = design.enums.find((e) => sameValues(e.doc.enumValues ?? [], values))
+    let refId: string
+    if (existing !== undefined) {
+      refId = existing.id
+    } else {
+      refId = generateUniqueId()
+      const seed = `${pascalCase(model.doc.name)}${pascalCase(property.doc.name)}` || 'Enum'
+      const name = uniqueComponentName(design, seed)
+      assignDesignSection(design, 'enums', [...design.enums, { id: refId, doc: { name, properties: [], enumValues: values } }])
+    }
+    onUpdate((p) => {
+      const { enumValues: _e, targetModelRef: _t, ...docRest } = p.doc
+      return { ...p, doc: { ...docRest, type: 'string' }, design: { ...(p.design ?? {}), reference: { target: 'enum', refId } } }
+    })
+  }, [design, model, property, onUpdate])
 
   const patchConstraints = useCallback((patch: Record<string, number | string | undefined>) => {
     onUpdate((p) => {
@@ -766,6 +812,31 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, model, property, 
               data-testid="design-property-format"
             />
           </label>
+        )}
+        {canInlineEnum && (
+          <div className="design-field design-field-full">
+            <span className="design-field-label">{t('design.enum.inlineLabel', 'Enum values')}</span>
+            <div className="design-enum-inline-row">
+              <DesignEnumValuesEditor
+                values={inlineEnumValues}
+                onChange={setInlineEnumValues}
+                parseValue={(raw) => parseTypedValue(property, raw)}
+                data-testid="design-property-enum-values"
+              />
+              {inlineEnumValues.length > 0 && (
+                <HeaderHoverTooltip label={t('design.enum.extract', 'Extract to a named enum')}>
+                  <Button
+                    secondary
+                    small
+                    icon="export"
+                    options={{ ariaLabel: t('design.enum.extract', 'Extract to a named enum') }}
+                    onClick={extractToEnum}
+                    data-testid="design-property-enum-extract"
+                  />
+                </HeaderHoverTooltip>
+              )}
+            </div>
+          </div>
         )}
         {choice.kind === 'array' && (
           <label className="design-field">

@@ -2145,6 +2145,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Wartości enuma",
+      "addValue": "Dodaj wartość…",
+      "removeValue": "Usuń wartość",
+      "extract": "Wyodrębnij do nazwanego enuma"
+    },
     "tags": {
       "add": "Dodaj tag…",
       "remove": "Usuń tag",

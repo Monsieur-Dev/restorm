@@ -1763,3 +1763,15 @@
 .design-tag-chip-remove:hover {
   opacity: 1;
 }
+
+/* Inline enum-values editor + extract button (property / param) */
+.design-enum-inline-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.design-enum-inline-row .design-tags-editor {
+  flex: 1 1 auto;
+  min-width: 0;
+}

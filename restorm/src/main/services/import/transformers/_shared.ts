@@ -285,7 +285,11 @@ function mapParameterToDocumentation(p: CommonParameter): ParameterDocumentation
   if (p.examples !== undefined) entry.examples = p.examples
   if (p.collectionFormat !== undefined) entry.collectionFormat = p.collectionFormat
   if (p.allowEmptyValue !== undefined) entry.allowEmptyValue = p.allowEmptyValue
+  // The enum sits on the schema itself for a scalar param, or on `items` for a
+  // scalar-enum ARRAY param (e.g. petstore `findByStatus` `status`) — surface
+  // it either way so the enum isn't lost on an array-valued query parameter.
   if (p.schema?.enum !== undefined) entry.enumValues = p.schema.enum
+  else if (p.schema?.type === 'array' && Array.isArray(p.schema.items?.enum)) entry.enumValues = p.schema.items.enum
   const constraints = extractSchemaConstraints(p.schema)
   if (constraints !== undefined) entry.constraints = constraints
   return entry

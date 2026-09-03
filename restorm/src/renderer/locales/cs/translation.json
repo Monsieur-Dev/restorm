@@ -2145,6 +2145,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Hodnoty výčtu",
+      "addValue": "Přidat hodnotu…",
+      "removeValue": "Odebrat hodnotu",
+      "extract": "Extrahovat do pojmenovaného výčtu"
+    },
     "tags": {
       "add": "Přidat značku…",
       "remove": "Odebrat značku",

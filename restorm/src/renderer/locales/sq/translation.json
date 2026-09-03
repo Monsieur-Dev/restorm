@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Vlerat enum",
+      "addValue": "Shto një vlerë…",
+      "removeValue": "Hiq vlerën",
+      "extract": "Nxirr në një enum të emërtuar"
+    },
     "tags": {
       "add": "Shto një etiketë…",
       "remove": "Hiq etiketën",

@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "列舉值",
+      "addValue": "新增值…",
+      "removeValue": "移除值",
+      "extract": "擷取為具名列舉"
+    },
     "tags": {
       "add": "新增標籤…",
       "remove": "移除標籤",

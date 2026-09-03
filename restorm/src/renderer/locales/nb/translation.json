@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Enum-verdier",
+      "addValue": "Legg til en verdi…",
+      "removeValue": "Fjern verdi",
+      "extract": "Trekk ut til en navngitt enum"
+    },
     "tags": {
       "add": "Legg til en tagg…",
       "remove": "Fjern tagg",

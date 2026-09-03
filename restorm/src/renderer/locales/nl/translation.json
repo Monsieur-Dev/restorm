@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Enum-waarden",
+      "addValue": "Een waarde toevoegen…",
+      "removeValue": "Waarde verwijderen",
+      "extract": "Extraheren naar een benoemde enum"
+    },
     "tags": {
       "add": "Een tag toevoegen…",
       "remove": "Tag verwijderen",

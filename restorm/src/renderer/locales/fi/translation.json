@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Enum-arvot",
+      "addValue": "Lisää arvo…",
+      "removeValue": "Poista arvo",
+      "extract": "Poimi nimettyyn enumiin"
+    },
     "tags": {
       "add": "Lisää tunniste…",
       "remove": "Poista tunniste",

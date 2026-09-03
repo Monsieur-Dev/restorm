@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Enum értékek",
+      "addValue": "Érték hozzáadása…",
+      "removeValue": "Érték eltávolítása",
+      "extract": "Kiemelés névvel ellátott enumba"
+    },
     "tags": {
       "add": "Címke hozzáadása…",
       "remove": "Címke eltávolítása",

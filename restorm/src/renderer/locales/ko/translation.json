@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "열거형 값",
+      "addValue": "값 추가…",
+      "removeValue": "값 제거",
+      "extract": "명명된 열거형으로 추출"
+    },
     "tags": {
       "add": "태그 추가…",
       "remove": "태그 제거",

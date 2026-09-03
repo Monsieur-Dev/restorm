@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Nilai enum",
+      "addValue": "Tambahkan nilai…",
+      "removeValue": "Hapus nilai",
+      "extract": "Ekstrak ke enum bernama"
+    },
     "tags": {
       "add": "Tambahkan tag…",
       "remove": "Hapus tag",

@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "列挙値",
+      "addValue": "値を追加…",
+      "removeValue": "値を削除",
+      "extract": "名前付き列挙型として抽出"
+    },
     "tags": {
       "add": "タグを追加…",
       "remove": "タグを削除",

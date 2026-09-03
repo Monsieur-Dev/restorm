@@ -2145,6 +2145,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Значення enum",
+      "addValue": "Додати значення…",
+      "removeValue": "Видалити значення",
+      "extract": "Винести в іменований enum"
+    },
     "tags": {
       "add": "Додати тег…",
       "remove": "Видалити тег",

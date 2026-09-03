@@ -8,6 +8,7 @@ import {
 import { openapi31ToApiDocumentation } from '../../src/main/services/import/transformers/openapi31ToApiDocumentation'
 import { designToApiDocumentation } from '../../src/shared/design/apiDesignDoc'
 import { buildReferenceApiDesign } from './apiDesignReference'
+import type { ApiDesign } from '../../src/shared/types/apiDesign'
 
 // A compact Petstore-shaped spec exercising every emitter mapping the
 // importer can read back: $refs, arrays of refs, enum components, xml
@@ -236,6 +237,29 @@ describe('openApiExport', () => {
     const getUser = reimported.operations.find((op) => op.operationId === 'getUser')
     expect(getUser?.match.urlPattern).toBe('/v1/users/{id}')
     expect(getUser?.parameters?.[0]?.name).toBe('id')
+  })
+
+  it('emits a property’s INLINE enum values on its schema and re-imports them', () => {
+    // A plain scalar property carrying an anonymous (inline) enum — what the
+    // property editor now lets you author — projects to `schema.enum` and
+    // survives a re-import, no named enum component involved.
+    const design = {
+      id: 'd',
+      info: { title: 'T', version: '1.0.0' },
+      models: [{
+        id: 'm',
+        doc: { name: 'Pet' },
+        properties: [{ id: 'p', doc: { name: 'status', type: 'string', required: false, enumValues: ['available', 'pending', 'sold'] } }]
+      }],
+      enums: [],
+      routeGroups: []
+    } as unknown as ApiDesign
+    const emitted = apiDocumentationToOpenApi(designToApiDocumentation(design))
+    const status = ((emitted as { components: { schemas: Record<string, { properties: Record<string, Record<string, unknown>> }> } })
+      .components.schemas['Pet']).properties['status']
+    expect(status?.['enum']).toEqual(['available', 'pending', 'sold'])
+    const reimported = openapi3ToApiDocumentation(emitted as unknown as OAS3Spec)
+    expect(reimported.models['Pet']?.properties.find((p) => p.name === 'status')?.enumValues).toEqual(['available', 'pending', 'sold'])
   })
 
   // ── OpenAPI 3.1 target (the downloadable descriptor) ──────────────

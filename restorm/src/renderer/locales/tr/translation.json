@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "enum": {
+      "inlineLabel": "Enum değerleri",
+      "addValue": "Değer ekle…",
+      "removeValue": "Değeri kaldır",
+      "extract": "Adlandırılmış enum'a çıkar"
+    },
     "tags": {
       "add": "Etiket ekle…",
       "remove": "Etiketi kaldır",
