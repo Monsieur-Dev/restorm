@@ -13,8 +13,12 @@ import {
   generateDesignClients,
   findClientRequest,
   parseDesignClientRowId,
-  openDesignClientTab
+  openDesignClientTab,
+  getDesignClientsDeprecatedIds,
+  designClientBreadcrumbSegments,
+  designClientRowId
 } from '../../services/designClientsStore'
+import { designSectionRowId } from '../../../../shared/design/designSections'
 import { designClientsChildren } from '../../services/FolderToListView'
 import { designDescriptors } from '../../services/designDescriptors'
 import { DesignDescriptorAccordions } from './DesignDescriptorAccordions'
@@ -80,7 +84,10 @@ export const DesignClientsSection: React.FC<{ design: ApiDesign; scopeId?: strin
         (mode === 'server' && isKnownHttpMethod(protocol))
           ? <RegistryBadge badgeId={httpBadgeIdFor(protocol)} text={label ?? protocol} server />
           : <Badge type={mapToBadgeType(protocol)} label={label} mode={mode} />,
-      renderRequestBadge: (request: Request) => <RegistryBadge badgeId={requestBadgeId(request)} />
+      renderRequestBadge: (request: Request) => <RegistryBadge badgeId={requestBadgeId(request)} />,
+      // Dim deprecated client rows in the central tree too (same set + wrapper
+      // as the sidebar), so a deprecated route reads as dimmed everywhere.
+      deprecatedRequestIds: getDesignClientsDeprecatedIds()
     })
     // Force the default-open state and append each leaf's description in grey.
     const decorate = (items: ListViewItemData[]): ListViewItemData[] =>
@@ -138,11 +145,19 @@ export const DesignClientsSection: React.FC<{ design: ApiDesign; scopeId?: strin
     if (parsed === null) return
     const req = findClientRequest(parsed.designId, parsed.itemId)
     if (req === undefined) return // a folder row — the ListView toggles it instead
-    openDesignClientTab(req, [
+    // Breadcrumb mirrors the sidebar: Design / Clients / <protocol> / <folder…>
+    // (the route itself is the tab title, so it is not repeated as a crumb).
+    const crumbs: { id: string; label: string }[] = [
       { id: `design-client-root:${design.id}`, label: design.name },
-      { id: rowId, label: (req as { name: string }).name }
-    ], rowId)
-  }, [design.id, design.name])
+      { id: designSectionRowId(design.id, 'clients'), label: t('design.section.clients', 'Clients') }
+    ]
+    const segs = designClientBreadcrumbSegments(rowId)
+    if (segs !== null) {
+      crumbs.push({ id: designClientRowId(design.id, `proto:${segs.protocol}`), label: t(`design.protocol.${segs.protocol}`) })
+      for (const folder of segs.folders) crumbs.push({ id: designClientRowId(design.id, folder.id), label: folder.name })
+    }
+    openDesignClientTab(req, crumbs, rowId)
+  }, [design.id, design.name, t])
 
   const onToggle = useCallback((rowId: string, expanded: boolean) => {
     setCollapsedIds((prev) => {

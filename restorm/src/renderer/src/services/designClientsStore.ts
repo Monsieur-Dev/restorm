@@ -168,6 +168,34 @@ export function designClientRowAncestorIds(rowId: string): string[] {
   return ids
 }
 
+/** The protocol + intermediate folder names on the path down to a client leaf —
+ *  lets a client tab's breadcrumb mirror the sidebar (Design / Clients /
+ *  <protocol> / <folder…>) instead of stopping at the design name. */
+export function designClientBreadcrumbSegments(
+  rowId: string
+): { protocol: DesignProtocol; folders: { id: string; name: string }[] } | null {
+  const parsed = parseDesignClientRowId(rowId)
+  if (parsed === null) return null
+  const { designId, itemId } = parsed
+  const findPath = (items: FolderItem[], acc: { id: string; name: string }[]): { id: string; name: string }[] | null => {
+    for (const item of items) {
+      const children = (item as { items?: FolderItem[] }).items
+      if (Array.isArray(children)) {
+        const hit = findPath(children, [...acc, { id: item.id, name: (item as { name?: string }).name ?? '' }])
+        if (hit !== null) return hit
+      } else if (item.id === itemId) {
+        return acc
+      }
+    }
+    return null
+  }
+  for (const bundle of getDesignClients(designId)) {
+    const folders = findPath(bundle.items, [])
+    if (folders !== null) return { protocol: bundle.protocol, folders }
+  }
+  return null
+}
+
 /** Drop a design's generated clients (server stopped / a fresh regenerate),
  *  closing any tabs they opened. */
 export function clearDesignClients(designId: string): void {
