@@ -5,7 +5,8 @@ import {
   designNameResolver,
   designToApiDocumentation,
   ensureLeadingSlash,
-  groupChainBasePath
+  groupChainBasePath,
+  unionTags
 } from '../../src/shared/design/apiDesignDoc'
 import type { ApiDocumentation } from '../../src/shared/types/apiDocumentation'
 import type { ApiDesign, DesignRouteGroup } from '../../src/shared/types/apiDesign'
@@ -234,5 +235,46 @@ describe('designToApiDocumentation', () => {
       expect(idParam?.type).toBe('string')
       expect(idParam?.format).toBe('uuid')
     })
+  })
+})
+
+describe('tags — group + route union', () => {
+  it('unionTags dedups, keeps group tags first and drops blanks', () => {
+    expect(unionTags(['a', 'b'], ['b', 'c'])).toEqual(['a', 'b', 'c'])
+    expect(unionTags(['x'], undefined)).toEqual(['x'])
+    expect(unionTags(undefined, ['y'])).toEqual(['y'])
+    expect(unionTags([' a ', ''], ['a', '  '])).toEqual(['a'])
+    expect(unionTags(undefined, undefined)).toEqual([])
+  })
+
+  it('projects the union of group and route tags onto each operation', () => {
+    const design = {
+      id: 'd',
+      info: { title: 'D' },
+      models: [],
+      enums: [],
+      routeGroups: [{
+        id: 'g',
+        doc: { name: 'Pets', tags: ['pets', 'v1'] },
+        routes: [
+          { id: 'r1', doc: { match: { urlPattern: '/', method: 'GET' }, tags: ['pets', 'list'] } },
+          { id: 'r2', doc: { match: { urlPattern: '/{{id}}', method: 'GET' } } }
+        ]
+      }]
+    } as unknown as ApiDesign
+
+    const doc = designToApiDocumentation(design)
+    // r1: group ∪ route, deduped, group-first.
+    expect(doc.operations[0]?.tags).toEqual(['pets', 'v1', 'list'])
+    // r2: only the group's shared tags (no own tags).
+    expect(doc.operations[1]?.tags).toEqual(['pets', 'v1'])
+  })
+
+  it('leaves an operation untagged when neither group nor route declares tags', () => {
+    const design = {
+      id: 'd', info: { title: 'D' }, models: [], enums: [],
+      routeGroups: [{ id: 'g', doc: { name: 'Pets' }, routes: [{ id: 'r', doc: { match: { urlPattern: '/', method: 'GET' } } }] }]
+    } as unknown as ApiDesign
+    expect(designToApiDocumentation(design).operations[0]?.tags).toBeUndefined()
   })
 })

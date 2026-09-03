@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Címke hozzáadása…",
+      "remove": "Címke eltávolítása",
+      "routeLabel": "Címkék",
+      "groupLabel": "Közös címkék"
+    },
     "section": {
       "settings": "Beállítások",
       "models": "Modellek",

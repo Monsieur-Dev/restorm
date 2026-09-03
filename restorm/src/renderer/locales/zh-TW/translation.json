@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "新增標籤…",
+      "remove": "移除標籤",
+      "routeLabel": "標籤",
+      "groupLabel": "共用標籤"
+    },
     "section": {
       "settings": "設定",
       "models": "模型",

@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Adicionar uma tag…",
+      "remove": "Remover tag",
+      "routeLabel": "Tags",
+      "groupLabel": "Tags compartilhadas"
+    },
     "section": {
       "settings": "Configurações",
       "models": "Modelos",

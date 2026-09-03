@@ -2145,6 +2145,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Ajouter un tag…",
+      "remove": "Supprimer le tag",
+      "routeLabel": "Tags",
+      "groupLabel": "Tags partagés"
+    },
     "section": {
       "settings": "Paramètres",
       "models": "Modèles",

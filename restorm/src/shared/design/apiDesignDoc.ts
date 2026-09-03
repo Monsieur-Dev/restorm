@@ -228,6 +228,20 @@ export function composeRoutePath(
  * (`DesignDocumentationSection`), and a unit test pins it. Don't
  * reorder, filter or clone here without updating that consumer.
  */
+/** The deduplicated union of a group's shared tags and a route's own tags,
+ * group tags first (so a shared tag reads as the primary one). Trims blanks. */
+export function unionTags(groupTags: string[] | undefined, routeTags: string[] | undefined): string[] {
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const tag of [...(groupTags ?? []), ...(routeTags ?? [])]) {
+    const trimmed = tag.trim()
+    if (trimmed === '' || seen.has(trimmed)) continue
+    seen.add(trimmed)
+    out.push(trimmed)
+  }
+  return out
+}
+
 export function designToApiDocumentation(design: ApiDesign): ApiDocumentation {
   const resolve = designNameResolver(design)
   const models: Record<string, ModelDocumentation> = {}
@@ -242,6 +256,12 @@ export function designToApiDocumentation(design: ApiDesign): ApiDocumentation {
   for (const group of design.routeGroups) {
     groups[group.doc.name] = group.doc
     for (const route of group.routes) {
+      const projected = designRouteDoc(route, { groupBasePath: groupChainBasePath(design, group) }, design)
+      // A route's effective tags are the UNION of its group's shared tags and
+      // its own — deduplicated, group tags first so a shared tag reads as the
+      // primary. Absent on both sides leaves the operation untagged (the OAS
+      // export then falls back to the group name as the sole tag).
+      const merged = unionTags(group.doc.tags, route.doc.tags)
       operations.push({
         // The design's base path is NOT composed into operation paths:
         // it belongs to the base URL and travels in `server.basePath`
@@ -250,8 +270,9 @@ export function designToApiDocumentation(design: ApiDesign): ApiDocumentation {
         // is different: `compileDesignRoutes` binds full paths.
         // The group base path folds the whole ancestor chain (version+base per
         // group), so a nested group composes under its parents.
-        ...designRouteDoc(route, { groupBasePath: groupChainBasePath(design, group) }, design),
-        group: group.doc.name
+        ...projected,
+        group: group.doc.name,
+        ...(merged.length > 0 ? { tags: merged } : {})
       })
     }
   }

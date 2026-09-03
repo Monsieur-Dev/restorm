@@ -35,6 +35,7 @@ import { RouteResponsesTab } from './RouteResponsesTab'
 import { RouteSettingsTab } from './RouteSettingsTab'
 import { DesignRouteCodegenTab } from './DesignRouteCodegenTab'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { DesignTagsEditor } from './DesignTagsEditor'
 
 const AUTH_KINDS: readonly DesignAuthKind[] = ['none', 'bearer', 'apiKeyHeader', 'basic']
 
@@ -524,6 +525,17 @@ const GroupCard: React.FC<{
             }}
             options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.schema.fields.description', 'Description') }}
             data-testid="design-group-description"
+          />
+        </label>
+        <label className="design-field design-field-full">
+          <span className="design-field-label">{t('design.tags.groupLabel', 'Shared tags')}</span>
+          <DesignTagsEditor
+            tags={group.doc.tags ?? []}
+            onChange={(tags) => {
+              const { tags: _dropped, ...docRest } = group.doc
+              replaceGroup(design, group.id, { ...group, doc: tags.length > 0 ? { ...docRest, tags } : docRest })
+            }}
+            data-testid="design-group-tags"
           />
         </label>
       </div>

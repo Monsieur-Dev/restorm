@@ -30,6 +30,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useDesignEnvVariables } from '../../hooks/useDesignEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { DesignTagsEditor } from './DesignTagsEditor'
 
 /** Rebuild a route with the given param links, omitting empty bags —
  * `design: { paramLinks: {} }` must never reach the file. */
@@ -426,6 +427,17 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
             }}
             options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.schema.fields.description', 'Description') }}
             data-testid="design-route-description"
+          />
+        </label>
+        <label className="design-field design-field-full">
+          <span className="design-field-label">{t('design.tags.routeLabel', 'Tags')}</span>
+          <DesignTagsEditor
+            tags={route.doc.tags ?? []}
+            onChange={(tags) => {
+              const { tags: _dropped, ...docRest } = route.doc
+              commit({ ...route, doc: tags.length > 0 ? { ...docRest, tags } : docRest })
+            }}
+            data-testid="design-route-tags"
           />
         </label>
       </div>

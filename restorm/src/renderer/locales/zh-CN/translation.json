@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "添加标签…",
+      "remove": "移除标签",
+      "routeLabel": "标签",
+      "groupLabel": "共享标签"
+    },
     "section": {
       "settings": "设置",
       "models": "模型",

@@ -172,6 +172,11 @@ export interface GroupDocumentation {
   name: string
   description?: string
   externalDocs?: ExternalDocs
+  /** Tags shared by every route in the group. A route's effective tags are the
+   * union of these and its own `OperationDocumentation.tags` — a design projects
+   * that union onto each operation (OpenAPI `tags`). Distinct from the group
+   * NAME, which is always projected as a tag on its own. */
+  tags?: string[]
 }
 
 /**

@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Lägg till en tagg…",
+      "remove": "Ta bort tagg",
+      "routeLabel": "Taggar",
+      "groupLabel": "Delade taggar"
+    },
     "section": {
       "settings": "Inställningar",
       "models": "Modeller",

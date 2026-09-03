@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Tilføj et tag…",
+      "remove": "Fjern tag",
+      "routeLabel": "Tags",
+      "groupLabel": "Delte tags"
+    },
     "section": {
       "settings": "Indstillinger",
       "models": "Modeller",

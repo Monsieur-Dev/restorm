@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Añadir una etiqueta…",
+      "remove": "Eliminar etiqueta",
+      "routeLabel": "Etiquetas",
+      "groupLabel": "Etiquetas compartidas"
+    },
     "section": {
       "settings": "Ajustes",
       "models": "Modelos",

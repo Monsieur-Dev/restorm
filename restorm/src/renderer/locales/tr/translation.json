@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Etiket ekle…",
+      "remove": "Etiketi kaldır",
+      "routeLabel": "Etiketler",
+      "groupLabel": "Paylaşılan etiketler"
+    },
     "section": {
       "settings": "Ayarlar",
       "models": "Modeller",

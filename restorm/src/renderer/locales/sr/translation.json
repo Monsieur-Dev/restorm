@@ -2144,6 +2144,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Dodaj oznaku…",
+      "remove": "Ukloni oznaku",
+      "routeLabel": "Oznake",
+      "groupLabel": "Zajedničke oznake"
+    },
     "section": {
       "settings": "Podešavanja",
       "models": "Modeli",

@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Lisää tunniste…",
+      "remove": "Poista tunniste",
+      "routeLabel": "Tunnisteet",
+      "groupLabel": "Jaetut tunnisteet"
+    },
     "section": {
       "settings": "Asetukset",
       "models": "Mallit",

@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Thêm thẻ…",
+      "remove": "Xóa thẻ",
+      "routeLabel": "Thẻ",
+      "groupLabel": "Thẻ dùng chung"
+    },
     "section": {
       "settings": "Cài đặt",
       "models": "Mô hình",

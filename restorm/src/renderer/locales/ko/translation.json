@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "태그 추가…",
+      "remove": "태그 제거",
+      "routeLabel": "태그",
+      "groupLabel": "공유 태그"
+    },
     "section": {
       "settings": "설정",
       "models": "모델",

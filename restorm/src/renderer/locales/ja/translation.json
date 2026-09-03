@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "タグを追加…",
+      "remove": "タグを削除",
+      "routeLabel": "タグ",
+      "groupLabel": "共有タグ"
+    },
     "section": {
       "settings": "設定",
       "models": "モデル",

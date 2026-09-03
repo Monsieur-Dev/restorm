@@ -2145,6 +2145,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Додати тег…",
+      "remove": "Видалити тег",
+      "routeLabel": "Теги",
+      "groupLabel": "Спільні теги"
+    },
     "section": {
       "settings": "Налаштування",
       "models": "Моделі",

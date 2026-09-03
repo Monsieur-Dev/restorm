@@ -2144,6 +2144,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Adaugă o etichetă…",
+      "remove": "Elimină eticheta",
+      "routeLabel": "Etichete",
+      "groupLabel": "Etichete comune"
+    },
     "section": {
       "settings": "Setări",
       "models": "Modele",

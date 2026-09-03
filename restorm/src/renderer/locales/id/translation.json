@@ -2142,6 +2142,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Tambahkan tag…",
+      "remove": "Hapus tag",
+      "routeLabel": "Tag",
+      "groupLabel": "Tag bersama"
+    },
     "section": {
       "settings": "Pengaturan",
       "models": "Model",

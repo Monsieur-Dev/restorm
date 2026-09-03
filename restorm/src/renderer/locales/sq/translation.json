@@ -2143,6 +2143,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Shto një etiketë…",
+      "remove": "Hiq etiketën",
+      "routeLabel": "Etiketat",
+      "groupLabel": "Etiketat e përbashkëta"
+    },
     "section": {
       "settings": "Cilësimet",
       "models": "Modelet",

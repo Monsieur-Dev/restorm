@@ -2145,6 +2145,12 @@
     }
   },
   "design": {
+    "tags": {
+      "add": "Přidat značku…",
+      "remove": "Odebrat značku",
+      "routeLabel": "Značky",
+      "groupLabel": "Sdílené značky"
+    },
     "section": {
       "settings": "Nastavení",
       "models": "Modely",
