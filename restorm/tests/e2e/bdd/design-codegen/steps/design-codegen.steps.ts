@@ -205,8 +205,12 @@ Then('the generate button is disabled with the validation explanation', async ()
   await expect(p.locator('[data-testid="design-code-blocked"]')).toBeVisible()
 })
 
-Then('the generate control is plan-gated', async () => {
+Then('no plan gate blocks the code generation', async () => {
   const p = requirePage()
-  await expect(p.locator('[data-testid^="design-code-gate-"]')).toBeVisible()
-  await expect(p.locator('[data-testid^="design-code-generate-"]')).toBeDisabled()
+  // Generation is free on every plan (Community included): NO plan-gate overlay
+  // is rendered on the Code section, and the round generate disc is present (it
+  // enables once an output dir is chosen — the steps that follow prove it
+  // actually generates with no plan).
+  await expect(p.locator('[data-testid^="design-code-gate-"]')).toHaveCount(0)
+  await expect(p.locator('[data-testid^="design-code-generate-"]').first()).toBeVisible()
 })

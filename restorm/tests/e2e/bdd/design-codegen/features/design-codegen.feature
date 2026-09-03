@@ -3,7 +3,8 @@ Feature: Design code generation
   Copier-format template run: source picked (local folder here — zero
   network), output folder chosen through the system dialog, generation
   previewed, and written to disk only after confirmation. An invalid
-  design cannot generate; Community sees the gate.
+  design cannot generate; generation is free on every plan (serving the
+  design as a mock is what stays Pro, not generating code from it).
 
   Scenario: A local template generates, previews and extracts
     Given restorm is launched with MCP for codegen work
@@ -43,9 +44,12 @@ Feature: Design code generation
     And the local fixture template is added
     Then the generate button is disabled with the validation explanation
 
-  Scenario: Community sees the generation gate
+  Scenario: Community generates freely — no plan gate
     Given restorm is launched with MCP for codegen work without a plan
     When the agent authors a valid "Community API" design
     And the design tab is opened on the code section
     And the local fixture template is added
-    Then the generate control is plan-gated
+    Then no plan gate blocks the code generation
+    When the output folder is picked through the system dialog
+    And the generation is launched
+    Then the preview lists the generated files

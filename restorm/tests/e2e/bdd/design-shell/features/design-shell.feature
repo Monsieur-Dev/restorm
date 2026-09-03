@@ -3,8 +3,9 @@ Feature: The Design tab shell
   GROUP entries only (one per section, never one row per model); opening
   a group refocuses the same tab on that section, the internal icon rail
   switches sections, the smartbar star favourites the design, and its
-  virtual sub-entries never drag. Editing is free on every plan — the
-  plan gates RUNNING the design (serve, codegen), not designing it.
+  virtual sub-entries never drag. Editing AND generating code are free on
+  every plan — the plan gates SERVING the design as a mock, not designing
+  it or generating from it.
 
   Scenario: One tab per design, refocused on the section a group entry names
     Given a Pro project carrying an API design is open
