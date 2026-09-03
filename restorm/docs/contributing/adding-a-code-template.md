@@ -8,9 +8,20 @@ contract for template authors — official and community.
 
 | Source | How | Typical use |
 |---|---|---|
-| Official registry | embedded in the app (`OFFICIAL_TEMPLATES` in `src/main/services/designCodegen/templateSource.ts`) | the supported stacks |
-| Repository | `owner/repo` on github — fetched as a **tarball archive** through the firewall-bypassed provisioning path (never a git clone) | your fork of an official template |
+| Official templates | curated **in the cloud** and fetched by the app's code-generation library — the official set, visible to every signed-in user | the supported stacks |
+| Organization templates | your organization's own, private to its members (**Enterprise**) | internal stacks shared across your org |
+| Repository | `owner/repo` or a git URL — fetched as a **tarball archive** through the firewall-bypassed provisioning path (never a git clone) | any public template repo |
 | Local folder | any folder on disk | developing a template (zero network) |
+
+Official and organization templates are just **pointers to a git repository**;
+when you *Use* one from the library, the design stores it as a plain `repo`
+source (there is no in-code registry any more). The **official** set is curated
+in the cloud repo — edit [`cloud/scripts/official-templates.sql`](../../../cloud/scripts/official-templates.sql)
+and apply it to the target Supabase database (seed `dev` during development;
+apply to prod at ship time). An **organization's** own templates are managed by
+an admin (or a member granted `can_manage_templates`) in the admin dashboard's
+*Templates* card or the library's *Templates &lt;org&gt;* tab — both go through
+the `templates` Edge Function.
 
 Every template must carry a **`restorm-template.json`** manifest at its
 root:
@@ -130,13 +141,15 @@ Both real Copier and the sandbox pass the context as **plain dicts**, so:
 - [`Monsieur-Dev/restorm-template-server-grpc-dotnet`](https://github.com/Monsieur-Dev/restorm-template-server-grpc-dotnet) — gRPC, C# / .NET
 - [`Monsieur-Dev/restorm-template-db-postgres`](https://github.com/Monsieur-Dev/restorm-template-db-postgres) — SQL schema, PostgreSQL
 
-Each carries: `copier.yml` + `template/`, the manifest, a `reference/`
-answers file built from the petstore reference design, the context
-schema copy, an MIT license, and a CI that **generates with real Copier,
-builds the result, boots it and smoke-tests a served route** — a broken
-official template cannot ship. Fork one of these to start yours; wave-2
-stacks (Spring Boot, MongoDB, Axum, SQL Server, FastAPI) follow the same
-recipe.
+These are the rows seeded as **official** (owner: none / cloud-curated) by
+`cloud/scripts/official-templates.sql`. Each carries: `copier.yml` +
+`template/`, the manifest, a `reference/` answers file built from the petstore
+reference design, the context schema copy, an MIT license, and a CI that
+**generates with real Copier, builds the result, boots it and smoke-tests a
+served route** — a broken official template cannot ship. Fork one of these to
+start yours; wave-2 stacks (Spring Boot, MongoDB, Axum, SQL Server, FastAPI)
+follow the same recipe. To add or retire an official template, edit that SQL
+script and re-apply it — do not re-introduce an in-code list.
 
 ## Safety model (what the app guarantees)
 
