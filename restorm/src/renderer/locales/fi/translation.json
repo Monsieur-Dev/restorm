@@ -2168,7 +2168,9 @@
         "startFailed": "Palvelinta ei voitu käynnistää",
         "protocolAlways": "HTTP tarjoillaan aina",
         "protocolToggle": "Tarjoile myös tämä projektio",
-        "stateful": "Tilallinen tila — POST/PUT/DELETE muokkaavat muistivarastoa (nollautuu uudelleenkäynnistyksessä)"
+        "stateful": "Tilallinen tila — POST/PUT/DELETE muokkaavat muistivarastoa (nollautuu uudelleenkäynnistyksessä)",
+        "clientsCallout": "Mock-palvelimesi on käynnissä. Jokaiselle protokollalle, jota tämä suunnitelma palvelee, luotiin valmiit ajettavat asiakkaat.",
+        "clientsCalloutLink": "Löydät ne täältä"
       },
       "identity": {
         "title": "Identiteetti",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Tiedostot kirjoitettu",
       "openOutput": "Avaa tuloskansio",
+      "refresh": "Päivitä tämä malli sen lähteestä",
       "removeConfirm": "Template ”{{name}}” poistetaan tästä suunnitelmasta (levylle jo luodut tiedostot jäävät koskematta).",
       "removeTitle": "Poistetaanko tämä Template?",
       "tabs": {

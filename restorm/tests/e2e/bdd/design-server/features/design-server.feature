@@ -62,3 +62,8 @@ Feature: Design server
     And the design port is already occupied
     When I try to spin the design server
     Then a design server error mentions the failed start
+
+  Scenario: Serving surfaces the clients callout linking to the Clients section
+    Given a Pro project carrying a servable API design is open on its settings
+    When I spin the design server
+    Then the clients callout links to the Clients section

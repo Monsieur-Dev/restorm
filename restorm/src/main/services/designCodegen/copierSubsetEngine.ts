@@ -47,7 +47,7 @@ sys.modules['js'] = None
 sys.modules['pyodide_js'] = None
 
 import yaml
-from jinja2 import StrictUndefined
+from jinja2 import DictLoader, StrictUndefined
 from jinja2.sandbox import SandboxedEnvironment
 
 TEMPLATE_ROOT = "/restorm-template"
@@ -138,12 +138,32 @@ def generate(input_data):
         fail("_exclude must be a list of globs")
 
     answers = collect_answers(config, provided, ctx)
+    # Partials: a template may split into include / import files. Jinja resolves
+    # those through a LOADER; real Copier serves them from
+    # the template root, so mirror that with a DictLoader over the template's
+    # OWN text files, keyed by their path RELATIVE TO THE TEMPLATE ROOT — an
+    # include reads 'partials/x.jinja' exactly as it does under real Copier.
+    # Only the template's own files are exposed; no host filesystem is reachable.
+    partials = {}
+    for _dirpath, _dirnames, _filenames in os.walk(TEMPLATE_ROOT):
+        for _filename in _filenames:
+            _full = posixpath.join(_dirpath, _filename)
+            _rel = posixpath.relpath(_full, TEMPLATE_ROOT)
+            try:
+                with open(_full, "r", encoding="utf-8") as _fh:
+                    partials[_rel] = _fh.read()
+            except (UnicodeDecodeError, OSError):
+                pass  # binary / unreadable files are not Jinja templates
     # SANDBOXED environment (CC1): attribute traversal from a template
     # expression is refused — real Copier sandboxes too. Whitespace
     # settings mirror what real Copier's CI output showed EMPIRICALLY
     # (no trim_blocks/lstrip_blocks), so both engines render the same
     # bytes and the official repos' goldens hold for both.
-    env = SandboxedEnvironment(undefined=StrictUndefined, keep_trailing_newline=True)
+    env = SandboxedEnvironment(
+        undefined=StrictUndefined,
+        keep_trailing_newline=True,
+        loader=DictLoader(partials),
+    )
 
     def render_text(text, what):
         try:

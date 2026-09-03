@@ -2171,7 +2171,9 @@
         "startFailed": "The server could not start",
         "protocolAlways": "HTTP is always served",
         "protocolToggle": "Serve this projection too",
-        "stateful": "Stateful mode — POST/PUT/DELETE mutate an in-memory store (reset on restart)"
+        "stateful": "Stateful mode — POST/PUT/DELETE mutate an in-memory store (reset on restart)",
+        "clientsCallout": "Your mock server is running. Ready-to-run clients were generated for every protocol this design serves.",
+        "clientsCalloutLink": "Find them here"
       },
       "identity": {
         "title": "Identity",
@@ -2306,6 +2308,7 @@
         "done": "Done"
       },
       "openOutput": "Open the output folder",
+      "refresh": "Refresh this template from its source",
       "extractedTitle": "Files written",
       "removeTitle": "Remove this template?",
       "removeConfirm": "The template “{{name}}” will be removed from this design (generated files on disk are left untouched).",

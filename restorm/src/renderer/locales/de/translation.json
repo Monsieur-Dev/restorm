@@ -2168,7 +2168,9 @@
         "startFailed": "Der Server konnte nicht gestartet werden",
         "protocolAlways": "HTTP wird immer bereitgestellt",
         "protocolToggle": "Diese Projektion ebenfalls bereitstellen",
-        "stateful": "Stateful-Modus — POST/PUT/DELETE verändern einen In-Memory-Speicher (Reset beim Neustart)"
+        "stateful": "Stateful-Modus — POST/PUT/DELETE verändern einen In-Memory-Speicher (Reset beim Neustart)",
+        "clientsCallout": "Ihr Mock-Server läuft. Für jedes Protokoll, das dieses Design bedient, wurden einsatzbereite Clients generiert.",
+        "clientsCalloutLink": "Hier finden Sie sie"
       },
       "identity": {
         "title": "Identität",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Dateien geschrieben",
       "openOutput": "Ausgabeordner öffnen",
+      "refresh": "Dieses Template aus seiner Quelle aktualisieren",
       "removeConfirm": "Das Template „{{name}}“ wird aus diesem Design entfernt (bereits generierte Dateien auf der Festplatte bleiben unberührt).",
       "removeTitle": "Dieses Template entfernen?",
       "tabs": {

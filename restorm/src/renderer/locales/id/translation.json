@@ -2167,7 +2167,9 @@
         "startFailed": "Server tidak dapat dimulai",
         "protocolAlways": "HTTP selalu disajikan",
         "protocolToggle": "Sajikan juga proyeksi ini",
-        "stateful": "Mode stateful — POST/PUT/DELETE mengubah penyimpanan dalam memori (reset saat mulai ulang)"
+        "stateful": "Mode stateful — POST/PUT/DELETE mengubah penyimpanan dalam memori (reset saat mulai ulang)",
+        "clientsCallout": "Mock server Anda sedang berjalan. Klien siap pakai telah dibuat untuk setiap protokol yang dilayani desain ini.",
+        "clientsCalloutLink": "Temukan di sini"
       },
       "identity": {
         "title": "Identitas",
@@ -2303,6 +2305,7 @@
       },
       "extractedTitle": "File ditulis",
       "openOutput": "Buka folder keluaran",
+      "refresh": "Segarkan templat ini dari sumbernya",
       "removeConfirm": "Template “{{name}}” akan dihapus dari desain ini (file yang sudah dihasilkan di disk tidak diubah).",
       "removeTitle": "Hapus Template ini?",
       "tabs": {

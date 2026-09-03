@@ -2168,7 +2168,9 @@
         "startFailed": "Serveri nuk mundi të nisej",
         "protocolAlways": "HTTP shërbehet gjithmonë",
         "protocolToggle": "Shërbeje edhe këtë projeksion",
-        "stateful": "Modaliteti stateful — POST/PUT/DELETE ndryshojnë një depo në memorie (rivendoset në rinisje)"
+        "stateful": "Modaliteti stateful — POST/PUT/DELETE ndryshojnë një depo në memorie (rivendoset në rinisje)",
+        "clientsCallout": "Serveri juaj mock po funksionon. U gjeneruan klientë gati për t'u ekzekutuar për çdo protokoll që shërben ky dizajn.",
+        "clientsCalloutLink": "Gjejini këtu"
       },
       "identity": {
         "title": "Identiteti",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Skedarët u shkruan",
       "openOutput": "Hap dosjen e daljes",
+      "refresh": "Rifresko këtë shabllon nga burimi i tij",
       "removeConfirm": "Template «{{name}}» do të hiqet nga ky dizajn (skedarët tashmë të gjeneruar në disk mbeten të paprekur).",
       "removeTitle": "Të hiqet ky Template?",
       "tabs": {

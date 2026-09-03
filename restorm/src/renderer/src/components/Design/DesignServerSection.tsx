@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Button,
+  Callout,
   GatedControl,
   InputBox,
   ScrollableElement,
@@ -14,6 +16,7 @@ import { resolveUrlAgainstEnv } from '../../../../shared/utils/resolveUrlAgainst
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { applyServingSnapshot, useIsDesignServerListening } from '../../services/designServerStore'
 import { generateDesignClients, clearDesignClients, getDesignClients } from '../../services/designClientsStore'
+import { setPendingDesignSection } from '../../services/designSectionIntent'
 import { useDesignEnvVariables } from '../../hooks/useDesignEnvVariables'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import { assignDesignSection } from './designMutations'
@@ -180,6 +183,26 @@ export const DesignServerSection: React.FC<{
             </HeaderHoverTooltip>
           </GatedControl>
         </div>
+
+        {serving && (
+          <Callout
+            variant="info"
+            className="design-serve-clients-callout"
+            data-testid="design-serve-clients-callout"
+            message={t(
+              'design.settings.serve.clientsCallout',
+              'Your mock server is running. Ready-to-run clients were generated for every protocol this design serves.'
+            )}
+            actions={
+              <Button
+                data-testid="design-serve-clients-link"
+                onClick={() => { setPendingDesignSection(design.id, 'clients') }}
+              >
+                {t('design.settings.serve.clientsCalloutLink', 'Find them here')}
+              </Button>
+            }
+          />
+        )}
 
         <div className="design-settings-grid design-serve-fields">
           <label className="design-field">

@@ -2168,7 +2168,9 @@
         "startFailed": "De server kon niet starten",
         "protocolAlways": "HTTP wordt altijd geserveerd",
         "protocolToggle": "Deze projectie ook serveren",
-        "stateful": "Stateful-modus — POST/PUT/DELETE wijzigen een in-memory opslag (reset bij herstart)"
+        "stateful": "Stateful-modus — POST/PUT/DELETE wijzigen een in-memory opslag (reset bij herstart)",
+        "clientsCallout": "Uw mockserver draait. Er zijn klaar-voor-gebruik clients gegenereerd voor elk protocol dat dit ontwerp bedient.",
+        "clientsCalloutLink": "Vind ze hier"
       },
       "identity": {
         "title": "Identiteit",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Bestanden geschreven",
       "openOutput": "Uitvoermap openen",
+      "refresh": "Deze template vernieuwen vanaf de bron",
       "removeConfirm": "De Template “{{name}}” wordt uit dit ontwerp verwijderd (reeds gegenereerde bestanden op schijf blijven ongewijzigd).",
       "removeTitle": "Deze Template verwijderen?",
       "tabs": {

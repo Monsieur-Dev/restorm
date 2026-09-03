@@ -2168,7 +2168,9 @@
         "startFailed": "Sunucu başlatılamadı",
         "protocolAlways": "HTTP her zaman sunulur",
         "protocolToggle": "Bu projeksiyonu da sun",
-        "stateful": "Durumlu mod — POST/PUT/DELETE bir bellek deposunu değiştirir (yeniden başlatmada sıfırlanır)"
+        "stateful": "Durumlu mod — POST/PUT/DELETE bir bellek deposunu değiştirir (yeniden başlatmada sıfırlanır)",
+        "clientsCallout": "Mock sunucunuz çalışıyor. Bu tasarımın hizmet verdiği her protokol için çalıştırmaya hazır istemciler oluşturuldu.",
+        "clientsCalloutLink": "Onları burada bulabilirsiniz"
       },
       "identity": {
         "title": "Kimlik",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Dosyalar yazıldı",
       "openOutput": "Çıktı klasörünü aç",
+      "refresh": "Bu şablonu kaynağından yenile",
       "removeConfirm": "“{{name}}” Template’i bu tasarımdan kaldırılacak (diskte önceden oluşturulan dosyalara dokunulmaz).",
       "removeTitle": "Bu Template kaldırılsın mı?",
       "tabs": {

@@ -331,6 +331,18 @@ class DesignCodegenService {
     this.pending.delete(designId)
   }
 
+  /** Drop the cached metadata for ONE source so the next read re-acquires it
+   * fresh — the "refresh from source" action: a template edited locally (a new
+   * question, a changed variable) or advanced on its git remote is picked up
+   * without restarting the app. Local reads re-read the file; remote reads
+   * re-fetch copier.yml; generation re-downloads the tarball regardless. */
+  invalidateSource(source: TemplateSourceRef): void {
+    const key = sourceCacheKey(source)
+    this.variablesCache.delete(key)
+    this.questionsCache.delete(key)
+    this.usedVarsCache.delete(key)
+  }
+
   /** Drop EVERY pending run — project close / app teardown (the trees
    * carry whole file contents; they must not outlive their project). */
   clear(): void {

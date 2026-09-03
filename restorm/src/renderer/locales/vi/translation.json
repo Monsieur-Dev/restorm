@@ -2167,7 +2167,9 @@
         "startFailed": "Không thể khởi động máy chủ",
         "protocolAlways": "HTTP luôn được phục vụ",
         "protocolToggle": "Phục vụ cả phép chiếu này",
-        "stateful": "Chế độ stateful — POST/PUT/DELETE thay đổi kho lưu trong bộ nhớ (đặt lại khi khởi động lại)"
+        "stateful": "Chế độ stateful — POST/PUT/DELETE thay đổi kho lưu trong bộ nhớ (đặt lại khi khởi động lại)",
+        "clientsCallout": "Máy chủ mock của bạn đang chạy. Các client sẵn sàng chạy đã được tạo cho mọi giao thức mà thiết kế này phục vụ.",
+        "clientsCalloutLink": "Tìm chúng tại đây"
       },
       "identity": {
         "title": "Danh tính",
@@ -2303,6 +2305,7 @@
       },
       "extractedTitle": "Đã ghi tệp",
       "openOutput": "Mở thư mục đầu ra",
+      "refresh": "Làm mới mẫu này từ nguồn của nó",
       "removeConfirm": "Template “{{name}}” sẽ bị xóa khỏi thiết kế này (các tệp đã tạo trên đĩa vẫn được giữ nguyên).",
       "removeTitle": "Xóa Template này?",
       "tabs": {

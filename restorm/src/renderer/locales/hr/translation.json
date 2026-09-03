@@ -2169,7 +2169,9 @@
         "startFailed": "Poslužitelj se nije mogao pokrenuti",
         "protocolAlways": "HTTP se uvijek servira",
         "protocolToggle": "Serviraj i ovu projekciju",
-        "stateful": "Stateful način — POST/PUT/DELETE mijenjaju spremište u memoriji (resetira se pri ponovnom pokretanju)"
+        "stateful": "Stateful način — POST/PUT/DELETE mijenjaju spremište u memoriji (resetira se pri ponovnom pokretanju)",
+        "clientsCallout": "Vaš mock poslužitelj je pokrenut. Za svaki protokol koji ovaj dizajn poslužuje generirani su klijenti spremni za pokretanje.",
+        "clientsCalloutLink": "Pronađite ih ovdje"
       },
       "identity": {
         "title": "Identitet",
@@ -2305,6 +2307,7 @@
       },
       "extractedTitle": "Datoteke zapisane",
       "openOutput": "Otvori izlaznu mapu",
+      "refresh": "Osvježi ovaj predložak iz njegovog izvora",
       "removeConfirm": "Template „{{name}}“ bit će uklonjen iz ovog dizajna (već generirane datoteke na disku ostaju netaknute).",
       "removeTitle": "Ukloniti ovaj Template?",
       "tabs": {

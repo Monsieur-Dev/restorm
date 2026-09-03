@@ -70,6 +70,13 @@ export const DesignCodeSection: React.FC<{
   const onAnswersChange = useCallback((templateId: string, answers: Record<string, unknown>): void => {
     setAnswersByTemplate((prev) => ({ ...prev, [templateId]: answers }))
   }, [])
+  // Bumped per template to force its questions to re-fetch after a "refresh
+  // from source" — the main process drops the source's cached metadata first.
+  const [refreshNonces, setRefreshNonces] = useState<Record<string, number>>({})
+  const refreshTemplate = useCallback(async (tpl: DesignCodegenTemplate): Promise<void> => {
+    await window.restorm?.designCodegen.refreshTemplate(tpl.source)
+    setRefreshNonces((prev) => ({ ...prev, [tpl.id]: (prev[tpl.id] ?? 0) + 1 }))
+  }, [])
   // Collapsed/expanded state of each template pane, persisted in the user
   // profile. `loaded` gates the SplitView (its panes read defaultCollapsed once).
   const { loaded: collapseLoaded, collapsedIds, setCollapsedIds } = useCollapsedCodeTemplates()
@@ -317,11 +324,21 @@ export const DesignCodeSection: React.FC<{
                         data-testid={`design-code-open-output-${tpl.id}`}
                       />
                     </ControlGroup>
+                    <HeaderHoverTooltip label={t('design.code.refresh', 'Refresh this template from its source')}>
+                      <Button
+                        secondary
+                        small
+                        icon="refresh"
+                        onClick={() => { void refreshTemplate(tpl) }}
+                        options={{ ariaLabel: t('design.code.refresh', 'Refresh this template from its source') }}
+                        data-testid={`design-code-refresh-${tpl.id}`}
+                      />
+                    </HeaderHoverTooltip>
                   </div>
                 </div>
               </div>
 
-              <DesignTemplateQuestions template={tpl} onAnswersChange={onAnswersChange} />
+              <DesignTemplateQuestions template={tpl} onAnswersChange={onAnswersChange} refreshNonce={refreshNonces[tpl.id] ?? 0} />
 
               {activeId === tpl.id && message !== null && (
                 <p className="design-code-message" data-testid="design-code-message">{message}</p>

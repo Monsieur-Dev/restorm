@@ -2168,7 +2168,9 @@
         "startFailed": "Servern kunde inte starta",
         "protocolAlways": "HTTP serveras alltid",
         "protocolToggle": "Servera även denna projektion",
-        "stateful": "Stateful-läge — POST/PUT/DELETE ändrar ett minneslager (återställs vid omstart)"
+        "stateful": "Stateful-läge — POST/PUT/DELETE ändrar ett minneslager (återställs vid omstart)",
+        "clientsCallout": "Din mockserver körs. Färdiga klienter genererades för varje protokoll som den här designen betjänar.",
+        "clientsCalloutLink": "Hitta dem här"
       },
       "identity": {
         "title": "Identitet",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Filer skrivna",
       "openOutput": "Öppna utdatamappen",
+      "refresh": "Uppdatera den här mallen från dess källa",
       "removeConfirm": "Template ”{{name}}” tas bort från den här designen (redan genererade filer på disken lämnas orörda).",
       "removeTitle": "Ta bort detta Template?",
       "tabs": {

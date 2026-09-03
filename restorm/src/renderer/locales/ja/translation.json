@@ -2167,7 +2167,9 @@
         "startFailed": "サーバーを起動できませんでした",
         "protocolAlways": "HTTP は常に提供されます",
         "protocolToggle": "このプロジェクションも提供する",
-        "stateful": "ステートフルモード — POST/PUT/DELETE がインメモリストアを変更します（再起動でリセット）"
+        "stateful": "ステートフルモード — POST/PUT/DELETE がインメモリストアを変更します（再起動でリセット）",
+        "clientsCallout": "モックサーバーが稼働中です。この設計が提供する各プロトコル向けに、すぐに実行できるクライアントが生成されました。",
+        "clientsCalloutLink": "こちらで確認できます"
       },
       "identity": {
         "title": "アイデンティティ",
@@ -2303,6 +2305,7 @@
       },
       "extractedTitle": "ファイルを書き込みました",
       "openOutput": "出力フォルダーを開く",
+      "refresh": "このテンプレートをソースから再取得",
       "removeConfirm": "Template「{{name}}」がこのデザインから削除されます（ディスク上に生成済みのファイルはそのまま残ります）。",
       "removeTitle": "この Template を削除しますか？",
       "tabs": {

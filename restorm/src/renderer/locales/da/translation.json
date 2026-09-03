@@ -2168,7 +2168,9 @@
         "startFailed": "Serveren kunne ikke starte",
         "protocolAlways": "HTTP serveres altid",
         "protocolToggle": "Servér også denne projektion",
-        "stateful": "Stateful-tilstand — POST/PUT/DELETE ændrer et in-memory-lager (nulstilles ved genstart)"
+        "stateful": "Stateful-tilstand — POST/PUT/DELETE ændrer et in-memory-lager (nulstilles ved genstart)",
+        "clientsCallout": "Din mockserver kører. Der blev genereret klar-til-brug-klienter for hver protokol, som dette design betjener.",
+        "clientsCalloutLink": "Find dem her"
       },
       "identity": {
         "title": "Identitet",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Filer skrevet",
       "openOutput": "Åbn outputmappen",
+      "refresh": "Opdater denne skabelon fra dens kilde",
       "removeConfirm": "Template “{{name}}” fjernes fra dette design (allerede genererede filer på disken forbliver urørte).",
       "removeTitle": "Fjern dette Template?",
       "tabs": {

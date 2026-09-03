@@ -2168,7 +2168,9 @@
         "startFailed": "Impossibile avviare il server",
         "protocolAlways": "HTTP è sempre servito",
         "protocolToggle": "Servi anche questa proiezione",
-        "stateful": "Modalità stateful — POST/PUT/DELETE modificano uno store in memoria (azzerato al riavvio)"
+        "stateful": "Modalità stateful — POST/PUT/DELETE modificano uno store in memoria (azzerato al riavvio)",
+        "clientsCallout": "Il tuo mock server è in esecuzione. Sono stati generati client pronti all'uso per ogni protocollo servito da questo design.",
+        "clientsCalloutLink": "Li trovi qui"
       },
       "identity": {
         "title": "Identità",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "File scritti",
       "openOutput": "Apri la cartella di output",
+      "refresh": "Aggiorna questo template dalla sua origine",
       "removeConfirm": "Il Template «{{name}}» verrà rimosso da questo design (i file già generati su disco restano invariati).",
       "removeTitle": "Rimuovere questo Template?",
       "tabs": {

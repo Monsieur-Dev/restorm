@@ -1420,6 +1420,14 @@ export function registerRestormIPC(deps: {
     }
   })
 
+  // "Refresh from source": drop the cached metadata for this template so the
+  // next question/variable read re-acquires it (a locally-edited template or one
+  // advanced on its git remote is picked up without restarting the app).
+  validatedHandle('design-codegen:refresh-template', designCodegenVariablesArgs, (_event, [source]) => {
+    designCodegenService.invalidateSource(source)
+    return Promise.resolve({ success: true })
+  })
+
   // Cloud template library: the official set + the caller org's own (Enterprise).
   // A `null` result means signed out — surfaced as `signedOut` so the library can
   // prompt a login rather than show a fetch error.

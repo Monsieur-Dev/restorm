@@ -1470,6 +1470,14 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('design-codegen:questions', source)
       return result as { success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }
     },
+    /** Drop the cached metadata for a template source so the next question /
+     * variable read re-acquires it — the "refresh from source" button. */
+    refreshTemplate: async (
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:refresh-template', source)
+      return result as { success: boolean; error?: string }
+    },
     /** The answers a previous generation saved in an output folder
      * (`.copier-answers.yml`); relative resolves against the project file. */
     readAnswers: async (outputDir: string): Promise<{ success: boolean; answers?: Record<string, unknown>; error?: string }> => {

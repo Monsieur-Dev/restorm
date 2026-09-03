@@ -2169,7 +2169,9 @@
         "startFailed": "Serverul nu a putut porni",
         "protocolAlways": "HTTP este servit întotdeauna",
         "protocolToggle": "Servește și această proiecție",
-        "stateful": "Mod cu stare — POST/PUT/DELETE modifică un stoc în memorie (resetat la repornire)"
+        "stateful": "Mod cu stare — POST/PUT/DELETE modifică un stoc în memorie (resetat la repornire)",
+        "clientsCallout": "Serverul dumneavoastră mock rulează. Au fost generați clienți gata de rulat pentru fiecare protocol pe care îl deservește acest design.",
+        "clientsCalloutLink": "Îi găsiți aici"
       },
       "identity": {
         "title": "Identitate",
@@ -2305,6 +2307,7 @@
       },
       "extractedTitle": "Fișiere scrise",
       "openOutput": "Deschide folderul de ieșire",
+      "refresh": "Reîmprospătează acest șablon din sursa sa",
       "removeConfirm": "Template-ul „{{name}}“ va fi eliminat din acest design (fișierele deja generate pe disc rămân neatinse).",
       "removeTitle": "Eliminați acest Template?",
       "tabs": {

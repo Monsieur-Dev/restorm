@@ -460,6 +460,9 @@ declare global {
         getQuestions: (
           source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
         ) => Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }>
+        refreshTemplate: (
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+        ) => Promise<{ success: boolean; error?: string }>
         readAnswers: (outputDir: string) => Promise<{ success: boolean; answers?: Record<string, unknown>; error?: string }>
         extract: (designId: string, outputDir: string) => Promise<{ success: boolean; root?: string; written?: string[]; error?: string }>
         discard: (designId: string) => Promise<void>

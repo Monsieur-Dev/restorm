@@ -38,7 +38,7 @@ import { assertSafeRelativePath, type GeneratedFile } from './extractTree'
 
 export interface TemplateManifest {
   name: string
-  type: 'server' | 'db'
+  type: 'server' | 'db' | 'docs'
   language: string
   contextVersions: number[]
   /** User variables the template exposes for code generation (optional). */
@@ -51,7 +51,7 @@ export const MANIFEST_SCHEMA = JSON.stringify({
   required: ['name', 'type', 'language', 'contextVersions'],
   properties: {
     name: { type: 'string', minLength: 1 },
-    type: { enum: ['server', 'db'] },
+    type: { enum: ['server', 'db', 'docs'] },
     language: { type: 'string', minLength: 1 },
     contextVersions: { type: 'array', items: { type: 'integer' }, minItems: 1 },
     variables: {

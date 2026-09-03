@@ -2170,7 +2170,9 @@
         "startFailed": "Server se nepodařilo spustit",
         "protocolAlways": "HTTP se servíruje vždy",
         "protocolToggle": "Servírovat i tuto projekci",
-        "stateful": "Stavový režim — POST/PUT/DELETE mění úložiště v paměti (reset při restartu)"
+        "stateful": "Stavový režim — POST/PUT/DELETE mění úložiště v paměti (reset při restartu)",
+        "clientsCallout": "Váš mock server běží. Pro každý protokol, který tento design obsluhuje, byli vygenerováni klienti připravení ke spuštění.",
+        "clientsCalloutLink": "Najdete je zde"
       },
       "identity": {
         "title": "Identita",
@@ -2306,6 +2308,7 @@
       },
       "extractedTitle": "Soubory zapsány",
       "openOutput": "Otevřít výstupní složku",
+      "refresh": "Obnovit tuto šablonu z jejího zdroje",
       "removeConfirm": "Template „{{name}}“ bude z tohoto návrhu odebrán (již vygenerované soubory na disku zůstanou nedotčené).",
       "removeTitle": "Odebrat tento Template?",
       "tabs": {

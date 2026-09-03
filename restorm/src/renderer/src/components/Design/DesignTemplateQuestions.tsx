@@ -50,7 +50,10 @@ export const DesignTemplateQuestions: React.FC<{
   template: DesignCodegenTemplate
   /** Lifted so the parent can pass the current answers to `generate`. */
   onAnswersChange: (templateId: string, answers: Record<string, unknown>) => void
-}> = ({ template, onAnswersChange }) => {
+  /** Bumped by the parent's "refresh from source" so the questions re-fetch
+   * after the main process drops the source's cached metadata. */
+  refreshNonce?: number
+}> = ({ template, onAnswersChange, refreshNonce }) => {
   const { t } = useTranslation()
   const [questions, setQuestions] = useState<CopierQuestion[] | null>(null)
   const [values, setValues] = useState<Record<string, unknown>>({})
@@ -71,7 +74,7 @@ export const DesignTemplateQuestions: React.FC<{
       .then((r) => { if (!cancelled) setQuestions(r.success && r.questions !== undefined ? r.questions : []) })
       .catch(() => { if (!cancelled) setQuestions([]) })
     return () => { cancelled = true }
-  }, [template.source])
+  }, [template.source, refreshNonce])
 
   // Seed the answers: saved value from the output folder's .copier-answers.yml
   // if present, else the copier.yml default. Re-runs when the output folder

@@ -2167,7 +2167,9 @@
         "startFailed": "服务器无法启动",
         "protocolAlways": "HTTP 始终提供",
         "protocolToggle": "同时提供此投影",
-        "stateful": "有状态模式 — POST/PUT/DELETE 修改内存存储（重启时重置）"
+        "stateful": "有状态模式 — POST/PUT/DELETE 修改内存存储（重启时重置）",
+        "clientsCallout": "您的模拟服务器正在运行。已为此设计所服务的每个协议生成了可直接运行的客户端。",
+        "clientsCalloutLink": "在此处查看"
       },
       "identity": {
         "title": "标识",
@@ -2303,6 +2305,7 @@
       },
       "extractedTitle": "已写入文件",
       "openOutput": "打开输出文件夹",
+      "refresh": "从来源刷新此模板",
       "removeConfirm": "Template“{{name}}”将从此设计中移除（磁盘上已生成的文件保持不变）。",
       "removeTitle": "移除此 Template？",
       "tabs": {

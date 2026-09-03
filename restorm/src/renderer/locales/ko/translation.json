@@ -2167,7 +2167,9 @@
         "startFailed": "서버를 시작할 수 없습니다",
         "protocolAlways": "HTTP는 항상 제공됩니다",
         "protocolToggle": "이 프로젝션도 제공",
-        "stateful": "스테이트풀 모드 — POST/PUT/DELETE가 인메모리 저장소를 변경합니다 (재시작 시 초기화)"
+        "stateful": "스테이트풀 모드 — POST/PUT/DELETE가 인메모리 저장소를 변경합니다 (재시작 시 초기화)",
+        "clientsCallout": "목 서버가 실행 중입니다. 이 디자인이 제공하는 각 프로토콜에 대해 바로 실행할 수 있는 클라이언트가 생성되었습니다.",
+        "clientsCalloutLink": "여기에서 확인하세요"
       },
       "identity": {
         "title": "아이덴티티",
@@ -2303,6 +2305,7 @@
       },
       "extractedTitle": "파일 작성됨",
       "openOutput": "출력 폴더 열기",
+      "refresh": "이 템플릿을 소스에서 새로 고침",
       "removeConfirm": "Template “{{name}}”이(가) 이 디자인에서 제거됩니다(디스크에 이미 생성된 파일은 그대로 유지됩니다).",
       "removeTitle": "이 Template을(를) 제거하시겠습니까?",
       "tabs": {

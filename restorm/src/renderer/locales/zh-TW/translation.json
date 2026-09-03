@@ -2167,7 +2167,9 @@
         "startFailed": "伺服器無法啟動",
         "protocolAlways": "HTTP 始終提供",
         "protocolToggle": "同時提供此投影",
-        "stateful": "有狀態模式 — POST/PUT/DELETE 修改記憶體儲存（重新啟動時重設）"
+        "stateful": "有狀態模式 — POST/PUT/DELETE 修改記憶體儲存（重新啟動時重設）",
+        "clientsCallout": "您的模擬伺服器正在執行。已為此設計所服務的每個通訊協定產生了可直接執行的用戶端。",
+        "clientsCalloutLink": "在此處查看"
       },
       "identity": {
         "title": "識別",
@@ -2303,6 +2305,7 @@
       },
       "extractedTitle": "已寫入檔案",
       "openOutput": "開啟輸出資料夾",
+      "refresh": "從來源重新整理此範本",
       "removeConfirm": "Template「{{name}}」將從此設計中移除（磁碟上已產生的檔案維持不變）。",
       "removeTitle": "移除此 Template？",
       "tabs": {

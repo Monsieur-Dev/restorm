@@ -2170,7 +2170,9 @@
         "startFailed": "Nie udało się uruchomić serwera",
         "protocolAlways": "HTTP jest zawsze serwowany",
         "protocolToggle": "Serwuj także tę projekcję",
-        "stateful": "Tryb stanowy — POST/PUT/DELETE modyfikują magazyn w pamięci (reset przy restarcie)"
+        "stateful": "Tryb stanowy — POST/PUT/DELETE modyfikują magazyn w pamięci (reset przy restarcie)",
+        "clientsCallout": "Twój serwer mock jest uruchomiony. Dla każdego protokołu obsługiwanego przez ten projekt wygenerowano gotowych do uruchomienia klientów.",
+        "clientsCalloutLink": "Znajdziesz ich tutaj"
       },
       "identity": {
         "title": "Tożsamość",
@@ -2306,6 +2308,7 @@
       },
       "extractedTitle": "Pliki zapisane",
       "openOutput": "Otwórz folder wyjściowy",
+      "refresh": "Odśwież ten szablon z jego źródła",
       "removeConfirm": "Template „{{name}}“ zostanie usunięty z tego projektu (już wygenerowane pliki na dysku pozostaną nienaruszone).",
       "removeTitle": "Usunąć ten Template?",
       "tabs": {

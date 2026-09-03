@@ -37,7 +37,8 @@ root:
 
 `contextVersions` lists the context versions the template understands.
 Restorm refuses an incompatible template **before rendering anything**,
-with a message naming both versions.
+with a message naming both versions. `type` categorises the template —
+`server`, `db`, or `docs`.
 
 ## Declaring variables (optional)
 
@@ -118,6 +119,14 @@ Supported: questions with literal `default`s (the app supplies answers),
 `_subdirectory`, `_templates_suffix`, `_exclude`, sandboxed
 `hooks/pre_gen.py` / `hooks/post_gen.py` (exec'd with `ctx` / `answers` /
 `output_root`; an escape attempt fails cleanly in MEMFS).
+
+**Partials.** `{% include %}` and `{% import %}` resolve against the
+template's own files from the **template root** — so
+`{% include 'partials/models.md.jinja' %}` works whatever `_subdirectory`
+is. Split a large template into one file per block, and load per-language
+resource files with a dynamic import: `{% import 'trads/' ~ lang ~ '.jinja'
+as t %}`. (Keep partials outside `_subdirectory`, or `_exclude` them, so
+they are not emitted as output files.)
 **Refused with a clear error:** `_tasks` and `_migrations` — they demand
 a real shell the sandbox deliberately does not have.
 

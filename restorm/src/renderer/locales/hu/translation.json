@@ -2168,7 +2168,9 @@
         "startFailed": "A szervert nem sikerült elindítani",
         "protocolAlways": "A HTTP mindig kiszolgálásra kerül",
         "protocolToggle": "Ez a projekció is legyen kiszolgálva",
-        "stateful": "Állapottartó mód — POST/PUT/DELETE módosítja a memóriabeli tárolót (újraindításkor törlődik)"
+        "stateful": "Állapottartó mód — POST/PUT/DELETE módosítja a memóriabeli tárolót (újraindításkor törlődik)",
+        "clientsCallout": "A mock szerver fut. A tervezet által kiszolgált minden protokollhoz futtatásra kész kliensek készültek.",
+        "clientsCalloutLink": "Itt találja őket"
       },
       "identity": {
         "title": "Identitás",
@@ -2304,6 +2306,7 @@
       },
       "extractedTitle": "Fájlok kiírva",
       "openOutput": "Kimeneti mappa megnyitása",
+      "refresh": "A sablon frissítése a forrásából",
       "removeConfirm": "A(z) „{{name}}“ Template eltávolításra kerül erről a tervről (a lemezen már legenerált fájlok érintetlenül maradnak).",
       "removeTitle": "Eltávolítja ezt a Template-et?",
       "tabs": {

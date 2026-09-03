@@ -263,3 +263,15 @@ Then('a design server error mentions the failed start', async () => {
     portBlocker = null
   }
 })
+
+Then('the clients callout links to the Clients section', async () => {
+  const p = requirePage()
+  // A running server auto-generates per-protocol clients; the callout points there.
+  await expect(p.locator('[data-testid="design-serve-clients-callout"]')).toBeVisible({ timeout: 10000 })
+  // The spin button's hover tooltip ("Stop the server") renders below it, over
+  // the callout link, and lingers because the mouse is still on the button after
+  // serving. A real user moving to the link dismisses it; in headless, dispatch
+  // the click straight to the element so the tooltip can't intercept it.
+  await p.locator('[data-testid="design-serve-clients-link"]').dispatchEvent('click')
+  await expect(p.locator('[data-testid="design-clients-section"]')).toBeVisible({ timeout: 5000 })
+})
