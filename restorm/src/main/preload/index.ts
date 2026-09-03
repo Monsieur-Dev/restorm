@@ -2365,8 +2365,8 @@ contextBridge.exposeInMainWorld('restorm', {
      * (which awaits an ack, see `replyMcpOpenTab`) and absent for the other
      * internal senders (e.g. `run_request`'s tab-open side effect), which
      * stay fire-and-forget. */
-    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
     },
@@ -2380,8 +2380,8 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.send('mcp:open-tab-result', payload)
     },
     /** Subscribe to MCP `reveal_in_tree` requests. */
-    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
     },
@@ -2396,8 +2396,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     },
     /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
-    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
     },

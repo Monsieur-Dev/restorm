@@ -1270,10 +1270,14 @@ export function registerRestormIPC(deps: {
       return { success: true, folder }
     } catch (error) {
       const unsupported = error instanceof GrpcReflectionUnsupportedError
-      // Pass the cause as STRUCTURED metadata, not a second positional arg:
-      // the logger's second parameter is a metadata object, so a raw Error
-      // handed there is dropped and Sentry shows "No error message".
-      logger.error('[IPC] gRPC reflection import error', errorMeta(error))
+      // A failed reflection import is a HANDLED, user-facing outcome — a wrong
+      // address, a server that does not serve reflection, an unreachable host.
+      // It is returned to the renderer below and shown to the user, so it is
+      // logged at WARN, not ERROR: only error-level logs bridge into crash
+      // reporting (see errorLogForwarding.ts), and this is operational noise,
+      // not an app crash. The cause travels as STRUCTURED metadata (the
+      // logger's second arg) so a raw Error isn't dropped.
+      logger.warn('[IPC] gRPC reflection import error', errorMeta(error))
       return {
         success: false,
         unsupported,
@@ -1292,7 +1296,9 @@ export function registerRestormIPC(deps: {
       return { success: true, services, protoDescriptorSet: fileDescriptorSet.toString('base64') }
     } catch (error) {
       const unsupported = error instanceof GrpcReflectionUnsupportedError
-      logger.error('[IPC] gRPC reflection query error', errorMeta(error))
+      // Handled, user-facing failure (returned below) — WARN, not ERROR, so it
+      // stays out of crash reporting (see the import handler above).
+      logger.warn('[IPC] gRPC reflection query error', errorMeta(error))
       return {
         success: false,
         unsupported,
