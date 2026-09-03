@@ -83,15 +83,33 @@ export function designFromDocumentation(
 
   const wrapProperty = (property: ModelDocumentation['properties'][number]): DesignProperty => {
     const wrapped: DesignProperty = { id: newId(), doc: property }
-    const target = property.targetModelRef
-    if (target !== undefined) {
-      const modelId = modelIdByName.get(target)
-      const enumId = modelId === undefined ? enumIdByName.get(target) : undefined
-      if (modelId !== undefined) {
-        wrapped.design = { reference: { target: 'model', refId: modelId } }
-      } else if (enumId !== undefined) {
-        wrapped.design = { reference: { target: 'enum', refId: enumId } }
+    // An importer may spell an array as the LABEL `array<X>` on `type` (rather
+    // than the canonical `type: 'array'` + element type). Normalise it so the
+    // schema editor recognises the array (it keys on `doc.type === 'array'`)
+    // and shows the element type instead of falling back to a bare "string".
+    const parsed = parseTypeLabel(property.type)
+    const refName = property.targetModelRef ?? (parsed.isArray ? parsed.name : undefined)
+    const refModelId = refName !== undefined ? modelIdByName.get(refName) : undefined
+    const refEnumId = refModelId === undefined && refName !== undefined ? enumIdByName.get(refName) : undefined
+
+    if (parsed.isArray) {
+      if (refModelId !== undefined) {
+        wrapped.doc = { ...property, type: 'array', isArrayOfRef: true }
+        wrapped.design = { reference: { target: 'model', refId: refModelId } }
+      } else if (refEnumId !== undefined) {
+        wrapped.doc = { ...property, type: 'array', isArrayOfRef: true }
+        wrapped.design = { reference: { target: 'enum', refId: refEnumId } }
+      } else {
+        wrapped.doc = { ...property, type: 'array' }
+        wrapped.design = { arrayItems: { type: parsed.name } }
       }
+      return wrapped
+    }
+
+    if (refModelId !== undefined) {
+      wrapped.design = { reference: { target: 'model', refId: refModelId } }
+    } else if (refEnumId !== undefined) {
+      wrapped.design = { reference: { target: 'enum', refId: refEnumId } }
     }
     return wrapped
   }

@@ -120,8 +120,13 @@ describe('designFromDocumentation', () => {
     const status = design.enums[0]
     if (pet === undefined || owner === undefined || status === undefined) throw new Error('derived components missing')
 
-    // Every property wrapped with an id; doc rows verbatim.
-    expect(pet.properties.map((p) => p.doc)).toEqual(doc.models['Pet']?.properties)
+    // Every property wrapped with an id; doc rows carried through — except an
+    // `array<X>` type label, which is normalised to the canonical `array` form
+    // (the element type / array-of-ref lands on `design`, see below).
+    const expectedDocs = (doc.models['Pet']?.properties ?? []).map((p) =>
+      /^array<.+>$/.test(p.type) ? { ...p, type: 'array' } : p
+    )
+    expect(pet.properties.map((p) => p.doc)).toEqual(expectedDocs)
 
     // References derived from targetModelRef, by kind.
     const statusProp = pet.properties.find((p) => p.doc.name === 'status')

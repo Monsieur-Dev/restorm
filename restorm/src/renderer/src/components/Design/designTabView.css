@@ -579,6 +579,14 @@
 }
 
 /* One scroll region for BOTH property panes (the ECUI ScrollableElement root). */
+/* Breathing room between a section's tab strip (Schéma / Définition / Variables
+   générales …) and its content — the panels sat flush against the tabs. */
+[data-testid^="design-model-tabs-tabpanel-"],
+[data-testid^="design-route-tabs-tabpanel-"],
+[data-testid^="design-code-tabs-tabpanel-"] {
+  padding-top: 10px;
+}
+
 .design-schema-main {
   flex: 1 1 auto;
   min-width: 0;
@@ -607,6 +615,10 @@
 }
 
 .design-schema-detail-scroll {
+  /* Fill the (height-capped) detail column so the ScrollableElement actually
+     overflows and scrolls — mirrors `.design-schema-main`. Without `flex`, it
+     sized to its content and the scrollbar never engaged. */
+  flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
 }
@@ -1662,8 +1674,17 @@
   padding: 10px 12px;
 }
 /* The "Variables générales" master-detail reuses the entity list/detail layout;
-   the detail side scrolls its per-template panes. */
+   the detail side scrolls its per-template panes. Fill the Code tab's height so
+   the scopes-list divider runs all the way to the bottom of the surface. */
+.design-codegen-general {
+  flex: 1;
+  min-height: 0;
+}
 .design-codegen-general .design-entity-detail {
+  /* Plain block flow, top-aligned + full width — the base rule centres its
+     (placeholder) content, which would float the variables editor mid-surface
+     now that the detail fills the full height. */
+  display: block;
   overflow: auto;
   padding: 12px 14px;
 }

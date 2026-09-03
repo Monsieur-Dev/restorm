@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd'
 import { isAbsolute, join } from 'path'
-import { mkdirSync, rmSync } from 'fs'
+import { mkdirSync, rmSync, readFileSync } from 'fs'
+import { createServer } from 'http'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect } from '../../fixtures/doc-shots.fixture'
@@ -429,3 +430,283 @@ When('I mark the scenario {string} as favorite', async ({}, _scenarioName: strin
   // set_favorite autosaves too — clear any external-change toast before capture.
   await dismissExternalChangeToast(requirePage())
 })
+
+// ---- API designer captures ------------------------------------------------
+
+/** The built design's id, kept across the designer capture steps. */
+let designId: string | null = null
+
+function requireDesign(): string {
+  if (designId === null) throw new Error('build the design first')
+  return designId
+}
+
+/** Build a representative Petstore API design through the embedded MCP design
+ * tools (the app's supported programmatic surface — writes go through the
+ * main-process store, repaint the open editor and autosave), then open its tab.
+ * Rich enough to make every designer section a good screenshot: a couple of
+ * models with flags + an example, an enum, CRUD routes, and a template. */
+const PETSTORE_MOCK_PORT = 4599
+
+When('I build the Petstore API design served on port {int}', async ({ restormRoot }, _port: number) => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const call = (name: string, input: Record<string, unknown>): Promise<Record<string, unknown>> =>
+    callEmbeddedMcpTool<Record<string, unknown>>(mcp, name, input)
+
+  // A fresh project gives the design a home in the sidebar. The path shows in
+  // the status bar of every capture — a neutral, machine-independent location.
+  const projectDir = '/tmp/restorm-designer-demo'
+  rmSync(projectDir, { recursive: true, force: true })
+  mkdirSync(projectDir, { recursive: true })
+  await call('create_project', { filePath: join(projectDir, 'petstore.restorm') })
+  // Await the renderer post-load mirror before authoring through MCP.
+  await p.waitForTimeout(1500)
+
+  // Import the bundled Swagger Petstore (served over localhost so it is a real
+  // import), then DERIVE a design from it — realistic types (Pet.photoUrls:
+  // array<string>), models, routes and auth, exactly like a user would.
+  const spec = readFileSync(join(restormRoot, 'tests/unit/swagger-petstore.json'), 'utf-8')
+  const server = createServer((_req, res) => {
+    res.setHeader('content-type', 'application/json')
+    res.end(spec)
+  })
+  await new Promise<void>((resolve) => { server.listen(PETSTORE_MOCK_PORT, '127.0.0.1', () => { resolve() }) })
+  try {
+    await call('import_from_url', { url: `http://127.0.0.1:${String(PETSTORE_MOCK_PORT)}/swagger-petstore.json` })
+    await p.waitForTimeout(2000)
+  } finally {
+    server.close()
+  }
+
+  const envFolders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  const envFolder = envFolders.find((f) => f.kind === 'env-folder')
+  if (envFolder === undefined) throw new Error('no env folder after the petstore import')
+  const derived = await call('create_design_from_documentation', { envFolderId: envFolder.id, name: 'Petstore' })
+  designId = typeof derived['id'] === 'string' ? derived['id'] : null
+  const id = requireDesign()
+
+  // Drop the imported REQUEST tree so the sidebar stays focused on the design.
+  // The import creates one request folder per tag (pet/store/user) under the env
+  // folder; delete every non-env, non-design folder, keeping the env folder +
+  // the derived design.
+  const afterFolders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  for (const f of afterFolders) {
+    if (f.kind !== 'env-folder' && f.id !== id) {
+      await call('delete_item', { id: f.id }).catch(() => undefined)
+    }
+  }
+
+  // A real official template so the Code / Variables views populate.
+  const templateRef = 'Monsieur-Dev/restorm-template-server-rest-typescript'
+  await call('set_design_templates', {
+    designId: id,
+    templates: [{ repo: templateRef, outputDir: './out/api' }]
+  })
+  // Seed a couple of example codegen variables so the "Variables générales" and
+  // the property "Génération de code" surfaces read as real (docs illustration).
+  // Resolve the template by its actual id (a label ref is unreliable).
+  const gdForTpl = await call('get_design', { designId: id })
+  const codegen0 = gdForTpl['codegen'] as Record<string, unknown> | undefined
+  const templates0 = (codegen0?.['templates'] as Record<string, unknown>[] | undefined) ?? []
+  const firstTplId = templates0[0]?.['id']
+  const tplRef = typeof firstTplId === 'string' ? firstTplId : templateRef
+  await call('set_design_template_variables', {
+    designId: id,
+    template: tplRef,
+    scope: 'project',
+    variables: { packageName: '{{ kebabCase design.name }}', apiVersion: '"1.0.0"' }
+  }).catch(() => undefined)
+  await call('set_design_property_variables', {
+    designId: id,
+    model: 'Pet',
+    property: 'name',
+    template: tplRef,
+    variables: { columnName: '"pet_name"', indexed: 'true' }
+  }).catch(() => undefined)
+
+  // Flush + persist, then reveal + open the design's tab (it is nested inside
+  // the imported env folder).
+  await p.keyboard.press('Control+S')
+  await p.waitForTimeout(1000)
+  await call('reveal_in_tree', { itemId: id })
+  await p.waitForTimeout(800)
+  const designRow = p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${id}"]`)
+  await designRow.click()
+  await expect(p.locator(`[data-testid="design-tab-view-${id}"]`)).toBeVisible({ timeout: 15000 })
+  await p.waitForTimeout(800)
+  await dismissExternalChangeToast(p)
+  // Expand the design node so its section rows are present in the sidebar for
+  // the capture steps to click.
+  await expandRowViaToggle(p, designRow)
+})
+
+/** Switch the open design tab to a section by clicking its sidebar row. The
+ * section rows are virtual sidebar entries with id `design-section:<id>:<key>`
+ * (every section except `settings`, whose "row" is the design node itself) —
+ * clicking one restages the design tab on that section (locale-independent,
+ * unlike matching the translated label). */
+async function gotoDesignSection(p: Page, id: string, section: string, selectEntity?: string): Promise<void> {
+  const rowId = section === 'settings' ? id : `design-section:${id}:${section}`
+  await p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${rowId}"]`).click()
+  await expect(p.locator(`[data-testid="design-section-${section}"]`)).toBeVisible({ timeout: 10000 })
+  await p.waitForTimeout(500)
+  // Select an entity within the section (a model / a route) so the detail pane
+  // is populated rather than showing the "select one" placeholder. The label is
+  // design DATA (model/route names), not UI text — so it stays locale-stable.
+  if (selectEntity !== undefined) {
+    await p
+      .locator(`[data-testid="design-${section}-section"]`)
+      .getByText(selectEntity, { exact: true })
+      .first()
+      .click()
+    await p.waitForTimeout(600)
+  }
+}
+
+When(
+  'I capture the designer section {string} selecting {string} for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, section: string, entity: string, template: string) => {
+    const p = requirePage()
+    const id = requireDesign()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => { await gotoDesignSection(p, id, section, entity) }
+    })
+  }
+)
+
+/** The home-page designer hero — the Routes view with a route selected showing
+ * its multi-protocol projections. Lands in the website's `assets/home/<locale>/`
+ * (a sibling of the docs assets), not the docs tree. */
+When('I capture the designer home shot for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireDesign()
+  const homeOut = join(websiteOut, '..', 'home')
+  await captureForAllLocales(p, restormRoot, targetResolver(homeOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => { await gotoDesignSection(p, id, 'routes', 'Find pet by ID') }
+  })
+})
+
+/** The Models view showcasing the feature: the Pet model selected with its
+ * photoUrls (array-of-string) property open in the detail pane. Doubles as the
+ * designer "overview" shot. */
+When('I capture the models overview for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireDesign()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await gotoDesignSection(p, id, 'models', 'Pet')
+      await p
+        .locator('[data-testid="design-properties-table"]')
+        .getByText('photoUrls', { exact: true })
+        .first()
+        .click()
+      await p.waitForTimeout(500)
+    }
+  })
+})
+
+/** Serve the design as a mock (Pro/Enterprise — the doc-shots run is seeded
+ * Pro) so the Server + Clients sections show a live server. */
+When('I serve the design mock', async () => {
+  const id = requireDesign()
+  await callEmbeddedMcpTool(requireMcp(), 'serve_design', { designId: id })
+  await requirePage().waitForTimeout(2000)
+  await dismissExternalChangeToast(requirePage())
+})
+
+/** The Clients section, with the Clients node EXPANDED in the sidebar so its
+ * protocol sub-rows are visible (per the doc framing). */
+When('I capture the clients section for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireDesign()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await gotoDesignSection(p, id, 'clients')
+      // Fully expand the sidebar tree (all levels) so the whole client subtree
+      // is visible — the dedicated "expand all" toolbar button.
+      await p.locator('[data-testid="sidebar-expand-all-button"]').click()
+      await p.waitForTimeout(700)
+    }
+  })
+})
+
+/** The template LIBRARY modal (Code ▸ Add a template) — its Official / Recent /
+ * Custom tabs. Officials load from the cloud (the run pins the dev channel), so
+ * the Official tab shows the curated set even though the seeded session has no
+ * cloud token (the app's anonymous officials fetch backs it). */
+When('I capture the template library for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireDesign()
+  await gotoDesignSection(p, id, 'code')
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      const tabs = p.locator('[data-testid="design-template-library-tabs"]')
+      if (!(await tabs.isVisible().catch(() => false))) {
+        await p.locator('[data-testid="design-code-add"]').click()
+      }
+      await expect(tabs).toBeVisible({ timeout: 15000 })
+      // Open on the Official tab — the officials load via the anonymous cloud
+      // fetch, and that is what the doc page illustrates.
+      await p.locator('[data-testid="design-template-library-tabs-tab-official"]').click().catch(() => undefined)
+      // Let the cloud officials land so the tab isn't mid-fetch.
+      await p.waitForTimeout(1500)
+    },
+    clipTo: () => p.locator('.ecu-modal-container[role="dialog"]')
+  })
+  await p.keyboard.press('Escape')
+})
+
+/** The general (project-scope) codegen variables editor — Code ▸ General
+ * variables — showing the variables a template declares and their Handlebars
+ * values. */
+When('I capture the general variables for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireDesign()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await gotoDesignSection(p, id, 'code')
+      await p.locator('[data-testid="design-code-tabs-tab-variables"]').click()
+      await expect(p.locator('[data-testid="design-codegen-general-section"]')).toBeVisible({ timeout: 10000 })
+      await p.waitForTimeout(500)
+    }
+  })
+})
+
+/** A property's Code-generation tab — its flags + the variables a template reads
+ * for it. Models ▸ Pet ▸ property ▸ Code generation. */
+When('I capture the property code-generation tab for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireDesign()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await gotoDesignSection(p, id, 'models', 'Pet')
+      await p.locator('[data-testid="design-properties-table"]').getByText('name', { exact: true }).first().click()
+      await p.waitForTimeout(400)
+      await p.locator('[data-testid="design-property-tab-codegen"]').click()
+      await expect(p.locator('[data-testid="design-schema-detail"]')).toBeVisible({ timeout: 10000 })
+      await p.waitForTimeout(500)
+    }
+  })
+})
+
+When(
+  'I capture the designer section {string} for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, section: string, template: string) => {
+    const p = requirePage()
+    const id = requireDesign()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      // Re-assert the section per locale: a language switch keeps the tab open
+      // but re-navigating guarantees the right section is shown at capture time.
+      beforeShot: async () => { await gotoDesignSection(p, id, section) }
+    })
+  }
+)

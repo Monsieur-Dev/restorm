@@ -393,6 +393,10 @@ export const DesignCodeSection: React.FC<{
           { id: 'template', label: t('design.code.tabs.template', 'Template'), content: templateTab },
           {
             id: 'variables',
+            // No outer ScrollableElement: the "General variables" master-detail
+            // must fill the tab height so the scopes-list divider runs to the
+            // bottom (the detail side scrolls its own panes).
+            useScrollableElement: false,
             label: t('design.codegen.vars.generalTitle', 'General variables'),
             content: <DesignCodegenGeneralVariables design={design} />
           }
