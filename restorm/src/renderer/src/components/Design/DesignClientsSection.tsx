@@ -156,6 +156,10 @@ export const DesignClientsSection: React.FC<{ design: ApiDesign; scopeId?: strin
       crumbs.push({ id: designClientRowId(design.id, `proto:${segs.protocol}`), label: t(`design.protocol.${segs.protocol}`) })
       for (const folder of segs.folders) crumbs.push({ id: designClientRowId(design.id, folder.id), label: folder.name })
     }
+    // The workbench tab uses the LAST crumb as its title, so the route itself
+    // is the final crumb (its name becomes the title; the folders above stay
+    // the clickable path).
+    crumbs.push({ id: rowId, label: (req as { name: string }).name })
     openDesignClientTab(req, crumbs, rowId)
   }, [design.id, design.name, t])
 

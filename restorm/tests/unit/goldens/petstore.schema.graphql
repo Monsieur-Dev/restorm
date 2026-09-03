@@ -44,7 +44,7 @@ type Query {
   """Fetch one user"""
   getUser(id: ID!): User
   """List users"""
-  userList(limit: Int, offset: Int): [User!]!
+  userList(limit: Int, offset: Int): [User!]! @deprecated
 }
 
 type Mutation {

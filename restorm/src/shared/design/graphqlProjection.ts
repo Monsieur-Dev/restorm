@@ -331,7 +331,11 @@ function fieldSdl(operation: GraphqlOperation): string {
   const args = operation.args.length > 0
     ? `(${operation.args.map(([name, type]) => `${name}: ${type}`).join(', ')})`
     : ''
-  return `${operation.fieldName}${args}: ${operation.returnType}`
+  // A deprecated route carries `@deprecated` onto its Query/Mutation field — the
+  // standard GraphQL directive the import reads back into `field.deprecated`, so
+  // the served design's clients dim + show the callout like the HTTP ones.
+  const deprecated = operation.route.doc.deprecated === true ? ' @deprecated' : ''
+  return `${operation.fieldName}${args}: ${operation.returnType}${deprecated}`
 }
 
 function pushDescription(lines: string[], text: string | undefined, indent = ''): void {
