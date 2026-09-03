@@ -22,6 +22,7 @@ interface GraphQLField {
   description?: string | undefined
   args: GraphQLArgument[]
   type: string
+  deprecated?: boolean | undefined
 }
 
 interface GraphQLArgument {
@@ -166,14 +167,22 @@ function parseFieldsBlock(block: string): GraphQLField[] {
     // Skip empty lines
     if (!trimmed) continue
     
-    // Parse field: name(args): Type
+    // Parse field: name(args): Type [@directive…]
     const fieldMatch = /^(\w+)(?:\(([^)]*)\))?\s*:\s*(.+)$/.exec(trimmed)
     if (fieldMatch?.[1] && fieldMatch[3]) {
+      // The type capture greedily includes any trailing directives; a field is
+      // deprecated when it carries `@deprecated` (optionally `@deprecated(reason:…)`).
+      // Strip every directive off before reading the type so `[Pet!]! @deprecated`
+      // resolves to `[Pet!]!`, not a polluted type string.
+      const rawType = fieldMatch[3]
+      const deprecated = /@deprecated\b/.test(rawType)
+      const cleanType = rawType.replace(/@\w+(\s*\([^)]*\))?/g, '').trim()
       fields.push({
         name: fieldMatch[1],
         description: currentDescription || undefined,
         args: parseArguments(fieldMatch[2] ?? ''),
-        type: parseTypeString(fieldMatch[3])
+        type: parseTypeString(cleanType),
+        ...(deprecated ? { deprecated: true } : {})
       })
       currentDescription = ''
     }

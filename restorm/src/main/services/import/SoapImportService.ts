@@ -22,6 +22,7 @@ interface WsdlOperation {
   soapAction: string
   input?: string | undefined
   output?: string | undefined
+  deprecated?: boolean | undefined
 }
 
 interface WsdlPortType {
@@ -170,11 +171,16 @@ function parseWsdl(wsdlContent: string): ParsedWsdl {
       if (!opName || !opContent) continue
       
       const docMatch = /<(?:\w+:)?documentation[^>]*>([\s\S]*?)<\/(?:\w+:)?documentation>/i.exec(opContent)
-      
+      // The opening tag carries a `deprecated="true"` attribute for a route the
+      // design flagged deprecated (see soapProjection); read it off the tag, not
+      // the content, so operation documentation text can't false-match.
+      const openTag = opMatch[0].slice(0, opMatch[0].indexOf('>') + 1)
+
       operations.push({
         name: opName,
         soapAction: '',
-        documentation: docMatch?.[1]?.trim()
+        documentation: docMatch?.[1]?.trim(),
+        deprecated: getAttr(openTag, 'deprecated') === 'true'
       })
     }
     

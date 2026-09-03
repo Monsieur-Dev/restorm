@@ -42,6 +42,8 @@ export interface ProtoMethod {
   clientStreaming: boolean
   serverStreaming: boolean
   comment?: string | undefined
+  /** The rpc carries a method-level `option deprecated = true;`. */
+  deprecated?: boolean | undefined
 }
 
 export interface ProtoService {

@@ -37,6 +37,19 @@ describe('designToWsdl', () => {
     expect(flat).toContain(ADDRESS)
     expect(flat).toContain(designSoapServiceName(design))
   })
+
+  it('carries route deprecation through to the imported apiDocumentation', () => {
+    // `route-user-list` is flagged deprecated → the WSDL emits a
+    // `deprecated="true"` attribute on the portType operation, which the
+    // importer must read back onto the operation (the flag the design clients
+    // dim on). Guards the green-but-dead trap where the attribute is emitted
+    // but nothing parses it.
+    const folder = importSoap(wsdl, { name: 'Round trip' }) as {
+      apiDocumentation?: { operations: { deprecated?: boolean; match: { operationName?: string } }[] }
+    }
+    const deprecated = (folder.apiDocumentation?.operations ?? []).filter((o) => o.deprecated === true)
+    expect(deprecated.map((o) => o.match.operationName)).toContain('ListUser')
+  })
 })
 
 describe('operations and dispatch', () => {

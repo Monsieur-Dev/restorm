@@ -110,6 +110,7 @@ export function grpcToApiDocumentation(
         extra: { callType: callTypeOf(method) }
       }
       if (method.comment !== undefined) doc.description = method.comment
+      if (method.deprecated === true) doc.deprecated = true
       const refs = Array.from(new Set([method.inputType, method.outputType]))
       if (refs.length > 0) doc.referencedModels = refs
       operations.push(doc)

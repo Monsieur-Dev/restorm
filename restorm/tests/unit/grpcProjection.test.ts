@@ -45,6 +45,18 @@ describe('designToProto', () => {
     expect(keys).toContain(`${designProtoPackage(design)}.User`)
   })
 
+  it('carries route deprecation as a method option that survives proto-loader', () => {
+    // `route-user-list` is flagged deprecated → the proto emits a method-level
+    // `option deprecated = true;`. proto-loader (and, downstream, reflection)
+    // decodes it onto the method definition — the flag the design clients dim
+    // on. Guards the green-but-dead trap where the option is emitted but the
+    // reflection round-trip drops it.
+    const pkgDef = loadProto(proto) as Record<string, Record<string, { options?: { deprecated?: boolean } }>>
+    const svc = pkgDef[`${designProtoPackage(design)}.${designProtoServiceName(design)}`]
+    expect(svc?.['ListUser']?.options?.deprecated).toBe(true)
+    expect(svc?.['GetUser']?.options?.deprecated).toBe(false)
+  })
+
   it('projects the package + service off the design title', () => {
     expect(designProtoPackage(design)).toBe('petstore')
     expect(designProtoServiceName(design)).toBe('PetstoreService')
@@ -69,6 +81,9 @@ describe('designGrpcMethods', () => {
     const list = designGrpcMethods(design).find((m) => m.name === 'ListUser')
     expect(list?.list).toBe(true)
     expect(list?.responseType).toBe('UserList')
+    // The list route is the design's deprecated one — the method carries it.
+    expect(list?.deprecated).toBe(true)
+    expect(designGrpcMethods(design).find((m) => m.name === 'GetUser')?.deprecated).toBeUndefined()
   })
 
   it('carries the path-parameter names of a by-id route', () => {

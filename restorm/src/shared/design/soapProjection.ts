@@ -52,6 +52,10 @@ export interface SoapOperation {
   /** Whether the response is a list of instances. */
   list: boolean
   documentation?: string
+  /** The route is flagged deprecated (`route.doc.deprecated`) — emitted as a
+   *  `deprecated="true"` attribute on the portType operation so a re-import
+   *  (the generated SOAP clients) carries the flag. */
+  deprecated?: boolean
 }
 
 /** Derive the SOAP operations — one per route, collision-free. */
@@ -94,6 +98,7 @@ export function designSoapOperations(design: ApiDesign): SoapOperation[] {
       }
       if (model !== undefined) operation.model = model
       if (route.doc.summary !== undefined && route.doc.summary !== '') operation.documentation = route.doc.summary
+      if (route.doc.deprecated === true) operation.deprecated = true
       operations.push(operation)
     }
   }
@@ -144,7 +149,7 @@ export function designToWsdl(design: ApiDesign, address: string): string {
 
   lines.push(`  <wsdl:portType name="${portTypeName}">`)
   for (const operation of operations) {
-    lines.push(`    <wsdl:operation name="${operation.name}">`)
+    lines.push(`    <wsdl:operation name="${operation.name}"${operation.deprecated === true ? ' deprecated="true"' : ''}>`)
     if (operation.documentation !== undefined) {
       lines.push(`      <wsdl:documentation>${xmlEscape(operation.documentation)}</wsdl:documentation>`)
     }

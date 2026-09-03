@@ -118,6 +118,10 @@ export interface GrpcMethod {
   exampleId?: string
   /** Path-parameter field names carried on the request message. */
   pathParams: string[]
+  /** The route is flagged deprecated (`route.doc.deprecated`) — emitted as a
+   *  method-level `option deprecated = true;` so a re-import (the generated
+   *  gRPC clients) carries the flag through reflection. */
+  deprecated?: boolean
 }
 
 /** `{{id}}` / `{id}` path-parameter names, in path order. */
@@ -174,6 +178,7 @@ export function designGrpcMethods(design: ApiDesign): GrpcMethod[] {
       }
       if (model !== undefined) entry.model = model
       if (meta?.exampleId !== undefined) entry.exampleId = meta.exampleId
+      if (route.doc.deprecated === true) entry.deprecated = true
       methods.push(entry)
     }
   }
@@ -323,7 +328,9 @@ export function designToProto(design: ApiDesign): string {
       : m.list
         ? (names.list.get(m.model.id) ?? 'Empty')
         : (names.message.get(m.model.id) ?? 'Empty')
-    out.push(`  rpc ${m.name} (${names.request[i]}) returns (${response});`)
+    out.push(m.deprecated === true
+      ? `  rpc ${m.name} (${names.request[i]}) returns (${response}) { option deprecated = true; }`
+      : `  rpc ${m.name} (${names.request[i]}) returns (${response});`)
   })
   out.push('}', '')
   return out.join('\n')

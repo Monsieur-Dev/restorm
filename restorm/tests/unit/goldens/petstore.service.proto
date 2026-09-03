@@ -53,6 +53,6 @@ message PostUserRequest {
 
 service PetstoreService {
   rpc GetUser (GetUserRequest) returns (User);
-  rpc ListUser (ListUserRequest) returns (UserList);
+  rpc ListUser (ListUserRequest) returns (UserList) { option deprecated = true; }
   rpc PostUser (PostUserRequest) returns (User);
 }

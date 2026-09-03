@@ -28,7 +28,7 @@
       <wsdl:input message="tns:GetUserRequest" />
       <wsdl:output message="tns:GetUserResponse" />
     </wsdl:operation>
-    <wsdl:operation name="ListUser">
+    <wsdl:operation name="ListUser" deprecated="true">
       <wsdl:documentation>List users</wsdl:documentation>
       <wsdl:input message="tns:ListUserRequest" />
       <wsdl:output message="tns:ListUserResponse" />
