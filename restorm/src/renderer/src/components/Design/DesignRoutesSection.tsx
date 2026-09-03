@@ -163,18 +163,27 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
     const childGroupsOf = (parentId: string | undefined): DesignRouteGroup[] =>
       design.routeGroups.filter((g) => g.parentId === parentId)
 
-    const routeNode = (group: DesignRouteGroup, route: DesignRoute): ListViewItemData => ({
+    // A deprecated route fades name + badge together (opacity 0.5), matching
+    // the sidebar/clients dimming, so a route flagged `deprecated` in its
+    // Réglages reads as dimmed in this tree too — not just in the served clients.
+    const dim = (node: React.ReactNode): React.ReactNode =>
+      <span style={{ opacity: 0.5 }} title={t('design.flags.deprecated', 'deprecated')}>{node}</span>
+    const routeNode = (group: DesignRouteGroup, route: DesignRoute): ListViewItemData => {
+      const deprecated = route.doc.deprecated === true
+      const badge = <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />
+      return {
       // A route row reads like a request row: method badge LEFT (icon slot),
       // SUMMARY as the label, pattern as fallback.
       id: route.id,
-      title: routeTitle(route),
-      icon: <RegistryBadge badgeId={httpBadgeIdFor(route.doc.match.method ?? 'GET')} text={route.doc.match.method ?? 'GET'} />,
+      title: deprecated ? dim(routeTitle(route)) : routeTitle(route),
+      icon: deprecated ? dim(badge) : badge,
       draggable: true,
       contextMenuItems: [
         { id: 'delete-route', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { deleteRoute(group, route.id) } }
       ],
       ...(hasIssue(route.id) ? { rightActions: errorDot } : {})
-    })
+      }
+    }
 
     const buildGroup = (group: DesignRouteGroup, ancestorMatches: boolean): ListViewItemData | null => {
       const groupMatches = term === '' || group.doc.name.toLowerCase().includes(term)

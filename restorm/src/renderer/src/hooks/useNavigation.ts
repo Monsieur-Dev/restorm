@@ -390,6 +390,31 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       if (isLast) return
 
       const itemId = item.id
+
+      // Design-client tab crumbs are SYNTHETIC ids (a client folder row, the
+      // Clients section row, or the `design-client-root:<id>` design crumb) —
+      // none live in rootItems, so findItemWithBreadcrumbs can't resolve them.
+      // Route them like the sidebar does: open/refocus the design tab and stage
+      // the Clients section, scoped to the clicked folder when the crumb is one.
+      const clientRow = parseDesignClientRowId(itemId)
+      const sectionRow = parseDesignSectionRowId(itemId)
+      const designRootId = itemId.startsWith('design-client-root:')
+        ? itemId.slice('design-client-root:'.length)
+        : null
+      const designId = clientRow?.designId ?? sectionRow?.designId ?? designRootId
+      if (designId !== null) {
+        const { item: designItem, breadcrumbs: designCrumbs } = findItemWithBreadcrumbs(rootItems, designId)
+        if (!designItem || !isApiDesign(designItem)) return
+        // Highlight the clicked crumb row (folder/section) in the sidebar; the
+        // design-root crumb highlights the design itself.
+        selectSingle(clientRow !== null || sectionRow !== null ? itemId : designId)
+        if (clientRow !== null) setPendingDesignSection(designItem.id, 'clients', itemId)
+        else if (sectionRow !== null) setPendingDesignSection(designItem.id, sectionRow.section)
+        openDesignTab(designItem, designCrumbs)
+        navigationService.navigateTo(itemId, 'breadcrumb', { type: 'design' })
+        return
+      }
+
       const { item: foundItem, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
       if (!foundItem) return
 
@@ -441,7 +466,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         }
       }
     },
-    [rootItems, selectSingle, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs]
+    [rootItems, selectSingle, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, getNearestEnvironmentsForBreadcrumbs]
   )
 
   // Middle-click ("open in background") variant of the breadcrumb
