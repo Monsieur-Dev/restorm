@@ -333,7 +333,11 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
           ? Math.max(0, PARAM_TYPES.length + design.enums.findIndex((e) => e.id === enumRefId))
           : Math.max(0, PARAM_TYPES.indexOf(param.type as typeof PARAM_TYPES[number]))
         const values = enumRefId === undefined ? (param.enumValues ?? []) : []
-        const canInline = enumRefId === undefined && (param.type === 'string' || param.type === 'integer' || param.type === 'number')
+        // A multi-value query param arrives as `array<scalar>` (e.g. petstore
+        // findByStatus `status`); its enum applies to the items, so unwrap the
+        // array to decide whether the inline enum editor applies.
+        const scalarType = /^array<(.+)>$/.exec(param.type)?.[1] ?? param.type
+        const canInline = enumRefId === undefined && (scalarType === 'string' || scalarType === 'integer' || scalarType === 'number')
         return (
           <div className="design-param-type-cell">
             <SelectBox
@@ -356,7 +360,7 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
                 <DesignEnumValuesEditor
                   values={values}
                   onChange={(next) => { setParamEnumValues(param.name, next) }}
-                  parseValue={(raw) => parseTypedRaw(param.type, raw)}
+                  parseValue={(raw) => parseTypedRaw(scalarType, raw)}
                   data-testid={`design-param-enum-values-${param.name}`}
                 />
                 {values.length > 0 && (
