@@ -83,6 +83,7 @@ interface EdmOperation {
 interface EdmEntitySet {
   name: string
   entityType: string
+  deprecated?: boolean
 }
 
 export interface EdmSchema {
@@ -317,7 +318,11 @@ function parseEdmx(xml: string, version: ODataVersion): EdmSchema {
         const name = es.attrs['Name'] ?? ''
         const entityType = es.attrs['EntityType'] ?? ''
         if (name && entityType) {
-          schema.entitySets.push({ name, entityType })
+          // A `Core.Deprecated` annotation inside the EntitySet marks the whole
+          // entity deprecated (emitted by the design's OData projection when
+          // every route exposing the model is deprecated).
+          const deprecated = /<Annotation\b[^>]*\bTerm\s*=\s*["']Core\.Deprecated["'][^>]*\bBool\s*=\s*["']true["']/i.test(es.body)
+          schema.entitySets.push({ name, entityType, ...(deprecated ? { deprecated: true } : {}) })
         }
       }
 
@@ -584,6 +589,10 @@ function buildEntitySetRequest(
     ...(entity?.qualifiedName ? { entityTypeRef: entity.qualifiedName } : {}),
     ...(entitySetProperties.length > 0 ? { entitySetProperties } : {}),
     ...(navigationProperties.length > 0 ? { navigationProperties } : {}),
+    // A deprecated entity set dims ALL its CRUD requests (the apiDoc carries a
+    // single list operation, so stamp the flag on the request itself rather
+    // than relying on the URL→operation matcher to reach every verb).
+    ...(set.deprecated === true ? { deprecated: true } : {}),
     tags: ['odata', set.name]
   })
 }
@@ -843,7 +852,8 @@ function buildApiDocumentation(
       summary: `List ${set.name}`,
       description: `Entity set of ${set.entityType}`,
       group: set.name,
-      referencedModels: [set.entityType]
+      referencedModels: [set.entityType],
+      ...(set.deprecated === true ? { deprecated: true } : {})
     })
   }
 

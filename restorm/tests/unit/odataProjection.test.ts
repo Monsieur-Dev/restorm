@@ -14,7 +14,7 @@ import {
   odataKeyPropertyName,
   ODATA_MAX_SERVED_ROWS
 } from '../../src/shared/design/odataProjection'
-import { parseEdmxV4 } from '../../src/main/services/import/ODataImportService'
+import { parseEdmxV4, importOData } from '../../src/main/services/import/ODataImportService'
 import { applyODataQuery } from '../../src/shared/utils/odataServerQuery'
 import { buildReferenceApiDesign } from './apiDesignReference'
 
@@ -47,6 +47,47 @@ describe('designToCsdl', () => {
 
     expect(schema.enumTypes.length).toBeGreaterThan(0)
     expect(schema.entitySets.map((s) => s.name)).toEqual(expect.arrayContaining(['Users', 'AdminUsers', 'Orders']))
+  })
+
+  it('leaves an entity set active while any route serving its model is active', () => {
+    // The reference design deprecates only the ListUser route; GetUser /
+    // CreateUser still serve the User model, so its entity set stays active.
+    const set = designODataEntitySets(design).find((s) => s.name === 'Users')
+    expect(set?.deprecated).toBeUndefined()
+  })
+
+  it('deprecates an entity set — and dims its CRUD clients — when every route serving its model is deprecated', () => {
+    // OData clients are CRUD generated per entity set (no per-route operation),
+    // so route deprecation aggregates up: mark every route deprecated and the
+    // bound models' entity sets carry `Core.Deprecated`, which the importer
+    // reads back and stamps on all five generated requests. Guards the
+    // green-but-dead trap where the annotation is emitted but nothing parses it.
+    const allDeprecated = buildReferenceApiDesign()
+    for (const group of allDeprecated.routeGroups) {
+      for (const route of group.routes) route.doc = { ...route.doc, deprecated: true }
+    }
+    const users = designODataEntitySets(allDeprecated).find((s) => s.name === 'Users')
+    expect(users?.deprecated).toBe(true)
+
+    const csdl = designToCsdl(allDeprecated)
+    expect(csdl).toContain('Term="Core.Deprecated"')
+    expect(parseEdmxV4(csdl).entitySets.find((s) => s.name === 'Users')?.deprecated).toBe(true)
+
+    // The generated OData clients for the deprecated set are all dimmed (every
+    // CRUD verb, not just the list op the apiDoc carries). Requests are tagged
+    // ['odata', set.name], so filter by tag to isolate the Users set.
+    const folder = importOData(csdl, { apiTitle: 'Round trip', baseUrl: 'http://x/odata' })
+    interface Req { deprecated?: boolean; tags?: string[]; items?: unknown[] }
+    const collect = (items: unknown[], out: Req[] = []): Req[] => {
+      for (const item of items as Req[]) {
+        if (Array.isArray(item.items)) collect(item.items, out)
+        else out.push(item)
+      }
+      return out
+    }
+    const usersRequests = collect(folder.items).filter((r) => r.tags?.includes('Users') === true)
+    expect(usersRequests.length).toBe(5) // GET-list, GET-key, POST, PATCH, DELETE
+    expect(usersRequests.every((r) => r.deprecated === true)).toBe(true)
   })
 
   it('claims colliding sanitized enum members apart — the SDL rule, CSDL side', () => {

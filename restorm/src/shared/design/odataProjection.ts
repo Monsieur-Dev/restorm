@@ -42,6 +42,11 @@ export interface ODataEntitySet {
    * model — the set's data is as protected as its routes: a caller must
    * satisfy ONE of them (the design default applies when empty). */
   auths: DesignAuthKind[]
+  /** The whole entity is deprecated — true only when the model is bound by at
+   * least one route and EVERY route binding it is deprecated. OData clients are
+   * CRUD generated per entity set (no per-route operation), so route
+   * deprecation aggregates up to the set, mirroring {@link modelRouteAuths}. */
+  deprecated?: boolean
 }
 
 /** One EntitySet per model, collision-free. */
@@ -54,9 +59,32 @@ export function designODataEntitySets(design: ApiDesign): ODataEntitySet[] {
     let n = 2
     while (taken.has(name)) { name = `${sanitizeEdmName(pluralize(typeName), `${typeName}Set`)}${n}`; n += 1 }
     taken.add(name)
-    sets.push({ name, typeName, model, auths: modelRouteAuths(design, model) })
+    sets.push({
+      name,
+      typeName,
+      model,
+      auths: modelRouteAuths(design, model),
+      ...(modelRoutesAllDeprecated(design, model) ? { deprecated: true } : {})
+    })
   }
   return sets
+}
+
+/** True when the model is bound by at least one route and every route binding
+ * it is deprecated — the aggregation that marks its entity set deprecated (a
+ * single still-active route keeps the whole set active). */
+function modelRoutesAllDeprecated(design: ApiDesign, model: DesignModel): boolean {
+  let bound = 0
+  for (const group of design.routeGroups) {
+    for (const route of group.routes) {
+      const responses = route.design?.responses ?? {}
+      const binds = Object.values(responses).some((meta) => meta.modelId === model.id)
+      if (!binds) continue
+      bound += 1
+      if (route.doc.deprecated !== true) return false
+    }
+  }
+  return bound > 0
 }
 
 /** The distinct non-`none` effective auths of every route whose success
@@ -206,7 +234,15 @@ export function designToCsdl(design: ApiDesign): string {
 
   lines.push(`      <EntityContainer Name="${xmlEscape(namespace)}Container">`)
   for (const set of sets) {
-    lines.push(`        <EntitySet Name="${xmlEscape(set.name)}" EntityType="${xmlEscape(namespace)}.${xmlEscape(set.typeName)}" />`)
+    const open = `        <EntitySet Name="${xmlEscape(set.name)}" EntityType="${xmlEscape(namespace)}.${xmlEscape(set.typeName)}"`
+    if (set.deprecated === true) {
+      // A deprecated entity set carries the standard Core.Deprecated annotation
+      // (every route exposing this model is deprecated) — the app's own OData
+      // importer reads it back so the generated CRUD clients dim.
+      lines.push(`${open}>`, '          <Annotation Term="Core.Deprecated" Bool="true" />', '        </EntitySet>')
+    } else {
+      lines.push(`${open} />`)
+    }
   }
   lines.push(
     '      </EntityContainer>',
