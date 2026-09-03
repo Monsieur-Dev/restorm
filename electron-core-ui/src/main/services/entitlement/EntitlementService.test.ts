@@ -35,6 +35,9 @@ function makeHarness(opts: {
   initialCache?: Persisted | null
   sessionToken?: string
   entitlementToken?: string
+  /** When set, the entitlement fetch response also carries a re-minted session
+   * JWT — the sliding-session field the app adopts. */
+  refreshedSessionToken?: string
   fetchRejects?: boolean
   /** Share ONE mutable cache slot between several harnesses — the shape of two
    * instances reading and writing the same `auth-session.dat`. */
@@ -47,7 +50,9 @@ function makeHarness(opts: {
 
   const fetchMock = vi.fn((): Promise<Response> => {
     if (opts.fetchRejects) return Promise.reject(new Error('offline'))
-    return Promise.resolve(new Response(JSON.stringify({ entitlement: opts.entitlementToken ?? '' }), { status: 200 }))
+    const body: Record<string, unknown> = { entitlement: opts.entitlementToken ?? '' }
+    if (opts.refreshedSessionToken !== undefined) body['session_token'] = opts.refreshedSessionToken
+    return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }))
   })
   const loginMock = vi.fn((_signal?: AbortSignal): Promise<string> => Promise.resolve(opts.sessionToken ?? 'unused'))
 
@@ -324,6 +329,44 @@ describe('EntitlementService — refresh (auto-refresh trigger target)', () => {
     const state = h.service.getState()
     expect(state.plan).toBe('pro')
     expect(state.capabilities).toEqual(['scenario.stepDebug'])
+  })
+
+  it('sliding session: adopts a re-minted session token from the refresh and persists it', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'pro', capabilities: [] })
+    const h = makeHarness({ now: at(5000), sessionToken, entitlementToken })
+    await h.service.signIn()
+    h.saved.length = 0
+
+    // The backend re-mints a fresh session on this poll (the sliding window).
+    const freshSession = await signSession({ secret: SESSION_SECRET, email: 'a@b.com', iatSeconds: IAT + 5000 })
+    const nextEnt = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT + 5000, plan: 'pro', capabilities: [] })
+    h.fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ entitlement: nextEnt, session_token: freshSession }), { status: 200 })
+    )
+
+    await h.service.refresh()
+
+    // The re-minted session is adopted and persisted (rides the same write).
+    expect(last(h.saved).sessionToken).toBe(freshSession)
+  })
+
+  it('sliding session: ignores an invalid re-minted session token (never downgrades)', async () => {
+    const sessionToken = await signSession({ secret: SESSION_SECRET, iatSeconds: IAT })
+    const entitlementToken = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'community', capabilities: [] })
+    const h = makeHarness({ now: at(10), sessionToken, entitlementToken })
+    await h.service.signIn()
+    h.saved.length = 0
+
+    const nextEnt = await signEntitlement({ privateKey: keys.privateKey, iatSeconds: IAT, plan: 'community', capabilities: [] })
+    h.fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ entitlement: nextEnt, session_token: 'not-a-jwt' }), { status: 200 })
+    )
+
+    await h.service.refresh()
+
+    // The bogus re-mint is rejected; the persisted session stays the valid original.
+    expect(last(h.saved).sessionToken).toBe(sessionToken)
   })
 })
 

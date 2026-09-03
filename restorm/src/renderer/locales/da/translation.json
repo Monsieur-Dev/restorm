@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Beskrivelse (stack / hvad den genererer)",
         "noOrgTemplates": "Ingen organisationsskabeloner endnu.",
         "loading": "Indlæser skabeloner…",
-        "signedOut": "Log ind for at se de officielle og organisationsskabeloner.",
+        "signedOut": "Log ind for at se din organisations skabeloner.",
         "fetchError": "Kunne ikke indlæse skabeloner:",
         "unavailable": "utilgængelig",
         "officialTag": "Officiel",

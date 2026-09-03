@@ -25,12 +25,15 @@ import './designTemplateLibrary.css'
 /** Git host → its provider logo, as a Material Design icon (github / gitlab /
  * bitbucket, falling back to the generic `git` mark for anything else). */
 function providerIcon(url: string): { type: 'material'; value: string } {
+  // `material` icons resolve through @mdi/js, whose exports are the full
+  // `mdi`-prefixed PascalCase names (mdiGithub, …) — a bare "github" resolves
+  // to no path and renders nothing.
   let host = ''
   try { host = new URL(url).host.toLowerCase() } catch { host = '' }
-  if (host.includes('github')) return { type: 'material', value: 'github' }
-  if (host.includes('gitlab')) return { type: 'material', value: 'gitlab' }
-  if (host.includes('bitbucket')) return { type: 'material', value: 'bitbucket' }
-  return { type: 'material', value: 'git' }
+  if (host.includes('github')) return { type: 'material', value: 'mdiGithub' }
+  if (host.includes('gitlab')) return { type: 'material', value: 'mdiGitlab' }
+  if (host.includes('bitbucket')) return { type: 'material', value: 'mdiBitbucket' }
+  return { type: 'material', value: 'mdiGit' }
 }
 
 /** A short display name for a cloud-template row — the `owner/repo` path from
@@ -76,12 +79,15 @@ export const DesignTemplateLibraryModal: React.FC<{
       const res = await window.restorm?.designCodegen.listTemplates()
       const view = res?.success === true ? res.view : undefined
       if (view === undefined) {
-        if (res?.signedOut === true) setSignedOut(true)
-        else setError(res?.error ?? t('design.code.library.unavailable', 'unavailable'))
+        setError(res?.error ?? t('design.code.library.unavailable', 'unavailable'))
         setOfficial([])
         setOrgTemplates([])
         return
       }
+      // Official templates are public: the view arrives populated even signed
+      // out, with `signedOut` set so we show a discreet "reconnect for your org
+      // templates" hint rather than hiding anything.
+      setSignedOut(res?.signedOut === true)
       setOrgName(view.orgName)
       setIsEnterprise(view.isEnterprise)
       setCanManage(view.canManage)
@@ -363,7 +369,7 @@ export const DesignTemplateLibraryModal: React.FC<{
       )}
       {signedOut && (
         <div className="design-template-library__status" data-testid="design-template-library-signedout">
-          {t('design.code.library.signedOut', 'Sign in to see the official and organization templates.')}
+          {t('design.code.library.signedOut', 'Sign in to see your organization’s templates.')}
         </div>
       )}
       {error !== null && (

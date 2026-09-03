@@ -2289,7 +2289,7 @@
         "descPlaceholder": "Descriere (stack / ce generează)",
         "noOrgTemplates": "Încă nu există șabloane ale organizației.",
         "loading": "Se încarcă șabloanele…",
-        "signedOut": "Autentifică-te pentru a vedea șabloanele oficiale și ale organizației.",
+        "signedOut": "Autentifică-te pentru a vedea șabloanele organizației tale.",
         "fetchError": "Șabloanele nu au putut fi încărcate:",
         "unavailable": "indisponibil",
         "officialTag": "Oficial",

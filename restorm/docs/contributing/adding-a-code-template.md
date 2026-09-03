@@ -161,5 +161,7 @@ script and re-apply it — do not re-introduce an in-code list.
 - extraction validates EVERY path against the confirmed output root
   before the first byte lands (no partial trees on refusal) — see
   `tests/unit/designCodegenExtract.test.ts`;
-- an invalid design cannot generate (same gate as serving); generation
-  is part of `DESIGN_RUN_CAPABILITY` (visible-but-locked in Community).
+- an invalid design cannot generate (same validity gate as serving);
+  generation itself is **free on every plan** (Community included) — only
+  serving the design as a mock is Pro (`DESIGN_RUN_CAPABILITY`), and the
+  org's shared templates are Enterprise.

@@ -2287,7 +2287,7 @@
         "descPlaceholder": "描述（技术栈 / 生成内容）",
         "noOrgTemplates": "还没有组织模板。",
         "loading": "正在加载模板…",
-        "signedOut": "登录以查看官方和组织模板。",
+        "signedOut": "登录以查看您组织的模板。",
         "fetchError": "无法加载模板：",
         "unavailable": "不可用",
         "officialTag": "官方",

@@ -2290,7 +2290,7 @@
         "descPlaceholder": "Popis (stack / co generuje)",
         "noOrgTemplates": "Zatím žádné šablony organizace.",
         "loading": "Načítání šablon…",
-        "signedOut": "Přihlaste se pro zobrazení oficiálních šablon a šablon organizace.",
+        "signedOut": "Přihlaste se pro zobrazení šablon vaší organizace.",
         "fetchError": "Šablony se nepodařilo načíst:",
         "unavailable": "nedostupné",
         "officialTag": "Oficiální",

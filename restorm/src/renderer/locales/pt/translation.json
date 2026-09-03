@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Descrição (stack / o que gera)",
         "noOrgTemplates": "Ainda não há modelos da organização.",
         "loading": "Carregando modelos…",
-        "signedOut": "Entre para ver os modelos oficiais e da organização.",
+        "signedOut": "Inicie sessão para ver os modelos da sua organização.",
         "fetchError": "Não foi possível carregar os modelos:",
         "unavailable": "indisponível",
         "officialTag": "Oficial",

@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Beskrivelse (stack / hva den genererer)",
         "noOrgTemplates": "Ingen organisasjonsmaler ennå.",
         "loading": "Laster maler…",
-        "signedOut": "Logg inn for å se de offisielle og organisasjonsmalene.",
+        "signedOut": "Logg inn for å se organisasjonens maler.",
         "fetchError": "Kunne ikke laste malene:",
         "unavailable": "utilgjengelig",
         "officialTag": "Offisiell",

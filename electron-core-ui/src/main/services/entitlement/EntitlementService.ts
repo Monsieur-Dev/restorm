@@ -370,6 +370,16 @@ export class EntitlementService {
     if (!this.sessionToken) return
     try {
       const body = await fetchEntitlement(this.deps.entitlementUrl, this.sessionToken, this.deps.fetchImpl)
+      // Sliding session: the backend re-mints a fresh session JWT on every online
+      // poll and returns it here, so an app left open past the 30-day session life
+      // never lapses. Adopt it (before persist, so it rides the same write) only
+      // when it verifies as a live session token — never downgrade to a bad one.
+      if (
+        body.session_token &&
+        !isSessionExpired(body.session_token, nowSeconds(this.deps.now), this.deps.sessionAudience)
+      ) {
+        this.sessionToken = body.session_token
+      }
       const verified = await this.verify(body.entitlement)
       if (verified) {
         this.entitlement = { token: body.entitlement, claims: verified }

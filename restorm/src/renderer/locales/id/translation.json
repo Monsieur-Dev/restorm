@@ -2287,7 +2287,7 @@
         "descPlaceholder": "Deskripsi (stack / apa yang dihasilkan)",
         "noOrgTemplates": "Belum ada templat organisasi.",
         "loading": "Memuat templat…",
-        "signedOut": "Masuk untuk melihat templat resmi dan organisasi.",
+        "signedOut": "Masuk untuk melihat templat organisasi Anda.",
         "fetchError": "Tidak dapat memuat templat:",
         "unavailable": "tidak tersedia",
         "officialTag": "Resmi",

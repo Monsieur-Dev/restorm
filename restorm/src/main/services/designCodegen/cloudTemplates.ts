@@ -14,6 +14,7 @@
 
 import {
   getEntitlementService,
+  makeBackendFetch,
   resolveBackendVersion,
 } from '../auth/authComposition'
 import { endpointUrl, resolveChannel } from '../../../shared/config/backend'
@@ -32,6 +33,28 @@ export function listCloudTemplates(): Promise<CloudTemplatesView | null> {
     templatesUrl(),
     { action: 'list' }
   )
+}
+
+/**
+ * The OFFICIAL templates only, fetched anonymously (no session). Official
+ * templates are public data — plain pointers to public git repos — so the
+ * library shows them even to a signed-out or expired-session user. Uses the
+ * same channel-scoped, firewall-bypassed fetch the entitlement service uses,
+ * with no `Authorization` header, so the `templates` endpoint answers as the
+ * anonymous caller (officials, empty org).
+ */
+export async function listPublicOfficialTemplates(): Promise<CloudTemplate[]> {
+  const fetchImpl = makeBackendFetch(resolveBackendVersion())
+  const res = await fetchImpl(templatesUrl(), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ action: 'list' })
+  })
+  if (!res.ok) {
+    throw new Error(`templates list failed with ${String(res.status)}`)
+  }
+  const view = (await res.json()) as CloudTemplatesView
+  return view.official
 }
 
 /** Add a template to the caller's org. `null` when signed out; throws on a

@@ -2291,7 +2291,7 @@
         "descPlaceholder": "Description (stack / ce qu'il génère)",
         "noOrgTemplates": "Aucun template d'organisation pour l'instant.",
         "loading": "Chargement des templates…",
-        "signedOut": "Connectez-vous pour voir les templates officiels et d'organisation.",
+        "signedOut": "Connectez-vous pour voir les templates de votre organisation.",
         "fetchError": "Impossible de charger les templates :",
         "unavailable": "indisponible",
         "officialTag": "Officiel",

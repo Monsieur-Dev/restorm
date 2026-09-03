@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Leírás (stack / mit generál)",
         "noOrgTemplates": "Még nincsenek szervezeti sablonok.",
         "loading": "Sablonok betöltése…",
-        "signedOut": "Jelentkezzen be a hivatalos és szervezeti sablonok megtekintéséhez.",
+        "signedOut": "Jelentkezzen be a szervezete sablonjainak megtekintéséhez.",
         "fetchError": "A sablonok betöltése sikertelen:",
         "unavailable": "nem elérhető",
         "officialTag": "Hivatalos",

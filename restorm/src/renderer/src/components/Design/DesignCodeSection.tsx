@@ -3,10 +3,10 @@
  * runs. A design carries a LIST of templates (TASK-468.20): the app code, then
  * the DB, then the backend… Each row names a template source + its output
  * folder and has its own round "generate" disc; new rows are added from the
- * template library modal (recent / official / custom). Generation renders INTO
- * MEMORY and the previewed tree is confirmed before a byte lands on disk.
- * Generation is the paid half of the design capability (DESIGN_RUN_CAPABILITY)
- * and an invalid design cannot generate at all.
+ * template library modal (recent / official / org / custom). Generation renders
+ * INTO MEMORY and the previewed tree is confirmed before a byte lands on disk.
+ * Generation is FREE on every plan (Community included) — only an invalid design
+ * blocks it. Serving the design as a mock is the Pro half (DESIGN_RUN_CAPABILITY).
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -14,15 +14,13 @@ import { useTranslation } from 'react-i18next'
 import {
   Button,
   ControlGroup,
-  GatedControl,
   InputBox,
   Modal,
   Pane,
   ScrollableElement,
   SplitView,
   Tabs,
-  toasterService,
-  useAuthState
+  toasterService
 } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DesignCodegenGeneralVariables } from './DesignCodegenGeneralVariables'
@@ -36,9 +34,7 @@ import type {
   DesignTemplateSource
 } from '../../../../shared/types/collections'
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
-import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { generateUniqueId } from '../../../../shared/utils/reidentifyTree'
-import { subscribeToPro } from '../../services/subscribeToPro'
 import { assignDesignSection } from './designMutations'
 import { DesignTemplateLibraryModal } from './DesignTemplateLibraryModal'
 import { loadRecentTemplates, pushRecentTemplate, type RecentTemplate } from './designCodegenRecents'
@@ -54,7 +50,6 @@ export const DesignCodeSection: React.FC<{
   issues: DesignIssue[]
 }> = ({ design, issues }) => {
   const { t } = useTranslation()
-  const runLocked = isDesignRunLocked(useAuthState())
 
   const templates = useMemo(() => design.codegen?.templates ?? [], [design.codegen])
   const [libraryOpen, setLibraryOpen] = useState(false)
@@ -268,31 +263,28 @@ export const DesignCodeSection: React.FC<{
               <div className="design-code-template-body" data-testid={`design-code-template-${tpl.id}`}>
               <div className="design-code-template-top">
                 <div className="design-code-template-play">
-                  <GatedControl
-                    locked={runLocked}
-                    onSubscribe={() => { void subscribeToPro() }}
-                    data-testid={`design-code-gate-${tpl.id}`}
+                  {/* Generation is FREE on every plan (Community included): the
+                      button gates only on a valid design + a chosen output
+                      folder — never on the plan. Serving the mock stays Pro. */}
+                  <HeaderHoverTooltip
+                    label={
+                      blocked
+                        ? t('design.code.blocked', 'Fix the design’s {{count}} validation issue(s) before generating', { count: issues.length })
+                        : (tpl.outputDir ?? '').trim() === ''
+                          ? t('design.code.outputMissing', 'Choose an output folder first')
+                          : t('design.code.generateOne', 'Generate this project')
+                    }
                   >
-                    <HeaderHoverTooltip
-                      label={
-                        blocked
-                          ? t('design.code.blocked', 'Fix the design’s {{count}} validation issue(s) before generating', { count: issues.length })
-                          : (tpl.outputDir ?? '').trim() === ''
-                            ? t('design.code.outputMissing', 'Choose an output folder first')
-                            : t('design.code.generateOne', 'Generate this project')
-                      }
-                    >
-                      <RoundActionButton
-                        icon={generating && activeId === tpl.id ? 'loading' : 'run'}
-                        tone="run"
-                        size="secondary"
-                        disabled={runLocked || blocked || generating || (tpl.outputDir ?? '').trim() === ''}
-                        onClick={() => { void generate(tpl) }}
-                        ariaLabel={t('design.code.generateOne', 'Generate this project')}
-                        data-testid={`design-code-generate-${tpl.id}`}
-                      />
-                    </HeaderHoverTooltip>
-                  </GatedControl>
+                    <RoundActionButton
+                      icon={generating && activeId === tpl.id ? 'loading' : 'run'}
+                      tone="run"
+                      size="secondary"
+                      disabled={blocked || generating || (tpl.outputDir ?? '').trim() === ''}
+                      onClick={() => { void generate(tpl) }}
+                      ariaLabel={t('design.code.generateOne', 'Generate this project')}
+                      data-testid={`design-code-generate-${tpl.id}`}
+                    />
+                  </HeaderHoverTooltip>
                 </div>
                 <div className="design-code-template-fields">
                   <div className="design-code-field-row">

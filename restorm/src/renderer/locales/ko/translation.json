@@ -2287,7 +2287,7 @@
         "descPlaceholder": "설명 (스택 / 생성 내용)",
         "noOrgTemplates": "아직 조직 템플릿이 없습니다.",
         "loading": "템플릿 로드 중…",
-        "signedOut": "공식 및 조직 템플릿을 보려면 로그인하세요.",
+        "signedOut": "조직의 템플릿을 보려면 로그인하세요.",
         "fetchError": "템플릿을 불러오지 못했습니다:",
         "unavailable": "사용 불가",
         "officialTag": "공식",

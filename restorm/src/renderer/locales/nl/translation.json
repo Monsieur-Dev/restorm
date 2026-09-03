@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Beschrijving (stack / wat het genereert)",
         "noOrgTemplates": "Nog geen organisatiesjablonen.",
         "loading": "Sjablonen laden…",
-        "signedOut": "Meld je aan om de officiële en organisatiesjablonen te zien.",
+        "signedOut": "Meld je aan om de sjablonen van je organisatie te zien.",
         "fetchError": "Kon de sjablonen niet laden:",
         "unavailable": "niet beschikbaar",
         "officialTag": "Officieel",

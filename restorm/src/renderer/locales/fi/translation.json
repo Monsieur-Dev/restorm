@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Kuvaus (stack / mitä se generoi)",
         "noOrgTemplates": "Ei vielä organisaation malleja.",
         "loading": "Ladataan malleja…",
-        "signedOut": "Kirjaudu sisään nähdäksesi viralliset ja organisaation mallit.",
+        "signedOut": "Kirjaudu sisään nähdäksesi organisaatiosi mallit.",
         "fetchError": "Mallien lataaminen epäonnistui:",
         "unavailable": "ei saatavilla",
         "officialTag": "Virallinen",

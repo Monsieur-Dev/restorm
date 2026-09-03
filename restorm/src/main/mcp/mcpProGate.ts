@@ -131,9 +131,11 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'list_custom_value_lists',
   // design domain — EDITING a design is free on every plan (the same
   // decision as the UI: the plan gates PLAYING it, not building it).
-  // The RUN + EXPORT surface (serve/steer/status/export/codegen) sits in
-  // PRO below, aligned with DESIGN_RUN_CAPABILITY and mirroring the
-  // scenario gate (Yoann 2026-08-17: run and export are paid).
+  // The mock-SERVE + EXPORT surface (serve/steer/status/export) sits in
+  // PRO below, aligned with DESIGN_RUN_CAPABILITY. Code GENERATION was
+  // split OUT to free (Yoann 2026-09-03): Community can run the official +
+  // local templates — only serving the design as a mock stays Pro+, and
+  // the org's SHARED templates stay Enterprise (server-enforced).
   'list_designs',
   'get_design',
   'create_design',
@@ -163,12 +165,15 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   // (generate_design_code) is Pro.
   'set_design_templates',
   'get_design_template_contract',
-  // authoring the per-scope codegen variable values is design editing (free);
-  // only RUNNING a template (generate_design_code) is Pro.
+  // authoring the per-scope codegen variable values is design editing (free).
   'set_design_template_variables',
   'set_design_model_variables',
   'set_design_property_variables',
   'set_design_route_variables',
+  // GENERATING code from a template is FREE on every plan (Yoann 2026-09-03):
+  // Community can use the official + local templates. Serving the design as a
+  // mock stays Pro (below); the org's shared templates stay Enterprise.
+  'generate_design_code',
   'set_favorite',
   // application settings — the generic read/write routes over every setting
   'get_settings',
@@ -252,16 +257,15 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   'list_themes',
   'get_workbench_layout',
   'set_workbench_layout',
-  // design RUN + EXPORT surface — playing a design (serving, hot
-  // steering, status), generating code, and exporting a descriptor are
-  // the paid half of the design domain, mirroring DESIGN_RUN_CAPABILITY
-  // on the UI's spin button and the scenario gate (edit free, run+export
-  // paid — Yoann 2026-08-17).
+  // design mock-SERVE + EXPORT surface — playing a design (serving as a
+  // mock, hot steering, status) and exporting a descriptor are the paid
+  // half of the design domain, mirroring DESIGN_RUN_CAPABILITY on the UI's
+  // serve button (Yoann 2026-08-17). Code GENERATION was split OUT to free
+  // (2026-09-03, in the free set above) — only the mock RUN stays Pro+.
   'serve_design',
   'stop_design_server',
   'set_design_route_response',
   'get_design_server_status',
-  'generate_design_code',
   'export_design'
 ])
 

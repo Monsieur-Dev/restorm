@@ -2290,7 +2290,7 @@
         "descPlaceholder": "Opis (stack / co generuje)",
         "noOrgTemplates": "Brak szablonów organizacji.",
         "loading": "Ładowanie szablonów…",
-        "signedOut": "Zaloguj się, aby zobaczyć oficjalne szablony i szablony organizacji.",
+        "signedOut": "Zaloguj się, aby zobaczyć szablony swojej organizacji.",
         "fetchError": "Nie udało się załadować szablonów:",
         "unavailable": "niedostępne",
         "officialTag": "Oficjalny",

@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Beskrivning (stack / vad den genererar)",
         "noOrgTemplates": "Inga organisationsmallar ännu.",
         "loading": "Läser in mallar…",
-        "signedOut": "Logga in för att se de officiella och organisationsmallarna.",
+        "signedOut": "Logga in för att se din organisations mallar.",
         "fetchError": "Det gick inte att läsa in mallarna:",
         "unavailable": "otillgänglig",
         "officialTag": "Officiell",

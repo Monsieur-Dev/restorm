@@ -26,19 +26,20 @@
 export const CRASH_OPT_OUT_CAPABILITY = 'crash.optOut'
 
 /**
- * Gates RUNNING an API design: spinning up the design server and
- * generating code from it. Locked for `community`, unlocked for every
- * paid plan. Deliberately NOT an editing gate (Yoann, 2026-08-17):
- * the free tier designs freely — what a subscription buys is playing
- * the design (design server, 468.6) and turning it into code (468.10).
- * A pure function of the plan tier, hence a pseudo-capability rather
- * than a backend-minted one.
+ * Gates SERVING an API design as a mock: spinning up the design server.
+ * Locked for `community`, unlocked for every paid plan. Deliberately NOT an
+ * editing gate, and (Yoann, 2026-09-03) NOT a code-generation gate either:
+ * the free tier designs freely AND generates code freely (from the official +
+ * local templates) — what a subscription buys is PLAYING the design as a mock
+ * (design server, 468.6). The org's SHARED templates are the separate
+ * Enterprise gate (server-enforced). A pure function of the plan tier, hence a
+ * pseudo-capability rather than a backend-minted one.
  */
 export const DESIGN_RUN_CAPABILITY = 'design.run'
 
-/** The one shared reading of the design-run gate, so the serve button,
- * the code generators and the settings machinery can never disagree on
- * who may run a design. */
+/** The one shared reading of the design-serve gate, so the serve button and the
+ * settings machinery can never disagree on who may serve a design as a mock.
+ * (Code generation is NOT gated — it is free on every plan.) */
 export function isDesignRunLocked(authState: { plan?: string | null | undefined }): boolean {
   return (authState.plan ?? 'community') === 'community'
 }

@@ -2289,7 +2289,7 @@
         "descPlaceholder": "Opis (stack / što generira)",
         "noOrgTemplates": "Još nema predložaka organizacije.",
         "loading": "Učitavanje predložaka…",
-        "signedOut": "Prijavite se za prikaz službenih i predložaka organizacije.",
+        "signedOut": "Prijavite se za prikaz predložaka vaše organizacije.",
         "fetchError": "Predloške nije moguće učitati:",
         "unavailable": "nedostupno",
         "officialTag": "Službeno",

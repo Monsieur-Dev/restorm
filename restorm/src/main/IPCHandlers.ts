@@ -28,7 +28,7 @@ import { odataMockServerService } from './services/ODataMockServerService'
 import { designServerService } from './services/DesignServerService'
 import type { ApiDesign } from '../shared/types/apiDesign'
 import { designCodegenService } from './services/designCodegen/DesignCodegenService'
-import { listCloudTemplates, createCloudTemplate, deleteCloudTemplate } from './services/designCodegen/cloudTemplates'
+import { listCloudTemplates, listPublicOfficialTemplates, createCloudTemplate, deleteCloudTemplate } from './services/designCodegen/cloudTemplates'
 import { collectionStore } from './services/CollectionStore'
 import { isApiDesign } from '../shared/models'
 import { trpcExecutionService } from './services/TrpcExecutionService'
@@ -1420,8 +1420,22 @@ export function registerRestormIPC(deps: {
   validatedHandle('design-codegen:list-templates', designCodegenListTemplatesArgs, async () => {
     try {
       const view = await listCloudTemplates()
-      if (view === null) return { success: false, signedOut: true }
-      return { success: true, view }
+      if (view !== null) return { success: true, view }
+    } catch {
+      // A session-scoped failure must not hide the public officials — fall through
+      // to the anonymous fetch below and surface them anyway.
+    }
+    // Signed out (or session unusable): official templates are public, so fetch
+    // them anonymously. `signedOut` tells the library to show the officials with
+    // a discreet "reconnect to see your organization's templates" hint rather
+    // than an empty/broken state.
+    try {
+      const official = await listPublicOfficialTemplates()
+      return {
+        success: true,
+        signedOut: true,
+        view: { orgName: null, isEnterprise: false, canManage: false, official, org: [] }
+      }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }

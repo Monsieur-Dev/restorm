@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Descripción (stack / lo que genera)",
         "noOrgTemplates": "Aún no hay plantillas de organización.",
         "loading": "Cargando plantillas…",
-        "signedOut": "Inicia sesión para ver las plantillas oficiales y de la organización.",
+        "signedOut": "Inicia sesión para ver las plantillas de tu organización.",
         "fetchError": "No se pudieron cargar las plantillas:",
         "unavailable": "no disponible",
         "officialTag": "Oficial",

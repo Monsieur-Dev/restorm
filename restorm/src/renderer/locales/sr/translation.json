@@ -2289,7 +2289,7 @@
         "descPlaceholder": "Opis (stack / šta generiše)",
         "noOrgTemplates": "Još nema šablona organizacije.",
         "loading": "Učitavanje šablona…",
-        "signedOut": "Prijavite se da biste videli zvanične šablone i šablone organizacije.",
+        "signedOut": "Prijavite se da biste videli šablone svoje organizacije.",
         "fetchError": "Nije moguće učitati šablone:",
         "unavailable": "nedostupno",
         "officialTag": "Zvanično",

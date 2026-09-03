@@ -2288,7 +2288,7 @@
         "descPlaceholder": "Açıklama (stack / ne ürettiği)",
         "noOrgTemplates": "Henüz kuruluş şablonu yok.",
         "loading": "Şablonlar yükleniyor…",
-        "signedOut": "Resmi ve kuruluş şablonlarını görmek için oturum açın.",
+        "signedOut": "Kuruluşunuzun şablonlarını görmek için oturum açın.",
         "fetchError": "Şablonlar yüklenemedi:",
         "unavailable": "kullanılamıyor",
         "officialTag": "Resmi",

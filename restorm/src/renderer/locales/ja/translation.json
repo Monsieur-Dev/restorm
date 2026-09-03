@@ -2287,7 +2287,7 @@
         "descPlaceholder": "説明（スタック / 生成内容）",
         "noOrgTemplates": "組織のテンプレートはまだありません。",
         "loading": "テンプレートを読み込んでいます…",
-        "signedOut": "公式テンプレートと組織テンプレートを見るにはサインインしてください。",
+        "signedOut": "組織のテンプレートを見るにはサインインしてください。",
         "fetchError": "テンプレートを読み込めませんでした:",
         "unavailable": "利用不可",
         "officialTag": "公式",
