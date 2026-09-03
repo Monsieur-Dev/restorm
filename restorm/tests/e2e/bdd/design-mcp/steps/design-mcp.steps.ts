@@ -381,7 +381,7 @@ Then('the design spin button shows the idle state', async () => {
   await expect(p.locator('[data-testid="design-serve-spin"]')).not.toHaveClass(/design-serve-spin-active/, { timeout: 10000 })
 })
 
-Then('the template contract over MCP carries the manifest schema, the context schema and the official templates', async () => {
+Then('the template contract over MCP carries the manifest schema and the context schema', async () => {
   const reply = await call('get_design_template_contract', {})
   expect(reply['error']).toBeUndefined()
   expect(reply['contextVersion']).toBe(1)
@@ -391,11 +391,9 @@ Then('the template contract over MCP carries the manifest schema, the context sc
   )
   const contextSchema = reply['contextSchema'] as { required?: string[] }
   expect(contextSchema.required).toEqual(expect.arrayContaining(['contextVersion', 'design', 'models']))
-  const official = reply['officialTemplates'] as { id: string; description: string }[]
-  expect(official.map((entry) => entry.id)).toEqual(
-    expect.arrayContaining(['server-rest-typescript', 'server-rest-dotnet', 'db-postgres'])
-  )
-  expect(official.every((entry) => typeof entry.description === 'string' && entry.description.length > 0)).toBe(true)
+  // Official templates now live in the cloud library, not in this contract.
+  expect(reply['officialTemplates']).toBeUndefined()
+  expect(typeof reply['officialTemplatesNote']).toBe('string')
 })
 
 When("the agent sets the design's templates to a repo and a local folder", async () => {

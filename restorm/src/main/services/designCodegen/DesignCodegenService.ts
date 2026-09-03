@@ -30,7 +30,6 @@ import {
   readLocalCopierQuestions,
   readAnswersFile,
   scanUsedVariables,
-  OFFICIAL_TEMPLATES,
   type AcquiredTemplate,
   type TemplateManifest,
   type TemplateQuestion,
@@ -68,7 +67,6 @@ export interface CodegenRunResult {
 
 /** A stable cache key for a template source. */
 function sourceCacheKey(source: TemplateSourceRef): string {
-  if (source.kind === 'official') return `official:${source.id}`
   if (source.kind === 'repo') return `repo:${source.repo}@${source.ref ?? 'main'}`
   return `local:${source.path}`
 }
@@ -76,7 +74,6 @@ function sourceCacheKey(source: TemplateSourceRef): string {
 /** Two template source refs point at the same template. */
 function sameSource(a: TemplateSourceRef, b: TemplateSourceRef): boolean {
   if (a.kind !== b.kind) return false
-  if (a.kind === 'official' && b.kind === 'official') return a.id === b.id
   if (a.kind === 'repo' && b.kind === 'repo') return a.repo === b.repo && (a.ref ?? 'main') === (b.ref ?? 'main')
   if (a.kind === 'local' && b.kind === 'local') return a.path === b.path
   return false
@@ -120,12 +117,7 @@ class DesignCodegenService {
 
   async acquire(source: TemplateSourceRef): Promise<AcquiredTemplate> {
     if (source.kind === 'local') return acquireLocalTemplate(source.path)
-    if (source.kind === 'repo') return acquireRemoteTemplate(source.repo, source.ref ?? 'main')
-    const official = OFFICIAL_TEMPLATES.find((t) => t.id === source.id)
-    if (official === undefined) {
-      throw new Error(`unknown official template: ${source.id}`)
-    }
-    return acquireRemoteTemplate(official.repo)
+    return acquireRemoteTemplate(source.repo, source.ref ?? 'main')
   }
 
   /**
@@ -236,11 +228,7 @@ class DesignCodegenService {
     if (source.kind === 'local') {
       variables = readLocalManifestVariables(source.path)
     } else {
-      const repo = source.kind === 'official'
-        ? OFFICIAL_TEMPLATES.find((t) => t.id === source.id)?.repo
-        : source.repo
-      if (repo === undefined) throw new Error(`unknown official template: ${source.id}`)
-      variables = await fetchRemoteManifestVariables(repo, source.kind === 'repo' ? (source.ref ?? 'main') : 'main')
+      variables = await fetchRemoteManifestVariables(source.repo, source.ref ?? 'main')
     }
     this.variablesCache.set(key, variables)
     return variables
@@ -262,11 +250,7 @@ class DesignCodegenService {
     if (source.kind === 'local') {
       questions = readLocalCopierQuestions(source.path)
     } else {
-      const repo = source.kind === 'official'
-        ? OFFICIAL_TEMPLATES.find((t) => t.id === source.id)?.repo
-        : source.repo
-      if (repo === undefined) throw new Error(`unknown official template: ${source.id}`)
-      questions = await fetchRemoteCopierQuestions(repo, source.kind === 'repo' ? (source.ref ?? 'main') : 'main')
+      questions = await fetchRemoteCopierQuestions(source.repo, source.ref ?? 'main')
     }
     this.questionsCache.set(key, questions)
     return questions

@@ -28,6 +28,7 @@ import { odataMockServerService } from './services/ODataMockServerService'
 import { designServerService } from './services/DesignServerService'
 import type { ApiDesign } from '../shared/types/apiDesign'
 import { designCodegenService } from './services/designCodegen/DesignCodegenService'
+import { listCloudTemplates, createCloudTemplate, deleteCloudTemplate } from './services/designCodegen/cloudTemplates'
 import { collectionStore } from './services/CollectionStore'
 import { isApiDesign } from '../shared/models'
 import { trpcExecutionService } from './services/TrpcExecutionService'
@@ -72,6 +73,7 @@ import {
   designServerStartArgs, designServerStopArgs, designServerStatusArgs,
   designServerSetForcedArgs, designServerUpdateArgs, designExportDescriptorArgs,
   designCodegenGenerateArgs, designCodegenVariablesArgs, designCodegenExtractArgs, designCodegenDiscardArgs, designCodegenReadAnswersArgs, designPickDirectoryArgs,
+  designCodegenListTemplatesArgs, designCodegenCreateTemplateArgs, designCodegenDeleteTemplateArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
@@ -1407,6 +1409,41 @@ export function registerRestormIPC(deps: {
   validatedHandle('design-codegen:questions', designCodegenVariablesArgs, async (_event, [source]) => {
     try {
       return { success: true, questions: await designCodegenService.getTemplateQuestions(source) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Cloud template library: the official set + the caller org's own (Enterprise).
+  // A `null` result means signed out — surfaced as `signedOut` so the library can
+  // prompt a login rather than show a fetch error.
+  validatedHandle('design-codegen:list-templates', designCodegenListTemplatesArgs, async () => {
+    try {
+      const view = await listCloudTemplates()
+      if (view === null) return { success: false, signedOut: true }
+      return { success: true, view }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Add a template to the caller's org (Enterprise + permitted, enforced server-side).
+  validatedHandle('design-codegen:create-template', designCodegenCreateTemplateArgs, async (_event, [url, description]) => {
+    try {
+      const template = await createCloudTemplate(url, description)
+      if (template === null) return { success: false, signedOut: true }
+      return { success: true, template }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Remove one of the caller org's templates (never an official one, enforced server-side).
+  validatedHandle('design-codegen:delete-template', designCodegenDeleteTemplateArgs, async (_event, [id]) => {
+    try {
+      const out = await deleteCloudTemplate(id)
+      if (out === null) return { success: false, signedOut: true }
+      return { success: true }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }

@@ -11,7 +11,6 @@ import { CodegenVariablesEditor, type CodegenVariablesEditorHandle } from './Cod
 function templateLabel(template: DesignCodegenTemplate): string {
   if (template.label !== undefined && template.label !== '') return template.label
   const source = template.source
-  if (source.kind === 'official') return source.id
   if (source.kind === 'repo') return source.repo
   return source.path.split(/[/\\]/).filter(Boolean).pop() ?? source.path
 }

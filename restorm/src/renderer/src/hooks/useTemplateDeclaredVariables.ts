@@ -9,7 +9,6 @@ const cache = new Map<string, TemplateVariableDecl[]>()
 const inFlight = new Set<string>()
 
 function sourceKey(source: DesignTemplateSource): string {
-  if (source.kind === 'official') return `official:${source.id}`
   if (source.kind === 'repo') return `repo:${source.repo}@${source.ref ?? 'main'}`
   return `local:${source.path}`
 }

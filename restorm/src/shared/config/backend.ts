@@ -53,6 +53,9 @@ export const BACKEND_ENDPOINTS = {
   /** Org administration. The app only ever calls its token actions, which are
    * scoped server-side to the caller's own tokens. */
   admin: 'admin',
+  /** Cloud-hosted codegen template registry — the official templates plus the
+   * caller org's own (Enterprise). Read by the code-generation library. */
+  templates: 'templates',
   checkout: 'checkout',
   'customer-portal': 'customer-portal'
 } as const

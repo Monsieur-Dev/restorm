@@ -40,7 +40,6 @@ import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { generateUniqueId } from '../../../../shared/utils/reidentifyTree'
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { assignDesignSection } from './designMutations'
-import { officialLabel, officialRepo } from './designOfficialTemplates'
 import { DesignTemplateLibraryModal } from './DesignTemplateLibraryModal'
 import { loadRecentTemplates, pushRecentTemplate, type RecentTemplate } from './designCodegenRecents'
 
@@ -99,23 +98,19 @@ export const DesignCodeSection: React.FC<{
   const labelFor = useCallback(
     (tpl: DesignCodegenTemplate): string => {
       if (tpl.label !== undefined && tpl.label !== '') return tpl.label
-      if (tpl.source.kind === 'official') return officialLabel(tpl.source.id)
       if (tpl.source.kind === 'repo') return tpl.source.repo
       return tpl.source.path
     },
     []
   )
 
-  // The GitHub repo URL (or local path) shown on the "Source" line.
+  // The repo URL (or local path) shown on the "Source" line. A `repo` that is
+  // already a full URL is shown as-is; a bare `owner/repo` is expanded to GitHub.
   const sourceUrl = useCallback(
     (source: DesignTemplateSource): string => {
       if (source.kind === 'local') return source.path
-      if (source.kind === 'repo') {
-        const url = `https://github.com/${source.repo}`
-        return source.ref !== undefined && source.ref !== '' ? `${url} @ ${source.ref}` : url
-      }
-      const repo = officialRepo(source.id)
-      return repo !== undefined ? `https://github.com/${repo}` : officialLabel(source.id)
+      const url = /^https?:\/\//.test(source.repo) ? source.repo : `https://github.com/${source.repo}`
+      return source.ref !== undefined && source.ref !== '' ? `${url} @ ${source.ref}` : url
     },
     []
   )

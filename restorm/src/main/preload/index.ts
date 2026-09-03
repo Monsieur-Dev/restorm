@@ -56,6 +56,7 @@ import {
 } from '../../shared/update/updateTypes'
 import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashRecoveryNotice, type CrashReviewRequest } from '../../shared/crash/crashTypes'
 import { COOKIE_IPC, type CookieInput, type CookieRow } from '../../shared/cookies/cookieTypes'
+import type { CloudTemplate, CloudTemplatesView } from '../../shared/types/codegenTemplates'
 import {
   CLI_TOKEN_IPC,
   type CliTokenResult,
@@ -1439,7 +1440,7 @@ contextBridge.exposeInMainWorld('restorm', {
      * is written until `extract` confirms an output folder. */
     generate: async (
       design: unknown,
-      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
       answers?: Record<string, unknown>
     ): Promise<{ success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('design-codegen:generate', design, source, answers)
@@ -1448,7 +1449,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** The variables a template DECLARES in its manifest — for the design's
      * variable editors to pre-fill (cached per source in the main process). */
     getVariables: async (
-      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
     ): Promise<{ success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('design-codegen:variables', source)
       return result as { success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }
@@ -1456,7 +1457,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** DISCOVERY: the variable names a template's files actually reference —
      * acquires the whole template (cached), for flagging undeclared-but-used. */
     getUsedVariables: async (
-      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
     ): Promise<{ success: boolean; used?: string[]; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('design-codegen:used-variables', source)
       return result as { success: boolean; used?: string[]; error?: string }
@@ -1464,7 +1465,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** The Copier questions a template declares in its copier.yml (fetches only
      * that file, cached) — the whole-generation answers the user fills. */
     getQuestions: async (
-      source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
     ): Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('design-codegen:questions', source)
       return result as { success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }
@@ -1494,6 +1495,22 @@ contextBridge.exposeInMainWorld('restorm', {
     revealOutput: async (designId: string, outputDir: string): Promise<{ success: boolean; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('design-codegen:reveal-output', designId, outputDir)
       return result as { success: boolean; error?: string }
+    },
+    /** The cloud template library: the official set + the caller org's own
+     * (Enterprise). `signedOut` distinguishes a login prompt from a fetch error. */
+    listTemplates: async (): Promise<{ success: boolean; view?: CloudTemplatesView; signedOut?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:list-templates')
+      return result as { success: boolean; view?: CloudTemplatesView; signedOut?: boolean; error?: string }
+    },
+    /** Add a template to the caller's org (Enterprise + permitted). */
+    createTemplate: async (url: string, description: string): Promise<{ success: boolean; template?: CloudTemplate; signedOut?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:create-template', url, description)
+      return result as { success: boolean; template?: CloudTemplate; signedOut?: boolean; error?: string }
+    },
+    /** Remove one of the caller org's templates (never an official one). */
+    deleteTemplate: async (id: string): Promise<{ success: boolean; signedOut?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:delete-template', id)
+      return result as { success: boolean; signedOut?: boolean; error?: string }
     }
   },
   jsonrpc: {

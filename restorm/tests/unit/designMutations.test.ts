@@ -6,7 +6,7 @@ const mkDesign = (templates: DesignCodegenTemplate[]): ApiDesign =>
   ({ id: 'd', info: { title: 'D' }, models: [], enums: [], routeGroups: [], codegen: { templates } }) as unknown as ApiDesign
 
 const officialTemplate = (id: string, variables?: DesignCodegenTemplate['variables']): DesignCodegenTemplate =>
-  ({ id, source: { kind: 'official', id: `src-${id}` }, ...(variables !== undefined ? { variables } : {}) })
+  ({ id, source: { kind: 'repo', repo: `repo-${id}` }, ...(variables !== undefined ? { variables } : {}) })
 
 describe('setTemplateScopeVariables', () => {
   it('sets one scope, preserving the template’s other scopes and other templates', () => {

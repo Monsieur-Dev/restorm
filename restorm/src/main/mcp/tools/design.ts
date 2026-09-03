@@ -37,7 +37,6 @@ import type {
 } from '../../../shared/types/apiDesign'
 import type { TemplateVariableScope, TemplateVarValues } from '../../../shared/design/templateVariables'
 import {
-  OFFICIAL_TEMPLATES,
   MANIFEST_SCHEMA
 } from '../../services/designCodegen/templateSource'
 import { CODEGEN_CONTEXT_VERSION } from '../../../shared/design/codegenContext'
@@ -1330,14 +1329,13 @@ export function registerDesignTools(mcp: McpService): void {
       title: 'Generate code from a design',
       description:
         'Run a Copier-format code template against the design in the SANDBOX (Pyodide MEMFS — the template never ' +
-        'touches the machine). Template source: `officialId` (registry id, e.g. server-rest-typescript), `repo` ' +
-        '(owner/repo on github, fetched as an archive over the firewall) or `localPath` (a folder) — exactly one. ' +
+        'touches the machine). Template source: `repo` ' +
+        '(owner/repo or a git URL, fetched as an archive over the firewall) or `localPath` (a folder) — exactly one. ' +
         'Without `confirm`, replies with the PREVIEW tree only (nothing written). With `confirm: true` AND ' +
         '`outputDir` (absolute, or relative to the project file), writes the tree under it — every path ' +
         'traversal-checked first. Refuses an invalid design (same gate as serving) and an incompatible manifest.',
       inputSchema: {
         designId: z.string().min(1),
-        officialId: z.string().min(1).optional(),
         repo: z.string().min(1).optional(),
         ref: z.string().min(1).optional().describe('Branch of `repo` (default main).'),
         localPath: z.string().min(1).optional(),
@@ -1350,7 +1348,6 @@ export function registerDesignTools(mcp: McpService): void {
       const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
       if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
       const sources: TemplateSourceRef[] = []
-      if (typeof args['officialId'] === 'string') sources.push({ kind: 'official', id: args['officialId'] })
       if (typeof args['repo'] === 'string') {
         sources.push({
           kind: 'repo',
@@ -1361,7 +1358,7 @@ export function registerDesignTools(mcp: McpService): void {
       if (typeof args['localPath'] === 'string') sources.push({ kind: 'local', path: args['localPath'] })
       const source = sources[0]
       if (source === undefined || sources.length > 1) {
-        return errorReply('pass exactly one of officialId / repo / localPath')
+        return errorReply('pass exactly one of repo / localPath')
       }
       const answers = (args['answers'] ?? {}) as Record<string, unknown>
       try {
@@ -1406,7 +1403,7 @@ export function registerDesignTools(mcp: McpService): void {
         'template and generate with it. Returns: the current context version, the `restorm-template.json` ' +
         'manifest JSON-Schema, the JSON-Schema of the `ctx` object a template receives, the engine notes, ' +
         'and the embedded official templates (id, repo, stack, description). Pair with generate_design_code ' +
-        '(officialId / repo / localPath) to run a template against a design.',
+        '(repo / localPath) to run a template against a design.',
       inputSchema: {} as Record<string, unknown>
     },
     () =>
@@ -1430,7 +1427,8 @@ export function registerDesignTools(mcp: McpService): void {
             'the design projection is passed as the `ctx` answer (its shape is `contextSchema`).'
           ]
         },
-        officialTemplates: OFFICIAL_TEMPLATES,
+        officialTemplatesNote:
+          'The official templates are curated in the cloud and fetched by the app\'s code-generation library; they are no longer part of this contract. A template a design uses is stored as a `repo` source (its git URL).',
         docs: 'docs/contributing/adding-a-code-template.md'
       })
   )
@@ -1442,7 +1440,7 @@ export function registerDesignTools(mcp: McpService): void {
       title: 'Set a design\'s code templates',
       description:
         'Persist the design\'s LIST of code-generation targets (TASK-468.20) and save the project. Replaces ' +
-        '`codegen.templates` wholesale (order preserved). Each entry names exactly one source — `officialId`, ' +
+        '`codegen.templates` wholesale (order preserved). Each entry names exactly one source — ' +
         '`repo` (+optional `ref`) or `localPath` — plus an optional `outputDir` (absolute or project-relative) ' +
         'and `label`. Pass an empty array to clear the list. Read the current list back from get_design.',
       inputSchema: {
@@ -1450,7 +1448,6 @@ export function registerDesignTools(mcp: McpService): void {
         templates: z
           .array(
             z.object({
-              officialId: z.string().min(1).optional(),
               repo: z.string().min(1).optional(),
               ref: z.string().min(1).optional().describe('Branch of `repo` (default main).'),
               localPath: z.string().min(1).optional(),
@@ -1469,13 +1466,11 @@ export function registerDesignTools(mcp: McpService): void {
         : []
       const templates: DesignCodegenTemplate[] = []
       for (const raw of rawList) {
-        const provided = (['officialId', 'repo', 'localPath'] as const).filter(
+        const provided = (['repo', 'localPath'] as const).filter(
           (k) => typeof raw[k] === 'string'
         ).length
         let source: DesignTemplateSource | null = null
-        if (typeof raw['officialId'] === 'string') {
-          source = { kind: 'official', id: raw['officialId'] }
-        } else if (typeof raw['repo'] === 'string') {
+        if (typeof raw['repo'] === 'string') {
           source = {
             kind: 'repo',
             repo: raw['repo'],
@@ -1485,12 +1480,7 @@ export function registerDesignTools(mcp: McpService): void {
           source = { kind: 'local', path: raw['localPath'] }
         }
         if (source === null || provided !== 1) {
-          return errorReply('each template needs exactly one of officialId / repo / localPath')
-        }
-        if (source.kind === 'official' && !OFFICIAL_TEMPLATES.some((t) => t.id === source.id)) {
-          return errorReply(
-            `unknown official template id "${source.id}" — call get_design_template_contract for the list`
-          )
+          return errorReply('each template needs exactly one of repo / localPath')
         }
         templates.push({
           id: newId(),

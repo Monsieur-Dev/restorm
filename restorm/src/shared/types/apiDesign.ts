@@ -377,7 +377,6 @@ export interface DesignRouteGroup {
 /** Design-server configuration carried by the design root. */
 /** Where the Code section's template comes from. */
 export type DesignTemplateSource =
-  | { kind: 'official'; id: string }
   | { kind: 'repo'; repo: string; ref?: string }
   | { kind: 'local'; path: string }
 

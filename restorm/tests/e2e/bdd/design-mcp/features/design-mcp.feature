@@ -81,6 +81,6 @@ Feature: Design MCP exposure
   Scenario: An agent reads the template contract and sets the design's template list
     Given restorm is launched with MCP for design work
     When the agent creates a design named "Template API" on port 7488
-    Then the template contract over MCP carries the manifest schema, the context schema and the official templates
+    Then the template contract over MCP carries the manifest schema and the context schema
     When the agent sets the design's templates to a repo and a local folder
     Then the design carries those two templates over MCP

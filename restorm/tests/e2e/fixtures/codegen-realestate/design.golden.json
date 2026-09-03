@@ -9,8 +9,8 @@
         "label": "REST · TypeScript · Express",
         "outputDir": "/home/yoann/Bureau/RealEstate-gen/ts",
         "source": {
-          "id": "server-rest-typescript",
-          "kind": "official"
+          "kind": "repo",
+          "repo": "Monsieur-Dev/restorm-template-server-rest-typescript"
         }
       },
       {

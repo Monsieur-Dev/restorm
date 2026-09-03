@@ -22,7 +22,6 @@ export interface RecentTemplate {
 /** A stable identity for de-duplication — two entries with the same source
  * kind + target collapse to one (the most recent wins). */
 export function recentSourceKey(source: DesignTemplateSource): string {
-  if (source.kind === 'official') return `official:${source.id}`
   if (source.kind === 'repo') return `repo:${source.repo}${source.ref !== undefined ? `@${source.ref}` : ''}`
   return `local:${source.path}`
 }

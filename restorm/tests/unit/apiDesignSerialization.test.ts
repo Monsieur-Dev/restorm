@@ -206,11 +206,11 @@ describe('API design — codegen template migration (TASK-468.20)', () => {
   it('migrates a legacy single templateSource into a one-entry templates list', () => {
     const design = ApiDesignModel.fromPlain({
       name: 'X',
-      codegen: { templateSource: { kind: 'official', id: 'server-rest-typescript' }, outputDir: './out' }
+      codegen: { templateSource: { kind: 'repo', repo: 'Monsieur-Dev/restorm-template-server-rest-typescript' }, outputDir: './out' }
     })
     expect(design.codegen?.templates).toHaveLength(1)
     const entry = design.codegen?.templates?.[0]
-    expect(entry?.source).toEqual({ kind: 'official', id: 'server-rest-typescript' })
+    expect(entry?.source).toEqual({ kind: 'repo', repo: 'Monsieur-Dev/restorm-template-server-rest-typescript' })
     expect(entry?.outputDir).toBe('./out')
     expect(typeof entry?.id).toBe('string')
     // The legacy fields are dropped and never re-emitted on save.

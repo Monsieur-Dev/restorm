@@ -15,6 +15,7 @@ import type {
   GitState
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
+import type { CloudTemplate, CloudTemplatesView } from '../../../shared/types/codegenTemplates'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
 import type {
@@ -447,23 +448,26 @@ declare global {
       designCodegen: {
         generate: (
           design: unknown,
-          source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
           answers?: Record<string, unknown>
         ) => Promise<{ success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }>
         getVariables: (
-          source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
         ) => Promise<{ success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }>
         getUsedVariables: (
-          source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
         ) => Promise<{ success: boolean; used?: string[]; error?: string }>
         getQuestions: (
-          source: { kind: 'official'; id: string } | { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
         ) => Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }>
         readAnswers: (outputDir: string) => Promise<{ success: boolean; answers?: Record<string, unknown>; error?: string }>
         extract: (designId: string, outputDir: string) => Promise<{ success: boolean; root?: string; written?: string[]; error?: string }>
         discard: (designId: string) => Promise<void>
         pickDirectory: (defaultPath?: string) => Promise<{ success: boolean; path?: string; canceled?: boolean }>
         revealOutput: (designId: string, outputDir: string) => Promise<{ success: boolean; error?: string }>
+        listTemplates: () => Promise<{ success: boolean; view?: CloudTemplatesView; signedOut?: boolean; error?: string }>
+        createTemplate: (url: string, description: string) => Promise<{ success: boolean; template?: CloudTemplate; signedOut?: boolean; error?: string }>
+        deleteTemplate: (id: string) => Promise<{ success: boolean; signedOut?: boolean; error?: string }>
       }
       jsonrpc: {
         execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>

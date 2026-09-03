@@ -29,59 +29,10 @@ import type { TemplateVariableDecl } from '../../../shared/design/templateVariab
 export type { TemplateVariableDecl, TemplateVariableScope, TemplateVariableType } from '../../../shared/design/templateVariables'
 import { assertSafeRelativePath, type GeneratedFile } from './extractTree'
 
-// ── Official registry ─────────────────────────────────────────────────
-
-export interface OfficialTemplate {
-  id: string
-  /** `owner/repo` on github. */
-  repo: string
-  type: 'server' | 'db'
-  /** Display language/stack label. */
-  stack: string
-  /** One-line description shown under the repo name in the library modal
-   * (TASK-468.20) and returned by the MCP template-contract tool. */
-  description: string
-}
-
-/** The embedded registry (AC#8's half (a)) — one entry per official
- * public template repository. */
-export const OFFICIAL_TEMPLATES: readonly OfficialTemplate[] = [
-  {
-    id: 'server-rest-typescript',
-    repo: 'Monsieur-Dev/restorm-template-server-rest-typescript',
-    type: 'server',
-    stack: 'REST · TypeScript · Express',
-    description: 'REST server in TypeScript on Express — typed routes, models and request validation.'
-  },
-  {
-    id: 'server-rest-dotnet',
-    repo: 'Monsieur-Dev/restorm-template-server-rest-dotnet',
-    type: 'server',
-    stack: 'REST · C# · ASP.NET Core',
-    description: 'Minimal-API REST server in C# / ASP.NET Core — endpoints, DTOs and validation.'
-  },
-  {
-    id: 'server-grpc-typescript',
-    repo: 'Monsieur-Dev/restorm-template-server-grpc-typescript',
-    type: 'server',
-    stack: 'gRPC · TypeScript',
-    description: 'gRPC server in TypeScript — .proto service, typed messages and server stubs.'
-  },
-  {
-    id: 'server-grpc-dotnet',
-    repo: 'Monsieur-Dev/restorm-template-server-grpc-dotnet',
-    type: 'server',
-    stack: 'gRPC · C# / .NET',
-    description: 'gRPC server in C# / .NET — .proto service, messages and server stubs.'
-  },
-  {
-    id: 'db-postgres',
-    repo: 'Monsieur-Dev/restorm-template-db-postgres',
-    type: 'db',
-    stack: 'SQL · PostgreSQL',
-    description: 'PostgreSQL schema, seed data and CRUD scripts derived from the design.'
-  }
-]
+// The official template registry used to live here as an in-code list. It now
+// lives in the cloud (the `templates` Edge Function) and is fetched by the
+// code-generation library; a template the user "uses" is stored in the design
+// as a plain `repo` source (its git URL). See `cloudTemplates.ts`.
 
 // ── Manifest ──────────────────────────────────────────────────────────
 
