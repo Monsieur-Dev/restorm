@@ -25,11 +25,16 @@ export const DeprecationAwareRequestTab: React.FC<DeprecationAwareRequestTabProp
 }) => {
   const { t } = useTranslation()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
+  // A transient design-client request carries the flag directly (its served
+  // spec's deprecation, stamped at generation) — it has no owning env-folder
+  // apiDoc to derive from, unlike a normal imported request.
+  const stampedDeprecated = (request as { deprecated?: boolean }).deprecated === true
   const deprecated = useMemo(() => {
+    if (stampedDeprecated) return true
     if (!apiDocumentation || !route) return false
     const op = findOperationForRoute(apiDocumentation, route)
     return op?.deprecated === true
-  }, [apiDocumentation, route])
+  }, [apiDocumentation, route, stampedDeprecated])
   const callout = deprecated
     ? { variant: 'warning' as const, message: t('requestTab.deprecated') }
     : undefined

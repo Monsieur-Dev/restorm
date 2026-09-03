@@ -300,6 +300,7 @@ export const DesignCodeSection: React.FC<{
                   </div>
                   <div className="design-code-field-row">
                     <span className="design-code-field-label">{t('design.code.destination', 'Destination')}</span>
+                    <div className="design-code-destination-wrap">
                     <ControlGroup className="design-code-destination">
                       <InputBox
                         value={tpl.outputDir ?? ''}
@@ -334,6 +335,7 @@ export const DesignCodeSection: React.FC<{
                         data-testid={`design-code-refresh-${tpl.id}`}
                       />
                     </HeaderHoverTooltip>
+                    </div>
                   </div>
                 </div>
               </div>

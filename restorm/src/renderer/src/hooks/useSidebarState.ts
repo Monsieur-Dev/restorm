@@ -17,7 +17,7 @@ import { httpBadgeIdFor, isKnownHttpMethod } from '../../../shared/utils/httpMet
 import { mapToBadgeType, requestBadgeId } from '../utils/badgeUtils'
 import type { Request } from '../../../shared/types/collections'
 import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
-import { getDesignClientsVersion, subscribeDesignClients } from '../services/designClientsStore'
+import { getDesignClientsVersion, subscribeDesignClients, getDesignClientsDeprecatedIds } from '../services/designClientsStore'
 
 export interface UseSidebarStateOptions {
   rootItems: FolderItem[]
@@ -94,7 +94,9 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       // than the title alone, and the decision rides on the live
       // matcher (so editing the URL re-evaluates instantly).
       renderRemovedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 }, title: 'Removed from source spec' }, name),
-      deprecatedRequestIds
+      // Merge the transient design-client deprecations (stamped on the client
+      // request at generation from the served spec) so those rows dim too.
+      deprecatedRequestIds: new Set([...deprecatedRequestIds, ...getDesignClientsDeprecatedIds()])
     }
     // Each root item becomes a top-level row in the sidebar. Folders
     // go through `folderAsRootListViewItem` (which renders them as a

@@ -1251,6 +1251,21 @@
   min-width: 0;
 }
 
+/* Destination control group + the standalone "refresh from source" button on
+   ONE line: the group fills the row, the small refresh disc sits at its right
+   (outside the group, like the trash disc in the pane header). */
+.design-code-destination-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.design-code-destination-wrap > .design-code-destination {
+  flex: 1 1 auto;
+  width: auto;
+}
+
 .design-code-template-play {
   display: flex;
   align-items: flex-start;

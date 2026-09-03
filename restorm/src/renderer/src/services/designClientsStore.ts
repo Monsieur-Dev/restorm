@@ -1,11 +1,14 @@
 import { useSyncExternalStore } from 'react'
-import type { ApiDesign, DesignProtocol, FolderItem, EnvironmentFolder } from '../../../shared/types/collections'
+import type { ApiDesign, DesignProtocol, FolderItem, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
 import { designSectionRowId } from '../../../shared/design/designSections'
 import { apiKeyHeaderName } from '../../../shared/design/designServing'
 import { designToGraphqlSdl } from '../../../shared/design/graphqlProjection'
 import { processAfterDeserialization } from '../utils/serialization'
 import { reidentifyForest } from '../../../shared/utils/reidentifyTree'
 import { resolveUrlAgainstEnv, flattenEnvVars, coerceEnvVarValue } from '../../../shared/utils/resolveUrlAgainstEnv'
+import { findOperationForRoute } from '../../../shared/utils/findOperationForRoute'
+import { routeFromRequest } from '../hooks/routeFromRequest'
 
 /**
  * Transient "clients" generated for a served design. When the mock server
@@ -81,6 +84,24 @@ export function findClientRequest(designId: string, itemId: string): FolderItem 
     if (hit) return hit
   }
   return undefined
+}
+
+/** Ids of every transient client REQUEST flagged deprecated (across all designs)
+ *  — merged into the sidebar's deprecated set so those rows dim like a
+ *  deprecated imported request. */
+export function getDesignClientsDeprecatedIds(): Set<string> {
+  const out = new Set<string>()
+  const walk = (items: FolderItem[]): void => {
+    for (const item of items) {
+      const children = (item as { items?: FolderItem[] }).items
+      if (Array.isArray(children)) { walk(children); continue }
+      if ((item as { deprecated?: boolean }).deprecated === true) out.add(item.id)
+    }
+  }
+  for (const bundles of byDesignId.values()) {
+    for (const bundle of bundles) walk(bundle.items)
+  }
+  return out
 }
 
 /** Live client bundles for a design — re-renders when they (re)generate or clear. */
@@ -236,7 +257,29 @@ async function importProtocol(
     ? { baseUrl: `http://127.0.0.1:${String(port)}/graphql` }
     : importEnvVars(items)
   resolveClientUrls(items, vars)
+  markDeprecatedClients(items)
   return unwrapImport(items)
+}
+
+/** Before the env-folder wrapper is dropped, use its imported apiDocumentation
+ *  to stamp `deprecated: true` on every client request that maps to a deprecated
+ *  operation — the design route's deprecation, carried through the served
+ *  /swagger.json. The transient tree keeps the flag so the sidebar dims the row
+ *  and the tab shows the deprecation callout, exactly like an imported request
+ *  (whose deprecation is otherwise derived live from its folder's apiDoc, which
+ *  these transient clients don't keep). */
+function markDeprecatedClients(items: FolderItem[]): void {
+  const apiDoc = (items[0] as { apiDocumentation?: ApiDocumentation }).apiDocumentation
+  if (apiDoc === undefined) return
+  const walk = (nodes: FolderItem[]): void => {
+    for (const node of nodes) {
+      const children = (node as { items?: FolderItem[] }).items
+      if (Array.isArray(children)) { walk(children); continue }
+      const op = findOperationForRoute(apiDoc, routeFromRequest(node as Request))
+      if (op?.deprecated === true) (node as { deprecated?: boolean }).deprecated = true
+    }
+  }
+  walk(items)
 }
 
 /** OpenAPI / GraphQL / SOAP imports wrap everything in one env-folder named
