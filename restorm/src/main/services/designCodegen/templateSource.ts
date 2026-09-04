@@ -94,10 +94,15 @@ export function parseTemplateManifest(text: string): TemplateManifest {
     throw new Error(`restorm-template.json is invalid: ${result.errors.join('; ')}`)
   }
   const manifest = parsed as TemplateManifest
-  if (!manifest.contextVersions.includes(CODEGEN_CONTEXT_VERSION)) {
+  // The context evolves ADDITIVELY (a higher version only adds optional fields),
+  // so what we produce is a SUPERSET of every earlier version — a template built
+  // for an older context still runs correctly. Accept it as long as it declares
+  // SOME version we can satisfy (≤ what we produce); refuse only a template that
+  // needs a NEWER context than this Restorm knows how to build.
+  if (!manifest.contextVersions.some((v) => v <= CODEGEN_CONTEXT_VERSION)) {
     throw new Error(
-      `template "${manifest.name}" supports context version(s) ${manifest.contextVersions.join(', ')} ` +
-      `but this Restorm produces version ${CODEGEN_CONTEXT_VERSION} — update the template (or Restorm)`
+      `template "${manifest.name}" needs context version(s) ${manifest.contextVersions.join(', ')} ` +
+      `but this Restorm only produces version ${CODEGEN_CONTEXT_VERSION} — update Restorm (or the template)`
     )
   }
   return manifest

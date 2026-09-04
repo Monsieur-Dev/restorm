@@ -98,6 +98,13 @@ describe('parseTemplateManifest', () => {
       .toThrow(new RegExp(`999.*version ${CODEGEN_CONTEXT_VERSION}`))
   })
 
+  it('accepts a template built for an OLDER context version (additive superset)', () => {
+    // A template declaring only v1 still runs against a v2+ Restorm — the newer
+    // context only ADDS optional fields, so the older shape is fully satisfied.
+    const older = { ...valid, contextVersions: [1] }
+    expect(parseTemplateManifest(JSON.stringify(older)).name).toBe('Express server')
+  })
+
   it('refuses a malformed manifest with the schema errors', () => {
     expect(() => parseTemplateManifest('{"name": ""}')).toThrow(/invalid/)
     expect(() => parseTemplateManifest('not json')).toThrow(/not valid JSON/)

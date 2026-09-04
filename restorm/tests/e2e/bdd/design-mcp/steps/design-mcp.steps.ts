@@ -384,7 +384,7 @@ Then('the design spin button shows the idle state', async () => {
 Then('the template contract over MCP carries the manifest schema and the context schema', async () => {
   const reply = await call('get_design_template_contract', {})
   expect(reply['error']).toBeUndefined()
-  expect(reply['contextVersion']).toBe(1)
+  expect(reply['contextVersion']).toBe(2)
   const manifest = reply['manifest'] as { schema?: { required?: string[] } }
   expect(manifest.schema?.required).toEqual(
     expect.arrayContaining(['name', 'type', 'language', 'contextVersions'])

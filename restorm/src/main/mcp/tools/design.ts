@@ -609,7 +609,10 @@ export function registerDesignTools(mcp: McpService): void {
           if (isResolveError(target)) return errorReply(target.error)
           design_.reference = { target: 'enum', refId: target.id }
           property.doc.targetModelRef = target.doc.name
-          property.doc.type = isArray ? `array<${target.doc.name}>` : target.doc.name
+          // An enum-referenced property KEEPS its underlying primitive `doc.type`
+          // (`string`/`integer`/…) — the enum lives in `design.reference`; the
+          // projections read that, not `doc.type`. (Only a MODEL reference
+          // rewrites `doc.type` to the model name.)
           // A named enum reference and an inline enum are mutually exclusive.
           delete property.doc.enumValues
           if (isArray) property.doc.isArrayOfRef = true
