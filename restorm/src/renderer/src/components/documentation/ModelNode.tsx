@@ -12,7 +12,7 @@ import {
 import { Button } from 'electron-core-ui/renderer'
 import { DelayedTooltip } from './DelayedTooltip'
 import { ModelRefLink } from './ModelRefLink'
-import { useDocumentationEdit } from './documentationModels'
+import { useDocumentationEdit, useDocumentedEnums } from './documentationModels'
 
 export interface ModelNodeData extends Record<string, unknown> {
   model: ModelDocumentation
@@ -79,6 +79,13 @@ function buildPropertyTooltip(prop: PropertyDocumentation): React.ReactNode {
   const parts: React.ReactNode[] = []
   if (prop.description !== undefined && prop.description.length > 0) {
     parts.push(<div key="desc" className="documentation-host-model-node__tooltip-line">{prop.description}</div>)
+  }
+  if (Array.isArray(prop.enumValues) && prop.enumValues.length > 0) {
+    parts.push(
+      <div key="enum" className="documentation-host-model-node__tooltip-line">
+        <strong>Enum:</strong> <code>{prop.enumValues.map((v) => String(v)).join(', ')}</code>
+      </div>
+    )
   }
   const example = formatExample(prop.example)
   if (example !== undefined) {
@@ -171,6 +178,7 @@ const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
 const ModelNodeImpl: React.FC<NodeProps> = ({ data }) => {
   const { model, incomingEdgeIds = [], nodeHeight } = data as ModelNodeData
   const totalIncoming = incomingEdgeIds.length
+  const documentedEnums = useDocumentedEnums()
   return (
     <div
       className="documentation-host-model-node"
@@ -217,7 +225,10 @@ const ModelNodeImpl: React.FC<NodeProps> = ({ data }) => {
                 }
               >
                 {prop.targetModelRef !== undefined ? (
-                  <ModelRefLink modelName={prop.targetModelRef}>
+                  <ModelRefLink
+                    modelName={prop.targetModelRef}
+                    kind={documentedEnums.has(prop.targetModelRef) ? 'enum' : 'model'}
+                  >
                     {propertyTypeLabel(prop)}
                   </ModelRefLink>
                 ) : propertyTypeLabel(prop)}

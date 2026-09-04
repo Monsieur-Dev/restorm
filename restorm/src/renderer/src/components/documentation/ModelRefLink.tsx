@@ -6,6 +6,9 @@ export interface ModelRefLinkProps {
   /** Name of the model the link should jump to. Must match a key
    * in `ApiDocumentation.models`. */
   modelName: string
+  /** Whether the target is an object MODEL (jump to the model graph) or a
+   * named ENUM (jump to the Enums section). Default `'model'`. */
+  kind?: 'model' | 'enum'
   /** Optional render override. Defaults to the model name. Useful
    * when the surrounding text already shows array brackets or
    * other decorations and we just need the bare reference name to
@@ -25,6 +28,7 @@ export interface ModelRefLinkProps {
  */
 export const ModelRefLink: React.FC<ModelRefLinkProps> = ({
   modelName,
+  kind = 'model',
   children,
   className
 }) => {
@@ -32,7 +36,8 @@ export const ModelRefLink: React.FC<ModelRefLinkProps> = ({
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>): void => {
     e.preventDefault()
     e.stopPropagation()
-    nav?.scrollToModel(modelName)
+    if (kind === 'enum') nav?.scrollToEnum(modelName)
+    else nav?.scrollToModel(modelName)
   }
   return (
     <Button

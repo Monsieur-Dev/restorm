@@ -16,6 +16,18 @@ export function useDocumentedModels(): Set<string> {
 }
 
 /**
+ * Set of NAMED ENUM names rendered by the surrounding `DocumentationHost`
+ * (the enum-shaped schemas surfaced in the Enums section). Cross-reference
+ * helpers use this so a type literal that names an enum links to the Enums
+ * section rather than the model graph.
+ */
+export const DocumentationEnumsContext = createContext<Set<string>>(new Set())
+
+export function useDocumentedEnums(): Set<string> {
+  return useContext(DocumentationEnumsContext)
+}
+
+/**
  * Edit affordances of the surrounding `DocumentationHost`, when its
  * documentation is EDITABLE somewhere else in the app (the design doc
  * viewer: the doc stays the readable view, editing lives in the design

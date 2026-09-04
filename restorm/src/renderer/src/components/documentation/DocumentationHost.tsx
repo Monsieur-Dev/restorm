@@ -11,7 +11,7 @@ import { ApiInfoSection } from './ApiInfoSection'
 import { CompositionSection } from './CompositionSection'
 import { DocumentationHostSearch, type DocumentationHostSearchHandle } from './DocumentationHostSearch'
 import { DocumentationSidebar } from './DocumentationSidebar'
-import { DocumentationEditContext, DocumentationModelsContext, DocumentationSecuritySchemesContext } from './documentationModels'
+import { DocumentationEditContext, DocumentationEnumsContext, DocumentationModelsContext, DocumentationSecuritySchemesContext } from './documentationModels'
 import { collectEnumGroups, isEnumModel } from './enumGroups'
 import { DocumentationNavigationContext, type DocumentationNavigationApi } from './documentationNavigation'
 import { EnumsSection } from './EnumsSection'
@@ -169,6 +169,11 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   const modelNames = useMemo<Set<string>>(
     () => new Set(structuralModels.map((m) => m.name)),
     [structuralModels]
+  )
+  // Named enums — a type literal that names one links to the Enums section.
+  const enumNames = useMemo<Set<string>>(
+    () => new Set(models.filter((m) => isEnumModel(m)).map((m) => m.name)),
+    [models]
   )
   /** Bucket the in-scope operations by their `group` (tag) in the
    * order the spec declares the groups. `(ungrouped)` collects
@@ -391,6 +396,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   return (
     <DocumentationNavigationContext.Provider value={navigationApi}>
     <DocumentationModelsContext.Provider value={modelNames}>
+    <DocumentationEnumsContext.Provider value={enumNames}>
     <DocumentationSecuritySchemesContext.Provider value={securitySchemes}>
     <DocumentationEditContext.Provider value={editApi}>
       <div
@@ -445,6 +451,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
       </div>
     </DocumentationEditContext.Provider>
     </DocumentationSecuritySchemesContext.Provider>
+    </DocumentationEnumsContext.Provider>
     </DocumentationModelsContext.Provider>
     </DocumentationNavigationContext.Provider>
   )
