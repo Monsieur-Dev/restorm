@@ -262,6 +262,35 @@ describe('openApiExport', () => {
     expect(reimported.models['Pet']?.properties.find((p) => p.name === 'status')?.enumValues).toEqual(['available', 'pending', 'sold'])
   })
 
+  it('emits an ARRAY parameter’s enum on its items, and re-imports it', () => {
+    // A multi-value query param (petstore findByStatus `status`): array<string>
+    // whose enum constrains the items. The enum must land on `items.enum`, not
+    // on the array schema, and survive a round-trip.
+    const design = {
+      id: 'd',
+      info: { title: 'T', version: '1.0.0' },
+      models: [],
+      enums: [],
+      routeGroups: [{
+        id: 'g',
+        doc: { name: 'Pets' },
+        routes: [{
+          id: 'r',
+          doc: { match: { urlPattern: '/pets', method: 'GET' }, parameters: [{ name: 'status', location: 'query', type: 'array<string>', required: true, enumValues: ['available', 'pending', 'sold'] }] }
+        }]
+      }]
+    } as unknown as ApiDesign
+    const emitted = apiDocumentationToOpenApi(designToApiDocumentation(design))
+    const status = ((emitted as { paths: Record<string, { get: { parameters: { name: string; schema: Record<string, unknown> }[] } }> }).paths['/pets']).get.parameters.find((p) => p.name === 'status')
+    expect(status?.schema['type']).toBe('array')
+    expect((status?.schema['items'] as { enum?: unknown[] } | undefined)?.enum).toEqual(['available', 'pending', 'sold'])
+    expect(status?.schema['enum']).toBeUndefined()
+    const reimported = openapi3ToApiDocumentation(emitted as unknown as OAS3Spec)
+    const rp = reimported.operations.find((o) => o.match.urlPattern === '/pets')?.parameters?.find((p) => p.name === 'status')
+    expect(rp?.type).toBe('array<string>')
+    expect(rp?.enumValues).toEqual(['available', 'pending', 'sold'])
+  })
+
   it('emits a $ref for a parameter that references a named enum', () => {
     const design = {
       id: 'd',

@@ -184,7 +184,15 @@ function modelSchema(model: ModelDocumentation, knownComponents: Set<string>, ta
 function parameterNode(parameter: ParameterDocumentation, knownComponents: Set<string>, target: OasTarget): Json {
   const schema = typeLabelToSchema(parameter.type, knownComponents)
   if (parameter.format !== undefined) schema['format'] = parameter.format
-  if (Array.isArray(parameter.enumValues) && parameter.enumValues.length > 0) schema['enum'] = parameter.enumValues
+  if (Array.isArray(parameter.enumValues) && parameter.enumValues.length > 0) {
+    // A multi-value param is `array<scalar>` whose enum constrains the ITEMS —
+    // emit it on `items`, not on the array itself (where it would mean the
+    // whole array is one of the enum values). A scalar param keeps it inline.
+    const items = schema['type'] === 'array' && typeof schema['items'] === 'object' && schema['items'] !== null
+      ? schema['items'] as Json
+      : schema
+    items['enum'] = parameter.enumValues
+  }
   applyConstraints(schema, parameter.constraints, target)
   const node: Json = {
     name: parameter.name,

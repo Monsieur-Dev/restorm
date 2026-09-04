@@ -324,20 +324,30 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
             </span>
           )
         }
-        // Type vocabulary: primitives, then the design's named enums. Selecting
-        // an enum stores a reference (paramEnumRefs); selecting a primitive
-        // clears it — both in ONE commit so the two writes can't race.
+        // Type vocabulary: primitives, then `array`, then the design's named
+        // enums. Selecting an enum stores a reference (paramEnumRefs); a
+        // primitive or `array` clears it — all in ONE commit so the two writes
+        // can't race. An array param spells `array<element>` in its type.
         const enumRefId = paramEnumRefId(param.name)
-        const options = [...PARAM_TYPES.map((type) => ({ text: type })), ...design.enums.map((e) => ({ text: `${e.doc.name} (${t('design.schema.typeEnum', 'enum')})` }))]
+        const ARRAY_INDEX = PARAM_TYPES.length
+        const options = [
+          ...PARAM_TYPES.map((type) => ({ text: type })),
+          { text: 'array' },
+          ...design.enums.map((e) => ({ text: `${e.doc.name} (${t('design.schema.typeEnum', 'enum')})` }))
+        ]
+        const arrayMatch = /^array(?:<(.+)>)?$/.exec(param.type)
+        const isArray = arrayMatch !== null
+        const elementType = arrayMatch?.[1] ?? 'string'
         const selected = enumRefId !== undefined
-          ? Math.max(0, PARAM_TYPES.length + design.enums.findIndex((e) => e.id === enumRefId))
-          : Math.max(0, PARAM_TYPES.indexOf(param.type as typeof PARAM_TYPES[number]))
+          ? Math.max(0, ARRAY_INDEX + 1 + design.enums.findIndex((e) => e.id === enumRefId))
+          : isArray
+            ? ARRAY_INDEX
+            : Math.max(0, PARAM_TYPES.indexOf(param.type as typeof PARAM_TYPES[number]))
         const values = enumRefId === undefined ? (param.enumValues ?? []) : []
-        // A multi-value query param arrives as `array<scalar>` (e.g. petstore
-        // findByStatus `status`); its enum applies to the items, so unwrap the
-        // array to decide whether the inline enum editor applies.
-        const scalarType = /^array<(.+)>$/.exec(param.type)?.[1] ?? param.type
-        const canInline = enumRefId === undefined && (scalarType === 'string' || scalarType === 'integer' || scalarType === 'number')
+        // The enum applies to the item type of an array param, else to the
+        // scalar type itself.
+        const effectiveScalar = isArray ? elementType : param.type
+        const canInline = enumRefId === undefined && (effectiveScalar === 'string' || effectiveScalar === 'integer' || effectiveScalar === 'number')
         return (
           <div className="design-param-type-cell">
             <SelectBox
@@ -347,20 +357,32 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
               selected={selected}
               onDidSelect={(data: ISelectData) => {
                 if (data.index < PARAM_TYPES.length) setParamPrimitiveType(param.name, PARAM_TYPES[data.index] ?? 'string')
+                else if (data.index === ARRAY_INDEX) setParamPrimitiveType(param.name, `array<${isArray ? elementType : 'string'}>`)
                 else {
-                  const picked = design.enums[data.index - PARAM_TYPES.length]
+                  const picked = design.enums[data.index - ARRAY_INDEX - 1]
                   if (picked !== undefined) setParamEnumRef(param.name, picked.id)
                 }
               }}
               selectBoxOptions={{ ariaLabel: t('design.schema.columns.type', 'Type'), useCustomDrawn: true }}
               data-testid={`design-param-type-${param.name}`}
             />
+            {isArray && (
+              <SelectBox
+                id={`design-param-element-${route.id}-${param.name}`}
+                className=""
+                options={PARAM_TYPES.map((type) => ({ text: type }))}
+                selected={Math.max(0, PARAM_TYPES.indexOf(elementType as typeof PARAM_TYPES[number]))}
+                onDidSelect={(data: ISelectData) => { setParamPrimitiveType(param.name, `array<${PARAM_TYPES[data.index] ?? 'string'}>`) }}
+                selectBoxOptions={{ ariaLabel: t('design.schema.fields.elementType', 'Element type'), useCustomDrawn: true }}
+                data-testid={`design-param-element-${param.name}`}
+              />
+            )}
             {canInline && (
               <div className="design-enum-inline-row">
                 <DesignEnumValuesEditor
                   values={values}
                   onChange={(next) => { setParamEnumValues(param.name, next) }}
-                  parseValue={(raw) => parseTypedRaw(scalarType, raw)}
+                  parseValue={(raw) => parseTypedRaw(effectiveScalar, raw)}
                   data-testid={`design-param-enum-values-${param.name}`}
                 />
                 {values.length > 0 && (
