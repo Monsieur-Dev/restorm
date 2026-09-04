@@ -2,12 +2,12 @@
 
 ## v1.1.0
 
-**Entwerfen Sie Ihre API, stellen Sie sie als Mock bereit und generieren Sie ihre Clients — ohne Restorm zu verlassen.**
+🎉 **Restorm ist jetzt auch ein API-Designer.** Entwerfen Sie Ihre API, stellen Sie sie als Live-Mock über fünf Protokolle gleichzeitig bereit und generieren Sie ihre Clients — alles ohne die App zu verlassen, alles auf Ihrer eigenen Festplatte.
 
-- **Ein visueller API-Designer.** Modellieren Sie Ihre API von Hand — Modelle, Enums, Routen, benannte Beispiele, Constraints — ohne eine einzige Zeile Spezifikation zu schreiben.
+- **Ein visueller API-Designer.** Modellieren Sie Ihre API von Hand — Modelle, Enums (benannt oder inline), Routen, Parameter, benannte Beispiele, Constraints, Tags und Deprecations — ohne eine einzige Zeile Spezifikation zu schreiben.
 - **Stellen Sie sie als Mock bereit, mit einem Klick, über 5 Protokolle gleichzeitig.** Der Entwurf wird zu einem Server, der in HTTP, GraphQL, SOAP, OData und gRPC gleichzeitig antwortet. Die Antworten stammen aus Ihren benannten Beispielen (oder aus realistischen, aus Ihren Modellen generierten Daten), mit Constraint-Validierung, simulierter Latenz und einem Stateful-Modus.
 - **Sofort ausführbare Clients, automatisch generiert.** Während der Mock läuft, erstellt der Bereich Clients echte, ausführbare Anfragen für jedes aktivierte Protokoll, ausgerichtet auf die Endpunkte des Mocks. Ein Klick öffnet eine Anfrage und trifft den Server — kein erneutes Importieren Ihrer API anderswo mehr, um sie zu testen.
-- **Exportieren Sie den Deskriptor** (OpenAPI und andere) und **generieren Sie Code** aus Ihrem Entwurf, in einer Sandbox gerendert und erst nach Ihrer Bestätigung auf die Festplatte geschrieben.
+- **Generieren Sie Code** aus Ihrem Entwurf mit den mitgelieferten Templates und Ihren eigenen, in einer Sandbox gerendert und erst nach Ihrer Bestätigung auf die Festplatte geschrieben. **Exportieren Sie auch den Deskriptor** (OpenAPI und mehr).
 - **Beim Import werden Anfrage-Bodies vorausgefüllt**: GraphQL wählt die Skalarfelder des Rückgabetyps aus, gRPC entfaltet verschachtelte Nachrichten — die Anfrage läuft unverändert.
 
 ## v1.0.6

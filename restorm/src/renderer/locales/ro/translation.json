@@ -2548,7 +2548,8 @@
       },
       "body": {
         "label": "Corpul cererii",
-        "empty": "(gol)"
+        "empty": "(gol)",
+        "nonStandardHint": "Un corp de cerere pe {{method}} nu este standard — multe servere și proxy-uri îl ignoră. Restorm îl servește și îl documentează oricum."
       },
       "responses": {
         "add": "Adaugă",

@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Request-Body",
-        "empty": "(leer)"
+        "empty": "(leer)",
+        "nonStandardHint": "Ein Request-Body bei {{method}} ist nicht standardkonform — viele Server und Proxys ignorieren ihn. Restorm stellt ihn dennoch bereit und dokumentiert ihn."
       },
       "responses": {
         "add": "Hinzufügen",

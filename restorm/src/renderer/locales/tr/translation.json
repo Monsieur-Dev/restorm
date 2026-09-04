@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "İstek gövdesi",
-        "empty": "(boş)"
+        "empty": "(boş)",
+        "nonStandardHint": "{{method}} üzerinde bir istek gövdesi standart değildir — birçok sunucu ve proxy bunu yok sayar. Restorm yine de onu sunar ve belgeler."
       },
       "responses": {
         "add": "Ekle",

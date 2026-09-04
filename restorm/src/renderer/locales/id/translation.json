@@ -2546,7 +2546,8 @@
       },
       "body": {
         "label": "Badan permintaan",
-        "empty": "(kosong)"
+        "empty": "(kosong)",
+        "nonStandardHint": "Isi permintaan pada {{method}} tidak standar — banyak server dan proxy mengabaikannya. Restorm tetap menyajikan dan mendokumentasikannya."
       },
       "responses": {
         "add": "Tambah",

@@ -533,30 +533,37 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
         </label>
       </div>
 
-      {BODY_METHODS.has(method) && (
-        <label className="design-field">
-          <span className="design-field-label">{t('design.routes.body.label', 'Request body')}</span>
-          <SelectBox
-            id={`design-route-body-${route.id}`}
-            className=""
-            options={bodyOptions}
-            selected={bodyIndex}
-            onDidSelect={(data: ISelectData) => {
-              const index = bodyOptions.findIndex((opt) => opt.text === data.selected)
-              const picked = index <= 0 ? undefined : bodyModels[index - 1]
-              const { body: _dropped, ...designRest } = route.design ?? {}
-              commit({
-                ...route,
-                design: picked === undefined
-                  ? designRest
-                  : { ...designRest, body: { modelId: picked.id, contentType: route.design?.body?.contentType ?? 'application/json' } }
-              })
-            }}
-            selectBoxOptions={{ ariaLabel: t('design.routes.body.label', 'Request body'), useCustomDrawn: true }}
-            data-testid="design-route-body"
-          />
-        </label>
-      )}
+      {/* A request body is offered for EVERY method. It is standard on
+          POST/PUT/PATCH; on GET/DELETE/HEAD/… it is unusual but not forbidden
+          (RFC 9110), and tooling like curl/Postman/Elasticsearch allow it — so
+          Restorm lets you define one and just flags it as non-standard. */}
+      <label className="design-field">
+        <span className="design-field-label">{t('design.routes.body.label', 'Request body')}</span>
+        <SelectBox
+          id={`design-route-body-${route.id}`}
+          className=""
+          options={bodyOptions}
+          selected={bodyIndex}
+          onDidSelect={(data: ISelectData) => {
+            const index = bodyOptions.findIndex((opt) => opt.text === data.selected)
+            const picked = index <= 0 ? undefined : bodyModels[index - 1]
+            const { body: _dropped, ...designRest } = route.design ?? {}
+            commit({
+              ...route,
+              design: picked === undefined
+                ? designRest
+                : { ...designRest, body: { modelId: picked.id, contentType: route.design?.body?.contentType ?? 'application/json' } }
+            })
+          }}
+          selectBoxOptions={{ ariaLabel: t('design.routes.body.label', 'Request body'), useCustomDrawn: true }}
+          data-testid="design-route-body"
+        />
+        {!BODY_METHODS.has(method) && route.design?.body !== undefined && (
+          <span className="design-field-hint" data-testid="design-route-body-nonstandard-hint">
+            {t('design.routes.body.nonStandardHint', 'A request body on {{method}} is non-standard — many servers and proxies ignore it. Restorm still serves and documents it.', { method })}
+          </span>
+        )}
+      </label>
 
       <StaticPane
         title={t('design.routes.params.pathTitle', 'Path parameters')}

@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Kérés törzse",
-        "empty": "(üres)"
+        "empty": "(üres)",
+        "nonStandardHint": "A(z) {{method}} metóduson a kéréstörzs nem szabványos — sok szerver és proxy figyelmen kívül hagyja. A Restorm ettől függetlenül kiszolgálja és dokumentálja."
       },
       "responses": {
         "add": "Hozzáadás",

@@ -2,12 +2,12 @@
 
 ## v1.1.0
 
-**Design dit API, servér det som en mock, og generér dets klienter — uden at forlade Restorm.**
+🎉 **Restorm er nu også en API-designer.** Design dit API, servér det som en live-mock på tværs af fem protokoller på én gang, og generér dets klienter — uden at forlade appen, alt sammen på din egen disk.
 
-- **En visuel API-designer.** Modellér dit API i hånden — modeller, enums, ruter, navngivne eksempler, begrænsninger — uden at skrive en eneste linje spec.
+- **En visuel API-designer.** Modellér dit API i hånden — modeller, enums (navngivne eller inline), ruter, parametre, navngivne eksempler, begrænsninger, tags og udfasninger — uden at skrive en eneste linje spec.
 - **Servér det som en mock, med ét klik, på tværs af 5 protokoller på én gang.** Designet bliver til en server, der svarer i HTTP, GraphQL, SOAP, OData og gRPC samtidig. Svarene kommer fra dine navngivne eksempler (eller realistiske data genereret ud fra dine modeller), med validering af begrænsninger, simuleret latenstid og en stateful tilstand.
 - **Klar-til-brug klienter, genereret automatisk.** Mens mocken kører, opretter Clients-sektionen rigtige, kørbare forespørgsler for hver aktiveret protokol, rettet mod mockens endpoints. Ét klik åbner en forespørgsel og rammer serveren — ikke mere genimport af dit API et andet sted for at teste det.
-- **Eksportér deskriptoren** (OpenAPI og andre) og **generér kode** ud fra dit design, gengivet i en sandkasse og skrevet til disk først, når du bekræfter.
+- **Generér kode** ud fra dit design med de medfølgende skabeloner og dine egne tilpassede, gengivet i en sandkasse og skrevet til disk først, når du bekræfter. **Eksportér også deskriptoren** (OpenAPI og andre).
 - **Ved import forudfyldes forespørgselsindhold**: GraphQL vælger returtypens skalarfelter, gRPC udfolder indlejrede beskeder — forespørgslen kører, som den er.
 
 ## v1.0.6

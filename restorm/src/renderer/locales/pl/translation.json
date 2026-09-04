@@ -2549,7 +2549,8 @@
       },
       "body": {
         "label": "Ciało żądania",
-        "empty": "(puste)"
+        "empty": "(puste)",
+        "nonStandardHint": "Treść żądania w {{method}} jest niestandardowa — wiele serwerów i serwerów proxy ją ignoruje. Restorm i tak ją obsługuje i dokumentuje."
       },
       "responses": {
         "add": "Dodaj",

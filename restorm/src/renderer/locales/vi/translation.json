@@ -2546,7 +2546,8 @@
       },
       "body": {
         "label": "Thân yêu cầu",
-        "empty": "(trống)"
+        "empty": "(trống)",
+        "nonStandardHint": "Phần thân yêu cầu trên {{method}} là không chuẩn — nhiều máy chủ và proxy bỏ qua nó. Restorm vẫn phục vụ và tạo tài liệu cho nó."
       },
       "responses": {
         "add": "Thêm",

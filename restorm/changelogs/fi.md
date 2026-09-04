@@ -2,12 +2,12 @@
 
 ## v1.1.0
 
-**Suunnittele API:si, tarjoile se mockina ja generoi sen asiakkaat — poistumatta Restormista.**
+🎉 **Restorm on nyt myös API-suunnittelija.** Suunnittele API:si, tarjoile se live-mockina viidellä protokollalla kerralla ja generoi sen asiakkaat — poistumatta sovelluksesta, kaikki omalla levylläsi.
 
-- **Visuaalinen API-suunnittelija.** Mallinna API:si käsin — mallit, enumit, reitit, nimetyt esimerkit, rajoitteet — kirjoittamatta riviäkään määrittelyä.
+- **Visuaalinen API-suunnittelija.** Mallinna API:si käsin — mallit, enumit (nimetyt tai inline), reitit, parametrit, nimetyt esimerkit, rajoitteet, tunnisteet ja vanhentumiset — kirjoittamatta riviäkään määrittelyä.
 - **Tarjoile se mockina, yhdellä napsautuksella, viidellä protokollalla kerralla.** Suunnitelmasta tulee palvelin, joka vastaa HTTP:llä, GraphQL:llä, SOAP:lla, OData:lla ja gRPC:llä samanaikaisesti. Vastaukset tulevat nimetyistä esimerkeistäsi (tai malleistasi generoidusta realistisesta datasta), rajoitteiden validoinnilla, simuloidulla viiveellä ja tilallisella tilalla.
 - **Käyttövalmiit asiakkaat, generoituna automaattisesti.** Mockin ollessa käynnissä Clients-osio luo aitoja, suoritettavia pyyntöjä jokaiselle käytössä olevalle protokollalle, kohdistettuna mockin päätepisteisiin. Yksi napsautus avaa pyynnön ja osuu palvelimeen — ei enää API:si uudelleentuontia muualle sen testaamiseksi.
-- **Vie deskriptori** (OpenAPI ja muut) ja **generoi koodia** suunnitelmastasi, renderöitynä hiekkalaatikossa ja levylle kirjoitettuna vasta, kun vahvistat.
+- **Generoi koodia** suunnitelmastasi käyttäen valmiita mallipohjia ja omia mukautettuja, renderöitynä hiekkalaatikossa ja levylle kirjoitettuna vasta, kun vahvistat. **Vie myös deskriptori** (OpenAPI ja muut).
 - **Tuonnissa pyyntöjen rungot esitäytetään**: GraphQL valitsee paluutyypin skalaarikentät, gRPC laajentaa sisäkkäiset viestit — pyyntö toimii sellaisenaan.
 
 ## v1.0.6

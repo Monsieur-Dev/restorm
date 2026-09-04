@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Request-body",
-        "empty": "(tom)"
+        "empty": "(tom)",
+        "nonStandardHint": "En anmodningskrop på {{method}} er ikke standard — mange servere og proxyer ignorerer den. Restorm leverer og dokumenterer den alligevel."
       },
       "responses": {
         "add": "Tilføj",

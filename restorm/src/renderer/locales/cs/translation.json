@@ -2549,7 +2549,8 @@
       },
       "body": {
         "label": "Tělo požadavku",
-        "empty": "(prázdné)"
+        "empty": "(prázdné)",
+        "nonStandardHint": "Tělo požadavku u {{method}} není standardní — mnoho serverů a proxy jej ignoruje. Restorm jej přesto obsluhuje a dokumentuje."
       },
       "responses": {
         "add": "Přidat",

@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Request-body",
-        "empty": "(tom)"
+        "empty": "(tom)",
+        "nonStandardHint": "En forespørselskropp på {{method}} er ikke standard — mange servere og proxyer ignorerer den. Restorm serverer og dokumenterer den likevel."
       },
       "responses": {
         "add": "Legg til",

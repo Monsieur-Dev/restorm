@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Corpo da requisição",
-        "empty": "(vazio)"
+        "empty": "(vazio)",
+        "nonStandardHint": "Um corpo de requisição em {{method}} não é padrão — muitos servidores e proxies o ignoram. Ainda assim, o Restorm o serve e o documenta."
       },
       "responses": {
         "add": "Adicionar",

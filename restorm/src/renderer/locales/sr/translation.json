@@ -2548,7 +2548,8 @@
       },
       "body": {
         "label": "Telo zahteva",
-        "empty": "(prazno)"
+        "empty": "(prazno)",
+        "nonStandardHint": "Telo zahteva na {{method}} nije standardno — mnogi serveri i proksiji ga ignorišu. Restorm ga svejedno servira i dokumentuje."
       },
       "responses": {
         "add": "Dodaj",

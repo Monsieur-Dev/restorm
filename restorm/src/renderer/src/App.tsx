@@ -2432,7 +2432,9 @@ const App: React.FC = () => {
       document: cloneForEventBus(reactive as unknown as FolderItem),
       parentFolderId: folder.id
     } as DocumentChangedPayload)
-    setExpandedIds((prev) => Array.from(new Set([...prev, folder.id])))
+    // Expand the parent env folder AND the new design itself, so its
+    // Models / Enums / Routes sub-tree is unfolded right after creation.
+    setExpandedIds((prev) => Array.from(new Set([...prev, folder.id, reactive.id])))
     setSelectedItemId(reactive.id)
     const breadcrumbs = [...lookup.breadcrumbs, { id: reactive.id, label: reactive.name, icon: null }]
     openDesignTab(reactive, breadcrumbs)

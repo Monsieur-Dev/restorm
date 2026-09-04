@@ -2,12 +2,12 @@
 
 ## v1.1.0
 
-**Zaprojektuj swoje API, udostępnij je jako mock i wygeneruj jego klientów — bez opuszczania Restorma.**
+🎉 **Restorm jest teraz także projektantem API.** Zaprojektuj swoje API, udostępnij je jako mock na żywo na pięciu protokołach naraz i wygeneruj jego klientów — bez opuszczania aplikacji, wszystko na własnym dysku.
 
-- **Wizualny projektant API.** Modeluj swoje API ręcznie — modele, enumy, trasy, nazwane przykłady, ograniczenia — bez pisania ani jednej linijki specyfikacji.
+- **Wizualny projektant API.** Modeluj swoje API ręcznie — modele, enumy (nazwane lub inline), trasy, parametry, nazwane przykłady, ograniczenia, tagi i wycofania — bez pisania ani jednej linijki specyfikacji.
 - **Udostępnij je jako mock, jednym kliknięciem, na 5 protokołach naraz.** Projekt staje się serwerem, który odpowiada jednocześnie w HTTP, GraphQL, SOAP, OData i gRPC. Odpowiedzi pochodzą z Twoich nazwanych przykładów (lub z realistycznych danych wygenerowanych z Twoich modeli), z walidacją ograniczeń, symulowanym opóźnieniem i trybem stanowym.
 - **Gotowi do uruchomienia klienci, generowani automatycznie.** Gdy mock działa, sekcja Clients tworzy prawdziwe, wykonywalne żądania dla każdego włączonego protokołu, skierowane na endpointy mocka. Jedno kliknięcie otwiera żądanie i uderza w serwer — koniec z ponownym importowaniem API gdzie indziej, żeby je przetestować.
-- **Wyeksportuj deskryptor** (OpenAPI i inne) i **wygeneruj kod** ze swojego projektu, renderowany w piaskownicy i zapisywany na dysk dopiero po Twoim potwierdzeniu.
+- **Wygeneruj kod** ze swojego projektu, korzystając z dostarczonych szablonów oraz własnych, niestandardowych, renderowany w piaskownicy i zapisywany na dysk dopiero po Twoim potwierdzeniu. **Wyeksportuj też deskryptor** (OpenAPI i inne).
 - **Przy imporcie treści żądań wypełniają się automatycznie**: GraphQL wybiera pola skalarne typu zwracanego, gRPC rozwija zagnieżdżone komunikaty — żądanie działa bez zmian.
 
 ## v1.0.6

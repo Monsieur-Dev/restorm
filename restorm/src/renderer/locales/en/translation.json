@@ -2550,7 +2550,8 @@
       },
       "body": {
         "label": "Request body",
-        "empty": "(empty)"
+        "empty": "(empty)",
+        "nonStandardHint": "A request body on {{method}} is non-standard — many servers and proxies ignore it. Restorm still serves and documents it."
       },
       "responses": {
         "add": "Add",

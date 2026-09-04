@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Request-body",
-        "empty": "(tom)"
+        "empty": "(tom)",
+        "nonStandardHint": "En begärandekropp på {{method}} är inte standard — många servrar och proxyservrar ignorerar den. Restorm levererar och dokumenterar den ändå."
       },
       "responses": {
         "add": "Lägg till",

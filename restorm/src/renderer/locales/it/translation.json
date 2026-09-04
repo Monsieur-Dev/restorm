@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Corpo della richiesta",
-        "empty": "(vuoto)"
+        "empty": "(vuoto)",
+        "nonStandardHint": "Un corpo della richiesta su {{method}} non è standard: molti server e proxy lo ignorano. Restorm lo serve e lo documenta comunque."
       },
       "responses": {
         "add": "Aggiungi",

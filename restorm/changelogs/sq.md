@@ -2,12 +2,12 @@
 
 ## v1.1.0
 
-**Projektoni API-n tuaj, shërbejeni si mock dhe gjeneroni klientët e saj — pa dalë nga Restorm.**
+🎉 **Tani Restorm është edhe një projektues API-sh.** Projektoni API-n tuaj, shërbejeni si një mock live në pesë protokolle njëherësh dhe gjeneroni klientët e saj — pa dalë nga aplikacioni, gjithçka në diskun tuaj.
 
-- **Një projektues vizual API-sh.** Modeloni API-n tuaj me dorë — modele, enum-e, rrugë, shembuj të emërtuar, kufizime — pa shkruar asnjë rresht specifikimi.
+- **Një projektues vizual API-sh.** Modeloni API-n tuaj me dorë — modele, enum-e (të emërtuar ose inline), rrugë, parametra, shembuj të emërtuar, kufizime, etiketa dhe vjetërsime — pa shkruar asnjë rresht specifikimi.
 - **Shërbejeni si mock, me një klik, në 5 protokolle njëherësh.** Projektimi bëhet një server që përgjigjet njëkohësisht në HTTP, GraphQL, SOAP, OData dhe gRPC. Përgjigjet vijnë nga shembujt tuaj të emërtuar (ose nga të dhëna realiste të gjeneruara prej modeleve tuaja), me validim kufizimesh, vonesë të simuluar dhe një modalitet me gjendje.
 - **Klientë gati për ekzekutim, të gjeneruar automatikisht.** Ndërsa mock-u është duke punuar, seksioni Clients krijon kërkesa reale, të ekzekutueshme për çdo protokoll të aktivizuar, të drejtuara te endpoint-et e mock-ut. Një klik hap një kërkesë dhe godet serverin — s'ka më nevojë të riimportoni API-n tuaj gjetkë për ta testuar.
-- **Eksportoni përshkruesin** (OpenAPI dhe të tjerë) dhe **gjeneroni kod** nga projektimi juaj, i renderuar në një sandbox dhe i shkruar në disk vetëm pasi ju konfirmoni.
+- **Gjeneroni kod** nga projektimi juaj duke përdorur shabllonet e ofruara dhe tuajat të personalizuara, i renderuar në një sandbox dhe i shkruar në disk vetëm pasi ju konfirmoni. **Eksportoni edhe përshkruesin** (OpenAPI dhe të tjerë).
 - **Gjatë importimit, trupat e kërkesave paraplotësohen**: GraphQL zgjedh fushat skalare të tipit të kthimit, gRPC shpalos mesazhet e ndërthurura — kërkesa ekzekutohet ashtu siç është.
 
 ## v1.0.6

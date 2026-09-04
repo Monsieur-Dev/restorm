@@ -2546,7 +2546,8 @@
       },
       "body": {
         "label": "请求体",
-        "empty": "（空）"
+        "empty": "（空）",
+        "nonStandardHint": "在 {{method}} 上使用请求体是非标准的——许多服务器和代理会忽略它。Restorm 仍会提供并记录它。"
       },
       "responses": {
         "add": "添加",

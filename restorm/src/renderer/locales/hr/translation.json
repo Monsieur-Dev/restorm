@@ -2548,7 +2548,8 @@
       },
       "body": {
         "label": "Tijelo zahtjeva",
-        "empty": "(prazno)"
+        "empty": "(prazno)",
+        "nonStandardHint": "Tijelo zahtjeva na {{method}} nije standardno — mnogi poslužitelji i proxyji ga zanemaruju. Restorm ga svejedno poslužuje i dokumentira."
       },
       "responses": {
         "add": "Dodaj",

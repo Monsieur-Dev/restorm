@@ -2,12 +2,12 @@
 
 ## v1.1.0
 
-**Osmislite svoj API, poslužite ga kao mock i generišite njegove klijente — bez napuštanja Restorma.**
+🎉 **Restorm je sada i dizajner API-ja.** Osmislite svoj API, poslužite ga kao živi mock na pet protokola odjednom i generišite njegove klijente — bez napuštanja aplikacije, sve na vašem sopstvenom disku.
 
-- **Vizuelni dizajner API-ja.** Modelujte svoj API ručno — modele, enume, rute, imenovane primere, ograničenja — bez pisanja ijedne linije specifikacije.
+- **Vizuelni dizajner API-ja.** Modelujte svoj API ručno — modele, enume (imenovane ili ugrađene), rute, parametre, imenovane primere, ograničenja, oznake i zastarelosti — bez pisanja ijedne linije specifikacije.
 - **Poslužite ga kao mock, jednim klikom, na 5 protokola odjednom.** Dizajn postaje server koji istovremeno odgovara u HTTP-u, GraphQL-u, SOAP-u, OData-i i gRPC-u. Odgovori dolaze iz vaših imenovanih primera (ili iz realističnih podataka generisanih iz vaših modela), uz validaciju ograničenja, simuliranu latenciju i stateful režim.
 - **Klijenti spremni za pokretanje, generisani automatski.** Dok mock radi, odeljak Clients kreira prave, izvršive zahteve za svaki omogućeni protokol, usmerene ka endpointovima mocka. Jedan klik otvara zahtev i pogađa server — nema više ponovnog uvoza vašeg API-ja negde drugde da biste ga testirali.
-- **Izvezite deskriptor** (OpenAPI i drugi) i **generišite kôd** iz svog dizajna, prikazan u sandboxu i zapisan na disk tek nakon što potvrdite.
+- **Generišite kôd** iz svog dizajna koristeći ponuđene šablone i sopstvene prilagođene, prikazan u sandboxu i zapisan na disk tek nakon što potvrdite. **Izvezite i deskriptor** (OpenAPI i drugi).
 - **Pri uvozu se tela zahteva unapred popunjavaju**: GraphQL bira skalarna polja povratnog tipa, gRPC razvija ugneždene poruke — zahtev se pokreće takav kakav jeste.
 
 ## v1.0.6

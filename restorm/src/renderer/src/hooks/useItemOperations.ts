@@ -1136,6 +1136,12 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       if (!silent) setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
       setRootItems((prevItems) => [...prevItems])
     }
+    // A freshly created design is expanded so its Models / Enums / Routes
+    // sub-tree is visible right away — matches the from-imported-API path in
+    // App (`makeReactiveApiDesign` handler). Its own id, not just the parent's.
+    if (!silent && kind === 'design') {
+      setExpandedIds((prev) => Array.from(new Set([...prev, id])))
+    }
     if (!silent) setSelectedItemId(id)
 
     if (!silent) {

@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Request-body",
-        "empty": "(leeg)"
+        "empty": "(leeg)",
+        "nonStandardHint": "Een request-body bij {{method}} is niet standaard — veel servers en proxy's negeren die. Restorm levert en documenteert die toch."
       },
       "responses": {
         "add": "Toevoegen",

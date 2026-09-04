@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Pyynnön runko",
-        "empty": "(tyhjä)"
+        "empty": "(tyhjä)",
+        "nonStandardHint": "Pyynnön runko {{method}}-metodissa ei ole standardi — monet palvelimet ja välityspalvelimet jättävät sen huomiotta. Restorm tarjoaa ja dokumentoi sen silti."
       },
       "responses": {
         "add": "Lisää",

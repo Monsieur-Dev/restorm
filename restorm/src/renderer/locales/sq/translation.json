@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Trupi i kërkesës",
-        "empty": "(bosh)"
+        "empty": "(bosh)",
+        "nonStandardHint": "Një trup kërkese në {{method}} nuk është standard — shumë serverë dhe proxy e shpërfillin. Restorm e shërben dhe e dokumenton gjithsesi."
       },
       "responses": {
         "add": "Shto",

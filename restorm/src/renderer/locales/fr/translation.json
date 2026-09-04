@@ -2550,7 +2550,8 @@
       },
       "body": {
         "label": "Corps de la requête",
-        "empty": "(vide)"
+        "empty": "(vide)",
+        "nonStandardHint": "Un corps de requête sur {{method}} n'est pas standard — beaucoup de serveurs et de proxys l'ignorent. Restorm le sert et le documente quand même."
       },
       "responses": {
         "add": "Ajouter",

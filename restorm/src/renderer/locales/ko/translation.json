@@ -2546,7 +2546,8 @@
       },
       "body": {
         "label": "요청 본문",
-        "empty": "(비어 있음)"
+        "empty": "(비어 있음)",
+        "nonStandardHint": "{{method}}에 요청 본문을 두는 것은 비표준입니다 — 많은 서버와 프록시가 이를 무시합니다. 그래도 Restorm은 이를 제공하고 문서화합니다."
       },
       "responses": {
         "add": "추가",

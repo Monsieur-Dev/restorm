@@ -2547,7 +2547,8 @@
       },
       "body": {
         "label": "Cuerpo de la petición",
-        "empty": "(vacío)"
+        "empty": "(vacío)",
+        "nonStandardHint": "Un cuerpo de solicitud en {{method}} no es estándar: muchos servidores y proxies lo ignoran. Aun así, Restorm lo sirve y lo documenta."
       },
       "responses": {
         "add": "Añadir",

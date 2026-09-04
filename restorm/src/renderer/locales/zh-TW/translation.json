@@ -2546,7 +2546,8 @@
       },
       "body": {
         "label": "請求主體",
-        "empty": "（空）"
+        "empty": "（空）",
+        "nonStandardHint": "在 {{method}} 上使用請求主體是非標準的——許多伺服器和代理會忽略它。Restorm 仍會提供並記錄它。"
       },
       "responses": {
         "add": "新增",
