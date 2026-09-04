@@ -2,9 +2,11 @@ import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
+  CodeEditor,
   InputBox,
   MessageType
 } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ApiDesign, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
 import { composeRoutePath, groupChainBasePath } from '../../../../shared/design/apiDesignDoc'
 import { httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
@@ -180,26 +182,34 @@ const RunRouteRow: React.FC<RunRouteRowProps> = ({ design, group, route, callCou
                 />
               </div>
               <div className="design-run-custom-body">
-                <InputBox
+                <CodeEditor
                   value={customBody}
-                  onChange={setCustomBody}
+                  onChange={(value) => { setCustomBody(value ?? '') }}
+                  language="json"
+                  autoHeight={{ maxHeight: 500, minHeight: 56 }}
                   options={{
-                    type: 'text',
-                    flexibleHeight: true,
-                    placeholder: t('design.run.customBodyPlaceholder', 'Optional response body (JSON)'),
-                    ariaLabel: t('design.run.customBody', 'Custom response body')
+                    ariaLabel: t('design.run.customBody', 'Custom response body'),
+                    minimap: { enabled: false },
+                    lineNumbers: 'off',
+                    scrollBeyondLastLine: false,
+                    folding: false,
+                    overviewRulerLanes: 0,
+                    renderLineHighlight: 'none',
+                    wordWrap: 'on'
                   }}
                   data-testid={`design-run-custom-body-${route.id}`}
                 />
               </div>
-              <Button
-                secondary
-                small
-                onClick={applyCustom}
-                data-testid={`design-run-custom-apply-${route.id}`}
-              >
-                {t('design.run.customApply', 'Force')}
-              </Button>
+              <HeaderHoverTooltip label={t('design.run.customApply', 'Force')}>
+                <Button
+                  secondary
+                  small
+                  icon="check"
+                  options={{ ariaLabel: t('design.run.customApply', 'Force') }}
+                  onClick={applyCustom}
+                  data-testid={`design-run-custom-apply-${route.id}`}
+                />
+              </HeaderHoverTooltip>
             </div>
             {forcedCustom !== undefined && (
               <span className="design-run-return-count">{byCode[forcedCustom.code] ?? 0}</span>
