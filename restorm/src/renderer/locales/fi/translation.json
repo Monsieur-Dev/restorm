@@ -2406,7 +2406,8 @@
       "ownProperties": "Omat ominaisuudet",
       "tabs": {
         "property": "Ominaisuus"
-      }
+      },
+      "advancedType": "Lisäasetukset…"
     },
     "flags": {
       "required": "pakollinen",

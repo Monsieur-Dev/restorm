@@ -2408,7 +2408,8 @@
       "ownProperties": "Vlastní vlastnosti",
       "tabs": {
         "property": "Vlastnost"
-      }
+      },
+      "advancedType": "Pokročilé…"
     },
     "flags": {
       "required": "povinné",

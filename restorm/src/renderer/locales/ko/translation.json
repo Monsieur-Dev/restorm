@@ -2405,7 +2405,8 @@
       "ownProperties": "고유 속성",
       "tabs": {
         "property": "속성"
-      }
+      },
+      "advancedType": "고급…"
     },
     "flags": {
       "required": "필수",

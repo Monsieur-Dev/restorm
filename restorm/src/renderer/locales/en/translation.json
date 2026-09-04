@@ -2409,7 +2409,8 @@
       "generatedProperties": "Generated properties",
       "tabs": {
         "property": "Property"
-      }
+      },
+      "advancedType": "Advanced…"
     },
     "flags": {
       "required": "required",

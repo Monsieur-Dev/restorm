@@ -2405,7 +2405,8 @@
       "ownProperties": "自有屬性",
       "tabs": {
         "property": "屬性"
-      }
+      },
+      "advancedType": "進階…"
     },
     "flags": {
       "required": "必填",

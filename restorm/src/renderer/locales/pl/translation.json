@@ -2408,7 +2408,8 @@
       "ownProperties": "Własne właściwości",
       "tabs": {
         "property": "Właściwość"
-      }
+      },
+      "advancedType": "Zaawansowane…"
     },
     "flags": {
       "required": "wymagane",

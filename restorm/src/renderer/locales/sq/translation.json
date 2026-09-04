@@ -2406,7 +2406,8 @@
       "ownProperties": "Veti vetjake",
       "tabs": {
         "property": "Veti"
-      }
+      },
+      "advancedType": "Të avancuara…"
     },
     "flags": {
       "required": "i detyrueshëm",

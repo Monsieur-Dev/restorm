@@ -2407,7 +2407,8 @@
       "ownProperties": "Proprietăți proprii",
       "tabs": {
         "property": "Proprietate"
-      }
+      },
+      "advancedType": "Avansat…"
     },
     "flags": {
       "required": "obligatoriu",

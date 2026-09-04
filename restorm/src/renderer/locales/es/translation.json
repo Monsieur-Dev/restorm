@@ -2406,7 +2406,8 @@
       "ownProperties": "Propiedades propias",
       "tabs": {
         "property": "Propiedad"
-      }
+      },
+      "advancedType": "Avanzado…"
     },
     "flags": {
       "required": "requerido",

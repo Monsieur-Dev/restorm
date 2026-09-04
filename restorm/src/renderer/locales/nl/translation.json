@@ -2406,7 +2406,8 @@
       "ownProperties": "Eigen eigenschappen",
       "tabs": {
         "property": "Eigenschap"
-      }
+      },
+      "advancedType": "Geavanceerd…"
     },
     "flags": {
       "required": "verplicht",

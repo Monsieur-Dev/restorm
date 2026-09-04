@@ -2406,7 +2406,8 @@
       "ownProperties": "Saját tulajdonságok",
       "tabs": {
         "property": "Tulajdonság"
-      }
+      },
+      "advancedType": "Speciális…"
     },
     "flags": {
       "required": "kötelező",

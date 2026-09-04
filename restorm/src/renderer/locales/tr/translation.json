@@ -2406,7 +2406,8 @@
       "ownProperties": "Kendi özellikleri",
       "tabs": {
         "property": "Özellik"
-      }
+      },
+      "advancedType": "Gelişmiş…"
     },
     "flags": {
       "required": "zorunlu",

@@ -2405,7 +2405,8 @@
       "ownProperties": "自有属性",
       "tabs": {
         "property": "属性"
-      }
+      },
+      "advancedType": "高级…"
     },
     "flags": {
       "required": "必填",

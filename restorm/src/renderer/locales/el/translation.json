@@ -2406,7 +2406,8 @@
       "ownProperties": "Δικές του ιδιότητες",
       "tabs": {
         "property": "Ιδιότητα"
-      }
+      },
+      "advancedType": "Για προχωρημένους…"
     },
     "flags": {
       "required": "υποχρεωτικό",

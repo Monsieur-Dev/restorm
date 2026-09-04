@@ -2408,7 +2408,8 @@
       "ownProperties": "Власні властивості",
       "tabs": {
         "property": "Властивість"
-      }
+      },
+      "advancedType": "Розширені…"
     },
     "flags": {
       "required": "обов’язкова",

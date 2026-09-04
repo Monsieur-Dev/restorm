@@ -2407,7 +2407,8 @@
       "ownProperties": "Sopstvena svojstva",
       "tabs": {
         "property": "Svojstvo"
-      }
+      },
+      "advancedType": "Napredno…"
     },
     "flags": {
       "required": "obavezno",

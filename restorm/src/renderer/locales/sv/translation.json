@@ -2406,7 +2406,8 @@
       "ownProperties": "Egna egenskaper",
       "tabs": {
         "property": "Egenskap"
-      }
+      },
+      "advancedType": "Avancerat…"
     },
     "flags": {
       "required": "obligatorisk",
