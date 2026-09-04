@@ -361,17 +361,33 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             ))}
           </section>
         ))
-        : operations.map((op, idx) => (
-          <RouteBlock
-            key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
-            operation={op}
-            headingLevel={sectionHeadingLevel}
-            showGroupChip={!isSingleRoute}
-            {...(tagColors ? { tagColors } : {})}
-            {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
-            {...(onEditOperation ? { onEdit: onEditOperation } : {})}
-          />
-        ))}
+        : operations.map((op, idx) => {
+          // A single-route (ungrouped) layout has no group header, so its
+          // group's description would otherwise never render — surface it
+          // above the route block when the operation carries a described group.
+          const group = op.group !== undefined ? slice.groups.find((g) => g.name === op.group) : undefined
+          const groupDescription = isSingleRoute && group?.description !== undefined && group.description.length > 0
+            ? group.description
+            : undefined
+          return (
+            <React.Fragment key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}>
+              {groupDescription !== undefined && (
+                <MarkdownViewer
+                  value={groupDescription}
+                  data-testid={`documentation-host-group-description-${op.group ?? ''}`}
+                />
+              )}
+              <RouteBlock
+                operation={op}
+                headingLevel={sectionHeadingLevel}
+                showGroupChip={!isSingleRoute}
+                {...(tagColors ? { tagColors } : {})}
+                {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
+                {...(onEditOperation ? { onEdit: onEditOperation } : {})}
+              />
+            </React.Fragment>
+          )
+        })}
 
       {structuralModels.length > 0 ? (
         <section
