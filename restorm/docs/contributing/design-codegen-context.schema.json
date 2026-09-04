@@ -1,22 +1,52 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://restorm.dev/schemas/design-codegen-context/v1.json",
-  "title": "Restorm design codegen context (v1)",
+  "$id": "https://restorm.dev/schemas/design-codegen-context/v2.json",
+  "title": "Restorm design codegen context (v2)",
   "description": "The JSON context a Restorm code-generation template receives. Cross-references travel by NAME (never by internal id); paths come both group-relative and fully composed, `{param}` spelling.",
   "type": "object",
-  "required": ["contextVersion", "design", "enums", "models", "groups"],
+  "required": [
+    "contextVersion",
+    "design",
+    "enums",
+    "models",
+    "groups"
+  ],
   "properties": {
-    "contextVersion": { "const": 1 },
+    "contextVersion": {
+      "const": 2
+    },
     "design": {
       "type": "object",
-      "required": ["name", "defaultAuth"],
+      "required": [
+        "name",
+        "defaultAuth"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "version": { "type": "string" },
-        "description": { "type": "string" },
-        "basePath": { "type": "string" },
-        "defaultAuth": { "enum": ["none", "bearer", "apiKeyHeader", "basic"] },
-        "vars": { "type": "object", "additionalProperties": true, "description": "Resolved PROJECT-scope user variables a custom template declared in its manifest." }
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "basePath": {
+          "type": "string"
+        },
+        "defaultAuth": {
+          "enum": [
+            "none",
+            "bearer",
+            "apiKeyHeader",
+            "basic"
+          ]
+        },
+        "vars": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Resolved PROJECT-scope user variables a custom template declared in its manifest."
+        }
       },
       "additionalProperties": false
     },
@@ -24,11 +54,33 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "values"],
+        "required": [
+          "name",
+          "values"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "values": { "type": "array", "items": { "type": ["string", "number"] } }
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            }
+          },
+          "memberNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Per-value code identifiers, index-aligned with `values`."
+          }
         },
         "additionalProperties": false
       }
@@ -37,43 +89,129 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "properties", "allProperties", "examples"],
+        "required": [
+          "name",
+          "properties",
+          "allProperties",
+          "examples"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "inherits": { "type": "string", "description": "Parent model name (single inheritance); its properties are NOT repeated here." },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "inherits": {
+            "type": "string",
+            "description": "Parent model name (single inheritance); its properties are NOT repeated here."
+          },
           "identifier": {
             "type": "object",
-            "required": ["property", "strategy"],
+            "required": [
+              "property",
+              "strategy"
+            ],
             "properties": {
-              "property": { "type": "string" },
-              "strategy": { "type": "string" }
+              "property": {
+                "type": "string"
+              },
+              "strategy": {
+                "type": "string"
+              }
             },
             "additionalProperties": false
           },
-          "timestamps": { "const": true },
-          "softDelete": { "const": true },
-          "volumetry": { "type": "string", "description": "Expected row-count order of magnitude: hundreds / tenThousands / millions." },
-          "accessPattern": { "enum": ["readHeavy", "writeHeavy", "balanced", "appendOnly"], "description": "Read/write profile of the resource." },
-          "traffic": { "enum": ["low", "medium", "high"], "description": "Expected access frequency (traffic)." },
-          "freshness": { "enum": ["strong", "shortCache", "longCache"], "description": "How stale the resource may be served (freshness tolerance)." },
-          "sensitivity": { "enum": ["public", "internal", "confidential", "pii"], "description": "Data classification of the resource." },
-          "retention": { "enum": ["permanent", "archivable", "ephemeral"], "description": "Retention / lifecycle." },
-          "properties": { "type": "array", "items": { "$ref": "#/definitions/property" }, "description": "OWN properties only — use for the type declaration (`extends inherits`)." },
-          "allProperties": { "type": "array", "items": { "$ref": "#/definitions/property" }, "description": "Own + inherited properties, flattened (root ancestor first). Use for a complete instance: seed/example data, DB columns, full request/response shapes." },
+          "timestamps": {
+            "const": true
+          },
+          "softDelete": {
+            "const": true
+          },
+          "volumetry": {
+            "type": "string",
+            "description": "Expected row-count order of magnitude: hundreds / tenThousands / millions."
+          },
+          "accessPattern": {
+            "enum": [
+              "readHeavy",
+              "writeHeavy",
+              "balanced",
+              "appendOnly"
+            ],
+            "description": "Read/write profile of the resource."
+          },
+          "traffic": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "description": "Expected access frequency (traffic)."
+          },
+          "freshness": {
+            "enum": [
+              "strong",
+              "shortCache",
+              "longCache"
+            ],
+            "description": "How stale the resource may be served (freshness tolerance)."
+          },
+          "sensitivity": {
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "pii"
+            ],
+            "description": "Data classification of the resource."
+          },
+          "retention": {
+            "enum": [
+              "permanent",
+              "archivable",
+              "ephemeral"
+            ],
+            "description": "Retention / lifecycle."
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/property"
+            },
+            "description": "OWN properties only — use for the type declaration (`extends inherits`)."
+          },
+          "allProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/property"
+            },
+            "description": "Own + inherited properties, flattened (root ancestor first). Use for a complete instance: seed/example data, DB columns, full request/response shapes."
+          },
           "examples": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["name", "values"],
+              "required": [
+                "name",
+                "values"
+              ],
               "properties": {
-                "name": { "type": "string" },
-                "values": { "type": "object" }
+                "name": {
+                  "type": "string"
+                },
+                "values": {
+                  "type": "object"
+                }
               },
               "additionalProperties": false
             }
           },
-          "vars": { "type": "object", "additionalProperties": true, "description": "Resolved MODEL-scope user variables (evaluated per model)." }
+          "vars": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Resolved MODEL-scope user variables (evaluated per model)."
+          }
         },
         "additionalProperties": false
       }
@@ -82,26 +220,58 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "headers", "routes"],
+        "required": [
+          "name",
+          "headers",
+          "routes"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "basePath": { "type": "string" },
-          "versionPrefix": { "type": "string" },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "basePath": {
+            "type": "string"
+          },
+          "versionPrefix": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags shared by every route of the group."
+          },
           "headers": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "name": { "type": "string" },
-                "example": { "type": "string" },
-                "description": { "type": "string" }
+                "name": {
+                  "type": "string"
+                },
+                "example": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
               },
               "additionalProperties": false
             }
           },
-          "routes": { "type": "array", "items": { "$ref": "#/definitions/route" } }
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/route"
+            }
+          }
         },
         "additionalProperties": false
       }
@@ -111,62 +281,195 @@
   "definitions": {
     "property": {
       "type": "object",
-      "required": ["name", "type", "required"],
+      "required": [
+        "name",
+        "type",
+        "required"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "type": { "type": "string", "description": "Scalar label: string / integer / number / boolean / array / map / any — or the referenced component's label." },
-        "format": { "type": "string" },
-        "required": { "type": "boolean" },
-        "readOnly": { "const": true },
-        "writeOnly": { "const": true },
-        "nullable": { "const": true },
-        "description": { "type": "string" },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "description": "Scalar label: string / integer / number / boolean / array / map / any — or the referenced component's label."
+        },
+        "format": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "const": true
+        },
+        "writeOnly": {
+          "const": true
+        },
+        "nullable": {
+          "const": true
+        },
+        "description": {
+          "type": "string"
+        },
         "example": {},
         "default": {},
-        "enum": { "type": "string", "description": "Referenced enum NAME." },
+        "enum": {
+          "type": "string",
+          "description": "Referenced enum NAME (a named enum entity)."
+        },
+        "enumValues": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string",
+              "number"
+            ]
+          },
+          "description": "Inline (anonymous) allowed values declared on the property itself; mutually exclusive with `enum`."
+        },
         "references": {
           "type": "object",
-          "required": ["model"],
+          "required": [
+            "model"
+          ],
           "properties": {
-            "model": { "type": "string" },
-            "onDelete": { "type": "string" },
-            "array": { "const": true }
+            "model": {
+              "type": "string"
+            },
+            "onDelete": {
+              "type": "string"
+            },
+            "array": {
+              "const": true
+            }
           },
           "additionalProperties": false
         },
-        "arrayOf": { "type": "string" },
-        "unique": { "const": true },
-        "searchable": { "const": true },
-        "immutable": { "const": true },
-        "pii": { "const": true },
-        "constraints": { "type": "object" },
-        "vars": { "type": "object", "additionalProperties": true, "description": "Resolved PROPERTY-scope user variables (evaluated per property)." }
+        "arrayOf": {
+          "type": "string"
+        },
+        "deprecated": {
+          "const": true
+        },
+        "unique": {
+          "const": true
+        },
+        "searchable": {
+          "const": true
+        },
+        "immutable": {
+          "const": true
+        },
+        "pii": {
+          "const": true
+        },
+        "constraints": {
+          "type": "object"
+        },
+        "vars": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Resolved PROPERTY-scope user variables (evaluated per property)."
+        }
       },
       "additionalProperties": false
     },
     "route": {
       "type": "object",
-      "required": ["method", "path", "fullPath", "params", "responses", "auth"],
+      "required": [
+        "method",
+        "path",
+        "fullPath",
+        "params",
+        "responses",
+        "auth"
+      ],
       "properties": {
-        "method": { "type": "string" },
-        "path": { "type": "string", "description": "Group-relative, {param} spelling." },
-        "fullPath": { "type": "string", "description": "Fully composed served path, {param} spelling." },
-        "summary": { "type": "string" },
-        "description": { "type": "string" },
-        "operationId": { "type": "string" },
+        "method": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string",
+          "description": "Group-relative, {param} spelling."
+        },
+        "fullPath": {
+          "type": "string",
+          "description": "Fully composed served path, {param} spelling."
+        },
+        "summary": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "operationId": {
+          "type": "string"
+        },
         "params": {
           "type": "array",
+          "description": "EVERY parameter (path / query / header) — filter by `in` for a location-specific view.",
           "items": {
             "type": "object",
-            "required": ["name"],
+            "required": [
+              "name",
+              "in"
+            ],
             "properties": {
-              "name": { "type": "string" },
+              "name": {
+                "type": "string"
+              },
+              "in": {
+                "enum": [
+                  "path",
+                  "query",
+                  "header"
+                ]
+              },
+              "type": {
+                "type": "string",
+                "description": "Scalar/array label (`string`, `array<string>`, …). Absent when the param references a named enum or a linked property."
+              },
+              "required": {
+                "const": true
+              },
+              "description": {
+                "type": "string"
+              },
+              "enum": {
+                "type": "string",
+                "description": "Referenced enum NAME (a named enum entity)."
+              },
+              "enumValues": {
+                "type": "array",
+                "items": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                },
+                "description": "Inline allowed values; for an array param they constrain the items. Mutually exclusive with `enum`."
+              },
+              "arrayOf": {
+                "type": "string",
+                "description": "Element type of an `array<element>` parameter."
+              },
+              "deprecated": {
+                "const": true
+              },
               "property": {
                 "type": "object",
-                "required": ["model", "property"],
+                "required": [
+                  "model",
+                  "property"
+                ],
                 "properties": {
-                  "model": { "type": "string" },
-                  "property": { "type": "string" }
+                  "model": {
+                    "type": "string"
+                  },
+                  "property": {
+                    "type": "string"
+                  }
                 },
                 "additionalProperties": false
               }
@@ -176,10 +479,16 @@
         },
         "body": {
           "type": "object",
-          "required": ["model"],
+          "required": [
+            "model"
+          ],
           "properties": {
-            "model": { "type": "string" },
-            "contentType": { "type": "string" }
+            "model": {
+              "type": "string"
+            },
+            "contentType": {
+              "type": "string"
+            }
           },
           "additionalProperties": false
         },
@@ -187,33 +496,81 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["code"],
+            "required": [
+              "code"
+            ],
             "properties": {
-              "code": { "type": "string" },
-              "description": { "type": "string" },
-              "model": { "type": "string" },
-              "list": { "const": true },
-              "paginated": { "const": true },
-              "example": { "type": "string", "description": "Named example bound to this response." }
+              "code": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "list": {
+                "const": true
+              },
+              "paginated": {
+                "const": true
+              },
+              "example": {
+                "type": "string",
+                "description": "Named example bound to this response."
+              }
             },
             "additionalProperties": false
           }
         },
-        "auth": { "enum": ["none", "bearer", "apiKeyHeader", "basic"], "description": "The EFFECTIVE contract this route enforces." },
+        "auth": {
+          "enum": [
+            "none",
+            "bearer",
+            "apiKeyHeader",
+            "basic"
+          ],
+          "description": "The EFFECTIVE contract this route enforces."
+        },
         "pagination": {
           "type": "object",
-          "required": ["style"],
+          "required": [
+            "style"
+          ],
           "properties": {
-            "style": { "type": "string" },
-            "defaultLimit": { "type": "number" },
-            "maxLimit": { "type": "number" }
+            "style": {
+              "type": "string"
+            },
+            "defaultLimit": {
+              "type": "number"
+            },
+            "maxLimit": {
+              "type": "number"
+            }
           },
           "additionalProperties": false
         },
-        "idempotent": { "const": true },
-        "cacheSeconds": { "type": "number" },
-        "deprecated": { "const": true },
-        "vars": { "type": "object", "additionalProperties": true, "description": "Resolved ROUTE-scope user variables (evaluated per route)." }
+        "idempotent": {
+          "const": true
+        },
+        "cacheSeconds": {
+          "type": "number"
+        },
+        "deprecated": {
+          "const": true
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Effective tags — the union of the group's shared tags and the route's own (deduplicated, group first)."
+        },
+        "vars": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Resolved ROUTE-scope user variables (evaluated per route)."
+        }
       },
       "additionalProperties": false
     }

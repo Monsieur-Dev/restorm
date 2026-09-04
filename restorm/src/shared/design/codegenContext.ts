@@ -21,8 +21,8 @@ import type {
   DesignRoute,
   DesignRouteGroup
 } from '../types/apiDesign'
-import { composeRoutePath, groupChainBasePath } from './apiDesignDoc'
-import { routePathParams } from './designRoutes'
+import type { ParameterDocumentation } from '../types/apiDocumentation'
+import { composeRoutePath, groupChainBasePath, unionTags } from './apiDesignDoc'
 import { effectiveAuth } from './designServing'
 import {
   resolveScopeVars,
@@ -33,7 +33,7 @@ import {
 
 /** Bump ONLY with a documented migration note — template manifests
  * pin the versions they understand. */
-export const CODEGEN_CONTEXT_VERSION = 1
+export const CODEGEN_CONTEXT_VERSION = 2
 
 /**
  * Everything needed to resolve a template's user-declared variables into the
@@ -75,6 +75,9 @@ export interface CodegenEnum {
   name: string
   description?: string
   values: (string | number)[]
+  /** Per-value code identifiers (index-aligned with `values`), when the design
+   * declares them — feeds `x-enum-varnames`-style output. Absent otherwise. */
+  memberNames?: string[]
 }
 
 export interface CodegenProperty {
@@ -90,12 +93,17 @@ export interface CodegenProperty {
   description?: string
   example?: unknown
   default?: unknown
-  /** Referenced enum NAME. */
+  /** Referenced enum NAME (a named enum entity). */
   enum?: string
+  /** INLINE enum values — an anonymous allowed set declared on the property
+   * itself (mutually exclusive with `enum`). */
+  enumValues?: (string | number)[]
   /** Referenced model NAME (+ the declared delete behaviour). */
   references?: { model: string; onDelete?: string; array?: boolean }
   /** Element type of an `array` property (scalar labels). */
   arrayOf?: string
+  /** The author asks consumers to migrate off this property. */
+  deprecated?: boolean
   unique?: boolean
   searchable?: boolean
   immutable?: boolean
@@ -148,6 +156,28 @@ export interface CodegenRouteResponse {
   example?: string
 }
 
+export interface CodegenParam {
+  name: string
+  /** `path` | `query` | `header`. */
+  in: string
+  /** Scalar/array label (`string`, `array<string>`, …). Absent when the param
+   * references a named enum (see `enum`) or inherits a linked property's type. */
+  type?: string
+  required?: boolean
+  description?: string
+  /** Referenced enum NAME (a named enum entity). */
+  enum?: string
+  /** INLINE enum values (mutually exclusive with `enum`). For an array param
+   * these constrain the ITEMS. */
+  enumValues?: (string | number)[]
+  /** Element type of an `array<element>` parameter (scalar label). */
+  arrayOf?: string
+  /** The author asks consumers to migrate off this parameter. */
+  deprecated?: boolean
+  /** Bound model property (a `paramLink`) — the param inherits its type. */
+  property?: { model: string; property: string }
+}
+
 export interface CodegenRoute {
   method: string
   /** Group-relative path, `{param}` spelling. */
@@ -158,8 +188,9 @@ export interface CodegenRoute {
   summary?: string
   description?: string
   operationId?: string
-  /** Path parameter names in order of appearance. */
-  params: { name: string; property?: { model: string; property: string } }[]
+  /** EVERY parameter (path / query / header) with its type, enum and
+   * deprecation — filter by `in` for a location-specific view. */
+  params: CodegenParam[]
   body?: { model: string; contentType?: string }
   responses: CodegenRouteResponse[]
   /** The auth contract this route actually enforces (effective). */
@@ -168,6 +199,9 @@ export interface CodegenRoute {
   idempotent?: boolean
   cacheSeconds?: number
   deprecated?: boolean
+  /** Effective tags — the UNION of the group's shared tags and the route's
+   * own, deduplicated (group first). Absent when empty. */
+  tags?: string[]
   /** Resolved ROUTE-scope user variables (`ctx.groups[].routes[].vars.<name>`),
    * evaluated per route. Absent when the template declares none. */
   vars?: Record<string, unknown>
@@ -178,6 +212,9 @@ export interface CodegenGroup {
   description?: string
   basePath?: string
   versionPrefix?: string
+  /** Tags shared by every route of the group (each route's `tags` already
+   * folds these in). Absent when empty. */
+  tags?: string[]
   headers: { name: string; example?: string; description?: string }[]
   routes: CodegenRoute[]
 }
@@ -218,7 +255,12 @@ function projectProperty(design: ApiDesign, property: DesignModel['properties'][
   if (reference?.target === 'enum') {
     const name = enumName(design, reference.refId)
     if (name !== undefined) out.enum = name
+  } else if (Array.isArray(doc.enumValues) && doc.enumValues.length > 0) {
+    // An inline (anonymous) enum on the property itself — mutually exclusive
+    // with a named enum reference.
+    out.enumValues = doc.enumValues.map((v) => (typeof v === 'number' ? v : String(v)))
   }
+  if (doc.deprecated === true) out.deprecated = true
   if (reference?.target === 'model') {
     const name = modelName(design, reference.refId)
     if (name !== undefined) {
@@ -342,6 +384,39 @@ function projectModel(
   return out
 }
 
+/** Project one route parameter — path, query or header — with its type, enum
+ * (named ref or inline), array element, deprecation and bound property. */
+function projectParam(
+  design: ApiDesign,
+  meta: DesignRoute['design'],
+  param: ParameterDocumentation
+): CodegenParam {
+  const out: CodegenParam = { name: param.name, in: param.location }
+  const enumId = meta?.paramEnumRefs?.[param.name]
+  const refName = enumId !== undefined ? enumName(design, enumId) : undefined
+  const link = meta?.paramLinks?.[param.name]
+  const model = link !== undefined ? design.models.find((m) => m.id === link.modelId) : undefined
+  const property = model?.properties.find((p) => p.id === link?.propertyId)
+  if (refName !== undefined) {
+    out.enum = refName
+  } else if (model !== undefined && property !== undefined) {
+    // A linked param inherits the property's type; leave `type` off (the
+    // `property` link carries it, matching the projection's live resolution).
+    out.property = { model: model.doc.name, property: property.doc.name }
+  } else {
+    out.type = param.type
+    const element = /^array<(.+)>$/.exec(param.type)?.[1]
+    if (element !== undefined) out.arrayOf = element
+    if (Array.isArray(param.enumValues) && param.enumValues.length > 0) {
+      out.enumValues = param.enumValues.map((v) => (typeof v === 'number' ? v : String(v)))
+    }
+  }
+  if (param.required) out.required = true
+  if (param.description !== undefined) out.description = param.description
+  if (param.deprecated === true) out.deprecated = true
+  return out
+}
+
 function projectRoute(
   design: ApiDesign,
   group: DesignRouteGroup,
@@ -359,17 +434,7 @@ function projectRoute(
     method: (route.doc.match.method ?? 'GET').toUpperCase(),
     path: templatePath(route.doc.match.urlPattern),
     fullPath: templatePath(fullPattern),
-    params: routePathParams(route.doc.match.urlPattern).map((name) => {
-      const link = meta?.paramLinks?.[name]
-      const model = link !== undefined ? design.models.find((m) => m.id === link.modelId) : undefined
-      const property = model?.properties.find((p) => p.id === link?.propertyId)
-      return {
-        name,
-        ...(model !== undefined && property !== undefined
-          ? { property: { model: model.doc.name, property: property.doc.name } }
-          : {})
-      }
-    }),
+    params: (route.doc.parameters ?? []).map((param) => projectParam(design, meta, param)),
     responses: Object.entries(route.doc.responses ?? {}).map(([code, doc]) => {
       const responseMeta = meta?.responses?.[code]
       const boundModel = modelName(design, responseMeta?.modelId)
@@ -410,6 +475,8 @@ function projectRoute(
   if (meta?.idempotent === true) out.idempotent = true
   if (typeof meta?.cacheSeconds === 'number' && meta.cacheSeconds > 0) out.cacheSeconds = meta.cacheSeconds
   if (route.doc.deprecated === true) out.deprecated = true
+  const tags = unionTags(group.doc.tags, route.doc.tags)
+  if (tags.length > 0) out.tags = tags
   if (binding !== undefined && designCtx !== undefined) {
     const resolved = resolveScopeVars({
       decls: binding.decls,
@@ -468,6 +535,7 @@ export function codegenEvalContext(
       routes: []
     }
     if (entity.group.doc.description !== undefined) group.description = entity.group.doc.description
+    if (entity.group.doc.tags !== undefined && entity.group.doc.tags.length > 0) group.tags = entity.group.doc.tags
     if (entity.group.design?.basePath !== undefined) group.basePath = entity.group.design.basePath
     if (entity.group.design?.versionPrefix !== undefined) group.versionPrefix = entity.group.design.versionPrefix
     const { routes: _routes, ...groupCtx } = group
@@ -497,13 +565,12 @@ export function buildCodegenContext(design: ApiDesign, binding?: CodegenVarsBind
   return {
     contextVersion: CODEGEN_CONTEXT_VERSION,
     design: designCtx,
-    enums: design.enums
-      .filter((e) => (e.doc.enumValues ?? []).length > 0)
-      .map((e) => ({
-        name: e.doc.name,
-        ...(e.doc.description !== undefined ? { description: e.doc.description } : {}),
-        values: (e.doc.enumValues ?? []).map((v) => (typeof v === 'number' ? v : String(v)))
-      })),
+    enums: design.enums.map((e) => ({
+      name: e.doc.name,
+      ...(e.doc.description !== undefined ? { description: e.doc.description } : {}),
+      values: (e.doc.enumValues ?? []).map((v) => (typeof v === 'number' ? v : String(v))),
+      ...(Array.isArray(e.memberNames) && e.memberNames.length > 0 ? { memberNames: e.memberNames } : {})
+    })),
     models: design.models.map((m) => projectModel(design, m, binding, designCtx)),
     groups: design.routeGroups.map((group) => {
       const out: CodegenGroup = {
@@ -516,6 +583,7 @@ export function buildCodegenContext(design: ApiDesign, binding?: CodegenVarsBind
         routes: []
       }
       if (group.doc.description !== undefined) out.description = group.doc.description
+      if (group.doc.tags !== undefined && group.doc.tags.length > 0) out.tags = group.doc.tags
       if (group.design?.basePath !== undefined) out.basePath = group.design.basePath
       if (group.design?.versionPrefix !== undefined) out.versionPrefix = group.design.versionPrefix
       // Routes project AFTER the group's own fields so route-scope variables can

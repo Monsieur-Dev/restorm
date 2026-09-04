@@ -9,13 +9,13 @@
  */
 export const CODEGEN_CONTEXT_SCHEMA = {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://restorm.dev/schemas/design-codegen-context/v1.json",
-  "title": "Restorm design codegen context (v1)",
+  "$id": "https://restorm.dev/schemas/design-codegen-context/v2.json",
+  "title": "Restorm design codegen context (v2)",
   "description": "The JSON context a Restorm code-generation template receives. Cross-references travel by NAME (never by internal id); paths come both group-relative and fully composed, `{param}` spelling.",
   "type": "object",
   "required": ["contextVersion", "design", "enums", "models", "groups"],
   "properties": {
-    "contextVersion": { "const": 1 },
+    "contextVersion": { "const": 2 },
     "design": {
       "type": "object",
       "required": ["name", "defaultAuth"],
@@ -37,7 +37,8 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         "properties": {
           "name": { "type": "string" },
           "description": { "type": "string" },
-          "values": { "type": "array", "items": { "type": ["string", "number"] } }
+          "values": { "type": "array", "items": { "type": ["string", "number"] } },
+          "memberNames": { "type": "array", "items": { "type": "string" }, "description": "Per-value code identifiers, index-aligned with `values`." }
         },
         "additionalProperties": false
       }
@@ -97,6 +98,7 @@ export const CODEGEN_CONTEXT_SCHEMA = {
           "description": { "type": "string" },
           "basePath": { "type": "string" },
           "versionPrefix": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" }, "description": "Tags shared by every route of the group." },
           "headers": {
             "type": "array",
             "items": {
@@ -132,7 +134,8 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         "description": { "type": "string" },
         "example": {},
         "default": {},
-        "enum": { "type": "string", "description": "Referenced enum NAME." },
+        "enum": { "type": "string", "description": "Referenced enum NAME (a named enum entity)." },
+        "enumValues": { "type": "array", "items": { "type": ["string", "number"] }, "description": "Inline (anonymous) allowed values declared on the property itself; mutually exclusive with `enum`." },
         "references": {
           "type": "object",
           "required": ["model"],
@@ -144,6 +147,7 @@ export const CODEGEN_CONTEXT_SCHEMA = {
           "additionalProperties": false
         },
         "arrayOf": { "type": "string" },
+        "deprecated": { "const": true },
         "unique": { "const": true },
         "searchable": { "const": true },
         "immutable": { "const": true },
@@ -165,11 +169,20 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         "operationId": { "type": "string" },
         "params": {
           "type": "array",
+          "description": "EVERY parameter (path / query / header) — filter by `in` for a location-specific view.",
           "items": {
             "type": "object",
-            "required": ["name"],
+            "required": ["name", "in"],
             "properties": {
               "name": { "type": "string" },
+              "in": { "enum": ["path", "query", "header"] },
+              "type": { "type": "string", "description": "Scalar/array label (`string`, `array<string>`, …). Absent when the param references a named enum or a linked property." },
+              "required": { "const": true },
+              "description": { "type": "string" },
+              "enum": { "type": "string", "description": "Referenced enum NAME (a named enum entity)." },
+              "enumValues": { "type": "array", "items": { "type": ["string", "number"] }, "description": "Inline allowed values; for an array param they constrain the items. Mutually exclusive with `enum`." },
+              "arrayOf": { "type": "string", "description": "Element type of an `array<element>` parameter." },
+              "deprecated": { "const": true },
               "property": {
                 "type": "object",
                 "required": ["model", "property"],
@@ -222,6 +235,7 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         "idempotent": { "const": true },
         "cacheSeconds": { "type": "number" },
         "deprecated": { "const": true },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Effective tags — the union of the group's shared tags and the route's own (deduplicated, group first)." },
         "vars": { "type": "object", "additionalProperties": true, "description": "Resolved ROUTE-scope user variables (evaluated per route)." }
       },
       "additionalProperties": false

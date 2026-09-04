@@ -15,6 +15,7 @@ import { validateAgainstSchema } from '../../src/shared/schemaValidate'
 import { resolveWithContextPriority } from '../../src/shared/utils/handlebars/resolveWithContextPriority'
 import type { CodegenVarError } from '../../src/shared/design/templateVariables'
 import { buildReferenceApiDesign } from './apiDesignReference'
+import type { ApiDesign } from '../../src/shared/types/apiDesign'
 
 const SCHEMA_PATH = join(__dirname, '../../docs/contributing/design-codegen-context.schema.json')
 
@@ -61,7 +62,7 @@ describe('buildCodegenContext', () => {
     expect(getOne?.path).toBe('/{id}')
     expect(getOne?.fullPath).toBe('/api/v1/users/{id}')
     expect(getOne?.auth).toBe('bearer')
-    expect(getOne?.params).toEqual([{ name: 'id', property: { model: 'User', property: 'id' } }])
+    expect(getOne?.params).toEqual([{ name: 'id', in: 'path', required: true, description: 'The user id.', property: { model: 'User', property: 'id' } }])
     expect(getOne?.cacheSeconds).toBe(60)
     const create = users?.routes.find((r) => r.method === 'POST')
     expect(create?.auth).toBe('none')
@@ -186,5 +187,68 @@ describe('buildCodegenContext — user variables (vars)', () => {
     expect(ctx.models.every((m) => m.vars === undefined)).toBe(true)
     expect(ctx.models.flatMap((m) => m.properties).every((p) => p.vars === undefined)).toBe(true)
     expect(ctx.groups.flatMap((g) => g.routes).every((r) => r.vars === undefined)).toBe(true)
+  })
+})
+
+describe('buildCodegenContext — enums / params / tags coverage', () => {
+  const design = {
+    id: 'd',
+    info: { title: 'T', version: '1.0.0' },
+    enums: [
+      { id: 'e1', doc: { name: 'PetStatus', properties: [], enumValues: ['available', 'sold'] }, memberNames: ['AVAILABLE', 'SOLD'] },
+      { id: 'e2', doc: { name: 'Empty', properties: [], enumValues: [] } }
+    ],
+    models: [{
+      id: 'm', doc: { name: 'Pet' },
+      properties: [
+        { id: 'p1', doc: { name: 'status', type: 'string', required: false, enumValues: ['a', 'b'], deprecated: true } },
+        { id: 'p2', doc: { name: 'kind', type: 'string', required: false }, design: { reference: { target: 'enum', refId: 'e1' } } }
+      ]
+    }],
+    routeGroups: [{
+      id: 'g', doc: { name: 'Pets', tags: ['pets'] },
+      routes: [{
+        id: 'r',
+        doc: {
+          match: { urlPattern: '/find', method: 'GET' },
+          tags: ['list'],
+          parameters: [
+            { name: 'status', location: 'query', type: 'array<string>', required: true, enumValues: ['available', 'sold'], deprecated: true },
+            { name: 'kind', location: 'query', type: 'string', required: false }
+          ]
+        },
+        design: { paramEnumRefs: { kind: 'e1' } }
+      }]
+    }]
+  } as unknown as ApiDesign
+
+  const ctx = buildCodegenContext(design)
+  const route = ctx.groups[0]?.routes[0]
+
+  it('exposes enums including empty ones, with memberNames', () => {
+    expect(ctx.enums.map((e) => e.name)).toEqual(['PetStatus', 'Empty'])
+    expect(ctx.enums.find((e) => e.name === 'PetStatus')?.memberNames).toEqual(['AVAILABLE', 'SOLD'])
+    expect(ctx.enums.find((e) => e.name === 'Empty')?.values).toEqual([])
+  })
+
+  it('exposes a property inline enum + deprecation, and a named enum ref', () => {
+    const props = ctx.models[0]?.properties ?? []
+    expect(props.find((p) => p.name === 'status')?.enumValues).toEqual(['a', 'b'])
+    expect(props.find((p) => p.name === 'status')?.deprecated).toBe(true)
+    expect(props.find((p) => p.name === 'kind')?.enum).toBe('PetStatus')
+  })
+
+  it('projects EVERY parameter with type / array / inline enum / enum-ref / deprecation', () => {
+    const status = route?.params.find((p) => p.name === 'status')
+    expect(status).toMatchObject({ in: 'query', type: 'array<string>', arrayOf: 'string', enumValues: ['available', 'sold'], required: true, deprecated: true })
+    const kind = route?.params.find((p) => p.name === 'kind')
+    // A named-enum reference wins over an inline type.
+    expect(kind?.enum).toBe('PetStatus')
+    expect(kind?.type).toBeUndefined()
+  })
+
+  it('projects group tags and the group∪route union on the route', () => {
+    expect(ctx.groups[0]?.tags).toEqual(['pets'])
+    expect(route?.tags).toEqual(['pets', 'list'])
   })
 })
