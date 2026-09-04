@@ -1776,10 +1776,43 @@
   min-width: 0;
 }
 
-/* Param type cell: type selector stacked over its inline enum editor */
-.design-param-type-cell {
+
+/* Param type control — compact summary chip in the table cell */
+.design-param-type-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 8px;
+  border: 1px solid var(--input-border, var(--panel-border));
+  border-radius: 4px;
+  background: var(--input-background);
+  color: var(--input-foreground);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.design-param-type-chip:hover {
+  border-color: var(--focusBorder);
+}
+
+.design-param-type-chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-param-type-chip-edit {
+  flex: 0 0 auto;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.design-param-type-modal {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 0;
+  gap: 12px;
+  min-width: 340px;
 }

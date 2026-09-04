@@ -26,7 +26,7 @@ import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/htt
 import { displayValue, parseTypedRaw } from './designDisplay'
 import { assignDesignSection, replaceRoute, uniqueComponentName } from './designMutations'
 import { generateUniqueId } from '../../utils/treeManipulation'
-import { DesignEnumValuesEditor } from './DesignEnumValuesEditor'
+import { DesignParamTypeControl } from './DesignParamTypeControl'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { useDesignEnvVariables } from '../../hooks/useDesignEnvVariables'
@@ -54,7 +54,6 @@ function withParamMaps(
   return next
 }
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH'])
-const PARAM_TYPES = ['string', 'integer', 'number', 'boolean'] as const
 
 /** Title-case the alphanumeric words of a name for a synthesized enum name
  * (e.g. `Finds pets by status` + `status` → `FindsPetsByStatusStatus`). */
@@ -314,92 +313,21 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
       id: 'type',
       header: t('design.schema.columns.type', 'Type'),
       autoWidth: false,
-      defaultWidth: 200,
+      defaultWidth: 150,
       renderCell: (param) => {
         const link = linkFor(param.name)
-        if (link !== null) {
-          return (
-            <span className="design-param-inherited" data-testid={`design-param-type-${param.name}`}>
-              {link.type}{link.format !== undefined ? ` ${link.format}` : ''}
-            </span>
-          )
-        }
-        // Type vocabulary: primitives, then `array`, then the design's named
-        // enums. Selecting an enum stores a reference (paramEnumRefs); a
-        // primitive or `array` clears it — all in ONE commit so the two writes
-        // can't race. An array param spells `array<element>` in its type.
-        const enumRefId = paramEnumRefId(param.name)
-        const ARRAY_INDEX = PARAM_TYPES.length
-        const options = [
-          ...PARAM_TYPES.map((type) => ({ text: type })),
-          { text: 'array' },
-          ...design.enums.map((e) => ({ text: `${e.doc.name} (${t('design.schema.typeEnum', 'enum')})` }))
-        ]
-        const arrayMatch = /^array(?:<(.+)>)?$/.exec(param.type)
-        const isArray = arrayMatch !== null
-        const elementType = arrayMatch?.[1] ?? 'string'
-        const selected = enumRefId !== undefined
-          ? Math.max(0, ARRAY_INDEX + 1 + design.enums.findIndex((e) => e.id === enumRefId))
-          : isArray
-            ? ARRAY_INDEX
-            : Math.max(0, PARAM_TYPES.indexOf(param.type as typeof PARAM_TYPES[number]))
-        const values = enumRefId === undefined ? (param.enumValues ?? []) : []
-        // The enum applies to the item type of an array param, else to the
-        // scalar type itself.
-        const effectiveScalar = isArray ? elementType : param.type
-        const canInline = enumRefId === undefined && (effectiveScalar === 'string' || effectiveScalar === 'integer' || effectiveScalar === 'number')
         return (
-          <div className="design-param-type-cell">
-            <SelectBox
-              id={`design-param-type-${route.id}-${param.name}`}
-              className=""
-              options={options}
-              selected={selected}
-              onDidSelect={(data: ISelectData) => {
-                if (data.index < PARAM_TYPES.length) setParamPrimitiveType(param.name, PARAM_TYPES[data.index] ?? 'string')
-                else if (data.index === ARRAY_INDEX) setParamPrimitiveType(param.name, `array<${isArray ? elementType : 'string'}>`)
-                else {
-                  const picked = design.enums[data.index - ARRAY_INDEX - 1]
-                  if (picked !== undefined) setParamEnumRef(param.name, picked.id)
-                }
-              }}
-              selectBoxOptions={{ ariaLabel: t('design.schema.columns.type', 'Type'), useCustomDrawn: true }}
-              data-testid={`design-param-type-${param.name}`}
-            />
-            {isArray && (
-              <SelectBox
-                id={`design-param-element-${route.id}-${param.name}`}
-                className=""
-                options={PARAM_TYPES.map((type) => ({ text: type }))}
-                selected={Math.max(0, PARAM_TYPES.indexOf(elementType as typeof PARAM_TYPES[number]))}
-                onDidSelect={(data: ISelectData) => { setParamPrimitiveType(param.name, `array<${PARAM_TYPES[data.index] ?? 'string'}>`) }}
-                selectBoxOptions={{ ariaLabel: t('design.schema.fields.elementType', 'Element type'), useCustomDrawn: true }}
-                data-testid={`design-param-element-${param.name}`}
-              />
-            )}
-            {canInline && (
-              <div className="design-enum-inline-row">
-                <DesignEnumValuesEditor
-                  values={values}
-                  onChange={(next) => { setParamEnumValues(param.name, next) }}
-                  parseValue={(raw) => parseTypedRaw(effectiveScalar, raw)}
-                  data-testid={`design-param-enum-values-${param.name}`}
-                />
-                {values.length > 0 && (
-                  <HeaderHoverTooltip label={t('design.enum.extract', 'Extract to a named enum')}>
-                    <Button
-                      secondary
-                      small
-                      icon="export"
-                      options={{ ariaLabel: t('design.enum.extract', 'Extract to a named enum') }}
-                      onClick={() => { extractParamToEnum(param.name) }}
-                      data-testid={`design-param-enum-extract-${param.name}`}
-                    />
-                  </HeaderHoverTooltip>
-                )}
-              </div>
-            )}
-          </div>
+          <DesignParamTypeControl
+            param={param}
+            enumRefId={paramEnumRefId(param.name)}
+            inherited={link !== null ? { type: link.type, ...(link.format !== undefined ? { format: link.format } : {}) } : null}
+            enums={design.enums}
+            onSetType={(typeString) => { setParamPrimitiveType(param.name, typeString) }}
+            onSetEnumRef={(enumId) => { setParamEnumRef(param.name, enumId) }}
+            onSetEnumValues={(next) => { setParamEnumValues(param.name, next) }}
+            onExtract={() => { extractParamToEnum(param.name) }}
+            data-testid={`design-param-type-${param.name}`}
+          />
         )
       }
     },
