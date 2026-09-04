@@ -165,6 +165,9 @@ const RunRouteRow: React.FC<RunRouteRowProps> = ({ design, group, route, callCou
                 <InputBox
                   value={customCode}
                   onChange={setCustomCode}
+                  // No debounce: a 3-digit code is committed instantly so a fast
+                  // Force click reads the value just typed (not a stale debounce).
+                  changeDebounceMs={0}
                   options={{
                     type: 'text',
                     maxLength: 3,

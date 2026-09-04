@@ -44,6 +44,7 @@ export type DesignIssueCode =
   | 'identifierPropertyUnknown'
   /** A route's parameter link points at no model/property. */
   | 'paramLinkTargetUnknown'
+  | 'paramEnumRefUnknown'
   /** A route's body model points at no model in this design. */
   | 'bodyModelUnknown'
   /** A response's model points at no model in this design. */
@@ -243,6 +244,12 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
         const property = model?.properties.find((p) => p.id === link.propertyId)
         if (model === undefined || property === undefined) {
           issues.push({ code: 'paramLinkTargetUnknown', path, subject: paramName })
+        }
+      }
+
+      for (const [paramName, enumId] of Object.entries(route.design?.paramEnumRefs ?? {})) {
+        if (!enumIds.has(enumId)) {
+          issues.push({ code: 'paramEnumRefUnknown', path, subject: paramName })
         }
       }
 

@@ -148,6 +148,9 @@ function modelSchema(model: ModelDocumentation, knownComponents: Set<string>, ta
       enum: model.enumValues
     }
     if (model.description !== undefined) schema['description'] = model.description
+    if (Array.isArray(model.enumVarNames) && model.enumVarNames.length === model.enumValues.length) {
+      schema['x-enum-varnames'] = model.enumVarNames
+    }
     if (model.deprecated === true) schema['deprecated'] = true
     return schema
   }

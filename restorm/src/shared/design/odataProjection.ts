@@ -133,7 +133,7 @@ export function odataKeyPropertyName(design: ApiDesign, model: DesignModel): str
 // ── CSDL emission ─────────────────────────────────────────────────────
 
 /** Map a design property to its Edm type. */
-function edmType(design: ApiDesign, namespace: string, property: DesignModel['properties'][number]): { type: string; collection: boolean; navigation: boolean } {
+function edmType(design: ApiDesign, namespace: string, property: DesignModel['properties'][number], inlineEnumNames: Map<string, string>): { type: string; collection: boolean; navigation: boolean } {
   const reference = property.design?.reference
   if (reference !== undefined) {
     if (reference.target === 'enum') {
@@ -153,6 +153,11 @@ function edmType(design: ApiDesign, namespace: string, property: DesignModel['pr
     }
   }
   const label = property.doc.type
+  const inlineEnum = inlineEnumNames.get(property.id)
+  if (inlineEnum !== undefined) {
+    const isArray = label === 'array' || /^array<.+>$/.test(label)
+    return { type: `${namespace}.${inlineEnum}`, collection: isArray, navigation: false }
+  }
   const array = /^array<(.+)>$/.exec(label)
   if (array?.[1] !== undefined) return { type: edmScalar(array[1], undefined), collection: true, navigation: false }
   if (label === 'array') {
@@ -197,6 +202,30 @@ export function designToCsdl(design: ApiDesign): string {
     `    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="${xmlEscape(namespace)}">`
   ]
 
+  // Synthesize an EnumType for every INLINE property enum (OData has no
+  // anonymous enum), named from its model + property and collision-free with
+  // the named enum / entity type names.
+  const takenTypeNames = new Set<string>([
+    ...design.enums.map((e) => sanitizeEdmName(e.doc.name, 'Enum')),
+    ...design.models.map((m) => sanitizeEdmName(m.doc.name, 'Entity'))
+  ])
+  const inlineEnumNames = new Map<string, string>()
+  const inlineEnumTypes: { name: string; values: readonly unknown[] }[] = []
+  for (const model of design.models) {
+    for (const property of model.properties) {
+      if (property.design?.reference !== undefined) continue
+      const inline = property.doc.enumValues
+      if (!Array.isArray(inline) || inline.length === 0) continue
+      const base = sanitizeEdmName(`${model.doc.name}-${property.doc.name}`, 'Enum')
+      let name = base
+      let n = 2
+      while (takenTypeNames.has(name)) { name = `${base}${n}`; n += 1 }
+      takenTypeNames.add(name)
+      inlineEnumNames.set(property.id, name)
+      inlineEnumTypes.push({ name, values: inline })
+    }
+  }
+
   for (const enum_ of design.enums) {
     const values = enum_.doc.enumValues ?? []
     if (values.length === 0) continue
@@ -204,6 +233,20 @@ export function designToCsdl(design: ApiDesign): string {
     // Member names are their own namespace within the EnumType —
     // sanitization can collapse distinct raw values (`v1.0` / `v1-0`)
     // onto one spelling, so they claim like the entity-set names do.
+    const takenMembers = new Set<string>()
+    values.forEach((value, index) => {
+      const base = sanitizeEdmName(String(value), `Value${index}`)
+      let name = base
+      let n = 2
+      while (takenMembers.has(name)) { name = `${base}_${n}`; n += 1 }
+      takenMembers.add(name)
+      lines.push(`        <Member Name="${xmlEscape(name)}" Value="${index}" />`)
+    })
+    lines.push('      </EnumType>')
+  }
+
+  for (const { name: typeName, values } of inlineEnumTypes) {
+    lines.push(`      <EnumType Name="${xmlEscape(typeName)}">`)
     const takenMembers = new Set<string>()
     values.forEach((value, index) => {
       const base = sanitizeEdmName(String(value), `Value${index}`)
@@ -241,7 +284,7 @@ export function designToCsdl(design: ApiDesign): string {
       lines.push('        <Key>', `          <PropertyRef Name="${xmlEscape(keySanitized)}" />`, '        </Key>')
     }
     for (const { property, name, raw } of emitted) {
-      const mapped = edmType(design, namespace, property)
+      const mapped = edmType(design, namespace, property, inlineEnumNames)
       const type = mapped.collection ? `Collection(${mapped.type})` : mapped.type
       const element = mapped.navigation ? 'NavigationProperty' : 'Property'
       const nullable = mapped.navigation || (!property.doc.required && raw !== keyRawName)

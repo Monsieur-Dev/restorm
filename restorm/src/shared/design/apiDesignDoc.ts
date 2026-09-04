@@ -83,7 +83,11 @@ export function designModelDoc(model: DesignModel, resolve: DesignNameResolver):
 
 /** A design enum as a plain `ModelDocumentation` (enum-shaped). */
 export function designEnumDoc(entry: DesignEnum): ModelDocumentation {
-  return entry.doc
+  // Surface the enum's member names as `enumVarNames` so the OpenAPI export can
+  // emit `x-enum-varnames` (they otherwise live design-only on the DesignEnum).
+  return entry.memberNames !== undefined && entry.memberNames.length > 0
+    ? { ...entry.doc, enumVarNames: entry.memberNames }
+    : entry.doc
 }
 
 /**

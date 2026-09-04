@@ -58,6 +58,10 @@ export interface GraphqlNames {
   enums: Map<string, string>
   /** enumId → (raw design value → sanitized GraphQL enum value). */
   enumValues: Map<string, Map<string, string>>
+  /** propertyId → a SYNTHESIZED enum type for an INLINE (anonymous) property
+   * enum: GraphQL has no anonymous enums, so each inline set becomes a named
+   * type derived from its model + property. */
+  inlineEnums: Map<string, { name: string; values: Map<string, string> }>
 }
 
 /** Build collision-free PascalCase type names for models and enums. */
@@ -70,18 +74,13 @@ export function designGraphqlNames(design: ApiDesign): GraphqlNames {
     taken.add(name)
     return name
   }
-  const names: GraphqlNames = { models: new Map(), enums: new Map(), enumValues: new Map() }
-  for (const model of design.models) {
-    names.models.set(model.id, claim(upperFirst(sanitizeGraphqlName(model.doc.name, 'Model'))))
-  }
-  for (const enum_ of design.enums) {
-    names.enums.set(enum_.id, claim(upperFirst(sanitizeGraphqlName(enum_.doc.name, 'Enum'))))
-    // Enum VALUES are the third GraphQL namespace — sanitization can
-    // collapse distinct raw values (`v1.0` / `v1-0`) onto one spelling,
-    // so they claim like types and fields do.
+  const claimEnumValues = (raw: readonly unknown[]): Map<string, string> => {
+    // Enum VALUES are the third GraphQL namespace — sanitization can collapse
+    // distinct raw values (`v1.0` / `v1-0`) onto one spelling, so they claim
+    // like types and fields do.
     const values = new Map<string, string>()
     const takenValues = new Set<string>()
-    ;(enum_.doc.enumValues ?? []).forEach((value, index) => {
+    raw.forEach((value, index) => {
       const base = sanitizeEnumValue(String(value), index)
       let name = base
       let n = 2
@@ -89,7 +88,26 @@ export function designGraphqlNames(design: ApiDesign): GraphqlNames {
       takenValues.add(name)
       values.set(String(value), name)
     })
-    names.enumValues.set(enum_.id, values)
+    return values
+  }
+  const names: GraphqlNames = { models: new Map(), enums: new Map(), enumValues: new Map(), inlineEnums: new Map() }
+  for (const model of design.models) {
+    names.models.set(model.id, claim(upperFirst(sanitizeGraphqlName(model.doc.name, 'Model'))))
+  }
+  for (const enum_ of design.enums) {
+    names.enums.set(enum_.id, claim(upperFirst(sanitizeGraphqlName(enum_.doc.name, 'Enum'))))
+    names.enumValues.set(enum_.id, claimEnumValues(enum_.doc.enumValues ?? []))
+  }
+  // Synthesize a named enum type for every INLINE property enum (no named ref).
+  for (const model of design.models) {
+    for (const property of model.properties) {
+      if (property.design?.reference !== undefined) continue
+      const inline = property.doc.enumValues
+      if (!Array.isArray(inline) || inline.length === 0) continue
+      const base = upperFirst(sanitizeGraphqlName(model.doc.name, 'Model')) +
+        upperFirst(sanitizeGraphqlName(property.doc.name, 'Field'))
+      names.inlineEnums.set(property.id, { name: claim(base), values: claimEnumValues(inline) })
+    }
   }
   return names
 }
@@ -107,7 +125,11 @@ function fieldType(names: GraphqlNames, property: DesignModel['properties'][numb
       return property.doc.isArrayOfRef === true ? `[${target}!]` : target
     }
   }
+  const inline = names.inlineEnums.get(property.id)
   const label = property.doc.type
+  if (inline !== undefined) {
+    return (label === 'array' || /^array<.+>$/.test(label)) ? `[${inline.name}!]` : inline.name
+  }
   const array = /^array<(.+)>$/.exec(label)
   if (array?.[1] !== undefined) return `[${scalarType(array[1])}!]`
   if (label === 'array') return `[${scalarType(property.design?.arrayItems?.type ?? 'string')}!]`
@@ -278,6 +300,14 @@ export function designToGraphqlSdl(design: ApiDesign): string {
     for (const value of values) {
       lines.push(`  ${names.enumValues.get(enum_.id)?.get(String(value)) ?? String(value)}`)
     }
+    lines.push('}', '')
+  }
+
+  // Synthesized types for inline property enums (declared before the object
+  // types that reference them; GraphQL is order-independent, but this reads well).
+  for (const { name, values } of names.inlineEnums.values()) {
+    lines.push(`enum ${name} {`)
+    for (const sanitized of values.values()) lines.push(`  ${sanitized}`)
     lines.push('}', '')
   }
 

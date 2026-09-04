@@ -164,9 +164,33 @@ export async function httpGetText(url: string): Promise<string> {
 export async function httpGetBytes(url: string): Promise<Uint8Array> {
   const res = await safeGet(url)
   if (!res.ok) throw new Error(`code deps: download failed (${res.status}) for ${url}`)
-  const buf = new Uint8Array(await res.arrayBuffer())
-  if (buf.byteLength > MAX_RESPONSE_BYTES) {
-    throw new Error(`code deps: artifact at ${url} exceeds the ${MAX_RESPONSE_BYTES}-byte cap`)
+  const tooLarge = (): Error => new Error(`code deps: artifact at ${url} exceeds the ${MAX_RESPONSE_BYTES}-byte cap`)
+  // Reject an oversized artifact WITHOUT first buffering the whole body: honour
+  // a declared Content-Length, then stream-cap the read so a lying/absent
+  // header still can't grow the buffer past the cap in memory.
+  const declared = Number(res.headers.get('content-length') ?? '')
+  if (Number.isFinite(declared) && declared > MAX_RESPONSE_BYTES) throw tooLarge()
+  const body = res.body
+  if (body === null) {
+    const buf = new Uint8Array(await res.arrayBuffer())
+    if (buf.byteLength > MAX_RESPONSE_BYTES) throw tooLarge()
+    return buf
   }
-  return buf
+  const reader = body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > MAX_RESPONSE_BYTES) {
+      await reader.cancel()
+      throw tooLarge()
+    }
+    chunks.push(value)
+  }
+  const out = new Uint8Array(total)
+  let offset = 0
+  for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.byteLength }
+  return out
 }

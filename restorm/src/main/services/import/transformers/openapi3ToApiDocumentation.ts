@@ -89,6 +89,7 @@ interface OAS3Parameter {
   in: string
   description?: string
   required?: boolean
+  deprecated?: boolean
   schema?: CommonSchema | OAS3Reference
   example?: unknown
   examples?: Record<string, unknown>
@@ -236,6 +237,7 @@ function toCommonParameter(spec: OAS3Spec, p: OAS3Parameter): CommonParameter {
   }
   if (p.description !== undefined) out.description = p.description
   if (p.required !== undefined) out.required = p.required
+  if (p.deprecated === true) out.deprecated = true
   if (schema) out.schema = schema
   if (p.example !== undefined) out.example = p.example
   return out
@@ -348,10 +350,15 @@ function mapModels(components: OAS3Components | undefined): Record<string, Model
     const merged = mergeAllOfInto({ ...schema })
     const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
     if (merged.description !== undefined) entry.description = merged.description
+    if (merged.deprecated === true) entry.deprecated = true
     // Top-level enum schema: surface values so consumers render the
     // model as an enum node rather than an empty object.
     if (Array.isArray(merged.enum) && merged.enum.length > 0) {
       entry.enumValues = [...merged.enum]
+      const varnames = (merged as { 'x-enum-varnames'?: unknown })['x-enum-varnames']
+      if (Array.isArray(varnames) && varnames.length === merged.enum.length && varnames.every((v) => typeof v === 'string')) {
+        entry.enumVarNames = [...varnames]
+      }
     }
     const oneOf = extractCompositionRefs(merged.oneOf)
     const anyOf = extractCompositionRefs(merged.anyOf)

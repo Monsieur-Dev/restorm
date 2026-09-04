@@ -165,6 +165,9 @@ export interface ModelDocumentation {
    * enum rather than an object — `properties` is empty in that
    * case and consumers should render the values directly. */
   enumValues?: unknown[]
+  /** Optional identifier names for `enumValues`, index-aligned — the OpenAPI
+   * `x-enum-varnames` extension (a design enum's `memberNames`). */
+  enumVarNames?: string[]
 }
 
 /** A group of operations (Swagger tag, WSDL service, gRPC package, GraphQL root type...). */

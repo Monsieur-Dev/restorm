@@ -96,6 +96,7 @@ export interface CommonSchema {
   enum?: unknown[]
   nullable?: boolean                  // 2.0 + 3.0 (gone in 3.1)
   readOnly?: boolean
+  deprecated?: boolean
   oneOf?: CommonSchema[]
   anyOf?: CommonSchema[]
   allOf?: CommonSchema[]
@@ -210,6 +211,7 @@ export interface CommonParameter {
   in: string
   description?: string
   required?: boolean
+  deprecated?: boolean
   schema?: CommonSchema
   default?: unknown
   example?: unknown
@@ -273,6 +275,7 @@ function mapParameterToDocumentation(p: CommonParameter): ParameterDocumentation
   }
   if (p.schema?.format !== undefined) entry.format = p.schema.format
   if (p.description !== undefined) entry.description = p.description
+  if (p.deprecated === true) entry.deprecated = true
   if (p.default !== undefined) {
     const raw = p.default
     if (typeof raw === 'string') entry.defaultValue = raw
@@ -469,6 +472,7 @@ export function mapSchemaProperties(schema: CommonSchema): PropertyDocumentation
       prop.nullable = true
     }
     if (propSchema.readOnly === true) prop.readOnly = true
+    if (propSchema.deprecated === true) prop.deprecated = true
     if (propSchema.example !== undefined) prop.example = propSchema.example
     if (propSchema.enum !== undefined && propSchema.enum.length > 0) prop.enumValues = propSchema.enum
     const constraints = extractSchemaConstraints(propSchema)

@@ -4,6 +4,7 @@ import { InputBox } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignEnum, CustomValueList } from '../../../../shared/types/collections'
 import { CustomValueListsEditor } from '../Folders/CustomValueListsEditor'
 import { assignDesignSection, uniqueComponentName } from './designMutations'
+import { removeEnumFromDesign } from '../../../../shared/design/designUsages'
 import { bridgeEnumValues, displayValue } from './designDisplay'
 
 /**
@@ -63,6 +64,22 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
       }
     })
     assignDesignSection(design, 'enums', enums)
+    // A removed enum leaves dangling references — strip them so a property
+    // typed by it degrades to its doc type and a route param that referenced
+    // it (paramEnumRefs) falls back to its plain type.
+    const nextIds = new Set(next.map((l) => l.id))
+    const deletedIds = design.enums.filter((e) => !nextIds.has(e.id)).map((e) => e.id)
+    if (deletedIds.length > 0) {
+      let models = design.models
+      let routeGroups = design.routeGroups
+      for (const id of deletedIds) {
+        const pruned = removeEnumFromDesign({ ...design, models, routeGroups }, id)
+        models = pruned.models
+        routeGroups = pruned.routeGroups
+      }
+      if (models.some((m, i) => m !== design.models[i])) assignDesignSection(design, 'models', models)
+      if (routeGroups.some((g, i) => g !== design.routeGroups[i])) assignDesignSection(design, 'routeGroups', routeGroups)
+    }
   }, [design])
 
   // Enum-level description: a concern the shared list model doesn't carry, so

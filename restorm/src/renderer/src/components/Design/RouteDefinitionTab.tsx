@@ -609,7 +609,10 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
             <Table<ParameterDocumentation>
               columns={paramColumns(false)}
               rows={otherParams}
-              getRowId={(p) => `other-${p.name}`}
+              // Key by POSITION, not name: these rows aren't reorderable here, so
+              // the index is stable while the name cell is being edited — keying
+              // by name would remount the row mid-rename and drop input focus.
+              getRowId={(p) => `other-${otherParams.indexOf(p)}`}
             />
           )}
       </StaticPane>

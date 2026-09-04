@@ -13,6 +13,7 @@ import { apiDocumentationToOpenApi } from '../../src/shared/design/openApiExport
 import { designToGraphqlSdl } from '../../src/shared/design/graphqlProjection'
 import { designToCsdl } from '../../src/shared/design/odataProjection'
 import { designToProto } from '../../src/shared/design/grpcProjection'
+import { openapi3ToApiDocumentation, type OAS3Spec } from '../../src/main/services/import/transformers/openapi3ToApiDocumentation'
 
 type Property = ApiDesign['models'][number]['properties'][number]
 
@@ -77,6 +78,33 @@ describe('projection fixes', () => {
     expect(csdl).not.toContain('Name="order-id"')
   })
 
+  it('GraphQL synthesizes a named enum type for an INLINE property enum', () => {
+    const d = design([
+      model('Order', [
+        { id: 'p1', doc: { name: 'id', type: 'string', required: true } },
+        { id: 'p2', doc: { name: 'status', type: 'string', enumValues: ['open', 'closed'] } }
+      ])
+    ])
+    const sdl = designToGraphqlSdl(d)
+    expect(sdl).toContain('enum OrderStatus {')
+    expect(sdl).toMatch(/status: OrderStatus/)
+    expect(sdl).toContain('open')
+    expect(sdl).toContain('closed')
+  })
+
+  it('OData synthesizes an EnumType for an INLINE property enum', () => {
+    const d = design([
+      model('Order', [
+        { id: 'p1', doc: { name: 'id', type: 'string', required: true } },
+        { id: 'p2', doc: { name: 'status', type: 'string', enumValues: ['open', 'closed'] } }
+      ])
+    ])
+    const csdl = designToCsdl(d)
+    expect(csdl).toMatch(/<EnumType Name="Order_status">/)
+    expect(csdl).toMatch(/<Property Name="status" Type="[^"]*\.Order_status"/)
+    expect(csdl).toMatch(/<Member Name="open"/)
+  })
+
   it('gRPC surfaces an INLINE property enum as a comment', () => {
     const d = design([
       model('Order', [
@@ -94,6 +122,50 @@ describe('projection fixes', () => {
     ])
     const oas = apiDocumentationToOpenApi(designToApiDocumentation(d)) as unknown as OasLite
     expect(oas.components.schemas.Legacy.deprecated).toBe(true)
+  })
+
+  it('deprecation on a model, property and parameter survives the OpenAPI round-trip', () => {
+    const d = design(
+      [model('Legacy', [
+        { id: 'p1', doc: { name: 'id', type: 'string', required: true } },
+        { id: 'p2', doc: { name: 'old', type: 'string', deprecated: true } }
+      ], { deprecated: true })],
+      [{
+        id: 'g1',
+        doc: { name: 'Legacies' },
+        routes: [{
+          id: 'r1',
+          doc: {
+            match: { method: 'GET', urlPattern: '/legacies' },
+            summary: 'List',
+            parameters: [{ name: 'q', location: 'query', type: 'string', required: false, deprecated: true }]
+          }
+        }]
+      }]
+    )
+    const spec = apiDocumentationToOpenApi(designToApiDocumentation(d)) as unknown as OAS3Spec
+    const reimported = openapi3ToApiDocumentation(spec)
+    const legacy = reimported.models['Legacy']
+    expect(legacy?.deprecated).toBe(true)
+    expect(legacy?.properties.find((p) => p.name === 'old')?.deprecated).toBe(true)
+    const param = reimported.operations[0]?.parameters?.find((p) => p.name === 'q')
+    expect(param?.deprecated).toBe(true)
+  })
+
+  it('enum member names round-trip through OpenAPI x-enum-varnames', () => {
+    const d: ApiDesign = {
+      type: 'design', id: 'd1', name: 'D', info: { title: 'D', version: '1.0.0' },
+      models: [model('User', [
+        { id: 'p1', doc: { name: 'id', type: 'string', required: true } },
+        { id: 'p2', doc: { name: 'status', type: 'string' }, design: { reference: { target: 'enum', refId: 'e1' } } }
+      ])],
+      enums: [{ id: 'e1', doc: { name: 'Status', properties: [], enumValues: ['open', 'closed'] }, memberNames: ['OPEN', 'CLOSED'] }],
+      routeGroups: []
+    }
+    const spec = apiDocumentationToOpenApi(designToApiDocumentation(d)) as unknown as OAS3Spec & { components?: { schemas?: Record<string, { 'x-enum-varnames'?: unknown }> } }
+    expect(spec.components?.schemas?.Status?.['x-enum-varnames']).toEqual(['OPEN', 'CLOSED'])
+    const reimported = openapi3ToApiDocumentation(spec)
+    expect(reimported.models['Status']?.enumVarNames).toEqual(['OPEN', 'CLOSED'])
   })
 
   it('a request body keeps its array-ness on the design→doc projection', () => {

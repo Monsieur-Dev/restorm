@@ -45,7 +45,7 @@ import { validateApiDesign } from '../../../shared/design/validateApiDesign'
 import { designFromDocumentation } from '../../../shared/design/designFromDocumentation'
 import { generateCrud, findCrudGroupForModel, generateSearchParams, syncPathParams } from '../../../shared/design/designRoutes'
 import { summarizeGroupProjections } from '../../../shared/design/designProjections'
-import { removeModelFromDesign } from '../../../shared/design/designUsages'
+import { removeModelFromDesign, removeEnumFromDesign } from '../../../shared/design/designUsages'
 import { DESCRIPTOR_FORMATS } from '../../../shared/design/descriptorFormats'
 import { broadcastTreeReplace } from './import'
 import { BrowserWindow } from 'electron'
@@ -609,7 +609,11 @@ export function registerDesignTools(mcp: McpService): void {
           if (isResolveError(target)) return errorReply(target.error)
           design_.reference = { target: 'enum', refId: target.id }
           property.doc.targetModelRef = target.doc.name
+          property.doc.type = isArray ? `array<${target.doc.name}>` : target.doc.name
+          // A named enum reference and an inline enum are mutually exclusive.
+          delete property.doc.enumValues
           if (isArray) property.doc.isArrayOfRef = true
+          else delete property.doc.isArrayOfRef
         }
       }
       if (Array.isArray(args['enumValues'])) {
@@ -621,6 +625,7 @@ export function registerDesignTools(mcp: McpService): void {
           // An inline enum and a named reference are mutually exclusive.
           delete design_.reference
           delete property.doc.targetModelRef
+          delete property.doc.isArrayOfRef
         }
       }
       if (typeof args['modelRef'] === 'string') {
@@ -635,6 +640,8 @@ export function registerDesignTools(mcp: McpService): void {
           design_.reference = { target: 'model', refId: target.id, ...onDelete }
           property.doc.targetModelRef = target.doc.name
           property.doc.type = isArray ? `array<${target.doc.name}>` : target.doc.name
+          // A model reference and an inline enum are mutually exclusive.
+          delete property.doc.enumValues
           if (isArray) property.doc.isArrayOfRef = true
           else delete property.doc.isArrayOfRef
         }
@@ -786,20 +793,13 @@ export function registerDesignTools(mcp: McpService): void {
       if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
       const resolved = resolveEntity(design.enums, typeof args['enum'] === 'string' ? args['enum'] : '', (e) => e.doc.name, 'enum')
       if (isResolveError(resolved)) return errorReply(resolved.error)
-      design.enums = design.enums.filter((e) => e.id !== resolved.id)
-      // Detach property references pointing at the removed enum.
-      design.models = design.models.map((model) => ({
-        ...model,
-        properties: model.properties.map((property) => {
-          const reference = property.design?.reference
-          if (reference?.target !== 'enum' || reference.refId !== resolved.id) return property
-          const { reference: _dropped, ...designRest } = property.design ?? {}
-          const detached: DesignProperty = { ...property }
-          if (Object.keys(designRest).length > 0) detached.design = designRest
-          else delete detached.design
-          return detached
-        })
-      }))
+      // Strip the enum AND every reference to it — property references degrade
+      // to their doc type, and route `paramEnumRefs` fall back to the plain
+      // param type (the previous inline detach left param refs dangling).
+      const pruned = removeEnumFromDesign(design, resolved.id)
+      design.enums = pruned.enums
+      design.models = pruned.models
+      design.routeGroups = pruned.routeGroups
       writeDesign(design)
       return jsonReply({ designId: design.id, enumId: resolved.id, deleted: true })
     }
@@ -1078,7 +1078,8 @@ export function registerDesignTools(mcp: McpService): void {
       description:
         'Update a route (by id or summary): match, docs, per-code responses ({code: {modelRef?, list?, paginated?, exampleName?, description?}}), ' +
         'input body ({modelRef?, contentType?}), parameter links ({paramName: {modelRef, propertyRef, descriptionAuto?}}), ' +
-        'and settings (cacheSeconds, idempotent, deprecated, authOverride, pagination).',
+        'and settings (cacheSeconds, idempotent, deprecated, authOverride, pagination). ' +
+        'NOTE: responses, body and paramLinks REPLACE the whole map when provided — send the full set you want, not a single delta (omit a field to leave it unchanged).',
       inputSchema: {
         designId: z.string().min(1),
         route: z.string().min(1).describe('Route id or summary.'),

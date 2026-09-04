@@ -157,3 +157,47 @@ export function removeModelFromDesign(design: ApiDesign, modelId: string): Pick<
 
   return { models, routeGroups }
 }
+
+/**
+ * Remove an enum from the design, stripping every reference to it: a property
+ * typed by the enum degrades to its doc type (reference cleared), and a route
+ * parameter that referenced it (`paramEnumRefs`) falls back to its plain type.
+ * Pure — returns the next `enums`, `models` and `routeGroups` arrays.
+ */
+export function removeEnumFromDesign(design: ApiDesign, enumId: string): Pick<ApiDesign, 'enums' | 'models' | 'routeGroups'> {
+  const enums = design.enums.filter((e) => e.id !== enumId)
+  const models = design.models.map((m) => {
+    const properties = m.properties.map((p) => {
+      const reference = p.design?.reference
+      if (reference?.target === 'enum' && reference.refId === enumId) {
+        const { reference: _droppedRef, ...restDesign } = p.design ?? {}
+        const { targetModelRef: _droppedName, isArrayOfRef: _droppedArr, ...restDoc } = p.doc
+        const { design: _oldDesign, ...pRest } = p
+        return Object.keys(restDesign).length > 0
+          ? { ...pRest, doc: restDoc, design: restDesign }
+          : { ...pRest, doc: restDoc }
+      }
+      return p
+    })
+    return properties.some((p, i) => p !== m.properties[i]) ? { ...m, properties } : m
+  })
+  const routeGroups = design.routeGroups.map((group) => ({
+    ...group,
+    routes: group.routes.map((route) => {
+      const refs = route.design?.paramEnumRefs
+      if (refs === undefined) return route
+      const nextRefs: NonNullable<typeof refs> = {}
+      let changed = false
+      for (const [name, id] of Object.entries(refs)) {
+        if (id === enumId) { changed = true; continue }
+        nextRefs[name] = id
+      }
+      if (!changed) return route
+      const meta = { ...route.design }
+      if (Object.keys(nextRefs).length > 0) meta.paramEnumRefs = nextRefs
+      else delete meta.paramEnumRefs
+      return { ...route, design: meta }
+    })
+  }))
+  return { enums, models, routeGroups }
+}

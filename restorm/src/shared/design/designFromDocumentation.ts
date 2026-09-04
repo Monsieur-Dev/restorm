@@ -151,7 +151,12 @@ export function designFromDocumentation(
   for (const [componentName, model] of componentEntries) {
     const enumId = enumIdByName.get(componentName)
     if (enumId !== undefined) {
-      enums.push({ id: enumId, doc: model })
+      // `x-enum-varnames` rides design-only as `memberNames`, not in the doc
+      // (designEnumDoc re-derives it on export).
+      const { enumVarNames, ...enumDoc } = model
+      enums.push(enumVarNames !== undefined && enumVarNames.length > 0
+        ? { id: enumId, doc: enumDoc, memberNames: enumVarNames }
+        : { id: enumId, doc: enumDoc })
       continue
     }
     const modelId = modelIdByName.get(componentName)
