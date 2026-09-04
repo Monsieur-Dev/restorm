@@ -13,6 +13,29 @@ export function assignDesignSection<K extends keyof ApiDesign>(design: ApiDesign
   design[key] = value
 }
 
+/**
+ * Find an existing enum whose values match `values` exactly (same length, same
+ * order, string-compared), or mint a new named enum seeded from `seed`. Shared
+ * by "Extract to a named enum" on both a model property and a route parameter —
+ * the dedup is what keeps a repeated extraction from minting duplicate enums.
+ * Returns the target enum's id and whether it was newly created.
+ */
+export function findOrCreateEnumForValues(
+  design: ApiDesign,
+  values: unknown[],
+  seed: string,
+  generateId: () => string
+): { refId: string; created: boolean } {
+  const sameValues = (a: unknown[], b: unknown[]): boolean =>
+    a.length === b.length && a.every((v, i) => String(v) === String(b[i]))
+  const existing = design.enums.find((e) => sameValues(e.doc.enumValues ?? [], values))
+  if (existing !== undefined) return { refId: existing.id, created: false }
+  const refId = generateId()
+  const name = uniqueComponentName(design, seed !== '' ? seed : 'Enum')
+  assignDesignSection(design, 'enums', [...design.enums, { id: refId, doc: { name, properties: [], enumValues: values } }])
+  return { refId, created: true }
+}
+
 /** Replace one model (by id) in the design's `models` array. */
 export function replaceModel(design: ApiDesign, modelId: string, next: DesignModel): void {
   assignDesignSection(design, 'models', design.models.map((m) => (m.id === modelId ? next : m)))

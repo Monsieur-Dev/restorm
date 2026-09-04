@@ -24,7 +24,7 @@ import { designRouteProjections, resolveDesignPath } from '../../../../shared/de
 import { flattenEnvVars } from '../../../../shared/utils/resolveUrlAgainstEnv'
 import { KNOWN_HTTP_METHODS, httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { displayValue, parseTypedRaw } from './designDisplay'
-import { assignDesignSection, replaceRoute, uniqueComponentName } from './designMutations'
+import { replaceRoute, findOrCreateEnumForValues } from './designMutations'
 import { generateUniqueId } from '../../utils/treeManipulation'
 import { DesignParamTypeControl } from './DesignParamTypeControl'
 import { RegistryBadge } from '../common/RegistryBadge'
@@ -248,19 +248,9 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
     const param = parameters.find((p) => p.name === paramName)
     const values = param?.enumValues ?? []
     if (values.length === 0) return
-    const sameValues = (a: unknown[], b: unknown[]): boolean =>
-      a.length === b.length && a.every((v, i) => String(v) === String(b[i]))
-    const existing = design.enums.find((e) => sameValues(e.doc.enumValues ?? [], values))
-    let enumId: string
-    if (existing !== undefined) {
-      enumId = existing.id
-    } else {
-      enumId = generateUniqueId()
-      const seed = `${pascalCaseName(route.doc.summary ?? route.doc.match.urlPattern)}${pascalCaseName(paramName)}` || 'Enum'
-      const name = uniqueComponentName(design, seed)
-      assignDesignSection(design, 'enums', [...design.enums, { id: enumId, doc: { name, properties: [], enumValues: values } }])
-    }
-    setParamEnumRef(paramName, enumId)
+    const seed = `${pascalCaseName(route.doc.summary ?? route.doc.match.urlPattern)}${pascalCaseName(paramName)}`
+    const { refId } = findOrCreateEnumForValues(design, values, seed, generateUniqueId)
+    setParamEnumRef(paramName, refId)
   }, [design, parameters, route, setParamEnumRef])
 
   // ── Model-property link vocabulary ─────────────────────────────────

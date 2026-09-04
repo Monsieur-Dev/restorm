@@ -21,7 +21,7 @@ import type {
 } from '../../../../shared/types/collections'
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
 import { generateUniqueId } from '../../utils/treeManipulation'
-import { assignDesignSection, replaceModel, uniqueComponentName } from './designMutations'
+import { assignDesignSection, replaceModel, findOrCreateEnumForValues } from './designMutations'
 import { displayValue, parseTypedValue } from './designDisplay'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { DesignPropertyCodegenTab } from './DesignPropertyCodegenTab'
@@ -646,18 +646,8 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({ design, model, property, 
   const extractToEnum = useCallback(() => {
     const values = property.doc.enumValues ?? []
     if (values.length === 0) return
-    const sameValues = (a: unknown[], b: unknown[]): boolean =>
-      a.length === b.length && a.every((v, i) => String(v) === String(b[i]))
-    const existing = design.enums.find((e) => sameValues(e.doc.enumValues ?? [], values))
-    let refId: string
-    if (existing !== undefined) {
-      refId = existing.id
-    } else {
-      refId = generateUniqueId()
-      const seed = `${pascalCase(model.doc.name)}${pascalCase(property.doc.name)}` || 'Enum'
-      const name = uniqueComponentName(design, seed)
-      assignDesignSection(design, 'enums', [...design.enums, { id: refId, doc: { name, properties: [], enumValues: values } }])
-    }
+    const seed = `${pascalCase(model.doc.name)}${pascalCase(property.doc.name)}`
+    const { refId } = findOrCreateEnumForValues(design, values, seed, generateUniqueId)
     onUpdate((p) => {
       const { enumValues: _e, targetModelRef: _t, ...docRest } = p.doc
       return { ...p, doc: { ...docRest, type: 'string' }, design: { ...(p.design ?? {}), reference: { target: 'enum', refId } } }
