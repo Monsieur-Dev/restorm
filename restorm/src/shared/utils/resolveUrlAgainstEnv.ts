@@ -52,3 +52,26 @@ export function flattenEnvVars(rawVars: Record<string, string>): Record<string, 
   }
   return out
 }
+
+/**
+ * Coerce one stored environment-variable value to the string the
+ * resolver substitutes — strings pass through, numbers/booleans
+ * stringify, typed-value objects contribute their `value` (or a
+ * meaningful `toString`). `undefined` = not resolvable. The ONE copy
+ * of a rule that had grown three verbatim clones (doc matcher,
+ * deprecated-route scan, design settings).
+ */
+export function coerceEnvVarValue(v: unknown): string | undefined {
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (v && typeof v === 'object') {
+    const obj = v as { value?: unknown; toString?: () => string }
+    if (typeof obj.value === 'string') return obj.value
+    if (typeof obj.value === 'number' || typeof obj.value === 'boolean') return String(obj.value)
+    if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
+      const s = obj.toString()
+      if (s !== '[object Object]') return s
+    }
+  }
+  return undefined
+}

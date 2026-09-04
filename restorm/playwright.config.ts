@@ -58,6 +58,90 @@ const fileFormatGateTestDir = defineBddConfig({
   outputDir: '.features-gen/file-format-gate'
 })
 
+const designDirtyStateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-dirty-state/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-dirty-state/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-dirty-state.fixture.ts'],
+  outputDir: '.features-gen/design-dirty-state'
+})
+
+const designShellTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-shell/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-shell/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-shell.fixture.ts'],
+  outputDir: '.features-gen/design-shell'
+})
+
+const designModelsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-models/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-models/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-models.fixture.ts'],
+  outputDir: '.features-gen/design-models'
+})
+
+const designRoutesTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-routes/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-routes/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-routes.fixture.ts'],
+  outputDir: '.features-gen/design-routes'
+})
+
+const designCreationTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-creation/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-creation/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-creation.fixture.ts'],
+  outputDir: '.features-gen/design-creation'
+})
+
+const designServerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-server/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-server/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-server.fixture.ts'],
+  outputDir: '.features-gen/design-server'
+})
+
+const designMcpTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-mcp/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-mcp/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-mcp'
+})
+
+const designCodegenTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-codegen/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-codegen/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-codegen'
+})
+
+const designReconstructTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-reconstruct/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-reconstruct/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-reconstruct'
+})
+
+const designCodegenUpdateTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-codegen-update/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-codegen-update/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-codegen-update'
+})
+
+const designReconstructGuiTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-reconstruct-gui/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-reconstruct-gui/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-mcp.fixture.ts'],
+  outputDir: '.features-gen/design-reconstruct-gui'
+})
+
+const designExportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-export/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-export/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-export.fixture.ts'],
+  outputDir: '.features-gen/design-export'
+})
+
+const designSearchTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-search/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-search/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-search.fixture.ts'],
+  outputDir: '.features-gen/design-search'
+})
+
+const designDocviewerTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/design-docviewer/features/**/*.feature',
+  steps: ['tests/e2e/bdd/design-docviewer/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-docviewer.fixture.ts'],
+  outputDir: '.features-gen/design-docviewer'
+})
+
 // Documentation-screenshot harness (website docs captures). The BDD config is
 // always defined (generation is cheap and side-effect free); the PROJECT is
 // gated on RESTORM_DOC_SHOTS=1 further down, so normal suites never run it.
@@ -626,6 +710,71 @@ export default defineConfig({
     {
       name: 'file-format-gate',
       testDir: fileFormatGateTestDir
+    },
+    {
+      name: 'design-dirty-state',
+      testDir: designDirtyStateTestDir
+    },
+    {
+      name: 'design-shell',
+      testDir: designShellTestDir
+    },
+    {
+      name: 'design-models',
+      testDir: designModelsTestDir
+    },
+    {
+      name: 'design-routes',
+      testDir: designRoutesTestDir
+    },
+    {
+      name: 'design-creation',
+      testDir: designCreationTestDir
+    },
+    {
+      name: 'design-server',
+      testDir: designServerTestDir
+    },
+    {
+      name: 'design-docviewer',
+      testDir: designDocviewerTestDir
+    },
+    {
+      name: 'design-search',
+      testDir: designSearchTestDir
+    },
+    {
+      name: 'design-export',
+      testDir: designExportTestDir
+    },
+    {
+      name: 'design-mcp',
+      testDir: designMcpTestDir
+    },
+    {
+      name: 'design-codegen',
+      testDir: designCodegenTestDir,
+      // The first generation cold-boots Pyodide in a worker + provisions
+      // the engine wheels — same latitude as the other WASM runtimes.
+      timeout: 7 * 60 * 1000
+    },
+    {
+      name: 'design-reconstruct',
+      testDir: designReconstructTestDir,
+      // Reconstruction issues a few hundred MCP calls in sequence.
+      timeout: 7 * 60 * 1000
+    },
+    {
+      name: 'design-codegen-update',
+      testDir: designCodegenUpdateTestDir,
+      // Two Pyodide generations (cold-boot on the first).
+      timeout: 7 * 60 * 1000
+    },
+    {
+      name: 'design-reconstruct-gui',
+      testDir: designReconstructGuiTestDir,
+      // Reconstructs the design click-by-click through the GUI.
+      timeout: 10 * 60 * 1000
     },
     {
       name: 'status-bar-context-menu',

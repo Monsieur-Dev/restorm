@@ -281,7 +281,7 @@ export function computeEntityFieldDiff(
   // computing a diff.
   const tagList = (item: FolderItem): string[] => {
     const raw = (item as FolderItem & { tags?: unknown }).tags
-    return Array.isArray(raw) ? [...raw].sort() : []
+    return Array.isArray(raw) ? (raw as unknown[]).filter((t): t is string => typeof t === 'string').sort() : []
   }
   const tagsDiffer = JSON.stringify(tagList(ours)) !== JSON.stringify(tagList(theirs))
   const withName = (diff: EntityFieldDiff | undefined): EntityFieldDiff | undefined => {

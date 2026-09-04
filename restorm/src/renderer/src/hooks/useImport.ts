@@ -5,12 +5,12 @@
 import React, { useCallback, useState } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
-import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from '../types/reactive'
 import { processAfterDeserialization } from '../utils/serialization'
 import { reidentifyForest } from '../../../shared/utils/reidentifyTree'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, EnvironmentFolder, Environment, FolderItem } from '../../../shared/types/collections'
-import { isScenario } from '../../../shared/types/collections'
+import { isScenario, isApiDesign } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
   rootItems: FolderItem[]
@@ -142,6 +142,14 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             document: cloneForEventBus(folder)
           })
           emitNestedEnvironments(folder)
+        } else if (isApiDesign(item)) {
+          // A design has its own save-unit document kind — announcing it
+          // as 'request' would cleanse its draft against the wrong shape.
+          eventBus.emitSync(DocumentEvents.DESIGN_CREATED, {
+            id: item.id,
+            type: 'design',
+            document: cloneForEventBus(item)
+          })
         } else {
           const request = item
           eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
@@ -240,7 +248,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // and flow into the dirty tracker / search index like any
       // nested request.
       const reactiveImported = itemsWithNewIds.map((item) =>
-        isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
       )
       setRootItems((prev) => [...prev, ...reactiveImported])
       expandAfterImport()

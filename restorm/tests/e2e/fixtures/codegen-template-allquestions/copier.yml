@@ -1,0 +1,57 @@
+# Test template exercising a Copier question of every type the Restorm
+# questions UI supports, plus `.vars.` codegen variables at every scope
+# (project / model / property / route). The design context arrives as `ctx`.
+
+# strings
+project_name:
+  type: str
+  default: my-app
+  help: The generated project name.
+author:
+  type: str
+  default: Anonymous
+  help: Project author.
+
+# numbers
+port:
+  type: int
+  default: 8080
+timeout_ms:
+  type: int
+  default: 5000
+ratio:
+  type: float
+  default: 0.5
+
+# boolean
+use_auth:
+  type: bool
+  default: false
+
+# single-choice enums
+db:
+  type: str
+  choices: [postgres, mysql, sqlite]
+  default: postgres
+license:
+  type: str
+  choices: [MIT, Apache-2.0, GPL-3.0]
+  default: MIT
+
+# multi-select (list of enum values)
+features:
+  type: str
+  multiselect: true
+  choices: [auth, cache, search, metrics]
+  default: []
+
+# structured
+config_json:
+  type: json
+  default: '{"key": "value"}'
+config_yaml:
+  type: yaml
+  default: 'key: value'
+
+_subdirectory: template
+_templates_suffix: .jinja

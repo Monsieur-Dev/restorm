@@ -1,9 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
+  BASE_FILE_FORMAT_VERSION,
   CURRENT_FILE_FORMAT_VERSION,
+  DESIGN_FILE_FORMAT_VERSION,
   FILE_FORMAT_MISSING_CODE,
   FILE_FORMAT_VERSION_KEY,
   checkFileFormatCompatibility,
+  requiredFileFormatVersion,
   resolveFileFormatVersion,
 } from '../../src/shared/config/fileFormatVersion'
 import { EnvironmentFolder } from '../../src/shared/models/EnvironmentFolder'
@@ -27,8 +30,47 @@ const documentAtRoot = (version?: unknown, collections: unknown[] = [collection(
 }
 
 describe('CURRENT_FILE_FORMAT_VERSION', () => {
-  it('is 1', () => {
-    expect(CURRENT_FILE_FORMAT_VERSION).toBe(1)
+  it('is 1.1 — the design format, the highest this build writes', () => {
+    expect(BASE_FILE_FORMAT_VERSION).toBe(1)
+    expect(DESIGN_FILE_FORMAT_VERSION).toBe(1.1)
+    expect(CURRENT_FILE_FORMAT_VERSION).toBe(DESIGN_FILE_FORMAT_VERSION)
+  })
+})
+
+describe('requiredFileFormatVersion — the lazy bump', () => {
+  const design = { type: 'design', id: 'd1', name: 'API' }
+
+  it('empty collections require the base version', () => {
+    expect(requiredFileFormatVersion([])).toBe(BASE_FILE_FORMAT_VERSION)
+  })
+
+  it('a design-less tree requires the base version', () => {
+    expect(requiredFileFormatVersion([collection()])).toBe(BASE_FILE_FORMAT_VERSION)
+  })
+
+  it('a design at the root requires the design version', () => {
+    expect(requiredFileFormatVersion([collection(), design])).toBe(DESIGN_FILE_FORMAT_VERSION)
+  })
+
+  it('a design nested in a folder requires the design version', () => {
+    const folder = { ...collection(), items: [{ id: 'f', name: 'sub', items: [design], configuration: {} }] }
+    expect(requiredFileFormatVersion([folder])).toBe(DESIGN_FILE_FORMAT_VERSION)
+  })
+
+  it('removing the last design moves the requirement back down', () => {
+    const withDesign = [collection(), design]
+    expect(requiredFileFormatVersion(withDesign)).toBe(DESIGN_FILE_FORMAT_VERSION)
+    expect(requiredFileFormatVersion(withDesign.filter((i) => i !== design))).toBe(BASE_FILE_FORMAT_VERSION)
+  })
+
+  it('a request `type` is not mistaken for a design', () => {
+    const request = { type: 'http', id: 'r', name: 'GET pets', url: 'https://x' }
+    expect(requiredFileFormatVersion([{ ...collection(), items: [request] }])).toBe(BASE_FILE_FORMAT_VERSION)
+  })
+
+  it('an older build refuses a document at the design version (the gate this bump exists for)', () => {
+    // From the point of view of a build whose CURRENT is 1: 1.1 > 1.
+    expect(DESIGN_FILE_FORMAT_VERSION).toBeGreaterThan(BASE_FILE_FORMAT_VERSION)
   })
 })
 

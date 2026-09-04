@@ -40,6 +40,7 @@ import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
 import { QUICK_CONFIG_PROJECT_WRITE_EVENT } from './services/requestQuickConfigStore'
 import { preloadScenarioViewports } from './services/scenarioViewportStore'
+import { setClientTabCloser, setClientTabOpener, designClientRowAncestorIds } from './services/designClientsStore'
 import { preloadScenarioBreakpoints } from './services/scenarioBreakpointStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
@@ -50,6 +51,7 @@ import { SseRequest } from '../../shared/models/requests/SseRequest'
 import { Folder as FolderClass } from '../../shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models/EnvironmentFolder'
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
+import { ApiDesign as ApiDesignClass } from '../../shared/models/ApiDesign'
 
 /**
  * Resolve the concrete class of a document node by its `type`
@@ -102,7 +104,7 @@ function cancelScenarioSaveTimer(): void {
   latestSaveAll = null
 }
 
-const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
+const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
     if (t === 'soap') return SoapRequest
@@ -113,6 +115,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
     return HTTPRequest
   }
   if (type === 'environment') return EnvironmentClass
+  if (type === 'design') return ApiDesignClass
   // Distinguish env folders from regular folders — the decomposer
   // lifts different child arrays depending on which of the two we're
   // looking at (`environments` + `items` vs `items` only). The bridge
@@ -177,7 +180,7 @@ import { IncompatibleProjectModal } from './components/Modals/IncompatibleProjec
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
 import { collectSubtreeScenarioUsages, type ContainerDeleteAffectedRequest } from './services/containerDeleteUsages'
-import { removeItemFromTree, insertItemIntoTree, deepCloneItem } from './utils/treeManipulation'
+import { removeItemFromTree, insertItemIntoTree, deepCloneItem, generateUniqueId } from './utils/treeManipulation'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { allLeafKeys } from './components/Modals/importSelectionHelpers'
 import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
@@ -191,6 +194,7 @@ import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
   findScenarioById,
+  findDesignById,
   findEnvironmentFolderById,
   findRequestById,
   findItemWithBreadcrumbs,
@@ -233,7 +237,9 @@ import {
 import { useFavoritesAndOpenItems } from './hooks/useFavoritesAndOpenItems'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
-import { makeReactiveFolder, makeReactiveRequest } from './types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from './types/reactive'
+import { designFromDocumentation } from '../../shared/design/designFromDocumentation'
+import { cloneForEventBus } from './utils/cloneForEventBus'
 import { searchIndexService } from './services/SearchIndexService'
 import { useRestormStore } from './store/restormStore'
 import type {
@@ -246,6 +252,7 @@ import type {
 import {
   isRequest,
   isScenario,
+  isApiDesign,
   isEnvironmentFolder,
   isAnyFolder,
   isFolder,
@@ -1317,6 +1324,7 @@ const App: React.FC = () => {
     hasRestoredWorkbenchRef,
     openFolderTab,
     openScenarioEditorTab,
+    openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,
@@ -1445,7 +1453,7 @@ const App: React.FC = () => {
   // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
   // or the legacy `request-<id>` form) to its item id.
   const resolveTabItemId = useCallback((tabId: string): string | null => {
-    const idxMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+    const idxMatch = /^(folder|env-folder|request|scenario|design)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (idxMatch?.[2]) {
       const indexPath = idxMatch[2].split('.').map((n) => Number(n))
       // Don't default a bad/missing segment to index 0 — that silently resolves
@@ -1467,7 +1475,7 @@ const App: React.FC = () => {
       }
       return null
     }
-    const legacyMatch = /^(folder|env-folder|request|scenario)-(?:id:)?(.+)$/.exec(tabId)
+    const legacyMatch = /^(folder|env-folder|request|scenario|design)-(?:id:)?(.+)$/.exec(tabId)
     return legacyMatch?.[2] ?? null
   }, [rootItems])
 
@@ -1510,6 +1518,17 @@ const App: React.FC = () => {
     const itemId = resolveTabItemId(activeTabId)
     if (!itemId) return null
     return findScenarioById(rootItems, itemId) ? itemId : null
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+
+  // Active design tab (if any) — the MCP `get_current_tab` snapshot
+  // reports `kind: 'design'` like it does for requests and scenarios.
+  const activeDesignId = useMemo<string | null>(() => {
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
+    if (!activeTabId) return null
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return null
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isApiDesign(item) ? itemId : null
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
@@ -1716,6 +1735,7 @@ const App: React.FC = () => {
     openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    openDesignTab,
     projectUuid,
     // A moved SCENARIO has no save-unit document of its own, so nothing
     // marks it unsaved. Route it through the same debounced whole-file
@@ -1982,8 +2002,8 @@ const App: React.FC = () => {
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
     tabId: mcpActiveTabId,
-    itemId: activeRequest?.id ?? activeScenarioId ?? null,
-    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : null,
+    itemId: activeRequest?.id ?? activeScenarioId ?? activeDesignId ?? null,
+    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : activeDesignId ? 'design' : null,
     envByFolder: {}
   })
   // `handleCloseTabById` is declared further down (it depends on
@@ -2002,6 +2022,7 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     openScenarioEditorTab,
+    openDesignTab,
     closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
@@ -2149,6 +2170,7 @@ const App: React.FC = () => {
     if (!push) return undefined
     const typeOf = (it: FolderItem): string => {
       if ((it as { type?: unknown }).type === 'scenario') return 'scenario'
+      if ((it as { type?: unknown }).type === 'design') return 'design'
       if ('folderType' in it && (it as { folderType?: unknown }).folderType === 'environment') return 'env-folder'
       if ('items' in it) return 'folder'
       return 'request'
@@ -2296,6 +2318,29 @@ const App: React.FC = () => {
   }, [])
   // Patch the forward-reference ref consumed by `useMcpNavigation` (above).
   useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
+  // Let the transient-clients store close the tabs its requests opened when a
+  // served design's clients are dropped (server stopped / regenerated).
+  useEffect(() => {
+    setClientTabCloser(closeTabByItemIdStable)
+    return () => { setClientTabCloser(null) }
+  }, [closeTabByItemIdStable])
+  // Let the Clients PAGE open a transient client in a tab — same no-env,
+  // synthetic-breadcrumb open the sidebar rows use (URLs baked absolute).
+  useEffect(() => {
+    setClientTabOpener((request, breadcrumbs, rowId) => {
+      openAnyRequestTab(request as Parameters<typeof openAnyRequestTab>[0], breadcrumbs, [])
+      // Mirror a sidebar click: select the row and expand its branch so the
+      // sidebar highlights + scrolls to the client we just opened. The main
+      // tree's highlight reads `selectedItemIds` (multi) FIRST, so set both —
+      // otherwise a stale multi-selection (e.g. the Clients section row we
+      // clicked to get here) keeps the highlight.
+      setSelectedItemId(rowId)
+      setSelectedItemIds([rowId])
+      const ancestors = designClientRowAncestorIds(rowId)
+      if (ancestors.length > 0) setExpandedIds((prev) => Array.from(new Set([...prev, ...ancestors])))
+    })
+    return () => { setClientTabOpener(null) }
+  }, [openAnyRequestTab, setSelectedItemId, setSelectedItemIds, setExpandedIds])
 
   // Close-others / close-to-the-right are scoped to the group containing
   // the targeted tab — the usual editor semantics. The Workspace stays
@@ -2356,6 +2401,45 @@ const App: React.FC = () => {
     if (!folder) return
     setApiSpecRefreshFolder(folder)
   }, [rootItems])
+  // The env-folder prefill entry: an imported documentation becomes an
+  // editable design CREATED INSIDE that folder (so it resolves the
+  // folder's variables), then opens in its tab.
+  const canCreateDesignFromDoc = useCallback((id: string): boolean => {
+    const folder = rootItems.find((c): c is EnvironmentFolder => isEnvironmentFolder(c) && c.id === id)
+    return folder?.apiDocumentation !== undefined
+  }, [rootItems])
+  const onCreateDesignFromDoc = useCallback((id: string): void => {
+    const lookup = findItemWithBreadcrumbs(rootItems, id)
+    const folder = lookup.item
+    if (!folder || !isEnvironmentFolder(folder) || folder.apiDocumentation === undefined) return
+    const built = designFromDocumentation(
+      t('design.fromDocName', '{{name}} design', { name: folder.name }),
+      folder.apiDocumentation,
+      generateUniqueId
+    )
+    const reactive = makeReactiveApiDesign(built, folder.id)
+    folder.items.push(reactive as unknown as FolderItem)
+    setRootItems((prev) => [...prev])
+    eventBus.emitSync(DocumentEvents.DESIGN_CREATED, {
+      id: reactive.id,
+      type: 'design',
+      document: cloneForEventBus(reactive as unknown as FolderItem),
+      parentFolderId: folder.id
+    } as DocumentChangedPayload)
+    eventBus.emitLocalSync(DocumentEvents.DESIGN_CREATED, {
+      id: reactive.id,
+      type: 'design',
+      document: cloneForEventBus(reactive as unknown as FolderItem),
+      parentFolderId: folder.id
+    } as DocumentChangedPayload)
+    // Expand the parent env folder AND the new design itself, so its
+    // Models / Enums / Routes sub-tree is unfolded right after creation.
+    setExpandedIds((prev) => Array.from(new Set([...prev, folder.id, reactive.id])))
+    setSelectedItemId(reactive.id)
+    const breadcrumbs = [...lookup.breadcrumbs, { id: reactive.id, label: reactive.name, icon: null }]
+    openDesignTab(reactive, breadcrumbs)
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openDesignTab, t])
+
   const openRefreshImportModal = useCallback((id: string): void => {
     const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
     if (!folder || !('name' in folder)) return
@@ -2435,6 +2519,9 @@ const App: React.FC = () => {
   const onCopyItemStable = useCallback((id: string) => { sidebarClipboardOpsRef.current.copy(id) }, [])
   const onPasteItemStable = useCallback((id: string) => { sidebarClipboardOpsRef.current.paste(id) }, [])
 
+  // `openItemAtSplit` is produced by `useNavigation` further down; the
+  // sidebar menus close over this ref so hook order stays untouched.
+  const openItemAtSplitRef = useRef<(itemId: string, targetGroupId: string, zone: 'left' | 'right' | 'top' | 'bottom' | 'full') => void>(() => { /* set after useNavigation */ })
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
@@ -2450,7 +2537,13 @@ const App: React.FC = () => {
     onPasteItem: onPasteItemStable,
     canPaste: canPasteItemsFn,
     canRefreshFromSource,
-    onRefreshFromSource
+    onRefreshFromSource,
+    canCreateDesignFromDoc,
+    onCreateDesignFromDoc,
+    // The design context menu's explicit single-tab escape hatch: open
+    // the design beside the focused group. The placement helper falls
+    // back to the first group when the id no longer resolves.
+    onOpenInSplit: (itemId: string) => { openItemAtSplitRef.current(itemId, focusedGroupId ?? 'restorm-main-group', 'right') }
   })
 
   // Delete an item and, when it lived DIRECTLY under a scenario, nudge the
@@ -2551,11 +2644,12 @@ const App: React.FC = () => {
     () => (selectedItemId ? findItemById(rootItems, selectedItemId) ?? null : null),
     [rootItems, selectedItemId]
   )
-  const selectedSidebarKind: 'env-folder' | 'folder' | 'scenario' | 'server' | 'request' | null = useMemo(() => {
+  const selectedSidebarKind: 'env-folder' | 'folder' | 'scenario' | 'design' | 'server' | 'request' | null = useMemo(() => {
     const item = selectedSidebarItem
     if (!item) return null
     if (isEnvironmentFolder(item)) return 'env-folder'
     if (isScenario(item)) return 'scenario'
+    if (isApiDesign(item)) return 'design'
     if (isFolder(item)) return 'folder'
     if (isRequest(item)) return (item as { server?: boolean }).server === true ? 'server' : 'request'
     return null
@@ -2948,6 +3042,7 @@ const App: React.FC = () => {
   const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
+  const getDesignByIdCb = useCallback((id: string) => findDesignById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
   // Send-time hook: request tab views call this to resolve their
@@ -3036,6 +3131,7 @@ const App: React.FC = () => {
         setRootItems: (folders: EnvironmentFolder[]) => void
         findItemIndexPath: (nameChain: string[]) => number[] | null
         findItemIdByPath: (nameChain: string[]) => string | null
+        mutateDesign: (designName: string, patch: Record<string, unknown>) => boolean
         setEnvFolderTagColor: (folderName: string, tag: string, color: string | null) => boolean
         closeFile: () => Promise<void>
         menuClose: () => Promise<void>
@@ -3050,7 +3146,7 @@ const App: React.FC = () => {
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -3060,6 +3156,10 @@ const App: React.FC = () => {
           for (const rootItem of reactiveItems) {
             if (isScenario(rootItem)) {
               await searchIndexService.indexScenarioTree(rootItem)
+            } else if (isApiDesign(rootItem)) {
+              // A design indexes itself + its models/enums/routes as
+              // sub-entries of the design category.
+              await searchIndexService.indexDesign(rootItem)
             } else if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
             } else {
@@ -3084,6 +3184,30 @@ const App: React.FC = () => {
         // helper above intentionally skips.
         navigationService.clearHistory()
         await handleMenuCloseRef.current()
+      },
+      mutateDesign: (designName: string, patch: Record<string, unknown>): boolean => {
+        // Assign each patch key onto the REACTIVE design (found by name,
+        // anywhere in the tree) so the edit goes through the proxy's set
+        // trap — the exact path a Design-tab edit takes: DESIGN_UPDATED →
+        // save-unit draft → dirty → autosave. Top-level keys only, per the
+        // design mutation convention (see DESIGN_INDEXABLE_KEYS).
+        const findDesign = (items: FolderItem[]): FolderItem | null => {
+          for (const item of items) {
+            if (isApiDesign(item) && item.name === designName) return item
+            const children = (item as FolderItem & { items?: FolderItem[] }).items
+            if (children) {
+              const found = findDesign(children)
+              if (found) return found
+            }
+          }
+          return null
+        }
+        const design = findDesign(rootItemsRef.current)
+        if (!design) return false
+        for (const [key, value] of Object.entries(patch)) {
+          ;(design as unknown as Record<string, unknown>)[key] = value
+        }
+        return true
       },
       setEnvFolderTagColor: (folderName: string, tag: string, color: string | null): boolean => {
         // Locate the first env folder whose name matches, then delegate to
@@ -3221,7 +3345,7 @@ const App: React.FC = () => {
     // `commitIfDraftMatches` actually matches when the node hasn't
     // changed between mutate and save. `SecretValue.toJSON` strips
     // plaintext on the preceding JSON round trip.
-    const kindForType = (type: 'folder' | 'request' | 'environment'): 'folder' | 'file' =>
+    const kindForType = (type: 'folder' | 'request' | 'environment' | 'design'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'
 
     // Per-id debounce for the save-unit draft IPC. Typing in a
@@ -3367,15 +3491,19 @@ const App: React.FC = () => {
     const subscriptions = [
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleFolderOrRequestUpdated),
+      eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated),
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.DESIGN_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
+      eventBus.subscribe(DocumentEvents.DESIGN_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete),
       // Bump tab contentVersion so request tabs re-derive their live
       // env list when the env tree mutates — see comment above.
@@ -3400,7 +3528,7 @@ const App: React.FC = () => {
       upsertTimers.clear()
     }
     // `rootItems` is intentionally NOT a dep: the handlers read the live
-    // tree via `rootItemsRef.current`, so this 15-subscription effect
+    // tree via `rootItemsRef.current`, so this subscription effect
     // mounts ONCE per file/project instead of tearing down + re-subscribing
     // on every tree keystroke. `environmentFolderCollections`
     // isn't read in the effect body at all, so it's dropped too.
@@ -3422,14 +3550,18 @@ const App: React.FC = () => {
     rootItems,
     openFolderTab,
     openScenarioEditorTab,
+    openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    selectedItemId,
     setSelectedItemId,
     setSelectedItemIds,
     setExpandedIds,
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   })
+  // Late-bind the split opener for the sidebar context menus (see the ref above).
+  useEffect(() => { openItemAtSplitRef.current = openItemAtSplit }, [openItemAtSplit])
   // Patch the forward-reference ref consumed by `useMcpWorkbenchLayout`
   // (above) now that `handleTabActivate` exists.
   useEffect(() => { tabActivateForLayoutRef.current = handleTabActivate }, [handleTabActivate])
@@ -3468,12 +3600,16 @@ const App: React.FC = () => {
     // split-open gesture is single-item by design, and lighting the overlay
     // for a group would invite a drop the app cannot honour.
     if (typeList.includes(LIST_VIEW_MULTI_DRAG_MIME)) return false
-    const overScenario = (el: Element | null | undefined): boolean =>
-      el instanceof Element && el.closest('[data-testid="scenario-editor"]') !== null
+    // In-workbench editors that own their OWN ListView drag (scenario canvas,
+    // the design entity lists) must not have that drag hijacked by the split
+    // overlay — otherwise their internal reorder is swallowed. Refuse the
+    // external-drop channel while the cursor sits over one of them.
+    const overReorderScope = (el: Element | null | undefined): boolean =>
+      el instanceof Element && el.closest('[data-testid="scenario-editor"], .design-tab-view') !== null
     // Primary: the whole element stack under the cursor (pierces the overlay).
-    if (document.elementsFromPoint(event.clientX, event.clientY).some(overScenario)) return false
+    if (document.elementsFromPoint(event.clientX, event.clientY).some(overReorderScope)) return false
     // Fallback for drags with no usable coordinates (some synthetic events).
-    if (overScenario(event.target as Element | null)) return false
+    if (overReorderScope(event.target as Element | null)) return false
     return true
   }, [])
 
@@ -3674,6 +3810,7 @@ const App: React.FC = () => {
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
                   onCollapseAll={() => { setExpandedIds([]) }}
+                  onExpandAll={() => { setExpandedIds(allFolderIdsRef.current.slice()) }}
                   onCreateRootEnvironmentFolder={handleCreateRootEnvironmentFolder}
                   onAddChildItem={handleAddChildItem}
                   onDeselectAll={() => { setSelectedItemId(null); setSelectedItemIds([]) }}
@@ -3731,7 +3868,7 @@ const App: React.FC = () => {
                 // reopen on load. See `onboardingRestorePending`.
                 onboardingRestorePending
                   ? null
-                  : <Onboarding rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />
+                  : <Onboarding rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onCreateDesign={() => { handleAddChildItem('', 'design') }} onOpenRequest={handleItemClick} />
               }
               workbenchId={workbenchId}
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
@@ -3743,6 +3880,7 @@ const App: React.FC = () => {
               onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
               getScenarioById={getScenarioByIdCb}
+              getDesignById={getDesignByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -3832,6 +3970,7 @@ const App: React.FC = () => {
             onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}
             getScenarioById={(id) => findScenarioById(rootItems, id)}
+            getDesignById={(id) => findDesignById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'

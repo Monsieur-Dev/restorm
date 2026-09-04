@@ -32,7 +32,7 @@ import type { Icon } from 'electron-core-ui/types'
 import type { Folder, EnvironmentFolder, FolderItem } from '../../../shared/types/collections'
 import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
-import { isAnyFolder, isScenario } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
 import { searchIndexService } from '../services/SearchIndexService'
 import { DocumentEvents } from '../services/DocumentEvents'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
@@ -70,15 +70,20 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
   // rebuild per event would be wasteful.
   const requestUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
-    const subscription = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, () => {
+    const bump = (): void => {
       if (requestUpdateTimerRef.current !== null) clearTimeout(requestUpdateTimerRef.current)
       requestUpdateTimerRef.current = setTimeout(() => {
         requestUpdateTimerRef.current = null
         setUpdateCount(n => n + 1)
       }, 250)
-    })
+    }
+    const requestSubscription = eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, bump)
+    // Design edits move the sidebar too (section-row counts, error
+    // dots), through the same debounced counter.
+    const designSubscription = eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, bump)
     return () => {
-      subscription.unsubscribe()
+      requestSubscription.unsubscribe()
+      designSubscription.unsubscribe()
       if (requestUpdateTimerRef.current !== null) clearTimeout(requestUpdateTimerRef.current)
     }
   }, [])
@@ -87,7 +92,8 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
   const handleTagsChange = useCallback((targetId: string, newTags: string[]) => {
     // Find and update the reactive object directly (triggers search re-indexing)
     const item = findItemById(rootItems, targetId)
-    if (item) {
+    // Designs carry no tags (union member without the field), so guard it.
+    if (item && 'tags' in item) {
       item.tags = newTags
     }
 
@@ -390,7 +396,7 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       if (!effectiveIcon && foundItem && isAnyFolder(foundItem)) {
         delete foundItem.icon
         effectiveIcon = getFolderIcon(foundItem)
-      } else if (foundItem && !isScenario(foundItem)) {
+      } else if (foundItem && !isScenario(foundItem) && !isApiDesign(foundItem)) {
         if (effectiveIcon) {
           foundItem.icon = effectiveIcon
         } else {

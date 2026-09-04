@@ -22,6 +22,8 @@ import {
 import { HTTPRequest } from '../../src/shared/models/requests/HTTPRequest'
 import { Folder as FolderClass } from '../../src/shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../src/shared/models/EnvironmentFolder'
+import { ApiDesign as ApiDesignClass } from '../../src/shared/models/ApiDesign'
+import { buildReferenceApiDesign } from './apiDesignReference'
 import { KeyValue } from '../../src/shared/models/KeyValue'
 import { SecretValue } from '../../src/shared/types/valueTypes/SecretValue'
 import { StringValue } from '../../src/shared/types/valueTypes/StringValue'
@@ -29,6 +31,7 @@ import { StringValue } from '../../src/shared/types/valueTypes/StringValue'
 const classResolver = (item: Record<string, unknown>, parentClass: object | undefined): object | undefined => {
   const type = item['type']
   if (type === 'http') return HTTPRequest
+  if (type === 'design') return ApiDesignClass
   if (parentClass === EnvironmentFolderClass || parentClass === FolderClass) return FolderClass
   return undefined
 }
@@ -78,6 +81,97 @@ describe('save-unit wiring (restorm ↔ lib)', () => {
     const rawItemClone = JSON.parse(JSON.stringify(request)) as Record<string, unknown>
     const bridgeDraft = cleanseForPersistence(rawItemClone, HTTPRequest)
     expect(bridgeDraft).toEqual(requestEntry?.content)
+  })
+
+  it('cleansed draft matches decomposer content for a design node (leaf unit)', () => {
+    // A design is one save unit: its models/enums/routeGroups are tab
+    // sections, never child units. The bridge's cleansed draft must be
+    // byte-for-byte the decomposer's content slice, or
+    // `commitIfDraftMatches` never matches and the unit stays dirty
+    // after every save.
+    const design = ApiDesignClass.fromPlain(buildReferenceApiDesign())
+    const folder = new EnvironmentFolderClass({
+      id: 'env-1',
+      name: 'Prod',
+      items: [design]
+    })
+
+    const rootPojo = JSON.parse(JSON.stringify(folder)) as Record<string, unknown>
+    const decomposed = decomposeForPersistence({
+      root: rootPojo,
+      rootClass: EnvironmentFolderClass,
+      basePath: '/tmp/proj',
+      format: 'yaml',
+      extension: 'yaml',
+      classResolver
+    })
+
+    const designEntry = decomposed.children.find((c) => c.runtimeId === 'design-petstore')
+    if (designEntry === undefined) throw new Error('the design must decompose as its own unit')
+    // A leaf: the design decomposes as its own unit, with no child units
+    // split out of it.
+    expect(decomposed.children.some((c) => c.parentId === 'design-petstore')).toBe(false)
+    const content = designEntry.content
+    expect(Array.isArray(content['models'])).toBe(true)
+
+    const rawItemClone = JSON.parse(JSON.stringify(design)) as Record<string, unknown>
+    const bridgeDraft = cleanseForPersistence(rawItemClone, ApiDesignClass)
+    expect(bridgeDraft).toEqual(designEntry.content)
+  })
+
+  it('pins the m-14 design fields (tags / paramEnumRefs / memberNames / codegenVars / contentTypes) through cleanse + decompose', () => {
+    // The rich reference fixture predates these fields; this design carries all
+    // of them so a future cleanse/decompose that dropped one is caught here
+    // (either path dropping a field breaks the byte-for-byte match).
+    const plain = {
+      type: 'design',
+      id: 'design-m14',
+      name: 'M14',
+      info: { title: 'M14', version: '1.0.0' },
+      models: [{ id: 'm1', doc: { name: 'User' }, properties: [{ id: 'p1', doc: { name: 'id', type: 'string' } }] }],
+      enums: [{ id: 'e1', doc: { name: 'Status', properties: [], enumValues: ['open', 'closed'] }, memberNames: ['OPEN', 'CLOSED'] }],
+      routeGroups: [{
+        id: 'g1',
+        doc: { name: 'Users', tags: ['shared'] },
+        routes: [{
+          id: 'r1',
+          doc: {
+            match: { method: 'GET', urlPattern: '/users' },
+            summary: 'List',
+            tags: ['list'],
+            parameters: [{ name: 'kind', location: 'query', type: 'string', required: false }]
+          },
+          design: {
+            paramEnumRefs: { kind: 'e1' },
+            body: { modelId: 'm1', contentTypes: ['application/json', 'application/xml'] },
+            codegenVars: { 'tmpl-1': { route: { path: '/x' } } }
+          }
+        }]
+      }]
+    }
+    const design = ApiDesignClass.fromPlain(plain)
+    const folder = new EnvironmentFolderClass({ id: 'env-m14', name: 'Prod', items: [design] })
+    const rootPojo = JSON.parse(JSON.stringify(folder)) as Record<string, unknown>
+    const decomposed = decomposeForPersistence({ root: rootPojo, rootClass: EnvironmentFolderClass, basePath: '/tmp/proj', format: 'yaml', extension: 'yaml', classResolver })
+    const designEntry = decomposed.children.find((c) => c.runtimeId === 'design-m14')
+    if (designEntry === undefined) throw new Error('the design must decompose as its own unit')
+
+    // The bridge's cleansed draft still matches the decomposer byte-for-byte…
+    const bridgeDraft = cleanseForPersistence(JSON.parse(JSON.stringify(design)) as Record<string, unknown>, ApiDesignClass)
+    expect(bridgeDraft).toEqual(designEntry.content)
+
+    // …and each new field actually survived (not silently dropped by both).
+    const content = designEntry.content
+    const group = (content['routeGroups'] as Record<string, unknown>[])[0]
+    const route = (group['routes'] as Record<string, unknown>[])[0]
+    const routeDesign = route['design'] as Record<string, unknown>
+    const enumEntry = (content['enums'] as Record<string, unknown>[])[0]
+    expect((group['doc'] as Record<string, unknown>)['tags']).toEqual(['shared'])
+    expect((route['doc'] as Record<string, unknown>)['tags']).toEqual(['list'])
+    expect(routeDesign['paramEnumRefs']).toEqual({ kind: 'e1' })
+    expect(routeDesign['codegenVars']).toEqual({ 'tmpl-1': { route: { path: '/x' } } })
+    expect((routeDesign['body'] as Record<string, unknown>)['contentTypes']).toEqual(['application/json', 'application/xml'])
+    expect(enumEntry['memberNames']).toEqual(['OPEN', 'CLOSED'])
   })
 
   it('commitIfDraftMatches succeeds when the renderer bridges the same node it later saves', () => {

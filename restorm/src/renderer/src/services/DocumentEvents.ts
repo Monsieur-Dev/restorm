@@ -12,7 +12,7 @@ export interface DocumentEventPayload {
   /** Document ID */
   id: string
   /** Document type */
-  type: 'folder' | 'request' | 'environment'
+  type: 'folder' | 'request' | 'environment' | 'design'
   /** Event source - where the change originated (default: 'user') */
   source?: EventSource
 }
@@ -47,6 +47,9 @@ export const DocumentEvents = {
   ENVIRONMENT_CREATED: 'document:environment:created',
   ENVIRONMENT_UPDATED: 'document:environment:updated',
   ENVIRONMENT_DELETED: 'document:environment:deleted',
+  DESIGN_CREATED: 'document:design:created',
+  DESIGN_UPDATED: 'document:design:updated',
+  DESIGN_DELETED: 'document:design:deleted',
   /**
    * Emitted right after a request completes and a new entry is pushed
    * to its response history. Consumers (e.g. the status-bar history

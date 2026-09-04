@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+🎉 **Giờ đây Restorm còn là một trình thiết kế API.** Thiết kế API của bạn, phục vụ nó như một mock trực tiếp trên năm giao thức cùng lúc, và tạo các client của nó — mà không rời khỏi ứng dụng, tất cả trên đĩa của riêng bạn.
+
+- **Trình thiết kế API trực quan.** Mô hình hóa API của bạn bằng tay — model, enum (có tên hoặc nội tuyến), route, tham số, ví dụ có tên, ràng buộc, thẻ và trạng thái ngừng dùng — mà không viết một dòng đặc tả nào.
+- **Phục vụ nó như một mock, chỉ với một cú nhấp, trên 5 giao thức cùng lúc.** Thiết kế trở thành một máy chủ trả lời đồng thời bằng HTTP, GraphQL, SOAP, OData và gRPC. Các phản hồi đến từ những ví dụ có tên của bạn (hoặc dữ liệu thực tế được tạo từ các model của bạn), kèm xác thực ràng buộc, độ trễ mô phỏng và chế độ có trạng thái.
+- **Các client sẵn sàng chạy, được tạo tự động.** Trong khi mock đang chạy, mục Clients tạo ra những request thật, chạy được cho từng giao thức đã bật, trỏ đến các endpoint của mock. Một cú nhấp mở một request và gọi thẳng máy chủ — không còn phải nhập lại API của bạn ở nơi khác để kiểm thử.
+- **Tạo mã** từ thiết kế của bạn bằng các mẫu được cung cấp và các mẫu tùy chỉnh của riêng bạn, được kết xuất trong một sandbox và chỉ ghi ra đĩa sau khi bạn xác nhận. **Xuất cả bộ mô tả** (OpenAPI và các loại khác).
+- **Khi nhập, phần thân request được điền sẵn**: GraphQL chọn các trường vô hướng của kiểu trả về, gRPC bung các thông điệp lồng nhau — request chạy được ngay.
+
 ## v1.0.6
 
 Sửa lỗi:

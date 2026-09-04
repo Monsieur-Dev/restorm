@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Törlés",
       "clone": "Klónozás",
+      "openInSplit": "Megnyitás osztott panelen",
       "copySuffix": "másolat",
       "rename": "Átnevezés",
       "addToFavorites": "Hozzáadás a kedvencekhez",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-terv"
       },
       "cut": "Kivágás",
       "copy": "Másolás",
@@ -335,7 +337,8 @@
       "moveInto": "Áthelyezés ebbe a forgatókönyvbe",
       "affectsNote": "A kérés törlése eltávolítja azt ezekből a forgatókönyvekből is.",
       "deleteAnyway": "Törlés mindenképp"
-    }
+    },
+    "expandAll": "Összes kérés kibontása"
   },
   "environment": {
     "newName": "Új környezet",
@@ -741,7 +744,8 @@
       "environment": "Környezetek",
       "settings": "Beállítások",
       "tag": "Címkék",
-      "scenario": "Forgatókönyvek"
+      "scenario": "Forgatókönyvek",
+      "design": "API-tervek"
     },
     "tooltip": {
       "noDetails": "Nincs elérhető részlet",
@@ -1238,7 +1242,8 @@
       "operation": "Művelet",
       "description": "Leírás",
       "example": "Példa",
-      "constraints": "Megkötések"
+      "constraints": "Megkötések",
+      "enum": "Enum"
     },
     "params": {
       "empty": "A szűrt útvonalakhoz nincs törzsön kívüli paraméter megadva."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "opcionális egyedi hivatkozás",
       "requiredArrayRef": "kötelező tömbhivatkozás",
       "optionalArrayRef": "opcionális tömbhivatkozás"
-    }
+    },
+    "editEntity": "Szerkesztés a tervezőben"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum értékek",
+      "addValue": "Érték hozzáadása…",
+      "removeValue": "Érték eltávolítása",
+      "extract": "Kiemelés névvel ellátott enumba"
+    },
+    "tags": {
+      "add": "Címke hozzáadása…",
+      "remove": "Címke eltávolítása",
+      "routeLabel": "Címkék",
+      "groupLabel": "Közös címkék"
+    },
+    "section": {
+      "settings": "Beállítások",
+      "models": "Modellek",
+      "enums": "Enumok",
+      "routes": "Útvonalak",
+      "documentation": "Dokumentáció",
+      "notes": "Jegyzetek",
+      "code": "Kód",
+      "server": "Kiszolgáló",
+      "clients": "Kliensek"
+    },
+    "rail": {
+      "ariaLabel": "A terv szakaszai"
+    },
+    "settings": {
+      "subtitle": "A(z) „{{name}}” API-terv általános beállításai",
+      "serve": {
+        "title": "Tervkiszolgáló",
+        "action": "A terv kiszolgálása",
+        "description": "Válaszok nevesített példákból · validálás megszorításokkal",
+        "port": "Port",
+        "latency": "Szimulált késleltetés (ms)",
+        "blocked": "Javítsa a terv {{count}} validálási hibáját a kiszolgálás előtt",
+        "startFailed": "A szervert nem sikerült elindítani",
+        "protocolAlways": "A HTTP mindig kiszolgálásra kerül",
+        "protocolToggle": "Ez a projekció is legyen kiszolgálva",
+        "stateful": "Állapottartó mód — POST/PUT/DELETE módosítja a memóriabeli tárolót (újraindításkor törlődik)",
+        "clientsCallout": "A mock szerver fut. A tervezet által kiszolgált minden protokollhoz futtatásra kész kliensek készültek.",
+        "clientsCalloutLink": "Itt találja őket"
+      },
+      "identity": {
+        "title": "Identitás",
+        "title_field": "Cím",
+        "version": "A terv verziója",
+        "description": "Leírás"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Alapútvonal",
+        "defaultAuth": "Alapértelmezett auth",
+        "environment": "Környezet"
+      },
+      "export": {
+        "title": "Exportálás",
+        "format": "Leíró formátuma",
+        "download": "Leíró letöltése",
+        "saved": "Leíró mentve ide: {{path}}",
+        "failed": "Az exportálás sikertelen"
+      }
+    },
+    "auth": {
+      "none": "Nincs",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-kulcs fejléc",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Szűrés…",
+      "selectPrompt": "Válasszon egy elemet a listából.",
+      "editorPending": "A szakasz szerkesztője úton van."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} tulajdonság",
+      "propertyCount_other": "{{count}} tulajdonság",
+      "add": "Modell hozzáadása",
+      "delete": "Modell törlése",
+      "deleteTitle": "Törli: {{name}}?",
+      "deleteNoImpact": "Ezt a modellt sehol sem használják.",
+      "deleteImpactIntro": "A modell törlése frissíti:",
+      "deleteImpactChild": "{{name}} elveszíti az öröklését (saját tulajdonságai megmaradnak)",
+      "description": "Leírás",
+      "descriptionPlaceholder": "Mit képvisel ez a modell (opcionális)",
+      "newName": "NewModel",
+      "selectPrompt": "Válasszon egy modellt, vagy hozzon létre egyet.",
+      "tabs": {
+        "schema": "Séma",
+        "examples": "Példák",
+        "settings": "Beállítások",
+        "notes": "Jegyzetek"
+      },
+      "addSubModel": "Almodell hozzáadása",
+      "collapseAll": "Összes összecsukása",
+      "expandAll": "Összes kibontása"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} érték",
+      "valueCount_other": "{{count}} érték",
+      "lists": "Enumok",
+      "values": "Értékek",
+      "addEnum": "Enum hozzáadása",
+      "addValue": "Érték hozzáadása",
+      "valueHeader": "Érték",
+      "newName": "NewEnum",
+      "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható.",
+      "nameHeader": "Név",
+      "description": "Leírás",
+      "descriptionPlaceholder": "Mit képvisel ez az enum (opcionális)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Még nincs sablon — adjon hozzá egyet, hogy kódot generáljon ebből a tervből.",
+      "subtitle": "Projektek generálása ebből a tervből — sandboxban renderelve, csak a fa megerősítése után írva",
+      "sourceTitle": "Sablon",
+      "sourceKind": {
+        "official": "Hivatalos",
+        "repo": "Repository",
+        "local": "Helyi mappa"
+      },
+      "official": "Hivatalos sablon",
+      "repo": "Repository (owner/repo)",
+      "local": "Helyi sablonmappa",
+      "output": "Kimeneti mappa (abszolút, vagy a projekthez képest relatív)",
+      "browse": "Kimeneti mappa kiválasztása",
+      "generate": "Projekt generálása",
+      "generating": "Generálás a sandboxban…",
+      "blocked": "Javítsa a terv {{count}} validálási hibáját a generálás előtt",
+      "failed": "A generálás nem sikerült",
+      "outputMissing": "Először válasszon kimeneti mappát",
+      "extracted": "{{count}} fájl kiírva ide: {{root}}",
+      "preview": "{{name}} {{count}} fájlt generált — erősítse meg a kiírást",
+      "confirm": "Írás a kimeneti mappába",
+      "discard": "Elvetés",
+      "generateOne": "Projekt generálása",
+      "remove": "Sablon eltávolítása",
+      "addTemplate": "Sablon hozzáadása",
+      "library": {
+        "title": "Sablonkönyvtár",
+        "recent": "Nemrég használt",
+        "official": "Hivatalos sablonok",
+        "custom": "Egyéni",
+        "add": "Hozzáadás",
+        "use": "Használat",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Szervezeti sablonok",
+        "openRepo": "Adattár megnyitása",
+        "remove": "Eltávolítás",
+        "addTemplate": "Sablon hozzáadása",
+        "urlPlaceholder": "Git adattár URL",
+        "descPlaceholder": "Leírás (stack / mit generál)",
+        "noOrgTemplates": "Még nincsenek szervezeti sablonok.",
+        "loading": "Sablonok betöltése…",
+        "signedOut": "Jelentkezzen be a szervezete sablonjainak megtekintéséhez.",
+        "fetchError": "A sablonok betöltése sikertelen:",
+        "unavailable": "nem elérhető",
+        "officialTag": "Hivatalos",
+        "officialDesc": {
+          "server-rest-typescript": "REST szerver TypeScriptben Expressen — típusos útvonalak, modellek és kérésvalidáció.",
+          "server-rest-dotnet": "Minimal-API szerver C# / ASP.NET Core alatt — végpontok, DTO-k és validáció.",
+          "server-grpc-typescript": "gRPC-kiszolgáló TypeScriptben — .proto szolgáltatás, típusos üzenetek és kiszolgálói csonkok.",
+          "server-grpc-dotnet": "gRPC-kiszolgáló C# / .NET környezetben — .proto szolgáltatás, üzenetek és kiszolgálói csonkok.",
+          "db-postgres": "PostgreSQL séma, seed adatok és CRUD szkriptek a tervből."
+        },
+        "added": "Template hozzáadva",
+        "done": "Kész"
+      },
+      "extractedTitle": "Fájlok kiírva",
+      "openOutput": "Kimeneti mappa megnyitása",
+      "refresh": "A sablon frissítése a forrásából",
+      "removeConfirm": "A(z) „{{name}}“ Template eltávolításra kerül erről a tervről (a lemezen már legenerált fájlok érintetlenül maradnak).",
+      "removeTitle": "Eltávolítja ezt a Template-et?",
+      "tabs": {
+        "template": "Sablon"
+      },
+      "questions": {
+        "title": "Sablonkérdések"
+      },
+      "errorTitle": "A generálás sikertelen",
+      "source": "Forrás",
+      "destination": "Cél",
+      "expand": "Kibontás",
+      "collapse": "Összecsukás"
+    },
+    "statusbar": {
+      "format": "terv · formátum {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Azonosság",
+      "identifierProperty": "Azonosító tulajdonság",
+      "identifierStrategy": "Stratégia",
+      "inheritsFrom": "Ettől örököl",
+      "noIdentifier": "(nincs)",
+      "noParent": "(nincs)",
+      "storage": "Tárolás és életciklus",
+      "volumetry": "Várt volumen",
+      "volumetryUnset": "(nem megadott)",
+      "operationalProfile": "Működési profil",
+      "accessPattern": "Olvasási/írási profil",
+      "traffic": "Hozzáférési gyakoriság",
+      "freshness": "Frissesség-tűrés",
+      "sensitivity": "Adatérzékenység",
+      "retention": "Megőrzés / életciklus",
+      "profileUnset": "(nem megadott)",
+      "timestamps": "Időbélyegek (létrehozva/módosítva)",
+      "softDelete": "Puha törlés",
+      "usedBy": "Használja",
+      "usedByNone": "Ezt a modellt még nem használják.",
+      "usage": {
+        "body": "törzs",
+        "response": "válasz {{code}}",
+        "param": "paraméter {{name}}",
+        "inherits": "{{name}} örököl tőle"
+      },
+      "generators": "Útvonalak",
+      "generateCrud": "CRUD generálása",
+      "generateSearch": "Keresési útvonalak generálása"
+    },
+    "schema": {
+      "addProperty": "Tulajdonság hozzáadása",
+      "deleteProperty": "Tulajdonság törlése",
+      "columns": {
+        "property": "Tulajdonság",
+        "type": "Típus",
+        "flags": "Attribútumok",
+        "example": "Példa"
+      },
+      "unnamed": "(névtelen)",
+      "nameMissing": "hiányzó név",
+      "panelTitle": "Tulajdonság: {{name}}",
+      "jumpToParent": "{{name}} megnyitása",
+      "typeModel": "modell",
+      "typeEnum": "enum",
+      "noFormat": "(nincs)",
+      "invalidPattern": "Érvénytelen reguláris kifejezés",
+      "minAboveMax": "A min meghaladja a maxot",
+      "fields": {
+        "name": "Név",
+        "type": "Típus",
+        "format": "Formátum",
+        "elementType": "Elemtípus",
+        "onDelete": "Törléskor",
+        "description": "Leírás",
+        "example": "Példa",
+        "default": "Alapértelmezett",
+        "deprecationMessage": "Elavulási üzenet",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Min. hossz",
+        "maxLength": "Max. hossz",
+        "pattern": "Minta"
+      },
+      "generatedProperties": "Generált tulajdonságok",
+      "inheritedProperties": "Örökölt tulajdonságok",
+      "ownProperties": "Saját tulajdonságok",
+      "tabs": {
+        "property": "Tulajdonság"
+      },
+      "advancedType": "Speciális…"
+    },
+    "flags": {
+      "required": "kötelező",
+      "nullable": "nullable",
+      "unique": "egyedi",
+      "immutable": "megváltoztathatatlan",
+      "searchable": "kereshető",
+      "deprecated": "elavult",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Alapértelmezett",
+      "add": "Példa hozzáadása",
+      "delete": "Példa törlése",
+      "name": "Példa neve",
+      "newName": "Példa",
+      "defaultHint": "Az alapértelmezett értékek az egyes tulajdonságokból származnak (üres = automatikusan generált).",
+      "namedHint": "Írjon be egy értéket a definiálásához; hagyja üresen a generált megtartásához.",
+      "columns": {
+        "value": "Érték",
+        "origin": "Eredet"
+      },
+      "auto": "auto",
+      "defined": "definiált",
+      "constraintViolated": "Az érték megsérti a tulajdonság megkötését ({{constraint}})",
+      "deleteTitle": "Törli ezt a példát?",
+      "deleteConfirm": "A(z) „{{name}}” példa törlődik."
+    },
+    "onDelete": {
+      "restrict": "Korlátozás (tiltás, amíg használatban van)",
+      "cascade": "Kaszkád törlés",
+      "setNull": "Null értékre állítás"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Automatikus növelés",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Több száz",
+      "tenThousands": "Több tízezer",
+      "millions": "Több millió"
+    },
+    "accessPattern": {
+      "readHeavy": "Olvasás-túlsúlyos",
+      "writeHeavy": "Írás-túlsúlyos",
+      "balanced": "Kiegyensúlyozott",
+      "appendOnly": "Csak hozzáfűzés"
+    },
+    "traffic": {
+      "low": "Alacsony",
+      "medium": "Közepes",
+      "high": "Magas"
+    },
+    "freshness": {
+      "strong": "Erős konzisztencia",
+      "shortCache": "Rövid gyorsítótár OK",
+      "longCache": "Hosszú gyorsítótár OK"
+    },
+    "sensitivity": {
+      "public": "Nyilvános",
+      "internal": "Belső",
+      "confidential": "Bizalmas",
+      "pii": "Személyes adatok (PII)"
+    },
+    "retention": {
+      "permanent": "Állandó",
+      "archivable": "Archiválható",
+      "ephemeral": "Ideiglenes (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "A tulajdonságnak nincs neve",
+      "propertyNameDuplicate": "Ismétlődő tulajdonságnév",
+      "propertyShadowsParent": "Elfed egy örökölt tulajdonságot",
+      "referenceTargetUnknown": "A hivatkozott típus már nem létezik",
+      "constraintPatternInvalid": "Érvénytelen minta (reguláris kifejezés)",
+      "constraintMinAboveMax": "A min meghaladja a maxot",
+      "modelNameEmpty": "A modellnek nincs neve",
+      "enumNameEmpty": "Az enumnak nincs neve",
+      "groupNameEmpty": "A csoportnak nincs neve",
+      "modelNameDuplicate": "Ismétlődő modellnév",
+      "enumNameDuplicate": "Ismétlődő enumnév",
+      "componentNameCollision": "Egy modell és egy enum osztozik ezen a néven",
+      "groupNameDuplicate": "Ismétlődő csoportnév",
+      "inheritanceTargetUnknown": "Az örökölt modell már nem létezik",
+      "inheritanceCycle": "Körkörös öröklési lánc",
+      "identifierPropertyUnknown": "Az azonosító tulajdonság már nem létezik",
+      "paramLinkTargetUnknown": "Egy paraméterkapcsolat hiányzó tulajdonságra mutat",
+      "bodyModelUnknown": "A törzs modellje már nem létezik",
+      "responseModelUnknown": "Egy válaszmodell már nem létezik",
+      "responseExampleUnknown": "Egy válasz hiányzó példát szolgál ki",
+      "routeResponsesMissing": "Az útvonal nem deklarál választ",
+      "routePathDuplicate": "Egy másik útvonal már válaszol erre a metódusra és útvonalra",
+      "routePathReserved": "A design szerver fenntartja ezt az útvonalat — a route soha nem válaszolna"
+    },
+    "routes": {
+      "addGroup": "Csoport hozzáadása",
+      "addRoute": "Útvonal hozzáadása",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Válasszon egy csoportot vagy útvonalat, vagy hozzon létre egy csoportot.",
+      "deleteGroupTitle": "Törli: {{name}}?",
+      "deleteGroupImpact": "A csoport és {{count}} útvonala törlődik.",
+      "method": "Metódus",
+      "path": "Útvonal",
+      "summary": "Összefoglaló",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definíció",
+        "responses": "Válaszok"
+      },
+      "group": {
+        "auth": "Kötelező auth",
+        "authInherited": "Terv alapértelmezése",
+        "versionPrefix": "Verzióelőtag",
+        "headers": "Szerződés-fejlécek (az útvonalak öröklik)",
+        "headerName": "Fejléc",
+        "addHeader": "Fejléc hozzáadása",
+        "deleteHeader": "Fejléc törlése",
+        "noHeaders": "Nincs közös fejléc."
+      },
+      "params": {
+        "pathTitle": "Útvonal-paraméterek",
+        "otherTitle": "Paraméterek (query / header)",
+        "name": "Név",
+        "location": "Hol",
+        "link": "Modellkapcsolat",
+        "noLink": "—",
+        "add": "Paraméter hozzáadása",
+        "delete": "Paraméter törlése",
+        "auto": "auto",
+        "pathEmpty": "Írjon egy {{param}}-ot az útvonalba a sor létrehozásához.",
+        "otherEmpty": "Még nincs query vagy header paraméter.",
+        "nameEmpty": "A paraméternek névre van szüksége",
+        "nameTaken": "Ez a név már foglalt"
+      },
+      "body": {
+        "label": "Kérés törzse",
+        "empty": "(üres)",
+        "nonStandardHint": "A(z) {{method}} metóduson a kéréstörzs nem szabványos — sok szerver és proxy figyelmen kívül hagyja. A Restorm ettől függetlenül kiszolgálja és dokumentálja."
+      },
+      "responses": {
+        "add": "Hozzáadás",
+        "codePlaceholder": "Státuszkód",
+        "standardErrors": "+ szabványos hibák",
+        "empty": "Még nincs deklarált válasz.",
+        "emptyBody": "üres törzs",
+        "model": "Visszaadott modell",
+        "list": "Lista",
+        "paginated": "Lapozott",
+        "listOf": "{{name}} listája",
+        "paginatedListOf": "{{name}} lapozott listája",
+        "example": "Kiszolgált példa",
+        "exampleAuto": "(auto generált)",
+        "delete": "Válasz törlése",
+        "codeInvalid": "Adjon meg egy 3 számjegyű státuszkódot",
+        "codeTaken": "Ez a kód már deklarálva van"
+      },
+      "settings": {
+        "inherited": "A csoporttól örökölve",
+        "authInherited": "A csoporttól örökölve",
+        "editGroup": "Szerkesztés a csoportban ↗",
+        "headers": "Szerződés-fejlécek",
+        "behaviour": "Viselkedés",
+        "idempotent": "Idempotens",
+        "cacheSeconds": "Cache (másodperc)",
+        "traffic": "Várt forgalom",
+        "authOverride": "Auth felülbírálás",
+        "pagination": "Lapozás",
+        "defaultLimit": "Alapértelmezett lapméret",
+        "maxLimit": "Max. lapméret"
+      },
+      "addSubgroup": "Alcsoport hozzáadása"
+    },
+    "newDesignName": "Új API-terv",
+    "createFromScratch": "API-terv létrehozása",
+    "createFromDoc": "Terv létrehozása ebből az API-ból",
+    "fromDocName": "{{name}} terv",
+    "run": {
+      "listening": "Kiszolgálás itt: http://localhost:{{port}}",
+      "stopped": "Szerver leállítva",
+      "totalCalls": "{{count}} hívás ebben a futásban",
+      "stop": "Szerver leállítása",
+      "close": "Panel bezárása",
+      "forcedPill": "kényszerítve {{code}}",
+      "defaultReturn": "Terv válasza (alapértelmezett)",
+      "codeReturn": "Válasz: {{code}}",
+      "customCode": "Egyéni státuszkód",
+      "customBody": "Egyéni választörzs",
+      "customBodyPlaceholder": "Opcionális választörzs (JSON)",
+      "customApply": "Kényszerítés"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Írási útvonalak védelme hitelesítéssel",
+      "authWritesHint": "bearer hitelesítés megkövetelése létrehozásnál, frissítésnél és törlésnél; az olvasások nyilvánosak maradnak.",
+      "generate": "Generálás",
+      "replace": "A meglévő útvonalak cseréje",
+      "replaceHint": "Ehhez a modellhez már léteznek útvonalak. Cserélje le őket a duplikátumok elkerülése érdekében; hagyja kikapcsolva egy második készlet hozzáadásához.",
+      "title": "CRUD generálása ehhez: {{name}}",
+      "projections": {
+        "http": "{{count}} REST útvonal",
+        "graphql": "{{queries}} lekérdezés / {{mutations}} mutáció a GraphQL-ben",
+        "grpc": "{{count}} gRPC-metódus",
+        "odata": "{{count}} OData entitáskészlet",
+        "soap": "{{count}} SOAP-művelet",
+        "title": "Egy modell, minden protokoll — ez a CRUD a következőként is elérhető:"
+      }
+    },
+    "server": {
+      "subtitle": "Szolgálja ki ezt a tervet élő mockként, és figyelje minden hívást."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kódgenerálás",
+        "name": "Változó",
+        "value": "Érték (Handlebars)",
+        "add": "Változó hozzáadása",
+        "none": "Még nincsenek változók — adjon hozzá egyet a sablon fejlécéből.",
+        "noTemplates": "Válasszon egy vagy több sablont a „</> Code” szakaszban — itt adhatja meg a generálás során használt változókat.",
+        "generalTitle": "Általános változók",
+        "scope": {
+          "general": "Általános",
+          "property": "Modell tulajdonsága"
+        },
+        "discover": "A sablon által használt változók felderítése",
+        "undeclared": "Használt, de nem deklarált: {{names}}",
+        "allDeclared": "A sablon által használt összes változó deklarált."
+      }
+    },
+    "clients": {
+      "generated": "Kliensek létrehozva — nyissa meg őket a Kliensek szakaszban az oldalsávban.",
+      "importing": "Kliensek importálása…",
+      "refresh": "Kliensek újragenerálása",
+      "startPrompt": "Indítsa el a szervert a kliensek létrehozásához.",
+      "startServerPrompt": "Indítsa el a <serverLink>tervszervert</serverLink> a modellből automatikusan generált klienskérések eléréséhez.",
+      "subtitle": "Az API-tervszervere fut, és a definiált útvonalakat szolgálja ki. Az alábbi kérések közvetlenül ezeket az útvonalakat hívják — nyisson meg egyet a teszteléséhez. Ezek ideiglenesek, és eltűnnek, amikor a szerver leáll."
+    },
+    "descriptors": {
+      "copy": "URL másolása"
+    },
+    "projections": {
+      "title": "Projekciók",
+      "hint": "Ugyanaz a művelet, ahogyan azt minden kiszolgált protokoll közzéteszi."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Megtartás",
@@ -2308,7 +2835,45 @@
     "addCookie": "Süti hozzáadása",
     "removeCookie": "Süti eltávolítása",
     "clearCookieDomain": "Tartomány sütijeinek törlése",
-    "clearCookies": "Összes süti törlése"
+    "clearCookies": "Összes süti törlése",
+    "listDesigns": "API-tervek listázása",
+    "getDesign": "API-terv lekérése",
+    "createDesign": "API-terv létrehozása",
+    "createDesignFromDocumentation": "Terv létrehozása importált API-ból",
+    "updateDesign": "Terv frissítése",
+    "deleteDesign": "Terv törlése",
+    "createDesignModel": "Tervmodell létrehozása",
+    "updateDesignModel": "Tervmodell frissítése",
+    "deleteDesignModel": "Tervmodell törlése",
+    "setDesignProperty": "Modelltulajdonság beállítása",
+    "deleteDesignProperty": "Modelltulajdonság törlése",
+    "createDesignEnum": "Terv-enum létrehozása",
+    "updateDesignEnum": "Terv-enum frissítése",
+    "deleteDesignEnum": "Terv-enum törlése",
+    "setDesignExample": "Nevesített példa beállítása",
+    "deleteDesignExample": "Nevesített példa törlése",
+    "createDesignRouteGroup": "Útvonalcsoport létrehozása",
+    "updateDesignRouteGroup": "Útvonalcsoport frissítése",
+    "deleteDesignRouteGroup": "Útvonalcsoport törlése",
+    "createDesignRoute": "Terv-útvonal létrehozása",
+    "updateDesignRoute": "Terv-útvonal frissítése",
+    "deleteDesignRoute": "Terv-útvonal törlése",
+    "setDesignRouteParam": "Útvonalparaméter létrehozása vagy frissítése",
+    "deleteDesignRouteParam": "Útvonalparaméter törlése",
+    "generateDesignCrud": "CRUD-útvonalak generálása",
+    "generateDesignSearchRoutes": "Keresési útvonalak generálása",
+    "serveDesign": "Terv kiszolgálása",
+    "stopDesignServer": "Tervszerver leállítása",
+    "getDesignServerStatus": "Tervszerver állapota",
+    "setDesignRouteResponse": "Válasz kényszerítése",
+    "exportDesign": "Tervleíró exportálása",
+    "generateDesignCode": "Kód generálása egy tervből",
+    "getDesignTemplateContract": "Kódsablonok szerződésének lekérése",
+    "setDesignTemplates": "Egy terv kódsablonjainak beállítása",
+    "setDesignModelVariables": "Egy modell kódgenerálási felülbírálatainak beállítása",
+    "setDesignPropertyVariables": "Egy tulajdonság kódgenerálási felülbírálatainak beállítása",
+    "setDesignRouteVariables": "Egy útvonal kódgenerálási felülbírálatainak beállítása",
+    "setDesignTemplateVariables": "Egy sablon globális kódgenerálási változóinak beállítása"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "Hozzáadva a(z) „{{name}}” forgatókönyv",
       "modifiedScenario": "Módosítva a(z) „{{name}}” forgatókönyv",
       "deletedScenario": "Törölve a(z) „{{name}}” forgatókönyv",
+      "addedDesign": "Hozzáadva a(z) „{{name}}” API-terv",
+      "modifiedDesign": "Módosítva a(z) „{{name}}” API-terv",
+      "deletedDesign": "Törölve a(z) „{{name}}” API-terv",
       "addedFolder": "Hozzáadva a(z) „{{name}}” mappa",
       "modifiedFolder": "Módosítva a(z) „{{name}}” mappa",
       "deletedFolder": "Törölve a(z) „{{name}}” mappa",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "Törölve a(z) „{{name}}” környezeti mappa",
       "movedRequest": "A(z) \"{{name}}\" kérés áthelyezve",
       "movedScenario": "A(z) \"{{name}}\" forgatókönyv áthelyezve",
+      "movedDesign": "A(z) \"{{name}}\" API-terv áthelyezve",
       "movedFolder": "A(z) \"{{name}}\" mappa áthelyezve",
       "movedEnvironmentFolder": "A(z) \"{{name}}\" környezeti mappa áthelyezve",
       "reorderedFolder": "Elemek átrendezve a(z) „{{name}}” mappában",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "A(z) „{{name}}” kérés frissítése",
       "singleScenario": "A(z) „{{name}}” forgatókönyv frissítése",
+      "singleDesign": "A(z) „{{name}}” API-terv frissítése",
       "singleFolder": "A(z) „{{name}}” mappa frissítése",
       "singleEnvironmentFolder": "A(z) „{{name}}” környezeti mappa frissítése",
       "singleFileFormatVersion": "Váltás a(z) {{name}} fájlformátumra",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} kérés",
       "countScenario_one": "{{count}} forgatókönyv",
       "countScenario_other": "{{count}} forgatókönyv",
+      "countDesign_one": "{{count}} API-terv",
+      "countDesign_other": "{{count}} API-terv",
       "countFolder_one": "{{count}} mappa",
       "countFolder_other": "{{count}} mappa",
       "countEnvironmentFolder_one": "{{count}} környezeti mappa",

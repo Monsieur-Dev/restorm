@@ -8,7 +8,7 @@ import {
   isAuthenticationRequest,
   type Request
 } from '../types/requests'
-import { isAnyFolder, isScenario, type Folder, type EnvironmentFolder, type FolderItem } from '../types/folderTypes'
+import { isAnyFolder, isScenario, isApiDesign, type Folder, type EnvironmentFolder, type FolderItem } from '../types/folderTypes'
 
 /**
  * Stable identifier for a single item in a parsed-spec import preview
@@ -147,10 +147,11 @@ function pruneBySelection(
       if (survives) {
         out.push({ ...folder, items: filteredChildren })
       }
-    } else if (isScenario(item)) {
+    } else if (isScenario(item) || isApiDesign(item)) {
       // A workflow scenario (Postman/Bruno script import) is a derived artifact
       // of the requests it orchestrates — not independently selectable, so it
       // always survives the prune; its nodes bind to sibling requests here.
+      // A design (no importer produces one today) is not selectable either.
       out.push(item)
     } else {
       const key = importNaturalKeyForRequest(item)
@@ -198,7 +199,7 @@ export function walkImportTreeWithKeys(
       const path = [...parentPath, folder.name]
       out.push({ key: importNaturalKeyForFolder(path), item, path })
       out.push(...walkImportTreeWithKeys(folder.items, path))
-    } else if (!isScenario(item)) {
+    } else if (!isScenario(item) && !isApiDesign(item)) {
       // Leaf request — its path is the parent's path; the key carries
       // the request kind + identity, not the path, since two routes
       // with the same method+url can't coexist anywhere in the tree.

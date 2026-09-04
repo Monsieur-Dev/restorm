@@ -54,3 +54,28 @@ Feature: Refusing a project written by a newer build
     And no project is open
     And the project file on disk is unchanged
 
+  Scenario: A project without a design keeps the base format on save
+    # The version a save writes is derived from the content — the lazy
+    # bump. A project using no version-gated feature saves at format 1
+    # and stays openable by every build.
+    Given a project written by this build
+    When I open that project
+    Then that project is open
+    When I edit the notes of the env folder "Redis Playground" and save
+    Then the project file on disk declares file format version "1"
+
+  Scenario: A project carrying a design opens, saves at the design format, and reopens intact
+    # 1.1 is what makes a build that predates designs refuse the file
+    # cleanly (the refusal scenarios above); for THIS build it is an
+    # ordinary supported version, and a save carries it forward.
+    Given a project carrying an API design
+    When I open that project
+    Then the incompatible-project message is not shown
+    And that project is open
+    When I edit the notes of the env folder "Petstore design project" and save
+    Then the project file on disk declares file format version "1.1"
+    And the project file on disk still carries the design
+    When I close and reopen that project
+    Then that project is open
+    And the project file on disk still carries the design
+

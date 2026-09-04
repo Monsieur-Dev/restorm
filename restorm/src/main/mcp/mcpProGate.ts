@@ -129,6 +129,53 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'update_custom_value_list',
   'delete_custom_value_list',
   'list_custom_value_lists',
+  // design domain — EDITING a design is free on every plan (the same
+  // decision as the UI: the plan gates PLAYING it, not building it).
+  // The mock-SERVE + EXPORT surface (serve/steer/status/export) sits in
+  // PRO below, aligned with DESIGN_RUN_CAPABILITY. Code GENERATION was
+  // split OUT to free (Yoann 2026-09-03): Community can run the official +
+  // local templates — only serving the design as a mock stays Pro+, and
+  // the org's SHARED templates stay Enterprise (server-enforced).
+  'list_designs',
+  'get_design',
+  'create_design',
+  'create_design_from_documentation',
+  'update_design',
+  'delete_design',
+  'create_design_model',
+  'update_design_model',
+  'delete_design_model',
+  'set_design_property',
+  'delete_design_property',
+  'create_design_enum',
+  'update_design_enum',
+  'delete_design_enum',
+  'set_design_example',
+  'delete_design_example',
+  'create_design_route_group',
+  'update_design_route_group',
+  'delete_design_route_group',
+  'create_design_route',
+  'update_design_route',
+  'delete_design_route',
+  'set_design_route_param',
+  'delete_design_route_param',
+  'generate_design_crud',
+  'generate_design_search_routes',
+  // editing a design's template list + reading the template authoring
+  // contract are free (like all design editing); only RUNNING a template
+  // (generate_design_code) is Pro.
+  'set_design_templates',
+  'get_design_template_contract',
+  // authoring the per-scope codegen variable values is design editing (free).
+  'set_design_template_variables',
+  'set_design_model_variables',
+  'set_design_property_variables',
+  'set_design_route_variables',
+  // GENERATING code from a template is FREE on every plan (Yoann 2026-09-03):
+  // Community can use the official + local templates. Serving the design as a
+  // mock stays Pro (below); the org's shared templates stay Enterprise.
+  'generate_design_code',
   'set_favorite',
   // application settings — the generic read/write routes over every setting
   'get_settings',
@@ -211,7 +258,17 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   'get_current_theme',
   'list_themes',
   'get_workbench_layout',
-  'set_workbench_layout'
+  'set_workbench_layout',
+  // design mock-SERVE + EXPORT surface — playing a design (serving as a
+  // mock, hot steering, status) and exporting a descriptor are the paid
+  // half of the design domain, mirroring DESIGN_RUN_CAPABILITY on the UI's
+  // serve button (Yoann 2026-08-17). Code GENERATION was split OUT to free
+  // (2026-09-03, in the free set above) — only the mock RUN stays Pro+.
+  'serve_design',
+  'stop_design_server',
+  'set_design_route_response',
+  'get_design_server_status',
+  'export_design'
 ])
 
 /**

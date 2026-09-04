@@ -2,12 +2,12 @@
  * Hook for managing sidebar state and list view items
  */
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { findItemById } from '../utils/treeSearch'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/collections'
-import { isScenario } from '../../../shared/types/collections'
+import { isScenario, isApiDesign } from '../../../shared/types/collections'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -17,6 +17,7 @@ import { httpBadgeIdFor, isKnownHttpMethod } from '../../../shared/utils/httpMet
 import { mapToBadgeType, requestBadgeId } from '../utils/badgeUtils'
 import type { Request } from '../../../shared/types/collections'
 import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
+import { getDesignClientsVersion, subscribeDesignClients, getDesignClientsDeprecatedIds } from '../services/designClientsStore'
 
 export interface UseSidebarStateOptions {
   rootItems: FolderItem[]
@@ -39,7 +40,11 @@ export interface UseSidebarStateOptions {
   /** `true` for an env folder that has an apiUpdate.sourceUrl
    * configured. Drives the "Refresh" right-click entry. */
   canRefreshFromSource?: (itemId: string) => boolean
+  canCreateDesignFromDoc?: (itemId: string) => boolean
+  onCreateDesignFromDoc?: (itemId: string) => void
   onRefreshFromSource?: (itemId: string) => void
+  /** Open an item in a split workbench panel (design context menu). */
+  onOpenInSplit?: (itemId: string) => void
 }
 
 export interface UseSidebarStateReturn {
@@ -47,8 +52,8 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource } = options
-  const { t } = useTranslation()
+  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit } = options
+  const { t, i18n } = useTranslation()
 
   // Set of request ids whose URL currently resolves to a deprecated
   // operation in their owning env folder's apiDocumentation. Lives
@@ -56,11 +61,21 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   // is explicit, and the dim re-evaluates as soon as the user edits
   // a URL — no persisted `request.deprecated` flag involved.
   const deprecatedRequestIds = useDeprecatedRequestIds(rootItems, updateCount)
+  // The transient client trees hang under each design's Clients row; bump the
+  // item memo when they (re)generate or clear, so those rows appear/vanish.
+  const designClientsVersion = useSyncExternalStore(subscribeDesignClients, getDesignClientsVersion)
 
   // Convert root folders to ListView items
   // updateCount is used as a dependency to force re-computation when items are mutated in-place
   const sidebarItems: ListViewItemData[] = useMemo(() => {
     void updateCount
+    // Read indirectly by `designToListViewItem` (the Clients rows) from the
+    // client store — touch the version so the memo rebuilds when it changes.
+    void designClientsVersion
+    // A design node's section rows freeze `i18n.t(...)` labels into their
+    // titles — the first translated strings ever baked into sidebar rows —
+    // so a language switch must rebuild them.
+    void i18n.language
     const expandedSet = new Set(expandedIds)
     const renderOptions = {
       expandedIds: expandedSet,
@@ -79,7 +94,9 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       // than the title alone, and the decision rides on the live
       // matcher (so editing the URL re-evaluates instantly).
       renderRemovedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 }, title: 'Removed from source spec' }, name),
-      deprecatedRequestIds
+      // Merge the transient design-client deprecations (stamped on the client
+      // request at generation from the served spec) so those rows dim too.
+      deprecatedRequestIds: new Set([...deprecatedRequestIds, ...getDesignClientsDeprecatedIds()])
     }
     // Each root item becomes a top-level row in the sidebar. Folders
     // go through `folderAsRootListViewItem` (which renders them as a
@@ -96,7 +113,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds])
+  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, designClientsVersion, i18n.language])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread
@@ -108,6 +125,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   const isItemScenario = useCallback((itemId: string): boolean => {
     const item = findItemById(rootItems, itemId)
     return item !== null && isScenario(item)
+  }, [rootItems])
+
+  const isItemDesign = useCallback((itemId: string): boolean => {
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isApiDesign(item)
   }, [rootItems])
 
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
@@ -125,10 +147,14 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       ...(onPasteItem !== undefined && { onPasteItem }),
       ...(canPaste !== undefined && { canPaste }),
       ...(canRefreshFromSource !== undefined && { canRefreshFromSource }),
+      ...(canCreateDesignFromDoc !== undefined && { canCreateDesignFromDoc }),
+      ...(onCreateDesignFromDoc !== undefined && { onCreateDesignFromDoc }),
       ...(onRefreshFromSource !== undefined && { onRefreshFromSource }),
-      isItemScenario
+      ...(onOpenInSplit !== undefined && { onOpenInSplit }),
+      isItemScenario,
+      isItemDesign
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit, isItemScenario, isItemDesign]
   )
 
   return {

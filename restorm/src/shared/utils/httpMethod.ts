@@ -26,3 +26,19 @@ export function isKnownHttpMethod(value: string): value is HTTPMethod {
 export function httpBadgeIdFor(method: string): string {
   return isKnownHttpMethod(method) ? `http_${method.toLowerCase()}` : 'http_other'
 }
+
+/**
+ * The verb prefix a projected operation name takes from its HTTP method, so a
+ * gRPC method / SOAP operation reads like a verb AND tracks the method — flip a
+ * GET to PATCH and the name follows (`GetHouse` → `PatchHouse`). GraphQL already
+ * derives its field name from the method the same way; this keeps the other
+ * protocols consistent instead of freezing a stale `summary`. A list GET reads
+ * `List`, a single GET `Get`; write verbs mirror the method token itself
+ * (`Post`/`Put`/`Patch`/`Delete`, or a custom verb title-cased).
+ */
+export function operationVerb(method: string, list: boolean): string {
+  const upper = method.toUpperCase()
+  if (upper === 'GET') return list ? 'List' : 'Get'
+  const lower = upper.toLowerCase()
+  return lower.charAt(0).toUpperCase() + lower.slice(1)
+}

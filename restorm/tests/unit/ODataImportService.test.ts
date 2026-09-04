@@ -128,11 +128,14 @@ describe('importOData (v4 EDMX)', () => {
   it('extracts entity types, enums, and operations into ApiDocumentation models', () => {
     const root = importOData(fixture)
     const doc = expectPresent(root.apiDocumentation, 'apiDocumentation')
-    expect(doc.models['OData.PetStore.Models.Pet']?.type).toBe('object')
-    expect(doc.models['OData.PetStore.Models.PetStatus']?.type).toBe('enum')
-    expect(doc.models['OData.PetStore.Models.PetStatus']?.enum).toEqual(['Available', 'Pending', 'Sold'])
-    expect(doc.operations.some((op) => op.method === 'POST' && op.path.includes('AdoptPet'))).toBe(true)
-    expect(doc.operations.some((op) => op.method === 'GET' && op.path.includes('GetAvailablePets'))).toBe(true)
+    expect((doc.models['OData.PetStore.Models.Pet']?.properties.length ?? 0) > 0).toBe(true)
+    // Enums follow the shared enum shape: empty `properties`, values in
+    // `enumValues` — the form the $filter autocomplete and doc viewer read.
+    expect(doc.models['OData.PetStore.Models.PetStatus']?.properties).toEqual([])
+    expect(doc.models['OData.PetStore.Models.PetStatus']?.enumValues).toEqual(['Available', 'Pending', 'Sold'])
+    // Operations carry their route in `match`, like every other importer.
+    expect(doc.operations.some((op) => op.match.method === 'POST' && op.match.urlPattern.includes('AdoptPet'))).toBe(true)
+    expect(doc.operations.some((op) => op.match.method === 'GET' && op.match.urlPattern.includes('GetAvailablePets'))).toBe(true)
   })
 
   it('sets entityTypeRef to the bound entity type on entity-set requests', () => {
@@ -250,8 +253,8 @@ describe('importOData (v4 JSON-CSDL)', () => {
   it('extracts the enum type into ApiDocumentation models', () => {
     const root = importOData(jsonCsdlFixture)
     const doc = expectPresent(root.apiDocumentation, 'apiDocumentation')
-    expect(doc.models['ODataDemo.Color']?.type).toBe('enum')
-    expect(doc.models['ODataDemo.Color']?.enum).toEqual(['Red', 'Green', 'Blue'])
+    expect(doc.models['ODataDemo.Color']?.properties).toEqual([])
+    expect(doc.models['ODataDemo.Color']?.enumValues).toEqual(['Red', 'Green', 'Blue'])
   })
 
   it('imports a bound action and an unbound function', () => {

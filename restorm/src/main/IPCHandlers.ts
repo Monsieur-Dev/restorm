@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow, dialog, shell } from 'electron'
 import { logger, getFileService, isFileServiceInitialized, isPersistenceServiceInitialized, getPersistenceService, getFeatureService, isFeatureServiceInitialized, validatedHandle } from 'electron-core-ui'
 import { isTabDetachEnabled } from './featureFlags'
-import { join, relative, dirname } from 'path'
+import { join, relative, dirname, isAbsolute, resolve as resolvePath } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
@@ -25,6 +25,12 @@ import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPEx
 import { grpcExecutionService, normalizeAddress as normalizeGrpcAddress, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { grpcMockServerService } from './services/GRPCMockServerService'
 import { odataMockServerService } from './services/ODataMockServerService'
+import { designServerService } from './services/DesignServerService'
+import type { ApiDesign } from '../shared/types/apiDesign'
+import { designCodegenService } from './services/designCodegen/DesignCodegenService'
+import { listCloudTemplates, listPublicOfficialTemplates, createCloudTemplate, deleteCloudTemplate } from './services/designCodegen/cloudTemplates'
+import { collectionStore } from './services/CollectionStore'
+import { isApiDesign } from '../shared/models'
 import { trpcExecutionService } from './services/TrpcExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
 import { jsonRpcExecutionService } from './services/JsonRpcExecutionService'
@@ -64,6 +70,10 @@ import {
   grpcListenArgs, grpcStopArgs, grpcIsListeningArgs,
   grpcReflectImportArgs, grpcReflectQueryArgs,
   odataListenArgs, odataStopArgs, odataIsListeningArgs,
+  designServerStartArgs, designServerStopArgs, designServerStatusArgs,
+  designServerSetForcedArgs, designServerUpdateArgs, designExportDescriptorArgs,
+  designCodegenGenerateArgs, designCodegenVariablesArgs, designCodegenExtractArgs, designCodegenDiscardArgs, designCodegenReadAnswersArgs, designPickDirectoryArgs,
+  designCodegenListTemplatesArgs, designCodegenCreateTemplateArgs, designCodegenDeleteTemplateArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   sseConnectArgs, sseDisconnectArgs, sseIsActiveArgs,
   amqpExecuteArgs, amqpConnectArgs, amqpSendArgs, amqpDisconnectArgs, amqpCancelArgs, amqpIsActiveArgs,
@@ -744,6 +754,12 @@ export function registerRestormIPC(deps: {
     // File close — same for any hosted OData mock service (its routes on the
     // shared HTTP PortHost): release the port so it doesn't outlive the file.
     odataMockServerService.closeAll()
+    // File close — same for any running design server: its design
+    // belongs to the closing file, so the port must not outlive it.
+    designServerService.closeAll()
+    // File close — pending (previewed, never extracted) generations
+    // carry whole file trees in memory; they die with their project.
+    designCodegenService.clear()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.
@@ -1254,10 +1270,14 @@ export function registerRestormIPC(deps: {
       return { success: true, folder }
     } catch (error) {
       const unsupported = error instanceof GrpcReflectionUnsupportedError
-      // Pass the cause as STRUCTURED metadata, not a second positional arg:
-      // the logger's second parameter is a metadata object, so a raw Error
-      // handed there is dropped and Sentry shows "No error message".
-      logger.error('[IPC] gRPC reflection import error', errorMeta(error))
+      // A failed reflection import is a HANDLED, user-facing outcome — a wrong
+      // address, a server that does not serve reflection, an unreachable host.
+      // It is returned to the renderer below and shown to the user, so it is
+      // logged at WARN, not ERROR: only error-level logs bridge into crash
+      // reporting (see errorLogForwarding.ts), and this is operational noise,
+      // not an app crash. The cause travels as STRUCTURED metadata (the
+      // logger's second arg) so a raw Error isn't dropped.
+      logger.warn('[IPC] gRPC reflection import error', errorMeta(error))
       return {
         success: false,
         unsupported,
@@ -1276,7 +1296,9 @@ export function registerRestormIPC(deps: {
       return { success: true, services, protoDescriptorSet: fileDescriptorSet.toString('base64') }
     } catch (error) {
       const unsupported = error instanceof GrpcReflectionUnsupportedError
-      logger.error('[IPC] gRPC reflection query error', errorMeta(error))
+      // Handled, user-facing failure (returned below) — WARN, not ERROR, so it
+      // stays out of crash reporting (see the import handler above).
+      logger.warn('[IPC] gRPC reflection query error', errorMeta(error))
       return {
         success: false,
         unsupported,
@@ -1299,6 +1321,244 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('odata:is-listening', odataIsListeningArgs, (_event, [requestId]) => {
     return odataMockServerService.isListening(requestId)
+  })
+
+  // Design server: spin/stop a design's HTTP projection on the shared
+  // PortHost, poll its status, hot-steer a route's forced response,
+  // and push design edits live (autosave while serving). The design
+  // payload crosses as-is — the service re-validates before serving.
+  validatedHandle('design-server:start', designServerStartArgs, async (_event, [design]) => {
+    return await designServerService.start(design as ApiDesign)
+  })
+
+  validatedHandle('design-server:stop', designServerStopArgs, (_event, [designId]) => {
+    return designServerService.stop(designId)
+  })
+
+  validatedHandle('design-server:status', designServerStatusArgs, (_event, [designId]) => {
+    return designServerService.status(designId)
+  })
+
+  validatedHandle('design-server:set-forced', designServerSetForcedArgs, (_event, [designId, routeId, forced]) => {
+    return designServerService.setForced(designId, routeId, forced)
+  })
+
+  validatedHandle('design-server:update', designServerUpdateArgs, (_event, [design]) => {
+    return designServerService.updateDesign(design as ApiDesign)
+  })
+
+  // Design descriptor export: save-dialog + write of an already-emitted
+  // descriptor (the renderer owns the emission, next to the design).
+  validatedHandle('design:export-descriptor', designExportDescriptorArgs, async (_event, [fileName, content, extension]) => {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) return { success: false, error: 'No window found' }
+    const result = await dialog.showSaveDialog(window, {
+      title: 'Export descriptor',
+      defaultPath: fileName,
+      filters: [{ name: extension.toUpperCase(), extensions: [extension] }]
+    })
+    if (result.canceled || !result.filePath) {
+      return { success: false, canceled: true }
+    }
+    try {
+      await fs.writeFile(result.filePath, content, 'utf-8')
+      logger.info('[IPC] design descriptor exported', { path: result.filePath })
+      return { success: true, path: result.filePath }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // ==========================================================================
+  // Design codegen IPC Handlers
+  // ==========================================================================
+
+  // Sandboxed generation: template acquisition + Pyodide run, nothing
+  // written to disk — the reply carries the PREVIEW tree the validation
+  // screen shows.
+  validatedHandle('design-codegen:generate', designCodegenGenerateArgs, async (_event, [design, source, answers]) => {
+    try {
+      const result = await designCodegenService.generate(design as ApiDesign, source, answers ?? {})
+      return {
+        success: true,
+        manifest: result.manifest,
+        preview: result.preview,
+        log: result.log
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // The variables a template DECLARES (for the design's variable editors to
+  // pre-fill). Cached per source in the service.
+  validatedHandle('design-codegen:variables', designCodegenVariablesArgs, async (_event, [source]) => {
+    try {
+      return { success: true, variables: await designCodegenService.getTemplateVariables(source) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // DISCOVERY: the variable names a template's files actually reference (acquires
+  // the whole template, cached). The UI flags undeclared-but-used ones.
+  validatedHandle('design-codegen:used-variables', designCodegenVariablesArgs, async (_event, [source]) => {
+    try {
+      return { success: true, used: await designCodegenService.getTemplateUsedVariables(source) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // The Copier QUESTIONS a template declares in its copier.yml (fetches only that
+  // file, cached) — the template's whole-generation parametrization.
+  validatedHandle('design-codegen:questions', designCodegenVariablesArgs, async (_event, [source]) => {
+    try {
+      return { success: true, questions: await designCodegenService.getTemplateQuestions(source) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // "Refresh from source": drop the cached metadata for this template so the
+  // next question/variable read re-acquires it (a locally-edited template or one
+  // advanced on its git remote is picked up without restarting the app).
+  validatedHandle('design-codegen:refresh-template', designCodegenVariablesArgs, (_event, [source]) => {
+    designCodegenService.invalidateSource(source)
+    return Promise.resolve({ success: true })
+  })
+
+  // Cloud template library: the official set + the caller org's own (Enterprise).
+  // A `null` result means signed out — surfaced as `signedOut` so the library can
+  // prompt a login rather than show a fetch error.
+  validatedHandle('design-codegen:list-templates', designCodegenListTemplatesArgs, async () => {
+    try {
+      const view = await listCloudTemplates()
+      if (view !== null) return { success: true, view }
+    } catch {
+      // A session-scoped failure must not hide the public officials — fall through
+      // to the anonymous fetch below and surface them anyway.
+    }
+    // Signed out (or session unusable): official templates are public, so fetch
+    // them anonymously. `signedOut` tells the library to show the officials with
+    // a discreet "reconnect to see your organization's templates" hint rather
+    // than an empty/broken state.
+    try {
+      const official = await listPublicOfficialTemplates()
+      return {
+        success: true,
+        signedOut: true,
+        view: { orgName: null, isEnterprise: false, canManage: false, official, org: [] }
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Add a template to the caller's org (Enterprise + permitted, enforced server-side).
+  validatedHandle('design-codegen:create-template', designCodegenCreateTemplateArgs, async (_event, [url, description]) => {
+    try {
+      const template = await createCloudTemplate(url, description)
+      if (template === null) return { success: false, signedOut: true }
+      return { success: true, template }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Remove one of the caller org's templates (never an official one, enforced server-side).
+  validatedHandle('design-codegen:delete-template', designCodegenDeleteTemplateArgs, async (_event, [id]) => {
+    try {
+      const out = await deleteCloudTemplate(id)
+      if (out === null) return { success: false, signedOut: true }
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Read the answers a previous generation saved in an output folder
+  // (`.copier-answers.yml`) — a relative folder resolves against the project
+  // file, exactly like extract/reveal. Absent → {} (the UI uses copier defaults).
+  validatedHandle('design-codegen:read-answers', designCodegenReadAnswersArgs, (_event, [outputDir]) => {
+    try {
+      let root = outputDir
+      if (!isAbsolute(root)) {
+        const projectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+        if (projectPath === null || projectPath === '') {
+          return { success: false, error: 'a relative output folder needs an open project file' }
+        }
+        root = resolvePath(dirname(projectPath), root)
+      }
+      return { success: true, answers: designCodegenService.readAnswers(root) }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Controlled extraction of the PENDING generation under the confirmed
+  // output folder — a relative folder resolves against the project file.
+  validatedHandle('design-codegen:extract', designCodegenExtractArgs, (_event, [designId, outputDir]) => {
+    try {
+      let root = outputDir
+      if (!isAbsolute(root)) {
+        const projectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+        if (projectPath === null || projectPath === '') {
+          return { success: false, error: 'a relative output folder needs an open project file' }
+        }
+        root = resolvePath(dirname(projectPath), root)
+      }
+      const current = collectionStore.findById(designId)
+      if (current === null || !isApiDesign(current)) {
+        return { success: false, error: `no design with id ${designId}` }
+      }
+      const { written } = designCodegenService.extract(
+        designId,
+        root,
+        current.toPlainObject() as unknown as ApiDesign
+      )
+      return { success: true, root, written }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  validatedHandle('design-codegen:discard', designCodegenDiscardArgs, (_event, [designId]) => {
+    designCodegenService.discard(designId)
+    return { success: true }
+  })
+
+  // Open the codegen output folder in the OS file explorer. Reuses the extract
+  // args (designId, outputDir) + the same relative→project-dir resolution, so
+  // it opens exactly the folder codegen would write to.
+  validatedHandle('design-codegen:reveal-output', designCodegenExtractArgs, async (_event, [_designId, outputDir]) => {
+    try {
+      let root = outputDir
+      if (!isAbsolute(root)) {
+        const projectPath = isFileServiceInitialized() ? getFileService().getFilePath() : null
+        if (projectPath === null || projectPath === '') {
+          return { success: false, error: 'a relative output folder needs an open project file' }
+        }
+        root = resolvePath(dirname(projectPath), root)
+      }
+      const err = await shell.openPath(root)
+      return err === '' ? { success: true } : { success: false, error: err }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // Output-directory picker (the Code section's Browse button).
+  validatedHandle('design:pick-directory', designPickDirectoryArgs, async (_event, [defaultPath]) => {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) return { success: false, error: 'No window found' }
+    const result = await dialog.showOpenDialog(window, {
+      title: 'Choose the output folder',
+      properties: ['openDirectory', 'createDirectory'],
+      ...(defaultPath !== undefined && defaultPath !== '' ? { defaultPath } : {})
+    })
+    if (result.canceled || result.filePaths.length === 0) return { success: false, canceled: true }
+    return { success: true, path: result.filePaths[0] }
   })
 
   // ==========================================================================

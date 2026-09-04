@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Delete",
       "clone": "Clone",
+      "openInSplit": "Open in split panel",
       "copySuffix": "copy",
       "rename": "Rename",
       "addToFavorites": "Add to favorites",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API design"
       },
       "cut": "Cut",
       "copy": "Copy",
@@ -335,7 +337,8 @@
       "moveInto": "Move into this scenario",
       "affectsNote": "Deleting this request will also remove it from these scenarios.",
       "deleteAnyway": "Delete anyway"
-    }
+    },
+    "expandAll": "Expand all requests"
   },
   "environment": {
     "newName": "New environment",
@@ -741,7 +744,8 @@
       "environment": "Environments",
       "settings": "Settings",
       "tag": "Tags",
-      "scenario": "Scenarios"
+      "scenario": "Scenarios",
+      "design": "API designs"
     },
     "tooltip": {
       "noDetails": "No details available",
@@ -1238,7 +1242,8 @@
       "operation": "Operation",
       "description": "Description",
       "example": "Example",
-      "constraints": "Constraints"
+      "constraints": "Constraints",
+      "enum": "Enum"
     },
     "params": {
       "empty": "No non-body parameters declared for the filtered routes."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "optional single ref",
       "requiredArrayRef": "required array ref",
       "optionalArrayRef": "optional array ref"
-    }
+    },
+    "editEntity": "Edit in the designer"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum values",
+      "addValue": "Add a value…",
+      "removeValue": "Remove value",
+      "extract": "Extract to a named enum"
+    },
+    "tags": {
+      "add": "Add a tag…",
+      "remove": "Remove tag",
+      "routeLabel": "Tags",
+      "groupLabel": "Shared tags"
+    },
+    "section": {
+      "settings": "Settings",
+      "models": "Models",
+      "enums": "Enums",
+      "routes": "Routes",
+      "documentation": "Documentation",
+      "notes": "Notes",
+      "code": "Code",
+      "server": "Server",
+      "clients": "Clients"
+    },
+    "rail": {
+      "ariaLabel": "Design sections"
+    },
+    "settings": {
+      "subtitle": "General settings of the design “{{name}}”",
+      "serve": {
+        "title": "Design server",
+        "action": "Serve this design",
+        "description": "Responses from named examples · validation by constraints",
+        "port": "Port",
+        "latency": "Simulated latency (ms)",
+        "blocked": "Fix the design’s {{count}} validation issue(s) before serving",
+        "startFailed": "The server could not start",
+        "protocolAlways": "HTTP is always served",
+        "protocolToggle": "Serve this projection too",
+        "stateful": "Stateful mode — POST/PUT/DELETE mutate an in-memory store (reset on restart)",
+        "clientsCallout": "Your mock server is running. Ready-to-run clients were generated for every protocol this design serves.",
+        "clientsCalloutLink": "Find them here"
+      },
+      "identity": {
+        "title": "Identity",
+        "title_field": "Title",
+        "version": "Design version",
+        "description": "Description"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Base path",
+        "defaultAuth": "Default auth",
+        "environment": "Environment"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Descriptor format",
+        "download": "Download the descriptor",
+        "saved": "Descriptor saved to {{path}}",
+        "failed": "The export failed"
+      }
+    },
+    "auth": {
+      "none": "None",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API key header",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filter…",
+      "selectPrompt": "Select an entry in the list.",
+      "editorPending": "The editor for this section is on its way."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} prop",
+      "propertyCount_other": "{{count}} props",
+      "add": "Add a model",
+      "delete": "Delete the model",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteNoImpact": "This model is not used anywhere.",
+      "deleteImpactIntro": "Deleting this model will update:",
+      "deleteImpactChild": "{{name}} loses its inheritance (its own properties stay)",
+      "description": "Description",
+      "descriptionPlaceholder": "What this model represents (optional)",
+      "newName": "NewModel",
+      "selectPrompt": "Select a model, or create one.",
+      "tabs": {
+        "schema": "Schema",
+        "examples": "Examples",
+        "settings": "Settings",
+        "notes": "Notes"
+      },
+      "addSubModel": "Add a sub-model",
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} value",
+      "valueCount_other": "{{count}} values",
+      "lists": "Enums",
+      "values": "Values",
+      "addEnum": "Add an enum",
+      "addValue": "Add a value",
+      "valueHeader": "Value",
+      "newName": "NewEnum",
+      "selectPrompt": "Select an enum, or create one — a closed set of values usable as a property type.",
+      "nameHeader": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "What this enum represents (optional)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "No template yet — add one to generate code from this design.",
+      "subtitle": "Generate projects from this design — rendered in a sandbox, written only after you confirm the tree",
+      "sourceTitle": "Template",
+      "sourceKind": {
+        "official": "Official",
+        "repo": "Repository",
+        "local": "Local folder"
+      },
+      "official": "Official template",
+      "repo": "Repository (owner/repo)",
+      "local": "Local template folder",
+      "output": "Output folder (absolute, or relative to the project)",
+      "browse": "Choose the output folder",
+      "generate": "Generate the project",
+      "generating": "Generating in the sandbox…",
+      "blocked": "Fix the design’s {{count}} validation issue(s) before generating",
+      "failed": "The generation failed",
+      "outputMissing": "Choose an output folder first",
+      "extracted": "{{count}} file(s) written to {{root}}",
+      "preview": "{{name}} generated {{count}} file(s) — confirm to write them",
+      "confirm": "Write to the output folder",
+      "discard": "Discard",
+      "generateOne": "Generate this project",
+      "remove": "Remove this template",
+      "addTemplate": "Add a template",
+      "library": {
+        "title": "Template library",
+        "recent": "Recently used",
+        "official": "Official templates",
+        "custom": "Custom",
+        "add": "Add",
+        "use": "Use",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Organization templates",
+        "openRepo": "Open the repository",
+        "remove": "Remove",
+        "addTemplate": "Add template",
+        "urlPlaceholder": "Git repository URL",
+        "descPlaceholder": "Description (stack / what it generates)",
+        "noOrgTemplates": "No organization templates yet.",
+        "loading": "Loading templates…",
+        "signedOut": "Sign in to see your organization’s templates.",
+        "fetchError": "Could not load templates:",
+        "unavailable": "unavailable",
+        "officialTag": "Official",
+        "officialDesc": {
+          "server-rest-typescript": "REST server in TypeScript on Express — typed routes, models and validation.",
+          "server-rest-dotnet": "Minimal-API server in C# / ASP.NET Core — endpoints, DTOs and validation.",
+          "server-grpc-typescript": "gRPC server in TypeScript — .proto service, typed messages and server stubs.",
+          "server-grpc-dotnet": "gRPC server in C# / .NET — .proto service, messages and server stubs.",
+          "db-postgres": "PostgreSQL schema, seed data and CRUD scripts from the design."
+        },
+        "added": "Template added",
+        "done": "Done"
+      },
+      "openOutput": "Open the output folder",
+      "refresh": "Refresh this template from its source",
+      "extractedTitle": "Files written",
+      "removeTitle": "Remove this template?",
+      "removeConfirm": "The template “{{name}}” will be removed from this design (generated files on disk are left untouched).",
+      "tabs": {
+        "template": "Template"
+      },
+      "questions": {
+        "title": "Template questions"
+      },
+      "errorTitle": "Generation failed",
+      "source": "Source",
+      "destination": "Destination",
+      "expand": "Expand",
+      "collapse": "Collapse"
+    },
+    "statusbar": {
+      "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identity",
+      "identifierProperty": "Identifier property",
+      "identifierStrategy": "Strategy",
+      "inheritsFrom": "Inherits from",
+      "noIdentifier": "(none)",
+      "noParent": "(none)",
+      "storage": "Storage & lifecycle",
+      "volumetry": "Expected volume",
+      "volumetryUnset": "(unspecified)",
+      "operationalProfile": "Operational profile",
+      "accessPattern": "Read/write profile",
+      "traffic": "Access frequency",
+      "freshness": "Freshness tolerance",
+      "sensitivity": "Data sensitivity",
+      "retention": "Retention / lifecycle",
+      "profileUnset": "(unspecified)",
+      "timestamps": "Timestamps (created/updated)",
+      "softDelete": "Soft delete",
+      "usedBy": "Used by",
+      "usedByNone": "This model is not used yet.",
+      "usage": {
+        "body": "body",
+        "response": "response {{code}}",
+        "param": "param {{name}}",
+        "inherits": "{{name}} inherits from it"
+      },
+      "generators": "Routes",
+      "generateCrud": "Generate the CRUD",
+      "generateSearch": "Generate the search routes"
+    },
+    "schema": {
+      "addProperty": "Add a property",
+      "deleteProperty": "Delete the property",
+      "columns": {
+        "property": "Property",
+        "type": "Type",
+        "flags": "Flags",
+        "example": "Example"
+      },
+      "unnamed": "(unnamed)",
+      "nameMissing": "name missing",
+      "panelTitle": "Property: {{name}}",
+      "jumpToParent": "Open {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(none)",
+      "invalidPattern": "Invalid regular expression",
+      "minAboveMax": "Min exceeds max",
+      "fields": {
+        "name": "Name",
+        "type": "Type",
+        "format": "Format",
+        "elementType": "Element type",
+        "onDelete": "On delete",
+        "description": "Description",
+        "example": "Example",
+        "default": "Default",
+        "deprecationMessage": "Deprecation message",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Min length",
+        "maxLength": "Max length",
+        "pattern": "Pattern"
+      },
+      "inheritedProperties": "Inherited properties",
+      "ownProperties": "Own properties",
+      "generatedProperties": "Generated properties",
+      "tabs": {
+        "property": "Property"
+      },
+      "advancedType": "Advanced…"
+    },
+    "flags": {
+      "required": "required",
+      "nullable": "nullable",
+      "unique": "unique",
+      "immutable": "immutable",
+      "searchable": "searchable",
+      "deprecated": "deprecated",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Default",
+      "add": "Add an example",
+      "delete": "Delete the example",
+      "name": "Example name",
+      "newName": "Example",
+      "defaultHint": "Default values come from each property (empty = generated automatically).",
+      "namedHint": "Type a value to define it; leave empty to keep the generated one.",
+      "columns": {
+        "value": "Value",
+        "origin": "Origin"
+      },
+      "auto": "auto",
+      "defined": "defined",
+      "constraintViolated": "Value violates the property constraint ({{constraint}})",
+      "deleteTitle": "Delete this example?",
+      "deleteConfirm": "The example “{{name}}” will be deleted."
+    },
+    "onDelete": {
+      "restrict": "Restrict (forbid while used)",
+      "cascade": "Cascade delete",
+      "setNull": "Set to null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-increment",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hundreds",
+      "tenThousands": "Tens of thousands",
+      "millions": "Millions"
+    },
+    "accessPattern": {
+      "readHeavy": "Read-heavy",
+      "writeHeavy": "Write-heavy",
+      "balanced": "Balanced",
+      "appendOnly": "Append-only"
+    },
+    "traffic": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "freshness": {
+      "strong": "Strong consistency",
+      "shortCache": "Short cache OK",
+      "longCache": "Long cache OK"
+    },
+    "sensitivity": {
+      "public": "Public",
+      "internal": "Internal",
+      "confidential": "Confidential",
+      "pii": "Personal data (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Archivable",
+      "ephemeral": "Ephemeral (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "The property has no name",
+      "propertyNameDuplicate": "Duplicate property name",
+      "propertyShadowsParent": "Shadows an inherited property",
+      "referenceTargetUnknown": "The referenced type no longer exists",
+      "constraintPatternInvalid": "Invalid pattern (regular expression)",
+      "constraintMinAboveMax": "Min exceeds max",
+      "modelNameEmpty": "The model has no name",
+      "enumNameEmpty": "The enum has no name",
+      "groupNameEmpty": "The group has no name",
+      "modelNameDuplicate": "Duplicate model name",
+      "enumNameDuplicate": "Duplicate enum name",
+      "componentNameCollision": "A model and an enum share this name",
+      "groupNameDuplicate": "Duplicate group name",
+      "inheritanceTargetUnknown": "The inherited model no longer exists",
+      "inheritanceCycle": "Circular inheritance chain",
+      "identifierPropertyUnknown": "The identifier property no longer exists",
+      "paramLinkTargetUnknown": "A parameter link points at a missing property",
+      "bodyModelUnknown": "The body model no longer exists",
+      "responseModelUnknown": "A response model no longer exists",
+      "responseExampleUnknown": "A response serves a missing example",
+      "routeResponsesMissing": "The route declares no response",
+      "routePathDuplicate": "Another route already answers this method and path",
+      "routePathReserved": "The design server reserves this path — the route would never answer"
+    },
+    "routes": {
+      "addGroup": "Add a group",
+      "addRoute": "Add a route",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Select a group or a route, or create a group.",
+      "deleteGroupTitle": "Delete {{name}}?",
+      "deleteGroupImpact": "The group and its {{count}} routes will be deleted.",
+      "method": "Method",
+      "path": "Path",
+      "summary": "Summary",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definition",
+        "responses": "Responses"
+      },
+      "group": {
+        "auth": "Required auth",
+        "authInherited": "Design default",
+        "versionPrefix": "Version prefix",
+        "headers": "Contract headers (inherited by routes)",
+        "headerName": "Header",
+        "addHeader": "Add a header",
+        "deleteHeader": "Delete the header",
+        "noHeaders": "No shared header."
+      },
+      "params": {
+        "pathTitle": "Path parameters",
+        "otherTitle": "Parameters (query / header)",
+        "name": "Name",
+        "location": "In",
+        "link": "Model link",
+        "noLink": "—",
+        "add": "Add a parameter",
+        "delete": "Delete the parameter",
+        "auto": "auto",
+        "pathEmpty": "Type a {{param}} in the path to create its row.",
+        "otherEmpty": "No query or header parameters yet.",
+        "nameEmpty": "A parameter needs a name",
+        "nameTaken": "This name is already used"
+      },
+      "body": {
+        "label": "Request body",
+        "empty": "(empty)",
+        "nonStandardHint": "A request body on {{method}} is non-standard — many servers and proxies ignore it. Restorm still serves and documents it."
+      },
+      "responses": {
+        "add": "Add",
+        "codePlaceholder": "Status code",
+        "standardErrors": "+ standard errors",
+        "empty": "No response declared yet.",
+        "emptyBody": "empty body",
+        "model": "Returned model",
+        "list": "List",
+        "paginated": "Paginated",
+        "listOf": "list of {{name}}",
+        "paginatedListOf": "paginated list of {{name}}",
+        "example": "Served example",
+        "exampleAuto": "(seeded auto)",
+        "delete": "Delete the response",
+        "codeInvalid": "Enter a 3-digit status code",
+        "codeTaken": "This code is already declared"
+      },
+      "settings": {
+        "inherited": "Inherited from the group",
+        "authInherited": "Inherited from the group",
+        "editGroup": "Edit in the group ↗",
+        "headers": "Contract headers",
+        "behaviour": "Behaviour",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (seconds)",
+        "traffic": "Expected traffic",
+        "authOverride": "Auth override",
+        "pagination": "Pagination",
+        "defaultLimit": "Default page size",
+        "maxLimit": "Max page size"
+      },
+      "addSubgroup": "Add a sub-group"
+    },
+    "newDesignName": "New API design",
+    "createFromScratch": "Create an API design",
+    "createFromDoc": "Create a design from this API",
+    "fromDocName": "{{name}} design",
+    "run": {
+      "listening": "Serving on http://localhost:{{port}}",
+      "stopped": "Server stopped",
+      "totalCalls": "{{count}} call(s) this run",
+      "stop": "Stop the server",
+      "close": "Close this panel",
+      "forcedPill": "forced {{code}}",
+      "defaultReturn": "Design response (default)",
+      "codeReturn": "Answer {{code}}",
+      "customCode": "Custom status code",
+      "customBody": "Custom response body",
+      "customBodyPlaceholder": "Optional response body (JSON)",
+      "customApply": "Force"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "title": "Generate CRUD for {{name}}",
+      "replace": "Replace the existing routes",
+      "replaceHint": "Routes already exist for this model. Replace them to avoid duplicates; leave off to add a second set.",
+      "authWrites": "Protect write routes with authentication",
+      "authWritesHint": "Require bearer auth on create, update and delete; reads stay public.",
+      "generate": "Generate",
+      "projections": {
+        "title": "One model, every protocol — this CRUD is also served as:",
+        "http": "{{count}} REST routes",
+        "graphql": "{{queries}} queries / {{mutations}} mutations in GraphQL",
+        "grpc": "{{count}} gRPC methods",
+        "odata": "{{count}} OData entity set",
+        "soap": "{{count}} SOAP operations"
+      }
+    },
+    "server": {
+      "subtitle": "Serve this design as a live mock and watch every call."
+    },
+    "clients": {
+      "subtitle": "Your API design server is running and serving the routes you defined. The requests below call those routes directly — open one to test it. They are ephemeral and vanish when the server stops.",
+      "startPrompt": "Start the server to generate the clients.",
+      "generated": "Clients generated — open them under Clients in the sidebar.",
+      "importing": "Importing clients…",
+      "refresh": "Regenerate the clients",
+      "startServerPrompt": "Start the <serverLink>design server</serverLink> to access client requests auto-generated from the model."
+    },
+    "projections": {
+      "title": "Projections",
+      "hint": "The same operation, as each served protocol exposes it."
+    },
+    "descriptors": {
+      "copy": "Copy the URL"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Code generation",
+        "name": "Variable",
+        "value": "Value (Handlebars)",
+        "add": "Add a variable",
+        "none": "No variables yet — add one from this template’s header.",
+        "noTemplates": "Choose one or more templates in the “</> Code” section — you’ll then define the variables used by generation here.",
+        "generalTitle": "General variables",
+        "scope": {
+          "general": "General",
+          "property": "Model property"
+        },
+        "discover": "Discover the variables this template uses",
+        "undeclared": "Used but not declared: {{names}}",
+        "allDeclared": "Every variable this template uses is declared."
+      }
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Retain",
@@ -2308,7 +2835,45 @@
     "addCookie": "Add a cookie",
     "removeCookie": "Remove a cookie",
     "clearCookieDomain": "Clear cookies for a domain",
-    "clearCookies": "Clear all cookies"
+    "clearCookies": "Clear all cookies",
+    "listDesigns": "List API designs",
+    "getDesign": "Get an API design",
+    "createDesign": "Create an API design",
+    "createDesignFromDocumentation": "Create a design from an imported API",
+    "updateDesign": "Update a design",
+    "deleteDesign": "Delete a design",
+    "createDesignModel": "Create a design model",
+    "updateDesignModel": "Update a design model",
+    "deleteDesignModel": "Delete a design model",
+    "setDesignProperty": "Set a model property",
+    "deleteDesignProperty": "Delete a model property",
+    "createDesignEnum": "Create a design enum",
+    "updateDesignEnum": "Update a design enum",
+    "deleteDesignEnum": "Delete a design enum",
+    "setDesignExample": "Set a named example",
+    "deleteDesignExample": "Delete a named example",
+    "createDesignRouteGroup": "Create a route group",
+    "updateDesignRouteGroup": "Update a route group",
+    "deleteDesignRouteGroup": "Delete a route group",
+    "createDesignRoute": "Create a design route",
+    "updateDesignRoute": "Update a design route",
+    "deleteDesignRoute": "Delete a design route",
+    "setDesignRouteParam": "Create or update a route parameter",
+    "deleteDesignRouteParam": "Delete a route parameter",
+    "generateDesignCrud": "Generate CRUD routes",
+    "generateDesignSearchRoutes": "Generate search routes",
+    "serveDesign": "Serve a design",
+    "stopDesignServer": "Stop a design server",
+    "getDesignServerStatus": "Design server status",
+    "setDesignRouteResponse": "Force a served response",
+    "exportDesign": "Export a design descriptor",
+    "generateDesignCode": "Generate code from a design",
+    "getDesignTemplateContract": "Get the code-template contract",
+    "setDesignTemplates": "Set a design's code templates",
+    "setDesignTemplateVariables": "Set a template's global codegen variables",
+    "setDesignModelVariables": "Set a model's codegen overrides",
+    "setDesignPropertyVariables": "Set a property's codegen overrides",
+    "setDesignRouteVariables": "Set a route's codegen overrides"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "Added the scenario \"{{name}}\"",
       "modifiedScenario": "Modified the scenario \"{{name}}\"",
       "deletedScenario": "Deleted the scenario \"{{name}}\"",
+      "addedDesign": "Added the design \"{{name}}\"",
+      "modifiedDesign": "Modified the design \"{{name}}\"",
+      "deletedDesign": "Deleted the design \"{{name}}\"",
       "addedFolder": "Added the folder \"{{name}}\"",
       "modifiedFolder": "Modified the folder \"{{name}}\"",
       "deletedFolder": "Deleted the folder \"{{name}}\"",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "Deleted the environment folder \"{{name}}\"",
       "movedRequest": "Moved the request \"{{name}}\"",
       "movedScenario": "Moved the scenario \"{{name}}\"",
+      "movedDesign": "Moved the design \"{{name}}\"",
       "movedFolder": "Moved the folder \"{{name}}\"",
       "movedEnvironmentFolder": "Moved the environment folder \"{{name}}\"",
       "reorderedFolder": "Reordered items in the folder \"{{name}}\"",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "Update to the request \"{{name}}\"",
       "singleScenario": "Update to the scenario \"{{name}}\"",
+      "singleDesign": "Update to the design \"{{name}}\"",
       "singleFolder": "Update to the folder \"{{name}}\"",
       "singleEnvironmentFolder": "Update to the environment folder \"{{name}}\"",
       "singleFileFormatVersion": "Move to file format {{name}}",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} requests",
       "countScenario_one": "{{count}} scenario",
       "countScenario_other": "{{count}} scenarios",
+      "countDesign_one": "{{count}} design",
+      "countDesign_other": "{{count}} designs",
       "countFolder_one": "{{count}} folder",
       "countFolder_other": "{{count}} folders",
       "countEnvironmentFolder_one": "{{count}} environment folder",

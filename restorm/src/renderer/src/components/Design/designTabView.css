@@ -1,0 +1,1797 @@
+/* The Design tab: icon rail + section pane. Rail colors ride the
+ * activity-bar tokens so every theme paints it consistently. */
+
+.design-tab-view {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  /* Anchor for the tab-scoped run panel overlay. */
+  position: relative;
+}
+
+.design-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  width: 44px;
+  flex-shrink: 0;
+  background-color: var(--activityBar-background, var(--editor-background));
+  border-right: 1px solid var(--panel-border, transparent);
+}
+
+.design-rail-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--activityBar-inactiveForeground, var(--activityBar-foreground));
+  cursor: pointer;
+}
+
+.design-rail-button .codicon {
+  font-size: 18px;
+}
+
+.design-rail-button:hover {
+  color: var(--activityBar-foreground);
+}
+
+.design-rail-button.active {
+  color: var(--activityBar-foreground);
+  border-left-color: var(--focusBorder, currentColor);
+  background-color: var(--list-activeSelectionBackground, transparent);
+}
+
+.design-section-host {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.design-section {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 24px;
+  box-sizing: border-box;
+}
+
+.design-section-scroll {
+  flex: 1;
+  min-width: 0;
+}
+
+.design-section-title {
+  margin: 0 0 4px;
+  font-size: 1.3em;
+}
+
+.design-section-subtitle {
+  margin: 0 0 16px;
+  opacity: 0.7;
+}
+
+.design-section-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.design-section-placeholder-message {
+  opacity: 0.7;
+}
+
+/* ── Settings ─────────────────────────────────────────────────────── */
+
+.design-settings-group-title {
+  margin: 20px 0 8px;
+  font-size: 0.8em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.design-serve-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 8px;
+}
+
+.design-serve-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.design-serve-title {
+  font-weight: 600;
+}
+
+.design-serve-description {
+  font-size: 0.9em;
+  opacity: 0.7;
+}
+
+.design-serve-protocols {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.design-protocol-pill {
+  padding: 2px 10px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 999px;
+  font-size: 0.85em;
+  opacity: 0.6;
+  /* The pills are now toggle BUTTONS — strip the native chrome so the
+   * pill look survives, keep the pointer on the toggleable ones. */
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.design-protocol-pill:disabled {
+  cursor: default;
+}
+
+.design-protocol-pill.active {
+  border-color: var(--focusBorder, currentColor);
+  color: var(--focusBorder, currentColor);
+  opacity: 1;
+}
+
+/* The spin is an ECUI round Button (possibly wrapped in the Community
+ * gate); neither may shrink away from the block's right edge. */
+.design-serve-block .ecu-gated,
+.design-serve-block .design-serve-spin {
+  flex-shrink: 0;
+}
+
+.design-serve-spin-active {
+  color: var(--errorForeground, #f14c4c);
+}
+
+.design-serve-fields {
+  margin-top: 10px;
+}
+
+.design-serve-error {
+  margin: 4px 0 0;
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.9em;
+}
+
+/* Export group: the format combo with the download button glued to
+ * its right (the ticket's "combo + bouton à côté"). */
+.design-export-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-export-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.design-export-status {
+  margin: 4px 0 0;
+  font-size: 0.9em;
+  opacity: 0.8;
+  word-break: break-all;
+}
+
+/* Documentation section: the DocumentationHost owns its own scroll +
+ * sidebar dock — the wrapper fills the section host (a flex ROW: it
+ * must claim the width via flex, the stretch default gives height). */
+.design-doc-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.design-doc-section > .documentation-host {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Run panel — the tab-scoped overlay of a serving design ───────── */
+
+/* The run panel is now INLINE in the Server section (below the serve
+ * controls) — a bordered card in normal flow, no longer an absolute overlay
+ * that masks the rest of the tab. */
+.design-run-panel {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 8px;
+  background-color: var(--editor-background, var(--panel-background));
+  overflow: hidden;
+}
+
+.design-run-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+}
+
+.design-run-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--descriptionForeground, #888);
+  flex-shrink: 0;
+}
+
+.design-run-status-dot.listening {
+  background-color: var(--testing-iconPassed, #2ea043);
+}
+
+.design-run-title {
+  font-weight: 600;
+  font-size: 0.95em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-total {
+  font-size: 0.85em;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.design-run-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.design-run-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.design-run-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+}
+
+.design-run-route {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.design-run-route-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-run-route-header:hover {
+  background-color: var(--listHoverBackground);
+}
+
+.design-run-route-title {
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-route-path {
+  font-size: 0.85em;
+  opacity: 0.6;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-forced-pill {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--errorForeground, #f14c4c);
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.8em;
+  flex-shrink: 0;
+}
+
+.design-run-route-count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9em;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.design-run-returns {
+  list-style: none;
+  margin: 0;
+  padding: 4px 8px 8px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.design-run-return {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+}
+
+.design-run-return.selected {
+  background-color: var(--listActiveSelectionBackground, rgba(128, 128, 128, 0.15));
+}
+
+.design-run-return-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-run-return-label {
+  flex-shrink: 0;
+}
+
+.design-run-return-detail {
+  font-size: 0.85em;
+  opacity: 0.6;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-run-return-count {
+  margin-left: auto;
+  padding-right: 8px;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85em;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.design-run-return-custom {
+  align-items: flex-start;
+  padding: 4px 6px;
+}
+
+.design-run-custom-fields {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.design-run-custom-code {
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.design-run-custom-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.design-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  max-width: 720px;
+}
+
+.design-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.design-field-wide {
+  grid-column: span 1;
+}
+
+.design-field-full {
+  grid-column: 1 / -1;
+}
+
+.design-field-label {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.design-field-hint {
+  font-size: 12px;
+  opacity: 0.75;
+  color: var(--descriptionForeground, var(--foreground));
+}
+
+/* ── Entity list sections (models / enums / routes) ──────────────── */
+
+.design-entity-list-section {
+  display: flex;
+  padding: 0;
+}
+
+/* The entity list is a StaticPane (standard uppercase header + actions, like
+   the sidebar / ENUMS panes). Root keeps the fixed width + divider; the pane
+   body flex-fills so the tree scrolls within the full height. */
+.design-entity-list {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.design-entity-list .static-pane-body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Dim the header actions until the pane is hovered/focused — matches the
+   SplitView Pane behaviour of the sidebar / ENUMS panes (StaticPane keeps them
+   opaque by default, which reads inconsistently here). */
+.design-entity-list .static-pane-header-actions {
+  opacity: 0.5;
+  transition: opacity 0.15s ease-out;
+}
+
+.design-entity-list:hover .static-pane-header-actions,
+.design-entity-list .static-pane-header-actions:focus-within {
+  opacity: 1;
+}
+
+.design-entity-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.design-entity-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.design-entity-list-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.design-list-detail {
+  font-size: 0.85em;
+  opacity: 0.6;
+  padding-right: 6px;
+}
+
+.design-entity-detail {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ── Notes ────────────────────────────────────────────────────────── */
+
+.design-notes-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ── Models section (468.3) ───────────────────────────────────────── */
+
+.design-model-card {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px 20px;
+}
+
+.design-model-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-model-card-header h2 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.design-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.design-icon-button:hover {
+  background-color: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.design-schema-tab {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  /* Width query context for the master-detail breakpoint below. */
+  container-type: inline-size;
+}
+
+/* Master-detail: property panes on one side, the selected-property panel on the
+   other. Row when there's width for it, column (detail beneath) when narrow. */
+.design-schema-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* One scroll region for BOTH property panes (the ECUI ScrollableElement root). */
+/* Breathing room between a section's tab strip (Schéma / Définition / Variables
+   générales …) and its content — the panels sat flush against the tabs. */
+[data-testid^="design-model-tabs-tabpanel-"],
+[data-testid^="design-route-tabs-tabpanel-"],
+[data-testid^="design-code-tabs-tabpanel-"] {
+  padding-top: 10px;
+}
+
+.design-schema-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The panes stack at their natural (content) height inside the scroll region. */
+.design-schema-panes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Wide: fixed-width column, top-aligned and sized to its content; it only grows
+   up to the available height, past which its content scrolls (ECUI
+   ScrollableElement) — i.e. a scrollbar appears only when the window is short. */
+.design-schema-detail {
+  flex: 0 0 400px;
+  align-self: flex-start;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.design-schema-detail-scroll {
+  /* Fill the (height-capped) detail column so the ScrollableElement actually
+     overflows and scrolls — mirrors `.design-schema-main`. Without `flex`, it
+     sized to its content and the scrollbar never engaged. */
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+@container (max-width: 820px) {
+  .design-schema-layout {
+    flex-direction: column;
+  }
+
+  /* Narrow: beneath the list, sized to its content but capped so the list keeps
+     a usable share; the detail scrolls internally past that cap. */
+  .design-schema-detail {
+    flex: 0 1 auto;
+    align-self: stretch;
+    width: 100%;
+    max-height: 55%;
+  }
+}
+
+/* Collapsible/static property panes reuse the sidebar pane look (StaticPane) —
+   header + body only, no surrounding frame. */
+.design-schema-pane .static-pane-header {
+  cursor: default;
+}
+
+.design-schema-pane-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-schema-pane-toggle .codicon {
+  font-size: 14px;
+}
+
+.design-prop-cell {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 24px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.design-prop-cell.inherited {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Selection highlights the whole row as one continuous rectangle (background on
+   the row's cells, not the inner per-column boxes). */
+.design-schema-tab tr.ecu-table-row:has(.design-prop-cell.selected) > td {
+  background-color: var(--list-activeSelectionBackground, rgba(90, 120, 200, 0.25));
+}
+
+.design-schema-tab tr.ecu-table-row:has(.design-prop-cell.selected) > td:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.design-schema-tab tr.ecu-table-row:has(.design-prop-cell.selected) > td:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.design-prop-cell.has-issue {
+  color: var(--errorForeground, #f14c4c);
+}
+
+.design-prop-missing-name {
+  color: var(--errorForeground, #f14c4c);
+  font-style: italic;
+}
+
+.design-prop-inherited-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.design-prop-jump {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  color: var(--textLink-foreground, #4daafc);
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.design-prop-type {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.9em;
+}
+
+.design-prop-format {
+  opacity: 0.6;
+}
+
+.design-prop-flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.design-flag-badge {
+  font-size: 0.75em;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background-color: var(--badge-background, rgba(128, 128, 128, 0.25));
+  color: var(--badge-foreground, inherit);
+}
+
+.design-prop-example {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-property-panel {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.design-property-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Lightweight, content-sizing tab strip for the property panel — the ECUI
+   Tabs fills its host's height, which collapses to 0 inside this
+   content-height flex column. These buttons just toggle which section renders. */
+.design-property-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+}
+
+.design-property-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 6px 10px;
+  color: var(--vscode-foreground);
+  font: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.design-property-tab:hover {
+  opacity: 1;
+}
+
+.design-property-tab.is-active {
+  opacity: 1;
+  border-bottom-color: var(--vscode-focusBorder, #007acc);
+}
+
+.design-property-panel-title {
+  margin: 0;
+  font-size: 1em;
+}
+
+.design-property-issues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-property-issue {
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.85em;
+}
+
+.design-property-flags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
+.design-flag-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* ── Examples tab ─────────────────────────────────────────────────── */
+
+.design-examples-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.design-example-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-pill {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 12px;
+  padding: 3px 12px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.design-pill.active {
+  background-color: var(--button-background, #0e639c);
+  color: var(--button-foreground, #ffffff);
+  border-color: transparent;
+}
+
+.design-example-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.design-examples-hint {
+  margin: 0;
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.design-example-prop.inherited {
+  opacity: 0.7;
+}
+
+.design-example-prop-owner {
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
+.design-example-origin {
+  font-size: 0.8em;
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+.design-example-origin.auto {
+  background-color: var(--badge-background, rgba(128, 128, 128, 0.25));
+  opacity: 0.7;
+}
+
+.design-example-origin.defined {
+  background-color: var(--button-background, #0e639c);
+  color: var(--button-foreground, #ffffff);
+}
+
+/* ── Model settings tab ───────────────────────────────────────────── */
+
+.design-model-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.design-usage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-usage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 12px;
+  padding: 3px 10px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.design-usage-chip:hover {
+  background-color: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+/* ── Notes tab of a model ─────────────────────────────────────────── */
+
+.design-model-notes {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Error dots (sidebar + lists) ─────────────────────────────────── */
+
+.design-error-dot,
+.design-list-error-dot {
+  color: var(--errorForeground, #f14c4c);
+  font-size: 0.9em;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ── Delete-impact modal ──────────────────────────────────────────── */
+
+.design-delete-modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.design-delete-modal-body p {
+  margin: 0;
+}
+
+.design-delete-impact-list {
+  margin: 0;
+  padding-left: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.design-delete-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Enums section ────────────────────────────────────────────────── */
+
+.design-enums-section {
+  display: flex;
+  padding: 0;
+  min-height: 0;
+}
+
+.design-enums-section > * {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Enum-level description sits above the values table in the values pane. */
+.design-enum-description {
+  margin-bottom: 8px;
+}
+
+/* ── Routes section (468.4) ───────────────────────────────────────── */
+
+.design-route-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-route-method {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.design-route-path {
+  flex: 1;
+}
+
+.design-route-resolved {
+  margin: 4px 0 0;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  opacity: 0.6;
+}
+
+.design-route-definition,
+.design-route-settings,
+.design-route-responses {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.design-route-params-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.design-param-name {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.9em;
+}
+
+.design-param-inherited {
+  opacity: 0.6;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+}
+
+.design-param-description {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.design-param-description > :first-child {
+  flex: 1;
+}
+
+.design-param-auto-badge {
+  font-size: 0.75em;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background-color: var(--badge-background, rgba(128, 128, 128, 0.25));
+  opacity: 0.8;
+}
+
+.design-route-responses-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-response-code-input {
+  width: 80px;
+}
+
+.design-response-row {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+}
+
+.design-response-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-response-code {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-weight: 600;
+}
+
+.design-response-summary {
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.design-response-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.design-response-body > .design-settings-grid {
+  flex: 1;
+}
+
+.design-inherited-block {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.design-inherited-block p {
+  margin: 0;
+}
+
+.design-route-row-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 4px;
+}
+
+.design-route-card-title {
+  margin: 0;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 1.05em;
+}
+
+.design-route-card-group {
+  opacity: 0.6;
+  font-size: 0.9em;
+}
+
+.design-generator-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Code section ─────────────────────────────────────────────────── */
+
+.design-code-empty {
+  opacity: 0.75;
+  font-size: 0.9em;
+  margin: 8px 0 12px;
+}
+
+/* The Template tab fills its Tabs panel so the SplitView can distribute height
+   among the template panes (like the sidebar's SplitView). */
+.design-code-template-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.design-code-template-tab > .design-section-subtitle,
+.design-code-template-tab > .design-code-actions,
+.design-code-template-tab > .design-code-empty {
+  flex: 0 0 auto;
+}
+
+/* Breathing room between the section's tab strip and the intro line. */
+.design-code-template-tab > .design-section-subtitle {
+  margin-top: 12px;
+}
+
+/* The SplitView of template panes fills the space between the subtitle and the
+   add-template row. */
+.design-code-template-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 8px 0;
+}
+
+/* Scrollable root inside each pane, so tall content (questions, preview,
+   error) scrolls within the pane instead of pushing the layout. */
+.design-code-template-scroll {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Each template pane's body: stacked blocks, scrolling inside the pane. */
+.design-code-template-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px 8px;
+}
+
+/* Top row: the play button (left column) and the source/destination fields
+   (right, full width), on the same line. */
+.design-code-template-top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.design-code-template-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.design-code-field-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.design-code-field-label {
+  font-size: 0.82em;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.design-code-source-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--monospace-font-family, ui-monospace, monospace);
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+.design-code-destination {
+  min-width: 0;
+  width: 100%;
+}
+
+/* The InputBox is wrapped in an unclassed div by the component; grow that
+   wrapper (the actual ControlGroup flex child) so the field fills the row. */
+.design-code-destination > div:has(> .inputbox) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.design-code-destination .inputbox {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Destination control group + the standalone "refresh from source" button on
+   ONE line: the group fills the row, the small refresh disc sits at its right
+   (outside the group, like the trash disc in the pane header). */
+.design-code-destination-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.design-code-destination-wrap > .design-code-destination {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.design-code-template-play {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.design-code-questions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.design-code-question {
+  display: flex;
+  flex-direction: column;
+}
+
+.design-code-question-help {
+  font-size: 0.85em;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+/* json/yaml answers edit in a bordered CodeEditor. */
+.design-code-answer-editor {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.design-code-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.design-code-blocked,
+.design-code-message {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.design-code-error {
+  margin-top: 12px;
+  border: 1px solid var(--vscode-inputValidation-errorBorder, rgba(224, 108, 117, 0.6));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.design-code-error-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--vscode-inputValidation-errorForeground, var(--vscode-errorForeground, #e06c75));
+  background: var(--vscode-inputValidation-errorBackground, rgba(224, 108, 117, 0.12));
+  border-bottom: 1px solid var(--vscode-inputValidation-errorBorder, rgba(224, 108, 117, 0.6));
+}
+
+.design-code-error-head .codicon {
+  color: inherit;
+}
+
+.design-code-preview {
+  margin-top: 16px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.design-code-preview-list {
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+}
+
+.design-code-preview-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 1px 0;
+}
+
+.design-code-preview-bytes {
+  opacity: 0.6;
+}
+
+.design-code-preview-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.design-serve-stateful {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.design-serve-stateful .design-field-label {
+  margin: 0;
+}
+
+/* Enums section: give the SplitView pane bodies the same 8px inner padding AND
+   the 8px column gap as the Models StaticPane, so the left list (filter + tree)
+   reads identically across sections. */
+.design-enums-section .split-view2 .split-view-view-body {
+  padding: 8px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* CRUD generation modal — replace-existing + protect-writes toggles. */
+.design-crud-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 420px;
+  max-width: 520px;
+}
+
+.design-crud-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.design-crud-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.design-crud-option-label {
+  font-weight: 600;
+}
+
+.design-crud-option-hint {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.design-crud-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Generated (timestamps) properties — read-only surfacing in the schema tab. */
+.design-generated-props {
+  margin-top: 12px;
+  opacity: 0.85;
+}
+
+.design-generated-prop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 6px;
+}
+
+.design-generated-prop-name {
+  min-width: 120px;
+  font-family: var(--monaco-monospace-font, monospace);
+}
+
+/* Projections panel — the same route as each served protocol exposes it. */
+.design-projections-hint {
+  margin: 0 0 8px;
+}
+
+.design-route-projections {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.design-projection-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+}
+
+.design-projection-proto {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.design-projection-sig {
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.design-projection-inactive .design-projection-sig {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+/* CRUD modal — the multi-protocol surface the generated group will expose. */
+.design-crud-projections {
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  background: var(--badge-background, rgba(128, 128, 128, 0.08));
+}
+
+.design-crud-projections-title {
+  display: block;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.design-crud-projections-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+/* ── Clients section ─────────────────────────────────────────────── */
+
+/* Server off: a single centered invitation with a link to the Server page.
+   `.design-section-host` is a flex ROW, so `flex: 1` is what fills the width —
+   `justify-content` then centers horizontally, `align-items` vertically. */
+.design-clients-empty {
+  flex: 1;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.design-clients-empty-text {
+  margin: 0;
+  max-width: 30rem;
+  font-size: 0.95em;
+  opacity: 0.85;
+}
+
+.design-clients-server-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--link-foreground, #4daafc);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.design-clients-server-link:hover {
+  color: var(--link-active-foreground, var(--link-foreground, #4daafc));
+}
+
+/* Server on. */
+.design-clients-live-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.design-clients-tree {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* One client row = operation name + its description in grey, on one line. */
+.design-clients-row {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.design-clients-row-op {
+  flex: 0 0 auto;
+}
+
+.design-clients-row-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9em;
+  opacity: 0.55;
+}
+
+.design-clients-importing {
+  margin-top: 12px;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Active-descriptor accordions (served design). */
+.design-descriptors {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+
+.design-descriptor {
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.design-descriptor-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--badge-background, rgba(128, 128, 128, 0.08));
+}
+
+.design-descriptor-toggle {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.design-descriptor-proto {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  min-width: 3.5rem;
+}
+
+.design-descriptor-url {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--monaco-monospace-font, monospace);
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+.design-descriptor-copy {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.design-descriptor-copy:hover {
+  opacity: 1;
+  background: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.15));
+}
+
+.design-descriptor-body {
+  height: 320px;
+  border-top: 1px solid var(--panel-border, rgba(128, 128, 128, 0.25));
+}
+
+/* ── Code-generation variables (per-entity tabs + Variables générales) ── */
+.design-codegen-vars-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 2px 12px;
+}
+.design-codegen-vars-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  text-align: center;
+  color: var(--descriptionForeground, var(--foreground));
+  opacity: 0.85;
+}
+.design-codegen-vars-empty-state p {
+  max-width: 46ch;
+  margin: 0;
+  line-height: 1.55;
+}
+.design-codegen-vars-pane .static-pane-body {
+  padding: 10px 12px;
+}
+/* The "Variables générales" master-detail reuses the entity list/detail layout;
+   the detail side scrolls its per-template panes. Fill the Code tab's height so
+   the scopes-list divider runs all the way to the bottom of the surface. */
+.design-codegen-general {
+  flex: 1;
+  min-height: 0;
+}
+.design-codegen-general .design-entity-detail {
+  /* Plain block flow, top-aligned + full width — the base rule centres its
+     (placeholder) content, which would float the variables editor mid-surface
+     now that the detail fills the full height. */
+  display: block;
+  overflow: auto;
+  padding: 12px 14px;
+}
+
+.design-codegen-vars-discovery {
+  margin: 8px 2px 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--descriptionForeground, var(--foreground));
+  opacity: 0.9;
+}
+
+/* ── Tags editor (route Definition + group settings) ─────────────────── */
+.design-tags-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.design-tags-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px 2px 8px;
+  border-radius: 10px;
+  background: var(--badge-background);
+  color: var(--badge-foreground);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.design-tag-chip-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.design-tag-chip-label {
+  white-space: nowrap;
+}
+
+.design-tag-chip-remove {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.design-tag-chip-remove:hover {
+  opacity: 1;
+}
+
+/* Inline enum-values editor + extract button (property / param) */
+.design-enum-inline-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.design-enum-inline-row .design-tags-editor {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+
+.design-param-type-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 340px;
+}
+
+.design-param-type-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}

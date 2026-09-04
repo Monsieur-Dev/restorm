@@ -42,7 +42,7 @@ export interface ApiInfo {
 }
 
 /** Connection info: host, base path, schemes, XML namespace, etc. */
-interface ApiServer {
+export interface ApiServer {
   host?: string
   basePath?: string
   schemes?: string[]
@@ -165,6 +165,9 @@ export interface ModelDocumentation {
    * enum rather than an object — `properties` is empty in that
    * case and consumers should render the values directly. */
   enumValues?: unknown[]
+  /** Optional identifier names for `enumValues`, index-aligned — the OpenAPI
+   * `x-enum-varnames` extension (a design enum's `memberNames`). */
+  enumVarNames?: string[]
 }
 
 /** A group of operations (Swagger tag, WSDL service, gRPC package, GraphQL root type...). */
@@ -172,6 +175,11 @@ export interface GroupDocumentation {
   name: string
   description?: string
   externalDocs?: ExternalDocs
+  /** Tags shared by every route in the group. A route's effective tags are the
+   * union of these and its own `OperationDocumentation.tags` — a design projects
+   * that union onto each operation (OpenAPI `tags`). Distinct from the group
+   * NAME, which is always projected as a tag on its own. */
+  tags?: string[]
 }
 
 /**

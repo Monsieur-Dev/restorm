@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { useAuthState, type CapabilityGate } from 'electron-core-ui/renderer'
 import { hasCapability, type Capability } from '../../../shared/auth/authState'
-import { CRASH_OPT_OUT_CAPABILITY } from '../../../shared/auth/planCapabilities'
+import { CRASH_OPT_OUT_CAPABILITY, DESIGN_RUN_CAPABILITY, isDesignRunLocked } from '../../../shared/auth/planCapabilities'
 import { subscribeToPro } from '../services/subscribeToPro'
 
 /**
@@ -25,7 +25,9 @@ export const CapabilityGateHost: React.FC<{ children: (gate: CapabilityGate) => 
     isLocked: (capability: string) => (
       capability === CRASH_OPT_OUT_CAPABILITY
         ? authState.plan === 'community'
-        : !hasCapability(authState, capability as Capability)
+        : capability === DESIGN_RUN_CAPABILITY
+          ? isDesignRunLocked(authState)
+          : !hasCapability(authState, capability as Capability)
     ),
     onSubscribe: () => { void subscribeToPro() }
   }), [authState])

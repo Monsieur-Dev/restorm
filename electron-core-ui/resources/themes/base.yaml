@@ -314,6 +314,10 @@ variables:
     value: "#8b5cf6"
     description: "Scenario badge background (violet)"
 
+  - id: badge-design-background
+    value: "#3b82f6"
+    description: "API design badge background (blue)"
+
   # ── Server-mode capsule glyph ────────────────────────────────────────────────
   - id: badge-capsule-glyph-background
     value: "#6b21a8"

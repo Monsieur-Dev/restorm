@@ -31,6 +31,7 @@ type ItemBackedTab = EditorTab & {
   request?: { id?: string }
   folder?: { id?: string }
   scenario?: { id?: string }
+  design?: { id?: string }
   breadcrumbs?: { id?: string }[]
 }
 
@@ -48,6 +49,7 @@ export function tabReferencesItem(tab: EditorTab, itemId: string): boolean {
   if (t.request?.id === itemId) return true
   if (t.folder?.id === itemId) return true
   if (t.scenario?.id === itemId) return true
+  if (t.design?.id === itemId) return true
   if (t.breadcrumbs?.some((bc) => bc.id === itemId)) return true
   return false
 }
@@ -65,7 +67,7 @@ export function tabReferencesItem(tab: EditorTab, itemId: string): boolean {
 export function tabMatchesItem(tab: EditorTab, itemId: string): boolean {
   if (isSingletonTabId(itemId)) return tab.id === itemId
   const t = tab as ItemBackedTab
-  return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId
+  return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId || t.design?.id === itemId
 }
 
 /**
@@ -78,7 +80,7 @@ export function tabMatchesItem(tab: EditorTab, itemId: string): boolean {
  */
 export function tabBackingItemId(tab: EditorTab): string | undefined {
   const t = tab as ItemBackedTab
-  return t.request?.id ?? t.folder?.id ?? t.scenario?.id
+  return t.request?.id ?? t.folder?.id ?? t.scenario?.id ?? t.design?.id
 }
 
 /**

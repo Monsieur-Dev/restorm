@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+🎉 **Restorm je sada i dizajner API-ja.** Dizajnirajte svoj API, poslužite ga kao živi mock na pet protokola odjednom i generirajte njegove klijente — bez napuštanja aplikacije, sve na vašem vlastitom disku.
+
+- **Vizualni dizajner API-ja.** Modelirajte svoj API ručno — modele, enume (imenovane ili ugrađene), rute, parametre, imenovane primjere, ograničenja, oznake i zastarjelosti — bez pisanja ijednog retka specifikacije.
+- **Poslužite ga kao mock, jednim klikom, na 5 protokola odjednom.** Dizajn postaje poslužitelj koji istovremeno odgovara u HTTP-u, GraphQL-u, SOAP-u, OData-i i gRPC-u. Odgovori dolaze iz vaših imenovanih primjera (ili iz realističnih podataka generiranih iz vaših modela), uz validaciju ograničenja, simuliranu latenciju i stateful način rada.
+- **Klijenti spremni za pokretanje, generirani automatski.** Dok mock radi, odjeljak Clients stvara prave, izvršive zahtjeve za svaki omogućeni protokol, usmjerene na endpointove mocka. Jedan klik otvara zahtjev i pogađa poslužitelj — nema više ponovnog uvoza vašeg API-ja drugdje da biste ga testirali.
+- **Generirajte kôd** iz svog dizajna koristeći ponuđene predloške i vlastite prilagođene, prikazan u sandboxu i zapisan na disk tek nakon što potvrdite. **Izvezite i deskriptor** (OpenAPI i drugi).
+- **Pri uvozu se tijela zahtjeva unaprijed popunjavaju**: GraphQL odabire skalarna polja povratnog tipa, gRPC razvija ugniježđene poruke — zahtjev se pokreće takav kakav jest.
+
 ## v1.0.6
 
 Ispravci:

@@ -15,6 +15,7 @@ import type {
   GitState
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
+import type { CloudTemplate, CloudTemplatesView } from '../../../shared/types/codegenTemplates'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
 import type {
@@ -434,6 +435,43 @@ declare global {
         isListening: (requestId: string) => Promise<boolean>
         onServerServed: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
+      designServer: {
+        start: (design: unknown) => Promise<{ success: boolean; listening: boolean; port: number; error?: string }>
+        stop: (designId: string) => Promise<boolean>
+        status: (designId: string) => Promise<{ listening: boolean; port?: number; grpcPort?: number; counters?: DesignServerCounters }>
+        setForced: (designId: string, routeId: string, forced: { code: string; body?: string } | null) => Promise<boolean>
+        update: (design: unknown) => Promise<boolean>
+        onProgress: (callback: (event: { designId: string; status: 'started' | 'completed' | 'error' }) => void) => (() => void)
+        onServed: (callback: (data: { designId: string; routeId: string; code: string; counters: DesignServerCounters }) => void) => (() => void)
+        exportDescriptor: (fileName: string, content: string, extension: string) => Promise<{ success: boolean; path?: string; canceled?: boolean; error?: string }>
+      }
+      designCodegen: {
+        generate: (
+          design: unknown,
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
+          answers?: Record<string, unknown>
+        ) => Promise<{ success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }>
+        getVariables: (
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+        ) => Promise<{ success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }>
+        getUsedVariables: (
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+        ) => Promise<{ success: boolean; used?: string[]; error?: string }>
+        getQuestions: (
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+        ) => Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }>
+        refreshTemplate: (
+          source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+        ) => Promise<{ success: boolean; error?: string }>
+        readAnswers: (outputDir: string) => Promise<{ success: boolean; answers?: Record<string, unknown>; error?: string }>
+        extract: (designId: string, outputDir: string) => Promise<{ success: boolean; root?: string; written?: string[]; error?: string }>
+        discard: (designId: string) => Promise<void>
+        pickDirectory: (defaultPath?: string) => Promise<{ success: boolean; path?: string; canceled?: boolean }>
+        revealOutput: (designId: string, outputDir: string) => Promise<{ success: boolean; error?: string }>
+        listTemplates: () => Promise<{ success: boolean; view?: CloudTemplatesView; signedOut?: boolean; error?: string }>
+        createTemplate: (url: string, description: string) => Promise<{ success: boolean; template?: CloudTemplate; signedOut?: boolean; error?: string }>
+        deleteTemplate: (id: string) => Promise<{ success: boolean; signedOut?: boolean; error?: string }>
+      }
       jsonrpc: {
         execute: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcExecutionResult>
         executeBatch: (input: { requestId: string; timeout?: number }) => Promise<JsonRpcBatchExecutionResult>
@@ -536,7 +574,7 @@ declare global {
         getMcpLogs: () => Promise<unknown[]>
         onMcpLogsChanged: (callback: () => void) => () => void
         clearMcpLogs: () => Promise<void>
-        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }) => void
+        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }) => void
         pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }) => void
         pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }) => void
         pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }) => void
@@ -560,14 +598,14 @@ declare global {
         onScenarioToast: (callback: (payload: { title: string; message: string; level: string; durationMs?: number; nodeId: string }) => void) => () => void
         onScenarioEngineEvent: (cb: (event: unknown) => void) => () => void
         pushMcpActiveStateBootstrap: (payload: {
-          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
+          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }
           envByFolder: Record<string, string | null>
         }) => void
-        onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void) => () => void
         replyMcpOpenTab: (payload: { requestId: string; opened: boolean }) => void
-        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
-        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void) => () => void
         onMcpRunRequest: (callback: (payload: { itemId: string }) => void) => () => void
         onMcpRequestUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
         onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void) => () => void
@@ -1285,6 +1323,13 @@ export interface AmqpExecutionResult {
 }
 
 /** AMQP message data for streaming */
+/** Per-run design-server call counters (mirrors the main-side shape in
+ * `DesignServerService`). */
+export interface DesignServerCounters {
+  total: number
+  routes: Record<string, { total: number; byCode: Record<string, number> }>
+}
+
 export interface AmqpMessageData {
   requestId: string
   message: AmqpMessageItem

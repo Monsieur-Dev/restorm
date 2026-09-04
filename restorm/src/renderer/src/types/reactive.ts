@@ -8,8 +8,8 @@
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
-import type { Folder, FolderItem, Request, Environment } from '../../../shared/types/collections'
-import { isAnyFolder, isRequest, isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
+import type { Folder, FolderItem, Request, Environment, ApiDesign } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest, isEnvironmentFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -249,6 +249,34 @@ const ENVIRONMENT_INDEXABLE_KEYS = new Set([
   // the dirty tracker already consumes.
 ])
 
+/** Properties that mark an API design dirty when modified.
+ *
+ * EVERY top-level design key is listed: a design is one save unit, and
+ * its editor mutates it by REASSIGNING a top-level section (immutable
+ * update: `design.models = next`), never by reaching into a nested
+ * object — the proxy's set trap only sees top-level assignments, so a
+ * deep in-place mutation would be stored silently (applied on screen,
+ * lost on close). The Design tab and every design test helper follow
+ * this convention. */
+export const DESIGN_INDEXABLE_KEYS = new Set([
+  'name',
+  'notes',
+  // `tags` is not a modelled top-level ApiDesign field today, but it stays
+  // listed (and tested) so a future top-level tags section indexes without a
+  // silent drop — the set is intentionally permissive on the forward edge.
+  'tags',
+  'info',
+  'server',
+  'securitySchemes',
+  'defaultSecurity',
+  'defaultAuth',
+  'serving',
+  'codegen',
+  'models',
+  'enums',
+  'routeGroups'
+])
+
 // ============================================================================
 // Internal Tracking
 // ============================================================================
@@ -305,9 +333,9 @@ const DEBOUNCE_MS = 50
  * Emit an update event with debouncing to batch rapid changes
  */
 function emitUpdate(
-  docType: 'folder' | 'request' | 'environment',
+  docType: 'folder' | 'request' | 'environment' | 'design',
   docId: string,
-  document: Folder | Request | Environment,
+  document: Folder | Request | Environment | ApiDesign,
   parentFolderId?: string,
   parentEnvironmentId?: string
 ): void {
@@ -326,6 +354,8 @@ function emitUpdate(
       event = DocumentEvents.FOLDER_UPDATED
     } else if (docType === 'request') {
       event = DocumentEvents.REQUEST_UPDATED
+    } else if (docType === 'design') {
+      event = DocumentEvents.DESIGN_UPDATED
     } else {
       event = DocumentEvents.ENVIRONMENT_UPDATED
     }
@@ -371,9 +401,9 @@ function emitUpdate(
  * Create a proxy handler for arrays that emits events on modification
  */
 function createArrayProxyHandler(
-  docType: 'folder' | 'request' | 'environment',
+  docType: 'folder' | 'request' | 'environment' | 'design',
   docId: string,
-  rootDocument: () => Folder | Request | Environment,
+  rootDocument: () => Folder | Request | Environment | ApiDesign,
   parentFolderId?: string,
   parentEnvironmentId?: string
 ): ProxyHandler<unknown[]> {
@@ -419,10 +449,10 @@ function createArrayProxyHandler(
  * Create a proxy handler for documents (Folder or Request)
  */
 function createDocumentProxyHandler(
-  docType: 'folder' | 'request',
+  docType: 'folder' | 'request' | 'design',
   indexableKeys: Set<string>,
   parentFolderId?: string
-): ProxyHandler<Folder | Request> {
+): ProxyHandler<Folder | Request | ApiDesign> {
   return {
     get(target, prop, receiver): unknown {
       // Return symbols
@@ -643,6 +673,22 @@ export function makeReactiveRequest(request: Request, parentFolderId?: string): 
 }
 
 /**
+ * Make an ApiDesign reactive — reassigning any top-level design key
+ * through the proxy emits `DESIGN_UPDATED` into the standard dirty /
+ * save-unit / autosave pipeline. `parentFolderId` is the owning folder
+ * when the design lives inside one; omitted at the root.
+ */
+export function makeReactiveApiDesign(design: ApiDesign, parentFolderId?: string): ApiDesign {
+  if (isReactive(design)) {
+    return design
+  }
+  return new Proxy(
+    design,
+    createDocumentProxyHandler('design', DESIGN_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<ApiDesign>
+  )
+}
+
+/**
  * Make a FolderItem (Folder or Request) reactive.
  * `parentFolderId` may be omitted for root-level items.
  */
@@ -653,6 +699,8 @@ export function makeReactiveFolderItem(item: FolderItem, parentFolderId?: string
   // scenario row. Returned as-is, mirroring the root-level import path.
   if (isScenario(item)) {
     return item
+  } else if (isApiDesign(item)) {
+    return makeReactiveApiDesign(item, parentFolderId)
   } else if (isAnyFolder(item)) {
     return makeReactiveFolder(item)
   } else if (isRequest(item)) {

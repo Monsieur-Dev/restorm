@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "删除",
       "clone": "克隆",
+      "openInSplit": "在拆分面板中打开",
       "copySuffix": "副本",
       "rename": "重命名",
       "addToFavorites": "添加到收藏",
@@ -314,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API 设计"
       },
       "cut": "剪切",
       "copy": "复制",
@@ -334,7 +336,8 @@
       "moveInto": "移动到此场景",
       "affectsNote": "删除此请求也会将其从这些场景中移除。",
       "deleteAnyway": "仍然删除"
-    }
+    },
+    "expandAll": "展开所有请求"
   },
   "environment": {
     "newName": "新环境",
@@ -740,7 +743,8 @@
       "environment": "环境",
       "settings": "设置",
       "tag": "标签",
-      "scenario": "场景"
+      "scenario": "场景",
+      "design": "API 设计"
     },
     "tooltip": {
       "noDetails": "无可用详情",
@@ -1237,7 +1241,8 @@
       "operation": "操作",
       "description": "描述",
       "example": "示例",
-      "constraints": "约束"
+      "constraints": "约束",
+      "enum": "Enum"
     },
     "params": {
       "empty": "筛选的路由未声明非请求体参数。"
@@ -1284,7 +1289,8 @@
       "optionalSingleRef": "可选的单一引用",
       "requiredArrayRef": "必需的数组引用",
       "optionalArrayRef": "可选的数组引用"
-    }
+    },
+    "editEntity": "在设计器中编辑"
   },
   "scenario": {
     "editor": {
@@ -2138,6 +2144,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "枚举值",
+      "addValue": "添加值…",
+      "removeValue": "移除值",
+      "extract": "提取为命名枚举"
+    },
+    "tags": {
+      "add": "添加标签…",
+      "remove": "移除标签",
+      "routeLabel": "标签",
+      "groupLabel": "共享标签"
+    },
+    "section": {
+      "settings": "设置",
+      "models": "模型",
+      "enums": "枚举",
+      "routes": "路由",
+      "documentation": "文档",
+      "notes": "笔记",
+      "code": "代码",
+      "server": "服务器",
+      "clients": "客户端"
+    },
+    "rail": {
+      "ariaLabel": "设计分区"
+    },
+    "settings": {
+      "subtitle": "设计 “{{name}}” 的常规设置",
+      "serve": {
+        "title": "设计服务器",
+        "action": "服务此设计",
+        "description": "来自命名示例的响应 · 按约束验证",
+        "port": "端口",
+        "latency": "模拟延迟（毫秒）",
+        "blocked": "请先修复设计的 {{count}} 个校验错误再启动服务",
+        "startFailed": "服务器无法启动",
+        "protocolAlways": "HTTP 始终提供",
+        "protocolToggle": "同时提供此投影",
+        "stateful": "有状态模式 — POST/PUT/DELETE 修改内存存储（重启时重置）",
+        "clientsCallout": "您的模拟服务器正在运行。已为此设计所服务的每个协议生成了可直接运行的客户端。",
+        "clientsCalloutLink": "在此处查看"
+      },
+      "identity": {
+        "title": "标识",
+        "title_field": "标题",
+        "version": "设计版本",
+        "description": "描述"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "基础路径",
+        "defaultAuth": "默认认证",
+        "environment": "环境"
+      },
+      "export": {
+        "title": "导出",
+        "format": "描述文件格式",
+        "download": "下载描述文件",
+        "saved": "描述文件已保存到 {{path}}",
+        "failed": "导出失败"
+      }
+    },
+    "auth": {
+      "none": "无",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API 密钥标头",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "筛选…",
+      "selectPrompt": "请在列表中选择一项。",
+      "editorPending": "此分区的编辑器即将推出。"
+    },
+    "models": {
+      "propertyCount_one": "{{count}} 个属性",
+      "propertyCount_other": "{{count}} 个属性",
+      "add": "添加模型",
+      "delete": "删除模型",
+      "deleteTitle": "删除 {{name}}？",
+      "deleteNoImpact": "此模型未在任何地方使用。",
+      "deleteImpactIntro": "删除此模型将更新：",
+      "deleteImpactChild": "{{name}} 将失去继承（其自身属性保留）",
+      "description": "描述",
+      "descriptionPlaceholder": "此模型表示的内容（可选）",
+      "newName": "NewModel",
+      "selectPrompt": "选择一个模型，或创建一个。",
+      "tabs": {
+        "schema": "结构",
+        "examples": "示例",
+        "settings": "设置",
+        "notes": "笔记"
+      },
+      "addSubModel": "添加子模型",
+      "collapseAll": "全部折叠",
+      "expandAll": "全部展开"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} 个值",
+      "valueCount_other": "{{count}} 个值",
+      "lists": "枚举",
+      "values": "值",
+      "addEnum": "添加枚举",
+      "addValue": "添加值",
+      "valueHeader": "值",
+      "newName": "NewEnum",
+      "selectPrompt": "选择一个枚举，或创建一个 —— 可用作属性类型的封闭值集合。",
+      "nameHeader": "名称",
+      "description": "描述",
+      "descriptionPlaceholder": "此枚举表示的内容（可选）"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "尚无模板 — 添加一个以从此设计生成代码。",
+      "subtitle": "从此设计生成项目 — 在沙盒中渲染，仅在你确认目录树后写入",
+      "sourceTitle": "模板",
+      "sourceKind": {
+        "official": "官方",
+        "repo": "仓库",
+        "local": "本地文件夹"
+      },
+      "official": "官方模板",
+      "repo": "仓库（owner/repo）",
+      "local": "本地模板文件夹",
+      "output": "输出文件夹（绝对路径或相对于项目）",
+      "browse": "选择输出文件夹",
+      "generate": "生成项目",
+      "generating": "正在沙箱中生成…",
+      "blocked": "生成前请修复设计的 {{count}} 个验证错误",
+      "failed": "生成失败",
+      "outputMissing": "请先选择输出文件夹",
+      "extracted": "已将 {{count}} 个文件写入 {{root}}",
+      "preview": "{{name}} 生成了 {{count}} 个文件 — 确认后写入",
+      "confirm": "写入输出文件夹",
+      "discard": "丢弃",
+      "generateOne": "生成此项目",
+      "remove": "移除此模板",
+      "addTemplate": "添加模板",
+      "library": {
+        "title": "模板库",
+        "recent": "最近使用",
+        "official": "官方模板",
+        "custom": "自定义",
+        "add": "添加",
+        "use": "使用",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "组织模板",
+        "openRepo": "打开仓库",
+        "remove": "移除",
+        "addTemplate": "添加模板",
+        "urlPlaceholder": "Git 仓库 URL",
+        "descPlaceholder": "描述（技术栈 / 生成内容）",
+        "noOrgTemplates": "还没有组织模板。",
+        "loading": "正在加载模板…",
+        "signedOut": "登录以查看您组织的模板。",
+        "fetchError": "无法加载模板：",
+        "unavailable": "不可用",
+        "officialTag": "官方",
+        "officialDesc": {
+          "server-rest-typescript": "基于 Express 的 TypeScript REST 服务器 — 类型化路由、模型和请求校验。",
+          "server-rest-dotnet": "基于 C# / ASP.NET Core 的 Minimal-API 服务器 — 端点、DTO 和校验。",
+          "server-grpc-typescript": "TypeScript 编写的 gRPC 服务器 —— .proto 服务、带类型的消息和服务器桩。",
+          "server-grpc-dotnet": "C# / .NET 编写的 gRPC 服务器 —— .proto 服务、消息和服务器桩。",
+          "db-postgres": "来自设计的 PostgreSQL 架构、种子数据和 CRUD 脚本。"
+        },
+        "added": "已添加 Template",
+        "done": "完成"
+      },
+      "extractedTitle": "已写入文件",
+      "openOutput": "打开输出文件夹",
+      "refresh": "从来源刷新此模板",
+      "removeConfirm": "Template“{{name}}”将从此设计中移除（磁盘上已生成的文件保持不变）。",
+      "removeTitle": "移除此 Template？",
+      "tabs": {
+        "template": "模板"
+      },
+      "questions": {
+        "title": "模板问题"
+      },
+      "errorTitle": "生成失败",
+      "source": "源",
+      "destination": "目标",
+      "expand": "展开",
+      "collapse": "折叠"
+    },
+    "statusbar": {
+      "format": "设计 · 格式 {{version}}"
+    },
+    "modelSettings": {
+      "identity": "标识",
+      "identifierProperty": "标识符属性",
+      "identifierStrategy": "策略",
+      "inheritsFrom": "继承自",
+      "noIdentifier": "（无）",
+      "noParent": "（无）",
+      "storage": "存储与生命周期",
+      "volumetry": "预期数据量",
+      "volumetryUnset": "（未指定）",
+      "operationalProfile": "运行特征",
+      "accessPattern": "读写特征",
+      "traffic": "访问频率",
+      "freshness": "新鲜度容忍",
+      "sensitivity": "数据敏感度",
+      "retention": "保留 / 生命周期",
+      "profileUnset": "（未指定）",
+      "timestamps": "时间戳（创建/修改）",
+      "softDelete": "软删除",
+      "usedBy": "使用方",
+      "usedByNone": "此模型尚未被使用。",
+      "usage": {
+        "body": "请求体",
+        "response": "响应 {{code}}",
+        "param": "参数 {{name}}",
+        "inherits": "{{name}} 继承自它"
+      },
+      "generators": "路由",
+      "generateCrud": "生成 CRUD",
+      "generateSearch": "生成搜索路由"
+    },
+    "schema": {
+      "addProperty": "添加属性",
+      "deleteProperty": "删除属性",
+      "columns": {
+        "property": "属性",
+        "type": "类型",
+        "flags": "标志",
+        "example": "示例"
+      },
+      "unnamed": "（未命名）",
+      "nameMissing": "缺少名称",
+      "panelTitle": "属性：{{name}}",
+      "jumpToParent": "打开 {{name}}",
+      "typeModel": "模型",
+      "typeEnum": "枚举",
+      "noFormat": "（无）",
+      "invalidPattern": "无效的正则表达式",
+      "minAboveMax": "最小值超过最大值",
+      "fields": {
+        "name": "名称",
+        "type": "类型",
+        "format": "格式",
+        "elementType": "元素类型",
+        "onDelete": "删除时",
+        "description": "描述",
+        "example": "示例",
+        "default": "默认值",
+        "deprecationMessage": "弃用消息",
+        "minimum": "最小值",
+        "maximum": "最大值",
+        "minLength": "最小长度",
+        "maxLength": "最大长度",
+        "pattern": "模式"
+      },
+      "generatedProperties": "生成的属性",
+      "inheritedProperties": "继承的属性",
+      "ownProperties": "自有属性",
+      "tabs": {
+        "property": "属性"
+      },
+      "advancedType": "高级…"
+    },
+    "flags": {
+      "required": "必填",
+      "nullable": "可空",
+      "unique": "唯一",
+      "immutable": "不可变",
+      "searchable": "可搜索",
+      "deprecated": "已弃用",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "默认",
+      "add": "添加示例",
+      "delete": "删除示例",
+      "name": "示例名称",
+      "newName": "示例",
+      "defaultHint": "默认值来自各个属性（留空 = 自动生成）。",
+      "namedHint": "输入值即可定义；留空则保留自动生成的值。",
+      "columns": {
+        "value": "值",
+        "origin": "来源"
+      },
+      "auto": "自动",
+      "defined": "已定义",
+      "constraintViolated": "该值违反了属性约束（{{constraint}}）",
+      "deleteTitle": "删除此示例？",
+      "deleteConfirm": "示例“{{name}}”将被删除。"
+    },
+    "onDelete": {
+      "restrict": "限制（使用中禁止删除）",
+      "cascade": "级联删除",
+      "setNull": "置为 null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "自增",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "数百",
+      "tenThousands": "数万",
+      "millions": "数百万"
+    },
+    "accessPattern": {
+      "readHeavy": "读多写少",
+      "writeHeavy": "写多读少",
+      "balanced": "读写均衡",
+      "appendOnly": "仅追加"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "freshness": {
+      "strong": "强一致性",
+      "shortCache": "可短缓存",
+      "longCache": "可长缓存"
+    },
+    "sensitivity": {
+      "public": "公开",
+      "internal": "内部",
+      "confidential": "机密",
+      "pii": "个人数据（PII）"
+    },
+    "retention": {
+      "permanent": "永久",
+      "archivable": "可归档",
+      "ephemeral": "临时（TTL）"
+    },
+    "issue": {
+      "propertyNameEmpty": "属性没有名称",
+      "propertyNameDuplicate": "属性名称重复",
+      "propertyShadowsParent": "遮蔽了继承的属性",
+      "referenceTargetUnknown": "引用的类型已不存在",
+      "constraintPatternInvalid": "无效的模式（正则表达式）",
+      "constraintMinAboveMax": "最小值超过最大值",
+      "modelNameEmpty": "模型没有名称",
+      "enumNameEmpty": "枚举没有名称",
+      "groupNameEmpty": "分组没有名称",
+      "modelNameDuplicate": "模型名称重复",
+      "enumNameDuplicate": "枚举名称重复",
+      "componentNameCollision": "一个模型和一个枚举共用此名称",
+      "groupNameDuplicate": "分组名称重复",
+      "inheritanceTargetUnknown": "继承的模型已不存在",
+      "inheritanceCycle": "继承链循环",
+      "identifierPropertyUnknown": "标识符属性已不存在",
+      "paramLinkTargetUnknown": "参数链接指向缺失的属性",
+      "bodyModelUnknown": "请求体模型已不存在",
+      "responseModelUnknown": "响应模型已不存在",
+      "responseExampleUnknown": "响应提供了缺失的示例",
+      "routeResponsesMissing": "该路由未声明任何响应",
+      "routePathDuplicate": "另一条路由已响应此方法和路径",
+      "routePathReserved": "设计服务器保留此路径 — 该路由将永远不会响应"
+    },
+    "routes": {
+      "addGroup": "添加分组",
+      "addRoute": "添加路由",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "选择一个分组或路由，或创建一个分组。",
+      "deleteGroupTitle": "删除 {{name}}？",
+      "deleteGroupImpact": "该分组及其 {{count}} 条路由将被删除。",
+      "method": "方法",
+      "path": "路径",
+      "summary": "摘要",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "定义",
+        "responses": "响应"
+      },
+      "group": {
+        "auth": "所需认证",
+        "authInherited": "设计默认值",
+        "versionPrefix": "版本前缀",
+        "headers": "契约请求头（由路由继承）",
+        "headerName": "请求头",
+        "addHeader": "添加请求头",
+        "deleteHeader": "删除请求头",
+        "noHeaders": "没有共享请求头。"
+      },
+      "params": {
+        "pathTitle": "路径参数",
+        "otherTitle": "参数（query / header）",
+        "name": "名称",
+        "location": "位置",
+        "link": "模型链接",
+        "noLink": "—",
+        "add": "添加参数",
+        "delete": "删除参数",
+        "auto": "自动",
+        "pathEmpty": "在路径中输入 {{param}} 即可创建其行。",
+        "otherEmpty": "尚无 query 或 header 参数。",
+        "nameEmpty": "参数需要一个名称",
+        "nameTaken": "该名称已被使用"
+      },
+      "body": {
+        "label": "请求体",
+        "empty": "（空）",
+        "nonStandardHint": "在 {{method}} 上使用请求体是非标准的——许多服务器和代理会忽略它。Restorm 仍会提供并记录它。"
+      },
+      "responses": {
+        "add": "添加",
+        "codePlaceholder": "状态码",
+        "standardErrors": "+ 标准错误",
+        "empty": "尚未声明任何响应。",
+        "emptyBody": "空请求体",
+        "model": "返回模型",
+        "list": "列表",
+        "paginated": "分页",
+        "listOf": "{{name}} 列表",
+        "paginatedListOf": "分页的 {{name}} 列表",
+        "example": "提供的示例",
+        "exampleAuto": "（自动生成）",
+        "delete": "删除响应",
+        "codeInvalid": "请输入 3 位状态码",
+        "codeTaken": "该状态码已声明"
+      },
+      "settings": {
+        "inherited": "继承自分组",
+        "authInherited": "继承自分组",
+        "editGroup": "在分组中编辑 ↗",
+        "headers": "契约请求头",
+        "behaviour": "行为",
+        "idempotent": "幂等",
+        "cacheSeconds": "缓存（秒）",
+        "traffic": "预期流量",
+        "authOverride": "认证覆盖",
+        "pagination": "分页",
+        "defaultLimit": "默认页大小",
+        "maxLimit": "最大页大小"
+      },
+      "addSubgroup": "添加子分组"
+    },
+    "newDesignName": "新的 API 设计",
+    "createFromScratch": "创建 API 设计",
+    "createFromDoc": "从此 API 创建设计",
+    "fromDocName": "{{name}} 设计",
+    "run": {
+      "listening": "正在 http://localhost:{{port}} 上提供服务",
+      "stopped": "服务器已停止",
+      "totalCalls": "本次运行 {{count}} 次调用",
+      "stop": "停止服务器",
+      "close": "关闭此面板",
+      "forcedPill": "强制 {{code}}",
+      "defaultReturn": "设计响应（默认）",
+      "codeReturn": "返回 {{code}}",
+      "customCode": "自定义状态码",
+      "customBody": "自定义响应体",
+      "customBodyPlaceholder": "可选响应体 (JSON)",
+      "customApply": "强制"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "使用身份验证保护写入路由",
+      "authWritesHint": "在创建、更新和删除时要求 bearer 认证；读取保持公开。",
+      "generate": "生成",
+      "replace": "替换现有路由",
+      "replaceHint": "此模型已存在路由。替换它们以避免重复；保持关闭则添加第二组。",
+      "title": "为 {{name}} 生成 CRUD",
+      "projections": {
+        "http": "{{count}} 条 REST 路由",
+        "graphql": "GraphQL 中 {{queries}} 个查询 / {{mutations}} 个变更",
+        "grpc": "{{count}} 个 gRPC 方法",
+        "odata": "{{count}} 个 OData 实体集",
+        "soap": "{{count}} 个 SOAP 操作",
+        "title": "一个模型，所有协议——此 CRUD 还以下列形式提供："
+      }
+    },
+    "server": {
+      "subtitle": "将此设计作为实时模拟提供，并观察每次调用。"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "代码生成",
+        "name": "变量",
+        "value": "值 (Handlebars)",
+        "add": "添加变量",
+        "none": "暂无变量 — 从该模板的标题栏添加一个。",
+        "noTemplates": "在“</> Code”部分选择一个或多个模板 — 然后在此定义生成所用的变量。",
+        "generalTitle": "常规变量",
+        "scope": {
+          "general": "常规",
+          "property": "模型属性"
+        },
+        "discover": "发现此模板使用的变量",
+        "undeclared": "已使用但未声明：{{names}}",
+        "allDeclared": "此模板使用的每个变量都已声明。"
+      }
+    },
+    "clients": {
+      "generated": "客户端已生成——在侧边栏的“客户端”下打开它们。",
+      "importing": "正在导入客户端…",
+      "refresh": "重新生成客户端",
+      "startPrompt": "启动服务器以生成客户端。",
+      "startServerPrompt": "启动<serverLink>设计服务器</serverLink>以访问从模型自动生成的客户端请求。",
+      "subtitle": "您的 API 设计服务器正在运行，并提供您定义的路由。下面的请求直接调用这些路由——打开其中一个即可测试。它们是临时的，服务器停止后即会消失。"
+    },
+    "descriptors": {
+      "copy": "复制 URL"
+    },
+    "projections": {
+      "title": "投影",
+      "hint": "同一操作，以每个所服务的协议各自暴露的形式呈现。"
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "保留",
@@ -2307,7 +2834,45 @@
     "addCookie": "添加 Cookie",
     "removeCookie": "删除 Cookie",
     "clearCookieDomain": "清除某个域的 Cookie",
-    "clearCookies": "清除所有 Cookie"
+    "clearCookies": "清除所有 Cookie",
+    "listDesigns": "列出 API 设计",
+    "getDesign": "获取 API 设计",
+    "createDesign": "创建 API 设计",
+    "createDesignFromDocumentation": "从导入的 API 创建设计",
+    "updateDesign": "更新设计",
+    "deleteDesign": "删除设计",
+    "createDesignModel": "创建设计模型",
+    "updateDesignModel": "更新设计模型",
+    "deleteDesignModel": "删除设计模型",
+    "setDesignProperty": "设置模型属性",
+    "deleteDesignProperty": "删除模型属性",
+    "createDesignEnum": "创建设计枚举",
+    "updateDesignEnum": "更新设计枚举",
+    "deleteDesignEnum": "删除设计枚举",
+    "setDesignExample": "设置命名示例",
+    "deleteDesignExample": "删除命名示例",
+    "createDesignRouteGroup": "创建路由组",
+    "updateDesignRouteGroup": "更新路由组",
+    "deleteDesignRouteGroup": "删除路由组",
+    "createDesignRoute": "创建设计路由",
+    "updateDesignRoute": "更新设计路由",
+    "deleteDesignRoute": "删除设计路由",
+    "setDesignRouteParam": "创建或更新路由参数",
+    "deleteDesignRouteParam": "删除路由参数",
+    "generateDesignCrud": "生成 CRUD 路由",
+    "generateDesignSearchRoutes": "生成搜索路由",
+    "serveDesign": "启动设计服务",
+    "stopDesignServer": "停止设计服务器",
+    "getDesignServerStatus": "设计服务器状态",
+    "setDesignRouteResponse": "强制响应",
+    "exportDesign": "导出设计描述文件",
+    "generateDesignCode": "从设计生成代码",
+    "getDesignTemplateContract": "获取代码模板契约",
+    "setDesignTemplates": "设置设计的代码模板",
+    "setDesignModelVariables": "设置模型的代码生成覆盖项",
+    "setDesignPropertyVariables": "设置属性的代码生成覆盖项",
+    "setDesignRouteVariables": "设置路由的代码生成覆盖项",
+    "setDesignTemplateVariables": "设置模板的全局代码生成变量"
   },
   "odataFilter": {
     "detail": {
@@ -2537,6 +3102,9 @@
       "addedScenario": "已添加场景 \"{{name}}\"",
       "modifiedScenario": "已修改场景 \"{{name}}\"",
       "deletedScenario": "已删除场景 \"{{name}}\"",
+      "addedDesign": "已添加设计 \"{{name}}\"",
+      "modifiedDesign": "已修改设计 \"{{name}}\"",
+      "deletedDesign": "已删除设计 \"{{name}}\"",
       "addedFolder": "已添加文件夹 \"{{name}}\"",
       "modifiedFolder": "已修改文件夹 \"{{name}}\"",
       "deletedFolder": "已删除文件夹 \"{{name}}\"",
@@ -2545,6 +3113,7 @@
       "deletedEnvironmentFolder": "已删除环境文件夹 \"{{name}}\"",
       "movedRequest": "移动了请求“{{name}}”",
       "movedScenario": "移动了场景“{{name}}”",
+      "movedDesign": "移动了设计“{{name}}”",
       "movedFolder": "移动了文件夹“{{name}}”",
       "movedEnvironmentFolder": "移动了环境文件夹“{{name}}”",
       "reorderedFolder": "已重新排序文件夹“{{name}}”中的项目",
@@ -2555,6 +3124,7 @@
     "commitTitle": {
       "singleRequest": "更新请求 \"{{name}}\"",
       "singleScenario": "更新场景 \"{{name}}\"",
+      "singleDesign": "更新设计 \"{{name}}\"",
       "singleFolder": "更新文件夹 \"{{name}}\"",
       "singleEnvironmentFolder": "更新环境文件夹 \"{{name}}\"",
       "singleFileFormatVersion": "迁移到文件格式 {{name}}",
@@ -2562,6 +3132,8 @@
       "countRequest_other": "{{count}} 个请求",
       "countScenario_one": "{{count}} 个场景",
       "countScenario_other": "{{count}} 个场景",
+      "countDesign_one": "{{count}} 个设计",
+      "countDesign_other": "{{count}} 个设计",
       "countFolder_one": "{{count}} 个文件夹",
       "countFolder_other": "{{count}} 个文件夹",
       "countEnvironmentFolder_one": "{{count}} 个环境文件夹",

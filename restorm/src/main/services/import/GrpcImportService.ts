@@ -42,6 +42,8 @@ export interface ProtoMethod {
   clientStreaming: boolean
   serverStreaming: boolean
   comment?: string | undefined
+  /** The rpc carries a method-level `option deprecated = true;`. */
+  deprecated?: boolean | undefined
 }
 
 export interface ProtoService {
@@ -227,25 +229,39 @@ function getCallType(method: ProtoMethod): GrpcCallType {
   return 'unary'
 }
 
-/** Build a sample request message for a method */
-function buildSampleMessage(inputType: string, messages: ProtoMessage[]): string {
-  const message = messages.find(m => m.name === inputType)
-  if (!message) {
-    return '{}'
+/** Build a sample request message for a method — nested message fields are
+ *  expanded recursively (and enum fields set to their first value) so the body
+ *  is ready to fill in, not an empty `{}`. */
+function buildSampleMessage(inputType: string, messages: ProtoMessage[], enums: ProtoEnum[]): string {
+  return JSON.stringify(buildSampleObject(inputType, messages, enums, new Set<string>()), null, 2)
+}
+
+/** Match a named type, tolerating a leading dot / package qualifier
+ *  (`.realestate.House` → `House`). */
+function findByName<T extends { name: string }>(typeName: string, defs: T[]): T | undefined {
+  const bare = typeName.replace(/^\./, '').split('.').pop() ?? typeName
+  return defs.find(d => d.name === typeName || d.name === bare)
+}
+
+/** Recursively build a sample object for a message type. `seen` guards against
+ *  self-referential protos (a message that transitively contains itself). */
+function buildSampleObject(typeName: string, messages: ProtoMessage[], enums: ProtoEnum[], seen: Set<string>): Record<string, unknown> {
+  const message = findByName(typeName, messages)
+  if (message === undefined || seen.has(message.name)) {
+    return {}
   }
-  
+  const nextSeen = new Set(seen).add(message.name)
   const sample: Record<string, unknown> = {}
   for (const field of message.fields) {
-    sample[field.name] = getSampleValue(field.type, field.repeated)
+    sample[field.name] = getSampleValue(field.type, field.repeated, messages, enums, nextSeen)
   }
-  
-  return JSON.stringify(sample, null, 2)
+  return sample
 }
 
 /** Get a sample value for a proto type */
-function getSampleValue(type: string, repeated: boolean): unknown {
+function getSampleValue(type: string, repeated: boolean, messages: ProtoMessage[], enums: ProtoEnum[], seen: Set<string>): unknown {
   let value: unknown
-  
+
   switch (type) {
     case 'string':
       value = ''
@@ -272,10 +288,16 @@ function getSampleValue(type: string, repeated: boolean): unknown {
     case 'bytes':
       value = ''
       break
-    default:
-      value = {}
+    default: {
+      // A named type: an enum defaults to its first value; otherwise it's a
+      // nested message, expanded recursively. Unknown → `{}`.
+      const enumDef = findByName(type, enums)
+      value = enumDef !== undefined
+        ? (enumDef.values[0] ?? '')
+        : buildSampleObject(type, messages, enums, seen)
+    }
   }
-  
+
   return repeated ? [value] : value
 }
 
@@ -285,6 +307,7 @@ function methodToRequest(
   method: ProtoMethod,
   packageName: string,
   messages: ProtoMessage[],
+  enums: ProtoEnum[],
   baseUrl: string,
   collectionName: string
 ): GrpcRequest {
@@ -299,7 +322,7 @@ function methodToRequest(
     service: fullServiceName,
     method: method.name,
     callType: getCallType(method),
-    requestMessage: buildSampleMessage(method.inputType, messages),
+    requestMessage: buildSampleMessage(method.inputType, messages, enums),
     metadata: [],
     // Matches `grpcImportAdapter.extractNormalizedSpec`'s naturalKey
     // (`main/services/import/idempotent/GrpcAdapter.ts`) exactly, so
@@ -347,7 +370,7 @@ export function buildEnvironmentFolderFromParsedProto(parsed: ParsedProto, optio
       tags: ['service'],
       configuration: {},
       items: service.methods.map(method =>
-        methodToRequest(service, method, parsed.package, parsed.messages, baseUrl, name)
+        methodToRequest(service, method, parsed.package, parsed.messages, parsed.enums, baseUrl, name)
       )
     }
     items.push(serviceFolder)

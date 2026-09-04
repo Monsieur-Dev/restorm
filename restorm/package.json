@@ -1,7 +1,7 @@
 {
   "name": "restorm",
-  "version": "1.0.7-preview",
-  "description": "Local-first API testing environment — client and server",
+  "version": "1.1.0-preview",
+  "description": "Local-first API designer and testing environment — client and server",
   "main": "dist/main/index.js",
   "homepage": "https://restorm.app",
   "author": {
@@ -253,8 +253,8 @@
       "category": "Development",
       "maintainer": "MonsieurDev <contact@restorm.app>",
       "vendor": "MonsieurDev",
-      "synopsis": "Local-first API testing environment — client and server",
-      "description": "Restorm is a local-first environment to test APIs end to end: it is both an API client and a server. Send and inspect requests, mock and simulate endpoints, and chain reproducible scenarios across REST, GraphQL, gRPC, WebSocket, Redis, AMQP, MQTT and more — everything kept on your own disk, Git-friendly for teams, with no forced cloud account.",
+      "synopsis": "Local-first API designer and testing environment — client and server",
+      "description": "Restorm is a local-first environment to design and test APIs end to end: it is both an API client and a server. Design an API and generate its docs, send and inspect requests, mock and simulate endpoints, and chain reproducible scenarios across REST, GraphQL, gRPC, WebSocket, Redis, AMQP, MQTT and more — everything kept on your own disk, Git-friendly for teams, with no forced cloud account.",
       "executableName": "restorm-bin",
       "desktop": {
         "entry": {

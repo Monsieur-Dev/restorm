@@ -31,7 +31,7 @@ import { useEffect } from 'react'
 import { makeReactiveFolderItem } from '../types/reactive'
 import { reviveValueTypesDeep } from '../utils/serialization'
 import { collectTreeItemIds } from '../utils/treeItemIds'
-import { isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
 import type { FolderItem } from '../../../shared/types/collections'
 
 interface RestormTreeBridge {
@@ -113,8 +113,10 @@ export interface UseMcpTreeReplaceInput {
 export function reifyItem(raw: unknown): FolderItem | null {
   if (!raw || typeof raw !== 'object') return null
   const item = raw as FolderItem
-  // Only reify recognised items; drop malformed payload entries.
-  if (!isScenario(item) && !isAnyFolder(item) && !isRequest(item)) return null
+  // Only reify recognised items; drop malformed payload entries. A design
+  // is a recognised leaf: dropping it here would silently delete it from
+  // the renderer tree on ANY MCP write (and from disk on the next save).
+  if (!isScenario(item) && !isApiDesign(item) && !isAnyFolder(item) && !isRequest(item)) return null
   // The payload crosses IPC as plain JSON, so persisted ValueType POJOs
   // (`{ type: 'expression', … }`) arrive un-revived — and the cell
   // renderers pick their editor by `instanceof`. Without this, an

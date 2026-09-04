@@ -48,6 +48,7 @@ export interface RestormSidebarProps {
   onEditingEnd: () => void
   onAddRequest: () => void
   onCollapseAll: () => void
+  onExpandAll: () => void
   onCreateRootEnvironmentFolder: () => void
   /**
    * Same handler the per-item Ajouter submenu uses — invoked with
@@ -98,6 +99,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   onEditingEnd,
   onAddRequest,
   onCollapseAll,
+  onExpandAll,
   onCreateRootEnvironmentFolder,
   onAddChildItem,
   onDeselectAll,
@@ -298,20 +300,28 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
           headerActions={
             <>
               <Button
-                data-testid="sidebar-add-request-button"
-                secondary
-                small
-                icon="add"
-                options={{ ariaLabel: t('sidebar.addRequest'), title: t('sidebar.addRequest') }}
-                onClick={onAddRequest}
-              />
-              <Button
                 data-testid="sidebar-collapse-all-button"
                 secondary
                 small
                 icon="collapse-all"
                 options={{ ariaLabel: t('sidebar.collapseAll'), title: t('sidebar.collapseAll') }}
                 onClick={onCollapseAll}
+              />
+              <Button
+                data-testid="sidebar-expand-all-button"
+                secondary
+                small
+                icon="expand-all"
+                options={{ ariaLabel: t('sidebar.expandAll'), title: t('sidebar.expandAll') }}
+                onClick={onExpandAll}
+              />
+              <Button
+                data-testid="sidebar-add-request-button"
+                secondary
+                small
+                icon="add"
+                options={{ ariaLabel: t('sidebar.addRequest'), title: t('sidebar.addRequest') }}
+                onClick={onAddRequest}
               />
             </>
           }

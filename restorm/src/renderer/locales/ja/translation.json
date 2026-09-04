@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "削除",
       "clone": "複製",
+      "openInSplit": "分割パネルで開く",
       "copySuffix": "コピー",
       "rename": "名前を変更",
       "addToFavorites": "お気に入りに追加",
@@ -314,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API デザイン"
       },
       "cut": "切り取り",
       "copy": "コピー",
@@ -334,7 +336,8 @@
       "moveInto": "このシナリオに移動",
       "affectsNote": "このリクエストを削除すると、これらのシナリオからも削除されます。",
       "deleteAnyway": "それでも削除"
-    }
+    },
+    "expandAll": "すべてのリクエストを展開"
   },
   "environment": {
     "newName": "新しい環境",
@@ -740,7 +743,8 @@
       "environment": "環境",
       "settings": "設定",
       "tag": "タグ",
-      "scenario": "シナリオ"
+      "scenario": "シナリオ",
+      "design": "APIデザイン"
     },
     "tooltip": {
       "noDetails": "詳細はありません",
@@ -1237,7 +1241,8 @@
       "operation": "操作",
       "description": "説明",
       "example": "例",
-      "constraints": "制約"
+      "constraints": "制約",
+      "enum": "Enum"
     },
     "params": {
       "empty": "フィルターされたルートに対してボディ以外のパラメーターは宣言されていません。"
@@ -1284,7 +1289,8 @@
       "optionalSingleRef": "任意の単一参照",
       "requiredArrayRef": "必須の配列参照",
       "optionalArrayRef": "任意の配列参照"
-    }
+    },
+    "editEntity": "デザイナーで編集"
   },
   "scenario": {
     "editor": {
@@ -2138,6 +2144,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "列挙値",
+      "addValue": "値を追加…",
+      "removeValue": "値を削除",
+      "extract": "名前付き列挙型として抽出"
+    },
+    "tags": {
+      "add": "タグを追加…",
+      "remove": "タグを削除",
+      "routeLabel": "タグ",
+      "groupLabel": "共有タグ"
+    },
+    "section": {
+      "settings": "設定",
+      "models": "モデル",
+      "enums": "列挙型",
+      "routes": "ルート",
+      "documentation": "ドキュメント",
+      "notes": "ノート",
+      "code": "コード",
+      "server": "サーバー",
+      "clients": "クライアント"
+    },
+    "rail": {
+      "ariaLabel": "デザインのセクション"
+    },
+    "settings": {
+      "subtitle": "デザイン「{{name}}」の全般設定",
+      "serve": {
+        "title": "デザインサーバー",
+        "action": "このデザインを配信",
+        "description": "名前付きサンプルからの応答 · 制約による検証",
+        "port": "ポート",
+        "latency": "シミュレートされた遅延 (ms)",
+        "blocked": "提供する前にデザインの{{count}}件の検証エラーを修正してください",
+        "startFailed": "サーバーを起動できませんでした",
+        "protocolAlways": "HTTP は常に提供されます",
+        "protocolToggle": "このプロジェクションも提供する",
+        "stateful": "ステートフルモード — POST/PUT/DELETE がインメモリストアを変更します（再起動でリセット）",
+        "clientsCallout": "モックサーバーが稼働中です。この設計が提供する各プロトコル向けに、すぐに実行できるクライアントが生成されました。",
+        "clientsCalloutLink": "こちらで確認できます"
+      },
+      "identity": {
+        "title": "アイデンティティ",
+        "title_field": "タイトル",
+        "version": "デザインのバージョン",
+        "description": "説明"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "ベースパス",
+        "defaultAuth": "既定の認証",
+        "environment": "環境"
+      },
+      "export": {
+        "title": "エクスポート",
+        "format": "ディスクリプタ形式",
+        "download": "ディスクリプタをダウンロード",
+        "saved": "ディスクリプタを {{path}} に保存しました",
+        "failed": "エクスポートに失敗しました"
+      }
+    },
+    "auth": {
+      "none": "なし",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "APIキーヘッダー",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "フィルター…",
+      "selectPrompt": "リストから項目を選択してください。",
+      "editorPending": "このセクションのエディターは準備中です。"
+    },
+    "models": {
+      "propertyCount_one": "{{count}} プロパティ",
+      "propertyCount_other": "{{count}} プロパティ",
+      "add": "モデルを追加",
+      "delete": "モデルを削除",
+      "deleteTitle": "{{name}} を削除しますか？",
+      "deleteNoImpact": "このモデルはどこでも使用されていません。",
+      "deleteImpactIntro": "このモデルを削除すると以下が更新されます：",
+      "deleteImpactChild": "{{name}} は継承を失います（固有のプロパティは残ります）",
+      "description": "説明",
+      "descriptionPlaceholder": "このモデルが表すもの（任意）",
+      "newName": "NewModel",
+      "selectPrompt": "モデルを選択するか、作成してください。",
+      "tabs": {
+        "schema": "スキーマ",
+        "examples": "例",
+        "settings": "設定",
+        "notes": "ノート"
+      },
+      "addSubModel": "サブモデルを追加",
+      "collapseAll": "すべて折りたたむ",
+      "expandAll": "すべて展開"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} 値",
+      "valueCount_other": "{{count}} 値",
+      "lists": "Enum",
+      "values": "値",
+      "addEnum": "enum を追加",
+      "addValue": "値を追加",
+      "valueHeader": "値",
+      "newName": "NewEnum",
+      "selectPrompt": "enum を選択するか、作成してください — プロパティの型として使える閉じた値の集合です。",
+      "nameHeader": "名前",
+      "description": "説明",
+      "descriptionPlaceholder": "この列挙型が表すもの（任意）"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "テンプレートがまだありません — 追加してこのデザインからコードを生成しましょう。",
+      "subtitle": "このデザインからプロジェクトを生成します — サンドボックスでレンダリングされ、ツリーを確認した後にのみ書き込まれます",
+      "sourceTitle": "テンプレート",
+      "sourceKind": {
+        "official": "公式",
+        "repo": "リポジトリ",
+        "local": "ローカルフォルダー"
+      },
+      "official": "公式テンプレート",
+      "repo": "リポジトリ（owner/repo）",
+      "local": "ローカルテンプレートフォルダー",
+      "output": "出力フォルダー（絶対、またはプロジェクト相対）",
+      "browse": "出力フォルダーを選択",
+      "generate": "プロジェクトを生成",
+      "generating": "サンドボックスで生成中…",
+      "blocked": "生成前にデザインの {{count}} 件の検証エラーを修正してください",
+      "failed": "生成に失敗しました",
+      "outputMissing": "まず出力フォルダーを選択してください",
+      "extracted": "{{count}} 個のファイルを {{root}} に書き込みました",
+      "preview": "{{name}} が {{count}} 個のファイルを生成 — 書き込みを確認してください",
+      "confirm": "出力フォルダーへ書き込む",
+      "discard": "破棄",
+      "generateOne": "このプロジェクトを生成",
+      "remove": "このテンプレートを削除",
+      "addTemplate": "テンプレートを追加",
+      "library": {
+        "title": "テンプレートライブラリ",
+        "recent": "最近使用したもの",
+        "official": "公式テンプレート",
+        "custom": "カスタム",
+        "add": "追加",
+        "use": "使用",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "組織のテンプレート",
+        "openRepo": "リポジトリを開く",
+        "remove": "削除",
+        "addTemplate": "テンプレートを追加",
+        "urlPlaceholder": "Git リポジトリの URL",
+        "descPlaceholder": "説明（スタック / 生成内容）",
+        "noOrgTemplates": "組織のテンプレートはまだありません。",
+        "loading": "テンプレートを読み込んでいます…",
+        "signedOut": "組織のテンプレートを見るにはサインインしてください。",
+        "fetchError": "テンプレートを読み込めませんでした:",
+        "unavailable": "利用不可",
+        "officialTag": "公式",
+        "officialDesc": {
+          "server-rest-typescript": "Express 上の TypeScript による REST サーバー — 型付きルート、モデル、リクエスト検証。",
+          "server-rest-dotnet": "C# / ASP.NET Core による Minimal-API サーバー — エンドポイント、DTO、検証。",
+          "server-grpc-typescript": "TypeScript による gRPC サーバー — .proto サービス、型付きメッセージ、サーバースタブ。",
+          "server-grpc-dotnet": "C# / .NET による gRPC サーバー — .proto サービス、メッセージ、サーバースタブ。",
+          "db-postgres": "デザインからの PostgreSQL スキーマ、シードデータ、CRUD スクリプト。"
+        },
+        "added": "Template を追加しました",
+        "done": "完了"
+      },
+      "extractedTitle": "ファイルを書き込みました",
+      "openOutput": "出力フォルダーを開く",
+      "refresh": "このテンプレートをソースから再取得",
+      "removeConfirm": "Template「{{name}}」がこのデザインから削除されます（ディスク上に生成済みのファイルはそのまま残ります）。",
+      "removeTitle": "この Template を削除しますか？",
+      "tabs": {
+        "template": "テンプレート"
+      },
+      "questions": {
+        "title": "テンプレートの質問"
+      },
+      "errorTitle": "生成に失敗しました",
+      "source": "ソース",
+      "destination": "出力先",
+      "expand": "展開",
+      "collapse": "折りたたむ"
+    },
+    "statusbar": {
+      "format": "デザイン · フォーマット {{version}}"
+    },
+    "modelSettings": {
+      "identity": "アイデンティティ",
+      "identifierProperty": "識別子プロパティ",
+      "identifierStrategy": "戦略",
+      "inheritsFrom": "継承元",
+      "noIdentifier": "（なし）",
+      "noParent": "（なし）",
+      "storage": "ストレージとライフサイクル",
+      "volumetry": "想定ボリューム",
+      "volumetryUnset": "（未指定）",
+      "operationalProfile": "運用プロファイル",
+      "accessPattern": "読み書きプロファイル",
+      "traffic": "アクセス頻度",
+      "freshness": "鮮度の許容度",
+      "sensitivity": "データの機密性",
+      "retention": "保持 / ライフサイクル",
+      "profileUnset": "（未指定）",
+      "timestamps": "タイムスタンプ（作成/更新）",
+      "softDelete": "論理削除",
+      "usedBy": "使用箇所",
+      "usedByNone": "このモデルはまだ使用されていません。",
+      "usage": {
+        "body": "ボディ",
+        "response": "レスポンス {{code}}",
+        "param": "パラメータ {{name}}",
+        "inherits": "{{name}} が継承しています"
+      },
+      "generators": "ルート",
+      "generateCrud": "CRUD を生成",
+      "generateSearch": "検索ルートを生成"
+    },
+    "schema": {
+      "addProperty": "プロパティを追加",
+      "deleteProperty": "プロパティを削除",
+      "columns": {
+        "property": "プロパティ",
+        "type": "型",
+        "flags": "フラグ",
+        "example": "例"
+      },
+      "unnamed": "（名前なし）",
+      "nameMissing": "名前がありません",
+      "panelTitle": "プロパティ：{{name}}",
+      "jumpToParent": "{{name}} を開く",
+      "typeModel": "モデル",
+      "typeEnum": "enum",
+      "noFormat": "（なし）",
+      "invalidPattern": "無効な正規表現です",
+      "minAboveMax": "最小値が最大値を超えています",
+      "fields": {
+        "name": "名前",
+        "type": "型",
+        "format": "フォーマット",
+        "elementType": "要素の型",
+        "onDelete": "削除時の動作",
+        "description": "説明",
+        "example": "例",
+        "default": "デフォルト",
+        "deprecationMessage": "非推奨メッセージ",
+        "minimum": "最小値",
+        "maximum": "最大値",
+        "minLength": "最小長",
+        "maxLength": "最大長",
+        "pattern": "パターン"
+      },
+      "generatedProperties": "生成されたプロパティ",
+      "inheritedProperties": "継承されたプロパティ",
+      "ownProperties": "固有のプロパティ",
+      "tabs": {
+        "property": "プロパティ"
+      },
+      "advancedType": "詳細…"
+    },
+    "flags": {
+      "required": "必須",
+      "nullable": "nullable",
+      "unique": "一意",
+      "immutable": "不変",
+      "searchable": "検索可能",
+      "deprecated": "非推奨",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "デフォルト",
+      "add": "例を追加",
+      "delete": "例を削除",
+      "name": "例の名前",
+      "newName": "例",
+      "defaultHint": "デフォルト値は各プロパティに由来します（空 = 自動生成）。",
+      "namedHint": "値を入力すると定義されます。空のままにすると生成値が使われます。",
+      "columns": {
+        "value": "値",
+        "origin": "由来"
+      },
+      "auto": "自動",
+      "defined": "定義済み",
+      "constraintViolated": "値がプロパティの制約に違反しています（{{constraint}}）",
+      "deleteTitle": "この例を削除しますか？",
+      "deleteConfirm": "例「{{name}}」が削除されます。"
+    },
+    "onDelete": {
+      "restrict": "制限（使用中は禁止）",
+      "cascade": "カスケード削除",
+      "setNull": "null に設定"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "自動増分",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "数百",
+      "tenThousands": "数万",
+      "millions": "数百万"
+    },
+    "accessPattern": {
+      "readHeavy": "読み取り中心",
+      "writeHeavy": "書き込み中心",
+      "balanced": "バランス型",
+      "appendOnly": "追記のみ"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "freshness": {
+      "strong": "強整合性",
+      "shortCache": "短期キャッシュ可",
+      "longCache": "長期キャッシュ可"
+    },
+    "sensitivity": {
+      "public": "公開",
+      "internal": "社内",
+      "confidential": "機密",
+      "pii": "個人データ（PII）"
+    },
+    "retention": {
+      "permanent": "永続",
+      "archivable": "アーカイブ可",
+      "ephemeral": "一時的（TTL）"
+    },
+    "issue": {
+      "propertyNameEmpty": "プロパティに名前がありません",
+      "propertyNameDuplicate": "プロパティ名が重複しています",
+      "propertyShadowsParent": "継承したプロパティを隠しています",
+      "referenceTargetUnknown": "参照先の型が存在しません",
+      "constraintPatternInvalid": "無効なパターン（正規表現）",
+      "constraintMinAboveMax": "最小値が最大値を超えています",
+      "modelNameEmpty": "モデルに名前がありません",
+      "enumNameEmpty": "enum に名前がありません",
+      "groupNameEmpty": "グループに名前がありません",
+      "modelNameDuplicate": "モデル名が重複しています",
+      "enumNameDuplicate": "enum 名が重複しています",
+      "componentNameCollision": "モデルと enum がこの名前を共有しています",
+      "groupNameDuplicate": "グループ名が重複しています",
+      "inheritanceTargetUnknown": "継承元のモデルが存在しません",
+      "inheritanceCycle": "継承チェーンが循環しています",
+      "identifierPropertyUnknown": "識別子プロパティが存在しません",
+      "paramLinkTargetUnknown": "パラメータリンクが存在しないプロパティを指しています",
+      "bodyModelUnknown": "ボディのモデルが存在しません",
+      "responseModelUnknown": "レスポンスのモデルが存在しません",
+      "responseExampleUnknown": "レスポンスが存在しない例を提供しています",
+      "routeResponsesMissing": "ルートがレスポンスを宣言していません",
+      "routePathDuplicate": "別のルートが既にこのメソッドとパスに応答しています",
+      "routePathReserved": "デザインサーバーがこのパスを予約しています — ルートは決して応答しません"
+    },
+    "routes": {
+      "addGroup": "グループを追加",
+      "addRoute": "ルートを追加",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "グループまたはルートを選択するか、グループを作成してください。",
+      "deleteGroupTitle": "{{name}} を削除しますか？",
+      "deleteGroupImpact": "グループとその {{count}} 件のルートが削除されます。",
+      "method": "メソッド",
+      "path": "パス",
+      "summary": "概要",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "定義",
+        "responses": "レスポンス"
+      },
+      "group": {
+        "auth": "必須の認証",
+        "authInherited": "デザインの既定",
+        "versionPrefix": "バージョンプレフィックス",
+        "headers": "契約ヘッダー（ルートが継承）",
+        "headerName": "ヘッダー",
+        "addHeader": "ヘッダーを追加",
+        "deleteHeader": "ヘッダーを削除",
+        "noHeaders": "共有ヘッダーはありません。"
+      },
+      "params": {
+        "pathTitle": "パスパラメータ",
+        "otherTitle": "パラメータ（query / header）",
+        "name": "名前",
+        "location": "場所",
+        "link": "モデルリンク",
+        "noLink": "—",
+        "add": "パラメータを追加",
+        "delete": "パラメータを削除",
+        "auto": "自動",
+        "pathEmpty": "パスに {{param}} を入力すると行が作成されます。",
+        "otherEmpty": "query / header パラメータはまだありません。",
+        "nameEmpty": "パラメータには名前が必要です",
+        "nameTaken": "この名前は既に使用されています"
+      },
+      "body": {
+        "label": "リクエストボディ",
+        "empty": "（空）",
+        "nonStandardHint": "{{method}} にリクエストボディを付けるのは非標準です — 多くのサーバーやプロキシは無視します。それでも Restorm は提供し、ドキュメント化します。"
+      },
+      "responses": {
+        "add": "追加",
+        "codePlaceholder": "ステータスコード",
+        "standardErrors": "+ 標準エラー",
+        "empty": "レスポンスはまだ宣言されていません。",
+        "emptyBody": "空のボディ",
+        "model": "返却モデル",
+        "list": "リスト",
+        "paginated": "ページネーション",
+        "listOf": "{{name}} のリスト",
+        "paginatedListOf": "{{name}} のページ付きリスト",
+        "example": "提供される例",
+        "exampleAuto": "（自動生成）",
+        "delete": "レスポンスを削除",
+        "codeInvalid": "3 桁のステータスコードを入力してください",
+        "codeTaken": "このコードは既に宣言されています"
+      },
+      "settings": {
+        "inherited": "グループから継承",
+        "authInherited": "グループから継承",
+        "editGroup": "グループで編集 ↗",
+        "headers": "契約ヘッダー",
+        "behaviour": "動作",
+        "idempotent": "冪等",
+        "cacheSeconds": "キャッシュ（秒）",
+        "traffic": "想定トラフィック",
+        "authOverride": "認証の上書き",
+        "pagination": "ページネーション",
+        "defaultLimit": "既定のページサイズ",
+        "maxLimit": "最大ページサイズ"
+      },
+      "addSubgroup": "サブグループを追加"
+    },
+    "newDesignName": "新しい API デザイン",
+    "createFromScratch": "API デザインを作成",
+    "createFromDoc": "この API からデザインを作成",
+    "fromDocName": "{{name}} デザイン",
+    "run": {
+      "listening": "http://localhost:{{port}} で提供中",
+      "stopped": "サーバー停止",
+      "totalCalls": "この実行で{{count}}回の呼び出し",
+      "stop": "サーバーを停止",
+      "close": "このパネルを閉じる",
+      "forcedPill": "強制 {{code}}",
+      "defaultReturn": "デザインのレスポンス（デフォルト）",
+      "codeReturn": "{{code}} で応答",
+      "customCode": "カスタムステータスコード",
+      "customBody": "カスタムレスポンスボディ",
+      "customBodyPlaceholder": "任意のレスポンスボディ (JSON)",
+      "customApply": "強制"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "書き込みルートを認証で保護する",
+      "authWritesHint": "作成・更新・削除で bearer 認証を必須にします。読み取りは公開のままです。",
+      "generate": "生成",
+      "replace": "既存のルートを置き換える",
+      "replaceHint": "このモデルにはすでにルートが存在します。重複を避けるには置き換えてください。オフのままにすると 2 つ目のセットを追加します。",
+      "title": "{{name}} の CRUD を生成",
+      "projections": {
+        "http": "REST ルート {{count}} 件",
+        "graphql": "GraphQL のクエリ {{queries}} 件 / ミューテーション {{mutations}} 件",
+        "grpc": "gRPC メソッド {{count}} 件",
+        "odata": "OData エンティティセット {{count}} 件",
+        "soap": "SOAP オペレーション {{count}} 件",
+        "title": "1 つのモデルで、あらゆるプロトコルに — この CRUD は次の形式でも提供されます:"
+      }
+    },
+    "server": {
+      "subtitle": "このデザインをライブモックとして配信し、すべての呼び出しを監視します。"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "コード生成",
+        "name": "変数",
+        "value": "値 (Handlebars)",
+        "add": "変数を追加",
+        "none": "まだ変数がありません — このテンプレートのヘッダーから追加してください。",
+        "noTemplates": "「</> Code」セクションで 1 つ以上のテンプレートを選択すると、生成で使う変数をここで定義できます。",
+        "generalTitle": "全般変数",
+        "scope": {
+          "general": "全般",
+          "property": "モデルのプロパティ"
+        },
+        "discover": "このテンプレートが使う変数を検出",
+        "undeclared": "使用されているが未宣言: {{names}}",
+        "allDeclared": "このテンプレートが使うすべての変数は宣言済みです。"
+      }
+    },
+    "clients": {
+      "generated": "クライアントを生成しました — サイドバーのクライアントから開けます。",
+      "importing": "クライアントをインポート中…",
+      "refresh": "クライアントを再生成",
+      "startPrompt": "クライアントを生成するにはサーバーを起動してください。",
+      "startServerPrompt": "モデルから自動生成されたクライアントリクエストにアクセスするには、<serverLink>デザインサーバー</serverLink>を起動してください。",
+      "subtitle": "API デザインサーバーが稼働中で、定義したルートを提供しています。以下のリクエストはそれらのルートを直接呼び出します — 開いてテストしてください。これらは一時的なもので、サーバーを停止すると消えます。"
+    },
+    "descriptors": {
+      "copy": "URL をコピー"
+    },
+    "projections": {
+      "title": "プロジェクション",
+      "hint": "同じ操作を、提供される各プロトコルが公開するかたちで。"
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "保持",
@@ -2307,7 +2834,45 @@
     "addCookie": "Cookie を追加",
     "removeCookie": "Cookie を削除",
     "clearCookieDomain": "ドメインの Cookie を消去",
-    "clearCookies": "すべての Cookie を消去"
+    "clearCookies": "すべての Cookie を消去",
+    "listDesigns": "APIデザインを一覧表示",
+    "getDesign": "APIデザインを取得",
+    "createDesign": "APIデザインを作成",
+    "createDesignFromDocumentation": "インポートしたAPIからデザインを作成",
+    "updateDesign": "デザインを更新",
+    "deleteDesign": "デザインを削除",
+    "createDesignModel": "デザインモデルを作成",
+    "updateDesignModel": "デザインモデルを更新",
+    "deleteDesignModel": "デザインモデルを削除",
+    "setDesignProperty": "モデルのプロパティを設定",
+    "deleteDesignProperty": "モデルのプロパティを削除",
+    "createDesignEnum": "デザインの列挙型を作成",
+    "updateDesignEnum": "デザインの列挙型を更新",
+    "deleteDesignEnum": "デザインの列挙型を削除",
+    "setDesignExample": "名前付き例を設定",
+    "deleteDesignExample": "名前付き例を削除",
+    "createDesignRouteGroup": "ルートグループを作成",
+    "updateDesignRouteGroup": "ルートグループを更新",
+    "deleteDesignRouteGroup": "ルートグループを削除",
+    "createDesignRoute": "デザインのルートを作成",
+    "updateDesignRoute": "デザインのルートを更新",
+    "deleteDesignRoute": "デザインのルートを削除",
+    "setDesignRouteParam": "ルートパラメータの作成または更新",
+    "deleteDesignRouteParam": "ルートパラメータの削除",
+    "generateDesignCrud": "CRUDルートを生成",
+    "generateDesignSearchRoutes": "検索ルートを生成",
+    "serveDesign": "デザインを提供",
+    "stopDesignServer": "デザインサーバーを停止",
+    "getDesignServerStatus": "デザインサーバーの状態",
+    "setDesignRouteResponse": "レスポンスを強制",
+    "exportDesign": "デザインのディスクリプタをエクスポート",
+    "generateDesignCode": "デザインからコードを生成",
+    "getDesignTemplateContract": "コードテンプレートの契約を取得",
+    "setDesignTemplates": "デザインのコードテンプレートを設定",
+    "setDesignModelVariables": "モデルのコード生成オーバーライドを設定",
+    "setDesignPropertyVariables": "プロパティのコード生成オーバーライドを設定",
+    "setDesignRouteVariables": "ルートのコード生成オーバーライドを設定",
+    "setDesignTemplateVariables": "テンプレートのグローバルなコード生成変数を設定"
   },
   "odataFilter": {
     "detail": {
@@ -2537,6 +3102,9 @@
       "addedScenario": "シナリオ「{{name}}」を追加",
       "modifiedScenario": "シナリオ「{{name}}」を変更",
       "deletedScenario": "シナリオ「{{name}}」を削除",
+      "addedDesign": "デザイン「{{name}}」を追加",
+      "modifiedDesign": "デザイン「{{name}}」を変更",
+      "deletedDesign": "デザイン「{{name}}」を削除",
       "addedFolder": "フォルダー「{{name}}」を追加",
       "modifiedFolder": "フォルダー「{{name}}」を変更",
       "deletedFolder": "フォルダー「{{name}}」を削除",
@@ -2545,6 +3113,7 @@
       "deletedEnvironmentFolder": "環境フォルダー「{{name}}」を削除",
       "movedRequest": "リクエスト「{{name}}」を移動",
       "movedScenario": "シナリオ「{{name}}」を移動",
+      "movedDesign": "デザイン「{{name}}」を移動",
       "movedFolder": "フォルダー「{{name}}」を移動",
       "movedEnvironmentFolder": "環境フォルダー「{{name}}」を移動",
       "reorderedFolder": "フォルダー「{{name}}」内の項目を並べ替えました",
@@ -2555,6 +3124,7 @@
     "commitTitle": {
       "singleRequest": "リクエスト「{{name}}」の更新",
       "singleScenario": "シナリオ「{{name}}」の更新",
+      "singleDesign": "デザイン「{{name}}」の更新",
       "singleFolder": "フォルダー「{{name}}」の更新",
       "singleEnvironmentFolder": "環境フォルダー「{{name}}」の更新",
       "singleFileFormatVersion": "ファイル形式 {{name}} への移行",
@@ -2562,6 +3132,8 @@
       "countRequest_other": "リクエスト{{count}}件",
       "countScenario_one": "シナリオ{{count}}件",
       "countScenario_other": "シナリオ{{count}}件",
+      "countDesign_one": "デザイン{{count}}件",
+      "countDesign_other": "デザイン{{count}}件",
       "countFolder_one": "フォルダー{{count}}件",
       "countFolder_other": "フォルダー{{count}}件",
       "countEnvironmentFolder_one": "環境フォルダー{{count}}件",

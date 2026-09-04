@@ -66,7 +66,11 @@
  * layout doesn't shift when toggling modes. */
 .ecui-editable-label-input {
   min-width: 80px;
-  max-width: 240px;
+
+  /* Grow to fit the text (never a fixed box that scrolls a long name out of
+   * view), capped near the window width so it can't overflow the viewport. */
+  field-sizing: content;
+  max-width: 90vw;
   padding: 2px 4px;
   border-radius: 2px;
   border: 1px solid var(--input-border);

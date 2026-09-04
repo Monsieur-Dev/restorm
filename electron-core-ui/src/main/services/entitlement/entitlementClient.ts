@@ -53,6 +53,10 @@ export interface EntitlementResponse {
   capabilities?: string[]
   expires_in?: number
   grace_seconds?: number
+  /** Sliding session: a freshly re-minted session JWT the backend returns on the
+   * interactive (session-JWT) path so a long-open app never lets its session
+   * lapse. Absent on the CLI-token path (a service credential has no session). */
+  session_token?: string
 }
 
 /** Import an Ed25519 SPKI PEM public key for verification. */

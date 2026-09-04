@@ -162,6 +162,15 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
    * @default false
    */
   tolerateHandlebars?: boolean
+
+  /**
+   * Size the editor to its CONTENT (Monaco's `getContentHeight`, word-wrap
+   * aware) between `minHeight` and `maxHeight` (px), then scroll past the cap.
+   * Overrides the `height` prop. For a body/JSON field that should grow with
+   * what the user types up to a ceiling. Pair with `scrollBeyondLastLine: false`
+   * in `options` so the measured height is tight.
+   */
+  autoHeight?: { maxHeight: number; minHeight?: number }
 }
 
 /**
@@ -236,11 +245,14 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     onGoToDefinition,
     goToDefinitionLabel,
     tolerateHandlebars = false,
+    autoHeight,
     'data-testid': dataTestId,
     ...props
   },
   ref
 ) {
+  // Content-fitted height (px) when `autoHeight` is set — see handleMount.
+  const [autoHeightPx, setAutoHeightPx] = useState<number | undefined>(undefined)
   const { t } = useTranslation()
   // Fall back to the built-in translation only when the host didn't pass a
   // label. The previous magic-string check (`=== 'Go to Definition'`) silently
@@ -568,6 +580,17 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       }
     })
 
+    // Content-fitted height: measure now and on every content-size change,
+    // clamped to [minHeight, maxHeight]; past the cap Monaco scrolls.
+    if (autoHeight !== undefined) {
+      const min = autoHeight.minHeight ?? 0
+      const fit = (): void => {
+        setAutoHeightPx(Math.min(autoHeight.maxHeight, Math.max(min, editor.getContentHeight())))
+      }
+      fit()
+      editor.onDidContentSizeChange(fit)
+    }
+
     // Call user-provided callbacks
     onMount?.(editor, monaco)
     onEditorMount?.(editor, monaco)
@@ -621,10 +644,16 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
     lastEmittedValueRef.current = props.value
   }, [editorInstance, props.value])
 
+  // When `autoHeight` is on, the measured content height wins over `height`
+  // (falling back to `minHeight` until the first measure).
+  const resolvedHeight = autoHeight !== undefined
+    ? `${autoHeightPx ?? autoHeight.minHeight ?? 0}px`
+    : props.height
+
   return (
     <div
       className="ecui-code-editor"
-      style={{ height: props.height, width: props.width }}
+      style={{ height: resolvedHeight, width: props.width }}
       {...(dataTestId && { 'data-testid': dataTestId })}
       data-theme-source={themeSource}
       data-resolved-theme={currentTheme}
@@ -632,6 +661,8 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
       <div style={{ width: '100%', height: '100%' }} {...(dataTestId && { 'data-testid': `${dataTestId}-monaco` })}>
         <Editor
           {...editorPropsWithoutValue}
+          // Content-fitted height overrides the `height` prop when autoHeight is on.
+          {...(autoHeight !== undefined ? { height: resolvedHeight } : {})}
           // Remount on a mid-life dispose (see editorGeneration) so the
           // library builds a fresh editor instead of keeping the defused
           // corpse it refuses to recreate.

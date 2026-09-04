@@ -1,0 +1,66 @@
+-- {{ ctx.design.name }} — executable CRUD examples, one block per model.
+-- IDEMPOTENT: inserts ON CONFLICT DO NOTHING, updates/deletes keyed on
+-- an existing row. Adapt the literals — these are living documentation
+-- of the schema, exercised by the template CI.
+{%- set models_by_name = {} -%}
+{%- for m in ctx.models -%}{%- set _ = models_by_name.update({m.name: m}) -%}{%- endfor -%}
+{%- macro chain_names(model, acc) -%}
+  {{- (chain_names(models_by_name[model.inherits], acc) if 'inherits' in model and model.inherits in models_by_name else '') -}}
+  {{- acc.append(model.name) or '' -}}
+{%- endmacro -%}
+{%- macro id_prop(model) -%}
+  {%- set ns = namespace(found=none) -%}
+  {%- set chain = [] -%}{{- chain_names(model, chain) -}}
+  {%- for name in chain -%}
+    {%- set m = models_by_name[name] -%}
+    {%- if ns.found is none and 'identifier' in m -%}{%- set ns.found = m.identifier.property -%}{%- endif -%}
+  {%- endfor -%}
+  {%- if ns.found is not none -%}{{ ns.found }}{%- else -%}id{%- endif -%}
+{%- endmacro -%}
+{%- macro demo_value(p, i) -%}
+  {%- if 'enum' in p -%}(SELECT enum_first(NULL::"{{ p.enum | lower }}"))
+  {%- elif 'references' in p -%}NULL
+  {%- elif p.type == 'integer' or p.type == 'number' -%}{{ 9000 + i }}
+  {%- elif p.type == 'boolean' -%}true
+  {%- elif p.type == 'array' -%}'{}'
+  {%- elif p.type == 'map' or p.type == 'any' -%}'{}'::jsonb
+  {%- elif 'format' in p and p.format == 'uuid' -%}gen_random_uuid()
+  {%- elif 'format' in p and p.format == 'date-time' -%}now()
+  {%- elif 'format' in p and p.format == 'date' -%}CURRENT_DATE
+  {%- elif 'format' in p and p.format == 'email' -%}'crud-{{ i }}@example.com'
+  {%- else -%}'crud-{{ p.name }}-{{ i }}xxxxxxxxxx'
+  {%- endif -%}
+{%- endmacro -%}
+{% for model in ctx.models %}
+{% set chain = [] %}{{ chain_names(model, chain) -}}
+{% set pk = id_prop(model) %}
+{% set writable = [] %}
+{% for owner_name in chain %}{% for p in models_by_name[owner_name].properties %}{% if p.name != pk and 'references' not in p %}{% set _ = writable.append(p) %}{% endif %}{% endfor %}{% endfor %}
+
+
+-- ── {{ model.name }} ──
+{% if writable | length > 0 %}
+-- CREATE
+INSERT INTO "{{ model.name | lower }}" ({% for p in writable %}{% if not loop.first %}, {% endif %}"{{ p.name }}"{% endfor %})
+VALUES ({% for p in writable %}{% if not loop.first %}, {% endif %}{{ demo_value(p, loop.index) }}{% endfor %})
+ON CONFLICT DO NOTHING;
+{% else %}
+-- CREATE: every column is either the identifier or a relation — insert
+-- through the relation-aware application layer instead.
+{% endif %}
+-- READ (list{% if 'softDelete' in model %}, soft-deleted rows excluded{% endif %})
+SELECT * FROM "{{ model.name | lower }}"{% if 'softDelete' in model %} WHERE "deleted_at" IS NULL{% endif %} LIMIT 20;
+-- READ (one)
+SELECT * FROM "{{ model.name | lower }}" WHERE "{{ pk }}" = (SELECT "{{ pk }}" FROM "{{ model.name | lower }}" LIMIT 1);
+{% if writable | length > 0 %}
+-- UPDATE{% if 'timestamps' in model %} (touches updated_at){% endif %}
+UPDATE "{{ model.name | lower }}" SET "{{ writable[0].name }}" = {{ demo_value(writable[0], 77) }}{% if 'timestamps' in model %}, "updated_at" = now(){% endif %} WHERE "{{ pk }}" = (SELECT "{{ pk }}" FROM "{{ model.name | lower }}" LIMIT 1);
+{% endif %}
+{% if 'softDelete' in model %}
+-- DELETE (soft — the design declares soft-delete)
+UPDATE "{{ model.name | lower }}" SET "deleted_at" = now() WHERE "{{ pk }}" = (SELECT "{{ pk }}" FROM "{{ model.name | lower }}" WHERE "deleted_at" IS NULL LIMIT 1);
+{% else %}
+-- DELETE (hard)
+DELETE FROM "{{ model.name | lower }}" WHERE "{{ pk }}" = (SELECT "{{ pk }}" FROM "{{ model.name | lower }}" ORDER BY "{{ pk }}" DESC LIMIT 1);
+{% endif %}
+{% endfor %}

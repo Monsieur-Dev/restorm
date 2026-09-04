@@ -55,7 +55,9 @@ async function mountWheels(py: PyodideLike, wheelPaths: readonly string[]): Prom
 /** Worker body (CommonJS, eval'd). Loads Pyodide lazily, mounts any cached
  * dependency wheels (offline `loadPackage`), then answers each
  * `{ code, input, vars }` with `{ ok, result, logs }`. */
-const PYODIDE_WORKER_SRC = `
+/** Exported for the design-codegen service, which runs the SAME worker
+ * (Pyodide + offline wheel mount) with its own python program. */
+export const PYODIDE_WORKER_SRC = `
 const { parentPort, workerData } = require('node:worker_threads')
 
 async function mountWheels(py, wheelPaths) {
@@ -103,7 +105,7 @@ parentPort.on('message', async (msg) => {
 })
 `
 
-function resolvePyodidePaths(): { pyodideUrl: string; indexURL: string } {
+export function resolvePyodidePaths(): { pyodideUrl: string; indexURL: string } {
   const req = createRequire(import.meta.url)
   // The ESM entry — dynamic-imported inside the worker.
   const pyodideUrl = pathToFileURL(req.resolve('pyodide/pyodide.mjs')).href

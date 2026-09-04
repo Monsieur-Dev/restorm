@@ -259,6 +259,7 @@
     "contextMenu": {
       "delete": "Usuń",
       "clone": "Klonuj",
+      "openInSplit": "Otwórz w podzielonym panelu",
       "copySuffix": "kopia",
       "rename": "Zmień nazwę",
       "addToFavorites": "Dodaj do ulubionych",
@@ -317,7 +318,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Projekt API"
       },
       "cut": "Wytnij",
       "copy": "Kopiuj",
@@ -337,7 +339,8 @@
       "moveInto": "Przenieś do tego scenariusza",
       "affectsNote": "Usunięcie tego żądania usunie je również z tych scenariuszy.",
       "deleteAnyway": "Usuń mimo to"
-    }
+    },
+    "expandAll": "Rozwiń wszystkie żądania"
   },
   "environment": {
     "newName": "Nowe środowisko",
@@ -743,7 +746,8 @@
       "environment": "Środowiska",
       "settings": "Ustawienia",
       "tag": "Tagi",
-      "scenario": "Scenariusze"
+      "scenario": "Scenariusze",
+      "design": "Projekty API"
     },
     "tooltip": {
       "noDetails": "Brak dostępnych szczegółów",
@@ -1240,7 +1244,8 @@
       "operation": "Operacja",
       "description": "Opis",
       "example": "Przykład",
-      "constraints": "Ograniczenia"
+      "constraints": "Ograniczenia",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nie zadeklarowano parametrów spoza treści dla filtrowanych tras."
@@ -1287,7 +1292,8 @@
       "optionalSingleRef": "opcjonalne odwołanie pojedyncze",
       "requiredArrayRef": "wymagane odwołanie tablicowe",
       "optionalArrayRef": "opcjonalne odwołanie tablicowe"
-    }
+    },
+    "editEntity": "Edytuj w projektancie"
   },
   "scenario": {
     "editor": {
@@ -2141,6 +2147,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Wartości enuma",
+      "addValue": "Dodaj wartość…",
+      "removeValue": "Usuń wartość",
+      "extract": "Wyodrębnij do nazwanego enuma"
+    },
+    "tags": {
+      "add": "Dodaj tag…",
+      "remove": "Usuń tag",
+      "routeLabel": "Tagi",
+      "groupLabel": "Wspólne tagi"
+    },
+    "section": {
+      "settings": "Ustawienia",
+      "models": "Modele",
+      "enums": "Enumy",
+      "routes": "Trasy",
+      "documentation": "Dokumentacja",
+      "notes": "Notatki",
+      "code": "Kod",
+      "server": "Serwer",
+      "clients": "Klienci"
+    },
+    "rail": {
+      "ariaLabel": "Sekcje projektu API"
+    },
+    "settings": {
+      "subtitle": "Ogólne ustawienia projektu API „{{name}}”",
+      "serve": {
+        "title": "Serwer projektu",
+        "action": "Serwuj ten projekt API",
+        "description": "Odpowiedzi z nazwanych przykładów · walidacja ograniczeniami",
+        "port": "Port",
+        "latency": "Symulowane opóźnienie (ms)",
+        "blocked": "Napraw {{count}} błędy walidacji projektu przed jego serwowaniem",
+        "startFailed": "Nie udało się uruchomić serwera",
+        "protocolAlways": "HTTP jest zawsze serwowany",
+        "protocolToggle": "Serwuj także tę projekcję",
+        "stateful": "Tryb stanowy — POST/PUT/DELETE modyfikują magazyn w pamięci (reset przy restarcie)",
+        "clientsCallout": "Twój serwer mock jest uruchomiony. Dla każdego protokołu obsługiwanego przez ten projekt wygenerowano gotowych do uruchomienia klientów.",
+        "clientsCalloutLink": "Znajdziesz ich tutaj"
+      },
+      "identity": {
+        "title": "Tożsamość",
+        "title_field": "Tytuł",
+        "version": "Wersja projektu",
+        "description": "Opis"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Ścieżka bazowa",
+        "defaultAuth": "Domyślne auth",
+        "environment": "Środowisko"
+      },
+      "export": {
+        "title": "Eksport",
+        "format": "Format deskryptora",
+        "download": "Pobierz deskryptor",
+        "saved": "Deskryptor zapisany w {{path}}",
+        "failed": "Eksport nie powiódł się"
+      }
+    },
+    "auth": {
+      "none": "Brak",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Nagłówek klucza API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtruj…",
+      "selectPrompt": "Wybierz pozycję z listy.",
+      "editorPending": "Edytor tej sekcji jest w drodze."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} właściwość",
+      "propertyCount_other": "{{count}} właściwości",
+      "add": "Dodaj model",
+      "delete": "Usuń model",
+      "deleteTitle": "Usunąć {{name}}?",
+      "deleteNoImpact": "Ten model nie jest nigdzie używany.",
+      "deleteImpactIntro": "Usunięcie tego modelu zaktualizuje:",
+      "deleteImpactChild": "{{name}} traci dziedziczenie (własne właściwości pozostają)",
+      "description": "Opis",
+      "descriptionPlaceholder": "Co reprezentuje ten model (opcjonalnie)",
+      "newName": "NewModel",
+      "selectPrompt": "Wybierz model lub utwórz nowy.",
+      "tabs": {
+        "schema": "Schemat",
+        "examples": "Przykłady",
+        "settings": "Ustawienia",
+        "notes": "Notatki"
+      },
+      "addSubModel": "Dodaj podmodel",
+      "collapseAll": "Zwiń wszystko",
+      "expandAll": "Rozwiń wszystko"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} wartość",
+      "valueCount_other": "{{count}} wartości",
+      "lists": "Enumy",
+      "values": "Wartości",
+      "addEnum": "Dodaj enum",
+      "addValue": "Dodaj wartość",
+      "valueHeader": "Wartość",
+      "newName": "NewEnum",
+      "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości.",
+      "nameHeader": "Nazwa",
+      "description": "Opis",
+      "descriptionPlaceholder": "Co reprezentuje ten enum (opcjonalnie)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Brak szablonu — dodaj jeden, aby wygenerować kod z tego projektu.",
+      "subtitle": "Generuj projekty z tego projektu — renderowane w piaskownicy, zapisywane dopiero po potwierdzeniu drzewa",
+      "sourceTitle": "Szablon",
+      "sourceKind": {
+        "official": "Oficjalny",
+        "repo": "Repozytorium",
+        "local": "Folder lokalny"
+      },
+      "official": "Oficjalny szablon",
+      "repo": "Repozytorium (owner/repo)",
+      "local": "Lokalny folder szablonu",
+      "output": "Folder wyjściowy (bezwzględny lub względny do projektu)",
+      "browse": "Wybierz folder wyjściowy",
+      "generate": "Wygeneruj projekt",
+      "generating": "Generowanie w piaskownicy…",
+      "blocked": "Napraw {{count}} błąd/błędy walidacji przed generowaniem",
+      "failed": "Generowanie nie powiodło się",
+      "outputMissing": "Najpierw wybierz folder wyjściowy",
+      "extracted": "{{count}} plik(ów) zapisano w {{root}}",
+      "preview": "{{name}} wygenerował {{count}} plik(ów) — potwierdź zapis",
+      "confirm": "Zapisz do folderu wyjściowego",
+      "discard": "Odrzuć",
+      "generateOne": "Wygeneruj ten projekt",
+      "remove": "Usuń ten szablon",
+      "addTemplate": "Dodaj szablon",
+      "library": {
+        "title": "Biblioteka szablonów",
+        "recent": "Ostatnio używane",
+        "official": "Oficjalne szablony",
+        "custom": "Niestandardowy",
+        "add": "Dodaj",
+        "use": "Użyj",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Szablony organizacji",
+        "openRepo": "Otwórz repozytorium",
+        "remove": "Usuń",
+        "addTemplate": "Dodaj szablon",
+        "urlPlaceholder": "URL repozytorium git",
+        "descPlaceholder": "Opis (stack / co generuje)",
+        "noOrgTemplates": "Brak szablonów organizacji.",
+        "loading": "Ładowanie szablonów…",
+        "signedOut": "Zaloguj się, aby zobaczyć szablony swojej organizacji.",
+        "fetchError": "Nie udało się załadować szablonów:",
+        "unavailable": "niedostępne",
+        "officialTag": "Oficjalny",
+        "officialDesc": {
+          "server-rest-typescript": "Serwer REST w TypeScript na Express — typowane trasy, modele i walidacja żądań.",
+          "server-rest-dotnet": "Serwer Minimal-API w C# / ASP.NET Core — punkty końcowe, DTO i walidacja.",
+          "server-grpc-typescript": "Serwer gRPC w TypeScript — usługa .proto, typowane komunikaty i stuby serwera.",
+          "server-grpc-dotnet": "Serwer gRPC w C# / .NET — usługa .proto, komunikaty i stuby serwera.",
+          "db-postgres": "Schemat PostgreSQL, dane seed i skrypty CRUD z projektu."
+        },
+        "added": "Dodano Template",
+        "done": "Gotowe"
+      },
+      "extractedTitle": "Pliki zapisane",
+      "openOutput": "Otwórz folder wyjściowy",
+      "refresh": "Odśwież ten szablon z jego źródła",
+      "removeConfirm": "Template „{{name}}“ zostanie usunięty z tego projektu (już wygenerowane pliki na dysku pozostaną nienaruszone).",
+      "removeTitle": "Usunąć ten Template?",
+      "tabs": {
+        "template": "Szablon"
+      },
+      "questions": {
+        "title": "Pytania szablonu"
+      },
+      "errorTitle": "Generowanie nie powiodło się",
+      "source": "Źródło",
+      "destination": "Cel",
+      "expand": "Rozwiń",
+      "collapse": "Zwiń"
+    },
+    "statusbar": {
+      "format": "projekt API · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Tożsamość",
+      "identifierProperty": "Właściwość identyfikująca",
+      "identifierStrategy": "Strategia",
+      "inheritsFrom": "Dziedziczy z",
+      "noIdentifier": "(brak)",
+      "noParent": "(brak)",
+      "storage": "Przechowywanie i cykl życia",
+      "volumetry": "Oczekiwany wolumen",
+      "volumetryUnset": "(nieokreślony)",
+      "operationalProfile": "Profil operacyjny",
+      "accessPattern": "Profil odczytu/zapisu",
+      "traffic": "Częstotliwość dostępu",
+      "freshness": "Tolerancja świeżości",
+      "sensitivity": "Wrażliwość danych",
+      "retention": "Przechowywanie / cykl życia",
+      "profileUnset": "(nieokreślony)",
+      "timestamps": "Znaczniki czasu (utworzono/zmieniono)",
+      "softDelete": "Miękkie usuwanie",
+      "usedBy": "Używany przez",
+      "usedByNone": "Ten model nie jest jeszcze używany.",
+      "usage": {
+        "body": "body",
+        "response": "odpowiedź {{code}}",
+        "param": "parametr {{name}}",
+        "inherits": "{{name}} dziedziczy z niego"
+      },
+      "generators": "Trasy",
+      "generateCrud": "Wygeneruj CRUD",
+      "generateSearch": "Wygeneruj trasy wyszukiwania"
+    },
+    "schema": {
+      "addProperty": "Dodaj właściwość",
+      "deleteProperty": "Usuń właściwość",
+      "columns": {
+        "property": "Właściwość",
+        "type": "Typ",
+        "flags": "Atrybuty",
+        "example": "Przykład"
+      },
+      "unnamed": "(bez nazwy)",
+      "nameMissing": "brak nazwy",
+      "panelTitle": "Właściwość: {{name}}",
+      "jumpToParent": "Otwórz {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(brak)",
+      "invalidPattern": "Nieprawidłowe wyrażenie regularne",
+      "minAboveMax": "Min przekracza max",
+      "fields": {
+        "name": "Nazwa",
+        "type": "Typ",
+        "format": "Format",
+        "elementType": "Typ elementów",
+        "onDelete": "Przy usunięciu",
+        "description": "Opis",
+        "example": "Przykład",
+        "default": "Domyślna",
+        "deprecationMessage": "Komunikat o wycofaniu",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Długość min",
+        "maxLength": "Długość max",
+        "pattern": "Wzorzec"
+      },
+      "generatedProperties": "Wygenerowane właściwości",
+      "inheritedProperties": "Odziedziczone właściwości",
+      "ownProperties": "Własne właściwości",
+      "tabs": {
+        "property": "Właściwość"
+      },
+      "advancedType": "Zaawansowane…"
+    },
+    "flags": {
+      "required": "wymagane",
+      "nullable": "nullable",
+      "unique": "unikalne",
+      "immutable": "niezmienne",
+      "searchable": "wyszukiwalne",
+      "deprecated": "wycofane",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Domyślny",
+      "add": "Dodaj przykład",
+      "delete": "Usuń przykład",
+      "name": "Nazwa przykładu",
+      "newName": "Przykład",
+      "defaultHint": "Wartości domyślne pochodzą z każdej właściwości (puste = generowane automatycznie).",
+      "namedHint": "Wpisz wartość, aby ją zdefiniować; pozostaw puste, aby zachować wygenerowaną.",
+      "columns": {
+        "value": "Wartość",
+        "origin": "Pochodzenie"
+      },
+      "auto": "auto",
+      "defined": "zdefiniowana",
+      "constraintViolated": "Wartość narusza ograniczenie właściwości ({{constraint}})",
+      "deleteTitle": "Usunąć ten przykład?",
+      "deleteConfirm": "Przykład „{{name}}” zostanie usunięty."
+    },
+    "onDelete": {
+      "restrict": "Ogranicz (zabroń, dopóki używany)",
+      "cascade": "Usuwanie kaskadowe",
+      "setNull": "Ustaw na null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrementacja",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Setki",
+      "tenThousands": "Dziesiątki tysięcy",
+      "millions": "Miliony"
+    },
+    "accessPattern": {
+      "readHeavy": "Głównie odczyt",
+      "writeHeavy": "Głównie zapis",
+      "balanced": "Zrównoważony",
+      "appendOnly": "Tylko dopisywanie"
+    },
+    "traffic": {
+      "low": "Niski",
+      "medium": "Średni",
+      "high": "Wysoki"
+    },
+    "freshness": {
+      "strong": "Silna spójność",
+      "shortCache": "Krótki cache OK",
+      "longCache": "Długi cache OK"
+    },
+    "sensitivity": {
+      "public": "Publiczne",
+      "internal": "Wewnętrzne",
+      "confidential": "Poufne",
+      "pii": "Dane osobowe (PII)"
+    },
+    "retention": {
+      "permanent": "Trwałe",
+      "archivable": "Archiwizowalne",
+      "ephemeral": "Ulotne (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Właściwość nie ma nazwy",
+      "propertyNameDuplicate": "Zduplikowana nazwa właściwości",
+      "propertyShadowsParent": "Przesłania odziedziczoną właściwość",
+      "referenceTargetUnknown": "Typ, do którego się odwołano, już nie istnieje",
+      "constraintPatternInvalid": "Nieprawidłowy wzorzec (wyrażenie regularne)",
+      "constraintMinAboveMax": "Min przekracza max",
+      "modelNameEmpty": "Model nie ma nazwy",
+      "enumNameEmpty": "Enum nie ma nazwy",
+      "groupNameEmpty": "Grupa nie ma nazwy",
+      "modelNameDuplicate": "Zduplikowana nazwa modelu",
+      "enumNameDuplicate": "Zduplikowana nazwa enuma",
+      "componentNameCollision": "Model i enum dzielą tę nazwę",
+      "groupNameDuplicate": "Zduplikowana nazwa grupy",
+      "inheritanceTargetUnknown": "Dziedziczony model już nie istnieje",
+      "inheritanceCycle": "Cykliczny łańcuch dziedziczenia",
+      "identifierPropertyUnknown": "Właściwość identyfikująca już nie istnieje",
+      "paramLinkTargetUnknown": "Powiązanie parametru wskazuje na brakującą właściwość",
+      "bodyModelUnknown": "Model ciała już nie istnieje",
+      "responseModelUnknown": "Model odpowiedzi już nie istnieje",
+      "responseExampleUnknown": "Odpowiedź serwuje brakujący przykład",
+      "routeResponsesMissing": "Trasa nie deklaruje żadnej odpowiedzi",
+      "routePathDuplicate": "Inna trasa już odpowiada na tę metodę i ścieżkę",
+      "routePathReserved": "Serwer projektu rezerwuje tę ścieżkę — trasa nigdy by nie odpowiedziała"
+    },
+    "routes": {
+      "addGroup": "Dodaj grupę",
+      "addRoute": "Dodaj trasę",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Wybierz grupę lub trasę, albo utwórz grupę.",
+      "deleteGroupTitle": "Usunąć {{name}}?",
+      "deleteGroupImpact": "Grupa i jej {{count}} tras zostaną usunięte.",
+      "method": "Metoda",
+      "path": "Ścieżka",
+      "summary": "Podsumowanie",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definicja",
+        "responses": "Odpowiedzi"
+      },
+      "group": {
+        "auth": "Wymagana autoryzacja",
+        "authInherited": "Domyślne projektu",
+        "versionPrefix": "Prefiks wersji",
+        "headers": "Nagłówki kontraktu (dziedziczone przez trasy)",
+        "headerName": "Nagłówek",
+        "addHeader": "Dodaj nagłówek",
+        "deleteHeader": "Usuń nagłówek",
+        "noHeaders": "Brak wspólnego nagłówka."
+      },
+      "params": {
+        "pathTitle": "Parametry ścieżki",
+        "otherTitle": "Parametry (query / header)",
+        "name": "Nazwa",
+        "location": "W",
+        "link": "Powiązanie modelu",
+        "noLink": "—",
+        "add": "Dodaj parametr",
+        "delete": "Usuń parametr",
+        "auto": "auto",
+        "pathEmpty": "Wpisz {{param}} w ścieżce, aby utworzyć jego wiersz.",
+        "otherEmpty": "Brak parametrów query lub header.",
+        "nameEmpty": "Parametr wymaga nazwy",
+        "nameTaken": "Ta nazwa jest już używana"
+      },
+      "body": {
+        "label": "Ciało żądania",
+        "empty": "(puste)",
+        "nonStandardHint": "Treść żądania w {{method}} jest niestandardowa — wiele serwerów i serwerów proxy ją ignoruje. Restorm i tak ją obsługuje i dokumentuje."
+      },
+      "responses": {
+        "add": "Dodaj",
+        "codePlaceholder": "Kod statusu",
+        "standardErrors": "+ błędy standardowe",
+        "empty": "Nie zadeklarowano jeszcze odpowiedzi.",
+        "emptyBody": "puste ciało",
+        "model": "Zwracany model",
+        "list": "Lista",
+        "paginated": "Stronicowana",
+        "listOf": "lista {{name}}",
+        "paginatedListOf": "stronicowana lista {{name}}",
+        "example": "Serwowany przykład",
+        "exampleAuto": "(auto generowany)",
+        "delete": "Usuń odpowiedź",
+        "codeInvalid": "Wprowadź 3-cyfrowy kod statusu",
+        "codeTaken": "Ten kod jest już zadeklarowany"
+      },
+      "settings": {
+        "inherited": "Dziedziczone z grupy",
+        "authInherited": "Dziedziczone z grupy",
+        "editGroup": "Edytuj w grupie ↗",
+        "headers": "Nagłówki kontraktu",
+        "behaviour": "Zachowanie",
+        "idempotent": "Idempotentna",
+        "cacheSeconds": "Cache (sekundy)",
+        "traffic": "Oczekiwany ruch",
+        "authOverride": "Nadpisanie autoryzacji",
+        "pagination": "Stronicowanie",
+        "defaultLimit": "Domyślny rozmiar strony",
+        "maxLimit": "Maks. rozmiar strony"
+      },
+      "addSubgroup": "Dodaj podgrupę"
+    },
+    "newDesignName": "Nowy projekt API",
+    "createFromScratch": "Utwórz projekt API",
+    "createFromDoc": "Utwórz projekt z tego API",
+    "fromDocName": "Projekt {{name}}",
+    "run": {
+      "listening": "Serwuje na http://localhost:{{port}}",
+      "stopped": "Serwer zatrzymany",
+      "totalCalls": "{{count}} wywołań w tym uruchomieniu",
+      "stop": "Zatrzymaj serwer",
+      "close": "Zamknij ten panel",
+      "forcedPill": "wymuszono {{code}}",
+      "defaultReturn": "Odpowiedź projektu (domyślna)",
+      "codeReturn": "Odpowiedz {{code}}",
+      "customCode": "Własny kod statusu",
+      "customBody": "Własna treść odpowiedzi",
+      "customBodyPlaceholder": "Opcjonalna treść odpowiedzi (JSON)",
+      "customApply": "Wymuś"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Chroń trasy zapisu uwierzytelnianiem",
+      "authWritesHint": "Wymagaj uwierzytelniania bearer przy tworzeniu, aktualizacji i usuwaniu; odczyty pozostają publiczne.",
+      "generate": "Wygeneruj",
+      "replace": "Zastąp istniejące trasy",
+      "replaceHint": "Dla tego modelu już istnieją trasy. Zastąp je, aby uniknąć duplikatów; pozostaw wyłączone, aby dodać drugi zestaw.",
+      "title": "Wygeneruj CRUD dla {{name}}",
+      "projections": {
+        "http": "{{count}} tras REST",
+        "graphql": "{{queries}} zapytań / {{mutations}} mutacji w GraphQL",
+        "grpc": "{{count}} metod gRPC",
+        "odata": "{{count}} zestaw encji OData",
+        "soap": "{{count}} operacji SOAP",
+        "title": "Jeden model, wszystkie protokoły — ten CRUD jest też serwowany jako:"
+      }
+    },
+    "server": {
+      "subtitle": "Serwuj ten projekt jako aktywny mock i obserwuj każde wywołanie."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generowanie kodu",
+        "name": "Zmienna",
+        "value": "Wartość (Handlebars)",
+        "add": "Dodaj zmienną",
+        "none": "Brak zmiennych — dodaj jedną z nagłówka tego szablonu.",
+        "noTemplates": "Wybierz jeden lub więcej szablonów w sekcji „</> Code” — tutaj zdefiniujesz zmienne używane podczas generowania.",
+        "generalTitle": "Zmienne ogólne",
+        "scope": {
+          "general": "Ogólne",
+          "property": "Właściwość modelu"
+        },
+        "discover": "Wykryj zmienne używane przez ten szablon",
+        "undeclared": "Używane, ale niezadeklarowane: {{names}}",
+        "allDeclared": "Wszystkie zmienne używane przez ten szablon są zadeklarowane."
+      }
+    },
+    "clients": {
+      "generated": "Klienci wygenerowani — otwórz ich w sekcji Klienci na pasku bocznym.",
+      "importing": "Importowanie klientów…",
+      "refresh": "Wygeneruj klientów ponownie",
+      "startPrompt": "Uruchom serwer, aby wygenerować klientów.",
+      "startServerPrompt": "Uruchom <serverLink>serwer projektu</serverLink>, aby uzyskać dostęp do żądań klienckich generowanych automatycznie z modelu.",
+      "subtitle": "Twój serwer projektu API działa i obsługuje zdefiniowane przez Ciebie trasy. Poniższe żądania wywołują te trasy bezpośrednio — otwórz jedno, aby je przetestować. Są efemeryczne i znikają po zatrzymaniu serwera."
+    },
+    "descriptors": {
+      "copy": "Kopiuj URL"
+    },
+    "projections": {
+      "title": "Projekcje",
+      "hint": "Ta sama operacja, tak jak udostępnia ją każdy serwowany protokół."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Zachowaj",
@@ -2310,7 +2837,45 @@
     "addCookie": "Dodaj plik cookie",
     "removeCookie": "Usuń plik cookie",
     "clearCookieDomain": "Wyczyść pliki cookie dla domeny",
-    "clearCookies": "Wyczyść wszystkie pliki cookie"
+    "clearCookies": "Wyczyść wszystkie pliki cookie",
+    "listDesigns": "Wyświetl projekty API",
+    "getDesign": "Pobierz projekt API",
+    "createDesign": "Utwórz projekt API",
+    "createDesignFromDocumentation": "Utwórz projekt z zaimportowanego API",
+    "updateDesign": "Zaktualizuj projekt",
+    "deleteDesign": "Usuń projekt",
+    "createDesignModel": "Utwórz model projektu",
+    "updateDesignModel": "Zaktualizuj model projektu",
+    "deleteDesignModel": "Usuń model projektu",
+    "setDesignProperty": "Ustaw właściwość modelu",
+    "deleteDesignProperty": "Usuń właściwość modelu",
+    "createDesignEnum": "Utwórz enum projektu",
+    "updateDesignEnum": "Zaktualizuj enum projektu",
+    "deleteDesignEnum": "Usuń enum projektu",
+    "setDesignExample": "Ustaw nazwany przykład",
+    "deleteDesignExample": "Usuń nazwany przykład",
+    "createDesignRouteGroup": "Utwórz grupę tras",
+    "updateDesignRouteGroup": "Zaktualizuj grupę tras",
+    "deleteDesignRouteGroup": "Usuń grupę tras",
+    "createDesignRoute": "Utwórz trasę projektu",
+    "updateDesignRoute": "Zaktualizuj trasę projektu",
+    "deleteDesignRoute": "Usuń trasę projektu",
+    "setDesignRouteParam": "Utwórz lub zaktualizuj parametr trasy",
+    "deleteDesignRouteParam": "Usuń parametr trasy",
+    "generateDesignCrud": "Generuj trasy CRUD",
+    "generateDesignSearchRoutes": "Generuj trasy wyszukiwania",
+    "serveDesign": "Serwuj projekt",
+    "stopDesignServer": "Zatrzymaj serwer projektu",
+    "getDesignServerStatus": "Stan serwera projektu",
+    "setDesignRouteResponse": "Wymuś odpowiedź",
+    "exportDesign": "Eksportuj deskryptor projektu",
+    "generateDesignCode": "Wygeneruj kod z projektu",
+    "getDesignTemplateContract": "Pobierz kontrakt szablonów kodu",
+    "setDesignTemplates": "Ustaw szablony kodu projektu",
+    "setDesignModelVariables": "Ustaw przesłonięcia generowania kodu dla modelu",
+    "setDesignPropertyVariables": "Ustaw przesłonięcia generowania kodu dla właściwości",
+    "setDesignRouteVariables": "Ustaw przesłonięcia generowania kodu dla trasy",
+    "setDesignTemplateVariables": "Ustaw globalne zmienne generowania kodu dla szablonu"
   },
   "odataFilter": {
     "detail": {
@@ -2540,6 +3105,9 @@
       "addedScenario": "Dodano scenariusz „{{name}}”",
       "modifiedScenario": "Zmodyfikowano scenariusz „{{name}}”",
       "deletedScenario": "Usunięto scenariusz „{{name}}”",
+      "addedDesign": "Dodano projekt API „{{name}}”",
+      "modifiedDesign": "Zmodyfikowano projekt API „{{name}}”",
+      "deletedDesign": "Usunięto projekt API „{{name}}”",
       "addedFolder": "Dodano folder „{{name}}”",
       "modifiedFolder": "Zmodyfikowano folder „{{name}}”",
       "deletedFolder": "Usunięto folder „{{name}}”",
@@ -2548,6 +3116,7 @@
       "deletedEnvironmentFolder": "Usunięto folder środowiska „{{name}}”",
       "movedRequest": "Przeniesiono żądanie \"{{name}}\"",
       "movedScenario": "Przeniesiono scenariusz \"{{name}}\"",
+      "movedDesign": "Przeniesiono projekt API \"{{name}}\"",
       "movedFolder": "Przeniesiono folder \"{{name}}\"",
       "movedEnvironmentFolder": "Przeniesiono folder środowiska \"{{name}}\"",
       "reorderedFolder": "Zmieniono kolejność elementów w folderze „{{name}}”",
@@ -2558,6 +3127,7 @@
     "commitTitle": {
       "singleRequest": "Aktualizacja żądania „{{name}}”",
       "singleScenario": "Aktualizacja scenariusza „{{name}}”",
+      "singleDesign": "Aktualizacja projektu API „{{name}}”",
       "singleFolder": "Aktualizacja folderu „{{name}}”",
       "singleEnvironmentFolder": "Aktualizacja folderu środowiska „{{name}}”",
       "singleFileFormatVersion": "Przejście na format pliku {{name}}",
@@ -2565,6 +3135,8 @@
       "countRequest_other": "{{count}} żądań",
       "countScenario_one": "{{count}} scenariusz",
       "countScenario_other": "{{count}} scenariuszy",
+      "countDesign_one": "{{count}} projekt API",
+      "countDesign_other": "{{count}} projektów API",
       "countFolder_one": "{{count}} folder",
       "countFolder_other": "{{count}} folderów",
       "countEnvironmentFolder_one": "{{count}} folder środowiska",

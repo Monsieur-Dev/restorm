@@ -1,0 +1,53 @@
+"""Account lifecycle state."""
+enum UserStatus {
+  active
+  suspended
+  deleted
+}
+
+"""A registered user."""
+type User {
+  id: String
+  email: String!
+  password: String!
+  status: UserStatus
+  nicknames: [String!]
+  settings: String @deprecated
+}
+
+"""A user with elevated rights."""
+type AdminUser {
+  id: String
+  email: String!
+  password: String!
+  status: UserStatus
+  nicknames: [String!]
+  settings: String @deprecated
+  scope: String!
+}
+
+type Order {
+  id: Int
+  customer: User!
+  lines: [User!]!
+}
+
+input UserInput {
+  email: String
+  password: String
+  status: UserStatus
+  nicknames: [String!]
+  settings: String
+}
+
+type Query {
+  """Fetch one user"""
+  getUser(id: ID!): User
+  """List users"""
+  userList(limit: Int, offset: Int): [User!]! @deprecated
+}
+
+type Mutation {
+  """Create a user"""
+  postUser(input: UserInput): User
+}

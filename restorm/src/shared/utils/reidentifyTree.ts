@@ -19,6 +19,8 @@
  * ORIGINAL element when it is still in the same tree.
  */
 
+import { isOpaqueDocumentationBag } from './designWalk'
+
 /** Generate a unique ID. Uses crypto.randomUUID (collision-free) rather
  * than Date.now()+Math.random(), which collides for two ids minted in the
  * same millisecond — fatal here since these ids key the per-request
@@ -90,7 +92,14 @@ export const REASSIGNED_ID_CONTAINER_KEYS = [
   'items', 'environments', 'customValueLists',
   'enumDefinitions', 'subEnvironments', 'entries',
   'nodes', 'edges', 'quickConfigs',
-  'headers', 'params', 'pathParams'
+  'headers', 'params', 'pathParams',
+  // An API design's sub-entity containers (`shared/types/apiDesign.ts`):
+  // models → properties + examples, enums, routeGroups → routes. The
+  // embedded `doc` bags are NOT containers — they hold documentation
+  // content with no live ids — and a design example's `values` map is
+  // keyed BY property id, which `remapReferences` rekeys (a map's keys
+  // are outside this walker's reach).
+  'models', 'properties', 'examples', 'enums', 'routeGroups', 'routes'
 ] as const
 
 /** Give a fresh id to this object and to every descendant that carries one and
@@ -207,6 +216,20 @@ export const ID_REFERENCE_KEYS = new Set<string>([
   'requestId',
   'nodeId',
   'connectionNodeId',
+  // API design references (`shared/types/apiDesign.ts`), all ID-based by
+  // contract so links survive renames: a property's typed reference
+  // (`PropertyReference.refId` → model/enum), a route's param link /
+  // body / response model (`modelId`, `propertyId`), a model's parent
+  // (`inheritsFrom`) and identifier (`identifier.propertyId`, same key),
+  // and a response's served example (`exampleId`).
+  'refId',
+  'modelId',
+  'propertyId',
+  'inheritsFrom',
+  'exampleId',
+  // A route group's parent (`DesignRouteGroup.parentId` → another group in the
+  // same design) — so a reidentified paste/clone keeps its sub-group nesting.
+  'parentId',
   // A scenario action's picked quick-config (`QUICK_CONFIG_ID_KEY`,
   // `shared/scenarioActionOverride.ts`). Resolved SCOPED to the request that
   // owns the config, so a clone still naming the original's id resolves to
@@ -236,7 +259,30 @@ export function remapReferences(node: unknown, idMap: Map<string, string>): void
   if (node === null || typeof node !== 'object') return
   const rec = node as Record<string, unknown>
   for (const [key, value] of Object.entries(rec)) {
-    if (key === 'id') continue
+    // Skip id FIELDS (they already hold fresh ids) — but only the string
+    // form: a design route's `paramLinks` is keyed by PARAMETER NAME, and
+    // a path parameter named `id` is the common case, so an object under
+    // an `id` key must still be walked.
+    if (key === 'id' && typeof value === 'string') continue
+    // A design entity's embedded `doc` and a design example's `values`
+    // hold user CONTENT — a payload field that happens to be spelled
+    // like a reference key must never be rewritten. The example map is
+    // special-cased first: its KEYS are property ids, which the generic
+    // value rewrite below cannot reach.
+    if (isOpaqueDocumentationBag(rec, key)) {
+      if (key === 'values') {
+        const values = value as Record<string, unknown>
+        const rekeyed: Record<string, unknown> = {}
+        let changed = false
+        for (const [valueKey, valueContent] of Object.entries(values)) {
+          const mappedKey = idMap.get(valueKey)
+          if (mappedKey !== undefined) changed = true
+          rekeyed[mappedKey ?? valueKey] = valueContent
+        }
+        if (changed) rec[key] = rekeyed
+      }
+      continue
+    }
     if (typeof value === 'string') {
       if (!ID_REFERENCE_KEYS.has(key)) continue
       const mapped = idMap.get(value)

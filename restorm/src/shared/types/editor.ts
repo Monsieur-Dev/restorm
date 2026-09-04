@@ -19,7 +19,8 @@ import type {
   RedisRequest,
   KafkaRequest,
   Environment,
-  Scenario
+  Scenario,
+  ApiDesign
 } from './collections'
 
 /** Breadcrumb item for navigation */
@@ -193,6 +194,27 @@ export interface ScenarioEditorTab extends BaseRestormTab {
   scenario: Scenario
 }
 
+/** The Design tab's internal sections, switched by its icon rail. */
+export type DesignSectionKey =
+  | 'settings'
+  | 'models'
+  | 'enums'
+  | 'routes'
+  | 'server'
+  | 'clients'
+  | 'documentation'
+  | 'notes'
+  | 'code'
+
+/** Tab hosting the API design editor. One tab per design (single-tab
+ * policy): opening any of the design's sidebar group entries refocuses
+ * this same tab on the section. */
+export interface DesignTab extends BaseRestormTab {
+  tabType: 'design'
+  /** The design being edited. */
+  design: ApiDesign
+}
+
 /** Tab displaying the firewall + outgoing-request console.
  * Singleton — there is at most one open at any time, identified
  * by the constant `tabId` `console:singleton`. The tab content
@@ -277,6 +299,7 @@ export type RestormEditorTab =
   | RedisRequestTab
   | KafkaRequestTab
   | ScenarioEditorTab
+  | DesignTab
   | ConsoleTab
   | FirewallTab
   | MiniBrowserTab
@@ -349,6 +372,11 @@ export function isHTTPRequestTab(tab: RestormEditorTab): tab is HTTPRequestTab {
 /** Type guard for ScenarioEditorTab */
 export function isScenarioEditorTab(tab: RestormEditorTab): tab is ScenarioEditorTab {
   return tab.tabType === 'scenario-editor'
+}
+
+/** Type guard for DesignTab */
+export function isDesignTab(tab: RestormEditorTab): tab is DesignTab {
+  return tab.tabType === 'design'
 }
 
 /** Type guard for GraphQLRequestTab */

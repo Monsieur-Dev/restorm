@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.0
+
+🎉 **Restorm är nu också en API-designer.** Designa ditt API, servera det som en live-mock över fem protokoll samtidigt, och generera dess klienter — utan att lämna appen, allt på din egen disk.
+
+- **En visuell API-designer.** Modellera ditt API för hand — modeller, enums (namngivna eller inline), rutter, parametrar, namngivna exempel, villkor, taggar och utfasningar — utan att skriva en enda rad specifikation.
+- **Servera det som en mock, med ett klick, över 5 protokoll samtidigt.** Designen blir en server som svarar i HTTP, GraphQL, SOAP, OData och gRPC samtidigt. Svaren kommer från dina namngivna exempel (eller realistiska data som genereras från dina modeller), med villkorsvalidering, simulerad latens och ett stateful läge.
+- **Körklara klienter, genererade automatiskt.** Medan mocken körs skapar Clients-sektionen riktiga, körbara förfrågningar för varje aktiverat protokoll, riktade mot mockens endpoints. Ett klick öppnar en förfrågan och träffar servern — inget mer återimporterande av ditt API någon annanstans för att testa det.
+- **Generera kod** från din design med de medföljande mallarna och dina egna anpassade, renderad i en sandlåda och skriven till disk först efter att du bekräftat. **Exportera även deskriptorn** (OpenAPI med flera).
+- **Vid import förifylls förfrågningarnas kroppar**: GraphQL väljer returtypens skalärfält, gRPC expanderar nästlade meddelanden — förfrågan körs som den är.
+
 ## v1.0.6
 
 Rättningar:

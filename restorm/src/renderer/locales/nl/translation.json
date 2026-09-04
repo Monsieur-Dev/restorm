@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Verwijderen",
       "clone": "Klonen",
+      "openInSplit": "In gesplitst paneel openen",
       "copySuffix": "kopie",
       "rename": "Naam wijzigen",
       "addToFavorites": "Toevoegen aan favorieten",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-design"
       },
       "cut": "Knippen",
       "copy": "Kopiëren",
@@ -335,7 +337,8 @@
       "moveInto": "Naar dit scenario verplaatsen",
       "affectsNote": "Deze aanvraag verwijderen haalt deze ook uit deze scenario's.",
       "deleteAnyway": "Toch verwijderen"
-    }
+    },
+    "expandAll": "Alle verzoeken uitklappen"
   },
   "environment": {
     "newName": "Nieuwe omgeving",
@@ -741,7 +744,8 @@
       "environment": "Omgevingen",
       "settings": "Instellingen",
       "tag": "Tags",
-      "scenario": "Scenario's"
+      "scenario": "Scenario's",
+      "design": "API-designs"
     },
     "tooltip": {
       "noDetails": "Geen details beschikbaar",
@@ -1238,7 +1242,8 @@
       "operation": "Operatie",
       "description": "Beschrijving",
       "example": "Voorbeeld",
-      "constraints": "Beperkingen"
+      "constraints": "Beperkingen",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Geen niet-body-parameters gedeclareerd voor de gefilterde routes."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "optionele enkele ref.",
       "requiredArrayRef": "vereiste array-ref.",
       "optionalArrayRef": "optionele array-ref."
-    }
+    },
+    "editEntity": "Bewerken in de designer"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum-waarden",
+      "addValue": "Een waarde toevoegen…",
+      "removeValue": "Waarde verwijderen",
+      "extract": "Extraheren naar een benoemde enum"
+    },
+    "tags": {
+      "add": "Een tag toevoegen…",
+      "remove": "Tag verwijderen",
+      "routeLabel": "Tags",
+      "groupLabel": "Gedeelde tags"
+    },
+    "section": {
+      "settings": "Instellingen",
+      "models": "Modellen",
+      "enums": "Enums",
+      "routes": "Routes",
+      "documentation": "Documentatie",
+      "notes": "Notities",
+      "code": "Code",
+      "server": "Server",
+      "clients": "Clients"
+    },
+    "rail": {
+      "ariaLabel": "Ontwerpsecties"
+    },
+    "settings": {
+      "subtitle": "Algemene instellingen van het ontwerp “{{name}}”",
+      "serve": {
+        "title": "Ontwerpserver",
+        "action": "Dit ontwerp serveren",
+        "description": "Antwoorden uit benoemde voorbeelden · validatie via constraints",
+        "port": "Poort",
+        "latency": "Gesimuleerde latentie (ms)",
+        "blocked": "Los de {{count}} validatiefout(en) van het design op voordat u het serveert",
+        "startFailed": "De server kon niet starten",
+        "protocolAlways": "HTTP wordt altijd geserveerd",
+        "protocolToggle": "Deze projectie ook serveren",
+        "stateful": "Stateful-modus — POST/PUT/DELETE wijzigen een in-memory opslag (reset bij herstart)",
+        "clientsCallout": "Uw mockserver draait. Er zijn klaar-voor-gebruik clients gegenereerd voor elk protocol dat dit ontwerp bedient.",
+        "clientsCalloutLink": "Vind ze hier"
+      },
+      "identity": {
+        "title": "Identiteit",
+        "title_field": "Titel",
+        "version": "Ontwerpversie",
+        "description": "Beschrijving"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Basispad",
+        "defaultAuth": "Standaard-auth",
+        "environment": "Omgeving"
+      },
+      "export": {
+        "title": "Exporteren",
+        "format": "Descriptorformaat",
+        "download": "Descriptor downloaden",
+        "saved": "Descriptor opgeslagen in {{path}}",
+        "failed": "De export is mislukt"
+      }
+    },
+    "auth": {
+      "none": "Geen",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-key-header",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filteren…",
+      "selectPrompt": "Selecteer een item in de lijst.",
+      "editorPending": "De editor voor deze sectie is onderweg."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} eigenschap",
+      "propertyCount_other": "{{count}} eigenschappen",
+      "add": "Model toevoegen",
+      "delete": "Model verwijderen",
+      "deleteTitle": "{{name}} verwijderen?",
+      "deleteNoImpact": "Dit model wordt nergens gebruikt.",
+      "deleteImpactIntro": "Het verwijderen van dit model werkt bij:",
+      "deleteImpactChild": "{{name}} verliest zijn overerving (eigen eigenschappen blijven)",
+      "description": "Beschrijving",
+      "descriptionPlaceholder": "Wat dit model vertegenwoordigt (optioneel)",
+      "newName": "NewModel",
+      "selectPrompt": "Selecteer een model of maak er een.",
+      "tabs": {
+        "schema": "Schema",
+        "examples": "Voorbeelden",
+        "settings": "Instellingen",
+        "notes": "Notities"
+      },
+      "addSubModel": "Submodel toevoegen",
+      "collapseAll": "Alles inklappen",
+      "expandAll": "Alles uitklappen"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} waarde",
+      "valueCount_other": "{{count}} waarden",
+      "lists": "Enums",
+      "values": "Waarden",
+      "addEnum": "Enum toevoegen",
+      "addValue": "Waarde toevoegen",
+      "valueHeader": "Waarde",
+      "newName": "NewEnum",
+      "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype.",
+      "nameHeader": "Naam",
+      "description": "Beschrijving",
+      "descriptionPlaceholder": "Wat deze enum vertegenwoordigt (optioneel)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Nog geen template — voeg er een toe om code te genereren vanuit dit ontwerp.",
+      "subtitle": "Genereer projecten vanuit dit ontwerp — weergegeven in een sandbox, pas geschreven nadat je de structuur bevestigt",
+      "sourceTitle": "Template",
+      "sourceKind": {
+        "official": "Officieel",
+        "repo": "Repository",
+        "local": "Lokale map"
+      },
+      "official": "Officieel template",
+      "repo": "Repository (owner/repo)",
+      "local": "Lokale templatemap",
+      "output": "Uitvoermap (absoluut of relatief aan het project)",
+      "browse": "Kies de uitvoermap",
+      "generate": "Project genereren",
+      "generating": "Genereren in de sandbox…",
+      "blocked": "Los eerst de {{count}} validatiefout(en) van het design op",
+      "failed": "De generatie is mislukt",
+      "outputMissing": "Kies eerst een uitvoermap",
+      "extracted": "{{count}} bestand(en) geschreven naar {{root}}",
+      "preview": "{{name}} genereerde {{count}} bestand(en) — bevestig om ze te schrijven",
+      "confirm": "Naar de uitvoermap schrijven",
+      "discard": "Verwerpen",
+      "generateOne": "Dit project genereren",
+      "remove": "Deze template verwijderen",
+      "addTemplate": "Een template toevoegen",
+      "library": {
+        "title": "Templatebibliotheek",
+        "recent": "Onlangs gebruikt",
+        "official": "Officiële templates",
+        "custom": "Aangepast",
+        "add": "Toevoegen",
+        "use": "Gebruiken",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Organisatiesjablonen",
+        "openRepo": "Repository openen",
+        "remove": "Verwijderen",
+        "addTemplate": "Sjabloon toevoegen",
+        "urlPlaceholder": "Git-repository-URL",
+        "descPlaceholder": "Beschrijving (stack / wat het genereert)",
+        "noOrgTemplates": "Nog geen organisatiesjablonen.",
+        "loading": "Sjablonen laden…",
+        "signedOut": "Meld je aan om de sjablonen van je organisatie te zien.",
+        "fetchError": "Kon de sjablonen niet laden:",
+        "unavailable": "niet beschikbaar",
+        "officialTag": "Officieel",
+        "officialDesc": {
+          "server-rest-typescript": "REST-server in TypeScript op Express — getypeerde routes, modellen en validatie van aanvragen.",
+          "server-rest-dotnet": "Minimal-API-server in C# / ASP.NET Core — endpoints, DTO's en validatie.",
+          "server-grpc-typescript": "gRPC-server in TypeScript — .proto-service, getypeerde berichten en server-stubs.",
+          "server-grpc-dotnet": "gRPC-server in C# / .NET — .proto-service, berichten en server-stubs.",
+          "db-postgres": "PostgreSQL-schema, seed-data en CRUD-scripts vanuit het ontwerp."
+        },
+        "added": "Template toegevoegd",
+        "done": "Klaar"
+      },
+      "extractedTitle": "Bestanden geschreven",
+      "openOutput": "Uitvoermap openen",
+      "refresh": "Deze template vernieuwen vanaf de bron",
+      "removeConfirm": "De Template “{{name}}” wordt uit dit ontwerp verwijderd (reeds gegenereerde bestanden op schijf blijven ongewijzigd).",
+      "removeTitle": "Deze Template verwijderen?",
+      "tabs": {
+        "template": "Sjabloon"
+      },
+      "questions": {
+        "title": "Sjabloonvragen"
+      },
+      "errorTitle": "Genereren mislukt",
+      "source": "Bron",
+      "destination": "Bestemming",
+      "expand": "Uitvouwen",
+      "collapse": "Inklappen"
+    },
+    "statusbar": {
+      "format": "ontwerp · formaat {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identiteit",
+      "identifierProperty": "Identificerende eigenschap",
+      "identifierStrategy": "Strategie",
+      "inheritsFrom": "Erft van",
+      "noIdentifier": "(geen)",
+      "noParent": "(geen)",
+      "storage": "Opslag & levenscyclus",
+      "volumetry": "Verwacht volume",
+      "volumetryUnset": "(niet opgegeven)",
+      "operationalProfile": "Operationeel profiel",
+      "accessPattern": "Lees-/schrijfprofiel",
+      "traffic": "Toegangsfrequentie",
+      "freshness": "Versheidstolerantie",
+      "sensitivity": "Gegevensgevoeligheid",
+      "retention": "Bewaring / levenscyclus",
+      "profileUnset": "(niet opgegeven)",
+      "timestamps": "Tijdstempels (aangemaakt/gewijzigd)",
+      "softDelete": "Soft delete",
+      "usedBy": "Gebruikt door",
+      "usedByNone": "Dit model wordt nog niet gebruikt.",
+      "usage": {
+        "body": "body",
+        "response": "antwoord {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} erft ervan"
+      },
+      "generators": "Routes",
+      "generateCrud": "CRUD genereren",
+      "generateSearch": "Zoekroutes genereren"
+    },
+    "schema": {
+      "addProperty": "Eigenschap toevoegen",
+      "deleteProperty": "Eigenschap verwijderen",
+      "columns": {
+        "property": "Eigenschap",
+        "type": "Type",
+        "flags": "Attributen",
+        "example": "Voorbeeld"
+      },
+      "unnamed": "(naamloos)",
+      "nameMissing": "naam ontbreekt",
+      "panelTitle": "Eigenschap: {{name}}",
+      "jumpToParent": "{{name}} openen",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(geen)",
+      "invalidPattern": "Ongeldige reguliere expressie",
+      "minAboveMax": "Min overschrijdt max",
+      "fields": {
+        "name": "Naam",
+        "type": "Type",
+        "format": "Formaat",
+        "elementType": "Elementtype",
+        "onDelete": "Bij verwijdering",
+        "description": "Beschrijving",
+        "example": "Voorbeeld",
+        "default": "Standaard",
+        "deprecationMessage": "Afkeuringsbericht",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Minimale lengte",
+        "maxLength": "Maximale lengte",
+        "pattern": "Patroon"
+      },
+      "generatedProperties": "Gegenereerde eigenschappen",
+      "inheritedProperties": "Overgeërfde eigenschappen",
+      "ownProperties": "Eigen eigenschappen",
+      "tabs": {
+        "property": "Eigenschap"
+      },
+      "advancedType": "Geavanceerd…"
+    },
+    "flags": {
+      "required": "verplicht",
+      "nullable": "nullable",
+      "unique": "uniek",
+      "immutable": "onveranderlijk",
+      "searchable": "doorzoekbaar",
+      "deprecated": "verouderd",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Standaard",
+      "add": "Voorbeeld toevoegen",
+      "delete": "Voorbeeld verwijderen",
+      "name": "Naam van het voorbeeld",
+      "newName": "Voorbeeld",
+      "defaultHint": "Standaardwaarden komen van elke eigenschap (leeg = automatisch gegenereerd).",
+      "namedHint": "Typ een waarde om die vast te leggen; laat leeg om de gegenereerde te behouden.",
+      "columns": {
+        "value": "Waarde",
+        "origin": "Herkomst"
+      },
+      "auto": "auto",
+      "defined": "gedefinieerd",
+      "constraintViolated": "De waarde schendt de beperking van de eigenschap ({{constraint}})",
+      "deleteTitle": "Dit voorbeeld verwijderen?",
+      "deleteConfirm": "Het voorbeeld “{{name}}” wordt verwijderd."
+    },
+    "onDelete": {
+      "restrict": "Beperken (verbieden zolang in gebruik)",
+      "cascade": "Trapsgewijs verwijderen",
+      "setNull": "Op null zetten"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-increment",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Honderden",
+      "tenThousands": "Tienduizenden",
+      "millions": "Miljoenen"
+    },
+    "accessPattern": {
+      "readHeavy": "Leeszwaar",
+      "writeHeavy": "Schrijfzwaar",
+      "balanced": "Gebalanceerd",
+      "appendOnly": "Alleen toevoegen"
+    },
+    "traffic": {
+      "low": "Laag",
+      "medium": "Middel",
+      "high": "Hoog"
+    },
+    "freshness": {
+      "strong": "Sterke consistentie",
+      "shortCache": "Korte cache OK",
+      "longCache": "Lange cache OK"
+    },
+    "sensitivity": {
+      "public": "Openbaar",
+      "internal": "Intern",
+      "confidential": "Vertrouwelijk",
+      "pii": "Persoonsgegevens (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Archiveerbaar",
+      "ephemeral": "Kortstondig (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "De eigenschap heeft geen naam",
+      "propertyNameDuplicate": "Dubbele eigenschapsnaam",
+      "propertyShadowsParent": "Verbergt een geërfde eigenschap",
+      "referenceTargetUnknown": "Het gerefereerde type bestaat niet meer",
+      "constraintPatternInvalid": "Ongeldig patroon (reguliere expressie)",
+      "constraintMinAboveMax": "Min overschrijdt max",
+      "modelNameEmpty": "Het model heeft geen naam",
+      "enumNameEmpty": "Het enum heeft geen naam",
+      "groupNameEmpty": "De groep heeft geen naam",
+      "modelNameDuplicate": "Dubbele modelnaam",
+      "enumNameDuplicate": "Dubbele enumnaam",
+      "componentNameCollision": "Een model en een enum delen deze naam",
+      "groupNameDuplicate": "Dubbele groepsnaam",
+      "inheritanceTargetUnknown": "Het geërfde model bestaat niet meer",
+      "inheritanceCycle": "Circulaire overervingsketen",
+      "identifierPropertyUnknown": "De identificerende eigenschap bestaat niet meer",
+      "paramLinkTargetUnknown": "Een parameterkoppeling wijst naar een ontbrekende eigenschap",
+      "bodyModelUnknown": "Het body-model bestaat niet meer",
+      "responseModelUnknown": "Een antwoordmodel bestaat niet meer",
+      "responseExampleUnknown": "Een antwoord serveert een ontbrekend voorbeeld",
+      "routeResponsesMissing": "De route declareert geen respons",
+      "routePathDuplicate": "Een andere route beantwoordt deze methode en dit pad al",
+      "routePathReserved": "De designserver reserveert dit pad — de route zou nooit antwoorden"
+    },
+    "routes": {
+      "addGroup": "Groep toevoegen",
+      "addRoute": "Route toevoegen",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Selecteer een groep of route, of maak een groep.",
+      "deleteGroupTitle": "{{name}} verwijderen?",
+      "deleteGroupImpact": "De groep en zijn {{count}} routes worden verwijderd.",
+      "method": "Methode",
+      "path": "Pad",
+      "summary": "Samenvatting",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definitie",
+        "responses": "Antwoorden"
+      },
+      "group": {
+        "auth": "Vereiste auth",
+        "authInherited": "Standaard van het design",
+        "versionPrefix": "Versievoorvoegsel",
+        "headers": "Contract-headers (geërfd door routes)",
+        "headerName": "Header",
+        "addHeader": "Header toevoegen",
+        "deleteHeader": "Header verwijderen",
+        "noHeaders": "Geen gedeelde header."
+      },
+      "params": {
+        "pathTitle": "Padparameters",
+        "otherTitle": "Parameters (query en header)",
+        "name": "Naam",
+        "location": "In",
+        "link": "Modelkoppeling",
+        "noLink": "—",
+        "add": "Parameter toevoegen",
+        "delete": "Parameter verwijderen",
+        "auto": "auto",
+        "pathEmpty": "Typ een {{param}} in het pad om de rij te maken.",
+        "otherEmpty": "Nog geen query- of header-parameters.",
+        "nameEmpty": "Een parameter heeft een naam nodig",
+        "nameTaken": "Deze naam is al in gebruik"
+      },
+      "body": {
+        "label": "Request-body",
+        "empty": "(leeg)",
+        "nonStandardHint": "Een request-body bij {{method}} is niet standaard — veel servers en proxy's negeren die. Restorm levert en documenteert die toch."
+      },
+      "responses": {
+        "add": "Toevoegen",
+        "codePlaceholder": "Statuscode",
+        "standardErrors": "+ standaardfouten",
+        "empty": "Nog geen antwoord gedeclareerd.",
+        "emptyBody": "lege body",
+        "model": "Geretourneerd model",
+        "list": "Lijst",
+        "paginated": "Gepagineerd",
+        "listOf": "lijst van {{name}}",
+        "paginatedListOf": "gepagineerde lijst van {{name}}",
+        "example": "Geserveerd voorbeeld",
+        "exampleAuto": "(auto gegenereerd)",
+        "delete": "Antwoord verwijderen",
+        "codeInvalid": "Voer een 3-cijferige statuscode in",
+        "codeTaken": "Deze code is al gedeclareerd"
+      },
+      "settings": {
+        "inherited": "Geërfd van de groep",
+        "authInherited": "Geërfd van de groep",
+        "editGroup": "Bewerken in de groep ↗",
+        "headers": "Contract-headers",
+        "behaviour": "Gedrag",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (seconden)",
+        "traffic": "Verwacht verkeer",
+        "authOverride": "Auth-override",
+        "pagination": "Paginering",
+        "defaultLimit": "Standaard paginagrootte",
+        "maxLimit": "Max. paginagrootte"
+      },
+      "addSubgroup": "Een subgroep toevoegen"
+    },
+    "newDesignName": "Nieuw API-design",
+    "createFromScratch": "Een API-design maken",
+    "createFromDoc": "Een design maken van deze API",
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Serveert op http://localhost:{{port}}",
+      "stopped": "Server gestopt",
+      "totalCalls": "{{count}} aanroep(en) in deze run",
+      "stop": "Server stoppen",
+      "close": "Dit paneel sluiten",
+      "forcedPill": "geforceerd {{code}}",
+      "defaultReturn": "Designrespons (standaard)",
+      "codeReturn": "Antwoord {{code}}",
+      "customCode": "Aangepaste statuscode",
+      "customBody": "Aangepaste responsbody",
+      "customBodyPlaceholder": "Optionele responsbody (JSON)",
+      "customApply": "Forceren"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Schrijfroutes beveiligen met authenticatie",
+      "authWritesHint": "Vereis bearer-authenticatie bij aanmaken, bijwerken en verwijderen; leesacties blijven openbaar.",
+      "generate": "Genereren",
+      "replace": "De bestaande routes vervangen",
+      "replaceHint": "Voor dit model bestaan al routes. Vervang ze om duplicaten te voorkomen; laat uit om een tweede set toe te voegen.",
+      "title": "CRUD genereren voor {{name}}",
+      "projections": {
+        "http": "{{count}} REST-routes",
+        "graphql": "{{queries}} query's / {{mutations}} mutaties in GraphQL",
+        "grpc": "{{count}} gRPC-methoden",
+        "odata": "{{count}} OData-entiteitenset",
+        "soap": "{{count}} SOAP-operaties",
+        "title": "Eén model, elk protocol — deze CRUD wordt ook aangeboden als:"
+      }
+    },
+    "server": {
+      "subtitle": "Serveer dit ontwerp als een live-mock en volg elke aanroep."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Codegeneratie",
+        "name": "Variabele",
+        "value": "Waarde (Handlebars)",
+        "add": "Variabele toevoegen",
+        "none": "Nog geen variabelen — voeg er een toe via de kop van dit sjabloon.",
+        "noTemplates": "Kies een of meer sjablonen in de sectie ‘</> Code’ — hier definieer je vervolgens de variabelen die de generatie gebruikt.",
+        "generalTitle": "Algemene variabelen",
+        "scope": {
+          "general": "Algemeen",
+          "property": "Modeleigenschap"
+        },
+        "discover": "Ontdek de variabelen die dit sjabloon gebruikt",
+        "undeclared": "Gebruikt maar niet gedeclareerd: {{names}}",
+        "allDeclared": "Alle variabelen die dit sjabloon gebruikt zijn gedeclareerd."
+      }
+    },
+    "clients": {
+      "generated": "Clients gegenereerd — open ze onder ‘Clients’ in de zijbalk.",
+      "importing": "Clients importeren…",
+      "refresh": "De clients opnieuw genereren",
+      "startPrompt": "Start de server om de clients te genereren.",
+      "startServerPrompt": "Start de <serverLink>designserver</serverLink> om toegang te krijgen tot de clientverzoeken die automatisch uit het model worden gegenereerd.",
+      "subtitle": "Uw API-designserver draait en bedient de routes die u hebt gedefinieerd. De onderstaande verzoeken roepen die routes rechtstreeks aan: open er een om die te testen. Ze zijn vluchtig en verdwijnen wanneer de server stopt."
+    },
+    "descriptors": {
+      "copy": "URL kopiëren"
+    },
+    "projections": {
+      "title": "Projecties",
+      "hint": "Dezelfde operatie, zoals elk aangeboden protocol die blootstelt."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Behouden",
@@ -2308,7 +2835,45 @@
     "addCookie": "Een cookie toevoegen",
     "removeCookie": "Een cookie verwijderen",
     "clearCookieDomain": "Cookies voor een domein wissen",
-    "clearCookies": "Alle cookies wissen"
+    "clearCookies": "Alle cookies wissen",
+    "listDesigns": "API-designs weergeven",
+    "getDesign": "Een API-design ophalen",
+    "createDesign": "Een API-design maken",
+    "createDesignFromDocumentation": "Design maken van geïmporteerde API",
+    "updateDesign": "Een design bijwerken",
+    "deleteDesign": "Een design verwijderen",
+    "createDesignModel": "Een designmodel maken",
+    "updateDesignModel": "Een designmodel bijwerken",
+    "deleteDesignModel": "Een designmodel verwijderen",
+    "setDesignProperty": "Een modeleigenschap instellen",
+    "deleteDesignProperty": "Een modeleigenschap verwijderen",
+    "createDesignEnum": "Een design-enum maken",
+    "updateDesignEnum": "Een design-enum bijwerken",
+    "deleteDesignEnum": "Een design-enum verwijderen",
+    "setDesignExample": "Een benoemd voorbeeld instellen",
+    "deleteDesignExample": "Een benoemd voorbeeld verwijderen",
+    "createDesignRouteGroup": "Een routegroep maken",
+    "updateDesignRouteGroup": "Een routegroep bijwerken",
+    "deleteDesignRouteGroup": "Een routegroep verwijderen",
+    "createDesignRoute": "Een designroute maken",
+    "updateDesignRoute": "Een designroute bijwerken",
+    "deleteDesignRoute": "Een designroute verwijderen",
+    "setDesignRouteParam": "Een routeparameter maken of bijwerken",
+    "deleteDesignRouteParam": "Een routeparameter verwijderen",
+    "generateDesignCrud": "CRUD-routes genereren",
+    "generateDesignSearchRoutes": "Zoekroutes genereren",
+    "serveDesign": "Een design serveren",
+    "stopDesignServer": "Een designserver stoppen",
+    "getDesignServerStatus": "Status van de designserver",
+    "setDesignRouteResponse": "Een respons forceren",
+    "exportDesign": "Een designdescriptor exporteren",
+    "generateDesignCode": "Code genereren uit een design",
+    "getDesignTemplateContract": "Het contract van de code-templates ophalen",
+    "setDesignTemplates": "De code-templates van een ontwerp instellen",
+    "setDesignModelVariables": "Codegen-overrides van een model instellen",
+    "setDesignPropertyVariables": "Codegen-overrides van een eigenschap instellen",
+    "setDesignRouteVariables": "Codegen-overrides van een route instellen",
+    "setDesignTemplateVariables": "Globale codegen-variabelen van een sjabloon instellen"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "Scenario \"{{name}}\" toegevoegd",
       "modifiedScenario": "Scenario \"{{name}}\" gewijzigd",
       "deletedScenario": "Scenario \"{{name}}\" verwijderd",
+      "addedDesign": "Ontwerp \"{{name}}\" toegevoegd",
+      "modifiedDesign": "Ontwerp \"{{name}}\" gewijzigd",
+      "deletedDesign": "Ontwerp \"{{name}}\" verwijderd",
       "addedFolder": "Map \"{{name}}\" toegevoegd",
       "modifiedFolder": "Map \"{{name}}\" gewijzigd",
       "deletedFolder": "Map \"{{name}}\" verwijderd",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verwijderd",
       "movedRequest": "Verzoek \"{{name}}\" verplaatst",
       "movedScenario": "Scenario \"{{name}}\" verplaatst",
+      "movedDesign": "Ontwerp \"{{name}}\" verplaatst",
       "movedFolder": "Map \"{{name}}\" verplaatst",
       "movedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verplaatst",
       "reorderedFolder": "Items opnieuw geordend in de map '{{name}}'",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "Update van verzoek \"{{name}}\"",
       "singleScenario": "Update van scenario \"{{name}}\"",
+      "singleDesign": "Update van ontwerp \"{{name}}\"",
       "singleFolder": "Update van map \"{{name}}\"",
       "singleEnvironmentFolder": "Update van omgevingsmap \"{{name}}\"",
       "singleFileFormatVersion": "Overgang naar bestandsformaat {{name}}",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} verzoeken",
       "countScenario_one": "{{count}} scenario",
       "countScenario_other": "{{count}} scenario's",
+      "countDesign_one": "{{count}} ontwerp",
+      "countDesign_other": "{{count}} ontwerpen",
       "countFolder_one": "{{count}} map",
       "countFolder_other": "{{count}} mappen",
       "countEnvironmentFolder_one": "{{count}} omgevingsmap",

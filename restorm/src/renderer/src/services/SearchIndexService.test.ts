@@ -67,3 +67,43 @@ describe('SearchIndexService (renderer) — scenario container indexing on load'
     expect(indexedIds()).toContain('sub-scn')
   })
 })
+
+describe('SearchIndexService (renderer) — design indexing', () => {
+  beforeEach(() => { indexDocuments.mockClear(); indexDocuments.mockResolvedValue(undefined) })
+
+  const design = {
+    type: 'design',
+    id: 'dsg',
+    name: 'Petstore design',
+    tags: ['pets'],
+    info: { title: 'Petstore', description: 'A pet store.', version: '1.0.0' },
+    server: { basePath: '/api' },
+    models: [{ id: 'm1', doc: { name: 'Pet', description: 'A pet.' }, properties: [{ id: 'p1', doc: { name: 'name', type: 'string', required: true } }] }],
+    enums: [{ id: 'e1', doc: { name: 'PetStatus', properties: [], enumValues: ['available', 'sold'] } }],
+    routeGroups: [{
+      id: 'g1',
+      doc: { name: 'Pets' },
+      design: { basePath: '/pets' },
+      routes: [{ id: 'r1', doc: { summary: 'List pets', description: 'Every pet.', match: { urlPattern: '/', method: 'GET' } } }]
+    }]
+  }
+
+  it('walks a design into design + per-entity documents with composite ids', async () => {
+    await searchIndexService.indexDesign(design as never)
+    const ids = indexedIds()
+    expect(ids).toEqual(['dsg', 'dsg::model:m1', 'dsg::enum:e1', 'dsg::route:r1'])
+    const docs = indexDocuments.mock.calls[0]?.[0] as { id: string; title: string; category: string; navigation: Record<string, unknown> }[]
+    expect(docs.every((d) => d.category === 'design')).toBe(true)
+    const route = docs.find((d) => d.id === 'dsg::route:r1')
+    expect(route?.title).toBe('List pets')
+    expect(route?.navigation).toMatchObject({ type: 'design', designId: 'dsg', section: 'routes', entityId: 'r1' })
+  })
+
+  it('indexes a design nested inside a folder during the tree walk', async () => {
+    const folder = { id: 'env', name: 'Env', tags: [], configuration: {}, items: [design] }
+    await searchIndexService.indexFolderTree(folder as unknown as FolderArg)
+    const ids = indexedIds()
+    expect(ids).toContain('dsg')
+    expect(ids).toContain('dsg::model:m1')
+  })
+})

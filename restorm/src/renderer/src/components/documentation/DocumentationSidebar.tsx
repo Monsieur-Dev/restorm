@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, ScrollableElement } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { Badge } from '../common/Badge'
+import { mapToBadgeType } from '../../utils/badgeUtils'
 import type {
   ModelDocumentation,
   OperationDocumentation
@@ -148,11 +150,7 @@ export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
                                 options={{ ariaLabel: summary }}
                               >
                                 {method !== undefined && method.length > 0 && (
-                                  <span
-                                    className={`documentation-host-sidebar__method documentation-host-sidebar__method--${method.toLowerCase()}`}
-                                  >
-                                    {method}
-                                  </span>
+                                  <Badge type={mapToBadgeType(method)} />
                                 )}
                                 <span className="documentation-host-sidebar__op-summary">{summary}</span>
                               </Button>

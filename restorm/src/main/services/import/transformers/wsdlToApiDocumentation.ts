@@ -20,6 +20,7 @@ export interface WsdlOperationData {
   soapAction: string
   input?: string | undefined
   output?: string | undefined
+  deprecated?: boolean | undefined
 }
 
 export interface WsdlPortTypeData {
@@ -63,6 +64,13 @@ function pickPortTypeDoc(portTypes: WsdlPortTypeData[], opName: string): string 
     if (match?.documentation !== undefined && match.documentation.length > 0) return match.documentation
   }
   return undefined
+}
+
+/** True when the operation is flagged deprecated in any portType — the binding
+ *  operations carry no such flag, so the deprecation rides on the portType side
+ *  (see soapProjection's `deprecated="true"` attribute). */
+function pickPortTypeDeprecated(portTypes: WsdlPortTypeData[], opName: string): boolean {
+  return portTypes.some((pt) => pt.operations.some((op) => op.name === opName && op.deprecated === true))
 }
 
 function findBinding(bindings: WsdlBindingData[], portBinding: string): WsdlBindingData | undefined {
@@ -111,6 +119,7 @@ export function wsdlToApiDocumentation(
       }
       const description = op.documentation ?? pickPortTypeDoc(parsed.portTypes, op.name)
       if (description !== undefined) doc.description = description
+      if (pickPortTypeDeprecated(parsed.portTypes, op.name)) doc.deprecated = true
       operations.push(doc)
     }
   }

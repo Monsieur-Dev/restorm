@@ -11,7 +11,7 @@ import { ApiInfoSection } from './ApiInfoSection'
 import { CompositionSection } from './CompositionSection'
 import { DocumentationHostSearch, type DocumentationHostSearchHandle } from './DocumentationHostSearch'
 import { DocumentationSidebar } from './DocumentationSidebar'
-import { DocumentationModelsContext, DocumentationSecuritySchemesContext } from './documentationModels'
+import { DocumentationEditContext, DocumentationEnumsContext, DocumentationModelsContext, DocumentationSecuritySchemesContext } from './documentationModels'
 import { collectEnumGroups, isEnumModel } from './enumGroups'
 import { DocumentationNavigationContext, type DocumentationNavigationApi } from './documentationNavigation'
 import { EnumsSection } from './EnumsSection'
@@ -66,6 +66,14 @@ export interface DocumentationHostProps {
    * leaves this at its default (`true`); the compact search-result
    * popover passes `false` so the model graph stays minimal. */
   showModelGraphMinimap?: boolean
+  /** Wired by hosts whose documentation is EDITABLE elsewhere in the
+   * app (the design doc viewer): each route block gains an edit
+   * button jumping to the operation's editable card. Imported-API
+   * surfaces leave this undefined — no edit chrome. */
+  onEditOperation?: (operation: OperationDocumentation) => void
+  /** Same, for models: each model-graph node header gains an edit
+   * button jumping to that model's editable card (matched by name). */
+  onEditModel?: (modelName: string) => void
 }
 
 /**
@@ -94,7 +102,9 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   showApiInfo = false,
   tagColors,
   testId,
-  showModelGraphMinimap = true
+  showModelGraphMinimap = true,
+  onEditOperation,
+  onEditModel
 }) => {
   const { t } = useTranslation()
   /** Resolve the effective `onAddRequest` once: when `hideAddRequest`
@@ -160,6 +170,11 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
     () => new Set(structuralModels.map((m) => m.name)),
     [structuralModels]
   )
+  // Named enums — a type literal that names one links to the Enums section.
+  const enumNames = useMemo<Set<string>>(
+    () => new Set(models.filter((m) => isEnumModel(m)).map((m) => m.name)),
+    [models]
+  )
   /** Bucket the in-scope operations by their `group` (tag) in the
    * order the spec declares the groups. `(ungrouped)` collects
    * orphan operations that have no `group` field — kept last so the
@@ -183,6 +198,12 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
       }))
   }, [slice.groups, operations])
   const securitySchemes = apiDocumentation.securitySchemes ?? {}
+  // Edit affordances (design doc viewer). Memoized so the context
+  // value stays referentially stable for the model-node consumers.
+  const editApi = useMemo(
+    () => (onEditModel !== undefined ? { editModel: onEditModel } : {}),
+    [onEditModel]
+  )
 
   const navigationApi = useMemo<DocumentationNavigationApi>(() => ({
     scrollToTop: (): void => {
@@ -335,20 +356,38 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
                 showGroupChip={false}
                 {...(tagColors ? { tagColors } : {})}
                 {...(effectiveOnAddRequest ? { onAddRequest: effectiveOnAddRequest } : {})}
+                {...(onEditOperation ? { onEdit: onEditOperation } : {})}
               />
             ))}
           </section>
         ))
-        : operations.map((op, idx) => (
-          <RouteBlock
-            key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}
-            operation={op}
-            headingLevel={sectionHeadingLevel}
-            showGroupChip={!isSingleRoute}
-            {...(tagColors ? { tagColors } : {})}
-            {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
-          />
-        ))}
+        : operations.map((op, idx) => {
+          // A single-route (ungrouped) layout has no group header, so its
+          // group's description would otherwise never render — surface it
+          // above the route block when the operation carries a described group.
+          const group = op.group !== undefined ? slice.groups.find((g) => g.name === op.group) : undefined
+          const groupDescription = isSingleRoute && group?.description !== undefined && group.description.length > 0
+            ? group.description
+            : undefined
+          return (
+            <React.Fragment key={`${op.operationId ?? op.match.urlPattern}-${String(idx)}`}>
+              {groupDescription !== undefined && (
+                <MarkdownViewer
+                  value={groupDescription}
+                  data-testid={`documentation-host-group-description-${op.group ?? ''}`}
+                />
+              )}
+              <RouteBlock
+                operation={op}
+                headingLevel={sectionHeadingLevel}
+                showGroupChip={!isSingleRoute}
+                {...(tagColors ? { tagColors } : {})}
+                {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
+                {...(onEditOperation ? { onEdit: onEditOperation } : {})}
+              />
+            </React.Fragment>
+          )
+        })}
 
       {structuralModels.length > 0 ? (
         <section
@@ -373,7 +412,9 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   return (
     <DocumentationNavigationContext.Provider value={navigationApi}>
     <DocumentationModelsContext.Provider value={modelNames}>
+    <DocumentationEnumsContext.Provider value={enumNames}>
     <DocumentationSecuritySchemesContext.Provider value={securitySchemes}>
+    <DocumentationEditContext.Provider value={editApi}>
       <div
         ref={rootRef}
         className={`documentation-host${showSidebar ? ' documentation-host--with-sidebar' : ''}${sidebarDockCollapsed ? ' documentation-host--sidebar-collapsed' : ''}`}
@@ -424,7 +465,9 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           renderMain()
         )}
       </div>
+    </DocumentationEditContext.Provider>
     </DocumentationSecuritySchemesContext.Provider>
+    </DocumentationEnumsContext.Provider>
     </DocumentationModelsContext.Provider>
     </DocumentationNavigationContext.Provider>
   )
@@ -450,9 +493,10 @@ interface RouteBlockProps {
   showGroupChip: boolean
   tagColors?: Record<string, string>
   onAddRequest?: (operation: OperationDocumentation) => void
+  onEdit?: (operation: OperationDocumentation) => void
 }
 
-const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, tagColors, onAddRequest }) => {
+const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, tagColors, onAddRequest, onEdit }) => {
   const { t } = useTranslation()
   const SectionHeading = headingLevel === 1 ? 'h1' : headingLevel === 2 ? 'h2' : 'h3'
   const opIdSlug = getOperationSlug(operation)
@@ -468,6 +512,7 @@ const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGr
         showGroupChip={showGroupChip}
         {...(tagColors ? { tagColors } : {})}
         {...(onAddRequest ? { onAddRequest } : {})}
+        {...(onEdit ? { onEdit } : {})}
       />
       {(operation.parameters?.length ?? 0) > 0 && (
         <section

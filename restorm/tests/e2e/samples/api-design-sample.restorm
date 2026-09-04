@@ -1,0 +1,290 @@
+fileFormatVersion: 1.1
+_projectUuid: 7a1c2f9e-4d3b-5a68-9c01-design468001
+collections:
+  - id: env-design-sample
+    name: Petstore design project
+    folderType: environment
+    configuration: {}
+    environments: []
+    items: []
+    tags: []
+  - id: design-petstore
+    name: Petstore design
+    type: design
+    defaultSecurity:
+      - bearerAuth: []
+    enums:
+      - id: enum-status
+        doc:
+          name: UserStatus
+          description: Account lifecycle state.
+          enumValues:
+            - active
+            - suspended
+            - deleted
+          properties: []
+    info:
+      contact:
+        name: API team
+        url: https://example.com/team
+        email: api@example.com
+      description: A pet store API designed in Restorm.
+      externalDocs:
+        url: https://example.com/wiki
+        description: Wiki
+      license:
+        name: MIT
+        url: https://opensource.org/licenses/MIT
+      termsOfService: https://example.com/terms
+      title: Petstore
+      version: 1.0.0
+    models:
+      - id: model-user
+        design:
+          identifier:
+            propertyId: prop-user-id
+            strategy: uuid
+          softDelete: true
+          timestamps: true
+        doc:
+          name: User
+          description: A registered user.
+        examples:
+          - id: example-user-admin
+            name: an admin User
+            description: Full-rights account served by the design server.
+            values:
+              prop-user-email: admin@example.com
+              prop-user-status: active
+        intents:
+          volumetry: tenThousands
+        properties:
+          - id: prop-user-id
+            design:
+              immutable: true
+              unique: true
+            doc:
+              name: id
+              type: string
+              description: Server-minted identifier.
+              format: uuid
+              readOnly: true
+              required: false
+          - id: prop-user-email
+            design:
+              searchable: true
+              unique: true
+            doc:
+              name: email
+              type: string
+              constraints:
+                maxLength: 254
+                pattern: ^[^@]+@[^@]+$
+              description: Sign-in address.
+              example: ada@example.com
+              format: email
+              required: true
+            intents:
+              pii: true
+          - id: prop-user-password
+            design:
+              writeOnly: true
+            doc:
+              name: password
+              type: string
+              constraints:
+                minLength: 12
+              required: true
+            intents:
+              pii: true
+          - id: prop-user-status
+            design:
+              defaultValue: active
+              reference:
+                refId: enum-status
+                target: enum
+            doc:
+              name: status
+              type: string
+              nullable: true
+              required: false
+          - id: prop-user-nicknames
+            design:
+              arrayItems:
+                type: string
+            doc:
+              name: nicknames
+              type: array
+              required: false
+          - id: prop-user-settings
+            design:
+              deprecationMessage: Use preferences instead.
+              mapValues:
+                type: string
+            doc:
+              name: settings
+              type: map
+              deprecated: true
+              required: false
+      - id: model-admin
+        design:
+          inheritsFrom: model-user
+        doc:
+          name: AdminUser
+          description: A user with elevated rights.
+        properties:
+          - id: prop-admin-scope
+            doc:
+              name: scope
+              type: string
+              required: true
+      - id: model-order
+        design:
+          identifier:
+            propertyId: prop-order-id
+            strategy: autoIncrement
+          timestamps: true
+        doc:
+          name: Order
+        intents:
+          volumetry: millions
+        properties:
+          - id: prop-order-id
+            doc:
+              name: id
+              type: integer
+              format: int64
+              readOnly: true
+              required: false
+          - id: prop-order-customer
+            design:
+              reference:
+                onDelete: restrict
+                refId: model-user
+                target: model
+            doc:
+              name: customer
+              type: User
+              required: true
+              targetModelRef: User
+          - id: prop-order-items
+            design:
+              reference:
+                onDelete: cascade
+                refId: model-user
+                target: model
+            doc:
+              name: lines
+              type: array
+              isArrayOfRef: true
+              required: true
+              targetModelRef: User
+    notes: Reference design used by the serialization tests.
+    routeGroups:
+      - id: group-users
+        design:
+          auth: bearer
+          basePath: /users
+          headers:
+            - name: X-Tenant
+              description: Tenant discriminator.
+              example: acme
+          versionPrefix: /v1
+        doc:
+          name: Users
+          description: User management.
+          externalDocs:
+            url: https://example.com/users
+        routes:
+          - id: route-user-get
+            design:
+              cacheSeconds: 60
+              idempotent: true
+              paramLinks:
+                id:
+                  descriptionAuto: true
+                  modelId: model-user
+                  propertyId: prop-user-id
+              responses:
+                '200':
+                  exampleId: example-user-admin
+                  modelId: model-user
+            doc:
+              description: Returns the user carrying the given identifier.
+              match:
+                method: GET
+                urlPattern: /{{id}}
+              operationId: getUser
+              parameters:
+                - name: id
+                  type: string
+                  description: The user id.
+                  location: path
+                  required: true
+              responses:
+                '200':
+                  description: The user.
+                  schema: User
+                '404':
+                  description: No such user.
+              summary: Fetch one user
+            intents:
+              traffic: high
+          - id: route-user-list
+            design:
+              pagination:
+                defaultLimit: 20
+                maxLimit: 100
+                style: offset
+              responses:
+                '200':
+                  list: true
+                  modelId: model-user
+                  paginated: true
+            doc:
+              deprecated: true
+              match:
+                method: GET
+                urlPattern: /
+              responses:
+                '200':
+                  description: A page of users.
+              summary: List users
+            intents:
+              traffic: medium
+          - id: route-user-create
+            design:
+              authOverride: none
+              body:
+                contentType: application/json
+                modelId: model-user
+              responses:
+                '201':
+                  modelId: model-user
+            doc:
+              match:
+                method: POST
+                urlPattern: /
+              responses:
+                '201':
+                  description: Created.
+              summary: Create a user
+    securitySchemes:
+      bearerAuth:
+        type: http
+        bearerFormat: JWT
+        description: JWT bearer
+        scheme: bearer
+    server:
+      basePath: /api
+      host: localhost
+      schemes:
+        - http
+    serving:
+      port: 7480
+      protocols:
+        - http
+        - graphql
+    tags:
+      - design
+      - reference

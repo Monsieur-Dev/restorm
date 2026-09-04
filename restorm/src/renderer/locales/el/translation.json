@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Διαγραφή",
       "clone": "Κλωνοποίηση",
+      "openInSplit": "Άνοιγμα σε διαιρεμένο πλαίσιο",
       "copySuffix": "αντίγραφο",
       "rename": "Μετονομασία",
       "addToFavorites": "Προσθήκη στα αγαπημένα",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Σχέδιο API"
       },
       "cut": "Αποκοπή",
       "copy": "Αντιγραφή",
@@ -335,7 +337,8 @@
       "moveInto": "Μετακίνηση σε αυτό το σενάριο",
       "affectsNote": "Η διαγραφή αυτού του αιτήματος θα το αφαιρέσει και από αυτά τα σενάρια.",
       "deleteAnyway": "Διαγραφή ούτως ή άλλως"
-    }
+    },
+    "expandAll": "Ανάπτυξη όλων των αιτημάτων"
   },
   "environment": {
     "newName": "Νέο περιβάλλον",
@@ -741,7 +744,8 @@
       "environment": "Περιβάλλοντα",
       "settings": "Ρυθμίσεις",
       "tag": "Ετικέτες",
-      "scenario": "Σενάρια"
+      "scenario": "Σενάρια",
+      "design": "Σχέδια API"
     },
     "tooltip": {
       "noDetails": "Δεν υπάρχουν διαθέσιμες λεπτομέρειες",
@@ -1238,7 +1242,8 @@
       "operation": "Λειτουργία",
       "description": "Περιγραφή",
       "example": "Παράδειγμα",
-      "constraints": "Περιορισμοί"
+      "constraints": "Περιορισμοί",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Δεν δηλώθηκαν παράμετροι εκτός σώματος για τις φιλτραρισμένες διαδρομές."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "προαιρετική μονή αναφορά",
       "requiredArrayRef": "απαιτούμενη αναφορά πίνακα",
       "optionalArrayRef": "προαιρετική αναφορά πίνακα"
-    }
+    },
+    "editEntity": "Επεξεργασία στον σχεδιαστή"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Τιμές enum",
+      "addValue": "Προσθήκη τιμής…",
+      "removeValue": "Αφαίρεση τιμής",
+      "extract": "Εξαγωγή σε επώνυμο enum"
+    },
+    "tags": {
+      "add": "Προσθήκη ετικέτας…",
+      "remove": "Αφαίρεση ετικέτας",
+      "routeLabel": "Ετικέτες",
+      "groupLabel": "Κοινές ετικέτες"
+    },
+    "section": {
+      "settings": "Ρυθμίσεις",
+      "models": "Μοντέλα",
+      "enums": "Enums",
+      "routes": "Διαδρομές",
+      "documentation": "Τεκμηρίωση",
+      "notes": "Σημειώσεις",
+      "code": "Κώδικας",
+      "server": "Διακομιστής",
+      "clients": "Clients"
+    },
+    "rail": {
+      "ariaLabel": "Ενότητες του σχεδίου"
+    },
+    "settings": {
+      "subtitle": "Γενικές ρυθμίσεις του σχεδίου «{{name}}»",
+      "serve": {
+        "title": "Διακομιστής σχεδίου",
+        "action": "Σερβίρισμα αυτού του σχεδίου",
+        "description": "Αποκρίσεις από επώνυμα παραδείγματα · επικύρωση με περιορισμούς",
+        "port": "Θύρα",
+        "latency": "Προσομοιωμένη καθυστέρηση (ms)",
+        "blocked": "Διορθώστε τα {{count}} σφάλματα επικύρωσης του σχεδίου πριν το σερβίρετε",
+        "startFailed": "Ο διακομιστής δεν μπόρεσε να ξεκινήσει",
+        "protocolAlways": "Το HTTP σερβίρεται πάντα",
+        "protocolToggle": "Σερβίρετε και αυτή την προβολή",
+        "stateful": "Λειτουργία με κατάσταση — POST/PUT/DELETE τροποποιούν μια αποθήκη στη μνήμη (επαναφορά στην επανεκκίνηση)",
+        "clientsCallout": "Ο mock server σας εκτελείται. Δημιουργήθηκαν έτοιμοι προς εκτέλεση clients για κάθε πρωτόκολλο που εξυπηρετεί αυτό το design.",
+        "clientsCalloutLink": "Θα τους βρείτε εδώ"
+      },
+      "identity": {
+        "title": "Ταυτότητα",
+        "title_field": "Τίτλος",
+        "version": "Έκδοση σχεδίου",
+        "description": "Περιγραφή"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Βασική διαδρομή",
+        "defaultAuth": "Προεπιλεγμένο auth",
+        "environment": "Περιβάλλον"
+      },
+      "export": {
+        "title": "Εξαγωγή",
+        "format": "Μορφή περιγραφέα",
+        "download": "Λήψη του περιγραφέα",
+        "saved": "Ο περιγραφέας αποθηκεύτηκε στο {{path}}",
+        "failed": "Η εξαγωγή απέτυχε"
+      }
+    },
+    "auth": {
+      "none": "Καμία",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Κεφαλίδα κλειδιού API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Φιλτράρισμα…",
+      "selectPrompt": "Επιλέξτε μια καταχώριση από τη λίστα.",
+      "editorPending": "Ο επεξεργαστής αυτής της ενότητας έρχεται."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} ιδιότητα",
+      "propertyCount_other": "{{count}} ιδιότητες",
+      "add": "Προσθήκη μοντέλου",
+      "delete": "Διαγραφή μοντέλου",
+      "deleteTitle": "Διαγραφή του {{name}};",
+      "deleteNoImpact": "Αυτό το μοντέλο δεν χρησιμοποιείται πουθενά.",
+      "deleteImpactIntro": "Η διαγραφή αυτού του μοντέλου θα ενημερώσει:",
+      "deleteImpactChild": "Το {{name}} χάνει την κληρονομικότητά του (οι δικές του ιδιότητες παραμένουν)",
+      "description": "Περιγραφή",
+      "descriptionPlaceholder": "Τι αντιπροσωπεύει αυτό το μοντέλο (προαιρετικό)",
+      "newName": "NewModel",
+      "selectPrompt": "Επιλέξτε ένα μοντέλο ή δημιουργήστε ένα.",
+      "tabs": {
+        "schema": "Σχήμα",
+        "examples": "Παραδείγματα",
+        "settings": "Ρυθμίσεις",
+        "notes": "Σημειώσεις"
+      },
+      "addSubModel": "Προσθήκη υπομοντέλου",
+      "collapseAll": "Σύμπτυξη όλων",
+      "expandAll": "Ανάπτυξη όλων"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} τιμή",
+      "valueCount_other": "{{count}} τιμές",
+      "lists": "Enums",
+      "values": "Τιμές",
+      "addEnum": "Προσθήκη enum",
+      "addValue": "Προσθήκη τιμής",
+      "valueHeader": "Τιμή",
+      "newName": "NewEnum",
+      "selectPrompt": "Επιλέξτε ένα enum ή δημιουργήστε ένα — ένα κλειστό σύνολο τιμών που χρησιμοποιείται ως τύπος ιδιότητας.",
+      "nameHeader": "Όνομα",
+      "description": "Περιγραφή",
+      "descriptionPlaceholder": "Τι αντιπροσωπεύει αυτό το enum (προαιρετικό)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Κανένα πρότυπο ακόμη — προσθέστε ένα για να δημιουργήσετε κώδικα από αυτό το σχέδιο.",
+      "subtitle": "Δημιουργήστε έργα από αυτό το σχέδιο — αποδίδονται σε sandbox, εγγράφονται μόνο αφού επιβεβαιώσετε το δέντρο",
+      "sourceTitle": "Πρότυπο",
+      "sourceKind": {
+        "official": "Επίσημο",
+        "repo": "Αποθετήριο",
+        "local": "Τοπικός φάκελος"
+      },
+      "official": "Επίσημο πρότυπο",
+      "repo": "Αποθετήριο (owner/repo)",
+      "local": "Τοπικός φάκελος προτύπου",
+      "output": "Φάκελος εξόδου (απόλυτος ή σχετικός με το έργο)",
+      "browse": "Επιλογή φακέλου εξόδου",
+      "generate": "Δημιουργία έργου",
+      "generating": "Δημιουργία στο sandbox…",
+      "blocked": "Διορθώστε τα {{count}} σφάλματα επικύρωσης πριν τη δημιουργία",
+      "failed": "Η δημιουργία απέτυχε",
+      "outputMissing": "Επιλέξτε πρώτα φάκελο εξόδου",
+      "extracted": "{{count}} αρχείο(-α) γράφτηκαν στο {{root}}",
+      "preview": "Το {{name}} δημιούργησε {{count}} αρχείο(-α) — επιβεβαιώστε την εγγραφή",
+      "confirm": "Εγγραφή στον φάκελο εξόδου",
+      "discard": "Απόρριψη",
+      "generateOne": "Δημιουργία αυτού του έργου",
+      "remove": "Αφαίρεση αυτού του προτύπου",
+      "addTemplate": "Προσθήκη προτύπου",
+      "library": {
+        "title": "Βιβλιοθήκη προτύπων",
+        "recent": "Πρόσφατα χρησιμοποιημένα",
+        "official": "Επίσημα πρότυπα",
+        "custom": "Προσαρμοσμένο",
+        "add": "Προσθήκη",
+        "use": "Χρήση",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Πρότυπα οργανισμού",
+        "openRepo": "Άνοιγμα αποθετηρίου",
+        "remove": "Αφαίρεση",
+        "addTemplate": "Προσθήκη προτύπου",
+        "urlPlaceholder": "URL αποθετηρίου git",
+        "descPlaceholder": "Περιγραφή (stack / τι δημιουργεί)",
+        "noOrgTemplates": "Δεν υπάρχουν ακόμη πρότυπα οργανισμού.",
+        "loading": "Φόρτωση προτύπων…",
+        "signedOut": "Συνδεθείτε για να δείτε τα πρότυπα του οργανισμού σας.",
+        "fetchError": "Δεν ήταν δυνατή η φόρτωση των προτύπων:",
+        "unavailable": "μη διαθέσιμο",
+        "officialTag": "Επίσημο",
+        "officialDesc": {
+          "server-rest-typescript": "Διακομιστής REST σε TypeScript με Express — τυποποιημένες διαδρομές, μοντέλα και επικύρωση αιτημάτων.",
+          "server-rest-dotnet": "Διακομιστής Minimal-API σε C# / ASP.NET Core — endpoints, DTO και επικύρωση.",
+          "server-grpc-typescript": "Διακομιστής gRPC σε TypeScript — υπηρεσία .proto, τυποποιημένα μηνύματα και server stubs.",
+          "server-grpc-dotnet": "Διακομιστής gRPC σε C# / .NET — υπηρεσία .proto, μηνύματα και server stubs.",
+          "db-postgres": "Σχήμα PostgreSQL, δεδομένα seed και σενάρια CRUD από το σχέδιο."
+        },
+        "added": "Το Template προστέθηκε",
+        "done": "Έτοιμο"
+      },
+      "extractedTitle": "Αρχεία γράφτηκαν",
+      "openOutput": "Άνοιγμα του φακέλου εξόδου",
+      "refresh": "Ανανέωση αυτού του προτύπου από την πηγή του",
+      "removeConfirm": "Το Template «{{name}}» θα αφαιρεθεί από αυτό το σχέδιο (τα ήδη δημιουργημένα αρχεία στον δίσκο παραμένουν ανέπαφα).",
+      "removeTitle": "Αφαίρεση αυτού του Template;",
+      "tabs": {
+        "template": "Πρότυπο"
+      },
+      "questions": {
+        "title": "Ερωτήσεις προτύπου"
+      },
+      "errorTitle": "Η δημιουργία απέτυχε",
+      "source": "Πηγή",
+      "destination": "Προορισμός",
+      "expand": "Ανάπτυξη",
+      "collapse": "Σύμπτυξη"
+    },
+    "statusbar": {
+      "format": "σχέδιο · μορφή {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Ταυτότητα",
+      "identifierProperty": "Ιδιότητα αναγνωριστικού",
+      "identifierStrategy": "Στρατηγική",
+      "inheritsFrom": "Κληρονομεί από",
+      "noIdentifier": "(καμία)",
+      "noParent": "(κανένα)",
+      "storage": "Αποθήκευση & κύκλος ζωής",
+      "volumetry": "Αναμενόμενος όγκος",
+      "volumetryUnset": "(απροσδιόριστος)",
+      "operationalProfile": "Λειτουργικό προφίλ",
+      "accessPattern": "Προφίλ ανάγνωσης/εγγραφής",
+      "traffic": "Συχνότητα πρόσβασης",
+      "freshness": "Ανοχή φρεσκάδας",
+      "sensitivity": "Ευαισθησία δεδομένων",
+      "retention": "Διατήρηση / κύκλος ζωής",
+      "profileUnset": "(απροσδιόριστος)",
+      "timestamps": "Χρονοσημάνσεις (δημιουργία/τροποποίηση)",
+      "softDelete": "Ήπια διαγραφή",
+      "usedBy": "Χρησιμοποιείται από",
+      "usedByNone": "Αυτό το μοντέλο δεν χρησιμοποιείται ακόμη.",
+      "usage": {
+        "body": "σώμα",
+        "response": "απόκριση {{code}}",
+        "param": "παράμετρος {{name}}",
+        "inherits": "Το {{name}} κληρονομεί από αυτό"
+      },
+      "generators": "Διαδρομές",
+      "generateCrud": "Δημιουργία CRUD",
+      "generateSearch": "Δημιουργία διαδρομών αναζήτησης"
+    },
+    "schema": {
+      "addProperty": "Προσθήκη ιδιότητας",
+      "deleteProperty": "Διαγραφή ιδιότητας",
+      "columns": {
+        "property": "Ιδιότητα",
+        "type": "Τύπος",
+        "flags": "Χαρακτηριστικά",
+        "example": "Παράδειγμα"
+      },
+      "unnamed": "(χωρίς όνομα)",
+      "nameMissing": "λείπει το όνομα",
+      "panelTitle": "Ιδιότητα: {{name}}",
+      "jumpToParent": "Άνοιγμα {{name}}",
+      "typeModel": "μοντέλο",
+      "typeEnum": "enum",
+      "noFormat": "(κανένα)",
+      "invalidPattern": "Μη έγκυρη κανονική έκφραση",
+      "minAboveMax": "Το ελάχιστο υπερβαίνει το μέγιστο",
+      "fields": {
+        "name": "Όνομα",
+        "type": "Τύπος",
+        "format": "Μορφή",
+        "elementType": "Τύπος στοιχείων",
+        "onDelete": "Κατά τη διαγραφή",
+        "description": "Περιγραφή",
+        "example": "Παράδειγμα",
+        "default": "Προεπιλογή",
+        "deprecationMessage": "Μήνυμα απαξίωσης",
+        "minimum": "Ελάχιστο",
+        "maximum": "Μέγιστο",
+        "minLength": "Ελάχιστο μήκος",
+        "maxLength": "Μέγιστο μήκος",
+        "pattern": "Μοτίβο"
+      },
+      "generatedProperties": "Δημιουργημένες ιδιότητες",
+      "inheritedProperties": "Κληρονομημένες ιδιότητες",
+      "ownProperties": "Δικές του ιδιότητες",
+      "tabs": {
+        "property": "Ιδιότητα"
+      },
+      "advancedType": "Για προχωρημένους…"
+    },
+    "flags": {
+      "required": "υποχρεωτικό",
+      "nullable": "nullable",
+      "unique": "μοναδικό",
+      "immutable": "αμετάβλητο",
+      "searchable": "αναζητήσιμο",
+      "deprecated": "παρωχημένο",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Προεπιλογή",
+      "add": "Προσθήκη παραδείγματος",
+      "delete": "Διαγραφή παραδείγματος",
+      "name": "Όνομα παραδείγματος",
+      "newName": "Παράδειγμα",
+      "defaultHint": "Οι προεπιλεγμένες τιμές προέρχονται από κάθε ιδιότητα (κενό = αυτόματη δημιουργία).",
+      "namedHint": "Πληκτρολογήστε μια τιμή για να την ορίσετε· αφήστε κενό για να διατηρήσετε τη δημιουργημένη.",
+      "columns": {
+        "value": "Τιμή",
+        "origin": "Προέλευση"
+      },
+      "auto": "αυτόματο",
+      "defined": "ορισμένο",
+      "constraintViolated": "Η τιμή παραβιάζει τον περιορισμό της ιδιότητας ({{constraint}})",
+      "deleteTitle": "Διαγραφή αυτού του παραδείγματος;",
+      "deleteConfirm": "Το παράδειγμα «{{name}}» θα διαγραφεί."
+    },
+    "onDelete": {
+      "restrict": "Περιορισμός (απαγόρευση όσο χρησιμοποιείται)",
+      "cascade": "Διαδοχική διαγραφή",
+      "setNull": "Ορισμός σε null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Αυτόματη αύξηση",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Εκατοντάδες",
+      "tenThousands": "Δεκάδες χιλιάδες",
+      "millions": "Εκατομμύρια"
+    },
+    "accessPattern": {
+      "readHeavy": "Κυρίως ανάγνωση",
+      "writeHeavy": "Κυρίως εγγραφή",
+      "balanced": "Ισορροπημένο",
+      "appendOnly": "Μόνο προσθήκη"
+    },
+    "traffic": {
+      "low": "Χαμηλή",
+      "medium": "Μεσαία",
+      "high": "Υψηλή"
+    },
+    "freshness": {
+      "strong": "Ισχυρή συνέπεια",
+      "shortCache": "Σύντομη cache OK",
+      "longCache": "Μεγάλη cache OK"
+    },
+    "sensitivity": {
+      "public": "Δημόσιο",
+      "internal": "Εσωτερικό",
+      "confidential": "Εμπιστευτικό",
+      "pii": "Προσωπικά δεδομένα (PII)"
+    },
+    "retention": {
+      "permanent": "Μόνιμο",
+      "archivable": "Αρχειοθετήσιμο",
+      "ephemeral": "Εφήμερο (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Η ιδιότητα δεν έχει όνομα",
+      "propertyNameDuplicate": "Διπλότυπο όνομα ιδιότητας",
+      "propertyShadowsParent": "Επισκιάζει μια κληρονομημένη ιδιότητα",
+      "referenceTargetUnknown": "Ο αναφερόμενος τύπος δεν υπάρχει πια",
+      "constraintPatternInvalid": "Μη έγκυρο μοτίβο (κανονική έκφραση)",
+      "constraintMinAboveMax": "Το ελάχιστο υπερβαίνει το μέγιστο",
+      "modelNameEmpty": "Το μοντέλο δεν έχει όνομα",
+      "enumNameEmpty": "Το enum δεν έχει όνομα",
+      "groupNameEmpty": "Η ομάδα δεν έχει όνομα",
+      "modelNameDuplicate": "Διπλότυπο όνομα μοντέλου",
+      "enumNameDuplicate": "Διπλότυπο όνομα enum",
+      "componentNameCollision": "Ένα μοντέλο και ένα enum μοιράζονται αυτό το όνομα",
+      "groupNameDuplicate": "Διπλότυπο όνομα ομάδας",
+      "inheritanceTargetUnknown": "Το κληρονομούμενο μοντέλο δεν υπάρχει πια",
+      "inheritanceCycle": "Κυκλική αλυσίδα κληρονομικότητας",
+      "identifierPropertyUnknown": "Η ιδιότητα αναγνωριστικού δεν υπάρχει πια",
+      "paramLinkTargetUnknown": "Μια σύνδεση παραμέτρου δείχνει σε ανύπαρκτη ιδιότητα",
+      "bodyModelUnknown": "Το μοντέλο του σώματος δεν υπάρχει πια",
+      "responseModelUnknown": "Ένα μοντέλο απόκρισης δεν υπάρχει πια",
+      "responseExampleUnknown": "Μια απόκριση σερβίρει ανύπαρκτο παράδειγμα",
+      "routeResponsesMissing": "Η διαδρομή δεν δηλώνει καμία απόκριση",
+      "routePathDuplicate": "Μια άλλη διαδρομή απαντά ήδη σε αυτήν τη μέθοδο και διαδρομή",
+      "routePathReserved": "Ο διακομιστής σχεδίασης δεσμεύει αυτή τη διαδρομή — η διαδρομή δεν θα απαντούσε ποτέ"
+    },
+    "routes": {
+      "addGroup": "Προσθήκη ομάδας",
+      "addRoute": "Προσθήκη διαδρομής",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Επιλέξτε μια ομάδα ή μια διαδρομή, ή δημιουργήστε μια ομάδα.",
+      "deleteGroupTitle": "Διαγραφή του {{name}};",
+      "deleteGroupImpact": "Η ομάδα και οι {{count}} διαδρομές της θα διαγραφούν.",
+      "method": "Μέθοδος",
+      "path": "Διαδρομή",
+      "summary": "Περίληψη",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Ορισμός",
+        "responses": "Αποκρίσεις"
+      },
+      "group": {
+        "auth": "Απαιτούμενη αυθεντικοποίηση",
+        "authInherited": "Προεπιλογή σχεδίου",
+        "versionPrefix": "Πρόθεμα έκδοσης",
+        "headers": "Κεφαλίδες συμβολαίου (κληρονομούνται από τις διαδρομές)",
+        "headerName": "Κεφαλίδα",
+        "addHeader": "Προσθήκη κεφαλίδας",
+        "deleteHeader": "Διαγραφή κεφαλίδας",
+        "noHeaders": "Καμία κοινή κεφαλίδα."
+      },
+      "params": {
+        "pathTitle": "Παράμετροι διαδρομής",
+        "otherTitle": "Παράμετροι (query / header)",
+        "name": "Όνομα",
+        "location": "Σε",
+        "link": "Σύνδεση μοντέλου",
+        "noLink": "—",
+        "add": "Προσθήκη παραμέτρου",
+        "delete": "Διαγραφή παραμέτρου",
+        "auto": "αυτόματο",
+        "pathEmpty": "Πληκτρολογήστε ένα {{param}} στη διαδρομή για να δημιουργηθεί η γραμμή του.",
+        "otherEmpty": "Δεν υπάρχουν ακόμη παράμετροι query ή header.",
+        "nameEmpty": "Μια παράμετρος χρειάζεται όνομα",
+        "nameTaken": "Αυτό το όνομα χρησιμοποιείται ήδη"
+      },
+      "body": {
+        "label": "Σώμα αιτήματος",
+        "empty": "(κενό)",
+        "nonStandardHint": "Ένα σώμα αιτήματος σε {{method}} δεν είναι τυπικό — πολλοί διακομιστές και διακομιστές μεσολάβησης το αγνοούν. Το Restorm το εξυπηρετεί και το τεκμηριώνει ούτως ή άλλως."
+      },
+      "responses": {
+        "add": "Προσθήκη",
+        "codePlaceholder": "Κωδικός κατάστασης",
+        "standardErrors": "+ τυπικά σφάλματα",
+        "empty": "Καμία δηλωμένη απόκριση ακόμη.",
+        "emptyBody": "κενό σώμα",
+        "model": "Επιστρεφόμενο μοντέλο",
+        "list": "Λίστα",
+        "paginated": "Σελιδοποιημένη",
+        "listOf": "λίστα από {{name}}",
+        "paginatedListOf": "σελιδοποιημένη λίστα από {{name}}",
+        "example": "Σερβιριζόμενο παράδειγμα",
+        "exampleAuto": "(αυτόματο)",
+        "delete": "Διαγραφή απόκρισης",
+        "codeInvalid": "Εισαγάγετε τριψήφιο κωδικό κατάστασης",
+        "codeTaken": "Αυτός ο κωδικός έχει ήδη δηλωθεί"
+      },
+      "settings": {
+        "inherited": "Κληρονομείται από την ομάδα",
+        "authInherited": "Κληρονομείται από την ομάδα",
+        "editGroup": "Επεξεργασία στην ομάδα ↗",
+        "headers": "Κεφαλίδες συμβολαίου",
+        "behaviour": "Συμπεριφορά",
+        "idempotent": "Ταυτοδύναμη",
+        "cacheSeconds": "Cache (δευτερόλεπτα)",
+        "traffic": "Αναμενόμενη κίνηση",
+        "authOverride": "Παράκαμψη αυθεντικοποίησης",
+        "pagination": "Σελιδοποίηση",
+        "defaultLimit": "Προεπιλεγμένο μέγεθος σελίδας",
+        "maxLimit": "Μέγιστο μέγεθος σελίδας"
+      },
+      "addSubgroup": "Προσθήκη υποομάδας"
+    },
+    "newDesignName": "Νέο σχέδιο API",
+    "createFromScratch": "Δημιουργία σχεδίου API",
+    "createFromDoc": "Δημιουργία σχεδίου από αυτό το API",
+    "fromDocName": "Σχέδιο {{name}}",
+    "run": {
+      "listening": "Σερβίρει στο http://localhost:{{port}}",
+      "stopped": "Ο διακομιστής σταμάτησε",
+      "totalCalls": "{{count}} κλήσεις σε αυτήν την εκτέλεση",
+      "stop": "Διακοπή του διακομιστή",
+      "close": "Κλείσιμο αυτού του πίνακα",
+      "forcedPill": "εξαναγκασμένο {{code}}",
+      "defaultReturn": "Απόκριση σχεδίου (προεπιλογή)",
+      "codeReturn": "Απάντηση {{code}}",
+      "customCode": "Προσαρμοσμένος κωδικός κατάστασης",
+      "customBody": "Προσαρμοσμένο σώμα απόκρισης",
+      "customBodyPlaceholder": "Προαιρετικό σώμα απόκρισης (JSON)",
+      "customApply": "Εξαναγκασμός"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Προστασία των διαδρομών εγγραφής με έλεγχο ταυτότητας",
+      "authWritesHint": "Απαίτηση bearer ελέγχου ταυτότητας σε δημιουργία, ενημέρωση και διαγραφή· οι αναγνώσεις παραμένουν δημόσιες.",
+      "generate": "Δημιουργία",
+      "replace": "Αντικατάσταση των υπαρχουσών διαδρομών",
+      "replaceHint": "Υπάρχουν ήδη διαδρομές για αυτό το μοντέλο. Αντικαταστήστε τες για να αποφύγετε διπλότυπα· αφήστε το ανενεργό για να προσθέσετε ένα δεύτερο σύνολο.",
+      "title": "Δημιουργία CRUD για {{name}}",
+      "projections": {
+        "http": "{{count}} διαδρομές REST",
+        "graphql": "{{queries}} queries / {{mutations}} mutations σε GraphQL",
+        "grpc": "{{count}} μέθοδοι gRPC",
+        "odata": "{{count}} σύνολο οντοτήτων OData",
+        "soap": "{{count}} λειτουργίες SOAP",
+        "title": "Ένα μοντέλο, κάθε πρωτόκολλο — αυτό το CRUD σερβίρεται επίσης ως:"
+      }
+    },
+    "server": {
+      "subtitle": "Σερβίρετε αυτό το σχέδιο ως live mock και παρακολουθήστε κάθε κλήση."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Δημιουργία κώδικα",
+        "name": "Μεταβλητή",
+        "value": "Τιμή (Handlebars)",
+        "add": "Προσθήκη μεταβλητής",
+        "none": "Δεν υπάρχουν ακόμη μεταβλητές — προσθέστε μία από την κεφαλίδα αυτού του προτύπου.",
+        "noTemplates": "Επιλέξτε ένα ή περισσότερα πρότυπα στην ενότητα «</> Code» — εδώ θα ορίσετε στη συνέχεια τις μεταβλητές που χρησιμοποιεί η δημιουργία.",
+        "generalTitle": "Γενικές μεταβλητές",
+        "scope": {
+          "general": "Γενικά",
+          "property": "Ιδιότητα μοντέλου"
+        },
+        "discover": "Εντοπισμός των μεταβλητών που χρησιμοποιεί αυτό το πρότυπο",
+        "undeclared": "Χρησιμοποιούνται αλλά δεν έχουν δηλωθεί: {{names}}",
+        "allDeclared": "Όλες οι μεταβλητές που χρησιμοποιεί αυτό το πρότυπο έχουν δηλωθεί."
+      }
+    },
+    "clients": {
+      "generated": "Δημιουργήθηκαν clients — θα τους βρείτε στην ενότητα Clients στην πλαϊνή μπάρα.",
+      "importing": "Εισαγωγή clients…",
+      "refresh": "Αναδημιουργία των clients",
+      "startPrompt": "Ξεκινήστε τον διακομιστή για να δημιουργηθούν τα clients.",
+      "startServerPrompt": "Ξεκινήστε τον <serverLink>διακομιστή σχεδίου</serverLink> για να αποκτήσετε πρόσβαση σε αιτήματα client που δημιουργούνται αυτόματα από το μοντέλο.",
+      "subtitle": "Ο διακομιστής σχεδίου API σας εκτελείται και σερβίρει τις διαδρομές που ορίσατε. Τα παρακάτω αιτήματα καλούν αυτές τις διαδρομές απευθείας — ανοίξτε ένα για να το δοκιμάσετε. Είναι εφήμερα και εξαφανίζονται όταν σταματήσει ο διακομιστής."
+    },
+    "descriptors": {
+      "copy": "Αντιγραφή του URL"
+    },
+    "projections": {
+      "title": "Προβολές",
+      "hint": "Η ίδια λειτουργία, όπως την εκθέτει κάθε σερβιρισμένο πρωτόκολλο."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Διατήρηση",
@@ -2308,7 +2835,45 @@
     "addCookie": "Προσθήκη cookie",
     "removeCookie": "Αφαίρεση cookie",
     "clearCookieDomain": "Εκκαθάριση cookies για έναν τομέα",
-    "clearCookies": "Εκκαθάριση όλων των cookies"
+    "clearCookies": "Εκκαθάριση όλων των cookies",
+    "listDesigns": "Λίστα σχεδίων API",
+    "getDesign": "Λήψη σχεδίου API",
+    "createDesign": "Δημιουργία σχεδίου API",
+    "createDesignFromDocumentation": "Δημιουργία σχεδίου από εισηγμένο API",
+    "updateDesign": "Ενημέρωση σχεδίου",
+    "deleteDesign": "Διαγραφή σχεδίου",
+    "createDesignModel": "Δημιουργία μοντέλου σχεδίου",
+    "updateDesignModel": "Ενημέρωση μοντέλου σχεδίου",
+    "deleteDesignModel": "Διαγραφή μοντέλου σχεδίου",
+    "setDesignProperty": "Ορισμός ιδιότητας μοντέλου",
+    "deleteDesignProperty": "Διαγραφή ιδιότητας μοντέλου",
+    "createDesignEnum": "Δημιουργία enum σχεδίου",
+    "updateDesignEnum": "Ενημέρωση enum σχεδίου",
+    "deleteDesignEnum": "Διαγραφή enum σχεδίου",
+    "setDesignExample": "Ορισμός επώνυμου παραδείγματος",
+    "deleteDesignExample": "Διαγραφή επώνυμου παραδείγματος",
+    "createDesignRouteGroup": "Δημιουργία ομάδας διαδρομών",
+    "updateDesignRouteGroup": "Ενημέρωση ομάδας διαδρομών",
+    "deleteDesignRouteGroup": "Διαγραφή ομάδας διαδρομών",
+    "createDesignRoute": "Δημιουργία διαδρομής σχεδίου",
+    "updateDesignRoute": "Ενημέρωση διαδρομής σχεδίου",
+    "deleteDesignRoute": "Διαγραφή διαδρομής σχεδίου",
+    "setDesignRouteParam": "Δημιουργία ή ενημέρωση παραμέτρου διαδρομής",
+    "deleteDesignRouteParam": "Διαγραφή παραμέτρου διαδρομής",
+    "generateDesignCrud": "Δημιουργία διαδρομών CRUD",
+    "generateDesignSearchRoutes": "Δημιουργία διαδρομών αναζήτησης",
+    "serveDesign": "Σερβίρισμα σχεδίου",
+    "stopDesignServer": "Διακοπή διακομιστή σχεδίου",
+    "getDesignServerStatus": "Κατάσταση διακομιστή σχεδίου",
+    "setDesignRouteResponse": "Εξαναγκασμός απόκρισης",
+    "exportDesign": "Εξαγωγή περιγραφέα σχεδίου",
+    "generateDesignCode": "Δημιουργία κώδικα από ένα design",
+    "getDesignTemplateContract": "Λήψη του συμβολαίου προτύπων κώδικα",
+    "setDesignTemplates": "Ορισμός των προτύπων κώδικα ενός σχεδίου",
+    "setDesignModelVariables": "Ορισμός των codegen overrides ενός μοντέλου",
+    "setDesignPropertyVariables": "Ορισμός των codegen overrides μιας ιδιότητας",
+    "setDesignRouteVariables": "Ορισμός των codegen overrides μιας διαδρομής",
+    "setDesignTemplateVariables": "Ορισμός των καθολικών μεταβλητών codegen ενός προτύπου"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "Προστέθηκε το σενάριο «{{name}}»",
       "modifiedScenario": "Τροποποιήθηκε το σενάριο «{{name}}»",
       "deletedScenario": "Διαγράφηκε το σενάριο «{{name}}»",
+      "addedDesign": "Προστέθηκε το σχέδιο API «{{name}}»",
+      "modifiedDesign": "Τροποποιήθηκε το σχέδιο API «{{name}}»",
+      "deletedDesign": "Διαγράφηκε το σχέδιο API «{{name}}»",
       "addedFolder": "Προστέθηκε ο φάκελος «{{name}}»",
       "modifiedFolder": "Τροποποιήθηκε ο φάκελος «{{name}}»",
       "deletedFolder": "Διαγράφηκε ο φάκελος «{{name}}»",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "Διαγράφηκε ο φάκελος περιβάλλοντος «{{name}}»",
       "movedRequest": "Μετακινήθηκε το αίτημα \"{{name}}\"",
       "movedScenario": "Μετακινήθηκε το σενάριο \"{{name}}\"",
+      "movedDesign": "Μετακινήθηκε το σχέδιο API \"{{name}}\"",
       "movedFolder": "Μετακινήθηκε ο φάκελος \"{{name}}\"",
       "movedEnvironmentFolder": "Μετακινήθηκε ο φάκελος περιβάλλοντος \"{{name}}\"",
       "reorderedFolder": "Αναδιάταξη στοιχείων στον φάκελο «{{name}}»",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "Ενημέρωση του αιτήματος «{{name}}»",
       "singleScenario": "Ενημέρωση του σεναρίου «{{name}}»",
+      "singleDesign": "Ενημέρωση του σχεδίου API «{{name}}»",
       "singleFolder": "Ενημέρωση του φακέλου «{{name}}»",
       "singleEnvironmentFolder": "Ενημέρωση του φακέλου περιβάλλοντος «{{name}}»",
       "singleFileFormatVersion": "Μετάβαση στη μορφή αρχείου {{name}}",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} αιτήματα",
       "countScenario_one": "{{count}} σενάριο",
       "countScenario_other": "{{count}} σενάρια",
+      "countDesign_one": "{{count}} σχέδιο API",
+      "countDesign_other": "{{count}} σχέδια API",
       "countFolder_one": "{{count}} φάκελος",
       "countFolder_other": "{{count}} φάκελοι",
       "countEnvironmentFolder_one": "{{count}} φάκελος περιβάλλοντος",

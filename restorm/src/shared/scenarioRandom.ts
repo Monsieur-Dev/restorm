@@ -22,7 +22,7 @@ export const isRandomOp = (v: unknown): v is RandomOp =>
 export const RANDOM_OPS_WITH_RANGE: readonly RandomOp[] = ['int', 'float']
 
 /** Deterministic, well-distributed 32-bit PRNG (mulberry32). */
-function mulberry32(seed: number): () => number {
+export function mulberry32(seed: number): () => number {
   let a = seed >>> 0
   return () => {
     a = (a + 0x6d2b79f5) | 0
@@ -33,7 +33,7 @@ function mulberry32(seed: number): () => number {
 }
 
 /** FNV-1a string hash → a 32-bit seed, so a string `seed` is reproducible. */
-function hashString(s: string): number {
+export function hashString(s: string): number {
   let h = 2166136261
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i)

@@ -1,0 +1,43 @@
+-- {{ ctx.design.name }} — seeds from the design's NAMED EXAMPLES.
+-- IDEMPOTENT: ON CONFLICT DO NOTHING everywhere.
+{%- set models_by_name = {} -%}
+{%- for m in ctx.models -%}{%- set _ = models_by_name.update({m.name: m}) -%}{%- endfor -%}
+{%- macro sql_value(p, v) -%}
+  {%- if v is none -%}NULL
+  {%- elif p.type == 'integer' or p.type == 'number' -%}{{ v }}
+  {%- elif p.type == 'boolean' -%}{{ 'true' if v else 'false' }}
+  {%- elif p.type == 'array' -%}'{}'
+  {%- elif p.type == 'map' or p.type == 'any' -%}'{{ (v | tojson) | replace("'", "''") }}'::jsonb
+  {%- else -%}'{{ (v | string) | replace("'", "''") }}'
+  {%- endif -%}
+{%- endmacro -%}
+{%- macro filler(p, i) -%}
+  {%- if p.type == 'integer' or p.type == 'number' -%}{{ 1000 + i }}
+  {%- elif p.type == 'boolean' -%}true
+  {%- elif p.type == 'array' -%}'{}'
+  {%- elif p.type == 'map' or p.type == 'any' -%}'{}'::jsonb
+  {%- elif 'format' in p and p.format == 'uuid' -%}gen_random_uuid()
+  {%- elif 'format' in p and p.format == 'date-time' -%}now()
+  {%- elif 'format' in p and p.format == 'date' -%}CURRENT_DATE
+  {%- elif 'format' in p and p.format == 'email' -%}'seed-{{ i }}@example.com'
+  {%- else -%}'seed-{{ p.name }}-{{ i }}-xxxxxxxxxxxx'
+  {%- endif -%}
+{%- endmacro -%}
+{% for model in ctx.models %}
+{% set idp = model.identifier.property if 'identifier' in model else 'id' %}
+{% for example in model.examples %}
+{% set cols = [] %}
+{# example-defined values first, then REQUIRED props the example does
+   not define and the schema cannot default (identifier + defaulted +
+   enum-with-default columns are left to the database) #}
+{% for p in model.properties %}{% if p.name in example['values'] %}{% set _ = cols.append(p) %}{% endif %}{% endfor %}
+{% for p in model.properties %}{% if p.name not in example['values'] and p.required and p.name != idp and 'default' not in p and 'readOnly' not in p %}{% set _ = cols.append(p) %}{% endif %}{% endfor %}
+{% if cols | length > 0 %}
+
+-- named example: {{ example.name }}
+INSERT INTO "{{ model.name | lower }}" ({% for p in cols %}{% if not loop.first %}, {% endif %}"{{ p.name }}"{% endfor %})
+VALUES ({% for p in cols %}{% if not loop.first %}, {% endif %}{% if p.name in example['values'] %}{{ sql_value(p, example['values'][p.name]) }}{% else %}{{ filler(p, loop.index) }}{% endif %}{% endfor %})
+ON CONFLICT DO NOTHING;
+{% endif %}
+{% endfor %}
+{% endfor %}

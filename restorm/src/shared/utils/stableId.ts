@@ -158,6 +158,17 @@ export function idPathSegment(record: Record<string, unknown>): string | null {
     return `scenario:${asText(record['name'])}`
   }
 
+  // API design root: the `type` discriminant, like a scenario. A design is
+  // a tree LEAF (no `items`), but its own sub-entities below need the
+  // segment as a container prefix — two same-named models in two designs
+  // must not spell the same path.
+  if ('name' in record && record['type'] === 'design') {
+    return `design:${asText(record['name'])}`
+  }
+
+  const designSegment = designEntitySegment(record)
+  if (designSegment !== null) return designSegment
+
   if ('name' in record && 'items' in record && 'configuration' in record && Array.isArray(record['items'])) {
     return `folder:${asText(record['name'])}`
   }
@@ -174,6 +185,62 @@ export function idPathSegment(record: Record<string, unknown>): string | null {
   if ('requestId' in record && typeof record['requestId'] === 'string') {
     const name = 'name' in record ? `:${asText(record['name'])}` : ''
     return `ref:${record['requestId']}${name}`
+  }
+
+  return null
+}
+
+/**
+ * Identity segments for the API-design sub-entities (model, enum, route
+ * group, route, property, named example). They all follow the design's
+ * composition shape — a wrapper embedding a documentation object under
+ * `doc` plus sibling extensions — and `doc` is a key no other persisted
+ * shape carries, so `'doc' in record` is the family discriminant. Within
+ * the family, in this order (the order matters — a model wrapper's `doc`
+ * would also pass the enum test):
+ *
+ * - **DesignModel** — wrapper-level `properties` array → `dmodel:<doc.name>`
+ * - **DesignRouteGroup** — wrapper-level `routes` array → `dgroup:<doc.name>`
+ * - **DesignRoute** — `doc.match` (an `OperationDocumentation`) →
+ *   `droute:<method>:<urlPattern>`
+ * - **DesignEnum** — `doc.properties` array (an enum-shaped
+ *   `ModelDocumentation`) → `denum:<doc.name>`
+ * - **DesignProperty** — `doc.type` (a `PropertyDocumentation`; `type`
+ *   alone, deliberately — an externally-authored file may omit
+ *   `required`, and a malformed document must still classify) →
+ *   `dprop:<doc.name>`
+ *
+ * A design's named example is not `doc`-shaped; it is recognised by its
+ * `values` map next to a `name`, a combination no other persisted shape
+ * carries (`EnumDefinition.values` is an array).
+ */
+export function designEntitySegment(record: Record<string, unknown>): string | null {
+  const doc = record['doc']
+  if (typeof doc === 'object' && doc !== null && !Array.isArray(doc)) {
+    const docRecord = doc as Record<string, unknown>
+    if (Array.isArray(record['properties'])) {
+      return `dmodel:${asText(docRecord['name'])}`
+    }
+    if (Array.isArray(record['routes'])) {
+      return `dgroup:${asText(docRecord['name'])}`
+    }
+    const match = docRecord['match']
+    if (typeof match === 'object' && match !== null) {
+      const matchRecord = match as Record<string, unknown>
+      return `droute:${asText(matchRecord['method'] ?? '')}:${asText(matchRecord['urlPattern'])}`
+    }
+    if (Array.isArray(docRecord['properties'])) {
+      return `denum:${asText(docRecord['name'])}`
+    }
+    if ('type' in docRecord) {
+      return `dprop:${asText(docRecord['name'])}`
+    }
+    return null
+  }
+
+  if ('name' in record && 'values' in record &&
+      typeof record['values'] === 'object' && record['values'] !== null && !Array.isArray(record['values'])) {
+    return `dexample:${asText(record['name'])}`
   }
 
   return null

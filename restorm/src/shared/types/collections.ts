@@ -47,4 +47,40 @@ export type {
 
 export type { Folder, EnvironmentFolder, FolderItem } from './folderTypes'
 export type { Scenario, ScenarioNode, ScenarioPort, ScenarioEdge, ScenarioNodeKind, ScenarioDataType, ScenarioPortRole, PortFlow } from './scenario'
-export { isEnvironmentFolder, isFolder, isAnyFolder, isRequest, isScenario } from './folderTypes'
+export type {
+  ApiDesign,
+  DesignModel,
+  DesignProperty,
+  DesignEnum,
+  DesignRouteGroup,
+  DesignRoute,
+  DesignExample,
+  DesignParamLink,
+  DesignResponseMeta,
+  DesignPagination,
+  DesignScalarType,
+  DesignServing,
+  DesignCodegen,
+  DesignCodegenTemplate,
+  DesignTemplateSource,
+  DesignProtocol,
+  DesignAuthKind,
+  PropertyReference,
+  PropertyIntents,
+  PropertyDesignMeta,
+  ModelIntents,
+  ModelDesignMeta,
+  ModelVolumetry,
+  ModelAccessPattern,
+  ModelTraffic,
+  ModelFreshness,
+  ModelSensitivity,
+  ModelRetention,
+  RouteIntents,
+  RouteDesignMeta,
+  RouteGroupDesignMeta,
+  RouteTraffic,
+  IdentifierStrategy,
+  ReferenceOnDelete
+} from './apiDesign'
+export { isEnvironmentFolder, isFolder, isAnyFolder, isRequest, isScenario, isApiDesign } from './folderTypes'

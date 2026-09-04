@@ -1105,7 +1105,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
                 aria-level={depth + 1}
                 aria-expanded={!isLeaf ? isExpanded : undefined}
                 aria-selected={isSelected}
-                draggable={!isEditing && !disableDrag}
+                draggable={!isEditing && !disableDrag && item.draggable !== false}
                 onClick={handleRowClick}
                 onDoubleClick={handleRowDoubleClick}
                 onAuxClick={handleRowAuxClick}

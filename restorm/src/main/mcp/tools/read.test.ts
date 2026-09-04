@@ -11,8 +11,10 @@ import type { McpService, McpToolConfig, McpToolHandler } from 'electron-core-ui
 
 class FakeMcpService {
   private handlers = new Map<string, McpToolHandler>()
-  registerTool(name: string, _config: McpToolConfig, handler: McpToolHandler): void {
+  readonly configs = new Map<string, McpToolConfig>()
+  registerTool(name: string, config: McpToolConfig, handler: McpToolHandler): void {
     this.handlers.set(name, handler)
+    this.configs.set(name, config)
   }
   registerResource(): void { /* not used in read.test */ }
   invoke(name: string, args: Record<string, unknown> = {}): unknown {
@@ -195,6 +197,9 @@ describe('read tools — search', () => {
       ] },
       { category: 'scenario', items: [
         { id: 's1', title: 'Main', category: 'scenario', score: 0.2 }
+      ] },
+      { category: 'design', items: [
+        { id: 'd1::enum:e1', title: 'UserStatus', category: 'design', score: 0.1 }
       ] }
     ])
   })
@@ -203,8 +208,20 @@ describe('read tools — search', () => {
     const mcp = new FakeMcpService()
     registerReadTools(mcp as unknown as McpService)
     const { payload } = parseReply(mcp.invoke('search', { query: 'u' })) as { payload: { matchCount: number; matches: { category: string }[] } }
-    expect(payload.matchCount).toBe(5)
-    expect(payload.matches.map((m) => m.category)).toEqual(['request', 'request', 'folder', 'environment', 'scenario'])
+    expect(payload.matchCount).toBe(6)
+    expect(payload.matches.map((m) => m.category)).toEqual(['request', 'request', 'folder', 'environment', 'scenario', 'design'])
+  })
+
+  it('restricts to design matches via the `kinds` filter (the schema knows the category)', () => {
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    // The declared enum must list 'design' or a real client's call is
+    // rejected at the validation layer before the filter even runs.
+    const schema = (mcp.configs.get('search') as { inputSchema?: Record<string, unknown> } | undefined)?.inputSchema
+    expect(JSON.stringify(schema?.['kinds'])).toContain('design')
+    const { payload } = parseReply(mcp.invoke('search', { query: 'u', kinds: ['design'] })) as { payload: { matchCount: number; matches: { id: string; category: string }[] } }
+    expect(payload.matchCount).toBe(1)
+    expect(payload.matches[0]).toEqual(expect.objectContaining({ id: 'd1::enum:e1', category: 'design' }))
   })
 
   it('restricts to scenario matches via the `kinds` filter', () => {

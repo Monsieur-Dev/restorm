@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "Hapus",
       "clone": "Klon",
+      "openInSplit": "Buka di panel terpisah",
       "copySuffix": "salinan",
       "rename": "Ubah nama",
       "addToFavorites": "Tambah ke favorit",
@@ -314,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Desain API"
       },
       "cut": "Potong",
       "copy": "Salin",
@@ -334,7 +336,8 @@
       "moveInto": "Pindahkan ke skenario ini",
       "affectsNote": "Menghapus permintaan ini juga akan menghapusnya dari skenario-skenario ini.",
       "deleteAnyway": "Tetap hapus"
-    }
+    },
+    "expandAll": "Bentangkan semua permintaan"
   },
   "environment": {
     "newName": "Lingkungan baru",
@@ -740,7 +743,8 @@
       "environment": "Lingkungan",
       "settings": "Pengaturan",
       "tag": "Tag",
-      "scenario": "Skenario"
+      "scenario": "Skenario",
+      "design": "Desain API"
     },
     "tooltip": {
       "noDetails": "Tidak ada detail yang tersedia",
@@ -1237,7 +1241,8 @@
       "operation": "Operasi",
       "description": "Deskripsi",
       "example": "Contoh",
-      "constraints": "Batasan"
+      "constraints": "Batasan",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Tidak ada parameter non-body yang dideklarasikan untuk rute yang difilter."
@@ -1284,7 +1289,8 @@
       "optionalSingleRef": "referensi tunggal opsional",
       "requiredArrayRef": "referensi larik wajib",
       "optionalArrayRef": "referensi larik opsional"
-    }
+    },
+    "editEntity": "Edit di desainer"
   },
   "scenario": {
     "editor": {
@@ -2138,6 +2144,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Nilai enum",
+      "addValue": "Tambahkan nilai…",
+      "removeValue": "Hapus nilai",
+      "extract": "Ekstrak ke enum bernama"
+    },
+    "tags": {
+      "add": "Tambahkan tag…",
+      "remove": "Hapus tag",
+      "routeLabel": "Tag",
+      "groupLabel": "Tag bersama"
+    },
+    "section": {
+      "settings": "Pengaturan",
+      "models": "Model",
+      "enums": "Enum",
+      "routes": "Rute",
+      "documentation": "Dokumentasi",
+      "notes": "Catatan",
+      "code": "Kode",
+      "server": "Server",
+      "clients": "Klien"
+    },
+    "rail": {
+      "ariaLabel": "Bagian desain"
+    },
+    "settings": {
+      "subtitle": "Pengaturan umum desain “{{name}}”",
+      "serve": {
+        "title": "Server desain",
+        "action": "Sajikan desain ini",
+        "description": "Respons dari contoh bernama · validasi dengan batasan",
+        "port": "Port",
+        "latency": "Latensi tersimulasi (ms)",
+        "blocked": "Perbaiki {{count}} kesalahan validasi desain sebelum menyajikannya",
+        "startFailed": "Server tidak dapat dimulai",
+        "protocolAlways": "HTTP selalu disajikan",
+        "protocolToggle": "Sajikan juga proyeksi ini",
+        "stateful": "Mode stateful — POST/PUT/DELETE mengubah penyimpanan dalam memori (reset saat mulai ulang)",
+        "clientsCallout": "Mock server Anda sedang berjalan. Klien siap pakai telah dibuat untuk setiap protokol yang dilayani desain ini.",
+        "clientsCalloutLink": "Temukan di sini"
+      },
+      "identity": {
+        "title": "Identitas",
+        "title_field": "Judul",
+        "version": "Versi desain",
+        "description": "Deskripsi"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Jalur dasar",
+        "defaultAuth": "Auth bawaan",
+        "environment": "Lingkungan"
+      },
+      "export": {
+        "title": "Ekspor",
+        "format": "Format deskriptor",
+        "download": "Unduh deskriptor",
+        "saved": "Deskriptor disimpan di {{path}}",
+        "failed": "Ekspor gagal"
+      }
+    },
+    "auth": {
+      "none": "Tidak ada",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header kunci API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Saring…",
+      "selectPrompt": "Pilih entri dalam daftar.",
+      "editorPending": "Editor bagian ini sedang dalam perjalanan."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} properti",
+      "propertyCount_other": "{{count}} properti",
+      "add": "Tambah model",
+      "delete": "Hapus model",
+      "deleteTitle": "Hapus {{name}}?",
+      "deleteNoImpact": "Model ini tidak digunakan di mana pun.",
+      "deleteImpactIntro": "Menghapus model ini akan memperbarui:",
+      "deleteImpactChild": "{{name}} kehilangan pewarisannya (properti miliknya tetap ada)",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Apa yang diwakili model ini (opsional)",
+      "newName": "NewModel",
+      "selectPrompt": "Pilih model, atau buat satu.",
+      "tabs": {
+        "schema": "Skema",
+        "examples": "Contoh",
+        "settings": "Pengaturan",
+        "notes": "Catatan"
+      },
+      "addSubModel": "Tambah sub-model",
+      "collapseAll": "Ciutkan semua",
+      "expandAll": "Perluas semua"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} nilai",
+      "valueCount_other": "{{count}} nilai",
+      "lists": "Enum",
+      "values": "Nilai",
+      "addEnum": "Tambah enum",
+      "addValue": "Tambah nilai",
+      "valueHeader": "Nilai",
+      "newName": "NewEnum",
+      "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti.",
+      "nameHeader": "Nama",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Apa yang diwakili enum ini (opsional)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Belum ada templat — tambahkan satu untuk menghasilkan kode dari desain ini.",
+      "subtitle": "Hasilkan proyek dari desain ini — dirender dalam sandbox, ditulis hanya setelah Anda mengonfirmasi pohonnya",
+      "sourceTitle": "Templat",
+      "sourceKind": {
+        "official": "Resmi",
+        "repo": "Repositori",
+        "local": "Folder lokal"
+      },
+      "official": "Templat resmi",
+      "repo": "Repositori (owner/repo)",
+      "local": "Folder templat lokal",
+      "output": "Folder keluaran (absolut, atau relatif terhadap proyek)",
+      "browse": "Pilih folder keluaran",
+      "generate": "Hasilkan proyek",
+      "generating": "Menghasilkan di sandbox…",
+      "blocked": "Perbaiki {{count}} kesalahan validasi desain sebelum menghasilkan",
+      "failed": "Pembuatan gagal",
+      "outputMissing": "Pilih folder keluaran terlebih dahulu",
+      "extracted": "{{count}} berkas ditulis ke {{root}}",
+      "preview": "{{name}} menghasilkan {{count}} berkas — konfirmasi untuk menulisnya",
+      "confirm": "Tulis ke folder keluaran",
+      "discard": "Buang",
+      "generateOne": "Hasilkan proyek ini",
+      "remove": "Hapus templat ini",
+      "addTemplate": "Tambahkan templat",
+      "library": {
+        "title": "Pustaka templat",
+        "recent": "Baru digunakan",
+        "official": "Templat resmi",
+        "custom": "Kustom",
+        "add": "Tambah",
+        "use": "Gunakan",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Templat organisasi",
+        "openRepo": "Buka repositori",
+        "remove": "Hapus",
+        "addTemplate": "Tambah templat",
+        "urlPlaceholder": "URL repositori git",
+        "descPlaceholder": "Deskripsi (stack / apa yang dihasilkan)",
+        "noOrgTemplates": "Belum ada templat organisasi.",
+        "loading": "Memuat templat…",
+        "signedOut": "Masuk untuk melihat templat organisasi Anda.",
+        "fetchError": "Tidak dapat memuat templat:",
+        "unavailable": "tidak tersedia",
+        "officialTag": "Resmi",
+        "officialDesc": {
+          "server-rest-typescript": "Server REST dalam TypeScript di Express — rute bertipe, model, dan validasi permintaan.",
+          "server-rest-dotnet": "Server Minimal-API dalam C# / ASP.NET Core — endpoint, DTO, dan validasi.",
+          "server-grpc-typescript": "Server gRPC dalam TypeScript — layanan .proto, pesan bertipe, dan stub server.",
+          "server-grpc-dotnet": "Server gRPC dalam C# / .NET — layanan .proto, pesan, dan stub server.",
+          "db-postgres": "Skema PostgreSQL, data seed, dan skrip CRUD dari desain."
+        },
+        "added": "Template ditambahkan",
+        "done": "Selesai"
+      },
+      "extractedTitle": "File ditulis",
+      "openOutput": "Buka folder keluaran",
+      "refresh": "Segarkan templat ini dari sumbernya",
+      "removeConfirm": "Template “{{name}}” akan dihapus dari desain ini (file yang sudah dihasilkan di disk tidak diubah).",
+      "removeTitle": "Hapus Template ini?",
+      "tabs": {
+        "template": "Templat"
+      },
+      "questions": {
+        "title": "Pertanyaan templat"
+      },
+      "errorTitle": "Pembuatan gagal",
+      "source": "Sumber",
+      "destination": "Tujuan",
+      "expand": "Perluas",
+      "collapse": "Ciutkan"
+    },
+    "statusbar": {
+      "format": "desain · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitas",
+      "identifierProperty": "Properti pengenal",
+      "identifierStrategy": "Strategi",
+      "inheritsFrom": "Mewarisi dari",
+      "noIdentifier": "(tidak ada)",
+      "noParent": "(tidak ada)",
+      "storage": "Penyimpanan & siklus hidup",
+      "volumetry": "Volume yang diharapkan",
+      "volumetryUnset": "(tidak ditentukan)",
+      "operationalProfile": "Profil operasional",
+      "accessPattern": "Profil baca/tulis",
+      "traffic": "Frekuensi akses",
+      "freshness": "Toleransi kesegaran",
+      "sensitivity": "Sensitivitas data",
+      "retention": "Retensi / siklus hidup",
+      "profileUnset": "(tidak ditentukan)",
+      "timestamps": "Stempel waktu (dibuat/diubah)",
+      "softDelete": "Hapus lunak",
+      "usedBy": "Digunakan oleh",
+      "usedByNone": "Model ini belum digunakan.",
+      "usage": {
+        "body": "body",
+        "response": "respons {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} mewarisinya"
+      },
+      "generators": "Rute",
+      "generateCrud": "Hasilkan CRUD",
+      "generateSearch": "Hasilkan rute pencarian"
+    },
+    "schema": {
+      "addProperty": "Tambah properti",
+      "deleteProperty": "Hapus properti",
+      "columns": {
+        "property": "Properti",
+        "type": "Tipe",
+        "flags": "Atribut",
+        "example": "Contoh"
+      },
+      "unnamed": "(tanpa nama)",
+      "nameMissing": "nama tidak ada",
+      "panelTitle": "Properti: {{name}}",
+      "jumpToParent": "Buka {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(tidak ada)",
+      "invalidPattern": "Ekspresi reguler tidak valid",
+      "minAboveMax": "Min melebihi maks",
+      "fields": {
+        "name": "Nama",
+        "type": "Tipe",
+        "format": "Format",
+        "elementType": "Tipe elemen",
+        "onDelete": "Saat dihapus",
+        "description": "Deskripsi",
+        "example": "Contoh",
+        "default": "Bawaan",
+        "deprecationMessage": "Pesan penghentian",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Panjang min.",
+        "maxLength": "Panjang maks.",
+        "pattern": "Pola"
+      },
+      "generatedProperties": "Properti yang dihasilkan",
+      "inheritedProperties": "Properti warisan",
+      "ownProperties": "Properti sendiri",
+      "tabs": {
+        "property": "Properti"
+      },
+      "advancedType": "Lanjutan…"
+    },
+    "flags": {
+      "required": "wajib",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "tak berubah",
+      "searchable": "dapat dicari",
+      "deprecated": "usang",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Bawaan",
+      "add": "Tambah contoh",
+      "delete": "Hapus contoh",
+      "name": "Nama contoh",
+      "newName": "Contoh",
+      "defaultHint": "Nilai bawaan berasal dari tiap properti (kosong = dibuat otomatis).",
+      "namedHint": "Ketik nilai untuk mendefinisikannya; biarkan kosong untuk mempertahankan yang dibuat otomatis.",
+      "columns": {
+        "value": "Nilai",
+        "origin": "Asal"
+      },
+      "auto": "otomatis",
+      "defined": "didefinisikan",
+      "constraintViolated": "Nilai melanggar batasan properti ({{constraint}})",
+      "deleteTitle": "Hapus contoh ini?",
+      "deleteConfirm": "Contoh “{{name}}” akan dihapus."
+    },
+    "onDelete": {
+      "restrict": "Batasi (larang selagi digunakan)",
+      "cascade": "Hapus berantai",
+      "setNull": "Setel ke null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Kenaikan otomatis",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Ratusan",
+      "tenThousands": "Puluhan ribu",
+      "millions": "Jutaan"
+    },
+    "accessPattern": {
+      "readHeavy": "Dominan baca",
+      "writeHeavy": "Dominan tulis",
+      "balanced": "Seimbang",
+      "appendOnly": "Hanya tambah"
+    },
+    "traffic": {
+      "low": "Rendah",
+      "medium": "Sedang",
+      "high": "Tinggi"
+    },
+    "freshness": {
+      "strong": "Konsistensi kuat",
+      "shortCache": "Cache singkat OK",
+      "longCache": "Cache lama OK"
+    },
+    "sensitivity": {
+      "public": "Publik",
+      "internal": "Internal",
+      "confidential": "Rahasia",
+      "pii": "Data pribadi (PII)"
+    },
+    "retention": {
+      "permanent": "Permanen",
+      "archivable": "Dapat diarsipkan",
+      "ephemeral": "Sementara (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Properti tidak memiliki nama",
+      "propertyNameDuplicate": "Nama properti duplikat",
+      "propertyShadowsParent": "Menutupi properti warisan",
+      "referenceTargetUnknown": "Tipe yang dirujuk sudah tidak ada",
+      "constraintPatternInvalid": "Pola tidak valid (ekspresi reguler)",
+      "constraintMinAboveMax": "Min melebihi maks",
+      "modelNameEmpty": "Model tidak memiliki nama",
+      "enumNameEmpty": "Enum tidak memiliki nama",
+      "groupNameEmpty": "Grup tidak memiliki nama",
+      "modelNameDuplicate": "Nama model duplikat",
+      "enumNameDuplicate": "Nama enum duplikat",
+      "componentNameCollision": "Sebuah model dan enum berbagi nama ini",
+      "groupNameDuplicate": "Nama grup duplikat",
+      "inheritanceTargetUnknown": "Model yang diwarisi sudah tidak ada",
+      "inheritanceCycle": "Rantai pewarisan melingkar",
+      "identifierPropertyUnknown": "Properti pengenal sudah tidak ada",
+      "paramLinkTargetUnknown": "Tautan parameter menunjuk properti yang hilang",
+      "bodyModelUnknown": "Model badan sudah tidak ada",
+      "responseModelUnknown": "Model respons sudah tidak ada",
+      "responseExampleUnknown": "Respons menyajikan contoh yang hilang",
+      "routeResponsesMissing": "Rute tidak mendeklarasikan respons apa pun",
+      "routePathDuplicate": "Rute lain sudah menjawab metode dan jalur ini",
+      "routePathReserved": "Server desain mencadangkan jalur ini — rute tidak akan pernah menjawab"
+    },
+    "routes": {
+      "addGroup": "Tambah grup",
+      "addRoute": "Tambah rute",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Pilih grup atau rute, atau buat grup.",
+      "deleteGroupTitle": "Hapus {{name}}?",
+      "deleteGroupImpact": "Grup dan {{count}} rutenya akan dihapus.",
+      "method": "Metode",
+      "path": "Jalur",
+      "summary": "Ringkasan",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definisi",
+        "responses": "Respons"
+      },
+      "group": {
+        "auth": "Auth wajib",
+        "authInherited": "Bawaan desain",
+        "versionPrefix": "Prefiks versi",
+        "headers": "Header kontrak (diwarisi oleh rute)",
+        "headerName": "Header",
+        "addHeader": "Tambah header",
+        "deleteHeader": "Hapus header",
+        "noHeaders": "Tidak ada header bersama."
+      },
+      "params": {
+        "pathTitle": "Parameter jalur",
+        "otherTitle": "Parameter (query / header)",
+        "name": "Nama",
+        "location": "Di",
+        "link": "Tautan model",
+        "noLink": "—",
+        "add": "Tambah parameter",
+        "delete": "Hapus parameter",
+        "auto": "otomatis",
+        "pathEmpty": "Ketik {{param}} di jalur untuk membuat barisnya.",
+        "otherEmpty": "Belum ada parameter query atau header.",
+        "nameEmpty": "Parameter memerlukan nama",
+        "nameTaken": "Nama ini sudah dipakai"
+      },
+      "body": {
+        "label": "Badan permintaan",
+        "empty": "(kosong)",
+        "nonStandardHint": "Isi permintaan pada {{method}} tidak standar — banyak server dan proxy mengabaikannya. Restorm tetap menyajikan dan mendokumentasikannya."
+      },
+      "responses": {
+        "add": "Tambah",
+        "codePlaceholder": "Kode status",
+        "standardErrors": "+ galat standar",
+        "empty": "Belum ada respons yang dideklarasikan.",
+        "emptyBody": "badan kosong",
+        "model": "Model yang dikembalikan",
+        "list": "Daftar",
+        "paginated": "Berhalaman",
+        "listOf": "daftar {{name}}",
+        "paginatedListOf": "daftar berhalaman {{name}}",
+        "example": "Contoh yang disajikan",
+        "exampleAuto": "(otomatis dibuat)",
+        "delete": "Hapus respons",
+        "codeInvalid": "Masukkan kode status 3 digit",
+        "codeTaken": "Kode ini sudah dideklarasikan"
+      },
+      "settings": {
+        "inherited": "Diwarisi dari grup",
+        "authInherited": "Diwarisi dari grup",
+        "editGroup": "Edit di grup ↗",
+        "headers": "Header kontrak",
+        "behaviour": "Perilaku",
+        "idempotent": "Idempoten",
+        "cacheSeconds": "Cache (detik)",
+        "traffic": "Lalu lintas yang diharapkan",
+        "authOverride": "Penimpaan auth",
+        "pagination": "Penomoran halaman",
+        "defaultLimit": "Ukuran halaman bawaan",
+        "maxLimit": "Ukuran halaman maks."
+      },
+      "addSubgroup": "Tambah sub-grup"
+    },
+    "newDesignName": "Desain API baru",
+    "createFromScratch": "Buat desain API",
+    "createFromDoc": "Buat desain dari API ini",
+    "fromDocName": "Desain {{name}}",
+    "run": {
+      "listening": "Melayani di http://localhost:{{port}}",
+      "stopped": "Server dihentikan",
+      "totalCalls": "{{count}} panggilan pada eksekusi ini",
+      "stop": "Hentikan server",
+      "close": "Tutup panel ini",
+      "forcedPill": "dipaksa {{code}}",
+      "defaultReturn": "Respons desain (bawaan)",
+      "codeReturn": "Jawab {{code}}",
+      "customCode": "Kode status kustom",
+      "customBody": "Isi respons kustom",
+      "customBodyPlaceholder": "Isi respons opsional (JSON)",
+      "customApply": "Paksa"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Lindungi rute tulis dengan autentikasi",
+      "authWritesHint": "Wajibkan autentikasi bearer pada create, update, dan delete; baca tetap publik.",
+      "generate": "Hasilkan",
+      "replace": "Ganti rute yang ada",
+      "replaceHint": "Rute untuk model ini sudah ada. Ganti untuk menghindari duplikat; biarkan nonaktif untuk menambah set kedua.",
+      "title": "Hasilkan CRUD untuk {{name}}",
+      "projections": {
+        "http": "{{count}} rute REST",
+        "graphql": "{{queries}} query / {{mutations}} mutation di GraphQL",
+        "grpc": "{{count}} metode gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} operasi SOAP",
+        "title": "Satu model, semua protokol — CRUD ini juga dilayani sebagai:"
+      }
+    },
+    "server": {
+      "subtitle": "Sajikan desain ini sebagai mock langsung dan pantau setiap panggilan."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Pembuatan kode",
+        "name": "Variabel",
+        "value": "Nilai (Handlebars)",
+        "add": "Tambah variabel",
+        "none": "Belum ada variabel — tambahkan satu dari header templat ini.",
+        "noTemplates": "Pilih satu atau beberapa templat di bagian “</> Code” — lalu tentukan variabel yang digunakan pembuatan di sini.",
+        "generalTitle": "Variabel umum",
+        "scope": {
+          "general": "Umum",
+          "property": "Properti model"
+        },
+        "discover": "Temukan variabel yang digunakan templat ini",
+        "undeclared": "Digunakan tetapi tidak dideklarasikan: {{names}}",
+        "allDeclared": "Semua variabel yang digunakan templat ini sudah dideklarasikan."
+      }
+    },
+    "clients": {
+      "generated": "Klien telah dibuat — buka di bawah Klien pada sidebar.",
+      "importing": "Mengimpor klien…",
+      "refresh": "Buat ulang klien",
+      "startPrompt": "Jalankan server untuk membuat klien.",
+      "startServerPrompt": "Jalankan <serverLink>server desain</serverLink> untuk mengakses permintaan klien yang dibuat otomatis dari model.",
+      "subtitle": "Server desain API Anda sedang berjalan dan melayani rute yang Anda tentukan. Permintaan di bawah memanggil rute tersebut secara langsung — buka salah satunya untuk mengujinya. Permintaan ini bersifat sementara dan akan hilang saat server dihentikan."
+    },
+    "descriptors": {
+      "copy": "Salin URL"
+    },
+    "projections": {
+      "title": "Proyeksi",
+      "hint": "Operasi yang sama, sebagaimana ditampilkan oleh setiap protokol yang dilayani."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Simpan",
@@ -2307,7 +2834,45 @@
     "addCookie": "Tambah cookie",
     "removeCookie": "Hapus cookie",
     "clearCookieDomain": "Hapus cookie untuk sebuah domain",
-    "clearCookies": "Hapus semua cookie"
+    "clearCookies": "Hapus semua cookie",
+    "listDesigns": "Daftar desain API",
+    "getDesign": "Ambil desain API",
+    "createDesign": "Buat desain API",
+    "createDesignFromDocumentation": "Buat desain dari API yang diimpor",
+    "updateDesign": "Perbarui desain",
+    "deleteDesign": "Hapus desain",
+    "createDesignModel": "Buat model desain",
+    "updateDesignModel": "Perbarui model desain",
+    "deleteDesignModel": "Hapus model desain",
+    "setDesignProperty": "Setel properti model",
+    "deleteDesignProperty": "Hapus properti model",
+    "createDesignEnum": "Buat enum desain",
+    "updateDesignEnum": "Perbarui enum desain",
+    "deleteDesignEnum": "Hapus enum desain",
+    "setDesignExample": "Setel contoh bernama",
+    "deleteDesignExample": "Hapus contoh bernama",
+    "createDesignRouteGroup": "Buat grup rute",
+    "updateDesignRouteGroup": "Perbarui grup rute",
+    "deleteDesignRouteGroup": "Hapus grup rute",
+    "createDesignRoute": "Buat rute desain",
+    "updateDesignRoute": "Perbarui rute desain",
+    "deleteDesignRoute": "Hapus rute desain",
+    "setDesignRouteParam": "Buat atau perbarui parameter rute",
+    "deleteDesignRouteParam": "Hapus parameter rute",
+    "generateDesignCrud": "Hasilkan rute CRUD",
+    "generateDesignSearchRoutes": "Hasilkan rute pencarian",
+    "serveDesign": "Sajikan desain",
+    "stopDesignServer": "Hentikan server desain",
+    "getDesignServerStatus": "Status server desain",
+    "setDesignRouteResponse": "Paksa respons",
+    "exportDesign": "Ekspor deskriptor desain",
+    "generateDesignCode": "Hasilkan kode dari desain",
+    "getDesignTemplateContract": "Dapatkan kontrak templat kode",
+    "setDesignTemplates": "Tetapkan templat kode desain",
+    "setDesignModelVariables": "Setel override codegen sebuah model",
+    "setDesignPropertyVariables": "Setel override codegen sebuah properti",
+    "setDesignRouteVariables": "Setel override codegen sebuah rute",
+    "setDesignTemplateVariables": "Setel variabel codegen global sebuah template"
   },
   "odataFilter": {
     "detail": {
@@ -2537,6 +3102,9 @@
       "addedScenario": "Menambahkan skenario \"{{name}}\"",
       "modifiedScenario": "Mengubah skenario \"{{name}}\"",
       "deletedScenario": "Menghapus skenario \"{{name}}\"",
+      "addedDesign": "Menambahkan desain \"{{name}}\"",
+      "modifiedDesign": "Mengubah desain \"{{name}}\"",
+      "deletedDesign": "Menghapus desain \"{{name}}\"",
       "addedFolder": "Menambahkan folder \"{{name}}\"",
       "modifiedFolder": "Mengubah folder \"{{name}}\"",
       "deletedFolder": "Menghapus folder \"{{name}}\"",
@@ -2545,6 +3113,7 @@
       "deletedEnvironmentFolder": "Menghapus folder lingkungan \"{{name}}\"",
       "movedRequest": "Memindahkan permintaan \"{{name}}\"",
       "movedScenario": "Memindahkan skenario \"{{name}}\"",
+      "movedDesign": "Memindahkan desain \"{{name}}\"",
       "movedFolder": "Memindahkan folder \"{{name}}\"",
       "movedEnvironmentFolder": "Memindahkan folder lingkungan \"{{name}}\"",
       "reorderedFolder": "Urutan item diubah di folder \"{{name}}\"",
@@ -2555,6 +3124,7 @@
     "commitTitle": {
       "singleRequest": "Pembaruan permintaan \"{{name}}\"",
       "singleScenario": "Pembaruan skenario \"{{name}}\"",
+      "singleDesign": "Pembaruan desain \"{{name}}\"",
       "singleFolder": "Pembaruan folder \"{{name}}\"",
       "singleEnvironmentFolder": "Pembaruan folder lingkungan \"{{name}}\"",
       "singleFileFormatVersion": "Beralih ke format berkas {{name}}",
@@ -2562,6 +3132,8 @@
       "countRequest_other": "{{count}} permintaan",
       "countScenario_one": "{{count}} skenario",
       "countScenario_other": "{{count}} skenario",
+      "countDesign_one": "{{count}} desain",
+      "countDesign_other": "{{count}} desain",
       "countFolder_one": "{{count}} folder",
       "countFolder_other": "{{count}} folder",
       "countEnvironmentFolder_one": "{{count}} folder lingkungan",

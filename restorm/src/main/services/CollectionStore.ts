@@ -12,11 +12,13 @@ import {
   Folder,
   EnvironmentFolder,
   Scenario,
+  ApiDesign,
   Environment,
   KeyValue,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario,
+  isApiDesign,
   type FolderItem,
   type Request
 } from '../../shared/models'
@@ -448,6 +450,118 @@ class CollectionStore {
   }
 
   // ==========================================================================
+  // Mutations - API designs
+  // ==========================================================================
+
+  private designIngestionStarted = false
+
+  /**
+   * Ingest RENDERER-side design edits into main's copy. Unlike request
+   * row edits (deliberately unmirrored — the whole-tree replace hazard),
+   * a design edit already crosses to main as a DESIGN_UPDATED event
+   * carrying the full document; folding it into main's tree keeps this
+   * copy current, so an MCP design write starts from the renderer's
+   * latest state instead of clobbering an unsaved edit on the next
+   * tree broadcast. Idempotent for main's own emissions (re-assigning
+   * an identical document is a no-op in effect).
+   */
+  startDesignIngestion(): void {
+    if (this.designIngestionStarted) return
+    this.designIngestionStarted = true
+    eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.DESIGN_UPDATED, (payload) => {
+      const doc = payload.document
+      if (doc === undefined || (doc as { type?: unknown }).type !== 'design') return
+      const existing = this.findById(payload.id)
+      if (!existing || !isApiDesign(existing)) return
+      const fresh = ApiDesign.fromPlain(doc as Record<string, unknown>)
+      // `fromPlain` sets the optional slots by CONDITIONAL spread, so a
+      // key the renderer removed is absent from `fresh` and a bare
+      // `Object.assign` would keep the stale value alive (and the next
+      // tree-replace would resurrect it renderer-side). Reconcile the
+      // known optional slots first, then merge into the SAME object so
+      // references held by parents stay.
+      if (!('notes' in fresh)) delete existing.notes
+      if (!('server' in fresh)) delete existing.server
+      if (!('securitySchemes' in fresh)) delete existing.securitySchemes
+      if (!('defaultSecurity' in fresh)) delete existing.defaultSecurity
+      if (!('defaultAuth' in fresh)) delete existing.defaultAuth
+      if (!('serving' in fresh)) delete existing.serving
+      if (!('codegen' in fresh)) delete existing.codegen
+      Object.assign(existing, fresh)
+    })
+  }
+
+  /**
+   * Create a new API design under `parentId` (any container) or at the
+   * ROOT when `null` — the same placements the sidebar offers. Emits a
+   * design-typed created event so search indexes it and the renderer's
+   * upsert re-instantiates it with the right class.
+   */
+  createDesign(parentId: string | null, designData: Partial<ApiDesign> & { name: string }): ApiDesign {
+    const newDesign = ApiDesign.fromPlain({
+      ...designData,
+      id: designData.id ?? this.generateId(),
+      name: designData.name
+    })
+    if (parentId === null) {
+      this.collections.push(newDesign)
+    } else {
+      const parent = this.findById(parentId)
+      if (parent && this.isContainer(parent)) {
+        this.childItemsForWrite(parent).push(newDesign)
+      }
+    }
+    this.emitDesignCreated(newDesign, parentId)
+    logger.debug('[CollectionStore] Design created', { id: newDesign.id, name: newDesign.name, parentId })
+    return newDesign
+  }
+
+  /**
+   * Update a design in place and emit the design-typed updated event
+   * (NEVER a request-typed one — the renderer would cleanse the draft
+   * against the HTTP-request shape and drop every design section).
+   * Sections mutate by REASSIGNMENT (`design.models = [...]`), same
+   * convention as the renderer's `assignDesignSection`.
+   */
+  updateDesign(id: string, updates: Partial<ApiDesign>): ApiDesign | null {
+    const design = this.findById(id)
+    if (!design || !isApiDesign(design)) return null
+    Object.assign(design, sanitizeUpdatePatch(updates, []))
+    this.emitDesignUpdated(design)
+    return design
+  }
+
+  /**
+   * Emit DESIGN_UPDATED for a design whose sections were mutated in
+   * place by a caller holding the store's object (the MCP design tools
+   * work this way). Without it the search index and the renderer's
+   * save-unit bridge never learn about the edit.
+   */
+  notifyDesignUpdated(design: ApiDesign): void {
+    this.emitDesignUpdated(design)
+  }
+
+  /** Delete a design by id (root or nested). Emits the design-typed
+   * deleted event so the search sub-documents sweep. */
+  deleteDesign(id: string): boolean {
+    const design = this.findById(id)
+    if (!design || !isApiDesign(design)) return false
+    const parent = this.findParentFolder(id)
+    if (!parent) {
+      const index = this.collections.findIndex((c) => c.id === id)
+      if (index === -1) return false
+      this.collections.splice(index, 1)
+    } else {
+      const siblings = this.childItemsForWrite(parent)
+      const index = siblings.findIndex((item) => item.id === id)
+      if (index === -1) return false
+      siblings.splice(index, 1)
+    }
+    this.emitDesignDeleted(id)
+    return true
+  }
+
+  // ==========================================================================
   // Mutations - Requests
   // ==========================================================================
 
@@ -589,12 +703,17 @@ class CollectionStore {
     id: string,
     newParentId: string | undefined,
     index: number | undefined
-  ): { ok: true; kind: 'request' | 'folder' | 'env-folder' | 'scenario'; parentId: string | null; index: number } | { ok: false; error: string } {
+  ): { ok: true; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design'; parentId: string | null; index: number } | { ok: false; error: string } {
     const item = this.findById(id)
     if (!item) return { ok: false, error: `No item with id ${id}` }
 
-    const kind: 'request' | 'folder' | 'env-folder' | 'scenario' =
-      isScenario(item) ? 'scenario' : isEnvironmentFolder(item) ? 'env-folder' : isAnyFolder(item) ? 'folder' : 'request'
+    // A design must NOT fall through to 'request': emitting it with a
+    // request-typed update would make the renderer cleanse the draft
+    // against the HTTP-request shape and drop every design section.
+    const kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' =
+      isScenario(item) ? 'scenario'
+        : isApiDesign(item) ? 'design'
+          : isEnvironmentFolder(item) ? 'env-folder' : isAnyFolder(item) ? 'folder' : 'request'
     const explicitParent = newParentId !== undefined && newParentId.length > 0
     const currentParent = this.findParentFolder(id)
     const isRootItem = currentParent === null && this.collections.some((c) => c.id === id)
@@ -611,6 +730,7 @@ class CollectionStore {
         : Math.max(0, Math.min(index, this.collections.length))
       this.collections.splice(target, 0, removed)
       if (kind === 'request') this.emitRequestUpdated(removed as unknown as Request)
+      else if (kind === 'design') this.emitDesignUpdated(removed as unknown as ApiDesign)
       else this.emitFolderUpdated(removed as Folder | EnvironmentFolder)
       return { ok: true, kind, parentId: null, index: target }
     }
@@ -657,6 +777,7 @@ class CollectionStore {
     }
     this.childItemsForWrite(dest).splice(targetIndex, 0, item)
     if (kind === 'request') this.emitRequestUpdated(item as Request)
+    else if (kind === 'design') this.emitDesignUpdated(item as ApiDesign)
     else this.emitFolderUpdated(item as Folder | EnvironmentFolder)
     return { ok: true, kind, parentId: destId, index: targetIndex }
   }
@@ -913,7 +1034,13 @@ class CollectionStore {
       if (item.items) item.items = item.items.map((c) => this.reifyItem(c))
       return item
     }
+    if (item instanceof ApiDesign) return item
     const rec = item as unknown as Record<string, unknown>
+    // Design leaf (plain object). Same reason as the scenario branch
+    // below: it carries a `type` the request factory would mangle.
+    if (rec['type'] === 'design') {
+      return ApiDesign.fromPlain(rec as Parameters<typeof ApiDesign.fromPlain>[0])
+    }
     // Scenario leaf (plain object). Checked before the generic
     // `type`-bearing request branch — a scenario also carries a `type`,
     // and the request factory would otherwise mis-build it as an
@@ -1028,6 +1155,38 @@ class CollectionStore {
     void eventBusService.emit(DocumentEvents.REQUEST_UPDATED, payload)
     pubsub.publish(PUBSUB_TOPICS.REQUEST_UPDATED, request)
     logger.debug('[CollectionStore] Request updated', { id: request.id, name: request.name })
+  }
+
+  private emitDesignCreated(design: ApiDesign, parentId: string | null): void {
+    const payload: DocumentChangedPayload = {
+      id: design.id,
+      type: 'design',
+      document: design.toPlainObject(),
+      ...(parentId !== null ? { parentFolderId: parentId } : {})
+    }
+    void eventBusService.emit(DocumentEvents.DESIGN_CREATED, payload)
+    logger.debug('[CollectionStore] Design created event', { id: design.id, name: design.name })
+  }
+
+  private emitDesignDeleted(id: string): void {
+    const payload: DocumentDeletedPayload = { id, type: 'design' }
+    void eventBusService.emit(DocumentEvents.DESIGN_DELETED, payload)
+    logger.debug('[CollectionStore] Design deleted event', { id })
+  }
+
+  private emitDesignUpdated(design: ApiDesign): void {
+    // The design-typed sibling of `emitRequestUpdated`: the renderer's
+    // upsert re-instantiates via `ApiDesignClass`, so no section is
+    // cleansed away. Same parent lookup for navigation re-keying.
+    const parent = this.findParentFolder(design.id)
+    const payload: DocumentChangedPayload = {
+      id: design.id,
+      type: 'design',
+      document: design.toPlainObject(),
+      ...(parent ? { parentFolderId: parent.id } : {})
+    }
+    void eventBusService.emit(DocumentEvents.DESIGN_UPDATED, payload)
+    logger.debug('[CollectionStore] Design updated', { id: design.id, name: design.name })
   }
 
   private emitRequestDeleted(id: string): void {

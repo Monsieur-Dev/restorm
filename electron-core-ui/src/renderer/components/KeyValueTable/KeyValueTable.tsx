@@ -149,6 +149,13 @@ export interface KeyValueTableProps {
   /** Header of the VALUE column. Defaults to `'Value'`. See {@link keyHeader}. */
   valueHeader?: string | undefined
   /**
+   * Whether the Value column is rendered. Defaults to `true`. Set to
+   * `false` for single-column lists (an ordered list of labels — e.g. an
+   * enum's values) where a separate substituted value has no meaning;
+   * rows then carry their `key` as the datum and keep `value` untouched.
+   */
+  showValue?: boolean | undefined
+  /**
    * Whether the Description column is rendered. Defaults to `true`.
    * Set to `false` in use-cases where descriptions aren't meaningful
    * (e.g. a short auth-config table where the rows are obvious).
@@ -214,6 +221,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     renderDescriptionCell: DescriptionCellRenderer = DefaultCellRenderer,
     keyHeader = 'Key',
     valueHeader = 'Value',
+    showValue = true,
     showDescription = true,
     showEnabledToggle = true,
     showResolvedValue = false,
@@ -408,26 +416,27 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
       })
     }
 
-    cols.push(
-      {
-        id: 'key',
-        header: keyHeader,
-        resizable: true,
-        minWidth: 80,
-        renderCell: (row) => {
-          const idx = rows.findIndex((r) => r.id === row.id)
-          return (
-            <KeyRenderer
-              value={row.key}
-              onChange={(v) => { updateData(idx, 'key', v) }}
-              {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-key` })}
-              rowId={row.id}
-              disabled={disabled}
-            />
-          )
-        }
-      },
-      {
+    cols.push({
+      id: 'key',
+      header: keyHeader,
+      resizable: true,
+      minWidth: 80,
+      renderCell: (row) => {
+        const idx = rows.findIndex((r) => r.id === row.id)
+        return (
+          <KeyRenderer
+            value={row.key}
+            onChange={(v) => { updateData(idx, 'key', v) }}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-row-${row.id}-key` })}
+            rowId={row.id}
+            disabled={disabled}
+          />
+        )
+      }
+    })
+
+    if (showValue) {
+      cols.push({
         id: 'value',
         header: valueHeader,
         resizable: true,
@@ -448,8 +457,8 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
             />
           )
         }
-      }
-    )
+      })
+    }
 
     if (showResolvedValue) {
       cols.push({
@@ -522,7 +531,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     }
 
     return cols
-  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, keyHeader, valueHeader, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow, t, disabled])
+  }, [KeyCellRenderer, ValueCellRenderer, DescriptionCellRenderer, ResolvedValueCellRenderer, keyHeader, valueHeader, showValue, showDescription, showResolvedValue, showEnabledToggle, rows, updateData, dataTestId, handleRemoveRow, t, disabled])
 
   return (
     <div

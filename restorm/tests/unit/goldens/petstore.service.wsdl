@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:tns="urn:restorm:design:petstore"
+                  targetNamespace="urn:restorm:design:petstore">
+  <wsdl:message name="GetUserRequest">
+    <wsdl:part name="parameters" element="tns:GetUser" />
+  </wsdl:message>
+  <wsdl:message name="GetUserResponse">
+    <wsdl:part name="parameters" element="tns:GetUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListUserRequest">
+    <wsdl:part name="parameters" element="tns:ListUser" />
+  </wsdl:message>
+  <wsdl:message name="ListUserResponse">
+    <wsdl:part name="parameters" element="tns:ListUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostUserRequest">
+    <wsdl:part name="parameters" element="tns:PostUser" />
+  </wsdl:message>
+  <wsdl:message name="PostUserResponse">
+    <wsdl:part name="parameters" element="tns:PostUserResponse" />
+  </wsdl:message>
+  <wsdl:portType name="PetstoreServicePortType">
+    <wsdl:operation name="GetUser">
+      <wsdl:documentation>Fetch one user</wsdl:documentation>
+      <wsdl:input message="tns:GetUserRequest" />
+      <wsdl:output message="tns:GetUserResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="ListUser" deprecated="true">
+      <wsdl:documentation>List users</wsdl:documentation>
+      <wsdl:input message="tns:ListUserRequest" />
+      <wsdl:output message="tns:ListUserResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="PostUser">
+      <wsdl:documentation>Create a user</wsdl:documentation>
+      <wsdl:input message="tns:PostUserRequest" />
+      <wsdl:output message="tns:PostUserResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PetstoreServiceBinding" type="tns:PetstoreServicePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetUser">
+      <soap:operation soapAction="urn:restorm:design:petstore#GetUser" />
+      <wsdl:input><soap:body use="literal" /></wsdl:input>
+      <wsdl:output><soap:body use="literal" /></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListUser">
+      <soap:operation soapAction="urn:restorm:design:petstore#ListUser" />
+      <wsdl:input><soap:body use="literal" /></wsdl:input>
+      <wsdl:output><soap:body use="literal" /></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostUser">
+      <soap:operation soapAction="urn:restorm:design:petstore#PostUser" />
+      <wsdl:input><soap:body use="literal" /></wsdl:input>
+      <wsdl:output><soap:body use="literal" /></wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="PetstoreService">
+    <wsdl:documentation>A pet store API designed in Restorm.</wsdl:documentation>
+    <wsdl:port name="PetstoreServicePort" binding="tns:PetstoreServiceBinding">
+      <soap:address location="http://localhost:7480/soap" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

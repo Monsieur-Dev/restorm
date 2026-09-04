@@ -155,6 +155,41 @@ describe('swaggerToApiDocumentation', () => {
     expect(doc.models.Status?.properties).toEqual([])
   })
 
+  it('keeps a flat scalar-enum query parameter’s values', () => {
+    const doc = swaggerToApiDocumentation(baseSpec)
+    const op = doc.operations.find((o) => o.match.method === 'POST' && o.match.urlPattern === '/pet/{petId}')
+    const status = op?.parameters?.find((p) => p.name === 'status')
+    expect(status?.enumValues).toEqual(['available', 'pending', 'sold'])
+  })
+
+  it('preserves the enum of a scalar-enum ARRAY parameter (enum on items — petstore findByStatus)', () => {
+    const spec: SwaggerSpec = {
+      ...baseSpec,
+      paths: {
+        '/pet/findByStatus': {
+          get: {
+            operationId: 'findPetsByStatus',
+            parameters: [{
+              name: 'status',
+              in: 'query',
+              required: true,
+              type: 'array',
+              items: { type: 'string', enum: ['available', 'pending', 'sold'] },
+              collectionFormat: 'multi'
+            }],
+            responses: { '200': { description: 'ok' } }
+          }
+        }
+      }
+    }
+    const doc = swaggerToApiDocumentation(spec)
+    const status = doc.operations
+      .find((o) => o.match.urlPattern === '/pet/findByStatus')
+      ?.parameters?.find((p) => p.name === 'status')
+    // Without the items→enum lift this came back undefined (the enum was dropped).
+    expect(status?.enumValues).toEqual(['available', 'pending', 'sold'])
+  })
+
   it('maps definitions into models with required flags and $ref type labels', () => {
     const doc = swaggerToApiDocumentation(baseSpec)
     const pet = doc.models.Pet

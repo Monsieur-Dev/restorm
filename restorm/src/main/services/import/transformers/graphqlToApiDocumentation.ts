@@ -25,6 +25,7 @@ export interface GraphQLFieldData {
   description?: string | undefined
   args: GraphQLArgumentData[]
   type: string
+  deprecated?: boolean | undefined
 }
 
 export interface GraphQLTypeData {
@@ -116,6 +117,7 @@ function buildOperations(
       operationId: f.name
     }
     if (f.description !== undefined) doc.description = f.description
+    if (f.deprecated === true) doc.deprecated = true
     const params = mapArgs(f.args)
     if (params !== undefined) doc.parameters = params
     if (isCustomType(f.type, modelNames)) {

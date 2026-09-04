@@ -116,12 +116,17 @@ export function grpcDescriptorToParsedProto(pkgDef: PackageDefinition, discovere
       const methods: ProtoMethod[] = Object.entries(def).map(([methodName, method]) => {
         const requestType = method.requestType.type as unknown as RawTypeName
         const responseType = method.responseType.type as unknown as RawTypeName
+        // proto-loader decodes the MethodDescriptorProto's options onto the
+        // method definition (its TS type omits `options`, but the runtime object
+        // carries it) — carry a method-level `deprecated` through.
+        const deprecated = (method as { options?: { deprecated?: boolean } }).options?.deprecated === true
         return {
           name: methodName,
           inputType: requestType.name,
           outputType: responseType.name,
           clientStreaming: method.requestStream,
-          serverStreaming: method.responseStream
+          serverStreaming: method.responseStream,
+          ...(deprecated ? { deprecated: true } : {})
         }
       })
       services.push({

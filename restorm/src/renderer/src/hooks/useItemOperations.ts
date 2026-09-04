@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewDropPosition, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
-import { isAnyFolder, isScenario, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isApiDesign, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
+import { parseDesignSectionRowId } from '../../../shared/design/designSections'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -31,7 +32,7 @@ import { mapAllWorkbenchTabs, tabBackingItemId, tabReferencesItem } from '../uti
 import { requestTabTitle } from '../../../shared/protocolRegistry'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab, RestormEditorTab } from '../../../shared/types/editor'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem, makeReactiveApiDesign } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -110,6 +111,7 @@ export interface UseItemOperationsOptions {
   openScenarioEditorTab: (scenario: import('../../../shared/types/collections').Scenario, breadcrumbs: BreadcrumbItem[]) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
+  openDesignTab: (design: import('../../../shared/types/collections').ApiDesign, breadcrumbs: BreadcrumbItem[]) => void
   /** Project UUID. When the deleted subtree contains favorited items,
    * each id is removed from the favorites store under this key. */
   projectUuid: string | null
@@ -205,12 +207,32 @@ export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: stri
     for (const child of item.items) emitClonedSubtreeCreated(child, item.id)
     return
   }
+  if (isApiDesign(item)) {
+    emitBothBuses(DocumentEvents.DESIGN_CREATED, {
+      id: item.id,
+      type: 'design',
+      document: cloneForEventBus(item),
+      ...(parentFolderId !== undefined ? { parentFolderId } : {})
+    } as DocumentChangedPayload)
+    return
+  }
   emitBothBuses(DocumentEvents.REQUEST_CREATED, {
     id: item.id,
     type: 'request',
     document: cloneForEventBus(item),
     ...(parentFolderId !== undefined ? { parentFolderId } : {})
   } as DocumentChangedPayload)
+}
+
+/** The update event + payload type an item announces when it MOVES.
+ * Designs and folders carry their own save-unit document kinds —
+ * announcing a design as 'request' would have the save-unit bridge
+ * cleanse its draft against the HTTP request shape and drop every
+ * design section, leaving the unit dirty forever. */
+function movedItemAnnouncement(item: FolderItem): { event: (typeof DocumentEvents)[keyof typeof DocumentEvents]; type: DocumentChangedPayload['type'] } {
+  if (isAnyFolder(item)) return { event: DocumentEvents.FOLDER_UPDATED, type: 'folder' }
+  if (isApiDesign(item)) return { event: DocumentEvents.DESIGN_UPDATED, type: 'design' }
+  return { event: DocumentEvents.REQUEST_UPDATED, type: 'request' }
 }
 
 export function useItemOperations(options: UseItemOperationsOptions): UseItemOperationsReturn {
@@ -225,7 +247,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     projectUuid,
     onStructureChanged
   } = options
-  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab } = options
+  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab } = options
   const { t } = useTranslation()
 
   // Coherence rules for a (possibly multi-item) sidebar drag. Shared verbatim
@@ -236,6 +258,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     if (sourceIds.length === 0) return false
     // An item can't land on itself.
     if (sourceIds.includes(targetId)) return false
+    // A design's virtual section rows are not tree items and never move;
+    // a selection carrying one refuses the drop WHOLESALE (the design
+    // itself, a real item, stays draggable).
+    if (sourceIds.some((id) => parseDesignSectionRowId(id) !== null)) return false
 
     // Is `childId` anywhere inside `parentId`'s subtree?
     const isDescendant = (parentId: string, childId: string): boolean => {
@@ -414,9 +440,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         continue
       }
       const movedParentId = findParentFolder(rootItems, movedItem.id)?.id
-      emitBothBuses(isAnyFolder(movedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+      const announcement = movedItemAnnouncement(movedItem)
+      emitBothBuses(announcement.event, {
         id: movedItem.id,
-        type: isAnyFolder(movedItem) ? 'folder' : 'request',
+        type: announcement.type,
         document: cloneForEventBus(movedItem),
         ...(movedParentId !== undefined ? { parentFolderId: movedParentId } : {})
       } as DocumentChangedPayload)
@@ -453,9 +480,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         movedAScenario = true
         continue
       }
-      emitBothBuses(isAnyFolder(movedItem) ? DocumentEvents.FOLDER_UPDATED : DocumentEvents.REQUEST_UPDATED, {
+      const announcement = movedItemAnnouncement(movedItem)
+      emitBothBuses(announcement.event, {
         id: movedItem.id,
-        type: isAnyFolder(movedItem) ? 'folder' : 'request',
+        type: announcement.type,
         document: cloneForEventBus(movedItem)
       } as DocumentChangedPayload)
     }
@@ -497,12 +525,14 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         openEnvironmentFolderTab(reactiveClone, breadcrumbs)
       } else if (isFolder(reactiveClone)) {
         openFolderTab(reactiveClone, breadcrumbs)
+      } else if (isApiDesign(reactiveClone)) {
+        openDesignTab(reactiveClone, breadcrumbs)
       } else if (isRequest(reactiveClone)) {
         const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
         openAnyRequestTab(reactiveClone, breadcrumbs, envs)
       }
     }
-  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab])
+  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
@@ -564,6 +594,16 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         emitBothBuses(DocumentEvents.REQUEST_DELETED, {
           id: node.id,
           type: 'request',
+          ...(parentId !== undefined ? { parentFolderId: parentId } : {})
+        } as DocumentDeletedPayload)
+        return
+      }
+      if (isApiDesign(node)) {
+        // A design is its own save unit: the DELETED event is what turns a
+        // sidebar delete into a tombstone the next save commits.
+        emitBothBuses(DocumentEvents.DESIGN_DELETED, {
+          id: node.id,
+          type: 'design',
           ...(parentId !== undefined ? { parentFolderId: parentId } : {})
         } as DocumentDeletedPayload)
         return
@@ -666,8 +706,16 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
     // Find and update the reactive object directly (triggers search re-indexing)
     const foundItem = findItemById(rootItems, itemId)
+    const previousName = foundItem?.name
     if (foundItem) {
       foundItem.name = newName
+      // A design's published API title (`info.title`, what serving/export/
+      // codegen stamp) tracks its sidebar name until the user edits the
+      // title independently. While they're in lockstep, carry the rename
+      // into the title so it never ships the stale default.
+      if (isApiDesign(foundItem) && foundItem.info.title === previousName) {
+        foundItem.info = { ...foundItem.info, title: newName }
+      }
     }
 
     // Force React re-render by creating new reference
@@ -699,6 +747,15 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         }
         if ('scenario' in renamed) {
           return { ...renamed, scenario: { ...renamed.scenario, name: newName }, title: newName, titleString: newName }
+        }
+        if ('design' in renamed) {
+          // Keep the open Settings "Title" field in step with the rename
+          // while it hasn't diverged from the (old) name — mirrors the
+          // model-level lockstep sync above.
+          const info = renamed.design.info.title === previousName
+            ? { ...renamed.design.info, title: newName }
+            : renamed.design.info
+          return { ...renamed, design: { ...renamed.design, name: newName, info }, title: newName, titleString: newName }
         }
         return renamed
       }
@@ -761,6 +818,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'auth': return 'New auth request'
       case 'trpc': return 'New tRPC request'
       case 'scenario': return 'New scenario'
+      case 'design': return t('design.newDesignName', 'New API design')
     }
   }, [t])
 
@@ -824,7 +882,34 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // `useImport` produces on import so the save-unit registry /
     // serializer / executors all pick them up without special casing.
     let pushedItem: FolderItem
-    if (kind === 'scenario') {
+    if (kind === 'design') {
+      const design: import('../../../shared/types/collections').ApiDesign = {
+        type: 'design',
+        id,
+        name,
+        info: { title: name, version: '1.0.0' },
+        models: [],
+        enums: [],
+        routeGroups: []
+      }
+      // Same parent bookkeeping as the request branch: the proxy stamps
+      // parentFolderId onto every event, and the save-unit registers
+      // under its real parent.
+      const designParentId = isRoot
+        ? undefined
+        : (parent && (isAnyFolder(parent) || isScenario(parent)) ? parent.id : undefined)
+      const reactive = designParentId !== undefined
+        ? makeReactiveApiDesign(design, designParentId)
+        : makeReactiveApiDesign(design)
+      mountChild(reactive as unknown as FolderItem)
+      pushedItem = reactive as unknown as FolderItem
+      emitBothBuses(DocumentEvents.DESIGN_CREATED, {
+        id: reactive.id,
+        type: 'design',
+        document: cloneForEventBus(reactive as unknown as FolderItem),
+        ...(designParentId !== undefined ? { parentFolderId: designParentId } : {})
+      } as DocumentChangedPayload)
+    } else if (kind === 'scenario') {
       // A scenario is a plain tree item (no execution wiring yet in
       // Phase 1). It syncs to main via `collections:sync` and reifies
       // into a `Scenario` model there; no per-item document event is
@@ -1051,6 +1136,12 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       if (!silent) setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
       setRootItems((prevItems) => [...prevItems])
     }
+    // A freshly created design is expanded so its Models / Enums / Routes
+    // sub-tree is visible right away — matches the from-imported-API path in
+    // App (`makeReactiveApiDesign` handler). Its own id, not just the parent's.
+    if (!silent && kind === 'design') {
+      setExpandedIds((prev) => Array.from(new Set([...prev, id])))
+    }
     if (!silent) setSelectedItemId(id)
 
     if (!silent) {
@@ -1065,7 +1156,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         openFolderTab(pushedItem, breadcrumbs)
       } else if (isScenario(pushedItem)) {
         openScenarioEditorTab(pushedItem, breadcrumbs)
-      } else if (!isAnyFolder(pushedItem)) {
+      } else if (isApiDesign(pushedItem)) {
+        openDesignTab(pushedItem, breadcrumbs)
+      } else if (isRequest(pushedItem)) {
         openAnyRequestTab(pushedItem, breadcrumbs, envs)
       }
       // Every kind this dispatcher can build lands in inline rename — folders,
@@ -1074,7 +1167,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       startInlineRename(id)
     }
     return id
-  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, defaultNameFor, startInlineRename])
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, openDesignTab, defaultNameFor, startInlineRename])
 
   const handleCreateRootEnvironmentFolder = useCallback(() => {
     const newFolder: EnvironmentFolder = {

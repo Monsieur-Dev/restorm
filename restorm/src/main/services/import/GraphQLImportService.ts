@@ -22,6 +22,7 @@ interface GraphQLField {
   description?: string | undefined
   args: GraphQLArgument[]
   type: string
+  deprecated?: boolean | undefined
 }
 
 interface GraphQLArgument {
@@ -166,14 +167,22 @@ function parseFieldsBlock(block: string): GraphQLField[] {
     // Skip empty lines
     if (!trimmed) continue
     
-    // Parse field: name(args): Type
+    // Parse field: name(args): Type [@directive…]
     const fieldMatch = /^(\w+)(?:\(([^)]*)\))?\s*:\s*(.+)$/.exec(trimmed)
     if (fieldMatch?.[1] && fieldMatch[3]) {
+      // The type capture greedily includes any trailing directives; a field is
+      // deprecated when it carries `@deprecated` (optionally `@deprecated(reason:…)`).
+      // Strip every directive off before reading the type so `[Pet!]! @deprecated`
+      // resolves to `[Pet!]!`, not a polluted type string.
+      const rawType = fieldMatch[3]
+      const deprecated = /@deprecated\b/.test(rawType)
+      const cleanType = rawType.replace(/@\w+(\s*\([^)]*\))?/g, '').trim()
       fields.push({
         name: fieldMatch[1],
         description: currentDescription || undefined,
         args: parseArguments(fieldMatch[2] ?? ''),
-        type: parseTypeString(fieldMatch[3])
+        type: parseTypeString(cleanType),
+        ...(deprecated ? { deprecated: true } : {})
       })
       currentDescription = ''
     }
@@ -201,17 +210,47 @@ function generateId(seed?: string): string {
   return `${hex}-${seed.length.toString(16).padStart(4, '0')}-4000-8000-${hex}${hex.slice(0, 4)}`
 }
 
-/** Build a sample GraphQL query for a field */
-function buildSampleQuery(field: GraphQLField, operationType: GraphQLOperationType): string {
+/** The underlying named type — strips list `[]` and non-null `!` wrappers. */
+function extractRootType(type: string): string {
+  return type.replace(/[![\]]/g, '').trim()
+}
+
+/** Build a selection set for an object return type: scalar / enum fields are
+ *  selected directly (so the query runs as-is), while object fields are left as
+ *  commented suggestions — the user uncomments what they want. Commenting the
+ *  nested objects also sidesteps infinite / cyclic expansion. */
+function buildSelectionSet(typeName: string, types: GraphQLType[]): string {
+  const type = types.find((t) => t.name === typeName)
+  if (type === undefined || type.fields.length === 0) return '# Add fields here'
+  return type.fields
+    .map((f) => {
+      const fieldType = extractRootType(f.type)
+      return types.some((t) => t.name === fieldType) ? `# ${f.name} { … }` : f.name
+    })
+    .join('\n    ')
+}
+
+/** Build a sample GraphQL query for a field — with the return type's scalar
+ *  fields pre-selected so it's immediately runnable. */
+function buildSampleQuery(field: GraphQLField, operationType: GraphQLOperationType, types: GraphQLType[]): string {
   const argsStr = field.args.length > 0
     ? `(${field.args.map(a => `${a.name}: ${getSampleValue(a.type)}`).join(', ')})`
     : ''
-  
+
   const operationName = operationType === 'query' ? 'query' : operationType
-  
+  const returnType = extractRootType(field.type)
+
+  // A scalar / enum return (e.g. Boolean from a delete mutation) takes no
+  // selection set — emitting `{ … }` on it would be invalid.
+  if (!types.some((t) => t.name === returnType)) {
+    return `${operationName} {
+  ${field.name}${argsStr}
+}`
+  }
+
   return `${operationName} {
   ${field.name}${argsStr} {
-    # Add fields here
+    ${buildSelectionSet(returnType, types)}
   }
 }`
 }
@@ -240,9 +279,10 @@ function fieldToRequest(
   field: GraphQLField,
   operationType: GraphQLOperationType,
   baseUrl: string,
-  collectionName: string
+  collectionName: string,
+  types: GraphQLType[]
 ): GraphQLRequest {
-  const query = buildSampleQuery(field, operationType)
+  const query = buildSampleQuery(field, operationType, types)
   
   const request: GraphQLRequest = {
     type: 'graphql',
@@ -299,7 +339,7 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
       name: 'Queries',
       tags: ['query'],
       configuration: {},
-      items: schema.queries.map(field => fieldToRequest(field, 'query', baseUrl, name))
+      items: schema.queries.map(field => fieldToRequest(field, 'query', baseUrl, name, schema.types))
     }
     items.push(queriesFolder)
   }
@@ -310,7 +350,7 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
       name: 'Mutations',
       tags: ['mutation'],
       configuration: {},
-      items: schema.mutations.map(field => fieldToRequest(field, 'mutation', baseUrl, name))
+      items: schema.mutations.map(field => fieldToRequest(field, 'mutation', baseUrl, name, schema.types))
     }
     items.push(mutationsFolder)
   }
@@ -321,7 +361,7 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
       name: 'Subscriptions',
       tags: ['subscription'],
       configuration: {},
-      items: schema.subscriptions.map(field => fieldToRequest(field, 'subscription', baseUrl, name))
+      items: schema.subscriptions.map(field => fieldToRequest(field, 'subscription', baseUrl, name, schema.types))
     }
     items.push(subscriptionsFolder)
   }

@@ -21,6 +21,13 @@ const MODAL = '[data-testid="incompatible-project-modal"]'
  */
 const SOURCE_SAMPLE = join(__dirname, '../../../samples/redis-sample.restorm')
 
+/**
+ * The committed sample carrying an API design — the 1.1 format. Built
+ * through the app's own serialization pipeline (the sanctioned
+ * bootstrap while no UI can author a design yet).
+ */
+const DESIGN_SAMPLE = join(__dirname, '../../../samples/api-design-sample.restorm')
+
 function requirePage(): Page {
   if (!page) throw new Error('the app has not been launched')
   return page
@@ -56,6 +63,22 @@ Given('a project written by this build', async ({ launchApp }) => {
   expect(raw, 'the fixture must already have an identity, or the stamp would rewrite it').toContain(
     '_projectUuid:'
   )
+})
+
+Given('a project carrying an API design', async ({ launchApp }) => {
+  const launched = await launchApp()
+  page = launched.page
+
+  projectPath = join(FILE_FORMAT_GATE_TEMP_DIR, 'design-project.restorm')
+  copyFileSync(DESIGN_SAMPLE, projectPath)
+  bytesPath = projectPath
+
+  const raw = readFileSync(projectPath, 'utf-8')
+  expect(raw, 'the design fixture must declare the design format at its root').toMatch(
+    /^fileFormatVersion:\s*1\.1$/m
+  )
+  expect(raw, 'the design fixture must already have an identity').toContain('_projectUuid:')
+  expect(raw, 'the design fixture must actually carry a design').toMatch(/^\s+type: design$/m)
 })
 
 /**
@@ -180,6 +203,86 @@ When('I dismiss the incompatible-project message', async () => {
 
 Then('the incompatible-project message is gone', async () => {
   await expect(requirePage().locator(MODAL)).toHaveCount(0, { timeout: 10000 })
+})
+
+/**
+ * A real, app-driven edit followed by a real save — the lazy-bump
+ * scenarios need an actual write (a clean project skips the save
+ * entirely), and driving the notes editor is the same recipe the
+ * dirty-state suite uses.
+ */
+When('I edit the notes of the env folder {string} and save', async ({}, folderName: string) => {
+  const p = requirePage()
+  const row = p
+    .locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: p.getByText(folderName, { exact: true }) })
+    .first()
+  await expect(row).toBeVisible({ timeout: 10000 })
+  await row.click()
+  await p.waitForTimeout(500)
+
+  const notesSubTab = p.locator('[role="tab"][data-tab-id="notes"]:visible').first()
+  await expect(notesSubTab).toBeVisible({ timeout: 5000 })
+  if ((await notesSubTab.getAttribute('aria-selected')) !== 'true') {
+    await notesSubTab.click()
+    await p.waitForTimeout(300)
+  }
+  const editor = p.locator('[data-testid$="-markdown-editor-notes-editor"]:visible').first()
+  await expect(editor).toBeVisible({ timeout: 5000 })
+  await editor.click()
+  const contentEditable = editor.locator('[contenteditable="true"]').first()
+  if (await contentEditable.count() > 0) {
+    await contentEditable.click()
+  }
+  await p.keyboard.type('format gate edit')
+  // Blur so the reactive debounce fires the update event before saving.
+  await p.mouse.click(5, 5)
+  await p.waitForTimeout(1200)
+
+  // Fire the save-all keydown directly on `window` — a real key press
+  // can be swallowed by the focused ProseMirror editor.
+  await p.evaluate(() => {
+    window.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 's', code: 'KeyS', ctrlKey: true, shiftKey: true, bubbles: true, cancelable: true
+    }))
+  })
+  await p.waitForTimeout(1500)
+})
+
+Then('the project file on disk declares file format version {string}', async ({}, version: string) => {
+  await expect(() => {
+    const raw = readFileSync(projectPath, 'utf-8')
+    const declared = /^fileFormatVersion:\s*([0-9.]+)$/m.exec(raw)?.[1]
+    expect(declared, 'the file must declare a version at its root').toBe(version)
+  }).toPass({ timeout: 10000 })
+})
+
+Then('the project file on disk still carries the design', () => {
+  const raw = readFileSync(projectPath, 'utf-8')
+  expect(raw).toMatch(/^\s+type: design$/m)
+  // Spot-check the design's content survived, not just its marker.
+  expect(raw).toContain('name: Petstore design')
+  expect(raw).toContain('name: User')
+  expect(raw).toContain('name: UserStatus')
+})
+
+When('I close and reopen that project', async () => {
+  const p = requirePage()
+  await p.keyboard.press('Escape')
+  await p.evaluate(async () => {
+    const helpers = (window as unknown as {
+      __restormTestHelpers?: { closeFile?: () => Promise<void> | void }
+    }).__restormTestHelpers
+    if (!helpers?.closeFile) throw new Error('__restormTestHelpers.closeFile not exposed')
+    await helpers.closeFile()
+  })
+  await expect(p.locator('.ecu-welcome-screen')).toBeVisible({ timeout: 10000 })
+  await p.evaluate(async (path: string) => {
+    const w = window as unknown as { restorm?: { file?: { openPath?: (p: string) => Promise<unknown> } } }
+    const fn = w.restorm?.file?.openPath
+    if (typeof fn !== 'function') throw new Error('window.restorm.file.openPath is not available')
+    await fn(path)
+  }, projectPath)
 })
 
 Then('the app is still usable', async () => {

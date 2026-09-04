@@ -258,6 +258,7 @@
     "contextMenu": {
       "delete": "Obriši",
       "clone": "Kloniraj",
+      "openInSplit": "Otvori u podeljenom panelu",
       "copySuffix": "kopija",
       "rename": "Preimenuj",
       "addToFavorites": "Dodaj u omiljeno",
@@ -316,7 +317,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Dizajn API-ja"
       },
       "cut": "Iseci",
       "copy": "Kopiraj",
@@ -336,7 +338,8 @@
       "moveInto": "Premesti u ovaj scenario",
       "affectsNote": "Brisanje ovog zahteva ukloniće ga i iz ovih scenarija.",
       "deleteAnyway": "Svejedno izbriši"
-    }
+    },
+    "expandAll": "Proširi sve zahteve"
   },
   "environment": {
     "newName": "Novo okruženje",
@@ -742,7 +745,8 @@
       "environment": "Okruženja",
       "settings": "Podešavanja",
       "tag": "Oznake",
-      "scenario": "Scenariji"
+      "scenario": "Scenariji",
+      "design": "Dizajni API-ja"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih detalja",
@@ -1239,7 +1243,8 @@
       "operation": "Operacija",
       "description": "Opis",
       "example": "Primer",
-      "constraints": "Ograničenja"
+      "constraints": "Ograničenja",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nema deklarisanih parametara van tela za filtrirane rute."
@@ -1286,7 +1291,8 @@
       "optionalSingleRef": "opciona pojedinačna referenca",
       "requiredArrayRef": "obavezna referenca niza",
       "optionalArrayRef": "opciona referenca niza"
-    }
+    },
+    "editEntity": "Uredi u dizajneru"
   },
   "scenario": {
     "editor": {
@@ -2140,6 +2146,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum vrednosti",
+      "addValue": "Dodaj vrednost…",
+      "removeValue": "Ukloni vrednost",
+      "extract": "Izdvoji u imenovani enum"
+    },
+    "tags": {
+      "add": "Dodaj oznaku…",
+      "remove": "Ukloni oznaku",
+      "routeLabel": "Oznake",
+      "groupLabel": "Zajedničke oznake"
+    },
+    "section": {
+      "settings": "Podešavanja",
+      "models": "Modeli",
+      "enums": "Enumi",
+      "routes": "Rute",
+      "documentation": "Dokumentacija",
+      "notes": "Beleške",
+      "code": "Kod",
+      "server": "Server",
+      "clients": "Klijenti"
+    },
+    "rail": {
+      "ariaLabel": "Sekcije dizajna"
+    },
+    "settings": {
+      "subtitle": "Opšta podešavanja dizajna „{{name}}”",
+      "serve": {
+        "title": "Dizajn-server",
+        "action": "Služi ovaj dizajn",
+        "description": "Odgovori iz imenovanih primera · validacija ograničenjima",
+        "port": "Port",
+        "latency": "Simulirana latencija (ms)",
+        "blocked": "Ispravite {{count}} grešaka validacije dizajna pre posluživanja",
+        "startFailed": "Server nije mogao da se pokrene",
+        "protocolAlways": "HTTP se uvek servira",
+        "protocolToggle": "Serviraj i ovu projekciju",
+        "stateful": "Stateful režim — POST/PUT/DELETE menjaju skladište u memoriji (resetuje se pri restartu)",
+        "clientsCallout": "Vaš mock server je pokrenut. Za svaki protokol koji ovaj dizajn opslužuje generisani su klijenti spremni za pokretanje.",
+        "clientsCalloutLink": "Pronađite ih ovde"
+      },
+      "identity": {
+        "title": "Identitet",
+        "title_field": "Naslov",
+        "version": "Verzija dizajna",
+        "description": "Opis"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Osnovna putanja",
+        "defaultAuth": "Podrazumevani auth",
+        "environment": "Okruženje"
+      },
+      "export": {
+        "title": "Izvoz",
+        "format": "Format deskriptora",
+        "download": "Preuzmi deskriptor",
+        "saved": "Deskriptor sačuvan u {{path}}",
+        "failed": "Izvoz nije uspeo"
+      }
+    },
+    "auth": {
+      "none": "Nijedna",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Zaglavlje API ključa",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtriraj…",
+      "selectPrompt": "Izaberite stavku sa liste.",
+      "editorPending": "Uređivač ove sekcije je na putu."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} svojstvo",
+      "propertyCount_other": "{{count}} svojstava",
+      "add": "Dodaj model",
+      "delete": "Obriši model",
+      "deleteTitle": "Obrisati {{name}}?",
+      "deleteNoImpact": "Ovaj model se nigde ne koristi.",
+      "deleteImpactIntro": "Brisanje ovog modela će ažurirati:",
+      "deleteImpactChild": "{{name}} gubi nasleđivanje (sopstvena svojstva ostaju)",
+      "description": "Opis",
+      "descriptionPlaceholder": "Šta ovaj model predstavlja (opciono)",
+      "newName": "NewModel",
+      "selectPrompt": "Izaberite model ili ga napravite.",
+      "tabs": {
+        "schema": "Šema",
+        "examples": "Primeri",
+        "settings": "Podešavanja",
+        "notes": "Beleške"
+      },
+      "addSubModel": "Dodaj podmodel",
+      "collapseAll": "Skupi sve",
+      "expandAll": "Proširi sve"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} vrednost",
+      "valueCount_other": "{{count}} vrednosti",
+      "lists": "Enumi",
+      "values": "Vrednosti",
+      "addEnum": "Dodaj enum",
+      "addValue": "Dodaj vrednost",
+      "valueHeader": "Vrednost",
+      "newName": "NewEnum",
+      "selectPrompt": "Izaberite enum ili ga napravite — zatvoren skup vrednosti upotrebljiv kao tip svojstva.",
+      "nameHeader": "Naziv",
+      "description": "Opis",
+      "descriptionPlaceholder": "Šta ovaj enum predstavlja (opciono)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Još nema šablona — dodajte ga da generišete kod iz ovog dizajna.",
+      "subtitle": "Generišite projekte iz ovog dizajna — prikazani u sandboxu, zapisani tek nakon što potvrdite stablo",
+      "sourceTitle": "Šablon",
+      "sourceKind": {
+        "official": "Zvanični",
+        "repo": "Repozitorijum",
+        "local": "Lokalna fascikla"
+      },
+      "official": "Zvanični šablon",
+      "repo": "Repozitorijum (owner/repo)",
+      "local": "Lokalna fascikla šablona",
+      "output": "Izlazna fascikla (apsolutna ili relativna u odnosu na projekat)",
+      "browse": "Izaberite izlaznu fasciklu",
+      "generate": "Generiši projekat",
+      "generating": "Generisanje u sandbox-u…",
+      "blocked": "Ispravite {{count}} grešku/greške validacije dizajna pre generisanja",
+      "failed": "Generisanje nije uspelo",
+      "outputMissing": "Prvo izaberite izlaznu fasciklu",
+      "extracted": "{{count}} fajl(ova) upisano u {{root}}",
+      "preview": "{{name}} je generisao {{count}} fajl(ova) — potvrdite upis",
+      "confirm": "Upiši u izlaznu fasciklu",
+      "discard": "Odbaci",
+      "generateOne": "Generiši ovaj projekat",
+      "remove": "Ukloni ovaj šablon",
+      "addTemplate": "Dodaj šablon",
+      "library": {
+        "title": "Biblioteka šablona",
+        "recent": "Nedavno korišćeno",
+        "official": "Zvanični šabloni",
+        "custom": "Prilagođeno",
+        "add": "Dodaj",
+        "use": "Koristi",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Šabloni organizacije",
+        "openRepo": "Otvori repozitorijum",
+        "remove": "Ukloni",
+        "addTemplate": "Dodaj šablon",
+        "urlPlaceholder": "URL git repozitorijuma",
+        "descPlaceholder": "Opis (stack / šta generiše)",
+        "noOrgTemplates": "Još nema šablona organizacije.",
+        "loading": "Učitavanje šablona…",
+        "signedOut": "Prijavite se da biste videli šablone svoje organizacije.",
+        "fetchError": "Nije moguće učitati šablone:",
+        "unavailable": "nedostupno",
+        "officialTag": "Zvanično",
+        "officialDesc": {
+          "server-rest-typescript": "REST server u TypeScriptu na Express-u — tipizirane rute, modeli i validacija zahteva.",
+          "server-rest-dotnet": "Minimal-API server u C# / ASP.NET Core — endpointi, DTO-ovi i validacija.",
+          "server-grpc-typescript": "gRPC server u TypeScript-u — .proto usluga, tipizirane poruke i serverski stubovi.",
+          "server-grpc-dotnet": "gRPC server u C# / .NET — .proto usluga, poruke i serverski stubovi.",
+          "db-postgres": "PostgreSQL šema, seed podaci i CRUD skripte iz dizajna."
+        },
+        "added": "Template dodat",
+        "done": "Gotovo"
+      },
+      "extractedTitle": "Datoteke zapisane",
+      "openOutput": "Otvori izlaznu fasciklu",
+      "refresh": "Osveži ovaj šablon iz njegovog izvora",
+      "removeConfirm": "Template „{{name}}“ biće uklonjen iz ovog dizajna (već generisani fajlovi na disku ostaju netaknuti).",
+      "removeTitle": "Ukloniti ovaj Template?",
+      "tabs": {
+        "template": "Šablon"
+      },
+      "questions": {
+        "title": "Pitanja šablona"
+      },
+      "errorTitle": "Generisanje nije uspelo",
+      "source": "Izvor",
+      "destination": "Odredište",
+      "expand": "Proširi",
+      "collapse": "Skupi"
+    },
+    "statusbar": {
+      "format": "dizajn · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitet",
+      "identifierProperty": "Identifikaciono svojstvo",
+      "identifierStrategy": "Strategija",
+      "inheritsFrom": "Nasleđuje od",
+      "noIdentifier": "(nijedno)",
+      "noParent": "(nijedan)",
+      "storage": "Skladištenje i životni ciklus",
+      "volumetry": "Očekivani obim",
+      "volumetryUnset": "(neodređeno)",
+      "operationalProfile": "Operativni profil",
+      "accessPattern": "Profil čitanja/pisanja",
+      "traffic": "Učestalost pristupa",
+      "freshness": "Tolerancija svežine",
+      "sensitivity": "Osetljivost podataka",
+      "retention": "Zadržavanje / životni ciklus",
+      "profileUnset": "(neodređeno)",
+      "timestamps": "Vremenske oznake (kreirano/izmenjeno)",
+      "softDelete": "Meko brisanje",
+      "usedBy": "Koristi se u",
+      "usedByNone": "Ovaj model se još ne koristi.",
+      "usage": {
+        "body": "telo",
+        "response": "odgovor {{code}}",
+        "param": "parametar {{name}}",
+        "inherits": "{{name}} nasleđuje od njega"
+      },
+      "generators": "Rute",
+      "generateCrud": "Generiši CRUD",
+      "generateSearch": "Generiši rute pretrage"
+    },
+    "schema": {
+      "addProperty": "Dodaj svojstvo",
+      "deleteProperty": "Obriši svojstvo",
+      "columns": {
+        "property": "Svojstvo",
+        "type": "Tip",
+        "flags": "Atributi",
+        "example": "Primer"
+      },
+      "unnamed": "(bez imena)",
+      "nameMissing": "nedostaje ime",
+      "panelTitle": "Svojstvo: {{name}}",
+      "jumpToParent": "Otvori {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(nijedan)",
+      "invalidPattern": "Neispravan regularni izraz",
+      "minAboveMax": "Min premašuje maks",
+      "fields": {
+        "name": "Ime",
+        "type": "Tip",
+        "format": "Format",
+        "elementType": "Tip elemenata",
+        "onDelete": "Pri brisanju",
+        "description": "Opis",
+        "example": "Primer",
+        "default": "Podrazumevano",
+        "deprecationMessage": "Poruka o zastarelosti",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Min. dužina",
+        "maxLength": "Maks. dužina",
+        "pattern": "Šablon"
+      },
+      "generatedProperties": "Generisana svojstva",
+      "inheritedProperties": "Nasleđena svojstva",
+      "ownProperties": "Sopstvena svojstva",
+      "tabs": {
+        "property": "Svojstvo"
+      },
+      "advancedType": "Napredno…"
+    },
+    "flags": {
+      "required": "obavezno",
+      "nullable": "nullable",
+      "unique": "jedinstveno",
+      "immutable": "nepromenljivo",
+      "searchable": "pretraživo",
+      "deprecated": "zastarelo",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Podrazumevano",
+      "add": "Dodaj primer",
+      "delete": "Obriši primer",
+      "name": "Ime primera",
+      "newName": "Primer",
+      "defaultHint": "Podrazumevane vrednosti dolaze iz svakog svojstva (prazno = automatski generisano).",
+      "namedHint": "Unesite vrednost da je definišete; ostavite prazno da zadržite generisanu.",
+      "columns": {
+        "value": "Vrednost",
+        "origin": "Poreklo"
+      },
+      "auto": "auto",
+      "defined": "definisano",
+      "constraintViolated": "Vrednost krši ograničenje svojstva ({{constraint}})",
+      "deleteTitle": "Izbrisati ovaj primer?",
+      "deleteConfirm": "Primer „{{name}}” biće izbrisan."
+    },
+    "onDelete": {
+      "restrict": "Ograniči (zabrani dok se koristi)",
+      "cascade": "Kaskadno brisanje",
+      "setNull": "Postavi na null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Stotine",
+      "tenThousands": "Desetine hiljada",
+      "millions": "Milioni"
+    },
+    "accessPattern": {
+      "readHeavy": "Pretežno čitanje",
+      "writeHeavy": "Pretežno pisanje",
+      "balanced": "Uravnoteženo",
+      "appendOnly": "Samo dodavanje"
+    },
+    "traffic": {
+      "low": "Nizak",
+      "medium": "Srednji",
+      "high": "Visok"
+    },
+    "freshness": {
+      "strong": "Jaka doslednost",
+      "shortCache": "Kratak keš OK",
+      "longCache": "Dug keš OK"
+    },
+    "sensitivity": {
+      "public": "Javno",
+      "internal": "Interno",
+      "confidential": "Poverljivo",
+      "pii": "Lični podaci (PII)"
+    },
+    "retention": {
+      "permanent": "Trajno",
+      "archivable": "Arhivirljivo",
+      "ephemeral": "Kratkotrajno (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Svojstvo nema ime",
+      "propertyNameDuplicate": "Duplirano ime svojstva",
+      "propertyShadowsParent": "Zaklanja nasleđeno svojstvo",
+      "referenceTargetUnknown": "Referencirani tip više ne postoji",
+      "constraintPatternInvalid": "Neispravan šablon (regularni izraz)",
+      "constraintMinAboveMax": "Min premašuje maks",
+      "modelNameEmpty": "Model nema ime",
+      "enumNameEmpty": "Enum nema ime",
+      "groupNameEmpty": "Grupa nema ime",
+      "modelNameDuplicate": "Duplirano ime modela",
+      "enumNameDuplicate": "Duplirano ime enuma",
+      "componentNameCollision": "Model i enum dele ovo ime",
+      "groupNameDuplicate": "Duplirano ime grupe",
+      "inheritanceTargetUnknown": "Nasleđeni model više ne postoji",
+      "inheritanceCycle": "Kružni lanac nasleđivanja",
+      "identifierPropertyUnknown": "Identifikaciono svojstvo više ne postoji",
+      "paramLinkTargetUnknown": "Veza parametra pokazuje na nepostojeće svojstvo",
+      "bodyModelUnknown": "Model tela više ne postoji",
+      "responseModelUnknown": "Model odgovora više ne postoji",
+      "responseExampleUnknown": "Odgovor poslužuje nepostojeći primer",
+      "routeResponsesMissing": "Ruta ne deklariše nijedan odgovor",
+      "routePathDuplicate": "Druga ruta već odgovara na ovaj metod i putanju",
+      "routePathReserved": "Dizajn server rezerviše ovu putanju — ruta nikada ne bi odgovorila"
+    },
+    "routes": {
+      "addGroup": "Dodaj grupu",
+      "addRoute": "Dodaj rutu",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Izaberite grupu ili rutu, ili napravite grupu.",
+      "deleteGroupTitle": "Obrisati {{name}}?",
+      "deleteGroupImpact": "Grupa i njenih {{count}} ruta biće obrisani.",
+      "method": "Metoda",
+      "path": "Putanja",
+      "summary": "Sažetak",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definicija",
+        "responses": "Odgovori"
+      },
+      "group": {
+        "auth": "Obavezna autentifikacija",
+        "authInherited": "Podrazumevano dizajna",
+        "versionPrefix": "Prefiks verzije",
+        "headers": "Ugovorna zaglavlja (nasleđuju ih rute)",
+        "headerName": "Zaglavlje",
+        "addHeader": "Dodaj zaglavlje",
+        "deleteHeader": "Obriši zaglavlje",
+        "noHeaders": "Nema zajedničkog zaglavlja."
+      },
+      "params": {
+        "pathTitle": "Parametri putanje",
+        "otherTitle": "Parametri (query / header)",
+        "name": "Ime",
+        "location": "U",
+        "link": "Veza modela",
+        "noLink": "—",
+        "add": "Dodaj parametar",
+        "delete": "Obriši parametar",
+        "auto": "auto",
+        "pathEmpty": "Unesite {{param}} u putanju da biste napravili njegov red.",
+        "otherEmpty": "Još nema query ili header parametara.",
+        "nameEmpty": "Parametar mora imati ime",
+        "nameTaken": "Ovo ime je već u upotrebi"
+      },
+      "body": {
+        "label": "Telo zahteva",
+        "empty": "(prazno)",
+        "nonStandardHint": "Telo zahteva na {{method}} nije standardno — mnogi serveri i proksiji ga ignorišu. Restorm ga svejedno servira i dokumentuje."
+      },
+      "responses": {
+        "add": "Dodaj",
+        "codePlaceholder": "Statusni kod",
+        "standardErrors": "+ standardne greške",
+        "empty": "Još nema deklarisanog odgovora.",
+        "emptyBody": "prazno telo",
+        "model": "Vraćeni model",
+        "list": "Lista",
+        "paginated": "Straničena",
+        "listOf": "lista {{name}}",
+        "paginatedListOf": "straničena lista {{name}}",
+        "example": "Posluženi primer",
+        "exampleAuto": "(auto generisan)",
+        "delete": "Obriši odgovor",
+        "codeInvalid": "Unesite trocifreni statusni kod",
+        "codeTaken": "Ovaj kod je već deklarisan"
+      },
+      "settings": {
+        "inherited": "Nasleđeno od grupe",
+        "authInherited": "Nasleđeno od grupe",
+        "editGroup": "Izmeni u grupi ↗",
+        "headers": "Ugovorna zaglavlja",
+        "behaviour": "Ponašanje",
+        "idempotent": "Idempotentna",
+        "cacheSeconds": "Keš (sekunde)",
+        "traffic": "Očekivani saobraćaj",
+        "authOverride": "Nadjačavanje autentifikacije",
+        "pagination": "Straničenje",
+        "defaultLimit": "Podrazumevana veličina stranice",
+        "maxLimit": "Maks. veličina stranice"
+      },
+      "addSubgroup": "Dodaj podgrupu"
+    },
+    "newDesignName": "Novi dizajn API-ja",
+    "createFromScratch": "Napravi dizajn API-ja",
+    "createFromDoc": "Napravi dizajn iz ovog API-ja",
+    "fromDocName": "Dizajn {{name}}",
+    "run": {
+      "listening": "Poslužuje na http://localhost:{{port}}",
+      "stopped": "Server zaustavljen",
+      "totalCalls": "{{count}} poziva u ovom pokretanju",
+      "stop": "Zaustavi server",
+      "close": "Zatvori ovaj panel",
+      "forcedPill": "prinudno {{code}}",
+      "defaultReturn": "Odgovor dizajna (podrazumevano)",
+      "codeReturn": "Odgovori {{code}}",
+      "customCode": "Prilagođeni statusni kod",
+      "customBody": "Prilagođeno telo odgovora",
+      "customBodyPlaceholder": "Opciono telo odgovora (JSON)",
+      "customApply": "Prinudi"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Zaštiti rute za pisanje autentifikacijom",
+      "authWritesHint": "Zahtevaj bearer autentifikaciju pri kreiranju, ažuriranju i brisanju; čitanja ostaju javna.",
+      "generate": "Generiši",
+      "replace": "Zameni postojeće rute",
+      "replaceHint": "Za ovaj model već postoje rute. Zamenite ih da biste izbegli duplikate; ostavite isključeno da dodate drugi skup.",
+      "title": "Generiši CRUD za {{name}}",
+      "projections": {
+        "http": "{{count}} REST ruta",
+        "graphql": "{{queries}} upita / {{mutations}} mutacija u GraphQL-u",
+        "grpc": "{{count}} gRPC metoda",
+        "odata": "{{count}} OData skup entiteta",
+        "soap": "{{count}} SOAP operacija",
+        "title": "Jedan model, svaki protokol — ovaj CRUD se takođe služi kao:"
+      }
+    },
+    "server": {
+      "subtitle": "Služi ovaj dizajn kao živi mock i prati svaki poziv."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generisanje koda",
+        "name": "Promenljiva",
+        "value": "Vrednost (Handlebars)",
+        "add": "Dodaj promenljivu",
+        "none": "Još nema promenljivih — dodajte jednu iz zaglavlja ovog šablona.",
+        "noTemplates": "Izaberite jedan ili više šablona u odeljku „</> Code“ — ovde ćete zatim definisati promenljive korišćene pri generisanju.",
+        "generalTitle": "Opšte promenljive",
+        "scope": {
+          "general": "Opšte",
+          "property": "Svojstvo modela"
+        },
+        "discover": "Otkrij promenljive koje ovaj šablon koristi",
+        "undeclared": "Korišćene ali nedeklarisane: {{names}}",
+        "allDeclared": "Sve promenljive koje ovaj šablon koristi su deklarisane."
+      }
+    },
+    "clients": {
+      "generated": "Klijenti generisani — otvorite ih pod „Klijenti” u bočnoj traci.",
+      "importing": "Uvoz klijenata…",
+      "refresh": "Ponovo generiši klijente",
+      "startPrompt": "Pokrenite server da biste generisali klijente.",
+      "startServerPrompt": "Pokrenite <serverLink>server dizajna</serverLink> za pristup klijentskim zahtevima automatski generisanim iz modela.",
+      "subtitle": "Vaš server dizajna API-ja je pokrenut i služi rute koje ste definisali. Zahtevi ispod direktno pozivaju te rute — otvorite jedan da biste ga testirali. Efemerni su i nestaju kada se server zaustavi."
+    },
+    "descriptors": {
+      "copy": "Kopiraj URL"
+    },
+    "projections": {
+      "title": "Projekcije",
+      "hint": "Ista operacija, onako kako je izlaže svaki posluženi protokol."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Zadrži",
@@ -2309,7 +2836,45 @@
     "addCookie": "Dodaj kolačić",
     "removeCookie": "Ukloni kolačić",
     "clearCookieDomain": "Obriši kolačiće za domen",
-    "clearCookies": "Obriši sve kolačiće"
+    "clearCookies": "Obriši sve kolačiće",
+    "listDesigns": "Lista dizajna API-ja",
+    "getDesign": "Preuzmi dizajn API-ja",
+    "createDesign": "Kreiraj dizajn API-ja",
+    "createDesignFromDocumentation": "Kreiraj dizajn iz uvezenog API-ja",
+    "updateDesign": "Ažuriraj dizajn",
+    "deleteDesign": "Obriši dizajn",
+    "createDesignModel": "Kreiraj model dizajna",
+    "updateDesignModel": "Ažuriraj model dizajna",
+    "deleteDesignModel": "Obriši model dizajna",
+    "setDesignProperty": "Postavi svojstvo modela",
+    "deleteDesignProperty": "Obriši svojstvo modela",
+    "createDesignEnum": "Kreiraj enum dizajna",
+    "updateDesignEnum": "Ažuriraj enum dizajna",
+    "deleteDesignEnum": "Obriši enum dizajna",
+    "setDesignExample": "Postavi imenovani primer",
+    "deleteDesignExample": "Obriši imenovani primer",
+    "createDesignRouteGroup": "Kreiraj grupu ruta",
+    "updateDesignRouteGroup": "Ažuriraj grupu ruta",
+    "deleteDesignRouteGroup": "Obriši grupu ruta",
+    "createDesignRoute": "Kreiraj rutu dizajna",
+    "updateDesignRoute": "Ažuriraj rutu dizajna",
+    "deleteDesignRoute": "Obriši rutu dizajna",
+    "setDesignRouteParam": "Napravi ili ažuriraj parametar rute",
+    "deleteDesignRouteParam": "Obriši parametar rute",
+    "generateDesignCrud": "Generiši CRUD rute",
+    "generateDesignSearchRoutes": "Generiši rute pretrage",
+    "serveDesign": "Poslužuj dizajn",
+    "stopDesignServer": "Zaustavi server dizajna",
+    "getDesignServerStatus": "Stanje servera dizajna",
+    "setDesignRouteResponse": "Prinudi odgovor",
+    "exportDesign": "Izvezi deskriptor dizajna",
+    "generateDesignCode": "Generiši kod iz dizajna",
+    "getDesignTemplateContract": "Preuzmi ugovor šablona koda",
+    "setDesignTemplates": "Postavi šablone koda dizajna",
+    "setDesignModelVariables": "Postavi nadjačavanja generisanja koda modela",
+    "setDesignPropertyVariables": "Postavi nadjačavanja generisanja koda svojstva",
+    "setDesignRouteVariables": "Postavi nadjačavanja generisanja koda rute",
+    "setDesignTemplateVariables": "Postavi globalne promenljive generisanja koda šablona"
   },
   "odataFilter": {
     "detail": {
@@ -2539,6 +3104,9 @@
       "addedScenario": "Dodat scenario „{{name}}”",
       "modifiedScenario": "Izmenjen scenario „{{name}}”",
       "deletedScenario": "Uklonjen scenario „{{name}}”",
+      "addedDesign": "Dodat dizajn „{{name}}”",
+      "modifiedDesign": "Izmenjen dizajn „{{name}}”",
+      "deletedDesign": "Uklonjen dizajn „{{name}}”",
       "addedFolder": "Dodata fascikla „{{name}}”",
       "modifiedFolder": "Izmenjena fascikla „{{name}}”",
       "deletedFolder": "Uklonjena fascikla „{{name}}”",
@@ -2547,6 +3115,7 @@
       "deletedEnvironmentFolder": "Uklonjena fascikla okruženja „{{name}}”",
       "movedRequest": "Premešten zahtev \"{{name}}\"",
       "movedScenario": "Premešten scenario \"{{name}}\"",
+      "movedDesign": "Premešten dizajn \"{{name}}\"",
       "movedFolder": "Premeštena fascikla \"{{name}}\"",
       "movedEnvironmentFolder": "Premeštena fascikla okruženja \"{{name}}\"",
       "reorderedFolder": "Promenjen redosled stavki u fascikli „{{name}}“",
@@ -2557,6 +3126,7 @@
     "commitTitle": {
       "singleRequest": "Ažuriranje zahteva „{{name}}”",
       "singleScenario": "Ažuriranje scenarija „{{name}}”",
+      "singleDesign": "Ažuriranje dizajna „{{name}}”",
       "singleFolder": "Ažuriranje fascikle „{{name}}”",
       "singleEnvironmentFolder": "Ažuriranje fascikle okruženja „{{name}}”",
       "singleFileFormatVersion": "Prelazak na format datoteke {{name}}",
@@ -2564,6 +3134,8 @@
       "countRequest_other": "{{count}} zahteva",
       "countScenario_one": "{{count}} scenario",
       "countScenario_other": "{{count}} scenarija",
+      "countDesign_one": "{{count}} dizajn",
+      "countDesign_other": "{{count}} dizajna",
       "countFolder_one": "{{count}} fascikla",
       "countFolder_other": "{{count}} fascikli",
       "countEnvironmentFolder_one": "{{count}} fascikla okruženja",

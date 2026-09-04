@@ -51,6 +51,9 @@ function searchResultDragData(result: SearchResult): Record<string, string> | un
     nav?.['type'] === 'request' ? nav['requestId'] :
     nav?.['type'] === 'folder' ? nav['folderId'] :
     nav?.['type'] === 'scenario' ? nav['scenarioId'] :
+    // A design ENTITY result drags as its owning design (entities are
+    // not tree items).
+    nav?.['type'] === 'design' ? nav['designId'] :
     undefined
   if (typeof id !== 'string' || id.length === 0) return undefined
   return { 'text/plain': id, [LIST_VIEW_DRAG_MIME]: id }
@@ -116,7 +119,7 @@ export interface RestormTitlebarProps {
    * `workbenchActive` is true; otherwise the modal is shown. */
   onOpenSettingsTab: () => void
   /** The sidebar selection the Édition / Sélection menus act on. */
-  selection?: { id: string; kind: 'env-folder' | 'folder' | 'scenario' | 'server' | 'request'; isFavorite: boolean } | null
+  selection?: { id: string; kind: 'env-folder' | 'folder' | 'scenario' | 'design' | 'server' | 'request'; isFavorite: boolean } | null
   /** Whether a paste payload is staged (enables Coller). */
   canPaste?: boolean
   onCutSelection?: () => void

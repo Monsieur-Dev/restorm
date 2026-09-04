@@ -5,7 +5,7 @@ import type {
   ParameterDocumentation,
   SchemaConstraints
 } from '../../../../shared/types/apiDocumentation'
-import { extractModelRef, useDocumentedModels } from './documentationModels'
+import { extractModelRef, useDocumentedEnums, useDocumentedModels } from './documentationModels'
 import { ModelRefLink } from './ModelRefLink'
 
 export interface ParametersTableProps {
@@ -101,6 +101,7 @@ export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, te
 
   const showOperationColumn = operations.length > 1
   const documentedModels = useDocumentedModels()
+  const documentedEnums = useDocumentedEnums()
 
   if (rows.length === 0) {
     return (
@@ -161,6 +162,13 @@ export const ParametersTable: React.FC<ParametersTableProps> = ({ operations, te
               <td className="documentation-host-parameters-table__td">
                 {(() => {
                   const ref = extractModelRef(p.type)
+                  if (ref.ref !== undefined && documentedEnums.has(ref.ref)) {
+                    return (
+                      <code>
+                        <ModelRefLink modelName={ref.ref} kind="enum">{p.type}</ModelRefLink>
+                      </code>
+                    )
+                  }
                   if (ref.ref !== undefined && documentedModels.has(ref.ref)) {
                     return (
                       <code>

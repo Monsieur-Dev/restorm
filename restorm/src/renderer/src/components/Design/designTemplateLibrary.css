@@ -1,0 +1,124 @@
+/* Template library modal (TASK-468.20) — the recent / official / custom tabs. */
+
+.design-template-library__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 420px;
+}
+
+.design-template-library__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 4px;
+}
+
+.design-template-library__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.design-template-library__row-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.design-template-library__row-desc {
+  font-size: 0.82em;
+  opacity: 0.7;
+}
+
+.design-template-library__custom {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 0;
+  min-width: 420px;
+}
+
+.design-template-library__custom-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.design-template-library__custom-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.design-template-library__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--vscode-widget-border, transparent);
+}
+
+/* Provider logo on a cloud-template row — a borderless icon button that opens
+   the repository in the browser. */
+.design-template-library__logo {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.design-template-library__logo:hover {
+  opacity: 1;
+  background: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.design-template-library__logo .codicon {
+  font-size: 18px;
+}
+
+/* Add-a-template form inside the org tab. */
+.design-template-library__add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+  min-width: 420px;
+}
+
+.design-template-library__empty {
+  opacity: 0.7;
+  padding: 8px 2px;
+}
+
+.design-template-library__status {
+  opacity: 0.7;
+  padding: 6px 2px;
+  font-size: 0.9em;
+}
+
+.design-template-library__error {
+  color: var(--errorForeground, #f14c4c);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--errorForeground, #f14c4c);
+  border-radius: 4px;
+  font-size: 0.88em;
+}

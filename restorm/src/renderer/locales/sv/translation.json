@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Ta bort",
       "clone": "Klona",
+      "openInSplit": "Öppna i delad panel",
       "copySuffix": "kopia",
       "rename": "Byt namn",
       "addToFavorites": "Lägg till i favoriter",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-design"
       },
       "cut": "Klipp ut",
       "copy": "Kopiera",
@@ -335,7 +337,8 @@
       "moveInto": "Flytta in i detta scenario",
       "affectsNote": "Att ta bort denna begäran tar även bort den från dessa scenarier.",
       "deleteAnyway": "Ta bort ändå"
-    }
+    },
+    "expandAll": "Expandera alla förfrågningar"
   },
   "environment": {
     "newName": "Ny miljö",
@@ -741,7 +744,8 @@
       "environment": "Miljöer",
       "settings": "Inställningar",
       "tag": "Taggar",
-      "scenario": "Scenarier"
+      "scenario": "Scenarier",
+      "design": "API-designer"
     },
     "tooltip": {
       "noDetails": "Inga detaljer tillgängliga",
@@ -1238,7 +1242,8 @@
       "operation": "Operation",
       "description": "Beskrivning",
       "example": "Exempel",
-      "constraints": "Begränsningar"
+      "constraints": "Begränsningar",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Inga icke-body-parametrar deklarerade för de filtrerade rutterna."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "valfri enkelref.",
       "requiredArrayRef": "obligatorisk array-ref.",
       "optionalArrayRef": "valfri array-ref."
-    }
+    },
+    "editEntity": "Redigera i designern"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum-värden",
+      "addValue": "Lägg till ett värde…",
+      "removeValue": "Ta bort värde",
+      "extract": "Extrahera till en namngiven enum"
+    },
+    "tags": {
+      "add": "Lägg till en tagg…",
+      "remove": "Ta bort tagg",
+      "routeLabel": "Taggar",
+      "groupLabel": "Delade taggar"
+    },
+    "section": {
+      "settings": "Inställningar",
+      "models": "Modeller",
+      "enums": "Enums",
+      "routes": "Rutter",
+      "documentation": "Dokumentation",
+      "notes": "Anteckningar",
+      "code": "Kod",
+      "server": "Server",
+      "clients": "Klienter"
+    },
+    "rail": {
+      "ariaLabel": "Designsektioner"
+    },
+    "settings": {
+      "subtitle": "Allmänna inställningar för designen “{{name}}”",
+      "serve": {
+        "title": "Designserver",
+        "action": "Servera denna design",
+        "description": "Svar från namngivna exempel · validering via begränsningar",
+        "port": "Port",
+        "latency": "Simulerad latens (ms)",
+        "blocked": "Åtgärda designens {{count}} valideringsfel innan den serveras",
+        "startFailed": "Servern kunde inte starta",
+        "protocolAlways": "HTTP serveras alltid",
+        "protocolToggle": "Servera även denna projektion",
+        "stateful": "Stateful-läge — POST/PUT/DELETE ändrar ett minneslager (återställs vid omstart)",
+        "clientsCallout": "Din mockserver körs. Färdiga klienter genererades för varje protokoll som den här designen betjänar.",
+        "clientsCalloutLink": "Hitta dem här"
+      },
+      "identity": {
+        "title": "Identitet",
+        "title_field": "Titel",
+        "version": "Designversion",
+        "description": "Beskrivning"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Bassökväg",
+        "defaultAuth": "Standard-auth",
+        "environment": "Miljö"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Deskriptorformat",
+        "download": "Ladda ner deskriptorn",
+        "saved": "Deskriptor sparad i {{path}}",
+        "failed": "Exporten misslyckades"
+      }
+    },
+    "auth": {
+      "none": "Ingen",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-nyckel-header",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtrera…",
+      "selectPrompt": "Välj en post i listan.",
+      "editorPending": "Redigeraren för denna sektion är på väg."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} egenskap",
+      "propertyCount_other": "{{count}} egenskaper",
+      "add": "Lägg till en modell",
+      "delete": "Ta bort modellen",
+      "deleteTitle": "Ta bort {{name}}?",
+      "deleteNoImpact": "Den här modellen används ingenstans.",
+      "deleteImpactIntro": "Att ta bort den här modellen uppdaterar:",
+      "deleteImpactChild": "{{name}} förlorar sitt arv (egna egenskaper behålls)",
+      "description": "Beskrivning",
+      "descriptionPlaceholder": "Vad denna modell representerar (valfritt)",
+      "newName": "NewModel",
+      "selectPrompt": "Välj en modell eller skapa en.",
+      "tabs": {
+        "schema": "Schema",
+        "examples": "Exempel",
+        "settings": "Inställningar",
+        "notes": "Anteckningar"
+      },
+      "addSubModel": "Lägg till en undermodell",
+      "collapseAll": "Fäll ihop alla",
+      "expandAll": "Expandera alla"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} värde",
+      "valueCount_other": "{{count}} värden",
+      "lists": "Enums",
+      "values": "Värden",
+      "addEnum": "Lägg till en enum",
+      "addValue": "Lägg till ett värde",
+      "valueHeader": "Värde",
+      "newName": "NewEnum",
+      "selectPrompt": "Välj en enum eller skapa en — en sluten uppsättning värden som kan användas som egenskapstyp.",
+      "nameHeader": "Namn",
+      "description": "Beskrivning",
+      "descriptionPlaceholder": "Vad denna enum representerar (valfritt)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Ingen mall ännu — lägg till en för att generera kod från denna design.",
+      "subtitle": "Generera projekt från denna design — renderad i en sandlåda, skriven först när du bekräftar trädet",
+      "sourceTitle": "Mall",
+      "sourceKind": {
+        "official": "Officiell",
+        "repo": "Repository",
+        "local": "Lokal mapp"
+      },
+      "official": "Officiell mall",
+      "repo": "Repository (owner/repo)",
+      "local": "Lokal mallmapp",
+      "output": "Utdatamapp (absolut eller relativ till projektet)",
+      "browse": "Välj utdatamapp",
+      "generate": "Generera projektet",
+      "generating": "Genererar i sandboxen…",
+      "blocked": "Åtgärda designens {{count}} valideringsfel före generering",
+      "failed": "Genereringen misslyckades",
+      "outputMissing": "Välj först en utdatamapp",
+      "extracted": "{{count}} fil(er) skrivna till {{root}}",
+      "preview": "{{name}} genererade {{count}} fil(er) — bekräfta för att skriva dem",
+      "confirm": "Skriv till utdatamappen",
+      "discard": "Släng",
+      "generateOne": "Generera detta projekt",
+      "remove": "Ta bort denna mall",
+      "addTemplate": "Lägg till en mall",
+      "library": {
+        "title": "Mallbibliotek",
+        "recent": "Nyligen använda",
+        "official": "Officiella mallar",
+        "custom": "Anpassad",
+        "add": "Lägg till",
+        "use": "Använd",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Organisationsmallar",
+        "openRepo": "Öppna repositoriet",
+        "remove": "Ta bort",
+        "addTemplate": "Lägg till mall",
+        "urlPlaceholder": "Git-repositorie-URL",
+        "descPlaceholder": "Beskrivning (stack / vad den genererar)",
+        "noOrgTemplates": "Inga organisationsmallar ännu.",
+        "loading": "Läser in mallar…",
+        "signedOut": "Logga in för att se din organisations mallar.",
+        "fetchError": "Det gick inte att läsa in mallarna:",
+        "unavailable": "otillgänglig",
+        "officialTag": "Officiell",
+        "officialDesc": {
+          "server-rest-typescript": "REST-server i TypeScript på Express — typade rutter, modeller och validering av förfrågningar.",
+          "server-rest-dotnet": "Minimal-API-server i C# / ASP.NET Core — slutpunkter, DTO:er och validering.",
+          "server-grpc-typescript": "gRPC-server i TypeScript — .proto-tjänst, typade meddelanden och server-stubbar.",
+          "server-grpc-dotnet": "gRPC-server i C# / .NET — .proto-tjänst, meddelanden och server-stubbar.",
+          "db-postgres": "PostgreSQL-schema, seed-data och CRUD-skript från designen."
+        },
+        "added": "Template tillagt",
+        "done": "Klart"
+      },
+      "extractedTitle": "Filer skrivna",
+      "openOutput": "Öppna utdatamappen",
+      "refresh": "Uppdatera den här mallen från dess källa",
+      "removeConfirm": "Template ”{{name}}” tas bort från den här designen (redan genererade filer på disken lämnas orörda).",
+      "removeTitle": "Ta bort detta Template?",
+      "tabs": {
+        "template": "Mall"
+      },
+      "questions": {
+        "title": "Mallfrågor"
+      },
+      "errorTitle": "Genereringen misslyckades",
+      "source": "Källa",
+      "destination": "Mål",
+      "expand": "Expandera",
+      "collapse": "Fäll ihop"
+    },
+    "statusbar": {
+      "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitet",
+      "identifierProperty": "Identifierande egenskap",
+      "identifierStrategy": "Strategi",
+      "inheritsFrom": "Ärver från",
+      "noIdentifier": "(ingen)",
+      "noParent": "(ingen)",
+      "storage": "Lagring & livscykel",
+      "volumetry": "Förväntad volym",
+      "volumetryUnset": "(ospecificerad)",
+      "operationalProfile": "Driftprofil",
+      "accessPattern": "Läs-/skrivprofil",
+      "traffic": "Åtkomstfrekvens",
+      "freshness": "Färskhetstolerans",
+      "sensitivity": "Datakänslighet",
+      "retention": "Lagring / livscykel",
+      "profileUnset": "(ospecificerad)",
+      "timestamps": "Tidsstämplar (skapad/ändrad)",
+      "softDelete": "Mjuk borttagning",
+      "usedBy": "Används av",
+      "usedByNone": "Den här modellen används inte ännu.",
+      "usage": {
+        "body": "body",
+        "response": "svar {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} ärver från den"
+      },
+      "generators": "Rutter",
+      "generateCrud": "Generera CRUD",
+      "generateSearch": "Generera sökrutter"
+    },
+    "schema": {
+      "addProperty": "Lägg till en egenskap",
+      "deleteProperty": "Ta bort egenskapen",
+      "columns": {
+        "property": "Egenskap",
+        "type": "Typ",
+        "flags": "Attribut",
+        "example": "Exempel"
+      },
+      "unnamed": "(namnlös)",
+      "nameMissing": "namn saknas",
+      "panelTitle": "Egenskap: {{name}}",
+      "jumpToParent": "Öppna {{name}}",
+      "typeModel": "modell",
+      "typeEnum": "enum",
+      "noFormat": "(inget)",
+      "invalidPattern": "Ogiltigt reguljärt uttryck",
+      "minAboveMax": "Min överstiger max",
+      "fields": {
+        "name": "Namn",
+        "type": "Typ",
+        "format": "Format",
+        "elementType": "Elementtyp",
+        "onDelete": "Vid borttagning",
+        "description": "Beskrivning",
+        "example": "Exempel",
+        "default": "Standard",
+        "deprecationMessage": "Utfasningsmeddelande",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Min. längd",
+        "maxLength": "Max. längd",
+        "pattern": "Mönster"
+      },
+      "generatedProperties": "Genererade egenskaper",
+      "inheritedProperties": "Ärvda egenskaper",
+      "ownProperties": "Egna egenskaper",
+      "tabs": {
+        "property": "Egenskap"
+      },
+      "advancedType": "Avancerat…"
+    },
+    "flags": {
+      "required": "obligatorisk",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "oföränderlig",
+      "searchable": "sökbar",
+      "deprecated": "utfasad",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Standard",
+      "add": "Lägg till ett exempel",
+      "delete": "Ta bort exemplet",
+      "name": "Exemplets namn",
+      "newName": "Exempel",
+      "defaultHint": "Standardvärden kommer från varje egenskap (tomt = genereras automatiskt).",
+      "namedHint": "Skriv ett värde för att definiera det; lämna tomt för att behålla det genererade.",
+      "columns": {
+        "value": "Värde",
+        "origin": "Ursprung"
+      },
+      "auto": "auto",
+      "defined": "definierat",
+      "constraintViolated": "Värdet bryter mot egenskapens begränsning ({{constraint}})",
+      "deleteTitle": "Radera det här exemplet?",
+      "deleteConfirm": "Exemplet ”{{name}}” raderas."
+    },
+    "onDelete": {
+      "restrict": "Begränsa (förbjud medan den används)",
+      "cascade": "Kaskadborttagning",
+      "setNull": "Sätt till null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hundratals",
+      "tenThousands": "Tiotusentals",
+      "millions": "Miljoner"
+    },
+    "accessPattern": {
+      "readHeavy": "Lästungt",
+      "writeHeavy": "Skrivtungt",
+      "balanced": "Balanserat",
+      "appendOnly": "Endast tillägg"
+    },
+    "traffic": {
+      "low": "Låg",
+      "medium": "Medel",
+      "high": "Hög"
+    },
+    "freshness": {
+      "strong": "Stark konsistens",
+      "shortCache": "Kort cache OK",
+      "longCache": "Lång cache OK"
+    },
+    "sensitivity": {
+      "public": "Offentlig",
+      "internal": "Intern",
+      "confidential": "Konfidentiell",
+      "pii": "Personuppgifter (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Arkiverbar",
+      "ephemeral": "Tillfällig (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Egenskapen saknar namn",
+      "propertyNameDuplicate": "Duplicerat egenskapsnamn",
+      "propertyShadowsParent": "Skuggar en ärvd egenskap",
+      "referenceTargetUnknown": "Den refererade typen finns inte längre",
+      "constraintPatternInvalid": "Ogiltigt mönster (reguljärt uttryck)",
+      "constraintMinAboveMax": "Min överstiger max",
+      "modelNameEmpty": "Modellen saknar namn",
+      "enumNameEmpty": "Enumen saknar namn",
+      "groupNameEmpty": "Gruppen saknar namn",
+      "modelNameDuplicate": "Duplicerat modellnamn",
+      "enumNameDuplicate": "Duplicerat enumnamn",
+      "componentNameCollision": "En modell och en enum delar detta namn",
+      "groupNameDuplicate": "Duplicerat gruppnamn",
+      "inheritanceTargetUnknown": "Den ärvda modellen finns inte längre",
+      "inheritanceCycle": "Cirkulär arvskedja",
+      "identifierPropertyUnknown": "Identifierar-egenskapen finns inte längre",
+      "paramLinkTargetUnknown": "En parameterlänk pekar på en saknad egenskap",
+      "bodyModelUnknown": "Body-modellen finns inte längre",
+      "responseModelUnknown": "En svarsmodell finns inte längre",
+      "responseExampleUnknown": "Ett svar serverar ett saknat exempel",
+      "routeResponsesMissing": "Rutten deklarerar inget svar",
+      "routePathDuplicate": "En annan rutt besvarar redan denna metod och sökväg",
+      "routePathReserved": "Designservern reserverar denna sökväg — rutten skulle aldrig svara"
+    },
+    "routes": {
+      "addGroup": "Lägg till en grupp",
+      "addRoute": "Lägg till en rutt",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Välj en grupp eller en rutt, eller skapa en grupp.",
+      "deleteGroupTitle": "Ta bort {{name}}?",
+      "deleteGroupImpact": "Gruppen och dess {{count}} rutter tas bort.",
+      "method": "Metod",
+      "path": "Sökväg",
+      "summary": "Sammanfattning",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definition",
+        "responses": "Svar"
+      },
+      "group": {
+        "auth": "Krävd auth",
+        "authInherited": "Designens standard",
+        "versionPrefix": "Versionsprefix",
+        "headers": "Kontrakt-headers (ärvda av rutter)",
+        "headerName": "Header",
+        "addHeader": "Lägg till en header",
+        "deleteHeader": "Ta bort headern",
+        "noHeaders": "Ingen delad header."
+      },
+      "params": {
+        "pathTitle": "Sökvägsparametrar",
+        "otherTitle": "Parametrar (query / header)",
+        "name": "Namn",
+        "location": "I",
+        "link": "Modellänk",
+        "noLink": "—",
+        "add": "Lägg till en parameter",
+        "delete": "Ta bort parametern",
+        "auto": "auto",
+        "pathEmpty": "Skriv en {{param}} i sökvägen för att skapa dess rad.",
+        "otherEmpty": "Inga query- eller header-parametrar ännu.",
+        "nameEmpty": "En parameter behöver ett namn",
+        "nameTaken": "Det här namnet används redan"
+      },
+      "body": {
+        "label": "Request-body",
+        "empty": "(tom)",
+        "nonStandardHint": "En begärandekropp på {{method}} är inte standard — många servrar och proxyservrar ignorerar den. Restorm levererar och dokumenterar den ändå."
+      },
+      "responses": {
+        "add": "Lägg till",
+        "codePlaceholder": "Statuskod",
+        "standardErrors": "+ standardfel",
+        "empty": "Inget svar deklarerat ännu.",
+        "emptyBody": "tom body",
+        "model": "Returnerad modell",
+        "list": "Lista",
+        "paginated": "Paginerad",
+        "listOf": "lista av {{name}}",
+        "paginatedListOf": "paginerad lista av {{name}}",
+        "example": "Serverat exempel",
+        "exampleAuto": "(auto genererat)",
+        "delete": "Ta bort svaret",
+        "codeInvalid": "Ange en 3-siffrig statuskod",
+        "codeTaken": "Den här koden är redan deklarerad"
+      },
+      "settings": {
+        "inherited": "Ärvt från gruppen",
+        "authInherited": "Ärvt från gruppen",
+        "editGroup": "Redigera i gruppen ↗",
+        "headers": "Kontrakt-headers",
+        "behaviour": "Beteende",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (sekunder)",
+        "traffic": "Förväntad trafik",
+        "authOverride": "Auth-åsidosättning",
+        "pagination": "Paginering",
+        "defaultLimit": "Standard sidstorlek",
+        "maxLimit": "Max sidstorlek"
+      },
+      "addSubgroup": "Lägg till en undergrupp"
+    },
+    "newDesignName": "Ny API-design",
+    "createFromScratch": "Skapa en API-design",
+    "createFromDoc": "Skapa en design från detta API",
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Serverar på http://localhost:{{port}}",
+      "stopped": "Servern stoppad",
+      "totalCalls": "{{count}} anrop i denna körning",
+      "stop": "Stoppa servern",
+      "close": "Stäng denna panel",
+      "forcedPill": "tvingad {{code}}",
+      "defaultReturn": "Designsvar (standard)",
+      "codeReturn": "Svara {{code}}",
+      "customCode": "Anpassad statuskod",
+      "customBody": "Anpassad svarskropp",
+      "customBodyPlaceholder": "Valfri svarskropp (JSON)",
+      "customApply": "Tvinga"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Skydda skrivrutter med autentisering",
+      "authWritesHint": "Kräv bearer-autentisering vid skapa, uppdatera och ta bort; läsningar förblir offentliga.",
+      "generate": "Generera",
+      "replace": "Ersätt de befintliga rutterna",
+      "replaceHint": "Det finns redan rutter för den här modellen. Ersätt dem för att undvika dubbletter; lämna av för att lägga till en andra uppsättning.",
+      "title": "Generera CRUD för {{name}}",
+      "projections": {
+        "http": "{{count}} REST-rutter",
+        "graphql": "{{queries}} queries / {{mutations}} mutations i GraphQL",
+        "grpc": "{{count}} gRPC-metoder",
+        "odata": "{{count}} OData-entitetsuppsättning",
+        "soap": "{{count}} SOAP-operationer",
+        "title": "En modell, alla protokoll — detta CRUD serveras även som:"
+      }
+    },
+    "server": {
+      "subtitle": "Servera den här designen som en live-mock och följ varje anrop."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kodgenerering",
+        "name": "Variabel",
+        "value": "Värde (Handlebars)",
+        "add": "Lägg till en variabel",
+        "none": "Inga variabler ännu — lägg till en från den här mallens rubrik.",
+        "noTemplates": "Välj en eller flera mallar i avsnittet ”</> Code” — här definierar du sedan variablerna som används vid generering.",
+        "generalTitle": "Allmänna variabler",
+        "scope": {
+          "general": "Allmänt",
+          "property": "Modellegenskap"
+        },
+        "discover": "Upptäck variablerna som den här mallen använder",
+        "undeclared": "Använda men inte deklarerade: {{names}}",
+        "allDeclared": "Alla variabler som den här mallen använder är deklarerade."
+      }
+    },
+    "clients": {
+      "generated": "Klienter genererade — öppna dem under Klienter i sidofältet.",
+      "importing": "Importerar klienter…",
+      "refresh": "Regenerera klienterna",
+      "startPrompt": "Starta servern för att generera klienterna.",
+      "startServerPrompt": "Starta <serverLink>designservern</serverLink> för att få tillgång till klientförfrågningar som genereras automatiskt från modellen.",
+      "subtitle": "Din API-designserver körs och serverar rutterna du definierade. Förfrågningarna nedan anropar dessa rutter direkt — öppna en för att testa den. De är flyktiga och försvinner när servern stoppas."
+    },
+    "descriptors": {
+      "copy": "Kopiera URL:en"
+    },
+    "projections": {
+      "title": "Projektioner",
+      "hint": "Samma operation, så som varje serverat protokoll exponerar den."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Behåll",
@@ -2308,7 +2835,45 @@
     "addCookie": "Lägg till en cookie",
     "removeCookie": "Ta bort en cookie",
     "clearCookieDomain": "Rensa cookies för en domän",
-    "clearCookies": "Rensa alla cookies"
+    "clearCookies": "Rensa alla cookies",
+    "listDesigns": "Lista API-designer",
+    "getDesign": "Hämta en API-design",
+    "createDesign": "Skapa en API-design",
+    "createDesignFromDocumentation": "Skapa design från importerad API",
+    "updateDesign": "Uppdatera en design",
+    "deleteDesign": "Ta bort en design",
+    "createDesignModel": "Skapa en designmodell",
+    "updateDesignModel": "Uppdatera en designmodell",
+    "deleteDesignModel": "Ta bort en designmodell",
+    "setDesignProperty": "Ange en modellegenskap",
+    "deleteDesignProperty": "Ta bort en modellegenskap",
+    "createDesignEnum": "Skapa en design-enum",
+    "updateDesignEnum": "Uppdatera en design-enum",
+    "deleteDesignEnum": "Ta bort en design-enum",
+    "setDesignExample": "Ange ett namngivet exempel",
+    "deleteDesignExample": "Ta bort ett namngivet exempel",
+    "createDesignRouteGroup": "Skapa en ruttgrupp",
+    "updateDesignRouteGroup": "Uppdatera en ruttgrupp",
+    "deleteDesignRouteGroup": "Ta bort en ruttgrupp",
+    "createDesignRoute": "Skapa en designrutt",
+    "updateDesignRoute": "Uppdatera en designrutt",
+    "deleteDesignRoute": "Ta bort en designrutt",
+    "setDesignRouteParam": "Skapa eller uppdatera en ruttparameter",
+    "deleteDesignRouteParam": "Ta bort en ruttparameter",
+    "generateDesignCrud": "Generera CRUD-rutter",
+    "generateDesignSearchRoutes": "Generera sökrutter",
+    "serveDesign": "Servera en design",
+    "stopDesignServer": "Stoppa en designserver",
+    "getDesignServerStatus": "Designserverns status",
+    "setDesignRouteResponse": "Tvinga ett svar",
+    "exportDesign": "Exportera en designdeskriptor",
+    "generateDesignCode": "Generera kod från en design",
+    "getDesignTemplateContract": "Hämta kontraktet för kodmallar",
+    "setDesignTemplates": "Ange en designs kodmallar",
+    "setDesignModelVariables": "Ange en modells codegen-overrides",
+    "setDesignPropertyVariables": "Ange en egenskaps codegen-overrides",
+    "setDesignRouteVariables": "Ange en rutts codegen-overrides",
+    "setDesignTemplateVariables": "Ange en malls globala codegen-variabler"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "La till scenariot \"{{name}}\"",
       "modifiedScenario": "Ändrade scenariot \"{{name}}\"",
       "deletedScenario": "Tog bort scenariot \"{{name}}\"",
+      "addedDesign": "La till designen \"{{name}}\"",
+      "modifiedDesign": "Ändrade designen \"{{name}}\"",
+      "deletedDesign": "Tog bort designen \"{{name}}\"",
       "addedFolder": "La till mappen \"{{name}}\"",
       "modifiedFolder": "Ändrade mappen \"{{name}}\"",
       "deletedFolder": "Tog bort mappen \"{{name}}\"",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "Tog bort miljömappen \"{{name}}\"",
       "movedRequest": "Flyttade begäran \"{{name}}\"",
       "movedScenario": "Flyttade scenariot \"{{name}}\"",
+      "movedDesign": "Flyttade designen \"{{name}}\"",
       "movedFolder": "Flyttade mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttade miljömappen \"{{name}}\"",
       "reorderedFolder": "Objekt omordnade i mappen ”{{name}}”",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "Uppdatering av förfrågan \"{{name}}\"",
       "singleScenario": "Uppdatering av scenariot \"{{name}}\"",
+      "singleDesign": "Uppdatering av designen \"{{name}}\"",
       "singleFolder": "Uppdatering av mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Uppdatering av miljömappen \"{{name}}\"",
       "singleFileFormatVersion": "Byte till filformat {{name}}",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} förfrågningar",
       "countScenario_one": "{{count}} scenario",
       "countScenario_other": "{{count}} scenarier",
+      "countDesign_one": "{{count}} design",
+      "countDesign_other": "{{count}} designer",
       "countFolder_one": "{{count}} mapp",
       "countFolder_other": "{{count}} mappar",
       "countEnvironmentFolder_one": "{{count}} miljömapp",

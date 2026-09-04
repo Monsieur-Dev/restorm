@@ -259,6 +259,7 @@
     "contextMenu": {
       "delete": "Smazat",
       "clone": "Duplikovat",
+      "openInSplit": "Otevřít v rozděleném panelu",
       "copySuffix": "kopie",
       "rename": "Přejmenovat",
       "addToFavorites": "Přidat k oblíbeným",
@@ -317,7 +318,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Návrh API"
       },
       "cut": "Vyjmout",
       "copy": "Kopírovat",
@@ -337,7 +339,8 @@
       "moveInto": "Přesunout do tohoto scénáře",
       "affectsNote": "Smazáním tohoto požadavku jej také odeberete z těchto scénářů.",
       "deleteAnyway": "Přesto smazat"
-    }
+    },
+    "expandAll": "Rozbalit všechny požadavky"
   },
   "environment": {
     "newName": "Nové prostředí",
@@ -743,7 +746,8 @@
       "environment": "Prostředí",
       "settings": "Nastavení",
       "tag": "Štítky",
-      "scenario": "Scénáře"
+      "scenario": "Scénáře",
+      "design": "Návrhy API"
     },
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",
@@ -1240,7 +1244,8 @@
       "operation": "Operace",
       "description": "Popis",
       "example": "Příklad",
-      "constraints": "Omezení"
+      "constraints": "Omezení",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Pro filtrované trasy nejsou deklarovány žádné parametry mimo tělo."
@@ -1287,7 +1292,8 @@
       "optionalSingleRef": "volitelný jednotlivý odkaz",
       "requiredArrayRef": "povinný odkaz na pole",
       "optionalArrayRef": "volitelný odkaz na pole"
-    }
+    },
+    "editEntity": "Upravit v návrháři"
   },
   "scenario": {
     "editor": {
@@ -2141,6 +2147,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Hodnoty výčtu",
+      "addValue": "Přidat hodnotu…",
+      "removeValue": "Odebrat hodnotu",
+      "extract": "Extrahovat do pojmenovaného výčtu"
+    },
+    "tags": {
+      "add": "Přidat značku…",
+      "remove": "Odebrat značku",
+      "routeLabel": "Značky",
+      "groupLabel": "Sdílené značky"
+    },
+    "section": {
+      "settings": "Nastavení",
+      "models": "Modely",
+      "enums": "Enumy",
+      "routes": "Trasy",
+      "documentation": "Dokumentace",
+      "notes": "Poznámky",
+      "code": "Kód",
+      "server": "Server",
+      "clients": "Klienti"
+    },
+    "rail": {
+      "ariaLabel": "Sekce návrhu"
+    },
+    "settings": {
+      "subtitle": "Obecná nastavení návrhu „{{name}}“",
+      "serve": {
+        "title": "Návrhový server",
+        "action": "Servírovat tento návrh",
+        "description": "Odpovědi z pojmenovaných příkladů · validace omezeními",
+        "port": "Port",
+        "latency": "Simulovaná latence (ms)",
+        "blocked": "Před spuštěním opravte {{count}} chyby validace návrhu",
+        "startFailed": "Server se nepodařilo spustit",
+        "protocolAlways": "HTTP se servíruje vždy",
+        "protocolToggle": "Servírovat i tuto projekci",
+        "stateful": "Stavový režim — POST/PUT/DELETE mění úložiště v paměti (reset při restartu)",
+        "clientsCallout": "Váš mock server běží. Pro každý protokol, který tento design obsluhuje, byli vygenerováni klienti připravení ke spuštění.",
+        "clientsCalloutLink": "Najdete je zde"
+      },
+      "identity": {
+        "title": "Identita",
+        "title_field": "Název",
+        "version": "Verze návrhu",
+        "description": "Popis"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Základní cesta",
+        "defaultAuth": "Výchozí auth",
+        "environment": "Prostředí"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Formát deskriptoru",
+        "download": "Stáhnout deskriptor",
+        "saved": "Deskriptor uložen do {{path}}",
+        "failed": "Export se nezdařil"
+      }
+    },
+    "auth": {
+      "none": "Žádná",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Hlavička API klíče",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtrovat…",
+      "selectPrompt": "Vyberte položku v seznamu.",
+      "editorPending": "Editor této sekce je na cestě."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} vlastnost",
+      "propertyCount_other": "{{count}} vlastností",
+      "add": "Přidat model",
+      "delete": "Smazat model",
+      "deleteTitle": "Smazat {{name}}?",
+      "deleteNoImpact": "Tento model se nikde nepoužívá.",
+      "deleteImpactIntro": "Smazání tohoto modelu aktualizuje:",
+      "deleteImpactChild": "{{name}} ztrácí dědičnost (vlastní vlastnosti zůstávají)",
+      "description": "Popis",
+      "descriptionPlaceholder": "Co tento model představuje (volitelné)",
+      "newName": "NewModel",
+      "selectPrompt": "Vyberte model, nebo nějaký vytvořte.",
+      "tabs": {
+        "schema": "Schéma",
+        "examples": "Příklady",
+        "settings": "Nastavení",
+        "notes": "Poznámky"
+      },
+      "addSubModel": "Přidat podmodel",
+      "collapseAll": "Sbalit vše",
+      "expandAll": "Rozbalit vše"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} hodnota",
+      "valueCount_other": "{{count}} hodnot",
+      "lists": "Enumy",
+      "values": "Hodnoty",
+      "addEnum": "Přidat enum",
+      "addValue": "Přidat hodnotu",
+      "valueHeader": "Hodnota",
+      "newName": "NewEnum",
+      "selectPrompt": "Vyberte enum, nebo nějaký vytvořte — uzavřená množina hodnot použitelná jako typ vlastnosti.",
+      "nameHeader": "Název",
+      "description": "Popis",
+      "descriptionPlaceholder": "Co tento výčet představuje (volitelné)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Zatím žádná šablona — přidejte ji pro generování kódu z tohoto návrhu.",
+      "subtitle": "Generujte projekty z tohoto návrhu — vykreslené v sandboxu, zapsané až po potvrzení stromu",
+      "sourceTitle": "Šablona",
+      "sourceKind": {
+        "official": "Oficiální",
+        "repo": "Repozitář",
+        "local": "Místní složka"
+      },
+      "official": "Oficiální šablona",
+      "repo": "Repozitář (owner/repo)",
+      "local": "Místní složka šablony",
+      "output": "Výstupní složka (absolutní, nebo relativní k projektu)",
+      "browse": "Zvolit výstupní složku",
+      "generate": "Vygenerovat projekt",
+      "generating": "Generuje se v sandboxu…",
+      "blocked": "Před generováním opravte {{count}} chyb(y) validace návrhu",
+      "failed": "Generování selhalo",
+      "outputMissing": "Nejprve zvolte výstupní složku",
+      "extracted": "{{count}} soubor(ů) zapsáno do {{root}}",
+      "preview": "{{name}} vygenerovala {{count}} soubor(ů) — potvrďte zápis",
+      "confirm": "Zapsat do výstupní složky",
+      "discard": "Zahodit",
+      "generateOne": "Vygenerovat tento projekt",
+      "remove": "Odebrat tuto šablonu",
+      "addTemplate": "Přidat šablonu",
+      "library": {
+        "title": "Knihovna šablon",
+        "recent": "Naposledy použité",
+        "official": "Oficiální šablony",
+        "custom": "Vlastní",
+        "add": "Přidat",
+        "use": "Použít",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Šablony organizace",
+        "openRepo": "Otevřít repozitář",
+        "remove": "Odebrat",
+        "addTemplate": "Přidat šablonu",
+        "urlPlaceholder": "URL git repozitáře",
+        "descPlaceholder": "Popis (stack / co generuje)",
+        "noOrgTemplates": "Zatím žádné šablony organizace.",
+        "loading": "Načítání šablon…",
+        "signedOut": "Přihlaste se pro zobrazení šablon vaší organizace.",
+        "fetchError": "Šablony se nepodařilo načíst:",
+        "unavailable": "nedostupné",
+        "officialTag": "Oficiální",
+        "officialDesc": {
+          "server-rest-typescript": "Server REST v TypeScriptu na Express — typované trasy, modely a validace požadavků.",
+          "server-rest-dotnet": "Server Minimal-API v C# / ASP.NET Core — endpointy, DTO a validace.",
+          "server-grpc-typescript": "gRPC server v TypeScriptu — služba .proto, typované zprávy a serverové stuby.",
+          "server-grpc-dotnet": "gRPC server v C# / .NET — služba .proto, zprávy a serverové stuby.",
+          "db-postgres": "Schéma PostgreSQL, počáteční data a CRUD skripty z návrhu."
+        },
+        "added": "Template přidán",
+        "done": "Hotovo"
+      },
+      "extractedTitle": "Soubory zapsány",
+      "openOutput": "Otevřít výstupní složku",
+      "refresh": "Obnovit tuto šablonu z jejího zdroje",
+      "removeConfirm": "Template „{{name}}“ bude z tohoto návrhu odebrán (již vygenerované soubory na disku zůstanou nedotčené).",
+      "removeTitle": "Odebrat tento Template?",
+      "tabs": {
+        "template": "Šablona"
+      },
+      "questions": {
+        "title": "Otázky šablony"
+      },
+      "errorTitle": "Generování selhalo",
+      "source": "Zdroj",
+      "destination": "Cíl",
+      "expand": "Rozbalit",
+      "collapse": "Sbalit"
+    },
+    "statusbar": {
+      "format": "návrh · formát {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identita",
+      "identifierProperty": "Identifikační vlastnost",
+      "identifierStrategy": "Strategie",
+      "inheritsFrom": "Dědí z",
+      "noIdentifier": "(žádná)",
+      "noParent": "(žádný)",
+      "storage": "Úložiště a životní cyklus",
+      "volumetry": "Očekávaný objem",
+      "volumetryUnset": "(neurčeno)",
+      "operationalProfile": "Provozní profil",
+      "accessPattern": "Profil čtení/zápisu",
+      "traffic": "Frekvence přístupu",
+      "freshness": "Tolerance aktuálnosti",
+      "sensitivity": "Citlivost dat",
+      "retention": "Uchovávání / životní cyklus",
+      "profileUnset": "(neurčeno)",
+      "timestamps": "Časová razítka (vytvořeno/upraveno)",
+      "softDelete": "Měkké mazání",
+      "usedBy": "Používá se v",
+      "usedByNone": "Tento model se zatím nepoužívá.",
+      "usage": {
+        "body": "tělo",
+        "response": "odpověď {{code}}",
+        "param": "parametr {{name}}",
+        "inherits": "{{name}} z něj dědí"
+      },
+      "generators": "Trasy",
+      "generateCrud": "Vygenerovat CRUD",
+      "generateSearch": "Vygenerovat vyhledávací trasy"
+    },
+    "schema": {
+      "addProperty": "Přidat vlastnost",
+      "deleteProperty": "Smazat vlastnost",
+      "columns": {
+        "property": "Vlastnost",
+        "type": "Typ",
+        "flags": "Atributy",
+        "example": "Příklad"
+      },
+      "unnamed": "(beze jména)",
+      "nameMissing": "chybí název",
+      "panelTitle": "Vlastnost: {{name}}",
+      "jumpToParent": "Otevřít {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(žádný)",
+      "invalidPattern": "Neplatný regulární výraz",
+      "minAboveMax": "Min překračuje max",
+      "fields": {
+        "name": "Název",
+        "type": "Typ",
+        "format": "Formát",
+        "elementType": "Typ prvků",
+        "onDelete": "Při smazání",
+        "description": "Popis",
+        "example": "Příklad",
+        "default": "Výchozí",
+        "deprecationMessage": "Zpráva o zastarání",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "minLength": "Min. délka",
+        "maxLength": "Max. délka",
+        "pattern": "Vzor"
+      },
+      "generatedProperties": "Vygenerované vlastnosti",
+      "inheritedProperties": "Zděděné vlastnosti",
+      "ownProperties": "Vlastní vlastnosti",
+      "tabs": {
+        "property": "Vlastnost"
+      },
+      "advancedType": "Pokročilé…"
+    },
+    "flags": {
+      "required": "povinné",
+      "nullable": "nullable",
+      "unique": "unikátní",
+      "immutable": "neměnné",
+      "searchable": "vyhledatelné",
+      "deprecated": "zastaralé",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Výchozí",
+      "add": "Přidat příklad",
+      "delete": "Smazat příklad",
+      "name": "Název příkladu",
+      "newName": "Příklad",
+      "defaultHint": "Výchozí hodnoty pocházejí z jednotlivých vlastností (prázdné = generováno automaticky).",
+      "namedHint": "Zadejte hodnotu pro její definici; nechte prázdné pro zachování generované.",
+      "columns": {
+        "value": "Hodnota",
+        "origin": "Původ"
+      },
+      "auto": "auto",
+      "defined": "definováno",
+      "constraintViolated": "Hodnota porušuje omezení vlastnosti ({{constraint}})",
+      "deleteTitle": "Smazat tento příklad?",
+      "deleteConfirm": "Příklad „{{name}}“ bude smazán."
+    },
+    "onDelete": {
+      "restrict": "Omezit (zakázat, dokud se používá)",
+      "cascade": "Kaskádové mazání",
+      "setNull": "Nastavit na null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Stovky",
+      "tenThousands": "Desetitisíce",
+      "millions": "Miliony"
+    },
+    "accessPattern": {
+      "readHeavy": "Převážně čtení",
+      "writeHeavy": "Převážně zápis",
+      "balanced": "Vyvážené",
+      "appendOnly": "Pouze přidávání"
+    },
+    "traffic": {
+      "low": "Nízký",
+      "medium": "Střední",
+      "high": "Vysoký"
+    },
+    "freshness": {
+      "strong": "Silná konzistence",
+      "shortCache": "Krátká cache OK",
+      "longCache": "Dlouhá cache OK"
+    },
+    "sensitivity": {
+      "public": "Veřejné",
+      "internal": "Interní",
+      "confidential": "Důvěrné",
+      "pii": "Osobní údaje (PII)"
+    },
+    "retention": {
+      "permanent": "Trvalé",
+      "archivable": "Archivovatelné",
+      "ephemeral": "Dočasné (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Vlastnost nemá název",
+      "propertyNameDuplicate": "Duplicitní název vlastnosti",
+      "propertyShadowsParent": "Zastiňuje zděděnou vlastnost",
+      "referenceTargetUnknown": "Odkazovaný typ už neexistuje",
+      "constraintPatternInvalid": "Neplatný vzor (regulární výraz)",
+      "constraintMinAboveMax": "Min překračuje max",
+      "modelNameEmpty": "Model nemá název",
+      "enumNameEmpty": "Enum nemá název",
+      "groupNameEmpty": "Skupina nemá název",
+      "modelNameDuplicate": "Duplicitní název modelu",
+      "enumNameDuplicate": "Duplicitní název enumu",
+      "componentNameCollision": "Model a enum sdílejí tento název",
+      "groupNameDuplicate": "Duplicitní název skupiny",
+      "inheritanceTargetUnknown": "Děděný model už neexistuje",
+      "inheritanceCycle": "Cyklický řetězec dědičnosti",
+      "identifierPropertyUnknown": "Identifikační vlastnost už neexistuje",
+      "paramLinkTargetUnknown": "Vazba parametru ukazuje na chybějící vlastnost",
+      "bodyModelUnknown": "Model těla už neexistuje",
+      "responseModelUnknown": "Model odpovědi už neexistuje",
+      "responseExampleUnknown": "Odpověď servíruje chybějící příklad",
+      "routeResponsesMissing": "Trasa nedeklaruje žádnou odpověď",
+      "routePathDuplicate": "Jiná trasa již odpovídá na tuto metodu a cestu",
+      "routePathReserved": "Design server si tuto cestu vyhrazuje — trasa by nikdy neodpověděla"
+    },
+    "routes": {
+      "addGroup": "Přidat skupinu",
+      "addRoute": "Přidat trasu",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Vyberte skupinu nebo trasu, nebo skupinu vytvořte.",
+      "deleteGroupTitle": "Smazat {{name}}?",
+      "deleteGroupImpact": "Skupina a jejích {{count}} tras budou smazány.",
+      "method": "Metoda",
+      "path": "Cesta",
+      "summary": "Shrnutí",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definice",
+        "responses": "Odpovědi"
+      },
+      "group": {
+        "auth": "Vyžadovaná autentizace",
+        "authInherited": "Výchozí návrhu",
+        "versionPrefix": "Prefix verze",
+        "headers": "Kontraktové hlavičky (děděné trasami)",
+        "headerName": "Hlavička",
+        "addHeader": "Přidat hlavičku",
+        "deleteHeader": "Smazat hlavičku",
+        "noHeaders": "Žádná sdílená hlavička."
+      },
+      "params": {
+        "pathTitle": "Parametry cesty",
+        "otherTitle": "Parametry (query / header)",
+        "name": "Název",
+        "location": "V",
+        "link": "Vazba na model",
+        "noLink": "—",
+        "add": "Přidat parametr",
+        "delete": "Smazat parametr",
+        "auto": "auto",
+        "pathEmpty": "Zadejte {{param}} v cestě pro vytvoření jeho řádku.",
+        "otherEmpty": "Zatím žádné query ani header parametry.",
+        "nameEmpty": "Parametr potřebuje název",
+        "nameTaken": "Tento název se již používá"
+      },
+      "body": {
+        "label": "Tělo požadavku",
+        "empty": "(prázdné)",
+        "nonStandardHint": "Tělo požadavku u {{method}} není standardní — mnoho serverů a proxy jej ignoruje. Restorm jej přesto obsluhuje a dokumentuje."
+      },
+      "responses": {
+        "add": "Přidat",
+        "codePlaceholder": "Stavový kód",
+        "standardErrors": "+ standardní chyby",
+        "empty": "Zatím žádná deklarovaná odpověď.",
+        "emptyBody": "prázdné tělo",
+        "model": "Vrácený model",
+        "list": "Seznam",
+        "paginated": "Stránkovaný",
+        "listOf": "seznam {{name}}",
+        "paginatedListOf": "stránkovaný seznam {{name}}",
+        "example": "Servírovaný příklad",
+        "exampleAuto": "(auto generovaný)",
+        "delete": "Smazat odpověď",
+        "codeInvalid": "Zadejte třímístný stavový kód",
+        "codeTaken": "Tento kód je již deklarován"
+      },
+      "settings": {
+        "inherited": "Děděno ze skupiny",
+        "authInherited": "Děděno ze skupiny",
+        "editGroup": "Upravit ve skupině ↗",
+        "headers": "Kontraktové hlavičky",
+        "behaviour": "Chování",
+        "idempotent": "Idempotentní",
+        "cacheSeconds": "Cache (sekundy)",
+        "traffic": "Očekávaný provoz",
+        "authOverride": "Přepsání autentizace",
+        "pagination": "Stránkování",
+        "defaultLimit": "Výchozí velikost stránky",
+        "maxLimit": "Max. velikost stránky"
+      },
+      "addSubgroup": "Přidat podskupinu"
+    },
+    "newDesignName": "Nový návrh API",
+    "createFromScratch": "Vytvořit návrh API",
+    "createFromDoc": "Vytvořit návrh z tohoto API",
+    "fromDocName": "Návrh {{name}}",
+    "run": {
+      "listening": "Běží na http://localhost:{{port}}",
+      "stopped": "Server zastaven",
+      "totalCalls": "{{count}} volání v tomto běhu",
+      "stop": "Zastavit server",
+      "close": "Zavřít tento panel",
+      "forcedPill": "vynuceno {{code}}",
+      "defaultReturn": "Odpověď návrhu (výchozí)",
+      "codeReturn": "Odpovědět {{code}}",
+      "customCode": "Vlastní stavový kód",
+      "customBody": "Vlastní tělo odpovědi",
+      "customBodyPlaceholder": "Volitelné tělo odpovědi (JSON)",
+      "customApply": "Vynutit"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Chránit zapisovací trasy autentizací",
+      "authWritesHint": "Vyžadovat bearer autentizaci pro vytvoření, úpravu a smazání; čtení zůstává veřejné.",
+      "generate": "Vygenerovat",
+      "replace": "Nahradit existující trasy",
+      "replaceHint": "Pro tento model už trasy existují. Nahraďte je, abyste předešli duplicitám; ponechte vypnuté pro přidání druhé sady.",
+      "title": "Vygenerovat CRUD pro {{name}}",
+      "projections": {
+        "http": "{{count}} tras REST",
+        "graphql": "{{queries}} dotazů / {{mutations}} mutací v GraphQL",
+        "grpc": "{{count}} metod gRPC",
+        "odata": "{{count}} sada entit OData",
+        "soap": "{{count}} operací SOAP",
+        "title": "Jeden model, každý protokol — tento CRUD je obsluhován také jako:"
+      }
+    },
+    "server": {
+      "subtitle": "Servírujte tento návrh jako živý mock a sledujte každé volání."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generování kódu",
+        "name": "Proměnná",
+        "value": "Hodnota (Handlebars)",
+        "add": "Přidat proměnnou",
+        "none": "Zatím žádné proměnné — přidejte jednu z hlavičky této šablony.",
+        "noTemplates": "Vyberte jednu nebo více šablon v sekci „</> Code“ — zde poté definujete proměnné použité při generování.",
+        "generalTitle": "Obecné proměnné",
+        "scope": {
+          "general": "Obecné",
+          "property": "Vlastnost modelu"
+        },
+        "discover": "Zjistit proměnné použité touto šablonou",
+        "undeclared": "Použité, ale nedeklarované: {{names}}",
+        "allDeclared": "Všechny proměnné použité touto šablonou jsou deklarované."
+      }
+    },
+    "clients": {
+      "generated": "Klienti vygenerováni — otevřete je v sekci Klienti na postranním panelu.",
+      "importing": "Import klientů…",
+      "refresh": "Znovu vygenerovat klienty",
+      "startPrompt": "Spusťte server pro vygenerování klientů.",
+      "startServerPrompt": "Spusťte <serverLink>návrhový server</serverLink> pro přístup k požadavkům klienta automaticky vygenerovaným z modelu.",
+      "subtitle": "Váš návrhový server API běží a obsluhuje trasy, které jste definovali. Následující požadavky volají tyto trasy přímo — otevřete některý a otestujte jej. Jsou dočasné a zmizí, jakmile se server zastaví."
+    },
+    "descriptors": {
+      "copy": "Kopírovat URL"
+    },
+    "projections": {
+      "title": "Projekce",
+      "hint": "Táž operace, tak jak ji vystavuje každý obsluhovaný protokol."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Ponechat",
@@ -2310,7 +2837,45 @@
     "addCookie": "Přidat cookie",
     "removeCookie": "Odstranit cookie",
     "clearCookieDomain": "Vymazat cookies pro doménu",
-    "clearCookies": "Vymazat všechny cookies"
+    "clearCookies": "Vymazat všechny cookies",
+    "listDesigns": "Vypsat návrhy API",
+    "getDesign": "Získat návrh API",
+    "createDesign": "Vytvořit návrh API",
+    "createDesignFromDocumentation": "Vytvořit návrh z importovaného API",
+    "updateDesign": "Aktualizovat návrh",
+    "deleteDesign": "Smazat návrh",
+    "createDesignModel": "Vytvořit model návrhu",
+    "updateDesignModel": "Aktualizovat model návrhu",
+    "deleteDesignModel": "Smazat model návrhu",
+    "setDesignProperty": "Nastavit vlastnost modelu",
+    "deleteDesignProperty": "Smazat vlastnost modelu",
+    "createDesignEnum": "Vytvořit enum návrhu",
+    "updateDesignEnum": "Aktualizovat enum návrhu",
+    "deleteDesignEnum": "Smazat enum návrhu",
+    "setDesignExample": "Nastavit pojmenovaný příklad",
+    "deleteDesignExample": "Smazat pojmenovaný příklad",
+    "createDesignRouteGroup": "Vytvořit skupinu tras",
+    "updateDesignRouteGroup": "Aktualizovat skupinu tras",
+    "deleteDesignRouteGroup": "Smazat skupinu tras",
+    "createDesignRoute": "Vytvořit trasu návrhu",
+    "updateDesignRoute": "Aktualizovat trasu návrhu",
+    "deleteDesignRoute": "Smazat trasu návrhu",
+    "setDesignRouteParam": "Vytvořit nebo upravit parametr trasy",
+    "deleteDesignRouteParam": "Odstranit parametr trasy",
+    "generateDesignCrud": "Generovat CRUD trasy",
+    "generateDesignSearchRoutes": "Generovat vyhledávací trasy",
+    "serveDesign": "Servírovat návrh",
+    "stopDesignServer": "Zastavit server návrhu",
+    "getDesignServerStatus": "Stav serveru návrhu",
+    "setDesignRouteResponse": "Vynutit odpověď",
+    "exportDesign": "Exportovat deskriptor návrhu",
+    "generateDesignCode": "Vygenerovat kód z návrhu",
+    "getDesignTemplateContract": "Získat kontrakt šablon kódu",
+    "setDesignTemplates": "Nastavit šablony kódu návrhu",
+    "setDesignModelVariables": "Nastavit přepisy generování kódu pro model",
+    "setDesignPropertyVariables": "Nastavit přepisy generování kódu pro vlastnost",
+    "setDesignRouteVariables": "Nastavit přepisy generování kódu pro trasu",
+    "setDesignTemplateVariables": "Nastavit globální proměnné generování kódu pro šablonu"
   },
   "odataFilter": {
     "detail": {
@@ -2540,6 +3105,9 @@
       "addedScenario": "Přidán scénář „{{name}}“",
       "modifiedScenario": "Upraven scénář „{{name}}“",
       "deletedScenario": "Odstraněn scénář „{{name}}“",
+      "addedDesign": "Přidán návrh API „{{name}}“",
+      "modifiedDesign": "Upraven návrh API „{{name}}“",
+      "deletedDesign": "Odstraněn návrh API „{{name}}“",
       "addedFolder": "Přidána složka „{{name}}“",
       "modifiedFolder": "Upravena složka „{{name}}“",
       "deletedFolder": "Odstraněna složka „{{name}}“",
@@ -2548,6 +3116,7 @@
       "deletedEnvironmentFolder": "Odstraněna složka prostředí „{{name}}“",
       "movedRequest": "Přesunut požadavek \"{{name}}\"",
       "movedScenario": "Přesunut scénář \"{{name}}\"",
+      "movedDesign": "Přesunut návrh API \"{{name}}\"",
       "movedFolder": "Přesunuta složka \"{{name}}\"",
       "movedEnvironmentFolder": "Přesunuta složka prostředí \"{{name}}\"",
       "reorderedFolder": "Změněno pořadí položek ve složce „{{name}}“",
@@ -2558,6 +3127,7 @@
     "commitTitle": {
       "singleRequest": "Aktualizace požadavku „{{name}}“",
       "singleScenario": "Aktualizace scénáře „{{name}}“",
+      "singleDesign": "Aktualizace návrhu API „{{name}}“",
       "singleFolder": "Aktualizace složky „{{name}}“",
       "singleEnvironmentFolder": "Aktualizace složky prostředí „{{name}}“",
       "singleFileFormatVersion": "Přechod na formát souboru {{name}}",
@@ -2565,6 +3135,8 @@
       "countRequest_other": "{{count}} požadavků",
       "countScenario_one": "{{count}} scénář",
       "countScenario_other": "{{count}} scénářů",
+      "countDesign_one": "{{count}} návrh API",
+      "countDesign_other": "{{count}} návrhů API",
       "countFolder_one": "{{count}} složka",
       "countFolder_other": "{{count}} složek",
       "countEnvironmentFolder_one": "{{count}} složka prostředí",

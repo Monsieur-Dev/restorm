@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Sil",
       "clone": "Çoğalt",
+      "openInSplit": "Bölünmüş panelde aç",
       "copySuffix": "kopya",
       "rename": "Yeniden adlandır",
       "addToFavorites": "Favorilere ekle",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API tasarımı"
       },
       "cut": "Kes",
       "copy": "Kopyala",
@@ -335,7 +337,8 @@
       "moveInto": "Bu senaryoya taşı",
       "affectsNote": "Bu isteği silmek onu bu senaryolardan da kaldırır.",
       "deleteAnyway": "Yine de sil"
-    }
+    },
+    "expandAll": "Tüm istekleri genişlet"
   },
   "environment": {
     "newName": "Yeni ortam",
@@ -741,7 +744,8 @@
       "environment": "Ortamlar",
       "settings": "Ayarlar",
       "tag": "Etiketler",
-      "scenario": "Senaryolar"
+      "scenario": "Senaryolar",
+      "design": "API tasarımları"
     },
     "tooltip": {
       "noDetails": "Ayrıntı yok",
@@ -1238,7 +1242,8 @@
       "operation": "İşlem",
       "description": "Açıklama",
       "example": "Örnek",
-      "constraints": "Kısıtlamalar"
+      "constraints": "Kısıtlamalar",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Filtrelenen rotalar için gövde dışı parametre tanımlanmadı."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "isteğe bağlı tekil başvuru",
       "requiredArrayRef": "zorunlu dizi başvurusu",
       "optionalArrayRef": "isteğe bağlı dizi başvurusu"
-    }
+    },
+    "editEntity": "Tasarımcıda düzenle"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum değerleri",
+      "addValue": "Değer ekle…",
+      "removeValue": "Değeri kaldır",
+      "extract": "Adlandırılmış enum'a çıkar"
+    },
+    "tags": {
+      "add": "Etiket ekle…",
+      "remove": "Etiketi kaldır",
+      "routeLabel": "Etiketler",
+      "groupLabel": "Paylaşılan etiketler"
+    },
+    "section": {
+      "settings": "Ayarlar",
+      "models": "Modeller",
+      "enums": "Enumlar",
+      "routes": "Rotalar",
+      "documentation": "Dokümantasyon",
+      "notes": "Notlar",
+      "code": "Kod",
+      "server": "Sunucu",
+      "clients": "İstemciler"
+    },
+    "rail": {
+      "ariaLabel": "Tasarım bölümleri"
+    },
+    "settings": {
+      "subtitle": "“{{name}}” tasarımının genel ayarları",
+      "serve": {
+        "title": "Tasarım sunucusu",
+        "action": "Bu tasarımı sun",
+        "description": "Adlandırılmış örneklerden yanıtlar · kısıtlamalarla doğrulama",
+        "port": "Bağlantı noktası",
+        "latency": "Simüle edilmiş gecikme (ms)",
+        "blocked": "Sunmadan önce tasarımın {{count}} doğrulama hatasını düzeltin",
+        "startFailed": "Sunucu başlatılamadı",
+        "protocolAlways": "HTTP her zaman sunulur",
+        "protocolToggle": "Bu projeksiyonu da sun",
+        "stateful": "Durumlu mod — POST/PUT/DELETE bir bellek deposunu değiştirir (yeniden başlatmada sıfırlanır)",
+        "clientsCallout": "Mock sunucunuz çalışıyor. Bu tasarımın hizmet verdiği her protokol için çalıştırmaya hazır istemciler oluşturuldu.",
+        "clientsCalloutLink": "Onları burada bulabilirsiniz"
+      },
+      "identity": {
+        "title": "Kimlik",
+        "title_field": "Başlık",
+        "version": "Tasarım sürümü",
+        "description": "Açıklama"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Temel yol",
+        "defaultAuth": "Varsayılan auth",
+        "environment": "Ortam"
+      },
+      "export": {
+        "title": "Dışa aktar",
+        "format": "Tanımlayıcı biçimi",
+        "download": "Tanımlayıcıyı indir",
+        "saved": "Tanımlayıcı {{path}} konumuna kaydedildi",
+        "failed": "Dışa aktarma başarısız oldu"
+      }
+    },
+    "auth": {
+      "none": "Yok",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API anahtarı başlığı",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtrele…",
+      "selectPrompt": "Listeden bir öğe seçin.",
+      "editorPending": "Bu bölümün düzenleyicisi yolda."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} özellik",
+      "propertyCount_other": "{{count}} özellik",
+      "add": "Model ekle",
+      "delete": "Modeli sil",
+      "deleteTitle": "{{name}} silinsin mi?",
+      "deleteNoImpact": "Bu model hiçbir yerde kullanılmıyor.",
+      "deleteImpactIntro": "Bu modelin silinmesi şunları güncelleyecek:",
+      "deleteImpactChild": "{{name}} kalıtımını kaybeder (kendi özellikleri kalır)",
+      "description": "Açıklama",
+      "descriptionPlaceholder": "Bu modelin neyi temsil ettiği (isteğe bağlı)",
+      "newName": "NewModel",
+      "selectPrompt": "Bir model seçin veya oluşturun.",
+      "tabs": {
+        "schema": "Şema",
+        "examples": "Örnekler",
+        "settings": "Ayarlar",
+        "notes": "Notlar"
+      },
+      "addSubModel": "Alt model ekle",
+      "collapseAll": "Tümünü daralt",
+      "expandAll": "Tümünü genişlet"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} değer",
+      "valueCount_other": "{{count}} değer",
+      "lists": "Enumlar",
+      "values": "Değerler",
+      "addEnum": "Enum ekle",
+      "addValue": "Değer ekle",
+      "valueHeader": "Değer",
+      "newName": "NewEnum",
+      "selectPrompt": "Bir enum seçin veya oluşturun — özellik tipi olarak kullanılabilen kapalı bir değer kümesi.",
+      "nameHeader": "Ad",
+      "description": "Açıklama",
+      "descriptionPlaceholder": "Bu enum'un neyi temsil ettiği (isteğe bağlı)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Henüz şablon yok — bu tasarımdan kod oluşturmak için bir tane ekleyin.",
+      "subtitle": "Bu tasarımdan projeler oluşturun — bir sandbox'ta işlenir, yalnızca ağacı onayladıktan sonra yazılır",
+      "sourceTitle": "Şablon",
+      "sourceKind": {
+        "official": "Resmî",
+        "repo": "Depo",
+        "local": "Yerel klasör"
+      },
+      "official": "Resmî şablon",
+      "repo": "Depo (owner/repo)",
+      "local": "Yerel şablon klasörü",
+      "output": "Çıktı klasörü (mutlak veya projeye göreli)",
+      "browse": "Çıktı klasörünü seç",
+      "generate": "Projeyi üret",
+      "generating": "Sandbox içinde üretiliyor…",
+      "blocked": "Üretmeden önce tasarımın {{count}} doğrulama hatasını düzeltin",
+      "failed": "Üretim başarısız oldu",
+      "outputMissing": "Önce bir çıktı klasörü seçin",
+      "extracted": "{{count}} dosya {{root}} klasörüne yazıldı",
+      "preview": "{{name}} {{count}} dosya üretti — yazmak için onaylayın",
+      "confirm": "Çıktı klasörüne yaz",
+      "discard": "Vazgeç",
+      "generateOne": "Bu projeyi oluştur",
+      "remove": "Bu şablonu kaldır",
+      "addTemplate": "Şablon ekle",
+      "library": {
+        "title": "Şablon kitaplığı",
+        "recent": "Son kullanılanlar",
+        "official": "Resmi şablonlar",
+        "custom": "Özel",
+        "add": "Ekle",
+        "use": "Kullan",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Kuruluş şablonları",
+        "openRepo": "Depoyu aç",
+        "remove": "Kaldır",
+        "addTemplate": "Şablon ekle",
+        "urlPlaceholder": "Git deposu URL'si",
+        "descPlaceholder": "Açıklama (stack / ne ürettiği)",
+        "noOrgTemplates": "Henüz kuruluş şablonu yok.",
+        "loading": "Şablonlar yükleniyor…",
+        "signedOut": "Kuruluşunuzun şablonlarını görmek için oturum açın.",
+        "fetchError": "Şablonlar yüklenemedi:",
+        "unavailable": "kullanılamıyor",
+        "officialTag": "Resmi",
+        "officialDesc": {
+          "server-rest-typescript": "Express üzerinde TypeScript ile REST sunucusu — türlendirilmiş rotalar, modeller ve istek doğrulama.",
+          "server-rest-dotnet": "C# / ASP.NET Core ile Minimal-API sunucusu — uç noktalar, DTO'lar ve doğrulama.",
+          "server-grpc-typescript": "TypeScript ile gRPC sunucusu — .proto hizmeti, tipli mesajlar ve sunucu stub'ları.",
+          "server-grpc-dotnet": "C# / .NET ile gRPC sunucusu — .proto hizmeti, mesajlar ve sunucu stub'ları.",
+          "db-postgres": "Tasarımdan PostgreSQL şeması, seed verileri ve CRUD betikleri."
+        },
+        "added": "Template eklendi",
+        "done": "Bitti"
+      },
+      "extractedTitle": "Dosyalar yazıldı",
+      "openOutput": "Çıktı klasörünü aç",
+      "refresh": "Bu şablonu kaynağından yenile",
+      "removeConfirm": "“{{name}}” Template’i bu tasarımdan kaldırılacak (diskte önceden oluşturulan dosyalara dokunulmaz).",
+      "removeTitle": "Bu Template kaldırılsın mı?",
+      "tabs": {
+        "template": "Şablon"
+      },
+      "questions": {
+        "title": "Şablon soruları"
+      },
+      "errorTitle": "Oluşturma başarısız oldu",
+      "source": "Kaynak",
+      "destination": "Hedef",
+      "expand": "Genişlet",
+      "collapse": "Daralt"
+    },
+    "statusbar": {
+      "format": "tasarım · biçim {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Kimlik",
+      "identifierProperty": "Tanımlayıcı özellik",
+      "identifierStrategy": "Strateji",
+      "inheritsFrom": "Şundan kalıt alır",
+      "noIdentifier": "(yok)",
+      "noParent": "(yok)",
+      "storage": "Depolama ve yaşam döngüsü",
+      "volumetry": "Beklenen hacim",
+      "volumetryUnset": "(belirtilmemiş)",
+      "operationalProfile": "Operasyonel profil",
+      "accessPattern": "Okuma/yazma profili",
+      "traffic": "Erişim sıklığı",
+      "freshness": "Tazelik toleransı",
+      "sensitivity": "Veri hassasiyeti",
+      "retention": "Saklama / yaşam döngüsü",
+      "profileUnset": "(belirtilmemiş)",
+      "timestamps": "Zaman damgaları (oluşturuldu/değiştirildi)",
+      "softDelete": "Yumuşak silme",
+      "usedBy": "Kullanan",
+      "usedByNone": "Bu model henüz kullanılmıyor.",
+      "usage": {
+        "body": "gövde",
+        "response": "yanıt {{code}}",
+        "param": "parametre {{name}}",
+        "inherits": "{{name}} ondan kalıt alır"
+      },
+      "generators": "Rotalar",
+      "generateCrud": "CRUD üret",
+      "generateSearch": "Arama rotalarını üret"
+    },
+    "schema": {
+      "addProperty": "Özellik ekle",
+      "deleteProperty": "Özelliği sil",
+      "columns": {
+        "property": "Özellik",
+        "type": "Tip",
+        "flags": "Nitelikler",
+        "example": "Örnek"
+      },
+      "unnamed": "(adsız)",
+      "nameMissing": "ad eksik",
+      "panelTitle": "Özellik: {{name}}",
+      "jumpToParent": "{{name}} aç",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(yok)",
+      "invalidPattern": "Geçersiz düzenli ifade",
+      "minAboveMax": "Min, maksimumu aşıyor",
+      "fields": {
+        "name": "Ad",
+        "type": "Tip",
+        "format": "Biçim",
+        "elementType": "Öğe tipi",
+        "onDelete": "Silme davranışı",
+        "description": "Açıklama",
+        "example": "Örnek",
+        "default": "Varsayılan",
+        "deprecationMessage": "Kullanımdan kaldırma mesajı",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Min. uzunluk",
+        "maxLength": "Maks. uzunluk",
+        "pattern": "Desen"
+      },
+      "generatedProperties": "Üretilen özellikler",
+      "inheritedProperties": "Devralınan özellikler",
+      "ownProperties": "Kendi özellikleri",
+      "tabs": {
+        "property": "Özellik"
+      },
+      "advancedType": "Gelişmiş…"
+    },
+    "flags": {
+      "required": "zorunlu",
+      "nullable": "nullable",
+      "unique": "benzersiz",
+      "immutable": "değişmez",
+      "searchable": "aranabilir",
+      "deprecated": "kullanımdan kalktı",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Varsayılan",
+      "add": "Örnek ekle",
+      "delete": "Örneği sil",
+      "name": "Örnek adı",
+      "newName": "Örnek",
+      "defaultHint": "Varsayılan değerler her özellikten gelir (boş = otomatik üretilir).",
+      "namedHint": "Tanımlamak için bir değer yazın; üretileni korumak için boş bırakın.",
+      "columns": {
+        "value": "Değer",
+        "origin": "Köken"
+      },
+      "auto": "otomatik",
+      "defined": "tanımlı",
+      "constraintViolated": "Değer, özelliğin kısıtını ihlal ediyor ({{constraint}})",
+      "deleteTitle": "Bu örnek silinsin mi?",
+      "deleteConfirm": "“{{name}}” örneği silinecek."
+    },
+    "onDelete": {
+      "restrict": "Kısıtla (kullanımdayken yasakla)",
+      "cascade": "Basamaklı silme",
+      "setNull": "Null yap"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Otomatik artış",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Yüzlerce",
+      "tenThousands": "On binlerce",
+      "millions": "Milyonlarca"
+    },
+    "accessPattern": {
+      "readHeavy": "Ağırlıklı okuma",
+      "writeHeavy": "Ağırlıklı yazma",
+      "balanced": "Dengeli",
+      "appendOnly": "Yalnızca ekleme"
+    },
+    "traffic": {
+      "low": "Düşük",
+      "medium": "Orta",
+      "high": "Yüksek"
+    },
+    "freshness": {
+      "strong": "Güçlü tutarlılık",
+      "shortCache": "Kısa önbellek OK",
+      "longCache": "Uzun önbellek OK"
+    },
+    "sensitivity": {
+      "public": "Genel",
+      "internal": "Dahili",
+      "confidential": "Gizli",
+      "pii": "Kişisel veri (PII)"
+    },
+    "retention": {
+      "permanent": "Kalıcı",
+      "archivable": "Arşivlenebilir",
+      "ephemeral": "Geçici (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Özelliğin adı yok",
+      "propertyNameDuplicate": "Yinelenen özellik adı",
+      "propertyShadowsParent": "Kalıtılan bir özelliği gölgeliyor",
+      "referenceTargetUnknown": "Başvurulan tip artık yok",
+      "constraintPatternInvalid": "Geçersiz desen (düzenli ifade)",
+      "constraintMinAboveMax": "Min, maksimumu aşıyor",
+      "modelNameEmpty": "Modelin adı yok",
+      "enumNameEmpty": "Enumun adı yok",
+      "groupNameEmpty": "Grubun adı yok",
+      "modelNameDuplicate": "Yinelenen model adı",
+      "enumNameDuplicate": "Yinelenen enum adı",
+      "componentNameCollision": "Bir model ve bir enum bu adı paylaşıyor",
+      "groupNameDuplicate": "Yinelenen grup adı",
+      "inheritanceTargetUnknown": "Miras alınan model artık yok",
+      "inheritanceCycle": "Dairesel kalıtım zinciri",
+      "identifierPropertyUnknown": "Tanımlayıcı özellik artık yok",
+      "paramLinkTargetUnknown": "Bir parametre bağlantısı eksik bir özelliği gösteriyor",
+      "bodyModelUnknown": "Gövde modeli artık yok",
+      "responseModelUnknown": "Bir yanıt modeli artık yok",
+      "responseExampleUnknown": "Bir yanıt eksik bir örnek sunuyor",
+      "routeResponsesMissing": "Rota hiçbir yanıt bildirmiyor",
+      "routePathDuplicate": "Başka bir rota bu yöntem ve yola zaten yanıt veriyor",
+      "routePathReserved": "Tasarım sunucusu bu yolu ayırıyor — rota asla yanıt vermez"
+    },
+    "routes": {
+      "addGroup": "Grup ekle",
+      "addRoute": "Rota ekle",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Bir grup veya rota seçin, ya da bir grup oluşturun.",
+      "deleteGroupTitle": "{{name}} silinsin mi?",
+      "deleteGroupImpact": "Grup ve {{count}} rotası silinecek.",
+      "method": "Metot",
+      "path": "Yol",
+      "summary": "Özet",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Tanım",
+        "responses": "Yanıtlar"
+      },
+      "group": {
+        "auth": "Gerekli auth",
+        "authInherited": "Tasarım varsayılanı",
+        "versionPrefix": "Sürüm öneki",
+        "headers": "Sözleşme başlıkları (rotalar tarafından miras alınır)",
+        "headerName": "Başlık",
+        "addHeader": "Başlık ekle",
+        "deleteHeader": "Başlığı sil",
+        "noHeaders": "Paylaşılan başlık yok."
+      },
+      "params": {
+        "pathTitle": "Yol parametreleri",
+        "otherTitle": "Parametreler (query / header)",
+        "name": "Ad",
+        "location": "Konum",
+        "link": "Model bağlantısı",
+        "noLink": "—",
+        "add": "Parametre ekle",
+        "delete": "Parametreyi sil",
+        "auto": "otomatik",
+        "pathEmpty": "Satırını oluşturmak için yola bir {{param}} yazın.",
+        "otherEmpty": "Henüz query veya header parametresi yok.",
+        "nameEmpty": "Bir parametrenin adı olmalı",
+        "nameTaken": "Bu ad zaten kullanılıyor"
+      },
+      "body": {
+        "label": "İstek gövdesi",
+        "empty": "(boş)",
+        "nonStandardHint": "{{method}} üzerinde bir istek gövdesi standart değildir — birçok sunucu ve proxy bunu yok sayar. Restorm yine de onu sunar ve belgeler."
+      },
+      "responses": {
+        "add": "Ekle",
+        "codePlaceholder": "Durum kodu",
+        "standardErrors": "+ standart hatalar",
+        "empty": "Henüz bildirilen yanıt yok.",
+        "emptyBody": "boş gövde",
+        "model": "Dönen model",
+        "list": "Liste",
+        "paginated": "Sayfalı",
+        "listOf": "{{name}} listesi",
+        "paginatedListOf": "sayfalı {{name}} listesi",
+        "example": "Sunulan örnek",
+        "exampleAuto": "(otomatik üretilen)",
+        "delete": "Yanıtı sil",
+        "codeInvalid": "3 haneli bir durum kodu girin",
+        "codeTaken": "Bu kod zaten bildirilmiş"
+      },
+      "settings": {
+        "inherited": "Gruptan miras",
+        "authInherited": "Gruptan miras",
+        "editGroup": "Grupta düzenle ↗",
+        "headers": "Sözleşme başlıkları",
+        "behaviour": "Davranış",
+        "idempotent": "İdempotent",
+        "cacheSeconds": "Önbellek (saniye)",
+        "traffic": "Beklenen trafik",
+        "authOverride": "Auth geçersiz kılma",
+        "pagination": "Sayfalama",
+        "defaultLimit": "Varsayılan sayfa boyutu",
+        "maxLimit": "Maks. sayfa boyutu"
+      },
+      "addSubgroup": "Alt grup ekle"
+    },
+    "newDesignName": "Yeni API tasarımı",
+    "createFromScratch": "API tasarımı oluştur",
+    "createFromDoc": "Bu API’den bir tasarım oluştur",
+    "fromDocName": "{{name}} tasarımı",
+    "run": {
+      "listening": "http://localhost:{{port}} üzerinde sunuluyor",
+      "stopped": "Sunucu durduruldu",
+      "totalCalls": "Bu çalıştırmada {{count}} çağrı",
+      "stop": "Sunucuyu durdur",
+      "close": "Bu paneli kapat",
+      "forcedPill": "zorlandı {{code}}",
+      "defaultReturn": "Tasarım yanıtı (varsayılan)",
+      "codeReturn": "{{code}} ile yanıtla",
+      "customCode": "Özel durum kodu",
+      "customBody": "Özel yanıt gövdesi",
+      "customBodyPlaceholder": "İsteğe bağlı yanıt gövdesi (JSON)",
+      "customApply": "Zorla"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Yazma rotalarını kimlik doğrulamayla koru",
+      "authWritesHint": "Oluşturma, güncelleme ve silmede bearer kimlik doğrulaması iste; okumalar herkese açık kalır.",
+      "generate": "Üret",
+      "replace": "Mevcut rotaları değiştir",
+      "replaceHint": "Bu model için zaten rotalar var. Yinelenenleri önlemek için değiştirin; ikinci bir set eklemek için kapalı bırakın.",
+      "title": "{{name}} için CRUD üret",
+      "projections": {
+        "http": "{{count}} REST rotası",
+        "graphql": "GraphQL'de {{queries}} query / {{mutations}} mutation",
+        "grpc": "{{count}} gRPC metodu",
+        "odata": "{{count}} OData varlık kümesi",
+        "soap": "{{count}} SOAP işlemi",
+        "title": "Tek model, her protokol — bu CRUD ayrıca şu biçimlerde sunulur:"
+      }
+    },
+    "server": {
+      "subtitle": "Bu tasarımı canlı bir mock olarak sun ve her çağrıyı izle."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kod üretimi",
+        "name": "Değişken",
+        "value": "Değer (Handlebars)",
+        "add": "Değişken ekle",
+        "none": "Henüz değişken yok — bu şablonun başlığından ekleyin.",
+        "noTemplates": "“</> Code” bölümünde bir veya daha fazla şablon seçin — ardından üretimde kullanılan değişkenleri burada tanımlarsınız.",
+        "generalTitle": "Genel değişkenler",
+        "scope": {
+          "general": "Genel",
+          "property": "Model özelliği"
+        },
+        "discover": "Bu şablonun kullandığı değişkenleri keşfet",
+        "undeclared": "Kullanılan ama bildirilmeyen: {{names}}",
+        "allDeclared": "Bu şablonun kullandığı her değişken bildirildi."
+      }
+    },
+    "clients": {
+      "generated": "İstemciler oluşturuldu — bunları kenar çubuğundaki İstemciler bölümünden açın.",
+      "importing": "İstemciler içe aktarılıyor…",
+      "refresh": "İstemcileri yeniden oluştur",
+      "startPrompt": "İstemcileri oluşturmak için sunucuyu başlatın.",
+      "startServerPrompt": "Modelden otomatik oluşturulan istemci isteklerine erişmek için <serverLink>tasarım sunucusunu</serverLink> başlatın.",
+      "subtitle": "API tasarım sunucunuz çalışıyor ve tanımladığınız rotaları sunuyor. Aşağıdaki istekler bu rotaları doğrudan çağırır — test etmek için birini açın. Bunlar geçicidir ve sunucu durduğunda kaybolur."
+    },
+    "descriptors": {
+      "copy": "URL'yi kopyala"
+    },
+    "projections": {
+      "title": "Projeksiyonlar",
+      "hint": "Aynı işlem, sunulan her protokolün onu sunduğu şekliyle."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Sakla",
@@ -2308,7 +2835,45 @@
     "addCookie": "Çerez ekle",
     "removeCookie": "Çerezi kaldır",
     "clearCookieDomain": "Bir alan adı için çerezleri temizle",
-    "clearCookies": "Tüm çerezleri temizle"
+    "clearCookies": "Tüm çerezleri temizle",
+    "listDesigns": "API tasarımlarını listele",
+    "getDesign": "Bir API tasarımı al",
+    "createDesign": "Bir API tasarımı oluştur",
+    "createDesignFromDocumentation": "İçe aktarılan API’den tasarım oluştur",
+    "updateDesign": "Bir tasarımı güncelle",
+    "deleteDesign": "Bir tasarımı sil",
+    "createDesignModel": "Bir tasarım modeli oluştur",
+    "updateDesignModel": "Bir tasarım modelini güncelle",
+    "deleteDesignModel": "Bir tasarım modelini sil",
+    "setDesignProperty": "Bir model özelliği ayarla",
+    "deleteDesignProperty": "Bir model özelliğini sil",
+    "createDesignEnum": "Bir tasarım enum’u oluştur",
+    "updateDesignEnum": "Bir tasarım enum’unu güncelle",
+    "deleteDesignEnum": "Bir tasarım enum’unu sil",
+    "setDesignExample": "Adlandırılmış örnek ayarla",
+    "deleteDesignExample": "Adlandırılmış örneği sil",
+    "createDesignRouteGroup": "Bir rota grubu oluştur",
+    "updateDesignRouteGroup": "Bir rota grubunu güncelle",
+    "deleteDesignRouteGroup": "Bir rota grubunu sil",
+    "createDesignRoute": "Bir tasarım rotası oluştur",
+    "updateDesignRoute": "Bir tasarım rotasını güncelle",
+    "deleteDesignRoute": "Bir tasarım rotasını sil",
+    "setDesignRouteParam": "Rota parametresi oluştur veya güncelle",
+    "deleteDesignRouteParam": "Rota parametresini sil",
+    "generateDesignCrud": "CRUD rotaları üret",
+    "generateDesignSearchRoutes": "Arama rotaları üret",
+    "serveDesign": "Bir tasarımı sun",
+    "stopDesignServer": "Bir tasarım sunucusunu durdur",
+    "getDesignServerStatus": "Tasarım sunucusu durumu",
+    "setDesignRouteResponse": "Bir yanıtı zorla",
+    "exportDesign": "Bir tasarım tanımlayıcısını dışa aktar",
+    "generateDesignCode": "Bir tasarımdan kod üret",
+    "getDesignTemplateContract": "Kod şablonları sözleşmesini al",
+    "setDesignTemplates": "Bir tasarımın kod şablonlarını ayarla",
+    "setDesignModelVariables": "Bir modelin codegen geçersiz kılmalarını ayarla",
+    "setDesignPropertyVariables": "Bir özelliğin codegen geçersiz kılmalarını ayarla",
+    "setDesignRouteVariables": "Bir rotanın codegen geçersiz kılmalarını ayarla",
+    "setDesignTemplateVariables": "Bir şablonun genel codegen değişkenlerini ayarla"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "\"{{name}}\" senaryosu eklendi",
       "modifiedScenario": "\"{{name}}\" senaryosu değiştirildi",
       "deletedScenario": "\"{{name}}\" senaryosu silindi",
+      "addedDesign": "\"{{name}}\" tasarımı eklendi",
+      "modifiedDesign": "\"{{name}}\" tasarımı değiştirildi",
+      "deletedDesign": "\"{{name}}\" tasarımı silindi",
       "addedFolder": "\"{{name}}\" klasörü eklendi",
       "modifiedFolder": "\"{{name}}\" klasörü değiştirildi",
       "deletedFolder": "\"{{name}}\" klasörü silindi",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "\"{{name}}\" ortam klasörü silindi",
       "movedRequest": "\"{{name}}\" isteği taşındı",
       "movedScenario": "\"{{name}}\" senaryosu taşındı",
+      "movedDesign": "\"{{name}}\" tasarımı taşındı",
       "movedFolder": "\"{{name}}\" klasörü taşındı",
       "movedEnvironmentFolder": "\"{{name}}\" ortam klasörü taşındı",
       "reorderedFolder": "\"{{name}}\" klasöründeki öğeler yeniden sıralandı",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "\"{{name}}\" isteğinde güncelleme",
       "singleScenario": "\"{{name}}\" senaryosunda güncelleme",
+      "singleDesign": "\"{{name}}\" tasarımında güncelleme",
       "singleFolder": "\"{{name}}\" klasöründe güncelleme",
       "singleEnvironmentFolder": "\"{{name}}\" ortam klasöründe güncelleme",
       "singleFileFormatVersion": "{{name}} dosya biçimine geçiş",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} istek",
       "countScenario_one": "{{count}} senaryo",
       "countScenario_other": "{{count}} senaryo",
+      "countDesign_one": "{{count}} tasarım",
+      "countDesign_other": "{{count}} tasarım",
       "countFolder_one": "{{count}} klasör",
       "countFolder_other": "{{count}} klasör",
       "countEnvironmentFolder_one": "{{count}} ortam klasörü",

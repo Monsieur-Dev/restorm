@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Poista",
       "clone": "Kloonaa",
+      "openInSplit": "Avaa jaetussa paneelissa",
       "copySuffix": "kopio",
       "rename": "Nimeä uudelleen",
       "addToFavorites": "Lisää suosikkeihin",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-suunnittelu"
       },
       "cut": "Leikkaa",
       "copy": "Kopioi",
@@ -335,7 +337,8 @@
       "moveInto": "Siirrä tähän skenaarioon",
       "affectsNote": "Tämän pyynnön poistaminen poistaa sen myös näistä skenaarioista.",
       "deleteAnyway": "Poista silti"
-    }
+    },
+    "expandAll": "Laajenna kaikki pyynnöt"
   },
   "environment": {
     "newName": "Uusi ympäristö",
@@ -741,7 +744,8 @@
       "environment": "Ympäristöt",
       "settings": "Asetukset",
       "tag": "Tagit",
-      "scenario": "Skenaariot"
+      "scenario": "Skenaariot",
+      "design": "API-suunnitelmat"
     },
     "tooltip": {
       "noDetails": "Ei tietoja saatavilla",
@@ -1238,7 +1242,8 @@
       "operation": "Operaatio",
       "description": "Kuvaus",
       "example": "Esimerkki",
-      "constraints": "Rajoitteet"
+      "constraints": "Rajoitteet",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Suodatetuille reiteille ei ole määritelty rungon ulkopuolisia parametreja."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "valinnainen yksittäisviite",
       "requiredArrayRef": "pakollinen taulukkoviite",
       "optionalArrayRef": "valinnainen taulukkoviite"
-    }
+    },
+    "editEntity": "Muokkaa suunnittelutilassa"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum-arvot",
+      "addValue": "Lisää arvo…",
+      "removeValue": "Poista arvo",
+      "extract": "Poimi nimettyyn enumiin"
+    },
+    "tags": {
+      "add": "Lisää tunniste…",
+      "remove": "Poista tunniste",
+      "routeLabel": "Tunnisteet",
+      "groupLabel": "Jaetut tunnisteet"
+    },
+    "section": {
+      "settings": "Asetukset",
+      "models": "Mallit",
+      "enums": "Enumit",
+      "routes": "Reitit",
+      "documentation": "Dokumentaatio",
+      "notes": "Muistiinpanot",
+      "code": "Koodi",
+      "server": "Palvelin",
+      "clients": "Asiakkaat"
+    },
+    "rail": {
+      "ariaLabel": "Suunnitelman osiot"
+    },
+    "settings": {
+      "subtitle": "Suunnitelman ”{{name}}” yleiset asetukset",
+      "serve": {
+        "title": "Suunnitelmapalvelin",
+        "action": "Palvele tämä suunnitelma",
+        "description": "Vastaukset nimetyistä esimerkeistä · validointi rajoitteilla",
+        "port": "Portti",
+        "latency": "Simuloitu viive (ms)",
+        "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen sen tarjoamista",
+        "startFailed": "Palvelinta ei voitu käynnistää",
+        "protocolAlways": "HTTP tarjoillaan aina",
+        "protocolToggle": "Tarjoile myös tämä projektio",
+        "stateful": "Tilallinen tila — POST/PUT/DELETE muokkaavat muistivarastoa (nollautuu uudelleenkäynnistyksessä)",
+        "clientsCallout": "Mock-palvelimesi on käynnissä. Jokaiselle protokollalle, jota tämä suunnitelma palvelee, luotiin valmiit ajettavat asiakkaat.",
+        "clientsCalloutLink": "Löydät ne täältä"
+      },
+      "identity": {
+        "title": "Identiteetti",
+        "title_field": "Otsikko",
+        "version": "Suunnitelman versio",
+        "description": "Kuvaus"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Peruspolku",
+        "defaultAuth": "Oletus-auth",
+        "environment": "Ympäristö"
+      },
+      "export": {
+        "title": "Vienti",
+        "format": "Kuvaajan muoto",
+        "download": "Lataa kuvaaja",
+        "saved": "Kuvaaja tallennettu kohteeseen {{path}}",
+        "failed": "Vienti epäonnistui"
+      }
+    },
+    "auth": {
+      "none": "Ei mitään",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-avainotsake",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Suodata…",
+      "selectPrompt": "Valitse kohde luettelosta.",
+      "editorPending": "Tämän osion editori on tulossa."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} ominaisuus",
+      "propertyCount_other": "{{count}} ominaisuutta",
+      "add": "Lisää malli",
+      "delete": "Poista malli",
+      "deleteTitle": "Poistetaanko {{name}}?",
+      "deleteNoImpact": "Tätä mallia ei käytetä missään.",
+      "deleteImpactIntro": "Tämän mallin poistaminen päivittää:",
+      "deleteImpactChild": "{{name}} menettää perintänsä (omat ominaisuudet säilyvät)",
+      "description": "Kuvaus",
+      "descriptionPlaceholder": "Mitä tämä malli edustaa (valinnainen)",
+      "newName": "NewModel",
+      "selectPrompt": "Valitse malli tai luo uusi.",
+      "tabs": {
+        "schema": "Skeema",
+        "examples": "Esimerkit",
+        "settings": "Asetukset",
+        "notes": "Muistiinpanot"
+      },
+      "addSubModel": "Lisää alimalli",
+      "collapseAll": "Tiivistä kaikki",
+      "expandAll": "Laajenna kaikki"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} arvo",
+      "valueCount_other": "{{count}} arvoa",
+      "lists": "Enumit",
+      "values": "Arvot",
+      "addEnum": "Lisää enum",
+      "addValue": "Lisää arvo",
+      "valueHeader": "Arvo",
+      "newName": "NewEnum",
+      "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä.",
+      "nameHeader": "Nimi",
+      "description": "Kuvaus",
+      "descriptionPlaceholder": "Mitä tämä enum edustaa (valinnainen)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Ei vielä mallia — lisää malli luodaksesi koodia tästä suunnitelmasta.",
+      "subtitle": "Luo projekteja tästä suunnitelmasta — renderöity hiekkalaatikossa, kirjoitetaan vasta kun vahvistat puun",
+      "sourceTitle": "Mallipohja",
+      "sourceKind": {
+        "official": "Virallinen",
+        "repo": "Repositorio",
+        "local": "Paikallinen kansio"
+      },
+      "official": "Virallinen mallipohja",
+      "repo": "Repositorio (owner/repo)",
+      "local": "Paikallinen mallipohjakansio",
+      "output": "Tuloskansio (absoluuttinen tai suhteessa projektiin)",
+      "browse": "Valitse tuloskansio",
+      "generate": "Luo projekti",
+      "generating": "Luodaan hiekkalaatikossa…",
+      "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen luontia",
+      "failed": "Luonti epäonnistui",
+      "outputMissing": "Valitse ensin tuloskansio",
+      "extracted": "{{count}} tiedosto(a) kirjoitettu kansioon {{root}}",
+      "preview": "{{name}} loi {{count}} tiedosto(a) — vahvista kirjoitus",
+      "confirm": "Kirjoita tuloskansioon",
+      "discard": "Hylkää",
+      "generateOne": "Luo tämä projekti",
+      "remove": "Poista tämä malli",
+      "addTemplate": "Lisää malli",
+      "library": {
+        "title": "Mallikirjasto",
+        "recent": "Viimeksi käytetyt",
+        "official": "Viralliset mallit",
+        "custom": "Mukautettu",
+        "add": "Lisää",
+        "use": "Käytä",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Organisaation mallit",
+        "openRepo": "Avaa repositorio",
+        "remove": "Poista",
+        "addTemplate": "Lisää malli",
+        "urlPlaceholder": "Git-repositorion URL",
+        "descPlaceholder": "Kuvaus (stack / mitä se generoi)",
+        "noOrgTemplates": "Ei vielä organisaation malleja.",
+        "loading": "Ladataan malleja…",
+        "signedOut": "Kirjaudu sisään nähdäksesi organisaatiosi mallit.",
+        "fetchError": "Mallien lataaminen epäonnistui:",
+        "unavailable": "ei saatavilla",
+        "officialTag": "Virallinen",
+        "officialDesc": {
+          "server-rest-typescript": "REST-palvelin TypeScriptillä Expressin päällä — tyypitetyt reitit, mallit ja pyyntöjen validointi.",
+          "server-rest-dotnet": "Minimal-API-palvelin C# / ASP.NET Core -ympäristössä — endpointit, DTO:t ja validointi.",
+          "server-grpc-typescript": "gRPC-palvelin TypeScriptillä — .proto-palvelu, tyypitetyt viestit ja palvelintynkät.",
+          "server-grpc-dotnet": "gRPC-palvelin C# / .NET -ympäristössä — .proto-palvelu, viestit ja palvelintynkät.",
+          "db-postgres": "PostgreSQL-skeema, seed-data ja CRUD-skriptit suunnitelmasta."
+        },
+        "added": "Template lisätty",
+        "done": "Valmis"
+      },
+      "extractedTitle": "Tiedostot kirjoitettu",
+      "openOutput": "Avaa tuloskansio",
+      "refresh": "Päivitä tämä malli sen lähteestä",
+      "removeConfirm": "Template ”{{name}}” poistetaan tästä suunnitelmasta (levylle jo luodut tiedostot jäävät koskematta).",
+      "removeTitle": "Poistetaanko tämä Template?",
+      "tabs": {
+        "template": "Malli"
+      },
+      "questions": {
+        "title": "Mallin kysymykset"
+      },
+      "errorTitle": "Luonti epäonnistui",
+      "source": "Lähde",
+      "destination": "Kohde",
+      "expand": "Laajenna",
+      "collapse": "Tiivistä"
+    },
+    "statusbar": {
+      "format": "suunnitelma · muoto {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identiteetti",
+      "identifierProperty": "Tunnisteominaisuus",
+      "identifierStrategy": "Strategia",
+      "inheritsFrom": "Perii mallista",
+      "noIdentifier": "(ei mitään)",
+      "noParent": "(ei mitään)",
+      "storage": "Tallennus ja elinkaari",
+      "volumetry": "Odotettu volyymi",
+      "volumetryUnset": "(määrittämätön)",
+      "operationalProfile": "Toimintaprofiili",
+      "accessPattern": "Luku-/kirjoitusprofiili",
+      "traffic": "Käyttötiheys",
+      "freshness": "Tuoreustoleranssi",
+      "sensitivity": "Tietojen arkaluonteisuus",
+      "retention": "Säilytys / elinkaari",
+      "profileUnset": "(määrittämätön)",
+      "timestamps": "Aikaleimat (luotu/muokattu)",
+      "softDelete": "Pehmeä poisto",
+      "usedBy": "Käyttäjät",
+      "usedByNone": "Tätä mallia ei vielä käytetä.",
+      "usage": {
+        "body": "body",
+        "response": "vastaus {{code}}",
+        "param": "parametri {{name}}",
+        "inherits": "{{name}} perii siitä"
+      },
+      "generators": "Reitit",
+      "generateCrud": "Generoi CRUD",
+      "generateSearch": "Generoi hakureitit"
+    },
+    "schema": {
+      "addProperty": "Lisää ominaisuus",
+      "deleteProperty": "Poista ominaisuus",
+      "columns": {
+        "property": "Ominaisuus",
+        "type": "Tyyppi",
+        "flags": "Attribuutit",
+        "example": "Esimerkki"
+      },
+      "unnamed": "(nimetön)",
+      "nameMissing": "nimi puuttuu",
+      "panelTitle": "Ominaisuus: {{name}}",
+      "jumpToParent": "Avaa {{name}}",
+      "typeModel": "malli",
+      "typeEnum": "enum",
+      "noFormat": "(ei mitään)",
+      "invalidPattern": "Virheellinen säännöllinen lauseke",
+      "minAboveMax": "Minimi ylittää maksimin",
+      "fields": {
+        "name": "Nimi",
+        "type": "Tyyppi",
+        "format": "Muoto",
+        "elementType": "Alkioiden tyyppi",
+        "onDelete": "Poistettaessa",
+        "description": "Kuvaus",
+        "example": "Esimerkki",
+        "default": "Oletus",
+        "deprecationMessage": "Vanhentumisviesti",
+        "minimum": "Minimi",
+        "maximum": "Maksimi",
+        "minLength": "Vähimmäispituus",
+        "maxLength": "Enimmäispituus",
+        "pattern": "Kaava"
+      },
+      "generatedProperties": "Luodut ominaisuudet",
+      "inheritedProperties": "Perityt ominaisuudet",
+      "ownProperties": "Omat ominaisuudet",
+      "tabs": {
+        "property": "Ominaisuus"
+      },
+      "advancedType": "Lisäasetukset…"
+    },
+    "flags": {
+      "required": "pakollinen",
+      "nullable": "nullable",
+      "unique": "yksilöllinen",
+      "immutable": "muuttumaton",
+      "searchable": "haettavissa",
+      "deprecated": "vanhentunut",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Oletus",
+      "add": "Lisää esimerkki",
+      "delete": "Poista esimerkki",
+      "name": "Esimerkin nimi",
+      "newName": "Esimerkki",
+      "defaultHint": "Oletusarvot tulevat kustakin ominaisuudesta (tyhjä = generoidaan automaattisesti).",
+      "namedHint": "Kirjoita arvo määrittääksesi sen; jätä tyhjäksi säilyttääksesi generoidun.",
+      "columns": {
+        "value": "Arvo",
+        "origin": "Alkuperä"
+      },
+      "auto": "auto",
+      "defined": "määritetty",
+      "constraintViolated": "Arvo rikkoo ominaisuuden rajoitetta ({{constraint}})",
+      "deleteTitle": "Poistetaanko tämä esimerkki?",
+      "deleteConfirm": "Esimerkki ”{{name}}” poistetaan."
+    },
+    "onDelete": {
+      "restrict": "Rajoita (estä käytön aikana)",
+      "cascade": "Vyörytetty poisto",
+      "setNull": "Aseta nulliksi"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Automaattinen kasvatus",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Satoja",
+      "tenThousands": "Kymmeniätuhansia",
+      "millions": "Miljoonia"
+    },
+    "accessPattern": {
+      "readHeavy": "Lukupainotteinen",
+      "writeHeavy": "Kirjoituspainotteinen",
+      "balanced": "Tasapainoinen",
+      "appendOnly": "Vain lisäys"
+    },
+    "traffic": {
+      "low": "Matala",
+      "medium": "Keskitaso",
+      "high": "Korkea"
+    },
+    "freshness": {
+      "strong": "Vahva eheys",
+      "shortCache": "Lyhyt välimuisti OK",
+      "longCache": "Pitkä välimuisti OK"
+    },
+    "sensitivity": {
+      "public": "Julkinen",
+      "internal": "Sisäinen",
+      "confidential": "Luottamuksellinen",
+      "pii": "Henkilötiedot (PII)"
+    },
+    "retention": {
+      "permanent": "Pysyvä",
+      "archivable": "Arkistoitava",
+      "ephemeral": "Väliaikainen (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Ominaisuudella ei ole nimeä",
+      "propertyNameDuplicate": "Ominaisuuden nimi on jo käytössä",
+      "propertyShadowsParent": "Peittää perityn ominaisuuden",
+      "referenceTargetUnknown": "Viitattua tyyppiä ei enää ole",
+      "constraintPatternInvalid": "Virheellinen kaava (säännöllinen lauseke)",
+      "constraintMinAboveMax": "Minimi ylittää maksimin",
+      "modelNameEmpty": "Mallilla ei ole nimeä",
+      "enumNameEmpty": "Enumilla ei ole nimeä",
+      "groupNameEmpty": "Ryhmällä ei ole nimeä",
+      "modelNameDuplicate": "Mallin nimi on jo käytössä",
+      "enumNameDuplicate": "Enumin nimi on jo käytössä",
+      "componentNameCollision": "Malli ja enum jakavat tämän nimen",
+      "groupNameDuplicate": "Ryhmän nimi on jo käytössä",
+      "inheritanceTargetUnknown": "Peritty malli ei enää ole olemassa",
+      "inheritanceCycle": "Kehämäinen perintäketju",
+      "identifierPropertyUnknown": "Tunnisteominaisuutta ei enää ole",
+      "paramLinkTargetUnknown": "Parametrilinkki osoittaa puuttuvaan ominaisuuteen",
+      "bodyModelUnknown": "Rungon mallia ei enää ole",
+      "responseModelUnknown": "Vastausmallia ei enää ole",
+      "responseExampleUnknown": "Vastaus tarjoilee puuttuvan esimerkin",
+      "routeResponsesMissing": "Reitti ei määrittele yhtään vastausta",
+      "routePathDuplicate": "Toinen reitti vastaa jo tähän metodiin ja polkuun",
+      "routePathReserved": "Design-palvelin varaa tämän polun — reitti ei koskaan vastaisi"
+    },
+    "routes": {
+      "addGroup": "Lisää ryhmä",
+      "addRoute": "Lisää reitti",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Valitse ryhmä tai reitti, tai luo ryhmä.",
+      "deleteGroupTitle": "Poistetaanko {{name}}?",
+      "deleteGroupImpact": "Ryhmä ja sen {{count}} reittiä poistetaan.",
+      "method": "Metodi",
+      "path": "Polku",
+      "summary": "Yhteenveto",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Määrittely",
+        "responses": "Vastaukset"
+      },
+      "group": {
+        "auth": "Vaadittu auth",
+        "authInherited": "Suunnitelman oletus",
+        "versionPrefix": "Versioetuliite",
+        "headers": "Sopimusotsakkeet (reittien perimät)",
+        "headerName": "Otsake",
+        "addHeader": "Lisää otsake",
+        "deleteHeader": "Poista otsake",
+        "noHeaders": "Ei jaettua otsaketta."
+      },
+      "params": {
+        "pathTitle": "Polkuparametrit",
+        "otherTitle": "Parametrit (query / header)",
+        "name": "Nimi",
+        "location": "Sijainti",
+        "link": "Mallilinkki",
+        "noLink": "—",
+        "add": "Lisää parametri",
+        "delete": "Poista parametri",
+        "auto": "auto",
+        "pathEmpty": "Kirjoita {{param}} polkuun luodaksesi sen rivin.",
+        "otherEmpty": "Ei vielä query- tai header-parametreja.",
+        "nameEmpty": "Parametri tarvitsee nimen",
+        "nameTaken": "Tämä nimi on jo käytössä"
+      },
+      "body": {
+        "label": "Pyynnön runko",
+        "empty": "(tyhjä)",
+        "nonStandardHint": "Pyynnön runko {{method}}-metodissa ei ole standardi — monet palvelimet ja välityspalvelimet jättävät sen huomiotta. Restorm tarjoaa ja dokumentoi sen silti."
+      },
+      "responses": {
+        "add": "Lisää",
+        "codePlaceholder": "Tilakoodi",
+        "standardErrors": "+ vakiovirheet",
+        "empty": "Ei vielä määriteltyä vastausta.",
+        "emptyBody": "tyhjä runko",
+        "model": "Palautettava malli",
+        "list": "Lista",
+        "paginated": "Sivutettu",
+        "listOf": "lista {{name}}",
+        "paginatedListOf": "sivutettu lista {{name}}",
+        "example": "Tarjoiltava esimerkki",
+        "exampleAuto": "(auto generoitu)",
+        "delete": "Poista vastaus",
+        "codeInvalid": "Anna 3-numeroinen tilakoodi",
+        "codeTaken": "Tämä koodi on jo määritelty"
+      },
+      "settings": {
+        "inherited": "Peritty ryhmältä",
+        "authInherited": "Peritty ryhmältä",
+        "editGroup": "Muokkaa ryhmässä ↗",
+        "headers": "Sopimusotsakkeet",
+        "behaviour": "Käyttäytyminen",
+        "idempotent": "Idempotentti",
+        "cacheSeconds": "Välimuisti (sekuntia)",
+        "traffic": "Odotettu liikenne",
+        "authOverride": "Auth-ohitus",
+        "pagination": "Sivutus",
+        "defaultLimit": "Oletussivukoko",
+        "maxLimit": "Enimmäissivukoko"
+      },
+      "addSubgroup": "Lisää aliryhmä"
+    },
+    "newDesignName": "Uusi API-suunnitelma",
+    "createFromScratch": "Luo API-suunnitelma",
+    "createFromDoc": "Luo suunnitelma tästä API:sta",
+    "fromDocName": "Suunnitelma {{name}}",
+    "run": {
+      "listening": "Palvelee osoitteessa http://localhost:{{port}}",
+      "stopped": "Palvelin pysäytetty",
+      "totalCalls": "{{count}} kutsua tässä ajossa",
+      "stop": "Pysäytä palvelin",
+      "close": "Sulje tämä paneeli",
+      "forcedPill": "pakotettu {{code}}",
+      "defaultReturn": "Suunnitelman vastaus (oletus)",
+      "codeReturn": "Vastaa {{code}}",
+      "customCode": "Mukautettu tilakoodi",
+      "customBody": "Mukautettu vastausrunko",
+      "customBodyPlaceholder": "Valinnainen vastausrunko (JSON)",
+      "customApply": "Pakota"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Suojaa kirjoitusreitit todennuksella",
+      "authWritesHint": "Vaadi bearer-todennus luonnissa, päivityksessä ja poistossa; luku pysyy julkisena.",
+      "generate": "Luo",
+      "replace": "Korvaa olemassa olevat reitit",
+      "replaceHint": "Tälle mallille on jo reittejä. Korvaa ne välttääksesi kaksoiskappaleet; jätä pois päältä lisätäksesi toisen joukon.",
+      "title": "Luo CRUD kohteelle {{name}}",
+      "projections": {
+        "http": "{{count}} REST-reittiä",
+        "graphql": "{{queries}} kyselyä / {{mutations}} mutaatiota GraphQL:ssä",
+        "grpc": "{{count}} gRPC-metodia",
+        "odata": "{{count}} OData-entiteettijoukko",
+        "soap": "{{count}} SOAP-operaatiota",
+        "title": "Yksi malli, kaikki protokollat — tämä CRUD tarjoillaan myös muodossa:"
+      }
+    },
+    "server": {
+      "subtitle": "Palvele tätä suunnitelmaa live-mockina ja seuraa jokaista kutsua."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Koodin luonti",
+        "name": "Muuttuja",
+        "value": "Arvo (Handlebars)",
+        "add": "Lisää muuttuja",
+        "none": "Ei vielä muuttujia — lisää yksi tämän mallin otsikosta.",
+        "noTemplates": "Valitse yksi tai useampi malli osiossa ”</> Code” — määrität sitten tässä luonnissa käytettävät muuttujat.",
+        "generalTitle": "Yleiset muuttujat",
+        "scope": {
+          "general": "Yleiset",
+          "property": "Mallin ominaisuus"
+        },
+        "discover": "Tunnista tämän mallin käyttämät muuttujat",
+        "undeclared": "Käytössä mutta ei määritelty: {{names}}",
+        "allDeclared": "Kaikki tämän mallin käyttämät muuttujat on määritelty."
+      }
+    },
+    "clients": {
+      "generated": "Asiakkaat luotu — avaa ne Asiakkaat-kohdasta sivupalkissa.",
+      "importing": "Tuodaan asiakkaita…",
+      "refresh": "Luo asiakkaat uudelleen",
+      "startPrompt": "Käynnistä palvelin luodaksesi asiakkaat.",
+      "startServerPrompt": "Käynnistä <serverLink>suunnittelupalvelin</serverLink> päästäksesi käsiksi mallista automaattisesti luotuihin asiakaspyyntöihin.",
+      "subtitle": "API-suunnittelupalvelimesi on käynnissä ja palvelee määrittämiäsi reittejä. Alla olevat pyynnöt kutsuvat näitä reittejä suoraan — avaa yksi testataksesi sitä. Ne ovat lyhytikäisiä ja katoavat, kun palvelin pysähtyy."
+    },
+    "descriptors": {
+      "copy": "Kopioi URL"
+    },
+    "projections": {
+      "title": "Projektiot",
+      "hint": "Sama operaatio sellaisena kuin kukin tarjoiltu protokolla sen paljastaa."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Säilytä",
@@ -2308,7 +2835,45 @@
     "addCookie": "Lisää eväste",
     "removeCookie": "Poista eväste",
     "clearCookieDomain": "Tyhjennä verkkotunnuksen evästeet",
-    "clearCookies": "Tyhjennä kaikki evästeet"
+    "clearCookies": "Tyhjennä kaikki evästeet",
+    "listDesigns": "Listaa API-suunnitelmat",
+    "getDesign": "Hae API-suunnitelma",
+    "createDesign": "Luo API-suunnitelma",
+    "createDesignFromDocumentation": "Luo suunnitelma tuodusta API:sta",
+    "updateDesign": "Päivitä suunnitelma",
+    "deleteDesign": "Poista suunnitelma",
+    "createDesignModel": "Luo suunnitelmamalli",
+    "updateDesignModel": "Päivitä suunnitelmamalli",
+    "deleteDesignModel": "Poista suunnitelmamalli",
+    "setDesignProperty": "Aseta mallin ominaisuus",
+    "deleteDesignProperty": "Poista mallin ominaisuus",
+    "createDesignEnum": "Luo suunnitelman enum",
+    "updateDesignEnum": "Päivitä suunnitelman enum",
+    "deleteDesignEnum": "Poista suunnitelman enum",
+    "setDesignExample": "Aseta nimetty esimerkki",
+    "deleteDesignExample": "Poista nimetty esimerkki",
+    "createDesignRouteGroup": "Luo reittiryhmä",
+    "updateDesignRouteGroup": "Päivitä reittiryhmä",
+    "deleteDesignRouteGroup": "Poista reittiryhmä",
+    "createDesignRoute": "Luo suunnitelman reitti",
+    "updateDesignRoute": "Päivitä suunnitelman reitti",
+    "deleteDesignRoute": "Poista suunnitelman reitti",
+    "setDesignRouteParam": "Luo tai päivitä reittiparametri",
+    "deleteDesignRouteParam": "Poista reittiparametri",
+    "generateDesignCrud": "Generoi CRUD-reitit",
+    "generateDesignSearchRoutes": "Generoi hakureitit",
+    "serveDesign": "Palvele suunnitelmaa",
+    "stopDesignServer": "Pysäytä suunnitelmapalvelin",
+    "getDesignServerStatus": "Suunnitelmapalvelimen tila",
+    "setDesignRouteResponse": "Pakota vastaus",
+    "exportDesign": "Vie suunnitelman kuvaaja",
+    "generateDesignCode": "Luo koodia suunnitelmasta",
+    "getDesignTemplateContract": "Hae koodimallien sopimus",
+    "setDesignTemplates": "Määritä suunnitelman koodimallit",
+    "setDesignModelVariables": "Aseta mallin koodinluonnin ohitukset",
+    "setDesignPropertyVariables": "Aseta ominaisuuden koodinluonnin ohitukset",
+    "setDesignRouteVariables": "Aseta reitin koodinluonnin ohitukset",
+    "setDesignTemplateVariables": "Aseta pohjan globaalit koodinluonnin muuttujat"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "Lisättiin skenaario \"{{name}}\"",
       "modifiedScenario": "Muutettiin skenaariota \"{{name}}\"",
       "deletedScenario": "Poistettiin skenaario \"{{name}}\"",
+      "addedDesign": "Lisättiin API-suunnitelma \"{{name}}\"",
+      "modifiedDesign": "Muutettiin API-suunnitelmaa \"{{name}}\"",
+      "deletedDesign": "Poistettiin API-suunnitelma \"{{name}}\"",
       "addedFolder": "Lisättiin kansio \"{{name}}\"",
       "modifiedFolder": "Muutettiin kansiota \"{{name}}\"",
       "deletedFolder": "Poistettiin kansio \"{{name}}\"",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "Poistettiin ympäristökansio \"{{name}}\"",
       "movedRequest": "Siirrettiin pyyntö \"{{name}}\"",
       "movedScenario": "Siirrettiin skenaario \"{{name}}\"",
+      "movedDesign": "Siirrettiin API-suunnitelma \"{{name}}\"",
       "movedFolder": "Siirrettiin kansio \"{{name}}\"",
       "movedEnvironmentFolder": "Siirrettiin ympäristökansio \"{{name}}\"",
       "reorderedFolder": "Kohteiden järjestys muutettu kansiossa ”{{name}}”",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "Päivitys pyyntöön \"{{name}}\"",
       "singleScenario": "Päivitys skenaarioon \"{{name}}\"",
+      "singleDesign": "Päivitys API-suunnitelmaan \"{{name}}\"",
       "singleFolder": "Päivitys kansioon \"{{name}}\"",
       "singleEnvironmentFolder": "Päivitys ympäristökansioon \"{{name}}\"",
       "singleFileFormatVersion": "Siirtyminen tiedostomuotoon {{name}}",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} pyyntöä",
       "countScenario_one": "{{count}} skenaario",
       "countScenario_other": "{{count}} skenaariota",
+      "countDesign_one": "{{count}} API-suunnitelma",
+      "countDesign_other": "{{count}} API-suunnitelmaa",
       "countFolder_one": "{{count}} kansio",
       "countFolder_other": "{{count}} kansiota",
       "countEnvironmentFolder_one": "{{count}} ympäristökansio",

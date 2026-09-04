@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "Xóa",
       "clone": "Nhân bản",
+      "openInSplit": "Mở trong bảng chia đôi",
       "copySuffix": "bản sao",
       "rename": "Đổi tên",
       "addToFavorites": "Thêm vào mục yêu thích",
@@ -314,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Thiết kế API"
       },
       "cut": "Cắt",
       "copy": "Sao chép",
@@ -334,7 +336,8 @@
       "moveInto": "Chuyển vào kịch bản này",
       "affectsNote": "Xóa yêu cầu này cũng sẽ gỡ nó khỏi các kịch bản này.",
       "deleteAnyway": "Vẫn xóa"
-    }
+    },
+    "expandAll": "Mở rộng tất cả yêu cầu"
   },
   "environment": {
     "newName": "Môi trường mới",
@@ -740,7 +743,8 @@
       "environment": "Môi trường",
       "settings": "Cài đặt",
       "tag": "Thẻ",
-      "scenario": "Kịch bản"
+      "scenario": "Kịch bản",
+      "design": "Thiết kế API"
     },
     "tooltip": {
       "noDetails": "Không có chi tiết",
@@ -1237,7 +1241,8 @@
       "operation": "Thao tác",
       "description": "Mô tả",
       "example": "Ví dụ",
-      "constraints": "Ràng buộc"
+      "constraints": "Ràng buộc",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Không có tham số ngoài phần thân được khai báo cho các tuyến đã lọc."
@@ -1284,7 +1289,8 @@
       "optionalSingleRef": "tham chiếu đơn tùy chọn",
       "requiredArrayRef": "tham chiếu mảng bắt buộc",
       "optionalArrayRef": "tham chiếu mảng tùy chọn"
-    }
+    },
+    "editEntity": "Chỉnh sửa trong trình thiết kế"
   },
   "scenario": {
     "editor": {
@@ -2138,6 +2144,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Giá trị enum",
+      "addValue": "Thêm một giá trị…",
+      "removeValue": "Xóa giá trị",
+      "extract": "Trích xuất thành enum có tên"
+    },
+    "tags": {
+      "add": "Thêm thẻ…",
+      "remove": "Xóa thẻ",
+      "routeLabel": "Thẻ",
+      "groupLabel": "Thẻ dùng chung"
+    },
+    "section": {
+      "settings": "Cài đặt",
+      "models": "Mô hình",
+      "enums": "Enum",
+      "routes": "Tuyến",
+      "documentation": "Tài liệu",
+      "notes": "Ghi chú",
+      "code": "Mã",
+      "server": "Máy chủ",
+      "clients": "Client"
+    },
+    "rail": {
+      "ariaLabel": "Các phần của thiết kế"
+    },
+    "settings": {
+      "subtitle": "Cài đặt chung của thiết kế “{{name}}”",
+      "serve": {
+        "title": "Máy chủ thiết kế",
+        "action": "Phục vụ thiết kế này",
+        "description": "Phản hồi từ các ví dụ được đặt tên · xác thực bằng ràng buộc",
+        "port": "Cổng",
+        "latency": "Độ trễ mô phỏng (ms)",
+        "blocked": "Sửa {{count}} lỗi xác thực của thiết kế trước khi phục vụ",
+        "startFailed": "Không thể khởi động máy chủ",
+        "protocolAlways": "HTTP luôn được phục vụ",
+        "protocolToggle": "Phục vụ cả phép chiếu này",
+        "stateful": "Chế độ stateful — POST/PUT/DELETE thay đổi kho lưu trong bộ nhớ (đặt lại khi khởi động lại)",
+        "clientsCallout": "Máy chủ mock của bạn đang chạy. Các client sẵn sàng chạy đã được tạo cho mọi giao thức mà thiết kế này phục vụ.",
+        "clientsCalloutLink": "Tìm chúng tại đây"
+      },
+      "identity": {
+        "title": "Danh tính",
+        "title_field": "Tiêu đề",
+        "version": "Phiên bản thiết kế",
+        "description": "Mô tả"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Đường dẫn gốc",
+        "defaultAuth": "Auth mặc định",
+        "environment": "Môi trường"
+      },
+      "export": {
+        "title": "Xuất",
+        "format": "Định dạng bộ mô tả",
+        "download": "Tải xuống bộ mô tả",
+        "saved": "Đã lưu bộ mô tả vào {{path}}",
+        "failed": "Xuất thất bại"
+      }
+    },
+    "auth": {
+      "none": "Không có",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header khóa API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Lọc…",
+      "selectPrompt": "Chọn một mục trong danh sách.",
+      "editorPending": "Trình soạn thảo của phần này đang trên đường đến."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} thuộc tính",
+      "propertyCount_other": "{{count}} thuộc tính",
+      "add": "Thêm mô hình",
+      "delete": "Xóa mô hình",
+      "deleteTitle": "Xóa {{name}}?",
+      "deleteNoImpact": "Mô hình này không được dùng ở đâu cả.",
+      "deleteImpactIntro": "Việc xóa mô hình này sẽ cập nhật:",
+      "deleteImpactChild": "{{name}} mất kế thừa (các thuộc tính riêng vẫn giữ)",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Model này đại diện cho điều gì (tùy chọn)",
+      "newName": "NewModel",
+      "selectPrompt": "Chọn một mô hình, hoặc tạo mới.",
+      "tabs": {
+        "schema": "Lược đồ",
+        "examples": "Ví dụ",
+        "settings": "Cài đặt",
+        "notes": "Ghi chú"
+      },
+      "addSubModel": "Thêm mô hình con",
+      "collapseAll": "Thu gọn tất cả",
+      "expandAll": "Mở rộng tất cả"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} giá trị",
+      "valueCount_other": "{{count}} giá trị",
+      "lists": "Enum",
+      "values": "Giá trị",
+      "addEnum": "Thêm enum",
+      "addValue": "Thêm giá trị",
+      "valueHeader": "Giá trị",
+      "newName": "NewEnum",
+      "selectPrompt": "Chọn một enum, hoặc tạo mới — tập giá trị đóng dùng được làm kiểu thuộc tính.",
+      "nameHeader": "Tên",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Enum này đại diện cho điều gì (tùy chọn)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Chưa có mẫu nào — thêm một mẫu để tạo mã từ thiết kế này.",
+      "subtitle": "Tạo dự án từ thiết kế này — được kết xuất trong sandbox, chỉ ghi sau khi bạn xác nhận cây thư mục",
+      "sourceTitle": "Mẫu",
+      "sourceKind": {
+        "official": "Chính thức",
+        "repo": "Kho mã",
+        "local": "Thư mục cục bộ"
+      },
+      "official": "Mẫu chính thức",
+      "repo": "Kho mã (owner/repo)",
+      "local": "Thư mục mẫu cục bộ",
+      "output": "Thư mục đầu ra (tuyệt đối hoặc tương đối với dự án)",
+      "browse": "Chọn thư mục đầu ra",
+      "generate": "Tạo dự án",
+      "generating": "Đang tạo trong sandbox…",
+      "blocked": "Sửa {{count}} lỗi xác thực của thiết kế trước khi tạo",
+      "failed": "Tạo thất bại",
+      "outputMissing": "Hãy chọn thư mục đầu ra trước",
+      "extracted": "Đã ghi {{count}} tệp vào {{root}}",
+      "preview": "{{name}} đã tạo {{count}} tệp — xác nhận để ghi",
+      "confirm": "Ghi vào thư mục đầu ra",
+      "discard": "Bỏ",
+      "generateOne": "Tạo dự án này",
+      "remove": "Xóa mẫu này",
+      "addTemplate": "Thêm mẫu",
+      "library": {
+        "title": "Thư viện mẫu",
+        "recent": "Đã dùng gần đây",
+        "official": "Mẫu chính thức",
+        "custom": "Tùy chỉnh",
+        "add": "Thêm",
+        "use": "Dùng",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Mẫu của tổ chức",
+        "openRepo": "Mở kho lưu trữ",
+        "remove": "Xóa",
+        "addTemplate": "Thêm mẫu",
+        "urlPlaceholder": "URL kho git",
+        "descPlaceholder": "Mô tả (stack / nội dung tạo ra)",
+        "noOrgTemplates": "Chưa có mẫu của tổ chức.",
+        "loading": "Đang tải mẫu…",
+        "signedOut": "Đăng nhập để xem mẫu của tổ chức bạn.",
+        "fetchError": "Không thể tải mẫu:",
+        "unavailable": "không khả dụng",
+        "officialTag": "Chính thức",
+        "officialDesc": {
+          "server-rest-typescript": "Máy chủ REST bằng TypeScript trên Express — tuyến định kiểu, mô hình và xác thực yêu cầu.",
+          "server-rest-dotnet": "Máy chủ Minimal-API bằng C# / ASP.NET Core — endpoint, DTO và xác thực.",
+          "server-grpc-typescript": "Máy chủ gRPC bằng TypeScript — dịch vụ .proto, thông điệp có kiểu và stub máy chủ.",
+          "server-grpc-dotnet": "Máy chủ gRPC bằng C# / .NET — dịch vụ .proto, thông điệp và stub máy chủ.",
+          "db-postgres": "Lược đồ PostgreSQL, dữ liệu seed và tập lệnh CRUD từ thiết kế."
+        },
+        "added": "Đã thêm Template",
+        "done": "Xong"
+      },
+      "extractedTitle": "Đã ghi tệp",
+      "openOutput": "Mở thư mục đầu ra",
+      "refresh": "Làm mới mẫu này từ nguồn của nó",
+      "removeConfirm": "Template “{{name}}” sẽ bị xóa khỏi thiết kế này (các tệp đã tạo trên đĩa vẫn được giữ nguyên).",
+      "removeTitle": "Xóa Template này?",
+      "tabs": {
+        "template": "Mẫu"
+      },
+      "questions": {
+        "title": "Câu hỏi mẫu"
+      },
+      "errorTitle": "Tạo mã thất bại",
+      "source": "Nguồn",
+      "destination": "Đích",
+      "expand": "Mở rộng",
+      "collapse": "Thu gọn"
+    },
+    "statusbar": {
+      "format": "thiết kế · định dạng {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Danh tính",
+      "identifierProperty": "Thuộc tính định danh",
+      "identifierStrategy": "Chiến lược",
+      "inheritsFrom": "Kế thừa từ",
+      "noIdentifier": "(không có)",
+      "noParent": "(không có)",
+      "storage": "Lưu trữ & vòng đời",
+      "volumetry": "Khối lượng dự kiến",
+      "volumetryUnset": "(chưa xác định)",
+      "operationalProfile": "Hồ sơ vận hành",
+      "accessPattern": "Hồ sơ đọc/ghi",
+      "traffic": "Tần suất truy cập",
+      "freshness": "Dung sai độ mới",
+      "sensitivity": "Độ nhạy cảm dữ liệu",
+      "retention": "Lưu giữ / vòng đời",
+      "profileUnset": "(chưa xác định)",
+      "timestamps": "Dấu thời gian (tạo/sửa)",
+      "softDelete": "Xóa mềm",
+      "usedBy": "Được dùng bởi",
+      "usedByNone": "Mô hình này chưa được dùng.",
+      "usage": {
+        "body": "body",
+        "response": "phản hồi {{code}}",
+        "param": "tham số {{name}}",
+        "inherits": "{{name}} kế thừa từ nó"
+      },
+      "generators": "Tuyến",
+      "generateCrud": "Tạo CRUD",
+      "generateSearch": "Tạo các tuyến tìm kiếm"
+    },
+    "schema": {
+      "addProperty": "Thêm thuộc tính",
+      "deleteProperty": "Xóa thuộc tính",
+      "columns": {
+        "property": "Thuộc tính",
+        "type": "Kiểu",
+        "flags": "Cờ",
+        "example": "Ví dụ"
+      },
+      "unnamed": "(chưa đặt tên)",
+      "nameMissing": "thiếu tên",
+      "panelTitle": "Thuộc tính: {{name}}",
+      "jumpToParent": "Mở {{name}}",
+      "typeModel": "mô hình",
+      "typeEnum": "enum",
+      "noFormat": "(không có)",
+      "invalidPattern": "Biểu thức chính quy không hợp lệ",
+      "minAboveMax": "Min vượt quá max",
+      "fields": {
+        "name": "Tên",
+        "type": "Kiểu",
+        "format": "Định dạng",
+        "elementType": "Kiểu phần tử",
+        "onDelete": "Khi xóa",
+        "description": "Mô tả",
+        "example": "Ví dụ",
+        "default": "Mặc định",
+        "deprecationMessage": "Thông báo ngừng dùng",
+        "minimum": "Tối thiểu",
+        "maximum": "Tối đa",
+        "minLength": "Độ dài tối thiểu",
+        "maxLength": "Độ dài tối đa",
+        "pattern": "Mẫu (pattern)"
+      },
+      "generatedProperties": "Thuộc tính đã tạo",
+      "inheritedProperties": "Thuộc tính kế thừa",
+      "ownProperties": "Thuộc tính riêng",
+      "tabs": {
+        "property": "Thuộc tính"
+      },
+      "advancedType": "Nâng cao…"
+    },
+    "flags": {
+      "required": "bắt buộc",
+      "nullable": "nullable",
+      "unique": "duy nhất",
+      "immutable": "bất biến",
+      "searchable": "tìm kiếm được",
+      "deprecated": "ngừng dùng",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Mặc định",
+      "add": "Thêm ví dụ",
+      "delete": "Xóa ví dụ",
+      "name": "Tên ví dụ",
+      "newName": "Ví dụ",
+      "defaultHint": "Giá trị mặc định lấy từ từng thuộc tính (trống = tạo tự động).",
+      "namedHint": "Nhập một giá trị để xác định; để trống để giữ giá trị được tạo.",
+      "columns": {
+        "value": "Giá trị",
+        "origin": "Nguồn gốc"
+      },
+      "auto": "tự động",
+      "defined": "đã xác định",
+      "constraintViolated": "Giá trị vi phạm ràng buộc của thuộc tính ({{constraint}})",
+      "deleteTitle": "Xóa ví dụ này?",
+      "deleteConfirm": "Ví dụ “{{name}}” sẽ bị xóa."
+    },
+    "onDelete": {
+      "restrict": "Hạn chế (cấm khi đang dùng)",
+      "cascade": "Xóa dây chuyền",
+      "setNull": "Đặt thành null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Tự tăng",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hàng trăm",
+      "tenThousands": "Hàng chục nghìn",
+      "millions": "Hàng triệu"
+    },
+    "accessPattern": {
+      "readHeavy": "Chủ yếu đọc",
+      "writeHeavy": "Chủ yếu ghi",
+      "balanced": "Cân bằng",
+      "appendOnly": "Chỉ thêm mới"
+    },
+    "traffic": {
+      "low": "Thấp",
+      "medium": "Trung bình",
+      "high": "Cao"
+    },
+    "freshness": {
+      "strong": "Nhất quán mạnh",
+      "shortCache": "Cache ngắn OK",
+      "longCache": "Cache dài OK"
+    },
+    "sensitivity": {
+      "public": "Công khai",
+      "internal": "Nội bộ",
+      "confidential": "Bảo mật",
+      "pii": "Dữ liệu cá nhân (PII)"
+    },
+    "retention": {
+      "permanent": "Vĩnh viễn",
+      "archivable": "Có thể lưu trữ",
+      "ephemeral": "Tạm thời (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Thuộc tính chưa có tên",
+      "propertyNameDuplicate": "Tên thuộc tính trùng lặp",
+      "propertyShadowsParent": "Che khuất một thuộc tính kế thừa",
+      "referenceTargetUnknown": "Kiểu được tham chiếu không còn tồn tại",
+      "constraintPatternInvalid": "Mẫu không hợp lệ (biểu thức chính quy)",
+      "constraintMinAboveMax": "Min vượt quá max",
+      "modelNameEmpty": "Mô hình chưa có tên",
+      "enumNameEmpty": "Enum chưa có tên",
+      "groupNameEmpty": "Nhóm chưa có tên",
+      "modelNameDuplicate": "Tên mô hình trùng lặp",
+      "enumNameDuplicate": "Tên enum trùng lặp",
+      "componentNameCollision": "Một mô hình và một enum dùng chung tên này",
+      "groupNameDuplicate": "Tên nhóm trùng lặp",
+      "inheritanceTargetUnknown": "Mô hình kế thừa không còn tồn tại",
+      "inheritanceCycle": "Chuỗi kế thừa vòng tròn",
+      "identifierPropertyUnknown": "Thuộc tính định danh không còn tồn tại",
+      "paramLinkTargetUnknown": "Một liên kết tham số trỏ đến thuộc tính bị thiếu",
+      "bodyModelUnknown": "Mô hình thân không còn tồn tại",
+      "responseModelUnknown": "Một mô hình phản hồi không còn tồn tại",
+      "responseExampleUnknown": "Một phản hồi phục vụ ví dụ bị thiếu",
+      "routeResponsesMissing": "Tuyến không khai báo phản hồi nào",
+      "routePathDuplicate": "Một tuyến khác đã trả lời phương thức và đường dẫn này",
+      "routePathReserved": "Máy chủ thiết kế giữ đường dẫn này — route sẽ không bao giờ trả lời"
+    },
+    "routes": {
+      "addGroup": "Thêm nhóm",
+      "addRoute": "Thêm tuyến",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Chọn một nhóm hoặc một tuyến, hoặc tạo nhóm mới.",
+      "deleteGroupTitle": "Xóa {{name}}?",
+      "deleteGroupImpact": "Nhóm và {{count}} tuyến của nó sẽ bị xóa.",
+      "method": "Phương thức",
+      "path": "Đường dẫn",
+      "summary": "Tóm tắt",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Định nghĩa",
+        "responses": "Phản hồi"
+      },
+      "group": {
+        "auth": "Auth bắt buộc",
+        "authInherited": "Mặc định của thiết kế",
+        "versionPrefix": "Tiền tố phiên bản",
+        "headers": "Header hợp đồng (các tuyến kế thừa)",
+        "headerName": "Header",
+        "addHeader": "Thêm header",
+        "deleteHeader": "Xóa header",
+        "noHeaders": "Không có header chung."
+      },
+      "params": {
+        "pathTitle": "Tham số đường dẫn",
+        "otherTitle": "Tham số (query / header)",
+        "name": "Tên",
+        "location": "Tại",
+        "link": "Liên kết mô hình",
+        "noLink": "—",
+        "add": "Thêm tham số",
+        "delete": "Xóa tham số",
+        "auto": "tự động",
+        "pathEmpty": "Gõ một {{param}} trong đường dẫn để tạo dòng của nó.",
+        "otherEmpty": "Chưa có tham số query hoặc header.",
+        "nameEmpty": "Tham số cần có tên",
+        "nameTaken": "Tên này đã được dùng"
+      },
+      "body": {
+        "label": "Thân yêu cầu",
+        "empty": "(trống)",
+        "nonStandardHint": "Phần thân yêu cầu trên {{method}} là không chuẩn — nhiều máy chủ và proxy bỏ qua nó. Restorm vẫn phục vụ và tạo tài liệu cho nó."
+      },
+      "responses": {
+        "add": "Thêm",
+        "codePlaceholder": "Mã trạng thái",
+        "standardErrors": "+ lỗi chuẩn",
+        "empty": "Chưa có phản hồi nào được khai báo.",
+        "emptyBody": "thân trống",
+        "model": "Mô hình trả về",
+        "list": "Danh sách",
+        "paginated": "Phân trang",
+        "listOf": "danh sách {{name}}",
+        "paginatedListOf": "danh sách phân trang {{name}}",
+        "example": "Ví dụ được phục vụ",
+        "exampleAuto": "(tự động tạo)",
+        "delete": "Xóa phản hồi",
+        "codeInvalid": "Nhập mã trạng thái 3 chữ số",
+        "codeTaken": "Mã này đã được khai báo"
+      },
+      "settings": {
+        "inherited": "Kế thừa từ nhóm",
+        "authInherited": "Kế thừa từ nhóm",
+        "editGroup": "Sửa trong nhóm ↗",
+        "headers": "Header hợp đồng",
+        "behaviour": "Hành vi",
+        "idempotent": "Bất biến (idempotent)",
+        "cacheSeconds": "Cache (giây)",
+        "traffic": "Lưu lượng dự kiến",
+        "authOverride": "Ghi đè auth",
+        "pagination": "Phân trang",
+        "defaultLimit": "Kích thước trang mặc định",
+        "maxLimit": "Kích thước trang tối đa"
+      },
+      "addSubgroup": "Thêm nhóm con"
+    },
+    "newDesignName": "Thiết kế API mới",
+    "createFromScratch": "Tạo thiết kế API",
+    "createFromDoc": "Tạo thiết kế từ API này",
+    "fromDocName": "Thiết kế {{name}}",
+    "run": {
+      "listening": "Đang phục vụ tại http://localhost:{{port}}",
+      "stopped": "Máy chủ đã dừng",
+      "totalCalls": "{{count}} lượt gọi trong lần chạy này",
+      "stop": "Dừng máy chủ",
+      "close": "Đóng bảng này",
+      "forcedPill": "ép buộc {{code}}",
+      "defaultReturn": "Phản hồi của thiết kế (mặc định)",
+      "codeReturn": "Trả lời {{code}}",
+      "customCode": "Mã trạng thái tùy chỉnh",
+      "customBody": "Nội dung phản hồi tùy chỉnh",
+      "customBodyPlaceholder": "Nội dung phản hồi tùy chọn (JSON)",
+      "customApply": "Ép buộc"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Bảo vệ các tuyến ghi bằng xác thực",
+      "authWritesHint": "Yêu cầu xác thực bearer khi tạo, cập nhật và xóa; đọc vẫn công khai.",
+      "generate": "Tạo",
+      "replace": "Thay thế các tuyến hiện có",
+      "replaceHint": "Đã có các tuyến cho mô hình này. Thay thế chúng để tránh trùng lặp; để tắt nếu muốn thêm một bộ thứ hai.",
+      "title": "Tạo CRUD cho {{name}}",
+      "projections": {
+        "http": "{{count}} tuyến REST",
+        "graphql": "{{queries}} query / {{mutations}} mutation trong GraphQL",
+        "grpc": "{{count}} phương thức gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} thao tác SOAP",
+        "title": "Một mô hình, mọi giao thức — CRUD này cũng được phục vụ dưới dạng:"
+      }
+    },
+    "server": {
+      "subtitle": "Phục vụ thiết kế này như một mock trực tiếp và theo dõi mọi lệnh gọi."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Tạo mã",
+        "name": "Biến",
+        "value": "Giá trị (Handlebars)",
+        "add": "Thêm biến",
+        "none": "Chưa có biến nào — thêm một biến từ tiêu đề của mẫu này.",
+        "noTemplates": "Chọn một hoặc nhiều mẫu trong phần “</> Code” — sau đó bạn sẽ định nghĩa tại đây các biến dùng cho việc tạo mã.",
+        "generalTitle": "Biến chung",
+        "scope": {
+          "general": "Chung",
+          "property": "Thuộc tính mô hình"
+        },
+        "discover": "Khám phá các biến mà mẫu này sử dụng",
+        "undeclared": "Được dùng nhưng chưa khai báo: {{names}}",
+        "allDeclared": "Mọi biến mà mẫu này sử dụng đều đã được khai báo."
+      }
+    },
+    "clients": {
+      "generated": "Đã tạo các client — mở chúng trong mục „Client” ở thanh bên.",
+      "importing": "Đang nhập các client…",
+      "refresh": "Tạo lại các client",
+      "startPrompt": "Khởi động máy chủ để tạo các client.",
+      "startServerPrompt": "Khởi động <serverLink>máy chủ thiết kế</serverLink> để truy cập các yêu cầu client được tạo tự động từ mô hình.",
+      "subtitle": "Máy chủ thiết kế API của bạn đang chạy và phục vụ các tuyến bạn đã định nghĩa. Các yêu cầu bên dưới gọi trực tiếp các tuyến đó — mở một yêu cầu để kiểm thử. Chúng là tạm thời và biến mất khi máy chủ dừng."
+    },
+    "descriptors": {
+      "copy": "Sao chép URL"
+    },
+    "projections": {
+      "title": "Phép chiếu",
+      "hint": "Cùng một thao tác, theo cách mà mỗi giao thức được phục vụ hiển thị nó."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Giữ lại",
@@ -2307,7 +2834,45 @@
     "addCookie": "Thêm cookie",
     "removeCookie": "Xóa cookie",
     "clearCookieDomain": "Xóa cookie cho một miền",
-    "clearCookies": "Xóa tất cả cookie"
+    "clearCookies": "Xóa tất cả cookie",
+    "listDesigns": "Liệt kê thiết kế API",
+    "getDesign": "Lấy một thiết kế API",
+    "createDesign": "Tạo một thiết kế API",
+    "createDesignFromDocumentation": "Tạo thiết kế từ API đã nhập",
+    "updateDesign": "Cập nhật thiết kế",
+    "deleteDesign": "Xóa thiết kế",
+    "createDesignModel": "Tạo mô hình thiết kế",
+    "updateDesignModel": "Cập nhật mô hình thiết kế",
+    "deleteDesignModel": "Xóa mô hình thiết kế",
+    "setDesignProperty": "Đặt thuộc tính mô hình",
+    "deleteDesignProperty": "Xóa thuộc tính mô hình",
+    "createDesignEnum": "Tạo enum thiết kế",
+    "updateDesignEnum": "Cập nhật enum thiết kế",
+    "deleteDesignEnum": "Xóa enum thiết kế",
+    "setDesignExample": "Đặt ví dụ có tên",
+    "deleteDesignExample": "Xóa ví dụ có tên",
+    "createDesignRouteGroup": "Tạo nhóm tuyến",
+    "updateDesignRouteGroup": "Cập nhật nhóm tuyến",
+    "deleteDesignRouteGroup": "Xóa nhóm tuyến",
+    "createDesignRoute": "Tạo tuyến thiết kế",
+    "updateDesignRoute": "Cập nhật tuyến thiết kế",
+    "deleteDesignRoute": "Xóa tuyến thiết kế",
+    "setDesignRouteParam": "Tạo hoặc cập nhật tham số tuyến",
+    "deleteDesignRouteParam": "Xóa tham số tuyến",
+    "generateDesignCrud": "Tạo các tuyến CRUD",
+    "generateDesignSearchRoutes": "Tạo các tuyến tìm kiếm",
+    "serveDesign": "Phục vụ một thiết kế",
+    "stopDesignServer": "Dừng máy chủ thiết kế",
+    "getDesignServerStatus": "Trạng thái máy chủ thiết kế",
+    "setDesignRouteResponse": "Ép một phản hồi",
+    "exportDesign": "Xuất bộ mô tả thiết kế",
+    "generateDesignCode": "Tạo mã từ một thiết kế",
+    "getDesignTemplateContract": "Lấy hợp đồng của mẫu mã nguồn",
+    "setDesignTemplates": "Đặt các mẫu mã nguồn của thiết kế",
+    "setDesignModelVariables": "Đặt ghi đè tạo mã của một mô hình",
+    "setDesignPropertyVariables": "Đặt ghi đè tạo mã của một thuộc tính",
+    "setDesignRouteVariables": "Đặt ghi đè tạo mã của một tuyến",
+    "setDesignTemplateVariables": "Đặt biến tạo mã toàn cục của một mẫu"
   },
   "odataFilter": {
     "detail": {
@@ -2537,6 +3102,9 @@
       "addedScenario": "Đã thêm kịch bản \"{{name}}\"",
       "modifiedScenario": "Đã sửa kịch bản \"{{name}}\"",
       "deletedScenario": "Đã xóa kịch bản \"{{name}}\"",
+      "addedDesign": "Đã thêm thiết kế \"{{name}}\"",
+      "modifiedDesign": "Đã sửa thiết kế \"{{name}}\"",
+      "deletedDesign": "Đã xóa thiết kế \"{{name}}\"",
       "addedFolder": "Đã thêm thư mục \"{{name}}\"",
       "modifiedFolder": "Đã sửa thư mục \"{{name}}\"",
       "deletedFolder": "Đã xóa thư mục \"{{name}}\"",
@@ -2545,6 +3113,7 @@
       "deletedEnvironmentFolder": "Đã xóa thư mục môi trường \"{{name}}\"",
       "movedRequest": "Đã di chuyển yêu cầu \"{{name}}\"",
       "movedScenario": "Đã di chuyển kịch bản \"{{name}}\"",
+      "movedDesign": "Đã di chuyển thiết kế \"{{name}}\"",
       "movedFolder": "Đã di chuyển thư mục \"{{name}}\"",
       "movedEnvironmentFolder": "Đã di chuyển thư mục môi trường \"{{name}}\"",
       "reorderedFolder": "Đã sắp xếp lại các mục trong thư mục \"{{name}}\"",
@@ -2555,6 +3124,7 @@
     "commitTitle": {
       "singleRequest": "Cập nhật yêu cầu \"{{name}}\"",
       "singleScenario": "Cập nhật kịch bản \"{{name}}\"",
+      "singleDesign": "Cập nhật thiết kế \"{{name}}\"",
       "singleFolder": "Cập nhật thư mục \"{{name}}\"",
       "singleEnvironmentFolder": "Cập nhật thư mục môi trường \"{{name}}\"",
       "singleFileFormatVersion": "Chuyển sang định dạng tệp {{name}}",
@@ -2562,6 +3132,8 @@
       "countRequest_other": "{{count}} yêu cầu",
       "countScenario_one": "{{count}} kịch bản",
       "countScenario_other": "{{count}} kịch bản",
+      "countDesign_one": "{{count}} thiết kế",
+      "countDesign_other": "{{count}} thiết kế",
       "countFolder_one": "{{count}} thư mục",
       "countFolder_other": "{{count}} thư mục",
       "countEnvironmentFolder_one": "{{count}} thư mục môi trường",

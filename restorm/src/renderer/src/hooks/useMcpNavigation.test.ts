@@ -13,9 +13,9 @@ vi.mock('electron-core-ui/renderer', () => ({
 // Stand in for the preload bridge. Captures the callbacks the hook
 // registers so a test can invoke `mcp:open-tab` / `mcp:reveal-in-tree` /
 // `mcp:close-tab` directly, exactly as main's IPC broadcast would.
-type OpenCb = (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void
-type RevealCb = (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void
-type CloseCb = (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void
+type OpenCb = (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void
+type RevealCb = (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void
+type CloseCb = (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void
 
 let openCb: OpenCb | null = null
 let revealCb: RevealCb | null = null
@@ -67,6 +67,7 @@ function setup(rootItems: FolderItem[]): { rootItemsRef: { current: FolderItem[]
     openEnvironmentFolderTab: vi.fn(),
     openAnyRequestTab,
     openScenarioEditorTab: vi.fn(),
+    openDesignTab: vi.fn(),
     closeTabByItemId: vi.fn()
   }
   const { result } = renderHook(() => {

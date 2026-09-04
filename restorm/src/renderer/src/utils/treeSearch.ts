@@ -8,9 +8,10 @@ import type {
   Environment,
   EnvironmentFolder,
   Request,
-  Scenario
+  Scenario,
+  ApiDesign
 } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -175,6 +176,12 @@ function findItemByIdInTree(container: TreeContainer, id: string): FolderItem | 
 }
 
 /** Find any item (folder or request) by ID across multiple root folders */
+/** Find a design anywhere in the tree by its id. */
+export function findDesignById(rootItems: FolderItem[], id: string): ApiDesign | undefined {
+  const item = findItemById(rootItems, id)
+  return item !== null && isApiDesign(item) ? item : undefined
+}
+
 export function findItemById(rootItems: FolderItem[], id: string): FolderItem | null {
   for (const root of rootItems) {
     // Check if root itself is the item we're looking for
@@ -215,6 +222,13 @@ function findItemWithBreadcrumbsInTree(
     } else if (isRequest(item)) {
       if (item.id === id) {
         // Leaf request — last breadcrumb, no icon.
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: null }] }
+      }
+    } else if (isApiDesign(item)) {
+      // An API design's section rows are virtual, so it's a childless leaf
+      // in the data tree — found like a request (without this branch a nested
+      // design resolves to null and the sidebar click never opens its tab).
+      if (item.id === id) {
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: null }] }
       }
     }

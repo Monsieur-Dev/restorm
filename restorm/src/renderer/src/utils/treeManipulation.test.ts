@@ -640,7 +640,8 @@ describe('REASSIGNED_ID_CONTAINER_KEYS', () => {
       'items', 'environments', 'customValueLists',
       'enumDefinitions', 'subEnvironments', 'entries',
       'nodes', 'edges', 'quickConfigs',
-      'headers', 'params', 'pathParams'
+      'headers', 'params', 'pathParams',
+      'models', 'properties', 'examples', 'enums', 'routeGroups', 'routes'
     ])
   })
 })
@@ -775,7 +776,13 @@ describe('ID_REFERENCE_KEYS', () => {
     { key: 'connectionNodeId', declaredIn: "ScenarioNode.config of the connect/close kinds", target: 'the connecting ScenarioNode.id' },
     { key: 'quickConfigId', declaredIn: 'shared/scenarioActionOverride.ts — QUICK_CONFIG_ID_KEY, read off ScenarioNode.config', target: 'QuickConfig.id on the bound request' },
     { key: 'authenticationRequestId', declaredIn: 'shared/types/requests/BaseRequest.ts + shared/types/baseTypes.ts (ApiUpdateConfig)', target: "a request of type 'auth'" },
-    { key: 'enumDefinitionId', declaredIn: 'shared/types/valueTypes/EnumValue.ts + EnumListValue.ts', target: 'EnumDefinition.id' }
+    { key: 'enumDefinitionId', declaredIn: 'shared/types/valueTypes/EnumValue.ts + EnumListValue.ts', target: 'EnumDefinition.id' },
+    { key: 'refId', declaredIn: 'shared/types/apiDesign.ts — PropertyReference.refId', target: 'DesignModel.id or DesignEnum.id' },
+    { key: 'modelId', declaredIn: 'shared/types/apiDesign.ts — DesignParamLink / RouteDesignMeta.body / DesignResponseMeta', target: 'DesignModel.id' },
+    { key: 'propertyId', declaredIn: 'shared/types/apiDesign.ts — DesignParamLink + ModelDesignMeta.identifier', target: 'DesignProperty.id' },
+    { key: 'inheritsFrom', declaredIn: 'shared/types/apiDesign.ts — ModelDesignMeta.inheritsFrom', target: 'DesignModel.id' },
+    { key: 'exampleId', declaredIn: 'shared/types/apiDesign.ts — DesignResponseMeta.exampleId', target: 'DesignExample.id' },
+    { key: 'parentId', declaredIn: 'shared/types/apiDesign.ts — DesignRouteGroup.parentId', target: 'the parent DesignRouteGroup.id (sub-groups)' }
   ]
 
   for (const { key, declaredIn, target } of liveReferenceFields) {

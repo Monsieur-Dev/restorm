@@ -53,6 +53,10 @@ interface SwaggerParameter {
   format?: string
   default?: string | number | boolean
   schema?: CommonSchema
+  /** Swagger 2.0 array parameter item schema — carries the element `type`
+   * and, crucially, the `enum` for a scalar-enum array (e.g. petstore's
+   * `findByStatus` `status`), which lives here and NOT on the parameter. */
+  items?: CommonSchema
   // Validation constraints — Swagger 2.0 inlines these on the
   // parameter itself for non-body params (no separate schema). The
   // body parameter carries them under `schema` instead, which the
@@ -149,6 +153,9 @@ function toCommonParameter(p: SwaggerParameter): CommonParameter {
     schema = { type: p.type }
     if (p.format !== undefined) schema.format = p.format
     if (p.enum !== undefined) schema.enum = p.enum
+    // An array parameter's element schema (with its own enum) lives on `items`.
+    // Carry it so the enum on a scalar-enum array survives to the doc layer.
+    if (p.items !== undefined) schema.items = p.items
     if (p.minLength !== undefined) schema.minLength = p.minLength
     if (p.maxLength !== undefined) schema.maxLength = p.maxLength
     if (p.minimum !== undefined) schema.minimum = p.minimum

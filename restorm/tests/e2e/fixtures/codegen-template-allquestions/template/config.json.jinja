@@ -1,0 +1,15 @@
+{
+  "name": "{{ project_name }}",
+  "author": "{{ author }}",
+  "license": "{{ license }}",
+  "prefix": "{{ ctx.design.vars.api_prefix if 'vars' in ctx.design else '/api' }}",
+  "port": {{ port }},
+  "timeoutMs": {{ timeout_ms }},
+  "ratio": {{ ratio }},
+  "auth": {{ use_auth | lower }},
+  "database": "{{ db }}",
+  "features": [{% for f in features %}"{{ f }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+  "tables": [{% for m in ctx.models %}"{{ m.vars.table_name if 'vars' in m else m.name }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+  "config_json": {{ config_json }},
+  "config_yaml": "{{ config_yaml }}"
+}

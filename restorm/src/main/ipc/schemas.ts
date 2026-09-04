@@ -425,6 +425,58 @@ export const odataListenArgs = z.tuple([requestIdArg])
 export const odataStopArgs = z.tuple([requestIdArg])
 export const odataIsListeningArgs = z.tuple([requestIdArg])
 
+// Design server: spin a design's HTTP projection, stop it, poll its
+// status, hot-steer a route's forced response, push design edits live.
+// The design payload travels as-is (the renderer owns the shape; the
+// service re-validates with `validateApiDesign` before serving).
+export const designServerStartArgs = z.tuple([z.unknown()])
+export const designServerStopArgs = z.tuple([z.string()])
+export const designServerStatusArgs = z.tuple([z.string()])
+export const designServerSetForcedArgs = z.tuple([
+  z.string(),
+  z.string(),
+  z.object({ code: z.string(), body: z.string().optional() }).nullable()
+])
+export const designServerUpdateArgs = z.tuple([z.unknown()])
+
+// Design codegen: sandboxed generation (design payload as-is, like the
+// design server), controlled extraction under a confirmed folder, and
+// the output-directory picker.
+export const designCodegenGenerateArgs = z.tuple([
+  z.unknown(),
+  z.union([
+    z.object({ kind: z.literal('repo'), repo: z.string().min(1), ref: z.string().min(1).optional() }),
+    z.object({ kind: z.literal('local'), path: z.string().min(1) })
+  ]),
+  z.record(z.string(), z.unknown()).optional()
+])
+export const designCodegenVariablesArgs = z.tuple([
+  z.union([
+    z.object({ kind: z.literal('repo'), repo: z.string().min(1), ref: z.string().min(1).optional() }),
+    z.object({ kind: z.literal('local'), path: z.string().min(1) })
+  ])
+])
+
+export const designCodegenExtractArgs = z.tuple([z.string().min(1), z.string().min(1)])
+export const designCodegenDiscardArgs = z.tuple([z.string().min(1)])
+/** Read the Copier answers saved in an output folder (`.copier-answers.yml`). */
+export const designCodegenReadAnswersArgs = z.tuple([z.string().min(1)])
+export const designPickDirectoryArgs = z.tuple([z.string().optional()])
+
+// Cloud-hosted codegen templates: list (no args), and org-template
+// create (url + description) / delete (id).
+export const designCodegenListTemplatesArgs = z.tuple([])
+export const designCodegenCreateTemplateArgs = z.tuple([z.string().min(1), z.string()])
+export const designCodegenDeleteTemplateArgs = z.tuple([z.string().min(1)])
+
+// Design descriptor export: emitted CONTENT + suggested file name +
+// extension; the handler owns the save dialog and the write.
+export const designExportDescriptorArgs = z.tuple([
+  z.string().min(1),
+  z.string(),
+  z.string().min(1).max(10)
+])
+
 // ==========================================================================
 // WebSocket Execution
 // ==========================================================================

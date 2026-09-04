@@ -256,6 +256,7 @@
     "contextMenu": {
       "delete": "刪除",
       "clone": "複製",
+      "openInSplit": "在分割面板中開啟",
       "copySuffix": "複本",
       "rename": "重新命名",
       "addToFavorites": "加入我的最愛",
@@ -314,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API 設計"
       },
       "cut": "剪下",
       "copy": "複製",
@@ -334,7 +336,8 @@
       "moveInto": "移動到此場景",
       "affectsNote": "刪除此請求也會將其從這些場景中移除。",
       "deleteAnyway": "仍然刪除"
-    }
+    },
+    "expandAll": "展開所有請求"
   },
   "environment": {
     "newName": "新增環境",
@@ -740,7 +743,8 @@
       "environment": "環境",
       "settings": "設定",
       "tag": "標籤",
-      "scenario": "情境"
+      "scenario": "情境",
+      "design": "API 設計"
     },
     "tooltip": {
       "noDetails": "沒有可用的詳細資料",
@@ -1237,7 +1241,8 @@
       "operation": "操作",
       "description": "描述",
       "example": "範例",
-      "constraints": "約束"
+      "constraints": "約束",
+      "enum": "Enum"
     },
     "params": {
       "empty": "篩選的路由未宣告非請求主體參數。"
@@ -1284,7 +1289,8 @@
       "optionalSingleRef": "選用的單一參照",
       "requiredArrayRef": "必要的陣列參照",
       "optionalArrayRef": "選用的陣列參照"
-    }
+    },
+    "editEntity": "在設計工具中編輯"
   },
   "scenario": {
     "editor": {
@@ -2138,6 +2144,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "列舉值",
+      "addValue": "新增值…",
+      "removeValue": "移除值",
+      "extract": "擷取為具名列舉"
+    },
+    "tags": {
+      "add": "新增標籤…",
+      "remove": "移除標籤",
+      "routeLabel": "標籤",
+      "groupLabel": "共用標籤"
+    },
+    "section": {
+      "settings": "設定",
+      "models": "模型",
+      "enums": "列舉",
+      "routes": "路由",
+      "documentation": "文件",
+      "notes": "筆記",
+      "code": "程式碼",
+      "server": "伺服器",
+      "clients": "用戶端"
+    },
+    "rail": {
+      "ariaLabel": "設計區段"
+    },
+    "settings": {
+      "subtitle": "設計「{{name}}」的一般設定",
+      "serve": {
+        "title": "設計伺服器",
+        "action": "提供此設計",
+        "description": "來自具名範例的回應 · 依約束驗證",
+        "port": "連接埠",
+        "latency": "模擬延遲（毫秒）",
+        "blocked": "請先修復設計的 {{count}} 個驗證錯誤再啟動服務",
+        "startFailed": "伺服器無法啟動",
+        "protocolAlways": "HTTP 始終提供",
+        "protocolToggle": "同時提供此投影",
+        "stateful": "有狀態模式 — POST/PUT/DELETE 修改記憶體儲存（重新啟動時重設）",
+        "clientsCallout": "您的模擬伺服器正在執行。已為此設計所服務的每個通訊協定產生了可直接執行的用戶端。",
+        "clientsCalloutLink": "在此處查看"
+      },
+      "identity": {
+        "title": "識別",
+        "title_field": "標題",
+        "version": "設計版本",
+        "description": "描述"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "基礎路徑",
+        "defaultAuth": "預設驗證",
+        "environment": "環境"
+      },
+      "export": {
+        "title": "匯出",
+        "format": "描述檔格式",
+        "download": "下載描述檔",
+        "saved": "描述檔已儲存至 {{path}}",
+        "failed": "匯出失敗"
+      }
+    },
+    "auth": {
+      "none": "無",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API 金鑰標頭",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "篩選…",
+      "selectPrompt": "請在清單中選擇一項。",
+      "editorPending": "此區段的編輯器即將推出。"
+    },
+    "models": {
+      "propertyCount_one": "{{count}} 個屬性",
+      "propertyCount_other": "{{count}} 個屬性",
+      "add": "新增模型",
+      "delete": "刪除模型",
+      "deleteTitle": "刪除 {{name}}？",
+      "deleteNoImpact": "此模型未在任何地方使用。",
+      "deleteImpactIntro": "刪除此模型將更新：",
+      "deleteImpactChild": "{{name}} 將失去繼承（其自身屬性保留）",
+      "description": "描述",
+      "descriptionPlaceholder": "此模型表示的內容（選填）",
+      "newName": "NewModel",
+      "selectPrompt": "選擇一個模型，或建立一個。",
+      "tabs": {
+        "schema": "結構",
+        "examples": "範例",
+        "settings": "設定",
+        "notes": "筆記"
+      },
+      "addSubModel": "新增子模型",
+      "collapseAll": "全部收合",
+      "expandAll": "全部展開"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} 個值",
+      "valueCount_other": "{{count}} 個值",
+      "lists": "列舉",
+      "values": "值",
+      "addEnum": "新增列舉",
+      "addValue": "新增值",
+      "valueHeader": "值",
+      "newName": "NewEnum",
+      "selectPrompt": "選擇一個列舉，或建立一個 —— 可用作屬性型別的封閉值集合。",
+      "nameHeader": "名稱",
+      "description": "描述",
+      "descriptionPlaceholder": "此列舉表示的內容（選填）"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "尚無範本 — 新增一個以從此設計產生程式碼。",
+      "subtitle": "從此設計產生專案 — 在沙箱中算繪，僅在你確認目錄樹後寫入",
+      "sourceTitle": "範本",
+      "sourceKind": {
+        "official": "官方",
+        "repo": "儲存庫",
+        "local": "本機資料夾"
+      },
+      "official": "官方範本",
+      "repo": "儲存庫（owner/repo）",
+      "local": "本機範本資料夾",
+      "output": "輸出資料夾（絕對路徑或相對於專案）",
+      "browse": "選擇輸出資料夾",
+      "generate": "產生專案",
+      "generating": "正在沙箱中產生…",
+      "blocked": "產生前請修正設計的 {{count}} 個驗證錯誤",
+      "failed": "產生失敗",
+      "outputMissing": "請先選擇輸出資料夾",
+      "extracted": "已將 {{count}} 個檔案寫入 {{root}}",
+      "preview": "{{name}} 產生了 {{count}} 個檔案 — 確認後寫入",
+      "confirm": "寫入輸出資料夾",
+      "discard": "捨棄",
+      "generateOne": "產生此專案",
+      "remove": "移除此範本",
+      "addTemplate": "新增範本",
+      "library": {
+        "title": "範本庫",
+        "recent": "最近使用",
+        "official": "官方範本",
+        "custom": "自訂",
+        "add": "新增",
+        "use": "使用",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "組織範本",
+        "openRepo": "開啟儲存庫",
+        "remove": "移除",
+        "addTemplate": "新增範本",
+        "urlPlaceholder": "Git 儲存庫 URL",
+        "descPlaceholder": "描述（技術堆疊 / 產生內容）",
+        "noOrgTemplates": "尚無組織範本。",
+        "loading": "正在載入範本…",
+        "signedOut": "登入以查看您組織的範本。",
+        "fetchError": "無法載入範本：",
+        "unavailable": "無法使用",
+        "officialTag": "官方",
+        "officialDesc": {
+          "server-rest-typescript": "基於 Express 的 TypeScript REST 伺服器 — 型別化路由、模型與請求驗證。",
+          "server-rest-dotnet": "基於 C# / ASP.NET Core 的 Minimal-API 伺服器 — 端點、DTO 與驗證。",
+          "server-grpc-typescript": "以 TypeScript 編寫的 gRPC 伺服器 —— .proto 服務、具型別的訊息與伺服器樁。",
+          "server-grpc-dotnet": "以 C# / .NET 編寫的 gRPC 伺服器 —— .proto 服務、訊息與伺服器樁。",
+          "db-postgres": "來自設計的 PostgreSQL 結構描述、種子資料與 CRUD 指令碼。"
+        },
+        "added": "已新增 Template",
+        "done": "完成"
+      },
+      "extractedTitle": "已寫入檔案",
+      "openOutput": "開啟輸出資料夾",
+      "refresh": "從來源重新整理此範本",
+      "removeConfirm": "Template「{{name}}」將從此設計中移除（磁碟上已產生的檔案維持不變）。",
+      "removeTitle": "移除此 Template？",
+      "tabs": {
+        "template": "範本"
+      },
+      "questions": {
+        "title": "範本問題"
+      },
+      "errorTitle": "產生失敗",
+      "source": "來源",
+      "destination": "目標",
+      "expand": "展開",
+      "collapse": "摺疊"
+    },
+    "statusbar": {
+      "format": "設計 · 格式 {{version}}"
+    },
+    "modelSettings": {
+      "identity": "識別",
+      "identifierProperty": "識別碼屬性",
+      "identifierStrategy": "策略",
+      "inheritsFrom": "繼承自",
+      "noIdentifier": "（無）",
+      "noParent": "（無）",
+      "storage": "儲存與生命週期",
+      "volumetry": "預期資料量",
+      "volumetryUnset": "（未指定）",
+      "operationalProfile": "運行特徵",
+      "accessPattern": "讀寫特徵",
+      "traffic": "存取頻率",
+      "freshness": "新鮮度容忍",
+      "sensitivity": "資料敏感度",
+      "retention": "保留 / 生命週期",
+      "profileUnset": "（未指定）",
+      "timestamps": "時間戳記（建立/修改）",
+      "softDelete": "軟刪除",
+      "usedBy": "使用方",
+      "usedByNone": "此模型尚未被使用。",
+      "usage": {
+        "body": "請求主體",
+        "response": "回應 {{code}}",
+        "param": "參數 {{name}}",
+        "inherits": "{{name}} 繼承自它"
+      },
+      "generators": "路由",
+      "generateCrud": "產生 CRUD",
+      "generateSearch": "產生搜尋路由"
+    },
+    "schema": {
+      "addProperty": "新增屬性",
+      "deleteProperty": "刪除屬性",
+      "columns": {
+        "property": "屬性",
+        "type": "型別",
+        "flags": "旗標",
+        "example": "範例"
+      },
+      "unnamed": "（未命名）",
+      "nameMissing": "缺少名稱",
+      "panelTitle": "屬性：{{name}}",
+      "jumpToParent": "開啟 {{name}}",
+      "typeModel": "模型",
+      "typeEnum": "列舉",
+      "noFormat": "（無）",
+      "invalidPattern": "無效的正規表示式",
+      "minAboveMax": "最小值超過最大值",
+      "fields": {
+        "name": "名稱",
+        "type": "型別",
+        "format": "格式",
+        "elementType": "元素型別",
+        "onDelete": "刪除時",
+        "description": "描述",
+        "example": "範例",
+        "default": "預設值",
+        "deprecationMessage": "棄用訊息",
+        "minimum": "最小值",
+        "maximum": "最大值",
+        "minLength": "最小長度",
+        "maxLength": "最大長度",
+        "pattern": "模式"
+      },
+      "generatedProperties": "產生的屬性",
+      "inheritedProperties": "繼承的屬性",
+      "ownProperties": "自有屬性",
+      "tabs": {
+        "property": "屬性"
+      },
+      "advancedType": "進階…"
+    },
+    "flags": {
+      "required": "必填",
+      "nullable": "可為空",
+      "unique": "唯一",
+      "immutable": "不可變",
+      "searchable": "可搜尋",
+      "deprecated": "已棄用",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "預設",
+      "add": "新增範例",
+      "delete": "刪除範例",
+      "name": "範例名稱",
+      "newName": "範例",
+      "defaultHint": "預設值來自各個屬性（留空 = 自動產生）。",
+      "namedHint": "輸入值即可定義；留空則保留自動產生的值。",
+      "columns": {
+        "value": "值",
+        "origin": "來源"
+      },
+      "auto": "自動",
+      "defined": "已定義",
+      "constraintViolated": "該值違反了屬性約束（{{constraint}}）",
+      "deleteTitle": "刪除此範例？",
+      "deleteConfirm": "範例「{{name}}」將被刪除。"
+    },
+    "onDelete": {
+      "restrict": "限制（使用中禁止刪除）",
+      "cascade": "串聯刪除",
+      "setNull": "設為 null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "自動遞增",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "數百",
+      "tenThousands": "數萬",
+      "millions": "數百萬"
+    },
+    "accessPattern": {
+      "readHeavy": "讀多寫少",
+      "writeHeavy": "寫多讀少",
+      "balanced": "讀寫均衡",
+      "appendOnly": "僅附加"
+    },
+    "traffic": {
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "freshness": {
+      "strong": "強一致性",
+      "shortCache": "可短快取",
+      "longCache": "可長快取"
+    },
+    "sensitivity": {
+      "public": "公開",
+      "internal": "內部",
+      "confidential": "機密",
+      "pii": "個人資料（PII）"
+    },
+    "retention": {
+      "permanent": "永久",
+      "archivable": "可封存",
+      "ephemeral": "臨時（TTL）"
+    },
+    "issue": {
+      "propertyNameEmpty": "屬性沒有名稱",
+      "propertyNameDuplicate": "屬性名稱重複",
+      "propertyShadowsParent": "遮蔽了繼承的屬性",
+      "referenceTargetUnknown": "引用的型別已不存在",
+      "constraintPatternInvalid": "無效的模式（正規表示式）",
+      "constraintMinAboveMax": "最小值超過最大值",
+      "modelNameEmpty": "模型沒有名稱",
+      "enumNameEmpty": "列舉沒有名稱",
+      "groupNameEmpty": "群組沒有名稱",
+      "modelNameDuplicate": "模型名稱重複",
+      "enumNameDuplicate": "列舉名稱重複",
+      "componentNameCollision": "一個模型和一個列舉共用此名稱",
+      "groupNameDuplicate": "群組名稱重複",
+      "inheritanceTargetUnknown": "繼承的模型已不存在",
+      "inheritanceCycle": "繼承鏈循環",
+      "identifierPropertyUnknown": "識別碼屬性已不存在",
+      "paramLinkTargetUnknown": "參數連結指向缺失的屬性",
+      "bodyModelUnknown": "主體模型已不存在",
+      "responseModelUnknown": "回應模型已不存在",
+      "responseExampleUnknown": "回應提供了缺失的範例",
+      "routeResponsesMissing": "該路由未宣告任何回應",
+      "routePathDuplicate": "另一條路由已回應此方法與路徑",
+      "routePathReserved": "設計伺服器保留此路徑 — 該路由將永遠不會回應"
+    },
+    "routes": {
+      "addGroup": "新增群組",
+      "addRoute": "新增路由",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "選擇一個群組或路由，或建立一個群組。",
+      "deleteGroupTitle": "刪除 {{name}}？",
+      "deleteGroupImpact": "該群組及其 {{count}} 條路由將被刪除。",
+      "method": "方法",
+      "path": "路徑",
+      "summary": "摘要",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "定義",
+        "responses": "回應"
+      },
+      "group": {
+        "auth": "所需驗證",
+        "authInherited": "設計預設值",
+        "versionPrefix": "版本前綴",
+        "headers": "契約標頭（由路由繼承）",
+        "headerName": "標頭",
+        "addHeader": "新增標頭",
+        "deleteHeader": "刪除標頭",
+        "noHeaders": "沒有共用標頭。"
+      },
+      "params": {
+        "pathTitle": "路徑參數",
+        "otherTitle": "參數（query / header）",
+        "name": "名稱",
+        "location": "位置",
+        "link": "模型連結",
+        "noLink": "—",
+        "add": "新增參數",
+        "delete": "刪除參數",
+        "auto": "自動",
+        "pathEmpty": "在路徑中輸入 {{param}} 即可建立其列。",
+        "otherEmpty": "尚無 query 或 header 參數。",
+        "nameEmpty": "參數需要一個名稱",
+        "nameTaken": "該名稱已被使用"
+      },
+      "body": {
+        "label": "請求主體",
+        "empty": "（空）",
+        "nonStandardHint": "在 {{method}} 上使用請求主體是非標準的——許多伺服器和代理會忽略它。Restorm 仍會提供並記錄它。"
+      },
+      "responses": {
+        "add": "新增",
+        "codePlaceholder": "狀態碼",
+        "standardErrors": "+ 標準錯誤",
+        "empty": "尚未宣告任何回應。",
+        "emptyBody": "空主體",
+        "model": "回傳模型",
+        "list": "清單",
+        "paginated": "分頁",
+        "listOf": "{{name}} 清單",
+        "paginatedListOf": "分頁的 {{name}} 清單",
+        "example": "提供的範例",
+        "exampleAuto": "（自動產生）",
+        "delete": "刪除回應",
+        "codeInvalid": "請輸入 3 位狀態碼",
+        "codeTaken": "該狀態碼已宣告"
+      },
+      "settings": {
+        "inherited": "繼承自群組",
+        "authInherited": "繼承自群組",
+        "editGroup": "在群組中編輯 ↗",
+        "headers": "契約標頭",
+        "behaviour": "行為",
+        "idempotent": "冪等",
+        "cacheSeconds": "快取（秒）",
+        "traffic": "預期流量",
+        "authOverride": "驗證覆寫",
+        "pagination": "分頁",
+        "defaultLimit": "預設頁面大小",
+        "maxLimit": "最大頁面大小"
+      },
+      "addSubgroup": "新增子群組"
+    },
+    "newDesignName": "新的 API 設計",
+    "createFromScratch": "建立 API 設計",
+    "createFromDoc": "從此 API 建立設計",
+    "fromDocName": "{{name}} 設計",
+    "run": {
+      "listening": "正在 http://localhost:{{port}} 上提供服務",
+      "stopped": "伺服器已停止",
+      "totalCalls": "本次執行 {{count}} 次呼叫",
+      "stop": "停止伺服器",
+      "close": "關閉此面板",
+      "forcedPill": "強制 {{code}}",
+      "defaultReturn": "設計回應（預設）",
+      "codeReturn": "回應 {{code}}",
+      "customCode": "自訂狀態碼",
+      "customBody": "自訂回應主體",
+      "customBodyPlaceholder": "選用回應主體 (JSON)",
+      "customApply": "強制"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "使用身分驗證保護寫入路由",
+      "authWritesHint": "在建立、更新和刪除時要求 bearer 驗證；讀取維持公開。",
+      "generate": "產生",
+      "replace": "取代現有路由",
+      "replaceHint": "此模型已存在路由。取代它們以避免重複；保持關閉則新增第二組。",
+      "title": "為 {{name}} 產生 CRUD",
+      "projections": {
+        "http": "{{count}} 條 REST 路由",
+        "graphql": "GraphQL 中 {{queries}} 個查詢 / {{mutations}} 個變更",
+        "grpc": "{{count}} 個 gRPC 方法",
+        "odata": "{{count}} 個 OData 實體集",
+        "soap": "{{count}} 個 SOAP 操作",
+        "title": "一個模型，所有通訊協定——此 CRUD 還以下列形式提供："
+      }
+    },
+    "server": {
+      "subtitle": "將此設計作為即時模擬提供，並觀察每次呼叫。"
+    },
+    "codegen": {
+      "vars": {
+        "tab": "程式碼產生",
+        "name": "變數",
+        "value": "值 (Handlebars)",
+        "add": "新增變數",
+        "none": "尚無變數 — 從此範本的標題列新增一個。",
+        "noTemplates": "在「</> Code」區段選擇一個或多個範本 — 接著在此定義產生時使用的變數。",
+        "generalTitle": "一般變數",
+        "scope": {
+          "general": "一般",
+          "property": "模型屬性"
+        },
+        "discover": "探索此範本使用的變數",
+        "undeclared": "已使用但未宣告：{{names}}",
+        "allDeclared": "此範本使用的每個變數都已宣告。"
+      }
+    },
+    "clients": {
+      "generated": "用戶端已產生——在側邊欄的「用戶端」下開啟它們。",
+      "importing": "正在匯入用戶端…",
+      "refresh": "重新產生用戶端",
+      "startPrompt": "啟動伺服器以產生用戶端。",
+      "startServerPrompt": "啟動<serverLink>設計伺服器</serverLink>以存取從模型自動產生的用戶端請求。",
+      "subtitle": "您的 API 設計伺服器正在執行，並提供您定義的路由。下面的請求會直接呼叫這些路由——開啟其中一個即可測試。它們是臨時的，伺服器停止後便會消失。"
+    },
+    "descriptors": {
+      "copy": "複製 URL"
+    },
+    "projections": {
+      "title": "投影",
+      "hint": "同一操作，以每個所服務的通訊協定各自公開的形式呈現。"
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "保留",
@@ -2307,7 +2834,45 @@
     "addCookie": "新增 Cookie",
     "removeCookie": "刪除 Cookie",
     "clearCookieDomain": "清除某個網域的 Cookie",
-    "clearCookies": "清除所有 Cookie"
+    "clearCookies": "清除所有 Cookie",
+    "listDesigns": "列出 API 設計",
+    "getDesign": "取得 API 設計",
+    "createDesign": "建立 API 設計",
+    "createDesignFromDocumentation": "從匯入的 API 建立設計",
+    "updateDesign": "更新設計",
+    "deleteDesign": "刪除設計",
+    "createDesignModel": "建立設計模型",
+    "updateDesignModel": "更新設計模型",
+    "deleteDesignModel": "刪除設計模型",
+    "setDesignProperty": "設定模型屬性",
+    "deleteDesignProperty": "刪除模型屬性",
+    "createDesignEnum": "建立設計列舉",
+    "updateDesignEnum": "更新設計列舉",
+    "deleteDesignEnum": "刪除設計列舉",
+    "setDesignExample": "設定具名範例",
+    "deleteDesignExample": "刪除具名範例",
+    "createDesignRouteGroup": "建立路由群組",
+    "updateDesignRouteGroup": "更新路由群組",
+    "deleteDesignRouteGroup": "刪除路由群組",
+    "createDesignRoute": "建立設計路由",
+    "updateDesignRoute": "更新設計路由",
+    "deleteDesignRoute": "刪除設計路由",
+    "setDesignRouteParam": "建立或更新路由參數",
+    "deleteDesignRouteParam": "刪除路由參數",
+    "generateDesignCrud": "產生 CRUD 路由",
+    "generateDesignSearchRoutes": "產生搜尋路由",
+    "serveDesign": "提供設計服務",
+    "stopDesignServer": "停止設計伺服器",
+    "getDesignServerStatus": "設計伺服器狀態",
+    "setDesignRouteResponse": "強制回應",
+    "exportDesign": "匯出設計描述檔",
+    "generateDesignCode": "從設計產生程式碼",
+    "getDesignTemplateContract": "取得程式碼範本合約",
+    "setDesignTemplates": "設定設計的程式碼範本",
+    "setDesignModelVariables": "設定模型的程式碼產生覆寫",
+    "setDesignPropertyVariables": "設定屬性的程式碼產生覆寫",
+    "setDesignRouteVariables": "設定路由的程式碼產生覆寫",
+    "setDesignTemplateVariables": "設定範本的全域程式碼產生變數"
   },
   "odataFilter": {
     "detail": {
@@ -2537,6 +3102,9 @@
       "addedScenario": "已新增情境 \"{{name}}\"",
       "modifiedScenario": "已修改情境 \"{{name}}\"",
       "deletedScenario": "已刪除情境 \"{{name}}\"",
+      "addedDesign": "已新增設計 \"{{name}}\"",
+      "modifiedDesign": "已修改設計 \"{{name}}\"",
+      "deletedDesign": "已刪除設計 \"{{name}}\"",
       "addedFolder": "已新增資料夾 \"{{name}}\"",
       "modifiedFolder": "已修改資料夾 \"{{name}}\"",
       "deletedFolder": "已刪除資料夾 \"{{name}}\"",
@@ -2545,6 +3113,7 @@
       "deletedEnvironmentFolder": "已刪除環境資料夾 \"{{name}}\"",
       "movedRequest": "已移動請求「{{name}}」",
       "movedScenario": "已移動場景「{{name}}」",
+      "movedDesign": "已移動設計「{{name}}」",
       "movedFolder": "已移動資料夾「{{name}}」",
       "movedEnvironmentFolder": "已移動環境資料夾「{{name}}」",
       "reorderedFolder": "已重新排序資料夾「{{name}}」中的項目",
@@ -2555,6 +3124,7 @@
     "commitTitle": {
       "singleRequest": "更新請求 \"{{name}}\"",
       "singleScenario": "更新情境 \"{{name}}\"",
+      "singleDesign": "更新設計 \"{{name}}\"",
       "singleFolder": "更新資料夾 \"{{name}}\"",
       "singleEnvironmentFolder": "更新環境資料夾 \"{{name}}\"",
       "singleFileFormatVersion": "遷移至檔案格式 {{name}}",
@@ -2562,6 +3132,8 @@
       "countRequest_other": "{{count}} 個請求",
       "countScenario_one": "{{count}} 個情境",
       "countScenario_other": "{{count}} 個情境",
+      "countDesign_one": "{{count}} 個設計",
+      "countDesign_other": "{{count}} 個設計",
       "countFolder_one": "{{count}} 個資料夾",
       "countFolder_other": "{{count}} 個資料夾",
       "countEnvironmentFolder_one": "{{count}} 個環境資料夾",

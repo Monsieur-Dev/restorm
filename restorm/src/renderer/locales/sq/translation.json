@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Fshi",
       "clone": "Klono",
+      "openInSplit": "Hape në panel të ndarë",
       "copySuffix": "kopje",
       "rename": "Riemërto",
       "addToFavorites": "Shto te të preferuarat",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Dizajn API"
       },
       "cut": "Pre",
       "copy": "Kopjo",
@@ -335,7 +337,8 @@
       "moveInto": "Zhvendos në këtë skenar",
       "affectsNote": "Fshirja e kësaj kërkese do ta heqë atë edhe nga këta skenarë.",
       "deleteAnyway": "Fshi gjithsesi"
-    }
+    },
+    "expandAll": "Zgjero të gjitha kërkesat"
   },
   "environment": {
     "newName": "Mjedis i ri",
@@ -741,7 +744,8 @@
       "environment": "Mjediset",
       "settings": "Parametrat",
       "tag": "Etiketat",
-      "scenario": "Skenarë"
+      "scenario": "Skenarë",
+      "design": "Dizajne API"
     },
     "tooltip": {
       "noDetails": "Asnjë detaj në dispozicion",
@@ -1238,7 +1242,8 @@
       "operation": "Operacioni",
       "description": "Përshkrimi",
       "example": "Shembull",
-      "constraints": "Kufizimet"
+      "constraints": "Kufizimet",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nuk ka parametra jashtë trupit të deklaruar për rrugët e filtruara."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "referencë e vetme opsionale",
       "requiredArrayRef": "referencë vargu e kërkuar",
       "optionalArrayRef": "referencë vargu opsionale"
-    }
+    },
+    "editEntity": "Përpuno në dizajner"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Vlerat enum",
+      "addValue": "Shto një vlerë…",
+      "removeValue": "Hiq vlerën",
+      "extract": "Nxirr në një enum të emërtuar"
+    },
+    "tags": {
+      "add": "Shto një etiketë…",
+      "remove": "Hiq etiketën",
+      "routeLabel": "Etiketat",
+      "groupLabel": "Etiketat e përbashkëta"
+    },
+    "section": {
+      "settings": "Cilësimet",
+      "models": "Modelet",
+      "enums": "Enumet",
+      "routes": "Rrugët",
+      "documentation": "Dokumentimi",
+      "notes": "Shënimet",
+      "code": "Kodi",
+      "server": "Serveri",
+      "clients": "Klientët"
+    },
+    "rail": {
+      "ariaLabel": "Seksionet e dizajnit"
+    },
+    "settings": {
+      "subtitle": "Cilësimet e përgjithshme të dizajnit “{{name}}”",
+      "serve": {
+        "title": "Serveri i dizajnit",
+        "action": "Shërbeje këtë dizajn",
+        "description": "Përgjigje nga shembujt e emërtuar · validim me kufizime",
+        "port": "Porta",
+        "latency": "Vonesë e simuluar (ms)",
+        "blocked": "Rregulloni {{count}} gabimet e validimit të dizajnit para se ta shërbeni",
+        "startFailed": "Serveri nuk mundi të nisej",
+        "protocolAlways": "HTTP shërbehet gjithmonë",
+        "protocolToggle": "Shërbeje edhe këtë projeksion",
+        "stateful": "Modaliteti stateful — POST/PUT/DELETE ndryshojnë një depo në memorie (rivendoset në rinisje)",
+        "clientsCallout": "Serveri juaj mock po funksionon. U gjeneruan klientë gati për t'u ekzekutuar për çdo protokoll që shërben ky dizajn.",
+        "clientsCalloutLink": "Gjejini këtu"
+      },
+      "identity": {
+        "title": "Identiteti",
+        "title_field": "Titulli",
+        "version": "Versioni i dizajnit",
+        "description": "Përshkrimi"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Shtegu bazë",
+        "defaultAuth": "Auth i parazgjedhur",
+        "environment": "Mjedisi"
+      },
+      "export": {
+        "title": "Eksport",
+        "format": "Formati i përshkruesit",
+        "download": "Shkarko përshkruesin",
+        "saved": "Përshkruesi u ruajt në {{path}}",
+        "failed": "Eksporti dështoi"
+      }
+    },
+    "auth": {
+      "none": "Asnjë",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header i çelësit API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtro…",
+      "selectPrompt": "Zgjidhni një hyrje nga lista.",
+      "editorPending": "Redaktori i këtij seksioni është rrugës."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} veti",
+      "propertyCount_other": "{{count}} veti",
+      "add": "Shto një model",
+      "delete": "Fshi modelin",
+      "deleteTitle": "Të fshihet {{name}}?",
+      "deleteNoImpact": "Ky model nuk përdoret askund.",
+      "deleteImpactIntro": "Fshirja e këtij modeli do të përditësojë:",
+      "deleteImpactChild": "{{name}} humb trashëgiminë e tij (vetitë e veta mbeten)",
+      "description": "Përshkrimi",
+      "descriptionPlaceholder": "Çfarë përfaqëson ky model (opsionale)",
+      "newName": "NewModel",
+      "selectPrompt": "Zgjidhni një model ose krijoni një.",
+      "tabs": {
+        "schema": "Skema",
+        "examples": "Shembuj",
+        "settings": "Cilësimet",
+        "notes": "Shënime"
+      },
+      "addSubModel": "Shto një nën-model",
+      "collapseAll": "Palos të gjitha",
+      "expandAll": "Zgjero të gjitha"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} vlerë",
+      "valueCount_other": "{{count}} vlera",
+      "lists": "Enumet",
+      "values": "Vlerat",
+      "addEnum": "Shto një enum",
+      "addValue": "Shto një vlerë",
+      "valueHeader": "Vlera",
+      "newName": "NewEnum",
+      "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie.",
+      "nameHeader": "Emri",
+      "description": "Përshkrimi",
+      "descriptionPlaceholder": "Çfarë përfaqëson ky enum (opsionale)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Ende asnjë shabllon — shtoni një për të gjeneruar kod nga ky dizajn.",
+      "subtitle": "Gjeneroni projekte nga ky dizajn — të renderuara në një sandbox, të shkruara vetëm pasi konfirmoni pemën",
+      "sourceTitle": "Shabllon",
+      "sourceKind": {
+        "official": "Zyrtar",
+        "repo": "Depo",
+        "local": "Dosje lokale"
+      },
+      "official": "Shabllon zyrtar",
+      "repo": "Depo (owner/repo)",
+      "local": "Dosja lokale e shabllonit",
+      "output": "Dosja e daljes (absolute ose relative ndaj projektit)",
+      "browse": "Zgjidhni dosjen e daljes",
+      "generate": "Gjenero projektin",
+      "generating": "Po gjenerohet në sandbox…",
+      "blocked": "Rregulloni {{count}} gabimet e validimit para gjenerimit",
+      "failed": "Gjenerimi dështoi",
+      "outputMissing": "Zgjidhni fillimisht një dosje daljeje",
+      "extracted": "{{count}} skedar(ë) u shkruan në {{root}}",
+      "preview": "{{name}} gjeneroi {{count}} skedar(ë) — konfirmoni shkrimin",
+      "confirm": "Shkruaj në dosjen e daljes",
+      "discard": "Hidh",
+      "generateOne": "Gjenero këtë projekt",
+      "remove": "Hiq këtë shabllon",
+      "addTemplate": "Shto një shabllon",
+      "library": {
+        "title": "Biblioteka e shablloneve",
+        "recent": "Përdorur së fundmi",
+        "official": "Shabllone zyrtare",
+        "custom": "I personalizuar",
+        "add": "Shto",
+        "use": "Përdor",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Shabllonet e organizatës",
+        "openRepo": "Hap depon",
+        "remove": "Hiq",
+        "addTemplate": "Shto shabllon",
+        "urlPlaceholder": "URL-ja e depos git",
+        "descPlaceholder": "Përshkrimi (stack / çfarë gjeneron)",
+        "noOrgTemplates": "Ende nuk ka shabllone të organizatës.",
+        "loading": "Duke ngarkuar shabllonet…",
+        "signedOut": "Identifikohu për të parë shabllonet e organizatës tënde.",
+        "fetchError": "Shabllonet nuk u ngarkuan dot:",
+        "unavailable": "e padisponueshme",
+        "officialTag": "Zyrtare",
+        "officialDesc": {
+          "server-rest-typescript": "Server REST në TypeScript mbi Express — rrugë të tipizuara, modele dhe validim kërkesash.",
+          "server-rest-dotnet": "Server Minimal-API në C# / ASP.NET Core — endpoint-e, DTO dhe validim.",
+          "server-grpc-typescript": "Server gRPC në TypeScript — shërbim .proto, mesazhe të tipizuara dhe stub-e serveri.",
+          "server-grpc-dotnet": "Server gRPC në C# / .NET — shërbim .proto, mesazhe dhe stub-e serveri.",
+          "db-postgres": "Skemë PostgreSQL, të dhëna seed dhe skripte CRUD nga dizajni."
+        },
+        "added": "Template u shtua",
+        "done": "U krye"
+      },
+      "extractedTitle": "Skedarët u shkruan",
+      "openOutput": "Hap dosjen e daljes",
+      "refresh": "Rifresko këtë shabllon nga burimi i tij",
+      "removeConfirm": "Template «{{name}}» do të hiqet nga ky dizajn (skedarët tashmë të gjeneruar në disk mbeten të paprekur).",
+      "removeTitle": "Të hiqet ky Template?",
+      "tabs": {
+        "template": "Shablloni"
+      },
+      "questions": {
+        "title": "Pyetjet e shabllonit"
+      },
+      "errorTitle": "Gjenerimi dështoi",
+      "source": "Burimi",
+      "destination": "Destinacioni",
+      "expand": "Zgjero",
+      "collapse": "Palos"
+    },
+    "statusbar": {
+      "format": "dizajn · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identiteti",
+      "identifierProperty": "Vetia identifikuese",
+      "identifierStrategy": "Strategjia",
+      "inheritsFrom": "Trashëgon nga",
+      "noIdentifier": "(asnjë)",
+      "noParent": "(asnjë)",
+      "storage": "Ruajtja & cikli i jetës",
+      "volumetry": "Vëllimi i pritur",
+      "volumetryUnset": "(i papërcaktuar)",
+      "operationalProfile": "Profili operacional",
+      "accessPattern": "Profili lexim/shkrim",
+      "traffic": "Frekuenca e aksesit",
+      "freshness": "Toleranca e freskisë",
+      "sensitivity": "Ndjeshmëria e të dhënave",
+      "retention": "Ruajtja / cikli i jetës",
+      "profileUnset": "(i papërcaktuar)",
+      "timestamps": "Vulat kohore (krijuar/ndryshuar)",
+      "softDelete": "Fshirje e butë",
+      "usedBy": "Përdoret nga",
+      "usedByNone": "Ky model nuk përdoret ende.",
+      "usage": {
+        "body": "trupi",
+        "response": "përgjigje {{code}}",
+        "param": "parametri {{name}}",
+        "inherits": "{{name}} trashëgon prej tij"
+      },
+      "generators": "Rrugët",
+      "generateCrud": "Gjenero CRUD",
+      "generateSearch": "Gjenero rrugët e kërkimit"
+    },
+    "schema": {
+      "addProperty": "Shto një veti",
+      "deleteProperty": "Fshi vetinë",
+      "columns": {
+        "property": "Vetia",
+        "type": "Tipi",
+        "flags": "Atributet",
+        "example": "Shembull"
+      },
+      "unnamed": "(pa emër)",
+      "nameMissing": "mungon emri",
+      "panelTitle": "Vetia: {{name}}",
+      "jumpToParent": "Hap {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(asnjë)",
+      "invalidPattern": "Shprehje e rregullt e pavlefshme",
+      "minAboveMax": "Min tejkalon max",
+      "fields": {
+        "name": "Emri",
+        "type": "Tipi",
+        "format": "Formati",
+        "elementType": "Tipi i elementeve",
+        "onDelete": "Në fshirje",
+        "description": "Përshkrimi",
+        "example": "Shembull",
+        "default": "Parazgjedhja",
+        "deprecationMessage": "Mesazhi i vjetrimit",
+        "minimum": "Minimumi",
+        "maximum": "Maksimumi",
+        "minLength": "Gjatësia min.",
+        "maxLength": "Gjatësia max.",
+        "pattern": "Modeli (pattern)"
+      },
+      "generatedProperties": "Veti të gjeneruara",
+      "inheritedProperties": "Veti të trashëguara",
+      "ownProperties": "Veti vetjake",
+      "tabs": {
+        "property": "Veti"
+      },
+      "advancedType": "Të avancuara…"
+    },
+    "flags": {
+      "required": "i detyrueshëm",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "i pandryshueshëm",
+      "searchable": "i kërkueshëm",
+      "deprecated": "i vjetruar",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Parazgjedhja",
+      "add": "Shto një shembull",
+      "delete": "Fshi shembullin",
+      "name": "Emri i shembullit",
+      "newName": "Shembull",
+      "defaultHint": "Vlerat e parazgjedhura vijnë nga secila veti (bosh = gjenerohet automatikisht).",
+      "namedHint": "Shkruani një vlerë për ta përcaktuar; lëreni bosh për të mbajtur atë të gjeneruarën.",
+      "columns": {
+        "value": "Vlera",
+        "origin": "Origjina"
+      },
+      "auto": "auto",
+      "defined": "e përcaktuar",
+      "constraintViolated": "Vlera shkel kufizimin e vetisë ({{constraint}})",
+      "deleteTitle": "Të fshihet ky shembull?",
+      "deleteConfirm": "Shembulli «{{name}}» do të fshihet."
+    },
+    "onDelete": {
+      "restrict": "Kufizo (ndalo sa është në përdorim)",
+      "cascade": "Fshirje kaskadë",
+      "setNull": "Vendos në null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Qindra",
+      "tenThousands": "Dhjetëra mijëra",
+      "millions": "Miliona"
+    },
+    "accessPattern": {
+      "readHeavy": "Kryesisht lexim",
+      "writeHeavy": "Kryesisht shkrim",
+      "balanced": "I balancuar",
+      "appendOnly": "Vetëm shtim"
+    },
+    "traffic": {
+      "low": "I ulët",
+      "medium": "Mesatar",
+      "high": "I lartë"
+    },
+    "freshness": {
+      "strong": "Konsistencë e fortë",
+      "shortCache": "Cache i shkurtër OK",
+      "longCache": "Cache i gjatë OK"
+    },
+    "sensitivity": {
+      "public": "Publik",
+      "internal": "I brendshëm",
+      "confidential": "Konfidencial",
+      "pii": "Të dhëna personale (PII)"
+    },
+    "retention": {
+      "permanent": "I përhershëm",
+      "archivable": "I arkivueshëm",
+      "ephemeral": "Kalimtar (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Vetia nuk ka emër",
+      "propertyNameDuplicate": "Emër vetie i dublikuar",
+      "propertyShadowsParent": "Mbulon një veti të trashëguar",
+      "referenceTargetUnknown": "Tipi i referuar nuk ekziston më",
+      "constraintPatternInvalid": "Model i pavlefshëm (shprehje e rregullt)",
+      "constraintMinAboveMax": "Min tejkalon max",
+      "modelNameEmpty": "Modeli nuk ka emër",
+      "enumNameEmpty": "Enumi nuk ka emër",
+      "groupNameEmpty": "Grupi nuk ka emër",
+      "modelNameDuplicate": "Emër modeli i dublikuar",
+      "enumNameDuplicate": "Emër enumi i dublikuar",
+      "componentNameCollision": "Një model dhe një enum ndajnë këtë emër",
+      "groupNameDuplicate": "Emër grupi i dublikuar",
+      "inheritanceTargetUnknown": "Modeli i trashëguar nuk ekziston më",
+      "inheritanceCycle": "Zinxhir trashëgimie rrethor",
+      "identifierPropertyUnknown": "Vetia identifikuese nuk ekziston më",
+      "paramLinkTargetUnknown": "Një lidhje parametri tregon një veti që mungon",
+      "bodyModelUnknown": "Modeli i trupit nuk ekziston më",
+      "responseModelUnknown": "Një model përgjigjeje nuk ekziston më",
+      "responseExampleUnknown": "Një përgjigje shërben një shembull që mungon",
+      "routeResponsesMissing": "Rruga nuk deklaron asnjë përgjigje",
+      "routePathDuplicate": "Një rrugë tjetër i përgjigjet tashmë kësaj metode dhe shtegu",
+      "routePathReserved": "Serveri i dizajnit e rezervon këtë shteg — rruga nuk do të përgjigjej kurrë"
+    },
+    "routes": {
+      "addGroup": "Shto një grup",
+      "addRoute": "Shto një rrugë",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Zgjidhni një grup ose një rrugë, ose krijoni një grup.",
+      "deleteGroupTitle": "Të fshihet {{name}}?",
+      "deleteGroupImpact": "Grupi dhe {{count}} rrugët e tij do të fshihen.",
+      "method": "Metoda",
+      "path": "Shtegu",
+      "summary": "Përmbledhja",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Përkufizimi",
+        "responses": "Përgjigjet"
+      },
+      "group": {
+        "auth": "Auth i kërkuar",
+        "authInherited": "Parazgjedhja e dizajnit",
+        "versionPrefix": "Prefiksi i versionit",
+        "headers": "Kokat e kontratës (të trashëguara nga rrugët)",
+        "headerName": "Koka",
+        "addHeader": "Shto një kokë",
+        "deleteHeader": "Fshi kokën",
+        "noHeaders": "Asnjë kokë e përbashkët."
+      },
+      "params": {
+        "pathTitle": "Parametrat e shtegut",
+        "otherTitle": "Parametrat (query / header)",
+        "name": "Emri",
+        "location": "Në",
+        "link": "Lidhja e modelit",
+        "noLink": "—",
+        "add": "Shto një parametër",
+        "delete": "Fshi parametrin",
+        "auto": "auto",
+        "pathEmpty": "Shkruani një {{param}} në shteg për të krijuar rreshtin e tij.",
+        "otherEmpty": "Ende asnjë parametër query ose header.",
+        "nameEmpty": "Një parametër ka nevojë për emër",
+        "nameTaken": "Ky emër është tashmë në përdorim"
+      },
+      "body": {
+        "label": "Trupi i kërkesës",
+        "empty": "(bosh)",
+        "nonStandardHint": "Një trup kërkese në {{method}} nuk është standard — shumë serverë dhe proxy e shpërfillin. Restorm e shërben dhe e dokumenton gjithsesi."
+      },
+      "responses": {
+        "add": "Shto",
+        "codePlaceholder": "Kodi i statusit",
+        "standardErrors": "+ gabimet standarde",
+        "empty": "Ende asnjë përgjigje e deklaruar.",
+        "emptyBody": "trup bosh",
+        "model": "Modeli i kthyer",
+        "list": "Listë",
+        "paginated": "E faqosur",
+        "listOf": "listë e {{name}}",
+        "paginatedListOf": "listë e faqosur e {{name}}",
+        "example": "Shembulli i shërbyer",
+        "exampleAuto": "(auto i gjeneruar)",
+        "delete": "Fshi përgjigjen",
+        "codeInvalid": "Shkruani një kod statusi me 3 shifra",
+        "codeTaken": "Ky kod është tashmë i deklaruar"
+      },
+      "settings": {
+        "inherited": "Trashëguar nga grupi",
+        "authInherited": "Trashëguar nga grupi",
+        "editGroup": "Ndrysho në grup ↗",
+        "headers": "Kokat e kontratës",
+        "behaviour": "Sjellja",
+        "idempotent": "Idempotente",
+        "cacheSeconds": "Cache (sekonda)",
+        "traffic": "Trafiku i pritur",
+        "authOverride": "Mbivendosja e auth",
+        "pagination": "Faqosja",
+        "defaultLimit": "Madhësia e parazgjedhur e faqes",
+        "maxLimit": "Madhësia maks. e faqes"
+      },
+      "addSubgroup": "Shto një nëngrup"
+    },
+    "newDesignName": "Dizajn i ri i API-t",
+    "createFromScratch": "Krijo një dizajn API",
+    "createFromDoc": "Krijo një dizajn nga ky API",
+    "fromDocName": "Dizajni {{name}}",
+    "run": {
+      "listening": "Shërben në http://localhost:{{port}}",
+      "stopped": "Serveri u ndal",
+      "totalCalls": "{{count}} thirrje në këtë ekzekutim",
+      "stop": "Ndalo serverin",
+      "close": "Mbyll këtë panel",
+      "forcedPill": "i detyruar {{code}}",
+      "defaultReturn": "Përgjigja e dizajnit (parazgjedhje)",
+      "codeReturn": "Përgjigju {{code}}",
+      "customCode": "Kod statusi i personalizuar",
+      "customBody": "Trup përgjigjeje i personalizuar",
+      "customBodyPlaceholder": "Trup përgjigjeje opsional (JSON)",
+      "customApply": "Detyro"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Mbroji rrugët e shkrimit me vërtetim",
+      "authWritesHint": "Kërko vërtetim bearer për krijim, përditësim dhe fshirje; leximet mbeten publike.",
+      "generate": "Gjenero",
+      "replace": "Zëvendëso rrugët ekzistuese",
+      "replaceHint": "Ekzistojnë tashmë rrugë për këtë model. Zëvendësoji për të shmangur dublikatat; lëre të çaktivizuar për të shtuar një grup të dytë.",
+      "title": "Gjenero CRUD për {{name}}",
+      "projections": {
+        "http": "{{count}} rrugë REST",
+        "graphql": "{{queries}} query / {{mutations}} mutacione në GraphQL",
+        "grpc": "{{count}} metoda gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} operacione SOAP",
+        "title": "Një model, çdo protokoll — ky CRUD shërbehet edhe si:"
+      }
+    },
+    "server": {
+      "subtitle": "Shërbeje këtë dizajn si një mock live dhe ndiq çdo thirrje."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Gjenerimi i kodit",
+        "name": "Variabël",
+        "value": "Vlera (Handlebars)",
+        "add": "Shto një variabël",
+        "none": "Ende asnjë variabël — shtoni një nga kreu i këtij shablloni.",
+        "noTemplates": "Zgjidhni një ose më shumë shabllone në seksionin «</> Code» — pastaj do të përcaktoni këtu variablat e përdorura nga gjenerimi.",
+        "generalTitle": "Variabla të përgjithshme",
+        "scope": {
+          "general": "Të përgjithshme",
+          "property": "Veti e modelit"
+        },
+        "discover": "Zbulo variablat që përdor ky shabllon",
+        "undeclared": "Të përdorura por të padeklaruara: {{names}}",
+        "allDeclared": "Të gjitha variablat që përdor ky shabllon janë të deklaruara."
+      }
+    },
+    "clients": {
+      "generated": "Klientët u gjeneruan — hapini te „Klientët” në shiritin anësor.",
+      "importing": "Po importohen klientët…",
+      "refresh": "Rigjenero klientët",
+      "startPrompt": "Nis serverin për të gjeneruar klientët.",
+      "startServerPrompt": "Nis <serverLink>serverin e dizajnit</serverLink> për të hyrë te kërkesat e klientit të gjeneruara automatikisht nga modeli.",
+      "subtitle": "Serveri juaj i dizajnit të API-t po ekzekutohet dhe shërben rrugët që keni përcaktuar. Kërkesat më poshtë i thërrasin drejtpërdrejt ato rrugë — hapni një për ta testuar. Janë efemere dhe zhduken kur serveri ndalon."
+    },
+    "descriptors": {
+      "copy": "Kopjo URL-në"
+    },
+    "projections": {
+      "title": "Projeksionet",
+      "hint": "I njëjti veprim, ashtu siç e ekspozon çdo protokoll i shërbyer."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Ruaj",
@@ -2308,7 +2835,45 @@
     "addCookie": "Shto një cookie",
     "removeCookie": "Hiq një cookie",
     "clearCookieDomain": "Pastro cookie-t e një domeni",
-    "clearCookies": "Pastro të gjitha cookie-t"
+    "clearCookies": "Pastro të gjitha cookie-t",
+    "listDesigns": "Listo dizajnet e API-t",
+    "getDesign": "Merr një dizajn API",
+    "createDesign": "Krijo një dizajn API",
+    "createDesignFromDocumentation": "Krijo dizajn nga API e importuar",
+    "updateDesign": "Përditëso një dizajn",
+    "deleteDesign": "Fshi një dizajn",
+    "createDesignModel": "Krijo një model dizajni",
+    "updateDesignModel": "Përditëso një model dizajni",
+    "deleteDesignModel": "Fshi një model dizajni",
+    "setDesignProperty": "Cakto një veti të modelit",
+    "deleteDesignProperty": "Fshi një veti të modelit",
+    "createDesignEnum": "Krijo një enum dizajni",
+    "updateDesignEnum": "Përditëso një enum dizajni",
+    "deleteDesignEnum": "Fshi një enum dizajni",
+    "setDesignExample": "Cakto një shembull të emërtuar",
+    "deleteDesignExample": "Fshi një shembull të emërtuar",
+    "createDesignRouteGroup": "Krijo një grup rrugësh",
+    "updateDesignRouteGroup": "Përditëso një grup rrugësh",
+    "deleteDesignRouteGroup": "Fshi një grup rrugësh",
+    "createDesignRoute": "Krijo një rrugë dizajni",
+    "updateDesignRoute": "Përditëso një rrugë dizajni",
+    "deleteDesignRoute": "Fshi një rrugë dizajni",
+    "setDesignRouteParam": "Krijo ose përditëso një parametër rruge",
+    "deleteDesignRouteParam": "Fshi një parametër rruge",
+    "generateDesignCrud": "Gjenero rrugë CRUD",
+    "generateDesignSearchRoutes": "Gjenero rrugë kërkimi",
+    "serveDesign": "Shërbe një dizajn",
+    "stopDesignServer": "Ndalo një server dizajni",
+    "getDesignServerStatus": "Gjendja e serverit të dizajnit",
+    "setDesignRouteResponse": "Detyro një përgjigje",
+    "exportDesign": "Eksporto një përshkrues dizajni",
+    "generateDesignCode": "Gjenero kod nga një dizajn",
+    "getDesignTemplateContract": "Merr kontratën e shablloneve të kodit",
+    "setDesignTemplates": "Cakto shabllonet e kodit të një dizajni",
+    "setDesignModelVariables": "Cakto mbivendosjet e gjenerimit të kodit të një modeli",
+    "setDesignPropertyVariables": "Cakto mbivendosjet e gjenerimit të kodit të një vetie",
+    "setDesignRouteVariables": "Cakto mbivendosjet e gjenerimit të kodit të një rruge",
+    "setDesignTemplateVariables": "Cakto variablat globale të gjenerimit të kodit të një shablloni"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "U shtua skenari \"{{name}}\"",
       "modifiedScenario": "U modifikua skenari \"{{name}}\"",
       "deletedScenario": "U fshi skenari \"{{name}}\"",
+      "addedDesign": "U shtua dizajni \"{{name}}\"",
+      "modifiedDesign": "U modifikua dizajni \"{{name}}\"",
+      "deletedDesign": "U fshi dizajni \"{{name}}\"",
       "addedFolder": "U shtua dosja \"{{name}}\"",
       "modifiedFolder": "U modifikua dosja \"{{name}}\"",
       "deletedFolder": "U fshi dosja \"{{name}}\"",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "U fshi dosja e mjedisit \"{{name}}\"",
       "movedRequest": "U zhvendos kërkesa \"{{name}}\"",
       "movedScenario": "U zhvendos skenari \"{{name}}\"",
+      "movedDesign": "U zhvendos dizajni \"{{name}}\"",
       "movedFolder": "U zhvendos dosja \"{{name}}\"",
       "movedEnvironmentFolder": "U zhvendos dosja e mjedisit \"{{name}}\"",
       "reorderedFolder": "Elementet u rirenditën në dosjen «{{name}}»",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "Përditësim i kërkesës \"{{name}}\"",
       "singleScenario": "Përditësim i skenarit \"{{name}}\"",
+      "singleDesign": "Përditësim i dizajnit \"{{name}}\"",
       "singleFolder": "Përditësim i dosjes \"{{name}}\"",
       "singleEnvironmentFolder": "Përditësim i dosjes së mjedisit \"{{name}}\"",
       "singleFileFormatVersion": "Kalim në formatin e skedarit {{name}}",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} kërkesa",
       "countScenario_one": "{{count}} skenar",
       "countScenario_other": "{{count}} skenarë",
+      "countDesign_one": "{{count}} dizajn",
+      "countDesign_other": "{{count}} dizajne",
       "countFolder_one": "{{count}} dosje",
       "countFolder_other": "{{count}} dosje",
       "countEnvironmentFolder_one": "{{count}} dosje mjedisi",

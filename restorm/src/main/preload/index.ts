@@ -56,6 +56,7 @@ import {
 } from '../../shared/update/updateTypes'
 import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashRecoveryNotice, type CrashReviewRequest } from '../../shared/crash/crashTypes'
 import { COOKIE_IPC, type CookieInput, type CookieRow } from '../../shared/cookies/cookieTypes'
+import type { CloudTemplate, CloudTemplatesView } from '../../shared/types/codegenTemplates'
 import {
   CLI_TOKEN_IPC,
   type CliTokenResult,
@@ -1377,6 +1378,149 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
+  designServer: {
+    /** Spin a design's HTTP server. Resolves once the port is bound (or
+     * the bind fails — port conflict, invalid design). The design
+     * travels whole: the main process owns no collection state. */
+    start: async (design: unknown): Promise<{ success: boolean; listening: boolean; port: number; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:start', design)
+      return result as { success: boolean; listening: boolean; port: number; error?: string }
+    },
+    /** Stop the design's server, freeing its port. */
+    stop: async (designId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:stop', designId)
+      return result as boolean
+    },
+    /** Listening state + this run's counters. */
+    status: async (designId: string): Promise<{ listening: boolean; port?: number; grpcPort?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:status', designId)
+      return result as { listening: boolean; port?: number; grpcPort?: number; counters?: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }
+    },
+    /** Hot-steer one route's response (run modal): `null` clears. */
+    setForced: async (designId: string, routeId: string, forced: { code: string; body?: string } | null): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:set-forced', designId, routeId, forced)
+      return result as boolean
+    },
+    /** Push the design's fresh shape while serving (autosave). */
+    update: async (design: unknown): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('design-server:update', design)
+      return result as boolean
+    },
+    /** Progress stream: a design is "serving" between `started` and
+     * `completed`/`error` — drives the beam like every other server. */
+    onProgress: (callback: (event: { designId: string; status: 'started' | 'completed' | 'error' }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { designId: string; status: 'started' | 'completed' | 'error' }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('design-server:progress', handler)
+      return () => {
+        ipcRenderer.removeListener('design-server:progress', handler)
+      }
+    },
+    /** Per-served-request counter stream feeding the run modal. */
+    onServed: (callback: (data: { designId: string; routeId: string; code: string; counters: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { designId: string; routeId: string; code: string; counters: { total: number; routes: Record<string, { total: number; byCode: Record<string, number> }> } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('design-server:served', handler)
+      return () => {
+        ipcRenderer.removeListener('design-server:served', handler)
+      }
+    },
+    /** Export an emitted descriptor: save dialog + write. The renderer
+     * emits (it owns the design); the main process owns the disk. */
+    exportDescriptor: async (fileName: string, content: string, extension: string): Promise<{ success: boolean; path?: string; canceled?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design:export-descriptor', fileName, content, extension)
+      return result as { success: boolean; path?: string; canceled?: boolean; error?: string }
+    }
+  },
+
+  designCodegen: {
+    /** Sandboxed generation — resolves with the PREVIEW tree; nothing
+     * is written until `extract` confirms an output folder. */
+    generate: async (
+      design: unknown,
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string },
+      answers?: Record<string, unknown>
+    ): Promise<{ success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:generate', design, source, answers)
+      return result as { success: boolean; manifest?: { name: string; type: string; language: string }; preview?: { path: string; bytes: number }[]; log?: string[]; error?: string }
+    },
+    /** The variables a template DECLARES in its manifest — for the design's
+     * variable editors to pre-fill (cached per source in the main process). */
+    getVariables: async (
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:variables', source)
+      return result as { success: boolean; variables?: { name: string; scope: string; type: string; options?: string[]; default?: string; description?: string }[]; error?: string }
+    },
+    /** DISCOVERY: the variable names a template's files actually reference —
+     * acquires the whole template (cached), for flagging undeclared-but-used. */
+    getUsedVariables: async (
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; used?: string[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:used-variables', source)
+      return result as { success: boolean; used?: string[]; error?: string }
+    },
+    /** The Copier questions a template declares in its copier.yml (fetches only
+     * that file, cached) — the whole-generation answers the user fills. */
+    getQuestions: async (
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:questions', source)
+      return result as { success: boolean; questions?: { key: string; type: string; default?: unknown; help?: string; choices?: (string | number)[]; multiselect?: boolean; multiline?: boolean; placeholder?: string; secret?: boolean }[]; error?: string }
+    },
+    /** Drop the cached metadata for a template source so the next question /
+     * variable read re-acquires it — the "refresh from source" button. */
+    refreshTemplate: async (
+      source: { kind: 'repo'; repo: string; ref?: string } | { kind: 'local'; path: string }
+    ): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:refresh-template', source)
+      return result as { success: boolean; error?: string }
+    },
+    /** The answers a previous generation saved in an output folder
+     * (`.copier-answers.yml`); relative resolves against the project file. */
+    readAnswers: async (outputDir: string): Promise<{ success: boolean; answers?: Record<string, unknown>; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:read-answers', outputDir)
+      return result as { success: boolean; answers?: Record<string, unknown>; error?: string }
+    },
+    /** Write the pending generation under the confirmed folder
+     * (relative resolves against the project file). */
+    extract: async (designId: string, outputDir: string): Promise<{ success: boolean; root?: string; written?: string[]; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:extract', designId, outputDir)
+      return result as { success: boolean; root?: string; written?: string[]; error?: string }
+    },
+    /** Drop the pending generation (validation screen dismissed). */
+    discard: async (designId: string): Promise<void> => {
+      await ipcRenderer.invoke('design-codegen:discard', designId)
+    },
+    /** Output-folder picker. */
+    pickDirectory: async (defaultPath?: string): Promise<{ success: boolean; path?: string; canceled?: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('design:pick-directory', defaultPath)
+      return result as { success: boolean; path?: string; canceled?: boolean }
+    },
+    /** Open the codegen output folder in the OS file explorer. */
+    revealOutput: async (designId: string, outputDir: string): Promise<{ success: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:reveal-output', designId, outputDir)
+      return result as { success: boolean; error?: string }
+    },
+    /** The cloud template library: the official set + the caller org's own
+     * (Enterprise). `signedOut` distinguishes a login prompt from a fetch error. */
+    listTemplates: async (): Promise<{ success: boolean; view?: CloudTemplatesView; signedOut?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:list-templates')
+      return result as { success: boolean; view?: CloudTemplatesView; signedOut?: boolean; error?: string }
+    },
+    /** Add a template to the caller's org (Enterprise + permitted). */
+    createTemplate: async (url: string, description: string): Promise<{ success: boolean; template?: CloudTemplate; signedOut?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:create-template', url, description)
+      return result as { success: boolean; template?: CloudTemplate; signedOut?: boolean; error?: string }
+    },
+    /** Remove one of the caller org's templates (never an official one). */
+    deleteTemplate: async (id: string): Promise<{ success: boolean; signedOut?: boolean; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('design-codegen:delete-template', id)
+      return result as { success: boolean; signedOut?: boolean; error?: string }
+    }
+  },
   jsonrpc: {
     /** Execute a single JSON-RPC 2.0 call. Reuses the HTTP dispatcher under
      * the hood — `JsonRpcExecutionService` composes the envelope and unwraps
@@ -2128,7 +2272,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
      * `restorm://active-tab`) can read it without a renderer round-trip.
      * Renderer fires this on every active-tab change; main caches it. */
-    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }): void => {
+    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }): void => {
       ipcRenderer.send('mcp:active-tab-changed', payload)
     },
     /** Push a per-env-folder selected-env id. `envId: null` clears the
@@ -2219,7 +2363,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {
-      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
+      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }
       envByFolder: Record<string, string | null>
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
@@ -2229,8 +2373,8 @@ contextBridge.exposeInMainWorld('restorm', {
      * (which awaits an ack, see `replyMcpOpenTab`) and absent for the other
      * internal senders (e.g. `run_request`'s tab-open side effect), which
      * stay fire-and-forget. */
-    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
     },
@@ -2244,8 +2388,8 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.send('mcp:open-tab-result', payload)
     },
     /** Subscribe to MCP `reveal_in_tree` requests. */
-    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
     },
@@ -2260,8 +2404,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     },
     /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
-    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
     },

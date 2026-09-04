@@ -61,6 +61,7 @@ type ItemBackedTab = EditorTab & {
   request?: { id?: string }
   folder?: { id?: string }
   scenario?: { id?: string }
+  design?: { id?: string }
 }
 
 function collectOpenItemIds(tree: WorkbenchTree): { itemId: string; tabId: string }[] {
@@ -71,11 +72,11 @@ function collectOpenItemIds(tree: WorkbenchTree): { itemId: string; tabId: strin
       if (isTabGroupNode(node)) {
         for (const tab of node.tabs) {
           const t = tab as ItemBackedTab
-          // The Opened pane lists open requests + scenarios — both are
+          // The Opened pane lists open requests, scenarios and designs —
           // "documents" the user re-opens; folder / environment-folder
           // tabs (Configuration / Docs / Notes surfaces) carry
           // workbench state but aren't items to surface here.
-          const itemId = t.request?.id ?? t.scenario?.id ?? null
+          const itemId = t.request?.id ?? t.scenario?.id ?? t.design?.id ?? null
           if (!itemId || seen.has(itemId)) continue
           seen.add(itemId)
           out.push({ itemId, tabId: tab.id })

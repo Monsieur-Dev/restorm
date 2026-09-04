@@ -1107,8 +1107,12 @@ class WebSocketExecutionService {
       if (routeMethod !== '*' && routeMethod !== method) continue
       const routePath = key.slice(sep + 1)
       // Match the root itself or anything strictly UNDER it — `/odata` claims
-      // `/odata` and `/odata/Pets`, but NOT a sibling like `/odatax`.
-      if ((path === routePath || path.startsWith(`${routePath}/`)) && routePath.length > bestLen) {
+      // `/odata` and `/odata/Pets`, but NOT a sibling like `/odatax`. A `/`
+      // root route claims the WHOLE port (the design server's shape) — the
+      // generic rule would demand a `//` prefix and never match; as the
+      // shortest possible prefix it still loses to any longer service root.
+      const matches = routePath === '/' || path === routePath || path.startsWith(`${routePath}/`)
+      if (matches && routePath.length > bestLen) {
         best = route
         bestLen = routePath.length
       }

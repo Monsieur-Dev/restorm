@@ -1,0 +1,5 @@
+# {{ ctx.design.name }}
+{% include 'partials/banner.jinja' %}
+{% for model in ctx.models %}
+- {{ model.name }}
+{% endfor %}

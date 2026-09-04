@@ -1,0 +1,28 @@
+# {{ project_name }}
+
+By {{ author }} — {{ license }}
+Generated from the **{{ ctx.design.name }}** design.
+
+## Server
+- Prefix: {{ ctx.design.vars.api_prefix if 'vars' in ctx.design else '/api' }}
+- Port: {{ port }}
+- Timeout: {{ timeout_ms }} ms
+- Ratio: {{ ratio }}
+- Auth: {{ use_auth }}
+- Database: {{ db }}
+- Features: {{ features | join(', ') }}
+
+## Models
+{% for m in ctx.models %}
+- {{ m.name }} → table `{{ m.vars.table_name if 'vars' in m else m.name }}`
+{% for p in m.properties %}
+  - {{ p.name }} → column `{{ p.vars.column_name if 'vars' in p else p.name }}`
+{% endfor %}
+{% endfor %}
+
+## Routes
+{% for g in ctx.groups %}
+{% for r in g.routes %}
+- {{ r.method }} {{ r.fullPath }} (cache {{ r.vars.cache_ttl if 'vars' in r else 0 }}s)
+{% endfor %}
+{% endfor %}

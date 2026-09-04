@@ -258,6 +258,7 @@
     "contextMenu": {
       "delete": "Șterge",
       "clone": "Clonează",
+      "openInSplit": "Deschide în panou divizat",
       "copySuffix": "copie",
       "rename": "Redenumește",
       "addToFavorites": "Adaugă la favorite",
@@ -316,7 +317,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Design API"
       },
       "cut": "Decupează",
       "copy": "Copiază",
@@ -336,7 +338,8 @@
       "moveInto": "Mută în acest scenariu",
       "affectsNote": "Ștergerea acestei cereri o va elimina și din aceste scenarii.",
       "deleteAnyway": "Șterge oricum"
-    }
+    },
+    "expandAll": "Extinde toate cererile"
   },
   "environment": {
     "newName": "Mediu nou",
@@ -742,7 +745,8 @@
       "environment": "Medii",
       "settings": "Setări",
       "tag": "Etichete",
-      "scenario": "Scenarii"
+      "scenario": "Scenarii",
+      "design": "Designuri API"
     },
     "tooltip": {
       "noDetails": "Niciun detaliu disponibil",
@@ -1239,7 +1243,8 @@
       "operation": "Operațiune",
       "description": "Descriere",
       "example": "Exemplu",
-      "constraints": "Constrângeri"
+      "constraints": "Constrângeri",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Niciun parametru din afara corpului declarat pentru rutele filtrate."
@@ -1286,7 +1291,8 @@
       "optionalSingleRef": "ref. unică opțională",
       "requiredArrayRef": "ref. de tablou obligatorie",
       "optionalArrayRef": "ref. de tablou opțională"
-    }
+    },
+    "editEntity": "Editează în designer"
   },
   "scenario": {
     "editor": {
@@ -2140,6 +2146,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Valori enum",
+      "addValue": "Adaugă o valoare…",
+      "removeValue": "Elimină valoarea",
+      "extract": "Extrage într-un enum numit"
+    },
+    "tags": {
+      "add": "Adaugă o etichetă…",
+      "remove": "Elimină eticheta",
+      "routeLabel": "Etichete",
+      "groupLabel": "Etichete comune"
+    },
+    "section": {
+      "settings": "Setări",
+      "models": "Modele",
+      "enums": "Enumuri",
+      "routes": "Rute",
+      "documentation": "Documentație",
+      "notes": "Notițe",
+      "code": "Cod",
+      "server": "Server",
+      "clients": "Clienți"
+    },
+    "rail": {
+      "ariaLabel": "Secțiunile designului"
+    },
+    "settings": {
+      "subtitle": "Setările generale ale designului „{{name}}”",
+      "serve": {
+        "title": "Server de design",
+        "action": "Servește acest design",
+        "description": "Răspunsuri din exemple denumite · validare prin constrângeri",
+        "port": "Port",
+        "latency": "Latență simulată (ms)",
+        "blocked": "Corectați cele {{count}} erori de validare ale designului înainte de a-l servi",
+        "startFailed": "Serverul nu a putut porni",
+        "protocolAlways": "HTTP este servit întotdeauna",
+        "protocolToggle": "Servește și această proiecție",
+        "stateful": "Mod cu stare — POST/PUT/DELETE modifică un stoc în memorie (resetat la repornire)",
+        "clientsCallout": "Serverul dumneavoastră mock rulează. Au fost generați clienți gata de rulat pentru fiecare protocol pe care îl deservește acest design.",
+        "clientsCalloutLink": "Îi găsiți aici"
+      },
+      "identity": {
+        "title": "Identitate",
+        "title_field": "Titlu",
+        "version": "Versiunea designului",
+        "description": "Descriere"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Cale de bază",
+        "defaultAuth": "Auth implicit",
+        "environment": "Mediu"
+      },
+      "export": {
+        "title": "Export",
+        "format": "Formatul descriptorului",
+        "download": "Descarcă descriptorul",
+        "saved": "Descriptor salvat în {{path}}",
+        "failed": "Exportul a eșuat"
+      }
+    },
+    "auth": {
+      "none": "Niciuna",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Header cheie API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtrează…",
+      "selectPrompt": "Selectați o intrare din listă.",
+      "editorPending": "Editorul acestei secțiuni este pe drum."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} proprietate",
+      "propertyCount_other": "{{count}} proprietăți",
+      "add": "Adaugă un model",
+      "delete": "Șterge modelul",
+      "deleteTitle": "Ștergeți {{name}}?",
+      "deleteNoImpact": "Acest model nu este folosit nicăieri.",
+      "deleteImpactIntro": "Ștergerea acestui model va actualiza:",
+      "deleteImpactChild": "{{name}} își pierde moștenirea (propriile proprietăți rămân)",
+      "description": "Descriere",
+      "descriptionPlaceholder": "Ce reprezintă acest model (opțional)",
+      "newName": "NewModel",
+      "selectPrompt": "Selectați un model sau creați unul.",
+      "tabs": {
+        "schema": "Schemă",
+        "examples": "Exemple",
+        "settings": "Setări",
+        "notes": "Note"
+      },
+      "addSubModel": "Adaugă un submodel",
+      "collapseAll": "Restrânge tot",
+      "expandAll": "Extinde tot"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} valoare",
+      "valueCount_other": "{{count}} valori",
+      "lists": "Enumuri",
+      "values": "Valori",
+      "addEnum": "Adaugă un enum",
+      "addValue": "Adaugă o valoare",
+      "valueHeader": "Valoare",
+      "newName": "NewEnum",
+      "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate.",
+      "nameHeader": "Nume",
+      "description": "Descriere",
+      "descriptionPlaceholder": "Ce reprezintă acest enum (opțional)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Încă niciun șablon — adaugă unul pentru a genera cod din acest design.",
+      "subtitle": "Generează proiecte din acest design — randate într-un sandbox, scrise doar după ce confirmi arborele",
+      "sourceTitle": "Șablon",
+      "sourceKind": {
+        "official": "Oficial",
+        "repo": "Repository",
+        "local": "Folder local"
+      },
+      "official": "Șablon oficial",
+      "repo": "Repository (owner/repo)",
+      "local": "Folderul local al șablonului",
+      "output": "Folder de ieșire (absolut sau relativ la proiect)",
+      "browse": "Alegeți folderul de ieșire",
+      "generate": "Generați proiectul",
+      "generating": "Se generează în sandbox…",
+      "blocked": "Corectați cele {{count}} erori de validare ale designului înainte de generare",
+      "failed": "Generarea a eșuat",
+      "outputMissing": "Alegeți mai întâi un folder de ieșire",
+      "extracted": "{{count}} fișier(e) scrise în {{root}}",
+      "preview": "{{name}} a generat {{count}} fișier(e) — confirmați scrierea",
+      "confirm": "Scrieți în folderul de ieșire",
+      "discard": "Renunțați",
+      "generateOne": "Generează acest proiect",
+      "remove": "Elimină acest șablon",
+      "addTemplate": "Adaugă un șablon",
+      "library": {
+        "title": "Bibliotecă de șabloane",
+        "recent": "Utilizate recent",
+        "official": "Șabloane oficiale",
+        "custom": "Personalizat",
+        "add": "Adaugă",
+        "use": "Folosește",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Șabloanele organizației",
+        "openRepo": "Deschide depozitul",
+        "remove": "Elimină",
+        "addTemplate": "Adaugă șablon",
+        "urlPlaceholder": "URL-ul depozitului git",
+        "descPlaceholder": "Descriere (stack / ce generează)",
+        "noOrgTemplates": "Încă nu există șabloane ale organizației.",
+        "loading": "Se încarcă șabloanele…",
+        "signedOut": "Autentifică-te pentru a vedea șabloanele organizației tale.",
+        "fetchError": "Șabloanele nu au putut fi încărcate:",
+        "unavailable": "indisponibil",
+        "officialTag": "Oficial",
+        "officialDesc": {
+          "server-rest-typescript": "Server REST în TypeScript pe Express — rute tipizate, modele și validarea cererilor.",
+          "server-rest-dotnet": "Server Minimal-API în C# / ASP.NET Core — endpointuri, DTO-uri și validare.",
+          "server-grpc-typescript": "Server gRPC în TypeScript — serviciu .proto, mesaje tipizate și stub-uri de server.",
+          "server-grpc-dotnet": "Server gRPC în C# / .NET — serviciu .proto, mesaje și stub-uri de server.",
+          "db-postgres": "Schemă PostgreSQL, date seed și scripturi CRUD din design."
+        },
+        "added": "Template adăugat",
+        "done": "Gata"
+      },
+      "extractedTitle": "Fișiere scrise",
+      "openOutput": "Deschide folderul de ieșire",
+      "refresh": "Reîmprospătează acest șablon din sursa sa",
+      "removeConfirm": "Template-ul „{{name}}“ va fi eliminat din acest design (fișierele deja generate pe disc rămân neatinse).",
+      "removeTitle": "Eliminați acest Template?",
+      "tabs": {
+        "template": "Șablon"
+      },
+      "questions": {
+        "title": "Întrebările șablonului"
+      },
+      "errorTitle": "Generarea a eșuat",
+      "source": "Sursă",
+      "destination": "Destinație",
+      "expand": "Extinde",
+      "collapse": "Restrânge"
+    },
+    "statusbar": {
+      "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitate",
+      "identifierProperty": "Proprietate identificatoare",
+      "identifierStrategy": "Strategie",
+      "inheritsFrom": "Moștenește din",
+      "noIdentifier": "(niciuna)",
+      "noParent": "(niciunul)",
+      "storage": "Stocare și ciclu de viață",
+      "volumetry": "Volum așteptat",
+      "volumetryUnset": "(nespecificat)",
+      "operationalProfile": "Profil operațional",
+      "accessPattern": "Profil citire/scriere",
+      "traffic": "Frecvența accesului",
+      "freshness": "Toleranță la prospețime",
+      "sensitivity": "Sensibilitatea datelor",
+      "retention": "Retenție / ciclu de viață",
+      "profileUnset": "(nespecificat)",
+      "timestamps": "Marcaje de timp (creat/modificat)",
+      "softDelete": "Ștergere soft",
+      "usedBy": "Folosit de",
+      "usedByNone": "Acest model nu este încă folosit.",
+      "usage": {
+        "body": "corp",
+        "response": "răspuns {{code}}",
+        "param": "parametru {{name}}",
+        "inherits": "{{name}} moștenește din el"
+      },
+      "generators": "Rute",
+      "generateCrud": "Generează CRUD",
+      "generateSearch": "Generează rutele de căutare"
+    },
+    "schema": {
+      "addProperty": "Adaugă o proprietate",
+      "deleteProperty": "Șterge proprietatea",
+      "columns": {
+        "property": "Proprietate",
+        "type": "Tip",
+        "flags": "Atribute",
+        "example": "Exemplu"
+      },
+      "unnamed": "(fără nume)",
+      "nameMissing": "lipsește numele",
+      "panelTitle": "Proprietate: {{name}}",
+      "jumpToParent": "Deschide {{name}}",
+      "typeModel": "model",
+      "typeEnum": "enum",
+      "noFormat": "(niciunul)",
+      "invalidPattern": "Expresie regulată invalidă",
+      "minAboveMax": "Min depășește max",
+      "fields": {
+        "name": "Nume",
+        "type": "Tip",
+        "format": "Format",
+        "elementType": "Tipul elementelor",
+        "onDelete": "La ștergere",
+        "description": "Descriere",
+        "example": "Exemplu",
+        "default": "Implicit",
+        "deprecationMessage": "Mesaj de depreciere",
+        "minimum": "Minim",
+        "maximum": "Maxim",
+        "minLength": "Lungime min.",
+        "maxLength": "Lungime max.",
+        "pattern": "Șablon"
+      },
+      "generatedProperties": "Proprietăți generate",
+      "inheritedProperties": "Proprietăți moștenite",
+      "ownProperties": "Proprietăți proprii",
+      "tabs": {
+        "property": "Proprietate"
+      },
+      "advancedType": "Avansat…"
+    },
+    "flags": {
+      "required": "obligatoriu",
+      "nullable": "nullable",
+      "unique": "unic",
+      "immutable": "imuabil",
+      "searchable": "căutabil",
+      "deprecated": "depreciat",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Implicit",
+      "add": "Adaugă un exemplu",
+      "delete": "Șterge exemplul",
+      "name": "Numele exemplului",
+      "newName": "Exemplu",
+      "defaultHint": "Valorile implicite provin din fiecare proprietate (gol = generat automat).",
+      "namedHint": "Tastați o valoare pentru a o defini; lăsați gol pentru a păstra valoarea generată.",
+      "columns": {
+        "value": "Valoare",
+        "origin": "Origine"
+      },
+      "auto": "auto",
+      "defined": "definit",
+      "constraintViolated": "Valoarea încalcă restricția proprietății ({{constraint}})",
+      "deleteTitle": "Ștergeți acest exemplu?",
+      "deleteConfirm": "Exemplul „{{name}}” va fi șters."
+    },
+    "onDelete": {
+      "restrict": "Restricționează (interzice cât timp e folosit)",
+      "cascade": "Ștergere în cascadă",
+      "setNull": "Setează la null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-incrementare",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Sute",
+      "tenThousands": "Zeci de mii",
+      "millions": "Milioane"
+    },
+    "accessPattern": {
+      "readHeavy": "Preponderent citire",
+      "writeHeavy": "Preponderent scriere",
+      "balanced": "Echilibrat",
+      "appendOnly": "Doar adăugare"
+    },
+    "traffic": {
+      "low": "Scăzut",
+      "medium": "Mediu",
+      "high": "Ridicat"
+    },
+    "freshness": {
+      "strong": "Consistență puternică",
+      "shortCache": "Cache scurt OK",
+      "longCache": "Cache lung OK"
+    },
+    "sensitivity": {
+      "public": "Public",
+      "internal": "Intern",
+      "confidential": "Confidențial",
+      "pii": "Date personale (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Arhivabil",
+      "ephemeral": "Efemer (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Proprietatea nu are nume",
+      "propertyNameDuplicate": "Nume de proprietate duplicat",
+      "propertyShadowsParent": "Ascunde o proprietate moștenită",
+      "referenceTargetUnknown": "Tipul referențiat nu mai există",
+      "constraintPatternInvalid": "Șablon invalid (expresie regulată)",
+      "constraintMinAboveMax": "Min depășește max",
+      "modelNameEmpty": "Modelul nu are nume",
+      "enumNameEmpty": "Enumul nu are nume",
+      "groupNameEmpty": "Grupul nu are nume",
+      "modelNameDuplicate": "Nume de model duplicat",
+      "enumNameDuplicate": "Nume de enum duplicat",
+      "componentNameCollision": "Un model și un enum împart acest nume",
+      "groupNameDuplicate": "Nume de grup duplicat",
+      "inheritanceTargetUnknown": "Modelul moștenit nu mai există",
+      "inheritanceCycle": "Lanț de moștenire circular",
+      "identifierPropertyUnknown": "Proprietatea identificatoare nu mai există",
+      "paramLinkTargetUnknown": "O legătură de parametru indică o proprietate lipsă",
+      "bodyModelUnknown": "Modelul corpului nu mai există",
+      "responseModelUnknown": "Un model de răspuns nu mai există",
+      "responseExampleUnknown": "Un răspuns servește un exemplu lipsă",
+      "routeResponsesMissing": "Ruta nu declară niciun răspuns",
+      "routePathDuplicate": "O altă rută răspunde deja acestei metode și căi",
+      "routePathReserved": "Serverul de design rezervă această cale — ruta nu ar răspunde niciodată"
+    },
+    "routes": {
+      "addGroup": "Adaugă un grup",
+      "addRoute": "Adaugă o rută",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Selectați un grup sau o rută, sau creați un grup.",
+      "deleteGroupTitle": "Ștergeți {{name}}?",
+      "deleteGroupImpact": "Grupul și cele {{count}} rute ale sale vor fi șterse.",
+      "method": "Metodă",
+      "path": "Cale",
+      "summary": "Rezumat",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definiție",
+        "responses": "Răspunsuri"
+      },
+      "group": {
+        "auth": "Auth necesară",
+        "authInherited": "Implicit al designului",
+        "versionPrefix": "Prefix de versiune",
+        "headers": "Antete de contract (moștenite de rute)",
+        "headerName": "Antet",
+        "addHeader": "Adaugă un antet",
+        "deleteHeader": "Șterge antetul",
+        "noHeaders": "Niciun antet partajat."
+      },
+      "params": {
+        "pathTitle": "Parametri de cale",
+        "otherTitle": "Parametri (query / header)",
+        "name": "Nume",
+        "location": "În",
+        "link": "Legătură model",
+        "noLink": "—",
+        "add": "Adaugă un parametru",
+        "delete": "Șterge parametrul",
+        "auto": "auto",
+        "pathEmpty": "Tastați un {{param}} în cale pentru a-i crea rândul.",
+        "otherEmpty": "Încă nu există parametri query sau header.",
+        "nameEmpty": "Un parametru are nevoie de un nume",
+        "nameTaken": "Acest nume este deja folosit"
+      },
+      "body": {
+        "label": "Corpul cererii",
+        "empty": "(gol)",
+        "nonStandardHint": "Un corp de cerere pe {{method}} nu este standard — multe servere și proxy-uri îl ignoră. Restorm îl servește și îl documentează oricum."
+      },
+      "responses": {
+        "add": "Adaugă",
+        "codePlaceholder": "Cod de stare",
+        "standardErrors": "+ erori standard",
+        "empty": "Niciun răspuns declarat încă.",
+        "emptyBody": "corp gol",
+        "model": "Model returnat",
+        "list": "Listă",
+        "paginated": "Paginată",
+        "listOf": "listă de {{name}}",
+        "paginatedListOf": "listă paginată de {{name}}",
+        "example": "Exemplu servit",
+        "exampleAuto": "(auto generat)",
+        "delete": "Șterge răspunsul",
+        "codeInvalid": "Introduceți un cod de stare din 3 cifre",
+        "codeTaken": "Acest cod este deja declarat"
+      },
+      "settings": {
+        "inherited": "Moștenit de la grup",
+        "authInherited": "Moștenit de la grup",
+        "editGroup": "Editează în grup ↗",
+        "headers": "Antete de contract",
+        "behaviour": "Comportament",
+        "idempotent": "Idempotentă",
+        "cacheSeconds": "Cache (secunde)",
+        "traffic": "Trafic așteptat",
+        "authOverride": "Suprascriere auth",
+        "pagination": "Paginare",
+        "defaultLimit": "Dimensiune implicită a paginii",
+        "maxLimit": "Dimensiune max. a paginii"
+      },
+      "addSubgroup": "Adaugă un subgrup"
+    },
+    "newDesignName": "Design nou de API",
+    "createFromScratch": "Creează un design de API",
+    "createFromDoc": "Creează un design din acest API",
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Servește pe http://localhost:{{port}}",
+      "stopped": "Server oprit",
+      "totalCalls": "{{count}} apeluri în această rulare",
+      "stop": "Oprește serverul",
+      "close": "Închide acest panou",
+      "forcedPill": "forțat {{code}}",
+      "defaultReturn": "Răspunsul designului (implicit)",
+      "codeReturn": "Răspunde {{code}}",
+      "customCode": "Cod de stare personalizat",
+      "customBody": "Corp de răspuns personalizat",
+      "customBodyPlaceholder": "Corp de răspuns opțional (JSON)",
+      "customApply": "Forțează"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Protejați rutele de scriere cu autentificare",
+      "authWritesHint": "Solicitați autentificare bearer la creare, actualizare și ștergere; citirile rămân publice.",
+      "generate": "Generați",
+      "replace": "Înlocuiți rutele existente",
+      "replaceHint": "Există deja rute pentru acest model. Înlocuiți-le pentru a evita duplicatele; lăsați dezactivat pentru a adăuga un al doilea set.",
+      "title": "Generați CRUD pentru {{name}}",
+      "projections": {
+        "http": "{{count}} rute REST",
+        "graphql": "{{queries}} interogări / {{mutations}} mutații în GraphQL",
+        "grpc": "{{count}} metode gRPC",
+        "odata": "{{count}} set de entități OData",
+        "soap": "{{count}} operațiuni SOAP",
+        "title": "Un singur model, fiecare protocol — acest CRUD este servit și ca:"
+      }
+    },
+    "server": {
+      "subtitle": "Servește acest design ca un mock live și urmărește fiecare apel."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Generare cod",
+        "name": "Variabilă",
+        "value": "Valoare (Handlebars)",
+        "add": "Adaugă o variabilă",
+        "none": "Încă nu există variabile — adaugă una din antetul acestui șablon.",
+        "noTemplates": "Alege unul sau mai multe șabloane în secțiunea „</> Code” — apoi definești aici variabilele folosite la generare.",
+        "generalTitle": "Variabile generale",
+        "scope": {
+          "general": "General",
+          "property": "Proprietate a modelului"
+        },
+        "discover": "Descoperă variabilele folosite de acest șablon",
+        "undeclared": "Folosite dar nedeclarate: {{names}}",
+        "allDeclared": "Toate variabilele folosite de acest șablon sunt declarate."
+      }
+    },
+    "clients": {
+      "generated": "Clienți generați — deschideți-i la Clienți în bara laterală.",
+      "importing": "Se importă clienții…",
+      "refresh": "Regenerează clienții",
+      "startPrompt": "Porniți serverul pentru a genera clienții.",
+      "startServerPrompt": "Porniți <serverLink>serverul de design</serverLink> pentru a accesa cererile client generate automat din model.",
+      "subtitle": "Serverul dumneavoastră de design API rulează și servește rutele pe care le-ați definit. Cererile de mai jos apelează direct acele rute — deschideți una pentru a o testa. Sunt efemere și dispar când serverul se oprește."
+    },
+    "descriptors": {
+      "copy": "Copiază URL-ul"
+    },
+    "projections": {
+      "title": "Proiecții",
+      "hint": "Aceeași operațiune, așa cum o expune fiecare protocol servit."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Păstrează",
@@ -2309,7 +2836,45 @@
     "addCookie": "Adaugă un cookie",
     "removeCookie": "Elimină un cookie",
     "clearCookieDomain": "Șterge cookie-urile unui domeniu",
-    "clearCookies": "Șterge toate cookie-urile"
+    "clearCookies": "Șterge toate cookie-urile",
+    "listDesigns": "Listează designurile API",
+    "getDesign": "Obține un design API",
+    "createDesign": "Creează un design API",
+    "createDesignFromDocumentation": "Creează un design din API importat",
+    "updateDesign": "Actualizează un design",
+    "deleteDesign": "Șterge un design",
+    "createDesignModel": "Creează un model de design",
+    "updateDesignModel": "Actualizează un model de design",
+    "deleteDesignModel": "Șterge un model de design",
+    "setDesignProperty": "Setează o proprietate a modelului",
+    "deleteDesignProperty": "Șterge o proprietate a modelului",
+    "createDesignEnum": "Creează un enum de design",
+    "updateDesignEnum": "Actualizează un enum de design",
+    "deleteDesignEnum": "Șterge un enum de design",
+    "setDesignExample": "Setează un exemplu numit",
+    "deleteDesignExample": "Șterge un exemplu numit",
+    "createDesignRouteGroup": "Creează un grup de rute",
+    "updateDesignRouteGroup": "Actualizează un grup de rute",
+    "deleteDesignRouteGroup": "Șterge un grup de rute",
+    "createDesignRoute": "Creează o rută de design",
+    "updateDesignRoute": "Actualizează o rută de design",
+    "deleteDesignRoute": "Șterge o rută de design",
+    "setDesignRouteParam": "Creează sau actualizează un parametru de rută",
+    "deleteDesignRouteParam": "Șterge un parametru de rută",
+    "generateDesignCrud": "Generează rute CRUD",
+    "generateDesignSearchRoutes": "Generează rute de căutare",
+    "serveDesign": "Servește un design",
+    "stopDesignServer": "Oprește un server de design",
+    "getDesignServerStatus": "Starea serverului de design",
+    "setDesignRouteResponse": "Forțează un răspuns",
+    "exportDesign": "Exportă un descriptor de design",
+    "generateDesignCode": "Generați cod dintr-un design",
+    "getDesignTemplateContract": "Obține contractul șabloanelor de cod",
+    "setDesignTemplates": "Setează șabloanele de cod ale unui design",
+    "setDesignModelVariables": "Setează suprascrierile de generare a codului pentru un model",
+    "setDesignPropertyVariables": "Setează suprascrierile de generare a codului pentru o proprietate",
+    "setDesignRouteVariables": "Setează suprascrierile de generare a codului pentru o rută",
+    "setDesignTemplateVariables": "Setează variabilele globale de generare a codului pentru un șablon"
   },
   "odataFilter": {
     "detail": {
@@ -2539,6 +3104,9 @@
       "addedScenario": "Adăugat scenariul „{{name}}”",
       "modifiedScenario": "Modificat scenariul „{{name}}”",
       "deletedScenario": "Șters scenariul „{{name}}”",
+      "addedDesign": "Adăugat designul „{{name}}”",
+      "modifiedDesign": "Modificat designul „{{name}}”",
+      "deletedDesign": "Șters designul „{{name}}”",
       "addedFolder": "Adăugat folderul „{{name}}”",
       "modifiedFolder": "Modificat folderul „{{name}}”",
       "deletedFolder": "Șters folderul „{{name}}”",
@@ -2547,6 +3115,7 @@
       "deletedEnvironmentFolder": "Șters folderul de mediu „{{name}}”",
       "movedRequest": "Cererea \"{{name}}\" a fost mutată",
       "movedScenario": "Scenariul \"{{name}}\" a fost mutat",
+      "movedDesign": "Designul \"{{name}}\" a fost mutat",
       "movedFolder": "Dosarul \"{{name}}\" a fost mutat",
       "movedEnvironmentFolder": "Dosarul de mediu \"{{name}}\" a fost mutat",
       "reorderedFolder": "Elemente reordonate în folderul „{{name}}”",
@@ -2557,6 +3126,7 @@
     "commitTitle": {
       "singleRequest": "Actualizare a cererii „{{name}}”",
       "singleScenario": "Actualizare a scenariului „{{name}}”",
+      "singleDesign": "Actualizare a designului „{{name}}”",
       "singleFolder": "Actualizare a folderului „{{name}}”",
       "singleEnvironmentFolder": "Actualizare a folderului de mediu „{{name}}”",
       "singleFileFormatVersion": "Trecere la formatul de fișier {{name}}",
@@ -2564,6 +3134,8 @@
       "countRequest_other": "{{count}} cereri",
       "countScenario_one": "{{count}} scenariu",
       "countScenario_other": "{{count}} scenarii",
+      "countDesign_one": "{{count}} design",
+      "countDesign_other": "{{count}} designuri",
       "countFolder_one": "{{count}} folder",
       "countFolder_other": "{{count}} foldere",
       "countEnvironmentFolder_one": "{{count}} folder de mediu",

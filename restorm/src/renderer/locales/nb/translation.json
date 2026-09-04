@@ -257,6 +257,7 @@
     "contextMenu": {
       "delete": "Slett",
       "clone": "Klon",
+      "openInSplit": "Åpne i delt panel",
       "copySuffix": "kopi",
       "rename": "Gi nytt navn",
       "addToFavorites": "Legg til i favoritter",
@@ -315,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-design"
       },
       "cut": "Klipp ut",
       "copy": "Kopier",
@@ -335,7 +337,8 @@
       "moveInto": "Flytt inn i dette scenarioet",
       "affectsNote": "Å slette denne forespørselen fjerner den også fra disse scenariene.",
       "deleteAnyway": "Slett likevel"
-    }
+    },
+    "expandAll": "Utvid alle forespørsler"
   },
   "environment": {
     "newName": "Nytt miljø",
@@ -741,7 +744,8 @@
       "environment": "Miljøer",
       "settings": "Innstillinger",
       "tag": "Tagger",
-      "scenario": "Scenarier"
+      "scenario": "Scenarier",
+      "design": "API-design"
     },
     "tooltip": {
       "noDetails": "Ingen detaljer tilgjengelig",
@@ -1238,7 +1242,8 @@
       "operation": "Operasjon",
       "description": "Beskrivelse",
       "example": "Eksempel",
-      "constraints": "Begrensninger"
+      "constraints": "Begrensninger",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Ingen ikke-body-parametere deklarert for de filtrerte rutene."
@@ -1285,7 +1290,8 @@
       "optionalSingleRef": "valgfri enkeltref.",
       "requiredArrayRef": "påkrevd array-ref.",
       "optionalArrayRef": "valgfri array-ref."
-    }
+    },
+    "editEntity": "Rediger i designeren"
   },
   "scenario": {
     "editor": {
@@ -2139,6 +2145,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Enum-verdier",
+      "addValue": "Legg til en verdi…",
+      "removeValue": "Fjern verdi",
+      "extract": "Trekk ut til en navngitt enum"
+    },
+    "tags": {
+      "add": "Legg til en tagg…",
+      "remove": "Fjern tagg",
+      "routeLabel": "Tagger",
+      "groupLabel": "Delte tagger"
+    },
+    "section": {
+      "settings": "Innstillinger",
+      "models": "Modeller",
+      "enums": "Enums",
+      "routes": "Ruter",
+      "documentation": "Dokumentasjon",
+      "notes": "Notater",
+      "code": "Kode",
+      "server": "Server",
+      "clients": "Klienter"
+    },
+    "rail": {
+      "ariaLabel": "Designseksjoner"
+    },
+    "settings": {
+      "subtitle": "Generelle innstillinger for designet «{{name}}»",
+      "serve": {
+        "title": "Designserver",
+        "action": "Server dette designet",
+        "description": "Svar fra navngitte eksempler · validering via begrensninger",
+        "port": "Port",
+        "latency": "Simulert latens (ms)",
+        "blocked": "Rett designets {{count}} valideringsfeil før det serveres",
+        "startFailed": "Serveren kunne ikke starte",
+        "protocolAlways": "HTTP serveres alltid",
+        "protocolToggle": "Server også denne projeksjonen",
+        "stateful": "Stateful-modus — POST/PUT/DELETE endrer et minnelager (nullstilles ved omstart)",
+        "clientsCallout": "Mock-serveren din kjører. Det ble generert klar-til-bruk-klienter for hver protokoll dette designet betjener.",
+        "clientsCalloutLink": "Finn dem her"
+      },
+      "identity": {
+        "title": "Identitet",
+        "title_field": "Tittel",
+        "version": "Designversjon",
+        "description": "Beskrivelse"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Basissti",
+        "defaultAuth": "Standard-auth",
+        "environment": "Miljø"
+      },
+      "export": {
+        "title": "Eksport",
+        "format": "Deskriptorformat",
+        "download": "Last ned deskriptoren",
+        "saved": "Deskriptor lagret i {{path}}",
+        "failed": "Eksporten mislyktes"
+      }
+    },
+    "auth": {
+      "none": "Ingen",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "API-nøkkel-header",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Filtrer…",
+      "selectPrompt": "Velg en oppføring i listen.",
+      "editorPending": "Redigereren for denne seksjonen er på vei."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} egenskap",
+      "propertyCount_other": "{{count}} egenskaper",
+      "add": "Legg til en modell",
+      "delete": "Slett modellen",
+      "deleteTitle": "Slette {{name}}?",
+      "deleteNoImpact": "Denne modellen brukes ingen steder.",
+      "deleteImpactIntro": "Sletting av denne modellen oppdaterer:",
+      "deleteImpactChild": "{{name}} mister arven sin (egne egenskaper beholdes)",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hva denne modellen representerer (valgfritt)",
+      "newName": "NewModel",
+      "selectPrompt": "Velg en modell, eller opprett en.",
+      "tabs": {
+        "schema": "Skjema",
+        "examples": "Eksempler",
+        "settings": "Innstillinger",
+        "notes": "Notater"
+      },
+      "addSubModel": "Legg til en undermodell",
+      "collapseAll": "Skjul alle",
+      "expandAll": "Utvid alle"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} verdi",
+      "valueCount_other": "{{count}} verdier",
+      "lists": "Enums",
+      "values": "Verdier",
+      "addEnum": "Legg til en enum",
+      "addValue": "Legg til en verdi",
+      "valueHeader": "Verdi",
+      "newName": "NewEnum",
+      "selectPrompt": "Velg en enum, eller opprett en — et lukket sett verdier som kan brukes som egenskapstype.",
+      "nameHeader": "Navn",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hva denne enumen representerer (valgfritt)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Ingen mal ennå — legg til en for å generere kode fra dette designet.",
+      "subtitle": "Generer prosjekter fra dette designet — gjengitt i en sandkasse, skrevet først når du bekrefter treet",
+      "sourceTitle": "Mal",
+      "sourceKind": {
+        "official": "Offisiell",
+        "repo": "Repository",
+        "local": "Lokal mappe"
+      },
+      "official": "Offisiell mal",
+      "repo": "Repository (owner/repo)",
+      "local": "Lokal malmappe",
+      "output": "Utdatamappe (absolutt eller relativ til prosjektet)",
+      "browse": "Velg utdatamappe",
+      "generate": "Generer prosjektet",
+      "generating": "Genererer i sandkassen…",
+      "blocked": "Rett designets {{count}} valideringsfeil før generering",
+      "failed": "Genereringen mislyktes",
+      "outputMissing": "Velg først en utdatamappe",
+      "extracted": "{{count}} fil(er) skrevet til {{root}}",
+      "preview": "{{name}} genererte {{count}} fil(er) — bekreft for å skrive dem",
+      "confirm": "Skriv til utdatamappen",
+      "discard": "Forkast",
+      "generateOne": "Generer dette prosjektet",
+      "remove": "Fjern denne malen",
+      "addTemplate": "Legg til en mal",
+      "library": {
+        "title": "Malbibliotek",
+        "recent": "Nylig brukt",
+        "official": "Offisielle maler",
+        "custom": "Egendefinert",
+        "add": "Legg til",
+        "use": "Bruk",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Organisasjonsmaler",
+        "openRepo": "Åpne repositoriet",
+        "remove": "Fjern",
+        "addTemplate": "Legg til mal",
+        "urlPlaceholder": "Git-repositorie-URL",
+        "descPlaceholder": "Beskrivelse (stack / hva den genererer)",
+        "noOrgTemplates": "Ingen organisasjonsmaler ennå.",
+        "loading": "Laster maler…",
+        "signedOut": "Logg inn for å se organisasjonens maler.",
+        "fetchError": "Kunne ikke laste malene:",
+        "unavailable": "utilgjengelig",
+        "officialTag": "Offisiell",
+        "officialDesc": {
+          "server-rest-typescript": "REST-server i TypeScript på Express — typede ruter, modeller og validering av forespørsler.",
+          "server-rest-dotnet": "Minimal-API-server i C# / ASP.NET Core — endepunkter, DTO-er og validering.",
+          "server-grpc-typescript": "gRPC-server i TypeScript — .proto-tjeneste, typede meldinger og server-stubber.",
+          "server-grpc-dotnet": "gRPC-server i C# / .NET — .proto-tjeneste, meldinger og server-stubber.",
+          "db-postgres": "PostgreSQL-skjema, seed-data og CRUD-skript fra designet."
+        },
+        "added": "Template lagt til",
+        "done": "Ferdig"
+      },
+      "extractedTitle": "Filer skrevet",
+      "openOutput": "Åpne utdatamappen",
+      "refresh": "Oppdater denne malen fra kilden",
+      "removeConfirm": "Template «{{name}}» fjernes fra dette designet (allerede genererte filer på disken forblir urørt).",
+      "removeTitle": "Fjerne dette Template?",
+      "tabs": {
+        "template": "Mal"
+      },
+      "questions": {
+        "title": "Malspørsmål"
+      },
+      "errorTitle": "Genereringen mislyktes",
+      "source": "Kilde",
+      "destination": "Mål",
+      "expand": "Utvid",
+      "collapse": "Skjul"
+    },
+    "statusbar": {
+      "format": "design · format {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Identitet",
+      "identifierProperty": "Identifiserende egenskap",
+      "identifierStrategy": "Strategi",
+      "inheritsFrom": "Arver fra",
+      "noIdentifier": "(ingen)",
+      "noParent": "(ingen)",
+      "storage": "Lagring og livssyklus",
+      "volumetry": "Forventet volum",
+      "volumetryUnset": "(uspesifisert)",
+      "operationalProfile": "Driftsprofil",
+      "accessPattern": "Lese-/skriveprofil",
+      "traffic": "Tilgangsfrekvens",
+      "freshness": "Ferskhetstoleranse",
+      "sensitivity": "Datafølsomhet",
+      "retention": "Oppbevaring / livssyklus",
+      "profileUnset": "(uspesifisert)",
+      "timestamps": "Tidsstempler (opprettet/endret)",
+      "softDelete": "Myk sletting",
+      "usedBy": "Brukes av",
+      "usedByNone": "Denne modellen brukes ikke ennå.",
+      "usage": {
+        "body": "body",
+        "response": "svar {{code}}",
+        "param": "parameter {{name}}",
+        "inherits": "{{name}} arver fra den"
+      },
+      "generators": "Ruter",
+      "generateCrud": "Generer CRUD",
+      "generateSearch": "Generer søkeruter"
+    },
+    "schema": {
+      "addProperty": "Legg til en egenskap",
+      "deleteProperty": "Slett egenskapen",
+      "columns": {
+        "property": "Egenskap",
+        "type": "Type",
+        "flags": "Attributter",
+        "example": "Eksempel"
+      },
+      "unnamed": "(uten navn)",
+      "nameMissing": "navn mangler",
+      "panelTitle": "Egenskap: {{name}}",
+      "jumpToParent": "Åpne {{name}}",
+      "typeModel": "modell",
+      "typeEnum": "enum",
+      "noFormat": "(ingen)",
+      "invalidPattern": "Ugyldig regulært uttrykk",
+      "minAboveMax": "Min overstiger maks",
+      "fields": {
+        "name": "Navn",
+        "type": "Type",
+        "format": "Format",
+        "elementType": "Elementtype",
+        "onDelete": "Ved sletting",
+        "description": "Beskrivelse",
+        "example": "Eksempel",
+        "default": "Standard",
+        "deprecationMessage": "Utfasingsmelding",
+        "minimum": "Minimum",
+        "maximum": "Maksimum",
+        "minLength": "Min. lengde",
+        "maxLength": "Maks. lengde",
+        "pattern": "Mønster"
+      },
+      "generatedProperties": "Genererte egenskaper",
+      "inheritedProperties": "Arvede egenskaper",
+      "ownProperties": "Egne egenskaper",
+      "tabs": {
+        "property": "Egenskap"
+      },
+      "advancedType": "Avansert…"
+    },
+    "flags": {
+      "required": "påkrevd",
+      "nullable": "nullable",
+      "unique": "unik",
+      "immutable": "uforanderlig",
+      "searchable": "søkbar",
+      "deprecated": "utfaset",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Standard",
+      "add": "Legg til et eksempel",
+      "delete": "Slett eksemplet",
+      "name": "Eksemplets navn",
+      "newName": "Eksempel",
+      "defaultHint": "Standardverdier kommer fra hver egenskap (tom = generert automatisk).",
+      "namedHint": "Skriv en verdi for å definere den; la stå tom for å beholde den genererte.",
+      "columns": {
+        "value": "Verdi",
+        "origin": "Opprinnelse"
+      },
+      "auto": "auto",
+      "defined": "definert",
+      "constraintViolated": "Verdien bryter egenskapens begrensning ({{constraint}})",
+      "deleteTitle": "Slette dette eksempelet?",
+      "deleteConfirm": "Eksempelet «{{name}}» blir slettet."
+    },
+    "onDelete": {
+      "restrict": "Begrens (forby mens den brukes)",
+      "cascade": "Kaskadesletting",
+      "setNull": "Sett til null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Auto-inkrement",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Hundrevis",
+      "tenThousands": "Titusenvis",
+      "millions": "Millioner"
+    },
+    "accessPattern": {
+      "readHeavy": "Lesetungt",
+      "writeHeavy": "Skrivetungt",
+      "balanced": "Balansert",
+      "appendOnly": "Kun tillegg"
+    },
+    "traffic": {
+      "low": "Lav",
+      "medium": "Middels",
+      "high": "Høy"
+    },
+    "freshness": {
+      "strong": "Sterk konsistens",
+      "shortCache": "Kort cache OK",
+      "longCache": "Lang cache OK"
+    },
+    "sensitivity": {
+      "public": "Offentlig",
+      "internal": "Intern",
+      "confidential": "Konfidensiell",
+      "pii": "Personopplysninger (PII)"
+    },
+    "retention": {
+      "permanent": "Permanent",
+      "archivable": "Arkiverbar",
+      "ephemeral": "Kortvarig (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Egenskapen har ikke noe navn",
+      "propertyNameDuplicate": "Duplisert egenskapsnavn",
+      "propertyShadowsParent": "Skjuler en arvet egenskap",
+      "referenceTargetUnknown": "Den refererte typen finnes ikke lenger",
+      "constraintPatternInvalid": "Ugyldig mønster (regulært uttrykk)",
+      "constraintMinAboveMax": "Min overstiger maks",
+      "modelNameEmpty": "Modellen har ikke noe navn",
+      "enumNameEmpty": "Enumen har ikke noe navn",
+      "groupNameEmpty": "Gruppen har ikke noe navn",
+      "modelNameDuplicate": "Duplisert modellnavn",
+      "enumNameDuplicate": "Duplisert enumnavn",
+      "componentNameCollision": "En modell og en enum deler dette navnet",
+      "groupNameDuplicate": "Duplisert gruppenavn",
+      "inheritanceTargetUnknown": "Den arvede modellen finnes ikke lenger",
+      "inheritanceCycle": "Sirkulær arvekjede",
+      "identifierPropertyUnknown": "Identifikator-egenskapen finnes ikke lenger",
+      "paramLinkTargetUnknown": "En parameterlenke peker på en manglende egenskap",
+      "bodyModelUnknown": "Body-modellen finnes ikke lenger",
+      "responseModelUnknown": "En svarmodell finnes ikke lenger",
+      "responseExampleUnknown": "Et svar serverer et manglende eksempel",
+      "routeResponsesMissing": "Ruten erklærer ikke noe svar",
+      "routePathDuplicate": "En annen rute besvarer allerede denne metoden og stien",
+      "routePathReserved": "Designserveren reserverer denne stien — ruten ville aldri svare"
+    },
+    "routes": {
+      "addGroup": "Legg til en gruppe",
+      "addRoute": "Legg til en rute",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Velg en gruppe eller en rute, eller opprett en gruppe.",
+      "deleteGroupTitle": "Slette {{name}}?",
+      "deleteGroupImpact": "Gruppen og dens {{count}} ruter slettes.",
+      "method": "Metode",
+      "path": "Sti",
+      "summary": "Sammendrag",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Definisjon",
+        "responses": "Svar"
+      },
+      "group": {
+        "auth": "Påkrevd auth",
+        "authInherited": "Designets standard",
+        "versionPrefix": "Versjonsprefiks",
+        "headers": "Kontrakt-headere (arvet av ruter)",
+        "headerName": "Header",
+        "addHeader": "Legg til en header",
+        "deleteHeader": "Slett headeren",
+        "noHeaders": "Ingen delt header."
+      },
+      "params": {
+        "pathTitle": "Stiparametre",
+        "otherTitle": "Parametre (query / header)",
+        "name": "Navn",
+        "location": "I",
+        "link": "Modellenke",
+        "noLink": "—",
+        "add": "Legg til en parameter",
+        "delete": "Slett parameteren",
+        "auto": "auto",
+        "pathEmpty": "Skriv en {{param}} i stien for å opprette raden.",
+        "otherEmpty": "Ingen query- eller header-parametre ennå.",
+        "nameEmpty": "En parameter trenger et navn",
+        "nameTaken": "Dette navnet er allerede i bruk"
+      },
+      "body": {
+        "label": "Request-body",
+        "empty": "(tom)",
+        "nonStandardHint": "En forespørselskropp på {{method}} er ikke standard — mange servere og proxyer ignorerer den. Restorm serverer og dokumenterer den likevel."
+      },
+      "responses": {
+        "add": "Legg til",
+        "codePlaceholder": "Statuskode",
+        "standardErrors": "+ standardfeil",
+        "empty": "Ingen svar deklarert ennå.",
+        "emptyBody": "tom body",
+        "model": "Returnert modell",
+        "list": "Liste",
+        "paginated": "Paginert",
+        "listOf": "liste av {{name}}",
+        "paginatedListOf": "paginert liste av {{name}}",
+        "example": "Servert eksempel",
+        "exampleAuto": "(auto generert)",
+        "delete": "Slett svaret",
+        "codeInvalid": "Skriv inn en 3-sifret statuskode",
+        "codeTaken": "Denne koden er allerede deklarert"
+      },
+      "settings": {
+        "inherited": "Arvet fra gruppen",
+        "authInherited": "Arvet fra gruppen",
+        "editGroup": "Rediger i gruppen ↗",
+        "headers": "Kontrakt-headere",
+        "behaviour": "Atferd",
+        "idempotent": "Idempotent",
+        "cacheSeconds": "Cache (sekunder)",
+        "traffic": "Forventet trafikk",
+        "authOverride": "Auth-overstyring",
+        "pagination": "Paginering",
+        "defaultLimit": "Standard sidestørrelse",
+        "maxLimit": "Maks sidestørrelse"
+      },
+      "addSubgroup": "Legg til en undergruppe"
+    },
+    "newDesignName": "Nytt API-design",
+    "createFromScratch": "Opprett et API-design",
+    "createFromDoc": "Opprett et design fra denne API-en",
+    "fromDocName": "Design {{name}}",
+    "run": {
+      "listening": "Serverer på http://localhost:{{port}}",
+      "stopped": "Server stoppet",
+      "totalCalls": "{{count}} kall i denne kjøringen",
+      "stop": "Stopp serveren",
+      "close": "Lukk dette panelet",
+      "forcedPill": "tvunget {{code}}",
+      "defaultReturn": "Designsvar (standard)",
+      "codeReturn": "Svar {{code}}",
+      "customCode": "Egendefinert statuskode",
+      "customBody": "Egendefinert svarkropp",
+      "customBodyPlaceholder": "Valgfri svarkropp (JSON)",
+      "customApply": "Tving"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Beskytt skriveruter med autentisering",
+      "authWritesHint": "Krev bearer-autentisering ved opprettelse, oppdatering og sletting; lesing forblir offentlig.",
+      "generate": "Generer",
+      "replace": "Erstatt de eksisterende rutene",
+      "replaceHint": "Det finnes allerede ruter for denne modellen. Erstatt dem for å unngå duplikater; la det være av for å legge til et nytt sett.",
+      "title": "Generer CRUD for {{name}}",
+      "projections": {
+        "http": "{{count}} REST-ruter",
+        "graphql": "{{queries}} queries / {{mutations}} mutations i GraphQL",
+        "grpc": "{{count}} gRPC-metoder",
+        "odata": "{{count}} OData-entitetssett",
+        "soap": "{{count}} SOAP-operasjoner",
+        "title": "Én modell, alle protokoller — dette CRUD-et serveres også som:"
+      }
+    },
+    "server": {
+      "subtitle": "Server dette designet som en live-mock, og følg med på hvert kall."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Kodegenerering",
+        "name": "Variabel",
+        "value": "Verdi (Handlebars)",
+        "add": "Legg til en variabel",
+        "none": "Ingen variabler ennå — legg til en fra denne malens topptekst.",
+        "noTemplates": "Velg én eller flere maler i «</> Code»-delen — her definerer du deretter variablene som brukes ved generering.",
+        "generalTitle": "Generelle variabler",
+        "scope": {
+          "general": "Generelt",
+          "property": "Modellegenskap"
+        },
+        "discover": "Oppdag variablene denne malen bruker",
+        "undeclared": "Brukt, men ikke deklarert: {{names}}",
+        "allDeclared": "Alle variablene denne malen bruker er deklarert."
+      }
+    },
+    "clients": {
+      "generated": "Klienter generert — åpne dem under Klienter i sidefeltet.",
+      "importing": "Importerer klienter…",
+      "refresh": "Regenerer klientene",
+      "startPrompt": "Start serveren for å generere klientene.",
+      "startServerPrompt": "Start <serverLink>designserveren</serverLink> for å få tilgang til klientforespørsler som genereres automatisk fra modellen.",
+      "subtitle": "Din API-designserver kjører og serverer rutene du definerte. Forespørslene nedenfor kaller disse rutene direkte — åpne én for å teste den. De er flyktige og forsvinner når serveren stoppes."
+    },
+    "descriptors": {
+      "copy": "Kopier URL-en"
+    },
+    "projections": {
+      "title": "Projeksjoner",
+      "hint": "Den samme operasjonen, slik hvert servert protokoll eksponerer den."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Behold",
@@ -2308,7 +2835,45 @@
     "addCookie": "Legg til en informasjonskapsel",
     "removeCookie": "Slett en informasjonskapsel",
     "clearCookieDomain": "Tøm informasjonskapsler for et domene",
-    "clearCookies": "Tøm alle informasjonskapsler"
+    "clearCookies": "Tøm alle informasjonskapsler",
+    "listDesigns": "List opp API-design",
+    "getDesign": "Hent et API-design",
+    "createDesign": "Opprett et API-design",
+    "createDesignFromDocumentation": "Opprett design fra importert API",
+    "updateDesign": "Oppdater et design",
+    "deleteDesign": "Slett et design",
+    "createDesignModel": "Opprett en designmodell",
+    "updateDesignModel": "Oppdater en designmodell",
+    "deleteDesignModel": "Slett en designmodell",
+    "setDesignProperty": "Angi en modellegenskap",
+    "deleteDesignProperty": "Slett en modellegenskap",
+    "createDesignEnum": "Opprett en design-enum",
+    "updateDesignEnum": "Oppdater en design-enum",
+    "deleteDesignEnum": "Slett en design-enum",
+    "setDesignExample": "Angi et navngitt eksempel",
+    "deleteDesignExample": "Slett et navngitt eksempel",
+    "createDesignRouteGroup": "Opprett en rutegruppe",
+    "updateDesignRouteGroup": "Oppdater en rutegruppe",
+    "deleteDesignRouteGroup": "Slett en rutegruppe",
+    "createDesignRoute": "Opprett en designrute",
+    "updateDesignRoute": "Oppdater en designrute",
+    "deleteDesignRoute": "Slett en designrute",
+    "setDesignRouteParam": "Opprett eller oppdater en ruteparameter",
+    "deleteDesignRouteParam": "Slett en ruteparameter",
+    "generateDesignCrud": "Generer CRUD-ruter",
+    "generateDesignSearchRoutes": "Generer søkeruter",
+    "serveDesign": "Server et design",
+    "stopDesignServer": "Stopp en designserver",
+    "getDesignServerStatus": "Status for designserveren",
+    "setDesignRouteResponse": "Tving et svar",
+    "exportDesign": "Eksporter en designdeskriptor",
+    "generateDesignCode": "Generer kode fra et design",
+    "getDesignTemplateContract": "Hent kontrakten for kodemaler",
+    "setDesignTemplates": "Angi et designs kodemaler",
+    "setDesignModelVariables": "Angi en modells codegen-overstyringer",
+    "setDesignPropertyVariables": "Angi en egenskaps codegen-overstyringer",
+    "setDesignRouteVariables": "Angi en rutes codegen-overstyringer",
+    "setDesignTemplateVariables": "Angi en mals globale codegen-variabler"
   },
   "odataFilter": {
     "detail": {
@@ -2538,6 +3103,9 @@
       "addedScenario": "La til scenarioet \"{{name}}\"",
       "modifiedScenario": "Endret scenarioet \"{{name}}\"",
       "deletedScenario": "Slettet scenarioet \"{{name}}\"",
+      "addedDesign": "La til designet \"{{name}}\"",
+      "modifiedDesign": "Endret designet \"{{name}}\"",
+      "deletedDesign": "Slettet designet \"{{name}}\"",
       "addedFolder": "La til mappen \"{{name}}\"",
       "modifiedFolder": "Endret mappen \"{{name}}\"",
       "deletedFolder": "Slettet mappen \"{{name}}\"",
@@ -2546,6 +3114,7 @@
       "deletedEnvironmentFolder": "Slettet miljømappen \"{{name}}\"",
       "movedRequest": "Flyttet forespørselen \"{{name}}\"",
       "movedScenario": "Flyttet scenariet \"{{name}}\"",
+      "movedDesign": "Flyttet designet \"{{name}}\"",
       "movedFolder": "Flyttet mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttet miljømappen \"{{name}}\"",
       "reorderedFolder": "Elementer omorganisert i mappen «{{name}}»",
@@ -2556,6 +3125,7 @@
     "commitTitle": {
       "singleRequest": "Oppdatering av forespørselen \"{{name}}\"",
       "singleScenario": "Oppdatering av scenarioet \"{{name}}\"",
+      "singleDesign": "Oppdatering av designet \"{{name}}\"",
       "singleFolder": "Oppdatering av mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Oppdatering av miljømappen \"{{name}}\"",
       "singleFileFormatVersion": "Bytte til filformat {{name}}",
@@ -2563,6 +3133,8 @@
       "countRequest_other": "{{count}} forespørsler",
       "countScenario_one": "{{count}} scenario",
       "countScenario_other": "{{count}} scenarioer",
+      "countDesign_one": "{{count}} design",
+      "countDesign_other": "{{count}} design",
       "countFolder_one": "{{count}} mappe",
       "countFolder_other": "{{count}} mapper",
       "countEnvironmentFolder_one": "{{count}} miljømappe",

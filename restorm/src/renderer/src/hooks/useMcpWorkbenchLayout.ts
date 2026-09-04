@@ -50,6 +50,7 @@ interface RestormLayoutBridge {
 function tabItemId(tab: RestormEditorTab): string | null {
   if ('request' in tab) return tab.request.id
   if ('scenario' in tab) return tab.scenario.id
+  if ('design' in tab) return tab.design.id
   if ('folder' in tab) return tab.folder.id
   return null
 }
@@ -105,6 +106,7 @@ export function resolveRebuildTabId(layoutTab: LayoutTab): string | null {
   if (tabType === 'folder') return `folder-id:${itemId}`
   if (tabType === 'environment-folder') return `env-folder-id:${itemId}`
   if (tabType === 'scenario-editor') return `scenario-id:${itemId}`
+  if (tabType === 'design') return `design-id:${itemId}`
   if (tabType && REQUEST_TAB_TYPES.has(tabType)) return `request-id:${itemId}`
   return null
 }

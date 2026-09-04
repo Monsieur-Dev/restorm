@@ -84,12 +84,16 @@ import {
   makeReactiveFolder,
   makeReactiveRequest,
   makeReactiveEnvironment,
+  makeReactiveApiDesign,
+  makeReactiveFolderItem,
   emitFolderCreated,
   emitFolderDeleted,
   emitRequestCreated,
-  emitRequestDeleted
+  emitRequestDeleted,
+  DESIGN_INDEXABLE_KEYS
 } from '../../src/renderer/src/types/reactive'
-import type { Folder, HTTPRequest, EnvironmentFolder, Environment, Request } from '../../src/shared/types/collections'
+import { buildReferenceApiDesign } from './apiDesignReference'
+import type { Folder, HTTPRequest, EnvironmentFolder, Environment, Request, ApiDesign } from '../../src/shared/types/collections'
 import { StringValue } from '../../src/shared/types/valueTypes'
 
 describe('Reactive Document System', () => {
@@ -600,6 +604,96 @@ describe('Reactive Document System', () => {
         mockedDocumentEvents.ENVIRONMENT_UPDATED,
         expect.objectContaining({ id: 'env-child', type: 'environment' })
       )
+    })
+  })
+  describe('makeReactiveApiDesign — every design section emits on edit', () => {
+    // One mutation per top-level design key: the parameterization is the
+    // "no silent surface" guard — a key missing from
+    // DESIGN_INDEXABLE_KEYS would store the edit without DESIGN_UPDATED
+    // (applied on screen, lost on close), and this table would go red.
+    const MUTATIONS: Record<string, unknown> = {
+      name: 'Renamed design',
+      notes: 'note',
+      tags: ['tagged'],
+      info: { title: 'New title' },
+      server: { host: 'example.com' },
+      securitySchemes: { basicAuth: { type: 'basic' } },
+      defaultSecurity: [{ basicAuth: [] }],
+      defaultAuth: 'basic',
+      serving: { port: 9000 },
+      codegen: { templates: [{ id: 't1', source: { kind: 'local', path: '/tpl' } }] },
+      models: [],
+      enums: [],
+      routeGroups: []
+    }
+
+    it('the mutation table covers EXACTLY the indexable design keys', () => {
+      // Hardcoding the list here once omitted `defaultAuth` — the very
+      // key its branch added. Deriving the assertion from the source
+      // set makes a future key impossible to forget.
+      expect(Object.keys(MUTATIONS).sort()).toEqual([...DESIGN_INDEXABLE_KEYS].sort())
+    })
+
+    it.each(Object.keys(MUTATIONS))('setting "%s" emits DESIGN_UPDATED on both buses', (key) => {
+      const design = makeReactiveApiDesign(buildReferenceApiDesign())
+
+      ;(design as unknown as Record<string, unknown>)[key] = MUTATIONS[key]
+      vi.advanceTimersByTime(100)
+
+      const expected = expect.objectContaining({ id: 'design-petstore', type: 'design' })
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith('document:design:updated', expected)
+      // The local bus feeds the renderer save-unit bridge — main-only
+      // delivery would index the edit but never mark the unit dirty.
+      expect((mockedEventBus as unknown as { emitLocalSync: ReturnType<typeof vi.fn> }).emitLocalSync)
+        .toHaveBeenCalledWith('document:design:updated', expected)
+    })
+
+    it('mutates through the proxy and keeps the value', () => {
+      const design = makeReactiveApiDesign(buildReferenceApiDesign())
+      design.name = 'Renamed design'
+      vi.advanceTimersByTime(100)
+      expect(design.name).toBe('Renamed design')
+    })
+
+    it('debounces rapid edits into one emission', () => {
+      const design = makeReactiveApiDesign(buildReferenceApiDesign())
+      design.name = 'A'
+      design.name = 'B'
+      design.notes = 'C'
+      vi.advanceTimersByTime(100)
+      expect(mockedEventBus.emitSync).toHaveBeenCalledTimes(1)
+    })
+
+    it('carries the parent folder id for a nested design', () => {
+      const design = makeReactiveApiDesign(buildReferenceApiDesign(), 'folder-9')
+      design.name = 'Nested'
+      vi.advanceTimersByTime(100)
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        'document:design:updated',
+        expect.objectContaining({ id: 'design-petstore', parentFolderId: 'folder-9' })
+      )
+    })
+
+    it('does not re-wrap an already reactive design', () => {
+      const design = makeReactiveApiDesign(buildReferenceApiDesign())
+      expect(makeReactiveApiDesign(design)).toBe(design)
+    })
+
+    it('makeReactiveFolderItem routes a design through the design wrapper', () => {
+      const item = makeReactiveFolderItem(buildReferenceApiDesign(), 'folder-2') as ApiDesign
+      item.notes = 'wired'
+      vi.advanceTimersByTime(100)
+      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
+        'document:design:updated',
+        expect.objectContaining({ id: 'design-petstore', type: 'design', parentFolderId: 'folder-2' })
+      )
+    })
+
+    it('stays quiet on a non-persisted key', () => {
+      const design = makeReactiveApiDesign(buildReferenceApiDesign())
+      ;(design as unknown as Record<string, unknown>)['__transient'] = true
+      vi.advanceTimersByTime(100)
+      expect(mockedEventBus.emitSync).not.toHaveBeenCalled()
     })
   })
 })

@@ -259,6 +259,7 @@
     "contextMenu": {
       "delete": "Видалити",
       "clone": "Клонувати",
+      "openInSplit": "Відкрити в розділеній панелі",
       "copySuffix": "копія",
       "rename": "Перейменувати",
       "addToFavorites": "Додати до обраного",
@@ -317,7 +318,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Дизайн API"
       },
       "cut": "Вирізати",
       "copy": "Копіювати",
@@ -337,7 +339,8 @@
       "moveInto": "Перемістити в цей сценарій",
       "affectsNote": "Видалення цього запиту також прибере його з цих сценаріїв.",
       "deleteAnyway": "Усе одно видалити"
-    }
+    },
+    "expandAll": "Розгорнути всі запити"
   },
   "environment": {
     "newName": "Нове середовище",
@@ -743,7 +746,8 @@
       "environment": "Середовища",
       "settings": "Параметри",
       "tag": "Теги",
-      "scenario": "Сценарії"
+      "scenario": "Сценарії",
+      "design": "Дизайни API"
     },
     "tooltip": {
       "noDetails": "Деталі недоступні",
@@ -1240,7 +1244,8 @@
       "operation": "Операція",
       "description": "Опис",
       "example": "Приклад",
-      "constraints": "Обмеження"
+      "constraints": "Обмеження",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Для відфільтрованих маршрутів не оголошено параметрів поза тілом."
@@ -1287,7 +1292,8 @@
       "optionalSingleRef": "необов'язкове одиничне посилання",
       "requiredArrayRef": "обов'язкове посилання на масив",
       "optionalArrayRef": "необов'язкове посилання на масив"
-    }
+    },
+    "editEntity": "Редагувати в дизайнері"
   },
   "scenario": {
     "editor": {
@@ -2141,6 +2147,527 @@
       }
     }
   },
+  "design": {
+    "enum": {
+      "inlineLabel": "Значення enum",
+      "addValue": "Додати значення…",
+      "removeValue": "Видалити значення",
+      "extract": "Винести в іменований enum"
+    },
+    "tags": {
+      "add": "Додати тег…",
+      "remove": "Видалити тег",
+      "routeLabel": "Теги",
+      "groupLabel": "Спільні теги"
+    },
+    "section": {
+      "settings": "Налаштування",
+      "models": "Моделі",
+      "enums": "Енуми",
+      "routes": "Маршрути",
+      "documentation": "Документація",
+      "notes": "Нотатки",
+      "code": "Код",
+      "server": "Сервер",
+      "clients": "Клієнти"
+    },
+    "rail": {
+      "ariaLabel": "Розділи дизайну"
+    },
+    "settings": {
+      "subtitle": "Загальні налаштування дизайну «{{name}}»",
+      "serve": {
+        "title": "Сервер дизайну",
+        "action": "Обслуговувати цей дизайн",
+        "description": "Відповіді з іменованих прикладів · валідація обмеженнями",
+        "port": "Порт",
+        "latency": "Імітована затримка (мс)",
+        "blocked": "Виправте {{count}} помилок валідації дизайну перед його запуском",
+        "startFailed": "Сервер не вдалося запустити",
+        "protocolAlways": "HTTP обслуговується завжди",
+        "protocolToggle": "Обслуговувати також цю проєкцію",
+        "stateful": "Режим зі станом — POST/PUT/DELETE змінюють сховище в пам'яті (скидається при перезапуску)",
+        "clientsCallout": "Ваш mock-сервер запущено. Для кожного протоколу, який обслуговує цей дизайн, було згенеровано готових до запуску клієнтів.",
+        "clientsCalloutLink": "Знайдіть їх тут"
+      },
+      "identity": {
+        "title": "Ідентичність",
+        "title_field": "Назва",
+        "version": "Версія дизайну",
+        "description": "Опис"
+      },
+      "api": {
+        "title": "API",
+        "basePath": "Базовий шлях",
+        "defaultAuth": "Типова автентифікація",
+        "environment": "Середовище"
+      },
+      "export": {
+        "title": "Експорт",
+        "format": "Формат дескриптора",
+        "download": "Завантажити дескриптор",
+        "saved": "Дескриптор збережено в {{path}}",
+        "failed": "Експорт не вдався"
+      }
+    },
+    "auth": {
+      "none": "Немає",
+      "bearer": "Bearer (JWT)",
+      "apiKeyHeader": "Заголовок ключа API",
+      "basic": "Basic"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "soap": "SOAP",
+      "odata": "OData",
+      "grpc": "gRPC"
+    },
+    "list": {
+      "filter": "Фільтрувати…",
+      "selectPrompt": "Виберіть запис у списку.",
+      "editorPending": "Редактор цього розділу вже в дорозі."
+    },
+    "models": {
+      "propertyCount_one": "{{count}} властивість",
+      "propertyCount_other": "{{count}} властивостей",
+      "add": "Додати модель",
+      "delete": "Видалити модель",
+      "deleteTitle": "Видалити {{name}}?",
+      "deleteNoImpact": "Ця модель ніде не використовується.",
+      "deleteImpactIntro": "Видалення цієї моделі оновить:",
+      "deleteImpactChild": "{{name}} втрачає успадкування (власні властивості залишаються)",
+      "description": "Опис",
+      "descriptionPlaceholder": "Що представляє ця модель (необов'язково)",
+      "newName": "NewModel",
+      "selectPrompt": "Виберіть модель або створіть нову.",
+      "tabs": {
+        "schema": "Схема",
+        "examples": "Приклади",
+        "settings": "Налаштування",
+        "notes": "Нотатки"
+      },
+      "addSubModel": "Додати підмодель",
+      "collapseAll": "Згорнути все",
+      "expandAll": "Розгорнути все"
+    },
+    "enums": {
+      "valueCount_one": "{{count}} значення",
+      "valueCount_other": "{{count}} значень",
+      "lists": "Енуми",
+      "values": "Значення",
+      "addEnum": "Додати енум",
+      "addValue": "Додати значення",
+      "valueHeader": "Значення",
+      "newName": "NewEnum",
+      "selectPrompt": "Виберіть енум або створіть новий — закритий набір значень, який можна використовувати як тип властивості.",
+      "nameHeader": "Назва",
+      "description": "Опис",
+      "descriptionPlaceholder": "Що представляє це перелічення (необов'язково)"
+    },
+    "documentation": {},
+    "code": {
+      "empty": "Ще немає шаблону — додайте його, щоб генерувати код із цього дизайну.",
+      "subtitle": "Генеруйте проєкти з цього дизайну — відрендерені в пісочниці, записуються лише після підтвердження дерева",
+      "sourceTitle": "Шаблон",
+      "sourceKind": {
+        "official": "Офіційний",
+        "repo": "Репозиторій",
+        "local": "Локальна тека"
+      },
+      "official": "Офіційний шаблон",
+      "repo": "Репозиторій (owner/repo)",
+      "local": "Локальна тека шаблону",
+      "output": "Тека виводу (абсолютна або відносна до проєкту)",
+      "browse": "Обрати теку виводу",
+      "generate": "Згенерувати проєкт",
+      "generating": "Генерація в пісочниці…",
+      "blocked": "Виправте {{count}} помилок валідації дизайну перед генерацією",
+      "failed": "Генерація не вдалася",
+      "outputMissing": "Спершу оберіть теку виводу",
+      "extracted": "{{count}} файл(и) записано до {{root}}",
+      "preview": "{{name}} згенерував {{count}} файл(и) — підтвердьте запис",
+      "confirm": "Записати до теки виводу",
+      "discard": "Відхилити",
+      "generateOne": "Згенерувати цей проєкт",
+      "remove": "Видалити цей шаблон",
+      "addTemplate": "Додати шаблон",
+      "library": {
+        "title": "Бібліотека шаблонів",
+        "recent": "Нещодавно використані",
+        "official": "Офіційні шаблони",
+        "custom": "Власний",
+        "add": "Додати",
+        "use": "Використати",
+        "orgTab": "Templates {{org}}",
+        "orgTabFallback": "Шаблони організації",
+        "openRepo": "Відкрити репозиторій",
+        "remove": "Видалити",
+        "addTemplate": "Додати шаблон",
+        "urlPlaceholder": "URL git-репозиторію",
+        "descPlaceholder": "Опис (stack / що генерує)",
+        "noOrgTemplates": "Ще немає шаблонів організації.",
+        "loading": "Завантаження шаблонів…",
+        "signedOut": "Увійдіть, щоб побачити шаблони вашої організації.",
+        "fetchError": "Не вдалося завантажити шаблони:",
+        "unavailable": "недоступно",
+        "officialTag": "Офіційний",
+        "officialDesc": {
+          "server-rest-typescript": "Сервер REST на TypeScript з Express — типізовані маршрути, моделі та валідація запитів.",
+          "server-rest-dotnet": "Сервер Minimal-API на C# / ASP.NET Core — ендпоінти, DTO та валідація.",
+          "server-grpc-typescript": "Сервер gRPC на TypeScript — служба .proto, типізовані повідомлення та серверні заглушки.",
+          "server-grpc-dotnet": "Сервер gRPC на C# / .NET — служба .proto, повідомлення та серверні заглушки.",
+          "db-postgres": "Схема PostgreSQL, початкові дані та CRUD-скрипти з дизайну."
+        },
+        "added": "Template додано",
+        "done": "Готово"
+      },
+      "extractedTitle": "Файли записано",
+      "openOutput": "Відкрити теку виводу",
+      "refresh": "Оновити цей шаблон з його джерела",
+      "removeConfirm": "Template «{{name}}» буде вилучено з цього дизайну (уже згенеровані файли на диску залишаться незмінними).",
+      "removeTitle": "Вилучити цей Template?",
+      "tabs": {
+        "template": "Шаблон"
+      },
+      "questions": {
+        "title": "Питання шаблону"
+      },
+      "errorTitle": "Помилка генерації",
+      "source": "Джерело",
+      "destination": "Призначення",
+      "expand": "Розгорнути",
+      "collapse": "Згорнути"
+    },
+    "statusbar": {
+      "format": "дизайн · формат {{version}}"
+    },
+    "modelSettings": {
+      "identity": "Ідентичність",
+      "identifierProperty": "Ідентифікаційна властивість",
+      "identifierStrategy": "Стратегія",
+      "inheritsFrom": "Успадковує від",
+      "noIdentifier": "(немає)",
+      "noParent": "(немає)",
+      "storage": "Зберігання та життєвий цикл",
+      "volumetry": "Очікуваний обсяг",
+      "volumetryUnset": "(не вказано)",
+      "operationalProfile": "Операційний профіль",
+      "accessPattern": "Профіль читання/запису",
+      "traffic": "Частота доступу",
+      "freshness": "Допустима давність даних",
+      "sensitivity": "Чутливість даних",
+      "retention": "Зберігання / життєвий цикл",
+      "profileUnset": "(не вказано)",
+      "timestamps": "Часові мітки (створено/змінено)",
+      "softDelete": "М’яке видалення",
+      "usedBy": "Використовується в",
+      "usedByNone": "Ця модель ще не використовується.",
+      "usage": {
+        "body": "тіло",
+        "response": "відповідь {{code}}",
+        "param": "параметр {{name}}",
+        "inherits": "{{name}} успадковує від неї"
+      },
+      "generators": "Маршрути",
+      "generateCrud": "Згенерувати CRUD",
+      "generateSearch": "Згенерувати маршрути пошуку"
+    },
+    "schema": {
+      "addProperty": "Додати властивість",
+      "deleteProperty": "Видалити властивість",
+      "columns": {
+        "property": "Властивість",
+        "type": "Тип",
+        "flags": "Атрибути",
+        "example": "Приклад"
+      },
+      "unnamed": "(без назви)",
+      "nameMissing": "відсутня назва",
+      "panelTitle": "Властивість: {{name}}",
+      "jumpToParent": "Відкрити {{name}}",
+      "typeModel": "модель",
+      "typeEnum": "enum",
+      "noFormat": "(немає)",
+      "invalidPattern": "Некоректний регулярний вираз",
+      "minAboveMax": "Мін перевищує макс",
+      "fields": {
+        "name": "Назва",
+        "type": "Тип",
+        "format": "Формат",
+        "elementType": "Тип елементів",
+        "onDelete": "При видаленні",
+        "description": "Опис",
+        "example": "Приклад",
+        "default": "Типове",
+        "deprecationMessage": "Повідомлення про застарілість",
+        "minimum": "Мінімум",
+        "maximum": "Максимум",
+        "minLength": "Мін. довжина",
+        "maxLength": "Макс. довжина",
+        "pattern": "Шаблон"
+      },
+      "generatedProperties": "Згенеровані властивості",
+      "inheritedProperties": "Успадковані властивості",
+      "ownProperties": "Власні властивості",
+      "tabs": {
+        "property": "Властивість"
+      },
+      "advancedType": "Розширені…"
+    },
+    "flags": {
+      "required": "обов’язкова",
+      "nullable": "nullable",
+      "unique": "унікальна",
+      "immutable": "незмінна",
+      "searchable": "доступна для пошуку",
+      "deprecated": "застаріла",
+      "readOnly": "readOnly",
+      "writeOnly": "writeOnly",
+      "pii": "PII"
+    },
+    "examples": {
+      "defaultPill": "Типовий",
+      "add": "Додати приклад",
+      "delete": "Видалити приклад",
+      "name": "Назва прикладу",
+      "newName": "Приклад",
+      "defaultHint": "Типові значення походять з кожної властивості (порожньо = генерується автоматично).",
+      "namedHint": "Введіть значення, щоб визначити його; залиште порожнім, щоб зберегти згенероване.",
+      "columns": {
+        "value": "Значення",
+        "origin": "Походження"
+      },
+      "auto": "авто",
+      "defined": "визначено",
+      "constraintViolated": "Значення порушує обмеження властивості ({{constraint}})",
+      "deleteTitle": "Видалити цей приклад?",
+      "deleteConfirm": "Приклад «{{name}}» буде видалено."
+    },
+    "onDelete": {
+      "restrict": "Обмежити (заборонити, поки використовується)",
+      "cascade": "Каскадне видалення",
+      "setNull": "Встановити в null"
+    },
+    "identifierStrategy": {
+      "uuid": "UUID",
+      "autoIncrement": "Автоінкремент",
+      "ulid": "ULID"
+    },
+    "volumetry": {
+      "hundreds": "Сотні",
+      "tenThousands": "Десятки тисяч",
+      "millions": "Мільйони"
+    },
+    "accessPattern": {
+      "readHeavy": "Переважно читання",
+      "writeHeavy": "Переважно запис",
+      "balanced": "Збалансований",
+      "appendOnly": "Лише додавання"
+    },
+    "traffic": {
+      "low": "Низький",
+      "medium": "Середній",
+      "high": "Високий"
+    },
+    "freshness": {
+      "strong": "Сувора узгодженість",
+      "shortCache": "Коротке кешування OK",
+      "longCache": "Довге кешування OK"
+    },
+    "sensitivity": {
+      "public": "Публічні",
+      "internal": "Внутрішні",
+      "confidential": "Конфіденційні",
+      "pii": "Персональні дані (PII)"
+    },
+    "retention": {
+      "permanent": "Постійні",
+      "archivable": "Архівовані",
+      "ephemeral": "Тимчасові (TTL)"
+    },
+    "issue": {
+      "propertyNameEmpty": "Властивість не має назви",
+      "propertyNameDuplicate": "Дубльована назва властивості",
+      "propertyShadowsParent": "Затіняє успадковану властивість",
+      "referenceTargetUnknown": "Тип, на який є посилання, більше не існує",
+      "constraintPatternInvalid": "Некоректний шаблон (регулярний вираз)",
+      "constraintMinAboveMax": "Мін перевищує макс",
+      "modelNameEmpty": "Модель не має назви",
+      "enumNameEmpty": "Енум не має назви",
+      "groupNameEmpty": "Група не має назви",
+      "modelNameDuplicate": "Дубльована назва моделі",
+      "enumNameDuplicate": "Дубльована назва енуму",
+      "componentNameCollision": "Модель і енум мають однакову назву",
+      "groupNameDuplicate": "Дубльована назва групи",
+      "inheritanceTargetUnknown": "Успадкованої моделі більше не існує",
+      "inheritanceCycle": "Циклічний ланцюг успадкування",
+      "identifierPropertyUnknown": "Ідентифікаційної властивості більше не існує",
+      "paramLinkTargetUnknown": "Звʼязок параметра вказує на відсутню властивість",
+      "bodyModelUnknown": "Моделі тіла більше не існує",
+      "responseModelUnknown": "Моделі відповіді більше не існує",
+      "responseExampleUnknown": "Відповідь подає відсутній приклад",
+      "routeResponsesMissing": "Маршрут не оголошує жодної відповіді",
+      "routePathDuplicate": "Інший маршрут уже відповідає на цей метод і шлях",
+      "routePathReserved": "Сервер дизайну резервує цей шлях — маршрут ніколи б не відповів"
+    },
+    "routes": {
+      "addGroup": "Додати групу",
+      "addRoute": "Додати маршрут",
+      "newGroupName": "NewGroup",
+      "selectPrompt": "Виберіть групу або маршрут, або створіть групу.",
+      "deleteGroupTitle": "Видалити {{name}}?",
+      "deleteGroupImpact": "Групу та її {{count}} маршрутів буде видалено.",
+      "method": "Метод",
+      "path": "Шлях",
+      "summary": "Підсумок",
+      "newParamName": "param",
+      "tabs": {
+        "definition": "Визначення",
+        "responses": "Відповіді"
+      },
+      "group": {
+        "auth": "Обовʼязкова автентифікація",
+        "authInherited": "Типове дизайну",
+        "versionPrefix": "Префікс версії",
+        "headers": "Контрактні заголовки (успадковуються маршрутами)",
+        "headerName": "Заголовок",
+        "addHeader": "Додати заголовок",
+        "deleteHeader": "Видалити заголовок",
+        "noHeaders": "Немає спільного заголовка."
+      },
+      "params": {
+        "pathTitle": "Параметри шляху",
+        "otherTitle": "Параметри (query / header)",
+        "name": "Назва",
+        "location": "Де",
+        "link": "Звʼязок із моделлю",
+        "noLink": "—",
+        "add": "Додати параметр",
+        "delete": "Видалити параметр",
+        "auto": "авто",
+        "pathEmpty": "Введіть {{param}} у шляху, щоб створити його рядок.",
+        "otherEmpty": "Ще немає query або header параметрів.",
+        "nameEmpty": "Параметр повинен мати назву",
+        "nameTaken": "Ця назва вже використовується"
+      },
+      "body": {
+        "label": "Тіло запиту",
+        "empty": "(порожнє)",
+        "nonStandardHint": "Тіло запиту для {{method}} не є стандартним — багато серверів і проксі його ігнорують. Restorm усе одно обробляє й документує його."
+      },
+      "responses": {
+        "add": "Додати",
+        "codePlaceholder": "Код статусу",
+        "standardErrors": "+ стандартні помилки",
+        "empty": "Ще немає оголошеної відповіді.",
+        "emptyBody": "порожнє тіло",
+        "model": "Повернута модель",
+        "list": "Список",
+        "paginated": "Посторінкова",
+        "listOf": "список {{name}}",
+        "paginatedListOf": "посторінковий список {{name}}",
+        "example": "Поданий приклад",
+        "exampleAuto": "(авто згенерований)",
+        "delete": "Видалити відповідь",
+        "codeInvalid": "Введіть тризначний код статусу",
+        "codeTaken": "Цей код уже оголошено"
+      },
+      "settings": {
+        "inherited": "Успадковано від групи",
+        "authInherited": "Успадковано від групи",
+        "editGroup": "Редагувати в групі ↗",
+        "headers": "Контрактні заголовки",
+        "behaviour": "Поведінка",
+        "idempotent": "Ідемпотентний",
+        "cacheSeconds": "Кеш (секунди)",
+        "traffic": "Очікуваний трафік",
+        "authOverride": "Перевизначення автентифікації",
+        "pagination": "Пагінація",
+        "defaultLimit": "Типовий розмір сторінки",
+        "maxLimit": "Макс. розмір сторінки"
+      },
+      "addSubgroup": "Додати підгрупу"
+    },
+    "newDesignName": "Новий дизайн API",
+    "createFromScratch": "Створити дизайн API",
+    "createFromDoc": "Створити дизайн з цього API",
+    "fromDocName": "Дизайн {{name}}",
+    "run": {
+      "listening": "Обслуговує на http://localhost:{{port}}",
+      "stopped": "Сервер зупинено",
+      "totalCalls": "{{count}} викликів у цьому запуску",
+      "stop": "Зупинити сервер",
+      "close": "Закрити цю панель",
+      "forcedPill": "примусово {{code}}",
+      "defaultReturn": "Відповідь дизайну (за замовчуванням)",
+      "codeReturn": "Відповісти {{code}}",
+      "customCode": "Власний код статусу",
+      "customBody": "Власне тіло відповіді",
+      "customBodyPlaceholder": "Необов’язкове тіло відповіді (JSON)",
+      "customApply": "Примусити"
+    },
+    "export": {
+      "format": {
+        "openapi31": "OpenAPI 3.1",
+        "graphqlSdl": "GraphQL SDL",
+        "odataCsdl": "OData CSDL",
+        "wsdl": "WSDL 1.1"
+      }
+    },
+    "crud": {
+      "authWrites": "Захищати маршрути запису автентифікацією",
+      "authWritesHint": "Вимагати автентифікацію bearer для створення, оновлення та видалення; читання залишається публічним.",
+      "generate": "Згенерувати",
+      "replace": "Замінити наявні маршрути",
+      "replaceHint": "Для цієї моделі вже є маршрути. Замініть їх, щоб уникнути дублікатів; залиште вимкненим, щоб додати другий набір.",
+      "title": "Згенерувати CRUD для {{name}}",
+      "projections": {
+        "http": "{{count}} маршрутів REST",
+        "graphql": "{{queries}} запитів / {{mutations}} мутацій у GraphQL",
+        "grpc": "{{count}} методів gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} операцій SOAP",
+        "title": "Одна модель, усі протоколи — цей CRUD також обслуговується як:"
+      }
+    },
+    "server": {
+      "subtitle": "Обслуговуйте цей дизайн як живий мок і стежте за кожним викликом."
+    },
+    "codegen": {
+      "vars": {
+        "tab": "Генерація коду",
+        "name": "Змінна",
+        "value": "Значення (Handlebars)",
+        "add": "Додати змінну",
+        "none": "Поки що немає змінних — додайте її із заголовка цього шаблону.",
+        "noTemplates": "Виберіть один або кілька шаблонів у розділі «</> Code» — тут ви потім визначите змінні, які використовує генерація.",
+        "generalTitle": "Загальні змінні",
+        "scope": {
+          "general": "Загальні",
+          "property": "Властивість моделі"
+        },
+        "discover": "Виявити змінні, які використовує цей шаблон",
+        "undeclared": "Використовуються, але не оголошені: {{names}}",
+        "allDeclared": "Усі змінні, які використовує цей шаблон, оголошені."
+      }
+    },
+    "clients": {
+      "generated": "Клієнти згенеровано — відкрийте їх у розділі «Клієнти» на бічній панелі.",
+      "importing": "Імпорт клієнтів…",
+      "refresh": "Перегенерувати клієнтів",
+      "startPrompt": "Запустіть сервер, щоб згенерувати клієнтів.",
+      "startServerPrompt": "Запустіть <serverLink>сервер дизайну</serverLink>, щоб отримати доступ до клієнтських запитів, автоматично згенерованих із моделі.",
+      "subtitle": "Ваш сервер дизайну API запущено й обслуговує визначені вами маршрути. Наведені нижче запити викликають ці маршрути безпосередньо — відкрийте один, щоб протестувати його. Вони ефемерні й зникають після зупинки сервера."
+    },
+    "descriptors": {
+      "copy": "Копіювати URL"
+    },
+    "projections": {
+      "title": "Проєкції",
+      "hint": "Та сама операція, як її надає кожен обслуговуваний протокол."
+    }
+  },
   "mqtt": {
     "qos": "QoS",
     "retain": "Зберігати",
@@ -2310,7 +2837,45 @@
     "addCookie": "Додати файл cookie",
     "removeCookie": "Видалити файл cookie",
     "clearCookieDomain": "Очистити файли cookie для домену",
-    "clearCookies": "Очистити всі файли cookie"
+    "clearCookies": "Очистити всі файли cookie",
+    "listDesigns": "Список дизайнів API",
+    "getDesign": "Отримати дизайн API",
+    "createDesign": "Створити дизайн API",
+    "createDesignFromDocumentation": "Створити дизайн з імпортованого API",
+    "updateDesign": "Оновити дизайн",
+    "deleteDesign": "Видалити дизайн",
+    "createDesignModel": "Створити модель дизайну",
+    "updateDesignModel": "Оновити модель дизайну",
+    "deleteDesignModel": "Видалити модель дизайну",
+    "setDesignProperty": "Задати властивість моделі",
+    "deleteDesignProperty": "Видалити властивість моделі",
+    "createDesignEnum": "Створити enum дизайну",
+    "updateDesignEnum": "Оновити enum дизайну",
+    "deleteDesignEnum": "Видалити enum дизайну",
+    "setDesignExample": "Задати іменований приклад",
+    "deleteDesignExample": "Видалити іменований приклад",
+    "createDesignRouteGroup": "Створити групу маршрутів",
+    "updateDesignRouteGroup": "Оновити групу маршрутів",
+    "deleteDesignRouteGroup": "Видалити групу маршрутів",
+    "createDesignRoute": "Створити маршрут дизайну",
+    "updateDesignRoute": "Оновити маршрут дизайну",
+    "deleteDesignRoute": "Видалити маршрут дизайну",
+    "setDesignRouteParam": "Створити або оновити параметр маршруту",
+    "deleteDesignRouteParam": "Видалити параметр маршруту",
+    "generateDesignCrud": "Згенерувати CRUD-маршрути",
+    "generateDesignSearchRoutes": "Згенерувати пошукові маршрути",
+    "serveDesign": "Обслуговувати дизайн",
+    "stopDesignServer": "Зупинити сервер дизайну",
+    "getDesignServerStatus": "Стан сервера дизайну",
+    "setDesignRouteResponse": "Примусити відповідь",
+    "exportDesign": "Експортувати дескриптор дизайну",
+    "generateDesignCode": "Згенерувати код із дизайну",
+    "getDesignTemplateContract": "Отримати контракт шаблонів коду",
+    "setDesignTemplates": "Задати шаблони коду дизайну",
+    "setDesignModelVariables": "Задати перевизначення кодогенерації моделі",
+    "setDesignPropertyVariables": "Задати перевизначення кодогенерації властивості",
+    "setDesignRouteVariables": "Задати перевизначення кодогенерації маршруту",
+    "setDesignTemplateVariables": "Задати глобальні змінні кодогенерації шаблону"
   },
   "odataFilter": {
     "detail": {
@@ -2540,6 +3105,9 @@
       "addedScenario": "Додано сценарій «{{name}}»",
       "modifiedScenario": "Змінено сценарій «{{name}}»",
       "deletedScenario": "Видалено сценарій «{{name}}»",
+      "addedDesign": "Додано дизайн «{{name}}»",
+      "modifiedDesign": "Змінено дизайн «{{name}}»",
+      "deletedDesign": "Видалено дизайн «{{name}}»",
       "addedFolder": "Додано теку «{{name}}»",
       "modifiedFolder": "Змінено теку «{{name}}»",
       "deletedFolder": "Видалено теку «{{name}}»",
@@ -2548,6 +3116,7 @@
       "deletedEnvironmentFolder": "Видалено теку середовища «{{name}}»",
       "movedRequest": "Переміщено запит \"{{name}}\"",
       "movedScenario": "Переміщено сценарій \"{{name}}\"",
+      "movedDesign": "Переміщено дизайн \"{{name}}\"",
       "movedFolder": "Переміщено теку \"{{name}}\"",
       "movedEnvironmentFolder": "Переміщено теку середовища \"{{name}}\"",
       "reorderedFolder": "Змінено порядок елементів у теці «{{name}}»",
@@ -2558,6 +3127,7 @@
     "commitTitle": {
       "singleRequest": "Оновлення запиту «{{name}}»",
       "singleScenario": "Оновлення сценарію «{{name}}»",
+      "singleDesign": "Оновлення дизайну «{{name}}»",
       "singleFolder": "Оновлення теки «{{name}}»",
       "singleEnvironmentFolder": "Оновлення теки середовища «{{name}}»",
       "singleFileFormatVersion": "Перехід на формат файлу {{name}}",
@@ -2565,6 +3135,8 @@
       "countRequest_other": "{{count}} запитів",
       "countScenario_one": "{{count}} сценарій",
       "countScenario_other": "{{count}} сценаріїв",
+      "countDesign_one": "{{count}} дизайн",
+      "countDesign_other": "{{count}} дизайнів",
       "countFolder_one": "{{count}} тека",
       "countFolder_other": "{{count}} тек",
       "countEnvironmentFolder_one": "{{count}} тека середовища",

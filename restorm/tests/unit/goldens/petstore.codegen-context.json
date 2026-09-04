@@ -1,0 +1,392 @@
+{
+  "contextVersion": 2,
+  "design": {
+    "name": "Petstore",
+    "version": "1.0.0",
+    "description": "A pet store API designed in Restorm.",
+    "basePath": "/api",
+    "defaultAuth": "bearer"
+  },
+  "enums": [
+    {
+      "name": "UserStatus",
+      "description": "Account lifecycle state.",
+      "values": [
+        "active",
+        "suspended",
+        "deleted"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "name": "User",
+      "properties": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "format": "uuid",
+          "readOnly": true,
+          "description": "Server-minted identifier.",
+          "unique": true,
+          "immutable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "format": "email",
+          "description": "Sign-in address.",
+          "example": "ada@example.com",
+          "unique": true,
+          "searchable": true,
+          "pii": true,
+          "constraints": {
+            "maxLength": 254,
+            "pattern": "^[^@]+@[^@]+$"
+          }
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "required": true,
+          "writeOnly": true,
+          "pii": true,
+          "constraints": {
+            "minLength": 12
+          }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "nullable": true,
+          "default": "active",
+          "enum": "UserStatus"
+        },
+        {
+          "name": "nicknames",
+          "type": "array",
+          "required": false,
+          "arrayOf": "string"
+        },
+        {
+          "name": "settings",
+          "type": "map",
+          "required": false,
+          "deprecated": true
+        }
+      ],
+      "allProperties": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "format": "uuid",
+          "readOnly": true,
+          "description": "Server-minted identifier.",
+          "unique": true,
+          "immutable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "format": "email",
+          "description": "Sign-in address.",
+          "example": "ada@example.com",
+          "unique": true,
+          "searchable": true,
+          "pii": true,
+          "constraints": {
+            "maxLength": 254,
+            "pattern": "^[^@]+@[^@]+$"
+          }
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "required": true,
+          "writeOnly": true,
+          "pii": true,
+          "constraints": {
+            "minLength": 12
+          }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "nullable": true,
+          "default": "active",
+          "enum": "UserStatus"
+        },
+        {
+          "name": "nicknames",
+          "type": "array",
+          "required": false,
+          "arrayOf": "string"
+        },
+        {
+          "name": "settings",
+          "type": "map",
+          "required": false,
+          "deprecated": true
+        }
+      ],
+      "examples": [
+        {
+          "name": "an admin User",
+          "values": {
+            "email": "admin@example.com",
+            "status": "active"
+          }
+        }
+      ],
+      "description": "A registered user.",
+      "identifier": {
+        "property": "id",
+        "strategy": "uuid"
+      },
+      "timestamps": true,
+      "softDelete": true,
+      "volumetry": "tenThousands"
+    },
+    {
+      "name": "AdminUser",
+      "properties": [
+        {
+          "name": "scope",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "allProperties": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "format": "uuid",
+          "readOnly": true,
+          "description": "Server-minted identifier.",
+          "unique": true,
+          "immutable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "format": "email",
+          "description": "Sign-in address.",
+          "example": "ada@example.com",
+          "unique": true,
+          "searchable": true,
+          "pii": true,
+          "constraints": {
+            "maxLength": 254,
+            "pattern": "^[^@]+@[^@]+$"
+          }
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "required": true,
+          "writeOnly": true,
+          "pii": true,
+          "constraints": {
+            "minLength": 12
+          }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "nullable": true,
+          "default": "active",
+          "enum": "UserStatus"
+        },
+        {
+          "name": "nicknames",
+          "type": "array",
+          "required": false,
+          "arrayOf": "string"
+        },
+        {
+          "name": "settings",
+          "type": "map",
+          "required": false,
+          "deprecated": true
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "examples": [],
+      "description": "A user with elevated rights.",
+      "inherits": "User"
+    },
+    {
+      "name": "Order",
+      "properties": [
+        {
+          "name": "id",
+          "type": "integer",
+          "required": false,
+          "format": "int64",
+          "readOnly": true
+        },
+        {
+          "name": "customer",
+          "type": "User",
+          "required": true,
+          "references": {
+            "model": "User",
+            "onDelete": "restrict"
+          }
+        },
+        {
+          "name": "lines",
+          "type": "array",
+          "required": true,
+          "references": {
+            "model": "User",
+            "onDelete": "cascade",
+            "array": true
+          }
+        }
+      ],
+      "allProperties": [
+        {
+          "name": "id",
+          "type": "integer",
+          "required": false,
+          "format": "int64",
+          "readOnly": true
+        },
+        {
+          "name": "customer",
+          "type": "User",
+          "required": true,
+          "references": {
+            "model": "User",
+            "onDelete": "restrict"
+          }
+        },
+        {
+          "name": "lines",
+          "type": "array",
+          "required": true,
+          "references": {
+            "model": "User",
+            "onDelete": "cascade",
+            "array": true
+          }
+        }
+      ],
+      "examples": [],
+      "identifier": {
+        "property": "id",
+        "strategy": "autoIncrement"
+      },
+      "timestamps": true,
+      "volumetry": "millions"
+    }
+  ],
+  "groups": [
+    {
+      "name": "Users",
+      "headers": [
+        {
+          "name": "X-Tenant",
+          "example": "acme",
+          "description": "Tenant discriminator."
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/{id}",
+          "fullPath": "/api/v1/users/{id}",
+          "params": [
+            {
+              "name": "id",
+              "in": "path",
+              "property": {
+                "model": "User",
+                "property": "id"
+              },
+              "required": true,
+              "description": "The user id."
+            }
+          ],
+          "responses": [
+            {
+              "code": "200",
+              "description": "The user.",
+              "model": "User",
+              "example": "an admin User"
+            },
+            {
+              "code": "404",
+              "description": "No such user."
+            }
+          ],
+          "auth": "bearer",
+          "summary": "Fetch one user",
+          "description": "Returns the user carrying the given identifier.",
+          "operationId": "getUser",
+          "idempotent": true,
+          "cacheSeconds": 60
+        },
+        {
+          "method": "GET",
+          "path": "/",
+          "fullPath": "/api/v1/users",
+          "params": [],
+          "responses": [
+            {
+              "code": "200",
+              "description": "A page of users.",
+              "model": "User",
+              "list": true,
+              "paginated": true
+            }
+          ],
+          "auth": "bearer",
+          "summary": "List users",
+          "pagination": {
+            "style": "offset",
+            "defaultLimit": 20,
+            "maxLimit": 100
+          },
+          "deprecated": true
+        },
+        {
+          "method": "POST",
+          "path": "/",
+          "fullPath": "/api/v1/users",
+          "params": [],
+          "responses": [
+            {
+              "code": "201",
+              "description": "Created.",
+              "model": "User"
+            }
+          ],
+          "auth": "none",
+          "summary": "Create a user",
+          "body": {
+            "model": "User",
+            "contentType": "application/json"
+          }
+        }
+      ],
+      "description": "User management.",
+      "basePath": "/users",
+      "versionPrefix": "/v1"
+    }
+  ]
+}
