@@ -156,7 +156,9 @@ function edmType(design: ApiDesign, namespace: string, property: DesignModel['pr
   const array = /^array<(.+)>$/.exec(label)
   if (array?.[1] !== undefined) return { type: edmScalar(array[1], undefined), collection: true, navigation: false }
   if (label === 'array') {
-    return { type: edmScalar(property.design?.arrayItems?.type ?? 'string', undefined), collection: true, navigation: false }
+    // Carry the element's scalar format so `Collection(Edm.Guid/Date/Int64)` is
+    // preserved instead of degrading every array element to a bare type.
+    return { type: edmScalar(property.design?.arrayItems?.type ?? 'string', property.design?.arrayItems?.format), collection: true, navigation: false }
   }
   return { type: edmScalar(label, property.doc.format), collection: false, navigation: false }
 }
@@ -215,18 +217,34 @@ export function designToCsdl(design: ApiDesign): string {
   }
 
   for (const set of sets) {
-    const keyName = odataKeyPropertyName(design, set.model)
-    lines.push(`      <EntityType Name="${xmlEscape(set.typeName)}">`)
-    if (keyName !== undefined) {
-      lines.push('        <Key>', `          <PropertyRef Name="${xmlEscape(keyName)}" />`, '        </Key>')
-    }
+    const keyRawName = odataKeyPropertyName(design, set.model)
+    // Property & key names are their own SimpleIdentifier namespace: a raw name
+    // with a hyphen/dot (`order-id`) is not a valid EDM identifier and a
+    // sanitize-collision would repeat a Property Name — both make invalid CSDL.
+    // Sanitize + dedup up front so the Key's PropertyRef references the exact
+    // spelling the key property emits (like the entity/enum names already do).
+    const takenProps = new Set<string>()
+    const emitted: { property: DesignModel['properties'][number]; name: string; raw: string }[] = []
     for (const { property } of servedProperties(design, set.model)) {
-      const name = property.doc.name
-      if (name === '') continue
+      const raw = property.doc.name
+      if (raw === '') continue
+      const base = sanitizeEdmName(raw, 'Property')
+      let name = base
+      let n = 2
+      while (takenProps.has(name)) { name = `${base}_${n}`; n += 1 }
+      takenProps.add(name)
+      emitted.push({ property, name, raw })
+    }
+    const keySanitized = emitted.find((e) => e.raw === keyRawName)?.name
+    lines.push(`      <EntityType Name="${xmlEscape(set.typeName)}">`)
+    if (keySanitized !== undefined) {
+      lines.push('        <Key>', `          <PropertyRef Name="${xmlEscape(keySanitized)}" />`, '        </Key>')
+    }
+    for (const { property, name, raw } of emitted) {
       const mapped = edmType(design, namespace, property)
       const type = mapped.collection ? `Collection(${mapped.type})` : mapped.type
       const element = mapped.navigation ? 'NavigationProperty' : 'Property'
-      const nullable = mapped.navigation || (!property.doc.required && name !== keyName)
+      const nullable = mapped.navigation || (!property.doc.required && raw !== keyRawName)
       lines.push(`        <${element} Name="${xmlEscape(name)}" Type="${type}"${nullable ? '' : ' Nullable="false"'} />`)
     }
     lines.push('      </EntityType>')

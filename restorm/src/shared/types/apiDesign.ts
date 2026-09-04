@@ -316,7 +316,7 @@ export interface RouteDesignMeta {
    * FULL set an imported spec declared (a body can accept several) so a
    * design→spec round-trip is lossless; `description` is the body-level
    * doc text. */
-  body?: { modelId?: RuntimeId; contentType?: string; contentTypes?: string[]; description?: string }
+  body?: { modelId?: RuntimeId; list?: boolean; contentType?: string; contentTypes?: string[]; description?: string }
   /** Status code → response design extensions. */
   responses?: Record<string, DesignResponseMeta>
   /** Pagination of list responses on this route. */

@@ -261,6 +261,9 @@ const ENVIRONMENT_INDEXABLE_KEYS = new Set([
 export const DESIGN_INDEXABLE_KEYS = new Set([
   'name',
   'notes',
+  // `tags` is not a modelled top-level ApiDesign field today, but it stays
+  // listed (and tested) so a future top-level tags section indexes without a
+  // silent drop — the set is intentionally permissive on the forward edge.
   'tags',
   'info',
   'server',

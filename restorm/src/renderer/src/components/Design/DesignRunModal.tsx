@@ -11,7 +11,8 @@ import type { ApiDesign, DesignRoute, DesignRouteGroup } from '../../../../share
 import { composeRoutePath, groupChainBasePath } from '../../../../shared/design/apiDesignDoc'
 import { httpBadgeIdFor } from '../../../../shared/utils/httpMethod'
 import { RegistryBadge } from '../common/RegistryBadge'
-import { useDesignServerCounters, useIsDesignServerListening } from '../../services/designServerStore'
+import { useDesignServerCounters, useIsDesignServerListening, useDesignForcedMap, setDesignForced } from '../../services/designServerStore'
+import type { DesignForcedChoice } from '../../services/designServerStore'
 
 export interface DesignRunPanelProps {
   design: ApiDesign
@@ -20,10 +21,7 @@ export interface DesignRunPanelProps {
 }
 
 /** One route's chosen return: absent = the design's default response. */
-interface ForcedChoice {
-  code: string
-  body?: string
-}
+type ForcedChoice = DesignForcedChoice
 
 /**
  * The live run panel, rendered INLINE in the Server section (below the
@@ -40,12 +38,13 @@ export const DesignRunPanel: React.FC<DesignRunPanelProps> = ({ design, port }) 
   const listening = useIsDesignServerListening(design.id)
   const counters = useDesignServerCounters(design.id)
   const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null)
-  // routeId → the forced choice mirrored locally (the main process owns
-  // the authoritative map; this mirror drives the radio rendering).
-  const [forcedByRoute, setForcedByRoute] = useState<Record<string, ForcedChoice | undefined>>({})
+  // routeId → the forced choice. Mirrored in the module-level design-server
+  // store (not local state) so it survives this panel unmounting on a design
+  // sub-tab switch; the main process owns the authoritative map.
+  const forcedByRoute = useDesignForcedMap(design.id)
 
   const applyForced = useCallback((routeId: string, choice: ForcedChoice | null) => {
-    setForcedByRoute((prev) => ({ ...prev, [routeId]: choice ?? undefined }))
+    setDesignForced(design.id, routeId, choice)
     void window.restorm?.designServer.setForced(design.id, routeId, choice)
   }, [design.id])
 

@@ -318,7 +318,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Projekt API"
       },
       "cut": "Wytnij",
       "copy": "Kopiuj",
@@ -338,7 +339,8 @@
       "moveInto": "Przenieś do tego scenariusza",
       "affectsNote": "Usunięcie tego żądania usunie je również z tych scenariuszy.",
       "deleteAnyway": "Usuń mimo to"
-    }
+    },
+    "expandAll": "Rozwiń wszystkie żądania"
   },
   "environment": {
     "newName": "Nowe środowisko",
@@ -1242,7 +1244,8 @@
       "operation": "Operacja",
       "description": "Opis",
       "example": "Przykład",
-      "constraints": "Ograniczenia"
+      "constraints": "Ograniczenia",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nie zadeklarowano parametrów spoza treści dla filtrowanych tras."
@@ -2165,7 +2168,8 @@
       "documentation": "Dokumentacja",
       "notes": "Notatki",
       "code": "Kod",
-      "server": "Serwer"
+      "server": "Serwer",
+      "clients": "Klienci"
     },
     "rail": {
       "ariaLabel": "Sekcje projektu API"
@@ -2582,7 +2586,8 @@
         "pagination": "Stronicowanie",
         "defaultLimit": "Domyślny rozmiar strony",
         "maxLimit": "Maks. rozmiar strony"
-      }
+      },
+      "addSubgroup": "Dodaj podgrupę"
     },
     "newDesignName": "Nowy projekt API",
     "createFromScratch": "Utwórz projekt API",
@@ -2616,7 +2621,15 @@
       "generate": "Wygeneruj",
       "replace": "Zastąp istniejące trasy",
       "replaceHint": "Dla tego modelu już istnieją trasy. Zastąp je, aby uniknąć duplikatów; pozostaw wyłączone, aby dodać drugi zestaw.",
-      "title": "Wygeneruj CRUD dla {{name}}"
+      "title": "Wygeneruj CRUD dla {{name}}",
+      "projections": {
+        "http": "{{count}} tras REST",
+        "graphql": "{{queries}} zapytań / {{mutations}} mutacji w GraphQL",
+        "grpc": "{{count}} metod gRPC",
+        "odata": "{{count}} zestaw encji OData",
+        "soap": "{{count}} operacji SOAP",
+        "title": "Jeden model, wszystkie protokoły — ten CRUD jest też serwowany jako:"
+      }
     },
     "server": {
       "subtitle": "Serwuj ten projekt jako aktywny mock i obserwuj każde wywołanie."
@@ -2638,6 +2651,21 @@
         "undeclared": "Używane, ale niezadeklarowane: {{names}}",
         "allDeclared": "Wszystkie zmienne używane przez ten szablon są zadeklarowane."
       }
+    },
+    "clients": {
+      "generated": "Klienci wygenerowani — otwórz ich w sekcji Klienci na pasku bocznym.",
+      "importing": "Importowanie klientów…",
+      "refresh": "Wygeneruj klientów ponownie",
+      "startPrompt": "Uruchom serwer, aby wygenerować klientów.",
+      "startServerPrompt": "Uruchom <serverLink>serwer projektu</serverLink>, aby uzyskać dostęp do żądań klienckich generowanych automatycznie z modelu.",
+      "subtitle": "Twój serwer projektu API działa i obsługuje zdefiniowane przez Ciebie trasy. Poniższe żądania wywołują te trasy bezpośrednio — otwórz jedno, aby je przetestować. Są efemeryczne i znikają po zatrzymaniu serwera."
+    },
+    "descriptors": {
+      "copy": "Kopiuj URL"
+    },
+    "projections": {
+      "title": "Projekcje",
+      "hint": "Ta sama operacja, tak jak udostępnia ją każdy serwowany protokół."
     }
   },
   "mqtt": {
@@ -2843,7 +2871,11 @@
     "exportDesign": "Eksportuj deskryptor projektu",
     "generateDesignCode": "Wygeneruj kod z projektu",
     "getDesignTemplateContract": "Pobierz kontrakt szablonów kodu",
-    "setDesignTemplates": "Ustaw szablony kodu projektu"
+    "setDesignTemplates": "Ustaw szablony kodu projektu",
+    "setDesignModelVariables": "Ustaw przesłonięcia generowania kodu dla modelu",
+    "setDesignPropertyVariables": "Ustaw przesłonięcia generowania kodu dla właściwości",
+    "setDesignRouteVariables": "Ustaw przesłonięcia generowania kodu dla trasy",
+    "setDesignTemplateVariables": "Ustaw globalne zmienne generowania kodu dla szablonu"
   },
   "odataFilter": {
     "detail": {

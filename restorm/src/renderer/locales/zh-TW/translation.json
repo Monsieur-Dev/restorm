@@ -315,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API 設計"
       },
       "cut": "剪下",
       "copy": "複製",
@@ -335,7 +336,8 @@
       "moveInto": "移動到此場景",
       "affectsNote": "刪除此請求也會將其從這些場景中移除。",
       "deleteAnyway": "仍然刪除"
-    }
+    },
+    "expandAll": "展開所有請求"
   },
   "environment": {
     "newName": "新增環境",
@@ -1239,7 +1241,8 @@
       "operation": "操作",
       "description": "描述",
       "example": "範例",
-      "constraints": "約束"
+      "constraints": "約束",
+      "enum": "Enum"
     },
     "params": {
       "empty": "篩選的路由未宣告非請求主體參數。"
@@ -2162,7 +2165,8 @@
       "documentation": "文件",
       "notes": "筆記",
       "code": "程式碼",
-      "server": "伺服器"
+      "server": "伺服器",
+      "clients": "用戶端"
     },
     "rail": {
       "ariaLabel": "設計區段"
@@ -2579,7 +2583,8 @@
         "pagination": "分頁",
         "defaultLimit": "預設頁面大小",
         "maxLimit": "最大頁面大小"
-      }
+      },
+      "addSubgroup": "新增子群組"
     },
     "newDesignName": "新的 API 設計",
     "createFromScratch": "建立 API 設計",
@@ -2613,7 +2618,15 @@
       "generate": "產生",
       "replace": "取代現有路由",
       "replaceHint": "此模型已存在路由。取代它們以避免重複；保持關閉則新增第二組。",
-      "title": "為 {{name}} 產生 CRUD"
+      "title": "為 {{name}} 產生 CRUD",
+      "projections": {
+        "http": "{{count}} 條 REST 路由",
+        "graphql": "GraphQL 中 {{queries}} 個查詢 / {{mutations}} 個變更",
+        "grpc": "{{count}} 個 gRPC 方法",
+        "odata": "{{count}} 個 OData 實體集",
+        "soap": "{{count}} 個 SOAP 操作",
+        "title": "一個模型，所有通訊協定——此 CRUD 還以下列形式提供："
+      }
     },
     "server": {
       "subtitle": "將此設計作為即時模擬提供，並觀察每次呼叫。"
@@ -2635,6 +2648,21 @@
         "undeclared": "已使用但未宣告：{{names}}",
         "allDeclared": "此範本使用的每個變數都已宣告。"
       }
+    },
+    "clients": {
+      "generated": "用戶端已產生——在側邊欄的「用戶端」下開啟它們。",
+      "importing": "正在匯入用戶端…",
+      "refresh": "重新產生用戶端",
+      "startPrompt": "啟動伺服器以產生用戶端。",
+      "startServerPrompt": "啟動<serverLink>設計伺服器</serverLink>以存取從模型自動產生的用戶端請求。",
+      "subtitle": "您的 API 設計伺服器正在執行，並提供您定義的路由。下面的請求會直接呼叫這些路由——開啟其中一個即可測試。它們是臨時的，伺服器停止後便會消失。"
+    },
+    "descriptors": {
+      "copy": "複製 URL"
+    },
+    "projections": {
+      "title": "投影",
+      "hint": "同一操作，以每個所服務的通訊協定各自公開的形式呈現。"
     }
   },
   "mqtt": {
@@ -2840,7 +2868,11 @@
     "exportDesign": "匯出設計描述檔",
     "generateDesignCode": "從設計產生程式碼",
     "getDesignTemplateContract": "取得程式碼範本合約",
-    "setDesignTemplates": "設定設計的程式碼範本"
+    "setDesignTemplates": "設定設計的程式碼範本",
+    "setDesignModelVariables": "設定模型的程式碼產生覆寫",
+    "setDesignPropertyVariables": "設定屬性的程式碼產生覆寫",
+    "setDesignRouteVariables": "設定路由的程式碼產生覆寫",
+    "setDesignTemplateVariables": "設定範本的全域程式碼產生變數"
   },
   "odataFilter": {
     "detail": {

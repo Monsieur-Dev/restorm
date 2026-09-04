@@ -36,13 +36,21 @@ function bridge(): Bridge | undefined {
   return (window as { restorm?: { designServer?: Bridge } }).restorm?.designServer
 }
 
+/** A run-modal forced-response steering choice for one route. */
+export interface DesignForcedChoice {
+  code: string
+  body?: string
+}
+
 const serving = new Set<string>()
 const counters = new Map<string, DesignServerCounters>()
+const forcedByDesign = new Map<string, Record<string, DesignForcedChoice>>()
 const listeners = new Set<() => void>()
 
 let subscribed = false
 
 const EMPTY_COUNTERS: DesignServerCounters = { total: 0, routes: {} }
+const EMPTY_FORCED: Record<string, DesignForcedChoice> = {}
 
 function notify(): void {
   for (const cb of listeners) cb()
@@ -52,13 +60,19 @@ function handleProgress(event: ProgressEvent): void {
   if (event.status === 'started') {
     if (!serving.has(event.designId)) {
       serving.add(event.designId)
-      // A fresh run starts from zeroed counters.
+      // A fresh run starts from zeroed counters and no forced steering (the
+      // main process spins up a fresh `forced` map for the new run).
       counters.set(event.designId, EMPTY_COUNTERS)
+      forcedByDesign.delete(event.designId)
       notify()
     }
     return
   }
-  if (serving.delete(event.designId)) notify()
+  if (serving.delete(event.designId)) {
+    // Server stopped: its forced steering no longer applies.
+    forcedByDesign.delete(event.designId)
+    notify()
+  }
 }
 
 function handleServed(event: ServedEvent): void {
@@ -97,6 +111,34 @@ export function useDesignServerCounters(designId: string): DesignServerCounters 
     subscribe,
     () => counters.get(designId) ?? EMPTY_COUNTERS,
     () => EMPTY_COUNTERS
+  )
+}
+
+/** Record/clear a run-modal forced-response choice. Kept in this module store
+ * so it survives the run panel unmounting (a design sub-tab switch) — the main
+ * process stays the authority, this mirrors its map so the radios reflect the
+ * still-active steering instead of resetting to "default" while the server
+ * keeps forcing. */
+export function setDesignForced(designId: string, routeId: string, choice: DesignForcedChoice | null): void {
+  const current = forcedByDesign.get(designId) ?? EMPTY_FORCED
+  let next: Record<string, DesignForcedChoice>
+  if (choice === null) {
+    const { [routeId]: _dropped, ...rest } = current
+    next = rest
+  } else {
+    next = { ...current, [routeId]: choice }
+  }
+  forcedByDesign.set(designId, next)
+  notify()
+}
+
+/** React hook: the design's forced-response map (routeId → choice), surviving
+ * run-panel remounts. */
+export function useDesignForcedMap(designId: string): Record<string, DesignForcedChoice> {
+  return useSyncExternalStore(
+    subscribe,
+    () => forcedByDesign.get(designId) ?? EMPTY_FORCED,
+    () => EMPTY_FORCED
   )
 }
 

@@ -317,7 +317,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Design API"
       },
       "cut": "Decupează",
       "copy": "Copiază",
@@ -337,7 +338,8 @@
       "moveInto": "Mută în acest scenariu",
       "affectsNote": "Ștergerea acestei cereri o va elimina și din aceste scenarii.",
       "deleteAnyway": "Șterge oricum"
-    }
+    },
+    "expandAll": "Extinde toate cererile"
   },
   "environment": {
     "newName": "Mediu nou",
@@ -1241,7 +1243,8 @@
       "operation": "Operațiune",
       "description": "Descriere",
       "example": "Exemplu",
-      "constraints": "Constrângeri"
+      "constraints": "Constrângeri",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Niciun parametru din afara corpului declarat pentru rutele filtrate."
@@ -2164,7 +2167,8 @@
       "documentation": "Documentație",
       "notes": "Notițe",
       "code": "Cod",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Clienți"
     },
     "rail": {
       "ariaLabel": "Secțiunile designului"
@@ -2581,7 +2585,8 @@
         "pagination": "Paginare",
         "defaultLimit": "Dimensiune implicită a paginii",
         "maxLimit": "Dimensiune max. a paginii"
-      }
+      },
+      "addSubgroup": "Adaugă un subgrup"
     },
     "newDesignName": "Design nou de API",
     "createFromScratch": "Creează un design de API",
@@ -2615,7 +2620,15 @@
       "generate": "Generați",
       "replace": "Înlocuiți rutele existente",
       "replaceHint": "Există deja rute pentru acest model. Înlocuiți-le pentru a evita duplicatele; lăsați dezactivat pentru a adăuga un al doilea set.",
-      "title": "Generați CRUD pentru {{name}}"
+      "title": "Generați CRUD pentru {{name}}",
+      "projections": {
+        "http": "{{count}} rute REST",
+        "graphql": "{{queries}} interogări / {{mutations}} mutații în GraphQL",
+        "grpc": "{{count}} metode gRPC",
+        "odata": "{{count}} set de entități OData",
+        "soap": "{{count}} operațiuni SOAP",
+        "title": "Un singur model, fiecare protocol — acest CRUD este servit și ca:"
+      }
     },
     "server": {
       "subtitle": "Servește acest design ca un mock live și urmărește fiecare apel."
@@ -2637,6 +2650,21 @@
         "undeclared": "Folosite dar nedeclarate: {{names}}",
         "allDeclared": "Toate variabilele folosite de acest șablon sunt declarate."
       }
+    },
+    "clients": {
+      "generated": "Clienți generați — deschideți-i la Clienți în bara laterală.",
+      "importing": "Se importă clienții…",
+      "refresh": "Regenerează clienții",
+      "startPrompt": "Porniți serverul pentru a genera clienții.",
+      "startServerPrompt": "Porniți <serverLink>serverul de design</serverLink> pentru a accesa cererile client generate automat din model.",
+      "subtitle": "Serverul dumneavoastră de design API rulează și servește rutele pe care le-ați definit. Cererile de mai jos apelează direct acele rute — deschideți una pentru a o testa. Sunt efemere și dispar când serverul se oprește."
+    },
+    "descriptors": {
+      "copy": "Copiază URL-ul"
+    },
+    "projections": {
+      "title": "Proiecții",
+      "hint": "Aceeași operațiune, așa cum o expune fiecare protocol servit."
     }
   },
   "mqtt": {
@@ -2842,7 +2870,11 @@
     "exportDesign": "Exportă un descriptor de design",
     "generateDesignCode": "Generați cod dintr-un design",
     "getDesignTemplateContract": "Obține contractul șabloanelor de cod",
-    "setDesignTemplates": "Setează șabloanele de cod ale unui design"
+    "setDesignTemplates": "Setează șabloanele de cod ale unui design",
+    "setDesignModelVariables": "Setează suprascrierile de generare a codului pentru un model",
+    "setDesignPropertyVariables": "Setează suprascrierile de generare a codului pentru o proprietate",
+    "setDesignRouteVariables": "Setează suprascrierile de generare a codului pentru o rută",
+    "setDesignTemplateVariables": "Setează variabilele globale de generare a codului pentru un șablon"
   },
   "odataFilter": {
     "detail": {

@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-design"
       },
       "cut": "Klip",
       "copy": "Kopiér",
@@ -336,7 +337,8 @@
       "moveInto": "Flyt ind i dette scenarie",
       "affectsNote": "Sletning af denne anmodning fjerner den også fra disse scenarier.",
       "deleteAnyway": "Slet alligevel"
-    }
+    },
+    "expandAll": "Udvid alle anmodninger"
   },
   "environment": {
     "newName": "Nyt miljø",
@@ -1240,7 +1242,8 @@
       "operation": "Operation",
       "description": "Beskrivelse",
       "example": "Eksempel",
-      "constraints": "Begrænsninger"
+      "constraints": "Begrænsninger",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Ingen ikke-body-parametre erklæret for de filtrerede ruter."
@@ -2163,7 +2166,8 @@
       "documentation": "Dokumentation",
       "notes": "Noter",
       "code": "Kode",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Klienter"
     },
     "rail": {
       "ariaLabel": "Designsektioner"
@@ -2580,7 +2584,8 @@
         "pagination": "Paginering",
         "defaultLimit": "Standard sidestørrelse",
         "maxLimit": "Maks. sidestørrelse"
-      }
+      },
+      "addSubgroup": "Tilføj en undergruppe"
     },
     "newDesignName": "Nyt API-design",
     "createFromScratch": "Opret et API-design",
@@ -2614,7 +2619,15 @@
       "generate": "Generér",
       "replace": "Erstat de eksisterende ruter",
       "replaceHint": "Der findes allerede ruter for denne model. Erstat dem for at undgå dubletter; lad være slået fra for at tilføje et ekstra sæt.",
-      "title": "Generér CRUD for {{name}}"
+      "title": "Generér CRUD for {{name}}",
+      "projections": {
+        "http": "{{count}} REST-ruter",
+        "graphql": "{{queries}} queries / {{mutations}} mutations i GraphQL",
+        "grpc": "{{count}} gRPC-metoder",
+        "odata": "{{count}} OData-entitetssæt",
+        "soap": "{{count}} SOAP-operationer",
+        "title": "Én model, alle protokoller — dette CRUD serveres også som:"
+      }
     },
     "server": {
       "subtitle": "Servér dette design som en live-mock, og følg hvert kald."
@@ -2636,6 +2649,21 @@
         "undeclared": "Brugt, men ikke deklareret: {{names}}",
         "allDeclared": "Alle variabler, denne skabelon bruger, er deklareret."
       }
+    },
+    "clients": {
+      "generated": "Klienter genereret — åbn dem under Klienter i sidepanelet.",
+      "importing": "Importerer klienter…",
+      "refresh": "Regenerér klienterne",
+      "startPrompt": "Start serveren for at generere klienterne.",
+      "startServerPrompt": "Start <serverLink>designserveren</serverLink> for at få adgang til klientanmodninger, der genereres automatisk fra modellen.",
+      "subtitle": "Din API-designserver kører og serverer de ruter, du definerede. Anmodningerne nedenfor kalder disse ruter direkte — åbn en for at teste den. De er flygtige og forsvinder, når serveren stopper."
+    },
+    "descriptors": {
+      "copy": "Kopiér URL'en"
+    },
+    "projections": {
+      "title": "Projektioner",
+      "hint": "Den samme operation, som hvert serveret protokol eksponerer den."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Eksportér en designdeskriptor",
     "generateDesignCode": "Generér kode fra et design",
     "getDesignTemplateContract": "Hent kontrakten for kodeskabeloner",
-    "setDesignTemplates": "Angiv et designs kodeskabeloner"
+    "setDesignTemplates": "Angiv et designs kodeskabeloner",
+    "setDesignModelVariables": "Angiv en models codegen-overrides",
+    "setDesignPropertyVariables": "Angiv en egenskabs codegen-overrides",
+    "setDesignRouteVariables": "Angiv en rutes codegen-overrides",
+    "setDesignTemplateVariables": "Angiv en skabelons globale codegen-variabler"
   },
   "odataFilter": {
     "detail": {

@@ -315,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Desain API"
       },
       "cut": "Potong",
       "copy": "Salin",
@@ -335,7 +336,8 @@
       "moveInto": "Pindahkan ke skenario ini",
       "affectsNote": "Menghapus permintaan ini juga akan menghapusnya dari skenario-skenario ini.",
       "deleteAnyway": "Tetap hapus"
-    }
+    },
+    "expandAll": "Bentangkan semua permintaan"
   },
   "environment": {
     "newName": "Lingkungan baru",
@@ -1239,7 +1241,8 @@
       "operation": "Operasi",
       "description": "Deskripsi",
       "example": "Contoh",
-      "constraints": "Batasan"
+      "constraints": "Batasan",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Tidak ada parameter non-body yang dideklarasikan untuk rute yang difilter."
@@ -2162,7 +2165,8 @@
       "documentation": "Dokumentasi",
       "notes": "Catatan",
       "code": "Kode",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Klien"
     },
     "rail": {
       "ariaLabel": "Bagian desain"
@@ -2579,7 +2583,8 @@
         "pagination": "Penomoran halaman",
         "defaultLimit": "Ukuran halaman bawaan",
         "maxLimit": "Ukuran halaman maks."
-      }
+      },
+      "addSubgroup": "Tambah sub-grup"
     },
     "newDesignName": "Desain API baru",
     "createFromScratch": "Buat desain API",
@@ -2613,7 +2618,15 @@
       "generate": "Hasilkan",
       "replace": "Ganti rute yang ada",
       "replaceHint": "Rute untuk model ini sudah ada. Ganti untuk menghindari duplikat; biarkan nonaktif untuk menambah set kedua.",
-      "title": "Hasilkan CRUD untuk {{name}}"
+      "title": "Hasilkan CRUD untuk {{name}}",
+      "projections": {
+        "http": "{{count}} rute REST",
+        "graphql": "{{queries}} query / {{mutations}} mutation di GraphQL",
+        "grpc": "{{count}} metode gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} operasi SOAP",
+        "title": "Satu model, semua protokol — CRUD ini juga dilayani sebagai:"
+      }
     },
     "server": {
       "subtitle": "Sajikan desain ini sebagai mock langsung dan pantau setiap panggilan."
@@ -2635,6 +2648,21 @@
         "undeclared": "Digunakan tetapi tidak dideklarasikan: {{names}}",
         "allDeclared": "Semua variabel yang digunakan templat ini sudah dideklarasikan."
       }
+    },
+    "clients": {
+      "generated": "Klien telah dibuat — buka di bawah Klien pada sidebar.",
+      "importing": "Mengimpor klien…",
+      "refresh": "Buat ulang klien",
+      "startPrompt": "Jalankan server untuk membuat klien.",
+      "startServerPrompt": "Jalankan <serverLink>server desain</serverLink> untuk mengakses permintaan klien yang dibuat otomatis dari model.",
+      "subtitle": "Server desain API Anda sedang berjalan dan melayani rute yang Anda tentukan. Permintaan di bawah memanggil rute tersebut secara langsung — buka salah satunya untuk mengujinya. Permintaan ini bersifat sementara dan akan hilang saat server dihentikan."
+    },
+    "descriptors": {
+      "copy": "Salin URL"
+    },
+    "projections": {
+      "title": "Proyeksi",
+      "hint": "Operasi yang sama, sebagaimana ditampilkan oleh setiap protokol yang dilayani."
     }
   },
   "mqtt": {
@@ -2840,7 +2868,11 @@
     "exportDesign": "Ekspor deskriptor desain",
     "generateDesignCode": "Hasilkan kode dari desain",
     "getDesignTemplateContract": "Dapatkan kontrak templat kode",
-    "setDesignTemplates": "Tetapkan templat kode desain"
+    "setDesignTemplates": "Tetapkan templat kode desain",
+    "setDesignModelVariables": "Setel override codegen sebuah model",
+    "setDesignPropertyVariables": "Setel override codegen sebuah properti",
+    "setDesignRouteVariables": "Setel override codegen sebuah rute",
+    "setDesignTemplateVariables": "Setel variabel codegen global sebuah template"
   },
   "odataFilter": {
     "detail": {

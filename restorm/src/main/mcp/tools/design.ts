@@ -354,6 +354,9 @@ export function registerDesignTools(mcp: McpService): void {
       const designId = typeof args['designId'] === 'string' ? args['designId'] : ''
       if (findDesign(designId) === null) return errorReply(`No design with id ${designId}`)
       designServerService.stop(designId)
+      // Drop any pending in-memory codegen preview too, matching the generic
+      // delete_item path (write.ts) — otherwise its `pending` entry leaks.
+      designCodegenService.discard(designId)
       const ok = collectionStore.deleteDesign(designId)
       if (!ok) return errorReply(`deleteDesign failed for ${designId}`)
       broadcastTreeReplace()

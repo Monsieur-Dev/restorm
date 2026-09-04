@@ -384,14 +384,27 @@ function projectModel(
   return out
 }
 
-/** Project one route parameter — path, query or header — with its type, enum
- * (named ref or inline), array element, deprecation and bound property. */
+/** The `in` values a codegen template can rely on (OpenAPI parameter
+ * locations). Restorm designs author path/query/header; an imported API may
+ * carry `cookie` (kept). */
+const CODEGEN_PARAM_LOCATIONS = new Set(['path', 'query', 'header', 'cookie'])
+
+/** Coerce a parameter's location to the codegen-context `in` enum. Non-HTTP
+ * locations that an import can leave behind (`argument`/`body` from GraphQL or
+ * Thrift specs) have no place in an HTTP client and are bucketed to `query`
+ * rather than leaking an out-of-contract value templates don't expect. */
+function normalizeParamIn(location: string): string {
+  return CODEGEN_PARAM_LOCATIONS.has(location) ? location : 'query'
+}
+
+/** Project one route parameter — path, query, header or cookie — with its
+ * type, enum (named ref or inline), array element, deprecation and property. */
 function projectParam(
   design: ApiDesign,
   meta: DesignRoute['design'],
   param: ParameterDocumentation
 ): CodegenParam {
-  const out: CodegenParam = { name: param.name, in: param.location }
+  const out: CodegenParam = { name: param.name, in: normalizeParamIn(param.location) }
   const enumId = meta?.paramEnumRefs?.[param.name]
   const refName = enumId !== undefined ? enumName(design, enumId) : undefined
   const link = meta?.paramLinks?.[param.name]

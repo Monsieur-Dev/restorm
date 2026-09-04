@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-design"
       },
       "cut": "Knippen",
       "copy": "Kopiëren",
@@ -336,7 +337,8 @@
       "moveInto": "Naar dit scenario verplaatsen",
       "affectsNote": "Deze aanvraag verwijderen haalt deze ook uit deze scenario's.",
       "deleteAnyway": "Toch verwijderen"
-    }
+    },
+    "expandAll": "Alle verzoeken uitklappen"
   },
   "environment": {
     "newName": "Nieuwe omgeving",
@@ -1240,7 +1242,8 @@
       "operation": "Operatie",
       "description": "Beschrijving",
       "example": "Voorbeeld",
-      "constraints": "Beperkingen"
+      "constraints": "Beperkingen",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Geen niet-body-parameters gedeclareerd voor de gefilterde routes."
@@ -2163,7 +2166,8 @@
       "documentation": "Documentatie",
       "notes": "Notities",
       "code": "Code",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Clients"
     },
     "rail": {
       "ariaLabel": "Ontwerpsecties"
@@ -2580,7 +2584,8 @@
         "pagination": "Paginering",
         "defaultLimit": "Standaard paginagrootte",
         "maxLimit": "Max. paginagrootte"
-      }
+      },
+      "addSubgroup": "Een subgroep toevoegen"
     },
     "newDesignName": "Nieuw API-design",
     "createFromScratch": "Een API-design maken",
@@ -2614,7 +2619,15 @@
       "generate": "Genereren",
       "replace": "De bestaande routes vervangen",
       "replaceHint": "Voor dit model bestaan al routes. Vervang ze om duplicaten te voorkomen; laat uit om een tweede set toe te voegen.",
-      "title": "CRUD genereren voor {{name}}"
+      "title": "CRUD genereren voor {{name}}",
+      "projections": {
+        "http": "{{count}} REST-routes",
+        "graphql": "{{queries}} query's / {{mutations}} mutaties in GraphQL",
+        "grpc": "{{count}} gRPC-methoden",
+        "odata": "{{count}} OData-entiteitenset",
+        "soap": "{{count}} SOAP-operaties",
+        "title": "Eén model, elk protocol — deze CRUD wordt ook aangeboden als:"
+      }
     },
     "server": {
       "subtitle": "Serveer dit ontwerp als een live-mock en volg elke aanroep."
@@ -2636,6 +2649,21 @@
         "undeclared": "Gebruikt maar niet gedeclareerd: {{names}}",
         "allDeclared": "Alle variabelen die dit sjabloon gebruikt zijn gedeclareerd."
       }
+    },
+    "clients": {
+      "generated": "Clients gegenereerd — open ze onder ‘Clients’ in de zijbalk.",
+      "importing": "Clients importeren…",
+      "refresh": "De clients opnieuw genereren",
+      "startPrompt": "Start de server om de clients te genereren.",
+      "startServerPrompt": "Start de <serverLink>designserver</serverLink> om toegang te krijgen tot de clientverzoeken die automatisch uit het model worden gegenereerd.",
+      "subtitle": "Uw API-designserver draait en bedient de routes die u hebt gedefinieerd. De onderstaande verzoeken roepen die routes rechtstreeks aan: open er een om die te testen. Ze zijn vluchtig en verdwijnen wanneer de server stopt."
+    },
+    "descriptors": {
+      "copy": "URL kopiëren"
+    },
+    "projections": {
+      "title": "Projecties",
+      "hint": "Dezelfde operatie, zoals elk aangeboden protocol die blootstelt."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Een designdescriptor exporteren",
     "generateDesignCode": "Code genereren uit een design",
     "getDesignTemplateContract": "Het contract van de code-templates ophalen",
-    "setDesignTemplates": "De code-templates van een ontwerp instellen"
+    "setDesignTemplates": "De code-templates van een ontwerp instellen",
+    "setDesignModelVariables": "Codegen-overrides van een model instellen",
+    "setDesignPropertyVariables": "Codegen-overrides van een eigenschap instellen",
+    "setDesignRouteVariables": "Codegen-overrides van een route instellen",
+    "setDesignTemplateVariables": "Globale codegen-variabelen van een sjabloon instellen"
   },
   "odataFilter": {
     "detail": {

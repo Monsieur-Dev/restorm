@@ -50,7 +50,18 @@ export function designPropertyDoc(
   resolve: DesignNameResolver
 ): PropertyDocumentation {
   const reference = property.design?.reference
-  if (reference === undefined) return property.doc
+  if (reference === undefined) {
+    // A canonical primitive array keeps its element type in design-only
+    // `arrayItems`; fold it into the `array<elem>` label so doc consumers
+    // (OpenAPI export → `items`, in-app doc view) don't emit a typeless array.
+    // GraphQL/OData/gRPC and the codegen context read `design.arrayItems`
+    // directly off the raw property and are unaffected by this.
+    const itemType = property.design?.arrayItems?.type
+    if (property.doc.type === 'array' && itemType !== undefined) {
+      return { ...property.doc, type: `array<${itemType}>` }
+    }
+    return property.doc
+  }
   const name = reference.target === 'model'
     ? resolve.modelName(reference.refId)
     : resolve.enumName(reference.refId)
@@ -140,19 +151,23 @@ export function designRouteDoc(
     ? design.models.find((m) => m.id === body.modelId)
     : undefined
   let consumes: string[] | undefined
-  if (bodyModel !== undefined) {
+  if (body !== undefined) {
+    // A body with no resolvable model (an inline object, or a dangling ref that
+    // validation reports) still projects a `body` row so the body is never
+    // silently dropped — as `object`, keeping its `array<…>` wrapper when set.
+    const bodyTypeName = bodyModel?.doc.name ?? 'object'
     const bodyParam: ParameterDocumentation = {
       name: 'body',
       location: 'body',
-      type: bodyModel.doc.name,
+      type: body.list === true ? `array<${bodyTypeName}>` : bodyTypeName,
       required: true,
-      ...(body?.description !== undefined ? { description: body.description } : {})
+      ...(body.description !== undefined ? { description: body.description } : {})
     }
     parameters = [...(parameters ?? []), bodyParam]
     // Emit the FULL media-type set when the design preserved one, else
     // the single primary content type.
-    const types = body?.contentTypes
-      ?? (body?.contentType !== undefined && body.contentType !== '' ? [body.contentType] : undefined)
+    const types = body.contentTypes
+      ?? (body.contentType !== undefined && body.contentType !== '' ? [body.contentType] : undefined)
     if (types !== undefined && types.length > 0) consumes = types
   }
   return {

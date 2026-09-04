@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-Design"
       },
       "cut": "Ausschneiden",
       "copy": "Kopieren",
@@ -336,7 +337,8 @@
       "moveInto": "In dieses Szenario verschieben",
       "affectsNote": "Beim Löschen dieser Anfrage wird sie auch aus diesen Szenarien entfernt.",
       "deleteAnyway": "Trotzdem löschen"
-    }
+    },
+    "expandAll": "Alle Anfragen ausklappen"
   },
   "environment": {
     "newName": "Neue Umgebung",
@@ -1240,7 +1242,8 @@
       "operation": "Operation",
       "description": "Beschreibung",
       "example": "Beispiel",
-      "constraints": "Einschränkungen"
+      "constraints": "Einschränkungen",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Keine Nicht-Body-Parameter für die gefilterten Routen deklariert."
@@ -2163,7 +2166,8 @@
       "documentation": "Dokumentation",
       "notes": "Notizen",
       "code": "Code",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Clients"
     },
     "rail": {
       "ariaLabel": "Design-Bereiche"
@@ -2580,7 +2584,8 @@
         "pagination": "Paginierung",
         "defaultLimit": "Standard-Seitengröße",
         "maxLimit": "Max. Seitengröße"
-      }
+      },
+      "addSubgroup": "Untergruppe hinzufügen"
     },
     "newDesignName": "Neues API-Design",
     "createFromScratch": "API-Design erstellen",
@@ -2614,7 +2619,15 @@
       "generate": "Generieren",
       "replace": "Vorhandene Routen ersetzen",
       "replaceHint": "Für dieses Modell existieren bereits Routen. Ersetzen Sie sie, um Duplikate zu vermeiden; deaktiviert lassen, um einen zweiten Satz hinzuzufügen.",
-      "title": "CRUD für {{name}} generieren"
+      "title": "CRUD für {{name}} generieren",
+      "projections": {
+        "http": "{{count}} REST-Routen",
+        "graphql": "{{queries}} Queries / {{mutations}} Mutations in GraphQL",
+        "grpc": "{{count}} gRPC-Methoden",
+        "odata": "{{count}} OData-Entitätenmenge",
+        "soap": "{{count}} SOAP-Operationen",
+        "title": "Ein Modell, alle Protokolle – dieses CRUD wird auch bereitgestellt als:"
+      }
     },
     "server": {
       "subtitle": "Stellen Sie dieses Design als Live-Mock bereit und beobachten Sie jeden Aufruf."
@@ -2636,6 +2649,21 @@
         "undeclared": "Verwendet, aber nicht deklariert: {{names}}",
         "allDeclared": "Alle vom Template verwendeten Variablen sind deklariert."
       }
+    },
+    "clients": {
+      "generated": "Clients generiert – öffnen Sie sie unter „Clients“ in der Seitenleiste.",
+      "importing": "Clients werden importiert…",
+      "refresh": "Clients neu generieren",
+      "startPrompt": "Starten Sie den Server, um die Clients zu generieren.",
+      "startServerPrompt": "Starten Sie den <serverLink>Design-Server</serverLink>, um auf die aus dem Modell automatisch generierten Client-Anfragen zuzugreifen.",
+      "subtitle": "Ihr API-Design-Server läuft und stellt die von Ihnen definierten Routen bereit. Die Anfragen unten rufen diese Routen direkt auf – öffnen Sie eine, um sie zu testen. Sie sind flüchtig und verschwinden, wenn der Server stoppt."
+    },
+    "descriptors": {
+      "copy": "URL kopieren"
+    },
+    "projections": {
+      "title": "Projektionen",
+      "hint": "Dieselbe Operation, wie jedes bereitgestellte Protokoll sie darstellt."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Einen Design-Deskriptor exportieren",
     "generateDesignCode": "Code aus einem Design generieren",
     "getDesignTemplateContract": "Vertrag der Code-Templates abrufen",
-    "setDesignTemplates": "Code-Templates eines Designs festlegen"
+    "setDesignTemplates": "Code-Templates eines Designs festlegen",
+    "setDesignModelVariables": "Codegen-Overrides eines Modells festlegen",
+    "setDesignPropertyVariables": "Codegen-Overrides einer Eigenschaft festlegen",
+    "setDesignRouteVariables": "Codegen-Overrides einer Route festlegen",
+    "setDesignTemplateVariables": "Globale Codegen-Variablen einer Vorlage festlegen"
   },
   "odataFilter": {
     "detail": {

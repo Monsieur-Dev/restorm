@@ -233,7 +233,14 @@ export const RouteDefinitionTab: React.FC<RouteDefinitionTabProps> = ({ design, 
     // single commit (the two live in doc vs design — separate commits race).
     const links = { ...(route.design?.paramLinks ?? {}) }
     const { [paramName]: _dropped, ...enumRest } = route.design?.paramEnumRefs ?? {}
-    const nextParams = parameters.map((p) => (p.name === paramName ? { ...p, type } : p))
+    // Picking a plain scalar also drops any INLINE enum values the param
+    // carried — otherwise an `integer` param keeps stale string enum values and
+    // the combo still reads "· enum ×N" (the named-enum ref is cleared above).
+    const nextParams = parameters.map((p) => {
+      if (p.name !== paramName) return p
+      const { enumValues: _enum, ...rest } = p
+      return { ...rest, type }
+    })
     commit(withParamMaps({ ...route, doc: { ...route.doc, parameters: nextParams } }, links, enumRest))
   }, [commit, parameters, route])
 

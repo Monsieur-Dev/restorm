@@ -318,7 +318,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Návrh API"
       },
       "cut": "Vyjmout",
       "copy": "Kopírovat",
@@ -338,7 +339,8 @@
       "moveInto": "Přesunout do tohoto scénáře",
       "affectsNote": "Smazáním tohoto požadavku jej také odeberete z těchto scénářů.",
       "deleteAnyway": "Přesto smazat"
-    }
+    },
+    "expandAll": "Rozbalit všechny požadavky"
   },
   "environment": {
     "newName": "Nové prostředí",
@@ -1242,7 +1244,8 @@
       "operation": "Operace",
       "description": "Popis",
       "example": "Příklad",
-      "constraints": "Omezení"
+      "constraints": "Omezení",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Pro filtrované trasy nejsou deklarovány žádné parametry mimo tělo."
@@ -2165,7 +2168,8 @@
       "documentation": "Dokumentace",
       "notes": "Poznámky",
       "code": "Kód",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Klienti"
     },
     "rail": {
       "ariaLabel": "Sekce návrhu"
@@ -2582,7 +2586,8 @@
         "pagination": "Stránkování",
         "defaultLimit": "Výchozí velikost stránky",
         "maxLimit": "Max. velikost stránky"
-      }
+      },
+      "addSubgroup": "Přidat podskupinu"
     },
     "newDesignName": "Nový návrh API",
     "createFromScratch": "Vytvořit návrh API",
@@ -2616,7 +2621,15 @@
       "generate": "Vygenerovat",
       "replace": "Nahradit existující trasy",
       "replaceHint": "Pro tento model už trasy existují. Nahraďte je, abyste předešli duplicitám; ponechte vypnuté pro přidání druhé sady.",
-      "title": "Vygenerovat CRUD pro {{name}}"
+      "title": "Vygenerovat CRUD pro {{name}}",
+      "projections": {
+        "http": "{{count}} tras REST",
+        "graphql": "{{queries}} dotazů / {{mutations}} mutací v GraphQL",
+        "grpc": "{{count}} metod gRPC",
+        "odata": "{{count}} sada entit OData",
+        "soap": "{{count}} operací SOAP",
+        "title": "Jeden model, každý protokol — tento CRUD je obsluhován také jako:"
+      }
     },
     "server": {
       "subtitle": "Servírujte tento návrh jako živý mock a sledujte každé volání."
@@ -2638,6 +2651,21 @@
         "undeclared": "Použité, ale nedeklarované: {{names}}",
         "allDeclared": "Všechny proměnné použité touto šablonou jsou deklarované."
       }
+    },
+    "clients": {
+      "generated": "Klienti vygenerováni — otevřete je v sekci Klienti na postranním panelu.",
+      "importing": "Import klientů…",
+      "refresh": "Znovu vygenerovat klienty",
+      "startPrompt": "Spusťte server pro vygenerování klientů.",
+      "startServerPrompt": "Spusťte <serverLink>návrhový server</serverLink> pro přístup k požadavkům klienta automaticky vygenerovaným z modelu.",
+      "subtitle": "Váš návrhový server API běží a obsluhuje trasy, které jste definovali. Následující požadavky volají tyto trasy přímo — otevřete některý a otestujte jej. Jsou dočasné a zmizí, jakmile se server zastaví."
+    },
+    "descriptors": {
+      "copy": "Kopírovat URL"
+    },
+    "projections": {
+      "title": "Projekce",
+      "hint": "Táž operace, tak jak ji vystavuje každý obsluhovaný protokol."
     }
   },
   "mqtt": {
@@ -2843,7 +2871,11 @@
     "exportDesign": "Exportovat deskriptor návrhu",
     "generateDesignCode": "Vygenerovat kód z návrhu",
     "getDesignTemplateContract": "Získat kontrakt šablon kódu",
-    "setDesignTemplates": "Nastavit šablony kódu návrhu"
+    "setDesignTemplates": "Nastavit šablony kódu návrhu",
+    "setDesignModelVariables": "Nastavit přepisy generování kódu pro model",
+    "setDesignPropertyVariables": "Nastavit přepisy generování kódu pro vlastnost",
+    "setDesignRouteVariables": "Nastavit přepisy generování kódu pro trasu",
+    "setDesignTemplateVariables": "Nastavit globální proměnné generování kódu pro šablonu"
   },
   "odataFilter": {
     "detail": {

@@ -315,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Thiết kế API"
       },
       "cut": "Cắt",
       "copy": "Sao chép",
@@ -335,7 +336,8 @@
       "moveInto": "Chuyển vào kịch bản này",
       "affectsNote": "Xóa yêu cầu này cũng sẽ gỡ nó khỏi các kịch bản này.",
       "deleteAnyway": "Vẫn xóa"
-    }
+    },
+    "expandAll": "Mở rộng tất cả yêu cầu"
   },
   "environment": {
     "newName": "Môi trường mới",
@@ -1239,7 +1241,8 @@
       "operation": "Thao tác",
       "description": "Mô tả",
       "example": "Ví dụ",
-      "constraints": "Ràng buộc"
+      "constraints": "Ràng buộc",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Không có tham số ngoài phần thân được khai báo cho các tuyến đã lọc."
@@ -2162,7 +2165,8 @@
       "documentation": "Tài liệu",
       "notes": "Ghi chú",
       "code": "Mã",
-      "server": "Máy chủ"
+      "server": "Máy chủ",
+      "clients": "Client"
     },
     "rail": {
       "ariaLabel": "Các phần của thiết kế"
@@ -2579,7 +2583,8 @@
         "pagination": "Phân trang",
         "defaultLimit": "Kích thước trang mặc định",
         "maxLimit": "Kích thước trang tối đa"
-      }
+      },
+      "addSubgroup": "Thêm nhóm con"
     },
     "newDesignName": "Thiết kế API mới",
     "createFromScratch": "Tạo thiết kế API",
@@ -2613,7 +2618,15 @@
       "generate": "Tạo",
       "replace": "Thay thế các tuyến hiện có",
       "replaceHint": "Đã có các tuyến cho mô hình này. Thay thế chúng để tránh trùng lặp; để tắt nếu muốn thêm một bộ thứ hai.",
-      "title": "Tạo CRUD cho {{name}}"
+      "title": "Tạo CRUD cho {{name}}",
+      "projections": {
+        "http": "{{count}} tuyến REST",
+        "graphql": "{{queries}} query / {{mutations}} mutation trong GraphQL",
+        "grpc": "{{count}} phương thức gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} thao tác SOAP",
+        "title": "Một mô hình, mọi giao thức — CRUD này cũng được phục vụ dưới dạng:"
+      }
     },
     "server": {
       "subtitle": "Phục vụ thiết kế này như một mock trực tiếp và theo dõi mọi lệnh gọi."
@@ -2635,6 +2648,21 @@
         "undeclared": "Được dùng nhưng chưa khai báo: {{names}}",
         "allDeclared": "Mọi biến mà mẫu này sử dụng đều đã được khai báo."
       }
+    },
+    "clients": {
+      "generated": "Đã tạo các client — mở chúng trong mục „Client” ở thanh bên.",
+      "importing": "Đang nhập các client…",
+      "refresh": "Tạo lại các client",
+      "startPrompt": "Khởi động máy chủ để tạo các client.",
+      "startServerPrompt": "Khởi động <serverLink>máy chủ thiết kế</serverLink> để truy cập các yêu cầu client được tạo tự động từ mô hình.",
+      "subtitle": "Máy chủ thiết kế API của bạn đang chạy và phục vụ các tuyến bạn đã định nghĩa. Các yêu cầu bên dưới gọi trực tiếp các tuyến đó — mở một yêu cầu để kiểm thử. Chúng là tạm thời và biến mất khi máy chủ dừng."
+    },
+    "descriptors": {
+      "copy": "Sao chép URL"
+    },
+    "projections": {
+      "title": "Phép chiếu",
+      "hint": "Cùng một thao tác, theo cách mà mỗi giao thức được phục vụ hiển thị nó."
     }
   },
   "mqtt": {
@@ -2840,7 +2868,11 @@
     "exportDesign": "Xuất bộ mô tả thiết kế",
     "generateDesignCode": "Tạo mã từ một thiết kế",
     "getDesignTemplateContract": "Lấy hợp đồng của mẫu mã nguồn",
-    "setDesignTemplates": "Đặt các mẫu mã nguồn của thiết kế"
+    "setDesignTemplates": "Đặt các mẫu mã nguồn của thiết kế",
+    "setDesignModelVariables": "Đặt ghi đè tạo mã của một mô hình",
+    "setDesignPropertyVariables": "Đặt ghi đè tạo mã của một thuộc tính",
+    "setDesignRouteVariables": "Đặt ghi đè tạo mã của một tuyến",
+    "setDesignTemplateVariables": "Đặt biến tạo mã toàn cục của một mẫu"
   },
   "odataFilter": {
     "detail": {

@@ -6,7 +6,7 @@
  * first byte lands (no partial trees on refusal).
  */
 
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute, join, normalize, resolve, sep } from 'node:path'
 import { threeWayMerge } from '../../../shared/design/threeWayMerge'
 
@@ -68,6 +68,19 @@ function ensureParentInsideRoot(target: Target, realRoot: string): void {
   }
 }
 
+/** Refuse to write (or read, on the merge path) THROUGH a symlink sitting at
+ * the leaf. `ensureParentInsideRoot` realpath-checks only the parent dir, but
+ * `writeFileSync`/`readFileSync` follow a symlink AT the final component — so a
+ * symlink already in the output folder (e.g. `config.py -> /etc/cron.d/x`)
+ * would carry the write outside the root the extractor promises to contain. */
+function assertLeafNotSymlink(target: Target): void {
+  let isLink = false
+  try { isLink = lstatSync(target.absolute).isSymbolicLink() } catch { return /* absent → fine */ }
+  if (isLink) {
+    throw new Error(`refusing to write through a symlink in the output folder: ${target.relative}`)
+  }
+}
+
 /** Validate EVERY path first, then write — refusal leaves no partial
  * tree. Returns the written relative paths. */
 export function extractGeneratedTree(files: readonly GeneratedFile[], outputRoot: string): string[] {
@@ -78,6 +91,7 @@ export function extractGeneratedTree(files: readonly GeneratedFile[], outputRoot
   for (const target of targets) {
     try {
       ensureParentInsideRoot(target, realRoot)
+      assertLeafNotSymlink(target)
       writeFileSync(target.absolute, target.data)
     } catch (error) {
       // A LATE failure is reported as what it is — an interrupted
@@ -135,6 +149,7 @@ export function extractGeneratedTreeMerging(files: readonly GeneratedFile[], out
   for (const target of targets) {
     try {
       ensureParentInsideRoot(target, realRoot)
+      assertLeafNotSymlink(target)
       const newText = asText(target.data)
       if (newText === null) {
         writeFileSync(target.absolute, target.data)

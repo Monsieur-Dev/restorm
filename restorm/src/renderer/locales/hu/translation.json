@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-terv"
       },
       "cut": "Kivágás",
       "copy": "Másolás",
@@ -336,7 +337,8 @@
       "moveInto": "Áthelyezés ebbe a forgatókönyvbe",
       "affectsNote": "A kérés törlése eltávolítja azt ezekből a forgatókönyvekből is.",
       "deleteAnyway": "Törlés mindenképp"
-    }
+    },
+    "expandAll": "Összes kérés kibontása"
   },
   "environment": {
     "newName": "Új környezet",
@@ -1240,7 +1242,8 @@
       "operation": "Művelet",
       "description": "Leírás",
       "example": "Példa",
-      "constraints": "Megkötések"
+      "constraints": "Megkötések",
+      "enum": "Enum"
     },
     "params": {
       "empty": "A szűrt útvonalakhoz nincs törzsön kívüli paraméter megadva."
@@ -2163,7 +2166,8 @@
       "documentation": "Dokumentáció",
       "notes": "Jegyzetek",
       "code": "Kód",
-      "server": "Kiszolgáló"
+      "server": "Kiszolgáló",
+      "clients": "Kliensek"
     },
     "rail": {
       "ariaLabel": "A terv szakaszai"
@@ -2580,7 +2584,8 @@
         "pagination": "Lapozás",
         "defaultLimit": "Alapértelmezett lapméret",
         "maxLimit": "Max. lapméret"
-      }
+      },
+      "addSubgroup": "Alcsoport hozzáadása"
     },
     "newDesignName": "Új API-terv",
     "createFromScratch": "API-terv létrehozása",
@@ -2614,7 +2619,15 @@
       "generate": "Generálás",
       "replace": "A meglévő útvonalak cseréje",
       "replaceHint": "Ehhez a modellhez már léteznek útvonalak. Cserélje le őket a duplikátumok elkerülése érdekében; hagyja kikapcsolva egy második készlet hozzáadásához.",
-      "title": "CRUD generálása ehhez: {{name}}"
+      "title": "CRUD generálása ehhez: {{name}}",
+      "projections": {
+        "http": "{{count}} REST útvonal",
+        "graphql": "{{queries}} lekérdezés / {{mutations}} mutáció a GraphQL-ben",
+        "grpc": "{{count}} gRPC-metódus",
+        "odata": "{{count}} OData entitáskészlet",
+        "soap": "{{count}} SOAP-művelet",
+        "title": "Egy modell, minden protokoll — ez a CRUD a következőként is elérhető:"
+      }
     },
     "server": {
       "subtitle": "Szolgálja ki ezt a tervet élő mockként, és figyelje minden hívást."
@@ -2636,6 +2649,21 @@
         "undeclared": "Használt, de nem deklarált: {{names}}",
         "allDeclared": "A sablon által használt összes változó deklarált."
       }
+    },
+    "clients": {
+      "generated": "Kliensek létrehozva — nyissa meg őket a Kliensek szakaszban az oldalsávban.",
+      "importing": "Kliensek importálása…",
+      "refresh": "Kliensek újragenerálása",
+      "startPrompt": "Indítsa el a szervert a kliensek létrehozásához.",
+      "startServerPrompt": "Indítsa el a <serverLink>tervszervert</serverLink> a modellből automatikusan generált klienskérések eléréséhez.",
+      "subtitle": "Az API-tervszervere fut, és a definiált útvonalakat szolgálja ki. Az alábbi kérések közvetlenül ezeket az útvonalakat hívják — nyisson meg egyet a teszteléséhez. Ezek ideiglenesek, és eltűnnek, amikor a szerver leáll."
+    },
+    "descriptors": {
+      "copy": "URL másolása"
+    },
+    "projections": {
+      "title": "Projekciók",
+      "hint": "Ugyanaz a művelet, ahogyan azt minden kiszolgált protokoll közzéteszi."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Tervleíró exportálása",
     "generateDesignCode": "Kód generálása egy tervből",
     "getDesignTemplateContract": "Kódsablonok szerződésének lekérése",
-    "setDesignTemplates": "Egy terv kódsablonjainak beállítása"
+    "setDesignTemplates": "Egy terv kódsablonjainak beállítása",
+    "setDesignModelVariables": "Egy modell kódgenerálási felülbírálatainak beállítása",
+    "setDesignPropertyVariables": "Egy tulajdonság kódgenerálási felülbírálatainak beállítása",
+    "setDesignRouteVariables": "Egy útvonal kódgenerálási felülbírálatainak beállítása",
+    "setDesignTemplateVariables": "Egy sablon globális kódgenerálási változóinak beállítása"
   },
   "odataFilter": {
     "detail": {

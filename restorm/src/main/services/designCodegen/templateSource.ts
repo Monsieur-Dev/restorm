@@ -29,6 +29,13 @@ import type { TemplateVariableDecl } from '../../../shared/design/templateVariab
 export type { TemplateVariableDecl, TemplateVariableScope, TemplateVariableType } from '../../../shared/design/templateVariables'
 import { assertSafeRelativePath, type GeneratedFile } from './extractTree'
 
+/** URL-encode a git ref (branch/tag/sha) per path segment so a slashed branch
+ * (`feature/x`) keeps its slashes while spaces/other characters are escaped —
+ * `repo` is charset-validated, but `ref` was interpolated raw. */
+function encodeGitRef(ref: string): string {
+  return ref.split('/').map(encodeURIComponent).join('/')
+}
+
 // The official template registry used to live here as an in-code list. It now
 // lives in the cloud (the `templates` Edge Function) and is fetched by the
 // code-generation library; a template the user "uses" is stored in the design
@@ -151,7 +158,7 @@ export function templateArchiveUrl(repo: string, ref = 'main'): string {
   if (!/^[\w.-]+\/[\w.-]+$/.test(cleaned)) {
     throw new Error(`not a github repository reference: ${repo}`)
   }
-  return `https://codeload.github.com/${cleaned}/tar.gz/refs/heads/${ref}`
+  return `https://codeload.github.com/${cleaned}/tar.gz/refs/heads/${encodeGitRef(ref)}`
 }
 
 /** `owner/repo` (or a full github URL) → the raw URL of its ROOT manifest. */
@@ -163,7 +170,7 @@ export function rawManifestUrl(repo: string, ref = 'main'): string {
   if (!/^[\w.-]+\/[\w.-]+$/.test(cleaned)) {
     throw new Error(`not a github repository reference: ${repo}`)
   }
-  return `https://raw.githubusercontent.com/${cleaned}/${ref}/restorm-template.json`
+  return `https://raw.githubusercontent.com/${cleaned}/${encodeGitRef(ref)}/restorm-template.json`
 }
 
 /** Extract just the DECLARED variables from a manifest's JSON text — a lenient
@@ -285,7 +292,7 @@ function rawRepoFileUrl(repo: string, ref: string, file: string): string {
   if (!/^[\w.-]+\/[\w.-]+$/.test(cleaned)) {
     throw new Error(`not a github repository reference: ${repo}`)
   }
-  return `https://raw.githubusercontent.com/${cleaned}/${ref}/${file}`
+  return `https://raw.githubusercontent.com/${cleaned}/${encodeGitRef(ref)}/${file}`
 }
 
 /** The Copier questions of a LOCAL template — reads only its copier.yml/.yaml

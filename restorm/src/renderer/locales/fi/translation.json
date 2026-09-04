@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API-suunnittelu"
       },
       "cut": "Leikkaa",
       "copy": "Kopioi",
@@ -336,7 +337,8 @@
       "moveInto": "Siirrä tähän skenaarioon",
       "affectsNote": "Tämän pyynnön poistaminen poistaa sen myös näistä skenaarioista.",
       "deleteAnyway": "Poista silti"
-    }
+    },
+    "expandAll": "Laajenna kaikki pyynnöt"
   },
   "environment": {
     "newName": "Uusi ympäristö",
@@ -1240,7 +1242,8 @@
       "operation": "Operaatio",
       "description": "Kuvaus",
       "example": "Esimerkki",
-      "constraints": "Rajoitteet"
+      "constraints": "Rajoitteet",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Suodatetuille reiteille ei ole määritelty rungon ulkopuolisia parametreja."
@@ -2163,7 +2166,8 @@
       "documentation": "Dokumentaatio",
       "notes": "Muistiinpanot",
       "code": "Koodi",
-      "server": "Palvelin"
+      "server": "Palvelin",
+      "clients": "Asiakkaat"
     },
     "rail": {
       "ariaLabel": "Suunnitelman osiot"
@@ -2580,7 +2584,8 @@
         "pagination": "Sivutus",
         "defaultLimit": "Oletussivukoko",
         "maxLimit": "Enimmäissivukoko"
-      }
+      },
+      "addSubgroup": "Lisää aliryhmä"
     },
     "newDesignName": "Uusi API-suunnitelma",
     "createFromScratch": "Luo API-suunnitelma",
@@ -2614,7 +2619,15 @@
       "generate": "Luo",
       "replace": "Korvaa olemassa olevat reitit",
       "replaceHint": "Tälle mallille on jo reittejä. Korvaa ne välttääksesi kaksoiskappaleet; jätä pois päältä lisätäksesi toisen joukon.",
-      "title": "Luo CRUD kohteelle {{name}}"
+      "title": "Luo CRUD kohteelle {{name}}",
+      "projections": {
+        "http": "{{count}} REST-reittiä",
+        "graphql": "{{queries}} kyselyä / {{mutations}} mutaatiota GraphQL:ssä",
+        "grpc": "{{count}} gRPC-metodia",
+        "odata": "{{count}} OData-entiteettijoukko",
+        "soap": "{{count}} SOAP-operaatiota",
+        "title": "Yksi malli, kaikki protokollat — tämä CRUD tarjoillaan myös muodossa:"
+      }
     },
     "server": {
       "subtitle": "Palvele tätä suunnitelmaa live-mockina ja seuraa jokaista kutsua."
@@ -2636,6 +2649,21 @@
         "undeclared": "Käytössä mutta ei määritelty: {{names}}",
         "allDeclared": "Kaikki tämän mallin käyttämät muuttujat on määritelty."
       }
+    },
+    "clients": {
+      "generated": "Asiakkaat luotu — avaa ne Asiakkaat-kohdasta sivupalkissa.",
+      "importing": "Tuodaan asiakkaita…",
+      "refresh": "Luo asiakkaat uudelleen",
+      "startPrompt": "Käynnistä palvelin luodaksesi asiakkaat.",
+      "startServerPrompt": "Käynnistä <serverLink>suunnittelupalvelin</serverLink> päästäksesi käsiksi mallista automaattisesti luotuihin asiakaspyyntöihin.",
+      "subtitle": "API-suunnittelupalvelimesi on käynnissä ja palvelee määrittämiäsi reittejä. Alla olevat pyynnöt kutsuvat näitä reittejä suoraan — avaa yksi testataksesi sitä. Ne ovat lyhytikäisiä ja katoavat, kun palvelin pysähtyy."
+    },
+    "descriptors": {
+      "copy": "Kopioi URL"
+    },
+    "projections": {
+      "title": "Projektiot",
+      "hint": "Sama operaatio sellaisena kuin kukin tarjoiltu protokolla sen paljastaa."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Vie suunnitelman kuvaaja",
     "generateDesignCode": "Luo koodia suunnitelmasta",
     "getDesignTemplateContract": "Hae koodimallien sopimus",
-    "setDesignTemplates": "Määritä suunnitelman koodimallit"
+    "setDesignTemplates": "Määritä suunnitelman koodimallit",
+    "setDesignModelVariables": "Aseta mallin koodinluonnin ohitukset",
+    "setDesignPropertyVariables": "Aseta ominaisuuden koodinluonnin ohitukset",
+    "setDesignRouteVariables": "Aseta reitin koodinluonnin ohitukset",
+    "setDesignTemplateVariables": "Aseta pohjan globaalit koodinluonnin muuttujat"
   },
   "odataFilter": {
     "detail": {

@@ -97,9 +97,16 @@ function protoFieldType(design: ApiDesign, property: Property): FieldType {
   const array = /^array<(.+)>$/.exec(label)
   if (array?.[1] !== undefined) return { type: protoScalar(array[1], undefined), repeated: true }
   if (label === 'array') {
-    return { type: protoScalar(property.design?.arrayItems?.type ?? 'string', undefined), repeated: true }
+    // Carry the element's scalar format (int64/uuid/…) so `array<integer>`
+    // (int64) doesn't silently degrade to `repeated int32`, matching how a
+    // scalar property projects.
+    return { type: protoScalar(property.design?.arrayItems?.type ?? 'string', property.design?.arrayItems?.format), repeated: true }
   }
-  return { type: protoScalar(label, property.doc.format), repeated: false }
+  // An INLINE (anonymous) enum on the property is surfaced the same way a named
+  // enum is in proto3 (string + a `// enum:` comment) — proto3 has no anonymous
+  // enum type, and this keeps the allowed set visible to a reader/generator.
+  const inlineEnum = (property.doc.enumValues ?? []).map(scalarToString).filter((v) => v !== '')
+  return { type: protoScalar(label, property.doc.format), repeated: false, ...(inlineEnum.length > 0 ? { enumValues: inlineEnum } : {}) }
 }
 
 // ── Method derivation ─────────────────────────────────────────────────

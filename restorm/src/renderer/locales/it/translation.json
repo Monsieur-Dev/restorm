@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Design API"
       },
       "cut": "Taglia",
       "copy": "Copia",
@@ -336,7 +337,8 @@
       "moveInto": "Sposta in questo scenario",
       "affectsNote": "Eliminando questa richiesta verrà rimossa anche da questi scenari.",
       "deleteAnyway": "Elimina comunque"
-    }
+    },
+    "expandAll": "Espandi tutte le richieste"
   },
   "environment": {
     "newName": "Nuovo ambiente",
@@ -1240,7 +1242,8 @@
       "operation": "Operazione",
       "description": "Descrizione",
       "example": "Esempio",
-      "constraints": "Vincoli"
+      "constraints": "Vincoli",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nessun parametro fuori dal corpo dichiarato per le rotte filtrate."
@@ -2163,7 +2166,8 @@
       "documentation": "Documentazione",
       "notes": "Note",
       "code": "Codice",
-      "server": "Server"
+      "server": "Server",
+      "clients": "Client"
     },
     "rail": {
       "ariaLabel": "Sezioni del design"
@@ -2580,7 +2584,8 @@
         "pagination": "Paginazione",
         "defaultLimit": "Dimensione pagina predefinita",
         "maxLimit": "Dimensione pagina max"
-      }
+      },
+      "addSubgroup": "Aggiungi un sottogruppo"
     },
     "newDesignName": "Nuovo design di API",
     "createFromScratch": "Crea un design di API",
@@ -2614,7 +2619,15 @@
       "generate": "Genera",
       "replace": "Sostituisci le route esistenti",
       "replaceHint": "Per questo modello esistono già delle route. Sostituiscile per evitare duplicati; lascia disattivato per aggiungere un secondo set.",
-      "title": "Genera CRUD per {{name}}"
+      "title": "Genera CRUD per {{name}}",
+      "projections": {
+        "http": "{{count}} route REST",
+        "graphql": "{{queries}} query / {{mutations}} mutation in GraphQL",
+        "grpc": "{{count}} metodi gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} operazioni SOAP",
+        "title": "Un modello, tutti i protocolli: questo CRUD è servito anche come:"
+      }
     },
     "server": {
       "subtitle": "Servi questo design come mock live e osserva ogni chiamata."
@@ -2636,6 +2649,21 @@
         "undeclared": "Usate ma non dichiarate: {{names}}",
         "allDeclared": "Tutte le variabili usate da questo modello sono dichiarate."
       }
+    },
+    "clients": {
+      "generated": "Client generati: aprili sotto «Client» nella barra laterale.",
+      "importing": "Importazione dei client…",
+      "refresh": "Rigenera i client",
+      "startPrompt": "Avvia il server per generare i client.",
+      "startServerPrompt": "Avvia il <serverLink>server di design</serverLink> per accedere alle richieste client generate automaticamente dal modello.",
+      "subtitle": "Il tuo server di design API è in esecuzione e serve le route che hai definito. Le richieste qui sotto chiamano direttamente quelle route: aprine una per testarla. Sono effimere e scompaiono quando il server si arresta."
+    },
+    "descriptors": {
+      "copy": "Copia l'URL"
+    },
+    "projections": {
+      "title": "Proiezioni",
+      "hint": "La stessa operazione, così come la espone ogni protocollo servito."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Esporta un descrittore di design",
     "generateDesignCode": "Genera codice da un design",
     "getDesignTemplateContract": "Ottieni il contratto dei template di codice",
-    "setDesignTemplates": "Imposta i template di codice di un design"
+    "setDesignTemplates": "Imposta i template di codice di un design",
+    "setDesignModelVariables": "Imposta gli override codegen di un modello",
+    "setDesignPropertyVariables": "Imposta gli override codegen di una proprietà",
+    "setDesignRouteVariables": "Imposta gli override codegen di una route",
+    "setDesignTemplateVariables": "Imposta le variabili codegen globali di un template"
   },
   "odataFilter": {
     "detail": {

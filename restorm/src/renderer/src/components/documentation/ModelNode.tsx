@@ -75,7 +75,7 @@ function formatExample(value: unknown): string | undefined {
   }
 }
 
-function buildPropertyTooltip(prop: PropertyDocumentation): React.ReactNode {
+function buildPropertyTooltip(prop: PropertyDocumentation, t: (key: string, fallback: string) => string): React.ReactNode {
   const parts: React.ReactNode[] = []
   if (prop.description !== undefined && prop.description.length > 0) {
     parts.push(<div key="desc" className="documentation-host-model-node__tooltip-line">{prop.description}</div>)
@@ -83,7 +83,7 @@ function buildPropertyTooltip(prop: PropertyDocumentation): React.ReactNode {
   if (Array.isArray(prop.enumValues) && prop.enumValues.length > 0) {
     parts.push(
       <div key="enum" className="documentation-host-model-node__tooltip-line">
-        <strong>Enum:</strong> <code>{prop.enumValues.map((v) => String(v)).join(', ')}</code>
+        <strong>{t('documentation.table.enum', 'Enum')}:</strong> <code>{prop.enumValues.map((v) => String(v)).join(', ')}</code>
       </div>
     )
   }
@@ -91,7 +91,7 @@ function buildPropertyTooltip(prop: PropertyDocumentation): React.ReactNode {
   if (example !== undefined) {
     parts.push(
       <div key="example" className="documentation-host-model-node__tooltip-line">
-        <strong>Example:</strong> <code>{example}</code>
+        <strong>{t('documentation.table.example', 'Example')}:</strong> <code>{example}</code>
       </div>
     )
   }
@@ -99,7 +99,7 @@ function buildPropertyTooltip(prop: PropertyDocumentation): React.ReactNode {
   if (constraints !== undefined) {
     parts.push(
       <div key="constraints" className="documentation-host-model-node__tooltip-line">
-        <strong>Constraints:</strong> <code>{constraints}</code>
+        <strong>{t('documentation.table.constraints', 'Constraints')}:</strong> <code>{constraints}</code>
       </div>
     )
   }
@@ -176,6 +176,7 @@ const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
 }
 
 const ModelNodeImpl: React.FC<NodeProps> = ({ data }) => {
+  const { t } = useTranslation()
   const { model, incomingEdgeIds = [], nodeHeight } = data as ModelNodeData
   const totalIncoming = incomingEdgeIds.length
   const documentedEnums = useDocumentedEnums()
@@ -208,7 +209,7 @@ const ModelNodeImpl: React.FC<NodeProps> = ({ data }) => {
 
       <ul className="documentation-host-model-node__properties">
         {model.properties.map((prop) => {
-          const tooltip = buildPropertyTooltip(prop)
+          const tooltip = buildPropertyTooltip(prop, t)
           const rowClass =
             'documentation-host-model-node__property' +
             (prop.required ? ' documentation-host-model-node__property--required' : '') +

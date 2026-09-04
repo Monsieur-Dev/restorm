@@ -315,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API デザイン"
       },
       "cut": "切り取り",
       "copy": "コピー",
@@ -335,7 +336,8 @@
       "moveInto": "このシナリオに移動",
       "affectsNote": "このリクエストを削除すると、これらのシナリオからも削除されます。",
       "deleteAnyway": "それでも削除"
-    }
+    },
+    "expandAll": "すべてのリクエストを展開"
   },
   "environment": {
     "newName": "新しい環境",
@@ -1239,7 +1241,8 @@
       "operation": "操作",
       "description": "説明",
       "example": "例",
-      "constraints": "制約"
+      "constraints": "制約",
+      "enum": "Enum"
     },
     "params": {
       "empty": "フィルターされたルートに対してボディ以外のパラメーターは宣言されていません。"
@@ -2162,7 +2165,8 @@
       "documentation": "ドキュメント",
       "notes": "ノート",
       "code": "コード",
-      "server": "サーバー"
+      "server": "サーバー",
+      "clients": "クライアント"
     },
     "rail": {
       "ariaLabel": "デザインのセクション"
@@ -2579,7 +2583,8 @@
         "pagination": "ページネーション",
         "defaultLimit": "既定のページサイズ",
         "maxLimit": "最大ページサイズ"
-      }
+      },
+      "addSubgroup": "サブグループを追加"
     },
     "newDesignName": "新しい API デザイン",
     "createFromScratch": "API デザインを作成",
@@ -2613,7 +2618,15 @@
       "generate": "生成",
       "replace": "既存のルートを置き換える",
       "replaceHint": "このモデルにはすでにルートが存在します。重複を避けるには置き換えてください。オフのままにすると 2 つ目のセットを追加します。",
-      "title": "{{name}} の CRUD を生成"
+      "title": "{{name}} の CRUD を生成",
+      "projections": {
+        "http": "REST ルート {{count}} 件",
+        "graphql": "GraphQL のクエリ {{queries}} 件 / ミューテーション {{mutations}} 件",
+        "grpc": "gRPC メソッド {{count}} 件",
+        "odata": "OData エンティティセット {{count}} 件",
+        "soap": "SOAP オペレーション {{count}} 件",
+        "title": "1 つのモデルで、あらゆるプロトコルに — この CRUD は次の形式でも提供されます:"
+      }
     },
     "server": {
       "subtitle": "このデザインをライブモックとして配信し、すべての呼び出しを監視します。"
@@ -2635,6 +2648,21 @@
         "undeclared": "使用されているが未宣言: {{names}}",
         "allDeclared": "このテンプレートが使うすべての変数は宣言済みです。"
       }
+    },
+    "clients": {
+      "generated": "クライアントを生成しました — サイドバーのクライアントから開けます。",
+      "importing": "クライアントをインポート中…",
+      "refresh": "クライアントを再生成",
+      "startPrompt": "クライアントを生成するにはサーバーを起動してください。",
+      "startServerPrompt": "モデルから自動生成されたクライアントリクエストにアクセスするには、<serverLink>デザインサーバー</serverLink>を起動してください。",
+      "subtitle": "API デザインサーバーが稼働中で、定義したルートを提供しています。以下のリクエストはそれらのルートを直接呼び出します — 開いてテストしてください。これらは一時的なもので、サーバーを停止すると消えます。"
+    },
+    "descriptors": {
+      "copy": "URL をコピー"
+    },
+    "projections": {
+      "title": "プロジェクション",
+      "hint": "同じ操作を、提供される各プロトコルが公開するかたちで。"
     }
   },
   "mqtt": {
@@ -2840,7 +2868,11 @@
     "exportDesign": "デザインのディスクリプタをエクスポート",
     "generateDesignCode": "デザインからコードを生成",
     "getDesignTemplateContract": "コードテンプレートの契約を取得",
-    "setDesignTemplates": "デザインのコードテンプレートを設定"
+    "setDesignTemplates": "デザインのコードテンプレートを設定",
+    "setDesignModelVariables": "モデルのコード生成オーバーライドを設定",
+    "setDesignPropertyVariables": "プロパティのコード生成オーバーライドを設定",
+    "setDesignRouteVariables": "ルートのコード生成オーバーライドを設定",
+    "setDesignTemplateVariables": "テンプレートのグローバルなコード生成変数を設定"
   },
   "odataFilter": {
     "detail": {

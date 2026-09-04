@@ -1242,7 +1242,8 @@
       "operation": "Operation",
       "description": "Description",
       "example": "Example",
-      "constraints": "Constraints"
+      "constraints": "Constraints",
+      "enum": "Enum"
     },
     "params": {
       "empty": "No non-body parameters declared for the filtered routes."

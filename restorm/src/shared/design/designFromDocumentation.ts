@@ -191,11 +191,14 @@ export function designFromDocumentation(
 
     const routeDesign: NonNullable<DesignRoute['design']> = {}
     if (bodyParam !== undefined) {
-      const { name: bodyModelName } = parseTypeLabel(bodyParam.type)
+      const { name: bodyModelName, isArray: bodyIsArray } = parseTypeLabel(bodyParam.type)
       const modelId = modelIdByName.get(bodyModelName)
       const consumes = operation.consumes ?? []
       routeDesign.body = {
         ...(modelId !== undefined ? { modelId } : {}),
+        // An array body (`array<User>`, a bulk endpoint) keeps its array-ness so
+        // the design→spec round-trip doesn't degrade it to a single object.
+        ...(bodyIsArray ? { list: true } : {}),
         contentType: consumes[0] ?? 'application/json',
         // Preserve the FULL declared media-type set (a spec can list
         // several) for a lossless round-trip; the editor still shows the

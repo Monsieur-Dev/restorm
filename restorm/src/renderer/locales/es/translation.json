@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Diseño de API"
       },
       "cut": "Cortar",
       "copy": "Copiar",
@@ -336,7 +337,8 @@
       "moveInto": "Mover a este escenario",
       "affectsNote": "Eliminar esta petición también la quitará de estos escenarios.",
       "deleteAnyway": "Eliminar de todos modos"
-    }
+    },
+    "expandAll": "Expandir todas las peticiones"
   },
   "environment": {
     "newName": "Nuevo entorno",
@@ -1240,7 +1242,8 @@
       "operation": "Operación",
       "description": "Descripción",
       "example": "Ejemplo",
-      "constraints": "Restricciones"
+      "constraints": "Restricciones",
+      "enum": "Enum"
     },
     "params": {
       "empty": "No hay parámetros fuera del cuerpo declarados para las rutas filtradas."
@@ -2163,7 +2166,8 @@
       "documentation": "Documentación",
       "notes": "Notas",
       "code": "Código",
-      "server": "Servidor"
+      "server": "Servidor",
+      "clients": "Clientes"
     },
     "rail": {
       "ariaLabel": "Secciones del diseño"
@@ -2580,7 +2584,8 @@
         "pagination": "Paginación",
         "defaultLimit": "Tamaño de página por defecto",
         "maxLimit": "Tamaño de página máx."
-      }
+      },
+      "addSubgroup": "Añadir un subgrupo"
     },
     "newDesignName": "Nuevo diseño de API",
     "createFromScratch": "Crear un diseño de API",
@@ -2614,7 +2619,15 @@
       "generate": "Generar",
       "replace": "Reemplazar las rutas existentes",
       "replaceHint": "Ya existen rutas para este modelo. Reemplázalas para evitar duplicados; déjalo desactivado para añadir un segundo conjunto.",
-      "title": "Generar CRUD para {{name}}"
+      "title": "Generar CRUD para {{name}}",
+      "projections": {
+        "http": "{{count}} rutas REST",
+        "graphql": "{{queries}} queries / {{mutations}} mutations en GraphQL",
+        "grpc": "{{count}} métodos gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} operaciones SOAP",
+        "title": "Un modelo, todos los protocolos: este CRUD también se sirve como:"
+      }
     },
     "server": {
       "subtitle": "Sirve este diseño como un mock en vivo y observa cada llamada."
@@ -2636,6 +2649,21 @@
         "undeclared": "Usadas pero no declaradas: {{names}}",
         "allDeclared": "Todas las variables que usa esta plantilla están declaradas."
       }
+    },
+    "clients": {
+      "generated": "Clientes generados: ábralos en «Clientes» en la barra lateral.",
+      "importing": "Importando clientes…",
+      "refresh": "Regenerar los clientes",
+      "startPrompt": "Inicie el servidor para generar los clientes.",
+      "startServerPrompt": "Inicie el <serverLink>servidor de diseño</serverLink> para acceder a las peticiones de cliente generadas automáticamente a partir del modelo.",
+      "subtitle": "Su servidor de diseño de API está en ejecución y sirve las rutas que ha definido. Las peticiones siguientes llaman directamente a esas rutas: abra una para probarla. Son efímeras y desaparecen cuando el servidor se detiene."
+    },
+    "descriptors": {
+      "copy": "Copiar la URL"
+    },
+    "projections": {
+      "title": "Proyecciones",
+      "hint": "La misma operación, tal como la expone cada protocolo servido."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Exportar un descriptor de diseño",
     "generateDesignCode": "Generar código desde un diseño",
     "getDesignTemplateContract": "Obtener el contrato de las plantillas de código",
-    "setDesignTemplates": "Definir las plantillas de código de un diseño"
+    "setDesignTemplates": "Definir las plantillas de código de un diseño",
+    "setDesignModelVariables": "Definir las sobrescrituras de codegen de un modelo",
+    "setDesignPropertyVariables": "Definir las sobrescrituras de codegen de una propiedad",
+    "setDesignRouteVariables": "Definir las sobrescrituras de codegen de una ruta",
+    "setDesignTemplateVariables": "Definir las variables de codegen globales de una plantilla"
   },
   "odataFilter": {
     "detail": {

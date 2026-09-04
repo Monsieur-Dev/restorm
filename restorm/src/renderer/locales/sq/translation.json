@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Dizajn API"
       },
       "cut": "Pre",
       "copy": "Kopjo",
@@ -336,7 +337,8 @@
       "moveInto": "Zhvendos në këtë skenar",
       "affectsNote": "Fshirja e kësaj kërkese do ta heqë atë edhe nga këta skenarë.",
       "deleteAnyway": "Fshi gjithsesi"
-    }
+    },
+    "expandAll": "Zgjero të gjitha kërkesat"
   },
   "environment": {
     "newName": "Mjedis i ri",
@@ -1240,7 +1242,8 @@
       "operation": "Operacioni",
       "description": "Përshkrimi",
       "example": "Shembull",
-      "constraints": "Kufizimet"
+      "constraints": "Kufizimet",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nuk ka parametra jashtë trupit të deklaruar për rrugët e filtruara."
@@ -2163,7 +2166,8 @@
       "documentation": "Dokumentimi",
       "notes": "Shënimet",
       "code": "Kodi",
-      "server": "Serveri"
+      "server": "Serveri",
+      "clients": "Klientët"
     },
     "rail": {
       "ariaLabel": "Seksionet e dizajnit"
@@ -2580,7 +2584,8 @@
         "pagination": "Faqosja",
         "defaultLimit": "Madhësia e parazgjedhur e faqes",
         "maxLimit": "Madhësia maks. e faqes"
-      }
+      },
+      "addSubgroup": "Shto një nëngrup"
     },
     "newDesignName": "Dizajn i ri i API-t",
     "createFromScratch": "Krijo një dizajn API",
@@ -2614,7 +2619,15 @@
       "generate": "Gjenero",
       "replace": "Zëvendëso rrugët ekzistuese",
       "replaceHint": "Ekzistojnë tashmë rrugë për këtë model. Zëvendësoji për të shmangur dublikatat; lëre të çaktivizuar për të shtuar një grup të dytë.",
-      "title": "Gjenero CRUD për {{name}}"
+      "title": "Gjenero CRUD për {{name}}",
+      "projections": {
+        "http": "{{count}} rrugë REST",
+        "graphql": "{{queries}} query / {{mutations}} mutacione në GraphQL",
+        "grpc": "{{count}} metoda gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} operacione SOAP",
+        "title": "Një model, çdo protokoll — ky CRUD shërbehet edhe si:"
+      }
     },
     "server": {
       "subtitle": "Shërbeje këtë dizajn si një mock live dhe ndiq çdo thirrje."
@@ -2636,6 +2649,21 @@
         "undeclared": "Të përdorura por të padeklaruara: {{names}}",
         "allDeclared": "Të gjitha variablat që përdor ky shabllon janë të deklaruara."
       }
+    },
+    "clients": {
+      "generated": "Klientët u gjeneruan — hapini te „Klientët” në shiritin anësor.",
+      "importing": "Po importohen klientët…",
+      "refresh": "Rigjenero klientët",
+      "startPrompt": "Nis serverin për të gjeneruar klientët.",
+      "startServerPrompt": "Nis <serverLink>serverin e dizajnit</serverLink> për të hyrë te kërkesat e klientit të gjeneruara automatikisht nga modeli.",
+      "subtitle": "Serveri juaj i dizajnit të API-t po ekzekutohet dhe shërben rrugët që keni përcaktuar. Kërkesat më poshtë i thërrasin drejtpërdrejt ato rrugë — hapni një për ta testuar. Janë efemere dhe zhduken kur serveri ndalon."
+    },
+    "descriptors": {
+      "copy": "Kopjo URL-në"
+    },
+    "projections": {
+      "title": "Projeksionet",
+      "hint": "I njëjti veprim, ashtu siç e ekspozon çdo protokoll i shërbyer."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Eksporto një përshkrues dizajni",
     "generateDesignCode": "Gjenero kod nga një dizajn",
     "getDesignTemplateContract": "Merr kontratën e shablloneve të kodit",
-    "setDesignTemplates": "Cakto shabllonet e kodit të një dizajni"
+    "setDesignTemplates": "Cakto shabllonet e kodit të një dizajni",
+    "setDesignModelVariables": "Cakto mbivendosjet e gjenerimit të kodit të një modeli",
+    "setDesignPropertyVariables": "Cakto mbivendosjet e gjenerimit të kodit të një vetie",
+    "setDesignRouteVariables": "Cakto mbivendosjet e gjenerimit të kodit të një rruge",
+    "setDesignTemplateVariables": "Cakto variablat globale të gjenerimit të kodit të një shablloni"
   },
   "odataFilter": {
     "detail": {

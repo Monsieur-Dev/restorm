@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Design de API"
       },
       "cut": "Cortar",
       "copy": "Copiar",
@@ -336,7 +337,8 @@
       "moveInto": "Mover para este cenário",
       "affectsNote": "Excluir esta requisição também a removerá destes cenários.",
       "deleteAnyway": "Excluir mesmo assim"
-    }
+    },
+    "expandAll": "Expandir todos os pedidos"
   },
   "environment": {
     "newName": "Novo ambiente",
@@ -1240,7 +1242,8 @@
       "operation": "Operação",
       "description": "Descrição",
       "example": "Exemplo",
-      "constraints": "Restrições"
+      "constraints": "Restrições",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nenhum parâmetro fora do corpo declarado para as rotas filtradas."
@@ -2163,7 +2166,8 @@
       "documentation": "Documentação",
       "notes": "Notas",
       "code": "Código",
-      "server": "Servidor"
+      "server": "Servidor",
+      "clients": "Clientes"
     },
     "rail": {
       "ariaLabel": "Seções do design"
@@ -2580,7 +2584,8 @@
         "pagination": "Paginação",
         "defaultLimit": "Tamanho de página padrão",
         "maxLimit": "Tamanho de página máx."
-      }
+      },
+      "addSubgroup": "Adicionar um subgrupo"
     },
     "newDesignName": "Novo design de API",
     "createFromScratch": "Criar um design de API",
@@ -2614,7 +2619,15 @@
       "generate": "Gerar",
       "replace": "Substituir as rotas existentes",
       "replaceHint": "Já existem rotas para este modelo. Substitua-as para evitar duplicados; deixe desativado para adicionar um segundo conjunto.",
-      "title": "Gerar CRUD para {{name}}"
+      "title": "Gerar CRUD para {{name}}",
+      "projections": {
+        "http": "{{count}} rotas REST",
+        "graphql": "{{queries}} queries / {{mutations}} mutations em GraphQL",
+        "grpc": "{{count}} métodos gRPC",
+        "odata": "{{count}} entity set OData",
+        "soap": "{{count}} operações SOAP",
+        "title": "Um modelo, todos os protocolos — este CRUD também é servido como:"
+      }
     },
     "server": {
       "subtitle": "Sirva este design como um mock ao vivo e observe cada chamada."
@@ -2636,6 +2649,21 @@
         "undeclared": "Usadas mas não declaradas: {{names}}",
         "allDeclared": "Todas as variáveis que este modelo usa estão declaradas."
       }
+    },
+    "clients": {
+      "generated": "Clientes gerados — abra-os em «Clientes» na barra lateral.",
+      "importing": "A importar clientes…",
+      "refresh": "Regenerar os clientes",
+      "startPrompt": "Inicie o servidor para gerar os clientes.",
+      "startServerPrompt": "Inicie o <serverLink>servidor de design</serverLink> para aceder aos pedidos de cliente gerados automaticamente a partir do modelo.",
+      "subtitle": "O seu servidor de design de API está em execução e serve as rotas que definiu. Os pedidos abaixo chamam diretamente essas rotas: abra um para o testar. São efémeros e desaparecem quando o servidor para."
+    },
+    "descriptors": {
+      "copy": "Copiar o URL"
+    },
+    "projections": {
+      "title": "Projeções",
+      "hint": "A mesma operação, tal como cada protocolo servido a expõe."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Exportar um descritor de design",
     "generateDesignCode": "Gerar código a partir de um design",
     "getDesignTemplateContract": "Obter o contrato dos templates de código",
-    "setDesignTemplates": "Definir os templates de código de um design"
+    "setDesignTemplates": "Definir os templates de código de um design",
+    "setDesignModelVariables": "Definir as substituições de codegen de um modelo",
+    "setDesignPropertyVariables": "Definir as substituições de codegen de uma propriedade",
+    "setDesignRouteVariables": "Definir as substituições de codegen de uma rota",
+    "setDesignTemplateVariables": "Definir as variáveis de codegen globais de um template"
   },
   "odataFilter": {
     "detail": {

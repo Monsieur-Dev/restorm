@@ -114,6 +114,21 @@ function fieldType(names: GraphqlNames, property: DesignModel['properties'][numb
   return scalarType(label)
 }
 
+/** Reserve a field name within a type/input, uniquifying a sanitize-collision
+ * (two distinct property names that sanitize alike, e.g. `order-id`/`order.id`)
+ * so the SDL never repeats a field — a duplicate makes `createSchema` throw and
+ * the whole GraphQL projection fail to build. Mirrors the proto field dedup. */
+function uniqueFieldName(base: string, taken: Set<string>): string {
+  let field = base
+  if (taken.has(field)) {
+    let k = 2
+    while (taken.has(`${field}_${String(k)}`)) k += 1
+    field = `${field}_${String(k)}`
+  }
+  taken.add(field)
+  return field
+}
+
 /** Scalar label → GraphQL scalar (unmapped shapes serve as String). */
 function scalarType(label: string): string {
   if (label === 'integer') return 'Int'
@@ -273,10 +288,15 @@ export function designToGraphqlSdl(design: ApiDesign): string {
     if (properties.length === 0) continue
     pushDescription(lines, model.doc.description)
     lines.push(`type ${name} {`)
+    const takenFields = new Set<string>()
     for (const { property } of properties) {
       if (property.doc.name === '') continue
+      const field = uniqueFieldName(sanitizeGraphqlName(property.doc.name, 'field'), takenFields)
       const marker = property.doc.required && property.doc.nullable !== true ? '!' : ''
-      lines.push(`  ${sanitizeGraphqlName(property.doc.name, 'field')}: ${fieldType(names, property)}${marker}`)
+      // A deprecated field carries `@deprecated`; the importer reads it back, so
+      // the flag round-trips (SDL has no field-level reason we model, so bare).
+      const deprecated = property.doc.deprecated === true ? ' @deprecated' : ''
+      lines.push(`  ${field}: ${fieldType(names, property)}${marker}${deprecated}`)
     }
     lines.push('}', '')
   }
@@ -292,13 +312,15 @@ export function designToGraphqlSdl(design: ApiDesign): string {
     const name = names.models.get(model.id)
     if (name === undefined) continue
     lines.push(`input ${name}Input {`)
+    const takenInputFields = new Set<string>()
     for (const { property } of servedProperties(design, model)) {
       if (property.doc.name === '' || property.doc.readOnly === true) continue
       const reference = property.design?.reference
       const type = reference?.target === 'model'
         ? (property.doc.isArrayOfRef === true ? '[ID!]' : 'ID')
         : fieldType(names, property)
-      lines.push(`  ${sanitizeGraphqlName(property.doc.name, 'field')}: ${type}`)
+      const field = uniqueFieldName(sanitizeGraphqlName(property.doc.name, 'field'), takenInputFields)
+      lines.push(`  ${field}: ${type}`)
     }
     lines.push('}', '')
   }

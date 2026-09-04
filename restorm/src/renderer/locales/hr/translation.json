@@ -317,7 +317,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "Dizajn API-ja"
       },
       "cut": "Izreži",
       "copy": "Kopiraj",
@@ -337,7 +338,8 @@
       "moveInto": "Premjesti u ovaj scenarij",
       "affectsNote": "Brisanjem ovog zahtjeva ukloniti će se i iz ovih scenarija.",
       "deleteAnyway": "Svejedno izbriši"
-    }
+    },
+    "expandAll": "Proširi sve zahtjeve"
   },
   "environment": {
     "newName": "Novo okruženje",
@@ -1241,7 +1243,8 @@
       "operation": "Operacija",
       "description": "Opis",
       "example": "Primjer",
-      "constraints": "Ograničenja"
+      "constraints": "Ograničenja",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Nema deklariranih parametara izvan tijela za filtrirane rute."
@@ -2164,7 +2167,8 @@
       "documentation": "Dokumentacija",
       "notes": "Bilješke",
       "code": "Kod",
-      "server": "Poslužitelj"
+      "server": "Poslužitelj",
+      "clients": "Klijenti"
     },
     "rail": {
       "ariaLabel": "Sekcije dizajna"
@@ -2581,7 +2585,8 @@
         "pagination": "Straničenje",
         "defaultLimit": "Zadana veličina stranice",
         "maxLimit": "Maks. veličina stranice"
-      }
+      },
+      "addSubgroup": "Dodaj podgrupu"
     },
     "newDesignName": "Novi dizajn API-ja",
     "createFromScratch": "Izradi dizajn API-ja",
@@ -2615,7 +2620,15 @@
       "generate": "Generiraj",
       "replace": "Zamijeni postojeće rute",
       "replaceHint": "Za ovaj model već postoje rute. Zamijenite ih kako biste izbjegli duplikate; ostavite isključeno da dodate drugi skup.",
-      "title": "Generiraj CRUD za {{name}}"
+      "title": "Generiraj CRUD za {{name}}",
+      "projections": {
+        "http": "{{count}} REST ruta",
+        "graphql": "{{queries}} upita / {{mutations}} mutacija u GraphQL-u",
+        "grpc": "{{count}} gRPC metoda",
+        "odata": "{{count}} OData skup entiteta",
+        "soap": "{{count}} SOAP operacija",
+        "title": "Jedan model, svaki protokol — ovaj CRUD poslužuje se i kao:"
+      }
     },
     "server": {
       "subtitle": "Poslužite ovaj dizajn kao živi mock i pratite svaki poziv."
@@ -2637,6 +2650,21 @@
         "undeclared": "Korištene, ali nedeklarirane: {{names}}",
         "allDeclared": "Sve varijable koje ovaj predložak koristi su deklarirane."
       }
+    },
+    "clients": {
+      "generated": "Klijenti generirani — otvorite ih pod „Klijenti” u bočnoj traci.",
+      "importing": "Uvoz klijenata…",
+      "refresh": "Ponovno generiraj klijente",
+      "startPrompt": "Pokrenite poslužitelj za generiranje klijenata.",
+      "startServerPrompt": "Pokrenite <serverLink>poslužitelj dizajna</serverLink> za pristup klijentskim zahtjevima automatski generiranima iz modela.",
+      "subtitle": "Vaš poslužitelj dizajna API-ja pokrenut je i poslužuje rute koje ste definirali. Zahtjevi u nastavku izravno pozivaju te rute — otvorite jedan da biste ga testirali. Efemerni su i nestaju kada se poslužitelj zaustavi."
+    },
+    "descriptors": {
+      "copy": "Kopiraj URL"
+    },
+    "projections": {
+      "title": "Projekcije",
+      "hint": "Ista operacija, onako kako je izlaže svaki posluženi protokol."
     }
   },
   "mqtt": {
@@ -2842,7 +2870,11 @@
     "exportDesign": "Izvezi deskriptor dizajna",
     "generateDesignCode": "Generiraj kod iz dizajna",
     "getDesignTemplateContract": "Dohvati ugovor predložaka koda",
-    "setDesignTemplates": "Postavi predloške koda dizajna"
+    "setDesignTemplates": "Postavi predloške koda dizajna",
+    "setDesignModelVariables": "Postavi nadjačavanja generiranja koda modela",
+    "setDesignPropertyVariables": "Postavi nadjačavanja generiranja koda svojstva",
+    "setDesignRouteVariables": "Postavi nadjačavanja generiranja koda rute",
+    "setDesignTemplateVariables": "Postavi globalne varijable generiranja koda predloška"
   },
   "odataFilter": {
     "detail": {

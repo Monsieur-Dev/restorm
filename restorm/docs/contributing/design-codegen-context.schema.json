@@ -408,7 +408,7 @@
         },
         "params": {
           "type": "array",
-          "description": "EVERY parameter (path / query / header) — filter by `in` for a location-specific view.",
+          "description": "EVERY parameter (path / query / header / cookie) — filter by `in` for a location-specific view.",
           "items": {
             "type": "object",
             "required": [
@@ -423,7 +423,8 @@
                 "enum": [
                   "path",
                   "query",
-                  "header"
+                  "header",
+                  "cookie"
                 ]
               },
               "type": {

@@ -316,7 +316,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API tasarımı"
       },
       "cut": "Kes",
       "copy": "Kopyala",
@@ -336,7 +337,8 @@
       "moveInto": "Bu senaryoya taşı",
       "affectsNote": "Bu isteği silmek onu bu senaryolardan da kaldırır.",
       "deleteAnyway": "Yine de sil"
-    }
+    },
+    "expandAll": "Tüm istekleri genişlet"
   },
   "environment": {
     "newName": "Yeni ortam",
@@ -1240,7 +1242,8 @@
       "operation": "İşlem",
       "description": "Açıklama",
       "example": "Örnek",
-      "constraints": "Kısıtlamalar"
+      "constraints": "Kısıtlamalar",
+      "enum": "Enum"
     },
     "params": {
       "empty": "Filtrelenen rotalar için gövde dışı parametre tanımlanmadı."
@@ -2163,7 +2166,8 @@
       "documentation": "Dokümantasyon",
       "notes": "Notlar",
       "code": "Kod",
-      "server": "Sunucu"
+      "server": "Sunucu",
+      "clients": "İstemciler"
     },
     "rail": {
       "ariaLabel": "Tasarım bölümleri"
@@ -2580,7 +2584,8 @@
         "pagination": "Sayfalama",
         "defaultLimit": "Varsayılan sayfa boyutu",
         "maxLimit": "Maks. sayfa boyutu"
-      }
+      },
+      "addSubgroup": "Alt grup ekle"
     },
     "newDesignName": "Yeni API tasarımı",
     "createFromScratch": "API tasarımı oluştur",
@@ -2614,7 +2619,15 @@
       "generate": "Üret",
       "replace": "Mevcut rotaları değiştir",
       "replaceHint": "Bu model için zaten rotalar var. Yinelenenleri önlemek için değiştirin; ikinci bir set eklemek için kapalı bırakın.",
-      "title": "{{name}} için CRUD üret"
+      "title": "{{name}} için CRUD üret",
+      "projections": {
+        "http": "{{count}} REST rotası",
+        "graphql": "GraphQL'de {{queries}} query / {{mutations}} mutation",
+        "grpc": "{{count}} gRPC metodu",
+        "odata": "{{count}} OData varlık kümesi",
+        "soap": "{{count}} SOAP işlemi",
+        "title": "Tek model, her protokol — bu CRUD ayrıca şu biçimlerde sunulur:"
+      }
     },
     "server": {
       "subtitle": "Bu tasarımı canlı bir mock olarak sun ve her çağrıyı izle."
@@ -2636,6 +2649,21 @@
         "undeclared": "Kullanılan ama bildirilmeyen: {{names}}",
         "allDeclared": "Bu şablonun kullandığı her değişken bildirildi."
       }
+    },
+    "clients": {
+      "generated": "İstemciler oluşturuldu — bunları kenar çubuğundaki İstemciler bölümünden açın.",
+      "importing": "İstemciler içe aktarılıyor…",
+      "refresh": "İstemcileri yeniden oluştur",
+      "startPrompt": "İstemcileri oluşturmak için sunucuyu başlatın.",
+      "startServerPrompt": "Modelden otomatik oluşturulan istemci isteklerine erişmek için <serverLink>tasarım sunucusunu</serverLink> başlatın.",
+      "subtitle": "API tasarım sunucunuz çalışıyor ve tanımladığınız rotaları sunuyor. Aşağıdaki istekler bu rotaları doğrudan çağırır — test etmek için birini açın. Bunlar geçicidir ve sunucu durduğunda kaybolur."
+    },
+    "descriptors": {
+      "copy": "URL'yi kopyala"
+    },
+    "projections": {
+      "title": "Projeksiyonlar",
+      "hint": "Aynı işlem, sunulan her protokolün onu sunduğu şekliyle."
     }
   },
   "mqtt": {
@@ -2841,7 +2869,11 @@
     "exportDesign": "Bir tasarım tanımlayıcısını dışa aktar",
     "generateDesignCode": "Bir tasarımdan kod üret",
     "getDesignTemplateContract": "Kod şablonları sözleşmesini al",
-    "setDesignTemplates": "Bir tasarımın kod şablonlarını ayarla"
+    "setDesignTemplates": "Bir tasarımın kod şablonlarını ayarla",
+    "setDesignModelVariables": "Bir modelin codegen geçersiz kılmalarını ayarla",
+    "setDesignPropertyVariables": "Bir özelliğin codegen geçersiz kılmalarını ayarla",
+    "setDesignRouteVariables": "Bir rotanın codegen geçersiz kılmalarını ayarla",
+    "setDesignTemplateVariables": "Bir şablonun genel codegen değişkenlerini ayarla"
   },
   "odataFilter": {
     "detail": {

@@ -169,13 +169,13 @@ export const CODEGEN_CONTEXT_SCHEMA = {
         "operationId": { "type": "string" },
         "params": {
           "type": "array",
-          "description": "EVERY parameter (path / query / header) — filter by `in` for a location-specific view.",
+          "description": "EVERY parameter (path / query / header / cookie) — filter by `in` for a location-specific view.",
           "items": {
             "type": "object",
             "required": ["name", "in"],
             "properties": {
               "name": { "type": "string" },
-              "in": { "enum": ["path", "query", "header"] },
+              "in": { "enum": ["path", "query", "header", "cookie"] },
               "type": { "type": "string", "description": "Scalar/array label (`string`, `array<string>`, …). Absent when the param references a named enum or a linked property." },
               "required": { "const": true },
               "description": { "type": "string" },

@@ -1242,7 +1242,8 @@
       "operation": "Opération",
       "description": "Description",
       "example": "Exemple",
-      "constraints": "Contraintes"
+      "constraints": "Contraintes",
+      "enum": "Énum"
     },
     "params": {
       "empty": "Aucun paramètre hors corps déclaré pour les routes filtrées."

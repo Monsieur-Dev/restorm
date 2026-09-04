@@ -148,6 +148,7 @@ function modelSchema(model: ModelDocumentation, knownComponents: Set<string>, ta
       enum: model.enumValues
     }
     if (model.description !== undefined) schema['description'] = model.description
+    if (model.deprecated === true) schema['deprecated'] = true
     return schema
   }
   const properties: Json = {}
@@ -176,6 +177,7 @@ function modelSchema(model: ModelDocumentation, knownComponents: Set<string>, ta
     }
   }
   if (model.xml !== undefined) schema['xml'] = xmlNode(model.xml)
+  if (model.deprecated === true) schema['deprecated'] = true
   return schema
 }
 
@@ -202,6 +204,7 @@ function parameterNode(parameter: ParameterDocumentation, knownComponents: Set<s
   }
   if (parameter.description !== undefined) node['description'] = parameter.description
   if (parameter.example !== undefined) node['example'] = parameter.example
+  if (parameter.deprecated === true) node['deprecated'] = true
   return node
 }
 

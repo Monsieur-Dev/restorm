@@ -315,7 +315,8 @@
           "odata": "OData",
           "sse": "SSE",
           "trpc": "tRPC"
-        }
+        },
+        "design": "API 设计"
       },
       "cut": "剪切",
       "copy": "复制",
@@ -335,7 +336,8 @@
       "moveInto": "移动到此场景",
       "affectsNote": "删除此请求也会将其从这些场景中移除。",
       "deleteAnyway": "仍然删除"
-    }
+    },
+    "expandAll": "展开所有请求"
   },
   "environment": {
     "newName": "新环境",
@@ -1239,7 +1241,8 @@
       "operation": "操作",
       "description": "描述",
       "example": "示例",
-      "constraints": "约束"
+      "constraints": "约束",
+      "enum": "Enum"
     },
     "params": {
       "empty": "筛选的路由未声明非请求体参数。"
@@ -2162,7 +2165,8 @@
       "documentation": "文档",
       "notes": "笔记",
       "code": "代码",
-      "server": "服务器"
+      "server": "服务器",
+      "clients": "客户端"
     },
     "rail": {
       "ariaLabel": "设计分区"
@@ -2579,7 +2583,8 @@
         "pagination": "分页",
         "defaultLimit": "默认页大小",
         "maxLimit": "最大页大小"
-      }
+      },
+      "addSubgroup": "添加子分组"
     },
     "newDesignName": "新的 API 设计",
     "createFromScratch": "创建 API 设计",
@@ -2613,7 +2618,15 @@
       "generate": "生成",
       "replace": "替换现有路由",
       "replaceHint": "此模型已存在路由。替换它们以避免重复；保持关闭则添加第二组。",
-      "title": "为 {{name}} 生成 CRUD"
+      "title": "为 {{name}} 生成 CRUD",
+      "projections": {
+        "http": "{{count}} 条 REST 路由",
+        "graphql": "GraphQL 中 {{queries}} 个查询 / {{mutations}} 个变更",
+        "grpc": "{{count}} 个 gRPC 方法",
+        "odata": "{{count}} 个 OData 实体集",
+        "soap": "{{count}} 个 SOAP 操作",
+        "title": "一个模型，所有协议——此 CRUD 还以下列形式提供："
+      }
     },
     "server": {
       "subtitle": "将此设计作为实时模拟提供，并观察每次调用。"
@@ -2635,6 +2648,21 @@
         "undeclared": "已使用但未声明：{{names}}",
         "allDeclared": "此模板使用的每个变量都已声明。"
       }
+    },
+    "clients": {
+      "generated": "客户端已生成——在侧边栏的“客户端”下打开它们。",
+      "importing": "正在导入客户端…",
+      "refresh": "重新生成客户端",
+      "startPrompt": "启动服务器以生成客户端。",
+      "startServerPrompt": "启动<serverLink>设计服务器</serverLink>以访问从模型自动生成的客户端请求。",
+      "subtitle": "您的 API 设计服务器正在运行，并提供您定义的路由。下面的请求直接调用这些路由——打开其中一个即可测试。它们是临时的，服务器停止后即会消失。"
+    },
+    "descriptors": {
+      "copy": "复制 URL"
+    },
+    "projections": {
+      "title": "投影",
+      "hint": "同一操作，以每个所服务的协议各自暴露的形式呈现。"
     }
   },
   "mqtt": {
@@ -2840,7 +2868,11 @@
     "exportDesign": "导出设计描述文件",
     "generateDesignCode": "从设计生成代码",
     "getDesignTemplateContract": "获取代码模板契约",
-    "setDesignTemplates": "设置设计的代码模板"
+    "setDesignTemplates": "设置设计的代码模板",
+    "setDesignModelVariables": "设置模型的代码生成覆盖项",
+    "setDesignPropertyVariables": "设置属性的代码生成覆盖项",
+    "setDesignRouteVariables": "设置路由的代码生成覆盖项",
+    "setDesignTemplateVariables": "设置模板的全局代码生成变量"
   },
   "odataFilter": {
     "detail": {
