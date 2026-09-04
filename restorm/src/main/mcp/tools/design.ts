@@ -543,6 +543,7 @@ export function registerDesignTools(mcp: McpService): void {
         readOnly: z.boolean().optional(),
         deprecated: z.boolean().optional(),
         enumRef: z.string().optional().describe('Enum id or name this property is typed by. Empty clears the reference.'),
+        enumValues: z.array(z.union([z.string(), z.number()])).optional().describe('INLINE (anonymous) enum values on the property itself. An empty array clears them. Mutually exclusive with enumRef.'),
         modelRef: z.string().optional().describe('Model id or name this property references. Empty clears the reference.'),
         isArray: z.boolean().optional().describe('With enumRef/modelRef: array-of-reference.'),
         constraints: z.record(z.string(), z.unknown()).optional().describe('minLength/maxLength/minimum/maximum/pattern/multipleOf/uniqueItems.'),
@@ -606,6 +607,17 @@ export function registerDesignTools(mcp: McpService): void {
           design_.reference = { target: 'enum', refId: target.id }
           property.doc.targetModelRef = target.doc.name
           if (isArray) property.doc.isArrayOfRef = true
+        }
+      }
+      if (Array.isArray(args['enumValues'])) {
+        const vals = args['enumValues'] as (string | number)[]
+        if (vals.length === 0) {
+          delete property.doc.enumValues
+        } else {
+          property.doc.enumValues = vals
+          // An inline enum and a named reference are mutually exclusive.
+          delete design_.reference
+          delete property.doc.targetModelRef
         }
       }
       if (typeof args['modelRef'] === 'string') {
@@ -881,6 +893,7 @@ export function registerDesignTools(mcp: McpService): void {
         versionPrefix: z.string().optional().describe('e.g. /v1.'),
         auth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional(),
         description: z.string().optional(),
+        tags: z.array(z.string()).optional().describe('Tags shared by every route of the group (folded into each route\'s effective tags).'),
         parent: z.string().optional().describe('Parent group id or name — makes this a SUB-GROUP nested under it.')
       } as Record<string, unknown>
     },
@@ -902,7 +915,11 @@ export function registerDesignTools(mcp: McpService): void {
       }
       const group: DesignRouteGroup = {
         id: newId(),
-        doc: { name, ...(typeof args['description'] === 'string' && args['description'] !== '' ? { description: args['description'] } : {}) },
+        doc: {
+          name,
+          ...(typeof args['description'] === 'string' && args['description'] !== '' ? { description: args['description'] } : {}),
+          ...(Array.isArray(args['tags']) && args['tags'].length > 0 ? { tags: args['tags'] as string[] } : {})
+        },
         ...(Object.keys(meta).length > 0 ? { design: meta } : {}),
         ...(parentId !== undefined ? { parentId } : {}),
         routes: []
@@ -927,6 +944,7 @@ export function registerDesignTools(mcp: McpService): void {
         basePath: z.string().optional().describe('Empty clears.'),
         versionPrefix: z.string().optional().describe('Empty clears.'),
         auth: z.enum(['none', 'bearer', 'apiKeyHeader', 'basic']).optional(),
+        tags: z.array(z.string()).optional().describe('Shared tags. An empty array clears them.'),
         parent: z.string().optional().describe('Reparent under this group id or name; empty string promotes to a root group. A group cannot become its own descendant.')
       } as Record<string, unknown>
     },
@@ -953,6 +971,10 @@ export function registerDesignTools(mcp: McpService): void {
       if (typeof args['description'] === 'string') {
         if (args['description'] === '') delete doc.description
         else doc.description = args['description']
+      }
+      if (Array.isArray(args['tags'])) {
+        if (args['tags'].length === 0) delete doc.tags
+        else doc.tags = args['tags'] as string[]
       }
       const meta = { ...(resolved.design ?? {}) }
       if (typeof args['basePath'] === 'string') {
@@ -1063,6 +1085,7 @@ export function registerDesignTools(mcp: McpService): void {
         description: z.string().optional(),
         operationId: z.string().optional(),
         deprecated: z.boolean().optional(),
+        tags: z.array(z.string()).optional().describe('The route\'s OWN tags (unioned with the group\'s). An empty array clears them.'),
         responses: z.record(z.string(), z.unknown()).optional(),
         body: z.record(z.string(), z.unknown()).optional(),
         paramLinks: z.record(z.string(), z.unknown()).optional(),
@@ -1096,6 +1119,10 @@ export function registerDesignTools(mcp: McpService): void {
       if (typeof args['deprecated'] === 'boolean') {
         if (args['deprecated']) next.doc.deprecated = true
         else delete next.doc.deprecated
+      }
+      if (Array.isArray(args['tags'])) {
+        if (args['tags'].length === 0) delete next.doc.tags
+        else next.doc.tags = args['tags'] as string[]
       }
 
       const meta = { ...(next.design ?? {}) }
@@ -1217,6 +1244,138 @@ export function registerDesignTools(mcp: McpService): void {
       )
       writeDesign(design)
       return jsonReply({ designId: design.id, routeId: located.route.id, deleted: true })
+    }
+  )
+
+  mcp.registerTool(
+    'set_design_route_param',
+    {
+      titleKey: 'mcpToolTitles.setDesignRouteParam',
+      title: 'Create or update a route parameter',
+      description:
+        'Create-or-update a query / header / path parameter BY NAME on a route. Covers `in` (location), `type` ' +
+        '(scalar or `array<element>`), required, description, deprecation, an INLINE enum (`enumValues`) or a ' +
+        'named-enum reference (`enumRef`). Path params usually come from `{{param}}` in the pattern; use this for ' +
+        'query/header params, to type an enum on one, or to mark one deprecated.',
+      inputSchema: {
+        designId: z.string().min(1),
+        route: z.string().min(1).describe('Route id or summary.'),
+        name: z.string().min(1).describe('Parameter name (the create-or-update key).'),
+        in: z.enum(['path', 'query', 'header']).optional().describe('Location — defaults to query for a new parameter.'),
+        type: z.string().optional().describe('string|integer|number|boolean, or array<element> (e.g. array<string>).'),
+        required: z.boolean().optional(),
+        description: z.string().optional().describe('Empty clears.'),
+        deprecated: z.boolean().optional(),
+        enumValues: z.array(z.union([z.string(), z.number()])).optional().describe('INLINE enum values (empty array clears). For an array param they constrain the items. Mutually exclusive with enumRef.'),
+        enumRef: z.string().optional().describe('Enum id or name this parameter references. Empty clears the reference.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const located = findRoute(design, typeof args['route'] === 'string' ? args['route'] : '')
+      if (isResolveError(located)) return errorReply(located.error)
+      const { group, route } = located
+      const name = typeof args['name'] === 'string' ? args['name'] : ''
+      if (!name) return errorReply('name is required')
+
+      type Param = NonNullable<DesignRoute['doc']['parameters']>[number]
+      const params: Param[] = [...(route.doc.parameters ?? [])]
+      const idx = params.findIndex((p) => p.name === name)
+      const existing = idx >= 0 ? params[idx] : undefined
+      const param: Param = existing !== undefined
+        ? { ...existing }
+        : { name, location: 'query', type: 'string', required: false }
+      if (typeof args['in'] === 'string') param.location = args['in']
+      if (typeof args['type'] === 'string' && args['type'] !== '') param.type = args['type']
+      if (typeof args['required'] === 'boolean') param.required = args['required']
+      if (typeof args['description'] === 'string') {
+        if (args['description'] === '') delete param.description
+        else param.description = args['description']
+      }
+      if (typeof args['deprecated'] === 'boolean') {
+        if (args['deprecated']) param.deprecated = true
+        else delete param.deprecated
+      }
+
+      const meta = { ...(route.design ?? {}) }
+      let enumRefs: Record<string, string> = { ...(meta.paramEnumRefs ?? {}) }
+      if (typeof args['enumRef'] === 'string') {
+        if (args['enumRef'] === '') {
+          const { [name]: _drop, ...rest } = enumRefs
+          enumRefs = rest
+        } else {
+          const target = resolveEntity(design.enums, args['enumRef'], (e) => e.doc.name, 'enum')
+          if (isResolveError(target)) return errorReply(target.error)
+          enumRefs[name] = target.id
+          delete param.enumValues // a named reference and inline values are exclusive
+        }
+      }
+      if (Array.isArray(args['enumValues'])) {
+        const vals = args['enumValues'] as (string | number)[]
+        if (vals.length === 0) {
+          delete param.enumValues
+        } else {
+          param.enumValues = vals
+          const { [name]: _drop, ...rest } = enumRefs
+          enumRefs = rest
+        }
+      }
+
+      if (idx >= 0) params[idx] = param
+      else params.push(param)
+      const nextRoute: DesignRoute = { ...route, doc: { ...route.doc, parameters: params } }
+      if (Object.keys(enumRefs).length > 0) meta.paramEnumRefs = enumRefs
+      else delete meta.paramEnumRefs
+      if (Object.keys(meta).length > 0) nextRoute.design = meta
+      else delete nextRoute.design
+      design.routeGroups = design.routeGroups.map((g) =>
+        g.id === group.id ? { ...group, routes: group.routes.map((r) => (r.id === route.id ? nextRoute : r)) } : g
+      )
+      writeDesign(design)
+      return jsonReply({ designId: design.id, routeId: route.id, name, created: existing === undefined })
+    }
+  )
+
+  mcp.registerTool(
+    'delete_design_route_param',
+    {
+      titleKey: 'mcpToolTitles.deleteDesignRouteParam',
+      title: 'Delete a route parameter',
+      description: 'Delete a route parameter by name, dropping any enum reference or model link it carried. (A path param typed in the pattern re-appears on the next sync.)',
+      inputSchema: {
+        designId: z.string().min(1),
+        route: z.string().min(1).describe('Route id or summary.'),
+        name: z.string().min(1).describe('Parameter name.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const design = findDesign(typeof args['designId'] === 'string' ? args['designId'] : '')
+      if (!design) return errorReply(`No design with id ${String(args['designId'])}`)
+      const located = findRoute(design, typeof args['route'] === 'string' ? args['route'] : '')
+      if (isResolveError(located)) return errorReply(located.error)
+      const { group, route } = located
+      const name = typeof args['name'] === 'string' ? args['name'] : ''
+      const params = (route.doc.parameters ?? []).filter((p) => p.name !== name)
+      const meta = { ...(route.design ?? {}) }
+      if (meta.paramEnumRefs !== undefined) {
+        const { [name]: _e, ...restEnum } = meta.paramEnumRefs
+        if (Object.keys(restEnum).length > 0) meta.paramEnumRefs = restEnum
+        else delete meta.paramEnumRefs
+      }
+      if (meta.paramLinks !== undefined) {
+        const { [name]: _l, ...restLinks } = meta.paramLinks
+        if (Object.keys(restLinks).length > 0) meta.paramLinks = restLinks
+        else delete meta.paramLinks
+      }
+      const nextRoute: DesignRoute = { ...route, doc: { ...route.doc, parameters: params } }
+      if (Object.keys(meta).length > 0) nextRoute.design = meta
+      else delete nextRoute.design
+      design.routeGroups = design.routeGroups.map((g) =>
+        g.id === group.id ? { ...group, routes: group.routes.map((r) => (r.id === route.id ? nextRoute : r)) } : g
+      )
+      writeDesign(design)
+      return jsonReply({ designId: design.id, routeId: route.id, name, deleted: true })
     }
   )
 

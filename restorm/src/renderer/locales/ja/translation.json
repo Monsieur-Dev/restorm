@@ -2828,6 +2828,8 @@
     "createDesignRoute": "デザインのルートを作成",
     "updateDesignRoute": "デザインのルートを更新",
     "deleteDesignRoute": "デザインのルートを削除",
+    "setDesignRouteParam": "ルートパラメータの作成または更新",
+    "deleteDesignRouteParam": "ルートパラメータの削除",
     "generateDesignCrud": "CRUDルートを生成",
     "generateDesignSearchRoutes": "検索ルートを生成",
     "serveDesign": "デザインを提供",

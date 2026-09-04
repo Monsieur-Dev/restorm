@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Crea una rotta di design",
     "updateDesignRoute": "Aggiorna una rotta di design",
     "deleteDesignRoute": "Elimina una rotta di design",
+    "setDesignRouteParam": "Crea o aggiorna un parametro di rotta",
+    "deleteDesignRouteParam": "Elimina un parametro di rotta",
     "generateDesignCrud": "Genera rotte CRUD",
     "generateDesignSearchRoutes": "Genera rotte di ricerca",
     "serveDesign": "Servi un design",

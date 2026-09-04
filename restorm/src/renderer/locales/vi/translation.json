@@ -2828,6 +2828,8 @@
     "createDesignRoute": "Tạo tuyến thiết kế",
     "updateDesignRoute": "Cập nhật tuyến thiết kế",
     "deleteDesignRoute": "Xóa tuyến thiết kế",
+    "setDesignRouteParam": "Tạo hoặc cập nhật tham số tuyến",
+    "deleteDesignRouteParam": "Xóa tham số tuyến",
     "generateDesignCrud": "Tạo các tuyến CRUD",
     "generateDesignSearchRoutes": "Tạo các tuyến tìm kiếm",
     "serveDesign": "Phục vụ một thiết kế",

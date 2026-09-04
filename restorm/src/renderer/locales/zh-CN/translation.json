@@ -2828,6 +2828,8 @@
     "createDesignRoute": "创建设计路由",
     "updateDesignRoute": "更新设计路由",
     "deleteDesignRoute": "删除设计路由",
+    "setDesignRouteParam": "创建或更新路由参数",
+    "deleteDesignRouteParam": "删除路由参数",
     "generateDesignCrud": "生成 CRUD 路由",
     "generateDesignSearchRoutes": "生成搜索路由",
     "serveDesign": "启动设计服务",

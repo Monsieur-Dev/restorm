@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Terv-útvonal létrehozása",
     "updateDesignRoute": "Terv-útvonal frissítése",
     "deleteDesignRoute": "Terv-útvonal törlése",
+    "setDesignRouteParam": "Útvonalparaméter létrehozása vagy frissítése",
+    "deleteDesignRouteParam": "Útvonalparaméter törlése",
     "generateDesignCrud": "CRUD-útvonalak generálása",
     "generateDesignSearchRoutes": "Keresési útvonalak generálása",
     "serveDesign": "Terv kiszolgálása",

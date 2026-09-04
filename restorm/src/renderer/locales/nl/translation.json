@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Een designroute maken",
     "updateDesignRoute": "Een designroute bijwerken",
     "deleteDesignRoute": "Een designroute verwijderen",
+    "setDesignRouteParam": "Een routeparameter maken of bijwerken",
+    "deleteDesignRouteParam": "Een routeparameter verwijderen",
     "generateDesignCrud": "CRUD-routes genereren",
     "generateDesignSearchRoutes": "Zoekroutes genereren",
     "serveDesign": "Een design serveren",

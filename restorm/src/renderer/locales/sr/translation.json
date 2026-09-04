@@ -2830,6 +2830,8 @@
     "createDesignRoute": "Kreiraj rutu dizajna",
     "updateDesignRoute": "Ažuriraj rutu dizajna",
     "deleteDesignRoute": "Obriši rutu dizajna",
+    "setDesignRouteParam": "Napravi ili ažuriraj parametar rute",
+    "deleteDesignRouteParam": "Obriši parametar rute",
     "generateDesignCrud": "Generiši CRUD rute",
     "generateDesignSearchRoutes": "Generiši rute pretrage",
     "serveDesign": "Poslužuj dizajn",

@@ -2831,6 +2831,8 @@
     "createDesignRoute": "Створити маршрут дизайну",
     "updateDesignRoute": "Оновити маршрут дизайну",
     "deleteDesignRoute": "Видалити маршрут дизайну",
+    "setDesignRouteParam": "Створити або оновити параметр маршруту",
+    "deleteDesignRouteParam": "Видалити параметр маршруту",
     "generateDesignCrud": "Згенерувати CRUD-маршрути",
     "generateDesignSearchRoutes": "Згенерувати пошукові маршрути",
     "serveDesign": "Обслуговувати дизайн",

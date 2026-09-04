@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Krijo një rrugë dizajni",
     "updateDesignRoute": "Përditëso një rrugë dizajni",
     "deleteDesignRoute": "Fshi një rrugë dizajni",
+    "setDesignRouteParam": "Krijo ose përditëso një parametër rruge",
+    "deleteDesignRouteParam": "Fshi një parametër rruge",
     "generateDesignCrud": "Gjenero rrugë CRUD",
     "generateDesignSearchRoutes": "Gjenero rrugë kërkimi",
     "serveDesign": "Shërbe një dizajn",

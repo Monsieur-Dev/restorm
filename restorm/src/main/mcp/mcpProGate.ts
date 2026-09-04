@@ -158,6 +158,8 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'create_design_route',
   'update_design_route',
   'delete_design_route',
+  'set_design_route_param',
+  'delete_design_route_param',
   'generate_design_crud',
   'generate_design_search_routes',
   // editing a design's template list + reading the template authoring

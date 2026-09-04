@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Opprett en designrute",
     "updateDesignRoute": "Oppdater en designrute",
     "deleteDesignRoute": "Slett en designrute",
+    "setDesignRouteParam": "Opprett eller oppdater en ruteparameter",
+    "deleteDesignRouteParam": "Slett en ruteparameter",
     "generateDesignCrud": "Generer CRUD-ruter",
     "generateDesignSearchRoutes": "Generer søkeruter",
     "serveDesign": "Server et design",

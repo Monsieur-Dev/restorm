@@ -2856,6 +2856,8 @@
     "createDesignRoute": "Create a design route",
     "updateDesignRoute": "Update a design route",
     "deleteDesignRoute": "Delete a design route",
+    "setDesignRouteParam": "Create or update a route parameter",
+    "deleteDesignRouteParam": "Delete a route parameter",
     "generateDesignCrud": "Generate CRUD routes",
     "generateDesignSearchRoutes": "Generate search routes",
     "serveDesign": "Serve a design",

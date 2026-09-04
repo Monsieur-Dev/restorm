@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Luo suunnitelman reitti",
     "updateDesignRoute": "Päivitä suunnitelman reitti",
     "deleteDesignRoute": "Poista suunnitelman reitti",
+    "setDesignRouteParam": "Luo tai päivitä reittiparametri",
+    "deleteDesignRouteParam": "Poista reittiparametri",
     "generateDesignCrud": "Generoi CRUD-reitit",
     "generateDesignSearchRoutes": "Generoi hakureitit",
     "serveDesign": "Palvele suunnitelmaa",

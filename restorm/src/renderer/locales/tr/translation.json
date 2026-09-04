@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Bir tasarım rotası oluştur",
     "updateDesignRoute": "Bir tasarım rotasını güncelle",
     "deleteDesignRoute": "Bir tasarım rotasını sil",
+    "setDesignRouteParam": "Rota parametresi oluştur veya güncelle",
+    "deleteDesignRouteParam": "Rota parametresini sil",
     "generateDesignCrud": "CRUD rotaları üret",
     "generateDesignSearchRoutes": "Arama rotaları üret",
     "serveDesign": "Bir tasarımı sun",

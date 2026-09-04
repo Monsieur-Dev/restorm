@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Skapa en designrutt",
     "updateDesignRoute": "Uppdatera en designrutt",
     "deleteDesignRoute": "Ta bort en designrutt",
+    "setDesignRouteParam": "Skapa eller uppdatera en ruttparameter",
+    "deleteDesignRouteParam": "Ta bort en ruttparameter",
     "generateDesignCrud": "Generera CRUD-rutter",
     "generateDesignSearchRoutes": "Generera sökrutter",
     "serveDesign": "Servera en design",

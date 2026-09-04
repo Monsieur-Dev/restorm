@@ -2831,6 +2831,8 @@
     "createDesignRoute": "Utwórz trasę projektu",
     "updateDesignRoute": "Zaktualizuj trasę projektu",
     "deleteDesignRoute": "Usuń trasę projektu",
+    "setDesignRouteParam": "Utwórz lub zaktualizuj parametr trasy",
+    "deleteDesignRouteParam": "Usuń parametr trasy",
     "generateDesignCrud": "Generuj trasy CRUD",
     "generateDesignSearchRoutes": "Generuj trasy wyszukiwania",
     "serveDesign": "Serwuj projekt",

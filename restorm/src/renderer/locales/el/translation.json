@@ -2829,6 +2829,8 @@
     "createDesignRoute": "Δημιουργία διαδρομής σχεδίου",
     "updateDesignRoute": "Ενημέρωση διαδρομής σχεδίου",
     "deleteDesignRoute": "Διαγραφή διαδρομής σχεδίου",
+    "setDesignRouteParam": "Δημιουργία ή ενημέρωση παραμέτρου διαδρομής",
+    "deleteDesignRouteParam": "Διαγραφή παραμέτρου διαδρομής",
     "generateDesignCrud": "Δημιουργία διαδρομών CRUD",
     "generateDesignSearchRoutes": "Δημιουργία διαδρομών αναζήτησης",
     "serveDesign": "Σερβίρισμα σχεδίου",

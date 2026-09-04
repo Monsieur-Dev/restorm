@@ -2830,6 +2830,8 @@
     "createDesignRoute": "Creează o rută de design",
     "updateDesignRoute": "Actualizează o rută de design",
     "deleteDesignRoute": "Șterge o rută de design",
+    "setDesignRouteParam": "Creează sau actualizează un parametru de rută",
+    "deleteDesignRouteParam": "Șterge un parametru de rută",
     "generateDesignCrud": "Generează rute CRUD",
     "generateDesignSearchRoutes": "Generează rute de căutare",
     "serveDesign": "Servește un design",

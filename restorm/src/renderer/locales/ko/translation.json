@@ -2828,6 +2828,8 @@
     "createDesignRoute": "디자인 라우트 만들기",
     "updateDesignRoute": "디자인 라우트 업데이트",
     "deleteDesignRoute": "디자인 라우트 삭제",
+    "setDesignRouteParam": "경로 매개변수 생성 또는 업데이트",
+    "deleteDesignRouteParam": "경로 매개변수 삭제",
     "generateDesignCrud": "CRUD 라우트 생성",
     "generateDesignSearchRoutes": "검색 라우트 생성",
     "serveDesign": "디자인 서비스 시작",

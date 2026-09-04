@@ -2828,6 +2828,8 @@
     "createDesignRoute": "Buat rute desain",
     "updateDesignRoute": "Perbarui rute desain",
     "deleteDesignRoute": "Hapus rute desain",
+    "setDesignRouteParam": "Buat atau perbarui parameter rute",
+    "deleteDesignRouteParam": "Hapus parameter rute",
     "generateDesignCrud": "Hasilkan rute CRUD",
     "generateDesignSearchRoutes": "Hasilkan rute pencarian",
     "serveDesign": "Sajikan desain",
