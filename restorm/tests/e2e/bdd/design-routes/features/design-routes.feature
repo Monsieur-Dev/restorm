@@ -67,6 +67,22 @@ Feature: Design routes editor
     When I open the route "List users" of the group "Users"
     Then the query parameter row "email" exists
 
+  Scenario: A request body on a non-standard method is flagged, and cleared when standard again
+    Given a Pro project carrying an API design is open in the routes editor
+    When I open the route "Create a user" of the group "Users"
+    Then the body combo shows "User"
+    When I set the route method to "GET"
+    Then the request body non-standard hint is visible
+    When I set the route method to "POST"
+    Then the request body non-standard hint is not visible
+
+  Scenario: A query parameter is typed as a named enum through the type control
+    Given a Pro project carrying an API design is open in the routes editor
+    When I open the route "Fetch one user" of the group "Users"
+    And I add a query parameter
+    And I type the query parameter "param" as the enum "UserStatus" via the type control
+    Then the query parameter "param" type reads "UserStatus"
+
   Scenario: Route settings persist and the inherited block jumps to the group
     Given a Pro project carrying an API design is open in the routes editor
     When I open the route "Fetch one user" of the group "Users"

@@ -4,7 +4,7 @@ import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_ROUTES_TEMP_DIR } from '../../fixtures/design-routes.fixture'
 import { openDesignSection } from '../../../support/designNav'
-import { fillVariableInput } from '../../../support/designGuiDriver'
+import { fillVariableInput, pickSelect, pickSelectExact } from '../../../support/designGuiDriver'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -177,6 +177,35 @@ Then('the body combo shows {string}', async ({}, label: string) => {
   const p = requirePage()
   const expected = label === '(empty)' ? /\(vide\)|\(empty\)/ : new RegExp(label)
   await expect(p.locator('[data-testid="design-route-body-trigger"]')).toHaveText(expected, { timeout: 5000 })
+})
+
+When('I set the route method to {string}', async ({}, method: string) => {
+  await pickSelect(requirePage(), 'design-route-method', method)
+})
+
+Then('the request body non-standard hint is visible', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="design-route-body-nonstandard-hint"]')).toBeVisible({ timeout: 5000 })
+})
+
+Then('the request body non-standard hint is not visible', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="design-route-body-nonstandard-hint"]')).toHaveCount(0, { timeout: 5000 })
+})
+
+When('I add a query parameter', async () => {
+  await requirePage().locator('[data-testid="design-route-add-param"]').click()
+  await requirePage().waitForTimeout(250)
+})
+
+When('I type the query parameter {string} as the enum {string} via the type control', async ({}, name: string, enumName: string) => {
+  // The compact type combo lists the design's named enums directly (no modal).
+  await pickSelectExact(requirePage(), `design-param-type-${name}`, `${enumName} (enum)`)
+})
+
+Then('the query parameter {string} type reads {string}', async ({}, name: string, summary: string) => {
+  const p = requirePage()
+  await expect(p.locator(`[data-testid="design-param-type-${name}-trigger"]`)).toHaveText(new RegExp(summary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), { timeout: 5000 })
 })
 
 // ── Models-side actions (rename / delete / generators) ────────────────
