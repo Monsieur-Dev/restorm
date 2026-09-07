@@ -58,11 +58,15 @@ jobs:
       - name: Build MSIX (electron-builder appx)
         run: |
           cd restorm
+          # Pin the package version to the shipped release BEFORE building. Passing
+          # -c.extraMetadata.version THROUGH the compound `dist:store` script is
+          # silently dropped: for a script containing `&&`, npm/pnpm forward the
+          # `--` args as shell positionals (ignored), not appended to electron-builder.
+          # So set it on package.json directly (CI checkout only, never committed).
+          npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version
           # RESTORM_STORE_BUILD makes the in-app updater inert — the Store owns
-          # updates for this channel. extraMetadata.version pins the package to
-          # the shipped release version: this is a repackaging, not a new version.
-          RESTORM_STORE_BUILD=1 NODE_OPTIONS=--max-old-space-size=4096 \
-            pnpm run dist:store -- -c.extraMetadata.version="${{ inputs.version }}"
+          # updates for this channel. This is a repackaging, not a new version.
+          RESTORM_STORE_BUILD=1 NODE_OPTIONS=--max-old-space-size=4096 pnpm run dist:store
         env:
           # Bake the crash-report DSN in like the direct-download build, so the
           # Store build reports crashes too. Absent secret ⇒ inert, build stays green.
