@@ -1,0 +1,78 @@
+name: Build MSIX (Microsoft Store)
+
+# Builds the Microsoft Store package (electron-builder `appx` target — full-trust
+# MSIX, so the app keeps its loopback/mock servers, firewall, file access and
+# child processes). makeappx is Windows-only, so this runs on a Windows runner.
+#
+# This is NOT a release: it produces a downloadable `.msix`/`.appx` artifact for
+# manual upload to Partner Center (product "Restorm", MSIX or PWA app). The Store
+# re-signs the package, so no code-signing cert of ours is needed here. The normal
+# NSIS + zip release (release.yml → dl.restorm.app) is untouched.
+#
+# Manual trigger only. `version` pins the package version to the shipped release
+# (a repackaging of that build, not a new version) — leave it at the current
+# released number unless the app itself changed.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version to stamp (matches the shipped release; no leading v)'
+        required: true
+        default: '1.1.0'
+
+jobs:
+  build-msix:
+    name: Build MSIX
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.26.1
+
+      - name: Install + build electron-core-ui
+        run: |
+          cd electron-core-ui
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install restorm dependencies
+        run: |
+          cd restorm
+          pnpm install --frozen-lockfile
+
+      - name: Build MSIX (electron-builder appx)
+        run: |
+          cd restorm
+          # RESTORM_STORE_BUILD makes the in-app updater inert — the Store owns
+          # updates for this channel. extraMetadata.version pins the package to
+          # the shipped release version: this is a repackaging, not a new version.
+          RESTORM_STORE_BUILD=1 NODE_OPTIONS=--max-old-space-size=4096 \
+            pnpm run dist:store -- -c.extraMetadata.version="${{ inputs.version }}"
+        env:
+          # Bake the crash-report DSN in like the direct-download build, so the
+          # Store build reports crashes too. Absent secret ⇒ inert, build stays green.
+          RESTORM_SENTRY_DSN: ${{ secrets.RESTORM_SENTRY_DSN }}
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: restorm-msix-${{ inputs.version }}
+          path: |
+            restorm/dist-electron/*.appx
+            restorm/dist-electron/*.msix
+          if-no-files-found: error
