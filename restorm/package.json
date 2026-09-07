@@ -29,6 +29,7 @@
     "typecheck": "tsc --noEmit --project tsconfig.typecheck.json",
     "package": "electron-vite build && electron-builder --dir",
     "dist": "electron-vite build && electron-builder",
+    "predist:store": "node scripts/generate-icons.mjs && node scripts/generate-sandbox-prelude.mts",
     "dist:store": "electron-vite build && electron-builder --win appx",
     "test": "vitest run",
     "test:watch": "vitest",
