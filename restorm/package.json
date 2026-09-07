@@ -29,6 +29,7 @@
     "typecheck": "tsc --noEmit --project tsconfig.typecheck.json",
     "package": "electron-vite build && electron-builder --dir",
     "dist": "electron-vite build && electron-builder",
+    "dist:store": "electron-vite build && electron-builder --win appx",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run --config vitest.config.ts",
@@ -316,6 +317,18 @@
         "zip"
       ],
       "icon": "assets/icons/icon.ico"
+    },
+    "appx": {
+      "identityName": "MonsieurDev.Restorm",
+      "publisher": "CN=9A3801C6-3716-4D88-B557-D4C59BA5C2F9",
+      "publisherDisplayName": "MonsieurDev",
+      "applicationId": "Restorm",
+      "backgroundColor": "#1b1b1b",
+      "showNameOnTiles": true,
+      "languages": [
+        "en-US",
+        "fr-FR"
+      ]
     },
     "mac": {
       "target": [
