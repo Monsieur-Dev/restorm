@@ -9,6 +9,7 @@ import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/collections'
 import { isScenario, isApiDesign } from '../../../shared/types/collections'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
+import type { DesignEntityActionHandler } from '../services/designSidebarNodes'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
 import { Badge } from '../components/common/Badge'
@@ -45,6 +46,9 @@ export interface UseSidebarStateOptions {
   onRefreshFromSource?: (itemId: string) => void
   /** Open an item in a split workbench panel (design context menu). */
   onOpenInSplit?: (itemId: string) => void
+  /** Run an add/clone/CRUD/delete action from a design's Models/Enums/Routes
+   * sidebar node (or the section row's "add" entry). */
+  onDesignEntityAction?: DesignEntityActionHandler
 }
 
 export interface UseSidebarStateReturn {
@@ -52,7 +56,7 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit, onDesignEntityAction } = options
   const { t, i18n } = useTranslation()
 
   // Set of request ids whose URL currently resolves to a deprecated
@@ -96,7 +100,8 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       renderRemovedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 }, title: 'Removed from source spec' }, name),
       // Merge the transient design-client deprecations (stamped on the client
       // request at generation from the served spec) so those rows dim too.
-      deprecatedRequestIds: new Set([...deprecatedRequestIds, ...getDesignClientsDeprecatedIds()])
+      deprecatedRequestIds: new Set([...deprecatedRequestIds, ...getDesignClientsDeprecatedIds()]),
+      ...(onDesignEntityAction !== undefined && { onDesignEntityAction })
     }
     // Each root item becomes a top-level row in the sidebar. Folders
     // go through `folderAsRootListViewItem` (which renders them as a
@@ -113,7 +118,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, designClientsVersion, i18n.language])
+  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, designClientsVersion, i18n.language, onDesignEntityAction])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread

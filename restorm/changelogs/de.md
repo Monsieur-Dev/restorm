@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**Der API-Designer wird jetzt über die Seitenleiste bedient.**
+
+- **Ihre Modelle, Enums und Routen leben in der Seitenleiste.** Die drei Listen im Tab entfallen – Modelle (mit ihrer Vererbungs-Verschachtelung), Enums und Routen (Gruppen und ihre Routen) sitzen jetzt direkt im Baum der Seitenleiste. Per Rechtsklick umbenennen, ein Untermodell oder eine Untergruppe hinzufügen, eine Route klonen, CRUD generieren oder löschen; per Ziehen umsortieren oder neu einhängen – niemals aus dem Design heraus. Jede Seite zeigt nur noch die Details des ausgewählten Elements.
+- **Ein Überblick über Ihre Modelle, Enums und Routen.** Der Wurzelknoten jedes Bereichs listet nun alles darunter — und Modelle erhalten einen **Graph**-Tab: ein Klassendiagramm Ihrer Modelle mit Vererbung und Referenzen. Enums zeigen ihre Werte direkt neben dem Namen.
+- **Ein Ort zum Umbenennen.** Ein Modell, Enum oder eine Route wird über den großen Titel (den Stift) umbenannt, und ein leerer Name zeigt **„<ohne Namen>“** an, damit der Stift stets erreichbar bleibt — der Name erscheint nicht mehr doppelt auf der Seite.
+- **Validierungsfehler zeigen auf das Element.** Wenn etwas nicht stimmt — ein Modell und ein Enum mit gleichem Namen, eine Referenz auf etwas nicht mehr Vorhandenes — erklärt es ein Hinweis oben am Modell, Enum oder an der Route.
+- **Ein vollständiger Brotkrümelpfad.** Der Pfad spiegelt die gesamte Seitenleisten-Hierarchie wider — Ordner › Design › Bereich › Gruppe › Element — und jedes Segment ist anklickbar.
+- **Mehrere auswählen, auf einmal löschen.** Wählen Sie mehrere Modelle, Enums oder Routen aus und löschen Sie sie auf einmal, nach einer Bestätigung.
+- **Die Quelle einer Code-Vorlage mit einem Klick kopieren oder öffnen.** Auf der Seite „</> Code“ erscheint beim Überfahren einer Vorlage eine Schaltfläche zum Kopieren ihrer URL oder ihres Pfads und eine zum Öffnen – das Repository im Browser oder der Ordner auf der Festplatte bei einer lokalen Vorlage.
+- **Neue Routen haben von Anfang an einen Namen.** Eine von Grund auf erstellte Route erhält jetzt einen Standardnamen und lässt sich sofort umbenennen.
+
+Fehlerbehebungen:
+
+- **Die Auswahl einer Code-Vorlage schließt die Bibliothek.** „Verwenden“ bringt Sie jetzt direkt zurück zur Code-Seite.
+- **Die Dokumentationsgenerierung schlägt bei optionalen Feldern nicht mehr fehl.** Das Generieren der Doku aus einem Design, dessen Modell oder Parameter „required“ nicht gesetzt hatte, bricht nicht mehr mit einem Vorlagenfehler ab.
+- **Das Löschen eines Enums fragt nach.** Enums erhalten dieselbe Bestätigung wie Modelle und Routen.
+- **Die Seitenleiste zeigt Ihre Auswahl.** Wenn „Seitenleiste mit dem aktiven Tab synchronisieren“ aktiv ist, klappt das Auswählen oder Erstellen eines Modells, Enums oder einer Route dessen übergeordnete Knoten auf, damit es im Baum sichtbar bleibt.
+
 ## v1.1.0
 
 🎉 **Restorm ist jetzt auch ein API-Designer.** Entwerfen Sie Ihre API, stellen Sie sie als Live-Mock über fünf Protokolle gleichzeitig bereit und generieren Sie ihre Clients — alles ohne die App zu verlassen, alles auf Ihrer eigenen Festplatte.

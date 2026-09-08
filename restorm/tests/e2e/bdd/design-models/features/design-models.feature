@@ -92,3 +92,11 @@ Feature: Design models and enums editor
     And the example value row "password" is tagged "auto"
     When I type "correct-horse-battery" as the example value of "password"
     Then the example value row "password" is tagged "defined"
+
+  Scenario: Deleting several models at once from a multi-selection
+    Given a Pro project carrying an API design is open in the models editor
+    When I open the model "Order"
+    And I also select the model "User" in the sidebar
+    And I delete the selected models
+    Then the models list does not offer "Order"
+    And the models list does not offer "User"

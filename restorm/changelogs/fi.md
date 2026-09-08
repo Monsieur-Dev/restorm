@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**API-suunnittelijaa ohjataan nyt sivupalkista.**
+
+- **Mallisi, enumit ja reitit elävät sivupalkissa.** Kolme välilehtien listaa katoaa — mallit (perintähierarkioineen), enumit ja reitit (ryhmät ja niiden reitit) ovat nyt suoraan sivupalkin puussa. Napsauta hiiren oikealla nimetäksesi uudelleen, lisätäksesi alimallin tai aliryhmän, kloonataksesi reitin, luodaksesi CRUD:n tai poistaaksesi; vedä järjestääksesi uudelleen tai vaihtaaksesi vanhempaa — ei koskaan ulos suunnitelmasta. Jokainen sivu näyttää nyt vain valitun kohteen tiedot.
+- **Yleiskatsaus malleihisi, enumeihisi ja reitteihisi.** Kunkin osion juurisolmu listaa nyt kaiken sen alla — ja Mallit saavat **Graafi**-välilehden: luokkakaavion malleistasi perintöineen ja viittauksineen. Enumit näyttävät arvonsa heti nimen vieressä.
+- **Yksi paikka nimeämiseen.** Malli, enum tai reitti nimetään sen suuresta otsikosta (kynä), ja tyhjä nimi näyttää **”<nimetön>”**, jotta kynä on aina ulottuvilla — nimeä ei enää näytetä sivulla kahdesti.
+- **Validointivirheet osoittavat kohteeseen.** Kun jokin on pielessä — malli ja enum, joilla on sama nimi, viittaus johonkin, jota ei enää ole — huomautus mallin, enumin tai reitin yläreunassa selittää sen.
+- **Täydellinen navigointipolku.** Polku heijastaa koko sivupalkin hierarkiaa — kansiot › suunnitelma › osio › ryhmä › kohde — ja jokainen segmentti on napsautettavissa.
+- **Valitse monta, poista kerralla.** Valitse useita malleja, enumeja tai reittejä ja poista ne kerralla, vahvistuksen jälkeen.
+- **Kopioi tai avaa koodimallin lähde yhdellä napsautuksella.** "</> Code" -sivulla mallin päälle vietäessä ilmestyy painike sen URL:n tai polun kopioimiseen ja toinen sen avaamiseen — repositorio selaimessa tai kansio levyllä paikallisen mallin tapauksessa.
+- **Uusilla reiteillä on heti nimi.** Tyhjästä luotu reitti saa nyt oletusnimen, joten voit nimetä sen heti uudelleen.
+
+Korjaukset:
+
+- **Koodimallin valitseminen sulkee kirjaston.** "Käytä" vie sinut nyt suoraan takaisin Code-sivulle.
+- **Dokumentaation luonti ei enää epäonnistu valinnaisilla kentillä.** Dokumentaation luominen suunnitelmasta, jonka malli tai parametri jätti "required"-arvon asettamatta, ei enää pysähdy mallivirheeseen.
+- **Enumin poisto kysyy ensin.** Enumit saavat saman vahvistuksen kuin mallit ja reitit.
+- **Sivupalkki paljastaa valintasi.** Kun ”synkronoi sivupalkki aktiivisen välilehden kanssa” on käytössä, mallin, enumin tai reitin valinta tai luonti avaa sen ylätasot, jotta se pysyy näkyvissä puussa.
+
 ## v1.1.0
 
 🎉 **Restorm on nyt myös API-suunnittelija.** Suunnittele API:si, tarjoile se live-mockina viidellä protokollalla kerralla ja generoi sen asiakkaat — poistumatta sovelluksesta, kaikki omalla levylläsi.

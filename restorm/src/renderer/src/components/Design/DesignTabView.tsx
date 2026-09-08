@@ -14,7 +14,7 @@ import {
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignAuthKind } from '../../../../shared/types/collections'
 import type { DesignSectionKey } from '../../../../shared/types/editor'
-import { validateApiDesign } from '../../../../shared/design/validateApiDesign'
+import { validateApiDesignCached } from '../../../../shared/design/validateApiDesign'
 import { isDesignRunLocked } from '../../../../shared/auth/planCapabilities'
 import { subscribeToPro } from '../../services/subscribeToPro'
 import { isDesignServerListening } from '../../services/designServerStore'
@@ -26,7 +26,9 @@ import { resolveUrlAgainstEnv } from '../../../../shared/utils/resolveUrlAgainst
 import { ensureLeadingSlash } from '../../../../shared/design/apiDesignDoc'
 import { DesignCodeSection } from './DesignCodeSection'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
-import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent, setActiveDesignSection } from '../../services/designSectionIntent'
+import { consumePendingDesignSection, peekPendingDesignSection, subscribeDesignSectionIntent, setActiveDesignSection, setActiveDesignEntity } from '../../services/designSectionIntent'
+import type { DesignEntityAction, DesignSectionIntent, ActiveDesignEntity } from '../../services/designSectionIntent'
+import { designSectionRowId, designEntityRowId, type DesignEntitySection } from '../../../../shared/design/designSections'
 import { useRestormStore } from '../../store/restormStore'
 import { useOptionalEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { findEnvironmentById } from '../../services/environmentSelectionStore'
@@ -90,6 +92,10 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     const intent = peekPendingDesignSection(design.id)
     return intent?.section === 'routes' ? intent.entityId ?? null : null
   })
+  const [selectedEnumId, setSelectedEnumId] = useState<string | null>(() => {
+    const intent = peekPendingDesignSection(design.id)
+    return intent?.section === 'enums' ? intent.entityId ?? null : null
+  })
   // The Clients section can be SCOPED to one client folder (a `design-client:`
   // row id): clicking a protocol/sub-folder in the sidebar shows just that
   // folder's descriptor + child tree. `null` = the whole Clients view.
@@ -98,28 +104,56 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
     return intent?.section === 'clients' ? intent.entityId ?? null : null
   })
 
-  const applyIntent = useCallback((intent: { section: DesignSectionKey; entityId?: string }): void => {
+  // A context-menu action a sidebar node asked a section to run (add / clone /
+  // delete / generate CRUD). Bumped `nonce` lets a section fire the action once
+  // per request even across a remount; `null` = no pending action.
+  const [entityAction, setEntityAction] = useState<{ section: DesignSectionKey; action: DesignEntityAction; entityId?: string; nonce: number } | null>(null)
+  const actionNonce = useRef(0)
+  const fireEntityAction = useCallback((intent: DesignSectionIntent): void => {
+    // A plain navigation (no action) CLEARS any pending action: a one-shot
+    // add/clone/delete must never survive to re-fire when its section component
+    // remounts on the next visit (the remount resets the section's nonce guard,
+    // so a lingering action would duplicate the entity — seen on enums + routes).
+    if (intent.action === undefined) { setEntityAction(null); return }
+    actionNonce.current += 1
+    setEntityAction({
+      section: intent.section,
+      action: intent.action,
+      nonce: actionNonce.current,
+      ...(intent.entityId !== undefined ? { entityId: intent.entityId } : {})
+    })
+  }, [])
+
+  const applyIntent = useCallback((intent: DesignSectionIntent): void => {
     setActiveSection(intent.section)
-    if (intent.section === 'models' && intent.entityId !== undefined) setSelectedModelId(intent.entityId)
-    if (intent.section === 'routes' && intent.entityId !== undefined) setSelectedRouteEntityId(intent.entityId)
+    // Selection FOLLOWS the intent's entity, including its ABSENCE: clicking a
+    // section ROW (no entity) clears the selection so the section shows its
+    // listing overview, not a stale detail. Clicking an entity node selects it.
+    if (intent.section === 'models') setSelectedModelId(intent.entityId ?? null)
+    if (intent.section === 'routes') setSelectedRouteEntityId(intent.entityId ?? null)
+    if (intent.section === 'enums') setSelectedEnumId(intent.entityId ?? null)
     // Clients scope follows the intent's entity — including its ABSENCE, which
     // resets to the full view (a click on the Clients section root).
     if (intent.section === 'clients') setClientsScopeId(intent.entityId ?? null)
-  }, [setActiveSection])
+    fireEntityAction(intent)
+  }, [setActiveSection, fireEntityAction])
 
   // Follow section intents while THIS tab stays mounted — the single-tab policy
   // refocuses an already-open tab on a sidebar section click. On mount, DRAIN
   // the pending intent that opened this tab (the lazy initializers already
-  // reflect it): leaving it staged would replay on the next open. No state
-  // write here — the initial section already IS the intent's section.
+  // reflect its section/entity) but still run any pending ACTION it carried, so
+  // a context-menu action that COLD-opens the tab isn't lost.
   useEffect(() => {
-    consumePendingDesignSection(design.id)
+    const drained = consumePendingDesignSection(design.id)
+    // Defer the mount-drain off the synchronous effect body so the setState it
+    // runs doesn't cascade-render inside this same commit.
+    if (drained !== undefined) queueMicrotask(() => { fireEntityAction(drained) })
     return subscribeDesignSectionIntent((designId, intent) => {
       if (designId !== design.id) return
       consumePendingDesignSection(design.id)
       applyIntent(intent)
     })
-  }, [design.id, applyIntent])
+  }, [design.id, applyIntent, fireEntityAction])
 
   // Environment resolution is SHARED across sections: the base-path/port
   // previews resolve against the environment picked in the design smart-bar
@@ -166,15 +200,78 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
   // design server / codegen gates.
   const issues = useMemo(() => {
     void designTick
-    return validateApiDesign(design)
+    return validateApiDesignCached(design)
   }, [design, designTick])
+
+  // Publish the selected entity so the tab breadcrumb can read `… / Section /
+  // Entity` (with a working link back to the section). Null when the section
+  // shows its listing (no entity selected). `designTick` in the deps retitles
+  // the crumb live on a rename.
+  useEffect(() => {
+    void designTick
+    // The label feeds the editable H1 (an ECUI EditableLabel). Pass the RAW name
+    // — even when empty — so the label renders its own muted "<sans nom>"
+    // placeholder and keeps the rename pencil reachable, instead of us baking a
+    // non-empty fallback here that the component would show as a real name.
+    // The sidebar rows to expand to reveal an entity: always the design node and
+    // its section row, plus the parent chain (a model's `inheritsFrom` ancestors,
+    // a route's owning group and that group's parent groups).
+    const base = (section: DesignEntitySection): string[] => [design.id, designSectionRowId(design.id, section)]
+    const modelAncestors = (modelId: string): string[] => {
+      const rows: string[] = []
+      const seen = new Set<string>()
+      let cur = design.models.find((m) => m.id === modelId)?.design?.inheritsFrom
+      while (cur !== undefined && !seen.has(cur) && design.models.some((m) => m.id === cur)) {
+        seen.add(cur)
+        rows.push(designEntityRowId(design.id, 'models', cur))
+        cur = design.models.find((m) => m.id === cur)?.design?.inheritsFrom
+      }
+      return rows
+    }
+    const groupChain = (groupId: string): string[] => {
+      const rows: string[] = []
+      const seen = new Set<string>()
+      let cur: string | undefined = groupId
+      while (cur !== undefined && !seen.has(cur)) {
+        seen.add(cur)
+        rows.push(designEntityRowId(design.id, 'routes', cur))
+        cur = design.routeGroups.find((g) => g.id === cur)?.parentId
+      }
+      return rows
+    }
+
+    let entity: ActiveDesignEntity | null = null
+    if (activeSection === 'models' && selectedModelId !== null) {
+      const m = design.models.find((x) => x.id === selectedModelId)
+      if (m) entity = { section: 'models', entityId: m.id, label: m.doc.name, ancestorRowIds: [...base('models'), ...modelAncestors(m.id)] }
+    } else if (activeSection === 'enums' && selectedEnumId !== null) {
+      const e = design.enums.find((x) => x.id === selectedEnumId)
+      if (e) entity = { section: 'enums', entityId: e.id, label: e.doc.name, ancestorRowIds: base('enums') }
+    } else if (activeSection === 'routes' && selectedRouteEntityId !== null) {
+      const g = design.routeGroups.find((x) => x.id === selectedRouteEntityId)
+      if (g !== undefined) {
+        // A group reveals via its own parent chain (not counting itself).
+        entity = { section: 'routes', entityId: g.id, label: g.doc.name, ancestorRowIds: [...base('routes'), ...groupChain(g.id).slice(1)] }
+      } else {
+        for (const grp of design.routeGroups) {
+          const r = grp.routes.find((x) => x.id === selectedRouteEntityId)
+          if (r !== undefined) {
+            entity = { section: 'routes', entityId: r.id, label: (r.doc.summary !== undefined && r.doc.summary !== '') ? r.doc.summary : r.doc.match.urlPattern, ancestorRowIds: [...base('routes'), ...groupChain(grp.id)] }
+            break
+          }
+        }
+      }
+    }
+    setActiveDesignEntity(design.id, entity)
+  }, [design, activeSection, selectedModelId, selectedEnumId, selectedRouteEntityId, designTick])
+
+  useEffect(() => () => { setActiveDesignEntity(design.id, null) }, [design.id])
 
   const jumpTo = (section: 'models' | 'routes' | 'enums', entityId: string): void => {
     setActiveSection(section)
     if (section === 'models') setSelectedModelId(entityId)
     if (section === 'routes') setSelectedRouteEntityId(entityId)
-    // 'enums' has no per-entity selection — switching the section is
-    // the whole jump.
+    if (section === 'enums') setSelectedEnumId(entityId)
   }
 
   return (
@@ -190,10 +287,17 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
             selectedModelId={selectedModelId}
             onSelectModel={setSelectedModelId}
             onJumpTo={jumpTo}
+            pendingAction={entityAction?.section === 'models' ? entityAction : null}
           />
         )}
         {activeSection === 'enums' && (
-          <DesignEnumsSection design={design} />
+          <DesignEnumsSection
+            design={design}
+            issues={issues}
+            selectedEnumId={selectedEnumId}
+            onSelectEnum={setSelectedEnumId}
+            pendingAction={entityAction?.section === 'enums' ? entityAction : null}
+          />
         )}
         {activeSection === 'routes' && (
           <DesignRoutesSection
@@ -201,6 +305,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
             issues={issues}
             selectedEntityId={selectedRouteEntityId}
             onSelectEntity={setSelectedRouteEntityId}
+            pendingAction={entityAction?.section === 'routes' ? entityAction : null}
           />
         )}
         {activeSection === 'server' && (

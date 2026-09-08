@@ -314,11 +314,11 @@
             {
               "name": "id",
               "in": "path",
+              "required": true,
               "property": {
                 "model": "User",
                 "property": "id"
               },
-              "required": true,
               "description": "The user id."
             }
           ],

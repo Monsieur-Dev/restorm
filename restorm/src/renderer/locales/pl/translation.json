@@ -2239,7 +2239,7 @@
       "deleteImpactChild": "{{name}} traci dziedziczenie (własne właściwości pozostają)",
       "description": "Opis",
       "descriptionPlaceholder": "Co reprezentuje ten model (opcjonalnie)",
-      "newName": "NewModel",
+      "newName": "NowyModel",
       "selectPrompt": "Wybierz model lub utwórz nowy.",
       "tabs": {
         "schema": "Schemat",
@@ -2259,11 +2259,13 @@
       "addEnum": "Dodaj enum",
       "addValue": "Dodaj wartość",
       "valueHeader": "Wartość",
-      "newName": "NewEnum",
+      "newName": "NowyEnum",
       "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości.",
       "nameHeader": "Nazwa",
       "description": "Opis",
-      "descriptionPlaceholder": "Co reprezentuje ten enum (opcjonalnie)"
+      "descriptionPlaceholder": "Co reprezentuje ten enum (opcjonalnie)",
+      "deleteTitle": "Usunąć {{name}}?",
+      "deleteImpact": "Każda właściwość lub parametr korzystający z tego wyliczenia utraci swoje odwołanie."
     },
     "documentation": {},
     "code": {
@@ -2324,6 +2326,10 @@
       },
       "extractedTitle": "Pliki zapisane",
       "openOutput": "Otwórz folder wyjściowy",
+      "copySource": "Kopiuj źródło",
+      "copied": "Skopiowano!",
+      "openSourceUrl": "Otwórz URL szablonu",
+      "openSourceFolder": "Otwórz folder szablonu",
       "refresh": "Odśwież ten szablon z jego źródła",
       "removeConfirm": "Template „{{name}}“ zostanie usunięty z tego projektu (już wygenerowane pliki na dysku pozostaną nienaruszone).",
       "removeTitle": "Usunąć ten Template?",
@@ -2514,7 +2520,8 @@
     "routes": {
       "addGroup": "Dodaj grupę",
       "addRoute": "Dodaj trasę",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NowaGrupa",
+      "newRouteName": "NowaTrasa",
       "selectPrompt": "Wybierz grupę lub trasę, albo utwórz grupę.",
       "deleteGroupTitle": "Usunąć {{name}}?",
       "deleteGroupImpact": "Grupa i jej {{count}} tras zostaną usunięte.",
@@ -2666,6 +2673,21 @@
     "projections": {
       "title": "Projekcje",
       "hint": "Ta sama operacja, tak jak udostępnia ją każdy serwowany protokół."
+    },
+    "listing": {
+      "models": {
+        "empty": "Utwórz swój pierwszy model"
+      },
+      "enums": {
+        "empty": "Utwórz swój pierwszy enum"
+      },
+      "routes": {
+        "empty": "Utwórz swoją pierwszą trasę"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {

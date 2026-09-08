@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} humb trashëgiminë e tij (vetitë e veta mbeten)",
       "description": "Përshkrimi",
       "descriptionPlaceholder": "Çfarë përfaqëson ky model (opsionale)",
-      "newName": "NewModel",
+      "newName": "ModelIRi",
       "selectPrompt": "Zgjidhni një model ose krijoni një.",
       "tabs": {
         "schema": "Skema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Shto një enum",
       "addValue": "Shto një vlerë",
       "valueHeader": "Vlera",
-      "newName": "NewEnum",
+      "newName": "EnumIRi",
       "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie.",
       "nameHeader": "Emri",
       "description": "Përshkrimi",
-      "descriptionPlaceholder": "Çfarë përfaqëson ky enum (opsionale)"
+      "descriptionPlaceholder": "Çfarë përfaqëson ky enum (opsionale)",
+      "deleteTitle": "Të fshihet {{name}}?",
+      "deleteImpact": "Çdo veti ose parametër që përdorte këtë enum do të humbasë referencën e tij."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Skedarët u shkruan",
       "openOutput": "Hap dosjen e daljes",
+      "copySource": "Kopjo burimin",
+      "copied": "U kopjua!",
+      "openSourceUrl": "Hap URL-në e shabllonit",
+      "openSourceFolder": "Hap dosjen e shabllonit",
       "refresh": "Rifresko këtë shabllon nga burimi i tij",
       "removeConfirm": "Template «{{name}}» do të hiqet nga ky dizajn (skedarët tashmë të gjeneruar në disk mbeten të paprekur).",
       "removeTitle": "Të hiqet ky Template?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Shto një grup",
       "addRoute": "Shto një rrugë",
-      "newGroupName": "NewGroup",
+      "newGroupName": "GrupIRi",
+      "newRouteName": "RrugëERe",
       "selectPrompt": "Zgjidhni një grup ose një rrugë, ose krijoni një grup.",
       "deleteGroupTitle": "Të fshihet {{name}}?",
       "deleteGroupImpact": "Grupi dhe {{count}} rrugët e tij do të fshihen.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projeksionet",
       "hint": "I njëjti veprim, ashtu siç e ekspozon çdo protokoll i shërbyer."
+    },
+    "listing": {
+      "models": {
+        "empty": "Krijoni modelin tuaj të parë"
+      },
+      "enums": {
+        "empty": "Krijoni enum-in tuaj të parë"
+      },
+      "routes": {
+        "empty": "Krijoni route-n tuaj të parë"
+      },
+      "tabs": {
+        "list": "Listë",
+        "graph": "Grafik"
+      }
     }
   },
   "mqtt": {

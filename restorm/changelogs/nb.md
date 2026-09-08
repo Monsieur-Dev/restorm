@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**API-designeren styres nå fra sidepanelet.**
+
+- **Modellene, enumene og rutene dine bor i sidepanelet.** De tre listene i fanene forsvinner — modeller (med arvenøstingen sin), enums og ruter (grupper og rutene deres) ligger nå direkte i treet i sidepanelet. Høyreklikk for å gi nytt navn, legge til en undermodell eller undergruppe, klone en rute, generere CRUD eller slette; dra for å endre rekkefølge eller forelder — aldri ut av designet. Hver side viser nå bare detaljene for det valgte elementet.
+- **En oversikt over modellene, enumene og rutene dine.** Rotnoden i hver seksjon viser nå alt under den — og Modeller får en **Graf**-fane: et klassediagram over modellene dine med arv og referanser. Enumer viser verdiene sine rett ved siden av navnet.
+- **Ett sted å gi nytt navn.** En modell, enum eller rute får nytt navn fra den store tittelen (blyanten), og et tomt navn viser **«<uten navn>»** slik at blyanten alltid er innen rekkevidde — navnet vises ikke lenger to ganger på siden.
+- **Valideringsfeil peker på elementet.** Når noe er galt — en modell og en enum med samme navn, en referanse til noe som ikke finnes lenger — forklarer en melding øverst på modellen, enumen eller ruten det.
+- **En fullstendig brødsmulesti.** Stien speiler hele sidefeltets hierarki — mapper › design › seksjon › gruppe › element — og hvert segment er klikkbart.
+- **Velg flere, slett på én gang.** Velg flere modeller, enumer eller ruter og slett dem på én gang, etter en bekreftelse.
+- **Kopier eller åpne kilden til en kodemal med ett klikk.** På siden "</> Code" viser en mal ved hover en knapp for å kopiere URL-en eller stien og en for å åpne den — repoet i nettleseren, eller mappen på disken for en lokal mal.
+- **Nye ruter starter med et navn.** En rute laget fra bunnen av får nå et standardnavn, så du kan gi den nytt navn med en gang.
+
+Rettelser:
+
+- **Å velge en kodemal lukker biblioteket.** "Bruk" tar deg nå rett tilbake til Code-siden.
+- **Dokumentasjonsgenerering feiler ikke lenger på valgfrie felter.** Å generere dokumentasjon fra et design der modellen eller parameteren lot "required" være uinnstilt, stopper ikke lenger med en malfeil.
+- **Sletting av en enum spør først.** Enumer får samme bekreftelse som modeller og ruter.
+- **Sidefeltet avslører det du velger.** Med «synkroniser sidefeltet med aktiv fane» på, utvider det å velge eller opprette en modell, enum eller rute foreldrene dens slik at den holdes synlig i treet.
+
 ## v1.1.0
 
 🎉 **Restorm er nå også en API-designer.** Design API-et ditt, server det som en live-mock på tvers av fem protokoller samtidig, og generer klientene — uten å forlate appen, alt på din egen disk.

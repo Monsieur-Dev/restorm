@@ -8,7 +8,9 @@ import type { ListViewDropEventPayload, ListViewDropPosition, ListViewItemEventP
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { isAnyFolder, isScenario, isApiDesign, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
-import { parseDesignSectionRowId } from '../../../shared/design/designSections'
+import { parseDesignSectionRowId, parseDesignEntityRowId } from '../../../shared/design/designSections'
+import { assignDesignSection, patchModel, replaceGroup } from '../components/Design/designMutations'
+import { canDropDesignEntity, applyDesignEntityDrop } from '../services/designEntityDrop'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -263,6 +265,27 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // itself, a real item, stays draggable).
     if (sourceIds.some((id) => parseDesignSectionRowId(id) !== null)) return false
 
+    // A design model / enum / route(-group) node can be dragged ONLY within its
+    // own design + section — never onto a folder, a request, another design,
+    // another section, or the root; and nothing from outside may drop onto one.
+    const sourceEntities = sourceIds.map((id) => parseDesignEntityRowId(id))
+    const targetEntity = parseDesignEntityRowId(targetId)
+    const targetSectionRow = parseDesignSectionRowId(targetId)
+    if (sourceEntities.some((e) => e !== null) || targetEntity !== null) {
+      const first = sourceEntities[0]
+      if (first === null || first === undefined) return false
+      if (!sourceEntities.every((e) => e !== null && e.designId === first.designId && e.section === first.section)) return false
+      // The target must be another ENTITY NODE of the SAME design + section
+      // (dropping onto the section row itself, a folder, or anything else is
+      // refused). `targetSectionRow` is read only to make that refusal explicit.
+      void targetSectionRow
+      if (targetEntity === null) return false
+      if (targetEntity.designId !== first.designId || targetEntity.section !== first.section) return false
+      const design = findItemById(rootItems, first.designId)
+      if (design === null || !isApiDesign(design)) return false
+      return canDropDesignEntity(design, first.section, first.entityId, targetEntity.entityId, position)
+    }
+
     // Is `childId` anywhere inside `parentId`'s subtree?
     const isDescendant = (parentId: string, childId: string): boolean => {
       const parent = findItemById(rootItems, parentId)
@@ -370,6 +393,19 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const position = payload.position
 
     if (!canDropSelection(sourceIds, targetId, position)) return
+
+    // A design entity drop (validated to the same design + section above) mutates
+    // the DESIGN, not the item tree — reorder/reparent a model, reorder an enum,
+    // or reorder/reparent a route(-group).
+    const entitySource = parseDesignEntityRowId(sourceIds[0] ?? '')
+    const entityTarget = parseDesignEntityRowId(targetId)
+    if (entitySource !== null && entityTarget !== null) {
+      const design = findItemById(rootItems, entitySource.designId)
+      if (design !== null && isApiDesign(design)) {
+        applyDesignEntityDrop(design, entitySource.section, entitySource.entityId, entityTarget.entityId, position)
+      }
+      return
+    }
 
     // Resolves an item's containing folder — used AFTER the move to report
     // where the item landed.
@@ -703,6 +739,34 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
   // Handle item rename from sidebar ListView
   const handleSidebarItemRename = useCallback((payload: ListViewItemEventPayload, newName: string) => {
     const itemId = payload.item.id
+
+    // A design model / enum / route(-group) node renames its own name field
+    // through the design-mutation door (reactive update + autosave), not the
+    // tree — these virtual nodes aren't in `rootItems`.
+    const entity = parseDesignEntityRowId(itemId)
+    if (entity !== null) {
+      const trimmed = newName.trim()
+      const design = findItemById(rootItems, entity.designId)
+      if (trimmed !== '' && design !== null && isApiDesign(design)) {
+        if (entity.section === 'models') {
+          const m = design.models.find((x) => x.id === entity.entityId)
+          if (m !== undefined) patchModel(design, entity.entityId, { doc: { ...m.doc, name: trimmed } })
+        } else if (entity.section === 'enums') {
+          assignDesignSection(design, 'enums', design.enums.map((e) => e.id === entity.entityId ? { ...e, doc: { ...e.doc, name: trimmed } } : e))
+        } else {
+          const group = design.routeGroups.find((g) => g.id === entity.entityId)
+          if (group !== undefined) {
+            assignDesignSection(design, 'routeGroups', design.routeGroups.map((g) => g.id === entity.entityId ? { ...g, doc: { ...g.doc, name: trimmed } } : g))
+          } else {
+            const owner = design.routeGroups.find((g) => g.routes.some((r) => r.id === entity.entityId))
+            if (owner !== undefined) {
+              replaceGroup(design, owner.id, { ...owner, routes: owner.routes.map((r) => r.id === entity.entityId ? { ...r, doc: { ...r.doc, summary: trimmed } } : r) })
+            }
+          }
+        }
+      }
+      return
+    }
 
     // Find and update the reactive object directly (triggers search re-indexing)
     const foundItem = findItemById(rootItems, itemId)

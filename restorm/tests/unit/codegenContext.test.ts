@@ -110,6 +110,34 @@ describe('buildCodegenContext', () => {
     // The context still validates against the bundled schema with the new fields.
     expect(validateAgainstSchema(ctx, JSON.stringify(CODEGEN_CONTEXT_SCHEMA)).valid).toBe(true)
   })
+
+  it('emits `required` as a real boolean even when the model leaves it unset', () => {
+    // A StrictUndefined template reads `prop.required` / `param.required`
+    // directly; when the model omits `required` (undefined), the old context
+    // dropped the key (property: undefined → gone in JSON; param: only set when
+    // truthy), and rendering crashed with `'dict object' has no attribute
+    // 'required'`. The context must fill it with `false` instead.
+    const d = buildReferenceApiDesign()
+    const prop = d.models.flatMap((m) => m.properties).find((p) => p.doc.required)
+    const route = d.routeGroups.flatMap((g) => g.routes).find((r) => (r.doc.parameters ?? []).length > 0)
+    const param = route?.doc.parameters?.[0]
+    if (!prop || !param) throw new Error('reference design changed — expected a property and a route param')
+    delete (prop.doc as { required?: boolean }).required
+    delete (param as { required?: boolean }).required
+
+    const ctx = buildCodegenContext(d)
+    const props = ctx.models.flatMap((m) => [...m.properties, ...m.allProperties])
+    const params = ctx.groups.flatMap((g) => g.routes.flatMap((r) => r.params))
+    // Every property/param carries a real boolean (JSON round-trip safe).
+    const round = JSON.parse(JSON.stringify(ctx))
+    const rProps = (round.models as { properties: { name: string, required?: unknown }[] }[]).flatMap((m) => m.properties)
+    const rParams = (round.groups as { routes: { params: { name: string, required?: unknown }[] }[] }[]).flatMap((g) => g.routes.flatMap((r) => r.params))
+    for (const p of [...props, ...rProps]) expect(typeof p.required).toBe('boolean')
+    for (const prm of [...params, ...rParams]) expect(typeof prm.required).toBe('boolean')
+    // The two we blanked come back as `false`, present after the JSON round-trip.
+    expect(rProps.find((p) => p.name === prop.doc.name)?.required).toBe(false)
+    expect(rParams.find((p) => p.name === param.name)?.required).toBe(false)
+  })
 })
 
 describe('buildCodegenContext — user variables (vars)', () => {

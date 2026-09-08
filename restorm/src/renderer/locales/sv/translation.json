@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} förlorar sitt arv (egna egenskaper behålls)",
       "description": "Beskrivning",
       "descriptionPlaceholder": "Vad denna modell representerar (valfritt)",
-      "newName": "NewModel",
+      "newName": "NyModell",
       "selectPrompt": "Välj en modell eller skapa en.",
       "tabs": {
         "schema": "Schema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Lägg till en enum",
       "addValue": "Lägg till ett värde",
       "valueHeader": "Värde",
-      "newName": "NewEnum",
+      "newName": "NyEnum",
       "selectPrompt": "Välj en enum eller skapa en — en sluten uppsättning värden som kan användas som egenskapstyp.",
       "nameHeader": "Namn",
       "description": "Beskrivning",
-      "descriptionPlaceholder": "Vad denna enum representerar (valfritt)"
+      "descriptionPlaceholder": "Vad denna enum representerar (valfritt)",
+      "deleteTitle": "Ta bort {{name}}?",
+      "deleteImpact": "Alla egenskaper eller parametrar som använde denna enum förlorar sin referens."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Filer skrivna",
       "openOutput": "Öppna utdatamappen",
+      "copySource": "Kopiera källan",
+      "copied": "Kopierat!",
+      "openSourceUrl": "Öppna mallens URL",
+      "openSourceFolder": "Öppna mallmappen",
       "refresh": "Uppdatera den här mallen från dess källa",
       "removeConfirm": "Template ”{{name}}” tas bort från den här designen (redan genererade filer på disken lämnas orörda).",
       "removeTitle": "Ta bort detta Template?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Lägg till en grupp",
       "addRoute": "Lägg till en rutt",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NyGrupp",
+      "newRouteName": "NyRutt",
       "selectPrompt": "Välj en grupp eller en rutt, eller skapa en grupp.",
       "deleteGroupTitle": "Ta bort {{name}}?",
       "deleteGroupImpact": "Gruppen och dess {{count}} rutter tas bort.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projektioner",
       "hint": "Samma operation, så som varje serverat protokoll exponerar den."
+    },
+    "listing": {
+      "models": {
+        "empty": "Skapa din första modell"
+      },
+      "enums": {
+        "empty": "Skapa din första enum"
+      },
+      "routes": {
+        "empty": "Skapa din första rutt"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {

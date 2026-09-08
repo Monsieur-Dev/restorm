@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import './editableLabel.css'
 
@@ -202,9 +203,19 @@ export const EditableLabel: React.FC<EditableLabelProps> = ({
   'data-testid': dataTestId,
   editTooltip
 }) => {
+  const { t } = useTranslation()
   const [uncontrolledIsEditing, setUncontrolledIsEditing] = useState(false)
   const isControlled = controlledIsEditing !== undefined
   const isEditing = isControlled ? controlledIsEditing : uncontrolledIsEditing
+
+  // Read-mode text: an empty value falls back to the caller's placeholder, or a
+  // muted, translated "<unnamed>" — so the label always has visible, clickable
+  // content (the edit pencil is unreachable when the trigger collapses to 0px).
+  const isEmptyValue = value === ''
+  const displayText = isEmptyValue
+    ? (placeholder !== undefined && placeholder !== '' ? placeholder : t('editableLabel.unnamed', '<unnamed>'))
+    : value
+  const textClassName = isEmptyValue ? 'ecui-editable-label-text ecui-editable-label-empty' : 'ecui-editable-label-text'
 
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   // A counter that bumps every time we transition into edit mode.
@@ -301,7 +312,7 @@ export const EditableLabel: React.FC<EditableLabelProps> = ({
           aria-label={ariaLabel}
           onClick={enterEditMode}
         >
-          <span className="ecui-editable-label-text">{value}</span>
+          <span className={textClassName}>{displayText}</span>
           <i
             className="codicon codicon-edit ecui-editable-label-pencil"
             aria-hidden="true"
@@ -309,7 +320,7 @@ export const EditableLabel: React.FC<EditableLabelProps> = ({
           />
         </button>
       ) : (
-        <span className="ecui-editable-label-text">{value}</span>
+        <span className={textClassName}>{displayText}</span>
       )}
     </Tag>
   )

@@ -188,6 +188,8 @@ import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectExpandableIds } from './services/FolderToListView'
+import { setPendingDesignSection } from './services/designSectionIntent'
+import type { DesignEntityActionHandler } from './services/designSidebarNodes'
 import { findScenariosUsingRequest, findScenariosUsingScenario, findScenariosUsingQuickConfig, requestScenarioDeleteUsages } from './services/scenarioRequestUsage'
 import { diffScenarioPortRenames, remapCallerScenarioEdges, isEmptyRenameMap } from '../../shared/scenarioPortRename'
 import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
@@ -216,6 +218,8 @@ import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver
 import { useItemOperations } from './hooks/useItemOperations'
 import type { AddChildKind, SidebarContextMenuItem } from './components/MainView/Sidebar/contextMenuBuilder'
 import { buildSelectionContextMenu } from './components/MainView/Sidebar/contextMenuBuilder'
+import { parseDesignEntityRowId, type DesignEntitySection } from '../../shared/design/designSections'
+import { deleteDesignEntities } from './components/Design/designMutations'
 import { useRequestCreationApi } from './hooks/useRequestCreationApi'
 import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
@@ -1660,6 +1664,18 @@ const App: React.FC = () => {
     isFolder: boolean
   }>({ isOpen: false, itemId: '', itemName: '', isFolder: false })
 
+  // Confirmation for a MULTI-select delete that includes design entities (models
+  // / enums / routes) — these live outside the item tree, so they get their own
+  // yes/no gate. `designs` groups the selected entities by their owning design
+  // (a selection can span several); `treeItemIds` are the plain tree items
+  // co-selected in the same gesture, deleted alongside so nothing is silently
+  // dropped; `names` lists everything for the dialog copy.
+  const [designEntityDelete, setDesignEntityDelete] = useState<{
+    designs: { designId: string; entries: { section: DesignEntitySection; entityId: string }[] }[]
+    treeItemIds: string[]
+    names: string[]
+  } | null>(null)
+
   // Enhanced deletion dialog for a request referenced by scenarios (move it in,
   // or delete + strip its boxes). Empty `usages` means the plain modal is used.
   const [scenarioDelete, setScenarioDelete] = useState<{
@@ -2522,10 +2538,20 @@ const App: React.FC = () => {
   // `openItemAtSplit` is produced by `useNavigation` further down; the
   // sidebar menus close over this ref so hook order stays untouched.
   const openItemAtSplitRef = useRef<(itemId: string, targetGroupId: string, zone: 'left' | 'right' | 'top' | 'bottom' | 'full') => void>(() => { /* set after useNavigation */ })
+  // A sidebar model/enum/route node's context-menu action (add / clone / CRUD /
+  // delete): stage the section + entity + action, then open/refocus the design
+  // tab, which drains the intent and hands the SECTION the action to run.
+  const handleDesignEntityAction = useCallback<DesignEntityActionHandler>((designId, section, action, entityId) => {
+    setPendingDesignSection(designId, section, entityId, action)
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, designId)
+    if (item !== null && isApiDesign(item)) openDesignTab(item, breadcrumbs)
+  }, [rootItems, openDesignTab])
+
   const { sidebarItems: sidebarItemsWithContextMenu } = useSidebarState({
     rootItems,
     expandedIds,
     updateCount,
+    onDesignEntityAction: handleDesignEntityAction,
     onCloneItem: handleCloneItem,
     onAddChildItem: handleAddChildItem,
     onDeleteItem: handleDeleteItemChecked,
@@ -2728,6 +2754,61 @@ const App: React.FC = () => {
   // last modal survives, so confirming would silently delete a single item.
   const groupDeleteIdsRef = useRef<string[] | null>(null)
   const handleDeleteItems = useCallback((ids: readonly string[]): void => {
+    // Design entities (models / enums / routes) live outside the item tree, so
+    // the tree-delete path below would silently drop them. Route any that are in
+    // the selection to their own confirmation + batch delete (scoped to the
+    // first design in the selection).
+    const designRows = ids.map((id) => parseDesignEntityRowId(id)).filter((p): p is NonNullable<typeof p> => p !== null)
+    const treeIds = ids.filter((id) => parseDesignEntityRowId(id) === null)
+    if (designRows.length > 0) {
+      // A lone design entity (nothing else selected) goes through its section's
+      // own delete flow — same as the sidebar node context menu — so the impact
+      // modal (inheritance children / usages / route count) shows, instead of the
+      // generic batch confirmation.
+      if (designRows.length === 1 && treeIds.length === 0) {
+        const only = designRows[0]
+        if (only !== undefined) setPendingDesignSection(only.designId, only.section, only.entityId, 'delete')
+        return
+      }
+      // Group the selected entities by their owning design (a selection can span
+      // several designs), resolving each name for the dialog. Co-selected tree
+      // items ride along so they aren't silently dropped.
+      const byDesign = new Map<string, { section: DesignEntitySection; entityId: string }[]>()
+      for (const p of designRows) {
+        const arr = byDesign.get(p.designId) ?? []
+        arr.push({ section: p.section, entityId: p.entityId })
+        byDesign.set(p.designId, arr)
+      }
+      const designs: { designId: string; entries: { section: DesignEntitySection; entityId: string }[] }[] = []
+      const entityNames: string[] = []
+      for (const [designId, entries] of byDesign) {
+        const design = findItemById(rootItems, designId)
+        if (design === null || !isApiDesign(design)) continue
+        designs.push({ designId, entries })
+        for (const { section, entityId } of entries) {
+          let nm = ''
+          if (section === 'models') nm = design.models.find((m) => m.id === entityId)?.doc.name ?? ''
+          else if (section === 'enums') nm = design.enums.find((e) => e.id === entityId)?.doc.name ?? ''
+          else {
+            const group = design.routeGroups.find((g) => g.id === entityId)
+            if (group !== undefined) nm = group.doc.name
+            else {
+              for (const g of design.routeGroups) {
+                const r = g.routes.find((x) => x.id === entityId)
+                if (r !== undefined) { nm = (r.doc.summary !== undefined && r.doc.summary !== '') ? r.doc.summary : r.doc.match.urlPattern; break }
+              }
+            }
+          }
+          entityNames.push(nm)
+        }
+      }
+      const treeItems = treeIds.map((id) => findItemById(rootItems, id)).filter((i): i is FolderItem => i != null)
+      const names = [...entityNames, ...treeItems.map((i) => i.name)].map((n) => (n === '' ? t('design.schema.unnamed', '(unnamed)') : n))
+      if (designs.length > 0 || treeItems.length > 0) {
+        setDesignEntityDelete({ designs, treeItemIds: treeItems.map((i) => i.id), names })
+      }
+      return
+    }
     if (ids.length <= 1) {
       for (const id of ids) handleDeleteItemChecked(id)
       return
@@ -2745,7 +2826,21 @@ const App: React.FC = () => {
       // son contenu») — a group reads correctly on the generic one.
       isFolder: false
     })
-  }, [handleDeleteItemChecked, rootItems])
+  }, [handleDeleteItemChecked, rootItems, t])
+
+  // Confirm a design-entity multi-delete: mutate the design in place (each
+  // entity pruned like its single delete) and close the dialog.
+  const confirmDesignEntityDelete = useCallback((): void => {
+    if (designEntityDelete === null) return
+    for (const { designId, entries } of designEntityDelete.designs) {
+      const design = findItemById(rootItems, designId)
+      if (design !== null && isApiDesign(design)) deleteDesignEntities(design, entries)
+    }
+    // Delete co-selected tree items through the normal checked path (it honours
+    // scenario-usage guards for a bound request / container).
+    for (const id of designEntityDelete.treeItemIds) handleDeleteItemChecked(id)
+    setDesignEntityDelete(null)
+  }, [designEntityDelete, rootItems, handleDeleteItemChecked])
 
   // Group semantics: a mixed group gets ADDED as a whole (only the missing
   // ones are toggled on); a group already fully favorited gets removed. A
@@ -2768,14 +2863,21 @@ const App: React.FC = () => {
   // Group context menu for a right-click INSIDE a sidebar multi-selection.
   // Plain function on purpose: it closes over the freshest handlers (cut is
   // itself a plain function) and the ListView calls it lazily at open time.
-  const sidebarSelectionContextMenu = (ids: string[]): SidebarContextMenuItem[] =>
-    buildSelectionContextMenu(ids, t, {
+  const sidebarSelectionContextMenu = (ids: string[]): SidebarContextMenuItem[] => {
+    // A design-entity multi-selection only supports delete — cut / copy / clone
+    // / favorite act on the item tree these virtual rows aren't part of, so
+    // offer just the one action that means something here.
+    if (ids.length > 0 && ids.every((id) => parseDesignEntityRowId(id) !== null)) {
+      return [{ id: 'delete-item', label: t('sidebar.contextMenu.delete'), icon: 'trash', onClick: () => { handleDeleteItems(ids) } }]
+    }
+    return buildSelectionContextMenu(ids, t, {
       onCutItems: (i) => { handleCutItems(i) },
       onCopyItems: (i) => { handleCopyItems(i) },
       onCloneItems: (i) => { handleCloneItems(i) },
       onDeleteItems: (i) => { handleDeleteItems(i) },
       onToggleFavoriteItems: (i) => { handleFavoriteItems(i) }
     }, ids.every((id) => isItemFavorite(id)))
+  }
 
   // Focus the titlebar search: the SearchBar exposes no imperative handle;
   // clicking its closed pill is the established path (the e2e suites drive
@@ -4078,6 +4180,15 @@ const App: React.FC = () => {
           groupDeleteQueueRef.current = []
           cancelDelete()
         }}
+      />
+
+      {/* Multi-select delete of design entities (models / enums / routes). */}
+      <DeleteConfirmationModal
+        isOpen={designEntityDelete !== null}
+        itemName={designEntityDelete !== null ? designEntityDelete.names.join('", "') : ''}
+        isFolder={false}
+        onConfirm={confirmDesignEntityDelete}
+        onCancel={() => { setDesignEntityDelete(null) }}
       />
 
       {/* Push modal — triggered by the statusbar repo-push button / the

@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**Дизајнер API-ја се сада контролише из бочне траке.**
+
+- **Ваши модели, енуми и руте живе у бочној траци.** Три листе у картицама нестају — модели (са својим угнежђавањем по наслеђивању), енуми и руте (групе и њихове руте) сада се налазе директно у стаблу бочне траке. Десним кликом преименујте, додајте подмодел или подгрупу, клонирајте руту, генеришите CRUD или обришите; превуците да промените редослед или родитеља — никада ван дизајна. Свака страница сада приказује само детаље изабране ставке.
+- **Pregled vaših modela, enuma i ruta.** Koreni čvor svake sekcije sada navodi sve u sebi — a Modeli dobijaju karticu **Graf**: dijagram klasa vaših modela sa nasleđivanjem i referencama. Enumi prikazuju svoje vrednosti odmah pored naziva.
+- **Jedno mesto za preimenovanje.** Model, enum ili rutu preimenujete iz velikog naslova (olovka), a prazan naziv prikazuje **„<bez naziva>”** kako bi olovka uvek bila nadohvat — naziv se više ne prikazuje dvaput na stranici.
+- **Greške provere ukazuju na element.** Kada nešto nije u redu — model i enum sa istim nazivom, referenca na nešto što više ne postoji — napomena na vrhu modela, enuma ili rute to objašnjava.
+- **Potpuna putanja navigacije.** Trag odražava celu hijerarhiju bočne trake — fascikle › dizajn › sekcija › grupa › stavka — i svaki segment je klikabilan.
+- **Izaberite više, obrišite odjednom.** Izaberite nekoliko modela, enuma ili ruta i obrišite ih odjednom, nakon potvrde.
+- **Копирајте или отворите извор шаблона кода једним кликом.** На страници „</> Code”, преласком преко шаблона појављује се дугме за копирање његовог URL-а или путање и дугме за његово отварање — репозиторијум у прегледачу или фасцикла на диску за локални шаблон.
+- **Нове руте одмах имају назив.** Рута направљена од нуле сада добија подразумевани назив, па можете одмах да је преименујете.
+
+Исправке:
+
+- **Избор шаблона кода затвара библиотеку.** „Користи” вас сада враћа право на страницу Code.
+- **Генерисање документације више не отказује на опционим пољима.** Генерисање документације из дизајна чији је модел или параметар оставио „required” непостављеним више се не зауставља грешком шаблона.
+- **Brisanje enuma prvo pita.** Enumi dobijaju istu potvrdu kao modeli i rute.
+- **Bočna traka otkriva vaš izbor.** Uz uključeno „sinhronizuj bočnu traku sa aktivnom karticom”, izbor ili kreiranje modela, enuma ili rute proširuje njegove roditelje kako bi ostao vidljiv u stablu.
+
 ## v1.1.0
 
 🎉 **Restorm je sada i dizajner API-ja.** Osmislite svoj API, poslužite ga kao živi mock na pet protokola odjednom i generišite njegove klijente — bez napuštanja aplikacije, sve na vašem sopstvenom disku.

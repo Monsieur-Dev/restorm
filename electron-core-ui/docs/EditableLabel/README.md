@@ -45,6 +45,7 @@ The element rendered in read mode comes from the polymorphic `as` prop. Typograp
 - **Entering edit mode**: click on the read element, or press Enter / Space while it's keyboard-focused. The input auto-focuses and selects the whole text, so the user can immediately type-to-replace.
 - **Committing**: Enter, blur, or Tab. The committed value is trimmed. `onChange` is skipped when the trimmed result equals the current `value` (no-op edit). If `validate` is supplied and returns a non-empty string, the commit is blocked, the error is rendered in an `aria-live="polite"` span, and the input re-focuses.
 - **Cancelling**: Escape. No `onChange`. The input discards its draft and the read element re-focuses.
+- **Empty value**: when `value` is `''`, read mode still renders visible, clickable content so the pencil stays reachable — a zero-width trigger would be impossible to click or hover. It shows the caller's `placeholder` when that is non-empty, otherwise a muted, italic fallback from the translated `editableLabel.unnamed` i18n key (default `<unnamed>`). This holds in both `editable` and read-only modes; the text span gets the extra `ecui-editable-label-empty` class.
 - **Controlled vs uncontrolled**: `isEditing` is optional; when passed, the parent is the single source of truth and `onEditingChange` notifies it of user-driven transitions.
 
 ## Accessibility
@@ -103,7 +104,13 @@ The stylesheet uses the standard ECU theme variables:
 - `--input-border` / `--input-background` / `--input-foreground` — input chrome.
 - `--errorForeground` (with a fallback) — validation error text and the input's invalid-state border.
 
+The text span also carries `ecui-editable-label-empty` when `value` is empty — a muted, italic treatment for the `<unnamed>` fallback. Restyle that class to change how a nameless label reads.
+
 Override any of these via the `className` prop on a specific instance, or via a theme-level cascade for the whole app.
+
+## i18n
+
+The empty-value fallback resolves through `react-i18next`: the `editableLabel.unnamed` key (default `<unnamed>`). A consuming app must ship this key in every locale it supports so a nameless label reads correctly in the user's language.
 
 ## Out of scope
 

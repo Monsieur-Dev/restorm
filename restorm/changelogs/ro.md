@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**Designerul de API se controlează acum din bara laterală.**
+
+- **Modelele, enum-urile și rutele tale trăiesc în bara laterală.** Cele trei liste din file dispar — modelele (cu imbricarea lor prin moștenire), enum-urile și rutele (grupurile și rutele lor) se află acum direct în arborele barei laterale. Clic dreapta pentru a redenumi, a adăuga un submodel sau un subgrup, a clona o rută, a genera CRUD sau a șterge; trage pentru a reordona sau a schimba părintele — niciodată în afara designului. Fiecare pagină afișează acum doar detaliile elementului selectat.
+- **O privire de ansamblu asupra modelelor, enum-urilor și rutelor.** Nodul rădăcină al fiecărei secțiuni listează acum tot ce conține — iar Modelele adaugă o filă **Grafic**: o diagramă de clase a modelelor tale cu moștenirea și referințele lor. Enum-urile își arată valorile chiar lângă nume.
+- **Un singur loc pentru redenumire.** Un model, enum sau rută se redenumește din titlul mare (creionul), iar un nume gol afișează **„<fără nume>”** ca să rămână creionul mereu accesibil — numele nu mai apare de două ori pe pagină.
+- **Erorile de validare indică elementul.** Când ceva nu e în regulă — un model și un enum cu același nume, o referință către ceva ce nu mai există — o notă în partea de sus a modelului, enum-ului sau rutei o explică.
+- **O cale de navigare completă.** Traseul reflectă întreaga ierarhie a barei laterale — foldere › design › secțiune › grup › element — și fiecare segment poate fi apăsat.
+- **Selectează mai multe, șterge dintr-o dată.** Selectează mai multe modele, enum-uri sau rute și șterge-le dintr-o dată, după o confirmare.
+- **Copiază sau deschide sursa unui șablon de cod dintr-un clic.** Pe pagina „</> Code”, la trecerea peste un șablon apar un buton pentru a-i copia URL-ul sau calea și unul pentru a-l deschide — depozitul în browser sau folderul de pe disc pentru un șablon local.
+- **Rutele noi pornesc cu un nume.** O rută creată de la zero primește acum un nume implicit, așa că o poți redenumi imediat.
+
+Remedieri:
+
+- **Alegerea unui șablon de cod închide biblioteca.** „Utilizează” te duce acum direct înapoi la pagina Code.
+- **Generarea documentației nu mai eșuează la câmpurile opționale.** Generarea documentației dintr-un design al cărui model sau parametru lăsa „required” nesetat nu se mai oprește cu o eroare de șablon.
+- **Ștergerea unui enum cere confirmare.** Enum-urile primesc aceeași confirmare ca modelele și rutele.
+- **Bara laterală dezvăluie selecția.** Cu „sincronizează bara laterală cu fila activă” activat, selectarea sau crearea unui model, enum sau rute îi extinde părinții ca să rămână vizibil în arbore.
+
 ## v1.1.0
 
 🎉 **Restorm este acum și un designer de API.** Proiectați-vă API-ul, serviți-l ca mock live pe cinci protocoale deodată și generați-i clienții — fără a părăsi aplicația, totul pe propriul disc.

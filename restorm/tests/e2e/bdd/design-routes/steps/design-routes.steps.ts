@@ -3,7 +3,7 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_ROUTES_TEMP_DIR } from '../../fixtures/design-routes.fixture'
-import { openDesignSection } from '../../../support/designNav'
+import { openDesignSection, addDesignEntity, expandDesignSection, designEntityNode, designEntityNodes, openDesignEntity, deleteDesignEntityNode } from '../../../support/designNav'
 import { fillVariableInput, pickSelect, pickSelectExact } from '../../../support/designGuiDriver'
 
 const { Given, When, Then } = createBdd(test)
@@ -29,37 +29,34 @@ async function openSection(p: Page, section: 'routes' | 'models'): Promise<void>
   await expect(p.locator(`[data-testid="design-${section}-section"]`)).toBeVisible({ timeout: 5000 })
 }
 
-/** Resolve a route row's item id INSIDE its group: rows are flat DOM
- * siblings, so walk from the level-1 group row through its level-2
- * children, matching the row TITLE exactly (the summary — or the
- * pattern when the route has none). Exact-name group matching avoids
- * the "PowerUsers vs Users" substring trap. */
+/** Resolve a route node's item id INSIDE its group in the SIDEBAR: rows are
+ * flat DOM siblings, so find the group row by exact title and walk its deeper
+ * descendants matching the route TITLE exactly (the summary — or the pattern
+ * when the route has none). Exact-name group matching avoids the "PowerUsers vs
+ * Users" substring trap. */
 async function routeRowId(p: Page, groupName: string, routeTitle: string): Promise<string> {
-  const id = await p.evaluate(({ groupName, routeTitle }) => {
-    const rows = Array.from(document.querySelectorAll('[data-testid="design-routes-listview"] .list-view-row'))
+  const id = await p.evaluate(({ designId, groupName, routeTitle }) => {
+    const rows = Array.from(document.querySelectorAll(`[data-testid="sidebar-listview"] .list-view-row[data-item-id^="design-entity:${designId}:routes:"]`))
     const levelOf = (row: Element): number => Number(row.getAttribute('aria-level') ?? row.closest('[aria-level]')?.getAttribute('aria-level') ?? '1')
     const titleOf = (row: Element): string => (row.querySelector('.list-view-title')?.textContent ?? '').trim()
-    let inGroup = false
-    for (const row of rows) {
-      if (levelOf(row) === 1) {
-        inGroup = titleOf(row) === groupName
-        continue
-      }
-      if (!inGroup) continue
-      if (titleOf(row) === routeTitle) {
-        return row.getAttribute('data-item-id')
-      }
+    const gi = rows.findIndex((r) => titleOf(r) === groupName)
+    if (gi < 0) return null
+    const gl = levelOf(rows[gi])
+    for (let i = gi + 1; i < rows.length; i++) {
+      if (levelOf(rows[i]) <= gl) break
+      if (titleOf(rows[i]) === routeTitle) return rows[i].getAttribute('data-item-id')
     }
     return null
-  }, { groupName, routeTitle })
+  }, { designId: DESIGN_ID, groupName, routeTitle })
   if (id === null) throw new Error(`route "${routeTitle}" not found under group ${groupName}`)
   return id
 }
 
 async function openRoute(p: Page, groupName: string, routeTitle: string): Promise<void> {
-  // Ensure the group is expanded (clicking it selects + shows its card;
-  // the chevron toggles expansion — click the row first, harmless).
-  const groupRow = p.locator('[data-testid="design-routes-listview"] .list-view-row').filter({ has: p.getByText(groupName, { exact: true }) }).first()
+  await expandDesignSection(p, DESIGN_ID, 'routes')
+  // Select + expand the group so its routes are in the tree.
+  const groupRow = designEntityNode(p, DESIGN_ID, 'routes', groupName)
+  await expect(groupRow).toBeVisible({ timeout: 5000 })
   await groupRow.click()
   await p.waitForTimeout(300)
   const chevron = groupRow.locator('button:has(.codicon-chevron-right)')
@@ -68,7 +65,7 @@ async function openRoute(p: Page, groupName: string, routeTitle: string): Promis
     await p.waitForTimeout(300)
   }
   const id = await routeRowId(p, groupName, routeTitle)
-  await p.locator(`[data-testid="design-routes-listview"] .list-view-row[data-item-id="${id}"]`).click()
+  await p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${id}"]`).click()
   await expect(p.locator('[data-testid="design-route-tabs"]')).toBeVisible({ timeout: 5000 })
   await p.waitForTimeout(300)
 }
@@ -96,7 +93,7 @@ Given('a Pro project carrying an API design is open in the routes editor', async
 
 When('I add a route group', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-routes-add-group"]').click()
+  await addDesignEntity(p, DESIGN_ID, 'routes', /Add a group/)
   await p.waitForTimeout(400)
 })
 
@@ -213,7 +210,7 @@ Then('the query parameter {string} type reads {string}', async ({}, name: string
 When('I open the models section and rename the property {string} of {string} to {string}', async ({}, propName: string, modelName: string, newName: string) => {
   const p = requirePage()
   await openSection(p, 'models')
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ has: p.getByText(modelName, { exact: true }) }).first().click()
+  await openDesignEntity(p, DESIGN_ID, 'models', modelName)
   await p.waitForTimeout(400)
   await p.locator('.design-prop-cell').filter({ has: p.getByText(propName, { exact: true }) }).first().click()
   await expect(p.locator('[data-testid="design-property-name-input"]')).toBeVisible({ timeout: 5000 })
@@ -232,9 +229,7 @@ When('I open the routes section', async () => {
 When('I open the models section and delete the model {string}', async ({}, modelName: string) => {
   const p = requirePage()
   await openSection(p, 'models')
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ has: p.getByText(modelName, { exact: true }) }).first().click()
-  await p.waitForTimeout(400)
-  await p.locator('[data-testid="design-model-delete"]').click()
+  await deleteDesignEntityNode(p, DESIGN_ID, 'models', modelName)
   await expect(p.locator('[data-testid="design-model-delete-modal"]')).toBeVisible({ timeout: 5000 })
   await p.locator('[data-testid="design-model-delete-confirm"]').click()
   await p.waitForTimeout(500)
@@ -243,7 +238,7 @@ When('I open the models section and delete the model {string}', async ({}, model
 When('I open the models section and generate the CRUD of {string}', async ({}, modelName: string) => {
   const p = requirePage()
   await openSection(p, 'models')
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ has: p.getByText(modelName, { exact: true }) }).first().click()
+  await openDesignEntity(p, DESIGN_ID, 'models', modelName)
   await p.waitForTimeout(400)
   await p.locator('[data-testid="design-model-tabs"] [role="tab"][data-tab-id="settings"]').click()
   await p.locator('[data-testid="design-model-generate-crud"]').click()
@@ -258,7 +253,7 @@ When('I open the models section and generate the CRUD of {string}', async ({}, m
 When('I open the models section and generate the search routes of {string}', async ({}, modelName: string) => {
   const p = requirePage()
   await openSection(p, 'models')
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ has: p.getByText(modelName, { exact: true }) }).first().click()
+  await openDesignEntity(p, DESIGN_ID, 'models', modelName)
   await p.waitForTimeout(400)
   await p.locator('[data-testid="design-model-tabs"] [role="tab"][data-tab-id="settings"]').click()
   await p.locator('[data-testid="design-model-generate-search"]').click()
@@ -267,37 +262,38 @@ When('I open the models section and generate the search routes of {string}', asy
 
 Then('the models list offers {string}', async ({}, modelName: string) => {
   const p = requirePage()
-  await openSection(p, 'models')
-  await expect(
-    p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ has: p.getByText(modelName, { exact: true }) })
-  ).toHaveCount(1, { timeout: 5000 })
+  await expandDesignSection(p, DESIGN_ID, 'models')
+  await expect(designEntityNodes(p, DESIGN_ID, 'models', modelName)).toHaveCount(1, { timeout: 5000 })
   await openSection(p, 'routes')
 })
 
 Then('the routes tree shows the group {string} with {int} routes', async ({}, groupName: string, count: number) => {
   const p = requirePage()
-  const groupRow = p.locator('[data-testid="design-routes-listview"] .list-view-row').filter({ has: p.getByText(groupName, { exact: true }) }).first()
+  await expandDesignSection(p, DESIGN_ID, 'routes')
+  const groupRow = designEntityNode(p, DESIGN_ID, 'routes', groupName)
   await expect(groupRow).toBeVisible({ timeout: 5000 })
   const chevron = groupRow.locator('button:has(.codicon-chevron-right)')
   if (await chevron.count() > 0) {
     await chevron.click()
     await p.waitForTimeout(300)
   }
-  const actual = await p.evaluate((name: string) => {
-    const rows = Array.from(document.querySelectorAll('[data-testid="design-routes-listview"] .list-view-row'))
-    const levelOf = (row: Element): number => Number(row.getAttribute('aria-level') ?? row.closest('[aria-level]')?.getAttribute('aria-level') ?? '1')
+  // Routes moved into the sidebar tree: count the group's DIRECT route children
+  // (one aria-level deeper, excluding sub-group folder nodes).
+  const actual = await p.evaluate(({ designId, name }: { designId: string, name: string }) => {
+    const rows = Array.from(document.querySelectorAll(`[data-testid="sidebar-listview"] .list-view-row[data-item-id^="design-entity:${designId}:routes:"]`))
+    const levelOf = (row: Element): number => Number(row.getAttribute('aria-level') ?? '1')
     const titleOf = (row: Element): string => (row.querySelector('.list-view-title')?.textContent ?? '').trim()
-    let inGroup = false
+    const gi = rows.findIndex((r) => titleOf(r) === name)
+    if (gi < 0) return -1
+    const gl = levelOf(rows[gi])
     let n = 0
-    for (const row of rows) {
-      if (levelOf(row) === 1) {
-        inGroup = titleOf(row) === name
-        continue
-      }
-      if (inGroup) n += 1
+    for (let i = gi + 1; i < rows.length; i++) {
+      const l = levelOf(rows[i])
+      if (l <= gl) break
+      if (l === gl + 1 && rows[i].querySelector('.codicon-folder') === null) n += 1
     }
     return n
-  }, groupName)
+  }, { designId: DESIGN_ID, name: groupName })
   expect(actual).toBe(count)
 })
 

@@ -343,7 +343,15 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               // selected, exactly as the single-selection tree did.
               selectedIds={selectedItemIds.length > 0 ? selectedItemIds : selectedItemId ? [selectedItemId] : []}
               onSelectionChange={handleSelectionChange}
-              activeId={activeId}
+              // Shift-range anchors on the ListView's `activeId`. For a design
+              // entity the app anchor (`selectedItemId`/`activeId`) is the OWNING
+              // DESIGN (so paste / favorites resolve against it), while the real
+              // highlighted row lives in `selectedItemIds` — so drive the anchor
+              // from the highlighted row when exactly one is selected. With a
+              // multi-selection, pass `undefined` so the ListView keeps the
+              // internal anchor its own shift-click just set (never snapping it
+              // back to the design).
+              activeId={selectedItemIds.length === 1 ? selectedItemIds[0] : selectedItemIds.length === 0 ? activeId : undefined}
               expandedIds={expandedIds}
               isRenameable
               expandOnChevronOnly

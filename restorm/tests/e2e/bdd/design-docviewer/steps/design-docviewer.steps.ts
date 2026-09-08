@@ -3,7 +3,8 @@ import { copyFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_DOCVIEWER_TEMP_DIR } from '../../fixtures/design-docviewer.fixture'
-import { openDesignSection } from '../../../support/designNav'
+import { openDesignSection, openDesignEntity } from '../../../support/designNav'
+import { designEntityTitle, renameModel } from '../../../support/designGuiDriver'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -58,17 +59,12 @@ When('I rename the {string} model to {string} from the models section', async ({
   const p = requirePage()
   await openSection(p, 'models')
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: from }).first().click()
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(from, { timeout: 5000 })
-  // EditableLabel: click the trigger, type into the revealed input,
-  // commit with Enter.
-  await p.locator('[data-testid="design-model-name"]').click()
-  const input = p.locator('[data-testid="design-model-name-input"]')
-  await expect(input).toBeVisible({ timeout: 5000 })
-  await input.fill(to)
-  await input.press('Enter')
+  await openDesignEntity(p, DESIGN_ID, 'models', from)
+  await expect(designEntityTitle(p)).toContainText(from, { timeout: 5000 })
+  // The model name is the editable H1 title now.
+  await renameModel(p, to)
   await p.waitForTimeout(400)
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(to, { timeout: 5000 })
+  await expect(designEntityTitle(p)).toContainText(to, { timeout: 5000 })
 })
 
 When('I return to the documentation section', async () => {
@@ -92,7 +88,7 @@ When('I click the edit link of the {string} model in the documentation', async (
 Then('the models section opens on the {string} model card', async ({}, name: string) => {
   const p = requirePage()
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(name, { timeout: 5000 })
+  await expect(designEntityTitle(p)).toContainText(name, { timeout: 5000 })
 })
 
 When('I click the edit link of the {string} route in the documentation', async ({}, slug: string) => {
@@ -108,5 +104,5 @@ Then('the routes section opens on the {string} route card', async ({}, summary: 
   await expect(p.locator('[data-testid="design-route-tabs"]')).toBeVisible({ timeout: 5000 })
   // Name the landing route: an index drift in the edit-link mapping
   // must land on the WRONG summary and fail here.
-  await expect(p.locator('[data-testid="design-route-summary-label"]')).toContainText(summary, { timeout: 5000 })
+  await expect(designEntityTitle(p)).toContainText(summary, { timeout: 5000 })
 })

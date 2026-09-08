@@ -1,11 +1,16 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox } from 'electron-core-ui/renderer'
+import { InputBox, Modal, Button } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignEnum, CustomValueList } from '../../../../shared/types/collections'
+import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
+import { DesignIssuesCallout } from './DesignIssuesCallout'
 import { CustomValueListsEditor } from '../Folders/CustomValueListsEditor'
 import { assignDesignSection, uniqueComponentName } from './designMutations'
 import { removeEnumFromDesign } from '../../../../shared/design/designUsages'
+import { generateUniqueId } from '../../utils/treeManipulation'
 import { bridgeEnumValues, displayValue } from './designDisplay'
+import { setPendingDesignSection, type PendingEntityAction } from '../../services/designSectionIntent'
+import { DesignEntityListing } from './DesignEntityListing'
 
 /**
  * The Enums section of the Design tab: the SAME master-details editor
@@ -16,8 +21,53 @@ import { bridgeEnumValues, displayValue } from './designDisplay'
  * single column (no label/value split, no enable toggle), the row text
  * IS the enum value.
  */
-export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) => {
+export const DesignEnumsSection: React.FC<{
+  design: ApiDesign
+  issues?: readonly DesignIssue[]
+  pendingAction?: PendingEntityAction | null
+  selectedEnumId?: string | null
+  onSelectEnum?: (id: string | null) => void
+}> = ({ design, issues = [], pendingAction, selectedEnumId = null, onSelectEnum }) => {
   const { t } = useTranslation()
+  const [pendingDeleteEnum, setPendingDeleteEnum] = useState<DesignEnum | null>(null)
+
+  const confirmDeleteEnum = useCallback((enumId: string): void => {
+    const pruned = removeEnumFromDesign(design, enumId)
+    assignDesignSection(design, 'enums', design.enums.filter((e) => e.id !== enumId))
+    if (pruned.models.some((m, i) => m !== design.models[i])) assignDesignSection(design, 'models', pruned.models)
+    if (pruned.routeGroups.some((g, i) => g !== design.routeGroups[i])) assignDesignSection(design, 'routeGroups', pruned.routeGroups)
+    if (selectedEnumId === enumId) onSelectEnum?.(null)
+    setPendingDeleteEnum(null)
+  }, [design, selectedEnumId, onSelectEnum])
+
+  // Run a one-shot action from a sidebar enum node's context menu, once per
+  // nonce: add a new enum, or delete one (pruning the references that pointed at
+  // it, like the master-details editor's own delete path).
+  const lastEnumActionNonce = useRef(0)
+  useEffect(() => {
+    if (!pendingAction || pendingAction.nonce === lastEnumActionNonce.current) return
+    lastEnumActionNonce.current = pendingAction.nonce
+    const { action, entityId } = pendingAction
+    // Run on a microtask so the selection change (React state) doesn't fire
+    // synchronously inside the effect that observed the action.
+    queueMicrotask(() => {
+      if (action === 'add') {
+        const fresh: DesignEnum = {
+          id: generateUniqueId(),
+          doc: { name: uniqueComponentName(design, t('design.enums.newName', 'NewEnum')), properties: [], enumValues: [] }
+        }
+        assignDesignSection(design, 'enums', [...design.enums, fresh])
+        onSelectEnum?.(fresh.id)
+        return
+      }
+      if (action === 'delete' && entityId !== undefined) {
+        // Ask first — deletion prunes every property/param that referenced the
+        // enum, so it gets the same yes/no gate as a model or a route group.
+        const target = design.enums.find((e) => e.id === entityId)
+        if (target !== undefined) setPendingDeleteEnum(target)
+      }
+    })
+  }, [pendingAction, design, t, onSelectEnum])
 
   // DesignEnum → CustomValueList. Row ids derive from (enum, index):
   // values carry no identity of their own, and the editor's table
@@ -101,20 +151,41 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
   const renderDescription = useCallback((enumId: string): React.ReactNode => {
     const current = design.enums.find((e) => e.id === enumId)?.doc.description ?? ''
     return (
-      <label className="design-field design-enum-description">
-        <span className="design-field-label">{t('design.enums.description', 'Description')}</span>
-        <InputBox
-          value={current}
-          onChange={(value) => { setEnumDescription(enumId, value) }}
-          options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.enums.description', 'Description'), placeholder: t('design.enums.descriptionPlaceholder', 'What this enum represents (optional)') }}
-          data-testid="design-enum-description"
-        />
-      </label>
+      <>
+        <DesignIssuesCallout issues={issues} entityId={enumId} />
+        <label className="design-field design-enum-description">
+          <span className="design-field-label">{t('design.enums.description', 'Description')}</span>
+          <InputBox
+            value={current}
+            onChange={(value) => { setEnumDescription(enumId, value) }}
+            options={{ type: 'text', flexibleHeight: true, ariaLabel: t('design.enums.description', 'Description'), placeholder: t('design.enums.descriptionPlaceholder', 'What this enum represents (optional)') }}
+            data-testid="design-enum-description"
+          />
+        </label>
+      </>
     )
-  }, [design.enums, setEnumDescription, t])
+  }, [design.enums, setEnumDescription, t, issues])
 
   return (
     <div className="design-section design-enums-section" data-testid="design-enums-section">
+      {selectedEnumId === null ? (
+        <DesignEntityListing
+          design={design}
+          section="enums"
+          onSelect={(id) => { onSelectEnum?.(id) }}
+          onAction={(designId, section, action, entityId) => {
+            // Delete is handled directly (open the confirm) so it doesn't first
+            // navigate INTO the enum — the listing is inside this component, like
+            // the models section. Add still routes through the intent bus.
+            if (action === 'delete' && entityId !== undefined) {
+              const target = design.enums.find((e) => e.id === entityId)
+              if (target !== undefined) setPendingDeleteEnum(target)
+              return
+            }
+            setPendingDesignSection(designId, section, entityId, action)
+          }}
+        />
+      ) : (
       <CustomValueListsEditor
         lists={lists}
         onListsChange={onListsChange}
@@ -133,10 +204,35 @@ export const DesignEnumsSection: React.FC<{ design: ApiDesign }> = ({ design }) 
         }}
         showEnabledToggle={false}
         showValue
-        filterable
-        reorderableLists
+        hideListsPanel
+        selectedListId={selectedEnumId}
+        {...(onSelectEnum ? { onSelectList: onSelectEnum } : {})}
         testIdPrefix="design-enums"
       />
+      )}
+
+      {pendingDeleteEnum !== null && (
+        <Modal
+          title={t('design.enums.deleteTitle', 'Delete {{name}}?', { name: pendingDeleteEnum.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : pendingDeleteEnum.doc.name })}
+          isOpen
+          onClose={() => { setPendingDeleteEnum(null) }}
+          size="dialog"
+          data-testid="design-enum-delete-modal"
+          enterActionTestId="design-enum-delete-confirm"
+        >
+          <div className="design-delete-modal-body">
+            <p>{t('design.enums.deleteImpact', 'Any property or parameter that used this enum will lose its reference.')}</p>
+            <div className="design-delete-modal-actions">
+              <Button secondary onClick={() => { setPendingDeleteEnum(null) }} data-testid="design-enum-delete-cancel">
+                {t('sidebar.deleteConfirm.cancel')}
+              </Button>
+              <Button onClick={() => { confirmDeleteEnum(pendingDeleteEnum.id) }} data-testid="design-enum-delete-confirm">
+                {t('sidebar.deleteConfirm.confirm')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

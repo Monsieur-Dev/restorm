@@ -456,6 +456,107 @@
   padding: 0;
 }
 
+/* Detail-only sections (Models / Routes): the master list moved to the sidebar,
+   so the selected entity's card fills the whole section. */
+.design-entity-detail-section {
+  display: flex;
+  padding: 0;
+  min-height: 0;
+}
+
+/* Section-root overview: when no entity is selected the section lists its
+   entities (like the Clients listing), fully expanded, filling the pane. */
+.design-entity-listing {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.design-entity-listing-toolbar {
+  display: flex;
+  padding: 8px 12px;
+  flex-shrink: 0;
+}
+
+.design-entity-listing-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 0 0 4px;
+}
+
+/* Empty state: a centered "create your first…" prompt with a primary button. */
+.design-entity-listing-empty {
+  align-items: center;
+  justify-content: center;
+}
+
+.design-entity-listing-empty-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.design-entity-listing-empty-message {
+  margin: 0;
+  color: var(--descriptionForeground);
+  font-size: 1.05em;
+}
+
+/* Enum listing rows: a larger name with its comma-separated values trailing in
+   a lighter, normal weight. */
+.design-enums-listing-view .list-view-title {
+  font-size: 1.05em;
+  font-weight: 600;
+}
+
+/* Entity-level validation errors: a stack of error callouts at the top of a
+ * model / enum / route detail pane. */
+.design-entity-issues-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Enum listing rows: a slightly larger name, then its values trailing it. */
+.design-listing-enum-name {
+  font-size: 1.05em;
+  font-weight: normal;
+}
+
+.design-listing-values {
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 8px;
+  font-size: 0.9em;
+}
+
+/* Route listing rows: a dimmed (grey) description trailing the row. */
+.design-listing-route-desc {
+  opacity: 0.55;
+  padding-right: 8px;
+  font-size: 0.9em;
+}
+
+/* Models view: a List / Graph tabbed shell filling the section. */
+.design-models-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.design-models-graph {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+}
+
 /* The entity list is a StaticPane (standard uppercase header + actions, like
    the sidebar / ENUMS panes). Root keeps the fixed width + divider; the pane
    body flex-fills so the tree scrolls within the full height. */
@@ -545,6 +646,13 @@
 .design-model-card-header h2 {
   margin: 0;
   font-size: 1.2em;
+}
+
+/* Keep the name label hoverable even when empty: an EditableLabel with no value
+   collapses to zero width, so its edit pencil becomes unreachable. A min width
+   guarantees a hover target to re-enter a name (model / route / group). */
+.design-model-card-header .ecui-editable-label-trigger {
+  min-width: 50px;
 }
 
 .design-icon-button {
@@ -1137,11 +1245,6 @@
   font-size: 1.05em;
 }
 
-.design-route-card-group {
-  opacity: 0.6;
-  font-size: 0.9em;
-}
-
 .design-generator-actions {
   display: flex;
   gap: 8px;
@@ -1238,6 +1341,24 @@
   font-family: var(--monospace-font-family, ui-monospace, monospace);
   font-size: 0.9em;
   opacity: 0.85;
+}
+
+/* The source row gains a trailing action cell (copy + open), revealed on hover. */
+.design-code-source-row {
+  grid-template-columns: 100px 1fr auto;
+}
+
+.design-code-source-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.design-code-source-row:hover .design-code-source-actions,
+.design-code-source-actions:focus-within {
+  opacity: 1;
 }
 
 .design-code-destination {

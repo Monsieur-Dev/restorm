@@ -2239,7 +2239,7 @@
       "deleteImpactChild": "{{name}} втрачає успадкування (власні властивості залишаються)",
       "description": "Опис",
       "descriptionPlaceholder": "Що представляє ця модель (необов'язково)",
-      "newName": "NewModel",
+      "newName": "НоваМодель",
       "selectPrompt": "Виберіть модель або створіть нову.",
       "tabs": {
         "schema": "Схема",
@@ -2259,11 +2259,13 @@
       "addEnum": "Додати енум",
       "addValue": "Додати значення",
       "valueHeader": "Значення",
-      "newName": "NewEnum",
+      "newName": "НовийEnum",
       "selectPrompt": "Виберіть енум або створіть новий — закритий набір значень, який можна використовувати як тип властивості.",
       "nameHeader": "Назва",
       "description": "Опис",
-      "descriptionPlaceholder": "Що представляє це перелічення (необов'язково)"
+      "descriptionPlaceholder": "Що представляє це перелічення (необов'язково)",
+      "deleteTitle": "Видалити {{name}}?",
+      "deleteImpact": "Будь-яка властивість або параметр, що використовували цей перелік, втратять посилання."
     },
     "documentation": {},
     "code": {
@@ -2324,6 +2326,10 @@
       },
       "extractedTitle": "Файли записано",
       "openOutput": "Відкрити теку виводу",
+      "copySource": "Копіювати джерело",
+      "copied": "Скопійовано!",
+      "openSourceUrl": "Відкрити URL шаблону",
+      "openSourceFolder": "Відкрити теку шаблону",
       "refresh": "Оновити цей шаблон з його джерела",
       "removeConfirm": "Template «{{name}}» буде вилучено з цього дизайну (уже згенеровані файли на диску залишаться незмінними).",
       "removeTitle": "Вилучити цей Template?",
@@ -2514,7 +2520,8 @@
     "routes": {
       "addGroup": "Додати групу",
       "addRoute": "Додати маршрут",
-      "newGroupName": "NewGroup",
+      "newGroupName": "НоваГрупа",
+      "newRouteName": "НовийМаршрут",
       "selectPrompt": "Виберіть групу або маршрут, або створіть групу.",
       "deleteGroupTitle": "Видалити {{name}}?",
       "deleteGroupImpact": "Групу та її {{count}} маршрутів буде видалено.",
@@ -2666,6 +2673,21 @@
     "projections": {
       "title": "Проєкції",
       "hint": "Та сама операція, як її надає кожен обслуговуваний протокол."
+    },
+    "listing": {
+      "models": {
+        "empty": "Створіть свою першу модель"
+      },
+      "enums": {
+        "empty": "Створіть свій перший enum"
+      },
+      "routes": {
+        "empty": "Створіть свій перший маршрут"
+      },
+      "tabs": {
+        "list": "Список",
+        "graph": "Граф"
+      }
     }
   },
   "mqtt": {

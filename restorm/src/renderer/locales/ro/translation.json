@@ -2238,7 +2238,7 @@
       "deleteImpactChild": "{{name}} își pierde moștenirea (propriile proprietăți rămân)",
       "description": "Descriere",
       "descriptionPlaceholder": "Ce reprezintă acest model (opțional)",
-      "newName": "NewModel",
+      "newName": "ModelNou",
       "selectPrompt": "Selectați un model sau creați unul.",
       "tabs": {
         "schema": "Schemă",
@@ -2258,11 +2258,13 @@
       "addEnum": "Adaugă un enum",
       "addValue": "Adaugă o valoare",
       "valueHeader": "Valoare",
-      "newName": "NewEnum",
+      "newName": "EnumNou",
       "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate.",
       "nameHeader": "Nume",
       "description": "Descriere",
-      "descriptionPlaceholder": "Ce reprezintă acest enum (opțional)"
+      "descriptionPlaceholder": "Ce reprezintă acest enum (opțional)",
+      "deleteTitle": "Ștergeți {{name}}?",
+      "deleteImpact": "Orice proprietate sau parametru care folosea acest enum își va pierde referința."
     },
     "documentation": {},
     "code": {
@@ -2323,6 +2325,10 @@
       },
       "extractedTitle": "Fișiere scrise",
       "openOutput": "Deschide folderul de ieșire",
+      "copySource": "Copiază sursa",
+      "copied": "Copiat!",
+      "openSourceUrl": "Deschide URL-ul șablonului",
+      "openSourceFolder": "Deschide folderul șablonului",
       "refresh": "Reîmprospătează acest șablon din sursa sa",
       "removeConfirm": "Template-ul „{{name}}“ va fi eliminat din acest design (fișierele deja generate pe disc rămân neatinse).",
       "removeTitle": "Eliminați acest Template?",
@@ -2513,7 +2519,8 @@
     "routes": {
       "addGroup": "Adaugă un grup",
       "addRoute": "Adaugă o rută",
-      "newGroupName": "NewGroup",
+      "newGroupName": "GrupNou",
+      "newRouteName": "RutăNouă",
       "selectPrompt": "Selectați un grup sau o rută, sau creați un grup.",
       "deleteGroupTitle": "Ștergeți {{name}}?",
       "deleteGroupImpact": "Grupul și cele {{count}} rute ale sale vor fi șterse.",
@@ -2665,6 +2672,21 @@
     "projections": {
       "title": "Proiecții",
       "hint": "Aceeași operațiune, așa cum o expune fiecare protocol servit."
+    },
+    "listing": {
+      "models": {
+        "empty": "Creează primul tău model"
+      },
+      "enums": {
+        "empty": "Creează primul tău enum"
+      },
+      "routes": {
+        "empty": "Creează prima ta rută"
+      },
+      "tabs": {
+        "list": "Listă",
+        "graph": "Grafic"
+      }
     }
   },
   "mqtt": {

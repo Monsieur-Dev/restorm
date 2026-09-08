@@ -2236,7 +2236,7 @@
       "deleteImpactChild": "{{name}} kehilangan pewarisannya (properti miliknya tetap ada)",
       "description": "Deskripsi",
       "descriptionPlaceholder": "Apa yang diwakili model ini (opsional)",
-      "newName": "NewModel",
+      "newName": "ModelBaru",
       "selectPrompt": "Pilih model, atau buat satu.",
       "tabs": {
         "schema": "Skema",
@@ -2256,11 +2256,13 @@
       "addEnum": "Tambah enum",
       "addValue": "Tambah nilai",
       "valueHeader": "Nilai",
-      "newName": "NewEnum",
+      "newName": "EnumBaru",
       "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti.",
       "nameHeader": "Nama",
       "description": "Deskripsi",
-      "descriptionPlaceholder": "Apa yang diwakili enum ini (opsional)"
+      "descriptionPlaceholder": "Apa yang diwakili enum ini (opsional)",
+      "deleteTitle": "Hapus {{name}}?",
+      "deleteImpact": "Setiap properti atau parameter yang menggunakan enum ini akan kehilangan referensinya."
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2323,10 @@
       },
       "extractedTitle": "File ditulis",
       "openOutput": "Buka folder keluaran",
+      "copySource": "Salin sumber",
+      "copied": "Tersalin!",
+      "openSourceUrl": "Buka URL templat",
+      "openSourceFolder": "Buka folder templat",
       "refresh": "Segarkan templat ini dari sumbernya",
       "removeConfirm": "Template “{{name}}” akan dihapus dari desain ini (file yang sudah dihasilkan di disk tidak diubah).",
       "removeTitle": "Hapus Template ini?",
@@ -2511,7 +2517,8 @@
     "routes": {
       "addGroup": "Tambah grup",
       "addRoute": "Tambah rute",
-      "newGroupName": "NewGroup",
+      "newGroupName": "GrupBaru",
+      "newRouteName": "RuteBaru",
       "selectPrompt": "Pilih grup atau rute, atau buat grup.",
       "deleteGroupTitle": "Hapus {{name}}?",
       "deleteGroupImpact": "Grup dan {{count}} rutenya akan dihapus.",
@@ -2663,6 +2670,21 @@
     "projections": {
       "title": "Proyeksi",
       "hint": "Operasi yang sama, sebagaimana ditampilkan oleh setiap protokol yang dilayani."
+    },
+    "listing": {
+      "models": {
+        "empty": "Buat model pertama Anda"
+      },
+      "enums": {
+        "empty": "Buat enum pertama Anda"
+      },
+      "routes": {
+        "empty": "Buat rute pertama Anda"
+      },
+      "tabs": {
+        "list": "Daftar",
+        "graph": "Grafik"
+      }
     }
   },
   "mqtt": {

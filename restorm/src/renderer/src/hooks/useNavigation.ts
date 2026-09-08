@@ -8,8 +8,8 @@ import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario, ApiDesign } from '../../../shared/types/collections'
 import { isFolder, isRequest, isScenario, isApiDesign, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
-import { parseDesignSectionRowId, designSectionRowId } from '../../../shared/design/designSections'
-import { setPendingDesignSection, peekPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection } from '../services/designSectionIntent'
+import { parseDesignSectionRowId, designSectionRowId, designEntityRowId, parseDesignEntityRowId } from '../../../shared/design/designSections'
+import { setPendingDesignSection, peekPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection, getActiveDesignEntity, subscribeActiveDesignEntity } from '../services/designSectionIntent'
 import { parseDesignClientRowId, findClientRequest } from '../services/designClientsStore'
 import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/editor'
 
@@ -112,6 +112,14 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       setSelectedItemIds([itemId])
       return
     }
+    // A model/enum/route entity node is likewise virtual: keep the anchor on
+    // the owning design so paste + favorites resolve, but highlight the node.
+    const entityRow = parseDesignEntityRowId(itemId)
+    if (entityRow !== null) {
+      setSelectedItemId(entityRow.designId)
+      setSelectedItemIds([itemId])
+      return
+    }
     setSelectedItemId(itemId)
     setSelectedItemIds([itemId])
   }, [setSelectedItemId, setSelectedItemIds])
@@ -123,10 +131,38 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // anchor is read from a ref so the subscription mounts once, not per select.
   const selectedItemIdRef = useRef(selectedItemId)
   useEffect(() => { selectedItemIdRef.current = selectedItemId }, [selectedItemId])
-  useEffect(() => subscribeActiveDesignSection((designId, section) => {
+  // Highlight the row the design tab is actually on: the SELECTED ENTITY when one
+  // is selected (model/enum/route), otherwise the section row (a listing) or the
+  // design node (settings). Both the section AND the entity are subscribed so
+  // whichever publishes last reconciles to the same result — a cross-section
+  // entity click must never leave the SECTION row highlighted instead of the
+  // entity (the section change fires this, and used to clobber the entity).
+  const highlightActiveDesignRow = useCallback((designId: string) => {
     if (selectedItemIdRef.current !== designId) return
-    setSelectedItemIds([section !== 'settings' ? designSectionRowId(designId, section) : designId])
-  }), [setSelectedItemIds])
+    const entity = getActiveDesignEntity(designId)
+    if (entity !== undefined) {
+      setSelectedItemIds([designEntityRowId(designId, entity.section, entity.entityId)])
+      // Reveal the entity by expanding its parents in the sidebar (design node,
+      // section row, parent models / route group) — but only when the user opted
+      // into sidebar/tab sync. The setting DEFAULTS on, so expand unless it is
+      // explicitly `false` (empty string / null = registration timing → default).
+      if (entity.ancestorRowIds.length > 0) {
+        void window.api.settings.get('behavior:syncSidebarWithTabs').then((stored) => {
+          if (stored === false) return
+          setExpandedIds((prev) => {
+            const next = new Set(prev)
+            for (const id of entity.ancestorRowIds) next.add(id)
+            return Array.from(next)
+          })
+        })
+      }
+      return
+    }
+    const section = getActiveDesignSection(designId)
+    if (section !== undefined) setSelectedItemIds([section !== 'settings' ? designSectionRowId(designId, section) : designId])
+  }, [setSelectedItemIds, setExpandedIds])
+  useEffect(() => subscribeActiveDesignSection((designId) => { highlightActiveDesignRow(designId) }), [highlightActiveDesignRow])
+  useEffect(() => subscribeActiveDesignEntity((designId) => { highlightActiveDesignRow(designId) }), [highlightActiveDesignRow])
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -235,6 +271,20 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // a tab activation) keeps the row highlighted, not the design root.
       selectSingle(itemId)
       setPendingDesignSection(item.id, sectionRow.section)
+      openDesignTab(item, breadcrumbs)
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
+      return
+    }
+
+    // A model / enum / route node under a design section: open (or refocus) the
+    // design tab on that section and stage the entity so the detail pane selects
+    // it. Same virtual-row treatment as the section rows above.
+    const entityRow = parseDesignEntityRowId(itemId)
+    if (entityRow !== null) {
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, entityRow.designId)
+      if (!item || !isApiDesign(item)) return
+      selectSingle(itemId)
+      setPendingDesignSection(item.id, entityRow.section, entityRow.entityId)
       openDesignTab(item, breadcrumbs)
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
@@ -398,18 +448,20 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // the Clients section, scoped to the clicked folder when the crumb is one.
       const clientRow = parseDesignClientRowId(itemId)
       const sectionRow = parseDesignSectionRowId(itemId)
+      const entityRow = parseDesignEntityRowId(itemId)
       const designRootId = itemId.startsWith('design-client-root:')
         ? itemId.slice('design-client-root:'.length)
         : null
-      const designId = clientRow?.designId ?? sectionRow?.designId ?? designRootId
+      const designId = clientRow?.designId ?? sectionRow?.designId ?? entityRow?.designId ?? designRootId
       if (designId !== null) {
         const { item: designItem, breadcrumbs: designCrumbs } = findItemWithBreadcrumbs(rootItems, designId)
         if (!designItem || !isApiDesign(designItem)) return
-        // Highlight the clicked crumb row (folder/section) in the sidebar; the
-        // design-root crumb highlights the design itself.
-        selectSingle(clientRow !== null || sectionRow !== null ? itemId : designId)
+        // Highlight the clicked crumb row (folder/section/entity) in the sidebar;
+        // the design-root crumb highlights the design itself.
+        selectSingle(clientRow !== null || sectionRow !== null || entityRow !== null ? itemId : designId)
         if (clientRow !== null) setPendingDesignSection(designItem.id, 'clients', itemId)
         else if (sectionRow !== null) setPendingDesignSection(designItem.id, sectionRow.section)
+        else if (entityRow !== null) setPendingDesignSection(designItem.id, entityRow.section, entityRow.entityId)
         openDesignTab(designItem, designCrumbs)
         navigationService.navigateTo(itemId, 'breadcrumb', { type: 'design' })
         return

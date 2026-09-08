@@ -3,7 +3,8 @@ import { copyFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_SEARCH_TEMP_DIR } from '../../fixtures/design-search.fixture'
-import { openDesignSection } from '../../../support/designNav'
+import { openDesignSection, openDesignEntity, deleteDesignEntityNode } from '../../../support/designNav'
+import { designEntityTitle, renameModel } from '../../../support/designGuiDriver'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -74,7 +75,7 @@ Then('the models section opens on the {string} model card', async ({}, name: str
   const p = requirePage()
   await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(name, { timeout: 5000 })
+  await expect(designEntityTitle(p)).toContainText(name, { timeout: 5000 })
 })
 
 When('I rename the {string} model to {string} from the models section', async ({}, from: string, to: string) => {
@@ -84,13 +85,9 @@ When('I rename the {string} model to {string} from the models section', async ({
   await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: from }).first().click()
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(from, { timeout: 5000 })
-  await p.locator('[data-testid="design-model-name"]').click()
-  const input = p.locator('[data-testid="design-model-name-input"]')
-  await expect(input).toBeVisible({ timeout: 5000 })
-  await input.fill(to)
-  await input.press('Enter')
+  await openDesignEntity(p, DESIGN_ID, 'models', from)
+  await expect(designEntityTitle(p)).toContainText(from, { timeout: 5000 })
+  await renameModel(p, to)
   // The reactive DESIGN_UPDATED emit is debounced before it reaches
   // the main-side reindex — give it a beat.
   await p.waitForTimeout(1500)
@@ -102,9 +99,9 @@ When('I delete the {string} model from the models section', async ({}, name: str
   await expect(p.locator(`[data-testid="design-tab-view-${DESIGN_ID}"]`)).toBeVisible({ timeout: 10000 })
   await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 450)
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: name }).first().click()
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(name, { timeout: 5000 })
-  await p.locator('[data-testid="design-model-delete"]').click()
+  await openDesignEntity(p, DESIGN_ID, 'models', name)
+  await expect(designEntityTitle(p)).toContainText(name, { timeout: 5000 })
+  await deleteDesignEntityNode(p, DESIGN_ID, 'models', name)
   await expect(p.locator('[data-testid="design-model-delete-modal"]')).toBeVisible({ timeout: 5000 })
   await p.locator('[data-testid="design-model-delete-confirm"]').click()
   // Deletion rides the debounced DESIGN_UPDATED — give the reindex a beat.

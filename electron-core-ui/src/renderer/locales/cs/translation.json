@@ -500,5 +500,8 @@
     "hash": "Hash",
     "parents": "Rodiče",
     "recoverVersion": "Obnovit tuto verzi"
+  },
+  "editableLabel": {
+    "unnamed": "<bez názvu>"
   }
 }

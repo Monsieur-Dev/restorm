@@ -2261,7 +2261,9 @@
       "selectPrompt": "Select an enum, or create one — a closed set of values usable as a property type.",
       "nameHeader": "Name",
       "description": "Description",
-      "descriptionPlaceholder": "What this enum represents (optional)"
+      "descriptionPlaceholder": "What this enum represents (optional)",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteImpact": "Any property or parameter that used this enum will lose its reference."
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2323,10 @@
         "done": "Done"
       },
       "openOutput": "Open the output folder",
+      "copySource": "Copy the source",
+      "copied": "Copied!",
+      "openSourceUrl": "Open the template URL",
+      "openSourceFolder": "Open the template folder",
       "refresh": "Refresh this template from its source",
       "extractedTitle": "Files written",
       "removeTitle": "Remove this template?",
@@ -2513,6 +2519,7 @@
       "addGroup": "Add a group",
       "addRoute": "Add a route",
       "newGroupName": "NewGroup",
+      "newRouteName": "NewRoute",
       "selectPrompt": "Select a group or a route, or create a group.",
       "deleteGroupTitle": "Delete {{name}}?",
       "deleteGroupImpact": "The group and its {{count}} routes will be deleted.",
@@ -2663,6 +2670,21 @@
         "discover": "Discover the variables this template uses",
         "undeclared": "Used but not declared: {{names}}",
         "allDeclared": "Every variable this template uses is declared."
+      }
+    },
+    "listing": {
+      "models": {
+        "empty": "Create your first model"
+      },
+      "enums": {
+        "empty": "Create your first enum"
+      },
+      "routes": {
+        "empty": "Create your first route"
+      },
+      "tabs": {
+        "list": "List",
+        "graph": "Graph"
       }
     }
   },

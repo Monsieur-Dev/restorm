@@ -500,5 +500,8 @@
     "hash": "雜湊",
     "parents": "父提交",
     "recoverVersion": "復原此版本"
+  },
+  "editableLabel": {
+    "unnamed": "<未命名>"
   }
 }

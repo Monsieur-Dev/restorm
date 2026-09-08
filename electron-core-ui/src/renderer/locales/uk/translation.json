@@ -500,5 +500,8 @@
     "hash": "Хеш",
     "parents": "Батьки",
     "recoverVersion": "Відновити цю версію"
+  },
+  "editableLabel": {
+    "unnamed": "<без назви>"
   }
 }

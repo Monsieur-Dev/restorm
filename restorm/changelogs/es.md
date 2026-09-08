@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**El diseñador de API ahora se maneja desde la barra lateral.**
+
+- **Tus modelos, enums y rutas viven en la barra lateral.** Las tres listas de las pestañas desaparecen: los modelos (con su anidamiento por herencia), los enums y las rutas (grupos y sus rutas) están ahora directamente en el árbol de la barra lateral. Haz clic derecho para renombrar, añadir un submodelo o un subgrupo, clonar una ruta, generar el CRUD o eliminar; arrastra para reordenar o reasignar el padre, nunca fuera del diseño. Cada página muestra ahora solo el detalle del elemento seleccionado.
+- **Una vista general de tus modelos, enums y rutas.** El nodo raíz de cada sección enumera ahora todo lo que contiene — y los Modelos añaden una pestaña **Gráfico**: un diagrama de clases de tus modelos con su herencia y referencias. Los enums muestran sus valores junto al nombre.
+- **Un único lugar para renombrar.** Un modelo, enum o ruta se renombra desde su título grande (el lápiz), y un nombre vacío muestra **«<sin nombre>»** para que el lápiz siga siendo accesible — el nombre ya no aparece dos veces en la página.
+- **Los errores de validación señalan el elemento.** Cuando algo va mal — un modelo y un enum que comparten nombre, una referencia a algo que ya no existe — una nota en la parte superior del modelo, enum o ruta lo explica.
+- **Una ruta de navegación completa.** El rastro refleja toda la jerarquía de la barra lateral — carpetas › diseño › sección › grupo › elemento — y cada segmento es clicable.
+- **Selecciona varios, elimina de una vez.** Selecciona varios modelos, enums o rutas y elimínalos de una sola vez, tras una confirmación.
+- **Copia o abre la fuente de una plantilla de código con un clic.** En la página «</> Code», al pasar el ratón sobre una plantilla aparece un botón para copiar su URL o ruta y otro para abrirla: el repositorio en el navegador, o la carpeta en el disco si es local.
+- **Las rutas nuevas empiezan con un nombre.** Una ruta creada desde cero recibe ahora un nombre por defecto, así puedes renombrarla enseguida.
+
+Correcciones:
+
+- **Elegir una plantilla de código cierra la biblioteca.** «Usar» ahora te devuelve directamente a la página Code.
+- **La generación de documentación ya no falla con los campos opcionales.** Generar la documentación de un diseño cuyo modelo o parámetro dejaba «required» sin definir ya no se detiene con un error de plantilla.
+- **Eliminar un enum pide confirmación.** Los enums reciben la misma confirmación que los modelos y las rutas.
+- **La barra lateral revela lo que seleccionas.** Con «sincronizar la barra lateral con la pestaña activa» activado, seleccionar o crear un modelo, enum o ruta despliega sus padres para mantenerlo visible en el árbol.
+
 ## v1.1.0
 
 🎉 **Restorm ahora es también un diseñador de API.** Diseñe su API, sírvala como un mock en vivo en cinco protocolos a la vez y genere sus clientes — todo sin salir de la app, todo en su propio disco.

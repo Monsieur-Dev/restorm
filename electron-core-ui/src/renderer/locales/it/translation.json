@@ -500,5 +500,8 @@
     "hash": "Hash",
     "parents": "Genitori",
     "recoverVersion": "Ripristina questa versione"
+  },
+  "editableLabel": {
+    "unnamed": "<senza nome>"
   }
 }

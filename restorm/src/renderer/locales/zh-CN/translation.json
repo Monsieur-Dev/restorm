@@ -2236,7 +2236,7 @@
       "deleteImpactChild": "{{name}} 将失去继承（其自身属性保留）",
       "description": "描述",
       "descriptionPlaceholder": "此模型表示的内容（可选）",
-      "newName": "NewModel",
+      "newName": "新模型",
       "selectPrompt": "选择一个模型，或创建一个。",
       "tabs": {
         "schema": "结构",
@@ -2256,11 +2256,13 @@
       "addEnum": "添加枚举",
       "addValue": "添加值",
       "valueHeader": "值",
-      "newName": "NewEnum",
+      "newName": "新枚举",
       "selectPrompt": "选择一个枚举，或创建一个 —— 可用作属性类型的封闭值集合。",
       "nameHeader": "名称",
       "description": "描述",
-      "descriptionPlaceholder": "此枚举表示的内容（可选）"
+      "descriptionPlaceholder": "此枚举表示的内容（可选）",
+      "deleteTitle": "删除 {{name}}？",
+      "deleteImpact": "任何使用此枚举的属性或参数都将失去其引用。"
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2323,10 @@
       },
       "extractedTitle": "已写入文件",
       "openOutput": "打开输出文件夹",
+      "copySource": "复制来源",
+      "copied": "已复制！",
+      "openSourceUrl": "打开模板 URL",
+      "openSourceFolder": "打开模板文件夹",
       "refresh": "从来源刷新此模板",
       "removeConfirm": "Template“{{name}}”将从此设计中移除（磁盘上已生成的文件保持不变）。",
       "removeTitle": "移除此 Template？",
@@ -2511,7 +2517,8 @@
     "routes": {
       "addGroup": "添加分组",
       "addRoute": "添加路由",
-      "newGroupName": "NewGroup",
+      "newGroupName": "新分组",
+      "newRouteName": "新路由",
       "selectPrompt": "选择一个分组或路由，或创建一个分组。",
       "deleteGroupTitle": "删除 {{name}}？",
       "deleteGroupImpact": "该分组及其 {{count}} 条路由将被删除。",
@@ -2663,6 +2670,21 @@
     "projections": {
       "title": "投影",
       "hint": "同一操作，以每个所服务的协议各自暴露的形式呈现。"
+    },
+    "listing": {
+      "models": {
+        "empty": "创建你的第一个模型"
+      },
+      "enums": {
+        "empty": "创建你的第一个枚举"
+      },
+      "routes": {
+        "empty": "创建你的第一个路由"
+      },
+      "tabs": {
+        "list": "列表",
+        "graph": "图"
+      }
     }
   },
   "mqtt": {

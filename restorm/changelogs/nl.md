@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**De API-designer wordt nu vanuit de zijbalk bediend.**
+
+- **Je modellen, enums en routes leven in de zijbalk.** De drie lijsten in de tabbladen verdwijnen: de modellen (met hun overervingsnesting), de enums en de routes (groepen en hun routes) staan nu rechtstreeks in de boom van de zijbalk. Klik met de rechtermuisknop om te hernoemen, een submodel of subgroep toe te voegen, een route te klonen, CRUD te genereren of te verwijderen; sleep om te herordenen of opnieuw onder te brengen — nooit buiten het ontwerp. Elke pagina toont nu alleen nog de details van het geselecteerde item.
+- **Een overzicht van je modellen, enums en routes.** De hoofdknoop van elke sectie toont nu alles eronder — en Modellen krijgen een **Graph**-tab: een klassendiagram van je modellen met hun overerving en verwijzingen. Enums tonen hun waarden naast de naam.
+- **Eén plek om te hernoemen.** Een model, enum of route hernoem je vanuit de grote titel (het potlood), en een lege naam toont **‘<naamloos>’** zodat het potlood altijd bereikbaar blijft — de naam staat niet langer twee keer op de pagina.
+- **Validatiefouten wijzen het item aan.** Als er iets mis is — een model en een enum met dezelfde naam, een verwijzing naar iets dat niet meer bestaat — legt een melding boven het model, de enum of de route het uit.
+- **Een volledig kruimelpad.** Het pad weerspiegelt de volledige zijbalkhiërarchie — mappen › ontwerp › sectie › groep › item — en elk segment is klikbaar.
+- **Selecteer er meerdere, verwijder in één keer.** Selecteer meerdere modellen, enums of routes en verwijder ze in één keer, na een bevestiging.
+- **Kopieer of open de bron van een codetemplate met één klik.** Op de pagina "</> Code" verschijnt bij het zweven over een template een knop om de URL of het pad te kopiëren en een om deze te openen: de repository in je browser, of de map op schijf voor een lokale template.
+- **Nieuwe routes beginnen met een naam.** Een van nul af opgebouwde route krijgt nu een standaardnaam, zodat je haar meteen kunt hernoemen.
+
+Oplossingen:
+
+- **Een codetemplate kiezen sluit de bibliotheek.** "Gebruiken" brengt je nu direct terug naar de Code-pagina.
+- **Het genereren van documentatie mislukt niet meer bij optionele velden.** Documentatie genereren uit een ontwerp waarvan het model of de parameter "required" niet had ingesteld, stopt niet meer met een templatefout.
+- **Een enum verwijderen vraagt eerst.** Enums krijgen dezelfde bevestiging als modellen en routes.
+- **De zijbalk onthult wat je selecteert.** Met ‘zijbalk synchroniseren met het actieve tabblad’ aan, klapt het selecteren of aanmaken van een model, enum of route de bovenliggende items uit zodat het zichtbaar blijft in de boom.
+
 ## v1.1.0
 
 🎉 **Restorm is nu ook een API-designer.** Ontwerp uw API, serveer hem als live mock over vijf protocollen tegelijk en genereer zijn clients — allemaal zonder de app te verlaten, allemaal op uw eigen schijf.

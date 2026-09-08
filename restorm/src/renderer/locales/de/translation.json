@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} verliert seine Vererbung (eigene Eigenschaften bleiben)",
       "description": "Beschreibung",
       "descriptionPlaceholder": "Was dieses Modell darstellt (optional)",
-      "newName": "NewModel",
+      "newName": "NeuesModell",
       "selectPrompt": "Wählen Sie ein Modell aus oder erstellen Sie eines.",
       "tabs": {
         "schema": "Schema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Enum hinzufügen",
       "addValue": "Wert hinzufügen",
       "valueHeader": "Wert",
-      "newName": "NewEnum",
+      "newName": "NeuerEnum",
       "selectPrompt": "Wählen Sie ein Enum aus oder erstellen Sie eines — eine geschlossene Wertemenge als Eigenschaftstyp.",
       "nameHeader": "Name",
       "description": "Beschreibung",
-      "descriptionPlaceholder": "Was dieses Enum darstellt (optional)"
+      "descriptionPlaceholder": "Was dieses Enum darstellt (optional)",
+      "deleteTitle": "{{name}} löschen?",
+      "deleteImpact": "Jede Eigenschaft oder jeder Parameter, der dieses Enum verwendet hat, verliert seine Referenz."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Dateien geschrieben",
       "openOutput": "Ausgabeordner öffnen",
+      "copySource": "Quelle kopieren",
+      "copied": "Kopiert!",
+      "openSourceUrl": "Vorlagen-URL öffnen",
+      "openSourceFolder": "Vorlagenordner öffnen",
       "refresh": "Dieses Template aus seiner Quelle aktualisieren",
       "removeConfirm": "Das Template „{{name}}“ wird aus diesem Design entfernt (bereits generierte Dateien auf der Festplatte bleiben unberührt).",
       "removeTitle": "Dieses Template entfernen?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Gruppe hinzufügen",
       "addRoute": "Route hinzufügen",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NeueGruppe",
+      "newRouteName": "NeueRoute",
       "selectPrompt": "Wählen Sie eine Gruppe oder Route aus, oder erstellen Sie eine Gruppe.",
       "deleteGroupTitle": "{{name}} löschen?",
       "deleteGroupImpact": "Die Gruppe und ihre {{count}} Routen werden gelöscht.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projektionen",
       "hint": "Dieselbe Operation, wie jedes bereitgestellte Protokoll sie darstellt."
+    },
+    "listing": {
+      "models": {
+        "empty": "Erstellen Sie Ihr erstes Modell"
+      },
+      "enums": {
+        "empty": "Erstellen Sie Ihr erstes Enum"
+      },
+      "routes": {
+        "empty": "Erstellen Sie Ihre erste Route"
+      },
+      "tabs": {
+        "list": "Liste",
+        "graph": "Graph"
+      }
     }
   },
   "mqtt": {

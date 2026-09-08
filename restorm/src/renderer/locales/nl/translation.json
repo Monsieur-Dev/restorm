@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} verliest zijn overerving (eigen eigenschappen blijven)",
       "description": "Beschrijving",
       "descriptionPlaceholder": "Wat dit model vertegenwoordigt (optioneel)",
-      "newName": "NewModel",
+      "newName": "NieuwModel",
       "selectPrompt": "Selecteer een model of maak er een.",
       "tabs": {
         "schema": "Schema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Enum toevoegen",
       "addValue": "Waarde toevoegen",
       "valueHeader": "Waarde",
-      "newName": "NewEnum",
+      "newName": "NieuwEnum",
       "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype.",
       "nameHeader": "Naam",
       "description": "Beschrijving",
-      "descriptionPlaceholder": "Wat deze enum vertegenwoordigt (optioneel)"
+      "descriptionPlaceholder": "Wat deze enum vertegenwoordigt (optioneel)",
+      "deleteTitle": "{{name}} verwijderen?",
+      "deleteImpact": "Elke eigenschap of parameter die deze enum gebruikte, verliest zijn referentie."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Bestanden geschreven",
       "openOutput": "Uitvoermap openen",
+      "copySource": "Bron kopiëren",
+      "copied": "Gekopieerd!",
+      "openSourceUrl": "Sjabloon-URL openen",
+      "openSourceFolder": "Sjabloonmap openen",
       "refresh": "Deze template vernieuwen vanaf de bron",
       "removeConfirm": "De Template “{{name}}” wordt uit dit ontwerp verwijderd (reeds gegenereerde bestanden op schijf blijven ongewijzigd).",
       "removeTitle": "Deze Template verwijderen?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Groep toevoegen",
       "addRoute": "Route toevoegen",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NieuweGroep",
+      "newRouteName": "NieuweRoute",
       "selectPrompt": "Selecteer een groep of route, of maak een groep.",
       "deleteGroupTitle": "{{name}} verwijderen?",
       "deleteGroupImpact": "De groep en zijn {{count}} routes worden verwijderd.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projecties",
       "hint": "Dezelfde operatie, zoals elk aangeboden protocol die blootstelt."
+    },
+    "listing": {
+      "models": {
+        "empty": "Maak je eerste model"
+      },
+      "enums": {
+        "empty": "Maak je eerste enum"
+      },
+      "routes": {
+        "empty": "Maak je eerste route"
+      },
+      "tabs": {
+        "list": "Lijst",
+        "graph": "Grafiek"
+      }
     }
   },
   "mqtt": {

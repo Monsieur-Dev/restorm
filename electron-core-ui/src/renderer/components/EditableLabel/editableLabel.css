@@ -62,6 +62,13 @@
   display: inline;
 }
 
+/* Empty value: a muted, italic placeholder (the caller's, or the default
+ * "<unnamed>") so the label always has visible, clickable content. */
+.ecui-editable-label-empty {
+  opacity: 0.55;
+  font-style: italic;
+}
+
 /* Edit-mode input — matches the text sizing of its parent so the
  * layout doesn't shift when toggling modes. */
 .ecui-editable-label-input {

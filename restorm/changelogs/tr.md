@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**API tasarımcısı artık kenar çubuğundan yönetiliyor.**
+
+- **Modelleriniz, enum'larınız ve rotalarınız kenar çubuğunda yaşıyor.** Sekmelerdeki üç liste kayboluyor — modeller (kalıtım iç içeliğiyle), enum'lar ve rotalar (gruplar ve rotaları) artık doğrudan kenar çubuğu ağacında yer alıyor. Sağ tıklayarak yeniden adlandırın, bir alt model veya alt grup ekleyin, bir rotayı klonlayın, CRUD üretin veya silin; sıralamayı değiştirmek veya üst öğeyi taşımak için sürükleyin — asla tasarımın dışına değil. Her sayfa artık yalnızca seçili öğenin ayrıntılarını gösteriyor.
+- **Modellerinize, enumlarınıza ve rotalarınıza kuş bakışı.** Her bölümün kök düğümü artık altındaki her şeyi listeler — ve Modeller bir **Grafik** sekmesi kazanır: modellerinizin kalıtım ve referanslarıyla bir sınıf diyagramı. Enumlar değerlerini adın hemen yanında gösterir.
+- **Yeniden adlandırmak için tek yer.** Bir model, enum veya rota büyük başlığından (kalem) yeniden adlandırılır ve boş bir ad **“<adsız>”** gösterir; böylece kalem her zaman erişilebilir kalır — ad artık sayfada iki kez görünmez.
+- **Doğrulama hataları öğeyi işaret eder.** Bir şey yanlış olduğunda — aynı adı paylaşan bir model ve enum, artık var olmayan bir şeye referans — modelin, enumun veya rotanın üstündeki bir not bunu açıklar.
+- **Eksiksiz bir gezinti yolu.** İz, kenar çubuğunun tüm hiyerarşisini yansıtır — klasörler › tasarım › bölüm › grup › öğe — ve her parça tıklanabilir.
+- **Birkaçını seç, tek seferde sil.** Birden çok modeli, enumu veya rotayı seçin ve bir onaydan sonra hepsini tek seferde silin.
+- **Bir kod şablonunun kaynağını tek tıklamayla kopyalayın veya açın.** "</> Code" sayfasında bir şablonun üzerine gelindiğinde URL'sini veya yolunu kopyalamak için bir düğme ve onu açmak için bir düğme belirir — tarayıcınızdaki depo veya yerel bir şablon için diskteki klasör.
+- **Yeni rotalar bir adla başlar.** Sıfırdan oluşturulan bir rota artık varsayılan bir ad alır, böylece onu hemen yeniden adlandırabilirsiniz.
+
+Düzeltmeler:
+
+- **Bir kod şablonu seçmek kütüphaneyi kapatır.** "Kullan" artık sizi doğrudan Code sayfasına geri götürür.
+- **Belge oluşturma artık isteğe bağlı alanlarda başarısız olmuyor.** Modeli veya parametresi "required" değerini ayarlanmamış bırakan bir tasarımdan belge oluşturmak artık bir şablon hatasıyla durmuyor.
+- **Bir enumu silmek önce sorar.** Enumlar, modeller ve rotalarla aynı onayı alır.
+- **Kenar çubuğu seçiminizi ortaya çıkarır.** «Kenar çubuğunu etkin sekmeyle eşitle» açıkken bir model, enum veya rota seçmek ya da oluşturmak, ağaçta görünür kalması için üst öğelerini açar.
+
 ## v1.1.0
 
 🎉 **Restorm artık aynı zamanda bir API tasarımcısı.** API'nizi tasarlayın, aynı anda beş protokolde canlı bir mock olarak sunun ve istemcilerini üretin — uygulamadan çıkmadan, tümü kendi diskinizde.

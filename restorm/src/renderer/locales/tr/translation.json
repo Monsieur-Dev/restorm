@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} kalıtımını kaybeder (kendi özellikleri kalır)",
       "description": "Açıklama",
       "descriptionPlaceholder": "Bu modelin neyi temsil ettiği (isteğe bağlı)",
-      "newName": "NewModel",
+      "newName": "YeniModel",
       "selectPrompt": "Bir model seçin veya oluşturun.",
       "tabs": {
         "schema": "Şema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Enum ekle",
       "addValue": "Değer ekle",
       "valueHeader": "Değer",
-      "newName": "NewEnum",
+      "newName": "YeniEnum",
       "selectPrompt": "Bir enum seçin veya oluşturun — özellik tipi olarak kullanılabilen kapalı bir değer kümesi.",
       "nameHeader": "Ad",
       "description": "Açıklama",
-      "descriptionPlaceholder": "Bu enum'un neyi temsil ettiği (isteğe bağlı)"
+      "descriptionPlaceholder": "Bu enum'un neyi temsil ettiği (isteğe bağlı)",
+      "deleteTitle": "{{name}} silinsin mi?",
+      "deleteImpact": "Bu enum'ı kullanan her özellik veya parametre başvurusunu kaybeder."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Dosyalar yazıldı",
       "openOutput": "Çıktı klasörünü aç",
+      "copySource": "Kaynağı kopyala",
+      "copied": "Kopyalandı!",
+      "openSourceUrl": "Şablon URL'sini aç",
+      "openSourceFolder": "Şablon klasörünü aç",
       "refresh": "Bu şablonu kaynağından yenile",
       "removeConfirm": "“{{name}}” Template’i bu tasarımdan kaldırılacak (diskte önceden oluşturulan dosyalara dokunulmaz).",
       "removeTitle": "Bu Template kaldırılsın mı?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Grup ekle",
       "addRoute": "Rota ekle",
-      "newGroupName": "NewGroup",
+      "newGroupName": "YeniGrup",
+      "newRouteName": "YeniRota",
       "selectPrompt": "Bir grup veya rota seçin, ya da bir grup oluşturun.",
       "deleteGroupTitle": "{{name}} silinsin mi?",
       "deleteGroupImpact": "Grup ve {{count}} rotası silinecek.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projeksiyonlar",
       "hint": "Aynı işlem, sunulan her protokolün onu sunduğu şekliyle."
+    },
+    "listing": {
+      "models": {
+        "empty": "İlk modelinizi oluşturun"
+      },
+      "enums": {
+        "empty": "İlk enum'unuzu oluşturun"
+      },
+      "routes": {
+        "empty": "İlk rotanızı oluşturun"
+      },
+      "tabs": {
+        "list": "Liste",
+        "graph": "Grafik"
+      }
     }
   },
   "mqtt": {

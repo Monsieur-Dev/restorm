@@ -2238,7 +2238,7 @@
       "deleteImpactChild": "{{name}} gubi nasljeđivanje (vlastita svojstva ostaju)",
       "description": "Opis",
       "descriptionPlaceholder": "Što ovaj model predstavlja (neobavezno)",
-      "newName": "NewModel",
+      "newName": "NoviModel",
       "selectPrompt": "Odaberite model ili ga izradite.",
       "tabs": {
         "schema": "Shema",
@@ -2258,11 +2258,13 @@
       "addEnum": "Dodaj enum",
       "addValue": "Dodaj vrijednost",
       "valueHeader": "Vrijednost",
-      "newName": "NewEnum",
+      "newName": "NoviEnum",
       "selectPrompt": "Odaberite enum ili ga izradite — zatvoren skup vrijednosti upotrebljiv kao tip svojstva.",
       "nameHeader": "Naziv",
       "description": "Opis",
-      "descriptionPlaceholder": "Što ovaj enum predstavlja (neobavezno)"
+      "descriptionPlaceholder": "Što ovaj enum predstavlja (neobavezno)",
+      "deleteTitle": "Izbrisati {{name}}?",
+      "deleteImpact": "Svako svojstvo ili parametar koji je koristio ovaj enum izgubit će svoju referencu."
     },
     "documentation": {},
     "code": {
@@ -2323,6 +2325,10 @@
       },
       "extractedTitle": "Datoteke zapisane",
       "openOutput": "Otvori izlaznu mapu",
+      "copySource": "Kopiraj izvor",
+      "copied": "Kopirano!",
+      "openSourceUrl": "Otvori URL predloška",
+      "openSourceFolder": "Otvori mapu predloška",
       "refresh": "Osvježi ovaj predložak iz njegovog izvora",
       "removeConfirm": "Template „{{name}}“ bit će uklonjen iz ovog dizajna (već generirane datoteke na disku ostaju netaknute).",
       "removeTitle": "Ukloniti ovaj Template?",
@@ -2513,7 +2519,8 @@
     "routes": {
       "addGroup": "Dodaj grupu",
       "addRoute": "Dodaj rutu",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NovaGrupa",
+      "newRouteName": "NovaRuta",
       "selectPrompt": "Odaberite grupu ili rutu, ili izradite grupu.",
       "deleteGroupTitle": "Izbrisati {{name}}?",
       "deleteGroupImpact": "Grupa i njezinih {{count}} ruta bit će izbrisani.",
@@ -2665,6 +2672,21 @@
     "projections": {
       "title": "Projekcije",
       "hint": "Ista operacija, onako kako je izlaže svaki posluženi protokol."
+    },
+    "listing": {
+      "models": {
+        "empty": "Stvorite svoj prvi model"
+      },
+      "enums": {
+        "empty": "Stvorite svoj prvi enum"
+      },
+      "routes": {
+        "empty": "Stvorite svoju prvu rutu"
+      },
+      "tabs": {
+        "list": "Popis",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {

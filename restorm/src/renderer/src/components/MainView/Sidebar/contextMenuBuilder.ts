@@ -5,7 +5,7 @@
 import React from 'react'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { RegistryBadge } from '../../common/RegistryBadge'
-import { parseDesignSectionRowId } from '../../../../../shared/design/designSections'
+import { parseDesignSectionRowId, parseDesignEntityRowId } from '../../../../../shared/design/designSections'
 
 export interface SidebarContextMenuItem {
   id: string
@@ -443,6 +443,13 @@ export const buildContextMenuForItem = (
   // A design's virtual section rows carry no menu of their own: every
   // action (favourite, clone, delete…) belongs to the design node.
   if (parseDesignSectionRowId(itemId) !== null) {
+    return []
+  }
+
+  // A design's model/enum/route(-group) node carries its OWN menu, attached on
+  // the ListViewItemData in `designSidebarNodes`. Returning [] here keeps
+  // `attachContextMenus` from clobbering it with the generic item menu.
+  if (parseDesignEntityRowId(itemId) !== null) {
     return []
   }
 

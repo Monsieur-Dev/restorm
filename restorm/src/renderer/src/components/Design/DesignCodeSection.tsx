@@ -117,6 +117,32 @@ export const DesignCodeSection: React.FC<{
     []
   )
 
+  // The plain, actionable target for a source: the local path, or the bare repo
+  // URL WITHOUT the display-only ` @ ref` suffix (so it copies/opens cleanly).
+  const sourceTarget = useCallback((source: DesignTemplateSource): string => {
+    if (source.kind === 'local') return source.path
+    return /^https?:\/\//.test(source.repo) ? source.repo : `https://github.com/${source.repo}`
+  }, [])
+
+  const [copiedSourceId, setCopiedSourceId] = useState<string | null>(null)
+  const copySource = useCallback((tpl: DesignCodegenTemplate): void => {
+    void navigator.clipboard.writeText(sourceTarget(tpl.source)).then(() => {
+      setCopiedSourceId(tpl.id)
+      setTimeout(() => { setCopiedSourceId((cur) => (cur === tpl.id ? null : cur)) }, 1200)
+    })
+  }, [sourceTarget])
+
+  // Open the template where it lives: a remote repo opens in the browser (routed
+  // to the OS via the window-open handler), a local template reveals its folder
+  // in the native file manager.
+  const openSource = useCallback((source: DesignTemplateSource): void => {
+    if (source.kind === 'local') {
+      void window.restorm?.file.revealInFolder(source.path)
+      return
+    }
+    window.open(sourceTarget(source), '_blank', 'noopener,noreferrer')
+  }, [sourceTarget])
+
   const addTemplate = useCallback(
     (source: DesignTemplateSource, label: string) => {
       persistTemplates([...templates, { id: generateUniqueId(), source, label }])
@@ -294,9 +320,31 @@ export const DesignCodeSection: React.FC<{
                   </HeaderHoverTooltip>
                 </div>
                 <div className="design-code-template-fields">
-                  <div className="design-code-field-row">
+                  <div className="design-code-field-row design-code-source-row">
                     <span className="design-code-field-label">{t('design.code.source', 'Source')}</span>
                     <span className="design-code-source-value" title={sourceUrl(tpl.source)}>{sourceUrl(tpl.source)}</span>
+                    <div className="design-code-source-actions">
+                      <HeaderHoverTooltip label={copiedSourceId === tpl.id ? t('design.code.copied', 'Copied!') : t('design.code.copySource', 'Copy the source')}>
+                        <Button
+                          secondary
+                          small
+                          icon={copiedSourceId === tpl.id ? 'check' : 'copy'}
+                          onClick={() => { copySource(tpl) }}
+                          options={{ ariaLabel: t('design.code.copySource', 'Copy the source') }}
+                          data-testid={`design-code-copy-source-${tpl.id}`}
+                        />
+                      </HeaderHoverTooltip>
+                      <HeaderHoverTooltip label={tpl.source.kind === 'local' ? t('design.code.openSourceFolder', 'Open the template folder') : t('design.code.openSourceUrl', 'Open the template URL')}>
+                        <Button
+                          secondary
+                          small
+                          icon="link-external"
+                          onClick={() => { openSource(tpl.source) }}
+                          options={{ ariaLabel: tpl.source.kind === 'local' ? t('design.code.openSourceFolder', 'Open the template folder') : t('design.code.openSourceUrl', 'Open the template URL') }}
+                          data-testid={`design-code-open-source-${tpl.id}`}
+                        />
+                      </HeaderHoverTooltip>
+                    </div>
                   </div>
                   <div className="design-code-field-row">
                     <span className="design-code-field-label">{t('design.code.destination', 'Destination')}</span>

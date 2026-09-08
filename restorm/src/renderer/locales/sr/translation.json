@@ -2238,7 +2238,7 @@
       "deleteImpactChild": "{{name}} gubi nasleđivanje (sopstvena svojstva ostaju)",
       "description": "Opis",
       "descriptionPlaceholder": "Šta ovaj model predstavlja (opciono)",
-      "newName": "NewModel",
+      "newName": "NoviModel",
       "selectPrompt": "Izaberite model ili ga napravite.",
       "tabs": {
         "schema": "Šema",
@@ -2258,11 +2258,13 @@
       "addEnum": "Dodaj enum",
       "addValue": "Dodaj vrednost",
       "valueHeader": "Vrednost",
-      "newName": "NewEnum",
+      "newName": "NoviEnum",
       "selectPrompt": "Izaberite enum ili ga napravite — zatvoren skup vrednosti upotrebljiv kao tip svojstva.",
       "nameHeader": "Naziv",
       "description": "Opis",
-      "descriptionPlaceholder": "Šta ovaj enum predstavlja (opciono)"
+      "descriptionPlaceholder": "Šta ovaj enum predstavlja (opciono)",
+      "deleteTitle": "Obrisati {{name}}?",
+      "deleteImpact": "Svako svojstvo ili parametar koji je koristio ovaj enum izgubiće svoju referencu."
     },
     "documentation": {},
     "code": {
@@ -2323,6 +2325,10 @@
       },
       "extractedTitle": "Datoteke zapisane",
       "openOutput": "Otvori izlaznu fasciklu",
+      "copySource": "Kopiraj izvor",
+      "copied": "Kopirano!",
+      "openSourceUrl": "Otvori URL šablona",
+      "openSourceFolder": "Otvori fasciklu šablona",
       "refresh": "Osveži ovaj šablon iz njegovog izvora",
       "removeConfirm": "Template „{{name}}“ biće uklonjen iz ovog dizajna (već generisani fajlovi na disku ostaju netaknuti).",
       "removeTitle": "Ukloniti ovaj Template?",
@@ -2513,7 +2519,8 @@
     "routes": {
       "addGroup": "Dodaj grupu",
       "addRoute": "Dodaj rutu",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NovaGrupa",
+      "newRouteName": "NovaRuta",
       "selectPrompt": "Izaberite grupu ili rutu, ili napravite grupu.",
       "deleteGroupTitle": "Obrisati {{name}}?",
       "deleteGroupImpact": "Grupa i njenih {{count}} ruta biće obrisani.",
@@ -2665,6 +2672,21 @@
     "projections": {
       "title": "Projekcije",
       "hint": "Ista operacija, onako kako je izlaže svaki posluženi protokol."
+    },
+    "listing": {
+      "models": {
+        "empty": "Napravite svoj prvi model"
+      },
+      "enums": {
+        "empty": "Napravite svoj prvi enum"
+      },
+      "routes": {
+        "empty": "Napravite svoju prvu rutu"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {

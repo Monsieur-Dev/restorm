@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} elveszíti az öröklését (saját tulajdonságai megmaradnak)",
       "description": "Leírás",
       "descriptionPlaceholder": "Mit képvisel ez a modell (opcionális)",
-      "newName": "NewModel",
+      "newName": "ÚjModell",
       "selectPrompt": "Válasszon egy modellt, vagy hozzon létre egyet.",
       "tabs": {
         "schema": "Séma",
@@ -2257,11 +2257,13 @@
       "addEnum": "Enum hozzáadása",
       "addValue": "Érték hozzáadása",
       "valueHeader": "Érték",
-      "newName": "NewEnum",
+      "newName": "ÚjEnum",
       "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható.",
       "nameHeader": "Név",
       "description": "Leírás",
-      "descriptionPlaceholder": "Mit képvisel ez az enum (opcionális)"
+      "descriptionPlaceholder": "Mit képvisel ez az enum (opcionális)",
+      "deleteTitle": "Törli: {{name}}?",
+      "deleteImpact": "Minden tulajdonság vagy paraméter, amely ezt a felsorolást használta, elveszíti a hivatkozását."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Fájlok kiírva",
       "openOutput": "Kimeneti mappa megnyitása",
+      "copySource": "Forrás másolása",
+      "copied": "Másolva!",
+      "openSourceUrl": "Sablon URL megnyitása",
+      "openSourceFolder": "Sablonmappa megnyitása",
       "refresh": "A sablon frissítése a forrásából",
       "removeConfirm": "A(z) „{{name}}“ Template eltávolításra kerül erről a tervről (a lemezen már legenerált fájlok érintetlenül maradnak).",
       "removeTitle": "Eltávolítja ezt a Template-et?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Csoport hozzáadása",
       "addRoute": "Útvonal hozzáadása",
-      "newGroupName": "NewGroup",
+      "newGroupName": "ÚjCsoport",
+      "newRouteName": "ÚjÚtvonal",
       "selectPrompt": "Válasszon egy csoportot vagy útvonalat, vagy hozzon létre egy csoportot.",
       "deleteGroupTitle": "Törli: {{name}}?",
       "deleteGroupImpact": "A csoport és {{count}} útvonala törlődik.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projekciók",
       "hint": "Ugyanaz a művelet, ahogyan azt minden kiszolgált protokoll közzéteszi."
+    },
+    "listing": {
+      "models": {
+        "empty": "Hozza létre első modelljét"
+      },
+      "enums": {
+        "empty": "Hozza létre első enumját"
+      },
+      "routes": {
+        "empty": "Hozza létre első útvonalát"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Gráf"
+      }
     }
   },
   "mqtt": {

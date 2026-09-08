@@ -3,7 +3,8 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_MODELS_TEMP_DIR } from '../../fixtures/design-models.fixture'
-import { openDesignSection } from '../../../support/designNav'
+import { openDesignSection, addDesignEntity, openDesignEntity, deleteDesignEntityNode, designEntityNode, clickDesignMenuItem } from '../../../support/designNav'
+import { designEntityTitle } from '../../../support/designGuiDriver'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -79,28 +80,45 @@ Given('a Pro project carrying an API design is open in the models editor', async
 
 When('I add a model', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-models-add"]').click()
+  await addDesignEntity(p, DESIGN_ID, 'models', /Add a model/)
   await expect(p.locator('[data-testid="design-model-tabs"]')).toBeVisible({ timeout: 5000 })
 })
 
 When('I open the model {string}', async ({}, name: string) => {
   const p = requirePage()
-  await p.locator('[data-testid="design-models-listview"] .list-view-row')
-    .filter({ has: p.getByText(name, { exact: true }) }).first().click()
+  await openDesignEntity(p, DESIGN_ID, 'models', name)
   await expect(p.locator('[data-testid="design-model-tabs"]')).toBeVisible({ timeout: 5000 })
-  await p.waitForTimeout(300)
 })
 
 Then('the models list does not offer {string}', async ({}, name: string) => {
   const p = requirePage()
   await expect(
-    p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ has: p.getByText(name, { exact: true }) })
+    p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id^="design-entity:${DESIGN_ID}:models:"]`)
+      .filter({ has: p.getByText(name, { exact: true }) })
   ).toHaveCount(0, { timeout: 5000 })
+})
+
+// Add a second model to the sidebar multi-selection (Ctrl-click, like the
+// real gesture — the earlier `open the model` step left the first one selected).
+When('I also select the model {string} in the sidebar', async ({}, name: string) => {
+  const p = requirePage()
+  await designEntityNode(p, DESIGN_ID, 'models', name).click({ modifiers: ['Control'] })
+})
+
+// Delete the whole multi-selection: right-click a selected node (its selection
+// menu offers only Delete for design entities), then confirm the batch dialog.
+When('I delete the selected models', async () => {
+  const p = requirePage()
+  await designEntityNode(p, DESIGN_ID, 'models', 'User').click({ button: 'right' })
+  await clickDesignMenuItem(p, /Delete|Supprimer/)
+  await expect(p.locator('[data-testid="delete-confirmation-modal"]')).toBeVisible({ timeout: 5000 })
+  await p.locator('[data-testid="delete-confirmation-confirm-button"]').click()
+  await p.waitForTimeout(500)
 })
 
 Then('the model card shows {string}', async ({}, name: string) => {
   const p = requirePage()
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(name, { timeout: 5000 })
+  await expect(designEntityTitle(p)).toContainText(name, { timeout: 5000 })
 })
 
 // ── Schema tab: properties ────────────────────────────────────────────
@@ -241,8 +259,7 @@ When('I click the jump on the inherited row {string}', async ({}, name: string) 
 
 When('I open the model {string} settings tab', async ({}, name: string) => {
   const p = requirePage()
-  await p.locator('[data-testid="design-models-listview"] .list-view-row')
-    .filter({ has: p.getByText(name, { exact: true }) }).first().click()
+  await openDesignEntity(p, DESIGN_ID, 'models', name)
   await expect(p.locator('[data-testid="design-model-tabs"]')).toBeVisible({ timeout: 5000 })
   await p.locator('[data-testid="design-model-tabs"] [role="tab"][data-tab-id="settings"]').click()
   await expect(p.locator(`[data-testid^="design-model-settings-"]`)).toBeVisible({ timeout: 5000 })
@@ -301,7 +318,10 @@ Then('the selected property panel reports a duplicate-name issue', async () => {
 
 When('I ask to delete the model', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-model-delete"]').click()
+  // The trash moved to the sidebar node's context menu — delete the currently
+  // open model (its name is the H1 title) from there; the confirm modal is the same.
+  const name = (await designEntityTitle(p).innerText()).trim()
+  await deleteDesignEntityNode(p, DESIGN_ID, 'models', name)
   await expect(p.locator('[data-testid="design-model-delete-modal"]')).toBeVisible({ timeout: 5000 })
 })
 
@@ -336,11 +356,11 @@ When('I open the models section', async () => {
 
 When('I add an enum', async () => {
   const p = requirePage()
-  await p.locator('[data-testid="design-enums-add-list-button"]').click()
+  // Added through the Enums sidebar row's context menu; the new enum is created
+  // with a default name and selected — its values table (add-entry) opens.
+  await addDesignEntity(p, DESIGN_ID, 'enums', /Add an enum/)
+  await expect(p.locator('[data-testid="design-enums-add-entry-button"]')).toBeVisible({ timeout: 5000 })
   await p.waitForTimeout(300)
-  // The fresh list opens in rename mode — commit the default name.
-  await p.keyboard.press('Enter')
-  await p.waitForTimeout(500)
 })
 
 When('I add the enum value {string}', async ({}, value: string) => {
@@ -360,8 +380,7 @@ When('I add the enum value {string}', async ({}, value: string) => {
 
 When('I open the model {string} examples tab', async ({}, name: string) => {
   const p = requirePage()
-  await p.locator('[data-testid="design-models-listview"] .list-view-row')
-    .filter({ has: p.getByText(name, { exact: true }) }).first().click()
+  await openDesignEntity(p, DESIGN_ID, 'models', name)
   await expect(p.locator('[data-testid="design-model-tabs"]')).toBeVisible({ timeout: 5000 })
   await p.locator('[data-testid="design-model-tabs"] [role="tab"][data-tab-id="examples"]').click()
   await expect(p.locator('[data-testid="design-example-pills"]')).toBeVisible({ timeout: 5000 })

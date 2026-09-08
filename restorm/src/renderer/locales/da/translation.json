@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} mister sin arv (egne egenskaber bevares)",
       "description": "Beskrivelse",
       "descriptionPlaceholder": "Hvad denne model repræsenterer (valgfrit)",
-      "newName": "NewModel",
+      "newName": "NytModel",
       "selectPrompt": "Vælg en model, eller opret en.",
       "tabs": {
         "schema": "Skema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Tilføj en enum",
       "addValue": "Tilføj en værdi",
       "valueHeader": "Værdi",
-      "newName": "NewEnum",
+      "newName": "NytEnum",
       "selectPrompt": "Vælg en enum, eller opret en — et lukket sæt værdier, der kan bruges som egenskabstype.",
       "nameHeader": "Navn",
       "description": "Beskrivelse",
-      "descriptionPlaceholder": "Hvad denne enum repræsenterer (valgfrit)"
+      "descriptionPlaceholder": "Hvad denne enum repræsenterer (valgfrit)",
+      "deleteTitle": "Slet {{name}}?",
+      "deleteImpact": "Enhver egenskab eller parameter, der brugte denne enum, mister sin reference."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Filer skrevet",
       "openOutput": "Åbn outputmappen",
+      "copySource": "Kopiér kilden",
+      "copied": "Kopieret!",
+      "openSourceUrl": "Åbn skabelonens URL",
+      "openSourceFolder": "Åbn skabelonmappen",
       "refresh": "Opdater denne skabelon fra dens kilde",
       "removeConfirm": "Template “{{name}}” fjernes fra dette design (allerede genererede filer på disken forbliver urørte).",
       "removeTitle": "Fjern dette Template?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Tilføj en gruppe",
       "addRoute": "Tilføj en rute",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NyGruppe",
+      "newRouteName": "NyRute",
       "selectPrompt": "Vælg en gruppe eller en rute, eller opret en gruppe.",
       "deleteGroupTitle": "Slet {{name}}?",
       "deleteGroupImpact": "Gruppen og dens {{count}} ruter slettes.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projektioner",
       "hint": "Den samme operation, som hvert serveret protokol eksponerer den."
+    },
+    "listing": {
+      "models": {
+        "empty": "Opret din første model"
+      },
+      "enums": {
+        "empty": "Opret din første enum"
+      },
+      "routes": {
+        "empty": "Opret din første rute"
+      },
+      "tabs": {
+        "list": "Liste",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {

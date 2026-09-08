@@ -163,7 +163,9 @@ export interface CodegenParam {
   /** Scalar/array label (`string`, `array<string>`, …). Absent when the param
    * references a named enum (see `enum`) or inherits a linked property's type. */
   type?: string
-  required?: boolean
+  /** Always present (a real boolean) so StrictUndefined templates can read it
+   * directly; `false` for a param that isn't required. */
+  required: boolean
   description?: string
   /** Referenced enum NAME (a named enum entity). */
   enum?: string
@@ -243,7 +245,11 @@ function projectProperty(design: ApiDesign, property: DesignModel['properties'][
   const out: CodegenProperty = {
     name: doc.name,
     type: doc.type,
-    required: doc.required
+    // Always a real boolean: a design persisted before `required` existed can
+    // carry `undefined` at runtime, which JSON.stringify would drop into Pyodide
+    // — a StrictUndefined template (`prop.required`) would then crash. Coerce
+    // through an optional view so the fallback survives the round-trip.
+    required: (doc.required as boolean | undefined) ?? false
   }
   if (doc.format !== undefined) out.format = doc.format
   if (doc.readOnly === true) out.readOnly = true
@@ -404,7 +410,9 @@ function projectParam(
   meta: DesignRoute['design'],
   param: ParameterDocumentation
 ): CodegenParam {
-  const out: CodegenParam = { name: param.name, in: normalizeParamIn(param.location) }
+  // `required` is always present (a real boolean) so StrictUndefined templates
+  // can read `param.required` on any param, required or not.
+  const out: CodegenParam = { name: param.name, in: normalizeParamIn(param.location), required: (param.required as boolean | undefined) ?? false }
   const enumId = meta?.paramEnumRefs?.[param.name]
   const refName = enumId !== undefined ? enumName(design, enumId) : undefined
   const link = meta?.paramLinks?.[param.name]
@@ -424,7 +432,6 @@ function projectParam(
       out.enumValues = param.enumValues.map((v) => (typeof v === 'number' ? v : String(v)))
     }
   }
-  if (param.required) out.required = true
   if (param.description !== undefined) out.description = param.description
   if (param.deprecated === true) out.deprecated = true
   return out

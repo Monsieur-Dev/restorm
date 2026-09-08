@@ -413,7 +413,8 @@
             "type": "object",
             "required": [
               "name",
-              "in"
+              "in",
+              "required"
             ],
             "properties": {
               "name": {
@@ -432,7 +433,8 @@
                 "description": "Scalar/array label (`string`, `array<string>`, …). Absent when the param references a named enum or a linked property."
               },
               "required": {
-                "const": true
+                "type": "boolean",
+                "description": "Always present; `false` when the parameter isn't required."
               },
               "description": {
                 "type": "string"

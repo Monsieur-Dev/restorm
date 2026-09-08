@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**Az API-tervezőt mostantól az oldalsávból lehet vezérelni.**
+
+- **A modelljeid, enumjaid és útvonalaid az oldalsávban élnek.** A füleken lévő három lista eltűnik — a modellek (öröklődés szerinti beágyazásukkal), az enumok és az útvonalak (csoportok és útvonalaik) mostantól közvetlenül az oldalsáv fájában találhatók. Jobb kattintással átnevezhetsz, hozzáadhatsz almodellt vagy alcsoportot, klónozhatsz útvonalat, CRUD-ot generálhatsz vagy törölhetsz; húzással átrendezhetsz vagy új szülőt adhatsz — soha nem a terven kívülre. Minden oldal mostantól csak a kiválasztott elem részleteit mutatja.
+- **Áttekintés a modellekről, enumokról és útvonalakról.** Minden szakasz gyökércsomópontja most felsorolja a tartalmát — és a Modellek egy **Gráf** fület kapnak: a modellek osztálydiagramját öröklődéssel és hivatkozásokkal. Az enumok az értékeiket a név mellett mutatják.
+- **Egyetlen hely az átnevezéshez.** Egy modellt, enumot vagy útvonalat a nagy címéből (a ceruza) nevezhetsz át, üres név esetén pedig **„<névtelen>”** jelenik meg, hogy a ceruza mindig elérhető legyen — a név többé nem jelenik meg kétszer az oldalon.
+- **A validációs hibák az elemre mutatnak.** Ha valami nem stimmel — egy modell és egy enum azonos névvel, egy már nem létező elemre mutató hivatkozás —, a modell, enum vagy útvonal tetején lévő jegyzet elmagyarázza.
+- **Teljes morzsamenü.** Az útvonal az oldalsáv teljes hierarchiáját tükrözi — mappák › terv › szakasz › csoport › elem —, és minden szegmens kattintható.
+- **Jelölj ki többet, törölj egyszerre.** Jelölj ki több modellt, enumot vagy útvonalat, és töröld őket egyszerre, megerősítés után.
+- **Másold vagy nyisd meg egy kódsablon forrását egy kattintással.** A „</> Code” oldalon egy sablon fölé húzva megjelenik egy gomb az URL vagy az elérési út másolásához és egy a megnyitásához — a tároló a böngésződben, vagy a mappa a lemezen egy helyi sablon esetén.
+- **Az új útvonalak névvel indulnak.** A nulláról létrehozott útvonal mostantól alapértelmezett nevet kap, így azonnal átnevezheted.
+
+Javítások:
+
+- **Egy kódsablon kiválasztása bezárja a könyvtárat.** A „Használat” mostantól egyenesen visszavisz a Code oldalra.
+- **A dokumentációgenerálás már nem hibázik az opcionális mezőknél.** Egy olyan tervből való dokumentációgenerálás, amelynek modellje vagy paramétere a „required” értéket beállítatlanul hagyta, már nem áll le sablonhibával.
+- **Egy enum törlése előbb rákérdez.** Az enumok ugyanazt a megerősítést kapják, mint a modellek és az útvonalak.
+- **Az oldalsáv felfedi a kijelölést.** Ha az „oldalsáv szinkronizálása az aktív lappal” be van kapcsolva, egy modell, enum vagy útvonal kijelölése vagy létrehozása kibontja a szülőit, hogy látható maradjon a fában.
+
 ## v1.1.0
 
 🎉 **A Restorm mostantól API-tervező is.** Tervezze meg az API-ját, szolgálja ki élő mockként egyszerre öt protokollon, és generálja a klienseit — anélkül, hogy elhagyná az alkalmazást, mindezt a saját lemezén.

@@ -1,19 +1,13 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { PendingEntityAction } from '../../services/designSectionIntent'
 import {
   Button,
-  EditableLabel,
   InputBox,
-  ListView,
   MarkdownEditor,
   Modal,
-  ScrollableElement,
-  StaticPane,
   Tabs,
-  Toggle,
-  usePersistedState,
-  type ListViewDropPosition,
-  type ListViewItemData
+  Toggle
 } from 'electron-core-ui/renderer'
 import type { ApiDesign, DesignModel, DesignRouteGroup } from '../../../../shared/types/collections'
 import type { DesignIssue } from '../../../../shared/design/validateApiDesign'
@@ -26,7 +20,9 @@ import { ModelSchemaTab } from './ModelSchemaTab'
 import { ModelExamplesTab } from './ModelExamplesTab'
 import { ModelSettingsTab } from './ModelSettingsTab'
 import { DesignModelCodegenTab } from './DesignModelCodegenTab'
-import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { DesignModelsListing } from './DesignModelsListing'
+import { DesignIssuesCallout } from './DesignIssuesCallout'
+import type { DesignEntityActionHandler } from '../../services/designSidebarNodes'
 
 export interface DesignModelsSectionProps {
   design: ApiDesign
@@ -34,6 +30,8 @@ export interface DesignModelsSectionProps {
   selectedModelId: string | null
   onSelectModel: (modelId: string | null) => void
   onJumpTo: (section: 'models' | 'routes', entityId: string) => void
+  /** A one-shot action fired from a sidebar model node's context menu. */
+  pendingAction?: PendingEntityAction | null
 }
 
 /**
@@ -43,28 +41,18 @@ export interface DesignModelsSectionProps {
  * first shows the impact (usages + inheritance children) and only
  * then strips it from the whole design.
  */
-export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design, issues, selectedModelId, onSelectModel, onJumpTo }) => {
+export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design, issues, selectedModelId, onSelectModel, onJumpTo, pendingAction }) => {
   const { t } = useTranslation()
-  const [filter, setFilter] = useState('')
   const [pendingDelete, setPendingDelete] = useState<DesignModel | null>(null)
   // The model whose CRUD generation is being configured (replace existing?
   // gate writes behind auth?) — null when the modal is closed.
   const [crudModel, setCrudModel] = useState<DesignModel | null>(null)
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null)
-  // Which list row is in inline-rename mode (F2, the row menu, or straight
-  // after creation) — mirrors the custom-enum-list editor.
-  const [editingId, setEditingId] = useState<string | null>(null)
-  // Track only EXPLICITLY collapsed nodes, so the tree is fully expanded by
-  // default. Persisted per design (user setting, NOT the .restorm file) so the
-  // fold state survives tab switches AND file reopen.
-  const [collapsedList, setCollapsedList] = usePersistedState<string[]>(`design-models-collapsed:${design.id}`, [])
-  const collapsedIds = useMemo(() => new Set(collapsedList), [collapsedList])
 
   const selected = design.models.find((m) => m.id === selectedModelId) ?? null
 
   // Create a model; when `inheritsFrom` is given it becomes a sub-model of that
-  // parent (the parent is expanded so the new child shows), and either way we
-  // drop straight into inline name editing like the custom-enum lists.
+  // parent. Selection follows the new model so its card opens immediately.
   const createModel = useCallback((inheritsFrom?: string): void => {
     const fresh: DesignModel = {
       id: generateUniqueId(),
@@ -73,141 +61,44 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
       ...(inheritsFrom !== undefined ? { design: { inheritsFrom } } : {})
     }
     assignDesignSection(design, 'models', [...design.models, fresh])
-    if (inheritsFrom !== undefined) setCollapsedList((prev) => prev.filter((id) => id !== inheritsFrom))
     onSelectModel(fresh.id)
     setSelectedPropertyId(null)
-    setEditingId(fresh.id)
-  }, [design, t, setCollapsedList, onSelectModel])
-  const addModel = (): void => { createModel() }
+  }, [design, t, onSelectModel])
 
-  const renameModel = (id: string, name: string): void => {
-    const trimmed = name.trim()
-    if (trimmed === '') return
-    const m = design.models.find((x) => x.id === id)
-    if (m) patchModel(design, id, { doc: { ...m.doc, name: trimmed } })
+  // Run a one-shot action asked by a sidebar model node's context menu, once per
+  // nonce (survives a remount): add / add-sub-model / generate-CRUD / delete —
+  // delegating to the SAME handlers the section already owns (so the CRUD config
+  // modal and the delete-impact modal are preserved).
+  const lastActionNonce = useRef(0)
+  useEffect(() => {
+    if (!pendingAction || pendingAction.nonce === lastActionNonce.current) return
+    lastActionNonce.current = pendingAction.nonce
+    const { action, entityId } = pendingAction
+    // Run the one-shot on a microtask so the state changes (open a modal, create
+    // a model) don't fire synchronously inside the effect that observed them.
+    queueMicrotask(() => {
+      if (action === 'add') { createModel(); return }
+      if (action === 'addSubModel' && entityId !== undefined) { createModel(entityId); return }
+      const target = entityId !== undefined ? design.models.find((m) => m.id === entityId) ?? null : null
+      if (action === 'generateCrud' && target !== null) setCrudModel(target)
+      else if (action === 'delete' && target !== null) setPendingDelete(target)
+    })
+  }, [pendingAction, createModel, design.models])
+
+  // The section-root listing reuses the section's own add / CRUD / delete
+  // handlers (the sidebar node menus route the same actions here via the intent
+  // bus; the listing is inside this component, so it calls them directly).
+  const listingAction: DesignEntityActionHandler = (_d, _s, action, entityId) => {
+    if (action === 'add') createModel()
+    else if (action === 'addSubModel' && entityId !== undefined) createModel(entityId)
+    else if (action === 'generateCrud' && entityId !== undefined) {
+      const m = design.models.find((x) => x.id === entityId)
+      if (m !== undefined) setCrudModel(m)
+    } else if (action === 'delete' && entityId !== undefined) {
+      const m = design.models.find((x) => x.id === entityId)
+      if (m !== undefined) setPendingDelete(m)
+    }
   }
-
-  // ── Hierarchy: children-by-parent + roots, derived from inheritsFrom ──
-  const { childMap, roots } = useMemo(() => {
-    const map = new Map<string, DesignModel[]>()
-    const ids = new Set(design.models.map((m) => m.id))
-    const rootList: DesignModel[] = []
-    for (const m of design.models) {
-      const parent = m.design?.inheritsFrom
-      if (parent !== undefined && ids.has(parent)) {
-        const arr = map.get(parent) ?? []
-        arr.push(m)
-        map.set(parent, arr)
-      } else rootList.push(m)
-    }
-    return { childMap: map, roots: rootList }
-  }, [design.models])
-
-  // Every id in the subtree rooted at `rootId` (itself + all descendants): the
-  // set a model may NEVER inherit from, or a cycle forms.
-  const subtreeIds = useCallback((rootId: string): Set<string> => {
-    const out = new Set<string>([rootId])
-    const stack = [rootId]
-    while (stack.length > 0) {
-      const id = stack.pop()
-      if (id === undefined) break
-      for (const child of childMap.get(id) ?? []) {
-        if (!out.has(child.id)) { out.add(child.id); stack.push(child.id) }
-      }
-    }
-    return out
-  }, [childMap])
-
-  const buildRow = useCallback((m: DesignModel, children: ListViewItemData[]): ListViewItemData => ({
-    id: m.id,
-    title: m.doc.name === '' ? t('design.schema.unnamed', '(unnamed)') : m.doc.name,
-    // The CRUD generator is reachable from BOTH the model card (Settings tab)
-    // and this row menu; "Add a sub-model" creates a child with the inheritance.
-    contextMenuItems: [{
-      id: 'rename',
-      label: t('sidebar.contextMenu.rename'),
-      icon: 'edit',
-      onClick: () => { setEditingId(m.id) }
-    }, {
-      id: 'add-sub-model',
-      label: t('design.models.addSubModel', 'Add a sub-model'),
-      icon: 'add',
-      onClick: () => { createModel(m.id) }
-    }, {
-      id: 'generate-crud',
-      label: t('design.modelSettings.generateCrud', 'Generate the CRUD'),
-      icon: 'type-hierarchy-sub',
-      onClick: () => { setCrudModel(m) }
-    }, {
-      id: 'delete',
-      label: t('design.models.delete', 'Delete the model'),
-      icon: 'trash',
-      onClick: () => { setPendingDelete(m) }
-    }],
-    ...(children.length > 0 ? { children, isExpandable: true, isExpanded: !collapsedIds.has(m.id) } : {}),
-    rightActions: (
-      <span className="design-list-detail">
-        {issues.some((issue) => issue.path.includes(m.id)) && <span className="design-list-error-dot codicon codicon-error" data-testid={`design-model-error-${m.id}`} />}
-        {t('design.models.propertyCount', '{{count}} props', { count: m.properties.length })}
-      </span>
-    )
-  }), [t, issues, collapsedIds, createModel])
-
-  const rows: ListViewItemData[] = useMemo(() => {
-    const term = filter.trim().toLowerCase()
-    if (term !== '') {
-      // While searching, flatten to matching models — no hierarchy.
-      return design.models.filter((m) => m.doc.name.toLowerCase().includes(term)).map((m) => buildRow(m, []))
-    }
-    const build = (m: DesignModel, visited: Set<string>): ListViewItemData => {
-      if (visited.has(m.id)) return buildRow(m, []) // defensive: never recurse a cycle
-      const next = new Set(visited).add(m.id)
-      return buildRow(m, (childMap.get(m.id) ?? []).map((c) => build(c, next)))
-    }
-    return roots.map((m) => build(m, new Set()))
-  }, [design.models, filter, buildRow, childMap, roots])
-
-  // Drag a model onto another to change its inheritance ("into"), or between
-  // siblings to reorder + adopt the target's parent. A model can never inherit
-  // from itself or one of its descendants (cycle) — refused live in canDrop.
-  const canDropModel = useCallback((draggedId: string, targetId: string, position: ListViewDropPosition): boolean => {
-    if (draggedId === targetId) return false
-    const target = design.models.find((m) => m.id === targetId)
-    if (!target) return false
-    const newParent = position === 'into' ? targetId : target.design?.inheritsFrom
-    if (newParent === undefined) return true
-    return !subtreeIds(draggedId).has(newParent)
-  }, [design.models, subtreeIds])
-
-  const moveModel = useCallback((draggedId: string, targetId: string, position: ListViewDropPosition): void => {
-    if (!canDropModel(draggedId, targetId, position)) return
-    const dragged = design.models.find((m) => m.id === draggedId)
-    const target = design.models.find((m) => m.id === targetId)
-    if (!dragged || !target) return
-    const newParent = position === 'into' ? targetId : target.design?.inheritsFrom
-    const nextDesign = { ...(dragged.design ?? {}) }
-    if (newParent === undefined) delete nextDesign.inheritsFrom
-    else nextDesign.inheritsFrom = newParent
-    const updated: DesignModel = Object.keys(nextDesign).length > 0
-      ? { ...dragged, design: nextDesign }
-      : (() => { const { design: _dropped, ...rest } = dragged; return rest as DesignModel })()
-    const without = design.models.filter((m) => m.id !== draggedId)
-    const targetIdx = without.findIndex((m) => m.id === targetId)
-    const insertIdx = position === 'before' ? targetIdx : targetIdx + 1
-    without.splice(insertIdx, 0, updated)
-    if (position === 'into') setCollapsedList((prev) => prev.filter((id) => id !== targetId))
-    assignDesignSection(design, 'models', without)
-  }, [design, canDropModel, setCollapsedList])
-
-  // Controlled expanded set for the ListView = every model NOT explicitly
-  // collapsed (default: all expanded). Expand-all clears the collapsed set;
-  // collapse-all collapses every model that has children.
-  const expandedIdList = useMemo(
-    () => design.models.filter((m) => !collapsedIds.has(m.id)).map((m) => m.id),
-    [design.models, collapsedIds]
-  )
-  const expandAll = (): void => { setCollapsedList([]) }
-  const collapseAll = (): void => { setCollapsedList(Array.from(childMap.keys())) }
 
   const confirmDelete = (): void => {
     if (pendingDelete === null) return
@@ -227,109 +118,13 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
   }, [design, pendingDelete])
 
   return (
-    <div className="design-section design-entity-list-section" data-testid="design-models-section">
-      <StaticPane
-        className="design-entity-list"
-        data-testid="design-models-list"
-        title={t('design.section.models')}
-        headerActions={
+    <div className="design-section design-entity-detail-section" data-testid="design-models-section">
+      {selected === null ? (
+        <DesignModelsListing design={design} onSelect={(id) => { onSelectModel(id); setSelectedPropertyId(null) }} onAction={listingAction} />
+      ) : (
+        <div className="design-entity-detail design-model-card" data-testid="design-models-detail">
           <>
-            <HeaderHoverTooltip label={t('design.models.collapseAll', 'Collapse all')}>
-              <Button
-                secondary
-                small
-                icon="collapse-all"
-                options={{ ariaLabel: t('design.models.collapseAll', 'Collapse all') }}
-                onClick={collapseAll}
-                data-testid="design-models-collapse-all"
-              />
-            </HeaderHoverTooltip>
-            <HeaderHoverTooltip label={t('design.models.expandAll', 'Expand all')}>
-              <Button
-                secondary
-                small
-                icon="expand-all"
-                options={{ ariaLabel: t('design.models.expandAll', 'Expand all') }}
-                onClick={expandAll}
-                data-testid="design-models-expand-all"
-              />
-            </HeaderHoverTooltip>
-            <HeaderHoverTooltip label={t('design.models.add', 'Add a model')}>
-              <Button
-                secondary
-                small
-                icon="add"
-                options={{ ariaLabel: t('design.models.add', 'Add a model') }}
-                onClick={addModel}
-                data-testid="design-models-add"
-              />
-            </HeaderHoverTooltip>
-          </>
-        }
-      >
-        <InputBox
-          value={filter}
-          onChange={setFilter}
-          options={{ type: 'text', placeholder: t('design.list.filter', 'Filter…'), ariaLabel: t('design.list.filter', 'Filter…') }}
-          data-testid="design-models-filter"
-        />
-        <ScrollableElement className="design-entity-list-scroll">
-          <ListView
-            items={rows}
-            selectedIds={selectedModelId === null ? [] : [selectedModelId]}
-            expandOnChevronOnly
-            onItemClick={(payload) => { onSelectModel(payload.item.id); setSelectedPropertyId(null) }}
-            editingItemId={editingId}
-            onEditingStart={(id) => { setEditingId(id) }}
-            onEditingEnd={() => { setEditingId(null) }}
-            onItemRename={(payload, newValue) => { renameModel(payload.item.id, newValue) }}
-            expandedIds={expandedIdList}
-            onItemToggle={(payload, expanded) => {
-              setCollapsedList((prev) => expanded
-                ? prev.filter((id) => id !== payload.item.id)
-                : (prev.includes(payload.item.id) ? prev : [...prev, payload.item.id]))
-            }}
-            canDrop={(sources, target, position) => {
-              const draggedId = sources[0]?.item.id
-              return sources.length === 1 && draggedId !== undefined && canDropModel(draggedId, target.item.id, position)
-            }}
-            onItemDrop={(payload) => {
-              if (payload.sources.length === 1) moveModel(payload.source.id, payload.item.id, payload.position)
-            }}
-            data-testid="design-models-listview"
-          />
-        </ScrollableElement>
-      </StaticPane>
-
-      <div className="design-entity-detail design-model-card" data-testid="design-models-detail">
-        {selected === null ? (
-          <p className="design-section-placeholder-message">
-            {t('design.models.selectPrompt', 'Select a model, or create one.')}
-          </p>
-        ) : (
-          <>
-            <div className="design-model-card-header">
-              <EditableLabel
-                value={selected.doc.name}
-                onChange={(next) => { patchModel(design, selected.id, { doc: { ...selected.doc, name: next } }) }}
-                as="h2"
-                editable
-                placeholder={t('design.schema.unnamed', '(unnamed)')}
-                data-testid="design-model-name"
-              />
-              {(
-                <HeaderHoverTooltip label={t('design.models.delete', 'Delete the model')}>
-                  <Button
-                    secondary
-                    small
-                    icon="trash"
-                    options={{ ariaLabel: t('design.models.delete', 'Delete the model') }}
-                    onClick={() => { setPendingDelete(selected) }}
-                    data-testid="design-model-delete"
-                  />
-                </HeaderHoverTooltip>
-              )}
-            </div>
+            <DesignIssuesCallout issues={issues} entityId={selected.id} />
             <label className="design-field design-field-full design-model-description">
               <span className="design-field-label">{t('design.models.description', 'Description')}</span>
               <InputBox
@@ -400,8 +195,8 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
               ]}
             />
           </>
-        )}
-      </div>
+        </div>
+      )}
 
       {pendingDelete !== null && (
         <Modal

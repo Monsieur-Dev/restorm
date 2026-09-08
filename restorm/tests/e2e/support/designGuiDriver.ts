@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import { openDesignSection } from './designNav'
+import { openDesignSection, addDesignEntity, openDesignEntity, getOpenDesignId } from './designNav'
 
 /**
  * GUI driver for the API Designer — every helper drives the app the way a
@@ -170,7 +170,7 @@ export async function setServingProtocols(p: Page, designId: string, protocols: 
 export async function addModel(p: Page, designId: string): Promise<void> {
   await openDesignSection(p, designId, 'models')
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
-  await p.locator('[data-testid="design-models-add"]').click()
+  await addDesignEntity(p, designId, 'models', /Add a model/)
   await expect(p.locator('[data-testid="design-model-tabs"]')).toBeVisible({ timeout: 5000 })
   await p.waitForTimeout(200)
 }
@@ -195,9 +195,28 @@ export async function editLabel(p: Page, id: string, value: string): Promise<voi
   await p.waitForTimeout(250)
 }
 
-/** Rename the open model (schema tab header name is an EditableLabel). */
+/** The open design tab's editable H1 title — the single, canonical surface for a
+ * model / enum / route(-group) name (the per-card name field was removed; the
+ * name now lives only in the breadcrumb H1 and the sidebar node). */
+export function designEntityTitle(p: Page): ReturnType<Page['locator']> {
+  return p.locator('.restorm-workbench-tab-title.ecui-editable-label').first()
+}
+
+/** Rename the open model / enum / route by editing its H1 title in place. */
 export async function renameModel(p: Page, name: string): Promise<void> {
-  await editLabel(p, 'design-model-name', name)
+  const title = designEntityTitle(p)
+  await expect(title).toBeAttached({ timeout: 5000 })
+  // The EditableLabel trigger can be a zero-width box for an empty name (only a
+  // hover-revealed pencil), which Playwright treats as hidden — dispatch the
+  // click directly so entering edit mode doesn't depend on a clickable box.
+  const trigger = title.locator('button.ecui-editable-label-trigger')
+  if (await trigger.count() > 0) await trigger.dispatchEvent('click')
+  else await title.dispatchEvent('click')
+  const input = title.locator('input')
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.fill(name)
+  await input.press('Enter')
+  await p.waitForTimeout(250)
 }
 
 /** Add a property to the open model and name it; returns its generated id
@@ -235,10 +254,9 @@ export async function openRouteTab(p: Page, tabId: string): Promise<void> {
 
 /** Open a model in the models list by name (schema tab appears). */
 export async function openModel(p: Page, name: string): Promise<void> {
-  await p.locator('[data-testid="design-models-listview"] .list-view-row')
-    .filter({ has: p.getByText(name, { exact: true }) }).first().click()
+  const designId = await getOpenDesignId(p)
+  await openDesignEntity(p, designId, 'models', name)
   await expect(p.locator('[data-testid="design-model-tabs"]')).toBeVisible({ timeout: 5000 })
-  await p.waitForTimeout(200)
 }
 
 /** Select an existing property row by its name (cells share a testid). */

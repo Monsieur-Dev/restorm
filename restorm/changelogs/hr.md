@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**Dizajner API-ja sada se upravlja iz bočne trake.**
+
+- **Vaši modeli, enumi i rute žive u bočnoj traci.** Tri popisa u karticama nestaju — modeli (s ugniježđivanjem po nasljeđivanju), enumi i rute (grupe i njihove rute) sada su izravno u stablu bočne trake. Desnim klikom preimenujte, dodajte podmodel ili podgrupu, klonirajte rutu, generirajte CRUD ili izbrišite; povucite za promjenu redoslijeda ili roditelja — nikada izvan dizajna. Svaka stranica sada prikazuje samo pojedinosti odabrane stavke.
+- **Pregled vaših modela, enuma i ruta.** Korijenski čvor svake sekcije sada popisuje sve u sebi — a Modeli dobivaju karticu **Graf**: dijagram klasa vaših modela s nasljeđivanjem i referencama. Enumi prikazuju svoje vrijednosti odmah uz naziv.
+- **Jedno mjesto za preimenovanje.** Model, enum ili rutu preimenujete iz velikog naslova (olovka), a prazan naziv prikazuje **„<bez naziva>”** kako bi olovka uvijek bila dohvatljiva — naziv se više ne prikazuje dvaput na stranici.
+- **Pogreške provjere upućuju na element.** Kad nešto nije u redu — model i enum s istim nazivom, referenca na nešto što više ne postoji — napomena na vrhu modela, enuma ili rute to objašnjava.
+- **Potpuni navigacijski trag.** Trag odražava cijelu hijerarhiju bočne trake — mape › dizajn › sekcija › grupa › stavka — i svaki je segment moguće kliknuti.
+- **Odaberite više, izbrišite odjednom.** Odaberite nekoliko modela, enuma ili ruta i izbrišite ih odjednom, nakon potvrde.
+- **Kopirajte ili otvorite izvor predloška koda jednim klikom.** Na stranici „</> Code”, prelaskom preko predloška pojavljuje se gumb za kopiranje njegova URL-a ili putanje i gumb za njegovo otvaranje — repozitorij u pregledniku ili mapa na disku za lokalni predložak.
+- **Nove rute odmah imaju naziv.** Ruta stvorena od nule sada dobiva zadani naziv, pa je možete odmah preimenovati.
+
+Ispravci:
+
+- **Odabir predloška koda zatvara knjižnicu.** „Koristi” vas sada vraća izravno na stranicu Code.
+- **Generiranje dokumentacije više ne pada na neobaveznim poljima.** Generiranje dokumentacije iz dizajna čiji je model ili parametar ostavio „required” nepostavljenim više se ne zaustavlja s pogreškom predloška.
+- **Brisanje enuma prvo pita.** Enumi dobivaju istu potvrdu kao modeli i rute.
+- **Bočna traka otkriva vaš odabir.** Uz uključeno „sinkroniziraj bočnu traku s aktivnom karticom”, odabir ili stvaranje modela, enuma ili rute proširuje njegove roditelje kako bi ostao vidljiv u stablu.
+
 ## v1.1.0
 
 🎉 **Restorm je sada i dizajner API-ja.** Dizajnirajte svoj API, poslužite ga kao živi mock na pet protokola odjednom i generirajte njegove klijente — bez napuštanja aplikacije, sve na vašem vlastitom disku.

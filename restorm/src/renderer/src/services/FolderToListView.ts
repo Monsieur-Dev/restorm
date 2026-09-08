@@ -9,7 +9,8 @@ import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
 import { SIDEBAR_DESIGN_SECTIONS, DESIGN_CODICON, designSectionRowId } from '../../../shared/design/designSections'
 import { getDesignClients, designClientRowId } from './designClientsStore'
-import { validateApiDesign } from '../../../shared/design/validateApiDesign'
+import { designSectionChildren, designSectionRowMenu, type DesignEntityActionHandler } from './designSidebarNodes'
+import { validateApiDesignCached } from '../../../shared/design/validateApiDesign'
 
 import { requestBadgeMode } from '../utils/badgeUtils'
 import React, { type ReactNode } from 'react'
@@ -75,6 +76,10 @@ export interface FolderToListViewOptions {
    * `useDeprecatedRequestIds`); editing a URL re-evaluates the row
    * instantly. */
   deprecatedRequestIds?: ReadonlySet<string>
+  /** Run a context-menu action from a design's Models/Enums/Routes sidebar node
+   * (add / clone / CRUD / delete). Navigates to the design tab and hands the
+   * section the action; the section owns the mutation + any modal. */
+  onDesignEntityAction?: DesignEntityActionHandler
 }
 
 const DEPRECATED_DIM_STYLE: React.CSSProperties = { opacity: 0.5 }
@@ -421,7 +426,7 @@ function designToListViewItem(
   // Validation drives the end-of-row error dots: each issue's path[1]
   // is the faulty entity's id, which maps back to the section holding
   // it. The design node itself gets a dot when ANY section has one.
-  const issues = validateApiDesign(design)
+  const issues = validateApiDesignCached(design)
   const modelIds = new Set(design.models.map((m) => m.id))
   const enumIds = new Set(design.enums.map((e) => e.id))
   const sectionsInError = new Set<string>()
@@ -443,9 +448,20 @@ function designToListViewItem(
     if (sectionsInError.has(section.key)) parts.push(errorDot(`design-section-error-${section.key}`))
     if (count !== null && count > 0) parts.push(String(count))
     const rowId = designSectionRowId(design.id, section.key)
-    // The Clients row is the one section that grows children: the transient
-    // per-protocol client requests, present only while the design is served.
-    const clientChildren = section.key === 'clients' ? designClientsChildren(design, options) : []
+    // Three sections grow their entities as real, draggable nodes (Models,
+    // Enums, Routes); Clients grows the transient per-protocol client requests
+    // while the design is served. Every other section row is a bare shortcut.
+    const sectionChildren: ListViewItemData[] =
+      section.key === 'clients'
+        ? designClientsChildren(design, options)
+        : (section.key === 'models' || section.key === 'enums' || section.key === 'routes')
+          ? designSectionChildren(design, section.key, options)
+          : []
+    // The three entity sections gain an "add…" context menu on their row (the
+    // entry point when the section is empty, or for a top-level add).
+    const rowMenu = (section.key === 'models' || section.key === 'enums' || section.key === 'routes')
+      ? designSectionRowMenu(design.id, section.key, options.onDesignEntityAction)
+      : []
     return {
       id: rowId,
       title: i18n.t(section.labelKey),
@@ -453,8 +469,9 @@ function designToListViewItem(
       // Virtual section rows are navigation shortcuts, not movable entities —
       // never draggable (a drag would carry no meaningful item id).
       draggable: false,
-      ...(clientChildren.length > 0
-        ? { isExpandable: true, isExpanded: options.expandedIds.has(rowId), children: clientChildren }
+      ...(rowMenu.length > 0 ? { contextMenuItems: rowMenu } : {}),
+      ...(sectionChildren.length > 0
+        ? { isExpandable: true, isExpanded: options.expandedIds.has(rowId), children: sectionChildren }
         : {}),
       ...(parts.length > 0
         ? { rightActions: React.createElement('span', { className: 'design-section-count' }, ...parts) }

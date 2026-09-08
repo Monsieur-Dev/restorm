@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} perde sua herança (suas próprias propriedades permanecem)",
       "description": "Descrição",
       "descriptionPlaceholder": "O que este modelo representa (opcional)",
-      "newName": "NewModel",
+      "newName": "NovoModelo",
       "selectPrompt": "Selecione um modelo ou crie um.",
       "tabs": {
         "schema": "Esquema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Adicionar um enum",
       "addValue": "Adicionar um valor",
       "valueHeader": "Valor",
-      "newName": "NewEnum",
+      "newName": "NovoEnum",
       "selectPrompt": "Selecione um enum ou crie um — um conjunto fechado de valores usável como tipo de propriedade.",
       "nameHeader": "Nome",
       "description": "Descrição",
-      "descriptionPlaceholder": "O que este enum representa (opcional)"
+      "descriptionPlaceholder": "O que este enum representa (opcional)",
+      "deleteTitle": "Excluir {{name}}?",
+      "deleteImpact": "Qualquer propriedade ou parâmetro que usava este enum perderá a sua referência."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Ficheiros escritos",
       "openOutput": "Abrir a pasta de saída",
+      "copySource": "Copiar a fonte",
+      "copied": "Copiado!",
+      "openSourceUrl": "Abrir o URL do modelo",
+      "openSourceFolder": "Abrir a pasta do modelo",
       "refresh": "Atualizar este modelo a partir da sua origem",
       "removeConfirm": "O Template «{{name}}» será removido deste design (os ficheiros já gerados no disco não são alterados).",
       "removeTitle": "Remover este Template?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Adicionar um grupo",
       "addRoute": "Adicionar uma rota",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NovoGrupo",
+      "newRouteName": "NovaRota",
       "selectPrompt": "Selecione um grupo ou uma rota, ou crie um grupo.",
       "deleteGroupTitle": "Excluir {{name}}?",
       "deleteGroupImpact": "O grupo e suas {{count}} rotas serão excluídos.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projeções",
       "hint": "A mesma operação, tal como cada protocolo servido a expõe."
+    },
+    "listing": {
+      "models": {
+        "empty": "Crie o seu primeiro modelo"
+      },
+      "enums": {
+        "empty": "Crie o seu primeiro enum"
+      },
+      "routes": {
+        "empty": "Crie a sua primeira rota"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Gráfico"
+      }
     }
   },
   "mqtt": {

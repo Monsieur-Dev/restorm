@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**O designer de API agora é controlado pela barra lateral.**
+
+- **Os seus modelos, enums e rotas vivem na barra lateral.** As três listas dos separadores desaparecem: os modelos (com o seu aninhamento por herança), os enums e as rotas (grupos e as suas rotas) ficam agora diretamente na árvore da barra lateral. Clique com o botão direito para renomear, adicionar um submodelo ou um subgrupo, clonar uma rota, gerar o CRUD ou eliminar; arraste para reordenar ou reatribuir o pai — nunca para fora do design. Cada página mostra agora apenas o detalhe do item selecionado.
+- **Uma visão geral dos seus modelos, enums e rotas.** O nó raiz de cada seção agora lista tudo o que contém — e os Modelos ganham uma aba **Gráfico**: um diagrama de classes dos seus modelos com a herança e as referências. Os enums mostram os seus valores ao lado do nome.
+- **Um único lugar para renomear.** Um modelo, enum ou rota é renomeado a partir do seu título grande (o lápis), e um nome vazio mostra **«<sem nome>»** para que o lápis permaneça sempre acessível — o nome já não aparece duas vezes na página.
+- **Os erros de validação apontam para o elemento.** Quando algo está errado — um modelo e um enum a partilhar um nome, uma referência a algo que já não existe — uma nota no topo do modelo, enum ou rota explica-o.
+- **Um caminho de navegação completo.** O rasto reflete toda a hierarquia da barra lateral — pastas › design › seção › grupo › elemento — e cada segmento é clicável.
+- **Selecione vários, exclua de uma vez.** Selecione vários modelos, enums ou rotas e exclua-os de uma só vez, após uma confirmação.
+- **Copie ou abra a fonte de um template de código com um clique.** Na página «</> Code», ao passar o rato sobre um template surge um botão para copiar o seu URL ou caminho e outro para o abrir: o repositório no navegador, ou a pasta no disco para um template local.
+- **As rotas novas começam com um nome.** Uma rota criada do zero recebe agora um nome por omissão, portanto pode renomeá-la de imediato.
+
+Correções:
+
+- **Escolher um template de código fecha a biblioteca.** «Usar» leva-o agora diretamente de volta à página Code.
+- **A geração de documentação já não falha em campos opcionais.** Gerar a documentação de um design cujo modelo ou parâmetro deixava «required» por definir já não para com um erro de template.
+- **Excluir um enum pede confirmação.** Os enums recebem a mesma confirmação que os modelos e as rotas.
+- **A barra lateral revela o que você seleciona.** Com «sincronizar a barra lateral com a aba ativa» ativado, selecionar ou criar um modelo, enum ou rota expande os seus pais para o manter visível na árvore.
+
 ## v1.1.0
 
 🎉 **O Restorm agora também é um designer de API.** Desenhe a sua API, sirva-a como um mock ao vivo em cinco protocolos ao mesmo tempo e gere os seus clientes — tudo sem sair da app, tudo no seu próprio disco.

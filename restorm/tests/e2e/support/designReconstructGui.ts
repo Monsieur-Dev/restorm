@@ -3,11 +3,11 @@ import { expect } from '@playwright/test'
 import type {
   ApiDesign, DesignModel, DesignEnum, DesignProperty, DesignRoute, DesignRouteGroup
 } from '../../../src/shared/types/apiDesign'
-import { openDesignSection } from './designNav'
+import { openDesignSection, addDesignEntity, expandDesignSection, designEntityNode, getOpenDesignId } from './designNav'
 import {
   createBlankDesign, setDesignIdentity, renameDesignNode, setServingProtocols,
   addModel, renameModel, addProperty, openModel, openModelTab, openRouteTab,
-  fillInput, fillVariableInput, pickSelect, pickSelectExact, toggleTo, editLabel
+  fillInput, fillVariableInput, pickSelect, pickSelectExact, toggleTo
 } from './designGuiDriver'
 
 /**
@@ -70,12 +70,11 @@ async function buildEnums(p: Page, designId: string, enumsList: readonly DesignE
   await openDesignSection(p, designId, 'enums')
   await expect(p.locator('[data-testid="design-enums-section"]')).toBeVisible({ timeout: 5000 })
   for (const e of enumsList) {
-    await p.locator('[data-testid="design-enums-add-list-button"]').click()
-    const rename = p.locator('.list-view-rename-input:visible').first()
-    await expect(rename).toBeVisible({ timeout: 5000 })
-    await rename.fill(e.doc.name)
-    await rename.press('Enter')
-    await p.waitForTimeout(250)
+    await addDesignEntity(p, designId, 'enums', /Add an enum/)
+    // The new enum is auto-selected (its values pane is up), so rename it through
+    // the open H1 title — the sidebar-node rename would deselect it and hide the
+    // add-entry button we need next.
+    await renameModel(p, e.doc.name)
     if (e.doc.description !== undefined && e.doc.description !== '') {
       await fillInput(p, 'design-enum-description', e.doc.description)
     }
@@ -277,8 +276,11 @@ async function generateSearch(p: Page, designId: string, model: string): Promise
 }
 
 async function selectGroup(p: Page, groupName: string): Promise<void> {
-  await p.locator('[data-testid="design-routes-listview"] .list-view-row')
-    .filter({ has: p.getByText(groupName, { exact: true }) }).first().click()
+  const designId = await getOpenDesignId(p)
+  await expandDesignSection(p, designId, 'routes')
+  const group = designEntityNode(p, designId, 'routes', groupName)
+  await expect(group).toBeVisible({ timeout: 5000 })
+  await group.click()
   await expect(p.locator('[data-testid="design-group-add-route"]')).toBeVisible({ timeout: 5000 })
 }
 
@@ -293,7 +295,7 @@ async function addRelationRoute(
   // Definition tab: method, path, summary, description.
   if (r.doc.match.method !== 'GET') await pickSelectExact(p, 'design-route-method', r.doc.match.method)
   await fillVariableInput(p, 'design-route-path', r.doc.match.urlPattern)
-  if (r.doc.summary !== undefined) await editLabel(p, 'design-route-summary-label', r.doc.summary)
+  if (r.doc.summary !== undefined) await renameModel(p, r.doc.summary)
   if (r.doc.description !== undefined) await fillInput(p, 'design-route-description', r.doc.description)
 
   // Responses tab: set up each response (default route ships a 200).

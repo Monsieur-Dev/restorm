@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**Návrhář API se nyní ovládá z postranního panelu.**
+
+- **Vaše modely, výčty a trasy žijí v postranním panelu.** Tři seznamy na kartách mizí — modely (s vnořením podle dědičnosti), výčty a trasy (skupiny a jejich trasy) jsou nyní přímo ve stromu postranního panelu. Pravým tlačítkem přejmenujete, přidáte podmodel nebo podskupinu, naklonujete trasu, vygenerujete CRUD nebo smažete; tažením změníte pořadí nebo rodiče — nikdy mimo návrh. Každá stránka nyní zobrazuje jen detail vybrané položky.
+- **Přehled vašich modelů, enumů a tras.** Kořenový uzel každé sekce nyní vypisuje vše, co obsahuje — a Modely přidávají kartu **Graf**: diagram tříd vašich modelů s dědičností a odkazy. Enumy zobrazují své hodnoty hned vedle názvu.
+- **Jedno místo pro přejmenování.** Model, enum nebo trasu přejmenujete z velkého názvu (tužka) a prázdný název zobrazí **„<bez názvu>“**, aby tužka byla vždy dosažitelná — název se už na stránce neobjevuje dvakrát.
+- **Chyby validace ukazují na prvek.** Když je něco špatně — model a enum se stejným názvem, odkaz na něco, co už neexistuje — vysvětlí to poznámka v horní části modelu, enumu nebo trasy.
+- **Úplná drobečková navigace.** Cesta odráží celou hierarchii postranního panelu — složky › návrh › sekce › skupina › položka — a každý segment je klikatelný.
+- **Vyberte více, smažte najednou.** Vyberte několik modelů, enumů nebo tras a smažte je najednou, po potvrzení.
+- **Zkopírujte nebo otevřete zdroj šablony kódu jedním kliknutím.** Na stránce „</> Code“ se po najetí na šablonu objeví tlačítko pro zkopírování její URL nebo cesty a tlačítko pro její otevření — repozitář v prohlížeči, nebo složka na disku u místní šablony.
+- **Nové trasy mají hned název.** Trasa vytvořená od nuly nyní dostane výchozí název, takže ji můžete hned přejmenovat.
+
+Opravy:
+
+- **Výběr šablony kódu zavře knihovnu.** „Použít“ vás nyní vrátí přímo na stránku Code.
+- **Generování dokumentace už neselhává u volitelných polí.** Generování dokumentace z návrhu, jehož model nebo parametr ponechal „required“ nenastavené, se už nezastaví chybou šablony.
+- **Smazání enumu se nejprve zeptá.** Enumy získávají stejné potvrzení jako modely a trasy.
+- **Postranní panel odhalí, co vyberete.** Když je zapnuto „synchronizovat postranní panel s aktivní kartou“, výběr nebo vytvoření modelu, enumu či trasy rozbalí jeho rodiče, aby zůstal v stromu viditelný.
+
 ## v1.1.0
 
 🎉 **Restorm je teď také designer API.** Navrhněte své API, obsloužíte je jako živý mock na pěti protokolech současně a vygenerujte jeho klienty — aniž byste opustili aplikaci, vše na vlastním disku.

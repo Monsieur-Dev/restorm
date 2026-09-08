@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} mister arven sin (egne egenskaper beholdes)",
       "description": "Beskrivelse",
       "descriptionPlaceholder": "Hva denne modellen representerer (valgfritt)",
-      "newName": "NewModel",
+      "newName": "NyModell",
       "selectPrompt": "Velg en modell, eller opprett en.",
       "tabs": {
         "schema": "Skjema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Legg til en enum",
       "addValue": "Legg til en verdi",
       "valueHeader": "Verdi",
-      "newName": "NewEnum",
+      "newName": "NyEnum",
       "selectPrompt": "Velg en enum, eller opprett en — et lukket sett verdier som kan brukes som egenskapstype.",
       "nameHeader": "Navn",
       "description": "Beskrivelse",
-      "descriptionPlaceholder": "Hva denne enumen representerer (valgfritt)"
+      "descriptionPlaceholder": "Hva denne enumen representerer (valgfritt)",
+      "deleteTitle": "Slette {{name}}?",
+      "deleteImpact": "Enhver egenskap eller parameter som brukte denne enumen, mister referansen sin."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Filer skrevet",
       "openOutput": "Åpne utdatamappen",
+      "copySource": "Kopier kilden",
+      "copied": "Kopiert!",
+      "openSourceUrl": "Åpne malens URL",
+      "openSourceFolder": "Åpne malmappen",
       "refresh": "Oppdater denne malen fra kilden",
       "removeConfirm": "Template «{{name}}» fjernes fra dette designet (allerede genererte filer på disken forblir urørt).",
       "removeTitle": "Fjerne dette Template?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Legg til en gruppe",
       "addRoute": "Legg til en rute",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NyGruppe",
+      "newRouteName": "NyRute",
       "selectPrompt": "Velg en gruppe eller en rute, eller opprett en gruppe.",
       "deleteGroupTitle": "Slette {{name}}?",
       "deleteGroupImpact": "Gruppen og dens {{count}} ruter slettes.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projeksjoner",
       "hint": "Den samme operasjonen, slik hvert servert protokoll eksponerer den."
+    },
+    "listing": {
+      "models": {
+        "empty": "Lag din første modell"
+      },
+      "enums": {
+        "empty": "Lag din første enum"
+      },
+      "routes": {
+        "empty": "Lag din første rute"
+      },
+      "tabs": {
+        "list": "Liste",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {

@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.1.1
+
+**Trình thiết kế API giờ được điều khiển từ thanh bên.**
+
+- **Model, enum và route của bạn nằm trong thanh bên.** Ba danh sách trong các tab biến mất — model (với lồng ghép kế thừa của chúng), enum và route (nhóm và các route của chúng) giờ nằm trực tiếp trong cây của thanh bên. Nhấp chuột phải để đổi tên, thêm model con hoặc nhóm con, nhân bản một route, tạo CRUD hoặc xóa; kéo để sắp xếp lại hoặc đổi cha — không bao giờ ra ngoài thiết kế. Mỗi trang giờ chỉ hiển thị chi tiết của mục được chọn.
+- **Cái nhìn tổng quan về mô hình, enum và tuyến của bạn.** Nút gốc của mỗi mục giờ liệt kê mọi thứ bên dưới — và Mô hình có thêm tab **Đồ thị**: sơ đồ lớp của các mô hình với kế thừa và tham chiếu. Enum hiển thị giá trị ngay bên cạnh tên.
+- **Một nơi duy nhất để đổi tên.** Một mô hình, enum hay tuyến được đổi tên từ tiêu đề lớn (cây bút chì), và tên trống hiển thị **“<chưa đặt tên>”** để cây bút luôn trong tầm với — tên không còn xuất hiện hai lần trên trang.
+- **Lỗi kiểm tra chỉ đúng phần tử.** Khi có gì đó sai — một mô hình và một enum trùng tên, một tham chiếu đến thứ không còn tồn tại — một ghi chú ở đầu mô hình, enum hoặc tuyến sẽ giải thích.
+- **Đường dẫn điều hướng đầy đủ.** Vệt đường phản chiếu toàn bộ cây thanh bên — thư mục › thiết kế › mục › nhóm › phần tử — và mỗi đoạn đều bấm được.
+- **Chọn nhiều, xóa một lần.** Chọn nhiều mô hình, enum hoặc tuyến và xóa tất cả cùng lúc, sau khi xác nhận.
+- **Sao chép hoặc mở nguồn của một mẫu mã bằng một cú nhấp.** Trên trang "</> Code", khi di chuột lên một mẫu sẽ hiện một nút để sao chép URL hoặc đường dẫn của nó và một nút để mở nó — kho lưu trữ trong trình duyệt, hoặc thư mục trên đĩa đối với mẫu cục bộ.
+- **Route mới bắt đầu với một cái tên.** Một route tạo từ đầu giờ nhận được một tên mặc định, nên bạn có thể đổi tên nó ngay.
+
+Sửa lỗi:
+
+- **Chọn một mẫu mã sẽ đóng thư viện.** "Dùng" giờ đưa bạn thẳng về trang Code.
+- **Việc tạo tài liệu không còn thất bại ở các trường tùy chọn.** Tạo tài liệu từ một thiết kế mà model hoặc tham số để "required" chưa đặt sẽ không còn dừng lại với lỗi mẫu.
+- **Xóa một enum sẽ hỏi trước.** Enum giờ nhận cùng xác nhận như mô hình và tuyến.
+- **Thanh bên hé lộ mục bạn chọn.** Khi bật «đồng bộ thanh bên với tab đang mở», việc chọn hoặc tạo một mô hình, enum hay tuyến sẽ mở rộng các mục cha để nó luôn hiện trong cây.
+
 ## v1.1.0
 
 🎉 **Giờ đây Restorm còn là một trình thiết kế API.** Thiết kế API của bạn, phục vụ nó như một mock trực tiếp trên năm giao thức cùng lúc, và tạo các client của nó — mà không rời khỏi ứng dụng, tất cả trên đĩa của riêng bạn.

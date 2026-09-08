@@ -2237,7 +2237,7 @@
       "deleteImpactChild": "{{name}} menettää perintänsä (omat ominaisuudet säilyvät)",
       "description": "Kuvaus",
       "descriptionPlaceholder": "Mitä tämä malli edustaa (valinnainen)",
-      "newName": "NewModel",
+      "newName": "UusiMalli",
       "selectPrompt": "Valitse malli tai luo uusi.",
       "tabs": {
         "schema": "Skeema",
@@ -2257,11 +2257,13 @@
       "addEnum": "Lisää enum",
       "addValue": "Lisää arvo",
       "valueHeader": "Arvo",
-      "newName": "NewEnum",
+      "newName": "UusiEnum",
       "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä.",
       "nameHeader": "Nimi",
       "description": "Kuvaus",
-      "descriptionPlaceholder": "Mitä tämä enum edustaa (valinnainen)"
+      "descriptionPlaceholder": "Mitä tämä enum edustaa (valinnainen)",
+      "deleteTitle": "Poistetaanko {{name}}?",
+      "deleteImpact": "Jokainen tätä luetteloa käyttänyt ominaisuus tai parametri menettää viittauksensa."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2324,10 @@
       },
       "extractedTitle": "Tiedostot kirjoitettu",
       "openOutput": "Avaa tuloskansio",
+      "copySource": "Kopioi lähde",
+      "copied": "Kopioitu!",
+      "openSourceUrl": "Avaa mallin URL",
+      "openSourceFolder": "Avaa mallin kansio",
       "refresh": "Päivitä tämä malli sen lähteestä",
       "removeConfirm": "Template ”{{name}}” poistetaan tästä suunnitelmasta (levylle jo luodut tiedostot jäävät koskematta).",
       "removeTitle": "Poistetaanko tämä Template?",
@@ -2512,7 +2518,8 @@
     "routes": {
       "addGroup": "Lisää ryhmä",
       "addRoute": "Lisää reitti",
-      "newGroupName": "NewGroup",
+      "newGroupName": "UusiRyhmä",
+      "newRouteName": "UusiReitti",
       "selectPrompt": "Valitse ryhmä tai reitti, tai luo ryhmä.",
       "deleteGroupTitle": "Poistetaanko {{name}}?",
       "deleteGroupImpact": "Ryhmä ja sen {{count}} reittiä poistetaan.",
@@ -2664,6 +2671,21 @@
     "projections": {
       "title": "Projektiot",
       "hint": "Sama operaatio sellaisena kuin kukin tarjoiltu protokolla sen paljastaa."
+    },
+    "listing": {
+      "models": {
+        "empty": "Luo ensimmäinen mallisi"
+      },
+      "enums": {
+        "empty": "Luo ensimmäinen enumisi"
+      },
+      "routes": {
+        "empty": "Luo ensimmäinen reittisi"
+      },
+      "tabs": {
+        "list": "Luettelo",
+        "graph": "Kaavio"
+      }
     }
   },
   "mqtt": {

@@ -2236,7 +2236,7 @@
       "deleteImpactChild": "{{name}} は継承を失います（固有のプロパティは残ります）",
       "description": "説明",
       "descriptionPlaceholder": "このモデルが表すもの（任意）",
-      "newName": "NewModel",
+      "newName": "新しいモデル",
       "selectPrompt": "モデルを選択するか、作成してください。",
       "tabs": {
         "schema": "スキーマ",
@@ -2256,11 +2256,13 @@
       "addEnum": "enum を追加",
       "addValue": "値を追加",
       "valueHeader": "値",
-      "newName": "NewEnum",
+      "newName": "新しいEnum",
       "selectPrompt": "enum を選択するか、作成してください — プロパティの型として使える閉じた値の集合です。",
       "nameHeader": "名前",
       "description": "説明",
-      "descriptionPlaceholder": "この列挙型が表すもの（任意）"
+      "descriptionPlaceholder": "この列挙型が表すもの（任意）",
+      "deleteTitle": "{{name}} を削除しますか？",
+      "deleteImpact": "この列挙型を使用していたプロパティやパラメーターは参照を失います。"
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2323,10 @@
       },
       "extractedTitle": "ファイルを書き込みました",
       "openOutput": "出力フォルダーを開く",
+      "copySource": "ソースをコピー",
+      "copied": "コピーしました！",
+      "openSourceUrl": "テンプレートのURLを開く",
+      "openSourceFolder": "テンプレートのフォルダーを開く",
       "refresh": "このテンプレートをソースから再取得",
       "removeConfirm": "Template「{{name}}」がこのデザインから削除されます（ディスク上に生成済みのファイルはそのまま残ります）。",
       "removeTitle": "この Template を削除しますか？",
@@ -2511,7 +2517,8 @@
     "routes": {
       "addGroup": "グループを追加",
       "addRoute": "ルートを追加",
-      "newGroupName": "NewGroup",
+      "newGroupName": "新しいグループ",
+      "newRouteName": "新しいルート",
       "selectPrompt": "グループまたはルートを選択するか、グループを作成してください。",
       "deleteGroupTitle": "{{name}} を削除しますか？",
       "deleteGroupImpact": "グループとその {{count}} 件のルートが削除されます。",
@@ -2663,6 +2670,21 @@
     "projections": {
       "title": "プロジェクション",
       "hint": "同じ操作を、提供される各プロトコルが公開するかたちで。"
+    },
+    "listing": {
+      "models": {
+        "empty": "最初のモデルを作成"
+      },
+      "enums": {
+        "empty": "最初の enum を作成"
+      },
+      "routes": {
+        "empty": "最初のルートを作成"
+      },
+      "tabs": {
+        "list": "リスト",
+        "graph": "グラフ"
+      }
     }
   },
   "mqtt": {

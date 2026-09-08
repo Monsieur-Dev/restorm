@@ -4,7 +4,8 @@ import { createServer, type Server } from 'net'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_SERVER_TEMP_DIR } from '../../fixtures/design-server.fixture'
-import { openDesignSection } from '../../../support/designNav'
+import { openDesignSection, openDesignEntity } from '../../../support/designNav'
+import { designEntityTitle } from '../../../support/designGuiDriver'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -214,8 +215,8 @@ async function openModel(p: Page, modelName: string): Promise<void> {
   await openDesignSection(p, DESIGN_ID, 'models')
   await p.mouse.move(700, 450)
   await expect(p.locator('[data-testid="design-models-section"]')).toBeVisible({ timeout: 5000 })
-  await p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ hasText: modelName }).first().click()
-  await expect(p.locator('[data-testid="design-model-name"]')).toContainText(modelName, { timeout: 5000 })
+  await openDesignEntity(p, DESIGN_ID, 'models', modelName)
+  await expect(designEntityTitle(p)).toContainText(modelName, { timeout: 5000 })
 }
 
 /** Back to the Server section (where the spin button + run panel live). */

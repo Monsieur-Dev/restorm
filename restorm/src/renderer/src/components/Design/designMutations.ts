@@ -8,6 +8,8 @@
 
 import type { ApiDesign, DesignModel, DesignProperty, DesignRoute, DesignRouteGroup } from '../../../../shared/types/collections'
 import type { TemplateVariableScope, TemplateVarValues } from '../../../../shared/design/templateVariables'
+import type { DesignEntitySection } from '../../../../shared/design/designSections'
+import { removeModelFromDesign, removeEnumFromDesign } from '../../../../shared/design/designUsages'
 
 export function assignDesignSection<K extends keyof ApiDesign>(design: ApiDesign, key: K, value: ApiDesign[K]): void {
   design[key] = value
@@ -56,6 +58,73 @@ export function replaceProperty(design: ApiDesign, modelId: string, propertyId: 
 /** Replace one route group (by id) in the design's `routeGroups`. */
 export function replaceGroup(design: ApiDesign, groupId: string, next: DesignRouteGroup): void {
   assignDesignSection(design, 'routeGroups', design.routeGroups.map((g) => (g.id === groupId ? next : g)))
+}
+
+/** Delete a batch of model / enum / route(-group) entities in one pass, each
+ * with the SAME pruning its single-delete path applies: a model drops its
+ * inheritance/usages, an enum strips the references that pointed at it, a group
+ * takes its whole sub-tree, a route leaves its group. Ids already gone (e.g. a
+ * route whose group is also in the batch) are skipped. Powers multi-select
+ * delete from the sidebar. */
+export function deleteDesignEntities(design: ApiDesign, entries: readonly { section: DesignEntitySection; entityId: string }[]): void {
+  for (const { section, entityId } of entries) {
+    if (section === 'models') {
+      if (!design.models.some((m) => m.id === entityId)) continue
+      const next = removeModelFromDesign(design, entityId)
+      assignDesignSection(design, 'models', next.models)
+      assignDesignSection(design, 'routeGroups', next.routeGroups)
+    } else if (section === 'enums') {
+      if (!design.enums.some((e) => e.id === entityId)) continue
+      const pruned = removeEnumFromDesign(design, entityId)
+      assignDesignSection(design, 'enums', design.enums.filter((e) => e.id !== entityId))
+      assignDesignSection(design, 'models', pruned.models)
+      assignDesignSection(design, 'routeGroups', pruned.routeGroups)
+    } else {
+      const group = design.routeGroups.find((g) => g.id === entityId)
+      if (group !== undefined) {
+        // A group takes its descendant sub-groups (their dangling parentId would
+        // orphan them otherwise).
+        const doomed = new Set<string>([group.id])
+        let grew = true
+        while (grew) {
+          grew = false
+          for (const g of design.routeGroups) {
+            if (g.parentId !== undefined && doomed.has(g.parentId) && !doomed.has(g.id)) { doomed.add(g.id); grew = true }
+          }
+        }
+        assignDesignSection(design, 'routeGroups', design.routeGroups.filter((g) => !doomed.has(g.id)))
+      } else {
+        const owner = design.routeGroups.find((g) => g.routes.some((r) => r.id === entityId))
+        if (owner !== undefined) replaceGroup(design, owner.id, { ...owner, routes: owner.routes.filter((r) => r.id !== entityId) })
+      }
+    }
+  }
+}
+
+/** Rename a model / enum / route(-group) by id (the one door for the sidebar
+ * node rename, the breadcrumb title rename, and any other rename surface). An
+ * empty name is allowed — the label surfaces render it as a muted "<sans nom>"
+ * placeholder — so clearing the field commits, it does not revert. */
+export function renameDesignEntity(design: ApiDesign, section: 'models' | 'enums' | 'routes', entityId: string, newName: string): void {
+  const trimmed = newName.trim()
+  if (section === 'models') {
+    const m = design.models.find((x) => x.id === entityId)
+    if (m !== undefined) patchModel(design, entityId, { doc: { ...m.doc, name: trimmed } })
+    return
+  }
+  if (section === 'enums') {
+    assignDesignSection(design, 'enums', design.enums.map((e) => (e.id === entityId ? { ...e, doc: { ...e.doc, name: trimmed } } : e)))
+    return
+  }
+  const group = design.routeGroups.find((g) => g.id === entityId)
+  if (group !== undefined) {
+    assignDesignSection(design, 'routeGroups', design.routeGroups.map((g) => (g.id === entityId ? { ...g, doc: { ...g.doc, name: trimmed } } : g)))
+    return
+  }
+  const owner = design.routeGroups.find((g) => g.routes.some((r) => r.id === entityId))
+  if (owner !== undefined) {
+    replaceGroup(design, owner.id, { ...owner, routes: owner.routes.map((r) => (r.id === entityId ? { ...r, doc: { ...r.doc, summary: trimmed } } : r)) })
+  }
 }
 
 /** Replace one route (by id) inside its group. */
