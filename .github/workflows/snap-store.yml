@@ -154,6 +154,7 @@ jobs:
           python3 scripts/snap-store-media.py restorm \
             screenshots/en/welcome-home.png \
             screenshots/en/request-editor.png \
-            screenshots/en/scenario-editor.png
+            screenshots/en/scenario-editor.png \
+            screenshots/en/designer.png
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
