@@ -346,7 +346,9 @@
     "add": "Adaugă mediu",
     "rename": "Redenumește",
     "addSub": "Adaugă submediu",
-    "delete": "Șterge"
+    "delete": "Șterge",
+    "duplicate": "Duplică mediul",
+    "duplicateName": "{{name}} (copie)"
   },
   "folderView": {
     "environments": "Medii",
@@ -397,7 +399,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definiți liste de valori reutilizabile pentru variabilele dvs.: alegeți o etichetă lizibilă, iar cererea trimite valoarea asociată. Selectați sau creați o enumerare pentru a începe."
-    }
+    },
+    "iconLabel": "Pictogramă:",
+    "colorLabel": "Culoare:"
   },
   "requestTab": {
     "deprecated": "Acest endpoint este depreciat și ar putea fi eliminat într-o versiune viitoare.",
@@ -467,7 +471,9 @@
       "close": "Închide",
       "closeOthers": "Închide celelalte",
       "addToFavorites": "Adaugă la favorite",
-      "removeFromFavorites": "Elimină din favorite"
+      "removeFromFavorites": "Elimină din favorite",
+      "pin": "Fixează",
+      "unpin": "Anulează fixarea"
     }
   },
   "codeEditor": {
@@ -1007,7 +1013,11 @@
       "us": "Format SUA (LL/ZZ/AAAA, 12h)",
       "iso": "Format ISO (AAAA-LL-ZZ, 24h)"
     },
-    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație"
+    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație",
+    "showOpenedList": "Afișează lista fișierelor deschise în bara laterală",
+    "showOpenedListDescription": "Afișează panoul „Deschise” cu fișierele deschise în prezent în spațiul de lucru",
+    "temporaryTabs": "File de previzualizare",
+    "temporaryTabsDescription": "Deschide elementele într-o singură filă de previzualizare reutilizabilă (afișată cu caractere cursive). Un dublu clic, o editare sau rularea unei cereri fixează fila."
   },
   "console": {
     "title": "Consolă",
@@ -1262,7 +1272,7 @@
       "externalDocs": "Documente externe",
       "examplePayload": "Exemplu de payload",
       "operationId": "operationId",
-      "addRequest": "+ Adaugă o cerere"
+      "addRequest": "+ Creează o cerere nouă din această documentație"
     },
     "apiInfo": {
       "version": "Versiune",
@@ -2238,7 +2248,7 @@
       "deleteImpactChild": "{{name}} își pierde moștenirea (propriile proprietăți rămân)",
       "description": "Descriere",
       "descriptionPlaceholder": "Ce reprezintă acest model (opțional)",
-      "newName": "NewModel",
+      "newName": "ModelNou",
       "selectPrompt": "Selectați un model sau creați unul.",
       "tabs": {
         "schema": "Schemă",
@@ -2258,11 +2268,13 @@
       "addEnum": "Adaugă un enum",
       "addValue": "Adaugă o valoare",
       "valueHeader": "Valoare",
-      "newName": "NewEnum",
+      "newName": "EnumNou",
       "selectPrompt": "Selectați un enum sau creați unul — un set închis de valori utilizabil ca tip de proprietate.",
       "nameHeader": "Nume",
       "description": "Descriere",
-      "descriptionPlaceholder": "Ce reprezintă acest enum (opțional)"
+      "descriptionPlaceholder": "Ce reprezintă acest enum (opțional)",
+      "deleteTitle": "Ștergeți {{name}}?",
+      "deleteImpact": "Orice proprietate sau parametru care folosea acest enum își va pierde referința."
     },
     "documentation": {},
     "code": {
@@ -2323,6 +2335,10 @@
       },
       "extractedTitle": "Fișiere scrise",
       "openOutput": "Deschide folderul de ieșire",
+      "copySource": "Copiază sursa",
+      "copied": "Copiat!",
+      "openSourceUrl": "Deschide URL-ul șablonului",
+      "openSourceFolder": "Deschide folderul șablonului",
       "refresh": "Reîmprospătează acest șablon din sursa sa",
       "removeConfirm": "Template-ul „{{name}}“ va fi eliminat din acest design (fișierele deja generate pe disc rămân neatinse).",
       "removeTitle": "Eliminați acest Template?",
@@ -2513,7 +2529,8 @@
     "routes": {
       "addGroup": "Adaugă un grup",
       "addRoute": "Adaugă o rută",
-      "newGroupName": "NewGroup",
+      "newGroupName": "GrupNou",
+      "newRouteName": "RutăNouă",
       "selectPrompt": "Selectați un grup sau o rută, sau creați un grup.",
       "deleteGroupTitle": "Ștergeți {{name}}?",
       "deleteGroupImpact": "Grupul și cele {{count}} rute ale sale vor fi șterse.",
@@ -2665,6 +2682,21 @@
     "projections": {
       "title": "Proiecții",
       "hint": "Aceeași operațiune, așa cum o expune fiecare protocol servit."
+    },
+    "listing": {
+      "models": {
+        "empty": "Creează primul tău model"
+      },
+      "enums": {
+        "empty": "Creează primul tău enum"
+      },
+      "routes": {
+        "empty": "Creează prima ta rută"
+      },
+      "tabs": {
+        "list": "Listă",
+        "graph": "Grafic"
+      }
     }
   },
   "mqtt": {
@@ -3343,5 +3375,12 @@
     "editNamed": "Editează {{name}}",
     "confirmReplace": "Există deja aici un cookie numit „{{name}}”. Îl înlocuiți?",
     "replaceButton": "Înlocuiește"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Adaugă etichetă",
+    "namePlaceholder": "Nume etichetă",
+    "createBookmark": "Creează etichetă",
+    "removeBookmark": "Elimină etichetă",
+    "bookmarkAria": "Etichetă: {{label}}"
   }
 }

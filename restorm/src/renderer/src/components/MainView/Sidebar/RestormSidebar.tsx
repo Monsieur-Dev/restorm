@@ -10,7 +10,8 @@ import {
   type ContextMenuItem,
   SplitView,
   Pane,
-  Button
+  Button,
+  useSetting
 } from 'electron-core-ui/renderer'
 import { buildEmptyAreaContextMenu, type AddChildHandler, type SidebarContextMenuItem } from './contextMenuBuilder'
 
@@ -27,12 +28,19 @@ export interface RestormSidebarProps {
   expandedIds: string[]
   editingItemId: string | null
   onItemClick: (itemId: string) => void
+  /** Double-click on a tree/favorite row — opens (or promotes) a PERMANENT
+   * tab rather than a preview tab. */
+  onItemDoubleClick?: (itemId: string) => void
   /**
    * Middle-click on a row. Receives the item id so the consumer can open
    * the corresponding tab without focusing it (the typical "open in
    * background" semantics).
    */
   onItemAuxClick?: (itemId: string) => void
+  /** Middle-click on a row in the OPENED pane — closes that item's tab (the
+   * usual "middle-click closes the tab" affordance), distinct from the tree's
+   * open-in-background aux-click above. */
+  onOpenedItemAuxClick?: (itemId: string) => void
   onItemToggle: (payload: ListViewItemEventPayload, expanded: boolean) => void
   onItemDrop: (payload: ListViewDropEventPayload) => void
   /** Hover-time coherence check for the drag (ghost error badge + refusal). */
@@ -87,7 +95,9 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   expandedIds,
   editingItemId,
   onItemClick,
+  onItemDoubleClick,
   onItemAuxClick,
+  onOpenedItemAuxClick,
   onItemToggle,
   onItemDrop,
   canDropSelection,
@@ -126,6 +136,12 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
     }
   }, [onItemClick])
 
+  const handleItemDoubleClick = useCallback((payload: ListViewItemEventPayload) => {
+    if (!onItemDoubleClick) return
+    const id = payload.item.id
+    if (id) onItemDoubleClick(id)
+  }, [onItemDoubleClick])
+
   const handleSelectionChange = useCallback((ids: string[], payload: ListViewItemEventPayload) => {
     onSelectionChange(ids, payload.item.id)
   }, [onSelectionChange])
@@ -144,12 +160,20 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
     }
   }, [onItemAuxClick])
 
+  const handleOpenedAuxClick = useCallback((payload: ListViewItemEventPayload) => {
+    const id = payload.item.id
+    if (id) onOpenedItemAuxClick?.(id)
+  }, [onOpenedItemAuxClick])
+
   // Each optional pane is only rendered when it has content, so the
   // collapsed-array indices coming back from SplitView depend on the
   // current composition. Tracking which panes are present here lets
   // the handler map indices → pane names without index-shift bugs.
   const showFavoritesPane = favoriteItems.length > 0
-  const showOpenedPane = openDocumentItems.length > 0
+  // The "Opened" pane is hidden entirely when the user turns off its Behavior
+  // setting (default on — `!== false` treats loading / unset as on).
+  const [showOpenedListSetting] = useSetting('behavior:showOpenedList')
+  const showOpenedPane = openDocumentItems.length > 0 && showOpenedListSetting !== false
   const presentPanes = useMemo<('favorites' | 'opened' | 'workspace')[]>(() => {
     const list: ('favorites' | 'opened' | 'workspace')[] = []
     if (showFavoritesPane) list.push('favorites')
@@ -264,6 +288,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               {...(onFavoritesEditingEnd && { onEditingEnd: onFavoritesEditingEnd })}
               onItemRename={onItemRename}
               onItemClick={handleItemClick}
+              onItemDoubleClick={handleItemDoubleClick}
               onItemAuxClick={handleItemAuxClick}
               onItemDrop={handleFavoritesDrop}
               data-testid="sidebar-favorites-listview"
@@ -288,7 +313,8 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               {...(onOpenedEditingEnd && { onEditingEnd: onOpenedEditingEnd })}
               onItemRename={onItemRename}
               onItemClick={handleItemClick}
-              onItemAuxClick={handleItemAuxClick}
+              onItemDoubleClick={handleItemDoubleClick}
+              onItemAuxClick={handleOpenedAuxClick}
               data-testid="sidebar-open-documents-listview"
             />
           </Pane>
@@ -343,12 +369,21 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               // selected, exactly as the single-selection tree did.
               selectedIds={selectedItemIds.length > 0 ? selectedItemIds : selectedItemId ? [selectedItemId] : []}
               onSelectionChange={handleSelectionChange}
-              activeId={activeId}
+              // Shift-range anchors on the ListView's `activeId`. For a design
+              // entity the app anchor (`selectedItemId`/`activeId`) is the OWNING
+              // DESIGN (so paste / favorites resolve against it), while the real
+              // highlighted row lives in `selectedItemIds` — so drive the anchor
+              // from the highlighted row when exactly one is selected. With a
+              // multi-selection, pass `undefined` so the ListView keeps the
+              // internal anchor its own shift-click just set (never snapping it
+              // back to the design).
+              activeId={selectedItemIds.length === 1 ? selectedItemIds[0] : selectedItemIds.length === 0 ? activeId : undefined}
               expandedIds={expandedIds}
               isRenameable
               expandOnChevronOnly
               onItemToggle={onItemToggle}
               onItemClick={handleItemClick}
+              onItemDoubleClick={handleItemDoubleClick}
               onItemAuxClick={handleItemAuxClick}
               onItemDrop={onItemDrop}
               canDrop={handleCanDrop}

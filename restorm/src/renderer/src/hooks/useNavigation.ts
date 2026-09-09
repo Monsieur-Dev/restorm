@@ -8,8 +8,8 @@ import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario, ApiDesign } from '../../../shared/types/collections'
 import { isFolder, isRequest, isScenario, isApiDesign, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
-import { parseDesignSectionRowId, designSectionRowId } from '../../../shared/design/designSections'
-import { setPendingDesignSection, peekPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection } from '../services/designSectionIntent'
+import { parseDesignSectionRowId, designSectionRowId, designEntityRowId, parseDesignEntityRowId } from '../../../shared/design/designSections'
+import { setPendingDesignSection, peekPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection, getActiveDesignEntity, subscribeActiveDesignEntity } from '../services/designSectionIntent'
 import { parseDesignClientRowId, findClientRequest } from '../services/designClientsStore'
 import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/editor'
 
@@ -18,6 +18,9 @@ import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/edi
  * surface so we don't couple the two modules at the signature level. */
 export interface OpenNavTabOptions {
   focus?: boolean
+  /** Open as a preview ("temporary") tab, or (with `false`) promote an
+   * already-open tab to permanent. Mirrors `OpenTabOptions.temporary`. */
+  temporary?: boolean
   /** Open the tab at an explicit group + split zone (sidebar→workbench
    * split drop). Mirrors `OpenTabOptions.placement`. */
   placement?: { targetGroupId: string; zone: 'left' | 'right' | 'top' | 'bottom' | 'full' }
@@ -49,7 +52,12 @@ export interface UseNavigationOptions {
 }
 
 export interface UseNavigationReturn {
-  handleItemClick: (itemId: string) => void
+  handleItemClick: (itemId: string, openOpts?: { temporary?: boolean }) => void
+  /**
+   * Double-click variant of {@link handleItemClick}. Opens the item as a
+   * PERMANENT tab — and promotes it if it was already open as a preview.
+   */
+  handleItemDoubleClick: (itemId: string) => void
   /**
    * Middle-click ("open in background") variant of `handleItemClick`.
    * Opens the matching workbench tab without focusing it, without
@@ -112,6 +120,14 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       setSelectedItemIds([itemId])
       return
     }
+    // A model/enum/route entity node is likewise virtual: keep the anchor on
+    // the owning design so paste + favorites resolve, but highlight the node.
+    const entityRow = parseDesignEntityRowId(itemId)
+    if (entityRow !== null) {
+      setSelectedItemId(entityRow.designId)
+      setSelectedItemIds([itemId])
+      return
+    }
     setSelectedItemId(itemId)
     setSelectedItemIds([itemId])
   }, [setSelectedItemId, setSelectedItemIds])
@@ -123,10 +139,38 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // anchor is read from a ref so the subscription mounts once, not per select.
   const selectedItemIdRef = useRef(selectedItemId)
   useEffect(() => { selectedItemIdRef.current = selectedItemId }, [selectedItemId])
-  useEffect(() => subscribeActiveDesignSection((designId, section) => {
+  // Highlight the row the design tab is actually on: the SELECTED ENTITY when one
+  // is selected (model/enum/route), otherwise the section row (a listing) or the
+  // design node (settings). Both the section AND the entity are subscribed so
+  // whichever publishes last reconciles to the same result — a cross-section
+  // entity click must never leave the SECTION row highlighted instead of the
+  // entity (the section change fires this, and used to clobber the entity).
+  const highlightActiveDesignRow = useCallback((designId: string) => {
     if (selectedItemIdRef.current !== designId) return
-    setSelectedItemIds([section !== 'settings' ? designSectionRowId(designId, section) : designId])
-  }), [setSelectedItemIds])
+    const entity = getActiveDesignEntity(designId)
+    if (entity !== undefined) {
+      setSelectedItemIds([designEntityRowId(designId, entity.section, entity.entityId)])
+      // Reveal the entity by expanding its parents in the sidebar (design node,
+      // section row, parent models / route group) — but only when the user opted
+      // into sidebar/tab sync. The setting DEFAULTS on, so expand unless it is
+      // explicitly `false` (empty string / null = registration timing → default).
+      if (entity.ancestorRowIds.length > 0) {
+        void window.api.settings.get('behavior:syncSidebarWithTabs').then((stored) => {
+          if (stored === false) return
+          setExpandedIds((prev) => {
+            const next = new Set(prev)
+            for (const id of entity.ancestorRowIds) next.add(id)
+            return Array.from(next)
+          })
+        })
+      }
+      return
+    }
+    const section = getActiveDesignSection(designId)
+    if (section !== undefined) setSelectedItemIds([section !== 'settings' ? designSectionRowId(designId, section) : designId])
+  }, [setSelectedItemIds, setExpandedIds])
+  useEffect(() => subscribeActiveDesignSection((designId) => { highlightActiveDesignRow(designId) }), [highlightActiveDesignRow])
+  useEffect(() => subscribeActiveDesignEntity((designId) => { highlightActiveDesignRow(designId) }), [highlightActiveDesignRow])
 
   // Handle navigation events from NavigationService
   useEffect(() => {
@@ -188,8 +232,33 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     return unsubscribe
   }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, rootItems, selectSingle, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
 
-  // Handle item click in the sidebar - use navigation service
-  const handleItemClick = useCallback((itemId: string) => {
+  // Preview-tab setting (default on). Read from the settings STORE via
+  // `settings.get` (+ live `onSettingChanged`) rather than the schema-backed
+  // `useSetting`: the same store-vs-schema split the sibling
+  // `behavior:syncSidebarWithTabs` reads use, and the only one that works when
+  // the restorm settings schema isn't loaded (e.g. the e2e launch, whose
+  // getAppPath resolves the config away). Kept in a ref so `handleItemClick`'s
+  // identity doesn't churn — the click reads the latest value at call time.
+  // Default ON: only an explicit `false` disables (empty string / null when
+  // unresolved fall back to the default, exactly like the sync-sidebar gate).
+  const temporaryTabsEnabledRef = useRef(true)
+  useEffect(() => {
+    let alive = true
+    void window.api.settings.get('behavior:temporaryTabs').then((stored) => {
+      if (alive) temporaryTabsEnabledRef.current = stored !== false
+    })
+    const cleanup = window.api.settings.onSettingChanged((key, value) => {
+      if (key === 'behavior:temporaryTabs') temporaryTabsEnabledRef.current = value !== false
+    })
+    return () => { alive = false; cleanup() }
+  }, [])
+
+  // Handle item click in the sidebar - use navigation service.
+  // `openOpts.temporary` overrides the preview-tab default: a double-click
+  // passes `false` to open/promote to a permanent tab; a plain single click
+  // leaves it undefined → preview when the setting is on.
+  const handleItemClick = useCallback((itemId: string, openOpts?: { temporary?: boolean }) => {
+    const temporary = openOpts?.temporary ?? temporaryTabsEnabledRef.current
     // A transient client row (under a served design's Clients section). A leaf
     // request opens as a normal request tab from the client store's object (it
     // isn't in rootItems); a FOLDER row (a protocol root or a sub-folder) opens
@@ -207,7 +276,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         openAnyRequestTab(
           request,
           [{ id: `design-client-root:${clientRow.designId}`, label: designName }, { id: itemId, label: request.name }],
-          []
+          [],
+          { temporary }
         )
         return
       }
@@ -215,7 +285,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       if (!item || !isApiDesign(item)) return
       selectSingle(itemId)
       setPendingDesignSection(item.id, 'clients', itemId)
-      openDesignTab(item, breadcrumbs)
+      openDesignTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
@@ -235,7 +305,21 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // a tab activation) keeps the row highlighted, not the design root.
       selectSingle(itemId)
       setPendingDesignSection(item.id, sectionRow.section)
-      openDesignTab(item, breadcrumbs)
+      openDesignTab(item, breadcrumbs, { temporary })
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
+      return
+    }
+
+    // A model / enum / route node under a design section: open (or refocus) the
+    // design tab on that section and stage the entity so the detail pane selects
+    // it. Same virtual-row treatment as the section rows above.
+    const entityRow = parseDesignEntityRowId(itemId)
+    if (entityRow !== null) {
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, entityRow.designId)
+      if (!item || !isApiDesign(item)) return
+      selectSingle(itemId)
+      setPendingDesignSection(item.id, entityRow.section, entityRow.entityId)
+      openDesignTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
@@ -252,32 +336,32 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // to land on; only default to Settings when nothing is pending, so that
       // intent isn't clobbered.
       if (peekPendingDesignSection(item.id) === undefined) setPendingDesignSection(item.id, 'settings')
-      openDesignTab(item, breadcrumbs)
+      openDesignTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
 
     if (isEnvironmentFolder(item)) {
-      openEnvironmentFolderTab(item, breadcrumbs)
+      openEnvironmentFolderTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'environment-folder' })
       return
     }
 
     if (isFolder(item)) {
-      openFolderTab(item, breadcrumbs)
+      openFolderTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'folder' })
       return
     }
 
     if (isScenario(item)) {
-      openScenarioEditorTab(item, breadcrumbs)
+      openScenarioEditorTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'scenario-editor' })
       return
     }
 
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-      openAnyRequestTab(item, breadcrumbs, environments)
+      openAnyRequestTab(item, breadcrumbs, environments, { temporary })
       if (isHTTPRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'http-request' })
       } else if (isGraphQLRequest(item)) {
@@ -309,6 +393,12 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       }
     }
   }, [rootItems, selectSingle, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+
+  // Double-click opens (or promotes) a PERMANENT tab — same dispatch as a
+  // single click, but forcing `temporary: false` so a preview tab is kept.
+  const handleItemDoubleClick = useCallback((itemId: string) => {
+    handleItemClick(itemId, { temporary: false })
+  }, [handleItemClick])
 
   // Middle-click ("open in background") variant of `handleItemClick`.
   // Opens the corresponding workbench tab without focusing it, without
@@ -398,18 +488,20 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // the Clients section, scoped to the clicked folder when the crumb is one.
       const clientRow = parseDesignClientRowId(itemId)
       const sectionRow = parseDesignSectionRowId(itemId)
+      const entityRow = parseDesignEntityRowId(itemId)
       const designRootId = itemId.startsWith('design-client-root:')
         ? itemId.slice('design-client-root:'.length)
         : null
-      const designId = clientRow?.designId ?? sectionRow?.designId ?? designRootId
+      const designId = clientRow?.designId ?? sectionRow?.designId ?? entityRow?.designId ?? designRootId
       if (designId !== null) {
         const { item: designItem, breadcrumbs: designCrumbs } = findItemWithBreadcrumbs(rootItems, designId)
         if (!designItem || !isApiDesign(designItem)) return
-        // Highlight the clicked crumb row (folder/section) in the sidebar; the
-        // design-root crumb highlights the design itself.
-        selectSingle(clientRow !== null || sectionRow !== null ? itemId : designId)
+        // Highlight the clicked crumb row (folder/section/entity) in the sidebar;
+        // the design-root crumb highlights the design itself.
+        selectSingle(clientRow !== null || sectionRow !== null || entityRow !== null ? itemId : designId)
         if (clientRow !== null) setPendingDesignSection(designItem.id, 'clients', itemId)
         else if (sectionRow !== null) setPendingDesignSection(designItem.id, sectionRow.section)
+        else if (entityRow !== null) setPendingDesignSection(designItem.id, entityRow.section, entityRow.entityId)
         openDesignTab(designItem, designCrumbs)
         navigationService.navigateTo(itemId, 'breadcrumb', { type: 'design' })
         return
@@ -621,6 +713,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   return {
     handleItemClick,
+    handleItemDoubleClick,
     handleItemAuxClick,
     openItemAtSplit,
     handleBreadcrumbClick,

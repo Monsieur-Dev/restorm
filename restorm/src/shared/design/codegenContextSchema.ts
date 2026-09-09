@@ -172,12 +172,12 @@ export const CODEGEN_CONTEXT_SCHEMA = {
           "description": "EVERY parameter (path / query / header / cookie) — filter by `in` for a location-specific view.",
           "items": {
             "type": "object",
-            "required": ["name", "in"],
+            "required": ["name", "in", "required"],
             "properties": {
               "name": { "type": "string" },
               "in": { "enum": ["path", "query", "header", "cookie"] },
               "type": { "type": "string", "description": "Scalar/array label (`string`, `array<string>`, …). Absent when the param references a named enum or a linked property." },
-              "required": { "const": true },
+              "required": { "type": "boolean", "description": "Always present; `false` when the parameter isn't required." },
               "description": { "type": "string" },
               "enum": { "type": "string", "description": "Referenced enum NAME (a named enum entity)." },
               "enumValues": { "type": "array", "items": { "type": ["string", "number"] }, "description": "Inline allowed values; for an array param they constrain the items. Mutually exclusive with `enum`." },

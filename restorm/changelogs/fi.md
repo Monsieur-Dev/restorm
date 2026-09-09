@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1
+
+**API-suunnittelijaa ohjataan nyt sivupalkista.**
+
+- **Mallisi, enumit ja reitit elävät sivupalkissa.** Kolme välilehtien listaa katoaa — mallit (perintähierarkioineen), enumit ja reitit (ryhmät ja niiden reitit) ovat nyt suoraan sivupalkin puussa. Napsauta hiiren oikealla nimetäksesi uudelleen, lisätäksesi alimallin tai aliryhmän, kloonataksesi reitin, luodaksesi CRUD:n tai poistaaksesi; vedä järjestääksesi uudelleen tai vaihtaaksesi vanhempaa — ei koskaan ulos suunnitelmasta. Jokainen sivu näyttää nyt vain valitun kohteen tiedot.
+- **Yleiskatsaus malleihisi, enumeihisi ja reitteihisi.** Kunkin osion juurisolmu listaa nyt kaiken sen alla — ja Mallit saavat **Graafi**-välilehden: luokkakaavion malleistasi perintöineen ja viittauksineen. Enumit näyttävät arvonsa heti nimen vieressä.
+- **Yksi paikka nimeämiseen.** Malli, enum tai reitti nimetään sen suuresta otsikosta (kynä), ja tyhjä nimi näyttää **”<nimetön>”**, jotta kynä on aina ulottuvilla — nimeä ei enää näytetä sivulla kahdesti.
+- **Validointivirheet osoittavat kohteeseen.** Kun jokin on pielessä — malli ja enum, joilla on sama nimi, viittaus johonkin, jota ei enää ole — huomautus mallin, enumin tai reitin yläreunassa selittää sen.
+- **Täydellinen navigointipolku.** Polku heijastaa koko sivupalkin hierarkiaa — kansiot › suunnitelma › osio › ryhmä › kohde — ja jokainen segmentti on napsautettavissa.
+- **Valitse monta, poista kerralla.** Valitse useita malleja, enumeja tai reittejä ja poista ne kerralla, vahvistuksen jälkeen.
+- **Kopioi tai avaa koodimallin lähde yhdellä napsautuksella.** "</> Code" -sivulla mallin päälle vietäessä ilmestyy painike sen URL:n tai polun kopioimiseen ja toinen sen avaamiseen — repositorio selaimessa tai kansio levyllä paikallisen mallin tapauksessa.
+- **Uusilla reiteillä on heti nimi.** Tyhjästä luotu reitti saa nyt oletusnimen, joten voit nimetä sen heti uudelleen.
+- **Esikatseluvälilehdet, kuten editorissasi.** Yksi napsautus avaa kohteen nyt uudelleenkäytettävään **esikatselu**välilehteen (sen nimi kursiivilla); toisen kohteen napsauttaminen käyttää samaa välilehteä sen sijaan, että pinoaisi uuden. Kaksoisnapsautus, mikä tahansa muokkaus tai pyynnön suoritus jättää sen pysyvästi auki. Poista käytöstä kohdassa Asetukset › Toiminta.
+- **Kiinnitä auki pitämäsi välilehdet.** Napsauta välilehteä hiiren oikealla ja kiinnitä se: kiinnitetyt välilehdet pysyvät ensimmäisinä, säilyvät ”sulje muut” -toiminnon läpi ja muistetaan projektikohtaisesti.
+- **Ympäristöt saavat kunnon näkymän.** Avaa ympäristö nimetäksesi sen otsikostaan, asettaaksesi sen kuvakkeen ja värin sekä lisätäksesi aliympäristön — ja hiiren oikean painikkeen valikko monistaa nyt ympäristön kaikkine muuttujineen ja aliympäristöineen.
+
+Korjaukset:
+
+- **Koodimallin valitseminen sulkee kirjaston.** "Käytä" vie sinut nyt suoraan takaisin Code-sivulle.
+- **Dokumentaation luonti ei enää epäonnistu valinnaisilla kentillä.** Dokumentaation luominen suunnitelmasta, jonka malli tai parametri jätti "required"-arvon asettamatta, ei enää pysähdy mallivirheeseen.
+- **Enumin poisto kysyy ensin.** Enumit saavat saman vahvistuksen kuin mallit ja reitit.
+- **Sivupalkki paljastaa valintasi.** Kun ”synkronoi sivupalkki aktiivisen välilehden kanssa” on käytössä, mallin, enumin tai reitin valinta tai luonti avaa sen ylätasot, jotta se pysyy näkyvissä puussa.
+- **Ympäristöpainike pysyy luettavana millä tahansa värillä.** Sen teksti vaihtuu nyt tummaksi tai vaaleaksi pysyäkseen luettavana ympäristön väriä vasten, kuten suorituspainike.
+- **Keskipainikkeen napsautus sulkee avoimen tiedoston.** Sivupalkin ”Avatut”-luettelon kohteen napsauttaminen keskipainikkeella sulkee sen välilehden — ja uusi Toiminta-asetus antaa piilottaa koko paneelin.
+- **Selkeämpi sanamuoto dokumentaatiosta aloitettaessa.** Tuodun API:n dokumentaatiossa painikkeessa lukee nyt ”Luo uusi pyyntö tästä dokumentaatiosta”.
+- **Kirjautuminen toimii Microsoft Store -versiossa.** Mukautetun protokollan takaisinkutsu, jonka selain palauttaa kirjautumisen jälkeen, on nyt ilmoitettu Store-paketissa, joten kirjautuminen valmistuu sen sijaan, että se aikakatkaistaisiin.
+
 ## v1.1.0
 
 🎉 **Restorm on nyt myös API-suunnittelija.** Suunnittele API:si, tarjoile se live-mockina viidellä protokollalla kerralla ja generoi sen asiakkaat — poistumatta sovelluksesta, kaikki omalla levylläsi.

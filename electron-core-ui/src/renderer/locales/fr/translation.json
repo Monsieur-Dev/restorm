@@ -439,7 +439,12 @@
     "emptyHint": "Saisissez une adresse ci-dessus pour commencer à naviguer."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Ajouter un signet"
+    "addBookmark": "Ajouter un signet",
+    "namePlaceholder": "Nom du signet",
+    "createBookmark": "Créer le signet",
+    "removeBookmark": "Supprimer le signet",
+    "bookmarkAria": "Signet : {{label}}",
+    "add": "Ajouter"
   },
   "toaster": {
     "notificationsRegion": "Notifications"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Parents",
     "recoverVersion": "Récupérer cette version"
+  },
+  "editableLabel": {
+    "unnamed": "<sans nom>"
   }
 }

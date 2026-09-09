@@ -1984,8 +1984,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   )
 
   const getTabContextMenuItems = useCallback(
-    (tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void }): ContextMenuItem[] => {
+    (tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void; togglePin: () => void }): ContextMenuItem[] => {
       const items: ContextMenuItem[] = []
+      const isPinned = tab.isPinned === true
+      items.push({
+        id: 'toggle-pin',
+        label: isPinned ? t('workbench.tabContextMenu.unpin', 'Unpin') : t('workbench.tabContextMenu.pin', 'Pin'),
+        icon: isPinned ? 'pinned' : 'pin',
+        onClick: actions.togglePin
+      })
+      items.push({ id: 'sep-pin', label: '', isSeparator: true })
       // Use the type guard, not a `tabType.includes('request')` substring
       // sniff: isAnyRequestTab matches the exact request-tab discriminants
       // and narrows to the union that carries `request`.

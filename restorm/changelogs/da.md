@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1
+
+**API-designeren styres nu fra sidepanelet.**
+
+- **Dine modeller, enums og ruter bor i sidepanelet.** De tre lister i fanerne forsvinder — modeller (med deres arvehierarki), enums og ruter (grupper og deres ruter) sidder nu direkte i sidepanelets træ. Højreklik for at omdøbe, tilføje en undermodel eller undergruppe, klone en rute, generere CRUD eller slette; træk for at omarrangere eller flytte forælder — aldrig ud af designet. Hver side viser nu kun detaljerne for det valgte element.
+- **Et overblik over dine modeller, enums og ruter.** Rodknuden i hver sektion viser nu alt under den — og Modeller får en **Graf**-fane: et klassediagram over dine modeller med deres nedarvning og referencer. Enums viser deres værdier lige ved siden af navnet.
+- **Ét sted at omdøbe.** En model, enum eller rute omdøbes fra dens store titel (blyanten), og et tomt navn viser **»<uden navn>«**, så blyanten altid er inden for rækkevidde — navnet vises ikke længere to gange på siden.
+- **Valideringsfejl peger på elementet.** Når noget er galt — en model og en enum med samme navn, en reference til noget, der ikke længere findes — forklarer en note øverst på modellen, enum'en eller ruten det.
+- **En komplet brødkrumme-sti.** Stien afspejler hele sidepanelets hierarki — mapper › design › sektion › gruppe › element — og hvert segment kan klikkes.
+- **Vælg flere, slet på én gang.** Vælg flere modeller, enums eller ruter og slet dem på én gang, efter en bekræftelse.
+- **Kopiér eller åbn kilden til en kodeskabelon med ét klik.** På siden "</> Code" viser en skabelon ved hover en knap til at kopiere dens URL eller sti og en til at åbne den — repositoriet i din browser eller mappen på disken for en lokal skabelon.
+- **Nye ruter starter med et navn.** En rute oprettet fra bunden får nu et standardnavn, så du kan omdøbe den med det samme.
+- **Forhåndsvisningsfaner, som i din editor.** Et enkelt klik åbner nu et element i en genanvendelig **forhåndsvisnings**-fane (dens navn vises i kursiv); at klikke på et andet element genbruger samme fane i stedet for at stable en ny. Dobbeltklik på den, redigér noget, eller kør en forespørgsel for at holde den åben permanent. Slå det fra under Indstillinger › Adfærd.
+- **Fastgør de faner, du holder åbne.** Højreklik på en fane og fastgør den: fastgjorte faner bliver forrest, overlever »luk de andre« og huskes pr. projekt.
+- **Miljøer får en rigtig detaljevisning.** Åbn et miljø for at omdøbe det fra dets titel, angive dets ikon og farve og tilføje et undermiljø — og højrekliksmenuen dublerer nu et miljø med alle dets variabler og undermiljøer.
+
+Rettelser:
+
+- **At vælge en kodeskabelon lukker biblioteket.** "Brug" sender dig nu direkte tilbage til Code-siden.
+- **Dokumentationsgenerering fejler ikke længere på valgfrie felter.** At generere dokumentation fra et design, hvis model eller parameter lod "required" være uindstillet, stopper ikke længere med en skabelonfejl.
+- **Sletning af en enum spørger først.** Enums får samme bekræftelse som modeller og ruter.
+- **Sidepanelet afslører dit valg.** Med »synkronisér sidepanel med aktiv fane« slået til udvider det at vælge eller oprette en model, enum eller rute dens forældre, så den forbliver synlig i træet.
+- **Miljøknappen forbliver læsbar på enhver farve.** Dens etiket skifter nu til mørk eller lys tekst for at forblive læselig mod miljøets farve, ligesom kør-knappen.
+- **Midterklik lukker en åben fil.** At midterklikke på et element i sidepanelets »Åbne«-liste lukker dens fane — og en ny Adfærd-indstilling lader dig skjule det panel helt.
+- **Klarere ordlyd når man starter fra dokumentation.** I et importeret API's dokumentation lyder knappen nu "Opret en ny forespørgsel ud fra denne dokumentation."
+- **Login virker i Microsoft Store-versionen.** Det brugerdefinerede protokol-callback, som browseren giver tilbage efter login, er nu erklæret i Store-pakken, så login fuldføres i stedet for at få timeout.
+
 ## v1.1.0
 
 🎉 **Restorm er nu også en API-designer.** Design dit API, servér det som en live-mock på tværs af fem protokoller på én gang, og generér dets klienter — uden at forlade appen, alt sammen på din egen disk.

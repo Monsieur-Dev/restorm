@@ -90,7 +90,17 @@ To track the maximized state reactively (it's workbench-wide and **not** part of
 
 #### Maximizing a tab (`allowFullscreen`)
 
-A tab opts into maximize by setting `allowFullscreen: true` on its `EditorTab`. Maximizable tabs respond to a double-click on their tab header (and to `setFullscreenTabId`) by opening their content in a fullscreen [`Modal`](../Modal/README.md). At most one tab across all split panes can be maximized at a time. The maximized state is workbench-wide (owned by `EditorWorkbench`), not per-group.
+A tab opts into maximize by setting `allowFullscreen: true` on its `EditorTab`. Maximizable tabs respond to a double-click on their tab header (and to `setFullscreenTabId`) by opening their content in a fullscreen [`Modal`](../Modal/README.md). At most one tab across all split panes can be maximized at a time. The maximized state is workbench-wide (owned by `EditorWorkbench`), not per-group. (A double-click on a **preview** tab promotes it instead of maximizing — see below.)
+
+#### Preview ("temporary") tabs (`isTemporary`)
+
+A tab may set `isTemporary: true` to render as a **preview** tab: its label is shown in italics, and a group holds **at most one** preview tab at a time — opening another preview tab in the same group replaces it. This mirrors the editor's single-click-to-preview model: the consumer opens single-clicked items as temporary and reuses the one preview slot per group.
+
+A preview tab is **promoted** to a permanent tab (the flag cleared) by:
+- a **double-click** on its tab header — wired through the `onPromoteTab?: (tabId, groupId) => void` callback (a double-click on a preview tab promotes rather than maximizing);
+- any consumer-driven signal (an edit, an explicit run) — the consumer clears `isTemporary` on the tab itself.
+
+A pinned tab and the special/singleton tabs are never temporary. The temporary flag round-trips through persistence (`temporaryTabIds`, see [Persistence](../Architecture/Persistence.md)).
 
 #### Tab content lives above the split-pane tree
 

@@ -439,7 +439,12 @@
     "emptyHint": "Adj meg egy címet fent a böngészés megkezdéséhez."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Könyvjelző hozzáadása"
+    "addBookmark": "Könyvjelző hozzáadása",
+    "namePlaceholder": "Könyvjelző neve",
+    "createBookmark": "Könyvjelző létrehozása",
+    "removeBookmark": "Könyvjelző eltávolítása",
+    "bookmarkAria": "Könyvjelző: {{label}}",
+    "add": "Hozzáadás"
   },
   "toaster": {
     "notificationsRegion": "Értesítések"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Szülők",
     "recoverVersion": "Ezen verzió visszaállítása"
+  },
+  "editableLabel": {
+    "unnamed": "<névtelen>"
   }
 }

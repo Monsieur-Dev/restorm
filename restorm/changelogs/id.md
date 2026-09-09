@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1
+
+**Perancang API kini dikendalikan dari bilah sisi.**
+
+- **Model, enum, dan rute Anda tinggal di bilah sisi.** Tiga daftar di dalam tab menghilang — model (dengan penyusunan pewarisannya), enum, dan rute (grup dan rutenya) kini berada langsung di pohon bilah sisi. Klik kanan untuk mengganti nama, menambah submodel atau subgrup, mengklon rute, menghasilkan CRUD, atau menghapus; seret untuk menyusun ulang atau memindahkan induk — tidak pernah keluar dari desain. Setiap halaman kini hanya menampilkan detail item yang dipilih.
+- **Pandangan sekilas atas model, enum, dan rute Anda.** Simpul akar setiap bagian kini mendaftar semua isinya — dan Model mendapat tab **Grafik**: diagram kelas model Anda dengan pewarisan dan referensinya. Enum menampilkan nilainya tepat di samping nama.
+- **Satu tempat untuk mengganti nama.** Model, enum, atau rute diganti namanya dari judul besarnya (pensil), dan nama kosong menampilkan **“<tanpa nama>”** agar pensil selalu terjangkau — nama tidak lagi muncul dua kali di halaman.
+- **Kesalahan validasi menunjuk ke item.** Ketika ada yang salah — model dan enum berbagi nama, referensi ke sesuatu yang tidak ada lagi — catatan di bagian atas model, enum, atau rute menjelaskannya.
+- **Breadcrumb yang lengkap.** Jejaknya mencerminkan seluruh hierarki bilah sisi — folder › desain › bagian › grup › item — dan setiap segmen dapat diklik.
+- **Pilih banyak, hapus sekaligus.** Pilih beberapa model, enum, atau rute dan hapus sekaligus, setelah konfirmasi.
+- **Salin atau buka sumber templat kode dengan satu klik.** Di halaman "</> Code", mengarahkan kursor ke templat memunculkan tombol untuk menyalin URL atau path-nya dan satu untuk membukanya — repositori di peramban Anda, atau folder di disk untuk templat lokal.
+- **Rute baru dimulai dengan nama.** Rute yang dibuat dari nol kini mendapat nama default, sehingga Anda bisa langsung menggantinya.
+- **Tab pratinjau, seperti di editor Anda.** Satu klik kini membuka item di tab **pratinjau** yang dapat digunakan kembali (namanya ditampilkan miring); mengklik item lain menggunakan kembali tab yang sama alih-alih menumpuk yang baru. Klik dua kali, edit apa pun, atau jalankan sebuah permintaan untuk membuatnya tetap terbuka permanen. Matikan di Pengaturan › Perilaku.
+- **Sematkan tab yang Anda biarkan terbuka.** Klik kanan sebuah tab lalu sematkan: tab yang disematkan tetap di depan, bertahan dari "tutup yang lain", dan diingat per proyek.
+- **Lingkungan mendapat tampilan detail yang semestinya.** Buka sebuah lingkungan untuk mengganti namanya dari judulnya, menetapkan ikon dan warnanya, serta menambahkan sublingkungan — dan menu klik kanan kini menggandakan sebuah lingkungan beserta semua variabel dan sublingkungannya.
+
+Perbaikan:
+
+- **Memilih templat kode menutup pustaka.** "Gunakan" kini membawa Anda langsung kembali ke halaman Code.
+- **Pembuatan dokumentasi tidak lagi gagal pada bidang opsional.** Membuat dokumentasi dari desain yang model atau parameternya membiarkan "required" tidak diatur tidak lagi berhenti dengan kesalahan templat.
+- **Menghapus enum meminta konfirmasi dulu.** Enum kini mendapat konfirmasi yang sama seperti model dan rute.
+- **Bilah sisi menampilkan pilihan Anda.** Dengan «sinkronkan bilah sisi dengan tab aktif» aktif, memilih atau membuat model, enum, atau rute akan membentangkan induknya agar tetap terlihat di pohon.
+- **Tombol lingkungan tetap terbaca di warna apa pun.** Labelnya kini beralih ke teks gelap atau terang agar tetap terbaca di atas warna lingkungan, seperti tombol jalankan.
+- **Klik tengah menutup file yang terbuka.** Mengklik tengah sebuah entri di daftar "Terbuka" pada bilah sisi akan menutup tabnya — dan pengaturan Perilaku baru memungkinkan Anda menyembunyikan panel itu sepenuhnya.
+- **Kata-kata yang lebih jelas saat mulai dari dokumentasi.** Dalam dokumentasi API yang diimpor, tombolnya kini berbunyi "Buat permintaan baru dari dokumentasi ini."
+- **Masuk berfungsi di versi Microsoft Store.** Callback protokol khusus yang dikembalikan peramban setelah Anda masuk kini dideklarasikan dalam paket Store, sehingga proses masuk selesai alih-alih kehabisan waktu.
+
 ## v1.1.0
 
 🎉 **Restorm kini juga sebuah perancang API.** Rancang API Anda, sajikan sebagai mock live di lima protokol sekaligus, dan hasilkan kliennya — tanpa meninggalkan aplikasi, semuanya di disk Anda sendiri.

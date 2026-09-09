@@ -344,7 +344,9 @@
     "add": "Thêm môi trường",
     "rename": "Đổi tên",
     "addSub": "Thêm môi trường con",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "duplicate": "Nhân bản môi trường",
+    "duplicateName": "{{name}} (bản sao)"
   },
   "folderView": {
     "environments": "Môi trường",
@@ -395,7 +397,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Định nghĩa các danh sách giá trị dùng lại được cho biến của bạn: bạn chọn một nhãn dễ đọc, yêu cầu sẽ gửi giá trị tương ứng. Hãy chọn hoặc tạo một kiểu liệt kê để bắt đầu."
-    }
+    },
+    "iconLabel": "Biểu tượng:",
+    "colorLabel": "Màu:"
   },
   "requestTab": {
     "deprecated": "Endpoint này đã không còn được dùng và có thể bị xóa trong phiên bản tương lai.",
@@ -465,7 +469,9 @@
       "close": "Đóng",
       "closeOthers": "Đóng các tab khác",
       "addToFavorites": "Thêm vào mục yêu thích",
-      "removeFromFavorites": "Xóa khỏi mục yêu thích"
+      "removeFromFavorites": "Xóa khỏi mục yêu thích",
+      "pin": "Ghim",
+      "unpin": "Bỏ ghim"
     }
   },
   "codeEditor": {
@@ -1005,7 +1011,11 @@
       "us": "Định dạng Mỹ (MM/DD/YYYY, 12h)",
       "iso": "Định dạng ISO (YYYY-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Định dạng được sử dụng để hiển thị ngày và giờ trong ứng dụng"
+    "dateTimeFormatDescription": "Định dạng được sử dụng để hiển thị ngày và giờ trong ứng dụng",
+    "showOpenedList": "Hiển thị danh sách tệp đang mở trong thanh bên",
+    "showOpenedListDescription": "Hiển thị bảng « Đang mở » liệt kê các tệp hiện đang mở trong không gian làm việc",
+    "temporaryTabs": "Thẻ xem trước",
+    "temporaryTabsDescription": "Mở các mục trong một thẻ xem trước có thể tái sử dụng (hiển thị nghiêng). Nhấp đúp, chỉnh sửa hoặc chạy một yêu cầu sẽ giữ thẻ mở cố định."
   },
   "console": {
     "title": "Bảng điều khiển",
@@ -1260,7 +1270,7 @@
       "externalDocs": "Tài liệu bên ngoài",
       "examplePayload": "Ví dụ payload",
       "operationId": "operationId",
-      "addRequest": "+ Thêm yêu cầu"
+      "addRequest": "+ Tạo yêu cầu mới từ tài liệu này"
     },
     "apiInfo": {
       "version": "Phiên bản",
@@ -2236,7 +2246,7 @@
       "deleteImpactChild": "{{name}} mất kế thừa (các thuộc tính riêng vẫn giữ)",
       "description": "Mô tả",
       "descriptionPlaceholder": "Model này đại diện cho điều gì (tùy chọn)",
-      "newName": "NewModel",
+      "newName": "MôHìnhMới",
       "selectPrompt": "Chọn một mô hình, hoặc tạo mới.",
       "tabs": {
         "schema": "Lược đồ",
@@ -2256,11 +2266,13 @@
       "addEnum": "Thêm enum",
       "addValue": "Thêm giá trị",
       "valueHeader": "Giá trị",
-      "newName": "NewEnum",
+      "newName": "EnumMới",
       "selectPrompt": "Chọn một enum, hoặc tạo mới — tập giá trị đóng dùng được làm kiểu thuộc tính.",
       "nameHeader": "Tên",
       "description": "Mô tả",
-      "descriptionPlaceholder": "Enum này đại diện cho điều gì (tùy chọn)"
+      "descriptionPlaceholder": "Enum này đại diện cho điều gì (tùy chọn)",
+      "deleteTitle": "Xóa {{name}}?",
+      "deleteImpact": "Mọi thuộc tính hoặc tham số đã dùng enum này sẽ mất tham chiếu."
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2333,10 @@
       },
       "extractedTitle": "Đã ghi tệp",
       "openOutput": "Mở thư mục đầu ra",
+      "copySource": "Sao chép nguồn",
+      "copied": "Đã sao chép!",
+      "openSourceUrl": "Mở URL của mẫu",
+      "openSourceFolder": "Mở thư mục của mẫu",
       "refresh": "Làm mới mẫu này từ nguồn của nó",
       "removeConfirm": "Template “{{name}}” sẽ bị xóa khỏi thiết kế này (các tệp đã tạo trên đĩa vẫn được giữ nguyên).",
       "removeTitle": "Xóa Template này?",
@@ -2511,7 +2527,8 @@
     "routes": {
       "addGroup": "Thêm nhóm",
       "addRoute": "Thêm tuyến",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NhómMới",
+      "newRouteName": "TuyếnMới",
       "selectPrompt": "Chọn một nhóm hoặc một tuyến, hoặc tạo nhóm mới.",
       "deleteGroupTitle": "Xóa {{name}}?",
       "deleteGroupImpact": "Nhóm và {{count}} tuyến của nó sẽ bị xóa.",
@@ -2663,6 +2680,21 @@
     "projections": {
       "title": "Phép chiếu",
       "hint": "Cùng một thao tác, theo cách mà mỗi giao thức được phục vụ hiển thị nó."
+    },
+    "listing": {
+      "models": {
+        "empty": "Tạo model đầu tiên của bạn"
+      },
+      "enums": {
+        "empty": "Tạo enum đầu tiên của bạn"
+      },
+      "routes": {
+        "empty": "Tạo route đầu tiên của bạn"
+      },
+      "tabs": {
+        "list": "Danh sách",
+        "graph": "Đồ thị"
+      }
     }
   },
   "mqtt": {
@@ -3341,5 +3373,12 @@
     "editNamed": "Chỉnh sửa {{name}}",
     "confirmReplace": "Đã có một cookie tên \"{{name}}\" ở đây. Thay thế nó?",
     "replaceButton": "Thay thế"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Thêm thẻ",
+    "namePlaceholder": "Tên thẻ",
+    "createBookmark": "Tạo thẻ",
+    "removeBookmark": "Xóa thẻ",
+    "bookmarkAria": "Thẻ: {{label}}"
   }
 }

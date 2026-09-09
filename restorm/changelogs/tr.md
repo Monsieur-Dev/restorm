@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1
+
+**API tasarımcısı artık kenar çubuğundan yönetiliyor.**
+
+- **Modelleriniz, enum'larınız ve rotalarınız kenar çubuğunda yaşıyor.** Sekmelerdeki üç liste kayboluyor — modeller (kalıtım iç içeliğiyle), enum'lar ve rotalar (gruplar ve rotaları) artık doğrudan kenar çubuğu ağacında yer alıyor. Sağ tıklayarak yeniden adlandırın, bir alt model veya alt grup ekleyin, bir rotayı klonlayın, CRUD üretin veya silin; sıralamayı değiştirmek veya üst öğeyi taşımak için sürükleyin — asla tasarımın dışına değil. Her sayfa artık yalnızca seçili öğenin ayrıntılarını gösteriyor.
+- **Modellerinize, enumlarınıza ve rotalarınıza kuş bakışı.** Her bölümün kök düğümü artık altındaki her şeyi listeler — ve Modeller bir **Grafik** sekmesi kazanır: modellerinizin kalıtım ve referanslarıyla bir sınıf diyagramı. Enumlar değerlerini adın hemen yanında gösterir.
+- **Yeniden adlandırmak için tek yer.** Bir model, enum veya rota büyük başlığından (kalem) yeniden adlandırılır ve boş bir ad **“<adsız>”** gösterir; böylece kalem her zaman erişilebilir kalır — ad artık sayfada iki kez görünmez.
+- **Doğrulama hataları öğeyi işaret eder.** Bir şey yanlış olduğunda — aynı adı paylaşan bir model ve enum, artık var olmayan bir şeye referans — modelin, enumun veya rotanın üstündeki bir not bunu açıklar.
+- **Eksiksiz bir gezinti yolu.** İz, kenar çubuğunun tüm hiyerarşisini yansıtır — klasörler › tasarım › bölüm › grup › öğe — ve her parça tıklanabilir.
+- **Birkaçını seç, tek seferde sil.** Birden çok modeli, enumu veya rotayı seçin ve bir onaydan sonra hepsini tek seferde silin.
+- **Bir kod şablonunun kaynağını tek tıklamayla kopyalayın veya açın.** "</> Code" sayfasında bir şablonun üzerine gelindiğinde URL'sini veya yolunu kopyalamak için bir düğme ve onu açmak için bir düğme belirir — tarayıcınızdaki depo veya yerel bir şablon için diskteki klasör.
+- **Yeni rotalar bir adla başlar.** Sıfırdan oluşturulan bir rota artık varsayılan bir ad alır, böylece onu hemen yeniden adlandırabilirsiniz.
+- **Editörünüzdeki gibi önizleme sekmeleri.** Tek tıklama artık bir öğeyi yeniden kullanılabilir bir **önizleme** sekmesinde açar (adı italik gösterilir); başka bir öğeye tıklamak yeni bir sekme yığmak yerine aynı sekmeyi yeniden kullanır. Çift tıklama, herhangi bir düzenleme veya bir isteği çalıştırma sekmeyi kalıcı olarak açık tutar. Ayarlar › Davranış'tan kapatın.
+- **Açık tuttuğunuz sekmeleri sabitleyin.** Bir sekmeye sağ tıklayıp sabitleyin: sabitlenen sekmeler önde kalır, "diğerlerini kapat" işlemine dayanır ve proje bazında hatırlanır.
+- **Ortamlar gerçek bir ayrıntı görünümüne kavuşuyor.** Bir ortamı açarak başlığından yeniden adlandırın, simgesini ve rengini ayarlayın ve bir alt ortam ekleyin — ve sağ tık menüsü artık bir ortamı tüm değişkenleri ve alt ortamlarıyla birlikte çoğaltır.
+
+Düzeltmeler:
+
+- **Bir kod şablonu seçmek kütüphaneyi kapatır.** "Kullan" artık sizi doğrudan Code sayfasına geri götürür.
+- **Belge oluşturma artık isteğe bağlı alanlarda başarısız olmuyor.** Modeli veya parametresi "required" değerini ayarlanmamış bırakan bir tasarımdan belge oluşturmak artık bir şablon hatasıyla durmuyor.
+- **Bir enumu silmek önce sorar.** Enumlar, modeller ve rotalarla aynı onayı alır.
+- **Kenar çubuğu seçiminizi ortaya çıkarır.** «Kenar çubuğunu etkin sekmeyle eşitle» açıkken bir model, enum veya rota seçmek ya da oluşturmak, ağaçta görünür kalması için üst öğelerini açar.
+- **Ortam düğmesi her renkte okunaklı kalır.** Etiketi artık, çalıştır düğmesi gibi, ortamın rengine karşı okunaklı kalmak için koyu veya açık metne geçer.
+- **Orta tıklama açık bir dosyayı kapatır.** Kenar çubuğundaki "Açık" listesindeki bir öğeye orta tıklamak sekmesini kapatır — ve yeni bir Davranış ayarı o paneli tamamen gizlemenizi sağlar.
+- **Dokümantasyondan başlarken daha net ifade.** İçe aktarılan bir API'nin dokümantasyonunda düğme artık "Bu dokümantasyondan yeni bir istek oluştur" yazıyor.
+- **Microsoft Store sürümünde oturum açma çalışıyor.** Tarayıcının oturum açtıktan sonra geri verdiği özel protokol geri çağrısı artık Store paketinde tanımlı olduğundan, oturum açma zaman aşımına uğramak yerine tamamlanıyor.
+
 ## v1.1.0
 
 🎉 **Restorm artık aynı zamanda bir API tasarımcısı.** API'nizi tasarlayın, aynı anda beş protokolde canlı bir mock olarak sunun ve istemcilerini üretin — uygulamadan çıkmadan, tümü kendi diskinizde.

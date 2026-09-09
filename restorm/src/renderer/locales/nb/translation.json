@@ -345,7 +345,9 @@
     "add": "Legg til miljø",
     "rename": "Gi nytt navn",
     "addSub": "Legg til undermiljø",
-    "delete": "Slett"
+    "delete": "Slett",
+    "duplicate": "Dupliser miljøet",
+    "duplicateName": "{{name}} (kopi)"
   },
   "folderView": {
     "environments": "Miljøer",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definer gjenbrukbare verdilister for variablene dine: du velger en lesbar etikett, og requesten sender den tilknyttede verdien. Velg eller opprett en enumerasjon for å komme i gang."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Farge:"
   },
   "requestTab": {
     "deprecated": "Dette endepunktet er utdatert og kan bli fjernet i en fremtidig versjon.",
@@ -466,7 +470,9 @@
       "close": "Lukk",
       "closeOthers": "Lukk andre",
       "addToFavorites": "Legg til i favoritter",
-      "removeFromFavorites": "Fjern fra favoritter"
+      "removeFromFavorites": "Fjern fra favoritter",
+      "pin": "Fest",
+      "unpin": "Løsne"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US-format (MM/DD/ÅÅÅÅ, 12t)",
       "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24t)"
     },
-    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen"
+    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen",
+    "showOpenedList": "Vis listen over åpne filer i sidefeltet",
+    "showOpenedListDescription": "Viser panelet «Åpnet» med filene som er åpne i arbeidsområdet nå",
+    "temporaryTabs": "Forhåndsvisningsfaner",
+    "temporaryTabsDescription": "Åpner elementer i én gjenbrukbar forhåndsvisningsfane (vist i kursiv). Et dobbeltklikk, en redigering eller å kjøre en forespørsel gjør fanen permanent."
   },
   "console": {
     "title": "Konsoll",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Eksterne dokumenter",
       "examplePayload": "Eksempel-payload",
       "operationId": "operationId",
-      "addRequest": "+ Legg til en forespørsel"
+      "addRequest": "+ Opprett en ny forespørsel fra denne dokumentasjonen"
     },
     "apiInfo": {
       "version": "Versjon",
@@ -2237,7 +2247,7 @@
       "deleteImpactChild": "{{name}} mister arven sin (egne egenskaper beholdes)",
       "description": "Beskrivelse",
       "descriptionPlaceholder": "Hva denne modellen representerer (valgfritt)",
-      "newName": "NewModel",
+      "newName": "NyModell",
       "selectPrompt": "Velg en modell, eller opprett en.",
       "tabs": {
         "schema": "Skjema",
@@ -2257,11 +2267,13 @@
       "addEnum": "Legg til en enum",
       "addValue": "Legg til en verdi",
       "valueHeader": "Verdi",
-      "newName": "NewEnum",
+      "newName": "NyEnum",
       "selectPrompt": "Velg en enum, eller opprett en — et lukket sett verdier som kan brukes som egenskapstype.",
       "nameHeader": "Navn",
       "description": "Beskrivelse",
-      "descriptionPlaceholder": "Hva denne enumen representerer (valgfritt)"
+      "descriptionPlaceholder": "Hva denne enumen representerer (valgfritt)",
+      "deleteTitle": "Slette {{name}}?",
+      "deleteImpact": "Enhver egenskap eller parameter som brukte denne enumen, mister referansen sin."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2334,10 @@
       },
       "extractedTitle": "Filer skrevet",
       "openOutput": "Åpne utdatamappen",
+      "copySource": "Kopier kilden",
+      "copied": "Kopiert!",
+      "openSourceUrl": "Åpne malens URL",
+      "openSourceFolder": "Åpne malmappen",
       "refresh": "Oppdater denne malen fra kilden",
       "removeConfirm": "Template «{{name}}» fjernes fra dette designet (allerede genererte filer på disken forblir urørt).",
       "removeTitle": "Fjerne dette Template?",
@@ -2512,7 +2528,8 @@
     "routes": {
       "addGroup": "Legg til en gruppe",
       "addRoute": "Legg til en rute",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NyGruppe",
+      "newRouteName": "NyRute",
       "selectPrompt": "Velg en gruppe eller en rute, eller opprett en gruppe.",
       "deleteGroupTitle": "Slette {{name}}?",
       "deleteGroupImpact": "Gruppen og dens {{count}} ruter slettes.",
@@ -2664,6 +2681,21 @@
     "projections": {
       "title": "Projeksjoner",
       "hint": "Den samme operasjonen, slik hvert servert protokoll eksponerer den."
+    },
+    "listing": {
+      "models": {
+        "empty": "Lag din første modell"
+      },
+      "enums": {
+        "empty": "Lag din første enum"
+      },
+      "routes": {
+        "empty": "Lag din første rute"
+      },
+      "tabs": {
+        "list": "Liste",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {
@@ -3342,5 +3374,12 @@
     "editNamed": "Rediger {{name}}",
     "confirmReplace": "En informasjonskapsel med navnet «{{name}}» finnes allerede her. Erstatte den?",
     "replaceButton": "Erstatt"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Legg til tagg",
+    "namePlaceholder": "Taggnavn",
+    "createBookmark": "Opprett tagg",
+    "removeBookmark": "Fjern tagg",
+    "bookmarkAria": "Tagg: {{label}}"
   }
 }

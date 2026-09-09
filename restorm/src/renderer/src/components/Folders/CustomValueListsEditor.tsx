@@ -71,6 +71,17 @@ export interface CustomValueListsEditorProps {
    * description — a concern the shared list model doesn't carry, so it stays
    * with the caller rather than in this editor. */
   renderSelectedListExtra?: (listId: string) => React.ReactNode
+  /** Hide the left "lists" panel entirely and render only the selected list's
+   * values pane. The consumer then owns list navigation (add / rename / delete /
+   * select) elsewhere — the design enums drive it from the sidebar tree. */
+  hideListsPanel?: boolean
+  /** Controlled selection. When provided, the editor shows this list's values
+   * instead of tracking its own selection; pair it with `onSelectList`. Leave
+   * undefined for the historical self-managed selection (env folders). */
+  selectedListId?: string | null
+  /** Notified when the user picks a list in the (visible) lists panel. Only
+   * meaningful alongside `selectedListId` (controlled mode). */
+  onSelectList?: (listId: string | null) => void
 }
 
 /**
@@ -94,7 +105,10 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
   testIdPrefix = 'custom-values',
   filterable = false,
   reorderableLists = false,
-  renderSelectedListExtra
+  renderSelectedListExtra,
+  hideListsPanel = false,
+  selectedListId,
+  onSelectList
 }) => {
   const { t } = useTranslation()
   const words: CustomValueListsWording = {
@@ -111,7 +125,16 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
   const [listFilter, setListFilter] = useState('')
 
   const [lists, setLists] = useState<CustomValueList[]>(() => listsProp)
-  const [selectedId, setSelectedId] = useState<string | null>(() => listsProp[0]?.id ?? null)
+  // Selection is CONTROLLED when `selectedListId` is provided (design enums drive
+  // it from the sidebar); otherwise self-managed (env folders). `setSelectedId`
+  // routes to whichever owns it, so the internal call sites are unchanged.
+  const controlledSelection = selectedListId !== undefined
+  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(() => listsProp[0]?.id ?? null)
+  const selectedId = controlledSelection ? (selectedListId ?? null) : internalSelectedId
+  const setSelectedId = useCallback((id: string | null): void => {
+    if (controlledSelection) onSelectList?.(id)
+    else setInternalSelectedId(id)
+  }, [controlledSelection, onSelectList])
   const [editingId, setEditingId] = useState<string | null>(null)
 
   // Latest committed lists, updated synchronously on every write. Text edits
@@ -148,7 +171,7 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
     persist([...listsRef.current, newList])
     setSelectedId(id)
     setEditingId(id)
-  }, [persist, words.newListName])
+  }, [persist, words.newListName, setSelectedId])
 
   const handleRename = useCallback((id: string, name: string) => {
     const trimmed = name.trim()
@@ -177,7 +200,7 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
     const next = listsRef.current.filter((l) => l.id !== id)
     persist(next)
     if (selectedId === id) setSelectedId(next[0]?.id ?? null)
-  }, [persist, selectedId])
+  }, [persist, selectedId, setSelectedId])
 
   const setEntries = useCallback((listId: string, entries: CustomValueEntry[]) => {
     const current = listsRef.current.find((l) => l.id === listId)
@@ -257,6 +280,87 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
     return items.filter((i) => keep.has(i.id))
   }, [items, lists, listFilter])
 
+  const valuesPane = (
+    <div style={{ minHeight: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--editor-background)' }}>
+      <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
+        {selected ? (
+          <Pane
+            title={`${words.valuesTitle} - ${selected.name}`}
+            collapsible={false}
+            minSize={80}
+            data-testid={`${testIdPrefix}-entries-pane`}
+            headerActions={disabled ? undefined : (
+              <HeaderHoverTooltip label={words.addEntry}>
+                <Button
+                  secondary
+                  small
+                  icon="add"
+                  options={{ ariaLabel: words.addEntry }}
+                  onClick={handleAddEntry}
+                  data-testid={`${testIdPrefix}-add-entry-button`}
+                />
+              </HeaderHoverTooltip>
+            )}
+          >
+            <div style={{ padding: 8, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+              {renderSelectedListExtra?.(selected.id)}
+              {/* A list with no values shows the table's own empty row rather
+                  than an italic "no values yet" line: the row is where the
+                  user types the first value, and a placeholder next to it
+                  would label a field that is ready for input as absent.
+                  Bringing the line back means rendering it above this table
+                  when `selected.entries.length === 0` — the table stays as
+                  it is either way. */}
+              <KeyValueTable
+                // Remount on list switch: the table seeds its rows once and
+                // then only adopts props that differ from what it emitted,
+                // so sharing one instance across lists would have it argue
+                // with itself about whose rows are authoritative.
+                key={selected.id}
+                ref={entriesTableRef}
+                initialRows={entryRows}
+                onRowsChange={handleEntryRowsChange}
+                keyHeader={words.keyHeader}
+                valueHeader={words.valueHeader}
+                showDescription={false}
+                showEnabledToggle={showEnabledToggle}
+                showValue={showValue}
+                disabled={disabled}
+                persistenceId={entriesPersistenceId}
+                data-testid={`${testIdPrefix}-entries-table`}
+              />
+            </div>
+          </Pane>
+        ) : (
+          <Pane title={words.valuesTitle} collapsible={false} minSize={80} data-testid={`${testIdPrefix}-entries-pane`}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--descriptionForeground)', fontStyle: 'italic', padding: 16 }}>
+              {/* The empty state carries a short explanation of the feature,
+                  not just a prompt — cap the line length so the paragraph
+                  stays readable when the pane is wide. */}
+              <span style={{ maxWidth: 520, textAlign: 'center', lineHeight: 1.5 }}>
+                {words.selectList}
+              </span>
+            </div>
+          </Pane>
+        )}
+      </SplitView>
+    </div>
+  )
+
+  // Values-only mode: the consumer (design enums) owns list navigation in the
+  // sidebar, so we drop the left panel + sash entirely and fill with the values.
+  if (hideListsPanel) {
+    return (
+      <div
+        className="custom-values-panel custom-values-panel-values-only"
+        style={{ width: '100%', height: '100%', display: 'flex', minHeight: 0 }}
+        data-testid={`${testIdPrefix}-values-only`}
+      >
+        {valuesPane}
+      </div>
+    )
+  }
+
   return (
     <VerticalSashContainer
       data-testid={`${testIdPrefix}-sash-container`}
@@ -319,72 +423,7 @@ export const CustomValueListsEditor: React.FC<CustomValueListsEditorProps> = ({
           </SplitView>
         </div>
       }
-      Right={
-        <div style={{ minHeight: 0, display: 'flex', boxSizing: 'border-box', backgroundColor: 'var(--editor-background)' }}>
-          <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }}>
-            {selected ? (
-              <Pane
-                title={`${words.valuesTitle} - ${selected.name}`}
-                collapsible={false}
-                minSize={80}
-                data-testid={`${testIdPrefix}-entries-pane`}
-                headerActions={disabled ? undefined : (
-                  <HeaderHoverTooltip label={words.addEntry}>
-                    <Button
-                      secondary
-                      small
-                      icon="add"
-                      options={{ ariaLabel: words.addEntry }}
-                      onClick={handleAddEntry}
-                      data-testid={`${testIdPrefix}-add-entry-button`}
-                    />
-                  </HeaderHoverTooltip>
-                )}
-              >
-                <div style={{ padding: 8, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                  {renderSelectedListExtra?.(selected.id)}
-                  {/* A list with no values shows the table's own empty row rather
-                      than an italic "no values yet" line: the row is where the
-                      user types the first value, and a placeholder next to it
-                      would label a field that is ready for input as absent.
-                      Bringing the line back means rendering it above this table
-                      when `selected.entries.length === 0` — the table stays as
-                      it is either way. */}
-                  <KeyValueTable
-                    // Remount on list switch: the table seeds its rows once and
-                    // then only adopts props that differ from what it emitted,
-                    // so sharing one instance across lists would have it argue
-                    // with itself about whose rows are authoritative.
-                    key={selected.id}
-                    ref={entriesTableRef}
-                    initialRows={entryRows}
-                    onRowsChange={handleEntryRowsChange}
-                    keyHeader={words.keyHeader}
-                    valueHeader={words.valueHeader}
-                    showDescription={false}
-                    showEnabledToggle={showEnabledToggle}
-                    showValue={showValue}
-                    disabled={disabled}
-                    persistenceId={entriesPersistenceId}
-                    data-testid={`${testIdPrefix}-entries-table`}
-                  />
-                </div>
-              </Pane>
-            ) : (
-              <Pane title={words.valuesTitle} collapsible={false} minSize={80} data-testid={`${testIdPrefix}-entries-pane`}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--descriptionForeground)', fontStyle: 'italic', padding: 16 }}>
-                  {/* The empty state carries a short explanation of the feature,
-                      not just a prompt — cap the line length so the paragraph
-                      stays readable when the pane is wide. */}
-                  <span style={{ maxWidth: 520, textAlign: 'center', lineHeight: 1.5 }}>
-                    {words.selectList}
-                  </span>
-                </div>
-              </Pane>
-            )}
-          </SplitView>
-        </div>
-      }
+      Right={valuesPane}
       initialWidth={260}
       minLeftWidth={MIN_LEFT_WIDTH}
       minRightWidth={RIGHT_MIN_WIDTH}

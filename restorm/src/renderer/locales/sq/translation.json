@@ -345,7 +345,9 @@
     "add": "Shto mjedis",
     "rename": "Riemërto",
     "addSub": "Shto nën-mjedis",
-    "delete": "Fshi"
+    "delete": "Fshi",
+    "duplicate": "Dyfisho mjedisin",
+    "duplicateName": "{{name}} (kopje)"
   },
   "folderView": {
     "environments": "Mjediset",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Përcaktoni lista vlerash të ripërdorshme për variablat tuaja: ju zgjidhni një etiketë të lexueshme, kërkesa dërgon vlerën e lidhur. Zgjidhni ose krijoni një enumerim për të filluar."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Ngjyra:"
   },
   "requestTab": {
     "deprecated": "Kjo pikë fundore është e vjetëruar dhe mund të hiqet në një version të ardhshëm.",
@@ -466,7 +470,9 @@
       "close": "Mbyll",
       "closeOthers": "Mbyll të tjerat",
       "addToFavorites": "Shto te të preferuarat",
-      "removeFromFavorites": "Hiq nga të preferuarat"
+      "removeFromFavorites": "Hiq nga të preferuarat",
+      "pin": "Fikso",
+      "unpin": "Hiq fiksimin"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "Format US (MM/DD/VVVV, 12 orë)",
       "iso": "Format ISO (VVVV-MM-DD, 24 orë)"
     },
-    "dateTimeFormatDescription": "Formati i përdorur për shfaqjen e datave dhe orëve në aplikacion"
+    "dateTimeFormatDescription": "Formati i përdorur për shfaqjen e datave dhe orëve në aplikacion",
+    "showOpenedList": "Shfaq listën e skedarëve të hapur në shiritin anësor",
+    "showOpenedListDescription": "Shfaq panelin «Të hapura» që rendit skedarët aktualisht të hapur në hapësirën e punës",
+    "temporaryTabs": "Skedat e parapamjes",
+    "temporaryTabsDescription": "Hap elementet në një skedë të vetme parapamjeje të ripërdorshme (shfaqet me shkronja të pjerrëta). Një klikim i dyfishtë, një ndryshim ose ekzekutimi i një kërkese e bën skedën të përhershme."
   },
   "console": {
     "title": "Konsola",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Dokumente të jashtme",
       "examplePayload": "Shembull ngarkese",
       "operationId": "operationId",
-      "addRequest": "+ Shto një kërkesë"
+      "addRequest": "+ Krijo një kërkesë të re nga ky dokumentacion"
     },
     "apiInfo": {
       "version": "Versioni",
@@ -2237,7 +2247,7 @@
       "deleteImpactChild": "{{name}} humb trashëgiminë e tij (vetitë e veta mbeten)",
       "description": "Përshkrimi",
       "descriptionPlaceholder": "Çfarë përfaqëson ky model (opsionale)",
-      "newName": "NewModel",
+      "newName": "ModelIRi",
       "selectPrompt": "Zgjidhni një model ose krijoni një.",
       "tabs": {
         "schema": "Skema",
@@ -2257,11 +2267,13 @@
       "addEnum": "Shto një enum",
       "addValue": "Shto një vlerë",
       "valueHeader": "Vlera",
-      "newName": "NewEnum",
+      "newName": "EnumIRi",
       "selectPrompt": "Zgjidhni një enum ose krijoni një — një bashkësi e mbyllur vlerash e përdorshme si tip vetie.",
       "nameHeader": "Emri",
       "description": "Përshkrimi",
-      "descriptionPlaceholder": "Çfarë përfaqëson ky enum (opsionale)"
+      "descriptionPlaceholder": "Çfarë përfaqëson ky enum (opsionale)",
+      "deleteTitle": "Të fshihet {{name}}?",
+      "deleteImpact": "Çdo veti ose parametër që përdorte këtë enum do të humbasë referencën e tij."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2334,10 @@
       },
       "extractedTitle": "Skedarët u shkruan",
       "openOutput": "Hap dosjen e daljes",
+      "copySource": "Kopjo burimin",
+      "copied": "U kopjua!",
+      "openSourceUrl": "Hap URL-në e shabllonit",
+      "openSourceFolder": "Hap dosjen e shabllonit",
       "refresh": "Rifresko këtë shabllon nga burimi i tij",
       "removeConfirm": "Template «{{name}}» do të hiqet nga ky dizajn (skedarët tashmë të gjeneruar në disk mbeten të paprekur).",
       "removeTitle": "Të hiqet ky Template?",
@@ -2512,7 +2528,8 @@
     "routes": {
       "addGroup": "Shto një grup",
       "addRoute": "Shto një rrugë",
-      "newGroupName": "NewGroup",
+      "newGroupName": "GrupIRi",
+      "newRouteName": "RrugëERe",
       "selectPrompt": "Zgjidhni një grup ose një rrugë, ose krijoni një grup.",
       "deleteGroupTitle": "Të fshihet {{name}}?",
       "deleteGroupImpact": "Grupi dhe {{count}} rrugët e tij do të fshihen.",
@@ -2664,6 +2681,21 @@
     "projections": {
       "title": "Projeksionet",
       "hint": "I njëjti veprim, ashtu siç e ekspozon çdo protokoll i shërbyer."
+    },
+    "listing": {
+      "models": {
+        "empty": "Krijoni modelin tuaj të parë"
+      },
+      "enums": {
+        "empty": "Krijoni enum-in tuaj të parë"
+      },
+      "routes": {
+        "empty": "Krijoni route-n tuaj të parë"
+      },
+      "tabs": {
+        "list": "Listë",
+        "graph": "Grafik"
+      }
     }
   },
   "mqtt": {
@@ -3342,5 +3374,12 @@
     "editNamed": "Redakto {{name}}",
     "confirmReplace": "Këtu ekziston tashmë një cookie me emrin «{{name}}». Ta zëvendësoni?",
     "replaceButton": "Zëvendëso"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Shto etiketë",
+    "namePlaceholder": "Emri i etiketës",
+    "createBookmark": "Krijo etiketë",
+    "removeBookmark": "Hiq etiketën",
+    "bookmarkAria": "Etiketë: {{label}}"
   }
 }

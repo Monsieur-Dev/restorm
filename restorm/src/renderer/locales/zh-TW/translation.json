@@ -344,7 +344,9 @@
     "add": "新增環境",
     "rename": "重新命名",
     "addSub": "新增子環境",
-    "delete": "刪除"
+    "delete": "刪除",
+    "duplicate": "複製環境",
+    "duplicateName": "{{name}}（複本）"
   },
   "folderView": {
     "environments": "環境",
@@ -395,7 +397,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "為變數定義可重複使用的值清單：您選擇易讀的標籤，請求會送出關聯的值。選取或建立一個列舉即可開始。"
-    }
+    },
+    "iconLabel": "圖示：",
+    "colorLabel": "顏色："
   },
   "requestTab": {
     "deprecated": "此端點已淘汰，未來版本中可能會移除。",
@@ -465,7 +469,9 @@
       "close": "關閉",
       "closeOthers": "關閉其他",
       "addToFavorites": "加入我的最愛",
-      "removeFromFavorites": "從我的最愛移除"
+      "removeFromFavorites": "從我的最愛移除",
+      "pin": "釘選",
+      "unpin": "取消釘選"
     }
   },
   "codeEditor": {
@@ -1005,7 +1011,11 @@
       "us": "美式格式（MM/DD/YYYY，12 小時制）",
       "iso": "ISO 格式（YYYY-MM-DD，24 小時制）"
     },
-    "dateTimeFormatDescription": "應用程式顯示日期與時間所使用的格式"
+    "dateTimeFormatDescription": "應用程式顯示日期與時間所使用的格式",
+    "showOpenedList": "在側邊欄顯示已開啟檔案清單",
+    "showOpenedListDescription": "顯示「已開啟」面板，列出目前在工作區中開啟的檔案",
+    "temporaryTabs": "預覽分頁",
+    "temporaryTabsDescription": "在單一可重複使用的預覽分頁（以斜體顯示）中開啟項目。雙擊、編輯或執行請求會使分頁固定。"
   },
   "console": {
     "title": "主控台",
@@ -1260,7 +1270,7 @@
       "externalDocs": "外部文件",
       "examplePayload": "範例酬載",
       "operationId": "operationId",
-      "addRequest": "+ 新增請求"
+      "addRequest": "+ 從此文件建立新請求"
     },
     "apiInfo": {
       "version": "版本",
@@ -2236,7 +2246,7 @@
       "deleteImpactChild": "{{name}} 將失去繼承（其自身屬性保留）",
       "description": "描述",
       "descriptionPlaceholder": "此模型表示的內容（選填）",
-      "newName": "NewModel",
+      "newName": "新模型",
       "selectPrompt": "選擇一個模型，或建立一個。",
       "tabs": {
         "schema": "結構",
@@ -2256,11 +2266,13 @@
       "addEnum": "新增列舉",
       "addValue": "新增值",
       "valueHeader": "值",
-      "newName": "NewEnum",
+      "newName": "新列舉",
       "selectPrompt": "選擇一個列舉，或建立一個 —— 可用作屬性型別的封閉值集合。",
       "nameHeader": "名稱",
       "description": "描述",
-      "descriptionPlaceholder": "此列舉表示的內容（選填）"
+      "descriptionPlaceholder": "此列舉表示的內容（選填）",
+      "deleteTitle": "刪除 {{name}}？",
+      "deleteImpact": "任何使用此列舉的屬性或參數都將失去其參照。"
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2333,10 @@
       },
       "extractedTitle": "已寫入檔案",
       "openOutput": "開啟輸出資料夾",
+      "copySource": "複製來源",
+      "copied": "已複製！",
+      "openSourceUrl": "開啟範本 URL",
+      "openSourceFolder": "開啟範本資料夾",
       "refresh": "從來源重新整理此範本",
       "removeConfirm": "Template「{{name}}」將從此設計中移除（磁碟上已產生的檔案維持不變）。",
       "removeTitle": "移除此 Template？",
@@ -2511,7 +2527,8 @@
     "routes": {
       "addGroup": "新增群組",
       "addRoute": "新增路由",
-      "newGroupName": "NewGroup",
+      "newGroupName": "新群組",
+      "newRouteName": "新路由",
       "selectPrompt": "選擇一個群組或路由，或建立一個群組。",
       "deleteGroupTitle": "刪除 {{name}}？",
       "deleteGroupImpact": "該群組及其 {{count}} 條路由將被刪除。",
@@ -2663,6 +2680,21 @@
     "projections": {
       "title": "投影",
       "hint": "同一操作，以每個所服務的通訊協定各自公開的形式呈現。"
+    },
+    "listing": {
+      "models": {
+        "empty": "建立你的第一個模型"
+      },
+      "enums": {
+        "empty": "建立你的第一個列舉"
+      },
+      "routes": {
+        "empty": "建立你的第一個路由"
+      },
+      "tabs": {
+        "list": "清單",
+        "graph": "圖"
+      }
     }
   },
   "mqtt": {
@@ -3341,5 +3373,12 @@
     "editNamed": "編輯 {{name}}",
     "confirmReplace": "此處已存在名為「{{name}}」的 Cookie。是否取代？",
     "replaceButton": "取代"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "新增標籤",
+    "namePlaceholder": "標籤名稱",
+    "createBookmark": "建立標籤",
+    "removeBookmark": "移除標籤",
+    "bookmarkAria": "標籤：{{label}}"
   }
 }

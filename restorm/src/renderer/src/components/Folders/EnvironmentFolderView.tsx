@@ -14,6 +14,7 @@ import {
   IconSelect,
   ColorPicker,
   Tooltip,
+  EditableLabel,
   type KeyValueTableHandle
 } from 'electron-core-ui/renderer'
 import { RestormKeyValueTable } from '../RestormKeyValueTable'
@@ -357,6 +358,31 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     setEditingEnvId(newEnv.id)
   }, [t, folder.id, localEnvironments, updateEnvironments])
 
+  // Handler for duplicating an environment: a DEEP copy (its variables and its
+  // whole sub-environment subtree), with fresh ids throughout, inserted as a
+  // sibling of the source. A sub-env rides on its top-level env's save unit, so
+  // one ENVIRONMENT_CREATED on the copied root records the subtree.
+  const handleDuplicateEnvironment = useCallback((envId: string) => {
+    const src = findEnvironmentById(localEnvironments, envId)
+    if (src === null) return
+    const parentId = findParentEnvironmentId(localEnvironments, envId)
+    const reId = (env: Environment): Environment => ({
+      ...env,
+      id: generateEnvironmentId(),
+      ...(env.subEnvironments ? { subEnvironments: env.subEnvironments.map(reId) } : {})
+    })
+    const cloned = reId(JSON.parse(JSON.stringify(src)) as Environment)
+    cloned.name = t('environment.duplicateName', '{{name}} (copy)', { name: src.name })
+    const reactive = makeReactiveEnvironment(cloned, folder.id, parentId)
+    const newEnvironments = parentId !== undefined
+      ? addSubEnvironment(localEnvironments, parentId, reactive)
+      : addEnvironmentToList(localEnvironments, reactive)
+    updateEnvironments(newEnvironments)
+    emitEnvironmentCreated(reactive, folder.id, parentId)
+    if (parentId !== undefined) setExpandedIds(prev => Array.from(new Set([...prev, parentId])))
+    setSelectedEnvId(reactive.id)
+  }, [t, folder.id, localEnvironments, updateEnvironments])
+
   // Handler for deleting an environment. Emits ENVIRONMENT_DELETED so
   // the save-unit registry records a pending delete — without the
   // explicit emit, nothing on the folder-proxy would fire (environments
@@ -520,12 +546,18 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
       onClick: () => { handleAddSubEnvironment(env.id) }
     },
     {
+      id: 'duplicate',
+      label: t('environment.duplicate', 'Duplicate the environment'),
+      icon: 'copy',
+      onClick: () => { handleDuplicateEnvironment(env.id) }
+    },
+    {
       id: 'delete',
       label: t('environment.delete'),
       icon: 'trash',
       onClick: () => { handleDeleteEnvironment(env.id) }
     }
-  ], [t, handleAddSubEnvironment, handleDeleteEnvironment])
+  ], [t, handleAddSubEnvironment, handleDuplicateEnvironment, handleDeleteEnvironment])
 
   // Convert environments to ListView items
   const sidebarItems: ListViewItemData[] = useMemo(
@@ -734,6 +766,52 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 }
               >
                 <div
+                  className="environment-detail-scroll"
+                  style={{ height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}
+                  data-testid="environment-detail-scroll"
+                >
+                {selectedEnvironment && (
+                  <div className="environment-detail-header" style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '8px 8px 0 8px' }}>
+                    <EditableLabel
+                      as="h3"
+                      value={selectedEnvironment.name}
+                      onChange={(next) => { handleRenameEnvironment(selectedEnvironment.id, next) }}
+                      data-testid="environment-detail-name"
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <span>{t('folderView.iconLabel', 'Icon:')}</span>
+                        <IconSelect
+                          value={selectedEnvironment.icon ?? null}
+                          onChange={(icon) => { handleIconChange(selectedEnvironment.id, icon) }}
+                          style={{ width: 24, height: 24 }}
+                          data-testid="environment-detail-icon-select"
+                        />
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <span>{t('folderView.colorLabel', 'Color:')}</span>
+                        <span
+                          ref={(el) => { if (colorPickerEnvId === selectedEnvironment.id || !colorButtonRef.current) colorButtonRef.current = el }}
+                          data-env-color-btn={selectedEnvironment.id}
+                          style={{ display: 'inline-flex', flexShrink: 0 }}
+                        >
+                          <Button
+                            style={{ width: 16, height: 16, minWidth: 16, minHeight: 16, lineHeight: '16px', padding: 0, border: '1px solid var(--panel-border)', borderRadius: 3 }}
+                            backgroundColor={selectedEnvironment.color ?? 'var(--button-background-emphasis-1, #c75000)'}
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation()
+                              const wrapper = (e.target as HTMLElement).closest('[data-env-color-btn]')
+                              colorButtonRef.current = wrapper as HTMLSpanElement | null
+                              setColorPickerEnvId(prev => (prev === selectedEnvironment.id ? null : selectedEnvironment.id))
+                            }}
+                            data-testid="environment-detail-color-button"
+                          />
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div
                   style={{
                     padding: '8px 8px 4px 8px',
                     boxSizing: 'border-box'
@@ -757,6 +835,16 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                   />
                 </div>
                 <ContextVariablesSection envId={selectedEnvId} secretVariables={secretVariables} />
+                <div style={{ padding: '4px 8px 8px 8px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    icon="add"
+                    onClick={() => { handleAddSubEnvironment(selectedEnvId) }}
+                    data-testid="environment-detail-add-sub-button"
+                  >
+                    {t('environment.addSub')}
+                  </Button>
+                </div>
+                </div>
               </Pane>
             ) : (
               <Pane

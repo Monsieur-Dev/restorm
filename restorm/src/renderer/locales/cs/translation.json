@@ -347,7 +347,9 @@
     "add": "Přidat prostředí",
     "rename": "Přejmenovat",
     "addSub": "Přidat podprostředí",
-    "delete": "Smazat"
+    "delete": "Smazat",
+    "duplicate": "Duplikovat prostředí",
+    "duplicateName": "{{name}} (kopie)"
   },
   "folderView": {
     "environments": "Prostředí",
@@ -398,7 +400,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definujte znovupoužitelné seznamy hodnot pro své proměnné: zvolíte čitelný popisek a požadavek odešle přiřazenou hodnotu. Vyberte nebo vytvořte výčet a začněte."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Barva:"
   },
   "requestTab": {
     "deprecated": "Tento endpoint je zastaralý a v budoucí verzi může být odstraněn.",
@@ -468,7 +472,9 @@
       "close": "Zavřít",
       "closeOthers": "Zavřít ostatní",
       "addToFavorites": "Přidat k oblíbeným",
-      "removeFromFavorites": "Odebrat z oblíbených"
+      "removeFromFavorites": "Odebrat z oblíbených",
+      "pin": "Připnout",
+      "unpin": "Odepnout"
     }
   },
   "codeEditor": {
@@ -1008,7 +1014,11 @@
       "us": "Formát US (MM/DD/RRRR, 12h)",
       "iso": "Formát ISO (RRRR-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci"
+    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci",
+    "showOpenedList": "Zobrazit seznam otevřených souborů v postranním panelu",
+    "showOpenedListDescription": "Zobrazí panel „Otevřené“ se soubory aktuálně otevřenými v pracovní ploše",
+    "temporaryTabs": "Karty náhledu",
+    "temporaryTabsDescription": "Otevírá položky v jedné znovupoužitelné kartě náhledu (zobrazené kurzívou). Dvojklik, úprava nebo spuštění požadavku ponechá kartu trvale otevřenou."
   },
   "console": {
     "title": "Konzole",
@@ -1263,7 +1273,7 @@
       "externalDocs": "Externí dokumentace",
       "examplePayload": "Ukázkový payload",
       "operationId": "operationId",
-      "addRequest": "+ Přidat požadavek"
+      "addRequest": "+ Vytvořit nový požadavek z této dokumentace"
     },
     "apiInfo": {
       "version": "Verze",
@@ -2239,7 +2249,7 @@
       "deleteImpactChild": "{{name}} ztrácí dědičnost (vlastní vlastnosti zůstávají)",
       "description": "Popis",
       "descriptionPlaceholder": "Co tento model představuje (volitelné)",
-      "newName": "NewModel",
+      "newName": "NovýModel",
       "selectPrompt": "Vyberte model, nebo nějaký vytvořte.",
       "tabs": {
         "schema": "Schéma",
@@ -2259,11 +2269,13 @@
       "addEnum": "Přidat enum",
       "addValue": "Přidat hodnotu",
       "valueHeader": "Hodnota",
-      "newName": "NewEnum",
+      "newName": "NovýEnum",
       "selectPrompt": "Vyberte enum, nebo nějaký vytvořte — uzavřená množina hodnot použitelná jako typ vlastnosti.",
       "nameHeader": "Název",
       "description": "Popis",
-      "descriptionPlaceholder": "Co tento výčet představuje (volitelné)"
+      "descriptionPlaceholder": "Co tento výčet představuje (volitelné)",
+      "deleteTitle": "Smazat {{name}}?",
+      "deleteImpact": "Každá vlastnost nebo parametr, který používal tento výčet, ztratí svou referenci."
     },
     "documentation": {},
     "code": {
@@ -2324,6 +2336,10 @@
       },
       "extractedTitle": "Soubory zapsány",
       "openOutput": "Otevřít výstupní složku",
+      "copySource": "Kopírovat zdroj",
+      "copied": "Zkopírováno!",
+      "openSourceUrl": "Otevřít URL šablony",
+      "openSourceFolder": "Otevřít složku šablony",
       "refresh": "Obnovit tuto šablonu z jejího zdroje",
       "removeConfirm": "Template „{{name}}“ bude z tohoto návrhu odebrán (již vygenerované soubory na disku zůstanou nedotčené).",
       "removeTitle": "Odebrat tento Template?",
@@ -2514,7 +2530,8 @@
     "routes": {
       "addGroup": "Přidat skupinu",
       "addRoute": "Přidat trasu",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NováSkupina",
+      "newRouteName": "NováTrasa",
       "selectPrompt": "Vyberte skupinu nebo trasu, nebo skupinu vytvořte.",
       "deleteGroupTitle": "Smazat {{name}}?",
       "deleteGroupImpact": "Skupina a jejích {{count}} tras budou smazány.",
@@ -2666,6 +2683,21 @@
     "projections": {
       "title": "Projekce",
       "hint": "Táž operace, tak jak ji vystavuje každý obsluhovaný protokol."
+    },
+    "listing": {
+      "models": {
+        "empty": "Vytvořte svůj první model"
+      },
+      "enums": {
+        "empty": "Vytvořte svůj první výčet"
+      },
+      "routes": {
+        "empty": "Vytvořte svou první trasu"
+      },
+      "tabs": {
+        "list": "Seznam",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {
@@ -3344,5 +3376,12 @@
     "editNamed": "Upravit {{name}}",
     "confirmReplace": "Cookie s názvem „{{name}}“ zde již existuje. Nahradit ji?",
     "replaceButton": "Nahradit"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Přidat štítek",
+    "namePlaceholder": "Název štítku",
+    "createBookmark": "Vytvořit štítek",
+    "removeBookmark": "Odebrat štítek",
+    "bookmarkAria": "Štítek: {{label}}"
   }
 }

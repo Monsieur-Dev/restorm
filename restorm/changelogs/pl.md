@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1
+
+**Projektant API jest teraz obsługiwany z paska bocznego.**
+
+- **Twoje modele, enumy i trasy żyją na pasku bocznym.** Trzy listy w kartach znikają — modele (z zagnieżdżeniem dziedziczenia), enumy i trasy (grupy i ich trasy) znajdują się teraz bezpośrednio w drzewie paska bocznego. Kliknij prawym przyciskiem, aby zmienić nazwę, dodać podmodel lub podgrupę, sklonować trasę, wygenerować CRUD lub usunąć; przeciągnij, aby zmienić kolejność lub rodzica — nigdy poza projekt. Każda strona pokazuje teraz tylko szczegóły wybranego elementu.
+- **Widok ogólny modeli, enumów i tras.** Węzeł główny każdej sekcji wyświetla teraz wszystko, co zawiera — a Modele zyskują kartę **Graf**: diagram klas modeli z ich dziedziczeniem i odniesieniami. Enumy pokazują swoje wartości obok nazwy.
+- **Jedno miejsce do zmiany nazwy.** Model, enum lub trasę zmienia się z dużego tytułu (ołówek), a pusta nazwa pokazuje **„<bez nazwy>”**, aby ołówek był zawsze dostępny — nazwa nie pojawia się już dwukrotnie na stronie.
+- **Błędy walidacji wskazują element.** Gdy coś jest nie tak — model i enum o tej samej nazwie, odwołanie do czegoś, czego już nie ma — notatka u góry modelu, enuma lub trasy to wyjaśnia.
+- **Pełna ścieżka nawigacji.** Ślad odzwierciedla całą hierarchię paska bocznego — foldery › projekt › sekcja › grupa › element — a każdy segment jest klikalny.
+- **Zaznacz wiele, usuń naraz.** Zaznacz kilka modeli, enumów lub tras i usuń je za jednym razem, po potwierdzeniu.
+- **Skopiuj lub otwórz źródło szablonu kodu jednym kliknięciem.** Na stronie „</> Code” po najechaniu na szablon pojawia się przycisk do skopiowania jego adresu URL lub ścieżki oraz przycisk do jego otwarcia — repozytorium w przeglądarce lub folder na dysku dla szablonu lokalnego.
+- **Nowe trasy mają od razu nazwę.** Trasa utworzona od zera otrzymuje teraz nazwę domyślną, więc możesz od razu zmienić jej nazwę.
+- **Karty podglądu, jak w twoim edytorze.** Pojedyncze kliknięcie otwiera teraz element w karcie **podglądu** wielokrotnego użytku (jego nazwa kursywą); kliknięcie innego elementu używa ponownie tej samej karty, zamiast dokładać nową. Dwuklik, dowolna edycja lub uruchomienie żądania zostawia ją otwartą na stałe. Wyłączysz to w Ustawienia › Zachowanie.
+- **Przypnij karty, które trzymasz otwarte.** Kliknij kartę prawym przyciskiem i przypnij ją: przypięte karty pozostają na początku, przetrwają „zamknij pozostałe“ i są zapamiętywane dla każdego projektu.
+- **Środowiska zyskują pełny widok szczegółów.** Otwórz środowisko, aby zmienić jego nazwę z tytułu, ustawić ikonę i kolor oraz dodać podśrodowisko — a menu prawego przycisku duplikuje teraz środowisko wraz ze wszystkimi jego zmiennymi i podśrodowiskami.
+
+Poprawki:
+
+- **Wybór szablonu kodu zamyka bibliotekę.** „Użyj” przenosi Cię teraz prosto z powrotem na stronę Code.
+- **Generowanie dokumentacji nie zawodzi już na polach opcjonalnych.** Wygenerowanie dokumentacji z projektu, którego model lub parametr pozostawiał „required” nieustawione, nie zatrzymuje się już z błędem szablonu.
+- **Usunięcie enuma pyta o potwierdzenie.** Enumy otrzymują takie samo potwierdzenie jak modele i trasy.
+- **Pasek boczny ujawnia zaznaczenie.** Przy włączonej opcji „synchronizuj pasek boczny z aktywną kartą” zaznaczenie lub utworzenie modelu, enuma lub trasy rozwija jego elementy nadrzędne, aby był widoczny w drzewie.
+- **Przycisk środowiska pozostaje czytelny na każdym kolorze.** Jego etykieta przełącza się teraz na ciemny lub jasny tekst, aby pozostać czytelną na kolorze środowiska, tak jak przycisk uruchamiania.
+- **Kliknięcie środkowym przyciskiem zamyka otwarty plik.** Kliknięcie środkowym przyciskiem pozycji na liście „Otwarte“ na pasku bocznym zamyka jej kartę — a nowe ustawienie Zachowania pozwala całkowicie ukryć ten panel.
+- **Jaśniejsze sformułowanie przy starcie z dokumentacji.** W dokumentacji zaimportowanego API przycisk brzmi teraz „Utwórz nowe żądanie z tej dokumentacji“.
+- **Logowanie działa w wersji z Microsoft Store.** Wywołanie zwrotne protokołu niestandardowego, które przeglądarka zwraca po zalogowaniu, jest teraz zadeklarowane w pakiecie Store, więc logowanie kończy się zamiast wygasać.
+
 ## v1.1.0
 
 🎉 **Restorm jest teraz także projektantem API.** Zaprojektuj swoje API, udostępnij je jako mock na żywo na pięciu protokołach naraz i wygeneruj jego klientów — bez opuszczania aplikacji, wszystko na własnym dysku.

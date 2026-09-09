@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1
+
+**Il designer di API ora si pilota dalla barra laterale.**
+
+- **I tuoi modelli, enum e route vivono nella barra laterale.** Le tre liste nelle schede spariscono: i modelli (con l'annidamento per ereditarietà), gli enum e le route (gruppi e relative route) sono ora direttamente nell'albero della barra laterale. Con il tasto destro puoi rinominare, aggiungere un sotto-modello o un sotto-gruppo, clonare una route, generare il CRUD o eliminare; trascina per riordinare o riassegnare il genitore, mai fuori dal design. Ogni pagina mostra ora solo il dettaglio dell'elemento selezionato.
+- **Una panoramica di modelli, enum e route.** Il nodo radice di ogni sezione elenca ora tutto ciò che contiene — e i Modelli aggiungono una scheda **Grafico**: un diagramma delle classi dei tuoi modelli con ereditarietà e riferimenti. Gli enum mostrano i loro valori accanto al nome.
+- **Un unico posto per rinominare.** Un modello, un enum o una route si rinomina dal titolo grande (la matita), e un nome vuoto mostra **«<senza nome>»** così la matita resta sempre raggiungibile — il nome non appare più due volte nella pagina.
+- **Gli errori di validazione indicano l'elemento.** Quando qualcosa non va — un modello e un enum con lo stesso nome, un riferimento a qualcosa che non esiste più — una nota in cima al modello, enum o route lo spiega.
+- **Un percorso di navigazione completo.** La traccia rispecchia l'intera gerarchia della barra laterale — cartelle › design › sezione › gruppo › elemento — e ogni segmento è cliccabile.
+- **Selezionane molti, elimina in una volta.** Seleziona più modelli, enum o route ed eliminali in un colpo solo, dopo una conferma.
+- **Copia o apri la sorgente di un template di codice con un clic.** Nella pagina «</> Code», al passaggio del mouse su un template compaiono un pulsante per copiarne l'URL o il percorso e uno per aprirlo: il repository nel browser, o la cartella sul disco per un template locale.
+- **Le nuove route partono con un nome.** Una route creata da zero riceve ora un nome predefinito, così puoi rinominarla subito.
+- **Schede di anteprima, come nel tuo editor.** Un solo clic apre ora un elemento in una scheda di **anteprima** riutilizzabile (il nome in corsivo); cliccare un altro elemento riutilizza la stessa scheda invece di impilarne una nuova. Un doppio clic, qualsiasi modifica o l'esecuzione di una richiesta la rende permanente. Disattivabile in Impostazioni › Comportamento.
+- **Fissa le schede che tieni aperte.** Fai clic destro su una scheda e fissala: le schede fissate restano in testa, sopravvivono a «chiudi le altre» e vengono ricordate per progetto.
+- **Gli ambienti hanno una vera vista di dettaglio.** Apri un ambiente per rinominarlo dal suo titolo, impostarne icona e colore e aggiungere un sotto-ambiente — e il menu contestuale ora duplica un ambiente con tutte le sue variabili e i suoi sotto-ambienti.
+
+Correzioni:
+
+- **Scegliere un template di codice chiude la libreria.** «Usa» ora ti riporta direttamente alla pagina Code.
+- **La generazione della documentazione non fallisce più sui campi opzionali.** Generare la documentazione da un design il cui modello o parametro lasciava «required» non impostato non si interrompe più con un errore di template.
+- **L'eliminazione di un enum chiede conferma.** Gli enum ricevono la stessa conferma di modelli e route.
+- **La barra laterale rivela ciò che selezioni.** Con «sincronizza la barra laterale con la scheda attiva» attivo, selezionare o creare un modello, enum o route espande i suoi genitori per tenerlo visibile nell'albero.
+- **Il pulsante dell'ambiente resta leggibile su qualsiasi colore.** La sua etichetta passa ora a testo chiaro o scuro per restare leggibile sul colore dell'ambiente, come il pulsante di esecuzione.
+- **Il clic centrale chiude un file aperto.** Fare clic centrale su una voce dell'elenco «Aperti» nella barra laterale ne chiude la scheda — e una nuova impostazione di Comportamento consente di nascondere del tutto quel pannello.
+- **Formulazione più chiara partendo dalla documentazione.** Nella documentazione di un'API importata, il pulsante ora recita «Crea una nuova richiesta da questa documentazione».
+- **L'accesso funziona nella versione Microsoft Store.** La callback a protocollo personalizzato che il browser restituisce dopo il login è ora dichiarata nel pacchetto Store, così l'accesso si completa invece di andare in timeout.
+
 ## v1.1.0
 
 🎉 **Restorm ora è anche un designer di API.** Progetti la sua API, la serva come mock live su cinque protocolli alla volta e ne generi i client — tutto senza uscire dall'app, tutto sul suo disco.

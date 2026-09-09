@@ -95,15 +95,12 @@ When('the local fixture template is added', async () => {
   await p.locator('[data-testid="design-template-library-tabs-tab-custom"]').click()
   await p.locator('[data-testid="design-template-library-local-input"]').fill(FIXTURE_TEMPLATE)
   await p.locator('[data-testid="design-template-library-local-add"]').click()
+  // Picking a template closes the library and returns to the Code page with the
+  // new template row present.
+  await expect(p.locator('[data-testid="design-template-library-modal"]')).toHaveCount(0, { timeout: 5000 })
   await expect(
     p.locator('[data-testid="design-code-template-list"] .design-code-template-body')
   ).toHaveCount(1, { timeout: 5000 })
-  // The library is a MULTI-add surface: it stays open (closed via Done). Close
-  // it so it stops covering the code section behind it. In headless the footer
-  // sits under its own scroll overlay, so dispatch the click straight to the
-  // Done button element (fires onClose regardless of what paints on top).
-  await p.locator('[data-testid="design-template-library-done"]').dispatchEvent('click')
-  await expect(p.locator('[data-testid="design-template-library-modal"]')).toHaveCount(0, { timeout: 5000 })
 })
 
 When('the output folder is picked through the system dialog', async () => {

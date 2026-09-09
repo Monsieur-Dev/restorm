@@ -3,7 +3,7 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_SHELL_TEMP_DIR } from '../../fixtures/design-shell.fixture'
-import { openDesignSection } from '../../../support/designNav'
+import { openDesignSection, expandDesignSection, designEntityNodes } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -106,25 +106,14 @@ When('I click the rail icon {string}', async ({}, section: string) => {
 
 Then('the {string} section lists {string}', async ({}, section: string, name: string) => {
   const p = requirePage()
-  await expect(
-    p.locator(`[data-testid="design-${section}-list"] .list-view-row`).filter({ has: p.getByText(name, { exact: true }) })
-  ).toHaveCount(1, { timeout: 5000 })
+  await expandDesignSection(p, DESIGN_ID, section)
+  await expect(designEntityNodes(p, DESIGN_ID, section, name)).toHaveCount(1, { timeout: 5000 })
 })
 
 Then('the {string} section does not list {string}', async ({}, section: string, name: string) => {
   const p = requirePage()
-  await expect(
-    p.locator(`[data-testid="design-${section}-list"] .list-view-row`).filter({ has: p.getByText(name, { exact: true }) })
-  ).toHaveCount(0, { timeout: 5000 })
-})
-
-When('I filter the {string} section with {string}', async ({}, section: string, term: string) => {
-  const p = requirePage()
-  const filterInput = p.locator(`[data-testid="design-${section}-filter-input"]`)
-  await filterInput.click()
-  await filterInput.fill(term)
-  // InputBox debounces by default — give the value time to commit.
-  await p.waitForTimeout(600)
+  await expandDesignSection(p, DESIGN_ID, section)
+  await expect(designEntityNodes(p, DESIGN_ID, section, name)).toHaveCount(0, { timeout: 5000 })
 })
 
 // ── Drag & drop refusal ───────────────────────────────────────────────

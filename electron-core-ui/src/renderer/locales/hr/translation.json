@@ -439,7 +439,12 @@
     "emptyHint": "Unesi adresu iznad za početak pregledavanja."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Dodaj oznaku"
+    "addBookmark": "Dodaj oznaku",
+    "namePlaceholder": "Naziv knjižne oznake",
+    "createBookmark": "Stvori knjižnu oznaku",
+    "removeBookmark": "Ukloni knjižnu oznaku",
+    "bookmarkAria": "Knjižna oznaka: {{label}}",
+    "add": "Dodaj"
   },
   "toaster": {
     "notificationsRegion": "Obavijesti"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Roditelji",
     "recoverVersion": "Vrati ovu verziju"
+  },
+  "editableLabel": {
+    "unnamed": "<bez naziva>"
   }
 }

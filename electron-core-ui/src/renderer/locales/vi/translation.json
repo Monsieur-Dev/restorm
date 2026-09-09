@@ -439,7 +439,12 @@
     "emptyHint": "Nhập địa chỉ ở trên để bắt đầu duyệt web."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Thêm dấu trang"
+    "addBookmark": "Thêm dấu trang",
+    "namePlaceholder": "Tên dấu trang",
+    "createBookmark": "Tạo dấu trang",
+    "removeBookmark": "Xóa dấu trang",
+    "bookmarkAria": "Dấu trang: {{label}}",
+    "add": "Thêm"
   },
   "toaster": {
     "notificationsRegion": "Thông báo"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Cha",
     "recoverVersion": "Khôi phục phiên bản này"
+  },
+  "editableLabel": {
+    "unnamed": "<chưa đặt tên>"
   }
 }

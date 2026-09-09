@@ -10,6 +10,33 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.1.1
+
+**The API designer, now driven from the sidebar.**
+
+- **Your models, enums and routes live in the sidebar.** The three in-tab lists are gone — models (with their inheritance nesting), enums, and routes (groups and their routes) now sit directly in the sidebar tree. Right-click any of them to rename, add a sub-model or sub-group, clone a route, generate CRUD, or delete; drag to reorder or re-parent — never out of the design. Each page now shows just the selected item's details.
+- **A bird's-eye view of your models, enums and routes.** Each section's root now lists everything under it — and Models add a **Graph** tab: a class diagram of your models with their inheritance and references drawn out. Enums show their values right beside the name.
+- **One place to rename anything.** A model, enum or route is renamed from its large title (the pencil), and an empty name reads **"<unnamed>"** so the pencil is always within reach — the name is no longer shown twice on the page.
+- **Validation errors point at the item.** When something is wrong — a model and an enum sharing a name, a reference to something that no longer exists — a note at the top of that model, enum or route now explains it.
+- **A complete breadcrumb.** The trail mirrors the full sidebar hierarchy — folders › design › section › group › item — and every segment is clickable.
+- **Select many, delete once.** Select several models, enums or routes and delete them in one go, after a confirmation.
+- **Copy or open a code template's source in one click.** On the "</> Code" page, hovering a template reveals a button to copy its URL or path, and one to open it — the repository in your browser, or the folder on disk for a local template.
+- **New routes start with a name.** A route created from scratch now gets a default name, so you can rename it right away.
+- **Preview tabs, like your editor.** A single click now opens an item in a reusable **preview** tab (its name shown in italics); clicking another item reuses the same tab instead of stacking a new one. Double-click it, edit anything, or run a request to keep it open for good. Turn it off in Settings › Behavior.
+- **Pin the tabs you keep open.** Right-click a tab and pin it: pinned tabs stay first, survive "close others", and are remembered per project.
+- **Environments get a proper detail view.** Open an environment to rename it from its title, set its icon and color, and add a sub-environment — and the right-click menu now duplicates an environment with all its variables and sub-environments.
+
+Fixes:
+
+- **Choosing a code template closes the library.** "Use" now returns you straight to the Code page.
+- **Documentation generation no longer fails on optional fields.** Generating docs from a design whose model or parameter left "required" unset no longer stops with a template error.
+- **Deleting an enum asks first.** Enums now get the same confirmation prompt as models and routes.
+- **The sidebar reveals what you select.** With "sync the sidebar with the active tab" turned on, selecting or creating a model, enum or route expands its parents so it stays visible in the tree.
+- **The environment button stays readable on any color.** Its label now switches to dark or light text to stay legible against the environment's color, like the run button.
+- **Middle-click closes an open file.** Middle-clicking an entry in the sidebar's "Opened" list closes its tab — and a new Behavior setting lets you hide that panel entirely.
+- **Clearer wording when starting from documentation.** In an imported API's documentation, the button now reads "Create a new request from this documentation."
+- **Signing in works on the Microsoft Store build.** The custom-protocol callback the browser hands back after you log in is now declared in the Store package, so the sign-in completes instead of timing out.
+
 ## v1.1.0
 
 🎉 **Restorm is now an API designer, too.** Design your API, serve it as a live mock across five protocols at once, and generate its clients — all without leaving the app, all on your own disk.

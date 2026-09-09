@@ -18,6 +18,26 @@ import {
 import { getColorFromString } from '../../../electron-core-ui/src/renderer/utils/colorFromString'
 import '@testing-library/jest-dom/vitest'
 
+// The components now read their user-facing strings (name placeholder, create /
+// remove labels, the "Bookmark: {{label}}" aria-label, the Add button) through
+// react-i18next. This test env has no i18n instance, so the real `t` returns the
+// default string WITHOUT interpolating `{{label}}`. Mock a `t` that returns the
+// default and interpolates its options, mirroring runtime — otherwise the
+// aria-label asserts against a literal `{{label}}`.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, def?: unknown, opts?: Record<string, unknown>): string => {
+      let s = typeof def === 'string' ? def : key
+      const vars = (def !== null && typeof def === 'object' ? def : opts) as Record<string, unknown> | undefined
+      if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(new RegExp(`{{\\s*${k}\\s*}}`, 'g'), String(v))
+      return s
+    },
+    i18n: { language: 'en', changeLanguage: (): Promise<void> => Promise.resolve() }
+  }),
+  Trans: ({ children }: { children?: React.ReactNode }): React.ReactNode => children,
+  initReactI18next: { type: '3rdParty', init: (): void => undefined }
+}))
+
 const noop = (): void => { /* intentionally empty */ }
 
 describe('BookmarkRibbon', () => {

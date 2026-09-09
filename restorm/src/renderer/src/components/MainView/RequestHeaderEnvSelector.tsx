@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Tooltip } from 'electron-core-ui/renderer'
+import { Button, Tooltip, getContrastColor } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { useExclusiveHeaderPopover } from '../../hooks/useExclusiveHeaderPopover'
@@ -98,6 +98,9 @@ export const RequestHeaderEnvSelector: React.FC<RequestHeaderEnvSelectorProps> =
       <Button
         align="left"
         backgroundColor={effectiveColor}
+        // Contrast the label/icon against the env colour so a light env (e.g.
+        // white) doesn't render white-on-white — same helper as the run button.
+        style={{ color: getContrastColor(effectiveColor) }}
         {...(selectedEnvironment?.icon ? { icon: selectedEnvironment.icon } : {})}
         className="request-header-env-button"
         onClick={() => { setOpen((v) => !v) }}

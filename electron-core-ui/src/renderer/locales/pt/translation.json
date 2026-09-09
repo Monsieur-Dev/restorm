@@ -439,7 +439,12 @@
     "emptyHint": "Introduza um endereço acima para começar a navegar."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Adicionar marcador"
+    "addBookmark": "Adicionar marcador",
+    "namePlaceholder": "Nome do marcador",
+    "createBookmark": "Criar marcador",
+    "removeBookmark": "Remover marcador",
+    "bookmarkAria": "Marcador: {{label}}",
+    "add": "Adicionar"
   },
   "toaster": {
     "notificationsRegion": "Notificações"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Pais",
     "recoverVersion": "Recuperar esta versão"
+  },
+  "editableLabel": {
+    "unnamed": "<sem nome>"
   }
 }

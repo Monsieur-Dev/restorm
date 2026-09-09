@@ -345,7 +345,9 @@
     "add": "Ajouter un environnement",
     "rename": "Renommer",
     "addSub": "Ajouter un sous-environnement",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "duplicate": "Dupliquer l'environnement",
+    "duplicateName": "{{name}} (copie)"
   },
   "folderView": {
     "environments": "Environnements",
@@ -396,7 +398,9 @@
       "label": "Libellé",
       "value": "Valeur",
       "selectList": "Définissez des listes de valeurs réutilisables dans vos variables : vous choisissez un libellé lisible, la requête envoie la valeur associée. Sélectionnez ou créez une énumération pour commencer."
-    }
+    },
+    "iconLabel": "Icône :",
+    "colorLabel": "Couleur :"
   },
   "requestTab": {
     "deprecated": "Ce endpoint est déprécié et pourrait être supprimé dans une version future.",
@@ -466,7 +470,9 @@
       "close": "Fermer",
       "closeOthers": "Fermer les autres",
       "addToFavorites": "Ajouter aux favoris",
-      "removeFromFavorites": "Retirer des favoris"
+      "removeFromFavorites": "Retirer des favoris",
+      "pin": "Épingler",
+      "unpin": "Désépingler"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "Format US (MM/JJ/AAAA, 12h)",
       "iso": "Format ISO (AAAA-MM-JJ, 24h)"
     },
-    "dateTimeFormatDescription": "Format utilisé pour afficher les dates et heures dans l'application"
+    "dateTimeFormatDescription": "Format utilisé pour afficher les dates et heures dans l'application",
+    "showOpenedList": "Afficher la liste des fichiers ouverts dans la barre latérale",
+    "showOpenedListDescription": "Affiche le panneau « Ouverts » qui liste les fichiers actuellement ouverts dans l'espace de travail",
+    "temporaryTabs": "Onglets d'aperçu",
+    "temporaryTabsDescription": "Ouvre les éléments dans un seul onglet d'aperçu réutilisable (affiché en italique). Un double-clic, une modification ou l'exécution d'une requête rend l'onglet permanent."
   },
   "console": {
     "title": "Console",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Docs externes",
       "examplePayload": "Exemple de charge utile",
       "operationId": "operationId",
-      "addRequest": "+ Ajouter une requête"
+      "addRequest": "+ Créer une nouvelle requête à partir de cette documentation"
     },
     "apiInfo": {
       "version": "Version",
@@ -2237,7 +2247,7 @@
       "deleteImpactChild": "{{name}} perd son héritage (ses propres propriétés restent)",
       "description": "Description",
       "descriptionPlaceholder": "Ce que ce modèle représente (facultatif)",
-      "newName": "NewModel",
+      "newName": "NouveauModele",
       "selectPrompt": "Sélectionnez un modèle, ou créez-en un.",
       "tabs": {
         "schema": "Schéma",
@@ -2257,11 +2267,13 @@
       "addEnum": "Ajouter une énum",
       "addValue": "Ajouter une valeur",
       "valueHeader": "Valeur",
-      "newName": "NewEnum",
+      "newName": "NouvelEnum",
       "selectPrompt": "Sélectionnez une énum, ou créez-en une — un ensemble fermé de valeurs utilisable comme type de propriété.",
       "nameHeader": "Nom",
       "description": "Description",
-      "descriptionPlaceholder": "Ce que cette énum représente (facultatif)"
+      "descriptionPlaceholder": "Ce que cette énum représente (facultatif)",
+      "deleteTitle": "Supprimer {{name}} ?",
+      "deleteImpact": "Toute propriété ou tout paramètre qui utilisait cet enum perdra sa référence."
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2333,10 @@
         "done": "Terminé"
       },
       "openOutput": "Ouvrir le dossier de sortie",
+      "copySource": "Copier la source",
+      "copied": "Copié !",
+      "openSourceUrl": "Ouvrir l'URL du template",
+      "openSourceFolder": "Ouvrir le dossier du template",
       "refresh": "Rafraîchir ce template depuis sa source",
       "extractedTitle": "Fichiers écrits",
       "removeTitle": "Retirer ce template ?",
@@ -2512,7 +2528,8 @@
     "routes": {
       "addGroup": "Ajouter un groupe",
       "addRoute": "Ajouter une route",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NouveauGroupe",
+      "newRouteName": "NouvelleRoute",
       "selectPrompt": "Sélectionnez un groupe ou une route, ou créez un groupe.",
       "deleteGroupTitle": "Supprimer {{name}} ?",
       "deleteGroupImpact": "Le groupe et ses {{count}} routes seront supprimés.",
@@ -2663,6 +2680,21 @@
         "discover": "Découvrir les variables utilisées par ce template",
         "undeclared": "Utilisées mais non déclarées : {{names}}",
         "allDeclared": "Toutes les variables utilisées par ce template sont déclarées."
+      }
+    },
+    "listing": {
+      "models": {
+        "empty": "Créez votre premier modèle"
+      },
+      "enums": {
+        "empty": "Créez votre premier enum"
+      },
+      "routes": {
+        "empty": "Créez votre première route"
+      },
+      "tabs": {
+        "list": "Liste",
+        "graph": "Graphe"
       }
     }
   },
@@ -3342,5 +3374,12 @@
     "editNamed": "Modifier {{name}}",
     "confirmReplace": "Un cookie nommé « {{name}} » existe déjà à cet endroit. Le remplacer ?",
     "replaceButton": "Remplacer"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Ajouter un tag",
+    "namePlaceholder": "Nom du tag",
+    "createBookmark": "Créer le tag",
+    "removeBookmark": "Supprimer le tag",
+    "bookmarkAria": "Tag : {{label}}"
   }
 }

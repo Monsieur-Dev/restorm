@@ -63,3 +63,36 @@ export function parseDesignSectionRowId(rowId: string): { designId: string; sect
   if (!DESIGN_SECTIONS.some((s) => s.key === section)) return null
   return { designId, section: section as DesignSectionKey }
 }
+
+/** The sections whose entities are shown as real, draggable sidebar nodes under
+ * their section row (models, enums, routes). A model/enum/route node's drag is
+ * confined to its own `(design, section)` — it can never leave the design. */
+export type DesignEntitySection = 'models' | 'enums' | 'routes'
+
+const ENTITY_ROW_PREFIX = 'design-entity:'
+
+/** Sidebar row id of a single model/enum/route (group) node under a design
+ * section. `entityId` is the entity's own id (model id, enum id, group id, route id). */
+export function designEntityRowId(designId: string, section: DesignEntitySection, entityId: string): string {
+  return `${ENTITY_ROW_PREFIX}${designId}:${section}:${entityId}`
+}
+
+/** Parse an entity row id back into `{ designId, section, entityId }`, or `null`
+ * when the id is not a design entity node. */
+export function parseDesignEntityRowId(
+  rowId: string
+): { designId: string; section: DesignEntitySection; entityId: string } | null {
+  if (!rowId.startsWith(ENTITY_ROW_PREFIX)) return null
+  const rest = rowId.slice(ENTITY_ROW_PREFIX.length)
+  const first = rest.indexOf(':')
+  if (first <= 0) return null
+  const designId = rest.slice(0, first)
+  const afterDesign = rest.slice(first + 1)
+  const second = afterDesign.indexOf(':')
+  if (second <= 0) return null
+  const section = afterDesign.slice(0, second)
+  const entityId = afterDesign.slice(second + 1)
+  if (section !== 'models' && section !== 'enums' && section !== 'routes') return null
+  if (entityId === '') return null
+  return { designId, section, entityId }
+}

@@ -3,7 +3,7 @@ import { copyFileSync, readFileSync } from 'fs'
 import { join } from 'path'
 import type { Page } from '@playwright/test'
 import { test, expect, DESIGN_CREATION_TEMP_DIR } from '../../fixtures/design-creation.fixture'
-import { openSectionOfOpenDesign } from '../../../support/designNav'
+import { openSectionOfOpenDesign, getOpenDesignId, expandDesignSection, designEntityNode, designEntityNodes } from '../../../support/designNav'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -88,18 +88,16 @@ When('I open the models section of the open design', async () => {
 
 Then('the models list of the open design offers {string}', async ({}, name: string) => {
   const p = requirePage()
-  await expect(
-    p.locator('[data-testid="design-models-listview"] .list-view-row').filter({ has: p.getByText(name, { exact: true }) })
-  ).toHaveCount(1, { timeout: 5000 })
+  const id = await getOpenDesignId(p)
+  await expandDesignSection(p, id, 'models')
+  await expect(designEntityNodes(p, id, 'models', name)).toHaveCount(1, { timeout: 5000 })
 })
 
 Then('the enums list of the open design offers {string}', async ({}, name: string) => {
   const p = requirePage()
-  await openSectionOfOpenDesign(p, 'enums')
-  await p.mouse.move(700, 450)
-  await expect(
-    p.locator('[data-testid="design-enums-list"] .list-view-row').filter({ has: p.getByText(name, { exact: true }) })
-  ).toHaveCount(1, { timeout: 5000 })
+  const id = await getOpenDesignId(p)
+  await expandDesignSection(p, id, 'enums')
+  await expect(designEntityNodes(p, id, 'enums', name)).toHaveCount(1, { timeout: 5000 })
 })
 
 When('I open the routes section of the open design', async () => {
@@ -111,28 +109,32 @@ When('I open the routes section of the open design', async () => {
 
 Then('the routes tree shows the group {string} with {int} routes', async ({}, groupName: string, count: number) => {
   const p = requirePage()
-  const groupRow = p.locator('[data-testid="design-routes-listview"] .list-view-row').filter({ has: p.getByText(groupName, { exact: true }) }).first()
+  const id = await getOpenDesignId(p)
+  await expandDesignSection(p, id, 'routes')
+  const groupRow = designEntityNode(p, id, 'routes', groupName)
   await expect(groupRow).toBeVisible({ timeout: 5000 })
   const chevron = groupRow.locator('button:has(.codicon-chevron-right)')
   if (await chevron.count() > 0) {
     await chevron.click()
     await p.waitForTimeout(300)
   }
-  const actual = await p.evaluate((name: string) => {
-    const rows = Array.from(document.querySelectorAll('[data-testid="design-routes-listview"] .list-view-row'))
-    const levelOf = (row: Element): number => Number(row.getAttribute('aria-level') ?? row.closest('[aria-level]')?.getAttribute('aria-level') ?? '1')
+  // The routes moved into the sidebar tree: count the group's DIRECT route
+  // children (one aria-level deeper, excluding sub-group folder nodes).
+  const actual = await p.evaluate(({ designId, name }: { designId: string, name: string }) => {
+    const rows = Array.from(document.querySelectorAll(`[data-testid="sidebar-listview"] .list-view-row[data-item-id^="design-entity:${designId}:routes:"]`))
+    const levelOf = (row: Element): number => Number(row.getAttribute('aria-level') ?? '1')
     const titleOf = (row: Element): string => (row.querySelector('.list-view-title')?.textContent ?? '').trim()
-    let inGroup = false
+    const gi = rows.findIndex((r) => titleOf(r) === name)
+    if (gi < 0) return -1
+    const gl = levelOf(rows[gi])
     let n = 0
-    for (const row of rows) {
-      if (levelOf(row) === 1) {
-        inGroup = titleOf(row) === name
-        continue
-      }
-      if (inGroup) n += 1
+    for (let i = gi + 1; i < rows.length; i++) {
+      const l = levelOf(rows[i])
+      if (l <= gl) break
+      if (l === gl + 1 && rows[i].querySelector('.codicon-folder') === null) n += 1
     }
     return n
-  }, groupName)
+  }, { designId: id, name: groupName })
   expect(actual).toBe(count)
 })
 

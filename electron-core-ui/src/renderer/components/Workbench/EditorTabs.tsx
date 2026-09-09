@@ -32,6 +32,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 	group,
 	onCloseTab,
 	onCloseOthersInGroup,
+	onTogglePinTab,
 	onMoveTab,
 	onActivateTab,
 	onGetTabContent,
@@ -346,7 +347,11 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 				onCloseOthersInGroup?.(tab.id, group.id);
 			};
 
-			const items = getTabContextMenuItems(tab, group.id, { close, closeOthersInGroup }) ?? [];
+			const togglePin = (): void => {
+				onTogglePinTab?.(tab.id, group.id);
+			};
+
+			const items = getTabContextMenuItems(tab, group.id, { close, closeOthersInGroup, togglePin }) ?? [];
 			if (!items.length) {
 				return;
 			}
@@ -358,7 +363,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
 				items
 			});
 		},
-		[getTabContextMenuItems, group.id, onCloseTab, onCloseOthersInGroup]
+		[getTabContextMenuItems, group.id, onCloseTab, onCloseOthersInGroup, onTogglePinTab]
 	);
 
 	// Ensure the active tab is scrolled into view when it changes

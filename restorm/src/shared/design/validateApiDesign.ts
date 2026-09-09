@@ -85,6 +85,26 @@ export function isDesignValid(design: ApiDesign): boolean {
   return validateApiDesign(design).length === 0
 }
 
+// Per-design cache for the render-hot paths (the sidebar rebuild validates once
+// in the tree builder and again for each section, plus the section-root
+// listing). Every mutation goes through `assignDesignSection`, which REPLACES
+// the relevant top-level array, so the three array identities are a sound cache
+// key: if none changed, the validation result is unchanged. Kept out of
+// `validateApiDesign` itself so the server / codegen callers stay purely
+// functional. WeakMap → no leak when a design closes.
+const validationCache = new WeakMap<ApiDesign, { models: unknown; enums: unknown; routeGroups: unknown; issues: DesignIssue[] }>()
+
+/** Memoized {@link validateApiDesign} for hot UI paths — see the cache note. */
+export function validateApiDesignCached(design: ApiDesign): DesignIssue[] {
+  const cached = validationCache.get(design)
+  if (cached !== undefined) {
+    if (cached.models === design.models && cached.enums === design.enums && cached.routeGroups === design.routeGroups) return cached.issues
+  }
+  const issues = validateApiDesign(design)
+  validationCache.set(design, { models: design.models, enums: design.enums, routeGroups: design.routeGroups, issues })
+  return issues
+}
+
 export function validateApiDesign(design: ApiDesign): DesignIssue[] {
   const issues: DesignIssue[] = []
   const modelById = new Map(design.models.map((m) => [m.id, m]))

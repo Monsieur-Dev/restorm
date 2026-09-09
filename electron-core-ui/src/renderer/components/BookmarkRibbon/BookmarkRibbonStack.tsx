@@ -117,7 +117,7 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
                 onMouseDown={(e) => { e.stopPropagation() }}
               >
                 <InputBox
-                  options={{ placeholder: 'Bookmark name' }}
+                  options={{ placeholder: t('bookmarkRibbon.namePlaceholder', 'Bookmark name') }}
                   value={addDraft}
                   // `handleAddCommit` reads `addDraft` synchronously on Enter /
                   // confirm-click, so the draft must track every keystroke; a
@@ -138,10 +138,10 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
                 <Button
                   secondary
                   onClick={handleAddCommit}
-                  options={{ ariaLabel: 'Create bookmark', title: 'Create bookmark' }}
+                  options={{ ariaLabel: t('bookmarkRibbon.createBookmark', 'Create bookmark'), title: t('bookmarkRibbon.createBookmark', 'Create bookmark') }}
                   {...(dataTestId ? { 'data-testid': `${dataTestId}-add-confirm` } : {})}
                 >
-                  Add
+                  {t('bookmarkRibbon.add', 'Add')}
                 </Button>
               </div>
             }

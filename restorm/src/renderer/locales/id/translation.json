@@ -344,7 +344,9 @@
     "add": "Tambah lingkungan",
     "rename": "Ubah nama",
     "addSub": "Tambah sub-lingkungan",
-    "delete": "Hapus"
+    "delete": "Hapus",
+    "duplicate": "Duplikat lingkungan",
+    "duplicateName": "{{name}} (salinan)"
   },
   "folderView": {
     "environments": "Lingkungan",
@@ -395,7 +397,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Tentukan daftar nilai yang dapat digunakan kembali untuk variabel Anda: Anda memilih label yang mudah dibaca, permintaan mengirimkan nilai terkait. Pilih atau buat enumerasi untuk memulai."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Warna:"
   },
   "requestTab": {
     "deprecated": "Endpoint ini tidak digunakan lagi dan mungkin dihapus pada versi mendatang.",
@@ -465,7 +469,9 @@
       "close": "Tutup",
       "closeOthers": "Tutup yang lain",
       "addToFavorites": "Tambah ke favorit",
-      "removeFromFavorites": "Hapus dari favorit"
+      "removeFromFavorites": "Hapus dari favorit",
+      "pin": "Sematkan",
+      "unpin": "Lepas sematan"
     }
   },
   "codeEditor": {
@@ -1005,7 +1011,11 @@
       "us": "Format AS (MM/DD/YYYY, 12 jam)",
       "iso": "Format ISO (YYYY-MM-DD, 24 jam)"
     },
-    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi"
+    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi",
+    "showOpenedList": "Tampilkan daftar berkas yang terbuka di bilah sisi",
+    "showOpenedListDescription": "Menampilkan panel «Terbuka» yang mencantumkan berkas yang sedang terbuka di ruang kerja",
+    "temporaryTabs": "Tab pratinjau",
+    "temporaryTabsDescription": "Membuka item dalam satu tab pratinjau yang dapat digunakan ulang (ditampilkan miring). Klik ganda, pengeditan, atau menjalankan permintaan membuat tab menjadi permanen."
   },
   "console": {
     "title": "Konsol",
@@ -1260,7 +1270,7 @@
       "externalDocs": "Dokumen eksternal",
       "examplePayload": "Contoh payload",
       "operationId": "operationId",
-      "addRequest": "+ Tambah permintaan"
+      "addRequest": "+ Buat permintaan baru dari dokumentasi ini"
     },
     "apiInfo": {
       "version": "Versi",
@@ -2236,7 +2246,7 @@
       "deleteImpactChild": "{{name}} kehilangan pewarisannya (properti miliknya tetap ada)",
       "description": "Deskripsi",
       "descriptionPlaceholder": "Apa yang diwakili model ini (opsional)",
-      "newName": "NewModel",
+      "newName": "ModelBaru",
       "selectPrompt": "Pilih model, atau buat satu.",
       "tabs": {
         "schema": "Skema",
@@ -2256,11 +2266,13 @@
       "addEnum": "Tambah enum",
       "addValue": "Tambah nilai",
       "valueHeader": "Nilai",
-      "newName": "NewEnum",
+      "newName": "EnumBaru",
       "selectPrompt": "Pilih enum, atau buat satu — himpunan nilai tertutup yang dapat dipakai sebagai tipe properti.",
       "nameHeader": "Nama",
       "description": "Deskripsi",
-      "descriptionPlaceholder": "Apa yang diwakili enum ini (opsional)"
+      "descriptionPlaceholder": "Apa yang diwakili enum ini (opsional)",
+      "deleteTitle": "Hapus {{name}}?",
+      "deleteImpact": "Setiap properti atau parameter yang menggunakan enum ini akan kehilangan referensinya."
     },
     "documentation": {},
     "code": {
@@ -2321,6 +2333,10 @@
       },
       "extractedTitle": "File ditulis",
       "openOutput": "Buka folder keluaran",
+      "copySource": "Salin sumber",
+      "copied": "Tersalin!",
+      "openSourceUrl": "Buka URL templat",
+      "openSourceFolder": "Buka folder templat",
       "refresh": "Segarkan templat ini dari sumbernya",
       "removeConfirm": "Template “{{name}}” akan dihapus dari desain ini (file yang sudah dihasilkan di disk tidak diubah).",
       "removeTitle": "Hapus Template ini?",
@@ -2511,7 +2527,8 @@
     "routes": {
       "addGroup": "Tambah grup",
       "addRoute": "Tambah rute",
-      "newGroupName": "NewGroup",
+      "newGroupName": "GrupBaru",
+      "newRouteName": "RuteBaru",
       "selectPrompt": "Pilih grup atau rute, atau buat grup.",
       "deleteGroupTitle": "Hapus {{name}}?",
       "deleteGroupImpact": "Grup dan {{count}} rutenya akan dihapus.",
@@ -2663,6 +2680,21 @@
     "projections": {
       "title": "Proyeksi",
       "hint": "Operasi yang sama, sebagaimana ditampilkan oleh setiap protokol yang dilayani."
+    },
+    "listing": {
+      "models": {
+        "empty": "Buat model pertama Anda"
+      },
+      "enums": {
+        "empty": "Buat enum pertama Anda"
+      },
+      "routes": {
+        "empty": "Buat rute pertama Anda"
+      },
+      "tabs": {
+        "list": "Daftar",
+        "graph": "Grafik"
+      }
     }
   },
   "mqtt": {
@@ -3341,5 +3373,12 @@
     "editNamed": "Edit {{name}}",
     "confirmReplace": "Sudah ada cookie bernama \"{{name}}\" di sini. Ganti?",
     "replaceButton": "Ganti"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tambah tag",
+    "namePlaceholder": "Nama tag",
+    "createBookmark": "Buat tag",
+    "removeBookmark": "Hapus tag",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

@@ -345,7 +345,9 @@
     "add": "Környezet hozzáadása",
     "rename": "Átnevezés",
     "addSub": "Alkörnyezet hozzáadása",
-    "delete": "Törlés"
+    "delete": "Törlés",
+    "duplicate": "Környezet duplikálása",
+    "duplicateName": "{{name}} (másolat)"
   },
   "folderView": {
     "environments": "Környezetek",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Határozzon meg újrafelhasználható értéklistákat a változóihoz: Ön egy olvasható címkét választ, a kérés pedig a hozzá tartozó értéket küldi. Kezdésként válasszon ki vagy hozzon létre egy felsorolást."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Szín:"
   },
   "requestTab": {
     "deprecated": "Ez a végpont elavult, és egy későbbi verzióban eltávolításra kerülhet.",
@@ -466,7 +470,9 @@
       "close": "Bezárás",
       "closeOthers": "Többi bezárása",
       "addToFavorites": "Hozzáadás a kedvencekhez",
-      "removeFromFavorites": "Eltávolítás a kedvencekből"
+      "removeFromFavorites": "Eltávolítás a kedvencekből",
+      "pin": "Rögzítés",
+      "unpin": "Feloldás"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US-formátum (HH/NN/ÉÉÉÉ, 12 órás)",
       "iso": "ISO-formátum (ÉÉÉÉ-HH-NN, 24 órás)"
     },
-    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban"
+    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban",
+    "showOpenedList": "Megnyitott fájlok listájának megjelenítése az oldalsávon",
+    "showOpenedListDescription": "Megjeleníti a „Megnyitva” panelt a munkaterületen jelenleg nyitott fájlokkal",
+    "temporaryTabs": "Előnézeti lapok",
+    "temporaryTabsDescription": "Az elemeket egyetlen újrafelhasználható előnézeti lapon nyitja meg (dőlt betűvel jelenik meg). A dupla kattintás, a szerkesztés vagy egy kérés futtatása állandóvá teszi a lapot."
   },
   "console": {
     "title": "Konzol",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Külső dokumentáció",
       "examplePayload": "Példa adattartalom",
       "operationId": "operationId",
-      "addRequest": "+ Kérés hozzáadása"
+      "addRequest": "+ Új kérés létrehozása ebből a dokumentációból"
     },
     "apiInfo": {
       "version": "Verzió",
@@ -2237,7 +2247,7 @@
       "deleteImpactChild": "{{name}} elveszíti az öröklését (saját tulajdonságai megmaradnak)",
       "description": "Leírás",
       "descriptionPlaceholder": "Mit képvisel ez a modell (opcionális)",
-      "newName": "NewModel",
+      "newName": "ÚjModell",
       "selectPrompt": "Válasszon egy modellt, vagy hozzon létre egyet.",
       "tabs": {
         "schema": "Séma",
@@ -2257,11 +2267,13 @@
       "addEnum": "Enum hozzáadása",
       "addValue": "Érték hozzáadása",
       "valueHeader": "Érték",
-      "newName": "NewEnum",
+      "newName": "ÚjEnum",
       "selectPrompt": "Válasszon egy enumot, vagy hozzon létre egyet — zárt értékkészlet, tulajdonságtípusként használható.",
       "nameHeader": "Név",
       "description": "Leírás",
-      "descriptionPlaceholder": "Mit képvisel ez az enum (opcionális)"
+      "descriptionPlaceholder": "Mit képvisel ez az enum (opcionális)",
+      "deleteTitle": "Törli: {{name}}?",
+      "deleteImpact": "Minden tulajdonság vagy paraméter, amely ezt a felsorolást használta, elveszíti a hivatkozását."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2334,10 @@
       },
       "extractedTitle": "Fájlok kiírva",
       "openOutput": "Kimeneti mappa megnyitása",
+      "copySource": "Forrás másolása",
+      "copied": "Másolva!",
+      "openSourceUrl": "Sablon URL megnyitása",
+      "openSourceFolder": "Sablonmappa megnyitása",
       "refresh": "A sablon frissítése a forrásából",
       "removeConfirm": "A(z) „{{name}}“ Template eltávolításra kerül erről a tervről (a lemezen már legenerált fájlok érintetlenül maradnak).",
       "removeTitle": "Eltávolítja ezt a Template-et?",
@@ -2512,7 +2528,8 @@
     "routes": {
       "addGroup": "Csoport hozzáadása",
       "addRoute": "Útvonal hozzáadása",
-      "newGroupName": "NewGroup",
+      "newGroupName": "ÚjCsoport",
+      "newRouteName": "ÚjÚtvonal",
       "selectPrompt": "Válasszon egy csoportot vagy útvonalat, vagy hozzon létre egy csoportot.",
       "deleteGroupTitle": "Törli: {{name}}?",
       "deleteGroupImpact": "A csoport és {{count}} útvonala törlődik.",
@@ -2664,6 +2681,21 @@
     "projections": {
       "title": "Projekciók",
       "hint": "Ugyanaz a művelet, ahogyan azt minden kiszolgált protokoll közzéteszi."
+    },
+    "listing": {
+      "models": {
+        "empty": "Hozza létre első modelljét"
+      },
+      "enums": {
+        "empty": "Hozza létre első enumját"
+      },
+      "routes": {
+        "empty": "Hozza létre első útvonalát"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Gráf"
+      }
     }
   },
   "mqtt": {
@@ -3342,5 +3374,12 @@
     "editNamed": "{{name}} szerkesztése",
     "confirmReplace": "Már létezik itt egy „{{name}}” nevű süti. Lecseréli?",
     "replaceButton": "Csere"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Címke hozzáadása",
+    "namePlaceholder": "Címke neve",
+    "createBookmark": "Címke létrehozása",
+    "removeBookmark": "Címke eltávolítása",
+    "bookmarkAria": "Címke: {{label}}"
   }
 }

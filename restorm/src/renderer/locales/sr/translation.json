@@ -346,7 +346,9 @@
     "add": "Dodaj okruženje",
     "rename": "Preimenuj",
     "addSub": "Dodaj pod-okruženje",
-    "delete": "Obriši"
+    "delete": "Obriši",
+    "duplicate": "Dupliraj okruženje",
+    "duplicateName": "{{name}} (kopija)"
   },
   "folderView": {
     "environments": "Okruženja",
@@ -397,7 +399,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definišite ponovo upotrebljive liste vrednosti za svoje promenljive: birate čitljivu oznaku, a zahtev šalje pridruženu vrednost. Izaberite ili napravite enumeraciju da biste počeli."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Boja:"
   },
   "requestTab": {
     "deprecated": "Ova krajnja tačka je zastarela i mogla bi biti uklonjena u budućoj verziji.",
@@ -467,7 +471,9 @@
       "close": "Zatvori",
       "closeOthers": "Zatvori ostale",
       "addToFavorites": "Dodaj u omiljeno",
-      "removeFromFavorites": "Ukloni iz omiljenog"
+      "removeFromFavorites": "Ukloni iz omiljenog",
+      "pin": "Prikači",
+      "unpin": "Otkači"
     }
   },
   "codeEditor": {
@@ -1007,7 +1013,11 @@
       "us": "Američki format (MM/DD/GGGG, 12 h)",
       "iso": "ISO format (GGGG-MM-DD, 24 h)"
     },
-    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji"
+    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji",
+    "showOpenedList": "Prikaži listu otvorenih datoteka u bočnoj traci",
+    "showOpenedListDescription": "Prikazuje panel „Otvoreno” sa datotekama koje su trenutno otvorene u radnom prostoru",
+    "temporaryTabs": "Kartice pregleda",
+    "temporaryTabsDescription": "Otvara stavke u jednoj kartici pregleda za višekratnu upotrebu (prikazana kurzivom). Dvoklik, izmena ili pokretanje zahteva čini karticu trajnom."
   },
   "console": {
     "title": "Konzola",
@@ -1262,7 +1272,7 @@
       "externalDocs": "Spoljna dokumentacija",
       "examplePayload": "Primer korisnog opterećenja",
       "operationId": "operationId",
-      "addRequest": "+ Dodaj zahtev"
+      "addRequest": "+ Napravi novi zahtev iz ove dokumentacije"
     },
     "apiInfo": {
       "version": "Verzija",
@@ -2238,7 +2248,7 @@
       "deleteImpactChild": "{{name}} gubi nasleđivanje (sopstvena svojstva ostaju)",
       "description": "Opis",
       "descriptionPlaceholder": "Šta ovaj model predstavlja (opciono)",
-      "newName": "NewModel",
+      "newName": "NoviModel",
       "selectPrompt": "Izaberite model ili ga napravite.",
       "tabs": {
         "schema": "Šema",
@@ -2258,11 +2268,13 @@
       "addEnum": "Dodaj enum",
       "addValue": "Dodaj vrednost",
       "valueHeader": "Vrednost",
-      "newName": "NewEnum",
+      "newName": "NoviEnum",
       "selectPrompt": "Izaberite enum ili ga napravite — zatvoren skup vrednosti upotrebljiv kao tip svojstva.",
       "nameHeader": "Naziv",
       "description": "Opis",
-      "descriptionPlaceholder": "Šta ovaj enum predstavlja (opciono)"
+      "descriptionPlaceholder": "Šta ovaj enum predstavlja (opciono)",
+      "deleteTitle": "Obrisati {{name}}?",
+      "deleteImpact": "Svako svojstvo ili parametar koji je koristio ovaj enum izgubiće svoju referencu."
     },
     "documentation": {},
     "code": {
@@ -2323,6 +2335,10 @@
       },
       "extractedTitle": "Datoteke zapisane",
       "openOutput": "Otvori izlaznu fasciklu",
+      "copySource": "Kopiraj izvor",
+      "copied": "Kopirano!",
+      "openSourceUrl": "Otvori URL šablona",
+      "openSourceFolder": "Otvori fasciklu šablona",
       "refresh": "Osveži ovaj šablon iz njegovog izvora",
       "removeConfirm": "Template „{{name}}“ biće uklonjen iz ovog dizajna (već generisani fajlovi na disku ostaju netaknuti).",
       "removeTitle": "Ukloniti ovaj Template?",
@@ -2513,7 +2529,8 @@
     "routes": {
       "addGroup": "Dodaj grupu",
       "addRoute": "Dodaj rutu",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NovaGrupa",
+      "newRouteName": "NovaRuta",
       "selectPrompt": "Izaberite grupu ili rutu, ili napravite grupu.",
       "deleteGroupTitle": "Obrisati {{name}}?",
       "deleteGroupImpact": "Grupa i njenih {{count}} ruta biće obrisani.",
@@ -2665,6 +2682,21 @@
     "projections": {
       "title": "Projekcije",
       "hint": "Ista operacija, onako kako je izlaže svaki posluženi protokol."
+    },
+    "listing": {
+      "models": {
+        "empty": "Napravite svoj prvi model"
+      },
+      "enums": {
+        "empty": "Napravite svoj prvi enum"
+      },
+      "routes": {
+        "empty": "Napravite svoju prvu rutu"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {
@@ -3343,5 +3375,12 @@
     "editNamed": "Izmeni {{name}}",
     "confirmReplace": "Ovde već postoji kolačić pod nazivom „{{name}}“. Zameniti ga?",
     "replaceButton": "Zameni"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Dodaj oznaku",
+    "namePlaceholder": "Naziv oznake",
+    "createBookmark": "Napravi oznaku",
+    "removeBookmark": "Ukloni oznaku",
+    "bookmarkAria": "Oznaka: {{label}}"
   }
 }

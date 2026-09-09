@@ -439,7 +439,12 @@
     "emptyHint": "Zadejte výše adresu a začněte procházet."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Přidat záložku"
+    "addBookmark": "Přidat záložku",
+    "namePlaceholder": "Název záložky",
+    "createBookmark": "Vytvořit záložku",
+    "removeBookmark": "Odebrat záložku",
+    "bookmarkAria": "Záložka: {{label}}",
+    "add": "Přidat"
   },
   "toaster": {
     "notificationsRegion": "Oznámení"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Rodiče",
     "recoverVersion": "Obnovit tuto verzi"
+  },
+  "editableLabel": {
+    "unnamed": "<bez názvu>"
   }
 }

@@ -33,6 +33,8 @@ import type { Folder, EnvironmentFolder, FolderItem } from '../../../shared/type
 import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
 import { isAnyFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
+import { parseDesignEntityRowId } from '../../../shared/design/designSections'
+import { renameDesignEntity } from '../components/Design/designMutations'
 import { searchIndexService } from '../services/SearchIndexService'
 import { DocumentEvents } from '../services/DocumentEvents'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
@@ -312,6 +314,16 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
   // Handle item rename from breadcrumb
   const handleItemRename = useCallback(
     (item: BreadcrumbItem, newName: string) => {
+      // A design entity crumb (model / enum / route) renames through the design
+      // mutation door — its virtual node isn't in `rootItems`. The design's
+      // DESIGN_UPDATED re-render re-publishes the crumb label, so no tree edit.
+      const entity = parseDesignEntityRowId(item.id)
+      if (entity !== null) {
+        const design = findItemById(rootItems, entity.designId)
+        if (design !== null && isApiDesign(design)) renameDesignEntity(design, entity.section, entity.entityId, newName)
+        forceUpdate()
+        return
+      }
       // Find and update the reactive object directly (triggers search re-indexing)
       const foundItem = findItemById(rootItems, item.id)
       if (foundItem) {

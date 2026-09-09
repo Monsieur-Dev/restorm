@@ -439,7 +439,12 @@
     "emptyHint": "Shkruaj një adresë më sipër për të filluar shfletimin."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Shto faqeshënues"
+    "addBookmark": "Shto faqeshënues",
+    "namePlaceholder": "Emri i faqeshënuesit",
+    "createBookmark": "Krijo faqeshënues",
+    "removeBookmark": "Hiq faqeshënuesin",
+    "bookmarkAria": "Faqeshënues: {{label}}",
+    "add": "Shto"
   },
   "toaster": {
     "notificationsRegion": "Njoftime"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Prindërit",
     "recoverVersion": "Rikthe këtë version"
+  },
+  "editableLabel": {
+    "unnamed": "<pa emër>"
   }
 }

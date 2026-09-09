@@ -345,7 +345,9 @@
     "add": "Omgeving toevoegen",
     "rename": "Naam wijzigen",
     "addSub": "Sub-omgeving toevoegen",
-    "delete": "Verwijderen"
+    "delete": "Verwijderen",
+    "duplicate": "Omgeving dupliceren",
+    "duplicateName": "{{name}} (kopie)"
   },
   "folderView": {
     "environments": "Omgevingen",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definieer herbruikbare waardelijsten voor uw variabelen: u kiest een leesbaar label, het request verstuurt de bijbehorende waarde. Selecteer of maak een enumeratie om te beginnen."
-    }
+    },
+    "iconLabel": "Pictogram:",
+    "colorLabel": "Kleur:"
   },
   "requestTab": {
     "deprecated": "Dit endpoint is verouderd en kan in een toekomstige versie worden verwijderd.",
@@ -466,7 +470,9 @@
       "close": "Sluiten",
       "closeOthers": "Andere sluiten",
       "addToFavorites": "Toevoegen aan favorieten",
-      "removeFromFavorites": "Verwijderen uit favorieten"
+      "removeFromFavorites": "Verwijderen uit favorieten",
+      "pin": "Vastmaken",
+      "unpin": "Losmaken"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "Amerikaanse notatie (MM/DD/JJJJ, 12h)",
       "iso": "ISO-notatie (JJJJ-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Notatie die wordt gebruikt om datums en tijden in de toepassing weer te geven"
+    "dateTimeFormatDescription": "Notatie die wordt gebruikt om datums en tijden in de toepassing weer te geven",
+    "showOpenedList": "Toon de lijst met geopende bestanden in de zijbalk",
+    "showOpenedListDescription": "Toont het paneel ‘Geopend’ met de bestanden die momenteel in de werkruimte openstaan",
+    "temporaryTabs": "Voorbeeldtabbladen",
+    "temporaryTabsDescription": "Opent items in één herbruikbaar voorbeeldtabblad (cursief weergegeven). Dubbelklikken, bewerken of een verzoek uitvoeren maakt het tabblad permanent."
   },
   "console": {
     "title": "Console",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Externe docs",
       "examplePayload": "Voorbeeld-payload",
       "operationId": "operationId",
-      "addRequest": "+ Verzoek toevoegen"
+      "addRequest": "+ Een nieuwe aanvraag maken op basis van deze documentatie"
     },
     "apiInfo": {
       "version": "Versie",
@@ -2237,7 +2247,7 @@
       "deleteImpactChild": "{{name}} verliest zijn overerving (eigen eigenschappen blijven)",
       "description": "Beschrijving",
       "descriptionPlaceholder": "Wat dit model vertegenwoordigt (optioneel)",
-      "newName": "NewModel",
+      "newName": "NieuwModel",
       "selectPrompt": "Selecteer een model of maak er een.",
       "tabs": {
         "schema": "Schema",
@@ -2257,11 +2267,13 @@
       "addEnum": "Enum toevoegen",
       "addValue": "Waarde toevoegen",
       "valueHeader": "Waarde",
-      "newName": "NewEnum",
+      "newName": "NieuwEnum",
       "selectPrompt": "Selecteer een enum of maak er een — een gesloten set waarden bruikbaar als eigenschapstype.",
       "nameHeader": "Naam",
       "description": "Beschrijving",
-      "descriptionPlaceholder": "Wat deze enum vertegenwoordigt (optioneel)"
+      "descriptionPlaceholder": "Wat deze enum vertegenwoordigt (optioneel)",
+      "deleteTitle": "{{name}} verwijderen?",
+      "deleteImpact": "Elke eigenschap of parameter die deze enum gebruikte, verliest zijn referentie."
     },
     "documentation": {},
     "code": {
@@ -2322,6 +2334,10 @@
       },
       "extractedTitle": "Bestanden geschreven",
       "openOutput": "Uitvoermap openen",
+      "copySource": "Bron kopiëren",
+      "copied": "Gekopieerd!",
+      "openSourceUrl": "Sjabloon-URL openen",
+      "openSourceFolder": "Sjabloonmap openen",
       "refresh": "Deze template vernieuwen vanaf de bron",
       "removeConfirm": "De Template “{{name}}” wordt uit dit ontwerp verwijderd (reeds gegenereerde bestanden op schijf blijven ongewijzigd).",
       "removeTitle": "Deze Template verwijderen?",
@@ -2512,7 +2528,8 @@
     "routes": {
       "addGroup": "Groep toevoegen",
       "addRoute": "Route toevoegen",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NieuweGroep",
+      "newRouteName": "NieuweRoute",
       "selectPrompt": "Selecteer een groep of route, of maak een groep.",
       "deleteGroupTitle": "{{name}} verwijderen?",
       "deleteGroupImpact": "De groep en zijn {{count}} routes worden verwijderd.",
@@ -2664,6 +2681,21 @@
     "projections": {
       "title": "Projecties",
       "hint": "Dezelfde operatie, zoals elk aangeboden protocol die blootstelt."
+    },
+    "listing": {
+      "models": {
+        "empty": "Maak je eerste model"
+      },
+      "enums": {
+        "empty": "Maak je eerste enum"
+      },
+      "routes": {
+        "empty": "Maak je eerste route"
+      },
+      "tabs": {
+        "list": "Lijst",
+        "graph": "Grafiek"
+      }
     }
   },
   "mqtt": {
@@ -3342,5 +3374,12 @@
     "editNamed": "{{name}} bewerken",
     "confirmReplace": "Er bestaat hier al een cookie met de naam \"{{name}}\". Vervangen?",
     "replaceButton": "Vervangen"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tag toevoegen",
+    "namePlaceholder": "Tagnaam",
+    "createBookmark": "Tag maken",
+    "removeBookmark": "Tag verwijderen",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

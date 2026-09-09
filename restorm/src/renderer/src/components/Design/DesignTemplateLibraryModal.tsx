@@ -106,13 +106,16 @@ export const DesignTemplateLibraryModal: React.FC<{
 
   const add = (source: DesignTemplateSource, label: string): void => {
     onAdd(source, label)
-    // Stay open — a design often stacks several templates. Confirm with a
-    // non-blocking toast; the user closes via "Done" when finished.
+    // Confirm with a non-blocking toast, then close: picking a template returns
+    // the user to the Code page with the template selected. To stack several,
+    // they reopen the library.
     toasterService.push('app', {
       id: 'design-template-added',
       title: t('design.code.library.added', 'Template added'),
-      body: label
+      body: label,
+      durationMs: 5000
     })
+    onClose()
   }
 
   /** "Use" a cloud template → append it as a repo source (its git URL). */

@@ -439,7 +439,12 @@
     "emptyHint": "Inserisci un indirizzo qui sopra per iniziare a navigare."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Aggiungi segnalibro"
+    "addBookmark": "Aggiungi segnalibro",
+    "namePlaceholder": "Nome del segnalibro",
+    "createBookmark": "Crea segnalibro",
+    "removeBookmark": "Rimuovi segnalibro",
+    "bookmarkAria": "Segnalibro: {{label}}",
+    "add": "Aggiungi"
   },
   "toaster": {
     "notificationsRegion": "Notifiche"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Genitori",
     "recoverVersion": "Ripristina questa versione"
+  },
+  "editableLabel": {
+    "unnamed": "<senza nome>"
   }
 }

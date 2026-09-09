@@ -19,16 +19,14 @@ Feature: The Design tab shell
     Then the design tab is open on the "models" section
     And exactly one design tab is open
 
-  Scenario: The icon rail switches sections, each with its filterable list
+  Scenario: The section rows switch sections; entities live in the sidebar tree
     Given a Pro project carrying an API design is open
     When I click the design row in the sidebar
     Then the design tab is open on the "settings" section
     When I click the rail icon "models"
     Then the design tab is open on the "models" section
     And the "models" section lists "User"
-    When I filter the "models" section with "Ord"
-    Then the "models" section lists "Order"
-    And the "models" section does not list "User"
+    And the "models" section lists "Order"
     When I click the rail icon "enums"
     Then the design tab is open on the "enums" section
     And the "enums" section lists "UserStatus"

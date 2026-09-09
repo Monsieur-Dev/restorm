@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.1.1
+
+**Návrhář API se nyní ovládá z postranního panelu.**
+
+- **Vaše modely, výčty a trasy žijí v postranním panelu.** Tři seznamy na kartách mizí — modely (s vnořením podle dědičnosti), výčty a trasy (skupiny a jejich trasy) jsou nyní přímo ve stromu postranního panelu. Pravým tlačítkem přejmenujete, přidáte podmodel nebo podskupinu, naklonujete trasu, vygenerujete CRUD nebo smažete; tažením změníte pořadí nebo rodiče — nikdy mimo návrh. Každá stránka nyní zobrazuje jen detail vybrané položky.
+- **Přehled vašich modelů, enumů a tras.** Kořenový uzel každé sekce nyní vypisuje vše, co obsahuje — a Modely přidávají kartu **Graf**: diagram tříd vašich modelů s dědičností a odkazy. Enumy zobrazují své hodnoty hned vedle názvu.
+- **Jedno místo pro přejmenování.** Model, enum nebo trasu přejmenujete z velkého názvu (tužka) a prázdný název zobrazí **„<bez názvu>“**, aby tužka byla vždy dosažitelná — název se už na stránce neobjevuje dvakrát.
+- **Chyby validace ukazují na prvek.** Když je něco špatně — model a enum se stejným názvem, odkaz na něco, co už neexistuje — vysvětlí to poznámka v horní části modelu, enumu nebo trasy.
+- **Úplná drobečková navigace.** Cesta odráží celou hierarchii postranního panelu — složky › návrh › sekce › skupina › položka — a každý segment je klikatelný.
+- **Vyberte více, smažte najednou.** Vyberte několik modelů, enumů nebo tras a smažte je najednou, po potvrzení.
+- **Zkopírujte nebo otevřete zdroj šablony kódu jedním kliknutím.** Na stránce „</> Code“ se po najetí na šablonu objeví tlačítko pro zkopírování její URL nebo cesty a tlačítko pro její otevření — repozitář v prohlížeči, nebo složka na disku u místní šablony.
+- **Nové trasy mají hned název.** Trasa vytvořená od nuly nyní dostane výchozí název, takže ji můžete hned přejmenovat.
+- **Karty náhledu, jako ve vašem editoru.** Jedno kliknutí nyní otevře položku ve znovupoužitelné kartě **náhledu** (její název je kurzivou); kliknutí na jinou položku znovu použije stejnou kartu, místo aby se přidávala nová. Dvojklik, jakákoli úprava nebo spuštění požadavku ji ponechá otevřenou natrvalo. Vypnete to v Nastavení › Chování.
+- **Připněte si karty, které máte stále otevřené.** Klikněte na kartu pravým tlačítkem a připněte ji: připnuté karty zůstávají vpředu, přežijí „zavřít ostatní“ a pamatují se pro každý projekt.
+- **Prostředí mají teď pořádný detailní pohled.** Otevřete prostředí, abyste je přejmenovali z jeho názvu, nastavili jeho ikonu a barvu a přidali podprostředí — a kontextová nabídka nyní duplikuje prostředí se všemi jeho proměnnými a podprostředími.
+
+Opravy:
+
+- **Výběr šablony kódu zavře knihovnu.** „Použít“ vás nyní vrátí přímo na stránku Code.
+- **Generování dokumentace už neselhává u volitelných polí.** Generování dokumentace z návrhu, jehož model nebo parametr ponechal „required“ nenastavené, se už nezastaví chybou šablony.
+- **Smazání enumu se nejprve zeptá.** Enumy získávají stejné potvrzení jako modely a trasy.
+- **Postranní panel odhalí, co vyberete.** Když je zapnuto „synchronizovat postranní panel s aktivní kartou“, výběr nebo vytvoření modelu, enumu či trasy rozbalí jeho rodiče, aby zůstal v stromu viditelný.
+- **Tlačítko prostředí zůstává čitelné na jakékoli barvě.** Jeho popisek se nyní přepne na tmavý nebo světlý text, aby zůstal čitelný na barvě prostředí, stejně jako tlačítko spuštění.
+- **Kliknutí prostředním tlačítkem zavře otevřený soubor.** Kliknutí prostředním tlačítkem na položku v seznamu „Otevřené“ v postranním panelu zavře její kartu — a nové nastavení Chování umožňuje tento panel zcela skrýt.
+- **Jasnější formulace při startu z dokumentace.** V dokumentaci importovaného API nyní tlačítko zní „Vytvořit nový požadavek z této dokumentace“.
+- **Přihlášení funguje ve verzi z Microsoft Store.** Zpětné volání vlastního protokolu, které prohlížeč vrací po přihlášení, je nyní deklarováno v balíčku Store, takže se přihlášení dokončí místo vypršení časového limitu.
+
 ## v1.1.0
 
 🎉 **Restorm je teď také designer API.** Navrhněte své API, obsloužíte je jako živý mock na pěti protokolech současně a vygenerujte jeho klienty — aniž byste opustili aplikaci, vše na vlastním disku.

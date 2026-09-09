@@ -347,7 +347,9 @@
     "add": "Dodaj środowisko",
     "rename": "Zmień nazwę",
     "addSub": "Dodaj podśrodowisko",
-    "delete": "Usuń"
+    "delete": "Usuń",
+    "duplicate": "Duplikuj środowisko",
+    "duplicateName": "{{name}} (kopia)"
   },
   "folderView": {
     "environments": "Środowiska",
@@ -398,7 +400,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Zdefiniuj wielokrotnego użytku listy wartości dla zmiennych: wybierasz czytelną etykietę, a żądanie wysyła powiązaną wartość. Wybierz lub utwórz wyliczenie, aby zacząć."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Kolor:"
   },
   "requestTab": {
     "deprecated": "Ten punkt końcowy jest przestarzały i może zostać usunięty w przyszłej wersji.",
@@ -468,7 +472,9 @@
       "close": "Zamknij",
       "closeOthers": "Zamknij inne",
       "addToFavorites": "Dodaj do ulubionych",
-      "removeFromFavorites": "Usuń z ulubionych"
+      "removeFromFavorites": "Usuń z ulubionych",
+      "pin": "Przypnij",
+      "unpin": "Odepnij"
     }
   },
   "codeEditor": {
@@ -1008,7 +1014,11 @@
       "us": "Format US (MM/DD/RRRR, 12h)",
       "iso": "Format ISO (RRRR-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Format używany do wyświetlania dat i godzin w aplikacji"
+    "dateTimeFormatDescription": "Format używany do wyświetlania dat i godzin w aplikacji",
+    "showOpenedList": "Pokaż listę otwartych plików na pasku bocznym",
+    "showOpenedListDescription": "Wyświetla panel „Otwarte” z plikami aktualnie otwartymi w obszarze roboczym",
+    "temporaryTabs": "Karty podglądu",
+    "temporaryTabsDescription": "Otwiera elementy w jednej wielokrotnego użytku karcie podglądu (wyświetlanej kursywą). Podwójne kliknięcie, edycja lub uruchomienie żądania utrwala kartę."
   },
   "console": {
     "title": "Konsola",
@@ -1263,7 +1273,7 @@
       "externalDocs": "Dokumentacja zewnętrzna",
       "examplePayload": "Przykładowy ładunek",
       "operationId": "operationId",
-      "addRequest": "+ Dodaj żądanie"
+      "addRequest": "+ Utwórz nowe żądanie na podstawie tej dokumentacji"
     },
     "apiInfo": {
       "version": "Wersja",
@@ -2239,7 +2249,7 @@
       "deleteImpactChild": "{{name}} traci dziedziczenie (własne właściwości pozostają)",
       "description": "Opis",
       "descriptionPlaceholder": "Co reprezentuje ten model (opcjonalnie)",
-      "newName": "NewModel",
+      "newName": "NowyModel",
       "selectPrompt": "Wybierz model lub utwórz nowy.",
       "tabs": {
         "schema": "Schemat",
@@ -2259,11 +2269,13 @@
       "addEnum": "Dodaj enum",
       "addValue": "Dodaj wartość",
       "valueHeader": "Wartość",
-      "newName": "NewEnum",
+      "newName": "NowyEnum",
       "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości.",
       "nameHeader": "Nazwa",
       "description": "Opis",
-      "descriptionPlaceholder": "Co reprezentuje ten enum (opcjonalnie)"
+      "descriptionPlaceholder": "Co reprezentuje ten enum (opcjonalnie)",
+      "deleteTitle": "Usunąć {{name}}?",
+      "deleteImpact": "Każda właściwość lub parametr korzystający z tego wyliczenia utraci swoje odwołanie."
     },
     "documentation": {},
     "code": {
@@ -2324,6 +2336,10 @@
       },
       "extractedTitle": "Pliki zapisane",
       "openOutput": "Otwórz folder wyjściowy",
+      "copySource": "Kopiuj źródło",
+      "copied": "Skopiowano!",
+      "openSourceUrl": "Otwórz URL szablonu",
+      "openSourceFolder": "Otwórz folder szablonu",
       "refresh": "Odśwież ten szablon z jego źródła",
       "removeConfirm": "Template „{{name}}“ zostanie usunięty z tego projektu (już wygenerowane pliki na dysku pozostaną nienaruszone).",
       "removeTitle": "Usunąć ten Template?",
@@ -2514,7 +2530,8 @@
     "routes": {
       "addGroup": "Dodaj grupę",
       "addRoute": "Dodaj trasę",
-      "newGroupName": "NewGroup",
+      "newGroupName": "NowaGrupa",
+      "newRouteName": "NowaTrasa",
       "selectPrompt": "Wybierz grupę lub trasę, albo utwórz grupę.",
       "deleteGroupTitle": "Usunąć {{name}}?",
       "deleteGroupImpact": "Grupa i jej {{count}} tras zostaną usunięte.",
@@ -2666,6 +2683,21 @@
     "projections": {
       "title": "Projekcje",
       "hint": "Ta sama operacja, tak jak udostępnia ją każdy serwowany protokół."
+    },
+    "listing": {
+      "models": {
+        "empty": "Utwórz swój pierwszy model"
+      },
+      "enums": {
+        "empty": "Utwórz swój pierwszy enum"
+      },
+      "routes": {
+        "empty": "Utwórz swoją pierwszą trasę"
+      },
+      "tabs": {
+        "list": "Lista",
+        "graph": "Graf"
+      }
     }
   },
   "mqtt": {
@@ -3344,5 +3376,12 @@
     "editNamed": "Edytuj {{name}}",
     "confirmReplace": "Plik cookie o nazwie „{{name}}” już tutaj istnieje. Zastąpić go?",
     "replaceButton": "Zastąp"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Dodaj tag",
+    "namePlaceholder": "Nazwa tagu",
+    "createBookmark": "Utwórz tag",
+    "removeBookmark": "Usuń tag",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

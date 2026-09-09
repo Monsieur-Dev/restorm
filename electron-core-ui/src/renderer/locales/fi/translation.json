@@ -439,7 +439,12 @@
     "emptyHint": "Kirjoita osoite yläpuolelle aloittaaksesi selaamisen."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Lisää kirjanmerkki"
+    "addBookmark": "Lisää kirjanmerkki",
+    "namePlaceholder": "Kirjanmerkin nimi",
+    "createBookmark": "Luo kirjanmerkki",
+    "removeBookmark": "Poista kirjanmerkki",
+    "bookmarkAria": "Kirjanmerkki: {{label}}",
+    "add": "Lisää"
   },
   "toaster": {
     "notificationsRegion": "Ilmoitukset"
@@ -500,5 +505,8 @@
     "hash": "Hash",
     "parents": "Vanhemmat",
     "recoverVersion": "Palauta tämä versio"
+  },
+  "editableLabel": {
+    "unnamed": "<nimetön>"
   }
 }
