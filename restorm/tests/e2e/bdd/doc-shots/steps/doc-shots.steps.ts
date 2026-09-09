@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd'
-import { isAbsolute, join } from 'path'
-import { mkdirSync, rmSync, readFileSync } from 'fs'
+import { isAbsolute, join, dirname, relative } from 'path'
+import { mkdirSync, rmSync, readFileSync, copyFileSync } from 'fs'
 import { createServer } from 'http'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
@@ -579,14 +579,23 @@ When(
 /** The home-page designer hero — the Routes view with a route selected showing
  * its multi-protocol projections. Lands in the website's `assets/home/<locale>/`
  * (a sibling of the docs assets), not the docs tree. */
-When('I capture the designer home shot for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+When('I capture the designer home shot for every locale to {string}', async ({ restormRoot, websiteOut, outRoot, localesFilter }, template: string) => {
   const p = requirePage()
   const id = requireDesign()
   const homeOut = join(websiteOut, '..', 'home')
-  await captureForAllLocales(p, restormRoot, targetResolver(homeOut, template), {
+  const written = await captureForAllLocales(p, restormRoot, targetResolver(homeOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => { await gotoDesignSection(p, id, 'routes', 'Find pet by ID') }
   })
+  // Mirror each home hero into the versioned screenshots/ root so the Snap Store
+  // listing — which sources screenshots/<locale>/ — carries the designer shot
+  // alongside welcome-home / request-editor / scenario-editor (same four images
+  // as the website home hero).
+  for (const src of written) {
+    const dst = join(outRoot, relative(homeOut, src))
+    mkdirSync(dirname(dst), { recursive: true })
+    copyFileSync(src, dst)
+  }
 })
 
 /** The Models view showcasing the feature: the Pet model selected with its

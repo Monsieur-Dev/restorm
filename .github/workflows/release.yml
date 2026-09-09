@@ -98,16 +98,26 @@ jobs:
           # file". Strip every empty signing/telemetry var so an
           # uncredentialed run stays a plain unsigned build.
           for v in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD \
-                   APPLE_TEAM_ID AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET \
+                   APPLE_TEAM_ID APPLE_API_KEY_ID APPLE_API_ISSUER \
+                   AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET \
                    SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_PROJECT; do
             if [ -z "$(printenv "$v")" ]; then unset "$v"; fi
           done
+          # macOS notarization uses an App Store Connect API key. The secret
+          # holds the .p8 base64; @electron/notarize wants a file PATH, so
+          # materialize it and point APPLE_API_KEY at the file. Absent secret ⇒
+          # nothing is written and the notarize gate below stays off.
+          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$APPLE_API_KEY_B64" ]; then
+            printf '%s' "$APPLE_API_KEY_B64" | base64 -d > "$RUNNER_TEMP/apple_api_key.p8"
+            export APPLE_API_KEY="$RUNNER_TEMP/apple_api_key.p8"
+          fi
           # Notarization is opt-in per electron-builder 26 and only meaningful
-          # once the Apple credentials exist — the flag rides the same secrets
-          # that enable signing, so an uncredentialed run stays exactly the
-          # unsigned build it always was.
+          # once the app is actually SIGNED (a cert is present) AND a
+          # notarization credential exists — notarizing an unsigned app fails.
+          # An uncredentialed run stays exactly the unsigned build it always was.
           NOTARIZE_FLAG=""
-          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$APPLE_TEAM_ID" ]; then
+          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$CSC_LINK" ] \
+             && { [ -n "$APPLE_API_KEY" ] || [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ]; }; then
             NOTARIZE_FLAG="-c.mac.notarize=true"
           fi
           NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG
@@ -140,9 +150,16 @@ jobs:
           # macOS: Developer ID Application cert as base64 .p12 + passphrase.
           # An unset secret yields an empty env var, which electron-builder
           # treats as absent — the build stays unsigned, exactly as before.
-          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
-          # macOS notarization (used with -c.mac.notarize=true above).
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # macOS notarization (used with -c.mac.notarize=true above). Primary
+          # path: an App Store Connect API key — the .p8 base64 rides in
+          # APPLE_API_KEY_B64 and is decoded to a file (APPLE_API_KEY) in the
+          # run step above. APPLE_ID + app-specific password remain a fallback
+          # when those are configured instead.
+          APPLE_API_KEY_B64: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
