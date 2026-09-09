@@ -12,6 +12,9 @@
 - **Velg flere, slett på én gang.** Velg flere modeller, enumer eller ruter og slett dem på én gang, etter en bekreftelse.
 - **Kopier eller åpne kilden til en kodemal med ett klikk.** På siden "</> Code" viser en mal ved hover en knapp for å kopiere URL-en eller stien og en for å åpne den — repoet i nettleseren, eller mappen på disken for en lokal mal.
 - **Nye ruter starter med et navn.** En rute laget fra bunnen av får nå et standardnavn, så du kan gi den nytt navn med en gang.
+- **Forhåndsvisningsfaner, som i editoren din.** Ett klikk åpner nå et element i en gjenbrukbar **forhåndsvisnings**-fane (navnet vises i kursiv); å klikke et annet element gjenbruker samme fane i stedet for å stable en ny. Dobbeltklikk på den, rediger noe, eller kjør en forespørsel for å holde den åpen for godt. Slå det av under Innstillinger › Oppførsel.
+- **Fest fanene du holder åpne.** Høyreklikk en fane og fest den: festede faner blir liggende først, overlever «lukk de andre» og huskes per prosjekt.
+- **Miljøer får en skikkelig detaljvisning.** Åpne et miljø for å gi det nytt navn fra tittelen, angi ikon og farge og legge til et undermiljø — og høyreklikkmenyen dupliserer nå et miljø med alle variablene og undermiljøene.
 
 Rettelser:
 
@@ -19,6 +22,10 @@ Rettelser:
 - **Dokumentasjonsgenerering feiler ikke lenger på valgfrie felter.** Å generere dokumentasjon fra et design der modellen eller parameteren lot "required" være uinnstilt, stopper ikke lenger med en malfeil.
 - **Sletting av en enum spør først.** Enumer får samme bekreftelse som modeller og ruter.
 - **Sidefeltet avslører det du velger.** Med «synkroniser sidefeltet med aktiv fane» på, utvider det å velge eller opprette en modell, enum eller rute foreldrene dens slik at den holdes synlig i treet.
+- **Miljøknappen forblir lesbar på enhver farge.** Etiketten skifter nå til mørk eller lys tekst for å holde seg lesbar mot miljøets farge, som kjør-knappen.
+- **Midtklikk lukker en åpen fil.** Å midtklikke et element i «Åpne»-listen i sidefeltet lukker fanen dens — og en ny Oppførsel-innstilling lar deg skjule det panelet helt.
+- **Klarere ordlyd når du starter fra dokumentasjon.** I dokumentasjonen til et importert API står det nå "Opprett en ny forespørsel fra denne dokumentasjonen" på knappen.
+- **Innlogging fungerer i Microsoft Store-versjonen.** Tilbakekallet med egendefinert protokoll som nettleseren gir tilbake etter innlogging, er nå deklarert i Store-pakken, slik at innloggingen fullføres i stedet for å få tidsavbrudd.
 
 ## v1.1.0
 

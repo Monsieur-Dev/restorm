@@ -439,7 +439,12 @@
     "emptyHint": "Wpisz adres powyżej, aby rozpocząć przeglądanie."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Dodaj zakładkę"
+    "addBookmark": "Dodaj zakładkę",
+    "namePlaceholder": "Nazwa zakładki",
+    "createBookmark": "Utwórz zakładkę",
+    "removeBookmark": "Usuń zakładkę",
+    "bookmarkAria": "Zakładka: {{label}}",
+    "add": "Dodaj"
   },
   "toaster": {
     "notificationsRegion": "Powiadomienia"

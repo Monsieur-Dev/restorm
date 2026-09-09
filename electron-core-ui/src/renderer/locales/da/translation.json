@@ -439,7 +439,12 @@
     "emptyHint": "Indtast en adresse ovenfor for at begynde at surfe."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Tilføj bogmærke"
+    "addBookmark": "Tilføj bogmærke",
+    "namePlaceholder": "Bogmærkenavn",
+    "createBookmark": "Opret bogmærke",
+    "removeBookmark": "Fjern bogmærke",
+    "bookmarkAria": "Bogmærke: {{label}}",
+    "add": "Tilføj"
   },
   "toaster": {
     "notificationsRegion": "Notifikationer"

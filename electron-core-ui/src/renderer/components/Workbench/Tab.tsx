@@ -49,7 +49,7 @@ export const Tab: React.FC<TabProps> = ({
 	return (
 		<div
 			ref={refCallback}
-			className={`tab${isActive ? ' active' : ''}${tab.isDirty ? ' dirty' : ''}${
+			className={`tab${isActive ? ' active' : ''}${tab.isDirty ? ' dirty' : ''}${tab.isPinned ? ' pinned' : ''}${tab.isTemporary ? ' temporary' : ''}${
 				showDropMarker ? (showDropMarker === 'left' ? ' drop-target-left' : ' drop-target-right') : ''
 			}`}
 			role="tab"
@@ -74,6 +74,9 @@ export const Tab: React.FC<TabProps> = ({
 			onDragEnd={onDragEnd}
 		>
 			<div className="tab-label">
+				{tab.isPinned && (
+					<span className="codicon codicon-pinned tab-pin-indicator" aria-hidden="true" />
+				)}
 				<span {...(dataTestId && { 'data-testid': `${dataTestId}-label` })} className="label-name">
 					{titleContent}
 				</span>

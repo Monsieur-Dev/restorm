@@ -186,6 +186,15 @@
         "icon": "assets/icons/icon"
       }
     ],
+    "protocols": [
+      {
+        "name": "Restorm",
+        "schemes": [
+          "restorm",
+          "restorm-preview"
+        ]
+      }
+    ],
     "beforePack": "scripts/before-pack.cjs",
     "afterPack": "scripts/after-pack.cjs",
     "directories": {

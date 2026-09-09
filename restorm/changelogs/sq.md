@@ -12,6 +12,9 @@
 - **Zgjidh disa, fshi njëherësh.** Zgjidh disa modele, enum-e ose rrugë dhe fshiji njëherësh, pas një konfirmimi.
 - **Kopjoni ose hapni burimin e një shablloni kodi me një klik.** Në faqen "</> Code", kur kaloni mbi një shabllon shfaqet një buton për të kopjuar URL-në ose shtegun e tij dhe një për ta hapur — depoja në shfletuesin tuaj, ose dosja në disk për një shabllon lokal.
 - **Rrugët e reja fillojnë me një emër.** Një rrugë e krijuar nga e para tani merr një emër të parazgjedhur, kështu që mund ta riemërtoni menjëherë.
+- **Skeda paraparjeje, si në redaktuesin tuaj.** Një klik i vetëm tani hap një element në një skedë **paraparjeje** të ripërdorshme (emri i tij me shkronja të pjerrëta); klikimi i një elementi tjetër ripërdor të njëjtën skedë në vend që të grumbullojë një të re. Një klik dyfishtë, çdo ndryshim ose ekzekutimi i një kërkese e mban të hapur përgjithmonë. Çaktivizoje te Cilësimet › Sjellja.
+- **Fiksoni skedat që i mbani hapur.** Klikoni me të djathtën një skedë dhe fiksojeni: skedat e fiksuara qëndrojnë të parat, i mbijetojnë «mbyll të tjerat» dhe mbahen mend për çdo projekt.
+- **Mjediset marrin një pamje të vërtetë detajesh.** Hapni një mjedis për ta riemërtuar nga titulli i tij, për t'i caktuar ikonën dhe ngjyrën dhe për të shtuar një nën-mjedis — dhe menyja e klikut të djathtë tani e dyfishon një mjedis me të gjitha variablat dhe nën-mjediset e tij.
 
 Rregullime:
 
@@ -19,6 +22,10 @@ Rregullime:
 - **Gjenerimi i dokumentacionit nuk dështon më te fushat opsionale.** Gjenerimi i dokumentacionit nga një projekt modeli ose parametri i të cilit e linte "required" të pacaktuar nuk ndalet më me një gabim shablloni.
 - **Fshirja e një enum-i pyet fillimisht.** Enum-et marrin të njëjtin konfirmim si modelet dhe rrugët.
 - **Shiriti anësor zbulon zgjedhjen tuaj.** Me «sinkronizo shiritin anësor me skedën aktive» të ndezur, zgjedhja ose krijimi i një modeli, enum-i ose rruge zgjeron prindërit e tij që të mbetet i dukshëm në pemë.
+- **Butoni i mjedisit mbetet i lexueshëm në çdo ngjyrë.** Etiketa e tij tani kalon në tekst të errët ose të çelët për të mbetur e lexueshme mbi ngjyrën e mjedisit, si butoni i ekzekutimit.
+- **Klikimi i mesëm mbyll një skedar të hapur.** Klikimi i mesëm mbi një zë në listën «Të hapura» të shiritit anësor mbyll skedën e tij — dhe një cilësim i ri i Sjelljes ju lejon ta fshihni krejtësisht atë panel.
+- **Formulim më i qartë kur nisni nga dokumentacioni.** Në dokumentacionin e një API-je të importuar, butoni tani thotë "Krijo një kërkesë të re nga ky dokumentacion."
+- **Hyrja funksionon në versionin e Microsoft Store.** Kthimi i thirrjes me protokoll të personalizuar që shfletuesi kthen pas hyrjes tani është deklaruar në paketën e Store, kështu që hyrja përfundon në vend që t'i mbarojë koha.
 
 ## v1.1.0
 

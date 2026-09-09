@@ -439,7 +439,12 @@
     "emptyHint": "Masukkan alamat di atas untuk mulai menjelajah."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Tambah penanda"
+    "addBookmark": "Tambah penanda",
+    "namePlaceholder": "Nama penanda",
+    "createBookmark": "Buat penanda",
+    "removeBookmark": "Hapus penanda",
+    "bookmarkAria": "Penanda: {{label}}",
+    "add": "Tambah"
   },
   "toaster": {
     "notificationsRegion": "Notifikasi"

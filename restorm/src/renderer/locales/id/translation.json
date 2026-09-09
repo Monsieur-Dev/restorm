@@ -344,7 +344,9 @@
     "add": "Tambah lingkungan",
     "rename": "Ubah nama",
     "addSub": "Tambah sub-lingkungan",
-    "delete": "Hapus"
+    "delete": "Hapus",
+    "duplicate": "Duplikat lingkungan",
+    "duplicateName": "{{name}} (salinan)"
   },
   "folderView": {
     "environments": "Lingkungan",
@@ -395,7 +397,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Tentukan daftar nilai yang dapat digunakan kembali untuk variabel Anda: Anda memilih label yang mudah dibaca, permintaan mengirimkan nilai terkait. Pilih atau buat enumerasi untuk memulai."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Warna:"
   },
   "requestTab": {
     "deprecated": "Endpoint ini tidak digunakan lagi dan mungkin dihapus pada versi mendatang.",
@@ -465,7 +469,9 @@
       "close": "Tutup",
       "closeOthers": "Tutup yang lain",
       "addToFavorites": "Tambah ke favorit",
-      "removeFromFavorites": "Hapus dari favorit"
+      "removeFromFavorites": "Hapus dari favorit",
+      "pin": "Sematkan",
+      "unpin": "Lepas sematan"
     }
   },
   "codeEditor": {
@@ -1005,7 +1011,11 @@
       "us": "Format AS (MM/DD/YYYY, 12 jam)",
       "iso": "Format ISO (YYYY-MM-DD, 24 jam)"
     },
-    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi"
+    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi",
+    "showOpenedList": "Tampilkan daftar berkas yang terbuka di bilah sisi",
+    "showOpenedListDescription": "Menampilkan panel «Terbuka» yang mencantumkan berkas yang sedang terbuka di ruang kerja",
+    "temporaryTabs": "Tab pratinjau",
+    "temporaryTabsDescription": "Membuka item dalam satu tab pratinjau yang dapat digunakan ulang (ditampilkan miring). Klik ganda, pengeditan, atau menjalankan permintaan membuat tab menjadi permanen."
   },
   "console": {
     "title": "Konsol",
@@ -1260,7 +1270,7 @@
       "externalDocs": "Dokumen eksternal",
       "examplePayload": "Contoh payload",
       "operationId": "operationId",
-      "addRequest": "+ Tambah permintaan"
+      "addRequest": "+ Buat permintaan baru dari dokumentasi ini"
     },
     "apiInfo": {
       "version": "Versi",
@@ -3363,5 +3373,12 @@
     "editNamed": "Edit {{name}}",
     "confirmReplace": "Sudah ada cookie bernama \"{{name}}\" di sini. Ganti?",
     "replaceButton": "Ganti"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tambah tag",
+    "namePlaceholder": "Nama tag",
+    "createBookmark": "Buat tag",
+    "removeBookmark": "Hapus tag",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

@@ -344,7 +344,9 @@
     "add": "Thêm môi trường",
     "rename": "Đổi tên",
     "addSub": "Thêm môi trường con",
-    "delete": "Xóa"
+    "delete": "Xóa",
+    "duplicate": "Nhân bản môi trường",
+    "duplicateName": "{{name}} (bản sao)"
   },
   "folderView": {
     "environments": "Môi trường",
@@ -395,7 +397,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Định nghĩa các danh sách giá trị dùng lại được cho biến của bạn: bạn chọn một nhãn dễ đọc, yêu cầu sẽ gửi giá trị tương ứng. Hãy chọn hoặc tạo một kiểu liệt kê để bắt đầu."
-    }
+    },
+    "iconLabel": "Biểu tượng:",
+    "colorLabel": "Màu:"
   },
   "requestTab": {
     "deprecated": "Endpoint này đã không còn được dùng và có thể bị xóa trong phiên bản tương lai.",
@@ -465,7 +469,9 @@
       "close": "Đóng",
       "closeOthers": "Đóng các tab khác",
       "addToFavorites": "Thêm vào mục yêu thích",
-      "removeFromFavorites": "Xóa khỏi mục yêu thích"
+      "removeFromFavorites": "Xóa khỏi mục yêu thích",
+      "pin": "Ghim",
+      "unpin": "Bỏ ghim"
     }
   },
   "codeEditor": {
@@ -1005,7 +1011,11 @@
       "us": "Định dạng Mỹ (MM/DD/YYYY, 12h)",
       "iso": "Định dạng ISO (YYYY-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Định dạng được sử dụng để hiển thị ngày và giờ trong ứng dụng"
+    "dateTimeFormatDescription": "Định dạng được sử dụng để hiển thị ngày và giờ trong ứng dụng",
+    "showOpenedList": "Hiển thị danh sách tệp đang mở trong thanh bên",
+    "showOpenedListDescription": "Hiển thị bảng « Đang mở » liệt kê các tệp hiện đang mở trong không gian làm việc",
+    "temporaryTabs": "Thẻ xem trước",
+    "temporaryTabsDescription": "Mở các mục trong một thẻ xem trước có thể tái sử dụng (hiển thị nghiêng). Nhấp đúp, chỉnh sửa hoặc chạy một yêu cầu sẽ giữ thẻ mở cố định."
   },
   "console": {
     "title": "Bảng điều khiển",
@@ -1260,7 +1270,7 @@
       "externalDocs": "Tài liệu bên ngoài",
       "examplePayload": "Ví dụ payload",
       "operationId": "operationId",
-      "addRequest": "+ Thêm yêu cầu"
+      "addRequest": "+ Tạo yêu cầu mới từ tài liệu này"
     },
     "apiInfo": {
       "version": "Phiên bản",
@@ -3363,5 +3373,12 @@
     "editNamed": "Chỉnh sửa {{name}}",
     "confirmReplace": "Đã có một cookie tên \"{{name}}\" ở đây. Thay thế nó?",
     "replaceButton": "Thay thế"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Thêm thẻ",
+    "namePlaceholder": "Tên thẻ",
+    "createBookmark": "Tạo thẻ",
+    "removeBookmark": "Xóa thẻ",
+    "bookmarkAria": "Thẻ: {{label}}"
   }
 }

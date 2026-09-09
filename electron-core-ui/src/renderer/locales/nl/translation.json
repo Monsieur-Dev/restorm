@@ -439,7 +439,12 @@
     "emptyHint": "Voer hierboven een adres in om te beginnen met browsen."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Bladwijzer toevoegen"
+    "addBookmark": "Bladwijzer toevoegen",
+    "namePlaceholder": "Bladwijzernaam",
+    "createBookmark": "Bladwijzer maken",
+    "removeBookmark": "Bladwijzer verwijderen",
+    "bookmarkAria": "Bladwijzer: {{label}}",
+    "add": "Toevoegen"
   },
   "toaster": {
     "notificationsRegion": "Meldingen"

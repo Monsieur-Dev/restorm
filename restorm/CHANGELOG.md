@@ -22,6 +22,9 @@ per-release process.
 - **Select many, delete once.** Select several models, enums or routes and delete them in one go, after a confirmation.
 - **Copy or open a code template's source in one click.** On the "</> Code" page, hovering a template reveals a button to copy its URL or path, and one to open it — the repository in your browser, or the folder on disk for a local template.
 - **New routes start with a name.** A route created from scratch now gets a default name, so you can rename it right away.
+- **Preview tabs, like your editor.** A single click now opens an item in a reusable **preview** tab (its name shown in italics); clicking another item reuses the same tab instead of stacking a new one. Double-click it, edit anything, or run a request to keep it open for good. Turn it off in Settings › Behavior.
+- **Pin the tabs you keep open.** Right-click a tab and pin it: pinned tabs stay first, survive "close others", and are remembered per project.
+- **Environments get a proper detail view.** Open an environment to rename it from its title, set its icon and color, and add a sub-environment — and the right-click menu now duplicates an environment with all its variables and sub-environments.
 
 Fixes:
 
@@ -29,6 +32,10 @@ Fixes:
 - **Documentation generation no longer fails on optional fields.** Generating docs from a design whose model or parameter left "required" unset no longer stops with a template error.
 - **Deleting an enum asks first.** Enums now get the same confirmation prompt as models and routes.
 - **The sidebar reveals what you select.** With "sync the sidebar with the active tab" turned on, selecting or creating a model, enum or route expands its parents so it stays visible in the tree.
+- **The environment button stays readable on any color.** Its label now switches to dark or light text to stay legible against the environment's color, like the run button.
+- **Middle-click closes an open file.** Middle-clicking an entry in the sidebar's "Opened" list closes its tab — and a new Behavior setting lets you hide that panel entirely.
+- **Clearer wording when starting from documentation.** In an imported API's documentation, the button now reads "Create a new request from this documentation."
+- **Signing in works on the Microsoft Store build.** The custom-protocol callback the browser hands back after you log in is now declared in the Store package, so the sign-in completes instead of timing out.
 
 ## v1.1.0
 

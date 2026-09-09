@@ -346,7 +346,9 @@
     "add": "Adaugă mediu",
     "rename": "Redenumește",
     "addSub": "Adaugă submediu",
-    "delete": "Șterge"
+    "delete": "Șterge",
+    "duplicate": "Duplică mediul",
+    "duplicateName": "{{name}} (copie)"
   },
   "folderView": {
     "environments": "Medii",
@@ -397,7 +399,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definiți liste de valori reutilizabile pentru variabilele dvs.: alegeți o etichetă lizibilă, iar cererea trimite valoarea asociată. Selectați sau creați o enumerare pentru a începe."
-    }
+    },
+    "iconLabel": "Pictogramă:",
+    "colorLabel": "Culoare:"
   },
   "requestTab": {
     "deprecated": "Acest endpoint este depreciat și ar putea fi eliminat într-o versiune viitoare.",
@@ -467,7 +471,9 @@
       "close": "Închide",
       "closeOthers": "Închide celelalte",
       "addToFavorites": "Adaugă la favorite",
-      "removeFromFavorites": "Elimină din favorite"
+      "removeFromFavorites": "Elimină din favorite",
+      "pin": "Fixează",
+      "unpin": "Anulează fixarea"
     }
   },
   "codeEditor": {
@@ -1007,7 +1013,11 @@
       "us": "Format SUA (LL/ZZ/AAAA, 12h)",
       "iso": "Format ISO (AAAA-LL-ZZ, 24h)"
     },
-    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație"
+    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație",
+    "showOpenedList": "Afișează lista fișierelor deschise în bara laterală",
+    "showOpenedListDescription": "Afișează panoul „Deschise” cu fișierele deschise în prezent în spațiul de lucru",
+    "temporaryTabs": "File de previzualizare",
+    "temporaryTabsDescription": "Deschide elementele într-o singură filă de previzualizare reutilizabilă (afișată cu caractere cursive). Un dublu clic, o editare sau rularea unei cereri fixează fila."
   },
   "console": {
     "title": "Consolă",
@@ -1262,7 +1272,7 @@
       "externalDocs": "Documente externe",
       "examplePayload": "Exemplu de payload",
       "operationId": "operationId",
-      "addRequest": "+ Adaugă o cerere"
+      "addRequest": "+ Creează o cerere nouă din această documentație"
     },
     "apiInfo": {
       "version": "Versiune",
@@ -3365,5 +3375,12 @@
     "editNamed": "Editează {{name}}",
     "confirmReplace": "Există deja aici un cookie numit „{{name}}”. Îl înlocuiți?",
     "replaceButton": "Înlocuiește"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Adaugă etichetă",
+    "namePlaceholder": "Nume etichetă",
+    "createBookmark": "Creează etichetă",
+    "removeBookmark": "Elimină etichetă",
+    "bookmarkAria": "Etichetă: {{label}}"
   }
 }

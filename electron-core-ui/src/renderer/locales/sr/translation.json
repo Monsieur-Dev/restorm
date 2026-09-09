@@ -439,7 +439,12 @@
     "emptyHint": "Unesi adresu iznad da počneš pregledanje."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Dodaj obeleživač"
+    "addBookmark": "Dodaj obeleživač",
+    "namePlaceholder": "Naziv obeleživača",
+    "createBookmark": "Napravi obeleživač",
+    "removeBookmark": "Ukloni obeleživač",
+    "bookmarkAria": "Obeleživač: {{label}}",
+    "add": "Dodaj"
   },
   "toaster": {
     "notificationsRegion": "Obaveštenja"

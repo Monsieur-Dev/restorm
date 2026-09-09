@@ -439,7 +439,12 @@
     "emptyHint": "Введи адресу вище, щоб почати перегляд."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Додати закладку"
+    "addBookmark": "Додати закладку",
+    "namePlaceholder": "Назва закладки",
+    "createBookmark": "Створити закладку",
+    "removeBookmark": "Видалити закладку",
+    "bookmarkAria": "Закладка: {{label}}",
+    "add": "Додати"
   },
   "toaster": {
     "notificationsRegion": "Сповіщення"

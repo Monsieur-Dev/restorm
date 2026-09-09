@@ -12,6 +12,9 @@
 - **Selecione vários, exclua de uma vez.** Selecione vários modelos, enums ou rotas e exclua-os de uma só vez, após uma confirmação.
 - **Copie ou abra a fonte de um template de código com um clique.** Na página «</> Code», ao passar o rato sobre um template surge um botão para copiar o seu URL ou caminho e outro para o abrir: o repositório no navegador, ou a pasta no disco para um template local.
 - **As rotas novas começam com um nome.** Uma rota criada do zero recebe agora um nome por omissão, portanto pode renomeá-la de imediato.
+- **Separadores de pré-visualização, como no seu editor.** Um único clique abre agora um item num separador de **pré-visualização** reutilizável (o nome em itálico); clicar noutro item reutiliza o mesmo separador em vez de empilhar um novo. Um duplo clique, qualquer edição ou a execução de um pedido mantém-no aberto de vez. Desative em Definições › Comportamento.
+- **Fixe os separadores que mantém abertos.** Clique com o botão direito num separador e fixe-o: os separadores fixados ficam à frente, sobrevivem a «fechar os outros» e são memorizados por projeto.
+- **Os ambientes ganham uma verdadeira vista de detalhe.** Abra um ambiente para o renomear a partir do seu título, definir o seu ícone e cor e adicionar um subambiente — e o menu do botão direito duplica agora um ambiente com todas as suas variáveis e subambientes.
 
 Correções:
 
@@ -19,6 +22,10 @@ Correções:
 - **A geração de documentação já não falha em campos opcionais.** Gerar a documentação de um design cujo modelo ou parâmetro deixava «required» por definir já não para com um erro de template.
 - **Excluir um enum pede confirmação.** Os enums recebem a mesma confirmação que os modelos e as rotas.
 - **A barra lateral revela o que você seleciona.** Com «sincronizar a barra lateral com a aba ativa» ativado, selecionar ou criar um modelo, enum ou rota expande os seus pais para o manter visível na árvore.
+- **O botão de ambiente mantém-se legível sobre qualquer cor.** O seu texto passa agora a claro ou escuro para se manter legível sobre a cor do ambiente, tal como o botão de execução.
+- **O clique do meio fecha um ficheiro aberto.** Clicar com o botão do meio numa entrada da lista «Abertos» da barra lateral fecha o seu separador — e uma nova definição de Comportamento permite ocultar totalmente esse painel.
+- **Texto mais claro ao partir da documentação.** Na documentação de uma API importada, o botão apresenta agora «Criar um novo pedido a partir desta documentação».
+- **O início de sessão funciona na versão da Microsoft Store.** A chamada de retorno de protocolo personalizado que o navegador devolve após o início de sessão está agora declarada no pacote da Store, pelo que o início de sessão termina em vez de expirar.
 
 ## v1.1.0
 

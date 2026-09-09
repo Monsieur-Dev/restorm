@@ -439,7 +439,12 @@
     "emptyHint": "Taramaya başlamak için yukarıya bir adres girin."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Yer işareti ekle"
+    "addBookmark": "Yer işareti ekle",
+    "namePlaceholder": "Yer işareti adı",
+    "createBookmark": "Yer işareti oluştur",
+    "removeBookmark": "Yer işaretini kaldır",
+    "bookmarkAria": "Yer işareti: {{label}}",
+    "add": "Ekle"
   },
   "toaster": {
     "notificationsRegion": "Bildirimler"

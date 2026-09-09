@@ -12,6 +12,9 @@
 - **Markera flera, radera på en gång.** Markera flera modeller, enums eller rutter och radera dem på en gång, efter en bekräftelse.
 - **Kopiera eller öppna källan till en kodmall med ett klick.** På sidan "</> Code" visar en mall vid hovring en knapp för att kopiera dess URL eller sökväg och en för att öppna den — repot i din webbläsare, eller mappen på disken för en lokal mall.
 - **Nya rutter börjar med ett namn.** En rutt skapad från grunden får nu ett standardnamn, så att du kan byta namn på den direkt.
+- **Förhandsvisningsflikar, som i din editor.** Ett enda klick öppnar nu ett objekt i en återanvändbar **förhandsvisnings**flik (namnet i kursiv stil); att klicka på ett annat objekt återanvänder samma flik i stället för att stapla en ny. Dubbelklicka på den, redigera något eller kör en förfrågan för att hålla den öppen permanent. Stäng av det under Inställningar › Beteende.
+- **Fäst flikarna du håller öppna.** Högerklicka på en flik och fäst den: fästa flikar ligger först, överlever ”stäng övriga” och kommer ihåg per projekt.
+- **Miljöer får en riktig detaljvy.** Öppna en miljö för att byta namn på den från dess titel, ange dess ikon och färg och lägga till en undermiljö — och högerklicksmenyn duplicerar nu en miljö med alla dess variabler och undermiljöer.
 
 Korrigeringar:
 
@@ -19,6 +22,10 @@ Korrigeringar:
 - **Dokumentationsgenerering misslyckas inte längre på valfria fält.** Att generera dokumentation från en design vars modell eller parameter lämnade "required" oinställt stannar inte längre med ett mallfel.
 - **Att radera en enum frågar först.** Enums får samma bekräftelse som modeller och rutter.
 - **Sidopanelen avslöjar det du markerar.** Med ”synkronisera sidopanelen med aktiv flik” på fäller markering eller skapande av en modell, enum eller rutt ut dess föräldrar så att den hålls synlig i trädet.
+- **Miljöknappen förblir läsbar på vilken färg som helst.** Dess etikett växlar nu till mörk eller ljus text för att förbli läsbar mot miljöns färg, precis som körknappen.
+- **Mittklick stänger en öppen fil.** Att mittklicka på en post i sidopanelens ”Öppnade”-lista stänger dess flik — och en ny Beteende-inställning låter dig dölja den panelen helt.
+- **Tydligare formulering när du utgår från dokumentationen.** I ett importerat API:s dokumentation står det nu "Skapa en ny förfrågan från den här dokumentationen" på knappen.
+- **Inloggning fungerar i Microsoft Store-versionen.** Återanropet med anpassat protokoll som webbläsaren lämnar tillbaka efter inloggning deklareras nu i Store-paketet, så att inloggningen slutförs i stället för att få timeout.
 
 ## v1.1.0
 

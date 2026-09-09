@@ -12,6 +12,9 @@
 - **Birkaçını seç, tek seferde sil.** Birden çok modeli, enumu veya rotayı seçin ve bir onaydan sonra hepsini tek seferde silin.
 - **Bir kod şablonunun kaynağını tek tıklamayla kopyalayın veya açın.** "</> Code" sayfasında bir şablonun üzerine gelindiğinde URL'sini veya yolunu kopyalamak için bir düğme ve onu açmak için bir düğme belirir — tarayıcınızdaki depo veya yerel bir şablon için diskteki klasör.
 - **Yeni rotalar bir adla başlar.** Sıfırdan oluşturulan bir rota artık varsayılan bir ad alır, böylece onu hemen yeniden adlandırabilirsiniz.
+- **Editörünüzdeki gibi önizleme sekmeleri.** Tek tıklama artık bir öğeyi yeniden kullanılabilir bir **önizleme** sekmesinde açar (adı italik gösterilir); başka bir öğeye tıklamak yeni bir sekme yığmak yerine aynı sekmeyi yeniden kullanır. Çift tıklama, herhangi bir düzenleme veya bir isteği çalıştırma sekmeyi kalıcı olarak açık tutar. Ayarlar › Davranış'tan kapatın.
+- **Açık tuttuğunuz sekmeleri sabitleyin.** Bir sekmeye sağ tıklayıp sabitleyin: sabitlenen sekmeler önde kalır, "diğerlerini kapat" işlemine dayanır ve proje bazında hatırlanır.
+- **Ortamlar gerçek bir ayrıntı görünümüne kavuşuyor.** Bir ortamı açarak başlığından yeniden adlandırın, simgesini ve rengini ayarlayın ve bir alt ortam ekleyin — ve sağ tık menüsü artık bir ortamı tüm değişkenleri ve alt ortamlarıyla birlikte çoğaltır.
 
 Düzeltmeler:
 
@@ -19,6 +22,10 @@ Düzeltmeler:
 - **Belge oluşturma artık isteğe bağlı alanlarda başarısız olmuyor.** Modeli veya parametresi "required" değerini ayarlanmamış bırakan bir tasarımdan belge oluşturmak artık bir şablon hatasıyla durmuyor.
 - **Bir enumu silmek önce sorar.** Enumlar, modeller ve rotalarla aynı onayı alır.
 - **Kenar çubuğu seçiminizi ortaya çıkarır.** «Kenar çubuğunu etkin sekmeyle eşitle» açıkken bir model, enum veya rota seçmek ya da oluşturmak, ağaçta görünür kalması için üst öğelerini açar.
+- **Ortam düğmesi her renkte okunaklı kalır.** Etiketi artık, çalıştır düğmesi gibi, ortamın rengine karşı okunaklı kalmak için koyu veya açık metne geçer.
+- **Orta tıklama açık bir dosyayı kapatır.** Kenar çubuğundaki "Açık" listesindeki bir öğeye orta tıklamak sekmesini kapatır — ve yeni bir Davranış ayarı o paneli tamamen gizlemenizi sağlar.
+- **Dokümantasyondan başlarken daha net ifade.** İçe aktarılan bir API'nin dokümantasyonunda düğme artık "Bu dokümantasyondan yeni bir istek oluştur" yazıyor.
+- **Microsoft Store sürümünde oturum açma çalışıyor.** Tarayıcının oturum açtıktan sonra geri verdiği özel protokol geri çağrısı artık Store paketinde tanımlı olduğundan, oturum açma zaman aşımına uğramak yerine tamamlanıyor.
 
 ## v1.1.0
 

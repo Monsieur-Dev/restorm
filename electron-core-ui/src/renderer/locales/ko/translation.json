@@ -439,7 +439,12 @@
     "emptyHint": "위에 주소를 입력하면 탐색을 시작합니다."
   },
   "bookmarkRibbon": {
-    "addBookmark": "북마크 추가"
+    "addBookmark": "북마크 추가",
+    "namePlaceholder": "북마크 이름",
+    "createBookmark": "북마크 만들기",
+    "removeBookmark": "북마크 제거",
+    "bookmarkAria": "북마크: {{label}}",
+    "add": "추가"
   },
   "toaster": {
     "notificationsRegion": "알림"

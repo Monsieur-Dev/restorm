@@ -345,7 +345,9 @@
     "add": "Legg til miljø",
     "rename": "Gi nytt navn",
     "addSub": "Legg til undermiljø",
-    "delete": "Slett"
+    "delete": "Slett",
+    "duplicate": "Dupliser miljøet",
+    "duplicateName": "{{name}} (kopi)"
   },
   "folderView": {
     "environments": "Miljøer",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definer gjenbrukbare verdilister for variablene dine: du velger en lesbar etikett, og requesten sender den tilknyttede verdien. Velg eller opprett en enumerasjon for å komme i gang."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Farge:"
   },
   "requestTab": {
     "deprecated": "Dette endepunktet er utdatert og kan bli fjernet i en fremtidig versjon.",
@@ -466,7 +470,9 @@
       "close": "Lukk",
       "closeOthers": "Lukk andre",
       "addToFavorites": "Legg til i favoritter",
-      "removeFromFavorites": "Fjern fra favoritter"
+      "removeFromFavorites": "Fjern fra favoritter",
+      "pin": "Fest",
+      "unpin": "Løsne"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US-format (MM/DD/ÅÅÅÅ, 12t)",
       "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24t)"
     },
-    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen"
+    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen",
+    "showOpenedList": "Vis listen over åpne filer i sidefeltet",
+    "showOpenedListDescription": "Viser panelet «Åpnet» med filene som er åpne i arbeidsområdet nå",
+    "temporaryTabs": "Forhåndsvisningsfaner",
+    "temporaryTabsDescription": "Åpner elementer i én gjenbrukbar forhåndsvisningsfane (vist i kursiv). Et dobbeltklikk, en redigering eller å kjøre en forespørsel gjør fanen permanent."
   },
   "console": {
     "title": "Konsoll",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Eksterne dokumenter",
       "examplePayload": "Eksempel-payload",
       "operationId": "operationId",
-      "addRequest": "+ Legg til en forespørsel"
+      "addRequest": "+ Opprett en ny forespørsel fra denne dokumentasjonen"
     },
     "apiInfo": {
       "version": "Versjon",
@@ -3364,5 +3374,12 @@
     "editNamed": "Rediger {{name}}",
     "confirmReplace": "En informasjonskapsel med navnet «{{name}}» finnes allerede her. Erstatte den?",
     "replaceButton": "Erstatt"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Legg til tagg",
+    "namePlaceholder": "Taggnavn",
+    "createBookmark": "Opprett tagg",
+    "removeBookmark": "Fjern tagg",
+    "bookmarkAria": "Tagg: {{label}}"
   }
 }

@@ -18,6 +18,9 @@ import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/edi
  * surface so we don't couple the two modules at the signature level. */
 export interface OpenNavTabOptions {
   focus?: boolean
+  /** Open as a preview ("temporary") tab, or (with `false`) promote an
+   * already-open tab to permanent. Mirrors `OpenTabOptions.temporary`. */
+  temporary?: boolean
   /** Open the tab at an explicit group + split zone (sidebar→workbench
    * split drop). Mirrors `OpenTabOptions.placement`. */
   placement?: { targetGroupId: string; zone: 'left' | 'right' | 'top' | 'bottom' | 'full' }
@@ -49,7 +52,12 @@ export interface UseNavigationOptions {
 }
 
 export interface UseNavigationReturn {
-  handleItemClick: (itemId: string) => void
+  handleItemClick: (itemId: string, openOpts?: { temporary?: boolean }) => void
+  /**
+   * Double-click variant of {@link handleItemClick}. Opens the item as a
+   * PERMANENT tab — and promotes it if it was already open as a preview.
+   */
+  handleItemDoubleClick: (itemId: string) => void
   /**
    * Middle-click ("open in background") variant of `handleItemClick`.
    * Opens the matching workbench tab without focusing it, without
@@ -224,8 +232,33 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     return unsubscribe
   }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, rootItems, selectSingle, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
 
-  // Handle item click in the sidebar - use navigation service
-  const handleItemClick = useCallback((itemId: string) => {
+  // Preview-tab setting (default on). Read from the settings STORE via
+  // `settings.get` (+ live `onSettingChanged`) rather than the schema-backed
+  // `useSetting`: the same store-vs-schema split the sibling
+  // `behavior:syncSidebarWithTabs` reads use, and the only one that works when
+  // the restorm settings schema isn't loaded (e.g. the e2e launch, whose
+  // getAppPath resolves the config away). Kept in a ref so `handleItemClick`'s
+  // identity doesn't churn — the click reads the latest value at call time.
+  // Default ON: only an explicit `false` disables (empty string / null when
+  // unresolved fall back to the default, exactly like the sync-sidebar gate).
+  const temporaryTabsEnabledRef = useRef(true)
+  useEffect(() => {
+    let alive = true
+    void window.api.settings.get('behavior:temporaryTabs').then((stored) => {
+      if (alive) temporaryTabsEnabledRef.current = stored !== false
+    })
+    const cleanup = window.api.settings.onSettingChanged((key, value) => {
+      if (key === 'behavior:temporaryTabs') temporaryTabsEnabledRef.current = value !== false
+    })
+    return () => { alive = false; cleanup() }
+  }, [])
+
+  // Handle item click in the sidebar - use navigation service.
+  // `openOpts.temporary` overrides the preview-tab default: a double-click
+  // passes `false` to open/promote to a permanent tab; a plain single click
+  // leaves it undefined → preview when the setting is on.
+  const handleItemClick = useCallback((itemId: string, openOpts?: { temporary?: boolean }) => {
+    const temporary = openOpts?.temporary ?? temporaryTabsEnabledRef.current
     // A transient client row (under a served design's Clients section). A leaf
     // request opens as a normal request tab from the client store's object (it
     // isn't in rootItems); a FOLDER row (a protocol root or a sub-folder) opens
@@ -243,7 +276,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         openAnyRequestTab(
           request,
           [{ id: `design-client-root:${clientRow.designId}`, label: designName }, { id: itemId, label: request.name }],
-          []
+          [],
+          { temporary }
         )
         return
       }
@@ -251,7 +285,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       if (!item || !isApiDesign(item)) return
       selectSingle(itemId)
       setPendingDesignSection(item.id, 'clients', itemId)
-      openDesignTab(item, breadcrumbs)
+      openDesignTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
@@ -271,7 +305,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // a tab activation) keeps the row highlighted, not the design root.
       selectSingle(itemId)
       setPendingDesignSection(item.id, sectionRow.section)
-      openDesignTab(item, breadcrumbs)
+      openDesignTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
@@ -285,7 +319,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       if (!item || !isApiDesign(item)) return
       selectSingle(itemId)
       setPendingDesignSection(item.id, entityRow.section, entityRow.entityId)
-      openDesignTab(item, breadcrumbs)
+      openDesignTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
@@ -302,32 +336,32 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // to land on; only default to Settings when nothing is pending, so that
       // intent isn't clobbered.
       if (peekPendingDesignSection(item.id) === undefined) setPendingDesignSection(item.id, 'settings')
-      openDesignTab(item, breadcrumbs)
+      openDesignTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'design' })
       return
     }
 
     if (isEnvironmentFolder(item)) {
-      openEnvironmentFolderTab(item, breadcrumbs)
+      openEnvironmentFolderTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'environment-folder' })
       return
     }
 
     if (isFolder(item)) {
-      openFolderTab(item, breadcrumbs)
+      openFolderTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'folder' })
       return
     }
 
     if (isScenario(item)) {
-      openScenarioEditorTab(item, breadcrumbs)
+      openScenarioEditorTab(item, breadcrumbs, { temporary })
       navigationService.navigateTo(itemId, 'sidebar', { type: 'scenario-editor' })
       return
     }
 
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-      openAnyRequestTab(item, breadcrumbs, environments)
+      openAnyRequestTab(item, breadcrumbs, environments, { temporary })
       if (isHTTPRequest(item)) {
         navigationService.navigateTo(itemId, 'sidebar', { type: 'http-request' })
       } else if (isGraphQLRequest(item)) {
@@ -359,6 +393,12 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       }
     }
   }, [rootItems, selectSingle, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+
+  // Double-click opens (or promotes) a PERMANENT tab — same dispatch as a
+  // single click, but forcing `temporary: false` so a preview tab is kept.
+  const handleItemDoubleClick = useCallback((itemId: string) => {
+    handleItemClick(itemId, { temporary: false })
+  }, [handleItemClick])
 
   // Middle-click ("open in background") variant of `handleItemClick`.
   // Opens the corresponding workbench tab without focusing it, without
@@ -673,6 +713,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   return {
     handleItemClick,
+    handleItemDoubleClick,
     handleItemAuxClick,
     openItemAtSplit,
     handleBreadcrumbClick,

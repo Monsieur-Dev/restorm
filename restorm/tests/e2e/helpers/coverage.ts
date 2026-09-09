@@ -39,7 +39,14 @@ export function getE2ECoverageOutputDirs(restormRoot: string): { nycOutputDir: s
  * strings CI never renders. */
 export function withE2ECoverageEnv(restormRoot: string, env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const sanitized = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('GIT_') && key !== 'SSH_ASKPASS'))
-  const base = withE2ELocaleEnv(sanitized)
+  // Mark the launch as an e2e run. Main uses this to pre-seed config.json with
+  // e2e-only defaults BEFORE the renderer boots (see the `RESTORM_E2E` block in
+  // src/main/index.ts): preview ("temporary") tabs OFF — otherwise a single
+  // click previews-and-replaces and silently closes tabs the specs opened by
+  // clicking — and the crash-report consent gate pre-decided, so its first-run
+  // toast never intercepts clicks. A dedicated preview-tabs spec can flip the
+  // tabs setting back on for itself.
+  const base = { ...withE2ELocaleEnv(sanitized), RESTORM_E2E: '1' }
   if (!isE2ECoverageEnabled()) return base
 
   const { v8OutputDir } = getE2ECoverageOutputDirs(restormRoot)

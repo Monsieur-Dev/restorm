@@ -89,7 +89,7 @@ import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import { checkFileFormatCompatibility } from '../shared/config/fileFormatVersion'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
-import { existsSync, statSync } from 'fs'
+import { existsSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { spawn } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
@@ -337,6 +337,52 @@ app.on('second-instance', (_event, argv) => {
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
   clearUserSettings()
+}
+
+// E2E-only: pre-seed the settings store before the app boots, so first-run UI
+// that would otherwise intercept the specs never appears. The e2e launch env
+// sets RESTORM_E2E (see `withE2ECoverageEnv`). User setting values live under a
+// `settings:` prefix (see `SettingsService.getUserValue`); writing config.json
+// here — after any `--clear-settings`, before the renderer reads — means the
+// renderer's first `settings.get` already sees the seeded value. We merge,
+// never clobber. Never runs in a real launch (flag unset).
+//   - behavior:temporaryTabs=false — preview tabs default ON for real users,
+//     but a single click then previews-and-replaces, which silently closes
+//     tabs the specs opened by clicking and breaks the many specs that assume
+//     a click opens a permanent tab.
+//   - privacy:crashReports=true — gives the crash-consent gate an explicit
+//     (source: 'user') value so the first-run consent prompt never shows; its
+//     persistent bottom toast otherwise intercepts pointer events on controls
+//     beneath it (e.g. a context menu opened near the bottom of the window).
+if (process.env.RESTORM_E2E === '1') {
+  try {
+    const cfgPath = join(app.getPath('userData'), 'config.json')
+    const store = existsSync(cfgPath)
+      ? JSON.parse(readFileSync(cfgPath, 'utf-8')) as Record<string, unknown>
+      : {}
+    store['settings:behavior:temporaryTabs'] = false
+    store['settings:privacy:crashReports'] = true
+    writeFileSync(cfgPath, JSON.stringify(store, null, 2))
+    // The crash-consent PROMPT (its bottom toast intercepts clicks) shows while
+    // the decision's `source` is `'default'` — and source is `'user'` only when
+    // the consent AUDIT FILE has an explicit entry for the gate (see
+    // `ConsentService.resolve` / `.load`), NOT merely when the setting above is
+    // set. So record an explicit `crash` entry in privacy/consent.json to make
+    // the prompt inert in e2e. `{version, gates:{<id>:{granted, consentedAt,
+    // policyVersion:string}}}` is the shape `load` validates. Don't clobber a
+    // real choice a relaunch already recorded.
+    const consentFile = join(app.getPath('userData'), 'privacy', 'consent.json')
+    if (!existsSync(consentFile)) {
+      mkdirSync(join(app.getPath('userData'), 'privacy'), { recursive: true })
+      writeFileSync(consentFile, `${JSON.stringify({
+        version: 1,
+        gates: { crash: { granted: true, consentedAt: new Date().toISOString(), policyVersion: '1' } }
+      }, null, 2)}\n`)
+    }
+    logger.info('E2E: seeded config.json + consent (preview tabs off, crash consent decided)', { path: cfgPath })
+  } catch (error) {
+    logger.warn('E2E config seed failed', { error: String(error) })
+  }
 }
 
 // Headless CLI-run mode: keep restorm's own diagnostics off the console (only

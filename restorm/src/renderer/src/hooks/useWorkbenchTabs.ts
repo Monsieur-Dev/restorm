@@ -77,6 +77,14 @@ export interface UseWorkbenchTabsOptions {
 export interface OpenTabOptions {
   focus?: boolean
   /**
+   * Open the tab as a preview ("temporary") tab — italic label, one per
+   * group. Opening another temporary tab in the same group replaces this
+   * one. `true` opens/keeps temporary; `false` explicitly PROMOTES an
+   * already-open tab to permanent (a double-click). `undefined` leaves an
+   * already-open tab's permanence untouched and opens a NEW tab permanent.
+   */
+  temporary?: boolean
+  /**
    * Open the tab at an explicit position in the tree rather than the
    * default focused/first group. Used by the sidebar→workbench split
    * drop: the user released the dragged item over `targetGroupId`'s
@@ -172,6 +180,9 @@ export interface UseWorkbenchTabsReturn {
   openDesignTab: (design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
+  /** Promote the preview tab for `itemId` to a permanent tab (clears the
+   * temporary flag). No-op when no matching temporary tab is open. */
+  promoteTemporaryTab: (itemId: string) => void
   handleRebuildTab: (tabId: string) => EditorTab | null
   handleStateRestored: (restoredTree: WorkbenchTree | null) => void
   handleSizesChange: (nodeId: string, sizes: number[]) => void
@@ -274,6 +285,14 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     itemId?: string
   ): WorkbenchTree => {
     const focus = options?.focus ?? true
+    // Preview-tab intent (see OpenTabOptions.temporary):
+    //  - wantTemporary: this open should land a NEW tab as temporary (and
+    //    evict the group's existing temporary tab — one per group).
+    //  - promote: this open should clear the temporary flag on an
+    //    already-open tab (a double-click / explicit permanent open).
+    const wantTemporary = options?.temporary === true
+    const promote = options?.temporary === false
+    if (wantTemporary) newTab.isTemporary = true
     // No groups yet: create the main group with this tab. We always
     // activate it here — even in background mode, an empty workbench
     // has nothing to preserve, so the new tab becomes the only visible
@@ -307,15 +326,23 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     // (item hasn't moved since the previous open).
     const existingGroupId = findGroupIdForTab(prev.groups, tabId)
     if (existingGroupId) {
-      if (!focus) return prev
+      // Background open of an already-open tab is a no-op UNLESS we're
+      // promoting it (a double-click can land here): still clear the flag.
+      if (!focus && !promote) return prev
       // Move focus to the group that owns the tab, so a foreground open SELECTS
       // it even when it already lives in another pane of a side-by-side split.
-      if (focusGroup) queueMicrotask(() => { focusGroup(existingGroupId) })
+      if (focus && focusGroup) queueMicrotask(() => { focusGroup(existingGroupId) })
       return {
         ...prev,
         groups: updateGroupById(prev.groups, existingGroupId, (group) => ({
           ...group,
-          activeTabId: tabId
+          // Promote to permanent on an explicit permanent open; otherwise
+          // leave the tab's existing permanence untouched (never demote an
+          // already-open tab back to temporary).
+          tabs: promote
+            ? group.tabs.map((t) => (t.id === tabId && t.isTemporary ? { ...t, isTemporary: false } : t))
+            : group.tabs,
+          activeTabId: focus ? tabId : (group.activeTabId ?? tabId)
         }))
       }
     }
@@ -336,7 +363,12 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
             : (group.activeTabId === stale.tabId ? tabId : (group.activeTabId ?? tabId))
           return {
             ...group,
-            tabs: group.tabs.map((t) => (t.id === stale.tabId ? newTab : t)),
+            // Refreshing an already-open tab (its item moved parents): keep its
+            // existing permanence — promote only on an explicit permanent open,
+            // and never demote a permanent tab back to temporary.
+            tabs: group.tabs.map((t) => (t.id === stale.tabId
+              ? { ...newTab, isTemporary: promote ? false : (t.isTemporary === true) }
+              : t)),
             activeTabId: nextActive
           }
         })
@@ -356,14 +388,24 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     if (focus && focusGroup) queueMicrotask(() => { focusGroup(targetGroupId) })
 
     const updatedGroups = hasGroupWithId(prev.groups, targetGroupId)
-      ? updateGroupById(prev.groups, targetGroupId, (group) => ({
-          ...group,
-          tabs: [...group.tabs, newTab],
-          // Background mode: preserve the group's current active tab
-          // if it has one, fall back to the just-added tab otherwise
-          // (an empty-activeTabId group would render as blank).
-          activeTabId: focus ? tabId : (group.activeTabId ?? tabId)
-        }))
+      ? updateGroupById(prev.groups, targetGroupId, (group) => {
+          // One preview tab per group: a new temporary tab evicts the
+          // group's existing temporary tab (a permanent OR pinned tab is
+          // never touched). A permanent open leaves every existing tab in
+          // place.
+          const kept = wantTemporary
+            ? group.tabs.filter((t) => t.isTemporary !== true || t.isPinned === true)
+            : group.tabs
+          // Background mode: preserve the group's current active tab — but if
+          // the eviction just removed it, fall back to the just-added tab so
+          // the group never points at a tab that no longer exists.
+          const activeSurvives = group.activeTabId !== undefined && kept.some((t) => t.id === group.activeTabId)
+          return {
+            ...group,
+            tabs: [...kept, newTab],
+            activeTabId: focus ? tabId : (activeSurvives ? (group.activeTabId ?? tabId) : tabId)
+          }
+        })
       : [
           ...prev.groups,
           {
@@ -512,6 +554,53 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
   },
     [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree]
   )
+
+  // Promote a preview tab to permanent — clears the temporary flag on the
+  // (single) tab whose underlying tree item matches `itemId`. Called when a
+  // temporary tab's content is edited (it enters the dirty set) or its
+  // request is run. A no-op when no matching temporary tab is open.
+  const promoteTemporaryTab = useCallback((itemId: string) => {
+    if (typeof itemId !== 'string' || itemId.length === 0) return
+    setWorkbenchTree((prev) => {
+      // Widen to `boolean`: the flag is only mutated inside the nested
+      // `clearIn` closure, which TS control-flow can't see from the outer
+      // return — without the widening it stays typed `false`.
+      let changed = false as boolean
+      // Rebuild only the branch that actually changed: untouched groups and
+      // arrays keep their identity so unrelated panes don't re-render.
+      const clearIn = (nodes: GroupNode[]): GroupNode[] => {
+        // Widen to `boolean`: mutated inside the nested `.map` closures below,
+        // which TS control-flow can't see from the outer returns.
+        let arrChanged = false as boolean
+        const out = nodes.map((node) => {
+          if (isContainerNode(node)) {
+            const groups = clearIn(node.groups)
+            if (groups === node.groups) return node
+            arrChanged = true
+            return { ...node, groups }
+          }
+          if (!isTabGroupNode(node)) return node
+          let nodeChanged = false as boolean
+          const tabs = node.tabs.map((tab) => {
+            const t = tab as { folder?: { id?: string }; request?: { id?: string }; scenario?: { id?: string }; design?: { id?: string } }
+            const tabItemId = t.folder?.id ?? t.request?.id ?? t.scenario?.id ?? t.design?.id
+            if (tab.isTemporary === true && tabItemId === itemId) {
+              changed = true
+              nodeChanged = true
+              return { ...tab, isTemporary: false }
+            }
+            return tab
+          })
+          if (!nodeChanged) return node
+          arrChanged = true
+          return { ...node, tabs }
+        })
+        return arrChanged ? out : nodes
+      }
+      const nextGroups = clearIn(prev.groups)
+      return changed ? { ...prev, groups: nextGroups } : prev
+    })
+  }, [setWorkbenchTree])
 
   const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design'; itemId: string } | null => {
     const match = /^(folder|env-folder|request|scenario|design)-id:(.+)$/.exec(tabId)
@@ -769,6 +858,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    promoteTemporaryTab,
     handleRebuildTab,
     handleStateRestored,
     handleSizesChange,

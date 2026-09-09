@@ -439,7 +439,12 @@
     "emptyHint": "上にアドレスを入力すると閲覧を開始できます。"
   },
   "bookmarkRibbon": {
-    "addBookmark": "ブックマークを追加"
+    "addBookmark": "ブックマークを追加",
+    "namePlaceholder": "ブックマーク名",
+    "createBookmark": "ブックマークを作成",
+    "removeBookmark": "ブックマークを削除",
+    "bookmarkAria": "ブックマーク: {{label}}",
+    "add": "追加"
   },
   "toaster": {
     "notificationsRegion": "通知"

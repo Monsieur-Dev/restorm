@@ -20,6 +20,18 @@ groups:
           descriptionKey: "behavior.syncSidebarWithTabsDescription"
           type: "toggle"
           default: true
+      - setting:
+          id: "showOpenedList"
+          titleKey: "behavior.showOpenedList"
+          descriptionKey: "behavior.showOpenedListDescription"
+          type: "toggle"
+          default: true
+      - setting:
+          id: "temporaryTabs"
+          titleKey: "behavior.temporaryTabs"
+          descriptionKey: "behavior.temporaryTabsDescription"
+          type: "toggle"
+          default: true
   - id: "console"
     titleKey: "console.title"
     items:

@@ -12,6 +12,9 @@
 - **Sélection multiple, suppression groupée.** Sélectionnez plusieurs modèles, enums ou routes et supprimez-les d'un coup, après confirmation.
 - **Copiez ou ouvrez la source d'un template de code en un clic.** Sur la page « </> Code », au survol d'un template, un bouton copie son URL ou son chemin, un autre l'ouvre — le dépôt dans votre navigateur, ou le dossier sur le disque pour un template local.
 - **Une nouvelle route a désormais un nom.** Une route créée de zéro reçoit un nom par défaut, immédiatement renommable.
+- **Des onglets d'aperçu, comme dans votre éditeur.** Un simple clic ouvre désormais un élément dans un onglet d'**aperçu** réutilisable (son nom en italique) ; cliquer un autre élément réutilise le même onglet au lieu d'en empiler un nouveau. Un double-clic, la moindre modification ou l'exécution d'une requête le rend permanent. Désactivable dans Paramètres › Comportement.
+- **Épinglez les onglets que vous gardez ouverts.** Un clic droit sur un onglet permet de l'épingler : les onglets épinglés restent en tête, survivent à « Fermer les autres » et sont mémorisés par projet.
+- **Les environnements ont une vraie vue de détail.** Ouvrez un environnement pour le renommer depuis son titre, choisir son icône et sa couleur, et ajouter un sous-environnement — et le menu contextuel duplique désormais un environnement avec toutes ses variables et ses sous-environnements.
 
 Corrections :
 
@@ -19,6 +22,10 @@ Corrections :
 - **La génération de documentation n'échoue plus sur les champs optionnels.** Générer la doc d'un design dont un modèle ou un paramètre laissait « required » non renseigné ne s'interrompt plus sur une erreur de template.
 - **La suppression d'un enum demande confirmation.** Les enums bénéficient de la même confirmation que les modèles et les routes.
 - **La barre latérale révèle votre sélection.** Avec « synchroniser la barre latérale avec l'onglet actif » activé, sélectionner ou créer un modèle, un enum ou une route déplie ses parents pour le garder visible dans l'arborescence.
+- **Le bouton d'environnement reste lisible sur toutes les couleurs.** Son libellé passe désormais en texte clair ou foncé pour rester lisible sur la couleur de l'environnement, comme le bouton d'exécution.
+- **Le clic du milieu ferme un fichier ouvert.** Un clic du milieu sur une entrée de la liste « Ouverts » de la barre latérale ferme son onglet — et un nouveau réglage Comportement permet de masquer ce panneau.
+- **Un libellé plus clair au départ de la documentation.** Dans la documentation d'une API importée, le bouton affiche désormais « Créer une nouvelle requête à partir de cette documentation ».
+- **La connexion fonctionne sur la version Microsoft Store.** Le retour de connexion renvoyé par le navigateur (protocole personnalisé) est désormais déclaré dans le paquet Store, donc la connexion aboutit au lieu d'expirer.
 
 ## v1.1.0
 

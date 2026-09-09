@@ -17,6 +17,14 @@ export interface EditorTab {
 	titleString?: string;
 	isDirty?: boolean;
 	isPinned?: boolean;
+	/**
+	 * Preview ("temporary") tab — opened by a single click, rendered in
+	 * italics, and limited to ONE per tab group: opening another temporary
+	 * tab in the same group replaces it. Promoted to a permanent tab (this
+	 * flag cleared) on a double-click, any edit that dirties it, or an
+	 * explicit run. Pinned + special/singleton tabs are never temporary.
+	 */
+	isTemporary?: boolean;
 	isSticky?: boolean;
 	/**
 	 * Optional React content for this tab. When provided, it will be rendered
@@ -72,9 +80,21 @@ export interface EditorWorkbenchCallbacks {
 	onSplitTab?: (tabId: string, fromGroupId: string, targetGroupId: string, direction: SplitDirection) => void;
 	onCloseTab?: (tabId: string, groupId: string) => void;
 	/**
-	 * Close all other tabs in the same group as the given tab.
+	 * Close all other tabs in the same group as the given tab. Pinned tabs are
+	 * kept (they are only removed by an explicit close on themselves).
 	 */
 	onCloseOthersInGroup?: (tabId: string, groupId: string) => void;
+	/**
+	 * Toggle a tab's pinned state. Pinned tabs render first (left) in their
+	 * group and survive "close others".
+	 */
+	onTogglePinTab?: (tabId: string, groupId: string) => void;
+	/**
+	 * Promote a preview ("temporary") tab to a permanent tab (clears its
+	 * `isTemporary` flag). Fired on a tab double-click; a no-op on a tab that
+	 * is already permanent.
+	 */
+	onPromoteTab?: (tabId: string, groupId: string) => void;
 	onDetachToNewWindow?: (tabId: string, groupId: string, cursorX?: number, cursorY?: number) => void;
 	onActivateTab?: (tabId: string, groupId: string) => void;
 	/**
@@ -131,7 +151,7 @@ export interface EditorWorkbenchCallbacks {
 	getTabContextMenuItems?: (
 		tab: EditorTab,
 		groupId: string,
-		actions: { close: () => void; closeOthersInGroup: () => void }
+		actions: { close: () => void; closeOthersInGroup: () => void; togglePin: () => void }
 	) => ContextMenuItem[] | undefined;
 	/**
 	 * When true, dragging a tab outside the current window's bounds is

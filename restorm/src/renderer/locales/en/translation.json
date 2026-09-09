@@ -345,7 +345,9 @@
     "add": "Add environment",
     "rename": "Rename",
     "addSub": "Add sub-environment",
-    "delete": "Delete"
+    "delete": "Delete",
+    "duplicate": "Duplicate the environment",
+    "duplicateName": "{{name}} (copy)"
   },
   "folderView": {
     "environments": "Environments",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Define reusable value lists for your variables: you pick a readable label, the request sends the associated value. Select or create an enumeration to get started."
-    }
+    },
+    "iconLabel": "Icon:",
+    "colorLabel": "Color:"
   },
   "requestTab": {
     "deprecated": "This endpoint is deprecated and may be removed in a future version.",
@@ -466,7 +470,9 @@
       "close": "Close",
       "closeOthers": "Close others",
       "addToFavorites": "Add to favorites",
-      "removeFromFavorites": "Remove from favorites"
+      "removeFromFavorites": "Remove from favorites",
+      "pin": "Pin",
+      "unpin": "Unpin"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US format (MM/DD/YYYY, 12h)",
       "iso": "ISO format (YYYY-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Format used to display dates and times in the application"
+    "dateTimeFormatDescription": "Format used to display dates and times in the application",
+    "showOpenedList": "Show the open files list in the sidebar",
+    "showOpenedListDescription": "Display the “Opened” panel that lists the files currently open in the workbench",
+    "temporaryTabs": "Preview tabs",
+    "temporaryTabsDescription": "Open items in a single reusable preview tab (shown in italics). A double-click, an edit, or running a request keeps the tab open."
   },
   "console": {
     "title": "Console",
@@ -1261,7 +1271,7 @@
       "externalDocs": "External docs",
       "examplePayload": "Example payload",
       "operationId": "operationId",
-      "addRequest": "+ Add a request"
+      "addRequest": "+ Create a new request from this documentation"
     },
     "apiInfo": {
       "version": "Version",
@@ -3364,5 +3374,12 @@
     "editNamed": "Edit {{name}}",
     "confirmReplace": "A cookie named \"{{name}}\" already exists here. Replace it?",
     "replaceButton": "Replace"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Add tag",
+    "namePlaceholder": "Tag name",
+    "createBookmark": "Create tag",
+    "removeBookmark": "Remove tag",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

@@ -12,6 +12,9 @@
 - **Zaznacz wiele, usuń naraz.** Zaznacz kilka modeli, enumów lub tras i usuń je za jednym razem, po potwierdzeniu.
 - **Skopiuj lub otwórz źródło szablonu kodu jednym kliknięciem.** Na stronie „</> Code” po najechaniu na szablon pojawia się przycisk do skopiowania jego adresu URL lub ścieżki oraz przycisk do jego otwarcia — repozytorium w przeglądarce lub folder na dysku dla szablonu lokalnego.
 - **Nowe trasy mają od razu nazwę.** Trasa utworzona od zera otrzymuje teraz nazwę domyślną, więc możesz od razu zmienić jej nazwę.
+- **Karty podglądu, jak w twoim edytorze.** Pojedyncze kliknięcie otwiera teraz element w karcie **podglądu** wielokrotnego użytku (jego nazwa kursywą); kliknięcie innego elementu używa ponownie tej samej karty, zamiast dokładać nową. Dwuklik, dowolna edycja lub uruchomienie żądania zostawia ją otwartą na stałe. Wyłączysz to w Ustawienia › Zachowanie.
+- **Przypnij karty, które trzymasz otwarte.** Kliknij kartę prawym przyciskiem i przypnij ją: przypięte karty pozostają na początku, przetrwają „zamknij pozostałe“ i są zapamiętywane dla każdego projektu.
+- **Środowiska zyskują pełny widok szczegółów.** Otwórz środowisko, aby zmienić jego nazwę z tytułu, ustawić ikonę i kolor oraz dodać podśrodowisko — a menu prawego przycisku duplikuje teraz środowisko wraz ze wszystkimi jego zmiennymi i podśrodowiskami.
 
 Poprawki:
 
@@ -19,6 +22,10 @@ Poprawki:
 - **Generowanie dokumentacji nie zawodzi już na polach opcjonalnych.** Wygenerowanie dokumentacji z projektu, którego model lub parametr pozostawiał „required” nieustawione, nie zatrzymuje się już z błędem szablonu.
 - **Usunięcie enuma pyta o potwierdzenie.** Enumy otrzymują takie samo potwierdzenie jak modele i trasy.
 - **Pasek boczny ujawnia zaznaczenie.** Przy włączonej opcji „synchronizuj pasek boczny z aktywną kartą” zaznaczenie lub utworzenie modelu, enuma lub trasy rozwija jego elementy nadrzędne, aby był widoczny w drzewie.
+- **Przycisk środowiska pozostaje czytelny na każdym kolorze.** Jego etykieta przełącza się teraz na ciemny lub jasny tekst, aby pozostać czytelną na kolorze środowiska, tak jak przycisk uruchamiania.
+- **Kliknięcie środkowym przyciskiem zamyka otwarty plik.** Kliknięcie środkowym przyciskiem pozycji na liście „Otwarte“ na pasku bocznym zamyka jej kartę — a nowe ustawienie Zachowania pozwala całkowicie ukryć ten panel.
+- **Jaśniejsze sformułowanie przy starcie z dokumentacji.** W dokumentacji zaimportowanego API przycisk brzmi teraz „Utwórz nowe żądanie z tej dokumentacji“.
+- **Logowanie działa w wersji z Microsoft Store.** Wywołanie zwrotne protokołu niestandardowego, które przeglądarka zwraca po zalogowaniu, jest teraz zadeklarowane w pakiecie Store, więc logowanie kończy się zamiast wygasać.
 
 ## v1.1.0
 

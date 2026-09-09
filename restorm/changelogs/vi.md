@@ -12,6 +12,9 @@
 - **Chọn nhiều, xóa một lần.** Chọn nhiều mô hình, enum hoặc tuyến và xóa tất cả cùng lúc, sau khi xác nhận.
 - **Sao chép hoặc mở nguồn của một mẫu mã bằng một cú nhấp.** Trên trang "</> Code", khi di chuột lên một mẫu sẽ hiện một nút để sao chép URL hoặc đường dẫn của nó và một nút để mở nó — kho lưu trữ trong trình duyệt, hoặc thư mục trên đĩa đối với mẫu cục bộ.
 - **Route mới bắt đầu với một cái tên.** Một route tạo từ đầu giờ nhận được một tên mặc định, nên bạn có thể đổi tên nó ngay.
+- **Tab xem trước, như trong trình soạn thảo của bạn.** Một cú nhấp giờ mở một mục trong tab **xem trước** có thể tái sử dụng (tên hiển thị in nghiêng); nhấp vào mục khác sẽ tái sử dụng cùng tab đó thay vì xếp chồng một tab mới. Nhấp đúp, chỉnh sửa bất cứ điều gì, hoặc chạy một yêu cầu để giữ nó mở vĩnh viễn. Tắt nó trong Cài đặt › Hành vi.
+- **Ghim những tab bạn giữ mở.** Nhấp chuột phải vào một tab và ghim nó: các tab được ghim luôn đứng trước, sống sót qua "đóng các tab khác", và được ghi nhớ theo từng dự án.
+- **Môi trường có được một khung xem chi tiết đúng nghĩa.** Mở một môi trường để đổi tên nó từ tiêu đề, đặt biểu tượng và màu cho nó, và thêm một môi trường con — và menu chuột phải giờ nhân bản một môi trường cùng toàn bộ biến và môi trường con của nó.
 
 Sửa lỗi:
 
@@ -19,6 +22,10 @@ Sửa lỗi:
 - **Việc tạo tài liệu không còn thất bại ở các trường tùy chọn.** Tạo tài liệu từ một thiết kế mà model hoặc tham số để "required" chưa đặt sẽ không còn dừng lại với lỗi mẫu.
 - **Xóa một enum sẽ hỏi trước.** Enum giờ nhận cùng xác nhận như mô hình và tuyến.
 - **Thanh bên hé lộ mục bạn chọn.** Khi bật «đồng bộ thanh bên với tab đang mở», việc chọn hoặc tạo một mô hình, enum hay tuyến sẽ mở rộng các mục cha để nó luôn hiện trong cây.
+- **Nút môi trường vẫn dễ đọc trên mọi màu.** Nhãn của nó giờ chuyển sang chữ tối hoặc sáng để vẫn dễ đọc trên màu của môi trường, giống như nút chạy.
+- **Nhấp chuột giữa đóng một tệp đang mở.** Nhấp chuột giữa vào một mục trong danh sách "Đang mở" ở thanh bên sẽ đóng tab của nó — và một tùy chọn Hành vi mới cho phép bạn ẩn hoàn toàn bảng đó.
+- **Từ ngữ rõ ràng hơn khi bắt đầu từ tài liệu.** Trong tài liệu của một API đã nhập, nút giờ ghi "Tạo một yêu cầu mới từ tài liệu này."
+- **Đăng nhập hoạt động trên bản Microsoft Store.** Lệnh gọi lại theo giao thức tùy chỉnh mà trình duyệt trả về sau khi bạn đăng nhập giờ đã được khai báo trong gói Store, nên việc đăng nhập hoàn tất thay vì hết thời gian chờ.
 
 ## v1.1.0
 

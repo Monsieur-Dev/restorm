@@ -12,6 +12,9 @@
 - **Jelölj ki többet, törölj egyszerre.** Jelölj ki több modellt, enumot vagy útvonalat, és töröld őket egyszerre, megerősítés után.
 - **Másold vagy nyisd meg egy kódsablon forrását egy kattintással.** A „</> Code” oldalon egy sablon fölé húzva megjelenik egy gomb az URL vagy az elérési út másolásához és egy a megnyitásához — a tároló a böngésződben, vagy a mappa a lemezen egy helyi sablon esetén.
 - **Az új útvonalak névvel indulnak.** A nulláról létrehozott útvonal mostantól alapértelmezett nevet kap, így azonnal átnevezheted.
+- **Előnézeti lapok, akár a szerkesztődben.** Egyetlen kattintás mostantól egy újrahasználható **előnézeti** lapon nyit meg egy elemet (a neve dőlt betűvel); egy másik elemre kattintva ugyanaz a lap kerül újrafelhasználásra, nem pedig egy új lap. Dupla kattintás, bármilyen szerkesztés vagy egy kérés futtatása véglegesen nyitva tartja. A Beállítások › Viselkedés alatt kapcsolható ki.
+- **Rögzítsd a nyitva tartott lapokat.** Kattints jobb gombbal egy lapra, és rögzítsd: a rögzített lapok elöl maradnak, túlélik a „többi bezárása“ műveletet, és projektenként megjegyzésre kerülnek.
+- **A környezetek rendes részletnézetet kapnak.** Nyiss meg egy környezetet, hogy a címéből átnevezd, beállítsd az ikonját és színét, és alkörnyezetet adj hozzá — a jobbklikk menü pedig mostantól az összes változójával és alkörnyezetével együtt sokszorozza a környezetet.
 
 Javítások:
 
@@ -19,6 +22,10 @@ Javítások:
 - **A dokumentációgenerálás már nem hibázik az opcionális mezőknél.** Egy olyan tervből való dokumentációgenerálás, amelynek modellje vagy paramétere a „required” értéket beállítatlanul hagyta, már nem áll le sablonhibával.
 - **Egy enum törlése előbb rákérdez.** Az enumok ugyanazt a megerősítést kapják, mint a modellek és az útvonalak.
 - **Az oldalsáv felfedi a kijelölést.** Ha az „oldalsáv szinkronizálása az aktív lappal” be van kapcsolva, egy modell, enum vagy útvonal kijelölése vagy létrehozása kibontja a szülőit, hogy látható maradjon a fában.
+- **A környezet gomb minden színen olvasható marad.** A felirata mostantól sötét vagy világos szövegre vált, hogy olvasható maradjon a környezet színén, akárcsak a futtatás gomb.
+- **A középső gombbal kattintás bezár egy megnyitott fájlt.** Az oldalsáv „Megnyitva“ listájában egy bejegyzésre középső gombbal kattintva bezárul annak lapja — és egy új Viselkedés beállítással teljesen elrejtheted ezt a panelt.
+- **Világosabb szöveg, amikor a dokumentációból indulsz.** Egy importált API dokumentációjában a gomb felirata mostantól „Új kérés létrehozása ebből a dokumentációból“.
+- **A bejelentkezés működik a Microsoft Store-os változatban.** Az egyéni protokollos visszahívás, amelyet a böngésző a bejelentkezés után visszaad, mostantól szerepel a Store-csomagban, így a bejelentkezés befejeződik, ahelyett hogy időtúllépéssel leállna.
 
 ## v1.1.0
 

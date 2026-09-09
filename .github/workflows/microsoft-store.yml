@@ -1,0 +1,156 @@
+name: Microsoft Store
+
+# Builds the Microsoft Store package (electron-builder `appx` target — full-trust
+# MSIX) and submits it to Partner Center via the Microsoft Store Developer CLI
+# (`msstore`). makeappx is Windows-only, so the whole job runs on a Windows runner.
+#
+# Mirrors the snap-store gating model: the publish step rides the Partner Center
+# API secrets and quietly SKIPS while any of them is absent, so the pipeline
+# stays green before the credentials are configured (the .msix is still built and
+# uploaded as an artifact for a manual Partner Center upload in that case).
+#
+# Runs automatically as a tail of a release (workflow_call from release.yml) and
+# by hand for a re-publish (workflow_dispatch with the version).
+#
+# Required repository secrets to enable the automatic submission (create an Azure
+# AD application in Partner Center → Account settings → User management → Azure AD
+# applications, granted the "Manager" role, then generate a client secret):
+#   MS_STORE_TENANT_ID     — the Azure AD directory (tenant) id
+#   MS_STORE_SELLER_ID     — the Partner Center seller id (Account settings)
+#   MS_STORE_CLIENT_ID     — the Azure AD application (client) id
+#   MS_STORE_CLIENT_SECRET — a client secret for that application
+# The product id is public (the Store listing id) and is set below.
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Git ref whose package.json names the released version'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version to build + submit (matches the release; no leading v)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  # The public Store listing id for Restorm (apps.microsoft.com/detail/<id>).
+  MS_STORE_PRODUCT_ID: 9PMNS771SKSK
+
+jobs:
+  microsoft-store:
+    name: Build + submit MSIX
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.26.1
+
+      - name: Resolve the version
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(node -p "require('./restorm/package.json').version")
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "Building + submitting v${VERSION}"
+
+      - name: Install + build electron-core-ui
+        run: |
+          cd electron-core-ui
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install restorm dependencies
+        run: |
+          cd restorm
+          pnpm install --frozen-lockfile
+
+      - name: Build MSIX (electron-builder appx)
+        run: |
+          cd restorm
+          # Pin the package version to the shipped release BEFORE building. Passing
+          # -c.extraMetadata.version THROUGH the compound `dist:store` script is
+          # silently dropped (npm forwards `--` args as shell positionals for a
+          # script containing `&&`), so set it on package.json directly (CI
+          # checkout only, never committed).
+          npm version "${VERSION}" --no-git-tag-version --allow-same-version
+          # RESTORM_STORE_BUILD makes the in-app updater inert — the Store owns
+          # updates for this channel.
+          RESTORM_STORE_BUILD=1 NODE_OPTIONS=--max-old-space-size=4096 pnpm run dist:store
+        env:
+          # Bake the crash-report DSN in like the direct-download build. Absent
+          # secret ⇒ inert, build stays green.
+          RESTORM_SENTRY_DSN: ${{ secrets.RESTORM_SENTRY_DSN }}
+
+      - name: Locate the built package
+        run: |
+          PKG=$(ls restorm/dist-electron/*.msix restorm/dist-electron/*.appx 2>/dev/null | head -1)
+          if [ -z "$PKG" ]; then
+            echo "no .msix/.appx produced under restorm/dist-electron/" >&2
+            exit 1
+          fi
+          echo "PKG=${PKG}" >> "$GITHUB_ENV"
+          echo "package: ${PKG}"
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: restorm-msix-${{ env.VERSION }}
+          path: |
+            restorm/dist-electron/*.appx
+            restorm/dist-electron/*.msix
+          if-no-files-found: error
+
+      - name: Setup Microsoft Store Developer CLI
+        # Only needed for the actual submission — but the setup is cheap and
+        # harmless, so it always runs; the gated step below is what skips.
+        uses: microsoft/microsoft-store-apppublisher@v1.4
+
+      - name: Submit to the Microsoft Store
+        # Gated on the Partner Center API secrets: while any is absent, skip
+        # cleanly (the .msix artifact above is still available for a manual
+        # Partner Center upload). Same pattern as the Snap Store publish.
+        run: |
+          if [ -z "$MS_STORE_TENANT_ID" ] || [ -z "$MS_STORE_SELLER_ID" ] || [ -z "$MS_STORE_CLIENT_ID" ] || [ -z "$MS_STORE_CLIENT_SECRET" ]; then
+            echo "Partner Center API secrets not configured — skipping Microsoft Store submission."
+            echo "The .msix is available as the 'restorm-msix-${VERSION}' artifact for a manual upload."
+            exit 0
+          fi
+          msstore reconfigure \
+            --tenantId "$MS_STORE_TENANT_ID" \
+            --sellerId "$MS_STORE_SELLER_ID" \
+            --clientId "$MS_STORE_CLIENT_ID" \
+            --clientSecret "$MS_STORE_CLIENT_SECRET"
+          # Publish the pre-built package to the existing Store listing. `restorm`
+          # is the Electron project dir (lets the CLI detect the app type); the
+          # exact package is pinned with --inputFile; --appId targets the listing.
+          msstore publish restorm \
+            --inputFile "$PKG" \
+            --appId "$MS_STORE_PRODUCT_ID" \
+            --verbose
+        env:
+          MS_STORE_TENANT_ID: ${{ secrets.MS_STORE_TENANT_ID }}
+          MS_STORE_SELLER_ID: ${{ secrets.MS_STORE_SELLER_ID }}
+          MS_STORE_CLIENT_ID: ${{ secrets.MS_STORE_CLIENT_ID }}
+          MS_STORE_CLIENT_SECRET: ${{ secrets.MS_STORE_CLIENT_SECRET }}

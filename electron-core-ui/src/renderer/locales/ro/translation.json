@@ -439,7 +439,12 @@
     "emptyHint": "Introdu o adresă mai sus pentru a începe navigarea."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Adaugă marcaj"
+    "addBookmark": "Adaugă marcaj",
+    "namePlaceholder": "Nume marcaj",
+    "createBookmark": "Creează marcaj",
+    "removeBookmark": "Elimină marcaj",
+    "bookmarkAria": "Marcaj: {{label}}",
+    "add": "Adaugă"
   },
   "toaster": {
     "notificationsRegion": "Notificări"

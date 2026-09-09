@@ -49,7 +49,7 @@ export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const {
 		group, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested,
-		onChangeFullscreenTabId, maximizedTabId = null, modalBody = null,
+		onChangeFullscreenTabId, onPromoteTab, maximizedTabId = null, modalBody = null,
 		getTabHost, isExternalDropDrag, onExternalDrop,
 		'data-testid': dataTestId
 	} = props;
@@ -74,10 +74,18 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	// non-maximizable tab from opening one.
 	const handleTabDoubleClick = useCallback((tabId: string) => {
 		const tab = group.tabs.find((t) => t.id === tabId);
+		// A double-click on a preview tab PROMOTES it to permanent (VSCode
+		// model) rather than opening the fullscreen modal — keeping the tab is
+		// the intent of double-clicking a preview. A permanent tab keeps the
+		// existing double-click-to-fullscreen behaviour.
+		if (tab?.isTemporary === true) {
+			onPromoteTab?.(tabId, group.id);
+			return;
+		}
 		if (tab?.allowFullscreen) {
 			onChangeFullscreenTabId?.(tabId);
 		}
-	}, [group.tabs, onChangeFullscreenTabId]);
+	}, [group.tabs, group.id, onChangeFullscreenTabId, onPromoteTab]);
 
 	// Wrapper around onActivateTab that also requests focus for this group
 	const handleActivateTab = useCallback((tabId: string, groupId: string) => {

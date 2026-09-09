@@ -982,7 +982,9 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		const rec = (nodes: GroupNode[]): void => {
 			for (const n of nodes) {
 				if (isTabGroupNode(n) && n.id === groupId) {
-					n.tabs = n.tabs.filter(t => t.id === tabId);
+					// Keep the target tab AND every pinned tab — "close others"
+					// never discards a pinned tab.
+					n.tabs = n.tabs.filter(t => t.id === tabId || t.isPinned === true);
 					n.activeTabId = tabId;
 				} else if (isContainerNode(n)) {
 					rec(n.groups);
@@ -992,6 +994,56 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 
 		rec(next.groups);
 		change(next);
+	}, [tree, change]);
+
+	const handleTogglePinTab = useCallback((tabId: string, groupId: string) => {
+		const next: WorkbenchTree = cloneTree(tree);
+		const rec = (nodes: GroupNode[]): void => {
+			for (const n of nodes) {
+				if (isTabGroupNode(n) && n.id === groupId) {
+					const tab = n.tabs.find(t => t.id === tabId);
+					if (tab !== undefined) {
+						tab.isPinned = tab.isPinned !== true;
+						// Pinning promotes: a tab can never be both pinned and a preview
+						// (a pinned preview would be evictable by the one-per-group rule).
+						if (tab.isPinned) tab.isTemporary = false;
+						// Re-seat so pinned tabs stay first: drop the tab, then insert
+						// it at the count of the OTHER pinned tabs — the end of the
+						// pinned block when pinning, the head of the unpinned block when
+						// unpinning (both the same index).
+						const without = n.tabs.filter(t => t.id !== tabId);
+						const pinnedCount = without.filter(t => t.isPinned === true).length;
+						without.splice(pinnedCount, 0, tab);
+						n.tabs = without;
+					}
+				} else if (isContainerNode(n)) {
+					rec(n.groups);
+				}
+			}
+		};
+		rec(next.groups);
+		change(next);
+	}, [tree, change]);
+
+	const handlePromoteTab = useCallback((tabId: string, groupId: string) => {
+		// Only rewrite the tree if the tab is actually temporary — a double-click
+		// on a permanent tab must not churn the tree (would re-run persistence).
+		// Widen to `boolean`: the flag is only mutated inside the nested `rec`
+		// closure, which TS control-flow can't see from the outer `if` below.
+		let didChange = false as boolean;
+		const next: WorkbenchTree = cloneTree(tree);
+		const rec = (nodes: GroupNode[]): void => {
+			for (const n of nodes) {
+				if (isTabGroupNode(n) && n.id === groupId) {
+					const tab = n.tabs.find(t => t.id === tabId);
+					if (tab?.isTemporary === true) { tab.isTemporary = false; didChange = true; }
+				} else if (isContainerNode(n)) {
+					rec(n.groups);
+				}
+			}
+		};
+		rec(next.groups);
+		if (didChange) change(next);
 	}, [tree, change]);
 
 	// Helper function to find group and drop target at cursor position
@@ -1280,6 +1332,8 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				onCloseTab={handleClose}
 				onActivateTab={handleActivate}
 				onCloseOthersInGroup={handleCloseOthersInGroup}
+				onTogglePinTab={handleTogglePinTab}
+				onPromoteTab={handlePromoteTab}
 				hasFocus={hasFocus}
 				onFocusRequested={handleFocusRequested}
 				onChangeFullscreenTabId={setFullscreenTabId}
@@ -1295,6 +1349,8 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		handleSplitTab,
 		handleClose,
 		handleCloseOthersInGroup,
+		handleTogglePinTab,
+		handlePromoteTab,
 		handleActivate,
 		handleFocusRequested,
 		extCallbacks.onDetachToNewWindow,

@@ -439,7 +439,12 @@
     "emptyHint": "Gib oben eine Adresse ein, um mit dem Surfen zu beginnen."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Lesezeichen hinzufügen"
+    "addBookmark": "Lesezeichen hinzufügen",
+    "namePlaceholder": "Lesezeichen-Name",
+    "createBookmark": "Lesezeichen erstellen",
+    "removeBookmark": "Lesezeichen entfernen",
+    "bookmarkAria": "Lesezeichen: {{label}}",
+    "add": "Hinzufügen"
   },
   "toaster": {
     "notificationsRegion": "Benachrichtigungen"

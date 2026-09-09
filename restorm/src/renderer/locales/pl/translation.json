@@ -347,7 +347,9 @@
     "add": "Dodaj środowisko",
     "rename": "Zmień nazwę",
     "addSub": "Dodaj podśrodowisko",
-    "delete": "Usuń"
+    "delete": "Usuń",
+    "duplicate": "Duplikuj środowisko",
+    "duplicateName": "{{name}} (kopia)"
   },
   "folderView": {
     "environments": "Środowiska",
@@ -398,7 +400,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Zdefiniuj wielokrotnego użytku listy wartości dla zmiennych: wybierasz czytelną etykietę, a żądanie wysyła powiązaną wartość. Wybierz lub utwórz wyliczenie, aby zacząć."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Kolor:"
   },
   "requestTab": {
     "deprecated": "Ten punkt końcowy jest przestarzały i może zostać usunięty w przyszłej wersji.",
@@ -468,7 +472,9 @@
       "close": "Zamknij",
       "closeOthers": "Zamknij inne",
       "addToFavorites": "Dodaj do ulubionych",
-      "removeFromFavorites": "Usuń z ulubionych"
+      "removeFromFavorites": "Usuń z ulubionych",
+      "pin": "Przypnij",
+      "unpin": "Odepnij"
     }
   },
   "codeEditor": {
@@ -1008,7 +1014,11 @@
       "us": "Format US (MM/DD/RRRR, 12h)",
       "iso": "Format ISO (RRRR-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Format używany do wyświetlania dat i godzin w aplikacji"
+    "dateTimeFormatDescription": "Format używany do wyświetlania dat i godzin w aplikacji",
+    "showOpenedList": "Pokaż listę otwartych plików na pasku bocznym",
+    "showOpenedListDescription": "Wyświetla panel „Otwarte” z plikami aktualnie otwartymi w obszarze roboczym",
+    "temporaryTabs": "Karty podglądu",
+    "temporaryTabsDescription": "Otwiera elementy w jednej wielokrotnego użytku karcie podglądu (wyświetlanej kursywą). Podwójne kliknięcie, edycja lub uruchomienie żądania utrwala kartę."
   },
   "console": {
     "title": "Konsola",
@@ -1263,7 +1273,7 @@
       "externalDocs": "Dokumentacja zewnętrzna",
       "examplePayload": "Przykładowy ładunek",
       "operationId": "operationId",
-      "addRequest": "+ Dodaj żądanie"
+      "addRequest": "+ Utwórz nowe żądanie na podstawie tej dokumentacji"
     },
     "apiInfo": {
       "version": "Wersja",
@@ -3366,5 +3376,12 @@
     "editNamed": "Edytuj {{name}}",
     "confirmReplace": "Plik cookie o nazwie „{{name}}” już tutaj istnieje. Zastąpić go?",
     "replaceButton": "Zastąp"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Dodaj tag",
+    "namePlaceholder": "Nazwa tagu",
+    "createBookmark": "Utwórz tag",
+    "removeBookmark": "Usuń tag",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

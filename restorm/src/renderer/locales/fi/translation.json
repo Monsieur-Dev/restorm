@@ -345,7 +345,9 @@
     "add": "Lisää ympäristö",
     "rename": "Nimeä uudelleen",
     "addSub": "Lisää aliympäristö",
-    "delete": "Poista"
+    "delete": "Poista",
+    "duplicate": "Monista ympäristö",
+    "duplicateName": "{{name}} (kopio)"
   },
   "folderView": {
     "environments": "Ympäristöt",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Määritä muuttujillesi uudelleenkäytettäviä arvoluetteloita: valitset luettavan nimikkeen, ja pyyntö lähettää siihen liitetyn arvon. Valitse tai luo luettelo aloittaaksesi."
-    }
+    },
+    "iconLabel": "Kuvake:",
+    "colorLabel": "Väri:"
   },
   "requestTab": {
     "deprecated": "Tämä päätepiste on vanhentunut ja se voidaan poistaa tulevassa versiossa.",
@@ -466,7 +470,9 @@
       "close": "Sulje",
       "closeOthers": "Sulje muut",
       "addToFavorites": "Lisää suosikkeihin",
-      "removeFromFavorites": "Poista suosikeista"
+      "removeFromFavorites": "Poista suosikeista",
+      "pin": "Kiinnitä",
+      "unpin": "Irrota"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "Yhdysvaltain muoto (KK/PP/VVVV, 12h)",
       "iso": "ISO-muoto (VVVV-KK-PP, 24h)"
     },
-    "dateTimeFormatDescription": "Sovelluksessa käytetty muoto päivämäärien ja aikojen näyttämiseen"
+    "dateTimeFormatDescription": "Sovelluksessa käytetty muoto päivämäärien ja aikojen näyttämiseen",
+    "showOpenedList": "Näytä avoimien tiedostojen luettelo sivupalkissa",
+    "showOpenedListDescription": "Näyttää ”Avatut”-paneelin, jossa luetellaan työtilassa parhaillaan avoinna olevat tiedostot",
+    "temporaryTabs": "Esikatseluvälilehdet",
+    "temporaryTabsDescription": "Avaa kohteet yhdellä uudelleenkäytettävällä esikatseluvälilehdellä (näytetään kursiivilla). Kaksoisnapsautus, muokkaus tai pyynnön suorittaminen tekee välilehdestä pysyvän."
   },
   "console": {
     "title": "Konsoli",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Ulkoiset dokumentit",
       "examplePayload": "Esimerkkikuorma",
       "operationId": "operationId",
-      "addRequest": "+ Lisää pyyntö"
+      "addRequest": "+ Luo uusi pyyntö tästä dokumentaatiosta"
     },
     "apiInfo": {
       "version": "Versio",
@@ -3364,5 +3374,12 @@
     "editNamed": "Muokkaa {{name}}",
     "confirmReplace": "Täällä on jo eväste nimeltä ”{{name}}”. Korvataanko se?",
     "replaceButton": "Korvaa"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lisää tunniste",
+    "namePlaceholder": "Tunnisteen nimi",
+    "createBookmark": "Luo tunniste",
+    "removeBookmark": "Poista tunniste",
+    "bookmarkAria": "Tunniste: {{label}}"
   }
 }

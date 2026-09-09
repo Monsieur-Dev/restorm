@@ -439,7 +439,12 @@
     "emptyHint": "Ange en adress ovan för att börja surfa."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Lägg till bokmärke"
+    "addBookmark": "Lägg till bokmärke",
+    "namePlaceholder": "Bokmärkesnamn",
+    "createBookmark": "Skapa bokmärke",
+    "removeBookmark": "Ta bort bokmärke",
+    "bookmarkAria": "Bokmärke: {{label}}",
+    "add": "Lägg till"
   },
   "toaster": {
     "notificationsRegion": "Aviseringar"

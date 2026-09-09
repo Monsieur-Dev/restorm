@@ -12,6 +12,9 @@
 - **Odaberite više, izbrišite odjednom.** Odaberite nekoliko modela, enuma ili ruta i izbrišite ih odjednom, nakon potvrde.
 - **Kopirajte ili otvorite izvor predloška koda jednim klikom.** Na stranici „</> Code”, prelaskom preko predloška pojavljuje se gumb za kopiranje njegova URL-a ili putanje i gumb za njegovo otvaranje — repozitorij u pregledniku ili mapa na disku za lokalni predložak.
 - **Nove rute odmah imaju naziv.** Ruta stvorena od nule sada dobiva zadani naziv, pa je možete odmah preimenovati.
+- **Kartice pretpregleda, kao u vašem uređivaču.** Jedan klik sada otvara stavku u kartici **pretpregleda** koja se ponovno koristi (naziv joj je u kurzivu); klik na drugu stavku ponovno koristi istu karticu umjesto da slaže novu. Dvoklik, bilo kakva izmjena ili izvršavanje zahtjeva ostavlja je trajno otvorenom. Isključite to u Postavke › Ponašanje.
+- **Prikvačite kartice koje držite otvorenima.** Desnom tipkom kliknite karticu i prikvačite je: prikvačene kartice ostaju prve, preživljavaju „zatvori ostale“ i pamte se po projektu.
+- **Okruženja dobivaju pravi prikaz pojedinosti.** Otvorite okruženje da biste ga preimenovali iz njegova naslova, postavili mu ikonu i boju te dodali podokruženje — a izbornik desnog klika sada duplicira okruženje sa svim njegovim varijablama i podokruženjima.
 
 Ispravci:
 
@@ -19,6 +22,10 @@ Ispravci:
 - **Generiranje dokumentacije više ne pada na neobaveznim poljima.** Generiranje dokumentacije iz dizajna čiji je model ili parametar ostavio „required” nepostavljenim više se ne zaustavlja s pogreškom predloška.
 - **Brisanje enuma prvo pita.** Enumi dobivaju istu potvrdu kao modeli i rute.
 - **Bočna traka otkriva vaš odabir.** Uz uključeno „sinkroniziraj bočnu traku s aktivnom karticom”, odabir ili stvaranje modela, enuma ili rute proširuje njegove roditelje kako bi ostao vidljiv u stablu.
+- **Gumb okruženja ostaje čitljiv na bilo kojoj boji.** Njegova oznaka sada prelazi na tamni ili svijetli tekst kako bi ostala čitljiva na boji okruženja, poput gumba za izvršavanje.
+- **Klik srednjom tipkom zatvara otvorenu datoteku.** Klik srednjom tipkom na stavku u popisu „Otvoreno“ u bočnoj traci zatvara njezinu karticu — a nova postavka Ponašanja omogućuje potpuno skrivanje te ploče.
+- **Jasniji tekst pri kretanju od dokumentacije.** U dokumentaciji uvezenog API-ja gumb sada glasi „Stvori novi zahtjev iz ove dokumentacije“.
+- **Prijava radi u verziji iz Microsoft Storea.** Povratni poziv prilagođenog protokola koji preglednik vraća nakon prijave sada je deklariran u Store paketu, pa se prijava dovršava umjesto da istekne.
 
 ## v1.1.0
 

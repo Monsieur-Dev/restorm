@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getContrastColor } from '../../utils/colorContrast'
 import { getColorFromString } from '../../utils/colorFromString'
 import { Tooltip } from '../Tooltip'
@@ -128,6 +129,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   className,
   'data-testid': dataTestId
 }) => {
+  const { t } = useTranslation()
   const [editorOpen, setEditorOpen] = useState(false)
   const [draftLabel, setDraftLabel] = useState(label)
   const [hovered, setHovered] = useState(false)
@@ -158,12 +160,12 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   // settled phase (`idle` / `open`).
   useEffect(() => {
     if (animState.phase === 'opening') {
-      const t = setTimeout(() => { dispatch({ type: 'ENTRY_DONE' }) }, ENTRY_WATCHDOG_MS)
-      return () => { clearTimeout(t) }
+      const timer = setTimeout(() => { dispatch({ type: 'ENTRY_DONE' }) }, ENTRY_WATCHDOG_MS)
+      return () => { clearTimeout(timer) }
     }
     if (animState.phase === 'closing') {
-      const t = setTimeout(() => { dispatch({ type: 'EXIT_DONE' }) }, EXIT_WATCHDOG_MS)
-      return () => { clearTimeout(t) }
+      const timer = setTimeout(() => { dispatch({ type: 'EXIT_DONE' }) }, EXIT_WATCHDOG_MS)
+      return () => { clearTimeout(timer) }
     }
     return undefined
   }, [animState.phase])
@@ -262,7 +264,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
         type="button"
         className={rootClasses}
         style={{ '--bookmark-color': effectiveColor, '--bookmark-text-color': textColor } as React.CSSProperties}
-        aria-label={`Bookmark: ${label}`}
+        aria-label={t('bookmarkRibbon.bookmarkAria', 'Bookmark: {{label}}', { label })}
         {...(editable ? { 'aria-expanded': editorOpen } : {})}
         {...(editable ? { onClick: handleToggle } : {})}
         onMouseEnter={() => { setHovered(true) }}
@@ -288,7 +290,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
             onMouseDown={(e) => { e.stopPropagation() }}
           >
             <InputBox
-              options={{ placeholder: 'Bookmark name' }}
+              options={{ placeholder: t('bookmarkRibbon.namePlaceholder', 'Bookmark name') }}
               value={draftLabel}
               // Commit reads `draftLabel` synchronously on Enter / blur, so the
               // draft must track every keystroke — a debounced onChange would
@@ -323,7 +325,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
                 fullWidth
                 icon="trash"
                 onClick={handleRemove}
-                options={{ ariaLabel: 'Remove bookmark', title: 'Remove bookmark' }}
+                options={{ ariaLabel: t('bookmarkRibbon.removeBookmark', 'Remove bookmark'), title: t('bookmarkRibbon.removeBookmark', 'Remove bookmark') }}
                 {...(dataTestId ? { 'data-testid': `${dataTestId}-remove` } : {})}
               />
             ) : null}

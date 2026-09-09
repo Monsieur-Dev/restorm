@@ -345,7 +345,9 @@
     "add": "Omgeving toevoegen",
     "rename": "Naam wijzigen",
     "addSub": "Sub-omgeving toevoegen",
-    "delete": "Verwijderen"
+    "delete": "Verwijderen",
+    "duplicate": "Omgeving dupliceren",
+    "duplicateName": "{{name}} (kopie)"
   },
   "folderView": {
     "environments": "Omgevingen",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definieer herbruikbare waardelijsten voor uw variabelen: u kiest een leesbaar label, het request verstuurt de bijbehorende waarde. Selecteer of maak een enumeratie om te beginnen."
-    }
+    },
+    "iconLabel": "Pictogram:",
+    "colorLabel": "Kleur:"
   },
   "requestTab": {
     "deprecated": "Dit endpoint is verouderd en kan in een toekomstige versie worden verwijderd.",
@@ -466,7 +470,9 @@
       "close": "Sluiten",
       "closeOthers": "Andere sluiten",
       "addToFavorites": "Toevoegen aan favorieten",
-      "removeFromFavorites": "Verwijderen uit favorieten"
+      "removeFromFavorites": "Verwijderen uit favorieten",
+      "pin": "Vastmaken",
+      "unpin": "Losmaken"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "Amerikaanse notatie (MM/DD/JJJJ, 12h)",
       "iso": "ISO-notatie (JJJJ-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Notatie die wordt gebruikt om datums en tijden in de toepassing weer te geven"
+    "dateTimeFormatDescription": "Notatie die wordt gebruikt om datums en tijden in de toepassing weer te geven",
+    "showOpenedList": "Toon de lijst met geopende bestanden in de zijbalk",
+    "showOpenedListDescription": "Toont het paneel ‘Geopend’ met de bestanden die momenteel in de werkruimte openstaan",
+    "temporaryTabs": "Voorbeeldtabbladen",
+    "temporaryTabsDescription": "Opent items in één herbruikbaar voorbeeldtabblad (cursief weergegeven). Dubbelklikken, bewerken of een verzoek uitvoeren maakt het tabblad permanent."
   },
   "console": {
     "title": "Console",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Externe docs",
       "examplePayload": "Voorbeeld-payload",
       "operationId": "operationId",
-      "addRequest": "+ Verzoek toevoegen"
+      "addRequest": "+ Een nieuwe aanvraag maken op basis van deze documentatie"
     },
     "apiInfo": {
       "version": "Versie",
@@ -3364,5 +3374,12 @@
     "editNamed": "{{name}} bewerken",
     "confirmReplace": "Er bestaat hier al een cookie met de naam \"{{name}}\". Vervangen?",
     "replaceButton": "Vervangen"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tag toevoegen",
+    "namePlaceholder": "Tagnaam",
+    "createBookmark": "Tag maken",
+    "removeBookmark": "Tag verwijderen",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

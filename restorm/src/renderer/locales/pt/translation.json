@@ -345,7 +345,9 @@
     "add": "Adicionar ambiente",
     "rename": "Renomear",
     "addSub": "Adicionar subambiente",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "duplicate": "Duplicar o ambiente",
+    "duplicateName": "{{name}} (cópia)"
   },
   "folderView": {
     "environments": "Ambientes",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Defina listas de valores reutilizáveis para as suas variáveis: você escolhe um rótulo legível e a requisição envia o valor associado. Selecione ou crie uma enumeração para começar."
-    }
+    },
+    "iconLabel": "Ícone:",
+    "colorLabel": "Cor:"
   },
   "requestTab": {
     "deprecated": "Este endpoint está obsoleto e poderá ser removido numa versão futura.",
@@ -466,7 +470,9 @@
       "close": "Fechar",
       "closeOthers": "Fechar os outros",
       "addToFavorites": "Adicionar aos favoritos",
-      "removeFromFavorites": "Remover dos favoritos"
+      "removeFromFavorites": "Remover dos favoritos",
+      "pin": "Fixar",
+      "unpin": "Desafixar"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "Formato EUA (MM/DD/AAAA, 12h)",
       "iso": "Formato ISO (AAAA-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Formato utilizado para apresentar datas e horas na aplicação"
+    "dateTimeFormatDescription": "Formato utilizado para apresentar datas e horas na aplicação",
+    "showOpenedList": "Mostrar a lista de ficheiros abertos na barra lateral",
+    "showOpenedListDescription": "Apresenta o painel «Abertos» que lista os ficheiros atualmente abertos no espaço de trabalho",
+    "temporaryTabs": "Separadores de pré-visualização",
+    "temporaryTabsDescription": "Abre os itens num único separador de pré-visualização reutilizável (apresentado em itálico). Um duplo clique, uma edição ou executar um pedido fixa o separador."
   },
   "console": {
     "title": "Consola",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Docs externas",
       "examplePayload": "Exemplo de payload",
       "operationId": "operationId",
-      "addRequest": "+ Adicionar uma requisição"
+      "addRequest": "+ Criar uma nova requisição a partir desta documentação"
     },
     "apiInfo": {
       "version": "Versão",
@@ -3364,5 +3374,12 @@
     "editNamed": "Editar {{name}}",
     "confirmReplace": "Já existe aqui um cookie com o nome «{{name}}». Substituí-lo?",
     "replaceButton": "Substituir"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Adicionar tag",
+    "namePlaceholder": "Nome da tag",
+    "createBookmark": "Criar tag",
+    "removeBookmark": "Remover tag",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

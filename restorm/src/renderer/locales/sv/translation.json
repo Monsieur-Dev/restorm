@@ -345,7 +345,9 @@
     "add": "Lägg till miljö",
     "rename": "Byt namn",
     "addSub": "Lägg till undermiljö",
-    "delete": "Ta bort"
+    "delete": "Ta bort",
+    "duplicate": "Duplicera miljön",
+    "duplicateName": "{{name}} (kopia)"
   },
   "folderView": {
     "environments": "Miljöer",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definiera återanvändbara värdelistor för dina variabler: du väljer en läsbar etikett och requesten skickar det kopplade värdet. Välj eller skapa en uppräkning för att komma igång."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Färg:"
   },
   "requestTab": {
     "deprecated": "Denna endpoint är föråldrad och kan tas bort i en framtida version.",
@@ -466,7 +470,9 @@
       "close": "Stäng",
       "closeOthers": "Stäng andra",
       "addToFavorites": "Lägg till i favoriter",
-      "removeFromFavorites": "Ta bort från favoriter"
+      "removeFromFavorites": "Ta bort från favoriter",
+      "pin": "Fäst",
+      "unpin": "Lossa"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US-format (MM/DD/ÅÅÅÅ, 12h)",
       "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Format som används för att visa datum och tid i applikationen"
+    "dateTimeFormatDescription": "Format som används för att visa datum och tid i applikationen",
+    "showOpenedList": "Visa listan över öppna filer i sidofältet",
+    "showOpenedListDescription": "Visar panelen ”Öppnade” med filerna som är öppna i arbetsytan just nu",
+    "temporaryTabs": "Förhandsgranskningsflikar",
+    "temporaryTabsDescription": "Öppnar objekt i en enda återanvändbar förhandsgranskningsflik (visas i kursiv stil). Ett dubbelklick, en redigering eller att köra en begäran gör fliken permanent."
   },
   "console": {
     "title": "Konsol",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Externa dokument",
       "examplePayload": "Exempel-payload",
       "operationId": "operationId",
-      "addRequest": "+ Lägg till en begäran"
+      "addRequest": "+ Skapa en ny begäran från denna dokumentation"
     },
     "apiInfo": {
       "version": "Version",
@@ -3364,5 +3374,12 @@
     "editNamed": "Redigera {{name}}",
     "confirmReplace": "Det finns redan en cookie med namnet ”{{name}}” här. Ersätta den?",
     "replaceButton": "Ersätt"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Lägg till tagg",
+    "namePlaceholder": "Taggnamn",
+    "createBookmark": "Skapa tagg",
+    "removeBookmark": "Ta bort tagg",
+    "bookmarkAria": "Tagg: {{label}}"
   }
 }

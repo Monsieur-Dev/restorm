@@ -12,6 +12,9 @@
 - **Mehrere auswählen, auf einmal löschen.** Wählen Sie mehrere Modelle, Enums oder Routen aus und löschen Sie sie auf einmal, nach einer Bestätigung.
 - **Die Quelle einer Code-Vorlage mit einem Klick kopieren oder öffnen.** Auf der Seite „</> Code“ erscheint beim Überfahren einer Vorlage eine Schaltfläche zum Kopieren ihrer URL oder ihres Pfads und eine zum Öffnen – das Repository im Browser oder der Ordner auf der Festplatte bei einer lokalen Vorlage.
 - **Neue Routen haben von Anfang an einen Namen.** Eine von Grund auf erstellte Route erhält jetzt einen Standardnamen und lässt sich sofort umbenennen.
+- **Vorschau-Tabs, wie in Ihrem Editor.** Ein einfacher Klick öffnet ein Element jetzt in einem wiederverwendbaren **Vorschau**-Tab (sein Name kursiv); ein Klick auf ein anderes Element verwendet denselben Tab weiter, statt einen neuen aufzustapeln. Ein Doppelklick, jede Bearbeitung oder das Ausführen einer Anfrage macht ihn dauerhaft. Abschaltbar unter Einstellungen › Verhalten.
+- **Heften Sie die Tabs an, die Sie offen halten.** Klicken Sie mit der rechten Maustaste auf einen Tab und heften Sie ihn an: angeheftete Tabs bleiben vorne, überstehen „Andere schließen“ und werden pro Projekt gemerkt.
+- **Umgebungen erhalten eine richtige Detailansicht.** Öffnen Sie eine Umgebung, um sie über ihren Titel umzubenennen, ihr Symbol und ihre Farbe festzulegen und eine Unterumgebung hinzuzufügen — und das Rechtsklick-Menü dupliziert eine Umgebung jetzt mit all ihren Variablen und Unterumgebungen.
 
 Fehlerbehebungen:
 
@@ -19,6 +22,10 @@ Fehlerbehebungen:
 - **Die Dokumentationsgenerierung schlägt bei optionalen Feldern nicht mehr fehl.** Das Generieren der Doku aus einem Design, dessen Modell oder Parameter „required“ nicht gesetzt hatte, bricht nicht mehr mit einem Vorlagenfehler ab.
 - **Das Löschen eines Enums fragt nach.** Enums erhalten dieselbe Bestätigung wie Modelle und Routen.
 - **Die Seitenleiste zeigt Ihre Auswahl.** Wenn „Seitenleiste mit dem aktiven Tab synchronisieren“ aktiv ist, klappt das Auswählen oder Erstellen eines Modells, Enums oder einer Route dessen übergeordnete Knoten auf, damit es im Baum sichtbar bleibt.
+- **Die Umgebungsschaltfläche bleibt auf jeder Farbe lesbar.** Ihr Text wechselt jetzt zu Dunkel oder Hell, um vor der Farbe der Umgebung lesbar zu bleiben, wie die Ausführen-Schaltfläche.
+- **Ein Klick mit der mittleren Maustaste schließt eine geöffnete Datei.** Ein Klick mit der mittleren Maustaste auf einen Eintrag in der Liste „Geöffnet“ der Seitenleiste schließt dessen Tab — und eine neue Verhalten-Einstellung lässt Sie dieses Panel ganz ausblenden.
+- **Klarere Formulierung beim Start aus der Dokumentation.** In der Dokumentation einer importierten API lautet die Schaltfläche jetzt „Eine neue Anfrage aus dieser Dokumentation erstellen“.
+- **Die Anmeldung funktioniert in der Version aus dem Microsoft Store.** Der Callback über das benutzerdefinierte Protokoll, den der Browser nach der Anmeldung zurückgibt, ist jetzt im Store-Paket deklariert, sodass die Anmeldung abgeschlossen wird, statt in eine Zeitüberschreitung zu laufen.
 
 ## v1.1.0
 

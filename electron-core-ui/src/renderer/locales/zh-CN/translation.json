@@ -439,7 +439,12 @@
     "emptyHint": "在上方输入地址即可开始浏览。"
   },
   "bookmarkRibbon": {
-    "addBookmark": "添加书签"
+    "addBookmark": "添加书签",
+    "namePlaceholder": "书签名称",
+    "createBookmark": "创建书签",
+    "removeBookmark": "移除书签",
+    "bookmarkAria": "书签：{{label}}",
+    "add": "添加"
   },
   "toaster": {
     "notificationsRegion": "通知"

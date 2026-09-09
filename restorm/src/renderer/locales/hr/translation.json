@@ -346,7 +346,9 @@
     "add": "Dodaj okruženje",
     "rename": "Preimenuj",
     "addSub": "Dodaj pod-okruženje",
-    "delete": "Izbriši"
+    "delete": "Izbriši",
+    "duplicate": "Dupliciraj okruženje",
+    "duplicateName": "{{name}} (kopija)"
   },
   "folderView": {
     "environments": "Okruženja",
@@ -397,7 +399,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definirajte ponovno upotrebljive popise vrijednosti za svoje varijable: birate čitljivu oznaku, a zahtjev šalje pridruženu vrijednost. Odaberite ili stvorite enumeraciju za početak."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Boja:"
   },
   "requestTab": {
     "deprecated": "Ova krajnja točka je zastarjela i mogla bi biti uklonjena u budućoj verziji.",
@@ -467,7 +471,9 @@
       "close": "Zatvori",
       "closeOthers": "Zatvori ostale",
       "addToFavorites": "Dodaj u favorite",
-      "removeFromFavorites": "Ukloni iz favorita"
+      "removeFromFavorites": "Ukloni iz favorita",
+      "pin": "Prikvači",
+      "unpin": "Otkvači"
     }
   },
   "codeEditor": {
@@ -1007,7 +1013,11 @@
       "us": "Američki format (MM/DD/GGGG, 12 h)",
       "iso": "ISO format (GGGG-MM-DD, 24 h)"
     },
-    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji"
+    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji",
+    "showOpenedList": "Prikaži popis otvorenih datoteka u bočnoj traci",
+    "showOpenedListDescription": "Prikazuje ploču „Otvoreno” s datotekama trenutačno otvorenima u radnom prostoru",
+    "temporaryTabs": "Kartice pretpregleda",
+    "temporaryTabsDescription": "Otvara stavke u jednoj kartici pretpregleda za višekratnu upotrebu (prikazana kurzivom). Dvostruki klik, uređivanje ili pokretanje zahtjeva čini karticu trajnom."
   },
   "console": {
     "title": "Konzola",
@@ -1262,7 +1272,7 @@
       "externalDocs": "Vanjska dokumentacija",
       "examplePayload": "Primjer sadržaja",
       "operationId": "operationId",
-      "addRequest": "+ Dodaj zahtjev"
+      "addRequest": "+ Stvori novi zahtjev iz ove dokumentacije"
     },
     "apiInfo": {
       "version": "Verzija",
@@ -3365,5 +3375,12 @@
     "editNamed": "Uredi {{name}}",
     "confirmReplace": "Ovdje već postoji kolačić naziva „{{name}}”. Zamijeniti ga?",
     "replaceButton": "Zamijeni"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Dodaj oznaku",
+    "namePlaceholder": "Naziv oznake",
+    "createBookmark": "Stvori oznaku",
+    "removeBookmark": "Ukloni oznaku",
+    "bookmarkAria": "Oznaka: {{label}}"
   }
 }

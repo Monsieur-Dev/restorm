@@ -345,7 +345,9 @@
     "add": "Ortam ekle",
     "rename": "Yeniden adlandır",
     "addSub": "Alt ortam ekle",
-    "delete": "Sil"
+    "delete": "Sil",
+    "duplicate": "Ortamı çoğalt",
+    "duplicateName": "{{name}} (kopya)"
   },
   "folderView": {
     "environments": "Ortamlar",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Değişkenleriniz için yeniden kullanılabilir değer listeleri tanımlayın: okunabilir bir etiket seçersiniz, istek ilişkili değeri gönderir. Başlamak için bir numaralandırma seçin veya oluşturun."
-    }
+    },
+    "iconLabel": "Simge:",
+    "colorLabel": "Renk:"
   },
   "requestTab": {
     "deprecated": "Bu uç nokta kullanımdan kaldırılmıştır ve gelecekteki bir sürümde kaldırılabilir.",
@@ -466,7 +470,9 @@
       "close": "Kapat",
       "closeOthers": "Diğerlerini kapat",
       "addToFavorites": "Favorilere ekle",
-      "removeFromFavorites": "Favorilerden çıkar"
+      "removeFromFavorites": "Favorilerden çıkar",
+      "pin": "Sabitle",
+      "unpin": "Sabitlemeyi kaldır"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "ABD biçimi (AA/GG/YYYY, 12 saat)",
       "iso": "ISO biçimi (YYYY-AA-GG, 24 saat)"
     },
-    "dateTimeFormatDescription": "Uygulamada tarihleri ve saatleri görüntülemek için kullanılan biçim"
+    "dateTimeFormatDescription": "Uygulamada tarihleri ve saatleri görüntülemek için kullanılan biçim",
+    "showOpenedList": "Kenar çubuğunda açık dosyalar listesini göster",
+    "showOpenedListDescription": "Çalışma alanında şu anda açık olan dosyaları listeleyen «Açık» panelini gösterir",
+    "temporaryTabs": "Önizleme sekmeleri",
+    "temporaryTabsDescription": "Öğeleri yeniden kullanılabilir tek bir önizleme sekmesinde açar (italik gösterilir). Çift tıklama, düzenleme veya bir isteği çalıştırma sekmeyi kalıcı yapar."
   },
   "console": {
     "title": "Konsol",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Harici belgeler",
       "examplePayload": "Örnek yük",
       "operationId": "operationId",
-      "addRequest": "+ İstek ekle"
+      "addRequest": "+ Bu dokümantasyondan yeni bir istek oluştur"
     },
     "apiInfo": {
       "version": "Sürüm",
@@ -3364,5 +3374,12 @@
     "editNamed": "{{name}} düzenle",
     "confirmReplace": "\"{{name}}\" adlı bir çerez burada zaten var. Değiştirilsin mi?",
     "replaceButton": "Değiştir"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Etiket ekle",
+    "namePlaceholder": "Etiket adı",
+    "createBookmark": "Etiket oluştur",
+    "removeBookmark": "Etiketi kaldır",
+    "bookmarkAria": "Etiket: {{label}}"
   }
 }

@@ -12,6 +12,9 @@
 - **Selectează mai multe, șterge dintr-o dată.** Selectează mai multe modele, enum-uri sau rute și șterge-le dintr-o dată, după o confirmare.
 - **Copiază sau deschide sursa unui șablon de cod dintr-un clic.** Pe pagina „</> Code”, la trecerea peste un șablon apar un buton pentru a-i copia URL-ul sau calea și unul pentru a-l deschide — depozitul în browser sau folderul de pe disc pentru un șablon local.
 - **Rutele noi pornesc cu un nume.** O rută creată de la zero primește acum un nume implicit, așa că o poți redenumi imediat.
+- **File de previzualizare, ca în editorul tău.** Un singur clic deschide acum un element într-o filă de **previzualizare** reutilizabilă (numele afișat cu cursive); clic pe alt element reutilizează aceeași filă în loc să stivuiască una nouă. Un dublu clic, orice modificare sau rularea unei cereri o păstrează deschisă definitiv. Dezactivează din Setări › Comportament.
+- **Fixează filele pe care le ții deschise.** Clic dreapta pe o filă și fixeaz-o: filele fixate rămân primele, supraviețuiesc la „închide celelalte“ și sunt reținute pentru fiecare proiect.
+- **Mediile primesc o vedere de detaliu ca lumea.** Deschide un mediu pentru a-l redenumi din titlul său, a-i seta pictograma și culoarea și a adăuga un submediu — iar meniul de clic dreapta duplică acum un mediu cu toate variabilele și submediile sale.
 
 Remedieri:
 
@@ -19,6 +22,10 @@ Remedieri:
 - **Generarea documentației nu mai eșuează la câmpurile opționale.** Generarea documentației dintr-un design al cărui model sau parametru lăsa „required” nesetat nu se mai oprește cu o eroare de șablon.
 - **Ștergerea unui enum cere confirmare.** Enum-urile primesc aceeași confirmare ca modelele și rutele.
 - **Bara laterală dezvăluie selecția.** Cu „sincronizează bara laterală cu fila activă” activat, selectarea sau crearea unui model, enum sau rute îi extinde părinții ca să rămână vizibil în arbore.
+- **Butonul de mediu rămâne lizibil pe orice culoare.** Eticheta sa trece acum la text închis sau deschis pentru a rămâne lizibilă pe culoarea mediului, ca butonul de rulare.
+- **Clicul din mijloc închide un fișier deschis.** Un clic din mijloc pe o intrare din lista „Deschise“ a barei laterale îi închide fila — iar o nouă setare de Comportament îți permite să ascunzi complet acel panou.
+- **Formulare mai clară când pornești de la documentație.** În documentația unui API importat, butonul afișează acum „Creează o cerere nouă din această documentație“.
+- **Autentificarea funcționează în versiunea Microsoft Store.** Apelul de retur cu protocol personalizat pe care browserul îl întoarce după autentificare este acum declarat în pachetul Store, așa că autentificarea se finalizează în loc să expire.
 
 ## v1.1.0
 

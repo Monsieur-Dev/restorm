@@ -439,7 +439,12 @@
     "emptyHint": "Introduce una dirección arriba para empezar a navegar."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Añadir marcador"
+    "addBookmark": "Añadir marcador",
+    "namePlaceholder": "Nombre del marcador",
+    "createBookmark": "Crear marcador",
+    "removeBookmark": "Eliminar marcador",
+    "bookmarkAria": "Marcador: {{label}}",
+    "add": "Añadir"
   },
   "toaster": {
     "notificationsRegion": "Notificaciones"

@@ -345,7 +345,9 @@
     "add": "Környezet hozzáadása",
     "rename": "Átnevezés",
     "addSub": "Alkörnyezet hozzáadása",
-    "delete": "Törlés"
+    "delete": "Törlés",
+    "duplicate": "Környezet duplikálása",
+    "duplicateName": "{{name}} (másolat)"
   },
   "folderView": {
     "environments": "Környezetek",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Határozzon meg újrafelhasználható értéklistákat a változóihoz: Ön egy olvasható címkét választ, a kérés pedig a hozzá tartozó értéket küldi. Kezdésként válasszon ki vagy hozzon létre egy felsorolást."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Szín:"
   },
   "requestTab": {
     "deprecated": "Ez a végpont elavult, és egy későbbi verzióban eltávolításra kerülhet.",
@@ -466,7 +470,9 @@
       "close": "Bezárás",
       "closeOthers": "Többi bezárása",
       "addToFavorites": "Hozzáadás a kedvencekhez",
-      "removeFromFavorites": "Eltávolítás a kedvencekből"
+      "removeFromFavorites": "Eltávolítás a kedvencekből",
+      "pin": "Rögzítés",
+      "unpin": "Feloldás"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US-formátum (HH/NN/ÉÉÉÉ, 12 órás)",
       "iso": "ISO-formátum (ÉÉÉÉ-HH-NN, 24 órás)"
     },
-    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban"
+    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban",
+    "showOpenedList": "Megnyitott fájlok listájának megjelenítése az oldalsávon",
+    "showOpenedListDescription": "Megjeleníti a „Megnyitva” panelt a munkaterületen jelenleg nyitott fájlokkal",
+    "temporaryTabs": "Előnézeti lapok",
+    "temporaryTabsDescription": "Az elemeket egyetlen újrafelhasználható előnézeti lapon nyitja meg (dőlt betűvel jelenik meg). A dupla kattintás, a szerkesztés vagy egy kérés futtatása állandóvá teszi a lapot."
   },
   "console": {
     "title": "Konzol",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Külső dokumentáció",
       "examplePayload": "Példa adattartalom",
       "operationId": "operationId",
-      "addRequest": "+ Kérés hozzáadása"
+      "addRequest": "+ Új kérés létrehozása ebből a dokumentációból"
     },
     "apiInfo": {
       "version": "Verzió",
@@ -3364,5 +3374,12 @@
     "editNamed": "{{name}} szerkesztése",
     "confirmReplace": "Már létezik itt egy „{{name}}” nevű süti. Lecseréli?",
     "replaceButton": "Csere"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Címke hozzáadása",
+    "namePlaceholder": "Címke neve",
+    "createBookmark": "Címke létrehozása",
+    "removeBookmark": "Címke eltávolítása",
+    "bookmarkAria": "Címke: {{label}}"
   }
 }

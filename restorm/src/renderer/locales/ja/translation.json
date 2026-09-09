@@ -344,7 +344,9 @@
     "add": "環境を追加",
     "rename": "名前を変更",
     "addSub": "サブ環境を追加",
-    "delete": "削除"
+    "delete": "削除",
+    "duplicate": "環境を複製",
+    "duplicateName": "{{name}}（コピー）"
   },
   "folderView": {
     "environments": "環境",
@@ -395,7 +397,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "変数で再利用できる値リストを定義します。読みやすいラベルを選ぶと、リクエストには対応する値が送信されます。列挙を選択するか、新しく作成して始めましょう。"
-    }
+    },
+    "iconLabel": "アイコン:",
+    "colorLabel": "色:"
   },
   "requestTab": {
     "deprecated": "このエンドポイントは非推奨です。今後のバージョンで削除される可能性があります。",
@@ -465,7 +469,9 @@
       "close": "閉じる",
       "closeOthers": "他を閉じる",
       "addToFavorites": "お気に入りに追加",
-      "removeFromFavorites": "お気に入りから削除"
+      "removeFromFavorites": "お気に入りから削除",
+      "pin": "ピン留め",
+      "unpin": "ピン留めを解除"
     }
   },
   "codeEditor": {
@@ -1005,7 +1011,11 @@
       "us": "米国形式（MM/DD/YYYY、12 時間制）",
       "iso": "ISO 形式（YYYY-MM-DD、24 時間制）"
     },
-    "dateTimeFormatDescription": "アプリケーション内で日付と時刻を表示する際に使用する形式"
+    "dateTimeFormatDescription": "アプリケーション内で日付と時刻を表示する際に使用する形式",
+    "showOpenedList": "開いているファイルの一覧をサイドバーに表示",
+    "showOpenedListDescription": "ワークベンチで現在開いているファイルを一覧する「開いています」パネルを表示します",
+    "temporaryTabs": "プレビュータブ",
+    "temporaryTabsDescription": "項目を再利用可能な単一のプレビュータブ（斜体で表示）で開きます。ダブルクリック、編集、またはリクエストの実行でタブが固定されます。"
   },
   "console": {
     "title": "コンソール",
@@ -1260,7 +1270,7 @@
       "externalDocs": "外部ドキュメント",
       "examplePayload": "ペイロードの例",
       "operationId": "operationId",
-      "addRequest": "+ リクエストを追加"
+      "addRequest": "+ このドキュメントから新しいリクエストを作成"
     },
     "apiInfo": {
       "version": "バージョン",
@@ -3363,5 +3373,12 @@
     "editNamed": "{{name}} を編集",
     "confirmReplace": "\"{{name}}\" という名前の Cookie がすでにここに存在します。置き換えますか？",
     "replaceButton": "置き換え"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "タグを追加",
+    "namePlaceholder": "タグ名",
+    "createBookmark": "タグを作成",
+    "removeBookmark": "タグを削除",
+    "bookmarkAria": "タグ: {{label}}"
   }
 }

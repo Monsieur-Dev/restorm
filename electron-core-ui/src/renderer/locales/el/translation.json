@@ -439,7 +439,12 @@
     "emptyHint": "Πληκτρολόγησε μια διεύθυνση παραπάνω για να ξεκινήσεις την περιήγηση."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Προσθήκη σελιδοδείκτη"
+    "addBookmark": "Προσθήκη σελιδοδείκτη",
+    "namePlaceholder": "Όνομα σελιδοδείκτη",
+    "createBookmark": "Δημιουργία σελιδοδείκτη",
+    "removeBookmark": "Αφαίρεση σελιδοδείκτη",
+    "bookmarkAria": "Σελιδοδείκτης: {{label}}",
+    "add": "Προσθήκη"
   },
   "toaster": {
     "notificationsRegion": "Ειδοποιήσεις"

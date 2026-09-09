@@ -347,7 +347,9 @@
     "add": "Přidat prostředí",
     "rename": "Přejmenovat",
     "addSub": "Přidat podprostředí",
-    "delete": "Smazat"
+    "delete": "Smazat",
+    "duplicate": "Duplikovat prostředí",
+    "duplicateName": "{{name}} (kopie)"
   },
   "folderView": {
     "environments": "Prostředí",
@@ -398,7 +400,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definujte znovupoužitelné seznamy hodnot pro své proměnné: zvolíte čitelný popisek a požadavek odešle přiřazenou hodnotu. Vyberte nebo vytvořte výčet a začněte."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Barva:"
   },
   "requestTab": {
     "deprecated": "Tento endpoint je zastaralý a v budoucí verzi může být odstraněn.",
@@ -468,7 +472,9 @@
       "close": "Zavřít",
       "closeOthers": "Zavřít ostatní",
       "addToFavorites": "Přidat k oblíbeným",
-      "removeFromFavorites": "Odebrat z oblíbených"
+      "removeFromFavorites": "Odebrat z oblíbených",
+      "pin": "Připnout",
+      "unpin": "Odepnout"
     }
   },
   "codeEditor": {
@@ -1008,7 +1014,11 @@
       "us": "Formát US (MM/DD/RRRR, 12h)",
       "iso": "Formát ISO (RRRR-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci"
+    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci",
+    "showOpenedList": "Zobrazit seznam otevřených souborů v postranním panelu",
+    "showOpenedListDescription": "Zobrazí panel „Otevřené“ se soubory aktuálně otevřenými v pracovní ploše",
+    "temporaryTabs": "Karty náhledu",
+    "temporaryTabsDescription": "Otevírá položky v jedné znovupoužitelné kartě náhledu (zobrazené kurzívou). Dvojklik, úprava nebo spuštění požadavku ponechá kartu trvale otevřenou."
   },
   "console": {
     "title": "Konzole",
@@ -1263,7 +1273,7 @@
       "externalDocs": "Externí dokumentace",
       "examplePayload": "Ukázkový payload",
       "operationId": "operationId",
-      "addRequest": "+ Přidat požadavek"
+      "addRequest": "+ Vytvořit nový požadavek z této dokumentace"
     },
     "apiInfo": {
       "version": "Verze",
@@ -3366,5 +3376,12 @@
     "editNamed": "Upravit {{name}}",
     "confirmReplace": "Cookie s názvem „{{name}}“ zde již existuje. Nahradit ji?",
     "replaceButton": "Nahradit"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Přidat štítek",
+    "namePlaceholder": "Název štítku",
+    "createBookmark": "Vytvořit štítek",
+    "removeBookmark": "Odebrat štítek",
+    "bookmarkAria": "Štítek: {{label}}"
   }
 }

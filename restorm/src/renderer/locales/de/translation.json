@@ -345,7 +345,9 @@
     "add": "Umgebung hinzufügen",
     "rename": "Umbenennen",
     "addSub": "Unterumgebung hinzufügen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "duplicate": "Umgebung duplizieren",
+    "duplicateName": "{{name}} (Kopie)"
   },
   "folderView": {
     "environments": "Umgebungen",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definieren Sie wiederverwendbare Wertelisten für Ihre Variablen: Sie wählen eine lesbare Bezeichnung, der Request sendet den zugehörigen Wert. Wählen oder erstellen Sie eine Aufzählung, um zu beginnen."
-    }
+    },
+    "iconLabel": "Symbol:",
+    "colorLabel": "Farbe:"
   },
   "requestTab": {
     "deprecated": "Dieser Endpunkt ist veraltet und könnte in einer zukünftigen Version entfernt werden.",
@@ -466,7 +470,9 @@
       "close": "Schließen",
       "closeOthers": "Andere schließen",
       "addToFavorites": "Zu Favoriten hinzufügen",
-      "removeFromFavorites": "Aus Favoriten entfernen"
+      "removeFromFavorites": "Aus Favoriten entfernen",
+      "pin": "Anheften",
+      "unpin": "Lösen"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US-Format (MM/TT/JJJJ, 12 h)",
       "iso": "ISO-Format (JJJJ-MM-TT, 24 h)"
     },
-    "dateTimeFormatDescription": "Format zur Anzeige von Datum und Uhrzeit in der Anwendung"
+    "dateTimeFormatDescription": "Format zur Anzeige von Datum und Uhrzeit in der Anwendung",
+    "showOpenedList": "Liste der geöffneten Dateien in der Seitenleiste anzeigen",
+    "showOpenedListDescription": "Zeigt den Bereich „Geöffnet“ mit den aktuell im Arbeitsbereich geöffneten Dateien an",
+    "temporaryTabs": "Vorschau-Tabs",
+    "temporaryTabsDescription": "Öffnet Elemente in einem einzigen wiederverwendbaren Vorschau-Tab (kursiv dargestellt). Ein Doppelklick, eine Änderung oder das Ausführen einer Anfrage macht den Tab dauerhaft."
   },
   "console": {
     "title": "Konsole",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Externe Docs",
       "examplePayload": "Beispiel-Payload",
       "operationId": "operationId",
-      "addRequest": "+ Anfrage hinzufügen"
+      "addRequest": "+ Neue Anfrage aus dieser Dokumentation erstellen"
     },
     "apiInfo": {
       "version": "Version",
@@ -3364,5 +3374,12 @@
     "editNamed": "{{name}} bearbeiten",
     "confirmReplace": "Hier existiert bereits ein Cookie mit dem Namen „{{name}}“. Ersetzen?",
     "replaceButton": "Ersetzen"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tag hinzufügen",
+    "namePlaceholder": "Tag-Name",
+    "createBookmark": "Tag erstellen",
+    "removeBookmark": "Tag entfernen",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

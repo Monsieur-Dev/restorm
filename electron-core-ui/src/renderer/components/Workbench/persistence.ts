@@ -19,6 +19,13 @@ export interface PersistedGroupNode {
    * just receives `undefined` for the data argument.
    */
   tabData?: unknown[] | undefined;
+  /** For tabs: the ids (subset of `tabIds`) that are pinned, so pinned state
+   * survives a reload. Absent when no tab in the group is pinned. */
+  pinnedTabIds?: string[] | undefined;
+  /** For tabs: the ids (subset of `tabIds`) that are temporary (preview),
+   * so the italic/preview state survives a reload. Absent when no tab in
+   * the group is temporary. */
+  temporaryTabIds?: string[] | undefined;
   /** For tabs: active tab ID */
   activeTabId?: string | undefined;
   /** For container: orientation */
@@ -53,11 +60,15 @@ export function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchSt
       // (stateless) case.
       const tabData = node.tabs.map(t => t.persistedState ?? null);
       const hasAnyData = tabData.some(d => d !== null);
+      const pinnedTabIds = node.tabs.filter(t => t.isPinned === true).map(t => t.id);
+      const temporaryTabIds = node.tabs.filter(t => t.isTemporary === true).map(t => t.id);
       return {
         type: 'tabs',
         id: node.id,
         tabIds: node.tabs.map(t => t.id),
         ...(hasAnyData ? { tabData } : {}),
+        ...(pinnedTabIds.length > 0 ? { pinnedTabIds } : {}),
+        ...(temporaryTabIds.length > 0 ? { temporaryTabIds } : {}),
         activeTabId: node.activeTabId
       };
     } else {
@@ -114,7 +125,11 @@ export function rebuildWorkbenchTree(
         if (tabId === undefined) continue;
         const persistedState = data[i] ?? undefined;
         const tab = rebuildTab(tabId, persistedState);
-        if (tab) tabs.push(tab);
+        if (tab) {
+          if (saved.pinnedTabIds?.includes(tabId)) tab.isPinned = true;
+          if (saved.temporaryTabIds?.includes(tabId)) tab.isTemporary = true;
+          tabs.push(tab);
+        }
       }
       if (tabs.length === 0) return null;
       

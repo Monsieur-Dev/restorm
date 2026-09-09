@@ -344,7 +344,9 @@
     "add": "添加环境",
     "rename": "重命名",
     "addSub": "添加子环境",
-    "delete": "删除"
+    "delete": "删除",
+    "duplicate": "复制环境",
+    "duplicateName": "{{name}}（副本）"
   },
   "folderView": {
     "environments": "环境",
@@ -395,7 +397,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "为变量定义可复用的值列表：您选择易读的标签，请求发送关联的值。选择或创建一个枚举即可开始。"
-    }
+    },
+    "iconLabel": "图标：",
+    "colorLabel": "颜色："
   },
   "requestTab": {
     "deprecated": "此端点已弃用，可能会在未来版本中移除。",
@@ -465,7 +469,9 @@
       "close": "关闭",
       "closeOthers": "关闭其他",
       "addToFavorites": "添加到收藏",
-      "removeFromFavorites": "从收藏中移除"
+      "removeFromFavorites": "从收藏中移除",
+      "pin": "固定",
+      "unpin": "取消固定"
     }
   },
   "codeEditor": {
@@ -1005,7 +1011,11 @@
       "us": "美式格式 (MM/DD/YYYY, 12 小时制)",
       "iso": "ISO 格式 (YYYY-MM-DD, 24 小时制)"
     },
-    "dateTimeFormatDescription": "应用程序中显示日期和时间所使用的格式"
+    "dateTimeFormatDescription": "应用程序中显示日期和时间所使用的格式",
+    "showOpenedList": "在侧边栏显示已打开文件列表",
+    "showOpenedListDescription": "显示“已打开”面板，列出当前在工作区中打开的文件",
+    "temporaryTabs": "预览标签页",
+    "temporaryTabsDescription": "在单个可重用的预览标签页（以斜体显示）中打开项目。双击、编辑或运行请求会使标签页固定。"
   },
   "console": {
     "title": "控制台",
@@ -1260,7 +1270,7 @@
       "externalDocs": "外部文档",
       "examplePayload": "示例负载",
       "operationId": "operationId",
-      "addRequest": "+ 添加请求"
+      "addRequest": "+ 从此文档创建新请求"
     },
     "apiInfo": {
       "version": "版本",
@@ -3363,5 +3373,12 @@
     "editNamed": "编辑 {{name}}",
     "confirmReplace": "此处已存在名为 “{{name}}” 的 Cookie。是否替换？",
     "replaceButton": "替换"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "添加标签",
+    "namePlaceholder": "标签名称",
+    "createBookmark": "创建标签",
+    "removeBookmark": "移除标签",
+    "bookmarkAria": "标签：{{label}}"
   }
 }

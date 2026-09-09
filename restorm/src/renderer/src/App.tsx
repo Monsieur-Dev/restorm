@@ -1331,6 +1331,7 @@ const App: React.FC = () => {
     openDesignTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    promoteTemporaryTab,
     handleRebuildTab,
     handleStateRestored,
     handleSizesChange,
@@ -1342,6 +1343,28 @@ const App: React.FC = () => {
     registerTabDirtyState,
     focusGroup: setFocusedGroupId
   })
+
+  // Promote a preview tab to permanent the moment its item is edited (enters
+  // the dirty set) — a preview tab is only ever provisional until the user
+  // changes something. Only newly-dirty ids are promoted, so a save that
+  // clears the set (then a later re-dirty) still fires.
+  const prevDirtyIdsRef = useRef<ReadonlySet<string>>(new Set())
+  useEffect(() => {
+    const seen = prevDirtyIdsRef.current
+    for (const id of dirtyItemIdsSet) {
+      if (!seen.has(id)) promoteTemporaryTab(id)
+    }
+    prevDirtyIdsRef.current = dirtyItemIdsSet
+  }, [dirtyItemIdsSet, promoteTemporaryTab])
+
+  // Running a request also promotes its preview tab — a run is a commitment
+  // to that request. `BaseRequestTabView` emits this for every protocol.
+  useEffect(() => {
+    const sub = eventBus.subscribe<{ requestId: string }>(DocumentEvents.REQUEST_EXECUTION_STARTED, ({ requestId }) => {
+      if (requestId) promoteTemporaryTab(requestId)
+    })
+    return () => { sub.unsubscribe() }
+  }, [promoteTemporaryTab])
 
   // Record the restore against the current workbench id once ECUI has reported
   // one (the tree it reopened, or `null` when there was nothing persisted) so
@@ -3642,6 +3665,7 @@ const App: React.FC = () => {
   // Use navigation hook for handling clicks and breadcrumbs
   const {
     handleItemClick,
+    handleItemDoubleClick,
     handleItemAuxClick,
     openItemAtSplit,
     handleBreadcrumbClick,
@@ -3885,7 +3909,9 @@ const App: React.FC = () => {
                   expandedIds={expandedIds}
                   editingItemId={sidebarEditingItemId}
                   onItemClick={handleItemClick}
+                  onItemDoubleClick={handleItemDoubleClick}
                   onItemAuxClick={handleItemAuxClick}
+                  onOpenedItemAuxClick={closeTabByItemIdStable}
                   onItemToggle={(payload, expanded) => {
                     const id = payload.item.id
                     if (!id) return

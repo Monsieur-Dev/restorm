@@ -439,7 +439,12 @@
     "emptyHint": "Enter an address above to start browsing."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Add bookmark"
+    "addBookmark": "Add bookmark",
+    "namePlaceholder": "Bookmark name",
+    "createBookmark": "Create bookmark",
+    "removeBookmark": "Remove bookmark",
+    "bookmarkAria": "Bookmark: {{label}}",
+    "add": "Add"
   },
   "toaster": {
     "notificationsRegion": "Notifications"

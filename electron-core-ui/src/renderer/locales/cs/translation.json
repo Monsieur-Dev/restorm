@@ -439,7 +439,12 @@
     "emptyHint": "Zadejte výše adresu a začněte procházet."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Přidat záložku"
+    "addBookmark": "Přidat záložku",
+    "namePlaceholder": "Název záložky",
+    "createBookmark": "Vytvořit záložku",
+    "removeBookmark": "Odebrat záložku",
+    "bookmarkAria": "Záložka: {{label}}",
+    "add": "Přidat"
   },
   "toaster": {
     "notificationsRegion": "Oznámení"

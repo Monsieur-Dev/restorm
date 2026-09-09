@@ -439,7 +439,12 @@
     "emptyHint": "在上方輸入網址即可開始瀏覽。"
   },
   "bookmarkRibbon": {
-    "addBookmark": "新增書籤"
+    "addBookmark": "新增書籤",
+    "namePlaceholder": "書籤名稱",
+    "createBookmark": "建立書籤",
+    "removeBookmark": "移除書籤",
+    "bookmarkAria": "書籤：{{label}}",
+    "add": "新增"
   },
   "toaster": {
     "notificationsRegion": "通知"

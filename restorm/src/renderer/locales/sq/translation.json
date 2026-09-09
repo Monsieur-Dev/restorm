@@ -345,7 +345,9 @@
     "add": "Shto mjedis",
     "rename": "Riemërto",
     "addSub": "Shto nën-mjedis",
-    "delete": "Fshi"
+    "delete": "Fshi",
+    "duplicate": "Dyfisho mjedisin",
+    "duplicateName": "{{name}} (kopje)"
   },
   "folderView": {
     "environments": "Mjediset",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Përcaktoni lista vlerash të ripërdorshme për variablat tuaja: ju zgjidhni një etiketë të lexueshme, kërkesa dërgon vlerën e lidhur. Zgjidhni ose krijoni një enumerim për të filluar."
-    }
+    },
+    "iconLabel": "Ikona:",
+    "colorLabel": "Ngjyra:"
   },
   "requestTab": {
     "deprecated": "Kjo pikë fundore është e vjetëruar dhe mund të hiqet në një version të ardhshëm.",
@@ -466,7 +470,9 @@
       "close": "Mbyll",
       "closeOthers": "Mbyll të tjerat",
       "addToFavorites": "Shto te të preferuarat",
-      "removeFromFavorites": "Hiq nga të preferuarat"
+      "removeFromFavorites": "Hiq nga të preferuarat",
+      "pin": "Fikso",
+      "unpin": "Hiq fiksimin"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "Format US (MM/DD/VVVV, 12 orë)",
       "iso": "Format ISO (VVVV-MM-DD, 24 orë)"
     },
-    "dateTimeFormatDescription": "Formati i përdorur për shfaqjen e datave dhe orëve në aplikacion"
+    "dateTimeFormatDescription": "Formati i përdorur për shfaqjen e datave dhe orëve në aplikacion",
+    "showOpenedList": "Shfaq listën e skedarëve të hapur në shiritin anësor",
+    "showOpenedListDescription": "Shfaq panelin «Të hapura» që rendit skedarët aktualisht të hapur në hapësirën e punës",
+    "temporaryTabs": "Skedat e parapamjes",
+    "temporaryTabsDescription": "Hap elementet në një skedë të vetme parapamjeje të ripërdorshme (shfaqet me shkronja të pjerrëta). Një klikim i dyfishtë, një ndryshim ose ekzekutimi i një kërkese e bën skedën të përhershme."
   },
   "console": {
     "title": "Konsola",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Dokumente të jashtme",
       "examplePayload": "Shembull ngarkese",
       "operationId": "operationId",
-      "addRequest": "+ Shto një kërkesë"
+      "addRequest": "+ Krijo një kërkesë të re nga ky dokumentacion"
     },
     "apiInfo": {
       "version": "Versioni",
@@ -3364,5 +3374,12 @@
     "editNamed": "Redakto {{name}}",
     "confirmReplace": "Këtu ekziston tashmë një cookie me emrin «{{name}}». Ta zëvendësoni?",
     "replaceButton": "Zëvendëso"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Shto etiketë",
+    "namePlaceholder": "Emri i etiketës",
+    "createBookmark": "Krijo etiketë",
+    "removeBookmark": "Hiq etiketën",
+    "bookmarkAria": "Etiketë: {{label}}"
   }
 }

@@ -74,7 +74,14 @@
 }
 
 .workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-label {
+	display: inline-flex;
+	align-items: center;
 	line-height: var(--editor-group-tab-height);
+}
+
+/* Preview ("temporary") tab: single-click open, italic label, one per group. */
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.temporary .label-name {
+	font-style: italic;
 }
 
 /* Dirty state indicator icon */
@@ -184,4 +191,16 @@
 .editor-group-container[data-has-focus="true"] .editor-group-content-panel {
 	border-color: var(--tab-activeBorder, var(--focusBorder));
 	border-top: none;
+}
+
+/* Pinned-tab indicator: a small pin glyph before the label. Pinned tabs sit
+ * first (left) in their group and survive "close others". Scoped under the tab
+ * path so its size beats the base `.codicon` 16px (equal-specificity single
+ * classes would otherwise let the 16px glyph win and grow the tab row). */
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab .tab-pin-indicator {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.85;
+  margin-right: 4px;
+  flex-shrink: 0;
 }

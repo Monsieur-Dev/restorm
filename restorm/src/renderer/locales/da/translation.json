@@ -345,7 +345,9 @@
     "add": "Tilføj miljø",
     "rename": "Omdøb",
     "addSub": "Tilføj undermiljø",
-    "delete": "Slet"
+    "delete": "Slet",
+    "duplicate": "Duplikér miljøet",
+    "duplicateName": "{{name}} (kopi)"
   },
   "folderView": {
     "environments": "Miljøer",
@@ -396,7 +398,9 @@
       "label": "Label",
       "value": "Value",
       "selectList": "Definér genbrugelige værdilister til dine variabler: du vælger en læsbar etiket, og requestet sender den tilknyttede værdi. Vælg eller opret en enumeration for at komme i gang."
-    }
+    },
+    "iconLabel": "Ikon:",
+    "colorLabel": "Farve:"
   },
   "requestTab": {
     "deprecated": "Dette endpoint er forældet og bliver muligvis fjernet i en fremtidig version.",
@@ -466,7 +470,9 @@
       "close": "Luk",
       "closeOthers": "Luk andre",
       "addToFavorites": "Føj til favoritter",
-      "removeFromFavorites": "Fjern fra favoritter"
+      "removeFromFavorites": "Fjern fra favoritter",
+      "pin": "Fastgør",
+      "unpin": "Frigør"
     }
   },
   "codeEditor": {
@@ -1006,7 +1012,11 @@
       "us": "US-format (MM/DD/ÅÅÅÅ, 12h)",
       "iso": "ISO-format (ÅÅÅÅ-MM-DD, 24h)"
     },
-    "dateTimeFormatDescription": "Format der bruges til at vise datoer og tider i applikationen"
+    "dateTimeFormatDescription": "Format der bruges til at vise datoer og tider i applikationen",
+    "showOpenedList": "Vis listen over åbne filer i sidepanelet",
+    "showOpenedListDescription": "Viser panelet »Åbnede« med de filer, der aktuelt er åbne i arbejdsområdet",
+    "temporaryTabs": "Forhåndsvisningsfaner",
+    "temporaryTabsDescription": "Åbner elementer i én genanvendelig forhåndsvisningsfane (vist i kursiv). Et dobbeltklik, en redigering eller kørsel af en anmodning gør fanen permanent."
   },
   "console": {
     "title": "Konsol",
@@ -1261,7 +1271,7 @@
       "externalDocs": "Eksterne dokumenter",
       "examplePayload": "Eksempel-payload",
       "operationId": "operationId",
-      "addRequest": "+ Tilføj en anmodning"
+      "addRequest": "+ Opret en ny anmodning ud fra denne dokumentation"
     },
     "apiInfo": {
       "version": "Version",
@@ -3364,5 +3374,12 @@
     "editNamed": "Rediger {{name}}",
     "confirmReplace": "Der findes allerede en cookie ved navn \"{{name}}\" her. Vil du erstatte den?",
     "replaceButton": "Erstat"
+  },
+  "bookmarkRibbon": {
+    "addBookmark": "Tilføj tag",
+    "namePlaceholder": "Tagnavn",
+    "createBookmark": "Opret tag",
+    "removeBookmark": "Fjern tag",
+    "bookmarkAria": "Tag: {{label}}"
   }
 }

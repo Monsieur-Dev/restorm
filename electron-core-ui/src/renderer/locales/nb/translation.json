@@ -439,7 +439,12 @@
     "emptyHint": "Skriv inn en adresse ovenfor for å begynne å surfe."
   },
   "bookmarkRibbon": {
-    "addBookmark": "Legg til bokmerke"
+    "addBookmark": "Legg til bokmerke",
+    "namePlaceholder": "Bokmerkenavn",
+    "createBookmark": "Opprett bokmerke",
+    "removeBookmark": "Fjern bokmerke",
+    "bookmarkAria": "Bokmerke: {{label}}",
+    "add": "Legg til"
   },
   "toaster": {
     "notificationsRegion": "Varsler"
