@@ -105,11 +105,18 @@ jobs:
 
       - name: Locate the built package
         run: |
-          PKG=$(ls restorm/dist-electron/*.msix restorm/dist-electron/*.appx 2>/dev/null | head -1)
-          if [ -z "$PKG" ]; then
+          # nullglob so an unmatched pattern expands to nothing (electron-builder
+          # emits an .appx, never an .msix, so the .msix glob has no match) — a
+          # plain `ls a b` on a missing `a` exits non-zero and, under the job's
+          # `set -e -o pipefail`, would kill the step even though the .appx exists.
+          # An array also preserves the space in "Restorm <version>.appx".
+          shopt -s nullglob
+          pkgs=(restorm/dist-electron/*.appx restorm/dist-electron/*.msix)
+          if [ ${#pkgs[@]} -eq 0 ]; then
             echo "no .msix/.appx produced under restorm/dist-electron/" >&2
             exit 1
           fi
+          PKG="${pkgs[0]}"
           echo "PKG=${PKG}" >> "$GITHUB_ENV"
           echo "package: ${PKG}"
 
