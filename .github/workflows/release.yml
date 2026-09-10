@@ -120,7 +120,16 @@ jobs:
              && { [ -n "$APPLE_API_KEY" ] || [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ]; }; then
             NOTARIZE_FLAG="-c.mac.notarize=true"
           fi
-          NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG
+          # A tag-triggered run sets GITHUB_REF_TYPE=tag, which flips
+          # electron-builder into implicit publishing — it then tries to push
+          # the .snap to the Snap Store, but snapcraft isn't installed on this
+          # build runner, so the whole build fails. We publish artifacts to R2
+          # (the step below) and the .snap to the store (snap-store.yml)
+          # ourselves, never from here. Force the non-tag build behaviour so
+          # electron-builder still generates latest*.yml (needed for
+          # auto-update) but pushes nothing: the reusable workflow_call path
+          # already runs this way (its ref is the caller's branch).
+          GITHUB_REF_TYPE=branch NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG
         env:
           # Source-map generation roughly doubles the renderer build's peak heap,
           # so the limit tracks whether maps are being produced at all — which is
