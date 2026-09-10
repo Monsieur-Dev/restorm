@@ -71,7 +71,11 @@ export const IMPORT_ERROR_CODES = [
   /** A `.restorm` project import declares NO file-format version at its
    *  root — same refusal as the open path: every Restorm save stamps one,
    *  so its absence means the file is not a Restorm project. */
-  'projectFormatMissing'
+  'projectFormatMissing',
+  /** The spec declares an OpenAPI version this build does not support
+   *  (e.g. a 3.x newer than the importer understands). The `version`
+   *  param names it; the offer is to update Restorm. */
+  'openApiUnsupportedVersion'
 ] as const
 
 export type ImportErrorCode = typeof IMPORT_ERROR_CODES[number]

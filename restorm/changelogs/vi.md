@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Hỗ trợ OpenAPI 3.2.**
+
+- **Nhập đặc tả OpenAPI 3.2.** Phương thức `QUERY`, các động từ tùy chỉnh (`additionalOperations`), tham số query string và các loại phương tiện truyền phát đều được nhập thành yêu cầu sẵn sàng chạy.
+- **Duyệt tệp để nhập.** Nút Duyệt trong hộp thoại nhập mở trình chọn tệp gốc — không còn phải gõ hay kéo đường dẫn.
+- **Chế độ xem chia đôi cho các lần dán lớn.** Dán một đặc tả nhiều dòng sẽ mở trình soạn mã ở bên trái và bản xem trước ở bên phải, với thanh phân chia có thể kéo.
+- **Nhập khoan dung.** Một đặc tả có vài `$ref` hỏng vẫn nhập mọi tuyến có thể và hiển thị cảnh báo liệt kê những gì phải bỏ qua.
+
+Sửa lỗi:
+
+- Nhập một đặc tả không hợp lệ hoặc không truy cập được sẽ hiển thị thông báo rõ ràng thay vì mở hộp thoại báo cáo sự cố.
+- Chế độ xem chi tiết của báo cáo sự cố cuộn lại được.
+- Nền của các hộp thoại không còn bị làm mờ.
+
 ## v1.1.1
 
 **Trình thiết kế API giờ được điều khiển từ thanh bên.**

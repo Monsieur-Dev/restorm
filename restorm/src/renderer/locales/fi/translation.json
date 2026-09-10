@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Tämän lähteen muotoa ei tunnistettu.",
       "unsupportedFormat": "Mikään tuoja ei tue muotoa {{format}}.",
       "projectFormatTooNew": "Tämä projektitiedosto käyttää muotoversiota {{found}}, mutta tämä Restorm-versio ymmärtää vain version {{current}}. Päivitä Restorm tuodaksesi sen.",
-      "projectFormatMissing": "Tämä tiedosto ei ilmoita Restorm-muotoversiota, joten se ei ole Restorm-projektitiedosto."
+      "projectFormatMissing": "Tämä tiedosto ei ilmoita Restorm-muotoversiota, joten se ei ole Restorm-projektitiedosto.",
+      "openApiUnsupportedVersion": "Tämä määritys ilmoittaa OpenAPI-version {{version}}, jota tämä Restorm-versio ei vielä tue. Päivitä Restorm tuodaksesi sen."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger on SmartBear Softwaren rekisteröity tavaramerkki."
       },
       "openapi": {
-        "description": "Nykyinen OpenAPI-standardi (3.0 ja 3.1). Sama liitä-ja-valmis-ergonomia kuin Swaggerissa: parametrit, pyyntösisällöt, suojausmäärittelyt ja webhookit ilmestyvät tyypitettynä pyyntöpuuna lähetysvalmiine esimerkkeineen.",
+        "description": "Nykyinen OpenAPI-standardi (3.0, 3.1 ja 3.2). Sama liitä-ja-valmis-ergonomia kuin Swaggerissa: parametrit, pyyntösisällöt, suojausmäärittelyt ja webhookit ilmestyvät tyypitettynä pyyntöpuuna lähetysvalmiine esimerkkeineen.",
         "trademark": "OpenAPI on OpenAPI Initiative -hankkeen projekti Linux Foundationin alaisuudessa."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Dokumentaatio"
     },
     "title": "Tuo pyyntöjä",
-    "largeApiHint": "Tämä API on suuri. Pidä projektisi kevyenä: valitse vain tarvitsemasi reitit ja poista muiden valinta alta. Pois jättämäsi säilyvät dokumentaatiossa — voit lisätä ne milloin tahansa."
+    "largeApiHint": "Tämä API on suuri. Pidä projektisi kevyenä: valitse vain tarvitsemasi reitit ja poista muiden valinta alta. Pois jättämäsi säilyvät dokumentaatiossa — voit lisätä ne milloin tahansa.",
+    "browse": "Selaa…",
+    "warning": {
+      "openApiStructuralIssues": "Määritys tuotiin, mutta {{count}} osaa ei voitu selvittää ja ne ohitettiin (ratkaisemattomat $ref-viittaukset, pyyntörungot ilman content-kenttää). Loput tuotiin normaalisti."
+    }
   },
   "emptyBench": {
     "importCard": {

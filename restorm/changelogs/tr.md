@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**OpenAPI 3.2 desteği.**
+
+- **OpenAPI 3.2 belirtimlerini içe aktarın.** `QUERY` metodu, özel fiiller (`additionalOperations`), query string parametresi ve akış medya türleri çalışmaya hazır istekler olarak içe aktarılır.
+- **İçe aktarılacak bir dosyaya göz atın.** İçe aktarma penceresindeki Gözat düğmesi yerel bir dosya seçici açar — artık yol yazmaya veya sürüklemeye gerek yok.
+- **Büyük yapıştırmalar için bölünmüş görünüm.** Çok satırlı bir belirtimi yapıştırmak solda bir kod düzenleyici, sağda önizleme açar ve aralarında sürüklenebilir bir ayırıcı bulunur.
+- **Hoşgörülü içe aktarma.** Birkaç bozuk `$ref` içeren bir belirtim mümkün olan tüm rotaları içe aktarır ve atlamak zorunda kaldıklarını listeleyen bir uyarı gösterir.
+
+Düzeltmeler:
+
+- Geçersiz veya erişilemez bir belirtimi içe aktarmak, çökme raporu penceresini açmak yerine net bir mesaj gösterir.
+- Çökme raporunun ayrıntı görünümü yeniden kaydırılıyor.
+- Pencere arka planları artık bulanık değil.
+
 ## v1.1.1
 
 **API tasarımcısı artık kenar çubuğundan yönetiliyor.**

@@ -1059,7 +1059,8 @@
       "formatNotDetected": "Nie rozpoznano formatu tego źródła.",
       "unsupportedFormat": "Żaden importer nie obsługuje formatu {{format}}.",
       "projectFormatTooNew": "Ten plik projektu używa wersji formatu {{found}}, ale ta wersja Restorm rozumie tylko wersję {{current}}. Zaktualizuj Restorm, aby go zaimportować.",
-      "projectFormatMissing": "Ten plik nie deklaruje żadnej wersji formatu Restorm, więc nie jest plikiem projektu Restorm."
+      "projectFormatMissing": "Ten plik nie deklaruje żadnej wersji formatu Restorm, więc nie jest plikiem projektu Restorm.",
+      "openApiUnsupportedVersion": "Ta specyfikacja deklaruje wersję OpenAPI {{version}}, której ta kompilacja Restorm jeszcze nie obsługuje. Zaktualizuj Restorm, aby ją zaimportować."
     },
     "formats": {
       "swagger": {
@@ -1067,7 +1068,7 @@
         "trademark": "Swagger jest zastrzeżonym znakiem towarowym SmartBear Software."
       },
       "openapi": {
-        "description": "Aktualny standard OpenAPI (3.0 i 3.1). Ta sama ergonomia wklej-i-działaj co Swagger: parametry, treści żądań, schematy bezpieczeństwa i webhooks lądują jako drzewo typowanych żądań z gotowymi do wysłania przykładami.",
+        "description": "Aktualny standard OpenAPI (3.0, 3.1 i 3.2). Ta sama ergonomia wklej-i-działaj co Swagger: parametry, treści żądań, schematy bezpieczeństwa i webhooks lądują jako drzewo typowanych żądań z gotowymi do wysłania przykładami.",
         "trademark": "OpenAPI to projekt OpenAPI Initiative pod skrzydłami Linux Foundation."
       },
       "curl": {
@@ -1206,7 +1207,11 @@
       "documentation": "Dokumentacja"
     },
     "title": "Importuj żądania",
-    "largeApiHint": "To API jest duże. Aby projekt pozostał lekki, zaznacz tylko potrzebne trasy, a pozostałe poniżej odznacz. Te pominięte pozostają w dokumentacji — możesz je dodać w dowolnej chwili."
+    "largeApiHint": "To API jest duże. Aby projekt pozostał lekki, zaznacz tylko potrzebne trasy, a pozostałe poniżej odznacz. Te pominięte pozostają w dokumentacji — możesz je dodać w dowolnej chwili.",
+    "browse": "Przeglądaj…",
+    "warning": {
+      "openApiStructuralIssues": "Specyfikacja została zaimportowana, ale {{count}} część/części nie udało się rozwiązać i zostały pominięte (nierozwiązane $ref-y, treści żądań bez content). Reszta została zaimportowana normalnie."
+    }
   },
   "emptyBench": {
     "importCard": {

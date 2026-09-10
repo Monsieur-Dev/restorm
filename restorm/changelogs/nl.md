@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Ondersteuning voor OpenAPI 3.2.**
+
+- **Importeer OpenAPI 3.2-specificaties.** De `QUERY`-methode, aangepaste werkwoorden (`additionalOperations`), de query-stringparameter en streaming-mediatypes worden geïmporteerd als kant-en-klare verzoeken.
+- **Blader naar een bestand om te importeren.** Een Bladeren-knop in het importvenster opent een native bestandskiezer — geen pad meer typen of slepen.
+- **Gesplitste weergave voor grote plaksels.** Bij het plakken van een spec met meerdere regels opent links een code-editor en rechts het voorbeeld, met een versleepbare scheiding.
+- **Tolerante import.** Een spec met een paar kapotte `$ref`s importeert elke mogelijke route en toont een waarschuwing met wat is overgeslagen.
+
+Oplossingen:
+
+- Het importeren van een ongeldige of onbereikbare spec toont een duidelijke melding in plaats van het crashrapport-venster te openen.
+- De detailweergave van het crashrapport scrollt weer.
+- Achtergronden van vensters zijn niet langer wazig.
+
 ## v1.1.1
 
 **De API-designer wordt nu vanuit de zijbalk bediend.**

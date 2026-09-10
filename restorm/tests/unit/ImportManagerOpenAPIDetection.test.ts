@@ -21,9 +21,13 @@ describe('ImportManager OpenAPI detection', () => {
     expect(detectFormat(content)).toBe('swagger')
   })
 
-  it('treats an unknown major (4.x) as undetected', () => {
+  it('detects an unknown major (4.x) as an unsupported OpenAPI version', () => {
+    // It IS an OpenAPI document, just a version no provider handles — the
+    // catch-all `openapi-unsupported` provider claims it so the importer can
+    // show an actionable "unsupported version" message instead of a generic
+    // "format not recognised".
     const content = JSON.stringify({ openapi: '4.0.0', info: { title: 'future' }, paths: {} })
-    expect(detectFormat(content)).toBeNull()
+    expect(detectFormat(content)).toBe('openapi-unsupported')
   })
 
   it('treats junk swagger / openapi values as undetected', () => {
@@ -60,9 +64,9 @@ describe('detectFormat — YAML content, no filePath (the URL-import condition)'
     expect(detectFormat(content)).toBe('swagger')
   })
 
-  it('treats a YAML unknown major (4.x) as undetected', () => {
+  it('detects a YAML unknown major (4.x) as an unsupported OpenAPI version', () => {
     const content = 'openapi: 4.0.0\ninfo:\n  title: future\npaths: {}\n'
-    expect(detectFormat(content)).toBeNull()
+    expect(detectFormat(content)).toBe('openapi-unsupported')
   })
 
   it('treats junk YAML swagger / openapi values as undetected', () => {

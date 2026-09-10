@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   openapi3ToApiDocumentation,
+  collectStructuralIssues,
+  summariseStructuralIssues,
   expandServerVariables,
   pickPrimaryContentType,
   type OAS3Spec
@@ -224,5 +226,66 @@ describe('openapi3ToApiDocumentation — multi-content-type', () => {
     const op = doc.operations[0]
     expect(op?.consumes).toEqual(expect.arrayContaining(['application/json', 'application/xml']))
     expect(op?.produces).toEqual(expect.arrayContaining(['application/json', 'application/xml']))
+  })
+})
+
+describe('openapi3ToApiDocumentation — structural validation', () => {
+  // A minimal, structurally sound 3.0 spec used as the baseline the invalid
+  // variants below diverge from.
+  const soundSpec = (): OAS3Spec =>
+    ({
+      openapi: '3.0.0',
+      info: { title: 'T', version: '1.0.0' },
+      paths: {
+        '/things': {
+          post: {
+            requestBody: { content: { 'application/json': { schema: { type: 'object' } } } },
+            responses: { '200': { description: 'ok' } }
+          }
+        }
+      }
+    }) as unknown as OAS3Spec
+
+  it('reports no structural issues for a sound spec', () => {
+    expect(collectStructuralIssues(soundSpec())).toEqual([])
+  })
+
+  it('does NOT crash and does NOT throw on a requestBody missing its content — it imports and flags the problem', () => {
+    const spec = soundSpec()
+    // The exact shape that used to make the operation walker run
+    // `Object.values(undefined)`: a requestBody object with no `content` map.
+    ;(spec.paths['/things'].post as { requestBody: unknown }).requestBody = { required: true }
+    // Import proceeds (partial-broken specs import what they can) …
+    expect(() => openapi3ToApiDocumentation(spec)).not.toThrow()
+    // … and the problem is surfaced as a named structural issue, never a bare
+    // "Cannot convert undefined or null to object" TypeError.
+    const issues = collectStructuralIssues(spec)
+    expect(issues.some((i) => i.includes('requestBody without content'))).toBe(true)
+    expect(issues.some((i) => i.includes('POST /things'))).toBe(true)
+  })
+
+  it('names an unresolved $ref (dangling in-document pointer) as a structural issue', () => {
+    const spec = soundSpec()
+    ;(spec.paths['/things'].post as { requestBody: unknown }).requestBody = {
+      $ref: '#/components/requestBodies/DoesNotExist'
+    }
+    expect(() => openapi3ToApiDocumentation(spec)).not.toThrow()
+    const issues = collectStructuralIssues(spec)
+    expect(issues.some((i) => i.includes('unresolved $ref') && i.includes('#/components/requestBodies/DoesNotExist'))).toBe(true)
+  })
+
+  it('flags an external file $ref the importer cannot follow', () => {
+    const spec = soundSpec()
+    const post = spec.paths['/things'].post as { responses: Record<string, { schema?: unknown }> }
+    post.responses['200'].schema = { $ref: './models/thing.yaml#/Thing' }
+    const issues = collectStructuralIssues(spec)
+    expect(issues.some((i) => i.includes('unresolved $ref') && i.includes('./models/thing.yaml#/Thing'))).toBe(true)
+  })
+
+  it('summarises a long issue list with a "(+N more)" tail', () => {
+    const many = Array.from({ length: 20 }, (_, i) => `unresolved $ref: #/components/schemas/S${i}`)
+    const summary = summariseStructuralIssues(many)
+    expect(summary).toContain('(+12 more)')
+    expect(summary.startsWith('unresolved $ref: #/components/schemas/S0')).toBe(true)
   })
 })

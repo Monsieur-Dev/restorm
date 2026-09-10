@@ -1056,7 +1056,8 @@
       "formatNotDetected": "无法识别此来源的格式。",
       "unsupportedFormat": "没有导入器支持 {{format}} 格式。",
       "projectFormatTooNew": "此项目文件使用格式版本 {{found}}，但当前版本的 Restorm 只支持版本 {{current}}。请更新 Restorm 后再导入。",
-      "projectFormatMissing": "此文件未声明 Restorm 格式版本，因此不是 Restorm 项目文件。"
+      "projectFormatMissing": "此文件未声明 Restorm 格式版本，因此不是 Restorm 项目文件。",
+      "openApiUnsupportedVersion": "此规范声明的 OpenAPI 版本 {{version}} 尚不被此版本的 Restorm 支持。请更新 Restorm 以导入它。"
     },
     "formats": {
       "swagger": {
@@ -1064,7 +1065,7 @@
         "trademark": "Swagger 是 SmartBear Software 的注册商标。"
       },
       "openapi": {
-        "description": "当前的 OpenAPI 标准（3.0 与 3.1）。与 Swagger 一样粘贴即用：参数、请求体、安全方案和 webhook 都会成为带示例、可直接发送的类型化请求树。",
+        "description": "当前的 OpenAPI 标准（3.0, 3.1 与 3.2）。与 Swagger 一样粘贴即用：参数、请求体、安全方案和 webhook 都会成为带示例、可直接发送的类型化请求树。",
         "trademark": "OpenAPI 是 Linux 基金会下 OpenAPI Initiative 的项目。"
       },
       "curl": {
@@ -1203,7 +1204,11 @@
       "documentation": "文档"
     },
     "title": "导入请求",
-    "largeApiHint": "此 API 很大。为保持项目轻量，只勾选你需要的路由，并在下方取消勾选其余部分。未导入的会保留在文档中——你可以随时添加。"
+    "largeApiHint": "此 API 很大。为保持项目轻量，只勾选你需要的路由，并在下方取消勾选其余部分。未导入的会保留在文档中——你可以随时添加。",
+    "browse": "浏览…",
+    "warning": {
+      "openApiStructuralIssues": "规范已导入，但有 {{count}} 处无法解析而被跳过（未解析的 $ref、缺少 content 的请求体）。其余部分已正常导入。"
+    }
   },
   "emptyBench": {
     "importCard": {

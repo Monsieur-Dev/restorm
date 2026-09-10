@@ -39,6 +39,13 @@ const fixtures: Record<string, { content: string; filePath?: string }> = {
   'openapi-3.1': {
     content: readFileSync(join(FIXTURES, 'openapi', 'petstore-3.1.json'), 'utf-8')
   },
+  'openapi-3.2': {
+    content: readFileSync(join(FIXTURES, 'openapi', 'petstore-3.2.json'), 'utf-8')
+  },
+  'openapi-unsupported': {
+    // An OpenAPI doc whose version no specific provider handles.
+    content: JSON.stringify({ openapi: '4.0.0', info: { title: 'Future', version: '1.0.0' }, paths: {} })
+  },
   postman: {
     content: readFileSync(join(UNIT, 'postman-petstore.json'), 'utf-8')
   },

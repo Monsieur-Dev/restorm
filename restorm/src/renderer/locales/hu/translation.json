@@ -1057,7 +1057,8 @@
       "formatNotDetected": "A forrás formátuma nem volt felismerhető.",
       "unsupportedFormat": "Egyetlen importáló sem kezeli a(z) {{format}} formátumot.",
       "projectFormatTooNew": "Ez a projektfájl a(z) {{found}} formátumverziót használja, de a Restorm ezen verziója csak a(z) {{current}} verziót érti. Frissítse a Restormot az importáláshoz.",
-      "projectFormatMissing": "Ez a fájl nem deklarál Restorm-formátumverziót, így nem Restorm-projektfájl."
+      "projectFormatMissing": "Ez a fájl nem deklarál Restorm-formátumverziót, így nem Restorm-projektfájl.",
+      "openApiUnsupportedVersion": "Ez a specifikáció a(z) {{version}} OpenAPI-verziót deklarálja, amelyet a Restorm ezen verziója még nem támogat. Frissítse a Restormot az importáláshoz."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "A Swagger a SmartBear Software bejegyzett védjegye."
       },
       "openapi": {
-        "description": "Az aktuális OpenAPI szabvány (3.0 és 3.1). Ugyanaz a beillesztős-ergonomia, mint a Swagger esetén: a paraméterek, kéréstörzsek, biztonsági sémák és webhookok típusos kérések fájában jelennek meg, küldésre kész példákkal.",
+        "description": "Az aktuális OpenAPI szabvány (3.0, 3.1 és 3.2). Ugyanaz a beillesztős-ergonomia, mint a Swagger esetén: a paraméterek, kéréstörzsek, biztonsági sémák és webhookok típusos kérések fájában jelennek meg, küldésre kész példákkal.",
         "trademark": "Az OpenAPI az OpenAPI Initiative projektje a Linux Foundation égisze alatt."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Dokumentáció"
     },
     "title": "Kérések importálása",
-    "largeApiHint": "Ez az API nagy. Hogy a projekt könnyű maradjon, csak a szükséges útvonalakat jelölje be, a többiről lent vegye le a pipát. A kihagyottak a dokumentációban maradnak — bármikor hozzáadhatja őket."
+    "largeApiHint": "Ez az API nagy. Hogy a projekt könnyű maradjon, csak a szükséges útvonalakat jelölje be, a többiről lent vegye le a pipát. A kihagyottak a dokumentációban maradnak — bármikor hozzáadhatja őket.",
+    "browse": "Tallózás…",
+    "warning": {
+      "openApiStructuralIssues": "A specifikáció importálva lett, de {{count}} rész nem volt feloldható, ezért kihagytuk (feloldatlan $ref-ek, tartalom nélküli kéréstörzsek). A többi normálisan importálódott."
+    }
   },
   "emptyBench": {
     "importCard": {

@@ -1057,7 +1057,8 @@
       "formatNotDetected": "The format of this source was not recognised.",
       "unsupportedFormat": "No importer handles the {{format}} format.",
       "projectFormatTooNew": "This project file uses format version {{found}}, but this version of Restorm only understands version {{current}}. Update Restorm to import it.",
-      "projectFormatMissing": "This file declares no Restorm format version, so it is not a Restorm project file."
+      "projectFormatMissing": "This file declares no Restorm format version, so it is not a Restorm project file.",
+      "openApiUnsupportedVersion": "This spec declares OpenAPI version {{version}}, which this build of Restorm doesn't support yet. Update Restorm to import it."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger is a registered trademark of SmartBear Software."
       },
       "openapi": {
-        "description": "The current OpenAPI standard (3.0 and 3.1). Same paste-and-go ergonomics as Swagger: parameters, request bodies, security schemes, and webhooks land as a tree of typed requests with examples ready to send.",
+        "description": "The current OpenAPI standard (3.0, 3.1 and 3.2). Same paste-and-go ergonomics as Swagger: parameters, request bodies, security schemes, and webhooks land as a tree of typed requests with examples ready to send.",
         "trademark": "OpenAPI is a project of the OpenAPI Initiative under the Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Documentation"
     },
     "title": "Import Requests",
-    "largeApiHint": "This API is large. To keep your project light, tick only the routes you need and untick the rest below. The ones you leave out stay in the documentation — you can add them anytime."
+    "largeApiHint": "This API is large. To keep your project light, tick only the routes you need and untick the rest below. The ones you leave out stay in the documentation — you can add them anytime.",
+    "browse": "Browse…",
+    "warning": {
+      "openApiStructuralIssues": "The spec imported, but {{count}} part(s) couldn't be resolved and were skipped (unresolved $refs, request bodies without content). The rest was imported normally."
+    }
   },
   "emptyBench": {
     "importCard": {

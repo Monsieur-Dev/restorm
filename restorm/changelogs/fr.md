@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Prise en charge d'OpenAPI 3.2.**
+
+- **Import des specs OpenAPI 3.2.** La méthode `QUERY`, les verbes personnalisés (`additionalOperations`), le paramètre de query string et les médias en streaming s'importent en requêtes prêtes à jouer.
+- **Un bouton Parcourir.** La modale d'import a un bouton Parcourir qui ouvre un sélecteur de fichier natif — fini de taper ou de glisser un chemin.
+- **Une vue scindée pour les gros collages.** Coller une spec sur plusieurs lignes ouvre un éditeur de code à gauche et l'aperçu à droite, avec un séparateur ajustable.
+- **Un import tolérant.** Une spec avec quelques `$ref` cassés importe toutes les routes possibles et affiche un avertissement listant ce qu'elle a dû ignorer.
+
+Corrections :
+
+- Importer une spec invalide ou injoignable affiche un message clair au lieu d'ouvrir la fenêtre de rapport de plantage.
+- La vue « voir le rapport complet » du rapport de plantage se défile de nouveau.
+- Les fonds des fenêtres ne sont plus floutés.
+
 ## v1.1.1
 
 **Le designer d'API se pilote depuis la barre latérale.**

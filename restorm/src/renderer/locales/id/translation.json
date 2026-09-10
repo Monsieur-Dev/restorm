@@ -1056,7 +1056,8 @@
       "formatNotDetected": "Format sumber ini tidak dikenali.",
       "unsupportedFormat": "Tidak ada pengimpor yang menangani format {{format}}.",
       "projectFormatTooNew": "Berkas proyek ini menggunakan format versi {{found}}, tetapi versi Restorm ini hanya memahami versi {{current}}. Perbarui Restorm untuk mengimpornya.",
-      "projectFormatMissing": "Berkas ini tidak mendeklarasikan versi format Restorm, jadi bukan berkas proyek Restorm."
+      "projectFormatMissing": "Berkas ini tidak mendeklarasikan versi format Restorm, jadi bukan berkas proyek Restorm.",
+      "openApiUnsupportedVersion": "Spesifikasi ini mendeklarasikan OpenAPI versi {{version}}, yang belum didukung oleh versi Restorm ini. Perbarui Restorm untuk mengimpornya."
     },
     "formats": {
       "swagger": {
@@ -1064,7 +1065,7 @@
         "trademark": "Swagger adalah merek dagang terdaftar dari SmartBear Software."
       },
       "openapi": {
-        "description": "Standar OpenAPI saat ini (3.0 dan 3.1). Ergonomi tempel-dan-jalan yang sama dengan Swagger: parameter, body permintaan, skema keamanan, dan webhook hadir sebagai pohon permintaan bertipe dengan contoh yang siap dikirim.",
+        "description": "Standar OpenAPI saat ini (3.0, 3.1 dan 3.2). Ergonomi tempel-dan-jalan yang sama dengan Swagger: parameter, body permintaan, skema keamanan, dan webhook hadir sebagai pohon permintaan bertipe dengan contoh yang siap dikirim.",
         "trademark": "OpenAPI adalah proyek dari OpenAPI Initiative di bawah Linux Foundation."
       },
       "curl": {
@@ -1203,7 +1204,11 @@
       "documentation": "Dokumentasi"
     },
     "title": "Impor permintaan",
-    "largeApiHint": "API ini besar. Agar proyek tetap ringan, centang hanya rute yang Anda perlukan dan hapus centang sisanya di bawah. Yang Anda lewatkan tetap ada di dokumentasi — Anda bisa menambahkannya kapan saja."
+    "largeApiHint": "API ini besar. Agar proyek tetap ringan, centang hanya rute yang Anda perlukan dan hapus centang sisanya di bawah. Yang Anda lewatkan tetap ada di dokumentasi — Anda bisa menambahkannya kapan saja.",
+    "browse": "Telusuri…",
+    "warning": {
+      "openApiStructuralIssues": "Spesifikasi berhasil diimpor, tetapi {{count}} bagian tidak dapat diselesaikan dan dilewati ($ref tidak terselesaikan, request body tanpa content). Sisanya diimpor secara normal."
+    }
   },
   "emptyBench": {
     "importCard": {

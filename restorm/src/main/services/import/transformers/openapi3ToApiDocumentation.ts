@@ -31,6 +31,7 @@ import {
   mapTagsToGroups,
   mergeAllOfInto,
   refName,
+  resolveJsonPointer,
   walkSchemaRefs,
   type CommonInfo,
   type CommonParameter,
@@ -68,6 +69,11 @@ export interface OAS3Server {
 
 interface OAS3MediaType {
   schema?: CommonSchema | OAS3Reference
+  /** OpenAPI 3.2 streaming media types (`application/jsonl`, `text/event-stream`,
+   * multipart) describe EACH item with `itemSchema` rather than a `schema` for
+   * the whole payload. Treated as the media type's schema when `schema` is
+   * absent so the body/response still gets a shape. */
+  itemSchema?: CommonSchema | OAS3Reference
   example?: unknown
   examples?: Record<string, unknown>
 }
@@ -117,6 +123,10 @@ type OAS3PathItem = Partial<Record<HttpMethod, OAS3Operation>> & {
   servers?: OAS3Server[]
   summary?: string
   description?: string
+  /** OpenAPI 3.2: operations for HTTP methods beyond the fixed set (a custom
+   * `PURGE`, `LINK`, …). Keys are the method tokens (case-sensitive per RFC
+   * 9110); each maps to a normal Operation. Absent on 3.0 / 3.1. */
+  additionalOperations?: Record<string, OAS3Operation>
 }
 
 /** OpenAPI 3.x security scheme entry. The `flows` block uses 3.x
@@ -168,11 +178,16 @@ export interface OAS3Spec {
   info: CommonInfo
   servers?: OAS3Server[]
   paths: Record<string, OAS3PathItem>
-  webhooks?: Record<string, OAS3PathItem>          // 3.1 only — passed through here for 3.1 reuse.
+  webhooks?: Record<string, OAS3PathItem>          // 3.1 / 3.2 — passed through here for reuse.
   components?: OAS3Components
   tags?: CommonTag[]
   externalDocs?: ExternalDocs
   security?: Record<string, string[]>[]
+  /** OpenAPI 3.2: the document's own canonical URI, used as the base for
+   * resolving relative `$ref`s and `$self`-relative references. Restorm resolves
+   * `$ref`s in-document, so this is recorded but not needed for resolution;
+   * accepted here so a 3.2 spec that declares it is not treated as malformed. */
+  $self?: string
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -185,6 +200,14 @@ export interface OAS3Spec {
  * importer-side `OpenAPIImportService` does when materialising the body, so
  * the docs and the prefilled request stay aligned.
  */
+/** The schema describing a media type's payload. OpenAPI 3.2 streaming media
+ * types carry `itemSchema` (the shape of each streamed item) instead of a
+ * whole-payload `schema`; fall back to it so streaming bodies/responses still
+ * get a shape. */
+function mediaTypeSchema(media: OAS3MediaType | undefined): CommonSchema | OAS3Reference | undefined {
+  return media?.schema ?? media?.itemSchema
+}
+
 export function pickPrimaryContentType(content: Record<string, OAS3MediaType> | undefined): string | undefined {
   if (!content) return undefined
   const keys = Object.keys(content)
@@ -256,8 +279,9 @@ function buildCommonResponses(spec: OAS3Spec, responses: Record<string, OAS3Resp
     const primary = pickPrimaryContentType(resolved.content)
     if (primary !== undefined && resolved.content) {
       const media = resolved.content[primary]
-      if (media?.schema) {
-        entry.schema = isReference(media.schema) ? { $ref: media.schema.$ref } : media.schema
+      const schema = mediaTypeSchema(media)
+      if (schema) {
+        entry.schema = isReference(schema) ? { $ref: schema.$ref } : schema
       }
     }
     if (resolved.headers) {
@@ -289,8 +313,8 @@ function bodyToCommonParameter(spec: OAS3Spec, body: OAS3RequestBody | OAS3Refer
   if (!resolved) return undefined
   const primary = pickPrimaryContentType(resolved.content)
   let schema: CommonSchema | undefined
-  if (primary !== undefined && resolved.content[primary]?.schema) {
-    const raw = resolved.content[primary].schema
+  const raw = primary !== undefined ? mediaTypeSchema(resolved.content[primary]) : undefined
+  if (raw) {
     schema = isReference(raw) ? { $ref: raw.$ref } : raw
   }
   const param: CommonParameter = {
@@ -316,10 +340,14 @@ function collectReferencedModels(spec: OAS3Spec, op: OAS3Operation): string[] {
   }
   if (op.requestBody) {
     const body = deref(spec, op.requestBody, 'requestBodies')
-    if (body) {
+    // A malformed `requestBody` (a resolved object with no `content` map) is
+    // caught up front by `collectStructuralIssues`; guard the access anyway so
+    // this walker can never throw a bare `Object.values(undefined)` TypeError.
+    if (body?.content) {
       for (const media of Object.values(body.content)) {
-        if (media.schema) {
-          walkSchemaRefs(isReference(media.schema) ? { $ref: media.schema.$ref } : media.schema, visit)
+        const schema = mediaTypeSchema(media)
+        if (schema) {
+          walkSchemaRefs(isReference(schema) ? { $ref: schema.$ref } : schema, visit)
         }
       }
     }
@@ -328,8 +356,9 @@ function collectReferencedModels(spec: OAS3Spec, op: OAS3Operation): string[] {
     const resp = deref(spec, raw, 'responses')
     if (!resp?.content) continue
     for (const media of Object.values(resp.content)) {
-      if (media.schema) {
-        walkSchemaRefs(isReference(media.schema) ? { $ref: media.schema.$ref } : media.schema, visit)
+      const schema = mediaTypeSchema(media)
+      if (schema) {
+        walkSchemaRefs(isReference(schema) ? { $ref: schema.$ref } : schema, visit)
       }
     }
   }
@@ -386,6 +415,32 @@ function mapModels(components: OAS3Components | undefined): Record<string, Model
 // Operations — reachable from `paths` and (3.1 only) `webhooks`.
 // ────────────────────────────────────────────────────────────────────────────
 
+/** Enumerate every operation on a path item, in deterministic order: the fixed
+ * method fields first (`get`…`query`), then any 3.2 `additionalOperations`
+ * (custom verbs like `PURGE`, `LINK`). `verb` is the method token to carry onto
+ * the operation — a fixed key stays lowercase (uppercased downstream), a custom
+ * verb is preserved verbatim (RFC 9110 method tokens are case-sensitive). Shared
+ * by the documentation transform and the request builder so both see the same
+ * operations for 3.0 / 3.1 / 3.2. */
+export function enumeratePathItemOperations(
+  pathItem: OAS3PathItem
+): { verb: string; operation: OAS3Operation }[] {
+  const out: { verb: string; operation: OAS3Operation }[] = []
+  for (const method of HTTP_METHODS) {
+    const op = pathItem[method]
+    if (op) out.push({ verb: method, operation: op })
+  }
+  // Widened to `unknown` values: the type says each entry is an Operation, but
+  // a malformed spec can put a null / scalar here — skip those rather than crash.
+  const additional = pathItem.additionalOperations as Record<string, unknown> | undefined
+  if (additional) {
+    for (const [verb, op] of Object.entries(additional)) {
+      if (op && typeof op === 'object') out.push({ verb, operation: op as OAS3Operation })
+    }
+  }
+  return out
+}
+
 /** Build the full operation list from a path-item map. Tags shared by every
  * operation under a path-item are NOT propagated — each operation must
  * declare its own (matches OpenAPI 3.x semantics). */
@@ -399,9 +454,7 @@ function buildOperationsFromMap(
   const out: OperationDocumentation[] = []
   for (const [path, pathItem] of Object.entries(pathMap)) {
     const sharedParams = resolveParameters(spec, pathItem.parameters)
-    for (const method of HTTP_METHODS) {
-      const op = pathItem[method]
-      if (!op) continue
+    for (const { verb: method, operation: op } of enumeratePathItemOperations(pathItem)) {
       const opParams = resolveParameters(spec, op.parameters)
       // Path-item-scoped params are inherited by every operation unless
       // the operation overrides them (by `(name, in)` pair).
@@ -434,9 +487,14 @@ function buildOperationsFromMap(
 
       // 3.x has per-operation `consumes`/`produces` derived from request/response
       // content keys. Surfaced for parity with the 2.0 doc.
-      const consumes = op.requestBody && !isReference(op.requestBody)
-        ? Object.keys(op.requestBody.content)
-        : undefined
+      // `content` is typed required, but a malformed body can omit it — read
+      // it through a widened view so a content-less requestBody can't throw
+      // `Object.keys(undefined)`.
+      const requestBodyContent =
+        op.requestBody && !isReference(op.requestBody)
+          ? (op.requestBody as { content?: Record<string, unknown> }).content
+          : undefined
+      const consumes = requestBodyContent ? Object.keys(requestBodyContent) : undefined
       if (consumes && consumes.length > 0) input.consumes = consumes
       const produces = new Set<string>()
       for (const raw of Object.values(op.responses ?? {})) {
@@ -525,6 +583,97 @@ function mapSecuritySchemes(
     }
   }
   return Object.keys(out).length > 0 ? out : undefined
+}
+
+/** How many named problems the structural error carries before it is
+ * summarised with an "(+N more)" tail — enough to be actionable without
+ * pasting a hundred broken refs into a callout. */
+const MAX_REPORTED_ISSUES = 8
+
+/**
+ * Walk a parsed 3.x spec for the structural defects that stop the importer
+ * building requests — the ones that used to surface as a bare
+ * `Cannot convert undefined or null to object` TypeError instead of an
+ * actionable message. Two classes:
+ *
+ *  - **Unresolved `$ref`** — any `$ref` in the document that does not resolve
+ *    against the document itself (a broken in-document pointer, or an external
+ *    `file.yaml#/…` ref the importer cannot follow). These are what a
+ *    hand-trimmed export typically leaves behind.
+ *  - **`requestBody` without `content`** — a request body object that declares
+ *    no media types, which the operation walker cannot turn into a body.
+ *
+ * Returns a de-duplicated, human-readable list. Empty means "structurally
+ * sound". A non-empty list does NOT stop the import — the transformer already
+ * tolerates each of these (a dangling ref is skipped, a content-less body
+ * produces no body param) — it is surfaced to the user as a non-fatal
+ * warning so a partially-broken spec imports what it can while naming what it
+ * couldn't build, instead of failing silently.
+ */
+export function collectStructuralIssues(spec: OAS3Spec): string[] {
+  const issues: string[] = []
+  const seen = new Set<string>()
+  const add = (issue: string): void => {
+    if (seen.has(issue)) return
+    seen.add(issue)
+    issues.push(issue)
+  }
+
+  // Every `$ref` anywhere in the document, checked against the document root.
+  const visitRefs = (node: unknown): void => {
+    if (Array.isArray(node)) {
+      for (const child of node) visitRefs(child)
+      return
+    }
+    if (!node || typeof node !== 'object') return
+    const ref = (node as { $ref?: unknown }).$ref
+    if (typeof ref === 'string') {
+      // A `#/…` pointer that resolves to a value in this document is fine;
+      // anything else (external file ref, or a dangling pointer) cannot be
+      // followed at import time.
+      if (resolveJsonPointer(spec, ref) === undefined) {
+        add(`unresolved $ref: ${ref}`)
+      }
+    }
+    for (const value of Object.values(node as Record<string, unknown>)) visitRefs(value)
+  }
+  visitRefs(spec)
+
+  // `requestBody` objects (inline or resolved from a component) that carry no
+  // `content` map — the exact shape that crashed the operation walker.
+  const checkPathMap = (pathMap: Record<string, OAS3PathItem> | undefined): void => {
+    if (!pathMap) return
+    for (const [path, rawItem] of Object.entries(pathMap)) {
+      // The types claim a path item is always a well-formed object; a malformed
+      // spec can hand us `null` or a scalar, so widen and narrow explicitly.
+      const pathItem = rawItem as OAS3PathItem | null | undefined
+      if (!pathItem || typeof pathItem !== 'object') continue
+      // Covers fixed methods, `query`, and 3.2 `additionalOperations`.
+      for (const { verb, operation: op } of enumeratePathItemOperations(pathItem)) {
+        if (!op.requestBody) continue
+        const body = deref(spec, op.requestBody, 'requestBodies')
+        // A `$ref` that failed to resolve is already reported above; only flag
+        // a body that resolved to an object yet declares no media types. The
+        // type marks `content` required, but a malformed body can omit it.
+        const content = (body as { content?: unknown } | undefined)?.content
+        if (body && !content) {
+          add(`requestBody without content: ${verb.toUpperCase()} ${path}`)
+        }
+      }
+    }
+  }
+  checkPathMap(spec.paths)
+  checkPathMap(spec.webhooks)
+
+  return issues
+}
+
+/** Fold a structural-issue list into a single `detail` string, capped so a
+ * spec with dozens of broken refs stays readable in a callout. */
+export function summariseStructuralIssues(issues: string[]): string {
+  if (issues.length <= MAX_REPORTED_ISSUES) return issues.join('; ')
+  const head = issues.slice(0, MAX_REPORTED_ISSUES).join('; ')
+  return `${head} (+${issues.length - MAX_REPORTED_ISSUES} more)`
 }
 
 export function openapi3ToApiDocumentation(

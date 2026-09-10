@@ -142,6 +142,19 @@ describe('crashScrubOptions — the declared policy', () => {
   it('preserves Sentry\'s structural identifiers so the ingest does not reject the event', () => {
     expect(crashScrubOptions().preserveKeys).toEqual(['event_id', 'trace_id', 'span_id'])
   })
+
+  it('caps payload strings so bulk user content (an imported spec) cannot ride into a report', () => {
+    expect(crashScrubOptions().maxStringLength).toBe(4096)
+    // End-to-end through beforeSend: a document-sized string is truncated, not
+    // sent. Clean prose (no secret/URL shapes) so nothing but the length cap
+    // acts on it.
+    const bulk = 'the imported specification described many operations. '.repeat(400) // ~21k chars
+    const event = { message: bulk } as Record<string, unknown>
+    const out = makeBeforeSend()(event) as Record<string, unknown>
+    expect(out).not.toBeNull()
+    expect((out.message as string).length).toBeLessThan(4200)
+    expect(out.message).toContain(' chars]')
+  })
 })
 
 describe('beforeSend — Sentry\'s own identifiers survive the scrub', () => {

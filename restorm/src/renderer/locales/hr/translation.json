@@ -1058,7 +1058,8 @@
       "formatNotDetected": "Format ovog izvora nije prepoznat.",
       "unsupportedFormat": "Nijedan uvoznik ne podržava format {{format}}.",
       "projectFormatTooNew": "Ova projektna datoteka koristi verziju formata {{found}}, ali ova verzija Restorma razumije samo verziju {{current}}. Ažurirajte Restorm da biste je uvezli.",
-      "projectFormatMissing": "Ova datoteka ne deklarira verziju formata Restorm, pa nije Restorm projektna datoteka."
+      "projectFormatMissing": "Ova datoteka ne deklarira verziju formata Restorm, pa nije Restorm projektna datoteka.",
+      "openApiUnsupportedVersion": "Ova specifikacija deklarira OpenAPI verziju {{version}}, koju ova verzija Restorma još ne podržava. Ažurirajte Restorm da biste je uvezli."
     },
     "formats": {
       "swagger": {
@@ -1066,7 +1067,7 @@
         "trademark": "Swagger je registrirani zaštitni znak tvrtke SmartBear Software."
       },
       "openapi": {
-        "description": "Trenutni OpenAPI standard (3.0 i 3.1). Ista paste-and-go ergonomija kao Swagger: parametri, tijela zahtjeva, sigurnosne sheme i webhookovi pristižu kao stablo tipiziranih zahtjeva s primjerima spremnima za slanje.",
+        "description": "Trenutni OpenAPI standard (3.0, 3.1 i 3.2). Ista paste-and-go ergonomija kao Swagger: parametri, tijela zahtjeva, sigurnosne sheme i webhookovi pristižu kao stablo tipiziranih zahtjeva s primjerima spremnima za slanje.",
         "trademark": "OpenAPI je projekt OpenAPI inicijative pod okriljem Linux zaklade."
       },
       "curl": {
@@ -1205,7 +1206,11 @@
       "documentation": "Dokumentacija"
     },
     "title": "Uvezi zahtjeve",
-    "largeApiHint": "Ovaj API je velik. Da projekt ostane lagan, označite samo rute koje trebate, a ostale ispod odznačite. One koje izostavite ostaju u dokumentaciji — možete ih dodati u bilo kojem trenutku."
+    "largeApiHint": "Ovaj API je velik. Da projekt ostane lagan, označite samo rute koje trebate, a ostale ispod odznačite. One koje izostavite ostaju u dokumentaciji — možete ih dodati u bilo kojem trenutku.",
+    "browse": "Pregledaj…",
+    "warning": {
+      "openApiStructuralIssues": "Specifikacija je uvezena, ali {{count}} dio(dijelova) nije bilo moguće razriješiti pa su preskočeni (nerazriješeni $ref-ovi, tijela zahtjeva bez content). Ostatak je uvezen normalno."
+    }
   },
   "emptyBench": {
     "importCard": {

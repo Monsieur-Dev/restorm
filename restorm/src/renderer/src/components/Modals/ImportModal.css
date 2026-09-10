@@ -38,6 +38,7 @@
 
 .import-loading,
 .import-error,
+.import-warning,
 .import-no-results,
 .import-large-hint {
   display: flex;
@@ -100,6 +101,51 @@
 }
 
 .import-error__detail code {
+  font-family: var(--editor-font-family, monospace);
+  font-size: 11px;
+  opacity: 0.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+/* Non-fatal import warning — same two-line layout as `.import-error`, but the
+   attention (warning) palette so it reads as "imported, but heads-up" rather
+   than "failed". Stacks under the preview; several can appear at once. */
+.import-warning {
+  background: var(--inputValidation-warningBackground);
+  border: 1px solid var(--inputValidation-warningBorder);
+  color: var(--inputValidation-warningForeground);
+  align-items: flex-start;
+  margin-top: 8px;
+}
+
+.import-warning > .codicon {
+  line-height: 1.4;
+}
+
+.import-warning__text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.import-warning__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.import-warning__detail-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.import-warning__detail code {
   font-family: var(--editor-font-family, monospace);
   font-size: 11px;
   opacity: 0.9;
@@ -398,4 +444,81 @@
   font-size: 12px;
   line-height: 1.4;
   opacity: 0.75;
+}
+
+/* ── Split layout: multi-line source input ─────────────────────────────
+   When the source input holds more than one line, the modal splits into a
+   resizable LEFT pane (the text zone, filling + scrolling) and a RIGHT pane
+   (callouts, buttons, preview, import), with a draggable sash between. */
+
+/* Not split: the `.import-right` wrapper is inert (its children act as direct
+   flex items of `.import-modal`), so the single-column layout is unchanged.
+   The source input is now its own section, which would add the modal's 20px
+   inter-section gap before the controls; pull it back 12px so the gap between
+   the input and the buttons stays the original 8px. */
+.import-modal:not([data-split="true"]) > .import-right { display: contents; }
+.import-modal:not([data-split="true"]) > .import-source-section { margin-bottom: -12px; }
+
+/* Split: a row of [source pane] [ECUI sash] [everything else]. The source
+   pane's width is set inline from the useVerticalSash hook; the ECUI `Sash`
+   positions itself absolutely over the boundary (it needs the row to be a
+   positioned box, which `.import-modal` already is). */
+/* The ECUI Sash positions itself from `.import-modal`'s padding box, so the
+   modal must have NO padding in split mode or the sash lands ~16px inside the
+   left pane (over the editor's gutter). Move the modal's inset onto the two
+   panes instead; the sash then floats exactly on the pane boundary. */
+.import-modal[data-split="true"] {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+}
+.import-modal[data-split="true"] > .import-source-section {
+  /* width + flex are set inline (splitLeftWidth). Restore the modal's inset on
+     the left/top/bottom; the RIGHT inset is the gap to the sash. */
+  box-sizing: border-box;
+  padding: 16px 12px 16px 16px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+/* The CodeEditor wrapper fills the left pane; Monaco owns the scrolling. */
+.import-modal[data-split="true"] > .import-source-section > .import-source-editor {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  border: 1px solid var(--input-border, #3a3a3a);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.import-modal[data-split="true"] > .import-right {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 0;
+  min-width: 300px;
+  min-height: 0;
+  overflow: auto;
+  /* Restore the modal's inset on the right/top/bottom; the LEFT inset is the
+     gap from the sash. */
+  padding: 16px 16px 16px 12px;
+}
+/* The right pane's box starts at the pane boundary and would paint over the
+   absolutely-positioned sash, swallowing its pointer events. Lift the sash
+   above both panes so it stays grabbable (its width comes from the `size`
+   prop). A faint idle tint makes the handle discoverable in the gap. */
+.import-modal[data-split="true"] > .sash.vertical {
+  z-index: 45;
+  /* `useVerticalSash` sets an inline pixel height from a ResizeObserver that can
+     measure 0 during the split transition and never re-fire (the modal's own
+     size doesn't change afterwards), collapsing the sash to an unhittable 0px.
+     The modal has a definite height, so force the sash to fill it. */
+  height: 100% !important;
+  top: 0 !important;
+  background: color-mix(in srgb, var(--input-border, #3a3a3a) 60%, transparent);
+}
+.import-modal[data-split="true"] > .sash.vertical:hover,
+.import-modal[data-split="true"] > .sash.vertical.active {
+  background: var(--focusBorder, #007acc);
 }

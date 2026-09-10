@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Formatet på den här källan kändes inte igen.",
       "unsupportedFormat": "Ingen importmodul hanterar formatet {{format}}.",
       "projectFormatTooNew": "Den här projektfilen använder formatversion {{found}}, men den här versionen av Restorm förstår bara version {{current}}. Uppdatera Restorm för att importera den.",
-      "projectFormatMissing": "Den här filen deklarerar ingen Restorm-formatversion och är därför ingen Restorm-projektfil."
+      "projectFormatMissing": "Den här filen deklarerar ingen Restorm-formatversion och är därför ingen Restorm-projektfil.",
+      "openApiUnsupportedVersion": "Den här specifikationen anger OpenAPI-version {{version}}, som den här versionen av Restorm inte stöder ännu. Uppdatera Restorm för att importera den."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger är ett registrerat varumärke som tillhör SmartBear Software."
       },
       "openapi": {
-        "description": "Den aktuella OpenAPI-standarden (3.0 och 3.1). Samma klistra-och-kör-ergonomi som Swagger: parametrar, request bodies, säkerhetsschemana och webhooks landar som ett träd av typade förfrågningar med exempel redo att skickas.",
+        "description": "Den aktuella OpenAPI-standarden (3.0, 3.1 och 3.2). Samma klistra-och-kör-ergonomi som Swagger: parametrar, request bodies, säkerhetsschemana och webhooks landar som ett träd av typade förfrågningar med exempel redo att skickas.",
         "trademark": "OpenAPI är ett projekt av OpenAPI Initiative under Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Dokumentation"
     },
     "title": "Importera förfrågningar",
-    "largeApiHint": "Detta API är stort. Håll projektet lätt: kryssa bara i de rutter du behöver och avmarkera resten nedan. De du utelämnar finns kvar i dokumentationen — du kan lägga till dem när som helst."
+    "largeApiHint": "Detta API är stort. Håll projektet lätt: kryssa bara i de rutter du behöver och avmarkera resten nedan. De du utelämnar finns kvar i dokumentationen — du kan lägga till dem när som helst.",
+    "browse": "Bläddra…",
+    "warning": {
+      "openApiStructuralIssues": "Specifikationen importerades, men {{count}} del(ar) kunde inte lösas och hoppades över (olösta $refs, förfrågningskroppar utan content). Resten importerades normalt."
+    }
   },
   "emptyBench": {
     "importCard": {

@@ -158,6 +158,34 @@ describe('scrubPayload — structural rules', () => {
     expect(out.a.b).toBe(REDACTED_DEPTH)
   })
 
+  it('caps a string longer than maxStringLength with a "+N chars" marker', () => {
+    // Punctuated JSON-shaped bulk (like a pasted spec) — not a single blob the
+    // token detector would swallow whole.
+    const bulk = '{"path": "/things", "op": "get"} '.repeat(500) // ~16.5k chars
+    const out = scrubPayload({ spec: bulk }, { maxStringLength: 100 }) as { spec: string }
+    // Head preserved (room is reserved for the marker, so the kept head is a bit
+    // under the cap); tail dropped with a marker; total stays within the cap.
+    expect(bulk.startsWith(out.spec.slice(0, 60))).toBe(true)
+    expect(out.spec).toContain(' chars]')
+    expect(out.spec.length).toBeLessThanOrEqual(100)
+  })
+
+  it('leaves a string at or under maxStringLength untouched', () => {
+    const out = scrubPayload({ s: 'short' }, { maxStringLength: 100 }) as { s: string }
+    expect(out.s).toBe('short')
+  })
+
+  it('caps AFTER scrubbing, so the truncated head is still clean', () => {
+    // A secret near the front is redacted; the bulk tail is then dropped by the
+    // cap. The output must contain neither the secret nor the raw tail.
+    const secret = 'Bearer abcdefghijklmnopqrstuvwxyz0123456789'
+    const tail = '{"path": "/x"}, '.repeat(500)
+    const value = `${secret} ${tail}`
+    const out = scrubPayload({ v: value }, { maxStringLength: 200 }) as { v: string }
+    expect(out.v).not.toContain('abcdefghijklmnopqrstuvwxyz0123456789')
+    expect(out.v.length).toBeLessThan(240)
+  })
+
   it('leaves numbers, booleans and null untouched', () => {
     const out = scrubPayload({ n: 42, b: true, z: null }) as Record<string, unknown>
     expect(out).toEqual({ n: 42, b: true, z: null })

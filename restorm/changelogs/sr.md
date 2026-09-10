@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Podrška za OpenAPI 3.2.**
+
+- **Uvoz OpenAPI 3.2 specifikacija.** Metoda `QUERY`, prilagođeni glagoli (`additionalOperations`), parametar query string i striming tipovi medija uvoze se kao zahtevi spremni za izvršavanje.
+- **Pronađite datoteku za uvoz.** Dugme Pregledaj u dijalogu uvoza otvara nativni izbor datoteke — nema više kucanja ili prevlačenja putanje.
+- **Podeljeni prikaz za velika lepljenja.** Lepljenje višelinijske specifikacije otvara uređivač koda levo i pregled desno, sa pomičnim razdvajačem.
+- **Tolerantan uvoz.** Specifikacija sa nekoliko pokvarenih `$ref`-ova uvozi sve moguće rute i prikazuje upozorenje sa onim što je morala da preskoči.
+
+Ispravke:
+
+- Uvoz nevažeće ili nedostupne specifikacije prikazuje jasnu poruku umesto otvaranja dijaloga izveštaja o padu.
+- Detaljni prikaz izveštaja o padu ponovo se pomera.
+- Pozadine dijaloga više nisu zamućene.
+
 ## v1.1.1
 
 **Dizajner API-ja se sada kontroliše iz bočne trake.**

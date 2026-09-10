@@ -1,5 +1,6 @@
 import type { EnvironmentFolder } from '../../../shared/models'
 import type { Folder } from '../../../shared/types/collections'
+import type { ImportWarningDescriptor } from '../../../shared/config/importWarnings'
 
 /**
  * Every import format exposes this interface so the registry can dispatch
@@ -64,6 +65,19 @@ export interface ImportProvider {
    * `TypeSpecImportService.ts`'s Trust model note for why.
    */
   parse(content: string, opts: { sourceUrl?: string; filePath?: string }): EnvironmentFolder | Folder
+
+  /**
+   * Optional, non-fatal diagnostics for a source that DID parse. Run after a
+   * successful `parse` on the same `content`, it returns the problems worth
+   * telling the user about — parts of the source the importer had to skip
+   * (an OpenAPI spec's dangling `$ref`s, a `requestBody` with no `content`).
+   * Kept separate from `parse` (which must stay a pure folder producer) so a
+   * format that has nothing to warn about simply omits it. The registry hands
+   * the result back on `ImportResult.warnings`; the wizard renders it as a
+   * warning callout beside the preview. Must never throw — a warnings pass
+   * that fails is treated as "no warnings", never as an import failure.
+   */
+  collectImportWarnings?(content: string, opts: { sourceUrl?: string; filePath?: string }): ImportWarningDescriptor[]
 
   /**
    * Optional post-import side effect, run AFTER the imported items have

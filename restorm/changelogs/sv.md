@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Stöd för OpenAPI 3.2.**
+
+- **Importera OpenAPI 3.2-specifikationer.** `QUERY`-metoden, anpassade verb (`additionalOperations`), query string-parametern och strömmande medietyper importeras som färdiga förfrågningar.
+- **Bläddra efter en fil att importera.** En Bläddra-knapp i importdialogen öppnar en inbyggd filväljare — inget mer att skriva eller dra en sökväg.
+- **Delad vy för stora inklistringar.** Att klistra in en flerradsspecifikation öppnar en kodredigerare till vänster och förhandsvisningen till höger, med en dragbar avdelare.
+- **Tolerant import.** En specifikation med några trasiga `$ref`:er importerar alla rutter den kan och visar en varning med det som hoppades över.
+
+Rättningar:
+
+- Att importera en ogiltig eller onåbar specifikation visar ett tydligt meddelande i stället för att öppna dialogen för kraschrapport.
+- Detaljvyn för kraschrapporten går att rulla igen.
+- Bakgrunder bakom dialoger är inte längre suddiga.
+
 ## v1.1.1
 
 **API-designern styrs nu från sidofältet.**

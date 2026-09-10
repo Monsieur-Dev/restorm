@@ -506,6 +506,7 @@ declare global {
         onFailed: (callback: (payload: { authRequestId: string; reason?: string }) => void) => (() => void)
       }
       import: {
+        pickFile: () => Promise<{ success: boolean; path?: string; canceled?: boolean }>
         preview: (input: string, options?: { extraHeaders?: Record<string, string> }) => Promise<{
           success: boolean
           items: unknown[]

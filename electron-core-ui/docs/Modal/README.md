@@ -139,7 +139,7 @@ const Example: React.FC = () => {
 
 ## Scoping to a container
 
-By default the modal portals to `document.body` and its overlay is `position: fixed` over the whole viewport. Pass `scopeToSelector` to instead contain it to a region — e.g. a single workbench tab — so the backdrop (and, with advanced visual effects on, its `backdrop-filter` blur) only covers that region:
+By default the modal portals to `document.body` and its overlay is `position: fixed` over the whole viewport. Pass `scopeToSelector` to instead contain it to a region — e.g. a single workbench tab — so the backdrop only covers that region:
 
 ```tsx
 <Modal

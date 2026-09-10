@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Unterstützung für OpenAPI 3.2.**
+
+- **Import von OpenAPI-3.2-Spezifikationen.** Die `QUERY`-Methode, benutzerdefinierte Verben (`additionalOperations`), der Query-String-Parameter und Streaming-Medientypen werden als sofort ausführbare Anfragen importiert.
+- **Datei zum Importieren auswählen.** Ein Durchsuchen-Button im Import-Dialog öffnet eine native Dateiauswahl — kein Tippen oder Ziehen eines Pfads mehr.
+- **Geteilte Ansicht für große Einfügungen.** Beim Einfügen einer mehrzeiligen Spezifikation öffnet sich links ein Code-Editor und rechts die Vorschau, mit einem verschiebbaren Trenner dazwischen.
+- **Toleranter Import.** Eine Spezifikation mit ein paar kaputten `$ref`s importiert jede mögliche Route und zeigt eine Warnung mit dem, was übersprungen werden musste.
+
+Korrekturen:
+
+- Der Import einer ungültigen oder nicht erreichbaren Spezifikation zeigt eine klare Meldung, statt den Absturzbericht-Dialog zu öffnen.
+- Die Detailansicht des Absturzberichts lässt sich wieder scrollen.
+- Dialog-Hintergründe sind nicht mehr weichgezeichnet.
+
 ## v1.1.1
 
 **Der API-Designer wird jetzt über die Seitenleiste bedient.**

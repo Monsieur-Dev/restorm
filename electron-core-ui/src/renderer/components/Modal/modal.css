@@ -134,11 +134,11 @@
 	flex-direction: column;
 }
 
-/* Enhanced visual effects when advanced effects are enabled */
-.ecu-advanced-effects .ecu-modal-overlay {
-	backdrop-filter: blur(8px);
-}
-
+/* Enhanced visual effects when advanced effects are enabled.
+ * The overlay backdrop is deliberately NEVER blurred — a plain scrim reads
+ * more cleanly behind a modal and avoids the frosted-glass artefact on the
+ * content peeking through. Advanced effects still deepen the container's
+ * shadow; only the backdrop blur is dropped. */
 .ecu-advanced-effects .ecu-modal-container {
 	box-shadow: 0 12px 40px rgb(0, 0, 0, 0.6), 0 4px 12px rgb(0, 0, 0, 0.3);
 }

@@ -80,7 +80,13 @@ export const CrashReportDialog: React.FC<CrashReportDialogProps> = ({ request, o
 
         {expanded && (
           <ScrollableElement
-            options={{ horizontal: 'auto', vertical: 'auto' }}
+            // `fitContent` sizes the scroll viewport to the payload up to the
+            // inline `maxHeight`, then scrolls. Without it the content wrapper
+            // takes `height: 100%` of a container that only has a max-height —
+            // which collapses to auto, so the payload grows past the 32vh cap
+            // with no scrollbar and the outer overflow just clips it (the report
+            // was unscrollable). Every other scroll-to-content usage sets it.
+            options={{ horizontal: 'auto', vertical: 'auto', fitContent: true }}
             style={{ maxHeight: '32vh' }}
             data-testid="crash-report-dialog-payload"
           >

@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Obsługa OpenAPI 3.2.**
+
+- **Import specyfikacji OpenAPI 3.2.** Metoda `QUERY`, niestandardowe czasowniki (`additionalOperations`), parametr query string i strumieniowe typy mediów są importowane jako gotowe do uruchomienia żądania.
+- **Wskaż plik do importu.** Przycisk Przeglądaj w oknie importu otwiera natywny wybór pliku — koniec z wpisywaniem lub przeciąganiem ścieżki.
+- **Widok podzielony dla dużych wklejeń.** Wklejenie wielowierszowej specyfikacji otwiera edytor kodu po lewej i podgląd po prawej, z przesuwanym separatorem.
+- **Tolerancyjny import.** Specyfikacja z kilkoma zepsutymi `$ref` importuje wszystkie możliwe trasy i pokazuje ostrzeżenie z tym, co trzeba było pominąć.
+
+Poprawki:
+
+- Import nieprawidłowej lub nieosiągalnej specyfikacji pokazuje jasny komunikat zamiast otwierać okno raportu awarii.
+- Widok szczegółów raportu awarii znów się przewija.
+- Tła okien nie są już rozmyte.
+
 ## v1.1.1
 
 **Projektant API jest teraz obsługiwany z paska bocznego.**

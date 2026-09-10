@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Le format de cette source n'a pas été reconnu.",
       "unsupportedFormat": "Aucun importateur ne prend en charge le format {{format}}.",
       "projectFormatTooNew": "Ce fichier de projet utilise la version de format {{found}}, mais cette version de Restorm ne comprend que la version {{current}}. Mettez à jour Restorm pour l'importer.",
-      "projectFormatMissing": "Ce fichier ne déclare aucune version de format Restorm : ce n'est pas un fichier de projet Restorm."
+      "projectFormatMissing": "Ce fichier ne déclare aucune version de format Restorm : ce n'est pas un fichier de projet Restorm.",
+      "openApiUnsupportedVersion": "Cette spécification déclare la version OpenAPI {{version}}, que cette version de Restorm ne prend pas encore en charge. Mettez Restorm à jour pour l'importer."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger est une marque déposée de SmartBear Software."
       },
       "openapi": {
-        "description": "Le standard OpenAPI actuel (3.0 et 3.1). Mêmes mécaniques que Swagger : paramètres, bodies, schémas d'auth et webhooks atterrissent en arborescence de requêtes typées, avec des exemples prêts à envoyer.",
+        "description": "Le standard OpenAPI actuel (3.0, 3.1 et 3.2). Mêmes mécaniques que Swagger : paramètres, bodies, schémas d'auth et webhooks atterrissent en arborescence de requêtes typées, avec des exemples prêts à envoyer.",
         "trademark": "OpenAPI est un projet de l'OpenAPI Initiative sous l'égide de la Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Documentation"
     },
     "title": "Importer des requêtes",
-    "largeApiHint": "Cette API est volumineuse. Pour garder votre projet léger, cochez seulement les routes qui vous intéressent et décochez les autres ci-dessous. Celles que vous laissez de côté restent dans la documentation : vous pourrez les ajouter à tout moment."
+    "largeApiHint": "Cette API est volumineuse. Pour garder votre projet léger, cochez seulement les routes qui vous intéressent et décochez les autres ci-dessous. Celles que vous laissez de côté restent dans la documentation : vous pourrez les ajouter à tout moment.",
+    "browse": "Parcourir…",
+    "warning": {
+      "openApiStructuralIssues": "La spécification a été importée, mais {{count}} élément(s) n'ont pas pu être résolus et ont été ignorés ($ref non résolus, bodies de requête sans content). Le reste a été importé normalement."
+    }
   },
   "emptyBench": {
     "importCard": {

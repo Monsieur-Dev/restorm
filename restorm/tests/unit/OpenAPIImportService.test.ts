@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { importOpenAPI, importOpenAPIFromJson, resolveServerUrl } from '../../src/main/services/import/OpenAPIImportService'
-import type { OAS3Spec } from '../../src/main/services/import/transformers/openapi3ToApiDocumentation'
+import { importProviders } from '../../src/main/services/import/registry'
+import { openapi3ToApiDocumentation, type OAS3Spec } from '../../src/main/services/import/transformers/openapi3ToApiDocumentation'
 import type { OAS31Spec } from '../../src/main/services/import/transformers/openapi31ToApiDocumentation'
 import type { Folder, HTTPRequest } from '../../src/shared/models'
 import type { EnumDefinition } from '../../src/shared/types/collections'
@@ -381,5 +382,158 @@ describe('OpenAPIImportService — empty/typeless body schema fallback ladder', 
     const body = findActionBody(makeSpecWithBody({ enum: ['alpha', 'beta'] }))
     expect(body?.type).toBe('text')
     if (body?.type === 'text') expect(body.content).toBe('"alpha"')
+  })
+})
+
+describe('OpenAPIImportService — malformed-spec resilience', () => {
+  // A spec that trips several of the transformer's unguarded accesses at once:
+  // a requestBody with no `content`, a schema whose `required` is a boolean
+  // (not an array), and a dangling `$ref`. A structurally broken export like
+  // this used to crash the import with a bare TypeError and fire a crash
+  // report; it must now import what it can instead.
+  const brokenSpec = JSON.stringify({
+    openapi: '3.0.0',
+    info: { title: 'Broken', version: '1.0.0' },
+    paths: {
+      '/a': {
+        post: {
+          requestBody: { required: true },                 // no `content`
+          responses: { '200': { description: 'ok' } }
+        }
+      },
+      '/b': {
+        get: {
+          responses: {
+            '200': {
+              description: 'ok',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/Missing' } } }
+            }
+          }
+        }
+      }
+    },
+    components: {
+      schemas: {
+        Thing: { type: 'object', required: false, properties: { id: { type: 'string' } } }
+      }
+    }
+  })
+
+  it('imports a structurally broken spec without throwing', () => {
+    expect(() => importOpenAPIFromJson(brokenSpec)).not.toThrow()
+  })
+
+  it('still produces the operations from a broken spec', () => {
+    const folder = importOpenAPIFromJson(brokenSpec) as Folder
+    // Two paths → at least the two operations land as importable requests.
+    const countRequests = (items: unknown[]): number =>
+      items.reduce<number>((n, item) => {
+        const it = item as { itemType?: string; type?: string; items?: unknown[] }
+        const self = it.items ? countRequests(it.items) : 0
+        return n + (it.items ? self : 1)
+      }, 0)
+    expect(countRequests(folder.items)).toBeGreaterThan(0)
+  })
+})
+
+describe('OpenAPIImportService — OpenAPI 3.2', () => {
+  const spec32 = loadFixture('petstore-3.2.json') as OAS3Spec
+  const json32 = loadJson('petstore-3.2.json')
+
+  it('imports a 3.2 spec into an EnvironmentFolder', () => {
+    const folder = importOpenAPIFromJson(json32)
+    expect(folder.name).toBe('Petstore 3.2')
+    expect(folder.importSource).toBe('openapi')
+  })
+
+  const allRequests = (): HTTPRequest[] => {
+    const folder = importOpenAPIFromJson(json32) as Folder
+    const out: HTTPRequest[] = []
+    const walk = (items: unknown[]): void => {
+      for (const item of items) {
+        const it = item as { type?: string; items?: unknown[]; method?: string }
+        if (it.items) walk(it.items)
+        else if (it.type === 'http') out.push(it as unknown as HTTPRequest)
+      }
+    }
+    walk(folder.items)
+    return out
+  }
+
+  it('imports the QUERY-method operation as a QUERY request', () => {
+    const methods = allRequests().map((r) => r.method)
+    expect(methods).toContain('QUERY')
+  })
+
+  it('imports an additionalOperations custom verb VERBATIM (not coerced to GET)', () => {
+    const methods = allRequests().map((r) => r.method)
+    expect(methods).toContain('PURGE')
+    // The custom verb must survive — regression guard against toHTTPMethod's GET default.
+    expect(methods.filter((m) => m === 'GET').length).toBeLessThanOrEqual(1)
+  })
+
+  it('routes 3.2 through the doc transform, surfacing all operations incl. query + additionalOperations', () => {
+    const doc = openapi3ToApiDocumentation(spec32)
+    // buildApiDocumentation dispatches by version; the transform itself
+    // enumerates query + additionalOperations regardless.
+    const docMethods = doc.operations.map((o) => o.match.method)
+    expect(docMethods).toContain('GET')
+    expect(docMethods).toContain('QUERY')
+    expect(docMethods).toContain('PURGE')
+  })
+
+  it('uses itemSchema as the response schema for a streaming media type', () => {
+    const doc = openapi3ToApiDocumentation(spec32)
+    const listOp = doc.operations.find((o) => o.match.method === 'GET' && o.match.urlPattern === '/pets')
+    // The application/jsonl response declares `itemSchema`, not `schema`.
+    expect(listOp?.responses?.['200']?.schema).toBe('Pet')
+  })
+
+  it('does not treat a $self-bearing 3.2 spec as structurally invalid', () => {
+    expect(importOpenAPIFromJson(json32)).toBeDefined()
+  })
+})
+
+describe('OpenAPIImportService — OpenAPI 3.2 querystring + unsupported version', () => {
+  const json32 = loadJson('petstore-3.2.json')
+
+  const firstRequestOnPath = (path: string): HTTPRequest | undefined => {
+    const folder = importOpenAPIFromJson(json32) as Folder
+    const out: HTTPRequest[] = []
+    const walk = (items: unknown[]): void => {
+      for (const item of items) {
+        const it = item as { type?: string; items?: unknown[]; url?: string; method?: string }
+        if (it.items) walk(it.items)
+        else if (it.type === 'http') out.push(it as unknown as HTTPRequest)
+      }
+    }
+    walk(folder.items)
+    return out.find((r) => r.url.includes(path) && r.method === 'GET')
+  }
+
+  it('expands a 3.2 in:"querystring" parameter into individual query params', () => {
+    const req = firstRequestOnPath('/pets')
+    const keys = (req?.params ?? []).map((p) => (p as unknown as { key: string }).key)
+    // The `filters` querystring schema has `status` + `page` properties.
+    expect(keys).toContain('status')
+    expect(keys).toContain('page')
+    // The blob param name itself is NOT added as a query key.
+    expect(keys).not.toContain('filters')
+  })
+
+  it('produces a coded openApiUnsupportedVersion error for an unsupported OpenAPI version', () => {
+    const unsupported = JSON.stringify({ openapi: '4.0.0', info: { title: 'Future', version: '1' }, paths: {} })
+    const provider = importProviders.find((p) => p.format === 'openapi-unsupported')
+    expect(provider).toBeDefined()
+    expect(provider?.canImport(unsupported, undefined)).toBe(true)
+    let message = ''
+    try { provider?.parse(unsupported, {}) } catch (e) { message = (e as Error).message }
+    expect(message).toContain('RESTORM_IMPORT_ERR:openApiUnsupportedVersion')
+    expect(message).toContain('4.0.0')
+  })
+
+  it('does not misclassify a supported 3.2 spec as unsupported', () => {
+    const provider = importProviders.find((p) => p.format === 'openapi-unsupported')
+    expect(provider?.canImport(json32, undefined)).toBe(false)
   })
 })

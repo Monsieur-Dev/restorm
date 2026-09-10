@@ -22,7 +22,8 @@ import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import type { Folder } from '../../../shared/types/collections'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
-import type { ImportErrorCode, ImportErrorParams } from '../../../shared/config/importErrors'
+import { parseImportError, type ImportErrorCode, type ImportErrorParams } from '../../../shared/config/importErrors'
+import type { ImportWarningDescriptor } from '../../../shared/config/importWarnings'
 import { withFirewallBypass } from 'electron-core-ui'
 import { assertSafeFetchUrl, fetchFollowingSafeRedirects } from '../../utils/urlSecurity'
 
@@ -63,6 +64,12 @@ export interface ImportResult {
    * subsequent Refresh can detect "no change since the import that
    * produced this folder" without re-running the full importer. */
   payloadChecksum?: string
+  /** Non-fatal problems found while importing a SUCCESSFUL source — parts
+   * of the spec that couldn't be honoured (dangling `$ref`s, a body with no
+   * content) and were skipped. The wizard renders these as a warning callout
+   * beside the preview so a partially-broken spec imports what it can while
+   * naming what it couldn't. Empty / absent on a clean import. */
+  warnings?: ImportWarningDescriptor[]
 }
 
 export interface ImportOptions {
@@ -307,21 +314,60 @@ export async function importFromContent(
     // deliberate saved state, not generator noise.
     if (provider.preserveEmptyKeyValues !== true) disableEmptyKeyValuesInTree(folder)
 
+    // Non-fatal diagnostics for a source that parsed — e.g. an OpenAPI spec
+    // with dangling `$ref`s or a body without content. The pieces were skipped
+    // (the import still succeeded); we surface them so the user knows what
+    // couldn't be built. A warnings pass must never fail the import.
+    let warnings: ImportWarningDescriptor[] | undefined
+    if (provider.collectImportWarnings) {
+      try {
+        const collected = provider.collectImportWarnings(content, opts)
+        if (collected.length > 0) warnings = collected
+      } catch (warnError) {
+        logger.warn(`[ImportManager] Warnings pass failed for ${source}; treating as no warnings`, {
+          error: warnError instanceof Error ? warnError.message : String(warnError)
+        })
+      }
+    }
+
     // Return the folder itself as a single item, not its children
     return {
       success: true,
       items: [folder], // Return the folder itself, not folder.items
       source,
-      format
+      format,
+      ...(warnings ? { warnings } : {})
     }
   } catch (error) {
-    logger.error(`[ImportManager] Error importing from ${source}:`, error)
+    // An import failure here is a HANDLED, user-facing error — the caller gets
+    // a structured result and the wizard shows a callout. It must NOT reach the
+    // crash reporter (only `logger.error` bridges to Sentry), and its raw text
+    // must not carry the user's spec into a log's Sentry `extra`. So we log at
+    // `warn` with the message only, and decode any coded error into its
+    // `errorCode` / `errorParams` so the renderer can render a localised,
+    // actionable sentence (broken $ref, requestBody without content, …) rather
+    // than a bare JS TypeError string.
+    const message = error instanceof Error ? error.message : String(error)
+    const coded = parseImportError(message)
+    if (coded) {
+      logger.warn(`[ImportManager] Import failed (${coded.code}) from ${source}`)
+      return {
+        success: false,
+        items: [],
+        source,
+        format,
+        error: message,
+        errorCode: coded.code,
+        errorParams: coded.params
+      }
+    }
+    logger.warn(`[ImportManager] Error importing from ${source}: ${message}`)
     return {
       success: false,
       items: [],
       source,
       format,
-      error: error instanceof Error ? error.message : String(error)
+      error: message
     }
   }
 }
@@ -423,7 +469,11 @@ async function readImportSource(
       }
       return { success: true, content: await response.text(), kind }
     } catch (error) {
-      logger.error(`[ImportManager] Failed to fetch URL:`, error)
+      // A failed fetch (bad URL, offline, TLS, blocked host) is a HANDLED,
+      // user-facing import error — it returns a structured result shown in the
+      // wizard callout. Log at `warn` (only `logger.error` bridges to the crash
+      // reporter) so a mistyped URL never pops the crash-report modal.
+      logger.warn(`[ImportManager] Failed to fetch URL ${input}: ${error instanceof Error ? error.message : String(error)}`)
       return {
         success: false,
         ...(lastStatusCode !== undefined ? { statusCode: lastStatusCode } : {}),
@@ -436,7 +486,8 @@ async function readImportSource(
   try {
     return { success: true, content: await fs.readFile(input, 'utf-8'), kind }
   } catch (error) {
-    logger.error(`[ImportManager] Failed to read file:`, error)
+    // A missing / unreadable file is a handled import error too — warn, not error.
+    logger.warn(`[ImportManager] Failed to read file ${input}: ${error instanceof Error ? error.message : String(error)}`)
     return { success: false, error: error instanceof Error ? error.message : String(error) }
   }
 }
@@ -497,7 +548,11 @@ export async function importFrom(
     }
     return result
   } catch (error) {
-    logger.error(`[ImportManager] Unexpected error:`, error)
+    // Catch-all for the whole import: still a HANDLED failure (a structured
+    // result is returned and the wizard shows a callout), so it must not reach
+    // the crash reporter. Warn with the message only — never the error object,
+    // which could carry the imported document in a log's Sentry `extra`.
+    logger.warn(`[ImportManager] Import failed unexpectedly for ${input}: ${error instanceof Error ? error.message : String(error)}`)
     return {
       success: false,
       items: [],

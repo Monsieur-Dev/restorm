@@ -1057,7 +1057,8 @@
       "formatNotDetected": "O formato desta origem não foi reconhecido.",
       "unsupportedFormat": "Nenhum importador suporta o formato {{format}}.",
       "projectFormatTooNew": "Este arquivo de projeto usa a versão de formato {{found}}, mas esta versão do Restorm só entende a versão {{current}}. Atualize o Restorm para importá-lo.",
-      "projectFormatMissing": "Este arquivo não declara nenhuma versão de formato do Restorm, portanto não é um arquivo de projeto do Restorm."
+      "projectFormatMissing": "Este arquivo não declara nenhuma versão de formato do Restorm, portanto não é um arquivo de projeto do Restorm.",
+      "openApiUnsupportedVersion": "Esta especificação declara a versão OpenAPI {{version}}, que esta versão do Restorm ainda não suporta. Atualize o Restorm para importá-la."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger é uma marca registada da SmartBear Software."
       },
       "openapi": {
-        "description": "O atual padrão OpenAPI (3.0 e 3.1). A mesma ergonomia de colar-e-pronto do Swagger: parâmetros, corpos de pedido, esquemas de segurança e webhooks aparecem como uma árvore de pedidos tipados, com exemplos prontos a enviar.",
+        "description": "O atual padrão OpenAPI (3.0, 3.1 e 3.2). A mesma ergonomia de colar-e-pronto do Swagger: parâmetros, corpos de pedido, esquemas de segurança e webhooks aparecem como uma árvore de pedidos tipados, com exemplos prontos a enviar.",
         "trademark": "OpenAPI é um projeto da OpenAPI Initiative sob a Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Documentação"
     },
     "title": "Importar pedidos",
-    "largeApiHint": "Esta API é grande. Para manter o seu projeto leve, marque apenas as rotas de que precisa e desmarque as restantes abaixo. As que deixar de fora permanecem na documentação: pode adicioná-las a qualquer momento."
+    "largeApiHint": "Esta API é grande. Para manter o seu projeto leve, marque apenas as rotas de que precisa e desmarque as restantes abaixo. As que deixar de fora permanecem na documentação: pode adicioná-las a qualquer momento.",
+    "browse": "Procurar…",
+    "warning": {
+      "openApiStructuralIssues": "A especificação foi importada, mas {{count}} parte(s) não puderam ser resolvidas e foram ignoradas ($refs não resolvidos, corpos de requisição sem content). O restante foi importado normalmente."
+    }
   },
   "emptyBench": {
     "importCard": {

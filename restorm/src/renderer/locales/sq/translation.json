@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Formati i këtij burimi nuk u njoh.",
       "unsupportedFormat": "Asnjë importues nuk e mbështet formatin {{format}}.",
       "projectFormatTooNew": "Ky skedar projekti përdor versionin e formatit {{found}}, por ky version i Restorm kupton vetëm versionin {{current}}. Përditësoni Restorm për ta importuar.",
-      "projectFormatMissing": "Ky skedar nuk deklaron asnjë version formati Restorm, prandaj nuk është skedar projekti Restorm."
+      "projectFormatMissing": "Ky skedar nuk deklaron asnjë version formati Restorm, prandaj nuk është skedar projekti Restorm.",
+      "openApiUnsupportedVersion": "Kjo specifikë deklaron versionin OpenAPI {{version}}, të cilin ky version i Restorm nuk e mbështet ende. Përditësoni Restorm për ta importuar."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger është një markë tregtare e regjistruar e SmartBear Software."
       },
       "openapi": {
-        "description": "Standardi aktual OpenAPI (3.0 dhe 3.1). E njëjta ergonomi si Swagger: parametrat, trupat e kërkesës, skemat e sigurisë dhe webhook-ët arrijnë si një pemë kërkesash të tipizuara me shembuj gati për t'u dërguar.",
+        "description": "Standardi aktual OpenAPI (3.0, 3.1 dhe 3.2). E njëjta ergonomi si Swagger: parametrat, trupat e kërkesës, skemat e sigurisë dhe webhook-ët arrijnë si një pemë kërkesash të tipizuara me shembuj gati për t'u dërguar.",
         "trademark": "OpenAPI është një projekt i OpenAPI Initiative nën Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Dokumentim"
     },
     "title": "Importo kërkesa",
-    "largeApiHint": "Ky API është i madh. Për ta mbajtur projektin të lehtë, zgjidhni vetëm rrugët që ju duhen dhe çzgjidhni të tjerat më poshtë. Ato që lini jashtë mbeten në dokumentacion — mund t'i shtoni në çdo kohë."
+    "largeApiHint": "Ky API është i madh. Për ta mbajtur projektin të lehtë, zgjidhni vetëm rrugët që ju duhen dhe çzgjidhni të tjerat më poshtë. Ato që lini jashtë mbeten në dokumentacion — mund t'i shtoni në çdo kohë.",
+    "browse": "Shfleto…",
+    "warning": {
+      "openApiStructuralIssues": "Specifika u importua, por {{count}} pjesë nuk u zgjidhën dot dhe u anashkaluan ($ref të pazgjidhur, trupa kërkesash pa content). Pjesa tjetër u importua normalisht."
+    }
   },
   "emptyBench": {
     "importCard": {

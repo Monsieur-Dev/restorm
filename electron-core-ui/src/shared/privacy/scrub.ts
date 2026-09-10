@@ -107,6 +107,17 @@ export interface ScrubOptions {
    * Defaults to 8 — deep enough for a realistic SDK event, shallow enough that
    * a pathological object can't stall the walk. */
   maxDepth?: number | undefined
+  /**
+   * Maximum length (in characters) of any single string value AFTER scrubbing.
+   * A string longer than this is cut to the cap with a `…[+N chars]` marker
+   * appended. Defence-in-depth against bulk user content — a whole imported
+   * document, a pasted spec, a large response body — riding into a payload in
+   * one string field, where the secret/URL detectors (which look for shapes,
+   * not size) would pass it through. The cut happens last, after every detector
+   * has already run and redacted the head, so it only drops trailing bulk, not
+   * anything a detector would have caught. Unset means no length cap.
+   */
+  maxStringLength?: number | undefined
 }
 
 /** One place a detector fired on a value that was supposed to be clean. */
@@ -376,7 +387,32 @@ export function scrubString(text: string, options: ScrubOptions = {}): string {
   out = out.replace(EMAIL_RE, REDACTED_EMAIL)
   out = out.replace(IPV4_RE, REDACTED_IP)
   out = out.replace(LONG_BLOB_RE, REDACTED_TOKEN)
-  return unparkUrls(out, parts)
+  out = unparkUrls(out, parts)
+
+  // Length cap runs LAST — after every detector has scrubbed the head — so it
+  // only trims trailing bulk (a pasted document, a huge body), never content a
+  // detector would otherwise have caught. The result (head + marker) is kept
+  // AT OR UNDER `cap` so re-scrubbing is a no-op: were it left over `cap`, the
+  // self-consistency gate would truncate again, see a different string, and
+  // flag the value as "unscrubbed".
+  const cap = options.maxStringLength
+  if (cap !== undefined && cap >= 0 && out.length > cap) {
+    const marker = (keep: number): string => `…[+${String(out.length - keep)} chars]`
+    // Reserve room for the marker within the cap. Converge `keep` to a fixpoint
+    // (its marker's digit-width can change `keep`, which can change the width
+    // again), then guarantee `keep + marker <= cap` — a growing dropped-count
+    // must never push the result 1 char over, or the self-consistency gate
+    // would re-truncate it and flag the value as "unscrubbed".
+    let keep = cap
+    for (let pass = 0; pass < 4; pass++) {
+      const next = Math.max(0, cap - marker(keep).length)
+      if (next === keep) break
+      keep = next
+    }
+    while (keep > 0 && keep + marker(keep).length > cap) keep--
+    out = `${out.slice(0, keep)}${marker(keep)}`
+  }
+  return out
 }
 
 /**

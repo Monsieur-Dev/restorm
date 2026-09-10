@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Formatet på denne kilde blev ikke genkendt.",
       "unsupportedFormat": "Intet importmodul understøtter formatet {{format}}.",
       "projectFormatTooNew": "Denne projektfil bruger formatversion {{found}}, men denne version af Restorm forstår kun version {{current}}. Opdater Restorm for at importere den.",
-      "projectFormatMissing": "Denne fil erklærer ingen Restorm-formatversion og er derfor ikke en Restorm-projektfil."
+      "projectFormatMissing": "Denne fil erklærer ingen Restorm-formatversion og er derfor ikke en Restorm-projektfil.",
+      "openApiUnsupportedVersion": "Denne specifikation angiver OpenAPI-version {{version}}, som denne udgave af Restorm endnu ikke understøtter. Opdater Restorm for at importere den."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger er et registreret varemærke tilhørende SmartBear Software."
       },
       "openapi": {
-        "description": "Den aktuelle OpenAPI-standard (3.0 og 3.1). Samme indsæt-og-kør-ergonomi som Swagger: parametre, anmodningsbodies, sikkerhedsskemaer og webhooks lander som et træ af typede anmodninger med eksempler klar til afsendelse.",
+        "description": "Den aktuelle OpenAPI-standard (3.0, 3.1 og 3.2). Samme indsæt-og-kør-ergonomi som Swagger: parametre, anmodningsbodies, sikkerhedsskemaer og webhooks lander som et træ af typede anmodninger med eksempler klar til afsendelse.",
         "trademark": "OpenAPI er et projekt under OpenAPI Initiative i Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Dokumentation"
     },
     "title": "Importér anmodninger",
-    "largeApiHint": "Denne API er stor. Hold dit projekt let: markér kun de ruter, du har brug for, og fravælg resten nedenfor. Dem, du udelader, bliver i dokumentationen — du kan tilføje dem når som helst."
+    "largeApiHint": "Denne API er stor. Hold dit projekt let: markér kun de ruter, du har brug for, og fravælg resten nedenfor. Dem, du udelader, bliver i dokumentationen — du kan tilføje dem når som helst.",
+    "browse": "Gennemse…",
+    "warning": {
+      "openApiStructuralIssues": "Specifikationen blev importeret, men {{count}} del(e) kunne ikke løses og blev sprunget over (uløste $refs, request-bodies uden content). Resten blev importeret normalt."
+    }
   },
   "emptyBench": {
     "importCard": {

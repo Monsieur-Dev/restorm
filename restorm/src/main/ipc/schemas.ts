@@ -621,6 +621,9 @@ export const importPreviewArgs = z.tuple([
 ])
 export const importImportArgs = z.tuple([z.string()])
 
+/** No args — the import modal's "Browse" button opens a native file picker. */
+export const importPickFileArgs = z.tuple([])
+
 export const importPostImportSeedArgs = z.tuple([
   z.object({
     /** Same `source` string `import:preview` was called with (URL or file path). */

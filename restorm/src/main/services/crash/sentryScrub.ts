@@ -68,6 +68,15 @@ export function crashScrubOptions(overrides: ScrubOptions = {}): ScrubOptions {
     // policy reads as "the Sentry trace identifiers", not "the ones that happen
     // to trip the rule today".
     preserveKeys: ['event_id', 'trace_id', 'span_id'],
+    // Defence-in-depth for a privacy-first client: cap any single string in the
+    // payload so bulk user content — a whole imported OpenAPI/AsyncAPI spec, a
+    // pasted document, a large response body — can't ride into a crash report in
+    // one field. The secret/URL detectors match shapes, not size, so a 250 KB
+    // spec would otherwise sail through. 4 KB keeps stack frames, messages and
+    // breadcrumb URLs fully intact (all far shorter) while truncating anything
+    // document-sized to a stub. The primary guard is that handled import errors
+    // never reach Sentry at all; this is the belt to that suspenders.
+    maxStringLength: 4096,
     ...overrides
   }
 }

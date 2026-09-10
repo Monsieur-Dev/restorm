@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Mbështetje për OpenAPI 3.2.**
+
+- **Importo specifikime OpenAPI 3.2.** Metoda `QUERY`, foljet e personalizuara (`additionalOperations`), parametri query string dhe llojet e mediave në transmetim importohen si kërkesa gati për t'u ekzekutuar.
+- **Shfleto një skedar për ta importuar.** Një buton Shfleto në dritaren e importit hap një zgjedhës skedarësh nativ — s'ka më shtypje apo tërheqje shtegu.
+- **Pamje e ndarë për ngjitje të mëdha.** Ngjitja e një specifikimi me shumë rreshta hap një redaktues kodi majtas dhe parapamjen djathtas, me një ndarës të lëvizshëm.
+- **Import tolerant.** Një specifikim me disa `$ref` të prishur importon të gjitha rrugët që mundet dhe shfaq një paralajmërim me atë që iu desh të anashkalonte.
+
+Rregullime:
+
+- Importimi i një specifikimi të pavlefshëm ose të paarritshëm shfaq një mesazh të qartë në vend që të hapë dritaren e raportit të prishjes.
+- Pamja e detajuar e raportit të prishjes lëviz sërish.
+- Sfondet e dritareve nuk janë më të turbullta.
+
 ## v1.1.1
 
 **Projektuesi i API-t tani drejtohet nga shiriti anësor.**

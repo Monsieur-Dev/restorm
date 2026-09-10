@@ -1058,7 +1058,8 @@
       "formatNotDetected": "Formatul acestei surse nu a fost recunoscut.",
       "unsupportedFormat": "Niciun importator nu gestionează formatul {{format}}.",
       "projectFormatTooNew": "Acest fișier de proiect folosește versiunea de format {{found}}, dar această versiune de Restorm înțelege doar versiunea {{current}}. Actualizați Restorm pentru a-l importa.",
-      "projectFormatMissing": "Acest fișier nu declară nicio versiune de format Restorm, deci nu este un fișier de proiect Restorm."
+      "projectFormatMissing": "Acest fișier nu declară nicio versiune de format Restorm, deci nu este un fișier de proiect Restorm.",
+      "openApiUnsupportedVersion": "Această specificație declară versiunea OpenAPI {{version}}, pe care această versiune de Restorm nu o acceptă încă. Actualizați Restorm pentru a o importa."
     },
     "formats": {
       "swagger": {
@@ -1066,7 +1067,7 @@
         "trademark": "Swagger este o marcă înregistrată a SmartBear Software."
       },
       "openapi": {
-        "description": "Standardul OpenAPI actual (3.0 și 3.1). Aceeași ergonomie de tip lipit-și-gata ca la Swagger: parametri, corpuri de cereri, scheme de securitate și webhook-uri ajung sub forma unui arbore de cereri tipizate, cu exemple gata de trimis.",
+        "description": "Standardul OpenAPI actual (3.0, 3.1 și 3.2). Aceeași ergonomie de tip lipit-și-gata ca la Swagger: parametri, corpuri de cereri, scheme de securitate și webhook-uri ajung sub forma unui arbore de cereri tipizate, cu exemple gata de trimis.",
         "trademark": "OpenAPI este un proiect al OpenAPI Initiative sub umbrela Linux Foundation."
       },
       "curl": {
@@ -1205,7 +1206,11 @@
       "documentation": "Documentație"
     },
     "title": "Importă cereri",
-    "largeApiHint": "Acest API este mare. Pentru a păstra proiectul ușor, bifați doar rutele de care aveți nevoie și debifați-le pe celelalte mai jos. Cele pe care le lăsați deoparte rămân în documentație — le puteți adăuga oricând."
+    "largeApiHint": "Acest API este mare. Pentru a păstra proiectul ușor, bifați doar rutele de care aveți nevoie și debifați-le pe celelalte mai jos. Cele pe care le lăsați deoparte rămân în documentație — le puteți adăuga oricând.",
+    "browse": "Răsfoiește…",
+    "warning": {
+      "openApiStructuralIssues": "Specificația a fost importată, dar {{count}} parte/părți nu au putut fi rezolvate și au fost omise ($ref-uri nerezolvate, corpuri de cerere fără content). Restul a fost importat normal."
+    }
   },
   "emptyBench": {
     "importCard": {

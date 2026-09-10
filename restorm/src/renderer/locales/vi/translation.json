@@ -1056,7 +1056,8 @@
       "formatNotDetected": "Không nhận diện được định dạng của nguồn này.",
       "unsupportedFormat": "Không có trình nhập nào xử lý định dạng {{format}}.",
       "projectFormatTooNew": "Tệp dự án này dùng phiên bản định dạng {{found}}, nhưng phiên bản Restorm này chỉ hiểu phiên bản {{current}}. Hãy cập nhật Restorm để nhập nó.",
-      "projectFormatMissing": "Tệp này không khai báo phiên bản định dạng Restorm, nên không phải là tệp dự án Restorm."
+      "projectFormatMissing": "Tệp này không khai báo phiên bản định dạng Restorm, nên không phải là tệp dự án Restorm.",
+      "openApiUnsupportedVersion": "Đặc tả này khai báo phiên bản OpenAPI {{version}}, mà bản dựng Restorm này chưa hỗ trợ. Hãy cập nhật Restorm để nhập nó."
     },
     "formats": {
       "swagger": {
@@ -1064,7 +1065,7 @@
         "trademark": "Swagger là nhãn hiệu đã đăng ký của SmartBear Software."
       },
       "openapi": {
-        "description": "Tiêu chuẩn OpenAPI hiện tại (3.0 và 3.1). Cùng cách thức dán-và-chạy như Swagger: tham số, body yêu cầu, sơ đồ bảo mật và webhook đến dưới dạng cây yêu cầu kiểu với ví dụ sẵn sàng gửi.",
+        "description": "Tiêu chuẩn OpenAPI hiện tại (3.0, 3.1 và 3.2). Cùng cách thức dán-và-chạy như Swagger: tham số, body yêu cầu, sơ đồ bảo mật và webhook đến dưới dạng cây yêu cầu kiểu với ví dụ sẵn sàng gửi.",
         "trademark": "OpenAPI là dự án của OpenAPI Initiative thuộc Linux Foundation."
       },
       "curl": {
@@ -1203,7 +1204,11 @@
       "documentation": "Tài liệu"
     },
     "title": "Nhập yêu cầu",
-    "largeApiHint": "API này lớn. Để giữ dự án nhẹ, chỉ tích những tuyến bạn cần và bỏ tích phần còn lại bên dưới. Những tuyến bạn bỏ qua vẫn nằm trong tài liệu — bạn có thể thêm chúng bất cứ lúc nào."
+    "largeApiHint": "API này lớn. Để giữ dự án nhẹ, chỉ tích những tuyến bạn cần và bỏ tích phần còn lại bên dưới. Những tuyến bạn bỏ qua vẫn nằm trong tài liệu — bạn có thể thêm chúng bất cứ lúc nào.",
+    "browse": "Duyệt…",
+    "warning": {
+      "openApiStructuralIssues": "Đặc tả đã được nhập, nhưng {{count}} phần không thể phân giải và đã bị bỏ qua ($ref chưa phân giải, phần thân yêu cầu không có content). Phần còn lại được nhập bình thường."
+    }
   },
   "emptyBench": {
     "importCard": {

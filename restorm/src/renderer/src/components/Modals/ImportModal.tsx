@@ -7,6 +7,9 @@ import {
   Modal,
   Button,
   InputBox,
+  CodeEditor,
+  Sash,
+  useVerticalSash,
   KeyValueTable,
   Tabs,
   Wordmark,
@@ -30,6 +33,8 @@ import { GrpcReflectionImportModal } from './GrpcReflectionImportModal'
 import { ImportSelectionTree } from './ImportSelectionTree'
 import { allLeafKeys, isLargeImport } from './importSelectionHelpers'
 import { describeImportError, flattenImportError, type DisplayedImportError } from './importErrorDisplay'
+import { describeImportWarning, type DisplayedImportWarning } from './importWarningDisplay'
+import type { ImportWarningDescriptor } from '../../../../shared/config/importWarnings'
 import { filterImportTreeBySelection } from '../../../../shared/utils/importNaturalKey'
 import type { ImportMeta } from '../../hooks/useImport'
 import './ImportModal.css'
@@ -168,6 +173,10 @@ export function ImportModal({
   // filesystem, a server), the upstream text verbatim. See
   // `importErrorDisplay.ts` for why the two never merge into one string.
   const [error, setError] = useState<DisplayedImportError | null>(null)
+  // Non-fatal problems reported alongside a SUCCESSFUL preview (an OpenAPI
+  // spec with dangling $refs, etc.). Rendered as a warning callout so the
+  // import proceeds while naming what couldn't be built.
+  const [warnings, setWarnings] = useState<DisplayedImportWarning[]>([])
   const [attachedAuth, setAttachedAuth] = useState<AuthenticationRequest | null>(null)
   // Resolved auth headers live in a ref rather than state — the only
   // consumer is the debounced preview closure, and we need the value
@@ -269,6 +278,7 @@ export function ImportModal({
   const handleInputChange = useCallback((value: string) => {
     setInput(value)
     setError(null)
+    setWarnings([])
 
     // Clear existing timer
     if (debounceTimerRef.current) {
@@ -321,11 +331,14 @@ export function ImportModal({
             setPreviewFormat(result.format)
             setPreviewExtraHeaders(composed ?? undefined)
             setError(null)
+            const rawWarnings = (result as { warnings?: ImportWarningDescriptor[] }).warnings
+            setWarnings(rawWarnings ? rawWarnings.map((w) => describeImportWarning(t, w)) : [])
           } else {
             setPreviewItems([])
             setPreviewChecksum(undefined)
             setPreviewFormat(undefined)
             setPreviewExtraHeaders(undefined)
+            setWarnings([])
             setError(describeImportError(t, {
               ...(result?.error !== undefined ? { raw: result.error } : {}),
               ...(result?.errorCode !== undefined ? { code: result.errorCode } : {}),
@@ -337,6 +350,7 @@ export function ImportModal({
           setPreviewChecksum(undefined)
           setPreviewFormat(undefined)
           setPreviewExtraHeaders(undefined)
+          setWarnings([])
           setError(describeImportError(t, { raw: err instanceof Error ? err.message : String(err) }))
         } finally {
           setIsLoading(false)
@@ -690,6 +704,7 @@ export function ImportModal({
     if (storedRows.length > 0) setCustomHeadersOpen(true)
     setIsLoading(true)
     setError(null)
+    setWarnings([])
     const token = { cancelled: false }
     void (async () => {
       try {
@@ -761,6 +776,18 @@ export function ImportModal({
   const handleOpenGrpcReflection = useCallback(() => {
     setShowGrpcReflectionModal(true)
   }, [])
+
+  // "Browse" — open a native file picker and feed the chosen absolute path
+  // into the same input the user could type into, so the existing
+  // auto-detect / preview flow handles it unchanged.
+  const handleBrowse = useCallback(() => {
+    void (async () => {
+      const result = await window.restorm?.import.pickFile()
+      if (result?.success === true && typeof result.path === 'string' && result.path.length > 0) {
+        handleInputChange(result.path)
+      }
+    })()
+  }, [handleInputChange])
 
   // The reflection import already produces a fully-formed `EnvironmentFolder`
   // (same shape `buildEnvironmentFolderFromParsedProto` gives a proto-file
@@ -840,12 +867,62 @@ export function ImportModal({
       setLockedKeys(new Set())
       setSearchFilter('')
       setError(null)
+      setWarnings([])
       setIsLoading(false)
       setIsDraggingOver(false)
       setManualHeaders([])
       setCustomHeadersOpen(false)
     }
   }, [isOpen])
+
+  // Split layout: once the source input holds more than one line (a pasted
+  // JSON/YAML spec), move the text zone to a resizable LEFT pane (a Monaco
+  // CodeEditor) and everything else to the RIGHT, so a whole pasted spec can be
+  // read + scrolled with syntax highlighting instead of living in a one-line
+  // field. Never in refresh mode (the URL is read-only).
+  const isSplit = !refreshContext && /[\r\n]/.test(input)
+
+  // ECUI vertical sash driving the left (text) pane's width. `containerRef`
+  // attaches to `.import-modal`; the Sash reads `layoutProvider` for its
+  // position and the hook clamps the width so neither pane collapses. Persisted
+  // so the chosen split survives across imports.
+  const {
+    containerRef: splitContainerRef,
+    width: splitLeftWidth,
+    setWidth: setSplitLeftWidth,
+    layoutProvider: splitLayoutProvider,
+    handleSashStart: onSplitSashStart,
+    handleSashChange: onSplitSashChange
+  } = useVerticalSash({
+    initialWidth: 460,
+    minWidth: 260,
+    minRightWidth: 340
+  })
+
+  // Default the split to 50/50: seed the left pane to half the modal each time
+  // the split activates (a false → true transition). The user can still drag it
+  // for the current session; the next time it re-splits it starts even again.
+  const wasSplitRef = useRef(false)
+  useEffect(() => {
+    let raf = 0
+    if (isSplit && !wasSplitRef.current) {
+      const el = splitContainerRef.current
+      if (el) {
+        // Defer to the next frame so the row layout has settled before we read
+        // the container width — reading it mid-transition can measure an
+        // intrinsic (too-wide) value and land the split off 50/50.
+        raf = requestAnimationFrame(() => {
+          if (el.clientWidth > 0) setSplitLeftWidth(Math.round(el.clientWidth / 2))
+        })
+      }
+    }
+    wasSplitRef.current = isSplit
+    return () => { if (raf) cancelAnimationFrame(raf) }
+  }, [isSplit, setSplitLeftWidth, splitContainerRef])
+
+  // The pasted source is usually JSON, but can be YAML; pick the editor
+  // highlighting from the first non-space char rather than forcing JSON.
+  const sourceEditorLanguage = /^\s*[{[]/.test(input) ? 'json' : 'yaml'
 
   return (
     <Modal
@@ -859,8 +936,10 @@ export function ImportModal({
       initialFocusTestId="source-input-input"
     >
       <div
+        ref={splitContainerRef}
         className="import-modal"
         data-testid="import-modal"
+        data-split={isSplit ? 'true' : undefined}
         data-refresh-mode={refreshContext ? 'true' : undefined}
         data-dragging-over={isDraggingOver ? 'true' : undefined}
         onDragEnter={handleModalDragEnter}
@@ -869,8 +948,13 @@ export function ImportModal({
         onDrop={handleModalDrop}
       >
 
-        {/* Source Input */}
-        <div className="import-section">
+        {/* Source Input — its own section so the split layout can move it to
+            the left pane while everything else moves right. In split mode its
+            width is driven by the sash. */}
+        <div
+          className="import-section import-source-section"
+          {...(isSplit ? { style: { width: splitLeftWidth, flex: '0 0 auto' } } : {})}
+        >
           <label className="import-label">
             {t('import.source.label')}
           </label>
@@ -894,6 +978,21 @@ export function ImportModal({
             >
               {refreshContext.sourceUrl}
             </div>
+          ) : isSplit ? (
+            // Multi-line source (a pasted spec): a Monaco CodeEditor filling the
+            // left pane — syntax highlighting, line numbers, proper scrolling.
+            // Bound to the same `input` state as the single-line InputBox, so
+            // toggling between them keeps the value.
+            <div className="import-source-editor" data-testid="source-input-editor">
+              <CodeEditor
+                value={input}
+                language={sourceEditorLanguage}
+                height="100%"
+                applyEditorSettings={false}
+                options={{ wordWrap: 'off', scrollBeyondLastLine: false }}
+                onChange={(next) => { handleInputChange(next ?? '') }}
+              />
+            </div>
           ) : (
             <InputBox
               value={input}
@@ -906,6 +1005,26 @@ export function ImportModal({
               data-testid="source-input"
             />
           )}
+        </div>
+        {/* ECUI vertical sash between the source pane and everything else —
+            only present in split mode. Positioned by the useVerticalSash
+            layout provider; dragging it resizes the left pane. */}
+        {isSplit && (
+          <Sash
+            orientation="vertical"
+            layoutProvider={splitLayoutProvider}
+            onStart={onSplitSashStart}
+            onChange={onSplitSashChange}
+            size={8}
+            data-testid="import-split-sash"
+          />
+        )}
+        {/* Right side — callouts, action buttons, preview and the import/cancel
+            row. `display: contents` when not split, so this wrapper is inert and
+            the layout is byte-identical to the single-column modal; a real flex
+            column (the right pane) when split. */}
+        <div className="import-right">
+          <div className="import-section import-controls-section">
           {isLoading && (
             <div className="import-loading" role="status">
               <i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
@@ -934,13 +1053,38 @@ export function ImportModal({
               </div>
             </div>
           )}
+          {/* Non-fatal warnings for a SUCCESSFUL import — the spec parsed and a
+              tree is previewed, but parts of it (dangling $refs, bodies with no
+              content) were skipped. Shown as an attention callout, not an
+              error, so the user imports what works while seeing what didn't. */}
+          {warnings.map((warning, index) => (
+            <div
+              key={index}
+              className="import-warning"
+              role="status"
+              data-testid="import-warning-message"
+            >
+              <i className="codicon codicon-warning" aria-hidden="true" />
+              <div className="import-warning__text">
+                <span>{warning.message}</span>
+                {warning.detail !== null && (
+                  <span className="import-warning__detail" data-testid="import-warning-detail">
+                    <span className="import-warning__detail-label">
+                      {t('import.error.detailLabel', 'Technical detail')}
+                    </span>
+                    <code>{warning.detail}</code>
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
           {/* Auth-route attach + manual headers are always available —
               not just on 401/403 — so users can pre-wire APIs that
               need a token even when the first request otherwise
               succeeds (or on file-based imports). Both buttons sit
               on the same row so the "auth-shaped vs one-shot
               headers" choice is presented at the same visual level. */}
-          <div style={{ display: 'inline-flex', gap: 8, alignSelf: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', width: '100%' }}>
             {!attachedAuth && (
               <Button
                 icon="key"
@@ -987,6 +1131,25 @@ export function ImportModal({
             >
               {t('import.formats.grpcReflection.action', 'Connect to a server…')}
             </Button>
+            {/* Browse — a normal (not `small`) button pushed to the far right of
+                the row, opening a native file picker for a local spec/collection. */}
+            {!refreshContext && (
+              // The ECUI `Button` puts caller `style` on the inner <button>, but
+              // the flex item is its `.button-container` wrapper — so a
+              // `marginLeft:auto` on the button never reaches the flex axis.
+              // Wrap it in a div that IS the flex item and carry the auto margin
+              // there to push Browse to the far right of the row.
+              <div style={{ marginLeft: 'auto' }}>
+                <Button
+                  icon="folder-opened"
+                  onClick={handleBrowse}
+                  options={{ ariaLabel: t('import.browse', 'Parcourir…') }}
+                  data-testid="import-browse-button"
+                >
+                  {t('import.browse', 'Parcourir…')}
+                </Button>
+              </div>
+            )}
           </div>
           {attachedAuth ? (
             <div
@@ -1148,6 +1311,7 @@ export function ImportModal({
             })()}
           </Button>
         </div>
+        </div>{/* .import-right */}
       </div>
 
       <AuthenticationSetupModal
