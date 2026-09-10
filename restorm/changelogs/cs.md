@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Podpora OpenAPI 3.2.**
+
+- **Import specifikací OpenAPI 3.2.** Metoda `QUERY`, vlastní slovesa (`additionalOperations`), parametr query string a streamované typy médií se importují jako požadavky připravené ke spuštění.
+- **Vyberte soubor k importu.** Tlačítko Procházet v dialogu importu otevře nativní výběr souboru — už žádné psaní ani přetahování cesty.
+- **Rozdělené zobrazení pro velká vložení.** Vložení víceřádkové specifikace otevře vlevo editor kódu a vpravo náhled s posuvným oddělovačem.
+- **Tolerantní import.** Specifikace s několika rozbitými `$ref` naimportuje všechny možné trasy a zobrazí upozornění s tím, co musela vynechat.
+
+Opravy:
+
+- Import neplatné nebo nedostupné specifikace zobrazí jasnou zprávu místo otevření dialogu hlášení o pádu.
+- Detailní zobrazení hlášení o pádu se opět posouvá.
+- Pozadí dialogů už není rozmazané.
+
 ## v1.1.1
 
 **Návrhář API se nyní ovládá z postranního panelu.**

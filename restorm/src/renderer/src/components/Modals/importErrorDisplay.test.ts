@@ -46,7 +46,7 @@ beforeAll(() => {
 
 /** Parameters that keep every code's sentence sensible, so one loop can
  *  cover all of them. Extra parameters a code doesn't use are inert. */
-const SAMPLE_PARAMS = { format: 'openapi', status: '502', url: 'https://api.example.com/spec', found: '99', current: '1' }
+const SAMPLE_PARAMS = { format: 'openapi', status: '502', url: 'https://api.example.com/spec', found: '99', current: '1', version: '4.0.0' }
 
 describe('describeImportError', () => {
   it('names every failure code in every shipped locale', () => {

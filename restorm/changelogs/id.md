@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Dukungan OpenAPI 3.2.**
+
+- **Impor spesifikasi OpenAPI 3.2.** Metode `QUERY`, verba khusus (`additionalOperations`), parameter query string, dan tipe media streaming diimpor sebagai permintaan yang siap dijalankan.
+- **Telusuri berkas untuk diimpor.** Tombol Telusuri di dialog impor membuka pemilih berkas asli — tidak perlu lagi mengetik atau menyeret jalur.
+- **Tampilan terbagi untuk tempelan besar.** Menempel spesifikasi multi-baris membuka editor kode di kiri dan pratinjau di kanan, dengan pembatas yang dapat digeser.
+- **Impor yang toleran.** Spesifikasi dengan beberapa `$ref` rusak mengimpor semua rute yang bisa dan menampilkan peringatan berisi apa yang terpaksa dilewati.
+
+Perbaikan:
+
+- Mengimpor spesifikasi yang tidak valid atau tidak terjangkau menampilkan pesan yang jelas alih-alih membuka dialog laporan kerusakan.
+- Tampilan detail laporan kerusakan dapat digulir kembali.
+- Latar belakang dialog tidak lagi buram.
+
 ## v1.1.1
 
 **Perancang API kini dikendalikan dari bilah sisi.**

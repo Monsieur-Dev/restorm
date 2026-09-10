@@ -1056,7 +1056,8 @@
       "formatNotDetected": "無法辨識此來源的格式。",
       "unsupportedFormat": "沒有匯入器支援 {{format}} 格式。",
       "projectFormatTooNew": "此專案檔使用格式版本 {{found}}，但目前版本的 Restorm 僅支援版本 {{current}}。請更新 Restorm 後再匯入。",
-      "projectFormatMissing": "此檔案未宣告 Restorm 格式版本，因此不是 Restorm 專案檔。"
+      "projectFormatMissing": "此檔案未宣告 Restorm 格式版本，因此不是 Restorm 專案檔。",
+      "openApiUnsupportedVersion": "此規格宣告的 OpenAPI 版本 {{version}} 尚不受此版本的 Restorm 支援。請更新 Restorm 以匯入它。"
     },
     "formats": {
       "swagger": {
@@ -1064,7 +1065,7 @@
         "trademark": "Swagger 為 SmartBear Software 的註冊商標。"
       },
       "openapi": {
-        "description": "目前的 OpenAPI 標準（3.0 與 3.1）。與 Swagger 一樣貼上即用：參數、請求內文、安全機制與 webhook 都會成為附帶範例、可立即傳送的型別化請求樹。",
+        "description": "目前的 OpenAPI 標準（3.0, 3.1 與 3.2）。與 Swagger 一樣貼上即用：參數、請求內文、安全機制與 webhook 都會成為附帶範例、可立即傳送的型別化請求樹。",
         "trademark": "OpenAPI 是 Linux Foundation 之下 OpenAPI Initiative 的計畫。"
       },
       "curl": {
@@ -1203,7 +1204,11 @@
       "documentation": "文件"
     },
     "title": "匯入請求",
-    "largeApiHint": "此 API 很大。為讓專案保持輕量，只勾選你需要的路由，並在下方取消勾選其餘部分。未匯入的會保留在文件中——你可以隨時新增。"
+    "largeApiHint": "此 API 很大。為讓專案保持輕量，只勾選你需要的路由，並在下方取消勾選其餘部分。未匯入的會保留在文件中——你可以隨時新增。",
+    "browse": "瀏覽…",
+    "warning": {
+      "openApiStructuralIssues": "規格已匯入，但有 {{count}} 處無法解析而被略過（未解析的 $ref、缺少 content 的請求主體）。其餘部分已正常匯入。"
+    }
   },
   "emptyBench": {
     "importCard": {

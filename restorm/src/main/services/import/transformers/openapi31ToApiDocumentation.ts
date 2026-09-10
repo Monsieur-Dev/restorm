@@ -132,35 +132,47 @@ function downcastSpec31To30(spec: OAS31Spec): OAS3Spec {
     return normalizeSchema31To30(value as CommonSchema)
   }
 
+  const walkOperation = (op: Record<string, unknown> | undefined): void => {
+    if (!op || typeof op !== 'object') return
+    const params = op.parameters as Record<string, unknown>[] | undefined
+    if (Array.isArray(params)) {
+      for (const p of params) {
+        if (p.schema) p.schema = walkSchemaInline(p.schema)
+      }
+    }
+    const body = op.requestBody as Record<string, unknown> | undefined
+    if (body && typeof body === 'object') {
+      const content = body.content as Record<string, Record<string, unknown>> | undefined
+      if (content) {
+        for (const media of Object.values(content)) {
+          // OpenAPI 3.2 streaming media types use `itemSchema`; normalise both.
+          if (media.schema) media.schema = walkSchemaInline(media.schema)
+          if (media.itemSchema) media.itemSchema = walkSchemaInline(media.itemSchema)
+        }
+      }
+    }
+    const responses = op.responses as Record<string, Record<string, unknown>> | undefined
+    if (responses) {
+      for (const resp of Object.values(responses)) {
+        const content = resp.content as Record<string, Record<string, unknown>> | undefined
+        if (!content) continue
+        for (const media of Object.values(content)) {
+          if (media.schema) media.schema = walkSchemaInline(media.schema)
+          if (media.itemSchema) media.itemSchema = walkSchemaInline(media.itemSchema)
+        }
+      }
+    }
+  }
+
   const walkPathItem = (pathItem: Record<string, unknown>): void => {
-    for (const method of ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'] as const) {
-      const op = pathItem[method] as Record<string, unknown> | undefined
-      if (!op) continue
-      const params = op.parameters as Record<string, unknown>[] | undefined
-      if (Array.isArray(params)) {
-        for (const p of params) {
-          if (p.schema) p.schema = walkSchemaInline(p.schema)
-        }
-      }
-      const body = op.requestBody as Record<string, unknown> | undefined
-      if (body && typeof body === 'object') {
-        const content = body.content as Record<string, Record<string, unknown>> | undefined
-        if (content) {
-          for (const media of Object.values(content)) {
-            if (media.schema) media.schema = walkSchemaInline(media.schema)
-          }
-        }
-      }
-      const responses = op.responses as Record<string, Record<string, unknown>> | undefined
-      if (responses) {
-        for (const resp of Object.values(responses)) {
-          const content = resp.content as Record<string, Record<string, unknown>> | undefined
-          if (!content) continue
-          for (const media of Object.values(content)) {
-            if (media.schema) media.schema = walkSchemaInline(media.schema)
-          }
-        }
-      }
+    // 3.0/3.1 fixed methods + the 3.2 `query` method.
+    for (const method of ['get', 'post', 'put', 'delete', 'patch', 'head', 'options', 'query'] as const) {
+      walkOperation(pathItem[method] as Record<string, unknown> | undefined)
+    }
+    // OpenAPI 3.2 `additionalOperations` — custom-verb operations.
+    const additional = pathItem.additionalOperations as Record<string, unknown> | undefined
+    if (additional && typeof additional === 'object') {
+      for (const op of Object.values(additional)) walkOperation(op as Record<string, unknown> | undefined)
     }
     // Path-item-scoped parameters live alongside operations.
     const sharedParams = pathItem.parameters as Record<string, unknown>[] | undefined

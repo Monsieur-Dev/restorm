@@ -84,7 +84,7 @@ import {
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
   scenarioUsageGetArgs,
-  importPreviewArgs, importImportArgs, importPostImportSeedArgs,
+  importPreviewArgs, importImportArgs, importPickFileArgs, importPostImportSeedArgs,
   miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
   miniBrowserNavigateArgs, miniBrowserReloadArgs,
   miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs,
@@ -1804,6 +1804,24 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
   // Import IPC Handlers
   // ==========================================================================
+
+  // Native file picker for the import modal's "Browse" button — returns the
+  // chosen absolute path, which the modal feeds into the same input the user
+  // could type into. Mirrors `design:pick-directory` (an openDirectory picker).
+  validatedHandle('import:pick-file', importPickFileArgs, async (_event) => {
+    const window = BrowserWindow.fromWebContents(_event.sender)
+    if (!window) return { success: false, error: 'No window found' }
+    const result = await dialog.showOpenDialog(window, {
+      title: 'Choose a file to import',
+      properties: ['openFile'],
+      filters: [
+        { name: 'API specs & collections', extensions: ['json', 'yaml', 'yml', 'xml', 'graphql', 'graphqls', 'har', 'raml', 'proto'] },
+        { name: 'All files', extensions: ['*'] }
+      ]
+    })
+    if (result.canceled || result.filePaths.length === 0) return { success: false, canceled: true }
+    return { success: true, path: result.filePaths[0] }
+  })
 
   validatedHandle('import:preview', importPreviewArgs, async (_event, [input, options]) => {
     logger.info('[IPC] Import preview requested:', { input })

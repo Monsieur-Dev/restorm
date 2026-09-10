@@ -1059,7 +1059,8 @@
       "formatNotDetected": "Formát tohoto zdroje nebyl rozpoznán.",
       "unsupportedFormat": "Formát {{format}} nezpracovává žádný importér.",
       "projectFormatTooNew": "Tento soubor projektu používá verzi formátu {{found}}, ale tato verze Restormu rozumí jen verzi {{current}}. Aktualizujte Restorm, abyste jej mohli importovat.",
-      "projectFormatMissing": "Tento soubor nedeklaruje žádnou verzi formátu Restorm, není to tedy soubor projektu Restorm."
+      "projectFormatMissing": "Tento soubor nedeklaruje žádnou verzi formátu Restorm, není to tedy soubor projektu Restorm.",
+      "openApiUnsupportedVersion": "Tato specifikace deklaruje verzi OpenAPI {{version}}, kterou tato verze Restormu zatím nepodporuje. Aktualizujte Restorm, abyste ji importovali."
     },
     "formats": {
       "swagger": {
@@ -1067,7 +1068,7 @@
         "trademark": "Swagger je registrovaná ochranná známka SmartBear Software."
       },
       "openapi": {
-        "description": "Současný standard OpenAPI (3.0 a 3.1). Stejná ergonomie jako u Swaggeru: parametry, těla požadavků, schémata zabezpečení a webhooky se dostanou do stromu typovaných požadavků s příklady připravenými k odeslání.",
+        "description": "Současný standard OpenAPI (3.0, 3.1 a 3.2). Stejná ergonomie jako u Swaggeru: parametry, těla požadavků, schémata zabezpečení a webhooky se dostanou do stromu typovaných požadavků s příklady připravenými k odeslání.",
         "trademark": "OpenAPI je projekt OpenAPI Initiative pod záštitou Linux Foundation."
       },
       "curl": {
@@ -1206,7 +1207,11 @@
       "documentation": "Dokumentace"
     },
     "title": "Importovat požadavky",
-    "largeApiHint": "Toto API je rozsáhlé. Aby projekt zůstal lehký, zaškrtněte jen potřebné trasy a ostatní níže odškrtněte. Vynechané zůstávají v dokumentaci — můžete je kdykoli přidat."
+    "largeApiHint": "Toto API je rozsáhlé. Aby projekt zůstal lehký, zaškrtněte jen potřebné trasy a ostatní níže odškrtněte. Vynechané zůstávají v dokumentaci — můžete je kdykoli přidat.",
+    "browse": "Procházet…",
+    "warning": {
+      "openApiStructuralIssues": "Specifikace byla importována, ale {{count}} část(i) se nepodařilo vyřešit a byly přeskočeny (nevyřešené $refy, těla požadavků bez content). Zbytek byl importován normálně."
+    }
   },
   "emptyBench": {
     "importCard": {

@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**OpenAPI 3.2 támogatás.**
+
+- **OpenAPI 3.2 specifikációk importálása.** A `QUERY` metódus, az egyéni igék (`additionalOperations`), a query string paraméter és a streaming médiatípusok futtatásra kész kérésekként importálódnak.
+- **Tallózza a importálandó fájlt.** Az importálási ablak Tallózás gombja natív fájlválasztót nyit — nincs több útvonalgépelés vagy húzás.
+- **Osztott nézet nagy beillesztésekhez.** Egy többsoros specifikáció beillesztése balra kódszerkesztőt, jobbra előnézetet nyit, közöttük húzható elválasztóval.
+- **Toleráns importálás.** A néhány törött `$ref`-et tartalmazó specifikáció minden lehetséges útvonalat importál, és figyelmeztetést mutat arról, amit ki kellett hagynia.
+
+Javítások:
+
+- Egy érvénytelen vagy elérhetetlen specifikáció importálása egyértelmű üzenetet mutat az összeomlás-jelentés ablak megnyitása helyett.
+- Az összeomlás-jelentés részletes nézete ismét görgethető.
+- Az ablakok háttere már nem elmosódott.
+
 ## v1.1.1
 
 **Az API-tervezőt mostantól az oldalsávból lehet vezérelni.**

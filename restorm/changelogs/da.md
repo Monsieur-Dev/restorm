@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Understøttelse af OpenAPI 3.2.**
+
+- **Importér OpenAPI 3.2-specifikationer.** `QUERY`-metoden, brugerdefinerede verber (`additionalOperations`), query string-parameteren og streaming-medietyper importeres som klar-til-brug-anmodninger.
+- **Gennemse en fil til import.** En Gennemse-knap i importdialogen åbner en indbygget filvælger — ikke mere at skrive eller trække en sti.
+- **Delt visning ved store indsætninger.** Når du indsætter en spec med flere linjer, åbnes en kodeeditor til venstre og forhåndsvisningen til højre med en trækbar adskiller.
+- **Tolerant import.** En spec med et par ødelagte `$ref`s importerer alle de ruter, den kan, og viser en advarsel med det, den måtte springe over.
+
+Rettelser:
+
+- Import af en ugyldig eller utilgængelig spec viser en klar besked i stedet for at åbne dialogen til nedbrudsrapport.
+- Detaljevisningen af nedbrudsrapporten kan rulles igen.
+- Baggrunde bag dialoger er ikke længere sløret.
+
 ## v1.1.1
 
 **API-designeren styres nu fra sidepanelet.**

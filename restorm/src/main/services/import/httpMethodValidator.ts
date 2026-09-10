@@ -14,3 +14,17 @@ export function toHTTPMethod(method?: string): HTTPMethod {
   }
   return 'GET'
 }
+
+/**
+ * Normalise a method token from an import source for storage on a request.
+ *
+ * Unlike {@link toHTTPMethod}, an UNKNOWN verb is preserved (uppercased) rather
+ * than coerced to `GET`: OpenAPI 3.2 `additionalOperations` can carry custom
+ * verbs (`PURGE`, `LINK`, …), and Restorm's request model accepts an arbitrary
+ * method token (the verb picker is not a bounded list), so importing one as
+ * `GET` would silently corrupt it. Empty / missing still defaults to `GET`.
+ */
+export function normalizeImportedMethod(method?: string): string {
+  if (!method) return 'GET'
+  return method.toUpperCase()
+}

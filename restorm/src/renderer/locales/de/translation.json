@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Das Format dieser Quelle wurde nicht erkannt.",
       "unsupportedFormat": "Kein Importer unterstützt das Format {{format}}.",
       "projectFormatTooNew": "Diese Projektdatei verwendet Formatversion {{found}}, diese Restorm-Version versteht jedoch nur Version {{current}}. Aktualisieren Sie Restorm, um sie zu importieren.",
-      "projectFormatMissing": "Diese Datei deklariert keine Restorm-Formatversion und ist daher keine Restorm-Projektdatei."
+      "projectFormatMissing": "Diese Datei deklariert keine Restorm-Formatversion und ist daher keine Restorm-Projektdatei.",
+      "openApiUnsupportedVersion": "Diese Spezifikation deklariert die OpenAPI-Version {{version}}, die dieser Build von Restorm noch nicht unterstützt. Aktualisiere Restorm, um sie zu importieren."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger ist eine eingetragene Marke von SmartBear Software."
       },
       "openapi": {
-        "description": "Der aktuelle OpenAPI-Standard (3.0 und 3.1). Dieselbe Paste-and-go-Ergonomie wie bei Swagger: Parameter, Request-Bodies, Sicherheitsschemata und Webhooks landen als Baum typisierter Anfragen mit sendebereiten Beispielen.",
+        "description": "Der aktuelle OpenAPI-Standard (3.0, 3.1 und 3.2). Dieselbe Paste-and-go-Ergonomie wie bei Swagger: Parameter, Request-Bodies, Sicherheitsschemata und Webhooks landen als Baum typisierter Anfragen mit sendebereiten Beispielen.",
         "trademark": "OpenAPI ist ein Projekt der OpenAPI Initiative unter dem Dach der Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Dokumentation"
     },
     "title": "Anfragen importieren",
-    "largeApiHint": "Diese API ist umfangreich. Damit Ihr Projekt schlank bleibt, wählen Sie nur die benötigten Routen aus und entfernen Sie unten die Häkchen bei den übrigen. Die weggelassenen bleiben in der Dokumentation — Sie können sie jederzeit hinzufügen."
+    "largeApiHint": "Diese API ist umfangreich. Damit Ihr Projekt schlank bleibt, wählen Sie nur die benötigten Routen aus und entfernen Sie unten die Häkchen bei den übrigen. Die weggelassenen bleiben in der Dokumentation — Sie können sie jederzeit hinzufügen.",
+    "browse": "Durchsuchen…",
+    "warning": {
+      "openApiStructuralIssues": "Die Spezifikation wurde importiert, aber {{count}} Teil(e) konnten nicht aufgelöst werden und wurden übersprungen (nicht aufgelöste $refs, Request-Bodys ohne content). Der Rest wurde normal importiert."
+    }
   },
   "emptyBench": {
     "importCard": {

@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Bu kaynağın biçimi tanınmadı.",
       "unsupportedFormat": "{{format}} biçimini işleyen bir içe aktarıcı yok.",
       "projectFormatTooNew": "Bu proje dosyası {{found}} biçim sürümünü kullanıyor, ancak Restorm’un bu sürümü yalnızca {{current}} sürümünü anlıyor. İçe aktarmak için Restorm’u güncelleyin.",
-      "projectFormatMissing": "Bu dosya bir Restorm biçim sürümü bildirmiyor, dolayısıyla bir Restorm proje dosyası değil."
+      "projectFormatMissing": "Bu dosya bir Restorm biçim sürümü bildirmiyor, dolayısıyla bir Restorm proje dosyası değil.",
+      "openApiUnsupportedVersion": "Bu belirtim, bu Restorm sürümünün henüz desteklemediği OpenAPI {{version}} sürümünü bildiriyor. İçe aktarmak için Restorm'u güncelleyin."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger, SmartBear Software'in tescilli markasıdır."
       },
       "openapi": {
-        "description": "Güncel OpenAPI standardı (3.0 ve 3.1). Swagger ile aynı yapıştır-ve-başla ergonomisi: parametreler, istek gövdeleri, güvenlik şemaları ve webhook'lar, gönderilmeye hazır örneklerle birlikte tipli istek ağacı olarak yer alır.",
+        "description": "Güncel OpenAPI standardı (3.0, 3.1 ve 3.2). Swagger ile aynı yapıştır-ve-başla ergonomisi: parametreler, istek gövdeleri, güvenlik şemaları ve webhook'lar, gönderilmeye hazır örneklerle birlikte tipli istek ağacı olarak yer alır.",
         "trademark": "OpenAPI, Linux Foundation altındaki OpenAPI Initiative'in bir projesidir."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Belgeler"
     },
     "title": "İstekleri içe aktar",
-    "largeApiHint": "Bu API büyük. Projenizi hafif tutmak için yalnızca ihtiyacınız olan rotaları işaretleyin ve aşağıda gerisinin işaretini kaldırın. Dışarıda bıraktıklarınız belgelerde kalır — istediğiniz zaman ekleyebilirsiniz."
+    "largeApiHint": "Bu API büyük. Projenizi hafif tutmak için yalnızca ihtiyacınız olan rotaları işaretleyin ve aşağıda gerisinin işaretini kaldırın. Dışarıda bıraktıklarınız belgelerde kalır — istediğiniz zaman ekleyebilirsiniz.",
+    "browse": "Gözat…",
+    "warning": {
+      "openApiStructuralIssues": "Belirtim içe aktarıldı, ancak {{count}} parça çözümlenemedi ve atlandı (çözümlenmemiş $ref'ler, content içermeyen istek gövdeleri). Geri kalanı normal şekilde içe aktarıldı."
+    }
   },
   "emptyBench": {
     "importCard": {

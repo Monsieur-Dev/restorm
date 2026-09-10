@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**OpenAPI 3.2 -tuki.**
+
+- **Tuo OpenAPI 3.2 -määrityksiä.** `QUERY`-metodi, mukautetut verbit (`additionalOperations`), query string -parametri ja suoratoistomediatyypit tuodaan valmiina ajettavina pyyntöinä.
+- **Selaa tuotava tiedosto.** Tuontivalintaikkunan Selaa-painike avaa natiivin tiedostonvalitsimen — ei enää polun kirjoittamista tai raahaamista.
+- **Jaettu näkymä suurille liitoksille.** Monirivisen määrityksen liittäminen avaa koodieditorin vasemmalle ja esikatselun oikealle säädettävällä jakajalla.
+- **Salliva tuonti.** Määritys, jossa on muutama rikkinäinen `$ref`, tuo kaikki mahdolliset reitit ja näyttää varoituksen siitä, mitä jäi pois.
+
+Korjaukset:
+
+- Virheellisen tai tavoittamattoman määrityksen tuonti näyttää selkeän viestin sen sijaan, että avaisi kaatumisraportti-ikkunan.
+- Kaatumisraportin yksityiskohtanäkymä vierii taas.
+- Valintaikkunoiden taustoja ei enää sumenneta.
+
 ## v1.1.1
 
 **API-suunnittelijaa ohjataan nyt sivupalkista.**

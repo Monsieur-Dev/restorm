@@ -1057,7 +1057,8 @@
       "formatNotDetected": "No se reconoció el formato de este origen.",
       "unsupportedFormat": "Ningún importador admite el formato {{format}}.",
       "projectFormatTooNew": "Este archivo de proyecto usa la versión de formato {{found}}, pero esta versión de Restorm solo entiende la versión {{current}}. Actualice Restorm para importarlo.",
-      "projectFormatMissing": "Este archivo no declara ninguna versión de formato de Restorm, por lo que no es un archivo de proyecto de Restorm."
+      "projectFormatMissing": "Este archivo no declara ninguna versión de formato de Restorm, por lo que no es un archivo de proyecto de Restorm.",
+      "openApiUnsupportedVersion": "Esta especificación declara la versión OpenAPI {{version}}, que esta versión de Restorm aún no admite. Actualiza Restorm para importarla."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger es una marca registrada de SmartBear Software."
       },
       "openapi": {
-        "description": "El estándar OpenAPI actual (3.0 y 3.1). Las mismas mecánicas que Swagger: parámetros, cuerpos, esquemas de auth y webhooks aterrizan como árbol de peticiones tipadas con ejemplos listos para enviar.",
+        "description": "El estándar OpenAPI actual (3.0, 3.1 y 3.2). Las mismas mecánicas que Swagger: parámetros, cuerpos, esquemas de auth y webhooks aterrizan como árbol de peticiones tipadas con ejemplos listos para enviar.",
         "trademark": "OpenAPI es un proyecto de la OpenAPI Initiative bajo la Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Documentación"
     },
     "title": "Importar peticiones",
-    "largeApiHint": "Esta API es grande. Para mantener tu proyecto ligero, marca solo las rutas que necesites y desmarca las demás abajo. Las que dejes fuera permanecen en la documentación: puedes añadirlas en cualquier momento."
+    "largeApiHint": "Esta API es grande. Para mantener tu proyecto ligero, marca solo las rutas que necesites y desmarca las demás abajo. Las que dejes fuera permanecen en la documentación: puedes añadirlas en cualquier momento.",
+    "browse": "Examinar…",
+    "warning": {
+      "openApiStructuralIssues": "La especificación se importó, pero {{count}} parte(s) no se pudieron resolver y se omitieron ($refs sin resolver, cuerpos de solicitud sin content). El resto se importó con normalidad."
+    }
   },
   "emptyBench": {
     "importCard": {

@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Het formaat van deze bron is niet herkend.",
       "unsupportedFormat": "Geen enkele importer ondersteunt het formaat {{format}}.",
       "projectFormatTooNew": "Dit projectbestand gebruikt formaatversie {{found}}, maar deze versie van Restorm begrijpt alleen versie {{current}}. Werk Restorm bij om het te importeren.",
-      "projectFormatMissing": "Dit bestand declareert geen Restorm-formaatversie en is dus geen Restorm-projectbestand."
+      "projectFormatMissing": "Dit bestand declareert geen Restorm-formaatversie en is dus geen Restorm-projectbestand.",
+      "openApiUnsupportedVersion": "Deze specificatie declareert OpenAPI-versie {{version}}, die deze build van Restorm nog niet ondersteunt. Werk Restorm bij om te importeren."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger is een gedeponeerd handelsmerk van SmartBear Software."
       },
       "openapi": {
-        "description": "De huidige OpenAPI-standaard (3.0 en 3.1). Dezelfde plak-en-klaar-ergonomie als Swagger: parameters, request bodies, security schemes en webhooks komen binnen als een boom van getypeerde verzoeken met klaarstaande voorbeelden.",
+        "description": "De huidige OpenAPI-standaard (3.0, 3.1 en 3.2). Dezelfde plak-en-klaar-ergonomie als Swagger: parameters, request bodies, security schemes en webhooks komen binnen als een boom van getypeerde verzoeken met klaarstaande voorbeelden.",
         "trademark": "OpenAPI is een project van het OpenAPI Initiative onder de Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Documentatie"
     },
     "title": "Verzoeken importeren",
-    "largeApiHint": "Deze API is groot. Houd je project licht: vink alleen de routes aan die je nodig hebt en vink de rest hieronder uit. Wat je weglaat blijft in de documentatie staan — je kunt het altijd later toevoegen."
+    "largeApiHint": "Deze API is groot. Houd je project licht: vink alleen de routes aan die je nodig hebt en vink de rest hieronder uit. Wat je weglaat blijft in de documentatie staan — je kunt het altijd later toevoegen.",
+    "browse": "Bladeren…",
+    "warning": {
+      "openApiStructuralIssues": "De specificatie is geïmporteerd, maar {{count}} onderde(e)l(en) konden niet worden opgelost en zijn overgeslagen (niet-opgeloste $refs, request-bodies zonder content). De rest is normaal geïmporteerd."
+    }
   },
   "emptyBench": {
     "importCard": {

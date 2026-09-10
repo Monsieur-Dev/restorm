@@ -1057,7 +1057,8 @@
       "formatNotDetected": "Formatet til denne kilden ble ikke gjenkjent.",
       "unsupportedFormat": "Ingen importmodul håndterer formatet {{format}}.",
       "projectFormatTooNew": "Denne prosjektfilen bruker formatversjon {{found}}, men denne versjonen av Restorm forstår bare versjon {{current}}. Oppdater Restorm for å importere den.",
-      "projectFormatMissing": "Denne filen deklarerer ingen Restorm-formatversjon og er derfor ikke en Restorm-prosjektfil."
+      "projectFormatMissing": "Denne filen deklarerer ingen Restorm-formatversjon og er derfor ikke en Restorm-prosjektfil.",
+      "openApiUnsupportedVersion": "Denne spesifikasjonen angir OpenAPI-versjon {{version}}, som denne versjonen av Restorm ennå ikke støtter. Oppdater Restorm for å importere den."
     },
     "formats": {
       "swagger": {
@@ -1065,7 +1066,7 @@
         "trademark": "Swagger er et registrert varemerke for SmartBear Software."
       },
       "openapi": {
-        "description": "Den nåværende OpenAPI-standarden (3.0 og 3.1). Samme lim-og-kjør-ergonomi som Swagger: parametre, forespørselsbodyer, sikkerhetsskjemaer og webhooks lander som et tre av typede forespørsler med eksempler klare til å sendes.",
+        "description": "Den nåværende OpenAPI-standarden (3.0, 3.1 og 3.2). Samme lim-og-kjør-ergonomi som Swagger: parametre, forespørselsbodyer, sikkerhetsskjemaer og webhooks lander som et tre av typede forespørsler med eksempler klare til å sendes.",
         "trademark": "OpenAPI er et prosjekt i OpenAPI Initiative under Linux Foundation."
       },
       "curl": {
@@ -1204,7 +1205,11 @@
       "documentation": "Dokumentasjon"
     },
     "title": "Importer forespørsler",
-    "largeApiHint": "Denne API-en er stor. Hold prosjektet lett: kryss av bare for rutene du trenger, og fjern haken på resten nedenfor. De du utelater, blir liggende i dokumentasjonen — du kan legge dem til når som helst."
+    "largeApiHint": "Denne API-en er stor. Hold prosjektet lett: kryss av bare for rutene du trenger, og fjern haken på resten nedenfor. De du utelater, blir liggende i dokumentasjonen — du kan legge dem til når som helst.",
+    "browse": "Bla gjennom…",
+    "warning": {
+      "openApiStructuralIssues": "Spesifikasjonen ble importert, men {{count}} del(er) kunne ikke løses og ble hoppet over (uløste $refs, forespørselskropper uten content). Resten ble importert normalt."
+    }
   },
   "emptyBench": {
     "importCard": {

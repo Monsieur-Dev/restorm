@@ -1056,7 +1056,8 @@
       "formatNotDetected": "이 소스의 형식을 인식하지 못했습니다.",
       "unsupportedFormat": "{{format}} 형식을 처리하는 가져오기 모듈이 없습니다.",
       "projectFormatTooNew": "이 프로젝트 파일은 형식 버전 {{found}}을(를) 사용하지만, 이 버전의 Restorm은 버전 {{current}}까지만 이해합니다. 가져오려면 Restorm을 업데이트하세요.",
-      "projectFormatMissing": "이 파일은 Restorm 형식 버전을 선언하지 않으므로 Restorm 프로젝트 파일이 아닙니다."
+      "projectFormatMissing": "이 파일은 Restorm 형식 버전을 선언하지 않으므로 Restorm 프로젝트 파일이 아닙니다.",
+      "openApiUnsupportedVersion": "이 사양은 OpenAPI 버전 {{version}}을(를) 선언하지만 이 Restorm 빌드에서는 아직 지원하지 않습니다. 가져오려면 Restorm을 업데이트하세요."
     },
     "formats": {
       "swagger": {
@@ -1064,7 +1065,7 @@
         "trademark": "Swagger는 SmartBear Software의 등록 상표입니다."
       },
       "openapi": {
-        "description": "현재의 OpenAPI 표준(3.0과 3.1)입니다. Swagger와 동일하게 붙여넣기만 하면 됩니다. 매개변수, 요청 본문, 보안 스킴, 웹훅이 예제와 함께 즉시 보낼 수 있는 타입화된 요청 트리로 변환됩니다.",
+        "description": "현재의 OpenAPI 표준(3.0, 3.1과 3.2)입니다. Swagger와 동일하게 붙여넣기만 하면 됩니다. 매개변수, 요청 본문, 보안 스킴, 웹훅이 예제와 함께 즉시 보낼 수 있는 타입화된 요청 트리로 변환됩니다.",
         "trademark": "OpenAPI는 Linux Foundation 산하 OpenAPI Initiative의 프로젝트입니다."
       },
       "curl": {
@@ -1203,7 +1204,11 @@
       "documentation": "문서"
     },
     "title": "요청 가져오기",
-    "largeApiHint": "이 API는 큽니다. 프로젝트를 가볍게 유지하려면 필요한 라우트만 체크하고 나머지는 아래에서 체크 해제하세요. 제외한 항목은 문서에 남아 있어 언제든지 추가할 수 있습니다."
+    "largeApiHint": "이 API는 큽니다. 프로젝트를 가볍게 유지하려면 필요한 라우트만 체크하고 나머지는 아래에서 체크 해제하세요. 제외한 항목은 문서에 남아 있어 언제든지 추가할 수 있습니다.",
+    "browse": "찾아보기…",
+    "warning": {
+      "openApiStructuralIssues": "사양을 가져왔지만 {{count}}개 부분을 확인할 수 없어 건너뛰었습니다(해결되지 않은 $ref, content 없는 요청 본문). 나머지는 정상적으로 가져왔습니다."
+    }
   },
   "emptyBench": {
     "importCard": {

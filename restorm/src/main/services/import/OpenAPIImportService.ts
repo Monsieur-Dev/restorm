@@ -33,9 +33,11 @@ import {
   type EnumMatchingRule
 } from '../../../shared/types/collections'
 import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
-import { toHTTPMethod } from './httpMethodValidator'
-import { openapi3ToApiDocumentation, type OAS3Spec, type OAS3Server, type OAS3SecurityScheme, expandServerVariables, pickPrimaryContentType } from './transformers/openapi3ToApiDocumentation'
+import { logger } from 'electron-core-ui/main'
+import { normalizeImportedMethod } from './httpMethodValidator'
+import { openapi3ToApiDocumentation, collectStructuralIssues, summariseStructuralIssues, enumeratePathItemOperations, type OAS3Spec, type OAS3Server, type OAS3SecurityScheme, expandServerVariables, pickPrimaryContentType } from './transformers/openapi3ToApiDocumentation'
 import { openapi31ToApiDocumentation, type OAS31Spec } from './transformers/openapi31ToApiDocumentation'
+import { openapi32ToApiDocumentation, type OAS32Spec } from './transformers/openapi32ToApiDocumentation'
 import { rewriteUrlTemplate, resolveJsonPointer, tryParseSpecText, parseSpecTextOrThrow, type CommonSchema } from './transformers/_shared'
 import { stableImportId as generateId } from './stableImportId'
 
@@ -86,8 +88,6 @@ type OAS3PathItem = Partial<Record<'get' | 'post' | 'put' | 'delete' | 'patch' |
   parameters?: (OAS3Parameter | OAS3Reference)[]
   servers?: OAS3Server[]
 }
-
-const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'] as const
 
 // ────────────────────────────────────────────────────────────────────────────
 // ID + KeyValue utilities — local to this service, mirrors SwaggerImportService
@@ -224,10 +224,7 @@ function extractEnumDefinitions(spec: OAS3Spec): { definitions: EnumDefinition[]
   const enumNames = buildEnumNameLookup(spec)
 
   for (const [path, pathItem] of Object.entries(spec.paths)) {
-    for (const method of HTTP_METHODS) {
-      const operation = pathItem[method]
-      if (!operation) continue
-
+    for (const { verb: method, operation } of enumeratePathItemOperations(pathItem)) {
       // Collect operation-level + path-item-level parameters (deref'd).
       const rawParams: (OAS3Parameter | OAS3Reference)[] = [
         ...(operation.parameters ?? []),
@@ -476,6 +473,26 @@ function buildUrl(path: string, parameters: OAS3Parameter[]): string {
   return url
 }
 
+/**
+ * Expand an OpenAPI 3.2 `in: "querystring"` parameter into individual query
+ * parameters. The querystring parameter carries a single schema (usually an
+ * object) that describes the entire query string; each of its properties
+ * becomes a `in: "query"` parameter so the imported request gets editable query
+ * rows. A non-object schema (or one with no properties) yields nothing rather
+ * than an unusable single blob param.
+ */
+function expandQuerystringParam(p: OAS3Parameter, spec: OAS3Spec): OAS3Parameter[] {
+  const shape = resolveSchemaShape(p.schema, spec)
+  if (!shape?.properties || typeof shape.properties !== 'object') return []
+  const required = new Set(Array.isArray(shape.required) ? shape.required : [])
+  return Object.entries(shape.properties).map(([name, propSchema]) => ({
+    name,
+    in: 'query',
+    schema: propSchema,
+    ...(required.has(name) ? { required: true } : {})
+  }))
+}
+
 function operationToRequest(
   path: string,
   method: string,
@@ -488,8 +505,13 @@ function operationToRequest(
   const filtered = (loc: string): OAS3Parameter[] => parameters.filter((p) => p.in === loc)
   const ctx = enumLookup ? { lookup: enumLookup, method, path } : undefined
 
+  // OpenAPI 3.2 `in: "querystring"` describes the WHOLE query string with one
+  // schema; expand its object properties into individual query parameters so
+  // they land as editable query rows like any other.
+  const querystringExpanded = filtered('querystring').flatMap((p) => expandQuerystringParam(p, spec))
+
   const headers = filtered('header').map((p) => keyValueFromOpenApi3Param(p, spec, ctx?.lookup, ctx?.method, ctx?.path))
-  const params = dedupeByName(filtered('query')).map((p) => keyValueFromOpenApi3Param(p, spec, ctx?.lookup, ctx?.method, ctx?.path))
+  const params = dedupeByName([...filtered('query'), ...querystringExpanded]).map((p) => keyValueFromOpenApi3Param(p, spec, ctx?.lookup, ctx?.method, ctx?.path))
   const pathParams = dedupeByName(filtered('path')).map((p) => keyValueFromOpenApi3Param(p, spec, ctx?.lookup, ctx?.method, ctx?.path))
 
   const request: HTTPRequest = {
@@ -497,7 +519,7 @@ function operationToRequest(
     id: generateId(`request:${method}:${path}`),
     name: operation.summary ?? operation.operationId ?? `${method.toUpperCase()} ${path}`,
     tags: operation.tags ?? [],
-    method: toHTTPMethod(method),
+    method: normalizeImportedMethod(method),
     url: buildUrl(path, parameters),
     headers,
     params,
@@ -619,10 +641,7 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
   }
 
   for (const [path, pathItem] of Object.entries(spec.paths)) {
-    for (const method of HTTP_METHODS) {
-      const operation = pathItem[method]
-      if (!operation) continue
-
+    for (const { verb: method, operation } of enumeratePathItemOperations(pathItem)) {
       const request = operationToRequest(path, method, pathItem, operation, spec, enumLookup)
       const tags = operation.tags ?? []
       if (tags.length === 0) {
@@ -659,9 +678,7 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
       items: []
     }
     for (const [path, pathItem] of Object.entries(webhooks)) {
-      for (const method of HTTP_METHODS) {
-        const operation = pathItem[method]
-        if (!operation) continue
+      for (const { verb: method, operation } of enumeratePathItemOperations(pathItem)) {
         const request = operationToRequest(path, method, pathItem, operation, spec, enumLookup)
         webhooksFolder.items.push(request)
       }
@@ -852,6 +869,12 @@ export interface OpenAPIImportOptions {
 function buildApiDocumentation(spec: OAS3Spec | OAS31Spec, options: OpenAPIImportOptions): ReturnType<typeof openapi3ToApiDocumentation> {
   const version = (spec as OAS3Spec).openapi
   const transformOptions = options.sourceUrl !== undefined ? { sourceUrl: options.sourceUrl } : {}
+  // 3.2 is a structural superset of 3.1 — its shim runs the same 3.1 schema
+  // downcast (now 3.2-aware) and delegates to the base transformer, which
+  // enumerates `query` / `additionalOperations` for both docs and requests.
+  if (typeof version === 'string' && version.startsWith('3.2')) {
+    return openapi32ToApiDocumentation(spec as OAS32Spec, transformOptions)
+  }
   if (typeof version === 'string' && version.startsWith('3.1')) {
     return openapi31ToApiDocumentation(spec as OAS31Spec, transformOptions)
   }
@@ -875,7 +898,22 @@ export function importOpenAPI(
     throw new Error('parentFolder requires an environmentFolder to store the environment configuration')
   }
 
-  const apiDocumentation = buildApiDocumentation(spec, options)
+  // The documentation transform is best-effort: the imported REQUESTS are the
+  // payload that matters, and a structurally broken spec can still trip an
+  // unguarded access deep in the doc walker. Rather than fail the whole import
+  // on a doc-only defect, degrade gracefully — import the requests, skip the
+  // (optional) documentation, and log at `warn` so it never reaches the crash
+  // reporter. The specific structural problems are surfaced to the user
+  // separately via `collectImportWarnings`.
+  let apiDocumentation: ReturnType<typeof buildApiDocumentation> | undefined
+  try {
+    apiDocumentation = buildApiDocumentation(spec, options)
+  } catch (docError) {
+    logger.warn('[OpenAPIImport] Could not build API documentation from this spec; importing requests only', {
+      error: docError instanceof Error ? docError.message : String(docError)
+    })
+    apiDocumentation = undefined
+  }
 
   if (options.environmentFolder) {
     options.environmentFolder.environments = [
@@ -888,7 +926,7 @@ export function importOpenAPI(
       const existing = (options.environmentFolder.enumDefinitions ?? [])
       options.environmentFolder.enumDefinitions = [...existing, ...enumDefs]
     }
-    options.environmentFolder.apiDocumentation = apiDocumentation
+    if (apiDocumentation !== undefined) options.environmentFolder.apiDocumentation = apiDocumentation
     return options.environmentFolder
   }
 
@@ -901,7 +939,7 @@ export function importOpenAPI(
     environments: [newEnvironment],
     items: importedItems,
     importSource: 'openapi',
-    apiDocumentation,
+    ...(apiDocumentation !== undefined ? { apiDocumentation } : {}),
     ...(enumDefs.length > 0 ? { enumDefinitions: enumDefs } : {})
   }
   return rootFolder
@@ -960,6 +998,35 @@ export async function importOpenAPIValidated(
 // ============================================================================
 
 import { importProviders } from './registry'
+import { formatImportError } from '../../../shared/config/importErrors'
+import type { ImportWarningDescriptor } from '../../../shared/config/importWarnings'
+
+/**
+ * Non-fatal structural diagnostics for an OpenAPI source that parsed — the
+ * dangling `$ref`s and content-less request bodies the transformer had to
+ * skip. Re-parses the text (import is not a hot path) and folds the issue
+ * list into a single `openApiStructuralIssues` warning: a translated sentence
+ * plus the specifics (ref strings, operation paths) in the `detail` slot and
+ * the total in `count`. Never throws — a parse failure here just means "no
+ * warnings" (the real parse error, if any, is reported by `parse`).
+ */
+function collectOpenApiImportWarnings(content: string): ImportWarningDescriptor[] {
+  let spec: unknown
+  try {
+    spec = tryParseSpecText(content.trim())
+  } catch {
+    return []
+  }
+  if (typeof spec !== 'object' || spec === null) return []
+  const issues = collectStructuralIssues(spec as OAS3Spec)
+  if (issues.length === 0) return []
+  return [
+    {
+      code: 'openApiStructuralIssues',
+      params: { detail: summariseStructuralIssues(issues), count: String(issues.length) }
+    }
+  ]
+}
 
 function canImportOpenAPI30(content: string, _filePath?: string, parsed?: unknown): boolean {
   // `parsed` is the shared JSON.parse `detectFormat` already ran once for
@@ -984,7 +1051,70 @@ function canImportOpenAPI31(content: string, _filePath?: string, parsed?: unknow
   return false
 }
 
+function canImportOpenAPI32(content: string, _filePath?: string, parsed?: unknown): boolean {
+  const json: unknown = parsed !== undefined ? parsed : tryParseSpecText(content.trim())
+  if (typeof json === 'object' && json !== null) {
+    const obj = json as Record<string, unknown>
+    return 'openapi' in obj && typeof obj.openapi === 'string' && obj.openapi.startsWith('3.2')
+  }
+  return false
+}
+
+/** Recognise a document that IS an OpenAPI spec (`openapi: "<x.y>"`) but whose
+ * version none of the specific providers above handle (a 3.3, a 4.0, …). This
+ * catch-all is registered LAST so the supported versions match first; it lets
+ * the importer produce an actionable "unsupported version — update Restorm"
+ * message instead of the generic "format not recognised". */
+function canImportOpenAPIUnsupported(content: string, _filePath?: string, parsed?: unknown): boolean {
+  const json: unknown = parsed !== undefined ? parsed : tryParseSpecText(content.trim())
+  if (typeof json === 'object' && json !== null) {
+    const obj = json as Record<string, unknown>
+    const v = obj.openapi
+    return typeof v === 'string' && !v.startsWith('3.0') && !v.startsWith('3.1') && !v.startsWith('3.2')
+  }
+  return false
+}
+
+/** The `openapi` version string of a parsed spec, for the unsupported-version
+ * error. */
+function openApiVersionOf(content: string): string {
+  try {
+    const json: unknown = tryParseSpecText(content.trim())
+    if (typeof json === 'object' && json !== null) {
+      const v = (json as Record<string, unknown>).openapi
+      if (typeof v === 'string') return v
+    }
+  } catch { /* fall through */ }
+  return 'unknown'
+}
+
 importProviders.push(
-  { format: 'openapi-3.0', canImport: canImportOpenAPI30, parse: (content, opts) => importOpenAPIFromJson(content, opts) },
-  { format: 'openapi-3.1', canImport: canImportOpenAPI31, parse: (content, opts) => importOpenAPIFromJson(content, opts) }
+  {
+    format: 'openapi-3.0',
+    canImport: canImportOpenAPI30,
+    parse: (content, opts) => importOpenAPIFromJson(content, opts),
+    collectImportWarnings: (content) => collectOpenApiImportWarnings(content)
+  },
+  {
+    format: 'openapi-3.1',
+    canImport: canImportOpenAPI31,
+    parse: (content, opts) => importOpenAPIFromJson(content, opts),
+    collectImportWarnings: (content) => collectOpenApiImportWarnings(content)
+  },
+  {
+    format: 'openapi-3.2',
+    canImport: canImportOpenAPI32,
+    parse: (content, opts) => importOpenAPIFromJson(content, opts),
+    collectImportWarnings: (content) => collectOpenApiImportWarnings(content)
+  },
+  {
+    // Registered last: an OpenAPI doc whose version we don't support. Parsing
+    // throws the coded "unsupported version" error, so the wizard shows the
+    // actionable message instead of a generic "format not recognised".
+    format: 'openapi-unsupported',
+    canImport: canImportOpenAPIUnsupported,
+    parse: (content) => {
+      throw new Error(formatImportError('openApiUnsupportedVersion', { version: openApiVersionOf(content) }))
+    }
+  }
 )

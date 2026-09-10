@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Suporte a OpenAPI 3.2.**
+
+- **Importe especificações OpenAPI 3.2.** O método `QUERY`, os verbos personalizados (`additionalOperations`), o parâmetro de query string e os tipos de mídia em streaming são importados como requisições prontas a executar.
+- **Procure um ficheiro para importar.** Um botão Procurar na janela de importação abre um seletor de ficheiros nativo — sem mais digitar ou arrastar um caminho.
+- **Vista dividida para colagens grandes.** Colar uma especificação com várias linhas abre um editor de código à esquerda e a pré-visualização à direita, com um separador ajustável.
+- **Importação tolerante.** Uma especificação com alguns `$ref` partidos importa todas as rotas que consegue e mostra um aviso com o que teve de ignorar.
+
+Correções:
+
+- Importar uma especificação inválida ou inacessível mostra uma mensagem clara em vez de abrir a janela de relatório de falha.
+- A vista de detalhe do relatório de falha volta a fazer scroll.
+- Os fundos das janelas já não são desfocados.
+
 ## v1.1.1
 
 **O designer de API agora é controlado pela barra lateral.**

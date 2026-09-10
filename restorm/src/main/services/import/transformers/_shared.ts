@@ -22,8 +22,13 @@ import type {
   SchemaConstraints
 } from '../../../../shared/types/apiDocumentation'
 
-/** All HTTP verbs Restorm imports map onto operations. Order matters for the deterministic walk. */
-export const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'] as const
+/** The fixed HTTP-method fields a path item can carry. Order matters for the
+ * deterministic walk. `query` is the OpenAPI 3.2 addition (a safe, cacheable
+ * body-bearing read); it is simply absent on 3.0 / 3.1 path items, so listing
+ * it here is backward-compatible. Verbs beyond this fixed set (a custom
+ * `PURGE`, `LINK`, …) arrive on 3.2 path items under `additionalOperations`,
+ * not as fixed keys — see `enumeratePathItemOperations`. */
+export const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options', 'query'] as const
 
 export type HttpMethod = (typeof HTTP_METHODS)[number]
 
@@ -453,7 +458,10 @@ export function extractDiscriminator(
 /** Build a `ModelDocumentation`-shaped property list from a schema's `properties` map. */
 export function mapSchemaProperties(schema: CommonSchema): PropertyDocumentation[] {
   const merged = mergeAllOfInto({ ...schema })
-  const required = new Set(merged.required ?? [])
+  // `required` must be an array of property names, but a hand-written / broken
+  // spec can put a boolean or other scalar here; `?? []` wouldn't catch a
+  // `false`, and `new Set(false)` throws. Treat anything non-array as "none".
+  const required = new Set(Array.isArray(merged.required) ? merged.required : [])
   const properties: PropertyDocumentation[] = []
   for (const [propName, propSchema] of Object.entries(merged.properties ?? {})) {
     const prop: PropertyDocumentation = {
@@ -544,7 +552,10 @@ export function rewriteUrlTemplate(template: string): string {
  * normalised across versions. */
 export interface OperationDocumentationInput {
   path: string
-  method: HttpMethod
+  /** A fixed method (`get`…`query`) OR an arbitrary verb token from a 3.2
+   * `additionalOperations` map (`PURGE`, `LINK`, …). Uppercased by
+   * `buildOperationDocumentation` into the stored `OperationDocumentation.method`. */
+  method: string
   tags?: string[]
   summary?: string
   description?: string

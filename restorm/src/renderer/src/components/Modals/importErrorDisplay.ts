@@ -84,6 +84,10 @@ const MESSAGE_BY_CODE: Record<ImportErrorCode, { key: string; fallback: string }
   projectFormatMissing: {
     key: 'import.error.projectFormatMissing',
     fallback: 'This file declares no Restorm format version, so it is not a Restorm project file.'
+  },
+  openApiUnsupportedVersion: {
+    key: 'import.error.openApiUnsupportedVersion',
+    fallback: 'This spec declares OpenAPI version {{version}}, which this build of Restorm does not support yet. Update Restorm to import it.'
   }
 }
 

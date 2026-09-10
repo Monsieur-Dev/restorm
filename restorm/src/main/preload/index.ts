@@ -2522,6 +2522,11 @@ contextBridge.exposeInMainWorld('restorm', {
     }
   },
   import: {
+    /** Native file picker for the modal's "Browse" button → absolute path. */
+    pickFile: async (): Promise<{ success: boolean; path?: string; canceled?: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('import:pick-file')
+      return result as { success: boolean; path?: string; canceled?: boolean }
+    },
     /** Preview import from file path or URL (dry-run) */
     preview: async (
       input: string,

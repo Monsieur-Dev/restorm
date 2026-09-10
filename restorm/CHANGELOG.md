@@ -10,6 +10,21 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.1.2
+
+**OpenAPI 3.2 support.**
+
+- **Import OpenAPI 3.2 specs.** The `QUERY` method, custom verbs (`additionalOperations`), the query-string parameter and streaming media types all import as ready-to-run requests.
+- **Browse for a file to import.** A Browse button on the import dialog opens a native file picker — no more typing or dragging a path.
+- **A split view for large pastes.** Pasting a multi-line spec opens a code editor on the left and the preview on the right, with a draggable divider between them.
+- **Tolerant import.** A spec with a few broken `$ref`s imports every route it can and shows a warning listing exactly what it had to skip.
+
+Fixes:
+
+- Importing an invalid or unreachable spec shows a clear message instead of opening the crash-report dialog.
+- The crash-report detail view scrolls again.
+- Dialog backdrops are no longer blurred.
+
 ## v1.1.1
 
 **The API designer, now driven from the sidebar.**

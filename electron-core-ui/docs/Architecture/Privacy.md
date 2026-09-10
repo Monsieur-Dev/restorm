@@ -181,9 +181,13 @@ than being blanked: the username is the PII, the rest of the path is the whole
 value of a stack trace.
 
 `ScrubOptions`: `redactKeys`, `redactValues`, `preserveKeys`, `urlPolicy`,
-`homeDir`, `maxDepth` (default 8). True cycles collapse to `[circular]` — a merely
-REPEATED reference does not, so a payload that points at the same `user` object
-twice keeps both. Over-deep values collapse to `[redacted-depth]`.
+`homeDir`, `maxDepth` (default 8), `maxStringLength` (default unset). True cycles
+collapse to `[circular]` — a merely REPEATED reference does not, so a payload that
+points at the same `user` object twice keeps both. Over-deep values collapse to
+`[redacted-depth]`. `maxStringLength` caps every single string AFTER the detectors
+run, appending a `…[+N chars]` marker — defence-in-depth so bulk user content (a
+pasted document, a whole imported spec, a large body) can't ride into a payload in
+one field, where the shape-based secret/URL detectors would pass it through.
 
 `preserveKeys` is the one calibrated hole in the fail-closed posture, and it is
 deliberately narrow. Some transports carry structural identifiers that LOOK like

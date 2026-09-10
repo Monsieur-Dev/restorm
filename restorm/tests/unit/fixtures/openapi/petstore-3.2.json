@@ -1,0 +1,94 @@
+{
+  "openapi": "3.2.0",
+  "$self": "https://api.example.com/openapi.json",
+  "info": {
+    "title": "Petstore 3.2",
+    "description": "Sample 3.2 API exercising query method, additionalOperations, and streaming itemSchema",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://api.example.com/v1" }],
+  "tags": [
+    { "name": "pets", "description": "Pet operations" }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "tags": ["pets"],
+        "summary": "List pets",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "querystring",
+            "schema": {
+              "type": "object",
+              "required": ["status"],
+              "properties": {
+                "status": { "type": "string" },
+                "page": { "type": "integer" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A stream of pets, one JSON object per line",
+            "content": {
+              "application/jsonl": {
+                "itemSchema": { "$ref": "#/components/schemas/Pet" }
+              }
+            }
+          }
+        }
+      },
+      "query": {
+        "tags": ["pets"],
+        "summary": "Complex pet search via QUERY",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PetQuery" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Matching pets",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Pet" } }
+              }
+            }
+          }
+        }
+      },
+      "additionalOperations": {
+        "PURGE": {
+          "tags": ["pets"],
+          "summary": "Purge the pets cache",
+          "responses": { "204": { "description": "Purged" } }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "tag": { "type": ["string", "null"] }
+        }
+      },
+      "PetQuery": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "limit": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

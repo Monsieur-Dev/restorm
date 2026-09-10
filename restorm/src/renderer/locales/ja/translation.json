@@ -1056,7 +1056,8 @@
       "formatNotDetected": "このソースの形式を認識できませんでした。",
       "unsupportedFormat": "{{format}} 形式に対応するインポーターがありません。",
       "projectFormatTooNew": "このプロジェクトファイルはフォーマットバージョン {{found}} を使用していますが、このバージョンの Restorm はバージョン {{current}} までしか理解できません。インポートするには Restorm を更新してください。",
-      "projectFormatMissing": "このファイルは Restorm のフォーマットバージョンを宣言していないため、Restorm プロジェクトファイルではありません。"
+      "projectFormatMissing": "このファイルは Restorm のフォーマットバージョンを宣言していないため、Restorm プロジェクトファイルではありません。",
+      "openApiUnsupportedVersion": "この仕様は OpenAPI バージョン {{version}} を宣言していますが、このビルドの Restorm はまだ対応していません。インポートするには Restorm を更新してください。"
     },
     "formats": {
       "swagger": {
@@ -1064,7 +1065,7 @@
         "trademark": "Swagger は SmartBear Software の登録商標です。"
       },
       "openapi": {
-        "description": "現行の OpenAPI 標準（3.0 と 3.1）。Swagger と同じく貼り付けるだけで利用可能：パラメータ、リクエストボディ、セキュリティスキーム、Webhook は、サンプル付きで送信可能な型付きリクエストのツリーになります。",
+        "description": "現行の OpenAPI 標準（3.0, 3.1 と 3.2）。Swagger と同じく貼り付けるだけで利用可能：パラメータ、リクエストボディ、セキュリティスキーム、Webhook は、サンプル付きで送信可能な型付きリクエストのツリーになります。",
         "trademark": "OpenAPI は Linux Foundation 配下の OpenAPI Initiative のプロジェクトです。"
       },
       "curl": {
@@ -1203,7 +1204,11 @@
       "documentation": "ドキュメント"
     },
     "title": "リクエストをインポート",
-    "largeApiHint": "この API は大規模です。プロジェクトを軽く保つため、必要なルートだけにチェックを入れ、残りは下でチェックを外してください。外したものはドキュメントに残るので、いつでも追加できます。"
+    "largeApiHint": "この API は大規模です。プロジェクトを軽く保つため、必要なルートだけにチェックを入れ、残りは下でチェックを外してください。外したものはドキュメントに残るので、いつでも追加できます。",
+    "browse": "参照…",
+    "warning": {
+      "openApiStructuralIssues": "仕様はインポートされましたが、{{count}} 個の部分を解決できずスキップしました（未解決の $ref、content のないリクエストボディ）。残りは通常どおりインポートされました。"
+    }
   },
   "emptyBench": {
     "importCard": {

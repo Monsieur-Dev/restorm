@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.2
+
+**Suport pentru OpenAPI 3.2.**
+
+- **Importă specificații OpenAPI 3.2.** Metoda `QUERY`, verbele personalizate (`additionalOperations`), parametrul query string și tipurile media în streaming se importă ca cereri gata de rulat.
+- **Răsfoiește un fișier de importat.** Un buton Răsfoiește în fereastra de import deschide un selector de fișiere nativ — gata cu tastarea sau tragerea unei căi.
+- **Vedere împărțită pentru lipiri mari.** Lipirea unei specificații pe mai multe linii deschide un editor de cod în stânga și previzualizarea în dreapta, cu un separator reglabil.
+- **Import tolerant.** O specificație cu câteva `$ref` stricate importă toate rutele posibile și afișează un avertisment cu ce a trebuit să omită.
+
+Remedieri:
+
+- Importul unei specificații nevalide sau inaccesibile afișează un mesaj clar în loc să deschidă fereastra de raport de eroare.
+- Vederea detaliată a raportului de eroare se derulează din nou.
+- Fundalurile ferestrelor nu mai sunt neclare.
+
 ## v1.1.1
 
 **Designerul de API se controlează acum din bara laterală.**
