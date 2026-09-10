@@ -111,12 +111,40 @@ jobs:
             printf '%s' "$APPLE_API_KEY_B64" | base64 -d > "$RUNNER_TEMP/apple_api_key.p8"
             export APPLE_API_KEY="$RUNNER_TEMP/apple_api_key.p8"
           fi
+          # macOS signing keychain — pre-managed here on purpose. electron-builder's
+          # own keychain setup unlocks its temporary keychain with the CERT password
+          # rather than the keychain password (app-builder-lib macCodeSign.js
+          # importCerts: `set-key-partition-list -k <cscKeyPassword>` against a
+          # keychain created with a random password), which fails on current macos
+          # runners with "SecKeychainUnlock: passphrase not correct". So build the
+          # keychain here with a known password (used consistently), import the
+          # cert, and hand electron-builder the ready keychain via CSC_KEYCHAIN — it
+          # skips its own keychain creation when CSC_LINK is unset (macPackager.js).
+          SIGNED=""
+          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$CSC_LINK" ] && [ -n "$CSC_KEY_PASSWORD" ]; then
+            KEYCHAIN="$RUNNER_TEMP/restorm-signing.keychain-db"
+            KEYCHAIN_PWD="$(openssl rand -base64 24)"
+            printf '%s' "$CSC_LINK" | base64 -d > "$RUNNER_TEMP/cert.p12"
+            security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
+            security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN"
+            security set-keychain-settings "$KEYCHAIN"
+            security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$CSC_KEY_PASSWORD" \
+              -T /usr/bin/codesign -T /usr/bin/productbuild
+            security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN" >/dev/null
+            security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+            rm -f "$RUNNER_TEMP/cert.p12"
+            echo "Signing identities in the build keychain:"
+            security find-identity -v -p codesigning "$KEYCHAIN"
+            export CSC_KEYCHAIN="$KEYCHAIN"
+            export CSC_IDENTITY_AUTO_DISCOVERY=true
+            unset CSC_LINK CSC_KEY_PASSWORD
+            SIGNED=1
+          fi
           # Notarization is opt-in per electron-builder 26 and only meaningful
-          # once the app is actually SIGNED (a cert is present) AND a
-          # notarization credential exists — notarizing an unsigned app fails.
-          # An uncredentialed run stays exactly the unsigned build it always was.
+          # once the app is actually SIGNED AND a notarization credential exists —
+          # notarizing an unsigned app fails. An uncredentialed run stays unsigned.
           NOTARIZE_FLAG=""
-          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$CSC_LINK" ] \
+          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$SIGNED" ] \
              && { [ -n "$APPLE_API_KEY" ] || [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ]; }; then
             NOTARIZE_FLAG="-c.mac.notarize=true"
           fi
