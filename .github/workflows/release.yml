@@ -22,12 +22,27 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: 'Platforms to build (comma-separated: linux,windows,macos)'
+        required: false
+        default: 'linux,windows,macos'
+        type: string
+      tag:
+        description: 'Existing tag/ref to (re)build WITHOUT bumping (e.g. v1.1.1). Blank = the dispatched ref. This workflow never creates or deletes tags — new versions come from manual-release.yml.'
+        required: false
+        type: string
   workflow_call:
     inputs:
       tag:
         description: 'Tag to build and publish (vX.Y.Z)'
         required: true
+        type: string
+      targets:
+        description: 'Platforms to build (comma-separated: linux,windows,macos)'
+        required: false
+        default: 'linux,windows,macos'
         type: string
 
 # Read-only: nothing here writes to the repository. The distributables and the
@@ -37,8 +52,42 @@ permissions:
   contents: read
 
 jobs:
+  # Resolve WHICH platforms to build (the `targets` input, default all three)
+  # and WHICH ref to build. Emitting the matrix here lets a dispatch build a
+  # subset — e.g. rebuild only macos from an existing tag — instead of the
+  # fixed 3-OS matrix. `targets` is also surfaced as an output so the
+  # downstream store jobs can each gate on their own platform having built.
+  setup:
+    name: Resolve build matrix + ref
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      ref: ${{ steps.plan.outputs.ref }}
+      targets: ${{ steps.plan.outputs.targets }}
+    steps:
+      - id: plan
+        shell: bash
+        run: |
+          TARGETS="${{ inputs.targets }}"
+          [ -z "$TARGETS" ] && TARGETS="linux,windows,macos"
+          REF="${{ inputs.tag }}"
+          [ -z "$REF" ] && REF="${{ github.ref }}"
+          inc=""
+          case ",$TARGETS," in *,linux,*)   inc="${inc}{\"os\":\"ubuntu-latest\",\"platform\":\"linux\"},";;   esac
+          case ",$TARGETS," in *,windows,*) inc="${inc}{\"os\":\"windows-latest\",\"platform\":\"windows\"},";; esac
+          case ",$TARGETS," in *,macos,*)   inc="${inc}{\"os\":\"macos-latest\",\"platform\":\"macos\"},";;    esac
+          inc="${inc%,}"
+          if [ -z "$inc" ]; then echo "no valid platform in targets='$TARGETS'" >&2; exit 1; fi
+          {
+            echo "matrix={\"include\":[$inc]}"
+            echo "ref=$REF"
+            echo "targets=$TARGETS"
+          } >> "$GITHUB_OUTPUT"
+          echo "Building [$TARGETS] from ref $REF"
+
   release:
     name: Release (${{ matrix.platform }})
+    needs: setup
     runs-on: ${{ matrix.os }}
     # Use bash on every runner (Git Bash on Windows) so the shared shell steps
     # below — inline `NODE_OPTIONS=… cmd`, unix-style paths — behave identically
@@ -48,20 +97,13 @@ jobs:
         shell: bash
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            platform: linux
-          - os: windows-latest
-            platform: windows
-          - os: macos-latest
-            platform: macos
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ needs.setup.outputs.ref }}
           lfs: true
 
       - name: Setup Node.js
@@ -313,7 +355,10 @@ jobs:
     # (the download page, the website's changelog pages, any other consumer) with
     # no access to this repository. Own job, not a step in the matrix above —
     # publishing the same files three times over would be a race for no reason.
-    needs: release
+    needs: [setup, release]
+    # Notes are version-level; only (re)publish them on a full release, not on a
+    # single-platform rebuild (they are already in the feed at that point).
+    if: ${{ contains(needs.setup.outputs.targets, 'linux') && contains(needs.setup.outputs.targets, 'windows') && contains(needs.setup.outputs.targets, 'macos') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -366,7 +411,10 @@ jobs:
     # release just published to the version folder and uploads it + the
     # listing screenshots. Kept out of the build matrix so the store-side
     # logic lives in one dedicated file (also runnable by hand via dispatch).
-    needs: release
+    needs: [setup, release]
+    # The .snap is produced by the LINUX build, so only publish it when linux
+    # was part of this run (a macos-only rebuild must not touch the store).
+    if: ${{ contains(needs.setup.outputs.targets, 'linux') }}
     uses: ./.github/workflows/snap-store.yml
     with:
       tag: ${{ inputs.tag || github.ref }}
@@ -377,7 +425,10 @@ jobs:
     # Stamps the released version onto the restorm-cli bootstrap package and
     # publishes it — its payload is fetched from R2's latest/ at runtime, so
     # nothing is rebuilt here either.
-    needs: release
+    needs: [setup, release]
+    # restorm-cli fetches every platform's build from R2 at runtime, so only
+    # (re)publish the launcher on a full release, not a single-platform rebuild.
+    if: ${{ contains(needs.setup.outputs.targets, 'linux') && contains(needs.setup.outputs.targets, 'windows') && contains(needs.setup.outputs.targets, 'macos') }}
     uses: ./.github/workflows/npm-publish.yml
     with:
       tag: ${{ inputs.tag || github.ref }}
