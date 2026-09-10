@@ -22,13 +22,38 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: 'Platforms to build (comma-separated: linux,windows,macos)'
+        required: false
+        default: 'linux,windows,macos'
+        type: string
+      tag:
+        description: 'Existing tag/ref to (re)build WITHOUT bumping (e.g. v1.1.1). Blank = the dispatched ref. This workflow never creates or deletes tags — new versions come from manual-release.yml.'
+        required: false
+        type: string
+      publish:
+        description: 'Publish artifacts to R2. Set false to validate the pipeline (incl. macOS sign/notarize/staple) without touching the public bucket or the auto-update feed.'
+        required: false
+        default: true
+        type: boolean
   workflow_call:
     inputs:
       tag:
         description: 'Tag to build and publish (vX.Y.Z)'
         required: true
         type: string
+      targets:
+        description: 'Platforms to build (comma-separated: linux,windows,macos)'
+        required: false
+        default: 'linux,windows,macos'
+        type: string
+      publish:
+        description: 'Publish artifacts to R2 (false = dry run).'
+        required: false
+        default: true
+        type: boolean
 
 # Read-only: nothing here writes to the repository. The distributables and the
 # notes go to R2 with their own credentials, and the version bump + tag are the
@@ -37,8 +62,42 @@ permissions:
   contents: read
 
 jobs:
+  # Resolve WHICH platforms to build (the `targets` input, default all three)
+  # and WHICH ref to build. Emitting the matrix here lets a dispatch build a
+  # subset — e.g. rebuild only macos from an existing tag — instead of the
+  # fixed 3-OS matrix. `targets` is also surfaced as an output so the
+  # downstream store jobs can each gate on their own platform having built.
+  setup:
+    name: Resolve build matrix + ref
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      ref: ${{ steps.plan.outputs.ref }}
+      targets: ${{ steps.plan.outputs.targets }}
+    steps:
+      - id: plan
+        shell: bash
+        run: |
+          TARGETS="${{ inputs.targets }}"
+          [ -z "$TARGETS" ] && TARGETS="linux,windows,macos"
+          REF="${{ inputs.tag }}"
+          [ -z "$REF" ] && REF="${{ github.ref }}"
+          inc=""
+          case ",$TARGETS," in *,linux,*)   inc="${inc}{\"os\":\"ubuntu-latest\",\"platform\":\"linux\"},";;   esac
+          case ",$TARGETS," in *,windows,*) inc="${inc}{\"os\":\"windows-latest\",\"platform\":\"windows\"},";; esac
+          case ",$TARGETS," in *,macos,*)   inc="${inc}{\"os\":\"macos-latest\",\"platform\":\"macos\"},";;    esac
+          inc="${inc%,}"
+          if [ -z "$inc" ]; then echo "no valid platform in targets='$TARGETS'" >&2; exit 1; fi
+          {
+            echo "matrix={\"include\":[$inc]}"
+            echo "ref=$REF"
+            echo "targets=$TARGETS"
+          } >> "$GITHUB_OUTPUT"
+          echo "Building [$TARGETS] from ref $REF"
+
   release:
     name: Release (${{ matrix.platform }})
+    needs: setup
     runs-on: ${{ matrix.os }}
     # Use bash on every runner (Git Bash on Windows) so the shared shell steps
     # below — inline `NODE_OPTIONS=… cmd`, unix-style paths — behave identically
@@ -48,20 +107,13 @@ jobs:
         shell: bash
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            platform: linux
-          - os: windows-latest
-            platform: windows
-          - os: macos-latest
-            platform: macos
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ needs.setup.outputs.ref }}
           lfs: true
 
       - name: Setup Node.js
@@ -140,14 +192,12 @@ jobs:
             unset CSC_LINK CSC_KEY_PASSWORD
             SIGNED=1
           fi
-          # Notarization is opt-in per electron-builder 26 and only meaningful
-          # once the app is actually SIGNED AND a notarization credential exists —
-          # notarizing an unsigned app fails. An uncredentialed run stays unsigned.
+          # ASYNC notarization: do NOT notarize inline — that pins the 10x macOS
+          # runner polling Apple for 30-80 min. electron-builder only SIGNS here;
+          # the submit + wait + staple are split across later jobs
+          # (mac-notary-wait on Linux, mac-staple-publish on a short mac runner).
+          # So no notarize flag.
           NOTARIZE_FLAG=""
-          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$SIGNED" ] \
-             && { [ -n "$APPLE_API_KEY" ] || [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ]; }; then
-            NOTARIZE_FLAG="-c.mac.notarize=true"
-          fi
           # A tag-triggered run sets GITHUB_REF_TYPE=tag, which flips
           # electron-builder into implicit publishing — it then tries to push
           # the .snap to the Snap Store, but snapcraft isn't installed on this
@@ -158,6 +208,27 @@ jobs:
           # auto-update) but pushes nothing: the reusable workflow_call path
           # already runs this way (its ref is the caller's branch).
           GITHUB_REF_TYPE=branch NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG
+          # Signed macOS build → submit each .dmg to the notary service WITHOUT
+          # waiting and record the submission ids. The .app inside every dmg/zip
+          # of one arch shares a single code signature (cdhash), so one
+          # submission per arch notarizes all of that arch's artifacts (stapling
+          # happens later, in mac-staple-publish). The presence of
+          # notary-submissions.txt is the async-signed marker the downstream
+          # steps/jobs key off.
+          if [ "${{ matrix.platform }}" = "macos" ] && [ -n "$SIGNED" ] && [ -n "$APPLE_API_KEY" ]; then
+            : > dist-electron/notary-submissions.txt
+            for dmg in dist-electron/*.dmg; do
+              [ -f "$dmg" ] || continue
+              echo "Submitting $dmg to the notary service (--no-wait)…"
+              id=$(xcrun notarytool submit "$dmg" \
+                     --key "$APPLE_API_KEY" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER" \
+                     --no-wait --output-format json \
+                   | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).id)}catch(e){process.exit(1)}})')
+              [ -n "$id" ] || { echo "notarytool submit returned no id for $dmg" >&2; exit 1; }
+              echo "  → submission id $id"
+              echo "$id" >> dist-electron/notary-submissions.txt
+            done
+          fi
         env:
           # Source-map generation roughly doubles the renderer build's peak heap,
           # so the limit tracks whether maps are being produced at all — which is
@@ -206,32 +277,48 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-      - name: Verify signature + notarization (macOS)
-        # Runs only once the Apple secrets exist — the proof the release is
-        # actually accepted by Gatekeeper, in the job log (codesign chain,
-        # notarization ticket stapled to the app, spctl assessment). The
-        # secrets context is not allowed in `if:` expressions, so the gate
-        # reads the secret through env and exits early when it is absent.
+      - name: Flag whether this macOS build went the async-notarization path
+        # The build step writes notary-submissions.txt only when it actually
+        # signed + submitted. Its presence routes the mac artifacts to
+        # mac-staple-publish (notarize wait → staple → verify → publish) instead
+        # of the inline publish below. An UNSIGNED mac build has no marker and
+        # keeps the normal in-matrix publish (a plain unsigned build, as before).
         if: matrix.platform == 'macos'
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          if [ -z "$APPLE_TEAM_ID" ]; then
-            echo "Apple secrets not configured — skipping signature verification (unsigned build)."
-            exit 0
+          if [ -f restorm/dist-electron/notary-submissions.txt ]; then
+            echo "mac_async=true" >> "$GITHUB_ENV"
+          else
+            echo "mac_async=false" >> "$GITHUB_ENV"
           fi
-          APP="$(find restorm/dist-electron -maxdepth 3 -name '*.app' -print -quit)"
-          if [ -z "$APP" ]; then echo "no .app found under dist-electron" >&2; exit 1; fi
-          echo "Verifying: $APP"
-          codesign --verify --deep --strict --verbose=2 "$APP"
-          xcrun stapler validate "$APP"
-          spctl --assess --type execute --verbose=2 "$APP"
+
+      - name: Store the signed macOS dist for the staple job
+        # Hand the signed-but-unstapled dist to mac-staple-publish: the .dmg
+        # installers (+ blockmaps), the auto-update .zip archives, the update
+        # feed, and the submission ids. Only SINGLE FILES are handed off (dmg,
+        # zip) — never the raw .app directory: GitHub artifacts don't preserve
+        # a bundle's symlinks/permissions and would break its signature. The
+        # staple job extracts the .app from the zip instead. Ephemeral (1-day).
+        if: matrix.platform == 'macos' && env.mac_async == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dist
+          path: |
+            restorm/dist-electron/*.dmg
+            restorm/dist-electron/*.dmg.blockmap
+            restorm/dist-electron/*-mac.zip
+            restorm/dist-electron/latest-mac.yml
+            restorm/dist-electron/notary-submissions.txt
+          retention-days: 1
+          if-no-files-found: error
 
       - name: Describe this platform's build for the npm launcher
         # `restorm-cli` reads this manifest to know which file to fetch and what
         # it must hash to, so it can cache a verified build instead of
         # re-downloading 400 MB on every CI job. Written per platform because
         # this step runs inside the build matrix — see the script's header.
+        # Skipped for the async macOS path: the hashes only settle after
+        # stapling, so mac-staple-publish writes the mac manifest instead.
+        if: matrix.platform != 'macos' || env.mac_async != 'true'
         run: |
           VERSION=$(node -p "require('./restorm/package.json').version")
           node scripts/release-manifest.mjs restorm/dist-electron "$VERSION" https://dl.restorm.app
@@ -242,6 +329,9 @@ jobs:
         # URL is what every installed app polls) with their `url:`/`path:`
         # entries rewritten to point into the version folder — electron-updater
         # and the website's download page both resolve those relative paths.
+        # Skipped for the async macOS path (mac-staple-publish publishes the
+        # stapled artifacts) and when `publish` is false (a dry-run validation).
+        if: (inputs.publish != false) && (matrix.platform != 'macos' || env.mac_async != 'true')
         run: |
           VERSION=$(node -p "require('./restorm/package.json').version")
           # Point the feeds' file references into the version folder. perl, not
@@ -305,6 +395,148 @@ jobs:
           AWS_DEFAULT_REGION: auto
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
+  # ── Async macOS notarization: WAIT (cheap Linux runner) ──────────────────
+  # The mac build job submitted each .dmg to the notary service --no-wait and
+  # freed the 10x macOS runner. Poll the App Store Connect Notary API from here
+  # (a 1x Linux runner) until every submission is Accepted. No-ops for an
+  # unsigned mac build (no submissions artifact) and when macOS wasn't built.
+  mac-notary-wait:
+    name: macOS notarization (wait)
+    needs: [setup, release]
+    if: contains(needs.setup.outputs.targets, 'macos')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        # The workflow's OWN ref (the branch/tag it ran from) — not the built
+        # tag — so scripts/notary-poll.mjs is present even when this run is
+        # rebuilding an older tag that predates the script.
+        uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - name: Download the signed macOS dist
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: macos-dist
+          path: restorm/dist-electron
+      - name: Poll the notary service until every submission is Accepted
+        env:
+          APPLE_API_KEY_B64: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          if [ ! -f restorm/dist-electron/notary-submissions.txt ]; then
+            echo "No macOS submissions (unsigned build) — nothing to wait for."
+            exit 0
+          fi
+          printf '%s' "$APPLE_API_KEY_B64" | base64 -d > "$RUNNER_TEMP/apple_api_key.p8"
+          export APPLE_API_KEY="$RUNNER_TEMP/apple_api_key.p8"
+          ids=$(tr '\n' ' ' < restorm/dist-electron/notary-submissions.txt)
+          echo "Polling submissions: $ids"
+          NOTARY_POLL_SECONDS=60 NOTARY_TIMEOUT_MINUTES=90 node scripts/notary-poll.mjs $ids
+
+  # ── Async macOS notarization: STAPLE + PUBLISH (short macOS runner) ───────
+  # Once notarized: staple the ticket into each .dmg and each .app (they share
+  # the notarized cdhash), re-zip the stapled .app into the auto-update zip
+  # (stapler can't staple a .zip), verify Gatekeeper acceptance, recompute the
+  # update feed + npm manifest from the stapled files, and publish to R2. Gated
+  # on the `publish` input so the whole flow can be validated with publish=false.
+  mac-staple-publish:
+    name: macOS staple + publish
+    needs: [setup, mac-notary-wait]
+    if: contains(needs.setup.outputs.targets, 'macos')
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        # Workflow ref (carries scripts/restaple-feed.mjs + release-manifest.mjs),
+        # not the built tag. The release VERSION is read from the artifact's feed.
+        uses: actions/checkout@v7
+      - name: Download the signed macOS dist
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: macos-dist
+          path: restorm/dist-electron
+      - name: Staple, verify, re-stamp the feed, publish
+        env:
+          PUBLISH: ${{ inputs.publish }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          set -euo pipefail
+          cd restorm
+          if [ ! -f dist-electron/notary-submissions.txt ]; then
+            echo "No macOS submissions (unsigned build) — nothing to staple/publish."
+            exit 0
+          fi
+          # Version from the artifact's feed, not package.json — the checkout is
+          # the workflow ref, whose version can differ from the rebuilt tag.
+          VERSION=$(awk '/^version:/{print $2; exit}' dist-electron/latest-mac.yml)
+          [ -n "$VERSION" ] || { echo "could not read version from latest-mac.yml" >&2; exit 1; }
+          echo "Publishing macOS artifacts for v${VERSION}"
+          # Staple each DMG directly (Gatekeeper validates the dmg's own ticket).
+          for dmg in dist-electron/*.dmg; do
+            [ -f "$dmg" ] || continue
+            echo "Stapling $dmg"; xcrun stapler staple "$dmg"; xcrun stapler validate "$dmg"
+          done
+          # The auto-update .zip can't be stapled directly, and the .app it
+          # carries must be stapled for offline Gatekeeper. Per zip: extract the
+          # .app, staple it (same notarized cdhash → the ticket is fetched by
+          # cdhash), verify Gatekeeper acceptance, then re-zip with the same
+          # ditto flags electron-builder uses.
+          for zip in dist-electron/*-mac.zip; do
+            [ -f "$zip" ] || continue
+            work="$RUNNER_TEMP/$(basename "$zip" .zip)"
+            rm -rf "$work"; mkdir -p "$work"
+            ditto -x -k "$zip" "$work"
+            app="$(find "$work" -maxdepth 1 -name '*.app' -print -quit)"
+            [ -n "$app" ] || { echo "no .app inside $zip" >&2; exit 1; }
+            echo "Stapling + verifying $app (from $(basename "$zip"))"
+            xcrun stapler staple "$app"
+            codesign --verify --deep --strict --verbose=2 "$app"
+            xcrun stapler validate "$app"
+            spctl --assess --type execute --verbose=2 "$app"
+            rm -f "$zip"
+            ditto -c -k --sequesterRsrc --keepParent "$app" "$zip"
+          done
+          # Recompute the update-feed hashes (stapling changed the files) + the
+          # npm launcher manifest, both from the FINAL stapled artifacts.
+          node ../scripts/restaple-feed.mjs dist-electron dist-electron/latest-mac.yml
+          node ../scripts/release-manifest.mjs dist-electron "$VERSION" https://dl.restorm.app
+          if [ "${PUBLISH}" = "false" ]; then
+            echo "publish=false — macOS sign/notarize/staple/verify validated; NOT publishing to R2."
+            exit 0
+          fi
+          # Publish (mirror of the matrix R2 step, mac files only): feed → root,
+          # binaries/blockmaps/manifest → v<version>/, installers → latest/ with
+          # stable version-less names.
+          V="v${VERSION}" perl -pi -e 's|^( *- +url: )(.+)$|$1$ENV{V}/$2|; s|^(path: )(.+)$|$1$ENV{V}/$2|' dist-electron/latest-mac.yml
+          aws s3 cp dist-electron/ "s3://restorm-releases/v${VERSION}/" \
+            --recursive --endpoint-url "${R2_ENDPOINT}" \
+            --exclude "*" --include "*.dmg" --include "*.dmg.blockmap" \
+            --include "*-mac.zip" --include "manifest-darwin.json" --exclude "*/*"
+          aws s3 cp dist-electron/latest-mac.yml "s3://restorm-releases/latest-mac.yml" \
+            --endpoint-url "${R2_ENDPOINT}"
+          for f in dist-electron/*-arm64.dmg dist-electron/*.dmg \
+                   dist-electron/*-arm64-mac.zip dist-electron/*-mac.zip \
+                   dist-electron/manifest-darwin.json; do
+            [ -f "$f" ] || continue
+            case "$(basename "$f")" in
+              *-arm64.dmg)     dest="Restorm-arm64.dmg" ;;
+              *.dmg)           dest="Restorm.dmg" ;;
+              *-arm64-mac.zip) dest="Restorm-arm64-mac.zip" ;;
+              *-mac.zip)       dest="Restorm-mac.zip" ;;
+              manifest-*.json) dest="$(basename "$f")" ;;
+              *)               dest="" ;;
+            esac
+            [ -n "$dest" ] || continue
+            aws s3 cp "$f" "s3://restorm-releases/latest/${dest}" --endpoint-url "${R2_ENDPOINT}"
+          done
+
   publish-notes:
     name: Publish release notes
     runs-on: ubuntu-latest
@@ -313,7 +545,10 @@ jobs:
     # (the download page, the website's changelog pages, any other consumer) with
     # no access to this repository. Own job, not a step in the matrix above —
     # publishing the same files three times over would be a race for no reason.
-    needs: release
+    needs: [setup, release]
+    # Notes are version-level; only (re)publish them on a full release, not on a
+    # single-platform rebuild (they are already in the feed at that point).
+    if: ${{ contains(needs.setup.outputs.targets, 'linux') && contains(needs.setup.outputs.targets, 'windows') && contains(needs.setup.outputs.targets, 'macos') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -366,7 +601,10 @@ jobs:
     # release just published to the version folder and uploads it + the
     # listing screenshots. Kept out of the build matrix so the store-side
     # logic lives in one dedicated file (also runnable by hand via dispatch).
-    needs: release
+    needs: [setup, release]
+    # The .snap is produced by the LINUX build, so only publish it when linux
+    # was part of this run (a macos-only rebuild must not touch the store).
+    if: ${{ contains(needs.setup.outputs.targets, 'linux') }}
     uses: ./.github/workflows/snap-store.yml
     with:
       tag: ${{ inputs.tag || github.ref }}
@@ -377,7 +615,10 @@ jobs:
     # Stamps the released version onto the restorm-cli bootstrap package and
     # publishes it — its payload is fetched from R2's latest/ at runtime, so
     # nothing is rebuilt here either.
-    needs: release
+    needs: [setup, release]
+    # restorm-cli fetches every platform's build from R2 at runtime, so only
+    # (re)publish the launcher on a full release, not a single-platform rebuild.
+    if: ${{ contains(needs.setup.outputs.targets, 'linux') && contains(needs.setup.outputs.targets, 'windows') && contains(needs.setup.outputs.targets, 'macos') }}
     uses: ./.github/workflows/npm-publish.yml
     with:
       tag: ${{ inputs.tag || github.ref }}
