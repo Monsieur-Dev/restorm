@@ -407,9 +407,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
+        # The workflow's OWN ref (the branch/tag it ran from) — not the built
+        # tag — so scripts/notary-poll.mjs is present even when this run is
+        # rebuilding an older tag that predates the script.
         uses: actions/checkout@v7
-        with:
-          ref: ${{ needs.setup.outputs.ref }}
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
@@ -449,9 +450,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout code
+        # Workflow ref (carries scripts/restaple-feed.mjs + release-manifest.mjs),
+        # not the built tag. The release VERSION is read from the artifact's feed.
         uses: actions/checkout@v7
-        with:
-          ref: ${{ needs.setup.outputs.ref }}
       - name: Download the signed macOS dist
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -472,7 +473,11 @@ jobs:
             echo "No macOS submissions (unsigned build) — nothing to staple/publish."
             exit 0
           fi
-          VERSION=$(node -p "require('./package.json').version")
+          # Version from the artifact's feed, not package.json — the checkout is
+          # the workflow ref, whose version can differ from the rebuilt tag.
+          VERSION=$(awk '/^version:/{print $2; exit}' dist-electron/latest-mac.yml)
+          [ -n "$VERSION" ] || { echo "could not read version from latest-mac.yml" >&2; exit 1; }
+          echo "Publishing macOS artifacts for v${VERSION}"
           # Staple each DMG directly (Gatekeeper validates the dmg's own ticket).
           for dmg in dist-electron/*.dmg; do
             [ -f "$dmg" ] || continue
