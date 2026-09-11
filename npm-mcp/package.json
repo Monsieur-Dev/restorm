@@ -1,0 +1,32 @@
+{
+  "name": "restorm-mcp",
+  "version": "0.0.0-dev",
+  "description": "Connect your AI assistant (Claude Desktop, Cursor, Claude Code…) to your running Restorm instance over MCP. A zero-dependency stdio↔HTTP bridge that discovers your local Restorm and forwards tool calls.",
+  "bin": {
+    "restorm-mcp": "mcp-launcher.mjs"
+  },
+  "scripts": {
+    "prepack": "node -e \"const fs=require('fs');const s='../scripts/mcp-launcher.mjs';if(!fs.existsSync(s))throw new Error('mcp-launcher.mjs source missing at '+s+' — publish restorm-mcp from the monorepo checkout');fs.copyFileSync(s,'mcp-launcher.mjs')\""
+  },
+  "files": [
+    "mcp-launcher.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "SEE LICENSE IN https://restorm.app",
+  "homepage": "https://restorm.app",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "claude",
+    "cursor",
+    "llm",
+    "assistant",
+    "restorm",
+    "api"
+  ],
+  "author": "MonsieurDev <contact@restorm.app>"
+}

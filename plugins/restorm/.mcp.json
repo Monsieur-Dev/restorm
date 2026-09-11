@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "restorm": {
+      "command": "npx",
+      "args": ["-y", "restorm-mcp"]
+    }
+  }
+}

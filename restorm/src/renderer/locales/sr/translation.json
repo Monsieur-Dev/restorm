@@ -2781,6 +2781,32 @@
     "proUpsell": {
       "note": "U verziji Community AI agenti upravljaju vašim zahtevima. Pređite na Pro da biste upravljali scenarijima, interfejsom i naprednom automatizacijom.",
       "link": "Pređite na Pro"
+    },
+    "connect": {
+      "action": "Dodaj Restorm u svog AI asistenta",
+      "title": "Dodaj Restorm u svog AI asistenta",
+      "intro": "Povežite svog AI asistenta sa ovom Restorm instancom putem MCP-a. Izaberite svog klijenta:",
+      "copy": "Kopiraj",
+      "copied": "Kopirano",
+      "run": "Dodaj u Claude Code",
+      "added": "Dodato",
+      "runOk": "Restorm je dodat u Claude Code. Ponovo pokrenite Claude Code da biste ga koristili.",
+      "runError": "Nije moguće pokrenuti komandu",
+      "claudeCode": {
+        "where": "Nalepite ovo u terminal"
+      },
+      "claudeDesktop": {
+        "where": "Dodajte ovo u svoj claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "Dodajte ovo u ~/.cursor/mcp.json"
+      },
+      "footnote": "MCP server mora biti pokrenut (podrazumevano jeste). Most sam pronalazi ovu instancu — nema porta ni tokena za kopiranje.",
+      "invite": {
+        "title": "Povežite svoj AI sa Restormom",
+        "body": "Povežite Claude ili Cursor sa ovom instancom jednim klikom.",
+        "cta": "Prikaži kako"
+      }
     }
   },
   "mcpToolTitles": {

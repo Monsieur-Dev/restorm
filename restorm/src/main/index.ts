@@ -90,7 +90,7 @@ import { checkFileFormatCompatibility } from '../shared/config/fileFormatVersion
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
-import { spawn } from 'node:child_process'
+import { spawn, execFile } from 'node:child_process'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
 import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
@@ -1488,6 +1488,47 @@ ipcMain.handle('app:get-version', () => resolveBackendVersion())
 // it on demand.
 ipcMain.handle('mcp:get-logs', () => mcpService.getServedCalls())
 ipcMain.handle('mcp:clear-logs', () => { mcpService.clearServedCalls() })
+
+// "Add Restorm to Claude" one-click support. Detect the `claude` CLI on the
+// PATH so the renderer only offers the Run button when it can work, and run
+// `claude mcp add …` on demand. We shell out ONLY to the user's own `claude`
+// CLI (Claude Code) — never write another app's config file.
+const execFileAsync = (cmd: string, args: string[], timeoutMs: number): Promise<{ stdout: string; stderr: string }> =>
+  new Promise((resolve, reject) => {
+    execFile(cmd, args, { timeout: timeoutMs, windowsHide: true }, (err, stdout, stderr) => {
+      if (err) { const e = err as Error & { stderr?: string }; e.stderr = stderr; reject(e); return }
+      resolve({ stdout, stderr })
+    })
+  })
+
+ipcMain.handle('mcp:detect-claude-cli', async (): Promise<boolean> => {
+  // Doc-capture mode forces detection so the "Add to Claude Code" button is
+  // always in the screenshot — the captures stay identical whatever machine
+  // regenerates them (the `claude` CLI is present on some, absent on others).
+  if (process.env.RESTORM_DOC_SHOTS === '1') return true
+  const probe = process.platform === 'win32' ? 'where' : 'which'
+  try {
+    await execFileAsync(probe, ['claude'], 5000)
+    return true
+  } catch {
+    return false
+  }
+})
+
+ipcMain.handle('mcp:run-claude-add', async (): Promise<{ ok: boolean; message?: string }> => {
+  try {
+    // `claude mcp add restorm -- npx -y restorm-mcp` — the `--` hands the rest
+    // to Claude Code as the server command.
+    await execFileAsync('claude', ['mcp', 'add', 'restorm', '--', 'npx', '-y', 'restorm-mcp'], 20000)
+    return { ok: true }
+  } catch (err) {
+    const stderr = (err as { stderr?: string }).stderr?.trim()
+    const fallback = err instanceof Error ? err.message : String(err)
+    // `??` would keep an empty stderr string; we want to fall through to the
+    // error message when stderr is missing OR blank — hence the length guard.
+    return { ok: false, message: stderr?.length ? stderr : fallback }
+  }
+})
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3
+
+**Branchez votre assistant IA sur Restorm.**
+
+- **En un clic, depuis l'app.** Le menu MCP de la barre d'état propose désormais « Ajouter Restorm à votre assistant IA » — une configuration prête à coller pour Claude Code, Claude Desktop et Cursor, plus un « Ajouter à Claude Code » en un clic.
+- **Ou en une ligne, partout.** Pointez n'importe quel client MCP vers votre Restorm en cours d'exécution avec `npx -y restorm-mcp` — le pont le trouve tout seul, sans aucun port ni jeton à copier.
+- **Un plugin pour Claude Code.** Lancez `/plugin marketplace add Monsieur-Dev/restorm`, puis installez le plugin `restorm`.
+
+Voir [Connecter votre assistant IA](https://restorm.app/en/docs/outils/mcp/).
+
 ## v1.1.2
 
 **Prise en charge d'OpenAPI 3.2.**

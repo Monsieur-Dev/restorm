@@ -154,6 +154,25 @@ const BUILTIN_TOOLS = [
       } }
   },
   {
+    name: 'screencast-start',
+    title: 'Start screencast',
+    description:
+      'Begin recording the active Electron window to a WebM video. Recording runs until `screencast-stop` ' +
+      'is called, which flushes it to a temp file and returns the path. The animated counterpart to `screenshot`.',
+    inputSchema: { type: 'object', properties: {
+        windowId: { type: 'integer', description: "Target a specific BrowserWindow by `webContents.id` (see `get-windows`). Omit for focused / first-visible." }
+      } }
+  },
+  {
+    name: 'screencast-stop',
+    title: 'Stop screencast',
+    description:
+      'Stop the in-progress screencast started by `screencast-start`, flush it to a temp WebM file, and return its path.',
+    inputSchema: { type: 'object', properties: {
+        windowId: { type: 'integer', description: "Target a specific BrowserWindow by `webContents.id` (see `get-windows`). Omit for focused / first-visible." }
+      } }
+  },
+  {
     name: 'refresh',
     title: 'Refresh',
     description:
@@ -448,6 +467,39 @@ const BUILTIN_TOOLS = [
       },
       required: ['gesture']
     }
+  },
+  {
+    name: 'batch',
+    title: 'Chain MCP tool calls in one request',
+    description:
+      'Run a sequence of MCP tool calls in order, with an implicit settle between each, and return all their ' +
+      'results together. Use it to script a short UI flow (e.g. type-text → dispatch-event → screenshot) in one round-trip.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        calls: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'Tool name to call.' },
+              arguments: { type: 'object', description: 'Arguments for that tool.' }
+            },
+            required: ['name']
+          }
+        }
+      },
+      required: ['calls']
+    }
+  },
+  {
+    name: 'list-instances',
+    title: 'List MCP instances',
+    description:
+      'Return every running Restorm instance that accepts MCP commands — each with its open file name, ' +
+      'project path, session `name`, `pid`, and `endpoint`. Use `__session: "<name>"` on a later call to ' +
+      'target a specific instance. Instances on which MCP was cut are excluded.',
+    inputSchema: { type: 'object', properties: {} }
   }
 ]
 

@@ -2780,6 +2780,26 @@
     "proUpsell": {
       "note": "On the Community plan, AI agents drive your requests. Upgrade to Pro to drive scenarios, the interface and advanced automation.",
       "link": "Upgrade to Pro"
+    },
+    "connect": {
+      "action": "Add Restorm to your AI assistant",
+      "title": "Add Restorm to your AI assistant",
+      "intro": "Connect your AI assistant to this Restorm instance over MCP. Pick your client:",
+      "copy": "Copy",
+      "copied": "Copied",
+      "run": "Add to Claude Code",
+      "added": "Added",
+      "runOk": "Restorm was added to Claude Code. Restart Claude Code to use it.",
+      "runError": "Couldn't run the command",
+      "claudeCode": { "where": "Paste this in a terminal" },
+      "claudeDesktop": { "where": "Add this to your claude_desktop_config.json" },
+      "cursor": { "where": "Add this to ~/.cursor/mcp.json" },
+      "footnote": "The MCP server must be running (it is, by default). The bridge finds this instance on its own — no port or token to copy.",
+      "invite": {
+        "title": "Connect your AI to Restorm",
+        "body": "Wire Claude or Cursor to this instance in one click.",
+        "cta": "Show me how"
+      }
     }
   },
   "mcpToolTitles": {

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3
+
+**Yapay zekâ asistanınızı Restorm'a bağlayın.**
+
+- **Tek tıkla, doğrudan uygulamadan.** Durum çubuğundaki MCP menüsü artık “Restorm'u yapay zekâ asistanınıza ekleyin” seçeneğini sunuyor — Claude Code, Claude Desktop ve Cursor için yapıştırmaya hazır kurulum, ayrıca tek tıkla “Claude Code'a ekle”.
+- **Ya da tek satır, her yerde.** `npx -y restorm-mcp` ile herhangi bir MCP istemcisini çalışan Restorm'unuza yönlendirin — köprü onu kendiliğinden bulur, kopyalanacak port veya token yok.
+- **Claude Code için bir eklenti.** `/plugin marketplace add Monsieur-Dev/restorm` komutunu çalıştırın, ardından `restorm` eklentisini kurun.
+
+Bkz. [Yapay zekâ asistanınızı bağlama](https://restorm.app/en/docs/outils/mcp/).
+
 ## v1.1.2
 
 **OpenAPI 3.2 desteği.**

@@ -10,6 +10,16 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.1.3
+
+**Connect your AI assistant to Restorm.**
+
+- **In one click, from the app.** The MCP menu in the status bar now offers "Add Restorm to your AI assistant" — ready-to-paste setup for Claude Code, Claude Desktop and Cursor, plus a one-click "Add to Claude Code".
+- **Or one line, anywhere.** Point any MCP client at your running Restorm with `npx -y restorm-mcp` — the bridge finds it on its own, no port or token to copy.
+- **A plugin for Claude Code.** Run `/plugin marketplace add Monsieur-Dev/restorm`, then install the `restorm` plugin.
+
+See [Connecting your AI assistant](https://restorm.app/en/docs/outils/mcp/).
+
 ## v1.1.2
 
 **OpenAPI 3.2 support.**

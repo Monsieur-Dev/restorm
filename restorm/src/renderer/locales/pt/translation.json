@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "Na versão Community, os agentes de IA controlam as suas solicitações. Mude para o Pro para controlar cenários, a interface e a automação avançada.",
       "link": "Mudar para o Pro"
+    },
+    "connect": {
+      "action": "Adicionar o Restorm ao seu assistente de IA",
+      "title": "Adicionar o Restorm ao seu assistente de IA",
+      "intro": "Ligue o seu assistente de IA a esta instância do Restorm através do MCP. Escolha o seu cliente:",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "run": "Adicionar ao Claude Code",
+      "added": "Adicionado",
+      "runOk": "O Restorm foi adicionado ao Claude Code. Reinicie o Claude Code para o utilizar.",
+      "runError": "Não foi possível executar o comando",
+      "claudeCode": {
+        "where": "Cole isto num terminal"
+      },
+      "claudeDesktop": {
+        "where": "Adicione isto ao seu claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "Adicione isto a ~/.cursor/mcp.json"
+      },
+      "footnote": "O servidor MCP tem de estar em execução (está, por predefinição). A ponte encontra esta instância sozinha — não há porta nem token para copiar.",
+      "invite": {
+        "title": "Ligue a sua IA ao Restorm",
+        "body": "Ligue o Claude ou o Cursor a esta instância com um clique.",
+        "cta": "Ver como"
+      }
     }
   },
   "mcpToolTitles": {

@@ -2779,6 +2779,32 @@
     "proUpsell": {
       "note": "Ở bản Community, các tác nhân AI điều khiển các yêu cầu của bạn. Nâng cấp lên Pro để điều khiển kịch bản, giao diện và tự động hóa nâng cao.",
       "link": "Nâng cấp lên Pro"
+    },
+    "connect": {
+      "action": "Thêm Restorm vào trợ lý AI của bạn",
+      "title": "Thêm Restorm vào trợ lý AI của bạn",
+      "intro": "Kết nối trợ lý AI của bạn với phiên bản Restorm này qua MCP. Chọn ứng dụng khách của bạn:",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "run": "Thêm vào Claude Code",
+      "added": "Đã thêm",
+      "runOk": "Restorm đã được thêm vào Claude Code. Khởi động lại Claude Code để sử dụng.",
+      "runError": "Không thể chạy lệnh",
+      "claudeCode": {
+        "where": "Dán nội dung này vào một terminal"
+      },
+      "claudeDesktop": {
+        "where": "Thêm nội dung này vào claude_desktop_config.json của bạn"
+      },
+      "cursor": {
+        "where": "Thêm nội dung này vào ~/.cursor/mcp.json"
+      },
+      "footnote": "Máy chủ MCP phải đang chạy (theo mặc định là đang chạy). Cầu nối tự tìm thấy phiên bản này — không có cổng hoặc token nào cần sao chép.",
+      "invite": {
+        "title": "Kết nối AI của bạn với Restorm",
+        "body": "Kết nối Claude hoặc Cursor với phiên bản này chỉ bằng một cú nhấp.",
+        "cta": "Xem cách thực hiện"
+      }
     }
   },
   "mcpToolTitles": {

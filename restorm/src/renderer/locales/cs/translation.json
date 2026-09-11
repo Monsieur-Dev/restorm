@@ -2782,6 +2782,32 @@
     "proUpsell": {
       "note": "Ve verzi Community řídí vaše požadavky agenti AI. Přejděte na verzi Pro a získejte řízení scénářů, rozhraní a pokročilé automatizace.",
       "link": "Přejděte na verzi Pro"
+    },
+    "connect": {
+      "action": "Přidat Restorm do vašeho asistenta AI",
+      "title": "Přidat Restorm do vašeho asistenta AI",
+      "intro": "Připojte svého asistenta AI k této instanci Restorm přes MCP. Vyberte svého klienta:",
+      "copy": "Kopírovat",
+      "copied": "Zkopírováno",
+      "run": "Přidat do Claude Code",
+      "added": "Přidáno",
+      "runOk": "Restorm byl přidán do Claude Code. Restartujte Claude Code, abyste jej mohli používat.",
+      "runError": "Příkaz se nepodařilo spustit",
+      "claudeCode": {
+        "where": "Vložte toto do terminálu"
+      },
+      "claudeDesktop": {
+        "where": "Přidejte toto do svého claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "Přidejte toto do ~/.cursor/mcp.json"
+      },
+      "footnote": "Server MCP musí běžet (ve výchozím nastavení běží). Most tuto instanci najde sám — není třeba kopírovat žádný port ani token.",
+      "invite": {
+        "title": "Připojte svou AI k Restorm",
+        "body": "Propojte Claude nebo Cursor s touto instancí jedním kliknutím.",
+        "cta": "Ukázat jak"
+      }
     }
   },
   "mcpToolTitles": {

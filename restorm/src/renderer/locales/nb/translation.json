@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "I Community-versjonen styrer AI-agenter forespørslene dine. Oppgrader til Pro for å styre scenarier, grensesnittet og avansert automatisering.",
       "link": "Oppgrader til Pro"
+    },
+    "connect": {
+      "action": "Legg Restorm til i AI-assistenten din",
+      "title": "Legg Restorm til i AI-assistenten din",
+      "intro": "Koble AI-assistenten din til denne Restorm-instansen via MCP. Velg klienten din:",
+      "copy": "Kopier",
+      "copied": "Kopiert",
+      "run": "Legg til i Claude Code",
+      "added": "Lagt til",
+      "runOk": "Restorm ble lagt til i Claude Code. Start Claude Code på nytt for å bruke det.",
+      "runError": "Kunne ikke kjøre kommandoen",
+      "claudeCode": {
+        "where": "Lim dette inn i en terminal"
+      },
+      "claudeDesktop": {
+        "where": "Legg dette til i din claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "Legg dette til i ~/.cursor/mcp.json"
+      },
+      "footnote": "MCP-serveren må kjøre (det gjør den som standard). Broen finner denne instansen selv — ingen port eller token å kopiere.",
+      "invite": {
+        "title": "Koble AI-en din til Restorm",
+        "body": "Koble Claude eller Cursor til denne instansen med ett klikk.",
+        "cta": "Vis meg hvordan"
+      }
     }
   },
   "mcpToolTitles": {

@@ -1,0 +1,4 @@
+# The launcher is the single source at ../scripts/mcp-launcher.mjs. It is copied
+# in at pack time by the `prepack` script (and by the release workflow) — never
+# committed here, so this package can never hold a divergent fork of it.
+mcp-launcher.mjs

@@ -1,0 +1,19 @@
+{
+  "name": "restorm-marketplace",
+  "owner": {
+    "name": "MonsieurDev",
+    "url": "https://restorm.app"
+  },
+  "metadata": {
+    "description": "Official Restorm plugins for Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "restorm",
+      "source": "./plugins/restorm",
+      "description": "Connect Claude to your running Restorm — design, test and mock APIs (REST, GraphQL, gRPC, SOAP, OData…) over MCP.",
+      "category": "mcp",
+      "keywords": ["mcp", "api", "rest", "graphql", "grpc", "soap", "odata", "testing", "mock", "openapi"]
+    }
+  ]
+}

@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StatusbarMcpIndicator as EcuiStatusbarMcpIndicator } from 'electron-core-ui/renderer'
+import { StatusbarMcpIndicator as EcuiStatusbarMcpIndicator, Button, toasterService } from 'electron-core-ui/renderer'
 import { useCapability } from '../../hooks/useCapability'
+import { McpConnectModal } from '../Modals/McpConnectModal'
+
+/** The persisted flag that marks the one-time "connect your AI" invite as shown.
+ * Once true the invite toast never appears again. */
+const MCP_INVITE_SEEN_KEY = 'behavior:mcpConnectInviteSeen'
+/** How long the app must be up (MCP running) before the one-time invite appears. */
+const MCP_INVITE_DELAY_MS = 5 * 60 * 1000
 
 export interface StatusbarMcpIndicatorProps {
   /** See the electron-core-ui StatusbarMcpIndicator — passed straight through. */
@@ -26,6 +33,7 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
   const [sessionName, setSessionName] = useState<string>('')
   const [running, setRunning] = useState(false)
   const [pulseSignal, setPulseSignal] = useState(0)
+  const [connectOpen, setConnectOpen] = useState(false)
   // Channel-resolved pricing URL, read from the per-boot runtime config so the
   // upsell link and the MCP 402 refusal (resolved main-side) point at the SAME
   // page (dev site on preview builds, restorm.app on release).
@@ -86,6 +94,45 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
     })
   }, [])
 
+  // One-time "connect your AI" invite. After the app has been up with the MCP
+  // server running for a few minutes, nudge the user once toward the connect
+  // modal — so they discover it without hunting for it. Shown at most once ever:
+  // the persisted flag is flipped true the moment the toast appears (per the
+  // design — a glance is enough), and the toast is persistent until dismissed.
+  useEffect(() => {
+    if (!running) return
+    const timer = window.setTimeout(() => {
+      void window.api.settings.get(MCP_INVITE_SEEN_KEY).then((seen) => {
+        // Unset resolves to '' — only an explicit `true` means "already shown".
+        if (seen === true) return
+        void window.api.settings.set(MCP_INVITE_SEEN_KEY, true)
+        let toastId = ''
+        toastId = toasterService.push('app', {
+          title: t('mcp.connect.invite.title'),
+          body: (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 300 }}>
+              <span>{t('mcp.connect.invite.body')}</span>
+              <div>
+                <Button
+                  icon="plug"
+                  onClick={() => {
+                    setConnectOpen(true)
+                    toasterService.dismiss('app', toastId)
+                  }}
+                  data-testid="mcp-connect-invite-cta"
+                >
+                  {t('mcp.connect.invite.cta')}
+                </Button>
+              </div>
+            </div>
+          )
+          // durationMs omitted → persistent until the user dismisses it.
+        })
+      })
+    }, MCP_INVITE_DELAY_MS)
+    return () => { window.clearTimeout(timer) }
+  }, [running, t])
+
   const handleToggleServer = useCallback(() => {
     const root = window as {
       restorm?: { runtime?: { toggleServer?: () => Promise<{ running: boolean; port: number | null }> } }
@@ -108,28 +155,48 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
     window.open(pricingUrl, '_blank', 'noopener,noreferrer')
   }, [pricingUrl])
 
+  // Open the connect modal AND mark the one-time invite as seen. Opening the
+  // modal — however the user got there — makes a later invite toast pointless,
+  // so we flip the flag here too (not only when the toast fires). A user who
+  // finds the modal on their own within the first 5 minutes never gets nagged.
+  const openConnectModal = useCallback(() => {
+    setConnectOpen(true)
+    void window.api.settings.set(MCP_INVITE_SEEN_KEY, true)
+  }, [])
+
   // Show the upsell only for a non-Pro plan AND once the channel-resolved pricing
   // URL has loaded (so the link never dead-clicks).
   const showUpsell = !mcpPro && pricingUrl !== null
 
   return (
-    <EcuiStatusbarMcpIndicator
-      port={port}
-      sessionName={sessionName}
-      pulseSignal={pulseSignal}
-      rightAligned={rightAligned}
-      running={running}
-      onToggleServer={handleToggleServer}
-      {...(onViewLogs ? { onViewLogs } : {})}
-      {...(showUpsell
-        ? {
-            proUpsell: {
-              note: t('mcp.proUpsell.note'),
-              linkLabel: t('mcp.proUpsell.link'),
-              onUpgrade: handleUpgrade
+    <>
+      <EcuiStatusbarMcpIndicator
+        port={port}
+        sessionName={sessionName}
+        pulseSignal={pulseSignal}
+        rightAligned={rightAligned}
+        running={running}
+        onToggleServer={handleToggleServer}
+        {...(onViewLogs ? { onViewLogs } : {})}
+        {...(running
+          ? {
+              connectAssistant: {
+                label: t('mcp.connect.action'),
+                onClick: () => { openConnectModal() }
+              }
             }
-          }
-        : {})}
-    />
+          : {})}
+        {...(showUpsell
+          ? {
+              proUpsell: {
+                note: t('mcp.proUpsell.note'),
+                linkLabel: t('mcp.proUpsell.link'),
+                onUpgrade: handleUpgrade
+              }
+            }
+          : {})}
+      />
+      <McpConnectModal isOpen={connectOpen} onClose={() => { setConnectOpen(false) }} />
+    </>
   )
 }

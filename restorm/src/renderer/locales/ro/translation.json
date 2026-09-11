@@ -2781,6 +2781,32 @@
     "proUpsell": {
       "note": "În versiunea Community, agenții AI vă controlează cererile. Treceți la Pro pentru a controla scenariile, interfața și automatizarea avansată.",
       "link": "Treceți la Pro"
+    },
+    "connect": {
+      "action": "Adăugați Restorm în asistentul dvs. AI",
+      "title": "Adăugați Restorm în asistentul dvs. AI",
+      "intro": "Conectați asistentul dvs. AI la această instanță Restorm prin MCP. Alegeți clientul dvs.:",
+      "copy": "Copiați",
+      "copied": "Copiat",
+      "run": "Adăugați în Claude Code",
+      "added": "Adăugat",
+      "runOk": "Restorm a fost adăugat în Claude Code. Reporniți Claude Code pentru a-l utiliza.",
+      "runError": "Comanda nu a putut fi executată",
+      "claudeCode": {
+        "where": "Lipiți acest lucru într-un terminal"
+      },
+      "claudeDesktop": {
+        "where": "Adăugați acest lucru în claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "Adăugați acest lucru în ~/.cursor/mcp.json"
+      },
+      "footnote": "Serverul MCP trebuie să ruleze (rulează în mod implicit). Puntea găsește această instanță singură — niciun port sau token de copiat.",
+      "invite": {
+        "title": "Conectați-vă IA la Restorm",
+        "body": "Conectați Claude sau Cursor la această instanță cu un singur clic.",
+        "cta": "Vedeți cum"
+      }
     }
   },
   "mcpToolTitles": {

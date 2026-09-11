@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3
+
+**把你的 AI 助手连接到 Restorm。**
+
+- **在应用中一键完成。** 状态栏的 MCP 菜单现在提供“将 Restorm 添加到你的 AI 助手”——为 Claude Code、Claude Desktop 和 Cursor 准备了可直接粘贴的配置，还有一键“添加到 Claude Code”。
+- **或者一行命令，随处可用。** 用 `npx -y restorm-mcp` 让任意 MCP 客户端指向正在运行的 Restorm——桥接会自动找到它，无需复制端口或令牌。
+- **为 Claude Code 提供的插件。** 运行 `/plugin marketplace add Monsieur-Dev/restorm`，然后安装 `restorm` 插件。
+
+参见[连接你的 AI 助手](https://restorm.app/en/docs/outils/mcp/)。
+
 ## v1.1.2
 
 **支持 OpenAPI 3.2。**

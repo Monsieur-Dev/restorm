@@ -49,6 +49,19 @@ export interface StatusbarMcpIndicatorProps {
     /** Open the pricing page in the system browser. */
     onUpgrade: () => void
   }
+  /**
+   * Optional "connect an AI assistant" action shown at the top of the popover.
+   * The host provides the translated label and the handler (typically opening a
+   * modal with copy-paste instructions to add this instance's MCP server to an
+   * assistant). This component stays domain-agnostic — the label and the modal
+   * content are the host's. Omitted → nothing shown.
+   */
+  connectAssistant?: {
+    /** Button label (e.g. « Ajouter Restorm à Claude »). */
+    label: string
+    /** Open the host's connect-instructions modal. */
+    onClick: () => void
+  }
 }
 
 /**
@@ -69,7 +82,8 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
   onViewLogs,
   running,
   onToggleServer,
-  proUpsell
+  proUpsell,
+  connectAssistant
 }) => {
   const { t } = useTranslation()
 
@@ -104,6 +118,20 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
         {sessionName && (
           <div data-testid="statusbar-mcp-popover-session" style={{ marginTop: 4, opacity: 0.8 }}>
             {t('statusbar.mcp.sessionName', { name: sessionName })}
+          </div>
+        )}
+        {/* "Connect an AI assistant" action — host provides the label + the
+            modal (copy-paste instructions to add this MCP server to a client). */}
+        {connectAssistant && (
+          <div style={{ marginTop: 6 }}>
+            <Button
+              link
+              icon="plug"
+              onClick={() => { connectAssistant.onClick() }}
+              data-testid="statusbar-mcp-connect-assistant"
+            >
+              {connectAssistant.label}
+            </Button>
           </div>
         )}
         {/* Non-blocking Pro upsell (shown only for a non-entitled plan): the

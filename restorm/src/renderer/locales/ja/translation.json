@@ -2779,6 +2779,32 @@
     "proUpsell": {
       "note": "Community 版では、AI エージェントがリクエストを操作します。シナリオ、インターフェース、高度な自動化を操作するには Pro にアップグレードしてください。",
       "link": "Pro にアップグレード"
+    },
+    "connect": {
+      "action": "Restorm を AI アシスタントに追加",
+      "title": "Restorm を AI アシスタントに追加",
+      "intro": "AI アシスタントを MCP 経由でこの Restorm インスタンスに接続します。クライアントを選択してください:",
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "run": "Claude Code に追加",
+      "added": "追加しました",
+      "runOk": "Restorm が Claude Code に追加されました。使用するには Claude Code を再起動してください。",
+      "runError": "コマンドを実行できませんでした",
+      "claudeCode": {
+        "where": "これをターミナルに貼り付けてください"
+      },
+      "claudeDesktop": {
+        "where": "これを claude_desktop_config.json に追加してください"
+      },
+      "cursor": {
+        "where": "これを ~/.cursor/mcp.json に追加してください"
+      },
+      "footnote": "MCP サーバーが実行されている必要があります(デフォルトで実行されています)。ブリッジがこのインスタンスを自動的に見つけます — コピーするポートやトークンはありません。",
+      "invite": {
+        "title": "AI を Restorm に接続",
+        "body": "Claude または Cursor をワンクリックでこのインスタンスに接続します。",
+        "cta": "方法を見る"
+      }
     }
   },
   "mcpToolTitles": {
