@@ -1,0 +1,14 @@
+{
+  "name": "restorm",
+  "version": "1.0.0",
+  "description": "Connect Claude to your running Restorm instance over MCP — read your project, create and run requests across every protocol, drive scenarios, design and mock APIs, and steer the UI.",
+  "author": {
+    "name": "MonsieurDev",
+    "email": "contact@restorm.app",
+    "url": "https://restorm.app"
+  },
+  "homepage": "https://restorm.app/en/docs/outils/mcp",
+  "repository": "https://github.com/Monsieur-Dev/restorm",
+  "license": "SEE LICENSE IN https://restorm.app",
+  "keywords": ["mcp", "api", "rest", "graphql", "grpc", "soap", "odata", "websocket", "mqtt", "testing", "mock", "openapi", "restorm"]
+}

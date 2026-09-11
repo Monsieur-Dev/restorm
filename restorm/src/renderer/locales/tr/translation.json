@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "Community sürümünde yapay zeka aracıları isteklerinizi yürütür. Senaryoları, arayüzü ve gelişmiş otomasyonu yürütmek için Pro'ya yükseltin.",
       "link": "Pro'ya yükseltin"
+    },
+    "connect": {
+      "action": "Restorm'u yapay zeka asistanınıza ekleyin",
+      "title": "Restorm'u yapay zeka asistanınıza ekleyin",
+      "intro": "Yapay zeka asistanınızı MCP üzerinden bu Restorm örneğine bağlayın. İstemcinizi seçin:",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı",
+      "run": "Claude Code'a ekle",
+      "added": "Eklendi",
+      "runOk": "Restorm, Claude Code'a eklendi. Kullanmak için Claude Code'u yeniden başlatın.",
+      "runError": "Komut çalıştırılamadı",
+      "claudeCode": {
+        "where": "Bunu bir terminale yapıştırın"
+      },
+      "claudeDesktop": {
+        "where": "Bunu claude_desktop_config.json dosyanıza ekleyin"
+      },
+      "cursor": {
+        "where": "Bunu ~/.cursor/mcp.json dosyasına ekleyin"
+      },
+      "footnote": "MCP sunucusunun çalışıyor olması gerekir (varsayılan olarak çalışır). Köprü bu örneği kendi başına bulur — kopyalanacak bir bağlantı noktası veya belirteç yoktur.",
+      "invite": {
+        "title": "Yapay zekânızı Restorm'a bağlayın",
+        "body": "Claude veya Cursor'u tek tıklamayla bu örneğe bağlayın.",
+        "cta": "Nasıl olduğunu göster"
+      }
     }
   },
   "mcpToolTitles": {

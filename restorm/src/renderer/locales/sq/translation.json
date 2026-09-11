@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "Në versionin Community, agjentët e IA-së drejtojnë kërkesat tuaja. Kaloni në Pro për të drejtuar skenarët, ndërfaqen dhe automatizimin e avancuar.",
       "link": "Kaloni në Pro"
+    },
+    "connect": {
+      "action": "Shto Restorm te asistenti juaj i IA-së",
+      "title": "Shto Restorm te asistenti juaj i IA-së",
+      "intro": "Lidhni asistentin tuaj të IA-së me këtë instancë Restorm përmes MCP-së. Zgjidhni klientin tuaj:",
+      "copy": "Kopjo",
+      "copied": "U kopjua",
+      "run": "Shto te Claude Code",
+      "added": "U shtua",
+      "runOk": "Restorm u shtua te Claude Code. Rinisni Claude Code për ta përdorur.",
+      "runError": "Komanda nuk u ekzekutua dot",
+      "claudeCode": {
+        "where": "Ngjiteni këtë në një terminal"
+      },
+      "claudeDesktop": {
+        "where": "Shtojeni këtë te claude_desktop_config.json juaj"
+      },
+      "cursor": {
+        "where": "Shtojeni këtë te ~/.cursor/mcp.json"
+      },
+      "footnote": "Serveri MCP duhet të jetë duke punuar (është, si parazgjedhje). Ura e gjen këtë instancë vetë — asnjë portë ose token për t'u kopjuar.",
+      "invite": {
+        "title": "Lidhni IA-në tuaj me Restorm",
+        "body": "Lidhni Claude ose Cursor me këtë instancë me një klikim.",
+        "cta": "Shihni si"
+      }
     }
   },
   "mcpToolTitles": {

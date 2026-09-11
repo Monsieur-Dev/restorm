@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3
+
+**Yhdistä tekoälyavustajasi Restormiin.**
+
+- **Yhdellä klikkauksella, suoraan sovelluksesta.** Tilarivin MCP-valikko tarjoaa nyt ”Lisää Restorm tekoälyavustajaasi” — valmiiksi liitettävät asetukset Claude Codelle, Claude Desktopille ja Cursorille sekä ”Lisää Claude Codeen” yhdellä klikkauksella.
+- **Tai yhdellä rivillä, missä tahansa.** Osoita mikä tahansa MCP-asiakas käynnissä olevaan Restormiisi komennolla `npx -y restorm-mcp` — silta löytää sen itse, ei kopioitavaa porttia tai tokenia.
+- **Laajennus Claude Codelle.** Suorita `/plugin marketplace add Monsieur-Dev/restorm` ja asenna sitten `restorm`-laajennus.
+
+Katso [Tekoälyavustajan yhdistäminen](https://restorm.app/en/docs/outils/mcp/).
+
 ## v1.1.2
 
 **OpenAPI 3.2 -tuki.**

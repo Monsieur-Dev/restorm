@@ -18,9 +18,16 @@ vi.mock('electron-core-ui/renderer', async () => {
     StatusbarMcpIndicator: (props: Record<string, unknown>) => {
       lastProps.current = props
       return null
-    }
+    },
+    // The wrapper also imports these (used by the one-time invite toast); provide
+    // inert stubs so the mocked barrel resolves them without loading Monaco.
+    Button: () => null,
+    toasterService: { push: vi.fn(() => ''), dismiss: vi.fn() }
   }
 })
+// The connect modal mounts the real ECUI Modal; these tests only exercise the
+// upsell wiring, so stub it out.
+vi.mock('../Modals/McpConnectModal', () => ({ McpConnectModal: () => null }))
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key })
 }))

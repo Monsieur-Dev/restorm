@@ -2779,6 +2779,32 @@
     "proUpsell": {
       "note": "在 Community 版本中，AI 代理負責驅動您的請求。升級至 Pro 即可驅動情境、介面與進階自動化。",
       "link": "升級至 Pro"
+    },
+    "connect": {
+      "action": "將 Restorm 新增至您的 AI 助理",
+      "title": "將 Restorm 新增至您的 AI 助理",
+      "intro": "透過 MCP 將您的 AI 助理連接至此 Restorm 執行個體。請選擇您的用戶端:",
+      "copy": "複製",
+      "copied": "已複製",
+      "run": "新增至 Claude Code",
+      "added": "已新增",
+      "runOk": "Restorm 已新增至 Claude Code。請重新啟動 Claude Code 以使用它。",
+      "runError": "無法執行該指令",
+      "claudeCode": {
+        "where": "將此貼到終端機中"
+      },
+      "claudeDesktop": {
+        "where": "將此新增至您的 claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "將此新增至 ~/.cursor/mcp.json"
+      },
+      "footnote": "MCP 伺服器必須正在執行(預設已在執行)。橋接會自動找到此執行個體——無需複製任何連接埠或權杖。",
+      "invite": {
+        "title": "將您的 AI 連接到 Restorm",
+        "body": "一鍵將 Claude 或 Cursor 連接到此執行個體。",
+        "cta": "查看方法"
+      }
     }
   },
   "mcpToolTitles": {

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3
+
+**Verbinden Sie Ihren KI-Assistenten mit Restorm.**
+
+- **Mit einem Klick, direkt aus der App.** Das MCP-Menü in der Statusleiste bietet jetzt „Restorm zu Ihrem KI-Assistenten hinzufügen“ — eine fertige Einrichtung zum Einfügen für Claude Code, Claude Desktop und Cursor, dazu ein „Zu Claude Code hinzufügen“ mit einem Klick.
+- **Oder mit einer Zeile, überall.** Richten Sie einen beliebigen MCP-Client mit `npx -y restorm-mcp` auf Ihr laufendes Restorm — die Brücke findet es von selbst, ohne Port oder Token zum Kopieren.
+- **Ein Plugin für Claude Code.** Führen Sie `/plugin marketplace add Monsieur-Dev/restorm` aus und installieren Sie dann das Plugin `restorm`.
+
+Siehe [Ihren KI-Assistenten verbinden](https://restorm.app/en/docs/outils/mcp/).
+
 ## v1.1.2
 
 **Unterstützung für OpenAPI 3.2.**

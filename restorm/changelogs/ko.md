@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3
+
+**AI 어시스턴트를 Restorm에 연결하세요.**
+
+- **앱에서 클릭 한 번으로.** 상태 표시줄의 MCP 메뉴에 이제 “AI 어시스턴트에 Restorm 추가”가 있습니다 — Claude Code, Claude Desktop, Cursor용으로 붙여넣기만 하면 되는 설정과 클릭 한 번으로 “Claude Code에 추가”까지 제공합니다.
+- **또는 어디서든 한 줄로.** `npx -y restorm-mcp`로 어떤 MCP 클라이언트든 실행 중인 Restorm에 연결하세요 — 브리지가 알아서 찾으며, 복사할 포트나 토큰이 없습니다.
+- **Claude Code용 플러그인.** `/plugin marketplace add Monsieur-Dev/restorm`을 실행한 다음 `restorm` 플러그인을 설치하세요.
+
+[AI 어시스턴트 연결하기](https://restorm.app/en/docs/outils/mcp/)를 참고하세요.
+
 ## v1.1.2
 
 **OpenAPI 3.2 지원.**

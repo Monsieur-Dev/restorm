@@ -190,6 +190,116 @@ When(
   }
 )
 
+/** Open the MCP status-bar indicator popover, reopening it per locale (a
+ * language switch closes it), and guard on the tooltip host being opaque so the
+ * capture never photographs an empty screen mid-fade (same trap as the account
+ * card). */
+async function openMcpPopover(p: Page): Promise<void> {
+  const popover = p.getByTestId('statusbar-mcp-popover')
+  if (!(await popover.isVisible())) {
+    await p.getByTestId('statusbar-mcp-indicator').click()
+    await popover.waitFor({ state: 'visible' })
+  }
+  await popover.evaluate(
+    (el) =>
+      new Promise<void>((resolve, reject) => {
+        const host = el.closest('.tooltip')
+        if (!host) { reject(new Error('mcp tooltip host not found')); return }
+        const deadline = Date.now() + 5000
+        const check = (): void => {
+          if (getComputedStyle(host).opacity === '1') { resolve(); return }
+          if (Date.now() > deadline) { reject(new Error('mcp popover never became opaque — the capture would show no popover')); return }
+          setTimeout(check, 50)
+        }
+        check()
+      })
+  )
+}
+
+/** Open the "Add Restorm to your AI assistant" modal from the MCP popover,
+ * reopening the popover if a language switch closed it. */
+async function openMcpConnectModal(p: Page): Promise<void> {
+  if (await p.getByTestId('mcp-connect-copy-claude-code').isVisible()) return
+  await openMcpPopover(p)
+  await p.getByTestId('statusbar-mcp-connect-assistant').click()
+  // Wait for the modal CONTENT (a copy button), not just the dialog frame.
+  await p.getByTestId('mcp-connect-copy-claude-code').waitFor({ state: 'visible' })
+}
+
+When(
+  'I capture the MCP indicator for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => {
+        await openMcpPopover(p)
+        // Stamp a synthetic "activity ripple" on the MCP icon. The real pulse is
+        // a transient animation the freeze/capture can't reliably paint, so we
+        // draw a ring styled exactly like `.statusbar-pulse-wave` at a
+        // mid-expansion frame — illustrating the doc's "the indicator blinks on
+        // every inbound call". Removed after the shot so it touches nothing else.
+        await p.evaluate(() => {
+          document.querySelectorAll('.doc-shots-mcp-ripple').forEach((n) => { n.remove() })
+          const ind = document.querySelector('[data-testid="statusbar-mcp-indicator"]')
+          const icon = ind?.querySelector('.codicon') as HTMLElement | null
+          if (!icon) return
+          const r = icon.getBoundingClientRect()
+          const size = Math.max(r.width, r.height) * 1.9
+          const ring = document.createElement('div')
+          ring.className = 'doc-shots-mcp-ripple'
+          ring.style.cssText = [
+            'position:fixed',
+            `left:${String(r.left + r.width / 2 - size / 2)}px`,
+            `top:${String(r.top + r.height / 2 - size / 2)}px`,
+            `width:${String(size)}px`,
+            `height:${String(size)}px`,
+            'border-radius:50%',
+            'background-color:var(--statusBar-prominentBackground, var(--focusBorder))',
+            'opacity:0.4',
+            'z-index:9998',
+            'pointer-events:none'
+          ].join(';')
+          document.body.appendChild(ring)
+        })
+      },
+      // Wider than the popover alone: include the status bar it hangs off, with
+      // margin all around, so the reader sees where the menu comes from. The
+      // popover and the status-bar indicator are disjoint elements, so union
+      // their boxes and extend down past the status-bar row (room for the ripple).
+      clip: async () => {
+        const pop = await p.getByTestId('statusbar-mcp-popover').boundingBox()
+        const bar = await p.getByTestId('statusbar-mcp-indicator').boundingBox()
+        const vp = p.viewportSize() ?? { width: 1600, height: 1000 }
+        if (!pop || !bar) throw new Error('mcp popover/indicator not found for clip')
+        const pad = 28
+        const x = Math.max(0, Math.min(pop.x, bar.x) - pad)
+        const y = Math.max(0, pop.y - pad)
+        const right = Math.min(vp.width, Math.max(pop.x + pop.width, bar.x + bar.width) + pad)
+        const bottom = Math.min(vp.height, bar.y + bar.height + 10)
+        return { x, y, width: right - x, height: bottom - y }
+      }
+    })
+    await p.evaluate(() => { document.querySelectorAll('.doc-shots-mcp-ripple').forEach((n) => { n.remove() }) })
+    await p.keyboard.press('Escape')
+  }
+)
+
+When(
+  'I capture the MCP connect modal for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => { await openMcpConnectModal(p) },
+      // The dialog BOX (role=dialog), not the dimmed app behind it.
+      clipTo: () => p.locator('.ecu-modal-container[role="dialog"]')
+    })
+    await p.keyboard.press('Escape')
+    await p.getByTestId('mcp-connect-copy-claude-code').waitFor({ state: 'hidden' })
+  }
+)
+
 /** Open the Cookie jar workbench tab (View ▸ Cookie jar) and select the
  * default "No environment" jar, where the seeded cookies live. Idempotent: a
  * language switch keeps the workbench tab open, so this reopens only when the

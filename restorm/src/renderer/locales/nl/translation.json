@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "In de Community-versie sturen AI-agents uw verzoeken aan. Stap over naar Pro om scenario's, de interface en geavanceerde automatisering aan te sturen.",
       "link": "Overstappen naar Pro"
+    },
+    "connect": {
+      "action": "Restorm aan uw AI-assistent toevoegen",
+      "title": "Restorm aan uw AI-assistent toevoegen",
+      "intro": "Verbind uw AI-assistent via MCP met deze Restorm-instantie. Kies uw client:",
+      "copy": "Kopiëren",
+      "copied": "Gekopieerd",
+      "run": "Aan Claude Code toevoegen",
+      "added": "Toegevoegd",
+      "runOk": "Restorm is aan Claude Code toegevoegd. Start Claude Code opnieuw op om het te gebruiken.",
+      "runError": "Kan de opdracht niet uitvoeren",
+      "claudeCode": {
+        "where": "Plak dit in een terminal"
+      },
+      "claudeDesktop": {
+        "where": "Voeg dit toe aan uw claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "Voeg dit toe aan ~/.cursor/mcp.json"
+      },
+      "footnote": "De MCP-server moet actief zijn (dat is standaard het geval). De brug vindt deze instantie zelf — geen poort of token om te kopiëren.",
+      "invite": {
+        "title": "Verbind uw AI met Restorm",
+        "body": "Verbind Claude of Cursor met één klik met deze instantie.",
+        "cta": "Laat zien hoe"
+      }
     }
   },
   "mcpToolTitles": {

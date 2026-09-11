@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3
+
+**Koble AI-assistenten din til Restorm.**
+
+- **Med ett klikk, rett fra appen.** MCP-menyen i statuslinjen tilbyr nå «Legg til Restorm i AI-assistenten din» — ferdig oppsett til å lime inn for Claude Code, Claude Desktop og Cursor, pluss «Legg til i Claude Code» med ett klikk.
+- **Eller én linje, hvor som helst.** Pek en hvilken som helst MCP-klient mot den kjørende Restorm-en din med `npx -y restorm-mcp` — broen finner den selv, ingen port eller token å kopiere.
+- **En plugin for Claude Code.** Kjør `/plugin marketplace add Monsieur-Dev/restorm`, og installer deretter `restorm`-pluginen.
+
+Se [Koble til AI-assistenten din](https://restorm.app/en/docs/outils/mcp/).
+
 ## v1.1.2
 
 **Støtte for OpenAPI 3.2.**

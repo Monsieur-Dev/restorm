@@ -21,6 +21,10 @@ Feature: Documentation screenshots
     # feeds straight into the website's documentation assets.
     And I capture the account card for every locale to "{locale}/compte-menu-connecte.png"
     And I capture my CLI/CI tokens for every locale to "{locale}/jetons-cli-modale.png"
+    # The MCP status-bar popover and the "Add Restorm to your AI assistant" modal —
+    # the in-app one-click way to connect an AI, captured scoped to each element.
+    And I capture the MCP indicator for every locale to "{locale}/mcp-indicateur-barre-etat.png"
+    And I capture the MCP connect modal for every locale to "{locale}/mcp-ajouter-agent-ia.png"
     And I create a custom enumeration "character" with the value "Buffy"
     And I build the scenario "Fight" chaining an input using "character", "Action Move", a log "Character moved", a 1000 ms wait and "Action Fight"
     And I mark the scenario "Fight" as favorite

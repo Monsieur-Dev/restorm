@@ -242,6 +242,10 @@
       {
         "from": "build/com.monsieurdev.restorm.metainfo.xml",
         "to": "restorm-resources/com.monsieurdev.restorm.metainfo.xml"
+      },
+      {
+        "from": "../scripts/mcp-launcher.mjs",
+        "to": "restorm-resources/mcp-launcher.mjs"
       }
     ],
     "snap": {

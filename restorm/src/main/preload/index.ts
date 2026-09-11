@@ -2230,6 +2230,21 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('mcp:toggle-server')
       return result as { running: boolean; port: number | null }
     },
+    /** Whether the `claude` CLI (Claude Code) is on the PATH — so the
+     * "Add to Claude Code" one-click button is offered only when it can
+     * actually work. */
+    detectClaudeCli: async (): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('mcp:detect-claude-cli')
+      return result === true
+    },
+    /** Register this instance's MCP server with Claude Code by running
+     * `claude mcp add restorm -- npx -y restorm-mcp`. Returns ok + an optional
+     * message (the CLI's stderr on failure). Never writes any other app's
+     * config file — only shells out to the user's own `claude` CLI. */
+    runClaudeAdd: async (): Promise<{ ok: boolean; message?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('mcp:run-claude-add')
+      return result as { ok: boolean; message?: string }
+    },
     /** Subscribe to MCP server state changes (started / stopped at runtime
      * via the toggle button). The payload carries the freshly-bound port on
      * resume (`null` when stopped) so the indicator can restore its label.

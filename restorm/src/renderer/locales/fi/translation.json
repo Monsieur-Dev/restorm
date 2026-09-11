@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "Community-versiossa tekoälyagentit ohjaavat pyyntöjäsi. Siirry Pro-versioon ohjataksesi skenaarioita, käyttöliittymää ja edistynyttä automaatiota.",
       "link": "Siirry Pro-versioon"
+    },
+    "connect": {
+      "action": "Lisää Restorm tekoälyavustajaasi",
+      "title": "Lisää Restorm tekoälyavustajaasi",
+      "intro": "Yhdistä tekoälyavustajasi tähän Restorm-instanssiin MCP:n kautta. Valitse asiakasohjelmasi:",
+      "copy": "Kopioi",
+      "copied": "Kopioitu",
+      "run": "Lisää Claude Codeen",
+      "added": "Lisätty",
+      "runOk": "Restorm lisättiin Claude Codeen. Käynnistä Claude Code uudelleen käyttääksesi sitä.",
+      "runError": "Komentoa ei voitu suorittaa",
+      "claudeCode": {
+        "where": "Liitä tämä terminaaliin"
+      },
+      "claudeDesktop": {
+        "where": "Lisää tämä claude_desktop_config.json-tiedostoosi"
+      },
+      "cursor": {
+        "where": "Lisää tämä ~/.cursor/mcp.json-tiedostoon"
+      },
+      "footnote": "MCP-palvelimen on oltava käynnissä (se on oletusarvoisesti). Silta löytää tämän instanssin itse — porttia tai tunnusta ei tarvitse kopioida.",
+      "invite": {
+        "title": "Yhdistä tekoälysi Restormiin",
+        "body": "Yhdistä Claude tai Cursor tähän instanssiin yhdellä napsautuksella.",
+        "cta": "Näytä miten"
+      }
     }
   },
   "mcpToolTitles": {

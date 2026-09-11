@@ -81,6 +81,13 @@ export async function captureForAllLocales(
      * surroundings ARE the subject.
      */
     clipTo?: () => import('@playwright/test').Locator
+    /**
+     * Capture a custom rectangle instead of a single element — for a subject
+     * that spans two disjoint elements (e.g. a popover AND the status bar it
+     * hangs off), where no single locator bounds both. Computed per shot from
+     * the live layout. Ignored when `clipTo` is set.
+     */
+    clip?: () => Promise<{ x: number; y: number; width: number; height: number }>
   } = {}
 ): Promise<string[]> {
   const locales = options.locales ?? shippedLocales(restormRoot)
@@ -92,6 +99,8 @@ export async function captureForAllLocales(
     mkdirSync(dirname(target), { recursive: true })
     if (options.clipTo) {
       await options.clipTo().screenshot({ path: target })
+    } else if (options.clip) {
+      await page.screenshot({ path: target, clip: await options.clip() })
     } else {
       await page.screenshot({ path: target })
     }

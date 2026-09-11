@@ -1,14 +1,18 @@
 name: npm publish
 
-# Publishes the `restorm-cli` bootstrap package (npm-cli/) to the npm registry
-# at the released version. Nothing is rebuilt: the package is a zero-dependency
-# launcher/downloader whose payload always comes from the public R2 bucket's
-# `latest/` folder at runtime, so publishing = stamping the release version and
+# Publishes the two zero-dependency npm packages at the released version:
+#   - `restorm-cli` (npm-cli/): the bootstrap launcher/downloader whose payload
+#     always comes from the public R2 bucket's `latest/` folder at runtime.
+#   - `restorm-mcp` (npm-mcp/): the stdio↔HTTP MCP bridge, so any MCP client
+#     (Claude Desktop, Cursor, Claude Code) can `npx -y restorm-mcp` onto a local
+#     Restorm. Its `bin` is the single-source `scripts/mcp-launcher.mjs`, copied
+#     in at pack time by the package's `prepack` (never a committed fork).
+# Nothing is rebuilt for either — publishing = stamping the release version and
 # pushing the tarball.
 #
 # The bare names `restorm` (npm typosquat guard: too similar to the existing
 # `rest-orm`) and the `@restorm` scope (owned by a third party) are both
-# unavailable — hence `restorm-cli`.
+# unavailable — hence the unscoped `restorm-cli` / `restorm-mcp` names.
 #
 # Runs automatically as the tail of a release (workflow_call from release.yml)
 # and by hand for a re-publish (workflow_dispatch with the version).
@@ -32,7 +36,7 @@ permissions:
 
 jobs:
   publish:
-    name: Publish restorm-cli to npm
+    name: Publish restorm-cli + restorm-mcp to npm
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -53,9 +57,9 @@ jobs:
             VERSION=$(node -p "require('./restorm/package.json').version")
           fi
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          echo "Publishing restorm-cli@${VERSION}"
+          echo "Publishing restorm-cli@${VERSION} + restorm-mcp@${VERSION}"
 
-      - name: Stamp the version and publish
+      - name: Stamp the version and publish restorm-cli
         # Re-publishing an existing version is a hard registry error — treat it
         # as the idempotent no-op it is (same convention as the snap upload's
         # "uniqueness" guard), so a release re-run stays green.
@@ -70,6 +74,28 @@ jobs:
           if [ $STATUS -ne 0 ]; then
             if echo "$OUT" | grep -qi "cannot publish over\|previously published"; then
               echo "restorm-cli@${VERSION} already on the registry — nothing to do."
+              exit 0
+            fi
+            exit $STATUS
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Stamp the version and publish restorm-mcp
+        # Same idempotent-republish convention. `npm publish` runs the package's
+        # `prepack`, which copies scripts/mcp-launcher.mjs in as the bin — so the
+        # tarball always carries the exact single-source launcher, never a fork.
+        working-directory: npm-mcp
+        run: |
+          npm version "${VERSION}" --no-git-tag-version
+          set +e
+          OUT=$(npm publish --access public 2>&1)
+          STATUS=$?
+          set -e
+          echo "$OUT"
+          if [ $STATUS -ne 0 ]; then
+            if echo "$OUT" | grep -qi "cannot publish over\|previously published"; then
+              echo "restorm-mcp@${VERSION} already on the registry — nothing to do."
               exit 0
             fi
             exit $STATUS

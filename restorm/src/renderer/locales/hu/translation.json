@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "A Community verzióban a mesterséges intelligencia ügynökök vezérlik a kéréseit. Váltson Pro verzióra a forgatókönyvek, a felület és a speciális automatizálás vezérléséhez.",
       "link": "Váltás Pro verzióra"
+    },
+    "connect": {
+      "action": "A Restorm hozzáadása az AI-asszisztenséhez",
+      "title": "A Restorm hozzáadása az AI-asszisztenséhez",
+      "intro": "Csatlakoztassa AI-asszisztensét ehhez a Restorm-példányhoz MCP-n keresztül. Válassza ki a klienst:",
+      "copy": "Másolás",
+      "copied": "Másolva",
+      "run": "Hozzáadás a Claude Code-hoz",
+      "added": "Hozzáadva",
+      "runOk": "A Restorm hozzá lett adva a Claude Code-hoz. A használatához indítsa újra a Claude Code-ot.",
+      "runError": "A parancsot nem sikerült futtatni",
+      "claudeCode": {
+        "where": "Illessze be ezt egy terminálba"
+      },
+      "claudeDesktop": {
+        "where": "Adja hozzá ezt a claude_desktop_config.json fájljához"
+      },
+      "cursor": {
+        "where": "Adja hozzá ezt a ~/.cursor/mcp.json fájlhoz"
+      },
+      "footnote": "Az MCP-kiszolgálónak futnia kell (alapértelmezés szerint fut). A híd magától megtalálja ezt a példányt — nincs másolandó port vagy token.",
+      "invite": {
+        "title": "Csatlakoztassa AI-ját a Restormhoz",
+        "body": "Kösse össze a Claude-ot vagy a Cursort ezzel a példánnyal egyetlen kattintással.",
+        "cta": "Megmutatjuk, hogyan"
+      }
     }
   },
   "mcpToolTitles": {

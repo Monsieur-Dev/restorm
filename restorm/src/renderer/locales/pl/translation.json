@@ -2782,6 +2782,32 @@
     "proUpsell": {
       "note": "W wersji Community agenci AI obsługują Twoje żądania. Przejdź na wersję Pro, aby sterować scenariuszami, interfejsem i zaawansowaną automatyzacją.",
       "link": "Przejdź na wersję Pro"
+    },
+    "connect": {
+      "action": "Dodaj Restorm do swojego asystenta AI",
+      "title": "Dodaj Restorm do swojego asystenta AI",
+      "intro": "Połącz swojego asystenta AI z tą instancją Restorm przez MCP. Wybierz swojego klienta:",
+      "copy": "Kopiuj",
+      "copied": "Skopiowano",
+      "run": "Dodaj do Claude Code",
+      "added": "Dodano",
+      "runOk": "Restorm został dodany do Claude Code. Uruchom ponownie Claude Code, aby go używać.",
+      "runError": "Nie można uruchomić polecenia",
+      "claudeCode": {
+        "where": "Wklej to w terminalu"
+      },
+      "claudeDesktop": {
+        "where": "Dodaj to do swojego claude_desktop_config.json"
+      },
+      "cursor": {
+        "where": "Dodaj to do ~/.cursor/mcp.json"
+      },
+      "footnote": "Serwer MCP musi być uruchomiony (domyślnie jest). Most sam znajduje tę instancję — nie trzeba kopiować żadnego portu ani tokena.",
+      "invite": {
+        "title": "Połącz swoją AI z Restorm",
+        "body": "Połącz Claude lub Cursor z tą instancją jednym kliknięciem.",
+        "cta": "Pokaż jak"
+      }
     }
   },
   "mcpToolTitles": {

@@ -2779,6 +2779,32 @@
     "proUpsell": {
       "note": "Pada versi Community, agen AI menjalankan permintaan Anda. Tingkatkan ke Pro untuk menjalankan skenario, antarmuka, dan otomatisasi lanjutan.",
       "link": "Tingkatkan ke Pro"
+    },
+    "connect": {
+      "action": "Tambahkan Restorm ke asisten AI Anda",
+      "title": "Tambahkan Restorm ke asisten AI Anda",
+      "intro": "Hubungkan asisten AI Anda ke instans Restorm ini melalui MCP. Pilih klien Anda:",
+      "copy": "Salin",
+      "copied": "Tersalin",
+      "run": "Tambahkan ke Claude Code",
+      "added": "Ditambahkan",
+      "runOk": "Restorm telah ditambahkan ke Claude Code. Mulai ulang Claude Code untuk menggunakannya.",
+      "runError": "Tidak dapat menjalankan perintah",
+      "claudeCode": {
+        "where": "Tempel ini di terminal"
+      },
+      "claudeDesktop": {
+        "where": "Tambahkan ini ke claude_desktop_config.json Anda"
+      },
+      "cursor": {
+        "where": "Tambahkan ini ke ~/.cursor/mcp.json"
+      },
+      "footnote": "Server MCP harus berjalan (secara default sudah berjalan). Bridge menemukan instans ini sendiri — tidak ada port atau token yang perlu disalin.",
+      "invite": {
+        "title": "Hubungkan AI Anda ke Restorm",
+        "body": "Hubungkan Claude atau Cursor ke instans ini dengan satu klik.",
+        "cta": "Tunjukkan caranya"
+      }
     }
   },
   "mcpToolTitles": {

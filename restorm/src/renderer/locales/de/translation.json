@@ -2780,6 +2780,32 @@
     "proUpsell": {
       "note": "In der Community-Version steuern KI-Agenten Ihre Anfragen. Wechseln Sie zu Pro, um Szenarien, die Oberfläche und erweiterte Automatisierung zu steuern.",
       "link": "Auf Pro upgraden"
+    },
+    "connect": {
+      "action": "Restorm zu Ihrem KI-Assistenten hinzufügen",
+      "title": "Restorm zu Ihrem KI-Assistenten hinzufügen",
+      "intro": "Verbinden Sie Ihren KI-Assistenten über MCP mit dieser Restorm-Instanz. Wählen Sie Ihren Client:",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "run": "Zu Claude Code hinzufügen",
+      "added": "Hinzugefügt",
+      "runOk": "Restorm wurde zu Claude Code hinzugefügt. Starten Sie Claude Code neu, um es zu verwenden.",
+      "runError": "Der Befehl konnte nicht ausgeführt werden",
+      "claudeCode": {
+        "where": "Fügen Sie dies in ein Terminal ein"
+      },
+      "claudeDesktop": {
+        "where": "Fügen Sie dies zu Ihrer claude_desktop_config.json hinzu"
+      },
+      "cursor": {
+        "where": "Fügen Sie dies zu ~/.cursor/mcp.json hinzu"
+      },
+      "footnote": "Der MCP-Server muss laufen (das ist standardmäßig der Fall). Die Brücke findet diese Instanz von selbst — kein Port und kein Token zum Kopieren.",
+      "invite": {
+        "title": "Verbinden Sie Ihre KI mit Restorm",
+        "body": "Verbinden Sie Claude oder Cursor mit einem Klick mit dieser Instanz.",
+        "cta": "So funktioniert's"
+      }
     }
   },
   "mcpToolTitles": {
