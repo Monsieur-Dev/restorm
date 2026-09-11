@@ -8,7 +8,7 @@
     "upgradeToPro": "Päivitä Pro-versioon",
     "dashboard": "Koontinäyttö",
     "signOutConfirm": {
-      "message": "Haluatko varmasti kirjautua ulos?",
+      "message": "Haluatteko varmasti kirjautua ulos?",
       "confirm": "Kyllä",
       "cancel": "Peruuta"
     }
@@ -88,67 +88,67 @@
     "cardTitle": "Vinkkejä ja kikkoja",
     "maximizeTab": {
       "title": "Suurenna välilehti yhdellä klikkauksella",
-      "body": "Kaksoisnapsauta mitä tahansa workbench-välilehteä näyttääksesi sen koko näytön kokoisena. Palaa edelliseen asetteluun painamalla Esc."
+      "body": "Kaksoisnapsauttakaa mitä tahansa workbench-välilehteä näyttääksenne sen koko näytön kokoisena. Palatkaa edelliseen asetteluun painamalla Esc."
     },
     "mcpControl": {
-      "title": "Ohjaa restormia tekoälyllä",
-      "body": "Restormissa on mukana MCP-palvelin, joten Claude Coden kaltaiset tekoälyavustajat voivat listata, avata, muokata ja ajaa pyyntöjäsi, tarkastella vastauksia ja muokata työtilaa ohjelmallisesti – poistumatta keskustelusta."
+      "title": "Ohjatkaa restormia tekoälyllä",
+      "body": "Restormissa on mukana MCP-palvelin, joten Claude Coden kaltaiset tekoälyavustajat voivat listata, avata, muokata ja ajaa pyyntöjänne, tarkastella vastauksia ja muokata työtilaa ohjelmallisesti – poistumatta keskustelusta."
     },
     "envSwitch": {
-      "title": "Vaihda ympäristöä helposti!",
-      "body": "Vaihda nykyisen pyynnön tai koko API:n pyyntöjen ympäristöä napsauttamalla tilarivin painiketta tai napsauttamalla pyynnön lähetyspainiketta hiiren oikealla."
+      "title": "Vaihtakaa ympäristöä helposti!",
+      "body": "Vaihtakaa nykyisen pyynnön tai koko API:n pyyntöjen ympäristöä napsauttamalla tilarivin painiketta tai napsauttamalla pyynnön lähetyspainiketta hiiren oikealla."
     },
     "authRequests": {
-      "title": "Tarvitsetko tunnistautumisen API:n käyttöön?",
-      "body": "Sen sijaan että lähetät pyynnön joka kerta tokenin saamiseksi ja liität sen joka paikkaan, käytä autentikointipyyntöjä. Kun kutsu epäonnistuu (401, 403, …) tai tokenin elinaika päättyy, autentikointipyyntö ajetaan automaattisesti uudelleen tokenin hakemiseksi ja uudelleenkäyttämiseksi. Kätevää!"
+      "title": "Tarvitsetteko tunnistautumisen API:n käyttöön?",
+      "body": "Sen sijaan että lähetätte pyynnön joka kerta tokenin saamiseksi ja liitätte sen joka paikkaan, käyttäkää autentikointipyyntöjä. Kun kutsu epäonnistuu (401, 403, …) tai tokenin elinaika päättyy, autentikointipyyntö ajetaan automaattisesti uudelleen tokenin hakemiseksi ja uudelleenkäyttämiseksi. Kätevää!"
     },
     "supplyChain": {
-      "title": "Suojaa itseäsi!",
-      "body": "Kuten kaikki ohjelmistot, Restorm käyttää kolmannen osapuolen kirjastoja. Toimitusketjuhyökkäysten estämiseksi kaikki lähtevät kutsut otetaan kiinni alimmalla tasolla, ja varoitamme sinua, jos kolmannen osapuolen kirjasto yrittää varastaa henkilökohtaisia tietojasi!"
+      "title": "Suojatkaa itseänne!",
+      "body": "Kuten kaikki ohjelmistot, Restorm käyttää kolmannen osapuolen kirjastoja. Toimitusketjuhyökkäysten estämiseksi kaikki lähtevät kutsut otetaan kiinni alimmalla tasolla, ja varoitamme teitä, jos kolmannen osapuolen kirjasto yrittää varastaa henkilökohtaisia tietojanne!"
     },
     "codeSnippets": {
-      "title": "Restorm auttaa sinua koodaamaan!",
-      "body": "Löydä koodisnipettejä jokaiselle pyynnölle integroidaksesi ne ohjelmistoosi. Useita kieliä saatavilla: curl, PowerShell, TypeScript, C# ja paljon muuta!"
+      "title": "Restorm auttaa teitä koodaamaan!",
+      "body": "Löytäkää koodisnipettejä jokaiselle pyynnölle integroidaksenne ne ohjelmistoonne. Useita kieliä saatavilla: curl, PowerShell, TypeScript, C# ja paljon muuta!"
     },
     "workbenchLayout": {
-      "title": "Järjestä työpöytäsi",
-      "body": "Onko sinulla iso näyttö ja paljon pyyntöjä? Asettele ne rinnakkain, päällekkäin tai miten haluat — vain raahaa välilehti haluamaasi paikkaan. Mukavuutesi takia!"
+      "title": "Järjestäkää työpöytänne",
+      "body": "Onko teillä iso näyttö ja paljon pyyntöjä? Asetelkaa ne rinnakkain, päällekkäin tai miten haluatte — vain raahatkaa välilehti haluamaanne paikkaan. Mukavuutenne takia!"
     },
     "persistState": {
-      "title": "Löydä se samanlaisena kuin jätit sen!",
-      "body": "Jos suljet Restormin ja avaat sen uudelleen, löydät sen täsmälleen samassa tilassa kuin jätit sen."
+      "title": "Löytäkää se samanlaisena kuin jätitte sen!",
+      "body": "Jos suljette Restormin ja avaatte sen uudelleen, löydätte sen täsmälleen samassa tilassa kuin jätitte sen."
     },
     "favorites": {
-      "title": "Jotkut ovat sydäntäsi lähempänä kuin toiset…",
-      "body": "Onko pyyntöjä, jotka ovat sinulle muita tärkeämpiä? Lisää ne suosikkeihin!"
+      "title": "Jotkut ovat sydäntänne lähempänä kuin toiset…",
+      "body": "Onko pyyntöjä, jotka ovat teille muita tärkeämpiä? Lisätkää ne suosikkeihin!"
     },
     "console": {
-      "title": "Näe paremmin mitä tapahtuu",
-      "body": "Konsoli näyttää API-kutsut sitä mukaa kun lähetät pyyntöjä. Kätevä kopioida ja liittää terminaaliin tarvittaessa! Mikä on makusi: curl vai PowerShell?"
+      "title": "Nähkää paremmin mitä tapahtuu",
+      "body": "Konsoli näyttää API-kutsut sitä mukaa kun lähetätte pyyntöjä. Kätevä kopioida ja liittää terminaaliin tarvittaessa! Mikä on makunne: curl vai PowerShell?"
     },
     "miniBrowser": {
-      "title": "Kyllästyitkö jatkuvaan ikkunoiden vaihteluun?",
-      "body": "Restormissa on sisäänrakennettu mini-selain. Kätevä, kun sovelluksesi reagoi visuaalisesti API-kutsuihisi."
+      "title": "Kyllästyittekö jatkuvaan ikkunoiden vaihteluun?",
+      "body": "Restormissa on sisäänrakennettu mini-selain. Kätevä, kun sovelluksenne reagoi visuaalisesti API-kutsuihinne."
     },
     "apiDocs": {
       "title": "Dokumentaatio — täällä samassa paikassa",
-      "body": "Ei tarvitse enää siirtyä Restormin ja API:n dokumentaation välillä. Jos API tarjoaa määrittelyn (Swagger, OpenAPI, …), se tuodaan Restormiin ja voit lukea sitä suoraan täällä."
+      "body": "Ei tarvitse enää siirtyä Restormin ja API:n dokumentaation välillä. Jos API tarjoaa määrittelyn (Swagger, OpenAPI, …), se tuodaan Restormiin ja voitte lukea sitä suoraan täällä."
     },
     "secrets": {
-      "title": "Suojaa salaisuutesi",
-      "body": "Salasanasi ja auth-tokenisi eivät tallennu suoraan Restorm-tiedostoon. Restorm tallentaa salaisuudet ja pyyntöhistorian erillisiin tiedostoihin. Sinun on huolehdittava, ettet pushaa niitä GitHubiin. Restorm voi myös hakea salaisuudet AWS:stä, GitHubista ja muista lähteistä."
+      "title": "Suojatkaa salaisuutenne",
+      "body": "Salasananne ja auth-tokeninne eivät tallennu suoraan Restorm-tiedostoon. Restorm tallentaa salaisuudet ja pyyntöhistorian erillisiin tiedostoihin. Teidän on huolehdittava, ettette pushaa niitä GitHubiin. Restorm voi myös hakea salaisuudet AWS:stä, GitHubista ja muista lähteistä."
     },
     "themes": {
-      "title": "Sinun värisi, sinun tunnelmasi",
-      "body": "Restormin mukana tulee useita värimalleja. Valitse se, joka sopii fiilikseesi."
+      "title": "Teidän värinne, teidän tunnelmanne",
+      "body": "Restormin mukana tulee useita värimalleja. Valitkaa se, joka sopii fiilikseenne."
     },
     "search": {
-      "title": "Löydä kaikki nopeasti",
-      "body": "Huomasitko tämän ikkunan yläosan? Restormissa on hakukone, joten et joudu enää etsimään tunteja sitä yhtä oikeaa pyyntöä."
+      "title": "Löytäkää kaikki nopeasti",
+      "body": "Huomasitteko tämän ikkunan yläosan? Restormissa on hakukone, joten ette joudu enää etsimään tunteja sitä yhtä oikeaa pyyntöä."
     },
     "multiEnv": {
       "title": "Samat pyynnöt, eri ympäristöt",
-      "body": "Onko sinulla kehitys-, prod- ja staging-ympäristö? Samat pyynnöt, mutta hieman erilaiset URL:t ja tokenit… Käytä ympäristöjä ja muuttujia vaihtaaksesi ne yhdellä klikkauksella. Voit jopa erottaa ne väreillä ja kuvakkeilla, jotta vältyt perjantai-iltapelolta tuotannossa!"
+      "body": "Onko teillä kehitys-, prod- ja staging-ympäristö? Samat pyynnöt, mutta hieman erilaiset URL:t ja tokenit… Käyttäkää ympäristöjä ja muuttujia vaihtaaksenne ne yhdellä klikkauksella. Voitte jopa erottaa ne väreillä ja kuvakkeilla, jotta vältytte perjantai-iltapelolta tuotannossa!"
     },
     "protocols": {
       "title": "Enemmän kuin pelkkä REST",
@@ -156,59 +156,59 @@
     },
     "responseTree": {
       "title": "Näe API-vastaukset visuaalisesti",
-      "body": "Tiesitkö, että voit selata API-vastauksiasi graafisemmin? Restorm näyttää ne interaktiivisena puuna, jota voit selata, taittaa ja avata."
+      "body": "Tiesittekö, että voitte selata API-vastauksianne graafisemmin? Restorm näyttää ne interaktiivisena puuna, jota voitte selata, taittaa ja avata."
     },
     "responseHistory": {
       "title": "Pyyntöjen historia",
-      "body": "Voit selata kaikkien API-kutsujesi historiaa. Kätevä tapa selvittää, mitä oikeasti tapahtui."
+      "body": "Voitte selata kaikkien API-kutsujenne historiaa. Kätevä tapa selvittää, mitä oikeasti tapahtui."
     },
     "multiLanguage": {
       "title": "27 kieltä!",
-      "body": "Restorm puhuu 27 kieltä. Englanti, ranska, espanja, saksa, italia, japani, kiina, korea ja monia muita — valitse omasi asetuksista!"
+      "body": "Restorm puhuu 27 kieltä. Englanti, ranska, espanja, saksa, italia, japani, kiina, korea ja monia muita — valitkaa omanne asetuksista!"
     },
     "fromPostman": {
-      "title": "Tuletko Postmanista tai Brunosta?",
-      "body": "Autamme sinua siirtymään Restormiin — vaihto sujuu helposti ;)"
+      "title": "Tuletteko Postmanista tai Brunosta?",
+      "body": "Autamme teitä siirtymään Restormiin — vaihto sujuu helposti ;)"
     },
     "chainRequests": {
       "title": "Useita pyyntöjä ketjutettavaksi?",
-      "body": "Käytä pyyntöjäsi skenaarioiden sisällä, lisää ehtoja ja voit jopa upottaa skenaarioita toisten skenaarioiden sisään."
+      "body": "Käyttäkää pyyntöjänne skenaarioiden sisällä, lisätkää ehtoja ja voitte jopa upottaa skenaarioita toisten skenaarioiden sisään."
     },
     "stepByStep": {
-      "title": "Käy skenaariosi läpi askel kerrallaan",
-      "body": "Yksi askel kerrallaan, jotta näet tarkalleen mitä tapahtuu. Voit jopa asettaa keskeytyskohtia."
+      "title": "Käykää skenaarionne läpi askel kerrallaan",
+      "body": "Yksi askel kerrallaan, jotta näette tarkalleen mitä tapahtuu. Voitte jopa asettaa keskeytyskohtia."
     },
     "cicd": {
-      "title": "Aja skenaariosi CI/CD-putkissasi",
-      "body": "Käynnistä Restorm päättömänä ajaaksesi skenaarion ilman käyttöliittymää ja kerää sen lokit — automatisoidut testit, rakennettu visuaalisesti."
+      "title": "Ajakaa skenaarionne CI/CD-putkissanne",
+      "body": "Käynnistäkää Restorm päättömänä ajaaksenne skenaarion ilman käyttöliittymää ja kerätkää sen lokit — automatisoidut testit, rakennettu visuaalisesti."
     },
     "nestedScenarios": {
-      "title": "Näe mitä skenaariossa tapahtuu",
-      "body": "Skenaario voi kutsua toista. Lue tarkastelussa jokainen loki ja hyppää suoraan siihen skenaarioon, josta se tuli."
+      "title": "Nähkää mitä skenaariossa tapahtuu",
+      "body": "Skenaario voi kutsua toista. Lukekaa tarkastelussa jokainen loki ja hypätkää suoraan siihen skenaarioon, josta se tuli."
     },
     "scenarioHistory": {
       "title": "Mitä juuri tapahtui?",
-      "body": "Selaa skenaarioidesi suoritushistoriaa. Jokin niistä on muuttunut sittemmin? Ei hätää — tallensimme sen asetukset."
+      "body": "Selatkaa skenaarioidenne suoritushistoriaa. Jokin niistä on muuttunut sittemmin? Ei hätää — tallensimme sen asetukset."
     },
     "codeSandbox": {
       "title": "Skenaariot ja turvallisuus",
-      "body": "Voit kirjoittaa koodia skenaarioihisi — mutta se suoritetaan turvallisessa hiekkalaatikossa, ilman pääsyä paikallisiin tiedostoihisi ja ilman suoraa internet-yhteyttä. Turvallisin tapa pysyä suojattuna!"
+      "body": "Voitte kirjoittaa koodia skenaarioihinne — mutta se suoritetaan turvallisessa hiekkalaatikossa, ilman pääsyä paikallisiin tiedostoihinne ja ilman suoraa internet-yhteyttä. Turvallisin tapa pysyä suojattuna!"
     },
     "codeLanguages": {
       "title": "Tekisikö mieli kirjoittaa koodia?",
-      "body": "Kirjoita koodia suoraan skenaarioihisi — kielillä TypeScript, JavaScript, Python, Lua, Ruby, C# tai R!"
+      "body": "Kirjoittakaa koodia suoraan skenaarioihinne — kielillä TypeScript, JavaScript, Python, Lua, Ruby, C# tai R!"
     },
     "scenarioAi": {
       "title": "Tekoälyllä ohjattavat skenaariot",
-      "body": "Claude, Cursor, Copilot… tuntevat koodikantasi: pyydä niiltä räätälöityjä skenaarioita. Kaikki on saatavilla MCP:n kautta skenaarioiden luomiseen, muokkaamiseen ja ajamiseen."
+      "body": "Claude, Cursor, Copilot… tuntevat koodikantanne: pyytäkää niiltä räätälöityjä skenaarioita. Kaikki on saatavilla MCP:n kautta skenaarioiden luomiseen, muokkaamiseen ja ajamiseen."
     },
     "interactiveScenarios": {
       "title": "Interaktiiviset skenaariot!",
-      "body": "Tee skenaarioistasi parametrisoitavia ja kysy jopa käyttäjältä mitä tehdä valintaikkunoilla."
+      "body": "Tehkää skenaarioistanne parametrisoitavia ja kysykää jopa käyttäjältä mitä tehdä valintaikkunoilla."
     },
     "customValueLists": {
       "title": "Uudelleenkäytettävät arvolistat",
-      "body": "Määrittele omat arvolistasi ja käytä niitä uudelleen niin pyynnöissäsi kuin skenaarioissasikin."
+      "body": "Määritelkää omat arvolistanne ja käyttäkää niitä uudelleen niin pyynnöissänne kuin skenaarioissannekin."
     }
   },
   "authFailureToast": {
@@ -325,14 +325,14 @@
     },
     "deleteConfirm": {
       "title": "Vahvista poisto",
-      "folderMessage": "Haluatko varmasti poistaa kansion \"{{name}}\" ja kaiken sen sisällön?",
-      "itemMessage": "Haluatko varmasti poistaa kohteen \"{{name}}\"?",
+      "folderMessage": "Haluatteko varmasti poistaa kansion \"{{name}}\" ja kaiken sen sisällön?",
+      "itemMessage": "Haluatteko varmasti poistaa kohteen \"{{name}}\"?",
       "confirm": "Poista",
       "cancel": "Peruuta"
     },
     "scenarioDelete": {
       "title": "Poista skenaarioiden käyttämä pyyntö",
-      "message": "”{{name}}” on käytössä seuraavissa skenaarioissa. Mitä haluat tehdä?",
+      "message": "”{{name}}” on käytössä seuraavissa skenaarioissa. Mitä haluatte tehdä?",
       "belongsTag": "kuuluu tähän skenaarioon",
       "moveInto": "Siirrä tähän skenaarioon",
       "affectsNote": "Tämän pyynnön poistaminen poistaa sen myös näistä skenaarioista.",
@@ -354,7 +354,7 @@
     "environmentsAriaLabel": "Kansion ympäristöt",
     "variables": "Muuttujat",
     "addVariable": "Lisää muuttujarivi",
-    "selectEnvironment": "Valitse ympäristö nähdäksesi muuttujat",
+    "selectEnvironment": "Valitkaa ympäristö nähdäksenne muuttujat",
     "tabs": {
       "docs": "Dokumentit",
       "environments": "Ympäristöt",
@@ -363,9 +363,9 @@
     },
     "home": {
       "configureEnvs": "Määritä ympäristöt",
-      "configureEnvsDesc": "Aseta perus-URL-osoitteet, muuttujat ja todennus jokaiselle ympäristölle",
+      "configureEnvsDesc": "Asettakaa perus-URL-osoitteet, muuttujat ja todennus jokaiselle ympäristölle",
       "viewDocs": "Näytä dokumentaatio",
-      "viewDocsDesc": "Selaa API-dokumentaatiota, malleja ja päätepisteitä",
+      "viewDocsDesc": "Selatkaa API-dokumentaatiota, malleja ja päätepisteitä",
       "favoriteRequests": "Suosikkipyynnöt",
       "removeFavorite": "Poista suosikeista",
       "apiUpdate": {
@@ -384,7 +384,7 @@
     },
     "contextVariables": {
       "title": "Käytettävissä olevat kontekstimuuttujat",
-      "description": "Käytä näitä muuttujia pyyntöjen URL-osoitteissa ja lauseketyyppisissä muuttujissa {{handlebars}}-syntaksilla.",
+      "description": "Käyttäkää näitä muuttujia pyyntöjen URL-osoitteissa ja lauseketyyppisissä muuttujissa {{handlebars}}-syntaksilla.",
       "name": "Muuttuja",
       "value": "Selvitetty arvo",
       "copied": "Kopioitu!"
@@ -397,7 +397,7 @@
       "addEntry": "Lisää arvo",
       "label": "Label",
       "value": "Value",
-      "selectList": "Määritä muuttujillesi uudelleenkäytettäviä arvoluetteloita: valitset luettavan nimikkeen, ja pyyntö lähettää siihen liitetyn arvon. Valitse tai luo luettelo aloittaaksesi."
+      "selectList": "Määrittäkää muuttujillenne uudelleenkäytettäviä arvoluetteloita: valitsette luettavan nimikkeen, ja pyyntö lähettää siihen liitetyn arvon. Valitkaa tai luokaa luettelo aloittaaksenne."
     },
     "iconLabel": "Kuvake:",
     "colorLabel": "Väri:"
@@ -444,11 +444,11 @@
       },
       "loading": "Lähetetään pyyntöä...",
       "noResponseBody": "Ei vastausrunkoa — katso tiedot Infos-välilehdeltä",
-      "noResponse": "Suorita pyyntö napsauttamalla Lähetä",
+      "noResponse": "Suorittakaa pyyntö napsauttamalla Lähetä",
       "history": {
         "list": "Vastaushistorian luettelo",
         "empty": "Vastauksia ei vielä tallennettu",
-        "select": "Valitse vastaus nähdäksesi yksityiskohdat",
+        "select": "Valitkaa vastaus nähdäksenne yksityiskohdat",
         "pin": "Kiinnitä vastaus",
         "unpin": "Poista kiinnitys"
       },
@@ -518,7 +518,7 @@
       "subscribe": "Tilaa",
       "stop": "Pysäytä",
       "waiting": "Tilattu — odotetaan tapahtumia…",
-      "noEvents": "Ei vielä tapahtumia. Tilaa aloittaaksesi suoratoiston.",
+      "noEvents": "Ei vielä tapahtumia. Tilatkaa aloittaaksenne suoratoiston.",
       "idle": "Ei tilattu",
       "streaming": "Suoratoisto — {{count}} tapahtuma(a) vastaanotettu",
       "eventLabel": "Tapahtuma {{index}}"
@@ -544,7 +544,7 @@
       "grpc": "gRPC",
       "grpcWeb": "gRPC-Web",
       "connect": "Connect",
-      "streamingUnsupported": "Tämä siirtotapa ei tue asiakas- tai kaksisuuntaista suoratoistoa HTTP/1.1:n kautta. Käytä sen sijaan natiivia gRPC-siirtotapaa."
+      "streamingUnsupported": "Tämä siirtotapa ei tue asiakas- tai kaksisuuntaista suoratoistoa HTTP/1.1:n kautta. Käyttäkää sen sijaan natiivia gRPC-siirtotapaa."
     },
     "server": {
       "proto": "Proto",
@@ -568,7 +568,7 @@
     "reflection": {
       "refresh": "Päivitä reflectionista",
       "refreshFailed": "Päivitys gRPC-reflectionilla epäonnistui",
-      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuo sen sijaan .proto-tiedosto.",
+      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuokaa sen sijaan .proto-tiedosto.",
       "unknownError": "Tuntematon virhe"
     }
   },
@@ -639,7 +639,7 @@
     "tabs": {
       "calls": "Kutsut"
     },
-    "empty": "Ei kutsuja vielä. Lisää yksi alle.",
+    "empty": "Ei kutsuja vielä. Lisätkää yksi alle.",
     "methodPlaceholder": "metodi",
     "idPlaceholder": "id (auto)",
     "moveUp": "Siirrä ylös",
@@ -863,7 +863,7 @@
     }
   },
   "welcome": {
-    "confirmRemoveFavorite": "Haluatko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
+    "confirmRemoveFavorite": "Haluatteko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
     "newAriaLabel": "Luo uusi kokoelma",
     "openAriaLabel": "Avaa kokoelma levyltä",
     "landmarkLabel": "Tervetuloa"
@@ -1006,7 +1006,7 @@
   "behavior": {
     "title": "Toiminta",
     "syncSidebarWithTabs": "Synkronoi sivupalkin valinta aktiivisen välilehden kanssa",
-    "syncSidebarWithTabsDescription": "Kun vaihdat välilehteä työtilassa, valitse ja näytä automaattisesti vastaava kohde sivupalkissa",
+    "syncSidebarWithTabsDescription": "Kun vaihdatte välilehteä työtilassa, valitse ja näytä automaattisesti vastaava kohde sivupalkissa",
     "dateTimeFormatTitle": "Päivämäärän/ajan muoto",
     "dateTimeFormat": {
       "us": "Yhdysvaltain muoto (KK/PP/VVVV, 12h)",
@@ -1035,9 +1035,9 @@
     "cancel": "Peruuta",
     "customHeadersAdd": "Lisää otsake",
     "customHeadersBtn": "Lisää mukautetut otsakkeet",
-    "customHeadersBtnTitle": "Liitä kertaluonteiset otsakkeet määrityksen noutoon (tallennetaan tuotuun kansioon uudelleentuonteja varten)",
+    "customHeadersBtnTitle": "Liittäkää kertaluonteiset otsakkeet määrityksen noutoon (tallennetaan tuotuun kansioon uudelleentuonteja varten)",
     "customHeadersDone": "Valmis",
-    "customHeadersHint": "Otsakkeet tallennetaan tuotuun kansioon, joten tuleva päivitys lähteestä toistaa ne. Käytä kirjautumisvirtoihin, joissa token vaihtuu, mieluummin yllä olevaa todennusreittiä.",
+    "customHeadersHint": "Otsakkeet tallennetaan tuotuun kansioon, joten tuleva päivitys lähteestä toistaa ne. Käyttäkää kirjautumisvirtoihin, joissa token vaihtuu, mieluummin yllä olevaa todennusreittiä.",
     "customHeadersTitle": "Mukautetut otsakkeet",
     "detachAuth": "Irrota todennusreitti",
     "dropZone": "Pudotusalue",
@@ -1056,13 +1056,13 @@
       "emptySpec": "Osoitteesta {{url}} noudettu määrittely ei sisällä yhtään {{format}}-operaatiota. Sen käyttöönotto tyhjentäisi tämän kansion, joten päivitys hylättiin.",
       "formatNotDetected": "Tämän lähteen muotoa ei tunnistettu.",
       "unsupportedFormat": "Mikään tuoja ei tue muotoa {{format}}.",
-      "projectFormatTooNew": "Tämä projektitiedosto käyttää muotoversiota {{found}}, mutta tämä Restorm-versio ymmärtää vain version {{current}}. Päivitä Restorm tuodaksesi sen.",
+      "projectFormatTooNew": "Tämä projektitiedosto käyttää muotoversiota {{found}}, mutta tämä Restorm-versio ymmärtää vain version {{current}}. Päivittäkää Restorm tuodaksenne sen.",
       "projectFormatMissing": "Tämä tiedosto ei ilmoita Restorm-muotoversiota, joten se ei ole Restorm-projektitiedosto.",
-      "openApiUnsupportedVersion": "Tämä määritys ilmoittaa OpenAPI-version {{version}}, jota tämä Restorm-versio ei vielä tue. Päivitä Restorm tuodaksesi sen."
+      "openApiUnsupportedVersion": "Tämä määritys ilmoittaa OpenAPI-version {{version}}, jota tämä Restorm-versio ei vielä tue. Päivittäkää Restorm tuodaksenne sen."
     },
     "formats": {
       "swagger": {
-        "description": "OpenAPI 2.0 -määrittely, syntynyt SmartBearilla. Liitä Swagger JSON tai YAML — Restorm jäsentää jokaisen operaation, hakee suojausmäärittelyt ja muuttaa koko asiakirjan navigoitavaksi pyyntöpuuksi.",
+        "description": "OpenAPI 2.0 -määrittely, syntynyt SmartBearilla. Liittäkää Swagger JSON tai YAML — Restorm jäsentää jokaisen operaation, hakee suojausmäärittelyt ja muuttaa koko asiakirjan navigoitavaksi pyyntöpuuksi.",
         "trademark": "Swagger on SmartBear Softwaren rekisteröity tavaramerkki."
       },
       "openapi": {
@@ -1070,19 +1070,19 @@
         "trademark": "OpenAPI on OpenAPI Initiative -hankkeen projekti Linux Foundationin alaisuudessa."
       },
       "curl": {
-        "description": "Onko pyyntö jo käynnissä päätteessäsi? Liitä koko curl-kutsu — liput, otsakkeet, sisältö, kyselymerkkijono — ja Restorm rakentaa sen uudelleen oikeaksi pyynnöksi, jonka voit suorittaa uudelleen, muokata ja kiinnittää.",
+        "description": "Onko pyyntö jo käynnissä päätteessänne? Liittäkää koko curl-kutsu — liput, otsakkeet, sisältö, kyselymerkkijono — ja Restorm rakentaa sen uudelleen oikeaksi pyynnöksi, jonka voitte suorittaa uudelleen, muokata ja kiinnittää.",
         "trademark": "curl on avoimen lähdekoodin ohjelmisto © Daniel Stenberg, käytetään tässä sen ehtojen mukaisesti."
       },
       "powershell": {
-        "description": "Sama idea, PowerShell-muodossa. Liitä Invoke-WebRequest- tai Invoke-RestMethod-komento, ja Restorm lukee URI:n, menetelmän, otsakkeet ja sisällön luodakseen pyynnön, jota voit kehittää visuaalisesti.",
+        "description": "Sama idea, PowerShell-muodossa. Liittäkää Invoke-WebRequest- tai Invoke-RestMethod-komento, ja Restorm lukee URI:n, menetelmän, otsakkeet ja sisällön luodakseen pyynnön, jota voitte kehittää visuaalisesti.",
         "trademark": "PowerShell on Microsoft Corporationin rekisteröity tavaramerkki."
       },
       "postman": {
-        "description": "Onko toimistolla tallessa Postman-kokoelma? Pudota JSON-tiedosto — Restorm lukee jokaisen pyynnön, jokaisen esimerkkivastauksen ja jokaisen ympäristömuuttujan ja rakentaa kokoelman Restorm-puuksi, jota voit ajaa muiden API:idesi rinnalla.",
+        "description": "Onko toimistolla tallessa Postman-kokoelma? Pudottakaa JSON-tiedosto — Restorm lukee jokaisen pyynnön, jokaisen esimerkkivastauksen ja jokaisen ympäristömuuttujan ja rakentaa kokoelman Restorm-puuksi, jota voitte ajaa muiden API:idenne rinnalla.",
         "trademark": "Postman on Postman, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       },
       "insomnia": {
-        "description": "Tuletko Insomniasta? Pudota vientitiedostosi. Restorm ymmärtää sen v4-/v5-kokoelmamuotoa, tuo mukanaan jokaisen pyynnön, otsakkeen, sisällön ja ympäristön ja näyttää kaiken Restorm-puuna.",
+        "description": "Tuletteko Insomniasta? Pudottakaa vientitiedostonne. Restorm ymmärtää sen v4-/v5-kokoelmamuotoa, tuo mukanaan jokaisen pyynnön, otsakkeen, sisällön ja ympäristön ja näyttää kaiken Restorm-puuna.",
         "trademark": "Insomnia on Kong Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       },
       "bruno": {
@@ -1090,89 +1090,89 @@
         "trademark": "Bruno on avoimen lähdekoodin ohjelmisto (MIT) tekijänä Anoop M. D., käytetään tässä sen ehtojen mukaisesti."
       },
       "thunderclient": {
-        "description": "Tuletko Thunder Clientista? Pudota viety collection-JSON — Restorm lukee jokaisen pyynnön, kansion, otsikon ja rungon, ja rakentaa kokoelman uudelleen ajovalmiina Restorm-puuna.",
+        "description": "Tuletteko Thunder Clientista? Pudottakaa viety collection-JSON — Restorm lukee jokaisen pyynnön, kansion, otsikon ja rungon, ja rakentaa kokoelman uudelleen ajovalmiina Restorm-puuna.",
         "trademark": "Thunder Client on omistajansa tavaramerkki, jota käytetään tässä vain yhteensopivuusviittauksena."
       },
       "graphql": {
-        "description": "Liitä GraphQL SDL (.graphql / .gql / liitos GraphQL-asiakkaastasi), niin Restorm rakentaa yhden pyynnön per operaatio, kytkettynä oikeaan query-/mutation-/subscription-tyyppiin valmiiksi rakennetuilla muuttujilla.",
+        "description": "Liittäkää GraphQL SDL (.graphql / .gql / liitos GraphQL-asiakkaastanne), niin Restorm rakentaa yhden pyynnön per operaatio, kytkettynä oikeaan query-/mutation-/subscription-tyyppiin valmiiksi rakennetuilla muuttujilla.",
         "trademark": "GraphQL on GraphQL Foundationin tavaramerkki, joka on Joint Development Foundationin projekti."
       },
       "grpc": {
-        "description": "Pudota .proto-tiedosto (tai kokonainen kansio sellaisia), niin Restorm käy läpi jokaisen palvelun, jokaisen RPC:n ja jokaisen viestin — jokaisesta menetelmästä tulee tyypitetty pyyntö, jonka voit lähettää gRPC-suorittimen kautta ilman codegeniä.",
+        "description": "Pudottakaa .proto-tiedosto (tai kokonainen kansio sellaisia), niin Restorm käy läpi jokaisen palvelun, jokaisen RPC:n ja jokaisen viestin — jokaisesta menetelmästä tulee tyypitetty pyyntö, jonka voitte lähettää gRPC-suorittimen kautta ilman codegeniä.",
         "trademark": "gRPC on Cloud Native Computing Foundationin projekti."
       },
       "grpcReflection": {
-        "description": "Eikö .proto-tiedostoa? Osoita Restorm käynnissä olevaan gRPC-palvelimeen, joka tarjoaa reflectionin — se kysyy grpc.reflection.v1alpha.ServerReflection-palvelua, löytää jokaisen palvelun ja metodin ja rakentaa saman tyypitetyn pyyntöpuun kuin proto-tiedoston tuonti, tallennettuna paikallisesti offline-käyttöä varten.",
+        "description": "Eikö .proto-tiedostoa? Osoittakaa Restorm käynnissä olevaan gRPC-palvelimeen, joka tarjoaa reflectionin — se kysyy grpc.reflection.v1alpha.ServerReflection-palvelua, löytää jokaisen palvelun ja metodin ja rakentaa saman tyypitetyn pyyntöpuun kuin proto-tiedoston tuonti, tallennettuna paikallisesti offline-käyttöä varten.",
         "action": "Yhdistä palvelimeen…"
       },
       "soap": {
-        "description": "Onko WSDL? Liitä se (tai sen URL) — Restorm jäsentää jokaisen <port>- ja <operation>-elementin ja tuottaa lähetysvalmiit SOAP-kuoret oikealla SOAPAction-otsakkeella, skeeman mukaan tyypitetyillä sisältöluonnoksilla ja WSDL:n ilmoittamalla todennusmenetelmällä."
+        "description": "Onko WSDL? Liittäkää se (tai sen URL) — Restorm jäsentää jokaisen <port>- ja <operation>-elementin ja tuottaa lähetysvalmiit SOAP-kuoret oikealla SOAPAction-otsakkeella, skeeman mukaan tyypitetyillä sisältöluonnoksilla ja WSDL:n ilmoittamalla todennusmenetelmällä."
       },
       "websocket": {
-        "description": "Liitä WebSocket-päätepiste (ws:// tai wss://) — Restorm avaa yhteyden, kaappaa palvelimen hello-kehykset ja rakentaa send-/subscribe-pyynnöt toistettavilla hyötykuormamalleilla.",
+        "description": "Liittäkää WebSocket-päätepiste (ws:// tai wss://) — Restorm avaa yhteyden, kaappaa palvelimen hello-kehykset ja rakentaa send-/subscribe-pyynnöt toistettavilla hyötykuormamalleilla.",
         "trademark": "WebSocket on IETF:n (RFC 6455) ja W3C:n standardoima protokolla."
       },
       "kafka": {
-        "description": "Liitä Apache Kafka bootstrap-server-URL (tai luettelo aiheista) — Restorm rekisteröi kuluttajat ja tuottajat aiheittain, dekoodaa Avro-/Protobuf-hyötykuormat Schema Registryn kautta ja antaa sinun toistaa yksittäisiä offsetteja yhdellä napsautuksella.",
+        "description": "Liittäkää Apache Kafka bootstrap-server-URL (tai luettelo aiheista) — Restorm rekisteröi kuluttajat ja tuottajat aiheittain, dekoodaa Avro-/Protobuf-hyötykuormat Schema Registryn kautta ja antaa teidän toistaa yksittäisiä offsetteja yhdellä napsautuksella.",
         "trademark": "Apache Kafka ja Kafka-logo ovat Apache Software Foundationin tavaramerkkejä."
       },
       "socketio": {
-        "description": "Liitä Socket.IO-palvelimen URL — Restorm neuvottelee kättelyn, listaa palvelimen lähettämät nimitilat ja tapahtumanimet ja antaa sinulle yhden pyynnön per emit-/on-tapahtuma hyötykuorman validoinnilla.",
+        "description": "Liittäkää Socket.IO-palvelimen URL — Restorm neuvottelee kättelyn, listaa palvelimen lähettämät nimitilat ja tapahtumanimet ja antaa teille yhden pyynnön per emit-/on-tapahtuma hyötykuorman validoinnilla.",
         "trademark": "Socket.IO on avoimen lähdekoodin kirjasto, joka on julkaistu MIT-lisenssillä; nimeä ja logoa käytetään tässä nimellisesti."
       },
       "odata": {
-        "description": "Liitä OData-service-document-URL tai $metadata-tiedosto — Restorm lukee CSDL:n, rakentaa entity setit, function importit ja toiminnot uudelleen ja esitäyttää $filter-/$select-/$top-/$skip-kyselyvaihtoehdot jokaiselle operaatiolle."
+        "description": "Liittäkää OData-service-document-URL tai $metadata-tiedosto — Restorm lukee CSDL:n, rakentaa entity setit, function importit ja toiminnot uudelleen ja esitäyttää $filter-/$select-/$top-/$skip-kyselyvaihtoehdot jokaiselle operaatiolle."
       },
       "mqtt": {
-        "description": "Liitä MQTT-välittäjän URL tai aiheluettelo — Restorm rakentaa publish-/subscribe-pyynnöt aiheittain, pitää yhteyden auki suoratoistoesikatseluja varten ja muistaa säilytettyjen viestien tilannekuvat, jotta voit toistaa ne myöhemmin.",
+        "description": "Liittäkää MQTT-välittäjän URL tai aiheluettelo — Restorm rakentaa publish-/subscribe-pyynnöt aiheittain, pitää yhteyden auki suoratoistoesikatseluja varten ja muistaa säilytettyjen viestien tilannekuvat, jotta voitte toistaa ne myöhemmin.",
         "trademark": "MQTT on OASIS-standardi; MQTT-nimi ja -logo ovat OASIS Openin tavaramerkkejä."
       },
       "paw": {
-        "description": "Tuletko Pawsta? Pudota JSON-vientitiedostosi (File → Export → JSON sovelluksessa — natiivia .paw-pakettia ei lueta suoraan). Restorm rakentaa uudelleen jokaisen pyynnön, otsakkeen, sisällön ja ympäristön, ja yhdistää Pawn dynaamiset arvot (aikaleimat, satunnaiset merkkijonot, UUID:t) lähimpään Restorm-vastineeseen.",
+        "description": "Tuletteko Pawsta? Pudottakaa JSON-vientitiedostonne (File → Export → JSON sovelluksessa — natiivia .paw-pakettia ei lueta suoraan). Restorm rakentaa uudelleen jokaisen pyynnön, otsakkeen, sisällön ja ympäristön, ja yhdistää Pawn dynaamiset arvot (aikaleimat, satunnaiset merkkijonot, UUID:t) lähimpään Restorm-vastineeseen.",
         "trademark": "Paw on RapidAPI, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       },
       "har": {
-        "description": "Tallensitko verkkoliikennejäljen selaimesi devtools-työkalusta? Pudota viety .har-tiedosto — Restorm käy läpi jokaisen tallennetun kutsun ja muuttaa sen toistettavaksi pyynnöksi, otsakkeet ja sisältö mukaan lukien."
+        "description": "Tallensitteko verkkoliikennejäljen selaimenne devtools-työkalusta? Pudottakaa viety .har-tiedosto — Restorm käy läpi jokaisen tallennetun kutsun ja muuttaa sen toistettavaksi pyynnöksi, otsakkeet ja sisältö mukaan lukien."
       },
       "restClient": {
-        "description": "Tuletko REST Client -VS Code -laajennuksesta? Liitä tai pudota .http-/.rest-tiedosto — Restorm jäsentää jokaisen pyyntölohkon, ratkaisee @variables-muuttujat ja rakentaa ne uudelleen Restorm-puuksi.",
+        "description": "Tuletteko REST Client -VS Code -laajennuksesta? Liittäkää tai pudottakaa .http-/.rest-tiedosto — Restorm jäsentää jokaisen pyyntölohkon, ratkaisee @variables-muuttujat ja rakentaa ne uudelleen Restorm-puuksi.",
         "trademark": "REST Client on sen omistajan tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       },
       "httpie": {
-        "description": "Pudota HTTPie Desktopin kokoelmavienti tai CLI-istuntotiedosto — Restorm lukee jokaisen pyynnön (ja istunnon tapauksessa sen pysyvät otsakkeet) ja rakentaa ne uudelleen käyttövalmiiksi.",
+        "description": "Pudottakaa HTTPie Desktopin kokoelmavienti tai CLI-istuntotiedosto — Restorm lukee jokaisen pyynnön (ja istunnon tapauksessa sen pysyvät otsakkeet) ja rakentaa ne uudelleen käyttövalmiiksi.",
         "trademark": "HTTPie on sen omistajan tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
       },
       "smithy": {
-        "description": "Liitä Smithy-malli — JSON-AST tai käsin kirjoitettu IDL — ja Restorm käy läpi jokaisen palvelun, resurssin ja operaation tuottaakseen vastaavan kansion käyttövalmiita pyyntöjä.",
+        "description": "Liittäkää Smithy-malli — JSON-AST tai käsin kirjoitettu IDL — ja Restorm käy läpi jokaisen palvelun, resurssin ja operaation tuottaakseen vastaavan kansion käyttövalmiita pyyntöjä.",
         "trademark": "Smithy on Amazon Web Servicesin projekti."
       },
       "typespec": {
-        "description": "Liitä TypeSpec-määrittelysi (.tsp) — Restorm kääntää sen taustalla OpenAPI-muotoon ja tuo sen aivan kuten käsin kirjoitetun määrittelyn: operaatiot, parametrit ja skeemat mukaan lukien.",
+        "description": "Liittäkää TypeSpec-määrittelynne (.tsp) — Restorm kääntää sen taustalla OpenAPI-muotoon ja tuo sen aivan kuten käsin kirjoitetun määrittelyn: operaatiot, parametrit ja skeemat mukaan lukien.",
         "trademark": "TypeSpec on Microsoftin projekti."
       },
       "raml": {
-        "description": "Liitä RAML 1.0- tai 0.8-dokumentti — Restorm heijastaa sen resurssipuun sisäkkäisiin kansioihin, yksi pyyntö per metodi, mallinnetut tyypit mukaan lukien.",
+        "description": "Liittäkää RAML 1.0- tai 0.8-dokumentti — Restorm heijastaa sen resurssipuun sisäkkäisiin kansioihin, yksi pyyntö per metodi, mallinnetut tyypit mukaan lukien.",
         "trademark": "RAML on RAML Workgroupin ylläpitämä määrittely."
       },
       "wadl": {
-        "description": "Ylläpidätkö yhä WADL-dokumenttia? Liitä XML — Restorm käy läpi sen sisäkkäisen <resource>-puun ja tuottaa vastaavan kansion pyyntöjä, metodit ja parametrit mukaan lukien.",
+        "description": "Ylläpidättekö yhä WADL-dokumenttia? Liittäkää XML — Restorm käy läpi sen sisäkkäisen <resource>-puun ja tuottaa vastaavan kansion pyyntöjä, metodit ja parametrit mukaan lukien.",
         "trademark": "Sun Microsystems toimitti WADL:n W3C:lle Member Submission -muodossa."
       },
       "thrift": {
-        "description": "Liitä Apache Thrift IDL -tiedosto (.thrift) — Restorm lukee jokaisen palvelun, metodin, structin ja enumin, jotta voit selata API:n rakennetta. Thriftin binaarista siirtoprotokollaa ei voi vielä suorittaa Restormista, joten tämä tuonti on vain dokumentaatiota varten.",
+        "description": "Liittäkää Apache Thrift IDL -tiedosto (.thrift) — Restorm lukee jokaisen palvelun, metodin, structin ja enumin, jotta voitte selata API:n rakennetta. Thriftin binaarista siirtoprotokollaa ei voi vielä suorittaa Restormista, joten tämä tuonti on vain dokumentaatiota varten.",
         "trademark": "Apache Thrift on Apache Software Foundationin tavaramerkki."
       },
       "apiBlueprint": {
-        "description": "Liitä API Blueprint -dokumentti (.apib) — Restorm jäsentää jokaisen resurssiryhmän ja siirtymän pyyntökansioksi, yksi per dokumentoitu metodi-/vastauspari.",
+        "description": "Liittäkää API Blueprint -dokumentti (.apib) — Restorm jäsentää jokaisen resurssiryhmän ja siirtymän pyyntökansioksi, yksi per dokumentoitu metodi-/vastauspari.",
         "trademark": "API Blueprint on alun perin Apiaryn luoma määrittely."
       },
       "restorm": {
-        "description": "Yhdistä toinen Restorm-projekti avoinna olevaan — jokainen tuotu kansio, pyyntö, ympäristö ja skenaario saapuu käärekansioon uusin tunnistein, jotta mikään ei törmää, ei edes tuotaessa projektia itseensä."
+        "description": "Yhdistäkää toinen Restorm-projekti avoinna olevaan — jokainen tuotu kansio, pyyntö, ympäristö ja skenaario saapuu käärekansioon uusin tunnistein, jotta mikään ei törmää, ei edes tuotaessa projektia itseensä."
       }
     },
     "grpcReflection": {
       "title": "gRPC-palvelin (reflection)",
-      "hint": "Kysy käynnissä olevan gRPC-palvelimen reflection-palvelua sen palveluiden ja metodien löytämiseksi ilman .proto-tiedostoa.",
+      "hint": "Kysykää käynnissä olevan gRPC-palvelimen reflection-palvelua sen palveluiden ja metodien löytämiseksi ilman .proto-tiedostoa.",
       "addressLabel": "Palvelimen osoite (host:portti)",
       "addressPlaceholder": "localhost:9000",
       "tlsLabel": "Käytä TLS:ää",
@@ -1181,8 +1181,8 @@
       "import": "Tuo",
       "reimportedTitle": "gRPC-reflection tuotu uudelleen",
       "reimportedNoop": "Jo ajan tasalla — ei muutoksia palvelimella.",
-      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — lataa projekti uudelleen nähdäksesi muutokset.",
-      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuo sen sijaan .proto-tiedosto.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ladatkaa projekti uudelleen nähdäksenne muutokset.",
+      "unsupported": "Tämä palvelin ei tue gRPC-reflectionia — tuokaa sen sijaan .proto-tiedosto.",
       "unknownError": "Tuntematon virhe"
     },
     "loading": "Analysoidaan...",
@@ -1197,15 +1197,15 @@
     "selectAll": "Valitse kaikki",
     "selectNone": "Tyhjennä valinnat",
     "source": {
-      "label": "Liitä jotain tähän!",
-      "placeholder": "Anna tiedostopolku, URL tai liitä curl/PowerShell-komento..."
+      "label": "Liittäkää jotain tähän!",
+      "placeholder": "Antakaa tiedostopolku, URL tai liittäkää curl/PowerShell-komento..."
     },
     "tabs": {
       "routes": "Reitit",
       "documentation": "Dokumentaatio"
     },
     "title": "Tuo pyyntöjä",
-    "largeApiHint": "Tämä API on suuri. Pidä projektisi kevyenä: valitse vain tarvitsemasi reitit ja poista muiden valinta alta. Pois jättämäsi säilyvät dokumentaatiossa — voit lisätä ne milloin tahansa.",
+    "largeApiHint": "Tämä API on suuri. Pitäkää projektinne kevyenä: valitkaa vain tarvitsemanne reitit ja poistakaa muiden valinta alta. Pois jättämänne säilyvät dokumentaatiossa — voitte lisätä ne milloin tahansa.",
     "browse": "Selaa…",
     "warning": {
       "openApiStructuralIssues": "Määritys tuotiin, mutta {{count}} osaa ei voitu selvittää ja ne ohitettiin (ratkaisemattomat $ref-viittaukset, pyyntörungot ilman content-kenttää). Loput tuotiin normaalisti."
@@ -1213,12 +1213,12 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Tuo API:si",
-      "body": "Tuo OpenAPI/Swagger-määrittely, GraphQL-skeema, Postman/Bruno/Insomnia-kokoelma tai liitä curl/PowerShell-komento. Restorm jäsentää sen, rakentaa kansiorakenteen ja saa jokaisen päätepisteen valmiiksi."
+      "title": "Tuokaa API:nne",
+      "body": "Tuokaa OpenAPI/Swagger-määrittely, GraphQL-skeema, Postman/Bruno/Insomnia-kokoelma tai liittäkää curl/PowerShell-komento. Restorm jäsentää sen, rakentaa kansiorakenteen ja saa jokaisen päätepisteen valmiiksi."
     },
     "recentActivity": {
       "title": "Viimeisin toiminta",
-      "empty": "Lähetä ensimmäinen pyyntö nähdäksesi sen täällä."
+      "empty": "Lähettäkää ensimmäinen pyyntö nähdäksenne sen täällä."
     },
     "apiCard": {
       "favorites": "Suosikit",
@@ -1311,15 +1311,15 @@
   "scenario": {
     "editor": {
       "emptyTitle": "Täällä on tyhjää…",
-      "emptyDragDrop": "Vedä kohde vasemmalla olevasta puusta skenaarioosi käyttääksesi sitä täällä. Voit jopa tuoda yhden skenaarion toiseen!",
-      "emptyRightClick": "Napsauta hiiren oikealla painikkeella tyhjää kohtaa lisätäksesi toimintoja skenaarioosi"
+      "emptyDragDrop": "Vetäkää kohde vasemmalla olevasta puusta skenaarioonne käyttääksenne sitä täällä. Voitte jopa tuoda yhden skenaarion toiseen!",
+      "emptyRightClick": "Napsauttakaa hiiren oikealla painikkeella tyhjää kohtaa lisätäksenne toimintoja skenaarioonne"
     },
     "pathSelector": {
       "placeholder": "JSON-polku",
       "ariaLabel": "JSON-polun valitsin",
       "pick": "Valitse tuloksesta",
       "loading": "Ladataan…",
-      "noResult": "Suorita lähdetoiminto valitaksesi ominaisuuden sen tuloksesta."
+      "noResult": "Suorittakaa lähdetoiminto valitaksenne ominaisuuden sen tuloksesta."
     },
     "tab": {
       "graph": "Skenaario",
@@ -1533,7 +1533,7 @@
     "validation": {
       "duplicateName": "Nimi ”{{name}}” on jo toisen toiminnon käytössä.",
       "panelTitle": "{{count}} toimintovirhe(ttä)",
-      "runBlocked": "Korjaa {{count}} toimintovirhe(ttä) ennen suoritusta",
+      "runBlocked": "Korjatkaa {{count}} toimintovirhe(ttä) ennen suoritusta",
       "focusBox": "Siirry tähän toimintoon",
       "showErrors": "Näytä virheet",
       "input": {
@@ -1582,7 +1582,7 @@
       },
       "reachability": {
         "unreachable": "Tämä toiminto ei voi koskaan suorittua: siihen ei johda yhteyttä skenaarion aloittavasta toiminnosta.",
-        "cycle": "Tämä toiminto on yhteyssilmukassa, jota mikään ei käynnistä, joten se ei voi koskaan suorittua. Yhdistä siihen toiminto silmukan ulkopuolelta."
+        "cycle": "Tämä toiminto on yhteyssilmukassa, jota mikään ei käynnistä, joten se ei voi koskaan suorittua. Yhdistäkää siihen toiminto silmukan ulkopuolelta."
       }
     },
     "usage": {
@@ -1597,9 +1597,9 @@
       "step": "Askel kerrallaan",
       "previewInfo": "Esimerkkitiedot aiempien pyyntötulosten perusteella.",
       "pause": "Tauko",
-      "noRunsHint": "Tälle pyynnölle ei ole tuoretta suoritusta — suorita se täältä täyttääksesi skenaarion esikatselun.",
+      "noRunsHint": "Tälle pyynnölle ei ole tuoretta suoritusta — suorittakaa se täältä täyttääksenne skenaarion esikatselun.",
       "syntheticInfo": "Esimerkkidata, joka on luotu tämän pyynnön dokumentaatiosta.",
-      "syntheticRunHint": "Esimerkkidata — suorita pyyntö korvataksesi sen oikealla tuloksella.",
+      "syntheticRunHint": "Esimerkkidata — suorittakaa pyyntö korvataksenne sen oikealla tuloksella.",
       "stop": "Pysäytä",
       "logsTitle": "Suorituslokit",
       "copyLogs": "Kopioi lokit",
@@ -1607,7 +1607,7 @@
       "clearLogs": "Tyhjennä lokit",
       "logsShowAll": "Näytä kaikki lokit",
       "showLevelLogs": "Näytä {{level}}-lokit",
-      "showLevelOnly": "Napsauta hiiren oikealla: vain tämä taso",
+      "showLevelOnly": "Napsauttakaa hiiren oikealla: vain tämä taso",
       "noUserLogs": "Ei käyttäjän lokeja (Log-toiminnon merkintöjä) tässä ajossa.",
       "helpTitle": "Mitä tämä toiminto tekee",
       "collapsePanel": "Tiivistä tarkastelupaneeli",
@@ -1662,7 +1662,7 @@
       "add": "Lisää keskeytyskohta",
       "remove": "Poista keskeytyskohta",
       "toggle": "Vaihda keskeytyskohta (F9)",
-      "reached": "Keskeytyskohta saavutettu – tätä toimintoa ei ole vielä suoritettu. Paina F5 jatkaaksesi tai F7 edetäksesi askel kerrallaan.",
+      "reached": "Keskeytyskohta saavutettu – tätä toimintoa ei ole vielä suoritettu. Painakaa F5 jatkaaksenne tai F7 edetäksenne askel kerrallaan.",
       "shortcut": "F9"
     },
     "minimap": {
@@ -2006,7 +2006,7 @@
       "setVariable": "Tallentaa arvon ajomuuttujaan.",
       "getVariable": "Lukee ajomuuttujan arvon.",
       "transform": "Renderöi Handlebars-mallin syötteestä ja ajomuuttujista.",
-      "code": "Suorittaa koodisi (TypeScript, JavaScript, Python, Lua, Ruby tai R) hiekkalaatikossa ja palauttaa tuloksen.",
+      "code": "Suorittaa koodinne (TypeScript, JavaScript, Python, Lua, Ruby tai R) hiekkalaatikossa ja palauttaa tuloksen.",
       "cast": "Muuntaa arvon toiseen tyyppiin (luku, merkkijono, totuusarvo, päivämäärä, lista).",
       "regex": "Etsii, poimii, korvaa tai jakaa tekstiä säännöllisellä lausekkeella.",
       "json": "Jäsentää JSON-merkkijonon tai sarjallistaa arvon JSON-muotoon.",
@@ -2100,7 +2100,7 @@
     },
     "cli": {
       "title": "Suorita komentoriviltä",
-      "intro": "Suorita tämä skenaario avaamatta sovellusta (CI, cron, skripti):",
+      "intro": "Suorittakaa tämä skenaario avaamatta sovellusta (CI, cron, skripti):",
       "byId": "Määritä id:n mukaan",
       "allLogs": "Kaikki lokit",
       "note": "`--out file` kirjoittaa run-login myös tiedostoon.",
@@ -2195,13 +2195,13 @@
         "description": "Vastaukset nimetyistä esimerkeistä · validointi rajoitteilla",
         "port": "Portti",
         "latency": "Simuloitu viive (ms)",
-        "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen sen tarjoamista",
+        "blocked": "Korjatkaa suunnitelman {{count}} validointivirhettä ennen sen tarjoamista",
         "startFailed": "Palvelinta ei voitu käynnistää",
         "protocolAlways": "HTTP tarjoillaan aina",
         "protocolToggle": "Tarjoile myös tämä projektio",
         "stateful": "Tilallinen tila — POST/PUT/DELETE muokkaavat muistivarastoa (nollautuu uudelleenkäynnistyksessä)",
-        "clientsCallout": "Mock-palvelimesi on käynnissä. Jokaiselle protokollalle, jota tämä suunnitelma palvelee, luotiin valmiit ajettavat asiakkaat.",
-        "clientsCalloutLink": "Löydät ne täältä"
+        "clientsCallout": "Mock-palvelimenne on käynnissä. Jokaiselle protokollalle, jota tämä suunnitelma palvelee, luotiin valmiit ajettavat asiakkaat.",
+        "clientsCalloutLink": "Löydätte ne täältä"
       },
       "identity": {
         "title": "Identiteetti",
@@ -2238,7 +2238,7 @@
     },
     "list": {
       "filter": "Suodata…",
-      "selectPrompt": "Valitse kohde luettelosta.",
+      "selectPrompt": "Valitkaa kohde luettelosta.",
       "editorPending": "Tämän osion editori on tulossa."
     },
     "models": {
@@ -2253,7 +2253,7 @@
       "description": "Kuvaus",
       "descriptionPlaceholder": "Mitä tämä malli edustaa (valinnainen)",
       "newName": "UusiMalli",
-      "selectPrompt": "Valitse malli tai luo uusi.",
+      "selectPrompt": "Valitkaa malli tai luokaa uusi.",
       "tabs": {
         "schema": "Skeema",
         "examples": "Esimerkit",
@@ -2273,7 +2273,7 @@
       "addValue": "Lisää arvo",
       "valueHeader": "Arvo",
       "newName": "UusiEnum",
-      "selectPrompt": "Valitse enum tai luo uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä.",
+      "selectPrompt": "Valitkaa enum tai luokaa uusi — suljettu arvojoukko, jota voi käyttää ominaisuuden tyyppinä.",
       "nameHeader": "Nimi",
       "description": "Kuvaus",
       "descriptionPlaceholder": "Mitä tämä enum edustaa (valinnainen)",
@@ -2282,8 +2282,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Ei vielä mallia — lisää malli luodaksesi koodia tästä suunnitelmasta.",
-      "subtitle": "Luo projekteja tästä suunnitelmasta — renderöity hiekkalaatikossa, kirjoitetaan vasta kun vahvistat puun",
+      "empty": "Ei vielä mallia — lisätkää malli luodaksenne koodia tästä suunnitelmasta.",
+      "subtitle": "Luokaa projekteja tästä suunnitelmasta — renderöity hiekkalaatikossa, kirjoitetaan vasta kun vahvistatte puun",
       "sourceTitle": "Mallipohja",
       "sourceKind": {
         "official": "Virallinen",
@@ -2297,9 +2297,9 @@
       "browse": "Valitse tuloskansio",
       "generate": "Luo projekti",
       "generating": "Luodaan hiekkalaatikossa…",
-      "blocked": "Korjaa suunnitelman {{count}} validointivirhettä ennen luontia",
+      "blocked": "Korjatkaa suunnitelman {{count}} validointivirhettä ennen luontia",
       "failed": "Luonti epäonnistui",
-      "outputMissing": "Valitse ensin tuloskansio",
+      "outputMissing": "Valitkaa ensin tuloskansio",
       "extracted": "{{count}} tiedosto(a) kirjoitettu kansioon {{root}}",
       "preview": "{{name}} loi {{count}} tiedosto(a) — vahvista kirjoitus",
       "confirm": "Kirjoita tuloskansioon",
@@ -2323,7 +2323,7 @@
         "descPlaceholder": "Kuvaus (stack / mitä se generoi)",
         "noOrgTemplates": "Ei vielä organisaation malleja.",
         "loading": "Ladataan malleja…",
-        "signedOut": "Kirjaudu sisään nähdäksesi organisaatiosi mallit.",
+        "signedOut": "Kirjautukaa sisään nähdäksenne organisaationne mallit.",
         "fetchError": "Mallien lataaminen epäonnistui:",
         "unavailable": "ei saatavilla",
         "officialTag": "Virallinen",
@@ -2452,7 +2452,7 @@
       "name": "Esimerkin nimi",
       "newName": "Esimerkki",
       "defaultHint": "Oletusarvot tulevat kustakin ominaisuudesta (tyhjä = generoidaan automaattisesti).",
-      "namedHint": "Kirjoita arvo määrittääksesi sen; jätä tyhjäksi säilyttääksesi generoidun.",
+      "namedHint": "Kirjoittakaa arvo määrittääksenne sen; jättäkää tyhjäksi säilyttääksenne generoidun.",
       "columns": {
         "value": "Arvo",
         "origin": "Alkuperä"
@@ -2535,7 +2535,7 @@
       "addRoute": "Lisää reitti",
       "newGroupName": "UusiRyhmä",
       "newRouteName": "UusiReitti",
-      "selectPrompt": "Valitse ryhmä tai reitti, tai luo ryhmä.",
+      "selectPrompt": "Valitkaa ryhmä tai reitti, tai luokaa ryhmä.",
       "deleteGroupTitle": "Poistetaanko {{name}}?",
       "deleteGroupImpact": "Ryhmä ja sen {{count}} reittiä poistetaan.",
       "method": "Metodi",
@@ -2566,7 +2566,7 @@
         "add": "Lisää parametri",
         "delete": "Poista parametri",
         "auto": "auto",
-        "pathEmpty": "Kirjoita {{param}} polkuun luodaksesi sen rivin.",
+        "pathEmpty": "Kirjoittakaa {{param}} polkuun luodaksenne sen rivin.",
         "otherEmpty": "Ei vielä query- tai header-parametreja.",
         "nameEmpty": "Parametri tarvitsee nimen",
         "nameTaken": "Tämä nimi on jo käytössä"
@@ -2640,7 +2640,7 @@
       "authWritesHint": "Vaadi bearer-todennus luonnissa, päivityksessä ja poistossa; luku pysyy julkisena.",
       "generate": "Luo",
       "replace": "Korvaa olemassa olevat reitit",
-      "replaceHint": "Tälle mallille on jo reittejä. Korvaa ne välttääksesi kaksoiskappaleet; jätä pois päältä lisätäksesi toisen joukon.",
+      "replaceHint": "Tälle mallille on jo reittejä. Korvatkaa ne välttääksenne kaksoiskappaleet; jättäkää pois päältä lisätäksenne toisen joukon.",
       "title": "Luo CRUD kohteelle {{name}}",
       "projections": {
         "http": "{{count}} REST-reittiä",
@@ -2652,7 +2652,7 @@
       }
     },
     "server": {
-      "subtitle": "Palvele tätä suunnitelmaa live-mockina ja seuraa jokaista kutsua."
+      "subtitle": "Palvelkaa tätä suunnitelmaa live-mockina ja seuratkaa jokaista kutsua."
     },
     "codegen": {
       "vars": {
@@ -2660,8 +2660,8 @@
         "name": "Muuttuja",
         "value": "Arvo (Handlebars)",
         "add": "Lisää muuttuja",
-        "none": "Ei vielä muuttujia — lisää yksi tämän mallin otsikosta.",
-        "noTemplates": "Valitse yksi tai useampi malli osiossa ”</> Code” — määrität sitten tässä luonnissa käytettävät muuttujat.",
+        "none": "Ei vielä muuttujia — lisätkää yksi tämän mallin otsikosta.",
+        "noTemplates": "Valitkaa yksi tai useampi malli osiossa ”</> Code” — määritätte sitten tässä luonnissa käytettävät muuttujat.",
         "generalTitle": "Yleiset muuttujat",
         "scope": {
           "general": "Yleiset",
@@ -2673,12 +2673,12 @@
       }
     },
     "clients": {
-      "generated": "Asiakkaat luotu — avaa ne Asiakkaat-kohdasta sivupalkissa.",
+      "generated": "Asiakkaat luotu — avatkaa ne Asiakkaat-kohdasta sivupalkissa.",
       "importing": "Tuodaan asiakkaita…",
       "refresh": "Luo asiakkaat uudelleen",
-      "startPrompt": "Käynnistä palvelin luodaksesi asiakkaat.",
-      "startServerPrompt": "Käynnistä <serverLink>suunnittelupalvelin</serverLink> päästäksesi käsiksi mallista automaattisesti luotuihin asiakaspyyntöihin.",
-      "subtitle": "API-suunnittelupalvelimesi on käynnissä ja palvelee määrittämiäsi reittejä. Alla olevat pyynnöt kutsuvat näitä reittejä suoraan — avaa yksi testataksesi sitä. Ne ovat lyhytikäisiä ja katoavat, kun palvelin pysähtyy."
+      "startPrompt": "Käynnistäkää palvelin luodaksenne asiakkaat.",
+      "startServerPrompt": "Käynnistäkää <serverLink>suunnittelupalvelin</serverLink> päästäksenne käsiksi mallista automaattisesti luotuihin asiakaspyyntöihin.",
+      "subtitle": "API-suunnittelupalvelimenne on käynnissä ja palvelee määrittämiänne reittejä. Alla olevat pyynnöt kutsuvat näitä reittejä suoraan — avatkaa yksi testataksenne sitä. Ne ovat lyhytikäisiä ja katoavat, kun palvelin pysähtyy."
     },
     "descriptors": {
       "copy": "Kopioi URL"
@@ -2689,13 +2689,13 @@
     },
     "listing": {
       "models": {
-        "empty": "Luo ensimmäinen mallisi"
+        "empty": "Luokaa ensimmäinen mallinne"
       },
       "enums": {
-        "empty": "Luo ensimmäinen enumisi"
+        "empty": "Luokaa ensimmäinen enuminne"
       },
       "routes": {
-        "empty": "Luo ensimmäinen reittisi"
+        "empty": "Luokaa ensimmäinen reittinne"
       },
       "tabs": {
         "list": "Luettelo",
@@ -2776,34 +2776,34 @@
     "captureRetentionCap": "MCP-kaappausten säilytys",
     "captureRetentionCapDescription": "Kuinka monta viimeisintä MCP-kutsua säilyttää kuvakaappauksensa / tallenteensa (muistissa ja levyllä). Rajan ylittyessä vanhemmat kaappaukset menettävät mediansa ja niiden väliaikainen videotiedosto poistetaan; 0 poistaa säilytyksen käytöstä.",
     "enabled": "Ota MCP-palvelin käyttöön",
-    "enabledDescription": "Käynnistää sisäänrakennetun MCP-palvelimen käynnistyksessä, jotta AI-työkalut voivat yhdistää tähän instanssiin. Poista käytöstä MCP-yhteyksien estämiseksi.",
+    "enabledDescription": "Käynnistää sisäänrakennetun MCP-palvelimen käynnistyksessä, jotta AI-työkalut voivat yhdistää tähän instanssiin. Poistakaa käytöstä MCP-yhteyksien estämiseksi.",
     "proUpsell": {
-      "note": "Community-versiossa tekoälyagentit ohjaavat pyyntöjäsi. Siirry Pro-versioon ohjataksesi skenaarioita, käyttöliittymää ja edistynyttä automaatiota.",
+      "note": "Community-versiossa tekoälyagentit ohjaavat pyyntöjänne. Siirtykää Pro-versioon ohjataksenne skenaarioita, käyttöliittymää ja edistynyttä automaatiota.",
       "link": "Siirry Pro-versioon"
     },
     "connect": {
-      "action": "Lisää Restorm tekoälyavustajaasi",
-      "title": "Lisää Restorm tekoälyavustajaasi",
-      "intro": "Yhdistä tekoälyavustajasi tähän Restorm-instanssiin MCP:n kautta. Valitse asiakasohjelmasi:",
+      "action": "Lisätkää Restorm tekoälyavustajaanne",
+      "title": "Lisätkää Restorm tekoälyavustajaanne",
+      "intro": "Yhdistäkää tekoälyavustajanne tähän Restorm-instanssiin MCP:n kautta. Valitkaa asiakasohjelmanne:",
       "copy": "Kopioi",
       "copied": "Kopioitu",
       "run": "Lisää Claude Codeen",
       "added": "Lisätty",
-      "runOk": "Restorm lisättiin Claude Codeen. Käynnistä Claude Code uudelleen käyttääksesi sitä.",
+      "runOk": "Restorm lisättiin Claude Codeen. Käynnistäkää Claude Code uudelleen käyttääksenne sitä.",
       "runError": "Komentoa ei voitu suorittaa",
       "claudeCode": {
-        "where": "Liitä tämä terminaaliin"
+        "where": "Liittäkää tämä terminaaliin"
       },
       "claudeDesktop": {
-        "where": "Lisää tämä claude_desktop_config.json-tiedostoosi"
+        "where": "Lisätkää tämä claude_desktop_config.json-tiedostoonne"
       },
       "cursor": {
-        "where": "Lisää tämä ~/.cursor/mcp.json-tiedostoon"
+        "where": "Lisätkää tämä ~/.cursor/mcp.json-tiedostoon"
       },
       "footnote": "MCP-palvelimen on oltava käynnissä (se on oletusarvoisesti). Silta löytää tämän instanssin itse — porttia tai tunnusta ei tarvitse kopioida.",
       "invite": {
-        "title": "Yhdistä tekoälysi Restormiin",
-        "body": "Yhdistä Claude tai Cursor tähän instanssiin yhdellä napsautuksella.",
+        "title": "Yhdistäkää tekoälynne Restormiin",
+        "body": "Yhdistäkää Claude tai Cursor tähän instanssiin yhdellä napsautuksella.",
         "cta": "Näytä miten"
       }
     }
@@ -2958,16 +2958,16 @@
     "batchFormatLabel": "Erän muoto",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "JSON-erä",
-    "versionMismatchWarning": "Tämä pyyntö on merkitty versioksi {{requestVersion}}, mutta vastaus näyttää versiolta {{responseVersion}}. Vaihda pyynnön versio vastaamaan palvelinta.",
+    "versionMismatchWarning": "Tämä pyyntö on merkitty versioksi {{requestVersion}}, mutta vastaus näyttää versiolta {{responseVersion}}. Vaihtakaa pyynnön versio vastaamaan palvelinta.",
     "orderbyPropertyPickerPlaceholder": "Valitse…",
     "batchAllowGetInChangeSet": "Salli GET change-setissä",
-    "batchAllowGetInChangeSetTooltip": "OData-spesifikaatio kieltää GET-pyynnöt change-setin sisällä; monet palvelimet hylkäävät tällaiset eräpyynnöt. Ota tämä asetus käyttöön vain, jos palvelimesi tukee sitä nimenomaisesti.",
+    "batchAllowGetInChangeSetTooltip": "OData-spesifikaatio kieltää GET-pyynnöt change-setin sisällä; monet palvelimet hylkäävät tällaiset eräpyynnöt. Ottakaa tämä asetus käyttöön vain, jos palvelimenne tukee sitä nimenomaisesti.",
     "batchGetInChangeSetWarning": "GET change-setin sisällä ei välttämättä hyväksytä kaikilla palvelimilla (OData-spesifikaation mukaan ei sallittu).",
     "batchForceIncludeInChangeSet": "Sisällytä joka tapauksessa",
     "batchForceAbsoluteBatchUrls": "Pakota absoluuttiset erä-URL:t (v4.01)",
-    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 suosii voimakkaasti suhteellisia URL-osoitteita alipyynnöissä. Ota käyttöön absoluuttisten URL-osoitteiden säilyttämiseksi (palvelimille, jotka vaativat niitä).",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 suosii voimakkaasti suhteellisia URL-osoitteita alipyynnöissä. Ottakaa käyttöön absoluuttisten URL-osoitteiden säilyttämiseksi (palvelimille, jotka vaativat niitä).",
     "getDelta": "Hae delta",
-    "deltaHint": "@odata.deltaLink saatavilla — napsauta korvata tämä vastaus viimeisimmällä muutosjoukolla.",
+    "deltaHint": "@odata.deltaLink saatavilla — napsauttakaa korvata tämä vastaus viimeisimmällä muutosjoukolla.",
     "deltaChanged": "{{count}} muutettu",
     "deltaRemoved": "{{count}} poistettu",
     "actionBody": "Toiminnon runko (JSON)",
@@ -2977,14 +2977,14 @@
     "batchAtomicityPlaceholder": "muutosjoukko (valinnainen)",
     "batchBody": "Erän alipyynnöt",
     "batchBodyLabel": "Runko (JSON)",
-    "batchEmpty": "Ei vielä alipyyntöjä. Lisää yksi alle.",
+    "batchEmpty": "Ei vielä alipyyntöjä. Lisätkää yksi alle.",
     "batchMoveDown": "Siirrä alas",
     "batchMoveUp": "Siirrä ylös",
     "batchRemove": "Poista alipyyntö",
     "batchUrlPlaceholder": "Pets(1) — suhteessa palvelun juureen",
     "expandAdd": "Lisää laajennus",
     "expandCollapseOptions": "Piilota asetukset",
-    "expandEmpty": "Ei vielä laajennuksia. Lisää yksi alle.",
+    "expandEmpty": "Ei vielä laajennuksia. Lisätkää yksi alle.",
     "expandMoveDown": "Siirrä alas",
     "expandMoveUp": "Siirrä ylös",
     "expandNested": "Sisäkkäinen $expand",
@@ -3000,12 +3000,12 @@
     "functionParameters": "Funktion parametrit (metatiedoista)",
     "navigationPropertiesHint": "Navigointiominaisuudet:",
     "orderbyAdd": "Lisää järjestys",
-    "orderbyEmpty": "Ei vielä järjestystä. Lisää ominaisuus alle.",
+    "orderbyEmpty": "Ei vielä järjestystä. Lisätkää ominaisuus alle.",
     "orderbyMoveDown": "Siirrä alas",
     "orderbyMoveUp": "Siirrä ylös",
     "orderbyPropertyPlaceholder": "Name",
     "orderbyRemove": "Poista",
-    "paginatedHint": "@odata.nextLink saatavilla — napsauta lisätäksesi seuraavan sivun tähän vastaukseen.",
+    "paginatedHint": "@odata.nextLink saatavilla — napsauttakaa lisätäksenne seuraavan sivun tähän vastaukseen.",
     "paramsApply": "Käytä parametreja",
     "paramsApplyToBody": "Käytä runkoon",
     "paramsApplyToUrl": "Käytä URL-osoitteeseen",
@@ -3037,7 +3037,7 @@
       "notListening": "Ei kuuntele",
       "served": "Kuuntelee — {{count}} pyyntö(ä) palveltu",
       "listenFailed": "Mock-palvelimen käynnistys epäonnistui",
-      "portInUse": "Portti {{port}} on jo toisen sovelluksen käytössä. Sulje se tai valitse toinen portti ja käynnistä palvelin uudelleen."
+      "portInUse": "Portti {{port}} on jo toisen sovelluksen käytössä. Sulkekaa se tai valitkaa toinen portti ja käynnistäkää palvelin uudelleen."
     }
   },
   "odata": {
@@ -3069,15 +3069,15 @@
     "emptyList": "Ei vielä tallennettuja konfiguraatioita.",
     "loadConfirm": {
       "title": "Lataa konfiguraatio",
-      "message": "Haluatko ladata konfiguraation \"{{name}}\"? Nykyinen tallentamaton konfiguraatiosi menetetään."
+      "message": "Haluatteko ladata konfiguraation \"{{name}}\"? Nykyinen tallentamaton konfiguraationne menetetään."
     },
     "updateConfirm": {
       "title": "Päivitä kokoonpano",
-      "message": "Haluatko korvata kokoonpanon ”{{name}}” nykyisillä arvoilla?"
+      "message": "Haluatteko korvata kokoonpanon ”{{name}}” nykyisillä arvoilla?"
     },
     "deleteConfirm": {
       "title": "Poista konfiguraatio",
-      "message": "Haluatko poistaa konfiguraation \"{{name}}\"?",
+      "message": "Haluatteko poistaa konfiguraation \"{{name}}\"?",
       "usedByScenarios_one": "Sitä käyttää skenaario {{scenarios}}.",
       "usedByScenarios_other": "Sitä käyttävät skenaariot {{scenarios}}."
     },
@@ -3088,12 +3088,12 @@
   },
   "subscription": {
     "checkout": {
-      "forbidden": "Pyydä organisaatiosi järjestelmänvalvojaa tilaamaan.",
-      "error": "Tilausta ei voitu aloittaa. Yritä uudelleen."
+      "forbidden": "Pyytäkää organisaationne järjestelmänvalvojaa tilaamaan.",
+      "error": "Tilausta ei voitu aloittaa. Yrittäkää uudelleen."
     },
     "portal": {
       "noSubscription": "Ei aktiivista tilausta hallittavaksi.",
-      "error": "Tilausportaalin avaaminen epäonnistui. Yritä uudelleen."
+      "error": "Tilausportaalin avaaminen epäonnistui. Yrittäkää uudelleen."
     }
   },
   "trpc": {
@@ -3139,22 +3139,22 @@
   "git": {
     "pullFailedTitle": "Nouto epäonnistui",
     "pullFailedBody": "Uusimpia muutoksia ei voitu noutaa.",
-    "pullSaveFailedBody": "Muutoksiasi ei voitu tallentaa ennen vetämistä.",
+    "pullSaveFailedBody": "Muutoksianne ei voitu tallentaa ennen vetämistä.",
     "pushFailedTitle": "Työntäminen epäonnistui",
     "pushFailedBody": "Muutoksia ei voitu työntää.",
     "pushSucceededTitle": "Työnnetty",
-    "pushSucceededBody": "Muutoksesi työnnettiin repositorioon.",
+    "pushSucceededBody": "Muutoksenne työnnettiin repositorioon.",
     "conflictResolvedCommitMessage": "Ratkaise ristiriidat",
     "conflictResolvedTitle": "Ristiriita ratkaistu",
-    "conflictResolvedBody": "Yhdistämisristiriitasi on ratkaistu ja committoitu.",
+    "conflictResolvedBody": "Yhdistämisristiriitanne on ratkaistu ja committoitu.",
     "conflictResolutionTitle": "Ratkaise ristiriidat",
     "conflictEntityPath": "Ristiriidassa olevan kohteen sijainti",
     "historyTitle": "Git-historia",
     "conflictCancel": "Peruuta",
     "conflictFinish": "Valmis",
-    "conflictReadOnlyEntityNotice": "Tätä entiteettityyppiä ei voi muokata tässä. Valitse yllä oma tai heidän versionsa.",
+    "conflictReadOnlyEntityNotice": "Tätä entiteettityyppiä ei voi muokata tässä. Valitkaa yllä oma tai heidän versionsa.",
     "quickConfigConflictTitle": "Pikaasetukset ristiriidassa",
-    "quickConfigOurs": "Sinun",
+    "quickConfigOurs": "Teidän",
     "quickConfigTheirs": "Heidän",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Käytä tätä commit-viestin kieltä oletuksena",
@@ -3218,10 +3218,10 @@
       "24h": "24 tunnin välein"
     },
     "gate": {
-      "initGitFolder": "Alusta git-kansiosi käyttääksesi tätä ominaisuutta."
+      "initGitFolder": "Alustakaa git-kansionne käyttääksenne tätä ominaisuutta."
     },
     "conflictChooseVersion": "Valitse versio",
-    "conflictChooseVersionHint": "Napsauta <0></0>-merkkiä oman tai palvelimen version yläreunassa — sen jälkeen voit muokata kaikkia kenttiä ennen tallennusta.",
+    "conflictChooseVersionHint": "Napsauttakaa <0></0>-merkkiä oman tai palvelimen version yläreunassa — sen jälkeen voitte muokata kaikkia kenttiä ennen tallennusta.",
     "conflictFinishBlocked": "Osa ristiriidoista on yhä ratkaisematta.",
     "conflictOnQuickConfig": "Ristiriita koskee pyynnön pika-asetusta: {{name}}",
     "conflictNameField": "Nimi",
@@ -3235,26 +3235,26 @@
   },
   "gitUpdate": {
     "title": "Päivitys vaaditaan",
-    "message": "Etäpalvelimella on tiedostosta uudempi versio. Sinun on päivitettävä versiosi ennen jatkamista. Jos versiosi ja palvelimen version välillä on ristiriitoja, autamme sinua ratkaisemaan ne.",
-    "conflictCount_one": "{{count}} kohde eroaa versiosi ja palvelimen version välillä.",
-    "conflictCount_other": "{{count}} kohdetta eroaa versiosi ja palvelimen version välillä.",
+    "message": "Etäpalvelimella on tiedostosta uudempi versio. Teidän on päivitettävä versionne ennen jatkamista. Jos versionne ja palvelimen version välillä on ristiriitoja, autamme teitä ratkaisemaan ne.",
+    "conflictCount_one": "{{count}} kohde eroaa versionne ja palvelimen version välillä.",
+    "conflictCount_other": "{{count}} kohdetta eroaa versionne ja palvelimen version välillä.",
     "cancel": "Peruuta",
     "discardMine": "Poista muutokseni",
     "keepMineOverwriting": "Säilytä versioni (korvaa palvelimen muutokset)",
     "updateFailedTitle": "Päivitys epäonnistui",
     "updateFailedBody": "Version hakeminen etäpalvelimelta epäonnistui.",
     "discardedTitle": "Muutokset poistettu",
-    "discardedBody": "Olet nyt palvelimen uusimmassa versiossa.",
+    "discardedBody": "Olette nyt palvelimen uusimmassa versiossa.",
     "updatedTitle": "Projekti päivitetty",
-    "updatedBody": "Olet nyt palvelimen uusimmassa versiossa, ja muutoksesi on säilytetty.",
+    "updatedBody": "Olette nyt palvelimen uusimmassa versiossa, ja muutoksenne on säilytetty.",
     "keepServerVersion": "Säilytä palvelimen versio",
     "resolveConflicts": "Ratkaise ristiriidat",
     "resetConfirmTitle": "Palautetaanko palvelimen versioon?",
-    "resetConfirmBody": "Kaikki paikalliset muutoksesi poistetaan pysyvästi ja korvataan palvelimen versiolla."
+    "resetConfirmBody": "Kaikki paikalliset muutoksenne poistetaan pysyvästi ja korvataan palvelimen versiolla."
   },
   "gitHistory": {
     "recoverConfirmTitle": "Palautetaanko tämä versio?",
-    "recoverConfirmBody": "Avoimen tiedoston nykyinen sisältö korvataan tämän committauksen versiolla. Muutosta ei committata — voit committata ja työntää sen itse, jos haluat säilyttää sen.",
+    "recoverConfirmBody": "Avoimen tiedoston nykyinen sisältö korvataan tämän committauksen versiolla. Muutosta ei committata — voitte committata ja työntää sen itse, jos haluatte säilyttää sen.",
     "recoverConfirmAction": "Palauta",
     "recoveredTitle": "Versio palautettu",
     "recoveredBody": "Tiedosto sisältää nyt valitun committauksen sisällön, committamatta.",
@@ -3273,9 +3273,9 @@
     "readyBody": "Versio {{version}} on valmis asennettavaksi.",
     "restartNow": "Käynnistä uudelleen nyt",
     "checkFailedTitle": "Päivitysten tarkistus epäonnistui",
-    "checkFailedBody": "Päivityksiä ei voitu tarkistaa. Yritä myöhemmin uudelleen.",
+    "checkFailedBody": "Päivityksiä ei voitu tarkistaa. Yrittäkää myöhemmin uudelleen.",
     "upToDateTitle": "Sovellus on ajan tasalla",
-    "upToDateBody": "Käytössäsi on uusin versio ({{version}}).",
+    "upToDateBody": "Käytössänne on uusin versio ({{version}}).",
     "whatsNewTitle": "Mitä uutta?",
     "status": {
       "idle": "Ajan tasalla",
@@ -3288,23 +3288,23 @@
   "privacy": {
     "settingsTitle": "Yksityisyys",
     "crashReportsTitle": "Lähetä kaatumisraportit",
-    "crashReportsDescription": "Lähettää anonymisoidun raportin, kun Restorm kaatuu, jotta vika voidaan korjata. Raporteista poistetaan URL-osoitteet, tunnisteet, pyyntöjen sisällöt ja henkilötiedot ennen kuin ne lähtevät koneeltasi. Sisältyy ilmaiseen tilaukseen; maksullisessa tilauksessa sen voi kytkeä pois. Kaikki tiedot: https://restorm.app/privacy",
+    "crashReportsDescription": "Lähettää anonymisoidun raportin, kun Restorm kaatuu, jotta vika voidaan korjata. Raporteista poistetaan URL-osoitteet, tunnisteet, pyyntöjen sisällöt ja henkilötiedot ennen kuin ne lähtevät koneeltanne. Sisältyy ilmaiseen tilaukseen; maksullisessa tilauksessa sen voi kytkeä pois. Kaikki tiedot: https://restorm.app/privacy",
     "telemetryTitle": "Lähetä käyttötilastot",
-    "telemetryDescription": "Lähettää anonyymejä tilastoja siitä, mitä ominaisuuksia käytetään, kehityksen suuntaamiseksi. Oletuksena pois päältä eikä koskaan käytössä ilman nimenomaista suostumustasi. Ei sisällä pyyntödataa, URL-osoitteita eikä henkilötietoja. Kaikki tiedot: https://restorm.app/privacy",
+    "telemetryDescription": "Lähettää anonyymejä tilastoja siitä, mitä ominaisuuksia käytetään, kehityksen suuntaamiseksi. Oletuksena pois päältä eikä koskaan käytössä ilman nimenomaista suostumustanne. Ei sisällä pyyntödataa, URL-osoitteita eikä henkilötietoja. Kaikki tiedot: https://restorm.app/privacy",
     "crashReportsLockedLabel": "Muutettavissa Pro-tilauksesta alkaen. Maksuttomassa tilauksessa kaatumisraportit ovat tarpeen laadun ylläpitämiseksi.",
     "consentToast": {
-      "title": "Auta meitä parantamaan Restormia",
-      "body": "Jos tapahtuu odottamaton virhe, Restorm voi lähettää meille anonyymin raportin, jotta voimme korjata ongelman. Se sisältää teknisen virhejäljen ja diagnostiikkatiedot (sovelluksen version, viimeaikaisen toiminnan). URL-osoitteet, tunnisteet, pyyntöjen ja vastausten sisällöt sekä henkilötiedot poistetaan ennen kuin raportti lähtee laitteeltasi. Näet tarkalleen, mitä lähetetään ennen jokaista raporttia.",
+      "title": "Auttakaa meitä parantamaan Restormia",
+      "body": "Jos tapahtuu odottamaton virhe, Restorm voi lähettää meille anonyymin raportin, jotta voimme korjata ongelman. Se sisältää teknisen virhejäljen ja diagnostiikkatiedot (sovelluksen version, viimeaikaisen toiminnan). URL-osoitteet, tunnisteet, pyyntöjen ja vastausten sisällöt sekä henkilötiedot poistetaan ennen kuin raportti lähtee laitteeltanne. Näette tarkalleen, mitä lähetetään ennen jokaista raporttia.",
       "save": "Tallenna asetukseni",
       "learnMore": "Lue lisää"
     },
     "crashReportReviewTitle": "Näytä jokainen kaatumisraportti ennen lähetystä",
-    "crashReportReviewDescription": "Näyttää kaatumisraportin tarkan sisällön ja kysyy ennen lähettämistä. Poista käytöstä, jos haluat lähettää raportit automaattisesti ilman kysymystä.",
+    "crashReportReviewDescription": "Näyttää kaatumisraportin tarkan sisällön ja kysyy ennen lähettämistä. Poistakaa käytöstä, jos haluatte lähettää raportit automaattisesti ilman kysymystä.",
     "reportDialog": {
       "title": "Lähetetäänkö tämä kaatumisraportti?",
       "intro": "Restorm kohtasi ongelman. Tämä on täsmälleen se, mitä lähetettäisiin.",
       "includedError": "Tekninen virhe ja kohta koodissa, jossa se tapahtui",
-      "includedVersion": "Sovelluksen versio ja käyttöjärjestelmäsi",
+      "includedVersion": "Sovelluksen versio ja käyttöjärjestelmänne",
       "includedActivity": "Mitä sovellus teki juuri ennen virhettä",
       "removed": "URL-osoitteet, tunnisteet, pyyntöjen ja vastausten sisällöt sekä henkilötiedot on jo poistettu.",
       "viewFull": "Näytä koko raportti",
@@ -3318,14 +3318,14 @@
     "relaunch": "Käynnistä Restorm uudelleen",
     "notice": {
       "title": "Tiedostoa ei avattu uudelleen",
-      "body": "{{file}} jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista.",
-      "bodyUnnamed": "Viimeisin tiedosto jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostosi on ehjä — voit avata sen uudelleen viimeisimmistä tiedostoista."
+      "body": "{{file}} jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostonne on ehjä — voitte avata sen uudelleen viimeisimmistä tiedostoista.",
+      "bodyUnnamed": "Viimeisin tiedosto jätettiin avaamatta: Restorm kaatui sitä avatessaan edellisellä käynnistyskerralla. Tiedostonne on ehjä — voitte avata sen uudelleen viimeisimmistä tiedostoista."
     }
   },
   "project": {
     "incompatible": {
       "title": "Projekti luotu uudemmalla versiolla",
-      "message": "Tämä tiedosto on luotu uudemmalla Restorm-versiolla kuin käytössäsi oleva. Päivitä Restorm avataksesi sen.",
+      "message": "Tämä tiedosto on luotu uudemmalla Restorm-versiolla kuin käytössänne oleva. Päivittäkää Restorm avataksenne sen.",
       "versions": "Tiedostomuoto {{found}}; tämä versio tukee enintään {{current}}."
     },
     "notARestormFile": {
@@ -3336,7 +3336,7 @@
   "cliTokens": {
     "title": "Omat CLI/CI-tunnukseni",
     "intro": "CLI/CI-tunnus antaa käyttöliittymättömän ajon (CI tai paikallisesti --headless) todentautua organisaationne nimissä. Se ei koskaan anna pääsyä tietoihinne.",
-    "empty": "Sinulla ei ole vielä yhtään tunnusta.",
+    "empty": "Teillä ei ole vielä yhtään tunnusta.",
     "never": "Ei koskaan",
     "create": "Luo tunnus",
     "namePlaceholder": "Nimike (esim. ci-main)",
@@ -3346,7 +3346,7 @@
     "days": "{{count}} päivää",
     "copy": "Kopioi",
     "copied": "Kopioitu",
-    "revealWarning": "Kopioi se nyt — tätä tunnusta ei näytetä enää koskaan.",
+    "revealWarning": "Kopioikaa se nyt — tätä tunnusta ei näytetä enää koskaan.",
     "revokeNamed": "Kumoa {{name}}",
     "column": {
       "name": "Nimi",
@@ -3362,13 +3362,13 @@
       "expired": "Vanhentunut"
     },
     "failure": {
-      "signed-out": "Kirjaudu sisään hallitaksesi tunnuksiasi.",
-      "forbidden": "Organisaatiosi ei salli sinun luoda tunnuksia. Ylläpitäjä voi myöntää oikeuden hallintakonsolista.",
-      "invalid-name": "Tuota nimikettä ei voi käyttää. Kokeile lyhyempää.",
+      "signed-out": "Kirjautukaa sisään hallitaksenne tunnuksianne.",
+      "forbidden": "Organisaationne ei salli teidän luoda tunnuksia. Ylläpitäjä voi myöntää oikeuden hallintakonsolista.",
+      "invalid-name": "Tuota nimikettä ei voi käyttää. Kokeilkaa lyhyempää.",
       "invalid-expiry": "Tuo voimassaoloaika ei kelpaa.",
       "not-found": "Tuota tunnusta ei enää ole.",
-      "unavailable": "Tunnukset eivät ole juuri nyt käytettävissä. Yritä hetken kuluttua uudelleen.",
-      "plan-required": "Käyttöliittymättömät ajot kuuluvat Pro-tilaukseen. Siirry Pro-tilaukseen luodaksesi tunnuksia — voit yhä kumota jo olemassa olevat."
+      "unavailable": "Tunnukset eivät ole juuri nyt käytettävissä. Yrittäkää hetken kuluttua uudelleen.",
+      "plan-required": "Käyttöliittymättömät ajot kuuluvat Pro-tilaukseen. Siirtykää Pro-tilaukseen luodaksenne tunnuksia — voitte yhä kumota jo olemassa olevat."
     }
   },
   "cookies": {

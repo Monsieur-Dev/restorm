@@ -14,34 +14,34 @@
     "untitled": "Nimetön",
     "unsavedChanges": {
       "title": "Tallentamattomat muutokset",
-      "message": "Haluatko tallentaa muutokset tiedostoon \"{{fileName}}\"?",
-      "detail": "Muutoksesi menetetään, jos et tallenna niitä.",
+      "message": "Haluatteko tallentaa muutokset tiedostoon \"{{fileName}}\"?",
+      "detail": "Muutoksenne menetetään, jos ette tallenna niitä.",
       "save": "Tallenna",
       "dontSave": "Älä tallenna",
       "cancel": "Peruuta"
     },
     "projectTooLarge": {
       "title": "Projekti on liian suuri tallennettavaksi",
-      "body": "Tämä projekti on liian suuri kirjoitettavaksi levylle. Poista käyttämättömät kokoelmat tai jaa se useaan tiedostoon ja yritä uudelleen."
+      "body": "Tämä projekti on liian suuri kirjoitettavaksi levylle. Poistakaa käyttämättömät kokoelmat tai jakakaa se useaan tiedostoon ja yrittäkää uudelleen."
     },
     "externalChange": {
       "title": "Tiedosto muuttui levyllä",
       "message": "”{{fileName}}” muutettiin sovelluksen ulkopuolella.",
-      "detail": "Lataa uudelleen käyttääksesi levyllä olevaa versiota tai säilytä oma versiosi ja korvaa se.",
-      "detailDirty": "Huomio: sinulla on tallentamattomia muutoksia — uudelleenlataus hylkää ne.",
+      "detail": "Ladatkaa uudelleen käyttääksenne levyllä olevaa versiota tai säilyttäkää oma versionne ja korvatkaa se.",
+      "detailDirty": "Huomio: teillä on tallentamattomia muutoksia — uudelleenlataus hylkää ne.",
       "reload": "Lataa uudelleen",
       "keepMine": "Säilytä oma versioni"
     },
     "saveFailed": {
       "title": "Tallennus epäonnistui",
       "reason": {
-        "readOnlyFile": "Tiedosto on vain luku -tilassa. Muuta sen käyttöoikeuksia tai tallenna toiseen sijaintiin.",
-        "readOnlyLocation": "Tämä sijainti on liitetty vain luku -tilassa. Tallenna toiseen sijaintiin.",
-        "permissionDenied": "Sinulla ei ole kirjoitusoikeutta tänne. Tarkista kansion käyttöoikeudet tai tallenna toiseen sijaintiin.",
-        "diskFull": "Levy on täynnä. Vapauta tilaa ja tallenna uudelleen.",
-        "quotaExceeded": "Levykiintiösi on loppunut. Vapauta tilaa ja tallenna uudelleen.",
+        "readOnlyFile": "Tiedosto on vain luku -tilassa. Muuttakaa sen käyttöoikeuksia tai tallentakaa toiseen sijaintiin.",
+        "readOnlyLocation": "Tämä sijainti on liitetty vain luku -tilassa. Tallentakaa toiseen sijaintiin.",
+        "permissionDenied": "Teillä ei ole kirjoitusoikeutta tänne. Tarkistakaa kansion käyttöoikeudet tai tallentakaa toiseen sijaintiin.",
+        "diskFull": "Levy on täynnä. Vapauttakaa tilaa ja tallentakaa uudelleen.",
+        "quotaExceeded": "Levykiintiönne on loppunut. Vapauttakaa tilaa ja tallentakaa uudelleen.",
         "pathMissing": "Tätä sijaintia ei enää ole. Kansio on voitu poistaa tai asema irrottaa.",
-        "fileBusy": "Tiedosto on toisen ohjelman käytössä. Sulje se ja tallenna uudelleen.",
+        "fileBusy": "Tiedosto on toisen ohjelman käytössä. Sulkekaa se ja tallentakaa uudelleen.",
         "unknown": "Tiedostoa ei voitu kirjoittaa: {{error}}"
       }
     }
@@ -51,7 +51,7 @@
     "recentFiles": "Viimeisimmät tiedostot",
     "addToFavorites": "Lisää suosikkeihin",
     "removeFromFavorites": "Poista suosikeista",
-    "confirmRemoveFavorite": "Haluatko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
+    "confirmRemoveFavorite": "Haluatteko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
     "favoritesLandmarkLabel": "Suosikkilista",
     "recentsLandmarkLabel": "Viimeisimpien tiedostojen lista",
     "openContainingFolder": "Avaa sisältävä kansio"
@@ -93,17 +93,17 @@
     "scope": {
       "user": "Käyttäjä",
       "workspace": "Työtila",
-      "workspaceDisabledTooltip": "Avaa projekti muokataksesi työtilan asetuksia"
+      "workspaceDisabledTooltip": "Avatkaa projekti muokataksenne työtilan asetuksia"
     },
     "appearance": {
       "title": "Ulkoasu",
       "theme": {
         "title": "Teema",
-        "description": "Valitse sovelluksen väriteema"
+        "description": "Valitkaa sovelluksen väriteema"
       },
       "language": {
         "title": "Kieli",
-        "description": "Valitse sovelluksen kieli",
+        "description": "Valitkaa sovelluksen kieli",
         "en": "English",
         "fr": "Français",
         "es": "Español",
@@ -134,7 +134,7 @@
       },
       "advancedVisualEffects": {
         "title": "Edistyneet visuaaliset tehosteet",
-        "description": "Ota käyttöön edistyneet visuaaliset tehosteet, kuten taustan sumennus peittokuvissa ja CSS-animaatiot. Poista käytöstä parantaaksesi suorituskykyä heikommalla laitteistolla."
+        "description": "Ottakaa käyttöön edistyneet visuaaliset tehosteet, kuten taustan sumennus peittokuvissa ja CSS-animaatiot. Poistakaa käytöstä parantaaksenne suorituskykyä heikommalla laitteistolla."
       },
       "editor": {
         "title": "Editori",
@@ -164,7 +164,7 @@
       "title": "Tiedostot",
       "autoSave": {
         "title": "Automaattinen tallennus",
-        "description": "Ohjaa muokattujen editoreiden automaattista tallennusta. Lue lisää automaattisesta tallennuksesta dokumentaatiosta.",
+        "description": "Ohjaa muokattujen editoreiden automaattista tallennusta. Lukekaa lisää automaattisesta tallennuksesta dokumentaatiosta.",
         "off": "Pois käytöstä",
         "afterDelay": "Viiveen jälkeen",
         "onWindowChange": "Ikkunaa vaihdettaessa"
@@ -220,8 +220,8 @@
     "searchSimpleIcons": "Etsi Simple Iconsista...",
     "searchFeather": "Etsi Featheristä...",
     "searchFontAwesome": "Etsi Font Awesomesta...",
-    "moreIcons": "+{{count}} lisää kuvaketta. Käytä hakua löytääksesi tietyt kuvakkeet.",
-    "more": "+{{count}} lisää. Käytä hakua löytääksesi tietyt kuvakkeet.",
+    "moreIcons": "+{{count}} lisää kuvaketta. Käyttäkää hakua löytääksenne tietyt kuvakkeet.",
+    "more": "+{{count}} lisää. Käyttäkää hakua löytääksenne tietyt kuvakkeet.",
     "noIconsFound": "Kuvakkeita ei löytynyt",
     "searchResults": "Hakutulokset",
     "categories": {
@@ -436,7 +436,7 @@
     "refresh": "Päivitä",
     "go": "Siirry",
     "address": "Osoite",
-    "emptyHint": "Kirjoita osoite yläpuolelle aloittaaksesi selaamisen."
+    "emptyHint": "Kirjoittakaa osoite yläpuolelle aloittaaksenne selaamisen."
   },
   "bookmarkRibbon": {
     "addBookmark": "Lisää kirjanmerkki",
@@ -467,7 +467,7 @@
   "git": {
     "cliMissing": {
       "title": "Git ei ole asennettu",
-      "body": "Asenna Git ja lisää se PATH-muuttujaan käyttääksesi Git-integraatiota."
+      "body": "Asentakaa Git ja lisätkää se PATH-muuttujaan käyttääksenne Git-integraatiota."
     },
     "pullAvailable": {
       "title": "Päivitys saatavilla",
@@ -491,15 +491,15 @@
   },
   "conflictResolution": {
     "listTitle": "Ristiriidat",
-    "userTitle": "Oma versiosi",
+    "userTitle": "Oma versionne",
     "serverTitle": "Palvelimen versio",
     "resolvedTitle": "Ratkaistu",
-    "selectAConflict": "Valitse ristiriita ratkaistaksesi sen",
+    "selectAConflict": "Valitkaa ristiriita ratkaistaksenne sen",
     "useThisVersion": "Käytä tätä versiota"
   },
   "gitHistory": {
     "commits": "Commitit",
-    "noCommitSelected": "Valitse commit nähdäksesi sen tiedot",
+    "noCommitSelected": "Valitkaa commit nähdäksenne sen tiedot",
     "author": "Tekijä",
     "date": "Päivämäärä",
     "hash": "Hash",

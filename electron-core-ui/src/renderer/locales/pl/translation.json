@@ -14,34 +14,34 @@
     "untitled": "Bez tytułu",
     "unsavedChanges": {
       "title": "Niezapisane zmiany",
-      "message": "Czy chcesz zapisać zmiany w „{{fileName}}”?",
-      "detail": "Twoje zmiany zostaną utracone, jeśli ich nie zapiszesz.",
+      "message": "Czy chce Pan/Pani zapisać zmiany w „{{fileName}}”?",
+      "detail": "Pana/Pani zmiany zostaną utracone, jeśli ich Pan/Pani nie zapisze.",
       "save": "Zapisz",
       "dontSave": "Nie zapisuj",
       "cancel": "Anuluj"
     },
     "projectTooLarge": {
       "title": "Projekt zbyt duży, aby go zapisać",
-      "body": "Ten projekt jest zbyt duży, aby zapisać go na dysku. Usuń nieużywane kolekcje lub podziel go na kilka plików, a następnie spróbuj ponownie."
+      "body": "Ten projekt jest zbyt duży, aby zapisać go na dysku. Proszę usunąć nieużywane kolekcje lub podzielić go na kilka plików, a następnie spróbować ponownie."
     },
     "externalChange": {
       "title": "Plik zmieniony na dysku",
       "message": "„{{fileName}}” został zmodyfikowany poza aplikacją.",
-      "detail": "Wczytaj ponownie, aby użyć wersji z dysku, albo zachowaj swoją wersję i nadpisz ją.",
-      "detailDirty": "Uwaga: masz niezapisane zmiany — ponowne wczytanie je odrzuci.",
+      "detail": "Proszę wczytać ponownie, aby użyć wersji z dysku, albo zachować swoją wersję i nadpisać ją.",
+      "detailDirty": "Uwaga: ma Pan/Pani niezapisane zmiany — ponowne wczytanie je odrzuci.",
       "reload": "Wczytaj ponownie",
       "keepMine": "Zachowaj moją wersję"
     },
     "saveFailed": {
       "title": "Nie udało się zapisać",
       "reason": {
-        "readOnlyFile": "Plik jest tylko do odczytu. Zmień jego uprawnienia lub zapisz w innej lokalizacji.",
-        "readOnlyLocation": "Ta lokalizacja jest zamontowana tylko do odczytu. Zapisz w innej lokalizacji.",
-        "permissionDenied": "Nie masz uprawnień do zapisu w tym miejscu. Sprawdź uprawnienia folderu lub zapisz w innej lokalizacji.",
-        "diskFull": "Dysk jest pełny. Zwolnij miejsce i zapisz ponownie.",
-        "quotaExceeded": "Twój limit dyskowy został wyczerpany. Zwolnij miejsce i zapisz ponownie.",
+        "readOnlyFile": "Plik jest tylko do odczytu. Proszę zmienić jego uprawnienia lub zapisać w innej lokalizacji.",
+        "readOnlyLocation": "Ta lokalizacja jest zamontowana tylko do odczytu. Proszę zapisać w innej lokalizacji.",
+        "permissionDenied": "Nie ma Pan/Pani uprawnień do zapisu w tym miejscu. Proszę sprawdzić uprawnienia folderu lub zapisać w innej lokalizacji.",
+        "diskFull": "Dysk jest pełny. Proszę zwolnić miejsce i zapisać ponownie.",
+        "quotaExceeded": "Pana/Pani limit dyskowy został wyczerpany. Proszę zwolnić miejsce i zapisać ponownie.",
         "pathMissing": "Ta lokalizacja już nie istnieje. Folder mógł zostać usunięty lub dysk odłączony.",
-        "fileBusy": "Plik jest używany przez inny program. Zamknij go i zapisz ponownie.",
+        "fileBusy": "Plik jest używany przez inny program. Proszę zamknąć go i zapisać ponownie.",
         "unknown": "Nie udało się zapisać pliku: {{error}}"
       }
     }
@@ -51,7 +51,7 @@
     "recentFiles": "Ostatnie pliki",
     "addToFavorites": "Dodaj do ulubionych",
     "removeFromFavorites": "Usuń z ulubionych",
-    "confirmRemoveFavorite": "Czy na pewno chcesz usunąć „{{fileName}}” z ulubionych?",
+    "confirmRemoveFavorite": "Czy na pewno chce Pan/Pani usunąć „{{fileName}}” z ulubionych?",
     "favoritesLandmarkLabel": "Lista ulubionych",
     "recentsLandmarkLabel": "Lista ostatnich plików",
     "openContainingFolder": "Otwórz folder zawierający plik"
@@ -93,17 +93,17 @@
     "scope": {
       "user": "Użytkownik",
       "workspace": "Obszar roboczy",
-      "workspaceDisabledTooltip": "Otwórz projekt, aby edytować ustawienia obszaru roboczego"
+      "workspaceDisabledTooltip": "Proszę otworzyć projekt, aby edytować ustawienia obszaru roboczego"
     },
     "appearance": {
       "title": "Wygląd",
       "theme": {
         "title": "Motyw",
-        "description": "Wybierz kolorystyczny motyw aplikacji"
+        "description": "Proszę wybrać kolorystyczny motyw aplikacji"
       },
       "language": {
         "title": "Język",
-        "description": "Wybierz język aplikacji",
+        "description": "Proszę wybrać język aplikacji",
         "en": "English",
         "fr": "Français",
         "es": "Español",
@@ -134,7 +134,7 @@
       },
       "advancedVisualEffects": {
         "title": "Zaawansowane efekty wizualne",
-        "description": "Włącz zaawansowane efekty wizualne, takie jak rozmycie tła nakładek i animacje CSS. Wyłącz, aby uzyskać lepszą wydajność na słabszym sprzęcie."
+        "description": "Proszę włączyć zaawansowane efekty wizualne, takie jak rozmycie tła nakładek i animacje CSS. Proszę wyłączyć, aby uzyskać lepszą wydajność na słabszym sprzęcie."
       },
       "editor": {
         "title": "Edytor",
@@ -220,8 +220,8 @@
     "searchSimpleIcons": "Szukaj w Simple Icons...",
     "searchFeather": "Szukaj w Feather...",
     "searchFontAwesome": "Szukaj w Font Awesome...",
-    "moreIcons": "+{{count}} więcej ikon. Użyj wyszukiwania, aby znaleźć konkretne ikony.",
-    "more": "+{{count}} więcej. Użyj wyszukiwania, aby znaleźć konkretne ikony.",
+    "moreIcons": "+{{count}} więcej ikon. Proszę użyć wyszukiwania, aby znaleźć konkretne ikony.",
+    "more": "+{{count}} więcej. Proszę użyć wyszukiwania, aby znaleźć konkretne ikony.",
     "noIconsFound": "Nie znaleziono ikon",
     "searchResults": "Wyniki wyszukiwania",
     "categories": {
@@ -436,7 +436,7 @@
     "refresh": "Odśwież",
     "go": "Przejdź",
     "address": "Adres",
-    "emptyHint": "Wpisz adres powyżej, aby rozpocząć przeglądanie."
+    "emptyHint": "Proszę wpisać adres powyżej, aby rozpocząć przeglądanie."
   },
   "bookmarkRibbon": {
     "addBookmark": "Dodaj zakładkę",
@@ -467,7 +467,7 @@
   "git": {
     "cliMissing": {
       "title": "Git nie jest zainstalowany",
-      "body": "Zainstaluj Git i dodaj go do zmiennej PATH, aby korzystać z integracji Git."
+      "body": "Proszę zainstalować Git i dodać go do zmiennej PATH, aby korzystać z integracji Git."
     },
     "pullAvailable": {
       "title": "Dostępna aktualizacja",
@@ -491,15 +491,15 @@
   },
   "conflictResolution": {
     "listTitle": "Konflikty",
-    "userTitle": "Twoja wersja",
+    "userTitle": "Pana/Pani wersja",
     "serverTitle": "Wersja serwera",
     "resolvedTitle": "Rozwiązano",
-    "selectAConflict": "Wybierz konflikt, aby go rozwiązać",
+    "selectAConflict": "Proszę wybrać konflikt, aby go rozwiązać",
     "useThisVersion": "Użyj tej wersji"
   },
   "gitHistory": {
     "commits": "Commity",
-    "noCommitSelected": "Wybierz commit, aby zobaczyć szczegóły",
+    "noCommitSelected": "Proszę wybrać commit, aby zobaczyć szczegóły",
     "author": "Autor",
     "date": "Data",
     "hash": "Hash",

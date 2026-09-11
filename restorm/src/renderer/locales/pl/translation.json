@@ -8,7 +8,7 @@
     "upgradeToPro": "Przejdź na Pro",
     "dashboard": "Panel",
     "signOutConfirm": {
-      "message": "Czy na pewno chcesz się wylogować?",
+      "message": "Czy na pewno chce się Pan/Pani wylogować?",
       "confirm": "Tak",
       "cancel": "Anuluj"
     }
@@ -90,127 +90,127 @@
     "cardTitle": "Wskazówki i triki",
     "maximizeTab": {
       "title": "Maksymalizuj kartę jednym kliknięciem",
-      "body": "Dwukrotnie kliknij dowolną kartę workbencha, aby wyświetlić ją na pełnym ekranie. Naciśnij Esc, aby przywrócić poprzedni układ."
+      "body": "Proszę dwukrotnie kliknąć dowolną kartę workbencha, aby wyświetlić ją na pełnym ekranie. Proszę nacisnąć Esc, aby przywrócić poprzedni układ."
     },
     "mcpControl": {
-      "title": "Steruj restormem za pomocą AI",
-      "body": "Restorm zawiera serwer MCP, dzięki czemu asystenci AI, tacy jak Claude Code, mogą listować, otwierać, edytować i wykonywać Twoje żądania, sprawdzać odpowiedzi oraz programowo zarządzać przestrzenią roboczą – bez wychodzenia z czatu."
+      "title": "Proszę sterować restormem za pomocą AI",
+      "body": "Restorm zawiera serwer MCP, dzięki czemu asystenci AI, tacy jak Claude Code, mogą listować, otwierać, edytować i wykonywać Pana/Pani żądania, sprawdzać odpowiedzi oraz programowo zarządzać przestrzenią roboczą – bez wychodzenia z czatu."
     },
     "envSwitch": {
-      "title": "Przełączaj środowiska z łatwością!",
-      "body": "Zmień środowisko bieżącego żądania lub wszystkich żądań Twojego API, klikając przycisk na pasku stanu albo klikając prawym przyciskiem myszy na przycisku wysyłania żądania."
+      "title": "Proszę przełączać środowiska z łatwością!",
+      "body": "Proszę zmienić środowisko bieżącego żądania lub wszystkich żądań Pana/Pani API, klikając przycisk na pasku stanu albo klikając prawym przyciskiem myszy na przycisku wysyłania żądania."
     },
     "authRequests": {
-      "title": "Musisz się uwierzytelnić, aby korzystać ze swojego API?",
-      "body": "Zamiast za każdym razem wysyłać żądanie, aby pobrać token i wklejać go wszędzie, użyj żądań uwierzytelniających. Gdy wywołanie zakończy się błędem (401, 403, …) lub token wygaśnie, żądanie uwierzytelniania jest automatycznie powtarzane, aby pobrać i ponownie użyć tokenu. Wygodne!"
+      "title": "Musi się Pan/Pani uwierzytelnić, aby korzystać ze swojego API?",
+      "body": "Zamiast za każdym razem wysyłać żądanie, aby pobrać token i wklejać go wszędzie, proszę użyć żądań uwierzytelniających. Gdy wywołanie zakończy się błędem (401, 403, …) lub token wygaśnie, żądanie uwierzytelniania jest automatycznie powtarzane, aby pobrać i ponownie użyć tokenu. Wygodne!"
     },
     "supplyChain": {
-      "title": "Chroń się!",
-      "body": "Jak każde oprogramowanie, Restorm korzysta z bibliotek zewnętrznych. Aby zapobiec atakom typu supply chain, wszystkie wywołania wychodzące są przechwytywane na najniższym poziomie i ostrzegamy Cię, jeśli biblioteka zewnętrzna próbuje wykraść Twoje dane osobowe!"
+      "title": "Proszę się chronić!",
+      "body": "Jak każde oprogramowanie, Restorm korzysta z bibliotek zewnętrznych. Aby zapobiec atakom typu supply chain, wszystkie wywołania wychodzące są przechwytywane na najniższym poziomie i ostrzegamy Pana/Panią, jeśli biblioteka zewnętrzna próbuje wykraść Pana/Pani dane osobowe!"
     },
     "codeSnippets": {
-      "title": "Restorm pomaga Ci pisać kod!",
-      "body": "Znajdziesz fragmenty kodu w każdym żądaniu, aby ułatwić ich integrację z Twoim oprogramowaniem. Dostępnych jest wiele języków: curl, PowerShell, TypeScript, C# i wiele więcej!"
+      "title": "Restorm pomaga Panu/Pani pisać kod!",
+      "body": "Znajdzie Pan/Pani fragmenty kodu w każdym żądaniu, aby ułatwić ich integrację z Pana/Pani oprogramowaniem. Dostępnych jest wiele języków: curl, PowerShell, TypeScript, C# i wiele więcej!"
     },
     "workbenchLayout": {
-      "title": "Zorganizuj swoje miejsce pracy",
-      "body": "Masz duży ekran i mnóstwo żądań? Ustaw je obok siebie, jedno pod drugim, jak chcesz — wystarczy przeciągnąć kartę tam, gdzie ją chcesz. Wszystko dla Twojej wygody!"
+      "title": "Proszę zorganizować swoje miejsce pracy",
+      "body": "Ma Pan/Pani duży ekran i mnóstwo żądań? Proszę ustawić je obok siebie, jedno pod drugim, jak Pan/Pani chce — wystarczy przeciągnąć kartę tam, gdzie ją Pan/Pani chce. Wszystko dla Pana/Pani wygody!"
     },
     "persistState": {
-      "title": "Wróć do niego dokładnie tak, jak go zostawiłeś!",
-      "body": "Jeśli zamkniesz Restorm i otworzysz go ponownie, znajdziesz go dokładnie w tym samym stanie, w jakim go zostawiłeś."
+      "title": "Proszę wrócić do niego dokładnie w takim stanie, w jakim go zostawiono!",
+      "body": "Jeśli zamknie Pan/Pani Restorm i otworzy go ponownie, znajdzie go dokładnie w tym samym stanie, w jakim go zostawiono."
     },
     "favorites": {
-      "title": "Niektóre są ci bliższe niż inne…",
-      "body": "Masz żądania, na których zależy ci bardziej? Dodaj je do ulubionych!"
+      "title": "Niektóre są Panu/Pani bliższe niż inne…",
+      "body": "Ma Pan/Pani żądania, na których zależy Panu/Pani bardziej? Proszę dodać je do ulubionych!"
     },
     "console": {
-      "title": "Zobacz, co się dzieje",
-      "body": "Konsola pokazuje wywołania Twoich API w czasie rzeczywistym, gdy wysyłasz żądania. Wygodne do kopiowania i wklejania do terminala, gdy zajdzie taka potrzeba! Co wolisz: curl czy PowerShell?"
+      "title": "Proszę zobaczyć, co się dzieje",
+      "body": "Konsola pokazuje wywołania Pana/Pani API w czasie rzeczywistym, gdy wysyła Pan/Pani żądania. Wygodne do kopiowania i wklejania do terminala, gdy zajdzie taka potrzeba! Co Pan/Pani woli: curl czy PowerShell?"
     },
     "miniBrowser": {
-      "title": "Masz dość ciągłego przełączania okien?",
-      "body": "Restorm zawiera wbudowaną mini przeglądarkę. Wygodne, gdy Twoja aplikacja reaguje wizualnie na wywołania API."
+      "title": "Ma Pan/Pani dość ciągłego przełączania okien?",
+      "body": "Restorm zawiera wbudowaną mini przeglądarkę. Wygodne, gdy Pana/Pani aplikacja reaguje wizualnie na wywołania API."
     },
     "apiDocs": {
       "title": "Dokumentacja — od razu pod ręką",
-      "body": "Koniec z przełączaniem między Restormem a dokumentacją Twojego API. Jeśli Twoje API udostępnia specyfikację (Swagger, OpenAPI, …), zostanie zaimportowana do Restormu i możesz ją czytać bezpośrednio tutaj."
+      "body": "Koniec z przełączaniem między Restormem a dokumentacją Pana/Pani API. Jeśli Pana/Pani API udostępnia specyfikację (Swagger, OpenAPI, …), zostanie zaimportowana do Restormu i może ją Pan/Pani czytać bezpośrednio tutaj."
     },
     "secrets": {
-      "title": "Chroń swoje sekrety",
-      "body": "Twoje hasła i tokeny autoryzacji nie są przechowywane bezpośrednio w pliku Restorm. Dlatego Restorm trzyma sekrety i historię żądań w osobnych plikach. To w Twojej gestii, by nie wrzucać ich na GitHuba. Restorm potrafi też pobierać sekrety z AWS, GitHuba i innych źródeł."
+      "title": "Proszę chronić swoje sekrety",
+      "body": "Pana/Pani hasła i tokeny autoryzacji nie są przechowywane bezpośrednio w pliku Restorm. Dlatego Restorm trzyma sekrety i historię żądań w osobnych plikach. To w Pana/Pani gestii, by nie wrzucać ich na GitHuba. Restorm potrafi też pobierać sekrety z AWS, GitHuba i innych źródeł."
     },
     "themes": {
-      "title": "Twoje kolory, Twój nastrój",
-      "body": "Restorm zawiera kilka schematów kolorów. Wybierz ten, który pasuje do Twojego nastroju."
+      "title": "Pana/Pani kolory, Pana/Pani nastrój",
+      "body": "Restorm zawiera kilka schematów kolorów. Proszę wybrać ten, który pasuje do Pana/Pani nastroju."
     },
     "search": {
-      "title": "Znajdź wszystko, szybko",
-      "body": "Widziałeś górę tego okna? Restorm zawiera wyszukiwarkę — żadnych godzin poszukiwania TEJ jednej żądania."
+      "title": "Proszę znaleźć wszystko, szybko",
+      "body": "Widzi Pan/Pani górę tego okna? Restorm zawiera wyszukiwarkę — żadnych godzin poszukiwania TEJ jednej żądania."
     },
     "multiEnv": {
       "title": "Te same żądania, różne środowiska",
-      "body": "Masz środowisko dev, prod i staging? To te same żądania, ale nie do końca te same URL-e, nie do końca te same tokeny… Użyj środowisk i zmiennych, by przełączać się jednym kliknięciem. Możesz nawet wyróżnić każde środowisko kolorem i ikoną, żeby uniknąć piątkowych nerwów na produkcji!"
+      "body": "Ma Pan/Pani środowisko dev, prod i staging? To te same żądania, ale nie do końca te same URL-e, nie do końca te same tokeny… Proszę użyć środowisk i zmiennych, by przełączać się jednym kliknięciem. Może Pan/Pani nawet wyróżnić każde środowisko kolorem i ikoną, żeby uniknąć piątkowych nerwów na produkcji!"
     },
     "protocols": {
       "title": "Więcej niż tylko REST",
       "body": "Restorm mówi REST… i wiele więcej! GraphQL, gRPC, SOAP, OData, WebSocket — wszystkie te protokoły na wyciągnięcie ręki, bez zmiany narzędzia."
     },
     "responseTree": {
-      "title": "Zobacz odpowiedzi swojego API",
-      "body": "Czy wiesz, że możesz przeglądać odpowiedzi swojego API w bardziej graficzny sposób? Restorm wyświetla je jako interaktywne drzewo, które możesz przeglądać, zwijać i rozwijać."
+      "title": "Proszę zobaczyć odpowiedzi swojego API",
+      "body": "Czy wie Pan/Pani, że może przeglądać odpowiedzi swojego API w bardziej graficzny sposób? Restorm wyświetla je jako interaktywne drzewo, które może Pan/Pani przeglądać, zwijać i rozwijać."
     },
     "responseHistory": {
       "title": "Historia żądań",
-      "body": "Możesz przeglądać historię wszystkich wywołań Twoich API. Wygodne, by sprawdzić, co tak naprawdę się wydarzyło."
+      "body": "Może Pan/Pani przeglądać historię wszystkich wywołań Pana/Pani API. Wygodne, by sprawdzić, co tak naprawdę się wydarzyło."
     },
     "multiLanguage": {
       "title": "27 języków!",
-      "body": "Restorm mówi w 27 językach. Angielski, francuski, hiszpański, niemiecki, włoski, japoński, chiński, koreański i wiele innych — wybierz swój w ustawieniach!"
+      "body": "Restorm mówi w 27 językach. Angielski, francuski, hiszpański, niemiecki, włoski, japoński, chiński, koreański i wiele innych — proszę wybrać swój w ustawieniach!"
     },
     "fromPostman": {
-      "title": "Przychodzisz z Postmana albo Bruno?",
-      "body": "Pomożemy Ci przesiąść się na Restorm — przejście proste jak nigdy ;)"
+      "title": "Przychodzi Pan/Pani z Postmana albo Bruno?",
+      "body": "Pomożemy Panu/Pani przesiąść się na Restorm — przejście proste jak nigdy ;)"
     },
     "chainRequests": {
       "title": "Kilka żądań do połączenia w łańcuch?",
-      "body": "Używaj swoich żądań wewnątrz scenariuszy, dodawaj warunki, a nawet zagnieżdżaj scenariusze w innych scenariuszach."
+      "body": "Proszę używać swoich żądań wewnątrz scenariuszy, dodawać warunki, a nawet zagnieżdżać scenariusze w innych scenariuszach."
     },
     "stepByStep": {
-      "title": "Przejdź przez scenariusze krok po kroku",
-      "body": "Krok po kroku, by dokładnie zobaczyć, co się dzieje. Możesz nawet ustawiać punkty wstrzymania."
+      "title": "Proszę przejść przez scenariusze krok po kroku",
+      "body": "Krok po kroku, by dokładnie zobaczyć, co się dzieje. Może Pan/Pani nawet ustawiać punkty wstrzymania."
     },
     "cicd": {
-      "title": "Uruchamiaj scenariusze w swoich pipeline'ach CI/CD",
-      "body": "Uruchom Restorm w trybie headless, aby wykonać scenariusz bez interfejsu i zebrać jego logi — testy automatyczne, zbudowane wizualnie."
+      "title": "Proszę uruchamiać scenariusze w swoich pipeline'ach CI/CD",
+      "body": "Proszę uruchomić Restorm w trybie headless, aby wykonać scenariusz bez interfejsu i zebrać jego logi — testy automatyczne, zbudowane wizualnie."
     },
     "nestedScenarios": {
-      "title": "Zobacz, co dzieje się w scenariuszu",
-      "body": "Scenariusz może wywołać inny. W inspektorze przeczytasz każdy log i przeskoczysz prosto do scenariusza, z którego pochodzi."
+      "title": "Proszę zobaczyć, co dzieje się w scenariuszu",
+      "body": "Scenariusz może wywołać inny. W inspektorze przeczyta Pan/Pani każdy log i przeskoczy prosto do scenariusza, z którego pochodzi."
     },
     "scenarioHistory": {
       "title": "Ale co się przed chwilą wydarzyło?",
-      "body": "Przeglądaj historię uruchomień swoich scenariuszy. Jeden z nich się od tego czasu zmienił? Bez obaw — zachowaliśmy jego konfigurację."
+      "body": "Proszę przeglądać historię uruchomień swoich scenariuszy. Jeden z nich się od tego czasu zmienił? Bez obaw — zachowaliśmy jego konfigurację."
     },
     "codeSandbox": {
       "title": "Scenariusze i bezpieczeństwo",
-      "body": "Możesz pisać kod w swoich scenariuszach — ale działa on w bezpiecznym sandboksie, bez dostępu do Twoich lokalnych plików i bez bezpośredniego dostępu do internetu. Najbezpieczniejszy sposób, by pozostać chronionym!"
+      "body": "Może Pan/Pani pisać kod w swoich scenariuszach — ale działa on w bezpiecznym sandboksie, bez dostępu do Pana/Pani lokalnych plików i bez bezpośredniego dostępu do internetu. Najbezpieczniejszy sposób, by zachować ochronę!"
     },
     "codeLanguages": {
-      "title": "Masz ochotę napisać trochę kodu?",
-      "body": "Pisz kod prosto w swoich scenariuszach — w TypeScript, JavaScript, Python, Lua, Ruby, C# lub R!"
+      "title": "Ma Pan/Pani ochotę napisać trochę kodu?",
+      "body": "Proszę pisać kod prosto w swoich scenariuszach — w TypeScript, JavaScript, Python, Lua, Ruby, C# lub R!"
     },
     "scenarioAi": {
       "title": "Scenariusze sterowane przez AI",
-      "body": "Claude, Cursor, Copilot… znają Twój kod: poproś je o scenariusze szyte na miarę. Wszystko jest udostępnione przez MCP, by tworzyć, edytować i uruchamiać scenariusze."
+      "body": "Claude, Cursor, Copilot… znają Pana/Pani kod: proszę poprosić je o scenariusze szyte na miarę. Wszystko jest udostępnione przez MCP, by tworzyć, edytować i uruchamiać scenariusze."
     },
     "interactiveScenarios": {
       "title": "Interaktywne scenariusze!",
-      "body": "Spraw, by Twoje scenariusze były parametryzowalne, a nawet pytaj użytkownika o decyzję za pomocą okien dialogowych."
+      "body": "Proszę sprawić, by Pana/Pani scenariusze były parametryzowalne, a nawet pytać użytkownika o decyzję za pomocą okien dialogowych."
     },
     "customValueLists": {
       "title": "Wielokrotnego użytku listy wartości",
-      "body": "Zdefiniuj własne listy wartości i używaj ich ponownie zarówno w żądaniach, jak i w scenariuszach."
+      "body": "Proszę zdefiniować własne listy wartości i używać ich ponownie zarówno w żądaniach, jak i w scenariuszach."
     }
   },
   "authFailureToast": {
@@ -327,14 +327,14 @@
     },
     "deleteConfirm": {
       "title": "Potwierdź usunięcie",
-      "folderMessage": "Czy na pewno chcesz usunąć folder „{{name}}” i całą jego zawartość?",
-      "itemMessage": "Czy na pewno chcesz usunąć „{{name}}”?",
+      "folderMessage": "Czy na pewno chce Pan/Pani usunąć folder „{{name}}” i całą jego zawartość?",
+      "itemMessage": "Czy na pewno chce Pan/Pani usunąć „{{name}}”?",
       "confirm": "Usuń",
       "cancel": "Anuluj"
     },
     "scenarioDelete": {
       "title": "Usuń żądanie używane przez scenariusze",
-      "message": "„{{name}}” jest używane w następujących scenariuszach. Co chcesz zrobić?",
+      "message": "„{{name}}” jest używane w następujących scenariuszach. Co chce Pan/Pani zrobić?",
       "belongsTag": "należy do tego scenariusza",
       "moveInto": "Przenieś do tego scenariusza",
       "affectsNote": "Usunięcie tego żądania usunie je również z tych scenariuszy.",
@@ -356,7 +356,7 @@
     "environmentsAriaLabel": "Środowiska folderu",
     "variables": "Zmienne",
     "addVariable": "Dodaj wiersz zmiennej",
-    "selectEnvironment": "Wybierz środowisko, aby wyświetlić zmienne",
+    "selectEnvironment": "Proszę wybrać środowisko, aby wyświetlić zmienne",
     "tabs": {
       "docs": "Dokumentacja",
       "environments": "Środowiska",
@@ -365,9 +365,9 @@
     },
     "home": {
       "configureEnvs": "Skonfiguruj środowiska",
-      "configureEnvsDesc": "Skonfiguruj bazowe adresy URL, zmienne i uwierzytelnianie dla każdego środowiska",
+      "configureEnvsDesc": "Proszę skonfigurować bazowe adresy URL, zmienne i uwierzytelnianie dla każdego środowiska",
       "viewDocs": "Wyświetl dokumentację",
-      "viewDocsDesc": "Przeglądaj dokumentację API, modele i punkty końcowe",
+      "viewDocsDesc": "Proszę przeglądać dokumentację API, modele i punkty końcowe",
       "favoriteRequests": "Ulubione żądania",
       "removeFavorite": "Usuń z ulubionych",
       "apiUpdate": {
@@ -386,7 +386,7 @@
     },
     "contextVariables": {
       "title": "Dostępne zmienne kontekstowe",
-      "description": "Użyj tych zmiennych w adresach URL żądań i w zmiennych typu wyrażenie ze składnią {{handlebars}}.",
+      "description": "Proszę użyć tych zmiennych w adresach URL żądań i w zmiennych typu wyrażenie ze składnią {{handlebars}}.",
       "name": "Zmienna",
       "value": "Wartość rozwiązana",
       "copied": "Skopiowano!"
@@ -399,7 +399,7 @@
       "addEntry": "Dodaj wartość",
       "label": "Label",
       "value": "Value",
-      "selectList": "Zdefiniuj wielokrotnego użytku listy wartości dla zmiennych: wybierasz czytelną etykietę, a żądanie wysyła powiązaną wartość. Wybierz lub utwórz wyliczenie, aby zacząć."
+      "selectList": "Proszę zdefiniować wielokrotnego użytku listy wartości dla zmiennych: wybiera Pan/Pani czytelną etykietę, a żądanie wysyła powiązaną wartość. Proszę wybrać lub utworzyć wyliczenie, aby zacząć."
     },
     "iconLabel": "Ikona:",
     "colorLabel": "Kolor:"
@@ -446,11 +446,11 @@
       },
       "loading": "Wysyłanie żądania...",
       "noResponseBody": "Brak treści odpowiedzi — szczegóły w zakładce Infos",
-      "noResponse": "Kliknij Wyślij, aby wykonać żądanie",
+      "noResponse": "Proszę kliknąć Wyślij, aby wykonać żądanie",
       "history": {
         "list": "Lista historii odpowiedzi",
         "empty": "Nie zarejestrowano jeszcze żadnych odpowiedzi",
-        "select": "Wybierz odpowiedź, aby zobaczyć szczegóły",
+        "select": "Proszę wybrać odpowiedź, aby zobaczyć szczegóły",
         "pin": "Przypnij odpowiedź",
         "unpin": "Odepnij odpowiedź"
       },
@@ -520,7 +520,7 @@
       "subscribe": "Subskrybuj",
       "stop": "Zatrzymaj",
       "waiting": "Zasubskrybowano — oczekiwanie na zdarzenia…",
-      "noEvents": "Brak zdarzeń. Subskrybuj, aby rozpocząć strumieniowanie.",
+      "noEvents": "Brak zdarzeń. Proszę subskrybować, aby rozpocząć strumieniowanie.",
       "idle": "Brak subskrypcji",
       "streaming": "Strumieniowanie — odebrano {{count}} zdarzeń",
       "eventLabel": "Zdarzenie {{index}}"
@@ -546,7 +546,7 @@
       "grpc": "gRPC",
       "grpcWeb": "gRPC-Web",
       "connect": "Connect",
-      "streamingUnsupported": "Ten transport nie obsługuje przesyłania strumieniowego po stronie klienta ani dwukierunkowego przez HTTP/1.1. Użyj zamiast tego natywnego transportu gRPC."
+      "streamingUnsupported": "Ten transport nie obsługuje przesyłania strumieniowego po stronie klienta ani dwukierunkowego przez HTTP/1.1. Proszę użyć zamiast tego natywnego transportu gRPC."
     },
     "server": {
       "proto": "Proto",
@@ -570,7 +570,7 @@
     "reflection": {
       "refresh": "Odśwież z reflection",
       "refreshFailed": "Odświeżanie przez reflection gRPC nie powiodło się",
-      "unsupported": "Ten serwer nie obsługuje reflection gRPC — zamiast tego zaimportuj plik .proto.",
+      "unsupported": "Ten serwer nie obsługuje reflection gRPC — zamiast tego proszę zaimportować plik .proto.",
       "unknownError": "Nieznany błąd"
     }
   },
@@ -641,7 +641,7 @@
     "tabs": {
       "calls": "Wywołania"
     },
-    "empty": "Brak wywołań. Dodaj jedno poniżej.",
+    "empty": "Brak wywołań. Proszę dodać jedno poniżej.",
     "methodPlaceholder": "metoda",
     "idPlaceholder": "id (auto)",
     "moveUp": "Przesuń w górę",
@@ -865,7 +865,7 @@
     }
   },
   "welcome": {
-    "confirmRemoveFavorite": "Czy na pewno chcesz usunąć „{{fileName}}” z ulubionych?",
+    "confirmRemoveFavorite": "Czy na pewno chce Pan/Pani usunąć „{{fileName}}” z ulubionych?",
     "newAriaLabel": "Utwórz nową kolekcję",
     "openAriaLabel": "Otwórz kolekcję z dysku",
     "landmarkLabel": "Witamy"
@@ -1037,9 +1037,9 @@
     "cancel": "Anuluj",
     "customHeadersAdd": "Dodaj nagłówek",
     "customHeadersBtn": "Dodaj własne nagłówki",
-    "customHeadersBtnTitle": "Dołącz jednorazowe nagłówki do pobrania specyfikacji (zapisywane w zaimportowanym folderze na potrzeby ponownych importów)",
+    "customHeadersBtnTitle": "Proszę dołączyć jednorazowe nagłówki do pobrania specyfikacji (zapisywane w zaimportowanym folderze na potrzeby ponownych importów)",
     "customHeadersDone": "Gotowe",
-    "customHeadersHint": "Nagłówki są zapisywane w zaimportowanym folderze, więc przyszłe odświeżenie ze źródła je powtórzy. W przypadku logowania z rotacją tokenów użyj raczej trasy uwierzytelniania powyżej.",
+    "customHeadersHint": "Nagłówki są zapisywane w zaimportowanym folderze, więc przyszłe odświeżenie ze źródła je powtórzy. W przypadku logowania z rotacją tokenów proszę użyć raczej trasy uwierzytelniania powyżej.",
     "customHeadersTitle": "Własne nagłówki",
     "detachAuth": "Odłącz trasę uwierzytelniania",
     "dropZone": "Strefa upuszczania",
@@ -1058,13 +1058,13 @@
       "emptySpec": "Specyfikacja pobrana z {{url}} nie deklaruje żadnej operacji {{format}}. Zastosowanie jej opróżniłoby ten folder, więc aktualizacja została odrzucona.",
       "formatNotDetected": "Nie rozpoznano formatu tego źródła.",
       "unsupportedFormat": "Żaden importer nie obsługuje formatu {{format}}.",
-      "projectFormatTooNew": "Ten plik projektu używa wersji formatu {{found}}, ale ta wersja Restorm rozumie tylko wersję {{current}}. Zaktualizuj Restorm, aby go zaimportować.",
+      "projectFormatTooNew": "Ten plik projektu używa wersji formatu {{found}}, ale ta wersja Restorm rozumie tylko wersję {{current}}. Proszę zaktualizować Restorm, aby go zaimportować.",
       "projectFormatMissing": "Ten plik nie deklaruje żadnej wersji formatu Restorm, więc nie jest plikiem projektu Restorm.",
-      "openApiUnsupportedVersion": "Ta specyfikacja deklaruje wersję OpenAPI {{version}}, której ta kompilacja Restorm jeszcze nie obsługuje. Zaktualizuj Restorm, aby ją zaimportować."
+      "openApiUnsupportedVersion": "Ta specyfikacja deklaruje wersję OpenAPI {{version}}, której ta kompilacja Restorm jeszcze nie obsługuje. Proszę zaktualizować Restorm, aby ją zaimportować."
     },
     "formats": {
       "swagger": {
-        "description": "Specyfikacja OpenAPI 2.0, narodzona w SmartBear. Wklej Swaggera w formacie JSON lub YAML — Restorm przetwarza każdą operację, pobiera schematy bezpieczeństwa i zamienia cały dokument w nawigowalne drzewo żądań.",
+        "description": "Specyfikacja OpenAPI 2.0, narodzona w SmartBear. Proszę wkleić Swaggera w formacie JSON lub YAML — Restorm przetwarza każdą operację, pobiera schematy bezpieczeństwa i zamienia cały dokument w nawigowalne drzewo żądań.",
         "trademark": "Swagger jest zastrzeżonym znakiem towarowym SmartBear Software."
       },
       "openapi": {
@@ -1072,19 +1072,19 @@
         "trademark": "OpenAPI to projekt OpenAPI Initiative pod skrzydłami Linux Foundation."
       },
       "curl": {
-        "description": "Macie już żądanie działające w terminalu? Wklejcie pełne wywołanie curl — flagi, nagłówki, treść, query string — a Restorm odtworzy je jako prawdziwe żądanie, które możecie ponownie uruchomić, edytować i przypiąć.",
+        "description": "Ma Pan/Pani już żądanie działające w terminalu? Proszę wkleić pełne wywołanie curl — flagi, nagłówki, treść, query string — a Restorm odtworzy je jako prawdziwe żądanie, które może Pan/Pani ponownie uruchomić, edytować i przypiąć.",
         "trademark": "curl to oprogramowanie open source © Daniel Stenberg, używane tutaj na jego warunkach."
       },
       "powershell": {
-        "description": "Ten sam pomysł, w wersji PowerShell. Wklejcie polecenie Invoke-WebRequest lub Invoke-RestMethod, a Restorm odczyta URI, metodę, nagłówki i treść, aby utworzyć żądanie do dalszej iteracji w sposób wizualny.",
+        "description": "Ten sam pomysł, w wersji PowerShell. Proszę wkleić polecenie Invoke-WebRequest lub Invoke-RestMethod, a Restorm odczyta URI, metodę, nagłówki i treść, aby utworzyć żądanie do dalszej iteracji w sposób wizualny.",
         "trademark": "PowerShell jest zastrzeżonym znakiem towarowym Microsoft Corporation."
       },
       "postman": {
-        "description": "Macie w pracy zapisaną kolekcję Postmana? Wrzućcie JSON — Restorm czyta każde żądanie, każdą przykładową odpowiedź i każdą zmienną środowiskową, a następnie odtwarza kolekcję jako drzewo Restorm, które możecie uruchamiać obok pozostałych API.",
+        "description": "Ma Pan/Pani w pracy zapisaną kolekcję Postmana? Proszę wrzucić JSON — Restorm czyta każde żądanie, każdą przykładową odpowiedź i każdą zmienną środowiskową, a następnie odtwarza kolekcję jako drzewo Restorm, które może Pan/Pani uruchamiać obok pozostałych API.",
         "trademark": "Postman jest zastrzeżonym znakiem towarowym Postman, Inc., używanym tutaj wyłącznie jako odniesienie do kompatybilności."
       },
       "insomnia": {
-        "description": "Przychodzicie z Insomnii? Wrzućcie eksport. Restorm rozumie jej format kolekcji v4/v5, przenosi każde żądanie, nagłówek, treść i środowisko, a całość prezentuje jako drzewo Restorm.",
+        "description": "Przychodzi Pan/Pani z Insomnii? Proszę wrzucić eksport. Restorm rozumie jej format kolekcji v4/v5, przenosi każde żądanie, nagłówek, treść i środowisko, a całość prezentuje jako drzewo Restorm.",
         "trademark": "Insomnia jest zastrzeżonym znakiem towarowym Kong Inc., używanym tutaj wyłącznie jako odniesienie do kompatybilności."
       },
       "bruno": {
@@ -1092,89 +1092,89 @@
         "trademark": "Bruno to oprogramowanie open source (MIT) autorstwa Anoop M. D., używane tutaj na jego warunkach."
       },
       "thunderclient": {
-        "description": "Przechodzisz z Thunder Clienta? Upuść wyeksportowany JSON kolekcji — Restorm odczytuje każde żądanie, folder, nagłówek i treść, po czym odbudowuje kolekcję jako drzewo Restorm gotowe do uruchomienia.",
+        "description": "Przechodzi Pan/Pani z Thunder Clienta? Proszę upuścić wyeksportowany JSON kolekcji — Restorm odczytuje każde żądanie, folder, nagłówek i treść, po czym odbudowuje kolekcję jako drzewo Restorm gotowe do uruchomienia.",
         "trademark": "Thunder Client jest znakiem towarowym swojego właściciela, użytym tu wyłącznie jako odniesienie do zgodności."
       },
       "graphql": {
-        "description": "Wklejcie GraphQL SDL (.graphql / .gql / wycinek z Waszego klienta GraphQL), a Restorm stworzy szkielet jednego żądania na operację, podpięty pod właściwy typ query/mutation/subscription, z już ustrukturyzowanymi zmiennymi.",
+        "description": "Proszę wkleić GraphQL SDL (.graphql / .gql / wycinek z Pana/Pani klienta GraphQL), a Restorm stworzy szkielet jednego żądania na operację, podpięty pod właściwy typ query/mutation/subscription, z już ustrukturyzowanymi zmiennymi.",
         "trademark": "GraphQL jest znakiem towarowym GraphQL Foundation, projektu Joint Development Foundation."
       },
       "grpc": {
-        "description": "Wrzućcie plik .proto (lub cały katalog) — Restorm przejdzie przez każdą usługę, każde RPC i każdą wiadomość, zamieniając każdą metodę w typowane żądanie, które możecie wysłać przez wykonawcę gRPC bez tknięcia codegen.",
+        "description": "Proszę wrzucić plik .proto (lub cały katalog) — Restorm przejdzie przez każdą usługę, każde RPC i każdą wiadomość, zamieniając każdą metodę w typowane żądanie, które może Pan/Pani wysłać przez wykonawcę gRPC bez tknięcia codegen.",
         "trademark": "gRPC to projekt Cloud Native Computing Foundation."
       },
       "grpcReflection": {
-        "description": "Brak pliku .proto? Wskaż Restorm działający serwer gRPC, który udostępnia reflection — odpytuje grpc.reflection.v1alpha.ServerReflection, wykrywa każdą usługę i metodę oraz buduje takie samo, typowane drzewo żądań jak import pliku proto, buforowane lokalnie do użytku offline.",
+        "description": "Brak pliku .proto? Proszę wskazać Restorm działający serwer gRPC, który udostępnia reflection — odpytuje grpc.reflection.v1alpha.ServerReflection, wykrywa każdą usługę i metodę oraz buduje takie samo, typowane drzewo żądań jak import pliku proto, buforowane lokalnie do użytku offline.",
         "action": "Połącz z serwerem…"
       },
       "soap": {
-        "description": "Macie WSDL? Wklejcie go (lub jego URL) — Restorm parsuje każdy <port> i <operation> oraz tworzy gotowe do wysłania koperty SOAP z właściwym nagłówkiem SOAPAction, szkieletami treści typowanymi przez schemat oraz schematem uwierzytelniania zadeklarowanym w WSDL."
+        "description": "Ma Pan/Pani WSDL? Proszę wkleić go (lub jego URL) — Restorm parsuje każdy <port> i <operation> oraz tworzy gotowe do wysłania koperty SOAP z właściwym nagłówkiem SOAPAction, szkieletami treści typowanymi przez schemat oraz schematem uwierzytelniania zadeklarowanym w WSDL."
       },
       "websocket": {
-        "description": "Wklejcie punkt końcowy WebSocket (ws:// lub wss://) — Restorm otwiera połączenie, przechwytuje ramki powitalne serwera i tworzy szkielety żądań send/subscribe z odtwarzalnymi szablonami payloadu.",
+        "description": "Proszę wkleić punkt końcowy WebSocket (ws:// lub wss://) — Restorm otwiera połączenie, przechwytuje ramki powitalne serwera i tworzy szkielety żądań send/subscribe z odtwarzalnymi szablonami payloadu.",
         "trademark": "WebSocket to protokół ustandaryzowany przez IETF (RFC 6455) i W3C."
       },
       "kafka": {
-        "description": "Wklejcie URL serwera bootstrap Apache Kafka (lub listę tematów) — Restorm rejestruje konsumentów i producentów na temat, dekoduje payloady Avro/Protobuf przez Wasze Schema Registry i pozwala odtworzyć poszczególne offsety jednym kliknięciem.",
+        "description": "Proszę wkleić URL serwera bootstrap Apache Kafka (lub listę tematów) — Restorm rejestruje konsumentów i producentów na temat, dekoduje payloady Avro/Protobuf przez Pana/Pani Schema Registry i pozwala odtworzyć poszczególne offsety jednym kliknięciem.",
         "trademark": "Apache Kafka oraz logo Kafki są znakami towarowymi Apache Software Foundation."
       },
       "socketio": {
-        "description": "Wklejcie URL serwera Socket.IO — Restorm negocjuje handshake, listuje namespace'y i nazwy zdarzeń emitowanych przez serwer i daje Wam jedno żądanie na emit / on z walidacją payloadu.",
+        "description": "Proszę wkleić URL serwera Socket.IO — Restorm negocjuje handshake, listuje namespace'y i nazwy zdarzeń emitowanych przez serwer i daje Panu/Pani jedno żądanie na emit / on z walidacją payloadu.",
         "trademark": "Socket.IO to biblioteka open source wydana na licencji MIT; nazwa i logo są używane nominatywnie."
       },
       "odata": {
-        "description": "Wklejcie URL dokumentu usługi OData lub plik $metadata — Restorm odczyta CSDL, odtworzy zestawy encji, importy funkcji i akcje oraz wstępnie wypełni opcje zapytań $filter / $select / $top / $skip dla każdej operacji."
+        "description": "Proszę wkleić URL dokumentu usługi OData lub plik $metadata — Restorm odczyta CSDL, odtworzy zestawy encji, importy funkcji i akcje oraz wstępnie wypełni opcje zapytań $filter / $select / $top / $skip dla każdej operacji."
       },
       "mqtt": {
-        "description": "Wklejcie URL brokera MQTT lub katalog tematów — Restorm tworzy żądania publish/subscribe na temat, utrzymuje połączenie dla podglądu strumieniowego i zapamiętuje migawki wiadomości retained, aby można było je później odtworzyć.",
+        "description": "Proszę wkleić URL brokera MQTT lub katalog tematów — Restorm tworzy żądania publish/subscribe na temat, utrzymuje połączenie dla podglądu strumieniowego i zapamiętuje migawki wiadomości retained, aby można było je później odtworzyć.",
         "trademark": "MQTT to standard OASIS; nazwa i logo MQTT są znakami towarowymi OASIS Open."
       },
       "paw": {
-        "description": "Przychodzicie z Paw? Wrzućcie swój eksport JSON (File → Export → JSON w aplikacji — natywny pakiet .paw nie jest odczytywany bezpośrednio). Restorm odtwarza każde żądanie, nagłówek, treść i środowisko, oraz mapuje dynamiczne wartości Paw (znaczniki czasu, losowe ciągi, UUID) na najbliższy odpowiednik w Restorm.",
+        "description": "Przychodzi Pan/Pani z Paw? Proszę wrzucić swój eksport JSON (File → Export → JSON w aplikacji — natywny pakiet .paw nie jest odczytywany bezpośrednio). Restorm odtwarza każde żądanie, nagłówek, treść i środowisko, oraz mapuje dynamiczne wartości Paw (znaczniki czasu, losowe ciągi, UUID) na najbliższy odpowiednik w Restorm.",
         "trademark": "Paw jest zastrzeżonym znakiem towarowym RapidAPI, Inc., używanym tutaj wyłącznie jako odniesienie do kompatybilności."
       },
       "har": {
-        "description": "Przechwyciliście ślad sieciowy z devtools przeglądarki? Wrzućcie wyeksportowany plik .har — Restorm przechodzi przez każde zarejestrowane wywołanie i zamienia je w powtarzalne żądanie, wraz z nagłówkami i treścią."
+        "description": "Przechwycono ślad sieciowy z devtools przeglądarki? Proszę wrzucić wyeksportowany plik .har — Restorm przechodzi przez każde zarejestrowane wywołanie i zamienia je w powtarzalne żądanie, wraz z nagłówkami i treścią."
       },
       "restClient": {
-        "description": "Przychodzicie z rozszerzenia REST Client dla VS Code? Wklejcie lub wrzućcie plik .http / .rest — Restorm przetwarza każdy blok żądania, rozwiązuje @variables i odtwarza je jako drzewo Restorm.",
+        "description": "Przychodzi Pan/Pani z rozszerzenia REST Client dla VS Code? Proszę wkleić lub wrzucić plik .http / .rest — Restorm przetwarza każdy blok żądania, rozwiązuje @variables i odtwarza je jako drzewo Restorm.",
         "trademark": "REST Client jest znakiem towarowym odpowiedniego właściciela, używanym tutaj wyłącznie jako odniesienie do kompatybilności."
       },
       "httpie": {
-        "description": "Wrzućcie eksport kolekcji HTTPie Desktop lub plik sesji CLI — Restorm odczytuje każde żądanie (a w przypadku sesji — jej trwałe nagłówki) i odtwarza je gotowe do użycia.",
+        "description": "Proszę wrzucić eksport kolekcji HTTPie Desktop lub plik sesji CLI — Restorm odczytuje każde żądanie (a w przypadku sesji — jej trwałe nagłówki) i odtwarza je gotowe do użycia.",
         "trademark": "HTTPie jest znakiem towarowym odpowiedniego właściciela, używanym tutaj wyłącznie jako odniesienie do kompatybilności."
       },
       "smithy": {
-        "description": "Wklejcie model Smithy — JSON AST lub ręcznie napisany IDL — a Restorm przejdzie przez każdą usługę, zasób i operację, tworząc odpowiedni folder gotowych do użycia żądań.",
+        "description": "Proszę wkleić model Smithy — JSON AST lub ręcznie napisany IDL — a Restorm przejdzie przez każdą usługę, zasób i operację, tworząc odpowiedni folder gotowych do użycia żądań.",
         "trademark": "Smithy jest projektem Amazon Web Services."
       },
       "typespec": {
-        "description": "Wklejcie swoją definicję TypeSpec (.tsp) — Restorm kompiluje ją w tle do OpenAPI i importuje dokładnie tak jak ręcznie napisaną specyfikację: operacje, parametry i schematy włącznie.",
+        "description": "Proszę wkleić swoją definicję TypeSpec (.tsp) — Restorm kompiluje ją w tle do OpenAPI i importuje dokładnie tak jak ręcznie napisaną specyfikację: operacje, parametry i schematy włącznie.",
         "trademark": "TypeSpec jest projektem firmy Microsoft."
       },
       "raml": {
-        "description": "Wklejcie dokument RAML 1.0 lub 0.8 — Restorm odwzorowuje jego drzewo zasobów w zagnieżdżonych folderach, jedno żądanie na metodę, wraz z modelowanymi typami.",
+        "description": "Proszę wkleić dokument RAML 1.0 lub 0.8 — Restorm odwzorowuje jego drzewo zasobów w zagnieżdżonych folderach, jedno żądanie na metodę, wraz z modelowanymi typami.",
         "trademark": "RAML jest specyfikacją utrzymywaną przez RAML Workgroup."
       },
       "wadl": {
-        "description": "Wciąż utrzymujecie dokument WADL? Wklejcie XML — Restorm przechodzi przez jego zagnieżdżone drzewo <resource> i tworzy odpowiedni folder żądań, wraz z metodami i parametrami.",
+        "description": "Wciąż utrzymuje Pan/Pani dokument WADL? Proszę wkleić XML — Restorm przechodzi przez jego zagnieżdżone drzewo <resource> i tworzy odpowiedni folder żądań, wraz z metodami i parametrami.",
         "trademark": "WADL został zgłoszony do W3C przez Sun Microsystems jako Member Submission."
       },
       "thrift": {
-        "description": "Wklejcie plik IDL Apache Thrift (.thrift) — Restorm odczytuje każdą usługę, metodę, strukturę i enum, dzięki czemu możecie przeglądać kształt API. Binarny protokół Thrift nie jest jeszcze wykonywalny z poziomu Restorm, więc ten import ma charakter wyłącznie dokumentacyjny.",
+        "description": "Proszę wkleić plik IDL Apache Thrift (.thrift) — Restorm odczytuje każdą usługę, metodę, strukturę i enum, dzięki czemu może Pan/Pani przeglądać kształt API. Binarny protokół Thrift nie jest jeszcze wykonywalny z poziomu Restorm, więc ten import ma charakter wyłącznie dokumentacyjny.",
         "trademark": "Apache Thrift jest znakiem towarowym Apache Software Foundation."
       },
       "apiBlueprint": {
-        "description": "Wklejcie dokument API Blueprint (.apib) — Restorm przetwarza każdą grupę zasobów i przejście na folder żądań, jedno na udokumentowaną parę metoda/odpowiedź.",
+        "description": "Proszę wkleić dokument API Blueprint (.apib) — Restorm przetwarza każdą grupę zasobów i przejście na folder żądań, jedno na udokumentowaną parę metoda/odpowiedź.",
         "trademark": "API Blueprint to specyfikacja pierwotnie stworzona przez Apiary."
       },
       "restorm": {
-        "description": "Scal inny projekt Restorm z aktualnie otwartym — każdy zaimportowany folder, żądanie, środowisko i scenariusz trafia do folderu opakowującego, z nowymi identyfikatorami, aby nic nie kolidowało, nawet przy imporcie projektu do niego samego."
+        "description": "Proszę scalić inny projekt Restorm z aktualnie otwartym — każdy zaimportowany folder, żądanie, środowisko i scenariusz trafia do folderu opakowującego, z nowymi identyfikatorami, aby nic nie kolidowało, nawet przy imporcie projektu do niego samego."
       }
     },
     "grpcReflection": {
       "title": "Serwer gRPC (reflection)",
-      "hint": "Odpytaj usługę reflection działającego serwera gRPC, aby wykryć jego usługi i metody bez pliku .proto.",
+      "hint": "Proszę odpytać usługę reflection działającego serwera gRPC, aby wykryć jego usługi i metody bez pliku .proto.",
       "addressLabel": "Adres serwera (host:port)",
       "addressPlaceholder": "localhost:9000",
       "tlsLabel": "Użyj TLS",
@@ -1183,8 +1183,8 @@
       "import": "Importuj",
       "reimportedTitle": "Reflection gRPC zaimportowany ponownie",
       "reimportedNoop": "Już aktualne — brak zmian na serwerze.",
-      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — załaduj projekt ponownie, aby zobaczyć zmiany.",
-      "unsupported": "Ten serwer nie obsługuje reflection gRPC — zamiast tego zaimportuj plik .proto.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — proszę załadować projekt ponownie, aby zobaczyć zmiany.",
+      "unsupported": "Ten serwer nie obsługuje reflection gRPC — zamiast tego proszę zaimportować plik .proto.",
       "unknownError": "Nieznany błąd"
     },
     "loading": "Analizowanie...",
@@ -1199,15 +1199,15 @@
     "selectAll": "Zaznacz wszystko",
     "selectNone": "Odznacz wszystko",
     "source": {
-      "label": "Wklej tutaj coś!",
-      "placeholder": "Wprowadź ścieżkę pliku, URL lub wklej polecenie curl/PowerShell..."
+      "label": "Proszę tutaj coś wkleić!",
+      "placeholder": "Proszę wprowadzić ścieżkę pliku, URL lub wkleić polecenie curl/PowerShell..."
     },
     "tabs": {
       "routes": "Trasy",
       "documentation": "Dokumentacja"
     },
     "title": "Importuj żądania",
-    "largeApiHint": "To API jest duże. Aby projekt pozostał lekki, zaznacz tylko potrzebne trasy, a pozostałe poniżej odznacz. Te pominięte pozostają w dokumentacji — możesz je dodać w dowolnej chwili.",
+    "largeApiHint": "To API jest duże. Aby projekt pozostał lekki, proszę zaznaczyć tylko potrzebne trasy, a pozostałe poniżej odznaczyć. Te pominięte pozostają w dokumentacji — może je Pan/Pani dodać w dowolnej chwili.",
     "browse": "Przeglądaj…",
     "warning": {
       "openApiStructuralIssues": "Specyfikacja została zaimportowana, ale {{count}} część/części nie udało się rozwiązać i zostały pominięte (nierozwiązane $ref-y, treści żądań bez content). Reszta została zaimportowana normalnie."
@@ -1215,12 +1215,12 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Zaimportuj swoje API",
-      "body": "Wczytaj specyfikację OpenAPI / Swagger, schemat GraphQL, kolekcję Postman / Bruno / Insomnia lub wklej komendę curl / PowerShell. Restorm ją sparsuje, zbuduje strukturę folderów i przygotuje każdy endpoint."
+      "title": "Proszę zaimportować swoje API",
+      "body": "Proszę wczytać specyfikację OpenAPI / Swagger, schemat GraphQL, kolekcję Postman / Bruno / Insomnia lub wkleić komendę curl / PowerShell. Restorm ją sparsuje, zbuduje strukturę folderów i przygotuje każdy endpoint."
     },
     "recentActivity": {
       "title": "Ostatnia aktywność",
-      "empty": "Wyślij swoje pierwsze żądanie, aby zobaczyć je tutaj."
+      "empty": "Proszę wysłać swoje pierwsze żądanie, aby zobaczyć je tutaj."
     },
     "apiCard": {
       "favorites": "Ulubione",
@@ -1313,15 +1313,15 @@
   "scenario": {
     "editor": {
       "emptyTitle": "Tu jest pusto…",
-      "emptyDragDrop": "Przeciągnij element z drzewa po lewej stronie do swojego scenariusza, aby go tu użyć. Możesz nawet zaimportować jeden scenariusz do drugiego!",
-      "emptyRightClick": "Kliknij prawym przyciskiem myszy puste miejsce, aby dodać akcje do scenariusza"
+      "emptyDragDrop": "Proszę przeciągnąć element z drzewa po lewej stronie do swojego scenariusza, aby go tu użyć. Może Pan/Pani nawet zaimportować jeden scenariusz do drugiego!",
+      "emptyRightClick": "Proszę kliknąć prawym przyciskiem myszy puste miejsce, aby dodać akcje do scenariusza"
     },
     "pathSelector": {
       "placeholder": "Ścieżka JSON",
       "ariaLabel": "Selektor ścieżki JSON",
       "pick": "Wybierz z wyniku",
       "loading": "Wczytywanie…",
-      "noResult": "Uruchom akcję źródłową, aby wybrać właściwość z jej wyniku."
+      "noResult": "Proszę uruchomić akcję źródłową, aby wybrać właściwość z jej wyniku."
     },
     "tab": {
       "graph": "Scenariusz",
@@ -1535,7 +1535,7 @@
     "validation": {
       "duplicateName": "Nazwa „{{name}}” jest już używana przez inną akcję.",
       "panelTitle": "{{count}} błąd(y) akcji",
-      "runBlocked": "Napraw {{count}} błąd(y) akcji przed uruchomieniem",
+      "runBlocked": "Proszę naprawić {{count}} błąd(y) akcji przed uruchomieniem",
       "focusBox": "Przejdź do tej akcji",
       "showErrors": "Pokaż błędy",
       "input": {
@@ -1584,7 +1584,7 @@
       },
       "reachability": {
         "unreachable": "Ta akcja nigdy się nie wykona: nie prowadzi do niej żadne połączenie od akcji rozpoczynającej scenariusz.",
-        "cycle": "Ta akcja należy do pętli połączeń, której nic nie uruchamia, więc nigdy się nie wykona. Podłącz do niej akcję spoza pętli."
+        "cycle": "Ta akcja należy do pętli połączeń, której nic nie uruchamia, więc nigdy się nie wykona. Proszę podłączyć do niej akcję spoza pętli."
       }
     },
     "usage": {
@@ -1599,9 +1599,9 @@
       "step": "Krok po kroku",
       "previewInfo": "Przykładowe dane na podstawie poprzednich wyników żądań.",
       "pause": "Wstrzymaj",
-      "noRunsHint": "Brak ostatniego wykonania dla tego żądania — uruchom je stąd, aby wypełnić podgląd scenariusza.",
+      "noRunsHint": "Brak ostatniego wykonania dla tego żądania — proszę je uruchomić stąd, aby wypełnić podgląd scenariusza.",
       "syntheticInfo": "Przykładowe dane wygenerowane z dokumentacji tego żądania.",
-      "syntheticRunHint": "Przykładowe dane — uruchom żądanie, aby zastąpić je rzeczywistym wynikiem.",
+      "syntheticRunHint": "Przykładowe dane — proszę uruchomić żądanie, aby zastąpić je rzeczywistym wynikiem.",
       "stop": "Zatrzymaj",
       "logsTitle": "Logi uruchomienia",
       "copyLogs": "Kopiuj logi",
@@ -1664,7 +1664,7 @@
       "add": "Dodaj punkt przerwania",
       "remove": "Usuń punkt przerwania",
       "toggle": "Przełącz punkt przerwania (F9)",
-      "reached": "Osiągnięto punkt przerwania — ta akcja nie została jeszcze wykonana. Naciśnij F5, aby wznowić, lub F7, aby wykonać krok.",
+      "reached": "Osiągnięto punkt przerwania — ta akcja nie została jeszcze wykonana. Proszę nacisnąć F5, aby wznowić, lub F7, aby wykonać krok.",
       "shortcut": "F9"
     },
     "minimap": {
@@ -2008,7 +2008,7 @@
       "setVariable": "Zapisuje wartość do zmiennej przebiegu.",
       "getVariable": "Odczytuje wartość zmiennej przebiegu.",
       "transform": "Renderuje szablon Handlebars na podstawie wejścia i zmiennych przebiegu.",
-      "code": "Uruchamia Twój kod (TypeScript, JavaScript, Python, Lua, Ruby lub R) w piaskownicy i zwraca wynik.",
+      "code": "Uruchamia Pana/Pani kod (TypeScript, JavaScript, Python, Lua, Ruby lub R) w piaskownicy i zwraca wynik.",
       "cast": "Konwertuje wartość na inny typ (liczba, ciąg, boolean, data, lista).",
       "regex": "Dopasowuje, wyodrębnia, zastępuje lub dzieli tekst za pomocą wyrażenia regularnego.",
       "json": "Parsuje ciąg JSON lub serializuje wartość do JSON.",
@@ -2102,7 +2102,7 @@
     },
     "cli": {
       "title": "Uruchom z wiersza poleceń",
-      "intro": "Uruchom ten scenariusz bez otwierania aplikacji (CI, cron, skrypt):",
+      "intro": "Proszę uruchomić ten scenariusz bez otwierania aplikacji (CI, cron, skrypt):",
       "byId": "Wskaż po id",
       "allLogs": "Wszystkie logi",
       "note": "`--out file` zapisuje run-log także do pliku.",
@@ -2197,13 +2197,13 @@
         "description": "Odpowiedzi z nazwanych przykładów · walidacja ograniczeniami",
         "port": "Port",
         "latency": "Symulowane opóźnienie (ms)",
-        "blocked": "Napraw {{count}} błędy walidacji projektu przed jego serwowaniem",
+        "blocked": "Proszę naprawić {{count}} błędy walidacji projektu przed jego serwowaniem",
         "startFailed": "Nie udało się uruchomić serwera",
         "protocolAlways": "HTTP jest zawsze serwowany",
         "protocolToggle": "Serwuj także tę projekcję",
         "stateful": "Tryb stanowy — POST/PUT/DELETE modyfikują magazyn w pamięci (reset przy restarcie)",
-        "clientsCallout": "Twój serwer mock jest uruchomiony. Dla każdego protokołu obsługiwanego przez ten projekt wygenerowano gotowych do uruchomienia klientów.",
-        "clientsCalloutLink": "Znajdziesz ich tutaj"
+        "clientsCallout": "Pana/Pani serwer mock jest uruchomiony. Dla każdego protokołu obsługiwanego przez ten projekt wygenerowano gotowych do uruchomienia klientów.",
+        "clientsCalloutLink": "Znajdzie Pan/Pani ich tutaj"
       },
       "identity": {
         "title": "Tożsamość",
@@ -2240,7 +2240,7 @@
     },
     "list": {
       "filter": "Filtruj…",
-      "selectPrompt": "Wybierz pozycję z listy.",
+      "selectPrompt": "Proszę wybrać pozycję z listy.",
       "editorPending": "Edytor tej sekcji jest w drodze."
     },
     "models": {
@@ -2255,7 +2255,7 @@
       "description": "Opis",
       "descriptionPlaceholder": "Co reprezentuje ten model (opcjonalnie)",
       "newName": "NowyModel",
-      "selectPrompt": "Wybierz model lub utwórz nowy.",
+      "selectPrompt": "Proszę wybrać model lub utworzyć nowy.",
       "tabs": {
         "schema": "Schemat",
         "examples": "Przykłady",
@@ -2275,7 +2275,7 @@
       "addValue": "Dodaj wartość",
       "valueHeader": "Wartość",
       "newName": "NowyEnum",
-      "selectPrompt": "Wybierz enum lub utwórz nowy — zamknięty zbiór wartości używany jako typ właściwości.",
+      "selectPrompt": "Proszę wybrać enum lub utworzyć nowy — zamknięty zbiór wartości używany jako typ właściwości.",
       "nameHeader": "Nazwa",
       "description": "Opis",
       "descriptionPlaceholder": "Co reprezentuje ten enum (opcjonalnie)",
@@ -2284,7 +2284,7 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Brak szablonu — dodaj jeden, aby wygenerować kod z tego projektu.",
+      "empty": "Brak szablonu — proszę dodać jeden, aby wygenerować kod z tego projektu.",
       "subtitle": "Generuj projekty z tego projektu — renderowane w piaskownicy, zapisywane dopiero po potwierdzeniu drzewa",
       "sourceTitle": "Szablon",
       "sourceKind": {
@@ -2299,11 +2299,11 @@
       "browse": "Wybierz folder wyjściowy",
       "generate": "Wygeneruj projekt",
       "generating": "Generowanie w piaskownicy…",
-      "blocked": "Napraw {{count}} błąd/błędy walidacji przed generowaniem",
+      "blocked": "Proszę naprawić {{count}} błąd/błędy walidacji przed generowaniem",
       "failed": "Generowanie nie powiodło się",
-      "outputMissing": "Najpierw wybierz folder wyjściowy",
+      "outputMissing": "Proszę najpierw wybrać folder wyjściowy",
       "extracted": "{{count}} plik(ów) zapisano w {{root}}",
-      "preview": "{{name}} wygenerował {{count}} plik(ów) — potwierdź zapis",
+      "preview": "{{name}} wygenerował {{count}} plik(ów) — proszę potwierdzić zapis",
       "confirm": "Zapisz do folderu wyjściowego",
       "discard": "Odrzuć",
       "generateOne": "Wygeneruj ten projekt",
@@ -2325,7 +2325,7 @@
         "descPlaceholder": "Opis (stack / co generuje)",
         "noOrgTemplates": "Brak szablonów organizacji.",
         "loading": "Ładowanie szablonów…",
-        "signedOut": "Zaloguj się, aby zobaczyć szablony swojej organizacji.",
+        "signedOut": "Proszę się zalogować, aby zobaczyć szablony swojej organizacji.",
         "fetchError": "Nie udało się załadować szablonów:",
         "unavailable": "niedostępne",
         "officialTag": "Oficjalny",
@@ -2454,7 +2454,7 @@
       "name": "Nazwa przykładu",
       "newName": "Przykład",
       "defaultHint": "Wartości domyślne pochodzą z każdej właściwości (puste = generowane automatycznie).",
-      "namedHint": "Wpisz wartość, aby ją zdefiniować; pozostaw puste, aby zachować wygenerowaną.",
+      "namedHint": "Proszę wpisać wartość, aby ją zdefiniować; pozostawić puste, aby zachować wygenerowaną.",
       "columns": {
         "value": "Wartość",
         "origin": "Pochodzenie"
@@ -2537,7 +2537,7 @@
       "addRoute": "Dodaj trasę",
       "newGroupName": "NowaGrupa",
       "newRouteName": "NowaTrasa",
-      "selectPrompt": "Wybierz grupę lub trasę, albo utwórz grupę.",
+      "selectPrompt": "Proszę wybrać grupę lub trasę, albo utworzyć grupę.",
       "deleteGroupTitle": "Usunąć {{name}}?",
       "deleteGroupImpact": "Grupa i jej {{count}} tras zostaną usunięte.",
       "method": "Metoda",
@@ -2568,7 +2568,7 @@
         "add": "Dodaj parametr",
         "delete": "Usuń parametr",
         "auto": "auto",
-        "pathEmpty": "Wpisz {{param}} w ścieżce, aby utworzyć jego wiersz.",
+        "pathEmpty": "Proszę wpisać {{param}} w ścieżce, aby utworzyć jego wiersz.",
         "otherEmpty": "Brak parametrów query lub header.",
         "nameEmpty": "Parametr wymaga nazwy",
         "nameTaken": "Ta nazwa jest już używana"
@@ -2592,7 +2592,7 @@
         "example": "Serwowany przykład",
         "exampleAuto": "(auto generowany)",
         "delete": "Usuń odpowiedź",
-        "codeInvalid": "Wprowadź 3-cyfrowy kod statusu",
+        "codeInvalid": "Proszę wprowadzić 3-cyfrowy kod statusu",
         "codeTaken": "Ten kod jest już zadeklarowany"
       },
       "settings": {
@@ -2639,10 +2639,10 @@
     },
     "crud": {
       "authWrites": "Chroń trasy zapisu uwierzytelnianiem",
-      "authWritesHint": "Wymagaj uwierzytelniania bearer przy tworzeniu, aktualizacji i usuwaniu; odczyty pozostają publiczne.",
+      "authWritesHint": "Proszę wymagać uwierzytelniania bearer przy tworzeniu, aktualizacji i usuwaniu; odczyty pozostają publiczne.",
       "generate": "Wygeneruj",
       "replace": "Zastąp istniejące trasy",
-      "replaceHint": "Dla tego modelu już istnieją trasy. Zastąp je, aby uniknąć duplikatów; pozostaw wyłączone, aby dodać drugi zestaw.",
+      "replaceHint": "Dla tego modelu już istnieją trasy. Proszę zastąpić je, aby uniknąć duplikatów; pozostawić wyłączone, aby dodać drugi zestaw.",
       "title": "Wygeneruj CRUD dla {{name}}",
       "projections": {
         "http": "{{count}} tras REST",
@@ -2654,7 +2654,7 @@
       }
     },
     "server": {
-      "subtitle": "Serwuj ten projekt jako aktywny mock i obserwuj każde wywołanie."
+      "subtitle": "Proszę serwować ten projekt jako aktywny mock i obserwować każde wywołanie."
     },
     "codegen": {
       "vars": {
@@ -2662,8 +2662,8 @@
         "name": "Zmienna",
         "value": "Wartość (Handlebars)",
         "add": "Dodaj zmienną",
-        "none": "Brak zmiennych — dodaj jedną z nagłówka tego szablonu.",
-        "noTemplates": "Wybierz jeden lub więcej szablonów w sekcji „</> Code” — tutaj zdefiniujesz zmienne używane podczas generowania.",
+        "none": "Brak zmiennych — proszę dodać jedną z nagłówka tego szablonu.",
+        "noTemplates": "Proszę wybrać jeden lub więcej szablonów w sekcji „</> Code” — tutaj zdefiniuje Pan/Pani zmienne używane podczas generowania.",
         "generalTitle": "Zmienne ogólne",
         "scope": {
           "general": "Ogólne",
@@ -2675,12 +2675,12 @@
       }
     },
     "clients": {
-      "generated": "Klienci wygenerowani — otwórz ich w sekcji Klienci na pasku bocznym.",
+      "generated": "Klienci wygenerowani — proszę ich otworzyć w sekcji Klienci na pasku bocznym.",
       "importing": "Importowanie klientów…",
       "refresh": "Wygeneruj klientów ponownie",
-      "startPrompt": "Uruchom serwer, aby wygenerować klientów.",
-      "startServerPrompt": "Uruchom <serverLink>serwer projektu</serverLink>, aby uzyskać dostęp do żądań klienckich generowanych automatycznie z modelu.",
-      "subtitle": "Twój serwer projektu API działa i obsługuje zdefiniowane przez Ciebie trasy. Poniższe żądania wywołują te trasy bezpośrednio — otwórz jedno, aby je przetestować. Są efemeryczne i znikają po zatrzymaniu serwera."
+      "startPrompt": "Proszę uruchomić serwer, aby wygenerować klientów.",
+      "startServerPrompt": "Proszę uruchomić <serverLink>serwer projektu</serverLink>, aby uzyskać dostęp do żądań klienckich generowanych automatycznie z modelu.",
+      "subtitle": "Pana/Pani serwer projektu API działa i obsługuje zdefiniowane przez Pana/Panią trasy. Poniższe żądania wywołują te trasy bezpośrednio — proszę otworzyć jedno, aby je przetestować. Są efemeryczne i znikają po zatrzymaniu serwera."
     },
     "descriptors": {
       "copy": "Kopiuj URL"
@@ -2691,13 +2691,13 @@
     },
     "listing": {
       "models": {
-        "empty": "Utwórz swój pierwszy model"
+        "empty": "Proszę utworzyć swój pierwszy model"
       },
       "enums": {
-        "empty": "Utwórz swój pierwszy enum"
+        "empty": "Proszę utworzyć swój pierwszy enum"
       },
       "routes": {
-        "empty": "Utwórz swoją pierwszą trasę"
+        "empty": "Proszę utworzyć swoją pierwszą trasę"
       },
       "tabs": {
         "list": "Lista",
@@ -2778,34 +2778,34 @@
     "captureRetentionCap": "Przechowywanie przechwytywań MCP",
     "captureRetentionCapDescription": "Ile ostatnich wywołań MCP zachowuje zrzut ekranu / nagranie (w pamięci i na dysku). Po przekroczeniu limitu starsze przechwytywania tracą multimedia, a ich tymczasowy plik wideo jest usuwany; 0 wyłącza przechowywanie.",
     "enabled": "Włącz serwer MCP",
-    "enabledDescription": "Uruchamia wbudowany serwer MCP przy starcie, aby narzędzia AI mogły połączyć się z tą instancją. Wyłącz, aby zapobiec połączeniom MCP.",
+    "enabledDescription": "Uruchamia wbudowany serwer MCP przy starcie, aby narzędzia AI mogły połączyć się z tą instancją. Proszę wyłączyć, aby zapobiec połączeniom MCP.",
     "proUpsell": {
-      "note": "W wersji Community agenci AI obsługują Twoje żądania. Przejdź na wersję Pro, aby sterować scenariuszami, interfejsem i zaawansowaną automatyzacją.",
+      "note": "W wersji Community agenci AI obsługują Pana/Pani żądania. Proszę przejść na wersję Pro, aby sterować scenariuszami, interfejsem i zaawansowaną automatyzacją.",
       "link": "Przejdź na wersję Pro"
     },
     "connect": {
       "action": "Dodaj Restorm do swojego asystenta AI",
       "title": "Dodaj Restorm do swojego asystenta AI",
-      "intro": "Połącz swojego asystenta AI z tą instancją Restorm przez MCP. Wybierz swojego klienta:",
+      "intro": "Proszę połączyć swojego asystenta AI z tą instancją Restorm przez MCP. Proszę wybrać swojego klienta:",
       "copy": "Kopiuj",
       "copied": "Skopiowano",
       "run": "Dodaj do Claude Code",
       "added": "Dodano",
-      "runOk": "Restorm został dodany do Claude Code. Uruchom ponownie Claude Code, aby go używać.",
+      "runOk": "Restorm został dodany do Claude Code. Proszę ponownie uruchomić Claude Code, aby go używać.",
       "runError": "Nie można uruchomić polecenia",
       "claudeCode": {
-        "where": "Wklej to w terminalu"
+        "where": "Proszę to wkleić w terminalu"
       },
       "claudeDesktop": {
-        "where": "Dodaj to do swojego claude_desktop_config.json"
+        "where": "Proszę to dodać do swojego claude_desktop_config.json"
       },
       "cursor": {
-        "where": "Dodaj to do ~/.cursor/mcp.json"
+        "where": "Proszę to dodać do ~/.cursor/mcp.json"
       },
       "footnote": "Serwer MCP musi być uruchomiony (domyślnie jest). Most sam znajduje tę instancję — nie trzeba kopiować żadnego portu ani tokena.",
       "invite": {
         "title": "Połącz swoją AI z Restorm",
-        "body": "Połącz Claude lub Cursor z tą instancją jednym kliknięciem.",
+        "body": "Proszę połączyć Claude lub Cursor z tą instancją jednym kliknięciem.",
         "cta": "Pokaż jak"
       }
     }
@@ -2960,16 +2960,16 @@
     "batchFormatLabel": "Format wsadu",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Wsad JSON",
-    "versionMismatchWarning": "To żądanie jest oznaczone jako {{requestVersion}}, ale odpowiedź wygląda na {{responseVersion}}. Zmień wersję żądania, aby pasowała do serwera.",
+    "versionMismatchWarning": "To żądanie jest oznaczone jako {{requestVersion}}, ale odpowiedź wygląda na {{responseVersion}}. Proszę zmienić wersję żądania, aby pasowała do serwera.",
     "orderbyPropertyPickerPlaceholder": "Wybierz…",
     "batchAllowGetInChangeSet": "Zezwól na GET w change-set",
-    "batchAllowGetInChangeSetTooltip": "Specyfikacja OData zabrania GET wewnątrz change-set; wiele serwerów odrzuci takie partie. Włącz tę flagę tylko jeśli serwer jawnie to obsługuje.",
+    "batchAllowGetInChangeSetTooltip": "Specyfikacja OData zabrania GET wewnątrz change-set; wiele serwerów odrzuci takie partie. Proszę włączyć tę flagę tylko jeśli serwer jawnie to obsługuje.",
     "batchGetInChangeSetWarning": "GET wewnątrz change-set może nie być akceptowany przez wszystkie serwery (niedozwolone wg specyfikacji OData).",
     "batchForceIncludeInChangeSet": "Uwzględnij mimo to",
     "batchForceAbsoluteBatchUrls": "Wymuś bezwzględne URL-e w pakiecie (v4.01)",
-    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 silnie preferuje względne URL-e w podzapytaniach. Włącz to, aby zachować bezwzględne URL-e (dla serwerów, które tego wymagają).",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 silnie preferuje względne URL-e w podzapytaniach. Proszę to włączyć, aby zachować bezwzględne URL-e (dla serwerów, które tego wymagają).",
     "getDelta": "Pobierz delta",
-    "deltaHint": "@odata.deltaLink dostępny — kliknij, aby zastąpić tę odpowiedź najnowszym zestawem zmian.",
+    "deltaHint": "@odata.deltaLink dostępny — proszę kliknąć, aby zastąpić tę odpowiedź najnowszym zestawem zmian.",
     "deltaChanged": "{{count}} zmieniono",
     "deltaRemoved": "{{count}} usunięto",
     "actionBody": "Treść akcji (JSON)",
@@ -2979,14 +2979,14 @@
     "batchAtomicityPlaceholder": "zestaw zmian (opcjonalnie)",
     "batchBody": "Podżądania wsadu",
     "batchBodyLabel": "Treść (JSON)",
-    "batchEmpty": "Brak podżądań. Dodaj jedno poniżej.",
+    "batchEmpty": "Brak podżądań. Proszę dodać jedno poniżej.",
     "batchMoveDown": "Przenieś w dół",
     "batchMoveUp": "Przenieś w górę",
     "batchRemove": "Usuń podżądanie",
     "batchUrlPlaceholder": "Pets(1) — względem katalogu głównego usługi",
     "expandAdd": "Dodaj rozwinięcie",
     "expandCollapseOptions": "Ukryj opcje",
-    "expandEmpty": "Brak rozwinięć. Dodaj jedno poniżej.",
+    "expandEmpty": "Brak rozwinięć. Proszę dodać jedno poniżej.",
     "expandMoveDown": "Przenieś w dół",
     "expandMoveUp": "Przenieś w górę",
     "expandNested": "Zagnieżdżone $expand",
@@ -3002,12 +3002,12 @@
     "functionParameters": "Parametry funkcji (z metadanych)",
     "navigationPropertiesHint": "Właściwości nawigacji:",
     "orderbyAdd": "Dodaj sortowanie",
-    "orderbyEmpty": "Brak sortowania. Dodaj właściwość poniżej.",
+    "orderbyEmpty": "Brak sortowania. Proszę dodać właściwość poniżej.",
     "orderbyMoveDown": "Przenieś w dół",
     "orderbyMoveUp": "Przenieś w górę",
     "orderbyPropertyPlaceholder": "Name",
     "orderbyRemove": "Usuń",
-    "paginatedHint": "@odata.nextLink dostępny — kliknij, aby dołączyć następną stronę do tej odpowiedzi.",
+    "paginatedHint": "@odata.nextLink dostępny — proszę kliknąć, aby dołączyć następną stronę do tej odpowiedzi.",
     "paramsApply": "Zastosuj parametry",
     "paramsApplyToBody": "Zastosuj do treści",
     "paramsApplyToUrl": "Zastosuj do adresu URL",
@@ -3039,7 +3039,7 @@
       "notListening": "Nie nasłuchuje",
       "served": "Nasłuchuje — obsłużono {{count}} żądań",
       "listenFailed": "Nie udało się uruchomić serwera mock",
-      "portInUse": "Port {{port}} jest już używany przez inną aplikację. Zamknij ją lub wybierz inny port, a następnie uruchom serwer ponownie."
+      "portInUse": "Port {{port}} jest już używany przez inną aplikację. Proszę zamknąć ją lub wybrać inny port, a następnie uruchomić serwer ponownie."
     }
   },
   "odata": {
@@ -3071,15 +3071,15 @@
     "emptyList": "Brak zapisanych konfiguracji.",
     "loadConfirm": {
       "title": "Wczytaj konfigurację",
-      "message": "Czy chcesz wczytać konfigurację „{{name}}\"? Twoja aktualna niezapisana konfiguracja zostanie utracona."
+      "message": "Czy chce Pan/Pani wczytać konfigurację „{{name}}\"? Pana/Pani aktualna niezapisana konfiguracja zostanie utracona."
     },
     "updateConfirm": {
       "title": "Zaktualizuj konfigurację",
-      "message": "Czy chcesz zastąpić konfigurację „{{name}}” bieżącymi wartościami?"
+      "message": "Czy chce Pan/Pani zastąpić konfigurację „{{name}}” bieżącymi wartościami?"
     },
     "deleteConfirm": {
       "title": "Usuń konfigurację",
-      "message": "Czy chcesz usunąć konfigurację „{{name}}\"?",
+      "message": "Czy chce Pan/Pani usunąć konfigurację „{{name}}\"?",
       "usedByScenarios_one": "Jest używana przez scenariusz {{scenarios}}.",
       "usedByScenarios_other": "Jest używana przez scenariusze {{scenarios}}."
     },
@@ -3090,12 +3090,12 @@
   },
   "subscription": {
     "checkout": {
-      "forbidden": "Poproś administratora swojej organizacji o wykupienie subskrypcji.",
-      "error": "Nie można rozpocząć subskrypcji. Spróbuj ponownie."
+      "forbidden": "Proszę poprosić administratora swojej organizacji o wykupienie subskrypcji.",
+      "error": "Nie można rozpocząć subskrypcji. Proszę spróbować ponownie."
     },
     "portal": {
       "noSubscription": "Brak aktywnej subskrypcji do zarządzania.",
-      "error": "Nie udało się otworzyć portalu subskrypcji. Spróbuj ponownie."
+      "error": "Nie udało się otworzyć portalu subskrypcji. Proszę spróbować ponownie."
     }
   },
   "trpc": {
@@ -3145,18 +3145,18 @@
     "pushFailedTitle": "Wypchnięcie nie powiodło się",
     "pushFailedBody": "Nie można wypchnąć zmian.",
     "pushSucceededTitle": "Wypchnięto",
-    "pushSucceededBody": "Twoje zmiany zostały wypchnięte do repozytorium.",
+    "pushSucceededBody": "Pana/Pani zmiany zostały wypchnięte do repozytorium.",
     "conflictResolvedCommitMessage": "Rozwiąż konflikty",
     "conflictResolvedTitle": "Konflikt rozwiązany",
-    "conflictResolvedBody": "Twój konflikt scalania został rozwiązany i zatwierdzony.",
+    "conflictResolvedBody": "Pana/Pani konflikt scalania został rozwiązany i zatwierdzony.",
     "conflictResolutionTitle": "Rozwiąż konflikty",
     "conflictEntityPath": "Lokalizacja elementu w konflikcie",
     "historyTitle": "Historia Gita",
     "conflictCancel": "Anuluj",
     "conflictFinish": "Zakończ",
-    "conflictReadOnlyEntityNotice": "Tego typu encji nie można tutaj edytować. Wybierz powyżej swoją wersję lub ich.",
+    "conflictReadOnlyEntityNotice": "Tego typu encji nie można tutaj edytować. Proszę wybrać powyżej swoją wersję lub ich.",
     "quickConfigConflictTitle": "Konfiguracje szybkie w konflikcie",
-    "quickConfigOurs": "Twoja",
+    "quickConfigOurs": "Pana/Pani",
     "quickConfigTheirs": "Ich",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Stosuj ten język wiadomości commit domyślnie",
@@ -3220,10 +3220,10 @@
       "24h": "Co 24 godziny"
     },
     "gate": {
-      "initGitFolder": "Zainicjuj folder Git, aby korzystać z tej funkcji."
+      "initGitFolder": "Proszę zainicjować folder Git, aby korzystać z tej funkcji."
     },
     "conflictChooseVersion": "Wybierz wersję",
-    "conflictChooseVersionHint": "Kliknij <0></0> u góry swojej wersji lub wersji serwera — następnie możesz edytować każde pole przed zapisaniem.",
+    "conflictChooseVersionHint": "Proszę kliknąć <0></0> u góry swojej wersji lub wersji serwera — następnie może Pan/Pani edytować każde pole przed zapisaniem.",
     "conflictFinishBlocked": "Niektóre konflikty wciąż wymagają decyzji.",
     "conflictOnQuickConfig": "Konflikt dotyczy szybkiego ustawienia żądania: {{name}}",
     "conflictNameField": "Nazwa",
@@ -3237,18 +3237,18 @@
   },
   "gitUpdate": {
     "title": "Wymagana aktualizacja",
-    "message": "Na serwerze zdalnym istnieje nowsza wersja pliku. Musisz zaktualizować swoją wersję, zanim przejdziesz dalej. Jeśli między Twoją wersją a wersją serwera wystąpią konflikty, pomożemy Ci je rozwiązać.",
-    "conflictCount_one": "{{count}} element różni się między Twoją wersją a wersją serwera.",
-    "conflictCount_other": "Liczba różniących się elementów między Twoją wersją a wersją serwera: {{count}}.",
+    "message": "Na serwerze zdalnym istnieje nowsza wersja pliku. Musi Pan/Pani zaktualizować swoją wersję, zanim przejdzie dalej. Jeśli między Pana/Pani wersją a wersją serwera wystąpią konflikty, pomożemy Panu/Pani je rozwiązać.",
+    "conflictCount_one": "{{count}} element różni się między Pana/Pani wersją a wersją serwera.",
+    "conflictCount_other": "Liczba różniących się elementów między Pana/Pani wersją a wersją serwera: {{count}}.",
     "cancel": "Anuluj",
     "discardMine": "Usuń moje zmiany",
     "keepMineOverwriting": "Zachowaj moją wersję (nadpisuje zmiany serwera)",
     "updateFailedTitle": "Aktualizacja nie powiodła się",
     "updateFailedBody": "Nie udało się pobrać wersji z serwera zdalnego.",
     "discardedTitle": "Zmiany usunięte",
-    "discardedBody": "Jesteś teraz na najnowszej wersji z serwera.",
+    "discardedBody": "Jest Pan/Pani teraz na najnowszej wersji z serwera.",
     "updatedTitle": "Projekt zaktualizowany",
-    "updatedBody": "Jesteś teraz na najnowszej wersji z serwera, Twoje zmiany zostały zachowane.",
+    "updatedBody": "Jest Pan/Pani teraz na najnowszej wersji z serwera, Pana/Pani zmiany zostały zachowane.",
     "keepServerVersion": "Zachowaj wersję serwera",
     "resolveConflicts": "Rozwiąż konflikty",
     "resetConfirmTitle": "Przywrócić wersję serwera?",
@@ -3256,7 +3256,7 @@
   },
   "gitHistory": {
     "recoverConfirmTitle": "Przywrócić tę wersję?",
-    "recoverConfirmBody": "Bieżąca zawartość otwartego pliku zostanie zastąpiona wersją z tego zatwierdzenia. Zmiana nie jest zatwierdzana — możesz ją samodzielnie zatwierdzić i wypchnąć, jeśli chcesz ją zachować.",
+    "recoverConfirmBody": "Bieżąca zawartość otwartego pliku zostanie zastąpiona wersją z tego zatwierdzenia. Zmiana nie jest zatwierdzana — może ją Pan/Pani samodzielnie zatwierdzić i wypchnąć, jeśli chce ją zachować.",
     "recoverConfirmAction": "Przywróć",
     "recoveredTitle": "Wersja przywrócona",
     "recoveredBody": "Plik zawiera teraz zawartość wybranego zatwierdzenia, niezatwierdzoną.",
@@ -3275,9 +3275,9 @@
     "readyBody": "Wersja {{version}} jest gotowa do zainstalowania.",
     "restartNow": "Uruchom ponownie teraz",
     "checkFailedTitle": "Sprawdzanie aktualizacji nie powiodło się",
-    "checkFailedBody": "Nie można sprawdzić aktualizacji. Spróbuj ponownie później.",
-    "upToDateTitle": "Masz najnowszą wersję",
-    "upToDateBody": "Używasz najnowszej wersji ({{version}}).",
+    "checkFailedBody": "Nie można sprawdzić aktualizacji. Proszę spróbować ponownie później.",
+    "upToDateTitle": "Ma Pan/Pani najnowszą wersję",
+    "upToDateBody": "Używa Pan/Pani najnowszej wersji ({{version}}).",
     "whatsNewTitle": "Co nowego?",
     "status": {
       "idle": "Aktualne",
@@ -3290,23 +3290,23 @@
   "privacy": {
     "settingsTitle": "Prywatność",
     "crashReportsTitle": "Wysyłaj raporty o awariach",
-    "crashReportsDescription": "Wysyła zanonimizowany raport, gdy Restorm ulegnie awarii, aby usterkę można było naprawić. Raporty są oczyszczane z adresów URL, tokenów, treści żądań i danych osobowych, zanim opuszczą Twój komputer. Wliczone w plan bezpłatny; plan płatny pozwala to wyłączyć. Pełne informacje: https://restorm.app/privacy",
+    "crashReportsDescription": "Wysyła zanonimizowany raport, gdy Restorm ulegnie awarii, aby usterkę można było naprawić. Raporty są oczyszczane z adresów URL, tokenów, treści żądań i danych osobowych, zanim opuszczą Pana/Pani komputer. Wliczone w plan bezpłatny; plan płatny pozwala to wyłączyć. Pełne informacje: https://restorm.app/privacy",
     "telemetryTitle": "Wysyłaj statystyki użycia",
-    "telemetryDescription": "Wysyła anonimowe statystyki dotyczące używanych funkcji, aby ukierunkować dalszy rozwój. Domyślnie wyłączone i nigdy nie włączane bez Twojej wyraźnej zgody. Nie zawiera danych żądań, adresów URL ani danych osobowych. Pełne informacje: https://restorm.app/privacy",
+    "telemetryDescription": "Wysyła anonimowe statystyki dotyczące używanych funkcji, aby ukierunkować dalszy rozwój. Domyślnie wyłączone i nigdy nie włączane bez Pana/Pani wyraźnej zgody. Nie zawiera danych żądań, adresów URL ani danych osobowych. Pełne informacje: https://restorm.app/privacy",
     "crashReportsLockedLabel": "Możliwe do zmiany od planu Pro. W planie bezpłatnym raporty o awariach są niezbędne do utrzymania jakości.",
     "consentToast": {
       "title": "Pomóż nam ulepszyć Restorm",
-      "body": "W razie nieoczekiwanego błędu Restorm może wysłać nam anonimowy raport, aby pomóc nam naprawić problem. Zawiera techniczny ślad błędu i kontekst diagnostyczny (wersja aplikacji, ostatnie działania). Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe są usuwane, zanim raport opuści Twoje urządzenie. Przed każdym raportem zobaczysz dokładnie, co zostanie wysłane.",
+      "body": "W razie nieoczekiwanego błędu Restorm może wysłać nam anonimowy raport, aby pomóc nam naprawić problem. Zawiera techniczny ślad błędu i kontekst diagnostyczny (wersja aplikacji, ostatnie działania). Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe są usuwane, zanim raport opuści Pana/Pani urządzenie. Przed każdym raportem zobaczy Pan/Pani dokładnie, co zostanie wysłane.",
       "save": "Zapisz moje preferencje",
       "learnMore": "Dowiedz się więcej"
     },
     "crashReportReviewTitle": "Pokazuj każdy raport przed wysłaniem",
-    "crashReportReviewDescription": "Pokazuje dokładną zawartość raportu o awarii i prosi o potwierdzenie przed wysłaniem. Wyłącz, aby wysyłać raporty automatycznie, bez pytania za każdym razem.",
+    "crashReportReviewDescription": "Pokazuje dokładną zawartość raportu o awarii i prosi o potwierdzenie przed wysłaniem. Proszę wyłączyć, aby wysyłać raporty automatycznie, bez pytania za każdym razem.",
     "reportDialog": {
       "title": "Wysłać ten raport o awarii?",
       "intro": "Restorm napotkał problem. Oto dokładnie to, co zostałoby wysłane.",
       "includedError": "Błąd techniczny i miejsce w kodzie, w którym wystąpił",
-      "includedVersion": "Wersja aplikacji i Twój system operacyjny",
+      "includedVersion": "Wersja aplikacji i Pana/Pani system operacyjny",
       "includedActivity": "Co aplikacja robiła tuż przed awarią",
       "removed": "Adresy URL, tokeny, treści żądań i odpowiedzi oraz dane osobowe zostały już usunięte.",
       "viewFull": "Pokaż pełny raport",
@@ -3327,7 +3327,7 @@
   "project": {
     "incompatible": {
       "title": "Projekt utworzony w nowszej wersji",
-      "message": "Ten plik został utworzony w nowszej wersji Restorm niż używana. Zaktualizuj Restorm, aby go otworzyć.",
+      "message": "Ten plik został utworzony w nowszej wersji Restorm niż używana. Proszę zaktualizować Restorm, aby go otworzyć.",
       "versions": "Format pliku {{found}}; ta wersja obsługuje do {{current}}."
     },
     "notARestormFile": {
@@ -3337,8 +3337,8 @@
   },
   "cliTokens": {
     "title": "Moje tokeny CLI/CI",
-    "intro": "Token CLI/CI pozwala uruchomieniu bez interfejsu (CI lub lokalnie z --headless) uwierzytelnić się jako Twoja organizacja. Nigdy nie daje dostępu do Twoich danych.",
-    "empty": "Nie masz jeszcze żadnego tokena.",
+    "intro": "Token CLI/CI pozwala uruchomieniu bez interfejsu (CI lub lokalnie z --headless) uwierzytelnić się jako Pana/Pani organizacja. Nigdy nie daje dostępu do Pana/Pani danych.",
+    "empty": "Nie ma Pan/Pani jeszcze żadnego tokena.",
     "never": "Nigdy",
     "create": "Utwórz token",
     "namePlaceholder": "Etykieta (np. ci-main)",
@@ -3348,7 +3348,7 @@
     "days": "{{count}} dni",
     "copy": "Kopiuj",
     "copied": "Skopiowano",
-    "revealWarning": "Skopiuj go teraz — ten token nie zostanie ponownie pokazany.",
+    "revealWarning": "Proszę go teraz skopiować — ten token nie zostanie ponownie pokazany.",
     "revokeNamed": "Unieważnij {{name}}",
     "column": {
       "name": "Nazwa",
@@ -3364,13 +3364,13 @@
       "expired": "Wygasły"
     },
     "failure": {
-      "signed-out": "Zaloguj się, aby zarządzać tokenami.",
-      "forbidden": "Twoja organizacja nie zezwala Ci na tworzenie tokenów. Administrator może nadać to uprawnienie w konsoli administracyjnej.",
-      "invalid-name": "Tej etykiety nie można użyć. Spróbuj krótszej.",
+      "signed-out": "Proszę się zalogować, aby zarządzać tokenami.",
+      "forbidden": "Pana/Pani organizacja nie zezwala Panu/Pani na tworzenie tokenów. Administrator może nadać to uprawnienie w konsoli administracyjnej.",
+      "invalid-name": "Tej etykiety nie można użyć. Proszę spróbować krótszej.",
       "invalid-expiry": "Ten czas życia jest nieprawidłowy.",
       "not-found": "Ten token już nie istnieje.",
-      "unavailable": "Tokeny są teraz niedostępne. Spróbuj za chwilę.",
-      "plan-required": "Uruchomienia bez interfejsu są częścią planu Pro. Przejdź na Pro, aby tworzyć tokeny — nadal możesz unieważniać te, które już masz."
+      "unavailable": "Tokeny są teraz niedostępne. Proszę spróbować za chwilę.",
+      "plan-required": "Uruchomienia bez interfejsu są częścią planu Pro. Proszę przejść na Pro, aby tworzyć tokeny — nadal może Pan/Pani unieważniać te, które już ma."
     }
   },
   "cookies": {
