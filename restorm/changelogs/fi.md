@@ -9,20 +9,20 @@
 
 ## v1.1.3
 
-**Yhdistä tekoälyavustajasi Restormiin.**
+**Yhdistäkää tekoälyavustajanne Restormiin.**
 
-- **Yhdellä klikkauksella, suoraan sovelluksesta.** Tilarivin MCP-valikko tarjoaa nyt ”Lisää Restorm tekoälyavustajaasi” — valmiiksi liitettävät asetukset Claude Codelle, Claude Desktopille ja Cursorille sekä ”Lisää Claude Codeen” yhdellä klikkauksella.
-- **Tai yhdellä rivillä, missä tahansa.** Osoita mikä tahansa MCP-asiakas käynnissä olevaan Restormiisi komennolla `npx -y restorm-mcp` — silta löytää sen itse, ei kopioitavaa porttia tai tokenia.
-- **Laajennus Claude Codelle.** Suorita `/plugin marketplace add Monsieur-Dev/restorm` ja asenna sitten `restorm`-laajennus.
+- **Yhdellä klikkauksella, suoraan sovelluksesta.** Tilarivin MCP-valikko tarjoaa nyt ”Lisää Restorm tekoälyavustajaanne” — valmiiksi liitettävät asetukset Claude Codelle, Claude Desktopille ja Cursorille sekä ”Lisää Claude Codeen” yhdellä klikkauksella.
+- **Tai yhdellä rivillä, missä tahansa.** Osoittakaa mikä tahansa MCP-asiakas käynnissä olevaan Restormiinne komennolla `npx -y restorm-mcp` — silta löytää sen itse, ei kopioitavaa porttia tai tokenia.
+- **Laajennus Claude Codelle.** Suorittakaa `/plugin marketplace add Monsieur-Dev/restorm` ja asentakaa sitten `restorm`-laajennus.
 
-Katso [Tekoälyavustajan yhdistäminen](https://restorm.app/en/docs/outils/mcp/).
+Katsokaa [Tekoälyavustajan yhdistäminen](https://restorm.app/en/docs/outils/mcp/).
 
 ## v1.1.2
 
 **OpenAPI 3.2 -tuki.**
 
 - **Tuo OpenAPI 3.2 -määrityksiä.** `QUERY`-metodi, mukautetut verbit (`additionalOperations`), query string -parametri ja suoratoistomediatyypit tuodaan valmiina ajettavina pyyntöinä.
-- **Selaa tuotava tiedosto.** Tuontivalintaikkunan Selaa-painike avaa natiivin tiedostonvalitsimen — ei enää polun kirjoittamista tai raahaamista.
+- **Selatkaa tuotava tiedosto.** Tuontivalintaikkunan Selaa-painike avaa natiivin tiedostonvalitsimen — ei enää polun kirjoittamista tai raahaamista.
 - **Jaettu näkymä suurille liitoksille.** Monirivisen määrityksen liittäminen avaa koodieditorin vasemmalle ja esikatselun oikealle säädettävällä jakajalla.
 - **Salliva tuonti.** Määritys, jossa on muutama rikkinäinen `$ref`, tuo kaikki mahdolliset reitit ja näyttää varoituksen siitä, mitä jäi pois.
 
@@ -36,24 +36,24 @@ Korjaukset:
 
 **API-suunnittelijaa ohjataan nyt sivupalkista.**
 
-- **Mallisi, enumit ja reitit elävät sivupalkissa.** Kolme välilehtien listaa katoaa — mallit (perintähierarkioineen), enumit ja reitit (ryhmät ja niiden reitit) ovat nyt suoraan sivupalkin puussa. Napsauta hiiren oikealla nimetäksesi uudelleen, lisätäksesi alimallin tai aliryhmän, kloonataksesi reitin, luodaksesi CRUD:n tai poistaaksesi; vedä järjestääksesi uudelleen tai vaihtaaksesi vanhempaa — ei koskaan ulos suunnitelmasta. Jokainen sivu näyttää nyt vain valitun kohteen tiedot.
-- **Yleiskatsaus malleihisi, enumeihisi ja reitteihisi.** Kunkin osion juurisolmu listaa nyt kaiken sen alla — ja Mallit saavat **Graafi**-välilehden: luokkakaavion malleistasi perintöineen ja viittauksineen. Enumit näyttävät arvonsa heti nimen vieressä.
+- **Mallinne, enumit ja reitit elävät sivupalkissa.** Kolme välilehtien listaa katoaa — mallit (perintähierarkioineen), enumit ja reitit (ryhmät ja niiden reitit) ovat nyt suoraan sivupalkin puussa. Napsauttakaa hiiren oikealla nimetäksenne uudelleen, lisätäksenne alimallin tai aliryhmän, kloonataksenne reitin, luodaksenne CRUD:n tai poistaaksenne; vetäkää järjestääksenne uudelleen tai vaihtaaksenne vanhempaa — ei koskaan ulos suunnitelmasta. Jokainen sivu näyttää nyt vain valitun kohteen tiedot.
+- **Yleiskatsaus malleihinne, enumeihinne ja reitteihinne.** Kunkin osion juurisolmu listaa nyt kaiken sen alla — ja Mallit saavat **Graafi**-välilehden: luokkakaavion malleistanne perintöineen ja viittauksineen. Enumit näyttävät arvonsa heti nimen vieressä.
 - **Yksi paikka nimeämiseen.** Malli, enum tai reitti nimetään sen suuresta otsikosta (kynä), ja tyhjä nimi näyttää **”<nimetön>”**, jotta kynä on aina ulottuvilla — nimeä ei enää näytetä sivulla kahdesti.
 - **Validointivirheet osoittavat kohteeseen.** Kun jokin on pielessä — malli ja enum, joilla on sama nimi, viittaus johonkin, jota ei enää ole — huomautus mallin, enumin tai reitin yläreunassa selittää sen.
 - **Täydellinen navigointipolku.** Polku heijastaa koko sivupalkin hierarkiaa — kansiot › suunnitelma › osio › ryhmä › kohde — ja jokainen segmentti on napsautettavissa.
-- **Valitse monta, poista kerralla.** Valitse useita malleja, enumeja tai reittejä ja poista ne kerralla, vahvistuksen jälkeen.
-- **Kopioi tai avaa koodimallin lähde yhdellä napsautuksella.** "</> Code" -sivulla mallin päälle vietäessä ilmestyy painike sen URL:n tai polun kopioimiseen ja toinen sen avaamiseen — repositorio selaimessa tai kansio levyllä paikallisen mallin tapauksessa.
-- **Uusilla reiteillä on heti nimi.** Tyhjästä luotu reitti saa nyt oletusnimen, joten voit nimetä sen heti uudelleen.
-- **Esikatseluvälilehdet, kuten editorissasi.** Yksi napsautus avaa kohteen nyt uudelleenkäytettävään **esikatselu**välilehteen (sen nimi kursiivilla); toisen kohteen napsauttaminen käyttää samaa välilehteä sen sijaan, että pinoaisi uuden. Kaksoisnapsautus, mikä tahansa muokkaus tai pyynnön suoritus jättää sen pysyvästi auki. Poista käytöstä kohdassa Asetukset › Toiminta.
-- **Kiinnitä auki pitämäsi välilehdet.** Napsauta välilehteä hiiren oikealla ja kiinnitä se: kiinnitetyt välilehdet pysyvät ensimmäisinä, säilyvät ”sulje muut” -toiminnon läpi ja muistetaan projektikohtaisesti.
-- **Ympäristöt saavat kunnon näkymän.** Avaa ympäristö nimetäksesi sen otsikostaan, asettaaksesi sen kuvakkeen ja värin sekä lisätäksesi aliympäristön — ja hiiren oikean painikkeen valikko monistaa nyt ympäristön kaikkine muuttujineen ja aliympäristöineen.
+- **Valitkaa monta, poistakaa kerralla.** Valitkaa useita malleja, enumeja tai reittejä ja poistakaa ne kerralla, vahvistuksen jälkeen.
+- **Kopioikaa tai avatkaa koodimallin lähde yhdellä napsautuksella.** "</> Code" -sivulla mallin päälle vietäessä ilmestyy painike sen URL:n tai polun kopioimiseen ja toinen sen avaamiseen — repositorio selaimessa tai kansio levyllä paikallisen mallin tapauksessa.
+- **Uusilla reiteillä on heti nimi.** Tyhjästä luotu reitti saa nyt oletusnimen, joten voitte nimetä sen heti uudelleen.
+- **Esikatseluvälilehdet, kuten editorissanne.** Yksi napsautus avaa kohteen nyt uudelleenkäytettävään **esikatselu**välilehteen (sen nimi kursiivilla); toisen kohteen napsauttaminen käyttää samaa välilehteä sen sijaan, että pinoaisi uuden. Kaksoisnapsautus, mikä tahansa muokkaus tai pyynnön suoritus jättää sen pysyvästi auki. Poistakaa käytöstä kohdassa Asetukset › Toiminta.
+- **Kiinnittäkää auki pitämänne välilehdet.** Napsauttakaa välilehteä hiiren oikealla ja kiinnittäkää se: kiinnitetyt välilehdet pysyvät ensimmäisinä, säilyvät ”sulje muut” -toiminnon läpi ja muistetaan projektikohtaisesti.
+- **Ympäristöt saavat kunnon näkymän.** Avatkaa ympäristö nimetäksenne sen otsikostaan, asettaaksenne sen kuvakkeen ja värin sekä lisätäksenne aliympäristön — ja hiiren oikean painikkeen valikko monistaa nyt ympäristön kaikkine muuttujineen ja aliympäristöineen.
 
 Korjaukset:
 
-- **Koodimallin valitseminen sulkee kirjaston.** "Käytä" vie sinut nyt suoraan takaisin Code-sivulle.
+- **Koodimallin valitseminen sulkee kirjaston.** "Käytä" vie teidät nyt suoraan takaisin Code-sivulle.
 - **Dokumentaation luonti ei enää epäonnistu valinnaisilla kentillä.** Dokumentaation luominen suunnitelmasta, jonka malli tai parametri jätti "required"-arvon asettamatta, ei enää pysähdy mallivirheeseen.
 - **Enumin poisto kysyy ensin.** Enumit saavat saman vahvistuksen kuin mallit ja reitit.
-- **Sivupalkki paljastaa valintasi.** Kun ”synkronoi sivupalkki aktiivisen välilehden kanssa” on käytössä, mallin, enumin tai reitin valinta tai luonti avaa sen ylätasot, jotta se pysyy näkyvissä puussa.
+- **Sivupalkki paljastaa valintanne.** Kun ”synkronoi sivupalkki aktiivisen välilehden kanssa” on käytössä, mallin, enumin tai reitin valinta tai luonti avaa sen ylätasot, jotta se pysyy näkyvissä puussa.
 - **Ympäristöpainike pysyy luettavana millä tahansa värillä.** Sen teksti vaihtuu nyt tummaksi tai vaaleaksi pysyäkseen luettavana ympäristön väriä vasten, kuten suorituspainike.
 - **Keskipainikkeen napsautus sulkee avoimen tiedoston.** Sivupalkin ”Avatut”-luettelon kohteen napsauttaminen keskipainikkeella sulkee sen välilehden — ja uusi Toiminta-asetus antaa piilottaa koko paneelin.
 - **Selkeämpi sanamuoto dokumentaatiosta aloitettaessa.** Tuodun API:n dokumentaatiossa painikkeessa lukee nyt ”Luo uusi pyyntö tästä dokumentaatiosta”.
@@ -61,12 +61,12 @@ Korjaukset:
 
 ## v1.1.0
 
-🎉 **Restorm on nyt myös API-suunnittelija.** Suunnittele API:si, tarjoile se live-mockina viidellä protokollalla kerralla ja generoi sen asiakkaat — poistumatta sovelluksesta, kaikki omalla levylläsi.
+🎉 **Restorm on nyt myös API-suunnittelija.** Suunnitelkaa API:nne, tarjoilkaa se live-mockina viidellä protokollalla kerralla ja generoikaa sen asiakkaat — poistumatta sovelluksesta, kaikki omalla levyllänne.
 
-- **Visuaalinen API-suunnittelija.** Mallinna API:si käsin — mallit, enumit (nimetyt tai inline), reitit, parametrit, nimetyt esimerkit, rajoitteet, tunnisteet ja vanhentumiset — kirjoittamatta riviäkään määrittelyä.
-- **Tarjoile se mockina, yhdellä napsautuksella, viidellä protokollalla kerralla.** Suunnitelmasta tulee palvelin, joka vastaa HTTP:llä, GraphQL:llä, SOAP:lla, OData:lla ja gRPC:llä samanaikaisesti. Vastaukset tulevat nimetyistä esimerkeistäsi (tai malleistasi generoidusta realistisesta datasta), rajoitteiden validoinnilla, simuloidulla viiveellä ja tilallisella tilalla.
-- **Käyttövalmiit asiakkaat, generoituna automaattisesti.** Mockin ollessa käynnissä Clients-osio luo aitoja, suoritettavia pyyntöjä jokaiselle käytössä olevalle protokollalle, kohdistettuna mockin päätepisteisiin. Yksi napsautus avaa pyynnön ja osuu palvelimeen — ei enää API:si uudelleentuontia muualle sen testaamiseksi.
-- **Generoi koodia** suunnitelmastasi käyttäen valmiita mallipohjia ja omia mukautettuja, renderöitynä hiekkalaatikossa ja levylle kirjoitettuna vasta, kun vahvistat. **Vie myös deskriptori** (OpenAPI ja muut).
+- **Visuaalinen API-suunnittelija.** Mallintakaa API:nne käsin — mallit, enumit (nimetyt tai inline), reitit, parametrit, nimetyt esimerkit, rajoitteet, tunnisteet ja vanhentumiset — kirjoittamatta riviäkään määrittelyä.
+- **Tarjoilkaa se mockina, yhdellä napsautuksella, viidellä protokollalla kerralla.** Suunnitelmasta tulee palvelin, joka vastaa HTTP:llä, GraphQL:llä, SOAP:lla, OData:lla ja gRPC:llä samanaikaisesti. Vastaukset tulevat nimetyistä esimerkeistänne (tai malleistanne generoidusta realistisesta datasta), rajoitteiden validoinnilla, simuloidulla viiveellä ja tilallisella tilalla.
+- **Käyttövalmiit asiakkaat, generoituna automaattisesti.** Mockin ollessa käynnissä Clients-osio luo aitoja, suoritettavia pyyntöjä jokaiselle käytössä olevalle protokollalle, kohdistettuna mockin päätepisteisiin. Yksi napsautus avaa pyynnön ja osuu palvelimeen — ei enää API:nne uudelleentuontia muualle sen testaamiseksi.
+- **Generoikaa koodia** suunnitelmastanne käyttäen valmiita mallipohjia ja omia mukautettuja, renderöitynä hiekkalaatikossa ja levylle kirjoitettuna vasta, kun vahvistatte. **Viekää myös deskriptori** (OpenAPI ja muut).
 - **Tuonnissa pyyntöjen rungot esitäytetään**: GraphQL valitsee paluutyypin skalaarikentät, gRPC laajentaa sisäkkäiset viestit — pyyntö toimii sellaisenaan.
 
 ## v1.0.6
@@ -80,13 +80,13 @@ Korjaukset:
 
 **Cookie jar – yksi evästepurkki jokaiselle ympäristölle.**
 
-- **Jokainen ympäristö pitää omat evästeensä.** Kirjaudu kehitys-API:isi ja tuotanto-API:isi kahdesta ympäristöstä, eivätkä niiden istunnot koskaan mene ristiin – yhdessä talteen otettu eväste lähetetään takaisin vain siinä samassa. Vanheneminen, `Path`, `Domain` ja alitoimialueet, `Secure`, `HttpOnly` ja `SameSite` otetaan nyt huomioon eikä niitä enää hylätä.
-- **Tässä on Cookie jar.** Uusi työtila-välilehti – **Näytä ▸ Cookie jar** – listaa kaikkien ympäristöjen evästeet verkkotunnuksen mukaan ryhmiteltyinä pienennettävissä paneeleissa: muokkaa arvoa, poista yksittäinen, tyhjennä verkkotunnus tai koko purkki, tai lisää eväste käsin. Se päivittyy reaaliaikaisesti, kun pyyntösi asettavat evästeitä.
-- **Näe, mitä kukin pyyntö lähetti ja vastaanotti.** Jokaisella pyynnöllä on nyt **Evästeet**-välilehti Vastaus- ja Tiedot-välilehtien vieressä, ja se näyttää kutsun mukana lähetetyt evästeet sekä takaisin vastaanotetut evästeet – mukaan lukien uudelleenohjauksessa asetetut evästeet, jotka eivät koskaan päädy lopulliseen vastaukseen. Se löytyy myös historian aiemmista vastauksista.
+- **Jokainen ympäristö pitää omat evästeensä.** Kirjautukaa kehitys-API:inne ja tuotanto-API:inne kahdesta ympäristöstä, eivätkä niiden istunnot koskaan mene ristiin – yhdessä talteen otettu eväste lähetetään takaisin vain siinä samassa. Vanheneminen, `Path`, `Domain` ja alitoimialueet, `Secure`, `HttpOnly` ja `SameSite` otetaan nyt huomioon eikä niitä enää hylätä.
+- **Tässä on Cookie jar.** Uusi työtila-välilehti – **Näytä ▸ Cookie jar** – listaa kaikkien ympäristöjen evästeet verkkotunnuksen mukaan ryhmiteltyinä pienennettävissä paneeleissa: muokatkaa arvoa, poistakaa yksittäinen, tyhjentäkää verkkotunnus tai koko purkki, tai lisätkää eväste käsin. Se päivittyy reaaliaikaisesti, kun pyyntönne asettavat evästeitä.
+- **Nähkää, mitä kukin pyyntö lähetti ja vastaanotti.** Jokaisella pyynnöllä on nyt **Evästeet**-välilehti Vastaus- ja Tiedot-välilehtien vieressä, ja se näyttää kutsun mukana lähetetyt evästeet sekä takaisin vastaanotetut evästeet – mukaan lukien uudelleenohjauksessa asetetut evästeet, jotka eivät koskaan päädy lopulliseen vastaukseen. Se löytyy myös historian aiemmista vastauksista.
 - **Evästekirjautumiset vain toimivat.** Pyyntö, joka palauttaa `Set-Cookie`, otetaan talteen ja lähetetään automaattisesti uudelleen seuraavissa suojatuissa kutsuissa – myös läpi skenaarioajon, jossa jokainen vaihe jakaa ympäristön purkin.
-- **Evästeet säilyvät kuten selaimessa.** Vanhenemisajan sisältävät evästeet tallennetaan projektikohtaisesti ja ladataan uudelleen, kun avaat projektin uudelleen; istuntoevästeet hylätään, kun käynnistät sovelluksen uudelleen – täsmälleen kuten selain tekisi.
+- **Evästeet säilyvät kuten selaimessa.** Vanhenemisajan sisältävät evästeet tallennetaan projektikohtaisesti ja ladataan uudelleen, kun avaatte projektin uudelleen; istuntoevästeet hylätään, kun käynnistätte sovelluksen uudelleen – täsmälleen kuten selain tekisi.
 - **REST-rajapintaa laajemmin.** GraphQL, SOAP, OData, JSON-RPC, tRPC ja SSE lähettävät ja tallentavat nyt evästeitä, ja WebSocket kuljettaa ne yhteyden kättelyssä (handshake).
-- **Evästeet voivat käyttää muuttujiasi.** Kirjoita `{{token}}` käsin lisäämääsi evästeeseen, niin se ratkaistaan aktiivista ympäristöä vasten, kun pyyntö lähtee.
+- **Evästeet voivat käyttää muuttujianne.** Kirjoittakaa `{{token}}` käsin lisäämäänne evästeeseen, niin se ratkaistaan aktiivista ympäristöä vasten, kun pyyntö lähtee.
 
 Korjaukset:
 
@@ -94,9 +94,9 @@ Korjaukset:
 
 ## v1.0.4
 
-**Kirjaudu kerran — kaikki ikkunat seuraavat.**
+**Kirjautukaa kerran — kaikki ikkunat seuraavat.**
 
-- **Tilisi seuraa sinua nyt ikkunasta toiseen.** Kirjaudu sisään, ulos tai vaihda tilausta yhdessä Restorm-ikkunassa, ja kaikki muut avoimet ikkunat omaksuvat sen heti — ilman uudelleenkäynnistystä, ilman toista kirjautumista. Ja kun viimeistelet kirjautumisen selaimessa, vahvistus saapuu nyt siihen ikkunaan, joka sitä pyysi, vaikka ikkunoita olisi auki useita.
+- **Tilinne seuraa teitä nyt ikkunasta toiseen.** Kirjautukaa sisään, ulos tai vaihtakaa tilausta yhdessä Restorm-ikkunassa, ja kaikki muut avoimet ikkunat omaksuvat sen heti — ilman uudelleenkäynnistystä, ilman toista kirjautumista. Ja kun viimeistelette kirjautumisen selaimessa, vahvistus saapuu nyt siihen ikkunaan, joka sitä pyysi, vaikka ikkunoita olisi auki useita.
 
 Korjaukset:
 
@@ -112,9 +112,9 @@ Korjaukset:
 
 ## v1.0.2
 
-**CLI/CI-tunnuksesi ilman sovelluksesta poistumista.**
+**CLI/CI-tunnuksenne ilman sovelluksesta poistumista.**
 
-- **Luo, katsele ja kumoa tunnuksesi Restormissa** — Pro- ja Enterprise-käyttäjille, tilipainikkeesta otsikkopalkissa. Ei enää käyntiä hallintapaneelissa juuri kirjoittamasi putken tunnuksen takia.
+- **Luokaa, katselkaa ja kumotkaa tunnuksenne Restormissa** — Pro- ja Enterprise-käyttäjille, tilipainikkeesta otsikkopalkissa. Ei enää käyntiä hallintapaneelissa juuri kirjoittamanne putken tunnuksen takia.
 - **Tunnukset voivat vanhentua.** Valitse luodessasi voimassaoloaika: 7–365 päivää tai ei vanhene, kuten ennen. Vanhentunut tunnus hylätään samoin kuin kumottu.
 - **Organisaatiosi voi delegoida.** Ylläpitäjä voi antaa tietylle jäsenelle oikeuden luoda tunnuksia ja erikseen pääsyn valvontalokiin tekemättä hänestä ylläpitäjää.
 - **Restorm asentuu nyt npm:stä.** `npm i -g restorm-cli` ja sitten `restorm` — sovellus käynnistyy Linuxissa, macOS:ssä ja Windowsissa ilman asennusohjelmaa. Koontiversio ladataan kerran, varmennetaan julkaistulla tarkistussummalla ja säilytetään välimuistissa, joten putki ei lataa sitä uudelleen joka työssä.

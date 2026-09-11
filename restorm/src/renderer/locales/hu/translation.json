@@ -87,68 +87,68 @@
   "tips": {
     "cardTitle": "Tippek és trükkök",
     "maximizeTab": {
-      "title": "Nagyítsd ki a lapot egyetlen kattintással",
-      "body": "Kattints duplán bármelyik workbench lapra, hogy teljes képernyőn jelenjen meg. Az Esc megnyomásával visszatérhetsz az előző elrendezéshez."
+      "title": "Nagyítsa ki a lapot egyetlen kattintással",
+      "body": "Kattintson duplán bármelyik workbench lapra, hogy teljes képernyőn jelenjen meg. Az Esc megnyomásával visszatérhet az előző elrendezéshez."
     },
     "mcpControl": {
-      "title": "Vezéreld a restormot AI-jal",
-      "body": "A restorm MCP-szervert tartalmaz, így a Claude Code-hoz hasonló AI-asszisztensek listázhatják, megnyithatják, szerkeszthetik és futtathatják a kéréseidet, megvizsgálhatják a válaszokat és programozottan kezelhetik a munkaterületet – anélkül, hogy elhagynák a beszélgetést."
+      "title": "Vezérelje a restormot AI-jal",
+      "body": "A restorm MCP-szervert tartalmaz, így a Claude Code-hoz hasonló AI-asszisztensek listázhatják, megnyithatják, szerkeszthetik és futtathatják a kéréseit, megvizsgálhatják a válaszokat és programozottan kezelhetik a munkaterületet – anélkül, hogy elhagynák a beszélgetést."
     },
     "envSwitch": {
-      "title": "Válts környezetet egyszerűen!",
-      "body": "Módosítsd az aktuális kérés vagy az API összes kérésének környezetét az állapotsor gombjára kattintva, vagy a kérés küldés gombján jobb egérgombbal kattintva."
+      "title": "Váltson környezetet egyszerűen!",
+      "body": "Módosítsa az aktuális kérés vagy az API összes kérésének környezetét az állapotsor gombjára kattintva, vagy a kérés küldés gombján jobb egérgombbal kattintva."
     },
     "authRequests": {
-      "title": "Hitelesítened kell magad az API-d eléréséhez?",
-      "body": "Ahelyett, hogy minden alkalommal kérést indítanál egy token lekérésére és mindenhová bemásolnád, használj autentikációs kéréseket. Ha egy hívás sikertelen (401, 403, …) vagy lejár a token, az autentikációs kérés automatikusan újra lefut a token kinyeréséhez és felhasználásához. Praktikus!"
+      "title": "Hitelesítenie kell magát az API-ja eléréséhez?",
+      "body": "Ahelyett, hogy minden alkalommal kérést indítana egy token lekérésére és mindenhová bemásolná, használjon autentikációs kéréseket. Ha egy hívás sikertelen (401, 403, …) vagy lejár a token, az autentikációs kérés automatikusan újra lefut a token kinyeréséhez és felhasználásához. Praktikus!"
     },
     "supplyChain": {
-      "title": "Védd magad!",
-      "body": "Mint minden szoftver, a Restorm is harmadik féltől származó könyvtárakat használ. Az ellátási láncot célzó támadások elkerülése érdekében minden kimenő hívást a legalsó szinten elkapunk, és figyelmeztetünk, ha egy harmadik féltől származó könyvtár megpróbálja ellopni a személyes adataidat!"
+      "title": "Védje magát!",
+      "body": "Mint minden szoftver, a Restorm is harmadik féltől származó könyvtárakat használ. Az ellátási láncot célzó támadások elkerülése érdekében minden kimenő hívást a legalsó szinten elkapunk, és figyelmeztetünk, ha egy harmadik féltől származó könyvtár megpróbálja ellopni a személyes adatait!"
     },
     "codeSnippets": {
       "title": "A Restorm segít a kódolásban!",
-      "body": "Találj kódrészleteket minden kéréshez, amelyek segítenek a szoftverbe integrálni őket. Sok nyelv elérhető: curl, PowerShell, TypeScript, C# és még sok más!"
+      "body": "Találjon kódrészleteket minden kéréshez, amelyek segítenek a szoftverbe integrálni őket. Sok nyelv elérhető: curl, PowerShell, TypeScript, C# és még sok más!"
     },
     "workbenchLayout": {
-      "title": "Szervezd a munkafelületedet",
-      "body": "Nagy a kijelződ és sok a kérés? Helyezd őket egymás mellé, egymás alá, vagy ahogy csak akarod — egyszerűen húzz egy fület oda, ahova szeretnéd. Mindent a kényelmedért!"
+      "title": "Szervezze a munkafelületét",
+      "body": "Nagy a kijelzője és sok a kérés? Helyezze őket egymás mellé, egymás alá, vagy ahogy csak akarja — egyszerűen húzzon egy fület oda, ahova szeretné. Mindent az Ön kényelméért!"
     },
     "persistState": {
-      "title": "Találd meg pontosan úgy, ahogy hagytad!",
-      "body": "Ha bezárod a Restormot és újra megnyitod, ugyanabban az állapotban találod, mint amikor utoljára otthagytad."
+      "title": "Találja meg pontosan úgy, ahogy hagyta!",
+      "body": "Ha bezárja a Restormot és újra megnyitja, ugyanabban az állapotban találja, mint amikor utoljára otthagyta."
     },
     "favorites": {
-      "title": "Vannak, amelyek közelebb állnak a szívedhez…",
-      "body": "Vannak kérések, amelyek fontosabbak számodra, mint mások? Jelöld be őket kedvencként!"
+      "title": "Vannak, amelyek közelebb állnak a szívéhez…",
+      "body": "Vannak kérések, amelyek fontosabbak az Ön számára, mint mások? Jelölje be őket kedvencként!"
     },
     "console": {
-      "title": "Lásd, mi történik",
-      "body": "A konzol valós időben mutatja az API-hívásokat, amikor kéréseket küldesz. Praktikus, ha be akarod illeszteni őket a terminálodba! Melyik a kedvenced: curl vagy PowerShell?"
+      "title": "Lássa, mi történik",
+      "body": "A konzol valós időben mutatja az API-hívásokat, amikor kéréseket küld. Praktikus, ha be akarja illeszteni őket a termináljába! Melyik a kedvence: curl vagy PowerShell?"
     },
     "miniBrowser": {
-      "title": "Eleged van az állandó ablakváltogatásból?",
-      "body": "A Restorm tartalmaz egy beépített mini böngészőt. Hasznos, ha az alkalmazásod vizuálisan reagál az API-hívásaidra."
+      "title": "Elege van az állandó ablakváltogatásból?",
+      "body": "A Restorm tartalmaz egy beépített mini böngészőt. Hasznos, ha az alkalmazása vizuálisan reagál az API-hívásaira."
     },
     "apiDocs": {
       "title": "Dokumentáció — itt helyben",
-      "body": "Nem kell többé a Restorm és az API dokumentációja között váltogatnod. Ha az API-d biztosít specifikációt (Swagger, OpenAPI, …), a Restorm beimportálja, és közvetlenül itt nézegetheted."
+      "body": "Nem kell többé a Restorm és az API dokumentációja között váltogatnia. Ha az API-ja biztosít specifikációt (Swagger, OpenAPI, …), a Restorm beimportálja, és közvetlenül itt nézegetheti."
     },
     "secrets": {
-      "title": "Védd a titkaidat",
-      "body": "A jelszavaid és az autorizációs tokenjeid nem közvetlenül a Restorm-fájlban tárolódnak. Ezért a Restorm külön fájlokban tartja a titkokat és a kérések előzményeit. Rajtad múlik, hogy ezeket ne töltsd fel a GitHubra. A Restorm képes a titkokat AWS-ből, GitHubról és más forrásokból is letölteni."
+      "title": "Védje a titkait",
+      "body": "A jelszavai és az autorizációs tokenjei nem közvetlenül a Restorm-fájlban tárolódnak. Ezért a Restorm külön fájlokban tartja a titkokat és a kérések előzményeit. Önön múlik, hogy ezeket ne töltse fel a GitHubra. A Restorm képes a titkokat AWS-ből, GitHubról és más forrásokból is letölteni."
     },
     "themes": {
-      "title": "A te színeid, a te hangulatod",
-      "body": "A Restorm több színsémával érkezik. Válaszd ki azt, amelyik a hangulatodhoz illik."
+      "title": "Az Ön színei, az Ön hangulata",
+      "body": "A Restorm több színsémával érkezik. Válassza ki azt, amelyik a hangulatához illik."
     },
     "search": {
-      "title": "Találd meg mindent, gyorsan",
-      "body": "Láttad az ablak tetejét? A Restorm beépített keresőt is tartalmaz, így nem kell órákig keresgélned AZT az egy kérést."
+      "title": "Találja meg mindent, gyorsan",
+      "body": "Látta az ablak tetejét? A Restorm beépített keresőt is tartalmaz, így nem kell órákig keresgélnie AZT az egy kérést."
     },
     "multiEnv": {
       "title": "Ugyanaz a kérés, más környezet",
-      "body": "Van dev, prod és staging környezeted? Ugyanazok a kérések, csak nem teljesen ugyanazok az URL-ek és tokenek… Használd a környezeteket és változókat, hogy egyetlen kattintással válts közöttük. Mindegyik környezetet jelölheted saját színnel és ikonnal, hogy elkerüld a pénteki éjszakai éles ijedelmet!"
+      "body": "Van dev, prod és staging környezete? Ugyanazok a kérések, csak nem teljesen ugyanazok az URL-ek és tokenek… Használja a környezeteket és változókat, hogy egyetlen kattintással váltson közöttük. Mindegyik környezetet jelölheti saját színnel és ikonnal, hogy elkerülje a pénteki éjszakai éles ijedelmet!"
     },
     "protocols": {
       "title": "Nem csak REST",
@@ -156,59 +156,59 @@
     },
     "responseTree": {
       "title": "Lásd az API-válaszokat vizuálisan",
-      "body": "Tudtad, hogy az API-válaszokat látványosabb formában is megtekintheted? A Restorm interaktív faként jeleníti meg őket, amelyet bejárhatsz, becsukhatsz és kinyithatsz."
+      "body": "Tudta, hogy az API-válaszokat látványosabb formában is megtekintheti? A Restorm interaktív faként jeleníti meg őket, amelyet bejárhat, becsukhat és kinyithat."
     },
     "responseHistory": {
       "title": "Kérések előzményei",
-      "body": "Megnézheted az összes API-híváshoz tartozó előzményt. Praktikus, ha rá akarsz jönni, mi is történt valójában."
+      "body": "Megnézheti az összes API-híváshoz tartozó előzményt. Praktikus, ha rá akar jönni, mi is történt valójában."
     },
     "multiLanguage": {
       "title": "27 nyelv!",
-      "body": "A Restorm 27 nyelven beszél. Angol, francia, spanyol, német, olasz, japán, kínai, koreai és még sok más — válaszd ki a sajátodat a beállításokban!"
+      "body": "A Restorm 27 nyelven beszél. Angol, francia, spanyol, német, olasz, japán, kínai, koreai és még sok más — válassza ki a sajátját a beállításokban!"
     },
     "fromPostman": {
-      "title": "Postmanből vagy Brunóból érkezel?",
+      "title": "Postmanből vagy Brunóból érkezik?",
       "body": "Segítünk az átállásban a Restormra — könnyűvé tesszük a váltást ;)"
     },
     "chainRequests": {
       "title": "Több kérést kell láncba fűzni?",
-      "body": "Használd a kéréseidet forgatókönyveken belül, adj hozzá feltételeket, sőt forgatókönyveket is ágyazhatsz más forgatókönyvekbe."
+      "body": "Használja a kéréseit forgatókönyveken belül, adjon hozzá feltételeket, sőt forgatókönyveket is ágyazhat más forgatókönyvekbe."
     },
     "stepByStep": {
-      "title": "Lépkedj végig a forgatókönyveiden",
-      "body": "Egyszerre egy lépés, hogy pontosan lásd, mi történik. Még töréspontokat is beállíthatsz."
+      "title": "Lépkedjen végig a forgatókönyvein",
+      "body": "Egyszerre egy lépés, hogy pontosan lássa, mi történik. Még töréspontokat is beállíthat."
     },
     "cicd": {
-      "title": "Futtasd a forgatókönyveidet a CI/CD-folyamataidban",
-      "body": "Indítsd el a Restormot felület nélkül, hogy egy forgatókönyvet UI nélkül futtass, és gyűjtsd be a naplóit — automatizált tesztek, vizuálisan felépítve."
+      "title": "Futtassa a forgatókönyveit a CI/CD-folyamataiban",
+      "body": "Indítsa el a Restormot felület nélkül, hogy egy forgatókönyvet UI nélkül futtasson, és gyűjtse be a naplóit — automatizált tesztek, vizuálisan felépítve."
     },
     "nestedScenarios": {
       "title": "Lásd, mi történik egy forgatókönyvben",
-      "body": "Egy forgatókönyv meghívhat egy másikat. Az ellenőrzőben olvasd el minden naplót, és ugorj egyenesen ahhoz a forgatókönyvhöz, amelyből származik."
+      "body": "Egy forgatókönyv meghívhat egy másikat. Az ellenőrzőben olvassa el minden naplót, és ugorjon egyenesen ahhoz a forgatókönyvhöz, amelyből származik."
     },
     "scenarioHistory": {
       "title": "De mi is történt az imént?",
-      "body": "Böngészd a forgatókönyveid futási előzményeit. Az egyikük azóta megváltozott? Semmi gond — elmentettük a konfigurációját."
+      "body": "Böngéssze a forgatókönyvei futási előzményeit. Az egyikük azóta megváltozott? Semmi gond — elmentettük a konfigurációját."
     },
     "codeSandbox": {
       "title": "Forgatókönyvek és biztonság",
-      "body": "Írhatsz kódot a forgatókönyveidben — de az egy biztonságos elszigetelt környezetben fut, a helyi fájljaidhoz való hozzáférés és közvetlen internetkapcsolat nélkül. A legbiztonságosabb módja annak, hogy védve maradj!"
+      "body": "Írhat kódot a forgatókönyveiben — de az egy biztonságos elszigetelt környezetben fut, a helyi fájljaihoz való hozzáférés és közvetlen internetkapcsolat nélkül. A legbiztonságosabb módja annak, hogy védve maradjon!"
     },
     "codeLanguages": {
-      "title": "Kedved támadt egy kis kódíráshoz?",
-      "body": "Írj kódot közvetlenül a forgatókönyveidben — TypeScript, JavaScript, Python, Lua, Ruby, C# vagy R nyelven!"
+      "title": "Kedve támadt egy kis kódíráshoz?",
+      "body": "Írjon kódot közvetlenül a forgatókönyveiben — TypeScript, JavaScript, Python, Lua, Ruby, C# vagy R nyelven!"
     },
     "scenarioAi": {
       "title": "Mesterséges intelligenciával vezérelhető forgatókönyvek",
-      "body": "A Claude, a Cursor, a Copilot… ismerik a kódbázisodat: kérj tőlük testreszabott forgatókönyveket. Minden elérhető MCP-n keresztül a forgatókönyvek létrehozásához, szerkesztéséhez és futtatásához."
+      "body": "A Claude, a Cursor, a Copilot… ismerik a kódbázisát: kérjen tőlük testreszabott forgatókönyveket. Minden elérhető MCP-n keresztül a forgatókönyvek létrehozásához, szerkesztéséhez és futtatásához."
     },
     "interactiveScenarios": {
       "title": "Interaktív forgatókönyvek!",
-      "body": "Tedd a forgatókönyveidet paraméterezhetővé, sőt párbeszédablakokkal kérdezd meg a felhasználót, hogy mit tegyél."
+      "body": "Tegye a forgatókönyveit paraméterezhetővé, sőt párbeszédablakokkal kérdezze meg a felhasználót, hogy mit tegyen."
     },
     "customValueLists": {
       "title": "Újrafelhasználható értéklisták",
-      "body": "Határozd meg a saját értéklistáidat, és használd fel őket újra a kéréseidben és a forgatókönyveidben egyaránt."
+      "body": "Határozza meg a saját értéklistáit, és használja fel őket újra a kéréseiben és a forgatókönyveiben egyaránt."
     }
   },
   "authFailureToast": {
@@ -1090,7 +1090,7 @@
         "trademark": "A Bruno nyílt forráskódú szoftver (MIT), Anoop M. D. által, itt a feltételei szerint használva."
       },
       "thunderclient": {
-        "description": "A Thunder Clientből érkezel? Húzd be az exportált kollekció JSON-t — a Restorm beolvas minden kérést, mappát, fejlécet és törzset, majd újraépíti a kollekciót futtatásra kész Restorm-fává.",
+        "description": "A Thunder Clientből érkezik? Húzza be az exportált kollekció JSON-t — a Restorm beolvas minden kérést, mappát, fejlécet és törzset, majd újraépíti a kollekciót futtatásra kész Restorm-fává.",
         "trademark": "A Thunder Client a mindenkori tulajdonosának védjegye, itt kizárólag kompatibilitási hivatkozásként szerepel."
       },
       "graphql": {
@@ -1213,8 +1213,8 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Importáld az API-d",
-      "body": "Hozz be egy OpenAPI / Swagger-specifikációt, GraphQL-sémát, Postman / Bruno / Insomnia-gyűjteményt, vagy illessz be egy curl / PowerShell-parancsot. A Restorm feldolgozza, felépíti a mappastruktúrát és minden végpontot előre kitöltve ad."
+      "title": "Importálja az API-ját",
+      "body": "Hozzon be egy OpenAPI / Swagger-specifikációt, GraphQL-sémát, Postman / Bruno / Insomnia-gyűjteményt, vagy illesszen be egy curl / PowerShell-parancsot. A Restorm feldolgozza, felépíti a mappastruktúrát és minden végpontot előre kitöltve ad."
     },
     "recentActivity": {
       "title": "Legutóbbi tevékenység",
@@ -1597,7 +1597,7 @@
       "step": "Lépésenként",
       "previewInfo": "Példaadatok korábbi kérési eredmények alapján.",
       "pause": "Szünet",
-      "noRunsHint": "Nincs friss futtatás ehhez a kéréshez — futtasd innen, hogy feltöltsd a forgatókönyv előnézetét.",
+      "noRunsHint": "Nincs friss futtatás ehhez a kéréshez — futtassa innen, hogy feltöltse a forgatókönyv előnézetét.",
       "syntheticInfo": "Példa adatok generálva ennek a kérésnek a dokumentációjából.",
       "syntheticRunHint": "Példa adatok — futtassa a kérést, hogy valódi eredménnyel cserélje ki.",
       "stop": "Leállítás",
@@ -3254,7 +3254,7 @@
   },
   "gitHistory": {
     "recoverConfirmTitle": "Visszaállítja ezt a verziót?",
-    "recoverConfirmBody": "A megnyitott fájl jelenlegi tartalmát felülírja ennek a commitnak a verziója. A módosítás nincs commitolva — saját magad commitolhatod és push-olhatod, ha meg akarod tartani.",
+    "recoverConfirmBody": "A megnyitott fájl jelenlegi tartalmát felülírja ennek a commitnak a verziója. A módosítás nincs commitolva — saját maga commitolhatja és push-olhatja, ha meg akarja tartani.",
     "recoverConfirmAction": "Visszaállítás",
     "recoveredTitle": "Verzió visszaállítva",
     "recoveredBody": "A fájl most a kiválasztott commit tartalmát tartalmazza, commit nélkül.",

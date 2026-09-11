@@ -436,7 +436,7 @@
     "refresh": "Frissítés",
     "go": "Ugrás",
     "address": "Cím",
-    "emptyHint": "Adj meg egy címet fent a böngészés megkezdéséhez."
+    "emptyHint": "Adjon meg egy címet fent a böngészés megkezdéséhez."
   },
   "bookmarkRibbon": {
     "addBookmark": "Könyvjelző hozzáadása",

@@ -2,27 +2,27 @@
 
 ## v1.1.4
 
-**Conecta tu asistente de IA en macOS — ahora de forma fiable.**
+**Conecte su asistente de IA en macOS — ahora de forma fiable.**
 
 - **Corregido: Claude Desktop y Cursor en macOS.** Conectar un asistente de IA cargaba las herramientas de Restorm, pero luego cada llamada fallaba con «no hay ninguna instancia en ejecución», incluso con Restorm abierto — la app y el conector se buscaban en carpetas temporales distintas. Ahora se encuentran de forma fiable, sea cual sea lo que haya iniciado el conector.
-- **Tratamiento formal en italiano, polaco y finés.** La interfaz ahora se dirige a ti en el registro formal en estos tres idiomas, en coherencia con el resto.
+- **Tratamiento formal en italiano, polaco y finés.** La interfaz ahora se dirige a usted en el registro formal en estos tres idiomas, en coherencia con el resto.
 
 ## v1.1.3
 
-**Conecta tu asistente de IA a Restorm.**
+**Conecte su asistente de IA a Restorm.**
 
-- **Con un clic, desde la app.** El menú MCP de la barra de estado ahora ofrece «Añadir Restorm a tu asistente de IA» — configuración lista para pegar para Claude Code, Claude Desktop y Cursor, además de «Añadir a Claude Code» con un clic.
-- **O con una línea, en cualquier parte.** Apunta cualquier cliente MCP a tu Restorm en ejecución con `npx -y restorm-mcp` — el puente lo encuentra por sí solo, sin ningún puerto ni token que copiar.
-- **Un plugin para Claude Code.** Ejecuta `/plugin marketplace add Monsieur-Dev/restorm` y luego instala el plugin `restorm`.
+- **Con un clic, desde la app.** El menú MCP de la barra de estado ahora ofrece «Añadir Restorm a su asistente de IA» — configuración lista para pegar para Claude Code, Claude Desktop y Cursor, además de «Añadir a Claude Code» con un clic.
+- **O con una línea, en cualquier parte.** Apunte cualquier cliente MCP a su Restorm en ejecución con `npx -y restorm-mcp` — el puente lo encuentra por sí solo, sin ningún puerto ni token que copiar.
+- **Un plugin para Claude Code.** Ejecute `/plugin marketplace add Monsieur-Dev/restorm` y luego instale el plugin `restorm`.
 
-Consulta [Conectar tu asistente de IA](https://restorm.app/en/docs/outils/mcp/).
+Consulte [Conectar su asistente de IA](https://restorm.app/en/docs/outils/mcp/).
 
 ## v1.1.2
 
 **Compatibilidad con OpenAPI 3.2.**
 
-- **Importa especificaciones OpenAPI 3.2.** El método `QUERY`, los verbos personalizados (`additionalOperations`), el parámetro de query string y los tipos de medio en streaming se importan como peticiones listas para ejecutar.
-- **Examina un archivo para importar.** Un botón Examinar en el diálogo de importación abre un selector de archivos nativo — se acabó teclear o arrastrar una ruta.
+- **Importe especificaciones OpenAPI 3.2.** El método `QUERY`, los verbos personalizados (`additionalOperations`), el parámetro de query string y los tipos de medio en streaming se importan como peticiones listas para ejecutar.
+- **Examine un archivo para importar.** Un botón Examinar en el diálogo de importación abre un selector de archivos nativo — se acabó teclear o arrastrar una ruta.
 - **Vista dividida para pegados grandes.** Al pegar una especificación de varias líneas se abre un editor de código a la izquierda y la vista previa a la derecha, con un separador ajustable.
 - **Importación tolerante.** Una especificación con algún `$ref` roto importa todas las rutas que puede y muestra un aviso con lo que ha tenido que omitir.
 
@@ -36,26 +36,26 @@ Correcciones:
 
 **El diseñador de API ahora se maneja desde la barra lateral.**
 
-- **Tus modelos, enums y rutas viven en la barra lateral.** Las tres listas de las pestañas desaparecen: los modelos (con su anidamiento por herencia), los enums y las rutas (grupos y sus rutas) están ahora directamente en el árbol de la barra lateral. Haz clic derecho para renombrar, añadir un submodelo o un subgrupo, clonar una ruta, generar el CRUD o eliminar; arrastra para reordenar o reasignar el padre, nunca fuera del diseño. Cada página muestra ahora solo el detalle del elemento seleccionado.
-- **Una vista general de tus modelos, enums y rutas.** El nodo raíz de cada sección enumera ahora todo lo que contiene — y los Modelos añaden una pestaña **Gráfico**: un diagrama de clases de tus modelos con su herencia y referencias. Los enums muestran sus valores junto al nombre.
+- **Sus modelos, enums y rutas viven en la barra lateral.** Las tres listas de las pestañas desaparecen: los modelos (con su anidamiento por herencia), los enums y las rutas (grupos y sus rutas) están ahora directamente en el árbol de la barra lateral. Haga clic derecho para renombrar, añadir un submodelo o un subgrupo, clonar una ruta, generar el CRUD o eliminar; arrastre para reordenar o reasignar el padre, nunca fuera del diseño. Cada página muestra ahora solo el detalle del elemento seleccionado.
+- **Una vista general de sus modelos, enums y rutas.** El nodo raíz de cada sección enumera ahora todo lo que contiene — y los Modelos añaden una pestaña **Gráfico**: un diagrama de clases de sus modelos con su herencia y referencias. Los enums muestran sus valores junto al nombre.
 - **Un único lugar para renombrar.** Un modelo, enum o ruta se renombra desde su título grande (el lápiz), y un nombre vacío muestra **«<sin nombre>»** para que el lápiz siga siendo accesible — el nombre ya no aparece dos veces en la página.
 - **Los errores de validación señalan el elemento.** Cuando algo va mal — un modelo y un enum que comparten nombre, una referencia a algo que ya no existe — una nota en la parte superior del modelo, enum o ruta lo explica.
 - **Una ruta de navegación completa.** El rastro refleja toda la jerarquía de la barra lateral — carpetas › diseño › sección › grupo › elemento — y cada segmento es clicable.
-- **Selecciona varios, elimina de una vez.** Selecciona varios modelos, enums o rutas y elimínalos de una sola vez, tras una confirmación.
-- **Copia o abre la fuente de una plantilla de código con un clic.** En la página «</> Code», al pasar el ratón sobre una plantilla aparece un botón para copiar su URL o ruta y otro para abrirla: el repositorio en el navegador, o la carpeta en el disco si es local.
-- **Las rutas nuevas empiezan con un nombre.** Una ruta creada desde cero recibe ahora un nombre por defecto, así puedes renombrarla enseguida.
-- **Pestañas de vista previa, como en tu editor.** Un solo clic abre ahora un elemento en una pestaña de **vista previa** reutilizable (su nombre en cursiva); hacer clic en otro elemento reutiliza la misma pestaña en lugar de apilar una nueva. Un doble clic, cualquier edición o ejecutar una petición la deja abierta para siempre. Desactívalo en Ajustes › Comportamiento.
-- **Fija las pestañas que mantienes abiertas.** Haz clic derecho en una pestaña y fíjala: las pestañas fijadas se quedan primero, sobreviven a «cerrar las demás» y se recuerdan por proyecto.
-- **Los entornos tienen una vista de detalle en condiciones.** Abre un entorno para renombrarlo desde su título, elegir su icono y color y añadir un subentorno — y el menú contextual ahora duplica un entorno con todas sus variables y subentornos.
+- **Seleccione varios, elimine de una vez.** Seleccione varios modelos, enums o rutas y elimínelos de una sola vez, tras una confirmación.
+- **Copie o abra la fuente de una plantilla de código con un clic.** En la página «</> Code», al pasar el ratón sobre una plantilla aparece un botón para copiar su URL o ruta y otro para abrirla: el repositorio en el navegador, o la carpeta en el disco si es local.
+- **Las rutas nuevas empiezan con un nombre.** Una ruta creada desde cero recibe ahora un nombre por defecto, así puede renombrarla enseguida.
+- **Pestañas de vista previa, como en su editor.** Un solo clic abre ahora un elemento en una pestaña de **vista previa** reutilizable (su nombre en cursiva); hacer clic en otro elemento reutiliza la misma pestaña en lugar de apilar una nueva. Un doble clic, cualquier edición o ejecutar una petición la deja abierta para siempre. Desactívelo en Ajustes › Comportamiento.
+- **Fije las pestañas que mantiene abiertas.** Haga clic derecho en una pestaña y fíjela: las pestañas fijadas se quedan primero, sobreviven a «cerrar las demás» y se recuerdan por proyecto.
+- **Los entornos tienen una vista de detalle en condiciones.** Abra un entorno para renombrarlo desde su título, elegir su icono y color y añadir un subentorno — y el menú contextual ahora duplica un entorno con todas sus variables y subentornos.
 
 Correcciones:
 
-- **Elegir una plantilla de código cierra la biblioteca.** «Usar» ahora te devuelve directamente a la página Code.
+- **Elegir una plantilla de código cierra la biblioteca.** «Usar» ahora le devuelve directamente a la página Code.
 - **La generación de documentación ya no falla con los campos opcionales.** Generar la documentación de un diseño cuyo modelo o parámetro dejaba «required» sin definir ya no se detiene con un error de plantilla.
 - **Eliminar un enum pide confirmación.** Los enums reciben la misma confirmación que los modelos y las rutas.
-- **La barra lateral revela lo que seleccionas.** Con «sincronizar la barra lateral con la pestaña activa» activado, seleccionar o crear un modelo, enum o ruta despliega sus padres para mantenerlo visible en el árbol.
+- **La barra lateral revela lo que selecciona.** Con «sincronizar la barra lateral con la pestaña activa» activado, seleccionar o crear un modelo, enum o ruta despliega sus padres para mantenerlo visible en el árbol.
 - **El botón de entorno se mantiene legible sobre cualquier color.** Su texto cambia ahora a claro u oscuro para seguir siendo legible sobre el color del entorno, igual que el botón de ejecución.
-- **El clic central cierra un archivo abierto.** Hacer clic central en una entrada de la lista «Abiertos» de la barra lateral cierra su pestaña — y un nuevo ajuste de Comportamiento te permite ocultar ese panel por completo.
+- **El clic central cierra un archivo abierto.** Hacer clic central en una entrada de la lista «Abiertos» de la barra lateral cierra su pestaña — y un nuevo ajuste de Comportamiento le permite ocultar ese panel por completo.
 - **Texto más claro al partir de la documentación.** En la documentación de una API importada, el botón ahora dice «Crear una nueva petición a partir de esta documentación».
 - **El inicio de sesión funciona en la versión de Microsoft Store.** La devolución de llamada de protocolo personalizado que el navegador entrega tras iniciar sesión ahora está declarada en el paquete de la Store, así que el inicio de sesión se completa en lugar de expirar.
 
@@ -73,7 +73,7 @@ Correcciones:
 
 Correcciones:
 
-- **Un proyecto muy grande ahora falla al guardar con un mensaje claro en lugar de congelarse.** Si un proyecto crece demasiado para escribirse en el disco de una sola vez —algo que puede ocurrir tras importar un esquema de API inusualmente grande—, Restorm te avisa claramente de que es demasiado grande para guardarlo, en vez de bloquearse o fallar en silencio.
+- **Un proyecto muy grande ahora falla al guardar con un mensaje claro en lugar de congelarse.** Si un proyecto crece demasiado para escribirse en el disco de una sola vez —algo que puede ocurrir tras importar un esquema de API inusualmente grande—, Restorm le avisa claramente de que es demasiado grande para guardarlo, en vez de bloquearse o fallar en silencio.
 - **Informes de errores más claros entre bastidores.** Cancelar el diálogo «Guardar como» ya no se registra como un error, y una importación fallida ahora informa de su causa real, de modo que los problemas de verdad son más fáciles de detectar y corregir.
 
 ## v1.0.5
@@ -125,7 +125,7 @@ Correcciones:
 
 - **Mover un elemento en la barra lateral ya no rompe la aplicación.** Con el mini navegador, los Ajustes o los registros MCP abiertos, arrastrar cualquier fila de la barra lateral destrozaba la interfaz y solo un reinicio la recuperaba.
 - **Renombrar un elemento ahora actualiza todas las pestañas abiertas**, incluidas las de un panel dividido y las de cualquier tipo de petición (gRPC, GraphQL, Redis…), que conservaban su nombre anterior hasta volver a abrirlas.
-- **Los informes de fallos vuelven a llegarnos.** Con el envío de informes activado, 1.0.0 no enviaba nada en silencio: un fallo que sufrías no nos decía nada.
+- **Los informes de fallos vuelven a llegarnos.** Con el envío de informes activado, 1.0.0 no enviaba nada en silencio: un fallo que sufría no nos decía nada.
 - **La ilustración de «lenguajes de código» vuelve a mostrar sus logotipos.**
 
 ## v1.0.0
@@ -135,11 +135,11 @@ Correcciones:
 Restorm es un cliente de escritorio rápido y offline-first para probar y ejecutar APIs en todos los protocolos principales.
 
 - **Protocolos**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
-- **Escenarios**: encadena solicitudes de forma visual, ramifica/itera, extrae y reutiliza valores, ejecuta sin interfaz en CI.
+- **Escenarios**: encadene solicitudes de forma visual, ramifique/itere, extraiga y reutilice valores, ejecute sin interfaz en CI.
 - **Entornos y variables**: `{{handlebars}}` en todas partes, secretos tipados, entornos por carpeta.
 - **Importación/Exportación**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, exportación de código.
-- **Proyectos nativos de Git**: tu proyecto `.restorm` es un archivo sencillo: versiónalo, compáralo y resuelve conflictos en la app.
-- **Local-first y privado**: todo se ejecuta en tu máquina; un cortafuegos de salida controla cada llamada externa.
+- **Proyectos nativos de Git**: su proyecto `.restorm` es un archivo sencillo: versiónelo, compárelo y resuelva conflictos en la app.
+- **Local-first y privado**: todo se ejecuta en su máquina; un cortafuegos de salida controla cada llamada externa.
 - **Multiplataforma**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
 Edición Community gratuita, con Pro y Enterprise para equipos.

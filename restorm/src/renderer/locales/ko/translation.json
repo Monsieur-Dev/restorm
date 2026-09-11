@@ -98,7 +98,7 @@
       "body": "상태 표시줄 버튼을 클릭하거나 요청의 보내기 버튼을 마우스 오른쪽 버튼으로 클릭하여 현재 요청 또는 API 의 모든 요청에 대한 환경을 변경할 수 있습니다."
     },
     "authRequests": {
-      "title": "API 를 사용하기 위해 인증이 필요한가요?",
+      "title": "API 를 사용하기 위해 인증이 필요합니까?",
       "body": "매번 토큰을 받기 위해 요청을 보내고 여기저기 복사해 붙여 넣는 대신, 인증 요청을 사용하세요. 호출이 실패하거나 (401, 403, …) 토큰의 유효 기간이 지나면 인증 요청이 자동으로 다시 실행되어 토큰을 추출하고 재사용합니다. 편리합니다!"
     },
     "supplyChain": {
@@ -111,99 +111,99 @@
     },
     "workbenchLayout": {
       "title": "워크벤치를 정돈하세요",
-      "body": "큰 화면과 여러 요청이 있나요? 좌우로 나란히, 위아래로 쌓아 두거나 원하는 대로 배치하세요. 탭을 원하는 위치로 끌어다 놓기만 하면 됩니다. 당신의 편의를 위해!"
+      "body": "큰 화면과 여러 요청이 있습니까? 좌우로 나란히, 위아래로 쌓아 두거나 원하는 대로 배치하세요. 탭을 원하는 위치로 끌어다 놓기만 하면 됩니다. 당신의 편의를 위해!"
     },
     "persistState": {
       "title": "떠난 그대로 다시 시작하세요!",
       "body": "Restorm 을 닫았다가 다시 열면, 마지막으로 떠났을 때와 정확히 같은 상태로 다시 시작할 수 있습니다."
     },
     "favorites": {
-      "title": "특히 좋아하는 요청이 있나요?",
-      "body": "다른 것보다 더 마음에 드는 요청이 있나요? 즐겨찾기에 추가하세요!"
+      "title": "특히 좋아하는 요청이 있습니까?",
+      "body": "다른 것보다 더 마음에 드는 요청이 있습니까? 즐겨찾기에 추가하세요!"
     },
     "console": {
       "title": "무슨 일이 벌어지는지 한눈에",
-      "body": "콘솔에서는 요청을 보낼 때마다 API 호출을 실시간으로 확인할 수 있습니다. 필요할 때 터미널에 그대로 복사해 붙여 넣기 좋아요! 어떤 게 취향인가요: curl 또는 PowerShell?"
+      "body": "콘솔에서는 요청을 보낼 때마다 API 호출을 실시간으로 확인할 수 있습니다. 필요할 때 터미널에 그대로 복사해 붙여 넣기 좋습니다! 어떤 게 취향입니까: curl 또는 PowerShell?"
     },
     "miniBrowser": {
-      "title": "계속 창을 전환하는 게 지치셨나요?",
-      "body": "Restorm 에는 미니 웹 브라우저가 내장되어 있어요. 앱이 API 호출에 시각적으로 반응할 때 유용합니다."
+      "title": "계속 창을 전환하는 게 지치셨습니까?",
+      "body": "Restorm 에는 미니 웹 브라우저가 내장되어 있습니다. 앱이 API 호출에 시각적으로 반응할 때 유용합니다."
     },
     "apiDocs": {
       "title": "문서도 여기서 한 번에",
-      "body": "Restorm 과 API 문서 사이를 오갈 필요가 없어요. API 가 명세 (Swagger, OpenAPI 등) 를 제공하면 Restorm 으로 불러와 바로 여기서 열람할 수 있습니다."
+      "body": "Restorm 과 API 문서 사이를 오갈 필요가 없습니다. API 가 명세 (Swagger, OpenAPI 등) 를 제공하면 Restorm 으로 불러와 바로 여기서 열람할 수 있습니다."
     },
     "secrets": {
       "title": "비밀을 안전하게",
-      "body": "비밀번호와 인증 토큰은 Restorm 파일 안에 직접 저장되지 않아요. 그래서 Restorm 은 비밀과 요청 기록을 별도 파일에 보관합니다. GitHub 에 함께 올리지 않도록 주의해 주세요. Restorm 은 AWS, GitHub 등에서 비밀을 가져올 수도 있어요."
+      "body": "비밀번호와 인증 토큰은 Restorm 파일 안에 직접 저장되지 않습니다. 그래서 Restorm 은 비밀과 요청 기록을 별도 파일에 보관합니다. GitHub 에 함께 올리지 않도록 주의해 주세요. Restorm 은 AWS, GitHub 등에서 비밀을 가져올 수도 있습니다."
     },
     "themes": {
       "title": "당신의 색, 당신의 기분",
-      "body": "Restorm 에는 여러 가지 색상 테마가 준비되어 있어요. 기분에 어울리는 것을 골라보세요."
+      "body": "Restorm 에는 여러 가지 색상 테마가 준비되어 있습니다. 기분에 어울리는 것을 골라보세요."
     },
     "search": {
       "title": "필요한 것을 빠르게",
-      "body": "이 창의 상단을 보셨나요? Restorm 에는 검색 엔진이 내장되어 있어요 — 더 이상 그 요청을 찾느라 시간을 낭비할 필요가 없습니다."
+      "body": "이 창의 상단을 보셨습니까? Restorm 에는 검색 엔진이 내장되어 있습니다 — 더 이상 그 요청을 찾느라 시간을 낭비할 필요가 없습니다."
     },
     "multiEnv": {
       "title": "같은 요청, 다른 환경",
-      "body": "dev, prod, staging 환경이 있나요? 같은 요청이지만 URL 도 토큰도 미묘하게 다르죠… 환경과 변수를 활용해 한 번의 클릭으로 전환하세요. 각 환경에 고유한 색상과 아이콘을 지정해 두면, 주말 직전 금요일 밤 운영 환경에서 식은땀 흘릴 일도 없답니다!"
+      "body": "dev, prod, staging 환경이 있습니까? 같은 요청이지만 URL 도 토큰도 미묘하게 다릅니다… 환경과 변수를 활용해 한 번의 클릭으로 전환하세요. 각 환경에 고유한 색상과 아이콘을 지정해 두면, 주말 직전 금요일 밤 운영 환경에서 식은땀 흘릴 일도 없습니다!"
     },
     "protocols": {
       "title": "REST 그 이상",
-      "body": "Restorm 은 REST 는 물론… 그 이상도 다룹니다! GraphQL, gRPC, SOAP, OData, WebSocket — 이 모든 프로토콜을 한 도구에서 다룰 수 있어요."
+      "body": "Restorm 은 REST 는 물론… 그 이상도 다룹니다! GraphQL, gRPC, SOAP, OData, WebSocket — 이 모든 프로토콜을 한 도구에서 다룰 수 있습니다."
     },
     "responseTree": {
       "title": "API 응답을 시각적으로",
-      "body": "API 응답을 더 시각적으로 살펴볼 수 있다는 걸 알고 계셨나요? Restorm 은 응답을 상호작용 가능한 트리로 보여주며, 노드를 펼치거나 접을 수 있어요."
+      "body": "API 응답을 더 시각적으로 살펴볼 수 있다는 걸 알고 계셨습니까? Restorm 은 응답을 상호작용 가능한 트리로 보여주며, 노드를 펼치거나 접을 수 있습니다."
     },
     "responseHistory": {
       "title": "요청 기록",
-      "body": "모든 API 호출 기록을 다시 살펴볼 수 있어요. 실제로 무슨 일이 있었는지 파악할 때 유용합니다."
+      "body": "모든 API 호출 기록을 다시 살펴볼 수 있습니다. 실제로 무슨 일이 있었는지 파악할 때 유용합니다."
     },
     "multiLanguage": {
       "title": "27 개 언어!",
-      "body": "Restorm 은 27 개 언어를 지원합니다. 영어, 프랑스어, 스페인어, 독일어, 이탈리아어, 일본어, 중국어, 한국어 등 그 밖에도 많아요 — 설정에서 원하는 언어를 골라보세요."
+      "body": "Restorm 은 27 개 언어를 지원합니다. 영어, 프랑스어, 스페인어, 독일어, 이탈리아어, 일본어, 중국어, 한국어 등 그 밖에도 많습니다 — 설정에서 원하는 언어를 골라보세요."
     },
     "fromPostman": {
-      "title": "Postman 이나 Bruno 에서 옮겨 오셨나요?",
-      "body": "Restorm 으로 갈아타는 것을 도와드릴게요 — 손쉬운 전환을 약속해요 ;)"
+      "title": "Postman 이나 Bruno 에서 옮겨 오셨습니까?",
+      "body": "Restorm 으로 갈아타는 것을 도와드리겠습니다 — 손쉬운 전환을 약속합니다 ;)"
     },
     "chainRequests": {
-      "title": "여러 요청을 연결하고 싶나요?",
-      "body": "시나리오 안에서 요청을 사용하고, 조건을 추가하고, 시나리오 안에 다른 시나리오를 중첩할 수도 있어요."
+      "title": "여러 요청을 연결하고 싶으십니까?",
+      "body": "시나리오 안에서 요청을 사용하고, 조건을 추가하고, 시나리오 안에 다른 시나리오를 중첩할 수도 있습니다."
     },
     "stepByStep": {
       "title": "시나리오를 한 단계씩 실행해 보세요",
-      "body": "한 번에 한 단계씩 진행하며 무슨 일이 일어나는지 정확히 볼 수 있어요. 중단점도 설정할 수 있어요."
+      "body": "한 번에 한 단계씩 진행하며 무슨 일이 일어나는지 정확히 볼 수 있습니다. 중단점도 설정할 수 있습니다."
     },
     "cicd": {
       "title": "CI/CD 파이프라인에서 시나리오를 실행하세요",
-      "body": "Restorm 을 헤드리스로 실행하면 UI 없이 시나리오를 돌리고 로그를 수집할 수 있어요. 시각적으로 구성한 자동화 테스트죠."
+      "body": "Restorm 을 헤드리스로 실행하면 UI 없이 시나리오를 돌리고 로그를 수집할 수 있습니다. 시각적으로 구성한 자동화 테스트입니다."
     },
     "nestedScenarios": {
       "title": "시나리오에서 무슨 일이 일어나는지 살펴보세요",
-      "body": "시나리오는 다른 시나리오를 호출할 수 있어요. 인스펙터에서 모든 로그를 읽고, 그 로그가 나온 시나리오로 바로 이동할 수 있어요."
+      "body": "시나리오는 다른 시나리오를 호출할 수 있습니다. 인스펙터에서 모든 로그를 읽고, 그 로그가 나온 시나리오로 바로 이동할 수 있습니다."
     },
     "scenarioHistory": {
       "title": "그런데 방금 무슨 일이 있었지?",
-      "body": "시나리오의 실행 기록을 둘러볼 수 있어요. 그새 시나리오가 바뀌었다고요? 걱정 마세요 — 그때의 구성을 그대로 보관해 두었어요."
+      "body": "시나리오의 실행 기록을 둘러볼 수 있습니다. 그새 시나리오가 바뀌었습니까? 걱정 마세요 — 그때의 구성을 그대로 보관해 두었습니다."
     },
     "codeSandbox": {
       "title": "시나리오와 보안",
-      "body": "시나리오 안에 코드를 작성할 수 있지만, 안전한 샌드박스 안에서 실행돼요. 로컬 파일에 접근하지 못하고 인터넷에도 직접 연결되지 않아요. 가장 안전하게 보호받는 방법이에요!"
+      "body": "시나리오 안에 코드를 작성할 수 있지만, 안전한 샌드박스 안에서 실행됩니다. 로컬 파일에 접근하지 못하고 인터넷에도 직접 연결되지 않습니다. 가장 안전하게 보호받는 방법입니다!"
     },
     "codeLanguages": {
-      "title": "코드를 좀 작성해 볼까요?",
+      "title": "코드를 좀 작성해 보시겠습니까?",
       "body": "시나리오 안에 바로 코드를 작성하세요 — TypeScript, JavaScript, Python, Lua, Ruby, C#, R 로요!"
     },
     "scenarioAi": {
       "title": "AI 로 다룰 수 있는 시나리오",
-      "body": "Claude, Cursor, Copilot… 모두 여러분의 코드베이스를 알고 있어요. 딱 맞는 시나리오를 만들어 달라고 요청해 보세요. 시나리오의 생성·편집·실행이 모두 MCP 로 공개되어 있어요."
+      "body": "Claude, Cursor, Copilot… 모두 여러분의 코드베이스를 알고 있습니다. 딱 맞는 시나리오를 만들어 달라고 요청해 보세요. 시나리오의 생성·편집·실행이 모두 MCP 로 공개되어 있습니다."
     },
     "interactiveScenarios": {
       "title": "인터랙티브한 시나리오!",
-      "body": "시나리오를 매개변수화하고, 대화 상자로 사용자에게 무엇을 할지 물어볼 수도 있어요."
+      "body": "시나리오를 매개변수화하고, 대화 상자로 사용자에게 무엇을 할지 물어볼 수도 있습니다."
     },
     "customValueLists": {
       "title": "재사용 가능한 값 목록",
@@ -1069,7 +1069,7 @@
         "trademark": "OpenAPI는 Linux Foundation 산하 OpenAPI Initiative의 프로젝트입니다."
       },
       "curl": {
-        "description": "이미 터미널에서 동작 중인 요청이 있나요? 전체 curl 호출(플래그, 헤더, 본문, 쿼리 문자열)을 그대로 붙여넣으면, restorm이 이를 다시 실행하고 편집하고 고정할 수 있는 실제 요청으로 재구성합니다.",
+        "description": "이미 터미널에서 동작 중인 요청이 있습니까? 전체 curl 호출(플래그, 헤더, 본문, 쿼리 문자열)을 그대로 붙여넣으면, restorm이 이를 다시 실행하고 편집하고 고정할 수 있는 실제 요청으로 재구성합니다.",
         "trademark": "curl은 © Daniel Stenberg의 오픈 소스 소프트웨어로, 해당 약관에 따라 사용됩니다."
       },
       "powershell": {
@@ -1077,11 +1077,11 @@
         "trademark": "PowerShell은 Microsoft Corporation의 등록 상표입니다."
       },
       "postman": {
-        "description": "회사에 저장해 둔 Postman 컬렉션이 있나요? JSON을 가져다 놓으세요. restorm이 모든 요청, 예제 응답, 환경 변수를 읽어, 다른 API와 나란히 실행할 수 있는 restorm 트리로 컬렉션을 재구성합니다.",
+        "description": "회사에 저장해 둔 Postman 컬렉션이 있습니까? JSON을 가져다 놓으세요. restorm이 모든 요청, 예제 응답, 환경 변수를 읽어, 다른 API와 나란히 실행할 수 있는 restorm 트리로 컬렉션을 재구성합니다.",
         "trademark": "Postman은 Postman, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       },
       "insomnia": {
-        "description": "Insomnia에서 넘어오셨나요? 내보낸 파일을 가져다 놓으면 됩니다. restorm은 v4 / v5 컬렉션 형식을 이해하며, 모든 요청, 헤더, 본문, 환경을 함께 가져와 restorm 트리로 보여 줍니다.",
+        "description": "Insomnia에서 넘어오셨습니까? 내보낸 파일을 가져다 놓으면 됩니다. restorm은 v4 / v5 컬렉션 형식을 이해하며, 모든 요청, 헤더, 본문, 환경을 함께 가져와 restorm 트리로 보여 줍니다.",
         "trademark": "Insomnia는 Kong Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       },
       "bruno": {
@@ -1089,7 +1089,7 @@
         "trademark": "Bruno는 Anoop M. D.가 만든 오픈 소스 소프트웨어(MIT)로, 해당 약관에 따라 사용됩니다."
       },
       "thunderclient": {
-        "description": "Thunder Client에서 넘어오셨나요? 내보낸 컬렉션 JSON을 가져다 놓으세요 — restorm이 모든 요청, 폴더, 헤더, 본문을 읽어, 바로 실행할 수 있는 restorm 트리로 컬렉션을 재구성합니다.",
+        "description": "Thunder Client에서 넘어오셨습니까? 내보낸 컬렉션 JSON을 가져다 놓으세요 — restorm이 모든 요청, 폴더, 헤더, 본문을 읽어, 바로 실행할 수 있는 restorm 트리로 컬렉션을 재구성합니다.",
         "trademark": "Thunder Client는 각 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       },
       "graphql": {
@@ -1101,11 +1101,11 @@
         "trademark": "gRPC는 Cloud Native Computing Foundation의 프로젝트입니다."
       },
       "grpcReflection": {
-        "description": ".proto 파일이 없나요? Restorm을 reflection을 제공하는 실행 중인 gRPC 서버로 연결하세요 — grpc.reflection.v1alpha.ServerReflection을 조회하여 모든 서비스와 메서드를 찾아내고, proto 파일 가져오기와 동일한 형식의 요청 트리를 만들어 오프라인 사용을 위해 로컬에 캐시합니다.",
+        "description": ".proto 파일이 없습니까? Restorm을 reflection을 제공하는 실행 중인 gRPC 서버로 연결하세요 — grpc.reflection.v1alpha.ServerReflection을 조회하여 모든 서비스와 메서드를 찾아내고, proto 파일 가져오기와 동일한 형식의 요청 트리를 만들어 오프라인 사용을 위해 로컬에 캐시합니다.",
         "action": "서버에 연결…"
       },
       "soap": {
-        "description": "WSDL이 있나요? 붙여넣기(또는 URL 입력)만으로 restorm이 각 <port>와 <operation>을 분석하여, 올바른 SOAPAction 헤더, 스키마로 타입화된 본문 스켈레톤, WSDL이 선언한 인증 스킴이 적용된 바로 보낼 수 있는 SOAP 엔벨로프를 생성합니다."
+        "description": "WSDL이 있습니까? 붙여넣기(또는 URL 입력)만으로 restorm이 각 <port>와 <operation>을 분석하여, 올바른 SOAPAction 헤더, 스키마로 타입화된 본문 스켈레톤, WSDL이 선언한 인증 스킴이 적용된 바로 보낼 수 있는 SOAP 엔벨로프를 생성합니다."
       },
       "websocket": {
         "description": "WebSocket 엔드포인트(ws:// 또는 wss://)를 붙여넣으면, restorm이 연결을 열고 서버의 hello 프레임을 캡처한 뒤, 재생 가능한 페이로드 템플릿이 있는 send / subscribe 요청을 생성합니다.",
@@ -1127,14 +1127,14 @@
         "trademark": "MQTT는 OASIS 표준이며, MQTT 이름과 로고는 OASIS Open의 상표입니다."
       },
       "paw": {
-        "description": "Paw에서 넘어오셨나요? JSON으로 내보낸 파일을 가져다 놓으면 됩니다(앱의 File → Export → JSON — 네이티브 .paw 번들은 직접 읽지 않습니다). restorm은 모든 요청, 헤더, 본문, 환경을 다시 구성하고, Paw의 동적 값(타임스탬프, 임의 문자열, UUID)을 가장 가까운 restorm 대응 값으로 매핑합니다.",
+        "description": "Paw에서 넘어오셨습니까? JSON으로 내보낸 파일을 가져다 놓으면 됩니다(앱의 File → Export → JSON — 네이티브 .paw 번들은 직접 읽지 않습니다). restorm은 모든 요청, 헤더, 본문, 환경을 다시 구성하고, Paw의 동적 값(타임스탬프, 임의 문자열, UUID)을 가장 가까운 restorm 대응 값으로 매핑합니다.",
         "trademark": "Paw는 RapidAPI, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       },
       "har": {
-        "description": "브라우저의 devtools에서 네트워크 트레이스를 캡처하셨나요? 내보낸 .har 파일을 가져다 놓으세요 — restorm이 기록된 모든 호출을 살펴보고 헤더와 본문을 포함한 재생 가능한 요청으로 변환합니다."
+        "description": "브라우저의 devtools에서 네트워크 트레이스를 캡처하셨습니까? 내보낸 .har 파일을 가져다 놓으세요 — restorm이 기록된 모든 호출을 살펴보고 헤더와 본문을 포함한 재생 가능한 요청으로 변환합니다."
       },
       "restClient": {
-        "description": "VS Code의 REST Client 확장에서 넘어오셨나요? .http / .rest 파일을 붙여넣거나 가져다 놓으세요 — restorm이 모든 요청 블록을 파싱하고 @variables를 해석하여 restorm 트리로 다시 구성합니다.",
+        "description": "VS Code의 REST Client 확장에서 넘어오셨습니까? .http / .rest 파일을 붙여넣거나 가져다 놓으세요 — restorm이 모든 요청 블록을 파싱하고 @variables를 해석하여 restorm 트리로 다시 구성합니다.",
         "trademark": "REST Client는 해당 소유자의 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
       },
       "httpie": {
@@ -1154,7 +1154,7 @@
         "trademark": "RAML은 RAML Workgroup이 관리하는 사양입니다."
       },
       "wadl": {
-        "description": "아직 WADL 문서를 유지하고 계신가요? XML을 붙여넣으세요 — restorm이 중첩된 <resource> 트리를 살펴보고 메서드와 파라미터를 포함한 대응 요청 폴더를 만듭니다.",
+        "description": "아직 WADL 문서를 유지하고 계십니까? XML을 붙여넣으세요 — restorm이 중첩된 <resource> 트리를 살펴보고 메서드와 파라미터를 포함한 대응 요청 폴더를 만듭니다.",
         "trademark": "WADL은 Sun Microsystems가 Member Submission으로 W3C에 제출했습니다."
       },
       "thrift": {
@@ -1309,7 +1309,7 @@
   },
   "scenario": {
     "editor": {
-      "emptyTitle": "여기는 비어 있어요…",
+      "emptyTitle": "여기는 비어 있습니다…",
       "emptyDragDrop": "왼쪽 트리에서 항목을 시나리오로 끌어다 놓아 여기에서 사용하세요. 한 시나리오를 다른 시나리오로 가져올 수도 있습니다!",
       "emptyRightClick": "빈 공간을 마우스 오른쪽 버튼으로 클릭하여 시나리오에 작업을 추가하세요"
     },
@@ -2245,7 +2245,7 @@
       "propertyCount_other": "{{count}}개 속성",
       "add": "모델 추가",
       "delete": "모델 삭제",
-      "deleteTitle": "{{name}}을(를) 삭제할까요?",
+      "deleteTitle": "{{name}}을(를) 삭제하시겠습니까?",
       "deleteNoImpact": "이 모델은 어디에서도 사용되지 않습니다.",
       "deleteImpactIntro": "이 모델을 삭제하면 다음이 업데이트됩니다:",
       "deleteImpactChild": "{{name}}이(가) 상속을 잃습니다(자체 속성은 유지됨)",
@@ -2276,7 +2276,7 @@
       "nameHeader": "이름",
       "description": "설명",
       "descriptionPlaceholder": "이 열거형이 나타내는 것 (선택 사항)",
-      "deleteTitle": "{{name}}을(를) 삭제할까요?",
+      "deleteTitle": "{{name}}을(를) 삭제하시겠습니까?",
       "deleteImpact": "이 열거형을 사용하던 속성이나 매개변수는 참조를 잃게 됩니다."
     },
     "documentation": {},
@@ -2535,7 +2535,7 @@
       "newGroupName": "새그룹",
       "newRouteName": "새라우트",
       "selectPrompt": "그룹 또는 라우트를 선택하거나 그룹을 만드세요.",
-      "deleteGroupTitle": "{{name}}을(를) 삭제할까요?",
+      "deleteGroupTitle": "{{name}}을(를) 삭제하시겠습니까?",
       "deleteGroupImpact": "그룹과 그 {{count}}개의 라우트가 삭제됩니다.",
       "method": "메서드",
       "path": "경로",
@@ -3248,11 +3248,11 @@
     "updatedBody": "이제 서버의 최신 버전이며 변경 사항이 유지되었습니다.",
     "keepServerVersion": "서버 버전 유지",
     "resolveConflicts": "충돌 해결",
-    "resetConfirmTitle": "서버 버전으로 재설정할까요?",
+    "resetConfirmTitle": "서버 버전으로 재설정하시겠습니까?",
     "resetConfirmBody": "모든 로컬 변경 사항이 영구적으로 삭제되고 서버 버전으로 대체됩니다."
   },
   "gitHistory": {
-    "recoverConfirmTitle": "이 버전을 복구할까요?",
+    "recoverConfirmTitle": "이 버전을 복구하시겠습니까?",
     "recoverConfirmBody": "열린 파일의 현재 내용이 이 커밋의 버전으로 대체됩니다. 변경 사항은 커밋되지 않으며, 유지하려면 직접 커밋하고 푸시할 수 있습니다.",
     "recoverConfirmAction": "복구",
     "recoveredTitle": "버전 복구됨",
@@ -3300,7 +3300,7 @@
     "crashReportReviewTitle": "전송 전에 각 충돌 보고서 표시",
     "crashReportReviewDescription": "충돌 보고서의 정확한 내용을 보여주고 전송 전에 확인합니다. 끄면 매번 묻지 않고 자동으로 전송합니다.",
     "reportDialog": {
-      "title": "이 충돌 보고서를 보낼까요?",
+      "title": "이 충돌 보고서를 보내시겠습니까?",
       "intro": "Restorm에 문제가 발생했습니다. 전송될 내용은 다음과 같습니다.",
       "includedError": "기술적 오류와 코드에서 발생한 위치",
       "includedVersion": "앱 버전 및 사용 중인 운영체제",

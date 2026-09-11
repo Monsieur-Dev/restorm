@@ -354,7 +354,7 @@
     "environmentsAriaLabel": "Mjediset e dosjes",
     "variables": "Variablat",
     "addVariable": "Shto rresht variabli",
-    "selectEnvironment": "Zgjidh një mjedis për të parë variablat",
+    "selectEnvironment": "Zgjidhni një mjedis për të parë variablat",
     "tabs": {
       "docs": "Dokumentacioni",
       "environments": "Mjedise",
@@ -363,9 +363,9 @@
     },
     "home": {
       "configureEnvs": "Konfiguro mjediset",
-      "configureEnvsDesc": "Vendos URL-të bazë, variablat dhe vërtetimin për çdo mjedis",
+      "configureEnvsDesc": "Vendosni URL-të bazë, variablat dhe vërtetimin për çdo mjedis",
       "viewDocs": "Shiko dokumentacionin",
-      "viewDocsDesc": "Shfleto dokumentacionin e API-së, modelet dhe pikat fundore",
+      "viewDocsDesc": "Shfletoni dokumentacionin e API-së, modelet dhe pikat fundore",
       "favoriteRequests": "Kërkesat e preferuara",
       "removeFavorite": "Hiq nga të preferuarat",
       "apiUpdate": {
@@ -384,7 +384,7 @@
     },
     "contextVariables": {
       "title": "Variablat e kontekstit në dispozicion",
-      "description": "Përdor këto variabla në URL-të e kërkesave dhe te variablat e tipit shprehje me sintaksën {{handlebars}}.",
+      "description": "Përdorni këto variabla në URL-të e kërkesave dhe te variablat e tipit shprehje me sintaksën {{handlebars}}.",
       "name": "Variabël",
       "value": "Vlera e zgjidhur",
       "copied": "U kopjua!"
@@ -448,7 +448,7 @@
       "history": {
         "list": "Lista e historikut të përgjigjeve",
         "empty": "Ende nuk është regjistruar asnjë përgjigje",
-        "select": "Zgjidh një përgjigje për të parë detajet",
+        "select": "Zgjidhni një përgjigje për të parë detajet",
         "pin": "Fikso përgjigjen",
         "unpin": "Hiq fiksimin e përgjigjes"
       },
@@ -1062,7 +1062,7 @@
     },
     "formats": {
       "swagger": {
-        "description": "Specifika OpenAPI 2.0, e lindur te SmartBear. Ngjit një Swagger JSON ose YAML — Restorm parsezon çdo operacion, tërheq skemat e sigurisë dhe e kthen të gjithë dokumentin në një pemë kërkesash të lundrueshme.",
+        "description": "Specifika OpenAPI 2.0, e lindur te SmartBear. Ngjisni një Swagger JSON ose YAML — Restorm parsezon çdo operacion, tërheq skemat e sigurisë dhe e kthen të gjithë dokumentin në një pemë kërkesash të lundrueshme.",
         "trademark": "Swagger është një markë tregtare e regjistruar e SmartBear Software."
       },
       "openapi": {
@@ -1197,8 +1197,8 @@
     "selectAll": "Zgjidh të gjitha",
     "selectNone": "Hiq të gjitha",
     "source": {
-      "label": "Ngjit diçka këtu!",
-      "placeholder": "Fut shtegun e skedarit, URL-në ose ngjit një komandë curl/PowerShell..."
+      "label": "Ngjitni diçka këtu!",
+      "placeholder": "Futni shtegun e skedarit, URL-në ose ngjitni një komandë curl/PowerShell..."
     },
     "tabs": {
       "routes": "Rrugët",
@@ -1213,8 +1213,8 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Importo API-në tënde",
-      "body": "Sill një specifikim OpenAPI / Swagger, një skemë GraphQL, një koleksion Postman / Bruno / Insomnia, ose ngjit një komandë curl / PowerShell. Restorm e analizon, ndërton strukturën e dosjeve dhe ulet me çdo endpoint të gatshëm."
+      "title": "Importoni API-në tuaj",
+      "body": "Sillni një specifikim OpenAPI / Swagger, një skemë GraphQL, një koleksion Postman / Bruno / Insomnia, ose ngjitni një komandë curl / PowerShell. Restorm e analizon, ndërton strukturën e dosjeve dhe ulet me çdo endpoint të gatshëm."
     },
     "recentActivity": {
       "title": "Aktivitet i fundit",
@@ -2323,7 +2323,7 @@
         "descPlaceholder": "Përshkrimi (stack / çfarë gjeneron)",
         "noOrgTemplates": "Ende nuk ka shabllone të organizatës.",
         "loading": "Duke ngarkuar shabllonet…",
-        "signedOut": "Identifikohu për të parë shabllonet e organizatës tënde.",
+        "signedOut": "Identifikohuni për të parë shabllonet e organizatës suaj.",
         "fetchError": "Shabllonet nuk u ngarkuan dot:",
         "unavailable": "e padisponueshme",
         "officialTag": "Zyrtare",
@@ -2676,8 +2676,8 @@
       "generated": "Klientët u gjeneruan — hapini te „Klientët” në shiritin anësor.",
       "importing": "Po importohen klientët…",
       "refresh": "Rigjenero klientët",
-      "startPrompt": "Nis serverin për të gjeneruar klientët.",
-      "startServerPrompt": "Nis <serverLink>serverin e dizajnit</serverLink> për të hyrë te kërkesat e klientit të gjeneruara automatikisht nga modeli.",
+      "startPrompt": "Nisni serverin për të gjeneruar klientët.",
+      "startServerPrompt": "Nisni <serverLink>serverin e dizajnit</serverLink> për të hyrë te kërkesat e klientit të gjeneruara automatikisht nga modeli.",
       "subtitle": "Serveri juaj i dizajnit të API-t po ekzekutohet dhe shërben rrugët që keni përcaktuar. Kërkesat më poshtë i thërrasin drejtpërdrejt ato rrugë — hapni një për ta testuar. Janë efemere dhe zhduken kur serveri ndalon."
     },
     "descriptors": {
@@ -3093,7 +3093,7 @@
     },
     "portal": {
       "noSubscription": "Nuk ka abonim aktiv për të menaxhuar.",
-      "error": "Portali i abonimit nuk u hap dot. Provo përsëri."
+      "error": "Portali i abonimit nuk u hap dot. Provoni përsëri."
     }
   },
   "trpc": {
@@ -3253,8 +3253,8 @@
     "resetConfirmBody": "Të gjitha ndryshimet tuaja lokale do të fshihen përfundimisht dhe do të zëvendësohen nga versioni i serverit."
   },
   "gitHistory": {
-    "recoverConfirmTitle": "Ta rikthesh këtë version?",
-    "recoverConfirmBody": "Përmbajtja aktuale e skedarit të hapur do të zëvendësohet me versionin e këtij commit-i. Ndryshimi nuk kryhet — mund ta kryesh dhe ta shtysh vetë nëse dëshiron ta mbash.",
+    "recoverConfirmTitle": "Ta riktheni këtë version?",
+    "recoverConfirmBody": "Përmbajtja aktuale e skedarit të hapur do të zëvendësohet me versionin e këtij commit-i. Ndryshimi nuk kryhet — mund ta kryeni dhe ta shtyni vetë nëse dëshironi ta mbani.",
     "recoverConfirmAction": "Rikthe",
     "recoveredTitle": "Versioni u rikthye",
     "recoveredBody": "Skedari tani përmban përmbajtjen e commit-it të zgjedhur, të pakryer.",

@@ -9,20 +9,20 @@
 
 ## v1.1.3
 
-**Collega il tuo assistente IA a Restorm.**
+**Colleghi il suo assistente IA a Restorm.**
 
-- **Con un clic, dall'app.** Il menu MCP nella barra di stato offre ora «Aggiungi Restorm al tuo assistente IA» — una configurazione pronta da incollare per Claude Code, Claude Desktop e Cursor, più un «Aggiungi a Claude Code» con un clic.
-- **Oppure una riga, ovunque.** Punta un qualsiasi client MCP sul tuo Restorm in esecuzione con `npx -y restorm-mcp` — il ponte lo trova da solo, senza porta né token da copiare.
-- **Un plugin per Claude Code.** Esegui `/plugin marketplace add Monsieur-Dev/restorm`, poi installa il plugin `restorm`.
+- **Con un clic, dall'app.** Il menu MCP nella barra di stato offre ora «Aggiunga Restorm al suo assistente IA» — una configurazione pronta da incollare per Claude Code, Claude Desktop e Cursor, più un «Aggiunga a Claude Code» con un clic.
+- **Oppure una riga, ovunque.** Punti un qualsiasi client MCP sul suo Restorm in esecuzione con `npx -y restorm-mcp` — il ponte lo trova da solo, senza porta né token da copiare.
+- **Un plugin per Claude Code.** Esegua `/plugin marketplace add Monsieur-Dev/restorm`, poi installi il plugin `restorm`.
 
-Vedi [Collegare il tuo assistente IA](https://restorm.app/en/docs/outils/mcp/).
+Veda [Collegare il suo assistente IA](https://restorm.app/en/docs/outils/mcp/).
 
 ## v1.1.2
 
 **Supporto per OpenAPI 3.2.**
 
-- **Importa specifiche OpenAPI 3.2.** Il metodo `QUERY`, i verbi personalizzati (`additionalOperations`), il parametro query string e i media in streaming vengono importati come richieste pronte all'uso.
-- **Sfoglia un file da importare.** Un pulsante Sfoglia nella finestra di importazione apre un selettore di file nativo — niente più digitare o trascinare un percorso.
+- **Importi specifiche OpenAPI 3.2.** Il metodo `QUERY`, i verbi personalizzati (`additionalOperations`), il parametro query string e i media in streaming vengono importati come richieste pronte all'uso.
+- **Sfogli un file da importare.** Un pulsante Sfoglia nella finestra di importazione apre un selettore di file nativo — niente più digitare o trascinare un percorso.
 - **Vista divisa per incolla di grandi dimensioni.** Incollando una specifica su più righe si apre un editor di codice a sinistra e l'anteprima a destra, con un divisore regolabile.
 - **Importazione tollerante.** Una specifica con qualche `$ref` rotto importa tutte le rotte possibili e mostra un avviso con ciò che ha dovuto ignorare.
 
@@ -36,27 +36,27 @@ Correzioni:
 
 **Il designer di API ora si pilota dalla barra laterale.**
 
-- **I tuoi modelli, enum e route vivono nella barra laterale.** Le tre liste nelle schede spariscono: i modelli (con l'annidamento per ereditarietà), gli enum e le route (gruppi e relative route) sono ora direttamente nell'albero della barra laterale. Con il tasto destro puoi rinominare, aggiungere un sotto-modello o un sotto-gruppo, clonare una route, generare il CRUD o eliminare; trascina per riordinare o riassegnare il genitore, mai fuori dal design. Ogni pagina mostra ora solo il dettaglio dell'elemento selezionato.
-- **Una panoramica di modelli, enum e route.** Il nodo radice di ogni sezione elenca ora tutto ciò che contiene — e i Modelli aggiungono una scheda **Grafico**: un diagramma delle classi dei tuoi modelli con ereditarietà e riferimenti. Gli enum mostrano i loro valori accanto al nome.
+- **I suoi modelli, enum e route vivono nella barra laterale.** Le tre liste nelle schede spariscono: i modelli (con l'annidamento per ereditarietà), gli enum e le route (gruppi e relative route) sono ora direttamente nell'albero della barra laterale. Con il tasto destro può rinominare, aggiungere un sotto-modello o un sotto-gruppo, clonare una route, generare il CRUD o eliminare; trascini per riordinare o riassegnare il genitore, mai fuori dal design. Ogni pagina mostra ora solo il dettaglio dell'elemento selezionato.
+- **Una panoramica di modelli, enum e route.** Il nodo radice di ogni sezione elenca ora tutto ciò che contiene — e i Modelli aggiungono una scheda **Grafico**: un diagramma delle classi dei suoi modelli con ereditarietà e riferimenti. Gli enum mostrano i loro valori accanto al nome.
 - **Un unico posto per rinominare.** Un modello, un enum o una route si rinomina dal titolo grande (la matita), e un nome vuoto mostra **«<senza nome>»** così la matita resta sempre raggiungibile — il nome non appare più due volte nella pagina.
 - **Gli errori di validazione indicano l'elemento.** Quando qualcosa non va — un modello e un enum con lo stesso nome, un riferimento a qualcosa che non esiste più — una nota in cima al modello, enum o route lo spiega.
 - **Un percorso di navigazione completo.** La traccia rispecchia l'intera gerarchia della barra laterale — cartelle › design › sezione › gruppo › elemento — e ogni segmento è cliccabile.
-- **Selezionane molti, elimina in una volta.** Seleziona più modelli, enum o route ed eliminali in un colpo solo, dopo una conferma.
-- **Copia o apri la sorgente di un template di codice con un clic.** Nella pagina «</> Code», al passaggio del mouse su un template compaiono un pulsante per copiarne l'URL o il percorso e uno per aprirlo: il repository nel browser, o la cartella sul disco per un template locale.
-- **Le nuove route partono con un nome.** Una route creata da zero riceve ora un nome predefinito, così puoi rinominarla subito.
-- **Schede di anteprima, come nel tuo editor.** Un solo clic apre ora un elemento in una scheda di **anteprima** riutilizzabile (il nome in corsivo); cliccare un altro elemento riutilizza la stessa scheda invece di impilarne una nuova. Un doppio clic, qualsiasi modifica o l'esecuzione di una richiesta la rende permanente. Disattivabile in Impostazioni › Comportamento.
-- **Fissa le schede che tieni aperte.** Fai clic destro su una scheda e fissala: le schede fissate restano in testa, sopravvivono a «chiudi le altre» e vengono ricordate per progetto.
-- **Gli ambienti hanno una vera vista di dettaglio.** Apri un ambiente per rinominarlo dal suo titolo, impostarne icona e colore e aggiungere un sotto-ambiente — e il menu contestuale ora duplica un ambiente con tutte le sue variabili e i suoi sotto-ambienti.
+- **Ne selezioni molti, elimini in una volta.** Selezioni più modelli, enum o route e li elimini in un colpo solo, dopo una conferma.
+- **Copi o apra la sorgente di un template di codice con un clic.** Nella pagina «</> Code», al passaggio del mouse su un template compaiono un pulsante per copiarne l'URL o il percorso e uno per aprirlo: il repository nel browser, o la cartella sul disco per un template locale.
+- **Le nuove route partono con un nome.** Una route creata da zero riceve ora un nome predefinito, così può rinominarla subito.
+- **Schede di anteprima, come nel suo editor.** Un solo clic apre ora un elemento in una scheda di **anteprima** riutilizzabile (il nome in corsivo); cliccare un altro elemento riutilizza la stessa scheda invece di impilarne una nuova. Un doppio clic, qualsiasi modifica o l'esecuzione di una richiesta la rende permanente. Disattivabile in Impostazioni › Comportamento.
+- **Fissi le schede che tiene aperte.** Faccia clic destro su una scheda e la fissi: le schede fissate restano in testa, sopravvivono a «chiuda le altre» e vengono ricordate per progetto.
+- **Gli ambienti hanno una vera vista di dettaglio.** Apra un ambiente per rinominarlo dal suo titolo, impostarne icona e colore e aggiungere un sotto-ambiente — e il menu contestuale ora duplica un ambiente con tutte le sue variabili e i suoi sotto-ambienti.
 
 Correzioni:
 
-- **Scegliere un template di codice chiude la libreria.** «Usa» ora ti riporta direttamente alla pagina Code.
+- **Scegliere un template di codice chiude la libreria.** «Usi» ora le riporta direttamente alla pagina Code.
 - **La generazione della documentazione non fallisce più sui campi opzionali.** Generare la documentazione da un design il cui modello o parametro lasciava «required» non impostato non si interrompe più con un errore di template.
 - **L'eliminazione di un enum chiede conferma.** Gli enum ricevono la stessa conferma di modelli e route.
-- **La barra laterale rivela ciò che selezioni.** Con «sincronizza la barra laterale con la scheda attiva» attivo, selezionare o creare un modello, enum o route espande i suoi genitori per tenerlo visibile nell'albero.
+- **La barra laterale rivela ciò che seleziona.** Con «sincronizzi la barra laterale con la scheda attiva» attivo, selezionare o creare un modello, enum o route espande i suoi genitori per tenerlo visibile nell'albero.
 - **Il pulsante dell'ambiente resta leggibile su qualsiasi colore.** La sua etichetta passa ora a testo chiaro o scuro per restare leggibile sul colore dell'ambiente, come il pulsante di esecuzione.
 - **Il clic centrale chiude un file aperto.** Fare clic centrale su una voce dell'elenco «Aperti» nella barra laterale ne chiude la scheda — e una nuova impostazione di Comportamento consente di nascondere del tutto quel pannello.
-- **Formulazione più chiara partendo dalla documentazione.** Nella documentazione di un'API importata, il pulsante ora recita «Crea una nuova richiesta da questa documentazione».
+- **Formulazione più chiara partendo dalla documentazione.** Nella documentazione di un'API importata, il pulsante ora recita «Crei una nuova richiesta da questa documentazione».
 - **L'accesso funziona nella versione Microsoft Store.** La callback a protocollo personalizzato che il browser restituisce dopo il login è ora dichiarata nel pacchetto Store, così l'accesso si completa invece di andare in timeout.
 
 ## v1.1.0
@@ -73,20 +73,20 @@ Correzioni:
 
 Correzioni:
 
-- **Un progetto molto grande ora fallisce il salvataggio con un messaggio chiaro anziché bloccarsi.** Se un progetto diventa troppo grande per essere scritto su disco in un unico blocco — cosa che può accadere dopo aver importato uno schema di API insolitamente grande — Restorm ti avvisa chiaramente che è troppo grande da salvare, invece di andare in crash o fallire in silenzio.
+- **Un progetto molto grande ora fallisce il salvataggio con un messaggio chiaro anziché bloccarsi.** Se un progetto diventa troppo grande per essere scritto su disco in un unico blocco — cosa che può accadere dopo aver importato uno schema di API insolitamente grande — Restorm La avvisa chiaramente che è troppo grande da salvare, invece di andare in crash o fallire in silenzio.
 - **Segnalazione degli errori più chiara dietro le quinte.** L'annullamento della finestra «Salva con nome» non viene più registrato come errore e un'importazione fallita ora riporta la causa reale, così i problemi veri sono più facili da individuare e correggere.
 
 ## v1.0.5
 
 **Cookie jar — un contenitore di cookie per ogni ambiente.**
 
-- **Ogni ambiente conserva i propri cookie.** Accedi alla tua API di sviluppo e alla tua API di produzione da due ambienti diversi: le loro sessioni non si incrociano mai — un cookie catturato in uno viene rimandato solo in quello. Scadenza, `Path`, `Domain` e sottodomini, `Secure`, `HttpOnly` e `SameSite` ora vengono rispettati, non scartati.
-- **Ecco il Cookie jar.** Una nuova scheda del workbench — **Visualizza ▸ Cookie jar** — elenca i cookie di ogni ambiente raggruppati per dominio in pannelli comprimibili: modifica un valore, eliminane uno, svuota un dominio o l'intero contenitore, oppure aggiungi un cookie a mano. Si aggiorna in diretta man mano che le tue richieste impostano cookie.
-- **Guarda cosa ha inviato e ricevuto ogni richiesta.** Ogni richiesta ha ora una scheda **Cookie** accanto a Risposta e Info, che mostra i cookie inviati con la chiamata e i cookie ricevuti in risposta — compresi i cookie impostati su un reindirizzamento che non raggiungono mai la risposta finale. C'è anche sulle risposte passate nella tua cronologia.
+- **Ogni ambiente conserva i propri cookie.** Acceda alla sua API di sviluppo e alla sua API di produzione da due ambienti diversi: le loro sessioni non si incrociano mai — un cookie catturato in uno viene rimandato solo in quello. Scadenza, `Path`, `Domain` e sottodomini, `Secure`, `HttpOnly` e `SameSite` ora vengono rispettati, non scartati.
+- **Ecco il Cookie jar.** Una nuova scheda del workbench — **Visualizza ▸ Cookie jar** — elenca i cookie di ogni ambiente raggruppati per dominio in pannelli comprimibili: modifichi un valore, ne elimini uno, svuoti un dominio o l'intero contenitore, oppure aggiunga un cookie a mano. Si aggiorna in diretta man mano che le sue richieste impostano cookie.
+- **Guardi cosa ha inviato e ricevuto ogni richiesta.** Ogni richiesta ha ora una scheda **Cookie** accanto a Risposta e Info, che mostra i cookie inviati con la chiamata e i cookie ricevuti in risposta — compresi i cookie impostati su un reindirizzamento che non raggiungono mai la risposta finale. C'è anche sulle risposte passate nella sua cronologia.
 - **I login con i cookie funzionano e basta.** Una richiesta che restituisce `Set-Cookie` viene catturata e ritrasmessa automaticamente nelle chiamate protette che seguono — anche durante l'esecuzione di uno scenario, dove ogni passaggio condivide il contenitore dell'ambiente.
-- **I cookie persistono come in un browser.** I cookie con una scadenza vengono salvati per progetto e ricaricati quando lo riapri; i cookie di sessione vengono scartati al riavvio — esattamente come farebbe un browser.
+- **I cookie persistono come in un browser.** I cookie con una scadenza vengono salvati per progetto e ricaricati quando lo riapre; i cookie di sessione vengono scartati al riavvio — esattamente come farebbe un browser.
 - **Oltre il REST.** GraphQL, SOAP, OData, JSON-RPC, tRPC e SSE ora inviano e memorizzano tutti i cookie, mentre WebSocket li trasporta nell'handshake di connessione.
-- **I cookie possono usare le tue variabili.** Digita `{{token}}` in un cookie che aggiungi a mano e verrà risolto in base all'ambiente attivo quando la richiesta parte.
+- **I cookie possono usare le sue variabili.** Digiti `{{token}}` in un cookie che aggiunge a mano e verrà risolto in base all'ambiente attivo quando la richiesta parte.
 
 Correzioni:
 
@@ -96,7 +96,7 @@ Correzioni:
 
 **Un accesso, tutte le finestre.**
 
-- **Il tuo account ora ti segue da una finestra all'altra.** Accedi, esci o cambia piano in una finestra di Restorm e tutte le altre finestre aperte lo adottano all'istante — senza riavvio, senza un secondo accesso. E quando completi un accesso dal browser, la conferma arriva ora alla finestra che l'aveva richiesta, anche con più finestre aperte.
+- **Il suo account ora La segue da una finestra all'altra.** Acceda, esca o cambi piano in una finestra di Restorm e tutte le altre finestre aperte lo adottano all'istante — senza riavvio, senza un secondo accesso. E quando completa un accesso dal browser, la conferma arriva ora alla finestra che l'aveva richiesta, anche con più finestre aperte.
 
 Correzioni:
 
@@ -125,7 +125,7 @@ Correzioni:
 
 - **Spostare un elemento nella barra laterale non blocca più l'app.** Con il mini browser, le Impostazioni o i log MCP aperti, trascinare una riga qualsiasi della barra laterale distruggeva l'interfaccia e solo un riavvio la ripristinava.
 - **Rinominare un elemento ora aggiorna tutte le schede aperte**, comprese quelle in un riquadro diviso e quelle di ogni tipo di richiesta (gRPC, GraphQL, Redis…), che mantenevano il vecchio nome fino alla riapertura.
-- **Le segnalazioni di crash ci arrivano di nuovo.** Con l'invio attivo, la 1.0.0 non inviava nulla in silenzio: un crash che incontravi non ci diceva niente.
+- **Le segnalazioni di crash ci arrivano di nuovo.** Con l'invio attivo, la 1.0.0 non inviava nulla in silenzio: un crash che incontrava non ci diceva niente.
 - **L'illustrazione «linguaggi di codice» mostra di nuovo i suoi loghi.**
 
 ## v1.0.0
@@ -135,11 +135,11 @@ Correzioni:
 Restorm è un client desktop veloce e offline-first per testare e pilotare API su tutti i principali protocolli.
 
 - **Protocolli**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
-- **Scenari**: concatena richieste visivamente, dirama/ripeti in loop, estrai e riutilizza valori, esegui headless in CI.
+- **Scenari**: concateni richieste visivamente, dirami/ripeta in loop, estragga e riutilizzi valori, esegua headless in CI.
 - **Ambienti e variabili**: `{{handlebars}}` ovunque, secret tipizzati, ambienti per cartella.
 - **Import/Export**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, esportazione di codice.
-- **Progetti Git-nativi**: il tuo progetto `.restorm` è un semplice file — versionalo, confrontalo e risolvi i conflitti nell'app.
-- **Local-first e privato**: tutto viene eseguito sul tuo computer; un firewall in uscita controlla ogni chiamata esterna.
+- **Progetti Git-nativi**: il suo progetto `.restorm` è un semplice file — lo versioni, lo confronti e risolva i conflitti nell'app.
+- **Local-first e privato**: tutto viene eseguito sul suo computer; un firewall in uscita controlla ogni chiamata esterna.
 - **Multipiattaforma**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
 Edizione Community gratuita, con Pro ed Enterprise per i team.

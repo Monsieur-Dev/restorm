@@ -91,55 +91,55 @@
     },
     "mcpControl": {
       "title": "用 AI 驱动 restorm",
-      "body": "restorm 内置 MCP 服务器，Claude Code 等 AI 助手无需离开聊天，即可列出、打开、编辑并执行你的请求，查看响应，并以编程方式操作工作区。"
+      "body": "restorm 内置 MCP 服务器，Claude Code 等 AI 助手无需离开聊天，即可列出、打开、编辑并执行您的请求，查看响应，并以编程方式操作工作区。"
     },
     "envSwitch": {
       "title": "轻松切换环境!",
       "body": "点击状态栏按钮可切换当前请求的环境，右键点击请求的发送按钮则可切换 API 中所有请求的环境。"
     },
     "authRequests": {
-      "title": "使用你的 API 需要认证?",
+      "title": "使用您的 API 需要认证?",
       "body": "与其每次都发送请求获取令牌然后到处复制粘贴，不如使用认证请求。当调用失败 (401、403 等) 或令牌过期时，认证请求会自动重新执行以提取并复用令牌。非常方便!"
     },
     "supplyChain": {
-      "title": "保护你自己!",
-      "body": "和其他软件一样，Restorm 使用了第三方库。为了防止供应链攻击，所有向外的调用都会在最底层被拦截，一旦某个第三方库试图窃取你的个人信息，我们会立即提醒你!"
+      "title": "保护您自己!",
+      "body": "和其他软件一样，Restorm 使用了第三方库。为了防止供应链攻击，所有向外的调用都会在最底层被拦截，一旦某个第三方库试图窃取您的个人信息，我们会立即提醒您!"
     },
     "codeSnippets": {
-      "title": "Restorm 帮你编写代码!",
-      "body": "在每个请求中查看代码片段，帮你轻松集成到你的软件中。支持多种语言: curl、PowerShell、TypeScript、C# 等等!"
+      "title": "Restorm 帮您编写代码!",
+      "body": "在每个请求中查看代码片段，帮您轻松集成到您的软件中。支持多种语言: curl、PowerShell、TypeScript、C# 等等!"
     },
     "workbenchLayout": {
-      "title": "整理你的工作台",
-      "body": "屏幕够大、请求又多? 并排摆放、上下堆叠、随心安排 — 只要拖动标签页到你想放的位置即可。一切为了你的舒适!"
+      "title": "整理您的工作台",
+      "body": "屏幕够大、请求又多? 并排摆放、上下堆叠、随心安排 — 只要拖动标签页到您想放的位置即可。一切为了您的舒适!"
     },
     "persistState": {
-      "title": "保持你离开时的样子!",
-      "body": "关闭 Restorm 后再次打开，你会发现它仍处于你上次离开时的完整状态。"
+      "title": "保持您离开时的样子!",
+      "body": "关闭 Restorm 后再次打开，您会发现它仍处于您上次离开时的完整状态。"
     },
     "favorites": {
-      "title": "总有几个让你格外偏爱…",
+      "title": "总有几个让您格外偏爱…",
       "body": "有些请求比其他的更重要? 把它们加入收藏吧!"
     },
     "console": {
       "title": "更清楚地看到正在发生的事",
-      "body": "控制台会在你发送请求时实时显示对 API 的调用。需要时直接复制粘贴到你的终端，非常方便! 你更喜欢哪种口味: curl 还是 PowerShell?"
+      "body": "控制台会在您发送请求时实时显示对 API 的调用。需要时直接复制粘贴到您的终端，非常方便! 您更喜欢哪种口味: curl 还是 PowerShell?"
     },
     "miniBrowser": {
       "title": "厌倦了不停切换窗口?",
-      "body": "Restorm 内置了一个迷你网页浏览器。当你的应用对 API 调用做出视觉反馈时非常实用!"
+      "body": "Restorm 内置了一个迷你网页浏览器。当您的应用对 API 调用做出视觉反馈时非常实用!"
     },
     "apiDocs": {
       "title": "文档就在这里看",
-      "body": "无需在 Restorm 与 API 文档之间来回切换。如果你的 API 提供了规范 (Swagger、OpenAPI…)，它会被导入到 Restorm，你可以直接在这里查阅。"
+      "body": "无需在 Restorm 与 API 文档之间来回切换。如果您的 API 提供了规范 (Swagger、OpenAPI…)，它会被导入到 Restorm，您可以直接在这里查阅。"
     },
     "secrets": {
-      "title": "保护你的密钥",
-      "body": "你的密码和授权令牌不会直接存放在 Restorm 文件里。因此 Restorm 把密钥和请求历史保存在独立的文件中。请注意不要把它们提交到 GitHub。Restorm 也可以从 AWS、GitHub 等地方拉取你的密钥。"
+      "title": "保护您的密钥",
+      "body": "您的密码和授权令牌不会直接存放在 Restorm 文件里。因此 Restorm 把密钥和请求历史保存在独立的文件中。请注意不要把它们提交到 GitHub。Restorm 也可以从 AWS、GitHub 等地方拉取您的密钥。"
     },
     "themes": {
-      "title": "你的颜色，你的心情",
-      "body": "Restorm 提供多种配色方案。挑一个最契合你当下心情的吧。"
+      "title": "您的颜色，您的心情",
+      "body": "Restorm 提供多种配色方案。挑一个最契合您当下心情的吧。"
     },
     "search": {
       "title": "想找什么，一秒搞定",
@@ -155,30 +155,30 @@
     },
     "responseTree": {
       "title": "可视化查看 API 响应",
-      "body": "你知道吗? Restorm 可以把 API 响应渲染成可交互的树形视图，让你随意展开、折叠地浏览。"
+      "body": "您知道吗? Restorm 可以把 API 响应渲染成可交互的树形视图，让您随意展开、折叠地浏览。"
     },
     "responseHistory": {
       "title": "请求历史",
-      "body": "你可以查看所有 API 调用的历史记录。方便回头梳理到底发生了什么。"
+      "body": "您可以查看所有 API 调用的历史记录。方便回头梳理到底发生了什么。"
     },
     "multiLanguage": {
       "title": "27 种语言!",
-      "body": "Restorm 支持 27 种语言。英语、法语、西班牙语、德语、意大利语、日语、汉语、韩语等等 — 在设置里选择你的语言吧!"
+      "body": "Restorm 支持 27 种语言。英语、法语、西班牙语、德语、意大利语、日语、汉语、韩语等等 — 在设置里选择您的语言吧!"
     },
     "fromPostman": {
       "title": "从 Postman 或 Bruno 过来的?",
-      "body": "我们帮你切换到 Restorm — 让你的迁移轻松无忧 ;)"
+      "body": "我们帮您切换到 Restorm — 让您的迁移轻松无忧 ;)"
     },
     "chainRequests": {
       "title": "有好几个请求要串起来?",
-      "body": "在场景中使用你的请求，添加条件，甚至把场景嵌套进其他场景里。"
+      "body": "在场景中使用您的请求，添加条件，甚至把场景嵌套进其他场景里。"
     },
     "stepByStep": {
-      "title": "逐步运行你的场景",
-      "body": "一次一步，精确地看清发生了什么。你甚至可以设置断点。"
+      "title": "逐步运行您的场景",
+      "body": "一次一步，精确地看清发生了什么。您甚至可以设置断点。"
     },
     "cicd": {
-      "title": "在你的 CI/CD 流水线中运行场景",
+      "title": "在您的 CI/CD 流水线中运行场景",
       "body": "以 headless 模式启动 Restorm，无界面运行一个场景并收集它的日志 — 用可视化方式构建的自动化测试。"
     },
     "nestedScenarios": {
@@ -187,27 +187,27 @@
     },
     "scenarioHistory": {
       "title": "可是刚刚发生了什么?",
-      "body": "浏览你场景的执行历史。其中某个之后改动了? 别担心 — 我们保留了它当时的配置。"
+      "body": "浏览您场景的执行历史。其中某个之后改动了? 别担心 — 我们保留了它当时的配置。"
     },
     "codeSandbox": {
       "title": "场景与安全",
-      "body": "你可以在场景中编写代码 — 但它运行在安全的 sandbox 中，无法访问你的本地文件，也无法直接访问互联网。保持安全的最稳妥方式!"
+      "body": "您可以在场景中编写代码 — 但它运行在安全的 sandbox 中，无法访问您的本地文件，也无法直接访问互联网。保持安全的最稳妥方式!"
     },
     "codeLanguages": {
       "title": "想写点代码?",
-      "body": "直接在你的场景里写代码 — 用 TypeScript、JavaScript、Python、Lua、Ruby、C# 或 R!"
+      "body": "直接在您的场景里写代码 — 用 TypeScript、JavaScript、Python、Lua、Ruby、C# 或 R!"
     },
     "scenarioAi": {
       "title": "可由 AI 驱动的场景",
-      "body": "Claude、Cursor、Copilot… 了解你的代码库：向它们索要量身定制的场景吧。一切都通过 MCP 暴露出来，用于创建、编辑和运行场景。"
+      "body": "Claude、Cursor、Copilot… 了解您的代码库：向它们索要量身定制的场景吧。一切都通过 MCP 暴露出来，用于创建、编辑和运行场景。"
     },
     "interactiveScenarios": {
       "title": "交互式场景!",
-      "body": "让你的场景可参数化，甚至通过对话框询问用户该做什么。"
+      "body": "让您的场景可参数化，甚至通过对话框询问用户该做什么。"
     },
     "customValueLists": {
       "title": "可复用的值列表",
-      "body": "定义你自己的值列表，并在请求和场景中一并复用它们。"
+      "body": "定义您自己的值列表，并在请求和场景中一并复用它们。"
     }
   },
   "authFailureToast": {
@@ -1204,7 +1204,7 @@
       "documentation": "文档"
     },
     "title": "导入请求",
-    "largeApiHint": "此 API 很大。为保持项目轻量，只勾选你需要的路由，并在下方取消勾选其余部分。未导入的会保留在文档中——你可以随时添加。",
+    "largeApiHint": "此 API 很大。为保持项目轻量，只勾选您需要的路由，并在下方取消勾选其余部分。未导入的会保留在文档中——您可以随时添加。",
     "browse": "浏览…",
     "warning": {
       "openApiStructuralIssues": "规范已导入，但有 {{count}} 处无法解析而被跳过（未解析的 $ref、缺少 content 的请求体）。其余部分已正常导入。"
@@ -1212,7 +1212,7 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "导入你的 API",
+      "title": "导入您的 API",
       "body": "带上 OpenAPI / Swagger 规范、GraphQL schema、Postman / Bruno / Insomnia 集合，或者粘贴一条 curl / PowerShell 命令。Restorm 会解析它、搭建文件夹结构，并为每个 endpoint 预填好字段。"
     },
     "recentActivity": {
@@ -2282,7 +2282,7 @@
     "documentation": {},
     "code": {
       "empty": "尚无模板 — 添加一个以从此设计生成代码。",
-      "subtitle": "从此设计生成项目 — 在沙盒中渲染，仅在你确认目录树后写入",
+      "subtitle": "从此设计生成项目 — 在沙盒中渲染，仅在您确认目录树后写入",
       "sourceTitle": "模板",
       "sourceKind": {
         "official": "官方",
@@ -2688,13 +2688,13 @@
     },
     "listing": {
       "models": {
-        "empty": "创建你的第一个模型"
+        "empty": "创建您的第一个模型"
       },
       "enums": {
-        "empty": "创建你的第一个枚举"
+        "empty": "创建您的第一个枚举"
       },
       "routes": {
-        "empty": "创建你的第一个路由"
+        "empty": "创建您的第一个路由"
       },
       "tabs": {
         "list": "列表",
@@ -3151,9 +3151,9 @@
     "historyTitle": "Git 历史记录",
     "conflictCancel": "取消",
     "conflictFinish": "完成",
-    "conflictReadOnlyEntityNotice": "此实体类型无法在此处编辑。请在上方选择你的版本或他们的版本。",
+    "conflictReadOnlyEntityNotice": "此实体类型无法在此处编辑。请在上方选择您的版本或他们的版本。",
     "quickConfigConflictTitle": "冲突的快速配置",
-    "quickConfigOurs": "你的",
+    "quickConfigOurs": "您的",
     "quickConfigTheirs": "他们的",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "默认应用此提交信息语言",
@@ -3253,7 +3253,7 @@
   },
   "gitHistory": {
     "recoverConfirmTitle": "恢复此版本？",
-    "recoverConfirmBody": "打开文件的当前内容将被替换为此提交的版本。更改不会被提交——如果想保留，你可以自己提交并推送。",
+    "recoverConfirmBody": "打开文件的当前内容将被替换为此提交的版本。更改不会被提交——如果想保留，您可以自己提交并推送。",
     "recoverConfirmAction": "恢复",
     "recoveredTitle": "版本已恢复",
     "recoveredBody": "文件现在包含所选提交的内容，未提交。",
@@ -3334,8 +3334,8 @@
   },
   "cliTokens": {
     "title": "我的 CLI/CI 令牌",
-    "intro": "CLI/CI 令牌让无界面运行（CI，或本地 --headless）以你的组织身份进行认证。它绝不授予对你数据的访问权限。",
-    "empty": "你还没有令牌。",
+    "intro": "CLI/CI 令牌让无界面运行（CI，或本地 --headless）以您的组织身份进行认证。它绝不授予对您数据的访问权限。",
+    "empty": "您还没有令牌。",
     "never": "从不",
     "create": "创建令牌",
     "namePlaceholder": "标签（例如 ci-main）",
@@ -3361,13 +3361,13 @@
       "expired": "已过期"
     },
     "failure": {
-      "signed-out": "请登录以管理你的令牌。",
-      "forbidden": "你的组织未允许你创建令牌。管理员可在管理控制台中授予该权限。",
+      "signed-out": "请登录以管理您的令牌。",
+      "forbidden": "您的组织未允许您创建令牌。管理员可在管理控制台中授予该权限。",
       "invalid-name": "该标签不可用。请换一个更短的。",
       "invalid-expiry": "该有效期无效。",
       "not-found": "该令牌已不存在。",
       "unavailable": "当前无法使用令牌。请稍后重试。",
-      "plan-required": "无界面运行属于 Pro 方案。升级到 Pro 即可创建令牌——你仍然可以吊销已有的令牌。"
+      "plan-required": "无界面运行属于 Pro 方案。升级到 Pro 即可创建令牌——您仍然可以吊销已有的令牌。"
     }
   },
   "cookies": {

@@ -50,6 +50,29 @@ A locale is in scope if a `translation.json` file exists for it under either app
 
 If you genuinely cannot translate a phrase yet, still add the **key** to every locale with a placeholder English value so the JSON structure stays parallel — leaving the key out causes the fallback chain to land on the wrong language.
 
+### Formal register (vouvoiement) — in EVERY locale, not just French
+
+User-facing copy addresses the reader in that language's **formal register**, in
+**every** locale — the app, the changelog (`changelogs/<loc>.md`), the website
+and the docs. This is the general rule; it is not French-only.
+
+- **Formal everywhere:** fr `vous`, de **Sie/Ihr**, es **usted/su**, it **Lei**,
+  pt (o seu / 3rd-person), nl **u/uw**, pl **Pan/Pani** (imperatives via `proszę`
+  + infinitive), cs `vy`, hr/sr `vi`, ro **dumneavoastră**, hu **magázás (Ön)**,
+  el 2nd-plural politeness, tr **siz** (`-iniz`), uk **ви**, fi **teitittely**
+  (`te`, `-tte`/`-nne`), id **Anda**, ja keigo (です/ます), ko **합니다체** (the
+  deferential form, NOT casual 해요체), zh-CN/zh-TW **您** (not 你).
+- **The only exceptions:** **da, nb, sv** (mainland Scandinavian) stay informal —
+  the polite form is archaic there. **en** and **vi** have no European-style T/V
+  split (neutral "you" / "bạn").
+- Register is frequently **MIXED within one locale** (some strings formal, others
+  informal). When touching a translation, sanity-check the whole locale, not just
+  your string. Never relax the register for brevity (hints/tooltips too).
+
+**Serbian (`sr`) ships in LATIN script (Gaj's Latin), not Cyrillic** — app,
+changelog, website, docs. Tell any translation subagent this explicitly (the
+default assumption for "Serbian" is Cyrillic). sr is formal AND Latin.
+
 ## Visual claims must be verified against the screenshot
 
 When reporting that a UI change is done — "labels removed", "edge no longer crosses the box", "spacing increased", "badge moved to the right of the name", or any other visible-state assertion — **you must look at the actual screenshot before stating it**. Don't assume the change took effect because the source diff says so: HMR may not have applied yet, the path you edited may not be the one that renders this view, or the framework may carry a hidden default that contradicts your diff.

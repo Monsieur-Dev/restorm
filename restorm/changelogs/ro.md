@@ -2,27 +2,27 @@
 
 ## v1.1.4
 
-**Conectează-ți asistentul AI pe macOS — acum fiabil.**
+**Conectați-vă asistentul AI pe macOS — acum fiabil.**
 
 - **Remediat: Claude Desktop și Cursor pe macOS.** Conectarea unui asistent AI încărca instrumentele Restorm, dar apoi fiecare apel eșua cu „nicio instanță pornită”, chiar și cu Restorm deschis — aplicația și conectorul se căutau reciproc în foldere temporare diferite. Acum se găsesc în mod fiabil, indiferent ce a lansat conectorul.
-- **Formulare formală în italiană, poloneză și finlandeză.** Interfața ți se adresează acum la registrul formal în aceste trei limbi, în concordanță cu restul.
+- **Formulare formală în italiană, poloneză și finlandeză.** Interfața vi se adresează acum la registrul formal în aceste trei limbi, în concordanță cu restul.
 
 ## v1.1.3
 
-**Conectează-ți asistentul AI la Restorm.**
+**Conectați-vă asistentul AI la Restorm.**
 
-- **Cu un singur clic, direct din aplicație.** Meniul MCP din bara de stare oferă acum „Adaugă Restorm la asistentul tău AI” — o configurație gata de lipit pentru Claude Code, Claude Desktop și Cursor, plus „Adaugă la Claude Code” cu un singur clic.
-- **Sau o singură linie, oriunde.** Îndreaptă orice client MCP către instanța ta Restorm pornită cu `npx -y restorm-mcp` — puntea o găsește singură, fără niciun port sau token de copiat.
-- **Un plugin pentru Claude Code.** Rulează `/plugin marketplace add Monsieur-Dev/restorm`, apoi instalează pluginul `restorm`.
+- **Cu un singur clic, direct din aplicație.** Meniul MCP din bara de stare oferă acum „Adăugați Restorm la asistentul dumneavoastră AI” — o configurație gata de lipit pentru Claude Code, Claude Desktop și Cursor, plus „Adăugați la Claude Code” cu un singur clic.
+- **Sau o singură linie, oriunde.** Îndreptați orice client MCP către instanța dumneavoastră Restorm pornită cu `npx -y restorm-mcp` — puntea o găsește singură, fără niciun port sau token de copiat.
+- **Un plugin pentru Claude Code.** Rulați `/plugin marketplace add Monsieur-Dev/restorm`, apoi instalați pluginul `restorm`.
 
-Vezi [Conectarea asistentului AI](https://restorm.app/en/docs/outils/mcp/).
+Vedeți [Conectarea asistentului AI](https://restorm.app/en/docs/outils/mcp/).
 
 ## v1.1.2
 
 **Suport pentru OpenAPI 3.2.**
 
-- **Importă specificații OpenAPI 3.2.** Metoda `QUERY`, verbele personalizate (`additionalOperations`), parametrul query string și tipurile media în streaming se importă ca cereri gata de rulat.
-- **Răsfoiește un fișier de importat.** Un buton Răsfoiește în fereastra de import deschide un selector de fișiere nativ — gata cu tastarea sau tragerea unei căi.
+- **Importați specificații OpenAPI 3.2.** Metoda `QUERY`, verbele personalizate (`additionalOperations`), parametrul query string și tipurile media în streaming se importă ca cereri gata de rulat.
+- **Răsfoiți un fișier de importat.** Un buton Răsfoiește în fereastra de import deschide un selector de fișiere nativ — gata cu tastarea sau tragerea unei căi.
 - **Vedere împărțită pentru lipiri mari.** Lipirea unei specificații pe mai multe linii deschide un editor de cod în stânga și previzualizarea în dreapta, cu un separator reglabil.
 - **Import tolerant.** O specificație cu câteva `$ref` stricate importă toate rutele posibile și afișează un avertisment cu ce a trebuit să omită.
 
@@ -36,27 +36,27 @@ Remedieri:
 
 **Designerul de API se controlează acum din bara laterală.**
 
-- **Modelele, enum-urile și rutele tale trăiesc în bara laterală.** Cele trei liste din file dispar — modelele (cu imbricarea lor prin moștenire), enum-urile și rutele (grupurile și rutele lor) se află acum direct în arborele barei laterale. Clic dreapta pentru a redenumi, a adăuga un submodel sau un subgrup, a clona o rută, a genera CRUD sau a șterge; trage pentru a reordona sau a schimba părintele — niciodată în afara designului. Fiecare pagină afișează acum doar detaliile elementului selectat.
-- **O privire de ansamblu asupra modelelor, enum-urilor și rutelor.** Nodul rădăcină al fiecărei secțiuni listează acum tot ce conține — iar Modelele adaugă o filă **Grafic**: o diagramă de clase a modelelor tale cu moștenirea și referințele lor. Enum-urile își arată valorile chiar lângă nume.
+- **Modelele, enum-urile și rutele dumneavoastră trăiesc în bara laterală.** Cele trei liste din file dispar — modelele (cu imbricarea lor prin moștenire), enum-urile și rutele (grupurile și rutele lor) se află acum direct în arborele barei laterale. Clic dreapta pentru a redenumi, a adăuga un submodel sau un subgrup, a clona o rută, a genera CRUD sau a șterge; trageți pentru a reordona sau a schimba părintele — niciodată în afara designului. Fiecare pagină afișează acum doar detaliile elementului selectat.
+- **O privire de ansamblu asupra modelelor, enum-urilor și rutelor.** Nodul rădăcină al fiecărei secțiuni listează acum tot ce conține — iar Modelele adaugă o filă **Grafic**: o diagramă de clase a modelelor dumneavoastră cu moștenirea și referințele lor. Enum-urile își arată valorile chiar lângă nume.
 - **Un singur loc pentru redenumire.** Un model, enum sau rută se redenumește din titlul mare (creionul), iar un nume gol afișează **„<fără nume>”** ca să rămână creionul mereu accesibil — numele nu mai apare de două ori pe pagină.
 - **Erorile de validare indică elementul.** Când ceva nu e în regulă — un model și un enum cu același nume, o referință către ceva ce nu mai există — o notă în partea de sus a modelului, enum-ului sau rutei o explică.
 - **O cale de navigare completă.** Traseul reflectă întreaga ierarhie a barei laterale — foldere › design › secțiune › grup › element — și fiecare segment poate fi apăsat.
-- **Selectează mai multe, șterge dintr-o dată.** Selectează mai multe modele, enum-uri sau rute și șterge-le dintr-o dată, după o confirmare.
-- **Copiază sau deschide sursa unui șablon de cod dintr-un clic.** Pe pagina „</> Code”, la trecerea peste un șablon apar un buton pentru a-i copia URL-ul sau calea și unul pentru a-l deschide — depozitul în browser sau folderul de pe disc pentru un șablon local.
-- **Rutele noi pornesc cu un nume.** O rută creată de la zero primește acum un nume implicit, așa că o poți redenumi imediat.
-- **File de previzualizare, ca în editorul tău.** Un singur clic deschide acum un element într-o filă de **previzualizare** reutilizabilă (numele afișat cu cursive); clic pe alt element reutilizează aceeași filă în loc să stivuiască una nouă. Un dublu clic, orice modificare sau rularea unei cereri o păstrează deschisă definitiv. Dezactivează din Setări › Comportament.
-- **Fixează filele pe care le ții deschise.** Clic dreapta pe o filă și fixeaz-o: filele fixate rămân primele, supraviețuiesc la „închide celelalte“ și sunt reținute pentru fiecare proiect.
-- **Mediile primesc o vedere de detaliu ca lumea.** Deschide un mediu pentru a-l redenumi din titlul său, a-i seta pictograma și culoarea și a adăuga un submediu — iar meniul de clic dreapta duplică acum un mediu cu toate variabilele și submediile sale.
+- **Selectați mai multe, ștergeți dintr-o dată.** Selectați mai multe modele, enum-uri sau rute și ștergeți-le dintr-o dată, după o confirmare.
+- **Copiați sau deschideți sursa unui șablon de cod dintr-un clic.** Pe pagina „</> Code”, la trecerea peste un șablon apar un buton pentru a-i copia URL-ul sau calea și unul pentru a-l deschide — depozitul în browser sau folderul de pe disc pentru un șablon local.
+- **Rutele noi pornesc cu un nume.** O rută creată de la zero primește acum un nume implicit, așa că o puteți redenumi imediat.
+- **File de previzualizare, ca în editorul dumneavoastră.** Un singur clic deschide acum un element într-o filă de **previzualizare** reutilizabilă (numele afișat cu cursive); clic pe alt element reutilizează aceeași filă în loc să stivuiască una nouă. Un dublu clic, orice modificare sau rularea unei cereri o păstrează deschisă definitiv. Dezactivați din Setări › Comportament.
+- **Fixați filele pe care le țineți deschise.** Clic dreapta pe o filă și fixați-o: filele fixate rămân primele, supraviețuiesc la „închideți celelalte“ și sunt reținute pentru fiecare proiect.
+- **Mediile primesc o vedere de detaliu ca lumea.** Deschideți un mediu pentru a-l redenumi din titlul său, a-i seta pictograma și culoarea și a adăuga un submediu — iar meniul de clic dreapta duplică acum un mediu cu toate variabilele și submediile sale.
 
 Remedieri:
 
-- **Alegerea unui șablon de cod închide biblioteca.** „Utilizează” te duce acum direct înapoi la pagina Code.
+- **Alegerea unui șablon de cod închide biblioteca.** „Utilizați“ vă duce acum direct înapoi la pagina Code.
 - **Generarea documentației nu mai eșuează la câmpurile opționale.** Generarea documentației dintr-un design al cărui model sau parametru lăsa „required” nesetat nu se mai oprește cu o eroare de șablon.
 - **Ștergerea unui enum cere confirmare.** Enum-urile primesc aceeași confirmare ca modelele și rutele.
-- **Bara laterală dezvăluie selecția.** Cu „sincronizează bara laterală cu fila activă” activat, selectarea sau crearea unui model, enum sau rute îi extinde părinții ca să rămână vizibil în arbore.
+- **Bara laterală dezvăluie selecția.** Cu „sincronizați bara laterală cu fila activă” activat, selectarea sau crearea unui model, enum sau rute îi extinde părinții ca să rămână vizibil în arbore.
 - **Butonul de mediu rămâne lizibil pe orice culoare.** Eticheta sa trece acum la text închis sau deschis pentru a rămâne lizibilă pe culoarea mediului, ca butonul de rulare.
-- **Clicul din mijloc închide un fișier deschis.** Un clic din mijloc pe o intrare din lista „Deschise“ a barei laterale îi închide fila — iar o nouă setare de Comportament îți permite să ascunzi complet acel panou.
-- **Formulare mai clară când pornești de la documentație.** În documentația unui API importat, butonul afișează acum „Creează o cerere nouă din această documentație“.
+- **Clicul din mijloc închide un fișier deschis.** Un clic din mijloc pe o intrare din lista „Deschise“ a barei laterale îi închide fila — iar o nouă setare de Comportament vă permite să ascundeți complet acel panou.
+- **Formulare mai clară când porniți de la documentație.** În documentația unui API importat, butonul afișează acum „Creați o cerere nouă din această documentație“.
 - **Autentificarea funcționează în versiunea Microsoft Store.** Apelul de retur cu protocol personalizat pe care browserul îl întoarce după autentificare este acum declarat în pachetul Store, așa că autentificarea se finalizează în loc să expire.
 
 ## v1.1.0
@@ -135,11 +135,11 @@ Remedieri:
 Restorm este un client desktop rapid, offline-first, pentru testarea și rularea API-urilor pe toate protocoalele majore.
 
 - **Protocoale**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
-- **Scenarii**: înlănțuiește cereri vizual, ramifică/buclă, extrage și reutilizează valori, rulează fără interfață în CI.
+- **Scenarii**: înlănțuiți cereri vizual, ramificați/buclați, extrageți și reutilizați valori, rulați fără interfață în CI.
 - **Medii și variabile**: `{{handlebars}}` peste tot, secrete tipizate, medii per folder.
 - **Import/Export**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, export de cod.
-- **Proiecte native Git**: proiectul tău `.restorm` este un simplu fișier — versionează-l, compară-l și rezolvă conflictele în aplicație.
-- **Local-first și privat**: totul rulează pe mașina ta; un firewall de ieșire controlează fiecare apel extern.
+- **Proiecte native Git**: proiectul dumneavoastră `.restorm` este un simplu fișier — versionați-l, comparați-l și rezolvați conflictele în aplicație.
+- **Local-first și privat**: totul rulează pe mașina dumneavoastră; un firewall de ieșire controlează fiecare apel extern.
 - **Multiplatformă**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
 Ediție Community gratuită, cu Pro și Enterprise pentru echipe.

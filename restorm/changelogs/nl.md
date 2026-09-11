@@ -2,20 +2,20 @@
 
 ## v1.1.4
 
-**Verbind je AI-assistent op macOS — nu betrouwbaar.**
+**Verbind uw AI-assistent op macOS — nu betrouwbaar.**
 
 - **Opgelost: Claude Desktop en Cursor op macOS.** Het verbinden van een AI-assistent laadde de tools van Restorm wel, maar daarna mislukte elke aanroep met “geen actieve instantie”, zelfs met Restorm open — de app en de connector zochten elkaar in verschillende tijdelijke mappen. Ze vinden elkaar nu betrouwbaar, ongeacht wat de connector heeft gestart.
-- **Formele aanspreekvorm in het Italiaans, Pools en Fins.** De interface spreekt je in deze drie talen nu aan in de formele vorm, in lijn met de rest.
+- **Formele aanspreekvorm in het Italiaans, Pools en Fins.** De interface spreekt u in deze drie talen nu aan in de formele vorm, in lijn met de rest.
 
 ## v1.1.3
 
-**Verbind je AI-assistent met Restorm.**
+**Verbind uw AI-assistent met Restorm.**
 
-- **Met één klik, vanuit de app.** Het MCP-menu in de statusbalk biedt nu “Restorm aan je AI-assistent toevoegen” — kant-en-klare instellingen om te plakken voor Claude Code, Claude Desktop en Cursor, plus een “Aan Claude Code toevoegen” met één klik.
-- **Of één regel, overal.** Richt een willekeurige MCP-client op je draaiende Restorm met `npx -y restorm-mcp` — de brug vindt het vanzelf, geen poort of token om te kopiëren.
+- **Met één klik, vanuit de app.** Het MCP-menu in de statusbalk biedt nu “Restorm aan uw AI-assistent toevoegen” — kant-en-klare instellingen om te plakken voor Claude Code, Claude Desktop en Cursor, plus een “Aan Claude Code toevoegen” met één klik.
+- **Of één regel, overal.** Richt een willekeurige MCP-client op uw draaiende Restorm met `npx -y restorm-mcp` — de brug vindt het vanzelf, geen poort of token om te kopiëren.
 - **Een plugin voor Claude Code.** Voer `/plugin marketplace add Monsieur-Dev/restorm` uit en installeer daarna de `restorm`-plugin.
 
-Zie [Je AI-assistent verbinden](https://restorm.app/en/docs/outils/mcp/).
+Zie [Uw AI-assistent verbinden](https://restorm.app/en/docs/outils/mcp/).
 
 ## v1.1.2
 
@@ -36,26 +36,26 @@ Oplossingen:
 
 **De API-designer wordt nu vanuit de zijbalk bediend.**
 
-- **Je modellen, enums en routes leven in de zijbalk.** De drie lijsten in de tabbladen verdwijnen: de modellen (met hun overervingsnesting), de enums en de routes (groepen en hun routes) staan nu rechtstreeks in de boom van de zijbalk. Klik met de rechtermuisknop om te hernoemen, een submodel of subgroep toe te voegen, een route te klonen, CRUD te genereren of te verwijderen; sleep om te herordenen of opnieuw onder te brengen — nooit buiten het ontwerp. Elke pagina toont nu alleen nog de details van het geselecteerde item.
-- **Een overzicht van je modellen, enums en routes.** De hoofdknoop van elke sectie toont nu alles eronder — en Modellen krijgen een **Graph**-tab: een klassendiagram van je modellen met hun overerving en verwijzingen. Enums tonen hun waarden naast de naam.
-- **Eén plek om te hernoemen.** Een model, enum of route hernoem je vanuit de grote titel (het potlood), en een lege naam toont **‘<naamloos>’** zodat het potlood altijd bereikbaar blijft — de naam staat niet langer twee keer op de pagina.
+- **Uw modellen, enums en routes leven in de zijbalk.** De drie lijsten in de tabbladen verdwijnen: de modellen (met hun overervingsnesting), de enums en de routes (groepen en hun routes) staan nu rechtstreeks in de boom van de zijbalk. Klik met de rechtermuisknop om te hernoemen, een submodel of subgroep toe te voegen, een route te klonen, CRUD te genereren of te verwijderen; sleep om te herordenen of opnieuw onder te brengen — nooit buiten het ontwerp. Elke pagina toont nu alleen nog de details van het geselecteerde item.
+- **Een overzicht van uw modellen, enums en routes.** De hoofdknoop van elke sectie toont nu alles eronder — en Modellen krijgen een **Graph**-tab: een klassendiagram van uw modellen met hun overerving en verwijzingen. Enums tonen hun waarden naast de naam.
+- **Eén plek om te hernoemen.** Een model, enum of route hernoemt u vanuit de grote titel (het potlood), en een lege naam toont **‘<naamloos>’** zodat het potlood altijd bereikbaar blijft — de naam staat niet langer twee keer op de pagina.
 - **Validatiefouten wijzen het item aan.** Als er iets mis is — een model en een enum met dezelfde naam, een verwijzing naar iets dat niet meer bestaat — legt een melding boven het model, de enum of de route het uit.
 - **Een volledig kruimelpad.** Het pad weerspiegelt de volledige zijbalkhiërarchie — mappen › ontwerp › sectie › groep › item — en elk segment is klikbaar.
 - **Selecteer er meerdere, verwijder in één keer.** Selecteer meerdere modellen, enums of routes en verwijder ze in één keer, na een bevestiging.
-- **Kopieer of open de bron van een codetemplate met één klik.** Op de pagina "</> Code" verschijnt bij het zweven over een template een knop om de URL of het pad te kopiëren en een om deze te openen: de repository in je browser, of de map op schijf voor een lokale template.
-- **Nieuwe routes beginnen met een naam.** Een van nul af opgebouwde route krijgt nu een standaardnaam, zodat je haar meteen kunt hernoemen.
-- **Voorbeeldtabbladen, net als in je editor.** Eén klik opent een item nu in een herbruikbaar **voorbeeld**tabblad (de naam schuin gedrukt); op een ander item klikken hergebruikt hetzelfde tabblad in plaats van een nieuw op te stapelen. Dubbelklik erop, bewerk iets of voer een verzoek uit om het definitief open te houden. Uit te schakelen via Instellingen › Gedrag.
-- **Zet de tabbladen vast die je open houdt.** Klik met de rechtermuisknop op een tabblad en zet het vast: vastgezette tabbladen blijven vooraan, overleven ‘overige sluiten’ en worden per project onthouden.
+- **Kopieer of open de bron van een codetemplate met één klik.** Op de pagina "</> Code" verschijnt bij het zweven over een template een knop om de URL of het pad te kopiëren en een om deze te openen: de repository in uw browser, of de map op schijf voor een lokale template.
+- **Nieuwe routes beginnen met een naam.** Een van nul af opgebouwde route krijgt nu een standaardnaam, zodat u haar meteen kunt hernoemen.
+- **Voorbeeldtabbladen, net als in uw editor.** Eén klik opent een item nu in een herbruikbaar **voorbeeld**tabblad (de naam schuin gedrukt); op een ander item klikken hergebruikt hetzelfde tabblad in plaats van een nieuw op te stapelen. Dubbelklik erop, bewerk iets of voer een verzoek uit om het definitief open te houden. Uit te schakelen via Instellingen › Gedrag.
+- **Zet de tabbladen vast die u open houdt.** Klik met de rechtermuisknop op een tabblad en zet het vast: vastgezette tabbladen blijven vooraan, overleven ‘overige sluiten’ en worden per project onthouden.
 - **Omgevingen krijgen een echte detailweergave.** Open een omgeving om haar via haar titel te hernoemen, haar pictogram en kleur in te stellen en een subomgeving toe te voegen — en het rechtsklikmenu dupliceert een omgeving nu met al haar variabelen en subomgevingen.
 
 Oplossingen:
 
-- **Een codetemplate kiezen sluit de bibliotheek.** "Gebruiken" brengt je nu direct terug naar de Code-pagina.
+- **Een codetemplate kiezen sluit de bibliotheek.** "Gebruiken" brengt u nu direct terug naar de Code-pagina.
 - **Het genereren van documentatie mislukt niet meer bij optionele velden.** Documentatie genereren uit een ontwerp waarvan het model of de parameter "required" niet had ingesteld, stopt niet meer met een templatefout.
 - **Een enum verwijderen vraagt eerst.** Enums krijgen dezelfde bevestiging als modellen en routes.
-- **De zijbalk onthult wat je selecteert.** Met ‘zijbalk synchroniseren met het actieve tabblad’ aan, klapt het selecteren of aanmaken van een model, enum of route de bovenliggende items uit zodat het zichtbaar blijft in de boom.
+- **De zijbalk onthult wat u selecteert.** Met ‘zijbalk synchroniseren met het actieve tabblad’ aan, klapt het selecteren of aanmaken van een model, enum of route de bovenliggende items uit zodat het zichtbaar blijft in de boom.
 - **De omgevingsknop blijft leesbaar op elke kleur.** Het label schakelt nu naar donkere of lichte tekst om leesbaar te blijven op de kleur van de omgeving, net als de uitvoerknop.
-- **Middelklik sluit een geopend bestand.** Met de middelste muisknop op een item in de lijst ‘Geopend’ van de zijbalk klikken sluit het tabblad ervan — en een nieuwe Gedrag-instelling laat je dat paneel helemaal verbergen.
+- **Middelklik sluit een geopend bestand.** Met de middelste muisknop op een item in de lijst ‘Geopend’ van de zijbalk klikken sluit het tabblad ervan — en een nieuwe Gedrag-instelling laat u dat paneel helemaal verbergen.
 - **Duidelijkere bewoording bij het starten vanuit de documentatie.** In de documentatie van een geïmporteerde API staat op de knop nu "Een nieuw verzoek maken vanuit deze documentatie."
 - **Aanmelden werkt in de Microsoft Store-versie.** De callback met aangepast protocol die de browser na het inloggen teruggeeft, is nu gedeclareerd in het Store-pakket, zodat het aanmelden voltooit in plaats van te verlopen.
 
@@ -138,8 +138,8 @@ Restorm is een snelle, offline-first desktopclient om API's te testen en aan te 
 - **Scenario's**: koppel verzoeken visueel aan elkaar, vertak/herhaal, extraheer en hergebruik waarden, voer headless uit in CI.
 - **Omgevingen & variabelen**: overal `{{handlebars}}`, getypeerde secrets, omgevingen per map.
 - **Import/Export**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, code-export.
-- **Git-native projecten**: je `.restorm`-project is een gewoon bestand — beheer versies, vergelijk en los conflicten op in de app.
-- **Local-first & privé**: alles draait op je eigen machine; een uitgaande firewall bewaakt elke externe aanroep.
+- **Git-native projecten**: uw `.restorm`-project is een gewoon bestand — beheer versies, vergelijk en los conflicten op in de app.
+- **Local-first & privé**: alles draait op uw eigen machine; een uitgaande firewall bewaakt elke externe aanroep.
 - **Platformonafhankelijk**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
 Gratis Community-editie, met Pro & Enterprise voor teams.
