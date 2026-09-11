@@ -582,7 +582,7 @@ export function registerRestormIPC(deps: {
       return { success: true }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
-      logger.error('Failed to reveal path in folder', { path, error: errorMsg })
+      logger.warn('Failed to reveal path in folder', { path, error: errorMsg })
       return { success: false, error: errorMsg }
     }
   })
@@ -638,7 +638,7 @@ export function registerRestormIPC(deps: {
       const content = await fs.readFile(safePath, 'utf8')
       return content
     } catch (error) {
-      logger.error('Failed to read project file', { relPath, error: String(error) })
+      logger.warn('Failed to read project file', { relPath, error: String(error) })
       return ''
     }
   })
@@ -1058,7 +1058,7 @@ export function registerRestormIPC(deps: {
         responseBody: result.body ?? ''
       }
     } catch (err) {
-      logger.error('[IPC] auth:prefetch error', err)
+      logger.warn('[IPC] auth:prefetch error', err)
       return {
         success: false,
         statusCode: 0,
@@ -1833,7 +1833,7 @@ export function registerRestormIPC(deps: {
       logger.info('[IPC] Import preview result:', { success: result.success, itemsCount: result.items.length })
       return result
     } catch (error) {
-      logger.error('[IPC] Import preview error:', error)
+      logger.warn('[IPC] Import preview error:', error)
       return {
         success: false,
         items: [],
@@ -1924,7 +1924,7 @@ export function registerRestormIPC(deps: {
       logger.info('[IPC] Import result:', { success: result.success, itemsCount: result.items.length })
       return result
     } catch (error) {
-      logger.error('[IPC] Import error:', error)
+      logger.warn('[IPC] Import error:', error)
       return {
         success: false,
         items: [],

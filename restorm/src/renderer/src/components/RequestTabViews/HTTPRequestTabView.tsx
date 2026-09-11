@@ -900,11 +900,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           setHttpResponse(errorResponse)
           setHistoryRefreshKey(prev => prev + 1)
           eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
-          logger.error('HTTP request failed', { error: result.error })
+          logger.warn('HTTP request failed', { error: result.error })
         }
       })
       .catch((err: unknown) => {
-        logger.error('HTTP request execution error', { error: String(err) })
+        logger.warn('HTTP request execution error', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)
@@ -921,7 +921,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         }
       })
       .catch((err: unknown) => {
-        logger.error('Failed to cancel HTTP request', { error: String(err) })
+        logger.warn('Failed to cancel HTTP request', { error: String(err) })
       })
   }, [request.id])
 

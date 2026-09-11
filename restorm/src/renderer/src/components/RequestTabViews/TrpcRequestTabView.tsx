@@ -340,7 +340,7 @@ export const TrpcRequestTabView: React.FC<TrpcRequestTabViewProps> = ({
         logger.info('tRPC request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
-        logger.error('tRPC request failed', { error: String(err) })
+        logger.warn('tRPC request failed', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)

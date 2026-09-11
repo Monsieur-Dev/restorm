@@ -220,7 +220,7 @@ export const JsonRpcBatchRequestTabView: React.FC<JsonRpcBatchRequestTabViewProp
         logger.info('JSON-RPC batch completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
-        logger.error('JSON-RPC batch failed', { error: String(err) })
+        logger.warn('JSON-RPC batch failed', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)

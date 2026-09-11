@@ -1538,7 +1538,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
       setHistoryRefreshKey((prev) => prev + 1)
       eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
     } catch (err) {
-      logger.error('OData load-next-page failed', { error: String(err) })
+      logger.warn('OData load-next-page failed', { error: String(err) })
     } finally {
       setIsSending(false)
     }
@@ -1596,7 +1596,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
       setHistoryRefreshKey((prev) => prev + 1)
       eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
     } catch (err) {
-      logger.error('OData load-delta failed', { error: String(err) })
+      logger.warn('OData load-delta failed', { error: String(err) })
     } finally {
       setIsSending(false)
     }

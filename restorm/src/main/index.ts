@@ -493,7 +493,7 @@ function createWindow(): MainWindow | undefined {
       const openPathOnStart = (targetPath: string): void => {
         if (existsSync(targetPath) && statSync(targetPath).isDirectory()) {
           // A project is a single `.restorm` file; a directory is never one.
-          logger.error('Cannot open a directory as a project', { path: targetPath })
+          logger.warn('Cannot open a directory as a project', { path: targetPath })
         } else if (isFileServiceInitialized()) {
           // FileService stamps `_projectUuid` before broadcasting `file:opened`
           // (configured via `uuidKey` on init), so this stays a simple open +
@@ -508,7 +508,7 @@ function createWindow(): MainWindow | undefined {
               // single-file projects can be something else.
               await attachDraftStoreForFile(targetPath, 'yaml')
             } else {
-              logger.error('Failed to open file on startup:', { path: targetPath })
+              logger.warn('Failed to open file on startup:', { path: targetPath })
             }
           })
         } else {

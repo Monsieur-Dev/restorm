@@ -344,7 +344,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
       })
       .catch((err: unknown) => {
         setIsSubscribing(false)
-        logger.error('Redis subscription failed', { error: String(err) })
+        logger.warn('Redis subscription failed', { error: String(err) })
       })
   }
 
@@ -374,7 +374,7 @@ export const RedisRequestTabView: React.FC<RedisRequestTabViewProps> = ({
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
       })
       .catch((err: unknown) => {
-        logger.error('Redis command failed', { error: String(err) })
+        logger.warn('Redis command failed', { error: String(err) })
       })
       .finally(() => { setIsRunningCommand(false) })
   }

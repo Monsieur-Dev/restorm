@@ -214,7 +214,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             ...(meta.expectedChecksum !== undefined ? { expectedChecksum: meta.expectedChecksum } : {})
           })
           .catch((error: unknown) => {
-            logger.error('[useImport] postImportSeed failed', { error: error instanceof Error ? error.message : String(error) })
+            logger.warn('[useImport] postImportSeed failed', { error: error instanceof Error ? error.message : String(error) })
           })
       }
 

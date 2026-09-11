@@ -372,7 +372,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
         setHistoryRefreshKey((k) => k + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
       })
-      .catch((err: unknown) => { logger.error('Kafka produce failed', { error: String(err) }) })
+      .catch((err: unknown) => { logger.warn('Kafka produce failed', { error: String(err) }) })
       .finally(() => { setIsProducing(false) })
   }
 
@@ -389,7 +389,7 @@ export const KafkaRequestTabView: React.FC<KafkaRequestTabViewProps> = ({ reques
         setHistoryRefreshKey((k) => k + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
       })
-      .catch((err: unknown) => { logger.error('Kafka browse failed', { error: String(err) }) })
+      .catch((err: unknown) => { logger.warn('Kafka browse failed', { error: String(err) }) })
       .finally(() => { setIsBrowsing(false) })
   }
 

@@ -277,7 +277,7 @@ export const JsonRpcRequestTabView: React.FC<JsonRpcRequestTabViewProps> = ({ re
         logger.info('JSON-RPC call completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
-        logger.error('JSON-RPC call failed', { error: String(err) })
+        logger.warn('JSON-RPC call failed', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)

@@ -170,7 +170,7 @@ function projectProtocols(active: ActiveServer): void {
           debug: () => { /* dropped */ },
           info: () => { /* dropped */ },
           warn: (...args: unknown[]) => { logger.warn('[DesignServerService] graphql', { args }) },
-          error: (...args: unknown[]) => { logger.error('[DesignServerService] graphql', { args }) }
+          error: (...args: unknown[]) => { logger.warn('[DesignServerService] graphql', { args }) }
         }
       })
     } catch (err) {
@@ -628,7 +628,7 @@ class DesignServerService {
       // port never leaks past a stop() that raced this rebuild.
       if (!this.servers.has(active.designId)) await this.teardownGrpc(active)
     } catch (err) {
-      logger.error('[DesignServerService] grpc projection failed to bind — disabled for this run', {
+      logger.warn('[DesignServerService] grpc projection failed to bind — disabled for this run', {
         designId: active.designId,
         error: err instanceof Error ? err.message : String(err)
       })

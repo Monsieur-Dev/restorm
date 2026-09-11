@@ -267,6 +267,6 @@ export function clearUserSettings(): void {
     rmSync(storagePath, { force: true })
     logger.info('User settings cleared', { path: storagePath })
   } catch (error) {
-    logger.error('Failed to clear user settings', { error: String(error) })
+    logger.warn('Failed to clear user settings', { error: String(error) })
   }
 }
