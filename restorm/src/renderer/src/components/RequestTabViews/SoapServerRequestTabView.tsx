@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from 'react'
-import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { pushServerListenErrorToast, logServerListenFailure } from '../../services/serverListenErrorToast'
 import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
 import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +10,6 @@ import {
   CodeEditor,
   ControlGroup,
   ScrollableElement,
-  logger,
   type Tab
 } from 'electron-core-ui/renderer'
 import type { SoapRequest, SoapMockOperation } from '../../../../shared/types/requests/SoapRequest'
@@ -168,10 +167,10 @@ export const SoapServerRequestTabView: React.FC<SoapServerRequestTabViewProps> =
       .then((res) => {
         if (res.error) {
           pushServerListenErrorToast(t, t('soap.server.listenFailed', 'Could not start the SOAP mock server'), res.error, serverPort)
-          logger.error('SOAP mock server failed to listen', { error: res.error })
+          logServerListenFailure('SOAP mock server failed to listen', res.error)
         }
       })
-      .catch((err: unknown) => { logger.error('SOAP mock server listen error', { error: String(err) }) })
+      .catch((err: unknown) => { logServerListenFailure('SOAP mock server listen error', err) })
   }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => { void window.restorm?.soap.stop(request.id) }, [request.id])

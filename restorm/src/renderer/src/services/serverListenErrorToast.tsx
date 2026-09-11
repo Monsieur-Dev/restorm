@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next'
-import { toasterService } from 'electron-core-ui/renderer'
+import { toasterService, logger } from 'electron-core-ui/renderer'
 import { ScenarioToastTitle, ScenarioToastBody } from '../components/ScenarioToastBody'
 
 /**
@@ -25,4 +25,26 @@ export function pushServerListenErrorToast(
     durationMs: 10000,
     ariaLive: 'assertive'
   })
+}
+
+/**
+ * A listen/bind failure the user caused and can fix from the toast — the port is
+ * busy, privileged, or the address is unavailable. Expected + actionable, so it
+ * must NOT reach crash reporting; anything else is a genuine, unexpected failure.
+ */
+export function isExpectedListenError(error: string): boolean {
+  return /EADDRINUSE|EACCES|EADDRNOTAVAIL|EADDRINVAL|address already in use|permission denied/i.test(error)
+}
+
+/**
+ * Log a mock-server listen/start failure at the RIGHT level, so an expected bind
+ * error (already surfaced by {@link pushServerListenErrorToast}) is a `warn` —
+ * below the main process's Sentry log bridge — while a genuinely unexpected
+ * failure stays a bridged `error`. Call this instead of `logger.error` at every
+ * server-tab listen callsite.
+ */
+export function logServerListenFailure(message: string, error: unknown): void {
+  const text = typeof error === 'string' ? error : String(error)
+  if (isExpectedListenError(text)) logger.warn(message, { error: text })
+  else logger.error(message, { error: text })
 }

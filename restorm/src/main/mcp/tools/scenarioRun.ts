@@ -398,7 +398,16 @@ const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> =
 /** A box's last run result as its output context, resolved per kind. Null when
  * the kind has no preview resolver, or it hasn't produced a result yet. */
 export async function getScenarioNodeResult(scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> {
-  const { node } = locateNode(scenarioId, nodeId)
+  // A stale upstream reference — the JSON-path picker asks for the result of a
+  // node that was since deleted or rewired — must resolve to `null`, NOT throw.
+  // The throw would surface as an Electron `console.error` from the
+  // `scenario:node-result` ipcMain handler and get captured as crash-report
+  // noise, even though the renderer already treats null as "no result yet".
+  // (The shared `locateNode` still throws, so the explicit MCP run/cancel tools
+  // keep reporting a genuinely bad id.)
+  const scenario = findScenario(scenarioId)
+  const node = scenario?.nodes.find((n) => n.id === nodeId)
+  if (!node) return null
   const resolver = previewResolvers[node.kind]
   return resolver ? resolver(scenarioId, node) : null
 }

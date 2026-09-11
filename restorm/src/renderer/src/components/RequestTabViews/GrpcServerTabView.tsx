@@ -9,7 +9,6 @@ import {
   SplitView,
   Pane,
   ControlGroup,
-  logger,
   type ISelectData
 } from 'electron-core-ui/renderer'
 import type { GrpcMockMethod, GrpcRequest, GrpcCallType } from '../../../../shared/types/collections'
@@ -18,7 +17,7 @@ import { BeamWrap } from '../common/BeamWrap'
 import { RoundActionButton } from '../common/RoundActionButton'
 import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
-import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { pushServerListenErrorToast, logServerListenFailure } from '../../services/serverListenErrorToast'
 import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
 import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
@@ -152,10 +151,10 @@ export const GrpcServerTabView: React.FC<GrpcServerTabViewProps> = ({ request, c
       .then((res) => {
         if (res.error) {
           pushServerListenErrorToast(t, t('grpc.server.listenFailed', 'gRPC server failed to start'), res.error)
-          logger.error('gRPC mock server failed to listen', { error: res.error })
+          logServerListenFailure('gRPC mock server failed to listen', res.error)
         }
       })
-      .catch((err: unknown) => { logger.error('gRPC mock server listen error', { error: String(err) }) })
+      .catch((err: unknown) => { logServerListenFailure('gRPC mock server listen error', err) })
   }, [request.id, isListening, conflictMode, t])
 
   const handleStop = useCallback((): void => {

@@ -37,6 +37,14 @@ export async function initRendererSentry(): Promise<() => Promise<void>> {
     // reports. Error level only; see `consoleCapture.ts`. Like every renderer
     // event it rides IPC to the main process and through its scrubbing gate.
     integrations: [Sentry.captureConsoleIntegration({ levels: [...CONSOLE_CAPTURE_LEVELS] })],
+    // Drop Monaco's benign cancellation sentinel. An editor action that is
+    // superseded or aborted mid-flight (e.g. a paste the user interrupts)
+    // rejects with VS Code's `Canceled` — not a fault, and the app survives it,
+    // but the SDK's onunhandledrejection handler would otherwise capture it as
+    // an event. `main.tsx` already hides it from the DevTools console;
+    // `preventDefault()` there does not stop the SDK, so drop it in the pipeline
+    // too. Tight match — only Monaco's dedicated sentinel, no real error hidden.
+    ignoreErrors: ['Canceled', 'CancellationError'],
     // No performance tracing: it samples ordinary requests, which is exactly
     // the traffic this app must not describe to a third party.
     tracesSampleRate: 0,

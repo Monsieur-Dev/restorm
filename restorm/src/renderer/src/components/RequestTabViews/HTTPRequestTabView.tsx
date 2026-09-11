@@ -41,7 +41,7 @@ import { RequestActionToolbar } from './RequestActionToolbar'
 import { useIsInWorkbenchTab } from '../../contexts/workbenchTabHost'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { ServerConfigLockedHint } from '../common/ServerConfigLockedHint'
-import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { pushServerListenErrorToast, logServerListenFailure } from '../../services/serverListenErrorToast'
 import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
 import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { RegistryBadge } from '../common/RegistryBadge'
@@ -969,10 +969,10 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       .then((res) => {
         if (res.error) {
           pushServerListenErrorToast(t, t('http.server.listenFailed'), res.error, serverPort)
-          logger.error('HTTP mock server failed to listen', { error: res.error })
+          logServerListenFailure('HTTP mock server failed to listen', res.error)
         }
       })
-      .catch((err: unknown) => { logger.error('HTTP mock server listen error', { error: String(err) }) })
+      .catch((err: unknown) => { logServerListenFailure('HTTP mock server listen error', err) })
   }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => {

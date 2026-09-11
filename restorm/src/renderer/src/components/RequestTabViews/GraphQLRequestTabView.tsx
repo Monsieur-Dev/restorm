@@ -1,7 +1,7 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
-import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { pushServerListenErrorToast, logServerListenFailure } from '../../services/serverListenErrorToast'
 import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
 import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useTransportReplaced } from '../../hooks/useTransportReplaced'
@@ -439,10 +439,10 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       .then((res) => {
         if (res.error) {
           pushServerListenErrorToast(t, t('graphql.server.listenFailed'), res.error, serverPort)
-          logger.error('GraphQL mock server failed to listen', { error: res.error })
+          logServerListenFailure('GraphQL mock server failed to listen', res.error)
         }
       })
-      .catch((err: unknown) => { logger.error('GraphQL mock server listen error', { error: String(err) }) })
+      .catch((err: unknown) => { logServerListenFailure('GraphQL mock server listen error', err) })
   }, [request.id, isListening, conflictMode, t, flushUpdate, serverPort])
 
   const handleStop = useCallback((): void => {
