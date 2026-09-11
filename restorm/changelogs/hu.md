@@ -36,17 +36,17 @@ Javítások:
 
 **Az API-tervezőt mostantól az oldalsávból lehet vezérelni.**
 
-- **A modelljeid, enumjaid és útvonalaid az oldalsávban élnek.** A füleken lévő három lista eltűnik — a modellek (öröklődés szerinti beágyazásukkal), az enumok és az útvonalak (csoportok és útvonalaik) mostantól közvetlenül az oldalsáv fájában találhatók. Jobb kattintással átnevezhetsz, hozzáadhatsz almodellt vagy alcsoportot, klónozhatsz útvonalat, CRUD-ot generálhatsz vagy törölhetsz; húzással átrendezhetsz vagy új szülőt adhatsz — soha nem a terven kívülre. Minden oldal mostantól csak a kiválasztott elem részleteit mutatja.
+- **A modelljei, enumjai és útvonalai az oldalsávban élnek.** A füleken lévő három lista eltűnik — a modellek (öröklődés szerinti beágyazásukkal), az enumok és az útvonalak (csoportok és útvonalaik) mostantól közvetlenül az oldalsáv fájában találhatók. Jobb kattintással átnevezhet, hozzáadhat almodellt vagy alcsoportot, klónozhat útvonalat, CRUD-ot generálhat vagy törölhet; húzással átrendezhet vagy új szülőt adhat — soha nem a terven kívülre. Minden oldal mostantól csak a kiválasztott elem részleteit mutatja.
 - **Áttekintés a modellekről, enumokról és útvonalakról.** Minden szakasz gyökércsomópontja most felsorolja a tartalmát — és a Modellek egy **Gráf** fület kapnak: a modellek osztálydiagramját öröklődéssel és hivatkozásokkal. Az enumok az értékeiket a név mellett mutatják.
-- **Egyetlen hely az átnevezéshez.** Egy modellt, enumot vagy útvonalat a nagy címéből (a ceruza) nevezhetsz át, üres név esetén pedig **„<névtelen>”** jelenik meg, hogy a ceruza mindig elérhető legyen — a név többé nem jelenik meg kétszer az oldalon.
+- **Egyetlen hely az átnevezéshez.** Egy modellt, enumot vagy útvonalat a nagy címéből (a ceruza) nevezhet át, üres név esetén pedig **„<névtelen>”** jelenik meg, hogy a ceruza mindig elérhető legyen — a név többé nem jelenik meg kétszer az oldalon.
 - **A validációs hibák az elemre mutatnak.** Ha valami nem stimmel — egy modell és egy enum azonos névvel, egy már nem létező elemre mutató hivatkozás —, a modell, enum vagy útvonal tetején lévő jegyzet elmagyarázza.
 - **Teljes morzsamenü.** Az útvonal az oldalsáv teljes hierarchiáját tükrözi — mappák › terv › szakasz › csoport › elem —, és minden szegmens kattintható.
-- **Jelölj ki többet, törölj egyszerre.** Jelölj ki több modellt, enumot vagy útvonalat, és töröld őket egyszerre, megerősítés után.
-- **Másold vagy nyisd meg egy kódsablon forrását egy kattintással.** A „</> Code” oldalon egy sablon fölé húzva megjelenik egy gomb az URL vagy az elérési út másolásához és egy a megnyitásához — a tároló a böngésződben, vagy a mappa a lemezen egy helyi sablon esetén.
-- **Az új útvonalak névvel indulnak.** A nulláról létrehozott útvonal mostantól alapértelmezett nevet kap, így azonnal átnevezheted.
-- **Előnézeti lapok, akár a szerkesztődben.** Egyetlen kattintás mostantól egy újrahasználható **előnézeti** lapon nyit meg egy elemet (a neve dőlt betűvel); egy másik elemre kattintva ugyanaz a lap kerül újrafelhasználásra, nem pedig egy új lap. Dupla kattintás, bármilyen szerkesztés vagy egy kérés futtatása véglegesen nyitva tartja. A Beállítások › Viselkedés alatt kapcsolható ki.
-- **Rögzítsd a nyitva tartott lapokat.** Kattints jobb gombbal egy lapra, és rögzítsd: a rögzített lapok elöl maradnak, túlélik a „többi bezárása“ műveletet, és projektenként megjegyzésre kerülnek.
-- **A környezetek rendes részletnézetet kapnak.** Nyiss meg egy környezetet, hogy a címéből átnevezd, beállítsd az ikonját és színét, és alkörnyezetet adj hozzá — a jobbklikk menü pedig mostantól az összes változójával és alkörnyezetével együtt sokszorozza a környezetet.
+- **Jelöljön ki többet, töröljön egyszerre.** Jelöljön ki több modellt, enumot vagy útvonalat, és törölje őket egyszerre, megerősítés után.
+- **Másolja vagy nyissa meg egy kódsablon forrását egy kattintással.** A „</> Code” oldalon egy sablon fölé húzva megjelenik egy gomb az URL vagy az elérési út másolásához és egy a megnyitásához — a tároló a böngészőjében, vagy a mappa a lemezen egy helyi sablon esetén.
+- **Az új útvonalak névvel indulnak.** A nulláról létrehozott útvonal mostantól alapértelmezett nevet kap, így azonnal átnevezheti.
+- **Előnézeti lapok, akár a szerkesztőjében.** Egyetlen kattintás mostantól egy újrahasználható **előnézeti** lapon nyit meg egy elemet (a neve dőlt betűvel); egy másik elemre kattintva ugyanaz a lap kerül újrafelhasználásra, nem pedig egy új lap. Dupla kattintás, bármilyen szerkesztés vagy egy kérés futtatása véglegesen nyitva tartja. A Beállítások › Viselkedés alatt kapcsolható ki.
+- **Rögzítse a nyitva tartott lapokat.** Kattintson jobb gombbal egy lapra, és rögzítse: a rögzített lapok elöl maradnak, túlélik a „többi bezárása“ műveletet, és projektenként megjegyzésre kerülnek.
+- **A környezetek rendes részletnézetet kapnak.** Nyisson meg egy környezetet, hogy a címéből átnevezze, beállítsa az ikonját és színét, és alkörnyezetet adjon hozzá — a jobbklikk menü pedig mostantól az összes változójával és alkörnyezetével együtt sokszorozza a környezetet.
 
 Javítások:
 
@@ -55,8 +55,8 @@ Javítások:
 - **Egy enum törlése előbb rákérdez.** Az enumok ugyanazt a megerősítést kapják, mint a modellek és az útvonalak.
 - **Az oldalsáv felfedi a kijelölést.** Ha az „oldalsáv szinkronizálása az aktív lappal” be van kapcsolva, egy modell, enum vagy útvonal kijelölése vagy létrehozása kibontja a szülőit, hogy látható maradjon a fában.
 - **A környezet gomb minden színen olvasható marad.** A felirata mostantól sötét vagy világos szövegre vált, hogy olvasható maradjon a környezet színén, akárcsak a futtatás gomb.
-- **A középső gombbal kattintás bezár egy megnyitott fájlt.** Az oldalsáv „Megnyitva“ listájában egy bejegyzésre középső gombbal kattintva bezárul annak lapja — és egy új Viselkedés beállítással teljesen elrejtheted ezt a panelt.
-- **Világosabb szöveg, amikor a dokumentációból indulsz.** Egy importált API dokumentációjában a gomb felirata mostantól „Új kérés létrehozása ebből a dokumentációból“.
+- **A középső gombbal kattintás bezár egy megnyitott fájlt.** Az oldalsáv „Megnyitva“ listájában egy bejegyzésre középső gombbal kattintva bezárul annak lapja — és egy új Viselkedés beállítással teljesen elrejtheti ezt a panelt.
+- **Világosabb szöveg, amikor a dokumentációból indul.** Egy importált API dokumentációjában a gomb felirata mostantól „Új kérés létrehozása ebből a dokumentációból“.
 - **A bejelentkezés működik a Microsoft Store-os változatban.** Az egyéni protokollos visszahívás, amelyet a böngésző a bejelentkezés után visszaad, mostantól szerepel a Store-csomagban, így a bejelentkezés befejeződik, ahelyett hogy időtúllépéssel leállna.
 
 ## v1.1.0
@@ -80,13 +80,13 @@ Javítások:
 
 **Cookie jar — környezetenként egy cookie-tároló.**
 
-- **Minden környezet a saját cookie-jait tartja meg.** Jelentkezz be a dev API-dba és a prod API-dba két külön környezetből, és a munkameneteik sosem keverednek — az egyikben elmentett cookie mindig csak abban megy vissza. A lejárat, a `Path`, a `Domain` és az aldomainek, a `Secure`, a `HttpOnly` és a `SameSite` mostantól érvényesül, nem vész el.
-- **Íme a Cookie jar.** Egy új munkaterület-lap — **Nézet ▸ Cookie jar** — minden környezet cookie-jait domain szerint csoportosítva sorolja fel összecsukható paneleken: szerkessz egy értéket, törölj egyet, üríts ki egy domaint vagy az egész tárolót, vagy adj hozzá cookie-t kézzel. Élőben frissül, ahogy a kéréseid cookie-kat állítanak be.
-- **Lásd, mit küldött és kapott az egyes kérések.** Minden kérés mostantól kap egy **Sütik** lapot a Válasz és az Információk mellett, amely megmutatja a hívással elküldött cookie-kat és a visszakapott cookie-kat — beleértve az átirányításkor beállított, a végső válaszba soha el nem jutó cookie-kat is. Ott van az előzményeid korábbi válaszain is.
+- **Minden környezet a saját cookie-jait tartja meg.** Jelentkezzen be a dev API-jába és a prod API-jába két külön környezetből, és a munkameneteik sosem keverednek — az egyikben elmentett cookie mindig csak abban megy vissza. A lejárat, a `Path`, a `Domain` és az aldomainek, a `Secure`, a `HttpOnly` és a `SameSite` mostantól érvényesül, nem vész el.
+- **Íme a Cookie jar.** Egy új munkaterület-lap — **Nézet ▸ Cookie jar** — minden környezet cookie-jait domain szerint csoportosítva sorolja fel összecsukható paneleken: szerkesszen egy értéket, töröljön egyet, ürítsen ki egy domaint vagy az egész tárolót, vagy adjon hozzá cookie-t kézzel. Élőben frissül, ahogy a kérései cookie-kat állítanak be.
+- **Lássa, mit küldött és kapott az egyes kérések.** Minden kérés mostantól kap egy **Sütik** lapot a Válasz és az Információk mellett, amely megmutatja a hívással elküldött cookie-kat és a visszakapott cookie-kat — beleértve az átirányításkor beállított, a végső válaszba soha el nem jutó cookie-kat is. Ott van az előzményei korábbi válaszain is.
 - **A cookie-alapú bejelentkezés egyszerűen működik.** A `Set-Cookie`-t visszaadó kérést a rendszer elmenti, és automatikusan újrajátssza az utána következő védett hívásokon — akár egy forgatókönyv futása során is, ahol minden lépés ugyanazt a környezeti tárolót használja.
-- **A cookie-k úgy maradnak meg, mint a böngészőben.** A lejárattal rendelkező cookie-k projektenként mentődnek, és újratöltődnek, amikor újra megnyitod; a munkamenet-cookie-k eldobódnak, amikor újraindítod — pontosan úgy, ahogy egy böngésző tenné.
+- **A cookie-k úgy maradnak meg, mint a böngészőben.** A lejárattal rendelkező cookie-k projektenként mentődnek, és újratöltődnek, amikor újra megnyitja; a munkamenet-cookie-k eldobódnak, amikor újraindítja — pontosan úgy, ahogy egy böngésző tenné.
 - **Túl a REST-en.** A GraphQL, a SOAP, az OData, a JSON-RPC, a tRPC és az SSE mostantól mind küld és tárol cookie-kat, a WebSocket pedig a kapcsolat kézfogásán viszi őket.
-- **A cookie-k használhatják a változóidat.** Írj `{{token}}`-t egy kézzel hozzáadott cookie-ba, és az az aktív környezet alapján oldódik fel, amikor a kérés elindul.
+- **A cookie-k használhatják a változóit.** Írjon `{{token}}`-t egy kézzel hozzáadott cookie-ba, és az az aktív környezet alapján oldódik fel, amikor a kérés elindul.
 
 Javítások:
 
@@ -135,11 +135,11 @@ Javítások:
 A Restorm egy gyors, offline-first asztali kliens API-k teszteléséhez és vezérléséhez az összes fontosabb protokollon.
 
 - **Protokollok**: REST/HTTP, GraphQL, gRPC, WebSocket, SSE, SOAP, OData, MQTT, AMQP, STOMP, Kafka, Redis, tRPC, JSON-RPC.
-- **Forgatókönyvek**: fűzz össze kéréseket vizuálisan, elágazás/ciklus, értékek kinyerése és újrafelhasználása, futtatás felület nélkül CI-ben.
+- **Forgatókönyvek**: fűzzön össze kéréseket vizuálisan, elágazás/ciklus, értékek kinyerése és újrafelhasználása, futtatás felület nélkül CI-ben.
 - **Környezetek és változók**: `{{handlebars}}` mindenhol, típusos titkok, mappánkénti környezetek.
 - **Importálás/Exportálás**: OpenAPI, Postman, Insomnia, HAR, WSDL, GraphQL SDL, OData EDMX, curl, kódexportálás.
-- **Git-natív projektek**: a `.restorm` projekted egy egyszerű fájl — verziózd, hasonlítsd össze és oldd fel az ütközéseket az alkalmazásban.
-- **Local-first és privát**: minden a saját gépeden fut; egy kimenő tűzfal minden külső hívást ellenőriz.
+- **Git-natív projektek**: a `.restorm` projektje egy egyszerű fájl — verziózza, hasonlítsa össze és oldja fel az ütközéseket az alkalmazásban.
+- **Local-first és privát**: minden a saját gépén fut; egy kimenő tűzfal minden külső hívást ellenőriz.
 - **Platformfüggetlen**: Windows, macOS, Linux (.deb/.rpm/AppImage) + npm.
 
 Ingyenes Community kiadás, valamint Pro és Enterprise csapatoknak.

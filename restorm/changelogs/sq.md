@@ -2,27 +2,27 @@
 
 ## v1.1.4
 
-**Lidh asistentin tënd të AI-së në macOS — tani i besueshëm.**
+**Lidhni asistentin tuaj të AI-së në macOS — tani i besueshëm.**
 
 - **Rregullim: Claude Desktop dhe Cursor në macOS.** Lidhja e një asistenti AI ngarkonte veglat e Restorm, por më pas çdo thirrje dështonte me «asnjë instancë në ekzekutim», edhe me Restorm-in hapur — aplikacioni dhe lidhësi kërkonin njëri-tjetrin në dosje të përkohshme të ndryshme. Tani takohen në mënyrë të besueshme, pavarësisht se çfarë e nisi lidhësin.
-- **Formulim formal në italisht, polonisht dhe finlandisht.** Ndërfaqja tani të drejtohet në regjistrin formal në këto tri gjuhë, në përputhje me pjesën tjetër.
+- **Formulim formal në italisht, polonisht dhe finlandisht.** Ndërfaqja tani ju drejtohet në regjistrin formal në këto tri gjuhë, në përputhje me pjesën tjetër.
 
 ## v1.1.3
 
-**Lidh asistentin tënd të AI-së me Restorm.**
+**Lidhni asistentin tuaj të AI-së me Restorm.**
 
-- **Me një klikim, drejt nga aplikacioni.** Menyja MCP në shiritin e statusit tani ofron «Shto Restorm te asistenti yt i AI-së» — konfigurim gati për t'u ngjitur për Claude Code, Claude Desktop dhe Cursor, plus «Shto te Claude Code» me një klikim.
-- **Ose një rresht, kudo.** Drejto çdo klient MCP te Restorm-i yt që po ekzekutohet me `npx -y restorm-mcp` — ura e gjen vetë, pa asnjë port apo token për t'u kopjuar.
-- **Një shtojcë për Claude Code.** Ekzekuto `/plugin marketplace add Monsieur-Dev/restorm`, pastaj instalo shtojcën `restorm`.
+- **Me një klikim, drejt nga aplikacioni.** Menyja MCP në shiritin e statusit tani ofron «Shtoni Restorm te asistenti juaj i AI-së» — konfigurim gati për t'u ngjitur për Claude Code, Claude Desktop dhe Cursor, plus «Shtoni te Claude Code» me një klikim.
+- **Ose një rresht, kudo.** Drejtoni çdo klient MCP te Restorm-i juaj që po ekzekutohet me `npx -y restorm-mcp` — ura e gjen vetë, pa asnjë port apo token për t'u kopjuar.
+- **Një shtojcë për Claude Code.** Ekzekutoni `/plugin marketplace add Monsieur-Dev/restorm`, pastaj instaloni shtojcën `restorm`.
 
-Shih [Lidhja e asistentit tënd të AI-së](https://restorm.app/en/docs/outils/mcp/).
+Shihni [Lidhja e asistentit tuaj të AI-së](https://restorm.app/en/docs/outils/mcp/).
 
 ## v1.1.2
 
 **Mbështetje për OpenAPI 3.2.**
 
-- **Importo specifikime OpenAPI 3.2.** Metoda `QUERY`, foljet e personalizuara (`additionalOperations`), parametri query string dhe llojet e mediave në transmetim importohen si kërkesa gati për t'u ekzekutuar.
-- **Shfleto një skedar për ta importuar.** Një buton Shfleto në dritaren e importit hap një zgjedhës skedarësh nativ — s'ka më shtypje apo tërheqje shtegu.
+- **Importoni specifikime OpenAPI 3.2.** Metoda `QUERY`, foljet e personalizuara (`additionalOperations`), parametri query string dhe llojet e mediave në transmetim importohen si kërkesa gati për t'u ekzekutuar.
+- **Shfletoni një skedar për ta importuar.** Një buton Shfleto në dritaren e importit hap një zgjedhës skedarësh nativ — s'ka më shtypje apo tërheqje shtegu.
 - **Pamje e ndarë për ngjitje të mëdha.** Ngjitja e një specifikimi me shumë rreshta hap një redaktues kodi majtas dhe parapamjen djathtas, me një ndarës të lëvizshëm.
 - **Import tolerant.** Një specifikim me disa `$ref` të prishur importon të gjitha rrugët që mundet dhe shfaq një paralajmërim me atë që iu desh të anashkalonte.
 
@@ -41,22 +41,22 @@ Rregullime:
 - **Një vend i vetëm për riemërtim.** Një model, enum ose rrugë riemërtohet nga titulli i madh (lapsi), dhe një emër bosh shfaq **«<pa emër>»** që lapsi të jetë gjithmonë i arritshëm — emri nuk shfaqet më dy herë në faqe.
 - **Gabimet e validimit tregojnë elementin.** Kur diçka nuk shkon — një model dhe një enum me të njëjtin emër, një referencë te diçka që nuk ekziston më — një shënim në krye të modelit, enum-it ose rrugës e shpjegon.
 - **Një shteg i plotë navigimi.** Gjurma pasqyron gjithë hierarkinë e shiritit anësor — dosje › dizajn › seksion › grup › element — dhe çdo segment mund të klikohet.
-- **Zgjidh disa, fshi njëherësh.** Zgjidh disa modele, enum-e ose rrugë dhe fshiji njëherësh, pas një konfirmimi.
+- **Zgjidhni disa, fshini njëherësh.** Zgjidhni disa modele, enum-e ose rrugë dhe fshijini njëherësh, pas një konfirmimi.
 - **Kopjoni ose hapni burimin e një shablloni kodi me një klik.** Në faqen "</> Code", kur kaloni mbi një shabllon shfaqet një buton për të kopjuar URL-në ose shtegun e tij dhe një për ta hapur — depoja në shfletuesin tuaj, ose dosja në disk për një shabllon lokal.
 - **Rrugët e reja fillojnë me një emër.** Një rrugë e krijuar nga e para tani merr një emër të parazgjedhur, kështu që mund ta riemërtoni menjëherë.
-- **Skeda paraparjeje, si në redaktuesin tuaj.** Një klik i vetëm tani hap një element në një skedë **paraparjeje** të ripërdorshme (emri i tij me shkronja të pjerrëta); klikimi i një elementi tjetër ripërdor të njëjtën skedë në vend që të grumbullojë një të re. Një klik dyfishtë, çdo ndryshim ose ekzekutimi i një kërkese e mban të hapur përgjithmonë. Çaktivizoje te Cilësimet › Sjellja.
-- **Fiksoni skedat që i mbani hapur.** Klikoni me të djathtën një skedë dhe fiksojeni: skedat e fiksuara qëndrojnë të parat, i mbijetojnë «mbyll të tjerat» dhe mbahen mend për çdo projekt.
+- **Skeda paraparjeje, si në redaktuesin tuaj.** Një klik i vetëm tani hap një element në një skedë **paraparjeje** të ripërdorshme (emri i tij me shkronja të pjerrëta); klikimi i një elementi tjetër ripërdor të njëjtën skedë në vend që të grumbullojë një të re. Një klik dyfishtë, çdo ndryshim ose ekzekutimi i një kërkese e mban të hapur përgjithmonë. Çaktivizojeni te Cilësimet › Sjellja.
+- **Fiksoni skedat që i mbani hapur.** Klikoni me të djathtën një skedë dhe fiksojeni: skedat e fiksuara qëndrojnë të parat, i mbijetojnë «mbyllni të tjerat» dhe mbahen mend për çdo projekt.
 - **Mjediset marrin një pamje të vërtetë detajesh.** Hapni një mjedis për ta riemërtuar nga titulli i tij, për t'i caktuar ikonën dhe ngjyrën dhe për të shtuar një nën-mjedis — dhe menyja e klikut të djathtë tani e dyfishon një mjedis me të gjitha variablat dhe nën-mjediset e tij.
 
 Rregullime:
 
-- **Zgjedhja e një shablloni kodi mbyll bibliotekën.** "Përdor" tani ju kthen drejtpërdrejt te faqja Code.
+- **Zgjedhja e një shablloni kodi mbyll bibliotekën.** "Përdorni" tani ju kthen drejtpërdrejt te faqja Code.
 - **Gjenerimi i dokumentacionit nuk dështon më te fushat opsionale.** Gjenerimi i dokumentacionit nga një projekt modeli ose parametri i të cilit e linte "required" të pacaktuar nuk ndalet më me një gabim shablloni.
 - **Fshirja e një enum-i pyet fillimisht.** Enum-et marrin të njëjtin konfirmim si modelet dhe rrugët.
-- **Shiriti anësor zbulon zgjedhjen tuaj.** Me «sinkronizo shiritin anësor me skedën aktive» të ndezur, zgjedhja ose krijimi i një modeli, enum-i ose rruge zgjeron prindërit e tij që të mbetet i dukshëm në pemë.
+- **Shiriti anësor zbulon zgjedhjen tuaj.** Me «sinkronizoni shiritin anësor me skedën aktive» të ndezur, zgjedhja ose krijimi i një modeli, enum-i ose rruge zgjeron prindërit e tij që të mbetet i dukshëm në pemë.
 - **Butoni i mjedisit mbetet i lexueshëm në çdo ngjyrë.** Etiketa e tij tani kalon në tekst të errët ose të çelët për të mbetur e lexueshme mbi ngjyrën e mjedisit, si butoni i ekzekutimit.
 - **Klikimi i mesëm mbyll një skedar të hapur.** Klikimi i mesëm mbi një zë në listën «Të hapura» të shiritit anësor mbyll skedën e tij — dhe një cilësim i ri i Sjelljes ju lejon ta fshihni krejtësisht atë panel.
-- **Formulim më i qartë kur nisni nga dokumentacioni.** Në dokumentacionin e një API-je të importuar, butoni tani thotë "Krijo një kërkesë të re nga ky dokumentacion."
+- **Formulim më i qartë kur nisni nga dokumentacioni.** Në dokumentacionin e një API-je të importuar, butoni tani thotë "Krijoni një kërkesë të re nga ky dokumentacion."
 - **Hyrja funksionon në versionin e Microsoft Store.** Kthimi i thirrjes me protokoll të personalizuar që shfletuesi kthen pas hyrjes tani është deklaruar në paketën e Store, kështu që hyrja përfundon në vend që t'i mbarojë koha.
 
 ## v1.1.0
