@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Hubungkan asisten AI Anda di macOS — kini andal.**
+
+- **Diperbaiki: Claude Desktop dan Cursor di macOS.** Menghubungkan asisten AI memuat alat-alat Restorm, tetapi kemudian setiap panggilan gagal dengan “tidak ada instansi yang berjalan”, bahkan saat Restorm terbuka — aplikasi dan konektor saling mencari di folder sementara yang berbeda. Kini keduanya bertemu dengan andal, apa pun yang menjalankan konektor.
+- **Sapaan formal dalam bahasa Italia, Polandia, dan Finlandia.** Antarmuka kini menyapa Anda dalam register formal dalam ketiga bahasa ini, selaras dengan yang lain.
+
 ## v1.1.3
 
 **Hubungkan asisten AI Anda ke Restorm.**

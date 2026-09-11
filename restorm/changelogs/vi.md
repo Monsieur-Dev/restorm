@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Kết nối trợ lý AI của bạn trên macOS — giờ đã đáng tin cậy.**
+
+- **Đã sửa: Claude Desktop và Cursor trên macOS.** Việc kết nối một trợ lý AI vẫn tải các công cụ của Restorm nhưng sau đó mọi lệnh gọi đều thất bại với “không có phiên bản đang chạy”, ngay cả khi Restorm đang mở — ứng dụng và trình kết nối tìm nhau ở các thư mục tạm khác nhau. Giờ đây chúng gặp nhau một cách đáng tin cậy, bất kể thứ gì đã khởi chạy trình kết nối.
+- **Cách xưng hô trang trọng trong tiếng Ý, tiếng Ba Lan và tiếng Phần Lan.** Giao diện giờ đây xưng hô với bạn theo lối trang trọng trong ba ngôn ngữ này, nhất quán với phần còn lại.
+
 ## v1.1.3
 
 **Kết nối trợ lý AI của bạn với Restorm.**

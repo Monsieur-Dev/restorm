@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Colleghi il suo assistente IA su macOS — ora in modo affidabile.**
+
+- **Corretto: Claude Desktop e Cursor su macOS.** Collegare un assistente IA caricava gli strumenti di Restorm, ma poi ogni chiamata falliva con «nessuna istanza in esecuzione», anche con Restorm aperto — l'app e il connettore si cercavano in cartelle temporanee diverse. Ora si trovano in modo affidabile, qualunque cosa abbia avviato il connettore.
+- **Formulazione formale in italiano, polacco e finlandese.** L'interfaccia ora si rivolge a Lei con il registro formale in queste tre lingue, in coerenza con il resto.
+
 ## v1.1.3
 
 **Collega il tuo assistente IA a Restorm.**

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Proszę podłączyć swojego asystenta AI na macOS — teraz niezawodnie.**
+
+- **Naprawiono: Claude Desktop i Cursor na macOS.** Podłączenie asystenta AI ładowało narzędzia Restorma, ale potem każde wywołanie kończyło się błędem „brak działającej instancji”, nawet przy otwartym Restormie — aplikacja i łącznik szukały się nawzajem w różnych folderach tymczasowych. Teraz odnajdują się niezawodnie, niezależnie od tego, co uruchomiło łącznik.
+- **Formalne zwroty w języku włoskim, polskim i fińskim.** Interfejs zwraca się teraz do Pana/Pani w tych trzech językach w formie formalnej, spójnie z resztą.
+
 ## v1.1.3
 
 **Podłącz swojego asystenta AI do Restorma.**

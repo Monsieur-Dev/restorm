@@ -41,7 +41,7 @@
  *   } } }
  */
 
-import { spawn } from 'node:child_process'
+import { spawn, execFileSync } from 'node:child_process'
 import { request as httpRequest } from 'node:http'
 import { connect as netConnect } from 'node:net'
 import { promises as fs, readdirSync, readFileSync } from 'node:fs'
@@ -80,6 +80,36 @@ const PROTOCOL_VERSION = '2025-03-26'
 // looks). Setting the SAME `RESTORM_MCP_DIR` for both removes that race. Unset
 // → the cross-platform, self-cleaning `os.tmpdir()` default (unchanged).
 const DISCOVERY_DIR = process.env.RESTORM_MCP_DIR?.trim() || join(tmpdir(), 'restorm-mcp')
+
+// Discovery is READ from several candidate dirs, not just DISCOVERY_DIR. A GUI
+// MCP client (Claude Desktop, Cursor, …) spawns this launcher with a STRIPPED
+// environment — no `TMPDIR` — so Node's `os.tmpdir()` collapses to `/tmp`, while
+// restorm, launched with a full login/GUI env, drops its lockfile in the REAL
+// per-user temp dir (macOS `/var/folders/…/T/restorm-mcp`). The two never meet
+// and the client reports "no running instance" even though one is up. To
+// rendezvous regardless of the spawn env, scan every plausible dir and take the
+// first with a live instance. An explicit `RESTORM_MCP_DIR` still wins alone — a
+// deliberate pin isolates and must not silently pick up instances elsewhere.
+let cachedDiscoveryDirs = null
+function discoveryDirs() {
+  if (cachedDiscoveryDirs) return cachedDiscoveryDirs
+  if (process.env.RESTORM_MCP_DIR?.trim()) {
+    cachedDiscoveryDirs = [DISCOVERY_DIR]
+    return cachedDiscoveryDirs
+  }
+  const dirs = [DISCOVERY_DIR, join('/tmp', 'restorm-mcp')]
+  if (process.platform === 'darwin') {
+    // The per-user Darwin temp dir comes from confstr, so it is env-INDEPENDENT
+    // and survives a stripped `TMPDIR` — this is where a GUI-launched restorm
+    // actually writes. `getconf` is a base-system binary present on every macOS.
+    try {
+      const out = execFileSync('getconf', ['DARWIN_USER_TEMP_DIR'], { encoding: 'utf8' }).trim()
+      if (out) dirs.push(join(out, 'restorm-mcp'))
+    } catch { /* getconf unavailable — skip this candidate */ }
+  }
+  cachedDiscoveryDirs = [...new Set(dirs)] // dedupe, keep order
+  return cachedDiscoveryDirs
+}
 
 // Last `tools/list` restorm actually returned, persisted so the next session
 // can answer `tools/list` (while restorm is still down) with the real, current
@@ -525,39 +555,46 @@ function isPidAlive(pid) {
 }
 
 /**
- * Read every parseable lockfile in DISCOVERY_DIR. Returns the parsed
- * entries plus their on-disk paths so callers can probe + GC.
+ * Read every parseable lockfile across ALL candidate discovery dirs (see
+ * `discoveryDirs`). Returns the parsed entries plus their on-disk paths so
+ * callers can probe + GC. Dedupes by absolute path so a dir listed twice is
+ * counted once.
  */
 function readDiscoveryEntries() {
-  let entries
-  try {
-    entries = readdirSync(DISCOVERY_DIR, { withFileTypes: true })
-  } catch {
-    return []
-  }
   const out = []
-  for (const e of entries) {
-    if (!e.isFile() || !e.name.endsWith('.json')) continue
-    const path = join(DISCOVERY_DIR, e.name)
-    let parsed
+  const seen = new Set()
+  for (const dir of discoveryDirs()) {
+    let entries
     try {
-      parsed = JSON.parse(readFileSync(path, 'utf8'))
+      entries = readdirSync(dir, { withFileTypes: true })
     } catch {
-      out.push({ file: path, parseable: false })
-      continue
+      continue // dir absent (never used on this box) — try the next candidate
     }
-    const pid = Number(parsed.pid)
-    const port = Number(parsed.port)
-    const token = typeof parsed.token === 'string' ? parsed.token : null
-    out.push({
-      file: path,
-      parseable: true,
-      pid: Number.isInteger(pid) ? pid : null,
-      port: Number.isInteger(port) && port > 0 ? port : null,
-      token,
-      projectPath: parsed.projectPath ?? null,
-      startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : ''
-    })
+    for (const e of entries) {
+      if (!e.isFile() || !e.name.endsWith('.json')) continue
+      const path = join(dir, e.name)
+      if (seen.has(path)) continue
+      seen.add(path)
+      let parsed
+      try {
+        parsed = JSON.parse(readFileSync(path, 'utf8'))
+      } catch {
+        out.push({ file: path, parseable: false })
+        continue
+      }
+      const pid = Number(parsed.pid)
+      const port = Number(parsed.port)
+      const token = typeof parsed.token === 'string' ? parsed.token : null
+      out.push({
+        file: path,
+        parseable: true,
+        pid: Number.isInteger(pid) ? pid : null,
+        port: Number.isInteger(port) && port > 0 ? port : null,
+        token,
+        projectPath: parsed.projectPath ?? null,
+        startedAt: typeof parsed.startedAt === 'string' ? parsed.startedAt : ''
+      })
+    }
   }
   return out
 }
