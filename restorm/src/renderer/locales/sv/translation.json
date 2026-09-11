@@ -2514,6 +2514,7 @@
       "ephemeral": "Tillfällig (TTL)"
     },
     "issue": {
+      "collidesWith": "Krockar med:",
       "propertyNameEmpty": "Egenskapen saknar namn",
       "propertyNameDuplicate": "Duplicerat egenskapsnamn",
       "propertyShadowsParent": "Skuggar en ärvd egenskap",

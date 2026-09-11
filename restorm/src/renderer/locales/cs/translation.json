@@ -2516,6 +2516,7 @@
       "ephemeral": "Dočasné (TTL)"
     },
     "issue": {
+      "collidesWith": "V konfliktu s:",
       "propertyNameEmpty": "Vlastnost nemá název",
       "propertyNameDuplicate": "Duplicitní název vlastnosti",
       "propertyShadowsParent": "Zastiňuje zděděnou vlastnost",

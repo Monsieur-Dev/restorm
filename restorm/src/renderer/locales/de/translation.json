@@ -2514,6 +2514,7 @@
       "ephemeral": "Kurzlebig (TTL)"
     },
     "issue": {
+      "collidesWith": "Kollidiert mit:",
       "propertyNameEmpty": "Die Eigenschaft hat keinen Namen",
       "propertyNameDuplicate": "Doppelter Eigenschaftsname",
       "propertyShadowsParent": "Überdeckt eine geerbte Eigenschaft",

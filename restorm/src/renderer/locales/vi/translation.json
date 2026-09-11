@@ -2513,6 +2513,7 @@
       "ephemeral": "Tạm thời (TTL)"
     },
     "issue": {
+      "collidesWith": "Xung đột với:",
       "propertyNameEmpty": "Thuộc tính chưa có tên",
       "propertyNameDuplicate": "Tên thuộc tính trùng lặp",
       "propertyShadowsParent": "Che khuất một thuộc tính kế thừa",

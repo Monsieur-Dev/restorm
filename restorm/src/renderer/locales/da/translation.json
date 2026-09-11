@@ -2514,6 +2514,7 @@
       "ephemeral": "Kortvarig (TTL)"
     },
     "issue": {
+      "collidesWith": "Kolliderer med:",
       "propertyNameEmpty": "Egenskaben har intet navn",
       "propertyNameDuplicate": "Duplikeret egenskabsnavn",
       "propertyShadowsParent": "Skygger for en nedarvet egenskab",

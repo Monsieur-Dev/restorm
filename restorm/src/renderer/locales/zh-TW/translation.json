@@ -2513,6 +2513,7 @@
       "ephemeral": "臨時（TTL）"
     },
     "issue": {
+      "collidesWith": "與以下項目衝突：",
       "propertyNameEmpty": "屬性沒有名稱",
       "propertyNameDuplicate": "屬性名稱重複",
       "propertyShadowsParent": "遮蔽了繼承的屬性",

@@ -2513,6 +2513,7 @@
       "ephemeral": "一時的（TTL）"
     },
     "issue": {
+      "collidesWith": "次と競合:",
       "propertyNameEmpty": "プロパティに名前がありません",
       "propertyNameDuplicate": "プロパティ名が重複しています",
       "propertyShadowsParent": "継承したプロパティを隠しています",

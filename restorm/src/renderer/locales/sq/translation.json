@@ -2514,6 +2514,7 @@
       "ephemeral": "Kalimtar (TTL)"
     },
     "issue": {
+      "collidesWith": "Në konflikt me:",
       "propertyNameEmpty": "Vetia nuk ka emër",
       "propertyNameDuplicate": "Emër vetie i dublikuar",
       "propertyShadowsParent": "Mbulon një veti të trashëguar",

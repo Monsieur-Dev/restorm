@@ -2515,6 +2515,7 @@
       "ephemeral": "Kratkotrajno (TTL)"
     },
     "issue": {
+      "collidesWith": "U sukobu s:",
       "propertyNameEmpty": "Svojstvo nema ime",
       "propertyNameDuplicate": "Duplicirano ime svojstva",
       "propertyShadowsParent": "Zasjenjuje naslijeđeno svojstvo",

@@ -2514,6 +2514,7 @@
       "ephemeral": "Kortstondig (TTL)"
     },
     "issue": {
+      "collidesWith": "Botst met:",
       "propertyNameEmpty": "De eigenschap heeft geen naam",
       "propertyNameDuplicate": "Dubbele eigenschapsnaam",
       "propertyShadowsParent": "Verbergt een geërfde eigenschap",

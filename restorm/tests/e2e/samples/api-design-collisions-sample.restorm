@@ -1,0 +1,59 @@
+fileFormatVersion: 1.1
+collections:
+  - id: 063073c4-bcb0-4b3b-8918-a9001ce56d93
+    name: collisions
+    type: design
+    enums:
+      - id: f0a16dee-a8d6-448b-a3c7-2442194733c0
+        doc:
+          name: Status
+          enumValues:
+            - ACTIVE
+            - INACTIVE
+          properties: []
+      - id: f1051fd4-9149-446a-bbac-5147068feeb9
+        doc:
+          name: Status
+          enumValues:
+            - OPEN
+            - CLOSED
+          properties: []
+    info:
+      title: collisions
+    models:
+      - id: d748cacc-5655-4d72-b1cc-9697eb011e06
+        doc:
+          name: User
+        properties: []
+      - id: e38aeff3-7f39-45be-911a-93fd69f942c6
+        doc:
+          name: User
+        properties: []
+    routeGroups:
+      - id: 07b5115f-5332-406a-8b8f-fe548640be54
+        design:
+          basePath: /items
+        doc:
+          name: Items
+        routes:
+          - id: f4d3de2b-5b2c-4070-8fb6-8bc7ef1b0bbb
+            doc:
+              match:
+                method: GET
+                urlPattern: /all
+              parameters: []
+              responses:
+                '200':
+                  description: OK
+          - id: a6ed43bc-cecf-4c40-bcb4-f23a569e43c9
+            doc:
+              match:
+                method: GET
+                urlPattern: /all
+              parameters: []
+              responses:
+                '200':
+                  description: OK
+    server:
+      basePath: /api
+_projectUuid: 747048d1-c292-4e81-9c4c-1facbedc1cfe

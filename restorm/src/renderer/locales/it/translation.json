@@ -2514,6 +2514,7 @@
       "ephemeral": "Effimero (TTL)"
     },
     "issue": {
+      "collidesWith": "In conflitto con:",
       "propertyNameEmpty": "La proprietà non ha nome",
       "propertyNameDuplicate": "Nome di proprietà duplicato",
       "propertyShadowsParent": "Nasconde una proprietà ereditata",

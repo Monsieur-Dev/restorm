@@ -38,6 +38,7 @@ export interface DesignRoutesSectionProps {
   issues?: readonly DesignIssue[]
   selectedEntityId: string | null
   onSelectEntity: (entityId: string | null) => void
+  onJumpTo?: ((section: 'models' | 'routes' | 'enums', entityId: string) => void) | undefined
   /** A one-shot action fired from a sidebar route/group node's context menu. */
   pendingAction?: PendingEntityAction | null
 }
@@ -53,7 +54,7 @@ interface Selection {
  * the selected ROUTE's request-editor-style card (Définition /
  * Réponses / Réglages / Notes tabs) on the right.
  */
-export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design, issues = [], selectedEntityId, onSelectEntity, pendingAction }) => {
+export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design, issues = [], selectedEntityId, onSelectEntity, onJumpTo, pendingAction }) => {
   const { t } = useTranslation()
   const [pendingDeleteGroup, setPendingDeleteGroup] = useState<DesignRouteGroup | null>(null)
 
@@ -229,6 +230,7 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
             group={selectedGroup}
             onAddRoute={() => { addRoute(selectedGroup) }}
             onDelete={() => { setPendingDeleteGroup(selectedGroup) }}
+            onJumpTo={onJumpTo}
           />
         )}
         {selectedGroup !== null && selectedRoute !== null && (
@@ -239,6 +241,7 @@ export const DesignRoutesSection: React.FC<DesignRoutesSectionProps> = ({ design
             group={selectedGroup}
             route={selectedRoute}
             onOpenGroup={(groupId) => { onSelectEntity(groupId) }}
+            onJumpTo={onJumpTo}
           />
         )}
         </div>
@@ -278,7 +281,8 @@ const GroupCard: React.FC<{
   group: DesignRouteGroup
   onAddRoute: () => void
   onDelete: () => void
-}> = ({ design, issues, group, onAddRoute, onDelete }) => {
+  onJumpTo?: ((section: 'models' | 'routes' | 'enums', entityId: string) => void) | undefined
+}> = ({ design, issues, group, onAddRoute, onDelete, onJumpTo }) => {
   const { t } = useTranslation()
 
   const patchDesignMeta = useCallback((patch: { basePath?: string | undefined; versionPrefix?: string | undefined; auth?: DesignAuthKind | undefined }) => {
@@ -377,7 +381,7 @@ const GroupCard: React.FC<{
 
   return (
     <>
-      <DesignIssuesCallout issues={issues} entityId={group.id} />
+      <DesignIssuesCallout issues={issues} entityId={group.id} design={design} onJumpTo={onJumpTo} />
       <div className="design-model-card-header">
         <EditableLabel
           value={group.doc.name}
@@ -501,12 +505,13 @@ const RouteCard: React.FC<{
   group: DesignRouteGroup
   route: DesignRoute
   onOpenGroup: (groupId: string) => void
-}> = ({ design, issues, group, route, onOpenGroup }) => {
+  onJumpTo?: ((section: 'models' | 'routes' | 'enums', entityId: string) => void) | undefined
+}> = ({ design, issues, group, route, onOpenGroup, onJumpTo }) => {
   const { t } = useTranslation()
 
   return (
     <>
-      <DesignIssuesCallout issues={issues} entityId={route.id} />
+      <DesignIssuesCallout issues={issues} entityId={route.id} design={design} onJumpTo={onJumpTo} />
       <Tabs
         data-testid="design-route-tabs"
         mountStrategy="lazy-once"

@@ -2514,6 +2514,7 @@
       "ephemeral": "Geçici (TTL)"
     },
     "issue": {
+      "collidesWith": "Şununla çakışıyor:",
       "propertyNameEmpty": "Özelliğin adı yok",
       "propertyNameDuplicate": "Yinelenen özellik adı",
       "propertyShadowsParent": "Kalıtılan bir özelliği gölgeliyor",

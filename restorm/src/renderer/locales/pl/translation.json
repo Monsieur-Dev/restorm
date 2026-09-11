@@ -2516,6 +2516,7 @@
       "ephemeral": "Ulotne (TTL)"
     },
     "issue": {
+      "collidesWith": "Koliduje z:",
       "propertyNameEmpty": "Właściwość nie ma nazwy",
       "propertyNameDuplicate": "Zduplikowana nazwa właściwości",
       "propertyShadowsParent": "Przesłania odziedziczoną właściwość",

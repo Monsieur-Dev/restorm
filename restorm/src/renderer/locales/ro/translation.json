@@ -2515,6 +2515,7 @@
       "ephemeral": "Efemer (TTL)"
     },
     "issue": {
+      "collidesWith": "În conflict cu:",
       "propertyNameEmpty": "Proprietatea nu are nume",
       "propertyNameDuplicate": "Nume de proprietate duplicat",
       "propertyShadowsParent": "Ascunde o proprietate moștenită",

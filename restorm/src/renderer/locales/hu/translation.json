@@ -2514,6 +2514,7 @@
       "ephemeral": "Ideiglenes (TTL)"
     },
     "issue": {
+      "collidesWith": "Ütközik ezzel:",
       "propertyNameEmpty": "A tulajdonságnak nincs neve",
       "propertyNameDuplicate": "Ismétlődő tulajdonságnév",
       "propertyShadowsParent": "Elfed egy örökölt tulajdonságot",

@@ -2514,6 +2514,7 @@
       "ephemeral": "Väliaikainen (TTL)"
     },
     "issue": {
+      "collidesWith": "Ristiriidassa:",
       "propertyNameEmpty": "Ominaisuudella ei ole nimeä",
       "propertyNameDuplicate": "Ominaisuuden nimi on jo käytössä",
       "propertyShadowsParent": "Peittää perityn ominaisuuden",

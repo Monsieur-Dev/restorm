@@ -2513,6 +2513,7 @@
       "ephemeral": "Sementara (TTL)"
     },
     "issue": {
+      "collidesWith": "Berkonflik dengan:",
       "propertyNameEmpty": "Properti tidak memiliki nama",
       "propertyNameDuplicate": "Nama properti duplikat",
       "propertyShadowsParent": "Menutupi properti warisan",

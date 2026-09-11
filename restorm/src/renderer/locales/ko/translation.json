@@ -2513,6 +2513,7 @@
       "ephemeral": "임시(TTL)"
     },
     "issue": {
+      "collidesWith": "충돌 대상:",
       "propertyNameEmpty": "속성에 이름이 없습니다",
       "propertyNameDuplicate": "속성 이름이 중복되었습니다",
       "propertyShadowsParent": "상속된 속성을 가립니다",

@@ -2516,6 +2516,7 @@
       "ephemeral": "Тимчасові (TTL)"
     },
     "issue": {
+      "collidesWith": "Конфліктує з:",
       "propertyNameEmpty": "Властивість не має назви",
       "propertyNameDuplicate": "Дубльована назва властивості",
       "propertyShadowsParent": "Затіняє успадковану властивість",

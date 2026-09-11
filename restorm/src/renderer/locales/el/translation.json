@@ -2514,6 +2514,7 @@
       "ephemeral": "Εφήμερο (TTL)"
     },
     "issue": {
+      "collidesWith": "Σε σύγκρουση με:",
       "propertyNameEmpty": "Η ιδιότητα δεν έχει όνομα",
       "propertyNameDuplicate": "Διπλότυπο όνομα ιδιότητας",
       "propertyShadowsParent": "Επισκιάζει μια κληρονομημένη ιδιότητα",
