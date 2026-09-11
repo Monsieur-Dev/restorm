@@ -6,6 +6,7 @@
 
 - **Opgelost: Claude Desktop en Cursor op macOS.** Het verbinden van een AI-assistent laadde de tools van Restorm wel, maar daarna mislukte elke aanroep met “geen actieve instantie”, zelfs met Restorm open — de app en de connector zochten elkaar in verschillende tijdelijke mappen. Ze vinden elkaar nu betrouwbaar, ongeacht wat de connector heeft gestart.
 - **Formele aanspreekvorm in het Italiaans, Pools en Fins.** De interface spreekt u in deze drie talen nu aan in de formele vorm, in lijn met de rest.
+- **Code-actie in scenario's — netter, met ingebouwde voorbeelden.** De Code-node rekt niet meer uit bij een lang script, en de editor krijgt een tabblad **Hulp nodig?** met een direct uitvoerbaar voorbeeld in de door u gekozen taal (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Plakken terwijl de editor open staat, zet niet langer een losse Code-node op het canvas.
 
 ## v1.1.3
 

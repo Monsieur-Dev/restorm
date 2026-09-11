@@ -1976,6 +1976,14 @@
         "version": "Versie",
         "versionPlaceholder": "versie",
         "add": "Pakket toevoegen"
+      },
+      "tab": {
+        "code": "Code",
+        "help": "Hulp nodig?"
+      },
+      "help": {
+        "intro": "De aangesloten waarde komt binnen als `input`, de run-variabelen als `vars`, en de samengestelde standaardbibliotheek is beschikbaar als globale variabelen. Retourneer het resultaat met `return` (of laat het in Python / Ruby / R / C# als laatste expressie staan) om het via de uitgang `result` te versturen.",
+        "exampleFor": "Voorbeeld in {{language}}"
       }
     },
     "help": {

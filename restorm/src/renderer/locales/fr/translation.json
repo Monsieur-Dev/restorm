@@ -1960,6 +1960,14 @@
       "language": "Langage",
       "code": "code",
       "modalTitle": "Éditer le code",
+      "tab": {
+        "code": "Code",
+        "help": "Besoin d’aide ?"
+      },
+      "help": {
+        "intro": "La valeur câblée arrive dans `input`, les variables du run dans `vars`, et la bibliothèque standard est disponible sous forme de variables globales. Renvoyez le résultat avec `return` (ou, en Python / Ruby / R / C#, laissez-le en dernière expression) pour l’envoyer vers la sortie `result`.",
+        "exampleFor": "Exemple en {{language}}"
+      },
       "result": "résultat",
       "timeout": "Délai max (s)",
       "deps": {

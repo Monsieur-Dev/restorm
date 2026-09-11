@@ -1975,6 +1975,14 @@
         "version": "버전",
         "versionPlaceholder": "버전",
         "add": "패키지 추가"
+      },
+      "tab": {
+        "code": "코드",
+        "help": "도움이 필요하신가요?"
+      },
+      "help": {
+        "intro": "연결된 값은 `input`으로, 실행 변수는 `vars`로 전달되며, 선별된 표준 라이브러리는 전역 변수로 제공됩니다. 결과를 `result` 출력으로 보내려면 `return`으로 반환하십시오(또는 Python / Ruby / R / C#에서는 마지막 표현식으로 두십시오).",
+        "exampleFor": "{{language}} 예제"
       }
     },
     "help": {

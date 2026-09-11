@@ -1976,6 +1976,14 @@
         "version": "Versione",
         "versionPlaceholder": "versione",
         "add": "Aggiungi pacchetto"
+      },
+      "tab": {
+        "code": "Codice",
+        "help": "Serve aiuto?"
+      },
+      "help": {
+        "intro": "Il valore cablato arriva come `input`, le variabili dell’esecuzione come `vars`, e la libreria standard curata è disponibile come variabili globali. Restituisca il risultato con `return` (oppure, in Python / Ruby / R / C#, lo lasci come ultima espressione) per inviarlo all’uscita `result`.",
+        "exampleFor": "Esempio in {{language}}"
       }
     },
     "help": {

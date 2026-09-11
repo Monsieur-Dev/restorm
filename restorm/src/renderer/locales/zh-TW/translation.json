@@ -1975,6 +1975,14 @@
         "version": "版本",
         "versionPlaceholder": "版本",
         "add": "新增套件"
+      },
+      "tab": {
+        "code": "程式碼",
+        "help": "需要協助嗎？"
+      },
+      "help": {
+        "intro": "連線傳入的值會以 `input` 形式抵達，執行變數以 `vars` 形式提供，精選的標準函式庫則以全域變數的形式可用。請使用 `return` 回傳結果（或在 Python / Ruby / R / C# 中將其作為最後一個運算式），以便透過 `result` 輸出埠傳送。",
+        "exampleFor": "{{language}} 範例"
       }
     },
     "help": {

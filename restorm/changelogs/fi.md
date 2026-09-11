@@ -6,6 +6,7 @@
 
 - **Korjattu: Claude Desktop ja Cursor macOS:ssä.** Tekoälyavustajan yhdistäminen latasi Restormin työkalut, mutta sen jälkeen jokainen kutsu epäonnistui ilmoituksella ”ei käynnissä olevaa instanssia”, vaikka Restorm oli auki — sovellus ja connector etsivät toisiaan eri väliaikaiskansioista. Nyt ne löytävät toisensa luotettavasti riippumatta siitä, mikä connectorin käynnisti.
 - **Muodollinen puhuttelu italiaksi, puolaksi ja suomeksi.** Käyttöliittymä puhuttelee teitä nyt näissä kolmessa kielessä muodollisessa muodossa, muun sisällön mukaisesti.
+- **Code-toiminto skenaarioissa — siistimpi, sisäänrakennetuin esimerkein.** Code-solmu ei enää veny, kun skripti on pitkä, ja sen editoriin tulee **Tarvitsetteko apua?** -välilehti, joka näyttää ajovalmiin esimerkin valitsemallanne kielellä (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Liittäminen editorin ollessa auki ei enää jätä irrallista Code-solmua työtilaan.
 
 ## v1.1.3
 

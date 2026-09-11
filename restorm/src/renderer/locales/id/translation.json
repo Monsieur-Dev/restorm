@@ -1975,6 +1975,14 @@
         "version": "Versi",
         "versionPlaceholder": "versi",
         "add": "Tambah paket"
+      },
+      "tab": {
+        "code": "Kode",
+        "help": "Butuh bantuan?"
+      },
+      "help": {
+        "intro": "Nilai yang terhubung tiba sebagai `input`, variabel run sebagai `vars`, dan pustaka standar terkurasi tersedia sebagai variabel global. Kembalikan hasilnya dengan `return` (atau, pada Python / Ruby / R / C#, biarkan sebagai ekspresi terakhir) untuk mengirimkannya melalui keluaran `result`.",
+        "exampleFor": "Contoh dalam {{language}}"
       }
     },
     "help": {

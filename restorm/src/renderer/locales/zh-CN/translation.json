@@ -1975,6 +1975,14 @@
         "version": "版本",
         "versionPlaceholder": "版本",
         "add": "添加软件包"
+      },
+      "tab": {
+        "code": "代码",
+        "help": "需要帮助吗？"
+      },
+      "help": {
+        "intro": "连线传入的值以 `input` 形式到达，运行变量以 `vars` 形式提供，精选的标准库以全局变量的形式可用。请使用 `return` 返回结果（或在 Python / Ruby / R / C# 中将其作为最后一个表达式），以便通过 `result` 输出端口发送。",
+        "exampleFor": "{{language}} 示例"
       }
     },
     "help": {

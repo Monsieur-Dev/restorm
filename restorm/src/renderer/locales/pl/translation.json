@@ -1978,6 +1978,14 @@
         "version": "Wersja",
         "versionPlaceholder": "wersja",
         "add": "Dodaj pakiet"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Potrzebna pomoc?"
+      },
+      "help": {
+        "intro": "Podłączona wartość trafia jako `input`, zmienne przebiegu jako `vars`, a wyselekcjonowana biblioteka standardowa jest dostępna jako zmienne globalne. Aby wysłać wynik przez wyjście `result`, proszę zwrócić go za pomocą `return` (albo w Pythonie / Ruby / R / C# pozostawić jako ostatnie wyrażenie).",
+        "exampleFor": "Przykład w języku {{language}}"
       }
     },
     "help": {

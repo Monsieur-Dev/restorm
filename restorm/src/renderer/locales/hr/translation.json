@@ -1977,6 +1977,14 @@
         "version": "Verzija",
         "versionPlaceholder": "verzija",
         "add": "Dodaj paket"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Trebate pomoć?"
+      },
+      "help": {
+        "intro": "Spojena vrijednost stiže kao `input`, varijable izvođenja kao `vars`, a odabrana standardna biblioteka dostupna je kao globalne varijable. Vratite rezultat pomoću `return` (ili ga u Pythonu / Ruby / R / C# ostavite kao posljednji izraz) kako biste ga poslali izlazom `result`.",
+        "exampleFor": "Primjer na jeziku {{language}}"
       }
     },
     "help": {

@@ -6,6 +6,7 @@
 
 - **Corretto: Claude Desktop e Cursor su macOS.** Collegare un assistente IA caricava gli strumenti di Restorm, ma poi ogni chiamata falliva con «nessuna istanza in esecuzione», anche con Restorm aperto — l'app e il connettore si cercavano in cartelle temporanee diverse. Ora si trovano in modo affidabile, qualunque cosa abbia avviato il connettore.
 - **Formulazione formale in italiano, polacco e finlandese.** L'interfaccia ora si rivolge a Lei con il registro formale in queste tre lingue, in coerenza con il resto.
+- **Azione Code negli scenari — più ordinata, con esempi integrati.** Il nodo Code non si allarga più quando lo script è lungo e il suo editor guadagna una scheda **Serve aiuto?** che mostra un esempio pronto all'uso nel linguaggio scelto (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Incollare con l'editor aperto non lascia più un nodo Code vagante sull'area di lavoro.
 
 ## v1.1.3
 

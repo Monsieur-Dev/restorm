@@ -1976,6 +1976,14 @@
         "version": "Verzió",
         "versionPlaceholder": "verzió",
         "add": "Csomag hozzáadása"
+      },
+      "tab": {
+        "code": "Kód",
+        "help": "Segítségre van szüksége?"
+      },
+      "help": {
+        "intro": "A bekötött érték `input` néven, a futás változói `vars` néven érkeznek, a válogatott standard könyvtár pedig globális változóként érhető el. Adja vissza az eredményt a `return` utasítással (vagy Python / Ruby / R / C# esetén hagyja az utolsó kifejezésként), hogy a `result` kimeneten távozzon.",
+        "exampleFor": "Példa a következő nyelven: {{language}}"
       }
     },
     "help": {

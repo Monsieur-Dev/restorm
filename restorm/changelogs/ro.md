@@ -6,6 +6,7 @@
 
 - **Remediat: Claude Desktop și Cursor pe macOS.** Conectarea unui asistent AI încărca instrumentele Restorm, dar apoi fiecare apel eșua cu „nicio instanță pornită”, chiar și cu Restorm deschis — aplicația și conectorul se căutau reciproc în foldere temporare diferite. Acum se găsesc în mod fiabil, indiferent ce a lansat conectorul.
 - **Formulare formală în italiană, poloneză și finlandeză.** Interfața vi se adresează acum la registrul formal în aceste trei limbi, în concordanță cu restul.
+- **Acțiunea Code din scenarii — mai curată, cu exemple integrate.** Nodul Code nu se mai întinde când scriptul este lung, iar editorul său primește o filă **Aveți nevoie de ajutor?** care arată un exemplu gata de rulat în limbajul ales (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Lipirea cu editorul deschis nu mai lasă un nod Code rătăcit pe pânză.
 
 ## v1.1.3
 

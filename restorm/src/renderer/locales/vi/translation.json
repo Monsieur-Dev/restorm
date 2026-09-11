@@ -1975,6 +1975,14 @@
         "version": "Phiên bản",
         "versionPlaceholder": "phiên bản",
         "add": "Thêm gói"
+      },
+      "tab": {
+        "code": "Mã",
+        "help": "Cần trợ giúp?"
+      },
+      "help": {
+        "intro": "Giá trị được nối vào đến dưới dạng `input`, các biến của lần chạy dưới dạng `vars`, và thư viện chuẩn được tuyển chọn có sẵn dưới dạng biến toàn cục. Hãy trả về kết quả bằng `return` (hoặc, trong Python / Ruby / R / C#, để nó làm biểu thức cuối cùng) để gửi ra cổng `result`.",
+        "exampleFor": "Ví dụ bằng {{language}}"
       }
     },
     "help": {

@@ -6,6 +6,7 @@
 
 - **Javítva: Claude Desktop és Cursor macOS-en.** Egy AI-asszisztens csatlakoztatása betöltötte a Restorm eszközeit, de ezután minden hívás „nincs futó példány“ hibával elszállt, még nyitott Restorm mellett is — az alkalmazás és a csatlakozó különböző ideiglenes mappákban kereste egymást. Mostantól megbízhatóan megtalálják egymást, bármi is indította el a csatlakozót.
 - **Formális megszólítás olaszul, lengyelül és finnül.** A felület ezen a három nyelven mostantól a formális megszólítást használja, a többivel összhangban.
+- **Code művelet a forgatókönyvekben — letisztultabb, beépített példákkal.** A Code csomópont már nem nyúlik meg hosszú szkript esetén, a szerkesztője pedig egy **Segítségre van szüksége?** lapot kap, amely futtatható példát mutat a választott nyelven (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). A beillesztés nyitott szerkesztő mellett már nem hoz létre elkóborolt Code csomópontot a vásznon.
 
 ## v1.1.3
 

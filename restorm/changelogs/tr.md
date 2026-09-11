@@ -6,6 +6,7 @@
 
 - **Düzeltildi: macOS'ta Claude Desktop ve Cursor.** Bir yapay zekâ asistanını bağlamak Restorm'un araçlarını yüklüyor ama sonra her çağrı, Restorm açık olsa bile, “çalışan örnek yok” hatasıyla başarısız oluyordu — uygulama ile bağlayıcı birbirini farklı geçici klasörlerde arıyordu. Artık bağlayıcıyı ne başlatmış olursa olsun güvenilir biçimde buluşuyorlar.
 - **İtalyanca, Lehçe ve Fince'de resmi ifade.** Arayüz bu üç dilde artık size resmi kayıtta hitap ediyor, geri kalanla tutarlı olarak.
+- **Senaryolarda Code eylemi — daha derli toplu, yerleşik örneklerle.** Code düğümü uzun betikte artık genişlemiyor ve düzenleyicisine, seçtiğiniz dilde çalıştırılmaya hazır bir örnek gösteren **Yardıma mı ihtiyacınız var?** sekmesi eklendi (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Düzenleyici açıkken yapıştırmak artık tuvale başıboş bir Code düğümü bırakmıyor.
 
 ## v1.1.3
 

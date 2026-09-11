@@ -1976,6 +1976,14 @@
         "version": "Version",
         "versionPlaceholder": "version",
         "add": "Lägg till paket"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Behöver du hjälp?"
+      },
+      "help": {
+        "intro": "Det kopplade värdet kommer in som `input`, körningens variabler som `vars`, och det kurerade standardbiblioteket är tillgängligt som globala variabler. Returnera resultatet med `return` (eller låt det i Python / Ruby / R / C# vara det sista uttrycket) för att skicka ut det via `result`-utgången.",
+        "exampleFor": "Exempel i {{language}}"
       }
     },
     "help": {

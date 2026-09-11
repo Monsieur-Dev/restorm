@@ -1976,6 +1976,14 @@
         "version": "Versión",
         "versionPlaceholder": "versión",
         "add": "Añadir paquete"
+      },
+      "tab": {
+        "code": "Código",
+        "help": "¿Necesita ayuda?"
+      },
+      "help": {
+        "intro": "El valor cableado llega como `input`, las variables de la ejecución como `vars`, y la biblioteca estándar seleccionada está disponible como variables globales. Devuelva el resultado con `return` (o, en Python / Ruby / R / C#, déjelo como última expresión) para enviarlo por la salida `result`.",
+        "exampleFor": "Ejemplo en {{language}}"
       }
     },
     "help": {

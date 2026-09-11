@@ -1976,6 +1976,14 @@
         "version": "Sürüm",
         "versionPlaceholder": "sürüm",
         "add": "Paket ekle"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Yardıma mı ihtiyacınız var?"
+      },
+      "help": {
+        "intro": "Bağlanan değer `input`, çalıştırma değişkenleri `vars` olarak gelir ve seçilmiş standart kütüphane genel değişkenler olarak kullanılabilir. Sonucu `result` çıkışından göndermek için `return` ile döndürün (ya da Python / Ruby / R / C# içinde son ifade olarak bırakın).",
+        "exampleFor": "{{language}} dilinde örnek"
       }
     },
     "help": {

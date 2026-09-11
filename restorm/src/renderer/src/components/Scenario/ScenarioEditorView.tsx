@@ -2460,6 +2460,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const onKey = (e: KeyboardEvent): void => {
       const el = e.target as HTMLElement | null
       const typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable || !!el.closest('.monaco-editor'))
+      // A modal/dialog is in front (e.g. the "Éditer le code" editor). Its own
+      // fields own copy/paste; never let a scenario-canvas shortcut fire behind
+      // it. The `typing` guard alone misses this because focus can sit on the
+      // modal chrome (or nowhere) rather than an input — and there a bare Ctrl+V
+      // would otherwise paste a NEW code node behind the open editor.
+      if (document.querySelector('.ecu-modal-overlay:not(.ecu-modal-closing)')) return
       // Undo / redo first — the platform mapping lives in ECUI. Redo's
       // Ctrl+Shift+Z variant would be rejected by the no-shift guard below, so
       // it has to be handled ahead of the clipboard combos. Blocked while a run

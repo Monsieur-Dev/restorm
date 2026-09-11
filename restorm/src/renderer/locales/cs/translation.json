@@ -1978,6 +1978,14 @@
         "version": "Verze",
         "versionPlaceholder": "verze",
         "add": "Přidat balíček"
+      },
+      "tab": {
+        "code": "Kód",
+        "help": "Potřebujete pomoc?"
+      },
+      "help": {
+        "intro": "Připojená hodnota přichází jako `input`, proměnné běhu jako `vars` a kurátorovaná standardní knihovna je k dispozici jako globální proměnné. Vraťte výsledek pomocí `return` (nebo jej v Pythonu / Ruby / R / C# ponechte jako poslední výraz), aby odešel výstupem `result`.",
+        "exampleFor": "Příklad v jazyce {{language}}"
       }
     },
     "help": {

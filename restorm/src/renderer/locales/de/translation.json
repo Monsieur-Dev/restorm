@@ -1976,6 +1976,14 @@
         "version": "Version",
         "versionPlaceholder": "Version",
         "add": "Paket hinzufügen"
+      },
+      "tab": {
+        "code": "Code",
+        "help": "Brauchen Sie Hilfe?"
+      },
+      "help": {
+        "intro": "Der verkabelte Wert kommt als `input` an, die Laufzeitvariablen als `vars`, und die kuratierte Standardbibliothek steht als globale Variablen bereit. Geben Sie das Ergebnis mit `return` zurück (oder lassen Sie es in Python / Ruby / R / C# als letzten Ausdruck stehen), um es über den Ausgang `result` zu senden.",
+        "exampleFor": "Beispiel in {{language}}"
       }
     },
     "help": {

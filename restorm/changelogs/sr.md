@@ -6,6 +6,7 @@
 
 - **Ispravljeno: Claude Desktop i Cursor na macOS-u.** Povezivanje AI asistenta učitavalo je Restormove alatke, ali je zatim svaki poziv padao uz poruku „nema pokrenute instance“, čak i sa otvorenim Restormom — aplikacija i konektor su se tražili u različitim privremenim fasciklama. Sada se pouzdano pronalaze, bez obzira na to šta je pokrenulo konektor.
 - **Formalno obraćanje na italijanskom, poljskom i finskom.** Interfejs vam se sada obraća u formalnom registru na ova tri jezika, u skladu sa ostatkom.
+- **Radnja Code u scenarijima — urednija, sa ugrađenim primerima.** Čvor Code se više ne rasteže kada je skripta duga, a njegov uređivač dobija karticu **Potrebna pomoć?** koja prikazuje primer spreman za pokretanje na jeziku koji ste izabrali (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Lepljenje dok je uređivač otvoren više ne ostavlja zalutali čvor Code na platnu.
 
 ## v1.1.3
 

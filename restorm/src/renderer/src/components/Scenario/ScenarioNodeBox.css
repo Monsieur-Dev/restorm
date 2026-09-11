@@ -796,6 +796,13 @@
 }
 .scn-node-collapsible-inner {
   min-height: 0;
+  /* This is a GRID item of `.scn-node-collapsible` (display:grid). Grid items
+   * default to `min-width: auto` = min-content, so a wide, unwrappable child
+   * (a long code line) would burst this item out past the node's capped width.
+   * `min-width: 0` lets it shrink to the grid track, so the flex chain below
+   * (body → col-in → the code field, all min-width:0) can compress and the code
+   * preview clips instead of stretching the node. */
+  min-width: 0;
   overflow-x: visible;
   overflow-y: clip;
   opacity: 0;
@@ -1230,6 +1237,18 @@
  * an edit button opening a full-screen CodeEditor modal. */
 .scn-code-field-wrap {
   width: 100%;
+  /* Allow this cell to shrink below the code's intrinsic width — see the
+     min-width:0 chain note on `.scn-code-preview` below. */
+  min-width: 0;
+}
+
+/* The code cell's own row must also be allowed to shrink below its content:
+   `.scn-node-col-in` is min-width:0 but each `.scn-row` inside it is not, so
+   without this the long-line min-content propagates up and stretches the node.
+   Scoped with :has() so ONLY the code row relaxes — label / toggle rows keep
+   their intrinsic width. */
+.scn-node-col-in .scn-row-left:has(.scn-code-field-wrap) {
+  min-width: 0;
 }
 
 /* Read-only preview of a multiline value + an edit button that opens the
@@ -1239,6 +1258,7 @@
   align-items: stretch;
   gap: 4px;
   width: 100%;
+  min-width: 0;
 }
 
 /* Text/value inputs in a node box never collapse below a readable width.
@@ -1250,8 +1270,18 @@
 }
 
 .scn-code-preview {
-  flex: 1 1 auto;
-  min-width: 100px;
+  /* Clip a long, unwrappable (`white-space: pre`) line instead of letting it
+   * stretch the node. Two things are needed and BOTH matter:
+   *  - `flex: 1 1 0` (basis 0) so the box is sized by the row's free space, not
+   *    by its content, and
+   *  - `min-width: 0` so this flex item — and every flex ancestor up to
+   *    `.scn-node-col-in` (see the field-wrap / row rules above) — may shrink
+   *    below the line's intrinsic min-content. A non-zero min-width here (the
+   *    old 100px) still let that min-content propagate up and blow out the node.
+   * With that, `overflow: hidden` + `max-width: 100%` clip the overflow. */
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
   margin: 0;
   max-height: 72px;
   overflow: hidden;
@@ -1300,6 +1330,43 @@
 .scn-code-modal-body .ecui-code-editor {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+/* When the code modal carries the two-tab layout (Code / Need help?), the Tabs
+   host must fill the full-screen modal body so the editor tab is full height. */
+.scn-code-modal-tabs {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inside a tab panel, the code editor tab reuses .scn-code-modal-body, which
+   fills the panel. The panel already provides its own height (Tabs sets the
+   tabpanel to flex:1 / absolute-fill), so nothing else is needed here. */
+
+/* "Need help?" tab: a short intro + a copyable example (ECUI MarkdownViewer)
+   for the chosen language. The MarkdownViewer paints its own code block +
+   copy button; this only sets the reading column's padding/width. */
+.scn-code-help {
+  padding: 16px 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--foreground, #cccccc);
+}
+
+/* The "Example in <lang>" heading (a bold paragraph right before the code
+   block): give it more breathing room above (separate it from the intro) and
+   sit it tighter to the code below. The below-gap is really the code block's
+   own top margin (adjacent margins collapse), so tighten BOTH. */
+.scn-code-help .markdown-viewer p:has(+ .markdown-code-block) {
+  margin-top: 1.5em;
+  margin-bottom: 0;
+  line-height: 1.2;
+}
+.scn-code-help .markdown-viewer p:has(+ .markdown-code-block) + .markdown-code-block {
+  margin-top: 0;
 }
 
 /* Node name field (input / get-/set-variable) — a thin InputBox wrapper. The

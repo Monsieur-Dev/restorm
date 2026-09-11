@@ -1977,6 +1977,14 @@
         "version": "Versiune",
         "versionPlaceholder": "versiune",
         "add": "Adaugă pachet"
+      },
+      "tab": {
+        "code": "Cod",
+        "help": "Aveți nevoie de ajutor?"
+      },
+      "help": {
+        "intro": "Valoarea conectată sosește ca `input`, variabilele rulării ca `vars`, iar biblioteca standard selectată este disponibilă ca variabile globale. Returnați rezultatul cu `return` (sau, în Python / Ruby / R / C#, lăsați-l ca ultimă expresie) pentru a-l trimite prin ieșirea `result`.",
+        "exampleFor": "Exemplu în {{language}}"
       }
     },
     "help": {

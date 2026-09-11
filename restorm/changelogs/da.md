@@ -6,6 +6,7 @@
 
 - **Rettet: Claude Desktop og Cursor på macOS.** At forbinde en AI-assistent indlæste Restorms værktøjer, men hvert kald fejlede så med „ingen kørende instans“, selv med Restorm åben — appen og connectoren ledte efter hinanden i forskellige midlertidige mapper. De finder nu hinanden pålideligt, uanset hvad der startede connectoren.
 - **Formel tiltale på italiensk, polsk og finsk.** Grænsefladen tiltaler dig nu i formel form på disse tre sprog, i tråd med resten.
+- **Code-handling i scenarier — renere, med indbyggede eksempler.** Code-noden strækker sig ikke længere, når scriptet er langt, og dens editor får en fane **Brug for hjælp?**, der viser et køreklart eksempel i det sprog, du har valgt (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). At indsætte, mens editoren er åben, efterlader ikke længere en løs Code-node på lærredet.
 
 ## v1.1.3
 

@@ -1976,6 +1976,14 @@
         "version": "Versio",
         "versionPlaceholder": "versio",
         "add": "Lisää paketti"
+      },
+      "tab": {
+        "code": "Koodi",
+        "help": "Tarvitsetteko apua?"
+      },
+      "help": {
+        "intro": "Kytketty arvo saapuu nimellä `input`, ajon muuttujat nimellä `vars`, ja valikoitu vakiokirjasto on käytettävissä globaaleina muuttujina. Palauttakaa tulos komennolla `return` (tai jättäkää se Pythonissa / Rubyssa / R:ssä / C#:ssa viimeiseksi lausekkeeksi), jotta se lähtee ulos `result`-portista.",
+        "exampleFor": "Esimerkki kielellä {{language}}"
       }
     },
     "help": {

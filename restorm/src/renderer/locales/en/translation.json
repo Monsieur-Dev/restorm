@@ -1960,6 +1960,14 @@
       "language": "Language",
       "code": "code",
       "modalTitle": "Edit code",
+      "tab": {
+        "code": "Code",
+        "help": "Need help?"
+      },
+      "help": {
+        "intro": "The wired value arrives as `input`, the run variables as `vars`, and the curated standard library is available as globals. Return the result (or, in Python / Ruby / R / C#, leave it as the last expression) to send it out of the `result` port.",
+        "exampleFor": "Example in {{language}}"
+      },
       "result": "result",
       "timeout": "Timeout (s)",
       "deps": {

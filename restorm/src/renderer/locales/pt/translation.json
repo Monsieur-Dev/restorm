@@ -1976,6 +1976,14 @@
         "version": "Versão",
         "versionPlaceholder": "versão",
         "add": "Adicionar pacote"
+      },
+      "tab": {
+        "code": "Código",
+        "help": "Precisa de ajuda?"
+      },
+      "help": {
+        "intro": "O valor ligado chega como `input`, as variáveis da execução como `vars`, e a biblioteca padrão selecionada está disponível como variáveis globais. Retorne o resultado com `return` (ou, em Python / Ruby / R / C#, deixe-o como a última expressão) para enviá-lo pela saída `result`.",
+        "exampleFor": "Exemplo em {{language}}"
       }
     },
     "help": {

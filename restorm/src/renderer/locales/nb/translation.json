@@ -1976,6 +1976,14 @@
         "version": "Versjon",
         "versionPlaceholder": "versjon",
         "add": "Legg til pakke"
+      },
+      "tab": {
+        "code": "Kode",
+        "help": "Trenger du hjelp?"
+      },
+      "help": {
+        "intro": "Den tilkoblede verdien kommer inn som `input`, kjøringens variabler som `vars`, og det kuraterte standardbiblioteket er tilgjengelig som globale variabler. Returner resultatet med `return` (eller la det i Python / Ruby / R / C# være det siste uttrykket) for å sende det ut av `result`-utgangen.",
+        "exampleFor": "Eksempel i {{language}}"
       }
     },
     "help": {

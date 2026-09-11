@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, CodeEditor, Modal } from 'electron-core-ui/renderer'
+import { Button, CodeEditor, MarkdownViewer, Modal, Tabs, type Tab } from 'electron-core-ui/renderer'
 import { loader, type OnMount } from '@monaco-editor/react'
 import type * as Monaco from 'monaco-editor'
 import { npmPackageGlobalName } from '../../../../../shared/codeNodePackages'
+import { CODE_LANGUAGE_LABELS, isCodeLanguage, type CodeLanguage } from '../../../../../shared/codeLanguages'
+import { CODE_NODE_EXAMPLES } from './codeNodeExamples'
 
 /** Ambient declarations of everything the `code` node injects into the sandbox,
  * so Monaco's TypeScript service stops red-underlining `input`, `_`, `CryptoJS`,
@@ -110,11 +112,46 @@ export interface ScenarioCodeEditorModalProps {
    * TS/JS editor declares their globals instead of red-underlining them. Only
    * meaningful for `language: 'typescript' | 'javascript'`. */
   packageNames?: readonly string[]
+  /** When set (and the language is a runnable `code`-node language), the modal
+   * splits into two tabs — "Code" (the editor) and "Need help?" (a runnable
+   * example for that language). Only the `code` node opts in; the generic
+   * text-field consumers (schema / template / document body) stay single-pane. */
+  showHelp?: boolean
+}
+
+/** Markdown fence identifier per language, so the help example is
+ * syntax-highlighted in the MarkdownViewer. */
+const CODE_NODE_FENCE_LANG: Record<CodeLanguage, string> = {
+  typescript: 'typescript',
+  javascript: 'javascript',
+  python: 'python',
+  lua: 'lua',
+  ruby: 'ruby',
+  r: 'r',
+  csharp: 'csharp'
+}
+
+/** The "Need help?" tab body for the `code` node modal: a short intro plus a
+ * runnable example in the language the node currently targets, rendered with the
+ * ECUI `MarkdownViewer` so the code block is syntax-highlighted AND copyable
+ * (its built-in copy button). Kept here (not in ECUI) because the sandbox
+ * contract it documents is project-specific. */
+const CodeNodeHelp: React.FC<{ language: CodeLanguage; dataTestId?: string }> = ({ language, dataTestId }) => {
+  const { t } = useTranslation()
+  const intro = t('scenario.code.help.intro', 'The wired value arrives as `input`, the run variables as `vars`, and the curated standard library is available as globals. Return the result (or, in Python / Ruby / R / C#, leave it as the last expression) to send it out of the `result` port.')
+  const exampleFor = t('scenario.code.help.exampleFor', 'Example in {{language}}', { language: CODE_LANGUAGE_LABELS[language] })
+  const markdown = `${intro}\n\n**${exampleFor}**\n\n\`\`\`${CODE_NODE_FENCE_LANG[language]}\n${CODE_NODE_EXAMPLES[language]}\n\`\`\`\n`
+  return (
+    <div className="scn-code-help" {...(dataTestId && { 'data-testid': `${dataTestId}-help` })}>
+      <MarkdownViewer value={markdown} />
+    </div>
+  )
 }
 
 /** A workbench-scoped, full-screen modal hosting the ECUI `CodeEditor` (Monaco).
  * The node box is too cramped for real editing, so any roomy text field
- * (JSON Schema, Handlebars template, document body, …) pops this open. */
+ * (JSON Schema, Handlebars template, document body, …) pops this open. The
+ * `code` node additionally opts into a "Need help?" tab via `showHelp`. */
 export const ScenarioCodeEditorModal: React.FC<ScenarioCodeEditorModalProps> = ({
   isOpen,
   onClose,
@@ -123,16 +160,12 @@ export const ScenarioCodeEditorModal: React.FC<ScenarioCodeEditorModalProps> = (
   language = 'plaintext',
   title,
   dataTestId,
-  packageNames = []
-}) => (
-  <Modal
-    title={title}
-    isOpen={isOpen}
-    onClose={onClose}
-    size="full"
-    scopeToSelector=".restorm-workbench-tab"
-    data-testid={dataTestId ? `${dataTestId}-modal` : 'scn-code-modal'}
-  >
+  packageNames = [],
+  showHelp = false
+}) => {
+  const { t } = useTranslation()
+  const helpLanguage = showHelp && isCodeLanguage(language) ? language : null
+  const editor = (
     <div className="scn-code-modal-body">
       <CodeEditor
         value={value}
@@ -144,8 +177,32 @@ export const ScenarioCodeEditorModal: React.FC<ScenarioCodeEditorModalProps> = (
         {...(dataTestId && { 'data-testid': `${dataTestId}-editor` })}
       />
     </div>
-  </Modal>
-)
+  )
+  const tabs: Tab[] = helpLanguage
+    ? [
+        { id: 'code', label: t('scenario.code.tab.code', 'Code'), content: editor, useScrollableElement: false },
+        { id: 'help', label: t('scenario.code.tab.help', 'Need help?'), content: <CodeNodeHelp language={helpLanguage} {...(dataTestId && { dataTestId })} /> }
+      ]
+    : []
+  return (
+    <Modal
+      title={title}
+      isOpen={isOpen}
+      onClose={onClose}
+      size="full"
+      scopeToSelector=".restorm-workbench-tab"
+      data-testid={dataTestId ? `${dataTestId}-modal` : 'scn-code-modal'}
+    >
+      {helpLanguage
+        ? (
+          <div className="scn-code-modal-tabs">
+            <Tabs tabs={tabs} mountStrategy="lazy-once" {...(dataTestId && { 'data-testid': `${dataTestId}-tabs` })} />
+          </div>
+          )
+        : editor}
+    </Modal>
+  )
+}
 
 export interface ScenarioCodeEditButtonProps {
   value: string
@@ -273,6 +330,9 @@ export interface ScenarioCodeFieldProps {
   /** Names of the packages pinned on THIS code node (`config.packages`) — see
    * {@link ScenarioCodeEditorModalProps.packageNames}. */
   packageNames?: readonly string[]
+  /** Add the modal's "Need help?" tab (a per-language example). See
+   * {@link ScenarioCodeEditorModalProps.showHelp}. */
+  showHelp?: boolean
 }
 
 /**
@@ -291,7 +351,8 @@ export const ScenarioCodeField: React.FC<ScenarioCodeFieldProps> = ({
   placeholder = '',
   invalid,
   dataTestId,
-  packageNames
+  packageNames,
+  showHelp
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -328,6 +389,7 @@ export const ScenarioCodeField: React.FC<ScenarioCodeFieldProps> = ({
         title={title}
         {...(dataTestId && { dataTestId })}
         {...(packageNames && { packageNames })}
+        {...(showHelp && { showHelp })}
       />
     </div>
   )

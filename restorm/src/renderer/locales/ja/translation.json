@@ -1975,6 +1975,14 @@
         "version": "バージョン",
         "versionPlaceholder": "バージョン",
         "add": "パッケージを追加"
+      },
+      "tab": {
+        "code": "コード",
+        "help": "ヘルプが必要ですか？"
+      },
+      "help": {
+        "intro": "接続された値は `input`、実行時の変数は `vars` として渡され、厳選された標準ライブラリはグローバル変数として利用できます。結果を `result` 出力へ送るには、`return` で返してください（Python / Ruby / R / C# では最後の式として残してください）。",
+        "exampleFor": "{{language}} の例"
       }
     },
     "help": {

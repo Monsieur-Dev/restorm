@@ -1976,6 +1976,14 @@
         "version": "Versioni",
         "versionPlaceholder": "versioni",
         "add": "Shto paketë"
+      },
+      "tab": {
+        "code": "Kodi",
+        "help": "Ju duhet ndihmë?"
+      },
+      "help": {
+        "intro": "Vlera e lidhur mbërrin si `input`, variablat e ekzekutimit si `vars`, dhe biblioteka standarde e përzgjedhur është e disponueshme si variabla globale. Ktheni rezultatin me `return` (ose, në Python / Ruby / R / C#, lëreni si shprehjen e fundit) për ta dërguar nga dalja `result`.",
+        "exampleFor": "Shembull në {{language}}"
       }
     },
     "help": {

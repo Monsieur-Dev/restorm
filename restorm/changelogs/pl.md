@@ -6,6 +6,7 @@
 
 - **Naprawiono: Claude Desktop i Cursor na macOS.** Podłączenie asystenta AI ładowało narzędzia Restorma, ale potem każde wywołanie kończyło się błędem „brak działającej instancji”, nawet przy otwartym Restormie — aplikacja i łącznik szukały się nawzajem w różnych folderach tymczasowych. Teraz odnajdują się niezawodnie, niezależnie od tego, co uruchomiło łącznik.
 - **Formalne zwroty w języku włoskim, polskim i fińskim.** Interfejs zwraca się teraz do Pana/Pani w tych trzech językach w formie formalnej, spójnie z resztą.
+- **Akcja Code w scenariuszach — czytelniejsza, z wbudowanymi przykładami.** Węzeł Code nie rozciąga się już przy długim skrypcie, a jego edytor zyskuje kartę **Potrzebna pomoc?** z gotowym do uruchomienia przykładem w wybranym języku (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Wklejanie przy otwartym edytorze nie dodaje już przypadkowego węzła Code na kanwie.
 
 ## v1.1.3
 
