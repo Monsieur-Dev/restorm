@@ -40,6 +40,8 @@ import { mergeEnumDefinitionsIntoModels } from '../documentation/mergeEnumDefini
 import { useRequestCreation } from '../../contexts/useRequestCreation'
 import { consumePendingEnvFolderSubTab, subscribeEnvFolderSubTabIntent } from '../../services/envFolderTabIntent'
 import { resolveBaseUrlPrefix } from '../../services/buildRequestFromOperation'
+import { useFolderDesignIssues } from '../../services/folderDesignIssuesStore'
+import { ApiDesignIssuesList } from '../Design/ApiDesignIssuesList'
 
 /** Generate a unique ID for a new environment */
 function generateEnvironmentId(): string {
@@ -1058,6 +1060,25 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
       : undefined
   ), [rawApiDocumentation, folder.enumDefinitions])
 
+  // API-design issues found by the background validation pass (main process).
+  // Only an env-folder that carries an apiDocumentation ("an API") can have any;
+  // the tab is hidden entirely when the design is clean. The list renders each
+  // route offender as an accordion that expands to the route's documentation,
+  // so it receives the (merged) apiDocumentation.
+  const designIssues = useFolderDesignIssues(folder.id)
+  const issuesTab: Tab | undefined = designIssues.length > 0
+    ? {
+      id: 'issues',
+      label: (
+        <span>
+          <span className="codicon codicon-warning" style={{ fontSize: '1em', verticalAlign: 'middle', marginRight: 6 }} />
+          {t('folderView.tabs.issues')}
+        </span>
+      ),
+      content: <ApiDesignIssuesList issues={designIssues} {...(apiDocumentation !== undefined ? { apiDocumentation } : {})} />
+    }
+    : undefined
+
   // Structured documentation viewer for the whole API spec. No
   // filters → host renders the API title + every operation +
   // every model + every enum. Memoized so the heavy ELK / React Flow
@@ -1093,7 +1114,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   return (
     <BaseFolderView
       folder={folder}
-      additionalTabs={[homeTab, environmentsTab, customValuesTab]}
+      additionalTabs={issuesTab !== undefined ? [homeTab, environmentsTab, customValuesTab, issuesTab] : [homeTab, environmentsTab, customValuesTab]}
       {...(docsContent !== undefined ? { docsContent } : {})}
       defaultActiveTabId={defaultActiveTabId ?? 'home'}
       onSwitchTabReady={handleSwitchTabReady}

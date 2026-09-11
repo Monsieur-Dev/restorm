@@ -358,7 +358,8 @@
       "docs": "Tài liệu",
       "environments": "Môi trường",
       "notes": "Ghi chú",
-      "customValues": "Kiểu liệt kê tùy chỉnh"
+      "customValues": "Kiểu liệt kê tùy chỉnh",
+      "issues": "Vấn đề"
     },
     "home": {
       "configureEnvs": "Cấu hình môi trường",
@@ -2535,7 +2536,7 @@
       "responseModelUnknown": "Một mô hình phản hồi không còn tồn tại",
       "responseExampleUnknown": "Một phản hồi phục vụ ví dụ bị thiếu",
       "routeResponsesMissing": "Tuyến không khai báo phản hồi nào",
-      "routePathDuplicate": "Một tuyến khác đã trả lời phương thức và đường dẫn này",
+      "routePathDuplicate": "Ít nhất một tuyến khác đã trả lời phương thức và đường dẫn này",
       "routePathReserved": "Máy chủ thiết kế giữ đường dẫn này — route sẽ không bao giờ trả lời"
     },
     "routes": {
@@ -2708,6 +2709,37 @@
       "tabs": {
         "list": "Danh sách",
         "graph": "Đồ thị"
+      }
+    },
+    "issuesList": {
+      "intro": "Chúng tôi đã phân tích API này và phát hiện một số vấn đề thiết kế tiềm ẩn.",
+      "badgeTooltip": "Vấn đề thiết kế ({{count}})",
+      "badgeAria": "Vấn đề thiết kế",
+      "code": {
+        "propertyNameEmpty": "Một số thuộc tính không có tên",
+        "propertyNameDuplicate": "Một số thuộc tính trùng tên trong cùng mô hình",
+        "propertyShadowsParent": "Một số thuộc tính che khuất một thuộc tính kế thừa",
+        "modelNameEmpty": "Một số mô hình không có tên",
+        "enumNameEmpty": "Một số enum không có tên",
+        "groupNameEmpty": "Một số nhóm tuyến không có tên",
+        "modelNameDuplicate": "Một số mô hình có cùng tên",
+        "enumNameDuplicate": "Một số enum có cùng tên",
+        "componentNameCollision": "Một mô hình và một enum có cùng tên",
+        "groupNameDuplicate": "Một số nhóm tuyến có cùng tên",
+        "inheritanceTargetUnknown": "Một số mô hình kế thừa từ một mô hình không còn tồn tại",
+        "inheritanceCycle": "Một số mô hình tạo thành chuỗi kế thừa vòng",
+        "referenceTargetUnknown": "Một số thuộc tính tham chiếu đến một kiểu không còn tồn tại",
+        "identifierPropertyUnknown": "Một số mô hình chỉ định làm định danh một thuộc tính không còn tồn tại",
+        "paramLinkTargetUnknown": "Một số tham số tuyến liên kết đến một mô hình hoặc thuộc tính không còn tồn tại",
+        "paramEnumRefUnknown": "Một số tham số tuyến tham chiếu đến một enum không còn tồn tại",
+        "bodyModelUnknown": "Một số tuyến dùng một mô hình thân không còn tồn tại",
+        "responseModelUnknown": "Một số phản hồi dùng một mô hình không còn tồn tại",
+        "responseExampleUnknown": "Một số phản hồi trả về một ví dụ mà mô hình của chúng không khai báo",
+        "constraintPatternInvalid": "Một số ràng buộc thuộc tính dùng một mẫu (biểu thức chính quy) không hợp lệ",
+        "constraintMinAboveMax": "Một số ràng buộc thuộc tính có giá trị nhỏ nhất lớn hơn giá trị lớn nhất",
+        "routeResponsesMissing": "Một số tuyến không khai báo phản hồi nào",
+        "routePathDuplicate": "Một số tuyến trả lời cùng một phương thức và đường dẫn",
+        "routePathReserved": "Một số tuyến nằm trên một đường dẫn do máy chủ thiết kế giữ chỗ"
       }
     }
   },

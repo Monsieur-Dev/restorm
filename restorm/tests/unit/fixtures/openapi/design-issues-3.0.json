@@ -1,0 +1,77 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Design Issues API",
+    "version": "1.0.0",
+    "description": "A deliberately flawed spec: two paths collapse to the same templated surface, one operation declares no response, and one route sits on a path the design server reserves. Used to exercise the background API-design validation."
+  },
+  "paths": {
+    "/items/{id}": {
+      "get": {
+        "operationId": "getItemById",
+        "tags": ["Items"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "An item",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Item" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/items/{itemId}": {
+      "get": {
+        "operationId": "getItemByItemId",
+        "tags": ["Items"],
+        "parameters": [
+          { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "The same item, different param name",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Item" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "tags": ["Ops"],
+        "responses": {}
+      }
+    },
+    "/swagger.json": {
+      "get": {
+        "operationId": "getSwaggerJson",
+        "tags": ["Ops"],
+        "responses": {
+          "200": {
+            "description": "This path is reserved by the design server and would never answer"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      }
+    }
+  }
+}

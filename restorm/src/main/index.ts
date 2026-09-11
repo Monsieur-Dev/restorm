@@ -91,7 +91,7 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { spawn, execFile } from 'node:child_process'
-import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
+import { searchIndexService, contextService, apiDesignValidationService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
 import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
 import { registerUpdateIpc } from './ipc/updateHandlers'
@@ -898,6 +898,12 @@ logger.info('Search Index Service initialized')
 // Initialize Context Service (manages Handlebars context and resolved values)
 contextService.initialize()
 logger.info('Context Service initialized')
+
+// Validate each API's design (env folders carrying an apiDocumentation) on load
+// / import / update, and push the issues to the renderer for the sidebar "!" +
+// the env-folder "Issues" tab.
+apiDesignValidationService.initialize()
+logger.info('API Design Validation Service initialized')
 
 // Mirror the renderer's per-env-folder active-environment selection into the
 // main process — unconditionally, NOT only when MCP is on. ContextService needs it

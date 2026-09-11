@@ -56,6 +56,7 @@ import {
 } from '../../shared/update/updateTypes'
 import { CRASH_IPC, type CrashArmedState, type CrashConsentState, type CrashRecoveryNotice, type CrashReviewRequest } from '../../shared/crash/crashTypes'
 import { COOKIE_IPC, type CookieInput, type CookieRow } from '../../shared/cookies/cookieTypes'
+import type { DesignIssueView } from '../../shared/design/describeDesignIssue'
 import type { CloudTemplate, CloudTemplatesView } from '../../shared/types/codegenTemplates'
 import {
   CLI_TOKEN_IPC,
@@ -700,6 +701,22 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('context:item-secrets-status', handler)
       return () => {
         ipcRenderer.removeListener('context:item-secrets-status', handler)
+      }
+    },
+    /** Snapshot of every API's design-validation issues, keyed by env-folder id. */
+    getFolderDesignIssues: async (): Promise<{ folderId: string; issues: DesignIssueView[] }[]> => {
+      const result: unknown = await ipcRenderer.invoke('design:get-folder-issues')
+      return Array.isArray(result) ? (result as { folderId: string; issues: DesignIssueView[] }[]) : []
+    },
+    /** Listen for "an API's design-validation issues changed" so the sidebar row
+     * shows a "!" and the env-folder toggles its Issues tab. */
+    onFolderDesignIssues: (callback: (result: { folderId: string; issues: DesignIssueView[] }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { folderId: string; issues: DesignIssueView[] }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('design:folder-issues-changed', handler)
+      return () => {
+        ipcRenderer.removeListener('design:folder-issues-changed', handler)
       }
     },
     /** Listen for variable transformation updates */

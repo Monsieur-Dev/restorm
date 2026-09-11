@@ -17,6 +17,7 @@ per-release process.
 - **Fixed: Claude Desktop and Cursor on macOS.** Connecting an AI assistant loaded Restorm's tools but then failed every call with "no running instance", even with Restorm open — the app and the connector were looking for each other in different temp folders. They now rendezvous reliably, whatever launched the connector.
 - **Formal wording in Italian, Polish and Finnish.** The interface now addresses you in the formal register in these three languages, consistent with the rest.
 - **Scenario Code action — cleaner, with built-in examples.** The Code node no longer stretches when the script is long, and its editor gains a **Need help?** tab showing a ready-to-run example in the language you picked (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Pasting while the editor is open no longer drops a stray Code node on the canvas.
+- **Spot design problems in your imported APIs.** After importing an API — or reopening a file — Restorm quietly checks each API for structural problems (duplicate routes, missing responses, paths that clash with the mock server…), flags it in the sidebar with a "!", and adds an "Issues" tab that lists each problem and the exact routes it affects, every route expandable to its documentation.
 
 ## v1.1.3
 

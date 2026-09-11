@@ -359,7 +359,8 @@
       "docs": "Docs",
       "environments": "Ambientes",
       "notes": "Notas",
-      "customValues": "Enumerações personalizadas"
+      "customValues": "Enumerações personalizadas",
+      "issues": "Problemas"
     },
     "home": {
       "configureEnvs": "Configurar ambientes",
@@ -2536,7 +2537,7 @@
       "responseModelUnknown": "Um modelo de resposta não existe mais",
       "responseExampleUnknown": "Uma resposta serve um exemplo ausente",
       "routeResponsesMissing": "A rota não declara nenhuma resposta",
-      "routePathDuplicate": "Outra rota já responde a este método e caminho",
+      "routePathDuplicate": "Pelo menos outra rota já responde a este método e caminho",
       "routePathReserved": "O servidor de design reserva este caminho — a rota nunca responderia"
     },
     "routes": {
@@ -2709,6 +2710,37 @@
       "tabs": {
         "list": "Lista",
         "graph": "Gráfico"
+      }
+    },
+    "issuesList": {
+      "intro": "Analisámos esta API e detetámos alguns possíveis problemas de design.",
+      "badgeTooltip": "Problemas de design ({{count}})",
+      "badgeAria": "Problemas de design",
+      "code": {
+        "propertyNameEmpty": "Algumas propriedades não têm nome",
+        "propertyNameDuplicate": "Algumas propriedades partilham o nome dentro do seu modelo",
+        "propertyShadowsParent": "Algumas propriedades ocultam uma propriedade herdada",
+        "modelNameEmpty": "Alguns modelos não têm nome",
+        "enumNameEmpty": "Alguns enums não têm nome",
+        "groupNameEmpty": "Alguns grupos de rotas não têm nome",
+        "modelNameDuplicate": "Vários modelos têm o mesmo nome",
+        "enumNameDuplicate": "Vários enums têm o mesmo nome",
+        "componentNameCollision": "Um modelo e um enum têm o mesmo nome",
+        "groupNameDuplicate": "Vários grupos de rotas têm o mesmo nome",
+        "inheritanceTargetUnknown": "Alguns modelos herdam de um modelo que já não existe",
+        "inheritanceCycle": "Alguns modelos formam uma cadeia de herança circular",
+        "referenceTargetUnknown": "Algumas propriedades referenciam um tipo que já não existe",
+        "identifierPropertyUnknown": "Alguns modelos apontam o seu identificador para uma propriedade que já não existe",
+        "paramLinkTargetUnknown": "Alguns parâmetros de rota ligam a um modelo ou propriedade que já não existe",
+        "paramEnumRefUnknown": "Alguns parâmetros de rota referenciam um enum que já não existe",
+        "bodyModelUnknown": "Algumas rotas usam um modelo de corpo que já não existe",
+        "responseModelUnknown": "Algumas respostas usam um modelo que já não existe",
+        "responseExampleUnknown": "Algumas respostas devolvem um exemplo que o seu modelo não declara",
+        "constraintPatternInvalid": "Algumas restrições de propriedade usam um padrão (expressão regular) inválido",
+        "constraintMinAboveMax": "Algumas restrições de propriedade têm um mínimo superior ao seu máximo",
+        "routeResponsesMissing": "Algumas rotas não declaram qualquer resposta",
+        "routePathDuplicate": "Várias rotas respondem ao mesmo método e caminho",
+        "routePathReserved": "Algumas rotas encontram-se num caminho reservado pelo servidor de design"
       }
     }
   },

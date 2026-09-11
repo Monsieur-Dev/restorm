@@ -7,6 +7,7 @@
 - **Javítva: Claude Desktop és Cursor macOS-en.** Egy AI-asszisztens csatlakoztatása betöltötte a Restorm eszközeit, de ezután minden hívás „nincs futó példány“ hibával elszállt, még nyitott Restorm mellett is — az alkalmazás és a csatlakozó különböző ideiglenes mappákban kereste egymást. Mostantól megbízhatóan megtalálják egymást, bármi is indította el a csatlakozót.
 - **Formális megszólítás olaszul, lengyelül és finnül.** A felület ezen a három nyelven mostantól a formális megszólítást használja, a többivel összhangban.
 - **Code művelet a forgatókönyvekben — letisztultabb, beépített példákkal.** A Code csomópont már nem nyúlik meg hosszú szkript esetén, a szerkesztője pedig egy **Segítségre van szüksége?** lapot kap, amely futtatható példát mutat a választott nyelven (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). A beillesztés nyitott szerkesztő mellett már nem hoz létre elkóborolt Code csomópontot a vásznon.
+- **Fedezze fel a tervezési problémákat importált API-jaiban.** Egy API importálása után — vagy egy fájl ismételt megnyitásakor — a Restorm észrevétlenül ellenőrzi az egyes API-kat strukturális problémák szempontjából (kétszeres útvonalak, hiányzó válaszok, a Mock Serverrel ütköző elérési utak…), az oldalsávban „!“ jellel jelöli meg, és hozzáad egy „Problémák“ lapot, amely felsorolja az egyes problémákat és a pontosan érintett útvonalakat, ahol minden útvonal kibontható a dokumentációjáig.
 
 ## v1.1.3
 

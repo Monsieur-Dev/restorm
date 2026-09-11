@@ -360,7 +360,8 @@
       "docs": "Dokumentacija",
       "environments": "Okruženja",
       "notes": "Beleške",
-      "customValues": "Prilagođene enumeracije"
+      "customValues": "Prilagođene enumeracije",
+      "issues": "Problemi"
     },
     "home": {
       "configureEnvs": "Konfiguriši okruženja",
@@ -2537,7 +2538,7 @@
       "responseModelUnknown": "Model odgovora više ne postoji",
       "responseExampleUnknown": "Odgovor poslužuje nepostojeći primer",
       "routeResponsesMissing": "Ruta ne deklariše nijedan odgovor",
-      "routePathDuplicate": "Druga ruta već odgovara na ovaj metod i putanju",
+      "routePathDuplicate": "Bar jedna druga ruta već odgovara na ovaj metod i putanju",
       "routePathReserved": "Dizajn server rezerviše ovu putanju — ruta nikada ne bi odgovorila"
     },
     "routes": {
@@ -2710,6 +2711,37 @@
       "tabs": {
         "list": "Lista",
         "graph": "Graf"
+      }
+    },
+    "issuesList": {
+      "intro": "Analizirali smo ovaj API i pronašli nekoliko mogućih problema u dizajnu.",
+      "badgeTooltip": "Problemi u dizajnu ({{count}})",
+      "badgeAria": "Problemi u dizajnu",
+      "code": {
+        "propertyNameEmpty": "Neka svojstva nemaju naziv",
+        "propertyNameDuplicate": "Neka svojstva dele naziv unutar svog modela",
+        "propertyShadowsParent": "Neka svojstva zaklanjaju nasleđeno svojstvo",
+        "modelNameEmpty": "Neki modeli nemaju naziv",
+        "enumNameEmpty": "Neki enumi nemaju naziv",
+        "groupNameEmpty": "Neke grupe ruta nemaju naziv",
+        "modelNameDuplicate": "Nekoliko modela ima isti naziv",
+        "enumNameDuplicate": "Nekoliko enuma ima isti naziv",
+        "componentNameCollision": "Model i enum imaju isti naziv",
+        "groupNameDuplicate": "Nekoliko grupa ruta ima isti naziv",
+        "inheritanceTargetUnknown": "Neki modeli nasleđuju od modela koji više ne postoji",
+        "inheritanceCycle": "Neki modeli formiraju kružni lanac nasleđivanja",
+        "referenceTargetUnknown": "Neka svojstva upućuju na tip koji više ne postoji",
+        "identifierPropertyUnknown": "Neki modeli kao identifikator označavaju svojstvo koje više ne postoji",
+        "paramLinkTargetUnknown": "Neki parametri ruta povezuju se sa modelom ili svojstvom koje više ne postoji",
+        "paramEnumRefUnknown": "Neki parametri ruta upućuju na enum koji više ne postoji",
+        "bodyModelUnknown": "Neke rute koriste model tela koji više ne postoji",
+        "responseModelUnknown": "Neki odgovori koriste model koji više ne postoji",
+        "responseExampleUnknown": "Neki odgovori vraćaju primer koji njihov model ne deklariše",
+        "constraintPatternInvalid": "Neka ograničenja svojstava koriste nevažeći obrazac (regularni izraz)",
+        "constraintMinAboveMax": "Neka ograničenja svojstava imaju minimum veći od maksimuma",
+        "routeResponsesMissing": "Neke rute ne deklarišu nijedan odgovor",
+        "routePathDuplicate": "Nekoliko ruta odgovara na istu metodu i putanju",
+        "routePathReserved": "Neke rute nalaze se na putanji koju rezerviše dizajn server"
       }
     }
   },

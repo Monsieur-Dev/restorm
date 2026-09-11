@@ -7,6 +7,7 @@
 - **Opraveno: Claude Desktop a Cursor na macOS.** Připojení AI asistenta sice načetlo nástroje Restormu, ale každé volání pak selhalo s hláškou „žádná spuštěná instance“, i když byl Restorm otevřený — aplikace a konektor se navzájem hledaly v různých dočasných složkách. Nyní se spolehlivě najdou, ať už konektor spustí cokoli.
 - **Formální oslovení v italštině, polštině a finštině.** Rozhraní vás nyní v těchto třech jazycích oslovuje ve formálním tvaru, v souladu se zbytkem.
 - **Akce Code ve scénářích — přehlednější, s vestavěnými příklady.** Uzel Code se už při dlouhém skriptu neroztahuje a jeho editor získává kartu **Potřebujete pomoc?** s příkladem připraveným ke spuštění ve zvoleném jazyce (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Vložení při otevřeném editoru už na plátno nepřidá zbloudilý uzel Code.
+- **Odhalte problémy v návrhu importovaných API.** Po importu API — nebo po opětovném otevření souboru — Restorm nenápadně zkontroluje každé API na strukturální problémy (duplicitní trasy, chybějící odpovědi, cesty kolidující s Mock Serverem…), označí je v postranním panelu znakem „!“ a přidá kartu „Problémy“, která vypíše každý problém a přesně dotčené trasy, přičemž každou trasu lze rozbalit na její dokumentaci.
 
 ## v1.1.3
 

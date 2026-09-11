@@ -359,7 +359,8 @@
       "docs": "Docs",
       "environments": "Omgevingen",
       "notes": "Notities",
-      "customValues": "Aangepaste enumeraties"
+      "customValues": "Aangepaste enumeraties",
+      "issues": "Problemen"
     },
     "home": {
       "configureEnvs": "Omgevingen configureren",
@@ -2536,7 +2537,7 @@
       "responseModelUnknown": "Een antwoordmodel bestaat niet meer",
       "responseExampleUnknown": "Een antwoord serveert een ontbrekend voorbeeld",
       "routeResponsesMissing": "De route declareert geen respons",
-      "routePathDuplicate": "Een andere route beantwoordt deze methode en dit pad al",
+      "routePathDuplicate": "Ten minste één andere route beantwoordt deze methode en dit pad al",
       "routePathReserved": "De designserver reserveert dit pad — de route zou nooit antwoorden"
     },
     "routes": {
@@ -2709,6 +2710,37 @@
       "tabs": {
         "list": "Lijst",
         "graph": "Grafiek"
+      }
+    },
+    "issuesList": {
+      "intro": "We hebben deze API geanalyseerd en enkele mogelijke ontwerpproblemen gevonden.",
+      "badgeTooltip": "Ontwerpproblemen ({{count}})",
+      "badgeAria": "Ontwerpproblemen",
+      "code": {
+        "propertyNameEmpty": "Sommige eigenschappen hebben geen naam",
+        "propertyNameDuplicate": "Sommige eigenschappen delen een naam binnen hun model",
+        "propertyShadowsParent": "Sommige eigenschappen overschaduwen een overgeërfde eigenschap",
+        "modelNameEmpty": "Sommige modellen hebben geen naam",
+        "enumNameEmpty": "Sommige enums hebben geen naam",
+        "groupNameEmpty": "Sommige routegroepen hebben geen naam",
+        "modelNameDuplicate": "Meerdere modellen hebben dezelfde naam",
+        "enumNameDuplicate": "Meerdere enums hebben dezelfde naam",
+        "componentNameCollision": "Een model en een enum hebben dezelfde naam",
+        "groupNameDuplicate": "Meerdere routegroepen hebben dezelfde naam",
+        "inheritanceTargetUnknown": "Sommige modellen erven van een model dat niet meer bestaat",
+        "inheritanceCycle": "Sommige modellen vormen een circulaire overervingsketen",
+        "referenceTargetUnknown": "Sommige eigenschappen verwijzen naar een type dat niet meer bestaat",
+        "identifierPropertyUnknown": "Sommige modellen wijzen hun identificator naar een eigenschap die niet meer bestaat",
+        "paramLinkTargetUnknown": "Sommige routeparameters verwijzen naar een model of eigenschap die niet meer bestaat",
+        "paramEnumRefUnknown": "Sommige routeparameters verwijzen naar een enum die niet meer bestaat",
+        "bodyModelUnknown": "Sommige routes gebruiken een body-model dat niet meer bestaat",
+        "responseModelUnknown": "Sommige responsen gebruiken een model dat niet meer bestaat",
+        "responseExampleUnknown": "Sommige responsen leveren een voorbeeld dat hun model niet declareert",
+        "constraintPatternInvalid": "Sommige eigenschapsbeperkingen gebruiken een ongeldig patroon (reguliere expressie)",
+        "constraintMinAboveMax": "Sommige eigenschapsbeperkingen hebben een minimum boven hun maximum",
+        "routeResponsesMissing": "Sommige routes declareren geen respons",
+        "routePathDuplicate": "Meerdere routes beantwoorden dezelfde methode en hetzelfde pad",
+        "routePathReserved": "Sommige routes bevinden zich op een pad dat de designserver reserveert"
       }
     }
   },

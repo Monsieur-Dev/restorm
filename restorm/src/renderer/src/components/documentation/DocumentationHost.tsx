@@ -74,6 +74,12 @@ export interface DocumentationHostProps {
   /** Same, for models: each model-graph node header gains an edit
    * button jumping to that model's editable card (matched by name). */
   onEditModel?: (modelName: string) => void
+  /** Show the method-badge + path line at the top of each route block. Default
+   * `true`. A caller that already labels the route itself (the API-issues list,
+   * whose accordion header IS the verb + path) passes `false` to avoid showing
+   * it twice — the rest of the header (operationId, request/response body…)
+   * still renders. */
+  showRouteMatchLine?: boolean
 }
 
 /**
@@ -104,7 +110,8 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   testId,
   showModelGraphMinimap = true,
   onEditOperation,
-  onEditModel
+  onEditModel,
+  showRouteMatchLine = true
 }) => {
   const { t } = useTranslation()
   /** Resolve the effective `onAddRequest` once: when `hideAddRequest`
@@ -354,6 +361,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
                 operation={op}
                 headingLevel={sectionHeadingLevel}
                 showGroupChip={false}
+                showRouteMatchLine={showRouteMatchLine}
                 {...(tagColors ? { tagColors } : {})}
                 {...(effectiveOnAddRequest ? { onAddRequest: effectiveOnAddRequest } : {})}
                 {...(onEditOperation ? { onEdit: onEditOperation } : {})}
@@ -381,6 +389,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
                 operation={op}
                 headingLevel={sectionHeadingLevel}
                 showGroupChip={!isSingleRoute}
+                showRouteMatchLine={showRouteMatchLine}
                 {...(tagColors ? { tagColors } : {})}
                 {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
                 {...(onEditOperation ? { onEdit: onEditOperation } : {})}
@@ -491,12 +500,13 @@ interface RouteBlockProps {
   operation: OperationDocumentation
   headingLevel: 1 | 2 | 3
   showGroupChip: boolean
+  showRouteMatchLine?: boolean
   tagColors?: Record<string, string>
   onAddRequest?: (operation: OperationDocumentation) => void
   onEdit?: (operation: OperationDocumentation) => void
 }
 
-const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, tagColors, onAddRequest, onEdit }) => {
+const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, showRouteMatchLine = true, tagColors, onAddRequest, onEdit }) => {
   const { t } = useTranslation()
   const SectionHeading = headingLevel === 1 ? 'h1' : headingLevel === 2 ? 'h2' : 'h3'
   const opIdSlug = getOperationSlug(operation)
@@ -510,6 +520,7 @@ const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGr
         operation={operation}
         headingLevel={headingLevel}
         showGroupChip={showGroupChip}
+        showMatchLine={showRouteMatchLine}
         {...(tagColors ? { tagColors } : {})}
         {...(onAddRequest ? { onAddRequest } : {})}
         {...(onEdit ? { onEdit } : {})}

@@ -35,6 +35,11 @@ export interface RouteHeaderProps {
    * the design doc viewer uses it to jump from the readable doc to
    * the operation's editable route card. Only rendered when defined. */
   onEdit?: (operation: OperationDocumentation) => void
+  /** Show the method-badge + path line at the top. Default `true`. A caller
+   * that already labels the route elsewhere (the API-issues accordion, whose
+   * own header is the verb + path) sets `false` so it isn't shown twice — the
+   * rest of the header (operationId, request/response body, security…) stays. */
+  showMatchLine?: boolean
 }
 
 function formatBodyParameter(operation: OperationDocumentation): string | undefined {
@@ -190,7 +195,7 @@ function renderSchemeDetail(scheme: SecurityScheme, requestedScopes: string[]): 
   return lines.length > 0 ? <>{lines}</> : null
 }
 
-export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, tagColors, onAddRequest, onEdit }) => {
+export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, tagColors, onAddRequest, onEdit, showMatchLine = true }) => {
   const { t } = useTranslation()
   const requestBodyType = formatBodyParameter(operation)
   const responseSchema = formatResponseSchema(operation)
@@ -266,23 +271,25 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
         </SummaryHeading>
       )}
 
-      <div className="documentation-host-route-header__match">
-        {verb !== undefined && verb.length > 0 && (
-          <Badge type={mapToBadgeType(verb)} />
-        )}
-        <code className="documentation-host-route-header__url">{operation.match.urlPattern}</code>
-        {altDiscriminators.length > 0 && (
-          <span className="documentation-host-route-header__alt-discriminators">
-            {altDiscriminators.map(({ label, value }) => (
-              <span key={label} className="documentation-host-route-header__alt-discriminator">
-                <span className="documentation-host-route-header__alt-label">{label}:</span>
-                {' '}
-                <code>{value}</code>
-              </span>
-            ))}
-          </span>
-        )}
-      </div>
+      {showMatchLine && (
+        <div className="documentation-host-route-header__match">
+          {verb !== undefined && verb.length > 0 && (
+            <Badge type={mapToBadgeType(verb)} />
+          )}
+          <code className="documentation-host-route-header__url">{operation.match.urlPattern}</code>
+          {altDiscriminators.length > 0 && (
+            <span className="documentation-host-route-header__alt-discriminators">
+              {altDiscriminators.map(({ label, value }) => (
+                <span key={label} className="documentation-host-route-header__alt-discriminator">
+                  <span className="documentation-host-route-header__alt-label">{label}:</span>
+                  {' '}
+                  <code>{value}</code>
+                </span>
+              ))}
+            </span>
+          )}
+        </div>
+      )}
 
       {onAddRequest !== undefined && (
         <Button

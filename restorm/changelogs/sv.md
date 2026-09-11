@@ -7,6 +7,7 @@
 - **Rättat: Claude Desktop och Cursor på macOS.** Att ansluta en AI-assistent laddade Restorms verktyg men lät sedan varje anrop misslyckas med ”ingen körande instans”, även med Restorm öppet — appen och anslutaren letade efter varandra i olika temporära mappar. De hittar nu varandra pålitligt, oavsett vad som startade anslutaren.
 - **Formell tilltalsform på italienska, polska och finska.** Gränssnittet tilltalar dig nu i formell form på dessa tre språk, i linje med resten.
 - **Code-åtgärd i scenarier — renare, med inbyggda exempel.** Code-noden sträcks inte längre ut när skriptet är långt, och dess redigerare får en flik **Behöver du hjälp?** som visar ett körklart exempel i språket du har valt (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Att klistra in medan redigeraren är öppen lämnar inte längre en lös Code-nod på arbetsytan.
+- **Hitta designproblem i dina importerade API:er.** Efter import av ett API — eller när du öppnar en fil igen — kontrollerar Restorm diskret varje API för strukturella problem (dubblerade vägar, saknade svar, sökvägar som krockar med mockservern…), markerar det i sidofältet med ett ”!” och lägger till en ”Problem”-flik som listar varje problem och exakt vilka vägar det berör, där varje väg kan fällas ut till sin dokumentation.
 
 ## v1.1.3
 

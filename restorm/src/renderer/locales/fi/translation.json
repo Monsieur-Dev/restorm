@@ -359,7 +359,8 @@
       "docs": "Dokumentit",
       "environments": "Ympäristöt",
       "notes": "Muistiinpanot",
-      "customValues": "Mukautetut luettelot"
+      "customValues": "Mukautetut luettelot",
+      "issues": "Ongelmat"
     },
     "home": {
       "configureEnvs": "Määritä ympäristöt",
@@ -2536,7 +2537,7 @@
       "responseModelUnknown": "Vastausmallia ei enää ole",
       "responseExampleUnknown": "Vastaus tarjoilee puuttuvan esimerkin",
       "routeResponsesMissing": "Reitti ei määrittele yhtään vastausta",
-      "routePathDuplicate": "Toinen reitti vastaa jo tähän metodiin ja polkuun",
+      "routePathDuplicate": "Vähintään yksi toinen reitti vastaa jo tähän metodiin ja polkuun",
       "routePathReserved": "Design-palvelin varaa tämän polun — reitti ei koskaan vastaisi"
     },
     "routes": {
@@ -2709,6 +2710,37 @@
       "tabs": {
         "list": "Luettelo",
         "graph": "Kaavio"
+      }
+    },
+    "issuesList": {
+      "intro": "Analysoimme tämän API:n ja löysimme joitakin mahdollisia suunnitteluongelmia.",
+      "badgeTooltip": "Suunnitteluongelmat ({{count}})",
+      "badgeAria": "Suunnitteluongelmat",
+      "code": {
+        "propertyNameEmpty": "Joillakin ominaisuuksilla ei ole nimeä",
+        "propertyNameDuplicate": "Jotkin ominaisuudet jakavat nimen mallinsa sisällä",
+        "propertyShadowsParent": "Jotkin ominaisuudet varjostavat perittyä ominaisuutta",
+        "modelNameEmpty": "Joillakin malleilla ei ole nimeä",
+        "enumNameEmpty": "Joillakin enumeilla ei ole nimeä",
+        "groupNameEmpty": "Joillakin reittiryhmillä ei ole nimeä",
+        "modelNameDuplicate": "Useilla malleilla on sama nimi",
+        "enumNameDuplicate": "Useilla enumeilla on sama nimi",
+        "componentNameCollision": "Mallilla ja enumilla on sama nimi",
+        "groupNameDuplicate": "Useilla reittiryhmillä on sama nimi",
+        "inheritanceTargetUnknown": "Jotkin mallit perivät mallista, jota ei enää ole",
+        "inheritanceCycle": "Jotkin mallit muodostavat kehämäisen perintäketjun",
+        "referenceTargetUnknown": "Jotkin ominaisuudet viittaavat tyyppiin, jota ei enää ole",
+        "identifierPropertyUnknown": "Jotkin mallit osoittavat tunnisteensa ominaisuuteen, jota ei enää ole",
+        "paramLinkTargetUnknown": "Jotkin reittiparametrit linkittyvät malliin tai ominaisuuteen, jota ei enää ole",
+        "paramEnumRefUnknown": "Jotkin reittiparametrit viittaavat enumiin, jota ei enää ole",
+        "bodyModelUnknown": "Jotkin reitit käyttävät runkomallia, jota ei enää ole",
+        "responseModelUnknown": "Jotkin vastaukset käyttävät mallia, jota ei enää ole",
+        "responseExampleUnknown": "Jotkin vastaukset tarjoavat esimerkin, jota niiden malli ei määrittele",
+        "constraintPatternInvalid": "Jotkin ominaisuusrajoitukset käyttävät virheellistä kuviota (säännöllinen lauseke)",
+        "constraintMinAboveMax": "Joillakin ominaisuusrajoituksilla on minimi suurempi kuin maksimi",
+        "routeResponsesMissing": "Jotkin reitit eivät määrittele yhtään vastausta",
+        "routePathDuplicate": "Useat reitit vastaavat samaan metodiin ja polkuun",
+        "routePathReserved": "Jotkin reitit sijaitsevat polulla, jonka design-palvelin varaa"
       }
     }
   },

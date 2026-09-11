@@ -10,8 +10,11 @@ import { captureForAllLocales, localeDirName } from '../../../helpers/capture-lo
 import { callEmbeddedMcpTool, readEmbeddedMcpLock } from '../../../helpers/embedded-mcp'
 
 const OPENAPI_URL = 'https://api.artifactsmmo.com/openapi.json'
+/** Loopback port for serving the deliberately-flawed API spec that illustrates
+ * the imported-API problem detection. Distinct from the petstore mock port. */
+const API_ISSUES_MOCK_PORT = 4601
 
-const { Given, When } = createBdd(test)
+const { Given, When, Then } = createBdd(test)
 
 let electronApp: ElectronApplication | null = null
 let page: Page | null = null
@@ -942,3 +945,73 @@ When(
     await closeImportModals(p)
   }
 )
+
+When('I import an API with design problems and open its Problems tab', async () => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const call = (name: string, input: Record<string, unknown>): Promise<Record<string, unknown>> =>
+    callEmbeddedMcpTool<Record<string, unknown>>(mcp, name, input)
+
+  // A fresh project so the flawed API is the whole sidebar — its path shows in
+  // the status bar of every capture, so use a neutral, machine-independent one.
+  const projectDir = '/tmp/restorm-demo-api-issues'
+  rmSync(projectDir, { recursive: true, force: true })
+  mkdirSync(projectDir, { recursive: true })
+  await call('create_project', { filePath: join(projectDir, 'my-awesome-api.restorm') })
+  await p.waitForTimeout(1500)
+
+  // Serve the bundled flawed spec over localhost so it is a real import (the
+  // same path a user takes), then let the background validation flag it.
+  const spec = readFileSync(join(__dirname, '../fixtures/doc-shot-api-issues.json'), 'utf-8')
+  const server = createServer((_req, res) => {
+    res.setHeader('content-type', 'application/json')
+    res.end(spec)
+  })
+  await new Promise<void>((resolveListen) => { server.listen(API_ISSUES_MOCK_PORT, '127.0.0.1', () => { resolveListen() }) })
+  try {
+    await call('import_from_url', { url: `http://127.0.0.1:${String(API_ISSUES_MOCK_PORT)}/my-awesome-api.json` })
+    await p.waitForTimeout(1500)
+  } finally {
+    server.close()
+  }
+
+  const folders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  const env = folders.find((f) => f.kind === 'env-folder')
+  if (env === undefined) throw new Error('no env folder after the flawed API import')
+  await call('open_tab', { itemId: env.id })
+  await p.waitForTimeout(800)
+
+  // The "Issues" tab only appears once the main-process validation has surfaced
+  // problems — wait for it, then select it.
+  const issuesTab = p.locator('[data-testid$="-tabs-tab-issues"]')
+  await expect(issuesTab).toBeVisible({ timeout: 10000 })
+  await issuesTab.click()
+  await expect(p.locator('[data-testid="api-design-issues-list"]')).toBeVisible({ timeout: 5000 })
+})
+
+Then('I capture the API problems view for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    // A language switch re-renders the workbench, which can drop the active
+    // sub-tab — re-select the Problems tab so every locale's shot lands on it.
+    beforeShot: async () => {
+      const tab = p.locator('[data-testid$="-tabs-tab-issues"]')
+      if (await tab.isVisible()) await tab.click()
+      await expect(p.locator('[data-testid="api-design-issues-list"]')).toBeVisible({ timeout: 5000 })
+    },
+    // Frame on the workbench tab's CONTENT (the API title + its sub-tab bar with
+    // "Problems" selected + the issues list). The content pane fills the full
+    // editor height, so compute a TIGHT rectangle from the pane's top down to the
+    // bottom of the list — no empty tail — recomputed per locale (translated
+    // labels reflow the list height).
+    clip: async () => await p.evaluate(() => {
+      const pane = document.querySelector('.restorm-workbench-tab')
+      const list = document.querySelector('[data-testid="api-design-issues-list"]')
+      if (pane === null || list === null) throw new Error('workbench content / issues list not found for the clip')
+      const pr = pane.getBoundingClientRect()
+      const lr = list.getBoundingClientRect()
+      return { x: pr.x, y: pr.y, width: pr.width, height: lr.bottom - pr.y + 16 }
+    })
+  })
+})

@@ -29,3 +29,7 @@ Feature: Documentation screenshots
     And I build the scenario "Fight" chaining an input using "character", "Action Move", a log "Character moved", a 1000 ms wait and "Action Fight"
     And I mark the scenario "Fight" as favorite
     Then I capture a screenshot for every locale to "{locale}/scenario-editor.png"
+    # Imported-API problem detection: import a deliberately flawed API, open its
+    # env-folder "Problems" tab (collapsed list), and frame the capture on it.
+    And I import an API with design problems and open its Problems tab
+    Then I capture the API problems view for every locale to "{locale}/api-problemes-detectes.png"

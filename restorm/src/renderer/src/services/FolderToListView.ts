@@ -31,6 +31,7 @@ function withListeningBeam(requestId: string, badge: ReactNode): ReactNode {
 }
 import { SecretResolvingSpinner } from '../components/common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../components/common/SecretErrorIndicator'
+import { DesignIssuesIndicator } from '../components/common/DesignIssuesIndicator'
 import { ItemSecretBadges } from '../components/common/ItemSecretBadges'
 
 /** Collect every environment id under a folder (own + nested sub-environments). */
@@ -564,13 +565,15 @@ function environmentFolderToListViewItem(
     isExpandable: children.length > 0,
     isExpanded,
     icon: toListViewIcon(folder.icon, 'folder-library'),
-    // Spinner (while any env resolves) + error badge (if any env's resolution
-    // failed) just after the env-folder name.
+    // Spinner (while any env resolves) + secret-error badge (if any env's
+    // resolution failed) + a design-issues "!" (if the API's projected design
+    // failed background validation), just after the env-folder name.
     rightActions: React.createElement(
       React.Fragment,
       null,
       React.createElement(SecretResolvingSpinner, { environmentIds: collectFolderEnvIds(folder.environments) }),
-      React.createElement(SecretErrorIndicator, { environmentIds: collectFolderEnvIds(folder.environments) })
+      React.createElement(SecretErrorIndicator, { environmentIds: collectFolderEnvIds(folder.environments) }),
+      React.createElement(DesignIssuesIndicator, { folderId: folder.id })
     ),
     children
   }

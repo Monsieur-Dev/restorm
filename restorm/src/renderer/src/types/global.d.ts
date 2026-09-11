@@ -16,6 +16,7 @@ import type {
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
 import type { CloudTemplate, CloudTemplatesView } from '../../../shared/types/codegenTemplates'
+import type { DesignIssueView } from '../../../shared/design/describeDesignIssue'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
 import type { UpdateState, UpdateSettings, ReleaseNoteSection } from '../../../shared/update/updateTypes'
 import type {
@@ -248,6 +249,8 @@ declare global {
         onEnvSecretsError: (callback: (result: { environmentId: string; hasError: boolean }) => void) => (() => void)
         getItemSecretStatuses: () => Promise<{ itemId: string; resolving: boolean; error: boolean; errorVars?: string[] }[]>
         onItemSecretsStatus: (callback: (result: { itemId: string; resolving: boolean; error: boolean; errorVars?: string[] }) => void) => (() => void)
+        getFolderDesignIssues: () => Promise<{ folderId: string; issues: DesignIssueView[] }[]>
+        onFolderDesignIssues: (callback: (result: { folderId: string; issues: DesignIssueView[] }) => void) => (() => void)
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
         registerRequest: (
           requestId: string,

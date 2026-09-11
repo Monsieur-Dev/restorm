@@ -359,7 +359,8 @@
       "docs": "Dokumentasjon",
       "environments": "Miljøer",
       "notes": "Notater",
-      "customValues": "Egendefinerte enumerasjoner"
+      "customValues": "Egendefinerte enumerasjoner",
+      "issues": "Problemer"
     },
     "home": {
       "configureEnvs": "Konfigurer miljøer",
@@ -2536,7 +2537,7 @@
       "responseModelUnknown": "En svarmodell finnes ikke lenger",
       "responseExampleUnknown": "Et svar serverer et manglende eksempel",
       "routeResponsesMissing": "Ruten erklærer ikke noe svar",
-      "routePathDuplicate": "En annen rute besvarer allerede denne metoden og stien",
+      "routePathDuplicate": "Minst én annen rute besvarer allerede denne metoden og stien",
       "routePathReserved": "Designserveren reserverer denne stien — ruten ville aldri svare"
     },
     "routes": {
@@ -2709,6 +2710,37 @@
       "tabs": {
         "list": "Liste",
         "graph": "Graf"
+      }
+    },
+    "issuesList": {
+      "intro": "Vi analyserte denne API-en og fant noen mulige designproblemer.",
+      "badgeTooltip": "Designproblemer ({{count}})",
+      "badgeAria": "Designproblemer",
+      "code": {
+        "propertyNameEmpty": "Noen egenskaper har ikke noe navn",
+        "propertyNameDuplicate": "Noen egenskaper deler navn innenfor modellen sin",
+        "propertyShadowsParent": "Noen egenskaper skygger for en arvet egenskap",
+        "modelNameEmpty": "Noen modeller har ikke noe navn",
+        "enumNameEmpty": "Noen enums har ikke noe navn",
+        "groupNameEmpty": "Noen rutegrupper har ikke noe navn",
+        "modelNameDuplicate": "Flere modeller har samme navn",
+        "enumNameDuplicate": "Flere enums har samme navn",
+        "componentNameCollision": "En modell og en enum har samme navn",
+        "groupNameDuplicate": "Flere rutegrupper har samme navn",
+        "inheritanceTargetUnknown": "Noen modeller arver fra en modell som ikke lenger finnes",
+        "inheritanceCycle": "Noen modeller danner en sirkulær arvekjede",
+        "referenceTargetUnknown": "Noen egenskaper refererer til en type som ikke lenger finnes",
+        "identifierPropertyUnknown": "Noen modeller peker identifikatoren sin til en egenskap som ikke lenger finnes",
+        "paramLinkTargetUnknown": "Noen ruteparametere lenker til en modell eller egenskap som ikke lenger finnes",
+        "paramEnumRefUnknown": "Noen ruteparametere refererer til en enum som ikke lenger finnes",
+        "bodyModelUnknown": "Noen ruter bruker en body-modell som ikke lenger finnes",
+        "responseModelUnknown": "Noen svar bruker en modell som ikke lenger finnes",
+        "responseExampleUnknown": "Noen svar leverer et eksempel som modellen deres ikke erklærer",
+        "constraintPatternInvalid": "Noen egenskapsbegrensninger bruker et ugyldig mønster (regulært uttrykk)",
+        "constraintMinAboveMax": "Noen egenskapsbegrensninger har et minimum over maksimum",
+        "routeResponsesMissing": "Noen ruter erklærer ikke noe svar",
+        "routePathDuplicate": "Flere ruter besvarer samme metode og sti",
+        "routePathReserved": "Noen ruter ligger på en sti som designserveren reserverer"
       }
     }
   },

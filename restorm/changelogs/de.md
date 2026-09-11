@@ -7,6 +7,7 @@
 - **Behoben: Claude Desktop und Cursor unter macOS.** Beim Verbinden eines KI-Assistenten wurden zwar Restorms Werkzeuge geladen, doch jeder Aufruf schlug dann mit „keine laufende Instanz“ fehl, selbst bei geöffnetem Restorm — die App und der Connector suchten einander in unterschiedlichen temporären Ordnern. Sie finden sich jetzt zuverlässig, ganz gleich, was den Connector gestartet hat.
 - **Förmliche Anrede auf Italienisch, Polnisch und Finnisch.** Die Oberfläche spricht Sie in diesen drei Sprachen jetzt in der Sie-Form an, im Einklang mit dem Rest.
 - **Code-Aktion in Szenarien — aufgeräumter, mit eingebauten Beispielen.** Der Code-Knoten wird bei langem Skript nicht mehr in die Breite gezogen, und sein Editor erhält einen Tab **Brauchen Sie Hilfe?** mit einem lauffähigen Beispiel in der von Ihnen gewählten Sprache (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Einfügen bei geöffnetem Editor legt keinen versehentlichen Code-Knoten mehr auf der Arbeitsfläche ab.
+- **Entdecken Sie Designprobleme in Ihren importierten APIs.** Nach dem Import einer API — oder beim erneuten Öffnen einer Datei — prüft Restorm jede API unauffällig auf strukturelle Probleme (doppelte Routen, fehlende Antworten, Pfade, die mit dem Mock-Server kollidieren…), kennzeichnet sie in der Seitenleiste mit einem „!“ und ergänzt einen Tab „Probleme“, der jedes Problem und die genau betroffenen Routen auflistet, wobei sich jede Route zu ihrer Dokumentation aufklappen lässt.
 
 ## v1.1.3
 

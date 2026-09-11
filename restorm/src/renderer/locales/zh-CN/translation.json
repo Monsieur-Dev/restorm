@@ -358,7 +358,8 @@
       "docs": "文档",
       "environments": "环境",
       "notes": "笔记",
-      "customValues": "自定义枚举"
+      "customValues": "自定义枚举",
+      "issues": "问题"
     },
     "home": {
       "configureEnvs": "配置环境",
@@ -2535,7 +2536,7 @@
       "responseModelUnknown": "响应模型已不存在",
       "responseExampleUnknown": "响应提供了缺失的示例",
       "routeResponsesMissing": "该路由未声明任何响应",
-      "routePathDuplicate": "另一条路由已响应此方法和路径",
+      "routePathDuplicate": "至少有另一条路由已响应此方法和路径",
       "routePathReserved": "设计服务器保留此路径 — 该路由将永远不会响应"
     },
     "routes": {
@@ -2708,6 +2709,37 @@
       "tabs": {
         "list": "列表",
         "graph": "图"
+      }
+    },
+    "issuesList": {
+      "intro": "我们分析了此 API，发现了一些潜在的设计问题。",
+      "badgeTooltip": "设计问题 ({{count}})",
+      "badgeAria": "设计问题",
+      "code": {
+        "propertyNameEmpty": "部分属性没有名称",
+        "propertyNameDuplicate": "部分属性在其模型内使用了相同的名称",
+        "propertyShadowsParent": "部分属性遮蔽了继承的属性",
+        "modelNameEmpty": "部分模型没有名称",
+        "enumNameEmpty": "部分枚举没有名称",
+        "groupNameEmpty": "部分路由分组没有名称",
+        "modelNameDuplicate": "多个模型使用了相同的名称",
+        "enumNameDuplicate": "多个枚举使用了相同的名称",
+        "componentNameCollision": "一个模型和一个枚举使用了相同的名称",
+        "groupNameDuplicate": "多个路由分组使用了相同的名称",
+        "inheritanceTargetUnknown": "部分模型继承自一个已不存在的模型",
+        "inheritanceCycle": "部分模型形成了循环继承链",
+        "referenceTargetUnknown": "部分属性引用了一个已不存在的类型",
+        "identifierPropertyUnknown": "部分模型将其标识符指向一个已不存在的属性",
+        "paramLinkTargetUnknown": "部分路由参数关联到一个已不存在的模型或属性",
+        "paramEnumRefUnknown": "部分路由参数引用了一个已不存在的枚举",
+        "bodyModelUnknown": "部分路由使用了一个已不存在的主体模型",
+        "responseModelUnknown": "部分响应使用了一个已不存在的模型",
+        "responseExampleUnknown": "部分响应返回了其模型未声明的示例",
+        "constraintPatternInvalid": "部分属性约束使用了无效的模式（正则表达式）",
+        "constraintMinAboveMax": "部分属性约束的最小值大于最大值",
+        "routeResponsesMissing": "部分路由未声明任何响应",
+        "routePathDuplicate": "多个路由响应相同的方法和路径",
+        "routePathReserved": "部分路由位于设计服务器保留的路径上"
       }
     }
   },

@@ -88,6 +88,12 @@ const designCollisionsTestDir = defineBddConfig({
   outputDir: '.features-gen/design-collisions'
 })
 
+const apiDesignIssuesTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/api-design-issues/features/**/*.feature',
+  steps: ['tests/e2e/bdd/api-design-issues/steps/**/*.ts', 'tests/e2e/bdd/fixtures/openapi-import.fixture.ts'],
+  outputDir: '.features-gen/api-design-issues'
+})
+
 const designCreationTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/design-creation/features/**/*.feature',
   steps: ['tests/e2e/bdd/design-creation/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-creation.fixture.ts'],
@@ -736,6 +742,10 @@ export default defineConfig({
     {
       name: 'design-collisions',
       testDir: designCollisionsTestDir
+    },
+    {
+      name: 'api-design-issues',
+      testDir: apiDesignIssuesTestDir
     },
     {
       name: 'design-creation',
