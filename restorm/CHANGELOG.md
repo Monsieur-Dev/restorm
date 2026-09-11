@@ -10,6 +10,13 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.1.4
+
+**Connect your AI assistant on macOS — now reliable.**
+
+- **Fixed: Claude Desktop and Cursor on macOS.** Connecting an AI assistant loaded Restorm's tools but then failed every call with "no running instance", even with Restorm open — the app and the connector were looking for each other in different temp folders. They now rendezvous reliably, whatever launched the connector.
+- **Formal wording in Italian, Polish and Finnish.** The interface now addresses you in the formal register in these three languages, consistent with the rest.
+
 ## v1.1.3
 
 **Connect your AI assistant to Restorm.**

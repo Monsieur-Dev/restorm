@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Lidh asistentin tënd të AI-së në macOS — tani i besueshëm.**
+
+- **Rregullim: Claude Desktop dhe Cursor në macOS.** Lidhja e një asistenti AI ngarkonte veglat e Restorm, por më pas çdo thirrje dështonte me «asnjë instancë në ekzekutim», edhe me Restorm-in hapur — aplikacioni dhe lidhësi kërkonin njëri-tjetrin në dosje të përkohshme të ndryshme. Tani takohen në mënyrë të besueshme, pavarësisht se çfarë e nisi lidhësin.
+- **Formulim formal në italisht, polonisht dhe finlandisht.** Ndërfaqja tani të drejtohet në regjistrin formal në këto tri gjuhë, në përputhje me pjesën tjetër.
+
 ## v1.1.3
 
 **Lidh asistentin tënd të AI-së me Restorm.**

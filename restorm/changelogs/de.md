@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Verbinden Sie Ihren KI-Assistenten unter macOS — jetzt zuverlässig.**
+
+- **Behoben: Claude Desktop und Cursor unter macOS.** Beim Verbinden eines KI-Assistenten wurden zwar Restorms Werkzeuge geladen, doch jeder Aufruf schlug dann mit „keine laufende Instanz“ fehl, selbst bei geöffnetem Restorm — die App und der Connector suchten einander in unterschiedlichen temporären Ordnern. Sie finden sich jetzt zuverlässig, ganz gleich, was den Connector gestartet hat.
+- **Förmliche Anrede auf Italienisch, Polnisch und Finnisch.** Die Oberfläche spricht Sie in diesen drei Sprachen jetzt in der Sie-Form an, im Einklang mit dem Rest.
+
 ## v1.1.3
 
 **Verbinden Sie Ihren KI-Assistenten mit Restorm.**

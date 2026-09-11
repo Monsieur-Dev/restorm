@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Povežite svog AI asistenta na macOS-u — sada pouzdano.**
+
+- **Ispravljeno: Claude Desktop i Cursor na macOS-u.** Povezivanje AI asistenta učitavalo je Restormove alatke, ali je zatim svaki poziv padao uz poruku „nema pokrenute instance“, čak i sa otvorenim Restormom — aplikacija i konektor su se tražili u različitim privremenim fasciklama. Sada se pouzdano pronalaze, bez obzira na to šta je pokrenulo konektor.
+- **Formalno obraćanje na italijanskom, poljskom i finskom.** Interfejs vam se sada obraća u formalnom registru na ova tri jezika, u skladu sa ostatkom.
+
 ## v1.1.3
 
 **Povežite svog AI asistenta sa Restormom.**

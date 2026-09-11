@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Yhdistäkää tekoälyavustajanne macOS:ssä — nyt luotettavasti.**
+
+- **Korjattu: Claude Desktop ja Cursor macOS:ssä.** Tekoälyavustajan yhdistäminen latasi Restormin työkalut, mutta sen jälkeen jokainen kutsu epäonnistui ilmoituksella ”ei käynnissä olevaa instanssia”, vaikka Restorm oli auki — sovellus ja connector etsivät toisiaan eri väliaikaiskansioista. Nyt ne löytävät toisensa luotettavasti riippumatta siitä, mikä connectorin käynnisti.
+- **Muodollinen puhuttelu italiaksi, puolaksi ja suomeksi.** Käyttöliittymä puhuttelee teitä nyt näissä kolmessa kielessä muodollisessa muodossa, muun sisällön mukaisesti.
+
 ## v1.1.3
 
 **Yhdistä tekoälyavustajasi Restormiin.**

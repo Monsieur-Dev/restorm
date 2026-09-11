@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Yapay zekâ asistanınızı macOS'ta bağlayın — artık güvenilir.**
+
+- **Düzeltildi: macOS'ta Claude Desktop ve Cursor.** Bir yapay zekâ asistanını bağlamak Restorm'un araçlarını yüklüyor ama sonra her çağrı, Restorm açık olsa bile, “çalışan örnek yok” hatasıyla başarısız oluyordu — uygulama ile bağlayıcı birbirini farklı geçici klasörlerde arıyordu. Artık bağlayıcıyı ne başlatmış olursa olsun güvenilir biçimde buluşuyorlar.
+- **İtalyanca, Lehçe ve Fince'de resmi ifade.** Arayüz bu üç dilde artık size resmi kayıtta hitap ediyor, geri kalanla tutarlı olarak.
+
 ## v1.1.3
 
 **Yapay zekâ asistanınızı Restorm'a bağlayın.**

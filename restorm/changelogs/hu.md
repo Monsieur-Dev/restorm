@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Csatlakoztassa AI-asszisztensét macOS-en — mostantól megbízhatóan.**
+
+- **Javítva: Claude Desktop és Cursor macOS-en.** Egy AI-asszisztens csatlakoztatása betöltötte a Restorm eszközeit, de ezután minden hívás „nincs futó példány“ hibával elszállt, még nyitott Restorm mellett is — az alkalmazás és a csatlakozó különböző ideiglenes mappákban kereste egymást. Mostantól megbízhatóan megtalálják egymást, bármi is indította el a csatlakozót.
+- **Formális megszólítás olaszul, lengyelül és finnül.** A felület ezen a három nyelven mostantól a formális megszólítást használja, a többivel összhangban.
+
 ## v1.1.3
 
 **Csatlakoztassa AI-asszisztensét a Restormhoz.**

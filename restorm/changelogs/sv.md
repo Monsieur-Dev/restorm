@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.4
+
+**Anslut din AI-assistent på macOS — nu pålitligt.**
+
+- **Rättat: Claude Desktop och Cursor på macOS.** Att ansluta en AI-assistent laddade Restorms verktyg men lät sedan varje anrop misslyckas med ”ingen körande instans”, även med Restorm öppet — appen och anslutaren letade efter varandra i olika temporära mappar. De hittar nu varandra pålitligt, oavsett vad som startade anslutaren.
+- **Formell tilltalsform på italienska, polska och finska.** Gränssnittet tilltalar dig nu i formell form på dessa tre språk, i linje med resten.
+
 ## v1.1.3
 
 **Anslut din AI-assistent till Restorm.**
