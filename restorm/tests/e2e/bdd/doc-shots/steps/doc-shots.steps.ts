@@ -829,3 +829,116 @@ When(
     })
   }
 )
+
+// ── Import-flow modal captures (per-locale modal chrome) ───────────────────
+// The import MODALS carry translated chrome (labels, format blurbs) and live
+// per-locale under assets/docs/<loc>/; the resulting-tree shots are language-
+// independent (assets/docs/shared/) and are not captured here.
+
+// Two cURL commands → a folder: the exact state the cURL doc screenshot shows.
+const CURL_IMPORT_SAMPLE = [
+  'curl https://api.restorm.example/pets',
+  "curl -X POST https://api.restorm.example/pets -H 'Content-Type: application/json' -d '{\"name\":\"Rex\"}'"
+].join('\n')
+
+Given('I create a new empty project for import captures', async () => {
+  const p = requirePage()
+  // Neutral, machine-independent path — it shows in the status bar behind the
+  // modal (the modal shots are clipped, but keep it clean regardless).
+  const projectDir = '/tmp/restorm-import-demo'
+  rmSync(projectDir, { recursive: true, force: true })
+  mkdirSync(projectDir, { recursive: true })
+  await configureNextSaveFileDialogForE2E(requireApp(), { kind: 'saveFile', path: join(projectDir, 'imports.restorm') })
+  await p.locator('[data-testid="titlebar-menubar-item-file"]').click()
+  await p.locator('[data-testid="titlebar-menu-item-new"]').first().click()
+  await p.waitForTimeout(800)
+})
+
+/** Dismiss a modal by its cancel button (falling back to Escape) if it's open. */
+async function cancelModalIfOpen(p: Page, modalTestId: string, cancelTestId: string): Promise<void> {
+  const modal = p.locator(`[data-testid="${modalTestId}"]`)
+  if (!(await modal.isVisible().catch(() => false))) return
+  const cancel = p.locator(`[data-testid="${cancelTestId}"]`)
+  if (await cancel.isVisible().catch(() => false)) await cancel.click()
+  else await p.keyboard.press('Escape')
+  await modal.waitFor({ state: 'hidden', timeout: 3000 }).catch(() => undefined)
+}
+
+/** Close any import modal so the next open renders cleanly in the current
+ * language (a stale open modal repaints, but reopening is deterministic). */
+async function closeImportModals(p: Page): Promise<void> {
+  await cancelModalIfOpen(p, 'grpc-reflection-import-modal', 'grpc-reflection-cancel-button')
+  await cancelModalIfOpen(p, 'import-modal', 'cancel-button')
+}
+
+async function openImportFormatModal(p: Page): Promise<void> {
+  await closeImportModals(p)
+  await p.keyboard.press('Control+I')
+  await expect(p.locator('[data-testid="import-modal"]')).toBeVisible({ timeout: 5000 })
+  await p.waitForTimeout(500)
+}
+
+async function openImportCurlModal(p: Page): Promise<void> {
+  await closeImportModals(p)
+  await p.keyboard.press('Control+I')
+  await expect(p.locator('[data-testid="import-modal"]')).toBeVisible({ timeout: 5000 })
+  await p.locator('[data-testid="source-input-input"]').fill(CURL_IMPORT_SAMPLE)
+  // The preview tree (a folder of 2 requests) confirms the paste parsed.
+  await expect(p.locator('[data-testid="import-selection-tree"]')).toBeVisible({ timeout: 15000 })
+  await p.waitForTimeout(500)
+}
+
+async function openGrpcReflectionModal(p: Page): Promise<void> {
+  await closeImportModals(p)
+  await p.keyboard.press('Control+I')
+  await expect(p.locator('[data-testid="import-modal"]')).toBeVisible({ timeout: 5000 })
+  await p.locator('[data-testid="import-grpc-reflection-button"]').click()
+  await expect(p.locator('[data-testid="grpc-reflection-import-modal"]')).toBeVisible({ timeout: 5000 })
+  const addr = p.locator('[data-testid="grpc-reflection-address-input-input"]')
+  if ((await addr.inputValue().catch(() => '')) === '') await addr.fill('localhost:50051')
+  await p.waitForTimeout(400)
+}
+
+/** The ECUI dialog container for the topmost import modal. */
+function importDialogBox(p: Page, modalTestId: string): Locator {
+  return p.locator(`[data-testid="${modalTestId}"]`).locator('xpath=ancestor-or-self::*[contains(@class,"ecu-modal-container")]').first()
+}
+
+When(
+  'I capture the import format modal for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => { await openImportFormatModal(p) },
+      clipTo: () => importDialogBox(p, 'import-modal')
+    })
+    await closeImportModals(p)
+  }
+)
+
+When(
+  'I capture the cURL import modal for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => { await openImportCurlModal(p) },
+      clipTo: () => importDialogBox(p, 'import-modal')
+    })
+    await closeImportModals(p)
+  }
+)
+
+When(
+  'I capture the gRPC reflection modal for every locale to {string}',
+  async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+    const p = requirePage()
+    await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+      ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+      beforeShot: async () => { await openGrpcReflectionModal(p) },
+      clipTo: () => importDialogBox(p, 'grpc-reflection-import-modal')
+    })
+    await closeImportModals(p)
+  }
+)
