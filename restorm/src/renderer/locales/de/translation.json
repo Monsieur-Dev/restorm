@@ -88,127 +88,127 @@
     "cardTitle": "Tipps & Tricks",
     "maximizeTab": {
       "title": "Tab mit einem Klick maximieren",
-      "body": "Doppelklicke einen Tab im Workbench, um ihn im Vollbild zu öffnen. Drücke Esc, um zur ursprünglichen Anordnung zurückzukehren."
+      "body": "Doppelklicken Sie einen Tab im Workbench, um ihn im Vollbild zu öffnen. Drücken Sie Esc, um zur ursprünglichen Anordnung zurückzukehren."
     },
     "mcpControl": {
       "title": "Restorm per KI steuern",
-      "body": "Restorm liefert einen MCP-Server mit, sodass KI-Assistenten wie Claude Code deine Anfragen auflisten, öffnen, bearbeiten und ausführen, Antworten inspizieren und den Arbeitsbereich programmatisch verändern können – ohne den Chat zu verlassen."
+      "body": "Restorm liefert einen MCP-Server mit, sodass KI-Assistenten wie Claude Code Ihre Anfragen auflisten, öffnen, bearbeiten und ausführen, Antworten inspizieren und den Arbeitsbereich programmatisch verändern können – ohne den Chat zu verlassen."
     },
     "envSwitch": {
       "title": "Umgebungen einfach wechseln!",
-      "body": "Wechsle die Umgebung der aktuellen Anfrage oder aller Anfragen deiner API mit einem Klick auf die Schaltfläche in der Statusleiste oder per Rechtsklick auf den Senden-Button der Anfrage."
+      "body": "Wechseln Sie die Umgebung der aktuellen Anfrage oder aller Anfragen Ihrer API mit einem Klick auf die Schaltfläche in der Statusleiste oder per Rechtsklick auf den Senden-Button der Anfrage."
     },
     "authRequests": {
-      "title": "Musst du dich für deine API authentifizieren?",
-      "body": "Statt jedes Mal eine Anfrage zu starten, um ein Token zu holen und überall einzufügen, nutze Auth-Requests. Schlägt ein Aufruf fehl (401, 403, …) oder ist dein Token abgelaufen, wird die Auth-Anfrage automatisch erneut ausgeführt, das Token extrahiert und weiterverwendet. Praktisch!"
+      "title": "Müssen Sie sich für Ihre API authentifizieren?",
+      "body": "Statt jedes Mal eine Anfrage zu starten, um ein Token zu holen und überall einzufügen, nutzen Sie Auth-Requests. Schlägt ein Aufruf fehl (401, 403, …) oder ist Ihr Token abgelaufen, wird die Auth-Anfrage automatisch erneut ausgeführt, das Token extrahiert und weiterverwendet. Praktisch!"
     },
     "supplyChain": {
-      "title": "Schütze dich!",
-      "body": "Wie jede Software nutzt Restorm Drittanbieter-Bibliotheken. Um Supply-Chain-Angriffe zu verhindern, werden alle ausgehenden Aufrufe auf niedrigster Ebene abgefangen, und wir warnen dich, wenn eine Drittanbieter-Bibliothek versucht, deine persönlichen Daten zu stehlen!"
+      "title": "Schützen Sie sich!",
+      "body": "Wie jede Software nutzt Restorm Drittanbieter-Bibliotheken. Um Supply-Chain-Angriffe zu verhindern, werden alle ausgehenden Aufrufe auf niedrigster Ebene abgefangen, und wir warnen Sie, wenn eine Drittanbieter-Bibliothek versucht, Ihre persönlichen Daten zu stehlen!"
     },
     "codeSnippets": {
       "title": "Restorm hilft beim Programmieren!",
-      "body": "Finde Code-Snippets zu jeder Anfrage, um sie in deiner Software einzubinden. Viele Sprachen verfügbar: curl, PowerShell, TypeScript, C# und vieles mehr!"
+      "body": "Finden Sie Code-Snippets zu jeder Anfrage, um sie in Ihrer Software einzubinden. Viele Sprachen verfügbar: curl, PowerShell, TypeScript, C# und vieles mehr!"
     },
     "workbenchLayout": {
-      "title": "Organisiere deinen Arbeitsbereich",
-      "body": "Großer Bildschirm und viele Anfragen? Lege sie nebeneinander, untereinander oder ganz nach Belieben – zieh eine Registerkarte einfach dorthin, wo du sie haben willst. Alles für deinen Komfort!"
+      "title": "Organisieren Sie Ihren Arbeitsbereich",
+      "body": "Großer Bildschirm und viele Anfragen? Legen Sie sie nebeneinander, untereinander oder ganz nach Belieben – ziehen Sie eine Registerkarte einfach dorthin, wo Sie sie haben möchten. Alles für Ihren Komfort!"
     },
     "persistState": {
-      "title": "Finde es genau so vor, wie du es verlassen hast!",
-      "body": "Wenn du Restorm schließt und wieder öffnest, findest du es genau in dem Zustand vor, in dem du es verlassen hast."
+      "title": "Finden Sie es genau so vor, wie Sie es verlassen haben!",
+      "body": "Wenn Sie Restorm schließen und wieder öffnen, finden Sie es genau in dem Zustand vor, in dem Sie es verlassen haben."
     },
     "favorites": {
-      "title": "Manche liegen dir mehr am Herzen…",
-      "body": "Sind dir manche Anfragen wichtiger als andere? Markiere sie als Favoriten!"
+      "title": "Manche liegen Ihnen mehr am Herzen…",
+      "body": "Sind Ihnen manche Anfragen wichtiger als andere? Markieren Sie sie als Favoriten!"
     },
     "console": {
-      "title": "So siehst du, was passiert",
-      "body": "Die Konsole zeigt dir die Aufrufe deiner APIs in Echtzeit, wenn du Anfragen abschickst. Praktisch zum Kopieren und Einfügen ins Terminal, wenn nötig! Welche Variante magst du: curl oder PowerShell?"
+      "title": "So sehen Sie, was passiert",
+      "body": "Die Konsole zeigt Ihnen die Aufrufe Ihrer APIs in Echtzeit, wenn Sie Anfragen abschicken. Praktisch zum Kopieren und Einfügen ins Terminal, wenn nötig! Welche Variante mögen Sie: curl oder PowerShell?"
     },
     "miniBrowser": {
       "title": "Genug vom ständigen Fensterwechsel?",
-      "body": "Restorm bringt einen integrierten Mini-Browser mit. Praktisch, wenn deine Anwendung visuell auf deine API-Aufrufe reagiert."
+      "body": "Restorm bringt einen integrierten Mini-Browser mit. Praktisch, wenn Ihre Anwendung visuell auf Ihre API-Aufrufe reagiert."
     },
     "apiDocs": {
       "title": "Die Doku — direkt hier",
-      "body": "Kein Wechsel mehr zwischen Restorm und der Dokumentation deiner API nötig. Liefert deine API eine Spezifikation (Swagger, OpenAPI, …), wird sie in Restorm importiert und ist direkt hier einsehbar."
+      "body": "Kein Wechsel mehr zwischen Restorm und der Dokumentation Ihrer API nötig. Liefert Ihre API eine Spezifikation (Swagger, OpenAPI, …), wird sie in Restorm importiert und ist direkt hier einsehbar."
     },
     "secrets": {
-      "title": "Schütze deine Geheimnisse",
-      "body": "Deine Passwörter und Auth-Tokens werden nicht direkt in der Restorm-Datei gespeichert. Deshalb legt Restorm Secrets und Anfrage-Historie in separaten Dateien ab. An dir liegt es, sie nicht auf GitHub zu pushen. Restorm kann Secrets auch aus AWS, GitHub oder anderen Quellen abrufen."
+      "title": "Schützen Sie Ihre Geheimnisse",
+      "body": "Ihre Passwörter und Auth-Tokens werden nicht direkt in der Restorm-Datei gespeichert. Deshalb legt Restorm Secrets und Anfrage-Historie in separaten Dateien ab. An Ihnen liegt es, sie nicht auf GitHub zu pushen. Restorm kann Secrets auch aus AWS, GitHub oder anderen Quellen abrufen."
     },
     "themes": {
-      "title": "Deine Farben, deine Stimmung",
-      "body": "Restorm bringt mehrere Farbschemata mit. Wähle dasjenige, das zu deiner Stimmung passt."
+      "title": "Ihre Farben, Ihre Stimmung",
+      "body": "Restorm bringt mehrere Farbschemata mit. Wählen Sie dasjenige, das zu Ihrer Stimmung passt."
     },
     "search": {
-      "title": "Finde alles, schnell",
-      "body": "Hast du den oberen Bereich des Fensters gesehen? Restorm bringt eine Suche mit — schluss damit, stundenlang DIE Anfrage zu suchen."
+      "title": "Finden Sie alles, schnell",
+      "body": "Haben Sie den oberen Bereich des Fensters gesehen? Restorm bringt eine Suche mit — schluss damit, stundenlang DIE Anfrage zu suchen."
     },
     "multiEnv": {
       "title": "Gleiche Anfragen, andere Umgebungen",
-      "body": "Hast du Dev, Staging und Prod? Es sind die gleichen Anfragen, nur nicht ganz dieselben URLs, nicht ganz dieselben Tokens… Nutze Umgebungen und Variablen, um per Klick umzuschalten. Du kannst sogar jede Umgebung mit Farbe und Icon kennzeichnen, damit dir die Schrecksekunden vor dem Wochenende in Produktion erspart bleiben!"
+      "body": "Haben Sie Dev, Staging und Prod? Es sind die gleichen Anfragen, nur nicht ganz dieselben URLs, nicht ganz dieselben Tokens… Nutzen Sie Umgebungen und Variablen, um per Klick umzuschalten. Sie können sogar jede Umgebung mit Farbe und Icon kennzeichnen, damit Ihnen die Schrecksekunden vor dem Wochenende in Produktion erspart bleiben!"
     },
     "protocols": {
       "title": "Mehr als nur REST",
-      "body": "Restorm spricht REST … und noch viel mehr! GraphQL, gRPC, SOAP, OData, WebSocket — all diese Protokolle stehen dir direkt zur Verfügung, ohne das Tool zu wechseln."
+      "body": "Restorm spricht REST … und noch viel mehr! GraphQL, gRPC, SOAP, OData, WebSocket — all diese Protokolle stehen Ihnen direkt zur Verfügung, ohne das Tool zu wechseln."
     },
     "responseTree": {
-      "title": "Sieh deine API-Antworten — visuell",
-      "body": "Wusstest du, dass du deine API-Antworten viel grafischer durchstöbern kannst? Restorm zeigt sie als interaktiven Baum, durch den du navigieren, einklappen und ausklappen kannst."
+      "title": "Sehen Sie Ihre API-Antworten — visuell",
+      "body": "Wussten Sie, dass Sie Ihre API-Antworten viel grafischer durchstöbern können? Restorm zeigt sie als interaktiven Baum, durch den Sie navigieren, einklappen und ausklappen können."
     },
     "responseHistory": {
       "title": "Verlauf der Anfragen",
-      "body": "Du kannst den Verlauf aller Aufrufe deiner APIs einsehen. Praktisch, um nachzuvollziehen, was wirklich passiert ist."
+      "body": "Sie können den Verlauf aller Aufrufe Ihrer APIs einsehen. Praktisch, um nachzuvollziehen, was wirklich passiert ist."
     },
     "multiLanguage": {
       "title": "27 Sprachen!",
-      "body": "Restorm spricht 27 Sprachen. Englisch, Französisch, Spanisch, Deutsch, Italienisch, Japanisch, Chinesisch, Koreanisch und viele mehr — wähle deine in den Einstellungen!"
+      "body": "Restorm spricht 27 Sprachen. Englisch, Französisch, Spanisch, Deutsch, Italienisch, Japanisch, Chinesisch, Koreanisch und viele mehr — wählen Sie Ihre in den Einstellungen!"
     },
     "fromPostman": {
-      "title": "Kommst du von Postman oder Bruno?",
-      "body": "Wir helfen dir beim Umstieg auf Restorm — dein Wechsel ganz leicht gemacht ;)"
+      "title": "Kommen Sie von Postman oder Bruno?",
+      "body": "Wir helfen Ihnen beim Umstieg auf Restorm — Ihr Wechsel ganz leicht gemacht ;)"
     },
     "chainRequests": {
       "title": "Mehrere Anfragen zu verketten?",
-      "body": "Nutze deine Anfragen in Szenarien, füge Bedingungen hinzu und verschachtle sogar Szenarien in anderen Szenarien."
+      "body": "Nutzen Sie Ihre Anfragen in Szenarien, fügen Sie Bedingungen hinzu und verschachteln Sie sogar Szenarien in anderen Szenarien."
     },
     "stepByStep": {
-      "title": "Geh deine Szenarien Schritt für Schritt durch",
-      "body": "Ein Schritt nach dem anderen, um genau zu sehen, was passiert. Du kannst sogar Breakpoints setzen."
+      "title": "Gehen Sie Ihre Szenarien Schritt für Schritt durch",
+      "body": "Ein Schritt nach dem anderen, um genau zu sehen, was passiert. Sie können sogar Breakpoints setzen."
     },
     "cicd": {
-      "title": "Führe deine Szenarien in deinen CI/CD-Pipelines aus",
-      "body": "Starte Restorm im Headless-Modus, um ein Szenario ohne Oberfläche auszuführen und seine Logs zu sammeln — automatisierte Tests, visuell gebaut."
+      "title": "Führen Sie Ihre Szenarien in Ihren CI/CD-Pipelines aus",
+      "body": "Starten Sie Restorm im Headless-Modus, um ein Szenario ohne Oberfläche auszuführen und seine Logs zu sammeln — automatisierte Tests, visuell gebaut."
     },
     "nestedScenarios": {
-      "title": "Sieh, was in einem Szenario passiert",
-      "body": "Ein Szenario kann ein anderes aufrufen. Lies im Inspektor jedes Log und spring direkt zu dem Szenario, aus dem es stammt."
+      "title": "Sehen Sie, was in einem Szenario passiert",
+      "body": "Ein Szenario kann ein anderes aufrufen. Lesen Sie im Inspektor jedes Log und springen Sie direkt zu dem Szenario, aus dem es stammt."
     },
     "scenarioHistory": {
       "title": "Aber was ist gerade passiert?",
-      "body": "Durchstöbere den Ausführungsverlauf deiner Szenarien. Eines davon hat sich seither geändert? Kein Problem — wir haben seine Konfiguration aufbewahrt."
+      "body": "Durchstöbern Sie den Ausführungsverlauf Ihrer Szenarien. Eines davon hat sich seither geändert? Kein Problem — wir haben seine Konfiguration aufbewahrt."
     },
     "codeSandbox": {
       "title": "Szenarien und Sicherheit",
-      "body": "Du kannst in deinen Szenarien Code schreiben — aber er läuft in einer sicheren Sandbox, ohne Zugriff auf deine lokalen Dateien und ohne direkten Internetzugang. Der sicherste Weg, geschützt zu bleiben!"
+      "body": "Sie können in Ihren Szenarien Code schreiben — aber er läuft in einer sicheren Sandbox, ohne Zugriff auf Ihre lokalen Dateien und ohne direkten Internetzugang. Der sicherste Weg, geschützt zu bleiben!"
     },
     "codeLanguages": {
       "title": "Lust, etwas Code zu schreiben?",
-      "body": "Schreibe Code direkt in deinen Szenarien — in TypeScript, JavaScript, Python, Lua, Ruby, C# oder R!"
+      "body": "Schreiben Sie Code direkt in Ihren Szenarien — in TypeScript, JavaScript, Python, Lua, Ruby, C# oder R!"
     },
     "scenarioAi": {
       "title": "Per KI steuerbare Szenarien",
-      "body": "Claude, Cursor, Copilot… kennen deinen Code: bitte sie um maßgeschneiderte Szenarien. Alles wird über MCP bereitgestellt, um Szenarien zu erstellen, zu bearbeiten und auszuführen."
+      "body": "Claude, Cursor, Copilot… kennen Ihren Code: bitten Sie sie um maßgeschneiderte Szenarien. Alles wird über MCP bereitgestellt, um Szenarien zu erstellen, zu bearbeiten und auszuführen."
     },
     "interactiveScenarios": {
       "title": "Interaktive Szenarien!",
-      "body": "Mach deine Szenarien parametrierbar und frag sogar den Nutzer mit Dialogfeldern, was zu tun ist."
+      "body": "Machen Sie Ihre Szenarien parametrierbar und fragen Sie sogar den Nutzer mit Dialogfeldern, was zu tun ist."
     },
     "customValueLists": {
       "title": "Wiederverwendbare Wertelisten",
-      "body": "Definiere deine eigenen Wertelisten und verwende sie in deinen Anfragen wie in deinen Szenarien."
+      "body": "Definieren Sie Ihre eigenen Wertelisten und verwenden Sie sie in Ihren Anfragen wie in Ihren Szenarien."
     }
   },
   "authFailureToast": {
@@ -1090,7 +1090,7 @@
         "trademark": "Bruno ist Open-Source-Software (MIT) von Anoop M. D., hier unter deren Bedingungen verwendet."
       },
       "thunderclient": {
-        "description": "Kommst du von Thunder Client? Lege das exportierte Collection-JSON ab — Restorm liest jede Anfrage, jeden Ordner, Header und Body und baut die Collection als Restorm-Baum wieder auf, startbereit.",
+        "description": "Kommen Sie von Thunder Client? Legen Sie das exportierte Collection-JSON ab — Restorm liest jede Anfrage, jeden Ordner, Header und Body und baut die Collection als Restorm-Baum wieder auf, startbereit.",
         "trademark": "Thunder Client ist eine Marke des jeweiligen Inhabers, hier nur als Kompatibilitätsreferenz verwendet."
       },
       "graphql": {
@@ -1213,7 +1213,7 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Importiere deine API",
+      "title": "Importieren Sie Ihre API",
       "body": "Bring eine OpenAPI/Swagger-Spec, ein GraphQL-Schema, eine Postman/Bruno/Insomnia-Sammlung mit oder füge einen curl/PowerShell-Befehl ein. Restorm parst sie, baut die Ordnerstruktur auf und liefert jeden Endpunkt vorgefüllt."
     },
     "recentActivity": {

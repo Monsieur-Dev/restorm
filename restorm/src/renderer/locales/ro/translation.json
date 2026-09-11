@@ -88,128 +88,128 @@
   "tips": {
     "cardTitle": "Sfaturi și trucuri",
     "maximizeTab": {
-      "title": "Maximizează o filă cu un clic",
-      "body": "Dublu-clic pe orice filă din workbench pentru a o afișa pe ecran complet. Apasă Esc pentru a reveni la aspectul anterior."
+      "title": "Maximizați o filă cu un clic",
+      "body": "Dublu-clic pe orice filă din workbench pentru a o afișa pe ecran complet. Apăsați Esc pentru a reveni la aspectul anterior."
     },
     "mcpControl": {
-      "title": "Controlează restorm cu AI",
-      "body": "Restorm include un server MCP, astfel încât asistenții AI precum Claude Code pot lista, deschide, edita și executa cererile tale, pot inspecta răspunsurile și pot manipula spațiul de lucru programatic – fără să părăsească conversația."
+      "title": "Controlați restorm cu AI",
+      "body": "Restorm include un server MCP, astfel încât asistenții AI precum Claude Code pot lista, deschide, edita și executa cererile dumneavoastră, pot inspecta răspunsurile și pot manipula spațiul de lucru programatic – fără să părăsească conversația."
     },
     "envSwitch": {
-      "title": "Schimbă mediile cu ușurință!",
-      "body": "Schimbă mediul cererii curente sau al tuturor cererilor din API-ul tău dând clic pe butonul din bara de stare, ori clic dreapta pe butonul de trimitere al cererii."
+      "title": "Schimbați mediile cu ușurință!",
+      "body": "Schimbați mediul cererii curente sau al tuturor cererilor din API-ul dumneavoastră dând clic pe butonul din bara de stare, ori clic dreapta pe butonul de trimitere al cererii."
     },
     "authRequests": {
-      "title": "Trebuie să te autentifici pentru a-ți folosi API-ul?",
-      "body": "În loc să lansezi o cerere de fiecare dată pentru a obține un token și a-l copia peste tot, folosește cererile de autentificare. Când un apel eșuează (401, 403, …) sau expiră durata de viață a tokenului, cererea de autentificare este rulată automat din nou pentru a extrage tokenul și a-l reutiliza. Practic!"
+      "title": "Trebuie să vă autentificați pentru a vă folosi API-ul?",
+      "body": "În loc să lansați o cerere de fiecare dată pentru a obține un token și a-l copia peste tot, folosiți cererile de autentificare. Când un apel eșuează (401, 403, …) sau expiră durata de viață a tokenului, cererea de autentificare este rulată automat din nou pentru a extrage tokenul și a-l reutiliza. Practic!"
     },
     "supplyChain": {
-      "title": "Protejează-te!",
-      "body": "Ca orice software, Restorm folosește biblioteci terțe. Pentru a preveni atacurile asupra lanțului de aprovizionare, toate apelurile ieșite sunt interceptate la nivelul cel mai jos, iar te avertizăm dacă o bibliotecă terță încearcă să-ți fure datele personale!"
+      "title": "Protejați-vă!",
+      "body": "Ca orice software, Restorm folosește biblioteci terțe. Pentru a preveni atacurile asupra lanțului de aprovizionare, toate apelurile ieșite sunt interceptate la nivelul cel mai jos, iar vă avertizăm dacă o bibliotecă terță încearcă să vă fure datele personale!"
     },
     "codeSnippets": {
-      "title": "Restorm te ajută să programezi!",
-      "body": "Găsește fragmente de cod la fiecare cerere pentru a te ajuta să le integrezi în software-ul tău. Multe limbaje sunt disponibile: curl, PowerShell, TypeScript, C# și multe altele!"
+      "title": "Restorm vă ajută să programați!",
+      "body": "Găsiți fragmente de cod la fiecare cerere pentru a vă ajuta să le integrați în software-ul dumneavoastră. Multe limbaje sunt disponibile: curl, PowerShell, TypeScript, C# și multe altele!"
     },
     "workbenchLayout": {
-      "title": "Organizează-ți spațiul de lucru",
-      "body": "Ai un ecran mare și multe cereri? Pune-le una lângă alta, una sub alta sau aproape oricum vrei — pur și simplu trage o filă acolo unde dorești. Totul pentru confortul tău!"
+      "title": "Organizați-vă spațiul de lucru",
+      "body": "Aveți un ecran mare și multe cereri? Puneți-le una lângă alta, una sub alta sau aproape oricum vreți — pur și simplu trageți o filă acolo unde doriți. Totul pentru confortul dumneavoastră!"
     },
     "persistState": {
-      "title": "Regăsește-l așa cum l-ai lăsat!",
-      "body": "Dacă închizi Restorm și îl deschizi din nou, îl vei regăsi exact în aceeași stare în care l-ai lăsat."
+      "title": "Regăsiți-l așa cum l-ați lăsat!",
+      "body": "Dacă închideți Restorm și îl deschideți din nou, îl veți regăsi exact în aceeași stare în care l-ați lăsat."
     },
     "favorites": {
-      "title": "Unele îți sunt mai dragi decât altele…",
-      "body": "Ai cereri care îți sunt mai apropiate de suflet? Marchează-le ca favorite!"
+      "title": "Unele vă sunt mai dragi decât altele…",
+      "body": "Aveți cereri care vă sunt mai apropiate de suflet? Marcați-le ca favorite!"
     },
     "console": {
-      "title": "Vezi ce se întâmplă",
-      "body": "Consola îți arată apelurile către API-uri pe măsură ce lansezi cereri. Practic pentru a le copia în terminal când ai nevoie! Ce preferi: curl sau PowerShell?"
+      "title": "Vedeți ce se întâmplă",
+      "body": "Consola vă arată apelurile către API-uri pe măsură ce lansați cereri. Practic pentru a le copia în terminal când aveți nevoie! Ce preferați: curl sau PowerShell?"
     },
     "miniBrowser": {
-      "title": "Sătul să tot schimbi fereastra?",
-      "body": "Restorm include un mini browser web. Practic atunci când aplicația ta reacționează vizual la apelurile API."
+      "title": "Sătul să tot schimbați fereastra?",
+      "body": "Restorm include un mini browser web. Practic atunci când aplicația dumneavoastră reacționează vizual la apelurile API."
     },
     "apiDocs": {
       "title": "Documentația — chiar aici",
-      "body": "Nu mai trebuie să schimbi între Restorm și documentația API-ului tău. Dacă API-ul oferă o specificație (Swagger, OpenAPI, …), aceasta este importată în Restorm și o poți consulta direct aici."
+      "body": "Nu mai trebuie să schimbați între Restorm și documentația API-ului dumneavoastră. Dacă API-ul oferă o specificație (Swagger, OpenAPI, …), aceasta este importată în Restorm și o puteți consulta direct aici."
     },
     "secrets": {
-      "title": "Protejează-ți secretele",
-      "body": "Parolele și tokenurile tale de autorizare nu sunt salvate direct în fișierul Restorm. De aceea, Restorm stochează secretele și istoricul cererilor în fișiere separate. Depinde de tine să nu le urci pe GitHub. Restorm poate prelua secretele și din AWS, GitHub sau alte surse."
+      "title": "Protejați-vă secretele",
+      "body": "Parolele și tokenurile dumneavoastră de autorizare nu sunt salvate direct în fișierul Restorm. De aceea, Restorm stochează secretele și istoricul cererilor în fișiere separate. Depinde de dumneavoastră să nu le urcați pe GitHub. Restorm poate prelua secretele și din AWS, GitHub sau alte surse."
     },
     "themes": {
-      "title": "Culorile tale, starea ta",
-      "body": "Restorm vine cu mai multe scheme de culori. Alege-o pe cea care se potrivește stării tale."
+      "title": "Culorile dumneavoastră, starea dumneavoastră",
+      "body": "Restorm vine cu mai multe scheme de culori. Alegeți-o pe cea care se potrivește stării dumneavoastră."
     },
     "search": {
       "title": "Găsește orice, repede",
-      "body": "Ai văzut partea de sus a acestei ferestre? Restorm include un motor de căutare — gata cu orele de căutat ACEA cerere."
+      "body": "Ați văzut partea de sus a acestei ferestre? Restorm include un motor de căutare — gata cu orele de căutat ACEA cerere."
     },
     "multiEnv": {
       "title": "Aceleași cereri, medii diferite",
-      "body": "Ai un mediu de dev, unul de prod și unul de staging? Aceleași cereri, dar nu chiar aceleași URL-uri și nu chiar aceleași tokenuri… Folosește mediile și variabilele ca să comuți între ele cu un singur clic. Le poți chiar diferenția cu culori și iconițe, ca să eviți spaimele de vineri seara dinaintea weekendului în producție!"
+      "body": "Aveți un mediu de dev, unul de prod și unul de staging? Aceleași cereri, dar nu chiar aceleași URL-uri și nu chiar aceleași tokenuri… Folosiți mediile și variabilele ca să comutați între ele cu un singur clic. Le puteți chiar diferenția cu culori și iconițe, ca să evitați spaimele de vineri seara dinaintea weekendului în producție!"
     },
     "protocols": {
       "title": "Mult mai mult decât REST",
-      "body": "Restorm vorbește REST… și mult mai mult! GraphQL, gRPC, SOAP, OData, WebSocket — toate aceste protocoale la îndemână, fără să schimbi unealta."
+      "body": "Restorm vorbește REST… și mult mai mult! GraphQL, gRPC, SOAP, OData, WebSocket — toate aceste protocoale la îndemână, fără să schimbați unealta."
     },
     "responseTree": {
-      "title": "Vizualizează răspunsurile API",
-      "body": "Știai că poți consulta răspunsurile API mai grafic? Restorm le afișează sub forma unui arbore interactiv pe care îl poți parcurge, plia și desfășura."
+      "title": "Vizualizați răspunsurile API",
+      "body": "Știați că puteți consulta răspunsurile API mai grafic? Restorm le afișează sub forma unui arbore interactiv pe care îl puteți parcurge, plia și desfășura."
     },
     "responseHistory": {
       "title": "Istoricul cererilor",
-      "body": "Poți consulta istoricul tuturor apelurilor către API-urile tale. Practic pentru a afla ce s-a întâmplat de fapt."
+      "body": "Puteți consulta istoricul tuturor apelurilor către API-urile dumneavoastră. Practic pentru a afla ce s-a întâmplat de fapt."
     },
     "multiLanguage": {
       "title": "27 de limbi!",
-      "body": "Restorm vorbește 27 de limbi. Engleză, franceză, spaniolă, germană, italiană, japoneză, chineză, coreeană și multe altele — alege-o pe a ta din setări!"
+      "body": "Restorm vorbește 27 de limbi. Engleză, franceză, spaniolă, germană, italiană, japoneză, chineză, coreeană și multe altele — alegeți-o pe a dumneavoastră din setări!"
     },
     "fromPostman": {
-      "title": "Vii de la Postman sau Bruno?",
-      "body": "Te ajutăm să faci trecerea la Restorm — tranziția ta, ușor de făcut ;)"
+      "title": "Veniți de la Postman sau Bruno?",
+      "body": "Vă ajutăm să faceți trecerea la Restorm — tranziția dumneavoastră, ușor de făcut ;)"
     },
     "chainRequests": {
       "title": "Mai multe cereri de înlănțuit?",
-      "body": "Folosește-ți cererile în cadrul scenariilor, adaugă condiții și chiar imbrică scenarii în alte scenarii."
+      "body": "Folosiți-vă cererile în cadrul scenariilor, adăugați condiții și chiar imbricați scenarii în alte scenarii."
     },
     "stepByStep": {
-      "title": "Parcurge-ți scenariile pas cu pas",
-      "body": "Un pas pe rând, ca să vezi exact ce se întâmplă. Poți chiar să setezi puncte de întrerupere."
+      "title": "Parcurgeți-vă scenariile pas cu pas",
+      "body": "Un pas pe rând, ca să vedeți exact ce se întâmplă. Puteți chiar să setați puncte de întrerupere."
     },
     "cicd": {
-      "title": "Rulează-ți scenariile în pipeline-urile tale CI/CD",
-      "body": "Pornește Restorm în mod headless ca să rulezi un scenariu fără interfață și să-i colectezi jurnalele — teste automate, construite vizual."
+      "title": "Rulați-vă scenariile în pipeline-urile dumneavoastră CI/CD",
+      "body": "Porniți Restorm în mod headless ca să rulați un scenariu fără interfață și să-i colectați jurnalele — teste automate, construite vizual."
     },
     "nestedScenarios": {
-      "title": "Vezi ce se petrece într-un scenariu",
-      "body": "Un scenariu poate apela altul. În inspector, citește fiecare jurnal și sari direct la scenariul din care provine."
+      "title": "Vedeți ce se petrece într-un scenariu",
+      "body": "Un scenariu poate apela altul. În inspector, citiți fiecare jurnal și săriți direct la scenariul din care provine."
     },
     "scenarioHistory": {
       "title": "Dar ce tocmai s-a întâmplat?",
-      "body": "Răsfoiește istoricul execuțiilor scenariilor tale. Unul dintre ele s-a schimbat între timp? Nicio grijă — i-am păstrat configurația."
+      "body": "Răsfoiți istoricul execuțiilor scenariilor dumneavoastră. Unul dintre ele s-a schimbat între timp? Nicio grijă — i-am păstrat configurația."
     },
     "codeSandbox": {
       "title": "Scenariile și securitatea",
-      "body": "Poți scrie cod în scenariile tale — dar rulează într-un sandbox securizat, fără acces la fișierele tale locale și fără acces direct la internet. Cel mai sigur mod de a rămâne protejat!"
+      "body": "Puteți scrie cod în scenariile dumneavoastră — dar rulează într-un sandbox securizat, fără acces la fișierele dumneavoastră locale și fără acces direct la internet. Cel mai sigur mod de a rămâne protejat!"
     },
     "codeLanguages": {
-      "title": "Ai chef să scrii niște cod?",
-      "body": "Scrie cod direct în scenariile tale — în TypeScript, JavaScript, Python, Lua, Ruby, C# sau R!"
+      "title": "Aveți chef să scrieți niște cod?",
+      "body": "Scrieți cod direct în scenariile dumneavoastră — în TypeScript, JavaScript, Python, Lua, Ruby, C# sau R!"
     },
     "scenarioAi": {
       "title": "Scenarii pilotabile de AI",
-      "body": "Claude, Cursor, Copilot… îți cunosc codul: cere-le scenarii făcute pe măsură. Totul este expus prin MCP pentru a crea, edita și rula scenarii."
+      "body": "Claude, Cursor, Copilot… vă cunosc codul: cereți-le scenarii făcute pe măsură. Totul este expus prin MCP pentru a crea, edita și rula scenarii."
     },
     "interactiveScenarios": {
       "title": "Scenarii interactive!",
-      "body": "Fă-ți scenariile parametrizabile și chiar întreabă utilizatorul ce să facă prin casete de dialog."
+      "body": "Faceți-vă scenariile parametrizabile și chiar întrebați utilizatorul ce să facă prin casete de dialog."
     },
     "customValueLists": {
       "title": "Liste de valori reutilizabile",
-      "body": "Definește-ți propriile liste de valori și reutilizează-le deopotrivă în cererile și în scenariile tale."
+      "body": "Definiți-vă propriile liste de valori și reutilizați-le deopotrivă în cererile și în scenariile dumneavoastră."
     }
   },
   "authFailureToast": {
@@ -1091,7 +1091,7 @@
         "trademark": "Bruno este software open source (MIT) de Anoop M. D., folosit aici conform termenilor săi."
       },
       "thunderclient": {
-        "description": "Vii din Thunder Client? Plasează JSON-ul colecției exportate — Restorm citește fiecare cerere, folder, antet și corp, apoi reconstruiește colecția ca un arbore Restorm gata de rulare.",
+        "description": "Veniți din Thunder Client? Plasați JSON-ul colecției exportate — Restorm citește fiecare cerere, folder, antet și corp, apoi reconstruiește colecția ca un arbore Restorm gata de rulare.",
         "trademark": "Thunder Client este o marcă înregistrată a proprietarului său respectiv, folosită aici doar ca referință de compatibilitate."
       },
       "graphql": {
@@ -1214,12 +1214,12 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Importă API-ul tău",
-      "body": "Adu o spec OpenAPI / Swagger, o schemă GraphQL, o colecție Postman / Bruno / Insomnia, sau lipește o comandă curl / PowerShell. Restorm o parsează, construiește structura de foldere și aterizează cu fiecare endpoint precompletat."
+      "title": "Importați API-ul dumneavoastră",
+      "body": "Aduceți o spec OpenAPI / Swagger, o schemă GraphQL, o colecție Postman / Bruno / Insomnia, sau lipiți o comandă curl / PowerShell. Restorm o parsează, construiește structura de foldere și aterizează cu fiecare endpoint precompletat."
     },
     "recentActivity": {
       "title": "Activitate recentă",
-      "empty": "Trimite prima ta cerere pentru a o vedea aici."
+      "empty": "Trimiteți prima dumneavoastră cerere pentru a o vedea aici."
     },
     "apiCard": {
       "favorites": "Favorite",
@@ -1598,7 +1598,7 @@
       "step": "Pas cu pas",
       "previewInfo": "Date de exemplu, bazate pe rezultatele cererilor anterioare.",
       "pause": "Pauză",
-      "noRunsHint": "Nicio rulare recentă pentru această cerere — rulează-o de aici ca să populezi previzualizarea scenariului.",
+      "noRunsHint": "Nicio rulare recentă pentru această cerere — rulați-o de aici ca să populați previzualizarea scenariului.",
       "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
       "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real.",
       "stop": "Oprește",
@@ -2007,7 +2007,7 @@
       "setVariable": "Stochează o valoare într-o variabilă din run.",
       "getVariable": "Citește valoarea unei variabile din run.",
       "transform": "Randează un șablon Handlebars din intrare și din variabilele rulării.",
-      "code": "Rulează codul tău (TypeScript, JavaScript, Python, Lua, Ruby sau R) într-un sandbox și returnează rezultatul.",
+      "code": "Rulează codul dumneavoastră (TypeScript, JavaScript, Python, Lua, Ruby sau R) într-un sandbox și returnează rezultatul.",
       "cast": "Convertește o valoare în alt tip (număr, text, boolean, dată, listă).",
       "regex": "Caută, extrage, înlocuiește sau împarte text cu o expresie regulată.",
       "json": "Analizează un șir JSON sau serializează o valoare în JSON.",
@@ -2283,8 +2283,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Încă niciun șablon — adaugă unul pentru a genera cod din acest design.",
-      "subtitle": "Generează proiecte din acest design — randate într-un sandbox, scrise doar după ce confirmi arborele",
+      "empty": "Încă niciun șablon — adăugați unul pentru a genera cod din acest design.",
+      "subtitle": "Generați proiecte din acest design — randate într-un sandbox, scrise doar după ce confirmați arborele",
       "sourceTitle": "Șablon",
       "sourceKind": {
         "official": "Oficial",
@@ -2324,7 +2324,7 @@
         "descPlaceholder": "Descriere (stack / ce generează)",
         "noOrgTemplates": "Încă nu există șabloane ale organizației.",
         "loading": "Se încarcă șabloanele…",
-        "signedOut": "Autentifică-te pentru a vedea șabloanele organizației tale.",
+        "signedOut": "Autentificați-vă pentru a vedea șabloanele organizației dumneavoastră.",
         "fetchError": "Șabloanele nu au putut fi încărcate:",
         "unavailable": "indisponibil",
         "officialTag": "Oficial",
@@ -2661,8 +2661,8 @@
         "name": "Variabilă",
         "value": "Valoare (Handlebars)",
         "add": "Adaugă o variabilă",
-        "none": "Încă nu există variabile — adaugă una din antetul acestui șablon.",
-        "noTemplates": "Alege unul sau mai multe șabloane în secțiunea „</> Code” — apoi definești aici variabilele folosite la generare.",
+        "none": "Încă nu există variabile — adăugați una din antetul acestui șablon.",
+        "noTemplates": "Alegeți unul sau mai multe șabloane în secțiunea „</> Code” — apoi definiți aici variabilele folosite la generare.",
         "generalTitle": "Variabile generale",
         "scope": {
           "general": "General",
@@ -2690,13 +2690,13 @@
     },
     "listing": {
       "models": {
-        "empty": "Creează primul tău model"
+        "empty": "Creați primul dumneavoastră model"
       },
       "enums": {
-        "empty": "Creează primul tău enum"
+        "empty": "Creați primul dumneavoastră enum"
       },
       "routes": {
-        "empty": "Creează prima ta rută"
+        "empty": "Creați prima dumneavoastră rută"
       },
       "tabs": {
         "list": "Listă",
@@ -3094,7 +3094,7 @@
     },
     "portal": {
       "noSubscription": "Niciun abonament activ de gestionat.",
-      "error": "Portalul de abonament nu a putut fi deschis. Încearcă din nou."
+      "error": "Portalul de abonament nu a putut fi deschis. Încercați din nou."
     }
   },
   "trpc": {
@@ -3274,9 +3274,9 @@
     "readyBody": "Versiunea {{version}} este gata de instalare.",
     "restartNow": "Repornește acum",
     "checkFailedTitle": "Verificarea actualizărilor a eșuat",
-    "checkFailedBody": "Nu s-au putut căuta actualizări. Încearcă din nou mai târziu.",
-    "upToDateTitle": "Ești la zi",
-    "upToDateBody": "Folosești cea mai recentă versiune ({{version}}).",
+    "checkFailedBody": "Nu s-au putut căuta actualizări. Încercați din nou mai târziu.",
+    "upToDateTitle": "Sunteți la zi",
+    "upToDateBody": "Folosiți cea mai recentă versiune ({{version}}).",
     "whatsNewTitle": "Ce e nou?",
     "status": {
       "idle": "La zi",

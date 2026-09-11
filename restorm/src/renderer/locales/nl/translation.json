@@ -8,7 +8,7 @@
     "upgradeToPro": "Upgraden naar Pro",
     "dashboard": "Dashboard",
     "signOutConfirm": {
-      "message": "Weet je zeker dat je wilt afmelden?",
+      "message": "Weet u zeker dat u wilt afmelden?",
       "confirm": "Ja",
       "cancel": "Annuleren"
     }
@@ -92,123 +92,123 @@
     },
     "mcpControl": {
       "title": "Bestuur restorm met AI",
-      "body": "Restorm bevat een MCP-server, zodat AI-assistenten zoals Claude Code je requests kunnen tonen, openen, bewerken en uitvoeren, responses kunnen inspecteren en je werkruimte programmatisch kunnen aansturen — zonder hun chat te verlaten."
+      "body": "Restorm bevat een MCP-server, zodat AI-assistenten zoals Claude Code uw requests kunnen tonen, openen, bewerken en uitvoeren, responses kunnen inspecteren en uw werkruimte programmatisch kunnen aansturen — zonder hun chat te verlaten."
     },
     "envSwitch": {
       "title": "Wissel eenvoudig van omgeving!",
-      "body": "Wissel de omgeving van de huidige request of van alle requests in je API door op de knop in de statusbalk te klikken, of door met de rechtermuisknop op de verzendknop van de request te klikken."
+      "body": "Wissel de omgeving van de huidige request of van alle requests in uw API door op de knop in de statusbalk te klikken, of door met de rechtermuisknop op de verzendknop van de request te klikken."
     },
     "authRequests": {
-      "title": "Moet je je authenticeren voor je API?",
-      "body": "In plaats van iedere keer een request te versturen om een token op te halen en die overal te plakken: gebruik auth-requests. Faalt een call (401, 403, …) of is de levensduur van je token voorbij, dan wordt de auth-request automatisch opnieuw uitgevoerd om het token op te halen en te gebruiken. Handig!"
+      "title": "Moet u zich authenticeren voor uw API?",
+      "body": "In plaats van iedere keer een request te versturen om een token op te halen en die overal te plakken: gebruik auth-requests. Faalt een call (401, 403, …) of is de levensduur van uw token voorbij, dan wordt de auth-request automatisch opnieuw uitgevoerd om het token op te halen en te gebruiken. Handig!"
     },
     "supplyChain": {
-      "title": "Bescherm jezelf!",
-      "body": "Zoals elke software gebruikt Restorm bibliotheken van derden. Om supply-chain-aanvallen te voorkomen worden alle uitgaande aanroepen op het laagste niveau onderschept, en we waarschuwen je als een bibliotheek van derden je persoonlijke informatie probeert te stelen!"
+      "title": "Bescherm uzelf!",
+      "body": "Zoals elke software gebruikt Restorm bibliotheken van derden. Om supply-chain-aanvallen te voorkomen worden alle uitgaande aanroepen op het laagste niveau onderschept, en we waarschuwen u als een bibliotheek van derden uw persoonlijke informatie probeert te stelen!"
     },
     "codeSnippets": {
-      "title": "Restorm helpt je met coderen!",
-      "body": "Vind code-snippets bij elke request om ze in je software te integreren. Veel talen beschikbaar: curl, PowerShell, TypeScript, C# en nog veel meer!"
+      "title": "Restorm helpt u met coderen!",
+      "body": "Vind code-snippets bij elke request om ze in uw software te integreren. Veel talen beschikbaar: curl, PowerShell, TypeScript, C# en nog veel meer!"
     },
     "workbenchLayout": {
-      "title": "Organiseer je werkbank",
-      "body": "Heb je een groot scherm en veel requests? Zet ze naast elkaar, onder elkaar of zo'n beetje hoe je maar wilt — sleep gewoon een tabblad waar je het wilt. Alles voor je gemak!"
+      "title": "Organiseer uw werkbank",
+      "body": "Hebt u een groot scherm en veel requests? Zet ze naast elkaar, onder elkaar of zo'n beetje hoe u maar wilt — sleep gewoon een tabblad waar u het wilt. Alles voor uw gemak!"
     },
     "persistState": {
-      "title": "Vind het terug zoals je het achterliet!",
-      "body": "Sluit je Restorm en open je het opnieuw, dan vind je het in exact dezelfde staat terug als waarin je het achterliet."
+      "title": "Vind het terug zoals u het achterliet!",
+      "body": "Sluit u Restorm en opent u het opnieuw, dan vindt u het in exact dezelfde staat terug als waarin u het achterliet."
     },
     "favorites": {
-      "title": "Sommige liggen je nauwer aan het hart…",
-      "body": "Heb je requests die je belangrijker vindt dan andere? Markeer ze als favoriet!"
+      "title": "Sommige liggen u nauwer aan het hart…",
+      "body": "Hebt u requests die u belangrijker vindt dan andere? Markeer ze als favoriet!"
     },
     "console": {
       "title": "Bekijk wat er gebeurt",
-      "body": "De console laat je zien hoe je APIs worden aangeroepen terwijl je requests verstuurt. Handig om ze in je terminal te plakken als dat nodig is! Wat is je smaak: curl of PowerShell?"
+      "body": "De console laat u zien hoe uw APIs worden aangeroepen terwijl u requests verstuurt. Handig om ze in uw terminal te plakken als dat nodig is! Wat is uw smaak: curl of PowerShell?"
     },
     "miniBrowser": {
       "title": "Moe van het constante vensterwisselen?",
-      "body": "Restorm heeft een ingebouwde mini-webbrowser. Handig wanneer je app visueel reageert op je API-aanroepen."
+      "body": "Restorm heeft een ingebouwde mini-webbrowser. Handig wanneer uw app visueel reageert op uw API-aanroepen."
     },
     "apiDocs": {
       "title": "De documentatie, gewoon hier",
-      "body": "Geen geschakel meer tussen Restorm en de documentatie van je API. Levert je API een spec (Swagger, OpenAPI, …), dan wordt die in Restorm geïmporteerd en kun je hem direct hier raadplegen."
+      "body": "Geen geschakel meer tussen Restorm en de documentatie van uw API. Levert uw API een spec (Swagger, OpenAPI, …), dan wordt die in Restorm geïmporteerd en kunt u hem direct hier raadplegen."
     },
     "secrets": {
-      "title": "Bescherm je geheimen",
-      "body": "Je wachtwoorden en auth-tokens worden niet rechtstreeks in het Restorm-bestand opgeslagen. Daarom bewaart Restorm geheimen en je request-historie in aparte bestanden. Het is aan jou ze niet naar GitHub te pushen. Restorm kan geheimen ook ophalen uit AWS, GitHub en andere bronnen."
+      "title": "Bescherm uw geheimen",
+      "body": "Uw wachtwoorden en auth-tokens worden niet rechtstreeks in het Restorm-bestand opgeslagen. Daarom bewaart Restorm geheimen en uw request-historie in aparte bestanden. Het is aan u ze niet naar GitHub te pushen. Restorm kan geheimen ook ophalen uit AWS, GitHub en andere bronnen."
     },
     "themes": {
-      "title": "Jouw kleuren, jouw stemming",
-      "body": "Restorm wordt geleverd met verschillende kleurschema's. Kies degene die past bij hoe je je voelt."
+      "title": "Uw kleuren, uw stemming",
+      "body": "Restorm wordt geleverd met verschillende kleurschema's. Kies degene die past bij hoe u zich voelt."
     },
     "search": {
       "title": "Vind alles, snel",
-      "body": "Heb je de bovenkant van dit venster gezien? Restorm heeft een ingebouwde zoekfunctie — nooit meer uren zoeken naar DE juiste request."
+      "body": "Hebt u de bovenkant van dit venster gezien? Restorm heeft een ingebouwde zoekfunctie — nooit meer uren zoeken naar DE juiste request."
     },
     "multiEnv": {
       "title": "Dezelfde requests, andere omgevingen",
-      "body": "Heb je een dev-, een prod- en een staging-omgeving? Dezelfde requests, alleen niet helemaal dezelfde URLs, niet helemaal dezelfde tokens… Gebruik omgevingen en variabelen om met één klik om te schakelen. Je kunt elke omgeving zelfs een eigen kleur en pictogram geven, om die schrikmomenten op vrijdagavond in productie te vermijden!"
+      "body": "Hebt u een dev-, een prod- en een staging-omgeving? Dezelfde requests, alleen niet helemaal dezelfde URLs, niet helemaal dezelfde tokens… Gebruik omgevingen en variabelen om met één klik om te schakelen. U kunt elke omgeving zelfs een eigen kleur en pictogram geven, om die schrikmomenten op vrijdagavond in productie te vermijden!"
     },
     "protocols": {
       "title": "Meer dan alleen REST",
       "body": "Restorm spreekt REST… en nog veel meer! GraphQL, gRPC, SOAP, OData, WebSocket — al die protocollen binnen handbereik, zonder van tool te wisselen."
     },
     "responseTree": {
-      "title": "Bekijk je API-responses visueel",
-      "body": "Wist je dat je je API-responses ook grafischer kunt verkennen? Restorm toont ze als een interactieve boom die je kunt navigeren, inklappen en uitklappen."
+      "title": "Bekijk uw API-responses visueel",
+      "body": "Wist u dat u uw API-responses ook grafischer kunt verkennen? Restorm toont ze als een interactieve boom die u kunt navigeren, inklappen en uitklappen."
     },
     "responseHistory": {
       "title": "Geschiedenis van requests",
-      "body": "Je kunt de geschiedenis van al je API-aanroepen bekijken. Handig om te achterhalen wat er precies is gebeurd."
+      "body": "U kunt de geschiedenis van al uw API-aanroepen bekijken. Handig om te achterhalen wat er precies is gebeurd."
     },
     "multiLanguage": {
       "title": "27 talen!",
-      "body": "Restorm spreekt 27 talen. Engels, Frans, Spaans, Duits, Italiaans, Japans, Chinees, Koreaans en nog veel meer — kies de jouwe in de instellingen!"
+      "body": "Restorm spreekt 27 talen. Engels, Frans, Spaans, Duits, Italiaans, Japans, Chinees, Koreaans en nog veel meer — kies de uwe in de instellingen!"
     },
     "fromPostman": {
-      "title": "Kom je van Postman of Bruno?",
-      "body": "We helpen je overstappen naar Restorm — je overgang met gemak ;)"
+      "title": "Komt u van Postman of Bruno?",
+      "body": "We helpen u overstappen naar Restorm — uw overgang met gemak ;)"
     },
     "chainRequests": {
       "title": "Meerdere requests aan elkaar koppelen?",
-      "body": "Gebruik je requests in scenario's, voeg voorwaarden toe en nest zelfs scenario's binnen andere scenario's."
+      "body": "Gebruik uw requests in scenario's, voeg voorwaarden toe en nest zelfs scenario's binnen andere scenario's."
     },
     "stepByStep": {
-      "title": "Stap door je scenario's heen",
-      "body": "Stap voor stap, om precies te zien wat er gebeurt. Je kunt zelfs breakpoints instellen."
+      "title": "Stap door uw scenario's heen",
+      "body": "Stap voor stap, om precies te zien wat er gebeurt. U kunt zelfs breakpoints instellen."
     },
     "cicd": {
-      "title": "Draai je scenario's in je CI/CD-pipelines",
+      "title": "Draai uw scenario's in uw CI/CD-pipelines",
       "body": "Start Restorm headless om een scenario zonder interface te draaien en de logs te verzamelen — geautomatiseerde tests, visueel gebouwd."
     },
     "nestedScenarios": {
       "title": "Zie wat er in een scenario gebeurt",
-      "body": "Een scenario kan een ander aanroepen. In de inspector lees je elke log en spring je meteen naar het scenario waar die vandaan komt."
+      "body": "Een scenario kan een ander aanroepen. In de inspector leest u elke log en springt u meteen naar het scenario waar die vandaan komt."
     },
     "scenarioHistory": {
       "title": "Maar wat is er net gebeurd?",
-      "body": "Blader door de uitvoeringsgeschiedenis van je scenario's. Is een ervan sindsdien veranderd? Geen zorgen — we hebben de configuratie bewaard."
+      "body": "Blader door de uitvoeringsgeschiedenis van uw scenario's. Is een ervan sindsdien veranderd? Geen zorgen — we hebben de configuratie bewaard."
     },
     "codeSandbox": {
       "title": "Scenario's en beveiliging",
-      "body": "Je kunt code schrijven in je scenario's — maar die draait in een beveiligde sandbox, zonder toegang tot je lokale bestanden en zonder directe internettoegang. De veiligste manier om beschermd te blijven!"
+      "body": "U kunt code schrijven in uw scenario's — maar die draait in een beveiligde sandbox, zonder toegang tot uw lokale bestanden en zonder directe internettoegang. De veiligste manier om beschermd te blijven!"
     },
     "codeLanguages": {
       "title": "Zin om wat code te schrijven?",
-      "body": "Schrijf code rechtstreeks in je scenario's — in TypeScript, JavaScript, Python, Lua, Ruby, C# of R!"
+      "body": "Schrijf code rechtstreeks in uw scenario's — in TypeScript, JavaScript, Python, Lua, Ruby, C# of R!"
     },
     "scenarioAi": {
-      "title": "Scenario's die je met AI kunt aansturen",
-      "body": "Claude, Cursor, Copilot… kennen je codebase: vraag ze om scenario's op maat. Alles is via MCP beschikbaar om scenario's te maken, te bewerken en uit te voeren."
+      "title": "Scenario's die u met AI kunt aansturen",
+      "body": "Claude, Cursor, Copilot… kennen uw codebase: vraag ze om scenario's op maat. Alles is via MCP beschikbaar om scenario's te maken, te bewerken en uit te voeren."
     },
     "interactiveScenarios": {
       "title": "Interactieve scenario's!",
-      "body": "Maak je scenario's parametriseerbaar en vraag de gebruiker zelfs met dialoogvensters wat er moet gebeuren."
+      "body": "Maak uw scenario's parametriseerbaar en vraag de gebruiker zelfs met dialoogvensters wat er moet gebeuren."
     },
     "customValueLists": {
       "title": "Herbruikbare waardelijsten",
-      "body": "Definieer je eigen waardelijsten en hergebruik ze in zowel je requests als je scenario's."
+      "body": "Definieer uw eigen waardelijsten en hergebruik ze in zowel uw requests als uw scenario's."
     }
   },
   "authFailureToast": {
@@ -325,8 +325,8 @@
     },
     "deleteConfirm": {
       "title": "Verwijderen bevestigen",
-      "folderMessage": "Weet je zeker dat je de map \"{{name}}\" en alle inhoud wilt verwijderen?",
-      "itemMessage": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?",
+      "folderMessage": "Weet u zeker dat u de map \"{{name}}\" en alle inhoud wilt verwijderen?",
+      "itemMessage": "Weet u zeker dat u \"{{name}}\" wilt verwijderen?",
       "confirm": "Verwijderen",
       "cancel": "Annuleren"
     },
@@ -363,7 +363,7 @@
     },
     "home": {
       "configureEnvs": "Omgevingen configureren",
-      "configureEnvsDesc": "Stel je basis-URL's, variabelen en authenticatie in voor elke omgeving",
+      "configureEnvsDesc": "Stel uw basis-URL's, variabelen en authenticatie in voor elke omgeving",
       "viewDocs": "Documentatie bekijken",
       "viewDocsDesc": "Blader door de API-documentatie, modellen en endpoints",
       "favoriteRequests": "Favoriete verzoeken",
@@ -384,7 +384,7 @@
     },
     "contextVariables": {
       "title": "Beschikbare contextvariabelen",
-      "description": "Gebruik deze variabelen in je verzoek-URL's en in variabelen van het type expressie met de {{handlebars}}-syntaxis.",
+      "description": "Gebruik deze variabelen in uw verzoek-URL's en in variabelen van het type expressie met de {{handlebars}}-syntaxis.",
       "name": "Variabele",
       "value": "Opgeloste waarde",
       "copied": "Gekopieerd!"
@@ -863,7 +863,7 @@
     }
   },
   "welcome": {
-    "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
+    "confirmRemoveFavorite": "Weet u zeker dat u \"{{fileName}}\" uit favorieten wilt verwijderen?",
     "newAriaLabel": "Een nieuwe collectie maken",
     "openAriaLabel": "Een collectie van schijf openen",
     "landmarkLabel": "Welkom"
@@ -1025,7 +1025,7 @@
       "curl": "curl (Unix-stijl)",
       "powershell": "PowerShell (Invoke-RestMethod)"
     },
-    "requestFormatDescription": "Standaard shell-variant voor het weergeven van uitgaande verzoeken op het Console-tabblad. Elke rij is een commandoregel die je kunt kopiëren en plakken; de schakelaar in de Console-werkbalk overschrijft deze standaard voor het huidige tabblad."
+    "requestFormatDescription": "Standaard shell-variant voor het weergeven van uitgaande verzoeken op het Console-tabblad. Elke rij is een commandoregel die u kunt kopiëren en plakken; de schakelaar in de Console-werkbalk overschrijft deze standaard voor het huidige tabblad."
   },
   "import": {
     "addAuth": "Een authenticatieroute toevoegen",
@@ -1090,11 +1090,11 @@
         "trademark": "Bruno is opensourcesoftware (MIT) van Anoop M. D., hier gebruikt onder de bijbehorende voorwaarden."
       },
       "thunderclient": {
-        "description": "Kom je van Thunder Client? Zet de geëxporteerde collection-JSON neer — Restorm leest elk verzoek, elke map, header en body, en bouwt de collectie vervolgens weer op als een startklare Restorm-boom.",
+        "description": "Komt u van Thunder Client? Zet de geëxporteerde collection-JSON neer — Restorm leest elk verzoek, elke map, header en body, en bouwt de collectie vervolgens weer op als een startklare Restorm-boom.",
         "trademark": "Thunder Client is een handelsmerk van de betreffende eigenaar, hier uitsluitend gebruikt ter referentie van compatibiliteit."
       },
       "graphql": {
-        "description": "Plak een GraphQL SDL (.graphql / .gql / een plakwerk uit je GraphQL-client) en Restorm steigert één verzoek per operatie, gekoppeld aan het juiste query/mutation/subscription-type met al gestructureerde variabelen.",
+        "description": "Plak een GraphQL SDL (.graphql / .gql / een plakwerk uit uw GraphQL-client) en Restorm steigert één verzoek per operatie, gekoppeld aan het juiste query/mutation/subscription-type met al gestructureerde variabelen.",
         "trademark": "GraphQL is een handelsmerk van de GraphQL Foundation, een project van de Joint Development Foundation."
       },
       "grpc": {
@@ -1205,7 +1205,7 @@
       "documentation": "Documentatie"
     },
     "title": "Verzoeken importeren",
-    "largeApiHint": "Deze API is groot. Houd je project licht: vink alleen de routes aan die je nodig hebt en vink de rest hieronder uit. Wat je weglaat blijft in de documentatie staan — je kunt het altijd later toevoegen.",
+    "largeApiHint": "Deze API is groot. Houd uw project licht: vink alleen de routes aan die u nodig hebt en vink de rest hieronder uit. Wat u weglaat blijft in de documentatie staan — u kunt het altijd later toevoegen.",
     "browse": "Bladeren…",
     "warning": {
       "openApiStructuralIssues": "De specificatie is geïmporteerd, maar {{count}} onderde(e)l(en) konden niet worden opgelost en zijn overgeslagen (niet-opgeloste $refs, request-bodies zonder content). De rest is normaal geïmporteerd."
@@ -1213,12 +1213,12 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Importeer je API",
+      "title": "Importeer uw API",
       "body": "Breng een OpenAPI/Swagger-spec, een GraphQL-schema, een Postman/Bruno/Insomnia-collectie mee, of plak een curl/PowerShell-commando. Restorm verwerkt het, bouwt de mappenstructuur op en levert elk endpoint kant-en-klaar."
     },
     "recentActivity": {
       "title": "Recente activiteit",
-      "empty": "Verstuur je eerste verzoek om het hier te zien."
+      "empty": "Verstuur uw eerste verzoek om het hier te zien."
     },
     "apiCard": {
       "favorites": "Favorieten",
@@ -1311,8 +1311,8 @@
   "scenario": {
     "editor": {
       "emptyTitle": "Het is hier leeg…",
-      "emptyDragDrop": "Sleep een item vanuit de boom links naar je scenario om het hier te gebruiken. Je kunt zelfs een scenario in een ander importeren!",
-      "emptyRightClick": "Klik met de rechtermuisknop op een lege plek om acties aan je scenario toe te voegen"
+      "emptyDragDrop": "Sleep een item vanuit de boom links naar uw scenario om het hier te gebruiken. U kunt zelfs een scenario in een ander importeren!",
+      "emptyRightClick": "Klik met de rechtermuisknop op een lege plek om acties aan uw scenario toe te voegen"
     },
     "pathSelector": {
       "placeholder": "JSON-pad",
@@ -2006,7 +2006,7 @@
       "setVariable": "Slaat een waarde op in een run-variabele.",
       "getVariable": "Leest de waarde van een run-variabele.",
       "transform": "Rendert een Handlebars-sjabloon uit de invoer en run-variabelen.",
-      "code": "Voert je code (TypeScript, JavaScript, Python, Lua, Ruby of R) uit in een sandbox en geeft het resultaat terug.",
+      "code": "Voert uw code (TypeScript, JavaScript, Python, Lua, Ruby of R) uit in een sandbox en geeft het resultaat terug.",
       "cast": "Converteert een waarde naar een ander type (getal, tekst, boolean, datum, lijst).",
       "regex": "Zoekt, extraheert, vervangt of splitst tekst met een reguliere expressie.",
       "json": "Parseert een JSON-string of serialiseert een waarde naar JSON.",
@@ -2283,7 +2283,7 @@
     "documentation": {},
     "code": {
       "empty": "Nog geen template — voeg er een toe om code te genereren vanuit dit ontwerp.",
-      "subtitle": "Genereer projecten vanuit dit ontwerp — weergegeven in een sandbox, pas geschreven nadat je de structuur bevestigt",
+      "subtitle": "Genereer projecten vanuit dit ontwerp — weergegeven in een sandbox, pas geschreven nadat u de structuur bevestigt",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Officieel",
@@ -2323,7 +2323,7 @@
         "descPlaceholder": "Beschrijving (stack / wat het genereert)",
         "noOrgTemplates": "Nog geen organisatiesjablonen.",
         "loading": "Sjablonen laden…",
-        "signedOut": "Meld je aan om de sjablonen van je organisatie te zien.",
+        "signedOut": "Meld u aan om de sjablonen van uw organisatie te zien.",
         "fetchError": "Kon de sjablonen niet laden:",
         "unavailable": "niet beschikbaar",
         "officialTag": "Officieel",
@@ -2661,7 +2661,7 @@
         "value": "Waarde (Handlebars)",
         "add": "Variabele toevoegen",
         "none": "Nog geen variabelen — voeg er een toe via de kop van dit sjabloon.",
-        "noTemplates": "Kies een of meer sjablonen in de sectie ‘</> Code’ — hier definieer je vervolgens de variabelen die de generatie gebruikt.",
+        "noTemplates": "Kies een of meer sjablonen in de sectie ‘</> Code’ — hier definieert u vervolgens de variabelen die de generatie gebruikt.",
         "generalTitle": "Algemene variabelen",
         "scope": {
           "general": "Algemeen",
@@ -2689,13 +2689,13 @@
     },
     "listing": {
       "models": {
-        "empty": "Maak je eerste model"
+        "empty": "Maak uw eerste model"
       },
       "enums": {
-        "empty": "Maak je eerste enum"
+        "empty": "Maak uw eerste enum"
       },
       "routes": {
-        "empty": "Maak je eerste route"
+        "empty": "Maak uw eerste route"
       },
       "tabs": {
         "list": "Lijst",
@@ -3069,7 +3069,7 @@
     "emptyList": "Nog geen opgeslagen configuraties.",
     "loadConfirm": {
       "title": "Configuratie laden",
-      "message": "Wil je de configuratie \"{{name}}\" laden? Je huidige niet-opgeslagen configuratie gaat verloren."
+      "message": "Wilt u de configuratie \"{{name}}\" laden? Uw huidige niet-opgeslagen configuratie gaat verloren."
     },
     "updateConfirm": {
       "title": "Configuratie bijwerken",
@@ -3077,7 +3077,7 @@
     },
     "deleteConfirm": {
       "title": "Configuratie verwijderen",
-      "message": "Wil je de configuratie \"{{name}}\" verwijderen?",
+      "message": "Wilt u de configuratie \"{{name}}\" verwijderen?",
       "usedByScenarios_one": "Het wordt gebruikt door het scenario {{scenarios}}.",
       "usedByScenarios_other": "Het wordt gebruikt door de scenario’s {{scenarios}}."
     },
@@ -3088,7 +3088,7 @@
   },
   "subscription": {
     "checkout": {
-      "forbidden": "Vraag de beheerder van je organisatie om een abonnement te nemen.",
+      "forbidden": "Vraag de beheerder van uw organisatie om een abonnement te nemen.",
       "error": "Kan het abonnement niet starten. Probeer het opnieuw."
     },
     "portal": {
@@ -3139,7 +3139,7 @@
   "git": {
     "pullFailedTitle": "Pullen mislukt",
     "pullFailedBody": "Kon de nieuwste wijzigingen niet ophalen.",
-    "pullSaveFailedBody": "Kan je wijzigingen niet opslaan vóór het pullen.",
+    "pullSaveFailedBody": "Kan uw wijzigingen niet opslaan vóór het pullen.",
     "pushFailedTitle": "Push mislukt",
     "pushFailedBody": "Kon de wijzigingen niet pushen.",
     "pushSucceededTitle": "Gepusht",
@@ -3152,9 +3152,9 @@
     "historyTitle": "Git-geschiedenis",
     "conflictCancel": "Annuleren",
     "conflictFinish": "Voltooien",
-    "conflictReadOnlyEntityNotice": "Dit entiteitstype kan hier niet worden bewerkt. Kies hierboven jouw versie of die van hen.",
+    "conflictReadOnlyEntityNotice": "Dit entiteitstype kan hier niet worden bewerkt. Kies hierboven uw versie of die van hen.",
     "quickConfigConflictTitle": "Snelconfiguraties in conflict",
-    "quickConfigOurs": "De jouwe",
+    "quickConfigOurs": "De uwe",
     "quickConfigTheirs": "De hunne",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Taal van het commitbericht standaard toepassen",
@@ -3254,7 +3254,7 @@
   },
   "gitHistory": {
     "recoverConfirmTitle": "Deze versie herstellen?",
-    "recoverConfirmBody": "De huidige inhoud van het geopende bestand wordt vervangen door de versie van deze commit. De wijziging wordt niet vastgelegd — je kunt die zelf vastleggen en pushen als je die wilt behouden.",
+    "recoverConfirmBody": "De huidige inhoud van het geopende bestand wordt vervangen door de versie van deze commit. De wijziging wordt niet vastgelegd — u kunt die zelf vastleggen en pushen als u die wilt behouden.",
     "recoverConfirmAction": "Herstellen",
     "recoveredTitle": "Versie hersteld",
     "recoveredBody": "Het bestand bevat nu de inhoud van de geselecteerde commit, niet vastgelegd.",
@@ -3274,8 +3274,8 @@
     "restartNow": "Nu herstarten",
     "checkFailedTitle": "Controle op updates mislukt",
     "checkFailedBody": "Kan niet op updates controleren. Probeer het later opnieuw.",
-    "upToDateTitle": "Je bent up-to-date",
-    "upToDateBody": "Je gebruikt de nieuwste versie ({{version}}).",
+    "upToDateTitle": "U bent up-to-date",
+    "upToDateBody": "U gebruikt de nieuwste versie ({{version}}).",
     "whatsNewTitle": "Wat is er nieuw?",
     "status": {
       "idle": "Up-to-date",

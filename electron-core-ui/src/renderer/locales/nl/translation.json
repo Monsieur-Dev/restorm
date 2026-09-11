@@ -14,8 +14,8 @@
     "untitled": "Naamloos",
     "unsavedChanges": {
       "title": "Niet-opgeslagen wijzigingen",
-      "message": "Wil je de wijzigingen in \"{{fileName}}\" opslaan?",
-      "detail": "Je wijzigingen gaan verloren als je ze niet opslaat.",
+      "message": "Wilt u de wijzigingen in \"{{fileName}}\" opslaan?",
+      "detail": "Uw wijzigingen gaan verloren als u ze niet opslaat.",
       "save": "Opslaan",
       "dontSave": "Niet opslaan",
       "cancel": "Annuleren"
@@ -27,7 +27,7 @@
     "externalChange": {
       "title": "Bestand op schijf gewijzigd",
       "message": "'{{fileName}}' is buiten de applicatie gewijzigd.",
-      "detail": "Herlaad om de versie op schijf te gebruiken, of behoud je versie en overschrijf die.",
+      "detail": "Herlaad om de versie op schijf te gebruiken, of behoud uw versie en overschrijf die.",
       "detailDirty": "Let op: u hebt niet-opgeslagen wijzigingen — opnieuw laden verwijdert ze.",
       "reload": "Herladen",
       "keepMine": "Mijn versie behouden"
@@ -51,7 +51,7 @@
     "recentFiles": "Recente bestanden",
     "addToFavorites": "Toevoegen aan favorieten",
     "removeFromFavorites": "Verwijderen uit favorieten",
-    "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
+    "confirmRemoveFavorite": "Weet u zeker dat u \"{{fileName}}\" uit favorieten wilt verwijderen?",
     "favoritesLandmarkLabel": "Lijst met favorieten",
     "recentsLandmarkLabel": "Lijst met recente bestanden",
     "openContainingFolder": "Bevattende map openen"

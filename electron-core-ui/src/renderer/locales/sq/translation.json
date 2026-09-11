@@ -93,17 +93,17 @@
     "scope": {
       "user": "Përdoruesi",
       "workspace": "Hapësira e punës",
-      "workspaceDisabledTooltip": "Hap një projekt për të modifikuar parametrat e hapësirës së punës"
+      "workspaceDisabledTooltip": "Hapni një projekt për të modifikuar parametrat e hapësirës së punës"
     },
     "appearance": {
       "title": "Pamja",
       "theme": {
         "title": "Tema",
-        "description": "Zgjidh temën e ngjyrave të aplikacionit"
+        "description": "Zgjidhni temën e ngjyrave të aplikacionit"
       },
       "language": {
         "title": "Gjuha",
-        "description": "Zgjidh gjuhën e aplikacionit",
+        "description": "Zgjidhni gjuhën e aplikacionit",
         "en": "English",
         "fr": "Français",
         "es": "Español",
@@ -134,7 +134,7 @@
       },
       "advancedVisualEffects": {
         "title": "Efekte vizuale të avancuara",
-        "description": "Aktivizo efekte vizuale të avancuara si zbehja e sfondit në mbivendosje dhe animacionet CSS. Çaktivizo për performancë më të mirë në harduer të nivelit të ulët."
+        "description": "Aktivizoni efekte vizuale të avancuara si zbehja e sfondit në mbivendosje dhe animacionet CSS. Çaktivizoni për performancë më të mirë në harduer të nivelit të ulët."
       },
       "editor": {
         "title": "Editori",
@@ -164,7 +164,7 @@
       "title": "Skedarët",
       "autoSave": {
         "title": "Ruajtje automatike",
-        "description": "Kontrollon ruajtjen automatike të editorëve të modifikuar. Lexo më shumë rreth ruajtjes automatike në dokumentacion.",
+        "description": "Kontrollon ruajtjen automatike të editorëve të modifikuar. Lexoni më shumë rreth ruajtjes automatike në dokumentacion.",
         "off": "I çaktivizuar",
         "afterDelay": "Pas vonesës",
         "onWindowChange": "Në ndryshim dritareje"
@@ -220,8 +220,8 @@
     "searchSimpleIcons": "Kërko Simple Icons...",
     "searchFeather": "Kërko Feather...",
     "searchFontAwesome": "Kërko Font Awesome...",
-    "moreIcons": "+{{count}} ikona të tjera. Përdor kërkimin për të gjetur ikona specifike.",
-    "more": "+{{count}} më shumë. Përdor kërkimin për të gjetur ikona specifike.",
+    "moreIcons": "+{{count}} ikona të tjera. Përdorni kërkimin për të gjetur ikona specifike.",
+    "more": "+{{count}} më shumë. Përdorni kërkimin për të gjetur ikona specifike.",
     "noIconsFound": "Nuk u gjet asnjë ikonë",
     "searchResults": "Rezultatet e kërkimit",
     "categories": {
@@ -436,7 +436,7 @@
     "refresh": "Rifresko",
     "go": "Shko",
     "address": "Adresa",
-    "emptyHint": "Shkruaj një adresë më sipër për të filluar shfletimin."
+    "emptyHint": "Shkruani një adresë më sipër për të filluar shfletimin."
   },
   "bookmarkRibbon": {
     "addBookmark": "Shto faqeshënues",

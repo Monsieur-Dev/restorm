@@ -14,8 +14,8 @@
     "untitled": "Sin título",
     "unsavedChanges": {
       "title": "Cambios sin guardar",
-      "message": "¿Quieres guardar los cambios en \"{{fileName}}\"?",
-      "detail": "Tus cambios se perderán si no los guardas.",
+      "message": "¿Quiere guardar los cambios en \"{{fileName}}\"?",
+      "detail": "Sus cambios se perderán si no los guarda.",
       "save": "Guardar",
       "dontSave": "No guardar",
       "cancel": "Cancelar"
@@ -27,7 +27,7 @@
     "externalChange": {
       "title": "Archivo modificado en el disco",
       "message": "«{{fileName}}» se modificó fuera de la aplicación.",
-      "detail": "Vuelve a cargar para usar la versión del disco, o conserva tu versión y sobrescríbela.",
+      "detail": "Vuelva a cargar para usar la versión del disco, o conserve su versión y sobrescríbala.",
       "detailDirty": "Atención: tiene cambios sin guardar; recargar los descartará.",
       "reload": "Volver a cargar",
       "keepMine": "Conservar mi versión"
@@ -51,7 +51,7 @@
     "recentFiles": "Archivos recientes",
     "addToFavorites": "Añadir a favoritos",
     "removeFromFavorites": "Quitar de favoritos",
-    "confirmRemoveFavorite": "¿Seguro que quieres quitar \"{{fileName}}\" de favoritos?",
+    "confirmRemoveFavorite": "¿Seguro que quiere quitar \"{{fileName}}\" de favoritos?",
     "favoritesLandmarkLabel": "Lista de favoritos",
     "recentsLandmarkLabel": "Lista de archivos recientes",
     "openContainingFolder": "Abrir carpeta contenedora"
@@ -93,17 +93,17 @@
     "scope": {
       "user": "Usuario",
       "workspace": "Espacio de trabajo",
-      "workspaceDisabledTooltip": "Abre un proyecto para editar los ajustes del espacio de trabajo"
+      "workspaceDisabledTooltip": "Abra un proyecto para editar los ajustes del espacio de trabajo"
     },
     "appearance": {
       "title": "Apariencia",
       "theme": {
         "title": "Tema",
-        "description": "Selecciona el tema de colores de la aplicación"
+        "description": "Seleccione el tema de colores de la aplicación"
       },
       "language": {
         "title": "Idioma",
-        "description": "Selecciona el idioma de la aplicación",
+        "description": "Seleccione el idioma de la aplicación",
         "en": "English",
         "fr": "Français",
         "es": "Español",
@@ -134,7 +134,7 @@
       },
       "advancedVisualEffects": {
         "title": "Efectos visuales avanzados",
-        "description": "Activa efectos visuales avanzados como el desenfoque de fondo en los overlays y las animaciones CSS. Desactívalo para un mejor rendimiento en hardware modesto."
+        "description": "Active efectos visuales avanzados como el desenfoque de fondo en los overlays y las animaciones CSS. Desactívelo para un mejor rendimiento en hardware modesto."
       },
       "editor": {
         "title": "Editor",
@@ -220,8 +220,8 @@
     "searchSimpleIcons": "Buscar en Simple Icons...",
     "searchFeather": "Buscar en Feather...",
     "searchFontAwesome": "Buscar en Font Awesome...",
-    "moreIcons": "+{{count}} iconos más. Usa la búsqueda para encontrar iconos específicos.",
-    "more": "+{{count}} más. Usa la búsqueda para encontrar iconos específicos.",
+    "moreIcons": "+{{count}} iconos más. Use la búsqueda para encontrar iconos específicos.",
+    "more": "+{{count}} más. Use la búsqueda para encontrar iconos específicos.",
     "noIconsFound": "No se han encontrado iconos",
     "searchResults": "Resultados de búsqueda",
     "categories": {
@@ -436,7 +436,7 @@
     "refresh": "Actualizar",
     "go": "Ir",
     "address": "Dirección",
-    "emptyHint": "Introduce una dirección arriba para empezar a navegar."
+    "emptyHint": "Introduzca una dirección arriba para empezar a navegar."
   },
   "bookmarkRibbon": {
     "addBookmark": "Añadir marcador",
