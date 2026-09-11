@@ -8,7 +8,7 @@
     "upgradeToPro": "Passa a Pro",
     "dashboard": "Dashboard",
     "signOutConfirm": {
-      "message": "Vuoi davvero disconnetterti?",
+      "message": "Vuole davvero disconnettersi?",
       "confirm": "Sì",
       "cancel": "Annulla"
     }
@@ -87,128 +87,128 @@
   "tips": {
     "cardTitle": "Suggerimenti e trucchi",
     "maximizeTab": {
-      "title": "Ingrandisci una scheda con un clic",
-      "body": "Fai doppio clic su una qualsiasi scheda del workbench per visualizzarla a schermo intero. Premi Esc per ripristinare il layout precedente."
+      "title": "Ingrandisca una scheda con un clic",
+      "body": "Faccia doppio clic su una qualsiasi scheda del workbench per visualizzarla a schermo intero. Prema Esc per ripristinare il layout precedente."
     },
     "mcpControl": {
-      "title": "Pilota restorm con un'IA",
-      "body": "Restorm include un server MCP, così assistenti IA come Claude Code possono elencare, aprire, modificare ed eseguire le tue richieste, ispezionare le risposte e manipolare lo spazio di lavoro in modo programmatico, senza uscire dalla loro conversazione."
+      "title": "Piloti restorm con un'IA",
+      "body": "Restorm include un server MCP, così assistenti IA come Claude Code possono elencare, aprire, modificare ed eseguire le sue richieste, ispezionare le risposte e manipolare lo spazio di lavoro in modo programmatico, senza uscire dalla loro conversazione."
     },
     "envSwitch": {
-      "title": "Cambia ambiente facilmente!",
-      "body": "Cambia ambiente sulla richiesta corrente o su tutte le richieste della tua API facendo clic sul pulsante nella barra di stato, oppure facendo clic destro sul pulsante di invio della richiesta."
+      "title": "Cambi ambiente facilmente!",
+      "body": "Cambi ambiente sulla richiesta corrente o su tutte le richieste della sua API facendo clic sul pulsante nella barra di stato, oppure facendo clic destro sul pulsante di invio della richiesta."
     },
     "authRequests": {
-      "title": "Devi autenticarti per usare la tua API?",
-      "body": "Invece di lanciare una richiesta ogni volta per ottenere un token e copiarlo e incollarlo ovunque, usa le richieste di autenticazione. Quando una chiamata fallisce (401, 403, …) o il tuo token scade, la richiesta di autenticazione viene rieseguita automaticamente per estrarre il token e riutilizzarlo. Comodo!"
+      "title": "Deve autenticarsi per usare la sua API?",
+      "body": "Invece di lanciare una richiesta ogni volta per ottenere un token e copiarlo e incollarlo ovunque, usi le richieste di autenticazione. Quando una chiamata fallisce (401, 403, …) o il suo token scade, la richiesta di autenticazione viene rieseguita automaticamente per estrarre il token e riutilizzarlo. Comodo!"
     },
     "supplyChain": {
-      "title": "Proteggiti!",
-      "body": "Come ogni software, Restorm utilizza librerie di terze parti. Per evitare attacchi alla supply chain, tutte le chiamate in uscita vengono intercettate al livello più basso e ti avvisiamo se una libreria di terze parti tenta di rubare le tue informazioni personali!"
+      "title": "Si protegga!",
+      "body": "Come ogni software, Restorm utilizza librerie di terze parti. Per evitare attacchi alla supply chain, tutte le chiamate in uscita vengono intercettate al livello più basso e la avvisiamo se una libreria di terze parti tenta di rubare le sue informazioni personali!"
     },
     "codeSnippets": {
-      "title": "Restorm ti aiuta a programmare!",
-      "body": "Trova snippet di codice su ogni richiesta per integrarla nel tuo software. Tanti linguaggi disponibili: curl, PowerShell, TypeScript, C# e molti altri!"
+      "title": "Restorm la aiuta a programmare!",
+      "body": "Trovi snippet di codice su ogni richiesta per integrarla nel suo software. Tanti linguaggi disponibili: curl, PowerShell, TypeScript, C# e molti altri!"
     },
     "workbenchLayout": {
-      "title": "Organizza il tuo banco di lavoro",
-      "body": "Hai uno schermo grande e tante richieste? Disponile fianco a fianco, una sotto l'altra o come preferisci! Basta trascinare una scheda dove vuoi. Tutto per il tuo comfort!"
+      "title": "Organizzi il suo banco di lavoro",
+      "body": "Ha uno schermo grande e tante richieste? Le disponga fianco a fianco, una sotto l'altra o come preferisce! Basta trascinare una scheda dove vuole. Tutto per il suo comfort!"
     },
     "persistState": {
-      "title": "Ritrovalo come l'hai lasciato!",
-      "body": "Se chiudi Restorm e lo riapri, lo ritroverai esattamente nello stesso stato in cui l'avevi lasciato."
+      "title": "Lo ritrovi come l'ha lasciato!",
+      "body": "Se chiude Restorm e lo riapre, lo ritroverà esattamente nello stesso stato in cui l'aveva lasciato."
     },
     "favorites": {
-      "title": "Ce ne sono alcune che ti stanno più a cuore…",
-      "body": "Hai richieste a cui tieni più che ad altre? Aggiungile ai preferiti!"
+      "title": "Ce ne sono alcune che le stanno più a cuore…",
+      "body": "Ha richieste a cui tiene più che ad altre? Le aggiunga ai preferiti!"
     },
     "console": {
       "title": "Per vedere meglio cosa succede",
-      "body": "La console ti mostra le chiamate alle tue API mentre lanci le richieste. Comodo per copiarle e incollarle nel tuo terminale quando serve! Quale preferisci: curl o PowerShell?"
+      "body": "La console le mostra le chiamate alle sue API mentre lancia le richieste. Comodo per copiarle e incollarle nel suo terminale quando serve! Quale preferisce: curl o PowerShell?"
     },
     "miniBrowser": {
       "title": "Stanco di cambiare finestra di continuo?",
-      "body": "Restorm integra un mini browser web. Comodo quando la tua applicazione reagisce visivamente alle chiamate API."
+      "body": "Restorm integra un mini browser web. Comodo quando la sua applicazione reagisce visivamente alle chiamate API."
     },
     "apiDocs": {
       "title": "La documentazione, qui dentro",
-      "body": "Niente più va-e-vieni tra Restorm e la documentazione della tua API. Se la tua API fornisce una documentazione (Swagger, OpenAPI, …), viene importata in Restorm e puoi consultarla direttamente qui."
+      "body": "Niente più va-e-vieni tra Restorm e la documentazione della sua API. Se la sua API fornisce una documentazione (Swagger, OpenAPI, …), viene importata in Restorm e può consultarla direttamente qui."
     },
     "secrets": {
-      "title": "Proteggi i tuoi segreti",
-      "body": "Le tue password e i token di autorizzazione non vengono salvati direttamente nel file Restorm. Per questo Restorm conserva i segreti e la cronologia delle richieste in file separati. Sta a te non caricarli su GitHub. Restorm sa anche recuperare i segreti da AWS, GitHub e altri."
+      "title": "Protegga i suoi segreti",
+      "body": "Le sue password e i token di autorizzazione non vengono salvati direttamente nel file Restorm. Per questo Restorm conserva i segreti e la cronologia delle richieste in file separati. Sta a lei non caricarli su GitHub. Restorm sa anche recuperare i segreti da AWS, GitHub e altri."
     },
     "themes": {
-      "title": "I tuoi colori, il tuo umore",
-      "body": "Restorm include diversi schemi di colore. Scegli quello che si addice al tuo umore."
+      "title": "I suoi colori, il suo umore",
+      "body": "Restorm include diversi schemi di colore. Scelga quello che si addice al suo umore."
     },
     "search": {
       "title": "Trova tutto, velocemente",
-      "body": "Hai visto in cima a questa finestra? Restorm integra un motore di ricerca: niente più ore a cercare LA richiesta giusta."
+      "body": "Ha visto in cima a questa finestra? Restorm integra un motore di ricerca: niente più ore a cercare LA richiesta giusta."
     },
     "multiEnv": {
       "title": "Stesse richieste, ambienti diversi",
-      "body": "Hai un ambiente di dev, uno di prod e uno di staging? Sono le stesse richieste, ma non proprio gli stessi URL e nemmeno gli stessi token… Usa gli ambienti e le variabili per passare dall'uno all'altro con un clic. Puoi anche distinguerli con colori e icone per evitare le strizze del venerdì sera prima del weekend in produzione!"
+      "body": "Ha un ambiente di dev, uno di prod e uno di staging? Sono le stesse richieste, ma non proprio gli stessi URL e nemmeno gli stessi token… Usi gli ambienti e le variabili per passare dall'uno all'altro con un clic. Può anche distinguerli con colori e icone per evitare le strizze del venerdì sera prima del weekend in produzione!"
     },
     "protocols": {
       "title": "Molto più di REST",
       "body": "Restorm parla REST… e molto di più! GraphQL, gRPC, SOAP, OData, WebSocket — tutti questi protocolli a portata di mano, senza cambiare strumento."
     },
     "responseTree": {
-      "title": "Visualizza le tue risposte API",
-      "body": "Sapevi che puoi consultare le tue risposte API in modo più grafico? Restorm le mostra come un albero interattivo da percorrere, comprimere ed espandere."
+      "title": "Visualizzi le sue risposte API",
+      "body": "Sapeva che può consultare le sue risposte API in modo più grafico? Restorm le mostra come un albero interattivo da percorrere, comprimere ed espandere."
     },
     "responseHistory": {
       "title": "Cronologia delle richieste",
-      "body": "Puoi consultare la cronologia di tutte le tue chiamate alle API. Comodo per capire cosa sia veramente successo."
+      "body": "Può consultare la cronologia di tutte le sue chiamate alle API. Comodo per capire cosa sia veramente successo."
     },
     "multiLanguage": {
       "title": "27 lingue!",
-      "body": "Restorm parla 27 lingue. Inglese, francese, spagnolo, tedesco, italiano, giapponese, cinese, coreano e molte altre — scegli la tua nelle impostazioni!"
+      "body": "Restorm parla 27 lingue. Inglese, francese, spagnolo, tedesco, italiano, giapponese, cinese, coreano e molte altre — scelga la sua nelle impostazioni!"
     },
     "fromPostman": {
-      "title": "Arrivi da Postman o Bruno?",
-      "body": "Ti aiutiamo a passare a Restorm — il tuo trasloco reso facile ;)"
+      "title": "Arriva da Postman o Bruno?",
+      "body": "La aiutiamo a passare a Restorm — il suo trasloco reso facile ;)"
     },
     "chainRequests": {
       "title": "Diverse richieste da concatenare?",
-      "body": "Usa le tue richieste dentro gli scenari, aggiungi condizioni e annida persino scenari dentro altri scenari."
+      "body": "Usi le sue richieste dentro gli scenari, aggiunga condizioni e annidi persino scenari dentro altri scenari."
     },
     "stepByStep": {
-      "title": "Percorri i tuoi scenari passo dopo passo",
-      "body": "Un passo alla volta, per vedere esattamente cosa succede. Puoi anche impostare dei punti di interruzione."
+      "title": "Percorra i suoi scenari passo dopo passo",
+      "body": "Un passo alla volta, per vedere esattamente cosa succede. Può anche impostare dei punti di interruzione."
     },
     "cicd": {
-      "title": "Esegui i tuoi scenari nelle tue pipeline CI/CD",
-      "body": "Avvia Restorm senza interfaccia per eseguire uno scenario senza UI e raccoglierne i log — test automatizzati, costruiti visivamente."
+      "title": "Esegua i suoi scenari nelle sue pipeline CI/CD",
+      "body": "Avvii Restorm senza interfaccia per eseguire uno scenario senza UI e raccoglierne i log — test automatizzati, costruiti visivamente."
     },
     "nestedScenarios": {
       "title": "Guarda cosa succede in uno scenario",
-      "body": "Uno scenario può chiamarne un altro. Nell'ispettore, leggi ogni log e salta direttamente allo scenario da cui proviene."
+      "body": "Uno scenario può chiamarne un altro. Nell'ispettore, legga ogni log e salti direttamente allo scenario da cui proviene."
     },
     "scenarioHistory": {
       "title": "Ma cos'è appena successo?",
-      "body": "Sfoglia la cronologia di esecuzione dei tuoi scenari. Uno di essi è cambiato nel frattempo? Nessun problema — ne abbiamo conservato la configurazione."
+      "body": "Sfogli la cronologia di esecuzione dei suoi scenari. Uno di essi è cambiato nel frattempo? Nessun problema — ne abbiamo conservato la configurazione."
     },
     "codeSandbox": {
       "title": "Scenari e sicurezza",
-      "body": "Puoi scrivere codice nei tuoi scenari — ma viene eseguito in una sandbox sicura, senza accesso ai tuoi file locali e senza accesso diretto a internet. Il modo più sicuro per restare protetto!"
+      "body": "Può scrivere codice nei suoi scenari — ma viene eseguito in una sandbox sicura, senza accesso ai suoi file locali e senza accesso diretto a internet. Il modo più sicuro per restare protetto!"
     },
     "codeLanguages": {
       "title": "Voglia di scrivere un po' di codice?",
-      "body": "Scrivi codice direttamente nei tuoi scenari — in TypeScript, JavaScript, Python, Lua, Ruby, C# o R!"
+      "body": "Scriva codice direttamente nei suoi scenari — in TypeScript, JavaScript, Python, Lua, Ruby, C# o R!"
     },
     "scenarioAi": {
       "title": "Scenari pilotabili dall'IA",
-      "body": "Claude, Cursor, Copilot… conoscono il tuo codice: chiedi loro scenari su misura. Tutto è esposto tramite MCP per creare, modificare ed eseguire scenari."
+      "body": "Claude, Cursor, Copilot… conoscono il suo codice: chieda loro scenari su misura. Tutto è esposto tramite MCP per creare, modificare ed eseguire scenari."
     },
     "interactiveScenarios": {
       "title": "Scenari interattivi!",
-      "body": "Rendi i tuoi scenari parametrizzabili e chiedi persino all'utente cosa fare con delle finestre di dialogo."
+      "body": "Renda i suoi scenari parametrizzabili e chieda persino all'utente cosa fare con delle finestre di dialogo."
     },
     "customValueLists": {
       "title": "Liste di valori riutilizzabili",
-      "body": "Definisci le tue liste di valori e riutilizzale sia nelle tue richieste sia nei tuoi scenari."
+      "body": "Definisca le sue liste di valori e le riutilizzi sia nelle sue richieste sia nei suoi scenari."
     }
   },
   "authFailureToast": {
@@ -325,14 +325,14 @@
     },
     "deleteConfirm": {
       "title": "Conferma eliminazione",
-      "folderMessage": "Vuoi davvero eliminare la cartella \"{{name}}\" e tutto il suo contenuto?",
-      "itemMessage": "Vuoi davvero eliminare \"{{name}}\"?",
+      "folderMessage": "Vuole davvero eliminare la cartella \"{{name}}\" e tutto il suo contenuto?",
+      "itemMessage": "Vuole davvero eliminare \"{{name}}\"?",
       "confirm": "Elimina",
       "cancel": "Annulla"
     },
     "scenarioDelete": {
       "title": "Eliminare una richiesta usata dagli scenari",
-      "message": "«{{name}}» è usata nei seguenti scenari. Cosa vuoi fare?",
+      "message": "«{{name}}» è usata nei seguenti scenari. Cosa vuole fare?",
       "belongsTag": "appartiene a questo scenario",
       "moveInto": "Sposta in questo scenario",
       "affectsNote": "Eliminando questa richiesta verrà rimossa anche da questi scenari.",
@@ -363,9 +363,9 @@
     },
     "home": {
       "configureEnvs": "Configura gli ambienti",
-      "configureEnvsDesc": "Imposta le tue URL di base, variabili e autenticazione per ogni ambiente",
+      "configureEnvsDesc": "Imposti le sue URL di base, variabili e autenticazione per ogni ambiente",
       "viewDocs": "Visualizza la documentazione",
-      "viewDocsDesc": "Sfoglia la documentazione dell'API, i modelli e gli endpoint",
+      "viewDocsDesc": "Sfogli la documentazione dell'API, i modelli e gli endpoint",
       "favoriteRequests": "Richieste preferite",
       "removeFavorite": "Rimuovi dai preferiti",
       "apiUpdate": {
@@ -384,7 +384,7 @@
     },
     "contextVariables": {
       "title": "Variabili di contesto disponibili",
-      "description": "Usa queste variabili nelle URL delle tue richieste e nelle variabili di tipo espressione con la sintassi {{handlebars}}.",
+      "description": "Usi queste variabili nelle URL delle sue richieste e nelle variabili di tipo espressione con la sintassi {{handlebars}}.",
       "name": "Variabile",
       "value": "Valore risolto",
       "copied": "Copiato!"
@@ -397,7 +397,7 @@
       "addEntry": "Aggiungi un valore",
       "label": "Label",
       "value": "Value",
-      "selectList": "Definisci elenchi di valori riutilizzabili per le tue variabili: scegli un'etichetta leggibile, la richiesta invia il valore associato. Seleziona o crea un'enumerazione per iniziare."
+      "selectList": "Definisca elenchi di valori riutilizzabili per le sue variabili: scelga un'etichetta leggibile, la richiesta invia il valore associato. Selezioni o crei un'enumerazione per iniziare."
     },
     "iconLabel": "Icona:",
     "colorLabel": "Colore:"
@@ -444,7 +444,7 @@
       },
       "loading": "Invio della richiesta in corso...",
       "noResponseBody": "Nessun corpo di risposta — vedi Infos per i dettagli",
-      "noResponse": "Clicca su Invia per eseguire la richiesta",
+      "noResponse": "Clicchi su Invia per eseguire la richiesta",
       "history": {
         "list": "Elenco della cronologia delle risposte",
         "empty": "Nessuna risposta registrata finora",
@@ -518,7 +518,7 @@
       "subscribe": "Iscriviti",
       "stop": "Ferma",
       "waiting": "Iscritto: in attesa di eventi…",
-      "noEvents": "Nessun evento ancora. Iscriviti per avviare lo streaming.",
+      "noEvents": "Nessun evento ancora. Si iscriva per avviare lo streaming.",
       "idle": "Non iscritto",
       "streaming": "Streaming: {{count}} evento/i ricevuto/i",
       "eventLabel": "Evento {{index}}"
@@ -568,7 +568,7 @@
     "reflection": {
       "refresh": "Aggiorna dalla reflection",
       "refreshFailed": "Aggiornamento tramite reflection gRPC non riuscito",
-      "unsupported": "Questo server non supporta la reflection gRPC — importa invece un file .proto.",
+      "unsupported": "Questo server non supporta la reflection gRPC — importi invece un file .proto.",
       "unknownError": "Errore sconosciuto"
     }
   },
@@ -639,7 +639,7 @@
     "tabs": {
       "calls": "Chiamate"
     },
-    "empty": "Nessuna chiamata ancora. Aggiungine una qui sotto.",
+    "empty": "Nessuna chiamata ancora. Ne aggiunga una qui sotto.",
     "methodPlaceholder": "metodo",
     "idPlaceholder": "id (auto)",
     "moveUp": "Sposta su",
@@ -863,7 +863,7 @@
     }
   },
   "welcome": {
-    "confirmRemoveFavorite": "Vuoi davvero rimuovere \"{{fileName}}\" dai preferiti?",
+    "confirmRemoveFavorite": "Vuole davvero rimuovere \"{{fileName}}\" dai preferiti?",
     "newAriaLabel": "Crea una nuova collezione",
     "openAriaLabel": "Apri una collezione dal disco",
     "landmarkLabel": "Benvenuto"
@@ -1037,7 +1037,7 @@
     "customHeadersBtn": "Aggiungi header personalizzati",
     "customHeadersBtnTitle": "Allega header una tantum al recupero della specifica (salvati sulla cartella importata per le reimportazioni)",
     "customHeadersDone": "Fatto",
-    "customHeadersHint": "Gli header vengono salvati sulla cartella importata, così un futuro aggiornamento dalla sorgente li ripete. Per i flussi di login con rotazione dei token, usa invece la route di autenticazione sopra.",
+    "customHeadersHint": "Gli header vengono salvati sulla cartella importata, così un futuro aggiornamento dalla sorgente li ripete. Per i flussi di login con rotazione dei token, usi invece la route di autenticazione sopra.",
     "customHeadersTitle": "Header personalizzati",
     "detachAuth": "Scollega route di autenticazione",
     "dropZone": "Area di rilascio",
@@ -1056,13 +1056,13 @@
       "emptySpec": "La specifica recuperata da {{url}} non dichiara alcuna operazione {{format}}. Applicarla svuoterebbe questa cartella, quindi l'aggiornamento è stato rifiutato.",
       "formatNotDetected": "Il formato di questa origine non è stato riconosciuto.",
       "unsupportedFormat": "Nessun importatore gestisce il formato {{format}}.",
-      "projectFormatTooNew": "Questo file di progetto usa la versione di formato {{found}}, ma questa versione di Restorm comprende solo la versione {{current}}. Aggiorna Restorm per importarlo.",
+      "projectFormatTooNew": "Questo file di progetto usa la versione di formato {{found}}, ma questa versione di Restorm comprende solo la versione {{current}}. Aggiorni Restorm per importarlo.",
       "projectFormatMissing": "Questo file non dichiara alcuna versione di formato Restorm, quindi non è un file di progetto Restorm.",
-      "openApiUnsupportedVersion": "Questa specifica dichiara la versione OpenAPI {{version}}, non ancora supportata da questa versione di Restorm. Aggiorna Restorm per importarla."
+      "openApiUnsupportedVersion": "Questa specifica dichiara la versione OpenAPI {{version}}, non ancora supportata da questa versione di Restorm. Aggiorni Restorm per importarla."
     },
     "formats": {
       "swagger": {
-        "description": "La spec OpenAPI 2.0, nata in SmartBear. Incolla uno Swagger JSON o YAML — Restorm scorre ogni operazione, recupera gli schemi di sicurezza e trasforma l'intero documento in un albero navigabile di richieste.",
+        "description": "La spec OpenAPI 2.0, nata in SmartBear. Incolli uno Swagger JSON o YAML — Restorm scorre ogni operazione, recupera gli schemi di sicurezza e trasforma l'intero documento in un albero navigabile di richieste.",
         "trademark": "Swagger è un marchio registrato di SmartBear Software."
       },
       "openapi": {
@@ -1090,7 +1090,7 @@
         "trademark": "Bruno è software open source (MIT) di Anoop M. D., utilizzato qui secondo i suoi termini."
       },
       "thunderclient": {
-        "description": "Vieni da Thunder Client? Trascina il JSON della collezione esportata — Restorm legge ogni richiesta, cartella, header e body, quindi ricostruisce la collezione come un albero Restorm pronto all'uso.",
+        "description": "Viene da Thunder Client? Trascini il JSON della collezione esportata — Restorm legge ogni richiesta, cartella, header e body, quindi ricostruisce la collezione come un albero Restorm pronto all'uso.",
         "trademark": "Thunder Client è un marchio del rispettivo proprietario, usato qui solo come riferimento di compatibilità."
       },
       "graphql": {
@@ -1102,7 +1102,7 @@
         "trademark": "gRPC è un progetto della Cloud Native Computing Foundation."
       },
       "grpcReflection": {
-        "description": "Niente file .proto? Punta Restorm verso un server gRPC in esecuzione che espone reflection: interroga grpc.reflection.v1alpha.ServerReflection, scopre ogni servizio e metodo e crea lo stesso albero di richieste tipizzate di un import da file proto, memorizzato in cache localmente per l'uso offline.",
+        "description": "Niente file .proto? Punti Restorm verso un server gRPC in esecuzione che espone reflection: interroga grpc.reflection.v1alpha.ServerReflection, scopre ogni servizio e metodo e crea lo stesso albero di richieste tipizzate di un import da file proto, memorizzato in cache localmente per l'uso offline.",
         "action": "Connetti a un server…"
       },
       "soap": {
@@ -1167,12 +1167,12 @@
         "trademark": "API Blueprint è una specifica creata originariamente da Apiary."
       },
       "restorm": {
-        "description": "Unisci un altro progetto Restorm a quello aperto: ogni cartella, richiesta, ambiente e scenario importato arriva in una cartella contenitore, con identità nuove perché nulla entri in collisione, nemmeno importando un progetto in sé stesso."
+        "description": "Unisca un altro progetto Restorm a quello aperto: ogni cartella, richiesta, ambiente e scenario importato arriva in una cartella contenitore, con identità nuove perché nulla entri in collisione, nemmeno importando un progetto in sé stesso."
       }
     },
     "grpcReflection": {
       "title": "Server gRPC (reflection)",
-      "hint": "Interroga il servizio di reflection di un server gRPC in esecuzione per scoprirne servizi e metodi senza un file .proto.",
+      "hint": "Interroghi il servizio di reflection di un server gRPC in esecuzione per scoprirne servizi e metodi senza un file .proto.",
       "addressLabel": "Indirizzo del server (host:porta)",
       "addressPlaceholder": "localhost:9000",
       "tlsLabel": "Usa TLS",
@@ -1181,8 +1181,8 @@
       "import": "Importa",
       "reimportedTitle": "Reflection gRPC reimportata",
       "reimportedNoop": "Già aggiornato — nessuna modifica sul server.",
-      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ricarica il progetto per vedere le modifiche.",
-      "unsupported": "Questo server non supporta la reflection gRPC — importa invece un file .proto.",
+      "reimportedSummary": "+{{added}} / -{{removed}} / ↻{{merged}} — ricarichi il progetto per vedere le modifiche.",
+      "unsupported": "Questo server non supporta la reflection gRPC — importi invece un file .proto.",
       "unknownError": "Errore sconosciuto"
     },
     "loading": "Analisi in corso...",
@@ -1197,15 +1197,15 @@
     "selectAll": "Seleziona tutto",
     "selectNone": "Deseleziona tutto",
     "source": {
-      "label": "Incolla qualcosa qui!",
-      "placeholder": "Inserisci il percorso del file, l'URL, o incolla un comando curl/PowerShell..."
+      "label": "Incolli qualcosa qui!",
+      "placeholder": "Inserisca il percorso del file, l'URL, o incolli un comando curl/PowerShell..."
     },
     "tabs": {
       "routes": "Route",
       "documentation": "Documentazione"
     },
     "title": "Importa richieste",
-    "largeApiHint": "Questa API è grande. Per mantenere leggero il progetto, seleziona solo le route che ti servono e deseleziona le altre qui sotto. Quelle che escludi restano nella documentazione: puoi aggiungerle in qualsiasi momento.",
+    "largeApiHint": "Questa API è grande. Per mantenere leggero il progetto, selezioni solo le route che le servono e deselezioni le altre qui sotto. Quelle che esclude restano nella documentazione: può aggiungerle in qualsiasi momento.",
     "browse": "Sfoglia…",
     "warning": {
       "openApiStructuralIssues": "La specifica è stata importata, ma {{count}} parte/i non è stato possibile risolverle e sono state ignorate ($ref non risolti, corpi di richiesta senza content). Il resto è stato importato normalmente."
@@ -1213,12 +1213,12 @@
   },
   "emptyBench": {
     "importCard": {
-      "title": "Importa la tua API",
-      "body": "Porta una spec OpenAPI / Swagger, uno schema GraphQL, una collezione Postman / Bruno / Insomnia, o incolla un comando curl / PowerShell. Restorm la analizza, costruisce la struttura di cartelle e atterra con ogni endpoint pronto."
+      "title": "Importi la sua API",
+      "body": "Porti una spec OpenAPI / Swagger, uno schema GraphQL, una collezione Postman / Bruno / Insomnia, o incolli un comando curl / PowerShell. Restorm la analizza, costruisce la struttura di cartelle e atterra con ogni endpoint pronto."
     },
     "recentActivity": {
       "title": "Attività recente",
-      "empty": "Invia la tua prima richiesta per vederla qui."
+      "empty": "Invii la sua prima richiesta per vederla qui."
     },
     "apiCard": {
       "favorites": "Preferiti",
@@ -1311,15 +1311,15 @@
   "scenario": {
     "editor": {
       "emptyTitle": "Qui è vuoto…",
-      "emptyDragDrop": "Trascina un elemento dall’albero a sinistra nel tuo scenario per usarlo qui. Puoi persino importare uno scenario in un altro!",
-      "emptyRightClick": "Fai clic con il tasto destro su un punto vuoto per aggiungere azioni al tuo scenario"
+      "emptyDragDrop": "Trascini un elemento dall’albero a sinistra nel suo scenario per usarlo qui. Può persino importare uno scenario in un altro!",
+      "emptyRightClick": "Faccia clic con il tasto destro su un punto vuoto per aggiungere azioni al suo scenario"
     },
     "pathSelector": {
       "placeholder": "Percorso JSON",
       "ariaLabel": "Selettore di percorso JSON",
       "pick": "Scegli dal risultato",
       "loading": "Caricamento…",
-      "noResult": "Esegui l'azione di origine per scegliere una proprietà dal suo risultato."
+      "noResult": "Esegua l'azione di origine per scegliere una proprietà dal suo risultato."
     },
     "tab": {
       "graph": "Scenario",
@@ -1533,7 +1533,7 @@
     "validation": {
       "duplicateName": "Il nome «{{name}}» è già usato da un'altra azione.",
       "panelTitle": "{{count}} azione/i in errore",
-      "runBlocked": "Correggi {{count}} errore/i di azione prima di eseguire",
+      "runBlocked": "Corregga {{count}} errore/i di azione prima di eseguire",
       "focusBox": "Vai a questa azione",
       "showErrors": "Mostra errori",
       "input": {
@@ -1582,7 +1582,7 @@
       },
       "reachability": {
         "unreachable": "Questa azione non può mai essere eseguita: nessuna connessione la raggiunge da un'azione che avvia lo scenario.",
-        "cycle": "Questa azione fa parte di un ciclo di connessioni che nulla avvia, quindi non può mai essere eseguita. Collegale un'azione esterna al ciclo."
+        "cycle": "Questa azione fa parte di un ciclo di connessioni che nulla avvia, quindi non può mai essere eseguita. Le colleghi un'azione esterna al ciclo."
       }
     },
     "usage": {
@@ -1597,9 +1597,9 @@
       "step": "Passo passo",
       "previewInfo": "Dati di esempio, basati sui risultati di richieste precedenti.",
       "pause": "Pausa",
-      "noRunsHint": "Nessuna esecuzione recente per questa richiesta — eseguila da qui per popolare l'anteprima dello scenario.",
+      "noRunsHint": "Nessuna esecuzione recente per questa richiesta — la esegua da qui per popolare l'anteprima dello scenario.",
       "syntheticInfo": "Dati di esempio generati dalla documentazione di questa richiesta.",
-      "syntheticRunHint": "Dati di esempio — esegui la richiesta per sostituirli con un risultato reale.",
+      "syntheticRunHint": "Dati di esempio — esegua la richiesta per sostituirli con un risultato reale.",
       "stop": "Ferma",
       "logsTitle": "Log di esecuzione",
       "copyLogs": "Copia log",
@@ -1662,7 +1662,7 @@
       "add": "Aggiungi punto di interruzione",
       "remove": "Rimuovi punto di interruzione",
       "toggle": "Attiva/disattiva punto di interruzione (F9)",
-      "reached": "Punto di interruzione raggiunto: questa azione non è ancora stata eseguita. Premi F5 per riprendere o F7 per procedere passo passo.",
+      "reached": "Punto di interruzione raggiunto: questa azione non è ancora stata eseguita. Prema F5 per riprendere o F7 per procedere passo passo.",
       "shortcut": "F9"
     },
     "minimap": {
@@ -1968,7 +1968,7 @@
         "manage": "Gestisci pacchetti",
         "count": "{{count}} dip.",
         "addShort": "Aggiungi",
-        "hint": "Pacchetti esterni fissati, risolti e memorizzati nella cache alla prima esecuzione, poi caricati offline. Sono supportati solo i pacchetti in puro linguaggio (Python: wheel puri Python); fissa la versione esatta.",
+        "hint": "Pacchetti esterni fissati, risolti e memorizzati nella cache alla prima esecuzione, poi caricati offline. Sono supportati solo i pacchetti in puro linguaggio (Python: wheel puri Python); fissi la versione esatta.",
         "empty": "Nessun pacchetto ancora aggiunto.",
         "remove": "Rimuovi {{package}}",
         "name": "Nome del pacchetto",
@@ -2006,7 +2006,7 @@
       "setVariable": "Memorizza un valore in una variabile del run.",
       "getVariable": "Legge il valore di una variabile del run.",
       "transform": "Esegue il rendering di un template Handlebars dall'input e dalle variabili del run.",
-      "code": "Esegue il tuo codice (TypeScript, JavaScript, Python, Lua, Ruby o R) in una sandbox e restituisce il risultato.",
+      "code": "Esegue il suo codice (TypeScript, JavaScript, Python, Lua, Ruby o R) in una sandbox e restituisce il risultato.",
       "cast": "Converte un valore in un altro tipo (numero, testo, booleano, data, elenco).",
       "regex": "Cerca, estrae, sostituisce o divide il testo con un'espressione regolare.",
       "json": "Analizza una stringa JSON, o serializza un valore in JSON.",
@@ -2099,13 +2099,13 @@
       "select": "seleziona / selezione multipla"
     },
     "cli": {
-      "title": "Esegui dalla riga di comando",
-      "intro": "Esegui questo scenario senza aprire l'app (CI, cron, script):",
+      "title": "Esegua dalla riga di comando",
+      "intro": "Esegua questo scenario senza aprire l'app (CI, cron, script):",
       "byId": "Designa per id",
       "allLogs": "Tutti i log",
       "note": "`--out file` scrive anche il run-log su un file.",
       "projectPlaceholder": "<progetto.restorm>",
-      "tokenPlaceholder": "<il_tuo_token>",
+      "tokenPlaceholder": "<il_suo_token>",
       "tokenNote": "Un'esecuzione headless richiede un piano Restorm Pro e un token CI.",
       "tokenLink": "Ottieni un token"
     },
@@ -2195,13 +2195,13 @@
         "description": "Risposte dagli esempi con nome · validazione per vincoli",
         "port": "Porta",
         "latency": "Latenza simulata (ms)",
-        "blocked": "Correggi i {{count}} errori di validazione del design prima di servirlo",
+        "blocked": "Corregga i {{count}} errori di validazione del design prima di servirlo",
         "startFailed": "Impossibile avviare il server",
         "protocolAlways": "HTTP è sempre servito",
         "protocolToggle": "Servi anche questa proiezione",
         "stateful": "Modalità stateful — POST/PUT/DELETE modificano uno store in memoria (azzerato al riavvio)",
-        "clientsCallout": "Il tuo mock server è in esecuzione. Sono stati generati client pronti all'uso per ogni protocollo servito da questo design.",
-        "clientsCalloutLink": "Li trovi qui"
+        "clientsCallout": "Il suo mock server è in esecuzione. Sono stati generati client pronti all'uso per ogni protocollo servito da questo design.",
+        "clientsCalloutLink": "Li trova qui"
       },
       "identity": {
         "title": "Identità",
@@ -2238,7 +2238,7 @@
     },
     "list": {
       "filter": "Filtra…",
-      "selectPrompt": "Seleziona una voce nell’elenco.",
+      "selectPrompt": "Selezioni una voce nell’elenco.",
       "editorPending": "L’editor di questa sezione è in arrivo."
     },
     "models": {
@@ -2253,7 +2253,7 @@
       "description": "Descrizione",
       "descriptionPlaceholder": "Cosa rappresenta questo modello (facoltativo)",
       "newName": "NuovoModello",
-      "selectPrompt": "Seleziona un modello o creane uno.",
+      "selectPrompt": "Selezioni un modello o ne crei uno.",
       "tabs": {
         "schema": "Schema",
         "examples": "Esempi",
@@ -2273,7 +2273,7 @@
       "addValue": "Aggiungi un valore",
       "valueHeader": "Valore",
       "newName": "NuovoEnum",
-      "selectPrompt": "Seleziona un enum o creane uno — un insieme chiuso di valori usabile come tipo di proprietà.",
+      "selectPrompt": "Selezioni un enum o ne crei uno — un insieme chiuso di valori usabile come tipo di proprietà.",
       "nameHeader": "Nome",
       "description": "Descrizione",
       "descriptionPlaceholder": "Cosa rappresenta questo enum (facoltativo)",
@@ -2282,8 +2282,8 @@
     },
     "documentation": {},
     "code": {
-      "empty": "Ancora nessun template — aggiungine uno per generare codice da questo design.",
-      "subtitle": "Genera progetti da questo design — renderizzato in una sandbox, scritto solo dopo la conferma dell'albero",
+      "empty": "Ancora nessun template — ne aggiunga uno per generare codice da questo design.",
+      "subtitle": "Generi progetti da questo design — renderizzato in una sandbox, scritto solo dopo la conferma dell'albero",
       "sourceTitle": "Template",
       "sourceKind": {
         "official": "Ufficiale",
@@ -2297,9 +2297,9 @@
       "browse": "Scegli la cartella di output",
       "generate": "Genera il progetto",
       "generating": "Generazione nella sandbox…",
-      "blocked": "Correggi i {{count}} errori di validazione del design prima di generare",
+      "blocked": "Corregga i {{count}} errori di validazione del design prima di generare",
       "failed": "La generazione non è riuscita",
-      "outputMissing": "Scegli prima una cartella di output",
+      "outputMissing": "Scelga prima una cartella di output",
       "extracted": "{{count}} file scritti in {{root}}",
       "preview": "{{name}} ha generato {{count}} file — conferma per scriverli",
       "confirm": "Scrivi nella cartella di output",
@@ -2323,7 +2323,7 @@
         "descPlaceholder": "Descrizione (stack / cosa genera)",
         "noOrgTemplates": "Nessun template dell'organizzazione.",
         "loading": "Caricamento dei template…",
-        "signedOut": "Accedi per vedere i template della tua organizzazione.",
+        "signedOut": "Acceda per vedere i template della sua organizzazione.",
         "fetchError": "Impossibile caricare i template:",
         "unavailable": "non disponibile",
         "officialTag": "Ufficiale",
@@ -2452,7 +2452,7 @@
       "name": "Nome dell’esempio",
       "newName": "Esempio",
       "defaultHint": "I valori predefiniti vengono da ogni proprietà (vuoto = generato automaticamente).",
-      "namedHint": "Digita un valore per definirlo; lascia vuoto per mantenere quello generato.",
+      "namedHint": "Digiti un valore per definirlo; lasci vuoto per mantenere quello generato.",
       "columns": {
         "value": "Valore",
         "origin": "Origine"
@@ -2535,7 +2535,7 @@
       "addRoute": "Aggiungi una rotta",
       "newGroupName": "NuovoGruppo",
       "newRouteName": "NuovaRotta",
-      "selectPrompt": "Seleziona un gruppo o una rotta, oppure crea un gruppo.",
+      "selectPrompt": "Selezioni un gruppo o una rotta, oppure crei un gruppo.",
       "deleteGroupTitle": "Eliminare {{name}}?",
       "deleteGroupImpact": "Il gruppo e le sue {{count}} rotte saranno eliminati.",
       "method": "Metodo",
@@ -2566,7 +2566,7 @@
         "add": "Aggiungi un parametro",
         "delete": "Elimina il parametro",
         "auto": "auto",
-        "pathEmpty": "Digita un {{param}} nel percorso per creare la sua riga.",
+        "pathEmpty": "Digiti un {{param}} nel percorso per creare la sua riga.",
         "otherEmpty": "Ancora nessun parametro query o header.",
         "nameEmpty": "Un parametro richiede un nome",
         "nameTaken": "Questo nome è già in uso"
@@ -2590,7 +2590,7 @@
         "example": "Esempio servito",
         "exampleAuto": "(auto generato)",
         "delete": "Elimina la risposta",
-        "codeInvalid": "Inserisci un codice di stato a 3 cifre",
+        "codeInvalid": "Inserisca un codice di stato a 3 cifre",
         "codeTaken": "Questo codice è già dichiarato"
       },
       "settings": {
@@ -2636,11 +2636,11 @@
       }
     },
     "crud": {
-      "authWrites": "Proteggi le route di scrittura con l’autenticazione",
-      "authWritesHint": "Richiedi l’autenticazione bearer per creazione, aggiornamento ed eliminazione; le letture restano pubbliche.",
+      "authWrites": "Protegga le route di scrittura con l’autenticazione",
+      "authWritesHint": "Richieda l’autenticazione bearer per creazione, aggiornamento ed eliminazione; le letture restano pubbliche.",
       "generate": "Genera",
-      "replace": "Sostituisci le route esistenti",
-      "replaceHint": "Per questo modello esistono già delle route. Sostituiscile per evitare duplicati; lascia disattivato per aggiungere un secondo set.",
+      "replace": "Sostituisca le route esistenti",
+      "replaceHint": "Per questo modello esistono già delle route. Le sostituisca per evitare duplicati; lasci disattivato per aggiungere un secondo set.",
       "title": "Genera CRUD per {{name}}",
       "projections": {
         "http": "{{count}} route REST",
@@ -2652,7 +2652,7 @@
       }
     },
     "server": {
-      "subtitle": "Servi questo design come mock live e osserva ogni chiamata."
+      "subtitle": "Serva questo design come mock live e osservi ogni chiamata."
     },
     "codegen": {
       "vars": {
@@ -2660,8 +2660,8 @@
         "name": "Variabile",
         "value": "Valore (Handlebars)",
         "add": "Aggiungi una variabile",
-        "none": "Ancora nessuna variabile: aggiungine una dall’intestazione di questo modello.",
-        "noTemplates": "Scegli uno o più modelli nella sezione «</> Code»: qui definirai poi le variabili usate dalla generazione.",
+        "none": "Ancora nessuna variabile: ne aggiunga una dall’intestazione di questo modello.",
+        "noTemplates": "Scelga uno o più modelli nella sezione «</> Code»: qui definirà poi le variabili usate dalla generazione.",
         "generalTitle": "Variabili generali",
         "scope": {
           "general": "Generale",
@@ -2673,12 +2673,12 @@
       }
     },
     "clients": {
-      "generated": "Client generati: aprili sotto «Client» nella barra laterale.",
+      "generated": "Client generati: li apra sotto «Client» nella barra laterale.",
       "importing": "Importazione dei client…",
       "refresh": "Rigenera i client",
-      "startPrompt": "Avvia il server per generare i client.",
-      "startServerPrompt": "Avvia il <serverLink>server di design</serverLink> per accedere alle richieste client generate automaticamente dal modello.",
-      "subtitle": "Il tuo server di design API è in esecuzione e serve le route che hai definito. Le richieste qui sotto chiamano direttamente quelle route: aprine una per testarla. Sono effimere e scompaiono quando il server si arresta."
+      "startPrompt": "Avvii il server per generare i client.",
+      "startServerPrompt": "Avvii il <serverLink>server di design</serverLink> per accedere alle richieste client generate automaticamente dal modello.",
+      "subtitle": "Il suo server di design API è in esecuzione e serve le route che ha definito. Le richieste qui sotto chiamano direttamente quelle route: ne apra una per testarla. Sono effimere e scompaiono quando il server si arresta."
     },
     "descriptors": {
       "copy": "Copia l'URL"
@@ -2689,13 +2689,13 @@
     },
     "listing": {
       "models": {
-        "empty": "Crea il tuo primo modello"
+        "empty": "Crei il suo primo modello"
       },
       "enums": {
-        "empty": "Crea il tuo primo enum"
+        "empty": "Crei il suo primo enum"
       },
       "routes": {
-        "empty": "Crea la tua prima route"
+        "empty": "Crei la sua prima route"
       },
       "tabs": {
         "list": "Elenco",
@@ -2776,15 +2776,15 @@
     "captureRetentionCap": "Conservazione delle acquisizioni MCP",
     "captureRetentionCapDescription": "Quante chiamate MCP recenti mantengono la schermata / registrazione acquisita (in memoria e su disco). Oltre il limite le acquisizioni più vecchie perdono il media e il file video temporaneo viene eliminato; 0 disattiva la conservazione.",
     "enabled": "Abilita server MCP",
-    "enabledDescription": "Avvia il server MCP integrato all'avvio in modo che gli strumenti AI possano connettersi a questa istanza. Disabilita per impedire connessioni MCP.",
+    "enabledDescription": "Avvii il server MCP integrato all'avvio in modo che gli strumenti AI possano connettersi a questa istanza. Disabiliti per impedire connessioni MCP.",
     "proUpsell": {
-      "note": "Nella versione Community, gli agenti IA gestiscono le tue richieste. Passa a Pro per gestire scenari, interfaccia e automazione avanzata.",
+      "note": "Nella versione Community, gli agenti IA gestiscono le sue richieste. Passi a Pro per gestire scenari, interfaccia e automazione avanzata.",
       "link": "Passa a Pro"
     },
     "connect": {
-      "action": "Aggiungi Restorm al tuo assistente IA",
-      "title": "Aggiungi Restorm al tuo assistente IA",
-      "intro": "Collega il tuo assistente IA a questa istanza di Restorm tramite MCP. Scegli il tuo client:",
+      "action": "Aggiunga Restorm al suo assistente IA",
+      "title": "Aggiunga Restorm al suo assistente IA",
+      "intro": "Colleghi il suo assistente IA a questa istanza di Restorm tramite MCP. Scelga il suo client:",
       "copy": "Copia",
       "copied": "Copiato",
       "run": "Aggiungi a Claude Code",
@@ -2792,18 +2792,18 @@
       "runOk": "Restorm è stato aggiunto a Claude Code. Riavvia Claude Code per usarlo.",
       "runError": "Impossibile eseguire il comando",
       "claudeCode": {
-        "where": "Incolla questo in un terminale"
+        "where": "Incolli questo in un terminale"
       },
       "claudeDesktop": {
-        "where": "Aggiungi questo al tuo claude_desktop_config.json"
+        "where": "Aggiunga questo al suo claude_desktop_config.json"
       },
       "cursor": {
-        "where": "Aggiungi questo a ~/.cursor/mcp.json"
+        "where": "Aggiunga questo a ~/.cursor/mcp.json"
       },
       "footnote": "Il server MCP deve essere in esecuzione (lo è per impostazione predefinita). Il bridge trova questa istanza da solo — nessuna porta o token da copiare.",
       "invite": {
-        "title": "Collega la tua IA a Restorm",
-        "body": "Collega Claude o Cursor a questa istanza con un clic.",
+        "title": "Colleghi la sua IA a Restorm",
+        "body": "Colleghi Claude o Cursor a questa istanza con un clic.",
         "cta": "Scopri come"
       }
     }
@@ -2958,16 +2958,16 @@
     "batchFormatLabel": "Formato del batch",
     "batchFormatMultipart": "multipart/mixed",
     "batchFormatJson": "Batch JSON",
-    "versionMismatchWarning": "Questa richiesta è contrassegnata come {{requestVersion}} ma la risposta sembra {{responseVersion}}. Cambia la versione della richiesta per allinearla al server.",
+    "versionMismatchWarning": "Questa richiesta è contrassegnata come {{requestVersion}} ma la risposta sembra {{responseVersion}}. Cambi la versione della richiesta per allinearla al server.",
     "orderbyPropertyPickerPlaceholder": "Seleziona…",
     "batchAllowGetInChangeSet": "Consenti GET nel change-set",
     "batchAllowGetInChangeSetTooltip": "La specifica OData vieta GET all'interno di un change-set; molti server rifiuteranno tali batch. Attivare questa opzione solo se il proprio server la supporta esplicitamente.",
     "batchGetInChangeSetWarning": "GET all'interno di un change-set potrebbe non essere accettato da tutti i server (non consentito dalla specifica OData).",
     "batchForceIncludeInChangeSet": "Includi comunque",
     "batchForceAbsoluteBatchUrls": "Forza URL assoluti nel batch (v4.01)",
-    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 preferisce fortemente gli URL relativi nelle sotto-richieste. Abilita questo per mantenere gli URL assoluti (per i server che lo richiedono).",
+    "batchForceAbsoluteBatchUrlsTooltip": "OData v4.01 preferisce fortemente gli URL relativi nelle sotto-richieste. Abiliti questo per mantenere gli URL assoluti (per i server che lo richiedono).",
     "getDelta": "Ottieni delta",
-    "deltaHint": "@odata.deltaLink disponibile — clicca per sostituire questa risposta con l'ultimo set di modifiche.",
+    "deltaHint": "@odata.deltaLink disponibile — clicchi per sostituire questa risposta con l'ultimo set di modifiche.",
     "deltaChanged": "{{count}} modificato/i",
     "deltaRemoved": "{{count}} rimosso/i",
     "actionBody": "Corpo dell'azione (JSON)",
@@ -2977,14 +2977,14 @@
     "batchAtomicityPlaceholder": "change-set (facoltativo)",
     "batchBody": "Sotto-richieste del batch",
     "batchBodyLabel": "Corpo (JSON)",
-    "batchEmpty": "Nessuna sotto-richiesta. Aggiungine una qui sotto.",
+    "batchEmpty": "Nessuna sotto-richiesta. Ne aggiunga una qui sotto.",
     "batchMoveDown": "Sposta giù",
     "batchMoveUp": "Sposta su",
     "batchRemove": "Rimuovi sotto-richiesta",
     "batchUrlPlaceholder": "Pets(1) — relativo alla radice del servizio",
     "expandAdd": "Aggiungi espansione",
     "expandCollapseOptions": "Nascondi opzioni",
-    "expandEmpty": "Nessuna espansione. Aggiungine una qui sotto.",
+    "expandEmpty": "Nessuna espansione. Ne aggiunga una qui sotto.",
     "expandMoveDown": "Sposta giù",
     "expandMoveUp": "Sposta su",
     "expandNested": "$expand annidato",
@@ -3005,7 +3005,7 @@
     "orderbyMoveUp": "Sposta su",
     "orderbyPropertyPlaceholder": "Name",
     "orderbyRemove": "Rimuovi",
-    "paginatedHint": "@odata.nextLink disponibile — fai clic per aggiungere la pagina successiva a questa risposta.",
+    "paginatedHint": "@odata.nextLink disponibile — faccia clic per aggiungere la pagina successiva a questa risposta.",
     "paramsApply": "Applica parametri",
     "paramsApplyToBody": "Applica al corpo",
     "paramsApplyToUrl": "Applica all'URL",
@@ -3037,7 +3037,7 @@
       "notListening": "Non in ascolto",
       "served": "In ascolto — {{count}} richiesta/e servita/e",
       "listenFailed": "Impossibile avviare il server mock",
-      "portInUse": "La porta {{port}} è già utilizzata da un'altra applicazione. Chiudila o scegli un'altra porta, poi riavvia il server."
+      "portInUse": "La porta {{port}} è già utilizzata da un'altra applicazione. La chiuda o scelga un'altra porta, poi riavvii il server."
     }
   },
   "odata": {
@@ -3069,15 +3069,15 @@
     "emptyList": "Nessuna configurazione salvata.",
     "loadConfirm": {
       "title": "Carica configurazione",
-      "message": "Vuoi caricare la configurazione \"{{name}}\"? La configurazione attuale non salvata andrà persa."
+      "message": "Vuole caricare la configurazione \"{{name}}\"? La configurazione attuale non salvata andrà persa."
     },
     "updateConfirm": {
       "title": "Aggiorna configurazione",
-      "message": "Vuoi sostituire la configurazione \"{{name}}\" con i valori attuali?"
+      "message": "Vuole sostituire la configurazione \"{{name}}\" con i valori attuali?"
     },
     "deleteConfirm": {
       "title": "Elimina configurazione",
-      "message": "Vuoi eliminare la configurazione \"{{name}}\"?",
+      "message": "Vuole eliminare la configurazione \"{{name}}\"?",
       "usedByScenarios_one": "È usata dallo scenario {{scenarios}}.",
       "usedByScenarios_other": "È usata dagli scenari {{scenarios}}."
     },
@@ -3088,12 +3088,12 @@
   },
   "subscription": {
     "checkout": {
-      "forbidden": "Chiedi all'amministratore della tua organizzazione di abbonarsi.",
-      "error": "Impossibile avviare l'abbonamento. Riprova."
+      "forbidden": "Chieda all'amministratore della sua organizzazione di abbonarsi.",
+      "error": "Impossibile avviare l'abbonamento. Riprovi."
     },
     "portal": {
       "noSubscription": "Nessun abbonamento attivo da gestire.",
-      "error": "Impossibile aprire il portale dell'abbonamento. Riprova."
+      "error": "Impossibile aprire il portale dell'abbonamento. Riprovi."
     }
   },
   "trpc": {
@@ -3152,9 +3152,9 @@
     "historyTitle": "Cronologia Git",
     "conflictCancel": "Annulla",
     "conflictFinish": "Fine",
-    "conflictReadOnlyEntityNotice": "Questo tipo di entità non può essere modificato qui. Scegli sopra la tua versione o la loro.",
+    "conflictReadOnlyEntityNotice": "Questo tipo di entità non può essere modificato qui. Scelga sopra la sua versione o la loro.",
     "quickConfigConflictTitle": "Configurazioni rapide in conflitto",
-    "quickConfigOurs": "La tua",
+    "quickConfigOurs": "La sua",
     "quickConfigTheirs": "La loro",
     "settingsTitle": "Git",
     "applyCommitMessageLanguageByDefaultTitle": "Applica la lingua del messaggio di commit come predefinita",
@@ -3218,10 +3218,10 @@
       "24h": "Ogni 24 ore"
     },
     "gate": {
-      "initGitFolder": "Inizializza la tua cartella Git per usare questa funzione."
+      "initGitFolder": "Inizializzi la sua cartella Git per usare questa funzione."
     },
-    "conflictChooseVersion": "Scegli una versione",
-    "conflictChooseVersionHint": "Fai clic sulla <0></0> in alto nella tua versione o in quella del server: potrai poi modificare ogni campo prima di salvare.",
+    "conflictChooseVersion": "Scelga una versione",
+    "conflictChooseVersionHint": "Faccia clic sulla <0></0> in alto nella sua versione o in quella del server: potrà poi modificare ogni campo prima di salvare.",
     "conflictFinishBlocked": "Alcuni conflitti devono ancora essere risolti.",
     "conflictOnQuickConfig": "Il conflitto riguarda la configurazione rapida della richiesta: {{name}}",
     "conflictNameField": "Nome",
@@ -3235,26 +3235,26 @@
   },
   "gitUpdate": {
     "title": "Aggiornamento necessario",
-    "message": "Sul server remoto esiste una versione più recente del file. Devi aggiornare la tua versione prima di continuare. Se ci sono conflitti tra la tua versione e quella del server, ti aiuteremo a risolverli.",
-    "conflictCount_one": "{{count}} elemento differisce tra la tua versione e quella del server.",
-    "conflictCount_other": "{{count}} elementi differiscono tra la tua versione e quella del server.",
+    "message": "Sul server remoto esiste una versione più recente del file. Deve aggiornare la sua versione prima di continuare. Se ci sono conflitti tra la sua versione e quella del server, la aiuteremo a risolverli.",
+    "conflictCount_one": "{{count}} elemento differisce tra la sua versione e quella del server.",
+    "conflictCount_other": "{{count}} elementi differiscono tra la sua versione e quella del server.",
     "cancel": "Annulla",
     "discardMine": "Elimina le mie modifiche",
     "keepMineOverwriting": "Mantieni la mia versione (sovrascrive le modifiche del server)",
     "updateFailedTitle": "Aggiornamento non riuscito",
     "updateFailedBody": "Impossibile recuperare la versione dal server remoto.",
     "discardedTitle": "Modifiche eliminate",
-    "discardedBody": "Ora sei sull’ultima versione del server.",
+    "discardedBody": "Ora è sull’ultima versione del server.",
     "updatedTitle": "Progetto aggiornato",
-    "updatedBody": "Ora sei sull’ultima versione del server, le tue modifiche sono state mantenute.",
+    "updatedBody": "Ora è sull’ultima versione del server, le sue modifiche sono state mantenute.",
     "keepServerVersion": "Mantieni la versione del server",
     "resolveConflicts": "Risolvi i conflitti",
     "resetConfirmTitle": "Ripristinare alla versione del server?",
-    "resetConfirmBody": "Tutte le tue modifiche locali saranno eliminate definitivamente e sostituite dalla versione del server."
+    "resetConfirmBody": "Tutte le sue modifiche locali saranno eliminate definitivamente e sostituite dalla versione del server."
   },
   "gitHistory": {
     "recoverConfirmTitle": "Ripristinare questa versione?",
-    "recoverConfirmBody": "Il contenuto attuale del file aperto verrà sostituito con la versione di questo commit. La modifica non viene committata: puoi committarla e inviarla tu stesso se vuoi conservarla.",
+    "recoverConfirmBody": "Il contenuto attuale del file aperto verrà sostituito con la versione di questo commit. La modifica non viene committata: può committarla e inviarla lei stesso se vuole conservarla.",
     "recoverConfirmAction": "Ripristina",
     "recoveredTitle": "Versione ripristinata",
     "recoveredBody": "Il file contiene ora il contenuto del commit selezionato, non committato.",
@@ -3273,9 +3273,9 @@
     "readyBody": "La versione {{version}} è pronta per l'installazione.",
     "restartNow": "Riavvia ora",
     "checkFailedTitle": "Controllo aggiornamenti non riuscito",
-    "checkFailedBody": "Impossibile controllare gli aggiornamenti. Riprova più tardi.",
-    "upToDateTitle": "Sei aggiornato",
-    "upToDateBody": "Stai usando l'ultima versione ({{version}}).",
+    "checkFailedBody": "Impossibile controllare gli aggiornamenti. Riprovi più tardi.",
+    "upToDateTitle": "È aggiornato",
+    "upToDateBody": "Sta usando l'ultima versione ({{version}}).",
     "whatsNewTitle": "Cosa c'è di nuovo?",
     "status": {
       "idle": "Aggiornato",
@@ -3293,18 +3293,18 @@
     "telemetryDescription": "Invia statistiche anonime sulle funzionalità utilizzate, per orientare gli sviluppi futuri. Disattivato per impostazione predefinita e mai attivato senza il suo consenso esplicito. Non contiene dati delle richieste, né URL, né dati personali. Tutti i dettagli: https://restorm.app/privacy",
     "crashReportsLockedLabel": "Modificabile a partire dal piano Pro. Nel piano gratuito i rapporti di arresto anomalo sono necessari per mantenere la qualità.",
     "consentToast": {
-      "title": "Aiutaci a migliorare Restorm",
-      "body": "In caso di errore inatteso, Restorm può inviarci un rapporto anonimo per aiutarci a correggere il problema. Contiene la traccia tecnica dell'errore e il contesto diagnostico (versione dell'app, attività recenti). URL, token, corpi di richiesta e risposta e dati personali vengono rimossi prima che lasci il tuo computer. Vedrai esattamente cosa viene inviato prima di ogni rapporto.",
+      "title": "Ci aiuti a migliorare Restorm",
+      "body": "In caso di errore inatteso, Restorm può inviarci un rapporto anonimo per aiutarci a correggere il problema. Contiene la traccia tecnica dell'errore e il contesto diagnostico (versione dell'app, attività recenti). URL, token, corpi di richiesta e risposta e dati personali vengono rimossi prima che lasci il suo computer. Vedrà esattamente cosa viene inviato prima di ogni rapporto.",
       "save": "Salva le mie preferenze",
       "learnMore": "Scopri di più"
     },
     "crashReportReviewTitle": "Mostra ogni rapporto prima dell'invio",
-    "crashReportReviewDescription": "Ti mostra il contenuto esatto di un rapporto di arresto anomalo e chiede conferma prima di inviarlo. Disattivalo per inviare i rapporti automaticamente, senza chiedere ogni volta.",
+    "crashReportReviewDescription": "Le mostra il contenuto esatto di un rapporto di arresto anomalo e chiede conferma prima di inviarlo. Lo disattivi per inviare i rapporti automaticamente, senza chiedere ogni volta.",
     "reportDialog": {
       "title": "Inviare questo rapporto di arresto anomalo?",
       "intro": "Restorm ha riscontrato un problema. Ecco esattamente ciò che verrebbe inviato.",
       "includedError": "L'errore tecnico e il punto del codice in cui si è verificato",
-      "includedVersion": "La versione dell'app e il tuo sistema operativo",
+      "includedVersion": "La versione dell'app e il suo sistema operativo",
       "includedActivity": "Cosa stava facendo l'app poco prima del problema",
       "removed": "URL, token, corpi di richiesta e risposta e dati personali sono già stati rimossi.",
       "viewFull": "Visualizza il rapporto completo",
@@ -3325,7 +3325,7 @@
   "project": {
     "incompatible": {
       "title": "Progetto creato con una versione più recente",
-      "message": "Questo file è stato creato con una versione di Restorm più recente di quella in uso. Aggiorna Restorm per aprirlo.",
+      "message": "Questo file è stato creato con una versione di Restorm più recente di quella in uso. Aggiorni Restorm per aprirlo.",
       "versions": "Formato file {{found}}; questa versione supporta fino a {{current}}."
     },
     "notARestormFile": {

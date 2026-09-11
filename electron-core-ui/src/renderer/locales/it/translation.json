@@ -14,7 +14,7 @@
     "untitled": "Senza titolo",
     "unsavedChanges": {
       "title": "Modifiche non salvate",
-      "message": "Vuoi salvare le modifiche a \"{{fileName}}\"?",
+      "message": "Vuole salvare le modifiche a \"{{fileName}}\"?",
       "detail": "Le modifiche andranno perse se non le salvi.",
       "save": "Salva",
       "dontSave": "Non salvare",
@@ -22,12 +22,12 @@
     },
     "projectTooLarge": {
       "title": "Progetto troppo grande per il salvataggio",
-      "body": "Questo progetto è troppo grande per essere scritto su disco. Rimuovi le raccolte inutilizzate o suddividilo in più file, quindi riprova."
+      "body": "Questo progetto è troppo grande per essere scritto su disco. Rimuova le raccolte inutilizzate o lo suddivida in più file, quindi riprovi."
     },
     "externalChange": {
       "title": "File modificato sul disco",
       "message": "«{{fileName}}» è stato modificato al di fuori dell'applicazione.",
-      "detail": "Ricarica per usare la versione sul disco, oppure mantieni la tua versione e sovrascrivila.",
+      "detail": "Ricarichi per usare la versione sul disco, oppure mantenga la sua versione e la sovrascriva.",
       "detailDirty": "Attenzione: sono presenti modifiche non salvate — ricaricare le eliminerà.",
       "reload": "Ricarica",
       "keepMine": "Mantieni la mia versione"
@@ -35,13 +35,13 @@
     "saveFailed": {
       "title": "Salvataggio non riuscito",
       "reason": {
-        "readOnlyFile": "Il file è di sola lettura. Modificane i permessi o salvalo in un'altra posizione.",
-        "readOnlyLocation": "Questa posizione è montata in sola lettura. Salva in un'altra posizione.",
-        "permissionDenied": "Non hai i permessi di scrittura qui. Controlla i permessi della cartella o salva in un'altra posizione.",
-        "diskFull": "Il disco è pieno. Libera spazio, poi salva di nuovo.",
-        "quotaExceeded": "La tua quota disco è esaurita. Libera spazio, poi salva di nuovo.",
+        "readOnlyFile": "Il file è di sola lettura. Ne modifichi i permessi o lo salvi in un'altra posizione.",
+        "readOnlyLocation": "Questa posizione è montata in sola lettura. Salvi in un'altra posizione.",
+        "permissionDenied": "Non ha i permessi di scrittura qui. Controlli i permessi della cartella o salvi in un'altra posizione.",
+        "diskFull": "Il disco è pieno. Liberi spazio, poi salvi di nuovo.",
+        "quotaExceeded": "La sua quota disco è esaurita. Liberi spazio, poi salvi di nuovo.",
         "pathMissing": "Questa posizione non esiste più. La cartella potrebbe essere stata eliminata o l'unità scollegata.",
-        "fileBusy": "Il file è in uso da un altro programma. Chiudilo, poi salva di nuovo.",
+        "fileBusy": "Il file è in uso da un altro programma. Lo chiuda, poi salvi di nuovo.",
         "unknown": "Impossibile scrivere il file: {{error}}"
       }
     }
@@ -51,7 +51,7 @@
     "recentFiles": "File recenti",
     "addToFavorites": "Aggiungi ai preferiti",
     "removeFromFavorites": "Rimuovi dai preferiti",
-    "confirmRemoveFavorite": "Vuoi davvero rimuovere \"{{fileName}}\" dai preferiti?",
+    "confirmRemoveFavorite": "Vuole davvero rimuovere \"{{fileName}}\" dai preferiti?",
     "favoritesLandmarkLabel": "Elenco dei preferiti",
     "recentsLandmarkLabel": "Elenco dei file recenti",
     "openContainingFolder": "Apri cartella contenitore"
@@ -93,17 +93,17 @@
     "scope": {
       "user": "Utente",
       "workspace": "Area di lavoro",
-      "workspaceDisabledTooltip": "Apri un progetto per modificare le impostazioni dell'area di lavoro"
+      "workspaceDisabledTooltip": "Apra un progetto per modificare le impostazioni dell'area di lavoro"
     },
     "appearance": {
       "title": "Aspetto",
       "theme": {
         "title": "Tema",
-        "description": "Seleziona il tema cromatico dell'applicazione"
+        "description": "Selezioni il tema cromatico dell'applicazione"
       },
       "language": {
         "title": "Lingua",
-        "description": "Seleziona la lingua dell'applicazione",
+        "description": "Selezioni la lingua dell'applicazione",
         "en": "English",
         "fr": "Français",
         "es": "Español",
@@ -134,7 +134,7 @@
       },
       "advancedVisualEffects": {
         "title": "Effetti visivi avanzati",
-        "description": "Attiva effetti visivi avanzati come la sfocatura di sfondo sugli overlay e le animazioni CSS. Disattivalo per ottenere prestazioni migliori su hardware modesto."
+        "description": "Attivi effetti visivi avanzati come la sfocatura di sfondo sugli overlay e le animazioni CSS. Lo disattivi per ottenere prestazioni migliori su hardware modesto."
       },
       "editor": {
         "title": "Editor",
@@ -175,7 +175,7 @@
       },
       "reopenLastFile": {
         "title": "Riapri automaticamente l'ultimo file aperto",
-        "description": "Se attivo, all'avvio riapre l'ultimo file che avevi aperto — ma solo se l'applicazione è stata chiusa mentre un file era aperto."
+        "description": "Se attivo, all'avvio riapre l'ultimo file che aveva aperto — ma solo se l'applicazione è stata chiusa mentre un file era aperto."
       }
     }
   },
@@ -220,8 +220,8 @@
     "searchSimpleIcons": "Cerca in Simple Icons...",
     "searchFeather": "Cerca in Feather...",
     "searchFontAwesome": "Cerca in Font Awesome...",
-    "moreIcons": "+{{count}} altre icone. Usa la ricerca per trovare icone specifiche.",
-    "more": "+{{count}} altre. Usa la ricerca per trovare icone specifiche.",
+    "moreIcons": "+{{count}} altre icone. Usi la ricerca per trovare icone specifiche.",
+    "more": "+{{count}} altre. Usi la ricerca per trovare icone specifiche.",
     "noIconsFound": "Nessuna icona trovata",
     "searchResults": "Risultati della ricerca",
     "categories": {
@@ -436,7 +436,7 @@
     "refresh": "Aggiorna",
     "go": "Vai",
     "address": "Indirizzo",
-    "emptyHint": "Inserisci un indirizzo qui sopra per iniziare a navigare."
+    "emptyHint": "Inserisca un indirizzo qui sopra per iniziare a navigare."
   },
   "bookmarkRibbon": {
     "addBookmark": "Aggiungi segnalibro",
@@ -467,7 +467,7 @@
   "git": {
     "cliMissing": {
       "title": "Git non è installato",
-      "body": "Installa Git e aggiungilo al tuo PATH per usare l'integrazione Git."
+      "body": "Installi Git e lo aggiunga al suo PATH per usare l'integrazione Git."
     },
     "pullAvailable": {
       "title": "Aggiornamento disponibile",
@@ -491,7 +491,7 @@
   },
   "conflictResolution": {
     "listTitle": "Conflitti",
-    "userTitle": "La tua versione",
+    "userTitle": "La sua versione",
     "serverTitle": "Versione del server",
     "resolvedTitle": "Risolto",
     "selectAConflict": "Seleziona un conflitto per risolverlo",
