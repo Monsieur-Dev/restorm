@@ -34,8 +34,9 @@ Feature: Documentation screenshots
     Then I capture the environment folder view for every locale to "{locale}/dossier-variables-onglet-environnements.png"
     And I open the ArtifactsMMO environment folder on its "docs" sub-tab
     Then I capture the environment folder view for every locale to "{locale}/documentation-api-onglet-docs.png"
-    And I open the ArtifactsMMO environment folder on its "custom-values" sub-tab
-    Then I capture the environment folder view for every locale to "{locale}/listes-valeurs-personnalisees.png"
+    # The settings page (User/Workspace tabs, search, groups table of contents).
+    And I open the settings page
+    Then I capture the settings page for every locale to "{locale}/reference-parametres-page.png"
     # Imported-API problem detection: import a deliberately flawed API, open its
     # env-folder "Problems" tab (collapsed list), and frame the capture on it.
     And I import an API with design problems and open its Problems tab

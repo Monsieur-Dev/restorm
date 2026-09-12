@@ -1049,3 +1049,29 @@ Then('I capture the environment folder view for every locale to {string}', async
     // matching the existing 1600x1000 manual shots.
   })
 })
+
+When('I open the settings page', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="titlebar-settings-button"]').click()
+  await expect(p.locator('[data-testid="settings-tab-content"]')).toBeVisible({ timeout: 5000 })
+  await p.waitForTimeout(600)
+})
+
+Then('I capture the settings page for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      // A language switch may steal focus; ensure the settings tab is showing.
+      if (!(await p.locator('[data-testid="settings-tab-content"]').isVisible())) {
+        await p.locator('[data-testid="titlebar-settings-button"]').click()
+      }
+      // Move the pointer off the gear button so its "Open settings" hover
+      // tooltip isn't captured, and give it a beat to fade.
+      await p.mouse.move(640, 450)
+      await p.waitForTimeout(400)
+    }
+    // Full window: the settings page shows the User/Workspace tabs, the search
+    // and the table of contents — the whole 1280x1000 window is the subject.
+  })
+})
