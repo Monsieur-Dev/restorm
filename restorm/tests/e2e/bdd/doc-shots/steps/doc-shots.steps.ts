@@ -1075,3 +1075,50 @@ Then('I capture the settings page for every locale to {string}', async ({ restor
     // and the table of contents — the whole 1280x1000 window is the subject.
   })
 })
+
+When('I create the custom value list {string} with values {string}', async ({}, listName: string, csv: string) => {
+  const p = requirePage()
+  await p.keyboard.press('Control+S')
+  await p.waitForTimeout(600)
+  const mcp = requireMcp()
+  const folders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  const env = folders.find((f) => f.kind === 'env-folder')
+  if (env === undefined) throw new Error('no env folder — import the API first')
+  const entries = csv.split(',').map((v) => v.trim()).filter((v) => v.length > 0)
+    .map((v) => ({ label: v, value: v.toLowerCase() }))
+  await callEmbeddedMcpTool(mcp, 'create_custom_value_list', { folderId: env.id, name: listName, entries })
+  await p.waitForTimeout(400)
+})
+
+let envValueList = ''
+
+When('I open the ArtifactsMMO folder Custom-values tab on the list {string}', async ({}, listName: string) => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const folders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  const env = folders.find((f) => f.kind === 'env-folder')
+  if (env === undefined) throw new Error('no env folder — import the API first')
+  await callEmbeddedMcpTool(mcp, 'open_tab', { itemId: env.id })
+  await p.waitForTimeout(800)
+  const tab = p.locator('[data-testid$="-tabs-tab-custom-values"]')
+  await expect(tab).toBeVisible({ timeout: 8000 })
+  await tab.click()
+  await p.waitForTimeout(500)
+  envValueList = listName
+  await p.getByText(listName, { exact: true }).first().click()
+  await p.waitForTimeout(400)
+})
+
+Then('I capture the value-list view for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      const tab = p.locator('[data-testid$="-tabs-tab-custom-values"]')
+      if (await tab.isVisible()) await tab.click()
+      // Re-select the curated list (a language switch resets the selection).
+      await p.getByText(envValueList, { exact: true }).first().click().catch(() => undefined)
+      await p.waitForTimeout(300)
+    }
+  })
+})

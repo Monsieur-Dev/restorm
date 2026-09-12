@@ -34,6 +34,11 @@ Feature: Documentation screenshots
     Then I capture the environment folder view for every locale to "{locale}/dossier-variables-onglet-environnements.png"
     And I open the ArtifactsMMO environment folder on its "docs" sub-tab
     Then I capture the environment folder view for every locale to "{locale}/documentation-api-onglet-docs.png"
+    # A curated custom value list ("Pet status" = Available/Pending/Sold), matching
+    # the original manual capture, shown on the env-folder's Custom-values tab.
+    And I create the custom value list "Pet status" with values "Available,Pending,Sold"
+    And I open the ArtifactsMMO folder Custom-values tab on the list "Pet status"
+    Then I capture the value-list view for every locale to "{locale}/listes-valeurs-personnalisees.png"
     # The settings page (User/Workspace tabs, search, groups table of contents).
     And I open the settings page
     Then I capture the settings page for every locale to "{locale}/reference-parametres-page.png"
