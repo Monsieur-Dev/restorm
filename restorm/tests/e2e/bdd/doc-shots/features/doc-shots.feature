@@ -29,6 +29,65 @@ Feature: Documentation screenshots
     And I build the scenario "Fight" chaining an input using "character", "Action Move", a log "Character moved", a 1000 ms wait and "Action Fight"
     And I mark the scenario "Fight" as favorite
     Then I capture a screenshot for every locale to "{locale}/scenario-editor.png"
+    # The scenario editor's add-node palette (right-click) open over the graph.
+    And I open the add-node palette in the scenario editor
+    Then I capture the scenario palette for every locale to "{locale}/editeur-scenarios-palette-ajout.png"
+    # The imported API's environment folder, on its Environments and Docs sub-tabs.
+    # Add a blue "staging" and a red "prod" (flame emoji) environment for a richer shot.
+    And I add a staging and a prod environment to the ArtifactsMMO folder
+    And I open the ArtifactsMMO environment folder on its "environments" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/dossier-variables-onglet-environnements.png"
+    And I open the ArtifactsMMO environment folder on its "docs" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/documentation-api-onglet-docs.png"
+    # A curated custom value list ("Pet status" = Available/Pending/Sold), matching
+    # the original manual capture, shown on the env-folder's Custom-values tab.
+    And I create the custom value list "Pet status" with values "Available,Pending,Sold"
+    And I open the ArtifactsMMO folder Custom-values tab on the list "Pet status"
+    Then I capture the value-list view for every locale to "{locale}/listes-valeurs-personnalisees.png"
+    # The settings page (User/Workspace tabs, search, groups table of contents).
+    And I open the settings page
+    Then I capture the settings page for every locale to "{locale}/reference-parametres-page.png"
+    # The theme selector (theme preview carousel) on the User settings tab.
+    Then I capture the theme carousel for every locale to "{locale}/reference-themes-carrousel.png"
+    # The Favorites pane at the top of the sidebar, with a few pinned requests.
+    And I mark the requests "Action Move,Get Server Details,Get Bank Details" as favorites
+    Then I capture the favorites pane for every locale to "{locale}/favoris-volet-lateral.png"
+    # A request's Code snippets tab (the generated cURL / language examples).
+    And I open the imported request "Get Server Details" on its "codeSnippets" sub-tab
+    Then I capture the code snippets view for every locale to "{locale}/export-de-code-exemples.png"
+    # The same request's Notes tab, a free-form note beside the response panel.
+    And I open the imported request "Get Server Details" on its "notes" sub-tab
+    And I write an example note on the open request
+    And I run the open request
+    Then I capture the request notes view for every locale to "{locale}/prise-de-notes-element.png"
+    # The imported tree (a folder per tag) next to the env folder's Home sub-tab.
+    And I open the ArtifactsMMO environment folder on its "home" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/import-accueil-mises-a-jour.png"
+    # Example environment variables — a string base URL plus two Secret-typed
+    # variables — on the env folder's Environments sub-tab.
+    And I set example environment variables on the ArtifactsMMO folder
+    And I open the ArtifactsMMO environment folder on its "environments" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/secrets-variables-environnement.png"
+    # The resolved-URL preview under a request's URL bar (variables substituted
+    # by the active environment now that baseUrl is set).
+    And I open the imported request "Get Server Details" on its "request" sub-tab
+    Then I capture the resolved URL preview for every locale to "{locale}/variables-en-ligne-valeur-resolue.png"
+    # The quick-settings popover with a few project-scoped saved configurations.
+    And I add example quick configurations to the open request
+    And I open the quick settings popover
+    Then I capture the quick settings popover for every locale to "{locale}/parametres-rapides-popover.png"
+    # The response-history modal, after running the request a few times.
+    And I run the open request 6 times
+    And I open the response history of the open request
+    Then I capture the response history modal for every locale to "{locale}/historique-des-reponses-modale.png"
+    # The console rendering the captured calls as cURL commands (run the request
+    # a few more times AFTER opening it so the calls are captured live).
+    And I open the console
+    And I run the open request 6 times
+    Then I capture the console for every locale to "{locale}/console-appels-curl.png"
+    # The global "search everything" palette, unfolded with a query typed.
+    And I open the global search and type "account"
+    Then I capture the global search for every locale to "{locale}/moteur-de-recherche.png"
     # Imported-API problem detection: import a deliberately flawed API, open its
     # env-folder "Problems" tab (collapsed list), and frame the capture on it.
     And I import an API with design problems and open its Problems tab
