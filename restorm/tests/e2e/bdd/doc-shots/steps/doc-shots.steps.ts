@@ -1015,3 +1015,37 @@ Then('I capture the API problems view for every locale to {string}', async ({ re
     })
   })
 })
+
+// Which env-folder sub-tab the env-folder capture step should re-select per
+// locale (a language switch can drop the active sub-tab).
+let envFolderSubTab = ''
+
+When('I open the ArtifactsMMO environment folder on its {string} sub-tab', async ({}, subTab: string) => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const folders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  const env = folders.find((f) => f.kind === 'env-folder')
+  if (env === undefined) throw new Error('no env folder — import the API first')
+  await callEmbeddedMcpTool(mcp, 'open_tab', { itemId: env.id })
+  await p.waitForTimeout(800)
+  envFolderSubTab = subTab
+  const tab = p.locator(`[data-testid$="-tabs-tab-${subTab}"]`)
+  await expect(tab).toBeVisible({ timeout: 8000 })
+  await tab.click()
+  await p.waitForTimeout(600)
+})
+
+Then('I capture the environment folder view for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      // A language switch re-renders the workbench; re-select the sub-tab.
+      const tab = p.locator(`[data-testid$="-tabs-tab-${envFolderSubTab}"]`)
+      if (await tab.isVisible()) await tab.click()
+      await p.waitForTimeout(300)
+    }
+    // Full window (no clip): these captures show the sidebar + the workbench,
+    // matching the existing 1600x1000 manual shots.
+  })
+})

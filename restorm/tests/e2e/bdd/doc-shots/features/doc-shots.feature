@@ -29,6 +29,13 @@ Feature: Documentation screenshots
     And I build the scenario "Fight" chaining an input using "character", "Action Move", a log "Character moved", a 1000 ms wait and "Action Fight"
     And I mark the scenario "Fight" as favorite
     Then I capture a screenshot for every locale to "{locale}/scenario-editor.png"
+    # The imported API's environment folder, on its Environments and Docs sub-tabs.
+    And I open the ArtifactsMMO environment folder on its "environments" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/dossier-variables-onglet-environnements.png"
+    And I open the ArtifactsMMO environment folder on its "docs" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/documentation-api-onglet-docs.png"
+    And I open the ArtifactsMMO environment folder on its "custom-values" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/listes-valeurs-personnalisees.png"
     # Imported-API problem detection: import a deliberately flawed API, open its
     # env-folder "Problems" tab (collapsed list), and frame the capture on it.
     And I import an API with design problems and open its Problems tab
