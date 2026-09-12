@@ -1122,3 +1122,44 @@ Then('I capture the value-list view for every locale to {string}', async ({ rest
     }
   })
 })
+
+When('I mark the requests {string} as favorites', async ({}, csv: string) => {
+  const p = requirePage()
+  await p.keyboard.press('Control+S')
+  await p.waitForTimeout(600)
+  const mcp = requireMcp()
+  const wanted = csv.split(',').map((s) => s.trim())
+  const requests = await callEmbeddedMcpTool<{ id: string; name: string }[]>(mcp, 'list_requests', {})
+  for (const name of wanted) {
+    const req = requests.find((r) => r.name === name)
+    if (req === undefined) throw new Error(`request not found for favorite: ${name}`)
+    await callEmbeddedMcpTool(mcp, 'set_favorite', { itemId: req.id, favorite: true })
+  }
+  await p.waitForTimeout(600)
+})
+
+Then('I capture the favorites pane for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    // The Favorites pane at the top of the sidebar, not the whole window.
+    clipTo: () => p.locator('[data-testid="sidebar-favorites-listview"]')
+  })
+})
+
+When('I add a staging and a prod environment to the ArtifactsMMO folder', async () => {
+  const p = requirePage()
+  await p.keyboard.press('Control+S')
+  await p.waitForTimeout(600)
+  const mcp = requireMcp()
+  const folders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  const env = folders.find((f) => f.kind === 'env-folder')
+  if (env === undefined) throw new Error('no env folder — import the API first')
+  // staging → blue
+  const staging = await callEmbeddedMcpTool<{ id: string }>(mcp, 'create_environment', { envFolderId: env.id, name: 'staging' })
+  await callEmbeddedMcpTool(mcp, 'update_environment', { envId: staging.id, color: '#2563eb' })
+  // prod → red + flame emoji
+  const prod = await callEmbeddedMcpTool<{ id: string }>(mcp, 'create_environment', { envFolderId: env.id, name: 'prod' })
+  await callEmbeddedMcpTool(mcp, 'update_environment', { envId: prod.id, color: '#dc2626', icon: { type: 'emoji', value: '🔥' } })
+  await p.waitForTimeout(600)
+})

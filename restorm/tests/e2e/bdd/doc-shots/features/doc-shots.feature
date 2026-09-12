@@ -30,6 +30,8 @@ Feature: Documentation screenshots
     And I mark the scenario "Fight" as favorite
     Then I capture a screenshot for every locale to "{locale}/scenario-editor.png"
     # The imported API's environment folder, on its Environments and Docs sub-tabs.
+    # Add a blue "staging" and a red "prod" (flame emoji) environment for a richer shot.
+    And I add a staging and a prod environment to the ArtifactsMMO folder
     And I open the ArtifactsMMO environment folder on its "environments" sub-tab
     Then I capture the environment folder view for every locale to "{locale}/dossier-variables-onglet-environnements.png"
     And I open the ArtifactsMMO environment folder on its "docs" sub-tab
@@ -42,6 +44,9 @@ Feature: Documentation screenshots
     # The settings page (User/Workspace tabs, search, groups table of contents).
     And I open the settings page
     Then I capture the settings page for every locale to "{locale}/reference-parametres-page.png"
+    # The Favorites pane at the top of the sidebar, with a few pinned requests.
+    And I mark the requests "Action Move,Get Server Details,Get Bank Details" as favorites
+    Then I capture the favorites pane for every locale to "{locale}/favoris-volet-lateral.png"
     # Imported-API problem detection: import a deliberately flawed API, open its
     # env-folder "Problems" tab (collapsed list), and frame the capture on it.
     And I import an API with design problems and open its Problems tab
