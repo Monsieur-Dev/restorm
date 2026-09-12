@@ -2,6 +2,7 @@ import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition,
 import type { Request } from './requests/index'
 import type { Scenario } from './scenario'
 import type { ApiDesign } from './apiDesign'
+import type { RecordingSession } from './recordingSession'
 import type { ApiDocumentation } from './apiDocumentation'
 
 export interface Folder {
@@ -42,7 +43,7 @@ export interface EnvironmentFolder extends Folder {
   apiUpdate?: ApiUpdateConfig
 }
 
-export type FolderItem = Folder | EnvironmentFolder | Request | Scenario | ApiDesign
+export type FolderItem = Folder | EnvironmentFolder | Request | Scenario | ApiDesign | RecordingSession
 
 export function isEnvironmentFolder(item: FolderItem): item is EnvironmentFolder {
   // Some legacy/loaded objects may omit `configuration` at runtime; detection should rely on `folderType`.
@@ -68,8 +69,13 @@ export function isApiDesign(item: FolderItem): item is ApiDesign {
   return 'type' in item && (item as { type: string }).type === 'design'
 }
 
+export function isRecordingSession(item: FolderItem): item is RecordingSession {
+  return 'type' in item && (item as { type: string }).type === 'recording'
+}
+
 export function isRequest(item: FolderItem): item is Request {
-  // A Scenario and an ApiDesign also carry a `type` and no `items`;
-  // exclude them so request type-guards don't mis-classify either.
-  return 'type' in item && !('items' in item) && !isScenario(item) && !isApiDesign(item)
+  // A Scenario, an ApiDesign and a RecordingSession also carry a `type`
+  // (and no `items` until they hold children); exclude them so request
+  // type-guards don't mis-classify any of them.
+  return 'type' in item && !('items' in item) && !isScenario(item) && !isApiDesign(item) && !isRecordingSession(item)
 }

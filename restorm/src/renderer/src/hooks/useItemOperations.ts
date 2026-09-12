@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewDropPosition, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
-import { isAnyFolder, isScenario, isApiDesign, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isApiDesign, isRecordingSession, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
 import { parseDesignSectionRowId, parseDesignEntityRowId } from '../../../shared/design/designSections'
 import { assignDesignSection, patchModel, replaceGroup } from '../components/Design/designMutations'
 import { canDropDesignEntity, applyDesignEntityDrop } from '../services/designEntityDrop'
@@ -218,6 +218,18 @@ export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: stri
     } as DocumentChangedPayload)
     return
   }
+  if (isRecordingSession(item)) {
+    // A session is its own save unit (url, lists); its deduced routes are
+    // ordinary children announced on their own, like a scenario's.
+    emitBothBuses(DocumentEvents.RECORDING_CREATED, {
+      id: item.id,
+      type: 'recording',
+      document: cloneForEventBus(item),
+      ...(parentFolderId !== undefined ? { parentFolderId } : {})
+    } as DocumentChangedPayload)
+    for (const child of item.items ?? []) emitClonedSubtreeCreated(child, item.id)
+    return
+  }
   emitBothBuses(DocumentEvents.REQUEST_CREATED, {
     id: item.id,
     type: 'request',
@@ -234,6 +246,7 @@ export function emitClonedSubtreeCreated(item: FolderItem, parentFolderId?: stri
 function movedItemAnnouncement(item: FolderItem): { event: (typeof DocumentEvents)[keyof typeof DocumentEvents]; type: DocumentChangedPayload['type'] } {
   if (isAnyFolder(item)) return { event: DocumentEvents.FOLDER_UPDATED, type: 'folder' }
   if (isApiDesign(item)) return { event: DocumentEvents.DESIGN_UPDATED, type: 'design' }
+  if (isRecordingSession(item)) return { event: DocumentEvents.RECORDING_UPDATED, type: 'recording' }
   return { event: DocumentEvents.REQUEST_UPDATED, type: 'request' }
 }
 
@@ -644,6 +657,17 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         } as DocumentDeletedPayload)
         return
       }
+      if (isRecordingSession(node)) {
+        // Own save unit → tombstone; then its deduced routes, like a
+        // scenario's children.
+        emitBothBuses(DocumentEvents.RECORDING_DELETED, {
+          id: node.id,
+          type: 'recording',
+          ...(parentId !== undefined ? { parentFolderId: parentId } : {})
+        } as DocumentDeletedPayload)
+        for (const child of node.items ?? []) announceDeleted(child, node.id)
+        return
+      }
       if (isAnyFolder(node) || isScenario(node)) {
         if (isAnyFolder(node)) {
           emitBothBuses(DocumentEvents.FOLDER_DELETED, {
@@ -662,7 +686,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     }
     const parentOf = (nodes: FolderItem[], childId: string): FolderItem | null => {
       for (const node of nodes) {
-        if (!isAnyFolder(node) && !isScenario(node)) continue
+        if (!isAnyFolder(node) && !isScenario(node) && !isRecordingSession(node)) continue
         const kids = (node as FolderItem & { items?: FolderItem[] }).items ?? []
         if (kids.some((child) => child.id === childId)) return node
         const deeper = parentOf(kids, childId)

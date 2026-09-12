@@ -52,6 +52,7 @@ import { Folder as FolderClass } from '../../shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models/EnvironmentFolder'
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
 import { ApiDesign as ApiDesignClass } from '../../shared/models/ApiDesign'
+import { RecordingSession as RecordingSessionClass } from '../../shared/models/RecordingSession'
 
 /**
  * Resolve the concrete class of a document node by its `type`
@@ -104,7 +105,7 @@ function cancelScenarioSaveTimer(): void {
   latestSaveAll = null
 }
 
-const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design', doc: Record<string, unknown>): object => {
+const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design' | 'recording', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
     if (t === 'soap') return SoapRequest
@@ -116,6 +117,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design',
   }
   if (type === 'environment') return EnvironmentClass
   if (type === 'design') return ApiDesignClass
+  if (type === 'recording') return RecordingSessionClass
   // Distinguish env folders from regular folders — the decomposer
   // lifts different child arrays depending on which of the two we're
   // looking at (`environments` + `items` vs `items` only). The bridge
@@ -241,7 +243,7 @@ import {
 import { useFavoritesAndOpenItems } from './hooks/useFavoritesAndOpenItems'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from './types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, makeReactiveRecordingSession } from './types/reactive'
 import { designFromDocumentation } from '../../shared/design/designFromDocumentation'
 import { cloneForEventBus } from './utils/cloneForEventBus'
 import { searchIndexService } from './services/SearchIndexService'
@@ -257,6 +259,7 @@ import {
   isRequest,
   isScenario,
   isApiDesign,
+  isRecordingSession,
   isEnvironmentFolder,
   isAnyFolder,
   isFolder,
@@ -3271,7 +3274,7 @@ const App: React.FC = () => {
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : isRecordingSession(item) ? makeReactiveRecordingSession(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -3285,6 +3288,8 @@ const App: React.FC = () => {
               // A design indexes itself + its models/enums/routes as
               // sub-entries of the design category.
               await searchIndexService.indexDesign(rootItem)
+            } else if (isRecordingSession(rootItem)) {
+              await searchIndexService.indexRecordingTree(rootItem)
             } else if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
             } else {
@@ -3470,7 +3475,7 @@ const App: React.FC = () => {
     // `commitIfDraftMatches` actually matches when the node hasn't
     // changed between mutate and save. `SecretValue.toJSON` strips
     // plaintext on the preceding JSON round trip.
-    const kindForType = (type: 'folder' | 'request' | 'environment' | 'design'): 'folder' | 'file' =>
+    const kindForType = (type: 'folder' | 'request' | 'environment' | 'design' | 'recording'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'
 
     // Per-id debounce for the save-unit draft IPC. Typing in a
@@ -3617,18 +3622,22 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleFolderOrRequestUpdated),
+      eventBus.subscribe(DocumentEvents.RECORDING_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated),
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.RECORDING_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.DESIGN_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.RECORDING_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.DESIGN_DELETED, handleDelete),
+      eventBus.subscribe(DocumentEvents.RECORDING_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete),
       // Bump tab contentVersion so request tabs re-derive their live
       // env list when the env tree mutates — see comment above.

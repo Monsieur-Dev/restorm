@@ -83,4 +83,6 @@ export type {
   IdentifierStrategy,
   ReferenceOnDelete
 } from './apiDesign'
-export { isEnvironmentFolder, isFolder, isAnyFolder, isRequest, isScenario, isApiDesign } from './folderTypes'
+export type { RecordingSession, RecordingProtocol } from './recordingSession'
+export { RECORDING_PROTOCOLS, isRecordingProtocol } from './recordingSession'
+export { isEnvironmentFolder, isFolder, isAnyFolder, isRequest, isScenario, isApiDesign, isRecordingSession } from './folderTypes'

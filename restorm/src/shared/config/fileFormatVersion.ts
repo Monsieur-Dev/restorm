@@ -69,12 +69,13 @@
  * collections being written, not a constant: a document using no
  * version-gated feature persists as `1` and stays openable by every
  * build, and the file only moves to a higher version on the first save
- * that actually carries the feature — 1.1 for an API design. The bump
- * exists solely so an older build refuses the file cleanly instead of
- * opening it, misunderstanding it, and saving its impoverished reading
- * back over the user's data. Removing the last design moves the next
- * save back down to `1` — content-derived in both directions, which is
- * also what keeps open→save byte-stable on any file.
+ * that actually carries the feature — 1.1 for an API design, 1.2 for a
+ * recording session. The bump exists solely so an older build refuses
+ * the file cleanly instead of opening it, misunderstanding it, and saving
+ * its impoverished reading back over the user's data. Removing the last
+ * design / session moves the next save back down — content-derived in
+ * both directions, which is also what keeps open→save byte-stable on any
+ * file. The version written is the HIGHEST one the content requires.
  */
 
 /** The base format: what a document carrying no version-gated feature
@@ -86,26 +87,45 @@ export const BASE_FILE_FORMAT_VERSION = 1
  * build must produce. */
 export const DESIGN_FILE_FORMAT_VERSION = 1.1
 
-export const CURRENT_FILE_FORMAT_VERSION = DESIGN_FILE_FORMAT_VERSION
+/** The format carrying recording sessions (a `type: 'recording'` item,
+ * whose deduced routes are ordinary items under it). `1.2 > 1.1` is the
+ * refusal a design-era build must produce. */
+export const RECORDING_FILE_FORMAT_VERSION = 1.2
+
+export const CURRENT_FILE_FORMAT_VERSION = RECORDING_FILE_FORMAT_VERSION
+
+/** Item `type` discriminants that gate a format version, highest first. */
+const GATED_ITEM_TYPES: readonly { type: string; version: number }[] = [
+  { type: 'recording', version: RECORDING_FILE_FORMAT_VERSION },
+  { type: 'design', version: DESIGN_FILE_FORMAT_VERSION }
+]
 
 /**
  * The `fileFormatVersion` a document with these collections must
  * declare: the highest version whose feature the content actually uses.
  *
- * Structural on purpose (`type: 'design'` anywhere in the item tree) —
+ * Structural on purpose (a gated `type` anywhere in the item tree) —
  * this runs on the plain payload a save is about to write, after the
  * class instances have been cloned away.
  */
 export function requiredFileFormatVersion(collections: unknown): number {
-  return containsDesign(collections) ? DESIGN_FILE_FORMAT_VERSION : BASE_FILE_FORMAT_VERSION
+  const present = new Set<string>()
+  collectItemTypes(collections, present)
+  for (const gate of GATED_ITEM_TYPES) {
+    if (present.has(gate.type)) return gate.version
+  }
+  return BASE_FILE_FORMAT_VERSION
 }
 
-function containsDesign(node: unknown): boolean {
-  if (Array.isArray(node)) return node.some(containsDesign)
-  if (!isRecord(node)) return false
-  if (node['type'] === 'design') return true
+function collectItemTypes(node: unknown, out: Set<string>): void {
+  if (Array.isArray(node)) {
+    for (const child of node) collectItemTypes(child, out)
+    return
+  }
+  if (!isRecord(node)) return
+  if (typeof node['type'] === 'string') out.add(node['type'])
   const children = node['items']
-  return Array.isArray(children) && children.some(containsDesign)
+  if (Array.isArray(children)) collectItemTypes(children, out)
 }
 
 /**

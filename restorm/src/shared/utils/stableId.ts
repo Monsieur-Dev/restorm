@@ -166,6 +166,13 @@ export function idPathSegment(record: Record<string, unknown>): string | null {
     return `design:${asText(record['name'])}`
   }
 
+  // Recording session: `type`-discriminated like a scenario, and a
+  // container like one (its deduced routes live in `items`), so the
+  // segment prefixes the paths of the requests deduced under it.
+  if ('name' in record && record['type'] === 'recording') {
+    return `recording:${asText(record['name'])}`
+  }
+
   const designSegment = designEntitySegment(record)
   if (designSegment !== null) return designSegment
 

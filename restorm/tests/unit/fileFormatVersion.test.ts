@@ -3,6 +3,7 @@ import {
   BASE_FILE_FORMAT_VERSION,
   CURRENT_FILE_FORMAT_VERSION,
   DESIGN_FILE_FORMAT_VERSION,
+  RECORDING_FILE_FORMAT_VERSION,
   FILE_FORMAT_MISSING_CODE,
   FILE_FORMAT_VERSION_KEY,
   checkFileFormatCompatibility,
@@ -30,10 +31,11 @@ const documentAtRoot = (version?: unknown, collections: unknown[] = [collection(
 }
 
 describe('CURRENT_FILE_FORMAT_VERSION', () => {
-  it('is 1.1 — the design format, the highest this build writes', () => {
+  it('is 1.2 — the recording-session format, the highest this build writes', () => {
     expect(BASE_FILE_FORMAT_VERSION).toBe(1)
     expect(DESIGN_FILE_FORMAT_VERSION).toBe(1.1)
-    expect(CURRENT_FILE_FORMAT_VERSION).toBe(DESIGN_FILE_FORMAT_VERSION)
+    expect(RECORDING_FILE_FORMAT_VERSION).toBe(1.2)
+    expect(CURRENT_FILE_FORMAT_VERSION).toBe(RECORDING_FILE_FORMAT_VERSION)
   })
 })
 
@@ -71,6 +73,38 @@ describe('requiredFileFormatVersion — the lazy bump', () => {
   it('an older build refuses a document at the design version (the gate this bump exists for)', () => {
     // From the point of view of a build whose CURRENT is 1: 1.1 > 1.
     expect(DESIGN_FILE_FORMAT_VERSION).toBeGreaterThan(BASE_FILE_FORMAT_VERSION)
+  })
+
+  const recording = { type: 'recording', id: 's1', name: 'Petstore session', url: 'http://localhost:8080/', protocols: ['http'], whitelist: [], blacklist: [] }
+
+  it('a recording session at the root requires the recording version', () => {
+    expect(requiredFileFormatVersion([collection(), recording])).toBe(RECORDING_FILE_FORMAT_VERSION)
+  })
+
+  it('a recording session nested in a folder requires the recording version', () => {
+    const folder = { ...collection(), items: [{ id: 'f', name: 'sub', items: [recording], configuration: {} }] }
+    expect(requiredFileFormatVersion([folder])).toBe(RECORDING_FILE_FORMAT_VERSION)
+  })
+
+  it('the highest requirement wins when a design and a session coexist', () => {
+    expect(requiredFileFormatVersion([design, recording])).toBe(RECORDING_FILE_FORMAT_VERSION)
+    expect(requiredFileFormatVersion([recording, design])).toBe(RECORDING_FILE_FORMAT_VERSION)
+  })
+
+  it('removing the last session moves the requirement back down to what remains', () => {
+    const both = [collection(), design, recording]
+    expect(requiredFileFormatVersion(both.filter((i) => i !== recording))).toBe(DESIGN_FILE_FORMAT_VERSION)
+    expect(requiredFileFormatVersion(both.filter((i) => i !== recording && i !== design))).toBe(BASE_FILE_FORMAT_VERSION)
+  })
+
+  it('a design-era build refuses a document at the recording version', () => {
+    // From the point of view of a build whose CURRENT is 1.1: 1.2 > 1.1.
+    expect(RECORDING_FILE_FORMAT_VERSION).toBeGreaterThan(DESIGN_FILE_FORMAT_VERSION)
+  })
+
+  it('a deduced request inside a session does not lower the requirement', () => {
+    const withRoutes = { ...recording, items: [{ id: 'f', name: 'api', configuration: {}, items: [{ type: 'http', id: 'r', name: 'GET pets', url: 'http://localhost:8080/api/pets' }] }] }
+    expect(requiredFileFormatVersion([withRoutes])).toBe(RECORDING_FILE_FORMAT_VERSION)
   })
 })
 

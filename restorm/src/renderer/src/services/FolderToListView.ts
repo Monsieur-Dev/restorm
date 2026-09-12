@@ -5,9 +5,10 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView, i18n } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request, ApiDesign } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request, ApiDesign, RecordingSession } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import { SIDEBAR_DESIGN_SECTIONS, DESIGN_CODICON, designSectionRowId } from '../../../shared/design/designSections'
+import { RECORDING_CODICON } from '../../../shared/recording/recordingSections'
 import { getDesignClients, designClientRowId } from './designClientsStore'
 import { designSectionChildren, designSectionRowMenu, type DesignEntityActionHandler } from './designSidebarNodes'
 import { validateApiDesignCached } from '../../../shared/design/validateApiDesign'
@@ -369,6 +370,28 @@ function scenarioToListViewItem(
 }
 
 /**
+ * Convert a recording session to a ListViewItemData. The session row
+ * carries the `record` codicon; its deduced routes (`items`) are shown as
+ * ordinary children. (The live browser / captures / routes virtual rows
+ * arrive with the recording sidebar work.)
+ */
+function recordingSessionToListViewItem(
+  session: RecordingSession,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const isExpanded = options.expandedIds.has(session.id)
+  const children = (session.items ?? []).map((item) => folderItemToListViewItem(item, options))
+  return {
+    id: session.id,
+    title: session.name,
+    isExpandable: children.length > 0,
+    isExpanded,
+    icon: RECORDING_CODICON,
+    children
+  }
+}
+
+/**
  * Convert an ApiDesign to a ListViewItemData: the design node plus its
  * VIRTUAL group entries (one per Design-tab section — never one row per
  * model/route). The virtual rows are not tree items: their ids parse via
@@ -533,6 +556,10 @@ export function folderItemToListViewItem(
     return designToListViewItem(item, options)
   }
 
+  if (isRecordingSession(item)) {
+    return { ...recordingSessionToListViewItem(item, options), rightActions: secretBadges(item.id) }
+  }
+
   if (isEnvironmentFolder(item)) {
     return environmentFolderToListViewItem(item, options)
   }
@@ -660,7 +687,7 @@ export function collectExpandableIds(item: FolderItem): string[] {
   }
   // A scenario is a container too, but it carries `type:'scenario'` and an
   // optional `items` — branch it first (an empty scenario isn't expandable).
-  if (isScenario(item)) {
+  if (isScenario(item) || isRecordingSession(item)) {
     const children = childItemsOf(item)
     return children.length > 0 ? [item.id, ...children.flatMap(collectExpandableIds)] : []
   }

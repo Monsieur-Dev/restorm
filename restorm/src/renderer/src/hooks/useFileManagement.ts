@@ -69,7 +69,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 }
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, emitEnvironmentUpdated } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, makeReactiveRecordingSession, emitEnvironmentUpdated } from '../types/reactive'
 import {
   prepareForSerialization,
   processAfterDeserialization,
@@ -84,7 +84,7 @@ import {
   resolveFileFormatVersion,
 } from '../../../shared/config/fileFormatVersion'
 import type { EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import { collectEnvFileSecretsFromCollections, applyEnvFileSecretsToCollections } from '../../../shared/utils/envFileSecrets'
 import { envSecretsDigestOf, findNodeByRuntimeId } from '../services/envSecretsDigest'
@@ -753,7 +753,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // Designs go through `makeReactiveApiDesign` so their edits emit
         // `DESIGN_UPDATED` into the same pipeline.
         const reactiveItems = collectionsWithIds.map((item) =>
-          isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isApiDesign(item) ? makeReactiveApiDesign(item) : isRecordingSession(item) ? makeReactiveRecordingSession(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
 
@@ -832,6 +832,8 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             // A design indexes itself + its models/enums/routes as
             // sub-entries of the design category.
             await searchIndexService.indexDesign(rootItem)
+          } else if (isRecordingSession(rootItem)) {
+            await searchIndexService.indexRecordingTree(rootItem)
           } else if ('items' in rootItem) {
             await searchIndexService.indexFolderTree(rootItem)
           } else {

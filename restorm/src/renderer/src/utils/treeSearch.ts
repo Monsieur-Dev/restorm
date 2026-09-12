@@ -9,9 +9,10 @@ import type {
   EnvironmentFolder,
   Request,
   Scenario,
-  ApiDesign
+  ApiDesign,
+  RecordingSession
 } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -21,6 +22,8 @@ const FOLDER_ICON: Icon = { type: 'codicon', value: 'folder' }
 const ENV_FOLDER_ICON: Icon = { type: 'codicon', value: 'folder-library' }
 /** Scenario icon for breadcrumbs (scenarios double as containers). */
 const SCENARIO_ICON: Icon = { type: 'codicon', value: 'circuit-board' }
+/** Recording-session icon for breadcrumbs (its deduced routes are its children). */
+const RECORDING_ICON: Icon = { type: 'codicon', value: 'record' }
 
 /**
  * A descendable tree node: anything that carries child `items`. Scenarios now
@@ -28,21 +31,24 @@ const SCENARIO_ICON: Icon = { type: 'codicon', value: 'circuit-board' }
  * (a request/sub-folder authored inside a scenario must be findable +
  * navigable) — even though a scenario is never itself returned as a folder.
  */
-type TreeContainer = Folder | EnvironmentFolder | Scenario
+type TreeContainer = Folder | EnvironmentFolder | Scenario | RecordingSession
 
 /** Children of any container (a scenario's `items` is optional → treat as []). */
 function childItemsOf(container: TreeContainer): FolderItem[] {
   return (container as { items?: FolderItem[] }).items ?? []
 }
 
-/** Whether a tree item can be descended into (folder, env-folder, or scenario). */
+/** Whether a tree item can be descended into (folder, env-folder, scenario,
+ * or recording session — whose deduced routes hang under it). */
 function isContainer(item: FolderItem): item is TreeContainer {
-  return isAnyFolder(item) || isScenario(item)
+  return isAnyFolder(item) || isScenario(item) || isRecordingSession(item)
 }
 
 /** Breadcrumb icon for a container node. */
 function getContainerIcon(item: TreeContainer): Icon {
-  return isScenario(item) ? SCENARIO_ICON : getFolderIcon(item)
+  if (isScenario(item)) return SCENARIO_ICON
+  if (isRecordingSession(item)) return RECORDING_ICON
+  return getFolderIcon(item)
 }
 
 /** Get the appropriate icon for a folder (custom icon if set, otherwise default) */
@@ -57,7 +63,7 @@ function findFolderByIdInTree(container: TreeContainer, id: string): Folder | En
   // Return any folder/env-folder match (a scenario is a container we descend
   // but never a folder); `!isScenario` rather than `isAnyFolder` so a folder
   // missing its `configuration` field is still returned, matching prior behavior.
-  if (!isScenario(container) && container.id === id) return container
+  if (!isScenario(container) && !isRecordingSession(container) && container.id === id) return container
   for (const item of childItemsOf(container)) {
     if (isContainer(item)) {
       const found = findFolderByIdInTree(item, id)

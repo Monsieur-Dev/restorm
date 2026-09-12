@@ -8,8 +8,8 @@
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
-import type { Folder, FolderItem, Request, Environment, ApiDesign } from '../../../shared/types/collections'
-import { isAnyFolder, isRequest, isEnvironmentFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
+import type { Folder, FolderItem, Request, Environment, ApiDesign, RecordingSession } from '../../../shared/types/collections'
+import { isAnyFolder, isRequest, isEnvironmentFolder, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -277,6 +277,20 @@ export const DESIGN_INDEXABLE_KEYS = new Set([
   'routeGroups'
 ])
 
+/** Top-level keys of a recording session whose (re)assignment through the
+ * proxy emits `RECORDING_UPDATED`. Same convention as a design: the
+ * config editor REASSIGNS a list (`session.whitelist = next`), never
+ * mutates one in place. `items` (the deduced routes) is left out on
+ * purpose — those are ordinary tree items with their own events. */
+export const RECORDING_INDEXABLE_KEYS = new Set([
+  'name',
+  'notes',
+  'url',
+  'protocols',
+  'whitelist',
+  'blacklist'
+])
+
 // ============================================================================
 // Internal Tracking
 // ============================================================================
@@ -333,9 +347,9 @@ const DEBOUNCE_MS = 50
  * Emit an update event with debouncing to batch rapid changes
  */
 function emitUpdate(
-  docType: 'folder' | 'request' | 'environment' | 'design',
+  docType: 'folder' | 'request' | 'environment' | 'design' | 'recording',
   docId: string,
-  document: Folder | Request | Environment | ApiDesign,
+  document: Folder | Request | Environment | ApiDesign | RecordingSession,
   parentFolderId?: string,
   parentEnvironmentId?: string
 ): void {
@@ -356,6 +370,8 @@ function emitUpdate(
       event = DocumentEvents.REQUEST_UPDATED
     } else if (docType === 'design') {
       event = DocumentEvents.DESIGN_UPDATED
+    } else if (docType === 'recording') {
+      event = DocumentEvents.RECORDING_UPDATED
     } else {
       event = DocumentEvents.ENVIRONMENT_UPDATED
     }
@@ -401,9 +417,9 @@ function emitUpdate(
  * Create a proxy handler for arrays that emits events on modification
  */
 function createArrayProxyHandler(
-  docType: 'folder' | 'request' | 'environment' | 'design',
+  docType: 'folder' | 'request' | 'environment' | 'design' | 'recording',
   docId: string,
-  rootDocument: () => Folder | Request | Environment | ApiDesign,
+  rootDocument: () => Folder | Request | Environment | ApiDesign | RecordingSession,
   parentFolderId?: string,
   parentEnvironmentId?: string
 ): ProxyHandler<unknown[]> {
@@ -449,10 +465,10 @@ function createArrayProxyHandler(
  * Create a proxy handler for documents (Folder or Request)
  */
 function createDocumentProxyHandler(
-  docType: 'folder' | 'request' | 'design',
+  docType: 'folder' | 'request' | 'design' | 'recording',
   indexableKeys: Set<string>,
   parentFolderId?: string
-): ProxyHandler<Folder | Request | ApiDesign> {
+): ProxyHandler<Folder | Request | ApiDesign | RecordingSession> {
   return {
     get(target, prop, receiver): unknown {
       // Return symbols
@@ -689,6 +705,25 @@ export function makeReactiveApiDesign(design: ApiDesign, parentFolderId?: string
 }
 
 /**
+ * Make a recording session reactive: a top-level assignment (url, lists,
+ * protocols, name, notes) emits `RECORDING_UPDATED` into the dirty /
+ * autosave / search pipeline, like a design. Its deduced routes (`items`)
+ * are wrapped by the caller as ordinary children.
+ */
+export function makeReactiveRecordingSession(session: RecordingSession, parentFolderId?: string): RecordingSession {
+  if (isReactive(session)) {
+    return session
+  }
+  if (session.items) {
+    session.items = session.items.map((child) => makeReactiveFolderItem(child, session.id))
+  }
+  return new Proxy(
+    session,
+    createDocumentProxyHandler('recording', RECORDING_INDEXABLE_KEYS, parentFolderId) as ProxyHandler<RecordingSession>
+  )
+}
+
+/**
  * Make a FolderItem (Folder or Request) reactive.
  * `parentFolderId` may be omitted for root-level items.
  */
@@ -701,6 +736,8 @@ export function makeReactiveFolderItem(item: FolderItem, parentFolderId?: string
     return item
   } else if (isApiDesign(item)) {
     return makeReactiveApiDesign(item, parentFolderId)
+  } else if (isRecordingSession(item)) {
+    return makeReactiveRecordingSession(item, parentFolderId)
   } else if (isAnyFolder(item)) {
     return makeReactiveFolder(item)
   } else if (isRequest(item)) {

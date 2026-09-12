@@ -13,6 +13,7 @@ import {
   EnvironmentFolder,
   Scenario,
   ApiDesign,
+  RecordingSession,
   Environment,
   KeyValue,
   isEnvironmentFolder,
@@ -1035,11 +1036,26 @@ class CollectionStore {
       return item
     }
     if (item instanceof ApiDesign) return item
+    if (item instanceof RecordingSession) {
+      // A recording session is a container too: its deduced routes are
+      // ordinary items that must come back as class instances.
+      if (item.items) item.items = item.items.map((c) => this.reifyItem(c))
+      return item
+    }
     const rec = item as unknown as Record<string, unknown>
     // Design leaf (plain object). Same reason as the scenario branch
     // below: it carries a `type` the request factory would mangle.
     if (rec['type'] === 'design') {
       return ApiDesign.fromPlain(rec as Parameters<typeof ApiDesign.fromPlain>[0])
+    }
+    // Recording session (plain object): `type`-bearing like a scenario, with
+    // its deduced routes under `items` — reify them like scenario children.
+    if (rec['type'] === 'recording') {
+      const session = RecordingSession.fromPlain(rec as Parameters<typeof RecordingSession.fromPlain>[0])
+      if (Array.isArray(rec['items'])) {
+        session.items = (rec['items'] as FolderItem[]).map((c) => this.reifyItem(c))
+      }
+      return session
     }
     // Scenario leaf (plain object). Checked before the generic
     // `type`-bearing request branch — a scenario also carries a `type`,

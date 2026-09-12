@@ -34,7 +34,7 @@ import { routeFromRequest } from '../../../hooks/routeFromRequest'
 import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../../../shared/utils/resolveUrlAgainstEnv'
 import { isEnvironmentFolder, isRequest, isAnyFolder } from '../../../../../shared/types/folderTypes'
 import { isScenario } from '../../../../../shared/types/collections'
-import type { EnvironmentFolder, Folder, Scenario } from '../../../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, Scenario, RecordingSession } from '../../../../../shared/types/collections'
 import type { Request } from '../../../../../shared/types/collections'
 import { ScenarioGraphPreview } from './ScenarioGraphPreview'
 import './SearchTooltipContent.css'
@@ -127,7 +127,7 @@ function findOwningEnvFolder(
   return null
 }
 
-function containsItem(folder: Folder | EnvironmentFolder | Scenario, itemId: string): boolean {
+function containsItem(folder: Folder | EnvironmentFolder | Scenario | RecordingSession, itemId: string): boolean {
   const items = 'items' in folder ? folder.items ?? [] : []
   for (const item of items) {
     if (item.id === itemId) return true

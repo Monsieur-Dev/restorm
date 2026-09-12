@@ -7,7 +7,7 @@ import { findItemById } from '../utils/treeSearch'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/collections'
-import { isScenario, isApiDesign } from '../../../shared/types/collections'
+import { isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import type { DesignEntityActionHandler } from '../services/designSidebarNodes'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -114,7 +114,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       // which goes through `folderItemToListViewItem` to get its expandable
       // scenario row. Keep the original `'items' in item` test (not `isAnyFolder`)
       // so a folder missing a `configuration` field still renders with children.
-      'items' in item && !isScenario(item)
+      'items' in item && !isScenario(item) && !isRecordingSession(item)
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
