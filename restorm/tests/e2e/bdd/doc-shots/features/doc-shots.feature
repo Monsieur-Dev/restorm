@@ -72,6 +72,10 @@ Feature: Documentation screenshots
     # by the active environment now that baseUrl is set).
     And I open the imported request "Get Server Details" on its "request" sub-tab
     Then I capture the resolved URL preview for every locale to "{locale}/variables-en-ligne-valeur-resolue.png"
+    # The quick-settings popover with a few project-scoped saved configurations.
+    And I add example quick configurations to the open request
+    And I open the quick settings popover
+    Then I capture the quick settings popover for every locale to "{locale}/parametres-rapides-popover.png"
     # The response-history modal, after running the request a few times.
     And I run the open request 6 times
     And I open the response history of the open request

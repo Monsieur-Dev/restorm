@@ -1388,6 +1388,49 @@ Then('I capture the resolved URL preview for every locale to {string}', async ({
   })
 })
 
+// ---- quick-settings popover ------------------------------------------------
+
+When('I add example quick configurations to the open request', async () => {
+  if (openRequestId === null) throw new Error('open a request first')
+  const p = requirePage()
+  const mcp = requireMcp()
+  const add = (name: string): Promise<unknown> =>
+    callEmbeddedMcpTool(mcp, 'add_quick_config', { requestId: openRequestId, name, storageTarget: 'project', fields: { url: '{{baseUrl}}/' } })
+  // Three project-scoped saved configurations (the "project" origin badge).
+  await add('Prod')
+  await add('Staging')
+  await add('Local draft')
+  await p.waitForTimeout(500)
+})
+
+When('I open the quick settings popover', async () => {
+  const p = requirePage()
+  const button = p.locator('[data-testid="quick-settings-open-button"]:visible').first()
+  await expect(button).toBeVisible({ timeout: 8000 })
+  await button.click()
+  await expect(p.locator('[data-testid="quick-settings-popover"]')).toBeVisible({ timeout: 5000 })
+  await p.waitForTimeout(400)
+})
+
+Then('I capture the quick settings popover for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      // A language switch closes the popover — re-open it per locale.
+      if (!(await p.locator('[data-testid="quick-settings-popover"]').isVisible().catch(() => false))) {
+        await p.locator('[data-testid="quick-settings-open-button"]:visible').first().click().catch(() => undefined)
+      }
+      await p.waitForTimeout(300)
+    },
+    clipTo: () => p.locator('[data-testid="quick-settings-popover"]')
+  })
+  // Close the popover so it stops covering the header for later steps.
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(300)
+})
+
 // ---- response history + console (after running the request a few times) ----
 
 When('I run the open request {int} times', async ({}, times: number) => {
