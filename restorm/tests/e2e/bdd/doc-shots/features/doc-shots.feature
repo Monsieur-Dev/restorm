@@ -64,7 +64,7 @@ Feature: Documentation screenshots
     And I open the ArtifactsMMO environment folder on its "environments" sub-tab
     Then I capture the environment folder view for every locale to "{locale}/secrets-variables-environnement.png"
     # The global "search everything" palette, unfolded with a query typed.
-    And I open the global search and type "action"
+    And I open the global search and type "account"
     Then I capture the global search for every locale to "{locale}/moteur-de-recherche.png"
     # Imported-API problem detection: import a deliberately flawed API, open its
     # env-folder "Problems" tab (collapsed list), and frame the capture on it.

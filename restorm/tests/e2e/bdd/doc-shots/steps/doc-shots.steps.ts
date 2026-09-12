@@ -163,7 +163,7 @@ When(
     const p = requirePage()
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-      beforeShot: async () => { await openAccountCard(p) },
+      beforeShot: async () => { await dismissExternalChangeToast(p); await openAccountCard(p) },
       // The card, not the window behind it.
       clipTo: () => p.getByTestId('account-card-popover')
     })
@@ -179,7 +179,7 @@ When(
     const p = requirePage()
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-      beforeShot: async () => { await openTokensModal(p) },
+      beforeShot: async () => { await dismissExternalChangeToast(p); await openTokensModal(p) },
       // The dialog box itself — the dimmed application behind it carries no
       // information the reader of this page needs.
       // The dialog BOX (`role=dialog`), not its body: the header carries the
@@ -236,6 +236,7 @@ When(
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
       beforeShot: async () => {
+      await dismissExternalChangeToast(p)
         await openMcpPopover(p)
         // Stamp a synthetic "activity ripple" on the MCP icon. The real pulse is
         // a transient animation the freeze/capture can't reliably paint, so we
@@ -294,7 +295,7 @@ When(
     const p = requirePage()
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-      beforeShot: async () => { await openMcpConnectModal(p) },
+      beforeShot: async () => { await dismissExternalChangeToast(p); await openMcpConnectModal(p) },
       // The dialog BOX (role=dialog), not the dimmed app behind it.
       clipTo: () => p.locator('.ecu-modal-container[role="dialog"]')
     })
@@ -364,7 +365,7 @@ When(
       // The workbench tab survives a language switch, but re-assert it and the
       // root selection per locale so a stray repaint can't photograph an empty
       // or wrong-jar panel silently.
-      beforeShot: async () => { await openCookieJar(p) },
+      beforeShot: async () => { await dismissExternalChangeToast(p); await openCookieJar(p) },
       // The panel itself — the workbench chrome behind it carries nothing the
       // documentation reader needs.
       clipTo: () => p.getByTestId('cookie-jar')
@@ -684,7 +685,7 @@ When(
     const id = requireDesign()
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-      beforeShot: async () => { await gotoDesignSection(p, id, section, entity) }
+      beforeShot: async () => { await dismissExternalChangeToast(p); await gotoDesignSection(p, id, section, entity) }
     })
   }
 )
@@ -698,7 +699,7 @@ When('I capture the designer home shot for every locale to {string}', async ({ r
   const homeOut = join(websiteOut, '..', 'home')
   const written = await captureForAllLocales(p, restormRoot, targetResolver(homeOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-    beforeShot: async () => { await gotoDesignSection(p, id, 'routes', 'Find pet by ID') }
+    beforeShot: async () => { await dismissExternalChangeToast(p); await gotoDesignSection(p, id, 'routes', 'Find pet by ID') }
   })
   // Mirror each home hero into the versioned screenshots/ root so the Snap Store
   // listing — which sources screenshots/<locale>/ — carries the designer shot
@@ -720,6 +721,7 @@ When('I capture the models overview for every locale to {string}', async ({ rest
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       await gotoDesignSection(p, id, 'models', 'Pet')
       await p
         .locator('[data-testid="design-properties-table"]')
@@ -748,6 +750,7 @@ When('I capture the clients section for every locale to {string}', async ({ rest
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       await gotoDesignSection(p, id, 'clients')
       // Fully expand the sidebar tree (all levels) so the whole client subtree
       // is visible — the dedicated "expand all" toolbar button.
@@ -768,6 +771,7 @@ When('I capture the template library for every locale to {string}', async ({ res
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       const tabs = p.locator('[data-testid="design-template-library-tabs"]')
       if (!(await tabs.isVisible().catch(() => false))) {
         await p.locator('[data-testid="design-code-add"]').click()
@@ -793,6 +797,7 @@ When('I capture the general variables for every locale to {string}', async ({ re
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       await gotoDesignSection(p, id, 'code')
       await p.locator('[data-testid="design-code-tabs-tab-variables"]').click()
       await expect(p.locator('[data-testid="design-codegen-general-section"]')).toBeVisible({ timeout: 10000 })
@@ -809,6 +814,7 @@ When('I capture the property code-generation tab for every locale to {string}', 
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       await gotoDesignSection(p, id, 'models', 'Pet')
       await p.locator('[data-testid="design-properties-table"]').getByText('name', { exact: true }).first().click()
       await p.waitForTimeout(400)
@@ -828,7 +834,7 @@ When(
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
       // Re-assert the section per locale: a language switch keeps the tab open
       // but re-navigating guarantees the right section is shown at capture time.
-      beforeShot: async () => { await gotoDesignSection(p, id, section) }
+      beforeShot: async () => { await dismissExternalChangeToast(p); await gotoDesignSection(p, id, section) }
     })
   }
 )
@@ -913,7 +919,7 @@ When(
     const p = requirePage()
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-      beforeShot: async () => { await openImportFormatModal(p) },
+      beforeShot: async () => { await dismissExternalChangeToast(p); await openImportFormatModal(p) },
       clipTo: () => importDialogBox(p, 'import-modal')
     })
     await closeImportModals(p)
@@ -926,7 +932,7 @@ When(
     const p = requirePage()
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-      beforeShot: async () => { await openImportCurlModal(p) },
+      beforeShot: async () => { await dismissExternalChangeToast(p); await openImportCurlModal(p) },
       clipTo: () => importDialogBox(p, 'import-modal')
     })
     await closeImportModals(p)
@@ -939,7 +945,7 @@ When(
     const p = requirePage()
     await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
       ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-      beforeShot: async () => { await openGrpcReflectionModal(p) },
+      beforeShot: async () => { await dismissExternalChangeToast(p); await openGrpcReflectionModal(p) },
       clipTo: () => importDialogBox(p, 'grpc-reflection-import-modal')
     })
     await closeImportModals(p)
@@ -996,6 +1002,7 @@ Then('I capture the API problems view for every locale to {string}', async ({ re
     // A language switch re-renders the workbench, which can drop the active
     // sub-tab — re-select the Problems tab so every locale's shot lands on it.
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       const tab = p.locator('[data-testid$="-tabs-tab-issues"]')
       if (await tab.isVisible()) await tab.click()
       await expect(p.locator('[data-testid="api-design-issues-list"]')).toBeVisible({ timeout: 5000 })
@@ -1040,6 +1047,7 @@ Then('I capture the environment folder view for every locale to {string}', async
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       // A language switch re-renders the workbench; re-select the sub-tab.
       const tab = p.locator(`[data-testid$="-tabs-tab-${envFolderSubTab}"]`)
       if (await tab.isVisible()) await tab.click()
@@ -1062,6 +1070,7 @@ Then('I capture the settings page for every locale to {string}', async ({ restor
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       // A language switch may steal focus; ensure the settings tab is showing.
       if (!(await p.locator('[data-testid="settings-tab-content"]').isVisible())) {
         await p.locator('[data-testid="titlebar-settings-button"]').click()
@@ -1114,6 +1123,7 @@ Then('I capture the value-list view for every locale to {string}', async ({ rest
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       const tab = p.locator('[data-testid$="-tabs-tab-custom-values"]')
       if (await tab.isVisible()) await tab.click()
       // Re-select the curated list (a language switch resets the selection).
@@ -1142,6 +1152,7 @@ Then('I capture the favorites pane for every locale to {string}', async ({ resto
   const p = requirePage()
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => { await dismissExternalChangeToast(p) },
     // The Favorites pane at the top of the sidebar, not the whole window.
     clipTo: () => p.locator('[data-testid="sidebar-favorites-listview"]')
   })
@@ -1155,11 +1166,15 @@ When('I add a staging and a prod environment to the ArtifactsMMO folder', async 
   const folders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
   const env = folders.find((f) => f.kind === 'env-folder')
   if (env === undefined) throw new Error('no env folder — import the API first')
+  // Nest staging + prod UNDER the imported base environment, not as siblings.
+  const envList = await callEmbeddedMcpTool<{ environments: { id: string; name: string }[] }>(mcp, 'list_environments', { envFolderId: env.id })
+  const base = envList.environments[0]
+  if (base === undefined) throw new Error('no base environment on the imported folder')
   // staging → blue
-  const staging = await callEmbeddedMcpTool<{ id: string }>(mcp, 'create_environment', { envFolderId: env.id, name: 'staging' })
+  const staging = await callEmbeddedMcpTool<{ id: string }>(mcp, 'create_environment', { envFolderId: env.id, name: 'staging', parentEnvironmentId: base.id })
   await callEmbeddedMcpTool(mcp, 'update_environment', { envId: staging.id, color: '#2563eb' })
   // prod → red + flame emoji
-  const prod = await callEmbeddedMcpTool<{ id: string }>(mcp, 'create_environment', { envFolderId: env.id, name: 'prod' })
+  const prod = await callEmbeddedMcpTool<{ id: string }>(mcp, 'create_environment', { envFolderId: env.id, name: 'prod', parentEnvironmentId: base.id })
   await callEmbeddedMcpTool(mcp, 'update_environment', { envId: prod.id, color: '#dc2626', icon: { type: 'emoji', value: '🔥' } })
   await p.waitForTimeout(600)
 })
@@ -1203,7 +1218,7 @@ Then('I capture the code snippets view for every locale to {string}', async ({ r
   const p = requirePage()
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-    beforeShot: async () => { await reselectRequestSubTab(p) },
+    beforeShot: async () => { await dismissExternalChangeToast(p); await reselectRequestSubTab(p) },
     // Frame on the workbench tab's CONTENT (title + sub-tab bar + the generated
     // snippets), matching the request-editor family of shots. Only the active
     // request's pane is displayed, so scope to the visible workbench tab.
@@ -1234,7 +1249,7 @@ Then('I capture the request notes view for every locale to {string}', async ({ r
   const p = requirePage()
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
-    beforeShot: async () => { await reselectRequestSubTab(p) }
+    beforeShot: async () => { await dismissExternalChangeToast(p); await reselectRequestSubTab(p) }
     // Full window: the Notes tab on the left with the response panel on the right.
   })
 })
@@ -1289,6 +1304,7 @@ Then('I capture the global search for every locale to {string}', async ({ restor
   await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
     ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
     beforeShot: async () => {
+      await dismissExternalChangeToast(p)
       // A language switch closes the palette — re-open and re-type per locale.
       if (!(await p.locator('[data-testid="main-titlebar-searchbar-results"]').isVisible().catch(() => false))) {
         await openSearchAndType(p, searchQuery).catch(() => undefined)
