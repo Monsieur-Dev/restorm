@@ -1163,3 +1163,141 @@ When('I add a staging and a prod environment to the ArtifactsMMO folder', async 
   await callEmbeddedMcpTool(mcp, 'update_environment', { envId: prod.id, color: '#dc2626', icon: { type: 'emoji', value: '🔥' } })
   await p.waitForTimeout(600)
 })
+
+// ---- request sub-tab captures (code snippets, notes) ----------------------
+
+/** The request opened by the generic sub-tab step, kept so the capture step can
+ * re-select its sub-tab after a language switch re-renders the workbench. */
+let openRequestId: string | null = null
+let openRequestSubTab = ''
+
+When('I open the imported request {string} on its {string} sub-tab', async ({}, requestName: string, subTab: string) => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const requests = await callEmbeddedMcpTool<{ id: string; name: string }[]>(mcp, 'list_requests', {})
+  const req = requests.find((r) => r.name === requestName)
+  if (req === undefined) throw new Error(`request "${requestName}" not found among ${String(requests.length)} imported requests`)
+  openRequestId = req.id
+  openRequestSubTab = subTab
+  await callEmbeddedMcpTool(mcp, 'open_tab', { itemId: req.id })
+  await p.waitForTimeout(1000)
+  // Request sub-tabs live on the `base-request-tabs-request` Tabs, so the id is
+  // `base-request-tabs-request-tab-<id>` (env-folder tabs use `-tabs-tab-<id>`).
+  // Every OPENED request renders its own hidden tab bar, so scope to `:visible`
+  // (only the active pane is displayed) to avoid a strict-mode multi-match.
+  const tab = p.locator(`[data-testid="base-request-tabs-request-tab-${subTab}"]:visible`)
+  await expect(tab).toBeVisible({ timeout: 8000 })
+  await tab.click()
+  await p.waitForTimeout(600)
+})
+
+/** Re-select the tracked request's sub-tab (a language switch re-renders the
+ * workbench and can drop the active sub-tab). */
+async function reselectRequestSubTab(p: Page): Promise<void> {
+  const tab = p.locator(`[data-testid="base-request-tabs-request-tab-${openRequestSubTab}"]:visible`)
+  if (await tab.isVisible().catch(() => false)) await tab.click()
+  await p.waitForTimeout(300)
+}
+
+Then('I capture the code snippets view for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => { await reselectRequestSubTab(p) },
+    // Frame on the workbench tab's CONTENT (title + sub-tab bar + the generated
+    // snippets), matching the request-editor family of shots. Only the active
+    // request's pane is displayed, so scope to the visible workbench tab.
+    clipTo: () => p.locator('.restorm-workbench-tab:visible').first()
+  })
+})
+
+When('I write an example note on the open request', async () => {
+  const p = requirePage()
+  const editor = p.locator('[data-testid="base-request-markdown-editor-notes-editor"]:visible').first()
+  await expect(editor).toBeVisible({ timeout: 8000 })
+  await editor.click()
+  await p.waitForTimeout(200)
+  await editor.pressSequentially('Smoke-tested nightly against the staging environment. Returns 200 for the server status.', { delay: 8 })
+  await p.waitForTimeout(400)
+})
+
+When('I run the open request', async () => {
+  if (openRequestId === null) throw new Error('open a request first')
+  const p = requirePage()
+  // Best-effort: the ArtifactsMMO server-status route is public, so a live run
+  // fills the response panel — but a network hiccup must not fail the capture.
+  await callEmbeddedMcpTool(requireMcp(), 'run_request', { id: openRequestId }).catch(() => undefined)
+  await p.waitForTimeout(1500)
+})
+
+Then('I capture the request notes view for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => { await reselectRequestSubTab(p) }
+    // Full window: the Notes tab on the left with the response panel on the right.
+  })
+})
+
+// ---- example environment variables (secret + string) ----------------------
+
+When('I set example environment variables on the ArtifactsMMO folder', async () => {
+  const p = requirePage()
+  await p.keyboard.press('Control+S')
+  await p.waitForTimeout(600)
+  const mcp = requireMcp()
+  const folders = await callEmbeddedMcpTool<{ id: string; kind: string }[]>(mcp, 'list_folders', {})
+  const envFolder = folders.find((f) => f.kind === 'env-folder')
+  if (envFolder === undefined) throw new Error('no env folder — import the API first')
+  const envList = await callEmbeddedMcpTool<{ environments: { id: string; name: string }[] }>(mcp, 'list_environments', { envFolderId: envFolder.id })
+  const envs = envList.environments
+  // The base environment created by the import (not the staging/prod we added).
+  const base = envs.find((e) => e.name !== 'staging' && e.name !== 'prod') ?? envs[0]
+  if (base === undefined) throw new Error('no environment on the imported folder')
+  const set = (key: string, value: Record<string, unknown>, description: string): Promise<unknown> =>
+    callEmbeddedMcpTool(mcp, 'set_env_variable', { envId: base.id, key, value, description })
+  // The imported spec already carries Secret-typed variables from its security
+  // schemes (the `$=` marker + refresh / edit-retrieval / lock affordances), so
+  // the shot just needs a couple of plain string variables next to them.
+  await set('baseUrl', { type: 'string', value: 'https://api.artifactsmmo.com' }, 'Base URL of the ArtifactsMMO API')
+  await set('character', { type: 'string', value: 'Buffy' }, 'Default character used by the examples')
+  await p.waitForTimeout(600)
+})
+
+// ---- global search (search everything) ------------------------------------
+
+let searchQuery = ''
+
+async function openSearchAndType(p: Page, query: string): Promise<void> {
+  // Click the collapsed pill to expand + focus the search input, then type via
+  // the keyboard: the ECUI InputBox wrapper is a zero-box element Playwright
+  // reports "hidden", so `.fill()` on it fails even though it holds focus.
+  await p.locator('[data-testid="main-titlebar-searchbar-closed"]').click()
+  await p.waitForTimeout(400)
+  await p.keyboard.insertText(query)
+  await expect(p.locator('[data-testid="main-titlebar-searchbar-results"]')).toBeVisible({ timeout: 5000 })
+  await p.waitForTimeout(500)
+}
+
+When('I open the global search and type {string}', async ({}, query: string) => {
+  searchQuery = query
+  await openSearchAndType(requirePage(), query)
+})
+
+Then('I capture the global search for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      // A language switch closes the palette — re-open and re-type per locale.
+      if (!(await p.locator('[data-testid="main-titlebar-searchbar-results"]').isVisible().catch(() => false))) {
+        await openSearchAndType(p, searchQuery).catch(() => undefined)
+      }
+      await p.waitForTimeout(400)
+    }
+    // Full window: the unfolded search bar and its grouped results dropdown.
+  })
+  // Close the palette so its results overlay stops intercepting later clicks.
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(300)
+})

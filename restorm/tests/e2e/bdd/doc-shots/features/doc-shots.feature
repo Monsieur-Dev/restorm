@@ -47,6 +47,25 @@ Feature: Documentation screenshots
     # The Favorites pane at the top of the sidebar, with a few pinned requests.
     And I mark the requests "Action Move,Get Server Details,Get Bank Details" as favorites
     Then I capture the favorites pane for every locale to "{locale}/favoris-volet-lateral.png"
+    # A request's Code snippets tab (the generated cURL / language examples).
+    And I open the imported request "Get Server Details" on its "codeSnippets" sub-tab
+    Then I capture the code snippets view for every locale to "{locale}/export-de-code-exemples.png"
+    # The same request's Notes tab, a free-form note beside the response panel.
+    And I open the imported request "Get Server Details" on its "notes" sub-tab
+    And I write an example note on the open request
+    And I run the open request
+    Then I capture the request notes view for every locale to "{locale}/prise-de-notes-element.png"
+    # The imported tree (a folder per tag) next to the env folder's Home sub-tab.
+    And I open the ArtifactsMMO environment folder on its "home" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/import-accueil-mises-a-jour.png"
+    # Example environment variables — a string base URL plus two Secret-typed
+    # variables — on the env folder's Environments sub-tab.
+    And I set example environment variables on the ArtifactsMMO folder
+    And I open the ArtifactsMMO environment folder on its "environments" sub-tab
+    Then I capture the environment folder view for every locale to "{locale}/secrets-variables-environnement.png"
+    # The global "search everything" palette, unfolded with a query typed.
+    And I open the global search and type "action"
+    Then I capture the global search for every locale to "{locale}/moteur-de-recherche.png"
     # Imported-API problem detection: import a deliberately flawed API, open its
     # env-folder "Problems" tab (collapsed list), and frame the capture on it.
     And I import an API with design problems and open its Problems tab
