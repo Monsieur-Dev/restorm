@@ -545,6 +545,41 @@ When('I mark the scenario {string} as favorite', async ({}, _scenarioName: strin
   await dismissExternalChangeToast(requirePage())
 })
 
+/** Open the scenario editor's add-node palette (a right-click context menu on
+ * the React Flow pane) over the currently-open scenario. */
+async function openScenarioPalette(p: Page): Promise<void> {
+  await expect(p.locator('[data-testid="scenario-editor"]')).toBeVisible({ timeout: 10000 })
+  const pane = p.locator('[data-testid="scenario-editor"] .react-flow__pane').first()
+  // Right-click an empty area near the top-left of the pane so the palette opens
+  // fully in view rather than clipped at a corner.
+  await pane.click({ button: 'right', position: { x: 120, y: 90 } })
+  await expect(p.locator('[data-testid="scenario-node-palette"]')).toBeVisible({ timeout: 5000 })
+  await p.waitForTimeout(300)
+}
+
+When('I open the add-node palette in the scenario editor', async () => {
+  await openScenarioPalette(requirePage())
+})
+
+Then('I capture the scenario palette for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      // A language switch closes the context menu — re-open it per locale.
+      if (!(await p.locator('[data-testid="scenario-node-palette"]').isVisible().catch(() => false))) {
+        await openScenarioPalette(p).catch(() => undefined)
+      }
+      await p.waitForTimeout(300)
+    }
+    // Full window: the scenario graph with the add-node palette open over it.
+  })
+  // Close the palette so it stops covering the canvas for later steps.
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(300)
+})
+
 // ---- API designer captures ------------------------------------------------
 
 /** The built design's id, kept across the designer capture steps. */
@@ -1441,10 +1476,18 @@ Then('I capture the theme carousel for every locale to {string}', async ({ resto
     beforeShot: async () => {
       await dismissExternalChangeToast(p)
       await ensureSettingsScope(p, 'user')
-      await p.locator('[data-testid="theme-carousel"]').scrollIntoViewIfNeeded().catch(() => undefined)
+      // Scroll the settings content back to the top so the Appearance section
+      // (with the theme carousel) leads the shot.
+      await p.evaluate(() => {
+        const pane = document.querySelector('[data-testid="settings-page-settings-view"]') ?? document.querySelector('[data-testid="settings-tab-content"]')
+        const scroller = pane?.querySelector('[class*="scroll"], [style*="overflow"]') ?? pane
+        if (scroller instanceof HTMLElement) scroller.scrollTop = 0
+      }).catch(() => undefined)
       await p.mouse.move(640, 450)
       await p.waitForTimeout(300)
     },
-    clipTo: () => p.locator('[data-testid="theme-carousel"]')
+    // The settings tab content (User scope) scrolled to the Appearance section —
+    // the theme selector shown in its settings context, without the sidebar.
+    clipTo: () => p.locator('[data-testid="settings-tab-content"]')
   })
 })

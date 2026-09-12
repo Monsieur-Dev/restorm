@@ -29,6 +29,9 @@ Feature: Documentation screenshots
     And I build the scenario "Fight" chaining an input using "character", "Action Move", a log "Character moved", a 1000 ms wait and "Action Fight"
     And I mark the scenario "Fight" as favorite
     Then I capture a screenshot for every locale to "{locale}/scenario-editor.png"
+    # The scenario editor's add-node palette (right-click) open over the graph.
+    And I open the add-node palette in the scenario editor
+    Then I capture the scenario palette for every locale to "{locale}/editeur-scenarios-palette-ajout.png"
     # The imported API's environment folder, on its Environments and Docs sub-tabs.
     # Add a blue "staging" and a red "prod" (flame emoji) environment for a richer shot.
     And I add a staging and a prod environment to the ArtifactsMMO folder
